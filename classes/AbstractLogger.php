@@ -1,6 +1,6 @@
 <?php
 
-abstract class WSAL_Logging_AbstractLogger {
+abstract class WSAL_AbstractLogger {
 	/**
 	 * @var WpSecurityAuditLog
 	 */

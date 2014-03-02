@@ -1,11 +1,6 @@
 <?php
 
-class WSAL_Sensors_LogInOutSensor extends WSAL_Sensors_AbstractSensor {
-/*
-            array( 'id' => 1000, 'category' => WPPH_E_NOTICE_TEXT, 'text' => __('Successfully logged in.',WPPH_PLUGIN_TEXT_DOMAIN)),
-            array( 'id' => 1001, 'category' => WPPH_E_NOTICE_TEXT, 'text' => __('Successfully logged out.',WPPH_PLUGIN_TEXT_DOMAIN)),
-            array( 'id' => 1002, 'category' => WPPH_E_WARNING_TEXT, 'text' => __('Failed login detected using <strong>%s</strong> as username.',WPPH_PLUGIN_TEXT_DOMAIN)),
-*/
+class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
 		add_action('wp_login', array($this, 'EventLogin'), 10, 2);

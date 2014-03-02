@@ -1,16 +1,15 @@
 <?php
 
-final class WSAL_Logging_Supervisor extends WSAL_Logging_AbstractLogger {
+final class WSAL_LoggerManager extends WSAL_AbstractLogger {
 	
 	protected $loggers = array();
 	
 	public function __construct(WpSecurityAuditLog $plugin){
 		parent::__construct($plugin);
 		
-		foreach(glob(dirname(__FILE__) . '/*.php') as $file){
+		foreach(glob(dirname(__FILE__) . '/Loggers/*.php') as $file){
 			$class = $plugin->GetClassFileClassName($file);
-			if(strpos($class, 'Abstract') === false && $class != __CLASS__)
-				$this->loggers[] = new $class($plugin);
+			$this->loggers[] = new $class($plugin);
 		}
 	}
 	

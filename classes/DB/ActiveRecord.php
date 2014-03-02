@@ -239,7 +239,7 @@ abstract class WSAL_DB_ActiveRecord {
 	 * Load multiple records from DB.
 	 * @param string $cond (Optional) Load condition.
 	 * @param array $args (Optional) Load condition arguments.
-	 * @return array List of loaded records.
+	 * @return self[] List of loaded records.
 	 */
 	public static function LoadMulti($cond = '%d', $args = array(1)){
 		global $wpdb;
@@ -268,6 +268,9 @@ abstract class WSAL_DB_ActiveRecord {
 		}
 	}
 	
+	/**
+	 * Install all DB tables.
+	 */
 	public static function InstallAll(){
 		$plugin = WpSecurityAuditLog::GetInstance();
 		foreach(glob(dirname(__FILE__) . '/*.php') as $file){
@@ -279,6 +282,9 @@ abstract class WSAL_DB_ActiveRecord {
 		}
 	}
 	
+	/**
+	 * Uninstall all DB tables.
+	 */
 	public static function UninstallAll(){
 		$plugin = WpSecurityAuditLog::GetInstance();
 		foreach(glob(dirname(__FILE__) . '/*.php') as $file){
@@ -290,23 +296,38 @@ abstract class WSAL_DB_ActiveRecord {
 		}
 	}
 	
+	/**
+	 * @return boolean
+	 */
 	public function IsLoaded(){
 		return $this->_state == self::STATE_LOADED;
 	}
 	
+	/**
+	 * @return boolean
+	 */
 	public function IsSaved(){
 		return $this->_state == self::STATE_CREATED
 			|| $this->_state == self::STATE_UPDATED;
 	}
 	
+	/**
+	 * @return boolean
+	 */
 	public function IsCreated(){
 		return $this->_state == self::STATE_CREATED;
 	}
 	
+	/**
+	 * @return boolean
+	 */
 	public function IsUpdated(){
 		return $this->_state == self::STATE_UPDATED;
 	}
 	
+	/**
+	 * @return boolean
+	 */
 	public function IsDeleted(){
 		return $this->_state == self::STATE_DELETED;
 	}

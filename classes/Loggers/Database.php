@@ -1,6 +1,6 @@
 <?php
 
-class WSAL_Logging_DatabaseLogger extends WSAL_Logging_AbstractLogger {
+class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	public function Log($type, $code, $message, $data = array()) {
 		// attempt loading existing log entry
 		$log = new WSAL_DB_Log();

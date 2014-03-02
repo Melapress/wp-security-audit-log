@@ -1,6 +1,6 @@
 <?php
 
-abstract class WSAL_Sensors_AbstractSensor {
+abstract class WSAL_AbstractSensor {
 	/**
 	 * @var WpSecurityAuditLog
 	 */

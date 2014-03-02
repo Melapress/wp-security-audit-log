@@ -32,14 +32,20 @@ class WpSecurityAuditLog {
 	const PLG_CLS_PRFX = 'WSAL_';
 	
 	/**
+	 * Views supervisor.
+	 * @var WSAL_ViewManager
+	 */
+	public $views;
+	
+	/**
 	 * Logger supervisor.
-	 * @var WSAL_Logging_Supervisor
+	 * @var WSAL_LoggerManager
 	 */
 	public $logger;
 	
 	/**
 	 * Sensors supervisor.
-	 * @var WSAL_Sensors_Supervisor
+	 * @var WSAL_SensorManager
 	 */
 	public $sensors;
 	
@@ -64,8 +70,9 @@ class WpSecurityAuditLog {
 		spl_autoload_register(array($this, 'LoadClass'));
 		
 		// load dependencies
-		$this->logger = new WSAL_Logging_Supervisor($this);
-		$this->sensors = new WSAL_Sensors_Supervisor($this);
+		$this->views = new WSAL_ViewManager($this);
+		$this->logger = new WSAL_LoggerManager($this);
+		$this->sensors = new WSAL_SensorManager($this);
 		
 		// listen to general events
 		$this->sensors->HookEvents();
@@ -108,6 +115,7 @@ class WpSecurityAuditLog {
 	 */
 	public function GetClassFileClassName($file){
 		$base = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, plugin_dir_path(__FILE__) . 'classes' . DIRECTORY_SEPARATOR);
+		$file = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $file);
 		return str_replace(
 			array($base, '\\', '/'),
 			array(self::PLG_CLS_PRFX, '_', '_'),
