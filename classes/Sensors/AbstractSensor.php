@@ -9,4 +9,6 @@ abstract class WSAL_Sensors_AbstractSensor {
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->plugin = $plugin;
 	}
+	
+	abstract function HookEvents();
 }

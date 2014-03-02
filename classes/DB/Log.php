@@ -5,7 +5,8 @@ class WSAL_DB_Log extends WSAL_DB_ActiveRecord {
 	protected $_idkey = 'id';
 	
 	public $id = 0;
-	public $code = -1;
+	public $type = 0;
+	public $code = 0;
 	public $message = '';
 	
 	protected $_latest_occurrence;

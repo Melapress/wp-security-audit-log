@@ -62,9 +62,14 @@ class WpSecurityAuditLog {
 	 */
 	public function __construct(){
 		spl_autoload_register(array($this, 'LoadClass'));
+		
 		// load dependencies
 		$this->logger = new WSAL_Logging_Supervisor($this);
 		$this->sensors = new WSAL_Sensors_Supervisor($this);
+		
+		// listen to general events
+		$this->sensors->HookEvents();
+		
 		// listen for installation event
 		register_activation_hook(__FILE__, array($this, 'Install'));
 	}

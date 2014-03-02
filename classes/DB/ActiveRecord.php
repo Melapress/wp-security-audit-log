@@ -132,6 +132,7 @@ abstract class WSAL_DB_ActiveRecord {
 	
 	/**
 	 * Save record to DB.
+	 * @return integer|boolean Either the number of modified/inserted rows or false on failure.
 	 */
 	public function Save(){
 		$this->_state = self::STATE_UNKNOWN;
@@ -150,13 +151,16 @@ abstract class WSAL_DB_ActiveRecord {
 			}
 			$format[] = $deffmt;
 		}
-		$wpdb->replace($this->GetTable(), $data, $format);
+		$result = $wpdb->replace($this->GetTable(), $data, $format);
 		if($wpdb->insert_id){
 			$this->{$this->_idkey} = $wpdb->insert_id;
-			$this->_state = self::STATE_CREATED;
+			if($result !== false)
+				$this->_state = self::STATE_CREATED;
 		}else{
-			$this->_state = self::STATE_UPDATED;
+			if($result !== false)
+				$this->_state = self::STATE_UPDATED;
 		}
+		return $result;
 	}
 	
 	/**
@@ -166,10 +170,16 @@ abstract class WSAL_DB_ActiveRecord {
 	 */
 	public function Load($cond = '%d', $args = array(1)){
 		global $wpdb;
+		
 		$this->_state = self::STATE_UNKNOWN;
+		
 		$sql = $wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '.$cond, $args);
-		$this->LoadData($wpdb->get_row($sql, ARRAY_A));
-		$this->_state = self::STATE_LOADED;
+		$data = $wpdb->get_row($sql, ARRAY_A);
+		
+		if(!is_null($data)){
+			$this->LoadData($data);
+			$this->_state = self::STATE_LOADED;
+		}
 	}
 	
 	/**
@@ -195,6 +205,9 @@ abstract class WSAL_DB_ActiveRecord {
 					case is_bool($this->$key):
 						$this->$key = (bool)$val;
 						break;
+					case is_string($this->$key):
+						$this->$key = (string)$val;
+						break;
 					default:
 						throw new Exception('Unsupported type "'.gettype($this->$key).'"');
 				}
@@ -208,10 +221,18 @@ abstract class WSAL_DB_ActiveRecord {
 	 */
 	public function Delete(){
 		global $wpdb;
-		return $wpdb->delete(
+		
+		$this->_state = self::STATE_UNKNOWN;
+	
+		$result = $wpdb->delete(
 			$this->GetTable(),
 			array($this->_idkey => $this->{$this->_idkey})
 		);
+		
+		if($result !== false)
+			$this->_state = self::STATE_DELETED;
+		
+		return $result;
 	}
 	
 	/**
@@ -267,5 +288,26 @@ abstract class WSAL_DB_ActiveRecord {
 				$class->Uninstall();
 			}
 		}
+	}
+	
+	public function IsLoaded(){
+		return $this->_state == self::STATE_LOADED;
+	}
+	
+	public function IsSaved(){
+		return $this->_state == self::STATE_CREATED
+			|| $this->_state == self::STATE_UPDATED;
+	}
+	
+	public function IsCreated(){
+		return $this->_state == self::STATE_CREATED;
+	}
+	
+	public function IsUpdated(){
+		return $this->_state == self::STATE_UPDATED;
+	}
+	
+	public function IsDeleted(){
+		return $this->_state == self::STATE_DELETED;
 	}
 }

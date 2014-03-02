@@ -1,6 +1,6 @@
 <?php
 
-class WSAL_Sensors_Supervisor extends WSAL_Sensors_AbstractSensor {
+final class WSAL_Sensors_Supervisor extends WSAL_Sensors_AbstractSensor {
 	
 	protected $sensors = array();
 	
@@ -10,8 +10,13 @@ class WSAL_Sensors_Supervisor extends WSAL_Sensors_AbstractSensor {
 		foreach(glob(dirname(__FILE__) . '/*.php') as $file){
 			$class = $plugin->GetClassFileClassName($file);
 			if(strpos($class, 'Abstract') === false && $class != __CLASS__)
-				$this->sensors = new $class($plugin);
+				$this->sensors[] = new $class($plugin);
 		}
+	}
+	
+	public function HookEvents() {
+		foreach($this->sensors as $sensor)
+			$sensor->HookEvents();
 	}
 	
 }
