@@ -40,15 +40,16 @@ final class WSAL_AlertManager {
 	
 	/**
 	 * Register alert types.
-	 * @param array $info Array of [type, code, description, message] respectively.
+	 * @param array $info Array of [type, code, category, description, message] respectively.
 	 */
 	public function Register($info){
 		if(func_num_args() == 1){
 			// handle single item
-			list($type, $code, $desc, $mesg) = $info;
+			list($type, $code, $catg, $desc, $mesg) = $info;
 			$this->_alerts[$type] = (object)array(
 				'type' => $type,
 				'code' => $code,
+				'catg' => $catg,
 				'desc' => $desc,
 				'mesg' => $mesg,
 			);

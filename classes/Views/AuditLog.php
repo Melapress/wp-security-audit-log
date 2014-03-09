@@ -116,6 +116,8 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return '<span class="log-read log-read-'
 					. ($item['read'] ? 'old' : 'new')
 					. '" title="Click to toggle."></span>';
+			case 'type':
+				return str_pad($item['type'], 4, '0', STR_PAD_LEFT);
 			case 'code':
 				$const = (object)array('name' => 'E_UNKNOWN', 'value' => 0, 'description' => 'Unknown error code.');
 				$const = $this->_plugin->constants->GetConstantBy('value', $item['code'], $const);

@@ -24,13 +24,13 @@ WpSecurityAuditLog::GetInstance()
 
 WpSecurityAuditLog::GetInstance()
 	->alerts->Register(
-		array(0001, E_ERROR, 'PHP Error', '%Message%.'),
-		array(0002, E_WARNING, 'PHP Warning', '%Message%.'),
-		array(0003, E_NOTICE, 'PHP Notice', '%Message%.'),
+		array(0001, E_ERROR, 'System', 'PHP Error', '%Message%.'),
+		array(0002, E_WARNING, 'System', 'PHP Warning', '%Message%.'),
+		array(0003, E_NOTICE, 'System', 'PHP Notice', '%Message%.'),
 		
-		array(1000, E_NOTICE, 'User logs in', 'Successfully logged in.'),
-		array(1001, E_NOTICE, 'User logs out', 'Successfully logged out.'),
-		array(1002, E_WARNING, 'Login failed', 'Failed login detected using "%Username%" as username.'),
-		array(2010, E_NOTICE, 'User uploaded file from Uploads directory', ''),
-		array(2011, E_WARNING, 'User deleted file from Uploads directory', '')
+		array(1000, E_NOTICE, 'User Activity', 'User logs in', 'Successfully logged in.'),
+		array(1001, E_NOTICE, 'User Activity', 'User logs out', 'Successfully logged out.'),
+		array(1002, E_WARNING, 'User Activity', 'Login failed', 'Failed login detected using "%Username%" as username.'),
+		array(2010, E_NOTICE, 'User Activity', 'User uploaded file from Uploads directory', ''),
+		array(2011, E_WARNING, 'User Activity', 'User deleted file from Uploads directory', '')
 	);
