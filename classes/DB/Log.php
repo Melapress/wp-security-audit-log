@@ -26,4 +26,11 @@ class WSAL_DB_Log extends WSAL_DB_ActiveRecord {
 		}
 		return $this->_occurrences;
 	}
+	
+	public function FormatMessage($values){
+		$keys = array();
+		$vals = array_values($values);
+		foreach(array_keys($values) as $key) $keys[] = "%$key%";
+		return str_replace($keys, $vals, $this->message);
+	}
 }

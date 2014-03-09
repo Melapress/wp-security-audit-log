@@ -1,11 +1,19 @@
 <?php
 
-require_once(ABSPATH . 'wp-admin/includes/template.php');
-require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
-
-class WSAL_Views_AuditLog extends WP_List_Table implements WSAL_ViewInterface {
+class WSAL_Views_AuditLog extends WSAL_AbstractView {
+	
+	protected $_plugin;
+	
+	protected $_listview;
 	
 	public function SetPlugin(WpSecurityAuditLog $plugin) {
+		$this->_plugin = $plugin;
+	}
+	
+	public function __construct(WpSecurityAuditLog $plugin) {
+		parent::__construct($plugin);
+		$this->_listview = new WSAL_Views_AuditLogList_Internal($plugin);
+		add_action('wp_ajax_AjaxInspector', array($this, 'AjaxInspector'));
 	}
 	
 	public function GetTitle() {
@@ -25,53 +33,107 @@ class WSAL_Views_AuditLog extends WP_List_Table implements WSAL_ViewInterface {
 	}
 	
 	public function Render(){
-		$this->prepare_items();
 		?><form id="audit-log-viewer" method="get">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
-			<?php $this->display() ?>
+			<?php $this->_listview->prepare_items(); ?>
+			<?php $this->_listview->display(); ?>
 		</form><?php
 	}
 	
-	// <editor-fold desc="WP_List_Table Methods">
+	public function AjaxInspector(){
+		if(!isset($_REQUEST['occurrence']))
+			die('Occurrence parameter expected.');
+		$occ = new WSAL_DB_Occurrence();
+		$occ->Load('id = %d', array((int)$_REQUEST['occurrence']));
+
+		echo '<!DOCTYPE html><html><head>';
+		echo '<link rel="stylesheet" id="open-sans-css" href="' . $this->_plugin->GetBaseUrl() . '/css/nice_r.css" type="text/css" media="all">';
+		echo '<script type="text/javascript" src="'.$this->_plugin->GetBaseUrl() . '/js/nice_r.js"></script>';
+		echo '</head><body>';
+		$nicer = new WSAL_Nicer($occ->GetMetaArray());
+		$nicer->render();
+		echo '</body></html>';
+		die;
+	}
 	
-	public function __construct(){
+	public function Header(){
+		add_thickbox();
+		wp_enqueue_style(
+			'auditlog',
+			$this->_plugin->GetBaseUrl() . '/css/auditlog.css',
+			array(),
+			filemtime($this->_plugin->GetBaseDir() . '/css/auditlog.css')
+		);
+	}
+	
+}
+
+require_once(ABSPATH . 'wp-admin/includes/admin.php');
+require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
+
+class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
+
+	/**
+	 * @var WpSecurityAuditLog
+	 */
+	protected $_plugin;
+	
+	public function __construct($plugin){
+		$this->_plugin = $plugin;
+		
 		parent::__construct(array(
 			'singular'  => 'log',
 			'plural'    => 'logs',
-			'ajax'      => true
+			'ajax'      => true,
+			'screen'    => 'interval-list',
 		));
 	}
-	
+
+	public function no_items(){
+		_e('No events so far.');
+	}
+
 	public function get_columns(){
 		return array(
 			'cb'   => '<input type="checkbox" />',
 			'read' => 'Read',
-			'type' => 'Type',
 			'code' => 'Code',
-			'date' => 'Date',
+			'type' => 'Type',
+			'crtd' => 'Date',
 			'mesg' => 'Message',
-		);
-	}
-	
-	public function column_cb($item){
-		return sprintf(
-			'<input type="checkbox" name="%1$s[]" value="%2$s" />',
-			esc_attr($this->_args['singular']),
-			$item['ID']
+			'more' => '',
 		);
 	}
 
+	public function column_cb($item){
+		return '<input type="checkbox" value="'.$item['id'].'" '
+			 . 'name="'.esc_attr($this->_args['singular']).'[]"/>';
+	}
+
 	public function column_default($item, $column_name){
-		switch(true){
-			case $column_name == 'date':
-				return date('r', $item[$column_name]);
-			case isset($item[$column_name]):
-				return $item[$column_name];
+		switch($column_name){
+			case 'read':
+				return '<span class="log-read log-read-'
+					. ($item['read'] ? 'old' : 'new')
+					. '" title="Click to toggle."></span>';
+			case 'code':
+				$const = (object)array('name' => 'E_UNKNOWN', 'value' => 0, 'description' => 'Unknown error code.');
+				$const = $this->_plugin->constants->GetConstantBy('value', $item['code'], $const);
+				return '<span class="log-type log-type-' . $const->value
+					. '" title="' . esc_html($const->name . ': ' . $const->description) . '"></span>';
+			case 'crtd':
+				return date('Y-m-d H:i:s', $item['date']);
+			case 'more':
+				$url = admin_url('admin-ajax.php') . '?action=AjaxInspector&amp;occurrence=' . $item['id'];
+				return '<a class="more-info thickbox" title="Alert Data Inspector"'
+					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
 			default:
-				return '<pre>' . esc_html(print_r($item, true)) . '</pre>';
+				return isset($item[$column_name])
+					? esc_html($item[$column_name])
+					: 'Column "' . esc_html($column_name) . '" not found';
 		}
 	}
-	
+
 	public function prepare_items() {
 		$per_page = 5;
 
@@ -83,22 +145,18 @@ class WSAL_Views_AuditLog extends WP_List_Table implements WSAL_ViewInterface {
 
 		//$this->process_bulk_action();
 
-		$data = array(
-			array(
-				'read' => false,
-				'type' => E_NOTICE,
-				'code' => 1000,
-				'date' => strtotime('4 Feb 2014'),
-				'mesg' => 'A new event',
-			),
-			array(
-				'read' => false,
-				'type' => E_NOTICE,
-				'code' => 1001,
-				'date' => strtotime('4 Dec 2013'),
-				'mesg' => 'An older event',
-			),
-		);
+		$data = array();
+		foreach(WSAL_DB_Occurrence::GetNewestUnique() as $occ){
+			$log = $occ->GetLog();
+			$data[] = array(
+				'id'   => $occ->id,
+				'read' => $occ->is_read,
+				'type' => $log->type,
+				'code' => $log->code,
+				'date' => $occ->created_on,
+				'mesg' => $occ->GetMessage(),
+			);
+		}
 
 		function usort_reorder($a, $b){
 			$orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'date';
@@ -122,7 +180,5 @@ class WSAL_Views_AuditLog extends WP_List_Table implements WSAL_ViewInterface {
 			'total_pages' => ceil($total_items / $per_page)
 		) );
 	}
-
-	// </editor-fold>
 
 }

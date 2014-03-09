@@ -1,9 +1,6 @@
 <?php
 
-class WSAL_Views_Support implements WSAL_ViewInterface {
-	
-	public function SetPlugin(WpSecurityAuditLog $plugin) {
-	}
+class WSAL_Views_Support extends WSAL_AbstractView {
 	
 	public function GetTitle() {
 		return 'Support';

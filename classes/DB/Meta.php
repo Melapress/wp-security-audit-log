@@ -7,5 +7,5 @@ class WSAL_DB_Meta extends WSAL_DB_ActiveRecord {
 	public $id = 0;
 	public $occurrence_id = 0;
 	public $name = '';
-	public $value = array();
+	public $value = array(); // force mixed type
 }

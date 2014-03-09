@@ -9,16 +9,15 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	}
 	
 	public function EventLogin(){
-		$this->plugin->logger->Log(1000, E_NOTICE, 'Successfully logged in.');
+		$this->plugin->alerts->Trigger(1000);
 	}
 	
 	public function EventLogout(){
-		$this->plugin->logger->Log(1001, E_NOTICE, 'Successfully logged out.');
+		$this->plugin->alerts->Trigger(1001);
 	}
 	
 	public function EventLoginFailure($username){
-		$msg = 'Failed login detected using <strong>%Username%</strong> as username.';
-		$this->plugin->logger->Log(1002, E_WARNING, $msg, array('Username' => $username));
+		$this->plugin->alerts->Trigger(1002, array('Username' => $username));
 	}
 	
 }

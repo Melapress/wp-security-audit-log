@@ -39,15 +39,21 @@ class WpSecurityAuditLog {
 	
 	/**
 	 * Logger supervisor.
-	 * @var WSAL_LoggerManager
+	 * @var WSAL_AlertManager
 	 */
-	public $logger;
+	public $alerts;
 	
 	/**
 	 * Sensors supervisor.
 	 * @var WSAL_SensorManager
 	 */
 	public $sensors;
+	
+	/**
+	 * Constants manager.
+	 * @var WSAL_ConstantManager
+	 */
+	public $constants;
 	
 	// </editor-fold>
 	
@@ -71,8 +77,9 @@ class WpSecurityAuditLog {
 		
 		// load dependencies
 		$this->views = new WSAL_ViewManager($this);
-		$this->logger = new WSAL_LoggerManager($this);
+		$this->alerts = new WSAL_AlertManager($this);
 		$this->sensors = new WSAL_SensorManager($this);
+		$this->constants = new WSAL_ConstantManager();
 		
 		// listen to general events
 		$this->sensors->HookEvents();
@@ -89,6 +96,14 @@ class WpSecurityAuditLog {
 		WSAL_DB_ActiveRecord::UninstallAll();
 	}
 	
+	public function GetBaseUrl(){
+		return plugins_url('', __FILE__);
+	}
+	
+	public function GetBaseDir(){
+		return plugin_dir_path(__FILE__);
+	}
+	
 	// </editor-fold>
 	
 	/**
@@ -99,7 +114,7 @@ class WpSecurityAuditLog {
 	public function LoadClass($class){
 		if(substr($class, 0, strlen(self::PLG_CLS_PRFX)) == self::PLG_CLS_PRFX){
 			$file = str_replace('_', DIRECTORY_SEPARATOR, substr($class, strlen(self::PLG_CLS_PRFX)));
-			$file = plugin_dir_path(__FILE__) . 'classes' . DIRECTORY_SEPARATOR . $file . '.php';
+			$file = $this->GetBaseDir() . 'classes' . DIRECTORY_SEPARATOR . $file . '.php';
 			if(file_exists($file)){
 				require_once($file);
 				return class_exists($class, false) || interface_exists($class, false);
@@ -114,7 +129,7 @@ class WpSecurityAuditLog {
 	 * @return string Class name.
 	 */
 	public function GetClassFileClassName($file){
-		$base = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, plugin_dir_path(__FILE__) . 'classes' . DIRECTORY_SEPARATOR);
+		$base = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $this->GetBaseDir() . 'classes' . DIRECTORY_SEPARATOR);
 		$file = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $file);
 		return str_replace(
 			array($base, '\\', '/'),
@@ -123,6 +138,9 @@ class WpSecurityAuditLog {
 		);
 	}
 }
+
+// Load extra files
+require_once('defaults.php');
 
 // Create & Run the plugin
 return WpSecurityAuditLog::GetInstance();

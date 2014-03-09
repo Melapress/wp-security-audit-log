@@ -39,26 +39,29 @@ abstract class WSAL_DB_ActiveRecord {
 	protected function _GetInstallQuery(){
 		global $wpdb;
 		
+		$copy = get_class($this);
+		$copy = new $copy();
+		
 		$sql = 'CREATE TABLE ' . $this->GetTable() . ' (' . PHP_EOL;
 		foreach($this->GetColumns() as $key) {
 			switch(true) {
-				case $key == $this->_idkey:
+				case $key == $copy->_idkey:
 					$sql .= $key . ' BIGINT NOT NULL AUTO_INCREMENT,'.PHP_EOL;
 					break;
-				case is_integer($this->$key):
+				case is_integer($copy->$key):
 					$sql .= $key . ' BIGINT NOT NULL,'.PHP_EOL;
 					break;
-				case is_float($this->$key):
+				case is_float($copy->$key):
 					$sql .= $key . ' FLOAT NOT NULL,'.PHP_EOL;
 					break;
-				case is_string($this->$key):
+				case is_string($copy->$key):
 					$sql .= $key . ' TEXT NOT NULL,'.PHP_EOL;
 					break;
-				case is_bool($this->$key):
+				case is_bool($copy->$key):
 					$sql .= $key . ' BIT NOT NULL,'.PHP_EOL;
 					break;
-				case is_array($this->$key):
-				case is_object($this->$key):
+				case is_array($copy->$key):
+				case is_object($copy->$key):
 					$sql .= $key . ' LONGTEXT NOT NULL,'.PHP_EOL;
 					break;
 			}
@@ -106,7 +109,7 @@ abstract class WSAL_DB_ActiveRecord {
 	 */
 	public function IsInstalled(){
 		global $wpdb;
-		$sql = 'SHOW TABLES LIKE ' . $this->GetTable();
+		$sql = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
 		return $wpdb->get_var($sql) == $this->GetTable();
 	}
 	
@@ -137,14 +140,16 @@ abstract class WSAL_DB_ActiveRecord {
 	public function Save(){
 		$this->_state = self::STATE_UNKNOWN;
 		global $wpdb;
+		$copy = get_class($this);
+		$copy = new $copy;
 		$data = array();
 		$format = array();
 		foreach($this->GetColumns() as $key){
 			$val = $this->$key;
 			$deffmt = '%s';
-			if(is_int($val))$deffmt = '%d';
-			if(is_float($val))$deffmt = '%f';
-			if(is_array($val) || is_object($val)){
+			if(is_int($copy->$key))$deffmt = '%d';
+			if(is_float($copy->$key))$deffmt = '%f';
+			if(is_array($copy->$key) || is_object($copy->$key)){
 				$data[$key] = json_encode($val);
 			}else{
 				$data[$key] = $val;
@@ -187,29 +192,29 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @param array|object $data Data array or object.
 	 */
 	public function LoadData($data){
+		$copy = get_class($this);
+		$copy = new $copy;
 		foreach((array)$data as $key => $val){
-			if(isset($this->$key)){
+			if(isset($copy->$key)){
 				switch(true){
-					case is_array($this->$key):
-						$this->$key = (array)json_decode($val);
+					case is_array($copy->$key):
+					case is_object($copy->$key):
+						$this->$key = json_decode($val);
 						break;
-					case is_object($this->$key):
-						$this->$key = (object)json_decode($val);
-						break;
-					case is_int($this->$key):
+					case is_int($copy->$key):
 						$this->$key = (int)$val;
 						break;
-					case is_float($this->$key):
+					case is_float($copy->$key):
 						$this->$key = (float)$val;
 						break;
-					case is_bool($this->$key):
+					case is_bool($copy->$key):
 						$this->$key = (bool)$val;
 						break;
-					case is_string($this->$key):
+					case is_string($copy->$key):
 						$this->$key = (string)$val;
 						break;
 					default:
-						throw new Exception('Unsupported type "'.gettype($this->$key).'"');
+						throw new Exception('Unsupported type "'.gettype($copy->$key).'"');
 				}
 			}
 		}
@@ -245,7 +250,8 @@ abstract class WSAL_DB_ActiveRecord {
 		global $wpdb;
 		$class = get_called_class();
 		$result = array();
-		$sql = $wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '.$cond, $args);
+		$temp = new $class();
+		$sql = $wpdb->prepare('SELECT * FROM ' . $temp->GetTable() . ' WHERE '.$cond, $args);
 		foreach($wpdb->get_results($sql, ARRAY_A) as $data){
 			$result[] = new $class($data);
 		}
@@ -262,10 +268,28 @@ abstract class WSAL_DB_ActiveRecord {
 	public static function LoadAndCallForEach($callback, $cond = '%d', $args = array(1)){
 		global $wpdb;
 		$class = get_called_class();
-		$sql = $wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '.$cond, $args);
+		$temp = new $class();
+		$sql = $wpdb->prepare('SELECT * FROM ' . $temp->GetTable() . ' WHERE '.$cond, $args);
 		foreach($wpdb->get_results($sql, ARRAY_A) as $data){
 			$callback(new $class($data));
 		}
+	}
+	
+	/**
+	 * Similar to LoadMulti but allows the use of a full SQL query.
+	 * @param string $cond Full SQL query.
+	 * @param array $args (Optional) Query arguments.
+	 * @return self[] List of loaded records.
+	 */
+	public static function LoadMultiQuery($query, $args = array()){
+		global $wpdb;
+		$class = get_called_class();
+		$result = array();
+		$sql = $wpdb->prepare($query, $args);
+		foreach($wpdb->get_results($sql, ARRAY_A) as $data){
+			$result[] = new $class($data);
+		}
+		return $result;
 	}
 	
 	/**
@@ -330,5 +354,43 @@ abstract class WSAL_DB_ActiveRecord {
 	 */
 	public function IsDeleted(){
 		return $this->_state == self::STATE_DELETED;
+	}
+	
+	protected static $_cache = array();
+	
+	/**
+	 * Load ActiveRecord from DB or cache.
+	 * @param string $target ActiveRecord class name.
+	 * @param string $query Load condition.
+	 * @param array $args Arguments used in condition.
+	 * @return WSAL_DB_ActiveRecord
+	 */
+	protected static function CacheLoad($target, $query, $args){
+		$index = $target . '::' . vsprintf($query, $args);
+		if(!isset(self::$_cache[$index])){
+			self::$_cache[$index] = new $target();
+			self::$_cache[$index]->Load($query, $args);
+		}
+		return self::$_cache[$index];
+	}
+	
+	/**
+	 * Remove ActiveRecord cache.
+	 * @param string $target ActiveRecord class name.
+	 * @param string $query Load condition.
+	 * @param array $args Arguments used in condition.
+	 */
+	protected static function CacheRemove($target, $query, $args){
+		$index = $target . '::' . sprintf($query, $args);
+		if(!isset(self::$_cache[$index])){
+			unset(self::$_cache[$index]);
+		}
+	}
+	
+	/**
+	 * Clear the cache.
+	 */
+	protected static function CacheClear(){
+		self::$_cache = array();
 	}
 }

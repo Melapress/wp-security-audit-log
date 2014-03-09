@@ -3,23 +3,22 @@
 class WSAL_ViewManager {
 	
 	/**
-	 * @var WSAL_ViewInterface[] 
+	 * @var WSAL_AbstractView[] 
 	 */
 	public $views = array();
 	
 	/**
 	 * @var WpSecurityAuditLog
 	 */
-	protected $plugin;
+	protected $_plugin;
 
 	public function __construct(WpSecurityAuditLog $plugin){
-		$this->plugin = $plugin;
+		$this->_plugin = $plugin;
 		
 		// load views
 		foreach(glob(dirname(__FILE__) . '/Views/*.php') as $file){
-			$class = $plugin->GetClassFileClassName($file);
-			$tmp = new $class($plugin);
-			$tmp->SetPlugin($plugin);
+			$class = $this->_plugin->GetClassFileClassName($file);
+			$tmp = new $class($this->_plugin);
 			$this->views[] = $tmp;
 		}
 		
@@ -28,9 +27,15 @@ class WSAL_ViewManager {
 		
 		// add menus
 		add_action('admin_menu', array($this, 'AddAdminMenus'));
+		
+		// render header
+		add_action('admin_enqueue_scripts', array($this, 'RenderViewHeader'));
+		
+		// render footer
+		add_action('admin_footer', array($this, 'RenderViewFooter'));
 	}
 	
-	public function OrderByWeight(WSAL_ViewInterface $a, WSAL_ViewInterface $b){
+	public function OrderByWeight(WSAL_AbstractView $a, WSAL_AbstractView $b){
 		$wa = $a->GetWeight();
 		$wb = $b->GetWeight();
 		switch(true){
@@ -50,7 +55,7 @@ class WSAL_ViewManager {
 			'Audit Log',
 			'manage_options', // admin & superadmin
 			'wsal-main',
-			array($this, 'Render_0'),
+			array($this, 'RenderViewBody'),
 			'dashicons-welcome-view-site'
 		);
 		
@@ -62,21 +67,36 @@ class WSAL_ViewManager {
 				$view->GetName(),
 				'manage_options', // admin & superadmin
 				$i == 0 ? 'wsal-main' : 'wsal-' . strtolower($view->GetName()),
-				array($this, 'Render_' . $i),
+				array($this, 'RenderViewBody'),
 				$view->GetIcon()
 			);
 		}
 	}
 	
-	public function __call($name, $args){
-		$name = explode('_', $name, 2);
-		if(count($name) == 2 && $name[0] == 'Render'){
-			$name = (int)$name[1];
-			?><div class="wrap">
-				<h2><?php _e($this->views[$name]->GetTitle()); ?></h2>
-				<?php $this->views[$name]->Render(); ?>
-			</div><?php
-		}
+	protected function GetBackendPageIndex(){
+		if(isset($_REQUEST['page']))
+			foreach($this->views as $i => $view)
+				if($_REQUEST['page'] == 'wsal-' . strtolower($view->GetName()))
+					return $i;
+		return 0;
+	}
+	
+	public function RenderViewHeader(){
+		$view_id = $this->GetBackendPageIndex();
+		$this->views[$view_id]->Header();
+	}
+	
+	public function RenderViewFooter(){
+		$view_id = $this->GetBackendPageIndex();
+		$this->views[$view_id]->Footer();
+	}
+	
+	public function RenderViewBody(){
+		$view_id = $this->GetBackendPageIndex();
+		?><div class="wrap">
+			<h2><?php _e($this->views[$view_id]->GetTitle()); ?></h2>
+			<?php $this->views[$view_id]->Render(); ?>
+		</div><?php
 	}
 	
 }
