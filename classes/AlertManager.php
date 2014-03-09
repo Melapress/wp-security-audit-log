@@ -29,12 +29,14 @@ final class WSAL_AlertManager {
 	 */
 	public function Trigger($type, $data){
 		if($this->IsEnabled($type)){
-			$this->Log(
-				$type,
-				$this->_alerts[$type]->code,
-				$this->_alerts[$type]->mesg,
-				$data
-			);
+			$alert = isset($this->_alerts[$type]) ? $this->_alerts[$type] : null;
+			if($alert){
+				// ok, convert alert to a log entry
+				$this->Log($type, $alert->code, $alert->mesg, $data);
+			}else{
+				// in general this shouldn't happen, but it could, so we handle it here :)
+				throw new Exception('Alert with code "'.$type.'" has not be registered.');
+			}
 		}
 	}
 	
