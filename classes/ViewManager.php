@@ -11,6 +11,8 @@ class WSAL_ViewManager {
 	 * @var WpSecurityAuditLog
 	 */
 	protected $_plugin;
+	
+	const MAIN_VIEW = 'wsal-main';
 
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->_plugin = $plugin;
@@ -54,7 +56,7 @@ class WSAL_ViewManager {
 			'WP Security Audit Log',
 			'Audit Log',
 			'manage_options', // admin & superadmin
-			'wsal-main',
+			self::MAIN_VIEW,
 			array($this, 'RenderViewBody'),
 			'dashicons-welcome-view-site'
 		);
@@ -62,11 +64,11 @@ class WSAL_ViewManager {
 		// add menu items
 		foreach($this->views as $i => $view){
 			add_submenu_page(
-				'wsal-main',
+				self::MAIN_VIEW,
 				$view->GetTitle(),
 				$view->GetName(),
 				'manage_options', // admin & superadmin
-				$i == 0 ? 'wsal-main' : 'wsal-' . strtolower($view->GetName()),
+				$i == 0 ? self::MAIN_VIEW : $view->GetSafeViewName(),
 				array($this, 'RenderViewBody'),
 				$view->GetIcon()
 			);
@@ -76,7 +78,7 @@ class WSAL_ViewManager {
 	protected function GetBackendPageIndex(){
 		if(isset($_REQUEST['page']))
 			foreach($this->views as $i => $view)
-				if($_REQUEST['page'] == 'wsal-' . strtolower($view->GetName()))
+				if($_REQUEST['page'] == $view->GetSafeViewName())
 					return $i;
 		return 0;
 	}

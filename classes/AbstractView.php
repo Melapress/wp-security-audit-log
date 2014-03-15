@@ -49,4 +49,13 @@ abstract class WSAL_AbstractView {
 	 */
 	public function Footer(){}
 	
+	/**
+	 * @return string Safe view menu name.
+	 */
+	public function GetSafeViewName(){
+		return 'wsal-' . strtolower(
+				preg_replace('/[^A-Za-z0-9\-]/', '-', $this->GetName())
+			);
+	}
+	
 }
