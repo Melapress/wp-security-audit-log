@@ -112,9 +112,8 @@ class WpSecurityAuditLog {
 			$events[$item['EventID']] = $item;
 		$sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog';
 		$auditlog = $wpdb->get_results($sql, ARRAY_A);
-		print_r($auditlog[0]); die;
 		// migrate using db logger
-		$lgr = new WSAL_Loggers_Database();
+		$lgr = new WSAL_Loggers_Database($this);
 		$codes = array('HIGH' => E_ERROR, 'WARNING' => E_WARNING, 'NOTICE' => E_NOTICE);
 		foreach($auditlog as $entry){
 			$code = $codes[$events[$entry['EventID']]['EventType']];
@@ -123,18 +122,21 @@ class WpSecurityAuditLog {
 				'UserAgent' => '',
 				'CurrentBlogID' => $entry['BlogId'],
 			);
+			if($entry['UserName'])
+				$data['Username'] = base64_decode($entry['UserName']);
 			$mesg = $events[$entry['EventID']]['EventDescription'];
+			$date = strtotime($entry['EventDate']);
 			// convert message from '<strong>%s</strong>' to '%Arg1%' format
 			$c = 0; $n = '<strong>%s</strong>'; $l = strlen($n);
 			while(($pos = strpos($mesg, $n)) !== false){
-				$mesg = substr_replace($mesg, '%Arg' . (++$c) .'%', $pos, $l);
+				$mesg = substr_replace($mesg, '%Arg' . ($c++) .'%', $pos, $l);
 			}
 			// generate new meta data args
 			$temp = unserialize(base64_decode($entry['EventData']));
 			foreach((array)$temp as $i => $item)
 				$data['Arg' . $i] = $item;
 			// send event data to logger!
-			$lgr->Log($entry['EventID'], $code, $mesg, $data, $entry['EventDate']);
+			$lgr->Log($entry['EventID'], $code, $mesg, $data, $date);
 		}
 	}
 	

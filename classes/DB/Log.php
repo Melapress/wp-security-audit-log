@@ -29,8 +29,13 @@ class WSAL_DB_Log extends WSAL_DB_ActiveRecord {
 	
 	public function FormatMessage($values){
 		$keys = array();
-		$vals = array_values($values);
-		foreach(array_keys($values) as $key) $keys[] = "%$key%";
+		$vals = array();
+		foreach($values as $key => $val){
+			if(is_scalar($key)){
+				$keys[] = "%$key%";
+				$vals[] = $val;
+			}
+		}
 		return str_replace($keys, $vals, $this->message);
 	}
 }

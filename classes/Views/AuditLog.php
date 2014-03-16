@@ -49,6 +49,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		echo '<!DOCTYPE html><html><head>';
 		echo '<link rel="stylesheet" id="open-sans-css" href="' . $this->_plugin->GetBaseUrl() . '/css/nice_r.css" type="text/css" media="all">';
 		echo '<script type="text/javascript" src="'.$this->_plugin->GetBaseUrl() . '/js/nice_r.js"></script>';
+		echo '<style type="text/css">';
+		echo 'html, body { margin: 0; padding: 0; }';
+		echo '.nice_r a { overflow: visible; margin-left: 8px; }';
+		echo '</style>';
 		echo '</head><body>';
 		$nicer = new WSAL_Nicer($occ->GetMetaArray());
 		$nicer->render();
