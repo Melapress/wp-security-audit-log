@@ -2,15 +2,11 @@
 .column-type,
 .column-code,
 .column-more {
-	width: 36px;
-}
-
-.column-code {
-	cursor: help;
+	width: 70px;
 }
 
 .column-crtd {
-	width: 120px;
+	width: 150px;
 }
 
 .more-info {
@@ -52,14 +48,18 @@
 	background: #290;
 }
 
+.log-type {
+	cursor: help;
+}
+
 .log-type:after {
 	display: block;
 	width: 16px;
 	height: 16px;
 	color: #FFF;
 	font-weight: bold;
-	font-size: 13px;
-	line-height: 16px;
+	font-size: 11px;
+	line-height: 17px;
 	background: #CCC;
 	text-align: center;
 	border-radius: 32px;
@@ -67,6 +67,7 @@
 }
 
 /* errors */
+.log-type-0:after,
 .log-type-1:after,
 .log-type-4:after,
 .log-type-16:after,

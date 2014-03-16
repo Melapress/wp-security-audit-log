@@ -1,7 +1,10 @@
 <?php
 
 class WSAL_Loggers_Database extends WSAL_AbstractLogger {
-	public function Log($type, $code, $message, $data = array()) {
+	public function Log($type, $code, $message, $data = array(), $date = null) {
+		// use today's date if not set up
+		if(is_null($date))$date = time();
+		
 		// attempt loading existing log entry
 		$log = new WSAL_DB_Log();
 		$log->Load(
@@ -19,7 +22,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		
 		// create new occurrence
 		$occ = new WSAL_DB_Occurrence();
-		$occ->created_on = time();
+		$occ->created_on = $date;
 		$occ->log_id = $log->id;
 		$occ->Save();
 		

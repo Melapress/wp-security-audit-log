@@ -96,7 +96,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	public function get_columns(){
 		return array(
 			'cb'   => '<input type="checkbox" />',
-			'read' => 'Read',
+			//'read' => 'Read',
 			'code' => 'Code',
 			'type' => 'Type',
 			'crtd' => 'Date',
@@ -110,6 +110,15 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			 . 'name="'.esc_attr($this->_args['singular']).'[]"/>';
 	}
 
+	public function get_sortable_columns(){
+		return array(
+			'read' => array('read', false),
+			'code' => array('code', false),
+			'type' => array('type', false),
+			'crtd' => array('crtd', true),
+		);
+	}
+	
 	public function column_default($item, $column_name){
 		switch($column_name){
 			case 'read':
@@ -119,12 +128,13 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			case 'type':
 				return str_pad($item['type'], 4, '0', STR_PAD_LEFT);
 			case 'code':
+				$alert = $this->_plugin->alerts->GetAlert($item['type']);
 				$const = (object)array('name' => 'E_UNKNOWN', 'value' => 0, 'description' => 'Unknown error code.');
-				$const = $this->_plugin->constants->GetConstantBy('value', $item['code'], $const);
+				$const = $this->_plugin->constants->GetConstantBy('value', $alert->code, $const);
 				return '<span class="log-type log-type-' . $const->value
 					. '" title="' . esc_html($const->name . ': ' . $const->description) . '"></span>';
 			case 'crtd':
-				return date('Y-m-d H:i:s', $item['date']);
+				return date('Y-m-d H:i:s', $item['crtd']);
 			case 'more':
 				$url = admin_url('admin-ajax.php') . '?action=AjaxInspector&amp;occurrence=' . $item['id'];
 				return '<a class="more-info thickbox" title="Alert Data Inspector"'
@@ -136,8 +146,18 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		}
 	}
 
+	public function reorder_items_str($a, $b){
+		$result = strcmp($a[$this->_orderby], $b[$this->_orderby]);
+		return ($this->_order === 'asc') ? $result : -$result;
+	}
+	
+	public function reorder_items_int($a, $b){
+		$result = $a[$this->_orderby] - $b[$this->_orderby];
+		return ($this->_order === 'asc') ? $result : -$result;
+	}
+	
 	public function prepare_items() {
-		$per_page = 5;
+		$per_page = 20;
 
 		$columns = $this->get_columns();
 		$hidden = array();
@@ -155,18 +175,15 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				'read' => $occ->is_read,
 				'type' => $log->type,
 				'code' => $log->code,
-				'date' => $occ->created_on,
+				'crtd' => $occ->created_on,
 				'mesg' => $occ->GetMessage(),
 			);
 		}
 
-		function usort_reorder($a, $b){
-			$orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'date';
-			$order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc';
-			$result = strcmp($a[$orderby], $b[$orderby]);
-			return ($order === 'asc') ? $result : -$result;
-		}
-		usort($data, 'usort_reorder');
+		$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'crtd';
+		$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'asc' : 'desc';
+		$numorder = in_array($this->_orderby, array('code', 'type', 'crtd'));
+		usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
 
 		$current_page = $this->get_pagenum();
 

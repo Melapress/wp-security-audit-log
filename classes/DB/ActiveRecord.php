@@ -88,7 +88,7 @@ abstract class WSAL_DB_ActiveRecord {
 	 */
 	public function GetTable(){
 		global $wpdb;
-		return $wpdb->prefix . $this->_table;
+		return $wpdb->base_prefix . $this->_table;
 	}
 	
 	/**

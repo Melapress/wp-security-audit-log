@@ -90,10 +90,52 @@ class WpSecurityAuditLog {
 	
 	public function Install(){
 		WSAL_DB_ActiveRecord::InstallAll();
+		if($this->CanUpgrade())$this->Upgrade();
 	}
 	
 	public function Uninstall(){
 		WSAL_DB_ActiveRecord::UninstallAll();
+	}
+	
+	public function CanUpgrade(){
+		global $wpdb;
+		$table = $wpdb->base_prefix . 'wordpress_auditlog_events';
+		return $wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table;
+	}
+	
+	public function Upgrade(){
+		global $wpdb;
+		// load data
+		$sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog_events';
+		$events = array();
+		foreach($wpdb->get_results($sql, ARRAY_A) as $item)
+			$events[$item['EventID']] = $item;
+		$sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog';
+		$auditlog = $wpdb->get_results($sql, ARRAY_A);
+		print_r($auditlog[0]); die;
+		// migrate using db logger
+		$lgr = new WSAL_Loggers_Database();
+		$codes = array('HIGH' => E_ERROR, 'WARNING' => E_WARNING, 'NOTICE' => E_NOTICE);
+		foreach($auditlog as $entry){
+			$code = $codes[$events[$entry['EventID']]['EventType']];
+			$data = array(
+				'ClientIP' => $entry['UserIP'],
+				'UserAgent' => '',
+				'CurrentBlogID' => $entry['BlogId'],
+			);
+			$mesg = $events[$entry['EventID']]['EventDescription'];
+			// convert message from '<strong>%s</strong>' to '%Arg1%' format
+			$c = 0; $n = '<strong>%s</strong>'; $l = strlen($n);
+			while(($pos = strpos($mesg, $n)) !== false){
+				$mesg = substr_replace($mesg, '%Arg' . (++$c) .'%', $pos, $l);
+			}
+			// generate new meta data args
+			$temp = unserialize(base64_decode($entry['EventData']));
+			foreach((array)$temp as $i => $item)
+				$data['Arg' . $i] = $item;
+			// send event data to logger!
+			$lgr->Log($entry['EventID'], $code, $mesg, $data, $entry['EventDate']);
+		}
 	}
 	
 	public function GetBaseUrl(){

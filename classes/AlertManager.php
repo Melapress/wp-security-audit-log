@@ -109,11 +109,28 @@ final class WSAL_AlertManager {
 	 * @param array $data Misc alert data.
 	 */
 	protected function Log($type, $code, $message, $data = array()){
-		$data['Client IP'] = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
-		$data['UserAgent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+		if(!isset($data['ClientIP']))
+			$data['ClientIP'] = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
+		if(!isset($data['UserAgent']))
+			$data['UserAgent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+		if(!isset($data['CurrentBlogID']))
+			$data['CurrentBlogID'] = function_exists('get_current_blog_id') ? get_current_blog_id() : 1;
 		
 		foreach($this->_loggers as $logger)
 			$logger->Log($type, $code, $message, $data);
+	}
+	
+	/**
+	 * Return alert given alert type.
+	 * @param integer $type Alert type.
+	 * @param mixed $default Returned if alert is not found.
+	 * @return WSAL_Alert
+	 */
+	public function GetAlert($type, $default = null){
+		foreach($this->_alerts as $alert)
+			if($alert->type == $type)
+				return $alert;
+		return $default;
 	}
 	
 	/**
