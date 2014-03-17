@@ -67,7 +67,16 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						</thead>
 						<tbody><?php
 							foreach($alerts as $alert){
-								?><tr>
+								$attrs = '';
+								switch(true){
+									case !$alert->mesg:
+										$attrs = ' title="Not Implemented" class="alert-incomplete"';
+										break;
+									case false:
+										$attrs = ' title="Not Available" class="alert-unavailable"';
+										break;
+								}
+								?><tr<?php echo $attrs; ?>>
 									<th><input name="alert[]" type="checkbox" <?php if($active[$alert->type])echo 'checked="checked"'; ?> value="<?php echo (int)$alert->type; ?>"></th>
 									<td><?php echo str_pad($alert->type, 4, '0', STR_PAD_LEFT); ?></td>
 									<td><?php echo $this->_plugin->constants->GetConstantBy('value', $alert->code)->name; ?></td>
@@ -86,6 +95,12 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		?><style type="text/css">
 			.wsal-tab {
 				display: none;
+			}
+			.wsal-tab tr.alert-incomplete td {
+				color: #9BE;
+			}
+			.wsal-tab tr.alert-unavailable td {
+				color: #CCC;
 			}
 		</style><?php
 	}
