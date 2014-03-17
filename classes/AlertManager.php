@@ -60,11 +60,27 @@ final class WSAL_AlertManager {
 		if(func_num_args() == 1){
 			// handle single item
 			list($type, $code, $catg, $desc, $mesg) = $info;
+			if(isset($this->_alerts[$type]))
+				throw new Exception("Alert $type already registered with Alert Manager.");
 			$this->_alerts[$type] = new WSAL_Alert($type, $code, $catg, $desc, $mesg);
 		}else{
 			// handle multiple items
 			foreach(func_get_args() as $arg)
 				$this->Register($arg);
+		}
+	}
+	
+	/**
+	 * Register a whole group of items.
+	 * @param array $items An array with group name as the index and an array of group items as the value.
+	 * Item values is an array of [type, code, description, message] respectively.
+	 */
+	public function RegisterGroup($groups){
+		foreach($groups as $name => $group){
+			foreach($group as $item){
+				list($type, $code, $desc, $mesg) = $item;
+				$this->Register(array($type, $code, $name, $desc, $mesg));
+			}
 		}
 	}
 	
