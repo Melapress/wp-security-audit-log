@@ -94,25 +94,25 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		?><script type="text/javascript">
 			jQuery(document).ready(function(){
 				// tab handling code
-				jQuery('#wsal-tabs a').click(function(){
-					jQuery('#wsal-tabs a').removeClass('nav-tab-active');
+				jQuery('#wsal-tabs>a').click(function(){
+					jQuery('#wsal-tabs>a').removeClass('nav-tab-active');
 					jQuery('table.wsal-tab').hide();
 					jQuery(jQuery(this).addClass('nav-tab-active').attr('href')).show();
 				});
 				// checkbox handling code
-				jQuery('table.wsal-tab thead th:first :checkbox:first').change(function(){
-					jQuery(this).parents('table:first').find('tbody th :checkbox').attr('checked', this.checked);
+				jQuery('table.wsal-tab>thead>tr>th>:checkbox').change(function(){
+					jQuery(this).parents('table:first').find('tbody>tr>th>:checkbox').attr('checked', this.checked);
 				});
-				jQuery('table.wsal-tab tbody th :checkbox').change(function(){
-					var allchecked = jQuery(this).parents('tbody:first').find('th :checkbox:not(:checked)').length === 0;
-					jQuery(this).parents('table:first').find('thead th:first :checkbox:first').attr('checked', allchecked);
+				jQuery('table.wsal-tab>tbody>tr>th>:checkbox').change(function(){
+					var allchecked = jQuery(this).parents('tbody:first').find('th>:checkbox:not(:checked)').length === 0;
+					jQuery(this).parents('table:first').find('thead>tr>th:first>:checkbox:first').attr('checked', allchecked);
 				});
 				// show relevant tab
-				var hashlink = jQuery('#wsal-tabs a[href="' + location.hash + '"]');
+				var hashlink = jQuery('#wsal-tabs>a[href="' + location.hash + '"]');
 				if(hashlink.length){
 					hashlink.click();
 				}else{
-					jQuery('#wsal-tabs a:first').click();
+					jQuery('#wsal-tabs>a:first').click();
 				}
 			});
 		</script><?php
