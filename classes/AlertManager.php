@@ -168,7 +168,7 @@ final class WSAL_AlertManager {
 				$result[$alert->catg] = array();
 			$result[$alert->catg][] = $alert;
 		}
-		asort($result);
+		ksort($result);
 		return $result;
 	}
 	
