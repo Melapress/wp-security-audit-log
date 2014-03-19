@@ -32,7 +32,7 @@ final class WSAL_Alert {
 	 */
 	public $mesg = '';
 	
-	public function __construct($type, $code, $catg, $desc, $mesg) {
+	public function __construct($type = 0, $code = 0, $catg = '', $desc = '', $mesg = '') {
 		$this->type = $type;
 		$this->code = $code;
 		$this->catg = $catg;

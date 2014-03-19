@@ -112,7 +112,7 @@ WpSecurityAuditLog::GetInstance()
 			array(0001, E_ERROR, 'PHP error', '%Message%.'),
 			array(0002, E_WARNING, 'PHP warning', '%Message%.'),
 			array(0003, E_NOTICE, 'PHP notice', '%Message%.'),
-			array(0004, E_NOTICE, 'PHP exception', '%Message%.'),
+			array(0004, E_ERROR, 'PHP exception', '%Message%.'),
 			array(6000, E_NOTICE, 'Events automatically pruned by system', ''),
 			array(6001, E_ERROR, 'Option Anyone Can Register in WordPress settings changed', ''),
 			array(6002, E_ERROR, 'New User Default Role changed', ''),

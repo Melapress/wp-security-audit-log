@@ -31,7 +31,7 @@ class WSAL_DB_Log extends WSAL_DB_ActiveRecord {
 		$keys = array();
 		$vals = array();
 		foreach($values as $key => $val){
-			if(is_scalar($key)){
+			if(is_scalar($val)){
 				$keys[] = "%$key%";
 				$vals[] = $val;
 			}
