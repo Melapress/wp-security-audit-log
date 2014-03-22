@@ -174,7 +174,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 
 		$data = array();
 		foreach(WSAL_DB_Occurrence::GetNewestUnique() as $occ){
-			$log = $occ->GetLog();
+			$log = $occ->GetAlert();
 			$data[] = array(
 				'id'   => $occ->id,
 				'read' => $occ->is_read,

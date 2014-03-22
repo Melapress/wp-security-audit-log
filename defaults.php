@@ -82,6 +82,12 @@ WpSecurityAuditLog::GetInstance()
 			array(2040, E_WARNING, 'User changed the visibility of a post with custom post type', ''),
 			array(2041, E_NOTICE, 'User changed the date of post with custom post type', ''),
 		),
+		'Widgets' => array(
+			array(2042, E_ERROR, 'User added a new widget', ''),
+			array(2043, E_WARNING, 'User modified a widget', ''),
+			array(2044, E_ERROR, 'User deleted widget', ''),
+			array(2045, E_NOTICE, 'User moved widget', ''),
+		),
 		'User Profiles' => array(
 			array(4000, E_ERROR, 'A new user was created on WordPress', ''),
 			array(4001, E_ERROR, 'A user created another WordPress user', ''),
@@ -92,21 +98,14 @@ WpSecurityAuditLog::GetInstance()
 			array(4006, E_NOTICE, 'A user changed another user\'s email address', ''),
 			array(4007, E_ERROR, 'A user was deleted by another user', ''),
 		),
-		'Widgets' => array(
-			array(2042, E_ERROR, 'User added a new widget', ''),
-			array(2043, E_WARNING, 'User modified a widget', ''),
-			array(2044, E_ERROR, 'User deleted widget', ''),
-			array(2045, E_NOTICE, 'User moved widget', ''),
-		),
 		'Plugins & Themes' => array(
-			array(3000, E_NOTICE, 'User activated a theme', ''),
 			array(5000, E_ERROR, 'User installed a plugin', ''),
 			array(5001, E_ERROR, 'User activated a WordPress plugin', ''),
 			array(5002, E_ERROR, 'User deactivated a WordPress plugin', ''),
 			array(5003, E_ERROR, 'User uninstalled a plugin', ''),
 			array(5004, E_WARNING, 'User upgraded a plugin', ''),
-			array(5005, E_ERROR, 'User installs a theme', ''),
-			array(5006, E_ERROR, 'User activated a theme', ''),
+			array(5005, E_ERROR, 'User installed a theme', ''),
+			array(5006, E_ERROR, 'User activated a theme', 'Activated theme "%NewTheme->Name%", installed in %NewTheme->get_template_directory()%.'),
 		),
 		'System Activity' => array(
 			array(0001, E_ERROR, 'PHP error', '%Message%.'),

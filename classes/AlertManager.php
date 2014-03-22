@@ -41,13 +41,12 @@ final class WSAL_AlertManager {
 	 */
 	public function Trigger($type, $data){
 		if($this->IsEnabled($type)){
-			$alert = isset($this->_alerts[$type]) ? $this->_alerts[$type] : null;
-			if($alert){
+			if(isset($this->_alerts[$type])){
 				// ok, convert alert to a log entry
-				$this->Log($type, $alert->code, $alert->mesg, $data);
+				$this->Log($type, $data);
 			}else{
 				// in general this shouldn't happen, but it could, so we handle it here :)
-				throw new Exception('Alert with code "'.$type.'" has not be registered.');
+				throw new Exception('Alert with code "' . $type . '" has not be registered.');
 			}
 		}
 	}
@@ -120,11 +119,9 @@ final class WSAL_AlertManager {
 	 * Converts an Alert into a Log entry (by invoking loggers).
 	 * You should not call this method directly.
 	 * @param integer $type Alert type.
-	 * @param integer $code Alert error level.
-	 * @param string $message Alert message.
 	 * @param array $data Misc alert data.
 	 */
-	protected function Log($type, $code, $message, $data = array()){
+	protected function Log($type, $data = array()){
 		if(!isset($data['ClientIP']))
 			$data['ClientIP'] = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 		if(!isset($data['UserAgent']))
@@ -133,7 +130,7 @@ final class WSAL_AlertManager {
 			$data['CurrentBlogID'] = function_exists('get_current_blog_id') ? get_current_blog_id() : 1;
 		
 		foreach($this->_loggers as $logger)
-			$logger->Log($type, $code, $message, $data);
+			$logger->Log($type, $data);
 	}
 	
 	/**

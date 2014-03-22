@@ -114,9 +114,7 @@ class WpSecurityAuditLog {
 		$auditlog = $wpdb->get_results($sql, ARRAY_A);
 		// migrate using db logger
 		$lgr = new WSAL_Loggers_Database($this);
-		$codes = array('HIGH' => E_ERROR, 'WARNING' => E_WARNING, 'NOTICE' => E_NOTICE);
 		foreach($auditlog as $entry){
-			$code = $codes[$events[$entry['EventID']]['EventType']];
 			$data = array(
 				'ClientIP' => $entry['UserIP'],
 				'UserAgent' => '',
@@ -129,14 +127,15 @@ class WpSecurityAuditLog {
 			// convert message from '<strong>%s</strong>' to '%Arg1%' format
 			$c = 0; $n = '<strong>%s</strong>'; $l = strlen($n);
 			while(($pos = strpos($mesg, $n)) !== false){
-				$mesg = substr_replace($mesg, '%Arg' . ($c++) .'%', $pos, $l);
+				$mesg = substr_replace($mesg, '%MigratedArg' . ($c++) .'%', $pos, $l);
 			}
+			$data['MigratedMesg'] = $mesg;
 			// generate new meta data args
 			$temp = unserialize(base64_decode($entry['EventData']));
 			foreach((array)$temp as $i => $item)
-				$data['Arg' . $i] = $item;
+				$data['MigratedArg' . $i] = $item;
 			// send event data to logger!
-			$lgr->Log($entry['EventID'], $code, $mesg, $data, $date);
+			$lgr->Log($entry['EventID'], $data, $date, true);
 		}
 	}
 	
