@@ -3,26 +3,47 @@
 class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		add_action('add_attachment', array($this, 'EventFileUploaded'));
-		add_action('delete_attachment', array($this, 'EventFileUploadedDeleted'));
+		add_action('automatic_updates_complete', array($this, 'EventWordpressUpgrade'));
+		add_action('admin_init', array($this, 'EventCheckForUpdatedSettings'));
 	}
 	
-	protected $IsFileUploaded = false;
-	
-	public function EventWordpressUpgrade($attachmentID){
-//        global $wpdb;
-//        $data = $wpdb->get_row("SELECT guid FROM $wpdb->posts WHERE ID = " . (int)$attachmentID);
-//        $this->plugin->alerts->Trigger(2010, array(
-//			'AttachmentID' => $attachmentID,
-//			'FileName' => basename($data->guid),
-//			'FilePath' => dirname($data->guid),
-//		));
-//		$this->IsFileUploaded = true;
+	public function EventWordpressUpgrade(){
+		// TODO Finish this and make sure WP action is correct
 	}
 	
-	public function EventUpdatedSettings(){
-		if(isset($_POST)){
-			if(!empty($_POST['admin_email']) && current_user_can()){ // TODO !!!
+	public function EventCheckForUpdatedSettings(){
+		if(isset($_POST) && !empty($_POST['option_page'])){
+			
+			// make sure user can actually modify target options
+			$option_page = $_POST['option_page'];
+			$capability = apply_filters("option_page_capability_{$option_page}", 'manage_options');
+			if(!current_user_can($capability))return;
+			
+			if(get_option('users_can_register') xor isset($_POST['users_can_register'])){
+				$from = get_option('users_can_register') ? 'Enabled' : 'Disabled';
+				$to = isset($_POST['users_can_register']) ? 'Enabled' : 'Disabled';
+				if($from !== $to){
+					$this->plugin->alerts->Trigger(6001, array(
+						'OldValue' => $from,
+						'NewValue' => $to,
+						'CurrentUserID' => wp_get_current_user()->ID,
+					));
+				}
+			}
+			
+			if(!empty($_POST['default_role'])){
+				$from = get_option('default_role');
+				$to = trim($_POST['default_role']);
+				if($from !== $to){
+					$this->plugin->alerts->Trigger(6002, array(
+						'OldRole' => $from,
+						'NewRole' => $to,
+						'CurrentUserID' => wp_get_current_user()->ID,
+					));
+				}
+			}
+			
+			if(!empty($_POST['admin_email'])){
 				$from = get_option('admin_email');
 				$to = trim($_POST['admin_email']);
 				if($from !== $to){
@@ -33,9 +54,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					));
 				}
 			}
-			if(!empty($_POST['option_page']) && $_POST['option_page'] == 'general' && current_user_can()){ // TODO !!!
-				
-			}
+			
 		}
 	}
 	

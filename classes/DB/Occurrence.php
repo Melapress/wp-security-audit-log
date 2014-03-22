@@ -70,7 +70,17 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	 * @return WSAL_DB_Occurrence[]
 	 */
 	public static function GetNewestUnique($limit = PHP_INT_MAX){
-		return self::LoadMulti('1 GROUP BY log_id ORDER BY created_on DESC LIMIT %d', array($limit));
+		$temp = new self();
+		return self::LoadMultiQuery('
+			SELECT *
+			FROM (
+				SELECT *
+				FROM ' . $temp->GetTable() . '
+				ORDER BY created_on DESC
+			) AS temp_table
+			GROUP BY log_id
+			LIMIT %d
+		', array($limit));
 	}
 	
 }

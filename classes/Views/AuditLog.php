@@ -102,8 +102,8 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		return array(
 			'cb'   => '<input type="checkbox" />',
 			//'read' => 'Read',
-			'code' => 'Code',
-			'type' => 'Type',
+			'type' => 'Code',
+			'code' => 'Type',
 			'crtd' => 'Date',
 			'mesg' => 'Message',
 			'more' => '',
