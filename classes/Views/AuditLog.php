@@ -105,6 +105,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			'type' => 'Code',
 			'code' => 'Type',
 			'crtd' => 'Date',
+			'user' => 'Username',
 			'mesg' => 'Message',
 			'more' => '',
 		);
@@ -121,6 +122,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			'code' => array('code', false),
 			'type' => array('type', false),
 			'crtd' => array('crtd', true),
+			'user' => array('user', false),
 		);
 	}
 	
@@ -161,6 +163,18 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		return ($this->_order === 'asc') ? $result : -$result;
 	}
 	
+	protected function get_username(WSAL_DB_Occurrence $occ){
+		$meta = $occ->GetFirstNamedMeta(array('Username', 'CurrentUserID'));
+		switch(true){
+			case $meta->name == 'Username':
+				return $meta->value;
+			case $meta->name == 'CurrentUserID':
+				return get_userdata($meta->value)->user_login;
+			default:
+				return 'unknown';
+		}
+	}
+	
 	public function prepare_items() {
 		$per_page = 20;
 
@@ -181,6 +195,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				'type' => $log->type,
 				'code' => $log->code,
 				'crtd' => $occ->created_on,
+				'user' => $this->get_username($occ),
 				'mesg' => $occ->GetMessage(),
 			);
 		}

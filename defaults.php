@@ -105,7 +105,7 @@ WpSecurityAuditLog::GetInstance()
 			array(5003, E_ERROR, 'User uninstalled a plugin', ''),
 			array(5004, E_WARNING, 'User upgraded a plugin', ''),
 			array(5005, E_ERROR, 'User installed a theme', ''),
-			array(5006, E_ERROR, 'User activated a theme', 'Activated theme "%NewTheme->Name%", installed in %NewTheme->get_template_directory()%.'),
+			array(5006, E_ERROR, 'User activated a theme', 'Activated theme "%NewTheme->Name%", installed in %NewTheme->get_template_directory%.'),
 		),
 		'System Activity' => array(
 			array(0001, E_ERROR, 'PHP error', '%Message%.'),

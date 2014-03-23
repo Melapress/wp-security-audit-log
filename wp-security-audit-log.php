@@ -118,6 +118,7 @@ class WpSecurityAuditLog {
 			$data = array(
 				'ClientIP' => $entry['UserIP'],
 				'UserAgent' => '',
+				'CurrentUserID' => $entry['UserID'],
 				'CurrentBlogID' => $entry['BlogId'],
 			);
 			if($entry['UserName'])

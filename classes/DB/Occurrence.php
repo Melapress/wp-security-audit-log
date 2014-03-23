@@ -25,6 +25,20 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		return $meta;
 	}
 	
+	/**
+	 * Returns the first meta value from a given set of names. Useful when you have a mix of items that could provide a particular detail.
+	 * @param array $names List of meta names.
+	 * @return \WSAL_DB_Meta The first meta item that exists.
+	 */
+	public function GetFirstNamedMeta($names){
+		$meta = new WSAL_DB_Meta();
+		$query = '(' . str_repeat('name = %s OR ', count($names)).'0)';
+		$query = 'occurrence_id = %d AND ' . $query . ' LIMIT 1';
+		array_unshift($names, $this->id); // prepend args with occurrence id
+		$meta->Load($query, $names);
+		return $meta->IsLoaded() ? $meta : null;
+	}
+	
 	public function GetAlert(){
 		return WpSecurityAuditLog::GetInstance()->alerts->GetAlert($this->alert_id);
 	}
@@ -53,30 +67,49 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 			$this->SetMetaValue($key, $val);
 	}
 	
+	protected function GetMetaExprValue($expr){
+		// TODO Handle function calls (and methods?)
+		$expr = explode('->', $expr);
+		$meta = array_shift($expr);
+		$meta = $this->GetMetaValue($meta);
+		foreach($expr as $part){
+			if(is_scalar($meta))return $meta; // this isn't 100% correct
+			$meta = is_array($meta) ? $meta[$part] : $meta->$part;
+		}
+		return (string)$meta;
+	}
+	
+	protected function GetFormattedMesg($mesg){
+		// tokenize message with regex
+		$mesg = preg_split('/(%.*?%)/', $mesg, -1, PREG_SPLIT_DELIM_CAPTURE);
+		// handle tokenized message
+		foreach($mesg as $i=>$token){
+			// handle escaped percent sign
+			if($token == '%%'){
+				$mesg[$i] = '%';
+			}else
+			// handle complex expressions
+			if(substr($token, 0, 1) == '%' && substr($token, -1, 1) == '%'){
+				$mesg[$i] = $this->GetMetaExprValue(substr($token, 1, -1));
+			}
+		}
+		// compact message and return
+		return implode('', $mesg);
+	}
+	
 	/**
 	 * @return string Full-formatted message.
 	 */
 	public function GetMessage(){
 		if(!isset($this->_cachedmessage)){
+			// get correct message entry
 			if($this->is_migrated){
-				$tmp = $this->GetMetaValue('MigratedMesg');
+				$this->_cachedmessage = $this->GetMetaValue('MigratedMesg');
 			}else{
-				$tmp = $this->GetAlert()->mesg;
+				$this->_cachedmessage = $this->GetAlert()->mesg;
 			}
-			// TODO Support object traversal
-			// TODO Support method execution
-			// TODO Read metadata on-demand
-			$values = $this->GetMetaArray();
-			$keys = array();
-			$vals = array();
-			foreach($values as $key => $val){
-				if(is_scalar($val)){
-					$keys[] = "%$key%";
-					$vals[] = $val;
-				}
-			}
-			$tmp = str_replace($keys, $vals, $tmp);
-			$this->_cachedmessage = $tmp;
+			// fill variables in message
+			$this->_cachedmessage = $this->GetFormattedMesg($this->_cachedmessage);
 		}
 		return $this->_cachedmessage;
 	}
