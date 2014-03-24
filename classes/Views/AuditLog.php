@@ -136,6 +136,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return str_pad($item['type'], 4, '0', STR_PAD_LEFT);
 			case 'code':
 				$alert = $this->_plugin->alerts->GetAlert($item['type']);
+				if(!$alert)return 'Uknown Alert ' . esc_html($item['type']);
 				$const = (object)array('name' => 'E_UNKNOWN', 'value' => 0, 'description' => 'Unknown error code.');
 				$const = $this->_plugin->constants->GetConstantBy('value', $alert->code, $const);
 				return '<span class="log-type log-type-' . $const->value

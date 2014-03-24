@@ -83,10 +83,10 @@ WpSecurityAuditLog::GetInstance()
 			array(2041, E_NOTICE, 'User changed the date of post with custom post type', ''),
 		),
 		'Widgets' => array(
-			array(2042, E_ERROR, 'User added a new widget', ''),
-			array(2043, E_WARNING, 'User modified a widget', ''),
-			array(2044, E_ERROR, 'User deleted widget', ''),
-			array(2045, E_NOTICE, 'User moved widget', ''),
+			array(2042, E_ERROR, 'User added a new widget', 'Added a new %WidgetName% widget in  %Sidebar%'),
+			array(2043, E_WARNING, 'User modified a widget', 'Modified the %WidgetName% widget in %Sidebar%'),
+			array(2044, E_ERROR, 'User deleted widget', 'Deleted the %WidgetName% widget from %Sidebar%'),
+			array(2045, E_NOTICE, 'User moved widget', 'Moved the %WidgetName% widget from %OldSidebar% to %NewSidebar%.'),
 		),
 		'User Profiles' => array(
 			array(4000, E_ERROR, 'A new user was created on WordPress', ''),

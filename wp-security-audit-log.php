@@ -105,6 +105,9 @@ class WpSecurityAuditLog {
 	
 	public function Upgrade(){
 		global $wpdb;
+		static $migTypes = array(
+			3000 => 5006
+		);
 		// load data
 		$sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog_events';
 		$events = array();
@@ -125,6 +128,8 @@ class WpSecurityAuditLog {
 				$data['Username'] = base64_decode($entry['UserName']);
 			$mesg = $events[$entry['EventID']]['EventDescription'];
 			$date = strtotime($entry['EventDate']);
+			$type = $entry['EventID'];
+			if(isset($migTypes[$type]))$type = $migTypes[$type];
 			// convert message from '<strong>%s</strong>' to '%Arg1%' format
 			$c = 0; $n = '<strong>%s</strong>'; $l = strlen($n);
 			while(($pos = strpos($mesg, $n)) !== false){
@@ -136,7 +141,7 @@ class WpSecurityAuditLog {
 			foreach((array)$temp as $i => $item)
 				$data['MigratedArg' . $i] = $item;
 			// send event data to logger!
-			$lgr->Log($entry['EventID'], $data, $date, true);
+			$lgr->Log($type, $data, $date, true);
 		}
 	}
 	
