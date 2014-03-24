@@ -141,7 +141,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return '<span class="log-type log-type-' . $const->value
 					. '" title="' . esc_html($const->name . ': ' . $const->description) . '"></span>';
 			case 'crtd':
-				return date('Y-m-d H:i:s', $item['crtd']);
+				return date('Y-m-d h:i:s A', $item['crtd']);
 			case 'more':
 				$url = admin_url('admin-ajax.php') . '?action=AjaxInspector&amp;occurrence=' . $item['id'];
 				return '<a class="more-info thickbox" title="Alert Data Inspector"'
@@ -165,14 +165,15 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	
 	protected function get_username(WSAL_DB_Occurrence $occ){
 		$meta = $occ->GetFirstNamedMeta(array('Username', 'CurrentUserID'));
-		switch(true){
-			case $meta->name == 'Username':
-				return $meta->value;
-			case $meta->name == 'CurrentUserID':
-				return get_userdata($meta->value)->user_login;
-			default:
-				return 'unknown';
+		if($meta){
+			switch(true){
+				case $meta->name == 'Username':
+					return $meta->value;
+				case $meta->name == 'CurrentUserID':
+					return get_userdata($meta->value)->user_login;
+			}
 		}
+		return 'unknown';
 	}
 	
 	public function prepare_items() {
