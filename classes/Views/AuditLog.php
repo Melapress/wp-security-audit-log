@@ -135,10 +135,10 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			case 'type':
 				return str_pad($item['type'], 4, '0', STR_PAD_LEFT);
 			case 'code':
-				$alert = $this->_plugin->alerts->GetAlert($item['type']);
-				if(!$alert)return 'Uknown Alert ' . esc_html($item['type']);
+				$code = $this->_plugin->alerts->GetAlert($item['type']);
+				$code = $code ? $code->code : 0;
 				$const = (object)array('name' => 'E_UNKNOWN', 'value' => 0, 'description' => 'Unknown error code.');
-				$const = $this->_plugin->constants->GetConstantBy('value', $alert->code, $const);
+				$const = $this->_plugin->constants->GetConstantBy('value', $code, $const);
 				return '<span class="log-type log-type-' . $const->value
 					. '" title="' . esc_html($const->name . ': ' . $const->description) . '"></span>';
 			case 'crtd':
@@ -194,7 +194,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			$data[] = array(
 				'id'   => $occ->id,
 				'read' => $occ->is_read,
-				'type' => $log->type,
+				'type' => $occ->alert_id,
 				'code' => $log->code,
 				'crtd' => $occ->created_on,
 				'user' => $this->get_username($occ),
