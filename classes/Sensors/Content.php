@@ -34,15 +34,25 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
         if (empty($post->post_type)) return;
         if ($post->post_type == 'revision') return;
-        if ($newStatus == 'auto-draft' || ($oldStatus == 'new' && $newStatus=='auto-draft')) return;
 		
-		// run checks
+        // run checks
 		if($this->_OldPost){
-			$this->CheckDateChange($this->_OldPost, $post);
-			$this->CheckCategoriesChange($this->_OldPost, $post);
-			$this->CheckAuthorChange($this->_OldPost, $post);
-			//$this->CheckStatusChange($this->_OldPost, $post);
-			//$this->CheckContentChange($this->_OldPost, $post);
+			if ($newStatus == 'auto-draft' || ($oldStatus == 'new' && $newStatus=='auto-draft')){
+				// TODO What's the difference between created and published new post?
+				$event = $this->GetEventTypeForPostType($post, 2000, 2004, 2029);
+				$this->plugin->alerts->Trigger($event, array(
+					'PostID' => $post->ID,
+					'PostType' => $post->post_type,
+					'PostTitle' => $post->post_title,
+					'PostUrl' => get_permalink($post->ID),
+				));
+			}else{
+				$this->CheckDateChange($this->_OldPost, $post);
+				$this->CheckCategoriesChange($this->_OldPost, $post);
+				$this->CheckAuthorChange($this->_OldPost, $post);
+				//$this->CheckStatusChange($this->_OldPost, $post);
+				//$this->CheckContentChange($this->_OldPost, $post);
+			}
 		}
 	}
 	
