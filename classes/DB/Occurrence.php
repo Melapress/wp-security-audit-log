@@ -122,7 +122,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	public static function GetNewestUnique($limit = PHP_INT_MAX){
 		$temp = new self();
 		return self::LoadMultiQuery('
-			SELECT *
+			SELECT *, COUNT(alert_id) as count
 			FROM (
 				SELECT *
 				FROM ' . $temp->GetTable() . '

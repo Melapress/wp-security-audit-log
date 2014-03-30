@@ -142,7 +142,9 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return '<span class="log-type log-type-' . $const->value
 					. '" title="' . esc_html($const->name . ': ' . $const->description) . '"></span>';
 			case 'crtd':
-				return date('Y-m-d h:i:s A', $item['crtd']);
+				return $item['crtd'] ? date('Y-m-d h:i:s A', $item['crtd']) : '<i>unknown</i>';
+			case 'user':
+				return !is_null($item['user']) ? esc_html($item['user']) : '<i>unknown</i>';
 			case 'more':
 				$url = admin_url('admin-ajax.php') . '?action=AjaxInspector&amp;occurrence=' . $item['id'];
 				return '<a class="more-info thickbox" title="Alert Data Inspector"'
@@ -152,6 +154,10 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 					? esc_html($item[$column_name])
 					: 'Column "' . esc_html($column_name) . '" not found';
 		}
+	}
+	
+	public function group_alerts(){
+		return false;
 	}
 
 	public function reorder_items_str($a, $b){
@@ -171,10 +177,10 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				case $meta->name == 'Username':
 					return $meta->value;
 				case $meta->name == 'CurrentUserID':
-					return get_userdata($meta->value)->user_login;
+					return ($data = get_userdata($meta->value)) ? $data->user_login : null;
 			}
 		}
-		return 'unknown';
+		return null;
 	}
 	
 	public function prepare_items() {
@@ -189,7 +195,11 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		//$this->process_bulk_action();
 
 		$data = array();
-		foreach(WSAL_DB_Occurrence::GetNewestUnique() as $occ){
+		foreach(
+			$this->group_alerts()
+				? WSAL_DB_Occurrence::GetNewestUnique()
+				: WSAL_DB_Occurrence::LoadMulti('1 ORDER BY created_on DESC')
+			as $occ){
 			$log = $occ->GetAlert();
 			$data[] = array(
 				'id'   => $occ->id,
