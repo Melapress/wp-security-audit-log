@@ -77,7 +77,8 @@
 .log-type-16:after,
 .log-type-64:after,
 .log-type-256:after,
-.log-type-4096:after
+.log-type-4096:after,
+.log-type-E_CRITICAL:after
 { background: #E00; content: "!"; }
 
 /* warnings */
@@ -92,5 +93,6 @@
 .log-type-1024:after,
 .log-type-2048:after,
 .log-type-8192:after,
-.log-type-16384:after
+.log-type-16384:after,
+.log-type-E_DEBUG:after
 { background: #09E; content: "i"; }

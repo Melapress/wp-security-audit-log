@@ -20,7 +20,7 @@ class WSAL_ConstantManager {
 	/**
 	 * Add new PHP constant.
 	 * @param string $name Constant name.
-	 * @param integer $value Constant value.
+	 * @param integer|string $value Constant value.
 	 * @param string $description Constant description.
 	 */
 	public function AddConstant($name, $value, $description = ''){
