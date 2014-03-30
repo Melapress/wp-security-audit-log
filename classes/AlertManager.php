@@ -39,7 +39,7 @@ final class WSAL_AlertManager {
 	 * @param integer $type Alert type.
 	 * @param array $data Alert data.
 	 */
-	public function Trigger($type, $data){
+	public function Trigger($type, $data = array()){
 		if($this->IsEnabled($type)){
 			if(isset($this->_alerts[$type])){
 				// ok, convert alert to a log entry

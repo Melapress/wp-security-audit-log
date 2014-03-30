@@ -35,9 +35,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         if (empty($post->post_type)) return;
         if ($post->post_type == 'revision') return;
 		
+		WSAL_Sensors_Request::SetVars(array(
+			'$newStatus' => $newStatus,
+			'$oldStatus' => $oldStatus,
+		));
+		
         // run checks
 		if($this->_OldPost){
-			if ($newStatus == 'auto-draft' || ($oldStatus == 'new' && $newStatus=='auto-draft')){
+			if ($newStatus == 'publish' && $oldStatus == 'auto-draft'){
 				// TODO What's the difference between created and published new post?
 				$event = $this->GetEventTypeForPostType($post, 2000, 2004, 2029);
 				$this->plugin->alerts->Trigger($event, array(
