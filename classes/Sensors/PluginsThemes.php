@@ -11,7 +11,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 		$action = isset($_REQUEST['action2']) ? $_REQUEST['action2'] : $action;
 		
-		// install
+		// install plugin
         if($action=='install-plugin' && !empty($_GET['plugin'])){
 			$newPlugin = null;
 			$pluginName = $_GET['plugin'];
@@ -35,7 +35,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			));
         }
 		
-		// activate
+		// activate plugin
         if(in_array($action, array('activate', 'activate-selected'))){
 			if(isset($_REQUEST['plugin'])){
 				if(!isset($_REQUEST['checked']))
@@ -58,7 +58,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			}
 		}
 		
-		// deactivate
+		// deactivate plugin
         if(in_array($action, array('deactivate', 'deactivate-selected'))){
 			if(isset($_REQUEST['plugin'])){
 				if(!isset($_REQUEST['checked']))
@@ -81,10 +81,32 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			}
 		}
 		
-		// uninstall
-		// TODO
+		// uninstall plugin
+        if(in_array($action, array('delete-selected'))){
+			if(!isset($_REQUEST['verify-delete'])){
+				
+				// first step, before user approves deletion
+				// TODO store plugin data in session here
+			}else{
+				// second step, after deletion approval
+				// TODO use plugin data from session
+				foreach($_REQUEST['checked'] as $pluginFile){
+					$pluginName = basename($pluginFile, '.php');
+					$pluginName = str_replace(array('_', '-', '  '), ' ', $pluginName);
+					$pluginName = ucwords($pluginName);
+					$pluginFile = WP_PLUGIN_DIR . '/' . $pluginFile;
+					$this->plugin->alerts->Trigger(5003, array(
+						'PluginFile' => $pluginFile,
+						'PluginData' => (object)array(
+							'Name' => $pluginName,
+						),
+					));
+				}
+
+			}
+		}
 		
-		// upgrade
+		// upgrade plugin
         if(in_array($action, array('upgrade-plugin', 'update-selected'))){
 			if(isset($_REQUEST['plugin'])){
 				if(!isset($_REQUEST['checked']))
@@ -105,6 +127,28 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					),
 				));
 			}
+		}
+		
+		// install theme
+        if($action=='install-theme' && !empty($_GET['theme'])){
+			$themeName = $_GET['theme'];
+			$newTheme = null;
+			foreach(wp_get_themes() as $theme){
+				if(strtolower(str_replace(' ', '-', $theme->Name)) == $themeName){
+					$newTheme = $theme;
+					break;
+				}
+			}
+			$this->plugin->alerts->Trigger(5005, array(
+				'NewTheme' => (object)array(
+					'Name' => $newTheme->Name,
+					'ThemeURI' => $newTheme->ThemeURI,
+					'Description' => $newTheme->Description,
+					'Author' => $newTheme->Author,
+					'Version' => $newTheme->Version,
+					'get_template_directory' => $newTheme->get_template_directory(),
+				),
+			));
 		}
 	}
 	
