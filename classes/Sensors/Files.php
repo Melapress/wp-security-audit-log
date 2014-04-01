@@ -1,10 +1,11 @@
 <?php
 
-class WSAL_Sensors_Uploads extends WSAL_AbstractSensor {
+class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
 		add_action('add_attachment', array($this, 'EventFileUploaded'));
 		add_action('delete_attachment', array($this, 'EventFileUploadedDeleted'));
+		add_action('admin_init', array($this, 'EventAdminInit'));
 	}
 	
 	protected $IsFileUploaded = false;
@@ -29,6 +30,17 @@ class WSAL_Sensors_Uploads extends WSAL_AbstractSensor {
 			'FileName' => basename($data->guid),
 			'FilePath' => dirname($data->guid),
 		));
+	}
+	
+	public function EventAdminInit(){
+		$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+		$is_theme_editor = basename($_SERVER['SCRIPT_NAME']) == 'theme-editor.php';
+		if($is_theme_editor && $action == 'update'){
+			$this->plugin->alerts->Trigger(2011, array(
+				'File' => $_REQUEST['file'],
+				'Theme' => $_REQUEST['theme'],
+			));
+		}
 	}
 	
 }

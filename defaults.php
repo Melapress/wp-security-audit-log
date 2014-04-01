@@ -37,7 +37,7 @@ WpSecurityAuditLog::GetInstance()
 			array(1002, E_WARNING, 'Login failed', 'Failed login detected using "%Username%" as username'),
 			array(2010, E_NOTICE, 'User uploaded file from Uploads directory', 'Uploaded the file %FileName% in %FilePath%'),
 			array(2011, E_WARNING, 'User deleted file from Uploads directory', 'Deleted the file %FileName% from %FilePath%'),
-			array(2046, E_CRITICAL, 'User changed a file using the editor', ''),
+			array(2046, E_CRITICAL, 'User changed a file using the editor', 'Modified %File% with the Theme Editor'),
 		),
 		'Blog Posts' => array(
 			array(2000, E_NOTICE, 'User created a new blog post and saved it as draft', ''),
