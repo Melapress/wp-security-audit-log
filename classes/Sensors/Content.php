@@ -5,6 +5,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	public function HookEvents() {
 		if(is_admin())add_action('init', array($this, 'EventRegisterOldPost'));
 		add_action('transition_post_status', array($this, 'EventPostChanged'), 10, 3);
+		add_action('delete_post', array($this, 'EventPostDeleted'), 10, 1);
+		add_action('wp_trash_post', array($this, 'EventPostTrashed'), 10, 1);
+		add_action('untrash_post', array($this, 'EventPostUntrashed'));
 	}
 	
 	protected function GetEventTypeForPostType($post, $typePost, $typePage, $typeCustom){
@@ -57,8 +60,39 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->CheckAuthorChange($this->_OldPost, $post);
 				//$this->CheckStatusChange($this->_OldPost, $post);
 				//$this->CheckContentChange($this->_OldPost, $post);
+				//$this->CheckVisibilityChange($this->_OldPost, $post);
 			}
 		}
+	}
+	
+	public function EventPostDeleted($post_id){
+		$post = get_post($post_id);
+		$event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
+		$this->plugin->alerts->Trigger($event, array(
+			'PostID' => $post->ID,
+			'PostType' => $post->post_type,
+			'PostTitle' => $post->post_title,
+		));
+	}
+	
+	public function EventPostTrashed($post_id){
+		$post = get_post($post_id);
+		$event = $this->GetEventTypeForPostType($post, 2012, 2013, 2034);
+		$this->plugin->alerts->Trigger($event, array(
+			'PostID' => $post->ID,
+			'PostType' => $post->post_type,
+			'PostTitle' => $post->post_title,
+		));
+	}
+	
+	public function EventPostUntrashed($post_id){
+		$post = get_post($post_id);
+		$event = $this->GetEventTypeForPostType($post, 2014, 2015, 2035);
+		$this->plugin->alerts->Trigger($event, array(
+			'PostID' => $post->ID,
+			'PostType' => $post->post_type,
+			'PostTitle' => $post->post_title,
+		));
 	}
 	
 	protected function CheckDateChange($oldpost, $newpost){
