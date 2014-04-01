@@ -8,8 +8,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		add_action('wp_login_failed', array($this, 'EventLoginFailure'));
 	}
 	
-	public function EventLogin(){
-		$this->plugin->alerts->Trigger(1000);
+	public function EventLogin($user_login, $user){
+		$this->plugin->alerts->Trigger(1000, array('Username' => $user_login));
 	}
 	
 	public function EventLogout(){
