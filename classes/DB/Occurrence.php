@@ -12,6 +12,10 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	
 	protected $_meta;
 	
+	/**
+	 * Returns all meta data related to this event.
+	 * @return WSAL_DB_Meta[]
+	 */
 	public function GetMeta(){
 		if(!isset($this->_meta)){
 			$this->_meta = WSAL_DB_Meta::LoadMulti('occurrence_id = %d', array($this->id));
@@ -19,6 +23,11 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		return $this->_meta;
 	}
 	
+	/**
+	 * Loads a meta item given its name.
+	 * @param string $name Meta name.
+	 * @return \WSAL_DB_Meta The meta item, be sure to checked if it was loaded successfully.
+	 */
 	public function GetNamedMeta($name){
 		$meta = new WSAL_DB_Meta();
 		$meta->Load('occurrence_id = %d AND name = %s', array($this->id, $name));
@@ -39,14 +48,28 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		return $meta->IsLoaded() ? $meta : null;
 	}
 	
+	/**
+	 * Returns the alert related to this occurrence.
+	 * @return WSAL_Alert
+	 */
 	public function GetAlert(){
 		return WpSecurityAuditLog::GetInstance()->alerts->GetAlert($this->alert_id);
 	}
 	
+	/**
+	 * Returns the value of a meta item.
+	 * @param string $name Name of meta item.
+	 * @return mixed The value, if meta item does not exist an empty array is returned.
+	 */
 	public function GetMetaValue($name){
 		return $this->GetNamedMeta($name)->value;
 	}
 	
+	/**
+	 * Set the value of a meta item (creates or updates meta item).
+	 * @param string $name Meta name.
+	 * @param mixed $value Meta value.
+	 */
 	public function SetMetaValue($name, $value){
 		$meta = $this->GetNamedMeta($name);
 		$meta->occurrence_id = $this->id;
@@ -55,6 +78,10 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		$meta->Save();
 	}
 	
+	/**
+	 * Returns a key-value pair of meta data.
+	 * @return array
+	 */
 	public function GetMetaArray(){
 		$result = array();
 		foreach($this->GetMeta() as $meta)
@@ -62,11 +89,20 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		return $result;
 	}
 	
+	/**
+	 * Creates or updates all meta data passed as an array of meta-key/meta-value pairs.
+	 * @param array $data New meta data.
+	 */
 	public function SetMeta($data){
 		foreach((array)$data as $key => $val)
 			$this->SetMetaValue($key, $val);
 	}
 	
+	/**
+	 * Retrieves a value for a particular meta variable expression.
+	 * @param string $expr Expression, eg: User->Name looks for a Name property for meta named User.
+	 * @return mixed The value nearest to the expression.
+	 */
 	protected function GetMetaExprValue($expr){
 		// TODO Handle function calls (and methods?)
 		$expr = explode('->', $expr);
@@ -79,6 +115,11 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		return (string)$meta;
 	}
 	
+	/**
+	 * Expands a message with variables by replacing variables with meta data values.
+	 * @param string $mesg The original message.
+	 * @return string The expanded message.
+	 */
 	protected function GetFormattedMesg($mesg){
 		// tokenize message with regex
 		$mesg = preg_split('/(%.*?%)/', $mesg, -1, PREG_SPLIT_DELIM_CAPTURE);
@@ -131,6 +172,15 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 			GROUP BY alert_id
 			LIMIT %d
 		', array($limit));
+	}
+	
+	/**
+	 * Delete occurrence as well as associated meta data.
+	 * @return boolean True on success, false on failure.
+	 */
+	public function Delete(){
+		foreach($this->GetMeta() as $meta)$meta->Delete();
+		return parent::Delete();
 	}
 	
 }

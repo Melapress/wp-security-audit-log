@@ -277,7 +277,7 @@ abstract class WSAL_DB_ActiveRecord {
 	
 	/**
 	 * Similar to LoadMulti but allows the use of a full SQL query.
-	 * @param string $cond Full SQL query.
+	 * @param string $query Full SQL query.
 	 * @param array $args (Optional) Query arguments.
 	 * @return self[] List of loaded records.
 	 */
