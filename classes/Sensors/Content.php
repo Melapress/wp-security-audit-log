@@ -3,7 +3,7 @@
 class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		if(is_admin())add_action('init', array($this, 'EventRegisterOldPost'));
+		if(is_admin())add_action('init', array($this, 'EventWordpressInit'));
 		add_action('transition_post_status', array($this, 'EventPostChanged'), 10, 3);
 		add_action('delete_post', array($this, 'EventPostDeleted'), 10, 1);
 		add_action('wp_trash_post', array($this, 'EventPostTrashed'), 10, 1);
@@ -23,15 +23,71 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	
 	protected $_OldPost = null;
 	
-	public function EventRegisterOldPost(){
-		// ignorable states
-        if (!isset($_POST) || !isset($_POST['post_ID'])) return;
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if (isset($_POST['action']) && $_POST['action'] == 'autosave') return;
-        
-		$this->_OldPost = get_post(intval($_POST['post_ID']));
+	public function EventWordpressInit(){
+		// load old post, if applicable
+		$this->RetrieveOldPost();
+		// check for category changes
+		$this->CheckCategoryCreation();
+		$this->CheckCategoryDeletion();
 	}
 	
+	protected function RetrieveOldPost(){
+        if (isset($_POST) && isset($_POST['post_ID'])
+			&& !(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+			&& !(isset($_POST['action']) && $_POST['action'] == 'autosave')
+		){
+			$this->_OldPost = get_post(intval($_POST['post_ID']));
+		}
+	}
+
+	protected function CheckCategoryCreation(){
+		if (empty($_POST)) return;
+
+		$categoryName = '';
+		if(!empty($_POST['screen']) && !empty($_POST['tag-name']) &&
+			$_POST['screen'] == 'edit-category' &&
+			$_POST['taxonomy'] == 'category' &&
+			$_POST['action'] == 'add-tag')
+		{
+			$categoryName = $_POST['tag-name'];
+		}
+		elseif(!empty($_POST['newcategory']) && $_POST['action'] == 'add-category')
+		{
+			$categoryName = $_POST['newcategory'];
+		}
+		
+		if($categoryName){
+			$this->plugin->alerts->Trigger(2023, array(
+				'CategoryName' => $categoryName,
+			));
+		}
+	}
+
+	protected function CheckCategoryDeletion(){
+		if (empty($_POST)) return;
+		$action = !empty($_POST['action']) ? $_POST['action']
+			: (!empty($_POST['action2']) ? $_POST['action2'] : '');
+		if (!$action) return;
+
+		$categoryIds = array();
+
+		if($action == 'delete' && $_POST['taxonomy'] == 'category' && !empty($_POST['delete_tags'])){
+			// bulk delete
+			$categoryIds[] = $_POST['delete_tags'];
+		}elseif($action == 'delete-tag' && $_POST['taxonomy'] == 'category' && !empty($_POST['tag_ID'])){
+			// single delete
+			$categoryIds[] = $_POST['tag_ID'];
+		}
+
+		foreach($categoryIds as $categoryID){
+			$category = get_category($categoryID);
+			$this->plugin->alerts->Trigger(2024, array(
+				'CategoryID' => $categoryID,
+				'CategoryName' => $category->cat_name,
+			));
+		}
+	}
+
 	public function EventPostChanged($newStatus, $oldStatus, $post){
 		// ignorable states
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
@@ -60,7 +116,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->CheckAuthorChange($this->_OldPost, $post);
 				//$this->CheckStatusChange($this->_OldPost, $post);
 				//$this->CheckContentChange($this->_OldPost, $post);
-				//$this->CheckVisibilityChange($this->_OldPost, $post);
+				$this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus);
 			}
 		}
 	}
@@ -132,6 +188,71 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'PostTitle' => $oldpost->post_title,
 				'OldAuthor' => get_userdata($oldpost->post_author)->user_login,
 				'NewAuthor' => get_userdata($newpost->post_author)->user_login,
+			));
+        }
+	}
+	
+	protected function CheckStatusChange($oldpost, $newpost){
+		// TODO Finish this.
+	}
+	
+	protected function CheckContentChange($oldpost, $newpost){
+		// TODO Finish this.
+	}
+	
+	protected function CheckVisibilityChange($oldpost, $newpost, $oldStatus, $newStatus){
+		$oldVisibility = '';
+		$newVisibility = '';
+		$oldPostPassword = $oldpost->post_password;
+		$newPostPassword = $newpost->post_password;
+		switch(true){
+			case ($oldStatus == 'publish' && $newStatus == 'publish'):
+				switch(true){
+					case (!empty($newPostPassword) && !empty($oldPostPassword)):
+						return; // nothing really changed, ignore call
+					case (empty($newPostPassword) && !empty($oldPostPassword)):
+						$oldVisibility = __('Password Protected');
+						$newVisibility = __('Public');
+						break;
+					case (!empty($newPostPassword)):
+						$oldVisibility = __('Public');
+						$newVisibility = __('Password Protected');
+						break;
+				}
+			case ($oldStatus == 'publish' && $newStatus == 'private'):
+				switch(true){
+					case (empty($newPostPassword) && empty($oldPostPassword)):
+						$oldVisibility = __('Public');
+						$newVisibility = __('Private');
+						break;
+					case (!empty($oldPostPassword)):
+						$oldVisibility = __('Password Protected');
+						$newVisibility = __('Private');
+						break;
+				}
+				break;
+			case ($oldStatus == 'private' && $newStatus == 'publish'):
+				switch(true){
+					case (empty($oldPostPassword) && empty($newPostPassword)):
+						$oldVisibility = __('Private');
+						$newVisibility = __('Public');
+						break;
+					case (empty($oldPostPassword) && !empty($newPostPassword)):
+						$oldVisibility = __('Private');
+						$newVisibility = __('Password Protected');
+						break;
+				}
+				break;
+		}
+		
+        if($oldVisibility != $newVisibility){
+			$event = $this->GetEventTypeForPostType($oldpost, 2025, 2026, 2040);
+			$this->plugin->alerts->Trigger($event, array(
+				'PostID' => $oldpost->ID,
+				'PostType' => $oldpost->post_type,
+				'PostTitle' => $oldpost->post_title,
+				'OldVisibility' => $oldVisibility,
+				'NewVisibility' => $newVisibility,
 			));
         }
 	}

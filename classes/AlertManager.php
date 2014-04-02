@@ -71,7 +71,7 @@ final class WSAL_AlertManager {
 	
 	/**
 	 * Register a whole group of items.
-	 * @param array $items An array with group name as the index and an array of group items as the value.
+	 * @param array $groups An array with group name as the index and an array of group items as the value.
 	 * Item values is an array of [type, code, description, message] respectively.
 	 */
 	public function RegisterGroup($groups){
