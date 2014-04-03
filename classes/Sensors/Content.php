@@ -22,21 +22,23 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 	
 	protected $_OldPost = null;
+	protected $_OldLink = null;
 	
 	public function EventWordpressInit(){
-		// load old post, if applicable
-		$this->RetrieveOldPost();
+		// load old data, if applicable
+		$this->RetrieveOldData();
 		// check for category changes
 		$this->CheckCategoryCreation();
 		$this->CheckCategoryDeletion();
 	}
 	
-	protected function RetrieveOldPost(){
+	protected function RetrieveOldData(){
         if (isset($_POST) && isset($_POST['post_ID'])
 			&& !(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
 			&& !(isset($_POST['action']) && $_POST['action'] == 'autosave')
 		){
 			$this->_OldPost = get_post(intval($_POST['post_ID']));
+			$this->_OldLink = get_permalink(intval($_POST['post_ID']));
 		}
 	}
 
@@ -116,6 +118,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->CheckAuthorChange($this->_OldPost, $post);
 				//$this->CheckStatusChange($this->_OldPost, $post);
 				//$this->CheckContentChange($this->_OldPost, $post);
+				$this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID));
 				$this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus);
 			}
 		}
@@ -198,6 +201,19 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	
 	protected function CheckContentChange($oldpost, $newpost){
 		// TODO Finish this.
+	}
+	
+	protected function CheckPermalinkChange($oldLink, $newLink, $post){
+        if($oldLink != $newLink){
+			$event = $this->GetEventTypeForPostType($post, 2017, 2018, 2037);
+			$this->plugin->alerts->Trigger($event, array(
+				'PostID' => $post->ID,
+				'PostType' => $post->post_type,
+				'PostTitle' => $post->post_title,
+				'OldUrl' => $oldLink,
+				'NewUrl' => $newLink,
+			));
+        }
 	}
 	
 	protected function CheckVisibilityChange($oldpost, $newpost, $oldStatus, $newStatus){
