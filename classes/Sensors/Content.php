@@ -23,6 +23,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	
 	protected $_OldPost = null;
 	protected $_OldLink = null;
+	protected $_OldCats = null;
 	
 	public function EventWordpressInit(){
 		// load old data, if applicable
@@ -37,8 +38,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			&& !(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
 			&& !(isset($_POST['action']) && $_POST['action'] == 'autosave')
 		){
-			$this->_OldPost = get_post(intval($_POST['post_ID']));
-			$this->_OldLink = get_permalink(intval($_POST['post_ID']));
+			$postID = intval($_POST['post_ID']);
+			$this->_OldPost = get_post($postID);
+			$this->_OldLink = get_permalink($postID);
+			$this->_OldCats = wp_get_post_categories($postID, array('fields' => 'names'));
 		}
 	}
 
@@ -114,11 +117,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				));
 			}else{
 				$this->CheckDateChange($this->_OldPost, $post);
-				$this->CheckCategoriesChange($this->_OldPost, $post);
+				$this->CheckCategoriesChange($this->_OldCats, wp_get_post_categories($post->ID, array('fields' => 'names')), $post);
 				$this->CheckAuthorChange($this->_OldPost, $post);
 				//$this->CheckStatusChange($this->_OldPost, $post);
 				//$this->CheckContentChange($this->_OldPost, $post);
-				$this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID));
+				$this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
 				$this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus);
 			}
 		}
@@ -169,15 +172,18 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         }
 	}
 	
-	protected function CheckCategoriesChange($oldpost, $newpost){
-		// TODO get old/new cats
-        if(false){ // TODO compare old/new cats
-			$event = $this->GetEventTypeForPostType($oldpost, 2016, 0, 2036);
+	protected function CheckCategoriesChange($oldCats, $newCats, $post){
+		$oldCats = implode(', ', $oldCats);
+		$newCats = implode(', ', $newCats);
+//echo '<pre>'; print_r(array($oldCats, $newCats)); die;
+        if($oldCats != $newCats){
+			$event = $this->GetEventTypeForPostType($post, 2016, 0, 2036);
 			$this->plugin->alerts->Trigger($event, array(
-				'PostID' => $oldpost->ID,
-				'PostType' => $oldpost->post_type,
-				'PostTitle' => $oldpost->post_title,
-				// TODO store old/new cats
+				'PostID' => $post->ID,
+				'PostType' => $post->post_type,
+				'PostTitle' => $post->post_title,
+				'OldCategories' => $oldCats ? $oldCats : 'no categories',
+				'NewCategories' => $newCats ? $newCats : 'no categories',
 			));
         }
 	}
