@@ -71,7 +71,7 @@ WpSecurityAuditLog::GetInstance()
 			array(2022, E_NOTICE, 'User changed page status', 'Changed the status of %PostTitle% page from %OldStatus% to %NewStatus%'),
 			array(2026, E_WARNING, 'User changed the visibility of a page post', 'Changed the visibility of %PostTitle% page  from %OldVisibility% to %NewVisibility%'),
 			array(2028, E_NOTICE, 'User changed the date of a page post', 'Changed the date of %PostTitle% page from %OldDate% to %NewDate%'),
-			array(2047, E_NOTICE, 'User changed the parent of a page', ''),
+			array(2047, E_NOTICE, 'User changed the parent of a page', 'Changed the parent of %PostTitle% page from %OldParentName% to %NewParentName%'),
 			array(2048, E_CRITICAL, 'User changes the template of a page', ''),
 		),
 		'Custom Posts' => array(

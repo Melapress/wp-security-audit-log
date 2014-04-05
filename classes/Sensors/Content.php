@@ -121,6 +121,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->CheckAuthorChange($this->_OldPost, $post);
 				$this->CheckStatusChange($this->_OldPost, $post);
 				//$this->CheckContentChange($this->_OldPost, $post);
+				$this->CheckParentChange($this->_OldPost, $post);
 				$this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
 				$this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus);
 			}
@@ -177,7 +178,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$newCats = implode(', ', $newCats);
         if($oldCats != $newCats){
 			$event = $this->GetEventTypeForPostType($post, 2016, 0, 2036);
-			$this->plugin->alerts->Trigger($event, array(
+			if($event)$this->plugin->alerts->Trigger($event, array(
 				'PostID' => $post->ID,
 				'PostType' => $post->post_type,
 				'PostTitle' => $post->post_title,
@@ -215,6 +216,21 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	
 	protected function CheckContentChange($oldpost, $newpost){
 		// TODO Finish this.
+	}
+	
+	protected function CheckParentChange($oldpost, $newpost){
+        if($oldpost->post_parent != $newpost->post_parent){
+			$event = $this->GetEventTypeForPostType($oldpost, 0, 2047, 0);
+			if($event)$this->plugin->alerts->Trigger($event, array(
+				'PostID' => $oldpost->ID,
+				'PostType' => $oldpost->post_type,
+				'PostTitle' => $oldpost->post_title,
+				'OldParent' => $oldpost->post_parent,
+				'NewParent' => $newpost->post_parent,
+				'OldParentName' => $oldpost->post_parent ? get_the_title($oldpost->post_parent) : 'no parent',
+				'NewParentName' => $newpost->post_parent ? get_the_title($newpost->post_parent) : 'no parent',
+			));
+        }
 	}
 	
 	protected function CheckPermalinkChange($oldLink, $newLink, $post){
