@@ -91,15 +91,15 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				));
 			}else{
 				$this->CheckDateChange($this->_OldPost, $post);
-				$this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post);
 				$this->CheckAuthorChange($this->_OldPost, $post);
 				$this->CheckStatusChange($this->_OldPost, $post);
-				//$this->CheckContentChange($this->_OldPost, $post);
 				$this->CheckParentChange($this->_OldPost, $post);
-				$this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
-				$this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus);
-				$this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post);
 				$this->CheckStickyChange($this->_OldStky, isset($_REQUEST['sticky']), $post);
+				$this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus);
+				$this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
+				$this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post);
+				$this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post);
+				$this->CheckModificationChange($this->_OldPost, $post);
 			}
 		}
 	}
@@ -238,10 +238,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         }
 	}
 	
-	protected function CheckContentChange($oldpost, $newpost){
-		// TODO Finish this.
-	}
-	
 	protected function CheckParentChange($oldpost, $newpost){
         if($oldpost->post_parent != $newpost->post_parent){
 			$event = $this->GetEventTypeForPostType($oldpost, 0, 2047, 0);
@@ -351,5 +347,26 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'PostTitle' => $post->post_title,
 			));
         }
+	}
+	
+	protected function CheckModificationChange($oldpost, $newpost){
+		if($oldpost->post_modified != $newpost->post_modified){
+			$event = 0;
+			// @see http://codex.wordpress.org/Class_Reference/WP_Query#Status_Parameters
+			switch($oldpost->post_status){ // TODO or should this be $newpost?
+				case 'draft':
+					$event = $this->GetEventTypeForPostType($newpost, 2003, 2007, 2032);
+					break;
+				case 'publish':
+					$event = $this->GetEventTypeForPostType($newpost, 2002, 2006, 2031);
+					break;
+			}
+			if($event)$this->plugin->alerts->Trigger($event, array(
+				'PostID' => $oldpost->ID,
+				'PostType' => $oldpost->post_type,
+				'PostTitle' => $oldpost->post_title,
+				'PostUrl' => get_permalink($oldpost->ID), // TODO or should this be $newpost?
+			));
+		}
 	}
 }

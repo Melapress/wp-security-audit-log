@@ -42,8 +42,8 @@ WpSecurityAuditLog::GetInstance()
 		'Blog Posts' => array(
 			array(2000, E_NOTICE, 'User created a new blog post and saved it as draft', ''),
 			array(2001, E_NOTICE, 'User published a blog post', ''),
-			array(2002, E_NOTICE, 'User modified a published blog post', ''),
-			array(2003, E_NOTICE, 'User modified a draft blog post', ''),
+			array(2002, E_NOTICE, 'User modified a published blog post', 'Modified the published blog post %PostTitle%. Blog post URL is %PostUrl%'),
+			array(2003, E_NOTICE, 'User modified a draft blog post', 'Modified the draft blog post %PostTitle%. Blog post ID is %PostID%'),
 			array(2008, E_NOTICE, 'User permanently deleted a blog post from the trash', 'Deleted the post %PostTitle%. Blog post ID is %PostID%'),
 			array(2012, E_WARNING, 'User moved a blog post to the trash', 'Moved the blog post %PostTitle% to trash'),
 			array(2014, E_CRITICAL, 'User restored a blog post from trash', 'Restored post %PostTitle% from trash'),
@@ -61,8 +61,8 @@ WpSecurityAuditLog::GetInstance()
 		'Pages' => array(
 			array(2004, E_NOTICE, 'User created a new WordPress page and saved it as draft', ''),
 			array(2005, E_NOTICE, 'User published a WorPress page', ''),
-			array(2006, E_NOTICE, 'User modified a published WordPress page', ''),
-			array(2007, E_NOTICE, 'User modified a draft WordPress page', ''),
+			array(2006, E_NOTICE, 'User modified a published WordPress page', 'Modified the published page %PostTitle%. Page URL is %PostUrl%'),
+			array(2007, E_NOTICE, 'User modified a draft WordPress page', 'Modified the draft page %PostTitle%. page ID is %PostID%'),
 			array(2009, E_NOTICE, 'User permanently deleted a page from the trash', 'Deleted the page %PostTitle%. Page ID is %PostID%'),
 			array(2013, E_WARNING, 'User moved WordPress page to the trash', 'Moved the page %PostTitle% to trash'),
 			array(2015, E_CRITICAL, 'User restored a WordPress page from trash', 'Restored page %PostTitle% from trash'),
@@ -77,8 +77,8 @@ WpSecurityAuditLog::GetInstance()
 		'Custom Posts' => array(
 			array(2029, E_NOTICE, 'User created a new post with custom post type and saved it as draft', ''),
 			array(2030, E_NOTICE, 'User published a post with custom post type', ''),
-			array(2031, E_NOTICE, 'User modified a post with custom post type', ''),
-			array(2032, E_NOTICE, 'User modified a draft post with custom post type', ''),
+			array(2031, E_NOTICE, 'User modified a post with custom post type', 'Modified custom post %PostTitle% of type %PostType%. Post URL is %PostUrl%'),
+			array(2032, E_NOTICE, 'User modified a draft post with custom post type', 'Modified draft custom post %PostTitle% of type is %PostType%. Post URL is %PostUrl%'),
 			array(2033, E_WARNING, 'User permanently deleted post with custom post type', 'Deleted custom post %PostTitle% of type %PostType%'),
 			array(2034, E_WARNING, 'User moved post with custom post type to trash', 'Moved custom post %PostTitle% to trash. Post type is %PostType%.'),
 			array(2035, E_CRITICAL, 'User restored post with custom post type from trash', 'Restored custom post %PostTitle% of type %PostType% from trash'),
