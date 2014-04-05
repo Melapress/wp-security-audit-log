@@ -266,6 +266,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         }
 	}
 	
+	// TODO I don't like this code at all
 	protected function CheckVisibilityChange($oldpost, $newpost, $oldStatus, $newStatus){
 		$oldVisibility = '';
 		$newVisibility = '';
