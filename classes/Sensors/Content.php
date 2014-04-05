@@ -24,6 +24,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	protected $_OldPost = null;
 	protected $_OldLink = null;
 	protected $_OldCats = null;
+	protected $_OldTmpl = null;
+	protected $_OldStky = null;
 	
 	public function EventWordpressInit(){
 		// load old data, if applicable
@@ -41,7 +43,64 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$postID = intval($_POST['post_ID']);
 			$this->_OldPost = get_post($postID);
 			$this->_OldLink = get_permalink($postID);
-			$this->_OldCats = wp_get_post_categories($postID, array('fields' => 'names'));
+			$this->_OldTmpl = $this->GetPostTemplate($this->_OldPost);
+			$this->_OldCats = $this->GetPostCategories($this->_OldPost);
+			$this->_OldStky = in_array($postID, get_option('sticky_posts'));
+		}
+	}
+	
+	protected function GetPostTemplate($post){
+		$id = $post->ID;
+		$template = get_page_template_slug($id);
+		$pagename = $post->post_name;
+
+		$templates = array();
+		if ( $template && 0 === validate_file( $template ) ) $templates[] = $template;
+		if ( $pagename ) $templates[] = "page-$pagename.php";
+		if ( $id ) $templates[] = "page-$id.php";
+		$templates[] = 'page.php';
+
+		return get_query_template( 'page', $templates );
+	}
+
+	protected function GetPostCategories($post){
+		return wp_get_post_categories($post->ID, array('fields' => 'names'));;
+	}
+
+	public function EventPostChanged($newStatus, $oldStatus, $post){
+		// ignorable states
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+        if (empty($post->post_type)) return;
+        if ($post->post_type == 'revision') return;
+		
+		WSAL_Sensors_Request::SetVars(array(
+			'$newStatus' => $newStatus,
+			'$oldStatus' => $oldStatus,
+		));
+		
+        // run checks
+		if($this->_OldPost){
+			if ($newStatus == 'publish' && $oldStatus == 'auto-draft'){
+				// TODO What's the difference between created and published new post?
+				$event = $this->GetEventTypeForPostType($post, 2000, 2004, 2029);
+				$this->plugin->alerts->Trigger($event, array(
+					'PostID' => $post->ID,
+					'PostType' => $post->post_type,
+					'PostTitle' => $post->post_title,
+					'PostUrl' => get_permalink($post->ID),
+				));
+			}else{
+				$this->CheckDateChange($this->_OldPost, $post);
+				$this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post);
+				$this->CheckAuthorChange($this->_OldPost, $post);
+				$this->CheckStatusChange($this->_OldPost, $post);
+				//$this->CheckContentChange($this->_OldPost, $post);
+				$this->CheckParentChange($this->_OldPost, $post);
+				$this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
+				$this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus);
+				$this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post);
+				$this->CheckStickyChange($this->_OldStky, isset($_REQUEST['sticky']), $post);
+			}
 		}
 	}
 
@@ -90,41 +149,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'CategoryID' => $categoryID,
 				'CategoryName' => $category->cat_name,
 			));
-		}
-	}
-
-	public function EventPostChanged($newStatus, $oldStatus, $post){
-		// ignorable states
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if (empty($post->post_type)) return;
-        if ($post->post_type == 'revision') return;
-		
-		WSAL_Sensors_Request::SetVars(array(
-			'$newStatus' => $newStatus,
-			'$oldStatus' => $oldStatus,
-		));
-		
-        // run checks
-		if($this->_OldPost){
-			if ($newStatus == 'publish' && $oldStatus == 'auto-draft'){
-				// TODO What's the difference between created and published new post?
-				$event = $this->GetEventTypeForPostType($post, 2000, 2004, 2029);
-				$this->plugin->alerts->Trigger($event, array(
-					'PostID' => $post->ID,
-					'PostType' => $post->post_type,
-					'PostTitle' => $post->post_title,
-					'PostUrl' => get_permalink($post->ID),
-				));
-			}else{
-				$this->CheckDateChange($this->_OldPost, $post);
-				$this->CheckCategoriesChange($this->_OldCats, wp_get_post_categories($post->ID, array('fields' => 'names')), $post);
-				$this->CheckAuthorChange($this->_OldPost, $post);
-				$this->CheckStatusChange($this->_OldPost, $post);
-				//$this->CheckContentChange($this->_OldPost, $post);
-				$this->CheckParentChange($this->_OldPost, $post);
-				$this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
-				$this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus);
-			}
 		}
 	}
 	
@@ -299,6 +323,32 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'PostTitle' => $oldpost->post_title,
 				'OldVisibility' => $oldVisibility,
 				'NewVisibility' => $newVisibility,
+			));
+        }
+	}
+	
+	protected function CheckTemplateChange($oldTmpl, $newTmpl, $post){
+        if($oldTmpl != $newTmpl){
+			$event = $this->GetEventTypeForPostType($post, 0, 2048, 0);
+			if($event)$this->plugin->alerts->Trigger($event, array(
+				'PostID' => $post->ID,
+				'PostType' => $post->post_type,
+				'PostTitle' => $post->post_title,
+				'OldTemplate' => ucwords(str_replace(array('-' , '_'), ' ', basename($oldTmpl, '.php'))),
+				'NewTemplate' => ucwords(str_replace(array('-' , '_'), ' ', basename($newTmpl, '.php'))),
+				'OldTemplatePath' => $oldTmpl,
+				'NewTemplatePath' => $newTmpl,
+			));
+        }
+	}
+	
+	protected function CheckStickyChange($oldStky, $newStky, $post){
+		if($oldStky != $newStky){
+			$event = $newStky ? 2049 : 2050;
+			$this->plugin->alerts->Trigger($event, array(
+				'PostID' => $post->ID,
+				'PostType' => $post->post_type,
+				'PostTitle' => $post->post_title,
 			));
         }
 	}

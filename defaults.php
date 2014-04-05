@@ -55,8 +55,8 @@ WpSecurityAuditLog::GetInstance()
 			array(2024, E_WARNING, 'User deleted category', 'Deleted the %CategoryName% category'),
 			array(2025, E_WARNING, 'User changed the visibility of a blog post', 'Changed the visibility of %PostTitle% blog post  from %OldVisibility% to %NewVisibility%'),
 			array(2027, E_NOTICE, 'User changed the date of a blog post', 'Changed the date of %PostTitle% blog post from %OldDate% to %NewDate%'),
-			array(2050, E_NOTICE, 'User removes post from sticky', ''),
-			array(2049, E_CRITICAL, 'User sets a post as sticky', ''),
+			array(2049, E_NOTICE, 'User sets a post as sticky', 'Set the post %PostTitle% as Sticky'),
+			array(2050, E_NOTICE, 'User removes post from sticky', 'Removed the post %PostTitle% from Sticky'),
 		),
 		'Pages' => array(
 			array(2004, E_NOTICE, 'User created a new WordPress page and saved it as draft', ''),
@@ -72,7 +72,7 @@ WpSecurityAuditLog::GetInstance()
 			array(2026, E_WARNING, 'User changed the visibility of a page post', 'Changed the visibility of %PostTitle% page  from %OldVisibility% to %NewVisibility%'),
 			array(2028, E_NOTICE, 'User changed the date of a page post', 'Changed the date of %PostTitle% page from %OldDate% to %NewDate%'),
 			array(2047, E_NOTICE, 'User changed the parent of a page', 'Changed the parent of %PostTitle% page from %OldParentName% to %NewParentName%'),
-			array(2048, E_CRITICAL, 'User changes the template of a page', ''),
+			array(2048, E_CRITICAL, 'User changes the template of a page', 'Changed the page template from %OldTemplate% to %NewTemplate%'),
 		),
 		'Custom Posts' => array(
 			array(2029, E_NOTICE, 'User created a new post with custom post type and saved it as draft', ''),
