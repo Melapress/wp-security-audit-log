@@ -58,7 +58,7 @@ class WSAL_ViewManager {
 			'manage_options', // admin & superadmin
 			self::MAIN_VIEW,
 			array($this, 'RenderViewBody'),
-			'dashicons-welcome-view-site'
+			count($this->views) ? $this->views[0]->GetIcon() : ''
 		);
 		
 		// add menu items
@@ -96,6 +96,7 @@ class WSAL_ViewManager {
 	public function RenderViewBody(){
 		$view_id = $this->GetBackendPageIndex();
 		?><div class="wrap">
+			<div id="icon-plugins" class="icon32"><br></div>
 			<h2><?php _e($this->views[$view_id]->GetTitle()); ?></h2>
 			<?php $this->views[$view_id]->Render(); ?>
 		</div><?php

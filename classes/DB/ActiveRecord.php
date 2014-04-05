@@ -150,7 +150,7 @@ abstract class WSAL_DB_ActiveRecord {
 			if(is_int($copy->$key))$deffmt = '%d';
 			if(is_float($copy->$key))$deffmt = '%f';
 			if(is_array($copy->$key) || is_object($copy->$key)){
-				$data[$key] = json_encode($val);
+				$data[$key] = @json_encode($val);
 			}else{
 				$data[$key] = $val;
 			}

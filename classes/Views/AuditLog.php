@@ -21,7 +21,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 	
 	public function GetIcon() {
-		return 'dashicons-welcome-view-site';
+		return $this->_wpversion < 3.8
+			? $this->_plugin->GetBaseUrl() . '/img/logo-main-menu.png'
+			: 'dashicons-welcome-view-site';
 	}
 	
 	public function GetName() {

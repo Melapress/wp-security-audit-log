@@ -7,11 +7,19 @@ abstract class WSAL_AbstractView {
 	 */
 	protected $_plugin;
 	
+	protected $_wpversion;
+	
 	/**
 	 * @param WpSecurityAuditLog $plugin
 	 */
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->_plugin = $plugin;
+		
+		// get and store wordpress version
+		global $wp_version;
+		if(!isset($wp_version))
+			$wp_version = get_bloginfo('version');
+		$this->_wpversion = floatval($wp_version);
 	}
 	
 	/**
