@@ -3,19 +3,15 @@
 class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		add_action('automatic_updates_complete', array($this, 'EventWordpressUpgrade'));
-		add_action('admin_init', array($this, 'EventCheckForUpdatedSettings'));
+		add_action('admin_init', array($this, 'EventAdminInit'));
 	}
 	
-	public function EventWordpressUpgrade(){
-		// TODO Finish this and make sure WP action is correct
-	}
-	
-	public function EventCheckForUpdatedSettings(){
+	public function EventAdminInit(){
 		
 		// make sure user can actually modify target options
 		if(!current_user_can('manage_options'))return;
 		
+		$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 		$is_option_page = isset($_POST) && !empty($_POST['option_page']);
 		$is_permalink_page = isset($_POST) && basename($_SERVER['SCRIPT_NAME']) == 'options-permalink.php';
 			
@@ -54,6 +50,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				));
 			}
 		}
+		
 		if($is_permalink_page && !empty($_POST['permalink_structure'])){
 			$old = get_option('permalink_structure');
 			$new = trim($_POST['permalink_structure']);
@@ -65,7 +62,17 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				));
 			}
 		}
-			
+		
+		if($action == 'do-core-upgrade' && isset($_REQUEST['version'])){
+			$oldVersion = get_bloginfo('version');
+			$newVersion = $_REQUEST['version'];
+			if($oldVersion !== $newVersion){
+				$this->plugin->alerts->Trigger(6004, array(
+					'OldVersion' => $oldVersion,
+					'NewVersion' => $newVersion,
+				));
+			}
+		}
 	}
 	
 }

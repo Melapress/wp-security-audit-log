@@ -80,16 +80,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		
         // run checks
 		if($this->_OldPost){
-			if ($newStatus == 'publish' && $oldStatus == 'auto-draft'){
-				// TODO What's the difference between created and published new post?
-				$event = $this->GetEventTypeForPostType($post, 2000, 2004, 2029);
-				$this->plugin->alerts->Trigger($event, array(
-					'PostID' => $post->ID,
-					'PostType' => $post->post_type,
-					'PostTitle' => $post->post_title,
-					'PostUrl' => get_permalink($post->ID),
-				));
+			if ($oldStatus == 'auto-draft'){
+				
+				// Handle create post events
+				$this->CheckPostCreation($this->_OldPost, $post);
+				
 			}else{
+				
+				// Handle update post events
 				$this->CheckDateChange($this->_OldPost, $post);
 				$this->CheckAuthorChange($this->_OldPost, $post);
 				$this->CheckStatusChange($this->_OldPost, $post);
@@ -100,10 +98,29 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post);
 				$this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post);
 				$this->CheckModificationChange($this->_OldPost, $post);
+				
 			}
 		}
 	}
-
+	
+	protected function CheckPostCreation($oldPost, $newPost){
+		$event = 0;
+		switch($newPost->post_status){
+			case 'publish':
+				$event = $this->GetEventTypeForPostType($oldPost, 2001, 2005, 2030);
+				break;
+			case 'draft':
+				$event = $this->GetEventTypeForPostType($oldPost, 2000, 2004, 2029);
+				break;
+		}
+		if($event)$this->plugin->alerts->Trigger($event, array(
+			'PostID' => $newPost->ID,
+			'PostType' => $newPost->post_type,
+			'PostTitle' => $newPost->post_title,
+			'PostUrl' => get_permalink($newPost->ID),
+		));
+	}
+	
 	protected function CheckCategoryCreation(){
 		if (empty($_POST)) return;
 
@@ -266,50 +283,24 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         }
 	}
 	
-	// TODO I don't like this code at all
 	protected function CheckVisibilityChange($oldpost, $newpost, $oldStatus, $newStatus){
 		$oldVisibility = '';
 		$newVisibility = '';
-		$oldPostPassword = $oldpost->post_password;
-		$newPostPassword = $newpost->post_password;
-		switch(true){
-			case ($oldStatus == 'publish' && $newStatus == 'publish'):
-				switch(true){
-					case (!empty($newPostPassword) && !empty($oldPostPassword)):
-						return; // nothing really changed, ignore call
-					case (empty($newPostPassword) && !empty($oldPostPassword)):
-						$oldVisibility = __('Password Protected');
-						$newVisibility = __('Public');
-						break;
-					case (!empty($newPostPassword)):
-						$oldVisibility = __('Public');
-						$newVisibility = __('Password Protected');
-						break;
-				}
-			case ($oldStatus == 'publish' && $newStatus == 'private'):
-				switch(true){
-					case (empty($newPostPassword) && empty($oldPostPassword)):
-						$oldVisibility = __('Public');
-						$newVisibility = __('Private');
-						break;
-					case (!empty($oldPostPassword)):
-						$oldVisibility = __('Password Protected');
-						$newVisibility = __('Private');
-						break;
-				}
-				break;
-			case ($oldStatus == 'private' && $newStatus == 'publish'):
-				switch(true){
-					case (empty($oldPostPassword) && empty($newPostPassword)):
-						$oldVisibility = __('Private');
-						$newVisibility = __('Public');
-						break;
-					case (empty($oldPostPassword) && !empty($newPostPassword)):
-						$oldVisibility = __('Private');
-						$newVisibility = __('Password Protected');
-						break;
-				}
-				break;
+		
+		if($oldpost->post_password){
+			$oldVisibility = __('Password Protected');
+		}elseif($oldStatus == 'publish'){
+			$oldVisibility = __('Public');
+		}elseif($oldStatus == 'private'){
+			$oldVisibility = __('Private');
+		}
+		
+		if($newpost->post_password){
+			$newVisibility = __('Password Protected');
+		}elseif($newStatus == 'publish'){
+			$newVisibility = __('Public');
+		}elseif($newStatus == 'private'){
+			$newVisibility = __('Private');
 		}
 		
         if($oldVisibility != $newVisibility){
