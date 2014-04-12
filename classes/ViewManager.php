@@ -54,7 +54,7 @@ class WSAL_ViewManager {
 		// add main menu
 		add_menu_page(
 			'WP Security Audit Log',
-			'Audit Log',
+			'Security Audit Log',
 			'manage_options', // admin & superadmin
 			self::MAIN_VIEW,
 			array($this, 'RenderViewBody'),

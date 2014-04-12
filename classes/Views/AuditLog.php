@@ -14,6 +14,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		parent::__construct($plugin);
 		$this->_listview = new WSAL_Views_AuditLogList_Internal($plugin);
 		add_action('wp_ajax_AjaxInspector', array($this, 'AjaxInspector'));
+		add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
 	}
 	
 	public function GetTitle() {
@@ -39,7 +40,27 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			<?php $this->_listview->prepare_items(); ?>
 			<?php $this->_listview->display(); ?>
-		</form><?php
+		</form>
+		<script type="text/javascript">
+			jQuery(document).ready(function(){
+				var cnt = <?php echo WSAL_DB_Occurrence::Count(); ?>;
+				var url = <?php echo json_encode(admin_url('admin-ajax.php') . '?action=AjaxRefresh&logcount='); ?>;
+				var ajx = null;
+				var chk = function(){
+					if(ajx)ajx.abort();
+					ajx = jQuery.post(url + cnt, function(data){
+						ajx = null;
+						if(data !== 'false'){
+							cnt = data;
+							jQuery('#audit-log-viewer').load(location.href + ' #audit-log-viewer');
+						}
+						chk();
+					});
+				};
+				setInterval(chk, 40000);
+				chk();
+			});
+		</script><?php
 	}
 	
 	public function AjaxInspector(){
@@ -60,6 +81,22 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$nicer = new WSAL_Nicer($occ->GetMetaArray());
 		$nicer->render();
 		echo '</body></html>';
+		die;
+	}
+	
+	public function AjaxRefresh(){
+		if(!isset($_REQUEST['logcount']))
+			die('Log count parameter expected.');
+		
+		$old = (int)$_REQUEST['logcount'];
+		$max = 40; // 40*500msec = 20sec
+		
+		do{
+			$new = WSAL_DB_Occurrence::Count();
+			usleep(500000); // 500msec
+		}while(($old == $new) && (--$max > 0));
+		
+		echo $old == $new ? 'false' : $new;
 		die;
 	}
 	
@@ -108,8 +145,9 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			'code' => 'Type',
 			'crtd' => 'Date',
 			'user' => 'Username',
+			'scip' => 'Source IP',
 			'mesg' => 'Message',
-			'more' => '',
+			//'more' => '',
 		);
 	}
 
@@ -125,6 +163,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			'type' => array('type', false),
 			'crtd' => array('crtd', true),
 			'user' => array('user', false),
+			'scip' => array('scip', false),
 		);
 	}
 	
@@ -147,10 +186,14 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return $item['crtd'] ? date('Y-m-d h:i:s A', $item['crtd']) : '<i>unknown</i>';
 			case 'user':
 				return !is_null($item['user']) ? esc_html($item['user']) : '<i>unknown</i>';
+			case 'scip':
+				return !is_null($item['scip']) ? esc_html($item['scip']) : '<i>unknown</i>';
 			case 'more':
 				$url = admin_url('admin-ajax.php') . '?action=AjaxInspector&amp;occurrence=' . $item['id'];
 				return '<a class="more-info thickbox" title="Alert Data Inspector"'
 					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
+			case 'mesg':
+				return $item['mesg'];
 			default:
 				return isset($item[$column_name])
 					? esc_html($item[$column_name])
@@ -185,6 +228,26 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		return null;
 	}
 	
+	public function meta_formatter($name, $value){
+		switch(true){
+			
+			case $name == '%Message%':
+				return esc_html($value);
+				
+			case strncmp($value, 'http://', 7) === 0:
+			case strncmp($value, 'https://', 7) === 0:
+				return '<a href="' . esc_html($value) . '"'
+					. ' title="' . esc_html($value) . '"'
+					. ' target="_blank">'
+						. esc_html(parse_url($value, PHP_URL_HOST)) . '/&hellip;/'
+						. esc_html(basename(parse_url($value, PHP_URL_PATH)))
+					. '</a>';
+				
+			default:
+				return '<strong>' . esc_html($value) . '</strong>';
+		}
+	}
+	
 	public function prepare_items() {
 		$per_page = 20;
 
@@ -196,6 +259,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 
 		//$this->process_bulk_action();
 
+		$occ = new WSAL_DB_Occurrence();
 		$data = array();
 		foreach(
 			$this->group_alerts()
@@ -210,7 +274,8 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				'code' => $log->code,
 				'crtd' => $occ->created_on,
 				'user' => $this->get_username($occ),
-				'mesg' => $occ->GetMessage(),
+				'scip' => $occ->GetMetaValue('ClientIP', ''),
+				'mesg' => $occ->GetMessage(array($this, 'meta_formatter')),
 			);
 		}
 

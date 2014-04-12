@@ -59,10 +59,12 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	/**
 	 * Returns the value of a meta item.
 	 * @param string $name Name of meta item.
-	 * @return mixed The value, if meta item does not exist an empty array is returned.
+	 * @param mixed $default Default value returned when meta does not exist.
+	 * @return mixed The value, if meta item does not exist $default returned.
 	 */
-	public function GetMetaValue($name){
-		return $this->GetNamedMeta($name)->value;
+	public function GetMetaValue($name, $default = array()){
+		$meta = $this->GetNamedMeta($name);
+		return $meta->IsLoaded() ? $meta->value : $default;
 	}
 	
 	/**
@@ -112,15 +114,17 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 			if(is_scalar($meta))return $meta; // this isn't 100% correct
 			$meta = is_array($meta) ? $meta[$part] : $meta->$part;
 		}
-		return (string)$meta;
+		return is_scalar($meta) ? (string)$meta : var_export($meta, true);
 	}
 	
 	/**
 	 * Expands a message with variables by replacing variables with meta data values.
 	 * @param string $mesg The original message.
+	 * @param callable|null $metaFormatter (Optional) Callback for formatting meta values.
+	 * @param string $afterMeta (Optional) Some text to put after meta values.
 	 * @return string The expanded message.
 	 */
-	protected function GetFormattedMesg($mesg){
+	protected function GetFormattedMesg($mesg, $metaFormatter = null){
 		// tokenize message with regex
 		$mesg = preg_split('/(%.*?%)/', $mesg, -1, PREG_SPLIT_DELIM_CAPTURE);
 		// handle tokenized message
@@ -132,6 +136,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 			// handle complex expressions
 			if(substr($token, 0, 1) == '%' && substr($token, -1, 1) == '%'){
 				$mesg[$i] = $this->GetMetaExprValue(substr($token, 1, -1));
+				if($metaFormatter)$mesg[$i] = $metaFormatter($token, $mesg[$i]);
 			}
 		}
 		// compact message and return
@@ -139,9 +144,10 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	}
 	
 	/**
+	 * @param callable|null $metaFormatter (Optional) Meta formatter callback.
 	 * @return string Full-formatted message.
 	 */
-	public function GetMessage(){
+	public function GetMessage($metaFormatter = null){
 		if(!isset($this->_cachedmessage)){
 			// get correct message entry
 			if($this->is_migrated){
@@ -150,7 +156,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 				$this->_cachedmessage = $this->GetAlert()->mesg;
 			}
 			// fill variables in message
-			$this->_cachedmessage = $this->GetFormattedMesg($this->_cachedmessage);
+			$this->_cachedmessage = $this->GetFormattedMesg($this->_cachedmessage, $metaFormatter);
 		}
 		return $this->_cachedmessage;
 	}

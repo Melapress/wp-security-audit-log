@@ -13,6 +13,10 @@
 	width: 110px;
 }
 
+.column-scip {
+	width: 120px;
+}
+
 .more-info {
 	float: right;
 	display: block;

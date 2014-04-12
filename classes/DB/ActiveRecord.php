@@ -276,6 +276,20 @@ abstract class WSAL_DB_ActiveRecord {
 	}
 	
 	/**
+	 * Count records in the DB matching a condition.
+	 * If no parameters are given, this counts the number of records in the DB table.
+	 * @param string $cond (Optional) Query condition.
+	 * @param array $args (Optional) Condition arguments.
+	 */
+	public static function Count($cond = '%d', $args = array(1)){
+		global $wpdb;
+		$class = get_called_class();
+		$temp = new $class();
+		$sql = $wpdb->prepare('SELECT COUNT(*) FROM ' . $temp->GetTable() . ' WHERE '.$cond, $args);
+		return (int)$wpdb->get_var($sql);
+	}
+	
+	/**
 	 * Similar to LoadMulti but allows the use of a full SQL query.
 	 * @param string $query Full SQL query.
 	 * @param array $args (Optional) Query arguments.
