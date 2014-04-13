@@ -122,7 +122,6 @@ class WpSecurityAuditLog {
 				'ClientIP' => $entry['UserIP'],
 				'UserAgent' => '',
 				'CurrentUserID' => $entry['UserID'],
-				'CurrentBlogID' => $entry['BlogId'],
 			);
 			if($entry['UserName'])
 				$data['Username'] = base64_decode($entry['UserName']);
@@ -141,7 +140,7 @@ class WpSecurityAuditLog {
 			foreach((array)$temp as $i => $item)
 				$data['MigratedArg' . $i] = $item;
 			// send event data to logger!
-			$lgr->Log($type, $data, $date, true);
+			$lgr->Log($type, $data, $date, $entry['BlogId'], true);
 		}
 	}
 	
@@ -151,6 +150,10 @@ class WpSecurityAuditLog {
 	
 	public function GetBaseDir(){
 		return plugin_dir_path(__FILE__);
+	}
+	
+	public function GetBaseName(){
+		return plugin_basename(__FILE__);
 	}
 	
 	// </editor-fold>

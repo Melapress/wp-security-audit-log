@@ -66,4 +66,12 @@ abstract class WSAL_AbstractView {
 			);
 	}
 	
+	/**
+	 * Override this and make it return true to create a shortcut link in plugin page to the view.
+	 * @return boolean
+	 */
+	public function HasPluginShortcutLink(){
+		return false;
+	}
+	
 }

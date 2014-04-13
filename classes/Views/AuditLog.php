@@ -2,19 +2,17 @@
 
 class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	
-	protected $_plugin;
-	
 	protected $_listview;
-	
-	public function SetPlugin(WpSecurityAuditLog $plugin) {
-		$this->_plugin = $plugin;
-	}
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
 		parent::__construct($plugin);
 		$this->_listview = new WSAL_Views_AuditLogList_Internal($plugin);
 		add_action('wp_ajax_AjaxInspector', array($this, 'AjaxInspector'));
 		add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
+	}
+	
+	public function HasPluginShortcutLink(){
+		return true;
 	}
 	
 	public function GetTitle() {
@@ -151,52 +149,52 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		);
 	}
 
-	public function column_cb($item){
-		return '<input type="checkbox" value="'.$item['id'].'" '
+	public function column_cb(WSAL_DB_Occurrence $item){
+		return '<input type="checkbox" value="'.$item->id.'" '
 			 . 'name="'.esc_attr($this->_args['singular']).'[]"/>';
 	}
 
 	public function get_sortable_columns(){
 		return array(
-			'read' => array('read', false),
+			'read' => array('is_read', false),
 			'code' => array('code', false),
-			'type' => array('type', false),
-			'crtd' => array('crtd', true),
+			'type' => array('alert_id', false),
+			'crtd' => array('created_on', true),
 			'user' => array('user', false),
 			'scip' => array('scip', false),
 		);
 	}
 	
-	public function column_default($item, $column_name){
+	public function column_default(WSAL_DB_Occurrence $item, $column_name){
 		switch($column_name){
 			case 'read':
 				return '<span class="log-read log-read-'
-					. ($item['read'] ? 'old' : 'new')
+					. ($item->is_read ? 'old' : 'new')
 					. '" title="Click to toggle."></span>';
 			case 'type':
-				return str_pad($item['type'], 4, '0', STR_PAD_LEFT);
+				return str_pad($item->alert_id, 4, '0', STR_PAD_LEFT);
 			case 'code':
-				$code = $this->_plugin->alerts->GetAlert($item['type']);
+				$code = $this->_plugin->alerts->GetAlert($item->alert_id);
 				$code = $code ? $code->code : 0;
 				$const = (object)array('name' => 'E_UNKNOWN', 'value' => 0, 'description' => 'Unknown error code.');
 				$const = $this->_plugin->constants->GetConstantBy('value', $code, $const);
 				return '<span class="log-type log-type-' . $const->value
 					. '" title="' . esc_html($const->name . ': ' . $const->description) . '"></span>';
 			case 'crtd':
-				return $item['crtd'] ? date('Y-m-d h:i:s A', $item['crtd']) : '<i>unknown</i>';
+				return $item->created_on ? date('Y-m-d h:i:s A', $item->created_on) : '<i>unknown</i>';
 			case 'user':
-				return !is_null($item['user']) ? esc_html($item['user']) : '<i>unknown</i>';
+				return !is_null($item->GetUsername()) ? esc_html($item->GetUsername()) : '<i>unknown</i>';
 			case 'scip':
-				return !is_null($item['scip']) ? esc_html($item['scip']) : '<i>unknown</i>';
+				return !is_null($item->GetSourceIP()) ? esc_html($item->GetSourceIP()) : '<i>unknown</i>';
 			case 'more':
 				$url = admin_url('admin-ajax.php') . '?action=AjaxInspector&amp;occurrence=' . $item['id'];
 				return '<a class="more-info thickbox" title="Alert Data Inspector"'
 					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
 			case 'mesg':
-				return $item['mesg'];
+				return $item->GetMessage(array($this, 'meta_formatter'));
 			default:
-				return isset($item[$column_name])
-					? esc_html($item[$column_name])
+				return isset($item->$column_name)
+					? esc_html($item->$column_name)
 					: 'Column "' . esc_html($column_name) . '" not found';
 		}
 	}
@@ -206,26 +204,13 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	}
 
 	public function reorder_items_str($a, $b){
-		$result = strcmp($a[$this->_orderby], $b[$this->_orderby]);
+		$result = strcmp($a->{$this->_orderby}, $b->{$this->_orderby});
 		return ($this->_order === 'asc') ? $result : -$result;
 	}
 	
 	public function reorder_items_int($a, $b){
-		$result = $a[$this->_orderby] - $b[$this->_orderby];
+		$result = $a->{$this->_orderby} - $b->{$this->_orderby};
 		return ($this->_order === 'asc') ? $result : -$result;
-	}
-	
-	protected function get_username(WSAL_DB_Occurrence $occ){
-		$meta = $occ->GetFirstNamedMeta(array('Username', 'CurrentUserID'));
-		if($meta){
-			switch(true){
-				case $meta->name == 'Username':
-					return $meta->value;
-				case $meta->name == 'CurrentUserID':
-					return ($data = get_userdata($meta->value)) ? $data->user_login : null;
-			}
-		}
-		return null;
 	}
 	
 	public function meta_formatter($name, $value){
@@ -258,31 +243,19 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		$this->_column_headers = array($columns, $hidden, $sortable);
 
 		//$this->process_bulk_action();
-
-		$occ = new WSAL_DB_Occurrence();
-		$data = array();
-		foreach(
-			$this->group_alerts()
-				? WSAL_DB_Occurrence::GetNewestUnique()
-				: WSAL_DB_Occurrence::LoadMulti('1 ORDER BY created_on DESC')
-			as $occ){
-			$log = $occ->GetAlert();
-			$data[] = array(
-				'id'   => $occ->id,
-				'read' => $occ->is_read,
-				'type' => $occ->alert_id,
-				'code' => $log->code,
-				'crtd' => $occ->created_on,
-				'user' => $this->get_username($occ),
-				'scip' => $occ->GetMetaValue('ClientIP', ''),
-				'mesg' => $occ->GetMessage(array($this, 'meta_formatter')),
-			);
+		
+		$data = $this->group_alerts()
+			? WSAL_DB_Occurrence::GetNewestUnique()
+			: WSAL_DB_Occurrence::LoadMulti('1 ORDER BY created_on DESC');
+		
+		if(count($data)){
+			$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'created_on';
+			$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'asc' : 'desc';
+			if(isset($data[0]->{$this->_orderby})){
+				$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
+				usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
+			}
 		}
-
-		$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'crtd';
-		$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'asc' : 'desc';
-		$numorder = in_array($this->_orderby, array('code', 'type', 'crtd'));
-		usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
 
 		$current_page = $this->get_pagenum();
 

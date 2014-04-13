@@ -10,5 +10,5 @@ abstract class WSAL_AbstractLogger {
 		$this->plugin = $plugin;
 	}
 	
-	public abstract function Log($type, $data = array());
+	public abstract function Log($type, $data = array(), $date = null, $siteid = null, $migrated = false);
 }

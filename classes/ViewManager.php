@@ -30,6 +30,9 @@ class WSAL_ViewManager {
 		// add menus
 		add_action('admin_menu', array($this, 'AddAdminMenus'));
 		
+		// add plugin shortcut links
+		add_filter('plugin_action_links_' . $plugin->GetBaseName(), array($this, 'AddPluginShortcuts'));
+		
 		// render header
 		add_action('admin_enqueue_scripts', array($this, 'RenderViewHeader'));
 		
@@ -54,7 +57,7 @@ class WSAL_ViewManager {
 		// add main menu
 		add_menu_page(
 			'WP Security Audit Log',
-			'Security Audit Log',
+			'Audit Log',
 			'manage_options', // admin & superadmin
 			self::MAIN_VIEW,
 			array($this, 'RenderViewBody'),
@@ -73,6 +76,22 @@ class WSAL_ViewManager {
 				$view->GetIcon()
 			);
 		}
+	}
+	
+	public function AddPluginShortcuts($old_links){
+		$new_links = array();
+		foreach($this->views as $view){
+			if($view->HasPluginShortcutLink()){
+				$new_links[] =
+					'<a href="'
+							. admin_url('page=wsal-'
+								. $view->GetSafeViewName()
+							) . '">'
+						. $view->GetName()
+					. '</a>';
+			}
+		}
+		return array_merge($new_links, $old_links);
 	}
 	
 	protected function GetBackendPageIndex(){

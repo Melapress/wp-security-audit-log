@@ -2,6 +2,14 @@
 
 class WSAL_Views_Settings extends WSAL_AbstractView {
 	
+	public function __construct(WpSecurityAuditLog $plugin) {
+		parent::__construct($plugin);
+	}
+	
+	public function HasPluginShortcutLink(){
+		return true;
+	}
+	
 	public function GetTitle() {
 		return 'Settings';
 	}

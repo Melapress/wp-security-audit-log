@@ -60,7 +60,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						<thead>
 							<tr>
 								<th width="48"><input type="checkbox"<?php if($allactive)echo 'checked="checked"'; ?>/></th>
-								<th width="80">Event</th>
+								<th width="80">Code</th>
 								<th width="100">Type</th>
 								<th>Description</th>
 							</tr>

@@ -34,8 +34,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
             $newRole = trim($_POST['role']);
             if($oldRole != $newRole){
 				$this->plugin->alerts->Trigger(4002, array(
-					'UserID' => $user_id,
-					'Username' => $user->user_login,
+					'TargetUserID' => $user_id,
+					'TargetUsername' => $user->user_login,
 					'OldRole' => $oldRole,
 					'NewRole' => $newRole,
 				));
@@ -46,8 +46,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
         if(!empty($_POST['pass1'])){
 			$event = $user_id == get_current_user_id() ? 4003 : 4004;
 			$this->plugin->alerts->Trigger($event, array(
-				'UserID' => $user_id,
-				'UserData' => (object)array(
+				'TargetUserID' => $user_id,
+				'TargetUserData' => (object)array(
 					'Username' => $user->user_login,
 					'Roles' => is_array($user->roles) ? implode(', ', $user->roles) : $user->roles,
 				),
@@ -61,8 +61,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
             if($oldEmail != $newEmail){
 				$event = $user_id == get_current_user_id() ? 4005 : 4006;
 				$this->plugin->alerts->Trigger($event, array(
-					'UserID' => $user_id,
-					'Username' => $user->user_login,
+					'TargetUserID' => $user_id,
+					'TargetUsername' => $user->user_login,
 					'OldEmail' => $oldEmail,
 					'NewEmail' => $newEmail,
 				));
@@ -72,8 +72,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		// super admin enabled
         if(isset($_POST['super_admin']) && !empty($_POST['super_admin'])){
 			$this->plugin->alerts->Trigger(4008, array(
-				'UserID' => $user_id,
-				'Username' => $user->user_login,
+				'TargetUserID' => $user_id,
+				'TargetUsername' => $user->user_login,
 			));
 		}
 		
@@ -82,8 +82,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			foreach(get_super_admins() as $admin){
 				if($user->user_login == $admin){
 					$this->plugin->alerts->Trigger(4009, array(
-						'UserID' => $user_id,
-						'Username' => $user->user_login,
+						'TargetUserID' => $user_id,
+						'TargetUsername' => $user->user_login,
 					));
 				}
 			}
@@ -93,8 +93,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	public function EventUserDeleted($user_id){
 		$user = get_userdata($user_id);
 		$this->plugin->alerts->Trigger(4007, array(
-			'UserID' => $user_id,
-			'UserData' => (object)array(
+			'TargetUserID' => $user_id,
+			'TargetUserData' => (object)array(
 				'Username' => $user->user_login,
 				'FirstName' => $user->user_firstname,
 				'LastName' => $user->user_lastname,

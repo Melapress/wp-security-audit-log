@@ -5,6 +5,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	protected $_idkey = 'id';
 	
 	public $id = 0;
+	public $site_id = 0;
 	public $alert_id = 0;
 	public $created_on = 0;
 	public $is_read = false;
@@ -187,6 +188,23 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	public function Delete(){
 		foreach($this->GetMeta() as $meta)$meta->Delete();
 		return parent::Delete();
+	}
+	
+	public function GetUsername(){
+		$meta = $this->GetFirstNamedMeta(array('Username', 'CurrentUserID'));
+		if($meta){
+			switch(true){
+				case $meta->name == 'Username':
+					return $meta->value;
+				case $meta->name == 'CurrentUserID':
+					return ($data = get_userdata($meta->value)) ? $data->user_login : null;
+			}
+		}
+		return null;
+	}
+	
+	public function GetSourceIP(){
+		return $this->GetMetaValue('ClientIP', '');
 	}
 	
 }

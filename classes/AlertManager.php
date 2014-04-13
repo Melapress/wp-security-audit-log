@@ -128,8 +128,6 @@ final class WSAL_AlertManager {
 			$data['UserAgent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
 		if(!isset($data['CurrentUserID']))
 			$data['CurrentUserID'] = function_exists('get_current_user_id') ? get_current_user_id() : 0;
-		if(!isset($data['CurrentBlogID']))
-			$data['CurrentBlogID'] = function_exists('get_current_blog_id') ? get_current_blog_id() : 1;
 		
 		foreach($this->_loggers as $logger)
 			$logger->Log($type, $data);
