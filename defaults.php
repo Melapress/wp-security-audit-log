@@ -72,7 +72,7 @@ WpSecurityAuditLog::GetInstance()
 			array(2026, E_WARNING, 'User changed the visibility of a page post', 'Changed the visibility of %PostTitle% page  from %OldVisibility% to %NewVisibility%'),
 			array(2028, E_NOTICE, 'User changed the date of a page post', 'Changed the date of %PostTitle% page from %OldDate% to %NewDate%'),
 			array(2047, E_NOTICE, 'User changed the parent of a page', 'Changed the parent of %PostTitle% page from %OldParentName% to %NewParentName%'),
-			array(2048, E_CRITICAL, 'User changes the template of a page', 'Changed the page template from %OldTemplate% to %NewTemplate%'),
+			array(2048, E_CRITICAL, 'User changes the template of a page', 'Changed the template of %PostTitle% page from %OldTemplate% to %NewTemplate%'),
 		),
 		'Custom Posts' => array(
 			array(2029, E_NOTICE, 'User created a new post with custom post type and saved it as draft', 'Created a new custom post called %PostTitle% of type %PostType%. Post ID is %PostID%'),

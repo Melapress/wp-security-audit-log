@@ -88,16 +88,19 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			}else{
 				
 				// Handle update post events
-				$this->CheckDateChange($this->_OldPost, $post);
-				$this->CheckAuthorChange($this->_OldPost, $post);
-				$this->CheckStatusChange($this->_OldPost, $post);
-				$this->CheckParentChange($this->_OldPost, $post);
-				$this->CheckStickyChange($this->_OldStky, isset($_REQUEST['sticky']), $post);
-				$this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus);
-				$this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
-				$this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post);
-				$this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post);
-				$this->CheckModificationChange($this->_OldPost, $post);
+				$changes = 0
+					+ $this->CheckDateChange($this->_OldPost, $post)
+					+ $this->CheckAuthorChange($this->_OldPost, $post)
+					+ $this->CheckStatusChange($this->_OldPost, $post)
+					+ $this->CheckParentChange($this->_OldPost, $post)
+					+ $this->CheckStickyChange($this->_OldStky, isset($_REQUEST['sticky']), $post)
+					+ $this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus)
+					+ $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post)
+					+ $this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post)
+					+ $this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post)
+				;
+				if(!$changes)
+					$this->CheckModificationChange($this->_OldPost, $post);
 				
 			}
 		}
@@ -211,6 +214,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'OldDate' => $oldpost->post_date,
 				'NewDate' => $newpost->post_date,
 			));
+			return 1;
         }
 	}
 	
@@ -219,13 +223,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$newCats = implode(', ', $newCats);
         if($oldCats != $newCats){
 			$event = $this->GetEventTypeForPostType($post, 2016, 0, 2036);
-			if($event)$this->plugin->alerts->Trigger($event, array(
-				'PostID' => $post->ID,
-				'PostType' => $post->post_type,
-				'PostTitle' => $post->post_title,
-				'OldCategories' => $oldCats ? $oldCats : 'no categories',
-				'NewCategories' => $newCats ? $newCats : 'no categories',
-			));
+			if($event){
+				$this->plugin->alerts->Trigger($event, array(
+					'PostID' => $post->ID,
+					'PostType' => $post->post_type,
+					'PostTitle' => $post->post_title,
+					'OldCategories' => $oldCats ? $oldCats : 'no categories',
+					'NewCategories' => $newCats ? $newCats : 'no categories',
+				));
+				return 1;
+			}
         }
 	}
 	
@@ -239,6 +246,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'OldAuthor' => get_userdata($oldpost->post_author)->user_login,
 				'NewAuthor' => get_userdata($newpost->post_author)->user_login,
 			));
+			return 1;
         }
 	}
 	
@@ -252,21 +260,25 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'OldStatus' => $oldpost->post_status,
 				'NewStatus' => $newpost->post_status,
 			));
+			return 1;
         }
 	}
 	
 	protected function CheckParentChange($oldpost, $newpost){
         if($oldpost->post_parent != $newpost->post_parent){
 			$event = $this->GetEventTypeForPostType($oldpost, 0, 2047, 0);
-			if($event)$this->plugin->alerts->Trigger($event, array(
-				'PostID' => $oldpost->ID,
-				'PostType' => $oldpost->post_type,
-				'PostTitle' => $oldpost->post_title,
-				'OldParent' => $oldpost->post_parent,
-				'NewParent' => $newpost->post_parent,
-				'OldParentName' => $oldpost->post_parent ? get_the_title($oldpost->post_parent) : 'no parent',
-				'NewParentName' => $newpost->post_parent ? get_the_title($newpost->post_parent) : 'no parent',
-			));
+			if($event){
+				$this->plugin->alerts->Trigger($event, array(
+					'PostID' => $oldpost->ID,
+					'PostType' => $oldpost->post_type,
+					'PostTitle' => $oldpost->post_title,
+					'OldParent' => $oldpost->post_parent,
+					'NewParent' => $newpost->post_parent,
+					'OldParentName' => $oldpost->post_parent ? get_the_title($oldpost->post_parent) : 'no parent',
+					'NewParentName' => $newpost->post_parent ? get_the_title($newpost->post_parent) : 'no parent',
+				));
+				return 1;
+			}
         }
 	}
 	
@@ -280,6 +292,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'OldUrl' => $oldLink,
 				'NewUrl' => $newLink,
 			));
+			return 1;
         }
 	}
 	
@@ -312,21 +325,25 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'OldVisibility' => $oldVisibility,
 				'NewVisibility' => $newVisibility,
 			));
+			return 1;
         }
 	}
 	
 	protected function CheckTemplateChange($oldTmpl, $newTmpl, $post){
         if($oldTmpl != $newTmpl){
 			$event = $this->GetEventTypeForPostType($post, 0, 2048, 0);
-			if($event)$this->plugin->alerts->Trigger($event, array(
-				'PostID' => $post->ID,
-				'PostType' => $post->post_type,
-				'PostTitle' => $post->post_title,
-				'OldTemplate' => ucwords(str_replace(array('-' , '_'), ' ', basename($oldTmpl, '.php'))),
-				'NewTemplate' => ucwords(str_replace(array('-' , '_'), ' ', basename($newTmpl, '.php'))),
-				'OldTemplatePath' => $oldTmpl,
-				'NewTemplatePath' => $newTmpl,
-			));
+			if($event){
+				$this->plugin->alerts->Trigger($event, array(
+					'PostID' => $post->ID,
+					'PostType' => $post->post_type,
+					'PostTitle' => $post->post_title,
+					'OldTemplate' => ucwords(str_replace(array('-' , '_'), ' ', basename($oldTmpl, '.php'))),
+					'NewTemplate' => ucwords(str_replace(array('-' , '_'), ' ', basename($newTmpl, '.php'))),
+					'OldTemplatePath' => $oldTmpl,
+					'NewTemplatePath' => $newTmpl,
+				));
+				return 1;
+			}
         }
 	}
 	
@@ -338,6 +355,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'PostType' => $post->post_type,
 				'PostTitle' => $post->post_title,
 			));
+			return 1;
         }
 	}
 	
@@ -353,12 +371,15 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					$event = $this->GetEventTypeForPostType($newpost, 2002, 2006, 2031);
 					break;
 			}
-			if($event)$this->plugin->alerts->Trigger($event, array(
-				'PostID' => $oldpost->ID,
-				'PostType' => $oldpost->post_type,
-				'PostTitle' => $oldpost->post_title,
-				'PostUrl' => get_permalink($oldpost->ID), // TODO or should this be $newpost?
-			));
+			if($event){
+				$this->plugin->alerts->Trigger($event, array(
+					'PostID' => $oldpost->ID,
+					'PostType' => $oldpost->post_type,
+					'PostTitle' => $oldpost->post_title,
+					'PostUrl' => get_permalink($oldpost->ID), // TODO or should this be $newpost?
+				));
+				return 1;
+			}
 		}
 	}
 }
