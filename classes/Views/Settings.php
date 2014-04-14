@@ -26,8 +26,26 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		return 2;
 	}
 	
+	protected function Save(){
+		
+	}
+	
 	public function Render(){
-		?>settings<?php
+		if(isset($_POST['submit'])){
+			try {
+				$this->Save();
+				?><div class="updated"><p><?php _e('Settings have been saved.'); ?></p></div><?php
+			}catch(Exception $ex){
+				?><div class="error"><p><?php _e('Error: '); ?><?php echo $ex->getMessage(); ?></p></div><?php
+			}
+		}
+		?><form id="audit-log-viewer" method="post">
+			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
+			
+			
+			
+			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes"></p>
+		</form><?php
 	}
 	
 }
