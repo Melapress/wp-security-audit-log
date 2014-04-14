@@ -95,12 +95,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					+ $this->CheckParentChange($this->_OldPost, $post)
 					+ $this->CheckStickyChange($this->_OldStky, isset($_REQUEST['sticky']), $post)
 					+ $this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus)
-					+ $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post)
 					+ $this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post)
 					+ $this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post)
 				;
 				if(!$changes)
-					$this->CheckModificationChange($this->_OldPost, $post);
+					$changes = $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
+				if(!$changes)
+					$changes = $this->CheckModificationChange($this->_OldPost, $post);
 				
 			}
 		}
@@ -174,12 +175,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	
 	public function EventPostDeleted($post_id){
 		$post = get_post($post_id);
-		$event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
-		$this->plugin->alerts->Trigger($event, array(
-			'PostID' => $post->ID,
-			'PostType' => $post->post_type,
-			'PostTitle' => $post->post_title,
-		));
+		if($post->post_type != 'attachment'){ // ignore attachments
+			$event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
+			$this->plugin->alerts->Trigger($event, array(
+				'PostID' => $post->ID,
+				'PostType' => $post->post_type,
+				'PostTitle' => $post->post_title,
+			));
+		}
 	}
 	
 	public function EventPostTrashed($post_id){
@@ -297,6 +300,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 	
 	protected function CheckVisibilityChange($oldpost, $newpost, $oldStatus, $newStatus){
+		if($oldStatus == 'draft' || $newStatus == 'draft')return;
+		
 		$oldVisibility = '';
 		$newVisibility = '';
 		

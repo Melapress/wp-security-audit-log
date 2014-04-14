@@ -11,24 +11,22 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 	protected $IsFileUploaded = false;
 	
 	public function EventFileUploaded($attachmentID){
-        global $wpdb;
-        $data = $wpdb->get_row("SELECT guid FROM $wpdb->posts WHERE ID = " . (int)$attachmentID);
+        $file = get_attached_file($attachmentID);
         $this->plugin->alerts->Trigger(2010, array(
 			'AttachmentID' => $attachmentID,
-			'FileName' => basename($data->guid),
-			'FilePath' => dirname($data->guid),
+			'FileName' => basename($file),
+			'FilePath' => dirname($file),
 		));
 		$this->IsFileUploaded = true;
 	}
 	
 	public function EventFileUploadedDeleted($attachmentID){
 		if($this->IsFileUploaded)return;
-        global $wpdb;
-        $data = $wpdb->get_row("SELECT guid FROM $wpdb->posts WHERE ID = " . (int)$attachmentID);
+        $file = get_attached_file($attachmentID);
 		$this->plugin->alerts->Trigger(2011, array(
 			'AttachmentID' => $attachmentID,
-			'FileName' => basename($data->guid),
-			'FilePath' => dirname($data->guid),
+			'FileName' => basename($file),
+			'FilePath' => dirname($file),
 		));
 	}
 	
@@ -36,7 +34,7 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 		$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 		$is_theme_editor = basename($_SERVER['SCRIPT_NAME']) == 'theme-editor.php';
 		if($is_theme_editor && $action == 'update'){
-			$this->plugin->alerts->Trigger(2011, array(
+			$this->plugin->alerts->Trigger(2046, array(
 				'File' => $_REQUEST['file'],
 				'Theme' => $_REQUEST['theme'],
 			));

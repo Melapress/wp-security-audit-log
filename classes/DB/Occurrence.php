@@ -110,7 +110,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		// TODO Handle function calls (and methods?)
 		$expr = explode('->', $expr);
 		$meta = array_shift($expr);
-		$meta = $this->GetMetaValue($meta);
+		$meta = $this->GetMetaValue($meta, null);
 		foreach($expr as $part){
 			if(is_scalar($meta))return $meta; // this isn't 100% correct
 			$meta = is_array($meta) ? $meta[$part] : $meta->$part;

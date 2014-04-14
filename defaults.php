@@ -34,7 +34,7 @@ WpSecurityAuditLog::GetInstance()
 		'Other User Activity' => array(
 			array(1000, E_NOTICE, 'User logs in', 'Successfully logged in'),
 			array(1001, E_NOTICE, 'User logs out', 'Successfully logged out'),
-			array(1002, E_WARNING, 'Login failed', 'Failed login detected using "%Username%" as username'),
+			array(1002, E_WARNING, 'Login failed', '%Attempts% failed login(s) detected'),
 			array(2010, E_NOTICE, 'User uploaded file from Uploads directory', 'Uploaded the file %FileName% in %FilePath%'),
 			array(2011, E_WARNING, 'User deleted file from Uploads directory', 'Deleted the file %FileName% from %FilePath%'),
 			array(2046, E_CRITICAL, 'User changed a file using the editor', 'Modified %File% with the Theme Editor'),
