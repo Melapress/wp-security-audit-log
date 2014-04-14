@@ -50,6 +50,12 @@ class WpSecurityAuditLog {
 	public $sensors;
 	
 	/**
+	 * Settings manager.
+	 * @var WSAL_Settings
+	 */
+	public $settings;
+	
+	/**
 	 * Constants manager.
 	 * @var WSAL_ConstantManager
 	 */
@@ -79,7 +85,8 @@ class WpSecurityAuditLog {
 		$this->views = new WSAL_ViewManager($this);
 		$this->alerts = new WSAL_AlertManager($this);
 		$this->sensors = new WSAL_SensorManager($this);
-		$this->constants = new WSAL_ConstantManager();
+		$this->settings = new WSAL_Settings($this);
+		$this->constants = new WSAL_ConstantManager($this);
 		
 		// listen to general events
 		$this->sensors->HookEvents();

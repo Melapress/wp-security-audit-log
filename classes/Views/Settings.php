@@ -39,10 +39,37 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				?><div class="error"><p><?php _e('Error: '); ?><?php echo $ex->getMessage(); ?></p></div><?php
 			}
 		}
-		?><form id="audit-log-viewer" method="post">
+		?><form id="audit-log-settings" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			
-			
+			<table class="form-table">
+				<tbody>
+					<tr valign="top">
+						<th scope="row"><label><?php _e('Security Alerts Pruning'); ?></label></th>
+						<td>
+							<input type="radio" id="delete1" style="margin-top: 2px;"/>
+							<label for="delete1"><?php echo __('Delete alerts older than'); ?></label>
+							<input type="text"
+								   placeholder="<?php echo __('(1 to 365)'); ?>"
+								   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
+							<span> <?php echo __('(1 to 365 days)',WPPH_PLUGIN_TEXT_DOMAIN);?></span>
+						</td>
+					</tr>
+					<tr>
+						<th></th>
+						<td>
+							<?php $max = $this->_plugin->settings->GetMaxAllowedAlerts(); ?>
+							<?php $text = sprintf(__('(1 to %d alerts)'), $max); ?>
+							<input type="radio" id="delete2" class="radioInput" style="margin-top: 2px;"/>
+							<label for="delete2"><?php echo __('Keep up to'); ?></label>
+							<input type="text" placeholder="<?php echo $text;?>"
+								   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
+							<span><?php echo $text; ?></span>
+							<p class="description" style="margin-top: 5px !important;"><?php echo sprintf(__('By default %s will keep up to %d WordPress Security Events.'), WPPH_PLUGIN_NAME, $max); ?></p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 			
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes"></p>
 		</form><?php
