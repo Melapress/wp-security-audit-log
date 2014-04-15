@@ -11,8 +11,6 @@ class WSAL_ViewManager {
 	 * @var WpSecurityAuditLog
 	 */
 	protected $_plugin;
-	
-	const MAIN_VIEW = 'wsal-main';
 
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->_plugin = $plugin;
@@ -54,27 +52,29 @@ class WSAL_ViewManager {
 	}
 	
 	public function AddAdminMenus(){
-		// add main menu
-		add_menu_page(
-			'WP Security Audit Log',
-			'Audit Log',
-			'manage_options', // admin & superadmin
-			self::MAIN_VIEW,
-			array($this, 'RenderViewBody'),
-			count($this->views) ? $this->views[0]->GetIcon() : ''
-		);
-		
-		// add menu items
-		foreach($this->views as $i => $view){
-			add_submenu_page(
-				self::MAIN_VIEW,
-				$view->GetTitle(),
-				$view->GetName(),
+		if(count($this->views)){
+			// add main menu
+			add_menu_page(
+				'WP Security Audit Log',
+				'Audit Log',
 				'manage_options', // admin & superadmin
-				$i == 0 ? self::MAIN_VIEW : $view->GetSafeViewName(),
+				$this->views[0]->GetSafeViewName(),
 				array($this, 'RenderViewBody'),
-				$view->GetIcon()
+				$this->views[0]->GetIcon()
 			);
+
+			// add menu items
+			foreach($this->views as $i => $view){
+				add_submenu_page(
+					$this->views[0]->GetSafeViewName(),
+					$view->GetTitle(),
+					$view->GetName(),
+					'manage_options', // admin & superadmin
+					$view->GetSafeViewName(),
+					array($this, 'RenderViewBody'),
+					$view->GetIcon()
+				);
+			}
 		}
 	}
 	
@@ -84,7 +84,7 @@ class WSAL_ViewManager {
 			if($view->HasPluginShortcutLink()){
 				$new_links[] =
 					'<a href="'
-							. admin_url('page=wsal-'
+							. admin_url('admin.php?page='
 								. $view->GetSafeViewName()
 							) . '">'
 						. $view->GetName()

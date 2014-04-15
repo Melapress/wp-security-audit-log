@@ -18,11 +18,6 @@ final class WSAL_AlertManager {
 	protected $plugin;
 	
 	/**
-	 * Disabled alerts option name.
-	 */
-	const OPT_DISABLED_TYPES = 'wsal-disabled-alerts';
-	
-	/**
 	 * Create new AlertManager instance.
 	 * @param WpSecurityAuditLog $plugin
 	 */
@@ -83,8 +78,6 @@ final class WSAL_AlertManager {
 		}
 	}
 	
-	protected $_disabled = null;
-	
 	/**
 	 * Returns whether alert of type $type is enabled or not.
 	 * @param integer $type Alert type.
@@ -99,20 +92,14 @@ final class WSAL_AlertManager {
 	 * @param int[] $types Alert type codes to be disabled.
 	 */
 	public function SetDisabledAlerts($types){
-		$this->_disabled = array_unique(array_map('intval', $types));
-		update_option(self::OPT_DISABLED_TYPES, implode(',', $this->_disabled));
+		$this->plugin->settings->SetDisabledAlerts($types);
 	}
 	
 	/**
 	 * @return int[] Returns an array of disabled alerts' type code.
 	 */
 	public function GetDisabledAlerts(){
-		if(!$this->_disabled){
-			$this->_disabled = get_option(self::OPT_DISABLED_TYPES, ',');
-			$this->_disabled = explode(',', $this->_disabled);
-			$this->_disabled = array_map('intval', $this->_disabled);
-		}
-		return $this->_disabled;
+		return $this->plugin->settings->GetDisabledAlerts();
 	}
 	
 	/**
