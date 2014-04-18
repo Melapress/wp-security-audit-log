@@ -63,4 +63,53 @@ class WSAL_Settings {
 		$this->_disabled = array_unique(array_map('intval', $types));
 		update_option(self::OPT_PRFX . 'disabled-alerts', implode(',', $this->_disabled));
 	}
+	
+	protected function IsUserOrRole($item){
+		// TODO finish user/role check
+	}
+	
+	protected function CheckUsersRoles($usersOrRoles){
+		foreach($usersOrRoles as $item)
+			if(!$this->IsUserOrRole($item))
+				throw new Exception("The identifier \"$item\" is neither a user nor a role.");
+	}
+	
+	protected $_viewers = null;
+	
+	public function SetAllowedPluginViewers($usersOrRoles){
+		$this->CheckUsersRoles($usersOrRoles);
+		$this->_viewers = $usersOrRoles;
+		update_option(self::OPT_PRFX . 'plugin-viewers', implode(',', $this->_viewers));
+	}
+	
+	public function GetAllowedPluginViewers(){
+		if(is_null($this->_viewers)){
+			$this->_viewers = explode(',', get_option(self::OPT_PRFX . 'plugin-viewers'));
+		}
+		return $this->_viewers;
+	}
+	
+	protected $_editors = null;
+	
+	public function SetAllowedPluginEditors($usersOrRoles){
+		$this->CheckUsersRoles($usersOrRoles);
+		$this->_editors = $usersOrRoles;
+		update_option(self::OPT_PRFX . 'plugin-editors', implode(',', $this->_editors));
+	}
+	
+	public function GetAllowedPluginEditors(){
+		if(is_null($this->_editors)){
+			$this->_editors = explode(',', get_option(self::OPT_PRFX . 'plugin-editors'));
+		}
+		return $this->_editors;
+	}
+	
+	public function CurrentUserCan($action){
+		return $this->UserCan(get_current_user_id(), $action);
+	}
+	
+	public function UserCan($user, $action){
+		if(is_object($user))$user = $user->id;
+		// TODO finish auth check
+	}
 }

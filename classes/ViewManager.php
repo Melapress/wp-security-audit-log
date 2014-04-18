@@ -64,7 +64,7 @@ class WSAL_ViewManager {
 			);
 
 			// add menu items
-			foreach($this->views as $i => $view){
+			foreach($this->views as $view){
 				add_submenu_page(
 					$this->views[0]->GetSafeViewName(),
 					$view->GetTitle(),
