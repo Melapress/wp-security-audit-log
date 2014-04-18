@@ -12,6 +12,10 @@ class WSAL_Settings {
 		$this->_plugin = $plugin;
 	}
 	
+	public function IsDataInspectorEnabled(){
+		return true;
+	}
+	
 	public function GetMaxAllowedAlerts(){
 		return 5000;
 	}

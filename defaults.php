@@ -115,6 +115,7 @@ WpSecurityAuditLog::GetInstance()
 			array(5006, E_CRITICAL, 'User activated a theme', 'Activated theme "%NewTheme->Name%", installed in %NewTheme->get_template_directory%'),
 		),
 		'System Activity' => array(
+			array(0000, E_CRITICAL, 'Unknown Error', 'An unexpected error has occurred'),
 			array(0001, E_CRITICAL, 'PHP error', '%Message%'),
 			array(0002, E_WARNING, 'PHP warning', '%Message%'),
 			array(0003, E_NOTICE, 'PHP notice', '%Message%'),

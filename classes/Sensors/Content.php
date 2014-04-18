@@ -321,7 +321,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$newVisibility = __('Private');
 		}
 		
-        if($oldVisibility != $newVisibility){
+        if($oldVisibility && $newVisibility && ($oldVisibility != $newVisibility)){
 			$event = $this->GetEventTypeForPostType($oldpost, 2025, 2026, 2040);
 			$this->plugin->alerts->Trigger($event, array(
 				'PostID' => $oldpost->ID,

@@ -136,8 +136,8 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	}
 
 	public function get_columns(){
-		return array(
-			'cb'   => '<input type="checkbox" />',
+		$cols = array(
+			//'cb'   => '<input type="checkbox" />',
 			//'read' => 'Read',
 			'type' => 'Code',
 			'code' => 'Type',
@@ -145,8 +145,10 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			'user' => 'Username',
 			'scip' => 'Source IP',
 			'mesg' => 'Message',
-			//'more' => '',
 		);
+		if($this->_plugin->settings->IsDataInspectorEnabled())
+			$cols['data'] = '';
+		return $cols;
 	}
 
 	public function column_cb(WSAL_DB_Occurrence $item){
@@ -186,12 +188,12 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return !is_null($item->GetUsername()) ? esc_html($item->GetUsername()) : '<i>unknown</i>';
 			case 'scip':
 				return !is_null($item->GetSourceIP()) ? esc_html($item->GetSourceIP()) : '<i>unknown</i>';
-			case 'more':
-				$url = admin_url('admin-ajax.php') . '?action=AjaxInspector&amp;occurrence=' . $item['id'];
-				return '<a class="more-info thickbox" title="Alert Data Inspector"'
-					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
 			case 'mesg':
 				return $item->GetMessage(array($this, 'meta_formatter'));
+			case 'data':
+				$url = admin_url('admin-ajax.php') . '?action=AjaxInspector&amp;occurrence=' . $item->id;
+				return '<a class="more-info thickbox" title="Alert Data Inspector"'
+					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
 			default:
 				return isset($item->$column_name)
 					? esc_html($item->$column_name)
