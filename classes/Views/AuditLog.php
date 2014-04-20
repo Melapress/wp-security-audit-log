@@ -34,6 +34,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 	
 	public function Render(){
+		if(!$this->_plugin->settings->CurrentUserCan('view')){
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+		}
 		?><form id="audit-log-viewer" method="get">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			<?php $this->_listview->prepare_items(); ?>
@@ -62,6 +65,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 	
 	public function AjaxInspector(){
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
 		if(!isset($_REQUEST['occurrence']))
 			die('Occurrence parameter expected.');
 		$occ = new WSAL_DB_Occurrence();
@@ -83,6 +88,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 	
 	public function AjaxRefresh(){
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
 		if(!isset($_REQUEST['logcount']))
 			die('Log count parameter expected.');
 		

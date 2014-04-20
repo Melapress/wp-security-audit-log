@@ -2,10 +2,6 @@
 
 class WSAL_Views_Settings extends WSAL_AbstractView {
 	
-	public function __construct(WpSecurityAuditLog $plugin) {
-		parent::__construct($plugin);
-	}
-	
 	public function HasPluginShortcutLink(){
 		return true;
 	}
@@ -27,10 +23,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	protected function Save(){
-		
+		$this->_plugin->settings->SetPruningDate($_REQUEST['PruningDate']);
+		$this->_plugin->settings->SetPruningLimit($_REQUEST['PruningLimit']);
 	}
 	
 	public function Render(){
+		if(!$this->_plugin->settings->CurrentUserCan('edit')){
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+		}
 		if(isset($_POST['submit'])){
 			try {
 				$this->Save();
@@ -47,12 +47,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<tr valign="top">
 						<th scope="row"><label><?php _e('Security Alerts Pruning'); ?></label></th>
 						<td>
+							<?php $text = __('(eg: 1 month)'); ?>
 							<input type="radio" id="delete1" style="margin-top: 2px;"/>
 							<label for="delete1"><?php echo __('Delete alerts older than'); ?></label>
-							<input type="text"
-								   placeholder="<?php echo __('(1 to 365)'); ?>"
+							<input type="text" name="PruningDate" placeholder="<?php echo $text; ?>"
 								   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
-							<span> <?php echo __('(1 to 365 days)',WPPH_PLUGIN_TEXT_DOMAIN);?></span>
+							<span> <?php echo $text; ?></span>
 						</td>
 					</tr>
 					<tr>
@@ -62,10 +62,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<?php $text = sprintf(__('(1 to %d alerts)'), $max); ?>
 							<input type="radio" id="delete2" class="radioInput" style="margin-top: 2px;"/>
 							<label for="delete2"><?php echo __('Keep up to'); ?></label>
-							<input type="text" placeholder="<?php echo $text;?>"
+							<input type="text" name="PruningLimit" placeholder="<?php echo $text;?>"
 								   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
 							<span><?php echo $text; ?></span>
-							<p class="description" style="margin-top: 5px !important;"><?php echo sprintf(__('By default %s will keep up to %d WordPress Security Events.'), WPPH_PLUGIN_NAME, $max); ?></p>
+							<p class="description" style="margin-top: 5px !important;"><?php
+								echo sprintf(__('By default we keep up to %d WordPress Security Events.'), $max);
+							?></p>
 						</td>
 					</tr>
 				</tbody>

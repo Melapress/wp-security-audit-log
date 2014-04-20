@@ -25,6 +25,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	}
 	
 	public function Render(){
+		if(!$this->_plugin->settings->CurrentUserCan('edit')){
+			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+		}
 		$alert = new WSAL_Alert(); // IDE type hinting
 		$groupedAlerts = $this->_plugin->alerts->GetCategorizedAlerts();
 		$safeNames = array_map(array($this, 'GetSafeCatgName'), array_keys($groupedAlerts));

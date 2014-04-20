@@ -87,6 +87,7 @@ class WpSecurityAuditLog {
 		$this->sensors = new WSAL_SensorManager($this);
 		$this->settings = new WSAL_Settings($this);
 		$this->constants = new WSAL_ConstantManager($this);
+		$this->widgets = new WSAL_WidgetManager($this);
 		
 		// listen to general events
 		$this->sensors->HookEvents();
@@ -115,6 +116,7 @@ class WpSecurityAuditLog {
 		static $migTypes = array(
 			3000 => 5006
 		);
+		
 		// load data
 		$sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog_events';
 		$events = array();
@@ -122,6 +124,7 @@ class WpSecurityAuditLog {
 			$events[$item['EventID']] = $item;
 		$sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog';
 		$auditlog = $wpdb->get_results($sql, ARRAY_A);
+		
 		// migrate using db logger
 		$lgr = new WSAL_Loggers_Database($this);
 		foreach($auditlog as $entry){
@@ -149,6 +152,19 @@ class WpSecurityAuditLog {
 			// send event data to logger!
 			$lgr->Log($type, $data, $date, $entry['BlogId'], true);
 		}
+		
+		// migrate settings
+		$this->settings->SetAllowedPluginEditors(
+			get_option('WPPH_PLUGIN_ALLOW_CHANGE')
+		);
+		$this->settings->SetAllowedPluginViewers(
+			get_option('WPPH_PLUGIN_ALLOW_ACCESS')
+		);
+		$s = get_option('wpph_plugin_settings');
+		$this->settings->SetPruningDate($s->daysToKeep . ' days');
+		$this->settings->SetPruningLimit($s->eventsToKeep);
+		$this->settings->SetViewPerPage($s->showEventsViewList);
+		$this->settings->SetViewPerPage($s->showDW);
 	}
 	
 	public function GetBaseUrl(){
