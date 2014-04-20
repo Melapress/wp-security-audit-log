@@ -15,7 +15,7 @@ class WSAL_WidgetManager {
 		if($this->_plugin->settings->IsWidgetsEnabled()){
 			wp_add_dashboard_widget(
 				'wsal',
-				__('Latest WordPress Security Alerts') . ' | WP Security Audit Log',
+				__('Latest Alerts') . ' | WP Security Audit Log',
 				array($this, 'RenderWidget')
 			);
 		}
