@@ -12,7 +12,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$action = isset($_REQUEST['action2']) ? $_REQUEST['action2'] : $action;
 		
 		// install plugin
-        if($action=='install-plugin' && !empty($_GET['plugin'])){
+        if(($action=='install-plugin' || $action=='upload-plugin') && !empty($_GET['plugin'])){
 			$newPlugin = null;
 			$pluginName = $_GET['plugin'];
 			foreach(get_plugins() as $pluginFile => $plugin){

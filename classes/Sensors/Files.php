@@ -11,12 +11,17 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 	protected $IsFileUploaded = false;
 	
 	public function EventFileUploaded($attachmentID){
-        $file = get_attached_file($attachmentID);
-        $this->plugin->alerts->Trigger(2010, array(
-			'AttachmentID' => $attachmentID,
-			'FileName' => basename($file),
-			'FilePath' => dirname($file),
-		));
+		if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'upload-plugin'){
+			$_GET['plugin'] = explode('.', basename(get_attached_file($attachmentID)));
+			$_GET['plugin'] = $_GET['plugin'][0];
+		}else{
+			$file = get_attached_file($attachmentID);
+			$this->plugin->alerts->Trigger(2010, array(
+				'AttachmentID' => $attachmentID,
+				'FileName' => basename($file),
+				'FilePath' => dirname($file),
+			));
+		}
 		$this->IsFileUploaded = true;
 	}
 	
