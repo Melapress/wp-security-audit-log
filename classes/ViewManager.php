@@ -57,7 +57,7 @@ class WSAL_ViewManager {
 			add_menu_page(
 				'WP Security Audit Log',
 				'Audit Log',
-				'manage_options', // admin & superadmin
+				'read', // no capability requirement
 				$this->views[0]->GetSafeViewName(),
 				array($this, 'RenderViewBody'),
 				$this->views[0]->GetIcon()
@@ -69,7 +69,7 @@ class WSAL_ViewManager {
 					$this->views[0]->GetSafeViewName(),
 					$view->GetTitle(),
 					$view->GetName(),
-					'manage_options', // admin & superadmin
+					'read', // no capability requirement
 					$view->GetSafeViewName(),
 					array($this, 'RenderViewBody'),
 					$view->GetIcon()
