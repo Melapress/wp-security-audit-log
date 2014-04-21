@@ -2,6 +2,11 @@
 
 class WSAL_Views_Settings extends WSAL_AbstractView {
 	
+	public function __construct(WpSecurityAuditLog $plugin) {
+		parent::__construct($plugin);
+		add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
+	}
+	
 	public function HasPluginShortcutLink(){
 		return true;
 	}
@@ -22,9 +27,32 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		return 2;
 	}
 	
+	protected function GetTokenType($token){
+		$users = array();
+		foreach(get_users('fields[]=user_login') as $obj)
+			$users[] = $obj->user_login;
+		$roles = array_keys(get_editable_roles());
+		
+		if(in_array($token, $users))return 'user';
+		if(in_array($token, $roles))return 'role';
+		return 'other';
+	}
+	
 	protected function Save(){
 		$this->_plugin->settings->SetPruningDate($_REQUEST['PruningDate']);
 		$this->_plugin->settings->SetPruningLimit($_REQUEST['PruningLimit']);
+		$this->_plugin->settings->SetWidgetsEnabled($_REQUEST['EnableDashboardWidgets']);
+		$this->_plugin->settings->SetAllowedPluginViewers(isset($_REQUEST['Viewers']) ? $_REQUEST['Viewers'] : array());
+		$this->_plugin->settings->SetAllowedPluginEditors(isset($_REQUEST['Editors']) ? $_REQUEST['Editors'] : array());
+		$this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
+	}
+	
+	public function AjaxCheckSecurityToken(){
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+		if(!isset($_REQUEST['token']))
+			die('Token parameter expected.');
+		die($this->GetTokenType($_REQUEST['token']));
 	}
 	
 	public function Render(){
@@ -41,33 +69,126 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 		?><form id="audit-log-settings" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
+			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr(admin_url('admin-ajax.php')); ?>" />
 			
 			<table class="form-table">
 				<tbody>
-					<tr valign="top">
-						<th scope="row"><label><?php _e('Security Alerts Pruning'); ?></label></th>
+					<tr>
+						<th><label for="delete1"><?php _e('Security Alerts Pruning'); ?></label></th>
 						<td>
-							<?php $text = __('(eg: 1 month)'); ?>
-							<input type="radio" id="delete1" style="margin-top: 2px;"/>
-							<label for="delete1"><?php echo __('Delete alerts older than'); ?></label>
-							<input type="text" name="PruningDate" placeholder="<?php echo $text; ?>"
-								   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
-							<span> <?php echo $text; ?></span>
+							<fieldset>
+								<?php $text = __('(eg: 1 month)'); ?>
+								<input type="radio" id="delete1" style="margin-top: 2px;"/>
+								<label for="delete1"><?php echo __('Delete alerts older than'); ?></label>
+								<input type="text" name="PruningDate" placeholder="<?php echo $text; ?>"
+									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
+								<span> <?php echo $text; ?></span>
+							</fieldset>
 						</td>
 					</tr>
 					<tr>
 						<th></th>
 						<td>
-							<?php $max = $this->_plugin->settings->GetMaxAllowedAlerts(); ?>
-							<?php $text = sprintf(__('(1 to %d alerts)'), $max); ?>
-							<input type="radio" id="delete2" class="radioInput" style="margin-top: 2px;"/>
-							<label for="delete2"><?php echo __('Keep up to'); ?></label>
-							<input type="text" name="PruningLimit" placeholder="<?php echo $text;?>"
-								   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
-							<span><?php echo $text; ?></span>
-							<p class="description" style="margin-top: 5px !important;"><?php
-								echo sprintf(__('By default we keep up to %d WordPress Security Events.'), $max);
-							?></p>
+							<fieldset>
+								<?php $max = $this->_plugin->settings->GetMaxAllowedAlerts(); ?>
+								<?php $text = sprintf(__('(1 to %d alerts)'), $max); ?>
+								<input type="radio" id="delete2" style="margin-top: 2px;"/>
+								<label for="delete2"><?php echo __('Keep up to'); ?></label>
+								<input type="text" name="PruningLimit" placeholder="<?php echo $text;?>"
+									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
+								<span><?php echo $text; ?></span>
+								<p class="description"><?php
+									echo sprintf(__('By default we keep up to %d WordPress Security Events.'), $max);
+								?></p>
+							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="dwoption_on"><?php _e('Alerts Dashboard Widget'); ?></label></th>
+						<td>
+							<fieldset>
+								<?php $dwe = $this->_plugin->settings->IsWidgetsEnabled(); ?>
+								<label for="dwoption_on">
+									<input type="radio" name="EnableDashboardWidgets" id="dwoption_on" style="margin-top: 2px;" <?php if($dwe)echo 'checked="checked"'; ?> value="1">
+									<span><?php _e('On'); ?></span>
+								</label>
+								<br/>
+								<label for="dwoption_off">
+									<input type="radio" name="EnableDashboardWidgets" id="dwoption_off" style="margin-top: 2px;" <?php if(!$dwe)echo 'checked="checked"'; ?> value="0">
+									<span><?php _e('Off'); ?></span>
+								</label>
+								<br/>
+								<p class="description"><?php
+									echo sprintf(
+											__('Display a dashboard widget with the latest %d security alerts.'),
+											$this->_plugin->settings->GetDashboardWidgetMaxAlerts()
+										);
+								?></p>
+							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="ViewerQueryBox"><?php _e('Can View Alerts'); ?></label></th>
+						<td>
+							<fieldset>
+								<input type="text" id="ViewerQueryBox" style="float: left; display: block; width: 250px;">
+								<input type="button" id="ViewerQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
+								<br style="clear: both;"/>
+								<p class="description"><?php
+									_e('Users and Roles in this list can view the security alerts');
+								?></p>
+								<div id="ViewerList"><?php
+									foreach($this->_plugin->settings->GetAllowedPluginViewers() as $item){
+										?><span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
+											<input type="hidden" name="Viewers[]" value="<?php echo esc_attr($item); ?>"/>
+											<?php echo esc_html($item); ?>
+											<a href="javascript:;" title="Remove">&times;</a>
+										</span><?php
+									}
+								?></div>
+							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="EditorQueryBox"><?php _e('Can Manage Plugin'); ?></label></th>
+						<td>
+							<fieldset>
+								<input type="text" id="EditorQueryBox" style="float: left; display: block; width: 250px;">
+								<input type="button" id="EditorQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
+								<br style="clear: both;"/>
+								<p class="description"><?php
+									_e('Users and Roles in this list can manage the plugin settings');
+								?></p>
+								<div id="EditorList"><?php
+									foreach($this->_plugin->settings->GetAllowedPluginEditors() as $item){
+										?><span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
+											<input type="hidden" name="Editors[]" value="<?php echo esc_attr($item); ?>"/>
+											<?php echo esc_html($item); ?>
+											<a href="javascript:;" title="Remove">&times;</a>
+										</span><?php
+									}
+								?></div>
+							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="aroption_on"><?php _e('Refresh Audit View'); ?></label></th>
+						<td>
+							<fieldset>
+								<?php $are = $this->_plugin->settings->IsRefreshAlertsEnabled(); ?>
+								<label for="aroption_on">
+									<input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: 2px;" <?php if($are)echo 'checked="checked"'; ?> value="1">
+									<span><?php _e('Automatic'); ?></span>
+								</label>
+								<span class="description"> &mdash; <?php _e('Refresh Audit View as soon as there are new events.'); ?></span>
+								<br/>
+								<label for="aroption_off">
+									<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: 2px;" <?php if(!$are)echo 'checked="checked"'; ?> value="0">
+									<span><?php _e('Manual'); ?></span>
+								</label>
+								<span class="description"> &mdash; <?php _e('Refresh Audit View when only page is reloaded.'); ?></span>
+								<br/>
+							</fieldset>
 						</td>
 					</tr>
 				</tbody>
@@ -75,6 +196,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes"></p>
 		</form><?php
+	}
+	
+	public function Header(){
+		wp_enqueue_style(
+			'settings',
+			$this->_plugin->GetBaseUrl() . '/css/settings.css',
+			array(),
+			filemtime($this->_plugin->GetBaseDir() . '/css/settings.css')
+		);
+	}
+	
+	public function Footer() {
+		wp_enqueue_script(
+			'settings',
+			$this->_plugin->GetBaseUrl() . '/js/settings.js',
+			array(),
+			filemtime($this->_plugin->GetBaseDir() . '/js/settings.js')
+		);
 	}
 	
 }

@@ -27,10 +27,31 @@ class WSAL_Settings {
 	}
 	
 	/**
-	 * @return boolean Whether dashboard widgets are enabled or not.
+	 * @param boolean $newvalue Whether dashboard widgets are enabled or not.
 	 */
 	public function SetWidgetsEnabled($newvalue){
 		update_option(self::OPT_PRFX . 'disable-widgets', !$newvalue);
+	}
+	
+	/**
+	 * @return boolean Whether alerts in audit log view refresh automatically or not.
+	 */
+	public function IsRefreshAlertsEnabled(){
+		return !get_option(self::OPT_PRFX . 'disable-refresh');
+	}
+	
+	/**
+	 * @param boolean $newvalue Whether alerts in audit log view refresh automatically or not.
+	 */
+	public function SetRefreshAlertsEnabled($newvalue){
+		update_option(self::OPT_PRFX . 'disable-refresh', !$newvalue);
+	}
+	
+	/**
+	 * @return int Maximum number of alerts to show in dashboard widget.
+	 */
+	public function GetDashboardWidgetMaxAlerts(){
+		return 5;
 	}
 	
 	/**
@@ -109,34 +130,16 @@ class WSAL_Settings {
 		update_option(self::OPT_PRFX . 'disabled-alerts', implode(',', $this->_disabled));
 	}
 	
-	/**
-	 * @param string $item Either a username or a role.
-	 * @return boolean Whether username or role exists or not.
-	 */
-	protected function IsUserOrRole($item){
-		// TODO finish user/role check
-	}
-	
-	/**
-	 * @param array $usersOrRoles Ensures all of these are valid values.
-	 */
-	protected function CheckUsersRoles($usersOrRoles){
-		foreach($usersOrRoles as $item)
-			if(!$this->IsUserOrRole($item))
-				throw new Exception("The identifier \"$item\" is neither a user nor a role.");
-	}
-	
 	protected $_viewers = null;
 	
 	public function SetAllowedPluginViewers($usersOrRoles){
-		$this->CheckUsersRoles($usersOrRoles);
 		$this->_viewers = $usersOrRoles;
 		update_option(self::OPT_PRFX . 'plugin-viewers', implode(',', $this->_viewers));
 	}
 	
 	public function GetAllowedPluginViewers(){
 		if(is_null($this->_viewers)){
-			$this->_viewers = explode(',', get_option(self::OPT_PRFX . 'plugin-viewers'));
+			$this->_viewers = array_unique(array_filter(explode(',', get_option(self::OPT_PRFX . 'plugin-viewers'))));
 		}
 		return $this->_viewers;
 	}
@@ -144,14 +147,13 @@ class WSAL_Settings {
 	protected $_editors = null;
 	
 	public function SetAllowedPluginEditors($usersOrRoles){
-		$this->CheckUsersRoles($usersOrRoles);
 		$this->_editors = $usersOrRoles;
 		update_option(self::OPT_PRFX . 'plugin-editors', implode(',', $this->_editors));
 	}
 	
 	public function GetAllowedPluginEditors(){
 		if(is_null($this->_editors)){
-			$this->_editors = explode(',', get_option(self::OPT_PRFX . 'plugin-editors'));
+			$this->_editors = array_unique(array_filter(explode(',', get_option(self::OPT_PRFX . 'plugin-editors'))));
 		}
 		return $this->_editors;
 	}

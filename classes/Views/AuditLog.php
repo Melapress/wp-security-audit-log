@@ -41,27 +41,18 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			<?php $this->_listview->prepare_items(); ?>
 			<?php $this->_listview->display(); ?>
-		</form>
-		<script type="text/javascript">
-			jQuery(document).ready(function(){
-				var cnt = <?php echo WSAL_DB_Occurrence::Count(); ?>;
-				var url = <?php echo json_encode(admin_url('admin-ajax.php') . '?action=AjaxRefresh&logcount='); ?>;
-				var ajx = null;
-				var chk = function(){
-					if(ajx)ajx.abort();
-					ajx = jQuery.post(url + cnt, function(data){
-						ajx = null;
-						if(data !== 'false'){
-							cnt = data;
-							jQuery('#audit-log-viewer').load(location.href + ' #audit-log-viewer');
-						}
-						chk();
-					});
-				};
-				setInterval(chk, 40000);
-				chk();
-			});
-		</script><?php
+		</form><?php
+		if($this->_plugin->settings->IsRefreshAlertsEnabled()){
+			$ajaxurl = admin_url('admin-ajax.php') . '?action=AjaxRefresh&logcount=';
+			?><script type="text/javascript">
+				jQuery(document).ready(function(){
+					WsalLogRefresher(
+						<?php echo json_encode($ajaxurl); ?>,
+						<?php echo (int)WSAL_DB_Occurrence::Count(); ?>
+					);
+				});
+			</script><?php
+		}
 	}
 	
 	public function AjaxInspector(){
@@ -112,6 +103,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			$this->_plugin->GetBaseUrl() . '/css/auditlog.css',
 			array(),
 			filemtime($this->_plugin->GetBaseDir() . '/css/auditlog.css')
+		);
+	}
+	
+	public function Footer() {
+		wp_enqueue_script(
+			'auditlog',
+			$this->_plugin->GetBaseUrl() . '/js/auditlog.js',
+			array(),
+			filemtime($this->_plugin->GetBaseDir() . '/js/auditlog.js')
 		);
 	}
 	

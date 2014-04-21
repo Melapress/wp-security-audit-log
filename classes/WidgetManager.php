@@ -12,7 +12,8 @@ class WSAL_WidgetManager {
 	}
 	
 	public function AddWidgets(){
-		if($this->_plugin->settings->IsWidgetsEnabled()){
+		if($this->_plugin->settings->IsWidgetsEnabled()
+		&& $this->_plugin->settings->CurrentUserCan('view')){
 			wp_add_dashboard_widget(
 				'wsal',
 				__('Latest Alerts') . ' | WP Security Audit Log',
@@ -22,7 +23,10 @@ class WSAL_WidgetManager {
 	}
 	
 	public function RenderWidget(){
-		$results = WSAL_DB_Occurrence::LoadMulti('1 ORDER BY created_on DESC LIMIT 5');
+		$results = WSAL_DB_Occurrence::LoadMulti(
+			' 1 ORDER BY created_on DESC LIMIT '
+			. $this->_plugin->settings->GetDashboardWidgetMaxAlerts()
+		);
 		?><div><?php
 			if(!count($results)){
 				?><p><?php _e('No alerts found.'); ?></p><?php
