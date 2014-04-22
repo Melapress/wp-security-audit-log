@@ -52,7 +52,7 @@ class WSAL_ViewManager {
 	}
 	
 	public function AddAdminMenus(){
-		if(count($this->views)){
+		if($this->_plugin->settings->CurrentUserCan('view') && count($this->views)){
 			// add main menu
 			add_menu_page(
 				'WP Security Audit Log',
