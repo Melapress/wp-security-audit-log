@@ -186,7 +186,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: 2px;" <?php if(!$are)echo 'checked="checked"'; ?> value="0">
 									<span><?php _e('Manual'); ?></span>
 								</label>
-								<span class="description"> &mdash; <?php _e('Refresh Audit View when only page is reloaded.'); ?></span>
+								<span class="description"> &mdash; <?php _e('Refresh Audit View only when page is reloaded.'); ?></span>
 								<br/>
 							</fieldset>
 						</td>
