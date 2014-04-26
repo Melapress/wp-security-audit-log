@@ -78,7 +78,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<td>
 							<fieldset>
 								<?php $text = __('(eg: 1 month)'); ?>
-								<input type="radio" id="delete1" style="margin-top: 2px;"/>
+								<!--<input type="radio" id="delete1" style="margin-top: 2px;"/>-->
 								<label for="delete1"><?php echo __('Delete alerts older than'); ?></label>
 								<input type="text" name="PruningDate" placeholder="<?php echo $text; ?>"
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
@@ -92,7 +92,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<fieldset>
 								<?php $max = $this->_plugin->settings->GetMaxAllowedAlerts(); ?>
 								<?php $text = sprintf(__('(1 to %d alerts)'), $max); ?>
-								<input type="radio" id="delete2" style="margin-top: 2px;"/>
+								<!--<input type="radio" id="delete2" style="margin-top: 2px;"/>-->
 								<label for="delete2"><?php echo __('Keep up to'); ?></label>
 								<input type="text" name="PruningLimit" placeholder="<?php echo $text;?>"
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
@@ -186,7 +186,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: 2px;" <?php if(!$are)echo 'checked="checked"'; ?> value="0">
 									<span><?php _e('Manual'); ?></span>
 								</label>
-								<span class="description"> &mdash; <?php _e('Refresh Audit View when only page is reloaded.'); ?></span>
+								<span class="description"> &mdash; <?php _e('Refresh Audit View only when page is reloaded.'); ?></span>
 								<br/>
 							</fieldset>
 						</td>

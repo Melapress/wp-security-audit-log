@@ -27,6 +27,7 @@ class WSAL_ViewManager {
 		
 		// add menus
 		add_action('admin_menu', array($this, 'AddAdminMenus'));
+		add_action('network_admin_menu', array($this, 'AddAdminMenus'));
 		
 		// add plugin shortcut links
 		add_filter('plugin_action_links_' . $plugin->GetBaseName(), array($this, 'AddPluginShortcuts'));

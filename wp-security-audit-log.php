@@ -61,6 +61,12 @@ class WpSecurityAuditLog {
 	 */
 	public $constants;
 	
+	/**
+	 * Contains a list of cleanup callbacks.
+	 * @var callable[]
+	 */
+	protected $_cleanup_hooks = array();
+	
 	// </editor-fold>
 	
 	// <editor-fold desc="Entry Points">
@@ -94,15 +100,34 @@ class WpSecurityAuditLog {
 		
 		// listen for installation event
 		register_activation_hook(__FILE__, array($this, 'Install'));
+		
+		// listen for cleanup event
+		add_action('wsal_cleanup', array($this, 'CleanUp'));
+		//add_action('init', array($this, 'CleanUp'));
+	}
+	
+	public function CleanUp(){
+		foreach($this->_cleanup_hooks as $hook)$hook();
+	}
+	
+	public function AddCleanupHook($hook){
+		$this->_cleanup_hooks[] = $hook;
+	}
+	
+	public function RemoveCleanupHook($hook){
+		while(($pos = array_search($hook, $this->_cleanup_hooks)) !== false)
+			unset($this->_cleanup_hooks[$pos]);
 	}
 	
 	public function Install(){
 		WSAL_DB_ActiveRecord::InstallAll();
 		if($this->CanUpgrade())$this->Upgrade();
+		wp_schedule_event(0, 'hourly', 'wsal_cleanup');
 	}
 	
 	public function Uninstall(){
 		WSAL_DB_ActiveRecord::UninstallAll();
+		wp_unschedule_event(0, 'wsal_cleanup');
 	}
 	
 	public function CanUpgrade(){

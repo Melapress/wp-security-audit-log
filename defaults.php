@@ -121,7 +121,7 @@ WpSecurityAuditLog::GetInstance()
 			array(0003, E_NOTICE, 'PHP notice', '%Message%'),
 			array(0004, E_CRITICAL, 'PHP exception', '%Message%'),
 			array(0005, E_CRITICAL, 'PHP shutdown error', '%Message%'),
-			array(6000, E_NOTICE, 'Events automatically pruned by system', ''),
+			array(6000, E_NOTICE, 'Events automatically pruned by system', '%EventCount% event(s) automatically deleted by system'),
 			array(6001, E_CRITICAL, 'Option Anyone Can Register in WordPress settings changed', '%NewValue% the option "Anyone can register"'),
 			array(6002, E_CRITICAL, 'New User Default Role changed', 'Changed the New User Default Role from %OldRole% to %NewRole%'),
 			array(6003, E_CRITICAL, 'WordPress Administrator Notification email changed', 'Changed the WordPress administrator notifications email address from %OldEmail% to %NewEmail%'),

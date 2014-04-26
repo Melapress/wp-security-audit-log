@@ -3,16 +3,17 @@
 class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		add_action('wsal_prune', array($this, 'EventPruneEvents'));
+		add_action('wsal_prune', array($this, 'EventPruneEvents'), 10, 2);
 		add_action('admin_init', array($this, 'EventAdminInit'));
 	}
 	
 	/**
 	 * @param WSAL_DB_Occurrence[] $events The events that were deleted.
 	 */
-	public function EventPruneEvents($events){
+	public function EventPruneEvents($events, $query){
 		$this->plugin->alerts->Trigger(6000, array(
 			'EventCount' => count($events),
+			'PruneQuery' => $query,
 		));
 	}
 	
