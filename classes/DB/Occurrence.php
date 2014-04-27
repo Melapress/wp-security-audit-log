@@ -112,7 +112,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		$meta = array_shift($expr);
 		$meta = $this->GetMetaValue($meta, null);
 		foreach($expr as $part){
-			if(is_scalar($meta))return $meta; // this isn't 100% correct
+			if(is_scalar($meta) || is_null($meta))return $meta; // this isn't 100% correct
 			$meta = is_array($meta) ? $meta[$part] : $meta->$part;
 		}
 		return is_scalar($meta) ? (string)$meta : var_export($meta, true);

@@ -29,7 +29,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 					mktime(0, 0, 0, $m, $d + 1, $y) - 1,
 				));
 		
-		if($occ->IsLoaded()){
+		$curip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
+		if($occ->IsLoaded() && $occ->GetMetaValue('ClientIP') === $curip){
 			// update existing record
 			$meta = $occ->GetMetaArray();
 			if(!isset($meta['Usernames']))

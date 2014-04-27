@@ -12,6 +12,29 @@ class WSAL_Settings {
 		$this->_plugin = $plugin;
 	}
 	
+	protected function IsMultisite(){
+		return function_exists('is_multisite') && is_multisite();
+	}
+	
+	protected function GetGlobalOption($option, $default = false){
+		$fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
+		return $fn($option, $default);
+	}
+	
+	protected function SetGlobalOption($option, $value){
+		$fn = $this->IsMultisite() ? 'update_site_option' : 'update_option';
+		return $fn($option, $value);
+	}
+	
+	protected function GetLocalOption($option, $default = false){
+		$result = get_user_option($option, get_current_user_id());
+		return $result === false ? $default : $result;
+	}
+	
+	protected function SetLocalOption($option, $value){
+		update_user_option(get_current_user_id(), $option, $value, false);
+	}
+	
 	/**
 	 * @return boolean Whether to enable data inspector or not.
 	 */
@@ -23,28 +46,28 @@ class WSAL_Settings {
 	 * @return boolean Whether dashboard widgets are enabled or not.
 	 */
 	public function IsWidgetsEnabled(){
-		return !get_option(self::OPT_PRFX . 'disable-widgets');
+		return !$this->GetGlobalOption(self::OPT_PRFX . 'disable-widgets');
 	}
 	
 	/**
 	 * @param boolean $newvalue Whether dashboard widgets are enabled or not.
 	 */
 	public function SetWidgetsEnabled($newvalue){
-		update_option(self::OPT_PRFX . 'disable-widgets', !$newvalue);
+		$this->SetGlobalOption(self::OPT_PRFX . 'disable-widgets', !$newvalue);
 	}
 	
 	/**
 	 * @return boolean Whether alerts in audit log view refresh automatically or not.
 	 */
 	public function IsRefreshAlertsEnabled(){
-		return !get_option(self::OPT_PRFX . 'disable-refresh');
+		return !$this->GetGlobalOption(self::OPT_PRFX . 'disable-refresh');
 	}
 	
 	/**
 	 * @param boolean $newvalue Whether alerts in audit log view refresh automatically or not.
 	 */
 	public function SetRefreshAlertsEnabled($newvalue){
-		update_option(self::OPT_PRFX . 'disable-refresh', !$newvalue);
+		$this->SetGlobalOption(self::OPT_PRFX . 'disable-refresh', !$newvalue);
 	}
 	
 	/**
@@ -75,7 +98,7 @@ class WSAL_Settings {
 	 */
 	public function GetPruningDate(){
 		if(!$this->_pruning){
-			$this->_pruning = get_option(self::OPT_PRFX . 'pruning-date');
+			$this->_pruning = $this->GetGlobalOption(self::OPT_PRFX . 'pruning-date');
 			if(!strtotime($this->_pruning))
 				$this->_pruning = $this->GetDefaultPruningDate();
 		}
@@ -87,7 +110,7 @@ class WSAL_Settings {
 	 */
 	public function SetPruningDate($newvalue){
 		if(strtotime($newvalue)){
-			update_option(self::OPT_PRFX . 'pruning-date', $newvalue);
+			$this->SetGlobalOption(self::OPT_PRFX . 'pruning-date', $newvalue);
 			$this->_pruning = $newvalue;
 		}
 	}
@@ -96,7 +119,7 @@ class WSAL_Settings {
 	 * @return integer Maximum number of alerts to keep.
 	 */
 	public function GetPruningLimit(){
-		$val = (int)get_option(self::OPT_PRFX . 'pruning-limit');
+		$val = (int)$this->GetGlobalOption(self::OPT_PRFX . 'pruning-limit');
 		return $val ? $val : $this->GetMaxAllowedAlerts();
 	}
 	
@@ -105,7 +128,7 @@ class WSAL_Settings {
 	 */
 	public function SetPruningLimit($newvalue){
 		$newvalue = max(min((int)$newvalue, $this->GetMaxAllowedAlerts()), 1);
-		update_option(self::OPT_PRFX . 'pruning-limit', $newvalue);
+		$this->SetGlobalOption(self::OPT_PRFX . 'pruning-limit', $newvalue);
 	}
 	
 	protected $_disabled = null;
@@ -115,7 +138,7 @@ class WSAL_Settings {
 	 */
 	public function GetDisabledAlerts(){
 		if(!$this->_disabled){
-			$this->_disabled = get_option(self::OPT_PRFX . 'disabled-alerts', ',');
+			$this->_disabled = $this->GetGlobalOption(self::OPT_PRFX . 'disabled-alerts', ',');
 			$this->_disabled = explode(',', $this->_disabled);
 			$this->_disabled = array_map('intval', $this->_disabled);
 		}
@@ -127,19 +150,19 @@ class WSAL_Settings {
 	 */
 	public function SetDisabledAlerts($types){
 		$this->_disabled = array_unique(array_map('intval', $types));
-		update_option(self::OPT_PRFX . 'disabled-alerts', implode(',', $this->_disabled));
+		$this->SetGlobalOption(self::OPT_PRFX . 'disabled-alerts', implode(',', $this->_disabled));
 	}
 	
 	protected $_viewers = null;
 	
 	public function SetAllowedPluginViewers($usersOrRoles){
 		$this->_viewers = $usersOrRoles;
-		update_option(self::OPT_PRFX . 'plugin-viewers', implode(',', $this->_viewers));
+		$this->SetGlobalOption(self::OPT_PRFX . 'plugin-viewers', implode(',', $this->_viewers));
 	}
 	
 	public function GetAllowedPluginViewers(){
 		if(is_null($this->_viewers)){
-			$this->_viewers = array_unique(array_filter(explode(',', get_option(self::OPT_PRFX . 'plugin-viewers'))));
+			$this->_viewers = array_unique(array_filter(explode(',', $this->GetGlobalOption(self::OPT_PRFX . 'plugin-viewers'))));
 		}
 		return $this->_viewers;
 	}
@@ -148,12 +171,12 @@ class WSAL_Settings {
 	
 	public function SetAllowedPluginEditors($usersOrRoles){
 		$this->_editors = $usersOrRoles;
-		update_option(self::OPT_PRFX . 'plugin-editors', implode(',', $this->_editors));
+		$this->SetGlobalOption(self::OPT_PRFX . 'plugin-editors', implode(',', $this->_editors));
 	}
 	
 	public function GetAllowedPluginEditors(){
 		if(is_null($this->_editors)){
-			$this->_editors = array_unique(array_filter(explode(',', get_option(self::OPT_PRFX . 'plugin-editors'))));
+			$this->_editors = array_unique(array_filter(explode(',', $this->GetGlobalOption(self::OPT_PRFX . 'plugin-editors'))));
 		}
 		return $this->_editors;
 	}
@@ -162,12 +185,12 @@ class WSAL_Settings {
 	
 	public function SetViewPerPage($newvalue){
 		$this->_perpage = max($newvalue, 1);
-		update_option(self::OPT_PRFX . 'items-per-page', $this->_perpage);
+		$this->SetGlobalOption(self::OPT_PRFX . 'items-per-page', $this->_perpage);
 	}
 	
 	public function GetViewPerPage(){
 		if(is_null($this->_perpage)){
-			$this->_perpage = (int)get_option(self::OPT_PRFX . 'items-per-page', 10);
+			$this->_perpage = (int)$this->GetGlobalOption(self::OPT_PRFX . 'items-per-page', 10);
 		}
 		return $this->_perpage;
 	}
@@ -196,6 +219,8 @@ class WSAL_Settings {
 			case 'view':
 				$allowed = $this->GetAllowedPluginViewers();
 				break;
+			default:
+				throw new Exception('Unknown action "'.$action.'".');
 		}
 		
 		$check = array_merge(
