@@ -261,7 +261,8 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return !is_null($item->GetSourceIP()) ? esc_html($item->GetSourceIP()) : '<i>unknown</i>';
 			case 'site':
 				$info = get_blog_details($item->site_id, true);
-				return '<a href="' . esc_attr($info->siteurl) . '">' . esc_html($info->blogname) . '</a>';
+				return !$info ? ('Unknown Site '.$item->site_id)
+					: ('<a href="' . esc_attr($info->siteurl) . '">' . esc_html($info->blogname) . '</a>');
 			case 'mesg':
 				return $item->GetMessage(array($this, 'meta_formatter'));
 			case 'data':
