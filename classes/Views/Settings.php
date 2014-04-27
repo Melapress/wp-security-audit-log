@@ -29,7 +29,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	
 	protected function GetTokenType($token){
 		$users = array();
-		foreach(get_users('fields[]=user_login') as $obj)
+		foreach(get_users('blog_id=0&fields[]=user_login') as $obj)
 			$users[] = $obj->user_login;
 		$roles = array_keys(get_editable_roles());
 		
