@@ -181,7 +181,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		</div><?php
 		
 		// show site alerts widget
-		if($this->is_main_blog()){
+		if($this->is_multisite() && $this->is_main_blog()){
 			// TODO should I check wp_is_large_network()?
 			$curr = $this->get_view_site_id();
 			$sites = wp_get_sites();
@@ -211,7 +211,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			'user' => 'Username',
 			'scip' => 'Source IP',
 		);
-		if($this->is_main_blog() && !$this->is_specific_view()){
+		if($this->is_multisite() && $this->is_main_blog() && !$this->is_specific_view()){
 			$cols['site'] = 'Site';
 		}
 		$cols['mesg'] = 'Message';
@@ -303,6 +303,10 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			default:
 				return '<strong>' . esc_html($value) . '</strong>';
 		}
+	}
+	
+	protected function is_multisite(){
+		return function_exists('is_multisite') && is_multisite();
 	}
 	
 	protected function is_main_blog(){
