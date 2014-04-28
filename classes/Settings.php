@@ -213,11 +213,12 @@ class WSAL_Settings {
 		$allowed = array();
 		
 		switch($action){
-			case 'edit':
-				$allowed = $this->GetAllowedPluginEditors();
-				break;
 			case 'view':
 				$allowed = $this->GetAllowedPluginViewers();
+				break;
+			case 'edit':
+				$allowed = $this->GetAllowedPluginEditors();
+				$allowed = array_merge($allowed, $this->GetAllowedPluginViewers());
 				break;
 			default:
 				throw new Exception('Unknown action "'.$action.'".');
