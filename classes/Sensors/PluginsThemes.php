@@ -3,8 +3,17 @@
 class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
+		add_action('admin_init', array($this, 'EventAdminInit'));
 		if(is_admin())add_action('shutdown', array($this, 'EventAdminShutdown'));
 		add_action('switch_theme', array($this, 'EventThemeActivated'));
+	}
+	
+	protected $old_themes;
+	protected $old_plugins;
+	
+	public function EventAdminInit(){
+		$this->old_themes = wp_get_themes();
+		$this->old_plugins = get_plugins();
 	}
 	
 	public function EventAdminShutdown(){
@@ -12,25 +21,25 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$action = isset($_REQUEST['action2']) ? $_REQUEST['action2'] : $action;
 		
 		// install plugin
-        if(($action=='install-plugin' || $action=='upload-plugin') && !empty($_GET['plugin'])){
-			$newPlugin = null;
-			$pluginName = $_GET['plugin'];
-			foreach(get_plugins() as $pluginFile => $plugin){
-				if(strtolower(str_replace(' ', '-', $plugin['Name'])) == $pluginName){
-					$newPlugin = $plugin;
-					break;
-				}
-			}
-			$pluginPath = $newPlugin ? plugin_dir_path(WP_PLUGIN_DIR . '/' . $pluginFile) : '';
+        if(($action=='install-plugin' || $action=='upload-plugin')){
+			$newPlugin = array_diff(array_keys(get_plugins()), array_keys($this->old_plugins));
+			if(count($newPlugin) != 1)
+				return $this->LogError(
+						'Expected exactly one new plugin but found ' . count($newPlugin),
+						array('NewPlugin' => $newPlugin, 'OldPlugins' => $this->old_plugins, 'NewPlugins' => get_plugins())
+					);
+			$newPluginPath = $newPlugin[0];
+			$newPlugin = get_plugins();
+			$newPlugin = $newPlugin[$newPluginPath];
+			$newPluginPath = plugin_dir_path(WP_PLUGIN_DIR . '/' . $newPluginPath[0]);
 			$this->plugin->alerts->Trigger(5000, array(
-				'PluginName' => $pluginName,
-				'PluginPath' => $pluginPath,
-				'PluginData' => (object)array(
+				'NewPlugin' => (object)array(
 					'Name' => $newPlugin['Name'],
 					'PluginURI' => $newPlugin['PluginURI'],
 					'Version' => $newPlugin['Version'],
 					'Author' => $newPlugin['Author'],
 					'Network' => $newPlugin['Network'] ? 'True' : 'False',
+					'plugin_dir_path' => $newPluginPath,
 				),
 			));
         }
@@ -82,7 +91,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// uninstall plugin
-        if(in_array($action, array('delete-selected'))){
+        if(in_array($action, array('delete-selected')) && basename($_SERVER['SCRIPT_NAME']) == 'plugins.php'){
 			if(!isset($_REQUEST['verify-delete'])){
 				
 				// first step, before user approves deletion
@@ -130,15 +139,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// install theme
-        if($action=='install-theme' && !empty($_GET['theme'])){
-			$themeName = $_GET['theme'];
-			$newTheme = null;
-			foreach(wp_get_themes() as $theme){
-				if(strtolower(str_replace(' ', '-', $theme->Name)) == $themeName){
-					$newTheme = $theme;
-					break;
-				}
-			}
+        if($action=='install-theme' || $action=='upload-theme'){
+			$newTheme = array_diff(wp_get_themes(), $this->old_themes);
+			if(count($newTheme) != 1)
+				return $this->LogError(
+						'Expected exactly one new theme but found ' . count($newTheme),
+						array('OldThemes' => $this->old_themes, 'NewThemes' => wp_get_themes())
+					);
+			$newTheme = array_shift($newTheme);
 			$this->plugin->alerts->Trigger(5005, array(
 				'NewTheme' => (object)array(
 					'Name' => $newTheme->Name,
@@ -149,6 +157,22 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					'get_template_directory' => $newTheme->get_template_directory(),
 				),
 			));
+		}
+		
+		// uninstall theme
+        if(in_array($action, array('delete-selected')) && basename($_SERVER['SCRIPT_NAME']) == 'themes.php'){
+			if(!isset($_REQUEST['verify-delete'])){
+				
+				// first step, before user approves deletion
+				// TODO store plugin data in session here
+			}else{
+				// second step, after deletion approval
+				// TODO use plugin data from session
+				/*foreach($_REQUEST['checked'] as $themeFile){
+					
+				}*/
+
+			}
 		}
 	}
 	

@@ -106,7 +106,7 @@ WpSecurityAuditLog::GetInstance()
 			array(4007, E_CRITICAL, 'A user was deleted by another user', 'Deleted User %TargetUserData->Username% with the role of %TargetUserData->Roles%'),
 		),
 		'Plugins & Themes' => array(
-			array(5000, E_CRITICAL, 'User installed a plugin', 'Installed the plugin %PluginName% in %PluginPath%'),
+			array(5000, E_CRITICAL, 'User installed a plugin', 'Installed the plugin %NewPlugin->Name% in %NewPlugin->plugin_dir_path%'),
 			array(5001, E_CRITICAL, 'User activated a WordPress plugin', 'Activated the plugin %PluginData->Name% installed in %PluginFile%'),
 			array(5002, E_CRITICAL, 'User deactivated a WordPress plugin', 'Deactivated the plugin %PluginData->Name% installed in %PluginFile%'),
 			array(5003, E_CRITICAL, 'User uninstalled a plugin', 'Uninstalled the plugin %PluginData->Name% which was installed in %PluginFile%'),
