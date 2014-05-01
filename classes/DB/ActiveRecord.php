@@ -84,6 +84,24 @@ abstract class WSAL_DB_ActiveRecord {
 	}
 	
 	/**
+	 * A wrapper for JSON encoding that fixes potential issues.
+	 * @param mixed $data The data to encode.
+	 * @return string JSON string.
+	 */
+	protected function _JsonEncode($data){
+		return @json_encode($data);
+	}
+	
+	/**
+	 * A wrapper for JSON encoding that fixes potential issues.
+	 * @param string $data The JSON string to decode.
+	 * @return mixed Decoded data.
+	 */
+	protected function _JsonDecode($data){
+		return @json_decode($data);
+	}
+	
+	/**
 	 * @return string Returns table name.
 	 */
 	public function GetTable(){
@@ -150,7 +168,7 @@ abstract class WSAL_DB_ActiveRecord {
 			if(is_int($copy->$key))$deffmt = '%d';
 			if(is_float($copy->$key))$deffmt = '%f';
 			if(is_array($copy->$key) || is_object($copy->$key)){
-				$data[$key] = @json_encode($val);
+				$data[$key] = $this->_JsonEncode($val);
 			}else{
 				$data[$key] = $val;
 			}
@@ -199,7 +217,7 @@ abstract class WSAL_DB_ActiveRecord {
 				switch(true){
 					case is_array($copy->$key):
 					case is_object($copy->$key):
-						$this->$key = json_decode($val);
+						$this->$key = $this->_JsonDecode($val);
 						break;
 					case is_int($copy->$key):
 						$this->$key = (int)$val;
