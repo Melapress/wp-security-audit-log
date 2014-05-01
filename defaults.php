@@ -103,7 +103,7 @@ WpSecurityAuditLog::GetInstance()
 			array(4004, E_CRITICAL, 'A user changed another user\'s password', 'Changed the password for user %TargetUserData->Username% with the role of %TargetUserData->Roles%'),
 			array(4005, E_NOTICE, 'User changed his or her email address', 'Changed the email address from %OldEmail% to %NewEmail%'),
 			array(4006, E_NOTICE, 'A user changed another user\'s email address', 'Changed the email address of user account %TargetUsername% from %OldEmail% to %NewEmail%'),
-			array(4007, E_CRITICAL, 'A user was deleted by another user', 'Deleted User %TargetUserData->Username% with the role of %UserData->Roles%'),
+			array(4007, E_CRITICAL, 'A user was deleted by another user', 'Deleted User %TargetUserData->Username% with the role of %TargetUserData->Roles%'),
 		),
 		'Plugins & Themes' => array(
 			array(5000, E_CRITICAL, 'User installed a plugin', 'Installed the plugin %PluginName% in %PluginPath%'),
