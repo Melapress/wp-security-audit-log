@@ -200,7 +200,8 @@ class WSAL_Settings {
 	 * @return boolean If user has access or not.
 	 */
 	public function CurrentUserCan($action){
-		return $this->UserCan(wp_get_current_user(), $action);
+		return current_user_can('manage_options') // I don't like this...
+			|| $this->UserCan(wp_get_current_user(), $action);
 	}
 	
 	/**

@@ -23,11 +23,26 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 		return 5;
 	}
 	
+	protected $exec_errors = array();
+	protected $exec_result = null;
+	
+	public function HandleError($code, $message, $filename = 'unknown', $lineno = 0){
+		$this->exec_errors[] = new ErrorException($message, $code, 0, $filename, $lineno);
+		return true;
+	}
+	
 	protected function Execute($code){
 		try {
-			return eval($code);
+			error_reporting(-1);
+			ini_set('display_errors', false);
+			if(function_exists('xdebug_disable'))xdebug_disable();
+			set_error_handler(array($this, 'HandleError'));
+			$this->exec_result = eval($code);
+			if(($e = error_get_last()) && !count($this->exec_errors))
+				$this->HandleError($e['type'], $e['message'], $e['file'], $e['line']);
+			restore_error_handler();
 		} catch (Exception $ex) {
-			return $ex;
+			$this->exec_errors[] = $ex;
 		}
 	}
 	
@@ -46,9 +61,26 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 		echo '.nice_r a { overflow: visible; }';
 		echo '</style>';
 		echo '</head><body>';
-		$result = $this->Execute(stripslashes_deep($_REQUEST['code']));
-		$result = new WSAL_Nicer($result);
-		$result->render();
+		
+		$this->Execute(stripslashes_deep($_REQUEST['code']));
+		
+		switch(true){
+			case !count($this->exec_errors) && isset($this->exec_result):
+				$result = $this->exec_result;
+				break;
+			case count($this->exec_errors) && isset($this->exec_result):
+				$result = array('Result' => $this->exec_result, 'Errors' => $this->exec_errors);
+				break;
+			case count($this->exec_errors) && !isset($this->exec_result):
+				$result = $this->exec_errors;
+				break;
+		}
+		
+		if(isset($result)){
+			$result = new WSAL_Nicer($result);
+			$result->render();
+		}else echo 'FATAL ERROR';
+		
 		echo '</body></html>';
 		die;
 	}

@@ -186,8 +186,8 @@ class WpSecurityAuditLog {
 			get_option('WPPH_PLUGIN_ALLOW_ACCESS')
 		);
 		$s = get_option('wpph_plugin_settings');
-		$this->settings->SetPruningDate(($s->daysToKeep ? $s->daysToKeep : 30) . ' days');
-		$this->settings->SetPruningLimit(min($s->eventsToKeep, 1));
+		//$this->settings->SetPruningDate(($s->daysToKeep ? $s->daysToKeep : 30) . ' days');
+		//$this->settings->SetPruningLimit(min($s->eventsToKeep, 1));
 		$this->settings->SetViewPerPage($s->showEventsViewList);
 		$this->settings->SetViewPerPage($s->showDW);
 	}
