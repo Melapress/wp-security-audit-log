@@ -73,14 +73,17 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         if (empty($post->post_type)) return;
         if ($post->post_type == 'revision') return;
 		
+		$original = isset($_POST['original_post_status']) ? $_POST['original_post_status'] : '';
+		
 		WSAL_Sensors_Request::SetVars(array(
 			'$newStatus' => $newStatus,
 			'$oldStatus' => $oldStatus,
+			'$original' => $original,
 		));
 		
         // run checks
 		if($this->_OldPost){
-			if ($oldStatus == 'auto-draft'){
+			if ($oldStatus == 'auto-draft' || $original == 'auto-draft'){
 				
 				// Handle create post events
 				$this->CheckPostCreation($this->_OldPost, $post);

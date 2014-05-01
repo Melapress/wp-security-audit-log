@@ -19,6 +19,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	public function EventAdminShutdown(){
 		$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 		$action = isset($_REQUEST['action2']) ? $_REQUEST['action2'] : $action;
+		$actype = basename($_SERVER['SCRIPT_NAME'], '.php');
+		$is_themes = $actype == 'themes';
+		$is_plugins = $actype == 'plugins';
 		
 		// install plugin
         if(($action=='install-plugin' || $action=='upload-plugin')){
@@ -45,7 +48,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
         }
 		
 		// activate plugin
-        if(in_array($action, array('activate', 'activate-selected'))){
+        if($is_plugins && in_array($action, array('activate', 'activate-selected'))){
 			if(isset($_REQUEST['plugin'])){
 				if(!isset($_REQUEST['checked']))
 					$_REQUEST['checked'] = array();
@@ -68,7 +71,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// deactivate plugin
-        if(in_array($action, array('deactivate', 'deactivate-selected'))){
+        if($is_plugins && in_array($action, array('deactivate', 'deactivate-selected'))){
 			if(isset($_REQUEST['plugin'])){
 				if(!isset($_REQUEST['checked']))
 					$_REQUEST['checked'] = array();
@@ -91,7 +94,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// uninstall plugin
-        if(in_array($action, array('delete-selected')) && basename($_SERVER['SCRIPT_NAME']) == 'plugins.php'){
+        if($is_plugins && in_array($action, array('delete-selected'))){
 			if(!isset($_REQUEST['verify-delete'])){
 				
 				// first step, before user approves deletion
@@ -160,7 +163,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// uninstall theme
-        if(in_array($action, array('delete-selected')) && basename($_SERVER['SCRIPT_NAME']) == 'themes.php'){
+        if($is_themes && in_array($action, array('delete-selected'))){
 			if(!isset($_REQUEST['verify-delete'])){
 				
 				// first step, before user approves deletion
@@ -184,6 +187,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				break;
 			}
 		}
+		if($newTheme == null)
+			return $this->LogError(
+					'Could not locate theme named "'.$newTheme.'".',
+					array('ThemeName' => $themeName, 'Themes' => wp_get_themes())
+				);
 		$this->plugin->alerts->Trigger(5006, array(
 			'NewTheme' => (object)array(
 				'Name' => $newTheme->Name,
