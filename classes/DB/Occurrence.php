@@ -125,9 +125,10 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	 * @param string $afterMeta (Optional) Some text to put after meta values.
 	 * @return string The expanded message.
 	 */
-	protected function GetFormattedMesg($mesg, $metaFormatter = null){
+	protected function GetFormattedMesg($origMesg, $metaFormatter = null){
 		// tokenize message with regex
-		$mesg = preg_split('/(%.*?%)/', $mesg, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$mesg = preg_split('/(%.*?%)/', $origMesg, -1, PREG_SPLIT_DELIM_CAPTURE);
+		if(!is_array($mesg))return $origMesg;
 		// handle tokenized message
 		foreach($mesg as $i=>$token){
 			// handle escaped percent sign
