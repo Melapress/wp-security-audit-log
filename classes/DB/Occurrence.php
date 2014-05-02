@@ -127,7 +127,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	 */
 	protected function GetFormattedMesg($origMesg, $metaFormatter = null){
 		// tokenize message with regex
-		$mesg = preg_split('/(%.*?%)/', $origMesg, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$mesg = preg_split('/(%.*?%)/', (string)$origMesg, -1, PREG_SPLIT_DELIM_CAPTURE);
 		if(!is_array($mesg))return $origMesg;
 		// handle tokenized message
 		foreach($mesg as $i=>$token){
