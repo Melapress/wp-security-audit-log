@@ -138,7 +138,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 			// handle complex expressions
 			if(substr($token, 0, 1) == '%' && substr($token, -1, 1) == '%'){
 				$mesg[$i] = $this->GetMetaExprValue(substr($token, 1, -1));
-				if($metaFormatter)$mesg[$i] = call_user_func_array($metaFormatter, $token, $mesg[$i]);
+				if($metaFormatter)$mesg[$i] = call_user_func($metaFormatter, $token, $mesg[$i]);
 			}
 		}
 		// compact message and return
