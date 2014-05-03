@@ -3,10 +3,23 @@
 class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
+		add_action('admin_init', array($this, 'EventAdminInit'));
 		add_action('user_register', array($this, 'EventUserRegister'));
         add_action('edit_user_profile_update', array($this, 'EventUserChanged'));
         add_action('personal_options_update', array($this, 'EventUserChanged'));
         add_action('delete_user', array($this, 'EventUserDeleted'));
+	}
+	
+	protected $old_superadmins;
+	
+	protected function IsMultisite(){
+		return function_exists('is_multisite') && is_multisite();
+	}
+	
+	public function EventAdminInit(){
+		if($this->IsMultisite()){
+			$this->old_superadmins = get_super_admins();
+		}
 	}
 	
 	public function EventUserRegister($user_id){
@@ -69,9 +82,13 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
             }
         }
 		
-		if(function_exists('is_multisite') && is_multisite()){
+		if($this->IsMultisite()){
+			$username = $user->user_login;
+			$old_superadmins = $this->old_superadmins;
+			$new_superadmins = get_super_admins();
+			
 			// super admin enabled
-			if(isset($_POST['super_admin']) && !empty($_POST['super_admin'])){
+			if(!in_array($username, $old_superadmins) && in_array($username, $new_superadmins)){
 				$this->plugin->alerts->Trigger(4008, array(
 					'TargetUserID' => $user_id,
 					'TargetUsername' => $user->user_login,
@@ -79,15 +96,11 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			}
 
 			// super admin disabled
-			if(!isset($_POST['super_admin']) || empty($_POST['super_admin'])){
-				foreach(get_super_admins() as $admin){
-					if($user->user_login == $admin){
-						$this->plugin->alerts->Trigger(4009, array(
-							'TargetUserID' => $user_id,
-							'TargetUsername' => $user->user_login,
-						));
-					}
-				}
+			if(in_array($username, $old_superadmins) && !in_array($username, $new_superadmins)){
+				$this->plugin->alerts->Trigger(4009, array(
+					'TargetUserID' => $user_id,
+					'TargetUsername' => $user->user_login,
+				));
 			}
 		}
 	}
