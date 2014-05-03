@@ -69,22 +69,24 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
             }
         }
 		
-		// super admin enabled
-        if(isset($_POST['super_admin']) && !empty($_POST['super_admin'])){
-			$this->plugin->alerts->Trigger(4008, array(
-				'TargetUserID' => $user_id,
-				'TargetUsername' => $user->user_login,
-			));
-		}
-		
-		// super admin disabled
-        if(!isset($_POST['super_admin']) || empty($_POST['super_admin'])){
-			foreach(get_super_admins() as $admin){
-				if($user->user_login == $admin){
-					$this->plugin->alerts->Trigger(4009, array(
-						'TargetUserID' => $user_id,
-						'TargetUsername' => $user->user_login,
-					));
+		if(function_exists('is_multisite') && is_multisite()){
+			// super admin enabled
+			if(isset($_POST['super_admin']) && !empty($_POST['super_admin'])){
+				$this->plugin->alerts->Trigger(4008, array(
+					'TargetUserID' => $user_id,
+					'TargetUsername' => $user->user_login,
+				));
+			}
+
+			// super admin disabled
+			if(!isset($_POST['super_admin']) || empty($_POST['super_admin'])){
+				foreach(get_super_admins() as $admin){
+					if($user->user_login == $admin){
+						$this->plugin->alerts->Trigger(4009, array(
+							'TargetUserID' => $user_id,
+							'TargetUsername' => $user->user_login,
+						));
+					}
 				}
 			}
 		}
