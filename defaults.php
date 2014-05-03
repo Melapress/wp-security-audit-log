@@ -60,7 +60,7 @@ WpSecurityAuditLog::GetInstance()
 		),
 		'Pages' => array(
 			array(2004, E_NOTICE, 'User created a new WordPress page and saved it as draft', 'Created a new page called %PostTitle%. Page ID is %PostID%'),
-			array(2005, E_NOTICE, 'User published a WorPress page', 'Published a page called %PostTitle%. Page URL is %PageUrl%'),
+			array(2005, E_NOTICE, 'User published a WorPress page', 'Published a page called %PostTitle%. Page URL is %PostUrl%'),
 			array(2006, E_NOTICE, 'User modified a published WordPress page', 'Modified the published page %PostTitle%. Page URL is %PostUrl%'),
 			array(2007, E_NOTICE, 'User modified a draft WordPress page', 'Modified the draft page %PostTitle%. page ID is %PostID%'),
 			array(2009, E_NOTICE, 'User permanently deleted a page from the trash', 'Deleted the page %PostTitle%. Page ID is %PostID%'),
