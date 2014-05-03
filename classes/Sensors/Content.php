@@ -178,7 +178,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	
 	public function EventPostDeleted($post_id){
 		$post = get_post($post_id);
-		if(in_array($post->post_type, array('attachment', 'revision'))){ // ignore attachments and revisions
+		if(!in_array($post->post_type, array('attachment', 'revision'))){ // ignore attachments and revisions
 			$event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
 			$this->plugin->alerts->Trigger($event, array(
 				'PostID' => $post->ID,
