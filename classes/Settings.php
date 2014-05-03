@@ -133,12 +133,17 @@ class WSAL_Settings {
 	
 	protected $_disabled = null;
 	
+	public function GetDefaultDisabledAlerts(){
+		return array(0000, 0003, 0005);
+	}
+	
 	/**
 	 * @return array IDs of disabled alerts.
 	 */
 	public function GetDisabledAlerts(){
 		if(!$this->_disabled){
-			$this->_disabled = $this->GetGlobalOption(self::OPT_PRFX . 'disabled-alerts', ',');
+			$this->_disabled = implode(',', $this->GetDefaultDisabledAlerts());
+			$this->_disabled = $this->GetGlobalOption(self::OPT_PRFX . 'disabled-alerts', $this->_disabled);
 			$this->_disabled = explode(',', $this->_disabled);
 			$this->_disabled = array_map('intval', $this->_disabled);
 		}
