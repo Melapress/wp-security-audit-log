@@ -153,8 +153,9 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		if(!isset($this->_cachedmessage)){
 			// get correct message entry
 			if($this->is_migrated){
-				$this->_cachedmessage = $this->GetMetaValue('MigratedMesg');
-			}else{
+				$this->_cachedmessage = $this->GetMetaValue('MigratedMesg', false);
+			}
+			if(!$this->is_migrated || !$this->_cachedmessage){
 				$this->_cachedmessage = $this->GetAlert()->mesg;
 			}
 			// fill variables in message
