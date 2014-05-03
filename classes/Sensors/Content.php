@@ -83,7 +83,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		
         // run checks
 		if($this->_OldPost){
-			if ($oldStatus == 'auto-draft' || $original == 'auto-draft'){
+			if ($oldStatus == 'draft' || $oldStatus == 'auto-draft' || $original == 'auto-draft'){
 				
 				// Handle create post events
 				$this->CheckPostCreation($this->_OldPost, $post);
