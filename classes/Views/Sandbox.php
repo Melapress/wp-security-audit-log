@@ -37,7 +37,9 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 			ini_set('display_errors', false);
 			if(function_exists('xdebug_disable'))xdebug_disable();
 			set_error_handler(array($this, 'HandleError'));
+			ob_start();
 			$this->exec_result = eval($code);
+			ob_end_clean();
 			if(($e = error_get_last()) && !count($this->exec_errors))
 				$this->HandleError($e['type'], $e['message'], $e['file'], $e['line']);
 			restore_error_handler();
