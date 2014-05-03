@@ -83,7 +83,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		
         // run checks
 		if($this->_OldPost){
-			if ($oldStatus == 'draft' || $oldStatus == 'auto-draft' || $original == 'auto-draft'){
+			if ($oldStatus == 'auto-draft' || $original == 'auto-draft'){
 				
 				// Handle create post events
 				$this->CheckPostCreation($this->_OldPost, $post);
@@ -211,6 +211,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	protected function CheckDateChange($oldpost, $newpost){
         $from = strtotime($oldpost->post_date);
         $to = strtotime($newpost->post_date);
+		if($oldpost->post_status == 'draft')return;
         if($from != $to){
 			$event = $this->GetEventTypeForPostType($oldpost, 2027, 2028, 2041);
 			$this->plugin->alerts->Trigger($event, array(
