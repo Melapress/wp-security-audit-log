@@ -25,7 +25,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		
 		// install plugin
         if(($action=='install-plugin' || $action=='upload-plugin')){
-			$newPlugin = array_diff(array_keys(get_plugins()), array_keys($this->old_plugins));
+			$newPlugin = array_values(array_diff(array_keys(get_plugins()), array_keys($this->old_plugins)));
 			if(count($newPlugin) != 1)
 				return $this->LogError(
 						'Expected exactly one new plugin but found ' . count($newPlugin),
