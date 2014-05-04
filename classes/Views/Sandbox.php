@@ -123,11 +123,14 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	}
 	
 	public function Render(){
+		$code = 'return wp_get_current_user();';
 		?><form id="sandbox" method="post" target="execframe" action="<?php echo admin_url('admin-ajax.php'); ?>">
 			<input type="hidden" name="action" value="AjaxExecute" />
-			<div>
-				<textarea name="code" style="width: 49%; height: 200px; font: 12px Consolas;">return wp_get_current_user();</textarea>
-				<iframe name="execframe" style="width: 49%; height: 200px; border: 1px solid #ddd; background: #FFF; position: absolute; right: 16px; box-sizing: border-box;"></iframe>
+			<div style="resize: vertical; height: 400px; overflow: auto; margin: 16px 0; padding-bottom: 12px;">
+				<div style="overflow: hidden; height: 100%; position: relative; box-sizing:">
+					<textarea name="code" style="resize: none; width: 49%; height: 100%; font: 12px Consolas; box-sizing: border-box;"><?php echo esc_html($code); ?></textarea>
+					<iframe name="execframe" style="resize: none; width: 49%; height: 100%; border: 1px solid #ddd; background: #FFF; position: absolute; right: 0; box-sizing: border-box;"></iframe>
+				</div>
 			</div>
 			<input style="" type="submit" name="submit" id="submit" class="button button-primary" value="Execute">
 		</form><?php
