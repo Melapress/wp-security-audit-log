@@ -43,9 +43,9 @@ function WsalAuditLogInit(WsalData){
 			});
 		});
 	
-}
-
-function WsalSsasChange(value){
-	jQuery('#wsal-cbid').val(value);
-	jQuery('#audit-log-viewer').submit();
+	jQuery('select.wsal-ssas').change(function(){
+		jQuery('select.wsal-ssas').attr('disabled', true);
+		jQuery('#wsal-cbid').val(this.value);
+		jQuery('#audit-log-viewer').submit();
+	});
 }

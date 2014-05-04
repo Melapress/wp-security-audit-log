@@ -186,7 +186,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			$curr = $this->get_view_site_id();
 			$sites = wp_get_sites();
 			?><div class="wsal-ssa wsal-ssa-<?php echo $which; ?>">
-				<select class="wsal-ssas" onchange="WsalSsasChange(this.value)">
+				<select class="wsal-ssas">
 					<option value="0"><?php _e('All Sites'); ?></option>
 					<?php foreach($sites as $site){ ?>
 						<?php $info = get_blog_details($site['blog_id'], true); ?>
