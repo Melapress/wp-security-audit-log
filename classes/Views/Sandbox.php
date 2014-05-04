@@ -129,11 +129,22 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 			<div style="resize: vertical; height: 400px; overflow: auto; margin: 16px 0; padding-bottom: 12px;">
 				<div style="overflow: hidden; height: 100%; position: relative; box-sizing:">
 					<textarea name="code" style="resize: none; width: 49%; height: 100%; font: 12px Consolas; box-sizing: border-box;"><?php echo esc_html($code); ?></textarea>
-					<iframe name="execframe" style="resize: none; width: 49%; height: 100%; border: 1px solid #ddd; background: #FFF; position: absolute; right: 0; box-sizing: border-box;"></iframe>
+					<iframe id="sandbox-result" name="execframe" style="resize: none; width: 49%; height: 100%; border: 1px solid #ddd; background: #FFF; position: absolute; right: 0; box-sizing: border-box;"></iframe>
 				</div>
 			</div>
-			<input style="" type="submit" name="submit" id="submit" class="button button-primary" value="Execute">
-		</form><?php
+			<input type="submit" name="submit" id="sandbox-submit" class="button button-primary" value="Execute">
+			<img id="sandbox-loader" style="margin: 6px 12px; display: none;" src="http://cdnjs.cloudflare.com/ajax/libs/jstree/3.0.0-beta10/themes/default/throbber.gif" width="16" height="16" alt="Loading..."/>
+		</form><script type="text/javascript">
+			jQuery(document).ready(function(){
+				jQuery('#sandbox').submit(function(){
+					jQuery('#sandbox-loader').show();
+				});
+				jQuery('#sandbox-result').on('load error', function(){
+					jQuery('#sandbox-loader').hide();
+				});
+				jQuery('#sandbox').submit();
+			});
+		</script><?php
 	}
 	
 }
