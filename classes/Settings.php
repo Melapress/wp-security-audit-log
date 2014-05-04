@@ -205,8 +205,24 @@ class WSAL_Settings {
 	 * @return boolean If user has access or not.
 	 */
 	public function CurrentUserCan($action){
-		return current_user_can('manage_options') // I don't like this...
-			|| $this->UserCan(wp_get_current_user(), $action);
+		return $this->UserCan(wp_get_current_user(), $action);
+	}
+	
+	/**
+	 * @return string[] List of superadmin usernames.
+	 */
+	protected function GetSuperAdmins(){
+		return $this->IsMultisite() ? get_super_admins() : array();
+	}
+	
+	/**
+	 * @return string[] List of admin usernames.
+	 */
+	protected function GetAdmins(){
+		$result = array();
+		$query = 'blog_id=0&role=administrator&fields[]=user_login';
+		foreach (get_users($query) as $user) $result[] = $user->user_login;
+		return $result;
 	}
 	
 	/**
@@ -222,9 +238,14 @@ class WSAL_Settings {
 			case 'view':
 				$allowed = $this->GetAllowedPluginViewers();
 				$allowed = array_merge($allowed, $this->GetAllowedPluginEditors());
+				$allowed = array_merge($allowed, $this->GetSuperAdmins());
+				$allowed = array_merge($allowed, $this->GetAdmins());
 				break;
 			case 'edit':
 				$allowed = $this->GetAllowedPluginEditors();
+				$allowed = array_merge($allowed, $this->IsMultisite() ?
+						$this->GetSuperAdmins() : $this->GetAdmins()
+					);
 				break;
 			default:
 				throw new Exception('Unknown action "'.$action.'".');
