@@ -17,22 +17,30 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	}
 	
 	public function EventLoginFailure($username){
-		$occ = new WSAL_DB_Occurrence();
-		
 		list($y, $m, $d) = explode('-', date('Y-m-d'));
-		$occ->Load('alert_id = %d AND site_id = %d'
-				. ' AND (created_on BETWEEN %d AND %d)',
-				array(
-					1002,
-					(function_exists('get_current_blog_id') ? get_current_blog_id() : 0),
-					mktime(0, 0, 0, $m, $d, $y),
-					mktime(0, 0, 0, $m, $d + 1, $y) - 1,
-				));
+		$occ = WSAL_DB_Occurrence::LoadMultiQuery('
+			SELECT * FROM `wp_wsal_occurrences` 
+			WHERE alert_id = %d AND site_id = %d
+				AND (created_on BETWEEN %d AND %d)
+				AND id IN (
+					SELECT occurrence_id as id
+					FROM wp_wsal_metadata
+					WHERE (name = "ClientIP" AND value = %s)
+					   OR (name = "Username" AND value = %s)
+					GROUP BY occurrence_id
+					HAVING COUNT(*) = 2
+				)
+		', array(
+			1002,
+			(function_exists('get_current_blog_id') ? get_current_blog_id() : 0),
+			mktime(0, 0, 0, $m, $d, $y),
+			mktime(0, 0, 0, $m, $d + 1, $y) - 1,
+			json_encode(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''),
+			json_encode($username),
+		));
+		$occ = count($occ) ? $occ[0] : null;
 		
-		$curip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
-		if($occ->IsLoaded()
-		&& $occ->GetMetaValue('ClientIP') === $curip
-		&& $occ->GetMetaValue('Username') === $username){
+		if($occ && $occ->IsLoaded()){
 			// update existing record
 			$occ->SetMetaValue('Attempts',
 				$occ->GetMetaValue('Attempts', 0) + 1
