@@ -30,22 +30,19 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				));
 		
 		$curip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
-		if($occ->IsLoaded() && $occ->GetMetaValue('ClientIP') === $curip){
+		if($occ->IsLoaded()
+		&& $occ->GetMetaValue('ClientIP') === $curip
+		&& $occ->GetMetaValue('Username') === $username){
 			// update existing record
-			$meta = $occ->GetMetaArray();
-			if(!isset($meta['Usernames']))
-				$meta['Usernames'] = array();
-			$meta['Usernames'][] = $username;
-			if(!isset($meta['Attempts']))
-				$meta['Attempts'] = 0;
-			$meta['Attempts'] = $meta['Attempts'] + 1;
-			$occ->SetMeta($meta);
+			$occ->SetMetaValue('Attempts',
+				$occ->GetMetaValue('Attempts', 0) + 1
+			);
 			$occ->created_on = current_time('timestamp');
 			$occ->Save();
 		}else{
 			// create a new record
 			$this->plugin->alerts->Trigger(1002, array(
-				'Usernames' => array($username),
+				'Username' => $username,
 				'Attempts' => 1
 			));
 		}
