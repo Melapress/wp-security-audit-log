@@ -84,11 +84,10 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		
 		if($this->IsMultisite()){
 			$username = $user->user_login;
-			$old_superadmins = $this->old_superadmins;
-			$new_superadmins = get_super_admins();
+			$enabled = isset($_REQUEST['super_admin']);
 			
 			// super admin enabled
-			if(!in_array($username, $old_superadmins) && in_array($username, $new_superadmins)){
+			if($enabled && !in_array($username, $this->old_superadmins)){
 				$this->plugin->alerts->Trigger(4008, array(
 					'TargetUserID' => $user_id,
 					'TargetUsername' => $user->user_login,
@@ -96,7 +95,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			}
 
 			// super admin disabled
-			if(in_array($username, $old_superadmins) && !in_array($username, $new_superadmins)){
+			if(!$enabled && in_array($username, $this->old_superadmins)){
 				$this->plugin->alerts->Trigger(4009, array(
 					'TargetUserID' => $user_id,
 					'TargetUsername' => $user->user_login,
