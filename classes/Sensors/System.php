@@ -24,10 +24,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		
 		$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 		$actype = basename($_SERVER['SCRIPT_NAME'], '.php');
-		$is_option_page = $actype == 'options-general';
+		$is_option_page = $actype == 'options';
 		$is_network_settings = $actype == 'settings';
 		$is_permalink_page = $actype == 'options-permalink';
-			
+		
 		if($is_option_page && (get_option('users_can_register') xor isset($_POST['users_can_register']))){
 			$old = get_option('users_can_register') ? 'Enabled' : 'Disabled';
 			$new = isset($_POST['users_can_register']) ? 'Enabled' : 'Disabled';
