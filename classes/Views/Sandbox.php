@@ -86,8 +86,6 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 		echo '.nice_r { position: absolute; padding: 8px; }';
 		echo '.nice_r a { overflow: visible; }';
 		echo '.faerror { font: 14px Arial; background: #FCC; text-align: center; padding: 32px; }';
-		echo '.einfo { list-style: none; margin: 0; font: 10px Tahoma; position: fixed; bottom: 0; left: 0; right: 0; background: #EEE; padding: 2px; border-top: 3px solid #FAFAFA; }';
-		echo '.einfo li { float: left; padding-right: 4px; border-right: 1px solid #CCC; margin-right: 4px; }';
 		echo '</style>';
 		echo '</head><body>';
 		
@@ -100,12 +98,15 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 		}else echo '<div class="faerror">FATAL ERROR</div>';
 		
 		if(count($this->exec_info)){
-			echo '<ul class="einfo">';
-			foreach($this->exec_info as $key => $val){
-				if($key && $key[0] != '_')
-					echo '<li>'.esc_html($key).': '.esc_html($val).'</li>';
-			}
-			echo '</ul>';
+			?><script type="text/javascript">
+				window.parent.SandboxUpdateState(<?php
+					$res = array();
+					foreach($this->exec_info as $key => $val)
+						if($key && $key[0] != '_')
+							$res[$key] = $val;
+					echo json_encode($res);
+				?>);
+			</script><?php
 		}
 		
 		echo '</body></html>';
@@ -126,24 +127,81 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 		$code = 'return wp_get_current_user();';
 		?><form id="sandbox" method="post" target="execframe" action="<?php echo admin_url('admin-ajax.php'); ?>">
 			<input type="hidden" name="action" value="AjaxExecute" />
-			<div style="resize: vertical; height: 400px; overflow: auto; margin: 16px 0; padding-bottom: 12px;">
-				<div style="overflow: hidden; height: 100%; position: relative; box-sizing:">
-					<textarea name="code" style="resize: none; width: 49%; height: 100%; font: 12px Consolas; box-sizing: border-box;"><?php echo esc_html($code); ?></textarea>
-					<iframe id="sandbox-result" name="execframe" style="resize: none; width: 49%; height: 100%; border: 1px solid #ddd; background: #FFF; position: absolute; right: 0; box-sizing: border-box;"></iframe>
+			<div id="sandbox-wrap-wrap">
+				<div id="sandbox-wrap">
+					<textarea name="code" id="sandbox-code"><?php echo esc_html($code); ?></textarea>
+					<iframe id="sandbox-result" name="execframe"></iframe>
 				</div>
+				<div id="sandbox-status">Ready.</div>
 			</div>
 			<input type="submit" name="submit" id="sandbox-submit" class="button button-primary" value="Execute">
 			<img id="sandbox-loader" style="margin: 6px 12px; display: none;" src="http://cdnjs.cloudflare.com/ajax/libs/jstree/3.0.0-beta10/themes/default/throbber.gif" width="16" height="16" alt="Loading..."/>
-		</form><script type="text/javascript">
+		</form><?php
+	}
+	
+	public function Header(){
+		?><link rel="stylesheet" href="//cdn.jsdelivr.net/codemirror/4.0.3/codemirror.css">
+		<style type="text/css">
+			#sandbox-wrap-wrap {
+				resize: vertical; height: 400px; overflow: auto; margin: 16px 0; padding-bottom: 16px; position: relative;
+			}
+			#sandbox-wrap {
+				overflow: hidden; height: 100% !important; position: relative; box-sizing: border-box;
+			}
+			#sandbox-wrap textarea,
+			#sandbox-wrap .CodeMirror {
+				resize: none; width: 50%; height: 100%; border: 1px solid #ddd; font: 12px Consolas; box-sizing: border-box;
+			}
+			#sandbox-wrap iframe {
+				resize: none; width: 50%; height: 100%; border: 1px solid #ddd; background: #FFF; position: absolute; top: 0; right: 0; box-sizing: border-box;
+			}
+			#sandbox-status {
+				font: 10px Tahoma; padding: 2px; position: absolute; left: 0; right: 16px; bottom: 0;
+			}
+			#sandbox-status ul {
+				list-style: none; margin: 0;
+			}
+			#sandbox-status li {
+				float: left; padding-right: 4px; border-right: 1px solid #CCC; margin: 0 4px 0 0;
+			}
+		</style><?php
+	}
+	
+	public function Footer(){
+		?><script src="//cdn.jsdelivr.net/codemirror/4.0.3/codemirror.js"></script>
+		<script src="//cdn.jsdelivr.net/codemirror/4.0.3/addon/edit/matchbrackets.js"></script>
+		<script src="//cdn.jsdelivr.net/codemirror/4.0.3/mode/clike/clike.js"></script>
+		<script src="//cdn.jsdelivr.net/codemirror/4.0.3/mode/php/php.js"></script>
+		<script type="text/javascript">
 			jQuery(document).ready(function(){
+				CodeMirror.fromTextArea(
+					jQuery('#sandbox-code')[0],
+					{
+						lineNumbers: true,
+						matchBrackets: true,
+						mode: "text/x-php",
+						indentUnit: 4,
+						indentWithTabs: true
+					}
+				);
+				
 				jQuery('#sandbox').submit(function(){
 					jQuery('#sandbox-loader').show();
 				});
+				
 				jQuery('#sandbox-result').on('load error', function(){
 					jQuery('#sandbox-loader').hide();
 				});
+				
 				//jQuery('#sandbox').submit();
 			});
+			
+			function SandboxUpdateState(data){
+				var ul = jQuery('<ul/>');
+				for(var key in data)
+					ul.append(jQuery('<li/>').text(key + ': ' + data[key]));
+				jQuery('#sandbox-status').html('').append(ul);
+			}
 		</script><?php
 	}
 	
