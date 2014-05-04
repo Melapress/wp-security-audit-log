@@ -142,7 +142,7 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 				jQuery('#sandbox-result').on('load error', function(){
 					jQuery('#sandbox-loader').hide();
 				});
-				jQuery('#sandbox').submit();
+				//jQuery('#sandbox').submit();
 			});
 		</script><?php
 	}
