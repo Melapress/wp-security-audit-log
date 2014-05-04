@@ -42,11 +42,10 @@ function WsalAuditLogInit(WsalData){
 				location.reload();
 			});
 		});
-		
-	jQuery('select.wsal-ssas')
-		.change(function(){
-			jQuery('#wsal-cbid').val(this.value);
-			jQuery(this).parents('form:first').submit();
-		});
 	
+}
+
+function WsalSsasChange(value){
+	jQuery('#wsal-cbid').val(value);
+	jQuery('#audit-log-viewer').submit();
 }
