@@ -26,9 +26,10 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	}
 	
 	public function CleanUp() {
+		$now = current_time('timestamp');
 		$max_count = $this->plugin->settings->GetPruningLimit();
 		$max_sdate = $this->plugin->settings->GetPruningDate();
-		$max_stamp = time() - (strtotime($max_sdate) - time());
+		$max_stamp = $now - (strtotime($max_sdate) - $now);
 		$cnt_items = WSAL_DB_Occurrence::Count();
 		if($cnt_items == $max_count)return;
 		$max_items = max(($cnt_items - $max_count) + 1, 0);

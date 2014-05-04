@@ -40,7 +40,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				$meta['Attempts'] = 0;
 			$meta['Attempts'] = $meta['Attempts'] + 1;
 			$occ->SetMeta($meta);
-			$occ->created_on = time();
+			$occ->created_on = current_time('timestamp');
 			$occ->Save();
 		}else{
 			// create a new record
