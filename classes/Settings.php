@@ -35,11 +35,87 @@ class WSAL_Settings {
 		update_user_option(get_current_user_id(), $option, $value, false);
 	}
 	
+	const OPT_DEV_DATA_INSPECTOR = 'd';
+	const OPT_DEV_PHP_ERRORS     = 'p';
+	const OPT_DEV_REQUEST_LOG    = 'r';
+	
+	protected $_devoption = null;
+	
+	/**
+	 * @return array Array of developer options to be enabled by default.
+	 */
+	public function GetDefaultDevOptions(){
+		return array(
+			self::OPT_DEV_DATA_INSPECTOR,
+			self::OPT_DEV_PHP_ERRORS,
+			self::OPT_DEV_REQUEST_LOG,
+		);
+	}
+	
+	/**
+	 * Returns whether a developer option is enabled or not.
+	 * @param string $option See self::OPT_DEV_* constants.
+	 * @return boolean If option is enabled or not.
+	 */
+	public function IsDevOptionEnabled($option){
+		if(is_null($this->_devoption)){
+			$this->_devoption = $this->GetGlobalOption(
+				self::OPT_PRFX . 'dev-options',
+				implode(',', $this->GetDefaultDevOptions())
+			);
+			$this->_devoption = explode(',', $this->_devoption);
+		}
+		return in_array($option, $this->_devoption);
+	}
+	
+	/**
+	 * Sets whether a developer option is enabled or not.
+	 * @param string $option See self::OPT_DEV_* constants.
+	 * @param boolean $enabled If option should be enabled or not.
+	 */
+	public function SetDevOptionEnabled($option, $enabled){
+		// make sure options have been loaded
+		$this->IsDevOptionEnabled('');
+		// remove option if it exists
+		while(($p = array_search($option, $this->_devoption)) !== false)
+			unset($this->_devoption[$p]);
+		// add option if callee wants it enabled
+		if($enabled)
+			$this->_devoption[] = $option;
+		// commit option
+		$this->SetGlobalOption(
+			self::OPT_PRFX . 'dev-options',
+			implode(',', $this->_devoption)
+		);
+	}
+	
+	/**
+	 * Remove all enabled developer options.
+	 */
+	public function ClearDevOptions(){
+		$this->_devoption = array();
+		$this->SetGlobalOption(self::OPT_PRFX . 'dev-options', '');
+	}
+	
 	/**
 	 * @return boolean Whether to enable data inspector or not.
 	 */
 	public function IsDataInspectorEnabled(){
-		return true;
+		return $this->IsDevOptionEnabled(self::OPT_DEV_DATA_INSPECTOR);
+	}
+	
+	/**
+	 * @return boolean Whether to PHP error logging or not.
+	 */
+	public function IsPhpErrorLoggingEnabled(){
+		return $this->IsDevOptionEnabled(self::OPT_DEV_PHP_ERRORS);
+	}
+	
+	/**
+	 * @return boolean Whether to log requests to file or not.
+	 */
+	public function IsRequestLoggingEnabled(){
+		return $this->IsDevOptionEnabled(self::OPT_DEV_REQUEST_LOG);
 	}
 	
 	/**

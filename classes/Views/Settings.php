@@ -24,7 +24,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	public function GetWeight() {
-		return 2;
+		return 3;
 	}
 	
 	protected function GetTokenType($token){
@@ -45,6 +45,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetAllowedPluginViewers(isset($_REQUEST['Viewers']) ? $_REQUEST['Viewers'] : array());
 		$this->_plugin->settings->SetAllowedPluginEditors(isset($_REQUEST['Editors']) ? $_REQUEST['Editors'] : array());
 		$this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
+		$this->_plugin->settings->ClearDevOptions();
+		foreach($_REQUEST['DevOptions'] as $opt)$this->_plugin->settings->SetDevOptionEnabled($opt, true);
 	}
 	
 	public function AjaxCheckSecurityToken(){
@@ -189,6 +191,28 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<span class="description"> &mdash; <?php _e('Refresh Audit View only when page is reloaded.'); ?></span>
 								<br/>
 							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th><label><?php _e('Developer Options'); ?></label></th>
+						<td>
+							<fieldset><?php
+								foreach(array(
+									WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array('Data Inspector', 'View data logged for each triggered alert.'),
+									WSAL_Settings::OPT_DEV_PHP_ERRORS     => array('PHP Errors', 'Enables sensor for alerts generated from PHP.'),
+									WSAL_Settings::OPT_DEV_REQUEST_LOG    => array('Request Log', 'Enables logging request to file.'),
+								) as $opt => $info){
+									?><label for="devoption_<?php echo $opt; ?>">
+										<input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
+											if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="1">
+										<span><?php _e($info[0]); ?></span>
+									</label><?php
+									if(isset($info[1]) && $info[1]){
+										?><span class="description"> &mdash; <?php _e($info[1]); ?></span><?php
+									}
+									?><br/><?php
+								}
+							?></fieldset>
 						</td>
 					</tr>
 				</tbody>

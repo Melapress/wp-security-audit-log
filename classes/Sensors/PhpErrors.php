@@ -10,10 +10,18 @@ class WSAL_Sensors_PhpErrors extends WSAL_AbstractSensor {
 		0003 => array(8,1024,2048,8192,16384),	// notices
 	);
 	
+	protected $_maybe_last_error = null;
+	
 	public function HookEvents() {
-		set_error_handler(array($this, 'EventError'), E_ALL);
-		set_exception_handler(array($this, 'EventException'));
-		register_shutdown_function(array($this, 'EventShutdown'));
+		if($this->plugin->settings->IsPhpErrorLoggingEnabled()){
+			set_error_handler(array($this, 'EventError'), E_ALL);
+			set_exception_handler(array($this, 'EventException'));
+			register_shutdown_function(array($this, 'EventShutdown'));
+		}
+	}
+	
+	protected function GetErrorHash($code, $mesg, $file, $line){
+		return md5(implode(':', func_get_args()));
 	}
 	
 	public function EventError($errno, $errstr, $errfile = 'unknown', $errline = 0, $errcontext = array()){
@@ -33,6 +41,8 @@ class WSAL_Sensors_PhpErrors extends WSAL_AbstractSensor {
 				$type = $temp;
 			}
 		}
+		
+		$this->_maybe_last_error = $this->GetErrorHash($errno, $errstr, $errfile, $errline);
 		
 		$this->_avoid_error_recursion = true;
 		$this->plugin->alerts->Trigger($type, $data);
@@ -62,13 +72,12 @@ class WSAL_Sensors_PhpErrors extends WSAL_AbstractSensor {
 	public function EventShutdown(){
 		if($this->_avoid_error_recursion)return;
 		
-		if(!!($error = error_get_last())){
-			
+		if(!!($e = error_get_last()) && ($this->_maybe_last_error != $this->GetErrorHash($e['type'], $e['message'], $e['file'], $e['line']))){
 			$data = array(
-				'Code'    => $error['type'],
-				'Message' => $error['message'],
-				'File'    => $error['file'],
-				'Line'    => $error['line'],
+				'Code'    => $e['type'],
+				'Message' => $e['message'],
+				'File'    => $e['file'],
+				'Line'    => $e['line'],
 			);
 			
 			$this->_avoid_error_recursion = true;
