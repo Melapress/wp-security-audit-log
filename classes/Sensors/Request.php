@@ -8,7 +8,7 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor {
 	}
 	
 	public function EventShutdown(){
-		$file = $this->plugin->GetBaseDir() . 'Request.log';
+		$file = $this->plugin->GetBaseDir() . 'Request.log.php';
 		
 		$line = '['.date('Y-m-d H:i:s').'] '
 			. $_SERVER['REQUEST_METHOD'] . ' '
@@ -16,6 +16,10 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor {
 			. (!empty($_POST) ? str_pad(PHP_EOL, 24) . json_encode($_POST) : '')
 			. (!empty(self::$envvars) ? str_pad(PHP_EOL, 24) . json_encode(self::$envvars) : '')
 			. PHP_EOL;
+		
+		if(!file_exists($file))
+			if(!file_put_contents($file, '<'.'?php die(\'Access Denied\');' . PHP_EOL))
+				return $this->LogError('Could not initialize request log file', array('file' => $file));
 		
 		$f = fopen($file, 'a');
 		if($f){
