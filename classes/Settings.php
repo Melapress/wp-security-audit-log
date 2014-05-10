@@ -214,7 +214,7 @@ class WSAL_Settings {
 	protected $_disabled = null;
 	
 	public function GetDefaultDisabledAlerts(){
-		return array(0000, 0003, 0005);
+		return array(); //array(0000, 0003, 0005);
 	}
 	
 	/**
