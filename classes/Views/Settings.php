@@ -207,11 +207,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 										<input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
 											if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="<?php echo $opt; ?>">
 										<span><?php _e($info[0]); ?></span>
-									</label><?php
-									if(isset($info[1]) && $info[1]){
-										?><span class="description"> &mdash; <?php _e($info[1]); ?></span><?php
-									}
-									?><br/><?php
+										<?php if(isset($info[1]) && $info[1]){ ?>
+											<span class="description"> &mdash; <?php _e($info[1]); ?></span>
+										<?php }
+									?></label><br/><?php
 								}
 							?></fieldset>
 						</td>
