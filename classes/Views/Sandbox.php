@@ -165,17 +165,17 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 		?><link rel="stylesheet" href="//cdn.jsdelivr.net/codemirror/4.0.3/codemirror.css">
 		<style type="text/css">
 			#sandbox-wrap-wrap {
-				resize: vertical; height: 400px; overflow: auto; margin: 16px 0; padding-bottom: 16px; position: relative;
+				resize: vertical; height: 400px; overflow: auto; margin: 16px 0; padding-bottom: 16px; position: relative; border: 1px solid #DDD;
 			}
 			#sandbox-wrap {
 				overflow: hidden; height: 100% !important; position: relative; box-sizing: border-box;
 			}
 			#sandbox-wrap textarea,
 			#sandbox-wrap .CodeMirror {
-				resize: none; width: 50%; height: 100%; border: 1px solid #ddd; font: 12px Consolas; box-sizing: border-box;
+				resize: none; width: 50%; height: 100%; border-bottom: 1px solid #ddd; font: 12px Consolas; box-sizing: border-box;
 			}
 			#sandbox-wrap iframe {
-				resize: none; width: 50%; height: 100%; border: 1px solid #ddd; background: #FFF; position: absolute; top: 0; right: 0; box-sizing: border-box;
+				resize: none; width: 50%; height: 100%; border-bottom: 1px solid #ddd; background: #FFF; position: absolute; top: 0; right: 0; box-sizing: border-box; border-left: 4px solid #DDD;
 			}
 			#sandbox-status {
 				font: 10px Tahoma; padding: 2px; position: absolute; left: 0; right: 16px; bottom: 0;
