@@ -31,6 +31,11 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	protected $exec_data = array();
 	protected $exec_info = array();
 	
+	protected $snippets = array(
+		'' => '',
+		'Current WP User' => 'return wp_get_current_user();',
+	);
+	
 	public function HandleError($code, $message, $filename = 'unknown', $lineno = 0){
 		if(!isset($this->exec_data['Errors']))
 			$this->exec_data['Errors'] = array();
@@ -131,7 +136,8 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	}
 	
 	public function Render(){
-		$code = 'return wp_get_current_user();';
+		$snpt = isset($_REQUEST['snippet']) ? $_REQUEST['snippet'] : '';
+		$code = isset($this->snippets[$snpt]) ? $this->snippets[$snpt] : '';
 		?><form id="sandbox" method="post" target="execframe" action="<?php echo admin_url('admin-ajax.php'); ?>">
 			<input type="hidden" name="action" value="AjaxExecute" />
 			<div id="sandbox-wrap-wrap">
@@ -141,6 +147,15 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 				</div>
 				<div id="sandbox-status">Ready.</div>
 			</div>
+			<label for="sandbox-snippet" style="float: left; line-height: 26px; display: inline-block; margin-right: 32px; border-right: 1px dotted #CCC; padding-right: 32px;">
+				Use Snippet: 
+				<?php $code = json_encode(admin_url('admin.php?page=wsal-sandbox') . '&snippet='); ?>
+				<select id="sandbox-snippet" onchange="location = <?php echo esc_attr($code); ?> + encodeURIComponent(this.value);"><?php
+					foreach(array_keys($this->snippets) as $name){
+						?><option value="<?php echo esc_attr($name); ?>"<?php if($name == $snpt)echo ' selected="selected"'; ?>><?php _e($name); ?></option><?php
+					}
+				?></select>
+			</label>
 			<input type="submit" name="submit" id="sandbox-submit" class="button button-primary" value="Execute">
 			<img id="sandbox-loader" style="margin: 6px 12px; display: none;" src="http://cdnjs.cloudflare.com/ajax/libs/jstree/3.0.0-beta10/themes/default/throbber.gif" width="16" height="16" alt="Loading..."/>
 		</form><?php
@@ -181,7 +196,7 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 		<script src="//cdn.jsdelivr.net/codemirror/4.0.3/mode/php/php.js"></script>
 		<script type="text/javascript">
 			jQuery(document).ready(function(){
-				CodeMirror.fromTextArea(
+				var ed = CodeMirror.fromTextArea(
 					jQuery('#sandbox-code')[0],
 					{
 						lineNumbers: true,
@@ -193,6 +208,7 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 				);
 				
 				jQuery('#sandbox').submit(function(){
+					if(!ed.isClean())jQuery('#sandbox-snippet').val('');
 					jQuery('#sandbox-loader').show();
 				});
 				
