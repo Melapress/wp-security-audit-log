@@ -48,6 +48,11 @@ abstract class WSAL_AbstractView {
 	abstract public function Render();
 	
 	/**
+	 * @return boolean Whether page should appear in menu or not.
+	 */
+	public function IsVisible(){ return true; }
+	
+	/**
 	 * Used for rendering stuff into head tag.
 	 */
 	public function Header(){}

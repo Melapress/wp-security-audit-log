@@ -66,15 +66,17 @@ class WSAL_ViewManager {
 
 			// add menu items
 			foreach($this->views as $view){
-				add_submenu_page(
-					$this->views[0]->GetSafeViewName(),
-					$view->GetTitle(),
-					$view->GetName(),
-					'read', // no capability requirement
-					$view->GetSafeViewName(),
-					array($this, 'RenderViewBody'),
-					$view->GetIcon()
-				);
+				if($view->IsVisible()){
+					add_submenu_page(
+						$this->views[0]->GetSafeViewName(),
+						$view->GetTitle(),
+						$view->GetName(),
+						'read', // no capability requirement
+						$view->GetSafeViewName(),
+						array($this, 'RenderViewBody'),
+						$view->GetIcon()
+					);
+				}
 			}
 		}
 	}

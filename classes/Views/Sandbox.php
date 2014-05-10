@@ -4,7 +4,7 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
 		parent::__construct($plugin);
-		add_action('wp_ajax_AjaxExecute', array($this, 'AjaxExecute'));
+		if(is_admin())add_action('wp_ajax_AjaxExecute', array($this, 'AjaxExecute'));
 	}
 	
 	public function GetTitle() {
@@ -21,6 +21,11 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	
 	public function GetWeight() {
 		return 5;
+	}
+	
+	public function IsVisible(){
+		return $this->_plugin->settings->CurrentUserCan('edit')
+				&& $this->_plugin->settings->IsSandboxPageEnabled();
 	}
 	
 	protected $exec_data = array();
@@ -113,7 +118,9 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	}
 	
 	public function AjaxExecute(){
-		if(!$this->_plugin->settings->CurrentUserCan('view'))
+		if(!$this->_plugin->settings->IsSandboxPageEnabled())
+			die('Sandbox Disabled.');
+		if(!$this->_plugin->settings->CurrentUserCan('edit'))
 			die('Access Denied.');
 		if(!isset($_REQUEST['code']))
 			die('Code parameter expected.');
