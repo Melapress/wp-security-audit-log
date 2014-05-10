@@ -46,12 +46,7 @@ class WSAL_Settings {
 	 * @return array Array of developer options to be enabled by default.
 	 */
 	public function GetDefaultDevOptions(){
-		return array(
-			self::OPT_DEV_DATA_INSPECTOR,
-			self::OPT_DEV_PHP_ERRORS,
-			self::OPT_DEV_REQUEST_LOG,
-			self::OPT_DEV_SANDBOX_PAGE,
-		);
+		return array();
 	}
 	
 	/**
