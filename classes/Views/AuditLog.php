@@ -9,6 +9,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$this->_listview = new WSAL_Views_AuditLogList_Internal($plugin);
 		add_action('wp_ajax_AjaxInspector', array($this, 'AjaxInspector'));
 		add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
+		add_action('wp_ajax_AjaxSetIpp', array($this, 'AjaxSetIpp'));
 	}
 	
 	public function HasPluginShortcutLink(){
@@ -37,22 +38,28 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		if(!$this->_plugin->settings->CurrentUserCan('view')){
 			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 		}
-		?><form id="audit-log-viewer" method="get">
+		
+		?><form id="audit-log-viewer" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
+			<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr(isset($_REQUEST['wsal-cbid']) ? $_REQUEST['wsal-cbid'] : ''); ?>" />
 			<?php $this->_listview->prepare_items(); ?>
 			<?php $this->_listview->display(); ?>
 		</form><?php
-		if($this->_plugin->settings->IsRefreshAlertsEnabled()){
-			$ajaxurl = admin_url('admin-ajax.php') . '?action=AjaxRefresh&logcount=';
-			?><script type="text/javascript">
-				jQuery(document).ready(function(){
-					WsalLogRefresher(
-						<?php echo json_encode($ajaxurl); ?>,
-						<?php echo (int)WSAL_DB_Occurrence::Count(); ?>
-					);
-				});
-			</script><?php
-		}
+		
+		?><script type="text/javascript">
+			jQuery(document).ready(function(){
+				WsalAuditLogInit(<?php echo json_encode(array(
+					'ajaxurl' => admin_url('admin-ajax.php'),
+					'tr8n' => array(
+						'numofitems' => __('Please enter the number of alerts you would like to see on one page:'),
+					),
+					'autorefresh' => array(
+						'enabled' => $this->_plugin->settings->IsRefreshAlertsEnabled(),
+						'token' => (int)WSAL_DB_Occurrence::Count(),
+					),
+				)); ?>);
+			});
+		</script><?php
 	}
 	
 	public function AjaxInspector(){
@@ -93,6 +100,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}while(($old == $new) && (--$max > 0));
 		
 		echo $old == $new ? 'false' : $new;
+		die;
+	}
+	
+	public function AjaxSetIpp(){
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+		if(!isset($_REQUEST['count']))
+			die('Count parameter expected.');
+		$this->_plugin->settings->SetViewPerPage((int)$_REQUEST['count']);
 		die;
 	}
 	
@@ -141,6 +157,49 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	public function no_items(){
 		_e('No events so far.');
 	}
+	
+	public function extra_tablenav($which){
+		// items-per-page widget
+		$o = __('Other');
+		$p = $this->_plugin->settings->GetViewPerPage();
+		$items = array($o, 5, 10, 15, 30, 50);
+		if (!in_array($p, $items)) $items[] = $p;
+		if ($p == $o || $p == 0) $p = $o[1]; // a sane default if things goes bust
+		
+		?><div class="wsal-ipp wsal-ipp-<?php echo $which; ?>">
+			<?php _e('Show '); ?>
+			<select class="wsal-ipps">
+				<?php foreach($items as $item){ ?>
+					<option
+						value="<?php echo is_string($item) ? '' : $item; ?>"
+						<?php if($item == $p)echo 'selected="selected"'; ?>><?php
+						echo $item;
+					?></option>
+				<?php } ?>
+			</select>
+			<?php _e(' Items'); ?>
+		</div><?php
+		
+		// show site alerts widget
+		if($this->is_multisite() && $this->is_main_blog()){
+			// TODO should I check wp_is_large_network()?
+			$curr = $this->get_view_site_id();
+			$sites = wp_get_sites();
+			?><div class="wsal-ssa wsal-ssa-<?php echo $which; ?>">
+				<select class="wsal-ssas">
+					<option value="0"><?php _e('All Sites'); ?></option>
+					<?php foreach($sites as $site){ ?>
+						<?php $info = get_blog_details($site['blog_id'], true); ?>
+						<option
+							value="<?php echo $info->blog_id; ?>"
+							<?php if($info->blog_id == $curr)echo 'selected="selected"'; ?>><?php
+							echo esc_html($info->blogname) . ' (' . esc_html($info->domain) . ')';
+						?></option>
+					<?php } ?>
+				</select>
+			</div><?php
+		}
+	}
 
 	public function get_columns(){
 		$cols = array(
@@ -151,10 +210,14 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			'crtd' => 'Date',
 			'user' => 'Username',
 			'scip' => 'Source IP',
-			'mesg' => 'Message',
 		);
-		if($this->_plugin->settings->IsDataInspectorEnabled())
+		if($this->is_multisite() && $this->is_main_blog() && !$this->is_specific_view()){
+			$cols['site'] = 'Site';
+		}
+		$cols['mesg'] = 'Message';
+		if($this->_plugin->settings->IsDataInspectorEnabled()){
 			$cols['data'] = '';
+		}
 		return $cols;
 	}
 
@@ -171,6 +234,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			'crtd' => array('created_on', true),
 			'user' => array('user', false),
 			'scip' => array('scip', false),
+			'site' => array('site', false),
 		);
 	}
 	
@@ -195,6 +259,10 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return !is_null($item->GetUsername()) ? esc_html($item->GetUsername()) : '<i>unknown</i>';
 			case 'scip':
 				return !is_null($item->GetSourceIP()) ? esc_html($item->GetSourceIP()) : '<i>unknown</i>';
+			case 'site':
+				$info = get_blog_details($item->site_id, true);
+				return !$info ? ('Unknown Site '.$item->site_id)
+					: ('<a href="' . esc_attr($info->siteurl) . '">' . esc_html($info->blogname) . '</a>');
 			case 'mesg':
 				return $item->GetMessage(array($this, 'meta_formatter'));
 			case 'data':
@@ -206,10 +274,6 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 					? esc_html($item->$column_name)
 					: 'Column "' . esc_html($column_name) . '" not found';
 		}
-	}
-	
-	public function group_alerts(){
-		return false;
 	}
 
 	public function reorder_items_str($a, $b){
@@ -242,8 +306,46 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		}
 	}
 	
+	protected function is_multisite(){
+		return function_exists('is_multisite') && is_multisite();
+	}
+	
+	protected function is_main_blog(){
+		return get_current_blog_id() == 1;
+	}
+	
+	protected function is_specific_view(){
+		return isset($_REQUEST['wsal-cbid']) && $_REQUEST['wsal-cbid'] != '0';
+	}
+	
+	protected function get_specific_view(){
+		return (int)$_REQUEST['wsal-cbid'];
+	}
+	
+	protected function get_view_site_id(){
+		switch(true){
+			
+			// non-multisite
+			case !function_exists('is_multisite') || !is_multisite():
+				return 0;
+			
+			// multisite + main site view
+			case $this->is_main_blog() && !$this->is_specific_view():
+				return 0;
+			
+			// multisite + switched site view
+			case $this->is_main_blog() && $this->is_specific_view():
+				return $this->get_specific_view();
+			
+			// multisite + local site view
+			default:
+				return get_current_blog_id();
+			
+		}
+	}
+	
 	public function prepare_items() {
-		$per_page = 20;
+		$per_page = $this->_plugin->settings->GetViewPerPage();
 
 		$columns = $this->get_columns();
 		$hidden = array();
@@ -253,9 +355,9 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 
 		//$this->process_bulk_action();
 		
-		$data = $this->group_alerts()
-			? WSAL_DB_Occurrence::GetNewestUnique()
-			: WSAL_DB_Occurrence::LoadMulti('1 ORDER BY created_on DESC');
+		$bid = (int)$this->get_view_site_id();
+		$sql = ($bid ? "site_id=$bid" : '1') . ' ORDER BY created_on DESC';
+		$data = WSAL_DB_Occurrence::LoadMulti($sql);
 		
 		if(count($data)){
 			$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'created_on';

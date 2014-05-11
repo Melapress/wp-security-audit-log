@@ -3,16 +3,17 @@
 class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		add_action('wsal_prune', array($this, 'EventPruneEvents'));
+		add_action('wsal_prune', array($this, 'EventPruneEvents'), 10, 2);
 		add_action('admin_init', array($this, 'EventAdminInit'));
 	}
 	
 	/**
 	 * @param WSAL_DB_Occurrence[] $events The events that were deleted.
 	 */
-	public function EventPruneEvents($events){
+	public function EventPruneEvents($events, $query){
 		$this->plugin->alerts->Trigger(6000, array(
 			'EventCount' => count($events),
+			'PruneQuery' => $query,
 		));
 	}
 	
@@ -22,9 +23,11 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		if(!current_user_can('manage_options'))return;
 		
 		$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
-		$is_option_page = isset($_POST) && !empty($_POST['option_page']);
-		$is_permalink_page = isset($_POST) && basename($_SERVER['SCRIPT_NAME']) == 'options-permalink.php';
-			
+		$actype = basename($_SERVER['SCRIPT_NAME'], '.php');
+		$is_option_page = $actype == 'options';
+		$is_network_settings = $actype == 'settings';
+		$is_permalink_page = $actype == 'options-permalink';
+		
 		if($is_option_page && (get_option('users_can_register') xor isset($_POST['users_can_register']))){
 			$old = get_option('users_can_register') ? 'Enabled' : 'Disabled';
 			$new = isset($_POST['users_can_register']) ? 'Enabled' : 'Disabled';
@@ -51,6 +54,18 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 		if($is_option_page && !empty($_POST['admin_email'])){
 			$old = get_option('admin_email');
+			$new = trim($_POST['admin_email']);
+			if($old !== $new){
+				$this->plugin->alerts->Trigger(6003, array(
+					'OldEmail' => $old,
+					'NewEmail' => $new,
+					'CurrentUserID' => wp_get_current_user()->ID,
+				));
+			}
+		}
+		
+		if($is_network_settings && !empty($_POST['admin_email'])){
+			$old = get_site_option('admin_email');
 			$new = trim($_POST['admin_email']);
 			if($old !== $new){
 				$this->plugin->alerts->Trigger(6003, array(

@@ -2,26 +2,32 @@
 
 class WSAL_Sensors_Request extends WSAL_AbstractSensor {
 	public function HookEvents() {
-		add_action('shutdown', array($this, 'EventShutdown'));
-	}
-	
-	protected function FileAppend($file, $data){
-		$f = fopen($file, 'a');
-		fwrite($f, $data);
-		fclose($f);
+		if($this->plugin->settings->IsRequestLoggingEnabled()){
+			add_action('shutdown', array($this, 'EventShutdown'));
+		}
 	}
 	
 	public function EventShutdown(){
-		$file = 'C:\Users\Christian\Desktop\request.log';
-		if(file_exists($file)){
-			$line = '['.date('Y-m-d H:i:s').'] '
-				. $_SERVER['REQUEST_METHOD'] . ' '
-				. $_SERVER['REQUEST_URI'] . ' '
-				. (!empty($_POST) ? str_pad(PHP_EOL, 24) . json_encode($_POST) : '')
-				. (!empty(self::$envvars) ? str_pad(PHP_EOL, 24) . json_encode(self::$envvars) : '')
-				. PHP_EOL;
-			$this->FileAppend($file, $line);
-		}
+		$file = $this->plugin->GetBaseDir() . 'Request.log.php';
+		
+		$line = '['.date('Y-m-d H:i:s').'] '
+			. $_SERVER['REQUEST_METHOD'] . ' '
+			. $_SERVER['REQUEST_URI'] . ' '
+			. (!empty($_POST) ? str_pad(PHP_EOL, 24) . json_encode($_POST) : '')
+			. (!empty(self::$envvars) ? str_pad(PHP_EOL, 24) . json_encode(self::$envvars) : '')
+			. PHP_EOL;
+		
+		if(!file_exists($file))
+			if(!file_put_contents($file, '<'.'?php die(\'Access Denied\');' . PHP_EOL))
+				return $this->LogError('Could not initialize request log file', array('file' => $file));
+		
+		$f = fopen($file, 'a');
+		if($f){
+			if(!fwrite($f, $line))
+				$this->LogWarn('Could not write to log file', array('file' => $file));
+			if(!fclose($f))
+				$this->LogWarn('Could not close log file', array('file' => $file));
+		}else $this->LogWarn('Could not open log file', array('file' => $file));
 	}
 	
 	protected static $envvars = array();

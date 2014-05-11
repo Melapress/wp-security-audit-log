@@ -1,9 +1,16 @@
 <?php
 
 class WSAL_Loggers_Database extends WSAL_AbstractLogger {
+	
+	public function __construct(WpSecurityAuditLog $plugin) {
+		parent::__construct($plugin);
+		$plugin->AddCleanupHook(array($this, 'CleanUp'));
+	}
+	
 	public function Log($type, $data = array(), $date = null, $siteid = null, $migrated = false) {
+
 		// use today's date if not set up
-		if(is_null($date))$date = time();
+		if(is_null($date))$date = current_time('timestamp');
 		
 		// create new occurrence
 		$occ = new WSAL_DB_Occurrence();
@@ -17,4 +24,40 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		// set up meta data
 		$occ->SetMeta($data);
 	}
+	
+	public function CleanUp() {
+		$now = current_time('timestamp');
+		$max_count = $this->plugin->settings->GetPruningLimit();
+		$max_sdate = $this->plugin->settings->GetPruningDate();
+		$max_stamp = $now - (strtotime($max_sdate) - $now);
+		$cnt_items = WSAL_DB_Occurrence::Count();
+		if($cnt_items == $max_count)return;
+		$max_items = max(($cnt_items - $max_count) + 1, 0);
+		
+		$is_date_e = true;
+		$is_limt_e = true;
+		
+		switch(true){
+			case $is_date_e && $is_limt_e:
+				$cond = 'created_on < %d ORDER BY created_on ASC LIMIT %d';
+				$args = array($max_stamp, $max_items);
+				break;
+			case $is_date_e && !$is_limt_e:
+				$cond = 'created_on < %d';
+				$args = array($max_stamp);
+				break;
+			case !$is_date_e && $is_limt_e:
+				$cond = '1 ORDER BY created_on ASC LIMIT %d';
+				$args = array($max_items);
+				break;
+		}
+		if(!isset($cond))return;
+		
+		$items = WSAL_DB_Occurrence::LoadMulti($cond, $args);
+		if(!count($items))return;
+		
+		foreach($items as $item)$item->Delete();
+		do_action('wsal_prune', $items, vsprintf($cond, $args));
+	}
+	
 }

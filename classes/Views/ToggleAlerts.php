@@ -15,7 +15,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	}
 	
 	public function GetWeight() {
-		return 3;
+		return 2;
 	}
 	
 	protected function GetSafeCatgName($name){

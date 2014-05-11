@@ -1,20 +1,51 @@
 
-function WsalLogRefresher(url, tkn){
-	var WsalAjx = null;
-	var WsalTkn = tkn;
+function WsalAuditLogInit(WsalData){
+	var WsalTkn = WsalData.autorefresh.token;
 	
-	var WsalChk = function(url){
+	// list refresher
+	var WsalAjx = null;
+	var WsalChk = function(){
 		if(WsalAjx)WsalAjx.abort();
-		WsalAjx = jQuery.post(url + WsalTkn, function(data){
+		WsalAjx = jQuery.post(WsalData.ajaxurl, {
+			action: 'AjaxRefresh',
+			logcount: WsalTkn
+		}, function(data){
 			WsalAjx = null;
 			if(data && data !== 'false'){
 				WsalTkn = data;
 				jQuery('#audit-log-viewer').load(location.href + ' #audit-log-viewer');
 			}
-			WsalChk(url);
+			WsalChk();
 		});
 	};
+	if(WsalData.autorefresh.enabled){
+		setInterval(WsalChk, 40000);
+		WsalChk();
+	}
 	
-	setInterval(function(){ WsalChk(url); }, 40000);
-	WsalChk(url);
+	var prev;
+	jQuery('select.wsal-ipps')
+		.focus(function(){
+			prev = this.value;
+		})
+		.change(function(){
+			var val = this.value;
+			if(val===''){
+				val = window.prompt(WsalData.tr8n.numofitems, prev);
+				if(val === null || val === prev)return this.value = prev; // operation canceled
+			}
+			jQuery('select.wsal-ipps').attr('disabled', true);
+			jQuery.post(WsalData.ajaxurl, {
+				action: 'AjaxSetIpp',
+				count: val
+			}, function(){
+				location.reload();
+			});
+		});
+	
+	jQuery('select.wsal-ssas').change(function(){
+		jQuery('select.wsal-ssas').attr('disabled', true);
+		jQuery('#wsal-cbid').val(this.value);
+		jQuery('#audit-log-viewer').submit();
+	});
 }

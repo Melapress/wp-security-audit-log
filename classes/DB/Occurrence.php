@@ -112,7 +112,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		$meta = array_shift($expr);
 		$meta = $this->GetMetaValue($meta, null);
 		foreach($expr as $part){
-			if(is_scalar($meta))return $meta; // this isn't 100% correct
+			if(is_scalar($meta) || is_null($meta))return $meta; // this isn't 100% correct
 			$meta = is_array($meta) ? $meta[$part] : $meta->$part;
 		}
 		return is_scalar($meta) ? (string)$meta : var_export($meta, true);
@@ -125,9 +125,10 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	 * @param string $afterMeta (Optional) Some text to put after meta values.
 	 * @return string The expanded message.
 	 */
-	protected function GetFormattedMesg($mesg, $metaFormatter = null){
+	protected function GetFormattedMesg($origMesg, $metaFormatter = null){
 		// tokenize message with regex
-		$mesg = preg_split('/(%.*?%)/', $mesg, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$mesg = preg_split('/(%.*?%)/', (string)$origMesg, -1, PREG_SPLIT_DELIM_CAPTURE);
+		if(!is_array($mesg))return (string)$origMesg;
 		// handle tokenized message
 		foreach($mesg as $i=>$token){
 			// handle escaped percent sign
@@ -137,7 +138,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 			// handle complex expressions
 			if(substr($token, 0, 1) == '%' && substr($token, -1, 1) == '%'){
 				$mesg[$i] = $this->GetMetaExprValue(substr($token, 1, -1));
-				if($metaFormatter)$mesg[$i] = $metaFormatter($token, $mesg[$i]);
+				if($metaFormatter)$mesg[$i] = call_user_func($metaFormatter, $token, $mesg[$i]);
 			}
 		}
 		// compact message and return
@@ -152,8 +153,9 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		if(!isset($this->_cachedmessage)){
 			// get correct message entry
 			if($this->is_migrated){
-				$this->_cachedmessage = $this->GetMetaValue('MigratedMesg');
-			}else{
+				$this->_cachedmessage = $this->GetMetaValue('MigratedMesg', false);
+			}
+			if(!$this->is_migrated || !$this->_cachedmessage){
 				$this->_cachedmessage = $this->GetAlert()->mesg;
 			}
 			// fill variables in message

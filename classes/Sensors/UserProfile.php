@@ -3,10 +3,24 @@
 class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
+		add_action('admin_init', array($this, 'EventAdminInit'));
 		add_action('user_register', array($this, 'EventUserRegister'));
         add_action('edit_user_profile_update', array($this, 'EventUserChanged'));
         add_action('personal_options_update', array($this, 'EventUserChanged'));
         add_action('delete_user', array($this, 'EventUserDeleted'));
+        add_action('wpmu_delete_user', array($this, 'EventUserDeleted'));
+	}
+	
+	protected $old_superadmins;
+	
+	protected function IsMultisite(){
+		return function_exists('is_multisite') && is_multisite();
+	}
+	
+	public function EventAdminInit(){
+		if($this->IsMultisite()){
+			$this->old_superadmins = get_super_admins();
+		}
 	}
 	
 	public function EventUserRegister($user_id){
@@ -69,29 +83,31 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
             }
         }
 		
-		// super admin enabled
-        if(isset($_POST['super_admin']) && !empty($_POST['super_admin'])){
-			$this->plugin->alerts->Trigger(4008, array(
-				'TargetUserID' => $user_id,
-				'TargetUsername' => $user->user_login,
-			));
-		}
-		
-		// super admin disabled
-        if(!isset($_POST['super_admin']) || empty($_POST['super_admin'])){
-			foreach(get_super_admins() as $admin){
-				if($user->user_login == $admin){
-					$this->plugin->alerts->Trigger(4009, array(
-						'TargetUserID' => $user_id,
-						'TargetUsername' => $user->user_login,
-					));
-				}
+		if($this->IsMultisite()){
+			$username = $user->user_login;
+			$enabled = isset($_REQUEST['super_admin']);
+			
+			// super admin enabled
+			if($enabled && !in_array($username, $this->old_superadmins)){
+				$this->plugin->alerts->Trigger(4008, array(
+					'TargetUserID' => $user_id,
+					'TargetUsername' => $user->user_login,
+				));
+			}
+
+			// super admin disabled
+			if(!$enabled && in_array($username, $this->old_superadmins)){
+				$this->plugin->alerts->Trigger(4009, array(
+					'TargetUserID' => $user_id,
+					'TargetUsername' => $user->user_login,
+				));
 			}
 		}
 	}
 	
 	public function EventUserDeleted($user_id){
 		$user = get_userdata($user_id);
+		$role = is_array($user->roles) ? implode(', ', $user->roles) : $user->roles;
 		$this->plugin->alerts->Trigger(4007, array(
 			'TargetUserID' => $user_id,
 			'TargetUserData' => (object)array(
@@ -99,7 +115,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				'FirstName' => $user->user_firstname,
 				'LastName' => $user->user_lastname,
 				'Email' => $user->user_email,
-				'Roles' => is_array($user->roles) ? implode(', ', $user->roles) : $user->roles,
+				'Roles' => $role ? $role : 'none',
 			),
 		));
 	}

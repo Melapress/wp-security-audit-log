@@ -27,6 +27,7 @@ class WSAL_ViewManager {
 		
 		// add menus
 		add_action('admin_menu', array($this, 'AddAdminMenus'));
+		add_action('network_admin_menu', array($this, 'AddAdminMenus'));
 		
 		// add plugin shortcut links
 		add_filter('plugin_action_links_' . $plugin->GetBaseName(), array($this, 'AddPluginShortcuts'));
@@ -52,12 +53,12 @@ class WSAL_ViewManager {
 	}
 	
 	public function AddAdminMenus(){
-		if(count($this->views)){
+		if($this->_plugin->settings->CurrentUserCan('view') && count($this->views)){
 			// add main menu
 			add_menu_page(
 				'WP Security Audit Log',
 				'Audit Log',
-				'manage_options', // admin & superadmin
+				'read', // no capability requirement
 				$this->views[0]->GetSafeViewName(),
 				array($this, 'RenderViewBody'),
 				$this->views[0]->GetIcon()
@@ -65,15 +66,17 @@ class WSAL_ViewManager {
 
 			// add menu items
 			foreach($this->views as $view){
-				add_submenu_page(
-					$this->views[0]->GetSafeViewName(),
-					$view->GetTitle(),
-					$view->GetName(),
-					'manage_options', // admin & superadmin
-					$view->GetSafeViewName(),
-					array($this, 'RenderViewBody'),
-					$view->GetIcon()
-				);
+				if($view->IsVisible()){
+					add_submenu_page(
+						$this->views[0]->GetSafeViewName(),
+						$view->GetTitle(),
+						$view->GetName(),
+						'read', // no capability requirement
+						$view->GetSafeViewName(),
+						array($this, 'RenderViewBody'),
+						$view->GetIcon()
+					);
+				}
 			}
 		}
 	}

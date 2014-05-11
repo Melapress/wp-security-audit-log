@@ -73,14 +73,17 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         if (empty($post->post_type)) return;
         if ($post->post_type == 'revision') return;
 		
+		$original = isset($_POST['original_post_status']) ? $_POST['original_post_status'] : '';
+		
 		WSAL_Sensors_Request::SetVars(array(
 			'$newStatus' => $newStatus,
 			'$oldStatus' => $oldStatus,
+			'$original' => $original,
 		));
 		
         // run checks
 		if($this->_OldPost){
-			if ($oldStatus == 'auto-draft'){
+			if ($oldStatus == 'auto-draft' || $original == 'auto-draft'){
 				
 				// Handle create post events
 				$this->CheckPostCreation($this->_OldPost, $post);
@@ -175,7 +178,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	
 	public function EventPostDeleted($post_id){
 		$post = get_post($post_id);
-		if($post->post_type != 'attachment'){ // ignore attachments
+		if(!in_array($post->post_type, array('attachment', 'revision'))){ // ignore attachments and revisions
 			$event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
 			$this->plugin->alerts->Trigger($event, array(
 				'PostID' => $post->ID,
@@ -208,6 +211,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	protected function CheckDateChange($oldpost, $newpost){
         $from = strtotime($oldpost->post_date);
         $to = strtotime($newpost->post_date);
+		if($oldpost->post_status == 'draft')return;
         if($from != $to){
 			$event = $this->GetEventTypeForPostType($oldpost, 2027, 2028, 2041);
 			$this->plugin->alerts->Trigger($event, array(

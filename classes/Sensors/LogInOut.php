@@ -17,34 +17,40 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	}
 	
 	public function EventLoginFailure($username){
-		$occ = new WSAL_DB_Occurrence();
-		
 		list($y, $m, $d) = explode('-', date('Y-m-d'));
-		$occ->Load('alert_id = %d AND site_id = %d'
-				. ' AND (created_on BETWEEN %d AND %d)',
-				array(
-					1002,
-					(function_exists('get_current_blog_id') ? get_current_blog_id() : 0),
-					mktime(0, 0, 0, $m, $d, $y),
-					mktime(0, 0, 0, $m, $d + 1, $y) - 1,
-				));
+		$occ = WSAL_DB_Occurrence::LoadMultiQuery('
+			SELECT * FROM `wp_wsal_occurrences` 
+			WHERE alert_id = %d AND site_id = %d
+				AND (created_on BETWEEN %d AND %d)
+				AND id IN (
+					SELECT occurrence_id as id
+					FROM wp_wsal_metadata
+					WHERE (name = "ClientIP" AND value = %s)
+					   OR (name = "Username" AND value = %s)
+					GROUP BY occurrence_id
+					HAVING COUNT(*) = 2
+				)
+		', array(
+			1002,
+			(function_exists('get_current_blog_id') ? get_current_blog_id() : 0),
+			mktime(0, 0, 0, $m, $d, $y),
+			mktime(0, 0, 0, $m, $d + 1, $y) - 1,
+			json_encode(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''),
+			json_encode($username),
+		));
+		$occ = count($occ) ? $occ[0] : null;
 		
-		if($occ->IsLoaded()){
+		if($occ && $occ->IsLoaded()){
 			// update existing record
-			$meta = $occ->GetMetaArray();
-			if(!isset($meta['Usernames']))
-				$meta['Usernames'] = array();
-			$meta['Usernames'][] = $username;
-			if(!isset($meta['Attempts']))
-				$meta['Attempts'] = 0;
-			$meta['Attempts'] = $meta['Attempts'] + 1;
-			$occ->SetMeta($meta);
-			$occ->created_on = time();
+			$occ->SetMetaValue('Attempts',
+				$occ->GetMetaValue('Attempts', 0) + 1
+			);
+			$occ->created_on = current_time('timestamp');
 			$occ->Save();
 		}else{
 			// create a new record
 			$this->plugin->alerts->Trigger(1002, array(
-				'Usernames' => array($username),
+				'Username' => $username,
 				'Attempts' => 1
 			));
 		}

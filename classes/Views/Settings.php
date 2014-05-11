@@ -24,12 +24,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	public function GetWeight() {
-		return 2;
+		return 3;
 	}
 	
 	protected function GetTokenType($token){
 		$users = array();
-		foreach(get_users('fields[]=user_login') as $obj)
+		foreach(get_users('blog_id=0&fields[]=user_login') as $obj)
 			$users[] = $obj->user_login;
 		$roles = array_keys(get_editable_roles());
 		
@@ -45,6 +45,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetAllowedPluginViewers(isset($_REQUEST['Viewers']) ? $_REQUEST['Viewers'] : array());
 		$this->_plugin->settings->SetAllowedPluginEditors(isset($_REQUEST['Editors']) ? $_REQUEST['Editors'] : array());
 		$this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
+		$this->_plugin->settings->ClearDevOptions();
+		foreach($_REQUEST['DevOptions'] as $opt)$this->_plugin->settings->SetDevOptionEnabled($opt, true);
 	}
 	
 	public function AjaxCheckSecurityToken(){
@@ -78,7 +80,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<td>
 							<fieldset>
 								<?php $text = __('(eg: 1 month)'); ?>
-								<input type="radio" id="delete1" style="margin-top: 2px;"/>
+								<!--<input type="radio" id="delete1" style="margin-top: 2px;"/>-->
 								<label for="delete1"><?php echo __('Delete alerts older than'); ?></label>
 								<input type="text" name="PruningDate" placeholder="<?php echo $text; ?>"
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
@@ -92,7 +94,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<fieldset>
 								<?php $max = $this->_plugin->settings->GetMaxAllowedAlerts(); ?>
 								<?php $text = sprintf(__('(1 to %d alerts)'), $max); ?>
-								<input type="radio" id="delete2" style="margin-top: 2px;"/>
+								<!--<input type="radio" id="delete2" style="margin-top: 2px;"/>-->
 								<label for="delete2"><?php echo __('Keep up to'); ?></label>
 								<input type="text" name="PruningLimit" placeholder="<?php echo $text;?>"
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
@@ -189,6 +191,28 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<span class="description"> &mdash; <?php _e('Refresh Audit View only when page is reloaded.'); ?></span>
 								<br/>
 							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th><label><?php _e('Developer Options'); ?></label></th>
+						<td>
+							<fieldset><?php
+								foreach(array(
+									WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array('Data Inspector', 'View data logged for each triggered alert.'),
+									WSAL_Settings::OPT_DEV_PHP_ERRORS     => array('PHP Errors', 'Enables sensor for alerts generated from PHP.'),
+									WSAL_Settings::OPT_DEV_REQUEST_LOG    => array('Request Log', 'Enables logging request to file.'),
+									WSAL_Settings::OPT_DEV_SANDBOX_PAGE   => array('Sandbox', 'Enables sandbox for testing PHP code.'),
+								) as $opt => $info){
+									?><label for="devoption_<?php echo $opt; ?>">
+										<input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
+											if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="<?php echo $opt; ?>">
+										<span><?php _e($info[0]); ?></span>
+										<?php if(isset($info[1]) && $info[1]){ ?>
+											<span class="description"> &mdash; <?php _e($info[1]); ?></span>
+										<?php }
+									?></label><br/><?php
+								}
+							?></fieldset>
 						</td>
 					</tr>
 				</tbody>
