@@ -39,7 +39,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 		}
 		
-		?><form id="audit-log-viewer" method="get">
+		?><form id="audit-log-viewer" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr(isset($_REQUEST['wsal-cbid']) ? $_REQUEST['wsal-cbid'] : ''); ?>" />
 			<?php $this->_listview->prepare_items(); ?>
@@ -315,7 +315,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	}
 	
 	protected function is_specific_view(){
-		return isset($_REQUEST['wsal-cbid']);
+		return isset($_REQUEST['wsal-cbid']) && $_REQUEST['wsal-cbid'] != '0';
 	}
 	
 	protected function get_specific_view(){
