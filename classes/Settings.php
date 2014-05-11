@@ -299,10 +299,23 @@ class WSAL_Settings {
 	 * @return string[] List of admin usernames.
 	 */
 	protected function GetAdmins(){
-		$result = array();
-		$query = 'blog_id=0&role=administrator&fields[]=user_login';
-		foreach (get_users($query) as $user) $result[] = $user->user_login;
-		return $result;
+		if($this->IsMultisite()){
+			// see: https://gist.github.com/1508426/65785a15b8638d43a9905effb59e4d97319ef8f8
+			global $wpdb;
+			$cap = get_current_blog_id();
+			$cap = ($cap < 2) ? 'wp_capabilities' : "wp_{$cap}_capabilities";
+			$sql = "SELECT DISTINCT $wpdb->users.user_login"
+				. " FROM $wpdb->users"
+				. " INNER JOIN $wpdb->usermeta ON ($wpdb->users.ID = $wpdb->usermeta.user_id )"
+				. " WHERE $wpdb->usermeta.meta_key = '$cap'"
+				. " AND CAST($wpdb->usermeta.meta_value AS CHAR) LIKE  '%\"administrator\"%'";
+			return $wpdb->get_col($sql);
+		}else{
+			$result = array();
+			$query = 'role=administrator&fields[]=user_login';
+			foreach (get_users($query) as $user) $result[] = $user->user_login;
+			return $result;
+		}
 	}
 	
 	/**
