@@ -8,6 +8,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
         add_action('edit_user_profile_update', array($this, 'EventUserChanged'));
         add_action('personal_options_update', array($this, 'EventUserChanged'));
         add_action('delete_user', array($this, 'EventUserDeleted'));
+        add_action('wpmu_delete_user', array($this, 'EventUserDeleted'));
 	}
 	
 	protected $old_superadmins;
@@ -106,6 +107,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	
 	public function EventUserDeleted($user_id){
 		$user = get_userdata($user_id);
+		$role = is_array($user->roles) ? implode(', ', $user->roles) : $user->roles;
 		$this->plugin->alerts->Trigger(4007, array(
 			'TargetUserID' => $user_id,
 			'TargetUserData' => (object)array(
@@ -113,7 +115,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				'FirstName' => $user->user_firstname,
 				'LastName' => $user->user_lastname,
 				'Email' => $user->user_email,
-				'Roles' => is_array($user->roles) ? implode(', ', $user->roles) : $user->roles,
+				'Roles' => $role ? $role : 'none',
 			),
 		));
 	}
