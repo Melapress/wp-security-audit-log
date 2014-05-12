@@ -264,7 +264,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return !$info ? ('Unknown Site '.$item->site_id)
 					: ('<a href="' . esc_attr($info->siteurl) . '">' . esc_html($info->blogname) . '</a>');
 			case 'mesg':
-				return $item->GetMessage(array($this, 'meta_formatter'));
+				return '<div id="Event' . $item->id . '">' . $item->GetMessage(array($this, 'meta_formatter')) . '</div>';
 			case 'data':
 				$url = admin_url('admin-ajax.php') . '?action=AjaxInspector&amp;occurrence=' . $item->id;
 				return '<a class="more-info thickbox" title="Alert Data Inspector"'

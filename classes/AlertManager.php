@@ -46,6 +46,39 @@ final class WSAL_AlertManager {
 		}
 	}
 	
+	protected $_pipeline = array();
+	
+	/**
+	 * Trigger only if a condition is met at the end of request.
+	 * @param integer $type Alert type ID.
+	 * @param array $data Alert data.
+	 * @param callable $cond Condition callback.
+	 */
+	public function TriggerIf($type, $data, $cond = null){
+		$this->_pipeline = array(
+			'type' => $type,
+			'data' => $data,
+			'cond' => $cond,
+		);
+	}
+	
+	protected function TriggerPipeline(){
+		foreach($this->_pipeline as $item)
+			if(!$item['cond'] || call_user_func($item['cond'], $this))
+				$this->Trigger($item['type'], $item['data']);
+	}
+	
+	/**
+	 * @param integer $type Alert type ID.
+	 * @return boolean True if at the end of request an alert of this type will be triggered.
+	 */
+	public function WillTrigger($type){
+		foreach($this->_pipeline as $item)
+			if($item['type'] == $type)
+				return true;
+		return false;
+	}
+	
 	/**
 	 * Register an alert type.
 	 * @param array $info Array of [type, code, category, description, message] respectively.
