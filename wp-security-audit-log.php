@@ -9,7 +9,7 @@ Author URI: http://www.wpwhitesecurity.com/
 License: GPL2
 
     WP Security Audit Log
-    Copyright(c) 2013  Robert Abela  (email : robert@wpwhitesecurity.com)
+    Copyright(c) 2014  Robert Abela  (email : robert@wpwhitesecurity.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as

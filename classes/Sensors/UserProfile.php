@@ -36,7 +36,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				'Email' => $user->user_email,
 				'Roles' => is_array($user->roles) ? implode(', ', $user->roles) : $user->roles,
 			),
-		));
+		), true);
 	}
 	
 	public function EventUserChanged($user_id){
@@ -108,7 +108,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	public function EventUserDeleted($user_id){
 		$user = get_userdata($user_id);
 		$role = is_array($user->roles) ? implode(', ', $user->roles) : $user->roles;
-		$this->plugin->alerts->Trigger(4007, array(
+		$this->plugin->alerts->TriggerIf(4007, array(
 			'TargetUserID' => $user_id,
 			'TargetUserData' => (object)array(
 				'Username' => $user->user_login,
@@ -117,7 +117,10 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				'Email' => $user->user_email,
 				'Roles' => $role ? $role : 'none',
 			),
-		));
+		), array($this, 'MustNotContainCreateUser'));
 	}
 	
+	public function MustNotContainCreateUser(WSAL_AlertManager $mgr){
+		return !$mgr->WillTrigger(4012);
+	}
 }

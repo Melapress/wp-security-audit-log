@@ -27,45 +27,66 @@ final class WSAL_AlertManager {
 			$class = $plugin->GetClassFileClassName($file);
 			$this->_loggers[] = new $class($plugin);
 		}
+		
+		add_action('shutdown', array($this, '_CommitPipeline'));
 	}
+	
+	/**
+	 * Contains a list of alerts to trigger.
+	 * @var array
+	 */
+	protected $_pipeline = array();
 	
 	/**
 	 * Trigger an alert.
 	 * @param integer $type Alert type.
 	 * @param array $data Alert data.
 	 */
-	public function Trigger($type, $data = array()){
-		if($this->IsEnabled($type)){
-			if(isset($this->_alerts[$type])){
-				// ok, convert alert to a log entry
-				$this->Log($type, $data);
-			}else{
-				// in general this shouldn't happen, but it could, so we handle it here :)
-				throw new Exception('Alert with code "' . $type . '" has not be registered.');
-			}
+	public function Trigger($type, $data = array(), $delayed = false){
+		if($delayed){
+			$this->TriggerIf($type, $data, null);
+		}else{
+			$this->_CommitItem($type, $data, null);
 		}
 	}
-	
-	protected $_pipeline = array();
 	
 	/**
 	 * Trigger only if a condition is met at the end of request.
 	 * @param integer $type Alert type ID.
 	 * @param array $data Alert data.
-	 * @param callable $cond Condition callback.
+	 * @param callable $cond A future condition callback (receives an object of type WSAL_AlertManager as parameter).
 	 */
 	public function TriggerIf($type, $data, $cond = null){
-		$this->_pipeline = array(
+		$this->_pipeline[] = array(
 			'type' => $type,
 			'data' => $data,
 			'cond' => $cond,
 		);
 	}
 	
-	protected function TriggerPipeline(){
+	/**
+	 * @internal Commit an alert now.
+	 */
+	protected function _CommitItem($type, $data, $cond){
+		if(!$cond || !!call_user_func($cond, $this)){
+			if($this->IsEnabled($type)){
+				if(isset($this->_alerts[$type])){
+					// ok, convert alert to a log entry
+					$this->Log($type, $data);
+				}else{
+					// in general this shouldn't happen, but it could, so we handle it here :)
+					throw new Exception('Alert with code "' . $type . '" has not be registered.');
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @internal Runs over triggered alerts in pipeline and passes them to loggers.
+	 */
+	public function _CommitPipeline(){
 		foreach($this->_pipeline as $item)
-			if(!$item['cond'] || call_user_func($item['cond'], $this))
-				$this->Trigger($item['type'], $item['data']);
+			$this->_CommitItem($item['type'], $item['data'], $item['cond']);
 	}
 	
 	/**
