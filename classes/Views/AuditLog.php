@@ -319,7 +319,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	}
 	
 	protected function get_specific_view(){
-		return (int)$_REQUEST['wsal-cbid'];
+		return isset($_REQUEST['wsal-cbid']) ? (int)$_REQUEST['wsal-cbid'] : 0;
 	}
 	
 	protected function get_view_site_id(){
