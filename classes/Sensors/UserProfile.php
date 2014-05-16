@@ -43,9 +43,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		$user = get_userdata($user_id);
 		
 		// roles changed
-        if(!empty($_POST['role'])){
+        if(!empty($_REQUEST['role'])){
 			$oldRole = count($user->roles) ? $user->roles[0] : '';
-            $newRole = trim($_POST['role']);
+            $newRole = trim($_REQUEST['role']);
             if($oldRole != $newRole){
 				$this->plugin->alerts->Trigger(4002, array(
 					'TargetUserID' => $user_id,
@@ -57,7 +57,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
         }
 
         // password changed
-        if(!empty($_POST['pass1'])){
+        if(!empty($_REQUEST['pass1'])){
 			$event = $user_id == get_current_user_id() ? 4003 : 4004;
 			$this->plugin->alerts->Trigger($event, array(
 				'TargetUserID' => $user_id,
@@ -69,9 +69,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
         }
 
         // email changed
-        if(!empty($_POST['email'])){
+        if(!empty($_REQUEST['email'])){
 			$oldEmail = $user->user_email;
-            $newEmail = trim($_POST['email']);
+            $newEmail = trim($_REQUEST['email']);
             if($oldEmail != $newEmail){
 				$event = $user_id == get_current_user_id() ? 4005 : 4006;
 				$this->plugin->alerts->Trigger($event, array(
@@ -87,20 +87,24 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			$username = $user->user_login;
 			$enabled = isset($_REQUEST['super_admin']);
 			
-			// super admin enabled
-			if($enabled && !in_array($username, $this->old_superadmins)){
-				$this->plugin->alerts->Trigger(4008, array(
-					'TargetUserID' => $user_id,
-					'TargetUsername' => $user->user_login,
-				));
-			}
+			if($user_id != get_current_user_id()){
+				
+				// super admin enabled
+				if($enabled && !in_array($username, $this->old_superadmins)){
+					$this->plugin->alerts->Trigger(4008, array(
+						'TargetUserID' => $user_id,
+						'TargetUsername' => $user->user_login,
+					));
+				}
 
-			// super admin disabled
-			if(!$enabled && in_array($username, $this->old_superadmins)){
-				$this->plugin->alerts->Trigger(4009, array(
-					'TargetUserID' => $user_id,
-					'TargetUsername' => $user->user_login,
-				));
+				// super admin disabled
+				if(!$enabled && in_array($username, $this->old_superadmins)){
+					$this->plugin->alerts->Trigger(4009, array(
+						'TargetUserID' => $user_id,
+						'TargetUsername' => $user->user_login,
+					));
+				}
+				
 			}
 		}
 	}
