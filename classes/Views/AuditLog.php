@@ -168,7 +168,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		
 		?><div class="wsal-ipp wsal-ipp-<?php echo $which; ?>">
 			<?php _e('Show '); ?>
-			<select class="wsal-ipps">
+			<select class="wsal-ipps" onfocus="WsalIppsFocus(value);" onchange="WsalIppsChange(value);">
 				<?php foreach($items as $item){ ?>
 					<option
 						value="<?php echo is_string($item) ? '' : $item; ?>"
@@ -186,7 +186,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			$curr = $this->get_view_site_id();
 			$sites = wp_get_sites();
 			?><div class="wsal-ssa wsal-ssa-<?php echo $which; ?>">
-				<select class="wsal-ssas">
+				<select class="wsal-ssas" onchange="WsalSsasChange(value);">
 					<option value="0"><?php _e('All Sites'); ?></option>
 					<?php foreach($sites as $site){ ?>
 						<?php $info = get_blog_details($site['blog_id'], true); ?>

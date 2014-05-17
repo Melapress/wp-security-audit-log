@@ -1,5 +1,7 @@
+var WsalData;
 
-function WsalAuditLogInit(WsalData){
+function WsalAuditLogInit(_WsalData){
+	WsalData = _WsalData;
 	var WsalTkn = WsalData.autorefresh.token;
 	
 	// list refresher
@@ -22,30 +24,30 @@ function WsalAuditLogInit(WsalData){
 		setInterval(WsalChk, 40000);
 		WsalChk();
 	}
-	
-	var prev;
-	jQuery('select.wsal-ipps')
-		.focus(function(){
-			prev = this.value;
-		})
-		.change(function(){
-			var val = this.value;
-			if(val===''){
-				val = window.prompt(WsalData.tr8n.numofitems, prev);
-				if(val === null || val === prev)return this.value = prev; // operation canceled
-			}
-			jQuery('select.wsal-ipps').attr('disabled', true);
-			jQuery.post(WsalData.ajaxurl, {
-				action: 'AjaxSetIpp',
-				count: val
-			}, function(){
-				location.reload();
-			});
-		});
-	
-	jQuery('select.wsal-ssas').change(function(){
-		jQuery('select.wsal-ssas').attr('disabled', true);
-		jQuery('#wsal-cbid').val(this.value);
-		jQuery('#audit-log-viewer').submit();
+}
+
+var WsalIppsPrev;
+
+function WsalIppsFocus(value){
+	WsalIppsPrev = value;
+}
+
+function WsalIppsChange(value){
+	if(value === ''){
+		value = window.prompt(WsalData.tr8n.numofitems, WsalIppsPrev);
+		if(value === null || value === WsalIppsPrev)return this.value = WsalIppsPrev; // operation canceled
+	}
+	jQuery('select.wsal-ipps').attr('disabled', true);
+	jQuery.post(WsalData.ajaxurl, {
+		action: 'AjaxSetIpp',
+		count: value
+	}, function(){
+		location.reload();
 	});
+}
+
+function WsalSsasChange(value){
+	jQuery('select.wsal-ssas').attr('disabled', true);
+	jQuery('#wsal-cbid').val(value);
+	jQuery('#audit-log-viewer').submit();
 }
