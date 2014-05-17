@@ -46,12 +46,12 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		$oldRole = count($oldRoles) ? implode(', ', $oldRoles) : '';
 		$newRole = $role;
 		if($oldRole != $newRole){
-			$this->plugin->alerts->TriggerIf(4002, array(
+			$this->plugin->alerts->Trigger(4002, array(
 				'TargetUserID' => $user_id,
 				'TargetUsername' => $user->user_login,
 				'OldRole' => $oldRole,
 				'NewRole' => $newRole,
-			), array($this, 'MustNotContainChangeRole'));
+			));
 		}
 	}
 
@@ -59,7 +59,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		$user = get_userdata($user_id);
 		
 		// roles changed
-        if(!empty($_REQUEST['role'])){
+        /*if(!empty($_REQUEST['role'])){
 			$oldRole = count($user->roles) ? $user->roles[0] : '';
             $newRole = trim($_REQUEST['role']);
             if($oldRole != $newRole){
@@ -70,7 +70,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 					'NewRole' => $newRole,
 				), true);
             }
-        }
+        }*/
 
         // password changed
         if(!empty($_REQUEST['pass1'])){
@@ -142,9 +142,5 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	
 	public function MustNotContainCreateUser(WSAL_AlertManager $mgr){
 		return !$mgr->WillTrigger(4012);
-	}
-	
-	public function MustNotContainChangeRole(WSAL_AlertManager $mgr){
-		return !$mgr->WillTrigger(4002);
 	}
 }

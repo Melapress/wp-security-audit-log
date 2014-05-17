@@ -3,7 +3,7 @@ Contributors: WPWhiteSecurity, uuf6429
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, wordpress security monitor, analytics, activity, admin, multisite, wordpress multisite
-Requires at least: 3.1
+Requires at least: 3.6
 Tested up to: 3.9.1
 Stable tag: 1.0.0
 
