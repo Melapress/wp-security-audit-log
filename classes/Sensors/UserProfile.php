@@ -9,6 +9,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
         add_action('personal_options_update', array($this, 'EventUserChanged'));
         add_action('delete_user', array($this, 'EventUserDeleted'));
         add_action('wpmu_delete_user', array($this, 'EventUserDeleted'));
+        add_action('set_user_role', array($this, 'EventUserRoleChanged'), 10, 3);
 	}
 	
 	protected $old_superadmins;
@@ -39,6 +40,21 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		), true);
 	}
 	
+	public function EventUserRoleChanged($user_id, $role, $oldRoles){
+		$user = get_userdata($user_id);
+		
+		$oldRole = count($oldRoles) ? implode(', ', $oldRoles) : '';
+		$newRole = $role;
+		if($oldRole != $newRole){
+			$this->plugin->alerts->TriggerIf(4002, array(
+				'TargetUserID' => $user_id,
+				'TargetUsername' => $user->user_login,
+				'OldRole' => $oldRole,
+				'NewRole' => $newRole,
+			), array($this, 'MustNotContainChangeRole'));
+		}
+	}
+
 	public function EventUserChanged($user_id){
 		$user = get_userdata($user_id);
 		
@@ -52,7 +68,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 					'TargetUsername' => $user->user_login,
 					'OldRole' => $oldRole,
 					'NewRole' => $newRole,
-				));
+				), true);
             }
         }
 
@@ -126,5 +142,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	
 	public function MustNotContainCreateUser(WSAL_AlertManager $mgr){
 		return !$mgr->WillTrigger(4012);
+	}
+	
+	public function MustNotContainChangeRole(WSAL_AlertManager $mgr){
+		return !$mgr->WillTrigger(4002);
 	}
 }
