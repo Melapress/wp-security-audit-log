@@ -289,7 +289,7 @@ abstract class WSAL_DB_ActiveRecord {
 		$temp = new $class();
 		$sql = $wpdb->prepare('SELECT * FROM ' . $temp->GetTable() . ' WHERE '.$cond, $args);
 		foreach($wpdb->get_results($sql, ARRAY_A) as $data){
-			$callback(new $class($data));
+			call_user_func($callback, new $class($data));
 		}
 	}
 	
