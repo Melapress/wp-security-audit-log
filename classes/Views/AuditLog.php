@@ -256,7 +256,11 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			case 'crtd':
 				return $item->created_on ? date('Y-m-d h:i:s A', $item->created_on) : '<i>unknown</i>';
 			case 'user':
-				return !is_null($item->GetUsername()) ? esc_html($item->GetUsername()) : '<i>unknown</i>';
+				$user = $item->GetUsername();
+				$usid = get_userdatabylogin($user ? $user : 0);
+				$usid = $usid ? $usid->ID : 0;
+				$uimg = get_avatar($usid, 96);
+				return !is_null($user) ? esc_html($user) : '<i>unknown</i>';
 			case 'scip':
 				return !is_null($item->GetSourceIP()) ? esc_html($item->GetSourceIP()) : '<i>unknown</i>';
 			case 'site':

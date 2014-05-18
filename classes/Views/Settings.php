@@ -46,7 +46,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetAllowedPluginEditors(isset($_REQUEST['Editors']) ? $_REQUEST['Editors'] : array());
 		$this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
 		$this->_plugin->settings->ClearDevOptions();
-		foreach($_REQUEST['DevOptions'] as $opt)$this->_plugin->settings->SetDevOptionEnabled($opt, true);
+		if(isset($_REQUEST['DevOptions']))
+			foreach($_REQUEST['DevOptions'] as $opt)
+				$this->_plugin->settings->SetDevOptionEnabled($opt, true);
 	}
 	
 	public function AjaxCheckSecurityToken(){
