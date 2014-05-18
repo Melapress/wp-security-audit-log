@@ -259,16 +259,27 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	
 	protected function CheckStatusChange($oldpost, $newpost){
         if($oldpost->post_status != $newpost->post_status){
-			$event = $this->GetEventTypeForPostType($oldpost, 2021, 2022, 2039);
-			$this->plugin->alerts->Trigger($event, array(
-				'PostID' => $oldpost->ID,
-				'PostType' => $oldpost->post_type,
-				'PostTitle' => $oldpost->post_title,
-				'OldStatus' => $oldpost->post_status,
-				'NewStatus' => $newpost->post_status,
-			));
+			if(isset($_REQUEST['publish'])){
+				// special case (publishing a post)
+				$event = $this->GetEventTypeForPostType($oldpost, 2001, 2005, 2030);
+				$this->plugin->alerts->Trigger($event, array(
+					'PostID' => $newpost->ID,
+					'PostType' => $newpost->post_type,
+					'PostTitle' => $newpost->post_title,
+					'PostUrl' => get_permalink($newpost->ID),
+				));
+			}else{
+				$event = $this->GetEventTypeForPostType($oldpost, 2021, 2022, 2039);
+				$this->plugin->alerts->Trigger($event, array(
+					'PostID' => $oldpost->ID,
+					'PostType' => $oldpost->post_type,
+					'PostTitle' => $oldpost->post_title,
+					'OldStatus' => $oldpost->post_status,
+					'NewStatus' => $newpost->post_status,
+				));
+			}
 			return 1;
-        }
+		}
 	}
 	
 	protected function CheckParentChange($oldpost, $newpost){
