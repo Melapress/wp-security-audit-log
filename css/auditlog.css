@@ -29,7 +29,13 @@
 }
 
 .column-user {
-	width: 110px;
+	width: 160px;
+	font-size: 75% !important;
+}
+
+.column-user img {
+	float: left;
+	margin-right: 4px;
 }
 
 .column-scip {

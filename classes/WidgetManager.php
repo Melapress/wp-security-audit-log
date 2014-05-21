@@ -31,7 +31,8 @@ class WSAL_WidgetManager {
 			if(!count($results)){
 				?><p><?php _e('No alerts found.'); ?></p><?php
 			}else{
-				?><table class="wp-list-table widefat" cellspacing="0" cellpadding="0">
+				?><table class="wp-list-table widefat" cellspacing="0" cellpadding="0"
+					   style="display: block; overflow-x: auto;">
 					<thead>
 						<th class="manage-column" style="width: 15%;" scope="col"><?php _e('User'); ?></th>
 						<th class="manage-column" style="width: 85%;" scope="col"><?php _e('Description'); ?></th>
