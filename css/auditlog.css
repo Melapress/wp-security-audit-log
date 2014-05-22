@@ -30,6 +30,9 @@
 
 .column-user {
 	width: 160px;
+}
+
+td.column-user {
 	font-size: 75% !important;
 }
 

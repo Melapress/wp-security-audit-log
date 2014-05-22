@@ -17,7 +17,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 	
 	public function GetTitle() {
-		return 'Audit Log Viewer';
+		return __('Audit Log Viewer');
 	}
 	
 	public function GetIcon() {
@@ -27,7 +27,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 	
 	public function GetName() {
-		return 'Audit Log Viewer';
+		return __('Audit Log Viewer');
 	}
 	
 	public function GetWeight(){
@@ -261,11 +261,14 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 					$image = get_avatar($user->ID, 32);
 					$uhtml = '<a href="' . admin_url('user-edit.php?user_id=' . $user->ID)
 							. '" target="_blank">' . esc_html($user->display_name) . '</a>';
-					$roles = esc_html(ucwords(implode(', ', $user->roles)));
+					$roles = $item->GetUserRoles();
+					$roles = (is_array($roles) && count($roles))
+							? esc_html(ucwords(implode(', ', $roles)))
+							: '<i>' . __('Unknown') . '</i>';
 				}else{
 					$image = get_avatar(0, 32);
-					$uhtml = '<i>Unknown</i>';
-					$roles = '<i>System</i>';
+					$uhtml = '<i>' . __('Unknown') . '</i>';
+					$roles = '<i>' . __('System') . '</i>';
 				}
 				return $image . $uhtml . '<br/>' . $roles;
 			case 'scip':
@@ -278,7 +281,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return '<div id="Event' . $item->id . '">' . $item->GetMessage(array($this, 'meta_formatter')) . '</div>';
 			case 'data':
 				$url = admin_url('admin-ajax.php') . '?action=AjaxInspector&amp;occurrence=' . $item->id;
-				return '<a class="more-info thickbox" title="Alert Data Inspector"'
+				return '<a class="more-info thickbox" title="' . __('Alert Data Inspector') . '"'
 					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
 			default:
 				return isset($item->$column_name)

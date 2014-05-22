@@ -3,7 +3,7 @@
 class WSAL_Views_Help extends WSAL_AbstractView {
 	
 	public function GetTitle() {
-		return 'Help';
+		return __('Help');
 	}
 	
 	public function GetIcon() {
@@ -11,7 +11,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	}
 	
 	public function GetName() {
-		return 'Help';
+		return __('Help');
 	}
 	
 	public function GetWeight() {

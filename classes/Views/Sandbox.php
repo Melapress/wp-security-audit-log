@@ -8,7 +8,7 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	}
 	
 	public function GetTitle() {
-		return 'Sandbox';
+		return __('Sandbox');
 	}
 	
 	public function GetIcon() {
@@ -16,7 +16,7 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	}
 	
 	public function GetName() {
-		return 'Sandbox';
+		return __('Sandbox');
 	}
 	
 	public function GetWeight() {

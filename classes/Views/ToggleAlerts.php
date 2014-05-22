@@ -3,7 +3,7 @@
 class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	
 	public function GetTitle() {
-		return 'Enable/Disable Alerts';
+		return __('Enable/Disable Alerts');
 	}
 	
 	public function GetIcon() {
@@ -11,7 +11,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	}
 	
 	public function GetName() {
-		return 'Enable/Disable Alerts';
+		return __('Enable/Disable Alerts');
 	}
 	
 	public function GetWeight() {
@@ -73,10 +73,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								$attrs = '';
 								switch(true){
 									case !$alert->mesg:
-										$attrs = ' title="Not Implemented" class="alert-incomplete"';
+										$attrs = ' title="'. __('Not Implemented') . '" class="alert-incomplete"';
 										break;
 									case false:
-										$attrs = ' title="Not Available" class="alert-unavailable"';
+										$attrs = ' title="'. __('Not Available') . '" class="alert-unavailable"';
 										break;
 								}
 								?><tr<?php echo $attrs; ?>>
@@ -90,7 +90,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					</table><?php
 				}
 			?></div>
-			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes"></p>
+			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr(__('Save Changes')); ?>"></p>
 		</form><?php
 	}
 	

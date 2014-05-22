@@ -192,6 +192,9 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		return parent::Delete();
 	}
 	
+	/**
+	 * @return string User's username.
+	 */
 	public function GetUsername(){
 		$meta = $this->GetFirstNamedMeta(array('Username', 'CurrentUserID'));
 		if($meta){
@@ -205,8 +208,18 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		return null;
 	}
 	
+	/**
+	 * @return string IP address of request.
+	 */
 	public function GetSourceIP(){
 		return $this->GetMetaValue('ClientIP', '');
+	}
+	
+	/**
+	 * @return array Array of user roles.
+	 */
+	public function GetUserRoles(){
+		return $this->GetMetaValue('CurrentUserRoles', array());
 	}
 	
 }

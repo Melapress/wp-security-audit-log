@@ -169,6 +169,8 @@ final class WSAL_AlertManager {
 			$data['UserAgent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
 		if(!isset($data['CurrentUserID']))
 			$data['CurrentUserID'] = function_exists('get_current_user_id') ? get_current_user_id() : 0;
+		if(is_user_logged_in())
+			$data['CurrentUserRoles'] = wp_get_current_user()->roles;
 		
 		foreach($this->_loggers as $logger)
 			$logger->Log($type, $data);

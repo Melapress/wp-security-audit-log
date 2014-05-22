@@ -12,7 +12,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	public function GetTitle() {
-		return 'Settings';
+		return __('Settings');
 	}
 	
 	public function GetIcon() {
@@ -20,7 +20,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	public function GetName() {
-		return 'Settings';
+		return __('Settings');
 	}
 	
 	public function GetWeight() {
