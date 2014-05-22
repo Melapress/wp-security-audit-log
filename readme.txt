@@ -55,11 +55,6 @@ For more information about the features for WordPress Multisite network installa
 = WordPress Security Audit Log in your Language! =
 We need help translating the plugin and the WordPress Security Events. If you're good at translating, please drop us an email on plugins@wpwhitesecurity.com.
 
-= WordPress & PHP Errors Monitoring Tools =
-Plugins and themes customizations are most probably the norm of the day on large WordPress websites, not to mention the installation of new plugins and components. Unforunately sometimes such changes create problems and it is not always easy and possible to setup real live scenarios and replicate specific problems or bugs.
-
-With WP Security Audit Log now it is easier than ever before to monitor your plugins', theme's and other code behaviour, it will generate a alert when a PHP error, warning, exception or shutdown is detected. It is also possible to log all HTTP GET and POST requests that are reaching your WordPress installation to a log file with WP Security Audit Log. Simply enable the PHP Errors monitoring or logging from the plugins settings.
-
 = WordPress Security Tips & Tricks =
 Even if WordPress security is not your cup of tea, the security of your WordPress is your responsibility. Keep yourself up to date with the latest WordPress Security Tips & Tricks. WP White Security frequently publishes WordPress security tips & tricks on the [WordPress Security section](http://www.wpwhitesecurity.com/wordpress-security/) of their blog.
 
@@ -104,7 +99,7 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 
 == Changelog ==
 
-= 1.0 (2014-05-20) =
+= 1.0 (2014-05-15) =
 * Complete plugin rewrite making the new version more stable and scalable
 
 * New Features
@@ -112,7 +107,7 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
   * Auto refresh of security alerts - WordPress administrators do not need to refresh the Audit Log Viewer page to see new alerts
   * Data Inspector reports more insider information about each alert (can be enabled from settings)
   * Sandbox allows developers to execute PHP code for troubleshooting (can be enabled from settings)
-  * Request Log that logs all HTTP GET and POST requests done on WordPress (can be enabled from settings)
+  * Request Log that logs all requests done on WordPress (can be enabled from settings)
   * Logging of PHP Errors; ideal for developers who want to monitor WordPress for any errors (can be enabled from settings)
   * New Support and About Us page that you should check out!
   
@@ -126,16 +121,6 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
   * Alert 5006: User activated a theme
   * Alert 6004: User upgraded WordPress
   * Alert 6005: User changed the WordPress permalinks
-  
-* New WordPress Developer Alerts
-  * Alert 0000: Unknown error
-  * Alert 0001: PHP Error
-  * Alert 0002: PHP Warning
-  * Alert 0003: PHP Notice
-  * Alert 0004: PHP Exception
-  * Alert 0005: PHP Shutdown Error
-  
-* For more information about what is new and changed in this version of the plugin refer to the [WP Security Audit Log release notes](http://www.wpwhitesecurity.com/wordpress-plugins/easy-wordpress-security-monitor-wp-security-audit-log-plugin).
 
 = 0.6.3 (2014-02-18) =
 * Bug Fix
