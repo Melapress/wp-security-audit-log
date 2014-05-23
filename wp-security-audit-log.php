@@ -5,6 +5,7 @@ Plugin URI: http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-securit
 Description: Identify WordPress security issues before they become a problem and keep track of everything happening on your WordPress, including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log will generate a security alert for everything that happens on your WordPress blog or website. Use the Audit Log Viewer included in the plugin to see all the security alerts.
 Author: WP White Security
 Version: 1.0.0
+Text Domain: wp-security-audit-log
 Author URI: http://www.wpwhitesecurity.com/
 License: GPL2
 
@@ -104,11 +105,18 @@ class WpSecurityAuditLog {
 		// listen for cleanup event
 		add_action('wsal_cleanup', array($this, 'CleanUp'));
 		//add_action('init', array($this, 'CleanUp'));
+		
+		// internationalize plugin
+		add_action('plugins_loaded', array($this, 'LoadPluginTextdomain'));
 	}
 	
 	public function CleanUp(){
 		foreach($this->_cleanup_hooks as $hook)
 			call_user_func($hook);
+	}
+	
+	public function LoadPluginTextdomain(){
+		load_plugin_textdomain('wp-security-audit-log', false, $this->GetBaseDir() . '/languages/');
 	}
 	
 	public function AddCleanupHook($hook){
