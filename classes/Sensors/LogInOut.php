@@ -18,8 +18,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	
 	public function EventLoginFailure($username){
 		list($y, $m, $d) = explode('-', date('Y-m-d'));
+		
 		$tt1 = new WSAL_DB_Occurrence();
 		$tt2 = new WSAL_DB_Meta();
+		
 		$occ = WSAL_DB_Occurrence::LoadMultiQuery('
 			SELECT * FROM `' . $tt1->GetTable() . '`
 			WHERE alert_id = %d AND site_id = %d
@@ -40,6 +42,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			json_encode(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''),
 			json_encode($username),
 		));
+		
 		$occ = count($occ) ? $occ[0] : null;
 		
 		if($occ && $occ->IsLoaded()){
