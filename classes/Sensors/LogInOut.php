@@ -18,13 +18,15 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	
 	public function EventLoginFailure($username){
 		list($y, $m, $d) = explode('-', date('Y-m-d'));
+		$tt1 = new WSAL_DB_Occurrence();
+		$tt2 = new WSAL_DB_Meta();
 		$occ = WSAL_DB_Occurrence::LoadMultiQuery('
-			SELECT * FROM `wp_wsal_occurrences` 
+			SELECT * FROM `' . $tt1->GetTable() . '`
 			WHERE alert_id = %d AND site_id = %d
 				AND (created_on BETWEEN %d AND %d)
 				AND id IN (
 					SELECT occurrence_id as id
-					FROM wp_wsal_metadata
+					FROM `' . $tt2->GetTable() . '`
 					WHERE (name = "ClientIP" AND value = %s)
 					   OR (name = "Username" AND value = %s)
 					GROUP BY occurrence_id
