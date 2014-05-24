@@ -131,8 +131,8 @@ WpSecurityAuditLog::GetInstance()
 		'MultiSite' => array(
 			array(4008, E_CRITICAL, __('User granted Super Admin privileges'), __('Granted Super Admin privileges to %TargetUsername%')),
 			array(4009, E_CRITICAL, __('User revoked from Super Admin privileges'), __('Revoked Super Admin privileges from %TargetUsername%')),
-			array(4010, E_CRITICAL, __('Existing user added to a site'), __('Added existing user %Username% with %UserRole% role to site %SiteName%')),
-			array(4011, E_CRITICAL, __('User removed from site'), __('Removed user %Username% with role %UserRole% from %SiteName% site')),
+			array(4010, E_CRITICAL, __('Existing user added to a site'), __('Added existing user %TargetUsername% with %TargetUserRole% role to site %SiteName%')),
+			array(4011, E_CRITICAL, __('User removed from site'), __('Removed user %TargetUsername% with role %TargetUserRole% from %SiteName% site')),
 			array(4012, E_CRITICAL, __('New network user created'), __('Created a new network user %NewUserData->Username%')),
 			array(7000, E_CRITICAL, __('New site added on network'), __('Added site %SiteName% to the network')),
 			array(7001, E_CRITICAL, __('Existing site archived'), __('Archived site %SiteName%')),

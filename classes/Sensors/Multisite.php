@@ -57,9 +57,9 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	
 	public function EventUserAddedToBlog($user_id, $role, $blog_id){
 		$this->plugin->alerts->TriggerIf(4010, array(
-			'UserID' => $user_id,
-			'Username' => get_userdata($user_id)->user_login,
-			'UserRole' => $role,
+			'TargetUserID' => $user_id,
+			'TargetUsername' => get_userdata($user_id)->user_login,
+			'TargetUserRole' => $role,
 			'BlogID' => $blog_id,
 			'SiteName' => get_blog_option($blog_id, 'blogname'),
 		), array($this, 'MustNotContainCreateUser'));
@@ -69,9 +69,9 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 		$user = get_userdata($user_id);
         $blog_id = (isset($_REQUEST['id']) ? $_REQUEST['id'] : 0);
 		$this->plugin->alerts->TriggerIf(4011, array(
-			'UserID' => $user_id,
-			'Username' => $user->user_login,
-			'UserRole' => is_array($user->roles) ? implode(', ', $user->roles) : $user->roles,
+			'TargetUserID' => $user_id,
+			'TargetUsername' => $user->user_login,
+			'TargetUserRole' => is_array($user->roles) ? implode(', ', $user->roles) : $user->roles,
 			'BlogID' => $blog_id,
 			'SiteName' => get_blog_option($blog_id, 'blogname'),
 		), array($this, 'MustNotContainCreateUser'));
