@@ -145,7 +145,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	}
 	
 	public function MustNotContainUserChanges(WSAL_AlertManager $mgr){
-		return !(  $mgr->WillOrHasTriggered(4012)
+		return !(  $mgr->WillOrHasTriggered(4010)
+				|| $mgr->WillOrHasTriggered(4012)
 				|| $mgr->WillOrHasTriggered(4000)
 				|| $mgr->WillOrHasTriggered(4001)
 			);
