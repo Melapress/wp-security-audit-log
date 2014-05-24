@@ -56,24 +56,28 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	}
 	
 	public function EventUserAddedToBlog($user_id, $role, $blog_id){
-		$this->plugin->alerts->Trigger(4010, array(
+		$this->plugin->alerts->TriggerIf(4010, array(
 			'UserID' => $user_id,
 			'Username' => get_userdata($user_id)->user_login,
 			'UserRole' => $role,
 			'BlogID' => $blog_id,
 			'SiteName' => get_blog_option($blog_id, 'blogname'),
-		), true);
+		), array($this, 'MustNotContainCreateUser'));
 	}
 	
 	public function EventUserRemovedFromBlog($user_id){
 		$user = get_userdata($user_id);
         $blog_id = (isset($_REQUEST['id']) ? $_REQUEST['id'] : 0);
-		$this->plugin->alerts->Trigger(4011, array(
+		$this->plugin->alerts->TriggerIf(4011, array(
 			'UserID' => $user_id,
 			'Username' => $user->user_login,
 			'UserRole' => is_array($user->roles) ? implode(', ', $user->roles) : $user->roles,
 			'BlogID' => $blog_id,
 			'SiteName' => get_blog_option($blog_id, 'blogname'),
-		), true);
+		), array($this, 'MustNotContainCreateUser'));
+	}
+	
+	public function MustNotContainCreateUser(WSAL_AlertManager $mgr){
+		return !$mgr->WillTrigger(4012);
 	}
 }
