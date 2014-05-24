@@ -62,7 +62,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 			'UserRole' => $role,
 			'BlogID' => $blog_id,
 			'SiteName' => get_blog_option($blog_id, 'blogname'),
-		));
+		), true);
 	}
 	
 	public function EventUserRemovedFromBlog($user_id){
@@ -74,6 +74,6 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 			'UserRole' => is_array($user->roles) ? implode(', ', $user->roles) : $user->roles,
 			'BlogID' => $blog_id,
 			'SiteName' => get_blog_option($blog_id, 'blogname'),
-		));
+		), true);
 	}
 }

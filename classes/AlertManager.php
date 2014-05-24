@@ -38,6 +38,12 @@ final class WSAL_AlertManager {
 	protected $_pipeline = array();
 	
 	/**
+	 * Contains an array of alerts that have been triggered for this request.
+	 * @var int[]
+	 */
+	protected $_triggered_types = array();
+	
+	/**
 	 * Trigger an alert.
 	 * @param integer $type Alert type.
 	 * @param array $data Alert data.
@@ -64,6 +70,7 @@ final class WSAL_AlertManager {
 		);
 	}
 	
+	
 	/**
 	 * @internal Commit an alert now.
 	 */
@@ -72,6 +79,7 @@ final class WSAL_AlertManager {
 			if($this->IsEnabled($type)){
 				if(isset($this->_alerts[$type])){
 					// ok, convert alert to a log entry
+					$this->_triggered_types[] = $type;
 					$this->Log($type, $data);
 				}else{
 					// in general this shouldn't happen, but it could, so we handle it here :)
@@ -98,6 +106,15 @@ final class WSAL_AlertManager {
 			if($item['type'] == $type)
 				return true;
 		return false;
+	}
+	
+	/**
+	 * @param int $type Alert type ID.
+	 * @return boolean True if an alert has been or will be triggered in this request, false otherwise.
+	 */
+	public function WillOrHasTriggered($type){
+		return in_array($type, $this->_triggered_types)
+				|| $this->WillTrigger($type);
 	}
 	
 	/**

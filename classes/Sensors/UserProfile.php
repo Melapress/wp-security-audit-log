@@ -46,12 +46,12 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		$oldRole = count($oldRoles) ? implode(', ', $oldRoles) : '';
 		$newRole = $role;
 		if($oldRole != $newRole){
-			$this->plugin->alerts->Trigger(4002, array(
+			$this->plugin->alerts->TriggerIf(4002, array(
 				'TargetUserID' => $user_id,
 				'TargetUsername' => $user->user_login,
 				'OldRole' => $oldRole,
 				'NewRole' => $newRole,
-			));
+			), array($this, 'MustNotContainUserChanges'));
 		}
 	}
 
@@ -142,5 +142,14 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	
 	public function MustNotContainCreateUser(WSAL_AlertManager $mgr){
 		return !$mgr->WillTrigger(4012);
+	}
+	
+	public function MustNotContainUserChanges(WSAL_AlertManager $mgr){
+		return !(  $mgr->WillOrHasTriggered(4010)
+				|| $mgr->WillOrHasTriggered(4011)
+				|| $mgr->WillOrHasTriggered(4012)
+				|| $mgr->WillOrHasTriggered(4000)
+				|| $mgr->WillOrHasTriggered(4001)
+			);
 	}
 }
