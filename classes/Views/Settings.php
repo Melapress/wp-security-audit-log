@@ -12,7 +12,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	public function GetTitle() {
-		return __('Settings');
+		return __('Settings', 'mah-domain');
 	}
 	
 	public function GetIcon() {
@@ -20,7 +20,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	public function GetName() {
-		return __('Settings');
+		return __('Settings', 'mah-domain');
 	}
 	
 	public function GetWeight() {
@@ -61,14 +61,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	
 	public function Render(){
 		if(!$this->_plugin->settings->CurrentUserCan('edit')){
-			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+			wp_die( __( 'You do not have sufficient permissions to access this page.' , 'mah-domain') );
 		}
 		if(isset($_POST['submit'])){
 			try {
 				$this->Save();
-				?><div class="updated"><p><?php _e('Settings have been saved.'); ?></p></div><?php
+				?><div class="updated"><p><?php _e('Settings have been saved.', 'mah-domain'); ?></p></div><?php
 			}catch(Exception $ex){
-				?><div class="error"><p><?php _e('Error: '); ?><?php echo $ex->getMessage(); ?></p></div><?php
+				?><div class="error"><p><?php _e('Error: ', 'mah-domain'); ?><?php echo $ex->getMessage(); ?></p></div><?php
 			}
 		}
 		?><form id="audit-log-settings" method="post">
@@ -78,12 +78,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			<table class="form-table">
 				<tbody>
 					<tr>
-						<th><label for="delete1"><?php _e('Security Alerts Pruning'); ?></label></th>
+						<th><label for="delete1"><?php _e('Security Alerts Pruning', 'mah-domain'); ?></label></th>
 						<td>
 							<fieldset>
-								<?php $text = __('(eg: 1 month)'); ?>
+								<?php $text = __('(eg: 1 month)', 'mah-domain'); ?>
 								<!--<input type="radio" id="delete1" style="margin-top: 2px;"/>-->
-								<label for="delete1"><?php echo __('Delete alerts older than'); ?></label>
+								<label for="delete1"><?php echo __('Delete alerts older than', 'mah-domain'); ?></label>
 								<input type="text" name="PruningDate" placeholder="<?php echo $text; ?>"
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
 								<span> <?php echo $text; ?></span>
@@ -95,36 +95,36 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<td>
 							<fieldset>
 								<?php $max = $this->_plugin->settings->GetMaxAllowedAlerts(); ?>
-								<?php $text = sprintf(__('(1 to %d alerts)'), $max); ?>
+								<?php $text = sprintf(__('(1 to %d alerts)', 'mah-domain'), $max); ?>
 								<!--<input type="radio" id="delete2" style="margin-top: 2px;"/>-->
-								<label for="delete2"><?php echo __('Keep up to'); ?></label>
+								<label for="delete2"><?php echo __('Keep up to', 'mah-domain'); ?></label>
 								<input type="text" name="PruningLimit" placeholder="<?php echo $text;?>"
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
 								<span><?php echo $text; ?></span>
 								<p class="description"><?php
-									echo sprintf(__('By default we keep up to %d WordPress Security Events.'), $max);
+									echo sprintf(__('By default we keep up to %d WordPress Security Events.', 'mah-domain'), $max);
 								?></p>
 							</fieldset>
 						</td>
 					</tr>
 					<tr>
-						<th><label for="dwoption_on"><?php _e('Alerts Dashboard Widget'); ?></label></th>
+						<th><label for="dwoption_on"><?php _e('Alerts Dashboard Widget', 'mah-domain'); ?></label></th>
 						<td>
 							<fieldset>
 								<?php $dwe = $this->_plugin->settings->IsWidgetsEnabled(); ?>
 								<label for="dwoption_on">
 									<input type="radio" name="EnableDashboardWidgets" id="dwoption_on" style="margin-top: 2px;" <?php if($dwe)echo 'checked="checked"'; ?> value="1">
-									<span><?php _e('On'); ?></span>
+									<span><?php _e('On', 'mah-domain'); ?></span>
 								</label>
 								<br/>
 								<label for="dwoption_off">
 									<input type="radio" name="EnableDashboardWidgets" id="dwoption_off" style="margin-top: 2px;" <?php if(!$dwe)echo 'checked="checked"'; ?> value="0">
-									<span><?php _e('Off'); ?></span>
+									<span><?php _e('Off', 'mah-domain'); ?></span>
 								</label>
 								<br/>
 								<p class="description"><?php
 									echo sprintf(
-											__('Display a dashboard widget with the latest %d security alerts.'),
+											__('Display a dashboard widget with the latest %d security alerts.', 'mah-domain'),
 											$this->_plugin->settings->GetDashboardWidgetMaxAlerts()
 										);
 								?></p>
@@ -132,14 +132,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</td>
 					</tr>
 					<tr>
-						<th><label for="ViewerQueryBox"><?php _e('Can View Alerts'); ?></label></th>
+						<th><label for="ViewerQueryBox"><?php _e('Can View Alerts', 'mah-domain'); ?></label></th>
 						<td>
 							<fieldset>
 								<input type="text" id="ViewerQueryBox" style="float: left; display: block; width: 250px;">
 								<input type="button" id="ViewerQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
 								<br style="clear: both;"/>
 								<p class="description"><?php
-									_e('Users and Roles in this list can view the security alerts');
+									_e('Users and Roles in this list can view the security alerts', 'mah-domain');
 								?></p>
 								<div id="ViewerList"><?php
 									foreach($this->_plugin->settings->GetAllowedPluginViewers() as $item){
@@ -154,14 +154,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</td>
 					</tr>
 					<tr>
-						<th><label for="EditorQueryBox"><?php _e('Can Manage Plugin'); ?></label></th>
+						<th><label for="EditorQueryBox"><?php _e('Can Manage Plugin', 'mah-domain'); ?></label></th>
 						<td>
 							<fieldset>
 								<input type="text" id="EditorQueryBox" style="float: left; display: block; width: 250px;">
 								<input type="button" id="EditorQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
 								<br style="clear: both;"/>
 								<p class="description"><?php
-									_e('Users and Roles in this list can manage the plugin settings');
+									_e('Users and Roles in this list can manage the plugin settings', 'mah-domain');
 								?></p>
 								<div id="EditorList"><?php
 									foreach($this->_plugin->settings->GetAllowedPluginEditors() as $item){
@@ -176,27 +176,27 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</td>
 					</tr>
 					<tr>
-						<th><label for="aroption_on"><?php _e('Refresh Audit View'); ?></label></th>
+						<th><label for="aroption_on"><?php _e('Refresh Audit View', 'mah-domain'); ?></label></th>
 						<td>
 							<fieldset>
 								<?php $are = $this->_plugin->settings->IsRefreshAlertsEnabled(); ?>
 								<label for="aroption_on">
 									<input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: 2px;" <?php if($are)echo 'checked="checked"'; ?> value="1">
-									<span><?php _e('Automatic'); ?></span>
+									<span><?php _e('Automatic', 'mah-domain'); ?></span>
 								</label>
-								<span class="description"> &mdash; <?php _e('Refresh Audit View as soon as there are new events.'); ?></span>
+								<span class="description"> &mdash; <?php _e('Refresh Audit View as soon as there are new events.', 'mah-domain'); ?></span>
 								<br/>
 								<label for="aroption_off">
 									<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: 2px;" <?php if(!$are)echo 'checked="checked"'; ?> value="0">
-									<span><?php _e('Manual'); ?></span>
+									<span><?php _e('Manual', 'mah-domain'); ?></span>
 								</label>
-								<span class="description"> &mdash; <?php _e('Refresh Audit View only when page is reloaded.'); ?></span>
+								<span class="description"> &mdash; <?php _e('Refresh Audit View only when page is reloaded.', 'mah-domain'); ?></span>
 								<br/>
 							</fieldset>
 						</td>
 					</tr>
 					<tr>
-						<th><label><?php _e('Developer Options'); ?></label></th>
+						<th><label><?php _e('Developer Options', 'mah-domain'); ?></label></th>
 						<td>
 							<fieldset><?php
 								foreach(array(
@@ -208,9 +208,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									?><label for="devoption_<?php echo $opt; ?>">
 										<input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
 											if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="<?php echo $opt; ?>">
-										<span><?php _e($info[0]); ?></span>
+										<span><?php _e($info[0], 'mah-domain'); ?></span>
 										<?php if(isset($info[1]) && $info[1]){ ?>
-											<span class="description"> &mdash; <?php _e($info[1]); ?></span>
+											<span class="description"> &mdash; <?php _e($info[1], 'mah-domain'); ?></span>
 										<?php }
 									?></label><br/><?php
 								}

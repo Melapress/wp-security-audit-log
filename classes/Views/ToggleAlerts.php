@@ -3,7 +3,7 @@
 class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	
 	public function GetTitle() {
-		return __('Enable/Disable Alerts');
+		return __('Enable/Disable Alerts', 'mah-domain');
 	}
 	
 	public function GetIcon() {
@@ -11,7 +11,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	}
 	
 	public function GetName() {
-		return __('Enable/Disable Alerts');
+		return __('Enable/Disable Alerts', 'mah-domain');
 	}
 	
 	public function GetWeight() {
@@ -26,7 +26,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	
 	public function Render(){
 		if(!$this->_plugin->settings->CurrentUserCan('edit')){
-			wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+			wp_die( __( 'You do not have sufficient permissions to access this page.' , 'mah-domain') );
 		}
 		$alert = new WSAL_Alert(); // IDE type hinting
 		$groupedAlerts = $this->_plugin->alerts->GetCategorizedAlerts();
@@ -40,14 +40,14 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					if(!in_array($alert->type, $enabled))
 						$disabled[] = $alert->type;
 				$this->_plugin->alerts->SetDisabledAlerts($disabled);
-				?><div class="updated"><p><?php _e('Settings have been saved.'); ?></p></div><?php
+				?><div class="updated"><p><?php _e('Settings have been saved.', 'mah-domain'); ?></p></div><?php
 			}catch(Exception $ex){
-				?><div class="error"><p><?php _e('Error: '); ?><?php echo $ex->getMessage(); ?></p></div><?php
+				?><div class="error"><p><?php _e('Error: ', 'mah-domain'); ?><?php echo $ex->getMessage(); ?></p></div><?php
 			}
 		}
 		?><h2 id="wsal-tabs" class="nav-tab-wrapper"><?php
 			foreach($safeNames as $name => $safe){
-				?><a href="#tab-<?php echo $safe; ?>" class="nav-tab"><?php echo __($name); ?></a><?php
+				?><a href="#tab-<?php echo $safe; ?>" class="nav-tab"><?php echo __($name, 'mah-domain'); ?></a><?php
 			}
 		?></h2>
 		<form id="audit-log-viewer" method="post">
@@ -73,24 +73,24 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								$attrs = '';
 								switch(true){
 									case !$alert->mesg:
-										$attrs = ' title="'. __('Not Implemented') . '" class="alert-incomplete"';
+										$attrs = ' title="'. __('Not Implemented', 'mah-domain') . '" class="alert-incomplete"';
 										break;
 									case false:
-										$attrs = ' title="'. __('Not Available') . '" class="alert-unavailable"';
+										$attrs = ' title="'. __('Not Available', 'mah-domain') . '" class="alert-unavailable"';
 										break;
 								}
 								?><tr<?php echo $attrs; ?>>
 									<th><input name="alert[]" type="checkbox" <?php if($active[$alert->type])echo 'checked="checked"'; ?> value="<?php echo (int)$alert->type; ?>"></th>
 									<td><?php echo str_pad($alert->type, 4, '0', STR_PAD_LEFT); ?></td>
 									<td><?php echo $this->_plugin->constants->GetConstantBy('value', $alert->code)->name; ?></td>
-									<td><?php echo esc_html(__($alert->desc)); ?></td>
+									<td><?php echo esc_html(__($alert->desc, 'mah-domain')); ?></td>
 								</tr><?php
 							}
 						?></tbody>
 					</table><?php
 				}
 			?></div>
-			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr(__('Save Changes')); ?>"></p>
+			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr(__('Save Changes', 'mah-domain')); ?>"></p>
 		</form><?php
 	}
 	
