@@ -47,7 +47,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		}
 		?><h2 id="wsal-tabs" class="nav-tab-wrapper"><?php
 			foreach($safeNames as $name => $safe){
-				?><a href="#tab-<?php echo $safe; ?>" class="nav-tab"><?php echo __($name, 'wp-security-audit-log'); ?></a><?php
+				?><a href="#tab-<?php echo $safe; ?>" class="nav-tab"><?php echo $name; ?></a><?php
 			}
 		?></h2>
 		<form id="audit-log-viewer" method="post">
@@ -83,7 +83,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 									<th><input name="alert[]" type="checkbox" <?php if($active[$alert->type])echo 'checked="checked"'; ?> value="<?php echo (int)$alert->type; ?>"></th>
 									<td><?php echo str_pad($alert->type, 4, '0', STR_PAD_LEFT); ?></td>
 									<td><?php echo $this->_plugin->constants->GetConstantBy('value', $alert->code)->name; ?></td>
-									<td><?php echo esc_html(__($alert->desc, 'wp-security-audit-log')); ?></td>
+									<td><?php echo esc_html($alert->desc); ?></td>
 								</tr><?php
 							}
 						?></tbody>

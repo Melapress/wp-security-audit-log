@@ -116,7 +116,7 @@ class WpSecurityAuditLog {
 	}
 	
 	public function LoadPluginTextdomain(){
-		load_plugin_textdomain('wp-security-audit-log', false, $this->GetBaseDir() . '/languages/');
+		load_plugin_textdomain('wp-security-audit-log', false, $this->GetBaseDir() . 'languages/');
 	}
 	
 	public function AddCleanupHook($hook){
