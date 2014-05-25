@@ -321,19 +321,19 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$newVisibility = '';
 		
 		if($oldpost->post_password){
-			$oldVisibility = __('Password Protected', 'mah-domain');
+			$oldVisibility = __('Password Protected', 'wp-security-audit-log');
 		}elseif($oldStatus == 'publish'){
-			$oldVisibility = __('Public', 'mah-domain');
+			$oldVisibility = __('Public', 'wp-security-audit-log');
 		}elseif($oldStatus == 'private'){
-			$oldVisibility = __('Private', 'mah-domain');
+			$oldVisibility = __('Private', 'wp-security-audit-log');
 		}
 		
 		if($newpost->post_password){
-			$newVisibility = __('Password Protected', 'mah-domain');
+			$newVisibility = __('Password Protected', 'wp-security-audit-log');
 		}elseif($newStatus == 'publish'){
-			$newVisibility = __('Public', 'mah-domain');
+			$newVisibility = __('Public', 'wp-security-audit-log');
 		}elseif($newStatus == 'private'){
-			$newVisibility = __('Private', 'mah-domain');
+			$newVisibility = __('Private', 'wp-security-audit-log');
 		}
 		
         if($oldVisibility && $newVisibility && ($oldVisibility != $newVisibility)){

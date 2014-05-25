@@ -16,7 +16,7 @@ class WSAL_WidgetManager {
 		&& $this->_plugin->settings->CurrentUserCan('view')){
 			wp_add_dashboard_widget(
 				'wsal',
-				__('Latest Alerts', 'mah-domain') . ' | WP Security Audit Log',
+				__('Latest Alerts', 'wp-security-audit-log') . ' | WP Security Audit Log',
 				array($this, 'RenderWidget')
 			);
 		}
@@ -29,13 +29,13 @@ class WSAL_WidgetManager {
 		);
 		?><div><?php
 			if(!count($results)){
-				?><p><?php _e('No alerts found.', 'mah-domain'); ?></p><?php
+				?><p><?php _e('No alerts found.', 'wp-security-audit-log'); ?></p><?php
 			}else{
 				?><table class="wp-list-table widefat" cellspacing="0" cellpadding="0"
 					   style="display: block; overflow-x: auto;">
 					<thead>
-						<th class="manage-column" style="width: 15%;" scope="col"><?php _e('User', 'mah-domain'); ?></th>
-						<th class="manage-column" style="width: 85%;" scope="col"><?php _e('Description', 'mah-domain'); ?></th>
+						<th class="manage-column" style="width: 15%;" scope="col"><?php _e('User', 'wp-security-audit-log'); ?></th>
+						<th class="manage-column" style="width: 85%;" scope="col"><?php _e('Description', 'wp-security-audit-log'); ?></th>
 					</thead>
 					<tbody><?php
 						$url = 'admin.php?page=' . $this->_plugin->views->views[0]->GetSafeViewName();

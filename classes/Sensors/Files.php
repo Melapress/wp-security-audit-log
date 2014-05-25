@@ -36,10 +36,19 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 	public function EventAdminInit(){
 		$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 		$is_theme_editor = basename($_SERVER['SCRIPT_NAME']) == 'theme-editor.php';
+		$is_plugin_editor = basename($_SERVER['SCRIPT_NAME']) == 'plugin-editor.php';
+		
 		if($is_theme_editor && $action == 'update'){
 			$this->plugin->alerts->Trigger(2046, array(
 				'File' => $_REQUEST['file'],
 				'Theme' => $_REQUEST['theme'],
+			));
+		}
+		
+		if($is_plugin_editor && $action == 'update'){
+			$this->plugin->alerts->Trigger(2051, array(
+				'File' => $_REQUEST['file'],
+				'Plugin' => $_REQUEST['plugin'],
 			));
 		}
 	}

@@ -3,7 +3,7 @@
 class WSAL_Views_About extends WSAL_AbstractView {
 	
 	public function GetTitle() {
-		return __('About WP Security Audit Log', 'mah-domain');
+		return __('About WP Security Audit Log', 'wp-security-audit-log');
 	}
 	
 	public function GetIcon() {
@@ -11,7 +11,7 @@ class WSAL_Views_About extends WSAL_AbstractView {
 	}
 	
 	public function GetName() {
-		return __('About', 'mah-domain');
+		return __('About', 'wp-security-audit-log');
 	}
 	
 	public function GetWeight(){

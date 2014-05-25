@@ -119,7 +119,7 @@ class WSAL_ViewManager {
 		$view_id = $this->GetBackendPageIndex();
 		?><div class="wrap">
 			<div id="icon-plugins" class="icon32"><br></div>
-			<h2><?php _e($this->views[$view_id]->GetTitle(), 'mah-domain'); ?></h2>
+			<h2><?php _e($this->views[$view_id]->GetTitle(), 'wp-security-audit-log'); ?></h2>
 			<?php $this->views[$view_id]->Render(); ?>
 		</div><?php
 	}
