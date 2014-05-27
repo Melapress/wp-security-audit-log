@@ -133,7 +133,7 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
   * User avatar (if available) is shown in the alert to allow administrators to easily recognize users and their activity	
   * Clickable username in alerts allow administrators to access user's profile instantly
   * User role is reported in alert so administrators can easily track any suspicious behaviour
-  * New alert for when user uses the plugin file editor from the dashboard (alert 2051)
+  * New alert for when user uses the plugin file editor from the dashboard (alert 2051). Alert will also report filename and location of the change file.
 
 * Improvements
   * User avatar (if available) is shown in the alert to allow administrators to easily recognize users and their activity	
@@ -142,6 +142,9 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
   
 * Bug fixes
   * Fixed wrapping problem in alerts dashboard widget
+  
+* New WordPress Security Alert for monitoring plugin files
+  * Alert 2051: User changed a plugin file using the plugin editor
   
 = 1.0 (2014-05-20) =
 * Complete plugin rewrite making the new version more stable and scalable
