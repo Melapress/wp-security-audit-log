@@ -86,7 +86,16 @@ class WpSecurityAuditLog {
 	 * Initialize plugin.
 	 */
 	public function __construct(){
+		// register autoloader
 		spl_autoload_register(array($this, 'LoadClass'));
+		
+		// upgrade/update as necesary
+		if(!$this->IsInstalled()){
+			WSAL_DB_ActiveRecord::InstallAll();
+			if ($this->CanUpgrade()) $this->Upgrade();
+		}else{
+			$this->Update();
+		}
 		
 		// load dependencies
 		$this->views = new WSAL_ViewManager($this);
@@ -110,27 +119,18 @@ class WpSecurityAuditLog {
 		add_action('plugins_loaded', array($this, 'LoadPluginTextdomain'));
 	}
 	
-	public function CleanUp(){
-		foreach($this->_cleanup_hooks as $hook)
-			call_user_func($hook);
-	}
-	
-	public function LoadPluginTextdomain(){
-		load_plugin_textdomain('wp-security-audit-log', false, $this->GetBaseDir() . 'languages/');
-	}
-	
-	public function AddCleanupHook($hook){
-		$this->_cleanup_hooks[] = $hook;
-	}
-	
-	public function RemoveCleanupHook($hook){
-		while(($pos = array_search($hook, $this->_cleanup_hooks)) !== false)
-			unset($this->_cleanup_hooks[$pos]);
-	}
-	
 	public function Install(){
-		WSAL_DB_ActiveRecord::InstallAll();
-		if($this->CanUpgrade())$this->Upgrade();
+		if (version_compare(PHP_VERSION, '5.3.0') < 0) {
+			die('Sorry, PHP version 5.3 or later is required.');
+		}
+		
+		if(!$this->IsInstalled()){
+			WSAL_DB_ActiveRecord::InstallAll();
+			if ($this->CanUpgrade()) $this->Upgrade();
+		}else{
+			$this->Update();
+		}
+		
 		wp_schedule_event(0, 'hourly', 'wsal_cleanup');
 	}
 	
@@ -139,10 +139,8 @@ class WpSecurityAuditLog {
 		wp_unschedule_event(0, 'wsal_cleanup');
 	}
 	
-	public function CanUpgrade(){
-		global $wpdb;
-		$table = $wpdb->base_prefix . 'wordpress_auditlog_events';
-		return $wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table;
+	public function Update(){
+		
 	}
 	
 	public function Upgrade(){
@@ -201,19 +199,9 @@ class WpSecurityAuditLog {
 		$this->settings->SetWidgetsEnabled(!!$s->showDW);
 	}
 	
-	public function GetBaseUrl(){
-		return plugins_url('', __FILE__);
-	}
-	
-	public function GetBaseDir(){
-		return plugin_dir_path(__FILE__);
-	}
-	
-	public function GetBaseName(){
-		return plugin_basename(__FILE__);
-	}
-	
 	// </editor-fold>
+	
+	// <editor-fold desc="Utility Methods">
 	
 	/**
 	 * This is the class autoloader. You should not call this directly.
@@ -246,6 +234,57 @@ class WpSecurityAuditLog {
 			substr($file, 0, -4)
 		);
 	}
+	
+	/**
+	 * @return boolean Whether we are running on multisite or not.
+	 */
+	public function IsMultisite(){
+		return funciton_exists('is_multisite') && is_multisite();
+	}
+	
+	public function CleanUp(){
+		foreach($this->_cleanup_hooks as $hook)
+			call_user_func($hook);
+	}
+	
+	public function LoadPluginTextdomain(){
+		load_plugin_textdomain('wp-security-audit-log', false, $this->GetBaseDir() . 'languages/');
+	}
+	
+	public function AddCleanupHook($hook){
+		$this->_cleanup_hooks[] = $hook;
+	}
+	
+	public function RemoveCleanupHook($hook){
+		while(($pos = array_search($hook, $this->_cleanup_hooks)) !== false)
+			unset($this->_cleanup_hooks[$pos]);
+	}
+	
+	public function IsInstalled(){
+		global $wpdb;
+		$table = $wpdb->base_prefix . 'wsal_occurrences';
+		return ($wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
+	}
+	
+	public function CanUpgrade(){
+		global $wpdb;
+		$table = $wpdb->base_prefix . 'wordpress_auditlog_events';
+		return ($wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
+	}
+	
+	public function GetBaseUrl(){
+		return plugins_url('', __FILE__);
+	}
+	
+	public function GetBaseDir(){
+		return plugin_dir_path(__FILE__);
+	}
+	
+	public function GetBaseName(){
+		return plugin_basename(__FILE__);
+	}
+	
+	// </editor-fold>
 }
 
 // Load extra files
