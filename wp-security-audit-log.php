@@ -89,14 +89,6 @@ class WpSecurityAuditLog {
 		// register autoloader
 		spl_autoload_register(array($this, 'LoadClass'));
 		
-		// upgrade/update as necesary
-		if(!$this->IsInstalled()){
-			WSAL_DB_ActiveRecord::InstallAll();
-			if ($this->CanUpgrade()) $this->Upgrade();
-		}else{
-			$this->Update();
-		}
-		
 		// load dependencies
 		$this->views = new WSAL_ViewManager($this);
 		$this->alerts = new WSAL_AlertManager($this);
@@ -111,12 +103,24 @@ class WpSecurityAuditLog {
 		// listen for installation event
 		register_activation_hook(__FILE__, array($this, 'Install'));
 		
+		// makes sure everything is ready
+		add_action('init', array($this, 'CheckInstall'));
+		
 		// listen for cleanup event
 		add_action('wsal_cleanup', array($this, 'CleanUp'));
-		//add_action('init', array($this, 'CleanUp'));
 		
 		// internationalize plugin
 		add_action('plugins_loaded', array($this, 'LoadPluginTextdomain'));
+	}
+	
+	public function CheckInstall(){
+		// upgrade/update as necesary
+		if(!$this->IsInstalled()){
+			WSAL_DB_ActiveRecord::InstallAll();
+			if ($this->CanUpgrade()) $this->Upgrade();
+		}else{
+			$this->Update();
+		}
 	}
 	
 	public function Install(){
@@ -124,12 +128,7 @@ class WpSecurityAuditLog {
 			die('Sorry, PHP version 5.3 or later is required.');
 		}
 		
-		if(!$this->IsInstalled()){
-			WSAL_DB_ActiveRecord::InstallAll();
-			if ($this->CanUpgrade()) $this->Upgrade();
-		}else{
-			$this->Update();
-		}
+		$this->CheckInstall();
 		
 		wp_schedule_event(0, 'hourly', 'wsal_cleanup');
 	}

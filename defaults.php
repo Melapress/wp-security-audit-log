@@ -3,8 +3,12 @@
 // if not included correctly...
 if ( !class_exists( 'WpSecurityAuditLog' ) ) exit();
 
+// define custom / new PHP constants
 defined('E_CRITICAL') || define('E_CRITICAL', 'E_CRITICAL');
 defined('E_DEBUG') || define('E_DEBUG', 'E_DEBUG');
+defined('E_RECOVERABLE_ERROR') || define('E_RECOVERABLE_ERROR', 'E_RECOVERABLE_ERROR');
+defined('E_DEPRECATED') || define('E_DEPRECATED', 'E_DEPRECATED');
+defined('E_USER_DEPRECATED') || define('E_USER_DEPRECATED', 'E_USER_DEPRECATED');
 
 WpSecurityAuditLog::GetInstance()
 	->constants->UseConstants(array(
