@@ -32,6 +32,8 @@ class WpSecurityAuditLog {
 	
 	const PLG_CLS_PRFX = 'WSAL_';
 	
+	const MIN_PHP_VERSION = '5.3.0';
+	
 	/**
 	 * Views supervisor.
 	 * @var WSAL_ViewManager
@@ -124,7 +126,7 @@ class WpSecurityAuditLog {
 	}
 	
 	public function Install(){
-		if (version_compare(PHP_VERSION, '5.2.0') < 0) {
+		if (version_compare(PHP_VERSION, self::MIN_PHP_VERSION) < 0) {
 			?><html>
 				<head>
 					<link rel="stylesheet" href="<?php
@@ -133,7 +135,7 @@ class WpSecurityAuditLog {
 				</head><body>
 					<div class="warn-wrap">
 						<div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div>
-						<?php _e('You are using a version of PHP that is older than 5.3, which is no longer supported.<br/>Contact us on <a href="mailto:plugins@wpwhitesecurity.com">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using.'); ?>
+						<?php echo sprintf(__('You are using a version of PHP that is older than %s, which is no longer supported.<br/>Contact us on <a href="mailto:plugins@wpwhitesecurity.com">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using.'), self::MIN_PHP_VERSION); ?>
 					</div>
 				</body>
 			</html><?php
