@@ -133,7 +133,7 @@ class WpSecurityAuditLog {
 				</head><body>
 					<div class="warn-wrap">
 						<div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div>
-						<?php _e('Sorry, PHP version 5.3 or later is required.'); ?>
+						<?php _e('You are using a version of PHP that is older than 5.3, which is no longer supported.<br/>Contact us on <a href="mailto:plugins@wpwhitesecurity.com">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using.'); ?>
 					</div>
 				</body>
 			</html><?php

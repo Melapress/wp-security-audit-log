@@ -32,5 +32,10 @@
 	position: relative;
 	color: #A00;
 	font: 14px Arial;
-	padding: 14px 48px;
+	padding: 6px 48px;
+}
+
+.warn-wrap a,
+.warn-wrap a:hover {
+	color: #F56;
 }
