@@ -124,8 +124,20 @@ class WpSecurityAuditLog {
 	}
 	
 	public function Install(){
-		if (version_compare(PHP_VERSION, '5.3.0') < 0) {
-			die('Sorry, PHP version 5.3 or later is required.');
+		if (version_compare(PHP_VERSION, '5.2.0') < 0) {
+			?><html>
+				<head>
+					<link rel="stylesheet" href="<?php
+						echo esc_attr($this->GetBaseUrl() . '/css/install-error.css?v=' . filemtime($this->GetBaseDir() . '/css/install-error.css'));
+					?>" type="text/css" media="all"/>
+				</head><body>
+					<div class="warn-wrap">
+						<div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div>
+						<?php _e('Sorry, PHP version 5.3 or later is required.'); ?>
+					</div>
+				</body>
+			</html><?php
+			die(1);
 		}
 		
 		$this->CheckInstall();

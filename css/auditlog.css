@@ -39,6 +39,10 @@ td.column-user {
 .column-user img {
 	float: left;
 	margin-right: 4px;
+	-webkit-border-radius: 50px;
+	-moz-border-radius: 50px;
+	-ms-border-radius: 50px;
+	border-radius: 50px;
 }
 
 .column-scip {
