@@ -371,7 +371,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		
 		$bid = (int)$this->get_view_site_id();
 		$sql = ($bid ? "site_id=$bid" : '1') . ' ORDER BY created_on DESC';
-		$data = WSAL_DB_Occurrence::LoadMulti($sql);
+		$data = WSAL_DB_Occurrence::LoadMulti($sql, array());
 		
 		if(count($data)){
 			$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'created_on';
