@@ -184,14 +184,11 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		if($this->is_multisite() && $this->is_main_blog()){
 			// TODO should I check wp_is_large_network()?
 			$curr = $this->get_view_site_id();
-			$sites = wp_get_sites();
 			?><div class="wsal-ssa wsal-ssa-<?php echo $which; ?>">
 				<select class="wsal-ssas" onchange="WsalSsasChange(value);">
 					<option value="0"><?php _e('All Sites', 'wp-security-audit-log'); ?></option>
-					<?php foreach($sites as $site){ ?>
-						<?php $info = get_blog_details($site['blog_id'], true); ?>
-						<option
-							value="<?php echo $info->blog_id; ?>"
+					<?php foreach($this->get_sites() as $info){ ?>
+						<option value="<?php echo $info->blog_id; ?>"
 							<?php if($info->blog_id == $curr)echo 'selected="selected"'; ?>><?php
 							echo esc_html($info->blogname) . ' (' . esc_html($info->domain) . ')';
 						?></option>
@@ -199,6 +196,29 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				</select>
 			</div><?php
 		}
+	}
+	
+	/**
+	 * @param int|null $limit Maximum number of sites to return (null = no limit).
+	 * @return object Object with keys: blog_id, blogname, domain
+	 */
+	protected function get_sites($limit = 100){
+		global $wpdb;
+		
+		// build query
+		$sql = 'SELECT blog_id, domain FROM ' . $wpdb->blogs;
+		if(!is_null($limit))$sql .= ' LIMIT ' . $limit;
+		
+		// execute query
+		$res = $wpdb->get_results($sql);
+		
+		// modify result
+		foreach($res as $row){
+			$row->blogname = get_blog_option($row->blog_id, 'blogname');
+		}
+		
+		// return result
+		return $res;
 	}
 
 	public function get_columns(){
