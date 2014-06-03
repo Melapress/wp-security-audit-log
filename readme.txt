@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=payme
 Plugin URI: http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
-Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite
+Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite
 Requires at least: 3.6
 Tested up to: 3.9.1
 Stable tag: 1.1.0
@@ -130,21 +130,17 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 
 = 1.1.0 (2014-05-27) =
 * New Features
-  * User avatar (if available) is shown in the alert to allow administrators to easily recognize users and their activity	
+  * User avatar is shown in the alert to allow administrators to easily recognize users and their activity	
   * Clickable username in alerts allow administrators to access user's profile instantly
   * User role is reported in alert so administrators can easily track any suspicious behaviour
-  * New alert for when user uses the plugin file editor from the dashboard (alert 2051). Alert will also report filename and location of the change file.
-
-* Improvements
-  * User avatar (if available) is shown in the alert to allow administrators to easily recognize users and their activity	
-  * Clickable username in alerts allow administrators to access user's profile instantly
-  * User role is reported in alert so administrators can easily track any suspicious behaviour
-  
+  * PHP Version checker; upon installation the plugin will check what version of PHP is installed on the system
+    
+* New WordPress Security Alert for monitoring plugin files
+  * Alert 2051: User changed a plugin file using the plugin editor (note: filename and location will also be reported in the alert)
+ 
 * Bug fixes
   * Fixed wrapping problem in alerts dashboard widget
-  
-* New WordPress Security Alert for monitoring plugin files
-  * Alert 2051: User changed a plugin file using the plugin editor
+  * Fixed upgrade script to properly create the new tables in the WordPress database
   
 = 1.0 (2014-05-20) =
 * Complete plugin rewrite making the new version more stable and scalable
