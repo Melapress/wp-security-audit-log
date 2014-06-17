@@ -99,9 +99,6 @@ class WpSecurityAuditLog {
 		$this->constants = new WSAL_ConstantManager($this);
 		$this->widgets = new WSAL_WidgetManager($this);
 		
-		// listen to general events
-		$this->sensors->HookEvents();
-		
 		// listen for installation event
 		register_activation_hook(__FILE__, array($this, 'Install'));
 		
@@ -302,6 +299,9 @@ class WpSecurityAuditLog {
 
 // Load extra files
 require_once('defaults.php');
+
+// Start listening to events
+WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
 
 // Create & Run the plugin
 return WpSecurityAuditLog::GetInstance();
