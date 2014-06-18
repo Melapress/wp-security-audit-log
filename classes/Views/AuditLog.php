@@ -202,7 +202,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	 * @param int|null $limit Maximum number of sites to return (null = no limit).
 	 * @return object Object with keys: blog_id, blogname, domain
 	 */
-	protected function get_sites($limit = 100){
+	protected function get_sites($limit = null){
 		global $wpdb;
 		
 		// build query

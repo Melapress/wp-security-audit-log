@@ -34,6 +34,26 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	protected $snippets = array(
 		'' => '',
 		'Current WP User' => 'return wp_get_current_user();',
+		'Multisite Site Creator' => '$num_site_to_create = 100;
+
+set_time_limit(0);
+ob_implicit_flush(true);
+while(ob_get_level())ob_end_flush();
+global $wpdb;
+$l = $wpdb->get_var("SELECT blog_id FROM $wpdb->blogs ORDER BY blog_id DESC LIMIT 1") + 1;
+
+echo \'<!DOCTYPE html><html><body style="margin:0;padding:0;font:12px Arial;"><span id="p">0</span>%\';
+
+for($i = $l; $i <= $num_site_to_create + $l; $i++){
+	wpmu_create_blog(\'localhost\', "/wordpress-3.8/test$i/", "Test $i", 1);
+	echo \'<script>document.getElementById("p").innerHTML="\' .
+		 number_format(($i - $l) / $num_site_to_create * 100, 2) .
+		 \'";</script>\';
+}
+
+echo \'<div style="display: none;">\';
+register_shutdown_function(function(){ echo \'</div></body></html>\'; });
+die();',
 	);
 	
 	public function HandleError($code, $message, $filename = 'unknown', $lineno = 0){
