@@ -139,7 +139,7 @@ die();',
 		echo '</style>';
 		echo '</head><body>';
 		
-		if(($e = error_get_last()) && !isset($this->exec_data['Errors']) && !count($this->exec_data['Errors']))
+		if(($e = error_get_last()) && (!isset($this->exec_data['Errors']) || !count($this->exec_data['Errors'])))
 			$this->HandleError($e['type'], $e['message'], $e['file'], $e['line']);
 		
 		if(count($this->exec_data)){
