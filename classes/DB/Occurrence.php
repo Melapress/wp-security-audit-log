@@ -7,7 +7,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	public $id = 0;
 	public $site_id = 0;
 	public $alert_id = 0;
-	public $created_on = 0;
+	public $created_on = 0.0;
 	public $is_read = false;
 	public $is_migrated = false;
 	
@@ -222,4 +222,19 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 		return $this->GetMetaValue('CurrentUserRoles', array());
 	}
 	
+	/**
+	 * @return float Number of seconds (and microseconds as fraction) since unix Day 0.
+	 * @todo This needs some caching.
+	 */
+	protected function GetMicrotime(){
+		return microtime(true) + get_option('gmt_offset') * HOUR_IN_SECONDS;
+	}
+	
+	public function Save(){
+		// use today's date if not set up
+		if(is_null($this->created_on))
+			$this->created_on = $this->GetMicrotime();
+		
+		return parent::Save();
+	}
 }

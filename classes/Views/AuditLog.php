@@ -274,10 +274,13 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return '<span class="log-type log-type-' . $const->value
 					. '" title="' . esc_html($const->name . ': ' . $const->description) . '"></span>';
 			case 'crtd':
-				return $item->created_on ? date('Y-m-d h:i:s A', $item->created_on) : '<i>unknown</i>';
+				return $item->created_on ? (
+						date('Y-m-d h:i:s A', $item->created_on) /*. '<br/>' .
+						substr(number_format(fmod($item->created_on, 1), 6), 2)*/
+					) : '<i>unknown</i>';
 			case 'user':
 				$username = $item->GetUsername();
-				if($username && ($user = get_userdatabylogin($username))){
+				if($username && ($user = get_user_by('login', $username))){
 					$image = get_avatar($user->ID, 32);
 					$uhtml = '<a href="' . admin_url('user-edit.php?user_id=' . $user->ID)
 							. '" target="_blank">' . esc_html($user->display_name) . '</a>';

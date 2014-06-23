@@ -8,10 +8,6 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	}
 	
 	public function Log($type, $data = array(), $date = null, $siteid = null, $migrated = false) {
-
-		// use today's date if not set up
-		if(is_null($date))$date = current_time('timestamp');
-		
 		// create new occurrence
 		$occ = new WSAL_DB_Occurrence();
 		$occ->is_migrated = $migrated;

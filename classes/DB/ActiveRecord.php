@@ -52,7 +52,7 @@ abstract class WSAL_DB_ActiveRecord {
 					$sql .= $key . ' BIGINT NOT NULL,'.PHP_EOL;
 					break;
 				case is_float($copy->$key):
-					$sql .= $key . ' FLOAT NOT NULL,'.PHP_EOL;
+					$sql .= $key . ' DOUBLE NOT NULL,'.PHP_EOL;
 					break;
 				case is_string($copy->$key):
 					$sql .= $key . ' TEXT NOT NULL,'.PHP_EOL;
@@ -123,6 +123,7 @@ abstract class WSAL_DB_ActiveRecord {
 	}
 	
 	/**
+	 * @deprecated
 	 * @return boolean Returns whether table structure is installed or not.
 	 */
 	public function IsInstalled(){
@@ -135,20 +136,16 @@ abstract class WSAL_DB_ActiveRecord {
 	 * Install this ActiveRecord structure into DB.
 	 */
 	public function Install(){
-		if(!$this->IsInstalled()) {
-			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-			dbDelta($this->_GetInstallQuery());
-		}
+		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+		dbDelta($this->_GetInstallQuery());
 	}
 	
 	/**
 	 * Remove this ActiveRecord structure into DB.
 	 */
 	public function Uninstall(){
-		if($this->IsInstalled()) {
-			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-			dbDelta($this->_GetUninstallQuery());
-		}
+		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+		dbDelta($this->_GetUninstallQuery());
 	}
 	
 	/**
@@ -269,7 +266,10 @@ abstract class WSAL_DB_ActiveRecord {
 		$class = get_called_class();
 		$result = array();
 		$temp = new $class();
-		$sql = $wpdb->prepare('SELECT * FROM ' . $temp->GetTable() . ' WHERE '.$cond, $args);
+		$sql = (!is_array($args) || !count($args)) // do we really need to prepare() or not?
+			? ('SELECT * FROM ' . $temp->GetTable() . ' WHERE ' . $cond)
+			: $wpdb->prepare('SELECT * FROM ' . $temp->GetTable() . ' WHERE ' . $cond, $args)
+		;
 		foreach($wpdb->get_results($sql, ARRAY_A) as $data){
 			$result[] = new $class($data);
 		}

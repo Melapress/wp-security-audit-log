@@ -27,12 +27,17 @@ class WSAL_Sensors_PhpErrors extends WSAL_AbstractSensor {
 	public function EventError($errno, $errstr, $errfile = 'unknown', $errline = 0, $errcontext = array()){
 		if($this->_avoid_error_recursion)return;
 		
+		ob_start();
+		debug_print_backtrace();
+		$errbacktrace = ob_get_clean();
+		
 		$data = array(
 			'Code'    => $errno,
 			'Message' => $errstr,
 			'File'    => $errfile,
 			'Line'    => $errline,
 			'Context' => $errcontext,
+			'Trace'   => $errbacktrace,
 		);
 		
 		$type = 0002; // default (middle ground)

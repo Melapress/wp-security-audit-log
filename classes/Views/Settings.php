@@ -45,6 +45,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetAllowedPluginViewers(isset($_REQUEST['Viewers']) ? $_REQUEST['Viewers'] : array());
 		$this->_plugin->settings->SetAllowedPluginEditors(isset($_REQUEST['Editors']) ? $_REQUEST['Editors'] : array());
 		$this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
+		$this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
 		$this->_plugin->settings->ClearDevOptions();
 		if(isset($_REQUEST['DevOptions']))
 			foreach($_REQUEST['DevOptions'] as $opt)
@@ -215,6 +216,19 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									?></label><br/><?php
 								}
 							?></fieldset>
+						</td>
+					</tr>
+					
+					<tr>
+						<th><label for="Incognito"><?php _e('Hide Plugin from Plugins Page', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<label for="Incognito">
+									<input type="checkbox" name="Incognito" value="1" id="Incognito"<?php
+										if($this->_plugin->settings->IsIncognito())echo ' checked="checked"'; ?>/>
+									<?php _e('Enable', 'wp-security-audit-log'); ?>
+								</label>
+							</fieldset>
 						</td>
 					</tr>
 				</tbody>

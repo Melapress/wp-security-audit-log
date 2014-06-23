@@ -363,4 +363,12 @@ class WSAL_Settings {
 		
 		return false;
 	}
+	
+	public function IsIncognito(){
+		return $this->GetGlobalOption(self::OPT_PRFX . 'hide-plugin');
+	}
+	
+	public function SetIncognito($enabled){
+		return $this->SetGlobalOption(self::OPT_PRFX . 'hide-plugin', $enabled);
+	}
 }

@@ -103,23 +103,17 @@ class WpSecurityAuditLog {
 		register_activation_hook(__FILE__, array($this, 'Install'));
 		
 		// makes sure everything is ready
-		add_action('init', array($this, 'CheckInstall'));
+		//add_action('init', array($this, 'CheckInstall'));
 		
 		// listen for cleanup event
 		add_action('wsal_cleanup', array($this, 'CleanUp'));
 		
 		// internationalize plugin
 		add_action('plugins_loaded', array($this, 'LoadPluginTextdomain'));
-	}
-	
-	public function CheckInstall(){
-		// upgrade/update as necesary
-		if(!$this->IsInstalled()){
-			WSAL_DB_ActiveRecord::InstallAll();
-			if ($this->CanUpgrade()) $this->Upgrade();
-		}else{
-			$this->Update();
-		}
+		
+		// hide plugin
+		if($this->settings->IsIncognito())
+			add_action('admin_head', array($this, 'HidePlugin'));
 	}
 	
 	public function Install(){
@@ -139,7 +133,9 @@ class WpSecurityAuditLog {
 			die(1);
 		}
 		
-		$this->CheckInstall();
+		$PreInstalled = $this->IsInstalled();
+		WSAL_DB_ActiveRecord::InstallAll();
+		if (!$PreInstalled && $this->CanUpgrade()) $this->Upgrade();
 		
 		wp_schedule_event(0, 'hourly', 'wsal_cleanup');
 	}
@@ -147,10 +143,6 @@ class WpSecurityAuditLog {
 	public function Uninstall(){
 		WSAL_DB_ActiveRecord::UninstallAll();
 		wp_unschedule_event(0, 'wsal_cleanup');
-	}
-	
-	public function Update(){
-		
 	}
 	
 	public function Upgrade(){
@@ -212,6 +204,10 @@ class WpSecurityAuditLog {
 	// </editor-fold>
 	
 	// <editor-fold desc="Utility Methods">
+	
+	public function HidePlugin(){
+		?><style type="text/css">.wp-list-table.plugins #wp-security-audit-log { display: none; }</style><?php
+	}
 	
 	/**
 	 * This is the class autoloader. You should not call this directly.
