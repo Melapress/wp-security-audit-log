@@ -34,6 +34,26 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	protected $snippets = array(
 		'' => '',
 		'Current WP User' => 'return wp_get_current_user();',
+		'Clean PHP Error Events' => 'set_time_limit(0);
+ob_implicit_flush(true);
+while(ob_get_level())ob_end_flush();
+global $wpdb;
+
+$occs = WSAL_DB_Occurrence::LoadMulti("alert_id IN (0,1,2,3,4,5)");
+$c = count($occs);
+
+echo \'<!DOCTYPE html><html><body style="margin:0;padding:0;font:12px Arial;"><span id="p">0</span>%\';
+
+foreach($occs as $i => $occ){
+	$occ->Delete();
+	echo \'<script>document.getElementById("p").innerHTML="\' .
+		 number_format(($i + 1) / $c * 100, 2) .
+		 \'";</script>\';
+}
+
+echo \'<div style="display: none;">\';
+register_shutdown_function(function(){ echo \'</div></body></html>\'; });
+die();',
 		'Multisite Site Creator' => '$num_site_to_create = 100;
 
 set_time_limit(0);
@@ -123,7 +143,7 @@ die();',
 			$this->HandleError($e['type'], $e['message'], $e['file'], $e['line']);
 		
 		if(count($this->exec_data)){
-			$result = new WSAL_Nicer($this->exec_data);
+			$result = new WSAL_Nicer($this->exec_data, true);
 			$result->render();
 		}else echo '<div class="faerror">FATAL ERROR</div>';
 		
