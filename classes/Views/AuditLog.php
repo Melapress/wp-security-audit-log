@@ -215,7 +215,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		if($this->is_multisite() && $this->is_main_blog()){
 			$curr = $this->get_view_site_id();
 			?><div class="wsal-ssa wsal-ssa-<?php echo $which; ?>">
-				<?php if($this->get_site_count() > 15){ ?>
+				<?php if($this->get_site_count() > 100){ ?>
 					<?php $curr = $curr ? get_blog_details($curr) : null; ?>
 					<?php $curr = $curr ? ($curr->blogname . ' (' . $curr->domain . ')') : 'All Sites'; ?>
 					<input type="text" class="wsal-ssas" value="<?php echo esc_attr($curr); ?>"/>
