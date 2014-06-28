@@ -227,7 +227,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	 * @todo This needs some caching.
 	 */
 	protected function GetMicrotime(){
-		return microtime(true) + get_option('gmt_offset') * HOUR_IN_SECONDS;
+		return microtime(true);// + get_option('gmt_offset') * HOUR_IN_SECONDS;
 	}
 	
 	public function Save(){

@@ -146,6 +146,8 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	public function __construct($plugin){
 		$this->_plugin = $plugin;
 		
+		$this->_gmt_offset_sec = get_option('gmt_offset') * HOUR_IN_SECONDS;
+		
 		parent::__construct(array(
 			'singular'  => 'log',
 			'plural'    => 'logs',
@@ -153,6 +155,8 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			'screen'    => 'interval-list',
 		));
 	}
+	
+	protected $_gmt_offset_sec = 0;
 
 	public function no_items(){
 		_e('No events so far.', 'wp-security-audit-log');
@@ -275,8 +279,11 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 					. '" title="' . esc_html($const->name . ': ' . $const->description) . '"></span>';
 			case 'crtd':
 				return $item->created_on ? (
-						date('Y-m-d h:i:s A', $item->created_on) /*. '<br/>' .
-						substr(number_format(fmod($item->created_on, 1), 6), 2)*/
+						str_replace(
+							'$$$',
+							substr(number_format(fmod($item->created_on + $this->_gmt_offset_sec, 1), 3), 2),
+							date('Y-m-d<\b\r>h:i:s.$$$&\n\b\s\p;A', $item->created_on + $this->_gmt_offset_sec)
+						)
 					) : '<i>unknown</i>';
 			case 'user':
 				$username = $item->GetUsername();
