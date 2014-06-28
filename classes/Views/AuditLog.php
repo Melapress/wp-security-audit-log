@@ -214,11 +214,22 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		// show site alerts widget
 		if($this->is_multisite() && $this->is_main_blog()){
 			$curr = $this->get_view_site_id();
-			$curr = $curr ? get_blog_details($curr) : null;
-			$curr = $curr ? ($curr->blogname . ' (' . $curr->domain . ')') : 'All Sites';
-			
 			?><div class="wsal-ssa wsal-ssa-<?php echo $which; ?>">
-				<input type="text" class="wsal-ssas" value="<?php echo esc_attr($curr); ?>"/>
+				<?php if($this->get_site_count() > 15){ ?>
+					<?php $curr = $curr ? get_blog_details($curr) : null; ?>
+					<?php $curr = $curr ? ($curr->blogname . ' (' . $curr->domain . ')') : 'All Sites'; ?>
+					<input type="text" class="wsal-ssas" value="<?php echo esc_attr($curr); ?>"/>
+				<?php }else{ ?>
+					<select class="wsal-ssas" onchange="WsalSsasChange(value);">
+						<option value="0"><?php _e('All Sites', 'wp-security-audit-log'); ?></option>
+						<?php foreach($this->get_sites() as $info){ ?>
+							<option value="<?php echo $info->blog_id; ?>"
+								<?php if($info->blog_id == $curr)echo 'selected="selected"'; ?>><?php
+								echo esc_html($info->blogname) . ' (' . esc_html($info->domain) . ')';
+							?></option>
+						<?php } ?>
+					</select>
+				<?php } ?>
 			</div><?php
 		}
 	}
@@ -244,6 +255,15 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		
 		// return result
 		return $res;
+	}
+	
+	/**
+	 * @return int The number of sites on the network.
+	 */
+	public function get_site_count(){
+		global $wpdb;
+		$sql = 'SELECT COUNT(*) FROM ' . $wpdb->blogs;
+		return (int)$wpdb->get_var($sql);
 	}
 
 	public function get_columns(){
