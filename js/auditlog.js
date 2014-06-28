@@ -24,6 +24,8 @@ function WsalAuditLogInit(_WsalData){
 		setInterval(WsalChk, 40000);
 		WsalChk();
 	}
+	
+	WsalSsasInit();
 }
 
 var WsalIppsPrev;
@@ -46,8 +48,63 @@ function WsalIppsChange(value){
 	});
 }
 
+function WsalSsasInit(){
+	var SsasAjx = null;
+	var SsasInps = jQuery("input.wsal-ssas");
+	SsasInps.after('<div class="wsal-ssas-dd" style="display: none;"/>');
+	SsasInps.click(function(){
+		jQuery(this).select();
+	});
+	SsasInps.keyup(function(){
+		var SsasInp = jQuery(this);
+		var SsasDiv = SsasInp.next();
+		var SsasVal = SsasInp.val();
+		if(SsasAjx)SsasAjx.abort();
+		SsasInp.removeClass('loading');
+		
+		// do a new search
+		if(SsasInp.attr('data-oldvalue') !== SsasVal && SsasVal.length > 2){
+			SsasInp.addClass('loading');
+			SsasAjx = jQuery.post(WsalData.ajaxurl, {
+				action: 'AjaxSearchSite',
+				search: SsasVal
+			}, function(data){
+				if(SsasAjx)SsasAjx = null;
+				SsasInp.removeClass('loading');
+				SsasDiv.hide();
+				SsasDiv.html('');
+				if(data && data.length){
+					var SsasReg = new RegExp(SsasVal.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'gi');
+					for (var i = 0; i < data.length; i++){
+						var link = jQuery('<a href="javascript:;" onclick="WsalSsasChange(' + data[i].blog_id + ')"/>')
+							.text(data[i].blogname + ' (' + data[i].domain + ')');
+						link.html(link.text().replace(SsasReg, '<u>$&</u>'));
+						SsasDiv.append(link);
+					}
+				}else{
+					SsasDiv.append(jQuery('<span/>').text(WsalData.tr8n.searchnone));
+				}
+				SsasDiv.prepend(jQuery('<a href="javascript:;" onclick="WsalSsasChange(0)" class="allsites"/>').text(WsalData.tr8n.searchback));
+				SsasDiv.show();
+			}, 'json');
+			SsasInp.attr('data-oldvalue', SsasVal);
+		}
+		
+		// handle keys
+	});
+	SsasInps.blur(function(){
+		setTimeout(function(){
+			var SsasInp = jQuery(this);
+			var SsasDiv = SsasInp.next();
+			SsasInp.attr('data-oldvalue', '');
+			SsasDiv.hide();
+		}, 200);
+	});
+}
+
 function WsalSsasChange(value){
-	jQuery('select.wsal-ssas').attr('disabled', true);
+	jQuery('div.wsal-ssas-dd').hide();
+	jQuery('input.wsal-ssas').attr('disabled', true);
 	jQuery('#wsal-cbid').val(value);
 	jQuery('#audit-log-viewer').submit();
 }

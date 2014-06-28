@@ -10,6 +10,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action('wp_ajax_AjaxInspector', array($this, 'AjaxInspector'));
 		add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
 		add_action('wp_ajax_AjaxSetIpp', array($this, 'AjaxSetIpp'));
+		add_action('wp_ajax_AjaxSearchSite', array($this, 'AjaxSearchSite'));
 	}
 	
 	public function HasPluginShortcutLink(){
@@ -52,6 +53,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					'ajaxurl' => admin_url('admin-ajax.php'),
 					'tr8n' => array(
 						'numofitems' => __('Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log'),
+						'searchback' => __('All Sites', 'wp-security-audit-log'),
+						'searchnone' =>  __('No Results', 'wp-security-audit-log'),
 					),
 					'autorefresh' => array(
 						'enabled' => $this->_plugin->settings->IsRefreshAlertsEnabled(),
@@ -112,6 +115,28 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		die;
 	}
 	
+	public function AjaxSearchSite(){
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+		if(!isset($_REQUEST['search']))
+			die('Search parameter expected.');
+		
+		$grp1 = array();
+		$grp2 = array();
+		
+		$search = $_REQUEST['search'];
+		
+		foreach($this->_listview->get_sites() as $site){
+			if(stripos($site->blogname, $search) !== false)
+				$grp1[] = $site;
+			else
+				if(stripos($site->domain, $search) !== false)
+					$grp2[] = $site;
+		}
+		
+		die(json_encode(array_slice($grp1 + $grp2, 0, 7)));
+	}
+	
 	public function Header(){
 		add_thickbox();
 		wp_enqueue_style(
@@ -123,6 +148,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 	
 	public function Footer() {
+		wp_enqueue_script('jquery');
+		wp_enqueue_script('suggest');
 		wp_enqueue_script(
 			'auditlog',
 			$this->_plugin->GetBaseUrl() . '/js/auditlog.js',
@@ -186,18 +213,12 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		
 		// show site alerts widget
 		if($this->is_multisite() && $this->is_main_blog()){
-			// TODO should I check wp_is_large_network()?
 			$curr = $this->get_view_site_id();
+			$curr = $curr ? get_blog_details($curr) : null;
+			$curr = $curr ? ($curr->blogname . ' (' . $curr->domain . ')') : 'All Sites';
+			
 			?><div class="wsal-ssa wsal-ssa-<?php echo $which; ?>">
-				<select class="wsal-ssas" onchange="WsalSsasChange(value);">
-					<option value="0"><?php _e('All Sites', 'wp-security-audit-log'); ?></option>
-					<?php foreach($this->get_sites() as $info){ ?>
-						<option value="<?php echo $info->blog_id; ?>"
-							<?php if($info->blog_id == $curr)echo 'selected="selected"'; ?>><?php
-							echo esc_html($info->blogname) . ' (' . esc_html($info->domain) . ')';
-						?></option>
-					<?php } ?>
-				</select>
+				<input type="text" class="wsal-ssas" value="<?php echo esc_attr($curr); ?>"/>
 			</div><?php
 		}
 	}
@@ -206,7 +227,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	 * @param int|null $limit Maximum number of sites to return (null = no limit).
 	 * @return object Object with keys: blog_id, blogname, domain
 	 */
-	protected function get_sites($limit = null){
+	public function get_sites($limit = null){
 		global $wpdb;
 		
 		// build query

@@ -11,7 +11,7 @@
 	width: 56px;
 }
 
-.wsal-ssa select {
+.wsal-ssa input {
 	margin-bottom: 6px;
 	width: 120px;
 	margin-left: 16px;
@@ -132,3 +132,43 @@ td.column-user {
 .log-type-16384:after,
 .log-type-E_DEBUG:after
 { background: #09E; content: "i"; }
+
+/* search box */
+.wsal-ssas-dd {
+	position: absolute;
+	border: 1px solid windowframe;
+	background: #FFF;
+	padding: 0;
+	margin: -8px 16px;
+	background: window;
+	color: windowtext;
+	min-width: 140px;
+}
+.wsal-ssas-dd * {
+	cursor: default;
+}
+.wsal-ssas-dd a {
+	padding: 2px 8px;
+	display: block;
+	line-height: normal;
+	text-decoration: none;
+	color: windowtext;
+}
+.wsal-ssas-dd a:hover,
+.wsal-ssas-dd .active {
+	background: highlight;
+	color: highlighttext;
+}
+.wsal-ssas-dd a u {
+	text-decoration: underline;
+}
+.wsal-ssas-dd span {
+	color: #555;
+	font-style: italic;
+	padding: 2px 8px;
+	display: block;
+	line-height: normal;
+}
+.wsal-ssas-dd .allsites {
+	border-bottom: 1px solid windowframe;
+}
