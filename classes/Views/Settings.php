@@ -226,7 +226,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<label for="Incognito">
 									<input type="checkbox" name="Incognito" value="1" id="Incognito"<?php
 										if($this->_plugin->settings->IsIncognito())echo ' checked="checked"'; ?>/>
-									<?php _e('Enable', 'wp-security-audit-log'); ?>
+									<?php _e('Hide', 'wp-security-audit-log'); ?>
 								</label>
 							</fieldset>
 						</td>

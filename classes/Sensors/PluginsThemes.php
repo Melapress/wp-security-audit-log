@@ -96,7 +96,6 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		// uninstall plugin
         if($is_plugins && in_array($action, array('delete-selected'))){
 			if(!isset($_REQUEST['verify-delete'])){
-				
 				// first step, before user approves deletion
 				// TODO store plugin data in session here
 			}else{
@@ -114,7 +113,6 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						),
 					));
 				}
-
 			}
 		}
 		
@@ -170,16 +168,28 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		// uninstall theme
         if($is_themes && in_array($action, array('delete-selected'))){
 			if(!isset($_REQUEST['verify-delete'])){
-				
 				// first step, before user approves deletion
 				// TODO store plugin data in session here
 			}else{
 				// second step, after deletion approval
 				// TODO use plugin data from session
-				/*foreach($_REQUEST['checked'] as $themeFile){
-					
-				}*/
-
+				$theme = array_diff($this->old_themes, wp_get_themes());
+				if(count($theme) != 1)
+					return $this->LogError(
+							'Expected exactly one deleted theme but found ' . count($theme),
+							array('OldThemes' => $this->old_themes, 'NewThemes' => wp_get_themes())
+						);
+				$theme = array_shift($theme);
+				$this->plugin->alerts->Trigger(5007, array(
+					'Theme' => (object)array(
+						'Name' => $theme->Name,
+						'ThemeURI' => $theme->ThemeURI,
+						'Description' => $theme->Description,
+						'Author' => $theme->Author,
+						'Version' => $theme->Version,
+						'get_template_directory' => $theme->get_template_directory(),
+					),
+				));
 			}
 		}
 	}
