@@ -34,46 +34,49 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 	protected $snippets = array(
 		'' => '',
 		'Current WP User' => 'return wp_get_current_user();',
-		'Clean PHP Error Events' => 'set_time_limit(0);
-ob_implicit_flush(true);
-while(ob_get_level())ob_end_flush();
-global $wpdb;
+		
+		'Clean PHP Error Events' => '
+class OccurrenceCleanupTask extends WSAL_AbstractSandboxTask {
+			
+	protected $event_ids = array(0000, 0001, 0002, 0003, 0004, 0005);
 
-$occs = WSAL_DB_Occurrence::LoadMulti("alert_id IN (0,1,2,3,4,5)");
-$c = count($occs);
-
-echo \'<!DOCTYPE html><html><body style="margin:0;padding:0;font:12px Arial;"><span id="p">0</span>%\';
-
-foreach($occs as $i => $occ){
-	$occ->Delete();
-	echo \'<script>document.getElementById("p").innerHTML="\' .
-		 number_format(($i + 1) / $c * 100, 2) .
-		 \'";</script>\';
+	protected function Execute(){
+		global $wpdb;
+		$occs = WSAL_DB_Occurrence::LoadMulti(\'alert_id IN (\'.implode(\',\', $this->event_ids).\')\');
+		$c = count($occs);
+		$this->Message($c ? (\'Removing \' . $c . \' events...\') : \'No events to remove!\');
+		foreach($occs as $i => $occ){
+			$this->Message(\'Removing Event \' . $occ->id . \'...\', true);
+			$occ->Delete();
+			$this->Progress(($i + 1) / $c * 100);
+		}
+	}
 }
+new OccurrenceCleanupTask();',
+		
+		'Multisite Site Creator' => '
+class DummySiteCreatorTask extends WSAL_AbstractSandboxTask {
+			
+	protected $sites_to_create = 100;
+	protected $site_host = \'localhost\';
+	protected $site_path = \'/wordpress-3.8/test$i/\';
+	protected $site_name = \'Test $i\';
 
-echo \'<div style="display: none;">\';
-register_shutdown_function(function(){ echo \'</div></body></html>\'; });
-die();',
-		'Multisite Site Creator' => '$num_site_to_create = 100;
-
-set_time_limit(0);
-ob_implicit_flush(true);
-while(ob_get_level())ob_end_flush();
-global $wpdb;
-$l = $wpdb->get_var("SELECT blog_id FROM $wpdb->blogs ORDER BY blog_id DESC LIMIT 1") + 1;
-
-echo \'<!DOCTYPE html><html><body style="margin:0;padding:0;font:12px Arial;"><span id="p">0</span>%\';
-
-for($i = $l; $i <= $num_site_to_create + $l; $i++){
-	wpmu_create_blog(\'localhost\', "/wordpress-3.8/test$i/", "Test $i", 1);
-	echo \'<script>document.getElementById("p").innerHTML="\' .
-		 number_format(($i - $l) / $num_site_to_create * 100, 2) .
-		 \'";</script>\';
+	protected function Execute(){
+		global $wpdb;
+		$l = $wpdb->get_var("SELECT blog_id FROM $wpdb->blogs ORDER BY blog_id DESC LIMIT 1") + 1;
+		$this->Message(\'Creating \' . $this->sites_to_create . \' new sites...\');
+		for($i = $l; $i <= $this->sites_to_create + $l; $i++){
+			$this->Progress(($i - $l) / $this->sites_to_create * 100);
+			wpmu_create_blog(
+				str_replace(\'$i\', $i, $this->site_host),
+				str_replace(\'$i\', $i, $this->site_path),
+				str_replace(\'$i\', $i, $this->site_name),
+			1);
+		}
+	}
 }
-
-echo \'<div style="display: none;">\';
-register_shutdown_function(function(){ echo \'</div></body></html>\'; });
-die();',
+new DummySiteCreatorTask();',
 	);
 	
 	public function HandleError($code, $message, $filename = 'unknown', $lineno = 0){
