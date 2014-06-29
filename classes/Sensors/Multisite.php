@@ -3,14 +3,60 @@
 class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		add_action('wpmu_new_blog', array($this, 'EventNewBlog'), 10, 1);
-		add_action('archive_blog', array($this, 'EventArchiveBlog'));
-		add_action('unarchive_blog', array($this, 'EventUnarchiveBlog'));
-		add_action('activate_blog', array($this, 'EventActivateBlog'));
-		add_action('deactivate_blog', array($this, 'EventDeactivateBlog'));
-		add_action('delete_blog', array($this, 'EventDeleteBlog'));
-		add_action('add_user_to_blog', array($this, 'EventUserAddedToBlog'), 10, 3);
-		add_action('remove_user_from_blog', array($this, 'EventUserRemovedFromBlog'));
+		if($this->plugin->IsMultisite()){
+			add_action('admin_init', array($this, 'EventAdminInit'));
+			if(is_admin())add_action('shutdown', array($this, 'EventAdminShutdown'));
+			add_action('wpmu_new_blog', array($this, 'EventNewBlog'), 10, 1);
+			add_action('archive_blog', array($this, 'EventArchiveBlog'));
+			add_action('unarchive_blog', array($this, 'EventUnarchiveBlog'));
+			add_action('activate_blog', array($this, 'EventActivateBlog'));
+			add_action('deactivate_blog', array($this, 'EventDeactivateBlog'));
+			add_action('delete_blog', array($this, 'EventDeleteBlog'));
+			add_action('add_user_to_blog', array($this, 'EventUserAddedToBlog'), 10, 3);
+			add_action('remove_user_from_blog', array($this, 'EventUserRemovedFromBlog'));
+		}
+	}
+	
+	protected $old_allowedthemes;
+	
+	public function EventAdminInit(){
+		$this->old_allowedthemes = array_keys(get_site_option('allowedthemes'));
+	}
+	
+	public function EventAdminShutdown(){
+		$new_allowedthemes = array_keys(get_site_option('allowedthemes'));
+		
+		// check for enabled themes
+		foreach($new_allowedthemes as $theme)
+			if(!in_array($theme, $this->old_allowedthemes)){
+				$theme = wp_get_theme($theme);
+				$this->plugin->alerts->Trigger(5008, array(
+					'Theme' => (object)array(
+						'Name' => $theme->Name,
+						'ThemeURI' => $theme->ThemeURI,
+						'Description' => $theme->Description,
+						'Author' => $theme->Author,
+						'Version' => $theme->Version,
+						'get_template_directory' => $theme->get_template_directory(),
+					),
+				));
+			}
+		
+		// check for disabled themes
+		foreach($this->old_allowedthemes as $theme)
+			if(!in_array($theme, $new_allowedthemes)){
+				$theme = wp_get_theme($theme);
+				$this->plugin->alerts->Trigger(5009, array(
+					'Theme' => (object)array(
+						'Name' => $theme->Name,
+						'ThemeURI' => $theme->ThemeURI,
+						'Description' => $theme->Description,
+						'Author' => $theme->Author,
+						'Version' => $theme->Version,
+						'get_template_directory' => $theme->get_template_directory(),
+					),
+				));
+			}
 	}
 
 	public function EventNewBlog($blog_id){

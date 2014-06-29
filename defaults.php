@@ -146,7 +146,7 @@ WpSecurityAuditLog::GetInstance()
 			array(7003, E_CRITICAL, __('Deactivated site has been activated', 'wp-security-audit-log'), __('Activated site %SiteName%', 'wp-security-audit-log')),
 			array(7004, E_CRITICAL, __('Site has been deactivated', 'wp-security-audit-log'), __('Deactivated site %SiteName%', 'wp-security-audit-log')),
 			array(7005, E_CRITICAL, __('Existing site deleted from network', 'wp-security-audit-log'), __('Deleted site %SiteName%', 'wp-security-audit-log')),
-			array(5008, E_CRITICAL, __('Activated theme on network', 'wp-security-audit-log'), __('Network activated %%Theme->Name% theme installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
-			array(5009, E_CRITICAL, __('Deactivated theme from network', 'wp-security-audit-log'), __('Network deactivated %%Theme->Name% theme installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
+			array(5008, E_CRITICAL, __('Activated theme on network', 'wp-security-audit-log'), __('Network activated %Theme->Name% theme installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
+			array(5009, E_CRITICAL, __('Deactivated theme from network', 'wp-security-audit-log'), __('Network deactivated %Theme->Name% theme installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
 		),
 	));

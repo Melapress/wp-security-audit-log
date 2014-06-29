@@ -245,7 +245,7 @@ class WpSecurityAuditLog {
 	 * @return boolean Whether we are running on multisite or not.
 	 */
 	public function IsMultisite(){
-		return funciton_exists('is_multisite') && is_multisite();
+		return function_exists('is_multisite') && is_multisite();
 	}
 	
 	public function CleanUp(){
