@@ -207,8 +207,24 @@ class WSAL_Settings {
 	 * @param integer $newvalue The new maximum number of alerts.
 	 */
 	public function SetPruningLimit($newvalue){
-		$newvalue = max(min((int)$newvalue, $this->GetMaxAllowedAlerts()), 1);
+		$newvalue = max(/*min(*/(int)$newvalue/*, $this->GetMaxAllowedAlerts())*/, 1);
 		$this->SetGlobalOption(self::OPT_PRFX . 'pruning-limit', $newvalue);
+	}
+	
+	public function SetPruningDateEnabled($enabled){
+		$this->SetGlobalOption(self::OPT_PRFX . 'pruning-date-e', $enabled);
+	}
+	
+	public function SetPruningLimitEnabled($enabled){
+		$this->SetGlobalOption(self::OPT_PRFX . 'pruning-limit-e', $enabled);
+	}
+	
+	public function IsPruningDateEnabled(){
+		return $this->GetGlobalOption(self::OPT_PRFX . 'pruning-date-e', true);
+	}
+	
+	public function IsPruningLimitEnabled(){
+		return $this->GetGlobalOption(self::OPT_PRFX . 'pruning-limit-e', true);
 	}
 	
 	protected $_disabled = null;
