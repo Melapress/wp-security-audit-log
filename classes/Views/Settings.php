@@ -88,6 +88,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<input type="text" name="PruningDate" placeholder="<?php echo $text; ?>"
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
 								<span> <?php echo $text; ?></span>
+								<p class="description"><?php
+									echo sprintf(__('Enter 0 to disable auto pruning of alerts by date.', 'wp-security-audit-log'), $max);
+								?></p>
 							</fieldset>
 						</td>
 					</tr>
@@ -103,7 +106,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
 								<span><?php echo $text; ?></span>
 								<p class="description"><?php
-									echo sprintf(__('By default we keep up to %d WordPress Security Events.', 'wp-security-audit-log'), $max);
+									echo sprintf(__('By default the plugin keeps up to 5000 Security Alerts. Enter 0 to disable auto pruning of alerts.', 'wp-security-audit-log'), $max);
 								?></p>
 							</fieldset>
 						</td>
