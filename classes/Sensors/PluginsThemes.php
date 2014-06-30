@@ -25,24 +25,24 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		
 		// install plugin
         if(($action=='install-plugin' || $action=='upload-plugin')){
-			$newPlugin = array_values(array_diff(array_keys(get_plugins()), array_keys($this->old_plugins)));
-			if(count($newPlugin) != 1)
+			$plugin = array_values(array_diff(array_keys(get_plugins()), array_keys($this->old_plugins)));
+			if(count($plugin) != 1)
 				return $this->LogError(
-						'Expected exactly one new plugin but found ' . count($newPlugin),
-						array('NewPlugin' => $newPlugin, 'OldPlugins' => $this->old_plugins, 'NewPlugins' => get_plugins())
+						'Expected exactly one new plugin but found ' . count($plugin),
+						array('NewPlugin' => $plugin, 'OldPlugins' => $this->old_plugins, 'NewPlugins' => get_plugins())
 					);
-			$newPluginPath = $newPlugin[0];
-			$newPlugin = get_plugins();
-			$newPlugin = $newPlugin[$newPluginPath];
-			$newPluginPath = plugin_dir_path(WP_PLUGIN_DIR . '/' . $newPluginPath[0]);
+			$pluginPath = $plugin[0];
+			$plugin = get_plugins();
+			$plugin = $plugin[$pluginPath];
+			$pluginPath = plugin_dir_path(WP_PLUGIN_DIR . '/' . $pluginPath[0]);
 			$this->plugin->alerts->Trigger(5000, array(
-				'NewPlugin' => (object)array(
-					'Name' => $newPlugin['Name'],
-					'PluginURI' => $newPlugin['PluginURI'],
-					'Version' => $newPlugin['Version'],
-					'Author' => $newPlugin['Author'],
-					'Network' => $newPlugin['Network'] ? 'True' : 'False',
-					'plugin_dir_path' => $newPluginPath,
+				'Plugin' => (object)array(
+					'Name' => $plugin['Name'],
+					'PluginURI' => $plugin['PluginURI'],
+					'Version' => $plugin['Version'],
+					'Author' => $plugin['Author'],
+					'Network' => $plugin['Network'] ? 'True' : 'False',
+					'plugin_dir_path' => $pluginPath,
 				),
 			));
         }
@@ -146,70 +146,69 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		
 		// install theme
         if(in_array($action, array('install-theme', 'upload-theme'))){
-			$newTheme = array_diff(wp_get_themes(), $this->old_themes);
-			if(count($newTheme) != 1)
-				return $this->LogError(
-						'Expected exactly one new theme but found ' . count($newTheme),
-						array('OldThemes' => $this->old_themes, 'NewThemes' => wp_get_themes())
-					);
-			$newTheme = array_shift($newTheme);
-			$this->plugin->alerts->Trigger(5005, array(
-				'NewTheme' => (object)array(
-					'Name' => $newTheme->Name,
-					'ThemeURI' => $newTheme->ThemeURI,
-					'Description' => $newTheme->Description,
-					'Author' => $newTheme->Author,
-					'Version' => $newTheme->Version,
-					'get_template_directory' => $newTheme->get_template_directory(),
-				),
-			));
+			$themes = array_diff(wp_get_themes(), $this->old_themes);
+			foreach($themes as $theme){
+				$this->plugin->alerts->Trigger(5005, array(
+					'Theme' => (object)array(
+						'Name' => $theme->Name,
+						'ThemeURI' => $theme->ThemeURI,
+						'Description' => $theme->Description,
+						'Author' => $theme->Author,
+						'Version' => $theme->Version,
+						'get_template_directory' => $theme->get_template_directory(),
+					),
+				));
+			}
 		}
 		
 		// uninstall theme
         if($is_themes && in_array($action, array('delete-selected', 'delete'))){
-			$theme = array_diff($this->old_themes, wp_get_themes());
-			if(count($theme) != 1)
-				return $this->LogError(
-						'Expected exactly one deleted theme but found ' . count($theme),
-						array('OldThemes' => $this->old_themes, 'NewThemes' => wp_get_themes())
-					);
-			$theme = array_shift($theme);
-			$this->plugin->alerts->Trigger(5007, array(
-				'Theme' => (object)array(
-					'Name' => $theme->Name,
-					'ThemeURI' => $theme->ThemeURI,
-					'Description' => $theme->Description,
-					'Author' => $theme->Author,
-					'Version' => $theme->Version,
-					'get_template_directory' => $theme->get_template_directory(),
-				),
-			));
+			foreach($this->GetRemovedThemes() as $theme){
+				$this->plugin->alerts->Trigger(5007, array(
+					'Theme' => (object)array(
+						'Name' => $theme->Name,
+						'ThemeURI' => $theme->ThemeURI,
+						'Description' => $theme->Description,
+						'Author' => $theme->Author,
+						'Version' => $theme->Version,
+						'get_template_directory' => $theme->get_template_directory(),
+					),
+				));
+			}
 		}
 	}
 	
 	public function EventThemeActivated($themeName){
-		$newTheme = null;
-		foreach(wp_get_themes() as $theme){
-			if($theme->Name == $themeName){
-				$newTheme = $theme;
+		$theme = null;
+		foreach(wp_get_themes() as $item){
+			if($item->Name == $themeName){
+				$theme = $item;
 				break;
 			}
 		}
-		if($newTheme == null)
+		if($theme == null)
 			return $this->LogError(
-					'Could not locate theme named "'.$newTheme.'".',
+					'Could not locate theme named "' . $theme . '".',
 					array('ThemeName' => $themeName, 'Themes' => wp_get_themes())
 				);
 		$this->plugin->alerts->Trigger(5006, array(
-			'NewTheme' => (object)array(
-				'Name' => $newTheme->Name,
-				'ThemeURI' => $newTheme->ThemeURI,
-				'Description' => $newTheme->Description,
-				'Author' => $newTheme->Author,
-				'Version' => $newTheme->Version,
-				'get_template_directory' => $newTheme->get_template_directory(),
+			'Theme' => (object)array(
+				'Name' => $theme->Name,
+				'ThemeURI' => $theme->ThemeURI,
+				'Description' => $theme->Description,
+				'Author' => $theme->Author,
+				'Version' => $theme->Version,
+				'get_template_directory' => $theme->get_template_directory(),
 			),
 		));
+	}
+	
+	protected function GetRemovedThemes(){
+		$result = $this->old_themes;
+		foreach($result as $i => $theme)
+			if(file_exists($theme->get_template_directory()))
+				unset($result[$i]);
+		return array_values($result);
 	}
 	
 }

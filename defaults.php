@@ -111,13 +111,13 @@ WpSecurityAuditLog::GetInstance()
 			array(4007, E_CRITICAL, __('A user was deleted by another user', 'wp-security-audit-log'), __('Deleted User %TargetUserData->Username% with the role of %TargetUserData->Roles%', 'wp-security-audit-log')),
 		),
 		'Plugins & Themes' => array(
-			array(5000, E_CRITICAL, __('User installed a plugin', 'wp-security-audit-log'), __('Installed the plugin %NewPlugin->Name% in %NewPlugin->plugin_dir_path%', 'wp-security-audit-log')),
+			array(5000, E_CRITICAL, __('User installed a plugin', 'wp-security-audit-log'), __('Installed the plugin %Plugin->Name% in %Plugin->plugin_dir_path%', 'wp-security-audit-log')),
 			array(5001, E_CRITICAL, __('User activated a WordPress plugin', 'wp-security-audit-log'), __('Activated the plugin %PluginData->Name% installed in %PluginFile%', 'wp-security-audit-log')),
 			array(5002, E_CRITICAL, __('User deactivated a WordPress plugin', 'wp-security-audit-log'), __('Deactivated the plugin %PluginData->Name% installed in %PluginFile%', 'wp-security-audit-log')),
 			array(5003, E_CRITICAL, __('User uninstalled a plugin', 'wp-security-audit-log'), __('Uninstalled the plugin %PluginData->Name% which was installed in %PluginFile%', 'wp-security-audit-log')),
 			array(5004, E_WARNING, __('User upgraded a plugin', 'wp-security-audit-log'), __('Upgraded the plugin %PluginData->Name% installed in %PluginFile%', 'wp-security-audit-log')),
-			array(5005, E_CRITICAL, __('User installed a theme', 'wp-security-audit-log'), __('Installed theme "%NewTheme->Name%" in %NewTheme->get_template_directory%', 'wp-security-audit-log')),
-			array(5006, E_CRITICAL, __('User activated a theme', 'wp-security-audit-log'), __('Activated theme "%NewTheme->Name%", installed in %NewTheme->get_template_directory%', 'wp-security-audit-log')),
+			array(5005, E_CRITICAL, __('User installed a theme', 'wp-security-audit-log'), __('Installed theme "%Theme->Name%" in %Theme->get_template_directory%', 'wp-security-audit-log')),
+			array(5006, E_CRITICAL, __('User activated a theme', 'wp-security-audit-log'), __('Activated theme "%Theme->Name%", installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
 			array(5007, E_CRITICAL, __('User uninstalled a theme', 'wp-security-audit-log'), __('Deleted theme "%Theme->Name%" installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
 		),
 		'System Activity' => array(
