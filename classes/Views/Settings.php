@@ -88,10 +88,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<?php $nbld = $this->_plugin->settings->IsPruningDateEnabled(); ?>
 								<label for="delete1">
 									<input type="checkbox" id="delete1" name="PruneByDate" value="1" <?php if($nbld)echo 'checked="checked"'; ?>
-										   onchange="jQuery('#PruningDate').attr('disabled', !checked);"/>
+										   onchange="jQuery('#PruningDate').attr('readonly', !checked);"/>
 									<?php echo __('Delete alerts older than', 'wp-security-audit-log'); ?>
 								</label>
-								<input type="text" id="PruningDate" name="PruningDate" placeholder="<?php echo $text; ?>" <?php if(!$nbld)echo 'disabled="disabled"'; ?>
+								<input type="text" id="PruningDate" name="PruningDate" placeholder="<?php echo $text; ?>" <?php if(!$nbld)echo 'readonly="readonly"'; ?>
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
 								<span> <?php echo $text; ?></span>
 							</fieldset>
@@ -105,10 +105,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<?php $nbld = $this->_plugin->settings->IsPruningLimitEnabled(); ?>
 								<label for="delete2">
 									<input type="checkbox" id="delete2" name="PruneByLimit" value="1" <?php if($nbld)echo 'checked="checked"'; ?>
-										   onchange="jQuery('#PruningLimit').attr('disabled', !checked);"/>
+										   onchange="jQuery('#PruningLimit').attr('readonly', !checked);"/>
 									<?php echo __('Keep up to', 'wp-security-audit-log'); ?>
 								</label>
-								<input type="text" id="PruningLimit" name="PruningLimit" placeholder="<?php echo $text;?>" <?php if(!$nbld)echo 'disabled="disabled"'; ?>
+								<input type="text" id="PruningLimit" name="PruningLimit" placeholder="<?php echo $text;?>" <?php if(!$nbld)echo 'readonly="readonly"'; ?>
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
 								<?php echo __('alerts', 'wp-security-audit-log'); ?>
 								<span><?php echo $text; ?></span>

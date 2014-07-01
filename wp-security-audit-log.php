@@ -102,9 +102,6 @@ class WpSecurityAuditLog {
 		// listen for installation event
 		register_activation_hook(__FILE__, array($this, 'Install'));
 		
-		// makes sure everything is ready
-		//add_action('init', array($this, 'CheckInstall'));
-		
 		// listen for cleanup event
 		add_action('wsal_cleanup', array($this, 'CleanUp'));
 		
@@ -114,6 +111,9 @@ class WpSecurityAuditLog {
 		// hide plugin
 		if($this->settings->IsIncognito())
 			add_action('admin_head', array($this, 'HidePlugin'));
+		
+		// clean up if need be
+		$this->CleanUp();
 	}
 	
 	public function Install(){
