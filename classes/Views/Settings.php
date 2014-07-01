@@ -101,7 +101,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<th></th>
 						<td>
 							<fieldset>
-								<?php $text = __('(eg: 80 alerts)', 'wp-security-audit-log'); ?>
+								<?php $text = __('(eg: 80)', 'wp-security-audit-log'); ?>
 								<?php $nbld = $this->_plugin->settings->IsPruningLimitEnabled(); ?>
 								<label for="delete2">
 									<input type="checkbox" id="delete2" name="PruneByLimit" value="1" <?php if($nbld)echo 'checked="checked"'; ?>
@@ -110,6 +110,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								</label>
 								<input type="text" id="PruningLimit" name="PruningLimit" placeholder="<?php echo $text;?>" <?php if(!$nbld)echo 'disabled="disabled"'; ?>
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
+								<?php echo __('alerts', 'wp-security-audit-log'); ?>
 								<span><?php echo $text; ?></span>
 							</fieldset>
 						</td>
