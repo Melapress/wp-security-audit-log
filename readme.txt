@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite
 Requires at least: 3.6
 Tested up to: 3.9.1
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 
 Identify WordPress issues before they become a security problem by keeping an audit log of users and all of the under the hood WordPress activity.
 
@@ -127,6 +127,8 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 4. The Audit Log Viewer of a Super Admin in a WordPress multisite network installation with the Site selection drop down menu.
 
 == Changelog ==
+
+= 1.2.0 (2014-06-30) =
 
 = 1.1.0 (2014-05-27) =
 * New Features
