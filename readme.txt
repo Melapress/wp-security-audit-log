@@ -1,5 +1,5 @@
 === WP Security Audit Log ===
-Contributors: WPWhiteSecurity, uuf6429
+Contributors: WPWhiteSecurity, uuf6429, robert681
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=payments%40wpwhitesecurity%2ecom&lc=US&item_name=WP%20Security%20Audit%20Log%20WordPress%20Plugin&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Plugin URI: http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/
 License: GPLv3
@@ -84,6 +84,13 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * Uses who upload or delete any sort of files
 * and much more...
 
+= As Featured On: =
+
+* [WP Mayor](http://www.wpmayor.com/wp-security-audit-log-plugin-review-user-activity-logging-wordpress/)
+* [ManageWP](https://managewp.com/free-wordpress-plugins-june-2014)
+* [Design Wall](http://www.designwall.com/blog/10-wordpress-multisite-plugins-you-shouldnt-live-without/)
+* [WPLift](http://wplift.com/wordpress-event-tracking)
+
 = WordPress Security Tips & Tricks =
 Even if WordPress security is not your cup of tea, the security of your WordPress is your responsibility. Keep yourself up to date with the latest WordPress Security Tips & Tricks. WP White Security frequently publishes WordPress security tips & tricks on the [WordPress Security section](http://www.wpwhitesecurity.com/wordpress-security/) of their blog.
 
@@ -125,10 +132,23 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 2. The WP Security Audit Log plugin options from where WordPress administrator can configure the auto pruning of security alerts and specific user access.
 3. The Enable/Disable Alerts settings node from where Administrators can disable or enable WordPress security alerts.
 4. The Audit Log Viewer of a Super Admin in a WordPress multisite network installation with the Site selection drop down menu.
+5. If there are more than 15 sites in a multisite, an auto complete site search shows up instead of the drop down menu (see [screenshots](https://wordpress.org/plugins/wp-security-audit-log/screenshots/) for reference)
 
 == Changelog ==
 
-= 1.2.0 (2014-06-30) =
+= 1.2.0 (2014-07-2) =
+* New Features
+	* Unlimited Alerts can be stored (removed the 5000 alerts limit)
+	* Alert time now includes milliseconds for more precision (ideal for auditing and compliance)
+	* Reported alert time is now relative to user's configured timezone
+	* Alerts automatic pruning procedures can now be enabled / disabled
+	* Option to hide WP Security Audit Log from plugins page in WordPress
+	* If there are more than 15 websites in a multisite installation, an auto complete site search box is shown instead of the drop down menu
+	
+* New WordPress Security Alerts
+	* Alert 5007: User has uninstalled / deleted a theme
+	* Alert 5008: Super administrator network activated a theme on multisite
+	* Alert 5009: Super administrator network deactivated a theme on multisite
 
 = 1.1.0 (2014-05-27) =
 * New Features
