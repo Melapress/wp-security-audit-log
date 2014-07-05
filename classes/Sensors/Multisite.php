@@ -20,11 +20,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	protected $old_allowedthemes;
 	
 	public function EventAdminInit(){
-		$this->old_allowedthemes = array_keys((array)get_site_option('allowedthemes'));
+		$this->old_allowedthemes = (array)array_keys((array)get_site_option('allowedthemes'));
 	}
 	
 	public function EventAdminShutdown(){
-		$new_allowedthemes = array_keys((array)get_site_option('allowedthemes'));
+		$new_allowedthemes = (array)array_keys((array)get_site_option('allowedthemes'));
 		
 		// check for enabled themes
 		foreach($new_allowedthemes as $theme)
