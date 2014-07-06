@@ -17,18 +17,19 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 		}
 	}
 	
-	protected $old_allowedthemes;
+	protected $old_allowedthemes = null;
 	
 	public function EventAdminInit(){
-		$this->old_allowedthemes = (array)array_keys((array)get_site_option('allowedthemes'));
+		$this->old_allowedthemes = array_keys((array)get_site_option('allowedthemes'));
 	}
 	
 	public function EventAdminShutdown(){
-		$new_allowedthemes = (array)array_keys((array)get_site_option('allowedthemes'));
+		if(is_null($this->old_allowedthemes))return;
+		$new_allowedthemes = array_keys((array)get_site_option('allowedthemes'));
 		
 		// check for enabled themes
 		foreach($new_allowedthemes as $theme)
-			if(!in_array($theme, $this->old_allowedthemes)){
+			if(!in_array($theme, (array)$this->old_allowedthemes)){
 				$theme = wp_get_theme($theme);
 				$this->plugin->alerts->Trigger(5008, array(
 					'Theme' => (object)array(
@@ -43,7 +44,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 			}
 		
 		// check for disabled themes
-		foreach($this->old_allowedthemes as $theme)
+		foreach((array)$this->old_allowedthemes as $theme)
 			if(!in_array($theme, $new_allowedthemes)){
 				$theme = wp_get_theme($theme);
 				$this->plugin->alerts->Trigger(5009, array(

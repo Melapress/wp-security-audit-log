@@ -70,7 +70,6 @@ final class WSAL_AlertManager {
 		);
 	}
 	
-	
 	/**
 	 * @internal Commit an alert now.
 	 */

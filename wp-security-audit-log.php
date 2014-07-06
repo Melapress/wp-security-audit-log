@@ -105,18 +105,15 @@ class WpSecurityAuditLog {
 		// listen for cleanup event
 		add_action('wsal_cleanup', array($this, 'CleanUp'));
 		
-		// internationalize plugin
-		add_action('plugins_loaded', array($this, 'LoadPluginTextdomain'));
-		
 		// hide plugin
 		if($this->settings->IsIncognito())
 			add_action('admin_head', array($this, 'HidePlugin'));
 		
 		// tell the world we've just finished loading
-		do_action('wsal_init');
+		do_action('wsal_init', $this);
 		
 		// clean up if need be
-		$this->CleanUp();
+		//$this->CleanUp();
 	}
 	
 	public function Install(){
@@ -256,10 +253,6 @@ class WpSecurityAuditLog {
 			call_user_func($hook);
 	}
 	
-	public function LoadPluginTextdomain(){
-		load_plugin_textdomain('wp-security-audit-log', false, $this->GetBaseDir() . 'languages/');
-	}
-	
 	public function AddCleanupHook($hook){
 		$this->_cleanup_hooks[] = $hook;
 	}
@@ -295,6 +288,12 @@ class WpSecurityAuditLog {
 	
 	// </editor-fold>
 }
+
+// Internationalize plugin now!
+function WSAL_LoadPluginTextdomain(){
+	load_plugin_textdomain('wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/');
+}
+add_action('plugins_loaded', 'WSAL_LoadPluginTextdomain');
 
 // Load extra files
 require_once('defaults.php');

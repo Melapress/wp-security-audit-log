@@ -132,7 +132,7 @@ new DummySiteCreatorTask();',
 	
 	public function AjaxExecuteResponse(){
 		echo '<!DOCTYPE html><html><head>';
-		echo '<link rel="stylesheet" id="open-sans-css" href="' . $this->_plugin->GetBaseUrl() . '/css/nice_r.css" type="text/css" media="all">';
+		echo '<link rel="stylesheet" id="open-sans-css" href="' . $this->_plugin->GetBaseUrl() . '/css/nice_r.css" type="text/css" media="all"/>';
 		echo '<script type="text/javascript" src="'.$this->_plugin->GetBaseUrl() . '/js/nice_r.js"></script>';
 		echo '<style type="text/css">';
 		echo 'html, body { margin: 0; padding: 0; }';

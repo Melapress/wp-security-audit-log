@@ -34,19 +34,19 @@ class WSAL_ViewManager {
 	}
 	
 	/**
-	 * Add new view given class name.
-	 * @param string $class Class name.
-	 */
-	public function AddFromClass($class){
-		$this->AddInstance(new $class($this->_plugin));
-	}
-	
-	/**
 	 * Add new view from file inside autoloader path.
 	 * @param string $file Path to file.
 	 */
 	public function AddFromFile($file){
 		$this->AddFromClass($this->_plugin->GetClassFileClassName($file));
+	}
+	
+	/**
+	 * Add new view given class name.
+	 * @param string $class Class name.
+	 */
+	public function AddFromClass($class){
+		$this->AddInstance(new $class($this->_plugin));
 	}
 	
 	/**
