@@ -16,14 +16,8 @@ class WSAL_ViewManager {
 		$this->_plugin = $plugin;
 		
 		// load views
-		foreach(glob(dirname(__FILE__) . '/Views/*.php') as $file){
-			$class = $this->_plugin->GetClassFileClassName($file);
-			$tmp = new $class($this->_plugin);
-			$this->views[] = $tmp;
-		}
-		
-		// order views by weight
-		usort($this->views, array($this, 'OrderByWeight'));
+		foreach(glob(dirname(__FILE__) . '/Views/*.php') as $file)
+			$this->AddFromFile($file);
 		
 		// add menus
 		add_action('admin_menu', array($this, 'AddAdminMenus'));
@@ -39,6 +33,43 @@ class WSAL_ViewManager {
 		add_action('admin_footer', array($this, 'RenderViewFooter'));
 	}
 	
+	/**
+	 * Add new view given class name.
+	 * @param string $class Class name.
+	 */
+	public function AddFromClass($class){
+		$this->AddInstance(new $class($this->_plugin));
+	}
+	
+	/**
+	 * Add new view from file inside autoloader path.
+	 * @param string $file Path to file.
+	 */
+	public function AddFromFile($file){
+		$this->AddFromClass($this->_plugin->GetClassFileClassName($file));
+	}
+	
+	/**
+	 * Add newly created view to list.
+	 * @param WSAL_AbstractView $view The new view.
+	 */
+	public function AddInstance(WSAL_AbstractView $view){
+		$this->views[] = $view;
+	}
+	
+	/**
+	 * Order views by their declared weight.
+	 */
+	public function ReorderViews(){
+		usort($this->views, array($this, 'OrderByWeight'));
+	}
+	
+	/**
+	 * @internal This has to be public for PHP to call it.
+	 * @param WSAL_AbstractView $a
+	 * @param WSAL_AbstractView $b
+	 * @return int
+	 */
 	public function OrderByWeight(WSAL_AbstractView $a, WSAL_AbstractView $b){
 		$wa = $a->GetWeight();
 		$wb = $b->GetWeight();
@@ -52,7 +83,12 @@ class WSAL_ViewManager {
 		}
 	}
 	
+	/**
+	 * Wordpress Action
+	 */
 	public function AddAdminMenus(){
+		$this->ReorderViews();
+		
 		if($this->_plugin->settings->CurrentUserCan('view') && count($this->views)){
 			// add main menu
 			add_menu_page(
@@ -81,7 +117,12 @@ class WSAL_ViewManager {
 		}
 	}
 	
+	/**
+	 * Wordpress Filter
+	 */
 	public function AddPluginShortcuts($old_links){
+		$this->ReorderViews();
+		
 		$new_links = array();
 		foreach($this->views as $view){
 			if($view->HasPluginShortcutLink()){
@@ -97,6 +138,9 @@ class WSAL_ViewManager {
 		return array_merge($new_links, $old_links);
 	}
 	
+	/**
+	 * @return int Returns page id of current page (or 0 on error).
+	 */
 	protected function GetBackendPageIndex(){
 		if(isset($_REQUEST['page']))
 			foreach($this->views as $i => $view)
@@ -105,16 +149,25 @@ class WSAL_ViewManager {
 		return 0;
 	}
 	
+	/**
+	 * Render header of the current view.
+	 */
 	public function RenderViewHeader(){
 		$view_id = $this->GetBackendPageIndex();
 		$this->views[$view_id]->Header();
 	}
 	
+	/**
+	 * Render footer of the current view.
+	 */
 	public function RenderViewFooter(){
 		$view_id = $this->GetBackendPageIndex();
 		$this->views[$view_id]->Footer();
 	}
 	
+	/**
+	 * Render content of the current view.
+	 */
 	public function RenderViewBody(){
 		$view_id = $this->GetBackendPageIndex();
 		?><div class="wrap">

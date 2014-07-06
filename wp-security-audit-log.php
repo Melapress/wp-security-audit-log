@@ -112,6 +112,9 @@ class WpSecurityAuditLog {
 		if($this->settings->IsIncognito())
 			add_action('admin_head', array($this, 'HidePlugin'));
 		
+		// tell the world we've just finished loading
+		do_action('wsal_init');
+		
 		// clean up if need be
 		$this->CleanUp();
 	}
