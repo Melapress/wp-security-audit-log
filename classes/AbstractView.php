@@ -66,9 +66,9 @@ abstract class WSAL_AbstractView {
 	 * @return string Safe view menu name.
 	 */
 	public function GetSafeViewName(){
-		return 'wsal-' . strtolower(
-				preg_replace('/[^A-Za-z0-9\-]/', '-', $this->GetName())
-			);
+		$name = $this->GetName();
+		if(function_exists('iconv'))$name = iconv('utf-8', 'ascii//TRANSLIT', $name);
+		return 'wsal-' . strtolower(preg_replace('/[^A-Za-z0-9\-]/', '-', $name));
 	}
 	
 	/**
