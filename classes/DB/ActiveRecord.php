@@ -261,7 +261,7 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @param array $args (Optional) Load condition arguments (rg: array(45) ).
 	 * @return self[] List of loaded records.
 	 */
-	public static function LoadMulti($cond, $args){
+	public static function LoadMulti($cond, $args = array()){
 		global $wpdb;
 		$class = get_called_class();
 		$result = array();
