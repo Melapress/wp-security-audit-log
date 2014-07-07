@@ -269,17 +269,17 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	public function get_columns(){
 		$cols = array(
 			//'cb'   => '<input type="checkbox" />',
-			//'read' => 'Read',
-			'type' => 'Code',
-			'code' => 'Type',
-			'crtd' => 'Date',
-			'user' => 'Username',
-			'scip' => 'Source IP',
+			//'read' => __('Read', 'wp-security-audit-log'),
+			'type' => __('Code', 'wp-security-audit-log'),
+			'code' => __('Type', 'wp-security-audit-log'),
+			'crtd' => __('Date', 'wp-security-audit-log'),
+			'user' => __('Username', 'wp-security-audit-log'),
+			'scip' => __('Source IP', 'wp-security-audit-log'),
 		);
 		if($this->is_multisite() && $this->is_main_blog() && !$this->is_specific_view()){
-			$cols['site'] = 'Site';
+			$cols['site'] = __('Site', 'wp-security-audit-log');
 		}
-		$cols['mesg'] = 'Message';
+		$cols['mesg'] = __('Message', 'wp-security-audit-log');
 		if($this->_plugin->settings->IsDataInspectorEnabled()){
 			$cols['data'] = '';
 		}
@@ -308,13 +308,13 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 			case 'read':
 				return '<span class="log-read log-read-'
 					. ($item->is_read ? 'old' : 'new')
-					. '" title="Click to toggle."></span>';
+					. '" title="' . __('Click to toggle.', 'wp-security-audit-log') . '"></span>';
 			case 'type':
 				return str_pad($item->alert_id, 4, '0', STR_PAD_LEFT);
 			case 'code':
 				$code = $this->_plugin->alerts->GetAlert($item->alert_id);
 				$code = $code ? $code->code : 0;
-				$const = (object)array('name' => 'E_UNKNOWN', 'value' => 0, 'description' => 'Unknown error code.');
+				$const = (object)array('name' => 'E_UNKNOWN', 'value' => 0, 'description' => __('Unknown error code.', 'wp-security-audit-log'));
 				$const = $this->_plugin->constants->GetConstantBy('value', $code, $const);
 				return '<span class="log-type log-type-' . $const->value
 					. '" title="' . esc_html($const->name . ': ' . $const->description) . '"></span>';
