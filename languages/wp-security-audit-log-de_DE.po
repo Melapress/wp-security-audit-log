@@ -1,0 +1,1465 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Security Audit Log v1.2.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2014-07-07 23:43:19+0000\n"
+"Last-Translator: admin <uuf6429@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: CSL v1.x\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;\n"
+"X-Poedit-Basepath: \n"
+"X-Poedit-Bookmarks: \n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Textdomain-Support: yes"
+
+#: classes/Sensors/Content.php:326
+#: classes/Sensors/Content.php:334
+#@ wp-security-audit-log
+msgid "Password Protected"
+msgstr "Passwortgeschützte"
+
+#: classes/Sensors/Content.php:328
+#: classes/Sensors/Content.php:336
+#@ wp-security-audit-log
+msgid "Public"
+msgstr "Öffentlichkeit"
+
+#: classes/Sensors/Content.php:330
+#: classes/Sensors/Content.php:338
+#@ wp-security-audit-log
+msgid "Private"
+msgstr "Privat"
+
+#: classes/Views/About.php:6
+#@ wp-security-audit-log
+msgid "About WP Security Audit Log"
+msgstr "Über WP Security Audit Log"
+
+#: classes/Views/About.php:14
+#@ wp-security-audit-log
+msgid "About"
+msgstr "Über"
+
+#: classes/Views/AuditLog.php:21
+#: classes/Views/AuditLog.php:31
+#@ wp-security-audit-log
+msgid "Audit Log Viewer"
+msgstr "Audit Log Viewer"
+
+#: classes/Views/AuditLog.php:40
+#: classes/Views/Settings.php:67
+#: classes/Views/ToggleAlerts.php:29
+#@ wp-security-audit-log
+msgid "You do not have sufficient permissions to access this page."
+msgstr "Sie haben keine ausreichenden Rechte, um auf diese Seite zuzugreifen."
+
+#: classes/Views/AuditLog.php:55
+#@ wp-security-audit-log
+msgid "Please enter the number of alerts you would like to see on one page:"
+msgstr "Bitte geben Sie die Anzahl der Warnungen Sie möchten, um auf einer Seite zu sehen:"
+
+#: classes/Views/AuditLog.php:56
+#: classes/Views/AuditLog.php:224
+#@ wp-security-audit-log
+msgid "All Sites"
+msgstr "Alle Seiten"
+
+#: classes/Views/AuditLog.php:57
+#@ wp-security-audit-log
+msgid "No Results"
+msgstr "Keine Ergebnisse"
+
+#: classes/Views/AuditLog.php:189
+#@ wp-security-audit-log
+msgid "No events so far."
+msgstr "Keine Veranstaltungen so weit."
+
+#: classes/Views/AuditLog.php:194
+#@ wp-security-audit-log
+msgid "Other"
+msgstr "Andere"
+
+#: classes/Views/AuditLog.php:201
+#@ wp-security-audit-log
+msgid "Show "
+msgstr "Zeigen"
+
+#: classes/Views/AuditLog.php:211
+#@ wp-security-audit-log
+msgid " Items"
+msgstr "Artikel"
+
+#: classes/Views/AuditLog.php:338
+#: classes/Views/AuditLog.php:341
+#@ wp-security-audit-log
+msgid "Unknown"
+msgstr "Unbekannt"
+
+#: classes/Views/AuditLog.php:342
+#@ wp-security-audit-log
+msgid "System"
+msgstr "System"
+
+#: classes/Views/AuditLog.php:355
+#@ wp-security-audit-log
+msgid "Alert Data Inspector"
+msgstr "Benachrichtigungsdaten Inspector"
+
+#: classes/Views/Help.php:6
+#: classes/Views/Help.php:14
+#@ wp-security-audit-log
+msgid "Help"
+msgstr "Hilfe"
+
+#: classes/Views/Sandbox.php:11
+#: classes/Views/Sandbox.php:19
+#@ wp-security-audit-log
+msgid "Sandbox"
+msgstr "Sandkasten"
+
+#: classes/Views/Settings.php:15
+#: classes/Views/Settings.php:23
+#@ wp-security-audit-log
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: classes/Views/Settings.php:72
+#: classes/Views/ToggleAlerts.php:43
+#@ wp-security-audit-log
+msgid "Settings have been saved."
+msgstr "Einstellungen wurden gespeichert."
+
+#: classes/Views/Settings.php:74
+#: classes/Views/ToggleAlerts.php:45
+#@ wp-security-audit-log
+msgid "Error: "
+msgstr "Fehler: "
+
+#: classes/Views/Settings.php:84
+#@ wp-security-audit-log
+msgid "Security Alerts Pruning"
+msgstr "Sicherheitswarnungen Rebschnitt"
+
+#: classes/Views/Settings.php:87
+#@ wp-security-audit-log
+msgid "(eg: 1 month)"
+msgstr "(zB: 1 Monat)"
+
+#: classes/Views/Settings.php:92
+#@ wp-security-audit-log
+msgid "Delete alerts older than"
+msgstr "Löschen Warnungen älter als"
+
+#: classes/Views/Settings.php:104
+#@ wp-security-audit-log
+msgid "(eg: 80)"
+msgstr "(zB: 80)"
+
+#: classes/Views/Settings.php:109
+#@ wp-security-audit-log
+msgid "Keep up to"
+msgstr "Bleiben Sie auf dem"
+
+#: classes/Views/Settings.php:113
+#@ wp-security-audit-log
+msgid "alerts"
+msgstr "Benachrichtigung"
+
+#: classes/Views/Settings.php:119
+#@ wp-security-audit-log
+msgid "Alerts Dashboard Widget"
+msgstr "Alerts Dashboard Widget"
+
+#: classes/Views/Settings.php:125
+#@ wp-security-audit-log
+msgid "On"
+msgstr "auf"
+
+#: classes/Views/Settings.php:130
+#@ wp-security-audit-log
+msgid "Off"
+msgstr "aus"
+
+#: classes/Views/Settings.php:135
+#, php-format
+#@ wp-security-audit-log
+msgid "Display a dashboard widget with the latest %d security alerts."
+msgstr "Zeigen Sie ein Dashboard-Widget mit den neuesten %d Sicherheitswarnungen."
+
+#: classes/Views/Settings.php:143
+#@ wp-security-audit-log
+msgid "Can View Alerts"
+msgstr "Kann Alerts anzeigen"
+
+#: classes/Views/Settings.php:150
+#@ wp-security-audit-log
+msgid "Users and Roles in this list can view the security alerts"
+msgstr "Benutzer und Rollen in dieser Liste können Sie die Sicherheitswarnungen angezeigt werden"
+
+#: classes/Views/Settings.php:165
+#@ wp-security-audit-log
+msgid "Can Manage Plugin"
+msgstr ""
+
+#: classes/Views/Settings.php:172
+#@ wp-security-audit-log
+msgid "Users and Roles in this list can manage the plugin settings"
+msgstr ""
+
+#: classes/Views/Settings.php:187
+#@ wp-security-audit-log
+msgid "Refresh Audit View"
+msgstr ""
+
+#: classes/Views/Settings.php:193
+#@ wp-security-audit-log
+msgid "Automatic"
+msgstr ""
+
+#: classes/Views/Settings.php:195
+#@ wp-security-audit-log
+msgid "Refresh Audit View as soon as there are new events."
+msgstr ""
+
+#: classes/Views/Settings.php:199
+#@ wp-security-audit-log
+msgid "Manual"
+msgstr ""
+
+#: classes/Views/Settings.php:201
+#@ wp-security-audit-log
+msgid "Refresh Audit View only when page is reloaded."
+msgstr ""
+
+#: classes/Views/Settings.php:207
+#@ wp-security-audit-log
+msgid "Developer Options"
+msgstr ""
+
+#: classes/Views/Settings.php:230
+#@ wp-security-audit-log
+msgid "Hide Plugin from Plugins Page"
+msgstr ""
+
+#: classes/Views/Settings.php:236
+#@ wp-security-audit-log
+msgid "Hide"
+msgstr ""
+
+#: classes/Views/ToggleAlerts.php:6
+#: classes/Views/ToggleAlerts.php:14
+#@ wp-security-audit-log
+msgid "Enable/Disable Alerts"
+msgstr ""
+
+#: classes/Views/ToggleAlerts.php:76
+#@ wp-security-audit-log
+msgid "Not Implemented"
+msgstr ""
+
+#: classes/Views/ToggleAlerts.php:79
+#@ wp-security-audit-log
+msgid "Not Available"
+msgstr ""
+
+#: classes/Views/ToggleAlerts.php:93
+#@ wp-security-audit-log
+msgid "Save Changes"
+msgstr ""
+
+#: classes/WidgetManager.php:19
+#@ wp-security-audit-log
+msgid "Latest Alerts"
+msgstr ""
+
+#: classes/WidgetManager.php:32
+#@ wp-security-audit-log
+msgid "No alerts found."
+msgstr ""
+
+#: classes/WidgetManager.php:37
+#@ wp-security-audit-log
+msgid "User"
+msgstr ""
+
+#: classes/WidgetManager.php:38
+#@ wp-security-audit-log
+msgid "Description"
+msgstr ""
+
+#: defaults.php:16
+#@ wp-security-audit-log
+msgid "Fatal run-time error."
+msgstr ""
+
+#: defaults.php:17
+#@ wp-security-audit-log
+msgid "Run-time warning (non-fatal error)."
+msgstr ""
+
+#: defaults.php:18
+#@ wp-security-audit-log
+msgid "Compile-time parse error."
+msgstr ""
+
+#: defaults.php:19
+#@ wp-security-audit-log
+msgid "Run-time notice."
+msgstr ""
+
+#: defaults.php:20
+#@ wp-security-audit-log
+msgid "Fatal error that occurred during startup."
+msgstr ""
+
+#: defaults.php:21
+#@ wp-security-audit-log
+msgid "Warnings that occurred during startup."
+msgstr ""
+
+#: defaults.php:22
+#@ wp-security-audit-log
+msgid "Fatal compile-time error."
+msgstr ""
+
+#: defaults.php:23
+#@ wp-security-audit-log
+msgid "Compile-time warning."
+msgstr ""
+
+#: defaults.php:24
+#@ wp-security-audit-log
+msgid "User-generated error message."
+msgstr ""
+
+#: defaults.php:25
+#@ wp-security-audit-log
+msgid "User-generated warning message."
+msgstr ""
+
+#: defaults.php:26
+#@ wp-security-audit-log
+msgid "User-generated notice message. "
+msgstr ""
+
+#: defaults.php:27
+#@ wp-security-audit-log
+msgid "Non-standard/optimal code warning."
+msgstr ""
+
+#: defaults.php:28
+#@ wp-security-audit-log
+msgid "Catchable fatal error."
+msgstr ""
+
+#: defaults.php:29
+#@ wp-security-audit-log
+msgid "Run-time deprecation notices."
+msgstr ""
+
+#: defaults.php:30
+#@ wp-security-audit-log
+msgid "Run-time user deprecation notices."
+msgstr ""
+
+#: defaults.php:32
+#@ wp-security-audit-log
+msgid "Critical, high-impact messages."
+msgstr ""
+
+#: defaults.php:33
+#@ wp-security-audit-log
+msgid "Debug informational messages."
+msgstr ""
+
+#: defaults.php:39
+#@ wp-security-audit-log
+msgid "User logs in"
+msgstr ""
+
+#: defaults.php:39
+#@ wp-security-audit-log
+msgid "Successfully logged in"
+msgstr ""
+
+#: defaults.php:40
+#@ wp-security-audit-log
+msgid "User logs out"
+msgstr ""
+
+#: defaults.php:40
+#@ wp-security-audit-log
+msgid "Successfully logged out"
+msgstr ""
+
+#: defaults.php:41
+#@ wp-security-audit-log
+msgid "Login failed"
+msgstr ""
+
+#: defaults.php:41
+#, php-format
+#@ wp-security-audit-log
+msgid "%Attempts% failed login(s) detected"
+msgstr ""
+
+#: defaults.php:42
+#@ wp-security-audit-log
+msgid "User uploaded file from Uploads directory"
+msgstr ""
+
+#: defaults.php:42
+#, php-format
+#@ wp-security-audit-log
+msgid "Uploaded the file %FileName% in %FilePath%"
+msgstr ""
+
+#: defaults.php:43
+#@ wp-security-audit-log
+msgid "User deleted file from Uploads directory"
+msgstr ""
+
+#: defaults.php:43
+#, php-format
+#@ wp-security-audit-log
+msgid "Deleted the file %FileName% from %FilePath%"
+msgstr ""
+
+#: defaults.php:44
+#@ wp-security-audit-log
+msgid "User changed a file using the theme editor"
+msgstr ""
+
+#: defaults.php:44
+#, php-format
+#@ wp-security-audit-log
+msgid "Modified %File% with the Theme Editor"
+msgstr ""
+
+#: defaults.php:45
+#@ wp-security-audit-log
+msgid "User changed a file using the plugin editor"
+msgstr ""
+
+#: defaults.php:45
+#, php-format
+#@ wp-security-audit-log
+msgid "Modified %File% with the Plugin Editor"
+msgstr ""
+
+#: defaults.php:48
+#@ wp-security-audit-log
+msgid "User created a new blog post and saved it as draft"
+msgstr ""
+
+#: defaults.php:48
+#, php-format
+#@ wp-security-audit-log
+msgid "Created a new blog post called %PostTitle%. Blog post ID is %PostID%"
+msgstr ""
+
+#: defaults.php:49
+#@ wp-security-audit-log
+msgid "User published a blog post"
+msgstr ""
+
+#: defaults.php:49
+#, php-format
+#@ wp-security-audit-log
+msgid "Published a blog post called %PostTitle%. Blog post URL is %PostUrl%"
+msgstr ""
+
+#: defaults.php:50
+#@ wp-security-audit-log
+msgid "User modified a published blog post"
+msgstr ""
+
+#: defaults.php:50
+#, php-format
+#@ wp-security-audit-log
+msgid "Modified the published blog post %PostTitle%. Blog post URL is %PostUrl%"
+msgstr ""
+
+#: defaults.php:51
+#@ wp-security-audit-log
+msgid "User modified a draft blog post"
+msgstr ""
+
+#: defaults.php:51
+#, php-format
+#@ wp-security-audit-log
+msgid "Modified the draft blog post %PostTitle%. Blog post ID is %PostID%"
+msgstr ""
+
+#: defaults.php:52
+#@ wp-security-audit-log
+msgid "User permanently deleted a blog post from the trash"
+msgstr ""
+
+#: defaults.php:52
+#, php-format
+#@ wp-security-audit-log
+msgid "Deleted the post %PostTitle%. Blog post ID is %PostID%"
+msgstr ""
+
+#: defaults.php:53
+#@ wp-security-audit-log
+msgid "User moved a blog post to the trash"
+msgstr ""
+
+#: defaults.php:53
+#, php-format
+#@ wp-security-audit-log
+msgid "Moved the blog post %PostTitle% to trash"
+msgstr ""
+
+#: defaults.php:54
+#@ wp-security-audit-log
+msgid "User restored a blog post from trash"
+msgstr ""
+
+#: defaults.php:54
+#, php-format
+#@ wp-security-audit-log
+msgid "Restored post %PostTitle% from trash"
+msgstr ""
+
+#: defaults.php:55
+#@ wp-security-audit-log
+msgid "User changed blog post category"
+msgstr ""
+
+#: defaults.php:55
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the category of the post %PostTitle% from %OldCategories% to %NewCategories%"
+msgstr ""
+
+#: defaults.php:56
+#@ wp-security-audit-log
+msgid "User changed blog post URL"
+msgstr ""
+
+#: defaults.php:56
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the URL of the post %PostTitle% from %OldUrl% to %NewUrl%"
+msgstr ""
+
+#: defaults.php:57
+#@ wp-security-audit-log
+msgid "User changed blog post author"
+msgstr ""
+
+#: defaults.php:57
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the author of %PostTitle% post from %OldAuthor% to %NewAuthor%"
+msgstr ""
+
+#: defaults.php:58
+#@ wp-security-audit-log
+msgid "User changed blog post status"
+msgstr ""
+
+#: defaults.php:58
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the status of %PostTitle% post from %OldStatus% to %NewStatus%"
+msgstr ""
+
+#: defaults.php:59
+#@ wp-security-audit-log
+msgid "User created new category"
+msgstr ""
+
+#: defaults.php:59
+#, php-format
+#@ wp-security-audit-log
+msgid "Created a new category called %CategoryName%"
+msgstr ""
+
+#: defaults.php:60
+#@ wp-security-audit-log
+msgid "User deleted category"
+msgstr ""
+
+#: defaults.php:60
+#, php-format
+#@ wp-security-audit-log
+msgid "Deleted the %CategoryName% category"
+msgstr ""
+
+#: defaults.php:61
+#@ wp-security-audit-log
+msgid "User changed the visibility of a blog post"
+msgstr ""
+
+#: defaults.php:61
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the visibility of %PostTitle% blog post  from %OldVisibility% to %NewVisibility%"
+msgstr ""
+
+#: defaults.php:62
+#@ wp-security-audit-log
+msgid "User changed the date of a blog post"
+msgstr ""
+
+#: defaults.php:62
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the date of %PostTitle% blog post from %OldDate% to %NewDate%"
+msgstr ""
+
+#: defaults.php:63
+#@ wp-security-audit-log
+msgid "User sets a post as sticky"
+msgstr ""
+
+#: defaults.php:63
+#, php-format
+#@ wp-security-audit-log
+msgid "Set the post %PostTitle% as Sticky"
+msgstr ""
+
+#: defaults.php:64
+#@ wp-security-audit-log
+msgid "User removes post from sticky"
+msgstr ""
+
+#: defaults.php:64
+#, php-format
+#@ wp-security-audit-log
+msgid "Removed the post %PostTitle% from Sticky"
+msgstr ""
+
+#: defaults.php:67
+#@ wp-security-audit-log
+msgid "User created a new WordPress page and saved it as draft"
+msgstr ""
+
+#: defaults.php:67
+#, php-format
+#@ wp-security-audit-log
+msgid "Created a new page called %PostTitle%. Page ID is %PostID%"
+msgstr ""
+
+#: defaults.php:68
+#@ wp-security-audit-log
+msgid "User published a WorPress page"
+msgstr ""
+
+#: defaults.php:68
+#, php-format
+#@ wp-security-audit-log
+msgid "Published a page called %PostTitle%. Page URL is %PostUrl%"
+msgstr ""
+
+#: defaults.php:69
+#@ wp-security-audit-log
+msgid "User modified a published WordPress page"
+msgstr ""
+
+#: defaults.php:69
+#, php-format
+#@ wp-security-audit-log
+msgid "Modified the published page %PostTitle%. Page URL is %PostUrl%"
+msgstr ""
+
+#: defaults.php:70
+#@ wp-security-audit-log
+msgid "User modified a draft WordPress page"
+msgstr ""
+
+#: defaults.php:70
+#, php-format
+#@ wp-security-audit-log
+msgid "Modified the draft page %PostTitle%. page ID is %PostID%"
+msgstr ""
+
+#: defaults.php:71
+#@ wp-security-audit-log
+msgid "User permanently deleted a page from the trash"
+msgstr ""
+
+#: defaults.php:71
+#, php-format
+#@ wp-security-audit-log
+msgid "Deleted the page %PostTitle%. Page ID is %PostID%"
+msgstr ""
+
+#: defaults.php:72
+#@ wp-security-audit-log
+msgid "User moved WordPress page to the trash"
+msgstr ""
+
+#: defaults.php:72
+#, php-format
+#@ wp-security-audit-log
+msgid "Moved the page %PostTitle% to trash"
+msgstr ""
+
+#: defaults.php:73
+#@ wp-security-audit-log
+msgid "User restored a WordPress page from trash"
+msgstr ""
+
+#: defaults.php:73
+#, php-format
+#@ wp-security-audit-log
+msgid "Restored page %PostTitle% from trash"
+msgstr ""
+
+#: defaults.php:74
+#@ wp-security-audit-log
+msgid "User changed page URL"
+msgstr ""
+
+#: defaults.php:74
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the URL of the page %PostTitle% from %OldUrl% to %NewUrl%"
+msgstr ""
+
+#: defaults.php:75
+#@ wp-security-audit-log
+msgid "User changed page author"
+msgstr ""
+
+#: defaults.php:75
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the author of %PostTitle% page from %OldAuthor% to %NewAuthor%"
+msgstr ""
+
+#: defaults.php:76
+#@ wp-security-audit-log
+msgid "User changed page status"
+msgstr ""
+
+#: defaults.php:76
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the status of %PostTitle% page from %OldStatus% to %NewStatus%"
+msgstr ""
+
+#: defaults.php:77
+#@ wp-security-audit-log
+msgid "User changed the visibility of a page post"
+msgstr ""
+
+#: defaults.php:77
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the visibility of %PostTitle% page  from %OldVisibility% to %NewVisibility%"
+msgstr ""
+
+#: defaults.php:78
+#@ wp-security-audit-log
+msgid "User changed the date of a page post"
+msgstr ""
+
+#: defaults.php:78
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the date of %PostTitle% page from %OldDate% to %NewDate%"
+msgstr ""
+
+#: defaults.php:79
+#@ wp-security-audit-log
+msgid "User changed the parent of a page"
+msgstr ""
+
+#: defaults.php:79
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the parent of %PostTitle% page from %OldParentName% to %NewParentName%"
+msgstr ""
+
+#: defaults.php:80
+#@ wp-security-audit-log
+msgid "User changes the template of a page"
+msgstr ""
+
+#: defaults.php:80
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the template of %PostTitle% page from %OldTemplate% to %NewTemplate%"
+msgstr ""
+
+#: defaults.php:83
+#@ wp-security-audit-log
+msgid "User created a new post with custom post type and saved it as draft"
+msgstr ""
+
+#: defaults.php:83
+#, php-format
+#@ wp-security-audit-log
+msgid "Created a new custom post called %PostTitle% of type %PostType%. Post ID is %PostID%"
+msgstr ""
+
+#: defaults.php:84
+#@ wp-security-audit-log
+msgid "User published a post with custom post type"
+msgstr ""
+
+#: defaults.php:84
+#, php-format
+#@ wp-security-audit-log
+msgid "Published a custom post %PostTitle% of type %PostType%. Post URL is %PostUrl%"
+msgstr ""
+
+#: defaults.php:85
+#@ wp-security-audit-log
+msgid "User modified a post with custom post type"
+msgstr ""
+
+#: defaults.php:85
+#, php-format
+#@ wp-security-audit-log
+msgid "Modified custom post %PostTitle% of type %PostType%. Post URL is %PostUrl%"
+msgstr ""
+
+#: defaults.php:86
+#@ wp-security-audit-log
+msgid "User modified a draft post with custom post type"
+msgstr ""
+
+#: defaults.php:86
+#, php-format
+#@ wp-security-audit-log
+msgid "Modified draft custom post %PostTitle% of type is %PostType%. Post URL is %PostUrl%"
+msgstr ""
+
+#: defaults.php:87
+#@ wp-security-audit-log
+msgid "User permanently deleted post with custom post type"
+msgstr ""
+
+#: defaults.php:87
+#, php-format
+#@ wp-security-audit-log
+msgid "Deleted custom post %PostTitle% of type %PostType%"
+msgstr ""
+
+#: defaults.php:88
+#@ wp-security-audit-log
+msgid "User moved post with custom post type to trash"
+msgstr ""
+
+#: defaults.php:88
+#, php-format
+#@ wp-security-audit-log
+msgid "Moved custom post %PostTitle% to trash. Post type is %PostType%"
+msgstr ""
+
+#: defaults.php:89
+#@ wp-security-audit-log
+msgid "User restored post with custom post type from trash"
+msgstr ""
+
+#: defaults.php:89
+#, php-format
+#@ wp-security-audit-log
+msgid "Restored custom post %PostTitle% of type %PostType% from trash"
+msgstr ""
+
+#: defaults.php:90
+#@ wp-security-audit-log
+msgid "User changed the category of a post with custom post type"
+msgstr ""
+
+#: defaults.php:90
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the category(ies) of custom post %PostTitle% of type %PostType% from %OldCategories% to %NewCategories%"
+msgstr ""
+
+#: defaults.php:91
+#@ wp-security-audit-log
+msgid "User changed the URL of a post with custom post type"
+msgstr ""
+
+#: defaults.php:91
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the URL of custom post %PostTitle% of type %PostType% from %OldUrl% to %NewUrl%"
+msgstr ""
+
+#: defaults.php:92
+#@ wp-security-audit-log
+msgid "User changed the author or post with custom post type"
+msgstr ""
+
+#: defaults.php:92
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the author of custom post %PostTitle% of type %PostType% from %OldAuthor% to %NewAuthor%"
+msgstr ""
+
+#: defaults.php:93
+#@ wp-security-audit-log
+msgid "User changed the status of post with custom post type"
+msgstr ""
+
+#: defaults.php:93
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the status of custom post %PostTitle% of type %PostType% from %OldStatus% to %NewStatus%"
+msgstr ""
+
+#: defaults.php:94
+#@ wp-security-audit-log
+msgid "User changed the visibility of a post with custom post type"
+msgstr ""
+
+#: defaults.php:94
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the visibility of custom post %PostTitle% of type %PostType% from %OldVisibility% to %NewVisibility%"
+msgstr ""
+
+#: defaults.php:95
+#@ wp-security-audit-log
+msgid "User changed the date of post with custom post type"
+msgstr ""
+
+#: defaults.php:95
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the date of custom post %PostTitle% of type %PostType% from %OldDate% to %NewDate%"
+msgstr ""
+
+#: defaults.php:98
+#@ wp-security-audit-log
+msgid "User added a new widget"
+msgstr ""
+
+#: defaults.php:98
+#, php-format
+#@ wp-security-audit-log
+msgid "Added a new %WidgetName% widget in  %Sidebar%"
+msgstr ""
+
+#: defaults.php:99
+#@ wp-security-audit-log
+msgid "User modified a widget"
+msgstr ""
+
+#: defaults.php:99
+#, php-format
+#@ wp-security-audit-log
+msgid "Modified the %WidgetName% widget in %Sidebar%"
+msgstr ""
+
+#: defaults.php:100
+#@ wp-security-audit-log
+msgid "User deleted widget"
+msgstr ""
+
+#: defaults.php:100
+#, php-format
+#@ wp-security-audit-log
+msgid "Deleted the %WidgetName% widget from %Sidebar%"
+msgstr ""
+
+#: defaults.php:101
+#@ wp-security-audit-log
+msgid "User moved widget"
+msgstr ""
+
+#: defaults.php:101
+#, php-format
+#@ wp-security-audit-log
+msgid "Moved the %WidgetName% widget from %OldSidebar% to %NewSidebar%"
+msgstr ""
+
+#: defaults.php:104
+#@ wp-security-audit-log
+msgid "A new user was created on WordPress"
+msgstr ""
+
+#: defaults.php:104
+#, php-format
+#@ wp-security-audit-log
+msgid "User %NewUserData->Username% subscribed with a role of %NewUserData->Roles%"
+msgstr ""
+
+#: defaults.php:105
+#@ wp-security-audit-log
+msgid "A user created another WordPress user"
+msgstr ""
+
+#: defaults.php:105
+#, php-format
+#@ wp-security-audit-log
+msgid "Created a new user %NewUserData->Username% with the role of %NewUserData->Roles%"
+msgstr ""
+
+#: defaults.php:106
+#@ wp-security-audit-log
+msgid "The role of a user was changed by another WordPress user"
+msgstr ""
+
+#: defaults.php:106
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the role of user %TargetUsername% from %OldRole% to %NewRole%"
+msgstr ""
+
+#: defaults.php:107
+#@ wp-security-audit-log
+msgid "User has changed his or her password"
+msgstr ""
+
+#: defaults.php:107
+#@ wp-security-audit-log
+msgid "Changed the password"
+msgstr ""
+
+#: defaults.php:108
+#@ wp-security-audit-log
+msgid "A user changed another user's password"
+msgstr ""
+
+#: defaults.php:108
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the password for user %TargetUserData->Username% with the role of %TargetUserData->Roles%"
+msgstr ""
+
+#: defaults.php:109
+#@ wp-security-audit-log
+msgid "User changed his or her email address"
+msgstr ""
+
+#: defaults.php:109
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the email address from %OldEmail% to %NewEmail%"
+msgstr ""
+
+#: defaults.php:110
+#@ wp-security-audit-log
+msgid "A user changed another user's email address"
+msgstr ""
+
+#: defaults.php:110
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the email address of user account %TargetUsername% from %OldEmail% to %NewEmail%"
+msgstr ""
+
+#: defaults.php:111
+#@ wp-security-audit-log
+msgid "A user was deleted by another user"
+msgstr ""
+
+#: defaults.php:111
+#, php-format
+#@ wp-security-audit-log
+msgid "Deleted User %TargetUserData->Username% with the role of %TargetUserData->Roles%"
+msgstr ""
+
+#: defaults.php:114
+#@ wp-security-audit-log
+msgid "User installed a plugin"
+msgstr ""
+
+#: defaults.php:114
+#, php-format
+#@ wp-security-audit-log
+msgid "Installed the plugin %Plugin->Name% in %Plugin->plugin_dir_path%"
+msgstr ""
+
+#: defaults.php:115
+#@ wp-security-audit-log
+msgid "User activated a WordPress plugin"
+msgstr ""
+
+#: defaults.php:115
+#, php-format
+#@ wp-security-audit-log
+msgid "Activated the plugin %PluginData->Name% installed in %PluginFile%"
+msgstr "Aktiviert das Plugin %PluginData->Name% in %PluginFile% installiert"
+
+#: defaults.php:116
+#@ wp-security-audit-log
+msgid "User deactivated a WordPress plugin"
+msgstr ""
+
+#: defaults.php:116
+#, php-format
+#@ wp-security-audit-log
+msgid "Deactivated the plugin %PluginData->Name% installed in %PluginFile%"
+msgstr ""
+
+#: defaults.php:117
+#@ wp-security-audit-log
+msgid "User uninstalled a plugin"
+msgstr ""
+
+#: defaults.php:117
+#, php-format
+#@ wp-security-audit-log
+msgid "Uninstalled the plugin %PluginData->Name% which was installed in %PluginFile%"
+msgstr ""
+
+#: defaults.php:118
+#@ wp-security-audit-log
+msgid "User upgraded a plugin"
+msgstr ""
+
+#: defaults.php:118
+#, php-format
+#@ wp-security-audit-log
+msgid "Upgraded the plugin %PluginData->Name% installed in %PluginFile%"
+msgstr ""
+
+#: defaults.php:119
+#@ wp-security-audit-log
+msgid "User installed a theme"
+msgstr ""
+
+#: defaults.php:119
+#, php-format
+#@ wp-security-audit-log
+msgid "Installed theme \"%Theme->Name%\" in %Theme->get_template_directory%"
+msgstr ""
+
+#: defaults.php:120
+#@ wp-security-audit-log
+msgid "User activated a theme"
+msgstr ""
+
+#: defaults.php:120
+#, php-format
+#@ wp-security-audit-log
+msgid "Activated theme \"%Theme->Name%\", installed in %Theme->get_template_directory%"
+msgstr ""
+
+#: defaults.php:121
+#@ wp-security-audit-log
+msgid "User uninstalled a theme"
+msgstr ""
+
+#: defaults.php:121
+#, php-format
+#@ wp-security-audit-log
+msgid "Deleted theme \"%Theme->Name%\" installed in %Theme->get_template_directory%"
+msgstr ""
+
+#: defaults.php:124
+#@ wp-security-audit-log
+msgid "Unknown Error"
+msgstr ""
+
+#: defaults.php:124
+#@ wp-security-audit-log
+msgid "An unexpected error has occurred"
+msgstr ""
+
+#: defaults.php:125
+#@ wp-security-audit-log
+msgid "PHP error"
+msgstr ""
+
+#: defaults.php:125
+#: defaults.php:126
+#: defaults.php:127
+#: defaults.php:128
+#: defaults.php:129
+#, php-format
+#@ wp-security-audit-log
+msgid "%Message%"
+msgstr ""
+
+#: defaults.php:126
+#@ wp-security-audit-log
+msgid "PHP warning"
+msgstr ""
+
+#: defaults.php:127
+#@ wp-security-audit-log
+msgid "PHP notice"
+msgstr ""
+
+#: defaults.php:128
+#@ wp-security-audit-log
+msgid "PHP exception"
+msgstr ""
+
+#: defaults.php:129
+#@ wp-security-audit-log
+msgid "PHP shutdown error"
+msgstr ""
+
+#: defaults.php:130
+#@ wp-security-audit-log
+msgid "Events automatically pruned by system"
+msgstr ""
+
+#: defaults.php:130
+#, php-format
+#@ wp-security-audit-log
+msgid "%EventCount% event(s) automatically deleted by system"
+msgstr ""
+
+#: defaults.php:131
+#@ wp-security-audit-log
+msgid "Option Anyone Can Register in WordPress settings changed"
+msgstr ""
+
+#: defaults.php:131
+#, php-format
+#@ wp-security-audit-log
+msgid "%NewValue% the option \"Anyone can register\""
+msgstr ""
+
+#: defaults.php:132
+#@ wp-security-audit-log
+msgid "New User Default Role changed"
+msgstr ""
+
+#: defaults.php:132
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the New User Default Role from %OldRole% to %NewRole%"
+msgstr ""
+
+#: defaults.php:133
+#@ wp-security-audit-log
+msgid "WordPress Administrator Notification email changed"
+msgstr ""
+
+#: defaults.php:133
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the WordPress administrator notifications email address from %OldEmail% to %NewEmail%"
+msgstr ""
+
+#: defaults.php:134
+#@ wp-security-audit-log
+msgid "WordPress was updated"
+msgstr ""
+
+#: defaults.php:134
+#, php-format
+#@ wp-security-audit-log
+msgid "Updated WordPress from version %OldVersion% to %NewVersion%"
+msgstr ""
+
+#: defaults.php:135
+#@ wp-security-audit-log
+msgid "User changes the WordPress Permalinks"
+msgstr ""
+
+#: defaults.php:135
+#, php-format
+#@ wp-security-audit-log
+msgid "Changed the WordPress permalinks from %OldPattern% to %NewPattern%"
+msgstr ""
+
+#: defaults.php:138
+#@ wp-security-audit-log
+msgid "User granted Super Admin privileges"
+msgstr ""
+
+#: defaults.php:138
+#, php-format
+#@ wp-security-audit-log
+msgid "Granted Super Admin privileges to %TargetUsername%"
+msgstr ""
+
+#: defaults.php:139
+#@ wp-security-audit-log
+msgid "User revoked from Super Admin privileges"
+msgstr ""
+
+#: defaults.php:139
+#, php-format
+#@ wp-security-audit-log
+msgid "Revoked Super Admin privileges from %TargetUsername%"
+msgstr ""
+
+#: defaults.php:140
+#@ wp-security-audit-log
+msgid "Existing user added to a site"
+msgstr ""
+
+#: defaults.php:140
+#, php-format
+#@ wp-security-audit-log
+msgid "Added existing user %TargetUsername% with %TargetUserRole% role to site %SiteName%"
+msgstr ""
+
+#: defaults.php:141
+#@ wp-security-audit-log
+msgid "User removed from site"
+msgstr ""
+
+#: defaults.php:141
+#, php-format
+#@ wp-security-audit-log
+msgid "Removed user %TargetUsername% with role %TargetUserRole% from %SiteName% site"
+msgstr ""
+
+#: defaults.php:142
+#@ wp-security-audit-log
+msgid "New network user created"
+msgstr ""
+
+#: defaults.php:142
+#, php-format
+#@ wp-security-audit-log
+msgid "Created a new network user %NewUserData->Username%"
+msgstr ""
+
+#: defaults.php:143
+#@ wp-security-audit-log
+msgid "New site added on network"
+msgstr ""
+
+#: defaults.php:143
+#, php-format
+#@ wp-security-audit-log
+msgid "Added site %SiteName% to the network"
+msgstr ""
+
+#: defaults.php:144
+#@ wp-security-audit-log
+msgid "Existing site archived"
+msgstr ""
+
+#: defaults.php:144
+#, php-format
+#@ wp-security-audit-log
+msgid "Archived site %SiteName%"
+msgstr ""
+
+#: defaults.php:145
+#@ wp-security-audit-log
+msgid "Archived site has been unarchived"
+msgstr ""
+
+#: defaults.php:145
+#, php-format
+#@ wp-security-audit-log
+msgid "Unarchived site %SiteName%"
+msgstr ""
+
+#: defaults.php:146
+#@ wp-security-audit-log
+msgid "Deactivated site has been activated"
+msgstr ""
+
+#: defaults.php:146
+#, php-format
+#@ wp-security-audit-log
+msgid "Activated site %SiteName%"
+msgstr ""
+
+#: defaults.php:147
+#@ wp-security-audit-log
+msgid "Site has been deactivated"
+msgstr ""
+
+#: defaults.php:147
+#, php-format
+#@ wp-security-audit-log
+msgid "Deactivated site %SiteName%"
+msgstr ""
+
+#: defaults.php:148
+#@ wp-security-audit-log
+msgid "Existing site deleted from network"
+msgstr ""
+
+#: defaults.php:148
+#, php-format
+#@ wp-security-audit-log
+msgid "Deleted site %SiteName%"
+msgstr ""
+
+#: defaults.php:149
+#@ wp-security-audit-log
+msgid "Activated theme on network"
+msgstr ""
+
+#: defaults.php:149
+#, php-format
+#@ wp-security-audit-log
+msgid "Network activated %Theme->Name% theme installed in %Theme->get_template_directory%"
+msgstr ""
+
+#: defaults.php:150
+#@ wp-security-audit-log
+msgid "Deactivated theme from network"
+msgstr ""
+
+#: defaults.php:150
+#, php-format
+#@ wp-security-audit-log
+msgid "Network deactivated %Theme->Name% theme installed in %Theme->get_template_directory%"
+msgstr ""
+
+#: wp-security-audit-log.php:129
+#, php-format
+#@ default
+msgid "You are using a version of PHP that is older than %s, which is no longer supported.<br/>Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using."
+msgstr ""
+
+#: classes/Views/AuditLog.php:273
+#@ wp-security-audit-log
+msgid "Code"
+msgstr "Kode"
+
+#: classes/Views/AuditLog.php:274
+#@ wp-security-audit-log
+msgid "Type"
+msgstr "Typ"
+
+#: classes/Views/AuditLog.php:275
+#@ wp-security-audit-log
+msgid "Date"
+msgstr "Datum"
+
+#: classes/Views/AuditLog.php:276
+#@ wp-security-audit-log
+msgid "Username"
+msgstr "Benutzername"
+
+#: classes/Views/AuditLog.php:277
+#@ wp-security-audit-log
+msgid "Source IP"
+msgstr "Quell IP"
+
+#: classes/Views/AuditLog.php:280
+#@ wp-security-audit-log
+msgid "Site"
+msgstr "Seite"
+
+#: classes/Views/AuditLog.php:282
+#@ wp-security-audit-log
+msgid "Message"
+msgstr "Nachricht"
+
+#: classes/Views/AuditLog.php:311
+#@ wp-security-audit-log
+msgid "Click to toggle."
+msgstr ""
+
+#: classes/Views/AuditLog.php:317
+#@ wp-security-audit-log
+msgid "Unknown error code."
+msgstr ""
+

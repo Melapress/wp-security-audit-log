@@ -334,7 +334,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 							. '" target="_blank">' . esc_html($user->display_name) . '</a>';
 					$roles = $item->GetUserRoles();
 					$roles = (is_array($roles) && count($roles))
-							? esc_html(ucwords(implode(', ', $roles)))
+							? __(esc_html(ucwords(implode(', ', $roles))))
 							: '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
 				}else{
 					$image = get_avatar(0, 32);
