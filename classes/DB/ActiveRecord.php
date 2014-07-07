@@ -257,11 +257,11 @@ abstract class WSAL_DB_ActiveRecord {
 	
 	/**
 	 * Load multiple records from DB.
-	 * @param string $cond (Optional) Load condition.
-	 * @param array $args (Optional) Load condition arguments.
+	 * @param string $cond (Optional) Load condition (eg: 'some_id = %d' ).
+	 * @param array $args (Optional) Load condition arguments (rg: array(45) ).
 	 * @return self[] List of loaded records.
 	 */
-	public static function LoadMulti($cond = '%d', $args = array(1)){
+	public static function LoadMulti($cond, $args){
 		global $wpdb;
 		$class = get_called_class();
 		$result = array();

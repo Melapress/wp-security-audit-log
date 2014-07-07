@@ -64,7 +64,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 
 	protected function GetPostCategories($post){
-		return wp_get_post_categories($post->ID, array('fields' => 'names'));;
+		return wp_get_post_categories($post->ID, array('fields' => 'names'));
 	}
 
 	public function EventPostChanged($newStatus, $oldStatus, $post){
@@ -159,12 +159,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		$categoryIds = array();
 
-		if($action == 'delete' && $_POST['taxonomy'] == 'category' && !empty($_POST['delete_tags'])){
-			// bulk delete
-			$categoryIds[] = $_POST['delete_tags'];
-		}elseif($action == 'delete-tag' && $_POST['taxonomy'] == 'category' && !empty($_POST['tag_ID'])){
-			// single delete
-			$categoryIds[] = $_POST['tag_ID'];
+		if(isset($_POST['taxonomy'])){
+			if($action == 'delete' && $_POST['taxonomy'] == 'category' && !empty($_POST['delete_tags'])){
+				// bulk delete
+				$categoryIds[] = $_POST['delete_tags'];
+			}elseif($action == 'delete-tag' && $_POST['taxonomy'] == 'category' && !empty($_POST['tag_ID'])){
+				// single delete
+				$categoryIds[] = $_POST['tag_ID'];
+			}
 		}
 
 		foreach($categoryIds as $categoryID){
