@@ -102,50 +102,6 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	}
 	
 	/**
-	 * Retrieves a value for a particular meta variable expression.
-	 * @param string $expr Expression, eg: User->Name looks for a Name property for meta named User.
-	 * @return mixed The value nearest to the expression.
-	 */
-	protected function GetMetaExprValue($expr){
-		// TODO Handle function calls (and methods?)
-		$expr = explode('->', $expr);
-		$meta = array_shift($expr);
-		$meta = $this->GetMetaValue($meta, null);
-		foreach($expr as $part){
-			if(is_scalar($meta) || is_null($meta))return $meta; // this isn't 100% correct
-			$meta = is_array($meta) ? $meta[$part] : $meta->$part;
-		}
-		return is_scalar($meta) ? (string)$meta : var_export($meta, true);
-	}
-	
-	/**
-	 * Expands a message with variables by replacing variables with meta data values.
-	 * @param string $mesg The original message.
-	 * @param callable|null $metaFormatter (Optional) Callback for formatting meta values.
-	 * @param string $afterMeta (Optional) Some text to put after meta values.
-	 * @return string The expanded message.
-	 */
-	protected function GetFormattedMesg($origMesg, $metaFormatter = null){
-		// tokenize message with regex
-		$mesg = preg_split('/(%.*?%)/', (string)$origMesg, -1, PREG_SPLIT_DELIM_CAPTURE);
-		if(!is_array($mesg))return (string)$origMesg;
-		// handle tokenized message
-		foreach($mesg as $i=>$token){
-			// handle escaped percent sign
-			if($token == '%%'){
-				$mesg[$i] = '%';
-			}else
-			// handle complex expressions
-			if(substr($token, 0, 1) == '%' && substr($token, -1, 1) == '%'){
-				$mesg[$i] = $this->GetMetaExprValue(substr($token, 1, -1));
-				if($metaFormatter)$mesg[$i] = call_user_func($metaFormatter, $token, $mesg[$i]);
-			}
-		}
-		// compact message and return
-		return implode('', $mesg);
-	}
-	
-	/**
 	 * @param callable|null $metaFormatter (Optional) Meta formatter callback.
 	 * @return string Full-formatted message.
 	 */
@@ -159,7 +115,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 				$this->_cachedmessage = $this->GetAlert()->mesg;
 			}
 			// fill variables in message
-			$this->_cachedmessage = $this->GetFormattedMesg($this->_cachedmessage, $metaFormatter);
+			$this->_cachedmessage = $this->GetAlert()->GetMessage($this->GetMetaArray(), $metaFormatter, $this->_cachedmessage);
 		}
 		return $this->_cachedmessage;
 	}

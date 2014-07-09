@@ -274,14 +274,23 @@ class WpSecurityAuditLog {
 		return ($wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
 	}
 	
+	/**
+	 * @return string Absolute URL to plugin directory WITHOUT final slash.
+	 */
 	public function GetBaseUrl(){
 		return plugins_url('', __FILE__);
 	}
 	
+	/**
+	 * @return string Full path to plugin directory WITH final slash.
+	 */
 	public function GetBaseDir(){
 		return plugin_dir_path(__FILE__);
 	}
 	
+	/**
+	 * @return string Plugin directory name.
+	 */
 	public function GetBaseName(){
 		return plugin_basename(__FILE__);
 	}

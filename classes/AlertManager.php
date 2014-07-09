@@ -23,12 +23,34 @@ final class WSAL_AlertManager {
 	 */
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->plugin = $plugin;
-		foreach(glob(dirname(__FILE__) . '/Loggers/*.php') as $file){
-			$class = $plugin->GetClassFileClassName($file);
-			$this->_loggers[] = new $class($plugin);
-		}
+		foreach(glob(dirname(__FILE__) . '/Loggers/*.php') as $file)
+			$this->AddFromFile ($file);
 		
 		add_action('shutdown', array($this, '_CommitPipeline'));
+	}
+	
+	/**
+	 * Add new logger from file inside autoloader path.
+	 * @param string $file Path to file.
+	 */
+	public function AddFromFile($file){
+		$this->AddFromClass($this->plugin->GetClassFileClassName($file));
+	}
+	
+	/**
+	 * Add new logger given class name.
+	 * @param string $class Class name.
+	 */
+	public function AddFromClass($class){
+		$this->AddInstance(new $class($this->plugin));
+	}
+	
+	/**
+	 * Add newly created logger to list.
+	 * @param WSAL_AbstractLogger $logger The new logger.
+	 */
+	public function AddInstance(WSAL_AbstractLogger $logger){
+		$this->_loggers[] = $logger;
 	}
 	
 	/**
