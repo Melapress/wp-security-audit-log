@@ -160,7 +160,6 @@ class WpSecurityAuditLog {
 		$auditlog = $wpdb->get_results($sql, ARRAY_A);
 		
 		// migrate using db logger
-		$lgr = new WSAL_Loggers_Database($this);
 		foreach($auditlog as $entry){
 			$data = array(
 				'ClientIP' => $entry['UserIP'],
@@ -184,7 +183,9 @@ class WpSecurityAuditLog {
 			foreach((array)$temp as $i => $item)
 				$data['MigratedArg' . $i] = $item;
 			// send event data to logger!
-			$lgr->Log($type, $data, $date, $entry['BlogId'], true);
+			foreach($this->alerts->GetLoggers() as $logger){
+				$logger->Log($type, $data, $date, $entry['BlogId'], true);
+			}
 		}
 		
 		// migrate settings

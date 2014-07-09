@@ -195,6 +195,13 @@ final class WSAL_AlertManager {
 	}
 	
 	/**
+	 * @return WSAL_AbstractLogger[] Returns an array of loaded loggers.
+	 */
+	public function GetLoggers(){
+		return $this->_loggers;
+	}
+	
+	/**
 	 * Converts an Alert into a Log entry (by invoking loggers).
 	 * You should not call this method directly.
 	 * @param integer $type Alert type.
