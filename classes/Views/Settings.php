@@ -206,23 +206,27 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<tr>
 						<th><label><?php _e('Developer Options', 'wp-security-audit-log'); ?></label></th>
 						<td>
-							<fieldset><?php
-								foreach(array(
-									WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array('Data Inspector', 'View data logged for each triggered alert.'),
-									WSAL_Settings::OPT_DEV_PHP_ERRORS     => array('PHP Errors', 'Enables sensor for alerts generated from PHP.'),
-									WSAL_Settings::OPT_DEV_REQUEST_LOG    => array('Request Log', 'Enables logging request to file.'),
-									WSAL_Settings::OPT_DEV_SANDBOX_PAGE   => array('Sandbox', 'Enables sandbox for testing PHP code.'),
-								) as $opt => $info){
-									?><label for="devoption_<?php echo $opt; ?>">
-										<input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
-											if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="<?php echo $opt; ?>">
-										<span><?php _e($info[0], 'wp-security-audit-log'); ?></span>
-										<?php if(isset($info[1]) && $info[1]){ ?>
-											<span class="description"> &mdash; <?php _e($info[1], 'wp-security-audit-log'); ?></span>
-										<?php }
-									?></label><br/><?php
-								}
-							?></fieldset>
+							<fieldset>
+								<a href="javascript:;" onclick="jQuery(this).hide().next().show();">Show Developer Options</a>
+								<div style="display: none;"><?php
+									foreach(array(
+										WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array('Data Inspector', 'View data logged for each triggered alert.'),
+										WSAL_Settings::OPT_DEV_PHP_ERRORS     => array('PHP Errors', 'Enables sensor for alerts generated from PHP.'),
+										WSAL_Settings::OPT_DEV_REQUEST_LOG    => array('Request Log', 'Enables logging request to file.'),
+										WSAL_Settings::OPT_DEV_SANDBOX_PAGE   => array('Sandbox', 'Enables sandbox for testing PHP code.'),
+										WSAL_Settings::OPT_DEV_BACKTRACE_LOG  => array('Backtrace', 'Log full backtrace for PHP-generated alerts.'),
+									) as $opt => $info){
+										?><label for="devoption_<?php echo $opt; ?>">
+											<input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
+												if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="<?php echo $opt; ?>">
+											<span><?php _e($info[0], 'wp-security-audit-log'); ?></span>
+											<?php if(isset($info[1]) && $info[1]){ ?>
+												<span class="description"> &mdash; <?php _e($info[1], 'wp-security-audit-log'); ?></span>
+											<?php }
+										?></label><br/><?php
+									}
+								?></div>
+							</fieldset>
 						</td>
 					</tr>
 					

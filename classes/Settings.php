@@ -39,6 +39,7 @@ class WSAL_Settings {
 	const OPT_DEV_PHP_ERRORS     = 'p';
 	const OPT_DEV_REQUEST_LOG    = 'r';
 	const OPT_DEV_SANDBOX_PAGE   = 's';
+	const OPT_DEV_BACKTRACE_LOG  = 'b';
 	
 	protected $_devoption = null;
 	
@@ -120,6 +121,13 @@ class WSAL_Settings {
 	 */
 	public function IsSandboxPageEnabled(){
 		return $this->IsDevOptionEnabled(self::OPT_DEV_SANDBOX_PAGE);
+	}
+	
+	/**
+	 * @return boolean Whether to store debug backtrace for PHP alerts or not.
+	 */
+	public function IsBacktraceLoggingEnabled(){
+		return $this->IsDevOptionEnabled(self::OPT_DEV_BACKTRACE_LOG);
 	}
 	
 	/**
