@@ -211,8 +211,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<a href="javascript:;" style="<?php if($any)echo 'display: none;'; ?>"
 								   onclick="jQuery(this).hide().next().show();">Show Developer Options</a>
 								<div style="<?php if(!$any)echo 'display: none;'; ?>">
-									<p><?php
-										_e('warning message goes here', 'wp-security-audit-log');
+									<p style="border-left: 3px solid #FFD000; padding: 2px 8px; margin-left: 6px; margin-bottom: 16px;"><?php
+										_e('Enabling any of the settings below may cause unintended side-effects including degraded performance.<br/>Only enable these options if you know what you are doing.', 'wp-security-audit-log');
 									?></p><?php
 									foreach(array(
 										WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array(
