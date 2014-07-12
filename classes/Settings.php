@@ -67,6 +67,13 @@ class WSAL_Settings {
 	}
 	
 	/**
+	 * @return boolean Whether any developer option has been enabled or not.
+	 */
+	public function IsAnyDevOptionEnabled(){
+		return !!$this->GetGlobalOption(self::OPT_PRFX . 'dev-options', null);
+	}
+	
+	/**
 	 * Sets whether a developer option is enabled or not.
 	 * @param string $option See self::OPT_DEV_* constants.
 	 * @param boolean $enabled If option should be enabled or not.
