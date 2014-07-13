@@ -108,12 +108,18 @@ class WpSecurityAuditLog {
 		// hide plugin
 		if($this->settings->IsIncognito())
 			add_action('admin_head', array($this, 'HidePlugin'));
-		
+	}
+	
+	/**
+	 * Load the rest of the system.
+	 * @internal
+	 */
+	public function Load(){
+		// load translations
+		load_plugin_textdomain('wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/');
+
 		// tell the world we've just finished loading
 		do_action('wsal_init', $this);
-		
-		// clean up if need be
-		//$this->CleanUp();
 	}
 	
 	public function Install(){
@@ -299,11 +305,7 @@ class WpSecurityAuditLog {
 	// </editor-fold>
 }
 
-// Internationalize plugin now!
-function WSAL_LoadPluginTextdomain(){
-	load_plugin_textdomain('wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/');
-}
-add_action('plugins_loaded', 'WSAL_LoadPluginTextdomain');
+add_action('plugins_loaded', array(WpSecurityAuditLog::GetInstance(), 'Load'));
 
 // Load extra files
 require_once('defaults.php');

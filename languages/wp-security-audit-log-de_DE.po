@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: WP Security Audit Log v1.2.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-07-07 23:43:19+0000\n"
+"PO-Revision-Date: 2014-07-13 00:10:15+0000\n"
 "Last-Translator: admin <uuf6429@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -121,6 +121,7 @@ msgstr "Hilfe"
 
 #: classes/Views/Sandbox.php:11
 #: classes/Views/Sandbox.php:19
+#: classes/Views/Settings.php:231
 #@ wp-security-audit-log
 msgid "Sandbox"
 msgstr "Sandkasten"
@@ -244,12 +245,12 @@ msgstr ""
 msgid "Developer Options"
 msgstr ""
 
-#: classes/Views/Settings.php:230
+#: classes/Views/Settings.php:254
 #@ wp-security-audit-log
 msgid "Hide Plugin from Plugins Page"
 msgstr ""
 
-#: classes/Views/Settings.php:236
+#: classes/Views/Settings.php:260
 #@ wp-security-audit-log
 msgid "Hide"
 msgstr ""
@@ -290,6 +291,7 @@ msgstr ""
 msgid "User"
 msgstr ""
 
+#: classes/Views/ToggleAlerts.php:68
 #: classes/WidgetManager.php:38
 #@ wp-security-audit-log
 msgid "Description"
@@ -383,7 +385,7 @@ msgstr ""
 #: defaults.php:39
 #@ wp-security-audit-log
 msgid "User logs in"
-msgstr ""
+msgstr "Benutzer meldet sich an"
 
 #: defaults.php:39
 #@ wp-security-audit-log
@@ -458,7 +460,7 @@ msgstr ""
 #: defaults.php:48
 #@ wp-security-audit-log
 msgid "User created a new blog post and saved it as draft"
-msgstr ""
+msgstr "Benutzer erstellt einen neuen Blog-Post und gespeichert als Entwurf."
 
 #: defaults.php:48
 #, php-format
@@ -1112,7 +1114,7 @@ msgstr ""
 #, php-format
 #@ wp-security-audit-log
 msgid "Uninstalled the plugin %PluginData->Name% which was installed in %PluginFile%"
-msgstr ""
+msgstr "Deinstalliert das Plugin %PluginData->Name%, die in %PluginFile% installiert wurde"
 
 #: defaults.php:118
 #@ wp-security-audit-log
@@ -1419,11 +1421,13 @@ msgid "You are using a version of PHP that is older than %s, which is no longer 
 msgstr ""
 
 #: classes/Views/AuditLog.php:273
+#: classes/Views/ToggleAlerts.php:66
 #@ wp-security-audit-log
 msgid "Code"
 msgstr "Kode"
 
 #: classes/Views/AuditLog.php:274
+#: classes/Views/ToggleAlerts.php:67
 #@ wp-security-audit-log
 msgid "Type"
 msgstr "Typ"
@@ -1461,5 +1465,100 @@ msgstr ""
 #: classes/Views/AuditLog.php:317
 #@ wp-security-audit-log
 msgid "Unknown error code."
+msgstr ""
+
+#: classes/Views/Settings.php:215
+#@ wp-security-audit-log
+msgid "Enabling any of the settings below may cause unintended side-effects including degraded performance.<br/>Only enable these options if you know what you are doing."
+msgstr ""
+
+#: classes/Views/Settings.php:219
+#@ wp-security-audit-log
+msgid "Data Inspector"
+msgstr ""
+
+#: classes/Views/Settings.php:220
+#@ wp-security-audit-log
+msgid "View data logged for each triggered alert."
+msgstr ""
+
+#: classes/Views/Settings.php:223
+#@ wp-security-audit-log
+msgid "PHP Errors"
+msgstr ""
+
+#: classes/Views/Settings.php:224
+#@ wp-security-audit-log
+msgid "Enables sensor for alerts generated from PHP."
+msgstr ""
+
+#: classes/Views/Settings.php:227
+#@ wp-security-audit-log
+msgid "Request Log"
+msgstr ""
+
+#: classes/Views/Settings.php:228
+#@ wp-security-audit-log
+msgid "Enables logging request to file."
+msgstr ""
+
+#: classes/Views/Settings.php:232
+#@ wp-security-audit-log
+msgid "Enables sandbox for testing PHP code."
+msgstr ""
+
+#: classes/Views/Settings.php:235
+#@ wp-security-audit-log
+msgid "Backtrace"
+msgstr ""
+
+#: classes/Views/Settings.php:236
+#@ wp-security-audit-log
+msgid "Log full backtrace for PHP-generated alerts."
+msgstr ""
+
+#: defaults.php:38
+#@ wp-security-audit-log
+msgid "Other User Activity"
+msgstr "Andere Aktivität"
+
+#: defaults.php:47
+#@ wp-security-audit-log
+msgid "Blog Posts"
+msgstr ""
+
+#: defaults.php:66
+#@ wp-security-audit-log
+msgid "Pages"
+msgstr ""
+
+#: defaults.php:82
+#@ wp-security-audit-log
+msgid "Custom Posts"
+msgstr ""
+
+#: defaults.php:97
+#@ wp-security-audit-log
+msgid "Widgets"
+msgstr ""
+
+#: defaults.php:103
+#@ wp-security-audit-log
+msgid "User Profiles"
+msgstr ""
+
+#: defaults.php:113
+#@ wp-security-audit-log
+msgid "Plugins & Themes"
+msgstr ""
+
+#: defaults.php:123
+#@ wp-security-audit-log
+msgid "System Activity"
+msgstr ""
+
+#: defaults.php:137
+#@ wp-security-audit-log
+msgid "MultiSite"
 msgstr ""
 
