@@ -217,6 +217,11 @@ final class WSAL_AlertManager {
 		if(!isset($data['CurrentUserRoles']) && function_exists('is_user_logged_in') && is_user_logged_in())
 			$data['CurrentUserRoles'] = wp_get_current_user()->roles;
 		
+		//if(isset($_SERVER['REMOTE_HOST']) && $_SERVER['REMOTE_HOST'] != $data['ClientIP'])
+		//	$data['ClientHost'] = $_SERVER['REMOTE_HOST'];
+		
+		//$data['OtherIPs'] = $_SERVER['REMOTE_HOST'];
+		
 		foreach($this->_loggers as $logger)
 			$logger->Log($type, $data);
 	}

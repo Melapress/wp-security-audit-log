@@ -188,14 +188,14 @@ new DummySiteCreatorTask();',
 					<textarea name="code" id="sandbox-code"><?php echo esc_html($code); ?></textarea>
 					<iframe id="sandbox-result" name="execframe"></iframe>
 				</div>
-				<div id="sandbox-status">Ready.</div>
+				<div id="sandbox-status"><?php _e('Ready.', 'wp-security-audit-log'); ?></div>
 			</div>
 			<label for="sandbox-snippet" style="float: left; line-height: 26px; display: inline-block; margin-right: 32px; border-right: 1px dotted #CCC; padding-right: 32px;">
 				Use Snippet: 
 				<?php $code = json_encode(admin_url('admin.php?page=wsal-sandbox') . '&snippet='); ?>
 				<select id="sandbox-snippet" onchange="location = <?php echo esc_attr($code); ?> + encodeURIComponent(this.value);"><?php
 					foreach(array_keys($this->snippets) as $name){
-						?><option value="<?php echo esc_attr($name); ?>"<?php if($name == $snpt)echo ' selected="selected"'; ?>><?php _e($name, 'wp-security-audit-log'); ?></option><?php
+						?><option value="<?php echo esc_attr($name); ?>"<?php if($name == $snpt)echo ' selected="selected"'; ?>><?php echo $name; ?></option><?php
 					}
 				?></select>
 			</label>
