@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite
 Requires at least: 3.6
 Tested up to: 3.9.1
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 
 Identify WordPress issues before they become a security problem by keeping an audit log of users and all of the under the hood WordPress activity.
 
@@ -56,6 +56,8 @@ For more information about the features for WordPress Multisite network installa
 
 = WordPress Security Audit Log in your Language! =
 We need help translating the plugin and the WordPress Security Events. If you're good at translating, please drop us an email on plugins@wpwhitesecurity.com.
+
+* Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
 
 = WordPress & PHP Errors Monitoring Tools =
 Plugins and themes customizations are most probably the norm of the day on large WordPress websites, not to mention the installation of new plugins and components. Unforunately sometimes such changes create problems and it is not always easy and possible to setup real live scenarios and replicate specific problems or bugs.
@@ -136,6 +138,21 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 
 == Changelog ==
 
+= 1.2.2 (2014-07-16) =
+* New Features
+	* Italian translation available thanks to [Leonardo Musumeci](http://leonardomusumeci.net/)
+	
+* Improvements
+	* Added a warning to developer options
+	* "Hidden" developer options from default settings. User has to click link to access developer plugins
+	
+* Bug Fixes
+	* Solved several issues related to translations. Now everything in the plugin is translatable
+	* Fixed several other issues reported by email
+
+* Bug Fix
+	* Fixed reported issue with ugrade (more info [here](http://wordpress.org/support/topic/errors-showing-since-120-upgrade-on-multisite-install?replies=4))
+
 = 1.2.1 (2014-07-2) =
 * Bug Fix
 	* Fixed reported issue with ugrade (more info [here](http://wordpress.org/support/topic/errors-showing-since-120-upgrade-on-multisite-install?replies=4))
@@ -148,7 +165,7 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 	* Alerts automatic pruning procedures can now be enabled / disabled
 	* Option to hide WP Security Audit Log from plugins page in WordPress
 	* If there are more than 15 websites in a multisite installation, an auto complete site search box is shown instead of the drop down menu
-	
+
 * New WordPress Security Alerts
 	* Alert 5007: User has uninstalled / deleted a theme
 	* Alert 5008: Super administrator network activated a theme on multisite
@@ -321,3 +338,4 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 = 0.1 (2013-05-24) =
 
 * Initial beta release of WP Security Audit Log.
+Status API Training Shop Blog About © 2014 GitHub, Inc. Terms Privacy Security Contact 
