@@ -138,38 +138,40 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 
 == Changelog ==
 
+= 1.2.3 (2014-07-XX) =
+* Bug Fixes
+  * Better database structure for high-traffic sites
+
 = 1.2.2 (2014-07-16) =
 * New Features
-	* Italian translation available thanks to [Leonardo Musumeci](http://leonardomusumeci.net/)
+  * Italian translation available thanks to [Leonardo Musumeci](http://leonardomusumeci.net/)
 	
 * Improvements
-	* Added a warning to developer options
-	* "Hidden" developer options from default settings. User has to click link to access developer plugins
+  * Added a warning to developer options
+  * "Hidden" developer options from default settings; user has to click link to access developer settings
+  * Backtrace logging now made optional from a developer setting
 	
 * Bug Fixes
-	* Solved several issues related to translations. Now everything in the plugin is translatable
-	* Fixed several other issues reported by email
-
-* Bug Fix
-	* Fixed reported issue with ugrade (more info [here](http://wordpress.org/support/topic/errors-showing-since-120-upgrade-on-multisite-install?replies=4))
+  * Solved several issues related to translations. Now everything in the plugin is translatable
+  * Fixed several other issues reported by email
 
 = 1.2.1 (2014-07-2) =
 * Bug Fix
-	* Fixed reported issue with ugrade (more info [here](http://wordpress.org/support/topic/errors-showing-since-120-upgrade-on-multisite-install?replies=4))
+  * Fixed reported issue with upgrade (more info [here](http://wordpress.org/support/topic/errors-showing-since-120-upgrade-on-multisite-install?replies=4))
 
 = 1.2.0 (2014-07-2) =
 * New Features
-	* Unlimited Alerts can be stored (removed the 5000 alerts limit)
-	* Alert time now includes milliseconds for more precision (ideal for auditing and compliance)
-	* Reported alert time is now relative to user's configured timezone
-	* Alerts automatic pruning procedures can now be enabled / disabled
-	* Option to hide WP Security Audit Log from plugins page in WordPress
-	* If there are more than 15 websites in a multisite installation, an auto complete site search box is shown instead of the drop down menu
+  * Unlimited Alerts can be stored (removed the 5000 alerts limit)
+  * Alert time now includes milliseconds for more precision (ideal for auditing and compliance)
+  * Reported alert time is now relative to user's configured timezone
+  * Alerts automatic pruning procedures can now be enabled / disabled
+  * Option to hide WP Security Audit Log from Plugins page in WordPress
+  * If there are more than 15 websites in a multisite installation, an auto complete site search box is shown instead of the drop down menu
 
 * New WordPress Security Alerts
-	* Alert 5007: User has uninstalled / deleted a theme
-	* Alert 5008: Super administrator network activated a theme on multisite
-	* Alert 5009: Super administrator network deactivated a theme on multisite
+  * Alert 5007: User has uninstalled / deleted a theme
+  * Alert 5008: Super administrator network activated a theme on multisite
+  * Alert 5009: Super administrator network deactivated a theme on multisite
 
 = 1.1.0 (2014-05-27) =
 * New Features
