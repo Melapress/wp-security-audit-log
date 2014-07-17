@@ -148,14 +148,10 @@ class WpSecurityAuditLog {
 		
 		$PreInstalled = $this->IsInstalled();
 		
-		// retrieve plugin versions
-		$old_version = $this->GetGlobalOption('version', '1.0.0');
-		$new_version = get_plugin_data(__FILE__, false, false);
-		if(!isset($new_version['Version']))die('Cannot determine current plugin version.');
-		$new_version = $new_version['Version'];
-		
 		// if system already installed, do updates now (if any)
-		if ($PreInstalled && $old_version != $new_version) $this->Update($old_version, $new_version);
+		$OldVersion = $this->GetOldVersion();
+		$NewVersion = $this->GetNewVersion();
+		if ($PreInstalled && $OldVersion != $NewVersion) $this->Update($OldVersion, $NewVersion);
 		
 		// ensure that the system is installed and schema is correct
 		WSAL_DB_ActiveRecord::InstallAll();
@@ -174,14 +170,9 @@ class WpSecurityAuditLog {
 	public function Update($old_version, $new_version){
 		$this->GetGlobalOption('version', $new_version);
 		
+		// do version-to-version specific changes
 		if(version_compare($old_version, '1.2.3') == -1){
-			// fix db schema issues introduced by earlier version
-			global $wpdb;
-			/*$wpdb->query('ALTER TABLE ' . $wpdb->base_prefix . 'wsal_metadata MODIFY name VARCHAR(64)');
-			$wpdb->query('ALTER TABLE ' . $wpdb->base_prefix . 'wsal_occurrences MODIFY id INT NOT NULL');
-			$wpdb->query('ALTER TABLE ' . $wpdb->base_prefix . 'wsal_occurrences DROP PRIMARY KEY');
-			$wpdb->query('ALTER TABLE ' . $wpdb->base_prefix . 'wsal_metadata MODIFY id INT NOT NULL');
-			$wpdb->query('ALTER TABLE ' . $wpdb->base_prefix . 'wsal_metadata DROP PRIMARY KEY');*/
+			// ... an example
 		}
 	}
 	
@@ -256,6 +247,21 @@ class WpSecurityAuditLog {
 	// </editor-fold>
 	
 	// <editor-fold desc="Utility Methods">
+	
+	/**
+	 * @return string The current plugin version (according to plugin file metadata).
+	 */
+	public function GetNewVersion(){
+		$version = get_plugin_data(__FILE__, false, false);
+		return isset($version['Version']) ? $version['Version'] : '0.0.0';
+	}
+	
+	/**
+	 * @return string The plugin version as stored in DB (will be the old version during an update/install).
+	 */
+	public function GetOldVersion(){
+		return $this->GetGlobalOption('version', '0.0.0');
+	}
 	
 	/**
 	 * @internal To be called in admin header for hiding plugin form Plugins list.
