@@ -39,40 +39,50 @@ abstract class WSAL_DB_ActiveRecord {
 	protected function _GetInstallQuery(){
 		global $wpdb;
 		
-		$copy = get_class($this);
-		$copy = new $copy();
+		$class = get_class($this);
+		$copy = new $class();
 		
 		$sql = 'CREATE TABLE ' . $this->GetTable() . ' (' . PHP_EOL;
+		
 		foreach($this->GetColumns() as $key) {
+			$sql .= '    ';
 			switch(true) {
 				case $key == $copy->_idkey:
-					$sql .= $key . ' BIGINT NOT NULL AUTO_INCREMENT,'.PHP_EOL;
+					$sql .= $key . ' BIGINT NOT NULL AUTO_INCREMENT,' . PHP_EOL;
 					break;
 				case is_integer($copy->$key):
-					$sql .= $key . ' BIGINT NOT NULL,'.PHP_EOL;
+					$sql .= $key . ' BIGINT NOT NULL,' . PHP_EOL;
 					break;
 				case is_float($copy->$key):
-					$sql .= $key . ' DOUBLE NOT NULL,'.PHP_EOL;
+					$sql .= $key . ' DOUBLE NOT NULL,' . PHP_EOL;
 					break;
 				case is_string($copy->$key):
-					$sql .= $key . ' TEXT NOT NULL,'.PHP_EOL;
+					$maxlenght = $key . '_maxlength';
+					if(property_exists($class, $maxlenght)){
+						$sql .= $key . ' VARCHAR(' . intval($class::$$maxlenght) . ') NOT NULL,' . PHP_EOL;
+					}else{
+						$sql .= $key . ' TEXT NOT NULL,' . PHP_EOL;
+					}
 					break;
 				case is_bool($copy->$key):
-					$sql .= $key . ' BIT NOT NULL,'.PHP_EOL;
+					$sql .= $key . ' BIT NOT NULL,' . PHP_EOL;
 					break;
 				case is_array($copy->$key):
 				case is_object($copy->$key):
-					$sql .= $key . ' LONGTEXT NOT NULL,'.PHP_EOL;
+					$sql .= $key . ' LONGTEXT NOT NULL,' . PHP_EOL;
 					break;
 			}
 		}
-		$sql .= 'CONSTRAINT PK_' . $this->GetTable().'_'.$this->_idkey
-			. ' PRIMARY KEY (' . $this->_idkey . ')' . PHP_EOL
-			. ' )';
+		
+		$sql .= $this->GetTableOptions() . PHP_EOL;
+		
+		$sql .= ')';
+		
 		if ( ! empty($wpdb->charset) )
 			$sql .= ' DEFAULT CHARACTER SET ' . $wpdb->charset;
 		if ( ! empty($wpdb->collate) )
 			$sql .= ' COLLATE ' . $wpdb->collate;
+		
 		return $sql;
 	}
 	
@@ -107,6 +117,13 @@ abstract class WSAL_DB_ActiveRecord {
 	public function GetTable(){
 		global $wpdb;
 		return $wpdb->base_prefix . $this->_table;
+	}
+	
+	/**
+	 * @return string SQL table options (constraints, foreign keys, indexes etc).
+	 */
+	protected function GetTableOptions(){
+		return '    PRIMARY KEY  (' . $this->_idkey . ')';
 	}
 	
 	/**

@@ -6,33 +6,8 @@ class WSAL_Settings {
 	 */
 	protected $_plugin;
 	
-	const OPT_PRFX = 'wsal-';
-	
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->_plugin = $plugin;
-	}
-	
-	protected function IsMultisite(){
-		return function_exists('is_multisite') && is_multisite();
-	}
-	
-	protected function GetGlobalOption($option, $default = false){
-		$fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
-		return $fn($option, $default);
-	}
-	
-	protected function SetGlobalOption($option, $value){
-		$fn = $this->IsMultisite() ? 'update_site_option' : 'update_option';
-		return $fn($option, $value);
-	}
-	
-	protected function GetLocalOption($option, $default = false){
-		$result = get_user_option($option, get_current_user_id());
-		return $result === false ? $default : $result;
-	}
-	
-	protected function SetLocalOption($option, $value){
-		update_user_option(get_current_user_id(), $option, $value, false);
 	}
 	
 	const OPT_DEV_DATA_INSPECTOR = 'd';
@@ -57,8 +32,8 @@ class WSAL_Settings {
 	 */
 	public function IsDevOptionEnabled($option){
 		if(is_null($this->_devoption)){
-			$this->_devoption = $this->GetGlobalOption(
-				self::OPT_PRFX . 'dev-options',
+			$this->_devoption = $this->_plugin->GetGlobalOption(
+				'dev-options',
 				implode(',', $this->GetDefaultDevOptions())
 			);
 			$this->_devoption = explode(',', $this->_devoption);
@@ -70,7 +45,7 @@ class WSAL_Settings {
 	 * @return boolean Whether any developer option has been enabled or not.
 	 */
 	public function IsAnyDevOptionEnabled(){
-		return !!$this->GetGlobalOption(self::OPT_PRFX . 'dev-options', null);
+		return !!$this->_plugin->GetGlobalOption('dev-options', null);
 	}
 	
 	/**
@@ -88,8 +63,8 @@ class WSAL_Settings {
 		if($enabled)
 			$this->_devoption[] = $option;
 		// commit option
-		$this->SetGlobalOption(
-			self::OPT_PRFX . 'dev-options',
+		$this->_plugin->SetGlobalOption(
+			'dev-options',
 			implode(',', $this->_devoption)
 		);
 	}
@@ -99,7 +74,7 @@ class WSAL_Settings {
 	 */
 	public function ClearDevOptions(){
 		$this->_devoption = array();
-		$this->SetGlobalOption(self::OPT_PRFX . 'dev-options', '');
+		$this->_plugin->SetGlobalOption('dev-options', '');
 	}
 	
 	/**
@@ -141,28 +116,28 @@ class WSAL_Settings {
 	 * @return boolean Whether dashboard widgets are enabled or not.
 	 */
 	public function IsWidgetsEnabled(){
-		return !$this->GetGlobalOption(self::OPT_PRFX . 'disable-widgets');
+		return !$this->_plugin->GetGlobalOption('disable-widgets');
 	}
 	
 	/**
 	 * @param boolean $newvalue Whether dashboard widgets are enabled or not.
 	 */
 	public function SetWidgetsEnabled($newvalue){
-		$this->SetGlobalOption(self::OPT_PRFX . 'disable-widgets', !$newvalue);
+		$this->_plugin->SetGlobalOption('disable-widgets', !$newvalue);
 	}
 	
 	/**
 	 * @return boolean Whether alerts in audit log view refresh automatically or not.
 	 */
 	public function IsRefreshAlertsEnabled(){
-		return !$this->GetGlobalOption(self::OPT_PRFX . 'disable-refresh');
+		return !$this->_plugin->GetGlobalOption('disable-refresh');
 	}
 	
 	/**
 	 * @param boolean $newvalue Whether alerts in audit log view refresh automatically or not.
 	 */
 	public function SetRefreshAlertsEnabled($newvalue){
-		$this->SetGlobalOption(self::OPT_PRFX . 'disable-refresh', !$newvalue);
+		$this->_plugin->SetGlobalOption('disable-refresh', !$newvalue);
 	}
 	
 	/**
@@ -193,7 +168,7 @@ class WSAL_Settings {
 	 */
 	public function GetPruningDate(){
 		if(!$this->_pruning){
-			$this->_pruning = $this->GetGlobalOption(self::OPT_PRFX . 'pruning-date');
+			$this->_pruning = $this->_plugin->GetGlobalOption('pruning-date');
 			if(!strtotime($this->_pruning))
 				$this->_pruning = $this->GetDefaultPruningDate();
 		}
@@ -205,7 +180,7 @@ class WSAL_Settings {
 	 */
 	public function SetPruningDate($newvalue){
 		if(strtotime($newvalue)){
-			$this->SetGlobalOption(self::OPT_PRFX . 'pruning-date', $newvalue);
+			$this->_plugin->SetGlobalOption('pruning-date', $newvalue);
 			$this->_pruning = $newvalue;
 		}
 	}
@@ -214,7 +189,7 @@ class WSAL_Settings {
 	 * @return integer Maximum number of alerts to keep.
 	 */
 	public function GetPruningLimit(){
-		$val = (int)$this->GetGlobalOption(self::OPT_PRFX . 'pruning-limit');
+		$val = (int)$this->_plugin->GetGlobalOption('pruning-limit');
 		return $val ? $val : $this->GetMaxAllowedAlerts();
 	}
 	
@@ -223,23 +198,23 @@ class WSAL_Settings {
 	 */
 	public function SetPruningLimit($newvalue){
 		$newvalue = max(/*min(*/(int)$newvalue/*, $this->GetMaxAllowedAlerts())*/, 1);
-		$this->SetGlobalOption(self::OPT_PRFX . 'pruning-limit', $newvalue);
+		$this->_plugin->SetGlobalOption('pruning-limit', $newvalue);
 	}
 	
 	public function SetPruningDateEnabled($enabled){
-		$this->SetGlobalOption(self::OPT_PRFX . 'pruning-date-e', $enabled);
+		$this->_plugin->SetGlobalOption('pruning-date-e', $enabled);
 	}
 	
 	public function SetPruningLimitEnabled($enabled){
-		$this->SetGlobalOption(self::OPT_PRFX . 'pruning-limit-e', $enabled);
+		$this->_plugin->SetGlobalOption('pruning-limit-e', $enabled);
 	}
 	
 	public function IsPruningDateEnabled(){
-		return $this->GetGlobalOption(self::OPT_PRFX . 'pruning-date-e', true);
+		return $this->_plugin->GetGlobalOption('pruning-date-e', true);
 	}
 	
 	public function IsPruningLimitEnabled(){
-		return $this->GetGlobalOption(self::OPT_PRFX . 'pruning-limit-e', true);
+		return $this->_plugin->GetGlobalOption('pruning-limit-e', true);
 	}
 	
 	protected $_disabled = null;
@@ -254,7 +229,7 @@ class WSAL_Settings {
 	public function GetDisabledAlerts(){
 		if(!$this->_disabled){
 			$this->_disabled = implode(',', $this->GetDefaultDisabledAlerts());
-			$this->_disabled = $this->GetGlobalOption(self::OPT_PRFX . 'disabled-alerts', $this->_disabled);
+			$this->_disabled = $this->_plugin->GetGlobalOption('disabled-alerts', $this->_disabled);
 			$this->_disabled = explode(',', $this->_disabled);
 			$this->_disabled = array_map('intval', $this->_disabled);
 		}
@@ -266,19 +241,19 @@ class WSAL_Settings {
 	 */
 	public function SetDisabledAlerts($types){
 		$this->_disabled = array_unique(array_map('intval', $types));
-		$this->SetGlobalOption(self::OPT_PRFX . 'disabled-alerts', implode(',', $this->_disabled));
+		$this->_plugin->SetGlobalOption('disabled-alerts', implode(',', $this->_disabled));
 	}
 	
 	protected $_viewers = null;
 	
 	public function SetAllowedPluginViewers($usersOrRoles){
 		$this->_viewers = $usersOrRoles;
-		$this->SetGlobalOption(self::OPT_PRFX . 'plugin-viewers', implode(',', $this->_viewers));
+		$this->_plugin->SetGlobalOption('plugin-viewers', implode(',', $this->_viewers));
 	}
 	
 	public function GetAllowedPluginViewers(){
 		if(is_null($this->_viewers)){
-			$this->_viewers = array_unique(array_filter(explode(',', $this->GetGlobalOption(self::OPT_PRFX . 'plugin-viewers'))));
+			$this->_viewers = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('plugin-viewers'))));
 		}
 		return $this->_viewers;
 	}
@@ -287,12 +262,12 @@ class WSAL_Settings {
 	
 	public function SetAllowedPluginEditors($usersOrRoles){
 		$this->_editors = $usersOrRoles;
-		$this->SetGlobalOption(self::OPT_PRFX . 'plugin-editors', implode(',', $this->_editors));
+		$this->_plugin->SetGlobalOption('plugin-editors', implode(',', $this->_editors));
 	}
 	
 	public function GetAllowedPluginEditors(){
 		if(is_null($this->_editors)){
-			$this->_editors = array_unique(array_filter(explode(',', $this->GetGlobalOption(self::OPT_PRFX . 'plugin-editors'))));
+			$this->_editors = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('plugin-editors'))));
 		}
 		return $this->_editors;
 	}
@@ -301,12 +276,12 @@ class WSAL_Settings {
 	
 	public function SetViewPerPage($newvalue){
 		$this->_perpage = max($newvalue, 1);
-		$this->SetGlobalOption(self::OPT_PRFX . 'items-per-page', $this->_perpage);
+		$this->_plugin->SetGlobalOption('items-per-page', $this->_perpage);
 	}
 	
 	public function GetViewPerPage(){
 		if(is_null($this->_perpage)){
-			$this->_perpage = (int)$this->GetGlobalOption(self::OPT_PRFX . 'items-per-page', 10);
+			$this->_perpage = (int)$this->_plugin->GetGlobalOption('items-per-page', 10);
 		}
 		return $this->_perpage;
 	}
@@ -323,14 +298,14 @@ class WSAL_Settings {
 	 * @return string[] List of superadmin usernames.
 	 */
 	protected function GetSuperAdmins(){
-		return $this->IsMultisite() ? get_super_admins() : array();
+		return $this->_plugin->IsMultisite() ? get_super_admins() : array();
 	}
 	
 	/**
 	 * @return string[] List of admin usernames.
 	 */
 	protected function GetAdmins(){
-		if($this->IsMultisite()){
+		if($this->_plugin->IsMultisite()){
 			// see: https://gist.github.com/1508426/65785a15b8638d43a9905effb59e4d97319ef8f8
 			global $wpdb;
 			$cap = get_current_blog_id();
@@ -367,7 +342,7 @@ class WSAL_Settings {
 				break;
 			case 'edit':
 				$allowed = $this->GetAllowedPluginEditors();
-				$allowed = array_merge($allowed, $this->IsMultisite() ?
+				$allowed = array_merge($allowed, $this->_plugin->IsMultisite() ?
 						$this->GetSuperAdmins() : $this->GetAdmins()
 					);
 				break;
@@ -396,10 +371,10 @@ class WSAL_Settings {
 	}
 	
 	public function IsIncognito(){
-		return $this->GetGlobalOption(self::OPT_PRFX . 'hide-plugin');
+		return $this->_plugin->GetGlobalOption('hide-plugin');
 	}
 	
 	public function SetIncognito($enabled){
-		return $this->SetGlobalOption(self::OPT_PRFX . 'hide-plugin', $enabled);
+		return $this->_plugin->SetGlobalOption('hide-plugin', $enabled);
 	}
 }

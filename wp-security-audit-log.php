@@ -4,7 +4,7 @@ Plugin Name: WP Security Audit Log
 Plugin URI: http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/
 Description: Identify WordPress security issues before they become a problem and keep track of everything happening on your WordPress, including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log will generate a security alert for everything that happens on your WordPress blog or website. Use the Audit Log Viewer included in the plugin to see all the security alerts.
 Author: WP White Security
-Version: 1.2.1
+Version: 1.2.3
 Text Domain: wp-security-audit-log
 Author URI: http://www.wpwhitesecurity.com/
 License: GPL2
@@ -33,6 +33,8 @@ class WpSecurityAuditLog {
 	const PLG_CLS_PRFX = 'WSAL_';
 	
 	const MIN_PHP_VERSION = '5.3.0';
+	
+	const OPT_PRFX = 'wsal-';
 	
 	/**
 	 * Views supervisor.
@@ -76,6 +78,8 @@ class WpSecurityAuditLog {
 	
 	/**
 	 * Standard singleton pattern.
+	 * WARNING! To ensure the system always works as expected, AVOID using this method.
+	 * Instead, make use of the plugin instance provided by 'wsal_init' action.
 	 * @return \self Returns the current plugin instance.
 	 */
 	public static function GetInstance(){
@@ -122,6 +126,9 @@ class WpSecurityAuditLog {
 		do_action('wsal_init', $this);
 	}
 	
+	/**
+	 * Install all assets required for a useable system.
+	 */
 	public function Install(){
 		if (version_compare(PHP_VERSION, self::MIN_PHP_VERSION) < 0) {
 			?><html>
@@ -140,18 +147,56 @@ class WpSecurityAuditLog {
 		}
 		
 		$PreInstalled = $this->IsInstalled();
+		
+		// retrieve plugin versions
+		$old_version = $this->GetGlobalOption('version', '1.0.0');
+		$new_version = get_plugin_data(__FILE__, false, false);
+		if(!isset($new_version['Version']))die('Cannot determine current plugin version.');
+		$new_version = $new_version['Version'];
+		
+		// if system already installed, do updates now (if any)
+		if ($PreInstalled && $old_version != $new_version) $this->Update($old_version, $new_version);
+		
+		// ensure that the system is installed and schema is correct
 		WSAL_DB_ActiveRecord::InstallAll();
-		if (!$PreInstalled && $this->CanUpgrade()) $this->Upgrade();
+		
+		// if system wasn't installed, try migration now
+		if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
 		
 		wp_schedule_event(0, 'hourly', 'wsal_cleanup');
 	}
 	
+	/**
+	 * Run some code that updates critical components required for a newwer version.
+	 * @param string $old_version The old version.
+	 * @param string $new_version The new version.
+	 */
+	public function Update($old_version, $new_version){
+		$this->GetGlobalOption('version', $new_version);
+		
+		if(version_compare($old_version, '1.2.3') == -1){
+			// fix db schema issues introduced by earlier version
+			global $wpdb;
+			/*$wpdb->query('ALTER TABLE ' . $wpdb->base_prefix . 'wsal_metadata MODIFY name VARCHAR(64)');
+			$wpdb->query('ALTER TABLE ' . $wpdb->base_prefix . 'wsal_occurrences MODIFY id INT NOT NULL');
+			$wpdb->query('ALTER TABLE ' . $wpdb->base_prefix . 'wsal_occurrences DROP PRIMARY KEY');
+			$wpdb->query('ALTER TABLE ' . $wpdb->base_prefix . 'wsal_metadata MODIFY id INT NOT NULL');
+			$wpdb->query('ALTER TABLE ' . $wpdb->base_prefix . 'wsal_metadata DROP PRIMARY KEY');*/
+		}
+	}
+	
+	/**
+	 * Uninstall plugin.
+	 */
 	public function Uninstall(){
 		WSAL_DB_ActiveRecord::UninstallAll();
 		wp_unschedule_event(0, 'wsal_cleanup');
 	}
 	
-	public function Upgrade(){
+	/**
+	 * Migrate data from old plugin.
+	 */
+	public function Migrate(){
 		global $wpdb;
 		static $migTypes = array(
 			3000 => 5006
@@ -212,6 +257,9 @@ class WpSecurityAuditLog {
 	
 	// <editor-fold desc="Utility Methods">
 	
+	/**
+	 * @internal To be called in admin header for hiding plugin form Plugins list.
+	 */
 	public function HidePlugin(){
 		?><style type="text/css">.wp-list-table.plugins #wp-security-audit-log { display: none; }</style><?php
 	}
@@ -255,27 +303,90 @@ class WpSecurityAuditLog {
 		return function_exists('is_multisite') && is_multisite();
 	}
 	
+	/**
+	 * Get a global option.
+	 * @param string $option Option name.
+	 * @param mixed $default (Optional) Value returned when option is not set (defaults to false).
+	 * @param string $prefix (Optional) A prefix used before option name.
+	 * @return mixed Option's value or $default if option not set.
+	 */
+	public function GetGlobalOption($option, $default = false, $prefix = self::OPT_PRFX){
+		$fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
+		return $fn($prefix . $option, $default);
+	}
+	
+	/**
+	 * Set a global option.
+	 * @param string $option Option name.
+	 * @param mixed $value New value for option.
+	 * @param string $prefix (Optional) A prefix used before option name.
+	 */
+	public function SetGlobalOption($option, $value, $prefix = self::OPT_PRFX){
+		$fn = $this->IsMultisite() ? 'update_site_option' : 'update_option';
+		$fn($prefix . $option, $value);
+	}
+	
+	/**
+	 * Get a user-specific option.
+	 * @param string $option Option name.
+	 * @param mixed $default (Optional) Value returned when option is not set (defaults to false).
+	 * @param string $prefix (Optional) A prefix used before option name.
+	 * @return mixed Option's value or $default if option not set.
+	 */
+	public function GetUserOption($option, $default = false, $prefix = self::OPT_PRFX){
+		$result = get_user_option($prefix . $option, get_current_user_id());
+		return $result === false ? $default : $result;
+	}
+	
+	/**
+	 * Set a user-specific option.
+	 * @param string $option Option name.
+	 * @param mixed $value New value for option.
+	 * @param string $prefix (Optional) A prefix used before option name.
+	 */
+	public function SetUserOption($option, $value, $prefix = self::OPT_PRFX){
+		update_user_option(get_current_user_id(), $prefix . $option, $value, false);
+	}
+	
+	/**
+	 * Run cleanup routines.
+	 */
 	public function CleanUp(){
 		foreach($this->_cleanup_hooks as $hook)
 			call_user_func($hook);
 	}
 	
+	/**
+	 * Add callback to be called when a cleanup operation is required.
+	 * @param callable $hook
+	 */
 	public function AddCleanupHook($hook){
 		$this->_cleanup_hooks[] = $hook;
 	}
 	
+	/**
+	 * Remove a callback from the cleanup callbacks list.
+	 * @param callable $hook
+	 */
 	public function RemoveCleanupHook($hook){
 		while(($pos = array_search($hook, $this->_cleanup_hooks)) !== false)
 			unset($this->_cleanup_hooks[$pos]);
 	}
 	
+	/**
+	 * Do we have an existing installation? This only applies for version 1.0 onwards.
+	 * @return boolean
+	 */
 	public function IsInstalled(){
 		global $wpdb;
 		$table = $wpdb->base_prefix . 'wsal_occurrences';
 		return ($wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
 	}
 	
-	public function CanUpgrade(){
+	/**
+	 * @return boolean Whether the old plugin was present or not.
+	 */
+	public function CanMigrate(){
 		global $wpdb;
 		$table = $wpdb->base_prefix . 'wordpress_auditlog_events';
 		return ($wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
