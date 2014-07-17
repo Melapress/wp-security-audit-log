@@ -12,6 +12,6 @@ class WSAL_DB_Meta extends WSAL_DB_ActiveRecord {
 	
 	protected function GetTableOptions(){
 		return parent::GetTableOptions() . ',' . PHP_EOL
-				. '    KEY occurrence_name (occurrence_id, name)';
+				. '    KEY occurrence_name (occurrence_id,name)';
 	}
 }
