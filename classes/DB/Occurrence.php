@@ -11,10 +11,10 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	public $is_read = false;
 	public $is_migrated = false;
 	
-	/*protected function GetTableOptions(){
+	protected function GetTableOptions(){
 		return parent::GetTableOptions() . ',' . PHP_EOL
 				. '    KEY site_alert_created (site_id, alert_id, created_on)';
-	}*/
+	}
 	
 	protected $_meta;
 	
