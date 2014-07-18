@@ -58,6 +58,7 @@ For more information about the features for WordPress Multisite network installa
 We need help translating the plugin and the WordPress Security Events. If you're good at translating, please drop us an email on plugins@wpwhitesecurity.com.
 
 * Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
+* German translation by [Mourad Louha](http://excel-translator.de)
 
 = WordPress & PHP Errors Monitoring Tools =
 Plugins and themes customizations are most probably the norm of the day on large WordPress websites, not to mention the installation of new plugins and components. Unforunately sometimes such changes create problems and it is not always easy and possible to setup real live scenarios and replicate specific problems or bugs.
