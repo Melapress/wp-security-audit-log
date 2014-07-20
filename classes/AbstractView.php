@@ -53,6 +53,11 @@ abstract class WSAL_AbstractView {
 	public function IsVisible(){ return true; }
 	
 	/**
+	 * @return boolean Whether page should be accessible or not.
+	 */
+	public function IsAccessible(){ return true; }
+	
+	/**
 	 * Used for rendering stuff into head tag.
 	 */
 	public function Header(){}

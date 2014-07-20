@@ -102,9 +102,9 @@ class WSAL_ViewManager {
 
 			// add menu items
 			foreach($this->views as $view){
-				if($view->IsVisible()){
+				if($view->IsAccessible()){
 					add_submenu_page(
-						$this->views[0]->GetSafeViewName(),
+						$view->IsVisible() ? $this->views[0]->GetSafeViewName() : null,
 						$view->GetTitle(),
 						$view->GetName(),
 						'read', // no capability requirement

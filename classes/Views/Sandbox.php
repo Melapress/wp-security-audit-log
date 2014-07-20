@@ -23,7 +23,7 @@ class WSAL_Views_Sandbox extends WSAL_AbstractView {
 		return 5;
 	}
 	
-	public function IsVisible(){
+	public function IsAccessible(){
 		return $this->_plugin->settings->CurrentUserCan('edit')
 				&& $this->_plugin->settings->IsSandboxPageEnabled();
 	}
