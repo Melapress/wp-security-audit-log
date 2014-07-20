@@ -23,7 +23,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
 			array('name' => 'E_COMPILE_WARNING', 'description' => __('Compile-time warning.', 'wp-security-audit-log')),
 			array('name' => 'E_USER_ERROR', 'description' => __('User-generated error message.', 'wp-security-audit-log')),
 			array('name' => 'E_USER_WARNING', 'description' => __('User-generated warning message.', 'wp-security-audit-log')),
-			array('name' => 'E_USER_NOTICE', 'description' => __('User-generated notice message. ', 'wp-security-audit-log')),
+			array('name' => 'E_USER_NOTICE', 'description' => __('User-generated notice message.', 'wp-security-audit-log')),
 			array('name' => 'E_STRICT', 'description' => __('Non-standard/optimal code warning.', 'wp-security-audit-log')),
 			array('name' => 'E_RECOVERABLE_ERROR', 'description' => __('Catchable fatal error.', 'wp-security-audit-log')),
 			array('name' => 'E_DEPRECATED', 'description' => __('Run-time deprecation notices.', 'wp-security-audit-log')),
@@ -62,6 +62,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
 				array(2027, E_NOTICE, __('User changed the date of a blog post', 'wp-security-audit-log'), __('Changed the date of %PostTitle% blog post from %OldDate% to %NewDate%', 'wp-security-audit-log')),
 				array(2049, E_NOTICE, __('User sets a post as sticky', 'wp-security-audit-log'), __('Set the post %PostTitle% as Sticky', 'wp-security-audit-log')),
 				array(2050, E_NOTICE, __('User removes post from sticky', 'wp-security-audit-log'), __('Removed the post %PostTitle% from Sticky', 'wp-security-audit-log')),
+				array(2053, E_CRITICAL, __('User creates a custom field for a post', 'wp-security-audit-log'), __('Created custom field %MetaKey% with value %MetaValue% in post %PostTitle%', 'wp-security-audit-log')),
+				array(2054, E_CRITICAL, __('User updates a custom field for a post', 'wp-security-audit-log'), __('Modified the value of custom field %MetaKey% from %MetaValueOld% to %MetaValueNew% in post %PostTitle%', 'wp-security-audit-log')),
+				array(2055, E_CRITICAL, __('User deletes a custom field from a post', 'wp-security-audit-log'), __('Deleted custom field %MetaKey% with value %MetaValue% from post %PostTitle%', 'wp-security-audit-log')),
 			),
 			__('Pages', 'wp-security-audit-log') => array(
 				array(2004, E_NOTICE, __('User created a new WordPress page and saved it as draft', 'wp-security-audit-log'), __('Created a new page called %PostTitle%. Page ID is %PostID%', 'wp-security-audit-log')),
@@ -78,6 +81,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
 				array(2028, E_NOTICE, __('User changed the date of a page post', 'wp-security-audit-log'), __('Changed the date of %PostTitle% page from %OldDate% to %NewDate%', 'wp-security-audit-log')),
 				array(2047, E_NOTICE, __('User changed the parent of a page', 'wp-security-audit-log'), __('Changed the parent of %PostTitle% page from %OldParentName% to %NewParentName%', 'wp-security-audit-log')),
 				array(2048, E_CRITICAL, __('User changes the template of a page', 'wp-security-audit-log'), __('Changed the template of %PostTitle% page from %OldTemplate% to %NewTemplate%', 'wp-security-audit-log')),
+				array(2059, E_CRITICAL, __('User creates a custom field for a page', 'wp-security-audit-log'), __('Created custom field %MetaKey% with value %MetaValue% in page %PostTitle%', 'wp-security-audit-log')),
+				array(2060, E_CRITICAL, __('User updates a custom field for a page', 'wp-security-audit-log'), __('Modified the value of custom field %MetaKey% from %MetaValueOld% to %MetaValueNew% in page %PostTitle%', 'wp-security-audit-log')),
+				array(2061, E_CRITICAL, __('User deletes a custom field from a page', 'wp-security-audit-log'), __('Deleted custom field %MetaKey% with value %MetaValue% from page %PostTitle%', 'wp-security-audit-log')),
 			),
 			__('Custom Posts', 'wp-security-audit-log') => array(
 				array(2029, E_NOTICE, __('User created a new post with custom post type and saved it as draft', 'wp-security-audit-log'), __('Created a new custom post called %PostTitle% of type %PostType%. Post ID is %PostID%', 'wp-security-audit-log')),
@@ -93,6 +99,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
 				array(2039, E_NOTICE, __('User changed the status of post with custom post type', 'wp-security-audit-log'), __('Changed the status of custom post %PostTitle% of type %PostType% from %OldStatus% to %NewStatus%', 'wp-security-audit-log')),
 				array(2040, E_WARNING, __('User changed the visibility of a post with custom post type', 'wp-security-audit-log'), __('Changed the visibility of custom post %PostTitle% of type %PostType% from %OldVisibility% to %NewVisibility%', 'wp-security-audit-log')),
 				array(2041, E_NOTICE, __('User changed the date of post with custom post type', 'wp-security-audit-log'), __('Changed the date of custom post %PostTitle% of type %PostType% from %OldDate% to %NewDate%', 'wp-security-audit-log')),
+				array(2056, E_CRITICAL, __('User creates a custom field for a custom post', 'wp-security-audit-log'), __('Created custom field %MetaKey% with value %MetaValue% in custom post %PostTitle% of type %PostType%', 'wp-security-audit-log')),
+				array(2057, E_CRITICAL, __('User updates a custom field for a custom post', 'wp-security-audit-log'), __('Modified the value of custom field %MetaKey% from %MetaValueOld% to %MetaValueNew% in custom post %PostTitle% of type %PostType%', 'wp-security-audit-log')),
+				array(2058, E_CRITICAL, __('User deletes a custom field from a custom post', 'wp-security-audit-log'), __('Deleted custom field %MetaKey% with value %MetaValue% from custom post %PostTitle% of type %PostType%', 'wp-security-audit-log')),
 			),
 			__('Widgets', 'wp-security-audit-log') => array(
 				array(2042, E_CRITICAL, __('User added a new widget', 'wp-security-audit-log'), __('Added a new %WidgetName% widget in  %Sidebar%', 'wp-security-audit-log')),
