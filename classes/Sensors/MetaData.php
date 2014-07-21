@@ -9,16 +9,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		add_action('deleted_post_meta', array($this, 'EventPostMetaDeleted'), 10, 4);
 	}
 	
-	protected function GetEventTypeForPostType($post, $typePost, $typePage, $typeCustom){
-		switch($post->post_type){
-			case 'page':
-				return $typePage;
-			case 'post':
-				return $typePost;
-			default:
-				return $typeCustom;
-		}
-	}
+	protected $old_meta = array();
 	
 	public function EventPostMetaCreated($meta_id, $object_id, $meta_key, $_meta_value){
 		$post = get_post($object_id);
@@ -56,47 +47,90 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	}
 	
 	public function EventPostMetaUpdating($meta_id, $object_id, $meta_key){
-		$this->old_meta_values[$meta_id] = get_metadata('post', $object_id, $meta_key, true);
+		$this->old_meta[$meta_id] = array($meta_key, get_metadata('post', $object_id, $meta_key, true));
 	}
 	
 	public function EventPostMetaUpdated($meta_id, $object_id, $meta_key, $_meta_value){
 		$post = get_post($object_id);
 		
-		if(isset($this->old_meta_values[$meta_id])){
-			switch($post->post_type){
-				case 'page':
-					$this->plugin->alerts->Trigger(2060, array(
-						'PostID' => $object_id,
-						'PostTitle' => $post->post_title,
-						'MetaID' => $meta_id,
-						'MetaKey' => $meta_key,
-						'MetaValueNew' => $_meta_value,
-						'MetaValueOld' => $this->old_meta_values[$meta_id],
-					));
-					break;
-				case 'post':
-					$this->plugin->alerts->Trigger(2054, array(
-						'PostID' => $object_id,
-						'PostTitle' => $post->post_title,
-						'MetaID' => $meta_id,
-						'MetaKey' => $meta_key,
-						'MetaValueNew' => $_meta_value,
-						'MetaValueOld' => $this->old_meta_values[$meta_id],
-					));
-					break;
-				default:
-					$this->plugin->alerts->Trigger(2057, array(
-						'PostID' => $object_id,
-						'PostTitle' => $post->post_title,
-						'PostType' => $post->post_type,
-						'MetaID' => $meta_id,
-						'MetaKey' => $meta_key,
-						'MetaValueNew' => $_meta_value,
-						'MetaValueOld' => $this->old_meta_values[$meta_id],
-					));
-					break;
+		if(isset($this->old_meta[$meta_id])){
+			
+			// check change in meta key
+			if($this->old_meta[$meta_id][0] != $meta_key){
+				switch($post->post_type){
+					case 'page':
+						$this->plugin->alerts->Trigger(2064, array(
+							'PostID' => $object_id,
+							'PostTitle' => $post->post_title,
+							'MetaID' => $meta_id,
+							'MetaKeyNew' => $meta_key,
+							'MetaKeyOld' => $this->old_meta[$meta_id][0],
+							'MetaValue' => $_meta_value,
+						));
+						break;
+					case 'post':
+						$this->plugin->alerts->Trigger(2062, array(
+							'PostID' => $object_id,
+							'PostTitle' => $post->post_title,
+							'MetaID' => $meta_id,
+							'MetaKeyNew' => $meta_key,
+							'MetaKeyOld' => $this->old_meta[$meta_id][0],
+							'MetaValue' => $_meta_value,
+						));
+						break;
+					default:
+						$this->plugin->alerts->Trigger(2063, array(
+							'PostID' => $object_id,
+							'PostTitle' => $post->post_title,
+							'PostType' => $post->post_type,
+							'MetaID' => $meta_id,
+							'MetaKeyNew' => $meta_key,
+							'MetaKeyOld' => $this->old_meta[$meta_id][0],
+							'MetaValue' => $_meta_value,
+						));
+						break;
+				}
 			}
-			unset($this->old_meta_values[$meta_id]);
+			
+			// check change in meta value
+			if($this->old_meta[$meta_id][1] != $_meta_value){
+				switch($post->post_type){
+					case 'page':
+						$this->plugin->alerts->Trigger(2060, array(
+							'PostID' => $object_id,
+							'PostTitle' => $post->post_title,
+							'MetaID' => $meta_id,
+							'MetaKey' => $meta_key,
+							'MetaValueNew' => $_meta_value,
+							'MetaValueOld' => $this->old_meta[$meta_id][1],
+						));
+						break;
+					case 'post':
+						$this->plugin->alerts->Trigger(2054, array(
+							'PostID' => $object_id,
+							'PostTitle' => $post->post_title,
+							'MetaID' => $meta_id,
+							'MetaKey' => $meta_key,
+							'MetaValueNew' => $_meta_value,
+							'MetaValueOld' => $this->old_meta[$meta_id][1],
+						));
+						break;
+					default:
+						$this->plugin->alerts->Trigger(2057, array(
+							'PostID' => $object_id,
+							'PostTitle' => $post->post_title,
+							'PostType' => $post->post_type,
+							'MetaID' => $meta_id,
+							'MetaKey' => $meta_key,
+							'MetaValueNew' => $_meta_value,
+							'MetaValueOld' => $this->old_meta[$meta_id][1],
+						));
+						break;
+				}
+			}
+			
+			// remove old meta update data
+			unset($this->old_meta[$meta_id]);
 		}
 	}
 	
