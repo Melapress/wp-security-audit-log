@@ -56,7 +56,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	}
 	
 	public function EventPostMetaUpdating($meta_id, $object_id, $meta_key){
-		$this->old_meta_values[$meta_id] = get_metadata('post', $object_id, $meta_key);
+		$this->old_meta_values[$meta_id] = get_metadata('post', $object_id, $meta_key, true);
 	}
 	
 	public function EventPostMetaUpdated($meta_id, $object_id, $meta_key, $_meta_value){
