@@ -24,7 +24,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$is_plugins = $actype == 'plugins';
 		
 		// install plugin
-        if(($action=='install-plugin' || $action=='upload-plugin')){
+        if(in_array($action, array('install-plugin', 'upload-plugin'))){
 			$plugin = array_values(array_diff(array_keys(get_plugins()), array_keys($this->old_plugins)));
 			if(count($plugin) != 1)
 				return $this->LogError(
