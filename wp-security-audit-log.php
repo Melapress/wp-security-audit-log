@@ -159,6 +159,7 @@ class WpSecurityAuditLog {
 		// if system wasn't installed, try migration now
 		if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
 		
+		// install cleanup hook
 		wp_schedule_event(0, 'hourly', 'wsal_cleanup');
 	}
 	
@@ -168,7 +169,11 @@ class WpSecurityAuditLog {
 	 * @param string $new_version The new version.
 	 */
 	public function Update($old_version, $new_version){
+		// update version in db
 		$this->GetGlobalOption('version', $new_version);
+		
+		// disable all developer options
+		$this->settings->ClearDevOptions();
 		
 		// do version-to-version specific changes
 		if(version_compare($old_version, '1.2.3') == -1){
