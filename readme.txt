@@ -61,9 +61,9 @@ We need help translating the plugin and the WordPress Security Events. If you're
 * German translation by [Mourad Louha](http://excel-translator.de)
 
 = WordPress & PHP Errors Monitoring Tools =
-Plugins and themes customizations are most probably the norm of the day on large WordPress websites, not to mention the installation of new plugins and components. Unforunately sometimes such changes create problems and it is not always easy and possible to setup real live scenarios and replicate specific problems or bugs.
+Plugins and themes customizations are most probably the norm of the day on large WordPress websites, not to mention the installation of new plugins and components. With WP Security Audit Log now it is easier than ever before to monitor your plugins', theme's and other code behaviour, it will generate a alert when a PHP error, warning, exception or shutdown is detected. It is also possible to log all HTTP GET and POST requests that are reaching your WordPress installation to a log file with WP Security Audit Log. Simply enable the PHP Errors monitoring or logging from the plugins settings.
 
-With WP Security Audit Log now it is easier than ever before to monitor your plugins', theme's and other code behaviour, it will generate a alert when a PHP error, warning, exception or shutdown is detected. It is also possible to log all HTTP GET and POST requests that are reaching your WordPress installation to a log file with WP Security Audit Log. Simply enable the PHP Errors monitoring or logging from the plugins settings.
+NOTE: Developer options should NEVER be enabled on Live websites. They should only be enabled on testing, staging and development WordPress and WordPress multisite installations.
 
 = Other Noteworthy Features =
 WP Security Audit Log plugin also has a number of features that make WordPress and WordPress multisite monitoring and auditing easier, such as:
@@ -140,10 +140,13 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 == Changelog ==
 
 = 1.2.3 (2014-07-23) =
+* Improvements
+	* Improved database structure for better support of high-traffic WordPress and WordPress multisite installations
+	* Developer options are reset during updates for improved performance
+	* Added a warning / note to the developer options (such options should NEVER be enabled on live websites but only on testing, staging and development websites)
+	
 * Bug Fixes
-  * Better database structure for high-traffic sites
   * Fixed database issue with primary key constraint
-  * Developer settings are reset after updates (for performance reasons)
 
 = 1.2.2 (2014-07-16) =
 * New Features
