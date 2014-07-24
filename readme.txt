@@ -74,17 +74,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * Configure WordPress security alerts purging by time or by number of alerts
 * User role is reported in alerts for a complete overview of what is happening
 * User avatar is reported in the alerts for better recognizability
-* Enable or disable any security alerts so they are not logged
-* And much more...
-
-* From where WordPress users are logging in
-* Users who created. modified or deleted categories
-* Users who created a blog post, page or a custom post
-* Users who published a blog post, page or a custom post
-* Users who modified published WordPress content such as custom posts, pages or a blog posts
-* Users who moves content such as blog posts or WordPress pages to trash or permanently deletes it
-* Users who modify WordPress widgets
-* Uses who upload or delete any sort of files
+* Enable or disable any security alerts
 * and much more...
 
 = As Featured On: =
