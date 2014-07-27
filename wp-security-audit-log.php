@@ -67,6 +67,12 @@ class WpSecurityAuditLog {
 	public $constants;
 	
 	/**
+	 * Licenses manager.
+	 * @var WSAL_LicenseManager
+	 */
+	public $licensing;
+	
+	/**
 	 * Contains a list of cleanup callbacks.
 	 * @var callable[]
 	 */
@@ -101,6 +107,7 @@ class WpSecurityAuditLog {
 		$this->sensors = new WSAL_SensorManager($this);
 		$this->settings = new WSAL_Settings($this);
 		$this->constants = new WSAL_ConstantManager($this);
+		$this->licensing = new WSAL_LicenseManager($this);
 		$this->widgets = new WSAL_WidgetManager($this);
 		
 		// listen for installation event
