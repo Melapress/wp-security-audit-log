@@ -19,11 +19,40 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$this->plugin->alerts->Trigger(1001);
 	}
 	
+	const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins';
+	
+	protected function GetLoginFailureLogLimit(){
+		return 10;
+	}
+	
+	protected function GetLoginFailureExpiration(){
+		return 12 * 60 * 60;
+	}
+	
+	protected function IsPastLoginFailureLimit($ip){
+		$data = get_transient(self::TRANSIENT_FAILEDLOGINS);
+		return ($data !== false) && ($data[$ip] > ($this->GetLoginFailureLogLimit()));
+	}
+	
+	protected function IncrementLoginFailure($ip){
+		$data = get_transient(self::TRANSIENT_FAILEDLOGINS);
+		if(!$data)$data = array();
+		if(!isset($data[$ip]))$data[$ip] = 0;
+		$data[$ip]++;
+		set_transient(self::TRANSIENT_FAILEDLOGINS, $data, $this->GetLoginFailureExpiration());
+	}
+	
 	public function EventLoginFailure($username){
+		
 		list($y, $m, $d) = explode('-', date('Y-m-d'));
 		
+		$ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 		$tt1 = new WSAL_DB_Occurrence();
 		$tt2 = new WSAL_DB_Meta();
+		
+		if($this->IsPastLoginFailureLimit($ip))return;
+		
+		$this->IncrementLoginFailure($ip);
 		
 		$occ = WSAL_DB_Occurrence::LoadMultiQuery('
 			SELECT * FROM `' . $tt1->GetTable() . '`
@@ -33,32 +62,34 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 					SELECT occurrence_id as id
 					FROM `' . $tt2->GetTable() . '`
 					WHERE (name = "ClientIP" AND value = %s)
-					   OR (name = "Username" AND value = %s)
 					GROUP BY occurrence_id
-					HAVING COUNT(*) = 2
+					HAVING COUNT(*) = 1
 				)
 		', array(
 			1002,
 			(function_exists('get_current_blog_id') ? get_current_blog_id() : 0),
 			mktime(0, 0, 0, $m, $d, $y),
 			mktime(0, 0, 0, $m, $d + 1, $y) - 1,
-			json_encode(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''),
-			json_encode($username),
+			json_encode($ip),
 		));
+		
+		$this->LogInfo('Ran expensive query', array());
 		
 		$occ = count($occ) ? $occ[0] : null;
 		
 		if($occ && $occ->IsLoaded()){
 			// update existing record
-			$occ->SetMetaValue('Attempts',
-				$occ->GetMetaValue('Attempts', 0) + 1
-			);
+			$new = $occ->GetMetaValue('Attempts', 0) + 1;
+			
+			if($new > $this->GetLoginFailureLogLimit())
+				$new = $this->GetLoginFailureLogLimit() . '+';
+			
+			$occ->SetMetaValue('Attempts', $new);
 			$occ->created_on = null;
 			$occ->Save();
 		}else{
 			// create a new record
 			$this->plugin->alerts->Trigger(1002, array(
-				'Username' => $username,
 				'Attempts' => 1
 			));
 		}
