@@ -73,8 +73,6 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			json_encode($ip),
 		));
 		
-		$this->LogInfo('Ran expensive query', array());
-		
 		$occ = count($occ) ? $occ[0] : null;
 		
 		if($occ && $occ->IsLoaded()){
