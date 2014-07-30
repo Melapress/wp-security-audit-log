@@ -15,8 +15,6 @@ class WSAL_LicenseManager {
 	
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->plugin = $plugin;
-		
-		
 	}
 	
 	protected function GetStoreUrl(){

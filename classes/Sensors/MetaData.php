@@ -3,10 +3,10 @@
 class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		/*add_action('added_post_meta', array($this,   'EventPostMetaCreated'), 10, 4);
+		add_action('added_post_meta', array($this,   'EventPostMetaCreated'), 10, 4);
 		add_action('update_post_meta', array($this,  'EventPostMetaUpdating'), 10, 3);
 		add_action('updated_post_meta', array($this, 'EventPostMetaUpdated'), 10, 4);
-		add_action('deleted_post_meta', array($this, 'EventPostMetaDeleted'), 10, 4);*/
+		add_action('deleted_post_meta', array($this, 'EventPostMetaDeleted'), 10, 4);
 	}
 	
 	protected $old_meta = array();
