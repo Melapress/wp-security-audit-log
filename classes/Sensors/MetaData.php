@@ -11,8 +11,14 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	
 	protected $old_meta = array();
 	
+	protected function CanLogPostMeta($meta_id, $object_id, $meta_key){
+		return substr($meta_key, 0, 1) != '_';
+	}
+	
 	public function EventPostMetaCreated($meta_id, $object_id, $meta_key, $_meta_value){
 		$post = get_post($object_id);
+		
+		if(!$this->CanLogPostMeta($meta_id, $object_id, $meta_key))return;
 		
 		switch($post->post_type){
 			case 'page':
@@ -52,6 +58,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	
 	public function EventPostMetaUpdated($meta_id, $object_id, $meta_key, $_meta_value){
 		$post = get_post($object_id);
+		
+		if(!$this->CanLogPostMeta($meta_id, $object_id, $meta_key))return;
 		
 		if(isset($this->old_meta[$meta_id])){
 			
@@ -136,7 +144,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	
 	public function EventPostMetaDeleted($meta_ids, $object_id, $meta_key, $_meta_value){
 		$post = get_post($object_id);
+		
 		foreach($meta_ids as $meta_id){
+			
+			if(!$this->CanLogPostMeta($meta_id, $object_id, $meta_key))continue;
+			
 			switch($post->post_type){
 				case 'page':
 					$this->plugin->alerts->Trigger(2061, array(
