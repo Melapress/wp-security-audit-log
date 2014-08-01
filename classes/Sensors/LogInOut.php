@@ -31,7 +31,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	
 	protected function IsPastLoginFailureLimit($ip){
 		$data = get_transient(self::TRANSIENT_FAILEDLOGINS);
-		return ($data !== false) && ($data[$ip] > ($this->GetLoginFailureLogLimit()));
+		return ($data !== false) && isset($data[$ip]) && ($data[$ip] > $this->GetLoginFailureLogLimit());
 	}
 	
 	protected function IncrementLoginFailure($ip){
