@@ -53,7 +53,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	}
 	
 	public function EventPostMetaUpdating($meta_id, $object_id, $meta_key){
-		$this->old_meta[$meta_id] = array($meta_key, get_metadata('post', $object_id, $meta_key, true));
+		static $meta_type = 'post';
+		$this->old_meta[$meta_id] = (object)array(
+			'key' => ($meta = get_metadata_by_mid($meta_type, $meta_id)) ? $meta->meta_key : $meta_key,
+			'val' => get_metadata($meta_type, $object_id, $meta_key, true),
+		);
 	}
 	
 	public function EventPostMetaUpdated($meta_id, $object_id, $meta_key, $_meta_value){
@@ -64,7 +68,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		if(isset($this->old_meta[$meta_id])){
 			
 			// check change in meta key
-			if($this->old_meta[$meta_id][0] != $meta_key){
+			if($this->old_meta[$meta_id]->key != $meta_key){
 				switch($post->post_type){
 					case 'page':
 						$this->plugin->alerts->Trigger(2064, array(
@@ -72,7 +76,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'PostTitle' => $post->post_title,
 							'MetaID' => $meta_id,
 							'MetaKeyNew' => $meta_key,
-							'MetaKeyOld' => $this->old_meta[$meta_id][0],
+							'MetaKeyOld' => $this->old_meta[$meta_id]->key,
 							'MetaValue' => $_meta_value,
 						));
 						break;
@@ -82,7 +86,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'PostTitle' => $post->post_title,
 							'MetaID' => $meta_id,
 							'MetaKeyNew' => $meta_key,
-							'MetaKeyOld' => $this->old_meta[$meta_id][0],
+							'MetaKeyOld' => $this->old_meta[$meta_id]->key,
 							'MetaValue' => $_meta_value,
 						));
 						break;
@@ -93,15 +97,15 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'PostType' => $post->post_type,
 							'MetaID' => $meta_id,
 							'MetaKeyNew' => $meta_key,
-							'MetaKeyOld' => $this->old_meta[$meta_id][0],
+							'MetaKeyOld' => $this->old_meta[$meta_id]->key,
 							'MetaValue' => $_meta_value,
 						));
 						break;
 				}
 			}
-			
+			else
 			// check change in meta value
-			if($this->old_meta[$meta_id][1] != $_meta_value){
+			if($this->old_meta[$meta_id]->val != $_meta_value){
 				switch($post->post_type){
 					case 'page':
 						$this->plugin->alerts->Trigger(2060, array(
@@ -110,7 +114,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'MetaID' => $meta_id,
 							'MetaKey' => $meta_key,
 							'MetaValueNew' => $_meta_value,
-							'MetaValueOld' => $this->old_meta[$meta_id][1],
+							'MetaValueOld' => $this->old_meta[$meta_id]->val,
 						));
 						break;
 					case 'post':
@@ -120,7 +124,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'MetaID' => $meta_id,
 							'MetaKey' => $meta_key,
 							'MetaValueNew' => $_meta_value,
-							'MetaValueOld' => $this->old_meta[$meta_id][1],
+							'MetaValueOld' => $this->old_meta[$meta_id]->val,
 						));
 						break;
 					default:
@@ -131,7 +135,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'MetaID' => $meta_id,
 							'MetaKey' => $meta_key,
 							'MetaValueNew' => $_meta_value,
-							'MetaValueOld' => $this->old_meta[$meta_id][1],
+							'MetaValueOld' => $this->old_meta[$meta_id]->val,
 						));
 						break;
 				}

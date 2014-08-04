@@ -62,7 +62,9 @@ class WSAL_Views_Licensing extends WSAL_AbstractView {
 									<?php echo esc_html($plugin['PluginData']['Version']); ?>
 								</b></small>
 							</td><td>
-								<input name="license[<?php echo esc_attr($name); ?>]" type="text" value="<?php echo esc_attr($licenseKey); ?>" style="width: 400px;"/>
+								<input type="text" style="width: 360px; margin: 6px 0;"
+									   name="license[<?php echo esc_attr($name); ?>]"
+									   value="<?php echo esc_attr($licenseKey); ?>"/>
 							</td><td>
 								<?php if($licenseKey){ ?>
 									<?php if($licenseStatus === 'valid'){ ?>
