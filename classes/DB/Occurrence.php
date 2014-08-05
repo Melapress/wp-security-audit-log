@@ -32,7 +32,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	/**
 	 * Loads a meta item given its name.
 	 * @param string $name Meta name.
-	 * @return \WSAL_DB_Meta The meta item, be sure to checked if it was loaded successfully.
+	 * @return WSAL_DB_Meta The meta item, be sure to checked if it was loaded successfully.
 	 */
 	public function GetNamedMeta($name){
 		$meta = new WSAL_DB_Meta();
@@ -43,7 +43,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	/**
 	 * Returns the first meta value from a given set of names. Useful when you have a mix of items that could provide a particular detail.
 	 * @param array $names List of meta names.
-	 * @return \WSAL_DB_Meta The first meta item that exists.
+	 * @return WSAL_DB_Meta The first meta item that exists.
 	 */
 	public function GetFirstNamedMeta($names){
 		$meta = new WSAL_DB_Meta();
