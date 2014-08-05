@@ -48,7 +48,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	public function GetFirstNamedMeta($names){
 		$meta = new WSAL_DB_Meta();
 		$query = '(' . str_repeat('name = %s OR ', count($names)).'0)';
-		$query = 'occurrence_id = %d AND ' . $query . ' LIMIT 1';
+		$query = 'occurrence_id = %d AND ' . $query . ' ORDER BY name DESC LIMIT 1';
 		array_unshift($names, $this->id); // prepend args with occurrence id
 		$meta->Load($query, $names);
 		return $meta->IsLoaded() ? $meta : null;
