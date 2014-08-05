@@ -39,6 +39,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	protected function Save(){
+		check_admin_referer('wsal-settings');
 		$this->_plugin->settings->SetPruningDateEnabled(isset($_REQUEST['PruneByDate']));
 		$this->_plugin->settings->SetPruningDate($_REQUEST['PruningDate']);
 		$this->_plugin->settings->SetPruningLimitEnabled(isset($_REQUEST['PruneByLimit']));
@@ -77,6 +78,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		?><form id="audit-log-settings" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr(admin_url('admin-ajax.php')); ?>" />
+			<?php wp_nonce_field('wsal-settings'); ?>
 			
 			<table class="form-table">
 				<tbody>

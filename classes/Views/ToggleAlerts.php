@@ -33,6 +33,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$safeNames = array_map(array($this, 'GetSafeCatgName'), array_keys($groupedAlerts));
 		$safeNames = array_combine(array_keys($groupedAlerts), $safeNames);
 		if(isset($_POST['submit']) && isset($_POST['alert'])){
+			check_admin_referer('wsal-togglealerts');
 			try {
 				$enabled = array_map('intval', $_POST['alert']);
 				$disabled = array();
@@ -52,6 +53,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		?></h2>
 		<form id="audit-log-viewer" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
+			<?php wp_nonce_field('wsal-togglealerts'); ?>
+			
 			<div class="nav-tabs"><?php
 				foreach($groupedAlerts as $name => $alerts){
 					$active = array(); $allactive = true;
