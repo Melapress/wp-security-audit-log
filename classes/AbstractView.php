@@ -84,4 +84,12 @@ abstract class WSAL_AbstractView {
 		return false;
 	}
 	
+	/**
+	 * @return string URL to backend page for displaying view.
+	 */
+	public function GetUrl(){
+		$fn = function_exists('network_admin_url') ? 'network_admin_url' : 'admin_url';
+		return $fn('admin.php?page=' . $this->GetSafeViewName());
+	}
+	
 }
