@@ -212,7 +212,7 @@ final class WSAL_AlertManager {
 			$data['ClientIP'] = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 		if(!isset($data['UserAgent']))
 			$data['UserAgent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-		if(!isset($data['CurrentUserID']))
+		if(!isset($data['Username']) && !isset($data['CurrentUserID']))
 			$data['CurrentUserID'] = function_exists('get_current_user_id') ? get_current_user_id() : 0;
 		if(!isset($data['CurrentUserRoles']) && function_exists('is_user_logged_in') && is_user_logged_in())
 			$data['CurrentUserRoles'] = wp_get_current_user()->roles;
