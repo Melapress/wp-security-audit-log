@@ -24,7 +24,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	
 	public function EventLogout(){
 		$this->plugin->alerts->Trigger(1001, array(
-			'Username' => $this->_current_user->user_login,
+			'CurrentUserID' => $this->_current_user->ID,
 			'CurrentUserRoles' => $this->_current_user->roles,
 		));
 	}
