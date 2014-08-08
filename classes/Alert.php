@@ -71,7 +71,7 @@ final class WSAL_Alert {
 		$mesg = preg_split('/(%.*?%)/', (string)$origMesg, -1, PREG_SPLIT_DELIM_CAPTURE);
 		if(!is_array($mesg))return (string)$origMesg;
 		// handle tokenized message
-		foreach($mesg as $i=>$token){
+		foreach($mesg as $i => $token){
 			// handle escaped percent sign
 			if($token == '%%'){
 				$mesg[$i] = '%';
