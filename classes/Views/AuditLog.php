@@ -378,7 +378,9 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 				return esc_html($value);
 			
 			case in_array($name, array('%MetaValue%', '%MetaValueOld%', '%MetaValueNew%')):
-				return strlen($value) > 50 ? (esc_html(substr($value, 0, 50)) . '&hellip;') :  esc_html($value);
+				return '<strong>' . (
+					strlen($value) > 50 ? (esc_html(substr($value, 0, 50)) . '&hellip;') :  esc_html($value)
+				) . '</strong>';
 				
 			case strncmp($value, 'http://', 7) === 0:
 			case strncmp($value, 'https://', 7) === 0:
