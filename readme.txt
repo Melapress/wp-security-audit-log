@@ -6,8 +6,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite
 Requires at least: 3.6
-Tested up to: 3.9.1
-Stable tag: 1.2.4
+Tested up to: 3.9.2
+Stable tag: 1.2.5
 
 Identify WordPress issues before they become a security problem by keeping an audit log of users and all of the under the hood WordPress activity.
 
@@ -24,6 +24,7 @@ WP Security Audit Log keeps a log of everything happening on your WordPress blog
 * User installs, activates, deactivates, upgrades or uninstalls a plugin
 * User creates a new post, page, category or a custom post type
 * User modifies an existing post, page, category or a custom post type
+* User creates, modifies or deletes a custom field from a post, page or custom post type
 * User adds, moves, modifies or deletes a widget
 * User installs or activates a new WordPress theme
 * User changes WordPress settings such as permalinks or administrator notification email
@@ -129,6 +130,34 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 
 == Changelog ==
 
+= 1.2.5 (2014-08-12) =
+* New Feature
+	* Monitoring of custom fields in WordPress posts, pages and custom post types.
+	
+* New WordPress Security Alerts
+	* Alert 2053: User created new custom field in blog post
+	* Alert 2054: User modified the value of custom field in blog post
+	* Alert 2055: User deleted a custom field in blog post
+	* Alert 2062: User renamed custom field in blog post
+	* Alert 2059: User created new custom field in page
+	* Alert 2060: User modified the value of custom field in page
+	* Alert 2061: User deleted custom field from page
+	* Alert 2063: User renamed custom field in 
+	* Alert 2056: User created new custom field in custom post type
+	* Alert 2057: User modified the value of custom field in custom post type
+	* Alert 2058: User deleted a custom field from custom post type
+	* Alert 2064: User renamed custom field in custom post type
+	
+* Improvements
+	* Improved the writing and reading of WordPress alerts from the WordPress database (plugin runs more efficiently on high traffic WordPress and WordPress multisite installations)
+	* Improved the monitoring of WordPress login and logout actions
+	* Applied various plugin performance tweaks
+	
+* Bug Fixes
+	* Fixed a specific issue where user and user role where not being reported ([ticket](http://wordpress.org/support/topic/showing-unknown-user-logged-out-but-never-logged-in?replies=11))
+	* Fixed an error which was being reported during user logout in specific scenarios ([ticket](http://wordpress.org/support/topic/error-at-logou?replies=3))
+	* Fixed a CSRF vulnerability reported by Kévin FALCOZ aka 0pc0deFR
+	
 = 1.2.4 (2014-07-27) =
 * Improvements
 	* Improved monitoring of failed logins, addressed issues reported [here](http://wordpress.org/support/topic/horrible-performance#post-), [here](http://wordpress.org/support/topic/much-too-much-sql-load#post-), [here](http://wordpress.org/support/topic/overload-due-to-this-plugin#post-) and [here](http://wordpress.org/support/topic/mysql-200-cpu-time-copying-to-tmp-table)
