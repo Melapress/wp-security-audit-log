@@ -91,7 +91,7 @@ class WSAL_ViewManager {
 		
 		if($this->_plugin->settings->CurrentUserCan('view') && count($this->views)){
 			// add main menu
-			add_menu_page(
+			$this->views[0]->hook_suffix = add_menu_page(
 				'WP Security Audit Log',
 				'Audit Log',
 				'read', // no capability requirement
@@ -103,7 +103,7 @@ class WSAL_ViewManager {
 			// add menu items
 			foreach($this->views as $view){
 				if($view->IsAccessible()){
-					add_submenu_page(
+					$view->hook_suffix = add_submenu_page(
 						$view->IsVisible() ? $this->views[0]->GetSafeViewName() : null,
 						$view->GetTitle(),
 						$view->GetName(),
@@ -139,30 +139,31 @@ class WSAL_ViewManager {
 	}
 	
 	/**
-	 * @return int Returns page id of current page (or 0 on error).
+	 * @param mixed $default Default value.
+	 * @return int Returns page id of current page (or $default on error).
 	 */
-	protected function GetBackendPageIndex(){
+	protected function GetBackendPageIndex($default = 0){
 		if(isset($_REQUEST['page']))
 			foreach($this->views as $i => $view)
 				if($_REQUEST['page'] == $view->GetSafeViewName())
 					return $i;
-		return 0;
+		return $default;
 	}
 	
 	/**
 	 * Render header of the current view.
 	 */
 	public function RenderViewHeader(){
-		$view_id = $this->GetBackendPageIndex();
-		$this->views[$view_id]->Header();
+		$view_id = $this->GetBackendPageIndex(null);
+		if ($view_id !== null) $this->views[$view_id]->Header();
 	}
 	
 	/**
 	 * Render footer of the current view.
 	 */
 	public function RenderViewFooter(){
-		$view_id = $this->GetBackendPageIndex();
-		$this->views[$view_id]->Footer();
+		$view_id = $this->GetBackendPageIndex(null);
+		if ($view_id !== null) $this->views[$view_id]->Footer();
 	}
 	
 	/**

@@ -10,6 +10,12 @@ abstract class WSAL_AbstractView {
 	protected $_wpversion;
 	
 	/**
+	 * Contains the result to a call to add_submenu_page().
+	 * @var string
+	 */
+	public $hook_suffix = '';
+	
+	/**
 	 * @param WpSecurityAuditLog $plugin
 	 */
 	public function __construct(WpSecurityAuditLog $plugin){
