@@ -18,7 +18,7 @@ class WSAL_Autoloader {
 	public function Register($prefix, $path){
 		if(!isset($this->paths[$prefix]))
 			$this->paths[$prefix] = array();
-		$this->paths[$prefix][] = str_replace('\\', '/', $path);
+		$this->paths[$prefix][] = rtrim(str_replace('\\', '/', $path), '/') . '/';
 	}
 	
 	/**
