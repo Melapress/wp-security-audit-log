@@ -334,7 +334,7 @@ abstract class WSAL_DB_ActiveRecord {
 		global $wpdb;
 		$class = get_called_class();
 		$result = array();
-		$sql = $wpdb->prepare($query, $args);
+		$sql = count($args) ? $wpdb->prepare($query, $args) :  $query;
 		foreach($wpdb->get_results($sql, ARRAY_A) as $data){
 			$result[] = new $class($data);
 		}

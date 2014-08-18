@@ -397,7 +397,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 	}
 	
 	protected function is_multisite(){
-		return function_exists('is_multisite') && is_multisite();
+		return $this->_plugin->IsMultisite();
 	}
 	
 	protected function is_main_blog(){
@@ -416,7 +416,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		switch(true){
 			
 			// non-multisite
-			case !function_exists('is_multisite') || !is_multisite():
+			case !$this->is_multisite():
 				return 0;
 			
 			// multisite + main site view
@@ -445,9 +445,12 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 
 		//$this->process_bulk_action();
 		
+		$query = new WSAL_DB_Query('WSAL_DB_Occurrence');
 		$bid = (int)$this->get_view_site_id();
-		$sql = ($bid ? "site_id=$bid" : '1') . ' ORDER BY created_on DESC';
-		$data = WSAL_DB_Occurrence::LoadMulti($sql, array());
+		if ($bid) $query->where[] = 'site_id = '.$bid;
+		$query->order[] = 'created_on DESC';
+		$data = apply_filters('wsal_auditlog_query', $query);
+		$data = $query->Execute();
 		
 		if(count($data)){
 			$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'created_on';
