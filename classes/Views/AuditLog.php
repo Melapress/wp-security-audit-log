@@ -449,7 +449,9 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		$bid = (int)$this->get_view_site_id();
 		if ($bid) $query->where[] = 'site_id = '.$bid;
 		$query->order[] = 'created_on DESC';
+		
 		$data = apply_filters('wsal_auditlog_query', $query);
+		
 		$data = $query->Execute();
 		
 		if(count($data)){
