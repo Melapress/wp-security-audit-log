@@ -61,6 +61,12 @@ class WpSecurityAuditLog {
 	public $settings;
 	
 	/**
+	 * Class loading manager.
+	 * @var WSAL_Autoloader
+	 */
+	public $autoloader;
+	
+	/**
 	 * Constants manager.
 	 * @var WSAL_ConstantManager
 	 */
@@ -98,8 +104,10 @@ class WpSecurityAuditLog {
 	 * Initialize plugin.
 	 */
 	public function __construct(){
-		// register autoloader
-		spl_autoload_register(array($this, 'LoadClass'));
+		// load autoloader and register base paths
+		require_once('classes/Autoloader.php');
+		$this->autoloader = new WSAL_Autoloader($this);
+		$this->autoloader->Register(self::PLG_CLS_PRFX, $this->GetBaseDir() . 'classes' . DIRECTORY_SEPARATOR);
 		
 		// load dependencies
 		$this->views = new WSAL_ViewManager($this);
@@ -283,35 +291,13 @@ class WpSecurityAuditLog {
 	}
 	
 	/**
-	 * This is the class autoloader. You should not call this directly.
-	 * @param string $class Class name.
-	 * @return boolean True if class is found and loaded, false otherwise.
-	 */
-	public function LoadClass($class){
-		if(substr($class, 0, strlen(self::PLG_CLS_PRFX)) == self::PLG_CLS_PRFX){
-			$file = str_replace('_', DIRECTORY_SEPARATOR, substr($class, strlen(self::PLG_CLS_PRFX)));
-			$file = $this->GetBaseDir() . 'classes' . DIRECTORY_SEPARATOR . $file . '.php';
-			if(file_exists($file)){
-				require_once($file);
-				return class_exists($class, false) || interface_exists($class, false);
-			}
-		}
-		return false;
-	}
-	
-	/**
 	 * Returns the class name of a particular file that contains the class.
 	 * @param string $file File name.
 	 * @return string Class name.
+	 * @deprecated since 1.2.5 Use autoloader->GetClassFileClassName() instead.
 	 */
 	public function GetClassFileClassName($file){
-		$base = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $this->GetBaseDir() . 'classes' . DIRECTORY_SEPARATOR);
-		$file = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $file);
-		return str_replace(
-			array($base, '\\', '/'),
-			array(self::PLG_CLS_PRFX, '_', '_'),
-			substr($file, 0, -4)
-		);
+		return $this->autoloader->GetClassFileClassName($file);
 	}
 	
 	/**
