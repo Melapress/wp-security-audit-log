@@ -43,8 +43,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		?><form id="audit-log-viewer" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr(isset($_REQUEST['wsal-cbid']) ? $_REQUEST['wsal-cbid'] : ''); ?>" />
+			<?php do_action('wsal_auditlog_before_view', $this->_listview); ?>
 			<?php $this->_listview->prepare_items(); ?>
 			<?php $this->_listview->display(); ?>
+			<?php do_action('wsal_auditlog_after_view', $this->_listview); ?>
 		</form><?php
 		
 		?><script type="text/javascript">
