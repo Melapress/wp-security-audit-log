@@ -19,14 +19,14 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$this->plugin->alerts->Trigger(1000, array(
 			'Username' => $user_login,
 			'CurrentUserRoles' => $user->roles,
-		));
+		), true);
 	}
 	
 	public function EventLogout(){
 		$this->plugin->alerts->Trigger(1001, array(
 			'CurrentUserID' => $this->_current_user->ID,
 			'CurrentUserRoles' => $this->_current_user->roles,
-		));
+		), true);
 	}
 	
 	const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins';
