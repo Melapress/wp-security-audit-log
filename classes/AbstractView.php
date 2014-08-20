@@ -60,6 +60,27 @@ abstract class WSAL_AbstractView {
 	abstract public function Render();
 	
 	/**
+	 * Renders the view icon (this has been deprecated in newwer WP versions).
+	 */
+	public function RenderIcon(){
+		?><div id="icon-plugins" class="icon32"><br></div><?php
+	}
+	
+	/**
+	 * Renders the view title.
+	 */
+	public function RenderTitle(){
+		?><h2><?php echo esc_html($this->GetTitle()); ?></h2><?php
+	}
+	
+	/**
+	 * @link self::Render()
+	 */
+	public function RenderContent(){
+		$this->Render();
+	}
+	
+	/**
 	 * @return boolean Whether page should appear in menu or not.
 	 */
 	public function IsVisible(){ return true; }
