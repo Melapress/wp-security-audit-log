@@ -134,7 +134,7 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 = 1.2.6 (2014-08-20) =
 * Improvements
 	* Several performance improvements and tweaks applied
-	* Udpated Italian translations
+	* Updated Italian translations
 	
 * Bug Fixes
 	* Fixed an issue with URLs of plugin pages [support ticket](http://wordpress.org/support/topic/admin-cannot-access-settings)
