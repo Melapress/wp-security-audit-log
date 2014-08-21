@@ -60,7 +60,7 @@ class WSAL_LicenseManager {
 		);
 
 		if (is_wp_error($response)) {
-			$this->plugin->settings->SetLicenseErrors($name, 'Invalid Licensing Server Response');
+			$this->plugin->settings->SetLicenseErrors($name, 'Invalid Licensing Server Response: ' . $response->get_error_message());
 			return false;
 		}
 
@@ -68,8 +68,11 @@ class WSAL_LicenseManager {
 		
 		if(is_object($license_data)){
 			$this->plugin->settings->SetLicenseStatus($name, $license_data->license);
-			if($license_data->license !== 'valid')
-				$this->plugin->settings->SetLicenseErrors($name, 'License Not Valid');
+			if($license_data->license !== 'valid'){
+				$error = 'License Not Valid';
+				if (isset($license_data->error)) $error .= ': ' . ucfirst(str_replace('_', ' ', $license_data->error));
+				$this->plugin->settings->SetLicenseErrors($name, $error);
+			}
 		}else{
 			$this->plugin->settings->SetLicenseErrors($name, 'Unexpected Licensing Server Response');
 		}
