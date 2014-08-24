@@ -65,13 +65,13 @@ class WSAL_Views_Licensing extends WSAL_AbstractView {
 								<input type="text" style="width: 360px; margin: 6px 0;"
 									   name="license[<?php echo esc_attr($name); ?>]"
 									   value="<?php echo esc_attr($licenseKey); ?>"/>
-							</td><td>
+							</td><td style="vertical-align: middle;">
 								<?php if($licenseKey){ ?>
 									<?php if($licenseStatus === 'valid'){ ?>
 										<?php _e('Active', 'wp-security-audit-log'); ?>
 									<?php }else{ ?>
 										<?php _e('Inactive', 'wp-security-audit-log'); ?><br/>
-								<small><?php echo esc_html($licenseErrors); ?></small>
+										<small><?php echo esc_html($licenseErrors); ?></small>
 									<?php } ?>
 								<?php } ?>
 							</td>

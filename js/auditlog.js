@@ -1,5 +1,7 @@
 var WsalData;
 
+window['WsalAuditLogRefreshed'] = function(){};
+
 function WsalAuditLogInit(_WsalData){
 	WsalData = _WsalData;
 	var WsalTkn = WsalData.autorefresh.token;
@@ -15,7 +17,10 @@ function WsalAuditLogInit(_WsalData){
 			WsalAjx = null;
 			if(data && data !== 'false'){
 				WsalTkn = data;
-				jQuery('#audit-log-viewer').load(location.href + ' #audit-log-viewer');
+				jQuery('#audit-log-viewer').load(
+					location.href + ' #audit-log-viewer',
+					window['WsalAuditLogRefreshed']
+				);
 			}
 			WsalChk();
 		});

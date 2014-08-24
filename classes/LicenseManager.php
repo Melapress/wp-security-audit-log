@@ -49,9 +49,9 @@ class WSAL_LicenseManager {
 
 		$api_params = array(
 			'edd_action'=> 'activate_license',
-			'license' 	=> $license,
-			'item_name' => urlencode($name),
-			'url'       => home_url()
+			'license' 	=> urlencode($license),
+			'item_name' => urlencode($this->plugins[$name]['PluginData']['Name']),
+			'url'       => urlencode(home_url())
 		);
 		
 		$response = wp_remote_get(
