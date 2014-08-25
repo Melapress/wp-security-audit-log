@@ -18,7 +18,7 @@ function WsalAuditLogInit(_WsalData){
 			if(data && data !== 'false'){
 				WsalTkn = data;
 				jQuery('#audit-log-viewer').load(
-					location.href + ' #audit-log-viewer',
+					location.href + ' #audit-log-viewer-content',
 					window['WsalAuditLogRefreshed']
 				);
 			}

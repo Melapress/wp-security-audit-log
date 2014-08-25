@@ -43,11 +43,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$this->_listview->prepare_items();
 		
 		?><form id="audit-log-viewer" method="post">
-			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
-			<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr(isset($_REQUEST['wsal-cbid']) ? $_REQUEST['wsal-cbid'] : ''); ?>" />
-			<?php do_action('wsal_auditlog_before_view', $this->_listview); ?>
-			<?php $this->_listview->display(); ?>
-			<?php do_action('wsal_auditlog_after_view', $this->_listview); ?>
+			<div id="audit-log-viewer-content">
+				<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
+				<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr(isset($_REQUEST['wsal-cbid']) ? $_REQUEST['wsal-cbid'] : ''); ?>" />
+				<?php do_action('wsal_auditlog_before_view', $this->_listview); ?>
+				<?php $this->_listview->display(); ?>
+				<?php do_action('wsal_auditlog_after_view', $this->_listview); ?>
+			</div>
 		</form><?php
 		
 		?><script type="text/javascript">
@@ -448,7 +450,7 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 
 		//$this->process_bulk_action();
 		
-		$query = new WSAL_DB_Query('WSAL_DB_Occurrence');
+		$query = new WSAL_DB_OccurrenceQuery('WSAL_DB_Occurrence');
 		$bid = (int)$this->get_view_site_id();
 		if ($bid) $query->where[] = 'site_id = '.$bid;
 		$query->order[] = 'created_on DESC';
