@@ -16,29 +16,23 @@ class WSAL_DB_OccurrenceQuery extends WSAL_DB_Query {
 	 */
 	public $meta_args = array();
 	
-	/**
-	 * Generates SQL for meta conditions.
-	 */
-	public function GetMetaSql(){
-		if (!count($this->meta_where)) return '';
-		$tmp = new WSAL_DB_Meta();
-		return 'id IN (
-			SELECT DISTINCT occurrence_id
-			FROM ' . $tmp->GetTable() . '
-			WHERE ' . implode(' AND ', $this->meta_where) . '
-		)';
+	public function GetSql(){
+		$sql = parent::GetSql();
+		if (count($this->meta_where)) {
+			$tmp = new WSAL_DB_Meta();
+			$sql[] = 'id IN (
+				SELECT DISTINCT occurrence_id
+				FROM ' . $tmp->GetTable() . '
+				WHERE ' . implode(' AND ', $this->meta_where) . '
+			)';
+		}
+		return $sql;
 	}
 	
-	/**
-	 * Builds query with meta conditions, executes and returns results.
-	 * @return WSAL_DB_ActiveRecord[]
-	 */
-	public function Execute(){
-		if(!!($sql = $this->GetMetaSql())){
-			$this->where[] = $sql;
-			foreach ($this->meta_args as $arg) $this->args[] = $arg;
-		}
-		return parent::Execute();
+	public function GetArgs(){
+		$args = parent::GetArgs();
+		foreach ($this->meta_args as $arg) $args[] = $arg;
+		return $args;
 	}
 	
 	/**
