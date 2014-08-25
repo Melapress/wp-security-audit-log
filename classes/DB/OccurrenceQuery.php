@@ -21,9 +21,10 @@ class WSAL_DB_OccurrenceQuery extends WSAL_DB_Query {
 	 */
 	public function GetMetaSql(){
 		if (!count($this->meta_where)) return '';
+		$tmp = new WSAL_DB_Meta();
 		return 'id IN (
 			SELECT DISTINCT occurrence_id
-			FROM wp_wsal_metadata
+			FROM ' . $tmp->GetTable() . '
 			WHERE ' . implode(' AND ', $this->meta_where) . '
 		)';
 	}
