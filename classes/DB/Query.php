@@ -69,17 +69,25 @@ class WSAL_DB_Query {
 	 * @return string Generated sql.
 	 */
 	public function GetSql(){
+		$where = $this->GetCond();
 		switch($this->GetDbType()){
 			case 'mysql':
 				return 'SELECT ' . implode(',', $this->columns)
 					. ' FROM ' . implode(',', $this->from)
 					. (count($this->joins) ? implode(' ', $this->where) : '')
-					. (count($this->where) ? (' WHERE ' . implode(' AND ', $this->where)) : '')
+					. (count($where) ? (' WHERE ' . implode(' AND ', $where)) : '')
 					. (count($this->order) ? (' ORDER BY ' . implode(', ', $this->order)) : '')
 				;
 			default:
 				throw new Exception('SQL generation for "' . $this->GetDbType() . '" databases is not supported.');
 		}
+	}
+	
+	/**
+	 * @return array Array of conditions.
+	 */
+	public function GetCond(){
+		return $this->where;
 	}
 	
 	/**

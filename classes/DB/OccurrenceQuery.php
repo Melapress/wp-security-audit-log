@@ -16,17 +16,17 @@ class WSAL_DB_OccurrenceQuery extends WSAL_DB_Query {
 	 */
 	public $meta_args = array();
 	
-	public function GetSql(){
-		$sql = parent::GetSql();
+	public function GetCond(){
+		$cond = parent::GetCond();
 		if (count($this->meta_where)) {
 			$tmp = new WSAL_DB_Meta();
-			$sql[] = 'id IN (
+			$cond[] = 'id IN (
 				SELECT DISTINCT occurrence_id
 				FROM ' . $tmp->GetTable() . '
 				WHERE ' . implode(' AND ', $this->meta_where) . '
 			)';
 		}
-		return $sql;
+		return $cond;
 	}
 	
 	public function GetArgs(){
