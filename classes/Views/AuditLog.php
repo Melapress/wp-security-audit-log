@@ -455,26 +455,33 @@ class WSAL_Views_AuditLogList_Internal extends WP_List_Table {
 		if ($bid) $query->where[] = 'site_id = '.$bid;
 		$query->order[] = 'created_on DESC';
 		
-		$data = apply_filters('wsal_auditlog_query', $query);
+		$query = apply_filters('wsal_auditlog_query', $query);
 		
-		$data = $query->Execute();
+		$total_items = $query->Count();
 		
-		if(count($data)){
+		/** @deprecated */
+		//$data = $query->Execute();
+		
+		if($total_items){
 			$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'created_on';
-			$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'asc' : 'desc';
-			if(isset($data[0]->{$this->_orderby})){
-				$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
-				usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
+			$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'ASC' : 'DESC';
+			$tmp = new WSAL_DB_Occurrence();
+			if(isset($tmp->{$this->_orderby})){
+				// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
+				$query->order[] = $this->_orderby . ' ' . $this->_order;
+				/** @deprecated */
+				//$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
+				//usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
 			}
 		}
 
-		$current_page = $this->get_pagenum();
+		/** @todo Modify $query instead */
+		/** @deprecated */
+		//$data = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page);
+		$query->offset = ($this->get_pagenum() - 1) * $per_page;
+		$query->length = $per_page;
 
-		$total_items = count($data);
-
-		$data = array_slice($data, ($current_page - 1) * $per_page, $per_page);
-
-		$this->items = $data;
+		$this->items = $query->Execute();
 
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,

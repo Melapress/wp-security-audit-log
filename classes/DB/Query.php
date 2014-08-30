@@ -2,7 +2,6 @@
 
 /**
  * @todo Add group-by support
- * @todo Add limit/top support
  */
 class WSAL_DB_Query {
 	/**
@@ -52,6 +51,18 @@ class WSAL_DB_Query {
 	public $args = array();
 	
 	/**
+	 * The amount of records to skip in result.
+	 * @var int
+	 */
+	public $offset = 0;
+	
+	/**
+	 * The maximum number of records in result.
+	 * @var int
+	 */
+	public $length = 0;
+	
+	/**
 	 * @param string $ar_class Name of class that extends ActiveRecord class.
 	 */
 	public function __construct($ar_class) {
@@ -76,7 +87,10 @@ class WSAL_DB_Query {
 					. ' FROM ' . implode(',', $this->from)
 					. (count($this->joins) ? implode(' ', $this->where) : '')
 					. (count($where) ? (' WHERE ' . implode(' AND ', $where)) : '')
+				// @todo GROUP BY goes here
+				// @todo HAVING goes here
 					. (count($this->order) ? (' ORDER BY ' . implode(', ', $this->order)) : '')
+					. ($this->length ? (' LIMIT ' . ($this->offset ? ($this->offset . ', ') : '') . ' ' . $this->length) : '')
 				;
 			default:
 				throw new Exception('SQL generation for "' . $this->GetDbType() . '" databases is not supported.');
@@ -102,5 +116,18 @@ class WSAL_DB_Query {
 	 */
 	public function Execute(){
 		return call_user_func(array($this->ar_cls, 'LoadMultiQuery'), $this->GetSql(), $this->GetArgs());
+	}
+	
+	public function Count(){
+		// back up columns, use COUNT as default column and generate sql
+		$cols = $this->columns;
+		$this->columns = array('COUNT(*)');
+		$sql = $this->GetSql();
+		
+		// restore columns
+		$this->columns = $cols;
+		
+		// execute query and return result
+		return call_user_func(array($this->ar_cls, 'CountQuery'), $sql, $this->GetArgs());
 	}
 }

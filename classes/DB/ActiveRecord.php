@@ -315,12 +315,25 @@ abstract class WSAL_DB_ActiveRecord {
 	 * If no parameters are given, this counts the number of records in the DB table.
 	 * @param string $cond (Optional) Query condition.
 	 * @param array $args (Optional) Condition arguments.
+	 * @return int Number of matching records.
 	 */
 	public static function Count($cond = '%d', $args = array(1)){
 		global $wpdb;
 		$class = get_called_class();
 		$temp = new $class();
-		$sql = $wpdb->prepare('SELECT COUNT(*) FROM ' . $temp->GetTable() . ' WHERE '.$cond, $args);
+		$sql = $wpdb->prepare('SELECT COUNT(*) FROM ' . $temp->GetTable() . ' WHERE ' . $cond, $args);
+		return (int)$wpdb->get_var($sql);
+	}
+	
+	/**
+	 * Count records in the DB matching a query.
+	 * @param string $query Full SQL query.
+	 * @param array $args (Optional) Query arguments.
+	 * @return int Number of matching records.
+	 */
+	public static function CountQuery($query, $args = array()){
+		global $wpdb;
+		$sql = count($args) ? $wpdb->prepare($query, $args) : $query;
 		return (int)$wpdb->get_var($sql);
 	}
 	
