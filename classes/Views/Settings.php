@@ -97,11 +97,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
 								<span> <?php echo $text; ?></span>
 							</fieldset>
-						</td>
-					</tr>
-					<tr>
-						<th></th>
-						<td>
 							<fieldset>
 								<?php $text = __('(eg: 80)', 'wp-security-audit-log'); ?>
 								<?php $nbld = $this->_plugin->settings->IsPruningLimitEnabled(); ?>
@@ -115,6 +110,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<?php echo __('alerts', 'wp-security-audit-log'); ?>
 								<span><?php echo $text; ?></span>
 							</fieldset>
+							<p class="description"><?php
+								echo __('Next Scheduled Cleanup is in ', 'wp-security-audit-log');
+								echo human_time_diff(current_time('timestamp'), $next = wp_next_scheduled('wsal_cleanup'));
+								echo '<!-- ' . date('dMy H:i:s', $next) . ' -->';
+							?></p>
 						</td>
 					</tr>
 					<tr>
@@ -182,6 +182,20 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 										</span><?php
 									}
 								?></div>
+							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="RestrictAdmins"><?php _e('Restrict Plugin Access', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<label for="RestrictAdmins">
+									<?php $ira = $this->_plugin->settings->IsRestrictAdmins(); ?>
+									<input type="checkbox" name="RestrictAdmins" id="RestrictAdmins"<?php if($ira)echo ' checked="checked"'; ?>/>
+									<span class="description">
+										<?php _e('By default all the administrators on this WordPress have access to manage this plugin.<br/>By enabling this option only the users specified in the two options above and your username will have access to view alerts and manage this plugin.', 'wp-security-audit-log'); ?>
+									</span>
+								</label>
 							</fieldset>
 						</td>
 					</tr>

@@ -71,7 +71,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
 				array(2004, E_NOTICE, __('User created a new WordPress page and saved it as draft', 'wp-security-audit-log'), __('Created a new page called %PostTitle%. Page ID is %PostID%', 'wp-security-audit-log')),
 				array(2005, E_NOTICE, __('User published a WorPress page', 'wp-security-audit-log'), __('Published a page called %PostTitle%. Page URL is %PostUrl%', 'wp-security-audit-log')),
 				array(2006, E_NOTICE, __('User modified a published WordPress page', 'wp-security-audit-log'), __('Modified the published page %PostTitle%. Page URL is %PostUrl%', 'wp-security-audit-log')),
-				array(2007, E_NOTICE, __('User modified a draft WordPress page', 'wp-security-audit-log'), __('Modified the draft page %PostTitle%. page ID is %PostID%', 'wp-security-audit-log')),
+				array(2007, E_NOTICE, __('User modified a draft WordPress page', 'wp-security-audit-log'), __('Modified the draft page %PostTitle%. Page ID is %PostID%', 'wp-security-audit-log')),
 				array(2009, E_NOTICE, __('User permanently deleted a page from the trash', 'wp-security-audit-log'), __('Deleted the page %PostTitle%. Page ID is %PostID%', 'wp-security-audit-log')),
 				array(2013, E_WARNING, __('User moved WordPress page to the trash', 'wp-security-audit-log'), __('Moved the page %PostTitle% to trash', 'wp-security-audit-log')),
 				array(2015, E_CRITICAL, __('User restored a WordPress page from trash', 'wp-security-audit-log'), __('Restored page %PostTitle% from trash', 'wp-security-audit-log')),

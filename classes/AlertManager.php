@@ -95,13 +95,17 @@ final class WSAL_AlertManager {
 	/**
 	 * @internal Commit an alert now.
 	 */
-	protected function _CommitItem($type, $data, $cond){
+	protected function _CommitItem($type, $data, $cond, $_retry = true){
 		if(!$cond || !!call_user_func($cond, $this)){
 			if($this->IsEnabled($type)){
 				if(isset($this->_alerts[$type])){
 					// ok, convert alert to a log entry
 					$this->_triggered_types[] = $type;
 					$this->Log($type, $data);
+				}elseif($_retry){
+					// this is the last attempt at loading alerts from default file
+					require_once($this->plugin->GetBaseDir() . 'defaults.php');
+					return $this->_CommitItem($type, $data, $cond, false);
 				}else{
 					// in general this shouldn't happen, but it could, so we handle it here :)
 					throw new Exception('Alert with code "' . $type . '" has not be registered.');

@@ -174,8 +174,9 @@ class WpSecurityAuditLog {
 		// if system wasn't installed, try migration now
 		if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
 		
-		// install cleanup hook
-		wp_schedule_event(0, 'hourly', 'wsal_cleanup');
+		// install cleanup hook (remove older one if it exists)
+		wp_clear_scheduled_hook('wsal_cleanup');
+		wp_schedule_event(current_time('timestamp') + 600, 'hourly', 'wsal_cleanup');
 	}
 	
 	/**
@@ -201,7 +202,7 @@ class WpSecurityAuditLog {
 	 */
 	public function Uninstall(){
 		WSAL_DB_ActiveRecord::UninstallAll();
-		wp_unschedule_event(0, 'wsal_cleanup');
+		wp_clear_scheduled_hook('wsal_cleanup');
 	}
 	
 	/**

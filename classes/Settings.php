@@ -217,6 +217,14 @@ class WSAL_Settings {
 		return $this->_plugin->GetGlobalOption('pruning-limit-e', true);
 	}
 	
+	public function IsRestrictAdmins(){
+		return $this->_plugin->GetGlobalOption('restrict-admins', false);
+	}
+	
+	public function SetRestrictAdmins($enable){
+		$this->_plugin->SetGlobalOption('restrict-admins', (bool)$enable);
+	}
+	
 	protected $_disabled = null;
 	
 	public function GetDefaultDisabledAlerts(){
