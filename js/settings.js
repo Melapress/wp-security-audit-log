@@ -34,4 +34,16 @@ jQuery(document).ready(function(){
 	});
 	
 	jQuery('#ViewerList>span>a, #EditorList>span>a').click(RemoveSecToken);
+	
+	jQuery('#RestrictAdmins').change(function(){
+		var user = jQuery('#RestrictAdminsDefaultUser').val();
+		var fltr = function() { return this.value === user; };
+		if (this.checked && jQuery('#EditorList input').filter(fltr).length === 0) {
+			jQuery('#EditorList').append(
+				jQuery('<span class="sectoken-user"/>').text(user)
+					.prepend(jQuery('<input type="hidden" name="Editors[]"/>').val(user))
+					.append(jQuery('<a href="javascript:;" title="Remove">&times;</a>').click(RemoveSecToken))
+			);
+		}
+	});
 });

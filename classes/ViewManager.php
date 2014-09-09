@@ -97,7 +97,8 @@ class WSAL_ViewManager {
 				'read', // no capability requirement
 				$this->views[0]->GetSafeViewName(),
 				array($this, 'RenderViewBody'),
-				$this->views[0]->GetIcon()
+				$this->views[0]->GetIcon(),
+				3 // after dashboard
 			);
 
 			// add menu items

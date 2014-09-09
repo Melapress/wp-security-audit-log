@@ -345,14 +345,18 @@ class WSAL_Settings {
 			case 'view':
 				$allowed = $this->GetAllowedPluginViewers();
 				$allowed = array_merge($allowed, $this->GetAllowedPluginEditors());
-				$allowed = array_merge($allowed, $this->GetSuperAdmins());
-				$allowed = array_merge($allowed, $this->GetAdmins());
+				if (!$this->IsRestrictAdmins()) {
+					$allowed = array_merge($allowed, $this->GetSuperAdmins());
+					$allowed = array_merge($allowed, $this->GetAdmins());
+				}
 				break;
 			case 'edit':
 				$allowed = $this->GetAllowedPluginEditors();
-				$allowed = array_merge($allowed, $this->_plugin->IsMultisite() ?
-						$this->GetSuperAdmins() : $this->GetAdmins()
-					);
+				if (!$this->IsRestrictAdmins()) {
+					$allowed = array_merge($allowed, $this->_plugin->IsMultisite() ?
+							$this->GetSuperAdmins() : $this->GetAdmins()
+						);
+				}
 				break;
 			default:
 				throw new Exception('Unknown action "'.$action.'".');

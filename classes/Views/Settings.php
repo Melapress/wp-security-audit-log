@@ -204,6 +204,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<th><label for="RestrictAdmins"><?php _e('Restrict Plugin Access', 'wp-security-audit-log'); ?></label></th>
 						<td>
 							<fieldset>
+								<input type="hidden" id="RestrictAdminsDefaultUser" value="<?php echo esc_attr(wp_get_current_user()->user_login); ?>"/>
 								<label for="RestrictAdmins">
 									<?php $ira = $this->_plugin->settings->IsRestrictAdmins(); ?>
 									<input type="checkbox" name="RestrictAdmins" id="RestrictAdmins"<?php if($ira)echo ' checked="checked"'; ?>/>
