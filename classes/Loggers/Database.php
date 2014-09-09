@@ -32,30 +32,20 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		
 		$is_date_e = $this->plugin->settings->IsPruningDateEnabled();
 		$is_limt_e = $this->plugin->settings->IsPruningLimitEnabled();
+		if (!$is_date_e && !$is_limt_e) return; // pruning disabled
 		
-		switch(true){
-			case $is_date_e && $is_limt_e:
-				$cond = 'created_on < %d ORDER BY created_on ASC LIMIT %d';
-				$args = array($max_stamp, $max_items);
-				break;
-			case $is_date_e && !$is_limt_e:
-				$cond = 'created_on < %d';
-				$args = array($max_stamp);
-				break;
-			case !$is_date_e && $is_limt_e:
-				$cond = '1 ORDER BY created_on ASC LIMIT %d';
-				$args = array($max_items);
-				break;
-			case !$is_date_e && !$is_limt_e:
-				return;
-		}
-		if(!isset($cond))return;
+		$query = new WSAL_DB_OccurrenceQuery('WSAL_DB_Occurrence');
+		$query->order[] = 'created_on ASC';
 		
-		$items = WSAL_DB_Occurrence::LoadMulti($cond, $args);
-		if(!count($items))return;
+		if ($is_date_e) $query->Where('created_on < %d', array($max_stamp));
+		if ($is_limt_e) $query->length = (int)$max_items;
 		
-		foreach($items as $item)$item->Delete();
-		do_action('wsal_prune', $items, vsprintf($cond, $args));
+		$count = $query->Count();
+		if (!$count) return; // nothing to delete
+		
+		// delete data and notify system
+		$query->Delete();
+		do_action('wsal_prune', $count, vsprintf($query->GetSql(), $query->GetArgs()));
 	}
 	
 }

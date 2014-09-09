@@ -4,7 +4,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
 		parent::__construct($plugin);
-		add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
+		if (is_admin()) {
+			add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
+			add_action('wp_ajax_AjaxRunCleanup', array($this, 'AjaxRunCleanup'));
+		}
 	}
 	
 	public function HasPluginShortcutLink(){
@@ -63,6 +66,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		die($this->GetTokenType($_REQUEST['token']));
 	}
 	
+	public function AjaxRunCleanup(){
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+		$this->_plugin->CleanUp();
+		wp_redirect($this->GetUrl());
+		exit;
+	}
+	
 	public function Render(){
 		if(!$this->_plugin->settings->CurrentUserCan('edit')){
 			wp_die( __( 'You do not have sufficient permissions to access this page.' , 'wp-security-audit-log') );
@@ -113,7 +124,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<p class="description"><?php
 								echo __('Next Scheduled Cleanup is in ', 'wp-security-audit-log');
 								echo human_time_diff(current_time('timestamp'), $next = wp_next_scheduled('wsal_cleanup'));
-								echo '<!-- ' . date('dMy H:i:s', $next) . ' -->';
+								echo '<!-- ' . date('dMy H:i:s', $next) . ' --> ';
+								echo sprintf(
+										__('(or %s)', 'wp-security-audit-log'),
+										'<a href="' . admin_url('admin-ajax.php?action=AjaxRunCleanup') . '">' . __('Run Manually', 'wp-security-audit-log') . '</a>'
+									);
 							?></p>
 						</td>
 					</tr>

@@ -70,4 +70,21 @@ class WSAL_DB_OccurrenceQuery extends WSAL_DB_Query {
 		$this->meta_where[] = $cond;
 		foreach ($args as $arg) $this->meta_args[] = $arg;
 	}
+	
+	public function Delete(){
+		// delete meta data: back up columns, remove them for DELETE and generate sql
+		$cols = $this->columns;
+		$this->columns = array('occurrence_id');
+		$tmp = new WSAL_DB_Meta();
+		$sql = 'DELETE FROM ' . $tmp->GetTable() . ' WHERE occurrence_id IN (' . $this->GetSql('select') . ')';
+		
+		// restore columns
+		$this->columns = $cols;
+		
+		// execute query
+		call_user_func(array($this->ar_cls, 'DeleteQuery'), $sql, $this->GetArgs());
+		
+		// delete occurrences
+		parent::Delete();
+	}
 }

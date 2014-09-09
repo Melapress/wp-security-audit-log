@@ -8,12 +8,12 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	}
 	
 	/**
-	 * @param WSAL_DB_Occurrence[] $events The events that were deleted.
+	 * @param int $count The number of deleted events.
 	 * @param string $query Query that selected events for deletion.
 	 */
-	public function EventPruneEvents($events, $query){
+	public function EventPruneEvents($count, $query){
 		$this->plugin->alerts->Trigger(6000, array(
-			'EventCount' => count($events),
+			'EventCount' => $count,
 			'PruneQuery' => $query,
 		));
 	}

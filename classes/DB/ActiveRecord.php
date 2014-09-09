@@ -273,6 +273,17 @@ abstract class WSAL_DB_ActiveRecord {
 	}
 	
 	/**
+	 * Delete records in DB matching a query.
+	 * @param string $query Full SQL query.
+	 * @param array $args (Optional) Query arguments.
+	 */
+	public static function DeleteQuery($query, $args = array()){
+		global $wpdb;
+		$sql = count($args) ? $wpdb->prepare($query, $args) : $query;
+		$wpdb->query($sql);
+	}
+	
+	/**
 	 * Load multiple records from DB.
 	 * @param string $cond (Optional) Load condition (eg: 'some_id = %d' ).
 	 * @param array $args (Optional) Load condition arguments (rg: array(45) ).

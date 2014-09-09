@@ -79,11 +79,11 @@ class WSAL_DB_Query {
 	/**
 	 * @return string Generated sql.
 	 */
-	public function GetSql(){
+	public function GetSql($verb = 'select'){
 		$where = $this->GetCond();
 		switch($this->GetDbType()){
 			case 'mysql':
-				return 'SELECT ' . implode(',', $this->columns)
+				return strtoupper($verb) . ' ' . implode(',', $this->columns)
 					. ' FROM ' . implode(',', $this->from)
 					. (count($this->joins) ? implode(' ', $this->where) : '')
 					. (count($where) ? (' WHERE ' . implode(' AND ', $where)) : '')
@@ -118,6 +118,9 @@ class WSAL_DB_Query {
 		return call_user_func(array($this->ar_cls, 'LoadMultiQuery'), $this->GetSql(), $this->GetArgs());
 	}
 	
+	/**
+	 * @return int Use query for counting records.
+	 */
 	public function Count(){
 		// back up columns, use COUNT as default column and generate sql
 		$cols = $this->columns;
@@ -129,5 +132,31 @@ class WSAL_DB_Query {
 		
 		// execute query and return result
 		return call_user_func(array($this->ar_cls, 'CountQuery'), $sql, $this->GetArgs());
+	}
+	
+	/**
+	 * Find occurrences matching a condition.
+	 * @param string $cond The condition.
+	 * @param array $args Condition arguments.
+	 */
+	public function Where($cond, $args){
+		$this->where[] = $cond;
+		foreach ($args as $arg) $this->args[] = $arg;
+	}
+	
+	/**
+	 * Use query for deleting records.
+	 */
+	public function Delete(){
+		// back up columns, remove them for DELETE and generate sql
+		$cols = $this->columns;
+		$this->columns = array();
+		$sql = $this->GetSql('delete');
+		
+		// restore columns
+		$this->columns = $cols;
+		
+		// execute query
+		call_user_func(array($this->ar_cls, 'DeleteQuery'), $sql, $this->GetArgs());
 	}
 }
