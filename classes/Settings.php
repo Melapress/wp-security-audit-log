@@ -382,6 +382,12 @@ class WSAL_Settings {
 		return false;
 	}
 	
+	public function GetCurrentUserRoles($baseRoles = null){
+		if ($baseRoles == null) $baseRoles = wp_get_current_user()->roles;
+		if (function_exists('is_super_admin') && is_super_admin()) $baseRoles[] = 'superadmin';
+		return $baseRoles;
+	}
+	
 	public function IsIncognito(){
 		return $this->_plugin->GetGlobalOption('hide-plugin');
 	}

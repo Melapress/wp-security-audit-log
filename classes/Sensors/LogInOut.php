@@ -18,14 +18,14 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	public function EventLogin($user_login, $user){
 		$this->plugin->alerts->Trigger(1000, array(
 			'Username' => $user_login,
-			'CurrentUserRoles' => $user->roles,
+			'CurrentUserRoles' => $this->plugin->settings->GetCurrentUserRoles($user->roles),
 		), true);
 	}
 	
 	public function EventLogout(){
 		$this->plugin->alerts->Trigger(1001, array(
 			'CurrentUserID' => $this->_current_user->ID,
-			'CurrentUserRoles' => $this->_current_user->roles,
+			'CurrentUserRoles' => $this->plugin->settings->GetCurrentUserRoles($this->_current_user->roles),
 		), true);
 	}
 	
