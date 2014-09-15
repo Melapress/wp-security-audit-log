@@ -98,7 +98,7 @@ class WSAL_ViewManager {
 				$this->views[0]->GetSafeViewName(),
 				array($this, 'RenderViewBody'),
 				$this->views[0]->GetIcon(),
-				2.5 // right after dashboard
+				'2.5' // right after dashboard
 			);
 
 			// add menu items
