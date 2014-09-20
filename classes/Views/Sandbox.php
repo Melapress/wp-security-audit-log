@@ -77,6 +77,11 @@ class DummySiteCreatorTask extends WSAL_AbstractSandboxTask {
 	}
 }
 new DummySiteCreatorTask();',
+		'Get Access Tokens' => '$settings = WpSecurityAuditLog::GetInstance()->settings;
+return array(
+	\'view\' => $settings->GetAccessTokens(\'view\'),
+	\'edit\' => $settings->GetAccessTokens(\'edit\'),
+);',
 	);
 	
 	public function HandleError($code, $message, $filename = 'unknown', $lineno = 0){

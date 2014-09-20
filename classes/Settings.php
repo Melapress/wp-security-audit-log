@@ -333,12 +333,11 @@ class WSAL_Settings {
 	}
 	
 	/**
-	 * @param integer|WP_user $user User object to check.
-	 * @param string $action Type of action, either 'view' or 'edit'.
-	 * @return boolean If user has access or not.
+	 * Returns access tokens for a particular action.
+	 * @param string $action Type of action.
+	 * @return string[] List of tokens (usernames, roles etc).
 	 */
-	public function UserCan($user, $action){
-		if(is_int($user))$user = get_userdata($user);
+	public function GetAccessTokens($action){
 		$allowed = array();
 		
 		switch($action){
@@ -362,16 +361,31 @@ class WSAL_Settings {
 				throw new Exception('Unknown action "'.$action.'".');
 		}
 		
+		if (!$this->IsRestrictAdmins()) {
+			if(is_multisite()){
+				$allowed = array_merge($allowed, get_super_admins());
+			}else{
+				$allowed[] = 'administrator';
+			}
+		}
+		
+		return array_unique($allowed);
+	}
+	
+	/**
+	 * @param integer|WP_user $user User object to check.
+	 * @param string $action Type of action, either 'view' or 'edit'.
+	 * @return boolean If user has access or not.
+	 */
+	public function UserCan($user, $action){
+		if(is_int($user))$user = get_userdata($user);
+		
+		$allowed = $this->GetAccessTokens($action);
+		
 		$check = array_merge(
 			$user->roles,
 			array($user->user_login)
 		);
-		
-		if(is_multisite()){
-			$allowed = array_merge($allowed, get_super_admins());
-		}else{
-			$allowed[] = 'administrator';
-		}
 		
 		foreach($check as $item){
 			if(in_array($item, $allowed)){
