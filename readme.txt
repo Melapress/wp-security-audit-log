@@ -131,6 +131,18 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 
 == Changelog ==
 
+= 1.2.7 (2014-09-21) =
+* New Feature
+	* New option "Restrict Plugin Access" that allows WordPress administrators to further restrict access to the plugin and the WordPress security alerts
+
+* Improvements
+	* Updated the Audit Log Viewer backend to retriev WordPress security alerts much faster and consume less resources on large websites
+	* Moved the Audit Log plugin menu entry underneath the dashboard entry for better access
+	* Several minor enhancements to the plugin to perform better on large WordPress installations
+	
+* Bug Fixes
+	* Fixed an uncaught exception with Logout Alert 1001 [support ticket](https://wordpress.org/support/topic/uncaught-exception-2)
+
 = 1.2.6 (2014-08-20) =
 * Improvements
 	* Several performance improvements and tweaks applied
