@@ -39,7 +39,7 @@ class WSAL_WidgetManager {
 					</thead>
 					<tbody><?php
 						$url = 'admin.php?page=' . $this->_plugin->views->views[0]->GetSafeViewName();
-						$fmt = array(new WSAL_Views_AuditLogList_Internal($this->_plugin), 'meta_formatter');
+						$fmt = array(new WSAL_AuditLogListView($this->_plugin), 'meta_formatter');
 						foreach($results as $entry){
 							?><tr>
 								<td><?php
