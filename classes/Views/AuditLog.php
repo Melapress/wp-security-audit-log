@@ -1,12 +1,13 @@
 <?php
 
 class WSAL_Views_AuditLog extends WSAL_AbstractView {
-	
+	/**
+	 * @var WSAL_AuditLogListView
+	 */
 	protected $_listview;
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
 		parent::__construct($plugin);
-		$this->_listview = new WSAL_AuditLogListView($plugin);
 		add_action('wp_ajax_AjaxInspector', array($this, 'AjaxInspector'));
 		add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
 		add_action('wp_ajax_AjaxSetIpp', array($this, 'AjaxSetIpp'));
@@ -35,20 +36,25 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		return 1;
 	}
 	
+	protected function GetListView(){
+		if (is_null($this->_listview)) $this->_listview = new WSAL_AuditLogListView($this->_plugin);
+		return $this->_listview;
+	}
+	
 	public function Render(){
 		if(!$this->_plugin->settings->CurrentUserCan('view')){
 			wp_die( __( 'You do not have sufficient permissions to access this page.' , 'wp-security-audit-log') );
 		}
 		
-		$this->_listview->prepare_items();
+		$this->GetListView()->prepare_items();
 		
 		?><form id="audit-log-viewer" method="post">
 			<div id="audit-log-viewer-content">
 				<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 				<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr(isset($_REQUEST['wsal-cbid']) ? $_REQUEST['wsal-cbid'] : ''); ?>" />
-				<?php do_action('wsal_auditlog_before_view', $this->_listview); ?>
-				<?php $this->_listview->display(); ?>
-				<?php do_action('wsal_auditlog_after_view', $this->_listview); ?>
+				<?php do_action('wsal_auditlog_before_view', $this->GetListView()); ?>
+				<?php $this->GetListView()->display(); ?>
+				<?php do_action('wsal_auditlog_after_view', $this->GetListView()); ?>
 			</div>
 		</form><?php
 		
@@ -131,7 +137,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		
 		$search = $_REQUEST['search'];
 		
-		foreach($this->_listview->get_sites() as $site){
+		foreach($this->GetListView()->get_sites() as $site){
 			if(stripos($site->blogname, $search) !== false)
 				$grp1[] = $site;
 			else
@@ -162,5 +168,4 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			filemtime($this->_plugin->GetBaseDir() . '/js/auditlog.js')
 		);
 	}
-	
 }

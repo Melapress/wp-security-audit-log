@@ -104,7 +104,7 @@ final class WSAL_AlertManager {
 					$this->Log($type, $data);
 				}elseif($_retry){
 					// this is the last attempt at loading alerts from default file
-					require_once($this->plugin->GetBaseDir() . 'defaults.php');
+					$this->plugin->LoadDefaults();
 					return $this->_CommitItem($type, $data, $cond, false);
 				}else{
 					// in general this shouldn't happen, but it could, so we handle it here :)

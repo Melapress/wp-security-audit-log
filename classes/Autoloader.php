@@ -32,7 +32,9 @@ class WSAL_Autoloader {
 				if(strstr($class, $prefix) !== false){
 					$file = $path . str_replace('_', DIRECTORY_SEPARATOR, substr($class, strlen($prefix))) . '.php';
 					if(file_exists($file)){
+						$s = $this->plugin->profiler->Start('Autoload ' . basename($file));
 						require_once($file);
+						$s->Stop();
 						return class_exists($class, false) || interface_exists($class, false);
 					}
 				}

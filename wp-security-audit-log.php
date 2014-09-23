@@ -79,6 +79,12 @@ class WpSecurityAuditLog {
 	public $licensing;
 	
 	/**
+	 * Simple profiler.
+	 * @var WSAL_SimpleProfiler
+	 */
+	public $profiler;
+	
+	/**
 	 * Contains a list of cleanup callbacks.
 	 * @var callable[]
 	 */
@@ -104,6 +110,10 @@ class WpSecurityAuditLog {
 	 * Initialize plugin.
 	 */
 	public function __construct(){
+		// profiler has to be loaded manually
+		require_once('classes/SimpleProfiler.php');
+		$this->profiler = new WSAL_SimpleProfiler();
+		
 		// load autoloader and register base paths
 		require_once('classes/Autoloader.php');
 		$this->autoloader = new WSAL_Autoloader($this);
@@ -138,7 +148,9 @@ class WpSecurityAuditLog {
 		load_plugin_textdomain('wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/');
 
 		// tell the world we've just finished loading
+		$s = $this->profiler->Start('WSAL Init Hook');
 		do_action('wsal_init', $this);
+		$s->Stop();
 	}
 	
 	/**
@@ -357,8 +369,10 @@ class WpSecurityAuditLog {
 	 * Run cleanup routines.
 	 */
 	public function CleanUp(){
+		$s = $this->profiler->Start('Clean Up');
 		//foreach($this->_cleanup_hooks as $hook)
 		//	call_user_func($hook);
+		$s->Stop();
 	}
 	
 	/**
@@ -418,16 +432,32 @@ class WpSecurityAuditLog {
 		return plugin_basename(__FILE__);
 	}
 	
+	/**
+	 * Load default configuration / data.
+	 */
+	public function LoadDefaults(){
+		$s = $this->profiler->Start('Load Defaults');
+		require_once('defaults.php');
+		$s->Stop();
+	}
+	
 	// </editor-fold>
 }
 
+// Profile WSAL load time
+$s = WpSecurityAuditLog::GetInstance()->profiler->Start('WSAL Init');
+
+// Begin load sequence
 add_action('plugins_loaded', array(WpSecurityAuditLog::GetInstance(), 'Load'));
 
 // Load extra files
-require_once('defaults.php');
+WpSecurityAuditLog::GetInstance()->LoadDefaults();
 
 // Start listening to events
 WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
+
+// End profile snapshot
+$s->Stop();
 
 // Create & Run the plugin
 return WpSecurityAuditLog::GetInstance();

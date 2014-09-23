@@ -82,6 +82,7 @@ return array(
 	\'view\' => $settings->GetAccessTokens(\'view\'),
 	\'edit\' => $settings->GetAccessTokens(\'edit\'),
 );',
+		'Show Profiler Results' => 'return array_map(\'strval\', WpSecurityAuditLog::GetInstance()->profiler->GetItems());'
 	);
 	
 	public function HandleError($code, $message, $filename = 'unknown', $lineno = 0){
