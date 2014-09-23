@@ -357,8 +357,8 @@ class WpSecurityAuditLog {
 	 * Run cleanup routines.
 	 */
 	public function CleanUp(){
-		foreach($this->_cleanup_hooks as $hook)
-			call_user_func($hook);
+		//foreach($this->_cleanup_hooks as $hook)
+		//	call_user_func($hook);
 	}
 	
 	/**
