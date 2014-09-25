@@ -108,6 +108,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$old = (int)$_REQUEST['logcount'];
 		$max = 40; // 40*500msec = 20sec
 		
+		session_write_close(); // fixes session lock issue
+		
 		do{
 			$new = WSAL_DB_Occurrence::Count();
 			usleep(500000); // 500msec
