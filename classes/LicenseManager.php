@@ -44,7 +44,7 @@ class WSAL_LicenseManager {
 		);
 	}
 	
-	public function ActivateLicense($name, $license){
+	public function ActivateLicense($name, $license, $sites = null){
 		$this->plugin->settings->SetLicenseKey($name, $license);
 
 		$api_params = array(
@@ -54,27 +54,33 @@ class WSAL_LicenseManager {
 			'url'       => urlencode(home_url())
 		);
 		
-		$response = wp_remote_get(
-			add_query_arg($api_params, $this->GetStoreUrl()),
-			array('timeout' => 15, 'sslverify' => false)
-		);
-
-		if (is_wp_error($response)) {
-			$this->plugin->settings->SetLicenseErrors($name, 'Invalid Licensing Server Response: ' . $response->get_error_message());
-			return false;
-		}
-
-		$license_data = json_decode( wp_remote_retrieve_body( $response ) );
+		$sites = is_null($sites) && function_exists('get_blog_count') ? get_blog_count() : 1;
 		
-		if(is_object($license_data)){
-			$this->plugin->settings->SetLicenseStatus($name, $license_data->license);
-			if($license_data->license !== 'valid'){
-				$error = 'License Not Valid';
-				if (isset($license_data->error)) $error .= ': ' . ucfirst(str_replace('_', ' ', $license_data->error));
-				$this->plugin->settings->SetLicenseErrors($name, $error);
+		for($i = 0; $i < $sites; $i++){
+			$response = wp_remote_get(
+				add_query_arg($api_params, $this->GetStoreUrl()),
+				array('timeout' => 15, 'sslverify' => false)
+			);
+
+			if (is_wp_error($response)) {
+				$this->plugin->settings->SetLicenseErrors($name, 'Invalid Licensing Server Response: ' . $response->get_error_message());
+				return false;
 			}
-		}else{
-			$this->plugin->settings->SetLicenseErrors($name, 'Unexpected Licensing Server Response');
+
+			$license_data = json_decode( wp_remote_retrieve_body( $response ) );
+
+			if(is_object($license_data)){
+				$this->plugin->settings->SetLicenseStatus($name, $license_data->license);
+				if($license_data->license !== 'valid'){
+					$error = 'License Not Valid';
+					if (isset($license_data->error)) $error .= ': ' . ucfirst(str_replace('_', ' ', $license_data->error));
+					$this->plugin->settings->SetLicenseErrors($name, $error);
+					return false;
+				}
+			}else{
+				$this->plugin->settings->SetLicenseErrors($name, 'Unexpected Licensing Server Response');
+				return false;
+			}
 		}
 		
 		return true;
