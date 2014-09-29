@@ -44,19 +44,29 @@ class WSAL_LicenseManager {
 		);
 	}
 	
-	public function ActivateLicense($name, $license, $sites = null){
+	protected function GetBlogIds(){
+		global $wpdb;
+		$sql = 'SELECT blog_id FROM ' . $wpdb->blogs;
+		return $wpdb->get_col($sql);
+	}
+	
+	public function ActivateLicense($name, $license){
 		$this->plugin->settings->SetLicenseKey($name, $license);
 
 		$api_params = array(
 			'edd_action'=> 'activate_license',
 			'license' 	=> urlencode($license),
 			'item_name' => urlencode($this->plugins[$name]['PluginData']['Name']),
-			'url'       => urlencode(home_url())
+			'url'       => urlencode(home_url()),
 		);
 		
-		$sites = is_null($sites) && function_exists('get_blog_count') ? get_blog_count() : 1;
+		$blog_ids = $this->plugin->IsMultisite() ? $this->GetBlogIds() : array(1);
 		
-		for($i = 0; $i < $sites; $i++){
+		foreach($blog_ids as $blog_id){
+			
+			if($this->plugin->IsMultisite())
+				$api_params['url'] = urlencode(get_home_url($blog_id));
+			
 			$response = wp_remote_get(
 				add_query_arg($api_params, $this->GetStoreUrl()),
 				array('timeout' => 15, 'sslverify' => false)
