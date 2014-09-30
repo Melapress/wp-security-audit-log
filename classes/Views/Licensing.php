@@ -49,7 +49,7 @@ class WSAL_Views_Licensing extends WSAL_AbstractView {
 					<tr><th>Plugin</th><th>License</th><th></th></tr>
 				</thead><tbody>
 					<?php $counter = 0; ?>
-					<?php foreach($this->_plugin->licensing->plugins as $name => $plugin){ ?>
+					<?php foreach($this->_plugin->licensing->Plugins() as $name => $plugin){ ?>
 						<?php $licenseKey = trim($this->_plugin->settings->GetLicenseKey($name)); ?>
 						<?php $licenseStatus = trim($this->_plugin->settings->GetLicenseStatus($name)); ?>
 						<?php $licenseErrors = trim($this->_plugin->settings->GetLicenseErrors($name)); ?>

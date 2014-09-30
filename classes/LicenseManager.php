@@ -11,7 +11,7 @@ class WSAL_LicenseManager {
 	 */
 	protected $plugin;
 	
-	public $plugins = array();
+	protected $plugins = array();
 	
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->plugin = $plugin;
@@ -25,23 +25,31 @@ class WSAL_LicenseManager {
 		return count($this->plugins);
 	}
 	
+	public function Plugins(){
+		foreach($this->plugins as $name => $pluginFile){
+			if(is_string($pluginFile)){
+				$pluginData = get_plugin_data($pluginFile);
+				$this->plugins[$name] = array(
+					'PluginData' => $pluginData,
+					'EddUpdater' => new EDD_SL_Plugin_Updater(
+						$this->GetStoreUrl(),
+						$pluginFile,
+						array( 
+							'license' 	=> $this->plugin->settings->GetLicenseKey($name),
+							'item_name' => $pluginData['Name'],
+							'author' 	=> $pluginData['Author'],
+							'version' 	=> $pluginData['Version'],
+						)
+					),
+				);
+			}
+		}
+		return $this->plugins;
+	}
+	
 	public function AddPremiumPlugin($pluginFile){
 		$name = sanitize_key($pluginFile);
-		$pluginData = get_plugin_data($pluginFile);
-		
-		$this->plugins[$name] = array(
-			'PluginData' => $pluginData,
-			'EddUpdater' => new EDD_SL_Plugin_Updater(
-				$this->GetStoreUrl(),
-				$pluginFile,
-				array( 
-					'license' 	=> $this->plugin->settings->GetLicenseKey($name),
-					'item_name' => $pluginData['Name'],
-					'author' 	=> $pluginData['Author'],
-					'version' 	=> $pluginData['Version'],
-				)
-			),
-		);
+		$this->plugins[$name] = $pluginFile;
 	}
 	
 	protected function GetBlogIds(){
@@ -53,10 +61,11 @@ class WSAL_LicenseManager {
 	public function ActivateLicense($name, $license){
 		$this->plugin->settings->SetLicenseKey($name, $license);
 
+		$plugin = $this->Plugins();
 		$api_params = array(
 			'edd_action'=> 'activate_license',
 			'license' 	=> urlencode($license),
-			'item_name' => urlencode($this->plugins[$name]['PluginData']['Name']),
+			'item_name' => urlencode($plugin[$name]['PluginData']['Name']),
 			'url'       => urlencode(home_url()),
 		);
 		
