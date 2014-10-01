@@ -61,11 +61,11 @@ class WSAL_LicenseManager {
 	public function ActivateLicense($name, $license){
 		$this->plugin->settings->SetLicenseKey($name, $license);
 
-		$plugin = $this->Plugins();
+		$plugins = $this->Plugins();
 		$api_params = array(
 			'edd_action'=> 'activate_license',
 			'license' 	=> urlencode($license),
-			'item_name' => urlencode($plugin[$name]['PluginData']['Name']),
+			'item_name' => urlencode($plugins[$name]['PluginData']['Name']),
 			'url'       => urlencode(home_url()),
 		);
 		
@@ -83,10 +83,11 @@ class WSAL_LicenseManager {
 
 			if (is_wp_error($response)) {
 				$this->plugin->settings->SetLicenseErrors($name, 'Invalid Licensing Server Response: ' . $response->get_error_message());
+				$this->DeactivateLicense($name, $license);
 				return false;
 			}
 
-			$license_data = json_decode( wp_remote_retrieve_body( $response ) );
+			$license_data = json_decode(wp_remote_retrieve_body($response));
 
 			if(is_object($license_data)){
 				$this->plugin->settings->SetLicenseStatus($name, $license_data->license);
@@ -94,10 +95,12 @@ class WSAL_LicenseManager {
 					$error = 'License Not Valid';
 					if (isset($license_data->error)) $error .= ': ' . ucfirst(str_replace('_', ' ', $license_data->error));
 					$this->plugin->settings->SetLicenseErrors($name, $error);
+					$this->DeactivateLicense($name, $license);
 					return false;
 				}
 			}else{
 				$this->plugin->settings->SetLicenseErrors($name, 'Unexpected Licensing Server Response');
+				$this->DeactivateLicense($name, $license);
 				return false;
 			}
 		}
@@ -105,7 +108,35 @@ class WSAL_LicenseManager {
 		return true;
 	}
 	
-	public function DeactivateLicense($name){
+	public function DeactivateLicense($name, $license = null){
 		$this->plugin->settings->SetLicenseStatus($name, '');
+		
+		// deactivate it on the server (if license was given)
+		if(!is_null($license)){
+			$plugins = $this->Plugins();
+			$api_params = array(
+				'edd_action'=> 'deactivate_license',
+				'license' 	=> urlencode($license),
+				'item_name' => urlencode($plugins[$name]['PluginData']['Name']),
+				'url'       => urlencode(home_url()),
+			);
+
+			$blog_ids = $this->plugin->IsMultisite() ? $this->GetBlogIds() : array(1);
+
+			foreach($blog_ids as $blog_id){
+
+				if($this->plugin->IsMultisite())
+					$api_params['url'] = urlencode(get_home_url($blog_id));
+
+				$response = wp_remote_get(
+					add_query_arg($api_params, $this->GetStoreUrl()),
+					array('timeout' => 15, 'sslverify' => false)
+				);
+
+				if (is_wp_error($response)) return false;
+
+				wp_remote_retrieve_body($response);
+			}
+		}
 	}
 }
