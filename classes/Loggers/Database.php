@@ -23,15 +23,15 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	
 	public function CleanUp() {
 		$now = current_time('timestamp');
-		$max_count = $this->plugin->settings->GetPruningLimit();
 		$max_sdate = $this->plugin->settings->GetPruningDate();
-		$max_stamp = $now - (strtotime($max_sdate) - $now);
-		$cnt_items = WSAL_DB_Occurrence::Count();
-		if($cnt_items == $max_count)return;
-		$max_items = max(($cnt_items - $max_count) + 1, 0);
-		
+		$max_count = $this->plugin->settings->GetPruningLimit();
 		$is_date_e = $this->plugin->settings->IsPruningDateEnabled();
 		$is_limt_e = $this->plugin->settings->IsPruningLimitEnabled();
+		
+		$max_stamp = $now - (strtotime($max_sdate) - $now);
+		$cnt_items = WSAL_DB_Occurrence::Count();
+		$max_items = max(($cnt_items - $max_count) + 1, 0);
+		
 		if (!$is_date_e && !$is_limt_e) return; // pruning disabled
 		
 		$query = new WSAL_DB_OccurrenceQuery('WSAL_DB_Occurrence');
@@ -43,8 +43,17 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$count = $query->Count();
 		if (!$count) return; // nothing to delete
 		
-		// delete data and notify system
+		// delete data
 		$query->Delete();
+		
+		// keep track of what we're doing
+		$this->plugin->alerts->Trigger(0003, array(
+				'Message' => 'Running system cleanup.',
+				'Query SQL' => $query->GetSql(),
+				'Query Args' => $query->GetArgs(),
+			), true);
+		
+		// notify system
 		do_action('wsal_prune', $count, vsprintf($query->GetSql(), $query->GetArgs()));
 	}
 	
