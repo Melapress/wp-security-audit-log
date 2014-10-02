@@ -370,8 +370,8 @@ class WpSecurityAuditLog {
 	 */
 	public function CleanUp(){
 		$s = $this->profiler->Start('Clean Up');
-		//foreach($this->_cleanup_hooks as $hook)
-		//	call_user_func($hook);
+		foreach($this->_cleanup_hooks as $hook)
+			call_user_func($hook);
 		$s->Stop();
 	}
 	
