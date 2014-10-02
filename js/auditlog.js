@@ -1,6 +1,25 @@
 var WsalData;
 
-window['WsalAuditLogRefreshed'] = function(){};
+window['WsalAuditLogRefreshed'] = function(){
+	// fix pagination links causing form params to get lost
+	jQuery('span.pagination-links a').click(function(ev){
+		ev.preventDefault();
+		var deparam = function(url){
+			var obj = {};
+			var pairs = url.split('&');
+			for(var i in pairs){
+				var split = pairs[i].split('=');
+				obj[decodeURIComponent(split[0])] = decodeURIComponent(split[1]);
+			}
+			return obj;
+		};
+		var paged = deparam(this.href).paged;
+		if (typeof paged === 'undefined') paged = 1;
+		jQuery('#audit-log-viewer').append(
+			jQuery('<input type="hidden" name="paged"/>').val(paged)
+		).submit();
+	});
+};
 
 function WsalAuditLogInit(_WsalData){
 	WsalData = _WsalData;
@@ -60,6 +79,7 @@ function WsalSsasInit(){
 	SsasInps.click(function(){
 		jQuery(this).select();
 	});
+	window['WsalAuditLogRefreshed']();
 	SsasInps.keyup(function(){
 		var SsasInp = jQuery(this);
 		var SsasDiv = SsasInp.next();
