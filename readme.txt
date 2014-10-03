@@ -200,7 +200,7 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
   * Italian translation available thanks to [Leonardo Musumeci](http://leonardomusumeci.net/)
 	
 * Improvements
-  * Added a warning to developer options
+  * Added a warning for developer options
   * "Hidden" developer options from default settings; user has to click link to access developer settings
   * Backtrace logging now made optional from a developer setting
 	
