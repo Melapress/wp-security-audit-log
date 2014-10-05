@@ -30,8 +30,7 @@ class WSAL_LicenseManager {
 	}
 	
 	protected function GetPluginData($pluginFile, $license){
-		//$pluginData = get_plugin_data($pluginFile);
-		
+		// A hack since get_plugin_data() is not available now
 		$pluginData = get_file_data($pluginFile, array(
 				'Name' => 'Plugin Name',
 				'PluginURI' => 'Plugin URI',
@@ -42,27 +41,27 @@ class WSAL_LicenseManager {
 				'DomainPath' => 'Domain Path',
 			), 'plugin' );
 		
+		$pluginUpdater = new EDD_SL_Plugin_Updater(
+			$this->GetStoreUrl(),
+			$pluginFile,
+			array( 
+				'license' 	=> $license,
+				'item_name' => $pluginData['Name'],
+				'author' 	=> $pluginData['Author'],
+				'version' 	=> $pluginData['Version'],
+			)
+		);
+		
 		return array(
 			'PluginData' => $pluginData,
-			'EddUpdater' => new EDD_SL_Plugin_Updater(
-				$this->GetStoreUrl(),
-				$pluginFile,
-				array( 
-					'license' 	=> $license,
-					'item_name' => $pluginData['Name'],
-					'author' 	=> $pluginData['Author'],
-					'version' 	=> $pluginData['Version'],
-				)
-			),
+			'EddUpdater' => $pluginUpdater,
 		);
 	}
 	
 	public function AddPremiumPlugin($pluginFile){
-		//if(is_admin()){ // TODO enable this for performance reasons?
 		$name = sanitize_key($pluginFile);
 		$license = $this->plugin->settings->GetLicenseKey($name);
 		$this->plugins[$name] = $this->GetPluginData($pluginFile, $license);
-		//}
 	}
 	
 	protected function GetBlogIds(){
