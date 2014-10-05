@@ -15,10 +15,11 @@ class WSAL_LicenseManager {
 	
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->plugin = $plugin;
+		add_action('plugins_loaded', array($this, 'LoadPlugins'));
 	}
 	
 	protected function GetStoreUrl(){
-		return 'http://wpwhitesecurity.com/';
+		return 'http://www.wpwhitesecurity.com/';
 	}
 	
 	public function CountPlugins(){
@@ -27,6 +28,11 @@ class WSAL_LicenseManager {
 	
 	public function Plugins(){
 		return $this->plugins;
+	}
+	
+	public function LoadPlugins(){
+		foreach(apply_filters('wsal_register', array()) as $pluginFile)
+			$this->AddPremiumPlugin($pluginFile);
 	}
 	
 	protected function GetPluginData($pluginFile, $license){
