@@ -26,30 +26,43 @@ class WSAL_LicenseManager {
 	}
 	
 	public function Plugins(){
-		foreach($this->plugins as $name => $pluginFile){
-			if(is_string($pluginFile)){
-				$pluginData = get_plugin_data($pluginFile);
-				$this->plugins[$name] = array(
-					'PluginData' => $pluginData,
-					'EddUpdater' => new EDD_SL_Plugin_Updater(
-						$this->GetStoreUrl(),
-						$pluginFile,
-						array( 
-							'license' 	=> $this->plugin->settings->GetLicenseKey($name),
-							'item_name' => $pluginData['Name'],
-							'author' 	=> $pluginData['Author'],
-							'version' 	=> $pluginData['Version'],
-						)
-					),
-				);
-			}
-		}
 		return $this->plugins;
 	}
 	
+	protected function GetPluginData($pluginFile, $license){
+		//$pluginData = get_plugin_data($pluginFile);
+		
+		$pluginData = get_file_data($pluginFile, array(
+				'Name' => 'Plugin Name',
+				'PluginURI' => 'Plugin URI',
+				'Version' => 'Version',
+				'Description' => 'Description',
+				'Author' => 'Author',
+				'TextDomain' => 'Text Domain',
+				'DomainPath' => 'Domain Path',
+			), 'plugin' );
+		
+		return array(
+			'PluginData' => $pluginData,
+			'EddUpdater' => new EDD_SL_Plugin_Updater(
+				$this->GetStoreUrl(),
+				$pluginFile,
+				array( 
+					'license' 	=> $license,
+					'item_name' => $pluginData['Name'],
+					'author' 	=> $pluginData['Author'],
+					'version' 	=> $pluginData['Version'],
+				)
+			),
+		);
+	}
+	
 	public function AddPremiumPlugin($pluginFile){
+		//if(is_admin()){ // TODO enable this for performance reasons?
 		$name = sanitize_key($pluginFile);
-		$this->plugins[$name] = $pluginFile;
+		$license = $this->plugin->settings->GetLicenseKey($name);
+		$this->plugins[$name] = $this->GetPluginData($pluginFile, $license);
+		//}
 	}
 	
 	protected function GetBlogIds(){

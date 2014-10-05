@@ -1,2 +1,12 @@
-/nbproject/private/
-img/Thumbs.db
+# Netbeans
+/nbproject/
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Log fils
+*.log
