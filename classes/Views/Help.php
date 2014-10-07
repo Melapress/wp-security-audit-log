@@ -22,7 +22,6 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		?><div class="metabox-holder" style="position: relative;">
 		
 			<div class="postbox" style="margin-right: 270px;">
-				<h3 class="hndl"><span><?php _e('Help', 'wp-security-audit-log'); ?></span></h3>
 				<div class="inside">
 					<div class="activity-block">
 						<h2><?php _e('Plugin Support', 'wp-security-audit-log'); ?></h2>
