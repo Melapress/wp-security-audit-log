@@ -32,6 +32,54 @@ abstract class WSAL_AbstractView {
 		if(!isset($wp_version))
 			$wp_version = get_bloginfo('version');
 		$this->_wpversion = floatval($wp_version);
+		
+		// handle admin notices
+		add_action('wp_ajax_AjaxDismissNotice', array($this, 'AjaxDismissNotice'));
+	}
+	
+	protected static $AllowedNoticeNames = array();
+	
+	/**
+	 * Dismiss an admin notice through ajax.
+	 * @internal
+	 */
+	public function AjaxDismissNotice(){
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+		
+		if(!isset($_REQUEST['notice']))
+			die('Notice name expected as "notice" parameter.');
+		
+		$this->DismissNotice($_REQUEST['notice']);
+	}
+	
+	/**
+	 * @param string $name Name of notice.
+	 * @return boolean Whether notice got dismissed or not.
+	 */
+	public function IsNoticeDismissed($name){
+		$user_id = get_current_user_id();
+		$meta_key = 'wsal-notice-' . $name;
+		self::$AllowedNoticeNames[] = $name;
+		return !!get_user_meta($user_id, $meta_key, true);
+	}
+	
+	/**
+	 * @param string $name Name of notice to dismiss.
+	 */
+	public function DismissNotice($name){
+		$user_id = get_current_user_id();
+		$meta_key = 'wsal-notice-' . $name;
+		$old_value = get_user_meta($user_id, $meta_key, true);
+		if (in_array($name, self::$AllowedNoticeNames) || $old_value === '0')
+			add_user_meta($user_id, $meta_key, '1', true);
+	}
+	
+	/**
+	 * @param string $name Makes this notice available.
+	 */
+	public function RegisterNotice($name){
+		self::$AllowedNoticeNames[] = $name;
 	}
 	
 	/**

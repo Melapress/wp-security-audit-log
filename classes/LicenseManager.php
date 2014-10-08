@@ -65,7 +65,7 @@ class WSAL_LicenseManager {
 	}
 	
 	public function AddPremiumPlugin($pluginFile){
-		$name = sanitize_key($pluginFile);
+		$name = sanitize_key(basename($pluginFile));
 		$license = $this->plugin->settings->GetLicenseKey($name);
 		$this->plugins[$name] = $this->GetPluginData($pluginFile, $license);
 	}
@@ -124,6 +124,10 @@ class WSAL_LicenseManager {
 		}
 		
 		return true;
+	}
+	
+	public function IsLicenseValid($name){
+		return trim(strtolower($this->plugin->settings->GetLicenseStatus($name))) === 'valid';
 	}
 	
 	public function DeactivateLicense($name, $license = null){

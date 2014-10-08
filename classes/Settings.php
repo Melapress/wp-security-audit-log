@@ -416,6 +416,7 @@ class WSAL_Settings {
 	
 	public function GetLicense($name){
 		$data = $this->GetLicenses();
+		$name = sanitize_key(basename($name));
 		return isset($data[$name]) ? $data[$name] : array();
 	}
 	
