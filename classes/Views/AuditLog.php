@@ -19,7 +19,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	
 	public function AdminNoticesNotificationsExtension() {
 		$NotificationExtensionInstalled = $this->_plugin->licensing->IsLicenseValid('wsal-notifications-extension.php');
-		if(!$this->IsNoticeDismissed('notifications-extension') && !$NotificationExtensionInstalled){
+		$IsCurrentView = $this->_plugin->views->GetActiveView() == $this;
+		if($IsCurrentView && !$this->IsNoticeDismissed('notifications-extension') && !$NotificationExtensionInstalled){
 			?><div class="updated" data-notice-name="notifications-extension">
 				<p><?php _e('Get notified instantly via email of important changes on your WordPress', 'wp-security-audit-log'); ?></p>
 				<p>
