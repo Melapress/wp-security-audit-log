@@ -133,17 +133,3 @@ function WsalSsasChange(value){
 	jQuery('#wsal-cbid').val(value);
 	jQuery('#audit-log-viewer').submit();
 }
-
-jQuery(document).ready(function(){
-	jQuery('a.wsal-dismiss-notification').click(function(){
-		var nfe = jQuery(this).parents('div:first');
-		var nfn = nfe.attr('data-notice-name');
-		jQuery.ajax({
-			type: 'POST',
-			url: WsalData.ajaxurl,
-			async: false,
-			data: { action: 'AjaxDismissNotice', notice: nfn }
-		});
-		nfe.fadeOut();
-	});
-});

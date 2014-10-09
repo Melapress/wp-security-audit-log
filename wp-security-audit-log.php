@@ -134,14 +134,38 @@ class WpSecurityAuditLog {
 		// listen for cleanup event
 		add_action('wsal_cleanup', array($this, 'CleanUp'));
 		
+		// render wsal header
+		add_action('admin_enqueue_scripts', array($this, 'RenderHeader'));
+		
+		// render wsal footer
+		add_action('admin_footer', array($this, 'RenderFooter'));
+		
 		// hide plugin
 		if($this->settings->IsIncognito())
 			add_action('admin_head', array($this, 'HidePlugin'));
 	}
 	
 	/**
-	 * Load the rest of the system.
-	 * @internal
+	 * @internal Render plugin stuff in page header.
+	 */
+	public function RenderHeader(){
+		// common.css?
+	}
+	
+	/**
+	 * @internal Render plugin stuff in page footer.
+	 */
+	public function RenderFooter(){
+		wp_enqueue_script(
+			'wsal-common',
+			$this->GetBaseUrl() . '/js/common.js',
+			array('jquery'),
+			filemtime($this->GetBaseDir() . '/js/common.js')
+		);
+	}
+	
+	/**
+	 * @internal Load the rest of the system.
 	 */
 	public function Load(){
 		// load translations
