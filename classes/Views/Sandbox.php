@@ -82,7 +82,8 @@ return array(
 	\'view\' => $settings->GetAccessTokens(\'view\'),
 	\'edit\' => $settings->GetAccessTokens(\'edit\'),
 );',
-		'Show Profiler Results' => 'return array_map(\'strval\', WpSecurityAuditLog::GetInstance()->profiler->GetItems());'
+		'Show Profiler Results' => 'return array_map(\'strval\', WpSecurityAuditLog::GetInstance()->profiler->GetItems());',
+		'Reset Notices' => 'foreach (WSAL_AbstractView::$AllowedNoticeNames as $name) delete_user_meta(get_current_user_id(), "wsal-notice-$name");',
 	);
 	
 	public function HandleError($code, $message, $filename = 'unknown', $lineno = 0){
