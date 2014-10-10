@@ -37,7 +37,7 @@ abstract class WSAL_AbstractView {
 		add_action('wp_ajax_AjaxDismissNotice', array($this, 'AjaxDismissNotice'));
 	}
 	
-	protected static $AllowedNoticeNames = array();
+	public static $AllowedNoticeNames = array();
 	
 	/**
 	 * Dismiss an admin notice through ajax.
