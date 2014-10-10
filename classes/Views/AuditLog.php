@@ -12,7 +12,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
 		add_action('wp_ajax_AjaxSetIpp', array($this, 'AjaxSetIpp'));
 		add_action('wp_ajax_AjaxSearchSite', array($this, 'AjaxSearchSite'));
-		add_action('admin_notices', array($this, 'AdminNoticesNotificationsExtension'));
+		add_action('all_admin_notices', array($this, 'AdminNoticesNotificationsExtension'));
 		
 		$this->RegisterNotice('notifications-extension');
 	}
