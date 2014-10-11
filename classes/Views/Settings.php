@@ -43,9 +43,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	
 	protected function Save(){
 		check_admin_referer('wsal-settings');
-		$this->_plugin->settings->SetPruningDateEnabled(isset($_REQUEST['PruneByDate']));
+		$this->_plugin->settings->SetPruningDateEnabled($_REQUEST['PruneBy'] == 'date');
 		$this->_plugin->settings->SetPruningDate($_REQUEST['PruningDate']);
-		$this->_plugin->settings->SetPruningLimitEnabled(isset($_REQUEST['PruneByLimit']));
+		$this->_plugin->settings->SetPruningLimitEnabled($_REQUEST['PruneBy'] == 'limit');
 		$this->_plugin->settings->SetPruningLimit($_REQUEST['PruningLimit']);
 		$this->_plugin->settings->SetWidgetsEnabled($_REQUEST['EnableDashboardWidgets']);
 		$this->_plugin->settings->SetAllowedPluginViewers(isset($_REQUEST['Viewers']) ? $_REQUEST['Viewers'] : array());
@@ -99,26 +99,34 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<td>
 							<fieldset>
 								<?php $text = __('(eg: 1 month)', 'wp-security-audit-log'); ?>
+								<?php $nbld = !($this->_plugin->settings->IsPruningDateEnabled() || $this->_plugin->settings->IsPruningLimitEnabled()); ?>
+								<label for="delete0">
+									<input type="radio" id="delete0" name="PruneBy" value="" <?php if($nbld)echo 'checked="checked"'; ?>/>
+									<?php echo __('None', 'wp-security-audit-log'); ?>
+								</label>
+							</fieldset>
+							<fieldset>
+								<?php $text = __('(eg: 1 month)', 'wp-security-audit-log'); ?>
 								<?php $nbld = $this->_plugin->settings->IsPruningDateEnabled(); ?>
 								<label for="delete1">
-									<input type="checkbox" id="delete1" name="PruneByDate" value="1" <?php if($nbld)echo 'checked="checked"'; ?>
-										   onchange="jQuery('#PruningDate').attr('readonly', !checked);"/>
+									<input type="radio" id="delete1" name="PruneBy" value="date" <?php if($nbld)echo 'checked="checked"'; ?>/>
 									<?php echo __('Delete alerts older than', 'wp-security-audit-log'); ?>
 								</label>
-								<input type="text" id="PruningDate" name="PruningDate" placeholder="<?php echo $text; ?>" <?php if(!$nbld)echo 'readonly="readonly"'; ?>
-									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"/>
+								<input type="text" id="PruningDate" name="PruningDate" placeholder="<?php echo $text; ?>"
+									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"
+									   onfocus="jQuery('#delete1').attr('checked', true);"/>
 								<span> <?php echo $text; ?></span>
 							</fieldset>
 							<fieldset>
 								<?php $text = __('(eg: 80)', 'wp-security-audit-log'); ?>
 								<?php $nbld = $this->_plugin->settings->IsPruningLimitEnabled(); ?>
 								<label for="delete2">
-									<input type="checkbox" id="delete2" name="PruneByLimit" value="1" <?php if($nbld)echo 'checked="checked"'; ?>
-										   onchange="jQuery('#PruningLimit').attr('readonly', !checked);"/>
+									<input type="radio" id="delete2" name="PruneBy" value="limit" <?php if($nbld)echo 'checked="checked"'; ?>/>
 									<?php echo __('Keep up to', 'wp-security-audit-log'); ?>
 								</label>
-								<input type="text" id="PruningLimit" name="PruningLimit" placeholder="<?php echo $text;?>" <?php if(!$nbld)echo 'readonly="readonly"'; ?>
-									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"/>
+								<input type="text" id="PruningLimit" name="PruningLimit" placeholder="<?php echo $text;?>"
+									   value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"
+									   onfocus="jQuery('#delete2').attr('checked', true);"/>
 								<?php echo __('alerts', 'wp-security-audit-log'); ?>
 								<span><?php echo $text; ?></span>
 							</fieldset>
