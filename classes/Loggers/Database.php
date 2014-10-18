@@ -9,7 +9,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	
 	public function Log($type, $data = array(), $date = null, $siteid = null, $migrated = false) {
 		// is this a php alert, and if so, are we logging such alerts?
-		if ($type < 0008 && !$this->plugin->settings->IsPhpErrorLoggingEnabled()) return;
+		if ($type < 0010 && !$this->plugin->settings->IsPhpErrorLoggingEnabled()) return;
 		
 		// create new occurrence
 		$occ = new WSAL_DB_Occurrence();
