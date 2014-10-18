@@ -8,6 +8,8 @@ class WSAL_Sensors_PhpErrors extends WSAL_AbstractSensor {
 		0001 => array(1,4,16,64,256,4096),		// errors
 		0002 => array(2,32,128,512),			// warnings
 		0003 => array(8,1024,2048,8192,16384),	// notices
+		0004 => array(),						// exceptions
+		0005 => array(),						// shutdown
 	);
 	
 	protected $_maybe_last_error = null;
