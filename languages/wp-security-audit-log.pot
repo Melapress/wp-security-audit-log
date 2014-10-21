@@ -2,15 +2,83 @@
 # This file is distributed under the same license as the WP Security Audit Log package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Security Audit Log 1.2.7\n"
+"Project-Id-Version: WP Security Audit Log 1.2.8\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/wp-security-audit-log\n"
-"POT-Creation-Date: 2014-09-26 09:43:13+00:00\n"
+"POT-Creation-Date: 2014-10-20 10:29:58+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: classes/AuditLogListView.php:29
+msgid "No events so far."
+msgstr ""
+
+#: classes/AuditLogListView.php:34
+msgid "Other"
+msgstr ""
+
+#: classes/AuditLogListView.php:41
+msgid "Show "
+msgstr ""
+
+#: classes/AuditLogListView.php:51
+msgid " Items"
+msgstr ""
+
+#: classes/AuditLogListView.php:64 classes/Views/AuditLog.php:85
+msgid "All Sites"
+msgstr ""
+
+#: classes/AuditLogListView.php:113 classes/Views/ToggleAlerts.php:69
+msgid "Code"
+msgstr ""
+
+#: classes/AuditLogListView.php:114 classes/Views/ToggleAlerts.php:70
+msgid "Type"
+msgstr ""
+
+#: classes/AuditLogListView.php:115
+msgid "Date"
+msgstr ""
+
+#: classes/AuditLogListView.php:116
+msgid "Username"
+msgstr ""
+
+#: classes/AuditLogListView.php:117
+msgid "Source IP"
+msgstr ""
+
+#: classes/AuditLogListView.php:120
+msgid "Site"
+msgstr ""
+
+#: classes/AuditLogListView.php:122
+msgid "Message"
+msgstr ""
+
+#: classes/AuditLogListView.php:151
+msgid "Click to toggle."
+msgstr ""
+
+#: classes/AuditLogListView.php:157
+msgid "Unknown error code."
+msgstr ""
+
+#: classes/AuditLogListView.php:178 classes/AuditLogListView.php:181
+msgid "Unknown"
+msgstr ""
+
+#: classes/AuditLogListView.php:182
+msgid "System"
+msgstr ""
+
+#: classes/AuditLogListView.php:195
+msgid "Alert Data Inspector"
+msgstr ""
 
 #: classes/Sensors/Content.php:326 classes/Sensors/Content.php:334
 msgid "Password Protected"
@@ -105,25 +173,25 @@ msgstr ""
 msgid "and much more&hellip;"
 msgstr ""
 
-#: classes/Views/About.php:56 classes/Views/Help.php:80
+#: classes/Views/About.php:56 classes/Views/Help.php:79
 msgid "WP Password Policy Manager"
 msgstr ""
 
-#: classes/Views/About.php:59 classes/Views/Help.php:83
+#: classes/Views/About.php:59 classes/Views/Help.php:82
 msgid ""
 "Easily configure WordPress password policies and ensure users use strong "
 "passwords with our plugin WP Password Policy Manager."
 msgstr ""
 
-#: classes/Views/About.php:61 classes/Views/Help.php:85
+#: classes/Views/About.php:61 classes/Views/Help.php:84
 msgid "Download"
 msgstr ""
 
-#: classes/Views/About.php:65 classes/Views/Help.php:89
+#: classes/Views/About.php:65 classes/Views/Help.php:88
 msgid "WP Security Audit Log in your Language!"
 msgstr ""
 
-#: classes/Views/About.php:67 classes/Views/Help.php:91
+#: classes/Views/About.php:67 classes/Views/Help.php:90
 msgid ""
 "If you are interested in translating our plugin please drop us an email on"
 msgstr ""
@@ -136,131 +204,180 @@ msgstr ""
 msgid "Professional WordPress security services provided by WP White Security"
 msgstr ""
 
-#: classes/Views/AuditLog.php:22 classes/Views/AuditLog.php:32
+#: classes/Views/AuditLog.php:25
+msgid "Get notified instantly via email of important changes on your WordPress"
+msgstr ""
+
+#: classes/Views/AuditLog.php:28
+msgid "Learn More"
+msgstr ""
+
+#: classes/Views/AuditLog.php:29
+msgid "Dismiss this notice"
+msgstr ""
+
+#: classes/Views/AuditLog.php:40 classes/Views/AuditLog.php:50
 msgid "Audit Log Viewer"
 msgstr ""
 
-#: classes/Views/AuditLog.php:46 classes/Views/Licensing.php:34
+#: classes/Views/AuditLog.php:64 classes/Views/Licensing.php:34
 #: classes/Views/Settings.php:80 classes/Views/ToggleAlerts.php:29
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: classes/Views/AuditLog.php:66
+#: classes/Views/AuditLog.php:84
 msgid "Please enter the number of alerts you would like to see on one page:"
 msgstr ""
 
-#: classes/Views/AuditLog.php:67
-msgid "All Sites"
-msgstr ""
-
-#: classes/Views/AuditLog.php:68
+#: classes/Views/AuditLog.php:86
 msgid "No Results"
 msgstr ""
 
+#: classes/Views/Extensions.php:6
+msgid "WP Security Audit Log Functionality Extensions"
+msgstr ""
+
+#: classes/Views/Extensions.php:14
+msgid "Extensions"
+msgstr ""
+
+#: classes/Views/Extensions.php:27
+msgid "Extend the functionality of your WP Security Audit Log plugin"
+msgstr ""
+
+#: classes/Views/Extensions.php:28
+msgid ""
+"Below is a list of extensions that allow you to extend the functionality of "
+"WP Security Audit Log plugin for a much better auditing and monitoring "
+"experience."
+msgstr ""
+
+#: classes/Views/Extensions.php:32
+msgid "Notifications Extension"
+msgstr ""
+
+#: classes/Views/Extensions.php:33
+msgid ""
+"Get notified instantly via email when important changes are made on your "
+"WordPress!"
+msgstr ""
+
+#: classes/Views/Extensions.php:34
+msgid ""
+"The Notifications Extension allows you to easily configure rules to receive "
+"an email when there is a change on WordPress. You do not need manually "
+"browse through the Audit Lock viewer anymore when looking for a specific "
+"change and the good thing is that you will be instantly alerted when it "
+"happens!"
+msgstr ""
+
+#: classes/Views/Extensions.php:35
+msgid "More Information"
+msgstr ""
+
 #: classes/Views/Help.php:6 classes/Views/Help.php:14
-#: classes/Views/Help.php:25
 msgid "Help"
 msgstr ""
 
-#: classes/Views/Help.php:28
+#: classes/Views/Help.php:27
 msgid "Plugin Support"
 msgstr ""
 
-#: classes/Views/Help.php:30
+#: classes/Views/Help.php:29
 msgid ""
 "Have you encountered or noticed any issues while using WP Security Audit Log "
 "plugin?"
 msgstr ""
 
-#: classes/Views/Help.php:31
+#: classes/Views/Help.php:30
 msgid ""
 "Or you want to report something to us? Click any of the options below to "
 "post on the plugin's forum or contact our support directly."
 msgstr ""
 
-#: classes/Views/Help.php:33
+#: classes/Views/Help.php:32
 msgid "Free Support Forum"
 msgstr ""
 
-#: classes/Views/Help.php:35
+#: classes/Views/Help.php:34
 msgid "Free Support Email"
 msgstr ""
 
-#: classes/Views/Help.php:40
+#: classes/Views/Help.php:39
 msgid "Plugin Documentation"
 msgstr ""
 
-#: classes/Views/Help.php:42
+#: classes/Views/Help.php:41
 msgid ""
 "For more detailed information about WP Security Audit Log you can visit the "
 "official plugin page."
 msgstr ""
 
-#: classes/Views/Help.php:43
+#: classes/Views/Help.php:42
 msgid ""
 "You can also visit the official list of WordPress Security Alerts for more "
 "information about all of the activity you can monitor with WP Security Audit "
 "Log."
 msgstr ""
 
-#: classes/Views/Help.php:45
+#: classes/Views/Help.php:44
 msgid "Official Plugin Page"
 msgstr ""
 
-#: classes/Views/Help.php:47
+#: classes/Views/Help.php:46
 msgid "List of WordPress Security Alerts"
 msgstr ""
 
-#: classes/Views/Help.php:52
+#: classes/Views/Help.php:51
 msgid "Need Help Securing WordPress?"
 msgstr ""
 
-#: classes/Views/Help.php:54
+#: classes/Views/Help.php:53
 msgid "Is your WordPress website hackable?"
 msgstr ""
 
-#: classes/Views/Help.php:55
+#: classes/Views/Help.php:54
 msgid ""
 "If you are not sure contact our WordPress security professionals to audit "
 "your WordPress or to simply secure your WordPress website."
 msgstr ""
 
-#: classes/Views/Help.php:56
+#: classes/Views/Help.php:55
 msgid "Click on any of the below service buttons for more information."
 msgstr ""
 
-#: classes/Views/Help.php:58
+#: classes/Views/Help.php:57
 msgid "WordPress Security Hardening"
 msgstr ""
 
-#: classes/Views/Help.php:60
+#: classes/Views/Help.php:59
 msgid "WordPress Security Audit"
 msgstr ""
 
-#: classes/Views/Help.php:65
+#: classes/Views/Help.php:64
 msgid "WordPress Security Readings"
 msgstr ""
 
-#: classes/Views/Help.php:67
+#: classes/Views/Help.php:66
 msgid "New to WordPress security?"
 msgstr ""
 
-#: classes/Views/Help.php:68
+#: classes/Views/Help.php:67
 msgid "Do not know from where to start or which is the best services for you?"
 msgstr ""
 
-#: classes/Views/Help.php:69
+#: classes/Views/Help.php:68
 msgid ""
 "Visit our WordPress security blog or the WordPress Security category "
 "directly for more information and a number of tips and tricks about "
 "WordPress security."
 msgstr ""
 
-#: classes/Views/Help.php:71
+#: classes/Views/Help.php:70
 msgid "WP White Security Blog"
 msgstr ""
 
-#: classes/Views/Help.php:73
+#: classes/Views/Help.php:72
 msgid "WordPress Security Category"
 msgstr ""
 
@@ -291,11 +408,11 @@ msgid "Inactive"
 msgstr ""
 
 #: classes/Views/Sandbox.php:11 classes/Views/Sandbox.php:19
-#: classes/Views/Settings.php:264
+#: classes/Views/Settings.php:272
 msgid "Sandbox"
 msgstr ""
 
-#: classes/Views/Sandbox.php:197
+#: classes/Views/Sandbox.php:198
 msgid "Ready."
 msgstr ""
 
@@ -307,75 +424,79 @@ msgstr ""
 msgid "Security Alerts Pruning"
 msgstr ""
 
-#: classes/Views/Settings.php:101
+#: classes/Views/Settings.php:101 classes/Views/Settings.php:109
 msgid "(eg: 1 month)"
 msgstr ""
 
-#: classes/Views/Settings.php:106
-msgid "Delete alerts older than"
+#: classes/Views/Settings.php:105
+msgid "None"
 msgstr ""
 
 #: classes/Views/Settings.php:113
+msgid "Delete alerts older than"
+msgstr ""
+
+#: classes/Views/Settings.php:121
 msgid "(eg: 80)"
 msgstr ""
 
-#: classes/Views/Settings.php:118
+#: classes/Views/Settings.php:125
 msgid "Keep up to"
 msgstr ""
 
-#: classes/Views/Settings.php:122
+#: classes/Views/Settings.php:130
 msgid "alerts"
 msgstr ""
 
-#: classes/Views/Settings.php:126
+#: classes/Views/Settings.php:134
 msgid "Next Scheduled Cleanup is in "
 msgstr ""
 
-#: classes/Views/Settings.php:130
+#: classes/Views/Settings.php:138
 msgid "(or %s)"
 msgstr ""
 
-#: classes/Views/Settings.php:131
+#: classes/Views/Settings.php:139
 msgid "Run Manually"
 msgstr ""
 
-#: classes/Views/Settings.php:137
+#: classes/Views/Settings.php:145
 msgid "Alerts Dashboard Widget"
 msgstr ""
 
-#: classes/Views/Settings.php:143
+#: classes/Views/Settings.php:151
 msgid "On"
 msgstr ""
 
-#: classes/Views/Settings.php:148
+#: classes/Views/Settings.php:156
 msgid "Off"
 msgstr ""
 
-#: classes/Views/Settings.php:153
+#: classes/Views/Settings.php:161
 msgid "Display a dashboard widget with the latest %d security alerts."
 msgstr ""
 
-#: classes/Views/Settings.php:161
+#: classes/Views/Settings.php:169
 msgid "Can View Alerts"
 msgstr ""
 
-#: classes/Views/Settings.php:168
+#: classes/Views/Settings.php:176
 msgid "Users and Roles in this list can view the security alerts"
 msgstr ""
 
-#: classes/Views/Settings.php:183
+#: classes/Views/Settings.php:191
 msgid "Can Manage Plugin"
 msgstr ""
 
-#: classes/Views/Settings.php:190
+#: classes/Views/Settings.php:198
 msgid "Users and Roles in this list can manage the plugin settings"
 msgstr ""
 
-#: classes/Views/Settings.php:205
+#: classes/Views/Settings.php:213
 msgid "Restrict Plugin Access"
 msgstr ""
 
-#: classes/Views/Settings.php:213
+#: classes/Views/Settings.php:221
 msgid ""
 "By default all the administrators on this WordPress have access to manage "
 "this plugin.<br/>By enabling this option only the users specified in the two "
@@ -383,91 +504,83 @@ msgid ""
 "this plugin."
 msgstr ""
 
-#: classes/Views/Settings.php:220
+#: classes/Views/Settings.php:228
 msgid "Refresh Audit View"
 msgstr ""
 
-#: classes/Views/Settings.php:226
+#: classes/Views/Settings.php:234
 msgid "Automatic"
 msgstr ""
 
-#: classes/Views/Settings.php:228
+#: classes/Views/Settings.php:236
 msgid "Refresh Audit View as soon as there are new events."
 msgstr ""
 
-#: classes/Views/Settings.php:232
+#: classes/Views/Settings.php:240
 msgid "Manual"
 msgstr ""
 
-#: classes/Views/Settings.php:234
+#: classes/Views/Settings.php:242
 msgid "Refresh Audit View only when page is reloaded."
 msgstr ""
 
-#: classes/Views/Settings.php:240
+#: classes/Views/Settings.php:248
 msgid "Developer Options"
 msgstr ""
 
-#: classes/Views/Settings.php:248
+#: classes/Views/Settings.php:256
 msgid ""
 "Only enable these options on testing, staging and development websites. "
 "Enabling any of the settings below on LIVE websites may cause unintended "
 "side-effects including degraded performance."
 msgstr ""
 
-#: classes/Views/Settings.php:252
+#: classes/Views/Settings.php:260
 msgid "Data Inspector"
 msgstr ""
 
-#: classes/Views/Settings.php:253
+#: classes/Views/Settings.php:261
 msgid "View data logged for each triggered alert."
 msgstr ""
 
-#: classes/Views/Settings.php:256
+#: classes/Views/Settings.php:264
 msgid "PHP Errors"
 msgstr ""
 
-#: classes/Views/Settings.php:257
+#: classes/Views/Settings.php:265
 msgid "Enables sensor for alerts generated from PHP."
 msgstr ""
 
-#: classes/Views/Settings.php:260
+#: classes/Views/Settings.php:268
 msgid "Request Log"
 msgstr ""
 
-#: classes/Views/Settings.php:261
+#: classes/Views/Settings.php:269
 msgid "Enables logging request to file."
 msgstr ""
 
-#: classes/Views/Settings.php:265
+#: classes/Views/Settings.php:273
 msgid "Enables sandbox for testing PHP code."
 msgstr ""
 
-#: classes/Views/Settings.php:268
+#: classes/Views/Settings.php:276
 msgid "Backtrace"
 msgstr ""
 
-#: classes/Views/Settings.php:269
+#: classes/Views/Settings.php:277
 msgid "Log full backtrace for PHP-generated alerts."
 msgstr ""
 
-#: classes/Views/Settings.php:287
+#: classes/Views/Settings.php:295
 msgid "Hide Plugin from Plugins Page"
 msgstr ""
 
-#: classes/Views/Settings.php:293
+#: classes/Views/Settings.php:301
 msgid "Hide"
 msgstr ""
 
 #: classes/Views/ToggleAlerts.php:6 classes/Views/ToggleAlerts.php:14
 msgid "Enable/Disable Alerts"
-msgstr ""
-
-#: classes/Views/ToggleAlerts.php:69
-msgid "Code"
-msgstr ""
-
-#: classes/Views/ToggleAlerts.php:70
-msgid "Type"
 msgstr ""
 
 #: classes/Views/ToggleAlerts.php:71 classes/WidgetManager.php:38
@@ -1521,7 +1634,7 @@ msgid ""
 ">get_template_directory%"
 msgstr ""
 
-#: wp-security-audit-log.php:169
+#: wp-security-audit-log.php:193
 msgid ""
 "You are using a version of PHP that is older than %s, which is no longer "
 "supported.<br/>Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com"
