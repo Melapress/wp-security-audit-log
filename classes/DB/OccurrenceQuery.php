@@ -72,17 +72,23 @@ class WSAL_DB_OccurrenceQuery extends WSAL_DB_Query {
 	}
 	
 	public function Delete(){
-		// delete meta data: back up columns, remove them for DELETE and generate sql
-		$cols = $this->columns;
-		$this->columns = array('occurrence_id');
-		$tmp = new WSAL_DB_Meta();
-		$sql = 'DELETE FROM ' . $tmp->GetTable() . ' WHERE occurrence_id IN (' . $this->GetSql('select') . ')';
+		global $wpdb;
+		// get relevant occurrence ids
+		$occids = $wpdb->get_col($this->GetSql('select'));
 		
-		// restore columns
-		$this->columns = $cols;
-		
-		// execute query
-		call_user_func(array($this->ar_cls, 'DeleteQuery'), $sql, $this->GetArgs());
+		if (count($occids)) {
+			// delete meta data: back up columns, remove them for DELETE and generate sql
+			$cols = $this->columns;
+			$this->columns = array('occurrence_id');
+			$tmp = new WSAL_DB_Meta();
+			$sql = 'DELETE FROM ' . $tmp->GetTable() . ' WHERE occurrence_id IN (' . implode(',', $occids) . ')';
+
+			// restore columns
+			$this->columns = $cols;
+
+			// execute query
+			call_user_func(array($this->ar_cls, 'DeleteQuery'), $sql, $this->GetArgs());
+		}
 		
 		// delete occurrences
 		parent::Delete();
