@@ -24,7 +24,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			?><div class="updated" data-notice-name="notifications-extension">
 				<p><?php _e('Get notified instantly via email of important changes on your WordPress', 'wp-security-audit-log'); ?></p>
 				<p>
-					<?php $url = 'http://www.wpwhitesecurity.com/plugins-premium-extensions/email-notifications-wordpress/'; ?>
+					<?php $url = 'http://www.wpwhitesecurity.com/plugins-premium-extensions/email-notifications-wordpress/?utm_source=plugin&utm_medium=auditlogviewer&utm_campaign=notifications'; ?>
 					<a href="<?php echo esc_attr($url); ?>" target="_blank"><?php _e('Learn More', 'wp-security-audit-log'); ?></a>
 					| <a href="javascript:;" class="wsal-dismiss-notification"><?php _e('Dismiss this notice', 'wp-security-audit-log'); ?></a>
 				</p>
