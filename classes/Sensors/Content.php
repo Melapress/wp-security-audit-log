@@ -382,15 +382,25 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 	
 	protected function CheckModificationChange($oldpost, $newpost){
+		$contentChanged = $oldpost->post_content != $newpost->post_content; // TODO what about excerpts?
+		
 		if($oldpost->post_modified != $newpost->post_modified){
 			$event = 0;
 			// @see http://codex.wordpress.org/Class_Reference/WP_Query#Status_Parameters
 			switch($oldpost->post_status){ // TODO or should this be $newpost?
 				case 'draft':
-					$event = $this->GetEventTypeForPostType($newpost, 2003, 2007, 2032);
+					if($contentChanged){
+						$event = $this->GetEventTypeForPostType($newpost, 2065, 2066, 2067);
+					}else{
+						$event = $this->GetEventTypeForPostType($newpost, 2003, 2007, 2032);
+					}
 					break;
 				case 'publish':
-					$event = $this->GetEventTypeForPostType($newpost, 2002, 2006, 2031);
+					if($contentChanged){
+						$event = $this->GetEventTypeForPostType($newpost, 2065, 2066, 2067);
+					}else{
+						$event = $this->GetEventTypeForPostType($newpost, 2002, 2006, 2031);
+					}
 					break;
 			}
 			if($event){
