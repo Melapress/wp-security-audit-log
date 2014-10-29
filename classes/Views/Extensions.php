@@ -36,9 +36,10 @@ class WSAL_Views_Extensions extends WSAL_AbstractView {
 					</div>
 					
 					<div class="">
-						<h2><?php _e('Search and Filtering Extension', 'wp-security-audit-log'); ?></h2>
-						<strong><?php _e('Search for specific alerts by using a free text search or filters.', 'wp-security-audit-log'); ?></strong>
-						<p><?php _e('The Search and Filtering Extension enables you to easily search for a specific WordPress security alert through the Audit Log viewer. You can use a free text based search, i.e. by simply entering a term for which to look for. Alternatively you can use the filtering rules which allow you to filter WordPress security alerts by date, username, Alert ID and more.', 'wp-security-audit-log'); ?></p>
+						<h2><?php _e('Reporting Extension', 'wp-security-audit-log'); ?></h2>
+						<strong><?php _e('Generate User, Site and Other Types of Reports from the Audit Log.', 'wp-security-audit-log'); ?></strong>
+						<p><?php _e('The Reporting Extension allows you to generate reports to keep track and record of the productivity, and to meet any legal and regulatory compliance your business need to adhere to. Unlike other reporting plugins WSAL Reporting Extension does not have any built-in templates that restrict you to specific type of reports, you can generate any type of report using all of the available data.', 'wp-security-audit-log'); ?></p>
+						<p><a class="button" href="http://www.wpwhitesecurity.com/plugins-premium-extensions/wordpress-reports/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=reports" target="_blank"><?php _e('More Information', 'wp-security-audit-log'); ?></a></p>
 					</div>
 				</div>
 			</div>
