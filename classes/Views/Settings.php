@@ -92,6 +92,15 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr(admin_url('admin-ajax.php')); ?>" />
 			<?php wp_nonce_field('wsal-settings'); ?>
 			
+			<div id="audit-log-adverts">
+				<a href="http://www.wpwhitesecurity.com/plugins-premium-extensions/email-notifications-wordpress/?utm_source=plugin&utm_medium=settingspage&utm_campaign=notifications">
+					<img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/wordpress_email_alerts_250x250.gif" width="250" height="250" alt=""/>
+				</a>
+				<a href="http://www.wpwhitesecurity.com/plugins-premium-extensions/wordpress-reports-extension/?utm_source=plugin&utm_medium=settingspage&utm_campaign=reports">
+					<img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/reporting_04_250x250.gif" width="250" height="250" alt=""/>
+				</a>
+			</div>
+			
 			<table class="form-table">
 				<tbody>
 					<tr>
