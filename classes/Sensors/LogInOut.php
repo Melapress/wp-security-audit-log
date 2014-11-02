@@ -23,10 +23,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	}
 	
 	public function EventLogout(){
-		$this->plugin->alerts->Trigger(1001, array(
-			'CurrentUserID' => $this->_current_user->ID,
-			'CurrentUserRoles' => $this->plugin->settings->GetCurrentUserRoles($this->_current_user->roles),
-		), true);
+		if($this->_current_user->ID != 0){
+			$this->plugin->alerts->Trigger(1001, array(
+				'CurrentUserID' => $this->_current_user->ID,
+				'CurrentUserRoles' => $this->plugin->settings->GetCurrentUserRoles($this->_current_user->roles),
+			), true);
+		}
 	}
 	
 	const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins';
