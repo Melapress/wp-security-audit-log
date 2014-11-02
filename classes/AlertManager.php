@@ -24,7 +24,7 @@ final class WSAL_AlertManager {
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->plugin = $plugin;
 		foreach(glob(dirname(__FILE__) . '/Loggers/*.php') as $file)
-			$this->AddFromFile ($file);
+			$this->AddFromFile($file);
 		
 		add_action('shutdown', array($this, '_CommitPipeline'));
 	}
