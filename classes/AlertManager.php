@@ -54,6 +54,16 @@ final class WSAL_AlertManager {
 	}
 	
 	/**
+	 * Remove logger by class name.
+	 * @param string $class The class name.
+	 */
+	public function RemoveByClass($class){
+		foreach($this->_loggers as $i => $inst)
+			if(get_class($inst) == $class)
+				unset($this->_loggers[$i]);
+	}
+	
+	/**
 	 * Contains a list of alerts to trigger.
 	 * @var array
 	 */
