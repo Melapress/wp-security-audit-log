@@ -21,7 +21,8 @@
 .column-read,
 .column-type,
 .column-code,
-.column-more {
+.column-more,
+.column-data {
 	width: 70px;
 }
 
@@ -30,6 +31,10 @@
 }
 
 .column-user {
+	width: 160px;
+}
+
+.column-site {
 	width: 160px;
 }
 
