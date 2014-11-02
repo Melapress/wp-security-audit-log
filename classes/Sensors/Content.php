@@ -390,7 +390,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			switch($oldpost->post_status){ // TODO or should this be $newpost?
 				case 'draft':
 					if($contentChanged){
-						$event = $this->GetEventTypeForPostType($newpost, 2065, 2066, 2067);
+						$event = $this->GetEventTypeForPostType($newpost, 2068, 2069, 2070);
 					}else{
 						$event = $this->GetEventTypeForPostType($newpost, 2003, 2007, 2032);
 					}
