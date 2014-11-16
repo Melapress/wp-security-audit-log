@@ -117,6 +117,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
 				array(2043, E_WARNING, __('User modified a widget', 'wp-security-audit-log'), __('Modified the %WidgetName% widget in %Sidebar%', 'wp-security-audit-log')),
 				array(2044, E_CRITICAL, __('User deleted widget', 'wp-security-audit-log'), __('Deleted the %WidgetName% widget from %Sidebar%', 'wp-security-audit-log')),
 				array(2045, E_NOTICE, __('User moved widget', 'wp-security-audit-log'), __('Moved the %WidgetName% widget from %OldSidebar% to %NewSidebar%', 'wp-security-audit-log')),
+				array(2071, E_NOTICE, __('User changed widget position', 'wp-security-audit-log'), __('Moved the %WidgetName% widget from position %OldPosition% to position %NewPosition% in sidebar %Sidebar%', 'wp-security-audit-log')),
 			),
 			__('User Profiles', 'wp-security-audit-log') => array(
 				array(4000, E_CRITICAL, __('A new user was created on WordPress', 'wp-security-audit-log'), __('User %NewUserData->Username% subscribed with a role of %NewUserData->Roles%', 'wp-security-audit-log')),

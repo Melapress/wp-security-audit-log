@@ -75,6 +75,61 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 	}
 	
 	public function EventWidgetPostMove(){
+
+		//#!-- generates the event 2071
+		if(isset($_REQUEST['action'])&&($_REQUEST['action']=='widgets-order'))
+		{
+			if(isset($_REQUEST['sidebars']) && !empty($_REQUEST['sidebars'])){
+				// Get the sidebars from $_REQUEST
+				$requestSidebars = array();
+				if($_REQUEST['sidebars']){
+					foreach($_REQUEST['sidebars'] as $key => &$value){
+						if(preg_match('/^sidebar-/', $key) && !empty($value)){
+							// build the sidebars array
+							$value = explode(',', $value);
+							// Cleanup widgets' name
+							foreach($value as $k => &$widgetName){
+								$widgetName = preg_replace("/^([a-z]+-[0-9]+)+?_/i",'', $widgetName);
+							}
+							$requestSidebars[$key] = $value;
+						}
+					}
+				}
+
+				if($requestSidebars){
+					// Get the sidebars from DATABASE
+					$sidebar_widgets = wp_get_sidebars_widgets();
+
+					// Get global sidebars so we can retrieve the real name of the sidebar
+					global $wp_registered_sidebars;
+
+					// Check in each array if there's any change
+					foreach($requestSidebars as $sidebarName => $widgets){
+						if(isset($sidebar_widgets[$sidebarName])){
+							foreach($sidebar_widgets[$sidebarName] as $i => $widgetName){
+								$index = array_search($widgetName, $widgets);
+								// check to see whether or not the widget has been moved
+								if($i != $index) {
+									$sn = $sidebarName;
+									// Try to retrieve the real name of the sidebar, otherwise fall-back to id: $sidebarName
+									if($wp_registered_sidebars && isset($wp_registered_sidebars[$sidebarName])) {
+										$sn = $wp_registered_sidebars[$sidebarName]['name'];
+									}
+									$this->plugin->alerts->Trigger(2071, array(
+										'WidgetName' => $widgetName,
+										'OldPosition' => $i+1,
+										'NewPosition' => $index+1,
+										'Sidebar' => $sn,
+									));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		//#!--
+
 		if($this->_WidgetMoveData){
 			$wName = $this->_WidgetMoveData['widget'];
 			$fromSidebar = $this->_WidgetMoveData['from'];
