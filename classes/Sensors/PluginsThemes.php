@@ -8,8 +8,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		add_action('switch_theme', array($this, 'EventThemeActivated'));
 	}
 	
-	protected $old_themes;
-	protected $old_plugins;
+	protected $old_themes = array();
+	protected $old_plugins = array();
 	
 	public function EventAdminInit(){
 		$this->old_themes = wp_get_themes();
