@@ -97,7 +97,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/wordpress_email_alerts_250x250.gif" width="250" height="250" alt=""/>
 				</a>
 				<a href="http://www.wpwhitesecurity.com/plugins-premium-extensions/search-filtering-extension-wordpress/?utm_source=plugin&utm_medium=settingspage&utm_campaign=search">
-					<img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/wordpress_alerts_search_04_250x250.gif" width="250" height="250" alt=""/>
+					<img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/wordpress_alerts_search_250x250.gif" width="250" height="250" alt=""/>
 				</a>
 				<a href="http://www.wpwhitesecurity.com/plugins-premium-extensions/wordpress-reports-extension/?utm_source=plugin&utm_medium=settingspage&utm_campaign=reports">
 					<img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/reporting_04_250x250.gif" width="250" height="250" alt=""/>
