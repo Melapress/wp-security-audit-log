@@ -63,7 +63,7 @@ Refer to the complete list of [WordPress Security Audit Alerts](http://www.wpwhi
 Use the premium [WSAL Notifications Extension](http://www.wpwhitesecurity.com/plugins-premium-extensions/email-notifications-wordpress/) to configure monitoring rules and get notified via email of specific actions. For example you can setup notifications rules to be alerted via email should any WordPress user logs in to your WordPress outside office hours. The email alerts include all the details a WordPress administrator or owner might need, such as the source IP address, user, user role, date, time, details about the actual action and much more.
 
 = Use Free Text Based Searches to Search for Specific Activity on WordPress =
-<strong>The search functionality allows you to quickly find specific WordPress activity you were looking for.</strong>
+<strong>The search functionality allows you to quickly find specific WordPress activity you are looking for.</strong>
 
 It is virtually impossible to find specific WordPress activity by manually browsing through thousands of WordPress security alerts. Now you can use the premium [WSAL Search Extension](http://www.wpwhitesecurity.com/plugins-premium-extensions/search-filtering-extension/) to do free text based searches in the WordPress audit log, allowing you to easily pin point specific WordPress user, site, plugin, theme and other activity. The Search extension also has a number of built-in filters that you can use to fine tune your search results, hence allowing you to find the WordPress security alert you are looking for easily and quickly.
 
