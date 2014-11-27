@@ -40,7 +40,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$query = new WSAL_DB_OccurrenceQuery('WSAL_DB_Occurrence');
 		$query->order[] = 'created_on ASC';
 		
-		if ($is_date_e) $query->Where('created_on < %d', array($max_stamp));
+		if ($is_date_e) $query->Where('created_on < ' . intval($max_stamp), array());
 		if ($is_limt_e) $query->length = (int)$max_items;
 		
 		$count = $query->Count();
