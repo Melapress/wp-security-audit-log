@@ -316,9 +316,7 @@ class WSAL_Settings {
 		if($this->_plugin->IsMultisite()){
 			// see: https://gist.github.com/1508426/65785a15b8638d43a9905effb59e4d97319ef8f8
 			global $wpdb;
-			$crtBlogId = get_current_blog_id();
-			//$cap = ($cap < 2) ? 'wp_capabilities' : "wp_{$cap}_capabilities"; // that "wp_" was messing things up
-			$cap = ($crtBlogId < 2) ? $wpdb->prefix.'capabilities' : $wpdb->prefix."capabilities";
+			$cap = $wpdb->prefix."capabilities";
 			$sql = "SELECT DISTINCT $wpdb->users.user_login"
 				. " FROM $wpdb->users"
 				. " INNER JOIN $wpdb->usermeta ON ($wpdb->users.ID = $wpdb->usermeta.user_id )"
