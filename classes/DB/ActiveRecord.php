@@ -57,9 +57,9 @@ abstract class WSAL_DB_ActiveRecord {
 					$sql .= $key . ' DOUBLE NOT NULL,' . PHP_EOL;
 					break;
 				case is_string($copy->$key):
-					$maxlenght = $key . '_maxlength';
-					if(property_exists($class, $maxlenght)){
-						$sql .= $key . ' VARCHAR(' . intval($class::$$maxlenght) . ') NOT NULL,' . PHP_EOL;
+					$maxlength = $key . '_maxlength';
+					if(property_exists($class, $maxlength)){
+						$sql .= $key . ' VARCHAR(' . intval($class::$$maxlength) . ') NOT NULL,' . PHP_EOL;
 					}else{
 						$sql .= $key . ' TEXT NOT NULL,' . PHP_EOL;
 					}
