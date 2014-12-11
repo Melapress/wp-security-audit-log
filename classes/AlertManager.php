@@ -223,7 +223,9 @@ final class WSAL_AlertManager {
 	 */
 	protected function Log($type, $data = array()){
 		if(!isset($data['ClientIP']))
-			$data['ClientIP'] = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
+			$data['ClientIP'] = $this->plugin->settings->GetMainClientIP();
+		if(!isset($data['OtherIPs']) && $this->plugin->settings->IsMainIPFromProxy())
+			$data['OtherIPs'] = $this->plugin->settings->GetClientIPs();
 		if(!isset($data['UserAgent']))
 			$data['UserAgent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
 		if(!isset($data['Username']) && !isset($data['CurrentUserID']))

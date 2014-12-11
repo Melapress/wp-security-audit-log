@@ -177,6 +177,16 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	}
 	
 	/**
+	 * @return string IP address of request (from proxies etc).
+	 */
+	public function GetOtherIPs(){
+		$result = array();
+		$data = (array)$this->GetMetaValue('OtherIPs', array());
+		foreach ($data as $ips) foreach($ips as $ip) $result[] = $ip;
+		return array_unique($result);
+	}
+	
+	/**
 	 * @return array Array of user roles.
 	 */
 	public function GetUserRoles(){

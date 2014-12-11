@@ -9,6 +9,8 @@ class WSAL_Settings {
 	public function __construct(WpSecurityAuditLog $plugin){
 		$this->_plugin = $plugin;
 	}
+	
+	// <editor-fold desc="Developer Options">
 
 	const OPT_DEV_DATA_INSPECTOR = 'd';
 	const OPT_DEV_PHP_ERRORS     = 'p';
@@ -111,6 +113,8 @@ class WSAL_Settings {
 	public function IsBacktraceLoggingEnabled(){
 		return $this->IsDevOptionEnabled(self::OPT_DEV_BACKTRACE_LOG);
 	}
+	
+	// </editor-fold>
 
 	/**
 	 * @return boolean Whether dashboard widgets are enabled or not.
@@ -146,6 +150,8 @@ class WSAL_Settings {
 	public function GetDashboardWidgetMaxAlerts(){
 		return 5;
 	}
+	
+	// <editor-fold desc="Pruning Settings">
 
 	/**
 	 * @return int The maximum number of alerts allowable.
@@ -224,6 +230,8 @@ class WSAL_Settings {
 	public function SetRestrictAdmins($enable){
 		$this->_plugin->SetGlobalOption('restrict-admins', (bool)$enable);
 	}
+	
+	// </editor-fold>
 
 	protected $_disabled = null;
 
@@ -252,6 +260,16 @@ class WSAL_Settings {
 		$this->_plugin->SetGlobalOption('disabled-alerts', implode(',', $this->_disabled));
 	}
 
+	public function IsIncognito(){
+		return $this->_plugin->GetGlobalOption('hide-plugin');
+	}
+
+	public function SetIncognito($enabled){
+		return $this->_plugin->SetGlobalOption('hide-plugin', $enabled);
+	}
+	
+	// <editor-fold desc="Access Control">
+	
 	protected $_viewers = null;
 
 	public function SetAllowedPluginViewers($usersOrRoles){
@@ -399,14 +417,10 @@ class WSAL_Settings {
 		if (function_exists('is_super_admin') && is_super_admin()) $baseRoles[] = 'superadmin';
 		return $baseRoles;
 	}
-
-	public function IsIncognito(){
-		return $this->_plugin->GetGlobalOption('hide-plugin');
-	}
-
-	public function SetIncognito($enabled){
-		return $this->_plugin->SetGlobalOption('hide-plugin', $enabled);
-	}
+	
+	// </editor-fold>
+	
+	// <editor-fold desc="Licensing">
 
 	public function GetLicenses(){
 		return $this->_plugin->GetGlobalOption('licenses');
@@ -461,4 +475,46 @@ class WSAL_Settings {
 	public function ClearLicenses(){
 		$this->SetLicenses(array());
 	}
+	
+	// </editor-fold>
+	
+	// <editor-fold desc="Client IP Retrieval">
+	
+	public function IsMainIPFromProxy(){
+		return $this->_plugin->GetGlobalOption('use-proxy-ip');
+	}
+
+	public function SetMainIPFromProxy($enabled){
+		return $this->_plugin->SetGlobalOption('use-proxy-ip', $enabled);
+	}
+	
+	public function GetMainClientIP(){
+		$result = isset($_SERVER['REMOTE_ADDR']) && $this->ValidateIP($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+		if ($this->IsMainIPFromProxy()) {
+			// TODO the algorithm below just gets the first IP in the list...we might want to make this more intelligent somehow
+			$result = $this->GetClientIPs();
+			$result = reset($result);
+			$result = isset($result[0]) ? $result[0] : null;
+		}
+		return $result;
+	}
+	
+	public function GetClientIPs(){
+		$ips = array();
+		foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
+			if (isset($_SERVER[$key])) {
+				$ips[$key] = array();
+				foreach (explode(',', $_SERVER[$key]) as $ip)
+					if ($this->ValidateIP($ip = trim($ip)))
+						$ips[$key][] = $ip;
+			}
+		}
+		return $ips;
+	}
+	
+	protected function ValidateIP($ip){
+		return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+	}
+	
+	// </editor-fold>
 }

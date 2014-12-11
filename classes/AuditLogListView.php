@@ -183,7 +183,17 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				}
 				return $image . $uhtml . '<br/>' . $roles;
 			case 'scip':
-				return !is_null($item->GetSourceIP()) ? esc_html($item->GetSourceIP()) : '<i>unknown</i>';
+				$scip = $item->GetSourceIP();
+				$oips = $item->GetOtherIPs();
+				// if there's no IP...
+				if (is_null($scip) || $scip == '') return '<i>unknown</i>';
+				// if there's only one IP...
+				if (count($oips) < 2) return esc_html($scip);
+				// if there are many IPs...
+				$html  = esc_html($scip) . ' <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
+				foreach($oips as $ip)if($scip!=$ip)$html .= '<div>' . $ip . '</div>';
+				$html .= '</div>';
+				return $html;
 			case 'site':
 				$info = get_blog_details($item->site_id, true);
 				return !$info ? ('Unknown Site '.$item->site_id)

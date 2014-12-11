@@ -58,7 +58,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		
 		list($y, $m, $d) = explode('-', date('Y-m-d'));
 		
-		$ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
+		$ip = $this->plugin->settings->GetMainClientIP();
 		$tt1 = new WSAL_DB_Occurrence();
 		$tt2 = new WSAL_DB_Meta();
 		
