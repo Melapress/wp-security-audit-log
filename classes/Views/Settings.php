@@ -53,6 +53,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetRestrictAdmins(isset($_REQUEST['RestrictAdmins']));
 		$this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
 		$this->_plugin->settings->SetMainIPFromProxy($_REQUEST['EnableProxyIpCapture']);
+		$this->_plugin->settings->SetInternalIPsFiltering($_REQUEST['EnableIpFiltering']);
 		$this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
 		$this->_plugin->settings->ClearDevOptions();
 		if(isset($_REQUEST['DevOptions']))
