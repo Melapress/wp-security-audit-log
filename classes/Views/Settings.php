@@ -52,6 +52,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetAllowedPluginEditors(isset($_REQUEST['Editors']) ? $_REQUEST['Editors'] : array());
 		$this->_plugin->settings->SetRestrictAdmins(isset($_REQUEST['RestrictAdmins']));
 		$this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
+		$this->_plugin->settings->SetMainIPFromProxy($_REQUEST['EnableProxyIpCapture']);
 		$this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
 		$this->_plugin->settings->ClearDevOptions();
 		if(isset($_REQUEST['DevOptions']))
@@ -174,6 +175,25 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 											$this->_plugin->settings->GetDashboardWidgetMaxAlerts()
 										);
 								?></p>
+							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="pioption_on"><?php _e('Proxy IPs', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<?php $pie = $this->_plugin->settings->IsMainIPFromProxy(); ?>
+								<label for="pioption_on">
+									<input type="radio" name="EnableProxyIpCapture" id="pioption_on" style="margin-top: 2px;" <?php if($pie)echo 'checked="checked"'; ?> value="1">
+									<span><?php _e('On', 'wp-security-audit-log'); ?></span>
+								</label>
+								<span class="description"> &mdash; <?php _e('IP is read from Proxy headers (might be unreliable).', 'wp-security-audit-log'); ?></span>
+								<br/>
+								<label for="pioption_off">
+									<input type="radio" name="EnableProxyIpCapture" id="pioption_off" style="margin-top: 2px;" <?php if(!$pie)echo 'checked="checked"'; ?> value="0">
+									<span><?php _e('Off', 'wp-security-audit-log'); ?></span>
+								</label>
+								<span class="description"> &mdash; <?php _e('IP is read from your web server.', 'wp-security-audit-log'); ?></span>
 							</fieldset>
 						</td>
 					</tr>
