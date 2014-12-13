@@ -179,21 +179,22 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</td>
 					</tr>
 					<tr>
-						<th><label for="pioption_on"><?php _e('Proxy IPs', 'wp-security-audit-log'); ?></label></th>
+						<th><label for="pioption_on"><?php _e('Reverse Proxy / Firewall Options', 'wp-security-audit-log'); ?></label></th>
 						<td>
 							<fieldset>
-								<?php $pie = $this->_plugin->settings->IsMainIPFromProxy(); ?>
-								<label for="pioption_on">
-									<input type="radio" name="EnableProxyIpCapture" id="pioption_on" style="margin-top: 2px;" <?php if($pie)echo 'checked="checked"'; ?> value="1">
-									<span><?php _e('On', 'wp-security-audit-log'); ?></span>
+								<label for="EnableProxyIpCapture">
+									<input type="checkbox" name="EnableProxyIpCapture" value="1" id="EnableProxyIpCapture"<?php
+										if($this->_plugin->settings->IsMainIPFromProxy())echo ' checked="checked"';
+									?>/> <?php _e('WordPress running behind firewall or proxy', 'wp-security-audit-log'); ?>
+									<span class="description"> &mdash; <?php _e('Enable this option if your WordPress is running behind a firewall or reverse proxy. When this option is enabled the plugin will retrieve the user\'s IP address from the proxy header.', 'wp-security-audit-log'); ?></span>
 								</label>
-								<span class="description"> &mdash; <?php _e('IP is read from Proxy headers (might be unreliable).', 'wp-security-audit-log'); ?></span>
 								<br/>
-								<label for="pioption_off">
-									<input type="radio" name="EnableProxyIpCapture" id="pioption_off" style="margin-top: 2px;" <?php if(!$pie)echo 'checked="checked"'; ?> value="0">
-									<span><?php _e('Off', 'wp-security-audit-log'); ?></span>
-								</label>
-								<span class="description"> &mdash; <?php _e('IP is read from your web server.', 'wp-security-audit-log'); ?></span>
+								<label for="EnableIpFiltering">
+									<input type="checkbox" name="EnableIpFiltering" value="1" id="EnableIpFiltering"<?php
+										if($this->_plugin->settings->IsInternalIPsFiltered())echo ' checked="checked"';
+									?>/> <?php _e('Filter Internal IP Addresses', 'wp-security-audit-log'); ?>
+									<span class="description"> &mdash; <?php _e('Enable this option to filter internal IP addresses from the proxy headers.', 'wp-security-audit-log'); ?></span>
+								</label>	
 							</fieldset>
 						</td>
 					</tr>
