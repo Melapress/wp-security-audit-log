@@ -302,10 +302,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 											__('Request Log', 'wp-security-audit-log'),
 											__('Enables logging request to file.', 'wp-security-audit-log')
 										),
-										WSAL_Settings::OPT_DEV_SANDBOX_PAGE   => array(
-											__('Sandbox', 'wp-security-audit-log'),
-											__('Enables sandbox for testing PHP code.', 'wp-security-audit-log')
-										),
 										WSAL_Settings::OPT_DEV_BACKTRACE_LOG  => array(
 											__('Backtrace', 'wp-security-audit-log'),
 											__('Log full backtrace for PHP-generated alerts.', 'wp-security-audit-log')

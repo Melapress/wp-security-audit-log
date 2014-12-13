@@ -15,7 +15,6 @@ class WSAL_Settings {
 	const OPT_DEV_DATA_INSPECTOR = 'd';
 	const OPT_DEV_PHP_ERRORS     = 'p';
 	const OPT_DEV_REQUEST_LOG    = 'r';
-	const OPT_DEV_SANDBOX_PAGE   = 's';
 	const OPT_DEV_BACKTRACE_LOG  = 'b';
 
 	protected $_devoption = null;
@@ -98,13 +97,6 @@ class WSAL_Settings {
 	 */
 	public function IsRequestLoggingEnabled(){
 		return $this->IsDevOptionEnabled(self::OPT_DEV_REQUEST_LOG);
-	}
-
-	/**
-	 * @return boolean Whether PHP sandbox page is enabled or not.
-	 */
-	public function IsSandboxPageEnabled(){
-		return $this->IsDevOptionEnabled(self::OPT_DEV_SANDBOX_PAGE);
 	}
 
 	/**
