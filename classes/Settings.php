@@ -489,12 +489,15 @@ class WSAL_Settings {
 	}
 	
 	public function GetMainClientIP(){
-		$result = isset($_SERVER['REMOTE_ADDR']) && $this->ValidateIP($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+		$result = null;
 		if ($this->IsMainIPFromProxy()) {
 			// TODO the algorithm below just gets the first IP in the list...we might want to make this more intelligent somehow
 			$result = $this->GetClientIPs();
 			$result = reset($result);
 			$result = isset($result[0]) ? $result[0] : null;
+		}elseif(isset($_SERVER['REMOTE_ADDR'])){
+			$result = $this->NormalizeIP($_SERVER['REMOTE_ADDR']);
+			if (!$this->ValidateIP($result)) $result = null;
 		}
 		return $result;
 	}
@@ -505,14 +508,15 @@ class WSAL_Settings {
 			if (isset($_SERVER[$key])) {
 				$ips[$key] = array();
 				foreach (explode(',', $_SERVER[$key]) as $ip)
-					if ($this->ValidateIP($ip = trim($ip)))
+					if ($this->ValidateIP($ip = $this->NormalizeIP($ip)))
 						$ips[$key][] = $ip;
 			}
 		}
 		return $ips;
 	}
 	
-	protected function ValidateIP($ip){
+	protected function NormalizeIP($ip){
+		$ip = trim($ip);
 		if(strpos($ip, ':') !== false && strpos($ip, '[') === false){
 			// IPv4 with a port (eg: 11.22.33.44:80)
 			$ip = explode(':', $ip);
@@ -522,7 +526,10 @@ class WSAL_Settings {
 			$ip = explode(']', $ip);
 			$ip = ltrim($ip[0], '[');
 		}
-		
+		return $ip;
+	}
+	
+	protected function ValidateIP($ip){
 		$opts = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
 		if ($this->IsInternalIPsFiltered()) $opts = $opts | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
 		return filter_var($ip, FILTER_VALIDATE_IP, $opts);
