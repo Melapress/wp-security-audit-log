@@ -184,7 +184,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return $image . $uhtml . '<br/>' . $roles;
 			case 'scip':
 				$scip = $item->GetSourceIP();
-				$oips = $item->GetOtherIPs();
+				$oips = array(); //$item->GetOtherIPs();
 				// if there's no IP...
 				if (is_null($scip) || $scip == '') return '<i>unknown</i>';
 				// if there's only one IP...
