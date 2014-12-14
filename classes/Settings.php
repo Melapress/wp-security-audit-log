@@ -513,6 +513,16 @@ class WSAL_Settings {
 	}
 	
 	protected function ValidateIP($ip){
+		if(strpos($ip, ':') !== false && strpos($ip, '[') === false){
+			// IPv4 with a port (eg: 11.22.33.44:80)
+			$ip = explode(':', $ip);
+			$ip = $ip[0];
+		}else{
+			// IPv6 with a port (eg: [::1]:80)
+			$ip = explode(']', $ip);
+			$ip = ltrim($ip[0], '[');
+		}
+		
 		$opts = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
 		if ($this->IsInternalIPsFiltered()) $opts = $opts | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
 		return filter_var($ip, FILTER_VALIDATE_IP, $opts);
