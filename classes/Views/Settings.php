@@ -186,15 +186,15 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<label for="EnableProxyIpCapture">
 									<input type="checkbox" name="EnableProxyIpCapture" value="1" id="EnableProxyIpCapture"<?php
 										if($this->_plugin->settings->IsMainIPFromProxy())echo ' checked="checked"';
-									?>/> <?php _e('WordPress running behind firewall or proxy', 'wp-security-audit-log'); ?>
-									<span class="description"> &mdash; <?php _e('Enable this option if your WordPress is running behind a firewall or reverse proxy. When this option is enabled the plugin will retrieve the user\'s IP address from the proxy header.', 'wp-security-audit-log'); ?></span>
+									?>/> <?php _e('WordPress running behind firewall or proxy', 'wp-security-audit-log'); ?><br/>
+									<span class="description"><?php _e('Enable this option if your WordPress is running behind a firewall or reverse proxy. When this option is enabled the plugin will retrieve the user\'s IP address from the proxy header.', 'wp-security-audit-log'); ?></span>
 								</label>
 								<br/>
 								<label for="EnableIpFiltering">
 									<input type="checkbox" name="EnableIpFiltering" value="1" id="EnableIpFiltering"<?php
 										if($this->_plugin->settings->IsInternalIPsFiltered())echo ' checked="checked"';
-									?>/> <?php _e('Filter Internal IP Addresses', 'wp-security-audit-log'); ?>
-									<span class="description"> &mdash; <?php _e('Enable this option to filter internal IP addresses from the proxy headers.', 'wp-security-audit-log'); ?></span>
+									?>/> <?php _e('Filter Internal IP Addresses', 'wp-security-audit-log'); ?><br/>
+									<span class="description"><?php _e('Enable this option to filter internal IP addresses from the proxy headers.', 'wp-security-audit-log'); ?></span>
 								</label>	
 							</fieldset>
 						</td>
