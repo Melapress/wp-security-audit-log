@@ -9,7 +9,7 @@ Requires at least: 3.6
 Tested up to: 4.1
 Stable tag: 1.3.2
 
-Identify WordPress issues before they become a security problem by keeping an audit log of users and all of the under the hood WordPress activity.
+Identify WordPress issues before they become security problems - Keep an audit log of all users's changes and other under the hood WordPress activity.
 
 == Description ==
 **Note: This plugin requires PHP 5.3 or higher to be activated because older versions of PHP are no longer maintained by PHP themselves, which make them prone to security issues. For more information or if you need assistance with your version of PHP please get in touch with us by using our [contact form](https://www.wpwhitesecurity.com/contact-wp-white-security/).**
