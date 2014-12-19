@@ -175,6 +175,7 @@ Yes it is possible to do so with the premium [WSAL Reporting Extension](http://w
 * **Bug Fixes**
 	* Fixed a bug where site administrators where not able to view the WordPress security alerts for their sites in a WordPress multisite installation
 	* Improved some SQL queries as reported in this [support ticket](https://wordpress.org/support/topic/syntax-error-d-not-replaced?replies=10#post-6278773)	
+	* Fixed an issue with alerts pruning (when pruning was set by number of alerts the plugin was pruning all alerts)
 	
 = 1.3.1 (2014-11-27) =
 * **New WordPress Security Alerts**
