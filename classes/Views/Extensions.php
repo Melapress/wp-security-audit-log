@@ -38,7 +38,7 @@ class WSAL_Views_Extensions extends WSAL_AbstractView {
 						<h2><?php _e('Security Alerts Search Extension', 'wp-security-audit-log'); ?></h2>
 						<strong><?php _e('Automatically Search for specific WordPress user and site activity in WordPress Security Audit Log.', 'wp-security-audit-log'); ?></strong>
 						<p><?php _e('The Search Extension enables you to easily find specific WordPress activity in the Audit Log with free text based searches. Filters can also be used in conjunction with free text based searches to further narrow down and have more accurate search results.', 'wp-security-audit-log'); ?></p>
-						<p><a class="button" href="http://www.wpwhitesecurity.com/plugins-premium-extensions/search-filtering-extension-wordpress/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=search" target="_blank"><?php _e('More Information', 'wp-security-audit-log'); ?></a></p>
+						<p><a class="button" href="http://www.wpwhitesecurity.com/plugins-premium-extensions/search-filtering-extension/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=search" target="_blank"><?php _e('More Information', 'wp-security-audit-log'); ?></a></p>
 					</div>
 					
 					<div class="activity-block">
