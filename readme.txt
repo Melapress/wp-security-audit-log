@@ -1,5 +1,5 @@
 === WP Security Audit Log ===
-Contributors: WPWhiteSecurity, uuf6429, robert681
+Contributors: WPWhiteSecurity, robert681
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=donations%40wpwhitesecurity%2ecom
 Plugin URI: http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/
 License: GPLv3
@@ -116,6 +116,7 @@ For more information and to get started with WordPress Security, check out the f
 * [List of WordPress Security Alerts](http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/security-audit-alerts-logs/)
 * [WordPress Multisite Features](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wp-security-audit-log-plugin-features-wordpress-multisite/)
 * [WP Security Audit Log and Reverse Proxy and WAFs Support](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wp-security-audit-log-plugin-retrieves-originating-wordpress-user-ip-address/]
+* {WP Security Audit Log Database Documentation](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wp-security-audit-log-wordpress-database-documentation/)
 * [Official WP Security Audit Log Page](http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/)
 
 = WordPress Security Tips & Tricks =
