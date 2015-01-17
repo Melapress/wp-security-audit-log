@@ -503,7 +503,7 @@ class WSAL_Settings {
 			$result = $this->GetClientIPs();
 			$result = reset($result);
 			$result = isset($result[0]) ? $result[0] : null;
-		}elseif(isset($_SERVER['REMOTE_ADDR'])){
+		} elseif(isset($_SERVER['REMOTE_ADDR'])) {
 			$result = $this->NormalizeIP($_SERVER['REMOTE_ADDR']);
 			if (!$this->ValidateIP($result)) $result = null;
 		}
@@ -525,7 +525,7 @@ class WSAL_Settings {
 	
 	protected function NormalizeIP($ip){
 		$ip = trim($ip);
-		if(strpos($ip, ':') !== false && strpos($ip, '[') === false){
+		if(strpos($ip, ':') !== false && substr_count($ip, '.') == 3 && strpos($ip, '[') === false){
 			// IPv4 with a port (eg: 11.22.33.44:80)
 			$ip = explode(':', $ip);
 			$ip = $ip[0];
