@@ -139,10 +139,6 @@ class WpSecurityAuditLog {
 		
 		// render wsal footer
 		add_action('admin_footer', array($this, 'RenderFooter'));
-		
-		// hide plugin
-		if($this->settings->IsIncognito())
-			add_action('admin_head', array($this, 'HidePlugin'));
 	}
 	
 	/**
@@ -175,6 +171,10 @@ class WpSecurityAuditLog {
 		$s = $this->profiler->Start('WSAL Init Hook');
 		do_action('wsal_init', $this);
 		$s->Stop();
+		
+		// hide plugin
+		if($this->settings->IsIncognito())
+			add_action('admin_head', array($this, 'HidePlugin'));
 	}
 	
 	/**
@@ -324,7 +324,11 @@ class WpSecurityAuditLog {
 	 * @internal To be called in admin header for hiding plugin form Plugins list.
 	 */
 	public function HidePlugin(){
-		?><style type="text/css">.wp-list-table.plugins #wp-security-audit-log { display: none; }</style><?php
+		$selectr = '.wp-list-table.plugins #';
+		$plugins = array('wp-security-audit-log');
+		foreach ($this->licensing->Plugins() as $plugin)
+			$plugins[] = strtolower(str_replace(' ', '-', $plugin['PluginData']['Name']));
+		?><style type="text/css"> <?php echo $selectr . implode(', ' . $selectr, $plugins); ?> { display: none; }</style><?php
 	}
 	
 	/**

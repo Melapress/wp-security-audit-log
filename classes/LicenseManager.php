@@ -47,16 +47,18 @@ class WSAL_LicenseManager {
 				'DomainPath' => 'Domain Path',
 			), 'plugin' );
 		
-		$pluginUpdater = new EDD_SL_Plugin_Updater(
-			$this->GetStoreUrl(),
-			$pluginFile,
-			array( 
-				'license' 	=> $license,
-				'item_name' => $pluginData['Name'],
-				'author' 	=> $pluginData['Author'],
-				'version' 	=> $pluginData['Version'],
-			)
-		);
+		$pluginUpdater = is_null($license)
+			 ? null
+			 : new EDD_SL_Plugin_Updater(
+				$this->GetStoreUrl(),
+				$pluginFile,
+				array( 
+					'license' 	=> $license,
+					'item_name' => $pluginData['Name'],
+					'author' 	=> $pluginData['Author'],
+					'version' 	=> $pluginData['Version'],
+				)
+			);
 		
 		return array(
 			'PluginData' => $pluginData,
@@ -68,6 +70,11 @@ class WSAL_LicenseManager {
 		$name = sanitize_key(basename($pluginFile));
 		$license = $this->plugin->settings->GetLicenseKey($name);
 		$this->plugins[$name] = $this->GetPluginData($pluginFile, $license);
+	}
+	
+	public function AddPlugin($pluginFile){
+		$name = sanitize_key(basename($pluginFile));
+		$this->plugins[$name] = $this->GetPluginData($pluginFile, null);
 	}
 	
 	protected function GetBlogIds(){
