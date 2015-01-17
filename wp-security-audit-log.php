@@ -98,7 +98,7 @@ class WpSecurityAuditLog {
 	 * Standard singleton pattern.
 	 * WARNING! To ensure the system always works as expected, AVOID using this method.
 	 * Instead, make use of the plugin instance provided by 'wsal_init' action.
-	 * @return \self Returns the current plugin instance.
+	 * @return WpSecurityAuditLog Returns the current plugin instance.
 	 */
 	public static function GetInstance(){
 		static $instance = null;

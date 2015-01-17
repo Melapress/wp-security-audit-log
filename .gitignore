@@ -10,3 +10,10 @@ Desktop.ini
 
 # Log fils
 *.log
+
+# VS and VSPHP
+*.cache
+*.phpproj
+*.puo
+*.sln
+*.suo
