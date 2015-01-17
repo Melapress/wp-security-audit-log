@@ -219,6 +219,14 @@ class WSAL_Settings {
 		return $this->_plugin->GetGlobalOption('restrict-admins', false);
 	}
 
+	/**
+	 * @deprecated Sandbox functionality is now in an external plugin.
+	 */
+	public function IsSandboxPageEnabled(){
+		$plugins = $this->_plugin->licensing->plugins();
+		return isset($plugins['wsal-sandbox-extensionphp']);
+	}
+
 	public function SetRestrictAdmins($enable){
 		$this->_plugin->SetGlobalOption('restrict-admins', (bool)$enable);
 	}
