@@ -59,8 +59,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				foreach($groupedAlerts as $name => $alerts){
 					$active = array(); $allactive = true;
 					foreach($alerts as $alert){
+						if ($alert->type <= 0006) continue; // <- ignore php alerts
 						$active[$alert->type] = $this->_plugin->alerts->IsEnabled($alert->type);
-						if(!$active[$alert->type])$allactive = false;
+						if (!$active[$alert->type]) $allactive = false;
 					}
 					?><table class="wp-list-table wsal-tab widefat fixed" cellspacing="0" id="tab-<?php echo $safeNames[$name]; ?>">
 						<thead>
@@ -73,6 +74,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						</thead>
 						<tbody><?php
 							foreach($alerts as $alert){
+								if ($alert->type <= 0006) continue; // <- ignore php alerts
 								$attrs = '';
 								switch(true){
 									case !$alert->mesg:
