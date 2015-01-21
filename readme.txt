@@ -172,11 +172,12 @@ Yes it is possible to do so with the premium [WSAL Reporting Extension](http://w
 	* [Premium Add-ons](http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/extensions/) will be hidden from the WordPress plugins page when the Hide plugin option is enabled.
 	
 * **Improvements**
-	* Updated some help text in plugin's settings page
+	* Updated some of the help text in plugin's settings page
 	* Updated the text of some WordPress security alerts
 	
 * **Bug Fixes**
 	* Fixed a bug related to the reverse proxy / IP retrieval functionality
+	* Fixed an issue related to Sandbox removal and upgrades [Support Ticket](https://wordpress.org/support/topic/fatal-error-undefined-method-on-upgrade)
 
 = 1.3.2 (2014-12-16) =
 * **New Features and Options**
