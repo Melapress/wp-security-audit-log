@@ -91,7 +91,7 @@ NOTE: Developer options should NEVER be enabled on Live websites. They should on
 WP Security Audit Log plugin also has a number of features that make WordPress and WordPress multisite monitoring and auditing easier, such as:
 
 * Realtime Audit Log viewer to watch user activity as it happens without any delays
-* Builtin support for reverse proxies and web application firewalls [more information](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wp-security-audit-log-plugin-retrieves-originating-wordpress-user-ip-address/]
+* Builtin support for reverse proxies and web application firewalls [more information](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wp-security-audit-log-plugin-retrieves-originating-wordpress-user-ip-address/)
 * Limit who can view the security alerts by users or roles
 * Limit who can manage the plugin by users or roles
 * Configurable WordPress dashboard widget highlighting the most recent critical activity
@@ -115,8 +115,8 @@ For more information and to get started with WordPress Security, check out the f
 
 * [List of WordPress Security Alerts](http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/security-audit-alerts-logs/)
 * [WordPress Multisite Features](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wp-security-audit-log-plugin-features-wordpress-multisite/)
-* [WP Security Audit Log and Reverse Proxy and WAFs Support](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wp-security-audit-log-plugin-retrieves-originating-wordpress-user-ip-address/]
-* {WP Security Audit Log Database Documentation](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wp-security-audit-log-wordpress-database-documentation/)
+* [WP Security Audit Log and Reverse Proxy and WAFs Support](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wp-security-audit-log-plugin-retrieves-originating-wordpress-user-ip-address/)
+* [WP Security Audit Log Database Documentation](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wp-security-audit-log-wordpress-database-documentation/)
 * [Official WP Security Audit Log Page](http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/)
 
 = WordPress Security Tips & Tricks =
