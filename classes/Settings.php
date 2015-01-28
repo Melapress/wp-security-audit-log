@@ -230,6 +230,17 @@ class WSAL_Settings {
 		return $this->_plugin->SetGlobalOption('hide-plugin', $enabled);
 	}
 	
+	/**
+	 * Checking if the data will be removed.
+	 */
+	public function IsDeleteData(){
+		return $this->_plugin->GetGlobalOption('delete-data');
+	}
+
+	public function SetDeleteData($enabled){
+		return $this->_plugin->SetGlobalOption('delete-data', $enabled);
+	}
+
 	// <editor-fold desc="Access Control">
 	
 	protected $_viewers = null;
