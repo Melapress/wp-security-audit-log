@@ -34,7 +34,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins';
 	
 	protected function GetLoginFailureLogLimit(){
-		return 10;
+		return 120;
 	}
 	
 	protected function GetLoginFailureExpiration(){
@@ -64,27 +64,36 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		
 		if($this->IsPastLoginFailureLimit($ip))return;
 		
-		$this->IncrementLoginFailure($ip);
-		
+		$username = $_POST["log"];
+		$newAlertCode = 1003;
+		$user = get_user_by('login', $username);
+		if ($user) {
+			$newAlertCode = 1002;	
+			$userRoles = $this->plugin->settings->GetCurrentUserRoles($user->roles);
+		}
+
+		//$this->IncrementLoginFailure($ip);
 		$occ = WSAL_DB_Occurrence::LoadMultiQuery('
-			SELECT * FROM `' . $tt1->GetTable() . '`
-			WHERE alert_id = %d AND site_id = %d
-				AND (created_on BETWEEN %d AND %d)
-				AND id IN (
-					SELECT occurrence_id as id
-					FROM `' . $tt2->GetTable() . '`
-					WHERE (name = "ClientIP" AND value = %s)
-					GROUP BY occurrence_id
-					HAVING COUNT(*) = 1
-				)
-		', array(
-			1002,
-			(function_exists('get_current_blog_id') ? get_current_blog_id() : 0),
-			mktime(0, 0, 0, $m, $d, $y),
-			mktime(0, 0, 0, $m, $d + 1, $y) - 1,
-			json_encode($ip),
-		));
-		
+			SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
+			INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
+			and ipMeta.name = "ClientIP"
+			and ipMeta.value = %s
+			INNER JOIN `' . $tt2->GetTable() . '` usernameMeta on usernameMeta.occurrence_id = occurrence.id
+			and usernameMeta.name = "Username"
+			and usernameMeta.value = %s
+			WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
+			AND (created_on BETWEEN %d AND %d)
+			GROUP BY occurrence.id',
+			array(
+				json_encode($ip),
+				json_encode($username),
+				1002,
+				(function_exists('get_current_blog_id') ? get_current_blog_id() : 0),
+				mktime(0, 0, 0, $m, $d, $y),
+				mktime(0, 0, 0, $m, $d + 1, $y) - 1
+			)
+		);
+
 		$occ = count($occ) ? $occ[0] : null;
 		
 		if($occ && $occ->IsLoaded()){
@@ -95,13 +104,22 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				$new = $this->GetLoginFailureLogLimit() . '+';
 			
 			$occ->SetMetaValue('Attempts', $new);
+			$occ->SetMetaValue('Username', $username);
+			//$occ->SetMetaValue('CurrentUserRoles', $userRoles);
 			$occ->created_on = null;
 			$occ->Save();
-		}else{
+		} else {
 			// create a new record
-			$this->plugin->alerts->Trigger(1002, array(
-				'Attempts' => 1
-			));
+			if ($newAlertCode == 1002) {
+				$this->plugin->alerts->Trigger($newAlertCode, array(
+					'Attempts' => 1,
+					'Username' => $_POST["log"],
+					'CurrentUserRoles' => $userRoles
+				));
+			} else {
+				$this->plugin->alerts->Trigger($newAlertCode, array('Attempts' => 1));
+			}
+			$this->IncrementLoginFailure($ip);
 		}
 	}
 	

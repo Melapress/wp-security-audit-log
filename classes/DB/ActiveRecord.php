@@ -160,9 +160,11 @@ abstract class WSAL_DB_ActiveRecord {
 	/**
 	 * Remove this ActiveRecord structure into DB.
 	 */
-	public function Uninstall(){
+	public function Uninstall()
+	{
+		global $wpdb;
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-		dbDelta($this->_GetUninstallQuery());
+		$wpdb->query($this->_GetUninstallQuery());
 	}
 	
 	/**
@@ -386,7 +388,7 @@ abstract class WSAL_DB_ActiveRecord {
 		$plugin = WpSecurityAuditLog::GetInstance();
 		foreach(glob(dirname(__FILE__) . '/*.php') as $file){
 			$class = $plugin->GetClassFileClassName($file);
-			if(is_subclass_of($class, __CLASS__)){
+			if(is_subclass_of($class, __CLASS__)) {
 				$class = new $class();
 				$class->Uninstall();
 			}
