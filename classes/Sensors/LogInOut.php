@@ -34,7 +34,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins';
 	
 	protected function GetLoginFailureLogLimit(){
-		return 120;
+		return 10;
 	}
 	
 	protected function GetLoginFailureExpiration(){

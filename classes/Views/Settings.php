@@ -1,5 +1,4 @@
 <?php
-
 class WSAL_Views_Settings extends WSAL_AbstractView {
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
