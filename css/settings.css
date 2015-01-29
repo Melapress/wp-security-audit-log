@@ -55,3 +55,13 @@
 .sectoken-role { background: #EFE; border-color: #5B5; }
 .sectoken-other { background: #FFE; border-color: #ED5; }
 .sectoken-del { background: #FEE; border-color: #EBB; }
+
+.wsal-tab {
+	margin-top: 0px;
+}
+.wsal-tab th {
+	padding-left: 20px;
+}
+.wsal-tab td {
+	padding-left: 20px;
+}

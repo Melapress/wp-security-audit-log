@@ -240,8 +240,18 @@ class WpSecurityAuditLog {
 	public function Uninstall(){
 		if ($this->GetGlobalOption("delete-data") == 1) {
 			WSAL_DB_ActiveRecord::UninstallAll();
+			$flag = true;
+			while ( $flag ) {
+				$flag = $this->delete_options_prefixed( 'wsal-' );
+			}
 		}
 		wp_clear_scheduled_hook('wsal_cleanup');
+	}
+
+	public function delete_options_prefixed( $prefix ) {
+    	global $wpdb;
+    	$result = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'" );
+    	return ($result) ? true : false;
 	}
 	
 	/**

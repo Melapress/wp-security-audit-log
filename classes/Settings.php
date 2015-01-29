@@ -483,6 +483,53 @@ class WSAL_Settings {
 		if ($this->IsInternalIPsFiltered()) $opts = $opts | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
 		return filter_var($ip, FILTER_VALIDATE_IP, $opts);
 	}
+
+	/**
+	 * Users excluded from monitoring
+	 */
+	protected $_excluded_users = null;
+	public function SetExcludedMonitoringUsers($users)
+	{
+		$this->_excluded_users = $users;
+		$this->_plugin->SetGlobalOption('excluded-users', implode(',', $this->_excluded_users));
+	}
+	public function GetExcludedMonitoringUsers()
+	{
+		if(is_null($this->_excluded_users)){
+			$this->_excluded_users = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-users'))));
+		}
+		return $this->_excluded_users;
+	}
+
+	/**
+	 * Roles excluded from monitoring
+	 */
+	protected $_excluded_roles = null;
+	public function SetExcludedMonitoringRoles($roles){
+		$this->_excluded_roles = $roles;
+		$this->_plugin->SetGlobalOption('excluded-roles', implode(',', $this->_excluded_roles));
+	}
+	public function GetExcludedMonitoringRoles(){
+		if(is_null($this->_excluded_roles)){
+			$this->_excluded_roles = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-roles'))));
+		}
+		return $this->_excluded_roles;
+	}
+
+	/**
+	 * Custom fields excluded from monitoring
+	 */
+	protected $_excluded_custom = null;
+	public function SetExcludedMonitoringCustom($custom){
+		$this->_excluded_custom = $custom;
+		$this->_plugin->SetGlobalOption('excluded-custom', implode(',', $this->_excluded_custom));
+	}
+	public function GetExcludedMonitoringCustom(){
+		if(is_null($this->_excluded_custom)){
+			$this->_excluded_custom = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-custom'))));
+		}
+		return $this->_excluded_custom;
+	}
 	
 	// </editor-fold>
 }

@@ -16,7 +16,7 @@ final class WSAL_AlertManager {
 	 * @var WpSecurityAuditLog
 	 */
 	protected $plugin;
-	
+
 	/**
 	 * Create new AlertManager instance.
 	 * @param WpSecurityAuditLog $plugin
@@ -28,7 +28,7 @@ final class WSAL_AlertManager {
 		
 		add_action('shutdown', array($this, '_CommitPipeline'));
 	}
-	
+
 	/**
 	 * Add new logger from file inside autoloader path.
 	 * @param string $file Path to file.
@@ -81,10 +81,12 @@ final class WSAL_AlertManager {
 	 * @param array $data Alert data.
 	 */
 	public function Trigger($type, $data = array(), $delayed = false){
-		if($delayed){
-			$this->TriggerIf($type, $data, null);
-		}else{
-			$this->_CommitItem($type, $data, null);
+		if ($this->IsDisabledUser(wp_get_current_user()->user_login) && $this->IsDisabledRole(wp_get_current_user()->roles[0])) { 
+			if($delayed){
+				$this->TriggerIf($type, $data, null);
+			}else{
+				$this->_CommitItem($type, $data, null);
+			}
 		}
 	}
 	
@@ -105,9 +107,10 @@ final class WSAL_AlertManager {
 	/**
 	 * @internal Commit an alert now.
 	 */
-	protected function _CommitItem($type, $data, $cond, $_retry = true){
+	protected function _CommitItem($type, $data, $cond, $_retry = true)
+	{
 		if(!$cond || !!call_user_func($cond, $this)){
-			if($this->IsEnabled($type)){
+			if($this->IsEnabled($type)) { 
 				if(isset($this->_alerts[$type])){
 					// ok, convert alert to a log entry
 					$this->_triggered_types[] = $type;
@@ -276,6 +279,42 @@ final class WSAL_AlertManager {
 		}
 		ksort($result);
 		return $result;
+	}
+
+	/**
+	 * Returns whether user is enabled or not.
+	 * @param string user.
+	 * @return boolean True if enabled, false otherwise.
+	 */
+	public function IsDisabledUser($user)
+	{ 
+		return (!in_array($user, $this->GetDisabledUsers())) ? true : false;
+	}
+	
+	/**
+	 * @return Returns an array of disabled users.
+	 */
+	public function GetDisabledUsers()
+	{ 
+		return $this->plugin->settings->GetExcludedMonitoringUsers();
+	}
+
+	/**
+	 * Returns whether user is enabled or not.
+	 * @param string user.
+	 * @return boolean True if enabled, false otherwise.
+	 */
+	public function IsDisabledRole($user)
+	{ 
+		return (!in_array($user, $this->GetDisabledUsers())) ? true : false;
+	}
+	
+	/**
+	 * @return Returns an array of disabled users.
+	 */
+	public function GetDisabledRoles()
+	{ 
+		return $this->plugin->settings->GetExcludedMonitoringRoles();
 	}
 	
 }
