@@ -326,7 +326,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		$query->offset = ($this->get_pagenum() - 1) * $per_page;
 		$query->length = $per_page;
 
-		$this->items = $query->Execute();
+		$this->items = $query->Execute(); 
 
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,

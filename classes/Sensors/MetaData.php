@@ -12,7 +12,20 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	protected $old_meta = array();
 	
 	protected function CanLogPostMeta($meta_id, $object_id, $meta_key){
-		return substr($meta_key, 0, 1) != '_';
+		//check if excluded meta key or starts with _
+		//$isExcludedMetaKey = check in custom option
+		if (substr($meta_key, 0, 1) == '_' || $this->IsExcludedCustomFields($meta_key)) {
+			return false;
+		} else {
+			return true;
+		}
+		//return substr($meta_key, 0, 1) != '_';
+	}
+
+	public function IsExcludedCustomFields($custom)
+	{ 
+		$customFields = $this->plugin->settings->GetExcludedMonitoringCustom();
+		return (!in_array($custom, $customFields)) ? true : false;
 	}
 	
 	public function EventPostMetaCreated($meta_id, $object_id, $meta_key, $_meta_value){

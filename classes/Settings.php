@@ -271,8 +271,8 @@ class WSAL_Settings {
 		$this->_plugin->SetGlobalOption('items-per-page', $this->_perpage);
 	}
 	public function GetViewPerPage(){
-		if(is_null($this->_perpage)){
-			$this->_perpage = (int)$this->_plugin->GetGlobalOption('items-per-page', 10);
+		if(is_null($this->_perpage)){ 
+			$this->_perpage = (int)$this->_plugin->GetGlobalOption('items-per-page', 10); 
 		}
 		return $this->_perpage;
 	}

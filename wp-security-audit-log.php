@@ -83,6 +83,12 @@ class WpSecurityAuditLog {
 	 * @var WSAL_SimpleProfiler
 	 */
 	public $profiler;
+
+	/**
+	 * Options.
+	 * @var WSAL_DB_Option
+	 */
+	public $options;
 	
 	/**
 	 * Contains a list of cleanup callbacks.
@@ -113,6 +119,9 @@ class WpSecurityAuditLog {
 		// profiler has to be loaded manually
 		require_once('classes/SimpleProfiler.php');
 		$this->profiler = new WSAL_SimpleProfiler();
+
+		require_once('classes/DB/ActiveRecord.php');
+		require_once('classes/DB/Option.php');
 		
 		// load autoloader and register base paths
 		require_once('classes/Autoloader.php');
@@ -207,6 +216,11 @@ class WpSecurityAuditLog {
 		
 		// ensure that the system is installed and schema is correct
 		WSAL_DB_ActiveRecord::InstallAll();
+
+		$data = $this->read_options_prefixed("wsal-"); //var_dump($data); die;
+		if (!empty($data)) {
+			$this->SetOptions($data);
+		}
 		
 		// if system wasn't installed, try migration now
 		if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
@@ -254,6 +268,19 @@ class WpSecurityAuditLog {
     	return ($result) ? true : false;
 	}
 	
+	public function read_options_prefixed( $prefix ) {
+    	global $wpdb;
+    	$result = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
+    	return $result;
+	}
+
+	public function SetOptions($data){
+		foreach($data as $key => $option) { 
+			$this->options = new WSAL_DB_Option();
+			$this->options->SetOptionValue($option['option_name'], $option['option_value']);
+		}
+	}
+
 	/**
 	 * Migrate data from old plugin.
 	 */
@@ -369,8 +396,11 @@ class WpSecurityAuditLog {
 	 * @return mixed Option's value or $default if option not set.
 	 */
 	public function GetGlobalOption($option, $default = false, $prefix = self::OPT_PRFX){
-		$fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
-		return $fn($prefix . $option, $default);
+		//$fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
+		//var_dump($fn($prefix . $option, $default));
+		//return $fn($prefix . $option, $default);
+		$this->options = new WSAL_DB_Option();
+		return $this->options->GetOptionValue($prefix . $option, $default);     
 	}
 	
 	/**
@@ -380,8 +410,10 @@ class WpSecurityAuditLog {
 	 * @param string $prefix (Optional) A prefix used before option name.
 	 */
 	public function SetGlobalOption($option, $value, $prefix = self::OPT_PRFX){
-		$fn = $this->IsMultisite() ? 'update_site_option' : 'update_option';
-		$fn($prefix . $option, $value);
+		//$fn = $this->IsMultisite() ? 'update_site_option' : 'update_option';
+		//$fn($prefix . $option, $value);
+		$this->options = new WSAL_DB_Option();
+		$this->options->SetOptionValue($prefix . $option, $value);
 	}
 	
 	/**
