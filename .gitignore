@@ -1,0 +1,19 @@
+# Netbeans
+/nbproject/
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Log fils
+*.log
+
+# VS and VSPHP
+*.cache
+*.phpproj
+*.puo
+*.sln
+*.suo

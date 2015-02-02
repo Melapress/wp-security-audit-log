@@ -1,0 +1,57 @@
+#audit-log-settings {
+	padding-right: 256px;
+	position: relative;
+}
+
+#audit-log-adverts {
+	position: absolute;
+	top: 3px;
+	right: 3px;
+	overflow: hidden;
+}
+
+#audit-log-adverts a {
+	display: block;
+	text-decoration: none;
+	margin: 4px 0;
+}
+
+.sectoken-user,
+.sectoken-role,
+.sectoken-other {
+	display: inline-block;
+	border-width: 1px;
+	border-style: solid;
+	padding: 2px 4px;
+	margin: 2px 0 0 2px;
+	border-radius: 3px;
+	cursor: default;
+}
+
+.sectoken-user a,
+.sectoken-role a,
+.sectoken-other a {
+	text-decoration: none;
+	font-size: 12px;
+	font-weight: bold;
+	color: #FFF;
+	margin-left: 2px;
+	background: #BBB;
+	border-radius: 25px;
+	height: 14px;
+	display: inline-block;
+	width: 14px;
+	text-align: center;
+	line-height: 16px;
+}
+
+.sectoken-user a:hover,
+.sectoken-role a:hover,
+.sectoken-other a:hover {
+	background: #FB9;
+}
+
+.sectoken-user { background: #EFF; border-color: #5BE; }
+.sectoken-role { background: #EFE; border-color: #5B5; }
+.sectoken-other { background: #FFE; border-color: #ED5; }
+.sectoken-del { background: #FEE; border-color: #EBB; }
