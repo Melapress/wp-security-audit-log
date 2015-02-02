@@ -117,9 +117,40 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 					'CurrentUserRoles' => $userRoles
 				));
 			} else {
-				$this->plugin->alerts->Trigger($newAlertCode, array('Attempts' => 1));
+				$this->IncrementLoginFailure($ip);
+
+				$occUnknown = WSAL_DB_Occurrence::LoadMultiQuery('
+					SELECT * FROM `' . $tt1->GetTable() . '`
+					WHERE alert_id = %d AND (created_on BETWEEN %d AND %d)
+						AND id IN (
+							SELECT occurrence_id as id
+							FROM `' . $tt2->GetTable() . '`
+							WHERE (name = "ClientIP" AND value = %s)
+							GROUP BY occurrence_id
+							HAVING COUNT(*) = 1
+						)
+				', array(
+					1003,
+					mktime(0, 0, 0, $m, $d, $y),
+					mktime(0, 0, 0, $m, $d + 1, $y) - 1,
+					json_encode($ip),
+				));
+				
+				$occUnknown = count($occUnknown) ? $occUnknown[0] : null;
+				if($occUnknown && $occUnknown->IsLoaded()) {
+					// update existing record
+					$new = $occUnknown->GetMetaValue('Attempts', 0) + 1;
+					
+					if($new > $this->GetLoginFailureLogLimit())
+						$new = $this->GetLoginFailureLogLimit() . '+';
+					
+					$occUnknown->SetMetaValue('Attempts', $new);
+					$occUnknown->created_on = null;
+					$occUnknown->Save();
+				} else {
+					$this->plugin->alerts->Trigger($newAlertCode, array('Attempts' => 1));
+				}
 			}
-			$this->IncrementLoginFailure($ip);
 		}
 	}
 	
