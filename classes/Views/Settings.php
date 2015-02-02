@@ -1,5 +1,4 @@
 <?php
-
 class WSAL_Views_Settings extends WSAL_AbstractView {
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
@@ -55,6 +54,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetMainIPFromProxy(isset($_REQUEST['EnableProxyIpCapture']));
 		$this->_plugin->settings->SetInternalIPsFiltering(isset($_REQUEST['EnableIpFiltering']));
 		$this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
+		$this->_plugin->settings->SetDeleteData(isset($_REQUEST['DeleteData']));
 		$this->_plugin->settings->ClearDevOptions();
 		if(isset($_REQUEST['DevOptions']))
 			foreach($_REQUEST['DevOptions'] as $opt)
@@ -337,11 +337,35 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</fieldset>
 						</td>
 					</tr>
+					<tr>
+						<th><label for="DeleteData"><?php _e('Remove Data on Unistall', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<label for="DeleteData">
+									<input type="checkbox" name="DeleteData" value="1" id="DeleteData"  onclick="return delete_confirm(this);"<?php
+										if($this->_plugin->settings->IsDeleteData())echo ' checked="checked"';
+									?>/> <span class="description">Check this box if you would like remove all data when the plugin is deleted.</span>
+								</label>
+ 							</fieldset>
+ 						</td>
+ 					</tr>
 				</tbody>
 			</table>
 			
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes"></p>
-		</form><?php
+		</form>
+		<script type="text/javascript">
+		<!--
+			function delete_confirm(elementRef)
+			{
+ 				if ( elementRef.checked )
+ 				{
+  					if ( window.confirm('Do you want remove all data when the plugin is deleted?') == false )
+   					elementRef.checked = false;
+ 				} 
+			}
+		// -->
+		</script><?php
 	}
 	
 	public function Header(){
