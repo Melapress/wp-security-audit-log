@@ -120,21 +120,19 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				$this->IncrementLoginFailure($ip);
 
 				$occUnknown = WSAL_DB_Occurrence::LoadMultiQuery('
-					SELECT * FROM `' . $tt1->GetTable() . '`
-					WHERE alert_id = %d AND (created_on BETWEEN %d AND %d)
-						AND id IN (
-							SELECT occurrence_id as id
-							FROM `' . $tt2->GetTable() . '`
-							WHERE (name = "ClientIP" AND value = %s)
-							GROUP BY occurrence_id
-							HAVING COUNT(*) = 1
-						)
-				', array(
-					1003,
-					mktime(0, 0, 0, $m, $d, $y),
-					mktime(0, 0, 0, $m, $d + 1, $y) - 1,
-					json_encode($ip),
-				));
+					SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
+					INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
+					and ipMeta.name = "ClientIP" and ipMeta.value = %s 
+					WHERE occurrence.alert_id = %d 
+					AND (created_on BETWEEN %d AND %d)
+					GROUP BY occurrence.id',
+					array(
+						json_encode($ip),
+						1003,
+						mktime(0, 0, 0, $m, $d, $y),
+						mktime(0, 0, 0, $m, $d + 1, $y) - 1
+					)
+				);
 				
 				$occUnknown = count($occUnknown) ? $occUnknown[0] : null;
 				if($occUnknown && $occUnknown->IsLoaded()) {
