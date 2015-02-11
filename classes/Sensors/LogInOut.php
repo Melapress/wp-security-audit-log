@@ -31,7 +31,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		}
 	}
 	
-	const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins';
+	const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins-known';
+	const TRANSIENT_FAILEDLOGINS_UNKNOWN = 'wsal-failedlogins-unknown';
 	
 	protected function GetLoginFailureLogLimit(){
 		return 10;
@@ -41,17 +42,30 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		return 12 * 60 * 60;
 	}
 	
-	protected function IsPastLoginFailureLimit($ip){
-		$data = get_transient(self::TRANSIENT_FAILEDLOGINS);
-		return ($data !== false) && isset($data[$ip]) && ($data[$ip] > $this->GetLoginFailureLogLimit());
+	protected function IsPastLoginFailureLimit($ip, $type){
+		if($type == "1002") {
+			$data = get_transient(self::TRANSIENT_FAILEDLOGINS);
+			return ($data !== false) && isset($data[$ip]) && ($data[$ip] > $this->GetLoginFailureLogLimit());
+		} else {
+			$data2 = get_transient(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
+			return ($data2 !== false) && isset($data2[$ip]) && ($data2[$ip] > $this->GetLoginFailureLogLimit());
+		}
 	}
 	
-	protected function IncrementLoginFailure($ip){
-		$data = get_transient(self::TRANSIENT_FAILEDLOGINS);
-		if(!$data)$data = array();
-		if(!isset($data[$ip]))$data[$ip] = 0;
-		$data[$ip]++;
-		set_transient(self::TRANSIENT_FAILEDLOGINS, $data, $this->GetLoginFailureExpiration());
+	protected function IncrementLoginFailure($ip, $type){
+		if($type == "1002") {
+			$data = get_transient(self::TRANSIENT_FAILEDLOGINS);
+			if(!$data)$data = array();
+			if(!isset($data[$ip]))$data[$ip] = 0;
+			$data[$ip]++;
+			set_transient(self::TRANSIENT_FAILEDLOGINS, $data, $this->GetLoginFailureExpiration());
+		} else {
+			$data2 = get_transient(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
+			if(!$data2)$data2 = array();
+			if(!isset($data2[$ip]))$data2[$ip] = 0;
+			$data2[$ip]++;
+			set_transient(self::TRANSIENT_FAILEDLOGINS_UNKNOWN, $data2, $this->GetLoginFailureExpiration());
+		}
 	}
 	
 	public function EventLoginFailure($username){
@@ -62,8 +76,6 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$tt1 = new WSAL_DB_Occurrence();
 		$tt2 = new WSAL_DB_Meta();
 		
-		if($this->IsPastLoginFailureLimit($ip))return;
-		
 		$username = $_POST["log"];
 		$newAlertCode = 1003;
 		$user = get_user_by('login', $username);
@@ -72,7 +84,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			$userRoles = $this->plugin->settings->GetCurrentUserRoles($user->roles);
 		}
 
-		//$this->IncrementLoginFailure($ip);
+		if($this->IsPastLoginFailureLimit($ip, $newAlertCode))return;
+
 		$occ = WSAL_DB_Occurrence::LoadMultiQuery('
 			SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
 			INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
@@ -97,7 +110,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$occ = count($occ) ? $occ[0] : null;
 		
 		if($occ && $occ->IsLoaded()){
-			// update existing record
+			// update existing record exists user
 			$new = $occ->GetMetaValue('Attempts', 0) + 1;
 			
 			if($new > $this->GetLoginFailureLogLimit())
@@ -108,17 +121,16 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			//$occ->SetMetaValue('CurrentUserRoles', $userRoles);
 			$occ->created_on = null;
 			$occ->Save();
+			$this->IncrementLoginFailure($ip, $newAlertCode);
 		} else {
-			// create a new record
 			if ($newAlertCode == 1002) {
+				// create a new record exists user
 				$this->plugin->alerts->Trigger($newAlertCode, array(
 					'Attempts' => 1,
 					'Username' => $_POST["log"],
 					'CurrentUserRoles' => $userRoles
 				));
 			} else {
-				$this->IncrementLoginFailure($ip);
-
 				$occUnknown = WSAL_DB_Occurrence::LoadMultiQuery('
 					SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
 					INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
@@ -136,7 +148,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				
 				$occUnknown = count($occUnknown) ? $occUnknown[0] : null;
 				if($occUnknown && $occUnknown->IsLoaded()) {
-					// update existing record
+					// update existing record not exists user
 					$new = $occUnknown->GetMetaValue('Attempts', 0) + 1;
 					
 					if($new > $this->GetLoginFailureLogLimit())
@@ -145,7 +157,9 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 					$occUnknown->SetMetaValue('Attempts', $new);
 					$occUnknown->created_on = null;
 					$occUnknown->Save();
+					$this->IncrementLoginFailure($ip, $newAlertCode);
 				} else {
+					// create a new record not exists user
 					$this->plugin->alerts->Trigger($newAlertCode, array('Attempts' => 1));
 				}
 			}
