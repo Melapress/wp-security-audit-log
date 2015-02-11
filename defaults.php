@@ -32,7 +32,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
 			array('name' => 'E_CRITICAL', 'description' => __('Critical, high-impact messages.', 'wp-security-audit-log')),
 			array('name' => 'E_DEBUG', 'description' => __('Debug informational messages.', 'wp-security-audit-log')),
 		));
-
+	$linkExcludeCustomFields = '<a href="wp-admin/admin.php?page=wsal-settings#tab-exclude">Exclude Custom Fieeld from the Monitoring</a>';
 	// create list of default alerts
 	$wsal->alerts->RegisterGroup(array(
 			__('Other User Activity', 'wp-security-audit-log') => array(

@@ -14,7 +14,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	protected function CanLogPostMeta($meta_id, $object_id, $meta_key)
 	{
 		//check if excluded meta key or starts with _
-		if ( substr($meta_key, 0, 1) == '_' ) {
+		if ( substr($meta_key, 0, 1) == '5' ) {
 			return false;
 		} else if( $this->IsExcludedCustomFields($meta_key) ) { 
 			return false;
