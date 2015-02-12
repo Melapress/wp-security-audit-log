@@ -35,7 +35,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	const TRANSIENT_FAILEDLOGINS_UNKNOWN = 'wsal-failedlogins-unknown';
 	
 	protected function GetLoginFailureLogLimit(){
-		return 10;
+		return 30;
 	}
 	
 	protected function GetLoginFailureExpiration(){
@@ -135,12 +135,13 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 					SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
 					INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
 					and ipMeta.name = "ClientIP" and ipMeta.value = %s 
-					WHERE occurrence.alert_id = %d 
+					WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
 					AND (created_on BETWEEN %d AND %d)
 					GROUP BY occurrence.id',
 					array(
 						json_encode($ip),
 						1003,
+						(function_exists('get_current_blog_id') ? get_current_blog_id() : 0),
 						mktime(0, 0, 0, $m, $d, $y),
 						mktime(0, 0, 0, $m, $d + 1, $y) - 1
 					)

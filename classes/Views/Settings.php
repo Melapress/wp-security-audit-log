@@ -50,7 +50,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetAllowedPluginViewers(isset($_REQUEST['Viewers']) ? $_REQUEST['Viewers'] : array());
 		$this->_plugin->settings->SetAllowedPluginEditors(isset($_REQUEST['Editors']) ? $_REQUEST['Editors'] : array());
 		$this->_plugin->settings->SetRestrictAdmins(isset($_REQUEST['RestrictAdmins']));
-		$this->_plugin->settings->SetRefreshAlertsEnabled(isset($_REQUEST['EnableAuditViewRefresh']));
+		$this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
 		$this->_plugin->settings->SetMainIPFromProxy(isset($_REQUEST['EnableProxyIpCapture']));
 		$this->_plugin->settings->SetInternalIPsFiltering(isset($_REQUEST['EnableIpFiltering']));
 		$this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
@@ -259,7 +259,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</td>
 					</tr>
 					<tr>
-						<th><label for="aroption_on"><?php _e('Refresh Audit View', 'wp-security-audit-log'); ?></label></th>
+						<th><label for="aroption_on"><?php _e('Refresh Audit Log Viewer', 'wp-security-audit-log'); ?></label></th>
 						<td>
 							<fieldset>
 								<?php $are = $this->_plugin->settings->IsRefreshAlertsEnabled(); ?>
@@ -267,13 +267,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									<input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: 2px;" <?php if($are)echo 'checked="checked"'; ?> value="1">
 									<span><?php _e('Automatic', 'wp-security-audit-log'); ?></span>
 								</label>
-								<span class="description"> &mdash; <?php _e('Refresh Audit View as soon as there are new events.', 'wp-security-audit-log'); ?></span>
+								<span class="description"> &mdash; <?php _e('Refresh Audit Log Viewer as soon as there are new alerts.', 'wp-security-audit-log'); ?></span>
 								<br/>
 								<label for="aroption_off">
 									<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: 2px;" <?php if(!$are)echo 'checked="checked"'; ?> value="0">
 									<span><?php _e('Manual', 'wp-security-audit-log'); ?></span>
 								</label>
-								<span class="description"> &mdash; <?php _e('Refresh Audit View only when page is reloaded.', 'wp-security-audit-log'); ?></span>
+								<span class="description"> &mdash; <?php _e('Refresh Audit Log Viewer only when the page is reloaded.', 'wp-security-audit-log'); ?></span>
 								<br/>
 							</fieldset>
 						</td>
