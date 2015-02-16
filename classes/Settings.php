@@ -13,6 +13,9 @@ class WSAL_Settings {
 	const OPT_DEV_PHP_ERRORS     = 'p';
 	const OPT_DEV_REQUEST_LOG    = 'r';
 	const OPT_DEV_BACKTRACE_LOG  = 'b';
+
+	const ERROR_CODE_INVALID_IP = 901;
+	
 	protected $_devoption = null;
 	/**
 	 * @return array Array of developer options to be enabled by default.
@@ -446,7 +449,9 @@ class WSAL_Settings {
 			$result = isset($result[0]) ? $result[0] : null;
 		} elseif(isset($_SERVER['REMOTE_ADDR'])) {
 			$result = $this->NormalizeIP($_SERVER['REMOTE_ADDR']);
-			if (!$this->ValidateIP($result)) $result = null;
+			if (!$this->ValidateIP($result)) {
+				$result = "Error " . self::ERROR_CODE_INVALID_IP . ": Invalid IP Address";
+			}
 		}
 		return $result;
 	}
