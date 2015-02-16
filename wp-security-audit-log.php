@@ -210,7 +210,17 @@ class WpSecurityAuditLog {
 		
 		// if system wasn't installed, try migration now
 		if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
-		
+
+		//setting the prunig date with the old value or the default value	
+		$pruningDate = $this->settings->GetPruningDate();
+		$this->settings->SetPruningDate($pruningDate);
+
+		$pruningEnabled = $this->settings->IsPruningLimitEnabled();
+		$this->settings->SetPruningLimitEnabled($pruningEnabled);
+		//setting the prunig limit with the old value or the default value
+		$pruningLimit = $this->settings->GetPruningLimit();
+		$this->settings->SetPruningLimit($pruningLimit);
+
 		// install cleanup hook (remove older one if it exists)
 		wp_clear_scheduled_hook('wsal_cleanup');
 		wp_schedule_event(current_time('timestamp') + 600, 'hourly', 'wsal_cleanup');
@@ -233,15 +243,41 @@ class WpSecurityAuditLog {
 			// ... an example
 		}
 	}
-	
+
 	/**
 	 * Uninstall plugin.
 	 */
 	public function Uninstall(){
 		if ($this->GetGlobalOption("delete-data") == 1) {
 			WSAL_DB_ActiveRecord::UninstallAll();
+			$flag = true;
+			while ( $flag ) {
+				$flag = $this->delete_options_prefixed( 'wsal-' );
+			}
 		}
 		wp_clear_scheduled_hook('wsal_cleanup');
+	}
+
+	public function delete_options_prefixed( $prefix ) {
+    	global $wpdb;
+    	if ( $this->IsMultisite() ) {
+    		$table_name = $wpdb->prefix .'sitemeta';
+    		$result = $wpdb->query( "DELETE FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'" );
+    	} else {
+	    	$result = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'" );
+	    }
+    	return ($result) ? true : false;
+	}
+	
+	public function read_options_prefixed( $prefix ) {
+    	global $wpdb;
+    	if ( $this->IsMultisite() ) {
+    		$table_name = $wpdb->prefix .'sitemeta';
+    		$result = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
+    	} else {
+	    	$result = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
+	    }
+    	return $result;
 	}
 	
 	/**
