@@ -446,7 +446,7 @@ class WSAL_Settings {
 			$result = isset($result[0]) ? $result[0] : null;
 		} elseif(isset($_SERVER['REMOTE_ADDR'])) {
 			$result = $this->NormalizeIP($_SERVER['REMOTE_ADDR']);
-			if (!$this->ValidateIP($result)) $result = null;
+			if (!$this->ValidateIP($result)) $result = "Invalid IP Address";
 		}
 		return $result;
 	}
