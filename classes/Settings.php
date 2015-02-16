@@ -15,7 +15,7 @@ class WSAL_Settings {
 	const OPT_DEV_BACKTRACE_LOG  = 'b';
 
 	const ERROR_CODE_INVALID_IP = 901;
-	
+
 	protected $_devoption = null;
 	/**
 	 * @return array Array of developer options to be enabled by default.
