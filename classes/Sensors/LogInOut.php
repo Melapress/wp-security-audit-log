@@ -30,6 +30,13 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			), true);
 		}
 	}
+
+	/**
+	 * @return boolean Whether we are running on multisite or not.
+	 */
+	public function IsMultisite(){
+		return function_exists('is_multisite') && is_multisite();
+	}
 	
 	const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins-known';
 	const TRANSIENT_FAILEDLOGINS_UNKNOWN = 'wsal-failedlogins-unknown';
@@ -42,29 +49,32 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		return 12 * 60 * 60;
 	}
 	
-	protected function IsPastLoginFailureLimit($ip, $type){
-		if($type == "1002") {
-			$data = get_transient(self::TRANSIENT_FAILEDLOGINS);
-			return ($data !== false) && isset($data[$ip]) && ($data[$ip] > $this->GetLoginFailureLogLimit());
+	protected function IsPastLoginFailureLimit($ip, $site_id, $user){
+		$get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
+		if($user) {
+			$dataKnown = $get_fn(self::TRANSIENT_FAILEDLOGINS);
+			return ($dataKnown !== false) && isset($dataKnown[$site_id.":".$user->id.":".$ip]) && ($dataKnown[$site_id.":".$user->id.":".$ip] > $this->GetLoginFailureLogLimit());
 		} else {
-			$data2 = get_transient(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
-			return ($data2 !== false) && isset($data2[$ip]) && ($data2[$ip] > $this->GetLoginFailureLogLimit());
+			$dataUnknown = $get_fn(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
+			return ($dataUnknown !== false) && isset($dataUnknown[$site_id.":".$ip]) && ($dataUnknown[$site_id.":".$ip] > $this->GetLoginFailureLogLimit());
 		}
 	}
 	
-	protected function IncrementLoginFailure($ip, $type){
-		if($type == "1002") {
-			$data = get_transient(self::TRANSIENT_FAILEDLOGINS);
-			if(!$data)$data = array();
-			if(!isset($data[$ip]))$data[$ip] = 0;
-			$data[$ip]++;
-			set_transient(self::TRANSIENT_FAILEDLOGINS, $data, $this->GetLoginFailureExpiration());
+	protected function IncrementLoginFailure($ip, $site_id, $user){
+		$get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
+		$set_fn = $this->IsMultisite() ? 'set_site_transient' : 'set_transient';
+		if($user) {
+			$dataKnown = $get_fn(self::TRANSIENT_FAILEDLOGINS);
+			if(!$dataKnown)$dataKnown = array();
+			if(!isset($dataKnown[$site_id.":".$user->id.":".$ip]))$dataKnown[$site_id.":".$user->id.":".$ip] = 1;
+			$dataKnown[$site_id.":".$user->id.":".$ip]++;
+			$set_fn(self::TRANSIENT_FAILEDLOGINS, $dataKnown, $this->GetLoginFailureExpiration());
 		} else {
-			$data2 = get_transient(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
-			if(!$data2)$data2 = array();
-			if(!isset($data2[$ip]))$data2[$ip] = 0;
-			$data2[$ip]++;
-			set_transient(self::TRANSIENT_FAILEDLOGINS_UNKNOWN, $data2, $this->GetLoginFailureExpiration());
+			$dataUnknown = $get_fn(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
+			if(!$dataUnknown)$dataUnknown = array();
+			if(!isset($dataUnknown[$site_id.":".$ip]))$dataUnknown[$site_id.":".$ip] = 1;
+			$dataUnknown[$site_id.":".$ip]++;
+			$set_fn(self::TRANSIENT_FAILEDLOGINS_UNKNOWN, $dataUnknown, $this->GetLoginFailureExpiration());
 		}
 	}
 	
@@ -79,92 +89,91 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$username = $_POST["log"];
 		$newAlertCode = 1003;
 		$user = get_user_by('login', $username);
+		$site_id = (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
 		if ($user) {
 			$newAlertCode = 1002;	
 			$userRoles = $this->plugin->settings->GetCurrentUserRoles($user->roles);
 		}
 
-		if($this->IsPastLoginFailureLimit($ip, $newAlertCode))return;
+		if($this->IsPastLoginFailureLimit($ip, $site_id, $user))return;
 
-		$occ = WSAL_DB_Occurrence::LoadMultiQuery('
-			SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
-			INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
-			and ipMeta.name = "ClientIP"
-			and ipMeta.value = %s
-			INNER JOIN `' . $tt2->GetTable() . '` usernameMeta on usernameMeta.occurrence_id = occurrence.id
-			and usernameMeta.name = "Username"
-			and usernameMeta.value = %s
-			WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
-			AND (created_on BETWEEN %d AND %d)
-			GROUP BY occurrence.id',
-			array(
-				json_encode($ip),
-				json_encode($username),
-				1002,
-				(function_exists('get_current_blog_id') ? get_current_blog_id() : 0),
-				mktime(0, 0, 0, $m, $d, $y),
-				mktime(0, 0, 0, $m, $d + 1, $y) - 1
-			)
-		);
+		if ($newAlertCode == 1002) {
+			$occ = WSAL_DB_Occurrence::LoadMultiQuery('
+				SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
+				INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
+				and ipMeta.name = "ClientIP"
+				and ipMeta.value = %s
+				INNER JOIN `' . $tt2->GetTable() . '` usernameMeta on usernameMeta.occurrence_id = occurrence.id
+				and usernameMeta.name = "Username"
+				and usernameMeta.value = %s
+				WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
+				AND (created_on BETWEEN %d AND %d)
+				GROUP BY occurrence.id',
+				array(
+					json_encode($ip),
+					json_encode($username),
+					1002,
+					$site_id,
+					mktime(0, 0, 0, $m, $d, $y),
+					mktime(0, 0, 0, $m, $d + 1, $y) - 1
+				)
+			);
 
-		$occ = count($occ) ? $occ[0] : null;
-		
-		if($occ && $occ->IsLoaded()){
-			// update existing record exists user
-			$new = $occ->GetMetaValue('Attempts', 0) + 1;
-			
-			if($new > $this->GetLoginFailureLogLimit())
-				$new = $this->GetLoginFailureLogLimit() . '+';
-			
-			$occ->SetMetaValue('Attempts', $new);
-			$occ->SetMetaValue('Username', $username);
-			//$occ->SetMetaValue('CurrentUserRoles', $userRoles);
-			$occ->created_on = null;
-			$occ->Save();
-			$this->IncrementLoginFailure($ip, $newAlertCode);
-		} else {
-			if ($newAlertCode == 1002) {
+			$occ = count($occ) ? $occ[0] : null;
+			if($occ && $occ->IsLoaded()){
+				// update existing record exists user
+				$this->IncrementLoginFailure($ip, $site_id, $user);
+				$new = $occ->GetMetaValue('Attempts', 0) + 1;
+				
+				if($new > $this->GetLoginFailureLogLimit())
+					$new = $this->GetLoginFailureLogLimit() . '+';
+				
+				$occ->SetMetaValue('Attempts', $new);
+				$occ->SetMetaValue('Username', $username);
+				//$occ->SetMetaValue('CurrentUserRoles', $userRoles);
+				$occ->created_on = null;
+				$occ->Save();	
+			} else {
 				// create a new record exists user
 				$this->plugin->alerts->Trigger($newAlertCode, array(
 					'Attempts' => 1,
 					'Username' => $_POST["log"],
 					'CurrentUserRoles' => $userRoles
 				));
-			} else {
-				$occUnknown = WSAL_DB_Occurrence::LoadMultiQuery('
-					SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
-					INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
-					and ipMeta.name = "ClientIP" and ipMeta.value = %s 
-					WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
-					AND (created_on BETWEEN %d AND %d)
-					GROUP BY occurrence.id',
-					array(
-						json_encode($ip),
-						1003,
-						(function_exists('get_current_blog_id') ? get_current_blog_id() : 0),
-						mktime(0, 0, 0, $m, $d, $y),
-						mktime(0, 0, 0, $m, $d + 1, $y) - 1
-					)
-				);
+			} 
+		} else {
+			$occUnknown = WSAL_DB_Occurrence::LoadMultiQuery('
+				SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
+				INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
+				and ipMeta.name = "ClientIP" and ipMeta.value = %s 
+				WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
+				AND (created_on BETWEEN %d AND %d)
+				GROUP BY occurrence.id',
+				array(
+					json_encode($ip),
+					1003,
+					$site_id,
+					mktime(0, 0, 0, $m, $d, $y),
+					mktime(0, 0, 0, $m, $d + 1, $y) - 1
+				)
+			);
 				
-				$occUnknown = count($occUnknown) ? $occUnknown[0] : null;
-				if($occUnknown && $occUnknown->IsLoaded()) {
-					// update existing record not exists user
-					$new = $occUnknown->GetMetaValue('Attempts', 0) + 1;
-					
-					if($new > $this->GetLoginFailureLogLimit())
-						$new = $this->GetLoginFailureLogLimit() . '+';
-					
-					$occUnknown->SetMetaValue('Attempts', $new);
-					$occUnknown->created_on = null;
-					$occUnknown->Save();
-					$this->IncrementLoginFailure($ip, $newAlertCode);
-				} else {
-					// create a new record not exists user
-					$this->plugin->alerts->Trigger($newAlertCode, array('Attempts' => 1));
-				}
+			$occUnknown = count($occUnknown) ? $occUnknown[0] : null;
+			if($occUnknown && $occUnknown->IsLoaded()) {
+				// update existing record not exists user
+				$this->IncrementLoginFailure($ip, $site_id, false);
+				$new = $occUnknown->GetMetaValue('Attempts', 0) + 1;
+				
+				if($new > $this->GetLoginFailureLogLimit())
+					$new = $this->GetLoginFailureLogLimit() . '+';
+				
+				$occUnknown->SetMetaValue('Attempts', $new);
+				$occUnknown->created_on = null;
+				$occUnknown->Save();
+			} else {
+				// create a new record not exists user
+				$this->plugin->alerts->Trigger($newAlertCode, array('Attempts' => 1));
 			}
 		}
-	}
-	
+	}	
 }
