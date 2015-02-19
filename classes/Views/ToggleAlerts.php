@@ -1,5 +1,4 @@
 <?php
-
 class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	
 	public function GetTitle() {

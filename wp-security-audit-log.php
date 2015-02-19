@@ -4,7 +4,7 @@ Plugin Name: WP Security Audit Log
 Plugin URI: http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/
 Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
 Author: WP White Security
-Version: 1.3.3
+Version: 1.4.0
 Text Domain: wp-security-audit-log
 Author URI: http://www.wpwhitesecurity.com/
 License: GPL2
@@ -139,6 +139,7 @@ class WpSecurityAuditLog {
 		
 		// render wsal footer
 		add_action('admin_footer', array($this, 'RenderFooter'));
+		
 	}
 	
 	/**
@@ -171,7 +172,7 @@ class WpSecurityAuditLog {
 		$s = $this->profiler->Start('WSAL Init Hook');
 		do_action('wsal_init', $this);
 		$s->Stop();
-		
+
 		// hide plugin
 		if($this->settings->IsIncognito())
 			add_action('admin_head', array($this, 'HidePlugin'));
@@ -209,7 +210,17 @@ class WpSecurityAuditLog {
 		
 		// if system wasn't installed, try migration now
 		if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
-		
+
+		//setting the prunig date with the old value or the default value	
+		$pruningDate = $this->settings->GetPruningDate();
+		$this->settings->SetPruningDate($pruningDate);
+
+		$pruningEnabled = $this->settings->IsPruningLimitEnabled();
+		$this->settings->SetPruningLimitEnabled($pruningEnabled);
+		//setting the prunig limit with the old value or the default value
+		$pruningLimit = $this->settings->GetPruningLimit();
+		$this->settings->SetPruningLimit($pruningLimit);
+
 		// install cleanup hook (remove older one if it exists)
 		wp_clear_scheduled_hook('wsal_cleanup');
 		wp_schedule_event(current_time('timestamp') + 600, 'hourly', 'wsal_cleanup');
@@ -232,13 +243,41 @@ class WpSecurityAuditLog {
 			// ... an example
 		}
 	}
-	
+
 	/**
 	 * Uninstall plugin.
 	 */
 	public function Uninstall(){
-		WSAL_DB_ActiveRecord::UninstallAll();
+		if ($this->GetGlobalOption("delete-data") == 1) {
+			WSAL_DB_ActiveRecord::UninstallAll();
+			$flag = true;
+			while ( $flag ) {
+				$flag = $this->delete_options_prefixed( 'wsal-' );
+			}
+		}
 		wp_clear_scheduled_hook('wsal_cleanup');
+	}
+
+	public function delete_options_prefixed( $prefix ) {
+    	global $wpdb;
+    	if ( $this->IsMultisite() ) {
+    		$table_name = $wpdb->prefix .'sitemeta';
+    		$result = $wpdb->query( "DELETE FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'" );
+    	} else {
+	    	$result = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'" );
+	    }
+    	return ($result) ? true : false;
+	}
+	
+	public function read_options_prefixed( $prefix ) {
+    	global $wpdb;
+    	if ( $this->IsMultisite() ) {
+    		$table_name = $wpdb->prefix .'sitemeta';
+    		$result = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
+    	} else {
+	    	$result = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
+	    }
+    	return $result;
 	}
 	
 	/**
