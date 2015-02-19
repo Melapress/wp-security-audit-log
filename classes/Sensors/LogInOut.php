@@ -53,7 +53,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
 		if($user) {
 			$dataKnown = $get_fn(self::TRANSIENT_FAILEDLOGINS);
-			return ($dataKnown !== false) && isset($dataKnown[$site_id.":".$user->id.":".$ip]) && ($dataKnown[$site_id.":".$user->id.":".$ip] > $this->GetLoginFailureLogLimit());
+			return ($dataKnown !== false) && isset($dataKnown[$site_id.":".$user->ID.":".$ip]) && ($dataKnown[$site_id.":".$user->ID.":".$ip] > $this->GetLoginFailureLogLimit());
 		} else {
 			$dataUnknown = $get_fn(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
 			return ($dataUnknown !== false) && isset($dataUnknown[$site_id.":".$ip]) && ($dataUnknown[$site_id.":".$ip] > $this->GetLoginFailureLogLimit());
@@ -66,8 +66,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		if($user) {
 			$dataKnown = $get_fn(self::TRANSIENT_FAILEDLOGINS);
 			if(!$dataKnown)$dataKnown = array();
-			if(!isset($dataKnown[$site_id.":".$user->id.":".$ip]))$dataKnown[$site_id.":".$user->id.":".$ip] = 1;
-			$dataKnown[$site_id.":".$user->id.":".$ip]++;
+			if(!isset($dataKnown[$site_id.":".$user->ID.":".$ip]))$dataKnown[$site_id.":".$user->ID.":".$ip] = 1;
+			$dataKnown[$site_id.":".$user->ID.":".$ip]++;
 			$set_fn(self::TRANSIENT_FAILEDLOGINS, $dataKnown, $this->GetLoginFailureExpiration());
 		} else {
 			$dataUnknown = $get_fn(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
