@@ -6,10 +6,10 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report
 Requires at least: 3.6
-Tested up to: 4.1
-Stable tag: 1.3.3
+Tested up to: 4.1.1
+Stable tag: 1.4
 
-Identify WordPress issues before they become security problems - Keep an audit log of all users' changes and other under the hood WordPress activity.
+Keep an WordPress audit log of all users' changes and other under the hood activity - Identify WordPress issues before they become security problems.
 
 == Description ==
 Keep an audit log of everything that is happening on your WordPress and [WordPress multisite](http://www.wpwhitesecurity.com/wordpress-plugins/wp-security-audit-log-plugin-features-wordpress-multisite/) with WP Security Audit Log to ensure user productivity and identify WordPress security issues before they become a security problem. WP Security Audit Log, WordPress' most comprehensive user monitoring and audit log plugin already helps thousands of WordPress administrators, owners and security professionals ensure the security of their websites and blogs. Ensure the security of your WordPress too by installing WP Security Audit Log. The community's favourite WordPress user monitoring monitoring and security auditing plugin is developed by WordPress Security Consultants and Professionals [WP White Security](http://www.wpwhitesecurity.com/). 
@@ -80,6 +80,7 @@ We need help translating the plugin and the WordPress Security Events. If you're
 
 * Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
 * German translation by [Mourad Louha](http://excel-translator.de)
+* Romanian translations by [Artmotion Secure Servers](http://www.artmotion.eu)
 * Spanish translation by Andrew Kurtis
 
 = WordPress & PHP Errors Monitoring Tools =
@@ -167,6 +168,19 @@ Yes it is possible to do so with the premium [WSAL Reporting Extension](http://w
 
 == Changelog ==
 
+= 1.4 (2015-02-24) =
+* **New Features**
+	* WordPress username is now reported when a failed login is recorded ([More Details])
+	* Plugin is now available in Romanian thanks to [Artmotion](http://www.artmotion.eu)
+
+* **Improvements**
+	* Improved IP Address validation checks - if IP address format is incorrect the plugin reports "incorrect format" and not "unkown" - This will help us improve troubleshooting
+	* Alerts pruning options are now added during activation of the plugin, making pruning options more reliable - existing pruning options will be retained
+	
+* **Bug Fixes**
+	* Fixed issue with the option "auto / manual" refresh of Audit Log Viewer
+	* Fixed plugin uninstallation process (added new option to purge all plugin data from WordPress database upon uninstall)
+	
 = 1.3.3 (2015-01-21) =
 * **New Features**
 	* [Premium Add-ons](http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/extensions/) will be hidden from the WordPress plugins page when the Hide plugin option is enabled.
