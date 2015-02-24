@@ -174,7 +174,7 @@ Yes it is possible to do so with the premium [WSAL Reporting Extension](http://w
 	* Plugin is now available in Romanian thanks to [Artmotion](http://www.artmotion.eu)
 
 * **Improvements**
-	* Improved IP Address validation checks - if IP address format is incorrect the plugin reports "incorrect format" and not "unkown" - This will help us improve troubleshooting
+	* Improved IP Address validation checks - if IP address format is incorrect the plugin reports "incorrect format" and not "unknown" - This will help us improve troubleshooting
 	* Alerts pruning options are now added during activation of the plugin, making pruning options more reliable - existing pruning options will be retained
 	
 * **Bug Fixes**
