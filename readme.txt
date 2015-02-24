@@ -153,6 +153,9 @@ Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can mo
 = Can I receive an email notification when a specific change happens on WordPress? =
 Yes it is possible to do so with the [WSAL Notifications Extension](http://www.wpwhitesecurity.com/plugins-premium-extensions/email-notifications-wordpress/). This plugin extension enables you to configure triggers to monitor for specific changes and when such changes take place an email is automatically sent to your email address of choice with all the details of such change such as the Alert ID, user, user role, date, time, details about the actual change and more.
 
+= How can I search for a specific WordPress security alert?
+You can use the premium add-on [Security Audit Log Search](http://www.wpwhitesecurity.com/plugins-premium-extensions/search-filtering-extension/) to automatically search for a specific WordPress security alert. It supports free text based searches and you can also use the built-in filters to fine tune your searches.
+
 = Can I generate reports from the WordPress security audit log? =
 Yes it is possible to do so with the premium [WSAL Reporting Extension](http://www.wpwhitesecurity.com/plugins-premium-extensions/wordpress-reports-extension/). This plugin extension allows you to generate any type of WordPress report using any type of data source. Reports can be generated in HTML and CSV format.
 
