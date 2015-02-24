@@ -170,7 +170,7 @@ Yes it is possible to do so with the premium [WSAL Reporting Extension](http://w
 
 = 1.4 (2015-02-24) =
 * **New Features**
-	* WordPress username is now reported when a failed login is recorded ([More Details])
+	* WordPress username is now reported when a failed login is recorded - [More Details](http://www.wpwhitesecurity.com/wordpress-plugins/wordpress-user-monitoring-plugin/wordpress-failed-logins-monitoring-improved/)
 	* Plugin is now available in Romanian thanks to [Artmotion](http://www.artmotion.eu)
 
 * **Improvements**
