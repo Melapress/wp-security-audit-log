@@ -42,6 +42,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 					'MetaID' => $meta_id,
 					'MetaKey' => $meta_key,
 					'MetaValue' => $_meta_value,
+					'MetaLink' => $meta_key,
 				));
 				break;
 			case 'post':
@@ -51,6 +52,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 					'MetaID' => $meta_id,
 					'MetaKey' => $meta_key,
 					'MetaValue' => $_meta_value,
+					'MetaLink' => $meta_key,
 				));
 				break;
 			default:
@@ -61,6 +63,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 					'MetaID' => $meta_id,
 					'MetaKey' => $meta_key,
 					'MetaValue' => $_meta_value,
+					'MetaLink' => $meta_key,
 				));
 				break;
 		}
@@ -92,6 +95,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'MetaKeyNew' => $meta_key,
 							'MetaKeyOld' => $this->old_meta[$meta_id]->key,
 							'MetaValue' => $_meta_value,
+							'MetaLink' => $meta_key,
 						));
 						break;
 					case 'post':
@@ -102,6 +106,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'MetaKeyNew' => $meta_key,
 							'MetaKeyOld' => $this->old_meta[$meta_id]->key,
 							'MetaValue' => $_meta_value,
+							'MetaLink' => $meta_key,
 						));
 						break;
 					default:
@@ -113,6 +118,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'MetaKeyNew' => $meta_key,
 							'MetaKeyOld' => $this->old_meta[$meta_id]->key,
 							'MetaValue' => $_meta_value,
+							'MetaLink' => $smeta_key,
 						));
 						break;
 				}
@@ -129,6 +135,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'MetaKey' => $meta_key,
 							'MetaValueNew' => $_meta_value,
 							'MetaValueOld' => $this->old_meta[$meta_id]->val,
+							'MetaLink' => $meta_key,
 						));
 						break;
 					case 'post':
@@ -139,6 +146,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'MetaKey' => $meta_key,
 							'MetaValueNew' => $_meta_value,
 							'MetaValueOld' => $this->old_meta[$meta_id]->val,
+							'MetaLink' => $meta_key,
 						));
 						break;
 					default:
@@ -150,6 +158,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'MetaKey' => $meta_key,
 							'MetaValueNew' => $_meta_value,
 							'MetaValueOld' => $this->old_meta[$meta_id]->val,
+							'MetaLink' => $meta_key,
 						));
 						break;
 				}
@@ -175,6 +184,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 						'MetaID' => $meta_id,
 						'MetaKey' => $meta_key,
 						'MetaValue' => $_meta_value,
+						'MetaLink' => $meta_key,
 					));
 					break;
 				case 'post':
@@ -184,6 +194,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 						'MetaID' => $meta_id,
 						'MetaKey' => $meta_key,
 						'MetaValue' => $_meta_value,
+						'MetaLink' => $meta_key,
 					));
 					break;
 				default:
@@ -194,6 +205,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 						'MetaID' => $meta_id,
 						'MetaKey' => $meta_key,
 						'MetaValue' => $_meta_value,
+						'MetaLink' => $meta_key,
 					));
 					break;
 			}

@@ -436,18 +436,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
  							</fieldset>
  						</td>
  					</tr>
-					<tr>
-						<th><label for="DeleteData"><?php _e('Remove Data on Unistall', 'wp-security-audit-log'); ?></label></th>
-						<td>
-							<fieldset>
-								<label for="DeleteData">
-									<input type="checkbox" name="DeleteData" value="1" id="DeleteData"  onclick="return delete_confirm(this);"<?php
-										if($this->_plugin->settings->IsDeleteData())echo ' checked="checked"';
-									?>/> <span class="description">Check this box if you would like remove all data when the plugin is deleted.</span>
-								</label>
- 							</fieldset>
- 						</td>
- 					</tr>
 					</tbody>
 				</table>
 				<table class="form-table wsal-tab widefat" id="tab-exclude">

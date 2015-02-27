@@ -148,7 +148,9 @@ class WpSecurityAuditLog {
 		
 		// render wsal footer
 		add_action('admin_footer', array($this, 'RenderFooter'));
-		
+
+		// handle admin Disable Custom Field
+		add_action('wp_ajax_AjaxDisableCustomField', array($this, 'AjaxDisableCustomField'));	
 	}
 	
 	/**
@@ -156,6 +158,16 @@ class WpSecurityAuditLog {
 	 */
 	public function RenderHeader(){
 		// common.css?
+	}
+
+	/**
+	 * Disable Custom Field through ajax.
+	 * @internal
+	 */
+	public function AjaxDisableCustomField(){ 
+		$this->SetGlobalOption('excluded-custom', $_POST['notice']);
+		echo 'Custom Field '.$_POST['notice'].' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude">[Excluded Objects]</a> tab in the plugin settings';
+		die;
 	}
 	
 	/**
@@ -217,10 +229,12 @@ class WpSecurityAuditLog {
 		// ensure that the system is installed and schema is correct
 		WSAL_DB_ActiveRecord::InstallAll();
 
-		$data = $this->read_options_prefixed("wsal-"); //var_dump($data); die;
+		// Load options from wp_options table or wp_sitemeta in multisite enviroment
+		$data = $this->read_options_prefixed("wsal-");
 		if (!empty($data)) {
 			$this->SetOptions($data);
 		}
+		$this->deleteAllOptions();
 		
 		// if system wasn't installed, try migration now
 		if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
@@ -264,10 +278,7 @@ class WpSecurityAuditLog {
 	public function Uninstall(){
 		if ($this->GetGlobalOption("delete-data") == 1) {
 			WSAL_DB_ActiveRecord::UninstallAll();
-			$flag = true;
-			while ( $flag ) {
-				$flag = $this->delete_options_prefixed( 'wsal-' );
-			}
+			$this->deleteAllOptions();
 		}
 		wp_clear_scheduled_hook('wsal_cleanup');
 	}
@@ -282,6 +293,13 @@ class WpSecurityAuditLog {
 	    	$result = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'" );
 	    }
     	return ($result) ? true : false;
+	}
+
+	private function deleteAllOptions() {
+    	$flag = true;
+		while ( $flag ) {
+			$flag = $this->delete_options_prefixed( 'wsal-' );
+		}
 	}
 	
 	public function read_options_prefixed( $prefix ) {
