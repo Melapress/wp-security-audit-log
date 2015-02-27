@@ -55,7 +55,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetExcludedMonitoringCustom(isset($_REQUEST['Customs']) ? $_REQUEST['Customs'] : array());
 
 		$this->_plugin->settings->SetRestrictAdmins(isset($_REQUEST['RestrictAdmins']));
-		$this->_plugin->settings->SetRefreshAlertsEnabled(isset($_REQUEST['EnableAuditViewRefresh']));
+		$this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
 		$this->_plugin->settings->SetMainIPFromProxy(isset($_REQUEST['EnableProxyIpCapture']));
 		$this->_plugin->settings->SetInternalIPsFiltering(isset($_REQUEST['EnableIpFiltering']));
 		$this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
@@ -346,23 +346,114 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><label for="DeleteData"><?php _e('Remove Data on Unistall', 'wp-security-audit-log'); ?></label></th>
-							<td>
-								<fieldset>
-									<label for="DeleteData">
-										<input type="checkbox" name="DeleteData" value="1" id="DeleteData"  onclick="return delete_confirm(this);"<?php
-											if($this->_plugin->settings->IsDeleteData())echo ' checked="checked"';
-										?>/> <span class="description">Check this box if you would like remove all data when the plugin is deleted.</span>
-									</label>
-	 							</fieldset>
-	 						</td>
-	 					</tr>
+						<th><label for="aroption_on"><?php _e('Refresh Audit Log Viewer', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<?php $are = $this->_plugin->settings->IsRefreshAlertsEnabled(); ?>
+								<label for="aroption_on">
+									<input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: 2px;" <?php if($are)echo 'checked="checked"'; ?> value="1">
+									<span><?php _e('Automatic', 'wp-security-audit-log'); ?></span>
+								</label>
+								<span class="description"> &mdash; <?php _e('Refresh Audit Log Viewer as soon as there are new alerts.', 'wp-security-audit-log'); ?></span>
+								<br/>
+								<label for="aroption_off">
+									<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: 2px;" <?php if(!$are)echo 'checked="checked"'; ?> value="0">
+									<span><?php _e('Manual', 'wp-security-audit-log'); ?></span>
+								</label>
+								<span class="description"> &mdash; <?php _e('Refresh Audit Log Viewer only when the page is reloaded.', 'wp-security-audit-log'); ?></span>
+								<br/>
+							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th><label><?php _e('Developer Options', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<?php $any = $this->_plugin->settings->IsAnyDevOptionEnabled(); ?>
+								<a href="javascript:;" style="<?php if($any)echo 'display: none;'; ?>"
+								   onclick="jQuery(this).hide().next().show();">Show Developer Options</a>
+								<div style="<?php if(!$any)echo 'display: none;'; ?>">
+									<p style="border-left: 3px solid #FFD000; padding: 2px 8px; margin-left: 6px; margin-bottom: 16px;"><?php
+										_e('Only enable these options on testing, staging and development websites. Enabling any of the settings below on LIVE websites may cause unintended side-effects including degraded performance.', 'wp-security-audit-log');
+									?></p><?php
+									foreach(array(
+										WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array(
+											__('Data Inspector', 'wp-security-audit-log'),
+											__('View data logged for each triggered alert.', 'wp-security-audit-log')
+										),
+										WSAL_Settings::OPT_DEV_PHP_ERRORS     => array(
+											__('PHP Errors', 'wp-security-audit-log'),
+											__('Enables sensor for alerts generated from PHP.', 'wp-security-audit-log')
+										),
+										WSAL_Settings::OPT_DEV_REQUEST_LOG    => array(
+											__('Request Log', 'wp-security-audit-log'),
+											__('Enables logging request to file.', 'wp-security-audit-log')
+										),
+										WSAL_Settings::OPT_DEV_BACKTRACE_LOG  => array(
+											__('Backtrace', 'wp-security-audit-log'),
+											__('Log full backtrace for PHP-generated alerts.', 'wp-security-audit-log')
+										),
+									) as $opt => $info){
+										?><label for="devoption_<?php echo $opt; ?>">
+											<input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
+												if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="<?php echo $opt; ?>">
+											<span><?php echo $info[0]; ?></span>
+											<?php if(isset($info[1]) && $info[1]){ ?>
+												<span class="description"> &mdash; <?php echo $info[1]; ?></span>
+											<?php }
+										?></label><br/><?php
+									}
+								?></div>
+							</fieldset>
+						</td>
+					</tr>
+					
+					<tr>
+						<th><label for="Incognito"><?php _e('Hide Plugin in Plugins Page', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<label for="Incognito">
+									<input type="checkbox" name="Incognito" value="1" id="Incognito"<?php
+										if($this->_plugin->settings->IsIncognito())echo ' checked="checked"';
+									?>/> <?php _e('Hide', 'wp-security-audit-log'); ?>
+								</label>
+								<br/>
+								<span class="description">
+									<?php _e('To manually revert this setting set the value of option wsal-hide-plugin to 0 in the wp_options table.', 'wp-security-audit-log'); ?>
+								</span>
+							</fieldset>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="DeleteData"><?php _e('Remove Data on Unistall', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<label for="DeleteData">
+									<input type="checkbox" name="DeleteData" value="1" id="DeleteData"  onclick="return delete_confirm(this);"<?php
+										if($this->_plugin->settings->IsDeleteData())echo ' checked="checked"';
+									?>/> <span class="description">Check this box if you would like remove all data when the plugin is deleted.</span>
+								</label>
+ 							</fieldset>
+ 						</td>
+ 					</tr>
+					<tr>
+						<th><label for="DeleteData"><?php _e('Remove Data on Unistall', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<label for="DeleteData">
+									<input type="checkbox" name="DeleteData" value="1" id="DeleteData"  onclick="return delete_confirm(this);"<?php
+										if($this->_plugin->settings->IsDeleteData())echo ' checked="checked"';
+									?>/> <span class="description">Check this box if you would like remove all data when the plugin is deleted.</span>
+								</label>
+ 							</fieldset>
+ 						</td>
+ 					</tr>
 					</tbody>
 				</table>
 				<table class="form-table wsal-tab widefat" id="tab-exclude">
 					<tbody>
 						<tr>
-							<th><h2>Userd &amp; Roles</h2></th>
+							<th><h2>Users &amp; Roles</h2></th>
 						</tr>
 						<tr>
 							<td colspan="2">Any of the users and roles listed in the below options will be excluded from monitoring. This means that any change they do will not be logged.</td>
