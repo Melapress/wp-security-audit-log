@@ -1,14 +1,15 @@
-# Copyright (C) 2014 WP Security Audit Log
+# Copyright (C) 2015 WP Security Audit Log
 # This file is distributed under the same license as the WP Security Audit Log package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Security Audit Log 1.3.2\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tag/wp-security-audit-log\n"
-"POT-Creation-Date: 2014-12-16 10:47:47+00:00\n"
+"Project-Id-Version: WP Security Audit Log 1.4.0\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/wp-security-audit-"
+"log\n"
+"POT-Creation-Date: 2015-02-24 09:09:21+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2015-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
@@ -221,7 +222,7 @@ msgid "Audit Log Viewer"
 msgstr ""
 
 #: classes/Views/AuditLog.php:64 classes/Views/Licensing.php:34
-#: classes/Views/Settings.php:82 classes/Views/ToggleAlerts.php:29
+#: classes/Views/Settings.php:82 classes/Views/ToggleAlerts.php:28
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
@@ -420,12 +421,12 @@ msgid "Licensing"
 msgstr ""
 
 #: classes/Views/Licensing.php:39 classes/Views/Settings.php:87
-#: classes/Views/ToggleAlerts.php:44
+#: classes/Views/ToggleAlerts.php:43
 msgid "Settings have been saved."
 msgstr ""
 
 #: classes/Views/Licensing.php:41 classes/Views/Settings.php:89
-#: classes/Views/ToggleAlerts.php:46
+#: classes/Views/ToggleAlerts.php:45
 msgid "Error: "
 msgstr ""
 
@@ -441,7 +442,7 @@ msgstr ""
 msgid "Inactive"
 msgstr ""
 
-#: classes/Views/Settings.php:18 classes/Views/Settings.php:26
+#: classes/Views/Settings.php:17 classes/Views/Settings.php:25
 msgid "Settings"
 msgstr ""
 
@@ -554,7 +555,7 @@ msgid ""
 msgstr ""
 
 #: classes/Views/Settings.php:262
-msgid "Refresh Audit View"
+msgid "Refresh Audit Log Viewer"
 msgstr ""
 
 #: classes/Views/Settings.php:268
@@ -562,7 +563,7 @@ msgid "Automatic"
 msgstr ""
 
 #: classes/Views/Settings.php:270
-msgid "Refresh Audit View as soon as there are new events."
+msgid "Refresh Audit Log Viewer as soon as there are new alerts."
 msgstr ""
 
 #: classes/Views/Settings.php:274
@@ -570,7 +571,7 @@ msgid "Manual"
 msgstr ""
 
 #: classes/Views/Settings.php:276
-msgid "Refresh Audit View only when page is reloaded."
+msgid "Refresh Audit Log Viewer only when the page is reloaded."
 msgstr ""
 
 #: classes/Views/Settings.php:282
@@ -617,14 +618,24 @@ msgid "Log full backtrace for PHP-generated alerts."
 msgstr ""
 
 #: classes/Views/Settings.php:325
-msgid "Hide Plugin from Plugins Page"
+msgid "Hide Plugin in Plugins Page"
 msgstr ""
 
 #: classes/Views/Settings.php:331
 msgid "Hide"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:6 classes/Views/ToggleAlerts.php:14
+#: classes/Views/Settings.php:335
+msgid ""
+"To manually revert this setting set the value of option wsal-hide-plugin to "
+"0 in the wp_options table."
+msgstr ""
+
+#: classes/Views/Settings.php:341
+msgid "Remove Data on Unistall"
+msgstr ""
+
+#: classes/Views/ToggleAlerts.php:5 classes/Views/ToggleAlerts.php:13
 msgid "Enable/Disable Alerts"
 msgstr ""
 
@@ -632,15 +643,15 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:79
+#: classes/Views/ToggleAlerts.php:80
 msgid "Not Implemented"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:82
+#: classes/Views/ToggleAlerts.php:83
 msgid "Not Available"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:96
+#: classes/Views/ToggleAlerts.php:97
 msgid "Save Changes"
 msgstr ""
 
@@ -744,7 +755,7 @@ msgstr ""
 msgid "Successfully logged out"
 msgstr ""
 
-#: defaults.php:41
+#: defaults.php:41 defaults.php:42
 msgid "Login failed"
 msgstr ""
 
@@ -753,991 +764,995 @@ msgid "%Attempts% failed login(s) detected"
 msgstr ""
 
 #: defaults.php:42
+msgid "%Attempts% failed login(s) detected using non existing user."
+msgstr ""
+
+#: defaults.php:43
 msgid "User uploaded file from Uploads directory"
 msgstr ""
 
-#: defaults.php:42
+#: defaults.php:43
 msgid "Uploaded the file %FileName% in %FilePath%"
 msgstr ""
 
-#: defaults.php:43
+#: defaults.php:44
 msgid "User deleted file from Uploads directory"
 msgstr ""
 
-#: defaults.php:43
+#: defaults.php:44
 msgid "Deleted the file %FileName% from %FilePath%"
 msgstr ""
 
-#: defaults.php:44
+#: defaults.php:45
 msgid "User changed a file using the theme editor"
 msgstr ""
 
-#: defaults.php:44
+#: defaults.php:45
 msgid "Modified %File% with the Theme Editor"
 msgstr ""
 
-#: defaults.php:45
+#: defaults.php:46
 msgid "User changed a file using the plugin editor"
 msgstr ""
 
-#: defaults.php:45
+#: defaults.php:46
 msgid "Modified %File% with the Plugin Editor"
 msgstr ""
 
-#: defaults.php:47
+#: defaults.php:48
 msgid "Blog Posts"
 msgstr ""
 
-#: defaults.php:48
+#: defaults.php:49
 msgid "User created a new blog post and saved it as draft"
 msgstr ""
 
-#: defaults.php:48
+#: defaults.php:49
 msgid "Created a new blog post called %PostTitle%. Blog post ID is %PostID%"
 msgstr ""
 
-#: defaults.php:49
+#: defaults.php:50
 msgid "User published a blog post"
 msgstr ""
 
-#: defaults.php:49
+#: defaults.php:50
 msgid "Published a blog post called %PostTitle%. Blog post URL is %PostUrl%"
 msgstr ""
 
-#: defaults.php:50
+#: defaults.php:51
 msgid "User modified a published blog post"
 msgstr ""
 
-#: defaults.php:50
+#: defaults.php:51
 msgid ""
 "Modified the published blog post %PostTitle%. Blog post URL is %PostUrl%"
 msgstr ""
 
-#: defaults.php:51
+#: defaults.php:52
 msgid "User modified a draft blog post"
 msgstr ""
 
-#: defaults.php:51
+#: defaults.php:52
 msgid "Modified the draft blog post %PostTitle%. Blog post ID is %PostID%"
 msgstr ""
 
-#: defaults.php:52
+#: defaults.php:53
 msgid "User permanently deleted a blog post from the trash"
 msgstr ""
 
-#: defaults.php:52
-msgid "Deleted the post %PostTitle%. Blog post ID is %PostID%"
+#: defaults.php:53
+msgid "Permanently deleted the post %PostTitle%. Blog post ID is %PostID%"
 msgstr ""
 
-#: defaults.php:53
+#: defaults.php:54
 msgid "User moved a blog post to the trash"
 msgstr ""
 
-#: defaults.php:53
+#: defaults.php:54
 msgid "Moved the blog post %PostTitle% to trash"
 msgstr ""
 
-#: defaults.php:54
+#: defaults.php:55
 msgid "User restored a blog post from trash"
 msgstr ""
 
-#: defaults.php:54
+#: defaults.php:55
 msgid "Restored post %PostTitle% from trash"
 msgstr ""
 
-#: defaults.php:55
+#: defaults.php:56
 msgid "User changed blog post category"
 msgstr ""
 
-#: defaults.php:55
+#: defaults.php:56
 msgid ""
 "Changed the category of the post %PostTitle% from %OldCategories% to "
 "%NewCategories%"
 msgstr ""
 
-#: defaults.php:56
+#: defaults.php:57
 msgid "User changed blog post URL"
 msgstr ""
 
-#: defaults.php:56
+#: defaults.php:57
 msgid "Changed the URL of the post %PostTitle% from %OldUrl% to %NewUrl%"
 msgstr ""
 
-#: defaults.php:57
+#: defaults.php:58
 msgid "User changed blog post author"
 msgstr ""
 
-#: defaults.php:57
+#: defaults.php:58
 msgid "Changed the author of %PostTitle% post from %OldAuthor% to %NewAuthor%"
 msgstr ""
 
-#: defaults.php:58
+#: defaults.php:59
 msgid "User changed blog post status"
 msgstr ""
 
-#: defaults.php:58
+#: defaults.php:59
 msgid "Changed the status of %PostTitle% post from %OldStatus% to %NewStatus%"
 msgstr ""
 
-#: defaults.php:59
+#: defaults.php:60
 msgid "User created new category"
 msgstr ""
 
-#: defaults.php:59
+#: defaults.php:60
 msgid "Created a new category called %CategoryName%"
 msgstr ""
 
-#: defaults.php:60
+#: defaults.php:61
 msgid "User deleted category"
 msgstr ""
 
-#: defaults.php:60
+#: defaults.php:61
 msgid "Deleted the %CategoryName% category"
 msgstr ""
 
-#: defaults.php:61
+#: defaults.php:62
 msgid "User changed the visibility of a blog post"
 msgstr ""
 
-#: defaults.php:61
+#: defaults.php:62
 msgid ""
 "Changed the visibility of %PostTitle% blog post  from %OldVisibility% to "
 "%NewVisibility%"
 msgstr ""
 
-#: defaults.php:62
+#: defaults.php:63
 msgid "User changed the date of a blog post"
 msgstr ""
 
-#: defaults.php:62
+#: defaults.php:63
 msgid "Changed the date of %PostTitle% blog post from %OldDate% to %NewDate%"
 msgstr ""
 
-#: defaults.php:63
+#: defaults.php:64
 msgid "User sets a post as sticky"
 msgstr ""
 
-#: defaults.php:63
+#: defaults.php:64
 msgid "Set the post %PostTitle% as Sticky"
 msgstr ""
 
-#: defaults.php:64
+#: defaults.php:65
 msgid "User removes post from sticky"
 msgstr ""
 
-#: defaults.php:64
+#: defaults.php:65
 msgid "Removed the post %PostTitle% from Sticky"
 msgstr ""
 
-#: defaults.php:65
+#: defaults.php:66
 msgid "User creates a custom field for a post"
 msgstr ""
 
-#: defaults.php:65
+#: defaults.php:66
 msgid ""
 "Created custom field %MetaKey% with value %MetaValue% in post %PostTitle%"
 msgstr ""
 
-#: defaults.php:66
+#: defaults.php:67
 msgid "User updates a custom field value for a post"
 msgstr ""
 
-#: defaults.php:66
+#: defaults.php:67
 msgid ""
 "Modified the value of custom field %MetaKey% from %MetaValueOld% to "
 "%MetaValueNew% in post %PostTitle%"
 msgstr ""
 
-#: defaults.php:67
+#: defaults.php:68
 msgid "User deletes a custom field from a post"
 msgstr ""
 
-#: defaults.php:67
+#: defaults.php:68
 msgid ""
 "Deleted custom field %MetaKey% with value %MetaValue% from post %PostTitle%"
 msgstr ""
 
-#: defaults.php:68
+#: defaults.php:69
 msgid "User updates a custom field name for a post"
 msgstr ""
 
-#: defaults.php:68
+#: defaults.php:69
 msgid ""
 "Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in post "
 "%PostTitle%"
 msgstr ""
 
-#: defaults.php:69
+#: defaults.php:70
 msgid "User modifies content for a published post"
 msgstr ""
 
-#: defaults.php:69
+#: defaults.php:70
 msgid "Modified the content of published post %PostTitle%"
 msgstr ""
 
-#: defaults.php:70
+#: defaults.php:71
 msgid "User modifies content for a draft post"
 msgstr ""
 
-#: defaults.php:70
+#: defaults.php:71
 msgid "Modified the content of draft post %PostTitle%"
 msgstr ""
 
-#: defaults.php:72
+#: defaults.php:73
 msgid "Pages"
 msgstr ""
 
-#: defaults.php:73
+#: defaults.php:74
 msgid "User created a new WordPress page and saved it as draft"
 msgstr ""
 
-#: defaults.php:73
+#: defaults.php:74
 msgid "Created a new page called %PostTitle%. Page ID is %PostID%"
 msgstr ""
 
-#: defaults.php:74
+#: defaults.php:75
 msgid "User published a WorPress page"
 msgstr ""
 
-#: defaults.php:74
+#: defaults.php:75
 msgid "Published a page called %PostTitle%. Page URL is %PostUrl%"
 msgstr ""
 
-#: defaults.php:75
+#: defaults.php:76
 msgid "User modified a published WordPress page"
 msgstr ""
 
-#: defaults.php:75
+#: defaults.php:76
 msgid "Modified the published page %PostTitle%. Page URL is %PostUrl%"
 msgstr ""
 
-#: defaults.php:76
+#: defaults.php:77
 msgid "User modified a draft WordPress page"
 msgstr ""
 
-#: defaults.php:76
+#: defaults.php:77
 msgid "Modified the draft page %PostTitle%. Page ID is %PostID%"
 msgstr ""
 
-#: defaults.php:77
+#: defaults.php:78
 msgid "User permanently deleted a page from the trash"
 msgstr ""
 
-#: defaults.php:77
-msgid "Deleted the page %PostTitle%. Page ID is %PostID%"
+#: defaults.php:78
+msgid "Permanently deleted the page %PostTitle%. Page ID is %PostID%"
 msgstr ""
 
-#: defaults.php:78
+#: defaults.php:79
 msgid "User moved WordPress page to the trash"
 msgstr ""
 
-#: defaults.php:78
+#: defaults.php:79
 msgid "Moved the page %PostTitle% to trash"
 msgstr ""
 
-#: defaults.php:79
+#: defaults.php:80
 msgid "User restored a WordPress page from trash"
 msgstr ""
 
-#: defaults.php:79
+#: defaults.php:80
 msgid "Restored page %PostTitle% from trash"
 msgstr ""
 
-#: defaults.php:80
+#: defaults.php:81
 msgid "User changed page URL"
 msgstr ""
 
-#: defaults.php:80
+#: defaults.php:81
 msgid "Changed the URL of the page %PostTitle% from %OldUrl% to %NewUrl%"
 msgstr ""
 
-#: defaults.php:81
+#: defaults.php:82
 msgid "User changed page author"
 msgstr ""
 
-#: defaults.php:81
+#: defaults.php:82
 msgid "Changed the author of %PostTitle% page from %OldAuthor% to %NewAuthor%"
 msgstr ""
 
-#: defaults.php:82
+#: defaults.php:83
 msgid "User changed page status"
 msgstr ""
 
-#: defaults.php:82
+#: defaults.php:83
 msgid "Changed the status of %PostTitle% page from %OldStatus% to %NewStatus%"
 msgstr ""
 
-#: defaults.php:83
+#: defaults.php:84
 msgid "User changed the visibility of a page post"
 msgstr ""
 
-#: defaults.php:83
+#: defaults.php:84
 msgid ""
 "Changed the visibility of %PostTitle% page  from %OldVisibility% to "
 "%NewVisibility%"
 msgstr ""
 
-#: defaults.php:84
+#: defaults.php:85
 msgid "User changed the date of a page post"
 msgstr ""
 
-#: defaults.php:84
+#: defaults.php:85
 msgid "Changed the date of %PostTitle% page from %OldDate% to %NewDate%"
 msgstr ""
 
-#: defaults.php:85
+#: defaults.php:86
 msgid "User changed the parent of a page"
 msgstr ""
 
-#: defaults.php:85
+#: defaults.php:86
 msgid ""
 "Changed the parent of %PostTitle% page from %OldParentName% to %NewParentName"
 "%"
 msgstr ""
 
-#: defaults.php:86
+#: defaults.php:87
 msgid "User changes the template of a page"
 msgstr ""
 
-#: defaults.php:86
+#: defaults.php:87
 msgid ""
 "Changed the template of %PostTitle% page from %OldTemplate% to %NewTemplate%"
 msgstr ""
 
-#: defaults.php:87
+#: defaults.php:88
 msgid "User creates a custom field for a page"
 msgstr ""
 
-#: defaults.php:87
+#: defaults.php:88
 msgid ""
 "Created custom field %MetaKey% with value %MetaValue% in page %PostTitle%"
 msgstr ""
 
-#: defaults.php:88
+#: defaults.php:89
 msgid "User updates a custom field value for a page"
 msgstr ""
 
-#: defaults.php:88
+#: defaults.php:89
 msgid ""
 "Modified the value of custom field %MetaKey% from %MetaValueOld% to "
 "%MetaValueNew% in page %PostTitle%"
 msgstr ""
 
-#: defaults.php:89
+#: defaults.php:90
 msgid "User deletes a custom field from a page"
 msgstr ""
 
-#: defaults.php:89
+#: defaults.php:90
 msgid ""
 "Deleted custom field %MetaKey% with value %MetaValue% from page %PostTitle%"
 msgstr ""
 
-#: defaults.php:90
+#: defaults.php:91
 msgid "User updates a custom field name for a page"
 msgstr ""
 
-#: defaults.php:90
+#: defaults.php:91
 msgid ""
 "Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in page "
 "%PostTitle%"
 msgstr ""
 
-#: defaults.php:91
+#: defaults.php:92
 msgid "User modifies content for a published page"
 msgstr ""
 
-#: defaults.php:91
+#: defaults.php:92
 msgid "Modified the content of published page %PostTitle%"
 msgstr ""
 
-#: defaults.php:92
+#: defaults.php:93
 msgid "User modifies content for a draft page"
 msgstr ""
 
-#: defaults.php:92
+#: defaults.php:93
 msgid "Modified the content of draft page %PostTitle%"
 msgstr ""
 
-#: defaults.php:94
+#: defaults.php:95
 msgid "Custom Posts"
 msgstr ""
 
-#: defaults.php:95
+#: defaults.php:96
 msgid "User created a new post with custom post type and saved it as draft"
 msgstr ""
 
-#: defaults.php:95
+#: defaults.php:96
 msgid ""
 "Created a new custom post called %PostTitle% of type %PostType%. Post ID is "
 "%PostID%"
 msgstr ""
 
-#: defaults.php:96
+#: defaults.php:97
 msgid "User published a post with custom post type"
 msgstr ""
 
-#: defaults.php:96
+#: defaults.php:97
 msgid ""
 "Published a custom post %PostTitle% of type %PostType%. Post URL is %PostUrl%"
 msgstr ""
 
-#: defaults.php:97
+#: defaults.php:98
 msgid "User modified a post with custom post type"
 msgstr ""
 
-#: defaults.php:97
+#: defaults.php:98
 msgid ""
 "Modified custom post %PostTitle% of type %PostType%. Post URL is %PostUrl%"
 msgstr ""
 
-#: defaults.php:98
+#: defaults.php:99
 msgid "User modified a draft post with custom post type"
 msgstr ""
 
-#: defaults.php:98
+#: defaults.php:99
 msgid ""
 "Modified draft custom post %PostTitle% of type is %PostType%. Post URL is "
 "%PostUrl%"
 msgstr ""
 
-#: defaults.php:99
+#: defaults.php:100
 msgid "User permanently deleted post with custom post type"
 msgstr ""
 
-#: defaults.php:99
-msgid "Deleted custom post %PostTitle% of type %PostType%"
+#: defaults.php:100
+msgid "Permanently Deleted custom post %PostTitle% of type %PostType%"
 msgstr ""
 
-#: defaults.php:100
+#: defaults.php:101
 msgid "User moved post with custom post type to trash"
 msgstr ""
 
-#: defaults.php:100
+#: defaults.php:101
 msgid "Moved custom post %PostTitle% to trash. Post type is %PostType%"
 msgstr ""
 
-#: defaults.php:101
+#: defaults.php:102
 msgid "User restored post with custom post type from trash"
 msgstr ""
 
-#: defaults.php:101
+#: defaults.php:102
 msgid "Restored custom post %PostTitle% of type %PostType% from trash"
 msgstr ""
 
-#: defaults.php:102
+#: defaults.php:103
 msgid "User changed the category of a post with custom post type"
 msgstr ""
 
-#: defaults.php:102
+#: defaults.php:103
 msgid ""
 "Changed the category(ies) of custom post %PostTitle% of type %PostType% from "
 "%OldCategories% to %NewCategories%"
 msgstr ""
 
-#: defaults.php:103
+#: defaults.php:104
 msgid "User changed the URL of a post with custom post type"
 msgstr ""
 
-#: defaults.php:103
+#: defaults.php:104
 msgid ""
 "Changed the URL of custom post %PostTitle% of type %PostType% from %OldUrl% "
 "to %NewUrl%"
 msgstr ""
 
-#: defaults.php:104
+#: defaults.php:105
 msgid "User changed the author or post with custom post type"
 msgstr ""
 
-#: defaults.php:104
+#: defaults.php:105
 msgid ""
 "Changed the author of custom post %PostTitle% of type %PostType% from "
 "%OldAuthor% to %NewAuthor%"
 msgstr ""
 
-#: defaults.php:105
+#: defaults.php:106
 msgid "User changed the status of post with custom post type"
 msgstr ""
 
-#: defaults.php:105
+#: defaults.php:106
 msgid ""
 "Changed the status of custom post %PostTitle% of type %PostType% from "
 "%OldStatus% to %NewStatus%"
 msgstr ""
 
-#: defaults.php:106
+#: defaults.php:107
 msgid "User changed the visibility of a post with custom post type"
 msgstr ""
 
-#: defaults.php:106
+#: defaults.php:107
 msgid ""
 "Changed the visibility of custom post %PostTitle% of type %PostType% from "
 "%OldVisibility% to %NewVisibility%"
 msgstr ""
 
-#: defaults.php:107
+#: defaults.php:108
 msgid "User changed the date of post with custom post type"
 msgstr ""
 
-#: defaults.php:107
+#: defaults.php:108
 msgid ""
 "Changed the date of custom post %PostTitle% of type %PostType% from %OldDate"
 "% to %NewDate%"
 msgstr ""
 
-#: defaults.php:108
+#: defaults.php:109
 msgid "User creates a custom field for a custom post"
 msgstr ""
 
-#: defaults.php:108
+#: defaults.php:109
 msgid ""
 "Created custom field %MetaKey% with value %MetaValue% in custom post "
 "%PostTitle% of type %PostType%"
 msgstr ""
 
-#: defaults.php:109
+#: defaults.php:110
 msgid "User updates a custom field for a custom post"
 msgstr ""
 
-#: defaults.php:109
+#: defaults.php:110
 msgid ""
 "Modified the value of custom field %MetaKey% from %MetaValueOld% to "
 "%MetaValueNew% in custom post %PostTitle% of type %PostType%"
 msgstr ""
 
-#: defaults.php:110
+#: defaults.php:111
 msgid "User deletes a custom field from a custom post"
 msgstr ""
 
-#: defaults.php:110
+#: defaults.php:111
 msgid ""
 "Deleted custom field %MetaKey% with value %MetaValue% from custom post "
 "%PostTitle% of type %PostType%"
 msgstr ""
 
-#: defaults.php:111
+#: defaults.php:112
 msgid "User updates a custom field name for a custom post"
 msgstr ""
 
-#: defaults.php:111
+#: defaults.php:112
 msgid ""
 "Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in custom "
 "post %PostTitle% of type %PostType%"
 msgstr ""
 
-#: defaults.php:112
+#: defaults.php:113
 msgid "User modifies content for a published custom post"
 msgstr ""
 
-#: defaults.php:112
+#: defaults.php:113
 msgid "Modified the content of published custom post type %PostTitle%"
 msgstr ""
 
-#: defaults.php:113
+#: defaults.php:114
 msgid "User modifies content for a draft custom post"
 msgstr ""
 
-#: defaults.php:113
+#: defaults.php:114
 msgid "Modified the content of draft custom post type %PostTitle%"
 msgstr ""
 
-#: defaults.php:115
+#: defaults.php:116
 msgid "Widgets"
 msgstr ""
 
-#: defaults.php:116
+#: defaults.php:117
 msgid "User added a new widget"
 msgstr ""
 
-#: defaults.php:116
+#: defaults.php:117
 msgid "Added a new %WidgetName% widget in  %Sidebar%"
 msgstr ""
 
-#: defaults.php:117
+#: defaults.php:118
 msgid "User modified a widget"
 msgstr ""
 
-#: defaults.php:117
+#: defaults.php:118
 msgid "Modified the %WidgetName% widget in %Sidebar%"
 msgstr ""
 
-#: defaults.php:118
+#: defaults.php:119
 msgid "User deleted widget"
 msgstr ""
 
-#: defaults.php:118
+#: defaults.php:119
 msgid "Deleted the %WidgetName% widget from %Sidebar%"
 msgstr ""
 
-#: defaults.php:119
+#: defaults.php:120
 msgid "User moved widget"
 msgstr ""
 
-#: defaults.php:119
+#: defaults.php:120
 msgid "Moved the %WidgetName% widget from %OldSidebar% to %NewSidebar%"
 msgstr ""
 
-#: defaults.php:120
+#: defaults.php:121
 msgid "User changed widget position"
 msgstr ""
 
-#: defaults.php:120
+#: defaults.php:121
 msgid ""
 "Moved the %WidgetName% widget from position %OldPosition% to position "
 "%NewPosition% in sidebar %Sidebar%"
 msgstr ""
 
-#: defaults.php:122
+#: defaults.php:123
 msgid "User Profiles"
 msgstr ""
 
-#: defaults.php:123
+#: defaults.php:124
 msgid "A new user was created on WordPress"
 msgstr ""
 
-#: defaults.php:123
+#: defaults.php:124
 msgid ""
 "User %NewUserData->Username% subscribed with a role of %NewUserData->Roles%"
 msgstr ""
 
-#: defaults.php:124
+#: defaults.php:125
 msgid "A user created another WordPress user"
 msgstr ""
 
-#: defaults.php:124
+#: defaults.php:125
 msgid ""
 "Created a new user %NewUserData->Username% with the role of %NewUserData-"
 ">Roles%"
 msgstr ""
 
-#: defaults.php:125
+#: defaults.php:126
 msgid "The role of a user was changed by another WordPress user"
 msgstr ""
 
-#: defaults.php:125
+#: defaults.php:126
 msgid "Changed the role of user %TargetUsername% from %OldRole% to %NewRole%"
 msgstr ""
 
-#: defaults.php:126
+#: defaults.php:127
 msgid "User has changed his or her password"
 msgstr ""
 
-#: defaults.php:126
+#: defaults.php:127
 msgid "Changed the password"
 msgstr ""
 
-#: defaults.php:127
+#: defaults.php:128
 msgid "A user changed another user's password"
 msgstr ""
 
-#: defaults.php:127
+#: defaults.php:128
 msgid ""
 "Changed the password for user %TargetUserData->Username% with the role of "
 "%TargetUserData->Roles%"
 msgstr ""
 
-#: defaults.php:128
+#: defaults.php:129
 msgid "User changed his or her email address"
 msgstr ""
 
-#: defaults.php:128
+#: defaults.php:129
 msgid "Changed the email address from %OldEmail% to %NewEmail%"
 msgstr ""
 
-#: defaults.php:129
+#: defaults.php:130
 msgid "A user changed another user's email address"
 msgstr ""
 
-#: defaults.php:129
+#: defaults.php:130
 msgid ""
 "Changed the email address of user account %TargetUsername% from %OldEmail% "
 "to %NewEmail%"
 msgstr ""
 
-#: defaults.php:130
+#: defaults.php:131
 msgid "A user was deleted by another user"
 msgstr ""
 
-#: defaults.php:130
+#: defaults.php:131
 msgid ""
 "Deleted User %TargetUserData->Username% with the role of %TargetUserData-"
 ">Roles%"
 msgstr ""
 
-#: defaults.php:132
+#: defaults.php:133
 msgid "Plugins & Themes"
 msgstr ""
 
-#: defaults.php:133
+#: defaults.php:134
 msgid "User installed a plugin"
 msgstr ""
 
-#: defaults.php:133
+#: defaults.php:134
 msgid "Installed the plugin %Plugin->Name% in %Plugin->plugin_dir_path%"
 msgstr ""
 
-#: defaults.php:134
+#: defaults.php:135
 msgid "User activated a WordPress plugin"
 msgstr ""
 
-#: defaults.php:134
+#: defaults.php:135
 msgid "Activated the plugin %PluginData->Name% installed in %PluginFile%"
 msgstr ""
 
-#: defaults.php:135
+#: defaults.php:136
 msgid "User deactivated a WordPress plugin"
 msgstr ""
 
-#: defaults.php:135
+#: defaults.php:136
 msgid "Deactivated the plugin %PluginData->Name% installed in %PluginFile%"
 msgstr ""
 
-#: defaults.php:136
+#: defaults.php:137
 msgid "User uninstalled a plugin"
 msgstr ""
 
-#: defaults.php:136
+#: defaults.php:137
 msgid ""
 "Uninstalled the plugin %PluginData->Name% which was installed in %PluginFile%"
 msgstr ""
 
-#: defaults.php:137
+#: defaults.php:138
 msgid "User upgraded a plugin"
 msgstr ""
 
-#: defaults.php:137
+#: defaults.php:138
 msgid "Upgraded the plugin %PluginData->Name% installed in %PluginFile%"
 msgstr ""
 
-#: defaults.php:138
+#: defaults.php:139
 msgid "User installed a theme"
 msgstr ""
 
-#: defaults.php:138
+#: defaults.php:139
 msgid "Installed theme \"%Theme->Name%\" in %Theme->get_template_directory%"
 msgstr ""
 
-#: defaults.php:139
+#: defaults.php:140
 msgid "User activated a theme"
 msgstr ""
 
-#: defaults.php:139
+#: defaults.php:140
 msgid ""
 "Activated theme \"%Theme->Name%\", installed in %Theme-"
 ">get_template_directory%"
 msgstr ""
 
-#: defaults.php:140
+#: defaults.php:141
 msgid "User uninstalled a theme"
 msgstr ""
 
-#: defaults.php:140
+#: defaults.php:141
 msgid ""
 "Deleted theme \"%Theme->Name%\" installed in %Theme->get_template_directory%"
 msgstr ""
 
-#: defaults.php:142
+#: defaults.php:143
 msgid "System Activity"
 msgstr ""
 
-#: defaults.php:143
+#: defaults.php:144
 msgid "Unknown Error"
 msgstr ""
 
-#: defaults.php:143
+#: defaults.php:144
 msgid "An unexpected error has occurred"
 msgstr ""
 
-#: defaults.php:144
+#: defaults.php:145
 msgid "PHP error"
 msgstr ""
 
-#: defaults.php:144 defaults.php:145 defaults.php:146 defaults.php:147
-#: defaults.php:148
+#: defaults.php:145 defaults.php:146 defaults.php:147 defaults.php:148
+#: defaults.php:149
 msgid "%Message%"
 msgstr ""
 
-#: defaults.php:145
+#: defaults.php:146
 msgid "PHP warning"
 msgstr ""
 
-#: defaults.php:146
+#: defaults.php:147
 msgid "PHP notice"
 msgstr ""
 
-#: defaults.php:147
+#: defaults.php:148
 msgid "PHP exception"
 msgstr ""
 
-#: defaults.php:148
+#: defaults.php:149
 msgid "PHP shutdown error"
 msgstr ""
 
-#: defaults.php:149
+#: defaults.php:150
 msgid "Events automatically pruned by system"
 msgstr ""
 
-#: defaults.php:149
+#: defaults.php:150
 msgid "%EventCount% event(s) automatically deleted by system"
 msgstr ""
 
-#: defaults.php:150
+#: defaults.php:151
 msgid "Option Anyone Can Register in WordPress settings changed"
 msgstr ""
 
-#: defaults.php:150
+#: defaults.php:151
 msgid "%NewValue% the option \"Anyone can register\""
 msgstr ""
 
-#: defaults.php:151
+#: defaults.php:152
 msgid "New User Default Role changed"
 msgstr ""
 
-#: defaults.php:151
+#: defaults.php:152
 msgid "Changed the New User Default Role from %OldRole% to %NewRole%"
 msgstr ""
 
-#: defaults.php:152
+#: defaults.php:153
 msgid "WordPress Administrator Notification email changed"
 msgstr ""
 
-#: defaults.php:152
+#: defaults.php:153
 msgid ""
 "Changed the WordPress administrator notifications email address from "
 "%OldEmail% to %NewEmail%"
 msgstr ""
 
-#: defaults.php:153
+#: defaults.php:154
 msgid "WordPress was updated"
 msgstr ""
 
-#: defaults.php:153
+#: defaults.php:154
 msgid "Updated WordPress from version %OldVersion% to %NewVersion%"
 msgstr ""
 
-#: defaults.php:154
+#: defaults.php:155
 msgid "User changes the WordPress Permalinks"
 msgstr ""
 
-#: defaults.php:154
+#: defaults.php:155
 msgid "Changed the WordPress permalinks from %OldPattern% to %NewPattern%"
 msgstr ""
 
-#: defaults.php:156
+#: defaults.php:157
 msgid "MultiSite"
 msgstr ""
 
-#: defaults.php:157
+#: defaults.php:158
 msgid "User granted Super Admin privileges"
 msgstr ""
 
-#: defaults.php:157
+#: defaults.php:158
 msgid "Granted Super Admin privileges to %TargetUsername%"
 msgstr ""
 
-#: defaults.php:158
+#: defaults.php:159
 msgid "User revoked from Super Admin privileges"
 msgstr ""
 
-#: defaults.php:158
+#: defaults.php:159
 msgid "Revoked Super Admin privileges from %TargetUsername%"
 msgstr ""
 
-#: defaults.php:159
+#: defaults.php:160
 msgid "Existing user added to a site"
 msgstr ""
 
-#: defaults.php:159
+#: defaults.php:160
 msgid ""
 "Added existing user %TargetUsername% with %TargetUserRole% role to site "
 "%SiteName%"
 msgstr ""
 
-#: defaults.php:160
+#: defaults.php:161
 msgid "User removed from site"
 msgstr ""
 
-#: defaults.php:160
+#: defaults.php:161
 msgid ""
 "Removed user %TargetUsername% with role %TargetUserRole% from %SiteName% site"
 msgstr ""
 
-#: defaults.php:161
+#: defaults.php:162
 msgid "New network user created"
 msgstr ""
 
-#: defaults.php:161
+#: defaults.php:162
 msgid "Created a new network user %NewUserData->Username%"
 msgstr ""
 
-#: defaults.php:162
+#: defaults.php:163
 msgid "New site added on network"
 msgstr ""
 
-#: defaults.php:162
+#: defaults.php:163
 msgid "Added site %SiteName% to the network"
 msgstr ""
 
-#: defaults.php:163
+#: defaults.php:164
 msgid "Existing site archived"
 msgstr ""
 
-#: defaults.php:163
+#: defaults.php:164
 msgid "Archived site %SiteName%"
 msgstr ""
 
-#: defaults.php:164
+#: defaults.php:165
 msgid "Archived site has been unarchived"
 msgstr ""
 
-#: defaults.php:164
+#: defaults.php:165
 msgid "Unarchived site %SiteName%"
 msgstr ""
 
-#: defaults.php:165
+#: defaults.php:166
 msgid "Deactivated site has been activated"
 msgstr ""
 
-#: defaults.php:165
+#: defaults.php:166
 msgid "Activated site %SiteName%"
 msgstr ""
 
-#: defaults.php:166
+#: defaults.php:167
 msgid "Site has been deactivated"
 msgstr ""
 
-#: defaults.php:166
+#: defaults.php:167
 msgid "Deactivated site %SiteName%"
 msgstr ""
 
-#: defaults.php:167
+#: defaults.php:168
 msgid "Existing site deleted from network"
 msgstr ""
 
-#: defaults.php:167
+#: defaults.php:168
 msgid "Deleted site %SiteName%"
 msgstr ""
 
-#: defaults.php:168
+#: defaults.php:169
 msgid "Activated theme on network"
 msgstr ""
 
-#: defaults.php:168
+#: defaults.php:169
 msgid ""
 "Network activated %Theme->Name% theme installed in %Theme-"
 ">get_template_directory%"
 msgstr ""
 
-#: defaults.php:169
+#: defaults.php:170
 msgid "Deactivated theme from network"
 msgstr ""
 
-#: defaults.php:169
+#: defaults.php:170
 msgid ""
 "Network deactivated %Theme->Name% theme installed in %Theme-"
 ">get_template_directory%"
 msgstr ""
 
-#: wp-security-audit-log.php:193
+#: wp-security-audit-log.php:194
 msgid ""
 "You are using a version of PHP that is older than %s, which is no longer "
 "supported.<br/>Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com"
@@ -1757,12 +1772,12 @@ msgstr ""
 
 #. Description of the plugin/theme
 msgid ""
-"Identify WordPress security issues before they become a problem and keep "
-"track of everything happening on your WordPress, including WordPress users "
+"Identify WordPress security issues before they become a problem. Keep track "
+"of everything happening on your WordPress including WordPress users "
 "activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit "
-"Log will generate a security alert for everything that happens on your "
-"WordPress blog or website. Use the Audit Log Viewer included in the plugin "
-"to see all the security alerts."
+"Log generates a security alert for everything that happens on your WordPress "
+"blogs and websites. Use the Audit Log Viewer included in the plugin to see "
+"all the security alerts."
 msgstr ""
 
 #. Author of the plugin/theme
