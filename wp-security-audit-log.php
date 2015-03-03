@@ -165,7 +165,13 @@ class WpSecurityAuditLog {
 	 * @internal
 	 */
 	public function AjaxDisableCustomField(){ 
-		$this->SetGlobalOption('excluded-custom', $_POST['notice']);
+		$fields = $this->GetGlobalOption('excluded-custom');
+		if ( isset($fields) && $fields != "") {
+			$fields .= ",".$_POST['notice'];
+		} else {
+			$fields = $_POST['notice'];
+		}
+		$this->SetGlobalOption('excluded-custom', $fields);
 		echo 'Custom Field '.$_POST['notice'].' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude">[Excluded Objects]</a> tab in the plugin settings';
 		die;
 	}

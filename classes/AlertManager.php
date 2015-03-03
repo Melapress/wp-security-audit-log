@@ -80,14 +80,33 @@ final class WSAL_AlertManager {
 	 * @param integer $type Alert type.
 	 * @param array $data Alert data.
 	 */
-	public function Trigger($type, $data = array(), $delayed = false){
-		if ($this->IsDisabledUser(wp_get_current_user()->user_login) && $this->IsDisabledRole(wp_get_current_user()->roles[0])) { 
-			if($delayed){
+	public function Trigger($type, $data = array(), $delayed = false){ 
+		if (!isset($data['Username'])) {
+			$data['Username'] = wp_get_current_user()->user_login;
+		}
+		if (!isset($data['CurrentUserRoles'])) {
+			$data['CurrentUserRoles'] = $this->plugin->settings->GetCurrentUserRoles();
+		}
+		if ( $this->CheckEnableUserRoles($data['Username'], $data['CurrentUserRoles']) ) { 
+			if ($delayed) {
 				$this->TriggerIf($type, $data, null);
-			}else{
+			} else {
 				$this->_CommitItem($type, $data, null);
 			}
 		}
+	}
+
+	/**
+	 * Check enable user and roles.
+	 * @param string user
+	 * @param array roles
+	 * @return boolean True if enable false otherwise.
+	 */
+	public function CheckEnableUserRoles($user, $roles) {
+		$is_enable = true;
+		if ( $user != "" && $this->IsDisabledUser($user) ) { $is_enable = false; }
+	    if ( $roles != "" && $this->IsDisabledRole($roles) ) { $is_enable = false; }
+	    return $is_enable;
 	}
 	
 	/**
@@ -284,11 +303,11 @@ final class WSAL_AlertManager {
 	/**
 	 * Returns whether user is enabled or not.
 	 * @param string user.
-	 * @return boolean True if enabled, false otherwise.
+	 * @return boolean True if disabled, false otherwise.
 	 */
 	public function IsDisabledUser($user)
 	{ 
-		return (!in_array($user, $this->GetDisabledUsers())) ? true : false;
+		return (in_array($user, $this->GetDisabledUsers())) ? true : false;
 	}
 	
 	/**
@@ -301,12 +320,16 @@ final class WSAL_AlertManager {
 
 	/**
 	 * Returns whether user is enabled or not.
-	 * @param string user.
-	 * @return boolean True if enabled, false otherwise.
+	 * @param array roles.
+	 * @return boolean True if disabled, false otherwise.
 	 */
-	public function IsDisabledRole($user)
+	public function IsDisabledRole($roles)
 	{ 
-		return (!in_array($user, $this->GetDisabledUsers())) ? true : false;
+		$is_disabled = false;
+		foreach ($roles as $role) {
+			if(in_array($role, $this->GetDisabledRoles())) $is_disabled = true;
+		}
+		return $is_disabled;
 	}
 	
 	/**

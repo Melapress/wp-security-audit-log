@@ -492,7 +492,7 @@ class WSAL_Settings {
 	/**
 	 * Users excluded from monitoring
 	 */
-	protected $_excluded_users = null;
+	protected $_excluded_users = array();
 	public function SetExcludedMonitoringUsers($users)
 	{
 		$this->_excluded_users = $users;
@@ -500,7 +500,7 @@ class WSAL_Settings {
 	}
 	public function GetExcludedMonitoringUsers()
 	{
-		if(is_null($this->_excluded_users)){
+		if(empty($this->_excluded_users)){
 			$this->_excluded_users = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-users'))));
 		}
 		return $this->_excluded_users;
@@ -509,13 +509,13 @@ class WSAL_Settings {
 	/**
 	 * Roles excluded from monitoring
 	 */
-	protected $_excluded_roles = null;
+	protected $_excluded_roles =  array();
 	public function SetExcludedMonitoringRoles($roles){
 		$this->_excluded_roles = $roles;
 		$this->_plugin->SetGlobalOption('excluded-roles', implode(',', $this->_excluded_roles));
 	}
 	public function GetExcludedMonitoringRoles(){
-		if(is_null($this->_excluded_roles)){
+		if(empty($this->_excluded_roles)){
 			$this->_excluded_roles = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-roles'))));
 		}
 		return $this->_excluded_roles;
@@ -524,13 +524,13 @@ class WSAL_Settings {
 	/**
 	 * Custom fields excluded from monitoring
 	 */
-	protected $_excluded_custom = null;
+	protected $_excluded_custom = array();
 	public function SetExcludedMonitoringCustom($custom){
 		$this->_excluded_custom = $custom;
 		$this->_plugin->SetGlobalOption('excluded-custom', implode(',', $this->_excluded_custom));
 	}
 	public function GetExcludedMonitoringCustom(){
-		if(is_null($this->_excluded_custom)){
+		if(empty($this->_excluded_custom)){
 			$this->_excluded_custom = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-custom'))));
 		}
 		return $this->_excluded_custom;

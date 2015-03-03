@@ -98,6 +98,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		if($this->IsPastLoginFailureLimit($ip, $site_id, $user))return;
 
 		if ($newAlertCode == 1002) {
+			if (!$this->plugin->alerts->CheckEnableUserRoles($username, $userRoles))return;
 			$occ = WSAL_DB_Occurrence::LoadMultiQuery('
 				SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
 				INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
@@ -137,7 +138,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				// create a new record exists user
 				$this->plugin->alerts->Trigger($newAlertCode, array(
 					'Attempts' => 1,
-					'Username' => $_POST["log"],
+					'Username' => $username,
 					'CurrentUserRoles' => $userRoles
 				));
 			} 
