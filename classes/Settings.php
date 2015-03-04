@@ -4,7 +4,8 @@ class WSAL_Settings {
 	 * @var WpSecurityAuditLog
 	 */
 	protected $_plugin;
-	public function __construct(WpSecurityAuditLog $plugin){
+	public function __construct(WpSecurityAuditLog $plugin){ 
+		ini_set( 'error_log', WP_CONTENT_DIR . '/debug.log' );
 		$this->_plugin = $plugin;
 	}
 	
@@ -484,6 +485,7 @@ class WSAL_Settings {
 	}
 	
 	protected function ValidateIP($ip){
+		error_log("IP returned in ValidateIP function: ".$ip);
 		$opts = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
 		if ($this->IsInternalIPsFiltered()) $opts = $opts | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
 		return filter_var($ip, FILTER_VALIDATE_IP, $opts);
