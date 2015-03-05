@@ -24,6 +24,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	}
 	
 	public function EventAdminShutdown(){
+		if (!current_user_can("switch_themes")) return;
 		if(is_null($this->old_allowedthemes))return;
 		$new_allowedthemes = array_keys((array)get_site_option('allowedthemes'));
 		
