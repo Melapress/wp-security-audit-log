@@ -486,7 +486,11 @@ class WSAL_Settings {
 	protected function ValidateIP($ip){
 		$opts = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
 		if ($this->IsInternalIPsFiltered()) $opts = $opts | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
-		return filter_var($ip, FILTER_VALIDATE_IP, $opts);
+		$filteredIP = filter_var($ip, FILTER_VALIDATE_IP, $opts);
+		if (!$filteredIP || empty($filteredIP)) {
+			error_log("Invalid IP in ValidateIP function: ".$ip);
+		}
+		return $filteredIP;
 	}
 	
 	// </editor-fold>
