@@ -81,13 +81,15 @@ final class WSAL_AlertManager {
 	 * @param array $data Alert data.
 	 */
 	public function Trigger($type, $data = array(), $delayed = false){ 
-		if (!isset($data['Username'])) {
-			$data['Username'] = wp_get_current_user()->user_login;
+		$username = wp_get_current_user()->user_login;
+		if (empty($username) && !empty($data["Username"])) { 
+			$username = $data['Username'];
 		}
-		if (!isset($data['CurrentUserRoles'])) {
-			$data['CurrentUserRoles'] = $this->plugin->settings->GetCurrentUserRoles();
+		$roles = $this->plugin->settings->GetCurrentUserRoles();
+		if (empty($roles) && !empty($data["CurrentUserRoles"])) {
+			$roles = $data['CurrentUserRoles']; 
 		}
-		if ( $this->CheckEnableUserRoles($data['Username'], $data['CurrentUserRoles']) ) { 
+		if ( $this->CheckEnableUserRoles($username, $roles) ) { 
 			if ($delayed) {
 				$this->TriggerIf($type, $data, null);
 			} else {
@@ -115,12 +117,17 @@ final class WSAL_AlertManager {
 	 * @param array $data Alert data.
 	 * @param callable $cond A future condition callback (receives an object of type WSAL_AlertManager as parameter).
 	 */
-	public function TriggerIf($type, $data, $cond = null){
-		$this->_pipeline[] = array(
-			'type' => $type,
-			'data' => $data,
-			'cond' => $cond,
-		);
+	public function TriggerIf($type, $data, $cond = null) {
+		$username = wp_get_current_user()->user_login;
+		$roles = $this->plugin->settings->GetCurrentUserRoles();
+		
+		if ($this->CheckEnableUserRoles($username, $roles)) {
+			$this->_pipeline[] = array(
+				'type' => $type,
+				'data' => $data,
+				'cond' => $cond,
+			);
+		}
 	}
 	
 	/**

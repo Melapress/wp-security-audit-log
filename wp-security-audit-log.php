@@ -4,7 +4,7 @@ Plugin Name: WP Security Audit Log
 Plugin URI: http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/
 Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
 Author: WP White Security
-Version: 1.4.0
+Version: 1.5.0
 Text Domain: wp-security-audit-log
 Author URI: http://www.wpwhitesecurity.com/
 License: GPL2
@@ -116,6 +116,7 @@ class WpSecurityAuditLog {
 	 * Initialize plugin.
 	 */
 	public function __construct(){
+		
 		// profiler has to be loaded manually
 		require_once('classes/SimpleProfiler.php');
 		$this->profiler = new WSAL_SimpleProfiler();
@@ -139,6 +140,9 @@ class WpSecurityAuditLog {
 		
 		// listen for installation event
 		register_activation_hook(__FILE__, array($this, 'Install'));
+
+		// listen for init event
+		add_action('init', array($this, 'Init'));
 		
 		// listen for cleanup event
 		add_action('wsal_cleanup', array($this, 'CleanUp'));
@@ -152,6 +156,15 @@ class WpSecurityAuditLog {
 		// handle admin Disable Custom Field
 		add_action('wp_ajax_AjaxDisableCustomField', array($this, 'AjaxDisableCustomField'));	
 	}
+
+	/**
+	 * @internal Render plugin stuff in page header.
+	 */
+	public function Init(){
+		
+		WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
+	}
+
 	
 	/**
 	 * @internal Render plugin stuff in page header.
@@ -172,7 +185,7 @@ class WpSecurityAuditLog {
 			$fields = $_POST['notice'];
 		}
 		$this->SetGlobalOption('excluded-custom', $fields);
-		echo 'Custom Field '.$_POST['notice'].' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude">[Excluded Objects]</a> tab in the plugin settings';
+		echo 'Custom Field '.$_POST['notice'].' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude"> Excluded Objects </a> tab in the plugin settings';
 		die;
 	}
 	
@@ -225,15 +238,15 @@ class WpSecurityAuditLog {
 			die(1);
 		}
 		
+		// ensure that the system is installed and schema is correct
+		WSAL_DB_ActiveRecord::InstallAll();
+		
 		$PreInstalled = $this->IsInstalled();
 		
 		// if system already installed, do updates now (if any)
 		$OldVersion = $this->GetOldVersion();
 		$NewVersion = $this->GetNewVersion();
 		if ($PreInstalled && $OldVersion != $NewVersion) $this->Update($OldVersion, $NewVersion);
-		
-		// ensure that the system is installed and schema is correct
-		WSAL_DB_ActiveRecord::InstallAll();
 
 		// Load options from wp_options table or wp_sitemeta in multisite enviroment
 		$data = $this->read_options_prefixed("wsal-");
@@ -270,7 +283,7 @@ class WpSecurityAuditLog {
 		$this->GetGlobalOption('version', $new_version);
 		
 		// disable all developer options
-		$this->settings->ClearDevOptions();
+		//$this->settings->ClearDevOptions();
 		
 		// do version-to-version specific changes
 		if(version_compare($old_version, '1.2.3') == -1){
@@ -572,7 +585,7 @@ add_action('plugins_loaded', array(WpSecurityAuditLog::GetInstance(), 'Load'));
 WpSecurityAuditLog::GetInstance()->LoadDefaults();
 
 // Start listening to events
-WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
+//WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
 
 // End profile snapshot
 $s->Stop();

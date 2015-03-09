@@ -38,7 +38,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
 				array(1000, E_NOTICE, __('User logs in', 'wp-security-audit-log'), __('Successfully logged in', 'wp-security-audit-log')),
 				array(1001, E_NOTICE, __('User logs out', 'wp-security-audit-log'), __('Successfully logged out', 'wp-security-audit-log')),
 				array(1002, E_WARNING, __('Login failed', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected', 'wp-security-audit-log')),
-				array(1003, E_WARNING, __('Login failed unknown user', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected using non existing user.', 'wp-security-audit-log')),
+				array(1003, E_WARNING, __('Login failed  / non existing user', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected using non existing user.', 'wp-security-audit-log')),
 				array(2010, E_NOTICE, __('User uploaded file from Uploads directory', 'wp-security-audit-log'), __('Uploaded the file %FileName% in %FilePath%', 'wp-security-audit-log')),
 				array(2011, E_WARNING, __('User deleted file from Uploads directory', 'wp-security-audit-log'), __('Deleted the file %FileName% from %FilePath%', 'wp-security-audit-log')),
 				array(2046, E_CRITICAL, __('User changed a file using the theme editor', 'wp-security-audit-log'), __('Modified %File% with the Theme Editor', 'wp-security-audit-log')),

@@ -6,6 +6,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		if (is_admin()) {
 			add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
 			add_action('wp_ajax_AjaxRunCleanup', array($this, 'AjaxRunCleanup'));
+			add_action('wp_ajax_AjaxGetAllUsers', array($this, 'AjaxGetAllUsers'));
+			add_action('wp_ajax_AjaxGetAllRoles', array($this, 'AjaxGetAllRoles'));
 		}
 	}
 	
@@ -96,6 +98,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 		?>
 		<h2 id="wsal-tabs" class="nav-tab-wrapper"><a href="#tab-general" class="nav-tab">General</a><a href="#tab-exclude" class="nav-tab">Exclude Objects</a></h2>
+		 <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
 		<form id="audit-log-settings" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr(admin_url('admin-ajax.php')); ?>" />
@@ -574,4 +577,25 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</script><?php
 	}
 	
+	public function AjaxGetAllUsers() {
+		$users = array();
+		foreach ( get_users() as $user ) {
+			if (strpos($user->user_login, $_GET['term']) !== false) {
+				array_push($users, $user->user_login);
+			}
+		}
+		echo json_encode($users);
+		exit;
+	}
+
+	public function AjaxGetAllRoles() {
+		$roles = array();
+		foreach ( get_editable_roles() as $role_name => $role_info ) {
+			if (strpos($role_name, $_GET['term']) !== false) {
+				array_push($roles, $role_name);
+			}
+		}
+		echo json_encode($roles);
+		exit;
+	}
 }

@@ -25,7 +25,11 @@ jQuery(document).ready(function(){
 		jQuery.post(jQuery('#ajaxurl').val(), {action: 'AjaxCheckSecurityToken', token: value}, function(data){
 			jQuery('#'+type+'QueryBox, #'+type+'QueryAdd').attr('disabled', false);
 			if (type != 'Custom') {
-				if(data==='other' && !confirm('The specified token is not a user nor a role, do you still want to add it?'))return;
+				if(data==='other') {
+					alert('The specified token is not a user nor a role!');
+					jQuery('#'+type+'QueryBox').val('');
+					return;
+				}	
 			}
 			jQuery('#'+type+'QueryBox').val('');
 			jQuery('#'+type+'List').append(jQuery('<span class="sectoken-'+data+'"/>').text(value).append(
@@ -48,4 +52,20 @@ jQuery(document).ready(function(){
 			);
 		}
 	});
+	
+
+	var usersUrl = ajaxurl + "?action=AjaxGetAllUsers";
+	jQuery("#ExUserQueryBox").autocomplete({
+	    source: usersUrl,
+	    minLength:1
+	});
+
+	var rolesUrl = ajaxurl + "?action=AjaxGetAllRoles";
+	jQuery("#ExRoleQueryBox").autocomplete({
+	    source: rolesUrl,
+	    minLength:1
+	});
+	
 });
+
+
