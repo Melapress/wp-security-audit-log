@@ -543,6 +543,7 @@ class WSAL_Settings {
 	public function GetExcludedMonitoringCustom(){
 		if(empty($this->_excluded_custom)){
 			$this->_excluded_custom = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-custom'))));
+			asort($this->_excluded_custom);
 		}
 		return $this->_excluded_custom;
 	}
