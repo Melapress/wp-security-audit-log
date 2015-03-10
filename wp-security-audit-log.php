@@ -158,7 +158,7 @@ class WpSecurityAuditLog {
 	}
 
 	/**
-	 * @internal Render plugin stuff in page header.
+	 * @internal Start to trigger the events after installation.
 	 */
 	public function Init(){
 		
@@ -325,17 +325,21 @@ class WpSecurityAuditLog {
     	global $wpdb;
     	if ( $this->IsMultisite() ) {
     		$table_name = $wpdb->prefix .'sitemeta';
-    		$result = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
+    		$results = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
     	} else {
-	    	$result = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
+	    	$results = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
 	    }
-    	return $result;
+    	return $results;
 	}
 
 	public function SetOptions($data){
 		foreach($data as $key => $option) { 
 			$this->options = new WSAL_DB_Option();
-			$this->options->SetOptionValue($option['option_name'], $option['option_value']);
+			if ( $this->IsMultisite() ) {
+				$this->options->SetOptionValue($option['meta_key'], $option['meta_value']);
+			} else {
+				$this->options->SetOptionValue($option['option_name'], $option['option_value']);
+			}
 		}
 	}
 

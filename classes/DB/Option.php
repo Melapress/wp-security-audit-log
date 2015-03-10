@@ -8,7 +8,7 @@ class WSAL_DB_Option extends WSAL_DB_ActiveRecord
 	public $id = 0;
 	public $option_name = '';
 	public static $option_name_maxlength = 100;
-	public $option_value = array(); // force mixed type
+	public $option_value = ''; 
 
 	public function SetOptionValue($name, $value)
 	{	
