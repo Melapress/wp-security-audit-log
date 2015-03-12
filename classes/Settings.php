@@ -5,7 +5,6 @@ class WSAL_Settings {
 	 */
 	protected $_plugin;
 	public function __construct(WpSecurityAuditLog $plugin) {
-		ini_set( 'error_log', WP_CONTENT_DIR . '/debug.log' );
 		$this->_plugin = $plugin;
 	}
 	
