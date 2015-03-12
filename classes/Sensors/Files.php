@@ -51,6 +51,5 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 				'Plugin' => $_REQUEST['plugin'],
 			));
 		}
-	}
-	
+	}	
 }
