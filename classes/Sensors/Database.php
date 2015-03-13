@@ -11,24 +11,26 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		$is_themes = $actype == 'themes';
 		$is_plugins = $actype == 'plugins';
 		$table_names = "";
-		$type_query = "";
+
+		$typeQueries = array(
+			"create" => array(),
+			"update" => array(),
+			"delete" => array()
+		);
 		foreach($queries as $qry) {
 			$str = explode(" ", $qry);
 			if (preg_match("|CREATE TABLE ([^ ]*)|", $qry)) {
-				$table_names .= $str[2] . ",";
-				$type_query = 'create';	
-			} else if (preg_match("|UPDATE ([^ ]*)|", $qry)) {
-				$table_names .= $str[1] . ",";
-				$type_query = 'update';
-			} else if (preg_match("|DELETE ([^ ]*)|", $qry)) {
-				$table_names .= $str[1] . ",";
-				$type_query = 'delete';
+				$typeQueries['create'] = $str[2];
+			} else if (preg_match("|ALTER TABLE ([^ ]*)|", $qry)) {
+				$typeQueries['update'] = $str[2];
+			} else if (preg_match("|DROP TABLE ([^ ]*)|", $qry)) {
+				$typeQueries['delete'] = $str[2];
 			}
 		}
-		$table_names = rtrim($table_names, ",");
+
 		//Action Plugin Component
+		$alertOptions = array();
 		if ($is_plugins) {
-			$event_code = $this->GetEventQueryType($actype, $type_query);
 			if (isset($_REQUEST['plugin'])) {
 				$pluginFile = $_REQUEST['plugin'];
 			} else {
@@ -37,12 +39,9 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			$pluginName = basename($pluginFile, '.php');
 			$pluginName = str_replace(array('_', '-', '  '), ' ', $pluginName);
 			$pluginName = ucwords($pluginName);
-			$this->plugin->alerts->Trigger($event_code, array(
-				'Plugin' => (object)array(
-					'Name' => $pluginName,
-				),
-				'TableNames' => $table_names
-			));
+			$alertOptions["Plugin"] = (object)array(
+				'Name' => $pluginName,
+			);
 		//Action Theme Component
 		} else if ($is_themes) {
 			if (isset($_REQUEST['theme'])) {
@@ -52,21 +51,22 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			}
 			$themeName = str_replace(array('_', '-', '  '), ' ', $themeName);
 			$themeName = ucwords($themeName);
-			$event_code = $this->GetEventQueryType($actype, $type_query);
-			$this->plugin->alerts->Trigger($event_code, array(
-				'Theme' => (object)array(
-					'Name' => $themeName,
-				),
-				'TableNames' => $table_names
-			));
+			$alertOptions["Theme"] = (object)array(
+				'Name' => $themeName,
+			);
 		//Action Unknown Component
 		} else {
-			$event_code = $this->GetEventQueryType($actype, $type_query);
-			$this->plugin->alerts->Trigger($event_code, array(
-				'Component' => 'Unknown',
-				'TableNames' => $table_names
-			));
+			$alertOptions["Component"] = "Unknown";
 		}
+
+		foreach($typeQueries as $queryType => $tableNames) {
+			if (!empty($tableNames)) {
+				$event_code = $this->GetEventQueryType($actype, $queryType);
+				$alertOptions["TableNames"] = $tableNames;
+				$this->plugin->alerts->Trigger($event_code, $alertOptions);
+			}
+		}
+
 		return $queries;
 	}
 	
