@@ -20,14 +20,13 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		foreach($queries as $qry) {
 			$str = explode(" ", $qry);
 			if (preg_match("|CREATE TABLE ([^ ]*)|", $qry)) {
-				$typeQueries['create'] = $str[2];
+				array_push($typeQueries['create'], $str[2]);
 			} else if (preg_match("|ALTER TABLE ([^ ]*)|", $qry)) {
-				$typeQueries['update'] = $str[2];
+				array_push($typeQueries['update'], $str[2]);
 			} else if (preg_match("|DROP TABLE ([^ ]*)|", $qry)) {
-				$typeQueries['delete'] = $str[2];
+				array_push($typeQueries['delete'], $str[2]);
 			}
 		}
-
 		//Action Plugin Component
 		$alertOptions = array();
 		if ($is_plugins) {
@@ -62,7 +61,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		foreach($typeQueries as $queryType => $tableNames) {
 			if (!empty($tableNames)) {
 				$event_code = $this->GetEventQueryType($actype, $queryType);
-				$alertOptions["TableNames"] = $tableNames;
+				$alertOptions["TableNames"] = implode(",", $tableNames);
 				$this->plugin->alerts->Trigger($event_code, $alertOptions);
 			}
 		}
