@@ -31,4 +31,5 @@ abstract class WSAL_AbstractSensor {
 	protected function LogInfo($message, $args){
 		$this->Log(0003, $message, $args);
 	}
+
 }

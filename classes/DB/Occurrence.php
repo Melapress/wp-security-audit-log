@@ -149,7 +149,7 @@ class WSAL_DB_Occurrence extends WSAL_DB_ActiveRecord {
 	 * @return boolean True on success, false on failure.
 	 */
 	public function Delete(){
-		foreach($this->GetMeta() as $meta)$meta->Delete();
+		foreach($this->GetMeta() as $meta) $meta->Delete();
 		return parent::Delete();
 	}
 	

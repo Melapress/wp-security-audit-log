@@ -4,7 +4,7 @@ Plugin Name: WP Security Audit Log
 Plugin URI: http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/
 Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
 Author: WP White Security
-Version: 1.4.1
+Version: 1.5.0
 Text Domain: wp-security-audit-log
 Author URI: http://www.wpwhitesecurity.com/
 License: GPL2
@@ -83,6 +83,12 @@ class WpSecurityAuditLog {
 	 * @var WSAL_SimpleProfiler
 	 */
 	public $profiler;
+
+	/**
+	 * Options.
+	 * @var WSAL_DB_Option
+	 */
+	public $options;
 	
 	/**
 	 * Contains a list of cleanup callbacks.
@@ -110,9 +116,13 @@ class WpSecurityAuditLog {
 	 * Initialize plugin.
 	 */
 	public function __construct(){
+		
 		// profiler has to be loaded manually
 		require_once('classes/SimpleProfiler.php');
 		$this->profiler = new WSAL_SimpleProfiler();
+
+		require_once('classes/DB/ActiveRecord.php');
+		require_once('classes/DB/Option.php');
 		
 		// load autoloader and register base paths
 		require_once('classes/Autoloader.php');
@@ -130,6 +140,9 @@ class WpSecurityAuditLog {
 		
 		// listen for installation event
 		register_activation_hook(__FILE__, array($this, 'Install'));
+
+		// listen for init event
+		add_action('init', array($this, 'Init'));
 		
 		// listen for cleanup event
 		add_action('wsal_cleanup', array($this, 'CleanUp'));
@@ -139,14 +152,41 @@ class WpSecurityAuditLog {
 		
 		// render wsal footer
 		add_action('admin_footer', array($this, 'RenderFooter'));
-		
+
+		// handle admin Disable Custom Field
+		add_action('wp_ajax_AjaxDisableCustomField', array($this, 'AjaxDisableCustomField'));	
 	}
+
+	/**
+	 * @internal Start to trigger the events after installation.
+	 */
+	public function Init(){
+		
+		WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
+	}
+
 	
 	/**
 	 * @internal Render plugin stuff in page header.
 	 */
 	public function RenderHeader(){
 		// common.css?
+	}
+
+	/**
+	 * Disable Custom Field through ajax.
+	 * @internal
+	 */
+	public function AjaxDisableCustomField(){ 
+		$fields = $this->GetGlobalOption('excluded-custom');
+		if ( isset($fields) && $fields != "") {
+			$fields .= ",".$_POST['notice'];
+		} else {
+			$fields = $_POST['notice'];
+		}
+		$this->SetGlobalOption('excluded-custom', $fields);
+		echo 'Custom Field '.$_POST['notice'].' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude"> Excluded Objects </a> tab in the plugin settings';
+		die;
 	}
 	
 	/**
@@ -198,15 +238,22 @@ class WpSecurityAuditLog {
 			die(1);
 		}
 		
+		// ensure that the system is installed and schema is correct
+		WSAL_DB_ActiveRecord::InstallAll();
+		
 		$PreInstalled = $this->IsInstalled();
 		
 		// if system already installed, do updates now (if any)
 		$OldVersion = $this->GetOldVersion();
 		$NewVersion = $this->GetNewVersion();
 		if ($PreInstalled && $OldVersion != $NewVersion) $this->Update($OldVersion, $NewVersion);
-		
-		// ensure that the system is installed and schema is correct
-		WSAL_DB_ActiveRecord::InstallAll();
+
+		// Load options from wp_options table or wp_sitemeta in multisite enviroment
+		$data = $this->read_options_prefixed("wsal-");
+		if (!empty($data)) {
+			$this->SetOptions($data);
+		}
+		$this->deleteAllOptions();
 		
 		// if system wasn't installed, try migration now
 		if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
@@ -236,7 +283,7 @@ class WpSecurityAuditLog {
 		$this->GetGlobalOption('version', $new_version);
 		
 		// disable all developer options
-		$this->settings->ClearDevOptions();
+		//$this->settings->ClearDevOptions();
 		
 		// do version-to-version specific changes
 		if(version_compare($old_version, '1.2.3') == -1){
@@ -250,16 +297,14 @@ class WpSecurityAuditLog {
 	public function Uninstall(){
 		if ($this->GetGlobalOption("delete-data") == 1) {
 			WSAL_DB_ActiveRecord::UninstallAll();
-			$flag = true;
-			while ( $flag ) {
-				$flag = $this->delete_options_prefixed( 'wsal-' );
-			}
+			$this->deleteAllOptions();
 		}
 		wp_clear_scheduled_hook('wsal_cleanup');
 	}
 
 	public function delete_options_prefixed( $prefix ) {
     	global $wpdb;
+
     	if ( $this->IsMultisite() ) {
     		$table_name = $wpdb->prefix .'sitemeta';
     		$result = $wpdb->query( "DELETE FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'" );
@@ -268,18 +313,36 @@ class WpSecurityAuditLog {
 	    }
     	return ($result) ? true : false;
 	}
+
+	private function deleteAllOptions() {
+    	$flag = true;
+		while ( $flag ) {
+			$flag = $this->delete_options_prefixed( 'wsal-' );
+		}
+	}
 	
 	public function read_options_prefixed( $prefix ) {
     	global $wpdb;
     	if ( $this->IsMultisite() ) {
     		$table_name = $wpdb->prefix .'sitemeta';
-    		$result = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
+    		$results = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
     	} else {
-	    	$result = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
+	    	$results = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
 	    }
-    	return $result;
+    	return $results;
 	}
-	
+
+	public function SetOptions($data){
+		foreach($data as $key => $option) { 
+			$this->options = new WSAL_DB_Option();
+			if ( $this->IsMultisite() ) {
+				$this->options->SetOptionValue($option['meta_key'], $option['meta_value']);
+			} else {
+				$this->options->SetOptionValue($option['option_name'], $option['option_value']);
+			}
+		}
+	}
+
 	/**
 	 * Migrate data from old plugin.
 	 */
@@ -395,8 +458,11 @@ class WpSecurityAuditLog {
 	 * @return mixed Option's value or $default if option not set.
 	 */
 	public function GetGlobalOption($option, $default = false, $prefix = self::OPT_PRFX){
-		$fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
-		return $fn($prefix . $option, $default);
+		//$fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
+		//var_dump($fn($prefix . $option, $default));
+		//return $fn($prefix . $option, $default);
+		$this->options = new WSAL_DB_Option();
+		return $this->options->GetOptionValue($prefix . $option, $default);     
 	}
 	
 	/**
@@ -406,8 +472,10 @@ class WpSecurityAuditLog {
 	 * @param string $prefix (Optional) A prefix used before option name.
 	 */
 	public function SetGlobalOption($option, $value, $prefix = self::OPT_PRFX){
-		$fn = $this->IsMultisite() ? 'update_site_option' : 'update_option';
-		$fn($prefix . $option, $value);
+		//$fn = $this->IsMultisite() ? 'update_site_option' : 'update_option';
+		//$fn($prefix . $option, $value);
+		$this->options = new WSAL_DB_Option();
+		$this->options->SetOptionValue($prefix . $option, $value);
 	}
 	
 	/**
@@ -521,7 +589,7 @@ add_action('plugins_loaded', array(WpSecurityAuditLog::GetInstance(), 'Load'));
 WpSecurityAuditLog::GetInstance()->LoadDefaults();
 
 // Start listening to events
-WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
+//WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
 
 // End profile snapshot
 $s->Stop();

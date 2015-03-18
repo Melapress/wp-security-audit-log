@@ -49,7 +49,7 @@
 		 * @param mixed $value The value to inspect and render.
 		 * @param boolean $inspectMethods Whether to inspect and output methods for objects or not.
 		 */
-		public function __construct($value, $inspectMethods = false){
+		public function __construct($value, $inspectMethods = false){ 
 			$this->value = $value;
 			$this->inspect_methods = $inspectMethods;
 			

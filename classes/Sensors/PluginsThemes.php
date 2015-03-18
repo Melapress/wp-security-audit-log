@@ -24,7 +24,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$is_plugins = $actype == 'plugins';
 		
 		// install plugin
-        if(in_array($action, array('install-plugin', 'upload-plugin'))){
+        if(in_array($action, array('install-plugin', 'upload-plugin')) && current_user_can("install_plugins")){
 			$plugin = array_values(array_diff(array_keys(get_plugins()), array_keys($this->old_plugins)));
 			if(count($plugin) != 1)
 				return $this->LogError(
@@ -48,7 +48,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
         }
 		
 		// activate plugin
-        if($is_plugins && in_array($action, array('activate', 'activate-selected'))){
+        if($is_plugins && in_array($action, array('activate', 'activate-selected')) && current_user_can("activate_plugins")){
 			if(isset($_REQUEST['plugin'])){
 				if(!isset($_REQUEST['checked']))
 					$_REQUEST['checked'] = array();
@@ -71,7 +71,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// deactivate plugin
-        if($is_plugins && in_array($action, array('deactivate', 'deactivate-selected'))){
+        if($is_plugins && in_array($action, array('deactivate', 'deactivate-selected')) && current_user_can("activate_plugins")){
 			if(isset($_REQUEST['plugin'])){
 				if(!isset($_REQUEST['checked']))
 					$_REQUEST['checked'] = array();
@@ -94,7 +94,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// uninstall plugin
-        if($is_plugins && in_array($action, array('delete-selected'))){
+        if($is_plugins && in_array($action, array('delete-selected')) && current_user_can("delete_plugins")){
 			if(!isset($_REQUEST['verify-delete'])){
 				// first step, before user approves deletion
 				// TODO store plugin data in session here
@@ -117,7 +117,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// upgrade plugin
-        if(in_array($action, array('upgrade-plugin', 'update-selected'))){
+        if(in_array($action, array('upgrade-plugin', 'update-selected')) && current_user_can("update_plugins")){
 			if(isset($_REQUEST['plugin'])){
 				if(!isset($_REQUEST['checked']))
 					$_REQUEST['checked'] = array();
@@ -145,7 +145,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// install theme
-        if(in_array($action, array('install-theme', 'upload-theme'))){
+        if(in_array($action, array('install-theme', 'upload-theme')) && current_user_can("install_themes")){
 			$themes = array_diff(wp_get_themes(), $this->old_themes);
 			foreach($themes as $theme){
 				$this->plugin->alerts->Trigger(5005, array(
@@ -162,7 +162,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// uninstall theme
-        if($is_themes && in_array($action, array('delete-selected', 'delete'))){
+        if($is_themes && in_array($action, array('delete-selected', 'delete')) && current_user_can("install_themes")){
 			foreach($this->GetRemovedThemes() as $theme){
 				$this->plugin->alerts->Trigger(5007, array(
 					'Theme' => (object)array(

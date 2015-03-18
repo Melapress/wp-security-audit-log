@@ -133,3 +133,18 @@ function WsalSsasChange(value){
 	jQuery('#wsal-cbid').val(value);
 	jQuery('#audit-log-viewer').submit();
 }
+
+function WsalDisableCustom(link, meta_key){
+	var nfe = jQuery(this).parents('div:first');
+	jQuery(link).hide();
+	jQuery.ajax({
+		type: 'POST',
+		url: ajaxurl,
+		async: false,
+		data: { action: 'AjaxDisableCustomField', notice: meta_key },
+		success: function(data) {
+			var notice = jQuery('<div class="updated" data-notice-name="notifications-extension"></div>').html(data);
+			jQuery("h2:first").after(notice);
+		}
+	});
+}

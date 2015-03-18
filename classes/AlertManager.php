@@ -16,7 +16,7 @@ final class WSAL_AlertManager {
 	 * @var WpSecurityAuditLog
 	 */
 	protected $plugin;
-	
+
 	/**
 	 * Create new AlertManager instance.
 	 * @param WpSecurityAuditLog $plugin
@@ -28,7 +28,7 @@ final class WSAL_AlertManager {
 		
 		add_action('shutdown', array($this, '_CommitPipeline'));
 	}
-	
+
 	/**
 	 * Add new logger from file inside autoloader path.
 	 * @param string $file Path to file.
@@ -80,12 +80,35 @@ final class WSAL_AlertManager {
 	 * @param integer $type Alert type.
 	 * @param array $data Alert data.
 	 */
-	public function Trigger($type, $data = array(), $delayed = false){
-		if($delayed){
-			$this->TriggerIf($type, $data, null);
-		}else{
-			$this->_CommitItem($type, $data, null);
+	public function Trigger($type, $data = array(), $delayed = false){ 
+		$username = wp_get_current_user()->user_login;
+		if (empty($username) && !empty($data["Username"])) { 
+			$username = $data['Username'];
 		}
+		$roles = $this->plugin->settings->GetCurrentUserRoles();
+		if (empty($roles) && !empty($data["CurrentUserRoles"])) {
+			$roles = $data['CurrentUserRoles']; 
+		}
+		if ( $this->CheckEnableUserRoles($username, $roles) ) { 
+			if ($delayed) {
+				$this->TriggerIf($type, $data, null);
+			} else {
+				$this->_CommitItem($type, $data, null);
+			}
+		}
+	}
+
+	/**
+	 * Check enable user and roles.
+	 * @param string user
+	 * @param array roles
+	 * @return boolean True if enable false otherwise.
+	 */
+	public function CheckEnableUserRoles($user, $roles) {
+		$is_enable = true;
+		if ( $user != "" && $this->IsDisabledUser($user) ) { $is_enable = false; }
+	    if ( $roles != "" && $this->IsDisabledRole($roles) ) { $is_enable = false; }
+	    return $is_enable;
 	}
 	
 	/**
@@ -94,20 +117,26 @@ final class WSAL_AlertManager {
 	 * @param array $data Alert data.
 	 * @param callable $cond A future condition callback (receives an object of type WSAL_AlertManager as parameter).
 	 */
-	public function TriggerIf($type, $data, $cond = null){
-		$this->_pipeline[] = array(
-			'type' => $type,
-			'data' => $data,
-			'cond' => $cond,
-		);
+	public function TriggerIf($type, $data, $cond = null) {
+		$username = wp_get_current_user()->user_login;
+		$roles = $this->plugin->settings->GetCurrentUserRoles();
+		
+		if ($this->CheckEnableUserRoles($username, $roles)) {
+			$this->_pipeline[] = array(
+				'type' => $type,
+				'data' => $data,
+				'cond' => $cond,
+			);
+		}
 	}
 	
 	/**
 	 * @internal Commit an alert now.
 	 */
-	protected function _CommitItem($type, $data, $cond, $_retry = true){
+	protected function _CommitItem($type, $data, $cond, $_retry = true)
+	{
 		if(!$cond || !!call_user_func($cond, $this)){
-			if($this->IsEnabled($type)){
+			if($this->IsEnabled($type)) { 
 				if(isset($this->_alerts[$type])){
 					// ok, convert alert to a log entry
 					$this->_triggered_types[] = $type;
@@ -276,6 +305,46 @@ final class WSAL_AlertManager {
 		}
 		ksort($result);
 		return $result;
+	}
+
+	/**
+	 * Returns whether user is enabled or not.
+	 * @param string user.
+	 * @return boolean True if disabled, false otherwise.
+	 */
+	public function IsDisabledUser($user)
+	{ 
+		return (in_array($user, $this->GetDisabledUsers())) ? true : false;
+	}
+	
+	/**
+	 * @return Returns an array of disabled users.
+	 */
+	public function GetDisabledUsers()
+	{ 
+		return $this->plugin->settings->GetExcludedMonitoringUsers();
+	}
+
+	/**
+	 * Returns whether user is enabled or not.
+	 * @param array roles.
+	 * @return boolean True if disabled, false otherwise.
+	 */
+	public function IsDisabledRole($roles)
+	{ 
+		$is_disabled = false;
+		foreach ($roles as $role) {
+			if(in_array($role, $this->GetDisabledRoles())) $is_disabled = true;
+		}
+		return $is_disabled;
+	}
+	
+	/**
+	 * @return Returns an array of disabled users.
+	 */
+	public function GetDisabledRoles()
+	{ 
+		return $this->plugin->settings->GetExcludedMonitoringRoles();
 	}
 	
 }

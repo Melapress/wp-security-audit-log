@@ -130,6 +130,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	
 	protected function CheckCategoryCreation(){
 		if (empty($_POST)) return;
+		if (!current_user_can("manage_categories")) return;
 
 		$categoryName = '';
 		if(!empty($_POST['screen']) && !empty($_POST['tag-name']) &&
@@ -153,6 +154,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 	protected function CheckCategoryDeletion(){
 		if (empty($_POST)) return;
+		if (!current_user_can("manage_categories")) return;
+		
 		$action = !empty($_POST['action']) ? $_POST['action']
 			: (!empty($_POST['action2']) ? $_POST['action2'] : '');
 		if (!$action) return;
