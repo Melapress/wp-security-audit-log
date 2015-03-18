@@ -3,7 +3,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
 		parent::__construct($plugin);
-		if (is_admin()) {
+
+		$hasPermission = ($this->_plugin->settings->CurrentUserCan('view') || $this->_plugin->settings->CurrentUserCan('edit'));
+		
+		if ($hasPermission) {
 			add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
 			add_action('wp_ajax_AjaxRunCleanup', array($this, 'AjaxRunCleanup'));
 			add_action('wp_ajax_AjaxGetAllUsers', array($this, 'AjaxGetAllUsers'));
