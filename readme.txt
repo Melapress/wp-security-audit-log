@@ -181,7 +181,7 @@ Yes it is possible to do so with the premium [WSAL Reporting Extension](http://w
 	* Updated the code where is_admin() function was being used to follow better security practises
 	
 * **Bug Fixes**
-	* Fixed a problem where a PHP exception was being thrown during the activation of the plugin [support ticket]()
+	* Fixed a problem where a PHP exception was being thrown during the activation of the plugin [support ticket](https://wordpress.org/support/topic/php-error-alert-with-code-5001-has-not-be-registered?replies=11)
 
 = 1.4.1 (2015-03-12) =
 * **Bug Fix**
