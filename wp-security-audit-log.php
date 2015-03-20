@@ -160,12 +160,7 @@ class WpSecurityAuditLog {
 	/**
 	 * @internal Start to trigger the events after installation.
 	 */
-	public function Init()
-	{
-		$optionsTable = new WSAL_DB_Option();
-		if (!$optionsTable->IsInstalled()) {
-			$optionsTable->Install();
-		}
+	public function Init(){
 		WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
 	}
 
@@ -209,6 +204,11 @@ class WpSecurityAuditLog {
 	 * @internal Load the rest of the system.
 	 */
 	public function Load(){
+
+		$optionsTable = new WSAL_DB_Option();
+		if (!$optionsTable->IsInstalled()) {
+			$optionsTable->Install();
+		}
 		// load translations
 		load_plugin_textdomain('wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/');
 

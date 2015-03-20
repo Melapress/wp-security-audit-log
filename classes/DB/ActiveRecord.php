@@ -376,7 +376,7 @@ abstract class WSAL_DB_ActiveRecord {
 		$plugin = WpSecurityAuditLog::GetInstance();
 		foreach(glob(dirname(__FILE__) . '/*.php') as $file){
 			$class = $plugin->GetClassFileClassName($file);
-			if(is_subclass_of($class, __CLASS__)){ error_log("Class name: " . $class);
+			if(is_subclass_of($class, __CLASS__)){
 				$class = new $class();
 				$class->Install();
 			}
