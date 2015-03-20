@@ -3,7 +3,7 @@
 class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		$hasPermission = (current_user_can("install_plugins") || current_user_can("activate_plugins")
+		$hasPermission = (current_user_can("install_plugins") || current_user_can("activate_plugins") ||
 		current_user_can("delete_plugins") || current_user_can("update_plugins") || current_user_can("install_themes"));
 
 		add_action('admin_init', array($this, 'EventAdminInit'));
