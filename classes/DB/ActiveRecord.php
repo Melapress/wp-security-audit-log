@@ -156,8 +156,7 @@ abstract class WSAL_DB_ActiveRecord {
 	 */
 	public function Install(){
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-		$result = dbDelta($this->_GetInstallQuery());
-		error_log("dbDelta result: " . print_r($result, true));
+		dbDelta($this->_GetInstallQuery());
 	}
 	
 	/**

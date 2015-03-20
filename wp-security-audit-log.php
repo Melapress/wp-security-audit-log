@@ -160,8 +160,12 @@ class WpSecurityAuditLog {
 	/**
 	 * @internal Start to trigger the events after installation.
 	 */
-	public function Init(){
-		
+	public function Init()
+	{
+		$optionsTable = new WSAL_DB_Option();
+		if (!$optionsTable->IsInstalled()) {
+			$optionsTable->Install();
+		}
 		WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
 	}
 
@@ -239,9 +243,7 @@ class WpSecurityAuditLog {
 		}
 		
 		// ensure that the system is installed and schema is correct
-		error_log("Creating DB, WSAL_DB_ActiveRecord::InstallAll");
 		WSAL_DB_ActiveRecord::InstallAll();
-		error_log("End, DB should be created");
 		
 		$PreInstalled = $this->IsInstalled();
 		
