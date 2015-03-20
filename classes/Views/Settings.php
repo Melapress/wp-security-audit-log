@@ -577,6 +577,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	public function AjaxGetAllUsers() {
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+
 		$users = array();
 		foreach ( get_users() as $user ) {
 			if (strpos($user->user_login, $_GET['term']) !== false) {
@@ -588,6 +591,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	public function AjaxGetAllRoles() {
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+		
 		$roles = array();
 		foreach ( get_editable_roles() as $role_name => $role_info ) {
 			if (strpos($role_name, $_GET['term']) !== false) {
