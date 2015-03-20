@@ -23,6 +23,7 @@ abstract class WSAL_DB_ActiveRecord {
 	protected $_state = self::STATE_UNKNOWN;
 	
 	public function __construct($data = null) {
+		ini_set( 'error_log', WP_CONTENT_DIR . '/debug.log' );
 		if(!$this->_table)
 			throw new Exception('Class "' . __CLASS__ . '" requires "_table" to be set.');
 		if(!$this->_idkey)
@@ -84,6 +85,7 @@ abstract class WSAL_DB_ActiveRecord {
 			$sql .= ' COLLATE ' . $wpdb->collate;
 		
 		return $sql;
+		
 	}
 	
 	/**
@@ -154,7 +156,8 @@ abstract class WSAL_DB_ActiveRecord {
 	 */
 	public function Install(){
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-		dbDelta($this->_GetInstallQuery());
+		$result = dbDelta($this->_GetInstallQuery());
+		error_log("dbDelta result: " . print_r($result, true));
 	}
 	
 	/**
@@ -374,7 +377,7 @@ abstract class WSAL_DB_ActiveRecord {
 		$plugin = WpSecurityAuditLog::GetInstance();
 		foreach(glob(dirname(__FILE__) . '/*.php') as $file){
 			$class = $plugin->GetClassFileClassName($file);
-			if(is_subclass_of($class, __CLASS__)){
+			if(is_subclass_of($class, __CLASS__)){ error_log("Class name: " . $class);
 				$class = new $class();
 				$class->Install();
 			}

@@ -239,7 +239,9 @@ class WpSecurityAuditLog {
 		}
 		
 		// ensure that the system is installed and schema is correct
+		error_log("Creating DB, WSAL_DB_ActiveRecord::InstallAll");
 		WSAL_DB_ActiveRecord::InstallAll();
+		error_log("End, DB should be created");
 		
 		$PreInstalled = $this->IsInstalled();
 		
