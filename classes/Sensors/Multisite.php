@@ -5,7 +5,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	public function HookEvents() {
 		if($this->plugin->IsMultisite()){
 			add_action('admin_init', array($this, 'EventAdminInit'));
-			if(is_admin())add_action('shutdown', array($this, 'EventAdminShutdown'));
+			if(current_user_can('switch_themes'))add_action('shutdown', array($this, 'EventAdminShutdown'));
 			add_action('wpmu_new_blog', array($this, 'EventNewBlog'), 10, 1);
 			add_action('archive_blog', array($this, 'EventArchiveBlog'));
 			add_action('unarchive_blog', array($this, 'EventUnarchiveBlog'));
@@ -24,7 +24,6 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	}
 	
 	public function EventAdminShutdown(){
-		if (!current_user_can("switch_themes")) return;
 		if(is_null($this->old_allowedthemes))return;
 		$new_allowedthemes = array_keys((array)get_site_option('allowedthemes'));
 		
