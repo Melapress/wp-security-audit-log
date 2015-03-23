@@ -4,7 +4,7 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
 		add_action('widgets_init', array($this, 'EventWidgetMove'));
-		if(is_admin())add_action('init', array($this, 'EventWidgetPostMove'));
+		if(current_user_can("edit_dashboard"))add_action('init', array($this, 'EventWidgetPostMove'));
 		add_action('sidebar_admin_setup', array($this, 'EventWidgetActivity'));
 	}
 	
