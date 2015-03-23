@@ -3,7 +3,7 @@
 class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		if(!current_user_can("manage_categories"))add_action('init', array($this, 'EventWordpressInit'));
+		if(current_user_can("manage_categories"))add_action('admin_init', array($this, 'EventWordpressInit'));
 		add_action('transition_post_status', array($this, 'EventPostChanged'), 10, 3);
 		add_action('delete_post', array($this, 'EventPostDeleted'), 10, 1);
 		add_action('wp_trash_post', array($this, 'EventPostTrashed'), 10, 1);

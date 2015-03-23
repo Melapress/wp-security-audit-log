@@ -269,22 +269,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><label for="Incognito"><?php _e('Hide Plugin in Plugins Page', 'wp-security-audit-log'); ?></label></th>
-							<td>
-								<fieldset>
-									<label for="Incognito">
-										<input type="checkbox" name="Incognito" value="1" id="Incognito"<?php
-											if($this->_plugin->settings->IsIncognito())echo ' checked="checked"';
-										?>/> <?php _e('Hide', 'wp-security-audit-log'); ?>
-									</label>
-									<br/>
-									<span class="description">
-										<?php _e('To manually revert this setting set the value of option wsal-hide-plugin to 0 in the wp_options table.', 'wp-security-audit-log'); ?>
-									</span>
-								</fieldset>
-							</td>
-						</tr>
-						<tr>
 						<th><label for="aroption_on"><?php _e('Refresh Audit Log Viewer', 'wp-security-audit-log'); ?></label></th>
 						<td>
 							<fieldset>

@@ -3,11 +3,13 @@
 class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		add_action('widgets_init', array($this, 'EventWidgetMove'));
-		if(current_user_can("edit_dashboard"))add_action('init', array($this, 'EventWidgetPostMove'));
+		if(current_user_can("edit_dashboard")) {
+			add_action('admin_init', array($this, 'EventWidgetMove'));
+			add_action('admin_init', array($this, 'EventWidgetPostMove'));
+		}
 		add_action('sidebar_admin_setup', array($this, 'EventWidgetActivity'));
 	}
-	
+
 	protected $_WidgetMoveData = null;
 	
 	public function EventWidgetMove(){
@@ -65,17 +67,16 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
                 $this->_WidgetMoveData = array('widget' => $wName, 'from' => $fromSidebar, 'to' => $toSidebar);
                 return;
             }
-			
-			$this->plugin->alerts->Trigger(2045, array(
+
+            $this->plugin->alerts->Trigger(2045, array(
 				'WidgetName' => $wName,
 				'OldSidebar' => $fromSidebar,
 				'NewSidebar' => $toSidebar,
-			));
+			));	
         }
 	}
 	
 	public function EventWidgetPostMove(){
-
 		//#!-- generates the event 2071
 		if(isset($_REQUEST['action'])&&($_REQUEST['action']=='widgets-order'))
 		{
