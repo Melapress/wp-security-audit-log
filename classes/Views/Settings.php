@@ -3,12 +3,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
 		parent::__construct($plugin);
-		if (is_admin()) {
-			add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
-			add_action('wp_ajax_AjaxRunCleanup', array($this, 'AjaxRunCleanup'));
-			add_action('wp_ajax_AjaxGetAllUsers', array($this, 'AjaxGetAllUsers'));
-			add_action('wp_ajax_AjaxGetAllRoles', array($this, 'AjaxGetAllRoles'));
-		}
+
+		add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
+		add_action('wp_ajax_AjaxRunCleanup', array($this, 'AjaxRunCleanup'));
+		add_action('wp_ajax_AjaxGetAllUsers', array($this, 'AjaxGetAllUsers'));
+		add_action('wp_ajax_AjaxGetAllRoles', array($this, 'AjaxGetAllRoles'));
 	}
 	
 	public function HasPluginShortcutLink(){
@@ -515,6 +514,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	public function AjaxGetAllUsers() {
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+
 		$users = array();
 		foreach ( get_users() as $user ) {
 			if (strpos($user->user_login, $_GET['term']) !== false) {
@@ -526,6 +528,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	public function AjaxGetAllRoles() {
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+		
 		$roles = array();
 		foreach ( get_editable_roles() as $role_name => $role_info ) {
 			if (strpos($role_name, $_GET['term']) !== false) {
