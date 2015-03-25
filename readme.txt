@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report
 Requires at least: 3.6
 Tested up to: 4.1.1
-Stable tag: 1.4.1
+Stable tag: 1.5.0
 
 Keep an WordPress audit log of all users' changes and other under the hood activity - Identify WordPress issues before they become security problems.
 
@@ -170,6 +170,18 @@ Yes it is possible to do so with the premium [WSAL Reporting Extension](http://w
 7. If there are more than 15 sites in a multisite, an auto complete site search shows up instead of the drop down menu (see [screenshots](https://wordpress.org/plugins/wp-security-audit-log/screenshots/) for reference)
 
 == Changelog ==
+
+= 1.5.0 (2015-03-18) =
+* **New Features**
+	* Ability to exclude custom fields from monitoring (custom fields can be excluded from the Audit Log Viewer with a simple click or you can specify them in the settings)
+	* Ability to exclude WordPress users and roles from monitoring
+
+* **Improvements**
+	* WP Security Audit Log now has its own settings table in WordPress database. This will provide us with more flexibility and have more centralization of data
+	* Updated the code where is_admin() function was being used to follow better security practises
+	
+* **Bug Fixes**
+	* Fixed a problem where a PHP exception was being thrown during the activation of the plugin [support ticket](https://wordpress.org/support/topic/php-error-alert-with-code-5001-has-not-be-registered?replies=11)
 
 = 1.4.1 (2015-03-12) =
 * **Bug Fix**

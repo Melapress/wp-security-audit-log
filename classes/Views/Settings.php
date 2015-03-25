@@ -3,12 +3,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
 		parent::__construct($plugin);
-		if (is_admin()) {
-			add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
-			add_action('wp_ajax_AjaxRunCleanup', array($this, 'AjaxRunCleanup'));
-			add_action('wp_ajax_AjaxGetAllUsers', array($this, 'AjaxGetAllUsers'));
-			add_action('wp_ajax_AjaxGetAllRoles', array($this, 'AjaxGetAllRoles'));
-		}
+
+		add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
+		add_action('wp_ajax_AjaxRunCleanup', array($this, 'AjaxRunCleanup'));
+		add_action('wp_ajax_AjaxGetAllUsers', array($this, 'AjaxGetAllUsers'));
+		add_action('wp_ajax_AjaxGetAllRoles', array($this, 'AjaxGetAllRoles'));
 	}
 	
 	public function HasPluginShortcutLink(){
@@ -270,22 +269,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><label for="Incognito"><?php _e('Hide Plugin in Plugins Page', 'wp-security-audit-log'); ?></label></th>
-							<td>
-								<fieldset>
-									<label for="Incognito">
-										<input type="checkbox" name="Incognito" value="1" id="Incognito"<?php
-											if($this->_plugin->settings->IsIncognito())echo ' checked="checked"';
-										?>/> <?php _e('Hide', 'wp-security-audit-log'); ?>
-									</label>
-									<br/>
-									<span class="description">
-										<?php _e('To manually revert this setting set the value of option wsal-hide-plugin to 0 in the wp_options table.', 'wp-security-audit-log'); ?>
-									</span>
-								</fieldset>
-							</td>
-						</tr>
-						<tr>
 						<th><label for="aroption_on"><?php _e('Refresh Audit Log Viewer', 'wp-security-audit-log'); ?></label></th>
 						<td>
 							<fieldset>
@@ -515,6 +498,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 	
 	public function AjaxGetAllUsers() {
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+
 		$users = array();
 		foreach ( get_users() as $user ) {
 			if (strpos($user->user_login, $_GET['term']) !== false) {
@@ -526,6 +512,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	public function AjaxGetAllRoles() {
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+		
 		$roles = array();
 		foreach ( get_editable_roles() as $role_name => $role_info ) {
 			if (strpos($role_name, $_GET['term']) !== false) {
