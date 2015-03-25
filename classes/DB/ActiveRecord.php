@@ -23,6 +23,7 @@ abstract class WSAL_DB_ActiveRecord {
 	protected $_state = self::STATE_UNKNOWN;
 	
 	public function __construct($data = null) {
+		ini_set( 'error_log', WP_CONTENT_DIR . '/debug.log' );
 		if(!$this->_table)
 			throw new Exception('Class "' . __CLASS__ . '" requires "_table" to be set.');
 		if(!$this->_idkey)
@@ -84,6 +85,7 @@ abstract class WSAL_DB_ActiveRecord {
 			$sql .= ' COLLATE ' . $wpdb->collate;
 		
 		return $sql;
+		
 	}
 	
 	/**

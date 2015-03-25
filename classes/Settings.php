@@ -4,7 +4,7 @@ class WSAL_Settings {
 	 * @var WpSecurityAuditLog
 	 */
 	protected $_plugin;
-	public function __construct(WpSecurityAuditLog $plugin){ 
+	public function __construct(WpSecurityAuditLog $plugin) {
 		$this->_plugin = $plugin;
 	}
 	
