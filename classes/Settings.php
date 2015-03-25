@@ -385,7 +385,7 @@ class WSAL_Settings {
 		$name = sanitize_key(basename($name));
 		return isset($data[$name]) ? $data[$name] : array();
 	}
-	public function SetLicenses($data){
+	public function SetLicenses($data){ 
 		$this->_plugin->SetGlobalOption('licenses', $data);
 	}
 	public function GetLicenseKey($name){
@@ -419,7 +419,7 @@ class WSAL_Settings {
 		$this->SetLicenses($data);
 	}
 	public function ClearLicenses(){
-		$this->SetLicenses(array());
+		$this->SetLicenses(array()); 
 	}
 	
 	// </editor-fold>
