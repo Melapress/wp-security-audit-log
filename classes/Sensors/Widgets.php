@@ -3,10 +3,7 @@
 class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 
 	public function HookEvents() {
-		error_log("Has edit dashboard permission: " . current_user_can("edit_dashboard"));
-		error_log("Has edit theme options permission: " . current_user_can("edit_theme_options"));
-
-		if(current_user_can("edit_dashboard")) { //this needs to change to edit_theme_options
+		if(current_user_can("edit_theme_options")) { 
 			add_action('admin_init', array($this, 'EventWidgetMove'));
 			add_action('admin_init', array($this, 'EventWidgetPostMove'));
 		}
@@ -18,7 +15,6 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 	public function EventWidgetMove(){
         if(isset($_POST) && !empty($_POST['sidebars']))
 		{
-			error_log("Start 2045 alert: ".print_r($_POST,true));
             $crtSidebars = $_POST['sidebars'];
             $sidebars = array();
             foreach ( $crtSidebars as $key => $val )
@@ -84,13 +80,12 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 		//#!-- generates the event 2071
 		if(isset($_REQUEST['action'])&&($_REQUEST['action']=='widgets-order'))
 		{
-			error_log("Start 2071 alert: ".print_r($_REQUEST,true));
 			if(isset($_REQUEST['sidebars']) && !empty($_REQUEST['sidebars'])){
 				// Get the sidebars from $_REQUEST
 				$requestSidebars = array();
 				if($_REQUEST['sidebars']){
 					foreach($_REQUEST['sidebars'] as $key => &$value){
-						if(preg_match('/^sidebar-/', $key) && !empty($value)){
+						if(!empty($value)){
 							// build the sidebars array
 							$value = explode(',', $value);
 							// Cleanup widgets' name
@@ -105,7 +100,6 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 				if($requestSidebars){
 					// Get the sidebars from DATABASE
 					$sidebar_widgets = wp_get_sidebars_widgets();
-					error_log("All sidebar widgets : ".print_r($sidebar_widgets,true));
 					// Get global sidebars so we can retrieve the real name of the sidebar
 					global $wp_registered_sidebars;
 
@@ -114,7 +108,7 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 						if(isset($sidebar_widgets[$sidebarName])){ 		
 
 							foreach($sidebar_widgets[$sidebarName] as $i => $widgetName){
-								$index = array_search($widgetName, $widgets); error_log("widget : ".print_r($widgetName,true));
+								$index = array_search($widgetName, $widgets);
 								// check to see whether or not the widget has been moved
 								if($i != $index) {
 									$sn = $sidebarName;
