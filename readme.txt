@@ -163,7 +163,7 @@ Yes it is possible to do so with the premium [WSAL Reporting Extension](http://w
 = Can I exclude users or roles from being monitored? =
 Yes it is possible to exclude both users and roles from being monitored. To exclude a user or a role specify it in the Excluded Objects section in the plugin's settings node.
 
-= Can I exclude custom fields from being monitored =
+= Can I exclude custom fields from being monitored? =
 Yes it is possible to exclude custom fields from being monitored. To exclude a custom field you can specify it in the Excluded Objects section in the plugin's settings node, else you can click the option Exclude Custom Field from Monitoring from the alert itself.
 
 == Screenshots ==
@@ -184,9 +184,9 @@ Yes it is possible to exclude custom fields from being monitored. To exclude a c
 	
 * **Bug Fixes**
 	* Updated the licensing mechanism to correct problem where [WP Security Audit Log premium add-ons](http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/extensions/) could not be activated.
-	* Fixed several issues where the database tables were not being created during install or upgrade. [Support ticket](https://wordpress.org/support/topic/wp_wsal_options-not-created-with-plugin-update?replies=8) and [Support ticket 2](https://wordpress.org/support/topic/missing-database-tables-1?replies=9]
+	* Fixed several issues where the database tables were not being created during install or upgrade. [Support ticket](https://wordpress.org/support/topic/wp_wsal_options-not-created-with-plugin-update?replies=8) and [Support ticket 2](https://wordpress.org/support/topic/missing-database-tables-1?replies=9)
 	* Fixed an issue where the plugin did not monitor any activity in specific scenarios. [Support ticket](https://wordpress.org/support/topic/clean-install-not-reporting-when-posts-or-pages-are-creatededited?replies=4) and [Support ticket 2](https://wordpress.org/support/topic/blank-audit-log-page?replies=2)
-	* Removed duplicate options in the settings page. [Support ticket](https://wordpress.org/support/topic/refresh-audit-view-refresh-audit-log-viewer?replies=5]
+	* Removed duplicate options in the settings page. [Support ticket](https://wordpress.org/support/topic/refresh-audit-view-refresh-audit-log-viewer?replies=5)
 
 = 1.5.0 (2015-03-18) =
 * **New Features**
