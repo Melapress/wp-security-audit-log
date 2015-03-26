@@ -24,7 +24,7 @@ class WSAL_Views_Licensing extends WSAL_AbstractView {
 
 	protected function Save(){
 		$this->_plugin->settings->ClearLicenses();
-		if (isset($_REQUEST['license']))
+		if (isset($_REQUEST['license'])) 
 			foreach ($_REQUEST['license'] as $name => $key)
 				$this->_plugin->licensing->ActivateLicense($name, $key);
 	}
