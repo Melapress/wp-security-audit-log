@@ -14,6 +14,8 @@ class WSAL_DB_Option extends WSAL_DB_ActiveRecord
 	{	
 		$this->GetNamedOption($name);
 		$this->option_name = $name;
+		// Serialize if $value is array or object
+		$value = maybe_serialize($value);
 		$this->option_value = $value;
 		$this->Save();
 	}
@@ -21,6 +23,8 @@ class WSAL_DB_Option extends WSAL_DB_ActiveRecord
 	public function GetOptionValue($name, $default = array())
 	{
 		$this->GetNamedOption($name);
+		// Unerialize if $value is array or object
+		$this->option_value = maybe_unserialize($this->option_value);
 		return $this->IsLoaded() ? $this->option_value : $default;
 	}
 
