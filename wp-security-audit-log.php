@@ -161,7 +161,6 @@ class WpSecurityAuditLog {
 	 * @internal Start to trigger the events after installation.
 	 */
 	public function Init(){
-		
 		WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
 	}
 
@@ -205,6 +204,20 @@ class WpSecurityAuditLog {
 	 * @internal Load the rest of the system.
 	 */
 	public function Load(){
+
+		$optionsTable = new WSAL_DB_Option();
+		if (!$optionsTable->IsInstalled()) {
+			$optionsTable->Install();
+			//setting the prunig date with the old value or the default value	
+			$pruningDate = $this->settings->GetPruningDate();
+			$this->settings->SetPruningDate($pruningDate);
+
+			$pruningEnabled = $this->settings->IsPruningLimitEnabled();
+			$this->settings->SetPruningLimitEnabled($pruningEnabled);
+			//setting the prunig limit with the old value or the default value
+			$pruningLimit = $this->settings->GetPruningLimit();
+			$this->settings->SetPruningLimit($pruningLimit);
+		}
 		// load translations
 		load_plugin_textdomain('wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/');
 
