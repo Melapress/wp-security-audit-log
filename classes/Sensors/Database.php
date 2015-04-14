@@ -12,7 +12,11 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		$str = explode(" ", $query);
 
 		if (preg_match("|DROP TABLE ([^ ]*)|", $query)) {
-			array_push($table_names, $str[4]);
+			if (!empty($str[4])) {
+				array_push($table_names, $str[4]);
+			} else {
+				array_push($table_names, $str[2]);
+			}
 			$actype = basename($_SERVER['SCRIPT_NAME'], '.php');
 			$alertOptions = $this->GetActionType($actype);
 		}
@@ -26,34 +30,43 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	}
 	
 	public function EventDBDeltaQuery($queries) {
-		$actype = basename($_SERVER['SCRIPT_NAME'], '.php');
-		$is_themes = $actype == 'themes';
-		$is_plugins = $actype == 'plugins';
-		$table_names = "";
 
 		$typeQueries = array(
 			"create" => array(),
 			"update" => array(),
 			"delete" => array()
 		);
+		global $wpdb;
+
 		foreach($queries as $qry) {
 			$str = explode(" ", $qry);
 			if (preg_match("|CREATE TABLE ([^ ]*)|", $qry)) {
-				array_push($typeQueries['create'], $str[2]);
+				if ($wpdb->get_var("SHOW TABLES LIKE '" . $str[2] . "'") != $str[2]) {
+					//some plugins keep trying to create tables even when they already exist- would result in too many alerts
+					array_push($typeQueries['create'], $str[2]);   
+				}
 			} else if (preg_match("|ALTER TABLE ([^ ]*)|", $qry)) {
 				array_push($typeQueries['update'], $str[2]);
 			} else if (preg_match("|DROP TABLE ([^ ]*)|", $qry)) {
-				array_push($typeQueries['delete'], $str[4]);
+				if (!empty($str[4])) {
+					array_push($typeQueries['delete'], $str[4]);
+				} else {
+					array_push($typeQueries['delete'], $str[2]);
+				}
 			}
 		}
-		$actype = basename($_SERVER['SCRIPT_NAME'], '.php');
-		$alertOptions = $this->GetActionType($actype);
 
-		foreach($typeQueries as $queryType => $tableNames) {
-			if (!empty($tableNames)) {
-				$event_code = $this->GetEventQueryType($actype, $queryType);
-				$alertOptions["TableNames"] = implode(",", $tableNames);
-				$this->plugin->alerts->Trigger($event_code, $alertOptions);
+		if (!empty($typeQueries["create"]) || !empty($typeQueries["update"]) || !empty($typeQueries["delete"])) {
+			$actype = basename($_SERVER['SCRIPT_NAME'], '.php');
+			$alertOptions = $this->GetActionType($actype);
+
+
+			foreach($typeQueries as $queryType => $tableNames) {
+				if (!empty($tableNames)) {
+					$event_code = $this->GetEventQueryType($actype, $queryType);
+					$alertOptions["TableNames"] = implode(",", $tableNames);
+					$this->plugin->alerts->Trigger($event_code, $alertOptions);
+				}
 			}
 		}
 
