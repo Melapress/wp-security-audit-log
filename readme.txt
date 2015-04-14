@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report
 Requires at least: 3.6
 Tested up to: 4.1.1
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 
 Keep an WordPress audit log of all users' changes and other under the hood activity - Identify WordPress issues before they become security problems.
 
@@ -177,6 +177,10 @@ Yes it is possible to exclude custom fields from being monitored. To exclude a c
 7. If there are more than 15 sites in a multisite, an auto complete site search shows up instead of the drop down menu (see [screenshots](https://wordpress.org/plugins/wp-security-audit-log/screenshots/) for reference)
 
 == Changelog ==
+
+= 1.5.2 (2015-04-07) =
+* **Bug Fix**
+	* Removed a clause which changed the debug log path (used for testing) [Support Ticket](https://wordpress.org/support/topic/plugin-is-changing-error-log-location)
 
 = 1.5.1 (2015-03-26) =
 * **Improvements**
