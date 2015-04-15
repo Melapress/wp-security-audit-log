@@ -43,6 +43,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
 				array(2011, E_WARNING, __('User deleted file from Uploads directory', 'wp-security-audit-log'), __('Deleted the file %FileName% from %FilePath%', 'wp-security-audit-log')),
 				array(2046, E_CRITICAL, __('User changed a file using the theme editor', 'wp-security-audit-log'), __('Modified %File% with the Theme Editor', 'wp-security-audit-log')),
 				array(2051, E_CRITICAL, __('User changed a file using the plugin editor', 'wp-security-audit-log'), __('Modified %File% with the Plugin Editor', 'wp-security-audit-log')),
+				array(2052, E_CRITICAL, __('User changed generic tables', 'wp-security-audit-log'), __('Changed the parent of %CategoryName% category from %OldParent% to %NewParent%', 'wp-security-audit-log')),
 			),
 			__('Blog Posts', 'wp-security-audit-log') => array(
 				array(2000, E_NOTICE, __('User created a new blog post and saved it as draft', 'wp-security-audit-log'), __('Created a new blog post called %PostTitle%. Blog post ID is %PostID%', 'wp-security-audit-log')),
@@ -167,6 +168,17 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
 				array(7005, E_CRITICAL, __('Existing site deleted from network', 'wp-security-audit-log'), __('Deleted site %SiteName%', 'wp-security-audit-log')),
 				array(5008, E_CRITICAL, __('Activated theme on network', 'wp-security-audit-log'), __('Network activated %Theme->Name% theme installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
 				array(5009, E_CRITICAL, __('Deactivated theme from network', 'wp-security-audit-log'), __('Network deactivated %Theme->Name% theme installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
+			),
+			__('Database', 'wp-security-audit-log') => array(
+				array(5010, E_CRITICAL, __('Plugin created tables', 'wp-security-audit-log'), __('Plugin %Plugin->Name% created these tables in the database: %TableNames%', 'wp-security-audit-log')),
+				array(5011, E_CRITICAL, __('Plugin modified tables structure', 'wp-security-audit-log'), __('Plugin %Plugin->Name% modified the structure of these database tables: %TableNames%', 'wp-security-audit-log')),
+				array(5012, E_CRITICAL, __('Plugin deleted tables', 'wp-security-audit-log'), __('Plugin %Plugin->Name% deleted the following tables from the database: %TableNames%', 'wp-security-audit-log')),
+				array(5013, E_CRITICAL, __('Theme created tables', 'wp-security-audit-log'), __('Theme %Theme->Name% created these tables in the database: %TableNames%', 'wp-security-audit-log')),
+				array(5014, E_CRITICAL, __('Theme modified tables structure', 'wp-security-audit-log'), __('Theme %Theme->Name% modified the structure of these database tables: %TableNames%', 'wp-security-audit-log')),
+				array(5015, E_CRITICAL, __('Theme deleted tables', 'wp-security-audit-log'), __('Theme %Theme->Name% deleted the following tables from the database: %TableNames%', 'wp-security-audit-log')),
+				array(5016, E_CRITICAL, __('Unknown component created tables', 'wp-security-audit-log'), __('An unknown component created these tables in the database: %TableNames%', 'wp-security-audit-log')),
+				array(5017, E_CRITICAL, __('Unknown component modified tables structure', 'wp-security-audit-log'), __('An unknown component modified the structure of these database tables: %TableNames%', 'wp-security-audit-log')),
+				array(5018, E_CRITICAL, __('Unknown component deleted tables', 'wp-security-audit-log'), __('An unknown component deleted the following tables from the database: %TableNames%', 'wp-security-audit-log')),
 			),
 		));
 }
