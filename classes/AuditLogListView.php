@@ -72,6 +72,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				<?php } ?>
 			</div><?php
 		}
+		?><div class="wsal-sorting wsal-sorting-<?php echo $which; ?>">
+			<select class="wsal-sortings" onchange="WsalSortingsChange(value);">
+				<option value="0" <?php if(!$this->_plugin->settings->IsSetSorting())echo 'selected="selected"'; ?>><?php _e('Sort this view', 'wp-security-audit-log'); ?></option>
+				<option value="1" <?php if($this->_plugin->settings->IsSetSorting())echo 'selected="selected"'; ?>><?php _e('Sort all alerts', 'wp-security-audit-log'); ?></option>
+			</select>
+		</div><?php
 	}
 	
 	/**
@@ -134,12 +140,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	public function get_sortable_columns(){
 		return array(
 			'read' => array('is_read', false),
-			'code' => array('code', false),
-			'type' => array('alert_id', false),
+			'code' => array('code', true),
+			'type' => array('alert_id', true),
 			'crtd' => array('created_on', true),
 			'user' => array('user', false),
-			'scip' => array('scip', false),
-			'site' => array('site', false),
+			'scip' => array('scip', true),
+			'site' => array('site', true),
 		);
 	}
 	
@@ -213,12 +219,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 	public function reorder_items_str($a, $b){
 		$result = strcmp($a->{$this->_orderby}, $b->{$this->_orderby});
-		return ($this->_order === 'asc') ? $result : -$result;
+		return ($this->_order === 'ASC') ? $result : -$result;
 	}
 	
 	public function reorder_items_int($a, $b){
 		$result = $a->{$this->_orderby} - $b->{$this->_orderby};
-		return ($this->_order === 'asc') ? $result : -$result;
+		return ($this->_order === 'ASC') ? $result : -$result;
 	}
 	
 	public function meta_formatter($name, $value){
@@ -297,14 +303,16 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		$hidden = array();
 		$sortable = $this->get_sortable_columns();
 
-		$this->_column_headers = array($columns, $hidden, $sortable);
+		//$this->_column_headers = array($columns, $hidden, $sortable);
 
 		//$this->process_bulk_action();
 		
 		$query = new WSAL_DB_OccurrenceQuery('WSAL_DB_Occurrence');
 		$bid = (int)$this->get_view_site_id();
 		if ($bid) $query->where[] = 'site_id = '.$bid;
-		$query->order[] = 'created_on DESC';
+		if (!$this->_plugin->settings->IsSetSorting()) {
+			$query->order[] = 'created_on DESC';
+		}
 		
 		$query = apply_filters('wsal_auditlog_query', $query);
 		
@@ -314,30 +322,40 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		//$data = $query->Execute();
 		
 		if($total_items){
-			$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'created_on';
+			$this->_orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'created_on';
 			$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'ASC' : 'DESC';
 			$tmp = new WSAL_DB_Occurrence();
-			if(isset($tmp->{$this->_orderby})){
+			if(isset($tmp->{$this->_orderby})){ 
+				//error_log("after: ".$sortable[$_REQUEST['orderby']]);
 				// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
-				$query->order[] = $this->_orderby . ' ' . $this->_order;
+				if ($this->_plugin->settings->IsSetSorting()) {
+					$query->order[] = $this->_orderby . ' ' . $this->_order;
+				} else {
+					$this->items = $query->Execute();
+					$this->items = array_slice($this->items, ($this->get_pagenum() - 1) * $per_page, $per_page);
+					$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
+					usort($this->items, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
+				}
 				/** @deprecated */
 				//$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
 				//usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
 			}
 		}
+		if ($this->_plugin->settings->IsSetSorting()) {
+			$query->offset = ($this->get_pagenum() - 1) * $per_page;
+			$query->length = $per_page;
 
+			$this->items = $query->Execute();
+		}
 		/** @todo Modify $query instead */
 		/** @deprecated */
-		//$data = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page);
-		$query->offset = ($this->get_pagenum() - 1) * $per_page;
-		$query->length = $per_page;
-
-		$this->items = $query->Execute(); 
-
+		//$this->items = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page);
+		
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,
 			'per_page'    => $per_page,
 			'total_pages' => ceil($total_items / $per_page)
 		) );
 	}
+
 }

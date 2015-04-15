@@ -12,6 +12,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
 		add_action('wp_ajax_AjaxSetIpp', array($this, 'AjaxSetIpp'));
 		add_action('wp_ajax_AjaxSearchSite', array($this, 'AjaxSearchSite'));
+		add_action('wp_ajax_AjaxSorting', array($this, 'AjaxSorting'));
 		add_action('all_admin_notices', array($this, 'AdminNoticesNotificationsExtension'));
 		
 		$this->RegisterNotice('notifications-extension');
@@ -166,6 +167,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 		
 		die(json_encode(array_slice($grp1 + $grp2, 0, 7)));
+	}
+
+	public function AjaxSorting(){
+		if(!$this->_plugin->settings->CurrentUserCan('view'))
+			die('Access Denied.');
+		if(!isset($_REQUEST['sorting']))
+			die('Sort parameter expected.'); 
+		if ($_REQUEST['sorting'] == 0) $this->_plugin->settings->SetSorting(false);
+		else $this->_plugin->settings->SetSorting(true);
+		die;
 	}
 	
 	public function Header(){

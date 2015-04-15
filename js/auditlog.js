@@ -148,3 +148,12 @@ function WsalDisableCustom(link, meta_key){
 		}
 	});
 }
+
+function WsalSortingsChange(value){
+	jQuery.post(WsalData.ajaxurl, {
+		action: 'AjaxSorting',
+		sorting: value
+	}, function(){
+		location.reload();
+	});
+}
