@@ -547,6 +547,18 @@ class WSAL_Settings {
 		}
 		return $this->_excluded_custom;
 	}
+
+	/**
+	 * Datetime format.
+	 * 24 hours or AM/PM
+	 */
+	public function GetDatetimeFormat(){
+		return $this->_plugin->GetGlobalOption('datetime-format', 0);
+	}
+
+	public function SetDatetimeFormat($newvalue){
+		return $this->_plugin->SetGlobalOption('datetime-format', $newvalue);
+	}
 	
 	// </editor-fold>
 }

@@ -61,6 +61,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetInternalIPsFiltering(isset($_REQUEST['EnableIpFiltering']));
 		$this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
 		$this->_plugin->settings->SetDeleteData(isset($_REQUEST['DeleteData']));
+		$this->_plugin->settings->SetDatetimeFormat($_REQUEST['DatetimeFormat']);
 		$this->_plugin->settings->ClearDevOptions();
 		if(isset($_REQUEST['DevOptions']))
 			foreach($_REQUEST['DevOptions'] as $opt)
@@ -288,6 +289,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</fieldset>
 						</td>
 					</tr>
+					<tr>
+						<th><label for="datetime_format_24"><?php _e('Alerts Time Format', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<?php $datetime = $this->_plugin->settings->GetDatetimeFormat(); ?>
+								<label for="datetime_format_24">
+									<input type="radio" name="DatetimeFormat" id="datetime_format_24" style="margin-top: 2px;" <?php if($datetime)echo 'checked="checked"'; ?> value="1">
+									<span><?php _e('24 hours', 'wp-security-audit-log'); ?></span>
+								</label>
+								<br/>
+								<label for="datetime_format_default">
+									<input type="radio" name="DatetimeFormat" id="datetime_format_default" style="margin-top: 2px;" <?php if(!$datetime)echo 'checked="checked"'; ?> value="0">
+									<span><?php _e('AM/PM', 'wp-security-audit-log'); ?></span>
+								</label>
+								<br/>
+ 							</fieldset>
+ 						</td>
+ 					</tr>
 					<tr>
 						<th><label><?php _e('Developer Options', 'wp-security-audit-log'); ?></label></th>
 						<td>
