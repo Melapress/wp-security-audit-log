@@ -422,7 +422,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if (!current_user_can("manage_categories")) return;
        	if(isset($_POST['name'])) {
        		$category = get_category($_POST['tag_ID']);
-       		$oldParent = get_category($category->category_parent);
+       		$oldParent = get_category($category->parent);
        		$oldParentName = $oldParent->name;
        		if(isset($_POST['parent'])) {
        			$newParent = get_category($_POST['parent']);
