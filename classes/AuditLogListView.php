@@ -143,7 +143,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			'code' => array('code', true),
 			'type' => array('alert_id', true),
 			'crtd' => array('created_on', true),
-			'user' => array('user', false),
+			'user' => array('user', true),
 			'scip' => array('scip', true),
 			'site' => array('site', true),
 		);
@@ -218,7 +218,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	}
 
 	public function reorder_items_str($a, $b){
-		$result = strcmp($a->{$this->_orderby}, $b->{$this->_orderby});
+		$result = strcmp($a->{$this->_orderby}, $b->{$this->_orderby}); 
 		return ($this->_order === 'ASC') ? $result : -$result;
 	}
 	
@@ -303,8 +303,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		$hidden = array();
 		$sortable = $this->get_sortable_columns();
 
-		//$this->_column_headers = array($columns, $hidden, $sortable);
-
+		$this->_column_headers = array($columns, $hidden, $sortable);
 		//$this->process_bulk_action();
 		
 		$query = new WSAL_DB_OccurrenceQuery('WSAL_DB_Occurrence');
@@ -312,33 +311,28 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		if ($bid) $query->where[] = 'site_id = '.$bid;
 		if (!$this->_plugin->settings->IsSetSorting()) {
 			$query->order[] = 'created_on DESC';
+			$data = $query->Execute();
+			$data = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page); 
 		}
 		
 		$query = apply_filters('wsal_auditlog_query', $query);
 		
 		$total_items = $query->Count();
 		
-		/** @deprecated */
-		//$data = $query->Execute();
-		
 		if($total_items){
 			$this->_orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'created_on';
 			$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'ASC' : 'DESC';
-			$tmp = new WSAL_DB_Occurrence();
-			if(isset($tmp->{$this->_orderby})){ 
-				//error_log("after: ".$sortable[$_REQUEST['orderby']]);
+			$tmp = new WSAL_DB_Occurrence(); 
+			if(isset($tmp->{$this->_orderby})){
 				// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
 				if ($this->_plugin->settings->IsSetSorting()) {
 					$query->order[] = $this->_orderby . ' ' . $this->_order;
 				} else {
-					$this->items = $query->Execute();
-					$this->items = array_slice($this->items, ($this->get_pagenum() - 1) * $per_page, $per_page);
-					$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
-					usort($this->items, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
+					$numorder = in_array($this->_orderby, array('alert_id', 'code', 'created_on')); 
+					if ($numorder) {
+						usort($data, array($this,'reorder_items_int'));
+					}
 				}
-				/** @deprecated */
-				//$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
-				//usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
 			}
 		}
 		if ($this->_plugin->settings->IsSetSorting()) {
@@ -346,16 +340,15 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			$query->length = $per_page;
 
 			$this->items = $query->Execute();
+		} else {
+			$this->items = $data;
 		}
-		/** @todo Modify $query instead */
-		/** @deprecated */
-		//$this->items = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page);
 		
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,
 			'per_page'    => $per_page,
 			'total_pages' => ceil($total_items / $per_page)
-		) );
+		) ); 
 	}
 
 }
