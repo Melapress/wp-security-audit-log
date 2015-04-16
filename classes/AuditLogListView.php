@@ -126,7 +126,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		return $cols;
 	}
 
-	public function column_cb(WSAL_DB_Occurrence $item){
+	public function column_cb($item){
 		return '<input type="checkbox" value="'.$item->id.'" '
 			 . 'name="'.esc_attr($this->_args['singular']).'[]"/>';
 	}
@@ -143,7 +143,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		);
 	}
 	
-	public function column_default(WSAL_DB_Occurrence $item, $column_name){
+	public function column_default($item, $column_name){
 		switch($column_name){
 			case 'read':
 				return '<span class="log-read log-read-'
