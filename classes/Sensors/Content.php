@@ -421,17 +421,21 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if (empty($_POST)) return;
 		if (!current_user_can("manage_categories")) return;
        	if(isset($_POST['name'])) {
-       		$category = get_category($_POST['tag_ID']);
-       		$oldParent = get_category($category->parent);
-       		$oldParentName = $oldParent->name;
+       		$category = get_category($_POST['tag_ID']); 
+       		if ( $category->parent != 0) {
+       			$oldParent = get_category($category->parent);
+       			$oldParentName = (empty($oldParent))? 'no parent' : $oldParent->name;
+       		} else {
+       			$oldParentName = 'no parent';
+       		}
        		if(isset($_POST['parent'])) {
        			$newParent = get_category($_POST['parent']);
-       			$newParentName = $newParent->name;	
+       			$newParentName = (empty($newParent))? 'no parent' : $newParent->name;
        		}
 			$this->plugin->alerts->Trigger(2052, array(
 				'CategoryName' => $category->name,
-				'OldParent' => $oldParentName ? $oldParentName : 'no parent',
-				'NewParent' => $newParentName ? $newParentName : 'no parent',
+				'OldParent' => $oldParentName,
+				'NewParent' => $newParentName,
 			));
 		}
 	}
