@@ -132,7 +132,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		return $cols;
 	}
 
-	public function column_cb(WSAL_DB_Occurrence $item){
+	public function column_cb($item){
 		return '<input type="checkbox" value="'.$item->id.'" '
 			 . 'name="'.esc_attr($this->_args['singular']).'[]"/>';
 	}
@@ -143,13 +143,13 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			'code' => array('code', true),
 			'type' => array('alert_id', true),
 			'crtd' => array('created_on', true),
-			'user' => array('user', true),
+			'user' => array('user', false),
 			'scip' => array('scip', true),
 			'site' => array('site', true),
 		);
 	}
 	
-	public function column_default(WSAL_DB_Occurrence $item, $column_name){
+	public function column_default($item, $column_name){
 		switch($column_name){
 			case 'read':
 				return '<span class="log-read log-read-'
@@ -349,6 +349,73 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			'per_page'    => $per_page,
 			'total_pages' => ceil($total_items / $per_page)
 		) ); 
+	}
+	/**
+	 * Overwrite function in WP_List_Table
+	 * for add paged to the url
+	 */
+	public function print_column_headers( $with_id = true ) {
+		list( $columns, $hidden, $sortable ) = $this->get_column_info();
+
+		$current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+		$current_url = remove_query_arg( 'paged', $current_url );
+		if ( isset( $_REQUEST['paged'] ) )
+			$paged = $_REQUEST['paged'];
+
+		if ( isset( $_GET['orderby'] ) )
+			$current_orderby = $_GET['orderby'];
+		else
+			$current_orderby = '';
+
+		if ( isset( $_GET['order'] ) && 'desc' == $_GET['order'] )
+			$current_order = 'desc';
+		else
+			$current_order = 'asc';
+
+		if ( ! empty( $columns['cb'] ) ) {
+			static $cb_counter = 1;
+			$columns['cb'] = '<label class="screen-reader-text" for="cb-select-all-' . $cb_counter . '">' . __( 'Select All' ) . '</label>'
+				. '<input id="cb-select-all-' . $cb_counter . '" type="checkbox" />';
+			$cb_counter++;
+		}
+
+		foreach ( $columns as $column_key => $column_display_name ) {
+			$class = array( 'manage-column', "column-$column_key" );
+
+			$style = '';
+			if ( in_array( $column_key, $hidden ) )
+				$style = 'display:none;';
+
+			$style = ' style="' . $style . '"';
+
+			if ( 'cb' == $column_key )
+				$class[] = 'check-column';
+			elseif ( in_array( $column_key, array( 'posts', 'comments', 'links' ) ) )
+				$class[] = 'num';
+
+			if ( isset( $sortable[$column_key] ) ) {
+				list( $orderby, $desc_first ) = $sortable[$column_key];
+
+				if ( $current_orderby == $orderby ) {
+					$order = 'asc' == $current_order ? 'desc' : 'asc';
+					$class[] = 'sorted';
+					$class[] = $current_order;
+				} else {
+					$order = $desc_first ? 'desc' : 'asc';
+					$class[] = 'sortable';
+					$class[] = $desc_first ? 'asc' : 'desc';
+				}
+
+				$column_display_name = '<a href="' . esc_url( add_query_arg( compact( 'orderby', 'order', 'paged'), $current_url ) ) . '"><span>' . $column_display_name . '</span><span class="sorting-indicator"></span></a>';
+			}
+
+			$id = $with_id ? "id='$column_key'" : '';
+
+			if ( !empty( $class ) )
+				$class = "class='" . join( ' ', $class ) . "'";
+
+			echo "<th scope='col' $id $class $style>$column_display_name</th>";
+		}
 	}
 
 }
