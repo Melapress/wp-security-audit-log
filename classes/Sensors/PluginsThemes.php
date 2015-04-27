@@ -120,7 +120,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// upgrade plugin
-        if(in_array($action, array('upgrade-plugin', 'update-selected')) && current_user_can("update_plugins")){
+        if(in_array($action, array('upgrade-plugin', 'update-plugin', 'update-selected')) && current_user_can("update_plugins")){
 			if(isset($_REQUEST['plugin'])){
 				if(!isset($_REQUEST['checked']))
 					$_REQUEST['checked'] = array();
