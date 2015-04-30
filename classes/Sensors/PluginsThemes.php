@@ -20,8 +20,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	}
 	
 	public function EventAdminShutdown(){
-		$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
-		$action = isset($_REQUEST['action2']) ? $_REQUEST['action2'] : $action;
+		$action = (isset($_REQUEST['action']) && $_REQUEST['action'] != "-1")  ? $_REQUEST['action'] : '';
+		$action = (isset($_REQUEST['action2']) && $_REQUEST['action2'] != "-1") ? $_REQUEST['action2'] : $action;
 		$actype = basename($_SERVER['SCRIPT_NAME'], '.php');
 		$is_themes = $actype == 'themes';
 		$is_plugins = $actype == 'plugins';
@@ -49,7 +49,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				),
 			));
         }
-		
+
 		// activate plugin
         if($is_plugins && in_array($action, array('activate', 'activate-selected')) && current_user_can("activate_plugins")){
 			if(isset($_REQUEST['plugin'])){
@@ -72,7 +72,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				));
 			}
 		}
-		
+
 		// deactivate plugin
         if($is_plugins && in_array($action, array('deactivate', 'deactivate-selected')) && current_user_can("activate_plugins")){
 			if(isset($_REQUEST['plugin'])){
@@ -121,9 +121,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		
 		// upgrade plugin
         if(in_array($action, array('upgrade-plugin', 'update-plugin', 'update-selected')) && current_user_can("update_plugins")){
-        	$plugins = array();
+        	$plugins = array(); 
 			if(isset($_REQUEST['plugins'])){
 				$plugins = explode(",", $_REQUEST['plugins']);
+			} else if(isset($_REQUEST['plugin'])){
+				$plugins[] = $_REQUEST['plugin'];
 			}
 			if(isset($plugins)){
 				foreach($plugins as $pluginFile){
