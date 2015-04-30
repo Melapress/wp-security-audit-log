@@ -102,7 +102,7 @@ class WSAL_LicenseManager {
 				$api_params['url'] = urlencode(get_home_url($blog_id));
 			
 			$response = wp_remote_get(
-				add_query_arg($api_params, $this->GetStoreUrl()),
+				esc_url_raw(add_query_arg($api_params, $this->GetStoreUrl())),
 				array('timeout' => 15, 'sslverify' => false)
 			);
 
@@ -158,7 +158,7 @@ class WSAL_LicenseManager {
 					$api_params['url'] = urlencode(get_home_url($blog_id));
 
 				$response = wp_remote_get(
-					add_query_arg($api_params, $this->GetStoreUrl()),
+					esc_url_raw(add_query_arg($api_params, $this->GetStoreUrl())),
 					array('timeout' => 15, 'sslverify' => false)
 				);
 
