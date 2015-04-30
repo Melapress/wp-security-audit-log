@@ -120,17 +120,13 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		
 		// upgrade plugin
-        if(in_array($action, array('upgrade-plugin', 'update-selected')) && current_user_can("update_plugins")){
-			if(isset($_REQUEST['plugin'])){
-				if(!isset($_REQUEST['checked']))
-					$_REQUEST['checked'] = array();
-				$_REQUEST['checked'][] = $_REQUEST['plugin'];
+        if(in_array($action, array('upgrade-plugin', 'update-plugin', 'update-selected')) && current_user_can("update_plugins")){
+        	$plugins = array();
+			if(isset($_REQUEST['plugins'])){
+				$plugins = explode(",", $_REQUEST['plugins']);
 			}
-			if(isset($_REQUEST['checked'])){
-				if(!is_array($_REQUEST['checked'])){
-					$_REQUEST['checked'] = array($_REQUEST['checked']);
-				}
-				foreach($_REQUEST['checked'] as $pluginFile){
+			if(isset($plugins)){
+				foreach($plugins as $pluginFile){
 					$pluginFile = WP_PLUGIN_DIR . '/' . $pluginFile;
 					$pluginData = get_plugin_data($pluginFile, false, true);
 					$this->plugin->alerts->Trigger(5004, array(
