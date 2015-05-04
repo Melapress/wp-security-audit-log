@@ -6,8 +6,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report
 Requires at least: 3.6
-Tested up to: 4.1.1
-Stable tag: 1.6.0
+Tested up to: 4.2.1
+Stable tag: 1.6.1
 
 Keep an WordPress audit log of all users' changes and other under the hood activity - Identify WordPress issues before they become security problems.
 
@@ -81,6 +81,7 @@ We need help translating the plugin and the WordPress Security Events. If you're
 * Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
 * German translation by [Mourad Louha](http://excel-translator.de)
 * Romanian translations by [Artmotion Secure Servers](http://www.artmotion.eu)
+* Serbo-Croatian by [Andrijana Nikolic](http://webhostinggeeks.com/)
 * Spanish translation by Andrew Kurtis
 
 = WordPress & PHP Errors Monitoring Tools =
@@ -111,6 +112,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * [WPLift](http://wplift.com/wordpress-event-tracking)
 * [BlogVault](https://blogvault.net/wp-security-audit-log-plugin-review/)
 * [MyWPExpert](http://www.mywpexpert.com/wp-security-audit-log/)
+* [Shout Me Loud](http://www.shoutmeloud.com/how-to-monitor-user-activities-wordpress-dashboard.html)
 
 = Related Links and Documentation =
 For more information and to get started with WordPress Security, check out the following:
@@ -177,6 +179,13 @@ Yes it is possible to exclude custom fields from being monitored. To exclude a c
 7. If there are more than 15 sites in a multisite, an auto complete site search shows up instead of the drop down menu (see [screenshots](https://wordpress.org/plugins/wp-security-audit-log/screenshots/) for reference)
 
 == Changelog ==
+
+= 1.6.1 (2015-05-04) =
+* **Bug Fixes**
+	* Fixed the monitoring of plugin updates for WordPress 4.2 [Support Ticket](https://wordpress.org/support/topic/not-logging-plugin-updates-in-42)
+	* Fixed an issue where multiple plugin updates triggered by drop down menu were not being reported
+	* Fixed a conflict with Magic Fields 2 plugin [Support Ticket](https://wordpress.org/support/topic/major-conflict-with-magic-fields-2)
+	* Updated the escaping of add_query_arg() function which could result in a potential XSS
 
 = 1.6.0 (2015-04-16) =
 * **New Security Alerts**

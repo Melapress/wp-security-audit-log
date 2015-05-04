@@ -2,10 +2,10 @@
 # This file is distributed under the same license as the WP Security Audit Log package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Security Audit Log 1.4.0\n"
+"Project-Id-Version: WP Security Audit Log 1.6.0\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/support/plugin/wp-security-audit-"
 "log\n"
-"POT-Creation-Date: 2015-02-24 09:09:21+00:00\n"
+"POT-Creation-Date: 2015-04-16 13:28:53+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -81,15 +81,15 @@ msgstr ""
 msgid "Alert Data Inspector"
 msgstr ""
 
-#: classes/Sensors/Content.php:326 classes/Sensors/Content.php:334
+#: classes/Sensors/Content.php:328 classes/Sensors/Content.php:336
 msgid "Password Protected"
 msgstr ""
 
-#: classes/Sensors/Content.php:328 classes/Sensors/Content.php:336
+#: classes/Sensors/Content.php:330 classes/Sensors/Content.php:338
 msgid "Public"
 msgstr ""
 
-#: classes/Sensors/Content.php:330 classes/Sensors/Content.php:338
+#: classes/Sensors/Content.php:332 classes/Sensors/Content.php:340
 msgid "Private"
 msgstr ""
 
@@ -222,7 +222,7 @@ msgid "Audit Log Viewer"
 msgstr ""
 
 #: classes/Views/AuditLog.php:64 classes/Views/Licensing.php:34
-#: classes/Views/Settings.php:82 classes/Views/ToggleAlerts.php:28
+#: classes/Views/Settings.php:88 classes/Views/ToggleAlerts.php:28
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
@@ -420,12 +420,12 @@ msgstr ""
 msgid "Licensing"
 msgstr ""
 
-#: classes/Views/Licensing.php:39 classes/Views/Settings.php:87
+#: classes/Views/Licensing.php:39 classes/Views/Settings.php:93
 #: classes/Views/ToggleAlerts.php:43
 msgid "Settings have been saved."
 msgstr ""
 
-#: classes/Views/Licensing.php:41 classes/Views/Settings.php:89
+#: classes/Views/Licensing.php:41 classes/Views/Settings.php:95
 #: classes/Views/ToggleAlerts.php:45
 msgid "Error: "
 msgstr ""
@@ -442,111 +442,111 @@ msgstr ""
 msgid "Inactive"
 msgstr ""
 
-#: classes/Views/Settings.php:17 classes/Views/Settings.php:25
+#: classes/Views/Settings.php:18 classes/Views/Settings.php:26
 msgid "Settings"
 msgstr ""
 
-#: classes/Views/Settings.php:112
+#: classes/Views/Settings.php:122
 msgid "Security Alerts Pruning"
 msgstr ""
 
-#: classes/Views/Settings.php:115 classes/Views/Settings.php:123
+#: classes/Views/Settings.php:125 classes/Views/Settings.php:133
 msgid "(eg: 1 month)"
 msgstr ""
 
-#: classes/Views/Settings.php:119
+#: classes/Views/Settings.php:129
 msgid "None"
 msgstr ""
 
-#: classes/Views/Settings.php:127
+#: classes/Views/Settings.php:137
 msgid "Delete alerts older than"
 msgstr ""
 
-#: classes/Views/Settings.php:135
+#: classes/Views/Settings.php:145
 msgid "(eg: 80)"
 msgstr ""
 
-#: classes/Views/Settings.php:139
+#: classes/Views/Settings.php:149
 msgid "Keep up to"
 msgstr ""
 
-#: classes/Views/Settings.php:144
+#: classes/Views/Settings.php:154
 msgid "alerts"
 msgstr ""
 
-#: classes/Views/Settings.php:148
+#: classes/Views/Settings.php:158
 msgid "Next Scheduled Cleanup is in "
 msgstr ""
 
-#: classes/Views/Settings.php:152
+#: classes/Views/Settings.php:162
 msgid "(or %s)"
 msgstr ""
 
-#: classes/Views/Settings.php:153
+#: classes/Views/Settings.php:163
 msgid "Run Manually"
 msgstr ""
 
-#: classes/Views/Settings.php:159
+#: classes/Views/Settings.php:169
 msgid "Alerts Dashboard Widget"
 msgstr ""
 
-#: classes/Views/Settings.php:165
+#: classes/Views/Settings.php:175
 msgid "On"
 msgstr ""
 
-#: classes/Views/Settings.php:170
+#: classes/Views/Settings.php:180
 msgid "Off"
 msgstr ""
 
-#: classes/Views/Settings.php:175
+#: classes/Views/Settings.php:185
 msgid "Display a dashboard widget with the latest %d security alerts."
 msgstr ""
 
-#: classes/Views/Settings.php:183
+#: classes/Views/Settings.php:193
 msgid "Reverse Proxy / Firewall Options"
 msgstr ""
 
-#: classes/Views/Settings.php:189
+#: classes/Views/Settings.php:199
 msgid "WordPress running behind firewall or proxy"
 msgstr ""
 
-#: classes/Views/Settings.php:190
+#: classes/Views/Settings.php:200
 msgid ""
 "Enable this option if your WordPress is running behind a firewall or reverse "
 "proxy. When this option is enabled the plugin will retrieve the user's IP "
 "address from the proxy header."
 msgstr ""
 
-#: classes/Views/Settings.php:196
+#: classes/Views/Settings.php:206
 msgid "Filter Internal IP Addresses"
 msgstr ""
 
-#: classes/Views/Settings.php:197
+#: classes/Views/Settings.php:207
 msgid ""
 "Enable this option to filter internal IP addresses from the proxy headers."
 msgstr ""
 
-#: classes/Views/Settings.php:203
+#: classes/Views/Settings.php:213
 msgid "Can View Alerts"
 msgstr ""
 
-#: classes/Views/Settings.php:210
+#: classes/Views/Settings.php:220
 msgid "Users and Roles in this list can view the security alerts"
 msgstr ""
 
-#: classes/Views/Settings.php:225
+#: classes/Views/Settings.php:235
 msgid "Can Manage Plugin"
 msgstr ""
 
-#: classes/Views/Settings.php:232
+#: classes/Views/Settings.php:242
 msgid "Users and Roles in this list can manage the plugin settings"
 msgstr ""
 
-#: classes/Views/Settings.php:247
+#: classes/Views/Settings.php:257
 msgid "Restrict Plugin Access"
 msgstr ""
 
-#: classes/Views/Settings.php:255
+#: classes/Views/Settings.php:265
 msgid ""
 "By default all the administrators on this WordPress have access to manage "
 "this plugin.<br/>By enabling this option only the users specified in the two "
@@ -554,85 +554,97 @@ msgid ""
 "this plugin."
 msgstr ""
 
-#: classes/Views/Settings.php:262
+#: classes/Views/Settings.php:272
 msgid "Refresh Audit Log Viewer"
 msgstr ""
 
-#: classes/Views/Settings.php:268
+#: classes/Views/Settings.php:278
 msgid "Automatic"
 msgstr ""
 
-#: classes/Views/Settings.php:270
+#: classes/Views/Settings.php:280
 msgid "Refresh Audit Log Viewer as soon as there are new alerts."
 msgstr ""
 
-#: classes/Views/Settings.php:274
+#: classes/Views/Settings.php:284
 msgid "Manual"
 msgstr ""
 
-#: classes/Views/Settings.php:276
+#: classes/Views/Settings.php:286
 msgid "Refresh Audit Log Viewer only when the page is reloaded."
 msgstr ""
 
-#: classes/Views/Settings.php:282
+#: classes/Views/Settings.php:292
 msgid "Developer Options"
 msgstr ""
 
-#: classes/Views/Settings.php:290
+#: classes/Views/Settings.php:300
 msgid ""
 "Only enable these options on testing, staging and development websites. "
 "Enabling any of the settings below on LIVE websites may cause unintended "
 "side-effects including degraded performance."
 msgstr ""
 
-#: classes/Views/Settings.php:294
+#: classes/Views/Settings.php:304
 msgid "Data Inspector"
 msgstr ""
 
-#: classes/Views/Settings.php:295
+#: classes/Views/Settings.php:305
 msgid "View data logged for each triggered alert."
 msgstr ""
 
-#: classes/Views/Settings.php:298
+#: classes/Views/Settings.php:308
 msgid "PHP Errors"
 msgstr ""
 
-#: classes/Views/Settings.php:299
+#: classes/Views/Settings.php:309
 msgid "Enables sensor for alerts generated from PHP."
 msgstr ""
 
-#: classes/Views/Settings.php:302
+#: classes/Views/Settings.php:312
 msgid "Request Log"
 msgstr ""
 
-#: classes/Views/Settings.php:303
+#: classes/Views/Settings.php:313
 msgid "Enables logging request to file."
 msgstr ""
 
-#: classes/Views/Settings.php:306
+#: classes/Views/Settings.php:316
 msgid "Backtrace"
 msgstr ""
 
-#: classes/Views/Settings.php:307
+#: classes/Views/Settings.php:317
 msgid "Log full backtrace for PHP-generated alerts."
 msgstr ""
 
-#: classes/Views/Settings.php:325
+#: classes/Views/Settings.php:335
 msgid "Hide Plugin in Plugins Page"
 msgstr ""
 
-#: classes/Views/Settings.php:331
+#: classes/Views/Settings.php:341
 msgid "Hide"
 msgstr ""
 
-#: classes/Views/Settings.php:335
+#: classes/Views/Settings.php:345
 msgid ""
 "To manually revert this setting set the value of option wsal-hide-plugin to "
 "0 in the wp_options table."
 msgstr ""
 
-#: classes/Views/Settings.php:341
+#: classes/Views/Settings.php:351
 msgid "Remove Data on Unistall"
+msgstr ""
+
+#: classes/Views/Settings.php:373
+msgid "Excluded Users"
+msgstr ""
+
+#: classes/Views/Settings.php:392
+msgid "Excluded Roles"
+msgstr ""
+
+#: classes/Views/Settings.php:417
+msgid "Excluded Custom Fields"
 msgstr ""
 
 #: classes/Views/ToggleAlerts.php:5 classes/Views/ToggleAlerts.php:13
@@ -735,68 +747,81 @@ msgstr ""
 msgid "Debug informational messages."
 msgstr ""
 
-#: defaults.php:38
+#: defaults.php:37
 msgid "Other User Activity"
 msgstr ""
 
-#: defaults.php:39
+#: defaults.php:38
 msgid "User logs in"
 msgstr ""
 
-#: defaults.php:39
+#: defaults.php:38
 msgid "Successfully logged in"
 msgstr ""
 
-#: defaults.php:40
+#: defaults.php:39
 msgid "User logs out"
 msgstr ""
 
-#: defaults.php:40
+#: defaults.php:39
 msgid "Successfully logged out"
 msgstr ""
 
-#: defaults.php:41 defaults.php:42
+#: defaults.php:40
 msgid "Login failed"
 msgstr ""
 
-#: defaults.php:41
+#: defaults.php:40
 msgid "%Attempts% failed login(s) detected"
 msgstr ""
 
-#: defaults.php:42
+#: defaults.php:41
+msgid "Login failed  / non existing user"
+msgstr ""
+
+#: defaults.php:41
 msgid "%Attempts% failed login(s) detected using non existing user."
 msgstr ""
 
-#: defaults.php:43
+#: defaults.php:42
 msgid "User uploaded file from Uploads directory"
 msgstr ""
 
-#: defaults.php:43
+#: defaults.php:42
 msgid "Uploaded the file %FileName% in %FilePath%"
 msgstr ""
 
-#: defaults.php:44
+#: defaults.php:43
 msgid "User deleted file from Uploads directory"
 msgstr ""
 
-#: defaults.php:44
+#: defaults.php:43
 msgid "Deleted the file %FileName% from %FilePath%"
 msgstr ""
 
-#: defaults.php:45
+#: defaults.php:44
 msgid "User changed a file using the theme editor"
 msgstr ""
 
-#: defaults.php:45
+#: defaults.php:44
 msgid "Modified %File% with the Theme Editor"
 msgstr ""
 
-#: defaults.php:46
+#: defaults.php:45
 msgid "User changed a file using the plugin editor"
 msgstr ""
 
-#: defaults.php:46
+#: defaults.php:45
 msgid "Modified %File% with the Plugin Editor"
+msgstr ""
+
+#: defaults.php:46
+msgid "User changed generic tables"
+msgstr ""
+
+#: defaults.php:46
+msgid ""
+"Changed the parent of %CategoryName% category from %OldParent% to %NewParent%"
 msgstr ""
 
 #: defaults.php:48
@@ -948,38 +973,16 @@ msgstr ""
 msgid "User creates a custom field for a post"
 msgstr ""
 
-#: defaults.php:66
-msgid ""
-"Created custom field %MetaKey% with value %MetaValue% in post %PostTitle%"
-msgstr ""
-
 #: defaults.php:67
 msgid "User updates a custom field value for a post"
-msgstr ""
-
-#: defaults.php:67
-msgid ""
-"Modified the value of custom field %MetaKey% from %MetaValueOld% to "
-"%MetaValueNew% in post %PostTitle%"
 msgstr ""
 
 #: defaults.php:68
 msgid "User deletes a custom field from a post"
 msgstr ""
 
-#: defaults.php:68
-msgid ""
-"Deleted custom field %MetaKey% with value %MetaValue% from post %PostTitle%"
-msgstr ""
-
 #: defaults.php:69
 msgid "User updates a custom field name for a post"
-msgstr ""
-
-#: defaults.php:69
-msgid ""
-"Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in post "
-"%PostTitle%"
 msgstr ""
 
 #: defaults.php:70
@@ -1123,38 +1126,16 @@ msgstr ""
 msgid "User creates a custom field for a page"
 msgstr ""
 
-#: defaults.php:88
-msgid ""
-"Created custom field %MetaKey% with value %MetaValue% in page %PostTitle%"
-msgstr ""
-
 #: defaults.php:89
 msgid "User updates a custom field value for a page"
-msgstr ""
-
-#: defaults.php:89
-msgid ""
-"Modified the value of custom field %MetaKey% from %MetaValueOld% to "
-"%MetaValueNew% in page %PostTitle%"
 msgstr ""
 
 #: defaults.php:90
 msgid "User deletes a custom field from a page"
 msgstr ""
 
-#: defaults.php:90
-msgid ""
-"Deleted custom field %MetaKey% with value %MetaValue% from page %PostTitle%"
-msgstr ""
-
 #: defaults.php:91
 msgid "User updates a custom field name for a page"
-msgstr ""
-
-#: defaults.php:91
-msgid ""
-"Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in page "
-"%PostTitle%"
 msgstr ""
 
 #: defaults.php:92
@@ -1303,40 +1284,16 @@ msgstr ""
 msgid "User creates a custom field for a custom post"
 msgstr ""
 
-#: defaults.php:109
-msgid ""
-"Created custom field %MetaKey% with value %MetaValue% in custom post "
-"%PostTitle% of type %PostType%"
-msgstr ""
-
 #: defaults.php:110
 msgid "User updates a custom field for a custom post"
-msgstr ""
-
-#: defaults.php:110
-msgid ""
-"Modified the value of custom field %MetaKey% from %MetaValueOld% to "
-"%MetaValueNew% in custom post %PostTitle% of type %PostType%"
 msgstr ""
 
 #: defaults.php:111
 msgid "User deletes a custom field from a custom post"
 msgstr ""
 
-#: defaults.php:111
-msgid ""
-"Deleted custom field %MetaKey% with value %MetaValue% from custom post "
-"%PostTitle% of type %PostType%"
-msgstr ""
-
 #: defaults.php:112
 msgid "User updates a custom field name for a custom post"
-msgstr ""
-
-#: defaults.php:112
-msgid ""
-"Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in custom "
-"post %PostTitle% of type %PostType%"
 msgstr ""
 
 #: defaults.php:113
@@ -1752,7 +1709,96 @@ msgid ""
 ">get_template_directory%"
 msgstr ""
 
-#: wp-security-audit-log.php:194
+#: defaults.php:172
+msgid "Database"
+msgstr ""
+
+#: defaults.php:173
+msgid "Plugin created tables"
+msgstr ""
+
+#: defaults.php:173
+msgid ""
+"Plugin %Plugin->Name% created these tables in the database: %TableNames%"
+msgstr ""
+
+#: defaults.php:174
+msgid "Plugin modified tables structure"
+msgstr ""
+
+#: defaults.php:174
+msgid ""
+"Plugin %Plugin->Name% modified the structure of these database tables: "
+"%TableNames%"
+msgstr ""
+
+#: defaults.php:175
+msgid "Plugin deleted tables"
+msgstr ""
+
+#: defaults.php:175
+msgid ""
+"Plugin %Plugin->Name% deleted the following tables from the database: "
+"%TableNames%"
+msgstr ""
+
+#: defaults.php:176
+msgid "Theme created tables"
+msgstr ""
+
+#: defaults.php:176
+msgid "Theme %Theme->Name% created these tables in the database: %TableNames%"
+msgstr ""
+
+#: defaults.php:177
+msgid "Theme modified tables structure"
+msgstr ""
+
+#: defaults.php:177
+msgid ""
+"Theme %Theme->Name% modified the structure of these database tables: "
+"%TableNames%"
+msgstr ""
+
+#: defaults.php:178
+msgid "Theme deleted tables"
+msgstr ""
+
+#: defaults.php:178
+msgid ""
+"Theme %Theme->Name% deleted the following tables from the database: "
+"%TableNames%"
+msgstr ""
+
+#: defaults.php:179
+msgid "Unknown component created tables"
+msgstr ""
+
+#: defaults.php:179
+msgid "An unknown component created these tables in the database: %TableNames%"
+msgstr ""
+
+#: defaults.php:180
+msgid "Unknown component modified tables structure"
+msgstr ""
+
+#: defaults.php:180
+msgid ""
+"An unknown component modified the structure of these database tables: "
+"%TableNames%"
+msgstr ""
+
+#: defaults.php:181
+msgid "Unknown component deleted tables"
+msgstr ""
+
+#: defaults.php:181
+msgid ""
+"An unknown component deleted the following tables from the database: "
+"%TableNames%"
+msgstr ""
+
+#: wp-security-audit-log.php:247
 msgid ""
 "You are using a version of PHP that is older than %s, which is no longer "
 "supported.<br/>Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com"
