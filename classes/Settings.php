@@ -554,5 +554,12 @@ class WSAL_Settings {
 		return $this->_excluded_custom;
 	}
 	
+	public function IsSetSorting() {
+		return $this->_plugin->GetGlobalOption('sort-alerts');
+	}
+
+	public function SetSorting($value) {
+		return $this->_plugin->SetGlobalOption('sort-alerts', $value);
+	}
 	// </editor-fold>
 }

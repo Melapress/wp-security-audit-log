@@ -72,6 +72,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				<?php } ?>
 			</div><?php
 		}
+		?><div class="wsal-sorting wsal-sorting-<?php echo $which; ?>">
+			<select class="wsal-sortings" onchange="WsalSortingsChange(value);">
+				<option value="0" <?php if(!$this->_plugin->settings->IsSetSorting())echo 'selected="selected"'; ?>><?php _e('Sort this view', 'wp-security-audit-log'); ?></option>
+				<option value="1" <?php if($this->_plugin->settings->IsSetSorting())echo 'selected="selected"'; ?>><?php _e('Sort all alerts', 'wp-security-audit-log'); ?></option>
+			</select>
+		</div><?php
 	}
 	
 	/**
@@ -134,12 +140,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	public function get_sortable_columns(){
 		return array(
 			'read' => array('is_read', false),
-			'code' => array('code', false),
-			'type' => array('alert_id', false),
+			'code' => array('code', true),
+			'type' => array('alert_id', true),
 			'crtd' => array('created_on', true),
 			'user' => array('user', false),
-			'scip' => array('scip', false),
-			'site' => array('site', false),
+			'scip' => array('scip', true),
+			'site' => array('site', true),
 		);
 	}
 	
@@ -212,13 +218,13 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	}
 
 	public function reorder_items_str($a, $b){
-		$result = strcmp($a->{$this->_orderby}, $b->{$this->_orderby});
-		return ($this->_order === 'asc') ? $result : -$result;
+		$result = strcmp($a->{$this->_orderby}, $b->{$this->_orderby}); 
+		return ($this->_order === 'ASC') ? $result : -$result;
 	}
 	
 	public function reorder_items_int($a, $b){
 		$result = $a->{$this->_orderby} - $b->{$this->_orderby};
-		return ($this->_order === 'asc') ? $result : -$result;
+		return ($this->_order === 'ASC') ? $result : -$result;
 	}
 	
 	public function meta_formatter($name, $value){
@@ -298,46 +304,118 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		$sortable = $this->get_sortable_columns();
 
 		$this->_column_headers = array($columns, $hidden, $sortable);
-
 		//$this->process_bulk_action();
 		
 		$query = new WSAL_DB_OccurrenceQuery('WSAL_DB_Occurrence');
 		$bid = (int)$this->get_view_site_id();
 		if ($bid) $query->where[] = 'site_id = '.$bid;
-		$query->order[] = 'created_on DESC';
+		if (!$this->_plugin->settings->IsSetSorting()) {
+			$query->order[] = 'created_on DESC';
+			$data = $query->Execute();
+			$data = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page); 
+		}
 		
 		$query = apply_filters('wsal_auditlog_query', $query);
 		
 		$total_items = $query->Count();
 		
-		/** @deprecated */
-		//$data = $query->Execute();
-		
 		if($total_items){
-			$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'created_on';
+			$this->_orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'created_on';
 			$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'ASC' : 'DESC';
-			$tmp = new WSAL_DB_Occurrence();
+			$tmp = new WSAL_DB_Occurrence(); 
 			if(isset($tmp->{$this->_orderby})){
 				// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
-				$query->order[] = $this->_orderby . ' ' . $this->_order;
-				/** @deprecated */
-				//$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
-				//usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
+				if ($this->_plugin->settings->IsSetSorting()) {
+					$query->order[] = $this->_orderby . ' ' . $this->_order;
+				} else {
+					$numorder = in_array($this->_orderby, array('alert_id', 'code', 'created_on')); 
+					if ($numorder) {
+						usort($data, array($this,'reorder_items_int'));
+					}
+				}
 			}
 		}
+		if ($this->_plugin->settings->IsSetSorting()) {
+			$query->offset = ($this->get_pagenum() - 1) * $per_page;
+			$query->length = $per_page;
 
-		/** @todo Modify $query instead */
-		/** @deprecated */
-		//$data = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page);
-		$query->offset = ($this->get_pagenum() - 1) * $per_page;
-		$query->length = $per_page;
-
-		$this->items = $query->Execute(); 
-
+			$this->items = $query->Execute();
+		} else {
+			$this->items = $data;
+		}
+		
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,
 			'per_page'    => $per_page,
 			'total_pages' => ceil($total_items / $per_page)
-		) );
+		) ); 
 	}
+	/**
+	 * Overwrite function in WP_List_Table
+	 * for add paged to the url
+	 */
+	public function print_column_headers( $with_id = true ) {
+		list( $columns, $hidden, $sortable ) = $this->get_column_info();
+
+		$current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+		$current_url = remove_query_arg( 'paged', $current_url );
+		if ( isset( $_REQUEST['paged'] ) )
+			$paged = $_REQUEST['paged'];
+
+		if ( isset( $_GET['orderby'] ) )
+			$current_orderby = $_GET['orderby'];
+		else
+			$current_orderby = '';
+
+		if ( isset( $_GET['order'] ) && 'desc' == $_GET['order'] )
+			$current_order = 'desc';
+		else
+			$current_order = 'asc';
+
+		if ( ! empty( $columns['cb'] ) ) {
+			static $cb_counter = 1;
+			$columns['cb'] = '<label class="screen-reader-text" for="cb-select-all-' . $cb_counter . '">' . __( 'Select All' ) . '</label>'
+				. '<input id="cb-select-all-' . $cb_counter . '" type="checkbox" />';
+			$cb_counter++;
+		}
+
+		foreach ( $columns as $column_key => $column_display_name ) {
+			$class = array( 'manage-column', "column-$column_key" );
+
+			$style = '';
+			if ( in_array( $column_key, $hidden ) )
+				$style = 'display:none;';
+
+			$style = ' style="' . $style . '"';
+
+			if ( 'cb' == $column_key )
+				$class[] = 'check-column';
+			elseif ( in_array( $column_key, array( 'posts', 'comments', 'links' ) ) )
+				$class[] = 'num';
+
+			if ( isset( $sortable[$column_key] ) ) {
+				list( $orderby, $desc_first ) = $sortable[$column_key];
+
+				if ( $current_orderby == $orderby ) {
+					$order = 'asc' == $current_order ? 'desc' : 'asc';
+					$class[] = 'sorted';
+					$class[] = $current_order;
+				} else {
+					$order = $desc_first ? 'desc' : 'asc';
+					$class[] = 'sortable';
+					$class[] = $desc_first ? 'asc' : 'desc';
+				}
+
+				$column_display_name = '<a href="' . esc_url( add_query_arg( compact( 'orderby', 'order', 'paged'), $current_url ) ) . '"><span>' . $column_display_name . '</span><span class="sorting-indicator"></span></a>';
+			}
+
+			$id = $with_id ? "id='$column_key'" : '';
+
+			if ( !empty( $class ) )
+				$class = "class='" . join( ' ', $class ) . "'";
+
+			echo "<th scope='col' $id $class $style>$column_display_name</th>";
+		}
+	}
+
 }
