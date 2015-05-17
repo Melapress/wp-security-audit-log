@@ -16,9 +16,11 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	}
 	
 	public function EventLogin($user_login, $user){
+		$userRoles = $this->plugin->settings->GetCurrentUserRoles($user->roles);
+		if ( $this->plugin->settings->IsLoginSuperAdmin($user_login) ) $userRoles[] = 'superadmin';
 		$this->plugin->alerts->Trigger(1000, array(
 			'Username' => $user_login,
-			'CurrentUserRoles' => $this->plugin->settings->GetCurrentUserRoles($user->roles),
+			'CurrentUserRoles' => $userRoles,
 		), true);
 	}
 	
@@ -93,6 +95,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		if ($user) {
 			$newAlertCode = 1002;	
 			$userRoles = $this->plugin->settings->GetCurrentUserRoles($user->roles);
+			if ( $this->plugin->settings->IsLoginSuperAdmin($username) ) $userRoles[] = 'superadmin';
 		}
 
 		if($this->IsPastLoginFailureLimit($ip, $site_id, $user))return;
