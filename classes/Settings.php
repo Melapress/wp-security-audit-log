@@ -368,10 +368,16 @@ class WSAL_Settings {
 		}
 		return false;
 	}
-	public function GetCurrentUserRoles($baseRoles = null){
+	public function GetCurrentUserRoles($baseRoles = null){ 
 		if ($baseRoles == null) $baseRoles = wp_get_current_user()->roles;
 		if (function_exists('is_super_admin') && is_super_admin()) $baseRoles[] = 'superadmin';
 		return $baseRoles;
+	}
+
+	public function IsLoginSuperAdmin($username){ 
+		$userId = username_exists($username);
+		if ( function_exists('is_super_admin') && is_super_admin($userId) ) return true;
+		else return false;
 	}
 	
 	// </editor-fold>
