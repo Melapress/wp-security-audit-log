@@ -73,15 +73,17 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
         }*/
 
         // password changed
-        if(!empty($_REQUEST['pass1'])){
-			$event = $user_id == get_current_user_id() ? 4003 : 4004;
-			$this->plugin->alerts->Trigger($event, array(
-				'TargetUserID' => $user_id,
-				'TargetUserData' => (object)array(
-					'Username' => $user->user_login,
-					'Roles' => is_array($user->roles) ? implode(', ', $user->roles) : $user->roles,
-				),
-			));
+        if(!empty($_REQUEST['pass1']) && !empty($_REQUEST['pass2'])){
+        	if (trim($_REQUEST['pass1']) == trim($_REQUEST['pass2'])) {
+				$event = $user_id == get_current_user_id() ? 4003 : 4004;
+				$this->plugin->alerts->Trigger($event, array(
+					'TargetUserID' => $user_id,
+					'TargetUserData' => (object)array(
+						'Username' => $user->user_login,
+						'Roles' => is_array($user->roles) ? implode(', ', $user->roles) : $user->roles,
+					),
+				));
+			}
         }
 
         // email changed
