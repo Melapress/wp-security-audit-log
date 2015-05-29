@@ -72,8 +72,9 @@ class WSAL_DB_Query {
 	}
 	
 	public function GetDbType(){
-		global $wpdb;
-		return $wpdb->is_mysql  ? 'mysql' : 'unknown';
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
+		return $_wpdb->is_mysql  ? 'mysql' : 'unknown';
 	}
 	
 	/**

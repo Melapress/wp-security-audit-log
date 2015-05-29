@@ -1,6 +1,6 @@
 <?php
 
-abstract class WSAL_DB_ActiveRecord {
+abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	
 	/**
 	 * Contains table name, override as required.
@@ -37,8 +37,8 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @return string Must return SQL for creating table.
 	 */
 	protected function _GetInstallQuery(){
-		global $wpdb;
-		
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		$class = get_class($this);
 		$copy = new $class();
 		
@@ -78,10 +78,10 @@ abstract class WSAL_DB_ActiveRecord {
 		
 		$sql .= ')';
 		
-		if ( ! empty($wpdb->charset) )
-			$sql .= ' DEFAULT CHARACTER SET ' . $wpdb->charset;
-		if ( ! empty($wpdb->collate) )
-			$sql .= ' COLLATE ' . $wpdb->collate;
+		if ( ! empty($_wpdb->charset) )
+			$sql .= ' DEFAULT CHARACTER SET ' . $_wpdb->charset;
+		if ( ! empty($_wpdb->collate) )
+			$sql .= ' COLLATE ' . $_wpdb->collate;
 		
 		return $sql;
 		
@@ -116,8 +116,9 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @return string Returns table name.
 	 */
 	public function GetTable(){
-		global $wpdb;
-		return $wpdb->base_prefix . $this->_table;
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
+		return $_wpdb->base_prefix . $this->_table;
 	}
 	
 	/**
@@ -145,9 +146,10 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @return boolean Returns whether table structure is installed or not.
 	 */
 	public function IsInstalled(){
-		global $wpdb;
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		$sql = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
-		return $wpdb->get_var($sql) == $this->GetTable();
+		return $_wpdb->get_var($sql) == $this->GetTable();
 	}
 	
 	/**
@@ -155,7 +157,7 @@ abstract class WSAL_DB_ActiveRecord {
 	 */
 	public function Install(){
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-		dbDelta($this->_GetInstallQuery());
+		dbDelta($this->_GetInstallQuery()); //change here
 	}
 	
 	/**
@@ -163,9 +165,10 @@ abstract class WSAL_DB_ActiveRecord {
 	 */
 	public function Uninstall()
 	{
-		global $wpdb;
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-		$wpdb->query($this->_GetUninstallQuery());
+		$_wpdb->query($this->_GetUninstallQuery());
 	}
 	
 	/**
@@ -174,7 +177,8 @@ abstract class WSAL_DB_ActiveRecord {
 	 */
 	public function Save(){
 		$this->_state = self::STATE_UNKNOWN;
-		global $wpdb;
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		$copy = get_class($this);
 		$copy = new $copy;
 		$data = array();
@@ -191,9 +195,9 @@ abstract class WSAL_DB_ActiveRecord {
 			}
 			$format[] = $deffmt;
 		}
-		$result = $wpdb->replace($this->GetTable(), $data, $format);
-		if($wpdb->insert_id){
-			$this->{$this->_idkey} = $wpdb->insert_id;
+		$result = $_wpdb->replace($this->GetTable(), $data, $format);
+		if($_wpdb->insert_id){
+			$this->{$this->_idkey} = $_wpdb->insert_id;
 			if($result !== false)
 				$this->_state = self::STATE_CREATED;
 		}else{
@@ -209,12 +213,12 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @param array $args (Optional) Load condition arguments.
 	 */
 	public function Load($cond = '%d', $args = array(1)){
-		global $wpdb;
-		
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		$this->_state = self::STATE_UNKNOWN;
 		
-		$sql = $wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '.$cond, $args);
-		$data = $wpdb->get_row($sql, ARRAY_A);
+		$sql = $_wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '.$cond, $args);
+		$data = $_wpdb->get_row($sql, ARRAY_A);
 		
 		if(!is_null($data)){
 			$this->LoadData($data);
@@ -260,11 +264,11 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @return int|boolean Either the amount of deleted rows or False on error.
 	 */
 	public function Delete(){
-		global $wpdb;
-		
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		$this->_state = self::STATE_UNKNOWN;
 	
-		$result = $wpdb->delete(
+		$result = $_wpdb->delete(
 			$this->GetTable(),
 			array($this->_idkey => $this->{$this->_idkey})
 		);
@@ -281,9 +285,10 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @param array $args (Optional) Query arguments.
 	 */
 	public static function DeleteQuery($query, $args = array()){
-		global $wpdb;
-		$sql = count($args) ? $wpdb->prepare($query, $args) : $query;
-		$wpdb->query($sql);
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
+		$sql = count($args) ? $_wpdb->prepare($query, $args) : $query;
+		$_wpdb->query($sql);
 	}
 	
 	/**
@@ -292,16 +297,17 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @param array $args (Optional) Load condition arguments (rg: array(45) ).
 	 * @return self[] List of loaded records.
 	 */
-	public static function LoadMulti($cond, $args = array()){
-		global $wpdb;
+	public static function LoadMulti($cond, $args = array()){ 
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		$class = get_called_class();
 		$result = array();
 		$temp = new $class();
 		$sql = (!is_array($args) || !count($args)) // do we really need to prepare() or not?
 			? ('SELECT * FROM ' . $temp->GetTable() . ' WHERE ' . $cond)
-			: $wpdb->prepare('SELECT * FROM ' . $temp->GetTable() . ' WHERE ' . $cond, $args)
+			: $_wpdb->prepare('SELECT * FROM ' . $temp->GetTable() . ' WHERE ' . $cond, $args)
 		;
-		foreach($wpdb->get_results($sql, ARRAY_A) as $data){
+		foreach($_wpdb->get_results($sql, ARRAY_A) as $data){
 			$result[] = new $class($data);
 		}
 		return $result;
@@ -314,12 +320,13 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @param string $cond (Optional) Load condition.
 	 * @param array $args (Optional) Load condition arguments.
 	 */
-	public static function LoadAndCallForEach($callback, $cond = '%d', $args = array(1)){
-		global $wpdb;
+	public static function LoadAndCallForEach($callback, $cond = '%d', $args = array(1)){ 
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		$class = get_called_class();
 		$temp = new $class();
-		$sql = $wpdb->prepare('SELECT * FROM ' . $temp->GetTable() . ' WHERE '.$cond, $args);
-		foreach($wpdb->get_results($sql, ARRAY_A) as $data){
+		$sql = $_wpdb->prepare('SELECT * FROM ' . $temp->GetTable() . ' WHERE '.$cond, $args);
+		foreach($_wpdb->get_results($sql, ARRAY_A) as $data){
 			call_user_func($callback, new $class($data));
 		}
 	}
@@ -332,11 +339,12 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @return int Number of matching records.
 	 */
 	public static function Count($cond = '%d', $args = array(1)){
-		global $wpdb;
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		$class = get_called_class();
 		$temp = new $class();
-		$sql = $wpdb->prepare('SELECT COUNT(*) FROM ' . $temp->GetTable() . ' WHERE ' . $cond, $args);
-		return (int)$wpdb->get_var($sql);
+		$sql = $_wpdb->prepare('SELECT COUNT(*) FROM ' . $temp->GetTable() . ' WHERE ' . $cond, $args);
+		return (int)$_wpdb->get_var($sql);
 	}
 	
 	/**
@@ -346,9 +354,10 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @return int Number of matching records.
 	 */
 	public static function CountQuery($query, $args = array()){
-		global $wpdb;
-		$sql = count($args) ? $wpdb->prepare($query, $args) : $query;
-		return (int)$wpdb->get_var($sql);
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
+		$sql = count($args) ? $_wpdb->prepare($query, $args) : $query;
+		return (int)$_wpdb->get_var($sql);
 	}
 	
 	/**
@@ -357,12 +366,13 @@ abstract class WSAL_DB_ActiveRecord {
 	 * @param array $args (Optional) Query arguments.
 	 * @return self[] List of loaded records.
 	 */
-	public static function LoadMultiQuery($query, $args = array()){
-		global $wpdb;
+	public static function LoadMultiQuery($query, $args = array()){ 
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		$class = get_called_class();
 		$result = array();
-		$sql = count($args) ? $wpdb->prepare($query, $args) :  $query;
-		foreach($wpdb->get_results($sql, ARRAY_A) as $data){
+		$sql = count($args) ? $_wpdb->prepare($query, $args) :  $query;
+		foreach($_wpdb->get_results($sql, ARRAY_A) as $data){
 			$result[] = new $class($data);
 		}
 		return $result;

@@ -72,9 +72,10 @@ class WSAL_DB_OccurrenceQuery extends WSAL_DB_Query {
 	}
 	
 	public function Delete(){
-		global $wpdb;
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
 		// get relevant occurrence ids
-		$occids = $wpdb->get_col($this->GetSql('select'));
+		$occids = $_wpdb->get_col($this->GetSql('select'));
 		
 		if (count($occids)) {
 			// delete meta data: back up columns, remove them for DELETE and generate sql

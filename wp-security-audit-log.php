@@ -120,7 +120,7 @@ class WpSecurityAuditLog {
 		// profiler has to be loaded manually
 		require_once('classes/SimpleProfiler.php');
 		$this->profiler = new WSAL_SimpleProfiler();
-
+		require_once('classes/DB/DBConnector.php');
 		require_once('classes/DB/ActiveRecord.php');
 		require_once('classes/DB/Option.php');
 		
@@ -545,9 +545,10 @@ class WpSecurityAuditLog {
 	 * @return boolean
 	 */
 	public function IsInstalled(){
-		global $wpdb;
-		$table = $wpdb->base_prefix . 'wsal_occurrences';
-		return ($wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
+		//global $wpdb;
+		$_wpdb = self::GetConnection();
+		$table = $_wpdb->base_prefix . 'wsal_occurrences';
+		return ($_wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
 	}
 	
 	/**
