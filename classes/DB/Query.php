@@ -3,7 +3,7 @@
 /**
  * @todo Add group-by support
  */
-class WSAL_DB_Query {
+class WSAL_DB_Query extends WSAL_ConnectorFactory{
 	/**
 	 * @var string
 	 */
@@ -73,7 +73,7 @@ class WSAL_DB_Query {
 	
 	public function GetDbType(){
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		return $_wpdb->is_mysql  ? 'mysql' : 'unknown';
 	}
 	

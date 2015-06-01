@@ -120,7 +120,7 @@ class WpSecurityAuditLog {
 		// profiler has to be loaded manually
 		require_once('classes/SimpleProfiler.php');
 		$this->profiler = new WSAL_SimpleProfiler();
-		require_once('classes/DB/DBConnector.php');
+		require_once('classes/DB/ConnectorFactory.php');
 		require_once('classes/DB/ActiveRecord.php');
 		require_once('classes/DB/Option.php');
 		

@@ -1,6 +1,6 @@
 <?php
 
-abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
+abstract class WSAL_DB_ActiveRecord extends WSAL_ConnectorFactory{
 	
 	/**
 	 * Contains table name, override as required.
@@ -38,7 +38,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	protected function _GetInstallQuery(){
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$class = get_class($this);
 		$copy = new $class();
 		
@@ -117,7 +117,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	public function GetTable(){
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		return $_wpdb->base_prefix . $this->_table;
 	}
 	
@@ -147,7 +147,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	public function IsInstalled(){
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$sql = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
 		return $_wpdb->get_var($sql) == $this->GetTable();
 	}
@@ -166,7 +166,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	public function Uninstall()
 	{
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 		$_wpdb->query($this->_GetUninstallQuery());
 	}
@@ -178,7 +178,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	public function Save(){
 		$this->_state = self::STATE_UNKNOWN;
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$copy = get_class($this);
 		$copy = new $copy;
 		$data = array();
@@ -214,7 +214,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	public function Load($cond = '%d', $args = array(1)){
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$this->_state = self::STATE_UNKNOWN;
 		
 		$sql = $_wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '.$cond, $args);
@@ -265,7 +265,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	public function Delete(){
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$this->_state = self::STATE_UNKNOWN;
 	
 		$result = $_wpdb->delete(
@@ -286,7 +286,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	public static function DeleteQuery($query, $args = array()){
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$sql = count($args) ? $_wpdb->prepare($query, $args) : $query;
 		$_wpdb->query($sql);
 	}
@@ -299,7 +299,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	public static function LoadMulti($cond, $args = array()){ 
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$class = get_called_class();
 		$result = array();
 		$temp = new $class();
@@ -322,7 +322,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	public static function LoadAndCallForEach($callback, $cond = '%d', $args = array(1)){ 
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$class = get_called_class();
 		$temp = new $class();
 		$sql = $_wpdb->prepare('SELECT * FROM ' . $temp->GetTable() . ' WHERE '.$cond, $args);
@@ -340,7 +340,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	public static function Count($cond = '%d', $args = array(1)){
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$class = get_called_class();
 		$temp = new $class();
 		$sql = $_wpdb->prepare('SELECT COUNT(*) FROM ' . $temp->GetTable() . ' WHERE ' . $cond, $args);
@@ -355,7 +355,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	public static function CountQuery($query, $args = array()){
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$sql = count($args) ? $_wpdb->prepare($query, $args) : $query;
 		return (int)$_wpdb->get_var($sql);
 	}
@@ -368,7 +368,7 @@ abstract class WSAL_DB_ActiveRecord extends WSAL_DB_Connector{
 	 */
 	public static function LoadMultiQuery($query, $args = array()){ 
 		//global $wpdb;
-		$_wpdb = self::GetConnection();
+		$_wpdb = self::GetConnector();
 		$class = get_called_class();
 		$result = array();
 		$sql = count($args) ? $_wpdb->prepare($query, $args) :  $query;
