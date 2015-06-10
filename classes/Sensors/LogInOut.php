@@ -85,8 +85,6 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		list($y, $m, $d) = explode('-', date('Y-m-d'));
 		
 		$ip = $this->plugin->settings->GetMainClientIP();
-		$tt1 = new WSAL_DB_Occurrence();
-		$tt2 = new WSAL_DB_Meta();
 		
 		$username = $_POST["log"];
 		$newAlertCode = 1003;
@@ -102,17 +100,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 
 		if ($newAlertCode == 1002) {
 			if (!$this->plugin->alerts->CheckEnableUserRoles($username, $userRoles))return;
-			$occ = WSAL_DB_Occurrence::LoadMultiQuery('
-				SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
-				INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
-				and ipMeta.name = "ClientIP"
-				and ipMeta.value = %s
-				INNER JOIN `' . $tt2->GetTable() . '` usernameMeta on usernameMeta.occurrence_id = occurrence.id
-				and usernameMeta.name = "Username"
-				and usernameMeta.value = %s
-				WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
-				AND (created_on BETWEEN %d AND %d)
-				GROUP BY occurrence.id',
+			$occ = WSAL_Occurrence::CheckKnownUsers(
 				array(
 					json_encode($ip),
 					json_encode($username),
@@ -146,13 +134,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				));
 			} 
 		} else {
-			$occUnknown = WSAL_DB_Occurrence::LoadMultiQuery('
-				SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
-				INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
-				and ipMeta.name = "ClientIP" and ipMeta.value = %s 
-				WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
-				AND (created_on BETWEEN %d AND %d)
-				GROUP BY occurrence.id',
+			$occUnknown = WSAL_Occurrence::CheckKnownUsers(
 				array(
 					json_encode($ip),
 					1003,

@@ -12,7 +12,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		if ($type < 0010 && !$this->plugin->settings->IsPhpErrorLoggingEnabled()) return;
 
 		// create new occurrence
-		$occ = new WSAL_DB_Occurrence();
+		$occ = new WSAL_Occurrence();
 		$occ->is_migrated = $migrated;
 		$occ->created_on = $date;
 		$occ->alert_id = $type;
@@ -35,7 +35,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
             return;
         } // pruning disabled
 
-		$cnt_items = WSAL_DB_Occurrence::Count();
+		$cnt_items = WSAL_Models_Occurrence::Count();
 
         // Check if there is something to delete
         if($is_limt_e && ($cnt_items < $max_count)){
@@ -45,7 +45,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
         $max_stamp = $now - (strtotime($max_sdate) - $now);
 		$max_items = max(($cnt_items - $max_count) + 1, 0);
 
-		$query = new WSAL_DB_OccurrenceQuery('WSAL_DB_Occurrence');
+		$query = new WSAL_OccurrenceQuery('WSAL_Occurrence');
 		$query->order[] = 'created_on ASC';
 
 		if ($is_date_e) $query->Where('created_on < ' . intval($max_stamp), array());

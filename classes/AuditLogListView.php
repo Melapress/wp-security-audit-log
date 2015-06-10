@@ -303,7 +303,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 		//$this->process_bulk_action();
 		
-		$query = new WSAL_DB_OccurrenceQuery('WSAL_DB_Occurrence');
+		$query = new WSAL_Models_OccurrenceQuery('WSAL_Models_Occurrence');
 		$bid = (int)$this->get_view_site_id();
 		if ($bid) $query->where[] = 'site_id = '.$bid;
 		$query->order[] = 'created_on DESC';
@@ -318,7 +318,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		if($total_items){
 			$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'created_on';
 			$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'ASC' : 'DESC';
-			$tmp = new WSAL_DB_Occurrence();
+			$tmp = new WSAL_Models_Occurrence();
 			if(isset($tmp->{$this->_orderby})){
 				// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
 				$query->order[] = $this->_orderby . ' ' . $this->_order;

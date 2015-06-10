@@ -120,9 +120,9 @@ class WpSecurityAuditLog {
 		// profiler has to be loaded manually
 		require_once('classes/SimpleProfiler.php');
 		$this->profiler = new WSAL_SimpleProfiler();
-		require_once('classes/DB/ConnectorFactory.php');
-		require_once('classes/DB/ActiveRecord.php');
-		require_once('classes/DB/Option.php');
+		require_once('classes/Models/ConnectorFactory.php');
+		require_once('classes/Models/ActiveRecord.php');
+		require_once('classes/Models/Option.php');
 		
 		// load autoloader and register base paths
 		require_once('classes/Autoloader.php');
@@ -205,7 +205,7 @@ class WpSecurityAuditLog {
 	 */
 	public function Load(){
 
-		$optionsTable = new WSAL_DB_Option();
+		$optionsTable = new WSAL_Models_Option();
 		if (!$optionsTable->IsInstalled()) {
 			$optionsTable->Install();
 			//setting the prunig date with the old value or the default value	
@@ -252,7 +252,7 @@ class WpSecurityAuditLog {
 		}
 		
 		// ensure that the system is installed and schema is correct
-		WSAL_DB_ActiveRecord::InstallAll();
+		WSAL_ActiveRecord::InstallAll();
 		
 		$PreInstalled = $this->IsInstalled();
 		
@@ -309,7 +309,7 @@ class WpSecurityAuditLog {
 	 */
 	public function Uninstall(){
 		if ($this->GetGlobalOption("delete-data") == 1) {
-			WSAL_DB_ActiveRecord::UninstallAll();
+			WSAL_Models_ActiveRecord::UninstallAll();
 			$this->deleteAllOptions();
 		}
 		wp_clear_scheduled_hook('wsal_cleanup');
@@ -347,7 +347,7 @@ class WpSecurityAuditLog {
 
 	public function SetOptions($data){
 		foreach($data as $key => $option) { 
-			$this->options = new WSAL_DB_Option();
+			$this->options = new WSAL_Models_Option();
 			if ( $this->IsMultisite() ) {
 				$this->options->SetOptionValue($option['meta_key'], $option['meta_value']);
 			} else {
@@ -474,7 +474,7 @@ class WpSecurityAuditLog {
 		//$fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
 		//var_dump($fn($prefix . $option, $default));
 		//return $fn($prefix . $option, $default);
-		$this->options = new WSAL_DB_Option();
+		$this->options = new WSAL_Models_Option();
 		return $this->options->GetOptionValue($prefix . $option, $default);     
 	}
 	
@@ -487,7 +487,7 @@ class WpSecurityAuditLog {
 	public function SetGlobalOption($option, $value, $prefix = self::OPT_PRFX){
 		//$fn = $this->IsMultisite() ? 'update_site_option' : 'update_option';
 		//$fn($prefix . $option, $value);
-		$this->options = new WSAL_DB_Option();
+		$this->options = new WSAL_Models_Option();
 		$this->options->SetOptionValue($prefix . $option, $value);
 	}
 	

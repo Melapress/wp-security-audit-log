@@ -18,6 +18,7 @@ class WSAL_MySQL_DB_Connector implements Connector
 		require_once('MySQLModelAdapters/OccurrenceAdapter.php');
 		require_once('MySQLModelAdapters/QueryAdapter.php');
 		require_once('MySQLModelAdapters/OccurrenceQueryAdapter.php');
+		$this->GetConnection();
 	}
     
     /**
@@ -48,13 +49,13 @@ class WSAL_MySQL_DB_Connector implements Connector
 			}
 		} else {
 			global $wpdb;
-			return $wpdb;
+			self::$connection = $wpdb;
+			return self::$connection;
 		}
 	}
 
-	public static function GetAdapter($class_name) {
-
-		$objName = 'WSAL_DB_'.$class_name.'Adapter';
-		$obj = new $objName();
+	public static function GetAdapter($class_name) { error_log($class_name);
+		$objName = 'WSAL_MySQL_'.$class_name.'Adapter';
+		return new $objName(self::$connection);
 	}
 }
