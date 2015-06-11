@@ -1,6 +1,6 @@
 <?php
 
-class WSAL_MySQL_MetaAdapter extends WSAL_MySQL_ActiveRecordAdapter implements WSAL_MetaInterface {
+class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_MetaInterface {
 
 	protected $_table = 'wsal_metadata';
 	protected $_idkey = 'id';

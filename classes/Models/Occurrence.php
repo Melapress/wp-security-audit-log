@@ -173,9 +173,18 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
         return parent::Save();
     }
 
-    public function CheckKnownUsers($args = array())
+    /**
+     * Finds occurences of the same type by IP and Username within specified time frame
+     * @param string $ipAddress
+     * @param string $username
+     * @param int $alertId Alert type we are lookign for
+     * @param int $siteId
+     * @param $startTime mktime
+     * @param $endTime mktime
+     */
+    public function findExistingOccurences($ipAddress, $username, $alertNumber, $siteId, $startDate, $endDate)
     {
-        return $this->getAdapter()->CheckKnownUsers($args);
+        return $this->getAdapter()->CheckKnownUsers($ipAddress, $username, $alertNumber, $siteId, $startDate, $endDate);
     }
 
     public function CheckUnKnownUsers($args = array())

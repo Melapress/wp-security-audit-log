@@ -91,7 +91,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$user = get_user_by('login', $username);
 		$site_id = (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
 		if ($user) {
-			$newAlertCode = 1002;	
+			$newAlertCode = 1002;
 			$userRoles = $this->plugin->settings->GetCurrentUserRoles($user->roles);
 			if ( $this->plugin->settings->IsLoginSuperAdmin($username) ) $userRoles[] = 'superadmin';
 		}
@@ -100,15 +100,13 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 
 		if ($newAlertCode == 1002) {
 			if (!$this->plugin->alerts->CheckEnableUserRoles($username, $userRoles))return;
-			$occ = WSAL_Occurrence::CheckKnownUsers(
-				array(
-					json_encode($ip),
-					json_encode($username),
-					1002,
-					$site_id,
-					mktime(0, 0, 0, $m, $d, $y),
-					mktime(0, 0, 0, $m, $d + 1, $y) - 1
-				)
+			$occ = WSAL_Occurrence::findExistingOccurences(
+				$ip
+				$username,
+				1002,
+				$site_id,
+				mktime(0, 0, 0, $m, $d, $y),
+				mktime(0, 0, 0, $m, $d + 1, $y) - 1
 			);
 
 			$occ = count($occ) ? $occ[0] : null;
@@ -134,14 +132,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				));
 			} 
 		} else {
-			$occUnknown = WSAL_Occurrence::CheckKnownUsers(
-				array(
-					json_encode($ip),
-					1003,
-					$site_id,
-					mktime(0, 0, 0, $m, $d, $y),
-					mktime(0, 0, 0, $m, $d + 1, $y) - 1
-				)
+			$occUnknown = WSAL_Occurrence::findExistingOccurences(
+				$ip
+				1003,
+				$site_id,
+				mktime(0, 0, 0, $m, $d, $y),
+				mktime(0, 0, 0, $m, $d + 1, $y) - 1
 			);
 				
 			$occUnknown = count($occUnknown) ? $occUnknown[0] : null;

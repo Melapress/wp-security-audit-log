@@ -1,6 +1,6 @@
 <?php
 
-interface WSAL_MetaInterface {
+interface WSAL_Adapters_MetaInterface {
 	/**
 	 * Create a meta object
 	 * @param $metaData Array of meta data

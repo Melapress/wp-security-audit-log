@@ -1,6 +1,6 @@
 <?php
 
-interface WSAL_ActiveRecordInterface {
+interface WSAL_Adapters_ActiveRecordInterface {
 	
 	public function IsInstalled();
 	public function Install();

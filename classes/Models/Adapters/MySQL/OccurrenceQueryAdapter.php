@@ -1,6 +1,6 @@
 <?php
 
-class WSAL_MySQL_OccurrenceQueryAdapter extends WSAL_MySQL_QueryAdapter implements WSAL_OccurrenceQueryInterface {
+class WSAL_Adapters_MySQL_OccurrenceQuery extends WSAL_Adapters_MySQL_Query implements WSAL_Adapters_OccurrenceQueryInterface {
 	
 	const LIKE_LEFT = 'l';
 	const LIKE_RIGHT = 'r';
@@ -24,7 +24,7 @@ class WSAL_MySQL_OccurrenceQueryAdapter extends WSAL_MySQL_QueryAdapter implemen
 	public function GetCond(){
 		$cond = parent::GetCond();
 		if (count($this->meta_where)) {
-			$tmp = new WSAL_MySQL_MetaAdapter();
+			$tmp = new WSAL_Adapters_MySQL_Meta();
 			$cond[] = 'id IN (
 				SELECT DISTINCT occurrence_id
 				FROM ' . $tmp->GetTable() . '
@@ -89,7 +89,7 @@ class WSAL_MySQL_OccurrenceQueryAdapter extends WSAL_MySQL_QueryAdapter implemen
 
 			//get meta adapter
 			//metaAdapter->deleteBYOccurenceIds(...);
-			$tmp = new WSAL_MySQL_MetaAdapter();
+			$tmp = new WSAL_Adapters_MySQL_Meta();
 			$sql = 'DELETE FROM ' . $tmp->GetTable() . ' WHERE occurrence_id IN (' . implode(',', $occids) . ')';
 
 			// restore columns

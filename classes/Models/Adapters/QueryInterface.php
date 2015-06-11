@@ -1,6 +1,6 @@
 <?php
 
-interface WSAL_QueryInterface {
+interface WSAL_Adapters_QueryInterface {
 	
 	public function Execute();
 	public function count();

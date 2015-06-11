@@ -1,12 +1,12 @@
 <?php
 
-class WSAL_MySQL_QueryAdapter implements WSAL_QueryInterface {
+class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 	
 
 	protected $ar_cls;
 	
 	/**
-	 * @var WSAL_ActiveRecord
+	 * @var WSAL_Models_ActiveRecord
 	 */
 	protected $ar_obj;
 	/**
@@ -108,7 +108,7 @@ class WSAL_MySQL_QueryAdapter implements WSAL_QueryInterface {
 	}
 	
 	/**
-	 * @return WSAL_ActiveRecord[] Execute query and return data as $ar_cls objects.
+	 * @return WSAL_Models_ActiveRecord[] Execute query and return data as $ar_cls objects.
 	 */
 	public function Execute(){
 		return call_user_func(array($this->ar_cls, 'LoadMultiQuery'), $this->GetSql(), $this->GetArgs());

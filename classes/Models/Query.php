@@ -1,32 +1,18 @@
 <?php
-require_once('ConnectorFactory.php');
-/**
- * @todo Add group-by support
- */
+require_once(__DIR__ . '/../Connector/ConnectorFactory.php');
+
+//TO DO: Get rid of OccurenceQuery and Query in favour of models
 class WSAL_Models_Query {
-	/**
-	 * @var string
-	 */
-
-	protected $connector;
-
 	public $adapterName = "Query";
-	
-	/**
-	 * @param string $ar_class Name of class that extends ActiveRecord class.
-	 */
-	public function __construct() {
-		$this->connector = $this->getConnector();
-	}
 	
 	protected function getConnector()
 	{
-		return WSAL_Models_ConnectorFactory::GetConnector();
+		return WSAL_Connector_ConnectorFactory::GetConnector();
 	}
 
 	protected function getAdapter()
 	{
-		return $this->connector->GetAdapter($this->adapterName);
+		return $this->getConnector()->getAdapter($this->adapterName);
 	}
 
 	public function Execute() {

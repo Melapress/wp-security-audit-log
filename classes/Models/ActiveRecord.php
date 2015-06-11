@@ -1,5 +1,5 @@
 <?php
-require_once('ConnectorFactory.php');
+require_once(__DIR__ . '/../Connector/ConnectorFactory.php');
 
 abstract class WSAL_Models_ActiveRecord{
 
@@ -42,12 +42,12 @@ abstract class WSAL_Models_ActiveRecord{
 
 	protected function getConnector()
 	{
-		return WSAL_Models_ConnectorFactory::GetConnector();
+		return WSAL_Connector_ConnectorFactory::GetConnector();
 	}
 
 	protected function getAdapter()
 	{
-		return $this->connector->GetAdapter($this->adapterName);
+		return $this->connector->getAdapter($this->adapterName);
 	}
 	
 
@@ -195,7 +195,7 @@ abstract class WSAL_Models_ActiveRecord{
 	 * @param string $target ActiveRecord class name.
 	 * @param string $query Load condition.
 	 * @param array $args Arguments used in condition.
-	 * @return WSAL_ActiveRecord
+	 * @return WSAL_Models_ActiveRecord
 	 */
 	protected static function CacheLoad($target, $query, $args){
 		$index = $target . '::' . vsprintf($query, $args);

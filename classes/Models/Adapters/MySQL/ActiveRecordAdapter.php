@@ -1,6 +1,6 @@
 <?php
 
-class WSAL_MySQL_ActiveRecordAdapter implements WSAL_ActiveRecordInterface {
+class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInterface {
 	
 	private $connection;
 

@@ -120,7 +120,6 @@ class WpSecurityAuditLog {
 		// profiler has to be loaded manually
 		require_once('classes/SimpleProfiler.php');
 		$this->profiler = new WSAL_SimpleProfiler();
-		require_once('classes/Models/ConnectorFactory.php');
 		require_once('classes/Models/ActiveRecord.php');
 		require_once('classes/Models/Option.php');
 		
@@ -252,7 +251,7 @@ class WpSecurityAuditLog {
 		}
 		
 		// ensure that the system is installed and schema is correct
-		WSAL_ActiveRecord::InstallAll();
+		WSAL_Models_ActiveRecord::InstallAll();
 		
 		$PreInstalled = $this->IsInstalled();
 		
@@ -539,25 +538,26 @@ class WpSecurityAuditLog {
 		while(($pos = array_search($hook, $this->_cleanup_hooks)) !== false)
 			unset($this->_cleanup_hooks[$pos]);
 	}
+
+	public static function getConnector()
+	{
+		require_once('classes/Connector/ConnectorFactory.php');
+		return WSAL_Connector_ConnectorFactory::getConnector();
+	}
 	
 	/**
 	 * Do we have an existing installation? This only applies for version 1.0 onwards.
 	 * @return boolean
 	 */
 	public function IsInstalled(){
-		//global $wpdb;
-		$_wpdb = self::GetConnection();
-		$table = $_wpdb->base_prefix . 'wsal_occurrences';
-		return ($_wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
+		return self::getConnector()->isInstalled();
 	}
 	
 	/**
 	 * @return boolean Whether the old plugin was present or not.
 	 */
 	public function CanMigrate(){
-		global $wpdb;
-		$table = $wpdb->base_prefix . 'wordpress_auditlog_events';
-		return ($wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
+		return self::getConnector()->canMigrate();
 	}
 	
 	/**

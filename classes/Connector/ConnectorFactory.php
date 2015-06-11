@@ -1,11 +1,15 @@
 <?php
 require_once('MySQLDBConnector.php');
 
-abstract class WSAL_Models_ConnectorFactory
+abstract class WSAL_Connector_ConnectorFactory
 {
 	public static $connector;
 	public static $adapter;
 
+	/**
+	 * Returns a connector singleton
+	 * @return WSAL_Connector_ConnectorInterface
+	 */
 	public static function GetConnector() {
 		//open config file
 		$type = "mysql"; //check type from config
@@ -32,7 +36,7 @@ abstract class WSAL_Models_ConnectorFactory
 				    break;
 				default :
 					//use config
-					self::$connector = new WSAL_MySQL_DB_Connector();
+					self::$connector = new WSAL_Connector_MySQLDB();
 			}
 		}
 		return self::$connector;
