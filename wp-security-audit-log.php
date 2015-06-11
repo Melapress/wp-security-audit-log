@@ -251,7 +251,7 @@ class WpSecurityAuditLog {
 		}
 		
 		// ensure that the system is installed and schema is correct
-		WSAL_Models_ActiveRecord::InstallAll();
+		self::getConnector()->installAllAdapters();
 		
 		$PreInstalled = $this->IsInstalled();
 		
@@ -308,7 +308,7 @@ class WpSecurityAuditLog {
 	 */
 	public function Uninstall(){
 		if ($this->GetGlobalOption("delete-data") == 1) {
-			WSAL_Models_ActiveRecord::UninstallAll();
+			self::getConnector()->uninstallAllAdapters();
 			$this->deleteAllOptions();
 		}
 		wp_clear_scheduled_hook('wsal_cleanup');

@@ -244,33 +244,5 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		}
 		return $result;
 	}
-	
-	/**
-	 * Install all DB tables.
-	 */
-	public static function InstallAll(){
-		$plugin = WpSecurityAuditLog::GetInstance();
-		foreach(glob(dirname(__FILE__) . '/*.php') as $file){
-			$class = $plugin->GetClassFileClassName($file);
-			if(is_subclass_of($class, __CLASS__)){
-				$class = new $class();
-				$class->Install();
-			}
-		}
-	}
-	
-	/**
-	 * Uninstall all DB tables.
-	 */
-	public static function UninstallAll(){
-		$plugin = WpSecurityAuditLog::GetInstance();
-		foreach(glob(dirname(__FILE__) . '/*.php') as $file){
-			$class = $plugin->GetClassFileClassName($file);
-			if(is_subclass_of($class, __CLASS__)) {
-				$class = new $class();
-				$class->Uninstall();
-			}
-		}
-	}
 
 }

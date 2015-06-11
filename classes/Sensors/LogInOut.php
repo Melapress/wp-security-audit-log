@@ -101,7 +101,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		if ($newAlertCode == 1002) {
 			if (!$this->plugin->alerts->CheckEnableUserRoles($username, $userRoles))return;
 			$occ = WSAL_Occurrence::findExistingOccurences(
-				$ip
+				$ip,
 				$username,
 				1002,
 				$site_id,
@@ -133,7 +133,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			} 
 		} else {
 			$occUnknown = WSAL_Occurrence::findExistingOccurences(
-				$ip
+				$ip,
 				1003,
 				$site_id,
 				mktime(0, 0, 0, $m, $d, $y),
