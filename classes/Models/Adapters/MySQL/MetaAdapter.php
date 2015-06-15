@@ -4,6 +4,11 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 
 	protected $_table = 'wsal_metadata';
 	protected $_idkey = 'id';
+
+    public function GetModel()
+    {
+        return new WSAL_Models_Meta();
+    }
 	
 	public function __construct($conn) {
 		parent::__construct($conn);

@@ -12,13 +12,14 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		if ($type < 0010 && !$this->plugin->settings->IsPhpErrorLoggingEnabled()) return;
 
 		// create new occurrence
-		$occ = new WSAL_Occurrence();
+		$occ = new WSAL_Models_Occurrence();
 		$occ->is_migrated = $migrated;
 		$occ->created_on = $date;
 		$occ->alert_id = $type;
 		$occ->site_id = !is_null($siteid) ? $siteid
 			: (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
 		$occ->Save();
+
 
 		// set up meta data
 		$occ->SetMeta($data);

@@ -1,33 +1,156 @@
 <?php
-require_once(__DIR__ . '/../Connector/ConnectorFactory.php');
 
-//TO DO: Get rid of OccurenceQuery and Query in favour of models
-class WSAL_Models_Query {
-	public $adapterName = "Query";
-	
-	protected function getConnector()
-	{
-		return WSAL_Connector_ConnectorFactory::GetConnector();
-	}
+class WSAL_Models_Query
+{
+    protected $columns = array();
+    protected $conditions = array();
+    protected $orderBy = array();
+    protected $offset = null;
+    protected $limit = null;
+    protected $from = array();
 
-	protected function getAdapter()
-	{
-		return $this->getConnector()->getAdapter($this->adapterName);
-	}
+    public function __construct()
+    {
 
-	public function Execute() {
-		return $this->getAdapter()->Execute();
-	}
+    }
 
-	public function count() {
-		return $this->getAdapter()->count();
-	}
+    public function getConnector()
+    {
+        if (!empty($this->connector)) {
+            return $this->connector;
+        }
+        if ($this->useDefaultAdapter) {
+            $this->connector = WSAL_Connector_ConnectorFactory::GetDefaultConnector();
+        } else {
+            $this->connector = WSAL_Connector_ConnectorFactory::GetConnector();
+        }
+        return $this->connector;
+    }
 
-	public function Delete() {
-		$this->getAdapter()->Delete();
-	}
+    public function getAdapter()
+    {
+        return $this->getConnector()->getAdapter('Query');
+    }
 
-	public function Where($cond, $args) {
-		$this->getAdapter()->Where($cond, $args);
-	}
+    public function addColumn($column)
+    {
+        $this->columns[] = $column;
+        return $this;
+    }
+
+    public function clearColumns()
+    {
+        $this->columns = array();
+        return $this;
+    }
+
+    public function getColumns()
+    {
+        return $this->columns;
+    }
+
+    public function setColumns($columns)
+    {
+        $this->columns = $columns;
+        return $this;
+    }
+
+    public function addCondition($field, $value)
+    {
+        $this->conditions[$field] = $value;
+        return $this;
+    }
+
+    public function clearConditions()
+    {
+        $this->conditions = array();
+        return $this;
+    }
+
+    public function getConditions()
+    {
+        return $this->conditions;
+    }
+
+    public function addOrderBy($field, $isDescending = false)
+    {
+        $this->orderBy[$field] = $isDescending;
+        return $this;
+    }
+
+    public function clearOrderBy()
+    {
+        $this->orderBy = array();
+        return $this;
+    }
+
+    public function getOrderBy()
+    {
+        return $this->orderBy;
+    }
+
+    public function addFrom($fromDataSet)
+    {
+        $this->from[] = $fromDataSet;
+        return $this;
+    }
+
+    public function clearFrom()
+    {
+        $this->from = array();
+        return $this;
+    }
+
+    public function getFrom()
+    {
+        return $this->from;
+    }
+
+    /**
+     * Gets the value of limit.
+     *
+     * @return mixed
+     */
+    public function getLimit()
+    {
+        return $this->limit;
+    }
+
+    /**
+     * Sets the value of limit.
+     *
+     * @param mixed $limit the limit
+     *
+     * @return self
+     */
+    public function setLimit($limit)
+    {
+        $this->limit = $limit;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of offset.
+     *
+     * @return mixed
+     */
+    public function getOffset()
+    {
+        return $this->offset;
+    }
+
+    /**
+     * Sets the value of offset.
+     *
+     * @param mixed $offset the offset
+     *
+     * @return self
+     */
+    public function setOffset($offset)
+    {
+        $this->offset = $offset;
+
+        return $this;
+    }
 }

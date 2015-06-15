@@ -5,19 +5,22 @@ require_once('AbstractConnector.php');
 
 class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements WSAL_Connector_ConnectorInterface
 {
-    public function __construct()
+    protected $connectionConfig = null;
+    public function __construct($connectionConfig = null)
     {
+        $this->connectionConfig = $connectionConfig;
         parent::__construct("MySQL");
+        require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
     }
     
     /**
      * Creates a connection and returns it
-     * @param bool $is_external Returns existing wpdb connection when false
      * @return Instance of WPDB
      */
-    private function createConnection($is_external = false)
+    private function createConnection()
     {
-        if ($is_external) {
+        if (!empty($this->connectionConfig)) {
+            //TO DO: Use the provided connection config
             $user = "root";
             $password = "";
             $database = "wordpress-clean-2";
@@ -36,12 +39,12 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     /**
      * Returns a wpdb instance
      */
-    public function getConnection($is_external = true)
+    public function getConnection()
     {
         if (!empty($this->connection)) {
             return $this->connection;
         } else {
-            $this->connection = $this->createConnection($is_external);
+            $this->connection = $this->createConnection();
             return $this->connection;
         }
     }
@@ -51,8 +54,13 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
      */
     public function getAdapter($class_name)
     {
-        $objName = 'WSAL_MySQL_'.$class_name.'Adapter';
+        $objName = $this->getAdapterClassName($class_name);
         return new $objName($this->getConnection());
+    }
+
+    protected function getAdapterClassName($class_name)
+    {
+        return 'WSAL_Adapters_MySQL_'.$class_name;
     }
 
     /**
@@ -78,13 +86,18 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     /**
      * Install all DB tables.
      */
-    public function installAllAdapters()
+    public function installAll()
     {
         $plugin = WpSecurityAuditLog::GetInstance();
+
+        $activeRecordAdapter = new WSAL_Adapters_MySQL_ActiveRecord($this->getConnection());
         foreach (glob($this->getAdaptersDirectory() . '/*.php') as $file) {
-            $class = $plugin->GetClassFileClassName($file);
-            if (is_subclass_of($class, __CLASS__)) {
-                $class = new $class();
+            $filePath = explode(DIRECTORY_SEPARATOR, $file);
+            $fileName = $filePath[count($filePath) - 1];
+            $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
+
+            $class = new $className($this->getConnection());
+            if (is_subclass_of($class, "WSAL_Adapters_MySQL_ActiveRecord")) {
                 $class->Install();
             }
         }
@@ -93,7 +106,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     /**
      * Uninstall all DB tables.
      */
-    public function uninstallAllAdapters()
+    public function uninstallAll()
     {
         $plugin = WpSecurityAuditLog::GetInstance();
         foreach (glob($this->getAdaptersDirectory() . '/*.php') as $file) {

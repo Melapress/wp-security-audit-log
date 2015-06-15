@@ -162,16 +162,6 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     {
         return microtime(true);// + get_option('gmt_offset') * HOUR_IN_SECONDS;
     }
-    
-    public function Save()
-    {
-        // use today's date if not set up
-        if (is_null($this->created_on)) {
-            $this->created_on = $this->GetMicrotime();
-        }
-        
-        return parent::Save();
-    }
 
     /**
      * Finds occurences of the same type by IP and Username within specified time frame

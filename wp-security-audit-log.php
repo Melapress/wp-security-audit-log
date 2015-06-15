@@ -121,6 +121,8 @@ class WpSecurityAuditLog {
 		require_once('classes/SimpleProfiler.php');
 		$this->profiler = new WSAL_SimpleProfiler();
 		require_once('classes/Models/ActiveRecord.php');
+		require_once('classes/Models/Query.php');
+		require_once('classes/Models/OccurenceQuery.php');
 		require_once('classes/Models/Option.php');
 		
 		// load autoloader and register base paths
@@ -251,7 +253,7 @@ class WpSecurityAuditLog {
 		}
 		
 		// ensure that the system is installed and schema is correct
-		self::getConnector()->installAllAdapters();
+		self::getConnector()->installAll();
 		
 		$PreInstalled = $this->IsInstalled();
 		
@@ -308,7 +310,7 @@ class WpSecurityAuditLog {
 	 */
 	public function Uninstall(){
 		if ($this->GetGlobalOption("delete-data") == 1) {
-			self::getConnector()->uninstallAllAdapters();
+			self::getConnector()->uninstallAll();
 			$this->deleteAllOptions();
 		}
 		wp_clear_scheduled_hook('wsal_cleanup');

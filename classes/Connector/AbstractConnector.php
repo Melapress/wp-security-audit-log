@@ -15,7 +15,6 @@ abstract class WSAL_Connector_AbstractConnector
         require_once($this->adaptersBasePath . 'MetaInterface.php');
         require_once($this->adaptersBasePath . 'OccurrenceInterface.php');
         require_once($this->adaptersBasePath . 'QueryInterface.php');
-        require_once($this->adaptersBasePath . 'OccurrenceQueryInterface.php');
 
         if (!empty($adaptersDirName)) {
             $this->adaptersDirName = $adaptersDirName;
@@ -23,7 +22,6 @@ abstract class WSAL_Connector_AbstractConnector
             require_once($this->getAdaptersDirectory() . '/MetaAdapter.php');
             require_once($this->getAdaptersDirectory() . '/OccurrenceAdapter.php');
             require_once($this->getAdaptersDirectory() . '/QueryAdapter.php');
-            require_once($this->getAdaptersDirectory() . '/OccurrenceQueryAdapter.php');
         }
     }
 

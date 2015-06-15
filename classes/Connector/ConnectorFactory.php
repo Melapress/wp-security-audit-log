@@ -3,43 +3,38 @@ require_once('MySQLDBConnector.php');
 
 abstract class WSAL_Connector_ConnectorFactory
 {
-	public static $connector;
-	public static $adapter;
+    public static $connector;
+    public static $defaultConnector;
+    public static $adapter;
 
-	/**
-	 * Returns a connector singleton
-	 * @return WSAL_Connector_ConnectorInterface
-	 */
-	public static function GetConnector() {
-		//open config file
-		$type = "mysql"; //check type from config
-		
-		if (self::$connector == null) {
-			switch (strtolower($type)) {
-				case 'mariadb':
-					
-						break;
-				case 'pgsql':
-					
-				    break;
-				case 'sybase':
-					
-				    break;
-				case 'oracle':
-					
-				    break;
-				case 'mssql':
-					
-				    break;
-				case 'sqlite':
+    /**
+     * Returns the a default WPDB connector for saving options
+     */
+    public static function GetDefaultConnector()
+    {
+         return new WSAL_Connector_MySQLDB();
+    }
 
-				    break;
-				default :
-					//use config
-					self::$connector = new WSAL_Connector_MySQLDB();
-			}
-		}
-		return self::$connector;
-	}
-    
+    /**
+     * Returns a connector singleton
+     * @return WSAL_Connector_ConnectorInterface
+     */
+    public static function GetConnector()
+    {
+        $connectionConfig = array();
+        //TO DO: Load connection config
+
+        $type = "mysql"; //Use type from config
+
+        if (self::$connector == null) {
+            switch (strtolower($type)) {
+                //TO DO: Add other connectors
+                case 'mysql':
+                default:
+                    //use config
+                    self::$connector = new WSAL_Connector_MySQLDB($connectionConfig);
+            }
+        }
+        return self::$connector;
+    }
 }

@@ -304,38 +304,55 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		//$this->process_bulk_action();
 		
 		//TO DO: Get rid of OccurenceQuery and use the Occurence Model
-		$query = new WSAL_Models_OccurrenceQuery('WSAL_Models_Occurrence');
+		$query = new WSAL_Models_OccurenceQuery();
+
 		$bid = (int)$this->get_view_site_id();
-		if ($bid) $query->where[] = 'site_id = '.$bid;
-		$query->order[] = 'created_on DESC';
+		if ($bid) {
+			$query->addCondition("site_id", $bid);
+		}
 		
 		$query = apply_filters('wsal_auditlog_query', $query);
 		
-		$total_items = $query->Count();
+		$total_items = $query->getAdapter()->Count($query);
 		
 		/** @deprecated */
 		//$data = $query->Execute();
-		
-		if($total_items){
-			$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'created_on';
-			$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'ASC' : 'DESC';
+
+
+		if (empty($_REQUEST["orderby"])) {
+			$query->addOrderBy("created_on", true);
+		} else {
+			$orderByField = $_REQUEST["orderby"];
+
+			$isDescending = true;
+			if (!empty($_REQUEST['order']) && $_REQUEST["order"] == "asc") {
+				$isDescending = false;
+			}
+
 			$tmp = new WSAL_Models_Occurrence();
-			if(isset($tmp->{$this->_orderby})){
+
+			//TO DO: Allow order by meta values
+			
+			//Making sure the field exists to order by
+			if (isset($tmp->{$orderByField})) {
 				// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
-				$query->order[] = $this->_orderby . ' ' . $this->_order;
+				$query->addOrderBy($_REQUEST["orderby"], $isDescending);
+
 				/** @deprecated */
 				//$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
 				//usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
+			} else {
+				$query->addOrderBy("created_on", true);
 			}
 		}
 
 		/** @todo Modify $query instead */
 		/** @deprecated */
 		//$data = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page);
-		$query->offset = ($this->get_pagenum() - 1) * $per_page;
-		$query->length = $per_page;
+		$query->setOffset(($this->get_pagenum() - 1) * $per_page);
+		$query->setLimit($per_page);
 
-		$this->items = $query->Execute(); 
+		$this->items = $query->getAdapter()->Execute($query);
 
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,
