@@ -42,12 +42,13 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     public function SetMetaValue($name, $value)
     {
         //get meta adapter
+        $model = new WSAL_Models_Meta();
         //call the function ($name, $this->getId())
         $meta = $this->getAdapter()->GetNamedMeta($name);
-        $meta->occurrence_id = $this->id;
+        $meta->occurrence_id = $this->getId();
         $meta->name = $name;
         $meta->value = $value;
-        $meta->Save();
+        $meta->Save($model);
     }
     
     /**

@@ -160,29 +160,10 @@ abstract class WSAL_Models_ActiveRecord
         return $result;
     }
 
-    public function Count($cond = '%d', $args = array(1)) {
+    public static function Count($cond = '%d', $args = array(1)) {
         $result = $this->getAdapter()->Count($cond, $args);
         return $result;
     }
-    
-    /**
-     * A wrapper for JSON encoding that fixes potential issues.
-     * @param mixed $data The data to encode.
-     * @return string JSON string.
-     */
-    protected function _JsonEncode($data){
-        return @json_encode($data);
-    }
-    
-    /**
-     * A wrapper for JSON encoding that fixes potential issues.
-     * @param string $data The JSON string to decode.
-     * @return mixed Decoded data.
-     */
-    protected function _JsonDecode($data){
-        return @json_decode($data);
-    }
-    
     
     /**
      * @return boolean

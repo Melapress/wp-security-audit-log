@@ -39,8 +39,8 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             }
             $sLimitClause .= $query->getLimit();
         }
-
-        return 'SELECT ' . implode(',', $columns)
+        $fields = (empty($columns))? '*' : implode(',', $columns);
+        return 'SELECT ' . $fields
             . ' FROM ' . implode(',', $fromDataSets)
             . $sWhereClause
             // @todo GROUP BY goes here

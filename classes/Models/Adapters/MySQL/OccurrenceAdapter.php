@@ -25,7 +25,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
      */
     public function GetMeta(){
         if(!isset($this->_meta)){
-            $this->_meta = WSAL_Adapters_MySQL_Meta::LoadMulti('occurrence_id = %d', array($this->id));
+            $this->_meta = WSAL_Adapters_MySQL_Meta::LoadMulti('occurrence_id = %d', array($this->GetModel()->id));
         }
         return $this->_meta;
     }
@@ -37,7 +37,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
      */
     public function GetNamedMeta($name){
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
-        $data = $meta->Load('occurrence_id = %d AND name = %s', array($this->id, $name));
+        $data = $meta->Load('occurrence_id = %d AND name = %s', array($this->GetModel()->id, $name));
         return $meta;
     }
     
@@ -50,7 +50,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
         $query = '(' . str_repeat('name = %s OR ', count($names)).'0)';
         $query = 'occurrence_id = %d AND ' . $query . ' ORDER BY name DESC LIMIT 1';
-        array_unshift($names, $this->id); // prepend args with occurrence id
+        array_unshift($names, $this->GetModel()->id); // prepend args with occurrence id
         $meta->Load($query, $names);
         return $meta->IsLoaded() ? $meta : null;
     }

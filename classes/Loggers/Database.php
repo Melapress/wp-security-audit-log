@@ -46,7 +46,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
         $max_stamp = $now - (strtotime($max_sdate) - $now);
 		$max_items = max(($cnt_items - $max_count) + 1, 0);
 
-		$query = new WSAL_OccurrenceQuery('WSAL_Occurrence');
+		$query = new WSAL_Models_OccurrenceQuery();
 		$query->order[] = 'created_on ASC';
 
 		if ($is_date_e) $query->Where('created_on < ' . intval($max_stamp), array());

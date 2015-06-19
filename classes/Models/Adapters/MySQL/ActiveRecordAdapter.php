@@ -23,7 +23,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
     public function GetModel()
     {
-        return new WSAL_Models_ActiveRecord();
+        return new WSAL_Models_ActiveRecord(); 
     }
     
     /**
@@ -104,7 +104,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $format = array();
         foreach ($this->GetColumns() as $key) {
 
-            $val = $this->$key;
+            $val = $copy->$key;
             $deffmt = '%s';
             if (is_int($copy->$key)) {
               $deffmt = '%d';
@@ -190,8 +190,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $class = get_called_class();
         $result = array();
         $sql = (!is_array($args) || !count($args)) // do we really need to prepare() or not?
-            ? ('SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond)
-            : $_wpdb->prepare('SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args)
+            ? ($cond)
+            : $_wpdb->prepare($cond, $args)
         ;
         foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
             $result[] = new $class($data);
@@ -322,4 +322,23 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         return $sql;
         
     }
+
+     /**
+     * A wrapper for JSON encoding that fixes potential issues.
+     * @param mixed $data The data to encode.
+     * @return string JSON string.
+     */
+    protected function _JsonEncode($data){
+        return @json_encode($data);
+    }
+    
+    /**
+     * A wrapper for JSON encoding that fixes potential issues.
+     * @param string $data The JSON string to decode.
+     * @return mixed Decoded data.
+     */
+    protected function _JsonDecode($data){
+        return @json_decode($data);
+    }
+
 }
