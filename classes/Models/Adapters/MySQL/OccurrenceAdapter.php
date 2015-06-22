@@ -38,7 +38,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     public function GetNamedMeta($name){
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
         $data = $meta->Load('occurrence_id = %d AND name = %s', array($this->GetModel()->id, $name));
-        return $meta;
+        return $data;
     }
     
     /**

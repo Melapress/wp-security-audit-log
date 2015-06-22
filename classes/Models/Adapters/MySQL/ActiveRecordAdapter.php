@@ -97,9 +97,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     public function Save($activeRecord)
     {
         //global $wpdb;
-        $_wpdb = $this->connection;
-        $copy = get_class($activeRecord);
-        $copy = new $copy($this->connection);
+        $_wpdb = $this->connection; 
+        $copy = $activeRecord;
         $data = array();
         $format = array();
         foreach ($this->GetColumns() as $key) {
@@ -124,7 +123,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             
         if ($result !== false) {
             if ($_wpdb->insert_id) {
-                $activeRecord->setId($_wpdb->insert_id);
+                $copy->setId($_wpdb->insert_id);
                 //$this->_state = self::STATE_CREATED;
             } else {
                 //$this->_state = self::STATE_UPDATED;

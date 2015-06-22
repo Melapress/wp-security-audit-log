@@ -96,7 +96,7 @@ abstract class WSAL_Models_ActiveRecord
      * Load object data from variable.
      * @param array|object $data Data array or object.
      */
-    public function LoadData($data){
+    public function LoadData($data){ var_dump($data);exit;
         $copy = get_class($this);
         $copy = new $copy;
         foreach((array)$data as $key => $val){
@@ -137,7 +137,6 @@ abstract class WSAL_Models_ActiveRecord
         if (is_null($this->created_on)) {
             $this->created_on = $this->GetMicrotime();
         }
-
         $updateId = $this->getId();
         $result = $this->getAdapter()->Save($this);
 

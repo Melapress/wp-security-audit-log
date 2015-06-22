@@ -23,7 +23,7 @@ class WSAL_WidgetManager {
 	}
 	
 	public function RenderWidget(){
-		$results = WSAL_Occurrence::LoadMulti(
+		$results = WSAL_Models_Occurrence::LoadMulti(
 			' 1 ORDER BY created_on DESC LIMIT '
 			. $this->_plugin->settings->GetDashboardWidgetMaxAlerts()
 		);

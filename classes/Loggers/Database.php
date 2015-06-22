@@ -7,7 +7,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$plugin->AddCleanupHook(array($this, 'CleanUp'));
 	}
 
-	public function Log($type, $data = array(), $date = null, $siteid = null, $migrated = false) {
+	public function Log($type, $data = array(), $date = null, $siteid = null, $migrated = false) { 
 		// is this a php alert, and if so, are we logging such alerts?
 		if ($type < 0010 && !$this->plugin->settings->IsPhpErrorLoggingEnabled()) return;
 
@@ -19,7 +19,6 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$occ->site_id = !is_null($siteid) ? $siteid
 			: (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
 		$occ->Save();
-
 
 		// set up meta data
 		$occ->SetMeta($data);
