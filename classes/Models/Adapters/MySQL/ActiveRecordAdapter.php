@@ -112,7 +112,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 $deffmt = '%f';
             }
             if (is_array($copy->$key) || is_object($copy->$key)) {
-                $data[$key] = $this->_JsonEncode($val);
+                $data[$key] = WSAL_Helpers_DataHelper::JsonEncode($val);
             } else {
                 $data[$key] = $val;
             }
@@ -144,8 +144,21 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         
         $sql = $_wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '. $cond, $args);
         $data = $_wpdb->get_row($sql, ARRAY_A);
-        
+
         return $data;
+    }
+
+    public function LoadArray($cond, $args = array())
+    {
+        //global $wpdb;
+        $_wpdb = $this->connection;
+        $result = array();
+        $sql = $_wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '. $cond, $args);
+        foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
+            $result[] = $data;
+        }
+        return $result;
+
     }
     
     /**
@@ -186,16 +199,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     {
         //global $wpdb;
         $_wpdb = $this->connection;
-        $class = get_called_class();
         $result = array();
         $sql = (!is_array($args) || !count($args)) // do we really need to prepare() or not?
             ? ($cond)
             : $_wpdb->prepare($cond, $args)
         ;
         foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
-            $result[] = new $class($data);
+            $result[] = $this->getModel()->LoadData($data);
         }
         return $result;
+
     }
     
     /**
@@ -321,23 +334,4 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         return $sql;
         
     }
-
-     /**
-     * A wrapper for JSON encoding that fixes potential issues.
-     * @param mixed $data The data to encode.
-     * @return string JSON string.
-     */
-    protected function _JsonEncode($data){
-        return @json_encode($data);
-    }
-    
-    /**
-     * A wrapper for JSON encoding that fixes potential issues.
-     * @param string $data The JSON string to decode.
-     * @return mixed Decoded data.
-     */
-    protected function _JsonDecode($data){
-        return @json_decode($data);
-    }
-
 }

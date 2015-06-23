@@ -144,6 +144,10 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	}
 	
 	public function column_default($item, $column_name){
+
+
+		//example: $item->getMetaValue('CurrentUserID')
+
 		if (!$this->_plugin->settings->GetDatetimeFormat()) $datetimeFormat = 'h:i:s.$$$&\n\b\s\p;A';
 		else $datetimeFormat = 'H:i:s.$$$';
 		switch($column_name){

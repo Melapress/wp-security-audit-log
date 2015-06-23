@@ -62,7 +62,13 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $args = array();
         $sql = $this->GetSql($query, $args);
 
-        return $this->getActiveRecordAdapter()->LoadMulti($sql, $args);
+        $occurenceAdapter = $query->getConnector()->getAdapter("Occurrence");
+
+        if (in_array($occurenceAdapter->GetTable(), $query->getFrom())) {
+            return $occurenceAdapter->LoadMulti($sql, $args);
+        } else {
+            return $this->getActiveRecordAdapter()->LoadMulti($sql, $args);
+        }
     }
     
     /**

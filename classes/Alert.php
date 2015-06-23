@@ -66,7 +66,7 @@ final class WSAL_Alert {
 	 * @param string $afterMeta (Optional) Some text to put after meta values.
 	 * @return string The expanded message.
 	 */
-	protected function GetFormattedMesg($origMesg, $metaData = array(), $metaFormatter = null){
+	protected function GetFormattedMesg($origMesg, $metaData = array(), $metaFormatter = null){ 
 		// tokenize message with regex
 		$mesg = preg_split('/(%.*?%)/', (string)$origMesg, -1, PREG_SPLIT_DELIM_CAPTURE);
 		if(!is_array($mesg))return (string)$origMesg;

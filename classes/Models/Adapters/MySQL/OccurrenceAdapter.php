@@ -23,9 +23,18 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
      * Returns all meta data related to this event.
      * @return WSAL_Meta[]
      */
-    public function GetMeta(){
+    public function GetMeta($occurence){
         if(!isset($this->_meta)){
-            $this->_meta = WSAL_Adapters_MySQL_Meta::LoadMulti('occurrence_id = %d', array($this->GetModel()->id));
+            $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
+            $this->_meta = $meta->Load('occurrence_id = %d', array($occurence->id));
+        }
+        return $this->_meta;
+    }
+
+    public function GetMultiMeta($occurence){
+        if(!isset($this->_meta)){
+            $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
+            $this->_meta = $meta->LoadArray('occurrence_id = %d', array($occurence->id));
         }
         return $this->_meta;
     }
@@ -35,10 +44,11 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
      * @param string $name Meta name.
      * @return WSAL_Meta The meta item, be sure to checked if it was loaded successfully.
      */
-    public function GetNamedMeta($name){
+    public function GetNamedMeta($occurence, $name){
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
-        $data = $meta->Load('occurrence_id = %d AND name = %s', array($this->GetModel()->id, $name));
-        return $data;
+        $this->_meta = $meta->Load('occurrence_id = %d AND name = %s', array($occurence->id, $name));
+
+        return $this->_meta;
     }
     
     /**
@@ -46,13 +56,17 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
      * @param array $names List of meta names.
      * @return WSAL_Meta The first meta item that exists.
      */
-    public function GetFirstNamedMeta($names){
+    public function GetFirstNamedMeta($occurence, $names){
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
         $query = '(' . str_repeat('name = %s OR ', count($names)).'0)';
         $query = 'occurrence_id = %d AND ' . $query . ' ORDER BY name DESC LIMIT 1';
-        array_unshift($names, $this->GetModel()->id); // prepend args with occurrence id
-        $meta->Load($query, $names);
-        return $meta->IsLoaded() ? $meta : null;
+        array_unshift($names, $occurence->id); // prepend args with occurrence id
+        
+        $this->_meta = $meta->Load($query, $names);
+        return $meta->getModel()->LoadData($this->_meta);
+
+        //TO DO: Do we want to reintroduce is loaded check/logic?
+        //return $meta->IsLoaded() ? $meta : null;
     }
     
     /**

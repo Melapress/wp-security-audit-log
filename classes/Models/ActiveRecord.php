@@ -71,7 +71,7 @@ abstract class WSAL_Models_ActiveRecord
         return $this->connector;
     }
 
-    protected function getAdapter()
+    public function getAdapter()
     {
         return $this->getConnector()->getAdapter($this->adapterName);
     }
@@ -96,7 +96,7 @@ abstract class WSAL_Models_ActiveRecord
      * Load object data from variable.
      * @param array|object $data Data array or object.
      */
-    public function LoadData($data){ var_dump($data);exit;
+    public function LoadData($data){
         $copy = get_class($this);
         $copy = new $copy;
         foreach((array)$data as $key => $val){
@@ -104,7 +104,7 @@ abstract class WSAL_Models_ActiveRecord
                 switch(true){
                     case is_array($copy->$key):
                     case is_object($copy->$key):
-                        $this->$key = $this->_JsonDecode($val);
+                        $this->$key = WSAL_Helpers_DataHelper::JsonDecode($val);
                         break;
                     case is_int($copy->$key):
                         $this->$key = (int)$val;
@@ -123,6 +123,7 @@ abstract class WSAL_Models_ActiveRecord
                 }
             }
         }
+        return $this;
     }
 
     /**
@@ -160,7 +161,7 @@ abstract class WSAL_Models_ActiveRecord
     }
 
     public static function Count($cond = '%d', $args = array(1)) {
-        $result = $this->getAdapter()->Count($cond, $args);
+        $result = $this->getAdapter()->Count($cond, $args); 
         return $result;
     }
     
