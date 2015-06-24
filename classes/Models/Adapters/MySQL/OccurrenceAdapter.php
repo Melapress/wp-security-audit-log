@@ -97,7 +97,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
      * @param $startTime mktime
      * @param $endTime mktime
      */
-    public function findExistingOccurences($ipAddress, $username, $alertId, $siteId, $startTime, $endTime)
+    public function CheckKnownUsers($args = array())
     {
         $tt2 = new WSAL_Adapters_MySQL_Meta($this->connection);
         return self::LoadMultiQuery(
@@ -111,18 +111,12 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
             WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
             AND (created_on BETWEEN %d AND %d)
             GROUP BY occurrence.id',
-            array(
-                json_encode($ipAddress),
-                json_encode($username),
-                $alertId,
-                $siteId,
-                $startTime,
-                $endTime
-            )
+            $args
         );
     }
 
-    public function CheckUnKnownUsers($args = array()) {
+    public function CheckUnKnownUsers($args = array()) 
+    {
         $tt2 = new WSAL_Adapters_MySQL_Meta($this->connection);
         return self::LoadMultiQuery('
             SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence 
@@ -130,8 +124,9 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
             and ipMeta.name = "ClientIP" and ipMeta.value = %s 
             WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
             AND (created_on BETWEEN %d AND %d)
-            GROUP BY occurrence.id
-        ', $args);
+            GROUP BY occurrence.id', 
+            $args
+        );
     }
     
     protected function prepareOccurenceQuery($query)

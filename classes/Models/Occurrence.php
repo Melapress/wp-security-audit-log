@@ -31,7 +31,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
         //get meta adapter
         //call the function ($name, $this->getId())
         $meta = $this->getAdapter()->GetNamedMeta($this, $name);
-        return $meta['value'];
+        return maybe_unserialize($meta['value']);
 
         //TO DO: re-introduce add is loaded check before running query
         //return $meta->IsLoaded() ? $meta->value : $default;
@@ -175,9 +175,9 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
      * @param $startTime mktime
      * @param $endTime mktime
      */
-    public function findExistingOccurences($ipAddress, $username, $alertNumber, $siteId, $startDate, $endDate)
+    public function CheckKnownUsers($args = array())
     {
-        return $this->getAdapter()->CheckKnownUsers($ipAddress, $username, $alertNumber, $siteId, $startDate, $endDate);
+        return $this->getAdapter()->CheckKnownUsers($args);
     }
 
     public function CheckUnKnownUsers($args = array())

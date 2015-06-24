@@ -104,7 +104,8 @@ abstract class WSAL_Models_ActiveRecord
                 switch(true){
                     case is_array($copy->$key):
                     case is_object($copy->$key):
-                        $this->$key = WSAL_Helpers_DataHelper::JsonDecode($val);
+                        $jsonDecodedVal = WSAL_Helpers_DataHelper::JsonDecode($val);
+                        $this->$key = ($jsonDecodedVal == null) ? $val : $jsonDecodedVal;
                         break;
                     case is_int($copy->$key):
                         $this->$key = (int)$val;

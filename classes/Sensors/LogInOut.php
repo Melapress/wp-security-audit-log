@@ -98,19 +98,23 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 
 		if($this->IsPastLoginFailureLimit($ip, $site_id, $user))return;
 
+		$objOcc = new  WSAL_Models_Occurrence();
+		
 		if ($newAlertCode == 1002) {
 			if (!$this->plugin->alerts->CheckEnableUserRoles($username, $userRoles))return;
-			$occ = WSAL_Models_Occurrence::findExistingOccurences(
-				$ip,
-				$username,
-				1002,
-				$site_id,
-				mktime(0, 0, 0, $m, $d, $y),
-				mktime(0, 0, 0, $m, $d + 1, $y) - 1
+			$occ = $objOcc->CheckKnownUsers(
+				array(
+					$ip,
+					$username,
+					1002,
+					$site_id,
+					mktime(0, 0, 0, $m, $d, $y),
+					mktime(0, 0, 0, $m, $d + 1, $y) - 1
+				)
 			);
-
 			$occ = count($occ) ? $occ[0] : null;
-			if($occ && $occ->IsLoaded()){
+			
+			if(!empty($occ)){
 				// update existing record exists user
 				$this->IncrementLoginFailure($ip, $site_id, $user);
 				$new = $occ->GetMetaValue('Attempts', 0) + 1;
@@ -132,16 +136,18 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				));
 			} 
 		} else {
-			$occUnknown = WSAL_Models_Occurrence::findExistingOccurences(
-				$ip,
-				1003,
-				$site_id,
-				mktime(0, 0, 0, $m, $d, $y),
-				mktime(0, 0, 0, $m, $d + 1, $y) - 1
+			$occUnknown = $objOcc->CheckUnKnownUsers(
+				array(
+					$ip,
+					1003,
+					$site_id,
+					mktime(0, 0, 0, $m, $d, $y),
+					mktime(0, 0, 0, $m, $d + 1, $y) - 1
+				)
 			);
 				
 			$occUnknown = count($occUnknown) ? $occUnknown[0] : null;
-			if($occUnknown && $occUnknown->IsLoaded()) {
+			if(!empty($occUnknown)) {
 				// update existing record not exists user
 				$this->IncrementLoginFailure($ip, $site_id, false);
 				$new = $occUnknown->GetMetaValue('Attempts', 0) + 1;

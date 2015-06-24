@@ -273,7 +273,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $result = array();
         $sql = count($args) ? $_wpdb->prepare($query, $args) :  $query;
         foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
-            $result[] = new $class($data);
+            $result[] = $this->getModel()->LoadData($data);
         }
         return $result;
     }

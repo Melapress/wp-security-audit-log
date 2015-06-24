@@ -29,7 +29,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
 
         $fromDataSets = $query->getFrom();
         $columns = $query->getColumns();
-        $orderBys = $query->getOrderBy(); 
+        $orderBys = $query->getOrderBy();
 
         $sLimitClause = "";
         if ($query->getLimit()) {

@@ -6,6 +6,6 @@ interface WSAL_Adapters_OccurrenceInterface
     public function GetNamedMeta($occurence, $name);
     public function GetFirstNamedMeta($occurence, $names);
     public static function GetNewestUnique($limit = PHP_INT_MAX);
-    public function findExistingOccurences($ipAddress, $username, $alertId, $siteId, $startTime, $endTime);
+    public function CheckKnownUsers($args = array());
     public function CheckUnKnownUsers($args = array());
 }
