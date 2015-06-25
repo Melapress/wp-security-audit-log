@@ -91,10 +91,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $plugin = WpSecurityAuditLog::GetInstance();
 
         $activeRecordAdapter = new WSAL_Adapters_MySQL_ActiveRecord($this->getConnection());
-        foreach (glob($this->getAdaptersDirectory() . '/*.php') as $file) {
-            $filePath = explode(DIRECTORY_SEPARATOR, $file);
+        foreach (glob($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php') as $file) {
+            $filePath = explode(DIRECTORY_SEPARATOR, $file); var_dump($filePath); var_dump($fileName);
             $fileName = $filePath[count($filePath) - 1];
-            $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
+            $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName)); var_dump($className);
 
             $class = new $className($this->getConnection());
             if (is_subclass_of($class, "WSAL_Adapters_MySQL_ActiveRecord")) {
@@ -109,7 +109,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     public function uninstallAll()
     {
         $plugin = WpSecurityAuditLog::GetInstance();
-        foreach (glob($this->getAdaptersDirectory() . '/*.php') as $file) {
+        foreach (glob($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php') as $file) {
             $class = $plugin->GetClassFileClassName($file);
             if (is_subclass_of($class, __CLASS__)) {
                 $class = new $class();

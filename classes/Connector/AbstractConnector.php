@@ -9,7 +9,7 @@ abstract class WSAL_Connector_AbstractConnector
 
     public function __construct($adaptersDirName = null)
     {
-        $this->adaptersBasePath =  __DIR__ . '/../Models/Adapters/';
+        $this->adaptersBasePath =  __DIR__ . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'Models'. DIRECTORY_SEPARATOR .'Adapters'. DIRECTORY_SEPARATOR;
 
         require_once($this->adaptersBasePath . 'ActiveRecordInterface.php');
         require_once($this->adaptersBasePath . 'MetaInterface.php');
@@ -18,10 +18,10 @@ abstract class WSAL_Connector_AbstractConnector
 
         if (!empty($adaptersDirName)) {
             $this->adaptersDirName = $adaptersDirName;
-            require_once($this->getAdaptersDirectory() . '/ActiveRecordAdapter.php');
-            require_once($this->getAdaptersDirectory() . '/MetaAdapter.php');
-            require_once($this->getAdaptersDirectory() . '/OccurrenceAdapter.php');
-            require_once($this->getAdaptersDirectory() . '/QueryAdapter.php');
+            require_once($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'ActiveRecordAdapter.php');
+            require_once($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'MetaAdapter.php');
+            require_once($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'OccurrenceAdapter.php');
+            require_once($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'QueryAdapter.php');
         }
     }
 
