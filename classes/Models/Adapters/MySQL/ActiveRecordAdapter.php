@@ -327,4 +327,11 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         return $sql;
         
     }
+
+    /**
+     * @return string Must return SQL for removing table (at a minimum, it should be ` 'DROP TABLE ' . $this->_table `).
+     */
+    protected function _GetUninstallQuery(){
+        return  'DROP TABLE ' . $this->GetTable();
+    }
 }
