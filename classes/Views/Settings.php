@@ -66,6 +66,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		if(isset($_REQUEST['DevOptions']))
 			foreach($_REQUEST['DevOptions'] as $opt)
 				$this->_plugin->settings->SetDevOptionEnabled($opt, true);
+		/* Adapter config */
+		$this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
+		$this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
+		$this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
+		$this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
+		$this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
+		$this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
 	}
 	
 	public function AjaxCheckSecurityToken(){
@@ -97,8 +104,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			}
 		}
 		?>
-		<h2 id="wsal-tabs" class="nav-tab-wrapper"><a href="#tab-general" class="nav-tab">General</a><a href="#tab-exclude" class="nav-tab">Exclude Objects</a></h2>
-		 <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
+		<h2 id="wsal-tabs" class="nav-tab-wrapper">
+			<a href="#tab-general" class="nav-tab">General</a>
+			<a href="#tab-exclude" class="nav-tab">Exclude Objects</a>
+			<a href="#adapter" class="nav-tab">Data Storage Adapter</a>
+		</h2>
+		<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
 		<form id="audit-log-settings" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr(admin_url('admin-ajax.php')); ?>" />
@@ -380,6 +391,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
  					</tr>
 					</tbody>
 				</table>
+				<!-- End general Tab-->
 				<table class="form-table wsal-tab widefat" id="tab-exclude">
 					<tbody>
 						<tr>
@@ -453,6 +465,75 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</tr>
 					</tbody>
 				</table>
+				<!-- End exclude objects Tab-->
+				<table class="form-table wsal-tab widefat" id="adapter">
+					<tbody>
+						<tr>
+							<th><h2>Type</h2></th>
+						</tr>
+						<tr>
+							<th><label for="AdapterType"><?php _e('Adapter Type', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterType = strtolower($this->_plugin->settings->GetAdapterConfig('adapter-type')); ?>
+									<select name="AdapterType" id="AdapterType">
+										<option value="MySQL" <?=($adapterType == 'mysql')? 'selected="selected"' : '';?>>DB MySQL</option>
+										<option value="other">Other</option>
+									</select>
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th><h2>Config</h2></th>
+						</tr>
+						<tr>
+							<th><label for="AdapterUser"><?php _e('Adapter User', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterUser = $this->_plugin->settings->GetAdapterConfig('adapter-user'); ?>
+									<input type="text" id="AdapterUser" name="AdapterUser" value="<?=$adapterUser?>" style="float: left; display: block; width: 250px;">
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th><label for="AdapterPassword"><?php _e('Adapter Password', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterPassword = $this->_plugin->settings->GetAdapterConfig('adapter-password'); ?>
+									<input type="password" id="AdapterPassword" name="AdapterPassword" value="<?=$adapterPassword?>" style="float: left; display: block; width: 250px;">
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th><label for="AdapterName"><?php _e('Adapter Name', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterName = $this->_plugin->settings->GetAdapterConfig('adapter-name'); ?>
+									<input type="text" id="AdapterName" name="AdapterName" value="<?=$adapterName?>" style="float: left; display: block; width: 250px;">
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th><label for="AdapterHostname"><?php _e('Adapter Hostname', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterHostname = $this->_plugin->settings->GetAdapterConfig('adapter-hostname'); ?>
+									<input type="text" id="AdapterHostname" name="AdapterHostname" value="<?=$adapterHostname?>" style="float: left; display: block; width: 250px;">
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th><label for="AdapterBasePrefix"><?php _e('Adapter Base prefix', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterBasePrefix = $this->_plugin->settings->GetAdapterConfig('adapter-base-prefix'); ?>
+									<input type="text" id="AdapterBasePrefix" name="AdapterBasePrefix" value="<?=$adapterBasePrefix?>" style="float: left; display: block; width: 250px;">
+								</fieldset>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<!-- End Adapter Tab-->
 			</div>
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes"></p>
 		</form>

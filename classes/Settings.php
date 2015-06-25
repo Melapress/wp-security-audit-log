@@ -565,6 +565,17 @@ class WSAL_Settings {
 	public function SetDatetimeFormat($newvalue){
 		return $this->_plugin->SetGlobalOption('datetime-format', $newvalue);
 	}
+
+	/**
+	 * Adapter Config.
+	 */
+	public function GetAdapterConfig($name_field){
+		return $this->_plugin->GetGlobalOption($name_field);
+	}
+
+	public function SetAdapterConfig($name_field, $newvalue){
+		return $this->_plugin->SetGlobalOption($name_field, $newvalue);
+	}
 	
 	// </editor-fold>
 }

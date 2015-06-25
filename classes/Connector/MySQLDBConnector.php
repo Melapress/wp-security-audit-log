@@ -21,14 +21,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     {
         if (!empty($this->connectionConfig)) {
             //TO DO: Use the provided connection config
-            $user = "root";
-            $password = "";
-            $database = "wordpress-clean-2";
-            //$database = "cleanwordpress";
-            $hostname = "localhost";
-            $base_prefix = "wp_";
-            $newWpdb = new wpdb($user, $password, $database, $hostname);
-            $newWpdb->set_prefix($base_prefix);
+            $connectionConfig = $this->connectionConfig;
+            $newWpdb = new wpdb($connectionConfig['user'], $connectionConfig['password'], $connectionConfig['name'], $connectionConfig['hostname']);
+            $newWpdb->set_prefix($connectionConfig['base_prefix']);
             return $newWpdb;
         } else {
             global $wpdb;
