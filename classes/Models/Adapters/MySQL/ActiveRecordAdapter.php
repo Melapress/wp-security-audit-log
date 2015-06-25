@@ -119,14 +119,11 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             $format[] = $deffmt;
         }
         
-        $result = $_wpdb->replace($this->GetTable(), $data, $format);
+        $result = $_wpdb->replace($this->GetTable(), $data, $format); var_dump($data); var_dump($this->GetTable()); var_dump($format); var_dump($result);
             
         if ($result !== false) {
             if ($_wpdb->insert_id) {
                 $copy->setId($_wpdb->insert_id);
-                //$this->_state = self::STATE_CREATED;
-            } else {
-                //$this->_state = self::STATE_UPDATED;
             }
         }
         return $result;
