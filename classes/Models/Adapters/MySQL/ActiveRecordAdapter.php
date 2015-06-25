@@ -76,7 +76,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function Install(){
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        error_log(print_r($this->_GetInstallQuery(), true));
         dbDelta($this->_GetInstallQuery());
     }
     
