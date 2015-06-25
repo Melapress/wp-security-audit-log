@@ -6,6 +6,13 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     protected $_idkey = 'id';
     protected $_meta;
 
+    public $id = 0;
+    public $site_id = 0;
+    public $alert_id = 0;
+    public $created_on = 0.0;
+    public $is_read = false;
+    public $is_migrated = false;
+
     public function __construct($conn) {
         parent::__construct($conn);
     }

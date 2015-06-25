@@ -92,9 +92,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
         $activeRecordAdapter = new WSAL_Adapters_MySQL_ActiveRecord($this->getConnection());
         foreach (glob($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php') as $file) {
-            $filePath = explode(DIRECTORY_SEPARATOR, $file); var_dump($filePath); var_dump($fileName);
+            $filePath = explode(DIRECTORY_SEPARATOR, $file); 
             $fileName = $filePath[count($filePath) - 1];
-            $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName)); var_dump($className);
+            $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
 
             $class = new $className($this->getConnection());
             if (is_subclass_of($class, "WSAL_Adapters_MySQL_ActiveRecord")) {

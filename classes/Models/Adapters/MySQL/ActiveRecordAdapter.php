@@ -76,6 +76,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function Install(){
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        error_log(print_r($this->_GetInstallQuery(), true));
         dbDelta($this->_GetInstallQuery());
     }
     
@@ -279,7 +280,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     protected function _GetInstallQuery()
     {
-        $wpdb = $this->connection;
+        $_wpdb = $this->connection;
         
         $class = get_class($this);
         $copy = new $class($this->connection);
@@ -320,11 +321,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         
         $sql .= ')';
         
-        if (! empty($wpdb->charset)) {
-            $sql .= ' DEFAULT CHARACTER SET ' . $wpdb->charset;
-        }
-        if (! empty($wpdb->collate)) {
-            $sql .= ' COLLATE ' . $wpdb->collate;
+        if (! empty($_wpdb->charset)) {
+            $sql .= ' DEFAULT CHARACTER SET ' . $_wpdb->charset;
         }
         
         return $sql;
