@@ -39,7 +39,7 @@ class WSAL_Models_Option extends WSAL_Models_ActiveRecord
         $this->_state = self::STATE_UNKNOWN;
 
         $updateId = $this->getId();
-        $result = $this->getAdapter()->SaveOptions($this);
+        $result = $this->getAdapter()->Save($this);
 
         if ($result !== false) {
             $this->_state = (!empty($updateId))?self::STATE_UPDATED:self::STATE_CREATED;

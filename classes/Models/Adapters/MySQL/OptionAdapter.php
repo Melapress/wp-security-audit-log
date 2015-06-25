@@ -27,37 +27,4 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
         return $this->Load('option_name = %s', array($name));
     }
 
-    public function SaveOptions($activeRecord)
-    {
-        //global $wpdb;
-        $_wpdb = $this->connection; 
-        $copy = $activeRecord;
-        $data = array();
-        $format = array();
-        foreach ($this->GetColumns() as $key) {
-
-            $val = $copy->$key;
-            $deffmt = '%s';
-            if (is_int($copy->$key)) {
-              $deffmt = '%d';
-            }
-            if (is_float($copy->$key)) {
-                $deffmt = '%f';
-            }
-            if (is_array($copy->$key) || is_object($copy->$key)) {
-                $data[$key] = WSAL_Helpers_DataHelper::JsonEncode($val);
-            } else {
-                $data[$key] = $val;
-            }
-            $format[] = $deffmt;
-        }
-        $result = $_wpdb->replace($this->GetTable(), $data, $format);
-            
-        if ($result !== false) {
-            if ($_wpdb->insert_id) {
-                $copy->setId($_wpdb->insert_id);
-            }
-        }
-        return $result;
-    }
 }
