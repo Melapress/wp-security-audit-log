@@ -13,6 +13,29 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
     }
     
+    
+    public function TestConnection()
+    {
+        $flag = false;
+        if (!empty($this->connectionConfig)) {
+            //TO DO: Use the provided connection config
+            $connectionConfig = $this->connectionConfig;
+            try {
+                $name = $connectionConfig['name'];
+                $hostname = $connectionConfig['hostname'];
+                $dbh = new PDO("mysql:dbname=$name;host=$hostname", $connectionConfig['user'], $connectionConfig['password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
+                $flag = true;
+            }
+            catch(PDOException $e)
+            {
+                $flag = false;
+            }
+        } else {
+            $flag = false;
+        }
+        return $flag;
+    }
+
     /**
      * Creates a connection and returns it
      * @return Instance of WPDB

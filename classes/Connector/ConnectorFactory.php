@@ -13,7 +13,7 @@ abstract class WSAL_Connector_ConnectorFactory
      */
     public static function GetDefaultConnector()
     {
-         return new WSAL_Connector_MySQLDB();
+        return new WSAL_Connector_MySQLDB();
     }
 
     /**
@@ -49,5 +49,25 @@ abstract class WSAL_Connector_ConnectorFactory
             'hostname' => $conf->GetAdapterConfig('adapter-hostname'),
             'base_prefix' => $conf->GetAdapterConfig('adapter-base-prefix')
         );
+    }
+
+    public static function CheckConfig($type, $user, $password, $name, $hostname, $base_prefix)
+    {
+        $result = false;
+        $config = array(
+            'user' => $user,
+            'password' => $password,
+            'name' => $name,
+            'hostname' => $hostname,
+            'base_prefix' => $base_prefix
+        );
+        switch (strtolower($type)) {
+            //TO DO: Add other connectors
+            case 'mysql':
+            default:
+                $test = new WSAL_Connector_MySQLDB($config);
+                $result = $test->TestConnection();
+        }
+        return $result;
     }
 }

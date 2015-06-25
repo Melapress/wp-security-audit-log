@@ -531,6 +531,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								</fieldset>
 							</td>
 						</tr>
+						<?php var_dump($this->_plugin->settings->CheckAdapterConfig($adapterType, $adapterUser, $adapterPassword, $adapterName, $adapterHostname, $adapterBasePrefix)); ?>
 					</tbody>
 				</table>
 				<!-- End Adapter Tab-->
