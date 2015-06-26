@@ -1,5 +1,7 @@
 <?php
 class WSAL_Views_Settings extends WSAL_AbstractView {
+
+	public $adapterMsg = '';
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
 		parent::__construct($plugin);
@@ -66,13 +68,25 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		if(isset($_REQUEST['DevOptions']))
 			foreach($_REQUEST['DevOptions'] as $opt)
 				$this->_plugin->settings->SetDevOptionEnabled($opt, true);
-		/* Adapter config */
-		$this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
-		$this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
-		$this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
-		$this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
-		$this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
-		$this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
+		/* Check Adapter config */
+		$result = $this->_plugin->settings->CheckAdapterConfig(
+			trim($_REQUEST['AdapterType']), 
+			trim($_REQUEST['AdapterUser']), 
+			trim($_REQUEST['AdapterPassword']), 
+			trim($_REQUEST['AdapterName']), 
+			trim($_REQUEST['AdapterHostname']), 
+			trim($_REQUEST['AdapterBasePrefix'])
+		);
+		if ($result['success']) {
+			/* Setting Adapter config */
+			$this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
+		}
+		$this->adapterMsg = $result['msg'];
 	}
 	
 	public function AjaxCheckSecurityToken(){
@@ -98,7 +112,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		if(isset($_POST['submit'])){
 			try {
 				$this->Save();
-				?><div class="updated"><p><?php _e('Settings have been saved.', 'wp-security-audit-log'); ?></p></div><?php
+				?><div class="updated">
+					<p><?php _e('Settings have been saved.', 'wp-security-audit-log'); ?></p>
+				</div><?php
+				echo $this->adapterMsg;
 			}catch(Exception $ex){
 				?><div class="error"><p><?php _e('Error: ', 'wp-security-audit-log'); ?><?php echo $ex->getMessage(); ?></p></div><?php
 			}
@@ -478,7 +495,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									<?php $adapterType = strtolower($this->_plugin->settings->GetAdapterConfig('adapter-type')); ?>
 									<select name="AdapterType" id="AdapterType">
 										<option value="MySQL" <?=($adapterType == 'mysql')? 'selected="selected"' : '';?>>DB MySQL</option>
-										<option value="other">Other</option>
+										
 									</select>
 								</fieldset>
 							</td>
@@ -531,12 +548,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								</fieldset>
 							</td>
 						</tr>
-						<?php var_dump($this->_plugin->settings->CheckAdapterConfig($adapterType, $adapterUser, $adapterPassword, $adapterName, $adapterHostname, $adapterBasePrefix)); ?>
 					</tbody>
 				</table>
 				<!-- End Adapter Tab-->
 			</div>
-			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes"></p>
+			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save &amp; Test Changes"></p>
 		</form>
 		<script type="text/javascript">
 		<!--

@@ -579,7 +579,7 @@ class WSAL_Settings {
 	}
 
 	public function SetAdapterConfig($name_field, $newvalue){
-		return $this->_plugin->SetGlobalOption($name_field, $newvalue);
+		return $this->_plugin->SetGlobalOption($name_field, trim($newvalue));
 	}
 	
 	// </editor-fold>

@@ -16,24 +16,29 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     
     public function TestConnection()
     {
-        $flag = false;
+        error_reporting(E_ALL ^ E_WARNING);
+        $result = array();
         if (!empty($this->connectionConfig)) {
-            //TO DO: Use the provided connection config
             $connectionConfig = $this->connectionConfig;
-            try {
-                $name = $connectionConfig['name'];
-                $hostname = $connectionConfig['hostname'];
-                $dbh = new PDO("mysql:dbname=$name;host=$hostname", $connectionConfig['user'], $connectionConfig['password'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING));
-                $flag = true;
-            }
-            catch(PDOException $e)
-            {
-                $flag = false;
+            $link = mysql_connect($connectionConfig['hostname'], $connectionConfig['user'], $connectionConfig['password']);
+            if (!$link) {
+                $result['msg'] = "<div class='error'><p>Could not connect to the server '" . $connectionConfig['hostname'] . "'</p></div>\n";
+                $result['success'] = false;
+            } else {
+                $dbcheck = mysql_select_db($connectionConfig['name'], $link);
+                if (!$dbcheck) {
+                    $result['msg'] = "<div class='error'><p>". mysql_error() ."</p>\n<p>Could not connect to the database '" . $connectionConfig['name'] . "'</p></div>\n";
+                    $result['success'] = false;
+                } else {
+                    $result['msg'] = "<div class='updated'><p>Successfully connected to the database '" . $connectionConfig['name'] ."'</p></div>\n";
+                    $result['success'] = true;
+                }
             }
         } else {
-            $flag = false;
+            $result['msg'] = "<div class='error'><p>Fill out the setting form</p></div>\n";
+            $result['success'] = false;
         }
-        return $flag;
+        return $result;
     }
 
     /**
