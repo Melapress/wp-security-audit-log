@@ -117,6 +117,7 @@ class WpSecurityAuditLog {
 	 */
 	public function __construct(){
 		
+		require_once('classes/Helpers/DataHelper.php');
 		// profiler has to be loaded manually
 		require_once('classes/SimpleProfiler.php');
 		$this->profiler = new WSAL_SimpleProfiler();

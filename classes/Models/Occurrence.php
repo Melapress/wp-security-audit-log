@@ -30,8 +30,11 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     {
         //get meta adapter
         //call the function ($name, $this->getId())
-        $meta = $this->getAdapter()->GetNamedMeta($name);
-        return $meta->IsLoaded() ? $meta->value : $default;
+        $meta = $this->getAdapter()->GetNamedMeta($this, $name);
+        return maybe_unserialize($meta['value']);
+
+        //TO DO: re-introduce add is loaded check before running query
+        //return $meta->IsLoaded() ? $meta->value : $default;
     }
     
     /**
@@ -42,12 +45,11 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     public function SetMetaValue($name, $value)
     {
         //get meta adapter
-        //call the function ($name, $this->getId())
-        $meta = $this->getAdapter()->GetNamedMeta($name);
-        $meta->occurrence_id = $this->id;
-        $meta->name = $name;
-        $meta->value = $value;
-        $meta->Save();
+        $model = new WSAL_Models_Meta();
+        $model->occurrence_id = $this->getId();
+        $model->name = $name;
+        $model->value = maybe_serialize($value);
+        $model->SaveMeta();
     }
     
     /**
@@ -56,11 +58,12 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
      */
     public function GetMetaArray()
     {
-        $result = array();
-        foreach ($this->getAdapter()->GetMeta() as $meta) {
-            $result[$meta->name] = $meta->value;
+        $result = array(); 
+        $metas = $this->getAdapter()->GetMultiMeta($this);
+        foreach ($metas as $meta) {
+            $result[$meta['name']] = maybe_unserialize($meta['value']);
         }
-        return $result;
+        return  $result;
     }
     
     /**
@@ -111,7 +114,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
      */
     public function GetUsername()
     {
-        $meta = $this->getAdapter()->GetFirstNamedMeta(array('Username', 'CurrentUserID'));
+        $meta = $this->getAdapter()->GetFirstNamedMeta($this, array('Username', 'CurrentUserID'));
         if ($meta) {
             switch(true){
                 case $meta->name == 'Username':
@@ -172,9 +175,9 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
      * @param $startTime mktime
      * @param $endTime mktime
      */
-    public function findExistingOccurences($ipAddress, $username, $alertNumber, $siteId, $startDate, $endDate)
+    public function CheckKnownUsers($args = array())
     {
-        return $this->getAdapter()->CheckKnownUsers($ipAddress, $username, $alertNumber, $siteId, $startDate, $endDate);
+        return $this->getAdapter()->CheckKnownUsers($args);
     }
 
     public function CheckUnKnownUsers($args = array())

@@ -87,7 +87,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					),
 					'autorefresh' => array(
 						'enabled' => $this->_plugin->settings->IsRefreshAlertsEnabled(),
-						'token' => (int)WSAL_Occurrence::Count(),
+						'token' => (int)WSAL_Models_Occurrence::Count(),
 					),
 				)); ?>);
 			});
@@ -99,7 +99,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die('Access Denied.');
 		if(!isset($_REQUEST['occurrence']))
 			die('Occurrence parameter expected.');
-		$occ = new WSAL_Occurrence();
+		$occ = new WSAL_Models_Occurrence();
 		$occ->Load('id = %d', array((int)$_REQUEST['occurrence']));
 
 		echo '<!DOCTYPE html><html><head>';
@@ -129,7 +129,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		session_write_close(); // fixes session lock issue
 		
 		do{
-			$new = WSAL_Occurrence::Count();
+			$new = WSAL_Models_Occurrence::Count();
 			usleep(500000); // 500msec
 		}while(($old == $new) && (--$max > 0));
 		

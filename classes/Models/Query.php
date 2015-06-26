@@ -8,6 +8,7 @@ class WSAL_Models_Query
     protected $offset = null;
     protected $limit = null;
     protected $from = array();
+	protected $useDefaultAdapter = false;
 
     public function __construct()
     {

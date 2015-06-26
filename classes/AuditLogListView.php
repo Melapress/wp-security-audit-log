@@ -144,6 +144,10 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	}
 	
 	public function column_default($item, $column_name){
+
+
+		//example: $item->getMetaValue('CurrentUserID')
+
 		if (!$this->_plugin->settings->GetDatetimeFormat()) $datetimeFormat = 'h:i:s.$$$&\n\b\s\p;A';
 		else $datetimeFormat = 'H:i:s.$$$';
 		switch($column_name){
@@ -304,7 +308,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		//$this->process_bulk_action();
 		
 		//TO DO: Get rid of OccurenceQuery and use the Occurence Model
-		$query = new WSAL_Models_OccurenceQuery();
+		$query = new WSAL_Models_OccurenceQuery(); 
 
 		$bid = (int)$this->get_view_site_id();
 		if ($bid) {
@@ -352,7 +356,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		$query->setOffset(($this->get_pagenum() - 1) * $per_page);
 		$query->setLimit($per_page);
 
-		$this->items = $query->getAdapter()->Execute($query);
+		$this->items = $query->getAdapter()->Execute($query); 
 
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,

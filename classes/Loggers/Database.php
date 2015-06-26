@@ -7,7 +7,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$plugin->AddCleanupHook(array($this, 'CleanUp'));
 	}
 
-	public function Log($type, $data = array(), $date = null, $siteid = null, $migrated = false) {
+	public function Log($type, $data = array(), $date = null, $siteid = null, $migrated = false) { 
 		// is this a php alert, and if so, are we logging such alerts?
 		if ($type < 0010 && !$this->plugin->settings->IsPhpErrorLoggingEnabled()) return;
 
@@ -19,7 +19,6 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$occ->site_id = !is_null($siteid) ? $siteid
 			: (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
 		$occ->Save();
-
 
 		// set up meta data
 		$occ->SetMeta($data);
@@ -46,7 +45,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
         $max_stamp = $now - (strtotime($max_sdate) - $now);
 		$max_items = max(($cnt_items - $max_count) + 1, 0);
 
-		$query = new WSAL_OccurrenceQuery('WSAL_Occurrence');
+		$query = new WSAL_Models_OccurrenceQuery();
 		$query->order[] = 'created_on ASC';
 
 		if ($is_date_e) $query->Where('created_on < ' . intval($max_stamp), array());

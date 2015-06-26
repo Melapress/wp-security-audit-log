@@ -26,4 +26,5 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
     {
         return $this->Load('option_name = %s', array($name));
     }
+
 }

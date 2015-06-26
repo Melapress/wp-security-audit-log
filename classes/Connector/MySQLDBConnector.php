@@ -13,6 +13,34 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
     }
     
+    
+    public function TestConnection()
+    {
+        error_reporting(E_ALL ^ E_WARNING);
+        $result = array();
+        if (!empty($this->connectionConfig)) {
+            $connectionConfig = $this->connectionConfig;
+            $link = mysql_connect($connectionConfig['hostname'], $connectionConfig['user'], $connectionConfig['password']);
+            if (!$link) {
+                $result['msg'] = "<div class='error'><p>Could not connect to the server '" . $connectionConfig['hostname'] . "'</p></div>\n";
+                $result['success'] = false;
+            } else {
+                $dbcheck = mysql_select_db($connectionConfig['name'], $link);
+                if (!$dbcheck) {
+                    $result['msg'] = "<div class='error'><p>". mysql_error() ."</p>\n<p>Could not connect to the database '" . $connectionConfig['name'] . "'</p></div>\n";
+                    $result['success'] = false;
+                } else {
+                    $result['msg'] = "<div class='updated'><p>Successfully connected to the database '" . $connectionConfig['name'] ."'</p></div>\n";
+                    $result['success'] = true;
+                }
+            }
+        } else {
+            $result['msg'] = "<div class='error'><p>Fill out the setting form</p></div>\n";
+            $result['success'] = false;
+        }
+        return $result;
+    }
+
     /**
      * Creates a connection and returns it
      * @return Instance of WPDB
@@ -21,14 +49,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     {
         if (!empty($this->connectionConfig)) {
             //TO DO: Use the provided connection config
-            $user = "root";
-            $password = "";
-            $database = "wordpress-clean-2";
-            //$database = "cleanwordpress";
-            $hostname = "localhost";
-            $base_prefix = "wp_";
-            $newWpdb = new wpdb($user, $password, $database, $hostname);
-            $newWpdb->set_prefix($base_prefix);
+            $connectionConfig = $this->connectionConfig;
+            $newWpdb = new wpdb($connectionConfig['user'], $connectionConfig['password'], $connectionConfig['name'], $connectionConfig['hostname']);
+            $newWpdb->set_prefix($connectionConfig['base_prefix']);
             return $newWpdb;
         } else {
             global $wpdb;
@@ -90,9 +113,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     {
         $plugin = WpSecurityAuditLog::GetInstance();
 
-        $activeRecordAdapter = new WSAL_Adapters_MySQL_ActiveRecord($this->getConnection());
-        foreach (glob($this->getAdaptersDirectory() . '/*.php') as $file) {
-            $filePath = explode(DIRECTORY_SEPARATOR, $file);
+        foreach (glob($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php') as $file) {
+            $filePath = explode(DIRECTORY_SEPARATOR, $file); 
             $fileName = $filePath[count($filePath) - 1];
             $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
 
@@ -109,12 +131,17 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     public function uninstallAll()
     {
         $plugin = WpSecurityAuditLog::GetInstance();
-        foreach (glob($this->getAdaptersDirectory() . '/*.php') as $file) {
-            $class = $plugin->GetClassFileClassName($file);
-            if (is_subclass_of($class, __CLASS__)) {
-                $class = new $class();
+
+        foreach (glob($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php') as $file) {
+            $filePath = explode(DIRECTORY_SEPARATOR, $file); 
+            $fileName = $filePath[count($filePath) - 1];
+            $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
+
+            $class = new $className($this->getConnection());
+            if (is_subclass_of($class, "WSAL_Adapters_MySQL_ActiveRecord")) {
                 $class->Uninstall();
             }
         }
     }
+    
 }

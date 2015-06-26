@@ -23,10 +23,11 @@ class WSAL_WidgetManager {
 	}
 	
 	public function RenderWidget(){
-		$results = WSAL_Occurrence::LoadMulti(
-			' 1 ORDER BY created_on DESC LIMIT '
-			. $this->_plugin->settings->GetDashboardWidgetMaxAlerts()
-		);
+		$query = new WSAL_Models_OccurenceQuery();
+		$query->addOrderBy("created_on", true);
+		$query->setLimit($this->_plugin->settings->GetDashboardWidgetMaxAlerts());
+		$results = $query->getAdapter()->Execute($query);
+			
 		?><div><?php
 			if(!count($results)){
 				?><p><?php _e('No alerts found.', 'wp-security-audit-log'); ?></p><?php

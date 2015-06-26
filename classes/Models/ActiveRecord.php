@@ -71,7 +71,7 @@ abstract class WSAL_Models_ActiveRecord
         return $this->connector;
     }
 
-    protected function getAdapter()
+    public function getAdapter()
     {
         return $this->getConnector()->getAdapter($this->adapterName);
     }
@@ -104,7 +104,8 @@ abstract class WSAL_Models_ActiveRecord
                 switch(true){
                     case is_array($copy->$key):
                     case is_object($copy->$key):
-                        $this->$key = $this->_JsonDecode($val);
+                        $jsonDecodedVal = WSAL_Helpers_DataHelper::JsonDecode($val);
+                        $this->$key = ($jsonDecodedVal == null) ? $val : $jsonDecodedVal;
                         break;
                     case is_int($copy->$key):
                         $this->$key = (int)$val;
@@ -123,6 +124,7 @@ abstract class WSAL_Models_ActiveRecord
                 }
             }
         }
+        return $this;
     }
 
     /**
@@ -137,7 +139,6 @@ abstract class WSAL_Models_ActiveRecord
         if (is_null($this->created_on)) {
             $this->created_on = $this->GetMicrotime();
         }
-
         $updateId = $this->getId();
         $result = $this->getAdapter()->Save($this);
 
@@ -160,29 +161,10 @@ abstract class WSAL_Models_ActiveRecord
         return $result;
     }
 
-    public function Count($cond = '%d', $args = array(1)) {
-        $result = $this->getAdapter()->Count($cond, $args);
+    public static function Count($cond = '%d', $args = array(1)) {
+        $result = $this->getAdapter()->Count($cond, $args); 
         return $result;
     }
-    
-    /**
-     * A wrapper for JSON encoding that fixes potential issues.
-     * @param mixed $data The data to encode.
-     * @return string JSON string.
-     */
-    protected function _JsonEncode($data){
-        return @json_encode($data);
-    }
-    
-    /**
-     * A wrapper for JSON encoding that fixes potential issues.
-     * @param string $data The JSON string to decode.
-     * @return mixed Decoded data.
-     */
-    protected function _JsonDecode($data){
-        return @json_decode($data);
-    }
-    
     
     /**
      * @return boolean

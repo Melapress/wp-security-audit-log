@@ -80,7 +80,7 @@ final class WSAL_AlertManager {
 	 * @param integer $type Alert type.
 	 * @param array $data Alert data.
 	 */
-	public function Trigger($type, $data = array(), $delayed = false){ 
+	public function Trigger($type, $data = array(), $delayed = false){
 		$username = wp_get_current_user()->user_login;
 		if (empty($username) && !empty($data["Username"])) { 
 			$username = $data['Username'];

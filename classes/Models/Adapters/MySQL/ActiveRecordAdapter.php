@@ -23,7 +23,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
     public function GetModel()
     {
-        return new WSAL_Models_ActiveRecord();
+        return new WSAL_Models_ActiveRecord(); 
     }
     
     /**
@@ -97,14 +97,13 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     public function Save($activeRecord)
     {
         //global $wpdb;
-        $_wpdb = $this->connection;
-        $copy = get_class($activeRecord);
-        $copy = new $copy($this->connection);
+        $_wpdb = $this->connection; 
+        $copy = $activeRecord;
         $data = array();
         $format = array();
         foreach ($this->GetColumns() as $key) {
 
-            $val = $this->$key;
+            $val = $copy->$key;
             $deffmt = '%s';
             if (is_int($copy->$key)) {
               $deffmt = '%d';
@@ -113,21 +112,17 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 $deffmt = '%f';
             }
             if (is_array($copy->$key) || is_object($copy->$key)) {
-                $data[$key] = $this->_JsonEncode($val);
+                $data[$key] = WSAL_Helpers_DataHelper::JsonEncode($val);
             } else {
                 $data[$key] = $val;
             }
             $format[] = $deffmt;
         }
-        
         $result = $_wpdb->replace($this->GetTable(), $data, $format);
             
         if ($result !== false) {
             if ($_wpdb->insert_id) {
-                $activeRecord->setId($_wpdb->insert_id);
-                //$this->_state = self::STATE_CREATED;
-            } else {
-                //$this->_state = self::STATE_UPDATED;
+                $copy->setId($_wpdb->insert_id);
             }
         }
         return $result;
@@ -145,8 +140,21 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         
         $sql = $_wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '. $cond, $args);
         $data = $_wpdb->get_row($sql, ARRAY_A);
-        
+
         return $data;
+    }
+
+    public function LoadArray($cond, $args = array())
+    {
+        //global $wpdb;
+        $_wpdb = $this->connection;
+        $result = array();
+        $sql = $_wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '. $cond, $args);
+        foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
+            $result[] = $data;
+        }
+        return $result;
+
     }
     
     /**
@@ -187,16 +195,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     {
         //global $wpdb;
         $_wpdb = $this->connection;
-        $class = get_called_class();
         $result = array();
         $sql = (!is_array($args) || !count($args)) // do we really need to prepare() or not?
-            ? ('SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond)
-            : $_wpdb->prepare('SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args)
+            ? ($cond)
+            : $_wpdb->prepare($cond, $args)
         ;
         foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
-            $result[] = new $class($data);
+            $result[] = $this->getModel()->LoadData($data);
         }
         return $result;
+
     }
     
     /**
@@ -261,7 +269,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $result = array();
         $sql = count($args) ? $_wpdb->prepare($query, $args) :  $query;
         foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
-            $result[] = new $class($data);
+            $result[] = $this->getModel()->LoadData($data);
         }
         return $result;
     }
@@ -271,7 +279,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     protected function _GetInstallQuery()
     {
-        $wpdb = $this->connection;
+        $_wpdb = $this->connection;
         
         $class = get_class($this);
         $copy = new $class($this->connection);
@@ -312,14 +320,18 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         
         $sql .= ')';
         
-        if (! empty($wpdb->charset)) {
-            $sql .= ' DEFAULT CHARACTER SET ' . $wpdb->charset;
-        }
-        if (! empty($wpdb->collate)) {
-            $sql .= ' COLLATE ' . $wpdb->collate;
+        if (! empty($_wpdb->charset)) {
+            $sql .= ' DEFAULT CHARACTER SET ' . $_wpdb->charset;
         }
         
         return $sql;
         
+    }
+
+    /**
+     * @return string Must return SQL for removing table (at a minimum, it should be ` 'DROP TABLE ' . $this->_table `).
+     */
+    protected function _GetUninstallQuery(){
+        return  'DROP TABLE ' . $this->GetTable();
     }
 }
