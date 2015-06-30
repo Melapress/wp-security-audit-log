@@ -40,15 +40,19 @@ abstract class WSAL_Connector_ConnectorFactory
     public static function GetConfig()
     {
         $conf = new WSAL_Settings(new WpSecurityAuditLog());
-
-        return array(
-            'type' => $conf->GetAdapterConfig('adapter-type'),
-            'user' => $conf->GetAdapterConfig('adapter-user'),
-            'password' => $conf->GetAdapterConfig('adapter-password'),
-            'name' => $conf->GetAdapterConfig('adapter-name'),
-            'hostname' => $conf->GetAdapterConfig('adapter-hostname'),
-            'base_prefix' => $conf->GetAdapterConfig('adapter-base-prefix')
-        );
+        $type = $conf->GetAdapterConfig('adapter-type');
+        if (empty($type)) {
+            return null;
+        } else {
+            return array(
+                'type' => $conf->GetAdapterConfig('adapter-type'),
+                'user' => $conf->GetAdapterConfig('adapter-user'),
+                'password' => $conf->GetAdapterConfig('adapter-password'),
+                'name' => $conf->GetAdapterConfig('adapter-name'),
+                'hostname' => $conf->GetAdapterConfig('adapter-hostname'),
+                'base_prefix' => $conf->GetAdapterConfig('adapter-base-prefix')
+            );
+        }
     }
 
     public static function CheckConfig($type, $user, $password, $name, $hostname, $base_prefix)

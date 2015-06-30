@@ -566,14 +566,6 @@ class WSAL_Settings {
 		return $this->_plugin->SetGlobalOption('datetime-format', $newvalue);
 	}
 
-	/**
-	 * Adapter Config.
-	 */
-	
-	public function CheckAdapterConfig($type, $user, $password, $name, $hostname, $base_prefix){
-		return WSAL_Connector_ConnectorFactory::CheckConfig($type, $user, $password, $name, $hostname, $base_prefix);
-	}
-
 	public function GetAdapterConfig($name_field){
 		return $this->_plugin->GetGlobalOption($name_field);
 	}

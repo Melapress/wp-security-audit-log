@@ -65,11 +65,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetDeleteData(isset($_REQUEST['DeleteData']));
 		$this->_plugin->settings->SetDatetimeFormat($_REQUEST['DatetimeFormat']);
 		$this->_plugin->settings->ClearDevOptions();
-		if(isset($_REQUEST['DevOptions']))
-			foreach($_REQUEST['DevOptions'] as $opt)
+
+		if(isset($_REQUEST['DevOptions'])) {
+			foreach($_REQUEST['DevOptions'] as $opt) {
 				$this->_plugin->settings->SetDevOptionEnabled($opt, true);
+			}
+		}
 		/* Check Adapter config */
-		$result = $this->_plugin->settings->CheckAdapterConfig(
+		WSAL_Connector_ConnectorFactory::CheckConfig(
 			trim($_REQUEST['AdapterType']), 
 			trim($_REQUEST['AdapterUser']), 
 			trim($_REQUEST['AdapterPassword']), 
@@ -77,16 +80,15 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			trim($_REQUEST['AdapterHostname']), 
 			trim($_REQUEST['AdapterBasePrefix'])
 		);
-		if ($result['success']) {
-			/* Setting Adapter config */
-			$this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
-			$this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
-			$this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
-			$this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
-			$this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
-			$this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
-		}
-		$this->adapterMsg = $result['msg'];
+
+
+		/* Setting Adapter config */
+		$this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
+		$this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
+		$this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
+		$this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
+		$this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
+		$this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
 	}
 	
 	public function AjaxCheckSecurityToken(){
@@ -115,7 +117,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				?><div class="updated">
 					<p><?php _e('Settings have been saved.', 'wp-security-audit-log'); ?></p>
 				</div><?php
-				echo $this->adapterMsg;
 			}catch(Exception $ex){
 				?><div class="error"><p><?php _e('Error: ', 'wp-security-audit-log'); ?><?php echo $ex->getMessage(); ?></p></div><?php
 			}
@@ -504,7 +505,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<th><h2>Config</h2></th>
 						</tr>
 						<tr>
-							<th><label for="AdapterUser"><?php _e('Adapter User', 'wp-security-audit-log'); ?></label></th>
+							<th><label for="AdapterUser"><?php _e('Database User', 'wp-security-audit-log'); ?></label></th>
 							<td>
 								<fieldset>
 									<?php $adapterUser = $this->_plugin->settings->GetAdapterConfig('adapter-user'); ?>
@@ -513,7 +514,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><label for="AdapterPassword"><?php _e('Adapter Password', 'wp-security-audit-log'); ?></label></th>
+							<th><label for="AdapterPassword"><?php _e('Database Password', 'wp-security-audit-log'); ?></label></th>
 							<td>
 								<fieldset>
 									<?php $adapterPassword = $this->_plugin->settings->GetAdapterConfig('adapter-password'); ?>
@@ -522,7 +523,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><label for="AdapterName"><?php _e('Adapter Name', 'wp-security-audit-log'); ?></label></th>
+							<th><label for="AdapterName"><?php _e('Database Name', 'wp-security-audit-log'); ?></label></th>
 							<td>
 								<fieldset>
 									<?php $adapterName = $this->_plugin->settings->GetAdapterConfig('adapter-name'); ?>
@@ -531,7 +532,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><label for="AdapterHostname"><?php _e('Adapter Hostname', 'wp-security-audit-log'); ?></label></th>
+							<th><label for="AdapterHostname"><?php _e('Database Hostname', 'wp-security-audit-log'); ?></label></th>
 							<td>
 								<fieldset>
 									<?php $adapterHostname = $this->_plugin->settings->GetAdapterConfig('adapter-hostname'); ?>
@@ -540,7 +541,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><label for="AdapterBasePrefix"><?php _e('Adapter Base prefix', 'wp-security-audit-log'); ?></label></th>
+							<th><label for="AdapterBasePrefix"><?php _e('Database Base prefix', 'wp-security-audit-log'); ?></label></th>
 							<td>
 								<fieldset>
 									<?php $adapterBasePrefix = $this->_plugin->settings->GetAdapterConfig('adapter-base-prefix'); ?>

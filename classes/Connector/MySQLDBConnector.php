@@ -12,33 +12,20 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         parent::__construct("MySQL");
         require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
     }
-    
+
+    function test_wp_die_callback() {
+        return array( $this, 'test_die_handler' );
+    }
+
+    function test_die_handler( $message, $title = '', $args = array() ) {       
+       throw new Exception("DB Connection failed");
+    }
     
     public function TestConnection()
     {
         error_reporting(E_ALL ^ E_WARNING);
-        $result = array();
-        if (!empty($this->connectionConfig)) {
-            $connectionConfig = $this->connectionConfig;
-            $link = mysql_connect($connectionConfig['hostname'], $connectionConfig['user'], $connectionConfig['password']);
-            if (!$link) {
-                $result['msg'] = "<div class='error'><p>Could not connect to the server '" . $connectionConfig['hostname'] . "'</p></div>\n";
-                $result['success'] = false;
-            } else {
-                $dbcheck = mysql_select_db($connectionConfig['name'], $link);
-                if (!$dbcheck) {
-                    $result['msg'] = "<div class='error'><p>". mysql_error() ."</p>\n<p>Could not connect to the database '" . $connectionConfig['name'] . "'</p></div>\n";
-                    $result['success'] = false;
-                } else {
-                    $result['msg'] = "<div class='updated'><p>Successfully connected to the database '" . $connectionConfig['name'] ."'</p></div>\n";
-                    $result['success'] = true;
-                }
-            }
-        } else {
-            $result['msg'] = "<div class='error'><p>Fill out the setting form</p></div>\n";
-            $result['success'] = false;
-        }
-        return $result;
+        add_filter( 'wp_die_handler', array( $this, 'test_wp_die_callback' ) );
+        $connection = $this->createConnection();
     }
 
     /**
