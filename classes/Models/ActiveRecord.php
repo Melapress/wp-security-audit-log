@@ -161,7 +161,7 @@ abstract class WSAL_Models_ActiveRecord
         return $result;
     }
 
-    public static function Count($cond = '%d', $args = array(1)) {
+    public function Count($cond = '%d', $args = array(1)) {
         $result = $this->getAdapter()->Count($cond, $args); 
         return $result;
     }

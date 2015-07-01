@@ -65,6 +65,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 		
 		$this->GetListView()->prepare_items();
+		$occ = new WSAL_Models_Occurrence();
 		
 		?><form id="audit-log-viewer" method="post">
 			<div id="audit-log-viewer-content">
@@ -87,7 +88,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					),
 					'autorefresh' => array(
 						'enabled' => $this->_plugin->settings->IsRefreshAlertsEnabled(),
-						'token' => (int)WSAL_Models_Occurrence::Count(),
+						'token' => (int)$occ->Count(),
 					),
 				)); ?>);
 			});
@@ -129,7 +130,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		session_write_close(); // fixes session lock issue
 		
 		do{
-			$new = WSAL_Models_Occurrence::Count();
+			$occ = new WSAL_Models_Occurrence();
+			$new = $occ->Count();
 			usleep(500000); // 500msec
 		}while(($old == $new) && (--$max > 0));
 		
