@@ -137,7 +137,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			'code' => array('code', false),
 			'type' => array('alert_id', false),
 			'crtd' => array('created_on', true),
-			'user' => array('user', false),
 			'scip' => array('scip', false),
 			'site' => array('site', false),
 		);
