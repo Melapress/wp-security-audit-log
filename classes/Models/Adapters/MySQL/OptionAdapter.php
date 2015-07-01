@@ -23,8 +23,11 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
     }
 
     public function GetNamedOption($name)
-    {
-        return $this->Load('option_name = %s', array($name));
+    {   if ($this->IsInstalled()) {
+            return $this->Load('option_name = %s', array($name));
+        } else {
+            return null;
+        }
     }
 
 }
