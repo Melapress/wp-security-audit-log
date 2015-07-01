@@ -45,7 +45,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             . $sWhereClause
             // @todo GROUP BY goes here
             // @todo HAVING goes here
-            . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', $orderBys)) : '')
+            . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', array_keys($orderBys)) . ' ' . implode(', ', array_values($orderBys))) : '')
             . $sLimitClause;
     }
     
@@ -84,12 +84,10 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $args = array();
         $sql = $this->GetSql($query, $args);
 
-
         // restore columns
         $query->setColumns($cols);
-        
         // execute query and return result
-        return $this->getActiveRecordAdapter()->CountQuery($this->GetSql($query), $args);
+        return $this->getActiveRecordAdapter()->CountQuery($sql, $args);
     }
     
     /**

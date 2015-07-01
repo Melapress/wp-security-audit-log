@@ -318,10 +318,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		$query = apply_filters('wsal_auditlog_query', $query);
 		
 		$total_items = $query->getAdapter()->Count($query);
-		
-		/** @deprecated */
-		//$data = $query->Execute();
-
 
 		if (empty($_REQUEST["orderby"])) {
 			$query->addOrderBy("created_on", true);
@@ -342,9 +338,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
 				$query->addOrderBy($_REQUEST["orderby"], $isDescending);
 
-				/** @deprecated */
-				//$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
-				//usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
 			} else {
 				$query->addOrderBy("created_on", true);
 			}

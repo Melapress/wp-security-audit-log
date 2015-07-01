@@ -75,7 +75,8 @@ class WSAL_Models_Query
 
     public function addOrderBy($field, $isDescending = false)
     {
-        $this->orderBy[$field] = $isDescending;
+        $order = ($isDescending) ? 'DESC' : 'ASC';
+        $this->orderBy[$field] = $order;
         return $this;
     }
 
