@@ -61,7 +61,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
         $result = array(); 
         $metas = $this->getAdapter()->GetMultiMeta($this);
         foreach ($metas as $meta) {
-            $result[$meta['name']] = maybe_unserialize($meta['value']);
+            $result[$meta->name] = maybe_unserialize($meta->value);
         }
         return  $result;
     }
