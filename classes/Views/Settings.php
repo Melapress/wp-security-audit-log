@@ -72,23 +72,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			}
 		}
 		/* Check Adapter config */
-		WSAL_Connector_ConnectorFactory::CheckConfig(
-			trim($_REQUEST['AdapterType']), 
-			trim($_REQUEST['AdapterUser']), 
-			trim($_REQUEST['AdapterPassword']), 
-			trim($_REQUEST['AdapterName']), 
-			trim($_REQUEST['AdapterHostname']), 
-			trim($_REQUEST['AdapterBasePrefix'])
-		);
+		if ( ($_REQUEST['AdapterUser'] != '') && ($_REQUEST['AdapterName'] != '') && ($_REQUEST['AdapterHostname'] != '') ) {
+			WSAL_Connector_ConnectorFactory::CheckConfig(
+				trim($_REQUEST['AdapterType']), 
+				trim($_REQUEST['AdapterUser']), 
+				trim($_REQUEST['AdapterPassword']), 
+				trim($_REQUEST['AdapterName']), 
+				trim($_REQUEST['AdapterHostname']), 
+				trim($_REQUEST['AdapterBasePrefix'])
+			);
 
-
-		/* Setting Adapter config */
-		$this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
-		$this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
-		$this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
-		$this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
-		$this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
-		$this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
+			/* Setting Adapter config */
+			$this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
+		}
 	}
 	
 	public function AjaxCheckSecurityToken(){
