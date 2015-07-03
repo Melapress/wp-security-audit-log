@@ -122,8 +122,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				if($new > $this->GetLoginFailureLogLimit())
 					$new = $this->GetLoginFailureLogLimit() . '+';
 				
-				$occ->SetMetaValue('Attempts', $new);
-				$occ->SetMetaValue('Username', $username);
+				$occ->UpdateMetaValue('Attempts', $new);
+				$occ->UpdateMetaValue('Username', $username);
 				//$occ->SetMetaValue('CurrentUserRoles', $userRoles);
 				$occ->created_on = null;
 				$occ->Save();	
@@ -155,7 +155,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				if($new > $this->GetLoginFailureLogLimit())
 					$new = $this->GetLoginFailureLogLimit() . '+';
 				
-				$occUnknown->SetMetaValue('Attempts', $new);
+				$occUnknown->UpdateMetaValue('Attempts', $new);
 				$occUnknown->created_on = null;
 				$occUnknown->Save();
 			} else {

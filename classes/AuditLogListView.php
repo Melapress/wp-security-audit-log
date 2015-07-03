@@ -137,8 +137,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			'code' => array('code', false),
 			'type' => array('alert_id', false),
 			'crtd' => array('created_on', true),
-			'scip' => array('scip', false),
-			'site' => array('site', false),
+			'scip' => array('scip', false)
 		);
 	}
 	
@@ -348,7 +347,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		$query->setOffset(($this->get_pagenum() - 1) * $per_page);
 		$query->setLimit($per_page);
 
-		$this->items = $query->getAdapter()->Execute($query); 
+		$this->items = $query->getAdapter()->Execute($query);
 
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,

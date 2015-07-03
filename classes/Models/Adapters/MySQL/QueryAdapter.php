@@ -18,10 +18,10 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
 
         $sWhereClause = "";
         foreach ($conditions as $fieldName => $fieldValue) {
-            if (!empty($sWhereClause)) {
-                $sWhereClause .= " WHERE";
+            if (empty($sWhereClause)) {
+                $sWhereClause .= " WHERE ";
             } else {
-                $sWhereClause .= " AND ";
+                $sWhereClause .= "AND ";
             }
             $sWhereClause .= $fieldName . " = %s";
             $args[] = $fieldValue;

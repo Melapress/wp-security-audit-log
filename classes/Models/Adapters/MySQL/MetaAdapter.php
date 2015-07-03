@@ -5,6 +5,7 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 	protected $_table = 'wsal_metadata';
 	protected $_idkey = 'id';
 
+	public $id = 0;
 	public $occurrence_id = 0;
 	public $name = '';
 	public static $name_maxlength = 100;
@@ -31,10 +32,9 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 		//execute the sql.
 	}
 
-	public function loadByNameAndOccurenceId($metaName, $occurenceId)
+	public function LoadByNameAndOccurenceId($metaName, $occurenceId)
 	{
-		//sql for it..
-		//return new Meta($data)
+		return $this->Load('occurrence_id = %d AND name = %s', array($occurenceId, $metaName));
 	}
 
 }

@@ -195,4 +195,5 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
         // delete occurrences
         parent::Delete($activeRecord);
     }
+
 }

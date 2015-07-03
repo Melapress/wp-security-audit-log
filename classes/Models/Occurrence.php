@@ -52,6 +52,12 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
         $model->SaveMeta();
     }
     
+    public function UpdateMetaValue($name, $value)
+    {
+        $model = new WSAL_Models_Meta();
+        $model->UpdateByNameAndOccurenceId($name, $value, $this->getId());
+    }
+
     /**
      * Returns a key-value pair of meta data.
      * @return array

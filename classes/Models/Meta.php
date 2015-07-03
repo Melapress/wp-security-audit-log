@@ -20,4 +20,15 @@ class WSAL_Models_Meta extends WSAL_Models_ActiveRecord {
         }
         return $result;
     }
+
+    public function UpdateByNameAndOccurenceId($name, $value, $occurrenceId)
+    {
+        $meta = $this->getAdapter()->LoadByNameAndOccurenceId($name, $occurrenceId);
+        $this->id = $meta['id'];
+        $this->occurrence_id = $meta['occurrence_id'];
+        $this->name = $meta['name'];
+        $this->value = $value;
+        $this->saveMeta();
+    }
+    
 }

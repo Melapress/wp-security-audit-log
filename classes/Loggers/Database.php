@@ -34,8 +34,8 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
         if (!$is_date_e && !$is_limt_e) {
             return;
         } // pruning disabled
-
-		$cnt_items = WSAL_Models_Occurrence::Count();
+        $occ = new WSAL_Models_Occurrence();
+		$cnt_items = $occ->Count();
 
         // Check if there is something to delete
         if($is_limt_e && ($cnt_items < $max_count)){
