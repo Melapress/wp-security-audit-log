@@ -23,7 +23,7 @@ class WSAL_WidgetManager {
 	}
 	
 	public function RenderWidget(){
-		$query = new WSAL_Models_OccurenceQuery();
+		$query = new WSAL_Models_OccurrenceQuery();
 		$query->addOrderBy("created_on", true);
 		$query->setLimit($this->_plugin->settings->GetDashboardWidgetMaxAlerts());
 		$results = $query->getAdapter()->Execute($query);

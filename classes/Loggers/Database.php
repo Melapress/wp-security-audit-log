@@ -46,26 +46,28 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$max_items = max(($cnt_items - $max_count) + 1, 0);
 
 		$query = new WSAL_Models_OccurrenceQuery();
-		$query->order[] = 'created_on ASC';
+		$query->addOrderBy("created_on", false);
+		// TO DO Fixing data
+		//if ($is_date_e) $query->addCondition('created_on < ', intval($max_stamp));
+		if ($is_limt_e) $query->setLimit((int)$max_items);
 
-		if ($is_date_e) $query->Where('created_on < ' . intval($max_stamp), array());
-		if ($is_limt_e) $query->length = (int)$max_items;
-
-		$count = $query->Count();
+		$result = $query->getAdapter()->GetSqlDelete($query);
+		$count = $query->getAdapter()->CountDeleted($query);
 		if (!$count) return; // nothing to delete
 
 		// delete data
-		$query->Delete();
+		$query->getAdapter()->Delete($query); 
 
+		$result = $query->getAdapter()->GetSqlDelete($query);
 		// keep track of what we're doing
 		$this->plugin->alerts->Trigger(0003, array(
 				'Message' => 'Running system cleanup.',
-				'Query SQL' => $query->GetSql(),
-				'Query Args' => $query->GetArgs(),
+				'Query SQL' => $result['sql'],
+				'Query Args' => $result['args'],
 			), true);
 
 		// notify system
-		do_action('wsal_prune', $count, vsprintf($query->GetSql(), $query->GetArgs()));
+		do_action('wsal_prune', $count, vsprintf($result['sql'], $result['args']));
 	}
 
 }

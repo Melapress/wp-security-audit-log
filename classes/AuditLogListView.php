@@ -305,8 +305,8 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 		//$this->process_bulk_action();
 		
-		//TO DO: Get rid of OccurenceQuery and use the Occurence Model
-		$query = new WSAL_Models_OccurenceQuery(); 
+		//TO DO: Get rid of OccurrenceQuery and use the Occurence Model
+		$query = new WSAL_Models_OccurrenceQuery(); 
 
 		$bid = (int)$this->get_view_site_id();
 		if ($bid) {

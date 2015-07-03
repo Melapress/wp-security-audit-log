@@ -95,20 +95,74 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
      */
     public function Delete($query)
     {
-        //TO DO: FIX THIS ONE
+        $result = $this->GetSqlDelete($query);
+        $count = CountDeleted($query);
+        // execute query
+        if ($count > 0) {
+            call_user_func(array($this->getActiveRecordAdapter(), 'DeleteQuery'), $result['sql'], $result['args']);
+        }
+    }
 
+    public function CountDeleted($query)
+    {
+        $result = $this->GetSqlDelete($query);
+        return $this->getActiveRecordAdapter()->CountQuery($result['sql'], $result['args']);
+    }
+
+    public function GetSqlDelete($query)
+    {
+        $result = array();
+        $args = array();
         // back up columns, remove them for DELETE and generate sql
         $cols = $query->getColumns();
         $query->clearColumns();
 
-        //TO DO: FIX THIS
-        $args = array();
-        $sql = $this->GetSql($query, $args);
-        
+        $conditions = $query->getConditions();
+
+        $sWhereClause = "";
+        foreach ($conditions as $fieldName => $fieldValue) {
+            if (empty($sWhereClause)) {
+                $sWhereClause .= " WHERE ";
+            } else {
+                $sWhereClause .= "AND ";
+            }
+            $sWhereClause .= $fieldName . " = %s";
+            $args[] = $fieldValue;
+        }
+
+        $fromDataSets = $query->getFrom();
+        $orderBys = $query->getOrderBy();
+
+        $sLimitClause = "";
+        if ($query->getLimit()) {
+            $sLimitClause .= " LIMIT ";
+            if ($query->getOffset()) {
+                $sLimitClause .= $query->getOffset() . ", ";
+            }
+            $sLimitClause .= $query->getLimit();
+        }
+        $result['sql'] = 'DELETE FROM ' . implode(',', $fromDataSets)
+            . $sWhereClause
+            . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', array_keys($orderBys)) . ' ' . implode(', ', array_values($orderBys))) : '')
+            . $sLimitClause;
+        $result['args'] = $args;
         //restore columns        
         $query->setColumns($cols);
         
-        // execute query
-        call_user_func(array($this->getActiveRecordAdapter(), 'DeleteQuery'), $sql, $args);
+        return $result;
     }
+
+    public function GetSearchCondition()
+    {
+        $searchConditions = '';
+        $tmp = new WSAL_Adapters_MySQL_Meta($this->connection);
+
+        $searchConditions = 'id IN (
+            SELECT DISTINCT occurrence_id
+                FROM ' . $tmp->GetTable() . '
+                WHERE value LIKE %s
+            )';
+        return $searchConditions;
+    }
+
 }

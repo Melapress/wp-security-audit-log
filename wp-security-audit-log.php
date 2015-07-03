@@ -123,7 +123,7 @@ class WpSecurityAuditLog {
 		$this->profiler = new WSAL_SimpleProfiler();
 		require_once('classes/Models/ActiveRecord.php');
 		require_once('classes/Models/Query.php');
-		require_once('classes/Models/OccurenceQuery.php');
+		require_once('classes/Models/OccurrenceQuery.php');
 		require_once('classes/Models/Option.php');
 		
 		// load autoloader and register base paths

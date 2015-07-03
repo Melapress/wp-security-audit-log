@@ -136,7 +136,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
         );
     }
     
-    protected function prepareOccurenceQuery($query)
+    protected function prepareOccurrenceQuery($query)
     {
         $searchQueryParameters = array();
         $searchConditions = array();
@@ -151,8 +151,8 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
                     $sWhereClause .= " AND ";
                 }
                 $sWhereClause .= "name = %s AND value = %s";
-                $searchQueryParamters[] = $field;
-                $searchQueryParamters[] = $value;
+                $searchQueryParameters[] = $field;
+                $searchQueryParameters[] = $value;
             }
 
             $searchConditions[] = 'id IN (
