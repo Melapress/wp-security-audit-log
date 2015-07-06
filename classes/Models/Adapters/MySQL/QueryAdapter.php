@@ -99,6 +99,26 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $this->getActiveRecordAdapter()->DeleteQuery($result['sql'], $result['args']);
     }
 
+    public function DeleteMetas($query)
+    {
+        // back up columns, use COUNT as default column and generate sql
+        $cols = $query->getColumns();
+        $query->clearColumns();
+        $query->addColumn('id');
+        $sql = $this->GetSql($query);
+        // restore columns
+        $query->setColumns($cols);
+
+        $_wpdb = $this->connection;
+        $occ_ids = array();
+        foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) { 
+            $occ_ids[] = $data['id'];
+        }
+        $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
+        $meta->DeleteByOccurenceIds($occ_ids);
+        return $occ_ids;
+    }
+
     public function GetSqlDelete($query)
     {
         $result = array();

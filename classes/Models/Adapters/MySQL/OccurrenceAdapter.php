@@ -189,7 +189,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
             $this->columns = $cols;
 
             // execute query
-            parent::DeleteQuery($sql, $this->GetArgs());
+            parent::DeleteQuery($sql);
         }
         
         // delete occurrences

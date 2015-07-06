@@ -25,11 +25,12 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 				. '    KEY occurrence_name (occurrence_id,name)';
 	}
 
-	public function deleteByOccurenceIds($occurenceIds)
+	public function DeleteByOccurenceIds($occurenceIds)
 	{
 		//do sql to delete by occurence id
 		$sql = 'DELETE FROM ' . $this->GetTable() . ' WHERE occurrence_id IN (' . implode(',', $occurenceIds) . ')';
-		//execute the sql.
+		// execute query
+        parent::DeleteQuery($sql);
 	}
 
 	public function LoadByNameAndOccurenceId($metaName, $occurenceId)

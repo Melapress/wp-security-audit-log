@@ -53,6 +53,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 
 		if ($max_items == 0) return; // nothing to delete
 
+		$occ_ids = $query->getAdapter()->DeleteMetas($query);
 		$result = $query->getAdapter()->GetSqlDelete($query);
 		$query->getAdapter()->Delete($query);
 
