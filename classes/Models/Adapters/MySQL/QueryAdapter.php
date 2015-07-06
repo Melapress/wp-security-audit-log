@@ -96,17 +96,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
     public function Delete($query)
     {
         $result = $this->GetSqlDelete($query);
-        $count = CountDeleted($query);
-        // execute query
-        if ($count > 0) {
-            call_user_func(array($this->getActiveRecordAdapter(), 'DeleteQuery'), $result['sql'], $result['args']);
-        }
-    }
-
-    public function CountDeleted($query)
-    {
-        $result = $this->GetSqlDelete($query);
-        return $this->getActiveRecordAdapter()->CountQuery($result['sql'], $result['args']);
+        $this->getActiveRecordAdapter()->DeleteQuery($result['sql'], $result['args']);
     }
 
     public function GetSqlDelete($query)
@@ -126,7 +116,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             } else {
                 $sWhereClause .= "AND ";
             }
-            $sWhereClause .= $fieldName . " = %s";
+            $sWhereClause .= $fieldName . "= %s";
             $args[] = $fieldValue;
         }
 

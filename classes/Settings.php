@@ -183,10 +183,10 @@ class WSAL_Settings {
 		$this->_plugin->SetGlobalOption('pruning-limit-e', $enabled);
 	}
 	public function IsPruningDateEnabled(){
-		return $this->_plugin->GetGlobalOption('pruning-date-e', true);
+		return $this->_plugin->GetGlobalOption('pruning-date-e');
 	}
 	public function IsPruningLimitEnabled(){
-		return $this->_plugin->GetGlobalOption('pruning-limit-e', true);
+		return $this->_plugin->GetGlobalOption('pruning-limit-e');
 	}
 	public function IsRestrictAdmins(){
 		return $this->_plugin->GetGlobalOption('restrict-admins', false);

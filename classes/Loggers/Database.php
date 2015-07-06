@@ -28,7 +28,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$now = current_time('timestamp');
 		$max_sdate = $this->plugin->settings->GetPruningDate();
 		$max_count = $this->plugin->settings->GetPruningLimit();
-		$is_date_e = $this->plugin->settings->IsPruningDateEnabled();
+		$is_date_e = $this->plugin->settings->IsPruningDateEnabled(); 
 		$is_limt_e = $this->plugin->settings->IsPruningLimitEnabled();
 
         if (!$is_date_e && !$is_limt_e) {
@@ -43,22 +43,19 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
         }
 
         $max_stamp = $now - (strtotime($max_sdate) - $now);
-		$max_items = max(($cnt_items - $max_count) + 1, 0);
+		$max_items = (int)max(($cnt_items - $max_count) + 1, 0);
 
 		$query = new WSAL_Models_OccurrenceQuery();
 		$query->addOrderBy("created_on", false);
 		// TO DO Fixing data
-		//if ($is_date_e) $query->addCondition('created_on < ', intval($max_stamp));
-		if ($is_limt_e) $query->setLimit((int)$max_items);
+		if ($is_date_e) $query->addCondition('created_on <', intval($max_stamp));
+		if ($is_limt_e) $query->setLimit($max_items); 
+
+		if ($max_items == 0) return; // nothing to delete
 
 		$result = $query->getAdapter()->GetSqlDelete($query);
-		$count = $query->getAdapter()->CountDeleted($query);
-		if (!$count) return; // nothing to delete
+		$query->getAdapter()->Delete($query);
 
-		// delete data
-		$query->getAdapter()->Delete($query); 
-
-		$result = $query->getAdapter()->GetSqlDelete($query);
 		// keep track of what we're doing
 		$this->plugin->alerts->Trigger(0003, array(
 				'Message' => 'Running system cleanup.',
@@ -67,7 +64,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 			), true);
 
 		// notify system
-		do_action('wsal_prune', $count, vsprintf($result['sql'], $result['args']));
+		do_action('wsal_prune', $max_items, vsprintf($result['sql'], $result['args']));
 	}
 
 }
