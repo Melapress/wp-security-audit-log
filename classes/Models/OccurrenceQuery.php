@@ -25,4 +25,5 @@ class WSAL_Models_OccurrenceQuery extends WSAL_Models_Query
             $this->getConnector()->getAdapter("Occurrence")->GetTable()
         );
     }
+    
 }
