@@ -71,8 +71,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				$this->_plugin->settings->SetDevOptionEnabled($opt, true);
 			}
 		}
+
+		// 
+		// Database Adapter Settings
+		// Temporarily not used
+		// 
 		/* Check Adapter config */
-		if ( ($_REQUEST['AdapterUser'] != '') && ($_REQUEST['AdapterName'] != '') && ($_REQUEST['AdapterHostname'] != '') ) {
+		if (!empty($_REQUEST["AdapterUser"]) && ($_REQUEST['AdapterUser'] != '') && ($_REQUEST['AdapterName'] != '') && ($_REQUEST['AdapterHostname'] != '') ) {
 			WSAL_Connector_ConnectorFactory::CheckConfig(
 				trim($_REQUEST['AdapterType']), 
 				trim($_REQUEST['AdapterUser']), 
@@ -126,7 +131,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<h2 id="wsal-tabs" class="nav-tab-wrapper">
 			<a href="#tab-general" class="nav-tab">General</a>
 			<a href="#tab-exclude" class="nav-tab">Exclude Objects</a>
-			<a href="#adapter" class="nav-tab">Data Storage Adapter</a>
+			<!--<a href="#adapter" class="nav-tab">Data Storage Adapter</a>-->
 		</h2>
 		<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
 		<form id="audit-log-settings" method="post">
@@ -484,6 +489,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</tr>
 					</tbody>
 				</table>
+				<?php
+				//
+				// Temporarily disabling this
+				//
+				/*
 				<!-- End exclude objects Tab-->
 				<table class="form-table wsal-tab widefat" id="adapter">
 					<tbody>
@@ -552,6 +562,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</tr>
 					</tbody>
 				</table>
+				*/
+				?>
 				<!-- End Adapter Tab-->
 			</div>
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save &amp; Test Changes"></p>
