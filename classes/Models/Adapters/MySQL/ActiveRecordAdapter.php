@@ -333,4 +333,128 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     protected function _GetUninstallQuery(){
         return  'DROP TABLE ' . $this->GetTable();
     }
+
+    /**
+     * Function used in WSAL reporting extension
+     */
+    public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp)
+    {
+        global $wpdb;
+        $tableUsers = $wpdb->users;
+        $_wpdb = $this->connection;
+        // tables
+        $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
+        $tableMeta = $meta->GetTable(); // metadata
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
+        $tableOcc = $occurrence->GetTable(); // occurrences
+
+        $ids = '0';
+        if (!empty($_userId) && $_userId != "null") {
+            $sql = 'SELECT ID FROM '.$tableUsers.' WHERE find_in_set(ID, @userId) > 0';
+            $wpdb->query("SET @userId = $_userId");
+            $result = $wpdb->get_results($sql, ARRAY_A); 
+            $arrayIds = array();
+            foreach ($result as $item) {
+                $arrayIds[] = $item['ID'];
+            }
+            $ids = implode(', ', $arrayIds);
+        }
+        
+        $sql = "SELECT DISTINCT 
+            occ.id, 
+            occ.alert_id, 
+            occ.site_id, 
+            occ.created_on,
+            replace(replace(replace(replace((
+                SELECT t1.value FROM $tableMeta AS t1 WHERE t1.name = 'CurrentUserRoles' AND t1.occurrence_id = occ.id), '[', ''), ']', ''), '\"', ''), '\\'', '') AS roles,
+            (SELECT replace(t2.value, '\"','') FROM $tableMeta as t2 WHERE t2.name = 'ClientIP' AND t2.occurrence_id = occ.id) AS ip,
+            (SELECT replace(t3.value, '\"', '') FROM $tableMeta as t3 WHERE t3.name = 'UserAgent' AND t3.occurrence_id = occ.id) AS ua,
+            COALESCE(
+                (SELECT replace(t4.value, '\"', '') FROM $tableMeta as t4 WHERE t4.name = 'Username' AND t4.occurrence_id = occ.id),
+                (SELECT replace(t5.value, '\"', '') FROM $tableMeta as t5 WHERE t5.name = 'CurrentUserID' AND t5.occurrence_id = occ.id)
+            ) as user_id
+            FROM $tableOcc AS occ
+            JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
+            WHERE
+                (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
+                AND (@userId is NULL OR (
+                    (meta.name = 'CurrentUserID' AND find_in_set(meta.value, @userId) > 0)
+                OR (meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($ids))
+                ))
+                AND (@roleName is NULL OR (meta.name = 'CurrentUserRoles'
+                AND replace(replace(replace(replace(meta.value, '\"', ''), ']', ''), '[', ''), '\\'', '') REGEXP @roleName
+                ))
+                AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
+                AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
+                AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
+            ORDER BY
+                site_id, created_on DESC
+        ";
+        $_wpdb->query("SET @siteId = $_siteId");
+        $_wpdb->query("SET @userId = $_userId");
+        $_wpdb->query("SET @roleName = $_roleName");
+        $_wpdb->query("SET @alertCode = $_alertCode");
+        $_wpdb->query("SET @startTimestamp = $_startTimestamp");
+        $_wpdb->query("SET @endTimestamp = $_endTimestamp");
+        $results = $_wpdb->get_results($sql);
+
+        foreach ($results as $row) {
+            $sql = "SELECT t6.ID FROM $tableUsers AS t6 WHERE t6.user_login = \"$row->user_id\"";
+            $userId = $wpdb->get_var($sql);
+            if ($userId == null) {
+                $sql = "SELECT t4.ID FROM $tableUsers AS t4 WHERE t4.ID = \"$row->user_id\"";
+                $userId = $wpdb->get_var($sql);
+            }
+            $row->user_id = $userId;
+        }
+        return $results;
+        /*
+        $query = <<<query
+SELECT DISTINCT
+    occ.id,
+    occ.alert_id,
+    occ.site_id,
+    occ.created_on,
+    replace(replace(replace(replace((select t1.value from $tableMeta as t1 where t1.name = 'CurrentUserRoles' and t1.occurrence_id = occ.id), '[', ''), ']', ''), '"', ''), '\\'', '') as roles,
+    (select replace(t2.value, '"','') from $tableMeta as t2 where t2.name = 'ClientIP' and t2.occurrence_id = occ.id) as ip,
+    (select replace(t3.value, '"', '') from $tableMeta as t3 where t3.name = 'UserAgent' and t3.occurrence_id = occ.id) as ua,
+
+    COALESCE(
+        (select t6.ID from $tableUsers as t6 where t6.user_login = (select replace(t7.value, '"', '') from $tableMeta as t7 where t7.name = 'Username' and t7.occurrence_id = occ.id)),
+        (select t4.ID from $tableUsers as t4 where t4.ID = (select t5.value from $tableMeta as t5 where t5.name = 'CurrentUserID' and t5.occurrence_id = occ.id))
+    ) as user_id
+FROM
+    $tableOcc as occ
+JOIN
+    $tableMeta as meta on meta.occurrence_id = occ.id
+WHERE
+    (@siteId is null or find_in_set(occ.site_id, @siteId) > 0)
+    and (@userId is null or (
+            (meta.name = 'CurrentUserID' and find_in_set(meta.value, @userId) > 0)
+         or (meta.name = 'Username' and replace(meta.value, '"', '') in (select user_login from $tableUsers where find_in_set(ID, @userId) > 0))
+    ))
+    and (@roleName is null or (meta.name = 'CurrentUserRoles'
+        and replace(replace(replace(replace(meta.value, '"', ''), ']', ''), '[', ''), '\\'', '') REGEXP @roleName
+    ))
+    and (@alertCode is null or find_in_set(occ.alert_id, @alertCode) > 0)
+    and (@startTimestamp is null or occ.created_on >= @startTimestamp)
+    and (@endTimestamp is null or occ.created_on <= @endTimestamp)
+order by
+    site_id, created_on DESC;
+query;
+        //#! Set variables first
+        $_wpdb->query("SET @siteId = $_siteId");
+        $_wpdb->query("SET @userId = $_userId");
+        $_wpdb->query("SET @roleName = $_roleName");
+        $_wpdb->query("SET @alertCode = $_alertCode");
+        $_wpdb->query("SET @startTimestamp = $_startTimestamp");
+        $_wpdb->query("SET @endTimestamp = $_endTimestamp");
+
+        //#! Then run query
+        return $_wpdb->get_results($query);
+         */
+    }
+
+
+
 }

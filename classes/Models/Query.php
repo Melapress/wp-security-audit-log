@@ -8,6 +8,7 @@ class WSAL_Models_Query
     protected $offset = null;
     protected $limit = null;
     protected $from = array();
+    protected $searchCondition = null;
 	protected $useDefaultAdapter = false;
 
     public function __construct()
@@ -154,5 +155,16 @@ class WSAL_Models_Query
         $this->offset = $offset;
 
         return $this;
+    }
+
+    public function addSearchCondition($value)
+    {
+        $this->searchCondition = $value;
+        return $this;
+    }
+
+    public function getSearchCondition()
+    {
+        return $this->searchCondition;
     }
 }

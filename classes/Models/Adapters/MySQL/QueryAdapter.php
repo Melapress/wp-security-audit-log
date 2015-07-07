@@ -15,15 +15,16 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
     protected function GetSql($query, &$args = array())
     {
         $conditions = $query->getConditions();
+        $searchCondition = $this->SearchCondition($query);
 
         $sWhereClause = "";
         foreach ($conditions as $fieldName => $fieldValue) {
             if (empty($sWhereClause)) {
                 $sWhereClause .= " WHERE ";
             } else {
-                $sWhereClause .= "AND ";
+                $sWhereClause .= " AND ";
             }
-            $sWhereClause .= $fieldName . " = %s";
+            $sWhereClause .= $fieldName;
             $args[] = $fieldValue;
         }
 
@@ -44,7 +45,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             . ' FROM ' . implode(',', $fromDataSets)
             . $sWhereClause
             // @todo GROUP BY goes here
-            // @todo HAVING goes here
+            . (!empty($searchCondition) ? (empty($sWhereClause) ? " WHERE ".$searchCondition : " AND ".$searchCondition) : '')
             . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', array_keys($orderBys)) . ' ' . implode(', ', array_values($orderBys))) : '')
             . $sLimitClause;
     }
@@ -134,9 +135,9 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             if (empty($sWhereClause)) {
                 $sWhereClause .= " WHERE ";
             } else {
-                $sWhereClause .= "AND ";
+                $sWhereClause .= " AND ";
             }
-            $sWhereClause .= $fieldName . "= %s";
+            $sWhereClause .= $fieldName;
             $args[] = $fieldValue;
         }
 
@@ -162,15 +163,17 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         return $result;
     }
 
-    public function GetSearchCondition()
+    public function SearchCondition($query)
     {
+        $condition = $query->getSearchCondition();
+        if (empty($condition)) return null;
         $searchConditions = '';
         $tmp = new WSAL_Adapters_MySQL_Meta($this->connection);
 
         $searchConditions = 'id IN (
             SELECT DISTINCT occurrence_id
                 FROM ' . $tmp->GetTable() . '
-                WHERE value LIKE %s
+                WHERE value LIKE "'.$condition.'"
             )';
         return $searchConditions;
     }

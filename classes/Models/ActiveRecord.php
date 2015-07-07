@@ -255,4 +255,13 @@ abstract class WSAL_Models_ActiveRecord
     {
         self::$_cache = array();
     }
+    
+    /**
+     * Function used in WSAL reporting extension
+     */
+    public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp)
+    {
+        return $this->getAdapter()->GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp);
+    }
+
 }

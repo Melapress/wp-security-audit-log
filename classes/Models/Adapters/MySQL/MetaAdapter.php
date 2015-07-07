@@ -38,4 +38,11 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 		return $this->Load('occurrence_id = %d AND name = %s', array($occurenceId, $metaName));
 	}
 
+	public function GetMatchingIPs()
+	{
+		$_wpdb = $this->connection;
+		$ips = $_wpdb->get_col("SELECT DISTINCT value FROM {$this->GetTable()} WHERE name = \"ClientIP\"");
+		return $ips;
+	}
+
 }

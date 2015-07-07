@@ -48,7 +48,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$query = new WSAL_Models_OccurrenceQuery();
 		$query->addOrderBy("created_on", false);
 		// TO DO Fixing data
-		if ($is_date_e) $query->addCondition('created_on <', intval($max_stamp));
+		if ($is_date_e) $query->addCondition('created_on <= %s ', intval($max_stamp));
 		if ($is_limt_e) $query->setLimit($max_items); 
 
 		if ($max_items == 0) return; // nothing to delete

@@ -310,7 +310,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 		$bid = (int)$this->get_view_site_id();
 		if ($bid) {
-			$query->addCondition("site_id", $bid);
+			$query->addCondition("site_id = %s ", $bid);
 		}
 		
 		$query = apply_filters('wsal_auditlog_query', $query);
