@@ -48,14 +48,15 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$query = new WSAL_Models_OccurrenceQuery();
 		$query->addOrderBy("created_on", false);
 		// TO DO Fixing data
-		if ($is_date_e) $query->addCondition('created_on <= %s ', intval($max_stamp));
+		if ($is_date_e) $query->addCondition('created_on <= %s', intval($max_stamp));
 		if ($is_limt_e) $query->setLimit($max_items); 
 
 		if (($max_items-1) == 0) return; // nothing to delete
 
 		$result = $query->getAdapter()->GetSqlDelete($query);
-		$query->getAdapter()->Delete($query);
+		$deletedCount = $query->getAdapter()->Delete($query);
 
+		if ($deletedCount == 0) return; // nothing to delete
 		// keep track of what we're doing
 		$this->plugin->alerts->Trigger(0003, array(
 				'Message' => 'Running system cleanup.',
@@ -64,7 +65,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 			), true);
 
 		// notify system
-		do_action('wsal_prune', $max_items, vsprintf($result['sql'], $result['args']));
+		do_action('wsal_prune', $deletedCount, vsprintf($result['sql'], $result['args']));
 	}
 
 }

@@ -178,10 +178,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function DeleteQuery($query, $args = array())
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         $sql = count($args) ? $_wpdb->prepare($query, $args) : $query;
-        $_wpdb->query($sql);
+        $result = $_wpdb->query($sql); 
+        return $result;
     }
     
     /**
