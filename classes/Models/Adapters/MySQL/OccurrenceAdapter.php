@@ -166,34 +166,5 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
         return $searchConditions;
     }
     
-    public function Delete($activeRecord)
-    {
-        //TO DO: FIX THIS
-
-        //global $wpdb;
-        $_wpdb = $this->connection;
-        // get relevant occurrence ids
-        $occids = $_wpdb->get_col($this->GetSql('select'));
-        
-        if (count($occids)) {
-            // delete meta data: back up columns, remove them for DELETE and generate sql
-            $cols = $this->columns;
-            $this->columns = array('occurrence_id');
-
-            //get meta adapter
-            //metaAdapter->deleteBYOccurenceIds(...);
-            $tmp = new WSAL_Adapters_MySQL_Meta($this->connection);
-            $sql = 'DELETE FROM ' . $tmp->GetTable() . ' WHERE occurrence_id IN (' . implode(',', $occids) . ')';
-
-            // restore columns
-            $this->columns = $cols;
-
-            // execute query
-            parent::DeleteQuery($sql);
-        }
-        
-        // delete occurrences
-        parent::Delete($activeRecord);
-    }
 
 }

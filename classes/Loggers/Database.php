@@ -51,9 +51,8 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		if ($is_date_e) $query->addCondition('created_on <= %s ', intval($max_stamp));
 		if ($is_limt_e) $query->setLimit($max_items); 
 
-		if ($max_items == 0) return; // nothing to delete
+		if (($max_items-1) == 0) return; // nothing to delete
 
-		$occ_ids = $query->getAdapter()->DeleteMetas($query);
 		$result = $query->getAdapter()->GetSqlDelete($query);
 		$query->getAdapter()->Delete($query);
 

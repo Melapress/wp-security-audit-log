@@ -90,12 +90,20 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         // execute query and return result
         return $this->getActiveRecordAdapter()->CountQuery($sql, $args);
     }
+
+    public function CountDelete($query)
+    {
+        $result = $this->GetSqlDelete($query, true);
+        // execute query and return result
+        return $this->getActiveRecordAdapter()->CountQuery($result['sql'], $result['args']);
+    }
     
     /**
      * Use query for deleting records.
      */
     public function Delete($query)
     {
+        $this->DeleteMetas($query);
         $result = $this->GetSqlDelete($query);
         $this->getActiveRecordAdapter()->DeleteQuery($result['sql'], $result['args']);
     }
@@ -117,10 +125,9 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         }
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
         $meta->DeleteByOccurenceIds($occ_ids);
-        return $occ_ids;
     }
 
-    public function GetSqlDelete($query)
+    public function GetSqlDelete($query, $getCount = false)
     {
         $result = array();
         $args = array();
@@ -152,7 +159,8 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             }
             $sLimitClause .= $query->getLimit();
         }
-        $result['sql'] = 'DELETE FROM ' . implode(',', $fromDataSets)
+        $result['sql'] = ($getCount ? 'SELECT COUNT(*) FROM ' : 'DELETE FROM ')
+            . implode(',', $fromDataSets)
             . $sWhereClause
             . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', array_keys($orderBys)) . ' ' . implode(', ', array_values($orderBys))) : '')
             . $sLimitClause;
