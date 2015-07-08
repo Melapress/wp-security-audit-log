@@ -85,46 +85,36 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		list($y, $m, $d) = explode('-', date('Y-m-d'));
 		
 		$ip = $this->plugin->settings->GetMainClientIP();
-		$tt1 = new WSAL_DB_Occurrence();
-		$tt2 = new WSAL_DB_Meta();
 		
 		$username = $_POST["log"];
 		$newAlertCode = 1003;
 		$user = get_user_by('login', $username);
 		$site_id = (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
 		if ($user) {
-			$newAlertCode = 1002;	
+			$newAlertCode = 1002;
 			$userRoles = $this->plugin->settings->GetCurrentUserRoles($user->roles);
 			if ( $this->plugin->settings->IsLoginSuperAdmin($username) ) $userRoles[] = 'superadmin';
 		}
 
 		if($this->IsPastLoginFailureLimit($ip, $site_id, $user))return;
 
+		$objOcc = new  WSAL_Models_Occurrence();
+		
 		if ($newAlertCode == 1002) {
 			if (!$this->plugin->alerts->CheckEnableUserRoles($username, $userRoles))return;
-			$occ = WSAL_DB_Occurrence::LoadMultiQuery('
-				SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
-				INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
-				and ipMeta.name = "ClientIP"
-				and ipMeta.value = %s
-				INNER JOIN `' . $tt2->GetTable() . '` usernameMeta on usernameMeta.occurrence_id = occurrence.id
-				and usernameMeta.name = "Username"
-				and usernameMeta.value = %s
-				WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
-				AND (created_on BETWEEN %d AND %d)
-				GROUP BY occurrence.id',
+			$occ = $objOcc->CheckKnownUsers(
 				array(
-					json_encode($ip),
-					json_encode($username),
+					$ip,
+					$username,
 					1002,
 					$site_id,
 					mktime(0, 0, 0, $m, $d, $y),
 					mktime(0, 0, 0, $m, $d + 1, $y) - 1
 				)
 			);
-
 			$occ = count($occ) ? $occ[0] : null;
-			if($occ && $occ->IsLoaded()){
+			
+			if(!empty($occ)){
 				// update existing record exists user
 				$this->IncrementLoginFailure($ip, $site_id, $user);
 				$new = $occ->GetMetaValue('Attempts', 0) + 1;
@@ -132,8 +122,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				if($new > $this->GetLoginFailureLogLimit())
 					$new = $this->GetLoginFailureLogLimit() . '+';
 				
-				$occ->SetMetaValue('Attempts', $new);
-				$occ->SetMetaValue('Username', $username);
+				$occ->UpdateMetaValue('Attempts', $new);
+				$occ->UpdateMetaValue('Username', $username);
 				//$occ->SetMetaValue('CurrentUserRoles', $userRoles);
 				$occ->created_on = null;
 				$occ->Save();	
@@ -146,15 +136,9 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				));
 			} 
 		} else {
-			$occUnknown = WSAL_DB_Occurrence::LoadMultiQuery('
-				SELECT occurrence.* FROM `' . $tt1->GetTable() . '` occurrence 
-				INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
-				and ipMeta.name = "ClientIP" and ipMeta.value = %s 
-				WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
-				AND (created_on BETWEEN %d AND %d)
-				GROUP BY occurrence.id',
+			$occUnknown = $objOcc->CheckUnKnownUsers(
 				array(
-					json_encode($ip),
+					$ip,
 					1003,
 					$site_id,
 					mktime(0, 0, 0, $m, $d, $y),
@@ -163,7 +147,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			);
 				
 			$occUnknown = count($occUnknown) ? $occUnknown[0] : null;
-			if($occUnknown && $occUnknown->IsLoaded()) {
+			if(!empty($occUnknown)) {
 				// update existing record not exists user
 				$this->IncrementLoginFailure($ip, $site_id, false);
 				$new = $occUnknown->GetMetaValue('Attempts', 0) + 1;
@@ -171,7 +155,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				if($new > $this->GetLoginFailureLogLimit())
 					$new = $this->GetLoginFailureLogLimit() . '+';
 				
-				$occUnknown->SetMetaValue('Attempts', $new);
+				$occUnknown->UpdateMetaValue('Attempts', $new);
 				$occUnknown->created_on = null;
 				$occUnknown->Save();
 			} else {
