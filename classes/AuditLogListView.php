@@ -137,6 +137,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			//'code' => array('code', false),
 			'type' => array('alert_id', false),
 			'crtd' => array('created_on', true),
+			'user' => array('username', true),
 			'scip' => array('scip', false)
 		);
 	}
@@ -179,8 +180,8 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$roles = $item->GetUserRoles();
 					if (is_array($roles) && count($roles)) {
 						$roles = __(esc_html(ucwords(implode(', ', $roles))));
-					} else if (is_string($roles)) {
-            			$roles = str_replace(array("\"", "[", "]"), "", $roles);
+					} else if (is_string($roles) && $roles != '') {
+            			$roles = __(esc_html(ucwords(str_replace(array("\"", "[", "]"), " ", $roles))));
         			} else {
         				$roles = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
         			}
