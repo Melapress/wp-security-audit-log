@@ -40,12 +40,19 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             }
             $sLimitClause .= $query->getLimit();
         }
-        $fields = (empty($columns))? '*' : implode(',', $columns);
+        $joinClause = '';
+        if ($query->hasMetaJoin()) {
+            $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
+            $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
+            $joinClause = ' LEFT JOIN '. $meta->GetTable() .' AS meta ON meta.occurrence_id = '. $occurrence->GetTable() .'.id ';
+        }
+        $fields = (empty($columns))? $fromDataSets[0] . '.*' : implode(',', $columns);
         return 'SELECT ' . $fields
             . ' FROM ' . implode(',', $fromDataSets)
+            . $joinClause
             . $sWhereClause
-            // @todo GROUP BY goes here
             . (!empty($searchCondition) ? (empty($sWhereClause) ? " WHERE ".$searchCondition : " AND ".$searchCondition) : '')
+            // @todo GROUP BY goes here
             . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', array_keys($orderBys)) . ' ' . implode(', ', array_values($orderBys))) : '')
             . $sLimitClause;
     }

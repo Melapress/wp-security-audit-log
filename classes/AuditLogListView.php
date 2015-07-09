@@ -137,14 +137,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			//'code' => array('code', false),
 			'type' => array('alert_id', false),
 			'crtd' => array('created_on', true),
-			'user' => array('username', true),
+			'user' => array('user', true),
 			'scip' => array('scip', false)
 		);
 	}
 	
 	public function column_default($item, $column_name){
-
-
 		//example: $item->getMetaValue('CurrentUserID')
 
 		if (!$this->_plugin->settings->GetDatetimeFormat()) $datetimeFormat = 'h:i:s.$$$&\n\b\s\p;A';
@@ -335,17 +333,23 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				$isDescending = false;
 			}
 
-			$tmp = new WSAL_Models_Occurrence();
-
 			//TO DO: Allow order by meta values
-			
-			//Making sure the field exists to order by
-			if (isset($tmp->{$orderByField})) {
-				// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
-				$query->addOrderBy($_REQUEST["orderby"], $isDescending);
-
+			if ($orderByField == "scip") {
+				$query->addMetaJoin();
+				$query->addOrderBy('CASE WHEN meta.name = "ClientIP" THEN meta.value END', $isDescending);
+			} else if ($orderByField == "user") {
+				$query->addMetaJoin();
+				$query->addOrderBy('CASE WHEN meta.name = "CurrentUserID" THEN meta.value END', $isDescending);
 			} else {
-				$query->addOrderBy("created_on", true);
+				$tmp = new WSAL_Models_Occurrence();
+				//Making sure the field exists to order by
+				if (isset($tmp->{$orderByField})) {
+					// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
+					$query->addOrderBy($_REQUEST["orderby"], $isDescending);
+
+				} else {
+					$query->addOrderBy("created_on", true);
+				}
 			}
 		}
 

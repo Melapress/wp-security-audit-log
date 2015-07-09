@@ -8,6 +8,7 @@ class WSAL_Models_Query
     protected $offset = null;
     protected $limit = null;
     protected $from = array();
+    protected $meta_join = false;
     protected $searchCondition = null;
 	protected $useDefaultAdapter = false;
 
@@ -166,5 +167,16 @@ class WSAL_Models_Query
     public function getSearchCondition()
     {
         return $this->searchCondition;
+    }
+
+    public function hasMetaJoin()
+    {
+        return $this->meta_join;
+    }
+
+    public function addMetaJoin()
+    {
+        $this->meta_join = true;
+        return $this;
     }
 }
