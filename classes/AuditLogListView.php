@@ -134,16 +134,15 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	public function get_sortable_columns(){
 		return array(
 			'read' => array('is_read', false),
-			'code' => array('code', false),
+			//'code' => array('code', false),
 			'type' => array('alert_id', false),
 			'crtd' => array('created_on', true),
+			'user' => array('user', true),
 			'scip' => array('scip', false)
 		);
 	}
 	
 	public function column_default($item, $column_name){
-
-
 		//example: $item->getMetaValue('CurrentUserID')
 
 		if (!$this->_plugin->settings->GetDatetimeFormat()) $datetimeFormat = 'h:i:s.$$$&\n\b\s\p;A';
@@ -172,15 +171,19 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					) : '<i>unknown</i>';
 			case 'user':
 				$username = $item->GetUsername();
-				if($username && ($user = get_user_by('login', $username))){
+				if ($username && ($user = get_user_by('login', $username))) {
 					$image = get_avatar($user->ID, 32);
 					$uhtml = '<a href="' . admin_url('user-edit.php?user_id=' . $user->ID)
 							. '" target="_blank">' . esc_html($user->display_name) . '</a>';
 					$roles = $item->GetUserRoles();
-					$roles = (is_array($roles) && count($roles))
-							? __(esc_html(ucwords(implode(', ', $roles))))
-							: '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
-				}else{
+					if (is_array($roles) && count($roles)) {
+						$roles = __(esc_html(ucwords(implode(', ', $roles))));
+					} else if (is_string($roles) && $roles != '') {
+            			$roles = __(esc_html(ucwords(str_replace(array("\"", "[", "]"), " ", $roles))));
+        			} else {
+        				$roles = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
+        			}
+				} else {
 					$image = get_avatar(0, 32);
 					$uhtml = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
 					$roles = '<i>' . __('System', 'wp-security-audit-log') . '</i>';
@@ -188,6 +191,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return $image . $uhtml . '<br/>' . $roles;
 			case 'scip':
 				$scip = $item->GetSourceIP();
+				if (is_string($scip)) {
+            		$scip = str_replace(array("\"", "[", "]"), "", $scip);
+            	}
 				$oips = array(); //$item->GetOtherIPs();
 				// if there's no IP...
 				if (is_null($scip) || $scip == '') return '<i>unknown</i>';
@@ -327,17 +333,23 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				$isDescending = false;
 			}
 
-			$tmp = new WSAL_Models_Occurrence();
-
 			//TO DO: Allow order by meta values
-			
-			//Making sure the field exists to order by
-			if (isset($tmp->{$orderByField})) {
-				// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
-				$query->addOrderBy($_REQUEST["orderby"], $isDescending);
-
+			if ($orderByField == "scip") {
+				$query->addMetaJoin();
+				$query->addOrderBy('CASE WHEN meta.name = "ClientIP" THEN meta.value END', $isDescending);
+			} else if ($orderByField == "user") {
+				$query->addMetaJoin();
+				$query->addOrderBy('CASE WHEN meta.name = "CurrentUserID" THEN meta.value END', $isDescending);
 			} else {
-				$query->addOrderBy("created_on", true);
+				$tmp = new WSAL_Models_Occurrence();
+				//Making sure the field exists to order by
+				if (isset($tmp->{$orderByField})) {
+					// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
+					$query->addOrderBy($_REQUEST["orderby"], $isDescending);
+
+				} else {
+					$query->addOrderBy("created_on", true);
+				}
 			}
 		}
 
