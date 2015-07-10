@@ -189,7 +189,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $searchConditions = 'id IN (
             SELECT DISTINCT occurrence_id
                 FROM ' . $tmp->GetTable() . '
-                WHERE value LIKE "'.$condition.'"
+                WHERE value LIKE "%'.$condition.'%"
             )';
         return $searchConditions;
     }
