@@ -1,5 +1,7 @@
 <?php
 class WSAL_Views_Settings extends WSAL_AbstractView {
+
+	public $adapterMsg = '';
 	
 	public function __construct(WpSecurityAuditLog $plugin) {
 		parent::__construct($plugin);
@@ -61,10 +63,38 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetInternalIPsFiltering(isset($_REQUEST['EnableIpFiltering']));
 		$this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
 		$this->_plugin->settings->SetDeleteData(isset($_REQUEST['DeleteData']));
+		$this->_plugin->settings->SetDatetimeFormat($_REQUEST['DatetimeFormat']);
 		$this->_plugin->settings->ClearDevOptions();
-		if(isset($_REQUEST['DevOptions']))
-			foreach($_REQUEST['DevOptions'] as $opt)
+
+		if(isset($_REQUEST['DevOptions'])) {
+			foreach($_REQUEST['DevOptions'] as $opt) {
 				$this->_plugin->settings->SetDevOptionEnabled($opt, true);
+			}
+		}
+
+		// 
+		// Database Adapter Settings
+		// Temporarily not used
+		// 
+		/* Check Adapter config */
+		if (!empty($_REQUEST["AdapterUser"]) && ($_REQUEST['AdapterUser'] != '') && ($_REQUEST['AdapterName'] != '') && ($_REQUEST['AdapterHostname'] != '') ) {
+			WSAL_Connector_ConnectorFactory::CheckConfig(
+				trim($_REQUEST['AdapterType']), 
+				trim($_REQUEST['AdapterUser']), 
+				trim($_REQUEST['AdapterPassword']), 
+				trim($_REQUEST['AdapterName']), 
+				trim($_REQUEST['AdapterHostname']), 
+				trim($_REQUEST['AdapterBasePrefix'])
+			);
+
+			/* Setting Adapter config */
+			$this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
+			$this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
+		}
 	}
 	
 	public function AjaxCheckSecurityToken(){
@@ -90,14 +120,20 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		if(isset($_POST['submit'])){
 			try {
 				$this->Save();
-				?><div class="updated"><p><?php _e('Settings have been saved.', 'wp-security-audit-log'); ?></p></div><?php
+				?><div class="updated">
+					<p><?php _e('Settings have been saved.', 'wp-security-audit-log'); ?></p>
+				</div><?php
 			}catch(Exception $ex){
 				?><div class="error"><p><?php _e('Error: ', 'wp-security-audit-log'); ?><?php echo $ex->getMessage(); ?></p></div><?php
 			}
 		}
 		?>
-		<h2 id="wsal-tabs" class="nav-tab-wrapper"><a href="#tab-general" class="nav-tab">General</a><a href="#tab-exclude" class="nav-tab">Exclude Objects</a></h2>
-		 <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
+		<h2 id="wsal-tabs" class="nav-tab-wrapper">
+			<a href="#tab-general" class="nav-tab">General</a>
+			<a href="#tab-exclude" class="nav-tab">Exclude Objects</a>
+			<!--<a href="#adapter" class="nav-tab">Data Storage Adapter</a>-->
+		</h2>
+		<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
 		<form id="audit-log-settings" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr(admin_url('admin-ajax.php')); ?>" />
@@ -289,6 +325,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</td>
 					</tr>
 					<tr>
+						<th><label for="datetime_format_24"><?php _e('Alerts Time Format', 'wp-security-audit-log'); ?></label></th>
+						<td>
+							<fieldset>
+								<?php $datetime = $this->_plugin->settings->GetDatetimeFormat(); ?>
+								<label for="datetime_format_24">
+									<input type="radio" name="DatetimeFormat" id="datetime_format_24" style="margin-top: 2px;" <?php if($datetime)echo 'checked="checked"'; ?> value="1">
+									<span><?php _e('24 hours', 'wp-security-audit-log'); ?></span>
+								</label>
+								<br/>
+								<label for="datetime_format_default">
+									<input type="radio" name="DatetimeFormat" id="datetime_format_default" style="margin-top: 2px;" <?php if(!$datetime)echo 'checked="checked"'; ?> value="0">
+									<span><?php _e('AM/PM', 'wp-security-audit-log'); ?></span>
+								</label>
+								<br/>
+ 							</fieldset>
+ 						</td>
+ 					</tr>
+					<tr>
 						<th><label><?php _e('Developer Options', 'wp-security-audit-log'); ?></label></th>
 						<td>
 							<fieldset>
@@ -361,6 +415,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
  					</tr>
 					</tbody>
 				</table>
+				<!-- End general Tab-->
 				<table class="form-table wsal-tab widefat" id="tab-exclude">
 					<tbody>
 						<tr>
@@ -434,8 +489,84 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</tr>
 					</tbody>
 				</table>
+				<?php
+				//
+				// Temporarily disabling this
+				//
+				/*
+				<!-- End exclude objects Tab-->
+				<table class="form-table wsal-tab widefat" id="adapter">
+					<tbody>
+						<tr>
+							<th><h2>Type</h2></th>
+						</tr>
+						<tr>
+							<th><label for="AdapterType"><?php _e('Adapter Type', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterType = strtolower($this->_plugin->settings->GetAdapterConfig('adapter-type')); ?>
+									<select name="AdapterType" id="AdapterType">
+										<option value="MySQL" <?=($adapterType == 'mysql')? 'selected="selected"' : '';?>>DB MySQL</option>
+										
+									</select>
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th><h2>Config</h2></th>
+						</tr>
+						<tr>
+							<th><label for="AdapterUser"><?php _e('Database User', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterUser = $this->_plugin->settings->GetAdapterConfig('adapter-user'); ?>
+									<input type="text" id="AdapterUser" name="AdapterUser" value="<?=$adapterUser?>" style="float: left; display: block; width: 250px;">
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th><label for="AdapterPassword"><?php _e('Database Password', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterPassword = $this->_plugin->settings->GetAdapterConfig('adapter-password'); ?>
+									<input type="password" id="AdapterPassword" name="AdapterPassword" value="<?=$adapterPassword?>" style="float: left; display: block; width: 250px;">
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th><label for="AdapterName"><?php _e('Database Name', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterName = $this->_plugin->settings->GetAdapterConfig('adapter-name'); ?>
+									<input type="text" id="AdapterName" name="AdapterName" value="<?=$adapterName?>" style="float: left; display: block; width: 250px;">
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th><label for="AdapterHostname"><?php _e('Database Hostname', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterHostname = $this->_plugin->settings->GetAdapterConfig('adapter-hostname'); ?>
+									<input type="text" id="AdapterHostname" name="AdapterHostname" value="<?=$adapterHostname?>" style="float: left; display: block; width: 250px;">
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th><label for="AdapterBasePrefix"><?php _e('Database Base prefix', 'wp-security-audit-log'); ?></label></th>
+							<td>
+								<fieldset>
+									<?php $adapterBasePrefix = $this->_plugin->settings->GetAdapterConfig('adapter-base-prefix'); ?>
+									<input type="text" id="AdapterBasePrefix" name="AdapterBasePrefix" value="<?=$adapterBasePrefix?>" style="float: left; display: block; width: 250px;">
+								</fieldset>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				*/
+				?>
+				<!-- End Adapter Tab-->
 			</div>
-			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes"></p>
+			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="Save &amp; Test Changes"></p>
 		</form>
 		<script type="text/javascript">
 		<!--

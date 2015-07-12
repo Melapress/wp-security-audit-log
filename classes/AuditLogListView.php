@@ -134,16 +134,19 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	public function get_sortable_columns(){
 		return array(
 			'read' => array('is_read', false),
-			'code' => array('code', false),
+			//'code' => array('code', false),
 			'type' => array('alert_id', false),
 			'crtd' => array('created_on', true),
-			'user' => array('user', false),
-			'scip' => array('scip', false),
-			'site' => array('site', false),
+			'user' => array('user', true),
+			'scip' => array('scip', false)
 		);
 	}
 	
 	public function column_default($item, $column_name){
+		//example: $item->getMetaValue('CurrentUserID')
+
+		if (!$this->_plugin->settings->GetDatetimeFormat()) $datetimeFormat = 'h:i:s.$$$&\n\b\s\p;A';
+		else $datetimeFormat = 'H:i:s.$$$';
 		switch($column_name){
 			case 'read':
 				return '<span class="log-read log-read-'
@@ -163,20 +166,24 @@ class WSAL_AuditLogListView extends WP_List_Table {
 						str_replace(
 							'$$$',
 							substr(number_format(fmod($item->created_on + $this->_gmt_offset_sec, 1), 3), 2),
-							date('Y-m-d<\b\r>h:i:s.$$$&\n\b\s\p;A', $item->created_on + $this->_gmt_offset_sec)
+							date('Y-m-d<\b\r>'.$datetimeFormat, $item->created_on + $this->_gmt_offset_sec)
 						)
 					) : '<i>unknown</i>';
 			case 'user':
 				$username = $item->GetUsername();
-				if($username && ($user = get_user_by('login', $username))){
+				if ($username && ($user = get_user_by('login', $username))) {
 					$image = get_avatar($user->ID, 32);
 					$uhtml = '<a href="' . admin_url('user-edit.php?user_id=' . $user->ID)
 							. '" target="_blank">' . esc_html($user->display_name) . '</a>';
 					$roles = $item->GetUserRoles();
-					$roles = (is_array($roles) && count($roles))
-							? __(esc_html(ucwords(implode(', ', $roles))))
-							: '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
-				}else{
+					if (is_array($roles) && count($roles)) {
+						$roles = __(esc_html(ucwords(implode(', ', $roles))));
+					} else if (is_string($roles) && $roles != '') {
+            			$roles = __(esc_html(ucwords(str_replace(array("\"", "[", "]"), " ", $roles))));
+        			} else {
+        				$roles = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
+        			}
+				} else {
 					$image = get_avatar(0, 32);
 					$uhtml = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
 					$roles = '<i>' . __('System', 'wp-security-audit-log') . '</i>';
@@ -184,6 +191,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return $image . $uhtml . '<br/>' . $roles;
 			case 'scip':
 				$scip = $item->GetSourceIP();
+				if (is_string($scip)) {
+            		$scip = str_replace(array("\"", "[", "]"), "", $scip);
+            	}
 				$oips = array(); //$item->GetOtherIPs();
 				// if there's no IP...
 				if (is_null($scip) || $scip == '') return '<i>unknown</i>';
@@ -301,38 +311,55 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 		//$this->process_bulk_action();
 		
-		$query = new WSAL_DB_OccurrenceQuery('WSAL_DB_Occurrence');
+		//TO DO: Get rid of OccurrenceQuery and use the Occurence Model
+		$query = new WSAL_Models_OccurrenceQuery(); 
+
 		$bid = (int)$this->get_view_site_id();
-		if ($bid) $query->where[] = 'site_id = '.$bid;
-		$query->order[] = 'created_on DESC';
+		if ($bid) {
+			$query->addCondition("site_id = %s ", $bid);
+		}
 		
 		$query = apply_filters('wsal_auditlog_query', $query);
 		
-		$total_items = $query->Count();
-		
-		/** @deprecated */
-		//$data = $query->Execute();
-		
-		if($total_items){
-			$this->_orderby = (!empty($_REQUEST['orderby']) && isset($sortable[$_REQUEST['orderby']])) ? $_REQUEST['orderby'] : 'created_on';
-			$this->_order = (!empty($_REQUEST['order']) && $_REQUEST['order']=='asc') ? 'ASC' : 'DESC';
-			$tmp = new WSAL_DB_Occurrence();
-			if(isset($tmp->{$this->_orderby})){
-				// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
-				$query->order[] = $this->_orderby . ' ' . $this->_order;
-				/** @deprecated */
-				//$numorder = in_array($this->_orderby, array('code', 'type', 'created_on'));
-				//usort($data, array($this, $numorder ? 'reorder_items_int' : 'reorder_items_str'));
+		$total_items = $query->getAdapter()->Count($query);
+
+		if (empty($_REQUEST["orderby"])) {
+			$query->addOrderBy("created_on", true);
+		} else {
+			$orderByField = $_REQUEST["orderby"];
+
+			$isDescending = true;
+			if (!empty($_REQUEST['order']) && $_REQUEST["order"] == "asc") {
+				$isDescending = false;
+			}
+
+			//TO DO: Allow order by meta values
+			if ($orderByField == "scip") {
+				$query->addMetaJoin();
+				$query->addOrderBy('CASE WHEN meta.name = "ClientIP" THEN meta.value END', $isDescending);
+			} else if ($orderByField == "user") {
+				$query->addMetaJoin();
+				$query->addOrderBy('CASE WHEN meta.name = "CurrentUserID" THEN meta.value END', $isDescending);
+			} else {
+				$tmp = new WSAL_Models_Occurrence();
+				//Making sure the field exists to order by
+				if (isset($tmp->{$orderByField})) {
+					// TODO we used to use a custom comparator ... is it safe to let MySQL do the ordering now?
+					$query->addOrderBy($_REQUEST["orderby"], $isDescending);
+
+				} else {
+					$query->addOrderBy("created_on", true);
+				}
 			}
 		}
 
 		/** @todo Modify $query instead */
 		/** @deprecated */
 		//$data = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page);
-		$query->offset = ($this->get_pagenum() - 1) * $per_page;
-		$query->length = $per_page;
+		$query->setOffset(($this->get_pagenum() - 1) * $per_page);
+		$query->setLimit($per_page);
 
-		$this->items = $query->Execute(); 
+		$this->items = $query->getAdapter()->Execute($query);
 
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,

@@ -183,10 +183,10 @@ class WSAL_Settings {
 		$this->_plugin->SetGlobalOption('pruning-limit-e', $enabled);
 	}
 	public function IsPruningDateEnabled(){
-		return $this->_plugin->GetGlobalOption('pruning-date-e', true);
+		return $this->_plugin->GetGlobalOption('pruning-date-e');
 	}
 	public function IsPruningLimitEnabled(){
-		return $this->_plugin->GetGlobalOption('pruning-limit-e', true);
+		return $this->_plugin->GetGlobalOption('pruning-limit-e');
 	}
 	public function IsRestrictAdmins(){
 		return $this->_plugin->GetGlobalOption('restrict-admins', false);
@@ -368,10 +368,16 @@ class WSAL_Settings {
 		}
 		return false;
 	}
-	public function GetCurrentUserRoles($baseRoles = null){
+	public function GetCurrentUserRoles($baseRoles = null){ 
 		if ($baseRoles == null) $baseRoles = wp_get_current_user()->roles;
 		if (function_exists('is_super_admin') && is_super_admin()) $baseRoles[] = 'superadmin';
 		return $baseRoles;
+	}
+
+	public function IsLoginSuperAdmin($username){ 
+		$userId = username_exists($username);
+		if ( function_exists('is_super_admin') && is_super_admin($userId) ) return true;
+		else return false;
 	}
 	
 	// </editor-fold>
@@ -546,6 +552,26 @@ class WSAL_Settings {
 			asort($this->_excluded_custom);
 		}
 		return $this->_excluded_custom;
+	}
+
+	/**
+	 * Datetime format.
+	 * 24 hours or AM/PM
+	 */
+	public function GetDatetimeFormat(){
+		return $this->_plugin->GetGlobalOption('datetime-format', 0);
+	}
+
+	public function SetDatetimeFormat($newvalue){
+		return $this->_plugin->SetGlobalOption('datetime-format', $newvalue);
+	}
+
+	public function GetAdapterConfig($name_field){
+		return $this->_plugin->GetGlobalOption($name_field);
+	}
+
+	public function SetAdapterConfig($name_field, $newvalue){
+		return $this->_plugin->SetGlobalOption($name_field, trim($newvalue));
 	}
 	
 	// </editor-fold>

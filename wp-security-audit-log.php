@@ -117,12 +117,14 @@ class WpSecurityAuditLog {
 	 */
 	public function __construct(){
 		
+		require_once('classes/Helpers/DataHelper.php');
 		// profiler has to be loaded manually
 		require_once('classes/SimpleProfiler.php');
 		$this->profiler = new WSAL_SimpleProfiler();
-
-		require_once('classes/DB/ActiveRecord.php');
-		require_once('classes/DB/Option.php');
+		require_once('classes/Models/ActiveRecord.php');
+		require_once('classes/Models/Query.php');
+		require_once('classes/Models/OccurrenceQuery.php');
+		require_once('classes/Models/Option.php');
 		
 		// load autoloader and register base paths
 		require_once('classes/Autoloader.php');
@@ -205,7 +207,7 @@ class WpSecurityAuditLog {
 	 */
 	public function Load(){
 
-		$optionsTable = new WSAL_DB_Option();
+		$optionsTable = new WSAL_Models_Option();
 		if (!$optionsTable->IsInstalled()) {
 			$optionsTable->Install();
 			//setting the prunig date with the old value or the default value	
@@ -252,7 +254,7 @@ class WpSecurityAuditLog {
 		}
 		
 		// ensure that the system is installed and schema is correct
-		WSAL_DB_ActiveRecord::InstallAll();
+		self::getConnector()->installAll();
 		
 		$PreInstalled = $this->IsInstalled();
 		
@@ -309,7 +311,7 @@ class WpSecurityAuditLog {
 	 */
 	public function Uninstall(){
 		if ($this->GetGlobalOption("delete-data") == 1) {
-			WSAL_DB_ActiveRecord::UninstallAll();
+			self::getConnector()->uninstallAll();
 			$this->deleteAllOptions();
 		}
 		wp_clear_scheduled_hook('wsal_cleanup');
@@ -347,7 +349,7 @@ class WpSecurityAuditLog {
 
 	public function SetOptions($data){
 		foreach($data as $key => $option) { 
-			$this->options = new WSAL_DB_Option();
+			$this->options = new WSAL_Models_Option();
 			if ( $this->IsMultisite() ) {
 				$this->options->SetOptionValue($option['meta_key'], $option['meta_value']);
 			} else {
@@ -474,7 +476,7 @@ class WpSecurityAuditLog {
 		//$fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
 		//var_dump($fn($prefix . $option, $default));
 		//return $fn($prefix . $option, $default);
-		$this->options = new WSAL_DB_Option();
+		$this->options = new WSAL_Models_Option();
 		return $this->options->GetOptionValue($prefix . $option, $default);     
 	}
 	
@@ -487,7 +489,7 @@ class WpSecurityAuditLog {
 	public function SetGlobalOption($option, $value, $prefix = self::OPT_PRFX){
 		//$fn = $this->IsMultisite() ? 'update_site_option' : 'update_option';
 		//$fn($prefix . $option, $value);
-		$this->options = new WSAL_DB_Option();
+		$this->options = new WSAL_Models_Option();
 		$this->options->SetOptionValue($prefix . $option, $value);
 	}
 	
@@ -539,24 +541,26 @@ class WpSecurityAuditLog {
 		while(($pos = array_search($hook, $this->_cleanup_hooks)) !== false)
 			unset($this->_cleanup_hooks[$pos]);
 	}
+
+	public static function getConnector()
+	{
+		require_once('classes/Connector/ConnectorFactory.php');
+		return WSAL_Connector_ConnectorFactory::getConnector();
+	}
 	
 	/**
 	 * Do we have an existing installation? This only applies for version 1.0 onwards.
 	 * @return boolean
 	 */
 	public function IsInstalled(){
-		global $wpdb;
-		$table = $wpdb->base_prefix . 'wsal_occurrences';
-		return ($wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
+		return self::getConnector()->isInstalled();
 	}
 	
 	/**
 	 * @return boolean Whether the old plugin was present or not.
 	 */
 	public function CanMigrate(){
-		global $wpdb;
-		$table = $wpdb->base_prefix . 'wordpress_auditlog_events';
-		return ($wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
+		return self::getConnector()->canMigrate();
 	}
 	
 	/**
