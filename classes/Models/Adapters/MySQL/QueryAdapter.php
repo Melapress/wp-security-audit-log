@@ -70,7 +70,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $args = array();
         $sql = $this->GetSql($query, $args);
 
-        $occurenceAdapter = $query->getConnector()->getAdapter("Occurrence");
+        $occurenceAdapter = $query->getConnector()->getAdapter("Occurrence"); var_dump($sql);
 
         if (in_array($occurenceAdapter->GetTable(), $query->getFrom())) {
             return $occurenceAdapter->LoadMulti($sql, $args);
@@ -184,12 +184,13 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $condition = $query->getSearchCondition();
         if (empty($condition)) return null;
         $searchConditions = '';
-        $tmp = new WSAL_Adapters_MySQL_Meta($this->connection);
+        $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
 
-        $searchConditions = 'id IN (
+        $searchConditions = $occurrence->GetTable() .'.id IN (
             SELECT DISTINCT occurrence_id
-                FROM ' . $tmp->GetTable() . '
-                WHERE value LIKE "%'.$condition.'%"
+                FROM ' . $meta->GetTable() . '
+                WHERE TRIM(BOTH "\"" FROM value) LIKE "'.$condition.'"
             )';
         return $searchConditions;
     }
