@@ -22,10 +22,24 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             if (empty($sWhereClause)) {
                 $sWhereClause .= " WHERE ";
             } else {
-                $sWhereClause .= (preg_match('/^(OR)/', $fieldName) ? "" : " AND ");
+                $sWhereClause .= " AND ";
             }
-            $sWhereClause .= $fieldName;
-            $args[] = $fieldValue;
+
+            if (is_array($fieldValue)) {
+                $subWhereClause = "(";
+                foreach($fieldValue as $orFieldName => $orFieldValue) {
+                    if ($subWhereClause != '(') {
+                        $subWhereClause .= " OR ";
+                    }
+                    $subWhereClause .= $orFieldName;
+                    $args[] = $orFieldValue;
+                }
+                $subWhereClause .= ")";
+                $sWhereClause .= $subWhereClause;
+            } else {
+                $sWhereClause .= $fieldName;
+                $args[] = $fieldValue;
+            }
         }
 
         $fromDataSets = $query->getFrom();
