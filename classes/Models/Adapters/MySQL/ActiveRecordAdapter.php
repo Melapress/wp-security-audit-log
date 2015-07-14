@@ -198,7 +198,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $sql = (!is_array($args) || !count($args)) // do we really need to prepare() or not?
             ? ($cond)
             : $_wpdb->prepare($cond, $args)
-        ;print_r($cond);var_dump($args);
+        ;
         foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
             $result[] = $this->getModel()->LoadData($data);
         }

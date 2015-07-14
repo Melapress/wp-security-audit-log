@@ -30,4 +30,29 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
         }
     }
 
+    public function GetNotificationsSetting($opt_prefix)
+    {
+        if ($this->IsInstalled()) {
+            return $this->LoadArray('option_name LIKE %s', array($opt_prefix.'%'));
+        } else {
+            return null;
+        }
+    }
+
+    public function DeleteByName($name)
+    {
+        if (!empty($name)) {
+            $sql = "DELETE FROM " . $this->GetTable() . " WHERE option_name = '". $name ."'";
+            // execute query
+            parent::DeleteQuery($sql);
+        }
+    }
+
+    public function CountNotifications($opt_prefix)
+    {
+        $_wpdb = $this->connection;
+        $sql = "SELECT COUNT(id) FROM " . $this->GetTable() . " WHERE option_name LIKE '". $opt_prefix ."%'";
+        return (int)$_wpdb->get_var($sql);
+    }
+
 }

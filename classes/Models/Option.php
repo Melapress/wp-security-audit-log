@@ -50,4 +50,19 @@ class WSAL_Models_Option extends WSAL_Models_ActiveRecord
         }
         return $result;
     }
+
+    public function GetNotificationsSetting($opt_prefix)
+    {
+        return $this->getAdapter()->GetNotificationsSetting($opt_prefix);
+    }
+
+    public function DeleteByName($name)
+    {
+        $this->getAdapter()->DeleteByName($name);
+    }
+
+    public function CountNotifications($opt_prefix)
+    {
+        return $this->getAdapter()->CountNotifications($opt_prefix);
+    }
 }
