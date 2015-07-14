@@ -22,7 +22,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             if (empty($sWhereClause)) {
                 $sWhereClause .= " WHERE ";
             } else {
-                $sWhereClause .= " AND ";
+                $sWhereClause .= (preg_match('/^(OR)/', $fieldName) ? "" : " AND ");
             }
             $sWhereClause .= $fieldName;
             $args[] = $fieldValue;
@@ -47,11 +47,14 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             $joinClause = ' LEFT JOIN '. $meta->GetTable() .' AS meta ON meta.occurrence_id = '. $occurrence->GetTable() .'.id ';
         }
         $fields = (empty($columns))? $fromDataSets[0] . '.*' : implode(',', $columns);
+        if (!empty($searchCondition)) {
+            $args[] = $searchCondition['args'];
+        }
         return 'SELECT ' . $fields
             . ' FROM ' . implode(',', $fromDataSets)
             . $joinClause
             . $sWhereClause
-            . (!empty($searchCondition) ? (empty($sWhereClause) ? " WHERE ".$searchCondition : " AND ".$searchCondition) : '')
+            . (!empty($searchCondition) ? (empty($sWhereClause) ? " WHERE ".$searchCondition['sql'] : " AND ".$searchCondition['sql']) : '')
             // @todo GROUP BY goes here
             . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', array_keys($orderBys)) . ' ' . implode(', ', array_values($orderBys))) : '')
             . $sLimitClause;
@@ -183,15 +186,16 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
     {
         $condition = $query->getSearchCondition();
         if (empty($condition)) return null;
-        $searchConditions = '';
+        $searchConditions = array();
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
 
-        $searchConditions = $occurrence->GetTable() .'.id IN (
+        $searchConditions['sql'] = $occurrence->GetTable() .'.id IN (
             SELECT DISTINCT occurrence_id
                 FROM ' . $meta->GetTable() . '
-                WHERE TRIM(BOTH "\"" FROM value) LIKE "'.$condition.'"
+                WHERE TRIM(BOTH "\"" FROM value) LIKE %s
             )';
+        $searchConditions['args'] = "%". $condition. "%";
         return $searchConditions;
     }
 
