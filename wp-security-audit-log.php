@@ -592,6 +592,45 @@ class WpSecurityAuditLog {
 		require_once('defaults.php');
 		$s->Stop();
 	}
+
+	/**
+	 * WSAL-Notifications-Extension Functions.
+	 */
+	public function GetNotificationsSetting($opt_prefix)
+	{
+		$this->options = new WSAL_Models_Option();
+		return $this->options->GetNotificationsSetting(self::OPT_PRFX . $opt_prefix);
+	}
+
+	public function GetNotification($id)
+    {
+        $this->options = new WSAL_Models_Option();
+		return $this->options->GetNotification($id);
+    }
+
+	public function DeleteByName($name)
+	{
+		$this->options = new WSAL_Models_Option();
+		return $this->options->DeleteByName($name);
+	}
+
+	public function DeleteByPrefix($opt_prefix)
+	{
+		$this->options = new WSAL_Models_Option();
+		return $this->options->DeleteByPrefix(self::OPT_PRFX . $opt_prefix);
+	}
+
+	public function CountNotifications($opt_prefix)
+	{
+		$this->options = new WSAL_Models_Option();
+		return $this->options->CountNotifications(self::OPT_PRFX . $opt_prefix);
+	}
+
+	public function UpdateGlobalOption($option, $value)
+	{
+		$this->options = new WSAL_Models_Option();
+		return $this->options->SetOptionValue($option, $value);
+	}
 	
 	// </editor-fold>
 }

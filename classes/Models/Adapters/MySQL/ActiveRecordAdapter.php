@@ -180,7 +180,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     {
         $_wpdb = $this->connection;
         $sql = count($args) ? $_wpdb->prepare($query, $args) : $query;
-        $result = $_wpdb->query($sql); 
+        $result = $_wpdb->query($sql);
         return $result;
     }
     
