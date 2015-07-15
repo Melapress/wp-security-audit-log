@@ -33,7 +33,16 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
     public function GetNotificationsSetting($opt_prefix)
     {
         if ($this->IsInstalled()) {
-            return $this->LoadArray('option_name LIKE %s', array($opt_prefix.'%'));
+            return $this->LoadArray('option_name LIKE %s', array($opt_prefix."%"));
+        } else {
+            return null;
+        }
+    }
+
+    public function GetNotification($id)
+    {
+        if ($this->IsInstalled()) {
+            return $this->Load('id = %d', array($id));
         } else {
             return null;
         }
@@ -44,7 +53,20 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
         if (!empty($name)) {
             $sql = "DELETE FROM " . $this->GetTable() . " WHERE option_name = '". $name ."'";
             // execute query
-            parent::DeleteQuery($sql);
+            return parent::DeleteQuery($sql);
+        } else {
+            return false;
+        }
+    }
+
+    public function DeleteByPrefix($opt_prefix)
+    {
+        if (!empty($opt_prefix)) {
+            $sql = "DELETE FROM " . $this->GetTable() . "WHERE option_name LIKE '". $opt_prefix ."%'";
+            // execute query
+            return parent::DeleteQuery($sql);
+        } else {
+            return false;
         }
     }
 
