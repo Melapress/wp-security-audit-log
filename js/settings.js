@@ -50,6 +50,8 @@ jQuery(document).ready(function(){
 					.prepend(jQuery('<input type="hidden" name="Editors[]"/>').val(user))
 					.append(jQuery('<a href="javascript:;" title="Remove">&times;</a>').click(RemoveSecToken))
 			);
+		} else {
+			jQuery('#EditorList').children().remove();
 		}
 	});
 	
