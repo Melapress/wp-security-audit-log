@@ -23,7 +23,7 @@ class WSAL_Models_Option extends WSAL_Models_ActiveRecord
         // Serialize if $value is array or object
         $value = maybe_serialize($value);
         $this->option_value = $value;
-        $this->Save();
+        return $this->Save();
     }
     
     public function GetOptionValue($name, $default = array())
@@ -49,5 +49,32 @@ class WSAL_Models_Option extends WSAL_Models_ActiveRecord
             $this->_state = (!empty($updateId))?self::STATE_UPDATED:self::STATE_CREATED;
         }
         return $result;
+    }
+
+    public function GetNotificationsSetting($opt_prefix)
+    {
+        return $this->getAdapter()->GetNotificationsSetting($opt_prefix);
+    }
+
+    public function GetNotification($id)
+    {
+        return $this->LoadData(
+            $this->getAdapter()->GetNotification($id)
+        );
+    }
+
+    public function DeleteByName($name)
+    {
+        return $this->getAdapter()->DeleteByName($name);
+    }
+
+    public function DeleteByPrefix($opt_prefix)
+    {
+        return $this->getAdapter()->DeleteByPrefix($opt_prefix);
+    }
+
+    public function CountNotifications($opt_prefix)
+    {
+        return $this->getAdapter()->CountNotifications($opt_prefix);
     }
 }

@@ -64,6 +64,11 @@ class WSAL_Models_Query
         return $this;
     }
 
+    public function addORCondition($aConditions)
+    {
+        $this->conditions[] = $aConditions;
+    }
+
     public function clearConditions()
     {
         $this->conditions = array();
