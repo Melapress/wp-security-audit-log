@@ -62,7 +62,7 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
     public function DeleteByPrefix($opt_prefix)
     {
         if (!empty($opt_prefix)) {
-            $sql = "DELETE FROM " . $this->GetTable() . "WHERE option_name LIKE '". $opt_prefix ."%'";
+            $sql = "DELETE FROM " . $this->GetTable() . " WHERE option_name LIKE '". $opt_prefix ."%'";
             // execute query
             return parent::DeleteQuery($sql);
         } else {

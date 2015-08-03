@@ -240,3 +240,5 @@
                       {"interval":"60","_nonce":"f06540506a","action":"heartbeat","screen_id":"audit-log_page_wsal-licensing-network","has_focus":"false"}
 [2015-07-29 11:49:20] POST /wp-admin/admin-ajax.php 
                       {"interval":"60","_nonce":"f06540506a","action":"heartbeat","screen_id":"audit-log_page_wsal-licensing-network","has_focus":"false"}
+[2015-08-03 13:05:02] POST /wp-admin/admin-ajax.php 
+                      {"interval":"60","_nonce":"7ce01a7fb0","action":"heartbeat","screen_id":"plugins-network","has_focus":"false"}
