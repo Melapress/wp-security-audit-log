@@ -46,19 +46,19 @@ class WSAL_Views_About extends WSAL_AbstractView {
 							<li><?php _e('and much more&hellip;', 'wp-security-audit-log'); ?></li>
 						</ul>
 						<br/>
-						Refer to the complete list of <a href="http://www.wpwhitesecurity.com/wordpress-security-plugins/wp-security-audit-log/security-audit-alerts-logs/?utm_source=wpsalabt&utm_medium=txtlink&utm_campaign=wpsal" target="_blank">WordPress Security Alerts</a> for more information.
+						Refer to the complete list of <a href="http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/?utm_source=wsalabt&utm_medium=txtlink&utm_campaign=wsal" target="_blank">WordPress Security Alerts</a> for more information.
 					</div>
 				</div>
 			</div>
 			
 			<div style="position: absolute; right: 70px; width: 180px; top: 10px;">
 				<div class="postbox">
-					<h3 class="hndl"><span><?php _e('WP Password Policy Manager', 'wp-security-audit-log'); ?></span></h3>
+					<h3 class="hndl"><span><?php _e('Extend the Functionality & Get More Value from WP Security Audit Log', 'wp-security-audit-log'); ?></span></h3>
 					<div class="inside">
 						<p>
-							<?php _e('Easily configure WordPress password policies and ensure users use strong passwords with our plugin WP Password Policy Manager.', 'wp-security-audit-log'); ?>
+							<?php _e('Get more value out of WP Security Audit Log by extending the functionality of WP Security Audit Log with the premium Add-Ons.'); ?>
 						</p>
-						<a class="button button-primary" href="http://wordpress.org/plugins/wp-password-policy-manager/" target="_blank"><?php _e('Download', 'wp-security-audit-log'); ?></a>
+						<a class="button button-primary" href="http://www.wpsecurityauditlog.com/plugin-extensions/" target="_blank"><?php _e('See Add-Ons', 'wp-security-audit-log'); ?></a>
 					</div>
 				</div>
 				<div class="postbox">
@@ -75,7 +75,6 @@ class WSAL_Views_About extends WSAL_AbstractView {
 						<ul>
 							<li><a href="http://www.wpwhitesecurity.com/wordpress-security-services/wordpress-security-hardening/?utm_source=wpsalabt&utm_medium=txtlink&utm_campaign=wpsal" target="_blank">Security Hardening</a></li>
 							<li><a href="http://www.wpwhitesecurity.com/wordpress-security-services/wordpress-security-audit/?utm_source=wpsalabt&utm_medium=txtlink&utm_campaign=wpsal" target="_blank">Security Audit</a></li>
-							<li><a href="http://www.wpwhitesecurity.com/wordpress-security-services/wordpress-hacker-attack-malware-virus-removal-services/?utm_source=wpsalabt&utm_medium=txtlink&utm_campaign=wpsal" target="_blank">Hack Cleanup</a></li>
 							<li><a href="http://www.wpwhitesecurity.com/wordpress-security-services/wordpress-plugins-security-code-audit-review/?utm_source=wpsalabt&utm_medium=txtlink&utm_campaign=wpsal" target="_blank">Plugin Security Code Audit</a></li>
 						</ul>
 					</div>
