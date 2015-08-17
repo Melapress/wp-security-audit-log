@@ -75,8 +75,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      * Install this ActiveRecord structure into DB.
      */
     public function Install(){
+        $_wpdb = $this->connection;
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($this->_GetInstallQuery());
+        $_wpdb->query($this->_GetInstallQuery());
     }
     
     /**
@@ -283,11 +284,11 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $class = get_class($this);
         $copy = new $class($this->connection);
         
-        $sql = 'CREATE TABLE ' . $this->GetTable() . ' (' . PHP_EOL;
+        $sql = 'CREATE TABLE IF NOT EXISTS ' . $this->GetTable() . ' (' . PHP_EOL;
         
         foreach ($this->GetColumns() as $key) {
             $sql .= '    ';
-            switch(true) {
+            switch (true) {
                 case $key == $copy->_idkey:
                     $sql .= $key . ' BIGINT NOT NULL AUTO_INCREMENT,' . PHP_EOL;
                     break;

@@ -242,3 +242,11 @@
                       {"interval":"60","_nonce":"f06540506a","action":"heartbeat","screen_id":"audit-log_page_wsal-licensing-network","has_focus":"false"}
 [2015-08-03 13:05:02] POST /wp-admin/admin-ajax.php 
                       {"interval":"60","_nonce":"7ce01a7fb0","action":"heartbeat","screen_id":"plugins-network","has_focus":"false"}
+[2015-08-17 11:41:05] POST /wp-admin/admin-ajax.php 
+                      {"action":"AjaxRefresh","logcount":"75"}
+[2015-08-17 11:41:27] POST /wp-admin/admin-ajax.php 
+                      {"action":"AjaxRefresh","logcount":"75"}
+[2015-08-17 11:41:47] POST /wp-admin/admin-ajax.php 
+                      {"action":"AjaxRefresh","logcount":"75"}
+[2015-08-17 11:42:08] POST /wp-admin/admin-ajax.php 
+                      {"action":"AjaxRefresh","logcount":"75"}
