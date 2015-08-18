@@ -124,7 +124,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $plugin = WpSecurityAuditLog::GetInstance();
 
         foreach (glob($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php') as $file) {
-            $filePath = explode(DIRECTORY_SEPARATOR, $file); 
+            $filePath = explode(DIRECTORY_SEPARATOR, $file);
             $fileName = $filePath[count($filePath) - 1];
             $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
 
@@ -133,6 +133,40 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
                 $class->Uninstall();
             }
         }
+    }
+
+    public function Migrate()
+    {
+        global $wpdb;
+        $_wpdb = $this->getConnection();
+
+        // Load data Occurrences
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb);
+        $sql = 'SELECT * FROM ' . $occurrence->GetTable();
+        $occurrences = $wpdb->get_results($sql, ARRAY_A);
+
+        // Insert data
+        $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (id, site_id, alert_id, created_on, is_read, is_migrated) VALUES ' ;
+        foreach ($occurrences as $entry) {
+            $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].', 1), ';
+        }
+        $sql = rtrim($sql, ", ");
+        $_wpdb->query($sql);
+
+        // Load data Meta
+        $meta = new WSAL_Adapters_MySQL_Meta($wpdb);
+        $sql = 'SELECT * FROM ' . $meta->GetTable();
+        $metadata = $wpdb->get_results($sql, ARRAY_A);
+
+        // Insert data
+        $metaNew = new WSAL_Adapters_MySQL_Meta($_wpdb);
+        $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (id, occurrence_id, name, value) VALUES ' ;
+        foreach ($metadata as $entry) {
+            $sql .= '('.$entry['id'].', '.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
+        }
+        $sql = rtrim($sql, ", ");
+        $_wpdb->query($sql);
     }
     
 }
