@@ -96,7 +96,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     /**
      * Install all DB tables.
      */
-    public function installAll()
+    public function installAll($excludeOptions = false)
     {
         $plugin = WpSecurityAuditLog::GetInstance();
 
@@ -106,6 +106,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
 
             $class = new $className($this->getConnection());
+            if ($excludeOptions && $class instanceof WSAL_Adapters_MySQL_Option) {
+                continue;
+            }
+            
             if (is_subclass_of($class, "WSAL_Adapters_MySQL_ActiveRecord")) {
                 $class->Install();
             }

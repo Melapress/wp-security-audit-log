@@ -170,7 +170,7 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 			
 			// added widget
 			case isset($postData['add_new']) && $postData['add_new'] == 'multi':
-				$sidebar = $postData['sidebar'];
+				$sidebar = isset($postData['sidebar']) ? $postData['sidebar'] : null;
 				if($canCheckSidebar && preg_match('/^sidebar-/', $sidebar)){
 					$sidebar = $wp_registered_sidebars[$sidebar]['name'];
 				}
@@ -182,7 +182,7 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 				
 			// deleted widget
 			case isset($postData['delete_widget']) && intval($postData['delete_widget']) == 1:
-				$sidebar = $postData['sidebar'];
+				$sidebar = isset($postData['sidebar']) ? $postData['sidebar'] : null;
 				if($canCheckSidebar && preg_match('/^sidebar-/',$sidebar)){
 					$sidebar = $wp_registered_sidebars[$sidebar]['name'];
 				}
@@ -203,7 +203,7 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 				if(empty($wId))return;
 
 				$wName = $postData['id_base'];
-				$sidebar = $postData['sidebar'];
+				$sidebar = isset($postData['sidebar']) ? $postData['sidebar'] : null;
 				$wData = isset($postData["widget-$wName"][$wId])
 					? $postData["widget-$wName"][$wId]
 					: null;
