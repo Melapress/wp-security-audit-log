@@ -6,13 +6,12 @@ require_once('AbstractConnector.php');
 class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements WSAL_Connector_ConnectorInterface
 {
     protected $connectionConfig = null;
-    protected $key = null;
+    
     public function __construct($connectionConfig = null)
     {
         $this->connectionConfig = $connectionConfig;
         parent::__construct("MySQL");
         require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
-        $this->key = pack('H*', "bcb04b7e103a0cd8b54763051cef08bc55abe029fdebae5e1d417e2ffb2a00a3");
     }
 
     function test_wp_die_callback() {
@@ -196,5 +195,4 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         
         return rtrim($plaintext_dec, "\0");
     }
-    
 }
