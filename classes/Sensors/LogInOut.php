@@ -15,7 +15,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$this->_current_user = wp_get_current_user();
 	}
 	
-	public function EventLogin($user_login, $user){
+	public function EventLogin($user_login, $user = null) {
+		if (empty($user)) {
+			$user = get_user_by('login', $user_login);
+		}
 		$userRoles = $this->plugin->settings->GetCurrentUserRoles($user->roles);
 		if ( $this->plugin->settings->IsLoginSuperAdmin($user_login) ) $userRoles[] = 'superadmin';
 		$this->plugin->alerts->Trigger(1000, array(

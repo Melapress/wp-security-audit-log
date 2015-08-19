@@ -6,6 +6,7 @@ require_once('AbstractConnector.php');
 class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements WSAL_Connector_ConnectorInterface
 {
     protected $connectionConfig = null;
+    
     public function __construct($connectionConfig = null)
     {
         $this->connectionConfig = $connectionConfig;
@@ -37,7 +38,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         if (!empty($this->connectionConfig)) {
             //TO DO: Use the provided connection config
             $connectionConfig = $this->connectionConfig;
-            $newWpdb = new wpdb($connectionConfig['user'], $connectionConfig['password'], $connectionConfig['name'], $connectionConfig['hostname']);
+            $password = $this->decryptString($connectionConfig['password']);
+            $newWpdb = new wpdb($connectionConfig['user'], $password, $connectionConfig['name'], $connectionConfig['hostname']);
             $newWpdb->set_prefix($connectionConfig['base_prefix']);
             return $newWpdb;
         } else {
@@ -101,7 +103,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $plugin = WpSecurityAuditLog::GetInstance();
 
         foreach (glob($this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php') as $file) {
-            $filePath = explode(DIRECTORY_SEPARATOR, $file); 
+            $filePath = explode(DIRECTORY_SEPARATOR, $file);
             $fileName = $filePath[count($filePath) - 1];
             $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
 
@@ -147,9 +149,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
         // Insert data
         $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
-        $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (id, site_id, alert_id, created_on, is_read, is_migrated) VALUES ' ;
+        $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read, is_migrated) VALUES ' ;
         foreach ($occurrences as $entry) {
-            $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].', 1), ';
+            $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].', 1), ';
         }
         $sql = rtrim($sql, ", ");
         $_wpdb->query($sql);
@@ -161,12 +163,36 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
         // Insert data
         $metaNew = new WSAL_Adapters_MySQL_Meta($_wpdb);
-        $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (id, occurrence_id, name, value) VALUES ' ;
+        $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
         foreach ($metadata as $entry) {
-            $sql .= '('.$entry['id'].', '.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
+            $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
         }
         $sql = rtrim($sql, ", ");
         $_wpdb->query($sql);
     }
+
+    public function encryptString($plaintext)
+    {
+        $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+        $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
+
+        $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, AUTH_KEY, $plaintext, MCRYPT_MODE_CBC, $iv);
+        $ciphertext = $iv . $ciphertext;
+        $ciphertext_base64 = base64_encode($ciphertext);
+        
+        return $ciphertext_base64;
+    }
     
+    private function decryptString($ciphertext_base64)
+    {
+        $ciphertext_dec = base64_decode($ciphertext_base64);
+        $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+    
+        $iv_dec = substr($ciphertext_dec, 0, $iv_size);
+        $ciphertext_dec = substr($ciphertext_dec, $iv_size);
+
+        $plaintext_dec = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, AUTH_KEY, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
+        
+        return rtrim($plaintext_dec, "\0");
+    }
 }
