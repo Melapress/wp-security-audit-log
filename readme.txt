@@ -110,6 +110,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * [Pagely](https://pagely.com/blog/2015/01/log-wordpress-dashboard-activity-improved-security-auditing/)
 * [Design Wall](http://www.designwall.com/blog/10-wordpress-multisite-plugins-you-shouldnt-live-without/)
 * [WPLift](http://wplift.com/wordpress-event-tracking)
+* [Tourqe News](http://torquemag.io/5-awesome-wordpress-plugins-you-may-not-have-heard-of/)
 * [BlogVault](https://blogvault.net/wp-security-audit-log-plugin-review/)
 * [MyWPExpert](http://www.mywpexpert.com/wp-security-audit-log/)
 * [Shout Me Loud](http://www.shoutmeloud.com/how-to-monitor-user-activities-wordpress-dashboard.html)
