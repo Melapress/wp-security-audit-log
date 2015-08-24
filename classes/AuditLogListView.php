@@ -198,7 +198,8 @@ class WSAL_AuditLogListView extends WP_List_Table {
                 // if there's no IP...
                 if (is_null($scip) || $scip == '') return '<i>unknown</i>';
                 // if there's only one IP...
-                if (count($oips) < 2) return "<a target='_blank' href='http://whatismyipaddress.com/ip/$scip'>". esc_html($scip) .'</a>';
+                $link = "http://whatismyipaddress.com/ip/" . $scip ."?utm_source=plugin&utm_medium=referral&utm_campaign=WPSAL";
+                if (count($oips) < 2) return "<a target='_blank' href='$link'>". esc_html($scip) .'</a>';
                 // if there are many IPs...
                 $html  = "<a target='_blank' href='http://whatismyipaddress.com/ip/$scip'>". esc_html($scip) .'</a>'.' <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
                 foreach($oips as $ip)if($scip!=$ip)$html .= '<div>' . $ip . '</div>';
