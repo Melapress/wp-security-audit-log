@@ -123,6 +123,33 @@ class WSAL_AuditLogListView extends WP_List_Table {
         if($this->_plugin->settings->IsDataInspectorEnabled()){
             $cols['data'] = '';
         }
+        $sel_columns = $this->_plugin->settings->GetColumnsSelected();
+        if (!empty($sel_columns)) {
+            unset($cols);
+            $sel_columns = (array)json_decode($sel_columns);
+            foreach ($sel_columns as $key => $value) {
+                switch ($key) {
+                    case 'alert_code':
+                        $cols['type'] = __('Code', 'wp-security-audit-log');
+                        break;
+                    case 'type':
+                        $cols['code'] = __('Type', 'wp-security-audit-log');
+                        break;
+                    case 'date':
+                        $cols['crtd'] = __('Date', 'wp-security-audit-log');
+                        break;
+                    case 'username':
+                        $cols['user'] = __('Username', 'wp-security-audit-log');
+                        break;
+                    case 'source_ip':
+                        $cols['scip'] = __('Source IP', 'wp-security-audit-log');
+                        break;
+                    case 'message':
+                        $cols['mesg'] = __('Message', 'wp-security-audit-log');
+                        break;
+                }
+            }
+        }
         return $cols;
     }
 
