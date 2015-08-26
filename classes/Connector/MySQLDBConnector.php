@@ -143,7 +143,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $_wpdb = $this->getConnection();
 
         // Load data Occurrences
-        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb);
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb); 
+        if (!$occurrence->IsInstalled()) die("No alerts to import");
         $sql = 'SELECT * FROM ' . $occurrence->GetTable();
         $occurrences = $wpdb->get_results($sql, ARRAY_A);
 
@@ -158,6 +159,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
         // Load data Meta
         $meta = new WSAL_Adapters_MySQL_Meta($wpdb);
+        if (!$meta->IsInstalled()) die("No alerts to import");
         $sql = 'SELECT * FROM ' . $meta->GetTable();
         $metadata = $wpdb->get_results($sql, ARRAY_A);
 

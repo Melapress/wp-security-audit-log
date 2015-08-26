@@ -79,6 +79,14 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $_wpdb->query($this->_GetInstallQuery());
     }
     
+     /**
+     * Install this ActiveRecord structure into DB WordPress.
+     */
+    public function InstallOriginal(){
+        global $wpdb;
+        $wpdb->query($this->_GetInstallQuery());
+    }
+
     /**
      * Remove this ActiveRecord structure into DB.
      */
