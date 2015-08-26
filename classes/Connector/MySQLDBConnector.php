@@ -169,6 +169,15 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         }
         $sql = rtrim($sql, ", ");
         $_wpdb->query($sql);
+        $this->DeleteAfterMigrate($occurrence);
+        $this->DeleteAfterMigrate($meta);
+    }
+
+    private function DeleteAfterMigrate($record)
+    {
+        global $wpdb;
+        $sql = 'DROP TABLE IF EXISTS ' . $record->GetTable();
+        $wpdb->query($sql);
     }
 
     public function encryptString($plaintext)
