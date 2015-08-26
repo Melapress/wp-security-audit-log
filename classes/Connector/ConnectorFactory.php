@@ -20,12 +20,16 @@ abstract class WSAL_Connector_ConnectorFactory
      * Returns a connector singleton
      * @return WSAL_Connector_ConnectorInterface
      */
-    public static function GetConnector()
+    public static function GetConnector($config = null)
     {
-        $connectionConfig = self::GetConfig();
+        if (!empty($config)) {
+            $connectionConfig = $config;
+        } else {
+            $connectionConfig = self::GetConfig();
+        }
+        
         //TO DO: Load connection config
-
-        if (self::$connector == null) {
+        if (self::$connector == null || !empty($config)) {
             switch (strtolower($connectionConfig['type'])) {
                 //TO DO: Add other connectors
                 case 'mysql':
@@ -58,13 +62,7 @@ abstract class WSAL_Connector_ConnectorFactory
     public static function CheckConfig($type, $user, $password, $name, $hostname, $base_prefix)
     {
         $result = false;
-        $config = array(
-            'user' => $user,
-            'password' => $password,
-            'name' => $name,
-            'hostname' => $hostname,
-            'base_prefix' => $base_prefix
-        );
+        $config = self::GetConfigArray($type, $user, $password, $name, $hostname, $base_prefix);
         switch (strtolower($type)) {
             //TO DO: Add other connectors
             case 'mysql':
@@ -73,5 +71,17 @@ abstract class WSAL_Connector_ConnectorFactory
                 $result = $test->TestConnection();
         }
         return $result;
+    }
+
+    public static function GetConfigArray($type, $user, $password, $name, $hostname, $base_prefix)
+    {
+        return array(
+            'type' => $type,
+            'user' => $user,
+            'password' => $password,
+            'name' => $name,
+            'hostname' => $hostname,
+            'base_prefix' => $base_prefix
+        );
     }
 }

@@ -542,10 +542,10 @@ class WpSecurityAuditLog {
 			unset($this->_cleanup_hooks[$pos]);
 	}
 
-	public static function getConnector()
+	public static function getConnector($config = null)
 	{
 		require_once('classes/Connector/ConnectorFactory.php');
-		return WSAL_Connector_ConnectorFactory::getConnector();
+		return WSAL_Connector_ConnectorFactory::getConnector($config);
 	}
 	
 	/**

@@ -76,7 +76,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function Install(){
         $_wpdb = $this->connection;
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         $_wpdb->query($this->_GetInstallQuery());
     }
     
@@ -87,7 +86,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     {
         //global $wpdb;
         $_wpdb = $this->connection;
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         $_wpdb->query($this->_GetUninstallQuery());
     }
     
@@ -455,7 +453,5 @@ query;
         return $_wpdb->get_results($query);
          */
     }
-
-
 
 }

@@ -28,7 +28,7 @@ class WSAL_Models_Option extends WSAL_Models_ActiveRecord
     
     public function GetOptionValue($name, $default = array())
     {
-        $option = $this->getAdapter()->GetNamedOption($name);
+        $option = $this->getAdapter()->GetNamedOption($name);        
         $this->option_value = (!empty($option)) ? $option['option_value'] : null;
         if (!empty($this->option_value)) {
             $this->_state = self::STATE_LOADED;

@@ -14,18 +14,18 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
     }
 
-    function test_wp_die_callback() {
+    public function test_wp_die_callback() {
         return array( $this, 'test_die_handler' );
     }
 
-    function test_die_handler( $message, $title = '', $args = array() ) {       
-       throw new Exception("DB Connection failed");
+    public function test_die_handler($message, $title = '', $args = array()) {
+        throw new Exception("DB Connection failed");
     }
     
     public function TestConnection()
     {
         error_reporting(E_ALL ^ E_WARNING);
-        add_filter( 'wp_die_handler', array( $this, 'test_wp_die_callback' ) );
+        add_filter('wp_die_handler', array($this, 'test_wp_die_callback'));
         $connection = $this->createConnection();
     }
 
@@ -106,7 +106,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $filePath = explode(DIRECTORY_SEPARATOR, $file);
             $fileName = $filePath[count($filePath) - 1];
             $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
-
+            
             $class = new $className($this->getConnection());
             if ($excludeOptions && $class instanceof WSAL_Adapters_MySQL_Option) {
                 continue;
