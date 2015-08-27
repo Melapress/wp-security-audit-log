@@ -16,7 +16,6 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
         parent::__construct($conn);
     }
 
-
     public function GetModel()
     {
         return new WSAL_Models_Option();
