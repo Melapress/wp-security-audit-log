@@ -150,6 +150,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
         // Insert data
         $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        $increase_id = 0;
+        $sql = 'SELECT MAX(id) FROM ' . $occurrenceNew->GetTable();
+        $increase_id = (int)$_wpdb->get_var($sql);
+
         $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read, is_migrated) VALUES ' ;
         foreach ($occurrences as $entry) {
             $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].', 1), ';
@@ -167,7 +171,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $metaNew = new WSAL_Adapters_MySQL_Meta($_wpdb);
         $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
         foreach ($metadata as $entry) {
-            $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
+            $occurrence_id = $entry['occurrence_id'] + $increase_id; 
+            $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
         }
         $sql = rtrim($sql, ", ");
         $_wpdb->query($sql);
