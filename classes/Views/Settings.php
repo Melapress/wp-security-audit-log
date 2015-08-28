@@ -56,6 +56,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
         $this->_plugin->settings->SetExcludedMonitoringUsers(isset($_REQUEST['ExUsers']) ? $_REQUEST['ExUsers'] : array());
         $this->_plugin->settings->SetExcludedMonitoringRoles(isset($_REQUEST['ExRoles']) ? $_REQUEST['ExRoles'] : array());
         $this->_plugin->settings->SetExcludedMonitoringCustom(isset($_REQUEST['Customs']) ? $_REQUEST['Customs'] : array());
+        $this->_plugin->settings->SetExcludedMonitoringIP(isset($_REQUEST['IpAddrs']) ? $_REQUEST['IpAddrs'] : array());
 
         $this->_plugin->settings->SetRestrictAdmins(isset($_REQUEST['RestrictAdmins']));
         $this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
@@ -516,6 +517,31 @@ viewer though the plugin will still record such information in the database.', '
                                         foreach($this->_plugin->settings->GetExcludedMonitoringCustom() as $item){
                                             ?><span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
                                                 <input type="hidden" name="Customs[]" value="<?php echo esc_attr($item); ?>"/>
+                                                <?php echo esc_html($item); ?>
+                                                <a href="javascript:;" title="Remove">&times;</a>
+                                            </span><?php
+                                        }
+                                    ?></div>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><h2>IP Addresses</h2></th>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Any of the IP addresses listed below will be excluded from monitoring. This means that all activity from such IP address will not be recorded.</td>
+                        </tr>
+                        <tr>
+                            <th><label for="IpAddrQueryBox"><?php _e('Excluded IP Addresses', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <input type="text" id="IpAddrQueryBox" style="float: left; display: block; width: 250px;">
+                                    <input type="button" id="IpAddrQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
+                                    <br style="clear: both;"/>
+                                    <div id="IpAddrList"><?php
+                                        foreach($this->_plugin->settings->GetExcludedMonitoringIP() as $item){
+                                            ?><span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
+                                                <input type="hidden" name="IpAddrs[]" value="<?php echo esc_attr($item); ?>"/>
                                                 <?php echo esc_html($item); ?>
                                                 <a href="javascript:;" title="Remove">&times;</a>
                                             </span><?php

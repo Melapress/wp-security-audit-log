@@ -40,7 +40,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         if (isset($_POST) && isset($_POST['post_ID'])
             && !(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             && !(isset($_POST['action']) && $_POST['action'] == 'autosave')
-        ){
+        ) {
             $postID = intval($_POST['post_ID']);
             $this->_OldPost = get_post($postID);
             $this->_OldLink = get_permalink($postID);

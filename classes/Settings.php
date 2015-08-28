@@ -555,6 +555,21 @@ class WSAL_Settings {
     }
 
     /**
+     * IP excluded from monitoring
+     */
+    protected $_excluded_ip = array();
+    public function SetExcludedMonitoringIP($ip){
+        $this->_excluded_ip = $ip;
+        $this->_plugin->SetGlobalOption('excluded-ip', implode(',', $this->_excluded_ip));
+    }
+    public function GetExcludedMonitoringIP(){
+        if(empty($this->_excluded_ip)){
+            $this->_excluded_ip = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-ip'))));
+        }
+        return $this->_excluded_ip;
+    }
+
+    /**
      * Datetime format.
      * 24 hours or AM/PM
      */
