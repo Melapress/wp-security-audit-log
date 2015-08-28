@@ -595,5 +595,12 @@ class WSAL_Settings {
         return $this->_plugin->SetGlobalOption('columns', json_encode($columns));
     }
     
+    public function IsWPBackend(){
+        return $this->_plugin->GetGlobalOption('wp-backend');
+    }
+
+    public function SetWPBackend($enabled){
+        return $this->_plugin->SetGlobalOption('wp-backend', $enabled);
+    }
     // </editor-fold>
 }
