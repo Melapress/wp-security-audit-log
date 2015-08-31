@@ -76,4 +76,14 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
         return (int)$_wpdb->get_var($sql);
     }
 
+    /**
+     * @deprecated
+     * @return boolean Returns whether table structure is installed or not.
+     */
+    public function IsInstalled() {
+        global $wpdb;
+        $sql = 'SHOW TABLES LIKE "' . $this->GetWPTable() . '"';
+        return $wpdb->get_var($sql) == $this->GetWPTable();
+    }
+
 }
