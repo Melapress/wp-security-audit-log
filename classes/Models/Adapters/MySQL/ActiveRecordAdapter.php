@@ -77,7 +77,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         //global $wpdb;
         $_wpdb = $this->connection;
         $sql = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
-        return $_wpdb->get_var($sql) == $this->GetTable();
+        return strtolower($_wpdb->get_var($sql)) == strtolower($this->GetTable());
     }
     
     /**
