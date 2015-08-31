@@ -3,7 +3,7 @@
 class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
     public function HookEvents() {
-        if(current_user_can("manage_categories"))add_action('admin_init', array($this, 'EventWordpressInit'));
+        if(current_user_can("read"))add_action('admin_init', array($this, 'EventWordpressInit'));
         add_action('transition_post_status', array($this, 'EventPostChanged'), 10, 3);
         add_action('delete_post', array($this, 'EventPostDeleted'), 10, 1);
         add_action('wp_trash_post', array($this, 'EventPostTrashed'), 10, 1);
@@ -40,7 +40,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         if (isset($_POST) && isset($_POST['post_ID'])
             && !(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             && !(isset($_POST['action']) && $_POST['action'] == 'autosave')
-        ) {
+        ){
             $postID = intval($_POST['post_ID']);
             $this->_OldPost = get_post($postID);
             $this->_OldLink = get_permalink($postID);
@@ -184,8 +184,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
         $post = get_post($post_id);
         if(!in_array($post->post_type, array('attachment', 'revision'))){ // ignore attachments and revisions
             $event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
-            // check WordPress backend operations
-            if ($this->CheckAutoDraft($event, $post->post_title)) return;
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $post->ID,
                 'PostType' => $post->post_type,
@@ -439,19 +437,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
                 'OldParent' => $oldParentName,
                 'NewParent' => $newParentName,
             ));
-        }
-    }
-
-    private function CheckAutoDraft($code, $title) {
-        if ($code == 2008 && $title == "auto-draft") {
-            // to do check setting else return false
-            if ($this->plugin->settings->IsWPBackend() == 1) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
         }
     }
 
