@@ -31,11 +31,20 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function GetTable()
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         return $_wpdb->base_prefix . $this->_table;
     }
     
+    /**
+     * Used for WordPress prefix
+     * @return string Returns table name of WordPress.
+     */
+    public function GetWPTable()
+    {
+        global $wpdb;
+        return $wpdb->base_prefix . $this->_table;
+    }
+
     /**
      * @return string SQL table options (constraints, foreign keys, indexes etc).
      */
@@ -68,7 +77,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         //global $wpdb;
         $_wpdb = $this->connection;
         $sql = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
-        return $_wpdb->get_var($sql) == $this->GetTable();
+        return strtolower($_wpdb->get_var($sql)) == strtolower($this->GetTable());
     }
     
     /**
@@ -79,6 +88,14 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $_wpdb->query($this->_GetInstallQuery());
     }
     
+     /**
+     * Install this ActiveRecord structure into DB WordPress.
+     */
+    public function InstallOriginal(){
+        global $wpdb;
+        $wpdb->query($this->_GetInstallQuery(true));
+    }
+
     /**
      * Remove this ActiveRecord structure into DB.
      */
@@ -275,14 +292,14 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     /**
      * @return string Must return SQL for creating table.
      */
-    protected function _GetInstallQuery()
+    protected function _GetInstallQuery($prefix = false)
     {
         $_wpdb = $this->connection;
         
         $class = get_class($this);
         $copy = new $class($this->connection);
-        
-        $sql = 'CREATE TABLE IF NOT EXISTS ' . $this->GetTable() . ' (' . PHP_EOL;
+        $table_name = ($prefix) ? $this->GetWPTable() : $this->GetTable();
+        $sql = 'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (' . PHP_EOL;
         
         foreach ($this->GetColumns() as $key) {
             $sql .= '    ';

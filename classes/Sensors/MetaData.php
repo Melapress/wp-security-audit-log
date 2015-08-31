@@ -6,7 +6,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
         add_action('add_post_meta', array($this,   'EventPostMetaCreated'), 10, 3);
         add_action('update_post_meta', array($this,  'EventPostMetaUpdating'), 10, 3);
         add_action('updated_post_meta', array($this, 'EventPostMetaUpdated'), 10, 4);
-        add_action('deleted_post_meta', array($this, 'EventPostMetaDeleted'), 10, 3);
+        add_action('deleted_post_meta', array($this, 'EventPostMetaDeleted'), 10, 4);
     }
     
     protected $old_meta = array();
@@ -16,7 +16,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
         //check if excluded meta key or starts with _
         if ( substr($meta_key, 0, 1) == '_' ) {
             return false;
-        } else if( $this->IsExcludedCustomFields($meta_key) ) { 
+        } else if ( $this->IsExcludedCustomFields($meta_key) ) {
             return false;
         } else {
             return true;
@@ -24,12 +24,12 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
     }
 
     public function IsExcludedCustomFields($custom)
-    { 
+    {
         $customFields = $this->plugin->settings->GetExcludedMonitoringCustom();
         return (in_array($custom, $customFields)) ? true : false;
     }
     
-    public function EventPostMetaCreated($object_id, $meta_key, $_meta_value){
+    public function EventPostMetaCreated($object_id, $meta_key, $_meta_value) {
         $post = get_post($object_id);
 
         if(!$this->CanLogPostMeta($object_id, $meta_key))return;
@@ -165,41 +165,45 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
             unset($this->old_meta[$meta_id]);
         }
     }
-    
-    public function EventPostMetaDeleted($object_id, $meta_id, $meta_key){
-        $post = get_post($object_id);
 
-        if(!$this->CanLogPostMeta($object_id, $meta_key))return;
+    public function EventPostMetaDeleted($meta_ids, $object_id, $meta_key, $_meta_value){
+        $post = get_post($object_id);
+        
+        foreach($meta_ids as $meta_id){
             
-        switch($post->post_type){
-            case 'page':
-                $this->plugin->alerts->Trigger(2061, array(
-                    'PostID' => $object_id,
-                    'PostTitle' => $post->post_title,
-                    'MetaID' => $meta_id,
-                    'MetaKey' => $meta_key,
-                    'MetaLink' => $meta_key,
-                ));
-                break;
-            case 'post':
-                $this->plugin->alerts->Trigger(2055, array(
-                    'PostID' => $object_id,
-                    'PostTitle' => $post->post_title,
-                    'MetaID' => $meta_id,
-                    'MetaKey' => $meta_key,
-                    'MetaLink' => $meta_key,
-                ));
-                break;
-            default:
-                $this->plugin->alerts->Trigger(2058, array(
-                    'PostID' => $object_id,
-                    'PostTitle' => $post->post_title,
-                    'PostType' => $post->post_type,
-                    'MetaID' => $meta_id,
-                    'MetaKey' => $meta_key,
-                    'MetaLink' => $meta_key,
-                ));
-                break;
+            if(!$this->CanLogPostMeta($object_id, $meta_key))continue;
+            
+            switch($post->post_type){
+                case 'page':
+                    $this->plugin->alerts->Trigger(2061, array(
+                        'PostID' => $object_id,
+                        'PostTitle' => $post->post_title,
+                        'MetaID' => $meta_id,
+                        'MetaKey' => $meta_key,
+                        'MetaValue' => $_meta_value,
+                    ));
+                    break;
+                case 'post':
+                    $this->plugin->alerts->Trigger(2055, array(
+                        'PostID' => $object_id,
+                        'PostTitle' => $post->post_title,
+                        'MetaID' => $meta_id,
+                        'MetaKey' => $meta_key,
+                        'MetaValue' => $_meta_value,
+                    ));
+                    break;
+                default:
+                    $this->plugin->alerts->Trigger(2058, array(
+                        'PostID' => $object_id,
+                        'PostTitle' => $post->post_title,
+                        'PostType' => $post->post_type,
+                        'MetaID' => $meta_id,
+                        'MetaKey' => $meta_key,
+                        'MetaValue' => $_meta_value,
+                    ));
+                    break;
+            }
         }
     }
+
 }

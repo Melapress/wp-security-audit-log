@@ -6,7 +6,7 @@ jQuery(document).ready(function(){
 		});
 	};
 	
-	jQuery('#ViewerQueryBox, #EditorQueryBox, #ExRoleQueryBox, #ExUserQueryBox, #CustomQueryBox').keydown(function(event){
+	jQuery('#ViewerQueryBox, #EditorQueryBox, #ExRoleQueryBox, #ExUserQueryBox, #CustomQueryBox, #IpAddrQueryBox').keydown(function(event){
 		if(event.keyCode === 13) {
 			var type = jQuery(this).attr('id').substr(0, 6);
 			jQuery('#'+type+'QueryAdd').click();
@@ -14,7 +14,7 @@ jQuery(document).ready(function(){
 		}
 	});
 	
-	jQuery('#ViewerQueryAdd, #EditorQueryAdd, #ExRoleQueryAdd, #ExUserQueryAdd, #CustomQueryAdd').click(function(){
+	jQuery('#ViewerQueryAdd, #EditorQueryAdd, #ExRoleQueryAdd, #ExUserQueryAdd, #CustomQueryAdd, #IpAddrQueryAdd').click(function(){
 		var type = jQuery(this).attr('id').substr(0, 6);
 		var value = jQuery.trim(jQuery('#'+type+'QueryBox').val());
 		var existing = jQuery('#'+type+'List input').filter(function() { return this.value === value; });
@@ -24,8 +24,8 @@ jQuery(document).ready(function(){
 		jQuery('#'+type+'QueryBox, #'+type+'QueryAdd').attr('disabled', true);
 		jQuery.post(jQuery('#ajaxurl').val(), {action: 'AjaxCheckSecurityToken', token: value}, function(data){
 			jQuery('#'+type+'QueryBox, #'+type+'QueryAdd').attr('disabled', false);
-			if (type != 'Custom') {
-				if(data==='other') {
+			if (type != 'Custom' && type != 'IpAddr') {
+				if(data === 'other') {
 					alert('The specified token is not a user nor a role!');
 					jQuery('#'+type+'QueryBox').val('');
 					return;
@@ -39,7 +39,7 @@ jQuery(document).ready(function(){
 		});
 	});
 	
-	jQuery('#ViewerList>span>a, #EditorList>span>a, #ExRoleList>span>a, #ExUserList>span>a, #CustomList>span>a').click(RemoveSecToken);
+	jQuery('#ViewerList>span>a, #EditorList>span>a, #ExRoleList>span>a, #ExUserList>span>a, #CustomList>span>a, #IpAddrList>span>a').click(RemoveSecToken);
 	
 	jQuery('#RestrictAdmins').change(function(){
 		var user = jQuery('#RestrictAdminsDefaultUser').val();

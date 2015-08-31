@@ -80,7 +80,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
      */
     public function isInstalled()
     {
-        $wpdb = $this->getConnection();
+        global $wpdb;
         $table = $wpdb->base_prefix . 'wsal_occurrences';
         return ($wpdb->get_var('SHOW TABLES LIKE "'.$table.'"') == $table);
     }
@@ -142,13 +142,18 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         global $wpdb;
         $_wpdb = $this->getConnection();
 
-        // Load data Occurrences
-        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb);
-        $sql = 'SELECT * FROM ' . $occurrence->GetTable();
+        // Load data Occurrences from WP
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb); 
+        if (!$occurrence->IsInstalled()) die("No alerts to import");
+        $sql = 'SELECT * FROM ' . $occurrence->GetWPTable();
         $occurrences = $wpdb->get_results($sql, ARRAY_A);
 
-        // Insert data
+        // Insert data to External DB
         $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        $increase_id = 0;
+        $sql = 'SELECT MAX(id) FROM ' . $occurrenceNew->GetTable();
+        $increase_id = (int)$_wpdb->get_var($sql);
+
         $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read, is_migrated) VALUES ' ;
         foreach ($occurrences as $entry) {
             $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].', 1), ';
@@ -156,19 +161,67 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $sql = rtrim($sql, ", ");
         $_wpdb->query($sql);
 
-        // Load data Meta
+        // Load data Meta from WP
         $meta = new WSAL_Adapters_MySQL_Meta($wpdb);
-        $sql = 'SELECT * FROM ' . $meta->GetTable();
+        if (!$meta->IsInstalled()) die("No alerts to import");
+        $sql = 'SELECT * FROM ' . $meta->GetWPTable();
         $metadata = $wpdb->get_results($sql, ARRAY_A);
 
-        // Insert data
+        // Insert data to External DB
         $metaNew = new WSAL_Adapters_MySQL_Meta($_wpdb);
         $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
+        foreach ($metadata as $entry) {
+            $occurrence_id = $entry['occurrence_id'] + $increase_id; 
+            $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
+        }
+        $sql = rtrim($sql, ", ");
+        $_wpdb->query($sql);
+        $this->DeleteAfterMigrate($occurrence);
+        $this->DeleteAfterMigrate($meta);
+    }
+
+    public function MigrateBack()
+    {
+        global $wpdb;
+        $_wpdb = $this->getConnection();
+
+        // Load data Occurrences from External DB
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb); 
+        if (!$occurrence->IsInstalled()) die("No alerts to import");
+        $sql = 'SELECT * FROM ' . $occurrence->GetTable();
+        $occurrences = $_wpdb->get_results($sql, ARRAY_A);
+
+        // Insert data to WP
+        $occurrenceWP = new WSAL_Adapters_MySQL_Occurrence($wpdb);
+
+        $sql = 'INSERT INTO ' . $occurrenceWP->GetWPTable() . ' (site_id, alert_id, created_on, is_read, is_migrated) VALUES ' ;
+        foreach ($occurrences as $entry) {
+            $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].', 1), ';
+        }
+        $sql = rtrim($sql, ", ");
+        $wpdb->query($sql);
+
+        // Load data Meta from External DB
+        $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
+        if (!$meta->IsInstalled()) die("No alerts to import");
+        $sql = 'SELECT * FROM ' . $meta->GetTable();
+        $metadata = $_wpdb->get_results($sql, ARRAY_A);
+
+        // Insert data to WP
+        $metaWP = new WSAL_Adapters_MySQL_Meta($wpdb);
+        $sql = 'INSERT INTO ' . $metaWP->GetWPTable() . ' (occurrence_id, name, value) VALUES ' ;
         foreach ($metadata as $entry) {
             $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
         }
         $sql = rtrim($sql, ", ");
-        $_wpdb->query($sql);
+        $wpdb->query($sql);
+    }
+
+    private function DeleteAfterMigrate($record)
+    {
+        global $wpdb;
+        $sql = 'DROP TABLE IF EXISTS ' . $record->GetTable();
+        $wpdb->query($sql);
     }
 
     public function encryptString($plaintext)
