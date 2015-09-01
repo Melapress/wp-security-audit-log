@@ -31,11 +31,20 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function GetTable()
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         return $_wpdb->base_prefix . $this->_table;
     }
     
+    /**
+     * Used for WordPress prefix
+     * @return string Returns table name of WordPress.
+     */
+    public function GetWPTable()
+    {
+        global $wpdb;
+        return $wpdb->base_prefix . $this->_table;
+    }
+
     /**
      * @return string SQL table options (constraints, foreign keys, indexes etc).
      */
@@ -68,17 +77,25 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         //global $wpdb;
         $_wpdb = $this->connection;
         $sql = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
-        return $_wpdb->get_var($sql) == $this->GetTable();
+        return strtolower($_wpdb->get_var($sql)) == strtolower($this->GetTable());
     }
     
     /**
      * Install this ActiveRecord structure into DB.
      */
     public function Install(){
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($this->_GetInstallQuery());
+        $_wpdb = $this->connection;
+        $_wpdb->query($this->_GetInstallQuery());
     }
     
+     /**
+     * Install this ActiveRecord structure into DB WordPress.
+     */
+    public function InstallOriginal(){
+        global $wpdb;
+        $wpdb->query($this->_GetInstallQuery(true));
+    }
+
     /**
      * Remove this ActiveRecord structure into DB.
      */
@@ -86,7 +103,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     {
         //global $wpdb;
         $_wpdb = $this->connection;
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         $_wpdb->query($this->_GetUninstallQuery());
     }
     
@@ -276,18 +292,18 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     /**
      * @return string Must return SQL for creating table.
      */
-    protected function _GetInstallQuery()
+    protected function _GetInstallQuery($prefix = false)
     {
         $_wpdb = $this->connection;
         
         $class = get_class($this);
         $copy = new $class($this->connection);
-        
-        $sql = 'CREATE TABLE ' . $this->GetTable() . ' (' . PHP_EOL;
+        $table_name = ($prefix) ? $this->GetWPTable() : $this->GetTable();
+        $sql = 'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (' . PHP_EOL;
         
         foreach ($this->GetColumns() as $key) {
             $sql .= '    ';
-            switch(true) {
+            switch (true) {
                 case $key == $copy->_idkey:
                     $sql .= $key . ' BIGINT NOT NULL AUTO_INCREMENT,' . PHP_EOL;
                     break;
@@ -454,7 +470,5 @@ query;
         return $_wpdb->get_results($query);
          */
     }
-
-
 
 }
