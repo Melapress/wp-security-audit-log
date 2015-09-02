@@ -423,18 +423,6 @@ viewer though the plugin will still record such information in the database.', '
                         </td>
                     </tr>
                     <tr>
-                        <th><label for="DeleteData"><?php _e('Remove Data on Unistall', 'wp-security-audit-log'); ?></label></th>
-                        <td>
-                            <fieldset>
-                                <label for="DeleteData">
-                                    <input type="checkbox" name="DeleteData" value="1" id="DeleteData"  onclick="return delete_confirm(this);"<?php
-                                        if($this->_plugin->settings->IsDeleteData())echo ' checked="checked"';
-                                    ?>/> <span class="description">Check this box if you would like remove all data when the plugin is deleted.</span>
-                                </label>
-                            </fieldset>
-                        </td>
-                    </tr>
-                    <tr>
                         <th><label for="DeleteData"><?php _e('Disable Alerts for WordPress Background Activity', 'wp-security-audit-log'); ?></label></th>
                         <td>
                             <fieldset>
@@ -447,6 +435,18 @@ viewer though the plugin will still record such information in the database.', '
                                 <span class="description">
                                     <?php _e('For example do not raise an alert when WordPress deletes the auto drafts.', 'wp-security-audit-log'); ?>
                                 </span>
+                            </fieldset>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="DeleteData"><?php _e('Remove Data on Unistall', 'wp-security-audit-log'); ?></label></th>
+                        <td>
+                            <fieldset>
+                                <label for="DeleteData">
+                                    <input type="checkbox" name="DeleteData" value="1" id="DeleteData"  onclick="return delete_confirm(this);"<?php
+                                        if($this->_plugin->settings->IsDeleteData())echo ' checked="checked"';
+                                    ?>/> <span class="description">Check this box if you would like remove all data when the plugin is deleted.</span>
+                                </label>
                             </fieldset>
                         </td>
                     </tr>
