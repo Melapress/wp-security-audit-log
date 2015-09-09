@@ -195,7 +195,7 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 = 2.1.0 (2015-09-09) =
 * **New Features**
 	* Support for the [External DB Add-on](http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/).
-	* Integration with WhatIsMyIP.com (Click an IP addresses in Audit Log viewer to get all information about it).
+	* Integration with WhatIsMyIPAddress.com (Click an IP addresses in Audit Log viewer to get all information about it).
 	* Settings to Incude or exclude specific columns from the Audit Log viewer.
 	* Ability to exclude an IP address from monitoring
 	* New option to disable the reporting of WordPress background tasks (such as deletion of auto draft posts)
