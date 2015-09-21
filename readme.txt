@@ -9,7 +9,7 @@ Requires at least: 3.6
 Tested up to: 4.3
 Stable tag: 2.1.0
 
-Keep a WordPress audit log of all users' changes and under the hood WordPress activity - Identify WordPress issues before they become security problems.
+Keep an audit log of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
 == Description ==
 Keep an audit log of everything that is happening on your WordPress and [WordPress multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/) with WP Security Audit Log to ensure user productivity and identify WordPress security issues before they become a security problem. WP Security Audit Log, WordPress' most comprehensive user monitoring and audit log plugin already helps thousands of WordPress administrators, owners and security professionals ensure the security of their websites and blogs. Ensure the security of your WordPress too by installing WP Security Audit Log. The community's favourite WordPress user monitoring monitoring and security auditing plugin is developed by WordPress Security Consultants and Professionals [WP White Security](http://www.wpwhitesecurity.com/). 
