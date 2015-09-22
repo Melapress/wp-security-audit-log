@@ -203,12 +203,15 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $searchConditions = array();
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
-
-        $searchConditions['sql'] = $occurrence->GetTable() .'.id IN (
-            SELECT DISTINCT occurrence_id
-                FROM ' . $meta->GetTable() . '
-                WHERE TRIM(BOTH "\"" FROM value) LIKE %s
-            )';
+        if (is_numeric($condition) && strlen($condition) == 4) {
+            $searchConditions['sql'] = $occurrence->GetTable() .'.alert_id LIKE %s';
+        } else {
+            $searchConditions['sql'] = $occurrence->GetTable() .'.id IN (
+                SELECT DISTINCT occurrence_id
+                    FROM ' . $meta->GetTable() . '
+                    WHERE TRIM(BOTH "\"" FROM value) LIKE %s
+                )';
+        }
         $searchConditions['args'] = "%". $condition. "%";
         return $searchConditions;
     }
