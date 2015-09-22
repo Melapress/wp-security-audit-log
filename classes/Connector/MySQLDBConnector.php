@@ -13,7 +13,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         parent::__construct("MySQL");
         require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
     }
-    
+
     public function TestConnection()
     {
         error_reporting(E_ALL ^ E_WARNING);
@@ -21,7 +21,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $password = $this->decryptString($connectionConfig['password']);
         $newWpdb = new wpdbCustom($connectionConfig['user'], $password, $connectionConfig['name'], $connectionConfig['hostname']);
         if (!$newWpdb->has_connected) { // Database Error
-            throw new Exception("DB Connection failed");
+            throw new Exception("Connection failed. Please check your connection details.");
         }
     }
 
