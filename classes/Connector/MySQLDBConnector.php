@@ -1,7 +1,7 @@
 <?php
 require_once('ConnectorInterface.php');
 require_once('AbstractConnector.php');
-
+require_once('wp-db-custom.php');
 
 class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements WSAL_Connector_ConnectorInterface
 {
@@ -13,20 +13,16 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         parent::__construct("MySQL");
         require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
     }
-
-    public function test_wp_die_callback() {
-        return array( $this, 'test_die_handler' );
-    }
-
-    public function test_die_handler($message, $title = '', $args = array()) {
-        throw new Exception("DB Connection failed");
-    }
     
     public function TestConnection()
     {
         error_reporting(E_ALL ^ E_WARNING);
-        add_filter('wp_die_handler', array($this, 'test_wp_die_callback'));
-        $connection = $this->createConnection();
+        $connectionConfig = $this->connectionConfig;
+        $password = $this->decryptString($connectionConfig['password']);
+        $newWpdb = new wpdbCustom($connectionConfig['user'], $password, $connectionConfig['name'], $connectionConfig['hostname']);
+        if (!$newWpdb->has_connected) { // Database Error
+            throw new Exception("DB Connection failed");
+        }
     }
 
     /**
