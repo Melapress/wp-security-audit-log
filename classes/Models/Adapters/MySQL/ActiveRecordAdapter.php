@@ -366,7 +366,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
         $user_names = '0';
         if (!empty($_userId) && $_userId != "null") {
-            $sql = 'SELECT ID, user_login FROM '.$tableUsers.' WHERE find_in_set(ID, @userId) > 0';
+            $sql = 'SELECT user_login FROM '.$tableUsers.' WHERE find_in_set(ID, @userId) > 0';
             $wpdb->query("SET @userId = $_userId");
             $result = $wpdb->get_results($sql, ARRAY_A);
             $aUsers = array();
@@ -376,7 +376,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             $user_names = implode(', ', $aUsers);
         }
         
-        $sql = "SELECT DISTINCT 
+        $sql = "SELECT DISTINCT
             occ.id, 
             occ.alert_id, 
             occ.site_id, 
