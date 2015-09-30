@@ -143,6 +143,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             case 'draft':
                 $event = $this->GetEventTypeForPostType($oldPost, 2000, 2004, 2029);
                 break;
+            case 'pending':
+                $event = 2073;
+                break;
         }
         if ($event) {
             $this->plugin->alerts->Trigger($event, array(

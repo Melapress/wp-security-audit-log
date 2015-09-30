@@ -70,6 +70,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(2065, E_WARNING, __('User modifies content for a published post', 'wp-security-audit-log'), __('Modified the content of published post %PostTitle%', 'wp-security-audit-log')),
                 array(2068, E_NOTICE, __('User modifies content for a draft post', 'wp-security-audit-log'), __('Modified the content of draft post %PostTitle%', 'wp-security-audit-log')),
                 array(2072, E_NOTICE, __('User modifies content of a post', 'wp-security-audit-log'), __('Modified the content of post %PostTitle% which is submitted for review', 'wp-security-audit-log')),
+                array(2073, E_NOTICE, __('User submitted a post for review', 'wp-security-audit-log'), __('Submitted blog post %PostTitle% for review. Blog post ID is %PostID%', 'wp-security-audit-log')),
             ),
             __('Pages', 'wp-security-audit-log') => array(
                 array(2004, E_NOTICE, __('User created a new WordPress page and saved it as draft', 'wp-security-audit-log'), __('Created a new page called %PostTitle%. Page ID is %PostID%', 'wp-security-audit-log')),

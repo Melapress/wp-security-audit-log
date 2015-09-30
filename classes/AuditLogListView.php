@@ -211,9 +211,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
                         $roles = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
                     }
                 } else {
-                    $image = get_avatar(0, 32);
-                    $uhtml = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
-                    $roles = '<i>' . __('System', 'wp-security-audit-log') . '</i>';
+                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __('System', 'wp-security-audit-log') . '</i>';
+                    $roles = '';
                 }
                 return $image . $uhtml . '<br/>' . $roles;
             case 'scip':
