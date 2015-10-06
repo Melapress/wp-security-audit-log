@@ -200,9 +200,9 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 * **Improvements**
 	* Added the functionality to search by Alert ID in [Search add-on](http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/)
 	* When a background process is reports, plugin now reports "System" as username and not "unkown"
+	* Improved the connection checks of the [External DB add-on](http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/) (now it also has a timeout for when incorrect IP / Host is specified)
 	
 * **Bug Fixes**
-	* Improved the connection checks of the [External DB add-on](http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/) (now it also has a timeout for when incorrect IP / Host is specified)
 	* Fixed an issue in the [Reports add-on](http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/) where not all available users were being listed to generate a report
 	* Fixed an issue with licensing notifications - now all licensing notifications will be automatically dismissed upon activating a key.
 	* Fixed an issue where the user reset passwords were not being recorded (since 4.3). [Ticket](https://wordpress.org/support/topic/wp-43-password-reset?replies=3)
