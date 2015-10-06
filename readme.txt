@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report
 Requires at least: 3.6
 Tested up to: 4.3
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 
 Keep an audit log of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -192,6 +192,21 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 
 == Changelog ==
 
+= 2.2.0 (2015-10-08) =
+* **New WordPress Security Alerts**
+	* 2072: User modifies a post that is submitted for review
+	* 2073: Contributor submits a post for review
+
+* **Improvements**
+	* Added the functionality to search by Alert ID in [Search add-on](http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/)
+	* When a background process is reports, plugin now reports "System" as username and not "unkown"
+	
+* **Bug Fixes**
+	* Improved the connection checks of the [External DB add-on](http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/) (now it also has a timeout for when incorrect IP / Host is specified)
+	* Fixed an issue in the [Reports add-on](http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/) where not all available users were being listed to generate a report
+	* Fixed an issue with licensing notifications - now all licensing notifications will be automatically dismissed upon activating a key.
+	* Fixed an issue where the user reset passwords were not being recorded (since 4.3). [Ticket](https://wordpress.org/support/topic/wp-43-password-reset?replies=3)
+	
 = 2.1.0 (2015-09-09) =
 * **New Features**
 	* Support for the [External DB Add-on](http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/).
