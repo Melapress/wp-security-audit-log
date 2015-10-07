@@ -192,7 +192,7 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 
 == Changelog ==
 
-= 2.2.0 (2015-10-08) =
+= 2.1.1 (2015-10-08) =
 * **New WordPress Security Alerts**
 	* 2072: User modifies a post that is submitted for review
 	* 2073: Contributor submits a post for review
