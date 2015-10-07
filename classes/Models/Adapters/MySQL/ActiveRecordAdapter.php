@@ -364,19 +364,19 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
         $tableOcc = $occurrence->GetTable(); // occurrences
 
-        $ids = '0';
+        $user_names = '0';
         if (!empty($_userId) && $_userId != "null") {
-            $sql = 'SELECT ID FROM '.$tableUsers.' WHERE find_in_set(ID, @userId) > 0';
+            $sql = 'SELECT user_login FROM '.$tableUsers.' WHERE find_in_set(ID, @userId) > 0';
             $wpdb->query("SET @userId = $_userId");
-            $result = $wpdb->get_results($sql, ARRAY_A); 
-            $arrayIds = array();
+            $result = $wpdb->get_results($sql, ARRAY_A);
+            $aUsers = array();
             foreach ($result as $item) {
-                $arrayIds[] = $item['ID'];
+                $aUsers[] = '"'.$item['user_login'].'"';
             }
-            $ids = implode(', ', $arrayIds);
+            $user_names = implode(', ', $aUsers);
         }
         
-        $sql = "SELECT DISTINCT 
+        $sql = "SELECT DISTINCT
             occ.id, 
             occ.alert_id, 
             occ.site_id, 
@@ -395,7 +395,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
                 AND (@userId is NULL OR (
                     (meta.name = 'CurrentUserID' AND find_in_set(meta.value, @userId) > 0)
-                OR (meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($ids))
+                OR (meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($user_names))  
                 ))
                 AND (@roleName is NULL OR (meta.name = 'CurrentUserRoles'
                 AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName

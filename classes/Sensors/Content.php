@@ -142,6 +142,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             case 'draft':
                 $event = $this->GetEventTypeForPostType($oldPost, 2000, 2004, 2029);
                 break;
+            case 'pending':
+                $event = 2073;
+                break;
         }
         if ($event) {
             $this->plugin->alerts->Trigger($event, array(
@@ -253,6 +256,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($oldpost->post_status == 'draft') {
             return;
         }
+        $pending = $this->CheckReviewPendingChange($oldpost, $newpost);
+        if ($pending) {
+            return;
+        }
         if ($from != $to) {
             $event = $this->GetEventTypeForPostType($oldpost, 2027, 2028, 2041);
             $this->plugin->alerts->Trigger($event, array(
@@ -264,6 +271,19 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             ));
             return 1;
         }
+    }
+
+    protected function CheckReviewPendingChange($oldpost, $newpost)
+    {
+        if ($oldpost->post_status == 'pending') {
+            $this->plugin->alerts->Trigger(2072, array(
+                'PostID' => $oldpost->ID,
+                'PostType' => $oldpost->post_type,
+                'PostTitle' => $oldpost->post_title
+            ));
+            return 1;
+        }
+        return 0;
     }
     
     protected function CheckCategoriesChange($oldCats, $newCats, $post)

@@ -138,7 +138,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			<a href="#tab-exclude" class="nav-tab">Exclude Objects</a>
 			<!--<a href="#adapter" class="nav-tab">Data Storage Adapter</a>-->
 		</h2>
-		<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
+		<script src="//code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
 		<form id="audit-log-settings" method="post">
 			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
 			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr(admin_url('admin-ajax.php')); ?>" />
