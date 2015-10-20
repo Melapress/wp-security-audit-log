@@ -271,6 +271,14 @@ class WSAL_AuditLogListView extends WP_List_Table {
                 } else {
                     return "";
                 }
+
+            case $name == '%RevisionLink%':
+                if (!empty($value) && $value != 'NULL') {
+                    return ' Click <a href="'.$value.'">here</a> to see the content changes.';
+                } else {
+                    return "";
+                }
+                
             case in_array($name, array('%MetaValue%', '%MetaValueOld%', '%MetaValueNew%')):
                 return '<strong>' . (
                     strlen($value) > 50 ? (esc_html(substr($value, 0, 50)) . '&hellip;') :  esc_html($value)

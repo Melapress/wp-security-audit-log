@@ -474,11 +474,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                     break;
             }
             if ($event) {
+                $revisions = wp_get_post_revisions($newpost->ID, ARRAY_A);
+                if (!empty($revisions)) {
+                    $revision = array_shift($revisions);
+                }
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $oldpost->ID,
                     'PostType' => $oldpost->post_type,
                     'PostTitle' => $oldpost->post_title,
                     'PostUrl' => get_permalink($oldpost->ID), // TODO or should this be $newpost?
+                    'RevisionLink' =>  (!empty($revision)) ? $this->getRevisionLink($revision->ID) : null
                 ));
                 return 1;
             }
@@ -524,6 +529,15 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             }
         } else {
             return false;
+        }
+    }
+
+    private function getRevisionLink($revision_id)
+    {
+        if (!empty($revision_id)) {
+            return admin_url('revision.php?revision='.$revision_id);
+        } else {
+            return null;
         }
     }
 }
