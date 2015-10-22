@@ -439,7 +439,7 @@ viewer though the plugin will still record such information in the database.', '
                         </td>
                     </tr>
                     <tr>
-                        <th><label for="DeleteData"><?php _e('Remove Data on Unistall', 'wp-security-audit-log'); ?></label></th>
+                        <th><label for="DeleteData"><?php _e('Remove Data on Uninstall', 'wp-security-audit-log'); ?></label></th>
                         <td>
                             <fieldset>
                                 <label for="DeleteData">
