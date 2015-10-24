@@ -116,6 +116,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * [BlogVault](https://blogvault.net/wp-security-audit-log-plugin-review/)
 * [MyWPExpert](http://www.mywpexpert.com/wp-security-audit-log/)
 * [Shout Me Loud](http://www.shoutmeloud.com/how-to-monitor-user-activities-wordpress-dashboard.html)
+* [The Darknet](http://www.darknet.org.uk/2015/10/wp-security-audit-log-a-complete-audit-log-plugin-for-wordpress/)
 
 = Related Links and Documentation =
 For more information and to get started with WordPress Security, check out the following:
