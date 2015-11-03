@@ -9,6 +9,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             add_action('admin_init', array($this, 'EventWordpressInit'));
         }
         add_action('transition_post_status', array($this, 'EventPostChanged'), 10, 3);
+        add_action('post_updated', array($this, 'CheckModificationChange'), 10, 3);
         add_action('delete_post', array($this, 'EventPostDeleted'), 10, 1);
         add_action('wp_trash_post', array($this, 'EventPostTrashed'), 10, 1);
         add_action('untrash_post', array($this, 'EventPostUntrashed'));
@@ -124,10 +125,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 if (!$changes) {
                     $changes = $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
                 }
-                if (!$changes) {
-                    $changes = $this->CheckModificationChange($this->_OldPost, $post);
-                }
-                
             }
         }
     }
@@ -450,7 +447,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
-    protected function CheckModificationChange($oldpost, $newpost)
+    public function CheckModificationChange($post_ID, $newpost, $oldpost)
     {
         $contentChanged = $oldpost->post_content != $newpost->post_content; // TODO what about excerpts?
         
