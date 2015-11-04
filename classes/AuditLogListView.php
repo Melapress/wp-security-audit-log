@@ -274,7 +274,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
             case $name == '%RevisionLink%':
                 if (!empty($value) && $value != 'NULL') {
-                    return ' Click <a href="'.$value.'">here</a> to see the content changes.';
+                    return ' Click <a target="_blank" href="'.$value.'">here</a> to see the content changes.';
                 } else {
                     return "";
                 }

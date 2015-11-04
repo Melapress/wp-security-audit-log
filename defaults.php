@@ -69,7 +69,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(2062, E_NOTICE, __('User updates a custom field name for a post', 'wp-security-audit-log'), __('Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in post %PostTitle%'.'%MetaLink%', 'wp-security-audit-log')),
                 array(2065, E_WARNING, __('User modifies content for a published post', 'wp-security-audit-log'), __('Modified the content of published post %PostTitle%.'.'%RevisionLink%', 'wp-security-audit-log')),
                 array(2068, E_NOTICE, __('User modifies content for a draft post', 'wp-security-audit-log'), __('Modified the content of draft post %PostTitle%.'.'%RevisionLink%', 'wp-security-audit-log')),
-                array(2072, E_NOTICE, __('User modifies content of a post', 'wp-security-audit-log'), __('Modified the content of post %PostTitle% which is submitted for review', 'wp-security-audit-log')),
+                array(2072, E_NOTICE, __('User modifies content of a post', 'wp-security-audit-log'), __('Modified the content of post %PostTitle% which is submitted for review.'.'%RevisionLink%', 'wp-security-audit-log')),
                 array(2073, E_NOTICE, __('User submitted a post for review', 'wp-security-audit-log'), __('Submitted blog post %PostTitle% for review. Blog post ID is %PostID%', 'wp-security-audit-log')),
             ),
             __('Pages', 'wp-security-audit-log') => array(
