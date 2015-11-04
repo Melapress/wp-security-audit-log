@@ -144,6 +144,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
                     case 'source_ip':
                         $cols['scip'] = __('Source IP', 'wp-security-audit-log');
                         break;
+                    case 'site':
+                        $cols['site'] = __('Site', 'wp-security-audit-log');
+                        break;
                     case 'message':
                         $cols['mesg'] = __('Message', 'wp-security-audit-log');
                         break;
