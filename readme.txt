@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report
 Requires at least: 3.6
 Tested up to: 4.3
-Stable tag: 2.1.1
+Stable tag: 2.2
 
 Keep an audit log of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -96,6 +96,8 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 
 * Realtime Audit Log viewer to watch user activity as it happens without any delays
 * Built-in support for reverse proxies and web application firewalls [more information](http://www.wpsecurityauditlog.com/documentation/automatically-retrieve-originating-wordpress-user-ip-address/)
+* Allows you to see what actually changed when the content of posts, pages and custom post types is changed
+* Integrated with WhatIsMyIpAddress.com so you to get all information about a source IP with just a mouse click
 * Limit who can view the security alerts by users and roles
 * Limit who can manage the plugin by users and roles
 * Configurable WordPress dashboard widget highlighting the most recent critical activity
@@ -189,6 +191,13 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 7. If there are more than 15 sites in a multisite, an auto complete site search shows up instead of the drop down menu (see [screenshots](https://wordpress.org/plugins/wp-security-audit-log/screenshots/) for reference)
 
 == Changelog ==
+
+= 2.2 (2015-11-10) =
+* **New Features**
+	* Aded the revision link in content change security alerts allowing you to see the actual content changes that took place on posts, pages and custom post types. [Learn More](http://URL)
+	
+* **Bug Fixes**
+	* Fixed an issue where user was allowed to disable all columns in Audit Log Viewer [Support ticket](https://wordpress.org/support/topic/audit-log-columns-selection-is-empty). Fix recommendation by Bates College.
 
 = 2.1.1 (2015-10-08) =
 * **New WordPress Security Alerts**
