@@ -9,6 +9,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             add_action('admin_init', array($this, 'EventWordpressInit'));
         }
         add_action('transition_post_status', array($this, 'EventPostChanged'), 10, 3);
+        add_action('post_updated', array($this, 'CheckModificationChange'), 10, 3);
         add_action('delete_post', array($this, 'EventPostDeleted'), 10, 1);
         add_action('wp_trash_post', array($this, 'EventPostTrashed'), 10, 1);
         add_action('untrash_post', array($this, 'EventPostUntrashed'));
@@ -112,7 +113,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             } else {
                 // Handle update post events
                 $changes = 0
-                    + $this->CheckDateChange($this->_OldPost, $post)
                     + $this->CheckAuthorChange($this->_OldPost, $post)
                     + $this->CheckStatusChange($this->_OldPost, $post)
                     + $this->CheckParentChange($this->_OldPost, $post)
@@ -124,10 +124,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 if (!$changes) {
                     $changes = $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
                 }
-                if (!$changes) {
-                    $changes = $this->CheckModificationChange($this->_OldPost, $post);
-                }
-                
             }
         }
     }
@@ -276,10 +272,15 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     protected function CheckReviewPendingChange($oldpost, $newpost)
     {
         if ($oldpost->post_status == 'pending') {
+            $revisions = wp_get_post_revisions($newpost->ID, ARRAY_A);
+            if (!empty($revisions)) {
+                $revision = array_shift($revisions);
+            }
             $this->plugin->alerts->Trigger(2072, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
-                'PostTitle' => $oldpost->post_title
+                'PostTitle' => $oldpost->post_title,
+                'RevisionLink' =>  (!empty($revision)) ? $this->getRevisionLink($revision->ID) : null
             ));
             return 1;
         }
@@ -450,37 +451,44 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
-    protected function CheckModificationChange($oldpost, $newpost)
+    public function CheckModificationChange($post_ID, $newpost, $oldpost)
     {
-        $contentChanged = $oldpost->post_content != $newpost->post_content; // TODO what about excerpts?
-        
-        if ($oldpost->post_modified != $newpost->post_modified) {
-            $event = 0;
-            // @see http://codex.wordpress.org/Class_Reference/WP_Query#Status_Parameters
-            switch ($oldpost->post_status) { // TODO or should this be $newpost?
-                case 'draft':
-                    if ($contentChanged) {
-                        $event = $this->GetEventTypeForPostType($newpost, 2068, 2069, 2070);
-                    } else {
-                        $event = $this->GetEventTypeForPostType($newpost, 2003, 2007, 2032);
+        $changes = 0 + $this->CheckDateChange($oldpost, $newpost);
+        if (!$changes) {
+            $contentChanged = $oldpost->post_content != $newpost->post_content; // TODO what about excerpts?
+            
+            if ($oldpost->post_modified != $newpost->post_modified) {
+                $event = 0;
+                // @see http://codex.wordpress.org/Class_Reference/WP_Query#Status_Parameters
+                switch ($oldpost->post_status) { // TODO or should this be $newpost?
+                    case 'draft':
+                        if ($contentChanged) {
+                            $event = $this->GetEventTypeForPostType($newpost, 2068, 2069, 2070);
+                        } else {
+                            $event = $this->GetEventTypeForPostType($newpost, 2003, 2007, 2032);
+                        }
+                        break;
+                    case 'publish':
+                        if ($contentChanged) {
+                            $event = $this->GetEventTypeForPostType($newpost, 2065, 2066, 2067);
+                        } else {
+                            $event = $this->GetEventTypeForPostType($newpost, 2002, 2006, 2031);
+                        }
+                        break;
+                }
+                if ($event) {
+                    $revisions = wp_get_post_revisions($post_ID, ARRAY_A);
+                    if (!empty($revisions)) {
+                        $revision = array_shift($revisions);
                     }
-                    break;
-                case 'publish':
-                    if ($contentChanged) {
-                        $event = $this->GetEventTypeForPostType($newpost, 2065, 2066, 2067);
-                    } else {
-                        $event = $this->GetEventTypeForPostType($newpost, 2002, 2006, 2031);
-                    }
-                    break;
-            }
-            if ($event) {
-                $this->plugin->alerts->Trigger($event, array(
-                    'PostID' => $oldpost->ID,
-                    'PostType' => $oldpost->post_type,
-                    'PostTitle' => $oldpost->post_title,
-                    'PostUrl' => get_permalink($oldpost->ID), // TODO or should this be $newpost?
-                ));
-                return 1;
+                    $this->plugin->alerts->Trigger($event, array(
+                        'PostID' => $post_ID,
+                        'PostType' => $oldpost->post_type,
+                        'PostTitle' => $oldpost->post_title,
+                        'PostUrl' => get_permalink($post_ID), // TODO or should this be $newpost?
+                        'RevisionLink' =>  (!empty($revision)) ? $this->getRevisionLink($revision->ID) : null
+                    ));
+                }
             }
         }
     }
@@ -524,6 +532,15 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             }
         } else {
             return false;
+        }
+    }
+
+    private function getRevisionLink($revision_id)
+    {
+        if (!empty($revision_id)) {
+            return admin_url('revision.php?revision='.$revision_id);
+        } else {
+            return null;
         }
     }
 }

@@ -353,8 +353,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
                                 <?php $columns = $this->_plugin->settings->GetColumns(); ?>
                                 <?php foreach ($columns as $key => $value) { ?>
                                     <label for="columns">
-                                        <input type="checkbox" name="Columns[<?=$key?>]" id="<?=$key?>" class="sel-columns" style="margin-top: 2px;" <?php if ($value == '1') echo 'checked="checked"'; ?> value="1">
-                                        <span><?=ucwords(str_replace("_", " ", $key))?></span>
+                                        <input type="checkbox" name="Columns[<?php echo $key; ?>]" id="<?php echo $key; ?>" class="sel-columns" style="margin-top: 2px;" <?php if ($value == '1') echo 'checked="checked"'; ?> value="1">
+                                        <span><?php echo ucwords(str_replace("_", " ", $key)); ?></span>
                                     </label>
                                     <br/>
                                 <?php } ?>

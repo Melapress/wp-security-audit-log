@@ -144,6 +144,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
                     case 'source_ip':
                         $cols['scip'] = __('Source IP', 'wp-security-audit-log');
                         break;
+                    case 'site':
+                        $cols['site'] = __('Site', 'wp-security-audit-log');
+                        break;
                     case 'message':
                         $cols['mesg'] = __('Message', 'wp-security-audit-log');
                         break;
@@ -271,6 +274,14 @@ class WSAL_AuditLogListView extends WP_List_Table {
                 } else {
                     return "";
                 }
+
+            case $name == '%RevisionLink%':
+                if (!empty($value) && $value != 'NULL') {
+                    return ' Click <a target="_blank" href="'.$value.'">here</a> to see the content changes.';
+                } else {
+                    return "";
+                }
+                
             case in_array($name, array('%MetaValue%', '%MetaValueOld%', '%MetaValueNew%')):
                 return '<strong>' . (
                     strlen($value) > 50 ? (esc_html(substr($value, 0, 50)) . '&hellip;') :  esc_html($value)

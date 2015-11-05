@@ -591,9 +591,16 @@ class WSAL_Settings {
 
     public function GetColumns(){
         $columns = array('alert_code' => '1', 'type' => '1', 'date' => '1', 'username' => '1', 'source_ip' => '1', 'message' => '1');
+        if ($this->_plugin->IsMultisite()) {
+            $columns = array_slice($columns, 0, 5, true) + array('site' => '1') + array_slice($columns, 5, null, true);
+        }
+        error_log(print_r($columns, true));
         $selected = $this->GetColumnsSelected();
         if (!empty($selected)) {
             $columns = array('alert_code' => '0', 'type' => '0', 'date' => '0', 'username' => '0', 'source_ip' => '0', 'message' => '0');
+            if ($this->_plugin->IsMultisite()) {
+                $columns = array_slice($columns, 0, 5, true) + array('site' => '0') + array_slice($columns, 5, null, true);
+            }
             $selected = (array)json_decode($selected);
             $columns = array_merge($columns, $selected);
             return $columns;
