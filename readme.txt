@@ -194,7 +194,7 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 
 = 2.2 (2015-11-10) =
 * **New Features**
-	* Aded the revision link in content change security alerts allowing you to see the actual content changes that took place on posts, pages and custom post types. [Learn More](http://URL)
+	* Aded the revision link in content change security alerts allowing you to see the actual content changes that took place on posts, pages and custom post types. [Learn More](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
 	
 * **Bug Fixes**
 	* Fixed an issue where user was allowed to disable all columns in Audit Log Viewer [Support ticket](https://wordpress.org/support/topic/audit-log-columns-selection-is-empty). Fix recommendation by Bates College.
