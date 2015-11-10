@@ -189,6 +189,7 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 5. The Enable/Disable Alerts settings node from where Administrators can disable or enable WordPress security alerts.
 6. The Audit Log Viewer of a Super Admin in a WordPress multisite network installation with the Site selection drop down menu.
 7. If there are more than 15 sites in a multisite, an auto complete site search shows up instead of the drop down menu (see [screenshots](https://wordpress.org/plugins/wp-security-audit-log/screenshots/) for reference)
+8. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes with WP Security Audit Log Plugin](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
 
 == Changelog ==
 
