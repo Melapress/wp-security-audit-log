@@ -106,10 +106,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         ));
         // run checks
         if ($this->_OldPost) {
+            if ($this->CheckBBPress($this->_OldPost)) {
+                $this->EventBBPressChanged($this->_OldPost, $post, $newStatus, $oldStatus);
+                return;
+            }
             if ($oldStatus == 'auto-draft' || $original == 'auto-draft') {
                 // Handle create post events
                 $this->CheckPostCreation($this->_OldPost, $post);
-                
             } else {
                 // Handle update post events
                 $changes = 0
@@ -209,6 +212,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     public function EventPostDeleted($post_id)
     {
         $post = get_post($post_id);
+        if ($this->CheckBBPress($post)) {
+            $this->EventBBPressByCode($post, 8006);
+            return;
+        }
         if (!in_array($post->post_type, array('attachment', 'revision'))) { // ignore attachments and revisions
             $event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
             // check WordPress backend operations
@@ -226,6 +233,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     public function EventPostTrashed($post_id)
     {
         $post = get_post($post_id);
+        if ($this->CheckBBPress($post)) {
+            $this->EventBBPressByCode($post, 8005);
+            return;
+        }
         $event = $this->GetEventTypeForPostType($post, 2012, 2013, 2034);
         $this->plugin->alerts->Trigger($event, array(
             'PostID' => $post->ID,
@@ -237,6 +248,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     public function EventPostUntrashed($post_id)
     {
         $post = get_post($post_id);
+        if ($this->CheckBBPress($post)) {
+            $this->EventBBPressByCode($post, 8007);
+            return;
+        }
         $event = $this->GetEventTypeForPostType($post, 2014, 2015, 2035);
         $this->plugin->alerts->Trigger($event, array(
             'PostID' => $post->ID,
@@ -453,6 +468,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     
     public function CheckModificationChange($post_ID, $newpost, $oldpost)
     {
+        if ($this->CheckBBPress($oldpost)) {
+            $this->EventBBPressModificationChanged($oldpost, $newpost);
+            return;
+        }
         $changes = 0 + $this->CheckDateChange($oldpost, $newpost);
         if (!$changes) {
             $contentChanged = $oldpost->post_content != $newpost->post_content; // TODO what about excerpts?
@@ -543,4 +562,37 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return null;
         }
     }
+
+    private function CheckBBPress($post)
+    {
+        switch ($post->post_type) {
+            case 'forum':
+            case 'topic':
+            case 'reply':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private function EventBBPressChanged($old_post, $new_post, $oldStatus = null, $newStatus = null)
+    {
+        //if ($oldStatus == 'auto-draft'
+        error_log(print_r($old_post, true));
+        
+    }
+
+    private function EventBBPressModificationChanged($old_post, $new_post)
+    {
+        error_log(print_r($old_post, true));
+    }
+
+    private function EventBBPressByCode($post, $event)
+    {
+        $this->plugin->alerts->Trigger($event, array(
+            'ForumID' => $post->ID,
+            'ForumName' => $post->post_title,
+        ));
+    }
+
 }

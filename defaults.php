@@ -182,6 +182,19 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(5017, E_CRITICAL, __('Unknown component modified tables structure', 'wp-security-audit-log'), __('An unknown component modified the structure of these database tables: %TableNames%', 'wp-security-audit-log')),
                 array(5018, E_CRITICAL, __('Unknown component deleted tables', 'wp-security-audit-log'), __('An unknown component deleted the following tables from the database: %TableNames%', 'wp-security-audit-log')),
             ),
+            __('BBPress Forum', 'wp-security-audit-log') => array(
+                array(8000, E_CRITICAL, __('User published new forum', 'wp-security-audit-log'), __('Published new forum %ForumName%. Forum URL is %ForumURL%', 'wp-security-audit-log')),
+                array(8001, E_NOTICE, __('User changed status of a forum', 'wp-security-audit-log'), __('Changed the status  of forum %ForumName% from %OldStatus% to %NewStatus%', 'wp-security-audit-log')),
+                array(8002, E_NOTICE, __('User changed visibility of a forum', 'wp-security-audit-log'), __('Changed the visibility of forum %ForumName% from %OldVisibility% to %NewVisibility%', 'wp-security-audit-log')),
+                array(8003, E_CRITICAL, __('User changed the URL of a forum', 'wp-security-audit-log'), __('Changed the URL of forum %ForumName% from %OldUrl% to %NewUrl%', 'wp-security-audit-log')),
+                array(8004, E_NOTICE, __('User changed order of a forum', 'wp-security-audit-log'), __('Changed the order of forum %ForumName% from %OldOrder% to %NewOrder%', 'wp-security-audit-log')),
+                array(8005, E_CRITICAL, __('User moved forum to trash', 'wp-security-audit-log'), __('Moved forum %ForumName% to trash. Forum ID is %ForumID%', 'wp-security-audit-log')),
+                array(8006, E_WARNING, __('User permanently deleted forum', 'wp-security-audit-log'), __('Permanently deleted forum %ForumName%', 'wp-security-audit-log')),
+                array(8007, E_WARNING, __('User restored forum from trash', 'wp-security-audit-log'), __('Restored forum %ForumName% from trash', 'wp-security-audit-log')),
+                array(8008, E_NOTICE, __('User changed the parent of a forum', 'wp-security-audit-log'), __('Changed parent of forum %ForumName% from %OldParent% to %NewParent%', 'wp-security-audit-log')),
+                array(8009, E_WARNING, __('User changed forum\'s role', 'wp-security-audit-log'), __('Changed the forum\'s auto role from %OldRole% to %NewRole%', 'wp-security-audit-log')),
+                array(8010, E_WARNING, __('User changed option of a forum', 'wp-security-audit-log'), __('%Status% the option for anonymous posting on forum', 'wp-security-audit-log')),
+            )
         ));
 }
 add_action('wsal_init', 'wsaldefaults_wsal_init');
