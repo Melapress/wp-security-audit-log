@@ -26,6 +26,36 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+// Create a helper function for easy SDK access.
+function wsal_fs() {
+    global $wsal_fs;
+
+    if ( ! isset( $wsal_fs ) ) {
+        // Include Freemius SDK.
+        require_once dirname(__FILE__) . '/freemius/start.php';
+
+        $wsal_fs = fs_dynamic_init( array(
+            'id'                => '94',
+            'slug'              => 'wp-security-audit-log',
+            'public_key'        => 'pk_d602740d3088272d75906045af9fa',
+            'is_premium'        => false,
+            'has_addons'        => false,
+            'has_paid_plans'    => false,
+            'menu'              => array(
+                'slug'       => 'wsal-auditlog',
+                'account'    => false,
+                'contact'    => false,
+                'support'    => false,
+            ),
+        ) );
+    }
+
+    return $wsal_fs;
+}
+
+// Init Freemius.
+wsal_fs();
+
 class WpSecurityAuditLog {
 	
 	// <editor-fold desc="Properties & Constants">
