@@ -557,7 +557,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     private function getRevisionLink($revision_id)
     {
         if (!empty($revision_id)) {
-            return ' Navigate <a target="_blank" href="'.admin_url('revision.php?revision='.$revision_id).'">here</a> to view the changes.';
+            return admin_url('revision.php?revision='.$revision_id);
         } else {
             return null;
         }
