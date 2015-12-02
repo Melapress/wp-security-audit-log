@@ -355,6 +355,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp, $_nextId = null, $_limit = 0)
     {
+
         global $wpdb;
         $tableUsers = $wpdb->users;
         $_wpdb = $this->connection;
@@ -408,13 +409,17 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             ORDER BY
                 site_id, created_on DESC
         ";
+
         $_wpdb->query("SET @siteId = $_siteId");
         $_wpdb->query("SET @userId = $_userId");
         $_wpdb->query("SET @roleName = $_roleName");
         $_wpdb->query("SET @alertCode = $_alertCode");
         $_wpdb->query("SET @startTimestamp = $_startTimestamp");
         $_wpdb->query("SET @endTimestamp = $_endTimestamp");
-        $sql .= " LIMIT {$_limit}";
+
+        if (!empty($_limit)) {
+            $sql .= " LIMIT {$_limit}";
+        }
         $results = $_wpdb->get_results($sql);
 
         foreach ($results as $row) {
@@ -427,7 +432,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             $row->user_id = $userId;
             $results['lastId'] = $row->id;
         }
-        error_log(print_r($results, true));
+        
         return $results;
         /*
         $query = <<<query
