@@ -577,14 +577,34 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
 
     private function EventBBPressChanged($old_post, $new_post, $oldStatus = null, $newStatus = null)
     {
-        //if ($oldStatus == 'auto-draft'
+        if ($old_post->post_status == 'draft') {
+            $event = 0;
+            switch ($new_post->post_status) {
+                case 'publish':
+                    $event = 8000;
+                    break;
+                case 'draft':
+                    //$event = 8000;
+                    break;
+                case 'pending':
+                    //$event = 8000;
+                    break;
+            }
+            if ($event) {
+                $this->plugin->alerts->Trigger($event, array(
+                    'ForumID' => $new_post->ID,
+                    'ForumName' => $new_post->post_title,
+                ));
+            }
+        }
         error_log(print_r($old_post, true));
+        error_log(print_r($new_post, true));
         
     }
 
     private function EventBBPressModificationChanged($old_post, $new_post)
     {
-        error_log(print_r($old_post, true));
+        //error_log(print_r($old_post, true));
     }
 
     private function EventBBPressByCode($post, $event)
