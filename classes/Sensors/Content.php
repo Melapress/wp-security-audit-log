@@ -628,11 +628,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 'NewParent' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent'
             ));
         }
-
-        //error_log(print_r($old_post, true));
-        //error_log(print_r($new_post, true));
-        error_log(print_r($_POST, true));
-        
     }
 
     private function EventBBPressModificationChanged($old_post, $new_post)
@@ -663,5 +658,4 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             'ForumName' => $post->post_title
         ));
     }
-
 }
