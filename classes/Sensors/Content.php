@@ -577,41 +577,90 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
 
     private function EventBBPressChanged($old_post, $new_post, $oldStatus = null, $newStatus = null)
     {
-        if ($old_post->post_status == 'draft') {
-            $event = 0;
-            switch ($new_post->post_status) {
-                case 'publish':
-                    $event = 8000;
-                    break;
-                case 'draft':
-                    //$event = 8000;
-                    break;
-                case 'pending':
-                    //$event = 8000;
-                    break;
-            }
-            if ($event) {
-                $this->plugin->alerts->Trigger($event, array(
-                    'ForumID' => $new_post->ID,
-                    'ForumName' => $new_post->post_title,
-                ));
-            }
+        $oldVisibility = '';
+        $newVisibility = '';
+        if ($old_post->post_password) {
+            $oldVisibility = __('Password Protected', 'wp-security-audit-log');
+        } elseif ($oldStatus == 'publish') {
+            $oldVisibility = __('Public', 'wp-security-audit-log');
+        } elseif ($oldStatus == 'private') {
+            $oldVisibility = __('Private', 'wp-security-audit-log');
         }
-        error_log(print_r($old_post, true));
-        error_log(print_r($new_post, true));
+        
+        if ($new_post->post_password) {
+            $newVisibility = __('Password Protected', 'wp-security-audit-log');
+        } elseif ($newStatus == 'publish') {
+            $newVisibility = __('Public', 'wp-security-audit-log');
+        } elseif ($newStatus == 'private') {
+            $newVisibility = __('Private', 'wp-security-audit-log');
+        }
+
+        if ($oldVisibility && $newVisibility && ($oldVisibility != $newVisibility)) {
+            $this->plugin->alerts->Trigger(8002, array(
+                'ForumName' => $new_post->post_title,
+                'OldVisibility' => $oldVisibility,
+                'NewVisibility' => $newVisibility
+            ));
+        }
+
+        $oldLink = get_permalink($old_post->ID);
+        $newLink = get_permalink($new_post->ID);
+        if ($oldLink != $newLink) {
+            $this->plugin->alerts->Trigger(8003, array(
+                'ForumName' => $new_post->post_title,
+                'OldUrl' => $oldLink,
+                'NewUrl' => $newLink
+            ));
+        }
+
+        if ($old_post->menu_order != $new_post->menu_order) {
+            $this->plugin->alerts->Trigger(8004, array(
+                'ForumName' => $new_post->post_title,
+                'OldOrder' => $old_post->menu_order,
+                'NewOrder' => $new_post->menu_order
+            ));
+        }
+
+        if ($old_post->post_parent != $new_post->post_parent) {
+            $this->plugin->alerts->Trigger(8008, array(
+                'ForumName' => $new_post->post_title,
+                'OldParent' => $old_post->post_parent ? get_the_title($old_post->post_parent) : 'no parent',
+                'NewParent' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent'
+            ));
+        }
+
+        //error_log(print_r($old_post, true));
+        //error_log(print_r($new_post, true));
+        error_log(print_r($_POST, true));
         
     }
 
     private function EventBBPressModificationChanged($old_post, $new_post)
     {
-        //error_log(print_r($old_post, true));
+        if ($old_post->post_status == 'draft') {
+            if ($new_post->post_status == 'publish') {
+                $this->plugin->alerts->Trigger(8000, array(
+                    'ForumName' => $new_post->post_title,
+                    'ForumURL' => get_permalink($new_post->ID)
+                ));
+            }
+        } elseif ($old_post->post_status == 'publish') {
+            if ($old_post->post_content != $new_post->post_content) {
+                /* To do: check status */
+                $this->plugin->alerts->Trigger(8001, array(
+                    'ForumName' => $new_post->post_title,
+                    'OldStatus' => $old_post->post_status,
+                    'NewStatus' => $new_post->post_status
+                ));
+            }
+        }
     }
 
     private function EventBBPressByCode($post, $event)
     {
         $this->plugin->alerts->Trigger($event, array(
             'ForumID' => $post->ID,
-            'ForumName' => $post->post_title,
+            'ForumName' => $post->post_title
         ));
     }
 
