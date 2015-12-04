@@ -213,6 +213,10 @@ class WSAL_AuditLogListView extends WP_List_Table {
                     } else {
                         $roles = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
                     }
+                } elseif ($username == 'Plugin') {
+                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/plugin-logo.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __('Plugin', 'wp-security-audit-log') . '</i>';
+                    $roles = '';
                 } else {
                     $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
                     $uhtml = '<i>' . __('System', 'wp-security-audit-log') . '</i>';
