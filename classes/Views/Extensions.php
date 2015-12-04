@@ -8,6 +8,7 @@ class WSAL_Views_Extensions extends WSAL_AbstractView {
 	
 	public function GetIcon() {
 		return 'admin-plugins';
+		// <span class="dashicons dashicons-external"></span>
 	}
 	
 	public function GetName() {
