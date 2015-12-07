@@ -78,14 +78,15 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
     {
         if (($occurrence->getId() % 2) == 0) {
             $promoToSend = $this->GetPromoAlert();
-            // WIP, to do: add message and link
-            $link = '<a href="'.$promoToSend['link'].'" target="_blank">'.$promoToSend['name'].'</a>';
-            $this->log(9999, array(
-                'ClientIP' => '127.0.0.1',
-                'Username' => 'Plugin',
-                'PromoMessage' => sprintf($promoToSend['message1'], $link).'<br>'.sprintf($promoToSend['message2'], $link),
-                'PromoName' => $promoToSend['name']
-            ));
+            if (!empty($promoToSend)) {
+                $link = '<a href="'.$promoToSend['link'].'" target="_blank">'.$promoToSend['name'].'</a>';
+                $this->log(9999, array(
+                    'ClientIP' => '127.0.0.1',
+                    'Username' => 'Plugin',
+                    'PromoMessage' => sprintf($promoToSend['message1'], $link).'<br>'.sprintf($promoToSend['message2'], $link),
+                    'PromoName' => $promoToSend['name']
+                ));
+            }
         }
     }
 
@@ -135,7 +136,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
                 'link' => 'http://www.wpsecurityauditlog.com/plugin-extensions/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=alladdons'
             );
 
-            $promoToSend = $aPromoAlert[$lastPromoSentId];
+            $promoToSend = isset($aPromoAlert[$lastPromoSentId]) ? $aPromoAlert[$lastPromoSentId] : $aPromoAlert[0];
 
             if ($lastPromoSentId < count($aPromoAlert)-1) {
                 $lastPromoSentId++;
