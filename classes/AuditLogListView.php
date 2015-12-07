@@ -272,6 +272,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
             case $name == '%Message%':
                 return esc_html($value);
 
+            case $name == '%PromoMessage%':
+                return $value;
+
+            case $name == '%PromoLink%':
+                return $value;
+
             case $name == '%MetaLink%':
                 if (!empty($value)) {
                     return "<a href=\"#\" onclick=\"WsalDisableCustom(this, '".$value."');\"> Exclude Custom Field from the Monitoring</a>";
