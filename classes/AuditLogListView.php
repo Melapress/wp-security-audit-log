@@ -273,7 +273,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
                 return esc_html($value);
 
             case $name == '%PromoMessage%':
-                return $value;
+                return '<p class="promo-alert">' . $value .'</p>';
 
             case $name == '%PromoLink%':
                 return $value;

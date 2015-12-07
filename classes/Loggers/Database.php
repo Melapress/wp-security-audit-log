@@ -76,16 +76,19 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
 
     private function AlertInject($occurrence)
     {
-        if (($occurrence->getId() % 2) == 0) {
-            $promoToSend = $this->GetPromoAlert();
-            if (!empty($promoToSend)) {
-                $link = '<a href="'.$promoToSend['link'].'" target="_blank">'.$promoToSend['name'].'</a>';
-                $this->log(9999, array(
-                    'ClientIP' => '127.0.0.1',
-                    'Username' => 'Plugin',
-                    'PromoMessage' => sprintf($promoToSend['message1'], $link).'<br>'.sprintf($promoToSend['message2'], $link),
-                    'PromoName' => $promoToSend['name']
-                ));
+        $count = $this->CheckPromoToShow();
+        if ($count) {
+            if (($occurrence->getId() % $count) == 0) {
+                $promoToSend = $this->GetPromoAlert();
+                if (!empty($promoToSend)) {
+                    $link = '<a href="'.$promoToSend['link'].'" target="_blank">'.$promoToSend['name'].'</a>';
+                    $this->log(9999, array(
+                        'ClientIP' => '127.0.0.1',
+                        'Username' => 'Plugin',
+                        'PromoMessage' => sprintf($promoToSend['message1'], $link).'<br>'.sprintf($promoToSend['message2'], $link),
+                        'PromoName' => $promoToSend['name']
+                    ));
+                }
             }
         }
     }
@@ -146,6 +149,28 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
             $this->plugin->SetGlobalOption('promo-send-id', $lastPromoSentId);
         }
         return $promoToSend;
+    }
+
+    private function CheckPromoToShow()
+    {
+        $promoToShow = null;
+        if (!class_exists('WSAL_NP_Plugin')) {
+            $promoToShow[] = true;
+        }
+        if (!class_exists('WSAL_SearchExtension')) {
+            $promoToShow[] = true;
+        }
+        if (!class_exists('WSAL_Rep_Plugin')) {
+            $promoToShow[] = true;
+        }
+        if (!class_exists('WSAL_Ext_Plugin')) {
+            $promoToShow[] = true;
+        }
+
+        if (empty($promoToShow)) {
+            return null;
+        }
+        return (count($promoToShow) == 4) ? 150 : 250;
     }
 
 }
