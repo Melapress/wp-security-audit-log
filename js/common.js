@@ -11,11 +11,7 @@ jQuery(document).ready(function(){
 		});
 		nfe.fadeOut();
 	});
-
-	var styles = {
-     	'color': '#CC4444',
-     	'vertical-align': 'bottom!important'
-    };
+	
     jQuery('head').append('<style>.wp-submenu .dashicons-external:before{vertical-align: bottom;}</style>');
 	jQuery("a[href*='page=wsal-extensions']").addClass('dashicons-before dashicons-external').css('color', '#CC4444');
 });
