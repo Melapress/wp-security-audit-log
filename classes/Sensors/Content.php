@@ -295,7 +295,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
                 'PostTitle' => $oldpost->post_title,
-                'RevisionLink' =>  (!empty($revision)) ? $this->getRevisionLink($revision->ID) : null
+                'RevisionLink' =>  (!empty($revision)) ? $this->getRevisionLink($revision->ID) : ''
             ));
             return 1;
         }
@@ -505,7 +505,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                         'PostType' => $oldpost->post_type,
                         'PostTitle' => $oldpost->post_title,
                         'PostUrl' => get_permalink($post_ID), // TODO or should this be $newpost?
-                        'RevisionLink' =>  (!empty($revision)) ? $this->getRevisionLink($revision->ID) : null
+                        'RevisionLink' =>  (!empty($revision)) ? $this->getRevisionLink($revision->ID) : ''
                     ));
                 }
             }
@@ -559,7 +559,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if (!empty($revision_id)) {
             return admin_url('revision.php?revision='.$revision_id);
         } else {
-            return null;
+            return '';
         }
     }
 
