@@ -129,13 +129,16 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                 ));
                 $result = 1;
             }
-        } elseif ($new_post->post_status == 'publish') {
-            if ($old_post->post_content != $new_post->post_content) {
+        } else {
+            $bbp_status = get_post_meta($old_post->ID, '_bbp_status', true);
+            $oldStatus = isset($bbp_status) ? $bbp_status : '';
+            $newStatus = isset($_REQUEST['bbp_forum_status']) ? $_REQUEST['bbp_forum_status'] : '';
+            if ($oldStatus != $newStatus) {
                 /* To do: check status */
                 $this->plugin->alerts->Trigger(8001, array(
                     'ForumName' => $new_post->post_title,
-                    'OldStatus' => $old_post->post_status,
-                    'NewStatus' => $new_post->post_status
+                    'OldStatus' => $oldStatus,
+                    'NewStatus' => $newStatus
                 ));
                 $result = 1;
             }

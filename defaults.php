@@ -184,7 +184,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(5018, E_CRITICAL, __('Unknown component deleted tables', 'wp-security-audit-log'), __('An unknown component deleted the following tables from the database: %TableNames%', 'wp-security-audit-log')),
             ),
             __('BBPress Forum', 'wp-security-audit-log') => array(
-                array(8000, E_CRITICAL, __('User published new forum', 'wp-security-audit-log'), __('Published new forum %ForumName%. Forum URL is %ForumURL%', 'wp-security-audit-log')),
+                array(8000, E_CRITICAL, __('User created new forum', 'wp-security-audit-log'), __('Created new forum %ForumName%. Forum URL is %ForumURL%', 'wp-security-audit-log')),
                 array(8001, E_NOTICE, __('User changed status of a forum', 'wp-security-audit-log'), __('Changed the status  of forum %ForumName% from %OldStatus% to %NewStatus%', 'wp-security-audit-log')),
                 array(8002, E_NOTICE, __('User changed visibility of a forum', 'wp-security-audit-log'), __('Changed the visibility of forum %ForumName% from %OldVisibility% to %NewVisibility%', 'wp-security-audit-log')),
                 array(8003, E_CRITICAL, __('User changed the URL of a forum', 'wp-security-audit-log'), __('Changed the URL of forum %ForumName% from %OldUrl% to %NewUrl%', 'wp-security-audit-log')),

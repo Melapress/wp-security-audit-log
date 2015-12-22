@@ -118,10 +118,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
         if ($action == 'update' && isset($_REQUEST['option_page']) && ($_REQUEST['option_page'] == 'bbpress')) {
             $allow_anonymous = get_option('_bbp_allow_anonymous');
-            $oldStatus = isset($allow_anonymous) ? 1 : 0;
-            $newStatus = isset($_REQUEST['_bbp_allow_anonymous']) ? 1 : 0;
+            $oldStatus = !empty($allow_anonymous) ? 1 : 0;
+            $newStatus = !empty($_REQUEST['_bbp_allow_anonymous']) ? 1 : 0;
             if ($oldStatus != $newStatus) {
-                $status = !empty($newStatus) ? 'Enabled' : 'Disabled';
+                $status = ($newStatus == 1) ? 'Enabled' : 'Disabled';
                 $this->plugin->alerts->Trigger(8010, array(
                     'Status' => $status
                 ));
