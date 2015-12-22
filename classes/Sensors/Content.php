@@ -9,7 +9,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             add_action('admin_init', array($this, 'EventWordpressInit'));
         }
         add_action('transition_post_status', array($this, 'EventPostChanged'), 10, 3);
-        add_action('post_updated', array($this, 'CheckModificationChange'), 10, 3);
         add_action('delete_post', array($this, 'EventPostDeleted'), 10, 1);
         add_action('wp_trash_post', array($this, 'EventPostTrashed'), 10, 1);
         add_action('untrash_post', array($this, 'EventPostUntrashed'));
@@ -107,7 +106,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         // run checks
         if ($this->_OldPost) {
             if ($this->CheckBBPress($this->_OldPost)) {
-                $this->EventBBPressChanged($this->_OldPost, $post, $newStatus, $oldStatus);
                 return;
             }
             if ($oldStatus == 'auto-draft' || $original == 'auto-draft') {
@@ -126,6 +124,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 ;
                 if (!$changes) {
                     $changes = $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
+                }
+                if (!$changes) {
+                    $changes = $this->CheckModificationChange($post->ID, $this->_OldPost, $post);
                 }
             }
         }
@@ -213,7 +214,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         $post = get_post($post_id);
         if ($this->CheckBBPress($post)) {
-            $this->EventBBPressByCode($post, 8006);
             return;
         }
         if (!in_array($post->post_type, array('attachment', 'revision'))) { // ignore attachments and revisions
@@ -234,7 +234,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         $post = get_post($post_id);
         if ($this->CheckBBPress($post)) {
-            $this->EventBBPressByCode($post, 8005);
             return;
         }
         $event = $this->GetEventTypeForPostType($post, 2012, 2013, 2034);
@@ -249,7 +248,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         $post = get_post($post_id);
         if ($this->CheckBBPress($post)) {
-            $this->EventBBPressByCode($post, 8007);
             return;
         }
         $event = $this->GetEventTypeForPostType($post, 2014, 2015, 2035);
@@ -265,11 +263,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         $from = strtotime($oldpost->post_date);
         $to = strtotime($newpost->post_date);
         if ($oldpost->post_status == 'draft') {
-            return;
+            return 0;
         }
         $pending = $this->CheckReviewPendingChange($oldpost, $newpost);
         if ($pending) {
-            return;
+            return 0;
         }
         if ($from != $to) {
             $event = $this->GetEventTypeForPostType($oldpost, 2027, 2028, 2041);
@@ -466,10 +464,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
-    public function CheckModificationChange($post_ID, $newpost, $oldpost)
+    public function CheckModificationChange($post_ID, $oldpost, $newpost)
     {
         if ($this->CheckBBPress($oldpost)) {
-            $this->EventBBPressModificationChanged($oldpost, $newpost);
             return;
         }
         $changes = 0 + $this->CheckDateChange($oldpost, $newpost);
@@ -507,6 +504,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                         'PostUrl' => get_permalink($post_ID), // TODO or should this be $newpost?
                         'RevisionLink' =>  (!empty($revision)) ? $this->getRevisionLink($revision->ID) : ''
                     ));
+                    return 1;
                 }
             }
         }
@@ -575,87 +573,4 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
 
-    private function EventBBPressChanged($old_post, $new_post, $oldStatus = null, $newStatus = null)
-    {
-        $oldVisibility = '';
-        $newVisibility = '';
-        if ($old_post->post_password) {
-            $oldVisibility = __('Password Protected', 'wp-security-audit-log');
-        } elseif ($oldStatus == 'publish') {
-            $oldVisibility = __('Public', 'wp-security-audit-log');
-        } elseif ($oldStatus == 'private') {
-            $oldVisibility = __('Private', 'wp-security-audit-log');
-        }
-        
-        if ($new_post->post_password) {
-            $newVisibility = __('Password Protected', 'wp-security-audit-log');
-        } elseif ($newStatus == 'publish') {
-            $newVisibility = __('Public', 'wp-security-audit-log');
-        } elseif ($newStatus == 'private') {
-            $newVisibility = __('Private', 'wp-security-audit-log');
-        }
-
-        if ($oldVisibility && $newVisibility && ($oldVisibility != $newVisibility)) {
-            $this->plugin->alerts->Trigger(8002, array(
-                'ForumName' => $new_post->post_title,
-                'OldVisibility' => $oldVisibility,
-                'NewVisibility' => $newVisibility
-            ));
-        }
-
-        $oldLink = get_permalink($old_post->ID);
-        $newLink = get_permalink($new_post->ID);
-        if ($oldLink != $newLink) {
-            $this->plugin->alerts->Trigger(8003, array(
-                'ForumName' => $new_post->post_title,
-                'OldUrl' => $oldLink,
-                'NewUrl' => $newLink
-            ));
-        }
-
-        if ($old_post->menu_order != $new_post->menu_order) {
-            $this->plugin->alerts->Trigger(8004, array(
-                'ForumName' => $new_post->post_title,
-                'OldOrder' => $old_post->menu_order,
-                'NewOrder' => $new_post->menu_order
-            ));
-        }
-
-        if ($old_post->post_parent != $new_post->post_parent) {
-            $this->plugin->alerts->Trigger(8008, array(
-                'ForumName' => $new_post->post_title,
-                'OldParent' => $old_post->post_parent ? get_the_title($old_post->post_parent) : 'no parent',
-                'NewParent' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent'
-            ));
-        }
-    }
-
-    private function EventBBPressModificationChanged($old_post, $new_post)
-    {
-        if ($old_post->post_status == 'draft') {
-            if ($new_post->post_status == 'publish') {
-                $this->plugin->alerts->Trigger(8000, array(
-                    'ForumName' => $new_post->post_title,
-                    'ForumURL' => get_permalink($new_post->ID)
-                ));
-            }
-        } elseif ($old_post->post_status == 'publish') {
-            if ($old_post->post_content != $new_post->post_content) {
-                /* To do: check status */
-                $this->plugin->alerts->Trigger(8001, array(
-                    'ForumName' => $new_post->post_title,
-                    'OldStatus' => $old_post->post_status,
-                    'NewStatus' => $new_post->post_status
-                ));
-            }
-        }
-    }
-
-    private function EventBBPressByCode($post, $event)
-    {
-        $this->plugin->alerts->Trigger($event, array(
-            'ForumID' => $post->ID,
-            'ForumName' => $post->post_title
-        ));
-    }
 }

@@ -92,7 +92,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
                     ),
                 )); ?>);
                 if (jQuery("td.mesg p").hasClass("promo-alert")) {
-                    jQuery("td.mesg p").parent().parent().parent().css("background-color", "#E5E370");
+                    jQuery("td.mesg p").parent().parent().parent().css("background-color", "#D5E46E");
                 };
             });
         </script><?php

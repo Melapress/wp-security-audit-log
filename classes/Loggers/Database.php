@@ -85,7 +85,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
                     $this->log(9999, array(
                         'ClientIP' => '127.0.0.1',
                         'Username' => 'Plugin',
-                        'PromoMessage' => sprintf($promoToSend['message1'], $link).'<br>'.sprintf($promoToSend['message2'], $link),
+                        'PromoMessage' => sprintf($promoToSend['message'], $link),
                         'PromoName' => $promoToSend['name']
                     ));
                 }
@@ -98,50 +98,11 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         $lastPromoSentId = $this->plugin->GetGlobalOption('promo-send-id');
         $lastPromoSentId = empty($lastPromoSentId) ? 0 : $lastPromoSentId;
         $promoToSend = null;
-        $aPromoAlert = array();
-        if (!class_exists('WSAL_NP_Plugin')) {
-            $aPromoAlert[] = array(
-                'name' => 'Email Notifications Add-on',
-                'message1' => 'Get notified instantly via email of important changes and actions on your WordPress. <strong>%s</strong>.',
-                'message2' => 'Would you like to receive an email when a user changes his password, or when someone logs in during odd hours or from an unusual location? <strong>Get the %s.</strong>',
-                'link' => 'http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=emailnotifications'
-            );
-        }
-        if (!class_exists('WSAL_SearchExtension')) {
-            $aPromoAlert[] = array(
-                'name' => 'Search & Filters Add-on',
-                'message1' => 'Automatically find a specific change or action in the WordPress audit log with the <strong>%s</strong>.',
-                'message2' => 'Add the Search functionality to the WordPress audit log to find a specific change or action automatically. <strong>Use the %s</strong>.',
-                'link' => 'http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=search'
-            );
-        }
-        if (!class_exists('WSAL_Rep_Plugin')) {
-            $aPromoAlert[] = array(
-                'name' => 'Reports Add-on',
-                'message1' => 'Generate WordPress reports for management purposes and to meet regulatory compliance requirements your business needs to adhere to with the <strong>%s</strong>.',
-                'message2' => 'Generate WordPress reports to monitor users’ productivity and meet legal and regulatory compliance requirements with the <strong>%s</strong>.',
-                'link' => 'http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=reports'
-            );
-        }
-        if (!class_exists('WSAL_Ext_Plugin')) {
-            $aPromoAlert[] = array(
-                'name' => 'External DB Add-on',
-                'message1' => 'Store the WordPress audit log in an external database to boost both the performance and security of your WordPress. <strong>Install the %s</strong>.',
-                'message2' => 'Meet regulatory compliance requirements your business needs to adhere to. <strong>Store the WordPress audit log on an external database</strong>.',
-                'link' => 'http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=externaldb'
-            );
-        }
-        if (!empty($aPromoAlert)) {
-            $aPromoAlert[] = array(
-                'name' => 'Add-Ons',
-                'message1' => 'Add email alerts, generate reports and add the search functionality to your WordPress audit log. <strong>%s</strong>.',
-                'message2' => 'Buy all the WP Security Audit Log add-ons as bundle and <strong>benefit from a 60&percnt; discount</strong>. All <strong>%s</strong> for 1 website only cost $99',
-                'link' => 'http://www.wpsecurityauditlog.com/plugin-extensions/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=alladdons'
-            );
+        $aPromoAlerts = $this->GetActivePromoText();
+        if (!empty($aPromoAlerts)) {
+            $promoToSend = isset($aPromoAlerts[$lastPromoSentId]) ? $aPromoAlerts[$lastPromoSentId] : $aPromoAlerts[0];
 
-            $promoToSend = isset($aPromoAlert[$lastPromoSentId]) ? $aPromoAlert[$lastPromoSentId] : $aPromoAlert[0];
-
-            if ($lastPromoSentId < count($aPromoAlert)-1) {
+            if ($lastPromoSentId < count($aPromoAlerts)-1) {
                 $lastPromoSentId++;
             } else {
                 $lastPromoSentId = 0;
@@ -149,6 +110,84 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
             $this->plugin->SetGlobalOption('promo-send-id', $lastPromoSentId);
         }
         return $promoToSend;
+    }
+
+    private function GetActivePromoText()
+    {
+        $aPromoAlerts = array();
+        for ($i = 1; $i <= 2; $i++) {
+            // Generic Premium Update
+            if ($i == 1) {
+                $msg = 'Add email alerts, generate compliance reports and add the search functionality to your WordPress audit log with the <strong>%s</strong>.';
+            } else {
+                $msg = 'Buy all the WP Security Audit Log premium add-ons as bundle and <strong>benefit from a 60&percnt; discount</strong>. <strong>All %s</strong> for 1 website only cost $99.';
+            }
+            $aPromoAlerts[] = array(
+                'name' => 'Premium Add-Ons',
+                'message' => '<strong>60&percnt; OFF On All Premium Add-Ons and Support Bundle</strong><br>'. $msg,
+                'link' => 'http://www.wpsecurityauditlog.com/plugin-extensions/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=alladdons'
+            );
+            // Email Add-On
+            if (!class_exists('WSAL_NP_Plugin')) {
+                if ($i == 1) {
+                    $msg = 'Get notified instantly via email of important changes and actions on your WordPress with the <strong>%s</strong>.';
+                } else {
+                    $msg = 'Receive an email when a user changes a password, when someone logs in during odd hours or from an unusual location with the <strong>%s</strong>';
+                }
+                $aPromoAlerts[] = array(
+                    'name' => 'Email Notifications Add-on',
+                    'message' => '<strong>Email Notifications for WordPress</strong><br>'. $msg,
+                    'link' => 'http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=emailnotifications'
+                );
+            }
+            // Search Add-On
+            if (!class_exists('WSAL_SearchExtension')) {
+                if ($i == 1) {
+                    $msg = 'Easily find a specific change or action in the WordPress audit log with the <strong>%s</strong>.';
+                } else {
+                    $msg = 'Add the Search functionality to the WordPress audit log to find a specific change or action easily within seconds. Use the <strong>%s</strong>';
+                }
+                $aPromoAlerts[] = array(
+                    'name' => 'Search & Filters Add-on',
+                    'message' => '<strong>Search and Filtering for WordPress Audit Log</strong><br>'. $msg,
+                    'link' => 'http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=search'
+                );
+            }
+            // Reports Add-On
+            if (!class_exists('WSAL_Rep_Plugin')) {
+                if ($i == 1) {
+                    $msg = 'Generate WordPress reports for management and to meet regulatory compliance requirements your business needs to adhere to with the <strong>%s</strong>.';
+                } else {
+                    $msg = 'Generate WordPress reports to ensure users’ productivity and meet legal and regulatory compliance requirements with the <strong>%s</strong>';
+                }
+                $aPromoAlerts[] = array(
+                    'name' => 'Reports Add-on',
+                    'message' => '<strong>WordPress Reports Add-On</strong><br>'. $msg,
+                    'link' => 'http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=reports'
+                );
+            }
+            // External DB Add-On
+            if (!class_exists('WSAL_Ext_Plugin')) {
+                if ($i == 1) {
+                    $msg = 'Store the WordPress audit log in an external database to boost the performance and security of your WordPress. <strong>%s</strong>.';
+                } else {
+                    $msg = 'Meet regulatory compliance requirements your business needs to adhere to. <strong>%s</strong>';
+                }
+                $aPromoAlerts[] = array(
+                    'name' => 'External DB Add-on',
+                    'message' => '<strong>External Database for WordPress Audit Log</strong><br>'. $msg,
+                    'link' => 'http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=externaldb'
+                );
+            }
+            if (count($aPromoAlerts) == 1) {
+                unset($aPromoAlerts[0]);
+            }
+        }
+        if (count($aPromoAlerts) >= 1) {
+            return $aPromoAlerts;
+        } else {
+            return null;
+        }
     }
 
     private function CheckPromoToShow()
