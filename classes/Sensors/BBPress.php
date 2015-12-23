@@ -1,6 +1,6 @@
 <?php
 /**
- * Support for BBPress forum
+ * Support for BBPress Forum Plugin
  */
 class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
 {
@@ -16,16 +16,24 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     public function CheckForumChange($post_ID, $newpost, $oldpost)
     {
         if ($this->CheckBBPress($oldpost)) {
+            // Creation and change status
             $changes = 0 + $this->EventForumCreation($oldpost, $newpost);
+            // Change Visibility
             if (!$changes) {
                 $oldVisibility = isset($_POST['original_post_status']) ? $_POST['original_post_status'] : '';
                 $newVisibility = isset($_POST['visibility']) ? $_POST['visibility'] : '';
 
                 if ($oldVisibility != $newVisibility) {
-                    $this->EventForumChangedVisibility($oldpost, $newpost, $oldVisibility, $newVisibility);
-                } else {
-                    $this->EventForumChanged($oldpost, $newpost);
+                    $changes = $this->EventForumChangedVisibility($oldpost, $oldVisibility, $newVisibility);
                 }
+            }
+            // Change Type
+            if (!$changes) {
+                $changes = $this->EventForumChangedType($oldpost);
+            }
+            // Change Order, Link or Parent
+            if (!$changes) {
+                $this->EventForumChanged($oldpost, $newpost);
             }
         }
     }
@@ -66,20 +74,36 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         }
     }
 
-    private function EventForumChangedVisibility($old_post, $new_post, $oldVisibility = null, $newVisibility = null)
+    private function EventForumChangedVisibility($post, $oldVisibility = null, $newVisibility = null)
     {
-        if ($old_post->post_password) {
+        if ($oldVisibility == 'password') {
             $oldVisibility = __('Password Protected', 'wp-security-audit-log');
         }
-        if ($new_post->post_password) {
+        if ($newVisibility == 'password') {
             $newVisibility = __('Password Protected', 'wp-security-audit-log');
         }
 
         if ($oldVisibility != $newVisibility) {
             $this->plugin->alerts->Trigger(8002, array(
-                'ForumName' => $new_post->post_title,
+                'ForumName' => $post->post_title,
                 'OldVisibility' => $oldVisibility,
                 'NewVisibility' => $newVisibility
+            ));
+            return 1;
+        }
+        return 0;
+    }
+
+    private function EventForumChangedType($post)
+    {
+        $bbp_forum_type = get_post_meta($post->ID, '_bbp_forum_type', true);
+        $oldType = isset($bbp_forum_type) ? $bbp_forum_type : '';
+        $newType = isset($_REQUEST['bbp_forum_type']) ? $_REQUEST['bbp_forum_type'] : '';
+        if ($oldType != $newType) {
+            $this->plugin->alerts->Trigger(8011, array(
+                'ForumName' => $post->post_title,
+                'OldType' => $oldType,
+                'NewType' => $newType
             ));
             return 1;
         }

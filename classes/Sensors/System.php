@@ -117,6 +117,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         }
 
         if ($action == 'update' && isset($_REQUEST['option_page']) && ($_REQUEST['option_page'] == 'bbpress')) {
+            // Anonymous posting
             $allow_anonymous = get_option('_bbp_allow_anonymous');
             $oldStatus = !empty($allow_anonymous) ? 1 : 0;
             $newStatus = !empty($_REQUEST['_bbp_allow_anonymous']) ? 1 : 0;
@@ -124,6 +125,26 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 $status = ($newStatus == 1) ? 'Enabled' : 'Disabled';
                 $this->plugin->alerts->Trigger(8010, array(
                     'Status' => $status
+                ));
+            }
+            // Disallow editing after
+            $bbp_edit_lock = get_option('_bbp_edit_lock');
+            $oldTime = !empty($bbp_edit_lock) ? $bbp_edit_lock : '';
+            $newTime = !empty($_REQUEST['_bbp_edit_lock']) ? $_REQUEST['_bbp_edit_lock'] : '';
+            if ($oldTime != $newTime) {
+                $this->plugin->alerts->Trigger(8012, array(
+                    'OldTime' => $oldTime,
+                    'NewTime' => $newTime
+                ));
+            }
+            // Throttle posting every
+            $bbp_throttle_time = get_option('_bbp_throttle_time');
+            $oldTime2 = !empty($bbp_throttle_time) ? $bbp_throttle_time : '';
+            $newTime2 = !empty($_REQUEST['_bbp_throttle_time']) ? $_REQUEST['_bbp_throttle_time'] : '';
+            if ($oldTime2 != $newTime2) {
+                $this->plugin->alerts->Trigger(8013, array(
+                    'OldTime' => $oldTime2,
+                    'NewTime' => $newTime2
                 ));
             }
         }

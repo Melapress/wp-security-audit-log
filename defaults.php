@@ -195,6 +195,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(8008, E_NOTICE, __('User changed the parent of a forum', 'wp-security-audit-log'), __('Changed parent of forum %ForumName% from %OldParent% to %NewParent%', 'wp-security-audit-log')),
                 array(8009, E_WARNING, __('User changed forum\'s role', 'wp-security-audit-log'), __('Changed the forum\'s auto role from %OldRole% to %NewRole%', 'wp-security-audit-log')),
                 array(8010, E_WARNING, __('User changed option of a forum', 'wp-security-audit-log'), __('%Status% the option for anonymous posting on forum', 'wp-security-audit-log')),
+                array(8011, E_NOTICE, __('User changed type of a forum', 'wp-security-audit-log'), __('Changed the type of forum %ForumName% from %OldType% to %NewType%', 'wp-security-audit-log')),
+                array(8012, E_NOTICE, __('User changed time to disallow post editing', 'wp-security-audit-log'), __('Changed the time to disallow post editing from %OldTime% to %NewTime% minutes', 'wp-security-audit-log')),
+                array(8013, E_WARNING, __('User changed the poting throttle time', 'wp-security-audit-log'), __('Changed the poting throttle time from %OldTime% to %NewTime% seconds', 'wp-security-audit-log')),
             )
         ));
 }

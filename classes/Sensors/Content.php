@@ -561,6 +561,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Ignore post from BBPress Plugin,
+     * Triggered on the BBPress Sensor
+     */
     private function CheckBBPress($post)
     {
         switch ($post->post_type) {
