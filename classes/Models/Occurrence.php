@@ -190,4 +190,9 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     {
         return $this->getAdapter()->CheckUnKnownUsers($args);
     }
+
+    public function GetByPostID($post_id)
+    {
+        return $this->getAdapter()->GetByPostID($post_id);
+    }
 }

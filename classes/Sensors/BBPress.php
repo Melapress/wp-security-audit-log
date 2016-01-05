@@ -16,17 +16,8 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     public function CheckForumChange($post_ID, $newpost, $oldpost)
     {
         if ($this->CheckBBPress($oldpost)) {
-            // Creation and change status
-            $changes = 0 + $this->EventForumCreation($oldpost, $newpost);
             // Change Visibility
-            if (!$changes) {
-                $oldVisibility = isset($_POST['original_post_status']) ? $_POST['original_post_status'] : '';
-                $newVisibility = isset($_POST['visibility']) ? $_POST['visibility'] : '';
-
-                if ($oldVisibility != $newVisibility) {
-                    $changes = $this->EventForumChangedVisibility($oldpost, $oldVisibility, $newVisibility);
-                }
-            }
+            $changes = 0 + $this->EventForumChangedVisibility($oldpost);
             // Change Type
             if (!$changes) {
                 $changes = $this->EventForumChangedType($oldpost);
@@ -34,6 +25,10 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
             // Change Order, Link or Parent
             if (!$changes) {
                 $this->EventForumChanged($oldpost, $newpost);
+            }
+            // Creation and change status
+            if (!$changes) {
+                $changes = $this->EventForumCreation($oldpost, $newpost);
             }
         }
     }
@@ -74,16 +69,14 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         }
     }
 
-    private function EventForumChangedVisibility($post, $oldVisibility = null, $newVisibility = null)
+    private function EventForumChangedVisibility($post)
     {
-        if ($oldVisibility == 'password') {
-            $oldVisibility = __('Password Protected', 'wp-security-audit-log');
-        }
-        if ($newVisibility == 'password') {
-            $newVisibility = __('Password Protected', 'wp-security-audit-log');
-        }
+        error_log(print_r($_REQUEST, true));
+        $oldVisibility = !empty($_REQUEST['visibility']) ? $_REQUEST['visibility'] : '';
+        $newVisibility = !empty($_REQUEST['bbp_forum_visibility']) ? $_REQUEST['bbp_forum_visibility'] : '';
+        $newVisibility = ($newVisibility == 'publish') ? 'public' : $newVisibility;
 
-        if ($oldVisibility != $newVisibility) {
+        if (!empty($newVisibility) && $oldVisibility != 'auto-draft' && $oldVisibility != $newVisibility) {
             $this->plugin->alerts->Trigger(8002, array(
                 'ForumName' => $post->post_title,
                 'OldVisibility' => $oldVisibility,
@@ -97,9 +90,9 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     private function EventForumChangedType($post)
     {
         $bbp_forum_type = get_post_meta($post->ID, '_bbp_forum_type', true);
-        $oldType = isset($bbp_forum_type) ? $bbp_forum_type : '';
-        $newType = isset($_REQUEST['bbp_forum_type']) ? $_REQUEST['bbp_forum_type'] : '';
-        if ($oldType != $newType) {
+        $oldType = !empty($bbp_forum_type) ? $bbp_forum_type : 'forum';
+        $newType = !empty($_REQUEST['bbp_forum_type']) ? $_REQUEST['bbp_forum_type'] : '';
+        if (!empty($newType) && $oldType != $newType) {
             $this->plugin->alerts->Trigger(8011, array(
                 'ForumName' => $post->post_title,
                 'OldType' => $oldType,
@@ -122,7 +115,7 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
             ));
             return 1;
         }
-
+        
         if ($old_post->menu_order != $new_post->menu_order) {
             $this->plugin->alerts->Trigger(8004, array(
                 'ForumName' => $new_post->post_title,
@@ -155,9 +148,9 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
             }
         } else {
             $bbp_status = get_post_meta($old_post->ID, '_bbp_status', true);
-            $oldStatus = isset($bbp_status) ? $bbp_status : '';
-            $newStatus = isset($_REQUEST['bbp_forum_status']) ? $_REQUEST['bbp_forum_status'] : '';
-            if ($oldStatus != $newStatus) {
+            $oldStatus = !empty($bbp_status) ? $bbp_status : 'open';
+            $newStatus = !empty($_REQUEST['bbp_forum_status']) ? $_REQUEST['bbp_forum_status'] : '';
+            if (!empty($newStatus) && $oldStatus != $newStatus) {
                 /* To do: check status */
                 $this->plugin->alerts->Trigger(8001, array(
                     'ForumName' => $new_post->post_title,

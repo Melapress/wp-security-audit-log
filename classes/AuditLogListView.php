@@ -410,10 +410,21 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
         $this->items = $query->getAdapter()->Execute($query);
 
-        $this->set_pagination_args( array(
+        $this->set_pagination_args(array(
             'total_items' => $total_items,
             'per_page'    => $per_page,
             'total_pages' => ceil($total_items / $per_page)
-        ) );
+        ));
+    }
+
+    public function single_row($item)
+    {
+        if ($item->alert_id == 9999) {
+            echo '<tr style="background-color: #D5E46E">';
+            $this->single_row_columns($item);
+            echo '</tr>';
+        } else {
+            parent::single_row($item);
+        }
     }
 }

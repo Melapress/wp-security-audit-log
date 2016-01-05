@@ -13,6 +13,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         add_action('wp_trash_post', array($this, 'EventPostTrashed'), 10, 1);
         add_action('untrash_post', array($this, 'EventPostUntrashed'));
         add_action('edit_category', array($this, 'EventChangedCategoryParent'));
+        add_action('save_post', array($this, 'SetRevisionLink'), 10, 3);
     }
     
     protected function GetEventTypeForPostType($post, $typePost, $typePage, $typeCustom)
@@ -282,18 +283,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
 
+    // Revision used
     protected function CheckReviewPendingChange($oldpost, $newpost)
     {
         if ($oldpost->post_status == 'pending') {
-            $revisions = wp_get_post_revisions($newpost->ID, ARRAY_A);
-            if (!empty($revisions)) {
-                $revision = array_shift($revisions);
-            }
             $this->plugin->alerts->Trigger(2072, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
-                'PostTitle' => $oldpost->post_title,
-                'RevisionLink' =>  (!empty($revision)) ? $this->getRevisionLink($revision->ID) : ''
+                'PostTitle' => $oldpost->post_title
             ));
             return 1;
         }
@@ -493,16 +490,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                         break;
                 }
                 if ($event) {
-                    $revisions = wp_get_post_revisions($post_ID, ARRAY_A);
-                    if (!empty($revisions)) {
-                        $revision = array_shift($revisions);
-                    }
                     $this->plugin->alerts->Trigger($event, array(
                         'PostID' => $post_ID,
                         'PostType' => $oldpost->post_type,
                         'PostTitle' => $oldpost->post_title,
-                        'PostUrl' => get_permalink($post_ID), // TODO or should this be $newpost?
-                        'RevisionLink' =>  (!empty($revision)) ? $this->getRevisionLink($revision->ID) : ''
+                        'PostUrl' => get_permalink($post_ID) // TODO or should this be $newpost?
                     ));
                     return 1;
                 }
@@ -574,6 +566,24 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 return true;
             default:
                 return false;
+        }
+    }
+
+    /**
+     * Triggered after save post for add revision link
+     */
+    public function SetRevisionLink($post_id, $post, $update)
+    {
+        $revisions = wp_get_post_revisions($post_id);
+        if (!empty($revisions)) {
+            $revision = array_shift($revisions);
+
+            $objOcc = new  WSAL_Models_Occurrence();
+            $occ = $objOcc->GetByPostID($post_id);
+            $occ = count($occ) ? $occ[0] : null;
+            if (!empty($occ)) {
+                $occ->SetMetaValue('RevisionLink', $this->getRevisionLink($revision->ID));
+            }
         }
     }
 

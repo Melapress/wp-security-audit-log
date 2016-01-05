@@ -131,6 +131,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(4005, E_NOTICE, __('User changed his or her email address', 'wp-security-audit-log'), __('Changed the email address from %OldEmail% to %NewEmail%', 'wp-security-audit-log')),
                 array(4006, E_NOTICE, __('A user changed another user\'s email address', 'wp-security-audit-log'), __('Changed the email address of user account %TargetUsername% from %OldEmail% to %NewEmail%', 'wp-security-audit-log')),
                 array(4007, E_CRITICAL, __('A user was deleted by another user', 'wp-security-audit-log'), __('Deleted User %TargetUserData->Username% with the role of %TargetUserData->Roles%', 'wp-security-audit-log')),
+                array(4013, E_CRITICAL, __('The forum role of a user was changed by another WordPress user', 'wp-security-audit-log'), __('The forum role of user %TargetUsername% was changed from %OldRole% to %NewRole% by %UserChanger%', 'wp-security-audit-log')),
             ),
             __('Plugins & Themes', 'wp-security-audit-log') => array(
                 array(5000, E_CRITICAL, __('User installed a plugin', 'wp-security-audit-log'), __('Installed the plugin %Plugin->Name% in %Plugin->plugin_dir_path%', 'wp-security-audit-log')),
@@ -197,7 +198,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(8010, E_WARNING, __('User changed option of a forum', 'wp-security-audit-log'), __('%Status% the option for anonymous posting on forum', 'wp-security-audit-log')),
                 array(8011, E_NOTICE, __('User changed type of a forum', 'wp-security-audit-log'), __('Changed the type of forum %ForumName% from %OldType% to %NewType%', 'wp-security-audit-log')),
                 array(8012, E_NOTICE, __('User changed time to disallow post editing', 'wp-security-audit-log'), __('Changed the time to disallow post editing from %OldTime% to %NewTime% minutes', 'wp-security-audit-log')),
-                array(8013, E_WARNING, __('User changed the poting throttle time', 'wp-security-audit-log'), __('Changed the poting throttle time from %OldTime% to %NewTime% seconds', 'wp-security-audit-log')),
+                array(8013, E_WARNING, __('User changed the posting throttle time', 'wp-security-audit-log'), __('Changed the posting throttle time from %OldTime% to %NewTime% seconds', 'wp-security-audit-log')),
             )
         ));
 }

@@ -12,24 +12,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
         add_action('wp_ajax_AjaxSetIpp', array($this, 'AjaxSetIpp'));
         add_action('wp_ajax_AjaxSearchSite', array($this, 'AjaxSearchSite'));
-        add_action('all_admin_notices', array($this, 'AdminNoticesNotificationsExtension'));
         
         $this->RegisterNotice('notifications-extension');
-    }
-    
-    public function AdminNoticesNotificationsExtension() {
-        $NotificationExtensionInstalled = $this->_plugin->licensing->IsLicenseValid('wsal-notifications-extension.php');
-        $IsCurrentView = $this->_plugin->views->GetActiveView() == $this;
-        if($IsCurrentView && !$this->IsNoticeDismissed('notifications-extension') && !$NotificationExtensionInstalled){
-            ?><div class="updated" data-notice-name="notifications-extension">
-                <p><?php _e('Get notified instantly via email of important changes on your WordPress', 'wp-security-audit-log'); ?></p>
-                <p>
-                    <?php $url = 'http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=plugin&utm_medium=auditlogviewer&utm_campaign=notifications'; ?>
-                    <a href="<?php echo esc_attr($url); ?>" target="_blank"><?php _e('Learn More', 'wp-security-audit-log'); ?></a>
-                    | <a href="javascript:;" class="wsal-dismiss-notification"><?php _e('Dismiss this notice', 'wp-security-audit-log'); ?></a>
-                </p>
-            </div><?php
-        }
     }
     
     public function HasPluginShortcutLink(){
@@ -91,9 +75,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
                         'token' => (int)$occ->Count(),
                     ),
                 )); ?>);
-                if (jQuery("td.mesg p").hasClass("promo-alert")) {
-                    jQuery("td.mesg p").parent().parent().parent().css("background-color", "#D5E46E");
-                };
             });
         </script><?php
     }
