@@ -140,24 +140,49 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         $result = 0;
         if ($old_post->post_status == 'draft') {
             if ($new_post->post_status == 'publish') {
-                $this->plugin->alerts->Trigger(8000, array(
-                    'ForumName' => $new_post->post_title,
-                    'ForumURL' => get_permalink($new_post->ID)
-                ));
+                switch ($old_post->post_type) {
+                    case 'forum':
+                        $this->plugin->alerts->Trigger(8000, array(
+                            'ForumName' => $new_post->post_title,
+                            'ForumURL' => get_permalink($new_post->ID)
+                        ));
+                        break;
+                    case 'topic':
+                        $this->plugin->alerts->Trigger(8014, array(
+                            'TopicName' => $new_post->post_title,
+                            'TopicURL' => get_permalink($new_post->ID)
+                        ));
+                        break;
+                }
                 $result = 1;
             }
         } else {
-            $bbp_status = get_post_meta($old_post->ID, '_bbp_status', true);
-            $oldStatus = !empty($bbp_status) ? $bbp_status : 'open';
-            $newStatus = !empty($_REQUEST['bbp_forum_status']) ? $_REQUEST['bbp_forum_status'] : '';
-            if (!empty($newStatus) && $oldStatus != $newStatus) {
-                /* To do: check status */
-                $this->plugin->alerts->Trigger(8001, array(
-                    'ForumName' => $new_post->post_title,
-                    'OldStatus' => $oldStatus,
-                    'NewStatus' => $newStatus
-                ));
-                $result = 1;
+            switch ($old_post->post_type) {
+                case 'forum':
+                    $bbp_status = get_post_meta($old_post->ID, '_bbp_status', true);
+                    $oldStatus = !empty($bbp_status) ? $bbp_status : 'open';
+                    $newStatus = !empty($_REQUEST['bbp_forum_status']) ? $_REQUEST['bbp_forum_status'] : '';
+                    if (!empty($newStatus) && $oldStatus != $newStatus) {
+                        $this->plugin->alerts->Trigger(8001, array(
+                            'ForumName' => $new_post->post_title,
+                            'OldStatus' => $oldStatus,
+                            'NewStatus' => $newStatus
+                        ));
+                        $result = 1;
+                    }
+                    break;
+                case 'topic':
+                    $oldStatus = !empty($_REQUEST['original_post_status']) ? $_REQUEST['original_post_status'] : '';
+                    $newStatus = !empty($_REQUEST['post_status']) ? $_REQUEST['post_status'] : '';
+                    if (!empty($newStatus) && $oldStatus != $newStatus) {
+                        $this->plugin->alerts->Trigger(8015, array(
+                            'TopicName' => $new_post->post_title,
+                            'OldStatus' => ($oldStatus == 'publish') ? 'open' : $oldStatus,
+                            'NewStatus' => ($newStatus == 'publish') ? 'open' : $newStatus
+                        ));
+                        $result = 1;
+                    }
+                    break;
             }
         }
         return $result;

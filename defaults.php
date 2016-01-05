@@ -186,7 +186,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
             ),
             __('BBPress Forum', 'wp-security-audit-log') => array(
                 array(8000, E_CRITICAL, __('User created new forum', 'wp-security-audit-log'), __('Created new forum %ForumName%. Forum URL is %ForumURL%', 'wp-security-audit-log')),
-                array(8001, E_NOTICE, __('User changed status of a forum', 'wp-security-audit-log'), __('Changed the status  of forum %ForumName% from %OldStatus% to %NewStatus%', 'wp-security-audit-log')),
+                array(8001, E_NOTICE, __('User changed status of a forum', 'wp-security-audit-log'), __('Changed the status of forum %ForumName% from %OldStatus% to %NewStatus%', 'wp-security-audit-log')),
                 array(8002, E_NOTICE, __('User changed visibility of a forum', 'wp-security-audit-log'), __('Changed the visibility of forum %ForumName% from %OldVisibility% to %NewVisibility%', 'wp-security-audit-log')),
                 array(8003, E_CRITICAL, __('User changed the URL of a forum', 'wp-security-audit-log'), __('Changed the URL of forum %ForumName% from %OldUrl% to %NewUrl%', 'wp-security-audit-log')),
                 array(8004, E_NOTICE, __('User changed order of a forum', 'wp-security-audit-log'), __('Changed the order of forum %ForumName% from %OldOrder% to %NewOrder%', 'wp-security-audit-log')),
@@ -199,6 +199,15 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(8011, E_NOTICE, __('User changed type of a forum', 'wp-security-audit-log'), __('Changed the type of forum %ForumName% from %OldType% to %NewType%', 'wp-security-audit-log')),
                 array(8012, E_NOTICE, __('User changed time to disallow post editing', 'wp-security-audit-log'), __('Changed the time to disallow post editing from %OldTime% to %NewTime% minutes', 'wp-security-audit-log')),
                 array(8013, E_WARNING, __('User changed the posting throttle time', 'wp-security-audit-log'), __('Changed the posting throttle time from %OldTime% to %NewTime% seconds', 'wp-security-audit-log')),
+                array(8014, E_NOTICE, __('User created new topic', 'wp-security-audit-log'), __('Created new topic %TopicName%. Topic URL is %TopicURL%', 'wp-security-audit-log')),
+                array(8015, E_NOTICE, __('User changed status of a topic', 'wp-security-audit-log'), __('Changed the status of topic %TopicName% from %OldStatus% to %NewStatus%', 'wp-security-audit-log')),
+                array(8016, E_NOTICE, __('User changed type of a topic', 'wp-security-audit-log'), __('Changed the type of topic %TopicName% from %OldType% to %NewType%', 'wp-security-audit-log')),
+                array(8017, E_CRITICAL, __('User changed URL of a topic', 'wp-security-audit-log'), __('Changed the URL of topic %TopicName% from %OldUrl% to %NewUrl%', 'wp-security-audit-log')),
+                array(8018, E_NOTICE, __('User changed the forum of a topic', 'wp-security-audit-log'), __('Changed the forum of topic %TopicName% from %OldForum% to %NewForum%', 'wp-security-audit-log')),
+                array(8019, E_CRITICAL, __('User moved topic to trash', 'wp-security-audit-log'), __('Moved forum %TopicName% to trash. Topic ID is %TopicID%', 'wp-security-audit-log')),
+                array(8020, E_WARNING, __('User permanently deleted topic', 'wp-security-audit-log'), __('Permanently deleted topic %TopicName%', 'wp-security-audit-log')),
+                array(8021, E_WARNING, __('User restored topic from trash', 'wp-security-audit-log'), __('Restored topic %TopicName% from trash', 'wp-security-audit-log')),
+                array(8022, E_NOTICE, __('User changed visibility of a topic', 'wp-security-audit-log'), __('Changed the visibility of topic %TopicName% from %OldVisibility% to %NewVisibility%', 'wp-security-audit-log')),
             )
         ));
 }
