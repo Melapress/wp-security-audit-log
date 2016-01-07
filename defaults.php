@@ -198,7 +198,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(8010, E_WARNING, __('User changed option of a forum', 'wp-security-audit-log'), __('%Status% the option for anonymous posting on forum', 'wp-security-audit-log')),
                 array(8011, E_NOTICE, __('User changed type of a forum', 'wp-security-audit-log'), __('Changed the type of forum %ForumName% from %OldType% to %NewType%', 'wp-security-audit-log')),
                 array(8012, E_NOTICE, __('User changed time to disallow post editing', 'wp-security-audit-log'), __('Changed the time to disallow post editing from %OldTime% to %NewTime% minutes', 'wp-security-audit-log')),
-                array(8013, E_WARNING, __('User changed the posting throttle time', 'wp-security-audit-log'), __('Changed the posting throttle time from %OldTime% to %NewTime% seconds', 'wp-security-audit-log')),
+                array(8013, E_WARNING, __('User changed the forum setting posting throttle time', 'wp-security-audit-log'), __('Changed the forum setting posting throttle time from %OldTime% to %NewTime% seconds', 'wp-security-audit-log')),
                 array(8014, E_NOTICE, __('User created new topic', 'wp-security-audit-log'), __('Created new topic %TopicName%. Topic URL is %TopicURL%', 'wp-security-audit-log')),
                 array(8015, E_NOTICE, __('User changed status of a topic', 'wp-security-audit-log'), __('Changed the status of topic %TopicName% from %OldStatus% to %NewStatus%', 'wp-security-audit-log')),
                 array(8016, E_NOTICE, __('User changed type of a topic', 'wp-security-audit-log'), __('Changed the type of topic %TopicName% from %OldType% to %NewType%', 'wp-security-audit-log')),

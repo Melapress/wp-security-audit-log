@@ -10,7 +10,7 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     public function HookEvents()
     {
         if (current_user_can("edit_posts")) {
-            add_action('admin_init', array($this, 'RetrieveOldData'));
+            add_action('admin_init', array($this, 'EventAdminInit'));
         }
         add_action('post_updated', array($this, 'CheckForumChange'), 10, 3);
         add_action('delete_post', array($this, 'EventForumDeleted'), 10, 1);
@@ -18,7 +18,15 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         add_action('untrash_post', array($this, 'EventForumUntrashed'));
     }
 
-    public function RetrieveOldData()
+    public function EventAdminInit()
+    {
+        // load old data, if applicable
+        $this->RetrieveOldData();
+        // check for Ajax changes
+        $this->TriggerAjaxChange();
+    }
+
+    protected function RetrieveOldData()
     {
         if (isset($_POST) && isset($_POST['post_ID'])
             && !(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
@@ -46,7 +54,7 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
             if (!$changes) {
                 $changes = $this->EventForumChangedStatus($oldpost);
             }
-            // Change Order, Link or Parent
+            // Change Order, Parent or URL
             if (!$changes) {
                 $changes = $this->EventForumChanged($oldpost, $newpost);
             }
@@ -198,7 +206,12 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                 }
                 break;
             case 'topic':
-                $bbp_sticky_topics = maybe_unserialize(get_post_meta($post->ID, '_bbp_sticky_topics', true));
+                if (!empty($_POST['parent_id'])) {
+                    $post_id = $_POST['parent_id'];
+                } else {
+                    $post_id = $post->ID;
+                }
+                $bbp_sticky_topics = maybe_unserialize(get_post_meta($post_id, '_bbp_sticky_topics', true));
                 $bbp_super_sticky_topics = maybe_unserialize(get_option('_bbp_super_sticky_topics'));
                 if (!empty($bbp_sticky_topics) && in_array($post->ID, $bbp_sticky_topics)) {
                     $oldType = 'stick';
@@ -208,12 +221,11 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                     $oldType = 'unstick';
                 }
                 $newType = !empty($_POST['bbp_stick_topic']) ? $_POST['bbp_stick_topic'] : '';
-               
                 if (!empty($newType) && $oldType != $newType) {
                     $this->plugin->alerts->Trigger(8016, array(
                         'TopicName' => $post->post_title,
-                        'OldType' => ($oldType == 'unstick') ? 'normal' : ($oldType == 'super') ? 'super sticky' : $oldType,
-                        'NewType' => ($newType == 'unstick') ? 'normal' : ($newType == 'super') ? 'super sticky' : $newType
+                        'OldType' => ($oldType == 'unstick') ? 'normal' : (($oldType == 'super') ? 'super sticky' : $oldType),
+                        'NewType' => ($newType == 'unstick') ? 'normal' : (($newType == 'super') ? 'super sticky' : $newType)
                     ));
                     $result = 1;
                 }
@@ -242,6 +254,22 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
             case 'topic':
                 $oldStatus = !empty($_REQUEST['original_post_status']) ? $_REQUEST['original_post_status'] : '';
                 $newStatus = !empty($_REQUEST['post_status']) ? $_REQUEST['post_status'] : '';
+                // In case of Ajax request Spam/Not spam
+                if (isset($_GET['action']) && $_GET['action'] == 'bbp_toggle_topic_spam') {
+                    $oldStatus = $post->post_status;
+                    $newStatus = 'spam';
+                    if (isset($_GET['post_status']) && $_GET['post_status'] == 'spam') {
+                        $newStatus = 'publish';
+                    }
+                }
+                // In case of Ajax request Close/Open
+                if (isset($_GET['action']) && $_GET['action'] == 'bbp_toggle_topic_close') {
+                    $oldStatus = $post->post_status;
+                    $newStatus = 'closed';
+                    if (isset($_GET['post_status']) && $_GET['post_status'] == 'closed') {
+                        $newStatus = 'publish';
+                    }
+                }
                 if (!empty($newStatus) && $oldStatus != $newStatus) {
                     $this->plugin->alerts->Trigger(8015, array(
                         'TopicName' => $post->post_title,
@@ -257,6 +285,36 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
 
     private function EventForumChanged($old_post, $new_post)
     {
+        // Changed Order
+        if ($old_post->menu_order != $new_post->menu_order) {
+            $this->plugin->alerts->Trigger(8004, array(
+                'ForumName' => $new_post->post_title,
+                'OldOrder' => $old_post->menu_order,
+                'NewOrder' => $new_post->menu_order
+            ));
+            return 1;
+        }
+        // Changed Parent
+        if ($old_post->post_parent != $new_post->post_parent) {
+            switch ($old_post->post_type) {
+                case 'forum':
+                    $this->plugin->alerts->Trigger(8008, array(
+                        'ForumName' => $new_post->post_title,
+                        'OldParent' => $old_post->post_parent ? get_the_title($old_post->post_parent) : 'no parent',
+                        'NewParent' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent'
+                    ));
+                    break;
+                case 'topic':
+                    $this->plugin->alerts->Trigger(8018, array(
+                        'TopicName' => $new_post->post_title,
+                        'OldForum' => $old_post->post_parent ? get_the_title($old_post->post_parent) : 'no parent',
+                        'NewForum' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent'
+                    ));
+                    break;
+            }
+            return 1;
+        }
+        // Changed URL
         $oldLink = $this->_OldLink;
         $newLink = get_permalink($new_post->ID);
         if (!empty($oldLink) && $oldLink != $newLink) {
@@ -273,35 +331,6 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                         'TopicName' => $new_post->post_title,
                         'OldUrl' => $oldLink,
                         'NewUrl' => $newLink
-                    ));
-                    break;
-            }
-            return 1;
-        }
-        
-        if ($old_post->menu_order != $new_post->menu_order) {
-            $this->plugin->alerts->Trigger(8004, array(
-                'ForumName' => $new_post->post_title,
-                'OldOrder' => $old_post->menu_order,
-                'NewOrder' => $new_post->menu_order
-            ));
-            return 1;
-        }
-
-        if ($old_post->post_parent != $new_post->post_parent) {
-            switch ($old_post->post_type) {
-                case 'forum':
-                    $this->plugin->alerts->Trigger(8008, array(
-                        'ForumName' => $new_post->post_title,
-                        'OldParent' => $old_post->post_parent ? get_the_title($old_post->post_parent) : 'no parent',
-                        'NewParent' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent'
-                    ));
-                    break;
-                case 'topic':
-                    $this->plugin->alerts->Trigger(8018, array(
-                        'TopicName' => $new_post->post_title,
-                        'OldForum' => $old_post->post_parent ? get_the_title($old_post->post_parent) : 'no parent',
-                        'NewForum' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent'
                     ));
                     break;
             }
@@ -324,5 +353,58 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
             'TopicID' => $post->ID,
             'TopicName' => $post->post_title
         ));
+    }
+
+    /**
+     * Trigger of ajax events generated in the Topic Grid
+     */
+    public function TriggerAjaxChange()
+    {
+        if (!empty($_GET['post_type']) && !empty($_GET['topic_id'])) {
+            if ($_GET['post_type'] == 'topic') {
+                $post = get_post($_GET['topic_id']);
+                
+                // Topic type
+                if (isset($_GET['action']) && $_GET['action'] == 'bbp_toggle_topic_stick') {
+                    if (!empty($post->post_parent)) {
+                        $post_id = $post->post_parent;
+                    } else {
+                        $post_id = $_GET['topic_id'];
+                    }
+                    
+                    $bbp_sticky_topics = maybe_unserialize(get_post_meta($post_id, '_bbp_sticky_topics', true));
+                    $bbp_super_sticky_topics = maybe_unserialize(get_option('_bbp_super_sticky_topics'));
+                    if (!empty($bbp_sticky_topics) && in_array($_GET['topic_id'], $bbp_sticky_topics)) {
+                        $oldType = 'sticky';
+                    } elseif (!empty($bbp_super_sticky_topics) && in_array($_GET['topic_id'], $bbp_super_sticky_topics)) {
+                        $oldType = 'super sticky';
+                    } else {
+                        $oldType = 'normal';
+                    }
+
+                    switch ($oldType) {
+                        case 'sticky':
+                        case 'super sticky':
+                            $newType = 'normal';
+                            break;
+                        case 'normal':
+                            if (isset($_GET['super']) && $_GET['super'] == 1) {
+                                $newType = 'super sticky';
+                            } else {
+                                $newType = 'sticky';
+                            }
+                            break;
+                    }
+
+                    if (!empty($newType) && $oldType != $newType) {
+                        $this->plugin->alerts->Trigger(8016, array(
+                            'TopicName' => $post->post_title,
+                            'OldType' => $oldType,
+                            'NewType' => $newType
+                        ));
+                    }
+                }
+            }
+        }
     }
 }
