@@ -1,5 +1,6 @@
 <?php
 
+
 class WSAL_Views_Extensions extends WSAL_AbstractView
 {
     
