@@ -125,13 +125,13 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     public function CheckUnKnownUsers($args = array()) 
     {
         $tt2 = new WSAL_Adapters_MySQL_Meta($this->connection);
-        return self::LoadMultiQuery('
-            SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence 
+        return self::LoadMultiQuery(
+            'SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence 
             INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
             and ipMeta.name = "ClientIP" and ipMeta.value = %s 
             WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
             AND (created_on BETWEEN %d AND %d)
-            GROUP BY occurrence.id', 
+            GROUP BY occurrence.id',
             $args
         );
     }
@@ -166,5 +166,22 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
         return $searchConditions;
     }
     
+    /**
+     * Gets occurrence by Post_id
+     * @param int $post_id
+     */
+    public function GetByPostID($post_id)
+    {
+        $tt2 = new WSAL_Adapters_MySQL_Meta($this->connection);
+        return self::LoadMultiQuery(
+            'SELECT occurrence.* FROM `' . $this->GetTable() . '`AS occurrence 
+            INNER JOIN `' . $tt2->GetTable() . '`AS postMeta ON postMeta.occurrence_id = occurrence.id
+            and postMeta.name = "PostID"
+            and postMeta.value = %d
+            GROUP BY occurrence.id
+            ORDER BY created_on DESC',
+            array($post_id)
+        );
+    }
 
 }

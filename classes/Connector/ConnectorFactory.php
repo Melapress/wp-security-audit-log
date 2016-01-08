@@ -43,7 +43,7 @@ abstract class WSAL_Connector_ConnectorFactory
 
     public static function GetConfig()
     {
-        $conf = new WSAL_Settings(new WpSecurityAuditLog());
+        $conf = new WSAL_Settings(WpSecurityAuditLog::GetInstance());
         $type = $conf->GetAdapterConfig('adapter-type');
         if (empty($type)) {
             return null;
