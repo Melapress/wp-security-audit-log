@@ -214,7 +214,7 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                 $bbp_sticky_topics = maybe_unserialize(get_post_meta($post_id, '_bbp_sticky_topics', true));
                 $bbp_super_sticky_topics = maybe_unserialize(get_option('_bbp_super_sticky_topics'));
                 if (!empty($bbp_sticky_topics) && in_array($post->ID, $bbp_sticky_topics)) {
-                    $oldType = 'stick';
+                    $oldType = 'sticky';
                 } elseif (!empty($bbp_super_sticky_topics) && in_array($post->ID, $bbp_super_sticky_topics)) {
                     $oldType = 'super';
                 } else {
