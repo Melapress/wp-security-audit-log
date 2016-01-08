@@ -131,6 +131,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(4005, E_NOTICE, __('User changed his or her email address', 'wp-security-audit-log'), __('Changed the email address from %OldEmail% to %NewEmail%', 'wp-security-audit-log')),
                 array(4006, E_NOTICE, __('A user changed another user\'s email address', 'wp-security-audit-log'), __('Changed the email address of user account %TargetUsername% from %OldEmail% to %NewEmail%', 'wp-security-audit-log')),
                 array(4007, E_CRITICAL, __('A user was deleted by another user', 'wp-security-audit-log'), __('Deleted User %TargetUserData->Username% with the role of %TargetUserData->Roles%', 'wp-security-audit-log')),
+                array(4013, E_CRITICAL, __('The forum role of a user was changed by another WordPress user', 'wp-security-audit-log'), __('The forum role of user %TargetUsername% was changed from %OldRole% to %NewRole% by %UserChanger%', 'wp-security-audit-log')),
             ),
             __('Plugins & Themes', 'wp-security-audit-log') => array(
                 array(5000, E_CRITICAL, __('User installed a plugin', 'wp-security-audit-log'), __('Installed the plugin %Plugin->Name% in %Plugin->plugin_dir_path%', 'wp-security-audit-log')),
@@ -155,6 +156,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(6003, E_CRITICAL, __('WordPress Administrator Notification email changed', 'wp-security-audit-log'), __('Changed the WordPress administrator notifications email address from %OldEmail% to %NewEmail%', 'wp-security-audit-log')),
                 array(6004, E_CRITICAL, __('WordPress was updated', 'wp-security-audit-log'), __('Updated WordPress from version %OldVersion% to %NewVersion%', 'wp-security-audit-log')),
                 array(6005, E_CRITICAL, __('User changes the WordPress Permalinks', 'wp-security-audit-log'), __('Changed the WordPress permalinks from %OldPattern% to %NewPattern%', 'wp-security-audit-log')),
+                array(9999, E_CRITICAL, __('Advertising Add-ons.', 'wp-security-audit-log'), __('%PromoMessage%', 'wp-security-audit-log')),
             ),
             __('MultiSite', 'wp-security-audit-log') => array(
                 array(4008, E_CRITICAL, __('User granted Super Admin privileges', 'wp-security-audit-log'), __('Granted Super Admin privileges to %TargetUsername%', 'wp-security-audit-log')),
@@ -182,6 +184,31 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(5017, E_CRITICAL, __('Unknown component modified tables structure', 'wp-security-audit-log'), __('An unknown component modified the structure of these database tables: %TableNames%', 'wp-security-audit-log')),
                 array(5018, E_CRITICAL, __('Unknown component deleted tables', 'wp-security-audit-log'), __('An unknown component deleted the following tables from the database: %TableNames%', 'wp-security-audit-log')),
             ),
+            __('BBPress Forum', 'wp-security-audit-log') => array(
+                array(8000, E_CRITICAL, __('User created new forum', 'wp-security-audit-log'), __('Created new forum %ForumName%. Forum URL is %ForumURL%', 'wp-security-audit-log')),
+                array(8001, E_NOTICE, __('User changed status of a forum', 'wp-security-audit-log'), __('Changed the status of forum %ForumName% from %OldStatus% to %NewStatus%', 'wp-security-audit-log')),
+                array(8002, E_NOTICE, __('User changed visibility of a forum', 'wp-security-audit-log'), __('Changed the visibility of forum %ForumName% from %OldVisibility% to %NewVisibility%', 'wp-security-audit-log')),
+                array(8003, E_CRITICAL, __('User changed the URL of a forum', 'wp-security-audit-log'), __('Changed the URL of forum %ForumName% from %OldUrl% to %NewUrl%', 'wp-security-audit-log')),
+                array(8004, E_NOTICE, __('User changed order of a forum', 'wp-security-audit-log'), __('Changed the order of forum %ForumName% from %OldOrder% to %NewOrder%', 'wp-security-audit-log')),
+                array(8005, E_CRITICAL, __('User moved forum to trash', 'wp-security-audit-log'), __('Moved forum %ForumName% to trash. Forum ID is %ForumID%', 'wp-security-audit-log')),
+                array(8006, E_WARNING, __('User permanently deleted forum', 'wp-security-audit-log'), __('Permanently deleted forum %ForumName%', 'wp-security-audit-log')),
+                array(8007, E_WARNING, __('User restored forum from trash', 'wp-security-audit-log'), __('Restored forum %ForumName% from trash', 'wp-security-audit-log')),
+                array(8008, E_NOTICE, __('User changed the parent of a forum', 'wp-security-audit-log'), __('Changed parent of forum %ForumName% from %OldParent% to %NewParent%', 'wp-security-audit-log')),
+                array(8009, E_WARNING, __('User changed forum\'s role', 'wp-security-audit-log'), __('Changed the forum\'s auto role from %OldRole% to %NewRole%', 'wp-security-audit-log')),
+                array(8010, E_WARNING, __('User changed option of a forum', 'wp-security-audit-log'), __('%Status% the option for anonymous posting on forum', 'wp-security-audit-log')),
+                array(8011, E_NOTICE, __('User changed type of a forum', 'wp-security-audit-log'), __('Changed the type of forum %ForumName% from %OldType% to %NewType%', 'wp-security-audit-log')),
+                array(8012, E_NOTICE, __('User changed time to disallow post editing', 'wp-security-audit-log'), __('Changed the time to disallow post editing from %OldTime% to %NewTime% minutes', 'wp-security-audit-log')),
+                array(8013, E_WARNING, __('User changed the forum setting posting throttle time', 'wp-security-audit-log'), __('Changed the forum setting posting throttle time from %OldTime% to %NewTime% seconds', 'wp-security-audit-log')),
+                array(8014, E_NOTICE, __('User created new topic', 'wp-security-audit-log'), __('Created new topic %TopicName%. Topic URL is %TopicURL%', 'wp-security-audit-log')),
+                array(8015, E_NOTICE, __('User changed status of a topic', 'wp-security-audit-log'), __('Changed the status of topic %TopicName% from %OldStatus% to %NewStatus%', 'wp-security-audit-log')),
+                array(8016, E_NOTICE, __('User changed type of a topic', 'wp-security-audit-log'), __('Changed the type of topic %TopicName% from %OldType% to %NewType%', 'wp-security-audit-log')),
+                array(8017, E_CRITICAL, __('User changed URL of a topic', 'wp-security-audit-log'), __('Changed the URL of topic %TopicName% from %OldUrl% to %NewUrl%', 'wp-security-audit-log')),
+                array(8018, E_NOTICE, __('User changed the forum of a topic', 'wp-security-audit-log'), __('Changed the forum of topic %TopicName% from %OldForum% to %NewForum%', 'wp-security-audit-log')),
+                array(8019, E_CRITICAL, __('User moved topic to trash', 'wp-security-audit-log'), __('Moved forum %TopicName% to trash. Topic ID is %TopicID%', 'wp-security-audit-log')),
+                array(8020, E_WARNING, __('User permanently deleted topic', 'wp-security-audit-log'), __('Permanently deleted topic %TopicName%', 'wp-security-audit-log')),
+                array(8021, E_WARNING, __('User restored topic from trash', 'wp-security-audit-log'), __('Restored topic %TopicName% from trash', 'wp-security-audit-log')),
+                array(8022, E_NOTICE, __('User changed visibility of a topic', 'wp-security-audit-log'), __('Changed the visibility of topic %TopicName% from %OldVisibility% to %NewVisibility%', 'wp-security-audit-log')),
+            )
         ));
 }
 add_action('wsal_init', 'wsaldefaults_wsal_init');

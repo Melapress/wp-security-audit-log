@@ -213,6 +213,10 @@ class WSAL_AuditLogListView extends WP_List_Table {
                     } else {
                         $roles = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
                     }
+                } elseif ($username == 'Plugin') {
+                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/plugin-logo.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __('Plugin', 'wp-security-audit-log') . '</i>';
+                    $roles = '';
                 } else {
                     $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
                     $uhtml = '<i>' . __('System', 'wp-security-audit-log') . '</i>';
@@ -267,6 +271,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
             
             case $name == '%Message%':
                 return esc_html($value);
+
+            case $name == '%PromoMessage%':
+                return '<p class="promo-alert">' . $value .'</p>';
+
+            case $name == '%PromoLink%':
+                return $value;
 
             case $name == '%MetaLink%':
                 if (!empty($value)) {
@@ -400,10 +410,21 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
         $this->items = $query->getAdapter()->Execute($query);
 
-        $this->set_pagination_args( array(
+        $this->set_pagination_args(array(
             'total_items' => $total_items,
             'per_page'    => $per_page,
             'total_pages' => ceil($total_items / $per_page)
-        ) );
+        ));
+    }
+
+    public function single_row($item)
+    {
+        if ($item->alert_id == 9999) {
+            echo '<tr style="background-color: #D5E46E">';
+            $this->single_row_columns($item);
+            echo '</tr>';
+        } else {
+            parent::single_row($item);
+        }
     }
 }

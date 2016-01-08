@@ -15,7 +15,7 @@ class WSAL_Views_About extends WSAL_AbstractView {
 	}
 	
 	public function GetWeight(){
-		return 4;
+		return 6;
 	}
 	
 	public function Render(){

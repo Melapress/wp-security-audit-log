@@ -353,8 +353,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     /**
      * Function used in WSAL reporting extension
      */
-    public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp)
+    public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp, $_nextId = null, $_limit = 0)
     {
+
         global $wpdb;
         $tableUsers = $wpdb->users;
         $_wpdb = $this->connection;
@@ -375,7 +376,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             }
             $user_names = implode(', ', $aUsers);
         }
-        
+        $conditionID = !empty($_nextId) ? ' AND occ.id < '.$_nextId : '';
+
         $sql = "SELECT DISTINCT
             occ.id, 
             occ.alert_id, 
@@ -403,15 +405,21 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
                 AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
                 AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
+                {$conditionID}
             ORDER BY
                 site_id, created_on DESC
         ";
+
         $_wpdb->query("SET @siteId = $_siteId");
         $_wpdb->query("SET @userId = $_userId");
         $_wpdb->query("SET @roleName = $_roleName");
         $_wpdb->query("SET @alertCode = $_alertCode");
         $_wpdb->query("SET @startTimestamp = $_startTimestamp");
         $_wpdb->query("SET @endTimestamp = $_endTimestamp");
+
+        if (!empty($_limit)) {
+            $sql .= " LIMIT {$_limit}";
+        }
         $results = $_wpdb->get_results($sql);
 
         foreach ($results as $row) {
@@ -422,7 +430,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 $userId = $wpdb->get_var($sql);
             }
             $row->user_id = $userId;
+            $results['lastId'] = $row->id;
         }
+        
         return $results;
         /*
         $query = <<<query
