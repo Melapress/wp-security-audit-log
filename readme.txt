@@ -14,6 +14,8 @@ Keep an audit log of all changes and under the hood WordPress activity to ensure
 == Description ==
 Keep an audit log of everything that is happening on your WordPress and [WordPress multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/) with WP Security Audit Log to ensure user productivity and identify WordPress security issues before they become a security problem. WP Security Audit Log, WordPress' most comprehensive user monitoring and audit log plugin already helps thousands of WordPress administrators, owners and security professionals ensure the security of their websites and blogs. Ensure the security of your WordPress too by installing WP Security Audit Log. The community's favourite WordPress user monitoring monitoring and security auditing plugin is developed by WordPress Security Consultants and Professionals [WP White Security](http://www.wpwhitesecurity.com/). 
 
+[youtube https://www.youtube.com/watch?v=1nopATCS-CQ]
+
 > <strong>Free and Premium Support</strong><br>
 > 
 > WP White Security provides support for WP Security Audit Log plugin on the WordPress forums for free, though please note that it is free support hence it is not always possible to answer all questions on a timely manner, although we do try.
@@ -80,6 +82,12 @@ WP Security Audit Log is the first tracking and audit WordPress security monitor
 
 For more information about the features for WordPress Multisite network installation refer to [WP Security Audit Log Features for WordPress Multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/)
 
+= WordPress Security Audit Log in your Language! =
+We need help translating the plugin and the WordPress Security Alerts. If you would like to translate this plugin visit the [WordPress translate Project](https://translate.wordpress.org/) for more information on how to translate the plugin. If you already know how translations work, [start translating WP Security Audit Log now](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log) and contact us on plugins@wpwhitesecurity.com for a free license of all add-ons.
+
+* Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
+* German translation by [Mourad Louha](http://excel-translator.de)
+
 = WordPress & PHP Errors Monitoring Tools =
 Plugins and themes customizations are most probably the norm of the day on large WordPress websites, not to mention the installation of new plugins and components. With WP Security Audit Log now it is easier than ever before to monitor your plugins', theme's and other code behaviour, it will generate a alert when a PHP error, warning, exception or shutdown is detected. It is also possible to log all HTTP GET and POST requests that are reaching your WordPress installation to a log file with WP Security Audit Log. Simply enable the PHP Errors monitoring or logging from the plugins settings.
 
@@ -114,6 +122,12 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * [Tourqe News](http://torquemag.io/5-awesome-wordpress-plugins-you-may-not-have-heard-of/)
 * [Shout Me Loud](http://www.shoutmeloud.com/how-to-monitor-user-activities-wordpress-dashboard.html)
 * [The Darknet](http://www.darknet.org.uk/2015/10/wp-security-audit-log-a-complete-audit-log-plugin-for-wordpress/)
+
+= WordPress Security Audit Log in your Language! =
+We need help translating the plugin and the WordPress Security Alerts. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log) to translate the plugin and drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
+
+* Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
+* German translation by [Mourad Louha](http://excel-translator.de)
 
 = Related Links and Documentation =
 For more information and to get started with WordPress Security, check out the following:
