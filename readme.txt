@@ -121,6 +121,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * [WPLift](http://wplift.com/wordpress-event-tracking)
 * [Tourqe News](http://torquemag.io/5-awesome-wordpress-plugins-you-may-not-have-heard-of/)
 * [Shout Me Loud](http://www.shoutmeloud.com/how-to-monitor-user-activities-wordpress-dashboard.html)
+* [Monster Post](http://blog.templatemonster.com/2015/12/15/wp-security-audit-log-plugin-review/)
 * [The Darknet](http://www.darknet.org.uk/2015/10/wp-security-audit-log-a-complete-audit-log-plugin-for-wordpress/)
 
 = WordPress Security Audit Log in your Language! =
