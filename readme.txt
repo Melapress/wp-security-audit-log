@@ -238,6 +238,7 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 	
 * **Bug Fix**
 	* Fixed an issue where administrators of sub domain websites could see the alerts of other websites from the dashboard widget in a multisite installation. [Ticket](https://wordpress.org/support/topic/in-wordpress-mu-all-users-can-view-the-widget-log-bug)
+	* Fixed a SQL query error where a NULL value was being saved and it wasn't accepted. [Ticket](https://wordpress.org/support/topic/sql-error-using-wordpress-44)
 
 = 2.2 (2015-11-10) =
 * **New Features**
