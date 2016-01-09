@@ -6,10 +6,10 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report
 Requires at least: 3.6
-Tested up to: 4.3.1
-Stable tag: 2.2
+Tested up to: 4.4.1
+Stable tag: 2.3
 
-Keep an audit log of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
+Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
 == Description ==
 Keep an audit log of everything that is happening on your WordPress and [WordPress multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/) with WP Security Audit Log to ensure user productivity and identify WordPress security issues before they become a security problem. WP Security Audit Log, WordPress' most comprehensive user monitoring and audit log plugin already helps thousands of WordPress administrators, owners and security professionals ensure the security of their websites and blogs. Ensure the security of your WordPress too by installing WP Security Audit Log. The community's favourite WordPress user monitoring monitoring and security auditing plugin is developed by WordPress Security Consultants and Professionals [WP White Security](http://www.wpwhitesecurity.com/). 
@@ -201,6 +201,42 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 8. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes with WP Security Audit Log Plugin](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
 
 == Changelog ==
+
+ 2.3 (2016-01-12) =
+* **New Features**
+	* Keep track of changes on bbPress forums. For more detailed information read the [WP Security Audit Log 2.3 Release Notes](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/track-bbpress-forums-changes-with-wp-security-audit-log/)
+	
+* **New WordPress Security Alerts**
+	* 8000: User published a new forum
+	* 8001: User changed the status of a forum
+	* 8002: User changed the visibility of a forum
+	* 8003: User changed the URL of a forum
+	* 8004: User changed the order of a forum
+	* 8005: User moved forum to trash
+	* 8006: User permanently deleted a fourm
+	* 8007: User restored a forum from trash
+	* 8008: User changed the parent of a forum
+	* 8009: User changed the role of forum auto user role
+	* 8010: User changed the option for anonymous posting on forum
+	* 8011: User changed the forum type
+	* 8012: User changed the time setting to disallow editing of posts
+	* 8013: User changed the time setting for post throttling
+	* 8014: User created new forum topic
+	* 8015: User changed the status of a forum topic
+	* 8016: User changed the type of a forum topic
+	* 8017: User changed the URL of a forum topic
+	* 8018: User changed the forum for a topic
+	* 8019: User moved a forum topic to trash
+	* 8020: User permanently deleted a forum topic
+	* 8021: User restored a forum topic from trash
+	* 8022: User changed the visibility of a forum topic
+	
+* **Improvements**
+	* Improved the performance / queries of the Audit Log Viewer, hence now it is faster when retrieving alerts from bigger databases
+	* Rewritten and improved the reporting engine for the [Reports Add-On](http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/)
+	
+* **Bug Fix**
+	* Fixed an issue where administrators of sub domain websites could see the alerts of other websites from the dashboard widget in a multisite installation. [Ticket](https://wordpress.org/support/topic/in-wordpress-mu-all-users-can-view-the-widget-log-bug)
 
 = 2.2 (2015-11-10) =
 * **New Features**
