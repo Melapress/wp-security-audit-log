@@ -203,7 +203,7 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 
 == Changelog ==
 
- 2.3 (2016-01-12) =
+= 2.3 (2016-01-12) =
 * **New Features**
 	* Keep track of changes on bbPress forums. For more detailed information read the [WP Security Audit Log 2.3 Release Notes](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/track-bbpress-forums-changes-with-wp-security-audit-log/)
 	
