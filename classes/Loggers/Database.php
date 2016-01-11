@@ -120,7 +120,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
             if ($i == 1) {
                 $msg = 'Add email alerts, generate compliance reports and add the search functionality to your WordPress audit log with the <strong>%s</strong>.';
             } else {
-                $msg = 'Buy all the WP Security Audit Log premium add-ons as bundle and <strong>benefit from a 60&percnt; discount</strong>. <strong>All %s</strong> for 1 website only cost $99.';
+                $msg = 'Buy all the WP Security Audit Log premium add-ons as bundle and <strong>benefit from a 60&percnt; discount</strong>. <strong>All %s</strong> for 1 website only cost $89.';
             }
             $aPromoAlerts[] = array(
                 'name' => 'Premium Add-Ons',
