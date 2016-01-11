@@ -33,7 +33,7 @@ class WSAL_Views_Extensions extends WSAL_AbstractView
                     <div class="activity-block">
                         <h2><?php _e('60% Off All Add-Ons Bundle', 'wp-security-audit-log'); ?></h2>
                         <strong><?php _e('Add email alerts, generate reports and add the search functionality to your WordPress audit log.', 'wp-security-audit-log'); ?></strong>
-                        <p><?php _e('Buy all the WP Security Audit Log Add-Ons as a bundle and benefit from a 60% discount. Packages start from as low as $99 for 1 website.', 'wp-security-audit-log'); ?></p>
+                        <p><?php _e('Buy all the WP Security Audit Log Add-Ons as a bundle and benefit from a 60% discount. The bundle for 1 website only costs $89 and price per website gets lower with bulk pricing.', 'wp-security-audit-log'); ?></p>
                         <p><a class="button" href="http://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=alladdons" target="_blank"><?php _e('More Information', 'wp-security-audit-log'); ?></a></p>
                     </div>
                     <?php
