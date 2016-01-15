@@ -353,9 +353,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     /**
      * Function used in WSAL reporting extension
      */
-    public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp, $_nextId = null, $_limit = 0)
+    public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp, $_nextDate = null, $_limit = 0)
     {
-
         global $wpdb;
         $tableUsers = $wpdb->users;
         $_wpdb = $this->connection;
@@ -376,7 +375,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             }
             $user_names = implode(', ', $aUsers);
         }
-        $conditionID = !empty($_nextId) ? ' AND occ.id < '.$_nextId : '';
+        $conditionDate = !empty($_nextDate) ? ' AND occ.created_on < '.$_nextDate : '';
 
         $sql = "SELECT DISTINCT
             occ.id, 
@@ -405,7 +404,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
                 AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
                 AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
-                {$conditionID}
+                {$conditionDate}
             ORDER BY
                 created_on DESC
         ";
@@ -430,7 +429,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 $userId = $wpdb->get_var($sql);
             }
             $row->user_id = $userId;
-            $results['lastId'] = $row->id;
+            $results['lastDate'] = $row->created_on;
         }
         
         return $results;
