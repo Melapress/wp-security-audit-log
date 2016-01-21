@@ -205,7 +205,7 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 
 = 2.3.2 (2016-01-21) =
 * **Bug Fix**
-	* Fixed an issue with the login/logout sensor reporter in this [ticket](https://wordpress.org/support/topic/undefined-index-log).
+	* Fixed an issue with the login/logout sensor reported in this [ticket](https://wordpress.org/support/topic/undefined-index-log).
 
 = 2.3.1 (2016-01-16) =
 * **Improvement**
