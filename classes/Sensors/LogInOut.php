@@ -98,7 +98,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
         
         $ip = $this->plugin->settings->GetMainClientIP();
         
-        $username = $_POST["log"];
+        $username = array_key_exists('log', $_POST) ? $_POST["log"] : $username;
         $newAlertCode = 1003;
         $user = get_user_by('login', $username);
         $site_id = (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
