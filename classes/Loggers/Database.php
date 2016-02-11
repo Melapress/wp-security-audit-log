@@ -125,7 +125,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
             $aPromoAlerts[] = array(
                 'name' => 'Premium Add-Ons',
                 'message' => '<strong>60&percnt; OFF On All Premium Add-Ons and Support Bundle</strong><br>'. $msg,
-                'link' => 'http://www.wpsecurityauditlog.com/plugin-extensions/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=alladdons'
+                'link' => 'http://www.wpsecurityauditlog.com/plugin-extensions/?utm_source=auditviewer&utm_medium=allpromoalert&utm_campaign=plugin'
             );
             // Email Add-On
             if (!class_exists('WSAL_NP_Plugin')) {
@@ -137,7 +137,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
                 $aPromoAlerts[] = array(
                     'name' => 'Email Notifications Add-on',
                     'message' => '<strong>Email Notifications for WordPress</strong><br>'. $msg,
-                    'link' => 'http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=emailnotifications'
+                    'link' => 'http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=auditviewer&utm_medium=emailpromoalert&utm_campaign=plugin'
                 );
             }
             // Search Add-On
@@ -150,7 +150,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
                 $aPromoAlerts[] = array(
                     'name' => 'Search & Filters Add-on',
                     'message' => '<strong>Search and Filtering for WordPress Audit Log</strong><br>'. $msg,
-                    'link' => 'http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=search'
+                    'link' => 'http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=auditviewer&utm_medium=searchpromoalert&utm_campaign=plugin'
                 );
             }
             // Reports Add-On
@@ -163,7 +163,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
                 $aPromoAlerts[] = array(
                     'name' => 'Reports Add-on',
                     'message' => '<strong>WordPress Reports Add-On</strong><br>'. $msg,
-                    'link' => 'http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=reports'
+                    'link' => 'http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=auditviewer&utm_medium=reportspromoalert&utm_campaign=plugin'
                 );
             }
             // External DB Add-On
@@ -176,7 +176,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
                 $aPromoAlerts[] = array(
                     'name' => 'External DB Add-on',
                     'message' => '<strong>External Database for WordPress Audit Log</strong><br>'. $msg,
-                    'link' => 'http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/?utm_source=promoalert&utm_medium=auditviewer&utm_campaign=externaldb'
+                    'link' => 'http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/?utm_source=auditviewer&utm_medium=extdbpromoalert&utm_campaign=plugin'
                 );
             }
             if (count($aPromoAlerts) == 1) {
@@ -209,7 +209,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         if (empty($promoToShow)) {
             return null;
         }
-        return (count($promoToShow) == 4) ? 150 : 250;
+        return (count($promoToShow) == 4) ? 100 : 175;
     }
 
 }
