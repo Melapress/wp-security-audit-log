@@ -452,7 +452,7 @@ class WSAL_Settings {
             // TODO the algorithm below just gets the first IP in the list...we might want to make this more intelligent somehow
             $result = $this->GetClientIPs();
             $result = reset($result);
-            $result = isset($result[0]) ? $result[0] : 'N/A - empty referer';
+            $result = isset($result[0]) ? $result[0] : null;
         } elseif (isset($_SERVER['REMOTE_ADDR'])) {
             $result = $this->NormalizeIP($_SERVER['REMOTE_ADDR']);
             if (!$this->ValidateIP($result)) {
