@@ -453,7 +453,7 @@ class WSAL_Settings {
             $result = $this->GetClientIPs();
             $result = reset($result);
             $result = isset($result[0]) ? $result[0] : null;
-        } elseif(isset($_SERVER['REMOTE_ADDR'])) {
+        } elseif (isset($_SERVER['REMOTE_ADDR'])) {
             $result = $this->NormalizeIP($_SERVER['REMOTE_ADDR']);
             if (!$this->ValidateIP($result)) {
                 $result = "Error " . self::ERROR_CODE_INVALID_IP . ": Invalid IP Address";

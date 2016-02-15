@@ -549,7 +549,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if (!empty($revision_id)) {
             return admin_url('revision.php?revision='.$revision_id);
         } else {
-            return '';
+            return null;
         }
     }
 
@@ -582,9 +582,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             $occ = $objOcc->GetByPostID($post_id);
             $occ = count($occ) ? $occ[0] : null;
             if (!empty($occ)) {
-                $occ->SetMetaValue('RevisionLink', $this->getRevisionLink($revision->ID));
+                $revisionLink = $this->getRevisionLink($revision->ID);
+                if (!empty($revisionLink)) {
+                    $occ->SetMetaValue('RevisionLink', $revisionLink);
+                }
             }
         }
     }
-
 }

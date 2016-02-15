@@ -7,6 +7,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     {
         add_action('wsal_prune', array($this, 'EventPruneEvents'), 10, 2);
         add_action('admin_init', array($this, 'EventAdminInit'));
+        add_action('auto_update_core', array($this, 'WPUpdate'), 10, 2);
     }
     
     /**
@@ -23,7 +24,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     
     public function EventAdminInit()
     {
-        
         // make sure user can actually modify target options
         if (!current_user_can('manage_options')) return;
         
@@ -148,5 +148,19 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 ));
             }
         }
+    }
+
+    /**
+     * WordPress auto core update
+     * @param bool   $update Whether to update.
+     * @param object $item   The update offer.
+     */
+    public function WPUpdate($update, $item)
+    {
+        $oldVersion = get_bloginfo('version');
+        $this->plugin->alerts->Trigger(6004, array(
+            'OldVersion' => $oldVersion,
+            'NewVersion' => $item->version.' (auto update)'
+        ));
     }
 }
