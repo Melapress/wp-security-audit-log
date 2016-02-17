@@ -44,12 +44,14 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
      */
     public function SetMetaValue($name, $value)
     {
-        //get meta adapter
-        $model = new WSAL_Models_Meta();
-        $model->occurrence_id = $this->getId();
-        $model->name = $name;
-        $model->value = maybe_serialize($value);
-        $model->SaveMeta();
+        if (isset($value)) {
+            // get meta adapter
+            $model = new WSAL_Models_Meta();
+            $model->occurrence_id = $this->getId();
+            $model->name = $name;
+            $model->value = maybe_serialize($value);
+            $model->SaveMeta();
+        }
     }
     
     public function UpdateMetaValue($name, $value)
@@ -64,7 +66,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
      */
     public function GetMetaArray()
     {
-        $result = array(); 
+        $result = array();
         $metas = $this->getAdapter()->GetMultiMeta($this);
         foreach ($metas as $meta) {
             $result[$meta->name] = maybe_unserialize($meta->value);
