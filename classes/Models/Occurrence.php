@@ -44,7 +44,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
      */
     public function SetMetaValue($name, $value)
     {
-        if (isset($value)) {
+        if (!empty($value)) {
             // get meta adapter
             $model = new WSAL_Models_Meta();
             $model->occurrence_id = $this->getId();

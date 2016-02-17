@@ -33,7 +33,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
     
     public function EventPostMetaCreated($object_id, $meta_key, $meta_value)
     {
-        if (is_null($meta_value)) return;
         $post = get_post($object_id);
 
         if (!$this->CanLogPostMeta($object_id, $meta_key)) return;
@@ -81,7 +80,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
     
     public function EventPostMetaUpdated($meta_id, $object_id, $meta_key, $meta_value)
     {
-        if (is_null($meta_value)) return;
         $post = get_post($object_id);
         
         if (!$this->CanLogPostMeta($object_id, $meta_key)) return;
@@ -170,7 +168,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
 
     public function EventPostMetaDeleted($meta_ids, $object_id, $meta_key, $meta_value)
     {
-        if (is_null($meta_value)) return;
         $post = get_post($object_id);
         
         foreach ($meta_ids as $meta_id) {
