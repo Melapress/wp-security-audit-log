@@ -136,6 +136,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     protected function CheckPostCreation($oldPost, $newPost)
     {
         $event = 0;
+        $is_scheduled = false;
         switch ($newPost->post_status) {
             case 'publish':
                 $event = $this->GetEventTypeForPostType($oldPost, 2001, 2005, 2030);
@@ -143,17 +144,29 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             case 'draft':
                 $event = $this->GetEventTypeForPostType($oldPost, 2000, 2004, 2029);
                 break;
+            case 'future':
+                $event = $this->GetEventTypeForPostType($oldPost, 2074, 2075, 2076);
+                $is_scheduled = true;
+                break;
             case 'pending':
                 $event = 2073;
                 break;
         }
         if ($event) {
-            $this->plugin->alerts->Trigger($event, array(
-                'PostID' => $newPost->ID,
-                'PostType' => $newPost->post_type,
-                'PostTitle' => $newPost->post_title,
-                'PostUrl' => get_permalink($newPost->ID),
-            ));
+            if ($is_scheduled) {
+                $this->plugin->alerts->Trigger($event, array(
+                    'PostType' => $newPost->post_type,
+                    'PostTitle' => $newPost->post_title,
+                    'PublishingDate' => $newPost->post_date
+                ));
+            } else {
+                $this->plugin->alerts->Trigger($event, array(
+                    'PostID' => $newPost->ID,
+                    'PostType' => $newPost->post_type,
+                    'PostTitle' => $newPost->post_title,
+                    'PostUrl' => get_permalink($newPost->ID)
+                ));
+            }
         }
     }
     
@@ -217,7 +230,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($this->CheckBBPress($post)) {
             return;
         }
-        if (!in_array($post->post_type, array('attachment', 'revision'))) { // ignore attachments and revisions
+        if (!in_array($post->post_type, array('attachment', 'revision', 'nav_menu_item'))) { // ignore attachments, revisions and menu items
             $event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
             // check WordPress backend operations
             if ($this->CheckAutoDraft($event, $post->post_title)) {

@@ -71,6 +71,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(2068, E_NOTICE, __('User modifies content for a draft post', 'wp-security-audit-log'), __('Modified the content of draft post %PostTitle%.'.'%RevisionLink%', 'wp-security-audit-log')),
                 array(2072, E_NOTICE, __('User modifies content of a post', 'wp-security-audit-log'), __('Modified the content of post %PostTitle% which is submitted for review.'.'%RevisionLink%', 'wp-security-audit-log')),
                 array(2073, E_NOTICE, __('User submitted a post for review', 'wp-security-audit-log'), __('Submitted blog post %PostTitle% for review. Blog post ID is %PostID%', 'wp-security-audit-log')),
+                array(2074, E_NOTICE, __('User scheduled a post', 'wp-security-audit-log'), __('Scheduled the post %PostTitle% to be published %PublishingDate%', 'wp-security-audit-log'))
             ),
             __('Pages', 'wp-security-audit-log') => array(
                 array(2004, E_NOTICE, __('User created a new WordPress page and saved it as draft', 'wp-security-audit-log'), __('Created a new page called %PostTitle%. Page ID is %PostID%', 'wp-security-audit-log')),
@@ -93,6 +94,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(2064, E_NOTICE, __('User updates a custom field name for a page', 'wp-security-audit-log'), __('Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in page %PostTitle%'.'%MetaLink%', 'wp-security-audit-log')),
                 array(2066, E_WARNING, __('User modifies content for a published page', 'wp-security-audit-log'), __('Modified the content of published page %PostTitle%.'.'%RevisionLink%', 'wp-security-audit-log')),
                 array(2069, E_NOTICE, __('User modifies content for a draft page', 'wp-security-audit-log'), __('Modified the content of draft page %PostTitle%.'.'%RevisionLink%', 'wp-security-audit-log')),
+                array(2075, E_NOTICE, __('User scheduled a page', 'wp-security-audit-log'), __('Scheduled the page %PostTitle% to be published %PublishingDate%', 'wp-security-audit-log'))
             ),
             __('Custom Posts', 'wp-security-audit-log') => array(
                 array(2029, E_NOTICE, __('User created a new post with custom post type and saved it as draft', 'wp-security-audit-log'), __('Created a new custom post called %PostTitle% of type %PostType%. Post ID is %PostID%', 'wp-security-audit-log')),
@@ -114,6 +116,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(2063, E_NOTICE, __('User updates a custom field name for a custom post', 'wp-security-audit-log'), __('Changed the custom field name from %MetaKeyOld% to %MetaKeyNew% in custom post %PostTitle% of type %PostType%'.'%MetaLink%', 'wp-security-audit-log')),
                 array(2067, E_WARNING, __('User modifies content for a published custom post', 'wp-security-audit-log'), __('Modified the content of published custom post type %PostTitle%.'.'%RevisionLink%', 'wp-security-audit-log')),
                 array(2070, E_NOTICE, __('User modifies content for a draft custom post', 'wp-security-audit-log'), __('Modified the content of draft custom post type %PostTitle%.'.'%RevisionLink%', 'wp-security-audit-log')),
+                array(2076, E_NOTICE, __('User scheduled a custom post type', 'wp-security-audit-log'), __('Scheduled the custom post type %PostTitle% to be published %PublishingDate%', 'wp-security-audit-log'))
             ),
             __('Widgets', 'wp-security-audit-log') => array(
                 array(2042, E_CRITICAL, __('User added a new widget', 'wp-security-audit-log'), __('Added a new %WidgetName% widget in  %Sidebar%', 'wp-security-audit-log')),
@@ -211,8 +214,8 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
             ),
             __('Menus', 'wp-security-audit-log') => array(
                 array(2078, E_NOTICE, __('User created new menu', 'wp-security-audit-log'), __('Created a new menu called %MenuName%', 'wp-security-audit-log')),
-                array(2079, E_WARNING, __('User added content to a menu', 'wp-security-audit-log'), __('Added the %ContentType% %ContentName% to menu %MenuName%', 'wp-security-audit-log')),
-                array(2080, E_WARNING, __('User removed content from a menu', 'wp-security-audit-log'), __('Removed the %ContentType% %ContentName% from the menu %MenuName%', 'wp-security-audit-log')),
+                array(2079, E_WARNING, __('User added content to a menu', 'wp-security-audit-log'), __('Added the %ContentType% - %ContentName% to menu %MenuName%', 'wp-security-audit-log')),
+                array(2080, E_WARNING, __('User removed content from a menu', 'wp-security-audit-log'), __('Removed the %ContentType% - %ContentName% from the menu %MenuName%', 'wp-security-audit-log')),
                 array(2081, E_CRITICAL, __('User deleted menu', 'wp-security-audit-log'), __('Deleted the menu %MenuName%', 'wp-security-audit-log'))
             )
         ));
