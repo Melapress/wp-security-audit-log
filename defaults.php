@@ -214,9 +214,10 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
             ),
             __('Menus', 'wp-security-audit-log') => array(
                 array(2078, E_NOTICE, __('User created new menu', 'wp-security-audit-log'), __('Created a new menu called %MenuName%', 'wp-security-audit-log')),
-                array(2079, E_WARNING, __('User added content to a menu', 'wp-security-audit-log'), __('Added the %ContentType% - %ContentName% to menu %MenuName%', 'wp-security-audit-log')),
-                array(2080, E_WARNING, __('User removed content from a menu', 'wp-security-audit-log'), __('Removed the %ContentType% - %ContentName% from the menu %MenuName%', 'wp-security-audit-log')),
-                array(2081, E_CRITICAL, __('User deleted menu', 'wp-security-audit-log'), __('Deleted the menu %MenuName%', 'wp-security-audit-log'))
+                array(2079, E_WARNING, __('User added content to a menu', 'wp-security-audit-log'), __('Added the %ContentType% called %ContentName% to menu %MenuName%', 'wp-security-audit-log')),
+                array(2080, E_WARNING, __('User removed content from a menu', 'wp-security-audit-log'), __('Removed the %ContentType% called %ContentName% from the menu %MenuName%', 'wp-security-audit-log')),
+                array(2081, E_CRITICAL, __('User deleted menu', 'wp-security-audit-log'), __('Deleted the menu %MenuName%', 'wp-security-audit-log')),
+                array(2082, E_WARNING, __('User changed menu setting', 'wp-security-audit-log'), __('%Status% the menu setting %MenuSetting% in %MenuName%', 'wp-security-audit-log'))
             )
         ));
 }
