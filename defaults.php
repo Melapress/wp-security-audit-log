@@ -10,7 +10,8 @@ defined('E_RECOVERABLE_ERROR') || define('E_RECOVERABLE_ERROR', 'E_RECOVERABLE_E
 defined('E_DEPRECATED') || define('E_DEPRECATED', 'E_DEPRECATED');
 defined('E_USER_DEPRECATED') || define('E_USER_DEPRECATED', 'E_USER_DEPRECATED');
 
-function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
+function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
+{
     $wsal->constants->UseConstants(array(
             // default PHP constants
             array('name' => 'E_ERROR', 'description' => __('Fatal run-time error.', 'wp-security-audit-log')),
@@ -32,7 +33,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
             array('name' => 'E_CRITICAL', 'description' => __('Critical, high-impact messages.', 'wp-security-audit-log')),
             array('name' => 'E_DEBUG', 'description' => __('Debug informational messages.', 'wp-security-audit-log')),
         ));
-    // create list of default alerts 
+    // create list of default alerts
     $wsal->alerts->RegisterGroup(array(
             __('Other User Activity', 'wp-security-audit-log') => array(
                 array(1000, E_NOTICE, __('User logs in', 'wp-security-audit-log'), __('Successfully logged in', 'wp-security-audit-log')),
@@ -217,9 +218,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal){
                 array(2079, E_WARNING, __('User added content to a menu', 'wp-security-audit-log'), __('Added the %ContentType% called %ContentName% to menu %MenuName%', 'wp-security-audit-log')),
                 array(2080, E_WARNING, __('User removed content from a menu', 'wp-security-audit-log'), __('Removed the %ContentType% called %ContentName% from the menu %MenuName%', 'wp-security-audit-log')),
                 array(2081, E_CRITICAL, __('User deleted menu', 'wp-security-audit-log'), __('Deleted the menu %MenuName%', 'wp-security-audit-log')),
-                array(2082, E_WARNING, __('User changed menu setting', 'wp-security-audit-log'), __('%Status% the menu setting %MenuSetting% in %MenuName%', 'wp-security-audit-log'))
+                array(2082, E_WARNING, __('User changed menu setting', 'wp-security-audit-log'), __('%Status% the menu setting %MenuSetting% in %MenuName%', 'wp-security-audit-log')),
+                array(2083, E_NOTICE, __('User modified content in a menu', 'wp-security-audit-log'), __('Modified the %ContentType% called %ContentName% in menu %MenuName%', 'wp-security-audit-log'))
             )
         ));
 }
 add_action('wsal_init', 'wsaldefaults_wsal_init');
-

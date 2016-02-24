@@ -47,7 +47,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                 array_push($contentNamesOld, $item->title);
                 array_push($contentTypesOld, $item->object);
             }
-
+            $is_occurred_event = false;
             if (isset($_POST['menu-item-title']) && isset($_POST['menu-item-type'])) {
                 $contentNamesNew = array_values($_POST['menu-item-title']);
                 $contentTypesNew = array_values($_POST['menu-item-object']);
@@ -59,6 +59,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                     if (count($addedNames) > 0 && count($addedTypes) > 0) {
                         $contentName = implode(",", $addedNames);
                         $contentType = implode(",", array_unique($addedTypes));
+                        $is_occurred_event = true;
                         $this->EventAddItems($contentType, $contentName, $menu_data['menu-name']);
                     }
 
@@ -68,7 +69,19 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                     if (count($removedNames) > 0 && count($removedTypes) > 0) {
                         $contentName = implode(",", $removedNames);
                         $contentType = implode(",", array_unique($removedTypes));
+                        $is_occurred_event = true;
                         $this->EventRemoveItems($contentType, $contentName, $menu_data['menu-name']);
+                    }
+
+                    // Modified Items in the menu
+                    if (!$is_occurred_event && count($addedNames) > 0) {
+                        $contentType = array();
+                        foreach (array_keys($addedNames) as $key) {
+                            array_push($contentType, $contentTypesOld[$key]);
+                        }
+                        $contentType = implode(",", array_unique($contentType));
+                        $contentName = implode(",", $addedNames);
+                        $this->EventModifiedItems($contentType, $contentName, $menu_data['menu-name']);
                     }
 
                     // Enable/Disable menu setting
@@ -194,10 +207,23 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                 if (is_array($customized)) {
                     foreach ($customized as $key => $value) {
                         if (!empty($value['nav_menu_term_id'])) {
-                            // Add Items to the menu
+                            $is_occurred_event = false;
                             $menu = wp_get_nav_menu_object($value['nav_menu_term_id']);
                             $content_name = !empty($value['title']) ? $value['title'] : "no title";
-                            $this->EventAddItems($value['type_label'], $content_name, $menu->name);
+                            if (!empty($this->_OldMenuItems)) {
+                                foreach ($this->_OldMenuItems as $old_item) {
+                                    $item_id = substr(trim($key, ']'), 14);
+                                    // Modified Items in the menu
+                                    if ($old_item['item_id'] == $item_id && $old_item['title'] != $content_name) {
+                                        $is_occurred_event = true;
+                                        $this->EventModifiedItems($value['type_label'], $content_name, $menu->name);
+                                    }
+                                }
+                            }
+                            // Add Items to the menu
+                            if (!$is_occurred_event) {
+                                $this->EventAddItems($value['type_label'], $content_name, $menu->name);
+                            }
                         } else {
                             // Setting Auto add pages
                             if (!empty($value) && isset($value['auto_add'])) {
@@ -261,6 +287,15 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         $this->plugin->alerts->Trigger(2082, array(
             'Status' => $status,
             'MenuSetting' => $menu_setting,
+            'MenuName' => $menu_name
+        ));
+    }
+
+    private function EventModifiedItems($content_type, $content_name, $menu_name)
+    {
+        $this->plugin->alerts->Trigger(2083, array(
+            'ContentType' => $content_type,
+            'ContentName' => $content_name,
             'MenuName' => $menu_name
         ));
     }
