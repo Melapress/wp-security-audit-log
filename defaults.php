@@ -219,7 +219,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2080, E_WARNING, __('User removed content from a menu', 'wp-security-audit-log'), __('Removed the %ContentType% called %ContentName% from the menu %MenuName%', 'wp-security-audit-log')),
                 array(2081, E_CRITICAL, __('User deleted menu', 'wp-security-audit-log'), __('Deleted the menu %MenuName%', 'wp-security-audit-log')),
                 array(2082, E_WARNING, __('User changed menu setting', 'wp-security-audit-log'), __('%Status% the menu setting %MenuSetting% in %MenuName%', 'wp-security-audit-log')),
-                array(2083, E_NOTICE, __('User modified content in a menu', 'wp-security-audit-log'), __('Modified the %ContentType% called %ContentName% in menu %MenuName%', 'wp-security-audit-log'))
+                array(2083, E_NOTICE, __('User modified content in a menu', 'wp-security-audit-log'), __('Modified the %ContentType% called %ContentName% in menu %MenuName%', 'wp-security-audit-log')),
+                array(2084, E_WARNING, __('User changed name of a menu', 'wp-security-audit-log'), __('Changed the name of menu %OldMenuName% to %NewMenuName%', 'wp-security-audit-log')),
+                array(2085, E_NOTICE, __('User changed order of the objects in a menu', 'wp-security-audit-log'), __('Changed the order of the objects in menu %MenuName%', 'wp-security-audit-log'))
             )
         ));
 }

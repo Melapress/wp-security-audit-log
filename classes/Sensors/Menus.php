@@ -38,38 +38,59 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
     {
         $menu = wp_get_nav_menu_object($menu_id);
         $items = wp_get_nav_menu_items($menu_id);
-
+        // To Do menu change name
+        if (!empty($this->_OldMenuTerms) && isset($_POST['menu']) && isset($_POST['menu-name'])) {
+            foreach ($this->_OldMenuTerms as $oldMenuTerm) {
+                if ($oldMenuTerm->term_id == $_POST['menu']) {
+                    if ($oldMenuTerm->name != $_POST['menu-name']) {
+                        $this->EventChangeName($oldMenuTerm->name, $_POST['menu-name']);
+                    }
+                }
+            }
+        }
         if (isset($items)) {
             $contentNamesOld = array();
             $contentTypesOld = array();
+            $contentOrderOld = array();
 
             foreach ($items as $item) {
                 array_push($contentNamesOld, $item->title);
                 array_push($contentTypesOld, $item->object);
+                $contentOrderOld[$item->ID] = $item->menu_order;
             }
             $is_occurred_event = false;
             if (isset($_POST['menu-item-title']) && isset($_POST['menu-item-type'])) {
                 $contentNamesNew = array_values($_POST['menu-item-title']);
                 $contentTypesNew = array_values($_POST['menu-item-object']);
+                $contentOrderNew = $_POST['menu-item-position'];
 
-                $addedNames = array_diff_assoc($contentNamesNew, $contentNamesOld);
-                $addedTypes = array_diff_assoc($contentTypesNew, $contentTypesOld);
-                // Add Items to the menu
-                if (count($addedNames) > 0 && count($addedTypes) > 0) {
-                    $contentName = implode(",", $addedNames);
-                    $contentType = implode(",", array_unique($addedTypes));
+                $order = array_diff_assoc($contentOrderNew, $contentOrderOld);
+                // Changed order of the objects in a menu
+                if ((count($contentOrderOld) == count($contentOrderNew)) && count($order) > 0) {
                     $is_occurred_event = true;
-                    $this->EventAddItems($contentType, $contentName, $menu->name);
+                    $this->EventChangeOrder($menu->name);
                 }
 
-                $removedNames = array_diff_assoc($contentNamesOld, $contentNamesNew);
-                $removedTypes = array_diff_assoc($contentTypesOld, $contentTypesNew);
-                // Remove items from the menu
-                if (count($removedNames) > 0 && count($removedTypes) > 0) {
-                    $contentName = implode(",", $removedNames);
-                    $contentType = implode(",", array_unique($removedTypes));
-                    $is_occurred_event = true;
-                    $this->EventRemoveItems($contentType, $contentName, $menu->name);
+                if (!$is_occurred_event) {
+                    $addedNames = array_diff_assoc($contentNamesNew, $contentNamesOld);
+                    $addedTypes = array_diff_assoc($contentTypesNew, $contentTypesOld);
+                    // Add Items to the menu
+                    if (count($addedNames) > 0 && count($addedTypes) > 0) {
+                        $contentName = implode(",", $addedNames);
+                        $contentType = implode(",", array_unique($addedTypes));
+                        $is_occurred_event = true;
+                        $this->EventAddItems($contentType, $contentName, $menu->name);
+                    }
+
+                    $removedNames = array_diff_assoc($contentNamesOld, $contentNamesNew);
+                    $removedTypes = array_diff_assoc($contentTypesOld, $contentTypesNew);
+                    // Remove items from the menu
+                    if (count($removedNames) > 0 && count($removedTypes) > 0) {
+                        $contentName = implode(",", $removedNames);
+                        $contentType = implode(",", array_unique($removedTypes));
+                        $is_occurred_event = true;
+                        $this->EventRemoveItems($contentType, $contentName, $menu->name);
+                    }
                 }
 
                 // Modified Items in the menu
@@ -158,6 +179,13 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                 if (isset($_GET['menu'])) {
                     $this->_OldMenu = wp_get_nav_menu_object($_GET['menu']);
                 }
+            } else {
+                $menus = wp_get_nav_menus();
+                if (!empty($menus)) {
+                    foreach ($menus as $menu) {
+                        array_push($this->_OldMenuTerms, $menu->name);
+                    }
+                }
             }
             $this->_OldMenuLocations = get_nav_menu_locations();
         }
@@ -172,7 +200,13 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                 $items = wp_get_nav_menu_items($menu->term_id);
                 if (!empty($items)) {
                     foreach ($items as $item) {
-                        array_push($this->_OldMenuItems, array('item_id' => $item->ID, 'title' => $item->title, 'object' => $item->object, 'menu_name' => $menu->name));
+                        array_push($this->_OldMenuItems, array(
+                            'item_id' => $item->ID,
+                            'title' => $item->title,
+                            'object' => $item->object,
+                            'menu_name' => $menu->name,
+                            'menu_order' => $item->menu_order
+                        ));
                     }
                 }
             }
@@ -215,6 +249,12 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                                     if ($old_item['item_id'] == $item_id && $old_item['title'] != $content_name) {
                                         $is_occurred_event = true;
                                         $this->EventModifiedItems($value['type_label'], $content_name, $menu->name);
+                                    }
+                                    // Changed order of the objects in a menu
+                                    if ($old_item['item_id'] == $item_id && $old_item['menu_order'] != $value['position']) {
+                                        $is_occurred_event = true;
+                                        $this->EventChangeOrder($menu->name);
+                                        return;
                                     }
                                 }
                             }
@@ -294,6 +334,21 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         $this->plugin->alerts->Trigger(2083, array(
             'ContentType' => $content_type,
             'ContentName' => $content_name,
+            'MenuName' => $menu_name
+        ));
+    }
+
+    private function EventChangeName($old_menu_name, $new_menu_name)
+    {
+        $this->plugin->alerts->Trigger(2084, array(
+            'OldMenuName' => $old_menu_name,
+            'NewMenuName' => $new_menu_name
+        ));
+    }
+
+    private function EventChangeOrder($menu_name)
+    {
+        $this->plugin->alerts->Trigger(2085, array(
             'MenuName' => $menu_name
         ));
     }
