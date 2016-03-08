@@ -11,7 +11,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
     {
         add_action('wp_create_nav_menu', array($this, 'CreateMenu'), 10, 2);
         add_action('wp_delete_nav_menu', array($this, 'DeleteMenu'), 10, 1);
-        add_action('wp_update_nav_menu', array($this, 'UpdateMenu'), 10, 1);
+        add_action('wp_update_nav_menu', array($this, 'UpdateMenu'), 10, 2);
         add_action('admin_init', array($this, 'EventAdminInit'));
         // Customizer trigger
         add_action('customize_register', array($this, 'CustomizeInit'));
@@ -34,138 +34,140 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         }
     }
 
-    public function UpdateMenu($menu_id)
+    public function UpdateMenu($menu_id, $menu_data = null)
     {
-        $menu = wp_get_nav_menu_object($menu_id);
-        $items = wp_get_nav_menu_items($menu_id);
-        // To Do menu change name
-        if (!empty($this->_OldMenuTerms) && isset($_POST['menu']) && isset($_POST['menu-name'])) {
-            foreach ($this->_OldMenuTerms as $oldMenuTerm) {
-                if ($oldMenuTerm->term_id == $_POST['menu']) {
-                    if ($oldMenuTerm->name != $_POST['menu-name']) {
-                        $this->EventChangeName($oldMenuTerm->name, $_POST['menu-name']);
+        if (!empty($menu_data)) {
+            $items = wp_get_nav_menu_items($menu_id);
+            // To Do menu change name
+            if (!empty($this->_OldMenuTerms) && isset($_POST['menu']) && isset($_POST['menu-name'])) {
+                foreach ($this->_OldMenuTerms as $oldMenuTerm) {
+                    if ($oldMenuTerm->term_id == $_POST['menu']) {
+                        if ($oldMenuTerm->name != $_POST['menu-name']) {
+                            $this->EventChangeName($oldMenuTerm->name, $_POST['menu-name']);
+                        }
                     }
                 }
             }
-        }
-        if (isset($items)) {
-            $contentNamesOld = array();
-            $contentTypesOld = array();
-            $contentOrderOld = array();
+            if (isset($items)) {
+                $contentNamesOld = array();
+                $contentTypesOld = array();
+                $contentOrderOld = array();
 
-            foreach ($items as $item) {
-                array_push($contentNamesOld, $item->title);
-                array_push($contentTypesOld, $item->object);
-                $contentOrderOld[$item->ID] = $item->menu_order;
-            }
-            $is_occurred_event = false;
-            if (isset($_POST['menu-item-title']) && isset($_POST['menu-item-type'])) {
-                $contentNamesNew = array_values($_POST['menu-item-title']);
-                $contentTypesNew = array_values($_POST['menu-item-object']);
-                $contentOrderNew = $_POST['menu-item-position'];
-
-                $order = array_diff_assoc($contentOrderNew, $contentOrderOld);
-                // Changed order of the objects in a menu
-                if ((count($contentOrderOld) == count($contentOrderNew)) && count($order) > 0) {
-                    $is_occurred_event = true;
-                    $this->EventChangeOrder($menu->name);
+                foreach ($items as $item) {
+                    array_push($contentNamesOld, $item->title);
+                    array_push($contentTypesOld, $item->object);
+                    $contentOrderOld[$item->ID] = $item->menu_order;
                 }
+                $is_occurred_event = false;
+                $is_occurred_change_event = false;
+                if (isset($_POST['menu-item-title']) && isset($_POST['menu-item-type'])) {
+                    $contentNamesNew = array_values($_POST['menu-item-title']);
+                    $contentTypesNew = array_values($_POST['menu-item-object']);
+                    $contentOrderNew = $_POST['menu-item-position'];
 
-                if (!$is_occurred_event) {
+                    $order = array_diff_assoc($contentOrderNew, $contentOrderOld);
+                    // Changed order of the objects in a menu
+                    if ((count($contentOrderOld) == count($contentOrderNew)) && count($order) > 0) {
+                        $is_occurred_change_event = true;
+                        $this->EventChangeOrder($menu_data['menu-name']);
+                    }
                     $addedNames = array_diff_assoc($contentNamesNew, $contentNamesOld);
-                    $addedTypes = array_diff_assoc($contentTypesNew, $contentTypesOld);
-                    // Add Items to the menu
-                    if (count($addedNames) > 0 && count($addedTypes) > 0) {
+                    
+                    if (!$is_occurred_change_event) {
+                        $addedTypes = array_diff_assoc($contentTypesNew, $contentTypesOld);
+                        // Add Items to the menu
+                        if (count($addedNames) > 0 && count($addedTypes) > 0) {
+                            $contentName = implode(",", $addedNames);
+                            $contentType = implode(",", array_unique($addedTypes));
+                            $is_occurred_event = true;
+                            $this->EventAddItems($contentType, $contentName, $menu_data['menu-name']);
+                        }
+
+                        $removedNames = array_diff_assoc($contentNamesOld, $contentNamesNew);
+                        $removedTypes = array_diff_assoc($contentTypesOld, $contentTypesNew);
+                        // Remove items from the menu
+                        if (count($removedNames) > 0 && count($removedTypes) > 0) {
+                            $contentName = implode(",", $removedNames);
+                            $contentType = implode(",", array_unique($removedTypes));
+                            $is_occurred_event = true;
+                            $this->EventRemoveItems($contentType, $contentName, $menu_data['menu-name']);
+                        }
+                    }
+
+                    // Modified Items in the menu
+                    if (!$is_occurred_event && count($addedNames) > 0) {
+                        $contentType = array();
+                        foreach (array_keys($addedNames) as $key) {
+                            array_push($contentType, $contentTypesOld[$key]);
+                        }
+                        $contentType = implode(",", array_unique($contentType));
                         $contentName = implode(",", $addedNames);
-                        $contentType = implode(",", array_unique($addedTypes));
-                        $is_occurred_event = true;
-                        $this->EventAddItems($contentType, $contentName, $menu->name);
+                        $this->EventModifiedItems($contentType, $contentName, $menu_data['menu-name']);
                     }
 
-                    $removedNames = array_diff_assoc($contentNamesOld, $contentNamesNew);
-                    $removedTypes = array_diff_assoc($contentTypesOld, $contentTypesNew);
-                    // Remove items from the menu
-                    if (count($removedNames) > 0 && count($removedTypes) > 0) {
-                        $contentName = implode(",", $removedNames);
-                        $contentType = implode(",", array_unique($removedTypes));
-                        $is_occurred_event = true;
-                        $this->EventRemoveItems($contentType, $contentName, $menu->name);
-                    }
-                }
-
-                // Modified Items in the menu
-                if (!$is_occurred_event && count($addedNames) > 0) {
-                    $contentType = array();
-                    foreach (array_keys($addedNames) as $key) {
-                        array_push($contentType, $contentTypesOld[$key]);
-                    }
-                    $contentType = implode(",", array_unique($contentType));
-                    $contentName = implode(",", $addedNames);
-                    $this->EventModifiedItems($contentType, $contentName, $menu->name);
-                }
-
-                // Enable/Disable menu setting
-                $fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
-                $nav_menu_options = maybe_unserialize($fn('nav_menu_options'));
-                $auto_add = null;
-                if (isset($nav_menu_options['auto_add'])) {
-                    if (in_array($menu_id, $nav_menu_options['auto_add'])) {
-                        if (empty($_POST['auto-add-pages'])) {
-                            $auto_add = "Disabled";
+                    // Enable/Disable menu setting
+                    $fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
+                    $nav_menu_options = maybe_unserialize($fn('nav_menu_options'));
+                    $auto_add = null;
+                    if (isset($nav_menu_options['auto_add'])) {
+                        if (in_array($menu_id, $nav_menu_options['auto_add'])) {
+                            if (empty($_POST['auto-add-pages'])) {
+                                $auto_add = "Disabled";
+                            }
+                        } else {
+                            if (isset($_POST['auto-add-pages'])) {
+                                $auto_add = "Enabled";
+                            }
                         }
                     } else {
                         if (isset($_POST['auto-add-pages'])) {
                             $auto_add = "Enabled";
                         }
                     }
-                } else {
-                    if (isset($_POST['auto-add-pages'])) {
-                        $auto_add = "Enabled";
+                    // Alert 2082 Auto add pages
+                    if (!empty($auto_add)) {
+                        $this->EventMenuSetting($menu_data['menu-name'], $auto_add, "Auto add pages");
                     }
-                }
-                // Alert 2082 Auto add pages
-                if (!empty($auto_add)) {
-                    $this->EventMenuSetting($menu->name, $auto_add, "Auto add pages");
-                }
-                
-                $nav_menu_locations = get_nav_menu_locations();
+                    
+                    $nav_menu_locations = get_nav_menu_locations();
 
-                $locationPrimary = null;
-                if (isset($this->_OldMenuLocations['primary']) && isset($nav_menu_locations['primary'])) {
-                    if ($nav_menu_locations['primary'] == $menu_id && $this->_OldMenuLocations['primary'] != $nav_menu_locations['primary']) {
-                        $locationPrimary = "Enabled";
+                    $locationPrimary = null;
+                    if (isset($this->_OldMenuLocations['primary']) && isset($nav_menu_locations['primary'])) {
+                        if ($nav_menu_locations['primary'] == $menu_id && $this->_OldMenuLocations['primary'] != $nav_menu_locations['primary']) {
+                            $locationPrimary = "Enabled";
+                        }
+                    } elseif (empty($this->_OldMenuLocations['primary']) && isset($nav_menu_locations['primary'])) {
+                        if ($nav_menu_locations['primary'] == $menu_id) {
+                            $locationPrimary = "Enabled";
+                        }
+                    } elseif (isset($this->_OldMenuLocations['primary']) && empty($nav_menu_locations['primary'])) {
+                        if ($this->_OldMenuLocations['primary'] == $menu_id) {
+                            $locationPrimary = "Disabled";
+                        }
                     }
-                } elseif (empty($this->_OldMenuLocations['primary']) && isset($nav_menu_locations['primary'])) {
-                    if ($nav_menu_locations['primary'] == $menu_id) {
-                        $locationPrimary = "Enabled";
+                    // Alert 2082 Primary menu
+                    if (!empty($locationPrimary)) {
+                        $this->EventMenuSetting($menu_data['menu-name'], $locationPrimary, "Location: primary menu");
                     }
-                } elseif (isset($this->_OldMenuLocations['primary']) && empty($nav_menu_locations['primary'])) {
-                    if ($this->_OldMenuLocations['primary'] == $menu_id) {
-                        $locationPrimary = "Disabled";
+                    
+                    $locationSocial = null;
+                    if (isset($this->_OldMenuLocations['social']) && isset($nav_menu_locations['social'])) {
+                        if ($nav_menu_locations['social'] == $menu_id && $this->_OldMenuLocations['social'] != $nav_menu_locations['social']) {
+                            $locationSocial = "Enabled";
+                        }
+                    } elseif (empty($this->_OldMenuLocations['social']) && isset($nav_menu_locations['social'])) {
+                        if ($nav_menu_locations['social'] == $menu_id) {
+                            $locationSocial = "Enabled";
+                        }
+                    } elseif (isset($this->_OldMenuLocations['social']) && empty($nav_menu_locations['social'])) {
+                        if ($this->_OldMenuLocations['social'] == $menu_id) {
+                            $locationSocial = "Disabled";
+                        }
                     }
-                }
-                // Alert 2082 Primary menu
-                if (!empty($locationPrimary)) {
-                    $this->EventMenuSetting($menu->name, $locationPrimary, "Location: primary menu");
-                }
-                
-                $locationSocial = null;
-                if (isset($this->_OldMenuLocations['social']) && isset($nav_menu_locations['social'])) {
-                    if ($nav_menu_locations['social'] == $menu_id && $this->_OldMenuLocations['social'] != $nav_menu_locations['social']) {
-                        $locationSocial = "Enabled";
+                    // Alert 2082 Social links menu
+                    if (!empty($locationSocial)) {
+                        $this->EventMenuSetting($menu_data['menu-name'], $locationSocial, "Location: social menu");
                     }
-                } elseif (empty($this->_OldMenuLocations['social']) && isset($nav_menu_locations['social'])) {
-                    if ($nav_menu_locations['social'] == $menu_id) {
-                        $locationSocial = "Enabled";
-                    }
-                } elseif (isset($this->_OldMenuLocations['social']) && empty($nav_menu_locations['social'])) {
-                    if ($this->_OldMenuLocations['social'] == $menu_id) {
-                        $locationSocial = "Disabled";
-                    }
-                }
-                // Alert 2082 Social links menu
-                if (!empty($locationSocial)) {
-                    $this->EventMenuSetting($menu->name, $locationSocial, "Location: social menu");
                 }
             }
         }
