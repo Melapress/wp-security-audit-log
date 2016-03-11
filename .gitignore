@@ -8,8 +8,9 @@ ehthumbs.db
 # Folder config file
 Desktop.ini
 
-# Log fils
+# Log files
 *.log
+Request.log.php
 
 # VS and VSPHP
 *.cache

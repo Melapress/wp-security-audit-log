@@ -38,12 +38,12 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
     {
         if (!empty($menu_data)) {
             $items = wp_get_nav_menu_items($menu_id);
-            // To Do menu change name
+            // Menu changed name
             if (!empty($this->_OldMenuTerms) && isset($_POST['menu']) && isset($_POST['menu-name'])) {
                 foreach ($this->_OldMenuTerms as $oldMenuTerm) {
-                    if ($oldMenuTerm->term_id == $_POST['menu']) {
-                        if ($oldMenuTerm->name != $_POST['menu-name']) {
-                            $this->EventChangeName($oldMenuTerm->name, $_POST['menu-name']);
+                    if ($oldMenuTerm['term_id'] == $_POST['menu']) {
+                        if ($oldMenuTerm['name'] != $_POST['menu-name']) {
+                            $this->EventChangeName($oldMenuTerm['name'], $_POST['menu-name']);
                         }
                     }
                 }
@@ -59,7 +59,6 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                     $contentOrderOld[$item->ID] = $item->menu_order;
                 }
                 $is_occurred_event = false;
-                $is_occurred_change_event = false;
                 if (isset($_POST['menu-item-title']) && isset($_POST['menu-item-type'])) {
                     $contentNamesNew = array_values($_POST['menu-item-title']);
                     $contentTypesNew = array_values($_POST['menu-item-object']);
@@ -68,18 +67,19 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                     $order = array_diff_assoc($contentOrderNew, $contentOrderOld);
                     // Changed order of the objects in a menu
                     if ((count($contentOrderOld) == count($contentOrderNew)) && count($order) > 0) {
-                        $is_occurred_change_event = true;
+                        $is_occurred_event = true;
                         $this->EventChangeOrder($menu_data['menu-name']);
                     }
                     $addedNames = array_diff_assoc($contentNamesNew, $contentNamesOld);
                     
-                    if (!$is_occurred_change_event) {
+                    if (!$is_occurred_event) {
                         $addedTypes = array_diff_assoc($contentTypesNew, $contentTypesOld);
                         // Add Items to the menu
                         if (count($addedNames) > 0 && count($addedTypes) > 0) {
                             $contentName = implode(",", $addedNames);
                             $contentType = implode(",", array_unique($addedTypes));
                             $is_occurred_event = true;
+                            $contentType = str_replace("custom", "custom link", $contentType);
                             $this->EventAddItems($contentType, $contentName, $menu_data['menu-name']);
                         }
 
@@ -90,6 +90,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                             $contentName = implode(",", $removedNames);
                             $contentType = implode(",", array_unique($removedTypes));
                             $is_occurred_event = true;
+                            $contentType = str_replace("custom", "custom link", $contentType);
                             $this->EventRemoveItems($contentType, $contentName, $menu_data['menu-name']);
                         }
                     }
@@ -185,7 +186,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                 $menus = wp_get_nav_menus();
                 if (!empty($menus)) {
                     foreach ($menus as $menu) {
-                        array_push($this->_OldMenuTerms, $menu->name);
+                        array_push($this->_OldMenuTerms, array("term_id" => $menu->term_id, "name" => $menu->name));
                     }
                 }
             }
@@ -198,7 +199,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         $menus = wp_get_nav_menus();
         if (!empty($menus)) {
             foreach ($menus as $menu) {
-                array_push($this->_OldMenuTerms, $menu->name);
+                array_push($this->_OldMenuTerms, array("term_id" => $menu->term_id, "name" => $menu->name));
                 $items = wp_get_nav_menu_items($menu->term_id);
                 if (!empty($items)) {
                     foreach ($items as $item) {
@@ -216,21 +217,25 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         $this->_OldMenuLocations = get_nav_menu_locations();
     }
 
+    /**
+     * Customize Events Function
+     */
     public function CustomizeSave()
     {
-        $updateMenu = array();
+        $updateMenus = array();
         $menus = wp_get_nav_menus();
         if (!empty($menus)) {
             foreach ($menus as $menu) {
-                array_push($updateMenu, $menu->name);
+                array_push($updateMenus, array("term_id" => $menu->term_id, "name" => $menu->name));
             }
         }
-        if (isset($updateMenu) && isset($this->_OldMenuTerms)) {
-            $terms = array_diff($this->_OldMenuTerms, $updateMenu);
-            if (isset($terms)) {
+        // Deleted Menu
+        if (isset($updateMenus) && isset($this->_OldMenuTerms)) {
+            $terms = array_diff_assoc($this->_OldMenuTerms, $updateMenus);
+            if (isset($terms) && count($terms) > 0) {
                 foreach ($terms as $term) {
                     $this->plugin->alerts->Trigger(2081, array(
-                        'MenuName' => $term
+                        'MenuName' => $term['name']
                     ));
                 }
             }
@@ -262,9 +267,20 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                             }
                             // Add Items to the menu
                             if (!$is_occurred_event) {
-                                $this->EventAddItems($value['type_label'], $content_name, $menu->name);
+                                $menu_name = !empty($customized['new_menu_name']) ? $customized['new_menu_name'] : $menu->name;
+                                $this->EventAddItems($value['type_label'], $content_name, $menu_name);
                             }
                         } else {
+                            // Menu changed name
+                            if (isset($updateMenus) && isset($this->_OldMenuTerms)) {
+                                foreach ($this->_OldMenuTerms as $old_menu) {
+                                    foreach ($updateMenus as $update_menu) {
+                                        if ($old_menu['term_id'] == $update_menu['term_id'] && $old_menu['name'] != $update_menu['name']) {
+                                            $this->EventChangeName($old_menu['name'], $update_menu['name']);
+                                        }
+                                    }
+                                }
+                            }
                             // Setting Auto add pages
                             if (!empty($value) && isset($value['auto_add'])) {
                                 if ($value['auto_add']) {
