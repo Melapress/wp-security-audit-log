@@ -107,8 +107,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                     }
 
                     // Enable/Disable menu setting
-                    $fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
-                    $nav_menu_options = maybe_unserialize($fn('nav_menu_options'));
+                    $nav_menu_options = maybe_unserialize(get_option('nav_menu_options'));
                     $auto_add = null;
                     if (isset($nav_menu_options['auto_add'])) {
                         if (in_array($menu_id, $nav_menu_options['auto_add'])) {
@@ -231,7 +230,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         }
         // Deleted Menu
         if (isset($updateMenus) && isset($this->_OldMenuTerms)) {
-            $terms = array_diff_assoc($this->_OldMenuTerms, $updateMenus);
+            $terms = array_diff(array_map('serialize', $this->_OldMenuTerms), array_map('serialize', $updateMenus));
+            $terms = array_map('unserialize', $terms);
+            
             if (isset($terms) && count($terms) > 0) {
                 foreach ($terms as $term) {
                     $this->plugin->alerts->Trigger(2081, array(
