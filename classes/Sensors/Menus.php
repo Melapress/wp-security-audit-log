@@ -12,6 +12,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         add_action('wp_create_nav_menu', array($this, 'CreateMenu'), 10, 2);
         add_action('wp_delete_nav_menu', array($this, 'DeleteMenu'), 10, 1);
         add_action('wp_update_nav_menu', array($this, 'UpdateMenu'), 10, 2);
+    
         add_action('admin_init', array($this, 'EventAdminInit'));
         // Customizer trigger
         add_action('customize_register', array($this, 'CustomizeInit'));
@@ -24,7 +25,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
             'MenuName' => $menu_data['menu-name']
         ));
     }
-    
+
     public function DeleteMenu($term_id)
     {
         if ($this->_OldMenu) {
@@ -172,28 +173,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
             }
         }
     }
-    
-    public function EventAdminInit()
-    {
-        $is_nav_menu = basename($_SERVER['SCRIPT_NAME']) == 'nav-menus.php';
-        if ($is_nav_menu) {
-            if (isset($_GET['action']) && $_GET['action'] == 'delete') {
-                if (isset($_GET['menu'])) {
-                    $this->_OldMenu = wp_get_nav_menu_object($_GET['menu']);
-                }
-            } else {
-                $menus = wp_get_nav_menus();
-                if (!empty($menus)) {
-                    foreach ($menus as $menu) {
-                        array_push($this->_OldMenuTerms, array("term_id" => $menu->term_id, "name" => $menu->name));
-                    }
-                }
-            }
-            $this->_OldMenuLocations = get_nav_menu_locations();
-        }
-    }
 
-    public function CustomizeInit()
+    private function BuildOldMenuTermsAndItems()
     {
         $menus = wp_get_nav_menus();
         if (!empty($menus)) {
@@ -213,6 +194,26 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                 }
             }
         }
+    }
+    
+    public function EventAdminInit()
+    {
+        $is_nav_menu = basename($_SERVER['SCRIPT_NAME']) == 'nav-menus.php';
+        if ($is_nav_menu) {
+            if (isset($_GET['action']) && $_GET['action'] == 'delete') {
+                if (isset($_GET['menu'])) {
+                    $this->_OldMenu = wp_get_nav_menu_object($_GET['menu']);
+                }
+            } else {
+                $this->BuildOldMenuTermsAndItems();
+            }
+            $this->_OldMenuLocations = get_nav_menu_locations();
+        }
+    }
+
+    public function CustomizeInit()
+    {
+        $this->BuildOldMenuTermsAndItems();
         $this->_OldMenuLocations = get_nav_menu_locations();
     }
 
@@ -272,6 +273,14 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                                 $this->EventAddItems($value['type_label'], $content_name, $menu_name);
                             }
                         } else {
+                            // Create Menu
+                            if ($key == 'new_menu_name') {
+                                if (!empty($value)) {
+                                    $this->plugin->alerts->Trigger(2078, array(
+                                        'MenuName' => $value
+                                    ));
+                                }
+                            }
                             // Menu changed name
                             if (isset($updateMenus) && isset($this->_OldMenuTerms)) {
                                 foreach ($this->_OldMenuTerms as $old_menu) {
@@ -295,11 +304,11 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                                 $loc = substr(trim($key, ']'), 19);
                                 if (!empty($value)) {
                                     $menu = wp_get_nav_menu_object($value);
-                                    $this->EventMenuSetting($menu->name, "Enabled", "Location: ".$loc." menu");
+                                    $this->EventMenuSetting((!empty($menu) ? $menu->name : ''), "Enabled", "Location: ".$loc." menu");
                                 } else {
                                     if (!empty($this->_OldMenuLocations[$loc])) {
                                         $menu = wp_get_nav_menu_object($this->_OldMenuLocations[$loc]);
-                                        $this->EventMenuSetting($menu->name, "Disabled", "Location: ".$loc." menu");
+                                        $this->EventMenuSetting((!empty($menu) ? $menu->name : ''), "Disabled", "Location: ".$loc." menu");
                                     }
                                 }
                             }
