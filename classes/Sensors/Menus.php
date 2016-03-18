@@ -46,7 +46,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         $old_locations = get_nav_menu_locations();
         if ($new_location  != 0) {
             $menu = wp_get_nav_menu_object($new_location);
-            if ($old_locations[$type] != $new_location) {
+            if (!empty($old_locations[$type]) && $old_locations[$type] != $new_location) {
                 $this->EventMenuSetting($menu->name, "Enabled", "Location: ".$type." menu");
             }
         } else {
@@ -80,7 +80,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                     }
                 }
             }
-            if (isset($items)) {
+            if (!empty($items)) {
                 $contentNamesOld = array();
                 $contentTypesOld = array();
                 $contentOrderOld = array();
@@ -134,70 +134,69 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                             $this->EventModifiedItems($contentType, $contentName, $menu_data['menu-name']);
                         }
                     }
-
-                    // Enable/Disable menu setting
-                    $nav_menu_options = maybe_unserialize(get_option('nav_menu_options'));
-                    $auto_add = null;
-                    if (isset($nav_menu_options['auto_add'])) {
-                        if (in_array($menu_id, $nav_menu_options['auto_add'])) {
-                            if (empty($_POST['auto-add-pages'])) {
-                                $auto_add = "Disabled";
-                            }
-                        } else {
-                            if (isset($_POST['auto-add-pages'])) {
-                                $auto_add = "Enabled";
-                            }
-                        }
-                    } else {
-                        if (isset($_POST['auto-add-pages'])) {
-                            $auto_add = "Enabled";
-                        }
+                }
+            }
+            // Enable/Disable menu setting
+            $nav_menu_options = maybe_unserialize(get_option('nav_menu_options'));
+            $auto_add = null;
+            if (isset($nav_menu_options['auto_add'])) {
+                if (in_array($menu_id, $nav_menu_options['auto_add'])) {
+                    if (empty($_POST['auto-add-pages'])) {
+                        $auto_add = "Disabled";
                     }
-                    // Alert 2082 Auto add pages
-                    if (!empty($auto_add)) {
-                        $this->EventMenuSetting($menu_data['menu-name'], $auto_add, "Auto add pages");
-                    }
-                    
-                    $nav_menu_locations = get_nav_menu_locations();
-
-                    $locationPrimary = null;
-                    if (isset($this->_OldMenuLocations['primary']) && isset($nav_menu_locations['primary'])) {
-                        if ($nav_menu_locations['primary'] == $menu_id && $this->_OldMenuLocations['primary'] != $nav_menu_locations['primary']) {
-                            $locationPrimary = "Enabled";
-                        }
-                    } elseif (empty($this->_OldMenuLocations['primary']) && isset($nav_menu_locations['primary'])) {
-                        if ($nav_menu_locations['primary'] == $menu_id) {
-                            $locationPrimary = "Enabled";
-                        }
-                    } elseif (isset($this->_OldMenuLocations['primary']) && empty($nav_menu_locations['primary'])) {
-                        if ($this->_OldMenuLocations['primary'] == $menu_id) {
-                            $locationPrimary = "Disabled";
-                        }
-                    }
-                    // Alert 2082 Primary menu
-                    if (!empty($locationPrimary)) {
-                        $this->EventMenuSetting($menu_data['menu-name'], $locationPrimary, "Location: primary menu");
-                    }
-                    
-                    $locationSocial = null;
-                    if (isset($this->_OldMenuLocations['social']) && isset($nav_menu_locations['social'])) {
-                        if ($nav_menu_locations['social'] == $menu_id && $this->_OldMenuLocations['social'] != $nav_menu_locations['social']) {
-                            $locationSocial = "Enabled";
-                        }
-                    } elseif (empty($this->_OldMenuLocations['social']) && isset($nav_menu_locations['social'])) {
-                        if ($nav_menu_locations['social'] == $menu_id) {
-                            $locationSocial = "Enabled";
-                        }
-                    } elseif (isset($this->_OldMenuLocations['social']) && empty($nav_menu_locations['social'])) {
-                        if ($this->_OldMenuLocations['social'] == $menu_id) {
-                            $locationSocial = "Disabled";
-                        }
-                    }
-                    // Alert 2082 Social links menu
-                    if (!empty($locationSocial)) {
-                        $this->EventMenuSetting($menu_data['menu-name'], $locationSocial, "Location: social menu");
+                } else {
+                    if (isset($_POST['auto-add-pages'])) {
+                        $auto_add = "Enabled";
                     }
                 }
+            } else {
+                if (isset($_POST['auto-add-pages'])) {
+                    $auto_add = "Enabled";
+                }
+            }
+            // Alert 2082 Auto add pages
+            if (!empty($auto_add)) {
+                $this->EventMenuSetting($menu_data['menu-name'], $auto_add, "Auto add pages");
+            }
+            
+            $nav_menu_locations = get_nav_menu_locations();
+
+            $locationPrimary = null;
+            if (isset($this->_OldMenuLocations['primary']) && isset($nav_menu_locations['primary'])) {
+                if ($nav_menu_locations['primary'] == $menu_id && $this->_OldMenuLocations['primary'] != $nav_menu_locations['primary']) {
+                    $locationPrimary = "Enabled";
+                }
+            } elseif (empty($this->_OldMenuLocations['primary']) && isset($nav_menu_locations['primary'])) {
+                if ($nav_menu_locations['primary'] == $menu_id) {
+                    $locationPrimary = "Enabled";
+                }
+            } elseif (isset($this->_OldMenuLocations['primary']) && empty($nav_menu_locations['primary'])) {
+                if ($this->_OldMenuLocations['primary'] == $menu_id) {
+                    $locationPrimary = "Disabled";
+                }
+            }
+            // Alert 2082 Primary menu
+            if (!empty($locationPrimary)) {
+                $this->EventMenuSetting($menu_data['menu-name'], $locationPrimary, "Location: primary menu");
+            }
+            
+            $locationSocial = null;
+            if (isset($this->_OldMenuLocations['social']) && isset($nav_menu_locations['social'])) {
+                if ($nav_menu_locations['social'] == $menu_id && $this->_OldMenuLocations['social'] != $nav_menu_locations['social']) {
+                    $locationSocial = "Enabled";
+                }
+            } elseif (empty($this->_OldMenuLocations['social']) && isset($nav_menu_locations['social'])) {
+                if ($nav_menu_locations['social'] == $menu_id) {
+                    $locationSocial = "Enabled";
+                }
+            } elseif (isset($this->_OldMenuLocations['social']) && empty($nav_menu_locations['social'])) {
+                if ($this->_OldMenuLocations['social'] == $menu_id) {
+                    $locationSocial = "Disabled";
+                }
+            }
+            // Alert 2082 Social links menu
+            if (!empty($locationSocial)) {
+                $this->EventMenuSetting($menu_data['menu-name'], $locationSocial, "Location: social menu");
             }
         }
     }
