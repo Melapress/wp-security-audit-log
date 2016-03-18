@@ -69,68 +69,80 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
     public function UpdateMenu($menu_id, $menu_data = null)
     {
         if (!empty($menu_data)) {
+            $contentNamesOld = array();
+            $contentTypesOld = array();
+            $contentOrderOld = array();
+
             $items = wp_get_nav_menu_items($menu_id);
+            if (!empty($items)) {
+                foreach ($items as $item) {
+                    array_push($contentNamesOld, $item->title);
+                    array_push($contentTypesOld, $item->object);
+                    $contentOrderOld[$item->ID] = $item->menu_order;
+                }
+            }
             // Menu changed name
             if (!empty($this->_OldMenuTerms) && isset($_POST['menu']) && isset($_POST['menu-name'])) {
                 foreach ($this->_OldMenuTerms as $oldMenuTerm) {
                     if ($oldMenuTerm['term_id'] == $_POST['menu']) {
                         if ($oldMenuTerm['name'] != $_POST['menu-name']) {
                             $this->EventChangeName($oldMenuTerm['name'], $_POST['menu-name']);
+                        } else {
+                            // Remove the last menu item
+                            if (count($contentNamesOld) == 1 && count($contentTypesOld) == 1) {
+                                $this->EventRemoveItems($contentTypesOld[0], $contentNamesOld[0], $_POST['menu-name']);
+                            }
                         }
                     }
                 }
             }
-            if (!empty($items)) {
-                $contentNamesOld = array();
-                $contentTypesOld = array();
-                $contentOrderOld = array();
+            
+            $is_occurred_event = false;
+            if (isset($_POST['menu-item-title']) && isset($_POST['menu-item-object'])) {
+                $contentNamesNew = array_values($_POST['menu-item-title']);
+                $contentTypesNew = array_values($_POST['menu-item-object']);
+                $contentOrderNew = $_POST['menu-item-position'];
 
-                foreach ($items as $item) {
-                    array_push($contentNamesOld, $item->title);
-                    array_push($contentTypesOld, $item->object);
-                    $contentOrderOld[$item->ID] = $item->menu_order;
+                $order = array_diff_assoc($contentOrderNew, $contentOrderOld);
+                // Changed order of the objects in a menu
+                if ((count($contentOrderOld) == count($contentOrderNew)) && count($order) > 0) {
+                    $is_occurred_event = true;
+                    $this->EventChangeOrder($menu_data['menu-name']);
                 }
-                $is_occurred_event = false;
-                if (isset($_POST['menu-item-title']) && isset($_POST['menu-item-object'])) {
-                    $contentNamesNew = array_values($_POST['menu-item-title']);
-                    $contentTypesNew = array_values($_POST['menu-item-object']);
-                    $contentOrderNew = $_POST['menu-item-position'];
-
-                    $order = array_diff_assoc($contentOrderNew, $contentOrderOld);
-                    // Changed order of the objects in a menu
-                    if ((count($contentOrderOld) == count($contentOrderNew)) && count($order) > 0) {
+                $addedNames = array_diff_assoc($contentNamesNew, $contentNamesOld);
+                
+                if (!$is_occurred_event) {
+                    $addedTypes = array_diff_assoc($contentTypesNew, $contentTypesOld);
+                    // Add Items to the menu
+                    if (count($addedNames) > 0 && count($addedTypes) > 0) {
                         $is_occurred_event = true;
-                        $this->EventChangeOrder($menu_data['menu-name']);
-                    }
-                    $addedNames = array_diff_assoc($contentNamesNew, $contentNamesOld);
-                    
-                    if (!$is_occurred_event) {
-                        $addedTypes = array_diff_assoc($contentTypesNew, $contentTypesOld);
-                        // Add Items to the menu
-                        if (count($addedNames) > 0 && count($addedTypes) > 0) {
-                            $is_occurred_event = true;
-                            foreach ($addedNames as $key => $contentName) {
-                                $contentType = str_replace("custom", "custom link", $addedTypes[$key]);
+                        foreach ($addedNames as $key => $contentName) {
+                            $contentType = str_replace("custom", "custom link", $addedTypes[$key]);
+                            if (!empty($contentType)) {
                                 $this->EventAddItems($contentType, $contentName, $menu_data['menu-name']);
                             }
                         }
+                    }
 
-                        $removedNames = array_diff_assoc($contentNamesOld, $contentNamesNew);
-                        $removedTypes = array_diff_assoc($contentTypesOld, $contentTypesNew);
-                        // Remove items from the menu
-                        if (count($removedNames) > 0 && count($removedTypes) > 0) {
-                            $is_occurred_event = true;
-                            foreach ($removedNames as $key => $contentName) {
-                                $contentType = str_replace("custom", "custom link", $removedTypes[$key]);
+                    $removedNames = array_diff_assoc($contentNamesOld, $contentNamesNew);
+                    $removedTypes = array_diff_assoc($contentTypesOld, $contentTypesNew);
+                    // Remove items from the menu
+                    if (count($removedNames) > 0 && count($removedTypes) > 0) {
+                        $is_occurred_event = true;
+                        foreach ($removedNames as $key => $contentName) {
+                            $contentType = str_replace("custom", "custom link", $removedTypes[$key]);
+                            if (!empty($contentType)) {
                                 $this->EventRemoveItems($contentType, $contentName, $menu_data['menu-name']);
                             }
                         }
                     }
+                }
 
-                    // Modified Items in the menu
-                    if (!$is_occurred_event && count($addedNames) > 0) {
-                        foreach ($addedNames as $key => $contentName) {
-                            $contentType = str_replace("custom", "custom link", $contentTypesOld[$key]);
+                // Modified Items in the menu
+                if (!$is_occurred_event && count($addedNames) > 0) {
+                    foreach ($addedNames as $key => $contentName) {
+                        $contentType = str_replace("custom", "custom link", $contentTypesOld[$key]);
+                        if (!empty($contentType)) {
                             $this->EventModifiedItems($contentType, $contentName, $menu_data['menu-name']);
                         }
                     }
