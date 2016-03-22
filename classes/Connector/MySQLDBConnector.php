@@ -139,7 +139,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $_wpdb = $this->getConnection();
 
         // Load data Occurrences from WP
-        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb); 
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb);
         if (!$occurrence->IsInstalled()) die("No alerts to import");
         $sql = 'SELECT * FROM ' . $occurrence->GetWPTable();
         $occurrences = $wpdb->get_results($sql, ARRAY_A);
@@ -150,9 +150,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $sql = 'SELECT MAX(id) FROM ' . $occurrenceNew->GetTable();
         $increase_id = (int)$_wpdb->get_var($sql);
 
-        $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read, is_migrated) VALUES ' ;
+        $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read) VALUES ' ;
         foreach ($occurrences as $entry) {
-            $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].', 1), ';
+            $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
         }
         $sql = rtrim($sql, ", ");
         $_wpdb->query($sql);
@@ -167,7 +167,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $metaNew = new WSAL_Adapters_MySQL_Meta($_wpdb);
         $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
         foreach ($metadata as $entry) {
-            $occurrence_id = $entry['occurrence_id'] + $increase_id; 
+            $occurrence_id = $entry['occurrence_id'] + $increase_id;
             $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
         }
         $sql = rtrim($sql, ", ");
@@ -182,7 +182,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $_wpdb = $this->getConnection();
 
         // Load data Occurrences from External DB
-        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb); 
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
         if (!$occurrence->IsInstalled()) die("No alerts to import");
         $sql = 'SELECT * FROM ' . $occurrence->GetTable();
         $occurrences = $_wpdb->get_results($sql, ARRAY_A);
@@ -190,9 +190,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         // Insert data to WP
         $occurrenceWP = new WSAL_Adapters_MySQL_Occurrence($wpdb);
 
-        $sql = 'INSERT INTO ' . $occurrenceWP->GetWPTable() . ' (site_id, alert_id, created_on, is_read, is_migrated) VALUES ' ;
+        $sql = 'INSERT INTO ' . $occurrenceWP->GetWPTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
         foreach ($occurrences as $entry) {
-            $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].', 1), ';
+            $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
         }
         $sql = rtrim($sql, ", ");
         $wpdb->query($sql);
