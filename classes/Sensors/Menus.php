@@ -110,14 +110,14 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                     $this->EventChangeOrder($menu_data['menu-name']);
                 }
                 $addedNames = array_diff_assoc($contentNamesNew, $contentNamesOld);
+                $addedTypes = array_diff_assoc($contentTypesNew, $contentTypesOld);
                 
                 if (!$is_occurred_event) {
-                    $addedTypes = array_diff_assoc($contentTypesNew, $contentTypesOld);
                     // Add Items to the menu
                     if (count($addedNames) > 0 && count($addedTypes) > 0) {
                         $is_occurred_event = true;
                         foreach ($addedNames as $key => $contentName) {
-                            $contentType = str_replace("custom", "custom link", $addedTypes[$key]);
+                            $contentType = str_replace("custom", "custom link", $contentTypesNew[$key]);
                             if (!empty($contentType)) {
                                 $this->EventAddItems($contentType, $contentName, $menu_data['menu-name']);
                             }
@@ -130,7 +130,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                     if (count($removedNames) > 0 && count($removedTypes) > 0) {
                         $is_occurred_event = true;
                         foreach ($removedNames as $key => $contentName) {
-                            $contentType = str_replace("custom", "custom link", $removedTypes[$key]);
+                            $contentType = str_replace("custom", "custom link", $contentTypesOld[$key]);
                             if (!empty($contentType)) {
                                 $this->EventRemoveItems($contentType, $contentName, $menu_data['menu-name']);
                             }
