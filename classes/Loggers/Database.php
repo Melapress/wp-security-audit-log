@@ -10,7 +10,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
     }
 
     public function Log($type, $data = array(), $date = null, $siteid = null, $migrated = false)
-    { 
+    {
         // is this a php alert, and if so, are we logging such alerts?
         if ($type < 0010 && !$this->plugin->settings->IsPhpErrorLoggingEnabled()) return;
 
@@ -25,8 +25,11 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
 
         // set up meta data
         $occ->SetMeta($data);
+
         // Inject for promoting the paid add-ons
-        $this->AlertInject($occ);
+        if ($type != 9999) {
+            $this->AlertInject($occ);
+        }
     }
 
     public function CleanUp()
@@ -77,12 +80,12 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
     private function AlertInject($occurrence)
     {
         $count = $this->CheckPromoToShow();
-        if ($count) {
+        if ($count && $occurrence->getId() != 0) {
             if (($occurrence->getId() % $count) == 0) {
                 $promoToSend = $this->GetPromoAlert();
                 if (!empty($promoToSend)) {
                     $link = '<a href="'.$promoToSend['link'].'" target="_blank">'.$promoToSend['name'].'</a>';
-                    $this->log(9999, array(
+                    $this->Log(9999, array(
                         'ClientIP' => '127.0.0.1',
                         'Username' => 'Plugin',
                         'PromoMessage' => sprintf($promoToSend['message'], $link),
@@ -211,5 +214,4 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         }
         return (count($promoToShow) == 4) ? 150 : 250;
     }
-
 }
