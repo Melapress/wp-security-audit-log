@@ -145,7 +145,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $_wpdb = $this->connection;
         $occ_ids = array();
         $sql = (!empty($args) ? $_wpdb->prepare($sql, $args) : $sql);
-        foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) { 
+        foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
             $occ_ids[] = $data['id'];
         }
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);

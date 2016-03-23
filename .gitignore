@@ -1,6 +1,5 @@
 # Netbeans
 /nbproject/
-Request.log.php
 
 # Windows image file caches
 Thumbs.db
@@ -9,8 +8,9 @@ ehthumbs.db
 # Folder config file
 Desktop.ini
 
-# Log fils
+# Log files
 *.log
+Request.log.php
 
 # VS and VSPHP
 *.cache

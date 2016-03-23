@@ -2,7 +2,6 @@
 
 class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
 {
-    
     public $id = 0;
     public $site_id = 0;
     public $alert_id = 0;
@@ -124,7 +123,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     {
         $meta = $this->getAdapter()->GetFirstNamedMeta($this, array('Username', 'CurrentUserID'));
         if ($meta) {
-            switch(true){
+            switch (true) {
                 case $meta->name == 'Username':
                     return $meta->value;
                 case $meta->name == 'CurrentUserID':

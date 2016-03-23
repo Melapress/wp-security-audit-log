@@ -1,7 +1,7 @@
 <?php
 
-class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInterface {
-    
+class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInterface
+{
     protected $connection;
 
     /**
@@ -23,7 +23,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
     public function GetModel()
     {
-        return new WSAL_Models_ActiveRecord(); 
+        return new WSAL_Models_ActiveRecord();
     }
     
     /**
@@ -60,10 +60,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     {
         $model = $this->GetModel();
         
-        if(!isset($this->_column_cache)){
+        if (!isset($this->_column_cache)) {
             $this->_column_cache = array();
-            foreach(array_keys(get_object_vars($model)) as $col)
-                if(trim($col) && $col[0] != '_')
+            foreach (array_keys(get_object_vars($model)) as $col)
+                if (trim($col) && $col[0] != '_')
                     $this->_column_cache[] = $col;
         }
         return $this->_column_cache;
@@ -113,16 +113,20 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     public function Save($activeRecord)
     {
         //global $wpdb;
-        $_wpdb = $this->connection; 
+        $_wpdb = $this->connection;
         $copy = $activeRecord;
         $data = array();
         $format = array();
-        foreach ($this->GetColumns() as $key) {
+
+        foreach ($this->GetColumns() as $index => $key) {
+            if ($key == $this->_idkey) {
+                $_idIndex = $index;
+            }
 
             $val = $copy->$key;
             $deffmt = '%s';
             if (is_int($copy->$key)) {
-              $deffmt = '%d';
+                $deffmt = '%d';
             }
             if (is_float($copy->$key)) {
                 $deffmt = '%f';
@@ -134,6 +138,12 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             }
             $format[] = $deffmt;
         }
+        
+        if (isset($data[$this->_idkey]) && empty($data[$this->_idkey])) {
+            unset($data[$this->_idkey]);
+            unset($format[$_idIndex]);
+        }
+
         $result = $_wpdb->replace($this->GetTable(), $data, $format);
             
         if ($result !== false) {
@@ -166,7 +176,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $_wpdb = $this->connection;
         $result = array();
         $sql = $_wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '. $cond, $args);
-        foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) { 
+        foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
             $result[] = $this->getModel()->LoadData($data);
         }
         return $result;
@@ -346,7 +356,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     /**
      * @return string Must return SQL for removing table (at a minimum, it should be ` 'DROP TABLE ' . $this->_table `).
      */
-    protected function _GetUninstallQuery(){
+    protected function _GetUninstallQuery()
+    {
         return  'DROP TABLE ' . $this->GetTable();
     }
 
@@ -434,5 +445,4 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         
         return $results;
     }
-
 }
