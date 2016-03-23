@@ -14,6 +14,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         add_action('untrash_post', array($this, 'EventPostUntrashed'));
         add_action('edit_category', array($this, 'EventChangedCategoryParent'));
         add_action('save_post', array($this, 'SetRevisionLink'), 10, 3);
+        add_action('publish_future_post', array($this, 'EventPublishFuture'), 10, 1);
     }
     
     protected function GetEventTypeForPostType($post, $typePost, $typePage, $typeCustom)
@@ -136,6 +137,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     protected function CheckPostCreation($oldPost, $newPost)
     {
         $event = 0;
+        $is_scheduled = false;
         switch ($newPost->post_status) {
             case 'publish':
                 $event = $this->GetEventTypeForPostType($oldPost, 2001, 2005, 2030);
@@ -143,16 +145,43 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             case 'draft':
                 $event = $this->GetEventTypeForPostType($oldPost, 2000, 2004, 2029);
                 break;
+            case 'future':
+                $event = $this->GetEventTypeForPostType($oldPost, 2074, 2075, 2076);
+                $is_scheduled = true;
+                break;
             case 'pending':
                 $event = 2073;
                 break;
         }
         if ($event) {
+            if ($is_scheduled) {
+                $this->plugin->alerts->Trigger($event, array(
+                    'PostType' => $newPost->post_type,
+                    'PostTitle' => $newPost->post_title,
+                    'PublishingDate' => $newPost->post_date
+                ));
+            } else {
+                $this->plugin->alerts->Trigger($event, array(
+                    'PostID' => $newPost->ID,
+                    'PostType' => $newPost->post_type,
+                    'PostTitle' => $newPost->post_title,
+                    'PostUrl' => get_permalink($newPost->ID)
+                ));
+            }
+        }
+    }
+
+    public function EventPublishFuture($post_id)
+    {
+        $post = get_post($post_id);
+        $event = $this->GetEventTypeForPostType($post, 2001, 2005, 2030);
+        
+        if ($event) {
             $this->plugin->alerts->Trigger($event, array(
-                'PostID' => $newPost->ID,
-                'PostType' => $newPost->post_type,
-                'PostTitle' => $newPost->post_title,
-                'PostUrl' => get_permalink($newPost->ID),
+                'PostID' => $post->ID,
+                'PostType' => $post->post_type,
+                'PostTitle' => $post->post_title,
+                'PostUrl' => get_permalink($post->ID)
             ));
         }
     }
@@ -217,7 +246,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($this->CheckBBPress($post)) {
             return;
         }
-        if (!in_array($post->post_type, array('attachment', 'revision'))) { // ignore attachments and revisions
+        if (!in_array($post->post_type, array('attachment', 'revision', 'nav_menu_item'))) { // ignore attachments, revisions and menu items
             $event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
             // check WordPress backend operations
             if ($this->CheckAutoDraft($event, $post->post_title)) {
