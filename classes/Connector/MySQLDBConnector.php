@@ -135,50 +135,22 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         }
     }
 
-    public function MigrateOccurrence($index, $limit, $increase_occurrence_id)
+    private function GetIncreaseOccurrence()
     {
-        $result = null;
-        $offset = ($index * $limit);
-        global $wpdb;
         $_wpdb = $this->getConnection();
-
         $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
-        if ($increase_occurrence_id == 0) {
-            $sql = 'SELECT MAX(id) FROM ' . $occurrenceNew->GetTable();
-            $increase_occurrence_id = (int)$_wpdb->get_var($sql);
-        }
-
-        // Load data Occurrences from WP
-        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb);
-        if (!$occurrence->IsInstalled()) {
-            die("No alerts to import");
-        }
-        $sql = 'SELECT * FROM ' . $occurrence->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET '. $offset;
-        $occurrences = $wpdb->get_results($sql, ARRAY_A);
-
-        // Insert data to External DB
-        if (!empty($occurrences)) {
-            $index++;
-            $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read) VALUES ' ;
-            foreach ($occurrences as $entry) {
-                $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
-            }
-            $sql = rtrim($sql, ", ");
-            $_wpdb->query($sql);
-
-            $result = array('index' => $index, 'limit' => $limit, 'increase_occurrence_id' => $increase_occurrence_id);
-        } else {
-            $this->DeleteAfterMigrate($occurrence);
-        }
-        return $result;
+        $sql = 'SELECT MAX(id) FROM ' . $occurrenceNew->GetTable();
+        return (int)$_wpdb->get_var($sql);
     }
 
-    public function MigrateMeta($index, $limit, $increase_occurrence_id)
+    public function MigrateMeta($index, $limit)
     {
         $result = null;
         $offset = ($index * $limit);
         global $wpdb;
         $_wpdb = $this->getConnection();
+
+        $increase_occurrence_id = $this->GetIncreaseOccurrence();
 
         // Load data Meta from WP
         $meta = new WSAL_Adapters_MySQL_Meta($wpdb);
@@ -201,10 +173,48 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $sql = rtrim($sql, ", ");
             $_wpdb->query($sql);
 
-            $result = array('index' => $index, 'limit' => $limit, 'increase_occurrence_id' => $increase_occurrence_id);
+            $result['complete'] = false;
         } else {
+            $result['complete'] = true;
             $this->DeleteAfterMigrate($meta);
         }
+        $result['index'] = $index;
+        return $result;
+    }
+
+    public function MigrateOccurrence($index, $limit)
+    {
+        $result = null;
+        $offset = ($index * $limit);
+        global $wpdb;
+        $_wpdb = $this->getConnection();
+
+        // Load data Occurrences from WP
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb);
+        if (!$occurrence->IsInstalled()) {
+            die("No alerts to import");
+        }
+        $sql = 'SELECT * FROM ' . $occurrence->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET '. $offset;
+        $occurrences = $wpdb->get_results($sql, ARRAY_A);
+
+        // Insert data to External DB
+        if (!empty($occurrences)) {
+            $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+
+            $index++;
+            $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read) VALUES ' ;
+            foreach ($occurrences as $entry) {
+                $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
+            }
+            $sql = rtrim($sql, ", ");
+            $_wpdb->query($sql);
+
+            $result['complete'] = false;
+        } else {
+            $result['complete'] = true;
+            $this->DeleteAfterMigrate($occurrence);
+        }
+        $result['index'] = $index;
         return $result;
     }
 
@@ -235,8 +245,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $sql = rtrim($sql, ", ");
             $wpdb->query($sql);
 
-            $result = array('index' => $index, 'limit' => $limit);
+            $result['complete'] = false;
+        } else {
+            $result['complete'] = true;
         }
+        $result['index'] = $index;
         return $result;
     }
 
@@ -267,8 +280,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $sql = rtrim($sql, ", ");
             $wpdb->query($sql);
 
-            $result = array('index' => $index, 'limit' => $limit);
+            $result['complete'] = false;
+        } else {
+            $result['complete'] = true;
         }
+        $result['index'] = $index;
         return $result;
     }
 
