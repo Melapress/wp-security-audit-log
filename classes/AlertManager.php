@@ -253,25 +253,43 @@ final class WSAL_AlertManager {
      * @param integer $type Alert type.
      * @param array $data Misc alert data.
      */
-    protected function Log($type, $data = array()){
-        if(!isset($data['ClientIP']))
-            $data['ClientIP'] = $this->plugin->settings->GetMainClientIP();
-        if(!isset($data['OtherIPs']) && $this->plugin->settings->IsMainIPFromProxy())
-            $data['OtherIPs'] = $this->plugin->settings->GetClientIPs();
-        if(!isset($data['UserAgent']))
-            $data['UserAgent'] = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-        if(!isset($data['Username']) && !isset($data['CurrentUserID']))
-            $data['CurrentUserID'] = function_exists('get_current_user_id') ? get_current_user_id() : 0;
-        if(!isset($data['CurrentUserRoles']) && function_exists('is_user_logged_in') && is_user_logged_in())
-            $data['CurrentUserRoles'] = $this->plugin->settings->GetCurrentUserRoles();
-        
+    protected function Log($type, $data = array())
+    {
+        if (!isset($data['ClientIP'])) {
+            $clientIP = $this->plugin->settings->GetMainClientIP();
+            if (!empty($clientIP)) {
+                $data['ClientIP'] = $clientIP;
+            }
+        }
+        if (!isset($data['OtherIPs']) && $this->plugin->settings->IsMainIPFromProxy()) {
+            $otherIPs = $this->plugin->settings->GetClientIPs();
+            if (!empty($otherIPs)) {
+                $data['OtherIPs'] = $otherIPs;
+            }
+        }
+        if (!isset($data['UserAgent'])) {
+            if (isset($_SERVER['HTTP_USER_AGENT'])) {
+                $data['UserAgent'] = $_SERVER['HTTP_USER_AGENT'];
+            }
+        }
+        if (!isset($data['Username']) && !isset($data['CurrentUserID'])) {
+            if (function_exists('get_current_user_id')) {
+                $data['CurrentUserID'] = get_current_user_id();
+            }
+        }
+        if (!isset($data['CurrentUserRoles']) && function_exists('is_user_logged_in') && is_user_logged_in()) {
+            $currentUserRoles = $this->plugin->settings->GetCurrentUserRoles();
+            if (!empty($currentUserRoles)) {
+                $data['CurrentUserRoles'] = $currentUserRoles;
+            }
+        }
         //if(isset($_SERVER['REMOTE_HOST']) && $_SERVER['REMOTE_HOST'] != $data['ClientIP'])
         //  $data['ClientHost'] = $_SERVER['REMOTE_HOST'];
-        
         //$data['OtherIPs'] = $_SERVER['REMOTE_HOST'];
         
-        foreach($this->_loggers as $logger)
+        foreach ($this->_loggers as $logger) {
             $logger->Log($type, $data);
+        }
     }
     
     /**

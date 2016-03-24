@@ -2,7 +2,6 @@
 
 class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
 {
-    
     public $id = 0;
     public $site_id = 0;
     public $alert_id = 0;
@@ -44,12 +43,14 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
      */
     public function SetMetaValue($name, $value)
     {
-        //get meta adapter
-        $model = new WSAL_Models_Meta();
-        $model->occurrence_id = $this->getId();
-        $model->name = $name;
-        $model->value = maybe_serialize($value);
-        $model->SaveMeta();
+        if (!empty($value)) {
+            // get meta adapter
+            $model = new WSAL_Models_Meta();
+            $model->occurrence_id = $this->getId();
+            $model->name = $name;
+            $model->value = maybe_serialize($value);
+            $model->SaveMeta();
+        }
     }
     
     public function UpdateMetaValue($name, $value)
@@ -64,7 +65,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
      */
     public function GetMetaArray()
     {
-        $result = array(); 
+        $result = array();
         $metas = $this->getAdapter()->GetMultiMeta($this);
         foreach ($metas as $meta) {
             $result[$meta->name] = maybe_unserialize($meta->value);
@@ -122,7 +123,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     {
         $meta = $this->getAdapter()->GetFirstNamedMeta($this, array('Username', 'CurrentUserID'));
         if ($meta) {
-            switch(true){
+            switch (true) {
                 case $meta->name == 'Username':
                     return $meta->value;
                 case $meta->name == 'CurrentUserID':

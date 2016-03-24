@@ -7,7 +7,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     {
         add_action('wsal_prune', array($this, 'EventPruneEvents'), 10, 2);
         add_action('admin_init', array($this, 'EventAdminInit'));
-        add_action('auto_update_core', array($this, 'WPUpdate'), 10, 2);
+
+        add_action('automatic_updates_complete', array($this, 'WPUpdate'), 10, 3);
     }
     
     /**
@@ -152,15 +153,16 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
     /**
      * WordPress auto core update
-     * @param bool   $update Whether to update.
-     * @param object $item   The update offer.
      */
-    public function WPUpdate($update, $item)
+    public function WPUpdate($automatic, $updates, $complete)
     {
-        $oldVersion = get_bloginfo('version');
-        $this->plugin->alerts->Trigger(6004, array(
-            'OldVersion' => $oldVersion,
-            'NewVersion' => $item->version.' (auto update)'
-        ));
+        if (isset($automatic['core'][0])) {
+            $obj = $automatic['core'][0];
+            $oldVersion = get_bloginfo('version');
+            $this->plugin->alerts->Trigger(6004, array(
+                'OldVersion' => $oldVersion,
+                'NewVersion' => $obj->item->version.' (auto update)'
+            ));
+        }
     }
 }

@@ -9,6 +9,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     
     public function __construct($connectionConfig = null)
     {
+        @ini_set('memory_limit', '256M');
+
         $this->connectionConfig = $connectionConfig;
         parent::__construct("MySQL");
         require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
@@ -139,23 +141,30 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $_wpdb = $this->getConnection();
 
         // Load data Occurrences from WP
-        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb); 
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb);
         if (!$occurrence->IsInstalled()) die("No alerts to import");
         $sql = 'SELECT * FROM ' . $occurrence->GetWPTable();
         $occurrences = $wpdb->get_results($sql, ARRAY_A);
 
         // Insert data to External DB
-        $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
-        $increase_id = 0;
-        $sql = 'SELECT MAX(id) FROM ' . $occurrenceNew->GetTable();
-        $increase_id = (int)$_wpdb->get_var($sql);
-
-        $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read, is_migrated) VALUES ' ;
-        foreach ($occurrences as $entry) {
-            $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].', 1), ';
+        if (!empty($occurrences)) {
+            $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+            $increase_id = 0;
+            $sql = 'SELECT MAX(id) FROM ' . $occurrenceNew->GetTable();
+            $increase_id = (int)$_wpdb->get_var($sql);
+            // split data
+            $occurrences_splited = $this->array_split($occurrences, 3);
+            foreach ($occurrences_splited as $occurrences_partition) {
+                if (!empty($occurrences_partition)) {
+                    $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read) VALUES ' ;
+                    foreach ($occurrences_partition as $entry) {
+                        $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
+                    }
+                    $sql = rtrim($sql, ", ");
+                    $_wpdb->query($sql);
+                }
+            }
         }
-        $sql = rtrim($sql, ", ");
-        $_wpdb->query($sql);
 
         // Load data Meta from WP
         $meta = new WSAL_Adapters_MySQL_Meta($wpdb);
@@ -164,14 +173,22 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $metadata = $wpdb->get_results($sql, ARRAY_A);
 
         // Insert data to External DB
-        $metaNew = new WSAL_Adapters_MySQL_Meta($_wpdb);
-        $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
-        foreach ($metadata as $entry) {
-            $occurrence_id = $entry['occurrence_id'] + $increase_id; 
-            $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
+        if (!empty($metadata)) {
+            $metaNew = new WSAL_Adapters_MySQL_Meta($_wpdb);
+            // split data
+            $metadata_splited = $this->array_split($metadata, 3);
+            foreach ($metadata_splited as $metadata_partition) {
+                if (!empty($metadata_partition)) {
+                    $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
+                    foreach ($metadata_partition as $entry) {
+                        $occurrence_id = $entry['occurrence_id'] + $increase_id;
+                        $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
+                    }
+                    $sql = rtrim($sql, ", ");
+                    $_wpdb->query($sql);
+                }
+            }
         }
-        $sql = rtrim($sql, ", ");
-        $_wpdb->query($sql);
         $this->DeleteAfterMigrate($occurrence);
         $this->DeleteAfterMigrate($meta);
     }
@@ -182,20 +199,27 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $_wpdb = $this->getConnection();
 
         // Load data Occurrences from External DB
-        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb); 
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
         if (!$occurrence->IsInstalled()) die("No alerts to import");
         $sql = 'SELECT * FROM ' . $occurrence->GetTable();
         $occurrences = $_wpdb->get_results($sql, ARRAY_A);
 
         // Insert data to WP
-        $occurrenceWP = new WSAL_Adapters_MySQL_Occurrence($wpdb);
-
-        $sql = 'INSERT INTO ' . $occurrenceWP->GetWPTable() . ' (site_id, alert_id, created_on, is_read, is_migrated) VALUES ' ;
-        foreach ($occurrences as $entry) {
-            $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].', 1), ';
+        if (!empty($occurrences)) {
+            $occurrenceWP = new WSAL_Adapters_MySQL_Occurrence($wpdb);
+            // split data
+            $occurrences_splited = $this->array_split($occurrences, 3);
+            foreach ($occurrences_splited as $occurrences_partition) {
+                if (!empty($occurrences_partition)) {
+                    $sql = 'INSERT INTO ' . $occurrenceWP->GetWPTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
+                    foreach ($occurrences_partition as $entry) {
+                        $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
+                    }
+                    $sql = rtrim($sql, ", ");
+                    $wpdb->query($sql);
+                }
+            }
         }
-        $sql = rtrim($sql, ", ");
-        $wpdb->query($sql);
 
         // Load data Meta from External DB
         $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
@@ -204,13 +228,21 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $metadata = $_wpdb->get_results($sql, ARRAY_A);
 
         // Insert data to WP
-        $metaWP = new WSAL_Adapters_MySQL_Meta($wpdb);
-        $sql = 'INSERT INTO ' . $metaWP->GetWPTable() . ' (occurrence_id, name, value) VALUES ' ;
-        foreach ($metadata as $entry) {
-            $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
+        if (!empty($metadata)) {
+            $metaWP = new WSAL_Adapters_MySQL_Meta($wpdb);
+            // split data
+            $metadata_splited = $this->array_split($metadata, 3);
+            foreach ($metadata_splited as $metadata_partition) {
+                if (!empty($metadata_partition)) {
+                    $sql = 'INSERT INTO ' . $metaWP->GetWPTable() . ' (occurrence_id, name, value) VALUES ' ;
+                    foreach ($metadata_partition as $entry) {
+                        $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
+                    }
+                    $sql = rtrim($sql, ", ");
+                    $wpdb->query($sql);
+                }
+            }
         }
-        $sql = rtrim($sql, ", ");
-        $wpdb->query($sql);
     }
 
     private function DeleteAfterMigrate($record)
@@ -247,11 +279,26 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
     private function truncateKey()
     {
+        if (!defined('AUTH_KEY')) {
+            return 'x4>Tg@G-Kr6a]o-eJeP^?UO)KW;LbV)I';
+        }
         $key_size =  strlen(AUTH_KEY);
         if ($key_size > 32) {
             return substr(AUTH_KEY, 0, 32);
         } else {
             return AUTH_KEY;
         }
+    }
+
+    // split the given array into n number of pieces
+    private function array_split($array, $pieces = 2)
+    {
+        if ($pieces < 2) {
+            return array($array);
+        }
+        $newCount = ceil(count($array)/$pieces);
+        $a = array_slice($array, 0, $newCount);
+        $b = $this->array_split(array_slice($array, $newCount), $pieces-1);
+        return array_merge(array($a), $b);
     }
 }

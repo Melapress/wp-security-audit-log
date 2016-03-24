@@ -16,11 +16,6 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
     
     protected $old_superadmins;
     
-    protected function IsMultisite()
-    {
-        return function_exists('is_multisite') && is_multisite();
-    }
-    
     public function EventAdminInit()
     {
         if ($this->IsMultisite()) {

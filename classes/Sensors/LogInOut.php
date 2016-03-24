@@ -39,14 +39,6 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
             ), true);
         }
     }
-
-    /**
-     * @return boolean Whether we are running on multisite or not.
-     */
-    public function IsMultisite()
-    {
-        return function_exists('is_multisite') && is_multisite();
-    }
     
     const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins-known';
     const TRANSIENT_FAILEDLOGINS_UNKNOWN = 'wsal-failedlogins-unknown';

@@ -277,8 +277,8 @@ class WpSecurityAuditLog {
 		$pruningDate = $this->settings->GetPruningDate();
 		$this->settings->SetPruningDate($pruningDate);
 
-		$pruningEnabled = $this->settings->IsPruningLimitEnabled();
-		$this->settings->SetPruningLimitEnabled($pruningEnabled);
+		//$pruningEnabled = $this->settings->IsPruningLimitEnabled();
+        $this->settings->SetPruningLimitEnabled(true);
 		//setting the prunig limit with the old value or the default value
 		$pruningLimit = $this->settings->GetPruningLimit();
 		$this->settings->SetPruningLimit($pruningLimit);
