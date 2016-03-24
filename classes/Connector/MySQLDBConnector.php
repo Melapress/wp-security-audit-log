@@ -135,114 +135,141 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         }
     }
 
-    public function Migrate()
+    public function MigrateOccurrence($index, $limit, $increase_occurrence_id)
     {
+        $result = null;
+        $offset = ($index * $limit);
         global $wpdb;
         $_wpdb = $this->getConnection();
 
+        $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        if ($increase_occurrence_id == 0) {
+            $sql = 'SELECT MAX(id) FROM ' . $occurrenceNew->GetTable();
+            $increase_occurrence_id = (int)$_wpdb->get_var($sql);
+        }
+
         // Load data Occurrences from WP
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb);
-        if (!$occurrence->IsInstalled()) die("No alerts to import");
-        $sql = 'SELECT * FROM ' . $occurrence->GetWPTable();
+        if (!$occurrence->IsInstalled()) {
+            die("No alerts to import");
+        }
+        $sql = 'SELECT * FROM ' . $occurrence->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET '. $offset;
         $occurrences = $wpdb->get_results($sql, ARRAY_A);
 
         // Insert data to External DB
         if (!empty($occurrences)) {
-            $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
-            $increase_id = 0;
-            $sql = 'SELECT MAX(id) FROM ' . $occurrenceNew->GetTable();
-            $increase_id = (int)$_wpdb->get_var($sql);
-            // split data
-            $occurrences_splited = $this->array_split($occurrences, 3);
-            foreach ($occurrences_splited as $occurrences_partition) {
-                if (!empty($occurrences_partition)) {
-                    $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read) VALUES ' ;
-                    foreach ($occurrences_partition as $entry) {
-                        $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
-                    }
-                    $sql = rtrim($sql, ", ");
-                    $_wpdb->query($sql);
-                }
+            $index++;
+            $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (site_id, alert_id, created_on, is_read) VALUES ' ;
+            foreach ($occurrences as $entry) {
+                $sql .= '('.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
             }
+            $sql = rtrim($sql, ", ");
+            $_wpdb->query($sql);
+
+            $result = array('index' => $index, 'limit' => $limit, 'increase_occurrence_id' => $increase_occurrence_id);
+        } else {
+            $this->DeleteAfterMigrate($occurrence);
         }
+        return $result;
+    }
+
+    public function MigrateMeta($index, $limit, $increase_occurrence_id)
+    {
+        $result = null;
+        $offset = ($index * $limit);
+        global $wpdb;
+        $_wpdb = $this->getConnection();
 
         // Load data Meta from WP
         $meta = new WSAL_Adapters_MySQL_Meta($wpdb);
-        if (!$meta->IsInstalled()) die("No alerts to import");
-        $sql = 'SELECT * FROM ' . $meta->GetWPTable();
+        if (!$meta->IsInstalled()) {
+            die("No alerts to import");
+        }
+        $sql = 'SELECT * FROM ' . $meta->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET '. $offset;
         $metadata = $wpdb->get_results($sql, ARRAY_A);
 
         // Insert data to External DB
         if (!empty($metadata)) {
             $metaNew = new WSAL_Adapters_MySQL_Meta($_wpdb);
-            // split data
-            $metadata_splited = $this->array_split($metadata, 3);
-            foreach ($metadata_splited as $metadata_partition) {
-                if (!empty($metadata_partition)) {
-                    $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
-                    foreach ($metadata_partition as $entry) {
-                        $occurrence_id = $entry['occurrence_id'] + $increase_id;
-                        $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
-                    }
-                    $sql = rtrim($sql, ", ");
-                    $_wpdb->query($sql);
-                }
+
+            $index++;
+            $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
+            foreach ($metadata as $entry) {
+                $occurrence_id = $entry['occurrence_id'] + $increase_occurrence_id;
+                $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
             }
+            $sql = rtrim($sql, ", ");
+            $_wpdb->query($sql);
+
+            $result = array('index' => $index, 'limit' => $limit, 'increase_occurrence_id' => $increase_occurrence_id);
+        } else {
+            $this->DeleteAfterMigrate($meta);
         }
-        $this->DeleteAfterMigrate($occurrence);
-        $this->DeleteAfterMigrate($meta);
+        return $result;
     }
 
-    public function MigrateBack()
+    public function MigrateBackOccurrence($index, $limit)
     {
+        $result = null;
+        $offset = ($index * $limit);
         global $wpdb;
         $_wpdb = $this->getConnection();
 
         // Load data Occurrences from External DB
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
-        if (!$occurrence->IsInstalled()) die("No alerts to import");
-        $sql = 'SELECT * FROM ' . $occurrence->GetTable();
+        if (!$occurrence->IsInstalled()) {
+            die("No alerts to import");
+        }
+        $sql = 'SELECT * FROM ' . $occurrence->GetTable()  . ' LIMIT ' . $limit . ' OFFSET '. $offset;
         $occurrences = $_wpdb->get_results($sql, ARRAY_A);
 
         // Insert data to WP
         if (!empty($occurrences)) {
             $occurrenceWP = new WSAL_Adapters_MySQL_Occurrence($wpdb);
-            // split data
-            $occurrences_splited = $this->array_split($occurrences, 3);
-            foreach ($occurrences_splited as $occurrences_partition) {
-                if (!empty($occurrences_partition)) {
-                    $sql = 'INSERT INTO ' . $occurrenceWP->GetWPTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
-                    foreach ($occurrences_partition as $entry) {
-                        $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
-                    }
-                    $sql = rtrim($sql, ", ");
-                    $wpdb->query($sql);
-                }
-            }
-        }
 
+            $index++;
+            $sql = 'INSERT INTO ' . $occurrenceWP->GetWPTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
+            foreach ($occurrences as $entry) {
+                $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
+            }
+            $sql = rtrim($sql, ", ");
+            $wpdb->query($sql);
+
+            $result = array('index' => $index, 'limit' => $limit);
+        }
+        return $result;
+    }
+
+    public function MigrateBackMeta($index, $limit)
+    {
+        $result = null;
+        $offset = ($index * $limit);
+        global $wpdb;
+        $_wpdb = $this->getConnection();
+        
         // Load data Meta from External DB
         $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
-        if (!$meta->IsInstalled()) die("No alerts to import");
-        $sql = 'SELECT * FROM ' . $meta->GetTable();
+        if (!$meta->IsInstalled()) {
+            die("No alerts to import");
+        }
+        $sql = 'SELECT * FROM ' . $meta->GetTable()  . ' LIMIT ' . $limit . ' OFFSET '. $offset;
         $metadata = $_wpdb->get_results($sql, ARRAY_A);
 
         // Insert data to WP
         if (!empty($metadata)) {
             $metaWP = new WSAL_Adapters_MySQL_Meta($wpdb);
-            // split data
-            $metadata_splited = $this->array_split($metadata, 3);
-            foreach ($metadata_splited as $metadata_partition) {
-                if (!empty($metadata_partition)) {
-                    $sql = 'INSERT INTO ' . $metaWP->GetWPTable() . ' (occurrence_id, name, value) VALUES ' ;
-                    foreach ($metadata_partition as $entry) {
-                        $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
-                    }
-                    $sql = rtrim($sql, ", ");
-                    $wpdb->query($sql);
-                }
+            
+            $index++;
+            $sql = 'INSERT INTO ' . $metaWP->GetWPTable() . ' (occurrence_id, name, value) VALUES ' ;
+            foreach ($metadata as $entry) {
+                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
             }
+            $sql = rtrim($sql, ", ");
+            $wpdb->query($sql);
+
+            $result = array('index' => $index, 'limit' => $limit);
         }
+        return $result;
     }
 
     private function DeleteAfterMigrate($record)
