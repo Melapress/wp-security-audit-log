@@ -222,9 +222,9 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 	* 2085: User changed the order of the objects in menu
 	
 * **New WordPress Security Alerts for Scheduled Items**
-	* 2074: User scheduled a post
-	* 2075: User scheduled a page
-	* 2076: User scheduled a custom post type
+	* 2074: User scheduled a post for publishing
+	* 2075: User scheduled a page for publishing
+	* 2076: User scheduled a custom post type for publishing
 	
 * **Bug Fixes**
 	* Fixed an issue where WordPress updated alerts were begin generated repeatedly upon accessing the updates page. [Support Ticket](https://wordpress.org/support/topic/weird-update-message-in-logs)
