@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report
 Requires at least: 3.6
 Tested up to: 4.4.2
-Stable tag: 2.3.3
+Stable tag: 2.4
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -204,6 +204,32 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 8. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes with WP Security Audit Log Plugin](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
 
 == Changelog ==
+
+= 2.4 (2016-03-29) =
+* **New Features**
+	* Monitoring of WordPress menus changes from both admin pages and theme customizer.
+	* New hook that allows users to create their own custom alerts. Read the [WP Security Audit Log Custom Alerts documentation](http://www) for more information.
+	* New alerts for when a either a post, a post or a custom post type is scheduled.
+	
+* **New WordPress Security Alerts for Menus**
+	* 2078: User created a new menu
+	* 2079: User added objects to menu
+	* 2080: User removed object from menu
+	* 2081: User deleted a menu
+	* 2082: User changed menu settings
+	* 2083: USer modified an object in menu
+	* 2084: User renamed a menu	
+	* 2085: User changed the order of the objects in menu
+	
+* **New WordPress Security Alerts for Scheduled Items**
+	* 2074: User scheduled a post
+	* 2075: User scheduled a page
+	* 2076: User scheduled a custom post type
+	
+* **Bug Fixes**
+	* Fixed an issue where WordPress updated alerts were begin generated repeatedly upon accessing the updates page. [Support Ticket](https://wordpress.org/support/topic/weird-update-message-in-logs)
+	* Fixed an issue where WordPress pruning was not working in an out of the box installation. [Support Ticket](https://wordpress.org/support/topic/huge-wsal-metadata-table-not-being-cleanedfixed)
+	* Fixed a conflict with Migrate DB. [Support Ticket](https://wordpress.org/support/topic/wp-migrate-db-pro)
 
 = 2.3.3 (2016-02-16) =
 * **Bug Fixes**
