@@ -223,7 +223,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2084, E_WARNING, __('User changed name of a menu', 'wp-security-audit-log'), __('Changed the name of menu %OldMenuName% to %NewMenuName%', 'wp-security-audit-log')),
                 array(2085, E_NOTICE, __('User changed order of the objects in a menu', 'wp-security-audit-log'), __('Changed the order of the objects in menu %MenuName%', 'wp-security-audit-log'))
             ),
-            __('Custom Alerts Developed', 'wp-security-audit-log') => array(
+            __('Custom Alerts', 'wp-security-audit-log') => array(
                 array(2222, E_CRITICAL, __('Custom critical Alert', 'wp-security-audit-log'), __('%CustomAlertText%', 'wp-security-audit-log')),
                 array(3333, E_WARNING, __('Custom warning Alert', 'wp-security-audit-log'), __('%CustomAlertText%', 'wp-security-audit-log')),
                 array(4444, E_NOTICE, __('Custom notice Alert', 'wp-security-audit-log'), __('%CustomAlertText%', 'wp-security-audit-log'))
