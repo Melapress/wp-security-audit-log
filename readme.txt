@@ -84,7 +84,7 @@ WP Security Audit Log is the first tracking and audit WordPress security monitor
 For more information about the features for WordPress Multisite network installation refer to [WP Security Audit Log Features for WordPress Multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/)
 
 = Easiy Create Your Own Custom Alerts =
-Is there something on your WordPress that the plugin does not monitor but you would like to keep record of? Refer to the [Hooks for custom alerts documentation](https://www.wpsecurityauditlog.com/documentation/create-custom-alerts-wordpress-audit-trail/) to easily create your own alerts and keep record of any change on your WordPress, be it a change in a WordPress customization, a third party plugin and more.
+Is there something on your WordPress that the plugin does not monitor, but you would like to keep a record of it? Refer to the [Hooks for custom alerts documentation](https://www.wpsecurityauditlog.com/documentation/create-custom-alerts-wordpress-audit-trail/) to easily create your own custom alerts and keep record of any change on your WordPress, be it a change in a WordPress customization, a third party plugin and more.
 
 = WordPress Security Audit Log in your Language! =
 We need help translating the plugin and the WordPress Security Alerts. If you would like to translate this plugin visit the [WordPress translate Project](https://translate.wordpress.org/) for more information on how to translate the plugin. If you already know how translations work, [start translating WP Security Audit Log now](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log) and contact us on plugins@wpwhitesecurity.com for a free license of all add-ons.
