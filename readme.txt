@@ -83,6 +83,9 @@ WP Security Audit Log is the first tracking and audit WordPress security monitor
 
 For more information about the features for WordPress Multisite network installation refer to [WP Security Audit Log Features for WordPress Multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/)
 
+= Easiy Create Your Own Custom Alerts =
+Is there something on your WordPress that the plugin does not monitor but you would like to keep record of? Refer to the [Hooks for custom alerts documentation](https://www.wpsecurityauditlog.com/documentation/create-custom-alerts-wordpress-audit-trail/) to easily create your own alerts and keep record of any change on your WordPress, be it a change in a WordPress customization, a third party plugin and more.
+
 = WordPress Security Audit Log in your Language! =
 We need help translating the plugin and the WordPress Security Alerts. If you would like to translate this plugin visit the [WordPress translate Project](https://translate.wordpress.org/) for more information on how to translate the plugin. If you already know how translations work, [start translating WP Security Audit Log now](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log) and contact us on plugins@wpwhitesecurity.com for a free license of all add-ons.
 
@@ -205,10 +208,13 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 
 == Changelog ==
 
-= 2.4 (2016-03-29) =
+= 2.4 (2016-03-28) =
+
+Read the [WP Security Audit Log 2.4 release notes](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/integration-hooks-custom-alerts-monitoring-wordpress-menus-2-4) for a detailed overview of what is new.
+
 * **New Features**
 	* Monitoring of WordPress menus changes from both admin pages and theme customizer.
-	* New hook that allows users to create their own custom alerts. Read the [WP Security Audit Log Custom Alerts documentation](http://www) for more information.
+	* New hook that allows users to create their own custom alerts. Read the [WP Security Audit Log Custom Alerts documentation](https://www.wpsecurityauditlog.com/documentation/create-custom-alerts-wordpress-audit-trail/) for more information.
 	* New alerts for when a either a post, a post or a custom post type is scheduled.
 	
 * **New WordPress Security Alerts for Menus**
