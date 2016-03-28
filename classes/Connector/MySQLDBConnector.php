@@ -149,13 +149,14 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $offset = ($index * $limit);
         global $wpdb;
         $_wpdb = $this->getConnection();
-
-        $increase_occurrence_id = $this->GetIncreaseOccurrence();
+        // Add +1 because an alert is generated after delete the metadata table
+        $increase_occurrence_id = $this->GetIncreaseOccurrence() + 1;
 
         // Load data Meta from WP
         $meta = new WSAL_Adapters_MySQL_Meta($wpdb);
         if (!$meta->IsInstalled()) {
-            die("No alerts to import");
+            $result['empty'] = true;
+            return $result;
         }
         $sql = 'SELECT * FROM ' . $meta->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET '. $offset;
         $metadata = $wpdb->get_results($sql, ARRAY_A);
@@ -167,7 +168,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $index++;
             $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
             foreach ($metadata as $entry) {
-                $occurrence_id = $entry['occurrence_id'] + $increase_occurrence_id;
+                $occurrence_id = intval($entry['occurrence_id']) + $increase_occurrence_id;
                 $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.$entry['value'].'\'), ';
             }
             $sql = rtrim($sql, ", ");
@@ -192,7 +193,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         // Load data Occurrences from WP
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($wpdb);
         if (!$occurrence->IsInstalled()) {
-            die("No alerts to import");
+            $result['empty'] = true;
+            return $result;
         }
         $sql = 'SELECT * FROM ' . $occurrence->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET '. $offset;
         $occurrences = $wpdb->get_results($sql, ARRAY_A);
@@ -228,7 +230,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         // Load data Occurrences from External DB
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
         if (!$occurrence->IsInstalled()) {
-            die("No alerts to import");
+            $result['empty'] = true;
+            return $result;
         }
         $sql = 'SELECT * FROM ' . $occurrence->GetTable()  . ' LIMIT ' . $limit . ' OFFSET '. $offset;
         $occurrences = $_wpdb->get_results($sql, ARRAY_A);
@@ -263,7 +266,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         // Load data Meta from External DB
         $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
         if (!$meta->IsInstalled()) {
-            die("No alerts to import");
+            $result['empty'] = true;
+            return $result;
         }
         $sql = 'SELECT * FROM ' . $meta->GetTable()  . ' LIMIT ' . $limit . ' OFFSET '. $offset;
         $metadata = $_wpdb->get_results($sql, ARRAY_A);
