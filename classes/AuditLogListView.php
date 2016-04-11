@@ -20,7 +20,7 @@ class WSAL_AuditLogListView extends WP_List_Table
         if ($timezone) {
             $this->_gmt_offset_sec = get_option('gmt_offset') * HOUR_IN_SECONDS;
         } else {
-            $this->_gmt_offset_sec = 0;
+            $this->_gmt_offset_sec = date('Z');
         }
         
         parent::__construct(array(
