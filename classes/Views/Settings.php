@@ -358,7 +358,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                 <?php $timezone = $this->_plugin->settings->GetTimezone(); ?>
                                 <label for="timezone-default">
                                     <input type="radio" name="Timezone" id="timezone-default" style="margin-top: 2px;" <?php if(!$timezone)echo 'checked="checked"'; ?> value="0">
-                                    <span><?php _e('Server\'s timezone', 'wp-security-audit-log'); ?></span>
+                                    <span><?php _e('UTC', 'wp-security-audit-log'); ?></span>
                                 </label>
                                 <br/>
                                 <label for="timezone">

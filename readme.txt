@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report
 Requires at least: 3.6
 Tested up to: 4.4.2
-Stable tag: 2.4
+Stable tag: 2.4.1
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -209,6 +209,18 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 8. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes with WP Security Audit Log Plugin](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
 
 == Changelog ==
+
+= 2.4.1 (2016-04-20) =
+
+Read the [WP Security Audit Log 2.4 release notes](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/timezone-settings) for a detailed overview of what is new in this version.
+
+* **New Features**
+	* New setting allowing the users to select the alerts' timestap (UTC or WordPress' configured timezone)
+	
+* **New WordPress Security Alerts for Content title changes**
+	* 2086: User changed the title of a post
+	* 2087: User changed the title of a page
+	* 2088: User changed the title of a custom post type
 
 = 2.4 (2016-03-28) =
 
