@@ -581,6 +581,18 @@ class WSAL_Settings {
         return $this->_plugin->SetGlobalOption('datetime-format', $newvalue);
     }
 
+    /**
+     * Alerts Timestamp
+     * Server's timezone or WordPress' timezone
+     */
+    public function GetTimezone(){
+        return $this->_plugin->GetGlobalOption('timezone', 0);
+    }
+
+    public function SetTimezone($newvalue){
+        return $this->_plugin->SetGlobalOption('timezone', $newvalue);
+    }
+
     public function GetAdapterConfig($name_field){
         return $this->_plugin->GetGlobalOption($name_field);
     }

@@ -495,7 +495,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($this->CheckBBPress($oldpost)) {
             return;
         }
-        $changes = 0 + $this->CheckDateChange($oldpost, $newpost);
+        $changes = 0 + $this->CheckDateChange($oldpost, $newpost)
+            + $this->CheckTitleChange($oldpost, $newpost);
         if (!$changes) {
             $contentChanged = $oldpost->post_content != $newpost->post_content; // TODO what about excerpts?
             
@@ -617,5 +618,18 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 }
             }
         }
+    }
+
+    private function CheckTitleChange($oldpost, $newpost)
+    {
+        if ($oldpost->post_title != $newpost->post_title) {
+            $event = $this->GetEventTypeForPostType($newpost, 2086, 2087, 2088);
+            $this->plugin->alerts->Trigger($event, array(
+                'OldTitle' => $oldpost->post_title,
+                'NewTitle' => $newpost->post_title,
+            ));
+            return 1;
+        }
+        return 0;
     }
 }

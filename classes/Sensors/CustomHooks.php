@@ -1,26 +1,26 @@
 <?php
 /**
- * Class used for to allow developers to create custom
- * alerts
+ * The Class is used to allow developers to create
+ * custom alerts
  */
 class WSAL_Sensors_CustomHooks extends WSAL_AbstractSensor
 {
     public function HookEvents()
     {
         /**
-         * For each hook use add_action() and pass:
+         * Use add_action() for every hook and pass the following:
          * @param string sample_hook_name
-         * @param string SampleFunction is the name of the function above
-         * @param int 10 priority (Optional)
-         * @param int 2 number of parameters passed to the function (Optional)(Check the hook documentation)
-         * @see http://adambrown.info/p/wp_hooks
+         * @param string SampleFunction - the name of the function above
+         * @param int 10 - priority (Optional)
+         * @param int 2 - number of parameters passed to the function (Optional)(Check the hook documentation)
+         * @see http://adambrown.info/p/wp_hooks for more information on WordPress hooks
          */
         add_action('sample_hook_name', array($this, 'SampleFunction'), 10, 2);
     }
     
     /**
-     * Sample function with 0 or more parameters,
-     * create one function for each hook
+     * Sample function with 0 or more parameters.
+     * Create one function for each hook:
      * @param anyType $paramname (Optional)
      */
     public function SampleFunction($value_1 = null, $value_2 = null)
@@ -32,7 +32,7 @@ class WSAL_Sensors_CustomHooks extends WSAL_AbstractSensor
         $alertCode = 2222;
 
         /**
-         * @var string alert text
+         * @var string: the alert text
          */
         $alertText = 'Sample alert text';
 

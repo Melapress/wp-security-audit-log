@@ -1,9 +1,11 @@
 <?php
-class WSAL_Views_Settings extends WSAL_AbstractView {
+class WSAL_Views_Settings extends WSAL_AbstractView
+{
 
     public $adapterMsg = '';
     
-    public function __construct(WpSecurityAuditLog $plugin) {
+    public function __construct(WpSecurityAuditLog $plugin)
+    {
         parent::__construct($plugin);
 
         add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
@@ -34,7 +36,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
     
     protected function GetTokenType($token){
         $users = array();
-        foreach(get_users('blog_id=0&fields[]=user_login') as $obj)
+        foreach (get_users('blog_id=0&fields[]=user_login') as $obj)
             $users[] = $obj->user_login;
         $roles = array_keys(get_editable_roles());
         
@@ -43,7 +45,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
         return 'other';
     }
     
-    protected function Save(){
+    protected function Save()
+    {
         check_admin_referer('wsal-settings');
         $this->_plugin->settings->SetPruningDateEnabled($_REQUEST['PruneBy'] == 'date');
         $this->_plugin->settings->SetPruningDate($_REQUEST['PruningDate']);
@@ -65,96 +68,98 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
         $this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
         $this->_plugin->settings->SetDeleteData(isset($_REQUEST['DeleteData']));
         $this->_plugin->settings->SetDatetimeFormat($_REQUEST['DatetimeFormat']);
+        $this->_plugin->settings->SetTimezone($_REQUEST['Timezone']);
         $this->_plugin->settings->SetWPBackend(isset($_REQUEST['WPBackend']));
         if (!empty($_REQUEST['Columns'])) {
             $this->_plugin->settings->SetColumns($_REQUEST['Columns']);
         }
         $this->_plugin->settings->ClearDevOptions();
 
-        if(isset($_REQUEST['DevOptions'])) {
-            foreach($_REQUEST['DevOptions'] as $opt) {
+        if (isset($_REQUEST['DevOptions'])) {
+            foreach ($_REQUEST['DevOptions'] as $opt) {
                 $this->_plugin->settings->SetDevOptionEnabled($opt, true);
             }
         }
 
-        // 
         // Database Adapter Settings
         // Temporarily not used
-        // 
         /* Check Adapter config */
-        if (!empty($_REQUEST["AdapterUser"]) && ($_REQUEST['AdapterUser'] != '') && ($_REQUEST['AdapterName'] != '') && ($_REQUEST['AdapterHostname'] != '') ) {
+        if (!empty($_REQUEST["AdapterUser"]) && ($_REQUEST['AdapterUser'] != '') && ($_REQUEST['AdapterName'] != '') && ($_REQUEST['AdapterHostname'] != '')) {
             WSAL_Connector_ConnectorFactory::CheckConfig(
-                trim($_REQUEST['AdapterType']), 
-                trim($_REQUEST['AdapterUser']), 
-                trim($_REQUEST['AdapterPassword']), 
-                trim($_REQUEST['AdapterName']), 
-                trim($_REQUEST['AdapterHostname']), 
+                trim($_REQUEST['AdapterType']),
+                trim($_REQUEST['AdapterUser']),
+                trim($_REQUEST['AdapterPassword']),
+                trim($_REQUEST['AdapterName']),
+                trim($_REQUEST['AdapterHostname']),
                 trim($_REQUEST['AdapterBasePrefix'])
             );
 
-			/* Setting Adapter config */
-			$this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
-			$this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
-			$this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
-			$this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
-			$this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
-			$this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
-		}
-	}
-	
-	public function AjaxCheckSecurityToken(){
-		if(!$this->_plugin->settings->CurrentUserCan('view'))
-			die('Access Denied.');
-		if(!isset($_REQUEST['token']))
-			die('Token parameter expected.');
-		die($this->GetTokenType($_REQUEST['token']));
-	}
-	
-	public function AjaxRunCleanup(){
-		if(!$this->_plugin->settings->CurrentUserCan('view'))
-			die('Access Denied.');
-		$this->_plugin->CleanUp();
-		wp_redirect($this->GetUrl());
-		exit;
-	}
-	
-	public function Render(){
-		if(!$this->_plugin->settings->CurrentUserCan('edit')){
-			wp_die( __( 'You do not have sufficient permissions to access this page.' , 'wp-security-audit-log') );
-		}
-		if(isset($_POST['submit'])){
-			try {
-				$this->Save();
-				?><div class="updated">
-					<p><?php _e('Settings have been saved.', 'wp-security-audit-log'); ?></p>
-				</div><?php
-			}catch(Exception $ex){
-				?><div class="error"><p><?php _e('Error: ', 'wp-security-audit-log'); ?><?php echo $ex->getMessage(); ?></p></div><?php
-			}
-		}
-		?>
-		<h2 id="wsal-tabs" class="nav-tab-wrapper">
-			<a href="#tab-general" class="nav-tab">General</a>
-			<a href="#tab-exclude" class="nav-tab">Exclude Objects</a>
-			<!--<a href="#adapter" class="nav-tab">Data Storage Adapter</a>-->
-		</h2>
-		<script src="//code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
-		<form id="audit-log-settings" method="post">
-			<input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
-			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr(admin_url('admin-ajax.php')); ?>" />
-			<?php wp_nonce_field('wsal-settings'); ?>
-			
-			<div id="audit-log-adverts">
-				<a href="http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=plugin&utm_medium=settingspage&utm_campaign=notifications">
-					<img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/notifications_250x150.gif" width="250" height="150" alt=""/>
-				</a>
-				<a href="http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=plugin&utm_medium=settingspage&utm_campaign=search">
-					<img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/search_250x150.gif" width="250" height="150" alt=""/>
-				</a>
-				<a href="http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=plugin&utm_medium=settingspage&utm_campaign=reports">
-					<img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/reporting_250x150.gif" width="250" height="150" alt=""/>
-				</a>
-			</div>
+            /* Setting Adapter config */
+            $this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
+            $this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
+            $this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
+            $this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
+            $this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
+            $this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
+        }
+    }
+    
+    public function AjaxCheckSecurityToken()
+    {
+        if (!$this->_plugin->settings->CurrentUserCan('view'))
+            die('Access Denied.');
+        if (!isset($_REQUEST['token']))
+            die('Token parameter expected.');
+        die($this->GetTokenType($_REQUEST['token']));
+    }
+    
+    public function AjaxRunCleanup()
+    {
+        if (!$this->_plugin->settings->CurrentUserCan('view'))
+            die('Access Denied.');
+        $this->_plugin->CleanUp();
+        wp_redirect($this->GetUrl());
+        exit;
+    }
+    
+    public function Render()
+    {
+        if (!$this->_plugin->settings->CurrentUserCan('edit')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'wp-security-audit-log'));
+        }
+        if (isset($_POST['submit'])) {
+            try {
+                $this->Save();
+                ?><div class="updated">
+                    <p><?php _e('Settings have been saved.', 'wp-security-audit-log'); ?></p>
+                </div><?php
+            } catch (Exception $ex) {
+                ?><div class="error"><p><?php _e('Error: ', 'wp-security-audit-log'); ?><?php echo $ex->getMessage(); ?></p></div><?php
+            }
+        }
+        ?>
+        <h2 id="wsal-tabs" class="nav-tab-wrapper">
+            <a href="#tab-general" class="nav-tab">General</a>
+            <a href="#tab-exclude" class="nav-tab">Exclude Objects</a>
+            <!--<a href="#adapter" class="nav-tab">Data Storage Adapter</a>-->
+        </h2>
+        <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
+        <form id="audit-log-settings" method="post">
+            <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
+            <input type="hidden" id="ajaxurl" value="<?php echo esc_attr(admin_url('admin-ajax.php')); ?>" />
+            <?php wp_nonce_field('wsal-settings'); ?>
+            
+            <div id="audit-log-adverts">
+                <a href="http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=plugin&utm_medium=settingspage&utm_campaign=notifications">
+                    <img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/notifications_250x150.gif" width="250" height="150" alt=""/>
+                </a>
+                <a href="http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=plugin&utm_medium=settingspage&utm_campaign=search">
+                    <img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/search_250x150.gif" width="250" height="150" alt=""/>
+                </a>
+                <a href="http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=plugin&utm_medium=settingspage&utm_campaign=reports">
+                    <img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/reporting_250x150.gif" width="250" height="150" alt=""/>
+                </a>
+            </div>
             <div class="nav-tabs">
                 <table class="form-table wsal-tab widefat" id="tab-general">
                     <tbody>
@@ -347,6 +352,25 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
                         </td>
                     </tr>
                     <tr>
+                        <th><label for="timezone-default"><?php _e('Alerts Timestamp', 'wp-security-audit-log'); ?></label></th>
+                        <td>
+                            <fieldset>
+                                <?php $timezone = $this->_plugin->settings->GetTimezone(); ?>
+                                <label for="timezone-default">
+                                    <input type="radio" name="Timezone" id="timezone-default" style="margin-top: 2px;" <?php if(!$timezone)echo 'checked="checked"'; ?> value="0">
+                                    <span><?php _e('Server\'s timezone', 'wp-security-audit-log'); ?></span>
+                                </label>
+                                <br/>
+                                <label for="timezone">
+                                    <input type="radio" name="Timezone" id="timezone" style="margin-top: 2px;" <?php if($timezone)echo 'checked="checked"'; ?> value="1">
+                                    <span><?php _e('WordPress\' timezone', 'wp-security-audit-log'); ?></span>
+                                </label>
+                                <br/>
+                                <span class="description"><?php _e('Select which timestamp should the alerts have in the Audit Log viewer. Note that the WordPress\' timezone might be different from that of the server.', 'wp-security-audit-log'); ?></span>
+                            </fieldset>
+                        </td>
+                    </tr>
+                    <tr>
                         <th><label for="columns"><?php _e('Audit Log Columns Selection', 'wp-security-audit-log'); ?></label></th>
                         <td>
                             <fieldset>
@@ -412,7 +436,7 @@ viewer though the plugin will still record such information in the database.', '
                             <fieldset>
                                 <label for="Incognito">
                                     <input type="checkbox" name="Incognito" value="1" id="Incognito"<?php
-                                        if ($this->_plugin->settings->IsIncognito())echo ' checked="checked"';
+                                        if ($this->_plugin->settings->IsIncognito()) echo ' checked="checked"';
                                     ?>/> <?php _e('Hide', 'wp-security-audit-log'); ?>
                                 </label>
                                 <br/>
@@ -428,7 +452,7 @@ viewer though the plugin will still record such information in the database.', '
                             <fieldset>
                                 <label for="WPBackend">
                                     <input type="checkbox" name="WPBackend" value="1" id="WPBackend" <?php
-                                        if($this->_plugin->settings->IsWPBackend())echo ' checked="checked"';
+                                        if ($this->_plugin->settings->IsWPBackend()) echo ' checked="checked"';
                                     ?>/> <?php _e('Hide activity', 'wp-security-audit-log'); ?>
                                 </label>
                                 <br/>
@@ -444,7 +468,7 @@ viewer though the plugin will still record such information in the database.', '
                             <fieldset>
                                 <label for="DeleteData">
                                     <input type="checkbox" name="DeleteData" value="1" id="DeleteData"  onclick="return delete_confirm(this);"<?php
-                                        if($this->_plugin->settings->IsDeleteData())echo ' checked="checked"';
+                                        if ($this->_plugin->settings->IsDeleteData()) echo ' checked="checked"';
                                     ?>/> <span class="description">Check this box if you would like remove all data when the plugin is deleted.</span>
                                 </label>
                             </fieldset>
@@ -512,15 +536,15 @@ viewer though the plugin will still record such information in the database.', '
                                     <input type="text" id="CustomQueryBox" style="float: left; display: block; width: 250px;">
                                     <input type="button" id="CustomQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
                                     <br style="clear: both;"/>
-                                    <div id="CustomList"><?php
-                                        foreach($this->_plugin->settings->GetExcludedMonitoringCustom() as $item){
-                                            ?><span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
-                                                <input type="hidden" name="Customs[]" value="<?php echo esc_attr($item); ?>"/>
-                                                <?php echo esc_html($item); ?>
-                                                <a href="javascript:;" title="Remove">&times;</a>
-                                            </span><?php
-                                        }
-                                    ?></div>
+                                    <div id="CustomList">
+                                    <?php foreach ($this->_plugin->settings->GetExcludedMonitoringCustom() as $item) { ?>
+                                        <span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
+                                            <input type="hidden" name="Customs[]" value="<?php echo esc_attr($item); ?>"/>
+                                            <?php echo esc_html($item); ?>
+                                            <a href="javascript:;" title="Remove">&times;</a>
+                                        </span>
+                                    <?php } ?>
+                                    </div>
                                 </fieldset>
                             </td>
                         </tr>
@@ -537,15 +561,15 @@ viewer though the plugin will still record such information in the database.', '
                                     <input type="text" id="IpAddrQueryBox" style="float: left; display: block; width: 250px;">
                                     <input type="button" id="IpAddrQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
                                     <br style="clear: both;"/>
-                                    <div id="IpAddrList"><?php
-                                        foreach($this->_plugin->settings->GetExcludedMonitoringIP() as $item){
-                                            ?><span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
-                                                <input type="hidden" name="IpAddrs[]" value="<?php echo esc_attr($item); ?>"/>
-                                                <?php echo esc_html($item); ?>
-                                                <a href="javascript:;" title="Remove">&times;</a>
-                                            </span><?php
-                                        }
-                                    ?></div>
+                                    <div id="IpAddrList">
+                                    <?php foreach ($this->_plugin->settings->GetExcludedMonitoringIP() as $item) { ?>
+                                        <span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
+                                            <input type="hidden" name="IpAddrs[]" value="<?php echo esc_attr($item); ?>"/>
+                                            <?php echo esc_html($item); ?>
+                                            <a href="javascript:;" title="Remove">&times;</a>
+                                        </span>
+                                    <?php } ?>
+                                    </div>
                                 </fieldset>
                             </td>
                         </tr>
@@ -568,7 +592,8 @@ viewer though the plugin will still record such information in the database.', '
         </script><?php
     }
     
-    public function Header(){
+    public function Header()
+    {
         wp_enqueue_style(
             'settings',
             $this->_plugin->GetBaseUrl() . '/css/settings.css',
@@ -588,7 +613,8 @@ viewer though the plugin will still record such information in the database.', '
         </style><?php
     }
     
-    public function Footer() {
+    public function Footer()
+    {
         wp_enqueue_script(
             'settings',
             $this->_plugin->GetBaseUrl() . '/js/settings.js',
@@ -624,12 +650,13 @@ viewer though the plugin will still record such information in the database.', '
         </script><?php
     }
     
-    public function AjaxGetAllUsers() {
-        if(!$this->_plugin->settings->CurrentUserCan('view'))
+    public function AjaxGetAllUsers()
+    {
+        if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
-
+        }
         $users = array();
-        foreach ( get_users() as $user ) {
+        foreach (get_users() as $user) {
             if (strpos($user->user_login, $_GET['term']) !== false) {
                 array_push($users, $user->user_login);
             }
@@ -638,12 +665,13 @@ viewer though the plugin will still record such information in the database.', '
         exit;
     }
 
-    public function AjaxGetAllRoles() {
-        if(!$this->_plugin->settings->CurrentUserCan('view'))
+    public function AjaxGetAllRoles()
+    {
+        if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
-        
+        }
         $roles = array();
-        foreach ( get_editable_roles() as $role_name => $role_info ) {
+        foreach (get_editable_roles() as $role_name => $role_info) {
             if (strpos($role_name, $_GET['term']) !== false) {
                 array_push($roles, $role_name);
             }
@@ -651,5 +679,4 @@ viewer though the plugin will still record such information in the database.', '
         echo json_encode($roles);
         exit;
     }
-
 }
