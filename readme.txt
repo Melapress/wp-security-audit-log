@@ -140,6 +140,7 @@ We need help translating the plugin and the WordPress Security Alerts. Please vi
 = Related Links and Documentation =
 For more information and to get started with WordPress Security, check out the following:
 
+* [What is a WordPress Audit Trail?](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-documentation/what-is-a-wordpress-audit-trail/]
 * [List of WordPress Security Alerts](http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/)
 * [WordPress Multisite Features](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/)
 * [WP Security Audit Log and Reverse Proxy and WAFs Support](http://www.wpsecurityauditlog.com/documentation/automatically-retrieve-originating-wordpress-user-ip-address/)
@@ -212,15 +213,18 @@ Yes. To exclude an IP address you can specify it in the Excluded Objects section
 
 = 2.4.1 (2016-04-20) =
 
-Read the [WP Security Audit Log 2.4 release notes](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/timezone-settings) for a detailed overview of what is new in this version.
+Read the [WP Security Audit Log 2.4 release notes](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/wp-security-audit-log-2-4-1-released/) for a detailed overview of what is new in this version.
 
 * **New Features**
-	* New setting allowing the users to select the alerts' timestap (UTC or WordPress' configured timezone)
+	* New setting allowing the users to configure the timestamp of the alerts. Read the FAQ [How to change the time zone in the WordPress Audit Trial](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-documentation/faq-change-time-zone-wordpress-audit-trail/) for more information.
 	
 * **New WordPress Security Alerts for Content title changes**
 	* 2086: User changed the title of a post
 	* 2087: User changed the title of a page
 	* 2088: User changed the title of a custom post type
+
+* **Improvements**
+	* Implemented AJAX calls for when migrating the WordPress Audit Trail between databases with the [External DB add-on](https://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/)
 
 = 2.4 (2016-03-28) =
 
