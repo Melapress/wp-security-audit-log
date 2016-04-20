@@ -9,8 +9,6 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     
     public function __construct($connectionConfig = null)
     {
-        @ini_set('memory_limit', '256M');
-
         $this->connectionConfig = $connectionConfig;
         parent::__construct("MySQL");
         require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
@@ -335,17 +333,5 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         } else {
             return AUTH_KEY;
         }
-    }
-
-    // split the given array into n number of pieces
-    private function array_split($array, $pieces = 2)
-    {
-        if ($pieces < 2) {
-            return array($array);
-        }
-        $newCount = ceil(count($array)/$pieces);
-        $a = array_slice($array, 0, $newCount);
-        $b = $this->array_split(array_slice($array, $newCount), $pieces-1);
-        return array_merge(array($a), $b);
     }
 }
