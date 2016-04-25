@@ -115,6 +115,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 
 = As Featured On: =
 
+* [WP SmackDown](https://wpsmackdown.com/wp-plugins/wp-security-audit-log/)
 * [WPKube](http://www.wpkube.com/improve-wordpress-security-wp-security-audit-log/)
 * [ManageWP Plugins of the month](https://managewp.com/free-wordpress-plugins-june-2014)
 * [MyWPExpert](http://www.mywpexpert.com/wp-security-audit-log/)
