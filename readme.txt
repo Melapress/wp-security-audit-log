@@ -164,40 +164,7 @@ To keep yourself updated with what is new and updated in our WordPress security 
 
 == Frequently Asked Questions ==
 
-= How can I prune WordPress security events? =
-
-By default the plugin will keep 5,000 WordPress Security Alerts. When this limit is reached, older alerts are deleted to make place for the new ones. You can configure the plugin to keep more alerts from the settings page. You can also configure the plugin to delete alerts which are older than a number of days.
-
-= Is there a complete list of all WordPress security audit events? =
-Yes. A complete list can be found [here](http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/)
-
-= Can I disable some WordPress security alerts? =
-
-Yes it is possible to disable (and re-enable) specific WordPress security alerts. To do so navigate to the "Enable/Disable Alerts" node in the plugin's menu, select the category tab and untick the WordPress security alert. Tick back the alert to re-enable it.
-
-= Can WP Security Audit Log plugin work and monitor activity on WodPress Multisite? =
-Yes, WP Security Audit Log works on WordPress Multisite networks, i.e. it can monitor user and under the hood WordPress activity on WordPress multisite installations. For more information refer to the post [WP Security Audit Log Features for WordPress Multisite installation](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/). 
-
-= Can I receive an email notification when a specific change happens on WordPress? =
-Yes it is possible to do so with the [Email Notifications Add-On](http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/). This plugin extension enables you to configure triggers to monitor for specific changes and when such changes take place an email is automatically sent to your email address of choice with all the details of such change such as the Alert ID, user, user role, date, time, details about the actual change and more.
-
-= How can I search for a specific WordPress security alert?
-You can use the premium add-on [Search Add-On](http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/) to automatically search for a specific WordPress security alert. It supports free text based searches and you can also use the built-in filters to fine tune your searches.
-
-= Can I generate reports from the WordPress security audit log? =
-Yes it is possible to do so with the premium [Reports Add-On](http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/). This plugin extension allows you to generate any type of WordPress report using any type of data source. Reports can be generated in HTML and CSV format.
-
-= Can I store the WordPress Audit Log in an external database (not in the WordPress database? =
-Yes you can easily do so with the premium [External DB Add-on](http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/).
-
-= Can I exclude users or roles from being monitored? =
-Yes it is possible to exclude both users and roles from being monitored. To exclude a user or a role specify it in the Excluded Objects section in the plugin's settings node.
-
-= Can I exclude custom fields from being monitored? =
-Yes it is possible to exclude custom fields from being monitored. To exclude a custom field you can specify it in the Excluded Objects section in the plugin's settings node, else you can click the option Exclude Custom Field from Monitoring from the alert itself.
-
-= Can I exclude an IP address from being monitoring? =
-Yes. To exclude an IP address you can specify it in the Excluded Objects sections in the plugin's settings node.
+= Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation/frequently-asked-questions-faqs/) on the plugin's website for the FAQs and the [Support & Documentation](https://www.wpsecurityauditlog.com/support/) section for more technical information and documents about the WP Security Audit Log. =
 
 == Screenshots ==
 
