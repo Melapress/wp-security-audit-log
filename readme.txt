@@ -83,7 +83,7 @@ WP Security Audit Log is the first tracking and audit WordPress security monitor
 
 For more information about the features for WordPress Multisite network installation refer to [WP Security Audit Log Features for WordPress Multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/)
 
-= Easiy Create Your Own Custom Alerts =
+= Easily Create Your Own Custom Alerts =
 Is there something on your WordPress that the plugin does not monitor, but you would like to keep a record of it? Refer to the [Hooks for custom alerts documentation](https://www.wpsecurityauditlog.com/documentation/create-custom-alerts-wordpress-audit-trail/) to easily create your own custom alerts and keep record of any change on your WordPress, be it a change in a WordPress customization, a third party plugin and more.
 
 = WordPress Security Audit Log in your Language! =
@@ -164,7 +164,7 @@ To keep yourself updated with what is new and updated in our WordPress security 
 
 == Frequently Asked Questions ==
 
-= Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation/frequently-asked-questions-faqs/) on the plugin's website for the FAQs and the [Support & Documentation](https://www.wpsecurityauditlog.com/support/) section for more technical information and documents about the WP Security Audit Log. =
+= Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation/frequently-asked-questions-faqs/) on the plugin's website for the FAQs and the [Support & Documentation](https://www.wpsecurityauditlog.com/support/) section for more technical information and documents about the WP Security Audit Log plugin. =
 
 == Screenshots ==
 
