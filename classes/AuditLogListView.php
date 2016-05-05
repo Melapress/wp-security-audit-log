@@ -311,7 +311,14 @@ class WSAL_AuditLogListView extends WP_List_Table
                 return '<strong>' . (
                     strlen($value) > 50 ? (esc_html(substr($value, 0, 50)) . '&hellip;') :  esc_html($value)
                 ) . '</strong>';
-                
+            
+            case $name == '%ClientIP%':
+                if (is_string($value)) {
+                    return '<strong>' . str_replace(array("\"", "[", "]"), "", $value) . '</strong>';
+                } else {
+                    return '<i>unknown</i>';
+                }
+
             case strncmp($value, 'http://', 7) === 0:
             case strncmp($value, 'https://', 7) === 0:
                 return '<a href="' . esc_html($value) . '"'
