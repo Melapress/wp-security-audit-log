@@ -8,7 +8,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         add_action('wsal_prune', array($this, 'EventPruneEvents'), 10, 2);
         add_action('admin_init', array($this, 'EventAdminInit'));
 
-        add_action('automatic_updates_complete', array($this, 'WPUpdate'), 10, 3);
+        add_action('automatic_updates_complete', array($this, 'WPUpdate'), 10, 1);
     }
     
     /**
@@ -154,7 +154,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     /**
      * WordPress auto core update
      */
-    public function WPUpdate($automatic, $updates, $complete)
+    public function WPUpdate($automatic)
     {
         if (isset($automatic['core'][0])) {
             $obj = $automatic['core'][0];
