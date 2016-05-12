@@ -99,9 +99,9 @@ abstract class WSAL_Models_ActiveRecord
     public function LoadData($data){
         $copy = get_class($this);
         $copy = new $copy;
-        foreach((array)$data as $key => $val){
-            if(isset($copy->$key)){
-                switch(true){
+        foreach ((array)$data as $key => $val) {
+            if (isset($copy->$key)) {
+                switch (true) {
                     case is_array($copy->$key):
                     case is_object($copy->$key):
                         $jsonDecodedVal = WSAL_Helpers_DataHelper::JsonDecode($val);
@@ -111,7 +111,7 @@ abstract class WSAL_Models_ActiveRecord
                         $this->$key = (int)$val;
                         break;
                     case is_float($copy->$key):
-                        $this->$key = (float)$val;
+                        $this->$key = $this->is_ip_address($val) ? (string)$val : (float)$val;
                         break;
                     case is_bool($copy->$key):
                         $this->$key = (bool)$val;
@@ -264,4 +264,15 @@ abstract class WSAL_Models_ActiveRecord
         return $this->getAdapter()->GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp);
     }
 
+    /**
+     * Check if the float is IPv4 instead
+     */
+    private function is_ip_address($ip_address)
+    {
+        $parts = explode('.', $ip_address);
+        if (count($parts) == 4) {
+            return true;
+        }
+        return false;
+    }
 }
