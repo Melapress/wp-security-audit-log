@@ -102,6 +102,9 @@ abstract class WSAL_Models_ActiveRecord
         foreach ((array)$data as $key => $val) {
             if (isset($copy->$key)) {
                 switch (true) {
+                    case $this->is_ip_address($val):
+                        $this->$key = (string)$val;
+                        break;
                     case is_array($copy->$key):
                     case is_object($copy->$key):
                         $jsonDecodedVal = WSAL_Helpers_DataHelper::JsonDecode($val);
@@ -111,7 +114,7 @@ abstract class WSAL_Models_ActiveRecord
                         $this->$key = (int)$val;
                         break;
                     case is_float($copy->$key):
-                        $this->$key = $this->is_ip_address($val) ? (string)$val : (float)$val;
+                        $this->$key = (float)$val;
                         break;
                     case is_bool($copy->$key):
                         $this->$key = (bool)$val;
@@ -269,8 +272,7 @@ abstract class WSAL_Models_ActiveRecord
      */
     private function is_ip_address($ip_address)
     {
-        $parts = explode('.', $ip_address);
-        if (count($parts) == 4) {
+        if (filter_var($ip_address, FILTER_VALIDATE_IP) !== false) {
             return true;
         }
         return false;
