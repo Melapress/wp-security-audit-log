@@ -394,12 +394,12 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             occ.site_id, 
             occ.created_on,
             replace(replace(replace((
-                SELECT t1.value FROM $tableMeta AS t1 WHERE t1.name = 'CurrentUserRoles' AND t1.occurrence_id = occ.id), '[', ''), ']', ''), '\\'', '') AS roles,
-            (SELECT replace(t2.value, '\"','') FROM $tableMeta as t2 WHERE t2.name = 'ClientIP' AND t2.occurrence_id = occ.id) AS ip,
-            (SELECT replace(t3.value, '\"', '') FROM $tableMeta as t3 WHERE t3.name = 'UserAgent' AND t3.occurrence_id = occ.id) AS ua,
+                SELECT t1.value FROM $tableMeta AS t1 WHERE t1.name = 'CurrentUserRoles' AND t1.occurrence_id = occ.id LIMIT 1), '[', ''), ']', ''), '\\'', '') AS roles,
+            (SELECT replace(t2.value, '\"','') FROM $tableMeta as t2 WHERE t2.name = 'ClientIP' AND t2.occurrence_id = occ.id LIMIT 1) AS ip,
+            (SELECT replace(t3.value, '\"', '') FROM $tableMeta as t3 WHERE t3.name = 'UserAgent' AND t3.occurrence_id = occ.id LIMIT 1) AS ua,
             COALESCE(
-                (SELECT replace(t4.value, '\"', '') FROM $tableMeta as t4 WHERE t4.name = 'Username' AND t4.occurrence_id = occ.id),
-                (SELECT replace(t5.value, '\"', '') FROM $tableMeta as t5 WHERE t5.name = 'CurrentUserID' AND t5.occurrence_id = occ.id)
+                (SELECT replace(t4.value, '\"', '') FROM $tableMeta as t4 WHERE t4.name = 'Username' AND t4.occurrence_id = occ.id LIMIT 1),
+                (SELECT replace(t5.value, '\"', '') FROM $tableMeta as t5 WHERE t5.name = 'CurrentUserID' AND t5.occurrence_id = occ.id LIMIT 1)
             ) as user_id
             FROM $tableOcc AS occ
             JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
