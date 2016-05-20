@@ -9,6 +9,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         add_action('admin_init', array($this, 'EventAdminInit'));
 
         add_action('automatic_updates_complete', array($this, 'WPUpdate'), 10, 1);
+         add_filter('template_redirect', array($this, 'Event404'));
     }
     
     /**
@@ -23,6 +24,14 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         ));
     }
     
+    public function Event404()
+    {
+        // TO DO check attempts and increase
+        $this->plugin->alerts->Trigger(6007, array(
+            'Attempts' => 1
+        ));
+    }
+
     public function EventAdminInit()
     {
         // make sure user can actually modify target options
