@@ -205,6 +205,10 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
             ),
         ));
     }
+
+    public function EventPluginPost() {
+       
+    }
     
     protected function GetRemovedThemes(){
         $result = $this->old_themes;
