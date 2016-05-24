@@ -445,6 +445,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         foreach ($menu_items as $menu_item) {
             if ($menu_item->ID == $item_id) {
                 $item_name = $menu_item->title;
+                break;
             }
         }
         return $item_name;

@@ -41,6 +41,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(1002, E_WARNING, __('Login failed', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected', 'wp-security-audit-log')),
                 array(1003, E_WARNING, __('Login failed  / non existing user', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected using non existing user.', 'wp-security-audit-log')),
                 array(1004, E_WARNING, __('Login blocked', 'wp-security-audit-log'), __('Blocked from logging in because another user is logged in from %ClientIP%', 'wp-security-audit-log')),
+                array(1005, E_WARNING, __('User logs in with existing session(s)', 'wp-security-audit-log'), __('Successfully logged in. Other session(s) from %IPAddress% for this username already exists', 'wp-security-audit-log')),
                 array(2010, E_NOTICE, __('User uploaded file from Uploads directory', 'wp-security-audit-log'), __('Uploaded the file %FileName% in %FilePath%', 'wp-security-audit-log')),
                 array(2011, E_WARNING, __('User deleted file from Uploads directory', 'wp-security-audit-log'), __('Deleted the file %FileName% from %FilePath%', 'wp-security-audit-log')),
                 array(2046, E_CRITICAL, __('User changed a file using the theme editor', 'wp-security-audit-log'), __('Modified %File% with the Theme Editor', 'wp-security-audit-log')),
