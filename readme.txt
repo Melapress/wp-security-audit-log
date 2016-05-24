@@ -164,7 +164,8 @@ To keep yourself updated with what is new and updated in our WordPress security 
 
 == Frequently Asked Questions ==
 
-= Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation/frequently-asked-questions-faqs/) on the plugin's website for the FAQs and the [Support & Documentation](https://www.wpsecurityauditlog.com/support/) section for more technical information and documents about the WP Security Audit Log plugin. =
+= Plugin FAQs and Technical Documentation =
+Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation/frequently-asked-questions-faqs/) on the plugin's website for the FAQs and the [Support & Documentation](https://www.wpsecurityauditlog.com/support/) section for more technical information and documents about the WP Security Audit Log plugin.
 
 == Screenshots ==
 
