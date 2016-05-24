@@ -32,7 +32,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     
     protected function Get404Expiration()
     {
-        return 12 * 60 * 60;
+        return 24 * 60 * 60;
     }
 
     protected function IsPast404Limit($ip)
