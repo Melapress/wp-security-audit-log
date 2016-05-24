@@ -41,22 +41,24 @@ class WSAL_Views_Help extends WSAL_AbstractView {
                             <?php _e('For more detailed information about WP Security Audit Log you can visit the plugin website.', 'wp-security-audit-log'); ?>
                             <?php _e('You can also visit the official list of WordPress Security Alerts for more information about all of the WordPress activity and changes you can monitor with WP Security Audit Log.', 'wp-security-audit-log'); ?>
                         </p><p>
-                            <a class="button" href="http://www.wpsecurityauditlog.com/?utm_source=wpsalabt&utm_medium=txtlink&utm_campaign=wpsal" target="_blank"><?php _e('Plugin Website', 'wp-security-audit-log'); ?></a>
+                            <a class="button" href="http://www.wpsecurityauditlog.com/?utm_source=plugin&utm_medium=helppage&utm_campaign=support" target="_blank"><?php _e('Plugin Website', 'wp-security-audit-log'); ?></a>
                             &nbsp;&nbsp;&nbsp;&nbsp;
-                            <a class="button" href="http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/?utm_source=wsalabt&utm_medium=txtlink&utm_campaign=wsal" target="_blank"><?php _e('List of WordPress Security Alerts', 'wp-security-audit-log'); ?></a>
+							<a class="button" href="https://www.wpsecurityauditlog.com/documentation/?utm_source=plugin&utm_medium=helppage&utm_campaign=support" target="_blank"><?php _e('Plugin Documenation', 'wp-security-audit-log'); ?></a>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+							<a class="button" href="https://www.wpsecurityauditlog.com/documentation/frequently-asked-questions-faqs/?utm_source=plugin&utm_medium=helppage&utm_campaign=support" target="_blank"><?php _e('FAQs', 'wp-security-audit-log'); ?></a>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <a class="button" href="http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/?utm_source=plugin&utm_medium=helppage&utm_campaign=support" target="_blank"><?php _e('List of WordPress Security Alerts', 'wp-security-audit-log'); ?></a>
                         </p>
                     </div>
 
                     <div class="">
-                        <h2><?php _e('WordPress Security Blog', 'wp-security-audit-log'); ?></h2>
+                        <h2><?php _e('Keep Yourself Up-to-Date with WordPress Security', 'wp-security-audit-log'); ?></h2>
                         <p>
-                            <?php _e('New to WordPress security?', 'wp-security-audit-log'); ?>
-                            <?php _e('Do not know from where to start or which is the best services for you?', 'wp-security-audit-log'); ?>
-                            <?php _e('Visit our WordPress security blog or the WordPress Security category directly for more information and a number of tips and tricks about WordPress security.', 'wp-security-audit-log'); ?>
+                            <?php _e('Keep yourself informed with what is happening in the WordPress security ecosystem, which are the new vulnerabilities, which plugins you need to update and what are the latest WordPress security hacks so you can stay one step ahead of the hackers.', 'wp-security-audit-log'); ?>
                         </p>
-                        <a class="button" href="http://www.wpwhitesecurity.com/blog/?utm_source=wsalabt&utm_medium=txtlink&utm_campaign=wsal" target="_blank"><?php _e('WP White Security Blog', 'wp-security-audit-log'); ?></a>
+                        <a class="button" href="http://www.wpwhitesecurity.com/blog/" target="_blank"><?php _e('Read the WP White Security Blog', 'wp-security-audit-log'); ?></a>
                         &nbsp;&nbsp;&nbsp;&nbsp;
-                        <a class="button" href="http://www.wpwhitesecurity.com/wordpress-security/?utm_source=wsalabt&utm_medium=txtlink&utm_campaign=wsal" target="_blank"><?php _e('WordPress Security Category', 'wp-security-audit-log'); ?></a>
+                        <a class="button" href="http://www.wpsecuritybloggers.com" target="_blank"><?php _e('Subscribe to WP Security Bloggers (An Aggregate of WordPress Security Blogs)', 'wp-security-audit-log'); ?></a>
                     </div>
                 </div>
             </div>
