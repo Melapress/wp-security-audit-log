@@ -151,6 +151,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(5005, E_CRITICAL, __('User installed a theme', 'wp-security-audit-log'), __('Installed theme "%Theme->Name%" in %Theme->get_template_directory%', 'wp-security-audit-log')),
                 array(5006, E_CRITICAL, __('User activated a theme', 'wp-security-audit-log'), __('Activated theme "%Theme->Name%", installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
                 array(5007, E_CRITICAL, __('User uninstalled a theme', 'wp-security-audit-log'), __('Deleted theme "%Theme->Name%" installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
+                array(5019, E_CRITICAL, __('A plugin created a post', 'wp-security-audit-log'), __('A plugin automatically created the following post: %PostTitle%', 'wp-security-audit-log')),
+                array(5020, E_CRITICAL, __('A plugin created a page', 'wp-security-audit-log'), __('A plugin automatically created the following page: %PostTitle%', 'wp-security-audit-log')),
+                array(5021, E_CRITICAL, __('A plugin created a custom post', 'wp-security-audit-log'), __('A plugin automatically created the following custom post: %PostTitle%', 'wp-security-audit-log')),
             ),
             __('System Activity', 'wp-security-audit-log') => array(
                 array(0000, E_CRITICAL, __('Unknown Error', 'wp-security-audit-log'), __('An unexpected error has occurred', 'wp-security-audit-log')),

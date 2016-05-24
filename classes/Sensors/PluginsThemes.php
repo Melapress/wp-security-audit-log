@@ -1,6 +1,7 @@
 <?php
 
-class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
+class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
+{
 
     public function HookEvents() {
         $hasPermission = (current_user_can("install_plugins") || current_user_can("activate_plugins") ||
@@ -10,18 +11,18 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
         if($hasPermission)add_action('shutdown', array($this, 'EventAdminShutdown'));
         add_action('switch_theme', array($this, 'EventThemeActivated'));
         // TO DO 
-        add_action('wp_insert_post', array($this, 'EventPluginPost'));
+        add_action('wp_insert_post', array($this, 'EventPluginPost'), 10, 2);
     }
     
     protected $old_themes = array();
     protected $old_plugins = array();
     
-    public function EventAdminInit(){
+    public function EventAdminInit() {
         $this->old_themes = wp_get_themes();
         $this->old_plugins = get_plugins();
     }
     
-    public function EventAdminShutdown(){
+    public function EventAdminShutdown() {
         $action = (isset($_REQUEST['action']) && $_REQUEST['action'] != "-1")  ? $_REQUEST['action'] : '';
         $action = (isset($_REQUEST['action2']) && $_REQUEST['action2'] != "-1") ? $_REQUEST['action2'] : $action;
         $actype = basename($_SERVER['SCRIPT_NAME'], '.php');
@@ -29,9 +30,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
         $is_plugins = $actype == 'plugins';
         
         // install plugin
-        if(in_array($action, array('install-plugin', 'upload-plugin')) && current_user_can("install_plugins")){
+        if (in_array($action, array('install-plugin', 'upload-plugin')) && current_user_can("install_plugins")) {
             $plugin = array_values(array_diff(array_keys(get_plugins()), array_keys($this->old_plugins)));
-            if(count($plugin) != 1)
+            if (count($plugin) != 1)
                 return $this->LogError(
                         'Expected exactly one new plugin but found ' . count($plugin),
                         array('NewPlugin' => $plugin, 'OldPlugins' => $this->old_plugins, 'NewPlugins' => get_plugins())
@@ -53,13 +54,13 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
         }
 
         // activate plugin
-        if($is_plugins && in_array($action, array('activate', 'activate-selected')) && current_user_can("activate_plugins")){
-            if(isset($_REQUEST['plugin'])){
-                if(!isset($_REQUEST['checked']))
+        if ($is_plugins && in_array($action, array('activate', 'activate-selected')) && current_user_can("activate_plugins")) {
+            if (isset($_REQUEST['plugin'])){
+                if (!isset($_REQUEST['checked']))
                     $_REQUEST['checked'] = array();
                 $_REQUEST['checked'][] = $_REQUEST['plugin'];
             }
-            foreach($_REQUEST['checked'] as $pluginFile){
+            foreach ($_REQUEST['checked'] as $pluginFile) {
                 $pluginFile = WP_PLUGIN_DIR . '/' . $pluginFile;
                 $pluginData = get_plugin_data($pluginFile, false, true);
                 $this->plugin->alerts->Trigger(5001, array(
@@ -206,16 +207,37 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
         ));
     }
 
-    public function EventPluginPost() {
-       
+    public function EventPluginPost($insert, $post)
+    {
+        //error_log( wp_debug_backtrace_summary() );
+        $WPActions = array('editpost', 'heartbeat');
+        if (isset($_POST['action']) && !in_array($_POST['action'], $WPActions)) {
+            $event = $this->GetEventTypeForPostType($oldPost, 5020, 5019, 5021);
+            $this->plugin->alerts->Trigger($event, array(
+                'PostID' => $post->ID,
+                'PostType' => $post->post_type,
+                'PostTitle' => $post->post_title
+            ));
+        }
     }
     
-    protected function GetRemovedThemes(){
+    protected function GetRemovedThemes() {
         $result = $this->old_themes;
-        foreach($result as $i => $theme)
-            if(file_exists($theme->get_template_directory()))
+        foreach ($result as $i => $theme)
+            if (file_exists($theme->get_template_directory()))
                 unset($result[$i]);
         return array_values($result);
     }
-    
+
+    protected function GetEventTypeForPostType($post, $typePost, $typePage, $typeCustom)
+    {
+        switch ($post->post_type) {
+            case 'page':
+                return $typePage;
+            case 'post':
+                return $typePost;
+            default:
+                return $typeCustom;
+        }
+    }
 }
