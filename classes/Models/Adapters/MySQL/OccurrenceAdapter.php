@@ -184,4 +184,24 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
         );
     }
 
+    /**
+     * Gets occurences of the same type by IP within specified time frame
+     * @param string $ipAddress
+     * @param int $alertId Alert type we are lookign for
+     * @param $startTime mktime
+     * @param $endTime mktime
+     */
+    public function CheckAlert404($args = array()) 
+    {
+        $tt2 = new WSAL_Adapters_MySQL_Meta($this->connection);
+        return self::LoadMultiQuery(
+            'SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence 
+            INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
+            and ipMeta.name = "ClientIP" and ipMeta.value = %s 
+            WHERE occurrence.alert_id = %d
+            AND (created_on BETWEEN %d AND %d)
+            GROUP BY occurrence.id',
+            $args
+        );
+    }
 }

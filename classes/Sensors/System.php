@@ -2,6 +2,7 @@
 
 class WSAL_Sensors_System extends WSAL_AbstractSensor
 {
+    const TRANSIENT_404 = 'wsal-404-attempts';
 
     public function HookEvents()
     {
@@ -9,6 +10,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         add_action('admin_init', array($this, 'EventAdminInit'));
 
         add_action('automatic_updates_complete', array($this, 'WPUpdate'), 10, 1);
+        add_filter('template_redirect', array($this, 'Event404'));
     }
     
     /**
@@ -22,7 +24,75 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             'PruneQuery' => $query,
         ));
     }
+
+    protected function Get404LogLimit()
+    {
+        return 10;
+    }
     
+    protected function Get404Expiration()
+    {
+        return 24 * 60 * 60;
+    }
+
+    protected function IsPast404Limit($ip)
+    {
+        $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
+        $data = $get_fn(self::TRANSIENT_404);
+        return ($data !== false) && isset($data[$ip]) && ($data[$ip] > $this->Get404LogLimit());
+    }
+    
+    protected function Increment404($ip)
+    {
+        $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
+        $set_fn = $this->IsMultisite() ? 'set_site_transient' : 'set_transient';
+
+        $data = $get_fn(self::TRANSIENT_404);
+        if (!$data) {
+            $data = array();
+        }
+        if (!isset($data[$ip])) {
+            $data[$ip] = 1;
+        }
+        $data[$ip]++;
+        $set_fn(self::TRANSIENT_404, $data, $this->Get404Expiration());
+    }
+    
+    public function Event404()
+    {
+        list($y, $m, $d) = explode('-', date('Y-m-d'));
+
+        $ip = $this->plugin->settings->GetMainClientIP();
+
+        $objOcc = new  WSAL_Models_Occurrence();
+
+        $occ = $objOcc->CheckAlert404(
+            array(
+                $ip,
+                6007,
+                mktime(0, 0, 0, $m, $d, $y),
+                mktime(0, 0, 0, $m, $d + 1, $y) - 1
+            )
+        );
+            
+        $occ = count($occ) ? $occ[0] : null;
+        if (!empty($occ)) {
+            // update existing record
+            $this->Increment404($ip);
+            $new = $occ->GetMetaValue('Attempts', 0) + 1;
+            
+            if ($new > $this->Get404LogLimit()) {
+                $new = $this->Get404LogLimit() . '+';
+            }
+            $occ->UpdateMetaValue('Attempts', $new);
+            $occ->created_on = null;
+            $occ->Save();
+        } else {
+            // create a new record
+            $this->plugin->alerts->Trigger(6007, array('Attempts' => 1));
+        }
+    }
+
     public function EventAdminInit()
     {
         // make sure user can actually modify target options

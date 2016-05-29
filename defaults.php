@@ -41,6 +41,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(1002, E_WARNING, __('Login failed', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected', 'wp-security-audit-log')),
                 array(1003, E_WARNING, __('Login failed  / non existing user', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected using non existing user.', 'wp-security-audit-log')),
                 array(1004, E_WARNING, __('Login blocked', 'wp-security-audit-log'), __('Blocked from logging in because another user is logged in from %ClientIP%', 'wp-security-audit-log')),
+                array(1005, E_WARNING, __('User logs in with existing session(s)', 'wp-security-audit-log'), __('Successfully logged in. Other session(s) from %IPAddress% for this username already exists', 'wp-security-audit-log')),
                 array(2010, E_NOTICE, __('User uploaded file from Uploads directory', 'wp-security-audit-log'), __('Uploaded the file %FileName% in %FilePath%', 'wp-security-audit-log')),
                 array(2011, E_WARNING, __('User deleted file from Uploads directory', 'wp-security-audit-log'), __('Deleted the file %FileName% from %FilePath%', 'wp-security-audit-log')),
                 array(2046, E_CRITICAL, __('User changed a file using the theme editor', 'wp-security-audit-log'), __('Modified %File% with the Theme Editor', 'wp-security-audit-log')),
@@ -150,6 +151,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(5005, E_CRITICAL, __('User installed a theme', 'wp-security-audit-log'), __('Installed theme "%Theme->Name%" in %Theme->get_template_directory%', 'wp-security-audit-log')),
                 array(5006, E_CRITICAL, __('User activated a theme', 'wp-security-audit-log'), __('Activated theme "%Theme->Name%", installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
                 array(5007, E_CRITICAL, __('User uninstalled a theme', 'wp-security-audit-log'), __('Deleted theme "%Theme->Name%" installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
+                array(5019, E_CRITICAL, __('A plugin created a post', 'wp-security-audit-log'), __('A plugin automatically created the following post: %PostTitle%', 'wp-security-audit-log')),
+                array(5020, E_CRITICAL, __('A plugin created a page', 'wp-security-audit-log'), __('A plugin automatically created the following page: %PostTitle%', 'wp-security-audit-log')),
+                array(5021, E_CRITICAL, __('A plugin created a custom post', 'wp-security-audit-log'), __('A plugin automatically created the following custom post: %PostTitle%', 'wp-security-audit-log')),
             ),
             __('System Activity', 'wp-security-audit-log') => array(
                 array(0000, E_CRITICAL, __('Unknown Error', 'wp-security-audit-log'), __('An unexpected error has occurred', 'wp-security-audit-log')),
@@ -164,6 +168,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(6003, E_CRITICAL, __('WordPress Administrator Notification email changed', 'wp-security-audit-log'), __('Changed the WordPress administrator notifications email address from %OldEmail% to %NewEmail%', 'wp-security-audit-log')),
                 array(6004, E_CRITICAL, __('WordPress was updated', 'wp-security-audit-log'), __('Updated WordPress from version %OldVersion% to %NewVersion%', 'wp-security-audit-log')),
                 array(6005, E_CRITICAL, __('User changes the WordPress Permalinks', 'wp-security-audit-log'), __('Changed the WordPress permalinks from %OldPattern% to %NewPattern%', 'wp-security-audit-log')),
+                array(6007, E_CRITICAL, __('User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log'), __(' Is requesting non-existing pages (404 Error Pages)', 'wp-security-audit-log')),
                 array(9999, E_CRITICAL, __('Advertising Add-ons.', 'wp-security-audit-log'), __('%PromoMessage%', 'wp-security-audit-log')),
             ),
             __('MultiSite', 'wp-security-audit-log') => array(
@@ -225,7 +230,8 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2082, E_WARNING, __('User changed menu setting', 'wp-security-audit-log'), __('%Status% the menu setting %MenuSetting% in %MenuName%', 'wp-security-audit-log')),
                 array(2083, E_NOTICE, __('User modified content in a menu', 'wp-security-audit-log'), __('Modified the %ContentType% called %ContentName% in menu %MenuName%', 'wp-security-audit-log')),
                 array(2084, E_WARNING, __('User changed name of a menu', 'wp-security-audit-log'), __('Changed the name of menu %OldMenuName% to %NewMenuName%', 'wp-security-audit-log')),
-                array(2085, E_NOTICE, __('User changed order of the objects in a menu', 'wp-security-audit-log'), __('Changed the order of the objects in menu %MenuName%', 'wp-security-audit-log'))
+                array(2085, E_NOTICE, __('User changed order of the objects in a menu', 'wp-security-audit-log'), __('Changed the order of the %ItemName% in menu %MenuName%', 'wp-security-audit-log')),
+                array(2089, E_NOTICE, __('User moved objects as a sub-item', 'wp-security-audit-log'), __('Moved %ItemName% as a sub-item of %ParentName%', 'wp-security-audit-log'))
             ),
             __('Custom Alerts', 'wp-security-audit-log') => array(
                 array(2222, E_CRITICAL, __('Custom critical Alert', 'wp-security-audit-log'), __('%CustomAlertText%', 'wp-security-audit-log')),
