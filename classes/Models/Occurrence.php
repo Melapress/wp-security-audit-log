@@ -101,7 +101,6 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
             // fill variables in message
             $this->_cachedmessage = $this->GetAlert()->GetMessage($this->GetMetaArray(), $metaFormatter, $this->_cachedmessage);
         }
-        error_log("classes/Models/occurrence.php -> GetMessage() return: ".print_r($this->_cachedmessage, true));
         return $this->_cachedmessage;
     }
     
