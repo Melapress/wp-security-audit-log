@@ -82,9 +82,6 @@ final class WSAL_Alert {
                 if($metaFormatter)$mesg[$i] = call_user_func($metaFormatter, $token, $mesg[$i]);
             }
         }
-        error_log("classes/Alert.php -> GetFormattedMesg() origMesg : ".print_r($origMesg, true));
-        error_log("classes/Alert.php -> GetFormattedMesg() metaData : ".print_r($metaData, true));
-        error_log("classes/Alert.php -> GetFormattedMesg() return : ".print_r($mesg, true));
         // compact message and return
         return implode('', $mesg);
     }

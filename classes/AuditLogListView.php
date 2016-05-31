@@ -313,7 +313,6 @@ class WSAL_AuditLogListView extends WP_List_Table
                 ) . '</strong>';
             
             case $name == '%ClientIP%':
-                error_log("classes/AuditLogListView.php -> meta_formatter() value : ".print_r($value, true));
                 if (is_string($value)) {
                     return '<strong>' . str_replace(array("\"", "[", "]"), "", $value) . '</strong>';
                 } else {
