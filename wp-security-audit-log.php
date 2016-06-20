@@ -544,7 +544,7 @@ class WpSecurityAuditLog {
 
 	public static function getConnector($config = null)
 	{
-		require_once('classes/Connector/ConnectorFactory.php');
+		//require_once('classes/Connector/ConnectorFactory.php');
 		return WSAL_Connector_ConnectorFactory::getConnector($config);
 	}
 	
