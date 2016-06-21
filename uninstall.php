@@ -3,5 +3,5 @@
 // if uninstall not called from WordPress exit
 if ( !defined( 'WP_UNINSTALL_PLUGIN' ) ) exit();
 
-require('wp-security-audit-log.php');
+require_once('wp-security-audit-log.php');
 WpSecurityAuditLog::GetInstance()->Uninstall();
