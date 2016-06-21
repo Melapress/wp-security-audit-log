@@ -154,6 +154,10 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(5019, E_CRITICAL, __('A plugin created a post', 'wp-security-audit-log'), __('A plugin automatically created the following post: %PostTitle%', 'wp-security-audit-log')),
                 array(5020, E_CRITICAL, __('A plugin created a page', 'wp-security-audit-log'), __('A plugin automatically created the following page: %PostTitle%', 'wp-security-audit-log')),
                 array(5021, E_CRITICAL, __('A plugin created a custom post', 'wp-security-audit-log'), __('A plugin automatically created the following custom post: %PostTitle%', 'wp-security-audit-log')),
+                array(5025, E_CRITICAL, __('A plugin deleted a post', 'wp-security-audit-log'), __('A plugin automatically deleted the following post(s): %PostTitles%', 'wp-security-audit-log')),
+                array(5026, E_CRITICAL, __('A plugin deleted a page', 'wp-security-audit-log'), __('A plugin automatically deleted the following page(s): %PostTitles%', 'wp-security-audit-log')),
+                array(5027, E_CRITICAL, __('A plugin deleted a custom post', 'wp-security-audit-log'), __('A plugin automatically deleted the following custom post(s): %PostTitles%', 'wp-security-audit-log')),
+                array(5031, E_WARNING, __('User updated a theme', 'wp-security-audit-log'), __('Updated the theme "%Theme->Name%" installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
             ),
             __('System Activity', 'wp-security-audit-log') => array(
                 array(0000, E_CRITICAL, __('Unknown Error', 'wp-security-audit-log'), __('An unexpected error has occurred', 'wp-security-audit-log')),
@@ -232,6 +236,18 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2084, E_WARNING, __('User changed name of a menu', 'wp-security-audit-log'), __('Changed the name of menu %OldMenuName% to %NewMenuName%', 'wp-security-audit-log')),
                 array(2085, E_NOTICE, __('User changed order of the objects in a menu', 'wp-security-audit-log'), __('Changed the order of the %ItemName% in menu %MenuName%', 'wp-security-audit-log')),
                 array(2089, E_NOTICE, __('User moved objects as a sub-item', 'wp-security-audit-log'), __('Moved %ItemName% as a sub-item of %ParentName%', 'wp-security-audit-log'))
+            ),
+            __('Comments', 'wp-security-audit-log') => array(
+                array(2090, E_NOTICE, __('User approved a comment', 'wp-security-audit-log'), __('Approved the comment posted by %Author%/%AuthorEmail% on %Date%.', 'wp-security-audit-log')),
+                array(2091, E_NOTICE, __('User unapproved a comment', 'wp-security-audit-log'), __('Unapproved the comment posted by %Author%/%AuthorEmail% on %Date%.', 'wp-security-audit-log')),
+                array(2092, E_NOTICE, __('User replied to a comment', 'wp-security-audit-log'), __('Replied to the comment posted by %Author%/%AuthorEmail% on %Date%.', 'wp-security-audit-log')),
+                array(2093, E_NOTICE, __('User edited a comment', 'wp-security-audit-log'), __('Edited a comment posted by %Author%/%AuthorEmail% on %Date%.', 'wp-security-audit-log')),
+                array(2094, E_NOTICE, __('User marked a comment as Spam', 'wp-security-audit-log'), __('Marked the comment posted by %Author%/%AuthorEmail% on %Date% as Spam.', 'wp-security-audit-log')),
+                array(2095, E_NOTICE, __('User marked a comment as Not Spam', 'wp-security-audit-log'), __('Marked the comment posted by %Author%/%AuthorEmail% on %Date% as Not Spam.', 'wp-security-audit-log')),
+                array(2096, E_NOTICE, __('User moved a comment to trash', 'wp-security-audit-log'), __('Moved the comment posted by %Author%/%AuthorEmail% on %Date% to trash.', 'wp-security-audit-log')),
+                array(2097, E_NOTICE, __('User restored a comment from the trash', 'wp-security-audit-log'), __('Restored the comment posted by %Author%/%AuthorEmail% on %Date% from the trash.', 'wp-security-audit-log')),
+                array(2098, E_NOTICE, __('User permanently deleted a comment', 'wp-security-audit-log'), __('Permanently deleted the comment posted by %Author%/%AuthorEmail% on %Date%.', 'wp-security-audit-log')),
+                array(2099, E_NOTICE, __('User posted a comment', 'wp-security-audit-log'), __('Posted a comment on %Date%.', 'wp-security-audit-log'))
             ),
             __('Custom Alerts', 'wp-security-audit-log') => array(
                 array(2222, E_CRITICAL, __('Custom critical Alert', 'wp-security-audit-log'), __('%CustomAlertText%', 'wp-security-audit-log')),

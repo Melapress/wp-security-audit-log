@@ -10,7 +10,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         add_action('admin_init', array($this, 'EventAdminInit'));
         if($hasPermission)add_action('shutdown', array($this, 'EventAdminShutdown'));
         add_action('switch_theme', array($this, 'EventThemeActivated'));
-        // TO DO 
+        // TO DO
         add_action('wp_insert_post', array($this, 'EventPluginPost'), 10, 2);
     }
     
@@ -55,7 +55,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
 
         // activate plugin
         if ($is_plugins && in_array($action, array('activate', 'activate-selected')) && current_user_can("activate_plugins")) {
-            if (isset($_REQUEST['plugin'])){
+            if (isset($_REQUEST['plugin'])) {
                 if (!isset($_REQUEST['checked']))
                     $_REQUEST['checked'] = array();
                 $_REQUEST['checked'][] = $_REQUEST['plugin'];
@@ -77,13 +77,13 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
 
         // deactivate plugin
-        if($is_plugins && in_array($action, array('deactivate', 'deactivate-selected')) && current_user_can("activate_plugins")){
-            if(isset($_REQUEST['plugin'])){
+        if ($is_plugins && in_array($action, array('deactivate', 'deactivate-selected')) && current_user_can("activate_plugins")) {
+            if (isset($_REQUEST['plugin'])) {
                 if(!isset($_REQUEST['checked']))
                     $_REQUEST['checked'] = array();
                 $_REQUEST['checked'][] = $_REQUEST['plugin'];
             }
-            foreach($_REQUEST['checked'] as $pluginFile){
+            foreach ($_REQUEST['checked'] as $pluginFile) {
                 $pluginFile = WP_PLUGIN_DIR . '/' . $pluginFile;
                 $pluginData = get_plugin_data($pluginFile, false, true);
                 $this->plugin->alerts->Trigger(5002, array(
@@ -100,14 +100,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
         
         // uninstall plugin
-        if($is_plugins && in_array($action, array('delete-selected')) && current_user_can("delete_plugins")){
-            if(!isset($_REQUEST['verify-delete'])){
+        if ($is_plugins && in_array($action, array('delete-selected')) && current_user_can("delete_plugins")) {
+            if (!isset($_REQUEST['verify-delete'])) {
                 // first step, before user approves deletion
                 // TODO store plugin data in session here
-            }else{
+            } else {
                 // second step, after deletion approval
                 // TODO use plugin data from session
-                foreach($_REQUEST['checked'] as $pluginFile){
+                foreach ($_REQUEST['checked'] as $pluginFile) {
                     $pluginName = basename($pluginFile, '.php');
                     $pluginName = str_replace(array('_', '-', '  '), ' ', $pluginName);
                     $pluginName = ucwords($pluginName);
@@ -123,15 +123,15 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
         
         // upgrade plugin
-        if(in_array($action, array('upgrade-plugin', 'update-plugin', 'update-selected')) && current_user_can("update_plugins")){
-            $plugins = array(); 
-            if(isset($_REQUEST['plugins'])){
+        if (in_array($action, array('upgrade-plugin', 'update-plugin', 'update-selected')) && current_user_can("update_plugins")) {
+            $plugins = array();
+            if (isset($_REQUEST['plugins'])) {
                 $plugins = explode(",", $_REQUEST['plugins']);
-            } else if(isset($_REQUEST['plugin'])){
+            } else if (isset($_REQUEST['plugin'])) {
                 $plugins[] = $_REQUEST['plugin'];
             }
-            if(isset($plugins)){
-                foreach($plugins as $pluginFile){
+            if (isset($plugins)) {
+                foreach ($plugins as $pluginFile) {
                     $pluginFile = WP_PLUGIN_DIR . '/' . $pluginFile;
                     $pluginData = get_plugin_data($pluginFile, false, true);
                     $this->plugin->alerts->Trigger(5004, array(
@@ -148,10 +148,27 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
             }
         }
         
+        // update theme
+        if (in_array($action, array('upgrade-theme')) && current_user_can("install_themes")) {
+            if (isset($_REQUEST['theme'])) {
+                $theme = wp_get_theme($_REQUEST['theme']);
+                $this->plugin->alerts->Trigger(5031, array(
+                    'Theme' => (object)array(
+                        'Name' => $theme->Name,
+                        'ThemeURI' => $theme->ThemeURI,
+                        'Description' => $theme->Description,
+                        'Author' => $theme->Author,
+                        'Version' => $theme->Version,
+                        'get_template_directory' => $theme->get_template_directory(),
+                    ),
+                ));
+            }
+        }
+        
         // install theme
-        if(in_array($action, array('install-theme', 'upload-theme')) && current_user_can("install_themes")){
+        if (in_array($action, array('install-theme', 'upload-theme')) && current_user_can("install_themes")) {
             $themes = array_diff(wp_get_themes(), $this->old_themes);
-            foreach($themes as $theme){
+            foreach ($themes as $theme) {
                 $this->plugin->alerts->Trigger(5005, array(
                     'Theme' => (object)array(
                         'Name' => $theme->Name,
@@ -166,8 +183,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
         
         // uninstall theme
-        if($is_themes && in_array($action, array('delete-selected', 'delete')) && current_user_can("install_themes")){
-            foreach($this->GetRemovedThemes() as $theme){
+        if ($is_themes && in_array($action, array('delete-selected', 'delete')) && current_user_can("install_themes")) {
+            foreach ($this->GetRemovedThemes() as $theme) {
                 $this->plugin->alerts->Trigger(5007, array(
                     'Theme' => (object)array(
                         'Name' => $theme->Name,
@@ -184,8 +201,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
     
     public function EventThemeActivated($themeName){
         $theme = null;
-        foreach(wp_get_themes() as $item){
-            if($item->Name == $themeName){
+        foreach (wp_get_themes() as $item) {
+            if ($item->Name == $themeName) {
                 $theme = $item;
                 break;
             }
@@ -209,10 +226,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
 
     public function EventPluginPost($insert, $post)
     {
-        //error_log( wp_debug_backtrace_summary() );
+        //error_log(print_r($post, true));
+        //error_log(print_r($_POST, true));
         $WPActions = array('editpost', 'heartbeat');
         if (isset($_POST['action']) && !in_array($_POST['action'], $WPActions)) {
-            $event = $this->GetEventTypeForPostType($oldPost, 5020, 5019, 5021);
+            $event = $this->GetEventTypeForPostType($post, 5020, 5019, 5021);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $post->ID,
                 'PostType' => $post->post_type,
@@ -221,7 +239,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
     }
     
-    protected function GetRemovedThemes() {
+    protected function GetRemovedThemes()
+    {
         $result = $this->old_themes;
         foreach ($result as $i => $theme)
             if (file_exists($theme->get_template_directory()))
