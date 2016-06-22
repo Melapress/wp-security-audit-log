@@ -11,7 +11,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         if($hasPermission)add_action('shutdown', array($this, 'EventAdminShutdown'));
         add_action('switch_theme', array($this, 'EventThemeActivated'));
         // TO DO
-        add_action('wp_insert_post', array($this, 'EventPluginPost'), 10, 2);
+        add_action('wp_insert_post', array($this, 'EventPluginPostCreate'), 10, 2);
+        add_action('delete_post', array($this, 'EventPluginPostDelete'), 10, 1);
     }
     
     protected $old_themes = array();
@@ -32,11 +33,12 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         // install plugin
         if (in_array($action, array('install-plugin', 'upload-plugin')) && current_user_can("install_plugins")) {
             $plugin = array_values(array_diff(array_keys(get_plugins()), array_keys($this->old_plugins)));
-            if (count($plugin) != 1)
+            if (count($plugin) != 1) {
                 return $this->LogError(
                         'Expected exactly one new plugin but found ' . count($plugin),
                         array('NewPlugin' => $plugin, 'OldPlugins' => $this->old_plugins, 'NewPlugins' => get_plugins())
                     );
+            }
             $pluginPath = $plugin[0];
             $plugin = get_plugins();
             $plugin = $plugin[$pluginPath];
@@ -56,8 +58,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         // activate plugin
         if ($is_plugins && in_array($action, array('activate', 'activate-selected')) && current_user_can("activate_plugins")) {
             if (isset($_REQUEST['plugin'])) {
-                if (!isset($_REQUEST['checked']))
+                if (!isset($_REQUEST['checked'])) {
                     $_REQUEST['checked'] = array();
+                }
                 $_REQUEST['checked'][] = $_REQUEST['plugin'];
             }
             foreach ($_REQUEST['checked'] as $pluginFile) {
@@ -79,8 +82,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         // deactivate plugin
         if ($is_plugins && in_array($action, array('deactivate', 'deactivate-selected')) && current_user_can("activate_plugins")) {
             if (isset($_REQUEST['plugin'])) {
-                if(!isset($_REQUEST['checked']))
+                if (!isset($_REQUEST['checked'])) {
                     $_REQUEST['checked'] = array();
+                }
                 $_REQUEST['checked'][] = $_REQUEST['plugin'];
             }
             foreach ($_REQUEST['checked'] as $pluginFile) {
@@ -207,11 +211,12 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
                 break;
             }
         }
-        if($theme == null)
+        if ($theme == null) {
             return $this->LogError(
                     'Could not locate theme named "' . $theme . '".',
                     array('ThemeName' => $themeName, 'Themes' => wp_get_themes())
                 );
+        }
         $this->plugin->alerts->Trigger(5006, array(
             'Theme' => (object)array(
                 'Name' => $theme->Name,
@@ -224,13 +229,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         ));
     }
 
-    public function EventPluginPost($insert, $post)
+    public function EventPluginPostCreate($insert, $post)
     {
-        //error_log(print_r($post, true));
-        //error_log(print_r($_POST, true));
-        $WPActions = array('editpost', 'heartbeat');
+        $WPActions = array('editpost', 'heartbeat', 'inline-save');
         if (isset($_POST['action']) && !in_array($_POST['action'], $WPActions)) {
-            $event = $this->GetEventTypeForPostType($post, 5020, 5019, 5021);
+            $event = $this->GetEventTypeForPostType($post, 5019, 5020, 5021);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $post->ID,
                 'PostType' => $post->post_type,
@@ -238,13 +241,30 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
             ));
         }
     }
+
+    public function EventPluginPostDelete($post_id)
+    {
+        if (empty($_REQUEST['action']) && isset($_REQUEST['page'])) {
+            $post = get_post($post_id);
+            if (!in_array($post->post_type, array('attachment', 'revision', 'nav_menu_item'))) {
+                $event = $this->GetEventTypeForPostType($post, 5025, 5026, 5027);
+                $this->plugin->alerts->Trigger($event, array(
+                    'PostID' => $post->ID,
+                    'PostType' => $post->post_type,
+                    'PostTitle' => $post->post_title
+                ));
+            }
+        }
+    }
     
     protected function GetRemovedThemes()
     {
         $result = $this->old_themes;
-        foreach ($result as $i => $theme)
-            if (file_exists($theme->get_template_directory()))
+        foreach ($result as $i => $theme) {
+            if (file_exists($theme->get_template_directory())) {
                 unset($result[$i]);
+            }
+        }
         return array_values($result);
     }
 

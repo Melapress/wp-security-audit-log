@@ -1,0 +1,45 @@
+.extension {
+	position:relative;
+	float:left;
+	box-sizing:border-box;
+	width:300px;
+	height:250px;
+	margin:10px 20px 10px 0;
+	border:1px solid #ccc
+}
+.extension p {
+	margin:0;padding:10px
+}
+.extension h3 {
+	box-sizing:border-box;
+	height:110px;
+	margin:0;
+	padding:20px 10px 0 120px;
+	border-bottom:1px solid #ccc;
+	background:10px 10px/90px 90px no-repeat #fff
+}
+.extension a {
+	text-decoration:none
+}
+.extension a.button-primary {
+	position: absolute;
+	bottom: 20px;
+}
+.all h3 {
+	background-image:url(../img/all.jpg)
+}
+.user-managment h3 {
+	background-image:url(../img/monitoring.jpg)
+}
+.email-notifications h3 {
+	background-image:url(../img/envelope.jpg);
+}
+.reports h3 {
+	background-image:url(../img/file.jpg);
+}
+.search-ext h3 {
+	background-image:url(../img/search.jpg);
+}
+.external-db h3 {
+	background-image:url(../img/database.jpg);
+}

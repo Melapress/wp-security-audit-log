@@ -34,38 +34,40 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
     public function EventPostMetaCreated($object_id, $meta_key, $meta_value)
     {
         $post = get_post($object_id);
-
         if (!$this->CanLogPostMeta($object_id, $meta_key)) return;
-        
-        switch ($post->post_type) {
-            case 'page':
-                $this->plugin->alerts->Trigger(2059, array(
-                    'PostID' => $object_id,
-                    'PostTitle' => $post->post_title,
-                    'MetaKey' => $meta_key,
-                    'MetaValue' => $meta_value,
-                    'MetaLink' => $meta_key,
-                ));
-                break;
-            case 'post':
-                $this->plugin->alerts->Trigger(2053, array(
-                    'PostID' => $object_id,
-                    'PostTitle' => $post->post_title,
-                    'MetaKey' => $meta_key,
-                    'MetaValue' => $meta_value,
-                    'MetaLink' => $meta_key,
-                ));
-                break;
-            default:
-                $this->plugin->alerts->Trigger(2056, array(
-                    'PostID' => $object_id,
-                    'PostTitle' => $post->post_title,
-                    'PostType' => $post->post_type,
-                    'MetaKey' => $meta_key,
-                    'MetaValue' => $meta_value,
-                    'MetaLink' => $meta_key,
-                ));
-                break;
+
+        $WPActions = array('add-meta');
+        if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
+            switch ($post->post_type) {
+                case 'page':
+                    $this->plugin->alerts->Trigger(2059, array(
+                        'PostID' => $object_id,
+                        'PostTitle' => $post->post_title,
+                        'MetaKey' => $meta_key,
+                        'MetaValue' => $meta_value,
+                        'MetaLink' => $meta_key,
+                    ));
+                    break;
+                case 'post':
+                    $this->plugin->alerts->Trigger(2053, array(
+                        'PostID' => $object_id,
+                        'PostTitle' => $post->post_title,
+                        'MetaKey' => $meta_key,
+                        'MetaValue' => $meta_value,
+                        'MetaLink' => $meta_key,
+                    ));
+                    break;
+                default:
+                    $this->plugin->alerts->Trigger(2056, array(
+                        'PostID' => $object_id,
+                        'PostTitle' => $post->post_title,
+                        'PostType' => $post->post_type,
+                        'MetaKey' => $meta_key,
+                        'MetaValue' => $meta_value,
+                        'MetaLink' => $meta_key,
+                    ));
+                    break;
+            }
         }
     }
     
@@ -83,86 +85,89 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
         $post = get_post($object_id);
         
         if (!$this->CanLogPostMeta($object_id, $meta_key)) return;
-        
-        if (isset($this->old_meta[$meta_id])) {
-            // check change in meta key
-            if ($this->old_meta[$meta_id]->key != $meta_key) {
-                switch ($post->post_type) {
-                    case 'page':
-                        $this->plugin->alerts->Trigger(2064, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'MetaID' => $meta_id,
-                            'MetaKeyNew' => $meta_key,
-                            'MetaKeyOld' => $this->old_meta[$meta_id]->key,
-                            'MetaValue' => $meta_value,
-                            'MetaLink' => $meta_key,
-                        ));
-                        break;
-                    case 'post':
-                        $this->plugin->alerts->Trigger(2062, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'MetaID' => $meta_id,
-                            'MetaKeyNew' => $meta_key,
-                            'MetaKeyOld' => $this->old_meta[$meta_id]->key,
-                            'MetaValue' => $meta_value,
-                            'MetaLink' => $meta_key,
-                        ));
-                        break;
-                    default:
-                        $this->plugin->alerts->Trigger(2063, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'PostType' => $post->post_type,
-                            'MetaID' => $meta_id,
-                            'MetaKeyNew' => $meta_key,
-                            'MetaKeyOld' => $this->old_meta[$meta_id]->key,
-                            'MetaValue' => $meta_value,
-                            'MetaLink' => $smeta_key,
-                        ));
-                        break;
+
+        $WPActions = array('add-meta');
+        if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
+            if (isset($this->old_meta[$meta_id])) {
+                // check change in meta key
+                if ($this->old_meta[$meta_id]->key != $meta_key) {
+                    switch ($post->post_type) {
+                        case 'page':
+                            $this->plugin->alerts->Trigger(2064, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'MetaID' => $meta_id,
+                                'MetaKeyNew' => $meta_key,
+                                'MetaKeyOld' => $this->old_meta[$meta_id]->key,
+                                'MetaValue' => $meta_value,
+                                'MetaLink' => $meta_key,
+                            ));
+                            break;
+                        case 'post':
+                            $this->plugin->alerts->Trigger(2062, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'MetaID' => $meta_id,
+                                'MetaKeyNew' => $meta_key,
+                                'MetaKeyOld' => $this->old_meta[$meta_id]->key,
+                                'MetaValue' => $meta_value,
+                                'MetaLink' => $meta_key,
+                            ));
+                            break;
+                        default:
+                            $this->plugin->alerts->Trigger(2063, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'PostType' => $post->post_type,
+                                'MetaID' => $meta_id,
+                                'MetaKeyNew' => $meta_key,
+                                'MetaKeyOld' => $this->old_meta[$meta_id]->key,
+                                'MetaValue' => $meta_value,
+                                'MetaLink' => $smeta_key,
+                            ));
+                            break;
+                    }
+                } else if ($this->old_meta[$meta_id]->val != $meta_value) { // check change in meta value
+                    switch ($post->post_type) {
+                        case 'page':
+                            $this->plugin->alerts->Trigger(2060, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'MetaID' => $meta_id,
+                                'MetaKey' => $meta_key,
+                                'MetaValueNew' => $meta_value,
+                                'MetaValueOld' => $this->old_meta[$meta_id]->val,
+                                'MetaLink' => $meta_key,
+                            ));
+                            break;
+                        case 'post':
+                            $this->plugin->alerts->Trigger(2054, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'MetaID' => $meta_id,
+                                'MetaKey' => $meta_key,
+                                'MetaValueNew' => $meta_value,
+                                'MetaValueOld' => $this->old_meta[$meta_id]->val,
+                                'MetaLink' => $meta_key,
+                            ));
+                            break;
+                        default:
+                            $this->plugin->alerts->Trigger(2057, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'PostType' => $post->post_type,
+                                'MetaID' => $meta_id,
+                                'MetaKey' => $meta_key,
+                                'MetaValueNew' => $meta_value,
+                                'MetaValueOld' => $this->old_meta[$meta_id]->val,
+                                'MetaLink' => $meta_key,
+                            ));
+                            break;
+                    }
                 }
-            } else if ($this->old_meta[$meta_id]->val != $meta_value) { // check change in meta value
-                switch ($post->post_type) {
-                    case 'page':
-                        $this->plugin->alerts->Trigger(2060, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'MetaID' => $meta_id,
-                            'MetaKey' => $meta_key,
-                            'MetaValueNew' => $meta_value,
-                            'MetaValueOld' => $this->old_meta[$meta_id]->val,
-                            'MetaLink' => $meta_key,
-                        ));
-                        break;
-                    case 'post':
-                        $this->plugin->alerts->Trigger(2054, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'MetaID' => $meta_id,
-                            'MetaKey' => $meta_key,
-                            'MetaValueNew' => $meta_value,
-                            'MetaValueOld' => $this->old_meta[$meta_id]->val,
-                            'MetaLink' => $meta_key,
-                        ));
-                        break;
-                    default:
-                        $this->plugin->alerts->Trigger(2057, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'PostType' => $post->post_type,
-                            'MetaID' => $meta_id,
-                            'MetaKey' => $meta_key,
-                            'MetaValueNew' => $meta_value,
-                            'MetaValueOld' => $this->old_meta[$meta_id]->val,
-                            'MetaLink' => $meta_key,
-                        ));
-                        break;
-                }
+                // remove old meta update data
+                unset($this->old_meta[$meta_id]);
             }
-            // remove old meta update data
-            unset($this->old_meta[$meta_id]);
         }
     }
 
@@ -170,38 +175,41 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
     {
         $post = get_post($object_id);
         
-        foreach ($meta_ids as $meta_id) {
-            if (!$this->CanLogPostMeta($object_id, $meta_key)) continue;
-            
-            switch ($post->post_type) {
-                case 'page':
-                    $this->plugin->alerts->Trigger(2061, array(
-                        'PostID' => $object_id,
-                        'PostTitle' => $post->post_title,
-                        'MetaID' => $meta_id,
-                        'MetaKey' => $meta_key,
-                        'MetaValue' => $meta_value,
-                    ));
-                    break;
-                case 'post':
-                    $this->plugin->alerts->Trigger(2055, array(
-                        'PostID' => $object_id,
-                        'PostTitle' => $post->post_title,
-                        'MetaID' => $meta_id,
-                        'MetaKey' => $meta_key,
-                        'MetaValue' => $meta_value,
-                    ));
-                    break;
-                default:
-                    $this->plugin->alerts->Trigger(2058, array(
-                        'PostID' => $object_id,
-                        'PostTitle' => $post->post_title,
-                        'PostType' => $post->post_type,
-                        'MetaID' => $meta_id,
-                        'MetaKey' => $meta_key,
-                        'MetaValue' => $meta_value,
-                    ));
-                    break;
+        $WPActions = array('delete-meta');
+        if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
+            foreach ($meta_ids as $meta_id) {
+                if (!$this->CanLogPostMeta($object_id, $meta_key)) continue;
+                
+                switch ($post->post_type) {
+                    case 'page':
+                        $this->plugin->alerts->Trigger(2061, array(
+                            'PostID' => $object_id,
+                            'PostTitle' => $post->post_title,
+                            'MetaID' => $meta_id,
+                            'MetaKey' => $meta_key,
+                            'MetaValue' => $meta_value,
+                        ));
+                        break;
+                    case 'post':
+                        $this->plugin->alerts->Trigger(2055, array(
+                            'PostID' => $object_id,
+                            'PostTitle' => $post->post_title,
+                            'MetaID' => $meta_id,
+                            'MetaKey' => $meta_key,
+                            'MetaValue' => $meta_value,
+                        ));
+                        break;
+                    default:
+                        $this->plugin->alerts->Trigger(2058, array(
+                            'PostID' => $object_id,
+                            'PostTitle' => $post->post_title,
+                            'PostType' => $post->post_type,
+                            'MetaID' => $meta_id,
+                            'MetaKey' => $meta_key,
+                            'MetaValue' => $meta_value,
+                        ));
+                        break;
+                }
             }
         }
     }

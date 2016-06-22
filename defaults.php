@@ -154,9 +154,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(5019, E_CRITICAL, __('A plugin created a post', 'wp-security-audit-log'), __('A plugin automatically created the following post: %PostTitle%', 'wp-security-audit-log')),
                 array(5020, E_CRITICAL, __('A plugin created a page', 'wp-security-audit-log'), __('A plugin automatically created the following page: %PostTitle%', 'wp-security-audit-log')),
                 array(5021, E_CRITICAL, __('A plugin created a custom post', 'wp-security-audit-log'), __('A plugin automatically created the following custom post: %PostTitle%', 'wp-security-audit-log')),
-                array(5025, E_CRITICAL, __('A plugin deleted a post', 'wp-security-audit-log'), __('A plugin automatically deleted the following post(s): %PostTitles%', 'wp-security-audit-log')),
-                array(5026, E_CRITICAL, __('A plugin deleted a page', 'wp-security-audit-log'), __('A plugin automatically deleted the following page(s): %PostTitles%', 'wp-security-audit-log')),
-                array(5027, E_CRITICAL, __('A plugin deleted a custom post', 'wp-security-audit-log'), __('A plugin automatically deleted the following custom post(s): %PostTitles%', 'wp-security-audit-log')),
+                array(5025, E_CRITICAL, __('A plugin deleted a post', 'wp-security-audit-log'), __('A plugin automatically deleted the following post: %PostTitle%', 'wp-security-audit-log')),
+                array(5026, E_CRITICAL, __('A plugin deleted a page', 'wp-security-audit-log'), __('A plugin automatically deleted the following page: %PostTitle%', 'wp-security-audit-log')),
+                array(5027, E_CRITICAL, __('A plugin deleted a custom post', 'wp-security-audit-log'), __('A plugin automatically deleted the following custom post: %PostTitle%', 'wp-security-audit-log')),
                 array(5031, E_WARNING, __('User updated a theme', 'wp-security-audit-log'), __('Updated the theme "%Theme->Name%" installed in %Theme->get_template_directory%', 'wp-security-audit-log')),
             ),
             __('System Activity', 'wp-security-audit-log') => array(
