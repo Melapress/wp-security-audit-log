@@ -232,13 +232,15 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
     public function EventPluginPostCreate($insert, $post)
     {
         $WPActions = array('editpost', 'heartbeat', 'inline-save');
-        if (isset($_POST['action']) && !in_array($_POST['action'], $WPActions)) {
-            $event = $this->GetEventTypeForPostType($post, 5019, 5020, 5021);
-            $this->plugin->alerts->Trigger($event, array(
-                'PostID' => $post->ID,
-                'PostType' => $post->post_type,
-                'PostTitle' => $post->post_title
-            ));
+        if (isset($_REQUEST['action']) && !in_array($_REQUEST['action'], $WPActions)) {
+            if (!in_array($post->post_type, array('attachment', 'revision', 'nav_menu_item'))) {
+                $event = $this->GetEventTypeForPostType($post, 5019, 5020, 5021);
+                $this->plugin->alerts->Trigger($event, array(
+                    'PostID' => $post->ID,
+                    'PostType' => $post->post_type,
+                    'PostTitle' => $post->post_title
+                ));
+            }
         }
     }
 
