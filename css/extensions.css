@@ -43,3 +43,8 @@
 .external-db h3 {
 	background-image:url(../img/database.jpg);
 }
+.wrap-advertising-page {
+	margin-top: 15px;
+	padding-top: 9px;
+	border-top: 1px solid #ccc;
+}

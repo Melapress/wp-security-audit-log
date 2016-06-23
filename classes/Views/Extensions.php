@@ -32,8 +32,9 @@ class WSAL_Views_Extensions extends WSAL_AbstractView
     public function Render()
     {
         ?>
-            <p><?php _e('The below add-ons allow you to extend the functionality of WP Security Audit Log plugin and enable you to get more benefits out of the WordPress security audit, such as configurable email alerts, ability to search using free text based searches & filters, and generate user activity reports to meet regulatory compliance requirements.', 'wp-security-audit-log'); ?>
-            </p>
+        <p><?php _e('The below add-ons allow you to extend the functionality of WP Security Audit Log plugin and enable you to get more benefits out of the WordPress security audit, such as configurable email alerts, ability to search using free text based searches & filters, and generate user activity reports to meet regulatory compliance requirements.', 'wp-security-audit-log'); ?>
+        </p>
+        <div class="wrap-advertising-page">
             <div class="extension all">
                 <a target="_blank" href="">
                     <h3><?php _e('All Add-Ons Bundle', 'wp-security-audit-log'); ?></h3>
@@ -115,6 +116,7 @@ class WSAL_Views_Extensions extends WSAL_AbstractView
                     </p>
                 </div>
             <?php } ?>
+        </div>
         <?php
     }
 }

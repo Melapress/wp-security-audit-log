@@ -84,7 +84,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
             if (($occurrence->getId() % $count) == 0) {
                 $promoToSend = $this->GetPromoAlert();
                 if (!empty($promoToSend)) {
-                    $link = '<a href="'.$promoToSend['link'].'" target="_blank">'.$promoToSend['name'].'</a>';
+                    $link = '<a href="'.$promoToSend['link'].'" target="_blank">Upgrade Now</a>';
                     $this->Log(9999, array(
                         'ClientIP' => '127.0.0.1',
                         'Username' => 'Plugin',
@@ -115,7 +115,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         return $promoToSend;
     }
 
-    private function GetActivePromoText()
+    private function GetActivePromoTextOld()
     {
         $aPromoAlerts = array();
         for ($i = 1; $i <= 2; $i++) {
@@ -193,9 +193,31 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         }
     }
 
+    private function GetActivePromoText()
+    {
+        $aPromoAlerts = array();
+        $aPromoAlerts[] = array(
+            'name' => 'Update to Premium',
+            'message' => 'Add email notifications, users logins and session management, reports, search and other functionality by upgrading to Premium. <strong>%s</strong>',
+            'link' => 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=auditviewer&utm_medium=promoalert&utm_campaign=plugin'
+        );
+        $aPromoAlerts[] = array(
+            'name' => 'Get 60% Discount When You Update to Premium',
+            'message' => 'Benefit from a discount of 60&percnt; when you upgrade to premium and add <strong>Email Notifications</strong>, <strong>User Logins and Session Management</strong>, <strong>Search</strong> and <strong>Reports</strong> functionality to the plugin. <strong>%s</strong>',
+            'link' => 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=auditviewer&utm_medium=promoalert&utm_campaign=plugin'
+        );
+        $aPromoAlerts[] = array(
+            'name' => 'Add Email Notifications, Search, Reports and Manage Users Sessions',
+            'message' => 'Upgrade to premium to extend the plugin’s functionality such as email notifications, reports, free-text based search and user logins and sessions management and benefit from a 60&percnt; discount. Starting at just $89 <strong>%s</strong>',
+            'link' => 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=auditviewer&utm_medium=promoalert&utm_campaign=plugin'
+        );
+        return $aPromoAlerts;
+    }
+
     private function CheckPromoToShow()
     {
         $promoToShow = null;
+        // Check: Email Add-On, Search Add-On, Reports Add-On, External DB Add-On, Manage Users Sessions Add-on
         if (!class_exists('WSAL_NP_Plugin')) {
             $promoToShow[] = true;
         }
@@ -208,10 +230,13 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         if (!class_exists('WSAL_Ext_Plugin')) {
             $promoToShow[] = true;
         }
+        if (!class_exists('WSAL_User_Management_Plugin')) {
+            $promoToShow[] = true;
+        }
 
         if (empty($promoToShow)) {
             return null;
         }
-        return (count($promoToShow) == 4) ? 100 : 175;
+        return (count($promoToShow) == 5) ? 80 : null;
     }
 }

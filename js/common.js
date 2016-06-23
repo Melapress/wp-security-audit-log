@@ -14,4 +14,5 @@ jQuery(document).ready(function(){
 	
     jQuery('head').append('<style>.wp-submenu .dashicons-external:before{vertical-align: bottom;}</style>');
 	jQuery("a[href*='page=wsal-extensions']").addClass('dashicons-before dashicons-external').css('color', '#CC4444');
+	jQuery("a[href*='page=wsal-emailnotifications']").css('color', '#CC4444');
 });
