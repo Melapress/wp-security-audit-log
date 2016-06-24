@@ -1,10 +1,10 @@
 <?php
 
-class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
+class WSAL_Views_Reports extends WSAL_AbstractView {
     
     public function GetTitle()
     {
-        return __('Email Notifications Add-On', 'wp-security-audit-log');
+        return __('Reports Add-On', 'wp-security-audit-log');
     }
     
     public function GetIcon()
@@ -14,12 +14,12 @@ class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
     
     public function GetName()
     {
-        return __('Notifications', 'wp-security-audit-log');
+        return __('Reports', 'wp-security-audit-log');
     }
     
     public function GetWeight()
     {
-        return 7;
+        return 9;
     }
 
     public function Header() {
@@ -36,18 +36,18 @@ class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
         ?>
         <div class="wrap-advertising-page">
             <p>
-                <?php _e('This premium add-on allows you to configure email alerts so you are notified instantly when important changes happen on your WordPress.', 'wp-security-audit-log'); ?>
+                <?php _e('Generate any type of user and site activity report to keep track of user productivity and meet  regulatory compliance requirements. You can also configure automated weekly or monthly email summary reports.', 'wp-security-audit-log'); ?>
             </p>
-            <?php $url = 'https://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=plugin&utm_medium=emailpage&utm_campaign=notifications'; ?>
+            <?php $url = 'https://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=plugin&utm_medium=reportspage&utm_campaign=reports'; ?>
             <p>
                 <a class="button-primary" href="<?php echo esc_attr($url); ?>" target="_blank"><?php _e('Learn More', 'wp-security-audit-log'); ?></a>
             </p>
             <p>
                 <span class="description">
-                    Save more than 70% when you purchase this add-on as part of the <strong>All Add-On</strong> bundle. 
+                    Save more than 70% when you purchase this add-on as part of the <strong>All Add-On</strong> bundle.
                 </span>
             </p>
-            <?php $url = 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=plugin&utm_medium=emailpage&utm_campaign=notifications'; ?>
+            <?php $url = 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=plugin&utm_medium=reportspage&utm_campaign=reports'; ?>
             <p>
                 <a class="button-primary" href="<?php echo esc_attr($url); ?>" target="_blank"><?php _e('Learn More', 'wp-security-audit-log'); ?></a>
             </p>
