@@ -212,7 +212,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         //error_log( wp_debug_backtrace_summary() );
         $WPActions = array('editpost', 'heartbeat');
         if (isset($_POST['action']) && !in_array($_POST['action'], $WPActions)) {
-            $event = $this->GetEventTypeForPostType($oldPost, 5020, 5019, 5021);
+            $event = $this->GetEventTypeForPostType($post, 5020, 5019, 5021);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $post->ID,
                 'PostType' => $post->post_type,
