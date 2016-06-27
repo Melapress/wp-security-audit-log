@@ -156,7 +156,7 @@ class WpSecurityAuditLog {
         add_action('admin_footer', array($this, 'RenderFooter'));
 
         // handle admin Disable Custom Field
-        add_action('wp_ajax_AjaxDisableCustomField', array($this, 'AjaxDisableCustomField'));   
+        add_action('wp_ajax_AjaxDisableCustomField', array($this, 'AjaxDisableCustomField'));
     }
 
     /**
@@ -178,15 +178,15 @@ class WpSecurityAuditLog {
      * Disable Custom Field through ajax.
      * @internal
      */
-    public function AjaxDisableCustomField(){ 
+    public function AjaxDisableCustomField(){
         $fields = $this->GetGlobalOption('excluded-custom');
-        if ( isset($fields) && $fields != "") {
-            $fields .= ",".$_POST['notice'];
+        if (isset($fields) && $fields != "") {
+            $fields .= "," . esc_html($_POST['notice']);
         } else {
-            $fields = $_POST['notice'];
+            $fields = esc_html($_POST['notice']);
         }
         $this->SetGlobalOption('excluded-custom', $fields);
-        echo 'Custom Field '.$_POST['notice'].' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude"> Excluded Objects </a> tab in the plugin settings';
+        echo 'Custom Field '.esc_html($_POST['notice']).' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude"> Excluded Objects </a> tab in the plugin settings';
         die;
     }
     
