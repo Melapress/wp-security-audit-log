@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.5
-Stable tag: 2.4.3
+Stable tag: 2.4.4
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -175,6 +175,14 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 9. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes with WP Security Audit Log Plugin](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
 
 == Changelog ==
+
+= 2.4.4 (2016-06-27) =
+
+* **Security fix**
+	* Fixed a [cross-site scripting vulnerability](http://www.wpwhitesecurity.com/wordpress-security/wordpress-security-glossary-terms-keywords/#cross-site-scripting) in the function AjaxDisableCustomField()
+	
+* **Bug fix**
+	* Fixed the hide plugin setting which was not working in some scenarios. [Support Ticket](https://wordpress.org/support/topic/hide-plugin-in-plugins-page-not-working)
 
 = 2.4.3 (2016-06-01) =
 
