@@ -24,19 +24,23 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
     public function EventCommentApprove($new_status, $old_status, $comment)
     {
         if (!empty($comment) && $old_status != $new_status) {
+            $post = get_post($comment->comment_post_ID);
+            $comment_link = get_permalink($post->ID) . "#comment-" . $comment->comment_ID;
+            $fields = array(
+                'PostTitle' => $post->post_title,
+                'Author' => $this->CheckAuthor($comment),
+                'Date' => $comment->comment_date,
+                'CommentLink' => $comment_link
+            );
+            if (!username_exists($comment->comment_author)) {
+                $fields['Username'] = "Website Visitor";
+            }
+
             if ($new_status == 'approved') {
-                $this->plugin->alerts->Trigger(2090, array(
-                    'Author' => $comment->comment_author,
-                    'AuthorEmail' => $comment->comment_author_email,
-                    'Date' => $comment->comment_date
-                ));
+                $this->plugin->alerts->Trigger(2090, $fields);
             }
             if ($new_status == 'unapproved') {
-                $this->plugin->alerts->Trigger(2091, array(
-                    'Author' => $comment->comment_author,
-                    'AuthorEmail' => $comment->comment_author_email,
-                    'Date' => $comment->comment_date
-                ));
+                $this->plugin->alerts->Trigger(2091, $fields);
             }
         }
     }
@@ -85,11 +89,32 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
     {
         $comment = get_comment($comment_ID);
         if (!empty($comment)) {
-            $this->plugin->alerts->Trigger($alert_code, array(
-                'Author' => $comment->comment_author,
-                'AuthorEmail' => $comment->comment_author_email,
-                'Date' => $comment->comment_date
-            ));
+            $post = get_post($comment->comment_post_ID);
+            $comment_link = get_permalink($post->ID) . "#comment-" . $comment_ID;
+            $fields = array(
+                'PostTitle' => $post->post_title,
+                'Author' => $this->CheckAuthor($comment),
+                'Date' => $comment->comment_date,
+                'CommentLink' => $comment_link
+            );
+            if (!username_exists($comment->comment_author)) {
+                $fields['Username'] = "Website Visitor";
+            }
+
+            $this->plugin->alerts->Trigger($alert_code, $fields);
+        }
+    }
+
+    /**
+     * Shows the username if the comment is owned by a user
+     * and the email if the comment was posted by a non WordPress user
+     */
+    private function CheckAuthor($comment)
+    {
+        if (username_exists($comment->comment_author)) {
+            return $comment->comment_author;
+        } else {
+            return $comment->comment_author_email;
         }
     }
 }

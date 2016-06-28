@@ -230,6 +230,14 @@ class WSAL_AuditLogListView extends WP_List_Table
                     $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/plugin-logo.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
                     $uhtml = '<i>' . __('Plugin', 'wp-security-audit-log') . '</i>';
                     $roles = '';
+                } elseif ($username == 'Plugins') {
+                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __('Plugins', 'wp-security-audit-log') . '</i>';
+                    $roles = '';
+                } elseif ($username == 'Website Visitor') {
+                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __('Website Visitor', 'wp-security-audit-log') . '</i>';
+                    $roles = '';
                 } else {
                     $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
                     $uhtml = '<i>' . __('System', 'wp-security-audit-log') . '</i>';
@@ -291,6 +299,9 @@ class WSAL_AuditLogListView extends WP_List_Table
                 return '<p class="promo-alert">' . $value .'</p>';
 
             case $name == '%PromoLink%':
+                return $value;
+
+            case $name == '%CommentLink%':
                 return $value;
 
             case $name == '%MetaLink%':

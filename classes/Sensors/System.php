@@ -35,14 +35,14 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         return 24 * 60 * 60;
     }
 
-    protected function IsPast404Limit($ip)
+    protected function IsPast404Limit($site_id, $ip)
     {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
         $data = $get_fn(self::TRANSIENT_404);
-        return ($data !== false) && isset($data[$ip]) && ($data[$ip] > $this->Get404LogLimit());
+        return ($data !== false) && isset($data[$site_id.":".$ip]) && ($data[$site_id.":".$ip] > $this->Get404LogLimit());
     }
     
-    protected function Increment404($ip)
+    protected function Increment404($site_id, $ip)
     {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
         $set_fn = $this->IsMultisite() ? 'set_site_transient' : 'set_transient';
@@ -51,18 +51,29 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if (!$data) {
             $data = array();
         }
-        if (!isset($data[$ip])) {
-            $data[$ip] = 1;
+        if (!isset($data[$site_id.":".$ip])) {
+            $data[$site_id.":".$ip] = 1;
         }
-        $data[$ip]++;
+        $data[$site_id.":".$ip]++;
         $set_fn(self::TRANSIENT_404, $data, $this->Get404Expiration());
     }
     
     public function Event404()
     {
+        global $wp_query;
+        if (!$wp_query->is_404) {
+            return;
+        }
+        
         list($y, $m, $d) = explode('-', date('Y-m-d'));
 
+        $site_id = (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
         $ip = $this->plugin->settings->GetMainClientIP();
+        if (!is_user_logged_in()) {
+            $username = "Website Visitor";
+        } else {
+            $username = wp_get_current_user()->user_login;
+        }
 
         $objOcc = new  WSAL_Models_Occurrence();
 
@@ -70,6 +81,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             array(
                 $ip,
                 6007,
+                $site_id,
                 mktime(0, 0, 0, $m, $d, $y),
                 mktime(0, 0, 0, $m, $d + 1, $y) - 1
             )
@@ -85,11 +97,16 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 $new = $this->Get404LogLimit() . '+';
             }
             $occ->UpdateMetaValue('Attempts', $new);
+            $occ->UpdateMetaValue('Username', $username);
             $occ->created_on = null;
             $occ->Save();
         } else {
             // create a new record
-            $this->plugin->alerts->Trigger(6007, array('Attempts' => 1));
+            $fields =  array(
+                'Attempts' => 1,
+                'Username' => $username
+            );
+            $this->plugin->alerts->Trigger(6007, $fields);
         }
     }
 

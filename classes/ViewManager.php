@@ -219,7 +219,7 @@ class WSAL_ViewManager {
     {
         $not_show = false;
         switch ($name_view) {
-            case 'Notifications':
+            case 'Notifications Email':
                 if (class_exists('WSAL_NP_Plugin')) {
                     $not_show = true;
                 }

@@ -42,7 +42,7 @@ class WSAL_Views_Extensions extends WSAL_AbstractView
                 <p><?php _e('Benefit from a 60% discount when you purchase all the add-ons as a single bundle.', 'wp-security-audit-log'); ?>
                 </p>
                 <p>
-                    <a target="_blank" href="https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=alladdons" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>          
+                    <a target="_blank" href="https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=alladdons" class="button-primary"><?php _e('Get this Bundle', 'wp-security-audit-log'); ?>          
                     </a>
                 </p>
             </div>
@@ -55,7 +55,7 @@ class WSAL_Views_Extensions extends WSAL_AbstractView
                         
                     </p>
                     <p>
-                        <a target="_blank" href="https://www.wpsecurityauditlog.com/extensions/wordpress-users-logins-management/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=logins" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        <a target="_blank" href="https://www.wpsecurityauditlog.com/extensions/user-sessions-management-wp-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=logins" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
                         </a>
                     </p>
                 </div>

@@ -238,7 +238,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $post->ID,
                     'PostType' => $post->post_type,
-                    'PostTitle' => $post->post_title
+                    'PostTitle' => $post->post_title,
+                    'Username' => 'Plugins'
                 ));
             }
         }
@@ -253,7 +254,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $post->ID,
                     'PostType' => $post->post_type,
-                    'PostTitle' => $post->post_title
+                    'PostTitle' => $post->post_title,
+                    'Username' => 'Plugins'
                 ));
             }
         }

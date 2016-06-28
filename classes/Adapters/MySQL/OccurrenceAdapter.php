@@ -198,7 +198,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
             'SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence 
             INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
             and ipMeta.name = "ClientIP" and ipMeta.value = %s 
-            WHERE occurrence.alert_id = %d
+            WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
             AND (created_on BETWEEN %d AND %d)
             GROUP BY occurrence.id',
             $args
