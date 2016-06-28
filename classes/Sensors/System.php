@@ -64,11 +64,16 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if (!$wp_query->is_404) {
             return;
         }
-        
+
         list($y, $m, $d) = explode('-', date('Y-m-d'));
 
         $site_id = (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
         $ip = $this->plugin->settings->GetMainClientIP();
+
+        if ($this->IsPast404Limit($site_id, $ip)) {
+            return;
+        }
+        
         if (!is_user_logged_in()) {
             $username = "Website Visitor";
         } else {
@@ -90,7 +95,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         $occ = count($occ) ? $occ[0] : null;
         if (!empty($occ)) {
             // update existing record
-            $this->Increment404($ip);
+            $this->Increment404($site_id, $ip);
             $new = $occ->GetMetaValue('Attempts', 0) + 1;
             
             if ($new > $this->Get404LogLimit()) {
