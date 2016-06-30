@@ -210,7 +210,7 @@ class WpSecurityAuditLog {
         $optionsTable = new WSAL_Models_Option();
         if (!$optionsTable->IsInstalled()) {
             $optionsTable->Install();
-            //setting the prunig date with the old value or the default value   
+            //setting the prunig date with the old value or the default value
             $pruningDate = $this->settings->GetPruningDate();
             $this->settings->SetPruningDate($pruningDate);
 
@@ -282,6 +282,8 @@ class WpSecurityAuditLog {
         //setting the prunig limit with the old value or the default value
         $pruningLimit = $this->settings->GetPruningLimit();
         $this->settings->SetPruningLimit($pruningLimit);
+        // disable alert 2099 by default
+        $this->settings->SetDisabledAlerts(array(2099));
 
         // install cleanup hook (remove older one if it exists)
         wp_clear_scheduled_hook('wsal_cleanup');

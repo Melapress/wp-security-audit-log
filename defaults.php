@@ -172,7 +172,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(6003, E_CRITICAL, __('WordPress Administrator Notification email changed', 'wp-security-audit-log'), __('Changed the WordPress administrator notifications email address from %OldEmail% to %NewEmail%', 'wp-security-audit-log')),
                 array(6004, E_CRITICAL, __('WordPress was updated', 'wp-security-audit-log'), __('Updated WordPress from version %OldVersion% to %NewVersion%', 'wp-security-audit-log')),
                 array(6005, E_CRITICAL, __('User changes the WordPress Permalinks', 'wp-security-audit-log'), __('Changed the WordPress permalinks from %OldPattern% to %NewPattern%', 'wp-security-audit-log')),
-                array(6007, E_CRITICAL, __('User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log'), __('Has requested a non existing page (404 Error Pages) %Attempts% times.', 'wp-security-audit-log')),
+                array(6007, E_CRITICAL, __('User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log'), __('Has requested a non existing page (404 Error Pages) %Attempts% %Msg%', 'wp-security-audit-log')),
                 array(9999, E_CRITICAL, __('Advertising Add-ons.', 'wp-security-audit-log'), __('%PromoName% %PromoMessage%', 'wp-security-audit-log')),
             ),
             __('MultiSite', 'wp-security-audit-log') => array(
