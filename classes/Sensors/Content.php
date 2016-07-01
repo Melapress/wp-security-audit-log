@@ -157,18 +157,21 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                         break;
                 }
                 if ($event) {
+                    $editorLink = $this->GetEditorLink($newPost);
                     if ($is_scheduled) {
                         $this->plugin->alerts->Trigger($event, array(
                             'PostType' => $newPost->post_type,
                             'PostTitle' => $newPost->post_title,
-                            'PublishingDate' => $newPost->post_date
+                            'PublishingDate' => $newPost->post_date,
+                            $editorLink['name'] => $editorLink['value']
                         ));
                     } else {
                         $this->plugin->alerts->Trigger($event, array(
                             'PostID' => $newPost->ID,
                             'PostType' => $newPost->post_type,
                             'PostTitle' => $newPost->post_title,
-                            'PostUrl' => get_permalink($newPost->ID)
+                            'PostUrl' => get_permalink($newPost->ID),
+                            $editorLink['name'] => $editorLink['value']
                         ));
                     }
                 }
@@ -182,11 +185,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         $event = $this->GetEventTypeForPostType($post, 2001, 2005, 2030);
         
         if ($event) {
+            $editorLink = $this->GetEditorLink($newPost);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $post->ID,
                 'PostType' => $post->post_type,
                 'PostTitle' => $post->post_title,
-                'PostUrl' => get_permalink($post->ID)
+                'PostUrl' => get_permalink($post->ID),
+                $editorLink['name'] => $editorLink['value']
             ));
         }
     }
@@ -259,10 +264,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 if ($this->CheckAutoDraft($event, $post->post_title)) {
                     return;
                 }
+                $editorLink = $this->GetEditorLink($post);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $post->ID,
                     'PostType' => $post->post_type,
                     'PostTitle' => $post->post_title,
+                    $editorLink['name'] => $editorLink['value']
                 ));
             }
         }
@@ -275,10 +282,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return;
         }
         $event = $this->GetEventTypeForPostType($post, 2012, 2013, 2034);
+        $editorLink = $this->GetEditorLink($post);
         $this->plugin->alerts->Trigger($event, array(
             'PostID' => $post->ID,
             'PostType' => $post->post_type,
             'PostTitle' => $post->post_title,
+            $editorLink['name'] => $editorLink['value']
         ));
     }
     
@@ -289,10 +298,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return;
         }
         $event = $this->GetEventTypeForPostType($post, 2014, 2015, 2035);
+        $editorLink = $this->GetEditorLink($post);
         $this->plugin->alerts->Trigger($event, array(
             'PostID' => $post->ID,
             'PostType' => $post->post_type,
             'PostTitle' => $post->post_title,
+            $editorLink['name'] => $editorLink['value']
         ));
     }
     
@@ -309,12 +320,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
         if ($from != $to) {
             $event = $this->GetEventTypeForPostType($oldpost, 2027, 2028, 2041);
+            $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
                 'PostTitle' => $oldpost->post_title,
                 'OldDate' => $oldpost->post_date,
                 'NewDate' => $newpost->post_date,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -324,10 +337,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     protected function CheckReviewPendingChange($oldpost, $newpost)
     {
         if ($oldpost->post_status == 'pending') {
+            $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger(2072, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
-                'PostTitle' => $oldpost->post_title
+                'PostTitle' => $oldpost->post_title,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -341,12 +356,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($oldCats != $newCats) {
             $event = $this->GetEventTypeForPostType($post, 2016, 0, 2036);
             if ($event) {
+                $editorLink = $this->GetEditorLink($post);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $post->ID,
                     'PostType' => $post->post_type,
                     'PostTitle' => $post->post_title,
                     'OldCategories' => $oldCats ? $oldCats : 'no categories',
                     'NewCategories' => $newCats ? $newCats : 'no categories',
+                    $editorLink['name'] => $editorLink['value']
                 ));
                 return 1;
             }
@@ -357,12 +374,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if ($oldpost->post_author != $newpost->post_author) {
             $event = $this->GetEventTypeForPostType($oldpost, 2019, 2020, 2038);
+            $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
                 'PostTitle' => $oldpost->post_title,
                 'OldAuthor' => get_userdata($oldpost->post_author)->user_login,
                 'NewAuthor' => get_userdata($newpost->post_author)->user_login,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -374,20 +393,24 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             if (isset($_REQUEST['publish'])) {
                 // special case (publishing a post)
                 $event = $this->GetEventTypeForPostType($oldpost, 2001, 2005, 2030);
+                $editorLink = $this->GetEditorLink($newpost);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $newpost->ID,
                     'PostType' => $newpost->post_type,
                     'PostTitle' => $newpost->post_title,
                     'PostUrl' => get_permalink($newpost->ID),
+                    $editorLink['name'] => $editorLink['value']
                 ));
             } else {
                 $event = $this->GetEventTypeForPostType($oldpost, 2021, 2022, 2039);
+                $editorLink = $this->GetEditorLink($oldpost);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $oldpost->ID,
                     'PostType' => $oldpost->post_type,
                     'PostTitle' => $oldpost->post_title,
                     'OldStatus' => $oldpost->post_status,
                     'NewStatus' => $newpost->post_status,
+                    $editorLink['name'] => $editorLink['value']
                 ));
             }
             return 1;
@@ -399,6 +422,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($oldpost->post_parent != $newpost->post_parent) {
             $event = $this->GetEventTypeForPostType($oldpost, 0, 2047, 0);
             if ($event) {
+                $editorLink = $this->GetEditorLink($oldpost);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $oldpost->ID,
                     'PostType' => $oldpost->post_type,
@@ -407,6 +431,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                     'NewParent' => $newpost->post_parent,
                     'OldParentName' => $oldpost->post_parent ? get_the_title($oldpost->post_parent) : 'no parent',
                     'NewParentName' => $newpost->post_parent ? get_the_title($newpost->post_parent) : 'no parent',
+                    $editorLink['name'] => $editorLink['value']
                 ));
                 return 1;
             }
@@ -417,12 +442,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if ($oldLink != $newLink) {
             $event = $this->GetEventTypeForPostType($post, 2017, 2018, 2037);
+            $editorLink = $this->GetEditorLink($post);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $post->ID,
                 'PostType' => $post->post_type,
                 'PostTitle' => $post->post_title,
                 'OldUrl' => $oldLink,
                 'NewUrl' => $newLink,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -455,12 +482,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         
         if ($oldVisibility && $newVisibility && ($oldVisibility != $newVisibility)) {
             $event = $this->GetEventTypeForPostType($oldpost, 2025, 2026, 2040);
+            $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
                 'PostTitle' => $oldpost->post_title,
                 'OldVisibility' => $oldVisibility,
                 'NewVisibility' => $newVisibility,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -471,6 +500,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($oldTmpl != $newTmpl) {
             $event = $this->GetEventTypeForPostType($post, 0, 2048, 0);
             if ($event) {
+                $editorLink = $this->GetEditorLink($post);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $post->ID,
                     'PostType' => $post->post_type,
@@ -479,6 +509,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                     'NewTemplate' => ucwords(str_replace(array('-' , '_'), ' ', basename($newTmpl, '.php'))),
                     'OldTemplatePath' => $oldTmpl,
                     'NewTemplatePath' => $newTmpl,
+                    $editorLink['name'] => $editorLink['value']
                 ));
                 return 1;
             }
@@ -489,10 +520,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if ($oldStky != $newStky) {
             $event = $newStky ? 2049 : 2050;
+            $editorLink = $this->GetEditorLink($post);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $post->ID,
                 'PostType' => $post->post_type,
                 'PostTitle' => $post->post_title,
+                'PostUrl' => get_permalink($post->ID),
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -528,11 +562,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                         break;
                 }
                 if ($event) {
+                    $editorLink = $this->GetEditorLink($oldpost);
                     $this->plugin->alerts->Trigger($event, array(
                         'PostID' => $post_ID,
                         'PostType' => $oldpost->post_type,
                         'PostTitle' => $oldpost->post_title,
-                        'PostUrl' => get_permalink($post_ID) // TODO or should this be $newpost?
+                        'PostUrl' => get_permalink($post_ID),
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     return 1;
                 }
@@ -632,12 +668,26 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if ($oldpost->post_title != $newpost->post_title) {
             $event = $this->GetEventTypeForPostType($newpost, 2086, 2087, 2088);
+            $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger($event, array(
                 'OldTitle' => $oldpost->post_title,
                 'NewTitle' => $newpost->post_title,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
         return 0;
+    }
+
+    private function GetEditorLink($post)
+    {
+        $name = 'EditorLink';
+        $name .= ($post->post_type == 'page') ? 'Page' : 'Post' ;
+        $value = get_edit_post_link($post->ID);
+        $aLink = array(
+            'name' => $name,
+            'value' => $value,
+        );
+        return $aLink;
     }
 }
