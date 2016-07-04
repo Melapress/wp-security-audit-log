@@ -187,7 +187,9 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     /**
      * Gets occurences of the same type by IP within specified time frame
      * @param string $ipAddress
+     * @param string $username
      * @param int $alertId Alert type we are lookign for
+     * @param int $siteId
      * @param $startTime mktime
      * @param $endTime mktime
      */
@@ -197,7 +199,9 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
         return self::LoadMultiQuery(
             'SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence 
             INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id 
-            and ipMeta.name = "ClientIP" and ipMeta.value = %s 
+            and ipMeta.name = "ClientIP" and ipMeta.value = %s
+            INNER JOIN `' . $tt2->GetTable() . '` usernameMeta on usernameMeta.occurrence_id = occurrence.id
+            and usernameMeta.name = "Username" and usernameMeta.value = %s
             WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
             AND (created_on BETWEEN %d AND %d)
             GROUP BY occurrence.id',

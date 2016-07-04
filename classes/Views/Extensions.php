@@ -36,82 +36,88 @@ class WSAL_Views_Extensions extends WSAL_AbstractView
         </p>
         <div class="wrap-advertising-page">
             <div class="extension all">
-                <a target="_blank" href="">
+                <?php $link = 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=alladdons'; ?>
+                <a target="_blank" href="<?php echo esc_attr($link); ?>">
                     <h3><?php _e('All Add-Ons Bundle', 'wp-security-audit-log'); ?></h3>
                 </a>
                 <p><?php _e('Benefit from a 60% discount when you purchase all the add-ons as a single bundle.', 'wp-security-audit-log'); ?>
                 </p>
                 <p>
-                    <a target="_blank" href="https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=alladdons" class="button-primary"><?php _e('Get this Bundle', 'wp-security-audit-log'); ?>          
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this Bundle', 'wp-security-audit-log'); ?>          
                     </a>
                 </p>
             </div>
             <?php if (!class_exists('WSAL_User_Management_Plugin')) { ?>
                 <div class="extension user-managment">
-                    <a target="_blank" href="">
+                    <?php $link = 'https://www.wpsecurityauditlog.com/extensions/user-sessions-management-wp-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=logins'; ?>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>">
                         <h3><?php _e('Users Logins and Management', 'wp-security-audit-log'); ?></h3>
                     </a>
                     <p><?php _e('See who is logged in to your WordPress and manage user sessions and logins.', 'wp-security-audit-log'); ?>
                         
                     </p>
                     <p>
-                        <a target="_blank" href="https://www.wpsecurityauditlog.com/extensions/user-sessions-management-wp-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=logins" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
                         </a>
                     </p>
                 </div>
             <?php } ?>
             <?php if (!class_exists('WSAL_NP_Plugin')) { ?>
                 <div class="extension email-notifications">
-                    <a target="_blank" href="">
+                    <?php $link = 'https://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=notifications'; ?>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>">
                         <h3><?php _e('Email Notifications', 'wp-security-audit-log'); ?></h3>
                     </a>
                     <p><?php _e('Get notified instantly via email when important changes are made on your WordPress!', 'wp-security-audit-log'); ?>
                         
                     </p>
                     <p>
-                        <a target="_blank" href="https://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=notifications" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
                         </a>
                     </p>
                 </div>
             <?php } ?>
             <?php if (!class_exists('WSAL_Rep_Plugin')) { ?>
                 <div class="extension reports">
-                    <a target="_blank" href="">
+                    <?php $link = 'https://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=reports'; ?>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>">
                         <h3><?php _e('Reports', 'wp-security-audit-log'); ?></h3>
                     </a>
                     <p><?php _e('Generate any type of user,site and activity report to keep track of user productivity and to meet  regulatory compliance requirements.', 'wp-security-audit-log'); ?>
                         
                     </p>
                     <p>
-                        <a target="_blank" href="https://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=reports" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
                         </a>
                     </p>
                 </div>
             <?php } ?>
             <?php if (!class_exists('WSAL_SearchExtension')) { ?>
                 <div class="extension search-ext">
-                    <a target="_blank" href="">
+                    <?php $link = 'https://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=search'; ?>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>">
                         <h3><?php _e('Search', 'wp-security-audit-log'); ?></h3>
                     </a>
                     <p><?php _e('Do free-text based searches for specific activity in the WordPress audit trail. You can also use filters to fine-tune your searches.', 'wp-security-audit-log'); ?>
                         
                     </p>
                     <p>
-                        <a target="_blank" href="https://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=search" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
                         </a>
                     </p>
                 </div>
             <?php } ?>
             <?php if (!class_exists('WSAL_Ext_Plugin')) { ?>
                 <div class="extension external-db">
-                    <a target="_blank" href="">
+                    <?php $link = 'https://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=externaldb'; ?>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>">
                         <h3><?php _e('External DB', 'wp-security-audit-log'); ?></h3>
                     </a>
                     <p><?php _e('Store the WordPress audit trial in an external database for a more secure and faster WordPress website.', 'wp-security-audit-log'); ?>
                         
                     </p>
                     <p>
-                        <a target="_blank" href="https://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=externaldb" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
                         </a>
                     </p>
                 </div>

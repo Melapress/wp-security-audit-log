@@ -40,7 +40,7 @@ class WSAL_Views_LogInUsers extends WSAL_AbstractView {
             <p>
                 <?php _e('This premium add-on allows you to see who is logged in to your WordPress,<br> block multiple same-user WordPress sessions and more.', 'wp-security-audit-log'); ?>
             </p>
-            <?php $url = 'https://www.wpsecurityauditlog.com/extensions/wordpress-users-logins-management/?utm_source=plugin&utm_medium=loginspage&utm_campaign=logins'; ?>
+            <?php $url = 'https://www.wpsecurityauditlog.com/extensions/user-sessions-management-wp-security-audit-log/?utm_source=plugin&utm_medium=loginspage&utm_campaign=logins'; ?>
             <p>
                 <a class="button-primary" href="<?php echo esc_attr($url); ?>" target="_blank"><?php _e('Learn More', 'wp-security-audit-log'); ?></a>
             </p>
