@@ -195,7 +195,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             ));
         }
     }
-    
+
     protected function CheckCategoryCreation()
     {
         if (empty($_POST)) {
@@ -210,10 +210,17 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         } elseif (!empty($_POST['newcategory']) && $_POST['action'] == 'add-category') {
             $categoryName = $_POST['newcategory'];
         }
+
+        if (!empty($_POST['slug'])) {
+            $slug = $_POST['slug'];
+        } else {
+            $slug = strtolower($categoryName);
+        }
         
         if ($categoryName) {
             $this->plugin->alerts->Trigger(2023, array(
                 'CategoryName' => $categoryName,
+                'Slug' => $slug
             ));
         }
     }
@@ -246,6 +253,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             $this->plugin->alerts->Trigger(2024, array(
                 'CategoryID' => $categoryID,
                 'CategoryName' => $category->cat_name,
+                'Slug' => $category->slug
             ));
         }
     }
@@ -269,6 +277,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                     'PostID' => $post->ID,
                     'PostType' => $post->post_type,
                     'PostTitle' => $post->post_title,
+                    'PostUrl' => get_permalink($post->ID),
                     $editorLink['name'] => $editorLink['value']
                 ));
             }
@@ -287,6 +296,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             'PostID' => $post->ID,
             'PostType' => $post->post_type,
             'PostTitle' => $post->post_title,
+            'PostUrl' => get_permalink($post->ID),
             $editorLink['name'] => $editorLink['value']
         ));
     }
