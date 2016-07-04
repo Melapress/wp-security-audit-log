@@ -28,7 +28,29 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
     public function IsExcludedCustomFields($custom)
     {
         $customFields = $this->plugin->settings->GetExcludedMonitoringCustom();
-        return (in_array($custom, $customFields)) ? true : false;
+        if (in_array($custom, $customFields)) {
+            return true;
+        }
+        foreach ($customFields as $field) {
+            if (strpos($field, "*") !== false) {
+                // wildcard str[any_character] when you enter (str*)
+                if (substr($field, -1) == '*') {
+                    $field = rtrim($field, '*');
+                    if (preg_match("/^$field/", $custom)) {
+                        return true;
+                    }
+                }
+                // wildcard [any_character]str when you enter (*str)
+                if (substr($field, 0, 1) == '*') {
+                    $field = ltrim($field, '*');
+                    if (preg_match("/$field$/", $custom)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+        //return (in_array($custom, $customFields)) ? true : false;
     }
     
     public function EventPostMetaCreated($object_id, $meta_key, $meta_value)
