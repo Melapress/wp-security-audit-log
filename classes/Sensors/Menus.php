@@ -55,7 +55,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                 $item_name = $oldMenuItems[$menu_item_db_id]['title'];
                 if ($oldMenuItems[$menu_item_db_id]['parent'] != $item_parent_id) {
                     $parent_name = $oldMenuItems[$item_parent_id]['title'];
-                    $this->EventChangeSubItem($item_name, $parent_name);
+                    $this->EventChangeSubItem($item_name, $parent_name, $_POST['menu-name']);
                 }
             }
 
@@ -311,7 +311,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                                         if ($old_item['menu_item_parent'] != $value['menu_item_parent'] && $value['menu_item_parent'] != 0) {
                                             $is_occurred_event = true;
                                             $parent_name = $this->GetItemName($value['nav_menu_term_id'], $value['menu_item_parent']);
-                                            $this->EventChangeSubItem($content_name, $parent_name);
+                                            $this->EventChangeSubItem($content_name, $parent_name, $menu->name);
                                         }
                                         // Changed order of the objects in a menu
                                         if ($old_item['menu_order'] != $value['position']) {
@@ -430,11 +430,12 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         ));
     }
 
-    private function EventChangeSubItem($item_name, $parent_name)
+    private function EventChangeSubItem($item_name, $parent_name, $menu_name)
     {
         $this->plugin->alerts->Trigger(2089, array(
             'ItemName' => $item_name,
-            'ParentName' => $parent_name
+            'ParentName' => $parent_name,
+            'MenuName' => $menu_name
         ));
     }
 
