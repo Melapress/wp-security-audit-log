@@ -121,7 +121,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         for ($i = 1; $i <= 2; $i++) {
             // Generic Premium Update
             if ($i == 1) {
-                $msg = 'Add email alerts, generate compliance reports and add the search functionality to your WordPress audit log with the <strong>%s</strong>.';
+                $msg = 'Add email alerts, generate compliance reports and add search functionality to your WordPress audit log with the <strong>%s</strong>.';
             } else {
                 $msg = 'Buy all the WP Security Audit Log premium add-ons as bundle and <strong>benefit from a 60&percnt; discount</strong>. <strong>All %s</strong> for 1 website only cost $89.';
             }
@@ -197,18 +197,18 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
     {
         $aPromoAlerts = array();
         $aPromoAlerts[] = array(
-            'name' => 'Update to Premium',
-            'message' => 'Add email notifications, users logins and session management, reports, search and other functionality by upgrading to Premium. <strong>%s</strong>',
+            'name' => 'Upgrade to Premium',
+            'message' => 'Add email alerts, see who is logged in, generate reports, add search and other functionality by upgrading to Premium for just $89. <strong>%s</strong>',
             'link' => 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=auditviewer&utm_medium=promoalert&utm_campaign=plugin'
         );
         $aPromoAlerts[] = array(
-            'name' => 'Get 60% Discount When You Update to Premium',
-            'message' => 'Benefit from a discount of 60&percnt; when you upgrade to premium and add <strong>Email Notifications</strong>, <strong>User Logins and Session Management</strong>, <strong>Search</strong> and <strong>Reports</strong> functionality to the plugin. <strong>%s</strong>',
+            'name' => 'Get 70% Discount When You Upgrade to Premium',
+            'message' => 'Benefit from a discount of 70&percnt; upgrade to premium for just $89 and add <strong>Email Alerts</strong>, <strong>User Logins Management</strong>, <strong>Search</strong> and <strong>Reporting</strong> functionality to the plugin. <strong>%s</strong>',
             'link' => 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=auditviewer&utm_medium=promoalert&utm_campaign=plugin'
         );
         $aPromoAlerts[] = array(
-            'name' => 'Add Email Notifications, Search, Reports and Manage Users Sessions',
-            'message' => 'Upgrade to premium to extend the plugin’s functionality such as email notifications, reports, free-text based search and user logins and sessions management and benefit from a 60&percnt; discount. Starting at just $89 <strong>%s</strong>',
+            'name' => 'Add Email Alerts, Search, Generate Reports and See Who is Logged In',
+            'message' => 'Upgrade to premium and extend the plugin’s features with email alerts, report generator, free-text based search and user logins and sessions management. Benefit from a 70&percnt; discount. Prices starts at just $89 <strong>%s</strong>',
             'link' => 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=auditviewer&utm_medium=promoalert&utm_campaign=plugin'
         );
         return $aPromoAlerts;
