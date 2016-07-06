@@ -238,16 +238,16 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2089, E_NOTICE, __('User moved objects as a sub-item', 'wp-security-audit-log'), __('Moved %ItemName% as a sub-item of %ParentName% in menu %MenuName%.', 'wp-security-audit-log'))
             ),
             __('Comments', 'wp-security-audit-log') => array(
-                array(2090, E_NOTICE, __('User approved a comment', 'wp-security-audit-log'), __('Approved the comment posted by %Author% on <a href="%CommentLink%">%Date%</a>.', 'wp-security-audit-log')),
-                array(2091, E_NOTICE, __('User unapproved a comment', 'wp-security-audit-log'), __('Unapproved the comment posted by %Author% on %Date%.', 'wp-security-audit-log')),
-                array(2092, E_NOTICE, __('User replied to a comment', 'wp-security-audit-log'), __('Replied to the comment posted by %Author% on <a href="%CommentLink%">%Date%</a>.', 'wp-security-audit-log')),
-                array(2093, E_NOTICE, __('User edited a comment', 'wp-security-audit-log'), __('Edited a comment posted by %Author% on <a href="%CommentLink%">%Date%</a>.', 'wp-security-audit-log')),
-                array(2094, E_NOTICE, __('User marked a comment as Spam', 'wp-security-audit-log'), __('Marked the comment posted by %Author% on %Date% as Spam.', 'wp-security-audit-log')),
-                array(2095, E_NOTICE, __('User marked a comment as Not Spam', 'wp-security-audit-log'), __('Marked the comment posted by %Author% on <a href="%CommentLink%">%Date%</a> as Not Spam.', 'wp-security-audit-log')),
-                array(2096, E_NOTICE, __('User moved a comment to trash', 'wp-security-audit-log'), __('Moved the comment posted by %Author% on %Date% to trash.', 'wp-security-audit-log')),
-                array(2097, E_NOTICE, __('User restored a comment from the trash', 'wp-security-audit-log'), __('Restored the comment posted by %Author% on %Date% from the trash.', 'wp-security-audit-log')),
-                array(2098, E_NOTICE, __('User permanently deleted a comment', 'wp-security-audit-log'), __('Permanently deleted the comment posted by %Author% on %Date%.', 'wp-security-audit-log')),
-                array(2099, E_NOTICE, __('User posted a comment', 'wp-security-audit-log'), __('Posted a comment on <a href="%CommentLink%">%Date%</a>.', 'wp-security-audit-log'))
+                array(2090, E_NOTICE, __('User approved a comment', 'wp-security-audit-log'), __('Approved the comment posted in response to the post %PostTitle% by %Author% on <a href="%CommentLink%">%Date%</a>.', 'wp-security-audit-log')),
+                array(2091, E_NOTICE, __('User unapproved a comment', 'wp-security-audit-log'), __('Unapproved the comment posted in response to the post %PostTitle% by %Author% on %Date%.', 'wp-security-audit-log')),
+                array(2092, E_NOTICE, __('User replied to a comment', 'wp-security-audit-log'), __('Replied to the comment posted in response to the post %PostTitle% by %Author% on <a href="%CommentLink%">%Date%</a>.', 'wp-security-audit-log')),
+                array(2093, E_NOTICE, __('User edited a comment', 'wp-security-audit-log'), __('Edited a comment posted in response to the post %PostTitle% by %Author% on <a href="%CommentLink%">%Date%</a>.', 'wp-security-audit-log')),
+                array(2094, E_NOTICE, __('User marked a comment as Spam', 'wp-security-audit-log'), __('Marked the comment posted in response to the post %PostTitle% by %Author% on %Date% as Spam.', 'wp-security-audit-log')),
+                array(2095, E_NOTICE, __('User marked a comment as Not Spam', 'wp-security-audit-log'), __('Marked the comment posted in response to the post %PostTitle% by %Author% on <a href="%CommentLink%">%Date%</a> as Not Spam.', 'wp-security-audit-log')),
+                array(2096, E_NOTICE, __('User moved a comment to trash', 'wp-security-audit-log'), __('Moved the comment posted in response to the post %PostTitle% by %Author% on %Date% to trash.', 'wp-security-audit-log')),
+                array(2097, E_NOTICE, __('User restored a comment from the trash', 'wp-security-audit-log'), __('Restored the comment posted in response to the post %PostTitle% by %Author% on %Date% from the trash.', 'wp-security-audit-log')),
+                array(2098, E_NOTICE, __('User permanently deleted a comment', 'wp-security-audit-log'), __('Permanently deleted the comment posted in response to the post %PostTitle% by %Author% on %Date%.', 'wp-security-audit-log')),
+                array(2099, E_NOTICE, __('User posted a comment', 'wp-security-audit-log'), __('%CommentMsg% on <a href="%CommentLink%">%Date%</a>.', 'wp-security-audit-log'))
             ),
             __('Custom Alerts', 'wp-security-audit-log') => array(
                 array(2222, E_CRITICAL, __('Custom critical Alert', 'wp-security-audit-log'), __('%CustomAlertText%', 'wp-security-audit-log')),

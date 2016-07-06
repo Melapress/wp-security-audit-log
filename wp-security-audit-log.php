@@ -282,9 +282,13 @@ class WpSecurityAuditLog {
         //setting the prunig limit with the old value or the default value
         $pruningLimit = $this->settings->GetPruningLimit();
         $this->settings->SetPruningLimit($pruningLimit);
-        // disable alert 2099 by default
-        $this->settings->SetDisabledAlerts(array(2099));
 
+        $oldDisabled = $this->GetGlobalOption('disabled-alerts');
+        // If old setting is empty disable alert 2099 by default
+        if (empty($oldDisabled)) {
+            $this->settings->SetDisabledAlerts(array(2099));
+        }
+        
         // install cleanup hook (remove older one if it exists)
         wp_clear_scheduled_hook('wsal_cleanup');
         wp_schedule_event(current_time('timestamp') + 600, 'hourly', 'wsal_cleanup');

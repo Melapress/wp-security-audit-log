@@ -304,6 +304,9 @@ class WSAL_AuditLogListView extends WP_List_Table
             case $name == '%CommentLink%':
                 return $value;
 
+            case $name == '%CommentMsg%':
+                return $value;
+
             case $name == '%MetaLink%':
                 if (!empty($value)) {
                     return "<a href=\"#\" onclick=\"WsalDisableCustom(this, '".$value."');\"> Exclude Custom Field from the Monitoring</a>";

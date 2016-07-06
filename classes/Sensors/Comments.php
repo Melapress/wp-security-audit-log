@@ -81,7 +81,23 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
             $this->EventGeneric($comment_ID, 2092);
         }
         if (isset($_REQUEST['comment'])) {
-            $this->EventGeneric($comment_ID, 2099);
+            $comment = get_comment($comment_ID);
+            if (!empty($comment)) {
+                $post = get_post($comment->comment_post_ID);
+                $comment_link = get_permalink($post->ID) . "#comment-" . $comment_ID;
+                $fields = array(
+                    'Date' => $comment->comment_date,
+                    'CommentLink' => $comment_link
+                );
+                if (!username_exists($comment->comment_author)) {
+                    $fields['CommentMsg'] = sprintf("A comment was posted in response to the post <strong>%s</strong>. The comment was posted by <strong>%s</strong>", $post->post_title, $this->CheckAuthor($comment));
+                    $fields['Username'] = "Website Visitor";
+                } else {
+                    $fields['CommentMsg'] = sprintf("Posted a comment in response to the post <strong>%s</strong>", $post->post_title);
+                }
+
+                $this->plugin->alerts->Trigger(2099, $fields);
+            }
         }
     }
 
