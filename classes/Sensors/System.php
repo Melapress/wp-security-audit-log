@@ -64,7 +64,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if (!$wp_query->is_404) {
             return;
         }
-        $msg = 'times.';
+        $msg = 'times';
 
         list($y, $m, $d) = explode('-', date('Y-m-d'));
 
@@ -102,7 +102,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             
             if ($new > $this->Get404LogLimit()) {
                 $new = 'more than ' . $this->Get404LogLimit();
-                $msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address.';
+                $msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
             }
             $occ->UpdateMetaValue('Attempts', $new);
             $occ->UpdateMetaValue('Username', $username);
