@@ -60,6 +60,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
 
         $WPActions = array('add-meta');
         if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
+            $editorLink = $this->GetEditorLink($post);
             switch ($post->post_type) {
                 case 'page':
                     $this->plugin->alerts->Trigger(2059, array(
@@ -68,6 +69,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                         'MetaKey' => $meta_key,
                         'MetaValue' => $meta_value,
                         'MetaLink' => $meta_key,
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     break;
                 case 'post':
@@ -77,6 +79,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                         'MetaKey' => $meta_key,
                         'MetaValue' => $meta_value,
                         'MetaLink' => $meta_key,
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     break;
                 default:
@@ -87,6 +90,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                         'MetaKey' => $meta_key,
                         'MetaValue' => $meta_value,
                         'MetaLink' => $meta_key,
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     break;
             }
@@ -110,6 +114,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
 
         $WPActions = array('add-meta');
         if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
+            $editorLink = $this->GetEditorLink($post);
             if (isset($this->old_meta[$meta_id])) {
                 // check change in meta key
                 if ($this->old_meta[$meta_id]->key != $meta_key) {
@@ -123,6 +128,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                                 'MetaKeyOld' => $this->old_meta[$meta_id]->key,
                                 'MetaValue' => $meta_value,
                                 'MetaLink' => $meta_key,
+                                $editorLink['name'] => $editorLink['value']
                             ));
                             break;
                         case 'post':
@@ -134,6 +140,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                                 'MetaKeyOld' => $this->old_meta[$meta_id]->key,
                                 'MetaValue' => $meta_value,
                                 'MetaLink' => $meta_key,
+                                $editorLink['name'] => $editorLink['value']
                             ));
                             break;
                         default:
@@ -146,6 +153,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                                 'MetaKeyOld' => $this->old_meta[$meta_id]->key,
                                 'MetaValue' => $meta_value,
                                 'MetaLink' => $smeta_key,
+                                $editorLink['name'] => $editorLink['value']
                             ));
                             break;
                     }
@@ -160,6 +168,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                                 'MetaValueNew' => $meta_value,
                                 'MetaValueOld' => $this->old_meta[$meta_id]->val,
                                 'MetaLink' => $meta_key,
+                                $editorLink['name'] => $editorLink['value']
                             ));
                             break;
                         case 'post':
@@ -171,6 +180,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                                 'MetaValueNew' => $meta_value,
                                 'MetaValueOld' => $this->old_meta[$meta_id]->val,
                                 'MetaLink' => $meta_key,
+                                $editorLink['name'] => $editorLink['value']
                             ));
                             break;
                         default:
@@ -183,6 +193,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                                 'MetaValueNew' => $meta_value,
                                 'MetaValueOld' => $this->old_meta[$meta_id]->val,
                                 'MetaLink' => $meta_key,
+                                $editorLink['name'] => $editorLink['value']
                             ));
                             break;
                     }
@@ -199,6 +210,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
         
         $WPActions = array('delete-meta');
         if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
+            $editorLink = $this->GetEditorLink($post);
             foreach ($meta_ids as $meta_id) {
                 if (!$this->CanLogPostMeta($object_id, $meta_key)) continue;
                 
@@ -210,6 +222,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                             'MetaID' => $meta_id,
                             'MetaKey' => $meta_key,
                             'MetaValue' => $meta_value,
+                            $editorLink['name'] => $editorLink['value']
                         ));
                         break;
                     case 'post':
@@ -219,6 +232,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                             'MetaID' => $meta_id,
                             'MetaKey' => $meta_key,
                             'MetaValue' => $meta_value,
+                            $editorLink['name'] => $editorLink['value']
                         ));
                         break;
                     default:
@@ -229,10 +243,23 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
                             'MetaID' => $meta_id,
                             'MetaKey' => $meta_key,
                             'MetaValue' => $meta_value,
+                            $editorLink['name'] => $editorLink['value']
                         ));
                         break;
                 }
             }
         }
+    }
+
+    private function GetEditorLink($post)
+    {
+        $name = 'EditorLink';
+        $name .= ($post->post_type == 'page') ? 'Page' : 'Post' ;
+        $value = get_edit_post_link($post->ID);
+        $aLink = array(
+            'name' => $name,
+            'value' => $value,
+        );
+        return $aLink;
     }
 }

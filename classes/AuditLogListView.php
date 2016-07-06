@@ -334,6 +334,20 @@ class WSAL_AuditLogListView extends WP_List_Table
                 } else {
                     return "";
                 }
+
+            case $name == '%EditorLinkForum%':
+                if (!empty($value)) {
+                    return ' <a target="_blank" href="'.$value.'">View the forum</a>';
+                } else {
+                    return "";
+                }
+
+            case $name == '%EditorLinkTopic%':
+                if (!empty($value)) {
+                    return ' <a target="_blank" href="'.$value.'">View the topic</a>';
+                } else {
+                    return "";
+                }
                 
             case in_array($name, array('%MetaValue%', '%MetaValueOld%', '%MetaValueNew%')):
                 return '<strong>' . (
