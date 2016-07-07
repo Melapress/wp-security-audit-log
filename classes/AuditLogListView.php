@@ -299,11 +299,7 @@ class WSAL_AuditLogListView extends WP_List_Table
                 return '<p class="promo-alert">' . $value .'</p>';
 
             case $name == '%PromoLink%':
-                return $value;
-
             case $name == '%CommentLink%':
-                return $value;
-
             case $name == '%CommentMsg%':
                 return $value;
 
@@ -315,46 +311,22 @@ class WSAL_AuditLogListView extends WP_List_Table
                 }
 
             case $name == '%RevisionLink%':
-                if (!empty($value) && $value != 'NULL') {
-                    return ' Click <a target="_blank" href="'.$value.'">here</a> to see the content changes.';
-                } else {
-                    return "";
-                }
-
+                return ' Click <a target="_blank" href="'.esc_url($value).'">here</a> to see the content changes.';
+                
             case $name == '%EditorLinkPost%':
-                if (!empty($value)) {
-                    return ' <a target="_blank" href="'.$value.'">View the post</a>';
-                } else {
-                    return "";
-                }
-
+                return ' <a target="_blank" href="'.esc_url($value).'">View the post</a>';
+                
             case $name == '%EditorLinkPage%':
-                if (!empty($value)) {
-                    return ' <a target="_blank" href="'.$value.'">View the page</a>';
-                } else {
-                    return "";
-                }
-
+                return ' <a target="_blank" href="'.esc_url($value).'">View the page</a>';
+                
             case $name == '%CategoryLink%':
-                if (!empty($value)) {
-                    return ' <a target="_blank" href="'.esc_url($value).'">View the category</a>';
-                } else {
-                    return "";
-                }
+                return ' <a target="_blank" href="'.esc_url($value).'">View the category</a>';
 
             case $name == '%EditorLinkForum%':
-                if (!empty($value)) {
-                    return ' <a target="_blank" href="'.$value.'">View the forum</a>';
-                } else {
-                    return "";
-                }
-
+                return ' <a target="_blank" href="'.esc_url($value).'">View the forum</a>';
+                
             case $name == '%EditorLinkTopic%':
-                if (!empty($value)) {
-                    return ' <a target="_blank" href="'.$value.'">View the topic</a>';
-                } else {
-                    return "";
-                }
+                return ' <a target="_blank" href="'.esc_url($value).'">View the topic</a>';
                 
             case in_array($name, array('%MetaValue%', '%MetaValueOld%', '%MetaValueNew%')):
                 return '<strong>' . (

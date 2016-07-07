@@ -28,13 +28,10 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
             $comment_link = get_permalink($post->ID) . "#comment-" . $comment->comment_ID;
             $fields = array(
                 'PostTitle' => $post->post_title,
-                'Author' => $this->CheckAuthor($comment),
+                'Author' => $comment->comment_author,
                 'Date' => $comment->comment_date,
-                'CommentLink' => $comment_link
+                'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>'
             );
-            if (!username_exists($comment->comment_author)) {
-                $fields['Username'] = "Website Visitor";
-            }
 
             if ($new_status == 'approved') {
                 $this->plugin->alerts->Trigger(2090, $fields);
@@ -87,7 +84,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
                 $comment_link = get_permalink($post->ID) . "#comment-" . $comment_ID;
                 $fields = array(
                     'Date' => $comment->comment_date,
-                    'CommentLink' => $comment_link
+                    'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>'
                 );
                 if (!username_exists($comment->comment_author)) {
                     $fields['CommentMsg'] = sprintf("A comment was posted in response to the post <strong>%s</strong>. The comment was posted by <strong>%s</strong>", $post->post_title, $this->CheckAuthor($comment));
@@ -109,13 +106,10 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
             $comment_link = get_permalink($post->ID) . "#comment-" . $comment_ID;
             $fields = array(
                 'PostTitle' => $post->post_title,
-                'Author' => $this->CheckAuthor($comment),
+                'Author' => $comment->comment_author,
                 'Date' => $comment->comment_date,
-                'CommentLink' => $comment_link
+                'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>'
             );
-            if (!username_exists($comment->comment_author)) {
-                $fields['Username'] = "Website Visitor";
-            }
 
             $this->plugin->alerts->Trigger($alert_code, $fields);
         }
