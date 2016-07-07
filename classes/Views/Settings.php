@@ -227,7 +227,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                 <p class="description">
                                     <?php
                                         echo sprintf(
-                                            __('This email address and display name will be used as the From details in the emails sent by the %s . Please ensure that the mail server can relay emails with the specified email address.', 'wp-security-audit-log'),
+                                            __('These email address and display name will be used as From details in the emails sent by the %s . Please ensure the mail server can relay emails with the domain of the specified email address.', 'wp-security-audit-log'),
                                             '<a target="_blank" href="https://www.wpsecurityauditlog.com/plugin-extensions/">' . __('(premium add-ons)', 'wp-security-audit-log') . '</a>'
                                         );
                                     ?>
