@@ -17,7 +17,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         add_action('wp_ajax_AjaxSearchSite', array($this, 'AjaxSearchSite'));
         add_action('all_admin_notices', array($this, 'AdminNoticesPremium'));
         // Check plugin version for to dismiss the notice only until upgrade
-        $plugin_file =  trailingslashit(WP_PLUGIN_DIR) . 'WP-Security-Audit-Log/wp-security-audit-log.php';
+        $plugin_file =  trailingslashit(WP_PLUGIN_DIR) . 'wp-security-audit-log/wp-security-audit-log.php';
         $data = get_plugin_data($plugin_file, false, false);
         $this->_version = isset($data['Version']) ? $data['Version'] : '0.0.0';
         $this->RegisterNotice('premium-wsal-'.$this->_version);
