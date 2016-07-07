@@ -335,6 +335,13 @@ class WSAL_AuditLogListView extends WP_List_Table
                     return "";
                 }
 
+            case $name == '%CategoryLink%':
+                if (!empty($value)) {
+                    return ' <a target="_blank" href="'.esc_url($value).'">View the category</a>';
+                } else {
+                    return "";
+                }
+
             case $name == '%EditorLinkForum%':
                 if (!empty($value)) {
                     return ' <a target="_blank" href="'.$value.'">View the forum</a>';

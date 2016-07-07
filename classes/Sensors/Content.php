@@ -15,6 +15,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         add_action('edit_category', array($this, 'EventChangedCategoryParent'));
         add_action('save_post', array($this, 'SetRevisionLink'), 10, 3);
         add_action('publish_future_post', array($this, 'EventPublishFuture'), 10, 1);
+        // to do change with 'create_term' instead 'create_category' for trigger Tags
+        add_action('create_category', array($this, 'EventCategoryCreation'), 10, 1);
     }
     
     protected function GetEventTypeForPostType($post, $typePost, $typePage, $typeCustom)
@@ -40,7 +42,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         // load old data, if applicable
         $this->RetrieveOldData();
         // check for category changes
-        $this->CheckCategoryCreation();
         $this->CheckCategoryDeletion();
     }
     
@@ -192,68 +193,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 'PostTitle' => $post->post_title,
                 'PostUrl' => get_permalink($post->ID),
                 $editorLink['name'] => $editorLink['value']
-            ));
-        }
-    }
-
-    protected function CheckCategoryCreation()
-    {
-        if (empty($_POST)) {
-            return;
-        }
-        $categoryName = '';
-        if (!empty($_POST['screen']) && !empty($_POST['tag-name']) &&
-            $_POST['screen'] == 'edit-category' &&
-            $_POST['taxonomy'] == 'category' &&
-            $_POST['action'] == 'add-tag') {
-            $categoryName = $_POST['tag-name'];
-        } elseif (!empty($_POST['newcategory']) && $_POST['action'] == 'add-category') {
-            $categoryName = $_POST['newcategory'];
-        }
-
-        if (!empty($_POST['slug'])) {
-            $slug = $_POST['slug'];
-        } else {
-            $slug = strtolower($categoryName);
-        }
-        
-        if ($categoryName) {
-            $this->plugin->alerts->Trigger(2023, array(
-                'CategoryName' => $categoryName,
-                'Slug' => $slug
-            ));
-        }
-    }
-
-    protected function CheckCategoryDeletion()
-    {
-        if (empty($_POST)) {
-            return;
-        }
-        $action = !empty($_POST['action']) ? $_POST['action']
-            : (!empty($_POST['action2']) ? $_POST['action2'] : '');
-        if (!$action) {
-            return;
-        }
-
-        $categoryIds = array();
-
-        if (isset($_POST['taxonomy'])) {
-            if ($action == 'delete' && $_POST['taxonomy'] == 'category' && !empty($_POST['delete_tags'])) {
-                // bulk delete
-                $categoryIds[] = $_POST['delete_tags'];
-            } elseif ($action == 'delete-tag' && $_POST['taxonomy'] == 'category' && !empty($_POST['tag_ID'])) {
-                // single delete
-                $categoryIds[] = $_POST['tag_ID'];
-            }
-        }
-
-        foreach ($categoryIds as $categoryID) {
-            $category = get_category($categoryID);
-            $this->plugin->alerts->Trigger(2024, array(
-                'CategoryID' => $categoryID,
-                'CategoryName' => $category->cat_name,
-                'Slug' => $category->slug
             ));
         }
     }
@@ -586,6 +525,50 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
 
+    public function EventCategoryCreation($category_id)
+    {
+        $category = get_category($category_id);
+        $category_link = $this->getCategoryLink($category_id);
+        $this->plugin->alerts->Trigger(2023, array(
+            'CategoryName' => $category->name,
+            'Slug' => $category->slug,
+            'CategoryLink' => $category_link
+        ));
+    }
+
+    protected function CheckCategoryDeletion()
+    {
+        if (empty($_POST)) {
+            return;
+        }
+        $action = !empty($_POST['action']) ? $_POST['action']
+            : (!empty($_POST['action2']) ? $_POST['action2'] : '');
+        if (!$action) {
+            return;
+        }
+
+        $categoryIds = array();
+
+        if (isset($_POST['taxonomy'])) {
+            if ($action == 'delete' && $_POST['taxonomy'] == 'category' && !empty($_POST['delete_tags'])) {
+                // bulk delete
+                $categoryIds[] = $_POST['delete_tags'];
+            } elseif ($action == 'delete-tag' && $_POST['taxonomy'] == 'category' && !empty($_POST['tag_ID'])) {
+                // single delete
+                $categoryIds[] = $_POST['tag_ID'];
+            }
+        }
+
+        foreach ($categoryIds as $categoryID) {
+            $category = get_category($categoryID);
+            $this->plugin->alerts->Trigger(2024, array(
+                'CategoryID' => $categoryID,
+                'CategoryName' => $category->cat_name,
+                'Slug' => $category->slug
+            ));
+        }
+    }
+
     public function EventChangedCategoryParent()
     {
         if (empty($_POST)) {
@@ -594,8 +577,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if (!current_user_can("manage_categories")) {
             return;
         }
-        if (isset($_POST['name'])) {
+        if (isset($_POST['name']) && isset($_POST['tag_ID'])) {
             $category = get_category($_POST['tag_ID']);
+            $category_link = $this->getCategoryLink($_POST['tag_ID']);
             if ($category->parent != 0) {
                 $oldParent = get_category($category->parent);
                 $oldParentName = (empty($oldParent))? 'no parent' : $oldParent->name;
@@ -610,6 +594,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 'CategoryName' => $category->name,
                 'OldParent' => $oldParentName,
                 'NewParent' => $newParentName,
+                'CategoryLink' => $category_link
             ));
         }
     }
@@ -632,6 +617,15 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if (!empty($revision_id)) {
             return admin_url('revision.php?revision='.$revision_id);
+        } else {
+            return null;
+        }
+    }
+
+    private function getCategoryLink($category_id)
+    {
+        if (!empty($category_id)) {
+            return admin_url('term.php?taxnomy=category&tag_ID='.$category_id);
         } else {
             return null;
         }
