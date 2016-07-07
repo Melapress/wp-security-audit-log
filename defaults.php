@@ -71,9 +71,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2065, E_WARNING, __('User modifies content for a published post', 'wp-security-audit-log'), __('Modified the content of the published post %PostTitle%.'.'%RevisionLink%'.' %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2068, E_NOTICE, __('User modifies content for a draft post', 'wp-security-audit-log'), __('Modified the content of the draft post %PostTitle%.'.'%RevisionLink%'.' %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2072, E_NOTICE, __('User modifies content of a post', 'wp-security-audit-log'), __('Modified the content of post %PostTitle% which is submitted for review.'.'%RevisionLink%'.' %EditorLinkPost%.', 'wp-security-audit-log')),
-                array(2073, E_NOTICE, __('User submitted a post for review', 'wp-security-audit-log'), __('Submitted the post %PostTitle% for review. %EditorLinkPost%.'.' %EditorLinkPost%.', 'wp-security-audit-log')),
-                array(2074, E_NOTICE, __('User scheduled a post', 'wp-security-audit-log'), __('Scheduled the post %PostTitle% to be published %PublishingDate%. %EditorLinkPost%.'.' %EditorLinkPost%.', 'wp-security-audit-log')),
-                array(2086, E_NOTICE, __('User changed title of a post', 'wp-security-audit-log'), __('Changed the title of the post %OldTitle% to %NewTitle%. %EditorLinkPost%.'.' %EditorLinkPost%.', 'wp-security-audit-log'))
+                array(2073, E_NOTICE, __('User submitted a post for review', 'wp-security-audit-log'), __('Submitted the post %PostTitle% for review. %EditorLinkPost%.', 'wp-security-audit-log')),
+                array(2074, E_NOTICE, __('User scheduled a post', 'wp-security-audit-log'), __('Scheduled the post %PostTitle% to be published %PublishingDate%. %EditorLinkPost%.', 'wp-security-audit-log')),
+                array(2086, E_NOTICE, __('User changed title of a post', 'wp-security-audit-log'), __('Changed the title of the post %OldTitle% to %NewTitle%. %EditorLinkPost%.', 'wp-security-audit-log'))
             ),
             __('Pages', 'wp-security-audit-log') => array(
                 array(2004, E_NOTICE, __('User created a new WordPress page and saved it as draft', 'wp-security-audit-log'), __('Created a new page called %PostTitle% and saved it as draft. %EditorLinkPage%.', 'wp-security-audit-log')),
