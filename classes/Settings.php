@@ -635,5 +635,21 @@ class WSAL_Settings {
     public function SetWPBackend($enabled){
         return $this->_plugin->SetGlobalOption('wp-backend', $enabled);
     }
+
+    public function SetFromEmail($email_address){
+        return $this->_plugin->SetGlobalOption('from-email', trim($email_address));
+    }
+
+    public function GetFromEmail(){
+        return $this->_plugin->GetGlobalOption('from-email');
+    }
+
+    public function SetDisplayName($display_name){
+        return $this->_plugin->SetGlobalOption('display-name', trim($display_name));
+    }
+
+    public function GetDisplayName(){
+        return $this->_plugin->GetGlobalOption('display-name');
+    }
     // </editor-fold>
 }

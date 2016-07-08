@@ -1,5 +1,6 @@
 <?php
-require_once('ConnectorInterface.php');
+//require_once('ConnectorInterface.php');
+require_once('wp-db-custom.php');
 
 abstract class WSAL_Connector_AbstractConnector
 {
@@ -9,12 +10,12 @@ abstract class WSAL_Connector_AbstractConnector
 
     public function __construct($adaptersDirName = null)
     {
-        $this->adaptersBasePath =  __DIR__ . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'Models'. DIRECTORY_SEPARATOR .'Adapters'. DIRECTORY_SEPARATOR;
+        $this->adaptersBasePath =  __DIR__ . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'Adapters'. DIRECTORY_SEPARATOR;
 
-        require_once($this->adaptersBasePath . 'ActiveRecordInterface.php');
-        require_once($this->adaptersBasePath . 'MetaInterface.php');
-        require_once($this->adaptersBasePath . 'OccurrenceInterface.php');
-        require_once($this->adaptersBasePath . 'QueryInterface.php');
+        //require_once($this->adaptersBasePath . 'ActiveRecordInterface.php');
+        //require_once($this->adaptersBasePath . 'MetaInterface.php');
+        //require_once($this->adaptersBasePath . 'OccurrenceInterface.php');
+        //require_once($this->adaptersBasePath . 'QueryInterface.php');
 
         if (!empty($adaptersDirName)) {
             $this->adaptersDirName = $adaptersDirName;

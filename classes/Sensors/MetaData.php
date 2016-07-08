@@ -28,44 +28,72 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
     public function IsExcludedCustomFields($custom)
     {
         $customFields = $this->plugin->settings->GetExcludedMonitoringCustom();
-        return (in_array($custom, $customFields)) ? true : false;
+        if (in_array($custom, $customFields)) {
+            return true;
+        }
+        foreach ($customFields as $field) {
+            if (strpos($field, "*") !== false) {
+                // wildcard str[any_character] when you enter (str*)
+                if (substr($field, -1) == '*') {
+                    $field = rtrim($field, '*');
+                    if (preg_match("/^$field/", $custom)) {
+                        return true;
+                    }
+                }
+                // wildcard [any_character]str when you enter (*str)
+                if (substr($field, 0, 1) == '*') {
+                    $field = ltrim($field, '*');
+                    if (preg_match("/$field$/", $custom)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+        //return (in_array($custom, $customFields)) ? true : false;
     }
     
     public function EventPostMetaCreated($object_id, $meta_key, $meta_value)
     {
         $post = get_post($object_id);
-
         if (!$this->CanLogPostMeta($object_id, $meta_key)) return;
-        
-        switch ($post->post_type) {
-            case 'page':
-                $this->plugin->alerts->Trigger(2059, array(
-                    'PostID' => $object_id,
-                    'PostTitle' => $post->post_title,
-                    'MetaKey' => $meta_key,
-                    'MetaValue' => $meta_value,
-                    'MetaLink' => $meta_key,
-                ));
-                break;
-            case 'post':
-                $this->plugin->alerts->Trigger(2053, array(
-                    'PostID' => $object_id,
-                    'PostTitle' => $post->post_title,
-                    'MetaKey' => $meta_key,
-                    'MetaValue' => $meta_value,
-                    'MetaLink' => $meta_key,
-                ));
-                break;
-            default:
-                $this->plugin->alerts->Trigger(2056, array(
-                    'PostID' => $object_id,
-                    'PostTitle' => $post->post_title,
-                    'PostType' => $post->post_type,
-                    'MetaKey' => $meta_key,
-                    'MetaValue' => $meta_value,
-                    'MetaLink' => $meta_key,
-                ));
-                break;
+
+        $WPActions = array('add-meta');
+        if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
+            $editorLink = $this->GetEditorLink($post);
+            switch ($post->post_type) {
+                case 'page':
+                    $this->plugin->alerts->Trigger(2059, array(
+                        'PostID' => $object_id,
+                        'PostTitle' => $post->post_title,
+                        'MetaKey' => $meta_key,
+                        'MetaValue' => $meta_value,
+                        'MetaLink' => $meta_key,
+                        $editorLink['name'] => $editorLink['value']
+                    ));
+                    break;
+                case 'post':
+                    $this->plugin->alerts->Trigger(2053, array(
+                        'PostID' => $object_id,
+                        'PostTitle' => $post->post_title,
+                        'MetaKey' => $meta_key,
+                        'MetaValue' => $meta_value,
+                        'MetaLink' => $meta_key,
+                        $editorLink['name'] => $editorLink['value']
+                    ));
+                    break;
+                default:
+                    $this->plugin->alerts->Trigger(2056, array(
+                        'PostID' => $object_id,
+                        'PostTitle' => $post->post_title,
+                        'PostType' => $post->post_type,
+                        'MetaKey' => $meta_key,
+                        'MetaValue' => $meta_value,
+                        'MetaLink' => $meta_key,
+                        $editorLink['name'] => $editorLink['value']
+                    ));
+                    break;
+            }
         }
     }
     
@@ -83,86 +111,96 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
         $post = get_post($object_id);
         
         if (!$this->CanLogPostMeta($object_id, $meta_key)) return;
-        
-        if (isset($this->old_meta[$meta_id])) {
-            // check change in meta key
-            if ($this->old_meta[$meta_id]->key != $meta_key) {
-                switch ($post->post_type) {
-                    case 'page':
-                        $this->plugin->alerts->Trigger(2064, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'MetaID' => $meta_id,
-                            'MetaKeyNew' => $meta_key,
-                            'MetaKeyOld' => $this->old_meta[$meta_id]->key,
-                            'MetaValue' => $meta_value,
-                            'MetaLink' => $meta_key,
-                        ));
-                        break;
-                    case 'post':
-                        $this->plugin->alerts->Trigger(2062, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'MetaID' => $meta_id,
-                            'MetaKeyNew' => $meta_key,
-                            'MetaKeyOld' => $this->old_meta[$meta_id]->key,
-                            'MetaValue' => $meta_value,
-                            'MetaLink' => $meta_key,
-                        ));
-                        break;
-                    default:
-                        $this->plugin->alerts->Trigger(2063, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'PostType' => $post->post_type,
-                            'MetaID' => $meta_id,
-                            'MetaKeyNew' => $meta_key,
-                            'MetaKeyOld' => $this->old_meta[$meta_id]->key,
-                            'MetaValue' => $meta_value,
-                            'MetaLink' => $smeta_key,
-                        ));
-                        break;
+
+        $WPActions = array('add-meta');
+        if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
+            $editorLink = $this->GetEditorLink($post);
+            if (isset($this->old_meta[$meta_id])) {
+                // check change in meta key
+                if ($this->old_meta[$meta_id]->key != $meta_key) {
+                    switch ($post->post_type) {
+                        case 'page':
+                            $this->plugin->alerts->Trigger(2064, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'MetaID' => $meta_id,
+                                'MetaKeyNew' => $meta_key,
+                                'MetaKeyOld' => $this->old_meta[$meta_id]->key,
+                                'MetaValue' => $meta_value,
+                                'MetaLink' => $meta_key,
+                                $editorLink['name'] => $editorLink['value']
+                            ));
+                            break;
+                        case 'post':
+                            $this->plugin->alerts->Trigger(2062, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'MetaID' => $meta_id,
+                                'MetaKeyNew' => $meta_key,
+                                'MetaKeyOld' => $this->old_meta[$meta_id]->key,
+                                'MetaValue' => $meta_value,
+                                'MetaLink' => $meta_key,
+                                $editorLink['name'] => $editorLink['value']
+                            ));
+                            break;
+                        default:
+                            $this->plugin->alerts->Trigger(2063, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'PostType' => $post->post_type,
+                                'MetaID' => $meta_id,
+                                'MetaKeyNew' => $meta_key,
+                                'MetaKeyOld' => $this->old_meta[$meta_id]->key,
+                                'MetaValue' => $meta_value,
+                                'MetaLink' => $smeta_key,
+                                $editorLink['name'] => $editorLink['value']
+                            ));
+                            break;
+                    }
+                } else if ($this->old_meta[$meta_id]->val != $meta_value) { // check change in meta value
+                    switch ($post->post_type) {
+                        case 'page':
+                            $this->plugin->alerts->Trigger(2060, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'MetaID' => $meta_id,
+                                'MetaKey' => $meta_key,
+                                'MetaValueNew' => $meta_value,
+                                'MetaValueOld' => $this->old_meta[$meta_id]->val,
+                                'MetaLink' => $meta_key,
+                                $editorLink['name'] => $editorLink['value']
+                            ));
+                            break;
+                        case 'post':
+                            $this->plugin->alerts->Trigger(2054, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'MetaID' => $meta_id,
+                                'MetaKey' => $meta_key,
+                                'MetaValueNew' => $meta_value,
+                                'MetaValueOld' => $this->old_meta[$meta_id]->val,
+                                'MetaLink' => $meta_key,
+                                $editorLink['name'] => $editorLink['value']
+                            ));
+                            break;
+                        default:
+                            $this->plugin->alerts->Trigger(2057, array(
+                                'PostID' => $object_id,
+                                'PostTitle' => $post->post_title,
+                                'PostType' => $post->post_type,
+                                'MetaID' => $meta_id,
+                                'MetaKey' => $meta_key,
+                                'MetaValueNew' => $meta_value,
+                                'MetaValueOld' => $this->old_meta[$meta_id]->val,
+                                'MetaLink' => $meta_key,
+                                $editorLink['name'] => $editorLink['value']
+                            ));
+                            break;
+                    }
                 }
-            } else if ($this->old_meta[$meta_id]->val != $meta_value) { // check change in meta value
-                switch ($post->post_type) {
-                    case 'page':
-                        $this->plugin->alerts->Trigger(2060, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'MetaID' => $meta_id,
-                            'MetaKey' => $meta_key,
-                            'MetaValueNew' => $meta_value,
-                            'MetaValueOld' => $this->old_meta[$meta_id]->val,
-                            'MetaLink' => $meta_key,
-                        ));
-                        break;
-                    case 'post':
-                        $this->plugin->alerts->Trigger(2054, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'MetaID' => $meta_id,
-                            'MetaKey' => $meta_key,
-                            'MetaValueNew' => $meta_value,
-                            'MetaValueOld' => $this->old_meta[$meta_id]->val,
-                            'MetaLink' => $meta_key,
-                        ));
-                        break;
-                    default:
-                        $this->plugin->alerts->Trigger(2057, array(
-                            'PostID' => $object_id,
-                            'PostTitle' => $post->post_title,
-                            'PostType' => $post->post_type,
-                            'MetaID' => $meta_id,
-                            'MetaKey' => $meta_key,
-                            'MetaValueNew' => $meta_value,
-                            'MetaValueOld' => $this->old_meta[$meta_id]->val,
-                            'MetaLink' => $meta_key,
-                        ));
-                        break;
-                }
+                // remove old meta update data
+                unset($this->old_meta[$meta_id]);
             }
-            // remove old meta update data
-            unset($this->old_meta[$meta_id]);
         }
     }
 
@@ -170,39 +208,58 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
     {
         $post = get_post($object_id);
         
-        foreach ($meta_ids as $meta_id) {
-            if (!$this->CanLogPostMeta($object_id, $meta_key)) continue;
-            
-            switch ($post->post_type) {
-                case 'page':
-                    $this->plugin->alerts->Trigger(2061, array(
-                        'PostID' => $object_id,
-                        'PostTitle' => $post->post_title,
-                        'MetaID' => $meta_id,
-                        'MetaKey' => $meta_key,
-                        'MetaValue' => $meta_value,
-                    ));
-                    break;
-                case 'post':
-                    $this->plugin->alerts->Trigger(2055, array(
-                        'PostID' => $object_id,
-                        'PostTitle' => $post->post_title,
-                        'MetaID' => $meta_id,
-                        'MetaKey' => $meta_key,
-                        'MetaValue' => $meta_value,
-                    ));
-                    break;
-                default:
-                    $this->plugin->alerts->Trigger(2058, array(
-                        'PostID' => $object_id,
-                        'PostTitle' => $post->post_title,
-                        'PostType' => $post->post_type,
-                        'MetaID' => $meta_id,
-                        'MetaKey' => $meta_key,
-                        'MetaValue' => $meta_value,
-                    ));
-                    break;
+        $WPActions = array('delete-meta');
+        if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
+            $editorLink = $this->GetEditorLink($post);
+            foreach ($meta_ids as $meta_id) {
+                if (!$this->CanLogPostMeta($object_id, $meta_key)) continue;
+                
+                switch ($post->post_type) {
+                    case 'page':
+                        $this->plugin->alerts->Trigger(2061, array(
+                            'PostID' => $object_id,
+                            'PostTitle' => $post->post_title,
+                            'MetaID' => $meta_id,
+                            'MetaKey' => $meta_key,
+                            'MetaValue' => $meta_value,
+                            $editorLink['name'] => $editorLink['value']
+                        ));
+                        break;
+                    case 'post':
+                        $this->plugin->alerts->Trigger(2055, array(
+                            'PostID' => $object_id,
+                            'PostTitle' => $post->post_title,
+                            'MetaID' => $meta_id,
+                            'MetaKey' => $meta_key,
+                            'MetaValue' => $meta_value,
+                            $editorLink['name'] => $editorLink['value']
+                        ));
+                        break;
+                    default:
+                        $this->plugin->alerts->Trigger(2058, array(
+                            'PostID' => $object_id,
+                            'PostTitle' => $post->post_title,
+                            'PostType' => $post->post_type,
+                            'MetaID' => $meta_id,
+                            'MetaKey' => $meta_key,
+                            'MetaValue' => $meta_value,
+                            $editorLink['name'] => $editorLink['value']
+                        ));
+                        break;
+                }
             }
         }
+    }
+
+    private function GetEditorLink($post)
+    {
+        $name = 'EditorLink';
+        $name .= ($post->post_type == 'page') ? 'Page' : 'Post' ;
+        $value = get_edit_post_link($post->ID);
+        $aLink = array(
+            'name' => $name,
+            'value' => $value,
+        );
+        return $aLink;
     }
 }

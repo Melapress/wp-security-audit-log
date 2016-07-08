@@ -131,18 +131,21 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     {
         $original = isset($_POST['original_post_status']) ? $_POST['original_post_status'] : '';
         if ($old_post->post_status == 'draft' || $original == 'auto-draft') {
+            $editorLink = $this->GetEditorLink($new_post);
             if ($new_post->post_status == 'publish') {
                 switch ($old_post->post_type) {
                     case 'forum':
                         $this->plugin->alerts->Trigger(8000, array(
                             'ForumName' => $new_post->post_title,
-                            'ForumURL' => get_permalink($new_post->ID)
+                            'ForumURL' => get_permalink($new_post->ID),
+                            $editorLink['name'] => $editorLink['value']
                         ));
                         break;
                     case 'topic':
                         $this->plugin->alerts->Trigger(8014, array(
                             'TopicName' => $new_post->post_title,
-                            'TopicURL' => get_permalink($new_post->ID)
+                            'TopicURL' => get_permalink($new_post->ID),
+                            $editorLink['name'] => $editorLink['value']
                         ));
                         break;
                 }
@@ -155,6 +158,7 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     private function EventForumChangedVisibility($post)
     {
         $result = 0;
+        $editorLink = $this->GetEditorLink($post);
         switch ($post->post_type) {
             case 'forum':
                 $oldVisibility = !empty($_REQUEST['visibility']) ? $_REQUEST['visibility'] : '';
@@ -165,7 +169,8 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                     $this->plugin->alerts->Trigger(8002, array(
                         'ForumName' => $post->post_title,
                         'OldVisibility' => $oldVisibility,
-                        'NewVisibility' => $newVisibility
+                        'NewVisibility' => $newVisibility,
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     $result = 1;
                 }
@@ -179,7 +184,8 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                     $this->plugin->alerts->Trigger(8022, array(
                         'TopicName' => $post->post_title,
                         'OldVisibility' => $oldVisibility,
-                        'NewVisibility' => $newVisibility
+                        'NewVisibility' => $newVisibility,
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     $result = 1;
                 }
@@ -191,6 +197,7 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     private function EventForumChangedType($post)
     {
         $result = 0;
+        $editorLink = $this->GetEditorLink($post);
         switch ($post->post_type) {
             case 'forum':
                 $bbp_forum_type = get_post_meta($post->ID, '_bbp_forum_type', true);
@@ -200,7 +207,8 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                     $this->plugin->alerts->Trigger(8011, array(
                         'ForumName' => $post->post_title,
                         'OldType' => $oldType,
-                        'NewType' => $newType
+                        'NewType' => $newType,
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     $result = 1;
                 }
@@ -226,7 +234,8 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                     $this->plugin->alerts->Trigger(8016, array(
                         'TopicName' => $post->post_title,
                         'OldType' => ($oldType == 'unstick') ? 'normal' : (($oldType == 'super') ? 'super sticky' : $oldType),
-                        'NewType' => ($newType == 'unstick') ? 'normal' : (($newType == 'super') ? 'super sticky' : $newType)
+                        'NewType' => ($newType == 'unstick') ? 'normal' : (($newType == 'super') ? 'super sticky' : $newType),
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     $result = 1;
                 }
@@ -238,6 +247,7 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     private function EventForumChangedStatus($post)
     {
         $result = 0;
+        $editorLink = $this->GetEditorLink($post);
         switch ($post->post_type) {
             case 'forum':
                 $bbp_status = get_post_meta($post->ID, '_bbp_status', true);
@@ -247,7 +257,8 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                     $this->plugin->alerts->Trigger(8001, array(
                         'ForumName' => $post->post_title,
                         'OldStatus' => $oldStatus,
-                        'NewStatus' => $newStatus
+                        'NewStatus' => $newStatus,
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     $result = 1;
                 }
@@ -275,7 +286,8 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                     $this->plugin->alerts->Trigger(8015, array(
                         'TopicName' => $post->post_title,
                         'OldStatus' => ($oldStatus == 'publish') ? 'open' : $oldStatus,
-                        'NewStatus' => ($newStatus == 'publish') ? 'open' : $newStatus
+                        'NewStatus' => ($newStatus == 'publish') ? 'open' : $newStatus,
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     $result = 1;
                 }
@@ -286,12 +298,14 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
 
     private function EventForumChanged($old_post, $new_post)
     {
+        $editorLink = $this->GetEditorLink($new_post);
         // Changed Order
         if ($old_post->menu_order != $new_post->menu_order) {
             $this->plugin->alerts->Trigger(8004, array(
                 'ForumName' => $new_post->post_title,
                 'OldOrder' => $old_post->menu_order,
-                'NewOrder' => $new_post->menu_order
+                'NewOrder' => $new_post->menu_order,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -302,14 +316,16 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                     $this->plugin->alerts->Trigger(8008, array(
                         'ForumName' => $new_post->post_title,
                         'OldParent' => $old_post->post_parent ? get_the_title($old_post->post_parent) : 'no parent',
-                        'NewParent' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent'
+                        'NewParent' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent',
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     break;
                 case 'topic':
                     $this->plugin->alerts->Trigger(8018, array(
                         'TopicName' => $new_post->post_title,
                         'OldForum' => $old_post->post_parent ? get_the_title($old_post->post_parent) : 'no parent',
-                        'NewForum' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent'
+                        'NewForum' => $new_post->post_parent ? get_the_title($new_post->post_parent) : 'no parent',
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     break;
             }
@@ -324,14 +340,16 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                     $this->plugin->alerts->Trigger(8003, array(
                         'ForumName' => $new_post->post_title,
                         'OldUrl' => $oldLink,
-                        'NewUrl' => $newLink
+                        'NewUrl' => $newLink,
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     break;
                 case 'topic':
                     $this->plugin->alerts->Trigger(8017, array(
                         'TopicName' => $new_post->post_title,
                         'OldUrl' => $oldLink,
-                        'NewUrl' => $newLink
+                        'NewUrl' => $newLink,
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     break;
             }
@@ -342,17 +360,21 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
 
     private function EventForumByCode($post, $event)
     {
+        $editorLink = $this->GetEditorLink($post);
         $this->plugin->alerts->Trigger($event, array(
             'ForumID' => $post->ID,
-            'ForumName' => $post->post_title
+            'ForumName' => $post->post_title,
+            $editorLink['name'] => $editorLink['value']
         ));
     }
 
     private function EventTopicByCode($post, $event)
     {
+        $editorLink = $this->GetEditorLink($post);
         $this->plugin->alerts->Trigger($event, array(
             'TopicID' => $post->ID,
-            'TopicName' => $post->post_title
+            'TopicName' => $post->post_title,
+            $editorLink['name'] => $editorLink['value']
         ));
     }
 
@@ -397,16 +419,37 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
                             }
                             break;
                     }
+                    $editorLink = $this->GetEditorLink($post);
 
                     if (!empty($newType) && $oldType != $newType) {
                         $this->plugin->alerts->Trigger(8016, array(
                             'TopicName' => $post->post_title,
                             'OldType' => $oldType,
-                            'NewType' => $newType
+                            'NewType' => $newType,
+                            $editorLink['name'] => $editorLink['value']
                         ));
                     }
                 }
             }
         }
+    }
+
+    private function GetEditorLink($post)
+    {
+        $name = 'EditorLink';
+        switch ($post->post_type) {
+            case 'forum':
+                $name .= 'Forum' ;
+                break;
+            case 'topic':
+                $name .= 'Topic' ;
+                break;
+        }
+        $value = get_edit_post_link($post->ID);
+        $aLink = array(
+            'name' => $name,
+            'value' => $value,
+        );
+        return $aLink;
     }
 }

@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__ . '/../Connector/ConnectorFactory.php');
+//require_once(__DIR__ . '/../Connector/ConnectorFactory.php');
 
 abstract class WSAL_Models_ActiveRecord
 {
