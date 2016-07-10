@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.5
-Stable tag: 2.4.4
+Stable tag: 2.5.0
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -175,6 +175,45 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 9. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes with WP Security Audit Log Plugin](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
 
 == Changelog ==
+
+= 2.5.0 (2016-07-13) =
+
+Read the [WP Security Audit Log 2.5.0 release notes](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/log-wordpress-comments-activity-2-5) for a detailed overview of what is new.
+
+* **New Features**
+	* Plugin now keeps a record in the audit trail of changes in WordPress comments. Refer to the list of alerts for WordPress comments for the complete list.
+	* Audit log alerts for 404 (page not found) requests.
+	* Audit log alerts for pages / posts / custom post types automatically created by plugins.
+	* Added wildcard (*) support for when excluding Custom Fields.
+	* New setting to customize From email address and display name (The [Reports](https://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/), [Email Alerts](https://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/) and [Users Sessions Management](https://www.wpsecurityauditlog.com/extensions/user-sessions-management-wp-security-audit-log/) add-ons have been updated to use the configured email address).
+	
+* **New WordPress Audit Trail Alert for Changes in Comments**
+	* 2090: User approved a comment
+	* 2091: User unapproved a comment
+	* 2092: User replied to a comment
+	* 2093: User edited a comment
+	* 2094: User marked a comment as Spam
+	* 2095: User marked a comment as not Spam
+	* 2096: User moved a comment to trash
+	* 2097: User moved a comment out from the trash
+	* 2098: User permanently deleted a comment
+	* 2099: Website visitor / User posted a comment (disabled by default. Enable it from the Enable/Disable Alerts node in the plugin menu)
+	
+* **New WordPress Audit Trail Alerts for Plugins Activity**
+	* 5019: Plugin automatically created a post
+	* 5020: Plugin automatically created a page
+	* 5021: Plugin automatically created a custom post type
+	* 5025: Plugin automatically deleted a post
+	* 5026: Plugin automatically deleted a page
+	* 5027: Plugin automatically deleted a custom post type
+	
+* **Other New WordPress Audit Trail Alerts**
+	* 5031: User updated a theme
+	* 2089: User moved an object as a sub-object in a menu
+	* 6007: User / website visitor requested a non-existing page (404 ERROR)
+	
+* **Improvements**
+	* Standardized all alerts messages / Improved the text of all of them. Each post / page / custom post type alert has a linkt to the Editor now
 
 = 2.4.4 (2016-06-27) =
 
