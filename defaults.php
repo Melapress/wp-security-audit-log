@@ -240,7 +240,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
             __('Comments', 'wp-security-audit-log') => array(
                 array(2090, E_NOTICE, __('User approved a comment', 'wp-security-audit-log'), __('Approved the comment posted in response to the post %PostTitle% by %Author% on %CommentLink%.', 'wp-security-audit-log')),
                 array(2091, E_NOTICE, __('User unapproved a comment', 'wp-security-audit-log'), __('Unapproved the comment posted in response to the post %PostTitle% by %Author% on %CommentLink%.', 'wp-security-audit-log')),
-                array(2092, E_NOTICE, __('User replied to a comment', 'wp-security-audit-log'), __('Replied to the comment posted in response to the post %PostTitle% by %Author% on %CommentLink.', 'wp-security-audit-log')),
+                array(2092, E_NOTICE, __('User replied to a comment', 'wp-security-audit-log'), __('Replied to the comment posted in response to the post %PostTitle% by %Author% on %CommentLink%.', 'wp-security-audit-log')),
                 array(2093, E_NOTICE, __('User edited a comment', 'wp-security-audit-log'), __('Edited a comment posted in response to the post %PostTitle% by %Author% on %CommentLink%.', 'wp-security-audit-log')),
                 array(2094, E_NOTICE, __('User marked a comment as Spam', 'wp-security-audit-log'), __('Marked the comment posted in response to the post %PostTitle% by %Author% on %CommentLink% as Spam.', 'wp-security-audit-log')),
                 array(2095, E_NOTICE, __('User marked a comment as Not Spam', 'wp-security-audit-log'), __('Marked the comment posted in response to the post %PostTitle% by %Author% on %CommentLink% as Not Spam.', 'wp-security-audit-log')),
