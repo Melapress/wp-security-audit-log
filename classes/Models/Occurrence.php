@@ -196,4 +196,9 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     {
         return $this->getAdapter()->GetByPostID($post_id);
     }
+
+    public function CheckAlert404($args = array())
+    {
+        return $this->getAdapter()->CheckAlert404($args);
+    }
 }

@@ -102,8 +102,11 @@ class WSAL_ViewManager {
             );
 
             // add menu items
-            foreach($this->views as $view){
-                if($view->IsAccessible()){
+            foreach ($this->views as $view) {
+                if ($view->IsAccessible()) {
+                    if ($this->GetClassNameByView($view->GetName())) {
+                        continue;
+                    }
                     $view->hook_suffix = add_submenu_page(
                         $view->IsVisible() ? $this->views[0]->GetSafeViewName() : null,
                         $view->GetTitle(),
@@ -211,5 +214,32 @@ class WSAL_ViewManager {
                 return $view;
         return false;
     }
-    
+
+    private function GetClassNameByView($name_view)
+    {
+        $not_show = false;
+        switch ($name_view) {
+            case 'Notifications Email':
+                if (class_exists('WSAL_NP_Plugin')) {
+                    $not_show = true;
+                }
+                break;
+            case 'Logged In Users':
+                if (class_exists('WSAL_User_Management_Plugin')) {
+                    $not_show = true;
+                }
+                break;
+            case 'Reports':
+                if (class_exists('WSAL_Rep_Plugin')) {
+                    $not_show = true;
+                }
+                break;
+            case 'Search':
+                if (class_exists('WSAL_SearchExtension')) {
+                    $not_show = true;
+                }
+                break;
+        }
+        return $not_show;
+    }
 }

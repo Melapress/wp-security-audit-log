@@ -1,10 +1,13 @@
 <?php
+require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 
 class WSAL_Views_AuditLog extends WSAL_AbstractView {
     /**
      * @var WSAL_AuditLogListView
      */
     protected $_listview;
+
+    protected $_version;
     
     public function __construct(WpSecurityAuditLog $plugin) {
         parent::__construct($plugin);
@@ -12,11 +15,34 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
         add_action('wp_ajax_AjaxSetIpp', array($this, 'AjaxSetIpp'));
         add_action('wp_ajax_AjaxSearchSite', array($this, 'AjaxSearchSite'));
-        
-        $this->RegisterNotice('notifications-extension');
+        add_action('all_admin_notices', array($this, 'AdminNoticesPremium'));
+        // Check plugin version for to dismiss the notice only until upgrade
+        $plugin_file =  trailingslashit(WP_PLUGIN_DIR) . plugin_basename(__FILE__);
+        $data = get_plugin_data($plugin_file, false, false);
+        $this->_version = isset($data['Version']) ? $data['Version'] : '0.0.0';
+        $this->RegisterNotice('premium-wsal-'.$this->_version);
+    }
+
+    public function AdminNoticesPremium()
+    {
+        $IsCurrentView = $this->_plugin->views->GetActiveView() == $this;
+        // Check if any of the extensions is activated
+        if (!class_exists('WSAL_NP_Plugin') && !class_exists('WSAL_SearchExtension') && !class_exists('WSAL_Rep_Plugin') && !class_exists('WSAL_Ext_Plugin') && !class_exists('WSAL_User_Management_Plugin')) {
+            if ($IsCurrentView && !$this->IsNoticeDismissed('premium-wsal-'.$this->_version)) { ?>
+                <div class="updated" data-notice-name="premium-wsal-<?=$this->_version?>">
+                    <?php $url = 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/ ?utm_source=auditviewer&utm_medium=page&utm_campaign=plugin'; ?>
+                    <p><a href="<?php echo esc_attr($url); ?>" target="_blank"><?php _e('Upgrade to Premium', 'wp-security-audit-log'); ?></a>
+                        <?php _e('and add Email Alerts, Reports, Search and Users Login and Session Management.', 'wp-security-audit-log'); ?>
+                        <a href="<?php echo esc_attr($url); ?>" target="_blank"><?php _e('Upgrade Now!', 'wp-security-audit-log'); ?></a>
+                        <a href="javascript:;" class="wsal-dismiss-notification wsal-premium"><span class="dashicons dashicons-dismiss"></span></a>
+                    </p>
+                </div>
+                <?php
+            }
+        }
     }
     
-    public function HasPluginShortcutLink(){
+    public function HasPluginShortcutLink() {
         return true;
     }
     
@@ -34,18 +60,18 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         return __('Audit Log Viewer', 'wp-security-audit-log');
     }
     
-    public function GetWeight(){
+    public function GetWeight() {
         return 1;
     }
     
-    protected function GetListView(){
+    protected function GetListView() {
         if (is_null($this->_listview)) $this->_listview = new WSAL_AuditLogListView($this->_plugin);
         return $this->_listview;
     }
     
-    public function Render(){
-        if(!$this->_plugin->settings->CurrentUserCan('view')){
-            wp_die( __( 'You do not have sufficient permissions to access this page.' , 'wp-security-audit-log') );
+    public function Render() {
+        if (!$this->_plugin->settings->CurrentUserCan('view')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'wp-security-audit-log'));
         }
         
         $this->GetListView()->prepare_items();
@@ -79,7 +105,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         </script><?php
     }
     
-    public function AjaxInspector(){
+    public function AjaxInspector() {
         if(!$this->_plugin->settings->CurrentUserCan('view'))
             die('Access Denied.');
         if(!isset($_REQUEST['occurrence']))
@@ -102,7 +128,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         die;
     }
     
-    public function AjaxRefresh(){
+    public function AjaxRefresh() {
         if(!$this->_plugin->settings->CurrentUserCan('view'))
             die('Access Denied.');
         if(!isset($_REQUEST['logcount']))
@@ -154,7 +180,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         die(json_encode(array_slice($grp1 + $grp2, 0, 7)));
     }
     
-    public function Header(){
+    public function Header() {
         add_thickbox();
         wp_enqueue_style(
             'auditlog',

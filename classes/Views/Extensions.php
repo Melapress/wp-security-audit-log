@@ -19,63 +19,110 @@ class WSAL_Views_Extensions extends WSAL_AbstractView
     public function GetWeight() {
         return 3.5;
     }
+
+    public function Header() {
+        wp_enqueue_style(
+            'extensions',
+            $this->_plugin->GetBaseUrl() . '/css/extensions.css',
+            array(),
+            filemtime($this->_plugin->GetBaseDir() . '/css/extensions.css')
+        );
+    }
     
     public function Render()
     {
-        ?><div class="metabox-holder" style="position: relative;">
-        
-            <div class="postbox" style="margin-right: 270px;">
-                <div class="inside">
-                    <div class="activity-block">
-                        <p><?php _e('The below add-ons allow you to extend the functionality of WP Security Audit Log plugin and enable you to get more benefits out of the WordPress security audit, such as configurable email alerts, ability to search using free text based searches & filters, and generate user activity reports to meet regulatory compliance requirements.', 'wp-security-audit-log'); ?></p>
-                    </div>
-
-                    <div class="activity-block">
-                        <h2><?php _e('60% Off All Add-Ons Bundle', 'wp-security-audit-log'); ?></h2>
-                        <strong><?php _e('Add email alerts, generate reports and add the search functionality to your WordPress audit log.', 'wp-security-audit-log'); ?></strong>
-                        <p><?php _e('Buy all the WP Security Audit Log Add-Ons as a bundle and benefit from a 60% discount. The bundle for 1 website only costs $89 and price per website gets lower with bulk pricing.', 'wp-security-audit-log'); ?></p>
-                        <p><a class="button" href="http://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=alladdons" target="_blank"><?php _e('More Information', 'wp-security-audit-log'); ?></a></p>
-                    </div>
-                    <?php
-                    if (!class_exists('WSAL_NP_Plugin')) { ?>
-                        <div class="activity-block">
-                            <h2><?php _e('Email Notifications Add-On', 'wp-security-audit-log'); ?></h2>
-                            <strong><?php _e('Get notified instantly via email when important changes are made on your WordPress!', 'wp-security-audit-log'); ?></strong>
-                            <p><?php _e('With the Email Notifications Add-On you can easily configure trigger rules so when a specific change happens on your WordPress you are instantly alerted via email. For example you can configure rules to receive an email when existing content is changed, when a new user is created or when someone logs in to WordPress outside normal office hours or from an odd location.', 'wp-security-audit-log'); ?></p>
-                            <p><a class="button" href="http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=notifications" target="_blank"><?php _e('More Information', 'wp-security-audit-log'); ?></a></p>
-                        </div>
-                    <?php
-                    }
-                    if (!class_exists('WSAL_Ext_Plugin')) { ?>
-                        <div class="activity-block">
-                            <h2><?php _e('External DB Add-On', 'wp-security-audit-log'); ?></h2>
-                            <strong><?php _e('Save the WordPress Audit Log in an external database.', 'wp-security-audit-log'); ?></strong>
-                            <p><?php _e('By saving the WordPress Audit Log in an external database you improve the security and performance of your WordPress websites and blogs. You also ensure that your WordPress is compliant to a number of mandatory regulatory compliance requirements business websites need to adhere to.', 'wp-security-audit-log'); ?></p>
-                            <p><a class="button" href="http://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=externaldb" target="_blank"><?php _e('More Information', 'wp-security-audit-log'); ?></a></p>
-                        </div>
-                    <?php
-                    }
-                    if (!class_exists('WSAL_SearchExtension')) { ?>
-                        <div class="activity-block">
-                            <h2><?php _e('Search Add-On', 'wp-security-audit-log'); ?></h2>
-                            <strong><?php _e('Automatically Search for specific WordPress user and site activity in WordPress Security Audit Log.', 'wp-security-audit-log'); ?></strong>
-                            <p><?php _e('The Search Add-On enables you to easily find specific WordPress activity in the Audit Log with free-text based searches. Filters can also be used in conjunction with free-text based searches to fine tune the search and find what you are looking for easily.', 'wp-security-audit-log'); ?></p>
-                            <p><a class="button" href="http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=search" target="_blank"><?php _e('More Information', 'wp-security-audit-log'); ?></a></p>
-                        </div>
-                    <?php
-                    }
-                    if (!class_exists('WSAL_Rep_Plugin')) { ?>
-                        <div class="activity-block">
-                            <h2><?php _e('Reports Add-Ons', 'wp-security-audit-log'); ?></h2>
-                            <strong><?php _e('Generate User, Site and Regulatory Compliance Reports.', 'wp-security-audit-log'); ?></strong>
-                            <p><?php _e('The Reports Add-On allows you to generate reports and keep track and record of user productivity, and meet any legal and regulatory compliance your business need to adhere to. Unlike other reporting plugins the Reports Add-On does not have any built-in templates that restrict you to specific type of reports, you can generate any type of report using all of the available data.', 'wp-security-audit-log'); ?></p>
-                            <p><a class="button" href="http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=reports" target="_blank"><?php _e('More Information', 'wp-security-audit-log'); ?></a></p>
-                        </div>
-                    <?php
-                    } ?>
-                </div>
+        ?>
+        <p><?php _e('The below add-ons allow you to extend the functionality of WP Security Audit Log plugin and enable you to get more benefits out of the WordPress security audit, such as configurable email alerts, ability to search using free text based searches & filters, and generate user activity reports to meet regulatory compliance requirements.', 'wp-security-audit-log'); ?>
+        </p>
+        <div class="wrap-advertising-page">
+            <div class="extension all">
+                <?php $link = 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=alladdons'; ?>
+                <a target="_blank" href="<?php echo esc_attr($link); ?>">
+                    <h3><?php _e('All Add-Ons Bundle', 'wp-security-audit-log'); ?></h3>
+                </a>
+                <p><?php _e('Benefit from a 60% discount when you purchase all the add-ons as a single bundle.', 'wp-security-audit-log'); ?>
+                </p>
+                <p>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this Bundle', 'wp-security-audit-log'); ?>          
+                    </a>
+                </p>
             </div>
-        </div><?php
+            <?php if (!class_exists('WSAL_User_Management_Plugin')) { ?>
+                <div class="extension user-managment">
+                    <?php $link = 'https://www.wpsecurityauditlog.com/extensions/user-sessions-management-wp-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=logins'; ?>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>">
+                        <h3><?php _e('Users Logins and Management', 'wp-security-audit-log'); ?></h3>
+                    </a>
+                    <p><?php _e('See who is logged in to your WordPress and manage user sessions and logins.', 'wp-security-audit-log'); ?>
+                        
+                    </p>
+                    <p>
+                        <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        </a>
+                    </p>
+                </div>
+            <?php } ?>
+            <?php if (!class_exists('WSAL_NP_Plugin')) { ?>
+                <div class="extension email-notifications">
+                    <?php $link = 'https://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=notifications'; ?>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>">
+                        <h3><?php _e('Email Notifications', 'wp-security-audit-log'); ?></h3>
+                    </a>
+                    <p><?php _e('Get notified instantly via email when important changes are made on your WordPress!', 'wp-security-audit-log'); ?>
+                        
+                    </p>
+                    <p>
+                        <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        </a>
+                    </p>
+                </div>
+            <?php } ?>
+            <?php if (!class_exists('WSAL_Rep_Plugin')) { ?>
+                <div class="extension reports">
+                    <?php $link = 'https://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=reports'; ?>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>">
+                        <h3><?php _e('Reports', 'wp-security-audit-log'); ?></h3>
+                    </a>
+                    <p><?php _e('Generate any type of user,site and activity report to keep track of user productivity and to meet  regulatory compliance requirements.', 'wp-security-audit-log'); ?>
+                        
+                    </p>
+                    <p>
+                        <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        </a>
+                    </p>
+                </div>
+            <?php } ?>
+            <?php if (!class_exists('WSAL_SearchExtension')) { ?>
+                <div class="extension search-ext">
+                    <?php $link = 'https://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=search'; ?>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>">
+                        <h3><?php _e('Search', 'wp-security-audit-log'); ?></h3>
+                    </a>
+                    <p><?php _e('Do free-text based searches for specific activity in the WordPress audit trail. You can also use filters to fine-tune your searches.', 'wp-security-audit-log'); ?>
+                        
+                    </p>
+                    <p>
+                        <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        </a>
+                    </p>
+                </div>
+            <?php } ?>
+            <?php if (!class_exists('WSAL_Ext_Plugin')) { ?>
+                <div class="extension external-db">
+                    <?php $link = 'https://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=externaldb'; ?>
+                    <a target="_blank" href="<?php echo esc_attr($link); ?>">
+                        <h3><?php _e('External DB', 'wp-security-audit-log'); ?></h3>
+                    </a>
+                    <p><?php _e('Store the WordPress audit trial in an external database for a more secure and faster WordPress website.', 'wp-security-audit-log'); ?>
+                        
+                    </p>
+                    <p>
+                        <a target="_blank" href="<?php echo esc_attr($link); ?>" class="button-primary"><?php _e('Get this extension', 'wp-security-audit-log'); ?>
+                        </a>
+                    </p>
+                </div>
+            <?php } ?>
+        </div>
+        <?php
     }
-    
 }

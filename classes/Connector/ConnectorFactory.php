@@ -1,6 +1,6 @@
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'Settings.php');
-require_once('MySQLDBConnector.php');
+//require_once(__DIR__ . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'Settings.php');
+//require_once('MySQLDBConnector.php');
 
 abstract class WSAL_Connector_ConnectorFactory
 {

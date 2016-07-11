@@ -4,7 +4,7 @@ Plugin Name: WP Security Audit Log
 Plugin URI: http://www.wpsecurityauditlog.com/
 Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
 Author: WP White Security
-Version: 2.4.4
+Version: 2.5.0
 Text Domain: wp-security-audit-log
 Author URI: http://www.wpsecurityauditlog.com/
 License: GPL2
@@ -284,6 +284,12 @@ class WpSecurityAuditLog {
         $pruningLimit = $this->settings->GetPruningLimit();
         $this->settings->SetPruningLimit($pruningLimit);
 
+        $oldDisabled = $this->GetGlobalOption('disabled-alerts');
+        // If old setting is empty disable alert 2099 by default
+        if (empty($oldDisabled)) {
+            $this->settings->SetDisabledAlerts(array(2099));
+        }
+        
         // install cleanup hook (remove older one if it exists)
         wp_clear_scheduled_hook('wsal_cleanup');
         wp_schedule_event(current_time('timestamp') + 600, 'hourly', 'wsal_cleanup');
@@ -442,15 +448,11 @@ class WpSecurityAuditLog {
      * @internal To be called in admin header for hiding plugin form Plugins list.
      */
     public function HidePlugin() {
-        $selectr = '';
+        $selectr = '.wp-list-table.plugins #';
         $plugins = array('wp-security-audit-log');
-        foreach ($this->licensing->Plugins() as $plugin) {
+        foreach ($this->licensing->Plugins() as $plugin)
             $plugins[] = strtolower(str_replace(' ', '-', $plugin['PluginData']['Name']));
-        }
-        foreach ($plugins as $value) {
-            $selectr .= '.wp-list-table.plugins tr[data-slug="' . $value . '"], ';
-        }
-        ?><style type="text/css"> <?php echo rtrim($selectr, ", "); ?> { display: none; }</style><?php
+        ?><style type="text/css"> <?php echo $selectr . implode(', ' . $selectr, $plugins); ?> { display: none; }</style><?php
     }
     
     /**
@@ -549,7 +551,6 @@ class WpSecurityAuditLog {
 
     public static function getConnector($config = null)
     {
-        require_once('classes/Connector/ConnectorFactory.php');
         return WSAL_Connector_ConnectorFactory::getConnector($config);
     }
     

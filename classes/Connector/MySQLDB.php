@@ -1,7 +1,4 @@
 <?php
-//require_once('ConnectorInterface.php');
-//require_once('AbstractConnector.php');
-//require_once('wp-db-custom.php');
 
 class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements WSAL_Connector_ConnectorInterface
 {

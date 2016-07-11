@@ -15,6 +15,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         add_action('edit_category', array($this, 'EventChangedCategoryParent'));
         add_action('save_post', array($this, 'SetRevisionLink'), 10, 3);
         add_action('publish_future_post', array($this, 'EventPublishFuture'), 10, 1);
+        // to do change with 'create_term' instead 'create_category' for trigger Tags
+        add_action('create_category', array($this, 'EventCategoryCreation'), 10, 1);
     }
     
     protected function GetEventTypeForPostType($post, $typePost, $typePage, $typeCustom)
@@ -40,7 +42,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         // load old data, if applicable
         $this->RetrieveOldData();
         // check for category changes
-        $this->CheckCategoryCreation();
         $this->CheckCategoryDeletion();
     }
     
@@ -136,37 +137,45 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     
     protected function CheckPostCreation($oldPost, $newPost)
     {
-        $event = 0;
-        $is_scheduled = false;
-        switch ($newPost->post_status) {
-            case 'publish':
-                $event = $this->GetEventTypeForPostType($oldPost, 2001, 2005, 2030);
-                break;
-            case 'draft':
-                $event = $this->GetEventTypeForPostType($oldPost, 2000, 2004, 2029);
-                break;
-            case 'future':
-                $event = $this->GetEventTypeForPostType($oldPost, 2074, 2075, 2076);
-                $is_scheduled = true;
-                break;
-            case 'pending':
-                $event = 2073;
-                break;
-        }
-        if ($event) {
-            if ($is_scheduled) {
-                $this->plugin->alerts->Trigger($event, array(
-                    'PostType' => $newPost->post_type,
-                    'PostTitle' => $newPost->post_title,
-                    'PublishingDate' => $newPost->post_date
-                ));
-            } else {
-                $this->plugin->alerts->Trigger($event, array(
-                    'PostID' => $newPost->ID,
-                    'PostType' => $newPost->post_type,
-                    'PostTitle' => $newPost->post_title,
-                    'PostUrl' => get_permalink($newPost->ID)
-                ));
+        $WPActions = array('editpost', 'heartbeat');
+        if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
+            if (!in_array($newPost->post_type, array('attachment', 'revision', 'nav_menu_item'))) {
+                $event = 0;
+                $is_scheduled = false;
+                switch ($newPost->post_status) {
+                    case 'publish':
+                        $event = $this->GetEventTypeForPostType($newPost, 2001, 2005, 2030);
+                        break;
+                    case 'draft':
+                        $event = $this->GetEventTypeForPostType($newPost, 2000, 2004, 2029);
+                        break;
+                    case 'future':
+                        $event = $this->GetEventTypeForPostType($newPost, 2074, 2075, 2076);
+                        $is_scheduled = true;
+                        break;
+                    case 'pending':
+                        $event = 2073;
+                        break;
+                }
+                if ($event) {
+                    $editorLink = $this->GetEditorLink($newPost);
+                    if ($is_scheduled) {
+                        $this->plugin->alerts->Trigger($event, array(
+                            'PostType' => $newPost->post_type,
+                            'PostTitle' => $newPost->post_title,
+                            'PublishingDate' => $newPost->post_date,
+                            $editorLink['name'] => $editorLink['value']
+                        ));
+                    } else {
+                        $this->plugin->alerts->Trigger($event, array(
+                            'PostID' => $newPost->ID,
+                            'PostType' => $newPost->post_type,
+                            'PostTitle' => $newPost->post_title,
+                            'PostUrl' => get_permalink($newPost->ID),
+                            $editorLink['name'] => $editorLink['value']
+                        ));
+                    }
+                }
             }
         }
     }
@@ -177,65 +186,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         $event = $this->GetEventTypeForPostType($post, 2001, 2005, 2030);
         
         if ($event) {
+            $editorLink = $this->GetEditorLink($newPost);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $post->ID,
                 'PostType' => $post->post_type,
                 'PostTitle' => $post->post_title,
-                'PostUrl' => get_permalink($post->ID)
-            ));
-        }
-    }
-    
-    protected function CheckCategoryCreation()
-    {
-        if (empty($_POST)) {
-            return;
-        }
-        $categoryName = '';
-        if (!empty($_POST['screen']) && !empty($_POST['tag-name']) &&
-            $_POST['screen'] == 'edit-category' &&
-            $_POST['taxonomy'] == 'category' &&
-            $_POST['action'] == 'add-tag') {
-            $categoryName = $_POST['tag-name'];
-        } elseif (!empty($_POST['newcategory']) && $_POST['action'] == 'add-category') {
-            $categoryName = $_POST['newcategory'];
-        }
-        
-        if ($categoryName) {
-            $this->plugin->alerts->Trigger(2023, array(
-                'CategoryName' => $categoryName,
-            ));
-        }
-    }
-
-    protected function CheckCategoryDeletion()
-    {
-        if (empty($_POST)) {
-            return;
-        }
-        $action = !empty($_POST['action']) ? $_POST['action']
-            : (!empty($_POST['action2']) ? $_POST['action2'] : '');
-        if (!$action) {
-            return;
-        }
-
-        $categoryIds = array();
-
-        if (isset($_POST['taxonomy'])) {
-            if ($action == 'delete' && $_POST['taxonomy'] == 'category' && !empty($_POST['delete_tags'])) {
-                // bulk delete
-                $categoryIds[] = $_POST['delete_tags'];
-            } elseif ($action == 'delete-tag' && $_POST['taxonomy'] == 'category' && !empty($_POST['tag_ID'])) {
-                // single delete
-                $categoryIds[] = $_POST['tag_ID'];
-            }
-        }
-
-        foreach ($categoryIds as $categoryID) {
-            $category = get_category($categoryID);
-            $this->plugin->alerts->Trigger(2024, array(
-                'CategoryID' => $categoryID,
-                'CategoryName' => $category->cat_name,
+                'PostUrl' => get_permalink($post->ID),
+                $editorLink['name'] => $editorLink['value']
             ));
         }
     }
@@ -246,17 +203,23 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($this->CheckBBPress($post)) {
             return;
         }
-        if (!in_array($post->post_type, array('attachment', 'revision', 'nav_menu_item'))) { // ignore attachments, revisions and menu items
-            $event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
-            // check WordPress backend operations
-            if ($this->CheckAutoDraft($event, $post->post_title)) {
-                return;
+        $WPActions = array('delete');
+        if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], $WPActions)) {
+            if (!in_array($post->post_type, array('attachment', 'revision', 'nav_menu_item'))) { // ignore attachments, revisions and menu items
+                $event = $this->GetEventTypeForPostType($post, 2008, 2009, 2033);
+                // check WordPress backend operations
+                if ($this->CheckAutoDraft($event, $post->post_title)) {
+                    return;
+                }
+                $editorLink = $this->GetEditorLink($post);
+                $this->plugin->alerts->Trigger($event, array(
+                    'PostID' => $post->ID,
+                    'PostType' => $post->post_type,
+                    'PostTitle' => $post->post_title,
+                    'PostUrl' => get_permalink($post->ID),
+                    $editorLink['name'] => $editorLink['value']
+                ));
             }
-            $this->plugin->alerts->Trigger($event, array(
-                'PostID' => $post->ID,
-                'PostType' => $post->post_type,
-                'PostTitle' => $post->post_title,
-            ));
         }
     }
     
@@ -267,10 +230,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return;
         }
         $event = $this->GetEventTypeForPostType($post, 2012, 2013, 2034);
+        $editorLink = $this->GetEditorLink($post);
         $this->plugin->alerts->Trigger($event, array(
             'PostID' => $post->ID,
             'PostType' => $post->post_type,
             'PostTitle' => $post->post_title,
+            'PostUrl' => get_permalink($post->ID),
+            $editorLink['name'] => $editorLink['value']
         ));
     }
     
@@ -281,10 +247,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return;
         }
         $event = $this->GetEventTypeForPostType($post, 2014, 2015, 2035);
+        $editorLink = $this->GetEditorLink($post);
         $this->plugin->alerts->Trigger($event, array(
             'PostID' => $post->ID,
             'PostType' => $post->post_type,
             'PostTitle' => $post->post_title,
+            $editorLink['name'] => $editorLink['value']
         ));
     }
     
@@ -301,12 +269,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
         if ($from != $to) {
             $event = $this->GetEventTypeForPostType($oldpost, 2027, 2028, 2041);
+            $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
                 'PostTitle' => $oldpost->post_title,
                 'OldDate' => $oldpost->post_date,
                 'NewDate' => $newpost->post_date,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -316,10 +286,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     protected function CheckReviewPendingChange($oldpost, $newpost)
     {
         if ($oldpost->post_status == 'pending') {
+            $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger(2072, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
-                'PostTitle' => $oldpost->post_title
+                'PostTitle' => $oldpost->post_title,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -333,12 +305,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($oldCats != $newCats) {
             $event = $this->GetEventTypeForPostType($post, 2016, 0, 2036);
             if ($event) {
+                $editorLink = $this->GetEditorLink($post);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $post->ID,
                     'PostType' => $post->post_type,
                     'PostTitle' => $post->post_title,
                     'OldCategories' => $oldCats ? $oldCats : 'no categories',
                     'NewCategories' => $newCats ? $newCats : 'no categories',
+                    $editorLink['name'] => $editorLink['value']
                 ));
                 return 1;
             }
@@ -349,12 +323,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if ($oldpost->post_author != $newpost->post_author) {
             $event = $this->GetEventTypeForPostType($oldpost, 2019, 2020, 2038);
+            $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
                 'PostTitle' => $oldpost->post_title,
                 'OldAuthor' => get_userdata($oldpost->post_author)->user_login,
                 'NewAuthor' => get_userdata($newpost->post_author)->user_login,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -366,20 +342,24 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             if (isset($_REQUEST['publish'])) {
                 // special case (publishing a post)
                 $event = $this->GetEventTypeForPostType($oldpost, 2001, 2005, 2030);
+                $editorLink = $this->GetEditorLink($newpost);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $newpost->ID,
                     'PostType' => $newpost->post_type,
                     'PostTitle' => $newpost->post_title,
                     'PostUrl' => get_permalink($newpost->ID),
+                    $editorLink['name'] => $editorLink['value']
                 ));
             } else {
                 $event = $this->GetEventTypeForPostType($oldpost, 2021, 2022, 2039);
+                $editorLink = $this->GetEditorLink($oldpost);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $oldpost->ID,
                     'PostType' => $oldpost->post_type,
                     'PostTitle' => $oldpost->post_title,
                     'OldStatus' => $oldpost->post_status,
                     'NewStatus' => $newpost->post_status,
+                    $editorLink['name'] => $editorLink['value']
                 ));
             }
             return 1;
@@ -391,6 +371,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($oldpost->post_parent != $newpost->post_parent) {
             $event = $this->GetEventTypeForPostType($oldpost, 0, 2047, 0);
             if ($event) {
+                $editorLink = $this->GetEditorLink($oldpost);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $oldpost->ID,
                     'PostType' => $oldpost->post_type,
@@ -399,6 +380,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                     'NewParent' => $newpost->post_parent,
                     'OldParentName' => $oldpost->post_parent ? get_the_title($oldpost->post_parent) : 'no parent',
                     'NewParentName' => $newpost->post_parent ? get_the_title($newpost->post_parent) : 'no parent',
+                    $editorLink['name'] => $editorLink['value']
                 ));
                 return 1;
             }
@@ -409,12 +391,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if ($oldLink != $newLink) {
             $event = $this->GetEventTypeForPostType($post, 2017, 2018, 2037);
+            $editorLink = $this->GetEditorLink($post);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $post->ID,
                 'PostType' => $post->post_type,
                 'PostTitle' => $post->post_title,
                 'OldUrl' => $oldLink,
                 'NewUrl' => $newLink,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -447,12 +431,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         
         if ($oldVisibility && $newVisibility && ($oldVisibility != $newVisibility)) {
             $event = $this->GetEventTypeForPostType($oldpost, 2025, 2026, 2040);
+            $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
                 'PostTitle' => $oldpost->post_title,
                 'OldVisibility' => $oldVisibility,
                 'NewVisibility' => $newVisibility,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -463,6 +449,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($oldTmpl != $newTmpl) {
             $event = $this->GetEventTypeForPostType($post, 0, 2048, 0);
             if ($event) {
+                $editorLink = $this->GetEditorLink($post);
                 $this->plugin->alerts->Trigger($event, array(
                     'PostID' => $post->ID,
                     'PostType' => $post->post_type,
@@ -471,6 +458,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                     'NewTemplate' => ucwords(str_replace(array('-' , '_'), ' ', basename($newTmpl, '.php'))),
                     'OldTemplatePath' => $oldTmpl,
                     'NewTemplatePath' => $newTmpl,
+                    $editorLink['name'] => $editorLink['value']
                 ));
                 return 1;
             }
@@ -481,10 +469,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if ($oldStky != $newStky) {
             $event = $newStky ? 2049 : 2050;
+            $editorLink = $this->GetEditorLink($post);
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $post->ID,
                 'PostType' => $post->post_type,
                 'PostTitle' => $post->post_title,
+                'PostUrl' => get_permalink($post->ID),
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
@@ -520,15 +511,61 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                         break;
                 }
                 if ($event) {
+                    $editorLink = $this->GetEditorLink($oldpost);
                     $this->plugin->alerts->Trigger($event, array(
                         'PostID' => $post_ID,
                         'PostType' => $oldpost->post_type,
                         'PostTitle' => $oldpost->post_title,
-                        'PostUrl' => get_permalink($post_ID) // TODO or should this be $newpost?
+                        'PostUrl' => get_permalink($post_ID),
+                        $editorLink['name'] => $editorLink['value']
                     ));
                     return 1;
                 }
             }
+        }
+    }
+
+    public function EventCategoryCreation($category_id)
+    {
+        $category = get_category($category_id);
+        $category_link = $this->getCategoryLink($category_id);
+        $this->plugin->alerts->Trigger(2023, array(
+            'CategoryName' => $category->name,
+            'Slug' => $category->slug,
+            'CategoryLink' => $category_link
+        ));
+    }
+
+    protected function CheckCategoryDeletion()
+    {
+        if (empty($_POST)) {
+            return;
+        }
+        $action = !empty($_POST['action']) ? $_POST['action']
+            : (!empty($_POST['action2']) ? $_POST['action2'] : '');
+        if (!$action) {
+            return;
+        }
+
+        $categoryIds = array();
+
+        if (isset($_POST['taxonomy'])) {
+            if ($action == 'delete' && $_POST['taxonomy'] == 'category' && !empty($_POST['delete_tags'])) {
+                // bulk delete
+                $categoryIds[] = $_POST['delete_tags'];
+            } elseif ($action == 'delete-tag' && $_POST['taxonomy'] == 'category' && !empty($_POST['tag_ID'])) {
+                // single delete
+                $categoryIds[] = $_POST['tag_ID'];
+            }
+        }
+
+        foreach ($categoryIds as $categoryID) {
+            $category = get_category($categoryID);
+            $this->plugin->alerts->Trigger(2024, array(
+                'CategoryID' => $categoryID,
+                'CategoryName' => $category->cat_name,
+                'Slug' => $category->slug
+            ));
         }
     }
 
@@ -540,8 +577,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if (!current_user_can("manage_categories")) {
             return;
         }
-        if (isset($_POST['name'])) {
+        if (isset($_POST['name']) && isset($_POST['tag_ID'])) {
             $category = get_category($_POST['tag_ID']);
+            $category_link = $this->getCategoryLink($_POST['tag_ID']);
             if ($category->parent != 0) {
                 $oldParent = get_category($category->parent);
                 $oldParentName = (empty($oldParent))? 'no parent' : $oldParent->name;
@@ -556,6 +594,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 'CategoryName' => $category->name,
                 'OldParent' => $oldParentName,
                 'NewParent' => $newParentName,
+                'CategoryLink' => $category_link
             ));
         }
     }
@@ -578,6 +617,15 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if (!empty($revision_id)) {
             return admin_url('revision.php?revision='.$revision_id);
+        } else {
+            return null;
+        }
+    }
+
+    private function getCategoryLink($category_id)
+    {
+        if (!empty($category_id)) {
+            return admin_url('term.php?taxnomy=category&tag_ID='.$category_id);
         } else {
             return null;
         }
@@ -624,12 +672,26 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if ($oldpost->post_title != $newpost->post_title) {
             $event = $this->GetEventTypeForPostType($newpost, 2086, 2087, 2088);
+            $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger($event, array(
                 'OldTitle' => $oldpost->post_title,
                 'NewTitle' => $newpost->post_title,
+                $editorLink['name'] => $editorLink['value']
             ));
             return 1;
         }
         return 0;
+    }
+
+    private function GetEditorLink($post)
+    {
+        $name = 'EditorLink';
+        $name .= ($post->post_type == 'page') ? 'Page' : 'Post' ;
+        $value = get_edit_post_link($post->ID);
+        $aLink = array(
+            'name' => $name,
+            'value' => $value,
+        );
+        return $aLink;
     }
 }
