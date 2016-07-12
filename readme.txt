@@ -176,7 +176,7 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 
 == Changelog ==
 
-= 2.5.0 (2016-07-13) =
+= 2.5.0 (2016-07-12) =
 
 Read the [WP Security Audit Log 2.5.0 release notes](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/log-wordpress-comments-activity-2-5) for a detailed overview of what is new.
 
