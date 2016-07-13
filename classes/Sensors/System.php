@@ -60,6 +60,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     
     public function Event404()
     {
+        // Check if the alert is disabled from the "Enable/Disable Alerts" section
+        if (!$this->plugin->alerts->IsEnabled(6007)) {
+            return;
+        }
         global $wp_query;
         if (!$wp_query->is_404) {
             return;
