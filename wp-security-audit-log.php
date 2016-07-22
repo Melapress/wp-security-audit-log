@@ -178,15 +178,15 @@ class WpSecurityAuditLog {
      * Disable Custom Field through ajax.
      * @internal
      */
-    public function AjaxDisableCustomField(){ 
+    public function AjaxDisableCustomField(){
         $fields = $this->GetGlobalOption('excluded-custom');
-        if ( isset($fields) && $fields != "") {
-            $fields .= ",".$_POST['notice'];
+        if (isset($fields) && $fields != "") {
+            $fields .= "," . esc_html($_POST['notice']);
         } else {
-            $fields = $_POST['notice'];
+            $fields = esc_html($_POST['notice']);
         }
         $this->SetGlobalOption('excluded-custom', $fields);
-        echo 'Custom Field '.$_POST['notice'].' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude"> Excluded Objects </a> tab in the plugin settings';
+        echo 'Custom Field '.esc_html($_POST['notice']).' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude"> Excluded Objects </a> tab in the plugin settings';
         die;
     }
     
@@ -221,7 +221,7 @@ class WpSecurityAuditLog {
             $this->settings->SetPruningLimit($pruningLimit);
         }
         // load translations
-        load_plugin_textdomain('wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/');
+        load_plugin_textdomain('wp-security-audit-log', false, basename(dirname(__FILE__)) . '/languages/');
 
         // tell the world we've just finished loading
         $s = $this->profiler->Start('WSAL Init Hook');
@@ -229,8 +229,9 @@ class WpSecurityAuditLog {
         $s->Stop();
 
         // hide plugin
-        if($this->settings->IsIncognito())
+        if ($this->settings->IsIncognito()) {
             add_action('admin_head', array($this, 'HidePlugin'));
+        }
     }
     
     /**
@@ -446,12 +447,16 @@ class WpSecurityAuditLog {
     /**
      * @internal To be called in admin header for hiding plugin form Plugins list.
      */
-    public function HidePlugin(){
-        $selectr = '.wp-list-table.plugins #';
+    public function HidePlugin() {
+        $selectr = '';
         $plugins = array('wp-security-audit-log');
-        foreach ($this->licensing->Plugins() as $plugin)
+        foreach ($this->licensing->Plugins() as $plugin) {
             $plugins[] = strtolower(str_replace(' ', '-', $plugin['PluginData']['Name']));
-        ?><style type="text/css"> <?php echo $selectr . implode(', ' . $selectr, $plugins); ?> { display: none; }</style><?php
+        }
+        foreach ($plugins as $value) {
+            $selectr .= '.wp-list-table.plugins tr[data-slug="' . $value . '"], ';
+        }
+        ?><style type="text/css"> <?php echo rtrim($selectr, ", "); ?> { display: none; }</style><?php
     }
     
     /**
@@ -550,7 +555,6 @@ class WpSecurityAuditLog {
 
     public static function getConnector($config = null)
     {
-        //require_once('classes/Connector/ConnectorFactory.php');
         return WSAL_Connector_ConnectorFactory::getConnector($config);
     }
     

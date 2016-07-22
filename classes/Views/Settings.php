@@ -154,15 +154,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView
             <?php wp_nonce_field('wsal-settings'); ?>
             
             <div id="audit-log-adverts">
-                <a href="http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/?utm_source=plugin&utm_medium=settingspage&utm_campaign=notifications">
-                    <img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/notifications_250x150.gif" width="250" height="150" alt=""/>
-                </a>
-                <a href="http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/?utm_source=plugin&utm_medium=settingspage&utm_campaign=search">
-                    <img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/search_250x150.gif" width="250" height="150" alt=""/>
-                </a>
-                <a href="http://www.wpsecurityauditlog.com/extensions/compliance-reports-add-on-for-wordpress/?utm_source=plugin&utm_medium=settingspage&utm_campaign=reports">
-                    <img src="<?php echo $this->_plugin->GetBaseUrl(); ?>/img/reporting_250x150.gif" width="250" height="150" alt=""/>
-                </a>
             </div>
             <div class="nav-tabs">
                 <table class="form-table wsal-tab widefat" id="tab-general">
