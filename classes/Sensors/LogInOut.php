@@ -115,6 +115,11 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
             }
         }
 
+        // Check if the alert is disabled from the "Enable/Disable Alerts" section
+        if (!$this->plugin->alerts->IsEnabled($newAlertCode)) {
+            return;
+        }
+
         if ($this->IsPastLoginFailureLimit($ip, $site_id, $user)) {
             return;
         }
