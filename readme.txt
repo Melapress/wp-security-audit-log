@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.5
-Stable tag: 2.5.0
+Stable tag: 2.5.1
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -175,6 +175,13 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 9. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes with WP Security Audit Log Plugin](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
 
 == Changelog ==
+
+= 2.5.1 (2016-07-26) =
+
+* **Bug fixes**
+	* Fixed the disabling functionality of Alert 6007 because it was not working.
+	* Fixed the disabling functionality for Alerts 1000 and 10001.
+	* Merged bug fixes from version 2.4.4 (were not included in 2.5.0).
 
 = 2.5.0 (2016-07-12) =
 
