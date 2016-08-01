@@ -38,8 +38,11 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                             if ($oldItem['menu_order'] != $args['menu-item-position']) {
                                 $is_changed_order = true;
                             }
-                            if (isset($args['menu-item-parent-id']) && $args['menu-item-parent-id'] != 0) {
+                            if (!empty($args['menu-item-parent-id']) && $args['menu-item-parent-id'] != 0) {
                                 $is_sub_item = true;
+                            }
+                            if (!empty($args['menu-item-title']) && $oldItem['title'] != $args['menu-item-title']) {
+                                $this->EventModifiedItems($_POST['menu-item-object'][$menu_item_db_id], $_POST['menu-item-title'][$menu_item_db_id], $_POST['menu-name']);
                             }
                         }
                         $oldMenuItems[$item_id] = array("type" => $oldItem['object'], "title" => $oldItem['title'], "parent" => $oldItem['menu_item_parent']);
@@ -235,6 +238,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                             'object' => $item->object,
                             'menu_name' => $menu->name,
                             'menu_order' => $item->menu_order,
+                            'url' => $item->url,
                             'menu_item_parent' => $item->menu_item_parent
                         ));
                     }

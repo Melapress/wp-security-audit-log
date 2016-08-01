@@ -169,9 +169,10 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
         
         // update theme
-        if (in_array($action, array('upgrade-theme')) && current_user_can("install_themes")) {
-            if (isset($_REQUEST['theme'])) {
-                $theme = wp_get_theme($_REQUEST['theme']);
+        if (in_array($action, array('upgrade-theme', 'update-theme')) && current_user_can("install_themes")) {
+            if (isset($_REQUEST['slug']) || isset($_REQUEST['theme'])) {
+                $theme_name = isset($_REQUEST['slug']) ? $_REQUEST['slug'] : $_REQUEST['theme'];
+                $theme = wp_get_theme($theme_name);
                 $this->plugin->alerts->Trigger(5031, array(
                     'Theme' => (object)array(
                         'Name' => $theme->Name,
@@ -201,9 +202,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
                 ));
             }
         }
-        
+       
         // uninstall theme
-        if ($is_themes && in_array($action, array('delete-selected', 'delete')) && current_user_can("install_themes")) {
+        if (in_array($action, array('delete-theme')) && current_user_can("install_themes")) {
             foreach ($this->GetRemovedThemes() as $theme) {
                 $this->plugin->alerts->Trigger(5007, array(
                     'Theme' => (object)array(
@@ -247,7 +248,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
 
     public function EventPluginPostCreate($insert, $post)
     {
-        $WPActions = array('editpost', 'heartbeat', 'inline-save');
+        $WPActions = array('editpost', 'heartbeat', 'inline-save', 'trash', 'untrash');
         if (isset($_REQUEST['action']) && !in_array($_REQUEST['action'], $WPActions)) {
             if (!in_array($post->post_type, array('attachment', 'revision', 'nav_menu_item'))) {
                 $event = $this->GetEventTypeForPostType($post, 5019, 5020, 5021);
