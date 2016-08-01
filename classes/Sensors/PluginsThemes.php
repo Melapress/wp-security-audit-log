@@ -126,6 +126,22 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
             }
         }
         
+        // uninstall plugin for Wordpress version 4.6
+        if (in_array($action, array('delete-plugin')) && current_user_can("delete_plugins")) {
+            if (isset($_REQUEST['plugin'])) {
+                $pluginFile = WP_PLUGIN_DIR . '/' . $_REQUEST['plugin'];
+                $pluginName = basename($pluginFile, '.php');
+                $pluginName = str_replace(array('_', '-', '  '), ' ', $pluginName);
+                $pluginName = ucwords($pluginName);
+                $this->plugin->alerts->Trigger(5003, array(
+                    'PluginFile' => $pluginFile,
+                    'PluginData' => (object)array(
+                        'Name' => $pluginName,
+                    ),
+                ));
+            }
+        }
+        
         // upgrade plugin
         if (in_array($action, array('upgrade-plugin', 'update-plugin', 'update-selected')) && current_user_can("update_plugins")) {
             $plugins = array();

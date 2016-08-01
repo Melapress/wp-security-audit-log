@@ -125,6 +125,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                     + $this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post)
                     + $this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post)
                 ;
+                
+                if (!$changes) {
+                    $changes = $this->CheckDateChange($this->_OldPost, $post);
+                }
                 if (!$changes) {
                     $changes = $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
                 }
@@ -486,8 +490,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($this->CheckBBPress($oldpost)) {
             return;
         }
-        $changes = 0 + $this->CheckDateChange($oldpost, $newpost)
-            + $this->CheckTitleChange($oldpost, $newpost);
+        $changes = 0 + $this->CheckTitleChange($oldpost, $newpost);
         if (!$changes) {
             $contentChanged = $oldpost->post_content != $newpost->post_content; // TODO what about excerpts?
             
