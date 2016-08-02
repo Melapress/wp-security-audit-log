@@ -490,7 +490,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($this->CheckBBPress($oldpost)) {
             return;
         }
-        $changes = 0 + $this->CheckTitleChange($oldpost, $newpost);
+        $changes = $this->CheckTitleChange($oldpost, $newpost);
         if (!$changes) {
             $contentChanged = $oldpost->post_content != $newpost->post_content; // TODO what about excerpts?
             
