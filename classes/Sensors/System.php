@@ -138,7 +138,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if ($is_option_page && (get_option('users_can_register') xor isset($_POST['users_can_register']))) {
             $old = get_option('users_can_register') ? 'Enabled' : 'Disabled';
             $new = isset($_POST['users_can_register']) ? 'Enabled' : 'Disabled';
-            if ($old !== $new) {
+            if ($old != $new) {
                 $this->plugin->alerts->Trigger(6001, array(
                     'OldValue' => $old,
                     'NewValue' => $new,
@@ -150,7 +150,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if ($is_option_page && !empty($_POST['default_role'])) {
             $old = get_option('default_role');
             $new = trim($_POST['default_role']);
-            if ($old !== $new) {
+            if ($old != $new) {
                 $this->plugin->alerts->Trigger(6002, array(
                     'OldRole' => $old,
                     'NewRole' => $new,
@@ -162,7 +162,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if ($is_option_page && !empty($_POST['admin_email'])) {
             $old = get_option('admin_email');
             $new = trim($_POST['admin_email']);
-            if ($old !== $new) {
+            if ($old != $new) {
                 $this->plugin->alerts->Trigger(6003, array(
                     'OldEmail' => $old,
                     'NewEmail' => $new,
@@ -174,7 +174,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if ($is_network_settings && !empty($_POST['admin_email'])) {
             $old = get_site_option('admin_email');
             $new = trim($_POST['admin_email']);
-            if ($old !== $new) {
+            if ($old != $new) {
                 $this->plugin->alerts->Trigger(6003, array(
                     'OldEmail' => $old,
                     'NewEmail' => $new,
@@ -183,10 +183,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             }
         }
         
-        if ($is_permalink_page && !empty($_POST['permalink_structure'])) {
+        if ($is_permalink_page && !empty($_REQUEST['permalink_structure'])) {
             $old = get_option('permalink_structure');
-            $new = trim($_POST['permalink_structure']);
-            if ($old !== $new) {
+            $new = trim($_REQUEST['permalink_structure']);
+            if ($old != $new) {
                 $this->plugin->alerts->Trigger(6005, array(
                     'OldPattern' => $old,
                     'NewPattern' => $new,
@@ -198,7 +198,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if ($action == 'do-core-upgrade' && isset($_REQUEST['version'])) {
             $oldVersion = get_bloginfo('version');
             $newVersion = $_REQUEST['version'];
-            if ($oldVersion !== $newVersion) {
+            if ($oldVersion != $newVersion) {
                 $this->plugin->alerts->Trigger(6004, array(
                     'OldVersion' => $oldVersion,
                     'NewVersion' => $newVersion,
@@ -210,7 +210,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if ($action == 'update' && isset($_REQUEST['_bbp_default_role'])) {
             $oldRole = get_option('_bbp_default_role');
             $newRole = $_REQUEST['_bbp_default_role'];
-            if ($oldRole !== $newRole) {
+            if ($oldRole != $newRole) {
                 $this->plugin->alerts->Trigger(8009, array(
                     'OldRole' => $oldRole,
                     'NewRole' => $newRole
