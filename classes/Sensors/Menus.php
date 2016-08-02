@@ -38,7 +38,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
                             if ($oldItem['menu_order'] != $args['menu-item-position']) {
                                 $is_changed_order = true;
                             }
-                            if (isset($args['menu-item-parent-id']) && $args['menu-item-parent-id'] != 0) {
+                            if (!empty($args['menu-item-parent-id'])) {
                                 $is_sub_item = true;
                             }
                             if (!empty($args['menu-item-title']) && $oldItem['title'] != $args['menu-item-title']) {
