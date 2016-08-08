@@ -46,6 +46,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
             } catch (Exception $ex) {
                 ?><div class="error"><p><?php _e('Error: ', 'wp-security-audit-log'); ?><?php echo $ex->getMessage(); ?></p></div><?php
             }
+            $this->_plugin->SetGlobalOption('log-404', isset($_REQUEST['log_404']) ? 1 : 0);
+            $this->_plugin->SetGlobalOption('purge-log', isset($_REQUEST['purge_log']) ? 1 : 0);
         }
         ?><h2 id="wsal-tabs" class="nav-tab-wrapper"><?php
             foreach ($safeNames as $name => $safe) {
@@ -94,6 +96,20 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                     <td><?php echo $this->_plugin->constants->GetConstantBy('value', $alert->code)->name; ?></td>
                                     <td><?php echo esc_html($alert->desc); ?></td>
                                 </tr><?php
+                                if ($alert->type == 6007) {
+                                    $log_404 = $this->_plugin->GetGlobalOption('log-404', 0);
+                                    $purge_log = $this->_plugin->GetGlobalOption('purge-log', 0);
+                                    ?><tr>
+                                        <td></td>
+                                        <td><input name="log_404" type="checkbox" value="1" <?php if ($log_404) echo 'checked="checked"'; ?>></td>
+                                        <td colspan="2"><strong>Capture 404 requests to file (the log file are created in the /wp-content/uploads/404s/ directory)</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td><input name="purge_log" type="checkbox" value="1" <?php if ($purge_log) echo 'checked="checked"'; ?>></td>
+                                        <td colspan="2"><strong>Purge log files older than one month</strong></td>
+                                    </tr><?php
+                                }
                             }
                         ?></tbody>
                     </table><?php

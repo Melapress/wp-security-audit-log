@@ -11,6 +11,18 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
         add_action('automatic_updates_complete', array($this, 'WPUpdate'), 10, 1);
         add_filter('template_redirect', array($this, 'Event404'));
+
+        $upload_dir = wp_upload_dir();
+        $uploadsDirPath = trailingslashit($upload_dir['basedir']).'404s/';
+        if (!$this->CheckDirectory($uploadsDirPath)) {
+            wp_mkdir_p($uploadsDirPath);
+        }
+
+        // Cron Job 404 log files pruning
+        add_action('log_files_pruning', array($this,'LogFilesPruning'));
+        if (!wp_next_scheduled('log_files_pruning')) {
+            wp_schedule_event(time(), 'daily', 'log_files_pruning');
+        }
     }
     
     /**
@@ -27,7 +39,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
     protected function Get404LogLimit()
     {
-        return 10;
+        return 99;
     }
     
     protected function Get404Expiration()
@@ -60,6 +72,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     
     public function Event404()
     {
+        $attempts = 1;
         // Check if the alert is disabled from the "Enable/Disable Alerts" section
         if (!$this->plugin->alerts->IsEnabled(6007)) {
             return;
@@ -113,6 +126,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             $occ->UpdateMetaValue('Msg', $msg);
             $occ->created_on = null;
             $occ->Save();
+            $attempts = $new;
         } else {
             // create a new record
             $fields =  array(
@@ -121,6 +135,19 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 'Msg' => $msg
             );
             $this->plugin->alerts->Trigger(6007, $fields);
+        }
+
+        if ($this->plugin->GetGlobalOption('log-404', 0)) {
+            // Request URL
+            $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
+            // Create/Append to the log file
+            $data = 'Attempts: ' . $attempts . ' - Date: ' . date('Y-m-d H:i:s', current_time('timestamp')) . ' - Request URL: ' . $url;
+            if (!is_user_logged_in()) {
+                $username = '';
+            } else {
+                $username = '_' . $username;
+            }
+            $this->WriteLog($data, $ip, $username);
         }
     }
 
@@ -265,5 +292,76 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 'NewVersion' => $obj->item->version.' (auto update)'
             ));
         }
+    }
+
+    /**
+     * Purge log files older than one month
+     */
+    public function LogFilesPruning()
+    {
+        if ($this->plugin->GetGlobalOption('purge-log', 0)) {
+            $upload_dir = wp_upload_dir();
+            $uploadsDirPath = trailingslashit($upload_dir['basedir']).'404s/';
+            if (is_dir($uploadsDirPath)) {
+                if ($handle = opendir($uploadsDirPath)) {
+                    while (false !== ($entry = readdir($handle))) {
+                        if ($entry != "." && $entry != "..") {
+                            if (file_exists($uploadsDirPath . $entry)) {
+                                $modified = filemtime($uploadsDirPath . $entry);
+                                if ($modified < strtotime('-4 weeks')) {
+                                    // Delete file
+                                    unlink($uploadsDirPath . $entry);
+                                }
+                            }
+                        }
+                    }
+                    closedir($handle);
+                }
+            }
+        }
+    }
+
+    /**
+     * Write a new line on 404 log file
+     */
+    private function WriteLog($data, $ip, $username = '')
+    {
+        $upload_dir = wp_upload_dir();
+        $uploadsDirPath = trailingslashit($upload_dir['basedir']).'404s/';
+        // Check directory
+        if (is_dir($uploadsDirPath) && is_readable($uploadsDirPath) && is_writable($uploadsDirPath)) {
+            $fp = $uploadsDirPath . $ip . $username . '.log';
+
+            if (!$file = fopen($fp, 'a')) {
+                $i = 0;
+                do {
+                    $fp2 = substr($fp, 0, -4) . '_' . $i . '.log';
+                    if ($file = fopen($fp2, 'a')) {
+                        exit;
+                    }
+                } while ($i > 0);
+            }
+            fwrite($file, sprintf("%s\n", $data));
+            fclose($file);
+        }
+    }
+
+    /**
+     * Check to see whether or not the specified directory is accessible
+     * @param string $dirPath
+     * @return bool
+     */
+    private function CheckDirectory($dirPath)
+    {
+        if (!is_dir($dirPath)) {
+            return false;
+        }
+        if (!is_readable($dirPath)) {
+            return false;
+        }
+        if (!is_writable($dirPath)) {
+            return false;
+        }
+        return true;
     }
 }
