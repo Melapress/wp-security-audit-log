@@ -299,7 +299,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
      */
     public function LogFilesPruning()
     {
-        if ($this->plugin->GetGlobalOption('purge-log', 0)) {
+        if ($this->plugin->GetGlobalOption('purge-404-log', 0)) {
             $upload_dir = wp_upload_dir();
             $uploadsDirPath = trailingslashit($upload_dir['basedir']).'404s/';
             if (is_dir($uploadsDirPath)) {
@@ -333,13 +333,15 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             $fp = $uploadsDirPath . $ip . $username . '.log';
 
             if (!$file = fopen($fp, 'a')) {
-                $i = 0;
+                $i = 1;
+                $fileOpened = false;
                 do {
                     $fp2 = substr($fp, 0, -4) . '_' . $i . '.log';
                     if ($file = fopen($fp2, 'a')) {
-                        exit;
+                        $fileOpened = true;
                     }
-                } while ($i > 0);
+                    $i++;
+                } while (!$fileOpened);
             }
             fwrite($file, sprintf("%s\n", $data));
             fclose($file);

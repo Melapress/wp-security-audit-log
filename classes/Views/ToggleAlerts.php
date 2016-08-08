@@ -47,7 +47,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                 ?><div class="error"><p><?php _e('Error: ', 'wp-security-audit-log'); ?><?php echo $ex->getMessage(); ?></p></div><?php
             }
             $this->_plugin->SetGlobalOption('log-404', isset($_REQUEST['log_404']) ? 1 : 0);
-            $this->_plugin->SetGlobalOption('purge-log', isset($_REQUEST['purge_log']) ? 1 : 0);
+            $this->_plugin->SetGlobalOption('purge-404-log', isset($_REQUEST['purge_log']) ? 1 : 0);
         }
         ?><h2 id="wsal-tabs" class="nav-tab-wrapper"><?php
             foreach ($safeNames as $name => $safe) {
@@ -98,7 +98,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                 </tr><?php
                                 if ($alert->type == 6007) {
                                     $log_404 = $this->_plugin->GetGlobalOption('log-404', 0);
-                                    $purge_log = $this->_plugin->GetGlobalOption('purge-log', 0);
+                                    $purge_log = $this->_plugin->GetGlobalOption('purge-404-log', 0);
                                     ?><tr>
                                         <td></td>
                                         <td><input name="log_404" type="checkbox" value="1" <?php if ($log_404) echo 'checked="checked"'; ?>></td>
