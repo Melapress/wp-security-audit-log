@@ -102,12 +102,12 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                     ?><tr>
                                         <td></td>
                                         <td><input name="log_404" type="checkbox" value="1" <?php if ($log_404) echo 'checked="checked"'; ?>></td>
-                                        <td colspan="2"><strong>Capture 404 requests to file (the log file are created in the /wp-content/uploads/404s/ directory)</strong></td>
+                                        <td colspan="2"><?php _e('Capture 404 requests to file (the log file are created in the /wp-content/uploads/404s/ directory)', 'wp-security-audit-log'); ?></td>
                                     </tr>
                                     <tr>
                                         <td></td>
                                         <td><input name="purge_log" type="checkbox" value="1" <?php if ($purge_log) echo 'checked="checked"'; ?>></td>
-                                        <td colspan="2"><strong>Purge log files older than one month</strong></td>
+                                        <td colspan="2"><?php _e('Purge log files older than one month', 'wp-security-audit-log'); ?></td>
                                     </tr><?php
                                 }
                             }

@@ -13,7 +13,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         add_filter('template_redirect', array($this, 'Event404'));
 
         $upload_dir = wp_upload_dir();
-        $uploadsDirPath = trailingslashit($upload_dir['basedir']).'404s/';
+        $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/';
         if (!$this->CheckDirectory($uploadsDirPath)) {
             wp_mkdir_p($uploadsDirPath);
         }
@@ -141,11 +141,11 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             // Request URL
             $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
             // Create/Append to the log file
-            $data = 'Attempts: ' . $attempts . ' - Date: ' . date('Y-m-d H:i:s', current_time('timestamp')) . ' - Request URL: ' . $url;
+            $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
             if (!is_user_logged_in()) {
                 $username = '';
             } else {
-                $username = '_' . $username;
+                $username = $username . '_';
             }
             $this->WriteLog($data, $ip, $username);
         }
@@ -301,7 +301,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     {
         if ($this->plugin->GetGlobalOption('purge-404-log', 0)) {
             $upload_dir = wp_upload_dir();
-            $uploadsDirPath = trailingslashit($upload_dir['basedir']).'404s/';
+            $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/';
             if (is_dir($uploadsDirPath)) {
                 if ($handle = opendir($uploadsDirPath)) {
                     while (false !== ($entry = readdir($handle))) {
@@ -327,18 +327,25 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     private function WriteLog($data, $ip, $username = '')
     {
         $upload_dir = wp_upload_dir();
-        $uploadsDirPath = trailingslashit($upload_dir['basedir']).'404s/';
+        $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/';
         // Check directory
         if (is_dir($uploadsDirPath) && is_readable($uploadsDirPath) && is_writable($uploadsDirPath)) {
-            $fp = $uploadsDirPath . $ip . $username . '.log';
-
+            $filename = date('Ymd') . '_' . $username . $ip . '.log';
+            $fp = $uploadsDirPath . $filename;
             if (!$file = fopen($fp, 'a')) {
                 $i = 1;
                 $fileOpened = false;
                 do {
                     $fp2 = substr($fp, 0, -4) . '_' . $i . '.log';
-                    if ($file = fopen($fp2, 'a')) {
-                        $fileOpened = true;
+                    if (!file_exists($fp2)) {
+                        if ($file = fopen($fp2, 'a')) {
+                            $fileOpened = true;
+                        }
+                    } else {
+                        $fpLast = $this->GetLastModified($uploadsDirPath, $filename);
+                        if ($file = fopen($fpLast, 'a')) {
+                            $fileOpened = true;
+                        }
                     }
                     $i++;
                 } while (!$fileOpened);
@@ -346,6 +353,27 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             fwrite($file, sprintf("%s\n", $data));
             fclose($file);
         }
+    }
+
+    private function GetLastModified($uploadsDirPath, $filename)
+    {
+        $filename = substr($filename, 0, -4);
+        $latest_mtime = 0;
+        $latest_filename = '';
+        if ($handle = opendir($uploadsDirPath)) {
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry != "." && $entry != "..") {
+                    if (preg_match('/^'.$filename.'/i', $entry) > 0) {
+                        if (filemtime($uploadsDirPath . $entry) > $latest_mtime) {
+                            $latest_mtime = filemtime($uploadsDirPath . $entry);
+                            $latest_filename = $entry;
+                        }
+                    }
+                }
+            }
+            closedir($handle);
+        }
+        return $uploadsDirPath . $latest_filename;
     }
 
     /**
