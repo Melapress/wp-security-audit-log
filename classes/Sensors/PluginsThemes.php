@@ -169,20 +169,27 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
         
         // update theme
-        if (in_array($action, array('upgrade-theme', 'update-theme')) && current_user_can("install_themes")) {
+        if (in_array($action, array('upgrade-theme', 'update-theme', 'update-selected-themes')) && current_user_can("install_themes")) {
+            $themes = array();
             if (isset($_REQUEST['slug']) || isset($_REQUEST['theme'])) {
-                $theme_name = isset($_REQUEST['slug']) ? $_REQUEST['slug'] : $_REQUEST['theme'];
-                $theme = wp_get_theme($theme_name);
-                $this->plugin->alerts->Trigger(5031, array(
-                    'Theme' => (object)array(
-                        'Name' => $theme->Name,
-                        'ThemeURI' => $theme->ThemeURI,
-                        'Description' => $theme->Description,
-                        'Author' => $theme->Author,
-                        'Version' => $theme->Version,
-                        'get_template_directory' => $theme->get_template_directory(),
-                    ),
-                ));
+                $themes[] = isset($_REQUEST['slug']) ? $_REQUEST['slug'] : $_REQUEST['theme'];
+            } elseif (isset($_REQUEST['themes'])) {
+                $themes = explode(",", $_REQUEST['themes']);
+            }
+            if (isset($themes)) {
+                foreach ($themes as $theme_name) {
+                    $theme = wp_get_theme($theme_name);
+                    $this->plugin->alerts->Trigger(5031, array(
+                        'Theme' => (object)array(
+                            'Name' => $theme->Name,
+                            'ThemeURI' => $theme->ThemeURI,
+                            'Description' => $theme->Description,
+                            'Author' => $theme->Author,
+                            'Version' => $theme->Version,
+                            'get_template_directory' => $theme->get_template_directory(),
+                        ),
+                    ));
+                }
             }
         }
         

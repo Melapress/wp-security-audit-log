@@ -274,7 +274,7 @@ class WpSecurityAuditLog {
         // if system wasn't installed, try migration now
         if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
 
-        //setting the prunig date with the old value or the default value   
+        // setting the prunig date with the old value or the default value
         $pruningDate = $this->settings->GetPruningDate();
         $this->settings->SetPruningDate($pruningDate);
 
@@ -288,6 +288,18 @@ class WpSecurityAuditLog {
         // If old setting is empty disable alert 2099 by default
         if (empty($oldDisabled)) {
             $this->settings->SetDisabledAlerts(array(2099));
+        }
+
+        $log_404 = $this->GetGlobalOption('log-404');
+        // If old setting is empty enable 404 logging by default
+        if ($log_404 === false) {
+            $this->SetGlobalOption('log-404', 1);
+        }
+
+        $purge_log_404 = $this->GetGlobalOption('purge-404-log');
+        // If old setting is empty enable 404 purge log by default
+        if ($purge_log_404 === false) {
+            $this->SetGlobalOption('purge-404-log', 1);
         }
         
         // install cleanup hook (remove older one if it exists)
