@@ -178,7 +178,7 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 
 = 2.5.2 (2016-08-12) =
 
-Read the [WP Security Audit Log 2.5.2 release notes](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/frequently-asked-questions-faqs/) for more details on what is new.
+Read the [WP Security Audit Log 2.5.2 release notes](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/logging-404-requests-support-wordpress-4-6/) for more details on what is new.
 
 * **New Feature**
 	* Logging of 404 Requests to a Log file. Read this [FAQ](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-documentation/logging-404-requests-urls-logfile/) for more information on this functionality.
