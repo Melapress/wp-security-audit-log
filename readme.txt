@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.6
-Stable tag: 2.5.2
+Stable tag: 2.5.3
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -175,6 +175,11 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 9. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes with WP Security Audit Log Plugin](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
 
 == Changelog ==
+
+= 2.5.3 (2016-08-16) =
+
+* **Bug Fix**
+	* Enabled the 404 logging by default during upgrade and new install. Read this [FAQ](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-documentation/logging-404-requests-urls-logfile/) for more information on this functionality.
 
 = 2.5.2 (2016-08-12) =
 
