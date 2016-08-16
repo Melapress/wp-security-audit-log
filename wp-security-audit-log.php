@@ -331,6 +331,18 @@ class WpSecurityAuditLog {
         // disable all developer options
         //$this->settings->ClearDevOptions();
         
+        $log_404 = $this->GetGlobalOption('log-404');
+        // If old setting is empty enable 404 logging by default
+        if ($log_404 === false) {
+            $this->SetGlobalOption('log-404', 1);
+        }
+
+        $purge_log_404 = $this->GetGlobalOption('purge-404-log');
+        // If old setting is empty enable 404 purge log by default
+        if ($purge_log_404 === false) {
+            $this->SetGlobalOption('purge-404-log', 1);
+        }
+        
         // do version-to-version specific changes
         if(version_compare($old_version, '1.2.3') == -1){
             // ... an example
