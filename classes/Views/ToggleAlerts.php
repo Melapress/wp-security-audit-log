@@ -46,8 +46,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
             } catch (Exception $ex) {
                 ?><div class="error"><p><?php _e('Error: ', 'wp-security-audit-log'); ?><?php echo $ex->getMessage(); ?></p></div><?php
             }
-            $this->_plugin->SetGlobalOption('log-404', isset($_REQUEST['log_404']) ? 1 : 0);
-            $this->_plugin->SetGlobalOption('purge-404-log', isset($_REQUEST['purge_log']) ? 1 : 0);
+            $this->_plugin->SetGlobalOption('log-404', isset($_REQUEST['log_404']) ? 'on' : 'off');
+            $this->_plugin->SetGlobalOption('purge-404-log', isset($_REQUEST['purge_log']) ? 'on' : 'off');
         }
         ?><h2 id="wsal-tabs" class="nav-tab-wrapper"><?php
             foreach ($safeNames as $name => $safe) {
@@ -97,16 +97,16 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                     <td><?php echo esc_html($alert->desc); ?></td>
                                 </tr><?php
                                 if ($alert->type == 6007) {
-                                    $log_404 = $this->_plugin->GetGlobalOption('log-404', 0);
-                                    $purge_log = $this->_plugin->GetGlobalOption('purge-404-log', 0);
+                                    $log_404 = $this->_plugin->GetGlobalOption('log-404');
+                                    $purge_log = $this->_plugin->GetGlobalOption('purge-404-log');
                                     ?><tr>
                                         <td></td>
-                                        <td><input name="log_404" type="checkbox" value="1" <?php if ($log_404) echo 'checked="checked"'; ?>></td>
+                                        <td><input name="log_404" type="checkbox" value="1" <?php if ($log_404 == 'on') echo 'checked="checked"'; ?>></td>
                                         <td colspan="2"><?php _e('Capture 404 requests to file (the log file are created in the /wp-content/uploads/wp-security-audit-log/404s/ directory)', 'wp-security-audit-log'); ?></td>
                                     </tr>
                                     <tr>
                                         <td></td>
-                                        <td><input name="purge_log" type="checkbox" value="1" <?php if ($purge_log) echo 'checked="checked"'; ?>></td>
+                                        <td><input name="purge_log" type="checkbox" value="1" <?php if ($purge_log == 'on') echo 'checked="checked"'; ?>></td>
                                         <td colspan="2"><?php _e('Purge log files older than one month', 'wp-security-audit-log'); ?></td>
                                     </tr><?php
                                 }
