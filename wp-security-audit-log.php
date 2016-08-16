@@ -219,18 +219,17 @@ class WpSecurityAuditLog {
             //setting the prunig limit with the old value or the default value
             $pruningLimit = $this->settings->GetPruningLimit();
             $this->settings->SetPruningLimit($pruningLimit);
+        }
+        $log_404 = $this->GetGlobalOption('log-404');
+        // If old setting is empty enable 404 logging by default
+        if ($log_404 === false) {
+            $this->SetGlobalOption('log-404', 1);
+        }
 
-            $log_404 = $this->GetGlobalOption('log-404');
-            // If old setting is empty enable 404 logging by default
-            if ($log_404 === false) {
-                $this->SetGlobalOption('log-404', 1);
-            }
-
-            $purge_log_404 = $this->GetGlobalOption('purge-404-log');
-            // If old setting is empty enable 404 purge log by default
-            if ($purge_log_404 === false) {
-                $this->SetGlobalOption('purge-404-log', 1);
-            }
+        $purge_log_404 = $this->GetGlobalOption('purge-404-log');
+        // If old setting is empty enable 404 purge log by default
+        if ($purge_log_404 === false) {
+            $this->SetGlobalOption('purge-404-log', 1);
         }
         // load translations
         load_plugin_textdomain('wp-security-audit-log', false, basename(dirname(__FILE__)) . '/languages/');
@@ -330,18 +329,6 @@ class WpSecurityAuditLog {
         
         // disable all developer options
         //$this->settings->ClearDevOptions();
-        
-        $log_404 = $this->GetGlobalOption('log-404');
-        // If old setting is empty enable 404 logging by default
-        if ($log_404 === false) {
-            $this->SetGlobalOption('log-404', 1);
-        }
-
-        $purge_log_404 = $this->GetGlobalOption('purge-404-log');
-        // If old setting is empty enable 404 purge log by default
-        if ($purge_log_404 === false) {
-            $this->SetGlobalOption('purge-404-log', 1);
-        }
         
         // do version-to-version specific changes
         if(version_compare($old_version, '1.2.3') == -1){
