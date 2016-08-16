@@ -223,13 +223,13 @@ class WpSecurityAuditLog {
         $log_404 = $this->GetGlobalOption('log-404');
         // If old setting is empty enable 404 logging by default
         if ($log_404 === false) {
-            $this->SetGlobalOption('log-404', 1);
+            $this->SetGlobalOption('log-404', 'on');
         }
 
         $purge_log_404 = $this->GetGlobalOption('purge-404-log');
         // If old setting is empty enable 404 purge log by default
         if ($purge_log_404 === false) {
-            $this->SetGlobalOption('purge-404-log', 1);
+            $this->SetGlobalOption('purge-404-log', 'on');
         }
         // load translations
         load_plugin_textdomain('wp-security-audit-log', false, basename(dirname(__FILE__)) . '/languages/');
@@ -304,13 +304,13 @@ class WpSecurityAuditLog {
         $log_404 = $this->GetGlobalOption('log-404');
         // If old setting is empty enable 404 logging by default
         if ($log_404 === false) {
-            $this->SetGlobalOption('log-404', 1);
+            $this->SetGlobalOption('log-404', 'on');
         }
 
         $purge_log_404 = $this->GetGlobalOption('purge-404-log');
         // If old setting is empty enable 404 purge log by default
         if ($purge_log_404 === false) {
-            $this->SetGlobalOption('purge-404-log', 1);
+            $this->SetGlobalOption('purge-404-log', 'on');
         }
         
         // install cleanup hook (remove older one if it exists)
