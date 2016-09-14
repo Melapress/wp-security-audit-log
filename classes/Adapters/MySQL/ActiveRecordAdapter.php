@@ -345,7 +345,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         
         $sql .= ')';
         
-        if (! empty($_wpdb->charset)) {
+        if (!empty($_wpdb->charset)) {
             $sql .= ' DEFAULT CHARACTER SET ' . $_wpdb->charset;
         }
         
@@ -369,6 +369,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         global $wpdb;
         $tableUsers = $wpdb->users;
         $_wpdb = $this->connection;
+        $_wpdb->set_charset($_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci');
         // tables
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
         $tableMeta = $meta->GetTable(); // metadata
