@@ -4,7 +4,7 @@ Plugin Name: WP Security Audit Log
 Plugin URI: http://www.wpsecurityauditlog.com/
 Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
 Author: WP White Security
-Version: 2.5.1
+Version: 2.5.3
 Text Domain: wp-security-audit-log
 Author URI: http://www.wpsecurityauditlog.com/
 License: GPL2
@@ -220,6 +220,17 @@ class WpSecurityAuditLog {
             $pruningLimit = $this->settings->GetPruningLimit();
             $this->settings->SetPruningLimit($pruningLimit);
         }
+        $log_404 = $this->GetGlobalOption('log-404');
+        // If old setting is empty enable 404 logging by default
+        if ($log_404 === false) {
+            $this->SetGlobalOption('log-404', 'on');
+        }
+
+        $purge_log_404 = $this->GetGlobalOption('purge-404-log');
+        // If old setting is empty enable 404 purge log by default
+        if ($purge_log_404 === false) {
+            $this->SetGlobalOption('purge-404-log', 'on');
+        }
         // load translations
         load_plugin_textdomain('wp-security-audit-log', false, basename(dirname(__FILE__)) . '/languages/');
 
@@ -274,7 +285,7 @@ class WpSecurityAuditLog {
         // if system wasn't installed, try migration now
         if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
 
-        //setting the prunig date with the old value or the default value   
+        // setting the prunig date with the old value or the default value
         $pruningDate = $this->settings->GetPruningDate();
         $this->settings->SetPruningDate($pruningDate);
 
@@ -288,6 +299,18 @@ class WpSecurityAuditLog {
         // If old setting is empty disable alert 2099 by default
         if (empty($oldDisabled)) {
             $this->settings->SetDisabledAlerts(array(2099));
+        }
+
+        $log_404 = $this->GetGlobalOption('log-404');
+        // If old setting is empty enable 404 logging by default
+        if ($log_404 === false) {
+            $this->SetGlobalOption('log-404', 'on');
+        }
+
+        $purge_log_404 = $this->GetGlobalOption('purge-404-log');
+        // If old setting is empty enable 404 purge log by default
+        if ($purge_log_404 === false) {
+            $this->SetGlobalOption('purge-404-log', 'on');
         }
         
         // install cleanup hook (remove older one if it exists)

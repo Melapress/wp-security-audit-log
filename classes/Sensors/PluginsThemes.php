@@ -126,6 +126,22 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
             }
         }
         
+        // uninstall plugin for Wordpress version 4.6
+        if (in_array($action, array('delete-plugin')) && current_user_can("delete_plugins")) {
+            if (isset($_REQUEST['plugin'])) {
+                $pluginFile = WP_PLUGIN_DIR . '/' . $_REQUEST['plugin'];
+                $pluginName = basename($pluginFile, '.php');
+                $pluginName = str_replace(array('_', '-', '  '), ' ', $pluginName);
+                $pluginName = ucwords($pluginName);
+                $this->plugin->alerts->Trigger(5003, array(
+                    'PluginFile' => $pluginFile,
+                    'PluginData' => (object)array(
+                        'Name' => $pluginName,
+                    ),
+                ));
+            }
+        }
+        
         // upgrade plugin
         if (in_array($action, array('upgrade-plugin', 'update-plugin', 'update-selected')) && current_user_can("update_plugins")) {
             $plugins = array();
@@ -153,19 +169,27 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
         
         // update theme
-        if (in_array($action, array('upgrade-theme')) && current_user_can("install_themes")) {
-            if (isset($_REQUEST['theme'])) {
-                $theme = wp_get_theme($_REQUEST['theme']);
-                $this->plugin->alerts->Trigger(5031, array(
-                    'Theme' => (object)array(
-                        'Name' => $theme->Name,
-                        'ThemeURI' => $theme->ThemeURI,
-                        'Description' => $theme->Description,
-                        'Author' => $theme->Author,
-                        'Version' => $theme->Version,
-                        'get_template_directory' => $theme->get_template_directory(),
-                    ),
-                ));
+        if (in_array($action, array('upgrade-theme', 'update-theme', 'update-selected-themes')) && current_user_can("install_themes")) {
+            $themes = array();
+            if (isset($_REQUEST['slug']) || isset($_REQUEST['theme'])) {
+                $themes[] = isset($_REQUEST['slug']) ? $_REQUEST['slug'] : $_REQUEST['theme'];
+            } elseif (isset($_REQUEST['themes'])) {
+                $themes = explode(",", $_REQUEST['themes']);
+            }
+            if (isset($themes)) {
+                foreach ($themes as $theme_name) {
+                    $theme = wp_get_theme($theme_name);
+                    $this->plugin->alerts->Trigger(5031, array(
+                        'Theme' => (object)array(
+                            'Name' => $theme->Name,
+                            'ThemeURI' => $theme->ThemeURI,
+                            'Description' => $theme->Description,
+                            'Author' => $theme->Author,
+                            'Version' => $theme->Version,
+                            'get_template_directory' => $theme->get_template_directory(),
+                        ),
+                    ));
+                }
             }
         }
         
@@ -185,9 +209,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
                 ));
             }
         }
-        
+       
         // uninstall theme
-        if ($is_themes && in_array($action, array('delete-selected', 'delete')) && current_user_can("install_themes")) {
+        if (in_array($action, array('delete-theme')) && current_user_can("install_themes")) {
             foreach ($this->GetRemovedThemes() as $theme) {
                 $this->plugin->alerts->Trigger(5007, array(
                     'Theme' => (object)array(
@@ -231,7 +255,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
 
     public function EventPluginPostCreate($insert, $post)
     {
-        $WPActions = array('editpost', 'heartbeat', 'inline-save');
+        $WPActions = array('editpost', 'heartbeat', 'inline-save', 'trash', 'untrash');
         if (isset($_REQUEST['action']) && !in_array($_REQUEST['action'], $WPActions)) {
             if (!in_array($post->post_type, array('attachment', 'revision', 'nav_menu_item'))) {
                 $event = $this->GetEventTypeForPostType($post, 5019, 5020, 5021);
