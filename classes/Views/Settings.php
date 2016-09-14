@@ -70,6 +70,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
         $this->_plugin->settings->SetMainIPFromProxy(isset($_REQUEST['EnableProxyIpCapture']));
         $this->_plugin->settings->SetInternalIPsFiltering(isset($_REQUEST['EnableIpFiltering']));
         $this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
+        $this->_plugin->settings->SetLoggingDisabled(isset($_REQUEST['Logging']));
         $this->_plugin->settings->SetDeleteData(isset($_REQUEST['DeleteData']));
         $this->_plugin->settings->SetDatetimeFormat($_REQUEST['DatetimeFormat']);
         $this->_plugin->settings->SetTimezone($_REQUEST['Timezone']);
@@ -478,6 +479,26 @@ viewer though the plugin will still record such information in the database.', '
                         </td>
                     </tr>
                     <tr>
+                        <th><label for="Logging"><?php _e('Logging', 'wp-security-audit-log'); ?></label></th>
+                        <td>
+                            <fieldset>
+                                <label for="Logging">
+                                    <span class="f-container">
+                                        <span class="f-left">
+                                            <input type="checkbox" name="Logging" value="1" class="switch" id="logging_status"/>
+                                            <label for="logging_status"></label>
+                                        </span>
+                                        <span class="f-right f-text"><span id="logging_status_text"></span></span>
+                                    </span>
+                                </label>
+                                <br/>
+                                <span class="description">
+                                    <?php _e('Disable all plugin logging.', 'wp-security-audit-log'); ?>
+                                </span>
+                            </fieldset>
+                        </td>
+                    </tr>
+                    <tr>
                         <th><label for="DeleteData"><?php _e('Remove Data on Uninstall', 'wp-security-audit-log'); ?></label></th>
                         <td>
                             <fieldset>
@@ -491,6 +512,7 @@ viewer though the plugin will still record such information in the database.', '
                     </tr>
                     </tbody>
                 </table>
+                
                 <!-- End general Tab-->
                 <table class="form-table wsal-tab widefat" id="tab-exclude">
                     <tbody>
@@ -598,12 +620,35 @@ viewer though the plugin will still record such information in the database.', '
         <!--
             function delete_confirm(elementRef)
             {
-                if ( elementRef.checked )
+                if (elementRef.checked)
                 {
                     if ( window.confirm('Do you want remove all data when the plugin is deleted?') == false )
                     elementRef.checked = false;
                 } 
             }
+
+            jQuery(document).ready(function() {
+                var statusConfig = <?php  if ($this->_plugin->settings->IsLoggingDisabled()) { echo 1; } else { echo 0; } ?>;
+                var logging_status = jQuery('#logging_status');
+                var txtNot = jQuery('#logging_status_text');
+
+                function wsalUpdateLoggingStatus(checkbox, label){
+                    if (checkbox.prop('checked')) {
+                        label.text('On');
+                    } else {
+                        label.text('Off');
+                    }
+                }
+                // Set On
+                if (statusConfig) {
+                    logging_status.prop('checked', true);
+                }
+                wsalUpdateLoggingStatus(logging_status, txtNot);
+
+                logging_status.on('change', function() { 
+                    wsalUpdateLoggingStatus(logging_status, txtNot); 
+                });
+            });
         // -->
         </script><?php
     }
