@@ -334,6 +334,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             } else {
                 $username = $username . '_';
             }
+            
+            if ($ip == '127.0.0.1' || $ip == '::1') {
+                $ip = 'localhost';
+            }
             $upload_dir = wp_upload_dir();
             $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/';
             $uploadsURL = trailingslashit($upload_dir['baseurl']).'wp-security-audit-log/404s/';
