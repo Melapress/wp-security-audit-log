@@ -663,5 +663,13 @@ class WSAL_Settings {
     public function GetDisplayName(){
         return $this->_plugin->GetGlobalOption('display-name');
     }
+
+     public function Set404LogLimit($value){
+        return $this->_plugin->SetGlobalOption('log-404-limit', abs($value));
+    }
+
+    public function Get404LogLimit(){
+        return $this->_plugin->GetGlobalOption('log-404-limit', 99);;
+    }
     // </editor-fold>
 }

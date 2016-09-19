@@ -85,28 +85,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                 $this->_plugin->settings->SetDevOptionEnabled($opt, true);
             }
         }
-
-        // Database Adapter Settings
-        // Temporarily not used
-        /* Check Adapter config */
-        if (!empty($_REQUEST["AdapterUser"]) && ($_REQUEST['AdapterUser'] != '') && ($_REQUEST['AdapterName'] != '') && ($_REQUEST['AdapterHostname'] != '')) {
-            WSAL_Connector_ConnectorFactory::CheckConfig(
-                trim($_REQUEST['AdapterType']),
-                trim($_REQUEST['AdapterUser']),
-                trim($_REQUEST['AdapterPassword']),
-                trim($_REQUEST['AdapterName']),
-                trim($_REQUEST['AdapterHostname']),
-                trim($_REQUEST['AdapterBasePrefix'])
-            );
-
-            /* Setting Adapter config */
-            $this->_plugin->settings->SetAdapterConfig('adapter-type', $_REQUEST['AdapterType']);
-            $this->_plugin->settings->SetAdapterConfig('adapter-user', $_REQUEST['AdapterUser']);
-            $this->_plugin->settings->SetAdapterConfig('adapter-password', $_REQUEST['AdapterPassword']);
-            $this->_plugin->settings->SetAdapterConfig('adapter-name', $_REQUEST['AdapterName']);
-            $this->_plugin->settings->SetAdapterConfig('adapter-hostname', $_REQUEST['AdapterHostname']);
-            $this->_plugin->settings->SetAdapterConfig('adapter-base-prefix', $_REQUEST['AdapterBasePrefix']);
-        }
+        $this->_plugin->settings->Set404LogLimit($_REQUEST['404Limit']);
     }
     
     public function AjaxCheckSecurityToken()
@@ -144,9 +123,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView
         }
         ?>
         <h2 id="wsal-tabs" class="nav-tab-wrapper">
-            <a href="#tab-general" class="nav-tab">General</a>
-            <a href="#tab-exclude" class="nav-tab">Exclude Objects</a>
-            <!--<a href="#adapter" class="nav-tab">Data Storage Adapter</a>-->
+            <a href="#tab-general" class="nav-tab"><?php _e('General', 'wp-security-audit-log'); ?></a>
+            <a href="#tab-audit-log" class="nav-tab"><?php _e('Audit Log', 'wp-security-audit-log'); ?></a>
+            <a href="#tab-exclude" class="nav-tab"><?php _e('Exclude Objects', 'wp-security-audit-log'); ?></a>
         </h2>
         <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js"/></script>
         <form id="audit-log-settings" method="post">
@@ -157,8 +136,215 @@ class WSAL_Views_Settings extends WSAL_AbstractView
             <div id="audit-log-adverts">
             </div>
             <div class="nav-tabs">
+                <!-- First tab -->
                 <table class="form-table wsal-tab widefat" id="tab-general">
                     <tbody>
+                        <!-- From Email & Name -->
+                        <tr>
+                            <th><label for="FromEmail"><?php _e('From Email & Name', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <label for="FromEmail"><?php _e('Email Address', 'wp-security-audit-log'); ?></label>
+                                    <input type="email" id="FromEmail" name="FromEmail" value="<?php echo esc_attr($this->_plugin->settings->GetFromEmail()); ?>" />
+                                    &nbsp;
+                                    <label for="DisplayName"><?php _e('Display Name', 'wp-security-audit-log'); ?></label>
+                                    <input type="text" id="DisplayName" name="DisplayName" value="<?php echo esc_attr($this->_plugin->settings->GetDisplayName()); ?>" />
+                                </fieldset>
+                                <p class="description">
+                                    <?php
+                                        echo sprintf(
+                                            __('These email address and display name will be used as From details in the emails sent by the %s . Please ensure the mail server can relay emails with the domain of the specified email address.', 'wp-security-audit-log'),
+                                            '<a target="_blank" href="https://www.wpsecurityauditlog.com/plugin-extensions/">' . __('(premium add-ons)', 'wp-security-audit-log') . '</a>'
+                                        );
+                                    ?>
+                                </p>
+                            </td>
+                        </tr>
+                        <!-- Alerts Dashboard Widget -->
+                        <tr>
+                            <th><label for="dwoption_on"><?php _e('Alerts Dashboard Widget', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <?php $dwe = $this->_plugin->settings->IsWidgetsEnabled(); ?>
+                                    <label for="dwoption_on">
+                                        <input type="radio" name="EnableDashboardWidgets" id="dwoption_on" style="margin-top: 2px;" <?php if($dwe)echo 'checked="checked"'; ?> value="1">
+                                        <span><?php _e('On', 'wp-security-audit-log'); ?></span>
+                                    </label>
+                                    <br/>
+                                    <label for="dwoption_off">
+                                        <input type="radio" name="EnableDashboardWidgets" id="dwoption_off" style="margin-top: 2px;" <?php if(!$dwe)echo 'checked="checked"'; ?> value="0">
+                                        <span><?php _e('Off', 'wp-security-audit-log'); ?></span>
+                                    </label>
+                                    <br/>
+                                    <p class="description"><?php
+                                        echo sprintf(
+                                                __('Display a dashboard widget with the latest %d security alerts.', 'wp-security-audit-log'),
+                                                $this->_plugin->settings->GetDashboardWidgetMaxAlerts()
+                                            );
+                                    ?></p>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Reverse Proxy / Firewall Options -->
+                        <tr>
+                            <th><label for="pioption_on"><?php _e('Reverse Proxy / Firewall Options', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <label for="EnableProxyIpCapture">
+                                        <input type="checkbox" name="EnableProxyIpCapture" value="1" id="EnableProxyIpCapture"<?php
+                                            if($this->_plugin->settings->IsMainIPFromProxy())echo ' checked="checked"';
+                                        ?>/> <?php _e('WordPress running behind firewall or proxy', 'wp-security-audit-log'); ?><br/>
+                                        <span class="description"><?php _e('Enable this option if your WordPress is running behind a firewall or reverse proxy. When this option is enabled the plugin will retrieve the user\'s IP address from the proxy header.', 'wp-security-audit-log'); ?></span>
+                                    </label>
+                                    <br/>
+                                    <label for="EnableIpFiltering">
+                                        <input type="checkbox" name="EnableIpFiltering" value="1" id="EnableIpFiltering"<?php
+                                            if($this->_plugin->settings->IsInternalIPsFiltered())echo ' checked="checked"';
+                                        ?>/> <?php _e('Filter Internal IP Addresses', 'wp-security-audit-log'); ?><br/>
+                                        <span class="description"><?php _e('Enable this option to filter internal IP addresses from the proxy headers.', 'wp-security-audit-log'); ?></span>
+                                    </label>    
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Can Manage Plugin -->
+                        <tr>
+                            <th><label for="EditorQueryBox"><?php _e('Can Manage Plugin', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <input type="text" id="EditorQueryBox" style="float: left; display: block; width: 250px;">
+                                    <input type="button" id="EditorQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
+                                    <br style="clear: both;"/>
+                                    <p class="description"><?php
+                                        _e('Users and Roles in this list can manage the plugin settings', 'wp-security-audit-log');
+                                    ?></p>
+                                    <div id="EditorList"><?php
+                                        foreach($this->_plugin->settings->GetAllowedPluginEditors() as $item){
+                                            ?><span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
+                                                <input type="hidden" name="Editors[]" value="<?php echo esc_attr($item); ?>"/>
+                                                <?php echo esc_html($item); ?>
+                                                <a href="javascript:;" title="Remove">&times;</a>
+                                            </span><?php
+                                        }
+                                    ?></div>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Restrict Plugin Access -->
+                        <tr>
+                            <th><label for="RestrictAdmins"><?php _e('Restrict Plugin Access', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <input type="hidden" id="RestrictAdminsDefaultUser" value="<?php echo esc_attr(wp_get_current_user()->user_login); ?>"/>
+                                    <label for="RestrictAdmins">
+                                        <?php $ira = $this->_plugin->settings->IsRestrictAdmins(); ?>
+                                        <input type="checkbox" name="RestrictAdmins" id="RestrictAdmins"<?php if($ira)echo ' checked="checked"'; ?>/>
+                                        <span class="description">
+                                            <?php _e('By default all the administrators on this WordPress have access to manage this plugin.<br/>By enabling this option only the users specified in the two options above and your username will have access to view alerts and manage this plugin.', 'wp-security-audit-log'); ?>
+                                        </span>
+                                    </label>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Developer Options -->
+                        <tr>
+                            <th><label><?php _e('Developer Options', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <?php $any = $this->_plugin->settings->IsAnyDevOptionEnabled(); ?>
+                                    <a href="javascript:;" style="<?php if($any)echo 'display: none;'; ?>"
+                                       onclick="jQuery(this).hide().next().show();">Show Developer Options</a>
+                                    <div style="<?php if(!$any)echo 'display: none;'; ?>">
+                                        <p style="border-left: 3px solid #FFD000; padding: 2px 8px; margin-left: 6px; margin-bottom: 16px;"><?php
+                                            _e('Only enable these options on testing, staging and development websites. Enabling any of the settings below on LIVE websites may cause unintended side-effects including degraded performance.', 'wp-security-audit-log');
+                                        ?></p><?php
+                                        foreach (array(
+                                            WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array(
+                                                __('Data Inspector', 'wp-security-audit-log'),
+                                                __('View data logged for each triggered alert.', 'wp-security-audit-log')
+                                            ),
+                                            WSAL_Settings::OPT_DEV_PHP_ERRORS     => array(
+                                                __('PHP Errors', 'wp-security-audit-log'),
+                                                __('Enables sensor for alerts generated from PHP.', 'wp-security-audit-log')
+                                            ),
+                                            WSAL_Settings::OPT_DEV_REQUEST_LOG    => array(
+                                                __('Request Log', 'wp-security-audit-log'),
+                                                __('Enables logging request to file.', 'wp-security-audit-log')
+                                            ),
+                                            WSAL_Settings::OPT_DEV_BACKTRACE_LOG  => array(
+                                                __('Backtrace', 'wp-security-audit-log'),
+                                                __('Log full backtrace for PHP-generated alerts.', 'wp-security-audit-log')
+                                            ),
+                                        ) as $opt => $info) {
+                                            ?><label for="devoption_<?php echo $opt; ?>">
+                                                <input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
+                                                    if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="<?php echo $opt; ?>">
+                                                <span><?php echo $info[0]; ?></span>
+                                                <?php if (isset($info[1]) && $info[1]) { ?>
+                                                    <span class="description"> &mdash; <?php echo $info[1]; ?></span>
+                                                <?php }
+                                            ?></label><br/><?php
+                                        }
+                                    ?></div>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Hide Plugin in Plugins Page -->
+                        <tr>
+                            <th><label for="Incognito"><?php _e('Hide Plugin in Plugins Page', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <label for="Incognito">
+                                        <input type="checkbox" name="Incognito" value="1" id="Incognito"<?php
+                                            if ($this->_plugin->settings->IsIncognito()) echo ' checked="checked"';
+                                        ?>/> <?php _e('Hide', 'wp-security-audit-log'); ?>
+                                    </label>
+                                    <br/>
+                                    <span class="description">
+                                        <?php _e('To manually revert this setting set the value of option wsal-hide-plugin to 0 in the wp_options table.', 'wp-security-audit-log'); ?>
+                                    </span>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Logging -->
+                        <tr>
+                            <th><label for="Logging"><?php _e('Logging', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <label for="Logging">
+                                        <span class="f-container">
+                                            <span class="f-left">
+                                                <input type="checkbox" name="Logging" value="1" class="switch" id="logging_status"/>
+                                                <label for="logging_status"></label>
+                                            </span>
+                                            <span class="f-right f-text"><span id="logging_status_text"></span></span>
+                                        </span>
+                                    </label>
+                                    <br/>
+                                    <span class="description">
+                                        <?php _e('Disable all plugin logging.', 'wp-security-audit-log'); ?>
+                                    </span>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Remove Data on Uninstall -->
+                        <tr>
+                            <th><label for="DeleteData"><?php _e('Remove Data on Uninstall', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <label for="DeleteData">
+                                        <input type="checkbox" name="DeleteData" value="1" id="DeleteData"  onclick="return delete_confirm(this);"<?php
+                                            if ($this->_plugin->settings->IsDeleteData()) echo ' checked="checked"';
+                                        ?>/> <span class="description">Check this box if you would like remove all data when the plugin is deleted.</span>
+                                    </label>
+                                </fieldset>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Second tab -->
+                <table class="form-table wsal-tab widefat" id="tab-audit-log">
+                    <tbody>
+                        <!-- Security Alerts Pruning -->
                         <tr>
                             <th><label for="delete1"><?php _e('Security Alerts Pruning', 'wp-security-audit-log'); ?></label></th>
                             <td>
@@ -166,7 +352,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     <?php $text = __('(eg: 1 month)', 'wp-security-audit-log'); ?>
                                     <?php $nbld = !($this->_plugin->settings->IsPruningDateEnabled() || $this->_plugin->settings->IsPruningLimitEnabled()); ?>
                                     <label for="delete0">
-                                        <input type="radio" id="delete0" name="PruneBy" value="" <?php if($nbld)echo 'checked="checked"'; ?>/>
+                                        <input type="radio" id="delete0" name="PruneBy" value="" <?php if ($nbld) echo 'checked="checked"'; ?>/>
                                         <?php echo __('None', 'wp-security-audit-log'); ?>
                                     </label>
                                 </fieldset>
@@ -206,70 +392,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                 ?></p>
                             </td>
                         </tr>
-                        <tr>
-                            <th><label for="FromEmail"><?php _e('From Email & Name', 'wp-security-audit-log'); ?></label></th>
-                            <td>
-                                <fieldset>
-                                    <label for="FromEmail"><?php _e('Email Address', 'wp-security-audit-log'); ?></label>
-                                    <input type="email" id="FromEmail" name="FromEmail" value="<?php echo esc_attr($this->_plugin->settings->GetFromEmail()); ?>" />
-                                    &nbsp;
-                                    <label for="DisplayName"><?php _e('Display Name', 'wp-security-audit-log'); ?></label>
-                                    <input type="text" id="DisplayName" name="DisplayName" value="<?php echo esc_attr($this->_plugin->settings->GetDisplayName()); ?>" />
-                                </fieldset>
-                                <p class="description">
-                                    <?php
-                                        echo sprintf(
-                                            __('These email address and display name will be used as From details in the emails sent by the %s . Please ensure the mail server can relay emails with the domain of the specified email address.', 'wp-security-audit-log'),
-                                            '<a target="_blank" href="https://www.wpsecurityauditlog.com/plugin-extensions/">' . __('(premium add-ons)', 'wp-security-audit-log') . '</a>'
-                                        );
-                                    ?>
-                                </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><label for="dwoption_on"><?php _e('Alerts Dashboard Widget', 'wp-security-audit-log'); ?></label></th>
-                            <td>
-                                <fieldset>
-                                    <?php $dwe = $this->_plugin->settings->IsWidgetsEnabled(); ?>
-                                    <label for="dwoption_on">
-                                        <input type="radio" name="EnableDashboardWidgets" id="dwoption_on" style="margin-top: 2px;" <?php if($dwe)echo 'checked="checked"'; ?> value="1">
-                                        <span><?php _e('On', 'wp-security-audit-log'); ?></span>
-                                    </label>
-                                    <br/>
-                                    <label for="dwoption_off">
-                                        <input type="radio" name="EnableDashboardWidgets" id="dwoption_off" style="margin-top: 2px;" <?php if(!$dwe)echo 'checked="checked"'; ?> value="0">
-                                        <span><?php _e('Off', 'wp-security-audit-log'); ?></span>
-                                    </label>
-                                    <br/>
-                                    <p class="description"><?php
-                                        echo sprintf(
-                                                __('Display a dashboard widget with the latest %d security alerts.', 'wp-security-audit-log'),
-                                                $this->_plugin->settings->GetDashboardWidgetMaxAlerts()
-                                            );
-                                    ?></p>
-                                </fieldset>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><label for="pioption_on"><?php _e('Reverse Proxy / Firewall Options', 'wp-security-audit-log'); ?></label></th>
-                            <td>
-                                <fieldset>
-                                    <label for="EnableProxyIpCapture">
-                                        <input type="checkbox" name="EnableProxyIpCapture" value="1" id="EnableProxyIpCapture"<?php
-                                            if($this->_plugin->settings->IsMainIPFromProxy())echo ' checked="checked"';
-                                        ?>/> <?php _e('WordPress running behind firewall or proxy', 'wp-security-audit-log'); ?><br/>
-                                        <span class="description"><?php _e('Enable this option if your WordPress is running behind a firewall or reverse proxy. When this option is enabled the plugin will retrieve the user\'s IP address from the proxy header.', 'wp-security-audit-log'); ?></span>
-                                    </label>
-                                    <br/>
-                                    <label for="EnableIpFiltering">
-                                        <input type="checkbox" name="EnableIpFiltering" value="1" id="EnableIpFiltering"<?php
-                                            if($this->_plugin->settings->IsInternalIPsFiltered())echo ' checked="checked"';
-                                        ?>/> <?php _e('Filter Internal IP Addresses', 'wp-security-audit-log'); ?><br/>
-                                        <span class="description"><?php _e('Enable this option to filter internal IP addresses from the proxy headers.', 'wp-security-audit-log'); ?></span>
-                                    </label>    
-                                </fieldset>
-                            </td>
-                        </tr>
+                        <!-- Can View Alerts -->
                         <tr>
                             <th><label for="ViewerQueryBox"><?php _e('Can View Alerts', 'wp-security-audit-log'); ?></label></th>
                             <td>
@@ -292,228 +415,117 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                 </fieldset>
                             </td>
                         </tr>
+                        <!-- Refresh Audit Log Viewer -->
                         <tr>
-                            <th><label for="EditorQueryBox"><?php _e('Can Manage Plugin', 'wp-security-audit-log'); ?></label></th>
+                            <th><label for="aroption_on"><?php _e('Refresh Audit Log Viewer', 'wp-security-audit-log'); ?></label></th>
                             <td>
                                 <fieldset>
-                                    <input type="text" id="EditorQueryBox" style="float: left; display: block; width: 250px;">
-                                    <input type="button" id="EditorQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
-                                    <br style="clear: both;"/>
-                                    <p class="description"><?php
-                                        _e('Users and Roles in this list can manage the plugin settings', 'wp-security-audit-log');
-                                    ?></p>
-                                    <div id="EditorList"><?php
-                                        foreach($this->_plugin->settings->GetAllowedPluginEditors() as $item){
-                                            ?><span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
-                                                <input type="hidden" name="Editors[]" value="<?php echo esc_attr($item); ?>"/>
-                                                <?php echo esc_html($item); ?>
-                                                <a href="javascript:;" title="Remove">&times;</a>
-                                            </span><?php
-                                        }
-                                    ?></div>
-                                </fieldset>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th><label for="RestrictAdmins"><?php _e('Restrict Plugin Access', 'wp-security-audit-log'); ?></label></th>
-                            <td>
-                                <fieldset>
-                                    <input type="hidden" id="RestrictAdminsDefaultUser" value="<?php echo esc_attr(wp_get_current_user()->user_login); ?>"/>
-                                    <label for="RestrictAdmins">
-                                        <?php $ira = $this->_plugin->settings->IsRestrictAdmins(); ?>
-                                        <input type="checkbox" name="RestrictAdmins" id="RestrictAdmins"<?php if($ira)echo ' checked="checked"'; ?>/>
-                                        <span class="description">
-                                            <?php _e('By default all the administrators on this WordPress have access to manage this plugin.<br/>By enabling this option only the users specified in the two options above and your username will have access to view alerts and manage this plugin.', 'wp-security-audit-log'); ?>
-                                        </span>
+                                    <?php $are = $this->_plugin->settings->IsRefreshAlertsEnabled(); ?>
+                                    <label for="aroption_on">
+                                        <input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: 2px;" <?php if($are)echo 'checked="checked"'; ?> value="1">
+                                        <span><?php _e('Automatic', 'wp-security-audit-log'); ?></span>
                                     </label>
+                                    <span class="description"> &mdash; <?php _e('Refresh Audit Log Viewer as soon as there are new alerts.', 'wp-security-audit-log'); ?></span>
+                                    <br/>
+                                    <label for="aroption_off">
+                                        <input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: 2px;" <?php if(!$are)echo 'checked="checked"'; ?> value="0">
+                                        <span><?php _e('Manual', 'wp-security-audit-log'); ?></span>
+                                    </label>
+                                    <span class="description"> &mdash; <?php _e('Refresh Audit Log Viewer only when the page is reloaded.', 'wp-security-audit-log'); ?></span>
+                                    <br/>
                                 </fieldset>
                             </td>
                         </tr>
+                        <!-- Alerts Time Format -->
                         <tr>
-                        <th><label for="aroption_on"><?php _e('Refresh Audit Log Viewer', 'wp-security-audit-log'); ?></label></th>
-                        <td>
-                            <fieldset>
-                                <?php $are = $this->_plugin->settings->IsRefreshAlertsEnabled(); ?>
-                                <label for="aroption_on">
-                                    <input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: 2px;" <?php if($are)echo 'checked="checked"'; ?> value="1">
-                                    <span><?php _e('Automatic', 'wp-security-audit-log'); ?></span>
-                                </label>
-                                <span class="description"> &mdash; <?php _e('Refresh Audit Log Viewer as soon as there are new alerts.', 'wp-security-audit-log'); ?></span>
-                                <br/>
-                                <label for="aroption_off">
-                                    <input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: 2px;" <?php if(!$are)echo 'checked="checked"'; ?> value="0">
-                                    <span><?php _e('Manual', 'wp-security-audit-log'); ?></span>
-                                </label>
-                                <span class="description"> &mdash; <?php _e('Refresh Audit Log Viewer only when the page is reloaded.', 'wp-security-audit-log'); ?></span>
-                                <br/>
-                            </fieldset>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><label for="datetime_format_24"><?php _e('Alerts Time Format', 'wp-security-audit-log'); ?></label></th>
-                        <td>
-                            <fieldset>
-                                <?php $datetime = $this->_plugin->settings->GetDatetimeFormat(); ?>
-                                <label for="datetime_format_24">
-                                    <input type="radio" name="DatetimeFormat" id="datetime_format_24" style="margin-top: 2px;" <?php if($datetime)echo 'checked="checked"'; ?> value="1">
-                                    <span><?php _e('24 hours', 'wp-security-audit-log'); ?></span>
-                                </label>
-                                <br/>
-                                <label for="datetime_format_default">
-                                    <input type="radio" name="DatetimeFormat" id="datetime_format_default" style="margin-top: 2px;" <?php if(!$datetime)echo 'checked="checked"'; ?> value="0">
-                                    <span><?php _e('AM/PM', 'wp-security-audit-log'); ?></span>
-                                </label>
-                                <br/>
-                            </fieldset>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><label for="timezone-default"><?php _e('Alerts Timestamp', 'wp-security-audit-log'); ?></label></th>
-                        <td>
-                            <fieldset>
-                                <?php $timezone = $this->_plugin->settings->GetTimezone(); ?>
-                                <label for="timezone-default">
-                                    <input type="radio" name="Timezone" id="timezone-default" style="margin-top: 2px;" <?php if(!$timezone)echo 'checked="checked"'; ?> value="0">
-                                    <span><?php _e('UTC', 'wp-security-audit-log'); ?></span>
-                                </label>
-                                <br/>
-                                <label for="timezone">
-                                    <input type="radio" name="Timezone" id="timezone" style="margin-top: 2px;" <?php if($timezone)echo 'checked="checked"'; ?> value="1">
-                                    <span><?php _e('WordPress\' timezone', 'wp-security-audit-log'); ?></span>
-                                </label>
-                                <br/>
-                                <span class="description"><?php _e('Select which timestamp should the alerts have in the Audit Log viewer. Note that the WordPress\' timezone might be different from that of the server.', 'wp-security-audit-log'); ?></span>
-                            </fieldset>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><label for="columns"><?php _e('Audit Log Columns Selection', 'wp-security-audit-log'); ?></label></th>
-                        <td>
-                            <fieldset>
-                                <?php $columns = $this->_plugin->settings->GetColumns(); ?>
-                                <?php foreach ($columns as $key => $value) { ?>
-                                    <label for="columns">
-                                        <input type="checkbox" name="Columns[<?php echo $key; ?>]" id="<?php echo $key; ?>" class="sel-columns" style="margin-top: 2px;" <?php if ($value == '1') echo 'checked="checked"'; ?> value="1">
-                                        <span><?php echo ucwords(str_replace("_", " ", $key)); ?></span>
+                            <th><label for="datetime_format_24"><?php _e('Alerts Time Format', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <?php $datetime = $this->_plugin->settings->GetDatetimeFormat(); ?>
+                                    <label for="datetime_format_24">
+                                        <input type="radio" name="DatetimeFormat" id="datetime_format_24" style="margin-top: 2px;" <?php if($datetime)echo 'checked="checked"'; ?> value="1">
+                                        <span><?php _e('24 hours', 'wp-security-audit-log'); ?></span>
                                     </label>
                                     <br/>
-                                <?php } ?>
-                                <span class="description"><?php _e('When you disable any of the above such details won’t be shown in the Audit Log
-viewer though the plugin will still record such information in the database.', 'wp-security-audit-log'); ?></span>
-                            </fieldset>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><label><?php _e('Developer Options', 'wp-security-audit-log'); ?></label></th>
-                        <td>
-                            <fieldset>
-                                <?php $any = $this->_plugin->settings->IsAnyDevOptionEnabled(); ?>
-                                <a href="javascript:;" style="<?php if($any)echo 'display: none;'; ?>"
-                                   onclick="jQuery(this).hide().next().show();">Show Developer Options</a>
-                                <div style="<?php if(!$any)echo 'display: none;'; ?>">
-                                    <p style="border-left: 3px solid #FFD000; padding: 2px 8px; margin-left: 6px; margin-bottom: 16px;"><?php
-                                        _e('Only enable these options on testing, staging and development websites. Enabling any of the settings below on LIVE websites may cause unintended side-effects including degraded performance.', 'wp-security-audit-log');
-                                    ?></p><?php
-                                    foreach (array(
-                                        WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array(
-                                            __('Data Inspector', 'wp-security-audit-log'),
-                                            __('View data logged for each triggered alert.', 'wp-security-audit-log')
-                                        ),
-                                        WSAL_Settings::OPT_DEV_PHP_ERRORS     => array(
-                                            __('PHP Errors', 'wp-security-audit-log'),
-                                            __('Enables sensor for alerts generated from PHP.', 'wp-security-audit-log')
-                                        ),
-                                        WSAL_Settings::OPT_DEV_REQUEST_LOG    => array(
-                                            __('Request Log', 'wp-security-audit-log'),
-                                            __('Enables logging request to file.', 'wp-security-audit-log')
-                                        ),
-                                        WSAL_Settings::OPT_DEV_BACKTRACE_LOG  => array(
-                                            __('Backtrace', 'wp-security-audit-log'),
-                                            __('Log full backtrace for PHP-generated alerts.', 'wp-security-audit-log')
-                                        ),
-                                    ) as $opt => $info) {
-                                        ?><label for="devoption_<?php echo $opt; ?>">
-                                            <input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
-                                                if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="<?php echo $opt; ?>">
-                                            <span><?php echo $info[0]; ?></span>
-                                            <?php if (isset($info[1]) && $info[1]) { ?>
-                                                <span class="description"> &mdash; <?php echo $info[1]; ?></span>
-                                            <?php }
-                                        ?></label><br/><?php
-                                    }
-                                ?></div>
-                            </fieldset>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <th><label for="Incognito"><?php _e('Hide Plugin in Plugins Page', 'wp-security-audit-log'); ?></label></th>
-                        <td>
-                            <fieldset>
-                                <label for="Incognito">
-                                    <input type="checkbox" name="Incognito" value="1" id="Incognito"<?php
-                                        if ($this->_plugin->settings->IsIncognito()) echo ' checked="checked"';
-                                    ?>/> <?php _e('Hide', 'wp-security-audit-log'); ?>
-                                </label>
-                                <br/>
-                                <span class="description">
-                                    <?php _e('To manually revert this setting set the value of option wsal-hide-plugin to 0 in the wp_options table.', 'wp-security-audit-log'); ?>
-                                </span>
-                            </fieldset>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><label for="DeleteData"><?php _e('Disable Alerts for WordPress Background Activity', 'wp-security-audit-log'); ?></label></th>
-                        <td>
-                            <fieldset>
-                                <label for="WPBackend">
-                                    <input type="checkbox" name="WPBackend" value="1" id="WPBackend" <?php
-                                        if ($this->_plugin->settings->IsWPBackend()) echo ' checked="checked"';
-                                    ?>/> <?php _e('Hide activity', 'wp-security-audit-log'); ?>
-                                </label>
-                                <br/>
-                                <span class="description">
-                                    <?php _e('For example do not raise an alert when WordPress deletes the auto drafts.', 'wp-security-audit-log'); ?>
-                                </span>
-                            </fieldset>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><label for="Logging"><?php _e('Logging', 'wp-security-audit-log'); ?></label></th>
-                        <td>
-                            <fieldset>
-                                <label for="Logging">
-                                    <span class="f-container">
-                                        <span class="f-left">
-                                            <input type="checkbox" name="Logging" value="1" class="switch" id="logging_status"/>
-                                            <label for="logging_status"></label>
-                                        </span>
-                                        <span class="f-right f-text"><span id="logging_status_text"></span></span>
+                                    <label for="datetime_format_default">
+                                        <input type="radio" name="DatetimeFormat" id="datetime_format_default" style="margin-top: 2px;" <?php if(!$datetime)echo 'checked="checked"'; ?> value="0">
+                                        <span><?php _e('AM/PM', 'wp-security-audit-log'); ?></span>
+                                    </label>
+                                    <br/>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Alerts Timestamp -->
+                        <tr>
+                            <th><label for="timezone-default"><?php _e('Alerts Timestamp', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <?php $timezone = $this->_plugin->settings->GetTimezone(); ?>
+                                    <label for="timezone-default">
+                                        <input type="radio" name="Timezone" id="timezone-default" style="margin-top: 2px;" <?php if(!$timezone)echo 'checked="checked"'; ?> value="0">
+                                        <span><?php _e('UTC', 'wp-security-audit-log'); ?></span>
+                                    </label>
+                                    <br/>
+                                    <label for="timezone">
+                                        <input type="radio" name="Timezone" id="timezone" style="margin-top: 2px;" <?php if($timezone)echo 'checked="checked"'; ?> value="1">
+                                        <span><?php _e('WordPress\' timezone', 'wp-security-audit-log'); ?></span>
+                                    </label>
+                                    <br/>
+                                    <span class="description"><?php _e('Select which timestamp should the alerts have in the Audit Log viewer. Note that the WordPress\' timezone might be different from that of the server.', 'wp-security-audit-log'); ?></span>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Audit Log Columns Selection -->
+                        <tr>
+                            <th><label for="columns"><?php _e('Audit Log Columns Selection', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <?php $columns = $this->_plugin->settings->GetColumns(); ?>
+                                    <?php foreach ($columns as $key => $value) { ?>
+                                        <label for="columns">
+                                            <input type="checkbox" name="Columns[<?php echo $key; ?>]" id="<?php echo $key; ?>" class="sel-columns" style="margin-top: 2px;" <?php if ($value == '1') echo 'checked="checked"'; ?> value="1">
+                                            <span><?php echo ucwords(str_replace("_", " ", $key)); ?></span>
+                                        </label>
+                                        <br/>
+                                    <?php } ?>
+                                    <span class="description"><?php _e('When you disable any of the above such details won’t be shown in the Audit Log
+    viewer though the plugin will still record such information in the database.', 'wp-security-audit-log'); ?></span>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Disable Alerts for WordPress Background activity -->
+                        <tr>
+                            <th><label for="DeleteData"><?php _e('Disable Alerts for WordPress Background Activity', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <label for="WPBackend">
+                                        <input type="checkbox" name="WPBackend" value="1" id="WPBackend" <?php
+                                            if ($this->_plugin->settings->IsWPBackend()) echo ' checked="checked"';
+                                        ?>/> <?php _e('Hide activity', 'wp-security-audit-log'); ?>
+                                    </label>
+                                    <br/>
+                                    <span class="description">
+                                        <?php _e('For example do not raise an alert when WordPress deletes the auto drafts.', 'wp-security-audit-log'); ?>
                                     </span>
-                                </label>
-                                <br/>
-                                <span class="description">
-                                    <?php _e('Disable all plugin logging.', 'wp-security-audit-log'); ?>
-                                </span>
-                            </fieldset>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><label for="DeleteData"><?php _e('Remove Data on Uninstall', 'wp-security-audit-log'); ?></label></th>
-                        <td>
-                            <fieldset>
-                                <label for="DeleteData">
-                                    <input type="checkbox" name="DeleteData" value="1" id="DeleteData"  onclick="return delete_confirm(this);"<?php
-                                        if ($this->_plugin->settings->IsDeleteData()) echo ' checked="checked"';
-                                    ?>/> <span class="description">Check this box if you would like remove all data when the plugin is deleted.</span>
-                                </label>
-                            </fieldset>
-                        </td>
-                    </tr>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Number of 404 Requests to Log -->
+                        <tr>
+                            <th><label for="404Limit"><?php _e('Number of 404 Requests to Log', 'wp-security-audit-log'); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <input type="number" id="404Limit" name="404Limit" value="<?php echo $this->_plugin->settings->Get404LogLimit(); ?>" />
+                                </fieldset>
+                                <p class="description">
+                                    <?php _e('By default the plugin keeps a log of 99 requests to non-existing pages. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log'); ?><br />
+                                    <?php _e('Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log'); ?>
+                                </p>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
-                
-                <!-- End general Tab-->
+                <!-- Third tab -->
                 <table class="form-table wsal-tab widefat" id="tab-exclude">
                     <tbody>
                         <tr>
@@ -522,6 +534,7 @@ viewer though the plugin will still record such information in the database.', '
                         <tr>
                             <td colspan="2">Any of the users and roles listed in the below options will be excluded from monitoring. This means that any change they do will not be logged.</td>
                         </tr>
+                        <!-- Excluded Users -->
                         <tr>
                             <th><label for="ExUserQueryBox"><?php _e('Excluded Users', 'wp-security-audit-log'); ?></label></th>
                             <td>
@@ -541,6 +554,7 @@ viewer though the plugin will still record such information in the database.', '
                                 </fieldset>
                             </td>
                         </tr>
+                        <!-- Excluded Roles -->
                         <tr>
                             <th><label for="ExRoleQueryBox"><?php _e('Excluded Roles', 'wp-security-audit-log'); ?></label></th>
                             <td>
@@ -567,6 +581,7 @@ viewer though the plugin will still record such information in the database.', '
                             <td colspan="2">All of the custom fields listed below will be excluded from monitoring. This means that if they are changed or updated the plugin will not log such activity.<br>
                             You can use the * wildcard to exclude more than one Custom Field. For example to exclude all the Custom Fields that start with wp123 specify wp123*.</td>
                         </tr>
+                        <!-- Excluded Custom Fields -->
                         <tr>
                             <th><label for="CustomQueryBox"><?php _e('Excluded Custom Fields', 'wp-security-audit-log'); ?></label></th>
                             <td>
@@ -592,6 +607,7 @@ viewer though the plugin will still record such information in the database.', '
                         <tr>
                             <td colspan="2">Any of the IP addresses listed below will be excluded from monitoring. This means that all activity from such IP address will not be recorded.</td>
                         </tr>
+                        <!-- Excluded IP Addresses -->
                         <tr>
                             <th><label for="IpAddrQueryBox"><?php _e('Excluded IP Addresses', 'wp-security-audit-log'); ?></label></th>
                             <td>

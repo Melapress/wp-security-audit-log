@@ -39,7 +39,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
     protected function Get404LogLimit()
     {
-        return 99;
+        return $this->plugin->settings->Get404LogLimit();
     }
     
     protected function Get404Expiration()
