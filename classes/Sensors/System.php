@@ -124,8 +124,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
             $linkFile = $this->WriteLog($new, $ip, $username);
 
-            error_log($linkFile);
-
             $occ->UpdateMetaValue('Attempts', $new);
             $occ->UpdateMetaValue('Username', $username);
             $occ->UpdateMetaValue('Msg', $msg);
@@ -321,6 +319,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
     /**
      * Write a new line on 404 log file
+     * Folder: /uploads/wp-security-audit-log/404s/
      */
     private function WriteLog($attempts, $ip, $username = '')
     {
