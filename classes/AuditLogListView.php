@@ -340,6 +340,9 @@ class WSAL_AuditLogListView extends WP_List_Table
                     return '<i>unknown</i>';
                 }
 
+            case $name == '%LinkFile%':
+                return '<a href="'.esc_url($value).'" download>Download the Log file</a>';
+
             case strncmp($value, 'http://', 7) === 0:
             case strncmp($value, 'https://', 7) === 0:
                 return '<a href="' . esc_html($value) . '"'
