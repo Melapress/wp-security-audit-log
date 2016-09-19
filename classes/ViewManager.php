@@ -239,6 +239,11 @@ class WSAL_ViewManager {
                     $not_show = true;
                 }
                 break;
+            case 'DB External':
+                if (class_exists('WSAL_Ext_Plugin')) {
+                    $not_show = true;
+                }
+                break;
         }
         return $not_show;
     }
