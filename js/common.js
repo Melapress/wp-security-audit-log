@@ -18,4 +18,5 @@ jQuery(document).ready(function(){
 	jQuery("a[href*='page=wsal-loginusers']").css('color', '#CC4444');
 	jQuery("a[href*='page=wsal-reports']").css('color', '#CC4444');
 	jQuery("a[href*='page=wsal-search']").css('color', '#CC4444');
+	jQuery("a[href*='page=wsal-externaldb']").css('color', '#CC4444');
 });
