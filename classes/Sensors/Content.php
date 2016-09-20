@@ -17,6 +17,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         add_action('publish_future_post', array($this, 'EventPublishFuture'), 10, 1);
         // to do change with 'create_term' instead 'create_category' for trigger Tags
         add_action('create_category', array($this, 'EventCategoryCreation'), 10, 1);
+
+        add_action('single_post_title', array($this, 'ViewingPost'), 10, 2);
+        add_filter('post_edit_form_tag', array($this, 'EditingPost'), 10, 1);
     }
     
     protected function GetEventTypeForPostType($post, $typePost, $typePage, $typeCustom)
@@ -667,6 +670,41 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 if (!empty($revisionLink)) {
                     $occ->SetMetaValue('RevisionLink', $revisionLink);
                 }
+            }
+        }
+    }
+
+    /**
+     * Alerts for Viewing of Posts, Pages and Custom Posts
+     */
+    public function ViewingPost($title, $post = null)
+    {
+        if (is_user_logged_in()) {
+            if (!is_admin()) {
+                $event = $this->GetEventTypeForPostType($post, 2101, 2103, 2105);
+                $this->plugin->alerts->Trigger($event, array(
+                    'PostType' => $post->post_type,
+                    'PostTitle' => $post->post_title,
+                    'PostUrl' => get_permalink($post->ID)
+                ));
+            }
+        }
+    }
+
+    /**
+     * Alerts for Editing of Posts, Pages and Custom Posts
+     */
+    public function EditingPost($post)
+    {
+        if (is_user_logged_in()) {
+            if (is_admin()) {
+                $event = $this->GetEventTypeForPostType($post, 2100, 2102, 2104);
+                $editorLink = $this->GetEditorLink($post);
+                $this->plugin->alerts->Trigger($event, array(
+                    'PostType' => $post->post_type,
+                    'PostTitle' => $post->post_title,
+                    $editorLink['name'] => $editorLink['value']
+                ));
             }
         }
     }

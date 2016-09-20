@@ -92,7 +92,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
             array(2072, E_NOTICE, __('User modified content of a post', 'wp-security-audit-log'), __('Modified the content of post %PostTitle% which is submitted for review.'.'%RevisionLink%'.' %EditorLinkPost%.', 'wp-security-audit-log')),
             array(2073, E_NOTICE, __('User submitted a post for review', 'wp-security-audit-log'), __('Submitted the post %PostTitle% for review. %EditorLinkPost%.', 'wp-security-audit-log')),
             array(2074, E_NOTICE, __('User scheduled a post', 'wp-security-audit-log'), __('Scheduled the post %PostTitle% to be published %PublishingDate%. %EditorLinkPost%.', 'wp-security-audit-log')),
-            array(2086, E_NOTICE, __('User changed title of a post', 'wp-security-audit-log'), __('Changed the title of the post %OldTitle% to %NewTitle%. %EditorLinkPost%.', 'wp-security-audit-log'))
+            array(2086, E_NOTICE, __('User changed title of a post', 'wp-security-audit-log'), __('Changed the title of the post %OldTitle% to %NewTitle%. %EditorLinkPost%.', 'wp-security-audit-log')),
+            array(2100, E_NOTICE, __('User opened a post in the editor', 'wp-security-audit-log'), __('Opened the post %PostTitle% in the editor. View the post: %EditorLinkPost%.', 'wp-security-audit-log')),
+            array(2101, E_NOTICE, __('User viewed a post', 'wp-security-audit-log'), __('Viewed the post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log'))
         ),
         __('Pages', 'wp-security-audit-log') => array(
             array(2004, E_NOTICE, __('User created a new WordPress page and saved it as draft', 'wp-security-audit-log'), __('Created a new page called %PostTitle% and saved it as draft. %EditorLinkPage%.', 'wp-security-audit-log')),
@@ -116,7 +118,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
             array(2066, E_WARNING, __('User modified content for a published page', 'wp-security-audit-log'), __('Modified the content of the published page %PostTitle%. Page URL is %PostUrl%.'.'%RevisionLink%'.' %EditorLinkPage%.', 'wp-security-audit-log')),
             array(2069, E_NOTICE, __('User modified content for a draft page', 'wp-security-audit-log'), __('Modified the content of draft page %PostTitle%.'.'%RevisionLink%'.' %EditorLinkPage%.', 'wp-security-audit-log')),
             array(2075, E_NOTICE, __('User scheduled a page', 'wp-security-audit-log'), __('Scheduled the page %PostTitle% to be published %PublishingDate%.'.' %EditorLinkPage%.', 'wp-security-audit-log')),
-            array(2087, E_NOTICE, __('User changed title of a page', 'wp-security-audit-log'), __('Changed the title of the page %OldTitle% to %NewTitle%.'.' %EditorLinkPage%.', 'wp-security-audit-log'))
+            array(2087, E_NOTICE, __('User changed title of a page', 'wp-security-audit-log'), __('Changed the title of the page %OldTitle% to %NewTitle%.'.' %EditorLinkPage%.', 'wp-security-audit-log')),
+            array(2102, E_NOTICE, __('User opened a page in the editor', 'wp-security-audit-log'), __('Opened the page %PostTitle% in the editor. View the page: %EditorLinkPage%.', 'wp-security-audit-log')),
+            array(2103, E_NOTICE, __('User viewed a page', 'wp-security-audit-log'), __('Viewed the page %PostTitle%. View the page: %PostUrl%.', 'wp-security-audit-log'))
         ),
         __('Custom Posts', 'wp-security-audit-log') => array(
             array(2029, E_NOTICE, __('User created a new post with custom post type and saved it as draft', 'wp-security-audit-log'), __('Created a new custom post called %PostTitle% of type %PostType%. %EditorLinkPost%.', 'wp-security-audit-log')),
@@ -139,7 +143,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
             array(2067, E_WARNING, __('User modified content for a published custom post type', 'wp-security-audit-log'), __('Modified the content of the published custom post type %PostTitle%. Post URL is %PostUrl%.'.'%EditorLinkPost%.', 'wp-security-audit-log')),
             array(2070, E_NOTICE, __('User modified content for a draft custom post type', 'wp-security-audit-log'), __('Modified the content of the draft custom post type %PostTitle%.'.'%EditorLinkPost%.', 'wp-security-audit-log')),
             array(2076, E_NOTICE, __('User scheduled a custom post type', 'wp-security-audit-log'), __('Scheduled the custom post type %PostTitle% to be published %PublishingDate%. %EditorLinkPost%.', 'wp-security-audit-log')),
-            array(2088, E_NOTICE, __('User changed title of a custom post type', 'wp-security-audit-log'), __('Changed the title of the custom post %OldTitle% to %NewTitle%. %EditorLinkPost%.', 'wp-security-audit-log'))
+            array(2088, E_NOTICE, __('User changed title of a custom post type', 'wp-security-audit-log'), __('Changed the title of the custom post %OldTitle% to %NewTitle%. %EditorLinkPost%.', 'wp-security-audit-log')),
+            array(2104, E_NOTICE, __('User opened a custom post type in the editor', 'wp-security-audit-log'), __('Opened the custom post %PostTitle% of type %PostType% in the editor. View the post: %EditorLinkPost%.', 'wp-security-audit-log')),
+            array(2105, E_NOTICE, __('User viewed a custom post type', 'wp-security-audit-log'), __('Viewed the custom post %PostTitle% of type %PostType%. View the post: %PostUrl%.', 'wp-security-audit-log'))
         ),
         __('Widgets', 'wp-security-audit-log') => array(
             array(2042, E_CRITICAL, __('User added a new widget', 'wp-security-audit-log'), __('Added a new %WidgetName% widget in  %Sidebar%.', 'wp-security-audit-log')),
