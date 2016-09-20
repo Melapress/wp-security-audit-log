@@ -262,18 +262,18 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                                 __('Data Inspector', 'wp-security-audit-log'),
                                                 __('View data logged for each triggered alert.', 'wp-security-audit-log')
                                             ),
-                                            WSAL_Settings::OPT_DEV_PHP_ERRORS     => array(
+                                            /* WSAL_Settings::OPT_DEV_PHP_ERRORS     => array(
                                                 __('PHP Errors', 'wp-security-audit-log'),
                                                 __('Enables sensor for alerts generated from PHP.', 'wp-security-audit-log')
-                                            ),
+                                            ), */
                                             WSAL_Settings::OPT_DEV_REQUEST_LOG    => array(
                                                 __('Request Log', 'wp-security-audit-log'),
                                                 __('Enables logging request to file.', 'wp-security-audit-log')
                                             ),
-                                            WSAL_Settings::OPT_DEV_BACKTRACE_LOG  => array(
+                                            /* WSAL_Settings::OPT_DEV_BACKTRACE_LOG  => array(
                                                 __('Backtrace', 'wp-security-audit-log'),
                                                 __('Log full backtrace for PHP-generated alerts.', 'wp-security-audit-log')
-                                            ),
+                                            ), */
                                         ) as $opt => $info) {
                                             ?><label for="devoption_<?php echo $opt; ?>">
                                                 <input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php

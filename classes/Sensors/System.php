@@ -395,23 +395,4 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         }
         return $latest_filename;
     }
-
-    /**
-     * Check to see whether or not the specified directory is accessible
-     * @param string $dirPath
-     * @return bool
-     */
-    private function CheckDirectory($dirPath)
-    {
-        if (!is_dir($dirPath)) {
-            return false;
-        }
-        if (!is_readable($dirPath)) {
-            return false;
-        }
-        if (!is_writable($dirPath)) {
-            return false;
-        }
-        return true;
-    }
 }

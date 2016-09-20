@@ -130,9 +130,6 @@ class WSAL_AuditLogListView extends WP_List_Table
             $cols['site'] = __('Site', 'wp-security-audit-log');
         }
         $cols['mesg'] = __('Message', 'wp-security-audit-log');
-        if ($this->_plugin->settings->IsDataInspectorEnabled()) {
-            $cols['data'] = '';
-        }
         $sel_columns = $this->_plugin->settings->GetColumnsSelected();
         if (!empty($sel_columns)) {
             unset($cols);
@@ -162,6 +159,9 @@ class WSAL_AuditLogListView extends WP_List_Table
                         break;
                 }
             }
+        }
+        if ($this->_plugin->settings->IsDataInspectorEnabled()) {
+            $cols['data'] = '';
         }
         return $cols;
     }
