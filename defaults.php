@@ -98,7 +98,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
         ),
         __('Pages', 'wp-security-audit-log') => array(
             array(2004, E_NOTICE, __('User created a new WordPress page and saved it as draft', 'wp-security-audit-log'), __('Created a new page called %PostTitle% and saved it as draft. %EditorLinkPage%.', 'wp-security-audit-log')),
-            array(2005, E_NOTICE, __('User published a WorPress page', 'wp-security-audit-log'), __('Published a page called %PostTitle%. Page URL is %PostUrl%. %EditorLinkPage%.', 'wp-security-audit-log')),
+            array(2005, E_NOTICE, __('User published a WordPress page', 'wp-security-audit-log'), __('Published a page called %PostTitle%. Page URL is %PostUrl%. %EditorLinkPage%.', 'wp-security-audit-log')),
             array(2006, E_NOTICE, __('User modified a published WordPress page', 'wp-security-audit-log'), __('Modified the published page %PostTitle%. Page URL is %PostUrl%. %EditorLinkPage%.', 'wp-security-audit-log')),
             array(2007, E_NOTICE, __('User modified a draft WordPress page', 'wp-security-audit-log'), __('Modified the draft page %PostTitle%. Page ID is %PostID%. %EditorLinkPage%.', 'wp-security-audit-log')),
             array(2009, E_WARNING, __('User permanently deleted a page from the trash', 'wp-security-audit-log'), __('Permanently deleted the page %PostTitle%. Page URL was %PostUrl%. %EditorLinkPage%.', 'wp-security-audit-log')),

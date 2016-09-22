@@ -14,7 +14,7 @@ class WSAL_Views_ExternalDB extends WSAL_AbstractView {
     
     public function GetName()
     {
-        return __('DB External', 'wp-security-audit-log');
+        return __('External DB ', 'wp-security-audit-log');
     }
     
     public function GetWeight()
