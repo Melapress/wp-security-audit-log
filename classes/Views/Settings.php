@@ -254,37 +254,42 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     <a href="javascript:;" style="<?php if($any)echo 'display: none;'; ?>"
                                        onclick="jQuery(this).hide().next().show();">Show Developer Options</a>
                                     <div style="<?php if(!$any)echo 'display: none;'; ?>">
-                                        <p style="border-left: 3px solid #FFD000; padding: 2px 8px; margin-left: 6px; margin-bottom: 16px;"><?php
-                                            _e('Only enable these options on testing, staging and development websites. Enabling any of the settings below on LIVE websites may cause unintended side-effects including degraded performance.', 'wp-security-audit-log');
-                                        ?></p><?php
-                                        foreach (array(
-                                            WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array(
-                                                __('Data Inspector', 'wp-security-audit-log'),
-                                                __('View data logged for each triggered alert.', 'wp-security-audit-log')
-                                            ),
-                                            /* WSAL_Settings::OPT_DEV_PHP_ERRORS     => array(
-                                                __('PHP Errors', 'wp-security-audit-log'),
-                                                __('Enables sensor for alerts generated from PHP.', 'wp-security-audit-log')
-                                            ), */
-                                            WSAL_Settings::OPT_DEV_REQUEST_LOG    => array(
-                                                __('Request Log', 'wp-security-audit-log'),
-                                                __('Enables logging request to file.', 'wp-security-audit-log')
-                                            ),
-                                            /* WSAL_Settings::OPT_DEV_BACKTRACE_LOG  => array(
-                                                __('Backtrace', 'wp-security-audit-log'),
-                                                __('Log full backtrace for PHP-generated alerts.', 'wp-security-audit-log')
-                                            ), */
-                                        ) as $opt => $info) {
-                                            ?><label for="devoption_<?php echo $opt; ?>">
-                                                <input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
-                                                    if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="<?php echo $opt; ?>">
-                                                <span><?php echo $info[0]; ?></span>
-                                                <?php if (isset($info[1]) && $info[1]) { ?>
-                                                    <span class="description"> &mdash; <?php echo $info[1]; ?></span>
-                                                <?php }
-                                            ?></label><br/><?php
-                                        }
-                                    ?></div>
+                                        <p style="border-left: 3px solid #FFD000; padding: 2px 8px; margin-left: 6px; margin-bottom: 16px;">
+                                            <?php _e('Only enable these options on testing, staging and development websites. Enabling any of the settings below on LIVE websites may cause unintended side-effects including degraded performance.', 'wp-security-audit-log'); ?>
+                                        </p>
+                                        <?php
+                                            foreach (array(
+                                                WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array(
+                                                    __('Data Inspector', 'wp-security-audit-log'),
+                                                    __('View data logged for each triggered alert.', 'wp-security-audit-log')
+                                                ),
+                                                /* WSAL_Settings::OPT_DEV_PHP_ERRORS     => array(
+                                                    __('PHP Errors', 'wp-security-audit-log'),
+                                                    __('Enables sensor for alerts generated from PHP.', 'wp-security-audit-log')
+                                                ), */
+                                                WSAL_Settings::OPT_DEV_REQUEST_LOG    => array(
+                                                    __('Request Log', 'wp-security-audit-log'),
+                                                    __('Enables logging request to file.', 'wp-security-audit-log')
+                                                ),
+                                                /* WSAL_Settings::OPT_DEV_BACKTRACE_LOG  => array(
+                                                    __('Backtrace', 'wp-security-audit-log'),
+                                                    __('Log full backtrace for PHP-generated alerts.', 'wp-security-audit-log')
+                                                ), */
+                                            ) as $opt => $info) {
+                                                ?><label for="devoption_<?php echo $opt; ?>">
+                                                    <input type="checkbox" name="DevOptions[]" id="devoption_<?php echo $opt; ?>" <?php
+                                                        if($this->_plugin->settings->IsDevOptionEnabled($opt))echo 'checked="checked"'; ?> value="<?php echo $opt; ?>">
+                                                    <span><?php echo $info[0]; ?></span>
+                                                    <?php if (isset($info[1]) && $info[1]) { ?>
+                                                        <span class="description"> &mdash; <?php echo $info[1]; ?></span>
+                                                    <?php }
+                                                ?></label><br/><?php
+                                            }
+                                        ?>
+                                        <span class="description">
+                                            <?php _e('The request log file is saved in the /wp-content/uploads/wp-security-audit-log/ directory.', 'wp-security-audit-log'); ?>
+                                        </span>
+                                    </div>
                                 </fieldset>
                             </td>
                         </tr>
