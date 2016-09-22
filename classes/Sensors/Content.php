@@ -681,12 +681,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if (is_user_logged_in()) {
             if (!is_admin()) {
-                $event = $this->GetEventTypeForPostType($post, 2101, 2103, 2105);
-                $this->plugin->alerts->Trigger($event, array(
-                    'PostType' => $post->post_type,
-                    'PostTitle' => $post->post_title,
-                    'PostUrl' => get_permalink($post->ID)
-                ));
+                if (!empty($post->post_title)) {
+                    $event = $this->GetEventTypeForPostType($post, 2101, 2103, 2105);
+                    $this->plugin->alerts->Trigger($event, array(
+                        'PostType' => $post->post_type,
+                        'PostTitle' => $post->post_title,
+                        'PostUrl' => get_permalink($post->ID)
+                    ));
+                }
             }
         }
     }
@@ -698,13 +700,15 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if (is_user_logged_in()) {
             if (is_admin()) {
-                $event = $this->GetEventTypeForPostType($post, 2100, 2102, 2104);
-                $editorLink = $this->GetEditorLink($post);
-                $this->plugin->alerts->Trigger($event, array(
-                    'PostType' => $post->post_type,
-                    'PostTitle' => $post->post_title,
-                    $editorLink['name'] => $editorLink['value']
-                ));
+                if (!empty($post->post_title)) {
+                    $event = $this->GetEventTypeForPostType($post, 2100, 2102, 2104);
+                    $editorLink = $this->GetEditorLink($post);
+                    $this->plugin->alerts->Trigger($event, array(
+                        'PostType' => $post->post_type,
+                        'PostTitle' => $post->post_title,
+                        $editorLink['name'] => $editorLink['value']
+                    ));
+                }
             }
         }
     }
