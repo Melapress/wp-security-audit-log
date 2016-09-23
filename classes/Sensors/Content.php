@@ -681,6 +681,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if (is_user_logged_in()) {
             if (!is_admin()) {
+                $currentPath = $_SERVER["REQUEST_URI"];
+                if (!empty($_SERVER["HTTP_REFERER"])
+                    && strpos($_SERVER["HTTP_REFERER"], $currentPath) !== false) {
+                    //Ignore this if we were on the same page so we avoid double audit entries
+                    return;
+                }
                 if (!empty($post->post_title)) {
                     $event = $this->GetEventTypeForPostType($post, 2101, 2103, 2105);
                     $this->plugin->alerts->Trigger($event, array(
@@ -700,6 +706,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         if (is_user_logged_in()) {
             if (is_admin()) {
+                $currentPath = $_SERVER["SCRIPT_NAME"] . "?post=" . $post->ID;
+                if (!empty($_SERVER["HTTP_REFERER"])
+                    && strpos($_SERVER["HTTP_REFERER"], $currentPath) !== false) {
+                    //Ignore this if we were on the same page so we avoid double audit entries
+                    return;
+                }
                 if (!empty($post->post_title)) {
                     $event = $this->GetEventTypeForPostType($post, 2100, 2102, 2104);
                     $editorLink = $this->GetEditorLink($post);

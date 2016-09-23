@@ -80,7 +80,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
         if (isset($_REQUEST['comment'])) {
             $comment = get_comment($comment_ID);
             if (!empty($comment)) {
-                if ($comment_approved != 'spam') {
+                if ($comment->comment_approved != 'spam') {
                     $post = get_post($comment->comment_post_ID);
                     $comment_link = get_permalink($post->ID) . "#comment-" . $comment_ID;
                     $fields = array(
