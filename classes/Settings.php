@@ -232,6 +232,17 @@ class WSAL_Settings {
     public function SetIncognito($enabled){
         return $this->_plugin->SetGlobalOption('hide-plugin', $enabled);
     }
+
+    /**
+     * Checking if Logging is enabled.
+     */
+    public function IsLoggingDisabled(){
+        return $this->_plugin->GetGlobalOption('disable-logging');
+    }
+
+    public function SetLoggingDisabled($disabled){
+        return $this->_plugin->SetGlobalOption('disable-logging', $disabled);
+    }
     
     /**
      * Checking if the data will be removed.
@@ -498,8 +509,9 @@ class WSAL_Settings {
             if (preg_match("/^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/", $ip)) return $ip;
             //Regex IPV6
             elseif (preg_match("/^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/", $ip)) return $ip;
-
-            error_log("Invalid IP in ValidateIP function: ".$ip);
+            if (!$this->IsLoggingDisabled) {
+                error_log("Invalid IP in ValidateIP function: ".$ip);
+            }
             return false;
         } else {
             return $filteredIP;
@@ -650,6 +662,14 @@ class WSAL_Settings {
 
     public function GetDisplayName(){
         return $this->_plugin->GetGlobalOption('display-name');
+    }
+
+     public function Set404LogLimit($value){
+        return $this->_plugin->SetGlobalOption('log-404-limit', abs($value));
+    }
+
+    public function Get404LogLimit(){
+        return $this->_plugin->GetGlobalOption('log-404-limit', 99);;
     }
     // </editor-fold>
 }
