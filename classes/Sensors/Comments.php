@@ -72,7 +72,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
      * @param int        $comment_ID       The comment ID.
      * @param int|string $comment_approved 1 if the comment is approved, 0 if not, 'spam' if spam.
      */
-    public function EventComment($comment_ID, $comment_approved)
+    public function EventComment($comment_ID, $comment_approved = null)
     {
         if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'replyto-comment') {
             $this->EventGeneric($comment_ID, 2092);
@@ -80,20 +80,22 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
         if (isset($_REQUEST['comment'])) {
             $comment = get_comment($comment_ID);
             if (!empty($comment)) {
-                $post = get_post($comment->comment_post_ID);
-                $comment_link = get_permalink($post->ID) . "#comment-" . $comment_ID;
-                $fields = array(
-                    'Date' => $comment->comment_date,
-                    'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>'
-                );
-                if (!username_exists($comment->comment_author)) {
-                    $fields['CommentMsg'] = sprintf("A comment was posted in response to the post <strong>%s</strong>. The comment was posted by <strong>%s</strong>", $post->post_title, $this->CheckAuthor($comment));
-                    $fields['Username'] = "Website Visitor";
-                } else {
-                    $fields['CommentMsg'] = sprintf("Posted a comment in response to the post <strong>%s</strong>", $post->post_title);
-                }
+                if ($comment->comment_approved != 'spam') {
+                    $post = get_post($comment->comment_post_ID);
+                    $comment_link = get_permalink($post->ID) . "#comment-" . $comment_ID;
+                    $fields = array(
+                        'Date' => $comment->comment_date,
+                        'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>'
+                    );
+                    if (!username_exists($comment->comment_author)) {
+                        $fields['CommentMsg'] = sprintf("A comment was posted in response to the post <strong>%s</strong>. The comment was posted by <strong>%s</strong>", $post->post_title, $this->CheckAuthor($comment));
+                        $fields['Username'] = "Website Visitor";
+                    } else {
+                        $fields['CommentMsg'] = sprintf("Posted a comment in response to the post <strong>%s</strong>", $post->post_title);
+                    }
 
-                $this->plugin->alerts->Trigger(2099, $fields);
+                    $this->plugin->alerts->Trigger(2099, $fields);
+                }
             }
         }
     }

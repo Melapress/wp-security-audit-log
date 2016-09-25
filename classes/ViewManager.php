@@ -239,6 +239,20 @@ class WSAL_ViewManager {
                     $not_show = true;
                 }
                 break;
+            case 'External DB ':
+                if (class_exists('WSAL_Ext_Plugin')) {
+                    $not_show = true;
+                }
+                break;
+            case ' Add Functionality':
+                if (class_exists('WSAL_NP_Plugin') ||
+                    class_exists('WSAL_User_Management_Plugin') ||
+                    class_exists('WSAL_Rep_Plugin') ||
+                    class_exists('WSAL_SearchExtension') ||
+                    class_exists('WSAL_Ext_Plugin')) {
+                    $not_show = true;
+                }
+                break;
         }
         return $not_show;
     }

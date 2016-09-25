@@ -39,7 +39,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
     protected function Get404LogLimit()
     {
-        return 99;
+        return $this->plugin->settings->Get404LogLimit();
     }
     
     protected function Get404Expiration()
@@ -121,33 +121,29 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 $new = 'more than ' . $this->Get404LogLimit();
                 $msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
             }
+
+            $linkFile = $this->WriteLog($new, $ip, $username);
+
             $occ->UpdateMetaValue('Attempts', $new);
             $occ->UpdateMetaValue('Username', $username);
             $occ->UpdateMetaValue('Msg', $msg);
+            if (!empty($linkFile)) {
+                $occ->UpdateMetaValue('LinkFile', $linkFile);
+            }
             $occ->created_on = null;
             $occ->Save();
-            $attempts = $new;
         } else {
+            $linkFile = $this->WriteLog(1, $ip, $username);
             // create a new record
             $fields =  array(
                 'Attempts' => 1,
                 'Username' => $username,
                 'Msg' => $msg
             );
-            $this->plugin->alerts->Trigger(6007, $fields);
-        }
-
-        if ($this->plugin->GetGlobalOption('log-404', 0)) {
-            // Request URL
-            $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
-            // Create/Append to the log file
-            $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
-            if (!is_user_logged_in()) {
-                $username = '';
-            } else {
-                $username = $username . '_';
+            if (!empty($linkFile)) {
+                $fields['LinkFile'] = $linkFile;
             }
-            $this->WriteLog($data, $ip, $username);
+            $this->plugin->alerts->Trigger(6007, $fields);
         }
     }
 
@@ -323,36 +319,60 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
     /**
      * Write a new line on 404 log file
+     * Folder: /uploads/wp-security-audit-log/404s/
      */
-    private function WriteLog($data, $ip, $username = '')
+    private function WriteLog($attempts, $ip, $username = '')
     {
-        $upload_dir = wp_upload_dir();
-        $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/';
-        // Check directory
-        if (is_dir($uploadsDirPath) && is_readable($uploadsDirPath) && is_writable($uploadsDirPath)) {
-            $filename = date('Ymd') . '_' . $username . $ip . '.log';
-            $fp = $uploadsDirPath . $filename;
-            if (!$file = fopen($fp, 'a')) {
-                $i = 1;
-                $fileOpened = false;
-                do {
-                    $fp2 = substr($fp, 0, -4) . '_' . $i . '.log';
-                    if (!file_exists($fp2)) {
-                        if ($file = fopen($fp2, 'a')) {
-                            $fileOpened = true;
-                        }
-                    } else {
-                        $fpLast = $this->GetLastModified($uploadsDirPath, $filename);
-                        if ($file = fopen($fpLast, 'a')) {
-                            $fileOpened = true;
-                        }
-                    }
-                    $i++;
-                } while (!$fileOpened);
+        $nameFile = null;
+        if ($this->plugin->GetGlobalOption('log-404', 0)) {
+            // Request URL
+            $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
+            // Create/Append to the log file
+            $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
+            if (!is_user_logged_in()) {
+                $username = '';
+            } else {
+                $username = $username . '_';
             }
-            fwrite($file, sprintf("%s\n", $data));
-            fclose($file);
+            
+            if ($ip == '127.0.0.1' || $ip == '::1') {
+                $ip = 'localhost';
+            }
+            $upload_dir = wp_upload_dir();
+            $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/';
+            $uploadsURL = trailingslashit($upload_dir['baseurl']).'wp-security-audit-log/404s/';
+
+            // Check directory
+            if ($this->CheckDirectory($uploadsDirPath)) {
+                $filename = date('Ymd') . '_' . $username . $ip . '.log';
+                $fp = $uploadsDirPath . $filename;
+                $nameFile = $uploadsURL . $filename;
+                if (!$file = fopen($fp, 'a')) {
+                    $i = 1;
+                    $fileOpened = false;
+                    do {
+                        $fp2 = substr($fp, 0, -4) . '_' . $i . '.log';
+                        if (!file_exists($fp2)) {
+                            if ($file = fopen($fp2, 'a')) {
+                                $fileOpened = true;
+                                $nameFile = $uploadsURL . substr($nameFile, 0, -4) . '_' . $i . '.log';
+                            }
+                        } else {
+                            $latestFilename = $this->GetLastModified($uploadsDirPath, $filename);
+                            $fpLast = $uploadsDirPath . $latestFilename;
+                            if ($file = fopen($fpLast, 'a')) {
+                                $fileOpened = true;
+                                $nameFile = $uploadsURL . $latestFilename;
+                            }
+                        }
+                        $i++;
+                    } while (!$fileOpened);
+                }
+                fwrite($file, sprintf("%s\n", $data));
+                fclose($file);
+            }
         }
+        return $nameFile;
     }
 
     private function GetLastModified($uploadsDirPath, $filename)
@@ -373,25 +393,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             }
             closedir($handle);
         }
-        return $uploadsDirPath . $latest_filename;
-    }
-
-    /**
-     * Check to see whether or not the specified directory is accessible
-     * @param string $dirPath
-     * @return bool
-     */
-    private function CheckDirectory($dirPath)
-    {
-        if (!is_dir($dirPath)) {
-            return false;
-        }
-        if (!is_readable($dirPath)) {
-            return false;
-        }
-        if (!is_writable($dirPath)) {
-            return false;
-        }
-        return true;
+        return $latest_filename;
     }
 }
