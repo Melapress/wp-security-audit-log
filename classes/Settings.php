@@ -582,15 +582,23 @@ class WSAL_Settings {
     }
 
     /**
-     * Datetime format.
-     * 24 hours or AM/PM
+     * Datetime from WordPress settings.
      */
-    public function GetDatetimeFormat(){
-        return $this->_plugin->GetGlobalOption('datetime-format', 0);
-    }
-
-    public function SetDatetimeFormat($newvalue){
-        return $this->_plugin->SetGlobalOption('datetime-format', $newvalue);
+    public function GetDatetimeFormat() {
+        $date_format = get_option('date_format');
+        $search = array('F', 'M', 'n', 'j', ' ', '/', 'y', 'S', ',', 'l', 'D');
+        $replace = array('m', 'm', 'm', 'd', '-', '-', 'Y', '', '', '', '');
+        $date_time_format = str_replace($search, $replace, $date_format);
+        $time_format = get_option('time_format');
+        $search = array('a', 'A', 'T', ' ');
+        $replace = array('', '', '', '');
+        $date_time_format .= '<\b\r>' . str_replace($search, $replace, $time_format);
+        if (stripos($time_format, 'A') !== false) {
+            $date_time_format .= '.$$$&\n\b\s\p;A';
+        } else {
+            $date_time_format .= '.$$$';
+        }
+        return $date_time_format;
     }
 
     /**

@@ -72,7 +72,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView
         $this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
         $this->_plugin->settings->SetLoggingDisabled(isset($_REQUEST['Logging']));
         $this->_plugin->settings->SetDeleteData(isset($_REQUEST['DeleteData']));
-        $this->_plugin->settings->SetDatetimeFormat($_REQUEST['DatetimeFormat']);
         $this->_plugin->settings->SetTimezone($_REQUEST['Timezone']);
         $this->_plugin->settings->SetWPBackend(isset($_REQUEST['WPBackend']));
         if (!empty($_REQUEST['Columns'])) {
@@ -437,25 +436,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                         <span><?php _e('Manual', 'wp-security-audit-log'); ?></span>
                                     </label>
                                     <span class="description"> &mdash; <?php _e('Refresh Audit Log Viewer only when the page is reloaded.', 'wp-security-audit-log'); ?></span>
-                                    <br/>
-                                </fieldset>
-                            </td>
-                        </tr>
-                        <!-- Alerts Time Format -->
-                        <tr>
-                            <th><label for="datetime_format_24"><?php _e('Alerts Time Format', 'wp-security-audit-log'); ?></label></th>
-                            <td>
-                                <fieldset>
-                                    <?php $datetime = $this->_plugin->settings->GetDatetimeFormat(); ?>
-                                    <label for="datetime_format_24">
-                                        <input type="radio" name="DatetimeFormat" id="datetime_format_24" style="margin-top: 2px;" <?php if($datetime)echo 'checked="checked"'; ?> value="1">
-                                        <span><?php _e('24 hours', 'wp-security-audit-log'); ?></span>
-                                    </label>
-                                    <br/>
-                                    <label for="datetime_format_default">
-                                        <input type="radio" name="DatetimeFormat" id="datetime_format_default" style="margin-top: 2px;" <?php if(!$datetime)echo 'checked="checked"'; ?> value="0">
-                                        <span><?php _e('AM/PM', 'wp-security-audit-log'); ?></span>
-                                    </label>
                                     <br/>
                                 </fieldset>
                             </td>

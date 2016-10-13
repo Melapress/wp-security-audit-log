@@ -664,7 +664,6 @@ class WpSecurityAuditLog {
         $this->options = new WSAL_Models_Option();
         return $this->options->SetOptionValue($option, $value);
     }
-    
     // </editor-fold>
 }
 
