@@ -582,23 +582,40 @@ class WSAL_Settings {
     }
 
     /**
-     * Datetime from WordPress settings.
+     * Datetime used in the Alerts.
      */
     public function GetDatetimeFormat() {
-        $date_format = get_option('date_format');
-        $search = array('F', 'M', 'n', 'j', ' ', '/', 'y', 'S', ',', 'l', 'D');
-        $replace = array('m', 'm', 'm', 'd', '-', '-', 'Y', '', '', '', '');
-        $date_time_format = str_replace($search, $replace, $date_format);
-        $time_format = get_option('time_format');
-        $search = array('a', 'A', 'T', ' ');
-        $replace = array('', '', '', '');
-        $date_time_format .= '<\b\r>' . str_replace($search, $replace, $time_format);
-        if (stripos($time_format, 'A') !== false) {
+        $date_time_format = $this->GetDateFormat() . '<\b\r>' . $this->GetTimeFormat();
+
+        $wp_time_format = get_option('time_format');
+        if (stripos($wp_time_format, 'A') !== false) {
             $date_time_format .= '.$$$&\n\b\s\p;A';
         } else {
             $date_time_format .= '.$$$';
         }
         return $date_time_format;
+    }
+
+    /**
+     * Date Format from WordPress General Settings.
+     */
+    public function GetDateFormat() {
+        $wp_date_format = get_option('date_format');
+        $search = array('F', 'M', 'n', 'j', ' ', '/', 'y', 'S', ',', 'l', 'D');
+        $replace = array('m', 'm', 'm', 'd', '-', '-', 'Y', '', '', '', '');
+        $date_format = str_replace($search, $replace, $wp_date_format);
+        return $date_format;
+    }
+
+    /**
+     * Time Format from WordPress General Settings.
+     */
+    public function GetTimeFormat() {
+        $wp_time_format = get_option('time_format');
+        $search = array('a', 'A', 'T', ' ');
+        $replace = array('', '', '', '');
+        $time_format = str_replace($search, $replace, $wp_time_format);
+        return $time_format;
     }
 
     /**
