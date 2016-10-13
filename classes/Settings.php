@@ -584,8 +584,12 @@ class WSAL_Settings {
     /**
      * Datetime used in the Alerts.
      */
-    public function GetDatetimeFormat() {
-        $date_time_format = $this->GetDateFormat() . '<\b\r>' . $this->GetTimeFormat();
+    public function GetDatetimeFormat($lineBreak = true) {
+        if ($lineBreak) {
+            $date_time_format = $this->GetDateFormat() . '<\b\r>' . $this->GetTimeFormat();
+        } else {
+            $date_time_format = $this->GetDateFormat() . ' ' . $this->GetTimeFormat();
+        }
 
         $wp_time_format = get_option('time_format');
         if (stripos($wp_time_format, 'A') !== false) {
