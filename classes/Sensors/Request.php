@@ -17,7 +17,7 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor
             wp_mkdir_p($uploadsDirPath);
         }
 
-        $file = $uploadsDirPath . 'Request.log';
+        $file = $uploadsDirPath . 'Request.log.php';
         
         $line = '['.date('Y-m-d H:i:s').'] '
             . $_SERVER['REQUEST_METHOD'] . ' '
@@ -26,7 +26,7 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor
             . (!empty(self::$envvars) ? str_pad(PHP_EOL, 24) . json_encode(self::$envvars) : '')
             . PHP_EOL;
         
-        if (!file_exists($file) && !file_put_contents($file, '===[ Request Log ]===' . PHP_EOL)) {
+        if (!file_exists($file) && !file_put_contents($file, '<'.'?php die(\'Access Denied\'); ?>' . PHP_EOL)) {
             return $this->LogError('Could not initialize request log file', array('file' => $file));
         }
         
