@@ -187,9 +187,8 @@ class WSAL_AuditLogListView extends WP_List_Table
     public function column_default($item, $column_name)
     {
         //example: $item->getMetaValue('CurrentUserID')
-
-        if (!$this->_plugin->settings->GetDatetimeFormat()) $datetimeFormat = 'h:i:s.$$$&\n\b\s\p;A';
-        else $datetimeFormat = 'H:i:s.$$$';
+        $datetimeFormat = $this->_plugin->settings->GetDatetimeFormat();
+        
         switch ($column_name) {
             case 'read':
                 return '<span class="log-read log-read-'
@@ -209,7 +208,7 @@ class WSAL_AuditLogListView extends WP_List_Table
                         str_replace(
                             '$$$',
                             substr(number_format(fmod($item->created_on + $this->_gmt_offset_sec, 1), 3), 2),
-                            date('Y-m-d<\b\r>'.$datetimeFormat, $item->created_on + $this->_gmt_offset_sec)
+                            date($datetimeFormat, $item->created_on + $this->_gmt_offset_sec)
                         )
                     ) : '<i>unknown</i>';
             case 'user':
