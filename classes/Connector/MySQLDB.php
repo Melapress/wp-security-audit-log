@@ -306,7 +306,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return $ciphertext_base64;
     }
     
-    private function decryptString($ciphertext_base64)
+    public function decryptString($ciphertext_base64)
     {
         $ciphertext_dec = base64_decode($ciphertext_base64);
         $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
