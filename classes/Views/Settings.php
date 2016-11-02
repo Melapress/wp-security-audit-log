@@ -192,16 +192,18 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     <label for="EnableProxyIpCapture">
                                         <input type="checkbox" name="EnableProxyIpCapture" value="1" id="EnableProxyIpCapture"<?php
                                             if($this->_plugin->settings->IsMainIPFromProxy())echo ' checked="checked"';
-                                        ?>/> <?php _e('WordPress running behind firewall or proxy', 'wp-security-audit-log'); ?><br/>
-                                        <span class="description"><?php _e('Enable this option if your WordPress is running behind a firewall or reverse proxy. When this option is enabled the plugin will retrieve the user\'s IP address from the proxy header.', 'wp-security-audit-log'); ?></span>
+                                        ?>/> <?php _e('WordPress running behind firewall or proxy', 'wp-security-audit-log'); ?>
                                     </label>
+                                    <br/>
+                                    <span class="description"><?php _e('Enable this option if your WordPress is running behind a firewall or reverse proxy. When this option is enabled the plugin will retrieve the user\'s IP address from the proxy header.', 'wp-security-audit-log'); ?></span>
                                     <br/>
                                     <label for="EnableIpFiltering">
                                         <input type="checkbox" name="EnableIpFiltering" value="1" id="EnableIpFiltering"<?php
                                             if($this->_plugin->settings->IsInternalIPsFiltered())echo ' checked="checked"';
-                                        ?>/> <?php _e('Filter Internal IP Addresses', 'wp-security-audit-log'); ?><br/>
-                                        <span class="description"><?php _e('Enable this option to filter internal IP addresses from the proxy headers.', 'wp-security-audit-log'); ?></span>
-                                    </label>    
+                                        ?>/> <?php _e('Filter Internal IP Addresses', 'wp-security-audit-log'); ?>
+                                    </label>
+                                    <br/>
+                                    <span class="description"><?php _e('Enable this option to filter internal IP addresses from the proxy headers.', 'wp-security-audit-log'); ?></span>    
                                 </fieldset>
                             </td>
                         </tr>
@@ -237,10 +239,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     <label for="RestrictAdmins">
                                         <?php $ira = $this->_plugin->settings->IsRestrictAdmins(); ?>
                                         <input type="checkbox" name="RestrictAdmins" id="RestrictAdmins"<?php if($ira)echo ' checked="checked"'; ?>/>
-                                        <span class="description">
-                                            <?php _e('By default all the administrators on this WordPress have access to manage this plugin.<br/>By enabling this option only the users specified in the two options above and your username will have access to view alerts and manage this plugin.', 'wp-security-audit-log'); ?>
-                                        </span>
+                                        <?php _e('By default all the administrators on this WordPress have access to manage this plugin.', 'wp-security-audit-log'); ?>
                                     </label>
+                                    <br/>
+                                    <span class="description">
+                                        <?php _e('By enabling this option only the users specified in the <strong>Can Manage Plugin</strong> and <strong>Can View Alerts</strong> can configure this plugin or view the alerts in the WordPress audit trail.', 'wp-security-audit-log'); ?>
+                                    </span>
                                 </fieldset>
                             </td>
                         </tr>

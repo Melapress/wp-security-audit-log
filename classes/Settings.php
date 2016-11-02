@@ -367,7 +367,7 @@ class WSAL_Settings {
      */
     public function UserCan($user, $action){
         if(is_int($user))$user = get_userdata($user);
-        $allowed = $this->GetAccessTokens($action);
+        $allowed = $this->GetAccessTokens($action); error_log(print_r($allowed,true));
         $check = array_merge(
             $user->roles,
             array($user->user_login)
