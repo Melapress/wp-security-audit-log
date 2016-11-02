@@ -13,7 +13,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
     public function TestConnection()
     {
-        error_reporting(E_ALL ^ E_WARNING);
+        error_reporting(E_ALL ^ (E_NOTICE | E_WARNING | E_DEPRECATED));
         $connectionConfig = $this->connectionConfig;
         $password = $this->decryptString($connectionConfig['password']);
         $newWpdb = new wpdbCustom($connectionConfig['user'], $password, $connectionConfig['name'], $connectionConfig['hostname']);
