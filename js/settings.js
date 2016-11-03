@@ -44,17 +44,23 @@ jQuery(document).ready(function(){
 	jQuery('#RestrictAdmins').change(function(){
 		var user = jQuery('#RestrictAdminsDefaultUser').val();
 		var fltr = function() { return this.value === user; };
-		if (this.checked && jQuery('#EditorList input').filter(fltr).length === 0) {
-			jQuery('#EditorList').append(
-				jQuery('<span class="sectoken-user"/>').text(user)
-					.prepend(jQuery('<input type="hidden" name="Editors[]"/>').val(user))
-					.append(jQuery('<a href="javascript:;" title="Remove">&times;</a>').click(RemoveSecToken))
-			);
-		} else {
-			jQuery('#EditorList').children().remove();
+		if (this.checked) {
+			if (jQuery('#EditorList input').filter(fltr).length === 1) {
+				jQuery('#EditorList .sectoken-user').each(function(){
+		            if (jQuery(this).find('input[type=hidden]').val() === user) {
+		            	jQuery(this).remove();
+		            }                
+		        });
+			}
+			jQuery('#EditorList').append(jQuery('<span class="sectoken-user"/>').text(user).prepend(jQuery('<input type="hidden" name="Editors[]"/>').val(user)));
+		} else if (!this.checked){
+			jQuery('#EditorList .sectoken-user').each(function(){
+	            if (jQuery(this).find('input[type=hidden]').val() === user) {
+	            	jQuery(this).remove();
+	            }                
+	        });
 		}
 	});
-	
 
 	var usersUrl = ajaxurl + "?action=AjaxGetAllUsers";
 	jQuery("#ExUserQueryBox").autocomplete({
@@ -66,8 +72,5 @@ jQuery(document).ready(function(){
 	jQuery("#ExRoleQueryBox").autocomplete({
 	    source: rolesUrl,
 	    minLength:1
-	});
-	
+	});	
 });
-
-

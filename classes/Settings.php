@@ -329,9 +329,9 @@ class WSAL_Settings {
      * @param string $action Type of action.
      * @return string[] List of tokens (usernames, roles etc).
      */
-    public function GetAccessTokens($action){
+    public function GetAccessTokens($action) {
         $allowed = array();
-        switch($action){
+        switch ($action) {
             case 'view':
                 $allowed = $this->GetAllowedPluginViewers();
                 $allowed = array_merge($allowed, $this->GetAllowedPluginEditors());
@@ -343,18 +343,16 @@ class WSAL_Settings {
             case 'edit':
                 $allowed = $this->GetAllowedPluginEditors();
                 if (!$this->IsRestrictAdmins()) {
-                    $allowed = array_merge($allowed, $this->_plugin->IsMultisite() ?
-                            $this->GetSuperAdmins() : $this->GetAdmins()
-                        );
+                    $allowed = array_merge($allowed, $this->_plugin->IsMultisite() ? $this->GetSuperAdmins() : $this->GetAdmins());
                 }
                 break;
             default:
                 throw new Exception('Unknown action "'.$action.'".');
         }
         if (!$this->IsRestrictAdmins()) {
-            if(is_multisite()){
+            if (is_multisite()) {
                 $allowed = array_merge($allowed, get_super_admins());
-            }else{
+            } else {
                 $allowed[] = 'administrator';
             }
         }
@@ -365,15 +363,14 @@ class WSAL_Settings {
      * @param string $action Type of action, either 'view' or 'edit'.
      * @return boolean If user has access or not.
      */
-    public function UserCan($user, $action){
-        if(is_int($user))$user = get_userdata($user);
+    public function UserCan($user, $action) {
+        if (is_int($user)) {
+            $user = get_userdata($user);
+        }
         $allowed = $this->GetAccessTokens($action);
-        $check = array_merge(
-            $user->roles,
-            array($user->user_login)
-        );
-        foreach($check as $item){
-            if(in_array($item, $allowed)){
+        $check = array_merge($user->roles, array($user->user_login));
+        foreach ($check as $item) {
+            if (in_array($item, $allowed)) {
                 return true;
             }
         }
@@ -387,7 +384,7 @@ class WSAL_Settings {
 
     public function IsLoginSuperAdmin($username){ 
         $userId = username_exists($username);
-        if ( function_exists('is_super_admin') && is_super_admin($userId) ) return true;
+        if (function_exists('is_super_admin') && is_super_admin($userId) ) return true;
         else return false;
     }
     
@@ -582,15 +579,44 @@ class WSAL_Settings {
     }
 
     /**
-     * Datetime format.
-     * 24 hours or AM/PM
+     * Datetime used in the Alerts.
      */
-    public function GetDatetimeFormat(){
-        return $this->_plugin->GetGlobalOption('datetime-format', 0);
+    public function GetDatetimeFormat($lineBreak = true) {
+        if ($lineBreak) {
+            $date_time_format = $this->GetDateFormat() . '<\b\r>' . $this->GetTimeFormat();
+        } else {
+            $date_time_format = $this->GetDateFormat() . ' ' . $this->GetTimeFormat();
+        }
+
+        $wp_time_format = get_option('time_format');
+        if (stripos($wp_time_format, 'A') !== false) {
+            $date_time_format .= '.$$$&\n\b\s\p;A';
+        } else {
+            $date_time_format .= '.$$$';
+        }
+        return $date_time_format;
     }
 
-    public function SetDatetimeFormat($newvalue){
-        return $this->_plugin->SetGlobalOption('datetime-format', $newvalue);
+    /**
+     * Date Format from WordPress General Settings.
+     */
+    public function GetDateFormat() {
+        $wp_date_format = get_option('date_format');
+        $search = array('F', 'M', 'n', 'j', ' ', '/', 'y', 'S', ',', 'l', 'D');
+        $replace = array('m', 'm', 'm', 'd', '-', '-', 'Y', '', '', '', '');
+        $date_format = str_replace($search, $replace, $wp_date_format);
+        return $date_format;
+    }
+
+    /**
+     * Time Format from WordPress General Settings.
+     */
+    public function GetTimeFormat() {
+        $wp_time_format = get_option('time_format');
+        $search = array('a', 'A', 'T', ' ');
+        $replace = array('', '', '', '');
+        $time_format = str_replace($search, $replace, $wp_time_format);
+        return $time_format;
     }
 
     /**
