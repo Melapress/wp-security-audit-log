@@ -329,9 +329,9 @@ class WSAL_Settings {
      * @param string $action Type of action.
      * @return string[] List of tokens (usernames, roles etc).
      */
-    public function GetAccessTokens($action){
+    public function GetAccessTokens($action) {
         $allowed = array();
-        switch($action){
+        switch ($action) {
             case 'view':
                 $allowed = $this->GetAllowedPluginViewers();
                 $allowed = array_merge($allowed, $this->GetAllowedPluginEditors());
@@ -343,18 +343,16 @@ class WSAL_Settings {
             case 'edit':
                 $allowed = $this->GetAllowedPluginEditors();
                 if (!$this->IsRestrictAdmins()) {
-                    $allowed = array_merge($allowed, $this->_plugin->IsMultisite() ?
-                            $this->GetSuperAdmins() : $this->GetAdmins()
-                        );
+                    $allowed = array_merge($allowed, $this->_plugin->IsMultisite() ? $this->GetSuperAdmins() : $this->GetAdmins());
                 }
                 break;
             default:
                 throw new Exception('Unknown action "'.$action.'".');
         }
         if (!$this->IsRestrictAdmins()) {
-            if(is_multisite()){
+            if (is_multisite()) {
                 $allowed = array_merge($allowed, get_super_admins());
-            }else{
+            } else {
                 $allowed[] = 'administrator';
             }
         }
@@ -365,15 +363,14 @@ class WSAL_Settings {
      * @param string $action Type of action, either 'view' or 'edit'.
      * @return boolean If user has access or not.
      */
-    public function UserCan($user, $action){
-        if(is_int($user))$user = get_userdata($user);
-        $allowed = $this->GetAccessTokens($action); error_log(print_r($allowed,true));
-        $check = array_merge(
-            $user->roles,
-            array($user->user_login)
-        );
-        foreach($check as $item){
-            if(in_array($item, $allowed)){
+    public function UserCan($user, $action) {
+        if (is_int($user)) {
+            $user = get_userdata($user);
+        }
+        $allowed = $this->GetAccessTokens($action);
+        $check = array_merge($user->roles, array($user->user_login));
+        foreach ($check as $item) {
+            if (in_array($item, $allowed)) {
                 return true;
             }
         }
@@ -387,7 +384,7 @@ class WSAL_Settings {
 
     public function IsLoginSuperAdmin($username){ 
         $userId = username_exists($username);
-        if ( function_exists('is_super_admin') && is_super_admin($userId) ) return true;
+        if (function_exists('is_super_admin') && is_super_admin($userId) ) return true;
         else return false;
     }
     

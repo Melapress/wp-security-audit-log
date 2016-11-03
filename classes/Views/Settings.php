@@ -219,11 +219,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                         _e('Users and Roles in this list can manage the plugin settings', 'wp-security-audit-log');
                                     ?></p>
                                     <div id="EditorList"><?php
-                                        foreach($this->_plugin->settings->GetAllowedPluginEditors() as $item){
+                                        foreach ($this->_plugin->settings->GetAllowedPluginEditors() as $item) {
                                             ?><span class="sectoken-<?php echo $this->GetTokenType($item); ?>">
                                                 <input type="hidden" name="Editors[]" value="<?php echo esc_attr($item); ?>"/>
                                                 <?php echo esc_html($item); ?>
-                                                <a href="javascript:;" title="Remove">&times;</a>
+                                                <?php if (wp_get_current_user()->user_login != $item) { ?>
+                                                    <a href="javascript:;" title="Remove">&times;</a>
+                                                <?php } ?>
                                             </span><?php
                                         }
                                     ?></div>
@@ -239,11 +241,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     <label for="RestrictAdmins">
                                         <?php $ira = $this->_plugin->settings->IsRestrictAdmins(); ?>
                                         <input type="checkbox" name="RestrictAdmins" id="RestrictAdmins"<?php if($ira)echo ' checked="checked"'; ?>/>
-                                        <?php _e('By default all the administrators on this WordPress have access to manage this plugin.', 'wp-security-audit-log'); ?>
                                     </label>
                                     <br/>
                                     <span class="description">
-                                        <?php _e('By enabling this option only the users specified in the <strong>Can Manage Plugin</strong> and <strong>Can View Alerts</strong> can configure this plugin or view the alerts in the WordPress audit trail.', 'wp-security-audit-log'); ?>
+                                        <?php _e('If this option is disabled all the administrators on this WordPress have access to manage this plugin.', 'wp-security-audit-log'); ?><br/>
+                                        <?php _e('By enabling this option only <strong>You</strong> and the users specified in the <strong>Can Manage Plugin</strong> and <strong>Can View Alerts</strong> can configure this plugin or view the alerts in the WordPress audit trail.', 'wp-security-audit-log'); ?>
                                     </span>
                                 </fieldset>
                             </td>
