@@ -129,6 +129,8 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * [Templatic](https://templatic.com/tips-tricks/improve-wordpress-security-posture/)
 * [Make a Website Hub](http://makeawebsitehub.com/wordpress-security/)
 * [The Darknet](http://www.darknet.org.uk/2015/10/wp-security-audit-log-a-complete-audit-log-plugin-for-wordpress/)
+* [WebEmpresa](https://www.webempresa.com/blog/auditando-cambios-en-wordpress.html)
+* [KitPloit](http://www.kitploit.com/2016/10/wp-security-audit-log-ultimate.html)
 
 = WordPress Security Audit Log in your Language! =
 We need help translating the plugin and the WordPress Security Alerts. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log) to translate the plugin and drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
@@ -178,6 +180,16 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 9. If there are more than 15 sites in a multisite, an auto complete site search shows up instead of the drop down menu (see [screenshots](https://wordpress.org/plugins/wp-security-audit-log/screenshots/) for reference)
 10. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes with WP Security Audit Log Plugin](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
 
+= 2.5.8 (2016-11-09) =
+
+* **Plugin Improvement (Standardized all date & time formats and timezone)**
+	* Plugin now uses the time & date format configured in WordPress (removed the option from plugin that override this).
+	* Updated all the [Premium Add-Ons](https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/) to use the time & date format configured in WordPress.
+	* Changed the Request Log file extension to php and disabled execution (before it was log, hence users could guess it)
+
+* **Bug Fixes**
+  * Fixed a problem with restricting users' access to the plugin ([support ticket](https://wordpress.org/support/topic/sorry-you-are-not-allowed-to-access-this-page-9/)).
+  * Fixed a bug in the custom alerts - previously custom alerts were overwritten during upgrade. Updated [custom alerts documentation](https://www.wpsecurityauditlog.com/documentation/create-custom-alerts-wordpress-audit-trail/) as well. 
 == Changelog ==
 
 = 2.5.7 (2016-10-05) =
