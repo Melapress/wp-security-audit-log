@@ -319,6 +319,111 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return rtrim($plaintext_dec, "\0");
     }
 
+    public function ArchiveOccurrence($args)
+    {
+        $_wpdb = $this->getConnection();
+        $archive_db = $args['archive_db'];
+
+        // Load data Occurrences from WP
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        if (!$occurrence->IsInstalled()) {
+            return null;
+        }
+        if (!empty($args['by_limit'])) {
+            $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE id < ((SELECT MAX(id) FROM ' . $occurrence->GetTable() . ') - ' .$args['by_limit'] . ')';
+        }
+        if (!empty($args['by_date'])) {
+            $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE created_on < ' . $args['by_date'];
+        }
+        $sql .= ' LIMIT ' . $args['limit'];
+        $occurrences = $_wpdb->get_results($sql, ARRAY_A);
+
+        // Insert data to Archive DB
+        if (!empty($occurrences)) {
+            $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($archive_db);
+
+            $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
+            foreach ($occurrences as $entry) {
+                $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
+            }
+            $sql = rtrim($sql, ", ");
+            $archive_db->query($sql);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function ArchiveMeta($args)
+    {
+        $_wpdb = $this->getConnection();
+        $archive_db = $args['archive_db'];
+
+        $aExtremes = $this->getExtremes($_wpdb, $archive_db);
+        $from_occurrence = $aExtremes['from_occurrence'];
+        $to_occurrence = $aExtremes['to_occurrence'];
+
+        // Load data Meta from WP
+        $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
+        if (!$meta->IsInstalled()) {
+            return null;
+        }
+        $sql = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id BETWEEN ' . $from_occurrence . ' AND ' . $to_occurrence;
+        $metadata = $_wpdb->get_results($sql, ARRAY_A);
+
+        // Insert data to Archive DB
+        if (!empty($metadata)) {
+            $metaNew = new WSAL_Adapters_MySQL_Meta($archive_db);
+
+            $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
+            foreach ($metadata as $entry) {
+                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace("'", "\'", $entry['value']).'\'), ';
+            }
+            $sql = rtrim($sql, ", ");
+            $archive_db->query($sql);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function DeleteAfterArchive($args)
+    {
+        $_wpdb = $this->getConnection();
+        $archive_db = $args['archive_db'];
+
+        $aExtremes = $this->getExtremes($_wpdb, $archive_db);
+        $from_occurrence = $aExtremes['from_occurrence'];
+        $to_occurrence = $aExtremes['to_occurrence'];
+        
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        $sql = 'DELETE FROM ' . $occurrence->GetTable() . ' WHERE id BETWEEN ' . $from_occurrence . ' AND ' . $to_occurrence;
+        $_wpdb->query($sql);
+
+        $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
+        $sql = 'DELETE FROM ' . $meta->GetTable() . ' WHERE occurrence_id BETWEEN ' . $from_occurrence . ' AND ' . $to_occurrence;
+        $_wpdb->query($sql);
+    }
+
+    /**
+     * Get extremes after occurrences insertion
+     */
+    private function getExtremes($original_db, $archive_db)
+    {
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($original_db);
+        $sql = 'SELECT MIN(id) FROM ' . $occurrence->GetTable();
+        $from_occurrence = (int)$original_db->get_var($sql);
+
+        $occurrenceArchive = new WSAL_Adapters_MySQL_Occurrence($archive_db);
+        $sql = 'SELECT MAX(id) FROM ' . $occurrenceArchive->GetTable();
+        $to_occurrence = (int)$archive_db->get_var($sql);
+
+        return array(
+            'from_occurrence' => $from_occurrence,
+            'to_occurrence' => $to_occurrence
+        );
+    }
+
     private function truncateKey()
     {
         if (!defined('AUTH_KEY')) {
