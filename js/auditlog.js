@@ -41,12 +41,10 @@ function WsalAuditLogInit(_WsalData){
 					window['WsalAuditLogRefreshed']
 				);
 			}
-			WsalChk();
 		});
 	};
 	if(WsalData.autorefresh.enabled){
-		setInterval(WsalChk, 40000);
-		WsalChk();
+		setInterval(WsalChk, 5000);
 	}
 	
 	WsalSsasInit();

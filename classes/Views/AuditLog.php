@@ -135,15 +135,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
             die('Log count parameter expected.');
         
         $old = (int)$_REQUEST['logcount'];
-        $max = 40; // 40*500msec = 20sec
-        
         session_write_close(); // fixes session lock issue
         
-        do{
-            $occ = new WSAL_Models_Occurrence();
-            $new = $occ->Count();
-            usleep(500000); // 500msec
-        }while(($old == $new) && (--$max > 0));
+        $occ = new WSAL_Models_Occurrence();
+        $new = $occ->Count();
         
         echo $old == $new ? 'false' : $new;
         die;
