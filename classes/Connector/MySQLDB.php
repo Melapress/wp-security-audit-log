@@ -319,6 +319,57 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return rtrim($plaintext_dec, "\0");
     }
 
+    public function MirroringAlertsToDB($args)
+    {
+        $result = null;
+        $_wpdb = $this->getConnection();
+        $mirroring_db = $args['mirroring_db'];
+
+        // Load data Occurrences from WP
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        if (!$occurrence->IsInstalled()) {
+            return null;
+        }
+        $today_start = strtotime(date('Y-m-d') . " 00:00:00");
+        $today_end = strtotime(date('Y-m-d') . " 23:59:59");
+
+        $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE created_on >= ' . $today_start . ' AND created_on <= ' . $today_end;
+        $occurrences = $_wpdb->get_results($sql, ARRAY_A);
+
+        if (!empty($occurrences)) {
+            $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($mirroring_db);
+
+            $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
+            foreach ($occurrences as $entry) {
+                $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
+            }
+            $sql = rtrim($sql, ", ");
+            $mirroring_db->query($sql);
+        }
+
+        $sql = 'SELECT MIN(id) FROM ' . $occurrence->GetTable() . ' WHERE created_on >= ' . $today_start . ' AND created_on <= ' . $today_end;
+        $from_occurrence = (int)$_wpdb->get_var($sql);
+        $sql = 'SELECT MAX(id) FROM ' . $occurrence->GetTable() . ' WHERE created_on >= ' . $today_start . ' AND created_on <= ' . $today_end;
+        $to_occurrence = (int)$_wpdb->get_var($sql);
+        // Load data Meta from WP
+        $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
+        if (!$meta->IsInstalled()) {
+            return null;
+        }
+        $sql = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id BETWEEN ' . $from_occurrence . ' AND ' . $to_occurrence;
+        $metadata = $_wpdb->get_results($sql, ARRAY_A);
+        if (!empty($metadata)) {
+            $metaNew = new WSAL_Adapters_MySQL_Meta($mirroring_db);
+
+            $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
+            foreach ($metadata as $entry) {
+                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace("'", "\'", $entry['value']).'\'), ';
+            }
+            $sql = rtrim($sql, ", ");
+            $mirroring_db->query($sql);
+        }
+    }
+
     public function ArchiveOccurrence($args)
     {
         $_wpdb = $this->getConnection();
