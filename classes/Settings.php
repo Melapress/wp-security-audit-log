@@ -188,6 +188,11 @@ class WSAL_Settings {
     public function IsPruningLimitEnabled(){
         return $this->_plugin->GetGlobalOption('pruning-limit-e');
     }
+
+    public function IsArchivingEnabled(){
+        return $this->_plugin->GetGlobalOption('archiving-e');
+    }
+
     public function IsRestrictAdmins(){
         return $this->_plugin->GetGlobalOption('restrict-admins', false);
     }

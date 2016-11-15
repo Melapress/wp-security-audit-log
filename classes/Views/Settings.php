@@ -355,6 +355,17 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                 <table class="form-table wsal-tab widefat" id="tab-audit-log">
                     <tbody>
                         <!-- Security Alerts Pruning -->
+                        <?php
+                            $disabled = '';
+                            if ($this->_plugin->settings->IsArchivingEnabled()) {
+                            $disabled = 'disabled';
+                            ?>
+                            <tr>
+                                <td colspan="2">
+                                    <?php _e('The options below are disabled because you enabled archiving of alerts to the archiving table from', 'wp-security-audit-log'); ?>&nbsp;<a href="<?php echo admin_url('admin.php?page=wsal-ext-settings#mirroring'); ?>" target="_blank">here</a>
+                                </td>
+                            </tr>
+                        <?php } ?>
                         <tr>
                             <th><label for="delete1"><?php _e('Security Alerts Pruning', 'wp-security-audit-log'); ?></label></th>
                             <td>
@@ -362,7 +373,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     <?php $text = __('(eg: 1 month)', 'wp-security-audit-log'); ?>
                                     <?php $nbld = !($this->_plugin->settings->IsPruningDateEnabled() || $this->_plugin->settings->IsPruningLimitEnabled()); ?>
                                     <label for="delete0">
-                                        <input type="radio" id="delete0" name="PruneBy" value="" <?php if ($nbld) echo 'checked="checked"'; ?>/>
+                                        <input type="radio" id="delete0" name="PruneBy" value="" <?php if ($nbld) echo 'checked="checked"'; ?> <?php echo $disabled; ?>/>
                                         <?php echo __('None', 'wp-security-audit-log'); ?>
                                     </label>
                                 </fieldset>
@@ -370,24 +381,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     <?php $text = __('(eg: 1 month)', 'wp-security-audit-log'); ?>
                                     <?php $nbld = $this->_plugin->settings->IsPruningDateEnabled(); ?>
                                     <label for="delete1">
-                                        <input type="radio" id="delete1" name="PruneBy" value="date" <?php if($nbld)echo 'checked="checked"'; ?>/>
+                                        <input type="radio" id="delete1" name="PruneBy" value="date" <?php if($nbld)echo 'checked="checked"'; ?> <?php echo $disabled; ?>/>
                                         <?php echo __('Delete alerts older than', 'wp-security-audit-log'); ?>
                                     </label>
                                     <input type="text" id="PruningDate" name="PruningDate" placeholder="<?php echo $text; ?>"
                                            value="<?php echo esc_attr($this->_plugin->settings->GetPruningDate()); ?>"
-                                           onfocus="jQuery('#delete1').attr('checked', true);"/>
+                                           onfocus="jQuery('#delete1').attr('checked', true);" <?php echo $disabled; ?>/>
                                     <span> <?php echo $text; ?></span>
                                 </fieldset>
                                 <fieldset>
                                     <?php $text = __('(eg: 80)', 'wp-security-audit-log'); ?>
                                     <?php $nbld = $this->_plugin->settings->IsPruningLimitEnabled(); ?>
                                     <label for="delete2">
-                                        <input type="radio" id="delete2" name="PruneBy" value="limit" <?php if($nbld)echo 'checked="checked"'; ?>/>
+                                        <input type="radio" id="delete2" name="PruneBy" value="limit" <?php if($nbld)echo 'checked="checked"'; ?> <?php echo $disabled; ?>/>
                                         <?php echo __('Keep up to', 'wp-security-audit-log'); ?>
                                     </label>
                                     <input type="text" id="PruningLimit" name="PruningLimit" placeholder="<?php echo $text;?>"
                                            value="<?php echo esc_attr($this->_plugin->settings->GetPruningLimit()); ?>"
-                                           onfocus="jQuery('#delete2').attr('checked', true);"/>
+                                           onfocus="jQuery('#delete2').attr('checked', true);" <?php echo $disabled; ?>/>
                                     <?php echo __('alerts', 'wp-security-audit-log'); ?>
                                     <span><?php echo $text; ?></span>
                                 </fieldset>
@@ -397,7 +408,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     echo '<!-- ' . date('dMy H:i:s', $next) . ' --> ';
                                     echo sprintf(
                                             __('(or %s)', 'wp-security-audit-log'),
-                                            '<a href="' . admin_url('admin-ajax.php?action=AjaxRunCleanup') . '">' . __('Run Manually', 'wp-security-audit-log') . '</a>'
+                                            '<a class="' .$disabled.'" href="' . admin_url('admin-ajax.php?action=AjaxRunCleanup') . '">' . __('Run Manually', 'wp-security-audit-log') . '</a>'
                                         );
                                 ?></p>
                             </td>
