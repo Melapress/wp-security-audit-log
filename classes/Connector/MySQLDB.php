@@ -356,18 +356,20 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         if (!$meta->IsInstalled()) {
             return null;
         }
-        $sql = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id >= ' . $first_occurrence_id;
-        $metadata = $_wpdb->get_results($sql, ARRAY_A);
+        if (!empty($first_occurrence_id)) {
+            $sql = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id >= ' . $first_occurrence_id;
+            $metadata = $_wpdb->get_results($sql, ARRAY_A);
 
-        if (!empty($metadata)) {
-            $metaNew = new WSAL_Adapters_MySQL_Meta($mirroring_db);
+            if (!empty($metadata)) {
+                $metaNew = new WSAL_Adapters_MySQL_Meta($mirroring_db);
 
-            $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
-            foreach ($metadata as $entry) {
-                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace("'", "\'", $entry['value']).'\'), ';
+                $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
+                foreach ($metadata as $entry) {
+                    $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace("'", "\'", $entry['value']).'\'), ';
+                }
+                $sql = rtrim($sql, ", ");
+                $mirroring_db->query($sql);
             }
-            $sql = rtrim($sql, ", ");
-            $mirroring_db->query($sql);
         }
         return $last_created_on;
     }
