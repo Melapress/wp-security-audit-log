@@ -29,7 +29,7 @@ class WSAL_Settings {
      * @return boolean If option is enabled or not.
      */
     public function IsDevOptionEnabled($option){
-        if(is_null($this->_devoption)){
+        if (is_null($this->_devoption)) {
             $this->_devoption = $this->_plugin->GetGlobalOption(
                 'dev-options',
                 implode(',', $this->GetDefaultDevOptions())
@@ -53,11 +53,13 @@ class WSAL_Settings {
         // make sure options have been loaded
         $this->IsDevOptionEnabled('');
         // remove option if it exists
-        while(($p = array_search($option, $this->_devoption)) !== false)
+        while (($p = array_search($option, $this->_devoption)) !== false) {
             unset($this->_devoption[$p]);
+        }
         // add option if callee wants it enabled
-        if($enabled)
+        if ($enabled) {
             $this->_devoption[] = $option;
+        }
         // commit option
         $this->_plugin->SetGlobalOption(
             'dev-options',
@@ -146,10 +148,11 @@ class WSAL_Settings {
      * @return string The current pruning date.
      */
     public function GetPruningDate(){
-        if(!$this->_pruning){
+        if (!$this->_pruning) {
             $this->_pruning = $this->_plugin->GetGlobalOption('pruning-date');
-            if(!strtotime($this->_pruning))
+            if (!strtotime($this->_pruning)) {
                 $this->_pruning = $this->GetDefaultPruningDate();
+            }
         }
         return $this->_pruning;
     }
@@ -157,7 +160,7 @@ class WSAL_Settings {
      * @param string $newvalue The new pruning date.
      */
     public function SetPruningDate($newvalue){
-        if(strtotime($newvalue)){
+        if (strtotime($newvalue)) {
             $this->_plugin->SetGlobalOption('pruning-date', $newvalue);
             $this->_pruning = $newvalue;
         }
@@ -189,10 +192,6 @@ class WSAL_Settings {
         return $this->_plugin->GetGlobalOption('pruning-limit-e');
     }
 
-    public function IsArchivingEnabled(){
-        return $this->_plugin->GetGlobalOption('archiving-e');
-    }
-
     public function IsRestrictAdmins(){
         return $this->_plugin->GetGlobalOption('restrict-admins', false);
     }
@@ -216,7 +215,7 @@ class WSAL_Settings {
      * @return array IDs of disabled alerts.
      */
     public function GetDisabledAlerts(){
-        if(!$this->_disabled){
+        if (!$this->_disabled) {
             $this->_disabled = implode(',', $this->GetDefaultDisabledAlerts());
             $this->_disabled = $this->_plugin->GetGlobalOption('disabled-alerts', $this->_disabled);
             $this->_disabled = ($this->_disabled == '') ? array() : explode(',', $this->_disabled);
@@ -268,7 +267,7 @@ class WSAL_Settings {
         $this->_plugin->SetGlobalOption('plugin-viewers', implode(',', $this->_viewers));
     }
     public function GetAllowedPluginViewers(){
-        if(is_null($this->_viewers)){
+        if (is_null($this->_viewers)) {
             $this->_viewers = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('plugin-viewers'))));
         }
         return $this->_viewers;
@@ -279,7 +278,7 @@ class WSAL_Settings {
         $this->_plugin->SetGlobalOption('plugin-editors', implode(',', $this->_editors));
     }
     public function GetAllowedPluginEditors(){
-        if(is_null($this->_editors)){
+        if (is_null($this->_editors)) {
             $this->_editors = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('plugin-editors'))));
         }
         return $this->_editors;
@@ -290,8 +289,8 @@ class WSAL_Settings {
         $this->_plugin->SetGlobalOption('items-per-page', $this->_perpage);
     }
     public function GetViewPerPage(){
-        if(is_null($this->_perpage)){ 
-            $this->_perpage = (int)$this->_plugin->GetGlobalOption('items-per-page', 10); 
+        if (is_null($this->_perpage)) {
+            $this->_perpage = (int)$this->_plugin->GetGlobalOption('items-per-page', 10);
         }
         return $this->_perpage;
     }
@@ -312,7 +311,7 @@ class WSAL_Settings {
      * @return string[] List of admin usernames.
      */
     protected function GetAdmins(){
-        if($this->_plugin->IsMultisite()){
+        if ($this->_plugin->IsMultisite()) {
             // see: https://gist.github.com/1508426/65785a15b8638d43a9905effb59e4d97319ef8f8
             global $wpdb;
             $cap = $wpdb->prefix."capabilities";
@@ -322,7 +321,7 @@ class WSAL_Settings {
                 . " WHERE $wpdb->usermeta.meta_key = '$cap'"
                 . " AND CAST($wpdb->usermeta.meta_value AS CHAR) LIKE  '%\"administrator\"%'";
             return $wpdb->get_col($sql);
-        }else{
+        } else {
             $result = array();
             $query = 'role=administrator&fields[]=user_login';
             foreach (get_users($query) as $user) $result[] = $user->user_login;
@@ -438,11 +437,10 @@ class WSAL_Settings {
         $this->SetLicenses($data);
     }
     public function ClearLicenses(){
-        $this->SetLicenses(array()); 
+        $this->SetLicenses(array());
     }
     
     // </editor-fold>
-    
     // <editor-fold desc="Client IP Retrieval">
     
     public function IsMainIPFromProxy(){
@@ -480,9 +478,11 @@ class WSAL_Settings {
         foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
             if (isset($_SERVER[$key])) {
                 $ips[$key] = array();
-                foreach (explode(',', $_SERVER[$key]) as $ip)
-                    if ($this->ValidateIP($ip = $this->NormalizeIP($ip)))
+                foreach (explode(',', $_SERVER[$key]) as $ip) {
+                    if ($this->ValidateIP($ip = $this->NormalizeIP($ip))) {
                         $ips[$key][] = $ip;
+                    }
+                }
             }
         }
         return $ips;
@@ -490,11 +490,11 @@ class WSAL_Settings {
     
     protected function NormalizeIP($ip){
         $ip = trim($ip);
-        if(strpos($ip, ':') !== false && substr_count($ip, '.') == 3 && strpos($ip, '[') === false){
+        if (strpos($ip, ':') !== false && substr_count($ip, '.') == 3 && strpos($ip, '[') === false) {
             // IPv4 with a port (eg: 11.22.33.44:80)
             $ip = explode(':', $ip);
             $ip = $ip[0];
-        }else{
+        } else {
             // IPv6 with a port (eg: [::1]:80)
             $ip = explode(']', $ip);
             $ip = ltrim($ip[0], '[');
@@ -531,7 +531,7 @@ class WSAL_Settings {
     }
     public function GetExcludedMonitoringUsers()
     {
-        if(empty($this->_excluded_users)){
+        if (empty($this->_excluded_users)) {
             $this->_excluded_users = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-users'))));
         }
         return $this->_excluded_users;
@@ -546,7 +546,7 @@ class WSAL_Settings {
         $this->_plugin->SetGlobalOption('excluded-roles', esc_html(implode(',', $this->_excluded_roles)));
     }
     public function GetExcludedMonitoringRoles(){
-        if(empty($this->_excluded_roles)){
+        if (empty($this->_excluded_roles)) {
             $this->_excluded_roles = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-roles'))));
         }
         return $this->_excluded_roles;
@@ -561,7 +561,7 @@ class WSAL_Settings {
         $this->_plugin->SetGlobalOption('excluded-custom', esc_html(implode(',', $this->_excluded_custom)));
     }
     public function GetExcludedMonitoringCustom(){
-        if(empty($this->_excluded_custom)){
+        if (empty($this->_excluded_custom)) {
             $this->_excluded_custom = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-custom'))));
             asort($this->_excluded_custom);
         }
@@ -577,7 +577,7 @@ class WSAL_Settings {
         $this->_plugin->SetGlobalOption('excluded-ip', esc_html(implode(',', $this->_excluded_ip)));
     }
     public function GetExcludedMonitoringIP(){
-        if(empty($this->_excluded_ip)){
+        if (empty($this->_excluded_ip)) {
             $this->_excluded_ip = array_unique(array_filter(explode(',', $this->_plugin->GetGlobalOption('excluded-ip'))));
         }
         return $this->_excluded_ip;
@@ -695,12 +695,32 @@ class WSAL_Settings {
         return $this->_plugin->GetGlobalOption('display-name');
     }
 
-     public function Set404LogLimit($value){
+    public function Set404LogLimit($value){
         return $this->_plugin->SetGlobalOption('log-404-limit', abs($value));
     }
 
     public function Get404LogLimit(){
-        return $this->_plugin->GetGlobalOption('log-404-limit', 99);;
+        return $this->_plugin->GetGlobalOption('log-404-limit', 99);
+    }
+
+/*============================== Support Archive Database ==============================*/
+
+    public function IsArchivingEnabled(){
+        return $this->_plugin->GetGlobalOption('archiving-e');
+    }
+
+    public function GetArchiveObject()
+    {
+        $archiveType = $this->_plugin->GetGlobalOption('archive-type');
+        $archiveUser = $this->_plugin->GetGlobalOption('archive-user');
+        $password = $this->_plugin->GetGlobalOption('archive-password');
+        $archiveName = $this->_plugin->GetGlobalOption('archive-name');
+        $archiveHostname = $this->_plugin->GetGlobalOption('archive-hostname');
+        $archiveBasePrefix = $this->_plugin->GetGlobalOption('archive-base-prefix');
+        $plugin = new WpSecurityAuditLog();
+        $config = WSAL_Connector_ConnectorFactory::GetConfigArray($archiveType, $archiveUser, $password, $archiveName, $archiveHostname, $archiveBasePrefix);
+        $obj = $plugin->getConnector($config)->getAdapter('Occurrence');
+        error_log(print_r($obj, true));
     }
     // </editor-fold>
 }

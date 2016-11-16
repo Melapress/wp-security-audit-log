@@ -89,14 +89,11 @@ class WSAL_AuditLogListView extends WP_List_Table
     public function get_sites($limit = null)
     {
         global $wpdb;
-        
         // build query
         $sql = 'SELECT blog_id, domain FROM ' . $wpdb->blogs;
         if (!is_null($limit)) $sql .= ' LIMIT ' . $limit;
-        
         // execute query
         $res = $wpdb->get_results($sql);
-        
         // modify result
         foreach ($res as $row) {
             $row->blogname = get_blog_option($row->blog_id, 'blogname');
