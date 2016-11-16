@@ -15,12 +15,17 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
         add_action('wp_ajax_AjaxSetIpp', array($this, 'AjaxSetIpp'));
         add_action('wp_ajax_AjaxSearchSite', array($this, 'AjaxSearchSite'));
+        add_action('wp_ajax_AjaxSwitchDB', array($this, 'AjaxSwitchDB'));
         add_action('all_admin_notices', array($this, 'AdminNoticesPremium'));
         // Check plugin version for to dismiss the notice only until upgrade
         $plugin_file =  trailingslashit(WP_PLUGIN_DIR) . plugin_basename(__FILE__);
         $data = get_plugin_data($plugin_file, false, false);
         $this->_version = isset($data['Version']) ? $data['Version'] : '0.0.0';
         $this->RegisterNotice('premium-wsal-'.$this->_version);
+
+        if (!session_id()) {
+            @session_start();
+        }
     }
 
     public function AdminNoticesPremium()
@@ -178,6 +183,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         }
         
         die(json_encode(array_slice($grp1 + $grp2, 0, 7)));
+    }
+
+    public function AjaxSwitchDB() {
+        if (isset($_REQUEST['selected_db'])) {
+            $_SESSION['selected_db'] = $_REQUEST['selected_db'];
+        }
     }
     
     public function Header() {

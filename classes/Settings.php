@@ -709,18 +709,22 @@ class WSAL_Settings {
         return $this->_plugin->GetGlobalOption('archiving-e');
     }
 
-    public function GetArchiveObject()
+    /**
+     * Switch to Archive DB if is enabled
+     */
+    public function SwitchToArchiveDB()
     {
-        $archiveType = $this->_plugin->GetGlobalOption('archive-type');
-        $archiveUser = $this->_plugin->GetGlobalOption('archive-user');
-        $password = $this->_plugin->GetGlobalOption('archive-password');
-        $archiveName = $this->_plugin->GetGlobalOption('archive-name');
-        $archiveHostname = $this->_plugin->GetGlobalOption('archive-hostname');
-        $archiveBasePrefix = $this->_plugin->GetGlobalOption('archive-base-prefix');
-        $plugin = new WpSecurityAuditLog();
-        $config = WSAL_Connector_ConnectorFactory::GetConfigArray($archiveType, $archiveUser, $password, $archiveName, $archiveHostname, $archiveBasePrefix);
-        $obj = $plugin->getConnector($config)->getAdapter('Occurrence');
-        error_log(print_r($obj, true));
+        if ($this->IsArchivingEnabled()) {
+            $archiveType = $this->_plugin->GetGlobalOption('archive-type');
+            $archiveUser = $this->_plugin->GetGlobalOption('archive-user');
+            $password = $this->_plugin->GetGlobalOption('archive-password');
+            $archiveName = $this->_plugin->GetGlobalOption('archive-name');
+            $archiveHostname = $this->_plugin->GetGlobalOption('archive-hostname');
+            $archiveBasePrefix = $this->_plugin->GetGlobalOption('archive-base-prefix');
+            $plugin = new WpSecurityAuditLog();
+            $config = WSAL_Connector_ConnectorFactory::GetConfigArray($archiveType, $archiveUser, $password, $archiveName, $archiveHostname, $archiveBasePrefix);
+            $plugin->getConnector($config)->getAdapter('Occurrence');
+        }
     }
     // </editor-fold>
 }

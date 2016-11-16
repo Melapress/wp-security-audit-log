@@ -29,6 +29,10 @@ class WSAL_AuditLogListView extends WP_List_Table
             'ajax'      => true,
             'screen'    => 'interval-list',
         ));
+
+        if (!session_id()) {
+            @session_start();
+        }
     }
 
     public function no_items()
@@ -78,6 +82,20 @@ class WSAL_AuditLogListView extends WP_List_Table
                         <?php } ?>
                     </select>
                 <?php } ?>
+            </div><?php
+        }
+
+        // switch to live or archive DB
+        if ($this->_plugin->settings->IsArchivingEnabled()) {
+            $selected = 'live';
+            if (isset($_SESSION['selected_db']) && $_SESSION['selected_db'] == 'archive') {
+                $selected = 'archive';
+            }
+            ?><div class="wsal-ssa wsal-db">
+                <select class="wsal-db" onchange="WsalDBChange(value);">
+                    <option value="live" <?php if ($selected == 'live') echo 'selected="selected"'; ?>><?php _e('Live Database', 'wp-security-audit-log'); ?></option>
+                    <option value="archive" <?php if ($selected == 'archive') echo 'selected="selected"'; ?>><?php _e('Archive Database', 'wp-security-audit-log'); ?></option>
+                </select>
             </div><?php
         }
     }
@@ -393,6 +411,13 @@ class WSAL_AuditLogListView extends WP_List_Table
     
     public function prepare_items()
     {
+        if ($this->_plugin->settings->IsArchivingEnabled()) {
+            // Switch to Archive DB
+            if (isset($_SESSION['selected_db']) && $_SESSION['selected_db'] == 'archive') {
+                $this->_plugin->settings->SwitchToArchiveDB();
+            }
+        }
+
         $per_page = $this->_plugin->settings->GetViewPerPage();
 
         $columns = $this->get_columns();
