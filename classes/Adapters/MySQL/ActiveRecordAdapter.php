@@ -446,4 +446,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         
         return $results;
     }
+
+    /**
+     * Function used in WSAL reporting extension
+     * get the date of the first alert in the DB
+     */
+    public function GetMinDate()
+    {
+        $_wpdb = $this->connection;
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        $sql = "SELECT MIN(created_on) FROM " . $occurrence->GetTable();
+        return $_wpdb->get_var($sql);
+    }
 }
