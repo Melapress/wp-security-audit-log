@@ -480,7 +480,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
         $user_names = $this->GetUserNames($_userId);
 
-        $sql = "SELECT COUNT(occ.id) FROM $tableOcc AS occ 
+        $sql = "SELECT COUNT(DISTINCT occ.id) FROM $tableOcc AS occ 
             JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
             WHERE
                 (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
