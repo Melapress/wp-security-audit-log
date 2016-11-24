@@ -441,16 +441,17 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             $sql .= " LIMIT {$_limit}";
         }
         $results = $_wpdb->get_results($sql);
-
-        foreach ($results as $row) {
-            $sql = "SELECT t6.ID FROM $wpdb->users AS t6 WHERE t6.user_login = \"$row->user_id\"";
-            $userId = $wpdb->get_var($sql);
-            if ($userId == null) {
-                $sql = "SELECT t4.ID FROM $wpdb->users AS t4 WHERE t4.ID = \"$row->user_id\"";
+        if (!empty($results)) {
+            foreach ($results as $row) {
+                $sql = "SELECT t6.ID FROM $wpdb->users AS t6 WHERE t6.user_login = \"$row->user_id\"";
                 $userId = $wpdb->get_var($sql);
+                if ($userId == null) {
+                    $sql = "SELECT t4.ID FROM $wpdb->users AS t4 WHERE t4.ID = \"$row->user_id\"";
+                    $userId = $wpdb->get_var($sql);
+                }
+                $row->user_id = $userId;
+                $results['lastDate'] = $row->created_on;
             }
-            $row->user_id = $userId;
-            $results['lastDate'] = $row->created_on;
         }
         
         return $results;

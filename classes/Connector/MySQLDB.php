@@ -55,6 +55,16 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     }
 
     /**
+     * Close DB connection
+     */
+    public function closeConnection()
+    {
+        $currentWpdb = $this->getConnection();
+        $result = $currentWpdb->close();
+        return $result;
+    }
+
+    /**
      * Gets an adapter for the specified model
      */
     public function getAdapter($class_name)
