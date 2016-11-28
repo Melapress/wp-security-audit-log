@@ -398,12 +398,14 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE created_on < ' . $args['by_date'];
         }
         if (!empty($args['by_limit'])) {
-            $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE id < ((SELECT MAX(id) FROM ' . $occurrence->GetTable() . ') - ' .$args['by_limit'] . ')';
+            $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE id <= ((SELECT MAX(id) FROM ' . $occurrence->GetTable() . ') - ' .$args['by_limit'] . ')';
         }
         if (!empty($args['last_created_on'])) {
             $sql .= ' AND created_on > ' . $args['last_created_on'];
         }
-        $sql .= ' LIMIT ' . $args['limit'];
+        if (!empty($args['limit'])) {
+            $sql .= ' LIMIT ' . $args['limit'];
+        }
         $occurrences = $_wpdb->get_results($sql, ARRAY_A);
 
         // Insert data to Archive DB
