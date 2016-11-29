@@ -721,9 +721,8 @@ class WSAL_Settings {
             $archiveName = $this->_plugin->GetGlobalOption('archive-name');
             $archiveHostname = $this->_plugin->GetGlobalOption('archive-hostname');
             $archiveBasePrefix = $this->_plugin->GetGlobalOption('archive-base-prefix');
-            $plugin = new WpSecurityAuditLog();
             $config = WSAL_Connector_ConnectorFactory::GetConfigArray($archiveType, $archiveUser, $password, $archiveName, $archiveHostname, $archiveBasePrefix);
-            $plugin->getConnector($config)->getAdapter('Occurrence');
+            $this->_plugin->getConnector($config)->getAdapter('Occurrence');
         }
     }
     // </editor-fold>
