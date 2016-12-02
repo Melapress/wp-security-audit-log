@@ -174,7 +174,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
             foreach ($metadata as $entry) {
                 $occurrence_id = intval($entry['occurrence_id']) + $increase_occurrence_id;
-                $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.str_replace("'", "\'", $entry['value']).'\'), ';
+                $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.str_replace(array("'", "\'"), "\'", $entry['value']).'\'), ';
             }
             $sql = rtrim($sql, ", ");
             $_wpdb->query($sql);
@@ -284,7 +284,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $index++;
             $sql = 'INSERT INTO ' . $metaWP->GetWPTable() . ' (occurrence_id, name, value) VALUES ' ;
             foreach ($metadata as $entry) {
-                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace("'", "\'", $entry['value']).'\'), ';
+                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace(array("'", "\'"), "\'", $entry['value']).'\'), ';
             }
             $sql = rtrim($sql, ", ");
             $wpdb->query($sql);
@@ -375,7 +375,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
                 $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
                 foreach ($metadata as $entry) {
-                    $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace("'", "\'", $entry['value']).'\'), ';
+                    $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace(array("'", "\'"), "\'", $entry['value']).'\'), ';
                 }
                 $sql = rtrim($sql, ", ");
                 $mirroring_db->query($sql);
@@ -449,7 +449,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
             $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
             foreach ($metadata as $entry) {
-                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace("'", "\'", $entry['value']).'\'), ';
+                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace(array("'", "\'"), "\'", $entry['value']).'\'), ';
             }
             $sql = rtrim($sql, ", ");
             $archive_db->query($sql);
