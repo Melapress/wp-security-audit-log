@@ -395,7 +395,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             return null;
         }
         if (!empty($args['by_date'])) {
-            $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE created_on < ' . $args['by_date'];
+            $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE created_on <= ' . $args['by_date'];
         }
         if (!empty($args['by_limit'])) {
             $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE id <= ((SELECT MAX(id) FROM ' . $occurrence->GetTable() . ') - ' .$args['by_limit'] . ')';
@@ -403,6 +403,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         if (!empty($args['last_created_on'])) {
             $sql .= ' AND created_on > ' . $args['last_created_on'];
         }
+        $sql .= ' ORDER BY created_on ASC';
         if (!empty($args['limit'])) {
             $sql .= ' LIMIT ' . $args['limit'];
         }
