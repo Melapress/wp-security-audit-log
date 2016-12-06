@@ -397,8 +397,12 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         if (!empty($args['by_date'])) {
             $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE created_on <= ' . $args['by_date'];
         }
+
         if (!empty($args['by_limit'])) {
-            $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE id <= ((SELECT MAX(id) FROM ' . $occurrence->GetTable() . ') - ' .$args['by_limit'] . ')';
+            $sql = 'SELECT occ.* FROM ' . $occurrence->GetTable() . ' occ    
+            LEFT JOIN (SELECT id FROM ' . $occurrence->GetTable() . ' order by created_on DESC limit ' . $args['by_limit'] . ') as ids 
+            on ids.id = occ.id
+            WHERE ids.id IS NULL';
         }
         if (!empty($args['last_created_on'])) {
             $sql .= ' AND created_on > ' . $args['last_created_on'];
@@ -412,16 +416,15 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         // Insert data to Archive DB
         if (!empty($occurrences)) {
             $last = end($occurrences);
-            $args['to_occurrence'] = $last['id'];
             $args['last_created_on'] = $last['created_on'];
+            $args['occurence_ids'] = array();
+
             $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($archive_db);
 
             $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
             foreach ($occurrences as $entry) {
                 $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
-                if (empty($args['from_occurrence'])) {
-                    $args['from_occurrence'] = $entry['id'];
-                }
+                $args['occurence_ids'][] = $entry['id'];
             }
             $sql = rtrim($sql, ", ");
             $archive_db->query($sql);
@@ -441,7 +444,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         if (!$meta->IsInstalled()) {
             return null;
         }
-        $sql = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id BETWEEN ' . $args['from_occurrence'] . ' AND ' . $args['to_occurrence'];
+        $sOccurenceIds = implode(", ", $args["occurence_ids"]);
+        $sql = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id IN (' . $sOccurenceIds . ')';
         $metadata = $_wpdb->get_results($sql, ARRAY_A);
 
         // Insert data to Archive DB
@@ -464,13 +468,15 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     {
         $_wpdb = $this->getConnection();
         $archive_db = $args['archive_db'];
+
+        $sOccurenceIds = implode(", ", $args["occurence_ids"]);
         
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
-        $sql = 'DELETE FROM ' . $occurrence->GetTable() . ' WHERE id BETWEEN ' . $args['from_occurrence'] . ' AND ' . $args['to_occurrence'];
+        $sql = 'DELETE FROM ' . $occurrence->GetTable() . ' WHERE id IN (' . $sOccurenceIds . ')';
         $_wpdb->query($sql);
 
         $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
-        $sql = 'DELETE FROM ' . $meta->GetTable() . ' WHERE occurrence_id BETWEEN ' . $args['from_occurrence'] . ' AND ' . $args['to_occurrence'];
+        $sql = 'DELETE FROM ' . $meta->GetTable() . ' WHERE occurrence_id IN (' . $sOccurenceIds . ')';
         $_wpdb->query($sql);
     }
 
