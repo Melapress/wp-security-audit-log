@@ -361,24 +361,13 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         return  'DROP TABLE ' . $this->GetTable();
     }
 
-    /**
-     * Function used in WSAL reporting extension
-     */
-    public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp, $_nextDate = null, $_limit = 0)
+    private function GetUserNames($_userId)
     {
         global $wpdb;
-        $tableUsers = $wpdb->users;
-        $_wpdb = $this->connection;
-        $_wpdb->set_charset($_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci');
-        // tables
-        $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
-        $tableMeta = $meta->GetTable(); // metadata
-        $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
-        $tableOcc = $occurrence->GetTable(); // occurrences
-
+        
         $user_names = '0';
         if (!empty($_userId) && $_userId != "null") {
-            $sql = 'SELECT user_login FROM '.$tableUsers.' WHERE find_in_set(ID, @userId) > 0';
+            $sql = 'SELECT user_login FROM '. $wpdb->users .' WHERE find_in_set(ID, @userId) > 0';
             $wpdb->query("SET @userId = $_userId");
             $result = $wpdb->get_results($sql, ARRAY_A);
             $aUsers = array();
@@ -387,6 +376,26 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             }
             $user_names = implode(', ', $aUsers);
         }
+        return $user_names;
+    }
+
+    /**
+     * Function used in WSAL reporting extension
+     */
+    public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp, $_nextDate = null, $_limit = 0)
+    {
+        global $wpdb;
+        
+        $_wpdb = $this->connection;
+        $_wpdb->set_charset($_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci');
+        // tables
+        $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
+        $tableMeta = $meta->GetTable(); // metadata
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
+        $tableOcc = $occurrence->GetTable(); // occurrences
+
+        $user_names = $this->GetUserNames($_userId);
+        
         $conditionDate = !empty($_nextDate) ? ' AND occ.created_on < '.$_nextDate : '';
 
         $sql = "SELECT DISTINCT
@@ -432,18 +441,72 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             $sql .= " LIMIT {$_limit}";
         }
         $results = $_wpdb->get_results($sql);
-
-        foreach ($results as $row) {
-            $sql = "SELECT t6.ID FROM $tableUsers AS t6 WHERE t6.user_login = \"$row->user_id\"";
-            $userId = $wpdb->get_var($sql);
-            if ($userId == null) {
-                $sql = "SELECT t4.ID FROM $tableUsers AS t4 WHERE t4.ID = \"$row->user_id\"";
+        if (!empty($results)) {
+            foreach ($results as $row) {
+                $sql = "SELECT t6.ID FROM $wpdb->users AS t6 WHERE t6.user_login = \"$row->user_id\"";
                 $userId = $wpdb->get_var($sql);
+                if ($userId == null) {
+                    $sql = "SELECT t4.ID FROM $wpdb->users AS t4 WHERE t4.ID = \"$row->user_id\"";
+                    $userId = $wpdb->get_var($sql);
+                }
+                $row->user_id = $userId;
+                $results['lastDate'] = $row->created_on;
             }
-            $row->user_id = $userId;
-            $results['lastDate'] = $row->created_on;
         }
         
         return $results;
+    }
+
+    /**
+     * Function used in WSAL reporting extension
+     * Check if criteria are matching in the DB
+     */
+    public function CheckMatchReportCriteria($criteria)
+    {
+        $_siteId = $criteria['siteId'];
+        $_userId = $criteria['userId'];
+        $_roleName = $criteria['roleName'];
+        $_alertCode = $criteria['alertCode'];
+        $_startTimestamp = $criteria['startTimestamp'];
+        $_endTimestamp = $criteria['endTimestamp'];
+        $_ipAddress = $criteria['ipAddress'];
+
+        $_wpdb = $this->connection;
+        $_wpdb->set_charset($_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci');
+        // tables
+        $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
+        $tableMeta = $meta->GetTable(); // metadata
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
+        $tableOcc = $occurrence->GetTable(); // occurrences
+
+        $user_names = $this->GetUserNames($_userId);
+
+        $sql = "SELECT COUNT(DISTINCT occ.id) FROM $tableOcc AS occ 
+            JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
+            WHERE
+                (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
+                AND (@userId is NULL OR (
+                    (meta.name = 'CurrentUserID' AND find_in_set(meta.value, @userId) > 0)
+                OR (meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($user_names))  
+                ))
+                AND (@roleName is NULL OR (meta.name = 'CurrentUserRoles'
+                AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName
+                ))
+                AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
+                AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
+                AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
+                AND (@ipAddress is NULL OR (meta.name = 'ClientIP' AND find_in_set(meta.value, @ipAddress) > 0))
+            ";
+
+        $_wpdb->query("SET @siteId = $_siteId");
+        $_wpdb->query("SET @userId = $_userId");
+        $_wpdb->query("SET @roleName = $_roleName");
+        $_wpdb->query("SET @alertCode = $_alertCode");
+        $_wpdb->query("SET @startTimestamp = $_startTimestamp");
+        $_wpdb->query("SET @endTimestamp = $_endTimestamp");
+        $_wpdb->query("SET @ipAddress = $_ipAddress");
+
+        $count = (int)$_wpdb->get_var($sql);
+        return $count;
     }
 }

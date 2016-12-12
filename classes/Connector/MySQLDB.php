@@ -55,6 +55,16 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     }
 
     /**
+     * Close DB connection
+     */
+    public function closeConnection()
+    {
+        $currentWpdb = $this->getConnection();
+        $result = $currentWpdb->close();
+        return $result;
+    }
+
+    /**
      * Gets an adapter for the specified model
      */
     public function getAdapter($class_name)
@@ -164,7 +174,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
             foreach ($metadata as $entry) {
                 $occurrence_id = intval($entry['occurrence_id']) + $increase_occurrence_id;
-                $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.str_replace("'", "\'", $entry['value']).'\'), ';
+                $sql .= '('.$occurrence_id.', \''.$entry['name'].'\', \''.str_replace(array("'", "\'"), "\'", $entry['value']).'\'), ';
             }
             $sql = rtrim($sql, ", ");
             $_wpdb->query($sql);
@@ -274,7 +284,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $index++;
             $sql = 'INSERT INTO ' . $metaWP->GetWPTable() . ' (occurrence_id, name, value) VALUES ' ;
             foreach ($metadata as $entry) {
-                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace("'", "\'", $entry['value']).'\'), ';
+                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace(array("'", "\'"), "\'", $entry['value']).'\'), ';
             }
             $sql = rtrim($sql, ", ");
             $wpdb->query($sql);
@@ -317,6 +327,157 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $plaintext_dec = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
         
         return rtrim($plaintext_dec, "\0");
+    }
+
+    public function MirroringAlertsToDB($args)
+    {
+        $last_created_on = null;
+        $first_occurrence_id = null;
+        $_wpdb = $this->getConnection();
+        $mirroring_db = $args['mirroring_db'];
+
+        // Load data Occurrences from WP
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        if (!$occurrence->IsInstalled()) {
+            return null;
+        }
+
+        $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE created_on > ' . $args['last_created_on'];
+        $occurrences = $_wpdb->get_results($sql, ARRAY_A);
+
+        if (!empty($occurrences)) {
+            $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($mirroring_db);
+
+            $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
+            foreach ($occurrences as $entry) {
+                $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
+                $last_created_on = $entry['created_on'];
+                // save the first id
+                if (empty($first_occurrence_id)) {
+                    $first_occurrence_id = $entry['id'];
+                }
+            }
+            $sql = rtrim($sql, ", ");
+            $mirroring_db->query($sql);
+        }
+
+        // Load data Meta from WP
+        $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
+        if (!$meta->IsInstalled()) {
+            return null;
+        }
+        if (!empty($first_occurrence_id)) {
+            $sql = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id >= ' . $first_occurrence_id;
+            $metadata = $_wpdb->get_results($sql, ARRAY_A);
+
+            if (!empty($metadata)) {
+                $metaNew = new WSAL_Adapters_MySQL_Meta($mirroring_db);
+
+                $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
+                foreach ($metadata as $entry) {
+                    $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace(array("'", "\'"), "\'", $entry['value']).'\'), ';
+                }
+                $sql = rtrim($sql, ", ");
+                $mirroring_db->query($sql);
+            }
+        }
+        return $last_created_on;
+    }
+
+    public function ArchiveOccurrence($args)
+    {
+        $_wpdb = $this->getConnection();
+        $archive_db = $args['archive_db'];
+
+        // Load data Occurrences from WP
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        if (!$occurrence->IsInstalled()) {
+            return null;
+        }
+        if (!empty($args['by_date'])) {
+            $sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE created_on <= ' . $args['by_date'];
+        }
+
+        if (!empty($args['by_limit'])) {
+            $sql = 'SELECT occ.* FROM ' . $occurrence->GetTable() . ' occ    
+            LEFT JOIN (SELECT id FROM ' . $occurrence->GetTable() . ' order by created_on DESC limit ' . $args['by_limit'] . ') as ids 
+            on ids.id = occ.id
+            WHERE ids.id IS NULL';
+        }
+        if (!empty($args['last_created_on'])) {
+            $sql .= ' AND created_on > ' . $args['last_created_on'];
+        }
+        $sql .= ' ORDER BY created_on ASC';
+        if (!empty($args['limit'])) {
+            $sql .= ' LIMIT ' . $args['limit'];
+        }
+        $occurrences = $_wpdb->get_results($sql, ARRAY_A);
+
+        // Insert data to Archive DB
+        if (!empty($occurrences)) {
+            $last = end($occurrences);
+            $args['last_created_on'] = $last['created_on'];
+            $args['occurence_ids'] = array();
+
+            $occurrenceNew = new WSAL_Adapters_MySQL_Occurrence($archive_db);
+
+            $sql = 'INSERT INTO ' . $occurrenceNew->GetTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
+            foreach ($occurrences as $entry) {
+                $sql .= '('.$entry['id'].', '.$entry['site_id'].', '.$entry['alert_id'].', '.$entry['created_on'].', '.$entry['is_read'].'), ';
+                $args['occurence_ids'][] = $entry['id'];
+            }
+            $sql = rtrim($sql, ", ");
+            $archive_db->query($sql);
+            return $args;
+        } else {
+            return false;
+        }
+    }
+
+    public function ArchiveMeta($args)
+    {
+        $_wpdb = $this->getConnection();
+        $archive_db = $args['archive_db'];
+
+        // Load data Meta from WP
+        $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
+        if (!$meta->IsInstalled()) {
+            return null;
+        }
+        $sOccurenceIds = implode(", ", $args["occurence_ids"]);
+        $sql = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id IN (' . $sOccurenceIds . ')';
+        $metadata = $_wpdb->get_results($sql, ARRAY_A);
+
+        // Insert data to Archive DB
+        if (!empty($metadata)) {
+            $metaNew = new WSAL_Adapters_MySQL_Meta($archive_db);
+
+            $sql = 'INSERT INTO ' . $metaNew->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
+            foreach ($metadata as $entry) {
+                $sql .= '('.$entry['occurrence_id'].', \''.$entry['name'].'\', \''.str_replace(array("'", "\'"), "\'", $entry['value']).'\'), ';
+            }
+            $sql = rtrim($sql, ", ");
+            $archive_db->query($sql);
+            return $args;
+        } else {
+            return false;
+        }
+    }
+
+    public function DeleteAfterArchive($args)
+    {
+        $_wpdb = $this->getConnection();
+        $archive_db = $args['archive_db'];
+
+        $sOccurenceIds = implode(", ", $args["occurence_ids"]);
+        
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
+        $sql = 'DELETE FROM ' . $occurrence->GetTable() . ' WHERE id IN (' . $sOccurenceIds . ')';
+        $_wpdb->query($sql);
+
+        $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
+        $sql = 'DELETE FROM ' . $meta->GetTable() . ' WHERE occurrence_id IN (' . $sOccurenceIds . ')';
+        $_wpdb->query($sql);
     }
 
     private function truncateKey()

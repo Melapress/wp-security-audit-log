@@ -15,12 +15,17 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
         add_action('wp_ajax_AjaxSetIpp', array($this, 'AjaxSetIpp'));
         add_action('wp_ajax_AjaxSearchSite', array($this, 'AjaxSearchSite'));
+        add_action('wp_ajax_AjaxSwitchDB', array($this, 'AjaxSwitchDB'));
         add_action('all_admin_notices', array($this, 'AdminNoticesPremium'));
         // Check plugin version for to dismiss the notice only until upgrade
         $plugin_file =  trailingslashit(WP_PLUGIN_DIR) . plugin_basename(__FILE__);
         $data = get_plugin_data($plugin_file, false, false);
         $this->_version = isset($data['Version']) ? $data['Version'] : '0.0.0';
         $this->RegisterNotice('premium-wsal-'.$this->_version);
+
+        if (!session_id()) {
+            @session_start();
+        }
     }
 
     public function AdminNoticesPremium()
@@ -65,7 +70,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     }
     
     protected function GetListView() {
-        if (is_null($this->_listview)) $this->_listview = new WSAL_AuditLogListView($this->_plugin);
+        if (is_null($this->_listview)) {
+            $this->_listview = new WSAL_AuditLogListView($this->_plugin);
+        }
         return $this->_listview;
     }
     
@@ -106,10 +113,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     }
     
     public function AjaxInspector() {
-        if(!$this->_plugin->settings->CurrentUserCan('view'))
+        if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
-        if(!isset($_REQUEST['occurrence']))
+        }
+        if (!isset($_REQUEST['occurrence'])) {
             die('Occurrence parameter expected.');
+        }
         $occ = new WSAL_Models_Occurrence();
         $occ->Load('id = %d', array((int)$_REQUEST['occurrence']));
 
@@ -129,55 +138,73 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     }
     
     public function AjaxRefresh() {
-        if(!$this->_plugin->settings->CurrentUserCan('view'))
+        if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
-        if(!isset($_REQUEST['logcount']))
+        }
+        if (!isset($_REQUEST['logcount'])) {
             die('Log count parameter expected.');
+        }
         
         $old = (int)$_REQUEST['logcount'];
         $max = 40; // 40*500msec = 20sec
-        
+
+        $is_archive = false;
+        if (isset($_SESSION['selected_db']) && $_SESSION['selected_db'] == 'archive') {
+            $is_archive = true;
+        }
         session_write_close(); // fixes session lock issue
         
-        do{
+        do {
             $occ = new WSAL_Models_Occurrence();
             $new = $occ->Count();
             usleep(500000); // 500msec
-        }while(($old == $new) && (--$max > 0));
+        } while (($old == $new) && (--$max > 0));
         
-        echo $old == $new ? 'false' : $new;
+        if ($is_archive) {
+            echo 'false';
+        } else {
+            echo $old == $new ? 'false' : $new;
+        }
         die;
     }
     
-    public function AjaxSetIpp(){
-        if(!$this->_plugin->settings->CurrentUserCan('view'))
+    public function AjaxSetIpp() {
+        if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
-        if(!isset($_REQUEST['count']))
+        }
+        if (!isset($_REQUEST['count'])) {
             die('Count parameter expected.');
+        }
         $this->_plugin->settings->SetViewPerPage((int)$_REQUEST['count']);
         die;
     }
     
-    public function AjaxSearchSite(){
-        if(!$this->_plugin->settings->CurrentUserCan('view'))
+    public function AjaxSearchSite() {
+        if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
-        if(!isset($_REQUEST['search']))
+        }
+        if (!isset($_REQUEST['search'])) {
             die('Search parameter expected.');
-        
+        }
         $grp1 = array();
         $grp2 = array();
         
         $search = $_REQUEST['search'];
         
-        foreach($this->GetListView()->get_sites() as $site){
-            if(stripos($site->blogname, $search) !== false)
+        foreach ($this->GetListView()->get_sites() as $site) {
+            if (stripos($site->blogname, $search) !== false) {
                 $grp1[] = $site;
-            else
-                if(stripos($site->domain, $search) !== false)
-                    $grp2[] = $site;
+            } elseif (stripos($site->domain, $search) !== false) {
+                $grp2[] = $site;
+            }
         }
-        
         die(json_encode(array_slice($grp1 + $grp2, 0, 7)));
+    }
+
+    public function AjaxSwitchDB() {
+        if (isset($_REQUEST['selected_db'])) {
+            $_SESSION['selected_db'] = $_REQUEST['selected_db'];
+        }
     }
     
     public function Header() {
