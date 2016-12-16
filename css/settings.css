@@ -139,3 +139,8 @@ input.switch[type="radio"]:disabled:checked + label {
     box-shadow: none;
     cursor: default;
 }
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.6;
+}

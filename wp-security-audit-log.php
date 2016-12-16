@@ -576,9 +576,9 @@ class WpSecurityAuditLog {
             unset($this->_cleanup_hooks[$pos]);
     }
 
-    public static function getConnector($config = null)
+    public static function getConnector($config = null, $reset = false)
     {
-        return WSAL_Connector_ConnectorFactory::getConnector($config);
+        return WSAL_Connector_ConnectorFactory::getConnector($config, $reset);
     }
     
     /**

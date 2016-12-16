@@ -148,3 +148,18 @@ function WsalDisableCustom(link, meta_key){
 		}
 	});
 }
+
+function WsalDBChange(value){
+	jQuery.ajax({
+		type: 'POST',
+		url: ajaxurl,
+		async: true,
+		data: { 
+			action: 'AjaxSwitchDB',
+			selected_db: value 
+		},
+		success: function() {
+			location.reload();
+		}
+	});
+}

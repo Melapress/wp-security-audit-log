@@ -20,7 +20,7 @@ abstract class WSAL_Connector_ConnectorFactory
      * Returns a connector singleton
      * @return WSAL_Connector_ConnectorInterface
      */
-    public static function GetConnector($config = null)
+    public static function GetConnector($config = null, $reset = false)
     {
         if (!empty($config)) {
             $connectionConfig = $config;
@@ -29,7 +29,7 @@ abstract class WSAL_Connector_ConnectorFactory
         }
         
         //TO DO: Load connection config
-        if (self::$connector == null || !empty($config)) {
+        if (self::$connector == null || !empty($config) || $reset) {
             switch (strtolower($connectionConfig['type'])) {
                 //TO DO: Add other connectors
                 case 'mysql':
