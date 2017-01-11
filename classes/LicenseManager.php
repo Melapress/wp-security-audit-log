@@ -19,7 +19,7 @@ class WSAL_LicenseManager {
     }
     
     protected function GetStoreUrl(){
-        return 'http://www.wpsecurityauditlog.com/';
+        return 'https://www.wpsecurityauditlog.com/';
     }
     
     public function CountPlugins(){
