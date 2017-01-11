@@ -40,14 +40,15 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
         return $this->Load('occurrence_id = %d AND name = %s', array($occurenceId, $metaName));
     }
 
-    public function GetMatchingIPs()
+    public function GetMatchingIPs($limit = null)
     {
         $_wpdb = $this->connection;
-        $ips = $_wpdb->get_col("SELECT DISTINCT value FROM {$this->GetTable()} WHERE name = \"ClientIP\"");
+        $sql = "SELECT DISTINCT value FROM {$this->GetTable()} WHERE name = \"ClientIP\"";
+        if (!is_null($limit)) $sql .= ' LIMIT ' . $limit;
+        $ips = $_wpdb->get_col($sql);
         foreach ($ips as $key => $ip) {
             $ips[$key] = str_replace('"', '', $ip);
         }
         return array_unique($ips);
     }
-
 }
