@@ -109,7 +109,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
                     ),
                 )); ?>);
             });
-        </script><?php
+        </script>
+        <div id="dialog-confirm" title="Empty the recycle bin?">
+          <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>These items will be permanently deleted and cannot be recovered. Are you sure?</p>
+        </div>
+        <?php
     }
     
     public function AjaxInspector() {
@@ -209,6 +213,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     
     public function Header() {
         add_thickbox();
+        wp_enqueue_style('jquery_ui', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css', array(), '');
         wp_enqueue_style(
             'auditlog',
             $this->_plugin->GetBaseUrl() . '/css/auditlog.css',
@@ -219,8 +224,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     
     public function Footer() {
         wp_enqueue_script('jquery');
-        wp_register_script('jquery_tools', 'http://cdn.jquerytools.org/1.2.6/all/jquery.tools.min.js', array('jquery'), '');
-        wp_enqueue_script('jquery_tools');
+        //wp_register_script('jquery_tools', 'http://cdn.jquerytools.org/1.2.6/all/jquery.tools.min.js', array('jquery'), '');
+        //wp_enqueue_script('jquery_tools');
+        wp_enqueue_script('jquery_ui', 'https://code.jquery.com/ui/1.12.1/jquery-ui.js', array('jquery'), '');
         wp_enqueue_script('suggest');
         wp_enqueue_script(
             'auditlog',

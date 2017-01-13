@@ -135,6 +135,7 @@ class WSAL_AuditLogListView extends WP_List_Table
         $cols = array(
             //'cb'   => '<input type="checkbox" />',
             //'read' => __('Read', 'wp-security-audit-log'),
+            'disable' => __('Disable', 'wp-security-audit-log'),
             'type' => __('Code', 'wp-security-audit-log'),
             'code' => __('Type', 'wp-security-audit-log'),
             'crtd' => __('Date', 'wp-security-audit-log'),
@@ -151,6 +152,9 @@ class WSAL_AuditLogListView extends WP_List_Table
             $sel_columns = (array)json_decode($sel_columns);
             foreach ($sel_columns as $key => $value) {
                 switch ($key) {
+                    case 'disable':
+                        $cols['disable'] = __('Disable', 'wp-security-audit-log');
+                        break;
                     case 'alert_code':
                         $cols['type'] = __('Code', 'wp-security-audit-log');
                         break;
@@ -209,6 +213,8 @@ class WSAL_AuditLogListView extends WP_List_Table
                 return '<span class="log-read log-read-'
                     . ($item->is_read ? 'old' : 'new')
                     . '" title="' . __('Click to toggle.', 'wp-security-audit-log') . '"></span>';
+            case 'disable':
+                return '<span class="log-disable" title="' . __('Disable this type of alerts.', 'wp-security-audit-log') . '"><a class="disable" href="#" onclick="WsalDisableConfirm('.$item->alert_id.');"><span class="dashicons dashicons-dismiss"></span></a></span>';
             case 'type':
                 return str_pad($item->alert_id, 4, '0', STR_PAD_LEFT);
             case 'code':

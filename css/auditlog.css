@@ -19,11 +19,16 @@
 }
 
 .column-read,
-.column-type,
-.column-code,
 .column-more,
+.column-type,
 .column-data {
 	width: 70px;
+}
+.column-code {
+	width: 50px;
+}
+.column-disable {
+	width: 50px;
 }
 
 .column-crtd {
@@ -142,6 +147,10 @@ td.column-user {
 	background: #ec0; content: "i";
 }
 
+.log-disable .disable {
+	margin-left: 12px;
+}
+
 /* search box */
 .wsal-ssas-dd {
 	position: absolute;
@@ -194,4 +203,47 @@ td.column-user {
     background-color:#222;
     border-radius: 3px;
     color:#fff;
+}
+
+.ui-tooltip, .arrow:after {
+    background-color:#222;
+    opacity: 0.9;
+    border: 1px solid white;
+}
+.ui-tooltip {
+    padding:2px 7px;
+    color: white;
+    border-radius: 3px;
+}
+.arrow {
+    width: 70px;
+    height: 16px;
+    overflow: hidden;
+    position: absolute;
+    left: 50%;
+    margin-left: -35px;
+    bottom: -16px;
+}
+.arrow.top {
+    top: -16px;
+    bottom: auto;
+}
+.arrow.left {
+    left: 20%;
+}
+.arrow:after {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: -20px;
+    width: 25px;
+    height: 25px;
+    box-shadow: 6px 5px 9px -9px black;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+.arrow.top:after {
+    bottom: -20px;
+    top: auto;
 }

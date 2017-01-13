@@ -164,12 +164,67 @@ function WsalDBChange(value){
 	});
 }
 
+function WsalDisableConfirm(code){
+	jQuery( "#dialog-confirm" ).dialog({
+		resizable: false,
+		height: "auto",
+		width: 400,
+		modal: true,
+		buttons: {
+			"Disable": function() {
+				WsalDisableByCode(code);
+			},
+			"Leave Enabled": function() {
+				jQuery( this ).dialog( "close" );
+			}
+		}
+    });
+}
+
+function WsalDisableByCode(code){
+	jQuery.ajax({
+		type: 'POST',
+		url: ajaxurl,
+		async: false,
+		data: { action: 'AjaxDisableByCode', code: code },
+		success: function(data) {
+			var notice = jQuery('<div class="updated" data-notice-name="disabled"></div>').html(data);
+			jQuery("h2:first").after(notice);
+		}
+	});
+}
+
 jQuery(document).ready(function(){
+	/*
 	jQuery('.log-type').tooltip({
 		offset: [-3, 30],
 		delay: 100,
 	    relative: false,
 	    position: 'bottom right',
 	    opacity: 0.9
+    });
+    jQuery('.log-disable').tooltip({
+		offset: [0, 10],
+		delay: 100,
+	    relative: false,
+	    position: 'center right',
+	    opacity: 0.9
+    });
+    */
+   	jQuery(document).tooltip({
+      	items: ".log-disable, .column-code",
+      	content: function() {
+	        var element = jQuery(this);
+	        if (element.is('.log-disable')) {
+	          	return element.attr( "title" );
+	        }
+	        if (element.is('.column-code')) {
+	          	return element.find('.log-type').attr( "title" );
+	        }
+        },
+        position: {
+	        my: "left top",
+        	at: "right+5 top-5"
+      	}
     });
 });
