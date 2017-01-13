@@ -163,3 +163,13 @@ function WsalDBChange(value){
 		}
 	});
 }
+
+jQuery(document).ready(function(){
+	jQuery('.log-type').tooltip({
+		offset: [-3, 30],
+		delay: 100,
+	    relative: false,
+	    position: 'bottom right',
+	    opacity: 0.9
+    });
+});
