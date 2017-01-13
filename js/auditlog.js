@@ -173,6 +173,7 @@ function WsalDisableConfirm(code){
 		buttons: {
 			"Disable": function() {
 				WsalDisableByCode(code);
+				jQuery( this ).dialog( "close" );
 			},
 			"Leave Enabled": function() {
 				jQuery( this ).dialog( "close" );
@@ -185,7 +186,7 @@ function WsalDisableByCode(code){
 	jQuery.ajax({
 		type: 'POST',
 		url: ajaxurl,
-		async: false,
+		async: true,
 		data: { action: 'AjaxDisableByCode', code: code },
 		success: function(data) {
 			var notice = jQuery('<div class="updated" data-notice-name="disabled"></div>').html(data);
