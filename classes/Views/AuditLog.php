@@ -220,8 +220,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     
     public function Footer() {
         wp_enqueue_script('jquery');
-        wp_register_script('addons_script', 'http://cdn.jquerytools.org/1.2.5/all/jquery.tools.min.js', array('jquery'), '');
-        wp_enqueue_script('addons_script');
+        wp_register_script('jquery_tools', 'http://cdn.jquerytools.org/1.2.6/all/jquery.tools.min.js', array('jquery'), '');
+        wp_enqueue_script('jquery_tools');
         wp_enqueue_script('suggest');
         wp_enqueue_script(
             'auditlog',
