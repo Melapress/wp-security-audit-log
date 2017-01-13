@@ -209,7 +209,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     
     public function Header() {
         add_thickbox();
-        wp_enqueue_style('jquery-ui-css', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css', array(), null, true);
         wp_enqueue_style(
             'auditlog',
             $this->_plugin->GetBaseUrl() . '/css/auditlog.css',
