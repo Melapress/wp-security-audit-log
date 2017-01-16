@@ -27,6 +27,9 @@
 .column-code {
 	width: 50px;
 }
+td.code.column-code a{
+	display: block;
+}
 .column-disable {
 	width: 50px;
 }
@@ -198,12 +201,7 @@ td.column-user {
 /**
  * Tooltip Styles
  */
-.tooltip {
-    padding:2px 7px;
-    background-color:#222;
-    border-radius: 3px;
-    color:#fff;
-}
+
 
 .ui-tooltip, .arrow:after {
     background-color:#222;
