@@ -197,3 +197,7 @@ td.column-user {
 	text-decoration: none;
 	float: right;
 }
+
+.dashicons-dismiss:hover {
+	color:#c00
+}

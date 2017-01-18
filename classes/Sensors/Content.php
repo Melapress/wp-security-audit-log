@@ -111,7 +111,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         ));
         // run checks
         if ($this->_OldPost) {
-            if ($this->CheckBBPress($this->_OldPost)) {
+            if ($this->CheckOtherSensors($this->_OldPost)) {
                 return;
             }
             if ($oldStatus == 'auto-draft' || $original == 'auto-draft') {
@@ -207,7 +207,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     public function EventPostDeleted($post_id)
     {
         $post = get_post($post_id);
-        if ($this->CheckBBPress($post)) {
+        if ($this->CheckOtherSensors($post)) {
             return;
         }
         $WPActions = array('delete');
@@ -233,7 +233,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     public function EventPostTrashed($post_id)
     {
         $post = get_post($post_id);
-        if ($this->CheckBBPress($post)) {
+        if ($this->CheckOtherSensors($post)) {
             return;
         }
         $event = $this->GetEventTypeForPostType($post, 2012, 2013, 2034);
@@ -250,7 +250,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     public function EventPostUntrashed($post_id)
     {
         $post = get_post($post_id);
-        if ($this->CheckBBPress($post)) {
+        if ($this->CheckOtherSensors($post)) {
             return;
         }
         $event = $this->GetEventTypeForPostType($post, 2014, 2015, 2035);
@@ -490,7 +490,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     
     public function CheckModificationChange($post_ID, $oldpost, $newpost)
     {
-        if ($this->CheckBBPress($oldpost)) {
+        if ($this->CheckOtherSensors($oldpost)) {
             return;
         }
         $changes = $this->CheckTitleChange($oldpost, $newpost);
@@ -638,15 +638,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     }
 
     /**
-     * Ignore post from BBPress Plugin,
-     * Triggered on the BBPress Sensor
+     * Ignore post from BBPress, WooCommerce Plugin
+     * Triggered on the Sensors
      */
-    private function CheckBBPress($post)
+    private function CheckOtherSensors($post)
     {
         switch ($post->post_type) {
             case 'forum':
             case 'topic':
             case 'reply':
+            case 'product':
                 return true;
             default:
                 return false;
