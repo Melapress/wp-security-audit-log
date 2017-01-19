@@ -1,6 +1,6 @@
 <?php
 /**
- * Support for _WooCommerce Plugin
+ * Support for WooCommerce Plugin
  */
 class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
 {
@@ -44,7 +44,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         ) {
             $postID = intval($_POST['post_ID']);
             $this->_OldPost = get_post($postID);
-            $this->_OldLink = get_permalink($postID);
+            $this->_OldLink = get_post_permalink($postID);
             $this->_OldCats = $this->GetProductCategories($this->_OldPost);
             $this->_OldData = $this->GetProductData($this->_OldPost);
         }
@@ -59,17 +59,25 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
                 $changes = $this->CheckCategoriesChange($this->_OldCats, $this->GetProductCategories($newpost), $newpost);
             }
             if (!$changes) {
-                // Change short description AND text
+                // Change Short description, Text, URL, Product Data, Date, Visibility
                 $changes = 0
                     + $this->CheckShortDescriptionChange($oldpost, $newpost)
                     + $this->CheckTextChange($oldpost, $newpost)
-                    + $this->CheckPermalinkChange($this->_OldLink, get_permalink($post_ID), $newpost);
-                    + $this->CheckProductDataChange($this->_OldData, $newpost);
+                    + $this->CheckProductDataChange($this->_OldData, $newpost)
+                    + $this->CheckDateChange($oldpost, $newpost)
+                    + $this->CheckVisibilityChange($oldpost)
+                    + $this->CheckStatusChange($oldpost, $newpost)
+                    + $this->CheckPriceChange($oldpost)
                 ;
+
+                if ($changes) {
+                    // if one of the above changes happen
+                    $this->CheckModifyChange($oldpost);
+                }
             }
             if (!$changes) {
                 // Change status
-                //$changes = $this->EventChangedStatus($oldpost);
+                $changes = $this->CheckPermalinkChange($this->_OldLink, get_post_permalink($post_ID), $newpost);
             }
             if (!$changes) {
                 // Change Order, Parent or URL
@@ -96,7 +104,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
                 } else if ($new_post->post_status == 'publish') {
                     $this->plugin->alerts->Trigger(9001, array(
                         'ProductTitle' => $new_post->post_title,
-                        'ProductUrl' => get_permalink($new_post->ID),
+                        'ProductUrl' => get_post_permalink($new_post->ID),
                         $editorLink['name'] => $editorLink['value']
                     ));
                     return 1;
@@ -136,8 +144,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
      */
     protected function CheckCategoriesChange($oldCats, $newCats, $post)
     {
-        $oldCats = implode(', ', $oldCats);
-        $newCats = implode(', ', $newCats);
+        $oldCats = is_array($oldCats) ? implode(', ', $oldCats) : $oldCats;
+        $newCats = is_array($newCats) ? implode(', ', $newCats) : $newCats;
         if ($oldCats != $newCats) {
             $editorLink = $this->GetEditorLink($post);
             $this->plugin->alerts->Trigger(9003, array(
@@ -188,7 +196,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
      */
     protected function CheckPermalinkChange($oldLink, $newLink, $post)
     {
-        if ($oldLink != $newLink) {
+        if (($oldLink && $newLink) && ($oldLink != $newLink)) {
             $editorLink = $this->GetEditorLink($post);
             $this->plugin->alerts->Trigger(9006, array(
                 'ProductTitle' => $post->post_title,
@@ -207,7 +215,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
     protected function CheckProductDataChange($oldData, $post)
     {
         if (isset($_POST['product-type'])) {
-            $oldData = implode(', ', $oldData);
+            $oldData = is_array($oldData) ? implode(', ', $oldData) : $oldData;
             $newData = $_POST['product-type'];
             if ($oldData != $newData) {
                 $editorLink = $this->GetEditorLink($post);
@@ -222,36 +230,175 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
     }
 
     /**
-     * Permanently deleted
+     * Trigger events 9008
      */
-    public function EventDeleted($post_id)
+    protected function CheckDateChange($oldpost, $newpost)
     {
-        $post = get_post($post_id);
-        if ($this->CheckWooCommerce($post)) {
-            error_log("EventDeleted");
+        $from = strtotime($oldpost->post_date);
+        $to = strtotime($newpost->post_date);
+        if ($oldpost->post_status == 'draft') {
+            return 0;
+        }
+        if ($from != $to) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9008, array(
+                'ProductTitle' => $oldpost->post_title,
+                'OldDate' => $oldpost->post_date,
+                'NewDate' => $newpost->post_date,
+                $editorLink['name'] => $editorLink['value']
+            ));
+            return 1;
+        }
+        return 0;
+    }
+
+    /**
+     * Trigger events 9009
+     */
+    protected function CheckVisibilityChange($oldpost)
+    {
+        $oldVisibility = isset($_POST['hidden_post_visibility']) ? $_POST['hidden_post_visibility'] : null;
+        $newVisibility = isset($_POST['visibility']) ? $_POST['visibility'] : null;
+        
+        if ($oldVisibility == 'password') {
+            $oldVisibility = __('Password Protected', 'wp-security-audit-log');
+        } else {
+            $oldVisibility = ucfirst($oldVisibility);
+        }
+        
+        if ($newVisibility == 'password') {
+            $newVisibility = __('Password Protected', 'wp-security-audit-log');
+        } else {
+            $newVisibility = ucfirst($newVisibility);
+        }
+        
+        if (($oldVisibility && $newVisibility) && ($oldVisibility != $newVisibility)) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9009, array(
+                'ProductTitle' => $oldpost->post_title,
+                'OldVisibility' => $oldVisibility,
+                'NewVisibility' => $newVisibility,
+                $editorLink['name'] => $editorLink['value']
+            ));
+            return 1;
+        }
+        return 0;
+    }
+
+    /**
+     * Trigger events 9010, 9011
+     */
+    protected function CheckModifyChange($oldpost)
+    {
+        $editorLink = $this->GetEditorLink($oldpost);
+        if ($oldpost->post_status == 'publish') {
+            $this->plugin->alerts->Trigger(9010, array(
+                'ProductTitle' => $oldpost->post_title,
+                'ProductUrl' => get_post_permalink($oldpost->ID),
+                $editorLink['name'] => $editorLink['value']
+            ));
+        } else if ($oldpost->post_status == 'draft') {
+            $this->plugin->alerts->Trigger(9011, array(
+                'ProductTitle' => $oldpost->post_title,
+                $editorLink['name'] => $editorLink['value']
+            ));
         }
     }
-    
+
     /**
-     * Moved to Trash
+     * Moved to Trash 9012
      */
     public function EventTrashed($post_id)
     {
         $post = get_post($post_id);
         if ($this->CheckWooCommerce($post)) {
-            error_log("EventTrashed");
+            $this->plugin->alerts->Trigger(9012, array(
+                'ProductTitle' => $post->post_title,
+                'ProductUrl' => get_post_permalink($post->ID)
+            ));
         }
     }
 
     /**
-     * Restored from Trash
+     * Permanently deleted 9013
+     */
+    public function EventDeleted($post_id)
+    {
+        $post = get_post($post_id);
+        if ($this->CheckWooCommerce($post)) {
+            $this->plugin->alerts->Trigger(9013, array(
+                'ProductTitle' => $post->post_title
+            ));
+        }
+    }
+
+    /**
+     * Restored from Trash 9014
      */
     public function EventUntrashed($post_id)
     {
         $post = get_post($post_id);
         if ($this->CheckWooCommerce($post)) {
-            error_log("EventUnTrashed");
+            $editorLink = $this->GetEditorLink($post);
+            $this->plugin->alerts->Trigger(9014, array(
+                'ProductTitle' => $post->post_title,
+                $editorLink['name'] => $editorLink['value']
+            ));
         }
+    }
+
+    /**
+     * Trigger events 9015
+     */
+    protected function CheckStatusChange($oldpost, $newpost)
+    {
+        if ($oldpost->post_status != $newpost->post_status) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9015, array(
+                'ProductTitle' => $oldpost->post_title,
+                'OldStatus' => $oldpost->post_status,
+                'NewStatus' => $newpost->post_status,
+                $editorLink['name'] => $editorLink['value']
+            ));
+            return 1;
+        }
+        return 0;
+    }
+
+    /**
+     * Trigger events 9016
+     */
+    protected function CheckPriceChange($oldpost)
+    {
+        $result = 0;
+        $oldPrice = get_post_meta($oldpost->ID, '_regular_price', true);
+        $oldSalePrice = get_post_meta($oldpost->ID, '_sale_price', true);
+        $newPrice = isset($_POST['_regular_price']) ? $_POST['_regular_price'] : null;
+        $newSalePrice = isset($_POST['_sale_price']) ? $_POST['_sale_price'] : null;
+
+        if (($oldPrice && $newPrice) && ($oldPrice != $newPrice)) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9016, array(
+                'ProductTitle' => $oldpost->post_title,
+                'PriceType' => 'Regular price',
+                'OldPrice' => $oldPrice,
+                'NewPrice' => $newPrice,
+                $editorLink['name'] => $editorLink['value']
+            ));
+            $result = 1;
+        }
+        if (($oldSalePrice && $newSalePrice) && ($oldSalePrice != $newSalePrice)) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9016, array(
+                'ProductTitle' => $oldpost->post_title,
+                'PriceType' => 'Sale price',
+                'OldPrice' => $oldSalePrice,
+                'NewPrice' => $newSalePrice,
+                $editorLink['name'] => $editorLink['value']
+            ));
+            $result = 1;
+        }
+        return $result;
     }
 
     protected function GetProductCategories($post)
