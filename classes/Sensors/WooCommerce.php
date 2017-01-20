@@ -8,6 +8,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
     protected $_OldLink = null;
     protected $_OldCats = null;
     protected $_OldData = null;
+    protected $_OldStockStatus = null;
 
     public function HookEvents()
     {
@@ -47,6 +48,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
             $this->_OldLink = get_post_permalink($postID);
             $this->_OldCats = $this->GetProductCategories($this->_OldPost);
             $this->_OldData = $this->GetProductData($this->_OldPost);
+            $this->_OldStockStatus = get_post_meta($postID, '_stock_status', true);
         }
     }
 
@@ -68,6 +70,11 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
                     + $this->CheckVisibilityChange($oldpost)
                     + $this->CheckStatusChange($oldpost, $newpost)
                     + $this->CheckPriceChange($oldpost)
+                    + $this->CheckSKUChange($oldpost)
+                    + $this->CheckStockStatusChange($oldpost)
+                    + $this->CheckStockQuantityChange($oldpost)
+                    + $this->CheckTypeChange($oldpost)
+                    + $this->CheckWeightChange($oldpost)
                 ;
 
                 if ($changes) {
@@ -376,29 +383,154 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         $newPrice = isset($_POST['_regular_price']) ? $_POST['_regular_price'] : null;
         $newSalePrice = isset($_POST['_sale_price']) ? $_POST['_sale_price'] : null;
 
-        if (($oldPrice && $newPrice) && ($oldPrice != $newPrice)) {
+        if (($newPrice) && ($oldPrice != $newPrice)) {
             $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger(9016, array(
                 'ProductTitle' => $oldpost->post_title,
                 'PriceType' => 'Regular price',
-                'OldPrice' => $oldPrice,
+                'OldPrice' => (!empty($oldPrice) ? $oldPrice : 0),
                 'NewPrice' => $newPrice,
                 $editorLink['name'] => $editorLink['value']
             ));
             $result = 1;
         }
-        if (($oldSalePrice && $newSalePrice) && ($oldSalePrice != $newSalePrice)) {
+        if (($newSalePrice) && ($oldSalePrice != $newSalePrice)) {
             $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger(9016, array(
                 'ProductTitle' => $oldpost->post_title,
                 'PriceType' => 'Sale price',
-                'OldPrice' => $oldSalePrice,
+                'OldPrice' => (!empty($oldSalePrice) ? $oldSalePrice : 0),
                 'NewPrice' => $newSalePrice,
                 $editorLink['name'] => $editorLink['value']
             ));
             $result = 1;
         }
         return $result;
+    }
+
+    /**
+     * Trigger events 9017
+     */
+    protected function CheckSKUChange($oldpost)
+    {
+        $oldSku = get_post_meta($oldpost->ID, '_sku', true);
+        $newSku = isset($_POST['_sku']) ? $_POST['_sku'] : null;
+
+        if (($newSku) && ($oldSku != $newSku)) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9017, array(
+                'ProductTitle' => $oldpost->post_title,
+                'OldSku' => (!empty($oldSku) ? $oldSku : 0),
+                'NewSku' => $newSku,
+                $editorLink['name'] => $editorLink['value']
+            ));
+            return 1;
+        }
+        return 0;
+    }
+
+    /**
+     * Trigger events 9018
+     */
+    protected function CheckStockStatusChange($oldpost)
+    {
+        $oldStatus = $this->_OldStockStatus;
+        $newStatus = isset($_POST['_stock_status']) ? $_POST['_stock_status'] : null;
+
+        if (($oldStatus && $newStatus) && ($oldStatus != $newStatus)) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9018, array(
+                'ProductTitle' => $oldpost->post_title,
+                'OldStatus' => $this->GetStockStatusName($oldStatus),
+                'NewStatus' => $this->GetStockStatusName($newStatus),
+                $editorLink['name'] => $editorLink['value']
+            ));
+            return 1;
+        }
+        return 0;
+    }
+
+    /**
+     * Trigger events 9019
+     */
+    protected function CheckStockQuantityChange($oldpost)
+    {
+        $oldValue  = get_post_meta($oldpost->ID, '_stock', true);
+        $newValue = isset($_POST['_stock']) ? $_POST['_stock'] : null;
+
+        if (($newValue) && ($oldValue != $newValue)) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9019, array(
+                'ProductTitle' => $oldpost->post_title,
+                'OldValue' => (!empty($oldValue) ? $oldValue : 0),
+                'NewValue' => $newValue,
+                $editorLink['name'] => $editorLink['value']
+            ));
+            return 1;
+        }
+        return 0;
+    }
+
+    /**
+     * Trigger events 9020
+     */
+    protected function CheckTypeChange($oldpost)
+    {
+        $result = 0;
+        $oldVirtual  = get_post_meta($oldpost->ID, '_virtual', true);
+        $newVirtual = isset($_POST['_virtual']) ? 'yes' : 'no';
+        $oldDownloadable  = get_post_meta($oldpost->ID, '_downloadable', true);
+        $newDownloadable = isset($_POST['_downloadable']) ? 'yes' : 'no';
+
+        if (($oldVirtual && $newVirtual) && ($oldVirtual != $newVirtual)) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9020, array(
+                'ProductTitle' => $oldpost->post_title,
+                'Type' => ($newVirtual == 'no') ? 'Non Virtual' : 'Virtual',
+                $editorLink['name'] => $editorLink['value']
+            ));
+            $result = 1;
+        }
+        if (($oldDownloadable && $newDownloadable) && ($oldDownloadable != $newDownloadable)) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9020, array(
+                'ProductTitle' => $oldpost->post_title,
+                'Type' => ($newDownloadable == 'no') ? 'Non Downloadable' : 'Downloadable',
+                $editorLink['name'] => $editorLink['value']
+            ));
+            $result = 1;
+        }
+        return $result;
+    }
+
+    /**
+     * Trigger events 9021
+     */
+    protected function CheckWeightChange($oldpost)
+    {
+        $oldWeight  = get_post_meta($oldpost->ID, '_weight', true);
+        $newWeight = isset($_POST['_weight']) ? $_POST['_weight'] : null;
+
+        if (($newWeight) && ($oldWeight != $newWeight)) {
+            $editorLink = $this->GetEditorLink($oldpost);
+            $this->plugin->alerts->Trigger(9021, array(
+                'ProductTitle' => $oldpost->post_title,
+                'OldWeight' => (!empty($oldWeight) ? $oldWeight : 0),
+                'NewWeight' => $newWeight,
+                $editorLink['name'] => $editorLink['value']
+            ));
+            return 1;
+        }
+        return 0;
+    }
+
+    private function GetStockStatusName($slug)
+    {
+        if ($slug == 'instock') {
+            return __('In stock', 'wp-security-audit-log');
+        } else if ($slug == 'outofstock') {
+            return __('Out of stock', 'wp-security-audit-log');
+        }
     }
 
     protected function GetProductCategories($post)
