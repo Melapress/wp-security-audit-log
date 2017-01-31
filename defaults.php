@@ -181,7 +181,10 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
             array(5027, E_CRITICAL, __('A plugin deleted a custom post', 'wp-security-audit-log'), __('A plugin automatically deleted the following custom post: %PostTitle%.', 'wp-security-audit-log')),
             array(5031, E_WARNING, __('User updated a theme', 'wp-security-audit-log'), __('Updated the theme "%Theme->Name%" installed in %Theme->get_template_directory%.', 'wp-security-audit-log')),
             array(2046, E_CRITICAL, __('User changed a file using the theme editor', 'wp-security-audit-log'), __('Modified %File% with the Theme Editor.', 'wp-security-audit-log')),
-            array(2051, E_CRITICAL, __('User changed a file using the plugin editor', 'wp-security-audit-log'), __('Modified %File% with the Plugin Editor.', 'wp-security-audit-log'))
+            array(2051, E_CRITICAL, __('User changed a file using the plugin editor', 'wp-security-audit-log'), __('Modified %File% with the Plugin Editor.', 'wp-security-audit-log')),
+            array(2106, E_NOTICE, __('A plugin modified a post', 'wp-security-audit-log'), __('Plugin modified the post %PostTitle%. View the post: %EditorLinkPost%.', 'wp-security-audit-log')),
+            array(2107, E_NOTICE, __('A plugin modified a page', 'wp-security-audit-log'), __('Plugin modified the page %PostTitle%. View the page: %EditorLinkPage%.', 'wp-security-audit-log')),
+            array(2108, E_NOTICE, __('A plugin modified a custom post', 'wp-security-audit-log'), __('Plugin modified the custom post %PostTitle%. View the post: %EditorLinkPost%.', 'wp-security-audit-log'))
         ),
         __('System Activity', 'wp-security-audit-log') => array(
             array(0000, E_CRITICAL, __('Unknown Error', 'wp-security-audit-log'), __('An unexpected error has occurred .', 'wp-security-audit-log')),

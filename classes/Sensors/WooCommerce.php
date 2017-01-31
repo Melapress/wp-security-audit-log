@@ -77,20 +77,19 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
                     + $this->CheckSKUChange($oldpost)
                     + $this->CheckStockStatusChange($oldpost)
                     + $this->CheckStockQuantityChange($oldpost)
-                    + $this->CheckTypeChange($oldpost)
+                    + $this->CheckTypeChange($oldpost, $newpost)
                     + $this->CheckWeightChange($oldpost)
                     + $this->CheckDimensionsChange($oldpost)
                     + $this->CheckDownloadableFileChange($oldpost)
                 ;
-
-                if ($changes) {
-                    // if one of the above changes happen
-                    $this->CheckModifyChange($oldpost);
-                }
             }
             if (!$changes) {
                 // Change Permalink
                 $changes = $this->CheckPermalinkChange($this->_OldLink, get_post_permalink($post_ID), $newpost);
+            }
+            if (!$changes) {
+                // if no one of the above changes happen
+                $this->CheckModifyChange($oldpost);
             }
         }
     }
@@ -173,6 +172,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
      */
     protected function CheckShortDescriptionChange($oldpost, $newpost)
     {
+        if ($oldpost->post_status == 'auto-draft') {
+            return 0;
+        }
         if ($oldpost->post_excerpt != $newpost->post_excerpt) {
             $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger(9004, array(
@@ -189,6 +191,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
      */
     protected function CheckTextChange($oldpost, $newpost)
     {
+        if ($oldpost->post_status == 'auto-draft') {
+            return 0;
+        }
         if ($oldpost->post_content != $newpost->post_content) {
             $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger(9005, array(
@@ -243,11 +248,11 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
      */
     protected function CheckDateChange($oldpost, $newpost)
     {
-        $from = strtotime($oldpost->post_date);
-        $to = strtotime($newpost->post_date);
-        if ($oldpost->post_status == 'draft') {
+        if ($oldpost->post_status == 'draft' || $oldpost->post_status == 'auto-draft') {
             return 0;
         }
+        $from = strtotime($oldpost->post_date);
+        $to = strtotime($newpost->post_date);
         if ($from != $to) {
             $editorLink = $this->GetEditorLink($oldpost);
             $this->plugin->alerts->Trigger(9008, array(
@@ -361,15 +366,20 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
      */
     protected function CheckStatusChange($oldpost, $newpost)
     {
+        if ($oldpost->post_status == 'draft' || $oldpost->post_status == 'auto-draft') {
+            return 0;
+        }
         if ($oldpost->post_status != $newpost->post_status) {
-            $editorLink = $this->GetEditorLink($oldpost);
-            $this->plugin->alerts->Trigger(9015, array(
-                'ProductTitle' => $oldpost->post_title,
-                'OldStatus' => $oldpost->post_status,
-                'NewStatus' => $newpost->post_status,
-                $editorLink['name'] => $editorLink['value']
-            ));
-            return 1;
+            if ($oldpost->post_status != 'trash' && $newpost->post_status != 'trash') {
+                $editorLink = $this->GetEditorLink($oldpost);
+                $this->plugin->alerts->Trigger(9015, array(
+                    'ProductTitle' => $oldpost->post_title,
+                    'OldStatus' => $oldpost->post_status,
+                    'NewStatus' => $newpost->post_status,
+                    $editorLink['name'] => $editorLink['value']
+                ));
+                return 1;
+            }
         }
         return 0;
     }
@@ -477,21 +487,23 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
     /**
      * Trigger events 9020
      */
-    protected function CheckTypeChange($oldpost)
+    protected function CheckTypeChange($oldpost, $newpost)
     {
         $result = 0;
-        $oldVirtual  = get_post_meta($oldpost->ID, '_virtual', true);
-        $newVirtual = isset($_POST['_virtual']) ? 'yes' : 'no';
-        $oldDownloadable  = get_post_meta($oldpost->ID, '_downloadable', true);
-        $newDownloadable = isset($_POST['_downloadable']) ? 'yes' : 'no';
+        if ($oldpost->post_status != 'trash' && $newpost->post_status != 'trash') {
+            $oldVirtual  = get_post_meta($oldpost->ID, '_virtual', true);
+            $newVirtual = isset($_POST['_virtual']) ? 'yes' : 'no';
+            $oldDownloadable  = get_post_meta($oldpost->ID, '_downloadable', true);
+            $newDownloadable = isset($_POST['_downloadable']) ? 'yes' : 'no';
 
-        if (($oldVirtual && $newVirtual) && ($oldVirtual != $newVirtual)) {
-            $type = ($newVirtual == 'no') ? 'Non Virtual' : 'Virtual';
-            $result = $this->EventType($oldpost, $type);
-        }
-        if (($oldDownloadable && $newDownloadable) && ($oldDownloadable != $newDownloadable)) {
-            $type = ($newDownloadable == 'no') ? 'Non Downloadable' : 'Downloadable';
-            $result = $this->EventType($oldpost, $type);
+            if (($oldVirtual && $newVirtual) && ($oldVirtual != $newVirtual)) {
+                $type = ($newVirtual == 'no') ? 'Non Virtual' : 'Virtual';
+                $result = $this->EventType($oldpost, $type);
+            }
+            if (($oldDownloadable && $newDownloadable) && ($oldDownloadable != $newDownloadable)) {
+                $type = ($newDownloadable == 'no') ? 'Non Downloadable' : 'Downloadable';
+                $result = $this->EventType($oldpost, $type);
+            }
         }
         return $result;
     }
@@ -660,70 +672,76 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
     protected function CheckSettingsChange()
     {
         if (isset($_GET['page']) && $_GET['page'] == 'wc-settings') {
-            if (isset($_POST['woocommerce_weight_unit'])) {
-                $oldUnit = $this->GetConfig('weight_unit');
-                $newUnit = $_POST['woocommerce_weight_unit'];
-                if ($oldUnit != $newUnit) {
-                    $this->plugin->alerts->Trigger(9027, array(
-                        'OldUnit' => $oldUnit,
-                        'NewUnit' => $newUnit
-                    ));
+            if (isset($_GET['tab']) && $_GET['tab'] == 'products') {
+                if (isset($_POST['woocommerce_weight_unit'])) {
+                    $oldUnit = $this->GetConfig('weight_unit');
+                    $newUnit = $_POST['woocommerce_weight_unit'];
+                    if ($oldUnit != $newUnit) {
+                        $this->plugin->alerts->Trigger(9027, array(
+                            'OldUnit' => $oldUnit,
+                            'NewUnit' => $newUnit
+                        ));
+                    }
+                }
+                if (isset($_POST['woocommerce_dimension_unit'])) {
+                    $oldUnit = $this->GetConfig('dimension_unit');
+                    $newUnit = $_POST['woocommerce_dimension_unit'];
+                    if ($oldUnit != $newUnit) {
+                        $this->plugin->alerts->Trigger(9028, array(
+                            'OldUnit' => $oldUnit,
+                            'NewUnit' => $newUnit
+                        ));
+                    }
                 }
             }
-            if (isset($_POST['woocommerce_dimension_unit'])) {
-                $oldUnit = $this->GetConfig('dimension_unit');
-                $newUnit = $_POST['woocommerce_dimension_unit'];
-                if ($oldUnit != $newUnit) {
-                    $this->plugin->alerts->Trigger(9028, array(
-                        'OldUnit' => $oldUnit,
-                        'NewUnit' => $newUnit
-                    ));
+            if (isset($_GET['tab']) && $_GET['tab'] == 'general') {
+                if (isset($_POST['woocommerce_default_country'])) {
+                    $oldLocation = $this->GetConfig('default_country');
+                    $newLocation = $_POST['woocommerce_default_country'];
+                    if ($oldLocation != $newLocation) {
+                        $this->plugin->alerts->Trigger(9029, array(
+                            'OldLocation' => $oldLocation,
+                            'NewLocation' => $newLocation
+                        ));
+                    }
+                    $oldCalcTaxes = $this->GetConfig('calc_taxes');
+                    $newCalcTaxes = isset($_POST['woocommerce_calc_taxes']) ? 'yes' : 'no';
+                    if ($oldCalcTaxes != $newCalcTaxes) {
+                        $status = ($newCalcTaxes == 'yes') ? 'Enabled' : 'Disabled';
+                        $this->plugin->alerts->Trigger(9030, array(
+                            'Status' => $status,
+                        ));
+                    }
+                }
+                if (isset($_POST['woocommerce_currency'])) {
+                    $oldCurrency = $this->GetConfig('currency');
+                    $newCurrency = $_POST['woocommerce_currency'];
+                    if ($oldCurrency != $newCurrency) {
+                        $this->plugin->alerts->Trigger(9031, array(
+                            'OldCurrency' => $oldCurrency,
+                            'NewCurrency' => $newCurrency
+                        ));
+                    }
                 }
             }
-            if (isset($_POST['woocommerce_default_country'])) {
-                $oldLocation = $this->GetConfig('default_country');
-                $newLocation = $_POST['woocommerce_default_country'];
-                if ($oldLocation != $newLocation) {
-                    $this->plugin->alerts->Trigger(9029, array(
-                        'OldLocation' => $oldLocation,
-                        'NewLocation' => $newLocation
-                    ));
-                }
-                $oldCalcTaxes = $this->GetConfig('calc_taxes');
-                $newCalcTaxes = isset($_POST['woocommerce_calc_taxes']) ? 'yes' : 'no';
-                if ($oldCalcTaxes != $newCalcTaxes) {
-                    $status = ($newCalcTaxes == 'yes') ? 'Enabled' : 'Disabled';
-                    $this->plugin->alerts->Trigger(9030, array(
-                        'Status' => $status,
-                    ));
-                }
-            }
-            if (isset($_POST['woocommerce_currency'])) {
-                $oldCurrency = $this->GetConfig('currency');
-                $newCurrency = $_POST['woocommerce_currency'];
-                if ($oldCurrency != $newCurrency) {
-                    $this->plugin->alerts->Trigger(9031, array(
-                        'OldCurrency' => $oldCurrency,
-                        'NewCurrency' => $newCurrency
-                    ));
-                }
-            }
-            if (!empty($_POST)) {
-                $oldEnableCoupons = $this->GetConfig('enable_coupons');
-                $newEnableCoupons = isset($_POST['woocommerce_enable_coupons']) ? 'yes' : 'no';
-                if ($oldEnableCoupons != $newEnableCoupons) {
-                    $status = ($newEnableCoupons == 'yes') ? 'Enabled' : 'Disabled';
-                    $this->plugin->alerts->Trigger(9032, array(
-                        'Status' => $status,
-                    ));
-                }
-                $oldEnableGuestCheckout = $this->GetConfig('enable_guest_checkout');
-                $newEnableGuestCheckout = isset($_POST['woocommerce_enable_guest_checkout']) ? 'yes' : 'no';
-                if ($oldEnableGuestCheckout != $newEnableGuestCheckout) {
-                    $status = ($newEnableGuestCheckout == 'yes') ? 'Enabled' : 'Disabled';
-                    $this->plugin->alerts->Trigger(9033, array(
-                        'Status' => $status,
-                    ));
+            if (isset($_GET['tab']) && $_GET['tab'] == 'checkout') {
+                if (!empty($_POST)) {
+                    $oldEnableCoupons = $this->GetConfig('enable_coupons');
+                    $newEnableCoupons = isset($_POST['woocommerce_enable_coupons']) ? 'yes' : 'no';
+                    if ($oldEnableCoupons != $newEnableCoupons) {
+                        $status = ($newEnableCoupons == 'yes') ? 'Enabled' : 'Disabled';
+                        $this->plugin->alerts->Trigger(9032, array(
+                            'Status' => $status,
+                        ));
+                    }
+                    $oldEnableGuestCheckout = $this->GetConfig('enable_guest_checkout');
+                    $newEnableGuestCheckout = isset($_POST['woocommerce_enable_guest_checkout']) ? 'yes' : 'no';
+                    if ($oldEnableGuestCheckout != $newEnableGuestCheckout) {
+                        $status = ($newEnableGuestCheckout == 'yes') ? 'Enabled' : 'Disabled';
+                        $this->plugin->alerts->Trigger(9033, array(
+                            'Status' => $status,
+                        ));
+                    }
                 }
             }
         }
