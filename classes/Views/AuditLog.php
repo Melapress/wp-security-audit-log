@@ -110,11 +110,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
                 )); ?>);
             });
         </script>
-        <div id="dialog-confirm" title="Disable alert confirm">
-            <p>Are you sure you do not want to record this type of WordPress change/activity anymore?<br><br>
-            Alert ID <span id="dialog-code"></span>: <span id="dialog-msg"></span><br><br>
-            Note: You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.</p>
-        </div>
         <?php
     }
     
@@ -215,8 +210,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     
     public function Header() {
         add_thickbox();
-        wp_enqueue_style('jquery_ui', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css', array(), '');
-        wp_enqueue_style('tooltipster', $this->_plugin->GetBaseUrl() . '/css/tooltipster.bundle.min.css', array(), '');
+        wp_enqueue_style('darktooltip', $this->_plugin->GetBaseUrl() . '/css/darktooltip.css', array(), '');
         wp_enqueue_style(
             'auditlog',
             $this->_plugin->GetBaseUrl() . '/css/auditlog.css',
@@ -227,8 +221,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     
     public function Footer() {
         wp_enqueue_script('jquery');
-        wp_enqueue_script('jquery_ui', 'https://code.jquery.com/ui/1.12.1/jquery-ui.js', array('jquery'), '');
-        wp_enqueue_script('tooltipster', $this->_plugin->GetBaseUrl() . '/js/tooltipster.bundle.min.js', array('jquery'), '');
+        wp_enqueue_script('darktooltip', $this->_plugin->GetBaseUrl() . '/js/jquery.darktooltip.js', array('jquery'), '');
         wp_enqueue_script('suggest');
         wp_enqueue_script(
             'auditlog',

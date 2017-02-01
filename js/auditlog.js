@@ -193,18 +193,20 @@ function WsalDisableByCode(code){
 }
 
 jQuery(document).ready(function(){
-    jQuery('.log-disable').tooltipster({
-    	side: 'right'
+	jQuery('.log-disable').darkTooltip({
+        animation: 'fadeIn',
+        size: 'small',
+        gravity: 'west',
+        confirm: true,
+        yes: 'Disable',
+        onYes: function(elem){
+			WsalDisableByCode(elem.attr('data-alert-id'))
+		}
     });
-    jQuery('.tooltip').tooltipster({
-    	side: 'right',
-	    distance: -18
-    });
-    jQuery("#dialog-confirm").dialog({
-		autoOpen: false,
-		resizable: false,
-		height: "auto",
-		width: 400,
-		modal: true
-    });
+
+	jQuery('.tooltip').darkTooltip({
+		animation: 'fadeIn',
+        gravity: 'west',
+        size: 'medium'
+	});
 });
