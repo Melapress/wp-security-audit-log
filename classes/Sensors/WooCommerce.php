@@ -702,8 +702,26 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
                         ));
                     }
                 }
-            }
-            if (isset($_GET['tab']) && $_GET['tab'] == 'general') {
+            } else if (isset($_GET['tab']) && $_GET['tab'] == 'checkout') {
+                if (!empty($_POST)) {
+                    $oldEnableCoupons = $this->GetConfig('enable_coupons');
+                    $newEnableCoupons = isset($_POST['woocommerce_enable_coupons']) ? 'yes' : 'no';
+                    if ($oldEnableCoupons != $newEnableCoupons) {
+                        $status = ($newEnableCoupons == 'yes') ? 'Enabled' : 'Disabled';
+                        $this->plugin->alerts->Trigger(9032, array(
+                            'Status' => $status,
+                        ));
+                    }
+                    $oldEnableGuestCheckout = $this->GetConfig('enable_guest_checkout');
+                    $newEnableGuestCheckout = isset($_POST['woocommerce_enable_guest_checkout']) ? 'yes' : 'no';
+                    if ($oldEnableGuestCheckout != $newEnableGuestCheckout) {
+                        $status = ($newEnableGuestCheckout == 'yes') ? 'Enabled' : 'Disabled';
+                        $this->plugin->alerts->Trigger(9033, array(
+                            'Status' => $status,
+                        ));
+                    }
+                }
+            } else {
                 if (isset($_POST['woocommerce_default_country'])) {
                     $oldLocation = $this->GetConfig('default_country');
                     $newLocation = $_POST['woocommerce_default_country'];
@@ -729,26 +747,6 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
                         $this->plugin->alerts->Trigger(9031, array(
                             'OldCurrency' => $oldCurrency,
                             'NewCurrency' => $newCurrency
-                        ));
-                    }
-                }
-            }
-            if (isset($_GET['tab']) && $_GET['tab'] == 'checkout') {
-                if (!empty($_POST)) {
-                    $oldEnableCoupons = $this->GetConfig('enable_coupons');
-                    $newEnableCoupons = isset($_POST['woocommerce_enable_coupons']) ? 'yes' : 'no';
-                    if ($oldEnableCoupons != $newEnableCoupons) {
-                        $status = ($newEnableCoupons == 'yes') ? 'Enabled' : 'Disabled';
-                        $this->plugin->alerts->Trigger(9032, array(
-                            'Status' => $status,
-                        ));
-                    }
-                    $oldEnableGuestCheckout = $this->GetConfig('enable_guest_checkout');
-                    $newEnableGuestCheckout = isset($_POST['woocommerce_enable_guest_checkout']) ? 'yes' : 'no';
-                    if ($oldEnableGuestCheckout != $newEnableGuestCheckout) {
-                        $status = ($newEnableGuestCheckout == 'yes') ? 'Enabled' : 'Disabled';
-                        $this->plugin->alerts->Trigger(9033, array(
-                            'Status' => $status,
                         ));
                     }
                 }
