@@ -295,7 +295,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
      */
     public function LogFilesPruning()
     {
-        if ($this->plugin->GetGlobalOption('purge-404-log', 0)) {
+        if ($this->plugin->GetGlobalOption('purge-404-log', 'off') == 'on') {
             $upload_dir = wp_upload_dir();
             $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/';
             if (is_dir($uploadsDirPath)) {
@@ -324,7 +324,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     private function WriteLog($attempts, $ip, $username = '')
     {
         $nameFile = null;
-        if ($this->plugin->GetGlobalOption('log-404', 0)) {
+        if ($this->plugin->GetGlobalOption('log-404', 'off') == 'on') {
             // Request URL
             $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
             // Create/Append to the log file

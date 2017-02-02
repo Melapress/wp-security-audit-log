@@ -41,7 +41,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         ) {
             $postID = intval($_POST['post_ID']);
             $this->_OldPost = get_post($postID);
-            $this->_OldLink = get_post_permalink($postID);
+            $this->_OldLink = get_post_permalink($postID, false, true);
             $this->_OldCats = $this->GetProductCategories($this->_OldPost);
             $this->_OldData = $this->GetProductData($this->_OldPost);
             $this->_OldStockStatus = get_post_meta($postID, '_stock_status', true);
@@ -62,7 +62,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
             $changes = 0 + $this->EventCreation($oldpost, $newpost);
             if (!$changes) {
                 // Change Categories
-                $changes = $this->CheckCategoriesChange($this->_OldCats, $this->GetProductCategories($newpost), $newpost);
+                $changes = $this->CheckCategoriesChange($this->_OldCats, $this->GetProductCategories($newpost), $oldpost, $newpost);
             }
             if (!$changes) {
                 // Change Short description, Text, URL, Product Data, Date, Visibility, etc.
@@ -85,11 +85,11 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
             }
             if (!$changes) {
                 // Change Permalink
-                $changes = $this->CheckPermalinkChange($this->_OldLink, get_post_permalink($post_ID), $newpost);
+                $changes = $this->CheckPermalinkChange($this->_OldLink, get_post_permalink($post_ID, false, true), $newpost);
             }
             if (!$changes) {
                 // if no one of the above changes happen
-                $this->CheckModifyChange($oldpost);
+                $this->CheckModifyChange($oldpost, $newpost);
             }
         }
     }
@@ -100,6 +100,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
     private function EventCreation($old_post, $new_post)
     {
         $original = isset($_POST['original_post_status']) ? $_POST['original_post_status'] : '';
+        if ($original == 'draft' && $new_post->post_status == 'draft') {
+            return 0;
+        }
         if ($old_post->post_status == 'draft' || $original == 'auto-draft') {
             if ($old_post->post_type == 'product') {
                 $editorLink = $this->GetEditorLink($new_post);
@@ -150,14 +153,17 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
     /**
      * Trigger events 9003
      */
-    protected function CheckCategoriesChange($oldCats, $newCats, $post)
+    protected function CheckCategoriesChange($oldCats, $newCats, $oldpost, $newpost)
     {
+        if ($newpost->post_status == 'trash' || $oldpost->post_status == 'trash') {
+            return 0;
+        }
         $oldCats = is_array($oldCats) ? implode(', ', $oldCats) : $oldCats;
         $newCats = is_array($newCats) ? implode(', ', $newCats) : $newCats;
         if ($oldCats != $newCats) {
-            $editorLink = $this->GetEditorLink($post);
+            $editorLink = $this->GetEditorLink($newpost);
             $this->plugin->alerts->Trigger(9003, array(
-                'ProductTitle' => $post->post_title,
+                'ProductTitle' => $newpost->post_title,
                 'OldCategories' => $oldCats ? $oldCats : 'no categories',
                 'NewCategories' => $newCats ? $newCats : 'no categories',
                 $editorLink['name'] => $editorLink['value']
@@ -302,8 +308,11 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
     /**
      * Trigger events 9010, 9011
      */
-    protected function CheckModifyChange($oldpost)
+    protected function CheckModifyChange($oldpost, $newpost)
     {
+        if ($newpost->post_status == 'trash') {
+            return 0;
+        }
         $editorLink = $this->GetEditorLink($oldpost);
         if ($oldpost->post_status == 'publish') {
             $this->plugin->alerts->Trigger(9010, array(
