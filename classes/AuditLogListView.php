@@ -210,14 +210,23 @@ class WSAL_AuditLogListView extends WP_List_Table
                     . ($item->is_read ? 'old' : 'new')
                     . '" title="' . __('Click to toggle.', 'wp-security-audit-log') . '"></span>';
             case 'type':
-                return str_pad($item->alert_id, 4, '0', STR_PAD_LEFT);
+                $code = $this->_plugin->alerts->GetAlert($item->alert_id);
+                return '<span class="log-disable" data-tooltip="'. __('Disable this type of alerts.', 'wp-security-audit-log').'<br>'.$item->alert_id.' - '.esc_html($code->desc).'" data-alert-id="'.$item->alert_id.'">'
+                    . str_pad($item->alert_id, 4, '0', STR_PAD_LEFT) . ' </span>';
             case 'code':
                 $code = $this->_plugin->alerts->GetAlert($item->alert_id);
                 $code = $code ? $code->code : 0;
                 $const = (object)array('name' => 'E_UNKNOWN', 'value' => 0, 'description' => __('Unknown error code.', 'wp-security-audit-log'));
                 $const = $this->_plugin->constants->GetConstantBy('value', $code, $const);
-                return '<span class="log-type log-type-' . $const->value
-                    . '" title="' . esc_html($const->name . ': ' . $const->description) . '"></span>';
+                if ($const->name == 'E_CRITICAL') {
+                    $const->name = 'Critical';
+                } else if ($const->name == 'E_WARNING') {
+                    $const->name = 'Warning';
+                } else if ($const->name == 'E_NOTICE') {
+                    $const->name = 'Notification';
+                }
+                return '<a class="tooltip" href="#" data-tooltip="'. esc_html($const->name) .'"><span class="log-type log-type-'. $const->value
+                    .'"></span></a>';
             case 'crtd':
                 return $item->created_on ? (
                         str_replace(

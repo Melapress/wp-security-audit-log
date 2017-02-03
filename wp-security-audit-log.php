@@ -157,6 +157,9 @@ class WpSecurityAuditLog {
 
         // handle admin Disable Custom Field
         add_action('wp_ajax_AjaxDisableCustomField', array($this, 'AjaxDisableCustomField'));
+
+        // handle admin Disable Alerts
+        add_action('wp_ajax_AjaxDisableByCode', array($this, 'AjaxDisableByCode'));
     }
 
     /**
@@ -186,7 +189,24 @@ class WpSecurityAuditLog {
             $fields = esc_html($_POST['notice']);
         }
         $this->SetGlobalOption('excluded-custom', $fields);
-        echo 'Custom Field '.esc_html($_POST['notice']).' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude"> Excluded Objects </a> tab in the plugin settings';
+        echo '<p>Custom Field '.esc_html($_POST['notice']).' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude"> Excluded Objects </a> tab in the plugin settings</p>';
+        die;
+    }
+
+    /**
+     * Disable Alert through ajax.
+     * @internal
+     */
+    public function AjaxDisableByCode(){
+        $sAlerts = $this->GetGlobalOption('disabled-alerts');
+        if (isset($sAlerts) && $sAlerts != "") {
+            $sAlerts .= "," . esc_html($_POST['code']);
+        } else {
+            $sAlerts = esc_html($_POST['code']);
+        }
+        $this->SetGlobalOption('disabled-alerts', $sAlerts);
+        echo '<p>Alert '.esc_html($_POST['code']).' is no longer being monitored.<br />';
+        echo 'You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.</p>';
         die;
     }
     

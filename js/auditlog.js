@@ -19,6 +19,23 @@ window['WsalAuditLogRefreshed'] = function(){
 			jQuery('<input type="hidden" name="paged"/>').val(paged)
 		).submit();
 	});
+	// tooltip Confirm disable alert
+	jQuery('.log-disable').darkTooltip({
+        animation: 'fadeIn',
+        size: 'small',
+        gravity: 'west',
+        confirm: true,
+        yes: 'Disable',
+        onYes: function(elem){
+			WsalDisableByCode(elem.attr('data-alert-id'))
+		}
+    });
+	// tooltip severity type
+	jQuery('.tooltip').darkTooltip({
+		animation: 'fadeIn',
+        gravity: 'west',
+        size: 'medium'
+	});
 };
 
 function WsalAuditLogInit(_WsalData){
@@ -160,6 +177,19 @@ function WsalDBChange(value){
 		},
 		success: function() {
 			location.reload();
+		}
+	});
+}
+
+function WsalDisableByCode(code){
+	jQuery.ajax({
+		type: 'POST',
+		url: ajaxurl,
+		async: true,
+		data: { action: 'AjaxDisableByCode', code: code },
+		success: function(data) {
+			var notice = jQuery('<div class="updated" data-notice-name="disabled"></div>').html(data);
+			jQuery("h2:first").after(notice);
 		}
 	});
 }
