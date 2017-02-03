@@ -101,12 +101,12 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                     $purge_log = $this->_plugin->GetGlobalOption('purge-404-log');
                                     ?><tr>
                                         <td></td>
-                                        <td><input name="log_404" type="checkbox" value="1" <?php if ($log_404 == 'on') echo 'checked="checked"'; ?>></td>
+                                        <td><input name="log_404" type="checkbox" class="check_log" value="1" <?php if ($log_404 == 'on') echo 'checked="checked"'; ?>></td>
                                         <td colspan="2"><?php _e('Capture 404 requests to file (the log file are created in the /wp-content/uploads/wp-security-audit-log/404s/ directory)', 'wp-security-audit-log'); ?></td>
                                     </tr>
                                     <tr>
                                         <td></td>
-                                        <td><input name="purge_log" type="checkbox" value="1" <?php if ($purge_log == 'on') echo 'checked="checked"'; ?>></td>
+                                        <td><input name="purge_log" type="checkbox" class="check_log" value="1" <?php if ($purge_log == 'on') echo 'checked="checked"'; ?>></td>
                                         <td colspan="2"><?php _e('Purge log files older than one month', 'wp-security-audit-log'); ?></td>
                                     </tr><?php
                                 }
@@ -159,6 +159,15 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                 }else{
                     jQuery('#wsal-tabs>a:first').click();
                 }
+                // Specific for alert 6007
+                jQuery("input[value=6007]").on("change", function(){
+                    var check = jQuery("input[value=6007]").is(":checked");
+                    if(check) {
+                        jQuery(".check_log").attr ( "checked" ,"checked" );
+                    } else {
+                        jQuery(".check_log").removeAttr('checked');
+                    }
+                }); 
             });
         </script><?php
     }

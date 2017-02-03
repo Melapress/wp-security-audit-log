@@ -253,18 +253,33 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * Used even for modified post
+     */
     public function EventPluginPostCreate($insert, $post)
     {
         $WPActions = array('editpost', 'heartbeat', 'inline-save', 'trash', 'untrash');
         if (isset($_REQUEST['action']) && !in_array($_REQUEST['action'], $WPActions)) {
             if (!in_array($post->post_type, array('attachment', 'revision', 'nav_menu_item'))) {
-                $event = $this->GetEventTypeForPostType($post, 5019, 5020, 5021);
-                $this->plugin->alerts->Trigger($event, array(
-                    'PostID' => $post->ID,
-                    'PostType' => $post->post_type,
-                    'PostTitle' => $post->post_title,
-                    'Username' => 'Plugins'
-                ));
+                // if the plugin modify the post
+                if (strpos($_REQUEST['action'], 'edit') !== false) {
+                    $event = $this->GetEventTypeForPostType($post, 2106, 2107, 2108);
+                    $editorLink = $this->GetEditorLink($post);
+                    $this->plugin->alerts->Trigger($event, array(
+                        'PostID' => $post->ID,
+                        'PostType' => $post->post_type,
+                        'PostTitle' => $post->post_title,
+                        $editorLink['name'] => $editorLink['value']
+                    ));
+                } else {
+                    $event = $this->GetEventTypeForPostType($post, 5019, 5020, 5021);
+                    $this->plugin->alerts->Trigger($event, array(
+                        'PostID' => $post->ID,
+                        'PostType' => $post->post_type,
+                        'PostTitle' => $post->post_title,
+                        'Username' => 'Plugins'
+                    ));
+                }
             }
         }
     }
@@ -306,5 +321,17 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
             default:
                 return $typeCustom;
         }
+    }
+
+    private function GetEditorLink($post)
+    {
+        $name = 'EditorLink';
+        $name .= ($post->post_type == 'page') ? 'Page' : 'Post' ;
+        $value = get_edit_post_link($post->ID);
+        $aLink = array(
+            'name' => $name,
+            'value' => $value,
+        );
+        return $aLink;
     }
 }

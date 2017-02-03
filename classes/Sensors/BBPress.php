@@ -4,7 +4,6 @@
  */
 class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
 {
-    protected $_OldPost = null;
     protected $_OldLink = null;
 
     public function HookEvents()
@@ -33,7 +32,6 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
             && !(isset($_POST['action']) && $_POST['action'] == 'autosave')
         ) {
             $postID = intval($_POST['post_ID']);
-            $this->_OldPost = get_post($postID);
             $this->_OldLink = get_permalink($postID);
         }
     }
