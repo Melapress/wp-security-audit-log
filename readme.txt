@@ -15,13 +15,15 @@ Keep an audit trail of all changes and under the hood WordPress activity to ensu
 
 <strong>THE MOST COMPREHENSIVE & EASY TO USE WORDPRESS AUDIT TRAIL PLUGIN</strong><br />
 
-Keep an audit log of everything that is happening on your WordPress and [WordPress multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/) with WP Security Audit Log to ensure user productivity and identify WordPress security issues before they become a security problem. [WP Security Audit Log](http://www.wpsecurityauditlog.com), WordPress' most comprehensive user monitoring and audit log plugin already helps thousands of WordPress administrators, owners and security professionals ensure the security of their websites and blogs. Ensure the security of your WordPress too by installing WP Security Audit Log. The community's favourite WordPress user monitoring and security auditing plugin is developed by WordPress Security Consultants and Professionals [WP White Security](http://www.wpwhitesecurity.com/). 
+Keep an audit log of everything that happens on your WordPress and [WordPress multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/) with WP Security Audit Log to ensure user productivity and identify WordPress security issues before they become a security problem.
+
+[WP Security Audit Log](http://www.wpsecurityauditlog.com) is WordPress' most comprehensive user monitoring and audit log plugin and is used by thousands of WordPress administrators, owners and security professionals. The plugin can also be used to [keep an audit trail of WooCommerce store and product changes](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/audit-trail-woocommerce-store-products). 
 
 [youtube https://www.youtube.com/watch?v=1nopATCS-CQ]
 
 > <strong>Free and Premium Support</strong><br>
 > 
-> WP White Security provides support for the WP Security Audit Log plugin on the WordPress forums for free. Since it is free support it is not always possible to answer all questions on a timely manner, although we do try our best.
+> Support for the WP Security Audit Log plugin on the WordPress forums is free. Since it is free support it is not always possible to answer all questions on a timely manner, although we do try our best.
 >
 > Premium world-class support is available via email to anyone who purchases any of the [Premium Add-Ons](http://www.wpsecurityauditlog.com/plugin-extensions/) listed below:
 >
