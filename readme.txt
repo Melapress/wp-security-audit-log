@@ -6,8 +6,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 4.7
-Stable tag: 2.5.9
+Tested up to: 4.7.2
+Stable tag: 2.6
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -182,6 +182,27 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 11. Mirror the WordPress audit trail to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
 
 == Changelog ==
+
+= 2.6 (2017-02-08) =
+
+* **New Features**
+	* [Audit trail for WooCommerce Store and Products](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/audit-trail-woocommerce-store-products).
+	* New Hover over functionality to disable alerts with a single click.
+	
+* **New WooCommerce Audit Trail Alerts**
+	* Refer to the [Audit trail WooCommerce Alerts List](https://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/#woocommerce) for a complete list of alerts the plugin uses to keep a record of changes in the WooCommerce store and products.
+
+* **Plugin Improvements**
+	* Improved severity of alerts and added severity description on hover over.
+	* Removed all code related to PHP error monitoring, which is no longer used (code spring cleaning).
+
+* **Bug Fixes**
+	* Fixed an issue in which 404 logs where still being generated when the logs option was disabled but alert 6007 was enabled.
+
+= 2.5.9.2 (2017-01-11) =
+
+* **Bug Fix**
+	* Updated store URL so [premium add-ons](https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/) can be updated.	
 
 = 2.5.9 (2017-01-03) =
 
