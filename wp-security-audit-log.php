@@ -125,6 +125,18 @@ class WpSecurityAuditLog {
         require_once('classes/Models/Query.php');
         require_once('classes/Models/OccurrenceQuery.php');
         require_once('classes/Models/Option.php');
+
+        // Use WP_Session (default)
+        if (!defined('WP_SESSION_COOKIE')) {
+            define('WP_SESSION_COOKIE', 'wsal_wp_session');
+        }
+        if (!class_exists('Recursive_ArrayAccess')) {
+            require_once('classes/Lib/class-recursive-arrayaccess.php');
+        }
+        if (!class_exists('WP_Session')) {
+            require_once('classes/Lib/class-wp-session.php');
+            require_once('classes/Lib/wp-session.php');
+        }
         
         // load autoloader and register base paths
         require_once('classes/Autoloader.php');
@@ -684,6 +696,7 @@ class WpSecurityAuditLog {
         $this->options = new WSAL_Models_Option();
         return $this->options->SetOptionValue($option, $value);
     }
+
     // </editor-fold>
 }
 

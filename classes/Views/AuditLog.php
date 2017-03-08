@@ -22,10 +22,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         $data = get_plugin_data($plugin_file, false, false);
         $this->_version = isset($data['Version']) ? $data['Version'] : '0.0.0';
         $this->RegisterNotice('premium-wsal-'.$this->_version);
-
-        if (!session_id()) {
-            @session_start();
-        }
     }
 
     public function AdminNoticesPremium()
@@ -109,8 +105,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
                     ),
                 )); ?>);
             });
-        </script>
-        <?php
+        </script><?php
     }
     
     public function AjaxInspector() {
@@ -150,10 +145,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         $max = 40; // 40*500msec = 20sec
 
         $is_archive = false;
-        if (isset($_SESSION['selected_db']) && $_SESSION['selected_db'] == 'archive') {
+        $wp_session = WP_Session::get_instance();
+        if (isset($wp_session['selected_db']) && $wp_session['selected_db'] == 'archive') {
             $is_archive = true;
         }
-        session_write_close(); // fixes session lock issue
         
         do {
             $occ = new WSAL_Models_Occurrence();
@@ -204,13 +199,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
     public function AjaxSwitchDB() {
         if (isset($_REQUEST['selected_db'])) {
-            $_SESSION['selected_db'] = $_REQUEST['selected_db'];
+            $wp_session = WP_Session::get_instance();
+            $wp_session['selected_db'] = $_REQUEST['selected_db'];
         }
     }
     
     public function Header() {
         add_thickbox();
-        wp_enqueue_style('darktooltip', $this->_plugin->GetBaseUrl() . '/css/darktooltip.css', array(), '');
         wp_enqueue_style(
             'auditlog',
             $this->_plugin->GetBaseUrl() . '/css/auditlog.css',
@@ -221,7 +216,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     
     public function Footer() {
         wp_enqueue_script('jquery');
-        wp_enqueue_script('darktooltip', $this->_plugin->GetBaseUrl() . '/js/jquery.darktooltip.js', array('jquery'), '');
         wp_enqueue_script('suggest');
         wp_enqueue_script(
             'auditlog',
