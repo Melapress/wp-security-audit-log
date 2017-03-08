@@ -89,6 +89,12 @@ class WpSecurityAuditLog {
      * @var WSAL_DB_Option
      */
     public $options;
+
+    /**
+     * Holds our session data
+     * @var WP_Session
+     */
+    public $wp_session = null;
     
     /**
      * Contains a list of cleanup callbacks.
@@ -125,6 +131,21 @@ class WpSecurityAuditLog {
         require_once('classes/Models/Query.php');
         require_once('classes/Models/OccurrenceQuery.php');
         require_once('classes/Models/Option.php');
+
+        // Use WP_Session (default)
+        if (!defined('WP_SESSION_COOKIE')) {
+            define('WP_SESSION_COOKIE', 'wsal_wp_session');
+        }
+        if (!class_exists('Recursive_ArrayAccess')) {
+            require_once('classes/Lib/class-recursive-arrayaccess.php');
+        }
+        if (!class_exists('WP_Session')) {
+            require_once('classes/Lib/class-wp-session.php');
+            require_once('classes/Lib/wp-session.php');
+        }
+        $this->wp_session = WP_Session::get_instance();
+        add_filter( 'wp_session_expiration_variant', array( $this, 'set_expiration_variant_time' ), 99999 );
+        add_filter( 'wp_session_expiration', array( $this, 'set_expiration_time' ), 99999 );
         
         // load autoloader and register base paths
         require_once('classes/Autoloader.php');
@@ -683,6 +704,24 @@ class WpSecurityAuditLog {
     {
         $this->options = new WSAL_Models_Option();
         return $this->options->SetOptionValue($option, $value);
+    }
+
+    /**
+     * Force the cookie expiration variant time to 23 hours
+     * @param int $exp Default expiration (1 hour)
+     * @return int
+     */
+    public function set_expiration_variant_time($exp) {
+        return ( 30 * 60 * 23 );
+    }
+
+    /**
+     * Force the cookie expiration time to 24 hours
+     * @param int $exp Default expiration (1 hour)
+     * @return int Cookie expiration time
+     */
+    public function set_expiration_time($exp) {
+        return ( 30 * 60 * 24 );
     }
     // </editor-fold>
 }
