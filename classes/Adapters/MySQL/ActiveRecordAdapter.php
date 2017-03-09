@@ -509,4 +509,68 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $count = (int)$_wpdb->get_var($sql);
         return $count;
     }
+
+    /**
+     * List of unique IP addresses used by the same user
+     */
+    public function GetReportGrouped($_siteId, $_startTimestamp, $_endTimestamp, $_limit = 0)
+    {
+        global $wpdb;
+        
+        $_wpdb = $this->connection;
+        $_wpdb->set_charset($_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci');
+        // tables
+        $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
+        $tableMeta = $meta->GetTable(); // metadata
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
+        $tableOcc = $occurrence->GetTable(); // occurrences
+
+        $sql = "SELECT DISTINCT
+            occ.site_id,
+            (SELECT replace(t4.value, '\"', '') FROM $tableMeta as t4 WHERE t4.name = 'Username' AND t4.occurrence_id = occ.id LIMIT 1) as user_login,
+            (SELECT replace(t2.value, '\"','') FROM $tableMeta as t2 WHERE t2.name = 'ClientIP' AND t2.occurrence_id = occ.id LIMIT 1) AS ip
+            FROM $tableOcc AS occ
+            JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
+            WHERE occ.alert_id = '1000'
+                AND (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
+                AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
+                AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
+            ORDER BY
+                user_login ASC
+        ";
+        $_wpdb->query("SET @siteId = $_siteId");
+        $_wpdb->query("SET @startTimestamp = $_startTimestamp");
+        $_wpdb->query("SET @endTimestamp = $_endTimestamp");
+
+        if (!empty($_limit)) {
+            $sql .= " LIMIT {$_limit}";
+        }
+
+        $grouped_types = array();
+        $results = $_wpdb->get_results($sql);
+        if (!empty($results)) {
+            foreach ($results as $key => $row) {
+                // get the display_name only for the first row & if the user_login changed from the previous row
+                if ($key == 0 || ($key > 1 && $results[($key - 1)]->user_login != $row->user_login)) {
+                    $sql = "SELECT t6.display_name FROM $wpdb->users AS t6 WHERE t6.user_login = \"$row->user_login\"";
+                    $displayName = $wpdb->get_var($sql);
+                }
+
+                $row->display_name = $displayName;
+                
+                if (!isset($grouped_types[$row->user_login])) {
+                    $grouped_types[$row->user_login] = array(
+                        'site_id' => $row->site_id,
+                        'user_login' => $row->user_login,
+                        'display_name' => $row->display_name,
+                        'ips' => array()
+                    );
+                }
+
+                $grouped_types[$row->user_login]['ips'][] = $row->ip;
+            }
+        }
+
+        return $grouped_types;
+    }
 }
