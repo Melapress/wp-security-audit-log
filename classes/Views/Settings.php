@@ -310,7 +310,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     </label>
                                     <br/>
                                     <span class="description">
-                                        <?php _e('To manually revert this setting set the value of option wsal-hide-plugin to 0 in the wp_options table.', 'wp-security-audit-log'); ?>
+                                        <?php _e('To manually revert this setting set the value of option wsal-hide-plugin to 0 in the wp_wsal_options table.', 'wp-security-audit-log'); ?>
                                     </span>
                                 </fieldset>
                             </td>
