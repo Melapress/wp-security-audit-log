@@ -575,7 +575,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             foreach ($results as $key => $row) {
                 // get the display_name only for the first row & if the user_login changed from the previous row
                 if ($key == 0 || ($key > 1 && $results[($key - 1)]->user_login != $row->user_login)) {
-                    $sql = "SELECT t5.display_name, t5.display_name FROM $wpdb->users AS t5 WHERE t5.user_login = \"$row->user_login\"";
+                    $sql = "SELECT t5.display_name FROM $wpdb->users AS t5 WHERE t5.user_login = \"$row->user_login\"";
                     $displayName = $wpdb->get_var($sql);
                 }
                 $row->display_name = $displayName;
