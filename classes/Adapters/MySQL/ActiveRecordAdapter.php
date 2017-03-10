@@ -543,7 +543,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 occ.site_id,
                 CONVERT((SELECT u.user_login
                     FROM $tableMeta as t2
-                    JOIN wp_users AS u ON u.ID = replace(t2.value, '\"', '')
+                    JOIN {$wpdb->prefix}wp_users AS u ON u.ID = replace(t2.value, '\"', '')
                     WHERE t2.name = 'CurrentUserID' 
                     AND t2.occurrence_id = occ.id
                     GROUP BY u.ID
