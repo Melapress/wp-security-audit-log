@@ -509,4 +509,90 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $count = (int)$_wpdb->get_var($sql);
         return $count;
     }
+
+    /**
+     * List of unique IP addresses used by the same user
+     */
+    public function GetReportGrouped($_siteId, $_startTimestamp, $_endTimestamp, $_alertCode = 'null', $_limit = 0)
+    {
+        global $wpdb;
+        
+        $_wpdb = $this->connection;
+        $_wpdb->set_charset($_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci');
+        // tables
+        $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
+        $tableMeta = $meta->GetTable(); // metadata
+        $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
+        $tableOcc = $occurrence->GetTable(); // occurrences
+
+        $sql = "SELECT DISTINCT * 
+            FROM (SELECT DISTINCT
+                    occ.site_id,
+                    CONVERT((SELECT replace(t1.value, '\"', '') FROM $tableMeta as t1 WHERE t1.name = 'Username' AND t1.occurrence_id = occ.id LIMIT 1) using UTF8) AS user_login ,
+                    CONVERT((SELECT replace(t3.value, '\"','') FROM $tableMeta as t3 WHERE t3.name = 'ClientIP' AND t3.occurrence_id = occ.id LIMIT 1) using UTF8) AS ip
+                FROM $tableOcc AS occ
+                JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
+                WHERE
+                    (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
+                    AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
+                    AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
+                    AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
+                HAVING user_login IS NOT NULL
+                UNION ALL
+                SELECT DISTINCT
+                occ.site_id,
+                CONVERT((SELECT u.user_login
+                    FROM $tableMeta as t2
+                    JOIN {$wpdb->prefix}users AS u ON u.ID = replace(t2.value, '\"', '')
+                    WHERE t2.name = 'CurrentUserID' 
+                    AND t2.occurrence_id = occ.id
+                    GROUP BY u.ID
+                    LIMIT 1) using UTF8) AS user_login,
+                CONVERT((SELECT replace(t4.value, '\"','') FROM $tableMeta as t4 WHERE t4.name = 'ClientIP' AND t4.occurrence_id = occ.id LIMIT 1) using UTF8) AS ip
+                FROM $tableOcc AS occ
+                JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
+                WHERE
+                    (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
+                    AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
+                    AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
+                    AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
+                HAVING user_login IS NOT NULL) ip_logins
+            WHERE user_login != 'Website Visitor'
+                ORDER BY user_login ASC
+        ";
+        $_wpdb->query("SET @siteId = $_siteId");
+        $_wpdb->query("SET @alertCode = $_alertCode");
+        $_wpdb->query("SET @startTimestamp = $_startTimestamp");
+        $_wpdb->query("SET @endTimestamp = $_endTimestamp");
+
+        if (!empty($_limit)) {
+            $sql .= " LIMIT {$_limit}";
+        }
+
+        $grouped_types = array();
+        $results = $_wpdb->get_results($sql);
+        if (!empty($results)) {
+            foreach ($results as $key => $row) {
+                // get the display_name only for the first row & if the user_login changed from the previous row
+                if ($key == 0 || ($key > 1 && $results[($key - 1)]->user_login != $row->user_login)) {
+                    $sql = "SELECT t5.display_name FROM $wpdb->users AS t5 WHERE t5.user_login = \"$row->user_login\"";
+                    $displayName = $wpdb->get_var($sql);
+                }
+                $row->display_name = $displayName;
+                
+                if (!isset($grouped_types[$row->user_login])) {
+                    $grouped_types[$row->user_login] = array(
+                        'site_id' => $row->site_id,
+                        'user_login' => $row->user_login,
+                        'display_name' => $row->display_name,
+                        'ips' => array()
+                    );
+                }
+
+                $grouped_types[$row->user_login]['ips'][] = $row->ip;
+            }
+        }
+
+        return $grouped_types;
+    }
 }
