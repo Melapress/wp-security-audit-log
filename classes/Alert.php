@@ -19,6 +19,12 @@ final class WSAL_Alert {
      * @var string
      */
     public $catg = '';
+
+    /**
+     * Alert sub category.
+     * @var string
+     */
+    public $subcatg = '';
     
     /**
      * Alert description (ie, describes what happens when alert is triggered).
@@ -32,10 +38,11 @@ final class WSAL_Alert {
      */
     public $mesg = '';
     
-    public function __construct($type = 0, $code = 0, $catg = '', $desc = '', $mesg = '') {
+    public function __construct($type = 0, $code = 0, $catg = '', $subcatg = '', $desc = '', $mesg = '') {
         $this->type = $type;
         $this->code = $code;
         $this->catg = $catg;
+        $this->subcatg = $subcatg;
         $this->desc = $desc;
         $this->mesg = $mesg;
     }
