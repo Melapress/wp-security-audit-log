@@ -135,6 +135,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 if (!$changes) {
                     $changes = $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
                 }
+                // Comments/Trackbacks and Pingbacks
+                $changes = $this->CheckCommentsPings($this->_OldPost, $post);
                 if (!$changes) {
                     $changes = $this->CheckModificationChange($post->ID, $this->_OldPost, $post);
                 }
@@ -747,6 +749,80 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return 1;
         }
         return 0;
+    }
+
+    private function CheckCommentsPings($oldpost, $newpost)
+    {
+        $result = 0;
+        // Comments
+        if ($oldpost->comment_status != $newpost->comment_status) {
+            $type = 'Comments';
+
+            if ($newpost->comment_status == 'open') {
+                $event = $this->GetCommentsPingsEvent($newpost, 'enable');
+            } else {
+                $event = $this->GetCommentsPingsEvent($newpost, 'disable');
+            }
+
+            $this->plugin->alerts->Trigger($event, array(
+                'Type' => $type,
+                'PostTitle' => $newpost->post_title,
+                'PostUrl' => get_permalink($newpost->ID)
+            ));
+            $result = 1;
+        }
+        // Trackbacks and Pingbacks
+        if ($oldpost->ping_status != $newpost->ping_status) {
+            $type = 'Trackbacks and Pingbacks';
+
+            if ($newpost->ping_status == 'open') {
+                $event = $this->GetCommentsPingsEvent($newpost, 'enable');
+            } else {
+                $event = $this->GetCommentsPingsEvent($newpost, 'disable');
+            }
+
+            $this->plugin->alerts->Trigger($event, array(
+                'Type' => $type,
+                'PostTitle' => $newpost->post_title,
+                'PostUrl' => get_permalink($newpost->ID)
+            ));
+            $result = 1;
+        }
+        return $result;
+    }
+
+    private function GetCommentsPingsEvent($post, $status)
+    {
+        if ($post->post_type == 'post') {
+            if ($post->post_status == 'publish') {
+                if ($status == 'disable') {
+                    $event = 2111;
+                } else {
+                    $event = 2112;
+                }
+            } else {
+                if ($status == 'disable') {
+                    $event = 2113;
+                } else {
+                    $event = 2114;
+                }
+            }
+        } else {
+            if ($post->post_status == 'publish') {
+                if ($status == 'disable') {
+                    $event = 2115;
+                } else {
+                    $event = 2116;
+                }
+            } else {
+                if ($status == 'disable') {
+                    $event = 2117;
+                } else {
+                    $event = 2118;
+                }
+            }
+        }
+        return $event;
     }
 
     private function GetEditorLink($post)

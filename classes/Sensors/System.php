@@ -23,8 +23,38 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if (!wp_next_scheduled('log_files_pruning')) {
             wp_schedule_event(time(), 'daily', 'log_files_pruning');
         }
+        // whitelist options
+        add_action('whitelist_options', array($this, 'EventOptions'), 10, 1);
     }
     
+    public function EventOptions($whitelist = null)
+    {
+        if (isset($_REQUEST['option_page']) && $_REQUEST['option_page'] == "reading") {
+            $old_status = get_option('blog_public');
+            $new_status = isset($_REQUEST['blog_public']) ? 0 : 1;
+            if ($old_status != $new_status) {
+                $this->plugin->alerts->Trigger(6008, array(
+                    'Status' => ($new_status == 0) ? 'Enabled' : 'Disabled'
+                ));
+            }
+        }
+        if (isset($_REQUEST['option_page']) && $_REQUEST['option_page'] == "discussion") {
+            $old_status = get_option('default_comment_status');
+            $new_status = isset($_REQUEST['default_comment_status']) ? 'open' : 'closed';
+            if ($old_status != $new_status) {
+                $this->plugin->alerts->Trigger(6009, array(
+                    'Status' => ($new_status == 0) ? 'Enabled' : 'Disabled'
+                ));
+            }
+            $old_status = get_option('require_name_email');
+            $new_status = isset($_REQUEST['require_name_email']) ? 0 : 1;
+            if ($old_status != $new_status) {
+                $this->plugin->alerts->Trigger(6010, array(
+                    'Status' => ($new_status == 0) ? 'Enabled' : 'Disabled'
+                ));
+            }
+        }
+    }
     /**
      * @param int $count The number of deleted events.
      * @param string $query Query that selected events for deletion.

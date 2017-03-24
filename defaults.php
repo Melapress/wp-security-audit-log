@@ -85,7 +85,11 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2074, E_NOTICE, __('User scheduled a post', 'wp-security-audit-log'), __('Scheduled the post %PostTitle% to be published %PublishingDate%. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2086, E_NOTICE, __('User changed title of a post', 'wp-security-audit-log'), __('Changed the title of the post %OldTitle% to %NewTitle%. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2100, E_NOTICE, __('User opened a post in the editor', 'wp-security-audit-log'), __('Opened the post %PostTitle% in the editor. View the post: %EditorLinkPost%.', 'wp-security-audit-log')),
-                array(2101, E_NOTICE, __('User viewed a post', 'wp-security-audit-log'), __('Viewed the post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log'))
+                array(2101, E_NOTICE, __('User viewed a post', 'wp-security-audit-log'), __('Viewed the post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
+                array(2111, E_NOTICE, __('User disabled Comments/Trackbacks and Pingbacks on a published post', 'wp-security-audit-log'), __('Disabled %Type% on the published post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
+                array(2112, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a published post', 'wp-security-audit-log'), __('Enabled %Type% on the published post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
+                array(2113, E_NOTICE, __('User disabled Comments/Trackbacks and Pingbacks on a draft post', 'wp-security-audit-log'), __('Disabled %Type% on the draft post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
+                array(2114, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a draft post', 'wp-security-audit-log'), __('Enabled %Type% on the draft post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log'))
             ),
             __('Comments', 'wp-security-audit-log') => array(
                 array(2090, E_NOTICE, __('User approved a comment', 'wp-security-audit-log'), __('Approved the comment posted in response to the post %PostTitle% by %Author% on %CommentLink%.', 'wp-security-audit-log')),
@@ -148,7 +152,11 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2075, E_NOTICE, __('User scheduled a page', 'wp-security-audit-log'), __('Scheduled the page %PostTitle% to be published %PublishingDate%.'.' %EditorLinkPage%.', 'wp-security-audit-log')),
                 array(2087, E_NOTICE, __('User changed title of a page', 'wp-security-audit-log'), __('Changed the title of the page %OldTitle% to %NewTitle%.'.' %EditorLinkPage%.', 'wp-security-audit-log')),
                 array(2102, E_NOTICE, __('User opened a page in the editor', 'wp-security-audit-log'), __('Opened the page %PostTitle% in the editor. View the page: %EditorLinkPage%.', 'wp-security-audit-log')),
-                array(2103, E_NOTICE, __('User viewed a page', 'wp-security-audit-log'), __('Viewed the page %PostTitle%. View the page: %PostUrl%.', 'wp-security-audit-log'))
+                array(2103, E_NOTICE, __('User viewed a page', 'wp-security-audit-log'), __('Viewed the page %PostTitle%. View the page: %PostUrl%.', 'wp-security-audit-log')),
+                array(2115, E_NOTICE, __('User disabled Comments/Trackbacks and Pingbacks on a published page', 'wp-security-audit-log'), __('Disabled %Type% on the published page %PostTitle%. View the page: %PostUrl%.', 'wp-security-audit-log')),
+                array(2116, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a published page', 'wp-security-audit-log'), __('Enabled %Type% on the published page %PostTitle%. View the page: %PostUrl%.', 'wp-security-audit-log')),
+                array(2117, E_NOTICE, __('User disabled Comments/Trackbacks and Pingbacks on a draft page', 'wp-security-audit-log'), __('Disabled %Type% on the draft page %PostTitle%. View the page: %PostUrl%.', 'wp-security-audit-log')),
+                array(2118, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a draft page', 'wp-security-audit-log'), __('Enabled %Type% on the draft page %PostTitle%. View the page: %PostUrl%.', 'wp-security-audit-log'))
             )
         ),
         __('WordPress & Multisite Management', 'wp-security-audit-log') => array(
@@ -234,6 +242,19 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2044, E_CRITICAL, __('User deleted widget', 'wp-security-audit-log'), __('Deleted the %WidgetName% widget from %Sidebar%.', 'wp-security-audit-log')),
                 array(2045, E_NOTICE, __('User moved widget', 'wp-security-audit-log'), __('Moved the %WidgetName% widget from %OldSidebar% to %NewSidebar%.', 'wp-security-audit-log')),
                 array(2071, E_NOTICE, __('User changed widget position', 'wp-security-audit-log'), __('Changed the position of the widget %WidgetName% in sidebar %Sidebar%.', 'wp-security-audit-log'))
+            ),
+            __('Site Settings', 'wp-security-audit-log') => array(
+                array(6008, E_CRITICAL, __('Enabled/Disabled the option Discourage search engines from indexing this site', 'wp-security-audit-log'), __('%Status% the option Discourage search engines from indexing this site.', 'wp-security-audit-log')),
+                array(6009, E_CRITICAL, __('Enabled/Disabled comments on all the website', 'wp-security-audit-log'), __('%Status% comments on all the website.', 'wp-security-audit-log')),
+                array(6010, E_CRITICAL, __('Enabled/Disabled the option Comment author must fill out name and email', 'wp-security-audit-log'), __('%Status% the option Comment author must fill out name and email.', 'wp-security-audit-log')),
+                array(6011, E_CRITICAL, __('Enabled/Disabled the option Users must be logged in and registered to comment', 'wp-security-audit-log'), __('%Status% the option Users must be logged in and registered to comment.', 'wp-security-audit-log')),
+                array(6012, E_CRITICAL, __('Enabled/Disabled the option to automatically close comments', 'wp-security-audit-log'), __('%Status% the option to automatically close comments after %Value% days.', 'wp-security-audit-log')),
+                array(6013, E_NOTICE, __('Changed the value of the option Automatically close comments', 'wp-security-audit-log'), __('Changed the value of the option Automatically close comments from %OldValue% to %NewValue% days.', 'wp-security-audit-log')),
+                array(6014, E_CRITICAL, __('Enabled/Disabled the option for comments to be manually approved', 'wp-security-audit-log'), __('%Status% the option for comments to be manually approved.', 'wp-security-audit-log')),
+                array(6015, E_CRITICAL, __('Enabled/Disabled the option for an author to have previously approved comments for the comments to appear', 'wp-security-audit-log'), __('%Status% the option for an author to have previously approved comments for the comments to appear.', 'wp-security-audit-log')),
+                array(6016, E_CRITICAL, __('Changed the number of links that a comment must have to be held in the queue', 'wp-security-audit-log'), __('Changed the number of links from %OldValue% to %NewValue% that a comment must have to be held in the queue.', 'wp-security-audit-log')),
+                array(6017, E_CRITICAL, __('Modified the list of keywords for comments moderation', 'wp-security-audit-log'), __('Modified the list of keywords for comments moderation.', 'wp-security-audit-log')),
+                array(6018, E_CRITICAL, __('Modified the list of keywords for comments blacklisting', 'wp-security-audit-log'), __('Modified the list of keywords for comments blacklisting.', 'wp-security-audit-log'))
             )
         ),
         __('Users Profiles & Activity', 'wp-security-audit-log') => array(
@@ -244,6 +265,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(1003, E_WARNING, __('Login failed  / non existing user', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected using non existing user.', 'wp-security-audit-log')),
                 array(1004, E_WARNING, __('Login blocked', 'wp-security-audit-log'), __('Blocked from logging in because the same WordPress user is logged in from %ClientIP%.', 'wp-security-audit-log')),
                 array(1005, E_WARNING, __('User logged in with existing session(s)', 'wp-security-audit-log'), __('Successfully logged in. Another session from %IPAddress% for this user already exist.', 'wp-security-audit-log')),
+                array(1006, E_CRITICAL, __('User logged out all other sessions with the same username', 'wp-security-audit-log'), __('Logged out all other sessions with the same username.', 'wp-security-audit-log')),
                 array(2010, E_NOTICE, __('User uploaded file from Uploads directory', 'wp-security-audit-log'), __('Uploaded the file %FileName% in %FilePath%.', 'wp-security-audit-log')),
                 array(2011, E_WARNING, __('User deleted file from Uploads directory', 'wp-security-audit-log'), __('Deleted the file %FileName% from %FilePath%.', 'wp-security-audit-log'))
             ),
@@ -255,7 +277,8 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(4004, E_CRITICAL, __('User changed another user\'s password', 'wp-security-audit-log'), __('Changed the password for the user %TargetUserData->Username% with the role of %TargetUserData->Roles%.', 'wp-security-audit-log')),
                 array(4005, E_NOTICE, __('User changed his or her email address', 'wp-security-audit-log'), __('Changed the email address from %OldEmail% to %NewEmail%.', 'wp-security-audit-log')),
                 array(4006, E_NOTICE, __('User changed another user\'s email address', 'wp-security-audit-log'), __('Changed the email address of the user %TargetUsername% from %OldEmail% to %NewEmail%.', 'wp-security-audit-log')),
-                array(4007, E_CRITICAL, __('User was deleted by another user', 'wp-security-audit-log'), __('Deleted the user %TargetUserData->Username% with the role of %TargetUserData->Roles%.', 'wp-security-audit-log'))
+                array(4007, E_CRITICAL, __('User was deleted by another user', 'wp-security-audit-log'), __('Deleted the user %TargetUserData->Username% with the role of %TargetUserData->Roles%.', 'wp-security-audit-log')),
+                array(4014, E_NOTICE, __('User opened the profile page of another user', 'wp-security-audit-log'), __('%UserChanger% opened the profile page of the user %TargetUsername%.', 'wp-security-audit-log'))
             )
         ),
         __('Third Party Support', 'wp-security-audit-log') => array(
