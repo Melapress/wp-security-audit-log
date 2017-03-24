@@ -365,12 +365,7 @@ class WSAL_AuditLogListView extends WP_List_Table
 
             case strncmp($value, 'http://', 7) === 0:
             case strncmp($value, 'https://', 7) === 0:
-                return '<a href="' . esc_html($value) . '"'
-                    . ' title="' . esc_html($value) . '"'
-                    . ' target="_blank">'
-                        . esc_html(parse_url($value, PHP_URL_HOST)) . '/&hellip;/'
-                        . esc_html(basename(parse_url($value, PHP_URL_PATH)))
-                    . '</a>';
+                return '<a href="' . esc_html($value) . '"' . ' title="' . esc_html($value) . '"' . ' target="_blank">' . esc_html($value) . '</a>';
                 
             default:
                 return '<strong>' . esc_html($value) . '</strong>';
