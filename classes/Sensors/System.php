@@ -404,7 +404,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             if ($old_value != $new_value) {
                 $this->plugin->alerts->Trigger(6018, array());
             }
-            error_log(print_r($_REQUEST, true));
         }
     }
 
