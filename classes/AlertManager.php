@@ -191,10 +191,10 @@ final class WSAL_AlertManager {
     public function Register($info){
         if(func_num_args() == 1){
             // handle single item
-            list($type, $code, $catg, $desc, $mesg) = $info;
+            list($type, $code, $catg, $subcatg, $desc, $mesg) = $info;
             if(isset($this->_alerts[$type]))
                 throw new Exception("Alert $type already registered with Alert Manager.");
-            $this->_alerts[$type] = new WSAL_Alert($type, $code, $catg, $desc, $mesg);
+            $this->_alerts[$type] = new WSAL_Alert($type, $code, $catg, $subcatg, $desc, $mesg);
         }else{
             // handle multiple items
             foreach(func_get_args() as $arg)
@@ -209,9 +209,11 @@ final class WSAL_AlertManager {
      */
     public function RegisterGroup($groups){
         foreach($groups as $name => $group){
-            foreach($group as $item){
-                list($type, $code, $desc, $mesg) = $item;
-                $this->Register(array($type, $code, $name, $desc, $mesg));
+            foreach($group as $subname => $subgroup){
+                foreach($subgroup as $item){
+                    list($type, $code, $desc, $mesg) = $item;
+                    $this->Register(array($type, $code, $name, $subname, $desc, $mesg));
+                }
             }
         }
     }
@@ -332,7 +334,9 @@ final class WSAL_AlertManager {
         foreach($this->_alerts as $alert){
             if(!isset($result[$alert->catg]))
                 $result[$alert->catg] = array();
-            $result[$alert->catg][] = $alert;
+            if(!isset($result[$alert->catg][$alert->subcatg]))
+                $result[$alert->catg][$alert->subcatg] = array();
+            $result[$alert->catg][$alert->subcatg][] = $alert;
         }
         ksort($result);
         return $result;

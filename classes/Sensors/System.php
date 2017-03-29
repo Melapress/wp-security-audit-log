@@ -23,6 +23,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         if (!wp_next_scheduled('log_files_pruning')) {
             wp_schedule_event(time(), 'daily', 'log_files_pruning');
         }
+        // whitelist options
+        add_action('whitelist_options', array($this, 'EventOptions'), 10, 1);
     }
     
     /**
@@ -313,6 +315,94 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                     }
                     closedir($handle);
                 }
+            }
+        }
+    }
+
+    /**
+     * Events from 6008 to 6018
+     */
+    public function EventOptions($whitelist = null)
+    {
+        if (isset($_REQUEST['option_page']) && $_REQUEST['option_page'] == "reading") {
+            $old_status = get_option('blog_public', 1);
+            $new_status = isset($_REQUEST['blog_public']) ? 0 : 1;
+            if ($old_status != $new_status) {
+                $this->plugin->alerts->Trigger(6008, array(
+                    'Status' => ($new_status == 0) ? 'Enabled' : 'Disabled'
+                ));
+            }
+        }
+        if (isset($_REQUEST['option_page']) && $_REQUEST['option_page'] == "discussion") {
+            $old_status = get_option('default_comment_status', 'closed');
+            $new_status = isset($_REQUEST['default_comment_status']) ? 'open' : 'closed';
+            if ($old_status != $new_status) {
+                $this->plugin->alerts->Trigger(6009, array(
+                    'Status' => ($new_status == 'open') ? 'Enabled' : 'Disabled'
+                ));
+            }
+            $old_status = get_option('require_name_email', 0);
+            $new_status = isset($_REQUEST['require_name_email']) ? 1 : 0;
+            if ($old_status != $new_status) {
+                $this->plugin->alerts->Trigger(6010, array(
+                    'Status' => ($new_status == 1) ? 'Enabled' : 'Disabled'
+                ));
+            }
+            $old_status = get_option('comment_registration', 0);
+            $new_status = isset($_REQUEST['comment_registration']) ? 1 : 0;
+            if ($old_status != $new_status) {
+                $this->plugin->alerts->Trigger(6011, array(
+                    'Status' => ($new_status == 1) ? 'Enabled' : 'Disabled'
+                ));
+            }
+            $old_status = get_option('close_comments_for_old_posts', 0);
+            $new_status = isset($_REQUEST['close_comments_for_old_posts']) ? 1 : 0;
+            if ($old_status != $new_status) {
+                $value = isset($_REQUEST['close_comments_days_old']) ? $_REQUEST['close_comments_days_old'] : 0;
+                $this->plugin->alerts->Trigger(6012, array(
+                    'Status' => ($new_status == 1) ? 'Enabled' : 'Disabled',
+                    'Value' => $value
+                ));
+            }
+            $old_value = get_option('close_comments_days_old', 0);
+            $new_value = isset($_REQUEST['close_comments_days_old']) ? $_REQUEST['close_comments_days_old'] : 0;
+            if ($old_value != $new_value) {
+                $this->plugin->alerts->Trigger(6013, array(
+                    'OldValue' => $old_value,
+                    'NewValue' => $new_value
+                ));
+            }
+            $old_status = get_option('comment_moderation', 0);
+            $new_status = isset($_REQUEST['comment_moderation']) ? 1 : 0;
+            if ($old_status != $new_status) {
+                $this->plugin->alerts->Trigger(6014, array(
+                    'Status' => ($new_status == 1) ? 'Enabled' : 'Disabled'
+                ));
+            }
+            $old_status = get_option('comment_whitelist', 0);
+            $new_status = isset($_REQUEST['comment_whitelist']) ? 1 : 0;
+            if ($old_status != $new_status) {
+                $this->plugin->alerts->Trigger(6015, array(
+                    'Status' => ($new_status == 1) ? 'Enabled' : 'Disabled'
+                ));
+            }
+            $old_value = get_option('comment_max_links', 0);
+            $new_value = isset($_REQUEST['comment_max_links']) ? $_REQUEST['comment_max_links'] : 0;
+            if ($old_value != $new_value) {
+                $this->plugin->alerts->Trigger(6016, array(
+                    'OldValue' => $old_value,
+                    'NewValue' => $new_value
+                ));
+            }
+            $old_value = get_option('moderation_keys', 0);
+            $new_value = isset($_REQUEST['moderation_keys']) ? $_REQUEST['moderation_keys'] : 0;
+            if ($old_value != $new_value) {
+                $this->plugin->alerts->Trigger(6017, array());
+            }
+            $old_value = get_option('blacklist_keys', 0);
+            $new_value = isset($_REQUEST['blacklist_keys']) ? $_REQUEST['blacklist_keys'] : 0;
+            if ($old_value != $new_value) {
+                $this->plugin->alerts->Trigger(6018, array());
             }
         }
     }

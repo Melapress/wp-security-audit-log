@@ -12,6 +12,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
         add_action('delete_user', array($this, 'EventUserDeleted'));
         add_action('wpmu_delete_user', array($this, 'EventUserDeleted'));
         add_action('set_user_role', array($this, 'EventUserRoleChanged'), 10, 3);
+
+        add_action('edit_user_profile', array($this, 'EventOpenProfile'), 10, 1);
     }
     
     protected $old_superadmins;
@@ -147,6 +149,19 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
                 'Roles' => $role ? $role : 'none',
             ),
         ), array($this, 'MustNotContainCreateUser'));
+    }
+
+    public function EventOpenProfile($user)
+    {
+        if (!empty($user)) {
+            $current_user = wp_get_current_user();
+            if (!empty($current_user) && ($user->ID != $current_user->ID)) {
+                $this->plugin->alerts->Trigger(4014, array(
+                    'UserChanger' => $current_user->user_login,
+                    'TargetUsername' => $user->user_login
+                ));
+            }
+        }
     }
     
     public function MustNotContainCreateUser(WSAL_AlertManager $mgr)
