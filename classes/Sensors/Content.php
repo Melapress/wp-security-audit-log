@@ -685,7 +685,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if (is_user_logged_in()) {
             if (!is_admin()) {
                 if ($this->CheckOtherSensors($post)) {
-                    return;
+                    return $title;
                 }
                 $currentPath = $_SERVER["REQUEST_URI"];
                 if (!empty($_SERVER["HTTP_REFERER"])
@@ -714,7 +714,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if (is_user_logged_in()) {
             if (is_admin()) {
                 if ($this->CheckOtherSensors($post)) {
-                    return;
+                    return $post;
                 }
                 $currentPath = $_SERVER["SCRIPT_NAME"] . "?post=" . $post->ID;
                 if (!empty($_SERVER["HTTP_REFERER"])
