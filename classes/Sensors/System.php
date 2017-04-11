@@ -405,6 +405,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 $this->plugin->alerts->Trigger(6018, array());
             }
         }
+        return $whitelist;
     }
 
     /**

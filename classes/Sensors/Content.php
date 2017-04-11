@@ -685,7 +685,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if (is_user_logged_in()) {
             if (!is_admin()) {
                 if ($this->CheckOtherSensors($post)) {
-                    return;
+                    return $title;
                 }
                 $currentPath = $_SERVER["REQUEST_URI"];
                 if (!empty($_SERVER["HTTP_REFERER"])
@@ -714,7 +714,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if (is_user_logged_in()) {
             if (is_admin()) {
                 if ($this->CheckOtherSensors($post)) {
-                    return;
+                    return $post;
                 }
                 $currentPath = $_SERVER["SCRIPT_NAME"] . "?post=" . $post->ID;
                 if (!empty($_SERVER["HTTP_REFERER"])
@@ -724,16 +724,35 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 }
                 if (!empty($post->post_title)) {
                     $event = $this->GetEventTypeForPostType($post, 2100, 2102, 2104);
-                    $editorLink = $this->GetEditorLink($post);
-                    $this->plugin->alerts->Trigger($event, array(
-                        'PostType' => $post->post_type,
-                        'PostTitle' => $post->post_title,
-                        $editorLink['name'] => $editorLink['value']
-                    ));
+                    if (!$this->WasTriggered($event)) {
+                        $editorLink = $this->GetEditorLink($post);
+                        $this->plugin->alerts->Trigger($event, array(
+                            'PostType' => $post->post_type,
+                            'PostTitle' => $post->post_title,
+                            $editorLink['name'] => $editorLink['value']
+                        ));
+                    }
                 }
             }
         }
         return $post;
+    }
+
+    /**
+     * Check if the alert was triggered
+     */
+    private function WasTriggered($alert_id)
+    {
+        $query = new WSAL_Models_OccurrenceQuery();
+        $query->addOrderBy("created_on", true);
+        $query->setLimit(1);
+        $lastOccurence = $query->getAdapter()->Execute($query);
+        if (!empty($lastOccurence)) {
+            if ($lastOccurence[0]->alert_id == $alert_id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function CheckTitleChange($oldpost, $newpost)

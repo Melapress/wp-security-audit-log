@@ -159,18 +159,25 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
     {
         ?><script type="text/javascript">
             jQuery(document).ready(function(){
+                var scrollHeight = jQuery(document).scrollTop();
                 // tab handling code
                 jQuery('#wsal-tabs>a').click(function(){
                     jQuery('#wsal-tabs>a').removeClass('nav-tab-active');
                     jQuery('.wsal-tab').hide();
                     jQuery(jQuery(this).addClass('nav-tab-active').attr('href')).show();
                     jQuery(jQuery(this).attr('href')+' .wsal-sub-tabs>a:first').click();
+                    setTimeout(function() {
+                        jQuery(window).scrollTop(scrollHeight);
+                    }, 1);
                 });
                 // sub tab handling code
                 jQuery('.wsal-sub-tabs>a').click(function(){
                     jQuery('.wsal-sub-tabs>a').removeClass('nav-tab-active');
                     jQuery('.wsal-sub-tab').hide();
                     jQuery(jQuery(this).addClass('nav-tab-active').attr('href')).show();
+                    setTimeout(function() {
+                        jQuery(window).scrollTop(scrollHeight);
+                    }, 1);
                 });
                 // checkbox handling code
                 jQuery('.wsal-tab>thead>tr>th>:checkbox').change(function(){
