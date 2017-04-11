@@ -333,12 +333,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($oldpost->post_author != $newpost->post_author) {
             $event = $this->GetEventTypeForPostType($oldpost, 2019, 2020, 2038);
             $editorLink = $this->GetEditorLink($oldpost);
+            $oldAuthor = get_userdata($oldpost->post_author);
+            $oldAuthor = (is_object($oldAuthor)) ? $oldAuthor->user_login : 'N/A';
+            $newAuthor = get_userdata($newpost->post_author);
+            $newAuthor = (is_object($newAuthor)) ? $newAuthor->user_login : 'N/A';
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
                 'PostTitle' => $oldpost->post_title,
-                'OldAuthor' => get_userdata($oldpost->post_author)->user_login,
-                'NewAuthor' => get_userdata($newpost->post_author)->user_login,
+                'OldAuthor' => $oldAuthor,
+                'NewAuthor' => $newAuthor,
                 $editorLink['name'] => $editorLink['value']
             ));
             return 1;
