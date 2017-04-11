@@ -275,6 +275,12 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 ));
             }
         }
+        // Destroy all the session of the same user from user profile page
+        if ($action == 'destroy-sessions' && isset($_REQUEST['user_id'])) {
+            $this->plugin->alerts->Trigger(1006, array(
+                'TargetUserID' => $_REQUEST['user_id']
+            ));
+        }
     }
 
     /**
