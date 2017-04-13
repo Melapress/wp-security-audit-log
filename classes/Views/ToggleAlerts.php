@@ -65,7 +65,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                     <?php
                     foreach ($group as $subname => $alerts) {
                         ?>
-                        <a href="#tab-<?php echo $this->GetSafeCatgName($subname); ?>" class="nav-tab"><?php echo $subname; ?></a>
+                        <a href="#tab-<?php echo $this->GetSafeCatgName($subname); ?>" class="nav-tab" data-parent="tab-<?php echo $safeNames[$name]; ?>"><?php echo $subname; ?></a>
                         <?php
                     } ?>
                     </h2>
@@ -188,19 +188,18 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                     jQuery(this).parents('table:first').find('thead>tr>th:first>:checkbox:first').attr('checked', allchecked);
                 });
                 
-                // show relevant sub tab
+                var hashlink = jQuery('#wsal-tabs>a[href="' + location.hash + '"]');
                 var hashsublink = jQuery('.wsal-sub-tabs>a[href="' + location.hash + '"]');
-                if (hashsublink.length) {
+                if (hashlink.length) {
+                    // show relevant tab
+                    hashlink.click();
+                } else if (hashsublink.length) {
+                    // show relevant sub tab
+                    jQuery('#wsal-tabs>a[href="#' + hashsublink.data('parent') + '"]').click();
                     hashsublink.click();
                 } else {
-                    jQuery('.wsal-sub-tabs>a:first').click();
-                }
-                // show relevant tab
-                var hashlink = jQuery('#wsal-tabs>a[href="' + location.hash + '"]');
-                if (hashlink.length){
-                    hashlink.click();
-                } else {
                     jQuery('#wsal-tabs>a:first').click();
+                    jQuery('.wsal-sub-tabs>a:first').click();
                 }
                 
                 // Specific for alert 6007
