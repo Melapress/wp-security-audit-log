@@ -86,10 +86,10 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
             if (!$changes) {
                 // Change Permalink
                 $changes = $this->CheckPermalinkChange($this->_OldLink, get_post_permalink($post_ID, false, true), $newpost);
-            }
-            if (!$changes) {
-                // if no one of the above changes happen
-                $this->CheckModifyChange($oldpost, $newpost);
+                if (!$changes) {
+                    // if no one of the above changes happen
+                    $this->CheckModifyChange($oldpost, $newpost);
+                }
             }
         }
     }
