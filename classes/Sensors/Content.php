@@ -18,7 +18,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         // to do change with 'create_term' instead 'create_category' for trigger Tags
         add_action('create_category', array($this, 'EventCategoryCreation'), 10, 1);
 
-        add_action('single_post_title', array($this, 'ViewingPost'), 10, 2);
+        add_filter('single_post_title', array($this, 'ViewingPost'), 10, 2);
         add_filter('post_edit_form_tag', array($this, 'EditingPost'), 10, 1);
     }
     
@@ -131,14 +131,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 
                 if (!$changes) {
                     $changes = $this->CheckDateChange($this->_OldPost, $post);
-                }
-                if (!$changes) {
-                    $changes = $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
-                }
-                // Comments/Trackbacks and Pingbacks
-                $changes = $this->CheckCommentsPings($this->_OldPost, $post);
-                if (!$changes) {
-                    $changes = $this->CheckModificationChange($post->ID, $this->_OldPost, $post);
+                    if (!$changes) {
+                        $changes = $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
+                        // Comments/Trackbacks and Pingbacks
+                        if (!$changes) {
+                            $changes = $this->CheckCommentsPings($this->_OldPost, $post);
+                            if (!$changes) {
+                                $changes = $this->CheckModificationChange($post->ID, $this->_OldPost, $post);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -289,6 +291,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             ));
             return 1;
         }
+        return 0;
     }
 
     // Revision used
@@ -415,6 +418,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             ));
             return 1;
         }
+        return 0;
     }
     
     protected function CheckVisibilityChange($oldpost, $newpost, $oldStatus, $newStatus)
