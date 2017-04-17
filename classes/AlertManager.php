@@ -23,8 +23,9 @@ final class WSAL_AlertManager {
      */
     public function __construct(WpSecurityAuditLog $plugin){
         $this->plugin = $plugin;
-        foreach(glob(dirname(__FILE__) . '/Loggers/*.php') as $file)
+        foreach (glob(dirname(__FILE__) . '/Loggers/*.php') as $file) {
             $this->AddFromFile($file);
+        }
         
         add_action('shutdown', array($this, '_CommitPipeline'));
     }
@@ -57,10 +58,13 @@ final class WSAL_AlertManager {
      * Remove logger by class name.
      * @param string $class The class name.
      */
-    public function RemoveByClass($class){
-        foreach($this->_loggers as $i => $inst)
-            if(get_class($inst) == $class)
+    public function RemoveByClass($class)
+    {
+        foreach ($this->_loggers as $i => $inst) {
+            if (get_class($inst) == $class) {
                 unset($this->_loggers[$i]);
+            }
+        }
     }
     
     /**
@@ -82,7 +86,7 @@ final class WSAL_AlertManager {
      */
     public function Trigger($type, $data = array(), $delayed = false){
         $username = wp_get_current_user()->user_login;
-        if (empty($username) && !empty($data["Username"])) { 
+        if (empty($username) && !empty($data["Username"])) {
             $username = $data['Username'];
         }
         $roles = $this->plugin->settings->GetCurrentUserRoles();
@@ -92,7 +96,7 @@ final class WSAL_AlertManager {
         if ($this->IsDisabledIP()) {
             return;
         }
-        if ($this->CheckEnableUserRoles($username, $roles)) { 
+        if ($this->CheckEnableUserRoles($username, $roles)) {
             if ($delayed) {
                 $this->TriggerIf($type, $data, null);
             } else {
@@ -109,8 +113,12 @@ final class WSAL_AlertManager {
      */
     public function CheckEnableUserRoles($user, $roles) {
         $is_enable = true;
-        if ( $user != "" && $this->IsDisabledUser($user) ) { $is_enable = false; }
-        if ( $roles != "" && $this->IsDisabledRole($roles) ) { $is_enable = false; }
+        if ($user != "" && $this->IsDisabledUser($user)) {
+            $is_enable = false;
+        }
+        if ($roles != "" && $this->IsDisabledRole($roles)) {
+            $is_enable = false;
+        }
         return $is_enable;
     }
     
@@ -138,17 +146,17 @@ final class WSAL_AlertManager {
      */
     protected function _CommitItem($type, $data, $cond, $_retry = true)
     {
-        if(!$cond || !!call_user_func($cond, $this)){
-            if($this->IsEnabled($type)) { 
-                if(isset($this->_alerts[$type])){
+        if (!$cond || !!call_user_func($cond, $this)) {
+            if ($this->IsEnabled($type)) {
+                if (isset($this->_alerts[$type])) {
                     // ok, convert alert to a log entry
                     $this->_triggered_types[] = $type;
                     $this->Log($type, $data);
-                }elseif($_retry){
+                } elseif ($_retry) {
                     // this is the last attempt at loading alerts from default file
                     $this->plugin->LoadDefaults();
                     return $this->_CommitItem($type, $data, $cond, false);
-                }else{
+                } else {
                     // in general this shouldn't happen, but it could, so we handle it here :)
                     throw new Exception('Alert with code "' . $type . '" has not be registered.');
                 }
@@ -160,18 +168,22 @@ final class WSAL_AlertManager {
      * @internal Runs over triggered alerts in pipeline and passes them to loggers.
      */
     public function _CommitPipeline(){
-        foreach($this->_pipeline as $item)
+        foreach ($this->_pipeline as $item) {
             $this->_CommitItem($item['type'], $item['data'], $item['cond']);
+        }
     }
     
     /**
      * @param integer $type Alert type ID.
      * @return boolean True if at the end of request an alert of this type will be triggered.
      */
-    public function WillTrigger($type){
-        foreach($this->_pipeline as $item)
-            if($item['type'] == $type)
+    public function WillTrigger($type)
+    {
+        foreach ($this->_pipeline as $item) {
+            if ($item['type'] == $type) {
                 return true;
+            }
+        }
         return false;
     }
     
@@ -188,17 +200,20 @@ final class WSAL_AlertManager {
      * Register an alert type.
      * @param array $info Array of [type, code, category, description, message] respectively.
      */
-    public function Register($info){
-        if(func_num_args() == 1){
+    public function Register($info)
+    {
+        if (func_num_args() == 1) {
             // handle single item
-            list($type, $code, $catg, $desc, $mesg) = $info;
-            if(isset($this->_alerts[$type]))
+            list($type, $code, $catg, $subcatg, $desc, $mesg) = $info;
+            if (isset($this->_alerts[$type])) {
                 throw new Exception("Alert $type already registered with Alert Manager.");
-            $this->_alerts[$type] = new WSAL_Alert($type, $code, $catg, $desc, $mesg);
-        }else{
+            }
+            $this->_alerts[$type] = new WSAL_Alert($type, $code, $catg, $subcatg, $desc, $mesg);
+        } else {
             // handle multiple items
-            foreach(func_get_args() as $arg)
+            foreach (func_get_args() as $arg) {
                 $this->Register($arg);
+            }
         }
     }
     
@@ -207,11 +222,14 @@ final class WSAL_AlertManager {
      * @param array $groups An array with group name as the index and an array of group items as the value.
      * Item values is an array of [type, code, description, message] respectively.
      */
-    public function RegisterGroup($groups){
-        foreach($groups as $name => $group){
-            foreach($group as $item){
-                list($type, $code, $desc, $mesg) = $item;
-                $this->Register(array($type, $code, $name, $desc, $mesg));
+    public function RegisterGroup($groups)
+    {
+        foreach ($groups as $name => $group) {
+            foreach ($group as $subname => $subgroup) {
+                foreach ($subgroup as $item) {
+                    list($type, $code, $desc, $mesg) = $item;
+                    $this->Register(array($type, $code, $name, $subname, $desc, $mesg));
+                }
             }
         }
     }
@@ -308,10 +326,13 @@ final class WSAL_AlertManager {
      * @param mixed $default Returned if alert is not found.
      * @return WSAL_Alert
      */
-    public function GetAlert($type, $default = null){
-        foreach($this->_alerts as $alert)
-            if($alert->type == $type)
+    public function GetAlert($type, $default = null)
+    {
+        foreach ($this->_alerts as $alert) {
+            if ($alert->type == $type) {
                 return $alert;
+            }
+        }
         return $default;
     }
     
@@ -327,12 +348,17 @@ final class WSAL_AlertManager {
      * Returns all supported alerts.
      * @return array
      */
-    public function GetCategorizedAlerts(){
+    public function GetCategorizedAlerts()
+    {
         $result = array();
-        foreach($this->_alerts as $alert){
-            if(!isset($result[$alert->catg]))
+        foreach ($this->_alerts as $alert) {
+            if (!isset($result[$alert->catg])) {
                 $result[$alert->catg] = array();
-            $result[$alert->catg][] = $alert;
+            }
+            if (!isset($result[$alert->catg][$alert->subcatg])) {
+                $result[$alert->catg][$alert->subcatg] = array();
+            }
+            $result[$alert->catg][$alert->subcatg][] = $alert;
         }
         ksort($result);
         return $result;
@@ -365,7 +391,9 @@ final class WSAL_AlertManager {
     {
         $is_disabled = false;
         foreach ($roles as $role) {
-            if(in_array($role, $this->GetDisabledRoles())) $is_disabled = true;
+            if (in_array($role, $this->GetDisabledRoles())) {
+                $is_disabled = true;
+            }
         }
         return $is_disabled;
     }

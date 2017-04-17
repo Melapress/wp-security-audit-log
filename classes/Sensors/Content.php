@@ -18,7 +18,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         // to do change with 'create_term' instead 'create_category' for trigger Tags
         add_action('create_category', array($this, 'EventCategoryCreation'), 10, 1);
 
-        add_action('single_post_title', array($this, 'ViewingPost'), 10, 2);
+        add_filter('single_post_title', array($this, 'ViewingPost'), 10, 2);
         add_filter('post_edit_form_tag', array($this, 'EditingPost'), 10, 1);
     }
     
@@ -131,12 +131,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 
                 if (!$changes) {
                     $changes = $this->CheckDateChange($this->_OldPost, $post);
-                }
-                if (!$changes) {
-                    $changes = $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
-                }
-                if (!$changes) {
-                    $changes = $this->CheckModificationChange($post->ID, $this->_OldPost, $post);
+                    if (!$changes) {
+                        $changes = $this->CheckPermalinkChange($this->_OldLink, get_permalink($post->ID), $post);
+                        // Comments/Trackbacks and Pingbacks
+                        if (!$changes) {
+                            $changes = $this->CheckCommentsPings($this->_OldPost, $post);
+                            if (!$changes) {
+                                $changes = $this->CheckModificationChange($post->ID, $this->_OldPost, $post);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -287,6 +291,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             ));
             return 1;
         }
+        return 0;
     }
 
     // Revision used
@@ -331,12 +336,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($oldpost->post_author != $newpost->post_author) {
             $event = $this->GetEventTypeForPostType($oldpost, 2019, 2020, 2038);
             $editorLink = $this->GetEditorLink($oldpost);
+            $oldAuthor = get_userdata($oldpost->post_author);
+            $oldAuthor = (is_object($oldAuthor)) ? $oldAuthor->user_login : 'N/A';
+            $newAuthor = get_userdata($newpost->post_author);
+            $newAuthor = (is_object($newAuthor)) ? $newAuthor->user_login : 'N/A';
             $this->plugin->alerts->Trigger($event, array(
                 'PostID' => $oldpost->ID,
                 'PostType' => $oldpost->post_type,
                 'PostTitle' => $oldpost->post_title,
-                'OldAuthor' => get_userdata($oldpost->post_author)->user_login,
-                'NewAuthor' => get_userdata($newpost->post_author)->user_login,
+                'OldAuthor' => $oldAuthor,
+                'NewAuthor' => $newAuthor,
                 $editorLink['name'] => $editorLink['value']
             ));
             return 1;
@@ -409,6 +418,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             ));
             return 1;
         }
+        return 0;
     }
     
     protected function CheckVisibilityChange($oldpost, $newpost, $oldStatus, $newStatus)
@@ -683,7 +693,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if (is_user_logged_in()) {
             if (!is_admin()) {
                 if ($this->CheckOtherSensors($post)) {
-                    return;
+                    return $title;
                 }
                 $currentPath = $_SERVER["REQUEST_URI"];
                 if (!empty($_SERVER["HTTP_REFERER"])
@@ -712,7 +722,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if (is_user_logged_in()) {
             if (is_admin()) {
                 if ($this->CheckOtherSensors($post)) {
-                    return;
+                    return $post;
                 }
                 $currentPath = $_SERVER["SCRIPT_NAME"] . "?post=" . $post->ID;
                 if (!empty($_SERVER["HTTP_REFERER"])
@@ -722,16 +732,35 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 }
                 if (!empty($post->post_title)) {
                     $event = $this->GetEventTypeForPostType($post, 2100, 2102, 2104);
-                    $editorLink = $this->GetEditorLink($post);
-                    $this->plugin->alerts->Trigger($event, array(
-                        'PostType' => $post->post_type,
-                        'PostTitle' => $post->post_title,
-                        $editorLink['name'] => $editorLink['value']
-                    ));
+                    if (!$this->WasTriggered($event)) {
+                        $editorLink = $this->GetEditorLink($post);
+                        $this->plugin->alerts->Trigger($event, array(
+                            'PostType' => $post->post_type,
+                            'PostTitle' => $post->post_title,
+                            $editorLink['name'] => $editorLink['value']
+                        ));
+                    }
                 }
             }
         }
         return $post;
+    }
+
+    /**
+     * Check if the alert was triggered
+     */
+    private function WasTriggered($alert_id)
+    {
+        $query = new WSAL_Models_OccurrenceQuery();
+        $query->addOrderBy("created_on", true);
+        $query->setLimit(1);
+        $lastOccurence = $query->getAdapter()->Execute($query);
+        if (!empty($lastOccurence)) {
+            if ($lastOccurence[0]->alert_id == $alert_id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function CheckTitleChange($oldpost, $newpost)
@@ -747,6 +776,80 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return 1;
         }
         return 0;
+    }
+
+    private function CheckCommentsPings($oldpost, $newpost)
+    {
+        $result = 0;
+        // Comments
+        if ($oldpost->comment_status != $newpost->comment_status) {
+            $type = 'Comments';
+
+            if ($newpost->comment_status == 'open') {
+                $event = $this->GetCommentsPingsEvent($newpost, 'enable');
+            } else {
+                $event = $this->GetCommentsPingsEvent($newpost, 'disable');
+            }
+
+            $this->plugin->alerts->Trigger($event, array(
+                'Type' => $type,
+                'PostTitle' => $newpost->post_title,
+                'PostUrl' => get_permalink($newpost->ID)
+            ));
+            $result = 1;
+        }
+        // Trackbacks and Pingbacks
+        if ($oldpost->ping_status != $newpost->ping_status) {
+            $type = 'Trackbacks and Pingbacks';
+
+            if ($newpost->ping_status == 'open') {
+                $event = $this->GetCommentsPingsEvent($newpost, 'enable');
+            } else {
+                $event = $this->GetCommentsPingsEvent($newpost, 'disable');
+            }
+
+            $this->plugin->alerts->Trigger($event, array(
+                'Type' => $type,
+                'PostTitle' => $newpost->post_title,
+                'PostUrl' => get_permalink($newpost->ID)
+            ));
+            $result = 1;
+        }
+        return $result;
+    }
+
+    private function GetCommentsPingsEvent($post, $status)
+    {
+        if ($post->post_type == 'post') {
+            if ($post->post_status == 'publish') {
+                if ($status == 'disable') {
+                    $event = 2111;
+                } else {
+                    $event = 2112;
+                }
+            } else {
+                if ($status == 'disable') {
+                    $event = 2113;
+                } else {
+                    $event = 2114;
+                }
+            }
+        } else {
+            if ($post->post_status == 'publish') {
+                if ($status == 'disable') {
+                    $event = 2115;
+                } else {
+                    $event = 2116;
+                }
+            } else {
+                if ($status == 'disable') {
+                    $event = 2117;
+                } else {
+                    $event = 2118;
+                }
+            }
+        }
+        return $event;
     }
 
     private function GetEditorLink($post)

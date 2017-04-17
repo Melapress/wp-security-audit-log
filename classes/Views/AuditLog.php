@@ -206,6 +206,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     
     public function Header() {
         add_thickbox();
+        wp_enqueue_style('darktooltip', $this->_plugin->GetBaseUrl() . '/css/darktooltip.css', array(), '');
         wp_enqueue_style(
             'auditlog',
             $this->_plugin->GetBaseUrl() . '/css/auditlog.css',
@@ -216,6 +217,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
     
     public function Footer() {
         wp_enqueue_script('jquery');
+        wp_enqueue_script('darktooltip', $this->_plugin->GetBaseUrl() . '/js/jquery.darktooltip.js', array('jquery'), '');
         wp_enqueue_script('suggest');
         wp_enqueue_script(
             'auditlog',
