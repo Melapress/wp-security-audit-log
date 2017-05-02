@@ -72,29 +72,25 @@ final class WP_Session extends Recursive_ArrayAccess implements Iterator, Counta
      * @uses apply_filters Calls `wp_session_expiration` to determine how long until sessions expire.
      */
     protected function __construct() {
-        if (isset($_COOKIE[WP_SESSION_COOKIE])) {
-            $cookie = stripslashes($_COOKIE[WP_SESSION_COOKIE]);
-            $cookie_crumbs = explode('||', $cookie);
+        if ( isset( $_COOKIE[WP_SESSION_COOKIE] ) ) {
+            $cookie = stripslashes( $_COOKIE[WP_SESSION_COOKIE] );
+            $cookie_crumbs = explode( '||', $cookie );
 
-            if ($this->is_valid_md5($cookie_crumbs[0])) {
-                $this->session_id = $cookie_crumbs[0];
-            } else {
-                $this->regenerate_id(true);
-            }
-
-            $this->expires     = $cookie_crumbs[1];
+            $this->session_id = $cookie_crumbs[0];
+            $this->expires = $cookie_crumbs[1];
             $this->exp_variant = $cookie_crumbs[2];
 
             // Update the session expiration if we're past the variant time
-            if (time() > $this->exp_variant) {
-                $this->set_expiration();
-                delete_option("_wp_session_expires_{$this->session_id}");
-                add_option("_wp_session_expires_{$this->session_id}", $this->expires, '', 'no');
+            if ( time() > $this->exp_variant ) {
+                    $this->set_expiration();
+                    delete_option( "_wp_session_expires_{$this->session_id}" );
+                    add_option( "_wp_session_expires_{$this->session_id}", $this->expires, '', 'no' );
             }
         } else {
-            $this->session_id = $this->generate_id();
+            $this->session_id = WP_Session_Utils::generate_id();
             $this->set_expiration();
         }
+
         $this->read_data();
 
         $this->set_cookie();
