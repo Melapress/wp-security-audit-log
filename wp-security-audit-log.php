@@ -137,6 +137,11 @@ class WpSecurityAuditLog {
             require_once('classes/Lib/class-wp-session.php');
             require_once('classes/Lib/wp-session.php');
         }
+
+        if (!class_exists('WP_Session_Utils')) {
+            require_once('classes/Lib/class-wp-session-utils.php');
+        }
+
         
         // load autoloader and register base paths
         require_once('classes/Autoloader.php');
