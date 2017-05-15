@@ -513,7 +513,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     /**
      * List of unique IP addresses used by the same user
      */
-    public function GetReportGrouped($_siteId, $_startTimestamp, $_endTimestamp, $_alertCode = 'null', $_limit = 0)
+    public function GetReportGrouped($_siteId, $_startTimestamp, $_endTimestamp, $_userId = 'null', $_roleName = 'null', $_ipAddress = 'null', $_alertCode = 'null', $_limit = 0)
     {
         global $wpdb;
         
@@ -525,6 +525,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
         $tableOcc = $occurrence->GetTable(); // occurrences
 
+        $user_names = $this->GetUserNames($_userId);
+
         $sql = "SELECT DISTINCT * 
             FROM (SELECT DISTINCT
                     occ.site_id,
@@ -534,9 +536,17 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
                 WHERE
                     (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
+                    AND (@userId is NULL OR (
+                        (meta.name = 'CurrentUserID' AND find_in_set(meta.value, @userId) > 0)
+                        OR (meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($user_names))  
+                    ))
+                    AND (@roleName is NULL OR (meta.name = 'CurrentUserRoles'
+                    AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName
+                    ))
                     AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
                     AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
                     AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
+                    AND (@ipAddress is NULL OR (meta.name = 'ClientIP' AND find_in_set(meta.value, @ipAddress) > 0))
                 HAVING user_login IS NOT NULL
                 UNION ALL
                 SELECT DISTINCT
@@ -553,18 +563,28 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
                 WHERE
                     (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
+                    AND (@userId is NULL OR (
+                        (meta.name = 'CurrentUserID' AND find_in_set(meta.value, @userId) > 0)
+                        OR (meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($user_names))  
+                    ))
+                    AND (@roleName is NULL OR (meta.name = 'CurrentUserRoles'
+                    AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName
+                    ))
                     AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
                     AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
                     AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
+                    AND (@ipAddress is NULL OR (meta.name = 'ClientIP' AND find_in_set(meta.value, @ipAddress) > 0))
                 HAVING user_login IS NOT NULL) ip_logins
             WHERE user_login != 'Website Visitor'
                 ORDER BY user_login ASC
         ";
         $_wpdb->query("SET @siteId = $_siteId");
+        $_wpdb->query("SET @userId = $_userId");
+        $_wpdb->query("SET @roleName = $_roleName");
         $_wpdb->query("SET @alertCode = $_alertCode");
         $_wpdb->query("SET @startTimestamp = $_startTimestamp");
         $_wpdb->query("SET @endTimestamp = $_endTimestamp");
-
+        $_wpdb->query("SET @ipAddress = $_ipAddress");
         if (!empty($_limit)) {
             $sql .= " LIMIT {$_limit}";
         }
