@@ -527,8 +527,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         // create temp table `tmp_users` in the external DB
         $this->TempUsers();
         
-        // TO DO Insert temporary
-        
         $sql = "SELECT DISTINCT * 
             FROM (SELECT DISTINCT
                     occ.site_id,
