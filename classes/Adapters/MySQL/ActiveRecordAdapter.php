@@ -385,7 +385,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp, $_nextDate = null, $_limit = 0)
     {
         global $wpdb;
-        
+        $user_names = $this->GetUserNames($_userId);
+
         $_wpdb = $this->connection;
         $_wpdb->set_charset($_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci');
         // tables
@@ -393,8 +394,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $tableMeta = $meta->GetTable(); // metadata
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
         $tableOcc = $occurrence->GetTable(); // occurrences
-
-        $user_names = $this->GetUserNames($_userId);
         
         $conditionDate = !empty($_nextDate) ? ' AND occ.created_on < '.$_nextDate : '';
 
@@ -516,7 +515,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     public function GetReportGrouped($_siteId, $_startTimestamp, $_endTimestamp, $_userId = 'null', $_roleName = 'null', $_ipAddress = 'null', $_alertCode = 'null', $_limit = 0)
     {
         global $wpdb;
-        
+        $user_names = $this->GetUserNames($_userId);
+
         $_wpdb = $this->connection;
         $_wpdb->set_charset($_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci');
         // tables
@@ -524,9 +524,11 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $tableMeta = $meta->GetTable(); // metadata
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
         $tableOcc = $occurrence->GetTable(); // occurrences
-
-        $user_names = $this->GetUserNames($_userId);
-
+        // create temp table `tmp_users` in the external DB
+        $this->TempUsers();
+        
+        // TO DO Insert temporary
+        
         $sql = "SELECT DISTINCT * 
             FROM (SELECT DISTINCT
                     occ.site_id,
@@ -553,7 +555,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 occ.site_id,
                 CONVERT((SELECT u.user_login
                     FROM $tableMeta as t2
-                    JOIN {$wpdb->prefix}users AS u ON u.ID = replace(t2.value, '\"', '')
+                    JOIN tmp_users AS u ON u.ID = replace(t2.value, '\"', '')
                     WHERE t2.name = 'CurrentUserID' 
                     AND t2.occurrence_id = occ.id
                     GROUP BY u.ID
@@ -614,5 +616,24 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         }
 
         return $grouped_types;
+    }
+
+    /**
+     * Create temp table `tmp_users` in the external DB
+     * It used in the query of the above function
+     */
+    private function TempUsers()
+    {
+        $_wpdb = $this->connection;
+        $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS tmp_users (ID BIGINT NOT NULL AUTO_INCREMENT, user_login VARCHAR(60) NOT NULL, PRIMARY KEY (ID))";
+        $_wpdb->query($sql);
+
+        $sql = 'INSERT INTO tmp_users (ID, user_login) VALUES ' ;
+        $users = get_users(array('fields' => array('ID', 'user_login')));
+        foreach ($users as $user) {
+            $sql .= '('. $user->ID .', \''. $user->user_login .'\'), ';
+        }
+        $sql = rtrim($sql, ", ");
+        $_wpdb->query($sql);
     }
 }
