@@ -524,8 +524,14 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $tableMeta = $meta->GetTable(); // metadata
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
         $tableOcc = $occurrence->GetTable(); // occurrences
-        // create temp table `tmp_users` in the external DB
-        $this->TempUsers();
+        // Get temp table `wsal_tmp_users`
+        $tmp_users = new WSAL_Adapters_MySQL_TmpUser($this->connection);
+        // if the table does not exist
+        if (!$tmp_users->IsInstalled()) {
+            return array();
+        }
+        $tableTmpUser = $tmp_users->GetTable(); // tmp_users
+        $this->TempUsers($tableTmpUser);
         
         $sql = "SELECT DISTINCT * 
             FROM (SELECT DISTINCT
@@ -553,7 +559,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 occ.site_id,
                 CONVERT((SELECT u.user_login
                     FROM $tableMeta as t2
-                    JOIN tmp_users AS u ON u.ID = replace(t2.value, '\"', '')
+                    JOIN $tableTmpUser AS u ON u.ID = replace(t2.value, '\"', '')
                     WHERE t2.name = 'CurrentUserID' 
                     AND t2.occurrence_id = occ.id
                     GROUP BY u.ID
@@ -617,16 +623,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     }
 
     /**
-     * Create temp table `tmp_users` in the external DB
-     * It used in the query of the above function
+     * TRUNCATE temp table `tmp_users` and populate with users
+     * It is used in the query of the above function
      */
-    private function TempUsers()
+    private function TempUsers($tableTmpUser)
     {
         $_wpdb = $this->connection;
-        $sql = "CREATE TEMPORARY TABLE IF NOT EXISTS tmp_users (ID BIGINT NOT NULL AUTO_INCREMENT, user_login VARCHAR(60) NOT NULL, PRIMARY KEY (ID))";
+        $sql = "TRUNCATE $tableTmpUser";
         $_wpdb->query($sql);
 
-        $sql = 'INSERT INTO tmp_users (ID, user_login) VALUES ' ;
+        $sql = "INSERT INTO $tableTmpUser (ID, user_login) VALUES " ;
         $users = get_users(array('fields' => array('ID', 'user_login')));
         foreach ($users as $user) {
             $sql .= '('. $user->ID .', \''. $user->user_login .'\'), ';
