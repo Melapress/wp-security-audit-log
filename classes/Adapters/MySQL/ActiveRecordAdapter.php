@@ -630,7 +630,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     private function TempUsers($tableUsers)
     {
         $_wpdb = $this->connection;
-        $sql = "TRUNCATE $tableUsers";
+        $sql = "DELETE FROM $tableUsers";
         $_wpdb->query($sql);
 
         $sql = "INSERT INTO $tableUsers (ID, user_login) VALUES " ;
