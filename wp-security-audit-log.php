@@ -125,6 +125,7 @@ class WpSecurityAuditLog {
         require_once('classes/Models/Query.php');
         require_once('classes/Models/OccurrenceQuery.php');
         require_once('classes/Models/Option.php');
+        require_once('classes/Models/TmpUser.php');
 
         // Use WP_Session (default)
         if (!defined('WP_SESSION_COOKIE')) {

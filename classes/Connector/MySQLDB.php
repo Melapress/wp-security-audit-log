@@ -114,6 +114,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             if ($excludeOptions && $class instanceof WSAL_Adapters_MySQL_Option) {
                 continue;
             }
+            // exclude the tmp_users table
+            if (!$excludeOptions && $class instanceof WSAL_Adapters_MySQL_TmpUser) {
+                continue;
+            }
             
             if (is_subclass_of($class, "WSAL_Adapters_MySQL_ActiveRecord")) {
                 $class->Install();

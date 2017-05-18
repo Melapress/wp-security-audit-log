@@ -385,7 +385,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp, $_nextDate = null, $_limit = 0)
     {
         global $wpdb;
-        
+        $user_names = $this->GetUserNames($_userId);
+
         $_wpdb = $this->connection;
         $_wpdb->set_charset($_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci');
         // tables
@@ -393,8 +394,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $tableMeta = $meta->GetTable(); // metadata
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
         $tableOcc = $occurrence->GetTable(); // occurrences
-
-        $user_names = $this->GetUserNames($_userId);
         
         $conditionDate = !empty($_nextDate) ? ' AND occ.created_on < '.$_nextDate : '';
 
@@ -513,10 +512,11 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     /**
      * List of unique IP addresses used by the same user
      */
-    public function GetReportGrouped($_siteId, $_startTimestamp, $_endTimestamp, $_alertCode = 'null', $_limit = 0)
+    public function GetReportGrouped($_siteId, $_startTimestamp, $_endTimestamp, $_userId = 'null', $_roleName = 'null', $_ipAddress = 'null', $_alertCode = 'null', $_limit = 0)
     {
         global $wpdb;
-        
+        $user_names = $this->GetUserNames($_userId);
+
         $_wpdb = $this->connection;
         $_wpdb->set_charset($_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci');
         // tables
@@ -524,7 +524,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $tableMeta = $meta->GetTable(); // metadata
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
         $tableOcc = $occurrence->GetTable(); // occurrences
-
+        // Get temp table `wsal_tmp_users`
+        $tmp_users = new WSAL_Adapters_MySQL_TmpUser($this->connection);
+        // if the table exist
+        if ($tmp_users->IsInstalled()) {
+            $tableUsers = $tmp_users->GetTable(); // tmp_users
+            $this->TempUsers($tableUsers);
+        } else {
+            $tableUsers = $wpdb->users;
+        }
+        
         $sql = "SELECT DISTINCT * 
             FROM (SELECT DISTINCT
                     occ.site_id,
@@ -534,16 +543,24 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
                 WHERE
                     (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
+                    AND (@userId is NULL OR (
+                        (meta.name = 'CurrentUserID' AND find_in_set(meta.value, @userId) > 0)
+                        OR (meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($user_names))  
+                    ))
+                    AND (@roleName is NULL OR (meta.name = 'CurrentUserRoles'
+                    AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName
+                    ))
                     AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
                     AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
                     AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
+                    AND (@ipAddress is NULL OR (meta.name = 'ClientIP' AND find_in_set(meta.value, @ipAddress) > 0))
                 HAVING user_login IS NOT NULL
                 UNION ALL
                 SELECT DISTINCT
                 occ.site_id,
                 CONVERT((SELECT u.user_login
                     FROM $tableMeta as t2
-                    JOIN {$wpdb->prefix}users AS u ON u.ID = replace(t2.value, '\"', '')
+                    JOIN $tableUsers AS u ON u.ID = replace(t2.value, '\"', '')
                     WHERE t2.name = 'CurrentUserID' 
                     AND t2.occurrence_id = occ.id
                     GROUP BY u.ID
@@ -553,18 +570,28 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
                 JOIN $tableMeta AS meta ON meta.occurrence_id = occ.id
                 WHERE
                     (@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
+                    AND (@userId is NULL OR (
+                        (meta.name = 'CurrentUserID' AND find_in_set(meta.value, @userId) > 0)
+                        OR (meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($user_names))  
+                    ))
+                    AND (@roleName is NULL OR (meta.name = 'CurrentUserRoles'
+                    AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName
+                    ))
                     AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
                     AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
                     AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
+                    AND (@ipAddress is NULL OR (meta.name = 'ClientIP' AND find_in_set(meta.value, @ipAddress) > 0))
                 HAVING user_login IS NOT NULL) ip_logins
             WHERE user_login != 'Website Visitor'
                 ORDER BY user_login ASC
         ";
         $_wpdb->query("SET @siteId = $_siteId");
+        $_wpdb->query("SET @userId = $_userId");
+        $_wpdb->query("SET @roleName = $_roleName");
         $_wpdb->query("SET @alertCode = $_alertCode");
         $_wpdb->query("SET @startTimestamp = $_startTimestamp");
         $_wpdb->query("SET @endTimestamp = $_endTimestamp");
-
+        $_wpdb->query("SET @ipAddress = $_ipAddress");
         if (!empty($_limit)) {
             $sql .= " LIMIT {$_limit}";
         }
@@ -594,5 +621,24 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         }
 
         return $grouped_types;
+    }
+
+    /**
+     * TRUNCATE temp table `tmp_users` and populate with users
+     * It is used in the query of the above function
+     */
+    private function TempUsers($tableUsers)
+    {
+        $_wpdb = $this->connection;
+        $sql = "DELETE FROM $tableUsers";
+        $_wpdb->query($sql);
+
+        $sql = "INSERT INTO $tableUsers (ID, user_login) VALUES " ;
+        $users = get_users(array('fields' => array('ID', 'user_login')));
+        foreach ($users as $user) {
+            $sql .= '('. $user->ID .', \''. $user->user_login .'\'), ';
+        }
+        $sql = rtrim($sql, ", ");
+        $_wpdb->query($sql);
     }
 }
