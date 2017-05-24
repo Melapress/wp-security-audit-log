@@ -229,7 +229,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
             $result[] = $this->getModel()->LoadData($data);
         }
         return $result;
-
     }
     
     /**
