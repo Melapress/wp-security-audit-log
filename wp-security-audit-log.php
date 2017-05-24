@@ -27,57 +27,57 @@ License: GPL2
 */
 
 class WpSecurityAuditLog {
-    
+
     // <editor-fold desc="Properties & Constants">
-    
+
     const PLG_CLS_PRFX = 'WSAL_';
-    
+
     const MIN_PHP_VERSION = '5.3.0';
-    
+
     const OPT_PRFX = 'wsal-';
-    
+
     /**
      * Views supervisor.
      * @var WSAL_ViewManager
      */
     public $views;
-    
+
     /**
      * Logger supervisor.
      * @var WSAL_AlertManager
      */
     public $alerts;
-    
+
     /**
      * Sensors supervisor.
      * @var WSAL_SensorManager
      */
     public $sensors;
-    
+
     /**
      * Settings manager.
      * @var WSAL_Settings
      */
     public $settings;
-    
+
     /**
      * Class loading manager.
      * @var WSAL_Autoloader
      */
     public $autoloader;
-    
+
     /**
      * Constants manager.
      * @var WSAL_ConstantManager
      */
     public $constants;
-    
+
     /**
      * Licenses manager.
      * @var WSAL_LicenseManager
      */
     public $licensing;
-    
+
     /**
      * Simple profiler.
      * @var WSAL_SimpleProfiler
@@ -89,17 +89,17 @@ class WpSecurityAuditLog {
      * @var WSAL_DB_Option
      */
     public $options;
-    
+
     /**
      * Contains a list of cleanup callbacks.
      * @var callable[]
      */
     protected $_cleanup_hooks = array();
-    
+
     // </editor-fold>
-    
+
     // <editor-fold desc="Entry Points">
-    
+
     /**
      * Standard singleton pattern.
      * WARNING! To ensure the system always works as expected, AVOID using this method.
@@ -111,12 +111,12 @@ class WpSecurityAuditLog {
         if(!$instance)$instance = new self();
         return $instance;
     }
-    
+
     /**
      * Initialize plugin.
      */
     public function __construct(){
-        
+
         require_once('classes/Helpers/DataHelper.php');
         // profiler has to be loaded manually
         require_once('classes/SimpleProfiler.php');
@@ -142,12 +142,12 @@ class WpSecurityAuditLog {
             require_once('classes/Lib/class-wp-session-utils.php');
         }
 
-        
+
         // load autoloader and register base paths
         require_once('classes/Autoloader.php');
         $this->autoloader = new WSAL_Autoloader($this);
         $this->autoloader->Register(self::PLG_CLS_PRFX, $this->GetBaseDir() . 'classes' . DIRECTORY_SEPARATOR);
-        
+
         // load dependencies
         $this->views = new WSAL_ViewManager($this);
         $this->alerts = new WSAL_AlertManager($this);
@@ -156,19 +156,19 @@ class WpSecurityAuditLog {
         $this->constants = new WSAL_ConstantManager($this);
         $this->licensing = new WSAL_LicenseManager($this);
         $this->widgets = new WSAL_WidgetManager($this);
-        
+
         // listen for installation event
         register_activation_hook(__FILE__, array($this, 'Install'));
 
         // listen for init event
         add_action('init', array($this, 'Init'));
-        
+
         // listen for cleanup event
         add_action('wsal_cleanup', array($this, 'CleanUp'));
-        
+
         // render wsal header
         add_action('admin_enqueue_scripts', array($this, 'RenderHeader'));
-        
+
         // render wsal footer
         add_action('admin_footer', array($this, 'RenderFooter'));
 
@@ -186,7 +186,7 @@ class WpSecurityAuditLog {
         WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
     }
 
-    
+
     /**
      * @internal Render plugin stuff in page header.
      */
@@ -226,7 +226,7 @@ class WpSecurityAuditLog {
         echo 'You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.</p>';
         die;
     }
-    
+
     /**
      * @internal Render plugin stuff in page footer.
      */
@@ -238,7 +238,7 @@ class WpSecurityAuditLog {
             filemtime($this->GetBaseDir() . '/js/common.js')
         );
     }
-    
+
     /**
      * @internal Load the rest of the system.
      */
@@ -281,7 +281,7 @@ class WpSecurityAuditLog {
             add_action('admin_head', array($this, 'HidePlugin'));
         }
     }
-    
+
     /**
      * Install all assets required for a useable system.
      */
@@ -301,12 +301,12 @@ class WpSecurityAuditLog {
             </html><?php
             die(1);
         }
-        
+
         // ensure that the system is installed and schema is correct
         self::getConnector()->installAll();
-        
+
         $PreInstalled = $this->IsInstalled();
-        
+
         // if system already installed, do updates now (if any)
         $OldVersion = $this->GetOldVersion();
         $NewVersion = $this->GetNewVersion();
@@ -318,7 +318,7 @@ class WpSecurityAuditLog {
             $this->SetOptions($data);
         }
         $this->deleteAllOptions();
-        
+
         // if system wasn't installed, try migration now
         if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
 
@@ -349,12 +349,12 @@ class WpSecurityAuditLog {
         if ($purge_log_404 === false) {
             $this->SetGlobalOption('purge-404-log', 'on');
         }
-        
+
         // install cleanup hook (remove older one if it exists)
         wp_clear_scheduled_hook('wsal_cleanup');
         wp_schedule_event(current_time('timestamp') + 600, 'hourly', 'wsal_cleanup');
     }
-    
+
     /**
      * Run some code that updates critical components required for a newwer version.
      * @param string $old_version The old version.
@@ -363,10 +363,10 @@ class WpSecurityAuditLog {
     public function Update($old_version, $new_version){
         // update version in db
         $this->GetGlobalOption('version', $new_version);
-        
+
         // disable all developer options
         //$this->settings->ClearDevOptions();
-        
+
         // do version-to-version specific changes
         if(version_compare($old_version, '1.2.3') == -1){
             // ... an example
@@ -402,7 +402,7 @@ class WpSecurityAuditLog {
             $flag = $this->delete_options_prefixed( 'wsal-' );
         }
     }
-    
+
     public function read_options_prefixed( $prefix ) {
         global $wpdb;
         if ( $this->IsMultisite() ) {
@@ -415,7 +415,7 @@ class WpSecurityAuditLog {
     }
 
     public function SetOptions($data){
-        foreach($data as $key => $option) { 
+        foreach($data as $key => $option) {
             $this->options = new WSAL_Models_Option();
             if ( $this->IsMultisite() ) {
                 $this->options->SetOptionValue($option['meta_key'], $option['meta_value']);
@@ -433,7 +433,7 @@ class WpSecurityAuditLog {
         static $migTypes = array(
             3000 => 5006
         );
-        
+
         // load data
         $sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog_events';
         $events = array();
@@ -441,7 +441,7 @@ class WpSecurityAuditLog {
             $events[$item['EventID']] = $item;
         $sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog';
         $auditlog = $wpdb->get_results($sql, ARRAY_A);
-        
+
         // migrate using db logger
         foreach($auditlog as $entry){
             $data = array(
@@ -470,7 +470,7 @@ class WpSecurityAuditLog {
                 $logger->Log($type, $data, $date, $entry['BlogId'], true);
             }
         }
-        
+
         // migrate settings
         $this->settings->SetAllowedPluginEditors(
             get_option('WPPH_PLUGIN_ALLOW_CHANGE')
@@ -484,11 +484,11 @@ class WpSecurityAuditLog {
         $this->settings->SetViewPerPage(max($s->showEventsViewList, 5));
         $this->settings->SetWidgetsEnabled(!!$s->showDW);
     }
-    
+
     // </editor-fold>
-    
+
     // <editor-fold desc="Utility Methods">
-    
+
     /**
      * @return string The current plugin version (according to plugin file metadata).
      */
@@ -496,14 +496,14 @@ class WpSecurityAuditLog {
         $version = get_plugin_data(__FILE__, false, false);
         return isset($version['Version']) ? $version['Version'] : '0.0.0';
     }
-    
+
     /**
      * @return string The plugin version as stored in DB (will be the old version during an update/install).
      */
     public function GetOldVersion(){
         return $this->GetGlobalOption('version', '0.0.0');
     }
-    
+
     /**
      * @internal To be called in admin header for hiding plugin form Plugins list.
      */
@@ -518,7 +518,7 @@ class WpSecurityAuditLog {
         }
         ?><style type="text/css"> <?php echo rtrim($selectr, ", "); ?> { display: none; }</style><?php
     }
-    
+
     /**
      * Returns the class name of a particular file that contains the class.
      * @param string $file File name.
@@ -528,14 +528,14 @@ class WpSecurityAuditLog {
     public function GetClassFileClassName($file){
         return $this->autoloader->GetClassFileClassName($file);
     }
-    
+
     /**
      * @return boolean Whether we are running on multisite or not.
      */
     public function IsMultisite(){
         return function_exists('is_multisite') && is_multisite();
     }
-    
+
     /**
      * Get a global option.
      * @param string $option Option name.
@@ -548,9 +548,9 @@ class WpSecurityAuditLog {
         //var_dump($fn($prefix . $option, $default));
         //return $fn($prefix . $option, $default);
         $this->options = new WSAL_Models_Option();
-        return $this->options->GetOptionValue($prefix . $option, $default);     
+        return $this->options->GetOptionValue($prefix . $option, $default);
     }
-    
+
     /**
      * Set a global option.
      * @param string $option Option name.
@@ -563,7 +563,7 @@ class WpSecurityAuditLog {
         $this->options = new WSAL_Models_Option();
         $this->options->SetOptionValue($prefix . $option, $value);
     }
-    
+
     /**
      * Get a user-specific option.
      * @param string $option Option name.
@@ -575,7 +575,7 @@ class WpSecurityAuditLog {
         $result = get_user_option($prefix . $option, get_current_user_id());
         return $result === false ? $default : $result;
     }
-    
+
     /**
      * Set a user-specific option.
      * @param string $option Option name.
@@ -585,7 +585,7 @@ class WpSecurityAuditLog {
     public function SetUserOption($option, $value, $prefix = self::OPT_PRFX){
         update_user_option(get_current_user_id(), $prefix . $option, $value, false);
     }
-    
+
     /**
      * Run cleanup routines.
      */
@@ -595,7 +595,7 @@ class WpSecurityAuditLog {
             call_user_func($hook);
         $s->Stop();
     }
-    
+
     /**
      * Add callback to be called when a cleanup operation is required.
      * @param callable $hook
@@ -603,7 +603,7 @@ class WpSecurityAuditLog {
     public function AddCleanupHook($hook){
         $this->_cleanup_hooks[] = $hook;
     }
-    
+
     /**
      * Remove a callback from the cleanup callbacks list.
      * @param callable $hook
@@ -617,7 +617,7 @@ class WpSecurityAuditLog {
     {
         return WSAL_Connector_ConnectorFactory::getConnector($config, $reset);
     }
-    
+
     /**
      * Do we have an existing installation? This only applies for version 1.0 onwards.
      * @return boolean
@@ -625,35 +625,35 @@ class WpSecurityAuditLog {
     public function IsInstalled(){
         return self::getConnector()->isInstalled();
     }
-    
+
     /**
      * @return boolean Whether the old plugin was present or not.
      */
     public function CanMigrate(){
         return self::getConnector()->canMigrate();
     }
-    
+
     /**
      * @return string Absolute URL to plugin directory WITHOUT final slash.
      */
     public function GetBaseUrl(){
         return plugins_url('', __FILE__);
     }
-    
+
     /**
      * @return string Full path to plugin directory WITH final slash.
      */
     public function GetBaseDir(){
         return plugin_dir_path(__FILE__);
     }
-    
+
     /**
      * @return string Plugin directory name.
      */
     public function GetBaseName(){
         return plugin_basename(__FILE__);
     }
-    
+
     /**
      * Load default configuration / data.
      */

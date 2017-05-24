@@ -1,12 +1,12 @@
 <?php
 
 class WSAL_ViewManager {
-    
+
     /**
-     * @var WSAL_AbstractView[] 
+     * @var WSAL_AbstractView[]
      */
     public $views = array();
-    
+
     /**
      * @var WpSecurityAuditLog
      */
@@ -14,25 +14,25 @@ class WSAL_ViewManager {
 
     public function __construct(WpSecurityAuditLog $plugin){
         $this->_plugin = $plugin;
-        
+
         // load views
         foreach(glob(dirname(__FILE__) . '/Views/*.php') as $file)
             $this->AddFromFile($file);
-        
+
         // add menus
         add_action('admin_menu', array($this, 'AddAdminMenus'));
         add_action('network_admin_menu', array($this, 'AddAdminMenus'));
-        
+
         // add plugin shortcut links
         add_filter('plugin_action_links_' . $plugin->GetBaseName(), array($this, 'AddPluginShortcuts'));
-        
+
         // render header
         add_action('admin_enqueue_scripts', array($this, 'RenderViewHeader'));
-        
+
         // render footer
         add_action('admin_footer', array($this, 'RenderViewFooter'));
     }
-    
+
     /**
      * Add new view from file inside autoloader path.
      * @param string $file Path to file.
@@ -40,7 +40,7 @@ class WSAL_ViewManager {
     public function AddFromFile($file){
         $this->AddFromClass($this->_plugin->GetClassFileClassName($file));
     }
-    
+
     /**
      * Add new view given class name.
      * @param string $class Class name.
@@ -48,7 +48,7 @@ class WSAL_ViewManager {
     public function AddFromClass($class){
         $this->AddInstance(new $class($this->_plugin));
     }
-    
+
     /**
      * Add newly created view to list.
      * @param WSAL_AbstractView $view The new view.
@@ -56,14 +56,14 @@ class WSAL_ViewManager {
     public function AddInstance(WSAL_AbstractView $view){
         $this->views[] = $view;
     }
-    
+
     /**
      * Order views by their declared weight.
      */
     public function ReorderViews(){
         usort($this->views, array($this, 'OrderByWeight'));
     }
-    
+
     /**
      * @internal This has to be public for PHP to call it.
      * @param WSAL_AbstractView $a
@@ -82,13 +82,13 @@ class WSAL_ViewManager {
                 return 0;
         }
     }
-    
+
     /**
      * Wordpress Action
      */
     public function AddAdminMenus(){
         $this->ReorderViews();
-        
+
         if($this->_plugin->settings->CurrentUserCan('view') && count($this->views)){
             // add main menu
             $this->views[0]->hook_suffix = add_menu_page(
@@ -120,13 +120,13 @@ class WSAL_ViewManager {
             }
         }
     }
-    
+
     /**
      * Wordpress Filter
      */
     public function AddPluginShortcuts($old_links){
         $this->ReorderViews();
-        
+
         $new_links = array();
         foreach($this->views as $view){
             if($view->HasPluginShortcutLink()){
@@ -141,7 +141,7 @@ class WSAL_ViewManager {
         }
         return array_merge($new_links, $old_links);
     }
-    
+
     /**
      * @return int Returns page id of current page (or false on error).
      */
@@ -152,45 +152,45 @@ class WSAL_ViewManager {
                     return $i;
         return false;
     }
-    
+
     /**
      *
      * @var WSAL_AbstractView|null
      */
     protected $_active_view = false;
-    
+
     /**
      * @return WSAL_AbstractView|null Returns the current active view or null if none.
      */
     public function GetActiveView(){
         if($this->_active_view === false){
             $this->_active_view = null;
-            
+
             if(isset($_REQUEST['page']))
                 foreach($this->views as $view)
                     if($_REQUEST['page'] == $view->GetSafeViewName())
                         $this->_active_view = $view;
-            
+
             if($this->_active_view)
                 $this->_active_view->is_active = true;
         }
         return $this->_active_view;
     }
-    
+
     /**
      * Render header of the current view.
      */
     public function RenderViewHeader(){
         if (!!($view = $this->GetActiveView())) $view->Header();
     }
-    
+
     /**
      * Render footer of the current view.
      */
     public function RenderViewFooter(){
         if (!!($view = $this->GetActiveView())) $view->Footer();
     }
-    
+
     /**
      * Render content of the current view.
      */
@@ -202,7 +202,7 @@ class WSAL_ViewManager {
             $view->RenderContent();
         ?></div><?php
     }
-    
+
     /**
      * Returns view instance corresponding to its class name.
      * @param string $className View class name.

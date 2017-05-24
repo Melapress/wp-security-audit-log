@@ -4,29 +4,43 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 {
     const TRANSIENT_404 = 'wsal-404-attempts';
 
-    public function HookEvents()
-    {
-        add_action('wsal_prune', array($this, 'EventPruneEvents'), 10, 2);
-        add_action('admin_init', array($this, 'EventAdminInit'));
+    public function HookEvents() {
 
-        add_action('automatic_updates_complete', array($this, 'WPUpdate'), 10, 1);
-        add_filter('template_redirect', array($this, 'Event404'));
+        add_action( 'wsal_prune', array( $this, 'EventPruneEvents' ), 10, 2 );
+        add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
 
-        $upload_dir = wp_upload_dir();
-        $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/';
-        if (!$this->CheckDirectory($uploadsDirPath)) {
-            wp_mkdir_p($uploadsDirPath);
+        add_action( 'automatic_updates_complete', array( $this, 'WPUpdate' ), 10, 1 );
+        add_filter( 'template_redirect', array( $this, 'Event404' ) );
+
+        $upload_dir     = wp_upload_dir();
+        $uploadsDirPath = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
+        if ( ! $this->CheckDirectory( $uploadsDirPath ) ) {
+            wp_mkdir_p( $uploadsDirPath );
         }
 
-        // Cron Job 404 log files pruning
-        add_action('log_files_pruning', array($this,'LogFilesPruning'));
-        if (!wp_next_scheduled('log_files_pruning')) {
-            wp_schedule_event(time(), 'daily', 'log_files_pruning');
+        // Directory for logged in users log files.
+        $user_upload_dir    = wp_upload_dir();
+        $user_upload_path   = trailingslashit( $user_upload_dir['basedir'] . '/wp-security-audit-log/404s/users/' );
+        if ( ! $this->CheckDirectory( $user_upload_path ) ) {
+            wp_mkdir_p( $user_upload_path );
         }
-        // whitelist options
-        add_action('whitelist_options', array($this, 'EventOptions'), 10, 1);
+
+        // Directory for visitor log files.
+        $visitor_upload_dir    = wp_upload_dir();
+        $visitor_upload_path   = trailingslashit( $visitor_upload_dir['basedir'] . '/wp-security-audit-log/404s/visitors/' );
+        if ( ! $this->CheckDirectory( $visitor_upload_path ) ) {
+            wp_mkdir_p( $visitor_upload_path );
+        }
+
+        // Cron Job 404 log files pruning.
+        add_action( 'log_files_pruning', array( $this, 'LogFilesPruning' ) );
+        if ( ! wp_next_scheduled( 'log_files_pruning' ) ) {
+            wp_schedule_event( time(), 'daily', 'log_files_pruning' );
+        }
+        // whitelist options.
+        add_action( 'whitelist_options', array( $this, 'EventOptions' ), 10, 1 );
     }
-    
+
     /**
      * @param int $count The number of deleted events.
      * @param string $query Query that selected events for deletion.
@@ -43,7 +57,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     {
         return $this->plugin->settings->Get404LogLimit();
     }
-    
+
     protected function Get404Expiration()
     {
         return 24 * 60 * 60;
@@ -55,7 +69,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         $data = $get_fn(self::TRANSIENT_404);
         return ($data !== false) && isset($data[$site_id.":".$username.":".$ip]) && ($data[$site_id.":".$username.":".$ip] > $this->Get404LogLimit());
     }
-    
+
     protected function Increment404($site_id, $username, $ip)
     {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
@@ -71,7 +85,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         $data[$site_id.":".$username.":".$ip]++;
         $set_fn(self::TRANSIENT_404, $data, $this->Get404Expiration());
     }
-    
+
     public function Event404()
     {
         $attempts = 1;
@@ -90,62 +104,112 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         $site_id = (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
         $ip = $this->plugin->settings->GetMainClientIP();
 
-        if (!is_user_logged_in()) {
-            $username = "Website Visitor";
+        if ( ! is_user_logged_in() ) {
+            $username = 'Website Visitor';
         } else {
             $username = wp_get_current_user()->user_login;
         }
-        
-        if ($this->IsPast404Limit($site_id, $username, $ip)) {
+
+        if ( $this->IsPast404Limit( $site_id, $username, $ip ) ) {
             return;
         }
 
-        $objOcc = new  WSAL_Models_Occurrence();
+        if ( 'Website Visitor' !== $username ) {
+            $objOcc = new WSAL_Models_Occurrence();
 
-        $occ = $objOcc->CheckAlert404(
-            array(
-                $ip,
-                $username,
-                6007,
-                $site_id,
-                mktime(0, 0, 0, $m, $d, $y),
-                mktime(0, 0, 0, $m, $d + 1, $y) - 1
-            )
-        );
-            
-        $occ = count($occ) ? $occ[0] : null;
-        if (!empty($occ)) {
-            // update existing record
-            $this->Increment404($site_id, $username, $ip);
-            $new = $occ->GetMetaValue('Attempts', 0) + 1;
-            
-            if ($new > $this->Get404LogLimit()) {
-                $new = 'more than ' . $this->Get404LogLimit();
-                $msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
-            }
-
-            $linkFile = $this->WriteLog($new, $ip, $username);
-
-            $occ->UpdateMetaValue('Attempts', $new);
-            $occ->UpdateMetaValue('Username', $username);
-            $occ->UpdateMetaValue('Msg', $msg);
-            if (!empty($linkFile)) {
-                $occ->UpdateMetaValue('LinkFile', $linkFile);
-            }
-            $occ->created_on = null;
-            $occ->Save();
-        } else {
-            $linkFile = $this->WriteLog(1, $ip, $username);
-            // create a new record
-            $fields =  array(
-                'Attempts' => 1,
-                'Username' => $username,
-                'Msg' => $msg
+            $occ = $objOcc->CheckAlert404(
+                array(
+                    $ip,
+                    $username,
+                    6007,
+                    $site_id,
+                    mktime(0, 0, 0, $m, $d, $y),
+                    mktime(0, 0, 0, $m, $d + 1, $y) - 1
+                )
             );
-            if (!empty($linkFile)) {
-                $fields['LinkFile'] = $linkFile;
+
+            $occ = count( $occ ) ? $occ[0] : null;
+            if ( ! empty( $occ ) ) {
+                // update existing record
+                $this->Increment404($site_id, $username, $ip);
+                $new = $occ->GetMetaValue('Attempts', 0) + 1;
+
+                if ($new > $this->Get404LogLimit()) {
+                    $new = 'more than ' . $this->Get404LogLimit();
+                    $msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
+                }
+
+                $linkFile = $this->WriteLog( $new, $ip, $username );
+
+                $occ->UpdateMetaValue('Attempts', $new);
+                $occ->UpdateMetaValue('Username', $username);
+                $occ->UpdateMetaValue('Msg', $msg);
+                if (!empty($linkFile)) {
+                    $occ->UpdateMetaValue('LinkFile', $linkFile);
+                }
+                $occ->created_on = null;
+                $occ->Save();
+            } else {
+                $linkFile = $this->WriteLog( 1, $ip, $username );
+                // create a new record
+                $fields =  array(
+                    'Attempts' => 1,
+                    'Username' => $username,
+                    'Msg' => $msg
+                );
+                if (!empty($linkFile)) {
+                    $fields['LinkFile'] = $linkFile;
+                }
+                $this->plugin->alerts->Trigger(6007, $fields);
             }
-            $this->plugin->alerts->Trigger(6007, $fields);
+        } else {
+            $objOcc = new WSAL_Models_Occurrence();
+
+            $occ = $objOcc->CheckAlert404(
+                array(
+                    $ip,
+                    $username,
+                    6023,
+                    $site_id,
+                    mktime(0, 0, 0, $m, $d, $y),
+                    mktime(0, 0, 0, $m, $d + 1, $y) - 1
+                )
+            );
+
+            $occ = count( $occ ) ? $occ[0] : null;
+            if ( ! empty( $occ ) ) {
+                // update existing record
+                $this->Increment404( $site_id, $username, $ip );
+                $new = $occ->GetMetaValue( 'Attempts', 0 ) + 1;
+
+                if ( $new > $this->Get404LogLimit() ) {
+                    $new = 'more than ' . $this->Get404LogLimit();
+                    $msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
+                }
+
+                $linkFile = $this->WriteLog( $new, $ip, $username, false );
+
+                $occ->UpdateMetaValue( 'Attempts', $new );
+                $occ->UpdateMetaValue( 'Username', $username );
+                $occ->UpdateMetaValue( 'Msg', $msg );
+                if ( ! empty( $linkFile ) ) {
+                    $occ->UpdateMetaValue( 'LinkFile', $linkFile );
+                }
+                $occ->created_on = null;
+                $occ->Save();
+            } else {
+                $linkFile = $this->WriteLog( 1, $ip, $username, false );
+                // create a new record.
+                $fields =  array(
+                    'Attempts' => 1,
+                    'Username' => $username,
+                    'Msg' => $msg
+                );
+                if ( ! empty( $linkFile ) ) {
+                    $fields['LinkFile'] = $linkFile;
+                }
+                $this->plugin->alerts->Trigger( 6023, $fields );
+            }
         }
     }
 
@@ -153,13 +217,13 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     {
         // make sure user can actually modify target options
         if (!current_user_can('manage_options')) return;
-        
+
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
         $actype = basename($_SERVER['SCRIPT_NAME'], '.php');
         $is_option_page = $actype == 'options';
         $is_network_settings = $actype == 'settings';
         $is_permalink_page = $actype == 'options-permalink';
-        
+
         if ($is_option_page && (get_option('users_can_register') xor isset($_POST['users_can_register']))) {
             $old = get_option('users_can_register') ? 'Enabled' : 'Disabled';
             $new = isset($_POST['users_can_register']) ? 'Enabled' : 'Disabled';
@@ -195,7 +259,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 ));
             }
         }
-        
+
         if ($is_network_settings && !empty($_POST['admin_email'])) {
             $old = get_site_option('admin_email');
             $new = trim($_POST['admin_email']);
@@ -207,7 +271,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 ));
             }
         }
-        
+
         if ($is_permalink_page && !empty($_REQUEST['permalink_structure'])) {
             $old = get_option('permalink_structure');
             $new = trim($_REQUEST['permalink_structure']);
@@ -219,7 +283,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 ));
             }
         }
-        
+
         if ($action == 'do-core-upgrade' && isset($_REQUEST['version'])) {
             $oldVersion = get_bloginfo('version');
             $newVersion = $_REQUEST['version'];
@@ -230,7 +294,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 ));
             }
         }
-        
+
         /* BBPress Forum support  Setting */
         if ($action == 'update' && isset($_REQUEST['_bbp_default_role'])) {
             $oldRole = get_option('_bbp_default_role');
@@ -301,11 +365,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     /**
      * Purge log files older than one month
      */
-    public function LogFilesPruning()
-    {
+    public function LogFilesPruning() {
         if ($this->plugin->GetGlobalOption('purge-404-log', 'off') == 'on') {
             $upload_dir = wp_upload_dir();
-            $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/';
+            $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/users/';
             if (is_dir($uploadsDirPath)) {
                 if ($handle = opendir($uploadsDirPath)) {
                     while (false !== ($entry = readdir($handle))) {
@@ -320,6 +383,26 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                         }
                     }
                     closedir($handle);
+                }
+            }
+        }
+        if ( 'on' == $this->plugin->GetGlobalOption( 'purge-visitor-404-log', 'off' ) ) {
+            $upload_dir = wp_upload_dir();
+            $uploadsDirPath = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/visitors/';
+            if ( is_dir( $uploadsDirPath ) ) {
+                if ( $handle = opendir( $uploadsDirPath ) ) {
+                    while ( false !== ( $entry = readdir( $handle ) ) ) {
+                        if ( $entry != "." && $entry != ".." ) {
+                            if ( file_exists( $uploadsDirPath . $entry ) ) {
+                                $modified = filemtime( $uploadsDirPath . $entry );
+                                if ( $modified < strtotime( '-4 weeks' ) ) {
+                                    // Delete file.
+                                    unlink( $uploadsDirPath . $entry );
+                                }
+                            }
+                        }
+                    }
+                    closedir( $handle );
                 }
             }
         }
@@ -418,57 +501,105 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
      * Write a new line on 404 log file
      * Folder: /uploads/wp-security-audit-log/404s/
      */
-    private function WriteLog($attempts, $ip, $username = '')
-    {
+    private function WriteLog( $attempts, $ip, $username = '', $logged_in = true ) {
         $nameFile = null;
-        if ($this->plugin->GetGlobalOption('log-404', 'off') == 'on') {
-            // Request URL
-            $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
-            // Create/Append to the log file
-            $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
-            if (!is_user_logged_in()) {
-                $username = '';
-            } else {
-                $username = $username . '_';
-            }
-            
-            if ($ip == '127.0.0.1' || $ip == '::1') {
-                $ip = 'localhost';
-            }
-            $upload_dir = wp_upload_dir();
-            $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/';
-            $uploadsURL = trailingslashit($upload_dir['baseurl']).'wp-security-audit-log/404s/';
 
-            // Check directory
-            if ($this->CheckDirectory($uploadsDirPath)) {
-                $filename = date('Ymd') . '_' . $username . $ip . '.log';
-                $fp = $uploadsDirPath . $filename;
-                $nameFile = $uploadsURL . $filename;
-                if (!$file = fopen($fp, 'a')) {
-                    $i = 1;
-                    $fileOpened = false;
-                    do {
-                        $fp2 = substr($fp, 0, -4) . '_' . $i . '.log';
-                        if (!file_exists($fp2)) {
-                            if ($file = fopen($fp2, 'a')) {
-                                $fileOpened = true;
-                                $nameFile = $uploadsURL . substr($nameFile, 0, -4) . '_' . $i . '.log';
-                            }
-                        } else {
-                            $latestFilename = $this->GetLastModified($uploadsDirPath, $filename);
-                            $fpLast = $uploadsDirPath . $latestFilename;
-                            if ($file = fopen($fpLast, 'a')) {
-                                $fileOpened = true;
-                                $nameFile = $uploadsURL . $latestFilename;
-                            }
-                        }
-                        $i++;
-                    } while (!$fileOpened);
+        if ( $logged_in ) {
+            if ( 'on' == $this->plugin->GetGlobalOption( 'log-404', 'off' ) ) {
+                // Request URL
+                $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
+                // Create/Append to the log file
+                $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
+                if (!is_user_logged_in()) {
+                    $username = '';
+                } else {
+                    $username = $username . '_';
                 }
-                fwrite($file, sprintf("%s\n", $data));
-                fclose($file);
+
+                if ($ip == '127.0.0.1' || $ip == '::1') {
+                    $ip = 'localhost';
+                }
+                $upload_dir = wp_upload_dir();
+                $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/users/';
+                $uploadsURL = trailingslashit($upload_dir['baseurl']).'wp-security-audit-log/404s/users/';
+
+                // Check directory
+                if ($this->CheckDirectory($uploadsDirPath)) {
+                    $filename = date('Ymd') . '_' . $username . $ip . '.log';
+                    $fp = $uploadsDirPath . $filename;
+                    $nameFile = $uploadsURL . $filename;
+                    if (!$file = fopen($fp, 'a')) {
+                        $i = 1;
+                        $fileOpened = false;
+                        do {
+                            $fp2 = substr($fp, 0, -4) . '_' . $i . '.log';
+                            if (!file_exists($fp2)) {
+                                if ($file = fopen($fp2, 'a')) {
+                                    $fileOpened = true;
+                                    $nameFile = $uploadsURL . substr($nameFile, 0, -4) . '_' . $i . '.log';
+                                }
+                            } else {
+                                $latestFilename = $this->GetLastModified($uploadsDirPath, $filename);
+                                $fpLast = $uploadsDirPath . $latestFilename;
+                                if ($file = fopen($fpLast, 'a')) {
+                                    $fileOpened = true;
+                                    $nameFile = $uploadsURL . $latestFilename;
+                                }
+                            }
+                            $i++;
+                        } while (!$fileOpened);
+                    }
+                    fwrite($file, sprintf("%s\n", $data));
+                    fclose($file);
+                }
+            }
+        } else {
+            if ( 'on' == $this->plugin->GetGlobalOption( 'log-visitor-404', 'off' ) ) {
+                // Request URL.
+                $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
+                // Create/Append to the log file.
+                $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
+                $username = '';
+
+                if ( '127.0.0.1' == $ip || '::1' == $ip ) {
+                    $ip = 'localhost';
+                }
+                $upload_dir     = wp_upload_dir();
+                $uploadsDirPath = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/visitors/';
+                $uploadsURL     = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/404s/visitors/';
+
+                // Check directory.
+                if ( $this->CheckDirectory( $uploadsDirPath ) ) {
+                    $filename = date( 'Ymd' ) . '_' . $username . $ip . '.log';
+                    $fp = $uploadsDirPath . $filename;
+                    $nameFile = $uploadsURL . $filename;
+                    if ( ! $file = fopen( $fp, 'a' ) ) {
+                        $i = 1;
+                        $fileOpened = false;
+                        do {
+                            $fp2 = substr( $fp, 0, -4 ) . '_' . $i . '.log';
+                            if ( ! file_exists( $fp2 ) ) {
+                                if ( $file = fopen( $fp2, 'a' ) ) {
+                                    $fileOpened = true;
+                                    $nameFile = $uploadsURL . substr( $nameFile, 0, -4 ) . '_' . $i . '.log';
+                                }
+                            } else {
+                                $latestFilename = $this->GetLastModified( $uploadsDirPath, $filename );
+                                $fpLast = $uploadsDirPath . $latestFilename;
+                                if ( $file = fopen( $fpLast, 'a' ) ) {
+                                    $fileOpened = true;
+                                    $nameFile = $uploadsURL . $latestFilename;
+                                }
+                            }
+                            $i++;
+                        } while ( ! $fileOpened );
+                    }
+                    fwrite( $file, sprintf( "%s\n", $data ) );
+                    fclose( $file );
+                }
             }
         }
+
         return $nameFile;
     }
 

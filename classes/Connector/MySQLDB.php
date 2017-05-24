@@ -3,7 +3,7 @@
 class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements WSAL_Connector_ConnectorInterface
 {
     protected $connectionConfig = null;
-    
+
     public function __construct($connectionConfig = null)
     {
         $this->connectionConfig = $connectionConfig;
@@ -109,18 +109,18 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $filePath = explode(DIRECTORY_SEPARATOR, $file);
             $fileName = $filePath[count($filePath) - 1];
             $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
-            
+
             $class = new $className($this->getConnection());
             if ($excludeOptions && $class instanceof WSAL_Adapters_MySQL_Option) {
                 continue;
             }
-            
+
             if (is_subclass_of($class, "WSAL_Adapters_MySQL_ActiveRecord")) {
                 $class->Install();
             }
         }
     }
-    
+
     /**
      * Uninstall all DB tables.
      */
@@ -267,7 +267,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $offset = ($index * $limit);
         global $wpdb;
         $_wpdb = $this->getConnection();
-        
+
         // Load data Meta from External DB
         $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
         if (!$meta->IsInstalled()) {
@@ -280,7 +280,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         // Insert data to WP
         if (!empty($metadata)) {
             $metaWP = new WSAL_Adapters_MySQL_Meta($wpdb);
-            
+
             $index++;
             $sql = 'INSERT INTO ' . $metaWP->GetWPTable() . ' (occurrence_id, name, value) VALUES ' ;
             foreach ($metadata as $entry) {
@@ -312,20 +312,20 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $plaintext, MCRYPT_MODE_CBC, $iv);
         $ciphertext = $iv . $ciphertext;
         $ciphertext_base64 = base64_encode($ciphertext);
-        
+
         return $ciphertext_base64;
     }
-    
+
     public function decryptString($ciphertext_base64)
     {
         $ciphertext_dec = base64_decode($ciphertext_base64);
         $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
-    
+
         $iv_dec = substr($ciphertext_dec, 0, $iv_size);
         $ciphertext_dec = substr($ciphertext_dec, $iv_size);
         $key = $this->truncateKey();
         $plaintext_dec = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
-        
+
         return rtrim($plaintext_dec, "\0");
     }
 
@@ -399,8 +399,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         }
 
         if (!empty($args['by_limit'])) {
-            $sql = 'SELECT occ.* FROM ' . $occurrence->GetTable() . ' occ    
-            LEFT JOIN (SELECT id FROM ' . $occurrence->GetTable() . ' order by created_on DESC limit ' . $args['by_limit'] . ') as ids 
+            $sql = 'SELECT occ.* FROM ' . $occurrence->GetTable() . ' occ
+            LEFT JOIN (SELECT id FROM ' . $occurrence->GetTable() . ' order by created_on DESC limit ' . $args['by_limit'] . ') as ids
             on ids.id = occ.id
             WHERE ids.id IS NULL';
         }
@@ -470,7 +470,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $archive_db = $args['archive_db'];
 
         $sOccurenceIds = implode(", ", $args["occurence_ids"]);
-        
+
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
         $sql = 'DELETE FROM ' . $occurrence->GetTable() . ' WHERE id IN (' . $sOccurenceIds . ')';
         $_wpdb->query($sql);

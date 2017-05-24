@@ -1,17 +1,17 @@
 <?php
 
 final class WSAL_AlertManager {
-    
+
     /**
      * @var WSAL_Alert[]
      */
     protected $_alerts = array();
-    
+
     /**
      * @var WSAL_AbstractLogger[]
      */
     protected $_loggers = array();
-    
+
     /**
      * @var WpSecurityAuditLog
      */
@@ -26,7 +26,7 @@ final class WSAL_AlertManager {
         foreach (glob(dirname(__FILE__) . '/Loggers/*.php') as $file) {
             $this->AddFromFile($file);
         }
-        
+
         add_action('shutdown', array($this, '_CommitPipeline'));
     }
 
@@ -37,7 +37,7 @@ final class WSAL_AlertManager {
     public function AddFromFile($file){
         $this->AddFromClass($this->plugin->GetClassFileClassName($file));
     }
-    
+
     /**
      * Add new logger given class name.
      * @param string $class Class name.
@@ -45,7 +45,7 @@ final class WSAL_AlertManager {
     public function AddFromClass($class){
         $this->AddInstance(new $class($this->plugin));
     }
-    
+
     /**
      * Add newly created logger to list.
      * @param WSAL_AbstractLogger $logger The new logger.
@@ -53,7 +53,7 @@ final class WSAL_AlertManager {
     public function AddInstance(WSAL_AbstractLogger $logger){
         $this->_loggers[] = $logger;
     }
-    
+
     /**
      * Remove logger by class name.
      * @param string $class The class name.
@@ -66,19 +66,19 @@ final class WSAL_AlertManager {
             }
         }
     }
-    
+
     /**
      * Contains a list of alerts to trigger.
      * @var array
      */
     protected $_pipeline = array();
-    
+
     /**
      * Contains an array of alerts that have been triggered for this request.
      * @var int[]
      */
     protected $_triggered_types = array();
-    
+
     /**
      * Trigger an alert.
      * @param integer $type Alert type.
@@ -121,7 +121,7 @@ final class WSAL_AlertManager {
         }
         return $is_enable;
     }
-    
+
     /**
      * Trigger only if a condition is met at the end of request.
      * @param integer $type Alert type ID.
@@ -131,7 +131,7 @@ final class WSAL_AlertManager {
     public function TriggerIf($type, $data, $cond = null) {
         $username = wp_get_current_user()->user_login;
         $roles = $this->plugin->settings->GetCurrentUserRoles();
-        
+
         if ($this->CheckEnableUserRoles($username, $roles)) {
             $this->_pipeline[] = array(
                 'type' => $type,
@@ -140,7 +140,7 @@ final class WSAL_AlertManager {
             );
         }
     }
-    
+
     /**
      * @internal Commit an alert now.
      */
@@ -163,7 +163,7 @@ final class WSAL_AlertManager {
             }
         }
     }
-    
+
     /**
      * @internal Runs over triggered alerts in pipeline and passes them to loggers.
      */
@@ -172,7 +172,7 @@ final class WSAL_AlertManager {
             $this->_CommitItem($item['type'], $item['data'], $item['cond']);
         }
     }
-    
+
     /**
      * @param integer $type Alert type ID.
      * @return boolean True if at the end of request an alert of this type will be triggered.
@@ -186,7 +186,7 @@ final class WSAL_AlertManager {
         }
         return false;
     }
-    
+
     /**
      * @param int $type Alert type ID.
      * @return boolean True if an alert has been or will be triggered in this request, false otherwise.
@@ -195,7 +195,7 @@ final class WSAL_AlertManager {
         return in_array($type, $this->_triggered_types)
                 || $this->WillTrigger($type);
     }
-    
+
     /**
      * Register an alert type.
      * @param array $info Array of [type, code, category, description, message] respectively.
@@ -216,7 +216,7 @@ final class WSAL_AlertManager {
             }
         }
     }
-    
+
     /**
      * Register a whole group of items.
      * @param array $groups An array with group name as the index and an array of group items as the value.
@@ -233,7 +233,7 @@ final class WSAL_AlertManager {
             }
         }
     }
-    
+
     /**
      * Returns whether alert of type $type is enabled or not.
      * @param integer $type Alert type.
@@ -242,7 +242,7 @@ final class WSAL_AlertManager {
     public function IsEnabled($type){
         return !in_array($type, $this->GetDisabledAlerts());
     }
-    
+
     /**
      * Disables a set of alerts by type.
      * @param int[] $types Alert type codes to be disabled.
@@ -250,21 +250,21 @@ final class WSAL_AlertManager {
     public function SetDisabledAlerts($types){
         $this->plugin->settings->SetDisabledAlerts($types);
     }
-    
+
     /**
      * @return int[] Returns an array of disabled alerts' type code.
      */
     public function GetDisabledAlerts(){
         return $this->plugin->settings->GetDisabledAlerts();
     }
-    
+
     /**
      * @return WSAL_AbstractLogger[] Returns an array of loaded loggers.
      */
     public function GetLoggers(){
         return $this->_loggers;
     }
-    
+
     /**
      * Converts an Alert into a Log entry (by invoking loggers).
      * You should not call this method directly.
@@ -302,24 +302,24 @@ final class WSAL_AlertManager {
             }
         }
         // Check if the user management plugin is loaded and adds the SessionID
-        if (class_exists('WSAL_User_Management_Plugin')) {
-            if (function_exists('get_current_user_id')) {
-                $session_tokens = get_user_meta(get_current_user_id(), 'session_tokens', true);
-                if (!empty($session_tokens)) {
-                    end($session_tokens);
-                    $data['SessionID'] = key($session_tokens);
+        if ( class_exists( 'WSAL_User_Management_Plugin' ) ) {
+            if ( function_exists( 'get_current_user_id' ) ) {
+                $session_tokens = get_user_meta( get_current_user_id(), 'session_tokens', true );
+                if ( ! empty( $session_tokens ) ) {
+                    end( $session_tokens );
+                    $data['SessionID'] = key( $session_tokens );
                 }
             }
         }
         //if(isset($_SERVER['REMOTE_HOST']) && $_SERVER['REMOTE_HOST'] != $data['ClientIP'])
         //  $data['ClientHost'] = $_SERVER['REMOTE_HOST'];
         //$data['OtherIPs'] = $_SERVER['REMOTE_HOST'];
-        
+
         foreach ($this->_loggers as $logger) {
             $logger->Log($type, $data);
         }
     }
-    
+
     /**
      * Return alert given alert type.
      * @param integer $type Alert type.
@@ -335,7 +335,7 @@ final class WSAL_AlertManager {
         }
         return $default;
     }
-    
+
     /**
      * Returns all supported alerts.
      * @return WSAL_Alert[]
@@ -343,7 +343,7 @@ final class WSAL_AlertManager {
     public function GetAlerts(){
         return $this->_alerts;
     }
-    
+
     /**
      * Returns all supported alerts.
      * @return array
@@ -373,7 +373,7 @@ final class WSAL_AlertManager {
     {
         return (in_array($user, $this->GetDisabledUsers())) ? true : false;
     }
-    
+
     /**
      * @return Returns an array of disabled users.
      */
@@ -397,7 +397,7 @@ final class WSAL_AlertManager {
         }
         return $is_disabled;
     }
-    
+
     /**
      * @return Returns an array of disabled users.
      */
