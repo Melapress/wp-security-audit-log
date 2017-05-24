@@ -16,7 +16,6 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
     {
         $conditions = $query->getConditions();
         $searchCondition = $this->SearchCondition($query);
-
         $sWhereClause = "";
         foreach ($conditions as $fieldName => $fieldValue) {
             if (empty($sWhereClause)) {
@@ -27,12 +26,22 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
 
             if (is_array($fieldValue)) {
                 $subWhereClause = "(";
-                foreach($fieldValue as $orFieldName => $orFieldValue) {
-                    if ($subWhereClause != '(') {
-                        $subWhereClause .= " OR ";
+                foreach ($fieldValue as $orFieldName => $orFieldValue) {
+                    if (is_array($orFieldValue)) {
+                        foreach ($orFieldValue as $value) {
+                            if ($subWhereClause != '(') {
+                                $subWhereClause .= " OR ";
+                            }
+                            $subWhereClause .= $orFieldName;
+                            $args[] = $value;
+                        }
+                    } else {
+                        if ($subWhereClause != '(') {
+                            $subWhereClause .= " OR ";
+                        }
+                        $subWhereClause .= $orFieldName;
+                        $args[] = $orFieldValue;
                     }
-                    $subWhereClause .= $orFieldName;
-                    $args[] = $orFieldValue;
                 }
                 $subWhereClause .= ")";
                 $sWhereClause .= $subWhereClause;
@@ -64,7 +73,8 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         if (!empty($searchCondition)) {
             $args[] = $searchCondition['args'];
         }
-        return 'SELECT ' . $fields
+        
+        $sql = 'SELECT ' . $fields
             . ' FROM ' . implode(',', $fromDataSets)
             . $joinClause
             . $sWhereClause
@@ -72,6 +82,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             // @todo GROUP BY goes here
             . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', array_keys($orderBys)) . ' ' . implode(', ', array_values($orderBys))) : '')
             . $sLimitClause;
+        return $sql;
     }
     
     protected function getActiveRecordAdapter()
