@@ -512,19 +512,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                 </fieldset>
                             </td>
                         </tr>
-                        <!-- Number of 404 Requests to Log -->
-                        <!-- <tr>
-                            <th><label for="404Limit"><?php _e('Number of 404 Requests to Log', 'wp-security-audit-log'); ?></label></th>
-                            <td>
-                                <fieldset>
-                                    <input type="number" id="404Limit" name="404Limit" value="<?php //echo $this->_plugin->settings->Get404LogLimit(); ?>" />
-                                </fieldset>
-                                <p class="description">
-                                    <?php //_e('By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log'); ?><br />
-                                    <?php //_e('Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log'); ?>
-                                </p>
-                            </td>
-                        </tr> -->
                     </tbody>
                 </table>
                 <!-- Third tab -->

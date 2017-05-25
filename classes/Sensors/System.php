@@ -1,8 +1,9 @@
 <?php
 
-class WSAL_Sensors_System extends WSAL_AbstractSensor
-{
-    const TRANSIENT_404 = 'wsal-404-attempts';
+class WSAL_Sensors_System extends WSAL_AbstractSensor {
+
+    const TRANSIENT_404         = 'wsal-404-attempts';
+    const TRANSIENT_VISITOR_404 = 'wsal-visitor-404-attempts';
 
     public function HookEvents() {
 
@@ -58,20 +59,27 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         return $this->plugin->settings->Get404LogLimit();
     }
 
-    protected function Get404Expiration()
-    {
+    protected function GetVisitor404LogLimit() {
+        return $this->plugin->settings->GetVisitor404LogLimit();
+    }
+
+    protected function Get404Expiration() {
         return 24 * 60 * 60;
     }
 
-    protected function IsPast404Limit($site_id, $username, $ip)
-    {
+    protected function IsPast404Limit($site_id, $username, $ip) {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
         $data = $get_fn(self::TRANSIENT_404);
         return ($data !== false) && isset($data[$site_id.":".$username.":".$ip]) && ($data[$site_id.":".$username.":".$ip] > $this->Get404LogLimit());
     }
 
-    protected function Increment404($site_id, $username, $ip)
-    {
+    protected function IsPastVisitor404Limit( $site_id, $username, $ip ) {
+        $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
+        $data = $get_fn( self::TRANSIENT_VISITOR_404 );
+        return ( false !== $data ) && isset( $data[ $site_id . ':' . $username . ':' . $ip ] ) && ( $data[ $site_id . ':' . $username . ':' . $ip ] > $this->GetVisitor404LogLimit() );
+    }
+
+    protected function Increment404($site_id, $username, $ip) {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
         $set_fn = $this->IsMultisite() ? 'set_site_transient' : 'set_transient';
 
@@ -86,23 +94,35 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         $set_fn(self::TRANSIENT_404, $data, $this->Get404Expiration());
     }
 
-    public function Event404()
-    {
-        $attempts = 1;
-        // Check if the alert is disabled from the "Enable/Disable Alerts" section
-        if (!$this->plugin->alerts->IsEnabled(6007)) {
-            return;
+    protected function IncrementVisitor404( $site_id, $username, $ip ) {
+        $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
+        $set_fn = $this->IsMultisite() ? 'set_site_transient' : 'set_transient';
+
+        $data = $get_fn( self::TRANSIENT_VISITOR_404 );
+        if ( ! $data ) {
+            $data = array();
         }
+        if ( ! isset( $data[ $site_id . ':' . $username . ':' . $ip ] ) ) {
+            $data[ $site_id . ':' . $username . ':' . $ip ] = 1;
+        }
+        $data[ $site_id . ':' . $username . ':' . $ip ]++;
+        $set_fn( self::TRANSIENT_VISITOR_404, $data, $this->Get404Expiration() );
+    }
+
+    public function Event404() {
+
+        $attempts = 1;
+
         global $wp_query;
-        if (!$wp_query->is_404) {
+        if ( ! $wp_query->is_404 ) {
             return;
         }
         $msg = 'times';
 
-        list($y, $m, $d) = explode('-', date('Y-m-d'));
+        list( $y, $m, $d ) = explode( '-', date( 'Y-m-d' ) );
 
-        $site_id = (function_exists('get_current_blog_id') ? get_current_blog_id() : 0);
-        $ip = $this->plugin->settings->GetMainClientIP();
+        $site_id    = ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
+        $ip         = $this->plugin->settings->GetMainClientIP();
 
         if ( ! is_user_logged_in() ) {
             $username = 'Website Visitor';
@@ -110,11 +130,17 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             $username = wp_get_current_user()->user_login;
         }
 
-        if ( $this->IsPast404Limit( $site_id, $username, $ip ) ) {
-            return;
-        }
-
         if ( 'Website Visitor' !== $username ) {
+
+            // Check if the alert is disabled from the "Enable/Disable Alerts" section.
+            if ( ! $this->plugin->alerts->IsEnabled( 6007 ) ) {
+                return;
+            }
+
+            if ( $this->IsPast404Limit( $site_id, $username, $ip ) ) {
+                return;
+            }
+
             $objOcc = new WSAL_Models_Occurrence();
 
             $occ = $objOcc->CheckAlert404(
@@ -130,7 +156,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
             $occ = count( $occ ) ? $occ[0] : null;
             if ( ! empty( $occ ) ) {
-                // update existing record
+                // update existing record.
                 $this->Increment404($site_id, $username, $ip);
                 $new = $occ->GetMetaValue('Attempts', 0) + 1;
 
@@ -163,6 +189,16 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
                 $this->plugin->alerts->Trigger(6007, $fields);
             }
         } else {
+
+            // Check if the alert is disabled from the "Enable/Disable Alerts" section.
+            if ( ! $this->plugin->alerts->IsEnabled( 6023 ) ) {
+                return;
+            }
+
+            if ( $this->IsPastVisitor404Limit( $site_id, $username, $ip ) ) {
+                return;
+            }
+
             $objOcc = new WSAL_Models_Occurrence();
 
             $occ = $objOcc->CheckAlert404(
@@ -178,12 +214,12 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
 
             $occ = count( $occ ) ? $occ[0] : null;
             if ( ! empty( $occ ) ) {
-                // update existing record
-                $this->Increment404( $site_id, $username, $ip );
+                // update existing record.
+                $this->IncrementVisitor404( $site_id, $username, $ip );
                 $new = $occ->GetMetaValue( 'Attempts', 0 ) + 1;
 
-                if ( $new > $this->Get404LogLimit() ) {
-                    $new = 'more than ' . $this->Get404LogLimit();
+                if ( $new > $this->GetVisitor404LogLimit() ) {
+                    $new = 'more than ' . $this->GetVisitor404LogLimit();
                     $msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
                 }
 
@@ -200,10 +236,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
             } else {
                 $linkFile = $this->WriteLog( 1, $ip, $username, false );
                 // create a new record.
-                $fields =  array(
-                    'Attempts' => 1,
-                    'Username' => $username,
-                    'Msg' => $msg
+                $fields = array(
+                    'Attempts'  => 1,
+                    'Username'  => $username,
+                    'Msg'       => $msg,
                 );
                 if ( ! empty( $linkFile ) ) {
                     $fields['LinkFile'] = $linkFile;

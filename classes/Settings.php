@@ -7,7 +7,7 @@ class WSAL_Settings {
     public function __construct(WpSecurityAuditLog $plugin) {
         $this->_plugin = $plugin;
     }
-    
+
     // <editor-fold desc="Developer Options">
     const OPT_DEV_DATA_INSPECTOR = 'd';
     const OPT_DEV_PHP_ERRORS     = 'p';
@@ -97,7 +97,7 @@ class WSAL_Settings {
     public function IsBacktraceLoggingEnabled(){
         return $this->IsDevOptionEnabled(self::OPT_DEV_BACKTRACE_LOG);
     }
-    
+
     // </editor-fold>
     /**
      * @return boolean Whether dashboard widgets are enabled or not.
@@ -129,7 +129,7 @@ class WSAL_Settings {
     public function GetDashboardWidgetMaxAlerts(){
         return 5;
     }
-    
+
     // <editor-fold desc="Pruning Settings">
     /**
      * @return int The maximum number of alerts allowable.
@@ -205,7 +205,7 @@ class WSAL_Settings {
     public function SetRestrictAdmins($enable){
         $this->_plugin->SetGlobalOption('restrict-admins', (bool)$enable);
     }
-    
+
     // </editor-fold>
     protected $_disabled = null;
     public function GetDefaultDisabledAlerts(){
@@ -247,7 +247,7 @@ class WSAL_Settings {
     public function SetLoggingDisabled($disabled){
         return $this->_plugin->SetGlobalOption('disable-logging', $disabled);
     }
-    
+
     /**
      * Checking if the data will be removed.
      */
@@ -260,7 +260,7 @@ class WSAL_Settings {
     }
 
     // <editor-fold desc="Access Control">
-    
+
     protected $_viewers = null;
     public function SetAllowedPluginViewers($usersOrRoles){
         $this->_viewers = $usersOrRoles;
@@ -380,20 +380,20 @@ class WSAL_Settings {
         }
         return false;
     }
-    public function GetCurrentUserRoles($baseRoles = null){ 
+    public function GetCurrentUserRoles($baseRoles = null){
         if ($baseRoles == null) $baseRoles = wp_get_current_user()->roles;
         if (function_exists('is_super_admin') && is_super_admin()) $baseRoles[] = 'superadmin';
         return $baseRoles;
     }
 
-    public function IsLoginSuperAdmin($username){ 
+    public function IsLoginSuperAdmin($username){
         $userId = username_exists($username);
         if (function_exists('is_super_admin') && is_super_admin($userId) ) return true;
         else return false;
     }
-    
+
     // </editor-fold>
-    
+
     // <editor-fold desc="Licensing">
     public function GetLicenses(){
         return $this->_plugin->GetGlobalOption('licenses');
@@ -403,7 +403,7 @@ class WSAL_Settings {
         $name = sanitize_key(basename($name));
         return isset($data[$name]) ? $data[$name] : array();
     }
-    public function SetLicenses($data){ 
+    public function SetLicenses($data){
         $this->_plugin->SetGlobalOption('licenses', $data);
     }
     public function GetLicenseKey($name){
@@ -439,24 +439,24 @@ class WSAL_Settings {
     public function ClearLicenses(){
         $this->SetLicenses(array());
     }
-    
+
     // </editor-fold>
     // <editor-fold desc="Client IP Retrieval">
-    
+
     public function IsMainIPFromProxy(){
         return $this->_plugin->GetGlobalOption('use-proxy-ip');
     }
     public function SetMainIPFromProxy($enabled){
         return $this->_plugin->SetGlobalOption('use-proxy-ip', $enabled);
     }
-    
+
     public function IsInternalIPsFiltered(){
         return $this->_plugin->GetGlobalOption('filter-internal-ip');
     }
     public function SetInternalIPsFiltering($enabled){
         return $this->_plugin->SetGlobalOption('filter-internal-ip', $enabled);
     }
-    
+
     public function GetMainClientIP(){
         $result = null;
         if ($this->IsMainIPFromProxy()) {
@@ -472,7 +472,7 @@ class WSAL_Settings {
         }
         return $result;
     }
-    
+
     public function GetClientIPs(){
         $ips = array();
         foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
@@ -487,7 +487,7 @@ class WSAL_Settings {
         }
         return $ips;
     }
-    
+
     protected function NormalizeIP($ip){
         $ip = trim($ip);
         if (strpos($ip, ':') !== false && substr_count($ip, '.') == 3 && strpos($ip, '[') === false) {
@@ -501,8 +501,8 @@ class WSAL_Settings {
         }
         return $ip;
     }
-    
-    protected function ValidateIP($ip){ 
+
+    protected function ValidateIP($ip){
         $opts = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
         if ($this->IsInternalIPsFiltered()) $opts = $opts | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
         $filteredIP = filter_var($ip, FILTER_VALIDATE_IP, $opts);
@@ -670,7 +670,7 @@ class WSAL_Settings {
     public function SetColumns($columns){
         return $this->_plugin->SetGlobalOption('columns', json_encode($columns));
     }
-    
+
     public function IsWPBackend(){
         return $this->_plugin->GetGlobalOption('wp-backend');
     }
@@ -701,6 +701,25 @@ class WSAL_Settings {
 
     public function Get404LogLimit(){
         return $this->_plugin->GetGlobalOption('log-404-limit', 99);
+    }
+
+    /**
+     * Sets the 404 log limit for visitor.
+     *
+     * @param  int $value - 404 log limit.
+     * @since  2.6.3
+     */
+    public function SetVisitor404LogLimit( $value ) {
+        return $this->_plugin->SetGlobalOption( 'log-visitor-404-limit', abs( $value ) );
+    }
+
+    /**
+     * Get the 404 log limit for visitor.
+     *
+     * @since  2.6.3
+     */
+    public function GetVisitor404LogLimit() {
+        return $this->_plugin->GetGlobalOption( 'log-visitor-404-limit', 99 );
     }
 
 /*============================== Support Archive Database ==============================*/
