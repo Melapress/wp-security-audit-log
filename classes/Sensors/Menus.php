@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ */
 class WSAL_Sensors_Menus extends WSAL_AbstractSensor
 {
     protected $_OldMenu = null;

@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ */
 class WSAL_Sensors_System extends WSAL_AbstractSensor
 {
     const TRANSIENT_404 = 'wsal-404-attempts';

@@ -1,10 +1,19 @@
 <?php
-
+/**
+ * @package Wsal
+ * Test the DB connection.
+ * It uses wpdb WordPress DB Class.
+ */
 class wpdbCustom extends wpdb
 {
-    /*
-     * overwrite wpdb class for set $allow_bail to false
+    /**
+     * Overwrite wpdb class for set $allow_bail to false
      * and hide the print of the error
+     * @global string $wp_version
+     * @param string $dbuser     MySQL database user
+     * @param string $dbpassword MySQL database password
+     * @param string $dbname     MySQL database name
+     * @param string $dbhost     MySQL database host
      */
     public function __construct($dbuser, $dbpassword, $dbname, $dbhost)
     {
@@ -32,5 +41,4 @@ class wpdbCustom extends wpdb
 
         $this->db_connect(false);
     }
-
 }

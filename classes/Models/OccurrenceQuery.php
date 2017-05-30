@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package Wsal
+ */
 class WSAL_Models_OccurrenceQuery extends WSAL_Models_Query
 {
     protected $arguments = array();

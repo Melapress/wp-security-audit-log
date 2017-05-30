@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @package Wsal
+ * Query Class
+ */
 class WSAL_Models_Query
 {
     protected $columns = array();
@@ -10,7 +13,7 @@ class WSAL_Models_Query
     protected $from = array();
     protected $meta_join = false;
     protected $searchCondition = null;
-	protected $useDefaultAdapter = false;
+    protected $useDefaultAdapter = false;
 
     public function __construct()
     {
@@ -104,6 +107,10 @@ class WSAL_Models_Query
         return $this;
     }
 
+    /**
+     * Reset from.
+     * @return self
+     */
     public function clearFrom()
     {
         $this->from = array();
@@ -117,7 +124,6 @@ class WSAL_Models_Query
 
     /**
      * Gets the value of limit.
-     *
      * @return mixed
      */
     public function getLimit()
@@ -127,21 +133,17 @@ class WSAL_Models_Query
 
     /**
      * Sets the value of limit.
-     *
      * @param mixed $limit the limit
-     *
      * @return self
      */
     public function setLimit($limit)
     {
         $this->limit = $limit;
-
         return $this;
     }
 
     /**
      * Gets the value of offset.
-     *
      * @return mixed
      */
     public function getOffset()
@@ -151,24 +153,30 @@ class WSAL_Models_Query
 
     /**
      * Sets the value of offset.
-     *
      * @param mixed $offset the offset
-     *
      * @return self
      */
     public function setOffset($offset)
     {
         $this->offset = $offset;
-
         return $this;
     }
 
+    /**
+     * Adds condition.
+     * @param mixed $value condition
+     * @return self
+     */
     public function addSearchCondition($value)
     {
         $this->searchCondition = $value;
         return $this;
     }
 
+    /**
+     * Gets condition.
+     * @return self
+     */
     public function getSearchCondition()
     {
         return $this->searchCondition;

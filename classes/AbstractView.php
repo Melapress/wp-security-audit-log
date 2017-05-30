@@ -1,9 +1,11 @@
 <?php
-
-abstract class WSAL_AbstractView {
-    
+/**
+ * @package Wsal
+ */
+abstract class WSAL_AbstractView
+{
     /**
-     * @var WpSecurityAuditLog 
+     * @var WpSecurityAuditLog
      */
     protected $_plugin;
     
@@ -24,13 +26,15 @@ abstract class WSAL_AbstractView {
     /**
      * @param WpSecurityAuditLog $plugin
      */
-    public function __construct(WpSecurityAuditLog $plugin){
+    public function __construct(WpSecurityAuditLog $plugin)
+    {
         $this->_plugin = $plugin;
         
         // get and store wordpress version
         global $wp_version;
-        if(!isset($wp_version))
+        if (!isset($wp_version)) {
             $wp_version = get_bloginfo('version');
+        }
         $this->_wpversion = floatval($wp_version);
         
         // handle admin notices
@@ -43,12 +47,15 @@ abstract class WSAL_AbstractView {
      * Dismiss an admin notice through ajax.
      * @internal
      */
-    public function AjaxDismissNotice(){
-        if(!$this->_plugin->settings->CurrentUserCan('view'))
+    public function AjaxDismissNotice()
+    {
+        if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
+        }
         
-        if(!isset($_REQUEST['notice']))
+        if (!isset($_REQUEST['notice'])) {
             die('Notice name expected as "notice" parameter.');
+        }
         
         $this->DismissNotice($_REQUEST['notice']);
     }
@@ -57,7 +64,8 @@ abstract class WSAL_AbstractView {
      * @param string $name Name of notice.
      * @return boolean Whether notice got dismissed or not.
      */
-    public function IsNoticeDismissed($name){
+    public function IsNoticeDismissed($name)
+    {
         $user_id = get_current_user_id();
         $meta_key = 'wsal-notice-' . $name;
         self::$AllowedNoticeNames[] = $name;
@@ -67,18 +75,21 @@ abstract class WSAL_AbstractView {
     /**
      * @param string $name Name of notice to dismiss.
      */
-    public function DismissNotice($name){
+    public function DismissNotice($name)
+    {
         $user_id = get_current_user_id();
         $meta_key = 'wsal-notice-' . $name;
         $old_value = get_user_meta($user_id, $meta_key, true);
-        if (in_array($name, self::$AllowedNoticeNames) || $old_value === false)
+        if (in_array($name, self::$AllowedNoticeNames) || $old_value === false) {
             update_user_meta($user_id, $meta_key, '1');
+        }
     }
     
     /**
      * @param string $name Makes this notice available.
      */
-    public function RegisterNotice($name){
+    public function RegisterNotice($name)
+    {
         self::$AllowedNoticeNames[] = $name;
     }
     
@@ -110,48 +121,60 @@ abstract class WSAL_AbstractView {
     /**
      * Renders the view icon (this has been deprecated in newwer WP versions).
      */
-    public function RenderIcon(){
+    public function RenderIcon()
+    {
         ?><div id="icon-plugins" class="icon32"><br></div><?php
     }
     
     /**
      * Renders the view title.
      */
-    public function RenderTitle(){
+    public function RenderTitle()
+    {
         ?><h2><?php echo esc_html($this->GetTitle()); ?></h2><?php
     }
     
     /**
      * @link self::Render()
      */
-    public function RenderContent(){
+    public function RenderContent()
+    {
         $this->Render();
     }
     
     /**
      * @return boolean Whether page should appear in menu or not.
      */
-    public function IsVisible(){ return true; }
+    public function IsVisible()
+    {
+        return true;
+    }
     
     /**
      * @return boolean Whether page should be accessible or not.
      */
-    public function IsAccessible(){ return true; }
+    public function IsAccessible()
+    {
+        return true;
+    }
     
     /**
      * Used for rendering stuff into head tag.
      */
-    public function Header(){}
+    public function Header()
+    {}
     
     /**
      * Used for rendering stuff in page fotoer.
      */
-    public function Footer(){}
+    public function Footer()
+    {}
     
     /**
      * @return string Safe view menu name.
      */
-    public function GetSafeViewName(){
+    public function GetSafeViewName()
+    {
         return 'wsal-' . preg_replace('/[^A-Za-z0-9\-]/', '-', $this->GetViewName());
     }
     
@@ -159,14 +182,16 @@ abstract class WSAL_AbstractView {
      * Override this and make it return true to create a shortcut link in plugin page to the view.
      * @return boolean
      */
-    public function HasPluginShortcutLink(){
+    public function HasPluginShortcutLink()
+    {
         return false;
     }
     
     /**
      * @return string URL to backend page for displaying view.
      */
-    public function GetUrl(){
+    public function GetUrl()
+    {
         $fn = function_exists('network_admin_url') ? 'network_admin_url' : 'admin_url';
         return $fn('admin.php?page=' . $this->GetSafeViewName());
     }
@@ -174,8 +199,8 @@ abstract class WSAL_AbstractView {
     /**
      * @return string Generates view name out of class name.
      */
-    public function GetViewName(){
+    public function GetViewName()
+    {
         return strtolower(str_replace(array('WSAL_Views_', 'WSAL_'), '', get_class($this)));
     }
-    
 }

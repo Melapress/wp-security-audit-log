@@ -1,5 +1,7 @@
 <?php
 /**
+ * @package Wsal
+ * @subpackage Sensors
  * Support for BBPress Forum Plugin
  */
 class WSAL_Sensors_BBPress extends WSAL_AbstractSensor

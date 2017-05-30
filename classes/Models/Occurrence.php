@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package Wsal
+ */
 class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
 {
     public $id = 0;
@@ -37,7 +39,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     }
     
     /**
-     * Set the value of a meta item (creates or updates meta item).
+     * Sets the value of a meta item (creates or updates meta item).
      * @param string $name Meta name.
      * @param mixed $value Meta value.
      */
@@ -187,6 +189,14 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
         return $this->getAdapter()->CheckKnownUsers($args);
     }
 
+    /**
+     * Finds occurences of the same type by IP within specified time frame
+     * @param string $ipAddress
+     * @param int $alertId Alert type we are lookign for
+     * @param int $siteId
+     * @param $startTime mktime
+     * @param $endTime mktime
+     */
     public function CheckUnKnownUsers($args = array())
     {
         return $this->getAdapter()->CheckUnKnownUsers($args);

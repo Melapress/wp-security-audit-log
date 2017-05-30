@@ -1,11 +1,11 @@
 <?php
-//require_once(__DIR__ . '/../Connector/ConnectorFactory.php');
-
+/**
+ * @package Wsal
+ */
 abstract class WSAL_Models_ActiveRecord
 {
-
     /**
-     * @var_$connector Data connector;
+     * @var $connector Data connector;
      */
     protected $connector;
 
@@ -20,20 +20,30 @@ abstract class WSAL_Models_ActiveRecord
      */
     public function GetFields()
     {
-        if(!isset($this->_column_cache)){
+        if (!isset($this->_column_cache)) {
             $this->_column_cache = array();
-            foreach(array_keys(get_object_vars($this)) as $col)
-                if(trim($col) && $col[0] != '_')
+            foreach (array_keys(get_object_vars($this)) as $col) {
+                if (trim($col) && $col[0] != '_') {
                     $this->_column_cache[] = $col;
+                }
+            }
         }
         return $this->_column_cache;
     }
 
+    /**
+     * Sets the id.
+     * @param integer $id
+     */
     public function setId($id)
     {
         $this->id = $id;
     }
 
+    /**
+     * Gets the id.
+     * @return integer $id.
+     */
     public function getId()
     {
         return $this->id;
@@ -82,11 +92,12 @@ abstract class WSAL_Models_ActiveRecord
      * @param string $cond (Optional) Load condition.
      * @param array $args (Optional) Load condition arguments.
      */
-    public function Load($cond = '%d', $args = array(1)){
+    public function Load($cond = '%d', $args = array(1))
+    {
         $this->_state = self::STATE_UNKNOWN;
 
         $data = $this->getAdapter()->Load($cond, $args);
-        if(!is_null($data)){
+        if (!is_null($data)) {
             $this->LoadData($data);
             $this->_state = self::STATE_LOADED;
         }
@@ -96,7 +107,8 @@ abstract class WSAL_Models_ActiveRecord
      * Load object data from variable.
      * @param array|object $data Data array or object.
      */
-    public function LoadData($data){
+    public function LoadData($data)
+    {
         $copy = get_class($this);
         $copy = new $copy;
         foreach ((array)$data as $key => $val) {
@@ -158,28 +170,32 @@ abstract class WSAL_Models_ActiveRecord
     {
         $this->_state = self::STATE_UNKNOWN;
         $result = $this->getAdapter()->Delete($this);
-        if($result !== false)
+        if ($result !== false) {
             $this->_state = self::STATE_DELETED;
+        }
         
         return $result;
     }
 
-    public function Count($cond = '%d', $args = array(1)) {
-        $result = $this->getAdapter()->Count($cond, $args); 
+    public function Count($cond = '%d', $args = array(1))
+    {
+        $result = $this->getAdapter()->Count($cond, $args);
         return $result;
     }
     
     /**
      * @return boolean
      */
-    public function IsLoaded(){
+    public function IsLoaded()
+    {
         return $this->_state == self::STATE_LOADED;
     }
     
     /**
      * @return boolean
      */
-    public function IsSaved(){
+    public function IsSaved()
+    {
         return $this->_state == self::STATE_CREATED
             || $this->_state == self::STATE_UPDATED;
     }
@@ -187,7 +203,8 @@ abstract class WSAL_Models_ActiveRecord
     /**
      * @return boolean
      */
-    public function IsCreated(){
+    public function IsCreated()
+    {
         return $this->_state == self::STATE_CREATED;
     }
     
@@ -229,9 +246,10 @@ abstract class WSAL_Models_ActiveRecord
      * @param array $args Arguments used in condition.
      * @return WSAL_Models_ActiveRecord
      */
-    protected static function CacheLoad($target, $query, $args){
+    protected static function CacheLoad($target, $query, $args)
+    {
         $index = $target . '::' . vsprintf($query, $args);
-        if(!isset(self::$_cache[$index])){
+        if (!isset(self::$_cache[$index])) {
             self::$_cache[$index] = new $target();
             self::$_cache[$index]->Load($query, $args);
         }
@@ -244,9 +262,10 @@ abstract class WSAL_Models_ActiveRecord
      * @param string $query Load condition.
      * @param array $args Arguments used in condition.
      */
-    protected static function CacheRemove($target, $query, $args){
+    protected static function CacheRemove($target, $query, $args)
+    {
         $index = $target . '::' . sprintf($query, $args);
-        if(!isset(self::$_cache[$index])){
+        if (!isset(self::$_cache[$index])) {
             unset(self::$_cache[$index]);
         }
     }

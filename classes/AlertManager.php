@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package Wsal
+ */
 final class WSAL_AlertManager {
     
     /**

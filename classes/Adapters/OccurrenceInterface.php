@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package Wsal
+ */
 interface WSAL_Adapters_OccurrenceInterface
 {
     public function GetMeta($occurence);

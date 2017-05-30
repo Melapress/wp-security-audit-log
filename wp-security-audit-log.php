@@ -26,14 +26,15 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-class WpSecurityAuditLog {
-    
+/**
+ * @package Wsal
+ */
+class WpSecurityAuditLog
+{
     // <editor-fold desc="Properties & Constants">
     
     const PLG_CLS_PRFX = 'WSAL_';
-    
     const MIN_PHP_VERSION = '5.3.0';
-    
     const OPT_PRFX = 'wsal-';
     
     /**
@@ -106,17 +107,20 @@ class WpSecurityAuditLog {
      * Instead, make use of the plugin instance provided by 'wsal_init' action.
      * @return WpSecurityAuditLog Returns the current plugin instance.
      */
-    public static function GetInstance(){
+    public static function GetInstance()
+    {
         static $instance = null;
-        if(!$instance)$instance = new self();
+        if (!$instance) {
+            $instance = new self();
+        }
         return $instance;
     }
     
     /**
      * Initialize plugin.
      */
-    public function __construct(){
-        
+    public function __construct()
+    {
         require_once('classes/Helpers/DataHelper.php');
         // profiler has to be loaded manually
         require_once('classes/SimpleProfiler.php');
@@ -143,7 +147,6 @@ class WpSecurityAuditLog {
             require_once('classes/Lib/class-wp-session-utils.php');
         }
 
-        
         // load autoloader and register base paths
         require_once('classes/Autoloader.php');
         $this->autoloader = new WSAL_Autoloader($this);
@@ -183,7 +186,8 @@ class WpSecurityAuditLog {
     /**
      * @internal Start to trigger the events after installation.
      */
-    public function Init(){
+    public function Init()
+    {
         WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
     }
 
@@ -191,7 +195,8 @@ class WpSecurityAuditLog {
     /**
      * @internal Render plugin stuff in page header.
      */
-    public function RenderHeader(){
+    public function RenderHeader()
+    {
         // common.css?
     }
 
@@ -199,7 +204,8 @@ class WpSecurityAuditLog {
      * Disable Custom Field through ajax.
      * @internal
      */
-    public function AjaxDisableCustomField(){
+    public function AjaxDisableCustomField()
+    {
         $fields = $this->GetGlobalOption('excluded-custom');
         if (isset($fields) && $fields != "") {
             $fields .= "," . esc_html($_POST['notice']);
@@ -215,7 +221,8 @@ class WpSecurityAuditLog {
      * Disable Alert through ajax.
      * @internal
      */
-    public function AjaxDisableByCode(){
+    public function AjaxDisableByCode()
+    {
         $sAlerts = $this->GetGlobalOption('disabled-alerts');
         if (isset($sAlerts) && $sAlerts != "") {
             $sAlerts .= "," . esc_html($_POST['code']);
@@ -231,7 +238,8 @@ class WpSecurityAuditLog {
     /**
      * @internal Render plugin stuff in page footer.
      */
-    public function RenderFooter(){
+    public function RenderFooter()
+    {
         wp_enqueue_script(
             'wsal-common',
             $this->GetBaseUrl() . '/js/common.js',
@@ -243,8 +251,8 @@ class WpSecurityAuditLog {
     /**
      * @internal Load the rest of the system.
      */
-    public function Load(){
-
+    public function Load()
+    {
         $optionsTable = new WSAL_Models_Option();
         if (!$optionsTable->IsInstalled()) {
             $optionsTable->Install();
@@ -286,7 +294,8 @@ class WpSecurityAuditLog {
     /**
      * Install all assets required for a useable system.
      */
-    public function Install(){
+    public function Install()
+    {
         if (version_compare(PHP_VERSION, self::MIN_PHP_VERSION) < 0) {
             ?><html>
                 <head>
@@ -302,7 +311,6 @@ class WpSecurityAuditLog {
             </html><?php
             die(1);
         }
-        
         // ensure that the system is installed and schema is correct
         self::getConnector()->installAll();
         
@@ -311,8 +319,9 @@ class WpSecurityAuditLog {
         // if system already installed, do updates now (if any)
         $OldVersion = $this->GetOldVersion();
         $NewVersion = $this->GetNewVersion();
-        if ($PreInstalled && $OldVersion != $NewVersion) $this->Update($OldVersion, $NewVersion);
-
+        if ($PreInstalled && $OldVersion != $NewVersion) {
+            $this->Update($OldVersion, $NewVersion);
+        }
         // Load options from wp_options table or wp_sitemeta in multisite enviroment
         $data = $this->read_options_prefixed("wsal-");
         if (!empty($data)) {
@@ -321,7 +330,9 @@ class WpSecurityAuditLog {
         $this->deleteAllOptions();
         
         // if system wasn't installed, try migration now
-        if (!$PreInstalled && $this->CanMigrate()) $this->Migrate();
+        if (!$PreInstalled && $this->CanMigrate()) {
+            $this->Migrate();
+        }
 
         // setting the prunig date with the old value or the default value
         $pruningDate = $this->settings->GetPruningDate();
@@ -361,7 +372,8 @@ class WpSecurityAuditLog {
      * @param string $old_version The old version.
      * @param string $new_version The new version.
      */
-    public function Update($old_version, $new_version){
+    public function Update($old_version, $new_version)
+    {
         // update version in db
         $this->GetGlobalOption('version', $new_version);
         
@@ -369,7 +381,7 @@ class WpSecurityAuditLog {
         //$this->settings->ClearDevOptions();
         
         // do version-to-version specific changes
-        if(version_compare($old_version, '1.2.3') == -1){
+        if (version_compare($old_version, '1.2.3') == -1) {
             // ... an example
         }
     }
@@ -377,7 +389,8 @@ class WpSecurityAuditLog {
     /**
      * Uninstall plugin.
      */
-    public function Uninstall(){
+    public function Uninstall()
+    {
         if ($this->GetGlobalOption("delete-data") == 1) {
             self::getConnector()->uninstallAll();
             $this->deleteAllOptions();
@@ -385,40 +398,60 @@ class WpSecurityAuditLog {
         wp_clear_scheduled_hook('wsal_cleanup');
     }
 
-    public function delete_options_prefixed( $prefix ) {
+    /**
+     * Delete from the options table of WP.
+     * @param string $prefix table prefix
+     * @return boolean query result
+     */
+    public function delete_options_prefixed($prefix)
+    {
         global $wpdb;
-
-        if ( $this->IsMultisite() ) {
+        if ($this->IsMultisite()) {
             $table_name = $wpdb->prefix .'sitemeta';
-            $result = $wpdb->query( "DELETE FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'" );
+            $result = $wpdb->query("DELETE FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'");
         } else {
-            $result = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'" );
+            $result = $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'");
         }
         return ($result) ? true : false;
     }
 
-    private function deleteAllOptions() {
+    /**
+     * Delete all the Wsal options from the options table of WP.
+     */
+    private function deleteAllOptions()
+    {
         $flag = true;
-        while ( $flag ) {
-            $flag = $this->delete_options_prefixed( 'wsal-' );
+        while ($flag) {
+            $flag = $this->delete_options_prefixed(self::OPT_PRFX);
         }
     }
     
-    public function read_options_prefixed( $prefix ) {
+    /**
+     * Read options from the options table of WP.
+     * @param string $prefix table prefix
+     * @return boolean query result
+     */
+    public function read_options_prefixed($prefix)
+    {
         global $wpdb;
-        if ( $this->IsMultisite() ) {
+        if ($this->IsMultisite()) {
             $table_name = $wpdb->prefix .'sitemeta';
-            $results = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
+            $results = $wpdb->get_results("SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A);
         } else {
-            $results = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
+            $results = $wpdb->get_results("SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A);
         }
         return $results;
     }
 
-    public function SetOptions($data){
-        foreach($data as $key => $option) { 
+    /**
+     * Set options in the Wsal options table.
+     * @param array $data table prefix
+     */
+    public function SetOptions($data)
+    {
+        foreach ($data as $key => $option) {
             $this->options = new WSAL_Models_Option();
-            if ( $this->IsMultisite() ) {
+            if ($this->IsMultisite()) {
                 $this->options->SetOptionValue($option['meta_key'], $option['meta_value']);
             } else {
                 $this->options->SetOptionValue($option['option_name'], $option['option_value']);
@@ -429,7 +462,8 @@ class WpSecurityAuditLog {
     /**
      * Migrate data from old plugin.
      */
-    public function Migrate(){
+    public function Migrate()
+    {
         global $wpdb;
         static $migTypes = array(
             3000 => 5006
@@ -438,36 +472,43 @@ class WpSecurityAuditLog {
         // load data
         $sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog_events';
         $events = array();
-        foreach($wpdb->get_results($sql, ARRAY_A) as $item)
+        foreach ($wpdb->get_results($sql, ARRAY_A) as $item) {
             $events[$item['EventID']] = $item;
+        }
         $sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog';
         $auditlog = $wpdb->get_results($sql, ARRAY_A);
         
         // migrate using db logger
-        foreach($auditlog as $entry){
+        foreach ($auditlog as $entry) {
             $data = array(
                 'ClientIP' => $entry['UserIP'],
                 'UserAgent' => '',
                 'CurrentUserID' => $entry['UserID'],
             );
-            if($entry['UserName'])
+            if ($entry['UserName']) {
                 $data['Username'] = base64_decode($entry['UserName']);
+            }
             $mesg = $events[$entry['EventID']]['EventDescription'];
             $date = strtotime($entry['EventDate']);
             $type = $entry['EventID'];
-            if(isset($migTypes[$type]))$type = $migTypes[$type];
+            if (isset($migTypes[$type])) {
+                $type = $migTypes[$type];
+            }
             // convert message from '<strong>%s</strong>' to '%Arg1%' format
-            $c = 0; $n = '<strong>%s</strong>'; $l = strlen($n);
-            while(($pos = strpos($mesg, $n)) !== false){
+            $c = 0;
+            $n = '<strong>%s</strong>';
+            $l = strlen($n);
+            while (($pos = strpos($mesg, $n)) !== false) {
                 $mesg = substr_replace($mesg, '%MigratedArg' . ($c++) .'%', $pos, $l);
             }
             $data['MigratedMesg'] = $mesg;
             // generate new meta data args
             $temp = unserialize(base64_decode($entry['EventData']));
-            foreach((array)$temp as $i => $item)
+            foreach ((array)$temp as $i => $item) {
                 $data['MigratedArg' . $i] = $item;
+            }
             // send event data to logger!
-            foreach($this->alerts->GetLoggers() as $logger){
+            foreach ($this->alerts->GetLoggers() as $logger) {
                 $logger->Log($type, $data, $date, $entry['BlogId'], true);
             }
         }
@@ -493,7 +534,8 @@ class WpSecurityAuditLog {
     /**
      * @return string The current plugin version (according to plugin file metadata).
      */
-    public function GetNewVersion(){
+    public function GetNewVersion()
+    {
         $version = get_plugin_data(__FILE__, false, false);
         return isset($version['Version']) ? $version['Version'] : '0.0.0';
     }
@@ -501,14 +543,16 @@ class WpSecurityAuditLog {
     /**
      * @return string The plugin version as stored in DB (will be the old version during an update/install).
      */
-    public function GetOldVersion(){
+    public function GetOldVersion()
+    {
         return $this->GetGlobalOption('version', '0.0.0');
     }
     
     /**
      * @internal To be called in admin header for hiding plugin form Plugins list.
      */
-    public function HidePlugin() {
+    public function HidePlugin()
+    {
         $selectr = '';
         $plugins = array('wp-security-audit-log');
         foreach ($this->licensing->Plugins() as $plugin) {
@@ -526,14 +570,16 @@ class WpSecurityAuditLog {
      * @return string Class name.
      * @deprecated since 1.2.5 Use autoloader->GetClassFileClassName() instead.
      */
-    public function GetClassFileClassName($file){
+    public function GetClassFileClassName($file)
+    {
         return $this->autoloader->GetClassFileClassName($file);
     }
     
     /**
      * @return boolean Whether we are running on multisite or not.
      */
-    public function IsMultisite(){
+    public function IsMultisite()
+    {
         return function_exists('is_multisite') && is_multisite();
     }
     
@@ -544,12 +590,10 @@ class WpSecurityAuditLog {
      * @param string $prefix (Optional) A prefix used before option name.
      * @return mixed Option's value or $default if option not set.
      */
-    public function GetGlobalOption($option, $default = false, $prefix = self::OPT_PRFX){
-        //$fn = $this->IsMultisite() ? 'get_site_option' : 'get_option';
-        //var_dump($fn($prefix . $option, $default));
-        //return $fn($prefix . $option, $default);
+    public function GetGlobalOption($option, $default = false, $prefix = self::OPT_PRFX)
+    {
         $this->options = new WSAL_Models_Option();
-        return $this->options->GetOptionValue($prefix . $option, $default);     
+        return $this->options->GetOptionValue($prefix . $option, $default);
     }
     
     /**
@@ -558,9 +602,8 @@ class WpSecurityAuditLog {
      * @param mixed $value New value for option.
      * @param string $prefix (Optional) A prefix used before option name.
      */
-    public function SetGlobalOption($option, $value, $prefix = self::OPT_PRFX){
-        //$fn = $this->IsMultisite() ? 'update_site_option' : 'update_option';
-        //$fn($prefix . $option, $value);
+    public function SetGlobalOption($option, $value, $prefix = self::OPT_PRFX)
+    {
         $this->options = new WSAL_Models_Option();
         $this->options->SetOptionValue($prefix . $option, $value);
     }
@@ -572,7 +615,8 @@ class WpSecurityAuditLog {
      * @param string $prefix (Optional) A prefix used before option name.
      * @return mixed Option's value or $default if option not set.
      */
-    public function GetUserOption($option, $default = false, $prefix = self::OPT_PRFX){
+    public function GetUserOption($option, $default = false, $prefix = self::OPT_PRFX)
+    {
         $result = get_user_option($prefix . $option, get_current_user_id());
         return $result === false ? $default : $result;
     }
@@ -583,17 +627,20 @@ class WpSecurityAuditLog {
      * @param mixed $value New value for option.
      * @param string $prefix (Optional) A prefix used before option name.
      */
-    public function SetUserOption($option, $value, $prefix = self::OPT_PRFX){
+    public function SetUserOption($option, $value, $prefix = self::OPT_PRFX)
+    {
         update_user_option(get_current_user_id(), $prefix . $option, $value, false);
     }
     
     /**
      * Run cleanup routines.
      */
-    public function CleanUp(){
+    public function CleanUp()
+    {
         $s = $this->profiler->Start('Clean Up');
-        foreach($this->_cleanup_hooks as $hook)
+        foreach ($this->_cleanup_hooks as $hook) {
             call_user_func($hook);
+        }
         $s->Stop();
     }
     
@@ -601,7 +648,8 @@ class WpSecurityAuditLog {
      * Add callback to be called when a cleanup operation is required.
      * @param callable $hook
      */
-    public function AddCleanupHook($hook){
+    public function AddCleanupHook($hook)
+    {
         $this->_cleanup_hooks[] = $hook;
     }
     
@@ -609,11 +657,18 @@ class WpSecurityAuditLog {
      * Remove a callback from the cleanup callbacks list.
      * @param callable $hook
      */
-    public function RemoveCleanupHook($hook){
-        while(($pos = array_search($hook, $this->_cleanup_hooks)) !== false)
+    public function RemoveCleanupHook($hook)
+    {
+        while (($pos = array_search($hook, $this->_cleanup_hooks)) !== false) {
             unset($this->_cleanup_hooks[$pos]);
+        }
     }
 
+    /**
+     * DB connection.
+     * @param mixed $config DB configuration.
+     * @return WSAL_Connector_ConnectorInterface
+     */
     public static function getConnector($config = null, $reset = false)
     {
         return WSAL_Connector_ConnectorFactory::getConnector($config, $reset);
@@ -623,42 +678,48 @@ class WpSecurityAuditLog {
      * Do we have an existing installation? This only applies for version 1.0 onwards.
      * @return boolean
      */
-    public function IsInstalled(){
+    public function IsInstalled()
+    {
         return self::getConnector()->isInstalled();
     }
     
     /**
      * @return boolean Whether the old plugin was present or not.
      */
-    public function CanMigrate(){
+    public function CanMigrate()
+    {
         return self::getConnector()->canMigrate();
     }
     
     /**
      * @return string Absolute URL to plugin directory WITHOUT final slash.
      */
-    public function GetBaseUrl(){
+    public function GetBaseUrl()
+    {
         return plugins_url('', __FILE__);
     }
     
     /**
      * @return string Full path to plugin directory WITH final slash.
      */
-    public function GetBaseDir(){
+    public function GetBaseDir()
+    {
         return plugin_dir_path(__FILE__);
     }
     
     /**
      * @return string Plugin directory name.
      */
-    public function GetBaseName(){
+    public function GetBaseName()
+    {
         return plugin_basename(__FILE__);
     }
     
     /**
      * Load default configuration / data.
      */
-    public function LoadDefaults(){
+    public function LoadDefaults()
+    {
         $s = $this->profiler->Start('Load Defaults');
         require_once('defaults.php');
         $s->Stop();

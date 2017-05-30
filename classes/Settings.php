@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package Wsal
+ */
 class WSAL_Settings {
     /**
      * @var WpSecurityAuditLog

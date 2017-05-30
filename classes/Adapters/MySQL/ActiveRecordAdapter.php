@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @package Wsal
+ * MySQL database ActiveRecord class
+ */
 class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInterface
 {
     protected $connection;
@@ -21,6 +24,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         $this->connection = $conn;
     }
 
+    /**
+     * @return WSAL_Models_ActiveRecord
+     */
     public function GetModel()
     {
         return new WSAL_Models_ActiveRecord();
@@ -62,9 +68,11 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         
         if (!isset($this->_column_cache)) {
             $this->_column_cache = array();
-            foreach (array_keys(get_object_vars($model)) as $col)
-                if (trim($col) && $col[0] != '_')
+            foreach (array_keys(get_object_vars($model)) as $col) {
+                if (trim($col) && $col[0] != '_') {
                     $this->_column_cache[] = $col;
+                }
+            }
         }
         return $this->_column_cache;
     }
@@ -73,8 +81,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      * @deprecated
      * @return boolean Returns whether table structure is installed or not.
      */
-    public function IsInstalled(){
-        //global $wpdb;
+    public function IsInstalled()
+    {
         $_wpdb = $this->connection;
         $sql = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
         return strtolower($_wpdb->get_var($sql)) == strtolower($this->GetTable());
@@ -83,15 +91,17 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     /**
      * Install this ActiveRecord structure into DB.
      */
-    public function Install(){
+    public function Install()
+    {
         $_wpdb = $this->connection;
         $_wpdb->query($this->_GetInstallQuery());
     }
     
-     /**
+    /**
      * Install this ActiveRecord structure into DB WordPress.
      */
-    public function InstallOriginal(){
+    public function InstallOriginal()
+    {
         global $wpdb;
         $wpdb->query($this->_GetInstallQuery(true));
     }
@@ -101,18 +111,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function Uninstall()
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         $_wpdb->query($this->_GetUninstallQuery());
     }
     
     /**
-     * Save an active record to DB.
+     * Save an active record into DB.
      * @return integer|boolean Either the number of modified/inserted rows or false on failure.
      */
     public function Save($activeRecord)
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         $copy = $activeRecord;
         $data = array();
@@ -155,13 +163,12 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     }
     
     /**
-     * Load record from DB.
+     * Load record from DB (Single row).
      * @param string $cond (Optional) Load condition.
      * @param array $args (Optional) Load condition arguments.
      */
     public function Load($cond = '%d', $args = array(1))
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         
         $sql = $_wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '. $cond, $args);
@@ -170,9 +177,13 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         return $data;
     }
 
+    /**
+     * Load records from DB (Multi rows).
+     * @param string $cond Load condition.
+     * @param array $args (Optional) Load condition arguments.
+     */
     public function LoadArray($cond, $args = array())
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         $result = array();
         $sql = $_wpdb->prepare('SELECT * FROM '.$this->GetTable().' WHERE '. $cond, $args);
@@ -188,7 +199,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function Delete($activeRecord)
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         $result = $_wpdb->delete(
             $this->GetTable(),
@@ -218,7 +228,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function LoadMulti($cond, $args = array())
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         $result = array();
         $sql = (!is_array($args) || !count($args)) // do we really need to prepare() or not?
@@ -240,7 +249,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function LoadAndCallForEach($callback, $cond = '%d', $args = array(1))
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         $class = get_called_class();
         $sql = $_wpdb->prepare('SELECT * FROM ' . $this->GetTable() . ' WHERE '.$cond, $args);
@@ -258,7 +266,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function Count($cond = '%d', $args = array(1))
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         $class = get_called_class();
         $sql = $_wpdb->prepare('SELECT COUNT(*) FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args);
@@ -273,7 +280,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function CountQuery($query, $args = array())
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         $sql = count($args) ? $_wpdb->prepare($query, $args) : $query;
         return (int)$_wpdb->get_var($sql);
@@ -287,7 +293,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
      */
     public function LoadMultiQuery($query, $args = array())
     {
-        //global $wpdb;
         $_wpdb = $this->connection;
         $class = get_called_class();
         $result = array();
@@ -299,6 +304,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     }
 
     /**
+     * @param string $prefix (Optional) table prefix
      * @return string Must return SQL for creating table.
      */
     protected function _GetInstallQuery($prefix = false)
@@ -349,7 +355,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         }
         
         return $sql;
-        
     }
 
     /**
@@ -360,6 +365,11 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
         return  'DROP TABLE ' . $this->GetTable();
     }
 
+    /**
+     * Get Users user_login.
+     * @param int $_userId user ID
+     * @return string comma separated users login
+     */
     private function GetUserNames($_userId)
     {
         global $wpdb;
@@ -379,7 +389,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     }
 
     /**
-     * Function used in WSAL reporting extension
+     * Function used in WSAL reporting extension.
+     * @param int $_siteId site ID
+     * @param int $_userId user ID
+     * @param string $_roleName user role
+     * @param int $_alertCode alert code
+     * @param timestamp $_startTimestamp from created_on
+     * @param timestamp $_endTimestamp to created_on
+     * @param timestamp $_nextDate (Optional) created_on >
+     * @param int $_limit (Optional) limit
+     * @return array Report results
      */
     public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp, $_nextDate = null, $_limit = 0)
     {
@@ -456,8 +475,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     }
 
     /**
-     * Function used in WSAL reporting extension
-     * Check if criteria are matching in the DB
+     * Function used in WSAL reporting extension.
+     * Check if criteria are matching in the DB.
+     * @param mixed $criteria query conditions
+     * @return int count of distinct values
      */
     public function CheckMatchReportCriteria($criteria)
     {
@@ -509,7 +530,17 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     }
 
     /**
-     * List of unique IP addresses used by the same user
+     * Function used in WSAL reporting extension.
+     * List of unique IP addresses used by the same user.
+     * @param int $_siteId site ID
+     * @param timestamp $_startTimestamp from created_on
+     * @param timestamp $_endTimestamp to created_on
+     * @param int $_userId (Optional) user ID
+     * @param string $_roleName (Optional) user role
+     * @param string $_ipAddress (Optional) IP address
+     * @param int $_alertCode (Optional) alert code
+     * @param int $_limit (Optional) limit
+     * @return array Report results grouped by IP and Username
      */
     public function GetReportGrouped($_siteId, $_startTimestamp, $_endTimestamp, $_userId = 'null', $_roleName = 'null', $_ipAddress = 'null', $_alertCode = 'null', $_limit = 0)
     {
@@ -623,8 +654,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     }
 
     /**
-     * TRUNCATE temp table `tmp_users` and populate with users
-     * It is used in the query of the above function
+     * DELETE from table `tmp_users` and populate with users.
+     * It is used in the query of the above function.
+     * @param string $tableUsers table name
      */
     private function TempUsers($tableUsers)
     {

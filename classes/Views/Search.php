@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package Wsal
+ */
 class WSAL_Views_Search extends WSAL_AbstractView {
     
     public function GetTitle()

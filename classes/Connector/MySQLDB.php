@@ -1,9 +1,19 @@
 <?php
-
+/**
+ * @package Wsal
+ * MySQL Connector Class
+ * It uses wpdb WordPress DB Class
+ */
 class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements WSAL_Connector_ConnectorInterface
 {
     protected $connectionConfig = null;
     
+    /**
+     * @param string $dbuser     MySQL database user
+     * @param string $dbpassword MySQL database password
+     * @param string $dbname     MySQL database name
+     * @param string $dbhost     MySQL database host
+     */
     public function __construct($connectionConfig = null)
     {
         $this->connectionConfig = $connectionConfig;
@@ -11,6 +21,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         require_once($this->getAdaptersDirectory() . '/OptionAdapter.php');
     }
 
+    /**
+     * Test the connection.
+     */
     public function TestConnection()
     {
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING | E_DEPRECATED));
@@ -80,6 +93,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
     /**
      * Checks if the necessary tables are available
+     * @return bool true|false
      */
     public function isInstalled()
     {
@@ -90,6 +104,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
     /**
      * Checks if old version tables are available
+     * @return bool true|false
      */
     public function canMigrate()
     {
@@ -144,6 +159,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         }
     }
 
+    /**
+     * Increase occurrence ID
+     * @return integer MAX(id)
+     */
     private function GetIncreaseOccurrence()
     {
         $_wpdb = $this->getConnection();
@@ -152,6 +171,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return (int)$_wpdb->get_var($sql);
     }
 
+    /**
+     * Migrate Metadata from WP DB to External DB.
+     * @param integer $index
+     * @param integer $limit limit
+     */
     public function MigrateMeta($index, $limit)
     {
         $result = null;
@@ -192,6 +216,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return $result;
     }
 
+    /**
+     * Migrate Occurrences from WP DB to External DB.
+     * @param integer $index
+     * @param integer $limit limit
+     */
     public function MigrateOccurrence($index, $limit)
     {
         $result = null;
@@ -229,6 +258,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return $result;
     }
 
+    /**
+     * Migrate Back Occurrences from External DB to WP DB.
+     * @param integer $index
+     * @param integer $limit limit
+     */
     public function MigrateBackOccurrence($index, $limit)
     {
         $result = null;
@@ -265,6 +299,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return $result;
     }
 
+    /**
+     * Migrate Back Metadata from External DB to WP DB.
+     * @param integer $index
+     * @param integer $limit limit
+     */
     public function MigrateBackMeta($index, $limit)
     {
         $result = null;
@@ -301,6 +340,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return $result;
     }
 
+    /**
+     * Delete after Migrate alerts.
+     * @param object $record type of record
+     */
     private function DeleteAfterMigrate($record)
     {
         global $wpdb;
@@ -308,6 +351,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $wpdb->query($sql);
     }
 
+    /**
+     * Encrypt string, before saves it to the DB.
+     * @param string $plaintext original text
+     * @return string encrypted text
+     */
     public function encryptString($plaintext)
     {
         $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
@@ -320,6 +368,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return $ciphertext_base64;
     }
     
+    /**
+     * Decrypt string, after reads it from the DB.
+     * @param string $ciphertext_base64 encrypted text
+     * @return string original text
+     */
     public function decryptString($ciphertext_base64)
     {
         $ciphertext_dec = base64_decode($ciphertext_base64);
@@ -333,6 +386,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return rtrim($plaintext_dec, "\0");
     }
 
+    /**
+     * Mirroring Occurrences and Metadata Tables.
+     * Read from current DB and copy into Mirroring DB.
+     * @param array $args archive Database and limit by date
+     */
     public function MirroringAlertsToDB($args)
     {
         $last_created_on = null;
@@ -388,6 +446,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         return $last_created_on;
     }
 
+    /**
+     * Archiving Occurrences Table.
+     * Read from current DB and copy into Archive DB.
+     * @param array $args archive Database and limit by count OR by date
+     */
     public function ArchiveOccurrence($args)
     {
         $_wpdb = $this->getConnection();
@@ -438,6 +501,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         }
     }
 
+    /**
+     * Archiving Metadata Table.
+     * Read from current DB and copy into Archive DB.
+     * @param array $args archive Database and occurrences IDs
+     */
     public function ArchiveMeta($args)
     {
         $_wpdb = $this->getConnection();
@@ -468,6 +536,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         }
     }
 
+    /**
+     * Delete Occurrences and Metadata after archiving.
+     * @param array $args archive Database and occurrences IDs
+     */
     public function DeleteAfterArchive($args)
     {
         $_wpdb = $this->getConnection();
@@ -484,6 +556,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $_wpdb->query($sql);
     }
 
+    /**
+     * Truncate string longer than 32 characters.
+     * Authentication Unique Key @see wp-config.php
+     * @return string AUTH_KEY
+     */
     private function truncateKey()
     {
         if (!defined('AUTH_KEY')) {

@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ */
 class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
 {
 

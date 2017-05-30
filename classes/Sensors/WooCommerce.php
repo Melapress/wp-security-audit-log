@@ -1,5 +1,7 @@
 <?php
 /**
+ * @package Wsal
+ * @subpackage Sensors
  * Support for WooCommerce Plugin
  */
 class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor

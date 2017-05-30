@@ -1,15 +1,17 @@
 <?php
+/**
+ * @package Wsal
+ */
+class WSAL_Models_Meta extends WSAL_Models_ActiveRecord
+{
+    protected $adapterName = "Meta";
 
-class WSAL_Models_Meta extends WSAL_Models_ActiveRecord {
-	
-	protected $adapterName = "Meta"; 
+    public $id = 0;
+    public $occurrence_id = 0;
+    public $name = '';
+    public $value = array(); // force mixed type
 
-	public $id = 0;
-	public $occurrence_id = 0;
-	public $name = '';
-	public $value = array(); // force mixed type
-
-	public function SaveMeta()
+    public function SaveMeta()
     {
         $this->_state = self::STATE_UNKNOWN;
         $updateId = $this->getId();

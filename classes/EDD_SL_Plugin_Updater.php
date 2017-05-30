@@ -4,6 +4,7 @@
 //set_site_transient( 'update_plugins', null );
 
 /**
+ * @package Wsal
  * Allows plugins to use their own update API.
  *
  * @author Pippin Williamson

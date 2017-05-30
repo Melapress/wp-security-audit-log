@@ -1,4 +1,7 @@
 <?php
+/**
+ * @package Wsal
+ */
 class WSAL_Views_Settings extends WSAL_AbstractView
 {
 
