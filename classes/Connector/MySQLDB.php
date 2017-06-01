@@ -304,29 +304,59 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $wpdb->query($sql);
     }
 
-    public function encryptString($plaintext)
-    {
-        $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
-        $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-        $key = $this->truncateKey();
-        $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $plaintext, MCRYPT_MODE_CBC, $iv);
-        $ciphertext = $iv . $ciphertext;
-        $ciphertext_base64 = base64_encode($ciphertext);
+    /**
+     * Encrypt plain text.
+     *
+     * @param  string $plaintext - Plain text that is going to be encrypted.
+     * @return string
+     * @since  2.6.3
+     */
+    public function encryptString( $plaintext ) {
 
-        return $ciphertext_base64;
+        $ciphertext = false;
+
+        $encrypt_method = 'AES-256-CBC';
+        $secret_key     = $this->truncateKey();
+        $secret_iv      = $this->get_openssl_iv();
+
+        // Hash the key.
+        $key = hash( 'sha256', $secret_key );
+
+        // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning.
+        $iv = substr( hash( 'sha256', $secret_iv ), 0, 16 );
+
+        $ciphertext = openssl_encrypt( $plaintext, $encrypt_method, $key, 0, $iv );
+        $ciphertext = base64_encode( $ciphertext );
+
+        return $ciphertext;
+
     }
 
-    public function decryptString($ciphertext_base64)
-    {
-        $ciphertext_dec = base64_decode($ciphertext_base64);
-        $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
+    /**
+     * Decrypt the encrypted string.
+     *
+     * @param  string $ciphertext_base64 - encrypted string.
+     * @return string
+     * @since  2.6.3
+     */
+    public function decryptString( $ciphertext_base64 ) {
 
-        $iv_dec = substr($ciphertext_dec, 0, $iv_size);
-        $ciphertext_dec = substr($ciphertext_dec, $iv_size);
-        $key = $this->truncateKey();
-        $plaintext_dec = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
+        $plaintext = false;
 
-        return rtrim($plaintext_dec, "\0");
+        $encrypt_method = 'AES-256-CBC';
+        $secret_key     = $this->truncateKey();
+        $secret_iv      = $this->get_openssl_iv();
+
+        // Hash the key.
+        $key = hash( 'sha256', $secret_key );
+
+        // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning.
+        $iv = substr( hash( 'sha256', $secret_iv ), 0, 16 );
+
+        $plaintext = openssl_decrypt( base64_decode( $ciphertext_base64 ), $encrypt_method, $key, 0, $iv );
+
+        return $plaintext;
+
     }
 
     public function MirroringAlertsToDB($args)
@@ -491,5 +521,22 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         } else {
             return AUTH_KEY;
         }
+    }
+
+    /**
+     * Get OpenSSL IV for DB.
+     *
+     * @since 2.6.3
+     */
+    private function get_openssl_iv() {
+
+        $secret_openssl_iv = 'і-(аэ┤#≥и┴зейН';
+        $key_size = strlen( $secret_openssl_iv );
+        if ( $key_size > 32 ) {
+            return substr( $secret_openssl_iv, 0, 32 );
+        } else {
+            return $secret_openssl_iv;
+        }
+
     }
 }
