@@ -104,6 +104,7 @@ final class WSAL_Alert
     }
     
     /**
+     * Gets alert message.
      * @param array $metaData (Optional) Meta data relevant to message.
      * @param callable|null $metaFormatter (Optional) Meta formatter callback.
      * @param string|null $mesg (Optional) Override message template to use.

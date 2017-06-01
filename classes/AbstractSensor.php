@@ -51,7 +51,7 @@ abstract class WSAL_AbstractSensor
     /**
      * Check to see whether or not the specified directory is accessible
      * @param string $dirPath
-     * @return bool
+     * @return boolean
      */
     protected function CheckDirectory($dirPath)
     {

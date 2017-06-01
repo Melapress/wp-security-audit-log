@@ -5,23 +5,28 @@
 class WSAL_Views_Extensions extends WSAL_AbstractView
 {
     
-    public function GetTitle() {
+    public function GetTitle()
+    {
         return __('WP Security Audit Log Add-Ons', 'wp-security-audit-log');
     }
     
-    public function GetIcon() {
+    public function GetIcon()
+    {
         return 'dashicons-external';
     }
     
-    public function GetName() {
+    public function GetName()
+    {
         return __(' Add Functionality', 'wp-security-audit-log');
     }
     
-    public function GetWeight() {
+    public function GetWeight()
+    {
         return 3.5;
     }
 
-    public function Header() {
+    public function Header()
+    {
         wp_enqueue_style(
             'extensions',
             $this->_plugin->GetBaseUrl() . '/css/extensions.css',

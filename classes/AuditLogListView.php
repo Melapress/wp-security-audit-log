@@ -7,7 +7,6 @@ require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
  */
 class WSAL_AuditLogListView extends WP_List_Table
 {
-
     /**
      * @var WpSecurityAuditLog
      */

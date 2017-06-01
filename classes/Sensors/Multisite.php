@@ -2,13 +2,22 @@
 /**
  * @package Wsal
  * @subpackage Sensors
+ * Multisite sensor.
  */
-class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
+class WSAL_Sensors_Multisite extends WSAL_AbstractSensor
+{
+    protected $old_allowedthemes = null;
 
-    public function HookEvents() {
-        if($this->plugin->IsMultisite()){
+    /**
+     * Listening to events using WP hooks.
+     */
+    public function HookEvents()
+    {
+        if ($this->plugin->IsMultisite()) {
             add_action('admin_init', array($this, 'EventAdminInit'));
-            if(current_user_can('switch_themes'))add_action('shutdown', array($this, 'EventAdminShutdown'));
+            if (current_user_can('switch_themes')) {
+                add_action('shutdown', array($this, 'EventAdminShutdown'));
+            }
             add_action('wpmu_new_blog', array($this, 'EventNewBlog'), 10, 1);
             add_action('archive_blog', array($this, 'EventArchiveBlog'));
             add_action('unarchive_blog', array($this, 'EventUnarchiveBlog'));
@@ -20,19 +29,27 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
         }
     }
     
-    protected $old_allowedthemes = null;
-    
-    public function EventAdminInit(){
+    /**
+     * Triggered when a user accesses the admin area.
+     */
+    public function EventAdminInit()
+    {
         $this->old_allowedthemes = array_keys((array)get_site_option('allowedthemes'));
     }
     
-    public function EventAdminShutdown(){
-        if(is_null($this->old_allowedthemes))return;
+    /**
+     * Activated/Deactivated theme on network.
+     */
+    public function EventAdminShutdown()
+    {
+        if (is_null($this->old_allowedthemes)) {
+            return;
+        }
         $new_allowedthemes = array_keys((array)get_site_option('allowedthemes'));
         
         // check for enabled themes
-        foreach($new_allowedthemes as $theme)
-            if(!in_array($theme, (array)$this->old_allowedthemes)){
+        foreach ($new_allowedthemes as $theme) {
+            if (!in_array($theme, (array)$this->old_allowedthemes)) {
                 $theme = wp_get_theme($theme);
                 $this->plugin->alerts->Trigger(5008, array(
                     'Theme' => (object)array(
@@ -45,10 +62,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
                     ),
                 ));
             }
+        }
         
         // check for disabled themes
-        foreach((array)$this->old_allowedthemes as $theme)
-            if(!in_array($theme, $new_allowedthemes)){
+        foreach ((array)$this->old_allowedthemes as $theme) {
+            if (!in_array($theme, $new_allowedthemes)) {
                 $theme = wp_get_theme($theme);
                 $this->plugin->alerts->Trigger(5009, array(
                     'Theme' => (object)array(
@@ -61,51 +79,80 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
                     ),
                 ));
             }
+        }
     }
 
-    public function EventNewBlog($blog_id){
+    /**
+     * New site added on the network.
+     */
+    public function EventNewBlog($blog_id)
+    {
         $this->plugin->alerts->Trigger(7000, array(
             'BlogID' => $blog_id,
             'SiteName' => get_blog_option($blog_id, 'blogname'),
         ));
     }
     
-    public function EventArchiveBlog($blog_id){
+    /**
+     * Existing site archived.
+     */
+    public function EventArchiveBlog($blog_id)
+    {
         $this->plugin->alerts->Trigger(7001, array(
             'BlogID' => $blog_id,
             'SiteName' => get_blog_option($blog_id, 'blogname'),
         ));
     }
     
-    public function EventUnarchiveBlog($blog_id){
+    /**
+     * Archived site has been unarchived.
+     */
+    public function EventUnarchiveBlog($blog_id)
+    {
         $this->plugin->alerts->Trigger(7002, array(
             'BlogID' => $blog_id,
             'SiteName' => get_blog_option($blog_id, 'blogname'),
         ));
     }
     
-    public function EventActivateBlog($blog_id){
+    /**
+     * Deactivated site has been activated.
+     */
+    public function EventActivateBlog($blog_id)
+    {
         $this->plugin->alerts->Trigger(7003, array(
             'BlogID' => $blog_id,
             'SiteName' => get_blog_option($blog_id, 'blogname'),
         ));
     }
     
-    public function EventDeactivateBlog($blog_id){
+    /**
+     * Site has been deactivated.
+     */
+    public function EventDeactivateBlog($blog_id)
+    {
         $this->plugin->alerts->Trigger(7004, array(
             'BlogID' => $blog_id,
             'SiteName' => get_blog_option($blog_id, 'blogname'),
         ));
     }
     
-    public function EventDeleteBlog($blog_id){
+    /**
+     * Existing site deleted from network.
+     */
+    public function EventDeleteBlog($blog_id)
+    {
         $this->plugin->alerts->Trigger(7005, array(
             'BlogID' => $blog_id,
             'SiteName' => get_blog_option($blog_id, 'blogname'),
         ));
     }
     
-    public function EventUserAddedToBlog($user_id, $role, $blog_id){
+    /**
+     * Existing user added to a site.
+     */
+    public function EventUserAddedToBlog($user_id, $role, $blog_id)
+    {
         $this->plugin->alerts->TriggerIf(4010, array(
             'TargetUserID' => $user_id,
             'TargetUsername' => get_userdata($user_id)->user_login,
@@ -115,7 +162,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
         ), array($this, 'MustNotContainCreateUser'));
     }
     
-    public function EventUserRemovedFromBlog($user_id){
+    /**
+     * User removed from site.
+     */
+    public function EventUserRemovedFromBlog($user_id)
+    {
         $user = get_userdata($user_id);
         $blog_id = (isset($_REQUEST['id']) ? $_REQUEST['id'] : 0);
         $this->plugin->alerts->TriggerIf(4011, array(
@@ -127,7 +178,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
         ), array($this, 'MustNotContainCreateUser'));
     }
     
-    public function MustNotContainCreateUser(WSAL_AlertManager $mgr){
+    /**
+     * New network user created.
+     */
+    public function MustNotContainCreateUser(WSAL_AlertManager $mgr)
+    {
         return !$mgr->WillTrigger(4012);
     }
 }

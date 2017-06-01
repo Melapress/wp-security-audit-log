@@ -4,7 +4,6 @@
  */
 class WSAL_Views_Settings extends WSAL_AbstractView
 {
-
     public $adapterMsg = '';
     
     public function __construct(WpSecurityAuditLog $plugin)
@@ -17,34 +16,45 @@ class WSAL_Views_Settings extends WSAL_AbstractView
         add_action('wp_ajax_AjaxGetAllRoles', array($this, 'AjaxGetAllRoles'));
     }
     
-    public function HasPluginShortcutLink(){
+    public function HasPluginShortcutLink()
+    {
         return true;
     }
     
-    public function GetTitle() {
+    public function GetTitle()
+    {
         return __('Settings', 'wp-security-audit-log');
     }
     
-    public function GetIcon() {
+    public function GetIcon()
+    {
         return 'dashicons-admin-generic';
     }
     
-    public function GetName() {
+    public function GetName()
+    {
         return __('Settings', 'wp-security-audit-log');
     }
     
-    public function GetWeight() {
+    public function GetWeight()
+    {
         return 3;
     }
     
-    protected function GetTokenType($token){
+    protected function GetTokenType($token)
+    {
         $users = array();
-        foreach (get_users('blog_id=0&fields[]=user_login') as $obj)
+        foreach (get_users('blog_id=0&fields[]=user_login') as $obj) {
             $users[] = $obj->user_login;
+        }
         $roles = array_keys(get_editable_roles());
         
-        if(in_array($token, $users))return 'user';
-        if(in_array($token, $roles))return 'role';
+        if (in_array($token, $users)) {
+            return 'user';
+        }
+        if (in_array($token, $roles)) {
+            return 'role';
+        }
         return 'other';
     }
     
@@ -92,17 +102,20 @@ class WSAL_Views_Settings extends WSAL_AbstractView
     
     public function AjaxCheckSecurityToken()
     {
-        if (!$this->_plugin->settings->CurrentUserCan('view'))
+        if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
-        if (!isset($_REQUEST['token']))
+        }
+        if (!isset($_REQUEST['token'])) {
             die('Token parameter expected.');
+        }
         die($this->GetTokenType($_REQUEST['token']));
     }
     
     public function AjaxRunCleanup()
     {
-        if (!$this->_plugin->settings->CurrentUserCan('view'))
+        if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
+        }
         $this->_plugin->CleanUp();
         wp_redirect($this->GetUrl());
         exit;
@@ -649,7 +662,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
             }
 
             jQuery(document).ready(function() {
-                var statusConfig = <?php  if ($this->_plugin->settings->IsLoggingDisabled()) { echo 1; } else { echo 0; } ?>;
+                var statusConfig = <?php if ($this->_plugin->settings->IsLoggingDisabled()) { echo 1; } else { echo 0; } ?>;
                 var logging_status = jQuery('#logging_status');
                 var txtNot = jQuery('#logging_status_text');
 

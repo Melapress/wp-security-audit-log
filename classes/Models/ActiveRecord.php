@@ -4,6 +4,12 @@
  */
 abstract class WSAL_Models_ActiveRecord
 {
+    const STATE_UNKNOWN  = 'unknown';
+    const STATE_CREATED  = 'created';
+    const STATE_UPDATED  = 'updated';
+    const STATE_DELETED  = 'deleted';
+    const STATE_LOADED   = 'loaded';
+
     /**
      * @var $connector Data connector;
      */
@@ -14,6 +20,10 @@ abstract class WSAL_Models_ActiveRecord
     protected $adapterName = null;
 
     protected $useDefaultAdapter = false;
+
+    protected $_state = self::STATE_UNKNOWN;
+
+    protected static $_cache = array();
     
     /**
      * @return array Returns this records' fields.
@@ -48,15 +58,10 @@ abstract class WSAL_Models_ActiveRecord
     {
         return $this->id;
     }
-    
-    const STATE_UNKNOWN  = 'unknown';
-    const STATE_CREATED  = 'created';
-    const STATE_UPDATED  = 'updated';
-    const STATE_DELETED  = 'deleted';
-    const STATE_LOADED   = 'loaded';
 
-    protected $_state = self::STATE_UNKNOWN;
-
+    /**
+     * @throws Exception requires adapterName
+     */
     public function __construct($data = null)
     {
         if (!$this->adapterName) {
@@ -68,6 +73,10 @@ abstract class WSAL_Models_ActiveRecord
         }
     }
 
+    /**
+     * Gets the connector.
+     * @return WSAL_Connector_ConnectorInterface
+     */
     protected function getConnector()
     {
         if (!empty($this->connector)) {
@@ -81,14 +90,19 @@ abstract class WSAL_Models_ActiveRecord
         return $this->connector;
     }
 
+    /**
+     * Gets an adapter for the specified model
+     * based on the adapter name.
+     * @see WSAL_Connector_ConnectorInterface::getAdapter()
+     */
     public function getAdapter()
     {
         return $this->getConnector()->getAdapter($this->adapterName);
     }
     
-
     /**
      * Load record from DB.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::Load()
      * @param string $cond (Optional) Load condition.
      * @param array $args (Optional) Load condition arguments.
      */
@@ -144,6 +158,7 @@ abstract class WSAL_Models_ActiveRecord
 
     /**
      * Save this active record
+     * @see WSAL_Adapters_MySQL_ActiveRecord::Save()
      * @return integer|boolean Either the number of modified/inserted rows or false on failure.
      */
     public function Save()
@@ -164,7 +179,9 @@ abstract class WSAL_Models_ActiveRecord
     }
 
     /**
-     * Deletes this active record
+     * Deletes this active record.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::Delete()
+     * @return int|boolean Either the amount of deleted rows or False on error.
      */
     public function Delete()
     {
@@ -177,6 +194,11 @@ abstract class WSAL_Models_ActiveRecord
         return $result;
     }
 
+    /**
+     * Count records that matching a condition.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::Count()
+     * @return int count
+     */
     public function Count($cond = '%d', $args = array(1))
     {
         $result = $this->getAdapter()->Count($cond, $args);
@@ -184,7 +206,8 @@ abstract class WSAL_Models_ActiveRecord
     }
     
     /**
-     * @return boolean
+     * Check state loaded.
+     * @return bool
      */
     public function IsLoaded()
     {
@@ -192,7 +215,8 @@ abstract class WSAL_Models_ActiveRecord
     }
     
     /**
-     * @return boolean
+     * Check state saved.
+     * @return bool
      */
     public function IsSaved()
     {
@@ -201,7 +225,8 @@ abstract class WSAL_Models_ActiveRecord
     }
     
     /**
-     * @return boolean
+     * Check state created.
+     * @return bool
      */
     public function IsCreated()
     {
@@ -209,7 +234,8 @@ abstract class WSAL_Models_ActiveRecord
     }
     
     /**
-     * @return boolean
+     * Check state updated.
+     * @return bool
      */
     public function IsUpdated()
     {
@@ -217,27 +243,32 @@ abstract class WSAL_Models_ActiveRecord
     }
 
     /**
-     * @return boolean
+     * Check if the Record structure is created.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::IsInstalled()
+     * @return bool
      */
     public function IsInstalled()
     {
         return $this->getAdapter()->IsInstalled();
     }
 
+    /**
+     * Install the Record structure.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::Install()
+     */
     public function Install()
     {
         return $this->getAdapter()->Install();
     }
     
     /**
-     * @return boolean
+     * Check state deleted.
+     * @return bool
      */
     public function IsDeleted()
     {
         return $this->_state == self::STATE_DELETED;
     }
-    
-    protected static $_cache = array();
     
     /**
      * Load ActiveRecord from DB or cache.
@@ -279,7 +310,15 @@ abstract class WSAL_Models_ActiveRecord
     }
     
     /**
-     * Function used in WSAL reporting extension
+     * Function used in WSAL reporting extension.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::GetReporting()
+     * @param int $_siteId site ID
+     * @param int $_userId user ID
+     * @param string $_roleName user role
+     * @param int $_alertCode alert code
+     * @param timestamp $_startTimestamp from created_on
+     * @param timestamp $_endTimestamp to created_on
+     * @return array Report results
      */
     public function GetReporting($_siteId, $_userId, $_roleName, $_alertCode, $_startTimestamp, $_endTimestamp)
     {
@@ -287,7 +326,10 @@ abstract class WSAL_Models_ActiveRecord
     }
 
     /**
-     * Check if the float is IPv4 instead
+     * Check if the float is IPv4 instead.
+     * @see WSAL_Models_ActiveRecord::LoadData()
+     * @param float $ip_address number to check
+     * @return bool result validation
      */
     private function is_ip_address($ip_address)
     {

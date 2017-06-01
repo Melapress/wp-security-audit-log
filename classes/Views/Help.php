@@ -2,25 +2,30 @@
 /**
  * @package Wsal
  */
-class WSAL_Views_Help extends WSAL_AbstractView {
-    
-    public function GetTitle() {
+class WSAL_Views_Help extends WSAL_AbstractView
+{
+    public function GetTitle()
+    {
         return __('Help', 'wp-security-audit-log');
     }
     
-    public function GetIcon() {
+    public function GetIcon()
+    {
         return 'dashicons-sos';
     }
     
-    public function GetName() {
+    public function GetName()
+    {
         return __('Help', 'wp-security-audit-log');
     }
     
-    public function GetWeight() {
+    public function GetWeight()
+    {
         return 5;
     }
     
-    public function Render(){
+    public function Render()
+    {
         ?><div class="metabox-holder" style="position: relative;">
         
             <div class="postbox" style="margin-right: 270px;">
@@ -77,5 +82,4 @@ class WSAL_Views_Help extends WSAL_AbstractView {
             
         </div><?php
     }
-    
 }

@@ -14,6 +14,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     
     /**
      * Returns the alert related to this occurrence.
+     * @see WSAL_AlertManager::GetAlert()
      * @return WSAL_Alert
      */
     public function GetAlert()
@@ -23,6 +24,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     
     /**
      * Returns the value of a meta item.
+     * @see WSAL_Adapters_MySQL_Occurrence::GetNamedMeta()
      * @param string $name Name of meta item.
      * @param mixed $default Default value returned when meta does not exist.
      * @return mixed The value, if meta item does not exist $default returned.
@@ -30,7 +32,6 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     public function GetMetaValue($name, $default = array())
     {
         //get meta adapter
-        //call the function ($name, $this->getId())
         $meta = $this->getAdapter()->GetNamedMeta($this, $name);
         return maybe_unserialize($meta['value']);
 
@@ -55,6 +56,12 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
         }
     }
     
+    /**
+     * Update Metadata of this occurrence by name.
+     * @see WSAL_Models_Meta::UpdateByNameAndOccurenceId()
+     * @param string $name meta name
+     * @param mixed $value meta value
+     */
     public function UpdateMetaValue($name, $value)
     {
         $model = new WSAL_Models_Meta();
@@ -63,6 +70,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
 
     /**
      * Returns a key-value pair of meta data.
+     * @see WSAL_Adapters_MySQL_Occurrence::GetMultiMeta()
      * @return array
      */
     public function GetMetaArray()
@@ -87,6 +95,8 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     }
     
     /**
+     * Gets alert message.
+     * @see WSAL_Alert::GetMessage()
      * @param callable|null $metaFormatter (Optional) Meta formatter callback.
      * @return string Full-formatted message.
      */
@@ -108,6 +118,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     
     /**
      * Delete occurrence as well as associated meta data.
+     * @see WSAL_Adapters_ActiveRecordInterface::Delete()
      * @return boolean True on success, false on failure.
      */
     public function Delete()
@@ -119,6 +130,8 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     }
     
     /**
+     * Gets the username.
+     * @see WSAL_Adapters_MySQL_Occurrence::GetFirstNamedMeta()
      * @return string User's username.
      */
     public function GetUsername()
@@ -136,6 +149,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     }
     
     /**
+     * Gets the Client IP.
      * @return string IP address of request.
      */
     public function GetSourceIP()
@@ -144,6 +158,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     }
     
     /**
+     * Gets if there are other IPs.
      * @return string IP address of request (from proxies etc).
      */
     public function GetOtherIPs()
@@ -159,6 +174,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     }
     
     /**
+     * Gets user roles.
      * @return array Array of user roles.
      */
     public function GetUserRoles()
@@ -176,13 +192,14 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     }
 
     /**
-     * Finds occurences of the same type by IP and Username within specified time frame
+     * Finds occurences of the same type by IP and Username within specified time frame.
      * @param string $ipAddress
      * @param string $username
      * @param int $alertId Alert type we are lookign for
      * @param int $siteId
      * @param $startTime mktime
      * @param $endTime mktime
+     * @return WSAL_Occurrence[]
      */
     public function CheckKnownUsers($args = array())
     {
@@ -190,23 +207,41 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
     }
 
     /**
-     * Finds occurences of the same type by IP within specified time frame
+     * Finds occurences of the same type by IP within specified time frame.
      * @param string $ipAddress
      * @param int $alertId Alert type we are lookign for
      * @param int $siteId
      * @param $startTime mktime
      * @param $endTime mktime
+     * @return WSAL_Occurrence[]
      */
     public function CheckUnKnownUsers($args = array())
     {
         return $this->getAdapter()->CheckUnKnownUsers($args);
     }
 
+    /**
+     * Gets occurrence by Post_id
+     * @see WSAL_Adapters_MySQL_Occurrence::GetByPostID()
+     * @param integer $post_id
+     * @return WSAL_Occurrence[]
+     */
     public function GetByPostID($post_id)
     {
         return $this->getAdapter()->GetByPostID($post_id);
     }
 
+    /**
+     * Gets occurences of the same type by IP within specified time frame.
+     * @see WSAL_Adapters_MySQL_Occurrence::CheckAlert404()
+     * @param string $ipAddress
+     * @param string $username
+     * @param int $alertId Alert type we are lookign for
+     * @param int $siteId
+     * @param $startTime mktime
+     * @param $endTime mktime
+     * @return WSAL_Occurrence[]
+     */
     public function CheckAlert404($args = array())
     {
         return $this->getAdapter()->CheckAlert404($args);

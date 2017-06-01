@@ -2,9 +2,15 @@
 /**
  * @package Wsal
  * @subpackage Sensors
+ * Writes the Request.log.php file.
  */
 class WSAL_Sensors_Request extends WSAL_AbstractSensor 
 {
+    protected static $envvars = array();
+    
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         if ($this->plugin->settings->IsRequestLoggingEnabled()) {
@@ -12,6 +18,9 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Fires just before PHP shuts down execution.
+     */
     public function EventShutdown()
     {
         $upload_dir = wp_upload_dir();
@@ -46,13 +55,17 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor
         }
     }
     
-    protected static $envvars = array();
-    
+    /**
+     * Sets $envvars element with key and value.
+     */
     public static function SetVar($name, $value)
     {
         self::$envvars[$name] = $value;
     }
     
+    /**
+     * Copy data array into $envvars array.
+     */
     public static function SetVars($data)
     {
         foreach ($data as $name => $value) {

@@ -107,7 +107,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
     }
 
     /**
-     * Remove this ActiveRecord structure into DB.
+     * Remove this ActiveRecord structure from DB.
      */
     public function Uninstall()
     {

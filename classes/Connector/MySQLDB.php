@@ -23,6 +23,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
     /**
      * Test the connection.
+     * @throws Exception Connection failed
      */
     public function TestConnection()
     {
@@ -56,6 +57,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
     /**
      * Returns a wpdb instance
+     * @return wpdb
      */
     public function getConnection()
     {
@@ -78,7 +80,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     }
 
     /**
-     * Gets an adapter for the specified model
+     * Gets an adapter for the specified model.
+     * @return WSAL_Adapters_MySQL_{class_name}
      */
     public function getAdapter($class_name)
     {

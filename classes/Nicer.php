@@ -50,26 +50,30 @@ class WSAL_Nicer
      * @param mixed $value The value to inspect and render.
      * @param boolean $inspectMethods Whether to inspect and output methods for objects or not.
      */
-    public function __construct($value, $inspectMethods = false){ 
+    public function __construct($value, $inspectMethods = false)
+    {
         $this->value = $value;
         $this->inspect_methods = $inspectMethods;
         
-        if(is_null($this->_has_reflection))
+        if (is_null($this->_has_reflection)) {
             $this->_has_reflection = class_exists('ReflectionClass');
+        }
     }
     
     /**
      * Generates the inspector HTML and returns it as a string.
      * @return string Generated HTML.
      */
-    public function generate(){
+    public function generate()
+    {
         return $this->_generate_value($this->value, $this->css_class);
     }
     
     /**
      * Renders the inspector HTML directly to the browser.
      */
-    public function render(){
+    public function render()
+    {
         echo $this->generate();
     }
 
@@ -78,50 +82,53 @@ class WSAL_Nicer
      * @param string $text The original string.
      * @return string The string as HTML.
      */
-    protected function _esc_html($text){
+    protected function _esc_html($text)
+    {
         return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
     }
     
-    protected function _inspect_array(&$html, &$var){
+    protected function _inspect_array(&$html, &$var)
+    {
         $has_subitems = false;
         
-        foreach($var as $k => $v){
-            if($k !== self::$BEEN_THERE){
+        foreach ($var as $k => $v) {
+            if ($k !== self::$BEEN_THERE) {
                 $html .= $this->_generate_keyvalue($k, $v);
                 $has_subitems = true;
             }
         }
         
-        if(!$has_subitems){
+        if (!$has_subitems) {
             $html .= '<span class="'.$this->css_class.'_ni">Empty Array</span>';
         }
     }
     
-    protected function _inspect_object(&$html, &$var){
+    protected function _inspect_object(&$html, &$var)
+    {
         // render properties
         $has_subitems = false;
         
-        foreach((array)$var as $k=>$v){
-            if($k !== self::$BEEN_THERE){
+        foreach ((array)$var as $k => $v) {
+            if ($k !== self::$BEEN_THERE) {
                 $html .= $this->_generate_keyvalue($k, $v);
                 $has_subitems = true;
             }
         }
         
-        if(!$has_subitems){
+        if (!$has_subitems) {
             $html .= '<span class="'.$this->css_class.'_ni">No Properties</span>';
         }
 
         // render methods (if enabled)
-        if($this->inspect_methods){
+        if ($this->inspect_methods) {
             $has_subitems = false;
             
-            foreach((array)get_class_methods($var) as $method){
+            foreach ((array)get_class_methods($var) as $method) {
                 $html .= $this->_generate_callable($var, $method);
                 $has_subitems = true;
             }
             
-            if(!$has_subitems){
+            if (!$has_subitems) {
                 $html .= '<span class="'.$this->css_class.'_ni">No Methods</span>';
             }
         }
@@ -133,19 +140,18 @@ class WSAL_Nicer
      * @param string $class Parent CSS class.
      * @param string $id Item HTML id.
      */
-    protected function _generate_value($var, $class = '', $id = ''){
+    protected function _generate_value($var, $class = '', $id = '')
+    {
         $BEENTHERE = self::$BEEN_THERE;
         $class .= ' '.$this->css_class.'_t_'.gettype($var);
         
         $html = '<div id="'.$id.'" class="'.$class.'">';
-        
-        switch(true){
-
+        switch (true) {
             // handle arrays
             case is_array($var):
-                if(isset($var[$BEENTHERE])){
+                if (isset($var[$BEENTHERE])) {
                     $html .= '<span class="'.$this->css_class.'_ir">Infinite Recursion Detected!</span>';
-                }else{
+                } else {
                     $var[$BEENTHERE] = true;
                     $this->_inspect_array($html, $var);
                     unset($var[$BEENTHERE]);
@@ -154,9 +160,9 @@ class WSAL_Nicer
 
             // handle objects
             case is_object($var):
-                if(isset($var->$BEENTHERE)){
+                if (isset($var->$BEENTHERE)) {
                     $html .= '<span class="'.$this->css_class.'_ir">Infinite Recursion Detected!</span>';
-                }else{
+                } else {
                     $var->$BEENTHERE = true;
                     $this->_inspect_object($html, $var);
                     unset($var->$BEENTHERE);
@@ -177,7 +183,8 @@ class WSAL_Nicer
      * @staticvar int $id
      * @return integer An ID unique per request.
      */
-    protected function _generate_dropid(){
+    protected function _generate_dropid()
+    {
         static $id = 0;
         return ++$id;
     }
@@ -188,14 +195,15 @@ class WSAL_Nicer
      * @param string $key Key name.
      * @param mixed $val Key value.
      */
-    protected function _generate_keyvalue($key, $val){
+    protected function _generate_keyvalue($key, $val)
+    {
         $id = $this->_generate_dropid();
         $p = '';                // preview
         $d = '';                // description
-        $t = gettype($val);     // get data type 
+        $t = gettype($val);     // get data type
         $is_hash = ($t=='array') || ($t=='object');
         
-        switch($t){
+        switch ($t) {
             case 'boolean':
                 $p = $val ? 'TRUE' : 'FALSE';
                 break;
@@ -228,34 +236,35 @@ class WSAL_Nicer
         $html .= '  <span class="'.$cls.'_p '.$cls.'_t_'.$t.'">'.$this->_esc_html($p).'</span>';
         $html .= '</a>';
         
-        if($is_hash){
+        if ($is_hash) {
             $html .= $this->_generate_value($val, $cls.'_v', $this->html_id.'_v'.$id);
         }
         
         return $html;
     }
     
-    protected function _generate_callable($context, $callback){
+    protected function _generate_callable($context, $callback)
+    {
         $id = $this->_generate_dropid();
         $ref = null;
         $name = 'Anonymous';
         $cls = $this->css_class;
         
-        if($this->_has_reflection){
-            if(is_null($context)){
+        if ($this->_has_reflection) {
+            if (is_null($context)) {
                 $ref = new ReflectionFunction($callback);
-            }else{
+            } else {
                 $ref = new ReflectionMethod($context, $callback);
             }
             $name = $ref->getName();
-        }elseif(is_string($callback)){
+        } elseif (is_string($callback)) {
             $name = $callback;
         }
             
-        if(!is_null($ref)){
+        if (!is_null($ref)) {
             $doc = $ref->getDocComment();
             $prms = array();
-            foreach($ref->getParameters() as $p){
+            foreach ($ref->getParameters() as $p) {
                 $prms[] = '$' . $p->getName() . (
                     $p->isDefaultValueAvailable()
                         ? (
@@ -268,7 +277,7 @@ class WSAL_Nicer
                         : ''
                 );
             }
-        }else{
+        } else {
             $doc = null;
             $prms = array('???');
         }
@@ -279,7 +288,7 @@ class WSAL_Nicer
         $html .= '  <span class="'.$cls.'_k">'.$this->_esc_html($name).'<span class="'.$cls.'_ma">(<span>'.implode(', ', $prms).'</span>)</span></span>';
         $html .= '</a>';
         
-        if($doc){
+        if ($doc) {
             $html .= '<div id="'.$this->html_id.'_v'.$id.'" class="nice_r_v '.$this->css_class.'_t_comment">';
             $html .= nl2br(str_replace(' ', '&nbsp;', $this->_esc_html($doc)));
             $html .= '</div>';

@@ -22,6 +22,8 @@ abstract class WSAL_AbstractView
      * @var boolean
      */
     public $is_active = false;
+
+    public static $AllowedNoticeNames = array();
     
     /**
      * @param WpSecurityAuditLog $plugin
@@ -40,8 +42,6 @@ abstract class WSAL_AbstractView
         // handle admin notices
         add_action('wp_ajax_AjaxDismissNotice', array($this, 'AjaxDismissNotice'));
     }
-    
-    public static $AllowedNoticeNames = array();
     
     /**
      * Dismiss an admin notice through ajax.

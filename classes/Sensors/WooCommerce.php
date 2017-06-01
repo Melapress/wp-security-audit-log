@@ -14,6 +14,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
     protected $_OldFileNames = array();
     protected $_OldFileUrls = array();
 
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         if (current_user_can("edit_posts")) {
@@ -28,6 +31,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         // add_action('edit_product_cat', array($this, 'EventCategoryChanged'), 10, 1);
     }
 
+    /**
+     * Triggered when a user accesses the admin area.
+     */
     public function EventAdminInit()
     {
         // load old data, if applicable
@@ -35,6 +41,10 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         $this->CheckSettingsChange();
     }
 
+    /**
+     * Retrieve Old data.
+     * @global mixed $_POST post data
+     */
     protected function RetrieveOldData()
     {
         if (isset($_POST) && isset($_POST['post_ID'])
@@ -785,6 +795,10 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         return $fn('woocommerce_' . $option_name);
     }
 
+    /**
+     * Check post type.
+     * @param stdClass $post post
+     */
     private function CheckWooCommerce($post)
     {
         switch ($post->post_type) {
@@ -795,6 +809,11 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Get editor link.
+     * @param stdClass $post the post
+     * @return array $aLink name and value link
+     */
     private function GetEditorLink($post)
     {
         $name = 'EditorLinkProduct';

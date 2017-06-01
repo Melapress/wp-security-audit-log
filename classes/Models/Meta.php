@@ -11,6 +11,11 @@ class WSAL_Models_Meta extends WSAL_Models_ActiveRecord
     public $name = '';
     public $value = array(); // force mixed type
 
+    /**
+     * Save Metadata into Adapter.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::Save()
+     * @return integer|boolean Either the number of modified/inserted rows or false on failure.
+     */
     public function SaveMeta()
     {
         $this->_state = self::STATE_UNKNOWN;
@@ -23,6 +28,13 @@ class WSAL_Models_Meta extends WSAL_Models_ActiveRecord
         return $result;
     }
 
+    /**
+     * Update Metadata by name and occurrence_id.
+     * @see WSAL_Adapters_MySQL_Meta::LoadByNameAndOccurenceId()
+     * @param string $name meta name
+     * @param mixed $value meta value
+     * @param integer $occurrenceId occurrence_id
+     */
     public function UpdateByNameAndOccurenceId($name, $value, $occurrenceId)
     {
         $meta = $this->getAdapter()->LoadByNameAndOccurenceId($name, $occurrenceId);

@@ -2,8 +2,8 @@
 /**
  * @package Wsal
  */
-class WSAL_Views_Search extends WSAL_AbstractView {
-    
+class WSAL_Views_Search extends WSAL_AbstractView
+{
     public function GetTitle()
     {
         return __('Search Add-On', 'wp-security-audit-log');
@@ -24,7 +24,8 @@ class WSAL_Views_Search extends WSAL_AbstractView {
         return 9;
     }
 
-    public function Header() {
+    public function Header()
+    {
         wp_enqueue_style(
             'extensions',
             $this->_plugin->GetBaseUrl() . '/css/extensions.css',

@@ -40,6 +40,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 
     /**
      * Returns metadata related to this event.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::Load()
      * @return WSAL_Meta
      */
     public function GetMeta($occurence)
@@ -53,6 +54,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 
     /**
      * Returns allmeta data related to this event.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::LoadArray()
      * @return WSAL_Meta[]
      */
     public function GetMultiMeta($occurence)
@@ -66,6 +68,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 
     /**
      * Loads a meta item given its name.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::Load()
      * @param string $name Meta name.
      * @return WSAL_Meta The meta item, be sure to checked if it was loaded successfully.
      */
@@ -117,13 +120,14 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     }
 
     /**
-     * Gets occurences of the same type by IP and Username within specified time frame
+     * Gets occurences of the same type by IP and Username within specified time frame.
      * @param string $ipAddress
      * @param string $username
      * @param int $alertId Alert type we are lookign for
      * @param int $siteId
      * @param $startTime mktime
      * @param $endTime mktime
+     * @return WSAL_Occurrence[]
      */
     public function CheckKnownUsers($args = array())
     {
@@ -144,12 +148,13 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     }
 
     /**
-     * Gets occurences of the same type by IP within specified time frame
+     * Gets occurences of the same type by IP within specified time frame.
      * @param string $ipAddress
      * @param int $alertId Alert type we are lookign for
      * @param int $siteId
      * @param $startTime mktime
      * @param $endTime mktime
+     * @return WSAL_Occurrence[]
      */
     public function CheckUnKnownUsers($args = array()) 
     {
@@ -200,8 +205,9 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     }
     
     /**
-     * Gets occurrence by Post_id
+     * Gets occurrence by Post_id.
      * @param int $post_id
+     * @return WSAL_Occurrence[]
      */
     public function GetByPostID($post_id)
     {
@@ -218,13 +224,14 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     }
 
     /**
-     * Gets occurences of the same type by IP within specified time frame
+     * Gets occurences of the same type by IP within specified time frame.
      * @param string $ipAddress
      * @param string $username
      * @param int $alertId Alert type we are lookign for
      * @param int $siteId
      * @param $startTime mktime
      * @param $endTime mktime
+     * @return WSAL_Occurrence[]
      */
     public function CheckAlert404($args = array())
     {

@@ -188,6 +188,7 @@ class WpSecurityAuditLog
      */
     public function Init()
     {
+        // Start listening to events
         WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
     }
 
