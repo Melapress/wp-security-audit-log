@@ -1,7 +1,9 @@
 <?php
-
-final class WSAL_Alert {
-    
+/**
+ * @package Wsal
+ */
+final class WSAL_Alert
+{
     /**
      * Alert type (used when triggering an alert etc).
      * @var integer
@@ -38,7 +40,8 @@ final class WSAL_Alert {
      */
     public $mesg = '';
     
-    public function __construct($type = 0, $code = 0, $catg = '', $subcatg = '', $desc = '', $mesg = '') {
+    public function __construct($type = 0, $code = 0, $catg = '', $subcatg = '', $desc = '', $mesg = '')
+    {
         $this->type = $type;
         $this->code = $code;
         $this->catg = $catg;
@@ -53,13 +56,16 @@ final class WSAL_Alert {
      * @param array $metaData (Optional) Meta data relevant to expression.
      * @return mixed The value nearest to the expression.
      */
-    protected function GetMetaExprValue($expr, $metaData = array()){
+    protected function GetMetaExprValue($expr, $metaData = array())
+    {
         // TODO Handle function calls (and methods?)
         $expr = explode('->', $expr);
         $meta = array_shift($expr);
         $meta = isset($metaData[$meta]) ? $metaData[$meta] : null;
-        foreach($expr as $part){
-            if(is_scalar($meta) || is_null($meta))return $meta; // this isn't 100% correct
+        foreach ($expr as $part) {
+            if (is_scalar($meta) || is_null($meta)) {
+                return $meta; // this isn't 100% correct
+            }
             $meta = is_array($meta) ? $meta[$part] : $meta->$part;
         }
         return is_scalar($meta) ? (string)$meta : var_export($meta, true);
@@ -73,20 +79,24 @@ final class WSAL_Alert {
      * @param string $afterMeta (Optional) Some text to put after meta values.
      * @return string The expanded message.
      */
-    protected function GetFormattedMesg($origMesg, $metaData = array(), $metaFormatter = null){ 
+    protected function GetFormattedMesg($origMesg, $metaData = array(), $metaFormatter = null)
+    {
         // tokenize message with regex
         $mesg = preg_split('/(%.*?%)/', (string)$origMesg, -1, PREG_SPLIT_DELIM_CAPTURE);
-        if(!is_array($mesg))return (string)$origMesg;
+        if (!is_array($mesg)) {
+            return (string)$origMesg;
+        }
         // handle tokenized message
-        foreach($mesg as $i => $token){
+        foreach ($mesg as $i => $token) {
             // handle escaped percent sign
-            if($token == '%%'){
+            if ($token == '%%') {
                 $mesg[$i] = '%';
-            }else
-            // handle complex expressions
-            if(substr($token, 0, 1) == '%' && substr($token, -1, 1) == '%'){
+            } else if (substr($token, 0, 1) == '%' && substr($token, -1, 1) == '%') {
+                // handle complex expressions
                 $mesg[$i] = $this->GetMetaExprValue(substr($token, 1, -1), $metaData);
-                if($metaFormatter)$mesg[$i] = call_user_func($metaFormatter, $token, $mesg[$i]);
+                if ($metaFormatter) {
+                    $mesg[$i] = call_user_func($metaFormatter, $token, $mesg[$i]);
+                }
             }
         }
         // compact message and return
@@ -94,12 +104,14 @@ final class WSAL_Alert {
     }
     
     /**
+     * Gets alert message.
      * @param array $metaData (Optional) Meta data relevant to message.
      * @param callable|null $metaFormatter (Optional) Meta formatter callback.
      * @param string|null $mesg (Optional) Override message template to use.
      * @return string Fully formatted message.
      */
-    public function GetMessage($metaData = array(), $metaFormatter = null, $mesg = null){
+    public function GetMessage($metaData = array(), $metaFormatter = null, $mesg = null)
+    {
         return $this->GetFormattedMesg(is_null($mesg) ? $this->mesg : $mesg, $metaData, $metaFormatter);
     }
 }

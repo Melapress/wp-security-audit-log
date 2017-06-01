@@ -1,9 +1,20 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * System Activity sensor.
+ */
 class WSAL_Sensors_System extends WSAL_AbstractSensor
 {
+    /**
+     * Transient name.
+     * WordPress will prefix the name with "_transient_" or "_transient_timeout_" in the options table.
+     */
     const TRANSIENT_404 = 'wsal-404-attempts';
 
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         add_action('wsal_prune', array($this, 'EventPruneEvents'), 10, 2);
@@ -39,16 +50,31 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * 404 limit count.
+     * @return integer limit
+     */
     protected function Get404LogLimit()
     {
         return $this->plugin->settings->Get404LogLimit();
     }
     
+    /**
+     * Expiration of the transient saved in the WP database.
+     * @return integer Time until expiration in seconds from now
+     */
     protected function Get404Expiration()
     {
         return 24 * 60 * 60;
     }
 
+    /**
+     * Check 404 limit.
+     * @param integer $site_id blog ID
+     * @param string $username username
+     * @param string $ip IP address
+     * @return boolean passed limit true|false
+     */
     protected function IsPast404Limit($site_id, $username, $ip)
     {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
@@ -56,6 +82,12 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         return ($data !== false) && isset($data[$site_id.":".$username.":".$ip]) && ($data[$site_id.":".$username.":".$ip] > $this->Get404LogLimit());
     }
     
+    /**
+     * Increment 404 limit.
+     * @param integer $site_id blog ID
+     * @param string $username username
+     * @param string $ip IP address
+     */
     protected function Increment404($site_id, $username, $ip)
     {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
@@ -72,6 +104,9 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         $set_fn(self::TRANSIENT_404, $data, $this->Get404Expiration());
     }
     
+    /**
+     * Event 404 Not found.
+     */
     public function Event404()
     {
         $attempts = 1;
@@ -149,11 +184,15 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Triggered when a user accesses the admin area.
+     */
     public function EventAdminInit()
     {
         // make sure user can actually modify target options
-        if (!current_user_can('manage_options')) return;
-        
+        if (!current_user_can('manage_options')) {
+            return;
+        }
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
         $actype = basename($_SERVER['SCRIPT_NAME'], '.php');
         $is_option_page = $actype == 'options';
@@ -299,7 +338,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     }
 
     /**
-     * Purge log files older than one month
+     * Purge log files older than one month.
      */
     public function LogFilesPruning()
     {
@@ -472,6 +511,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         return $nameFile;
     }
 
+    /**
+     * Get the latest file modified.
+     * @return string $latest_filename file name
+     */
     private function GetLastModified($uploadsDirPath, $filename)
     {
         $filename = substr($filename, 0, -4);

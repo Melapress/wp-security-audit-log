@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package Wsal
+ */
 abstract class WSAL_AbstractSensor
 {
     /**
@@ -7,7 +9,8 @@ abstract class WSAL_AbstractSensor
      */
     protected $plugin;
 
-    public function __construct(WpSecurityAuditLog $plugin){
+    public function __construct(WpSecurityAuditLog $plugin)
+    {
         $this->plugin = $plugin;
     }
 
@@ -48,7 +51,7 @@ abstract class WSAL_AbstractSensor
     /**
      * Check to see whether or not the specified directory is accessible
      * @param string $dirPath
-     * @return bool
+     * @return boolean
      */
     protected function CheckDirectory($dirPath)
     {

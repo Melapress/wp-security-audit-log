@@ -1,29 +1,46 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * Plugins & Themes sensor.
+ */
 class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
 {
+    protected $old_themes = array();
+    protected $old_plugins = array();
 
-    public function HookEvents() {
+    /**
+     * Listening to events using WP hooks.
+     */
+    public function HookEvents()
+    {
         $hasPermission = (current_user_can("install_plugins") || current_user_can("activate_plugins") ||
         current_user_can("delete_plugins") || current_user_can("update_plugins") || current_user_can("install_themes"));
 
         add_action('admin_init', array($this, 'EventAdminInit'));
-        if($hasPermission)add_action('shutdown', array($this, 'EventAdminShutdown'));
+        if ($hasPermission) {
+            add_action('shutdown', array($this, 'EventAdminShutdown'));
+        }
         add_action('switch_theme', array($this, 'EventThemeActivated'));
         // TO DO
         add_action('wp_insert_post', array($this, 'EventPluginPostCreate'), 10, 2);
         add_action('delete_post', array($this, 'EventPluginPostDelete'), 10, 1);
     }
     
-    protected $old_themes = array();
-    protected $old_plugins = array();
-    
-    public function EventAdminInit() {
+    /**
+     * Triggered when a user accesses the admin area.
+     */
+    public function EventAdminInit()
+    {
         $this->old_themes = wp_get_themes();
         $this->old_plugins = get_plugins();
     }
     
-    public function EventAdminShutdown() {
+    /**
+     * Install, uninstall, activate, deactivate, upgrade and update.
+     */
+    public function EventAdminShutdown()
+    {
         $action = (isset($_REQUEST['action']) && $_REQUEST['action'] != "-1")  ? $_REQUEST['action'] : '';
         $action = (isset($_REQUEST['action2']) && $_REQUEST['action2'] != "-1") ? $_REQUEST['action2'] : $action;
         $actype = basename($_SERVER['SCRIPT_NAME'], '.php');
@@ -35,9 +52,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
             $plugin = array_values(array_diff(array_keys(get_plugins()), array_keys($this->old_plugins)));
             if (count($plugin) != 1) {
                 return $this->LogError(
-                        'Expected exactly one new plugin but found ' . count($plugin),
-                        array('NewPlugin' => $plugin, 'OldPlugins' => $this->old_plugins, 'NewPlugins' => get_plugins())
-                    );
+                    'Expected exactly one new plugin but found ' . count($plugin),
+                    array('NewPlugin' => $plugin, 'OldPlugins' => $this->old_plugins, 'NewPlugins' => get_plugins())
+                );
             }
             $pluginPath = $plugin[0];
             $plugin = get_plugins();
@@ -227,7 +244,12 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
     }
     
-    public function EventThemeActivated($themeName){
+    /**
+     * Activated a theme.
+     * @param string $themeName name
+     */
+    public function EventThemeActivated($themeName)
+    {
         $theme = null;
         foreach (wp_get_themes() as $item) {
             if ($item->Name == $themeName) {
@@ -237,9 +259,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
         if ($theme == null) {
             return $this->LogError(
-                    'Could not locate theme named "' . $theme . '".',
-                    array('ThemeName' => $themeName, 'Themes' => wp_get_themes())
-                );
+                'Could not locate theme named "' . $theme . '".',
+                array('ThemeName' => $themeName, 'Themes' => wp_get_themes())
+            );
         }
         $this->plugin->alerts->Trigger(5006, array(
             'Theme' => (object)array(
@@ -254,7 +276,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
     }
 
     /**
-     * Used even for modified post
+     * Plugin creates/modifies posts.
+     * @param WP_Post $post post object
      */
     public function EventPluginPostCreate($insert, $post)
     {
@@ -284,6 +307,10 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Plugin deletes posts.
+     * @param integer $post_id post ID
+     */
     public function EventPluginPostDelete($post_id)
     {
         if (empty($_REQUEST['action']) && isset($_REQUEST['page'])) {
@@ -300,6 +327,10 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Get removed themes.
+     * @return array of WP_Theme objects
+     */
     protected function GetRemovedThemes()
     {
         $result = $this->old_themes;
@@ -311,6 +342,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         return array_values($result);
     }
 
+    /**
+     * Get event code by post type.
+     */
     protected function GetEventTypeForPostType($post, $typePost, $typePage, $typeCustom)
     {
         switch ($post->post_type) {
@@ -323,6 +357,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Get editor link.
+     * @param stdClass $post the post
+     * @return array $aLink name and value link
+     */
     private function GetEditorLink($post)
     {
         $name = 'EditorLink';

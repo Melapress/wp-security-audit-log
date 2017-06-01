@@ -1,8 +1,16 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * Custom fields (posts, pages and custom posts) sensor.
+ */
 class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
 {
+    protected $old_meta = array();
 
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         add_action('add_post_meta', array($this,   'EventPostMetaCreated'), 10, 3);
@@ -11,11 +19,13 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
         add_action('deleted_post_meta', array($this, 'EventPostMetaDeleted'), 10, 4);
     }
     
-    protected $old_meta = array();
-    
+    /**
+     * Check "Excluded Custom Fields" or meta keys starts with "_".
+     * @return boolean can log true|false
+     */
     protected function CanLogPostMeta($object_id, $meta_key)
     {
-        //check if excluded meta key or starts with _
+        // check if excluded meta key or starts with _
         if (substr($meta_key, 0, 1) == '_') {
             return false;
         } else if ($this->IsExcludedCustomFields($meta_key)) {
@@ -25,6 +35,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Check "Excluded Custom Fields".
+     * Used in the above function.
+     * @return boolean is excluded from monitoring true|false
+     */
     public function IsExcludedCustomFields($custom)
     {
         $customFields = $this->plugin->settings->GetExcludedMonitoringCustom();
@@ -50,13 +65,18 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
             }
         }
         return false;
-        //return (in_array($custom, $customFields)) ? true : false;
+        // return (in_array($custom, $customFields)) ? true : false;
     }
-    
+
+    /**
+     * Created a custom field.
+     */
     public function EventPostMetaCreated($object_id, $meta_key, $meta_value)
     {
         $post = get_post($object_id);
-        if (!$this->CanLogPostMeta($object_id, $meta_key)) return;
+        if (!$this->CanLogPostMeta($object_id, $meta_key)) {
+            return;
+        }
 
         $WPActions = array('add-meta');
         if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
@@ -97,6 +117,9 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Sets the old meta.
+     */
     public function EventPostMetaUpdating($meta_id, $object_id, $meta_key)
     {
         static $meta_type = 'post';
@@ -106,11 +129,15 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
         );
     }
     
+    /**
+     * Updated a custom field name/value.
+     */
     public function EventPostMetaUpdated($meta_id, $object_id, $meta_key, $meta_value)
     {
         $post = get_post($object_id);
-        
-        if (!$this->CanLogPostMeta($object_id, $meta_key)) return;
+        if (!$this->CanLogPostMeta($object_id, $meta_key)) {
+            return;
+        }
 
         $WPActions = array('add-meta');
         if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
@@ -204,6 +231,9 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Deleted a custom field.
+     */
     public function EventPostMetaDeleted($meta_ids, $object_id, $meta_key, $meta_value)
     {
         $post = get_post($object_id);
@@ -212,8 +242,9 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
         if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
             $editorLink = $this->GetEditorLink($post);
             foreach ($meta_ids as $meta_id) {
-                if (!$this->CanLogPostMeta($object_id, $meta_key)) continue;
-                
+                if (!$this->CanLogPostMeta($object_id, $meta_key)) {
+                    continue;
+                }
                 switch ($post->post_type) {
                     case 'page':
                         $this->plugin->alerts->Trigger(2061, array(
@@ -251,6 +282,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Get editor link.
+     * @param stdClass $post the post
+     * @return array $aLink name and value link
+     */
     private function GetEditorLink($post)
     {
         $name = 'EditorLink';

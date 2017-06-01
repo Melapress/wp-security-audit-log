@@ -1,7 +1,10 @@
 <?php
 //require_once('ConnectorInterface.php');
 require_once('wp-db-custom.php');
-
+/**
+ * @package Wsal
+ * Adapter Classes loader class
+ */
 abstract class WSAL_Connector_AbstractConnector
 {
     protected $connection = null;

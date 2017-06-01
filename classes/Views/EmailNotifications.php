@@ -1,6 +1,9 @@
 <?php
-
-class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
+/**
+ * @package Wsal
+ */
+class WSAL_Views_EmailNotifications extends WSAL_AbstractView
+{
     
     public function GetTitle()
     {
@@ -22,7 +25,8 @@ class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
         return 7;
     }
 
-    public function Header() {
+    public function Header()
+    {
         wp_enqueue_style(
             'extensions',
             $this->_plugin->GetBaseUrl() . '/css/extensions.css',

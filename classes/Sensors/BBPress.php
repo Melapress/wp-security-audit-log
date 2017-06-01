@@ -1,11 +1,19 @@
 <?php
 /**
- * Support for BBPress Forum Plugin
+ * @package Wsal
+ * @subpackage Sensors
+ * Support for BBPress Forum Plugin.
  */
 class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
 {
+    /**
+     * @var string old permalink
+     */
     protected $_OldLink = null;
 
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         if (current_user_can("edit_posts")) {
@@ -17,6 +25,9 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         add_action('untrash_post', array($this, 'EventForumUntrashed'));
     }
 
+    /**
+     * Triggered when a user accesses the admin area.
+     */
     public function EventAdminInit()
     {
         // load old data, if applicable
@@ -25,6 +36,10 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         $this->TriggerAjaxChange();
     }
 
+    /**
+     * Retrieve Old data.
+     * @global mixed $_POST post data
+     */
     protected function RetrieveOldData()
     {
         if (isset($_POST) && isset($_POST['post_ID'])
@@ -36,6 +51,12 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Calls event forum changes.
+     * @param integer $post_ID post ID
+     * @param stdClass $newpost the new post
+     * @param stdClass $oldpost the old post
+     */
     public function CheckForumChange($post_ID, $newpost, $oldpost)
     {
         if ($this->CheckBBPress($oldpost)) {
@@ -60,7 +81,8 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     }
 
     /**
-     * Permanently deleted
+     * Permanently deleted.
+     * @param integer $post_id post ID
      */
     public function EventForumDeleted($post_id)
     {
@@ -78,7 +100,8 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     }
     
     /**
-     * Moved to Trash
+     * Moved to Trash.
+     * @param integer $post_id post ID
      */
     public function EventForumTrashed($post_id)
     {
@@ -96,7 +119,8 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
     }
 
     /**
-     * Restored from Trash
+     * Restored from Trash.
+     * @param integer $post_id post ID
      */
     public function EventForumUntrashed($post_id)
     {
@@ -113,6 +137,11 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Check post type.
+     * @param stdClass $post post
+     * @return boolean
+     */
     private function CheckBBPress($post)
     {
         switch ($post->post_type) {
@@ -125,6 +154,12 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Event post creation.
+     * @param stdClass $old_post the old post
+     * @param stdClass $new_post the new post
+     * @return boolean
+     */
     private function EventForumCreation($old_post, $new_post)
     {
         $original = isset($_POST['original_post_status']) ? $_POST['original_post_status'] : '';
@@ -153,6 +188,11 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         return 0;
     }
 
+    /**
+     * Event post changed visibility.
+     * @param stdClass $post the post
+     * @return boolean $result
+     */
     private function EventForumChangedVisibility($post)
     {
         $result = 0;
@@ -192,6 +232,11 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         return $result;
     }
 
+    /**
+     * Event post changed type.
+     * @param stdClass $post the post
+     * @return boolean $result
+     */
     private function EventForumChangedType($post)
     {
         $result = 0;
@@ -242,6 +287,11 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         return $result;
     }
 
+    /**
+     * Event post changed status.
+     * @param stdClass $post the post
+     * @return boolean $result
+     */
     private function EventForumChangedStatus($post)
     {
         $result = 0;
@@ -294,6 +344,12 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         return $result;
     }
 
+    /**
+     * Event post changed (order, parent, URL).
+     * @param stdClass $old_post the old post
+     * @param stdClass $new_post the new post
+     * @return boolean $result
+     */
     private function EventForumChanged($old_post, $new_post)
     {
         $editorLink = $this->GetEditorLink($new_post);
@@ -356,6 +412,11 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         return 0;
     }
 
+    /**
+     * Trigger Event (Forum).
+     * @param stdClass $post the post
+     * @param integer $event event code
+     */
     private function EventForumByCode($post, $event)
     {
         $editorLink = $this->GetEditorLink($post);
@@ -366,6 +427,11 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * Trigger Event (Topic).
+     * @param stdClass $post the post
+     * @param integer $event event code
+     */
     private function EventTopicByCode($post, $event)
     {
         $editorLink = $this->GetEditorLink($post);
@@ -378,6 +444,7 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
 
     /**
      * Trigger of ajax events generated in the Topic Grid
+     * @global mixed $_GET Get data
      */
     public function TriggerAjaxChange()
     {
@@ -432,6 +499,11 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Get editor link.
+     * @param stdClass $post the post
+     * @return array $aLink name and value link
+     */
     private function GetEditorLink($post)
     {
         $name = 'EditorLink';

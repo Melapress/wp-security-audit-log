@@ -1,8 +1,14 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * User Profiles sensor.
+ */
 class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
 {
-
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         add_action('admin_init', array($this, 'EventAdminInit'));
@@ -18,6 +24,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
     
     protected $old_superadmins;
     
+    /**
+     * Triggered when a user accesses the admin area.
+     */
     public function EventAdminInit()
     {
         if ($this->IsMultisite()) {

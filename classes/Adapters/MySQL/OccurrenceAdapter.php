@@ -1,7 +1,10 @@
 <?php
-
-class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_OccurrenceInterface {
-
+/**
+ * @package Wsal
+ * MySQL database Occurrences class
+ */
+class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_OccurrenceInterface
+{
     protected $_table = 'wsal_occurrences';
     protected $_idkey = 'id';
     protected $_meta;
@@ -13,33 +16,50 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     public $is_read = false;
     public $is_migrated = false;
 
-    public function __construct($conn) {
+    public function __construct($conn)
+    {
         parent::__construct($conn);
     }
     
-    protected function GetTableOptions(){
+    /**
+     * @return string SQL table options (constraints, foreign keys, indexes etc).
+     */
+    protected function GetTableOptions()
+    {
         return parent::GetTableOptions() . ',' . PHP_EOL
                 . '    KEY site_alert_created (site_id,alert_id,created_on)';
     }
     
+    /**
+     * @return WSAL_Models_Occurrence
+     */
     public function GetModel()
     {
         return new WSAL_Models_Occurrence();
     }
+
     /**
-     * Returns all meta data related to this event.
-     * @return WSAL_Meta[]
+     * Returns metadata related to this event.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::Load()
+     * @return WSAL_Meta
      */
-    public function GetMeta($occurence){
-        if(!isset($this->_meta)){
+    public function GetMeta($occurence)
+    {
+        if (!isset($this->_meta)) {
             $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
             $this->_meta = $meta->Load('occurrence_id = %d', array($occurence->id));
         }
         return $this->_meta;
     }
 
-    public function GetMultiMeta($occurence){
-        if(!isset($this->_meta)){
+    /**
+     * Returns allmeta data related to this event.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::LoadArray()
+     * @return WSAL_Meta[]
+     */
+    public function GetMultiMeta($occurence)
+    {
+        if (!isset($this->_meta)) {
             $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
             $this->_meta = $meta->LoadArray('occurrence_id = %d', array($occurence->id));
         }
@@ -48,10 +68,12 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 
     /**
      * Loads a meta item given its name.
+     * @see WSAL_Adapters_MySQL_ActiveRecord::Load()
      * @param string $name Meta name.
      * @return WSAL_Meta The meta item, be sure to checked if it was loaded successfully.
      */
-    public function GetNamedMeta($occurence, $name){
+    public function GetNamedMeta($occurence, $name)
+    {
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
         $this->_meta = $meta->Load('occurrence_id = %d AND name = %s', array($occurence->id, $name));
 
@@ -63,7 +85,8 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
      * @param array $names List of meta names.
      * @return WSAL_Meta The first meta item that exists.
      */
-    public function GetFirstNamedMeta($occurence, $names){
+    public function GetFirstNamedMeta($occurence, $names)
+    {
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
         $query = '(' . str_repeat('name = %s OR ', count($names)).'0)';
         $query = 'occurrence_id = %d AND ' . $query . ' ORDER BY name DESC LIMIT 1';
@@ -81,7 +104,8 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
      * @param integer $limit Maximum limit.
      * @return WSAL_Occurrence[]
      */
-    public static function GetNewestUnique($limit = PHP_INT_MAX){
+    public static function GetNewestUnique($limit = PHP_INT_MAX)
+    {
         $temp = new self();
         return self::LoadMultiQuery('
             SELECT *, COUNT(alert_id) as count
@@ -96,13 +120,14 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     }
 
     /**
-     * Gets occurences of the same type by IP and Username within specified time frame
+     * Gets occurences of the same type by IP and Username within specified time frame.
      * @param string $ipAddress
      * @param string $username
      * @param int $alertId Alert type we are lookign for
      * @param int $siteId
      * @param $startTime mktime
      * @param $endTime mktime
+     * @return WSAL_Occurrence[]
      */
     public function CheckKnownUsers($args = array())
     {
@@ -122,6 +147,15 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
         );
     }
 
+    /**
+     * Gets occurences of the same type by IP within specified time frame.
+     * @param string $ipAddress
+     * @param int $alertId Alert type we are lookign for
+     * @param int $siteId
+     * @param $startTime mktime
+     * @param $endTime mktime
+     * @return WSAL_Occurrence[]
+     */
     public function CheckUnKnownUsers($args = array()) 
     {
         $tt2 = new WSAL_Adapters_MySQL_Meta($this->connection);
@@ -136,6 +170,10 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
         );
     }
     
+    /**
+     * Add conditions to the Query
+     * @param string $query
+     */
     protected function prepareOccurrenceQuery($query)
     {
         $searchQueryParameters = array();
@@ -167,8 +205,9 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     }
     
     /**
-     * Gets occurrence by Post_id
+     * Gets occurrence by Post_id.
      * @param int $post_id
+     * @return WSAL_Occurrence[]
      */
     public function GetByPostID($post_id)
     {
@@ -185,15 +224,16 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
     }
 
     /**
-     * Gets occurences of the same type by IP within specified time frame
+     * Gets occurences of the same type by IP within specified time frame.
      * @param string $ipAddress
      * @param string $username
      * @param int $alertId Alert type we are lookign for
      * @param int $siteId
      * @param $startTime mktime
      * @param $endTime mktime
+     * @return WSAL_Occurrence[]
      */
-    public function CheckAlert404($args = array()) 
+    public function CheckAlert404($args = array())
     {
         $tt2 = new WSAL_Adapters_MySQL_Meta($this->connection);
         return self::LoadMultiQuery(

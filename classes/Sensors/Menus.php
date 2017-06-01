@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * Menus sensor.
+ */
 class WSAL_Sensors_Menus extends WSAL_AbstractSensor
 {
     protected $_OldMenu = null;
@@ -7,6 +11,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
     protected $_OldMenuItems = array();
     protected $_OldMenuLocations = null;
 
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         add_action('wp_create_nav_menu', array($this, 'CreateMenu'), 10, 2);
@@ -22,6 +29,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         add_action('customize_save_after', array($this, 'CustomizeSave'));
     }
     
+    /**
+     * Menu item updated.
+     */
     public function UpdateMenuItem($menu_id, $menu_item_db_id, $args)
     {
         $oldMenuItems = array();
@@ -81,6 +91,10 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * New menu created.
+     * @param array $menu_data data
+     */
     public function CreateMenu($term_id, $menu_data)
     {
         $this->plugin->alerts->Trigger(2078, array(
@@ -88,6 +102,10 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * New menu created.
+     * @global array $_POST data post
+     */
     public function ManageMenuLocations()
     {
         // Manage Location tab
@@ -102,6 +120,10 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Menu location.
+     * @param integer $new_location location
+     */
     private function LocationSetting($new_location, $type)
     {
         $old_locations = get_nav_menu_locations();
@@ -118,6 +140,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Menu deleted.
+     */
     public function DeleteMenu($term_id)
     {
         if ($this->_OldMenu) {
@@ -127,6 +152,10 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Menu updated.
+     * @param array $menu_data (Optional) data
+     */
     public function UpdateMenu($menu_id, $menu_data = null)
     {
         if (!empty($menu_data)) {
@@ -222,6 +251,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Set old menu terms and items.
+     */
     private function BuildOldMenuTermsAndItems()
     {
         $menus = wp_get_nav_menus();
@@ -247,6 +279,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Triggered when a user accesses the admin area.
+     */
     public function EventAdminInit()
     {
         $is_nav_menu = basename($_SERVER['SCRIPT_NAME']) == 'nav-menus.php';
@@ -262,6 +297,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Customize set old data.
+     */
     public function CustomizeInit()
     {
         $this->BuildOldMenuTermsAndItems();
@@ -269,7 +307,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
     }
 
     /**
-     * Customize Events Function
+     * Customize Events Function.
      */
     public function CustomizeSave()
     {
@@ -382,6 +420,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Added content to a menu.
+     */
     private function EventAddItems($content_type, $content_name, $menu_name)
     {
         $this->plugin->alerts->Trigger(2079, array(
@@ -391,6 +432,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * Removed content from a menu.
+     */
     private function EventRemoveItems($content_type, $content_name, $menu_name)
     {
         $this->plugin->alerts->Trigger(2080, array(
@@ -400,6 +444,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * Changed menu setting.
+     */
     private function EventMenuSetting($menu_name, $status, $menu_setting)
     {
         $this->plugin->alerts->Trigger(2082, array(
@@ -409,6 +456,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * Modified content in a menu.
+     */
     private function EventModifiedItems($content_type, $content_name, $menu_name)
     {
         $this->plugin->alerts->Trigger(2083, array(
@@ -418,6 +468,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * Changed name of a menu.
+     */
     private function EventChangeName($old_menu_name, $new_menu_name)
     {
         $this->plugin->alerts->Trigger(2084, array(
@@ -426,6 +479,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * Changed order of the objects in a menu.
+     */
     private function EventChangeOrder($item_name, $menu_name)
     {
         $this->plugin->alerts->Trigger(2085, array(
@@ -434,6 +490,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * Moved objects as a sub-item.
+     */
     private function EventChangeSubItem($item_name, $parent_name, $menu_name)
     {
         $this->plugin->alerts->Trigger(2089, array(
@@ -443,6 +502,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * Get menu item name.
+     */
     private function GetItemName($term_id, $item_id)
     {
         $item_name = '';

@@ -1,8 +1,14 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * Wordpress comments.
+ */
 class WSAL_Sensors_Comments extends WSAL_AbstractSensor
 {
-
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         add_action('edit_comment', array($this, 'EventCommentEdit'), 10, 1);
@@ -15,12 +21,22 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
         add_action('comment_post', array($this, 'EventComment'), 10, 2);
     }
 
+    /**
+     * Trigger comment edit.
+     * @param integer $comment_ID comment ID
+     */
     public function EventCommentEdit($comment_ID)
     {
         $comment = get_comment($comment_ID);
         $this->EventGeneric($comment_ID, 2093);
     }
 
+    /**
+     * Trigger comment status.
+     * @param string $new_status new status
+     * @param string $old_status old status
+     * @param stdClass $comment comment
+     */
     public function EventCommentApprove($new_status, $old_status, $comment)
     {
         if (!empty($comment) && $old_status != $new_status) {
@@ -42,26 +58,46 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Trigger comment spam.
+     * @param integer $comment_ID comment ID
+     */
     public function EventCommentSpam($comment_ID)
     {
         $this->EventGeneric($comment_ID, 2094);
     }
 
+    /**
+     * Trigger comment unspam.
+     * @param integer $comment_ID comment ID
+     */
     public function EventCommentUnspam($comment_ID)
     {
         $this->EventGeneric($comment_ID, 2095);
     }
 
+    /**
+     * Trigger comment trash.
+     * @param integer $comment_ID comment ID
+     */
     public function EventCommentTrash($comment_ID)
     {
         $this->EventGeneric($comment_ID, 2096);
     }
 
+    /**
+     * Trigger comment untrash.
+     * @param integer $comment_ID comment ID
+     */
     public function EventCommentUntrash($comment_ID)
     {
         $this->EventGeneric($comment_ID, 2097);
     }
 
+    /**
+     * Trigger comment deleted.
+     * @param integer $comment_ID comment ID
+     */
     public function EventCommentDeleted($comment_ID)
     {
         $this->EventGeneric($comment_ID, 2098);
@@ -100,6 +136,11 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Trigger generic event.
+     * @param integer $comment_ID comment ID
+     * @param integer $alert_code event code
+     */
     private function EventGeneric($comment_ID, $alert_code)
     {
         $comment = get_comment($comment_ID);
@@ -120,6 +161,8 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor
     /**
      * Shows the username if the comment is owned by a user
      * and the email if the comment was posted by a non WordPress user
+     * @param stdClass $comment comment
+     * @return string author username or email
      */
     private function CheckAuthor($comment)
     {

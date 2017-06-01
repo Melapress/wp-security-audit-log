@@ -1,7 +1,10 @@
 <?php
 //require_once(__DIR__ . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'Settings.php');
 //require_once('MySQLDBConnector.php');
-
+/**
+ * @package Wsal
+ * Class WSAL_Connector_ConnectorFactory
+ */
 abstract class WSAL_Connector_ConnectorFactory
 {
     public static $connector;
@@ -41,6 +44,10 @@ abstract class WSAL_Connector_ConnectorFactory
         return self::$connector;
     }
 
+    /**
+     * Get the adapter config stored in the DB
+     * @return array|null adapter config
+     */
     public static function GetConfig()
     {
         $conf = new WSAL_Settings(WpSecurityAuditLog::GetInstance());
@@ -59,6 +66,16 @@ abstract class WSAL_Connector_ConnectorFactory
         }
     }
 
+    /**
+     * Check the adapter config with a test connection.
+     * @param string $type adapter type
+     * @param string $user adapter user
+     * @param string $password adapter password
+     * @param string $name adapter name
+     * @param string $hostname adapter hostname
+     * @param string $base_prefix adapter base_prefix
+     * @return boolean true|false
+     */
     public static function CheckConfig($type, $user, $password, $name, $hostname, $base_prefix)
     {
         $result = false;
@@ -73,6 +90,16 @@ abstract class WSAL_Connector_ConnectorFactory
         return $result;
     }
 
+    /**
+     * Create array config.
+     * @param string $type adapter type
+     * @param string $user adapter user
+     * @param string $password adapter password
+     * @param string $name adapter name
+     * @param string $hostname adapter hostname
+     * @param string $base_prefix adapter base_prefix
+     * @return array config
+     */
     public static function GetConfigArray($type, $user, $password, $name, $hostname, $base_prefix)
     {
         return array(

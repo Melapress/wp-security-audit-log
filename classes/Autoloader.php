@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @package Wsal
+ */
 class WSAL_Autoloader {
     /**
      * @var WpSecurityAuditLog
@@ -8,16 +10,19 @@ class WSAL_Autoloader {
     
     protected $paths = array();
     
-    public function __construct(WpSecurityAuditLog $plugin){
+    public function __construct(WpSecurityAuditLog $plugin)
+    {
         $this->plugin = $plugin;
         
         // register autoloader
         spl_autoload_register(array($this, 'LoadClass'));
     }
     
-    public function Register($prefix, $path){
-        if(!isset($this->paths[$prefix]))
+    public function Register($prefix, $path)
+    {
+        if (!isset($this->paths[$prefix])) {
             $this->paths[$prefix] = array();
+        }
         $this->paths[$prefix][] = rtrim(str_replace('\\', '/', $path), '/') . '/';
     }
     
@@ -26,12 +31,13 @@ class WSAL_Autoloader {
      * @param string $class Class name.
      * @return boolean True if class is found and loaded, false otherwise.
      */
-    public function LoadClass($class){
-        foreach($this->paths as $prefix => $paths){
-            foreach($paths as $path){
-                if(strstr($class, $prefix) !== false){
+    public function LoadClass($class)
+    {
+        foreach ($this->paths as $prefix => $paths) {
+            foreach ($paths as $path) {
+                if (strstr($class, $prefix) !== false) {
                     $file = $path . str_replace('_', DIRECTORY_SEPARATOR, substr($class, strlen($prefix))) . '.php';
-                    if(file_exists($file)){
+                    if (file_exists($file)) {
                         $s = $this->plugin->profiler->Start('Autoload ' . basename($file));
                         require_once($file);
                         $s->Stop();
@@ -40,7 +46,6 @@ class WSAL_Autoloader {
                 }
             }
         }
-        
         return false;
     }
     
@@ -49,12 +54,13 @@ class WSAL_Autoloader {
      * @param string $file File name.
      * @return string|false Class name or false on error.
      */
-    public function GetClassFileClassName($file){
+    public function GetClassFileClassName($file)
+    {
         $file = str_replace('\\', '/', $file); // win/dos hotfix
         
-        foreach($this->paths as $prefix => $paths){
-            foreach($paths as $path){
-                if(strstr($file, $path) !== false){
+        foreach ($this->paths as $prefix => $paths) {
+            foreach ($paths as $path) {
+                if (strstr($file, $path) !== false) {
                     return str_replace(
                         array($path, '/'),
                         array($prefix, '_'),
@@ -63,7 +69,6 @@ class WSAL_Autoloader {
                 }
             }
         }
-        
         return false;
     }
 }

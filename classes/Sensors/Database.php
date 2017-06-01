@@ -1,13 +1,24 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * Database sensor.
+ */
 class WSAL_Sensors_Database extends WSAL_AbstractSensor
 {
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         add_action('dbdelta_queries', array($this, 'EventDBDeltaQuery'));
         add_action('query', array($this, 'EventDropQuery'));
     }
 
+    /**
+     * Checks for drop query.
+     * @param WP_Query $query query object
+     */
     public function EventDropQuery($query)
     {
         $table_names = array();
@@ -31,6 +42,10 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor
         return $query;
     }
     
+    /**
+     * Checks DB Delta queries.
+     * @param array $queries array of query
+     */
     public function EventDBDeltaQuery($queries)
     {
         $typeQueries = array(
@@ -74,6 +89,11 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor
         return $queries;
     }
     
+    /**
+     * Get code alert by action and type query.
+     * @param string $type_action (plugins, themes or unknown)
+     * @param string $type_query (create, update or delete)
+     */
     protected function GetEventQueryType($type_action, $type_query)
     {
         switch ($type_action) {
@@ -92,6 +112,10 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Get info by action type.
+     * @param string $actype (plugins, themes or unknown)
+     */
     protected function GetActionType($actype)
     {
         $is_themes = $actype == 'themes';

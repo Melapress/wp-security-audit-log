@@ -1,12 +1,22 @@
 <?php
-
+/**
+ * @package Wsal
+ * MySQL database TmpUser class.
+ * This class is used for create a temporary table to store the WP users
+ * when the External DB Add-On is activated and the Alerts are stored on an external DB
+ * because the query between plugin tables and the internal wp_uses table is not possible.
+ * @see  WSAL_Adapters_MySQL_ActiveRecord->GetReportGrouped()
+ */
 class WSAL_Adapters_MySQL_TmpUser extends WSAL_Adapters_MySQL_ActiveRecord {
 
     protected $_table = 'wsal_tmp_users';
 
+    /**
+     * @return WSAL_Models_TmpUser
+     */
     public function GetModel()
     {
-        return new WSAL_Models_Meta();
+        return new WSAL_Models_TmpUser();
     }
     
     public function __construct($conn)
