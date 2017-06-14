@@ -333,6 +333,25 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     }
 
     /**
+     * Encrypt plain text - Fallback.
+     *
+     * @param  string $plaintext - Plain text that is going to be encrypted.
+     * @return string
+     * @since  2.6.3
+     */
+    public function encryptString_fallback( $plaintext ) {
+
+        $iv_size    = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC );
+        $iv         = mcrypt_create_iv( $iv_size, MCRYPT_RAND );
+        $key        = $this->truncateKey();
+        $ciphertext = mcrypt_encrypt( MCRYPT_RIJNDAEL_128, $key, $plaintext, MCRYPT_MODE_CBC, $iv );
+        $ciphertext = $iv . $ciphertext;
+        $ciphertext_base64 = base64_encode( $ciphertext );
+        return $ciphertext_base64;
+
+    }
+
+    /**
      * Decrypt the encrypted string.
      *
      * @param  string $ciphertext_base64 - encrypted string.
@@ -356,6 +375,25 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $plaintext = openssl_decrypt( base64_decode( $ciphertext_base64 ), $encrypt_method, $key, 0, $iv );
 
         return $plaintext;
+
+    }
+
+    /**
+     * Decrypt the encrypted string - Fallback.
+     *
+     * @param  string $ciphertext_base64 - encrypted string.
+     * @return string
+     * @since  2.6.3
+     */
+    public function decryptString_fallback( $ciphertext_base64 ) {
+
+        $ciphertext_dec = base64_decode( $ciphertext_base64 );
+        $iv_size        = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC );
+        $iv_dec         = substr( $ciphertext_dec, 0, $iv_size );
+        $ciphertext_dec = substr( $ciphertext_dec, $iv_size );
+        $key            = $this->truncateKey();
+        $plaintext_dec  = mcrypt_decrypt( MCRYPT_RIJNDAEL_128, $key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec );
+        return rtrim( $plaintext_dec, "\0" );
 
     }
 

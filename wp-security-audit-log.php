@@ -280,6 +280,13 @@ class WpSecurityAuditLog {
         if ($this->settings->IsIncognito()) {
             add_action('admin_head', array($this, 'HidePlugin'));
         }
+
+        // Update routine.
+        $old_version = $this->GetOldVersion();
+        $new_version = $this->GetNewVersion();
+        if ( $old_version !== $new_version ) {
+            $this->Update( $old_version, $new_version );
+        }
     }
 
     /**
@@ -308,9 +315,9 @@ class WpSecurityAuditLog {
         $PreInstalled = $this->IsInstalled();
 
         // if system already installed, do updates now (if any)
-        $OldVersion = $this->GetOldVersion();
-        $NewVersion = $this->GetNewVersion();
-        if ($PreInstalled && $OldVersion != $NewVersion) $this->Update($OldVersion, $NewVersion);
+        // $OldVersion = $this->GetOldVersion();
+        // $NewVersion = $this->GetNewVersion();
+        // if ($PreInstalled && $OldVersion != $NewVersion) $this->Update($OldVersion, $NewVersion);
 
         // Load options from wp_options table or wp_sitemeta in multisite enviroment
         $data = $this->read_options_prefixed("wsal-");
@@ -357,20 +364,44 @@ class WpSecurityAuditLog {
 
     /**
      * Run some code that updates critical components required for a newwer version.
+     *
      * @param string $old_version The old version.
      * @param string $new_version The new version.
      */
-    public function Update($old_version, $new_version){
-        // update version in db
-        $this->GetGlobalOption('version', $new_version);
+    public function Update( $old_version, $new_version ) {
+        // Update version in db.
+        $this->SetGlobalOption( 'version', $new_version );
 
-        // disable all developer options
+        // Disable all developer options.
         //$this->settings->ClearDevOptions();
 
-        // do version-to-version specific changes
-        if(version_compare($old_version, '1.2.3') == -1){
-            // ... an example
+        // Do version-to-version specific changes.
+        if ( -1 === version_compare( $old_version, $new_version ) ) {
+            $this->update_external_db_password();
         }
+    }
+
+    /**
+     * Method: Update external DB password.
+     *
+     * @since 2.6.3
+     */
+    public function update_external_db_password() {
+
+        // Get the password.
+        $old_password = $this->settings->GetAdapterConfig( 'adapter-password' );
+
+        if ( ! empty( $old_password ) ) {
+            // Decrypt the password using fallback method.
+            $password   = $this->getConnector()->decryptString_fallback( $old_password );
+
+            // Encrypt the password with latest encryption method.
+            $encrypted_password   = $this->getConnector()->encryptString( $password );
+
+            // Store the new password.
+            $this->settings->SetAdapterConfig( 'adapter-password', $encrypted_password );
+        }
+
     }
 
     /**
