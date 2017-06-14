@@ -2,7 +2,7 @@
 /**
  * @package Wsal
  *
- * Class Loader.
+ * Classes Auto Loader.
  */
 class WSAL_Autoloader {
     /**

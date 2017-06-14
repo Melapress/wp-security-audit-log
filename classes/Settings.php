@@ -2,7 +2,7 @@
 /**
  * @package Wsal
  *
- * This class is the actual controller of the Settings.
+ * This class is the actual controller of the Settings Page.
  */
 class WSAL_Settings
 {
