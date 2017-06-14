@@ -3,6 +3,26 @@
  * @package Wsal
  * @subpackage Sensors
  * Support for BBPress Forum Plugin.
+ *
+ * 8000 User created new forum
+ * 8001 User changed status of a forum
+ * 8002 User changed visibility of a forum
+ * 8003 User changed the URL of a forum
+ * 8004 User changed order of a forum
+ * 8005 User moved forum to trash
+ * 8006 User permanently deleted forum
+ * 8007 User restored forum from trash
+ * 8008 User changed the parent of a forum
+ * 8011 User changed type of a forum
+ * 8014 User created new topic
+ * 8015 User changed status of a topic
+ * 8016 User changed type of a topic
+ * 8017 User changed URL of a topic
+ * 8018 User changed the forum of a topic
+ * 8019 User moved topic to trash
+ * 8020 User permanently deleted topic
+ * 8021 User restored topic from trash
+ * 8022 User changed visibility of a topic
  */
 class WSAL_Sensors_BBPress extends WSAL_AbstractSensor
 {

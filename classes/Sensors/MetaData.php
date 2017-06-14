@@ -3,6 +3,19 @@
  * @package Wsal
  * @subpackage Sensors
  * Custom fields (posts, pages and custom posts) sensor.
+ *
+ * 2053 User created a custom field for a post
+ * 2056 User created a custom field for a custom post type
+ * 2059 User created a custom field for a page
+ * 2062 User updated a custom field name for a post
+ * 2063 User updated a custom field name for a custom post type
+ * 2064 User updated a custom field name for a page
+ * 2060 User updated a custom field value for a page
+ * 2057 User updated a custom field for a custom post type
+ * 2054 User updated a custom field value for a post
+ * 2055 User deleted a custom field from a post
+ * 2058 User deleted a custom field from a custom post type
+ * 2061 User deleted a custom field from a page
  */
 class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
 {

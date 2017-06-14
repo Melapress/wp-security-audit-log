@@ -3,6 +3,18 @@
  * @package Wsal
  * @subpackage Sensors
  * Multisite sensor.
+ *
+ * 4010 Existing user added to a site
+ * 4011 User removed from site
+ * 4012 New network user created
+ * 7000 New site added on the network
+ * 7001 Existing site archived
+ * 7002 Archived site has been unarchived
+ * 7003 Deactivated site has been activated
+ * 7004 Site has been deactivated
+ * 7005 Existing site deleted from network
+ * 5008 Activated theme on network
+ * 5009 Deactivated theme from network
  */
 class WSAL_Sensors_Multisite extends WSAL_AbstractSensor
 {

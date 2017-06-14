@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Occurrence model is the model for the Occurrence adapter,
+ * used for get the alert, set the meta fields, etc.
  */
 class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord
 {

@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * This class is the actual controller of the Settings.
  */
 class WSAL_Settings
 {

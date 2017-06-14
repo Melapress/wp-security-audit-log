@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * This Class load all the views, initialize them and shows the right one.
  */
 class WSAL_ViewManager
 {

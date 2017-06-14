@@ -3,6 +3,31 @@
  * @package Wsal
  * @subpackage Sensors
  * System Activity sensor.
+ *
+ * 6000 Events automatically pruned by system
+ * 6001 Option Anyone Can Register in WordPress settings changed
+ * 6002 New User Default Role changed
+ * 6003 WordPress Administrator Notification email changed
+ * 6004 WordPress was updated
+ * 6005 User changes the WordPress Permalinks
+ * 6007 User requests non-existing pages (404 Error Pages)
+ * 8009 User changed forum's role
+ * 8010 User changed option of a forum
+ * 8012 User changed time to disallow post editing
+ * 8013 User changed the forum setting posting throttle time
+ * 1006 User logged out all other sessions with the same username
+ * 6004 WordPress was updated
+ * 6008 Enabled/Disabled the option Discourage search engines from indexing this site
+ * 6009 Enabled/Disabled comments on all the website
+ * 6010 Enabled/Disabled the option Comment author must fill out name and email
+ * 6011 Enabled/Disabled the option Users must be logged in and registered to comment
+ * 6012 Enabled/Disabled the option to automatically close comments
+ * 6013 Changed the value of the option Automatically close comments
+ * 6014 Enabled/Disabled the option for comments to be manually approved
+ * 6015 Enabled/Disabled the option for an author to have previously approved comments for the comments to appear
+ * 6016 Changed the number of links that a comment must have to be held in the queue
+ * 6017 Modified the list of keywords for comments moderation
+ * 6018 Modified the list of keywords for comments blacklisting
  */
 class WSAL_Sensors_System extends WSAL_AbstractSensor
 {

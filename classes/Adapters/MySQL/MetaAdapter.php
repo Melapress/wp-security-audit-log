@@ -1,7 +1,10 @@
 <?php
 /**
  * @package Wsal
- * MySQL database Metadata class
+ * MySQL database Metadata class.
+ *
+ * MySQL wsal_metadata table used for to store the alert meta data:
+ * username, user_roles, client_ip, user_agent, post_id, post_title, etc.
  */
 class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_MetaInterface
 {

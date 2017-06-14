@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Interface used by the Query.
  */
 interface WSAL_Adapters_QueryInterface
 {

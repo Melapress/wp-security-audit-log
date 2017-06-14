@@ -1,15 +1,17 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Metadata model is the model for the Metadata adapter,
+ * used for save and update the metadata.
  */
 class WSAL_Models_Meta extends WSAL_Models_ActiveRecord
 {
-    protected $adapterName = "Meta";
-
     public $id = 0;
     public $occurrence_id = 0;
     public $name = '';
     public $value = array(); // force mixed type
+    protected $adapterName = "Meta";
 
     /**
      * Save Metadata into Adapter.

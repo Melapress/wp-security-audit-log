@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * About Page.
  */
 class WSAL_Views_About extends WSAL_AbstractView
 {

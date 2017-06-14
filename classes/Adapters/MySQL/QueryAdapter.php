@@ -1,7 +1,10 @@
 <?php
 /**
  * @package Wsal
- * MySQL database Query class
+ * MySQL database Query class.
+ *
+ * The SQL query is created in this class, here the SQL is filled with
+ * the arguments.
  */
 class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
 {

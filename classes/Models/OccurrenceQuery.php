@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * OccurrenceQuery model adds or clears arguments in the Query model.
  */
 class WSAL_Models_OccurrenceQuery extends WSAL_Models_Query
 {

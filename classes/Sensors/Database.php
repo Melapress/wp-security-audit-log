@@ -3,6 +3,16 @@
  * @package Wsal
  * @subpackage Sensors
  * Database sensor.
+ *
+ * 5010 Plugin created tables
+ * 5011 Plugin modified tables structure
+ * 5012 Plugin deleted tables
+ * 5013 Theme created tables
+ * 5014 Theme modified tables structure
+ * 5015 Theme deleted tables
+ * 5016 Unknown component created tables
+ * 5017 Unknown component modified tables structure
+ * 5018 Unknown component deleted tables
  */
 class WSAL_Sensors_Database extends WSAL_AbstractSensor
 {

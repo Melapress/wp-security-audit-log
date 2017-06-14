@@ -4,6 +4,9 @@ require_once(ABSPATH . 'wp-admin/includes/admin.php');
 require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 /**
  * @package Wsal
+ *
+ * This view is included in Audit Log Viewer Page.
+ * @see Views/AuditLog.php
  */
 class WSAL_AuditLogListView extends WP_List_Table
 {

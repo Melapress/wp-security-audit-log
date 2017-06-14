@@ -3,6 +3,12 @@
  * @package Wsal
  * @subpackage Sensors
  * Php Errors sensor.
+ *
+ * 0001 PHP error
+ * 0002 PHP warning
+ * 0003 PHP notice
+ * 0004 PHP exception
+ * 0005 PHP shutdown error
  */
 class WSAL_Sensors_PhpErrors extends WSAL_AbstractSensor
 {

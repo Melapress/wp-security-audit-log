@@ -3,6 +3,12 @@
  * @package Wsal
  * @subpackage Sensors
  * Widgets sensor.
+ *
+ * 2042 User added a new widget
+ * 2043 User modified a widget
+ * 2044 User deleted widget
+ * 2045 User moved widget
+ * 2071 User changed widget position
  */
 class WSAL_Sensors_Widgets extends WSAL_AbstractSensor
 {

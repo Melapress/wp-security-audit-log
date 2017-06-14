@@ -1,7 +1,11 @@
 <?php
 /**
  * @package Wsal
- * MySQL database ActiveRecord class
+ * MySQL database ActiveRecord class.
+ *
+ * MySQL generic table used for Save, Read, Create or Delete
+ * elements in the Database.
+ * There are also the functions used in the Report Add-On to get the reports.
  */
 class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInterface
 {

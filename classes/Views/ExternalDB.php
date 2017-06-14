@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * External DB Add-On promo Page.
+ * Used only if the plugin is not activated.
  */
 class WSAL_Views_ExternalDB extends WSAL_AbstractView
 {

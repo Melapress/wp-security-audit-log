@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Class Loader.
  */
 class WSAL_Autoloader {
     /**

@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Plugin Widget used in the Wordpress Dashboard.
  */
 class WSAL_WidgetManager
 {

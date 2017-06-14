@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Abstract ActiveRecord model is the generic model for any kind
+ * of adapter.
  */
 abstract class WSAL_Models_ActiveRecord
 {

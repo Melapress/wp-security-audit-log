@@ -2,6 +2,8 @@
 require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 /**
  * @package Wsal
+ *
+ * Audit Log Viewer Page
  */
 class WSAL_Views_AuditLog extends WSAL_AbstractView
 {

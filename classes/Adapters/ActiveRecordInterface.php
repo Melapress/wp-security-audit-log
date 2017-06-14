@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Interface used by the ActiveRecord.
  */
 interface WSAL_Adapters_ActiveRecordInterface
 {

@@ -1,7 +1,9 @@
 <?php
 /**
  * @package Wsal
- * Query Class
+ * Query Class.
+ *
+ * Query model is the class for all the query conditions.
  */
 class WSAL_Models_Query
 {

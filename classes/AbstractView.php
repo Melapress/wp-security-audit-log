@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Abstract class used in all the views.
+ * @see Views/*.php
  */
 abstract class WSAL_AbstractView
 {
