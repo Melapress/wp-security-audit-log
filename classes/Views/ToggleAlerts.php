@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Enable/Disable Alerts Page.
  */
 class WSAL_Views_ToggleAlerts extends WSAL_AbstractView 
 {

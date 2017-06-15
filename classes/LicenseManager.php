@@ -6,6 +6,8 @@ if(!class_exists('EDD_SL_Plugin_Updater')){
 }
 /**
  * @package Wsal
+ *
+ * License Manager used in all the Add-Ons licenses.
  */
 class WSAL_LicenseManager
 {

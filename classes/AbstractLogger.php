@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Abstract class used in the Logger.
+ * @see Loggers/Database.php
  */
 abstract class WSAL_AbstractLogger
 {

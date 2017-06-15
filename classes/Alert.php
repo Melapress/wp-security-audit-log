@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * WSAL_Alert Object class.
  */
 final class WSAL_Alert
 {

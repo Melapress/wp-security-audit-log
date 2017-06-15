@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * User Sessions Management Add-On promo Page.
+ * Used only if the plugin is not activated.
  */
 class WSAL_Views_LogInUsers extends WSAL_AbstractView
 {

@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Helper class used for encode/decode json data.
  */
 class WSAL_Helpers_DataHelper
 {

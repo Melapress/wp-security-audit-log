@@ -1,7 +1,10 @@
 <?php
 /**
  * @package Wsal
- * Loggers Class
+ * Loggers Class.
+ *
+ * This class store the logs in the Database and adds the promo
+ * alerts, there is also the function to clean up alerts.
  */
 class WSAL_Loggers_Database extends WSAL_AbstractLogger
 {

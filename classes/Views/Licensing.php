@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Licensing Page for all the Add-Ons enabled.
  */
 class WSAL_Views_Licensing extends WSAL_AbstractView
 {

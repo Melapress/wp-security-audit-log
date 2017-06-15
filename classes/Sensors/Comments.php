@@ -3,6 +3,17 @@
  * @package Wsal
  * @subpackage Sensors
  * Wordpress comments.
+ *
+ * 2090 User approved a comment
+ * 2091 User unapproved a comment
+ * 2092 User replied to a comment
+ * 2093 User edited a comment
+ * 2094 User marked a comment as Spam
+ * 2095 User marked a comment as Not Spam
+ * 2096 User moved a comment to trash
+ * 2097 User restored a comment from the trash
+ * 2098 User permanently deleted a comment
+ * 2099 User posted a comment
  */
 class WSAL_Sensors_Comments extends WSAL_AbstractSensor
 {

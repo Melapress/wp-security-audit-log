@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Email Notifications Add-On promo Page.
+ * Used only if the plugin is not activated.
  */
 class WSAL_Views_EmailNotifications extends WSAL_AbstractView
 {

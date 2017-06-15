@@ -2,13 +2,16 @@
 /**
  * @package Wsal
  * Wordpress options are always loaded from the default wordpress database.
+ *
+ * Option Model gets and sets the options of the wsal_options table in the database.
  */
 class WSAL_Models_Option extends WSAL_Models_ActiveRecord
 {
-    protected $adapterName = "Option";
     public $id = '';
     public $option_name = '';
     public $option_value = '';
+    protected $adapterName = "Option";
+
     /**
      * Options are always stored in WPDB. This setting ensures that
      */

@@ -3,6 +3,11 @@
  * @package Wsal
  * @subpackage Sensors
  * Files sensor.
+ *
+ * 2010 User uploaded file from Uploads directory
+ * 2011 User deleted file from Uploads directory
+ * 2046 User changed a file using the theme editor
+ * 2051 User changed a file using the plugin editor
  */
 class WSAL_Sensors_Files extends WSAL_AbstractSensor
 {

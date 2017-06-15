@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * This Class load all the sensors and initialize them.
  */
 final class WSAL_SensorManager extends WSAL_AbstractSensor
 {

@@ -3,6 +3,16 @@
  * @package Wsal
  * @subpackage Sensors
  * Menus sensor.
+ *
+ * 2078 User created new menu
+ * 2079 User added content to a menu
+ * 2080 User removed content from a menu
+ * 2081 User deleted menu
+ * 2082 User changed menu setting
+ * 2083 User modified content in a menu
+ * 2084 User changed name of a menu
+ * 2085 User changed order of the objects in a menu
+ * 2089 User moved objects as a sub-item
  */
 class WSAL_Sensors_Menus extends WSAL_AbstractSensor
 {

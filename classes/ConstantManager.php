@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Class used for Constants,
+ * E_NOTICE, E_WARNING, E_CRITICAL, etc.
  */
 class WSAL_ConstantManager
 {

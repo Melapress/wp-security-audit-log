@@ -1,6 +1,10 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Help Page.
+ * - Plugin support
+ * - Plugin Documentation
  */
 class WSAL_Views_Help extends WSAL_AbstractView
 {

@@ -1,7 +1,9 @@
 <?php
 /**
  * @package Wsal
- * MySQL database Occurrences class
+ * MySQL database Occurrence class.
+ *
+ * MySQL wsal_occurrences table used for to store the alerts.
  */
 class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_OccurrenceInterface
 {

@@ -1,6 +1,8 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Interface used by the Metadata.
  */
 interface WSAL_Adapters_MetaInterface
 {

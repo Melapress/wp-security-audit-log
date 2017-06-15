@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * Abstract class used in all the sensors.
+ * @see Sensors/*.php
  */
 abstract class WSAL_AbstractSensor
 {

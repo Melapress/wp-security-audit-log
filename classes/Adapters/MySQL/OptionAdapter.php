@@ -1,7 +1,9 @@
 <?php
 /**
  * @package Wsal
- * MySQL database Options class
+ * MySQL database Option class.
+ *
+ * MySQL wsal_options table used for to store the plugin settings and Add-Ons settings.
  */
 class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
 {

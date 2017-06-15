@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * All Add-Ons promo Page.
+ * Used only if no plugins are activated.
  */
 class WSAL_Views_Extensions extends WSAL_AbstractView
 {

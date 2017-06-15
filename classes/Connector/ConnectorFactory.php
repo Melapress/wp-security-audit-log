@@ -1,9 +1,10 @@
 <?php
-//require_once(__DIR__ . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'Settings.php');
-//require_once('MySQLDBConnector.php');
 /**
  * @package Wsal
- * Class WSAL_Connector_ConnectorFactory
+ * Class WSAL_Connector_ConnectorFactory.
+ *
+ * Abstract class used for create the connector, only MySQL is implemented.
+ * @todo add other adapters.
  */
 abstract class WSAL_Connector_ConnectorFactory
 {

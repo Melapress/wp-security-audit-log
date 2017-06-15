@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * WSAL_AlertManager class.
+ * It is the actual trigger for the alerts.
  */
 final class WSAL_AlertManager
 {

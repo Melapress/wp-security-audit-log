@@ -3,6 +3,13 @@
  * @package Wsal
  * @subpackage Sensors
  * Login/Logout sensor.
+ *
+ * 1000 User logged in
+ * 1001 User logged out
+ * 1002 Login failed
+ * 1003 Login failed / non existing user
+ * 1004 Login blocked
+ * 4003 User has changed his or her password
  */
 class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
 {

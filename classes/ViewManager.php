@@ -1,6 +1,9 @@
 <?php
 /**
  * @package Wsal
+ *
+ * This Class load all the views, initialize them and shows the active one.
+ * It creates also the menu items.
  */
 class WSAL_ViewManager
 {
