@@ -1,24 +1,33 @@
 <?php
+/**
+ * @package Wsal
+ *
+ * Enable/Disable Alerts Page.
+ */
 class WSAL_Views_ToggleAlerts extends WSAL_AbstractView 
 {
-    
-    public function GetTitle() {
+    public function GetTitle()
+    {
         return __('Enable/Disable Alerts', 'wp-security-audit-log');
     }
     
-    public function GetIcon() {
+    public function GetIcon()
+    {
         return 'dashicons-forms';
     }
     
-    public function GetName() {
+    public function GetName()
+    {
         return __('Enable/Disable Alerts', 'wp-security-audit-log');
     }
     
-    public function GetWeight() {
+    public function GetWeight()
+    {
         return 2;
     }
     
-    protected function GetSafeCatgName($name) {
+    protected function GetSafeCatgName($name)
+    {
         return strtolower(
             preg_replace('/[^A-Za-z0-9\-]/', '-', $name)
         );
@@ -38,9 +47,11 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
             try {
                 $enabled = array_map('intval', $_POST['alert']);
                 $disabled = array();
-                foreach ($this->_plugin->alerts->GetAlerts() as $alert)
-                    if (!in_array($alert->type, $enabled))
+                foreach ($this->_plugin->alerts->GetAlerts() as $alert) {
+                    if (!in_array($alert->type, $enabled)) {
                         $disabled[] = $alert->type;
+                    }
+                }
                 $this->_plugin->alerts->SetDisabledAlerts($disabled);
                 ?><div class="updated"><p><?php _e('Settings have been saved.', 'wp-security-audit-log'); ?></p></div><?php
             } catch (Exception $ex) {
@@ -74,10 +85,16 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                         $active = array();
                         $allactive = true;
                         foreach ($alerts as $alert) {
-                            if ($alert->type <= 0006) continue; // <- ignore php alerts
-                            if ($alert->type == 9999) continue; // <- ignore promo alerts
+                            if ($alert->type <= 0006) {
+                                continue; // <- ignore php alerts
+                            }
+                            if ($alert->type == 9999) {
+                                continue; // <- ignore promo alerts
+                            }
                             $active[$alert->type] = $this->_plugin->alerts->IsEnabled($alert->type);
-                            if (!$active[$alert->type]) $allactive = false;
+                            if (!$active[$alert->type]) {
+                                $allactive = false;
+                            }
                         }
                         ?><table class="wp-list-table wsal-tab widefat fixed wsal-sub-tab" cellspacing="0" id="tab-<?php echo $this->GetSafeCatgName($subname); ?>">
                             <thead>
@@ -90,8 +107,12 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                             </thead>
                             <tbody><?php
                                 foreach ($alerts as $alert) {
-                                    if ($alert->type <= 0006) continue; // <- ignore php alerts
-                                    if ($alert->type == 9999) continue; // <- ignore promo alerts
+                                    if ($alert->type <= 0006) {
+                                        continue; // <- ignore php alerts
+                                    }
+                                    if ($alert->type == 9999) {
+                                        continue; // <- ignore promo alerts
+                                    }
                                     $attrs = '';
                                     switch (true) {
                                         case !$alert->mesg:

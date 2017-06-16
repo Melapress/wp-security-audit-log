@@ -1,8 +1,27 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * User Profiles sensor.
+ *
+ * 4000 New user was created on WordPress
+ * 4001 User created another WordPress user
+ * 4002 The role of a user was changed by another WordPress user
+ * 4003 User has changed his or her password
+ * 4004 User changed another user's password
+ * 4005 User changed his or her email address
+ * 4006 User changed another user's email address
+ * 4007 User was deleted by another user
+ * 4008 User granted Super Admin privileges
+ * 4009 User revoked from Super Admin privileges
+ * 4013 The forum role of a user was changed by another WordPress user
+ * 4014 User opened the profile page of another user
+ */
 class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
 {
-
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         add_action('admin_init', array($this, 'EventAdminInit'));
@@ -18,6 +37,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
     
     protected $old_superadmins;
     
+    /**
+     * Triggered when a user accesses the admin area.
+     */
     public function EventAdminInit()
     {
         if ($this->IsMultisite()) {

@@ -1,6 +1,12 @@
 <?php
-
-class WSAL_Views_ExternalDB extends WSAL_AbstractView {
+/**
+ * @package Wsal
+ *
+ * External DB Add-On promo Page.
+ * Used only if the plugin is not activated.
+ */
+class WSAL_Views_ExternalDB extends WSAL_AbstractView
+{
     
     public function GetTitle()
     {
@@ -22,7 +28,8 @@ class WSAL_Views_ExternalDB extends WSAL_AbstractView {
         return 10;
     }
 
-    public function Header() {
+    public function Header()
+    {
         wp_enqueue_style(
             'extensions',
             $this->_plugin->GetBaseUrl() . '/css/extensions.css',

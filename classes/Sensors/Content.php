@@ -1,8 +1,113 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * Wordpress contents (posts, pages and custom posts).
+ *
+ * 2000 User created a new blog post and saved it as draft
+ * 2001 User published a blog post
+ * 2002 User modified a published blog post
+ * 2003 User modified a draft blog post
+ * 2008 User permanently deleted a blog post from the trash
+ * 2012 User moved a blog post to the trash
+ * 2014 User restored a blog post from trash
+ * 2016 User changed blog post category
+ * 2017 User changed blog post URL
+ * 2019 User changed blog post author
+ * 2021 User changed blog post status
+ * 2023 User created new category
+ * 2024 User deleted category
+ * 2025 User changed the visibility of a blog post
+ * 2027 User changed the date of a blog post
+ * 2049 User set a post as sticky
+ * 2050 User removed post from sticky
+ * 2052 User changed generic tables
+ * 2065 User modified content for a published post
+ * 2068 User modified content for a draft post
+ * 2072 User modified content of a post
+ * 2073 User submitted a post for review
+ * 2074 User scheduled a post
+ * 2086 User changed title of a post
+ * 2100 User opened a post in the editor
+ * 2101 User viewed a post
+ * 2111 User disabled Comments/Trackbacks and Pingbacks on a published post
+ * 2112 User enabled Comments/Trackbacks and Pingbacks on a published post
+ * 2113 User disabled Comments/Trackbacks and Pingbacks on a draft post
+ * 2114 User enabled Comments/Trackbacks and Pingbacks on a draft post
+ * 2004 User created a new WordPress page and saved it as draft
+ * 2005 User published a WordPress page
+ * 2006 User modified a published WordPress page
+ * 2007 User modified a draft WordPress page
+ * 2009 User permanently deleted a page from the trash
+ * 2013 User moved WordPress page to the trash
+ * 2015 User restored a WordPress page from trash
+ * 2018 User changed page URL
+ * 2020 User changed page author
+ * 2022 User changed page status
+ * 2026 User changed the visibility of a page post
+ * 2028 User changed the date of a page post
+ * 2047 User changed the parent of a page
+ * 2048 User changed the template of a page
+ * 2066 User modified content for a published page
+ * 2069 User modified content for a draft page
+ * 2075 User scheduled a page
+ * 2087 User changed title of a page
+ * 2102 User opened a page in the editor
+ * 2103 User viewed a page
+ * 2115 User disabled Comments/Trackbacks and Pingbacks on a published page
+ * 2116 User enabled Comments/Trackbacks and Pingbacks on a published page
+ * 2117 User disabled Comments/Trackbacks and Pingbacks on a draft page
+ * 2118 User enabled Comments/Trackbacks and Pingbacks on a draft page
+ * 2029 User created a new post with custom post type and saved it as draft
+ * 2030 User published a post with custom post type
+ * 2031 User modified a post with custom post type
+ * 2032 User modified a draft post with custom post type
+ * 2033 User permanently deleted post with custom post type
+ * 2034 User moved post with custom post type to trash
+ * 2035 User restored post with custom post type from trash
+ * 2036 User changed the category of a post with custom post type
+ * 2037 User changed the URL of a post with custom post type
+ * 2038 User changed the author or post with custom post type
+ * 2039 User changed the status of post with custom post type
+ * 2040 User changed the visibility of a post with custom post type
+ * 2041 User changed the date of post with custom post type
+ * 2067 User modified content for a published custom post type
+ * 2070 User modified content for a draft custom post type
+ * 2076 User scheduled a custom post type
+ * 2088 User changed title of a custom post type
+ * 2104 User opened a custom post type in the editor
+ * 2105 User viewed a custom post type
+*/
 class WSAL_Sensors_Content extends WSAL_AbstractSensor
 {
+    /**
+     * @var stdClass old post
+     */
+    protected $_OldPost = null;
 
+    /**
+     * @var string old permalink
+     */
+    protected $_OldLink = null;
+
+    /**
+     * @var array old categories
+     */
+    protected $_OldCats = null;
+
+    /**
+     * @var string old path to file
+     */
+    protected $_OldTmpl = null;
+
+    /**
+     * @var boolean old post is marked as sticky
+     */
+    protected $_OldStky = null;
+
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         if (current_user_can("edit_posts")) {
@@ -22,6 +127,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         add_filter('post_edit_form_tag', array($this, 'EditingPost'), 10, 1);
     }
     
+    /**
+     * Gets the alert code based on the type of post.
+     * @param stdClass $post the post
+     * @param integer $typePost alert code type post
+     * @param integer $typePage alert code type page
+     * @param integer $typeCustom alert code type custom
+     * @return integer alert code
+     */
     protected function GetEventTypeForPostType($post, $typePost, $typePage, $typeCustom)
     {
         switch ($post->post_type) {
@@ -34,12 +147,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
-    protected $_OldPost = null;
-    protected $_OldLink = null;
-    protected $_OldCats = null;
-    protected $_OldTmpl = null;
-    protected $_OldStky = null;
-    
+    /**
+     * Triggered when a user accesses the admin area.
+     */
     public function EventWordpressInit()
     {
         // load old data, if applicable
@@ -48,6 +158,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         $this->CheckCategoryDeletion();
     }
     
+    /**
+     * Retrieve Old data.
+     * @global mixed $_POST post data
+     */
     protected function RetrieveOldData()
     {
         if (isset($_POST) && isset($_POST['post_ID'])
@@ -63,6 +177,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Get the template path.
+     * @param stdClass $post the post
+     * @return string full path to file
+     */
     protected function GetPostTemplate($post)
     {
         $id = $post->ID;
@@ -84,11 +203,22 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         return get_query_template('page', $templates);
     }
 
+    /**
+     * Get post categories (array of category names).
+     * @param stdClass $post the post
+     * @return array list of categories
+     */
     protected function GetPostCategories($post)
     {
         return wp_get_post_categories($post->ID, array('fields' => 'names'));
     }
 
+    /**
+     * Check all the post changes.
+     * @param string $newStatus new status
+     * @param string $oldStatus old status
+     * @param stdClass $post the post
+     */
     public function EventPostChanged($newStatus, $oldStatus, $post)
     {
         // ignorable states
@@ -146,6 +276,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Check post creation.
+     * @global array $_POST
+     * @param stdClass $oldPost old post
+     * @param stdClass $newPost new post
+     */
     protected function CheckPostCreation($oldPost, $newPost)
     {
         $WPActions = array('editpost', 'heartbeat');
@@ -191,6 +327,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Post future publishing.
+     * @param integer $post_id post ID
+     */
     public function EventPublishFuture($post_id)
     {
         $post = get_post($post_id);
@@ -208,6 +348,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Post permanently deleted.
+     * @param integer $post_id post ID
+     */
     public function EventPostDeleted($post_id)
     {
         $post = get_post($post_id);
@@ -234,6 +378,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Post moved to the trash.
+     * @param integer $post_id post ID
+     */
     public function EventPostTrashed($post_id)
     {
         $post = get_post($post_id);
@@ -251,6 +399,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         ));
     }
     
+    /**
+     * Post restored from trash.
+     * @param integer $post_id post ID
+     */
     public function EventPostUntrashed($post_id)
     {
         $post = get_post($post_id);
@@ -267,6 +419,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         ));
     }
     
+    /**
+     * Post date changed.
+     * @param stdClass $oldPost old post
+     * @param stdClass $newPost new post
+     */
     protected function CheckDateChange($oldpost, $newpost)
     {
         $from = strtotime($oldpost->post_date);
@@ -294,7 +451,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         return 0;
     }
 
-    // Revision used
+    /**
+     * Revision used.
+     * @param stdClass $oldPost old post
+     * @param stdClass $newPost new post
+     */
     protected function CheckReviewPendingChange($oldpost, $newpost)
     {
         if ($oldpost->post_status == 'pending') {
@@ -310,6 +471,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         return 0;
     }
     
+    /**
+     * Categories changed.
+     * @param array $oldCats old categories
+     * @param array $newCats new categories
+     * @param stdClass $post the post
+     */
     protected function CheckCategoriesChange($oldCats, $newCats, $post)
     {
         $oldCats = implode(', ', $oldCats);
@@ -331,6 +498,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Author changed.
+     * @param stdClass $oldPost old post
+     * @param stdClass $newPost new post
+     */
     protected function CheckAuthorChange($oldpost, $newpost)
     {
         if ($oldpost->post_author != $newpost->post_author) {
@@ -352,6 +524,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Status changed.
+     * @param stdClass $oldPost old post
+     * @param stdClass $newPost new post
+     */
     protected function CheckStatusChange($oldpost, $newpost)
     {
         if ($oldpost->post_status != $newpost->post_status) {
@@ -382,6 +559,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Post parent changed.
+     * @param stdClass $oldPost old post
+     * @param stdClass $newPost new post
+     */
     protected function CheckParentChange($oldpost, $newpost)
     {
         if ($oldpost->post_parent != $newpost->post_parent) {
@@ -403,6 +585,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Permalink changed.
+     * @param string $oldLink old permalink
+     * @param string $newLink new permalink
+     * @param stdClass $post the post
+     */
     protected function CheckPermalinkChange($oldLink, $newLink, $post)
     {
         if ($oldLink != $newLink) {
@@ -421,6 +609,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         return 0;
     }
     
+    /**
+     * Post visibility changed.
+     * @param stdClass $oldPost old post
+     * @param stdClass $newPost new post
+     * @param string $oldStatus old status
+     * @param string $newStatus new status
+     */
     protected function CheckVisibilityChange($oldpost, $newpost, $oldStatus, $newStatus)
     {
         if ($oldStatus == 'draft' || $newStatus == 'draft') {
@@ -461,6 +656,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Post template changed.
+     * @param string $oldTmpl old template path
+     * @param string $newTmpl new template path
+     * @param stdClass $post the post
+     */
     protected function CheckTemplateChange($oldTmpl, $newTmpl, $post)
     {
         if ($oldTmpl != $newTmpl) {
@@ -482,6 +683,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Post sets as sticky changes.
+     * @param string $oldTmpl old template path
+     * @param string $newTmpl new template path
+     * @param stdClass $post the post
+     */
     protected function CheckStickyChange($oldStky, $newStky, $post)
     {
         if ($oldStky != $newStky) {
@@ -498,6 +705,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Post modified content.
+     * @param integer $post_ID post ID
+     * @param stdClass $oldPost old post
+     * @param stdClass $newPost new post
+     */
     public function CheckModificationChange($post_ID, $oldpost, $newpost)
     {
         if ($this->CheckOtherSensors($oldpost)) {
@@ -541,6 +754,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * New category created.
+     * @param integer $category_id category ID
+     */
     public function EventCategoryCreation($category_id)
     {
         $category = get_category($category_id);
@@ -552,6 +769,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * Category deleted.
+     * @global array $_POST post data
+     */
     protected function CheckCategoryDeletion()
     {
         if (empty($_POST)) {
@@ -585,6 +806,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Changed the parent of the category.
+     * @global array $_POST post data
+     */
     public function EventChangedCategoryParent()
     {
         if (empty($_POST)) {
@@ -615,6 +840,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Check auto draft and the setting: Hide Plugin in Plugins Page
+     * @param integer $code alert code
+     * @param string $title title
+     * @return boolean
+     */
     private function CheckAutoDraft($code, $title)
     {
         if ($code == 2008 && $title == "auto-draft") {
@@ -629,6 +860,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Builds revision link.
+     * @param integer $revision_id revision ID
+     * @return string|null link
+     */
     private function getRevisionLink($revision_id)
     {
         if (!empty($revision_id)) {
@@ -638,6 +874,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Builds category link.
+     * @param integer $category_id category ID
+     * @return string|null link
+     */
     private function getCategoryLink($category_id)
     {
         if (!empty($category_id)) {
@@ -650,6 +891,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     /**
      * Ignore post from BBPress, WooCommerce Plugin
      * Triggered on the Sensors
+     * @param stdClass $post the post
      */
     private function CheckOtherSensors($post)
     {
@@ -665,7 +907,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     }
 
     /**
-     * Triggered after save post for add revision link
+     * Triggered after save post for add revision link.
+     * @param integer $post_id post ID
+     * @param stdClass $post post
      */
     public function SetRevisionLink($post_id, $post, $update)
     {
@@ -686,7 +930,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     }
 
     /**
-     * Alerts for Viewing of Posts, Pages and Custom Posts
+     * Alerts for Viewing of Posts, Pages and Custom Posts.
+     * @param string $title title
+     * @param stdClass $post (Optional) the post
      */
     public function ViewingPost($title, $post = null)
     {
@@ -698,7 +944,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 $currentPath = $_SERVER["REQUEST_URI"];
                 if (!empty($_SERVER["HTTP_REFERER"])
                     && strpos($_SERVER["HTTP_REFERER"], $currentPath) !== false) {
-                    //Ignore this if we were on the same page so we avoid double audit entries
+                    // Ignore this if we were on the same page so we avoid double audit entries
                     return $title;
                 }
                 if (!empty($post->post_title)) {
@@ -715,7 +961,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     }
 
     /**
-     * Alerts for Editing of Posts, Pages and Custom Posts
+     * Alerts for Editing of Posts, Pages and Custom Posts.
+     * @param stdClass $post post
      */
     public function EditingPost($post)
     {
@@ -747,7 +994,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     }
 
     /**
-     * Check if the alert was triggered
+     * Check if the alert was triggered.
+     * @param integer $alert_id alert code
+     * @return boolean
      */
     private function WasTriggered($alert_id)
     {
@@ -763,6 +1012,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         return false;
     }
 
+    /**
+     * Changed title of a post.
+     * @param stdClass $oldPost old post
+     * @param stdClass $newPost new post
+     */
     private function CheckTitleChange($oldpost, $newpost)
     {
         if ($oldpost->post_title != $newpost->post_title) {
@@ -778,6 +1032,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         return 0;
     }
 
+    /**
+     * Comments/Trackbacks and Pingbacks check.
+     * @param stdClass $oldPost old post
+     * @param stdClass $newPost new post
+     */
     private function CheckCommentsPings($oldpost, $newpost)
     {
         $result = 0;
@@ -818,6 +1077,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         return $result;
     }
 
+    /**
+     * Comments/Trackbacks and Pingbacks event code.
+     * @param stdClass $post the post
+     * @param string $status the status
+     */
     private function GetCommentsPingsEvent($post, $status)
     {
         if ($post->post_type == 'post') {
@@ -852,6 +1116,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         return $event;
     }
 
+    /**
+     * Get editor link.
+     * @param stdClass $post the post
+     * @return array $aLink name and value link
+     */
     private function GetEditorLink($post)
     {
         $name = 'EditorLink';

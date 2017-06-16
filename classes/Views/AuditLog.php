@@ -1,7 +1,12 @@
 <?php
 require_once(ABSPATH . 'wp-admin/includes/plugin.php');
-
-class WSAL_Views_AuditLog extends WSAL_AbstractView {
+/**
+ * @package Wsal
+ *
+ * Audit Log Viewer Page
+ */
+class WSAL_Views_AuditLog extends WSAL_AbstractView
+{
     /**
      * @var WSAL_AuditLogListView
      */
@@ -9,7 +14,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
     protected $_version;
     
-    public function __construct(WpSecurityAuditLog $plugin) {
+    public function __construct(WpSecurityAuditLog $plugin)
+    {
         parent::__construct($plugin);
         add_action('wp_ajax_AjaxInspector', array($this, 'AjaxInspector'));
         add_action('wp_ajax_AjaxRefresh', array($this, 'AjaxRefresh'));
@@ -43,36 +49,43 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         }
     }
     
-    public function HasPluginShortcutLink() {
+    public function HasPluginShortcutLink()
+    {
         return true;
     }
     
-    public function GetTitle() {
+    public function GetTitle()
+    {
         return __('Audit Log Viewer', 'wp-security-audit-log');
     }
     
-    public function GetIcon() {
+    public function GetIcon()
+    {
         return $this->_wpversion < 3.8
             ? $this->_plugin->GetBaseUrl() . '/img/logo-main-menu.png'
             : 'dashicons-welcome-view-site';
     }
     
-    public function GetName() {
+    public function GetName()
+    {
         return __('Audit Log Viewer', 'wp-security-audit-log');
     }
     
-    public function GetWeight() {
+    public function GetWeight()
+    {
         return 1;
     }
     
-    protected function GetListView() {
+    protected function GetListView()
+    {
         if (is_null($this->_listview)) {
             $this->_listview = new WSAL_AuditLogListView($this->_plugin);
         }
         return $this->_listview;
     }
     
-    public function Render() {
+    public function Render()
+    {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'wp-security-audit-log'));
         }
@@ -108,7 +121,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         </script><?php
     }
     
-    public function AjaxInspector() {
+    public function AjaxInspector()
+    {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
         }
@@ -133,7 +147,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         die;
     }
     
-    public function AjaxRefresh() {
+    public function AjaxRefresh()
+    {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
         }
@@ -164,7 +179,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         die;
     }
     
-    public function AjaxSetIpp() {
+    public function AjaxSetIpp()
+    {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
         }
@@ -175,7 +191,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         die;
     }
     
-    public function AjaxSearchSite() {
+    public function AjaxSearchSite()
+    {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
             die('Access Denied.');
         }
@@ -197,14 +214,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         die(json_encode(array_slice($grp1 + $grp2, 0, 7)));
     }
 
-    public function AjaxSwitchDB() {
+    public function AjaxSwitchDB()
+    {
         if (isset($_REQUEST['selected_db'])) {
             $wp_session = WP_Session::get_instance();
             $wp_session['selected_db'] = $_REQUEST['selected_db'];
         }
     }
     
-    public function Header() {
+    public function Header()
+    {
         add_thickbox();
         wp_enqueue_style('darktooltip', $this->_plugin->GetBaseUrl() . '/css/darktooltip.css', array(), '');
         wp_enqueue_style(
@@ -215,7 +234,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
         );
     }
     
-    public function Footer() {
+    public function Footer()
+    {
         wp_enqueue_script('jquery');
         wp_enqueue_script('darktooltip', $this->_plugin->GetBaseUrl() . '/js/jquery.darktooltip.js', array('jquery'), '');
         wp_enqueue_script('suggest');

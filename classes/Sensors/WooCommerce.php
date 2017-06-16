@@ -1,6 +1,43 @@
 <?php
 /**
- * Support for WooCommerce Plugin
+ * @package Wsal
+ * @subpackage Sensors
+ * Support for WooCommerce Plugin.
+ *
+ * 9000 User created a new product
+ * 9001 User published a product
+ * 9002 User created a new product category
+ * 9003 User changed the category of a product
+ * 9004 User modified the short description of a product
+ * 9005 User modified the text of a product
+ * 9006 User changed the URL of a product
+ * 9007 User changed the Product Data of a product
+ * 9008 User changed the date of a product
+ * 9009 User changed the visibility of a product
+ * 9010 User modified the published product
+ * 9011 User modified the draft product
+ * 9012 User moved a product to trash
+ * 9013 User permanently deleted a product
+ * 9014 User restored a product from the trash
+ * 9015 User changed status of a product
+ * 9016 User changed type of a price
+ * 9017 User changed the SKU of a product
+ * 9018 User changed the stock status of a product
+ * 9019 User changed the stock quantity
+ * 9020 User set a product type
+ * 9021 User changed the weight of a product
+ * 9022 User changed the dimensions of a product
+ * 9023 User added the Downloadable File to a product
+ * 9024 User Removed the Downloadable File from a product
+ * 9025 User changed the name of a Downloadable File in a product
+ * 9026 User changed the URL of the Downloadable File in a product
+ * 9027 User changed the Weight Unit
+ * 9028 User changed the Dimensions Unit
+ * 9029 User changed the Base Location
+ * 9030 User Enabled/Disabled taxes
+ * 9031 User changed the currency
+ * 9032 User Enabled/Disabled the use of coupons during checkout
+ * 9033 User Enabled/Disabled guest checkout
  */
 class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
 {
@@ -12,6 +49,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
     protected $_OldFileNames = array();
     protected $_OldFileUrls = array();
 
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         if (current_user_can("edit_posts")) {
@@ -26,6 +66,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         // add_action('edit_product_cat', array($this, 'EventCategoryChanged'), 10, 1);
     }
 
+    /**
+     * Triggered when a user accesses the admin area.
+     */
     public function EventAdminInit()
     {
         // load old data, if applicable
@@ -33,6 +76,10 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         $this->CheckSettingsChange();
     }
 
+    /**
+     * Retrieve Old data.
+     * @global mixed $_POST post data
+     */
     protected function RetrieveOldData()
     {
         if (isset($_POST) && isset($_POST['post_ID'])
@@ -783,6 +830,10 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         return $fn('woocommerce_' . $option_name);
     }
 
+    /**
+     * Check post type.
+     * @param stdClass $post post
+     */
     private function CheckWooCommerce($post)
     {
         switch ($post->post_type) {
@@ -793,6 +844,11 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Get editor link.
+     * @param stdClass $post the post
+     * @return array $aLink name and value link
+     */
     private function GetEditorLink($post)
     {
         $name = 'EditorLinkProduct';

@@ -1,8 +1,12 @@
 <?php
-
+/**
+ * @package Wsal
+ * MySQL database Option class.
+ *
+ * MySQL wsal_options table used for to store the plugin settings and Add-Ons settings.
+ */
 class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
 {
-
     protected $_table = 'wsal_options';
     protected $_idkey = 'id';
 
@@ -16,19 +20,33 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
         parent::__construct($conn);
     }
 
+    /**
+     * @return WSAL_Models_Option
+     */
     public function GetModel()
     {
         return new WSAL_Models_Option();
     }
 
+    /**
+     * Get option by name.
+     * @param string $name option_name
+     * @return string|null option value
+     */
     public function GetNamedOption($name)
-    {   if ($this->IsInstalled()) {
+    {
+        if ($this->IsInstalled()) {
             return $this->Load('option_name = %s', array($name));
         } else {
             return null;
         }
     }
 
+    /**
+     * Get options by prefix (notifications stored in json format).
+     * @param string $opt_prefix prefix
+     * @return array|null options
+     */
     public function GetNotificationsSetting($opt_prefix)
     {
         if ($this->IsInstalled()) {
@@ -38,6 +56,11 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
         }
     }
 
+    /**
+     * Get option by id (notifications stored in json format).
+     * @param int $id option ID
+     * @return string|null option
+     */
     public function GetNotification($id)
     {
         if ($this->IsInstalled()) {
@@ -47,6 +70,11 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
         }
     }
 
+    /**
+     * Delete option by name.
+     * @param string $name option_name
+     * @return boolean.
+     */
     public function DeleteByName($name)
     {
         if (!empty($name)) {
@@ -58,6 +86,11 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
         }
     }
 
+    /**
+     * Delete options start with prefix.
+     * @param string $opt_prefix prefix
+     * @return boolean.
+     */
     public function DeleteByPrefix($opt_prefix)
     {
         if (!empty($opt_prefix)) {
@@ -69,11 +102,15 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord
         }
     }
 
+    /**
+     * Number of options start with prefix.
+     * @param string $opt_prefix prefix
+     * @return integer Indicates the number of items.
+     */
     public function CountNotifications($opt_prefix)
     {
         $_wpdb = $this->connection;
         $sql = "SELECT COUNT(id) FROM " . $this->GetTable() . " WHERE option_name LIKE '". $opt_prefix ."%'";
         return (int)$_wpdb->get_var($sql);
     }
-
 }

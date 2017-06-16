@@ -1,5 +1,11 @@
 <?php
-
+/**
+ * @package Wsal
+ * MySQL database Query class.
+ *
+ * The SQL query is created in this class, here the SQL is filled with
+ * the arguments.
+ */
 class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
 {
     protected $connection;
@@ -10,6 +16,9 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
     }
 
     /**
+     * Get the SQL filled with the args.
+     * @param object $query query object
+     * @param array $args args of the query
      * @return string Generated sql.
      */
     protected function GetSql($query, &$args = array())
@@ -85,13 +94,19 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         return $sql;
     }
     
+    /**
+     * Get an instance of the ActiveRecord Adapter.
+     * @return WSAL_Adapters_MySQL_ActiveRecord
+     */
     protected function getActiveRecordAdapter()
     {
         return new WSAL_Adapters_MySQL_ActiveRecord($this->connection);
     }
     
     /**
-     * @return WSAL_Models_ActiveRecord[] Execute query and return data as $ar_cls objects.
+     * Execute query and return data as $ar_cls objects.
+     * @param object $query query object
+     * @return WSAL_Models_ActiveRecord[]
      */
     public function Execute($query)
     {
@@ -108,7 +123,9 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
     }
     
     /**
-     * @return int Use query for counting records.
+     * Count query
+     * @param object $query query object
+     * @return integer counting records.
      */
     public function Count($query)
     {
@@ -126,6 +143,11 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         return $this->getActiveRecordAdapter()->CountQuery($sql, $args);
     }
 
+    /**
+     * Count DELETE query
+     * @param object $query query object
+     * @return integer counting records.
+     */
     public function CountDelete($query)
     {
         $result = $this->GetSqlDelete($query, true);
@@ -134,7 +156,8 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
     }
     
     /**
-     * Use query for deleting records.
+     * Query for deleting records
+     * @param object $query query object.
      */
     public function Delete($query)
     {
@@ -143,6 +166,11 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         return $this->getActiveRecordAdapter()->DeleteQuery($result['sql'], $result['args']);
     }
 
+    /**
+     * Load occurrence IDs then delete Metadata by occurrence_id
+     * @param object $query query object
+     * @param array $args args of the query
+     */
     public function DeleteMetas($query, $args)
     {
         // back up columns, use COUNT as default column and generate sql
@@ -163,6 +191,12 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $meta->DeleteByOccurenceIds($occ_ids);
     }
 
+    /**
+     * Get the DELETE query SQL filled with the args.
+     * @param object $query query object
+     * @param array $args args of the query
+     * @return string Generated sql.
+     */
     public function GetSqlDelete($query, $getCount = false)
     {
         $result = array();
@@ -201,16 +235,22 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', array_keys($orderBys)) . ' ' . implode(', ', array_values($orderBys))) : '')
             . $sLimitClause;
         $result['args'] = $args;
-        //restore columns        
+        // restore columns
         $query->setColumns($cols);
         
         return $result;
     }
 
+    /**
+     * Search by alert code OR by Metadata value.
+     * @param object $query query object
+     */
     public function SearchCondition($query)
     {
         $condition = $query->getSearchCondition();
-        if (empty($condition)) return null;
+        if (empty($condition)) {
+            return null;
+        }
         $searchConditions = array();
         $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
@@ -226,5 +266,4 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $searchConditions['args'] = "%". $condition. "%";
         return $searchConditions;
     }
-
 }

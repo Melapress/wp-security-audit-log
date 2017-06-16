@@ -1,7 +1,12 @@
 <?php
-
-class WSAL_Views_LogInUsers extends WSAL_AbstractView {
-    
+/**
+ * @package Wsal
+ *
+ * User Sessions Management Add-On promo Page.
+ * Used only if the plugin is not activated.
+ */
+class WSAL_Views_LogInUsers extends WSAL_AbstractView
+{
     public function GetTitle()
     {
         return __('User Sessions Management Add-On', 'wp-security-audit-log');
@@ -22,7 +27,8 @@ class WSAL_Views_LogInUsers extends WSAL_AbstractView {
         return 8;
     }
 
-    public function Header() {
+    public function Header()
+    {
         wp_enqueue_style(
             'extensions',
             $this->_plugin->GetBaseUrl() . '/css/extensions.css',

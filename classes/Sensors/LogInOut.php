@@ -1,8 +1,33 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * Login/Logout sensor.
+ *
+ * 1000 User logged in
+ * 1001 User logged out
+ * 1002 Login failed
+ * 1003 Login failed / non existing user
+ * 1004 Login blocked
+ * 4003 User has changed his or her password
+ */
 class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
 {
+    /**
+     * Transient name.
+     * WordPress will prefix the name with "_transient_" or "_transient_timeout_" in the options table.
+     */
+    const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins-known';
+    const TRANSIENT_FAILEDLOGINS_UNKNOWN = 'wsal-failedlogins-unknown';
 
+    /**
+     * @var WP_User current user object
+     */
+    protected $_current_user = null;
+
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         add_action('wp_login', array($this, 'EventLogin'), 10, 2);
@@ -13,13 +38,17 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         add_filter('wp_login_blocked', array($this, 'EventLoginBlocked'), 10, 1);
     }
     
-    protected $_current_user = null;
-    
+    /**
+     * Sets current user.
+     */
     public function GetCurrentUser()
     {
         $this->_current_user = wp_get_current_user();
     }
     
+    /**
+     * Event Login.
+     */
     public function EventLogin($user_login, $user = null)
     {
         if (empty($user)) {
@@ -35,6 +64,9 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         ), true);
     }
     
+    /**
+     * Event Logout.
+     */
     public function EventLogout()
     {
         if ($this->_current_user->ID != 0) {
@@ -45,19 +77,31 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         }
     }
     
-    const TRANSIENT_FAILEDLOGINS = 'wsal-failedlogins-known';
-    const TRANSIENT_FAILEDLOGINS_UNKNOWN = 'wsal-failedlogins-unknown';
-    
+    /**
+     * Login failure limit count.
+     * @return integer limit
+     */
     protected function GetLoginFailureLogLimit()
     {
         return 10;
     }
     
+    /**
+     * Expiration of the transient saved in the WP database.
+     * @return integer Time until expiration in seconds from now
+     */
     protected function GetLoginFailureExpiration()
     {
         return 12 * 60 * 60;
     }
     
+    /**
+     * Check failure limit.
+     * @param string $ip IP address
+     * @param integer $site_id blog ID
+     * @param WP_User $user user object
+     * @return boolean passed limit true|false
+     */
     protected function IsPastLoginFailureLimit($ip, $site_id, $user)
     {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
@@ -70,6 +114,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Increment failure limit.
+     * @param string $ip IP address
+     * @param integer $site_id blog ID
+     * @param WP_User $user user object
+     */
     protected function IncrementLoginFailure($ip, $site_id, $user)
     {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
@@ -97,6 +147,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         }
     }
     
+    /**
+     * Event Login failure.
+     * @param string $username username
+     */
     public function EventLoginFailure($username)
     {
         list($y, $m, $d) = explode('-', date('Y-m-d'));
@@ -193,6 +247,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Event changed password.
+     * @param WP_User $user user object
+     */
     public function EventPasswordReset($user, $new_pass)
     {
         if (!empty($user)) {
@@ -204,6 +262,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Event login blocked.
+     * @param string $username username
+     */
     public function EventLoginBlocked($username)
     {
         $user = get_user_by('login', $username);

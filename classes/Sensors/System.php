@@ -1,9 +1,45 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * System Activity sensor.
+ *
+ * 6000 Events automatically pruned by system
+ * 6001 Option Anyone Can Register in WordPress settings changed
+ * 6002 New User Default Role changed
+ * 6003 WordPress Administrator Notification email changed
+ * 6004 WordPress was updated
+ * 6005 User changes the WordPress Permalinks
+ * 6007 User requests non-existing pages (404 Error Pages)
+ * 8009 User changed forum's role
+ * 8010 User changed option of a forum
+ * 8012 User changed time to disallow post editing
+ * 8013 User changed the forum setting posting throttle time
+ * 1006 User logged out all other sessions with the same username
+ * 6004 WordPress was updated
+ * 6008 Enabled/Disabled the option Discourage search engines from indexing this site
+ * 6009 Enabled/Disabled comments on all the website
+ * 6010 Enabled/Disabled the option Comment author must fill out name and email
+ * 6011 Enabled/Disabled the option Users must be logged in and registered to comment
+ * 6012 Enabled/Disabled the option to automatically close comments
+ * 6013 Changed the value of the option Automatically close comments
+ * 6014 Enabled/Disabled the option for comments to be manually approved
+ * 6015 Enabled/Disabled the option for an author to have previously approved comments for the comments to appear
+ * 6016 Changed the number of links that a comment must have to be held in the queue
+ * 6017 Modified the list of keywords for comments moderation
+ * 6018 Modified the list of keywords for comments blacklisting
+ */
 class WSAL_Sensors_System extends WSAL_AbstractSensor
 {
+    /**
+     * Transient name.
+     * WordPress will prefix the name with "_transient_" or "_transient_timeout_" in the options table.
+     */
     const TRANSIENT_404 = 'wsal-404-attempts';
 
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         add_action('wsal_prune', array($this, 'EventPruneEvents'), 10, 2);
@@ -39,16 +75,31 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         ));
     }
 
+    /**
+     * 404 limit count.
+     * @return integer limit
+     */
     protected function Get404LogLimit()
     {
         return $this->plugin->settings->Get404LogLimit();
     }
     
+    /**
+     * Expiration of the transient saved in the WP database.
+     * @return integer Time until expiration in seconds from now
+     */
     protected function Get404Expiration()
     {
         return 24 * 60 * 60;
     }
 
+    /**
+     * Check 404 limit.
+     * @param integer $site_id blog ID
+     * @param string $username username
+     * @param string $ip IP address
+     * @return boolean passed limit true|false
+     */
     protected function IsPast404Limit($site_id, $username, $ip)
     {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
@@ -56,6 +107,12 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         return ($data !== false) && isset($data[$site_id.":".$username.":".$ip]) && ($data[$site_id.":".$username.":".$ip] > $this->Get404LogLimit());
     }
     
+    /**
+     * Increment 404 limit.
+     * @param integer $site_id blog ID
+     * @param string $username username
+     * @param string $ip IP address
+     */
     protected function Increment404($site_id, $username, $ip)
     {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
@@ -72,6 +129,9 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         $set_fn(self::TRANSIENT_404, $data, $this->Get404Expiration());
     }
     
+    /**
+     * Event 404 Not found.
+     */
     public function Event404()
     {
         $attempts = 1;
@@ -149,11 +209,15 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Triggered when a user accesses the admin area.
+     */
     public function EventAdminInit()
     {
         // make sure user can actually modify target options
-        if (!current_user_can('manage_options')) return;
-        
+        if (!current_user_can('manage_options')) {
+            return;
+        }
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
         $actype = basename($_SERVER['SCRIPT_NAME'], '.php');
         $is_option_page = $actype == 'options';
@@ -299,7 +363,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
     }
 
     /**
-     * Purge log files older than one month
+     * Purge log files older than one month.
      */
     public function LogFilesPruning()
     {
@@ -472,6 +536,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor
         return $nameFile;
     }
 
+    /**
+     * Get the latest file modified.
+     * @return string $latest_filename file name
+     */
     private function GetLastModified($uploadsDirPath, $filename)
     {
         $filename = substr($filename, 0, -4);

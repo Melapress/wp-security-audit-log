@@ -4,8 +4,13 @@
 if(!class_exists('EDD_SL_Plugin_Updater')){
     require_once('EDD_SL_Plugin_Updater.php');
 }
-
-class WSAL_LicenseManager {
+/**
+ * @package Wsal
+ *
+ * License Manager used in all the Add-Ons licenses.
+ */
+class WSAL_LicenseManager
+{
     /**
      * @var WpSecurityAuditLog
      */
@@ -13,30 +18,36 @@ class WSAL_LicenseManager {
     
     protected $plugins = array();
     
-    public function __construct(WpSecurityAuditLog $plugin){
+    public function __construct(WpSecurityAuditLog $plugin)
+    {
         $this->plugin = $plugin;
         add_action('plugins_loaded', array($this, 'LoadPlugins'));
     }
     
-    protected function GetStoreUrl(){
+    protected function GetStoreUrl()
+    {
         return 'https://www.wpsecurityauditlog.com/';
     }
     
-    public function CountPlugins(){
+    public function CountPlugins()
+    {
         return count($this->plugins);
     }
     
-    public function Plugins(){
+    public function Plugins()
+    {
         return $this->plugins;
     }
     
-    public function LoadPlugins(){
-        foreach(apply_filters('wsal_register', array()) as $pluginFile) {
+    public function LoadPlugins()
+    {
+        foreach (apply_filters('wsal_register', array()) as $pluginFile) {
             $this->AddPremiumPlugin($pluginFile);
         }
     }
     
-    protected function GetPluginData($pluginFile, $license){
+    protected function GetPluginData($pluginFile, $license)
+    {
         // A hack since get_plugin_data() is not available now
         $pluginData = get_file_data($pluginFile, array(
                 'Name' => 'Plugin Name',
@@ -46,11 +57,11 @@ class WSAL_LicenseManager {
                 'Author' => 'Author',
                 'TextDomain' => 'Text Domain',
                 'DomainPath' => 'Domain Path',
-            ), 'plugin' );
+            ), 'plugin');
         
         $pluginUpdater = is_null($license)
-             ? null
-             : new EDD_SL_Plugin_Updater(
+            ? null
+            : new EDD_SL_Plugin_Updater(
                 $this->GetStoreUrl(),
                 $pluginFile,
                 array(
@@ -67,7 +78,8 @@ class WSAL_LicenseManager {
         );
     }
     
-    public function AddPremiumPlugin($pluginFile) {
+    public function AddPremiumPlugin($pluginFile)
+    {
         if (isset($pluginFile)) {
             $name = sanitize_key(basename($pluginFile));
             $license = $this->plugin->settings->GetLicenseKey($name);
@@ -75,20 +87,23 @@ class WSAL_LicenseManager {
         }
     }
     
-    public function AddPlugin($pluginFile) {
+    public function AddPlugin($pluginFile)
+    {
         if (isset($pluginFile)) {
             $name = sanitize_key(basename($pluginFile));
             $this->plugins[$name] = $this->GetPluginData($pluginFile, null);
         }
     }
     
-    protected function GetBlogIds(){
+    protected function GetBlogIds()
+    {
         global $wpdb;
         $sql = 'SELECT blog_id FROM ' . $wpdb->blogs;
         return $wpdb->get_col($sql);
     }
     
-    public function ActivateLicense($name, $license){
+    public function ActivateLicense($name, $license)
+    {
         $this->plugin->settings->SetLicenseKey($name, $license);
 
         $plugins = $this->Plugins();
@@ -101,10 +116,10 @@ class WSAL_LicenseManager {
         
         $blog_ids = $this->plugin->IsMultisite() ? $this->GetBlogIds() : array(1);
         
-        foreach($blog_ids as $blog_id){
-            
-            if($this->plugin->IsMultisite())
+        foreach ($blog_ids as $blog_id) {
+            if ($this->plugin->IsMultisite()) {
                 $api_params['url'] = urlencode(get_home_url($blog_id));
+            }
             
             $response = wp_remote_get(
                 esc_url_raw(add_query_arg($api_params, $this->GetStoreUrl())),
@@ -119,16 +134,18 @@ class WSAL_LicenseManager {
 
             $license_data = json_decode(wp_remote_retrieve_body($response));
 
-            if(is_object($license_data)){
+            if (is_object($license_data)) {
                 $this->plugin->settings->SetLicenseStatus($name, $license_data->license);
-                if($license_data->license !== 'valid'){
+                if ($license_data->license !== 'valid') {
                     $error = 'License Not Valid';
-                    if (isset($license_data->error)) $error .= ': ' . ucfirst(str_replace('_', ' ', $license_data->error));
+                    if (isset($license_data->error)) {
+                        $error .= ': ' . ucfirst(str_replace('_', ' ', $license_data->error));
+                    }
                     $this->plugin->settings->SetLicenseErrors($name, $error);
                     $this->DeactivateLicense($name, $license);
                     return false;
                 }
-            }else{
+            } else {
                 $this->plugin->settings->SetLicenseErrors($name, 'Unexpected Licensing Server Response');
                 $this->DeactivateLicense($name, $license);
                 return false;
@@ -138,15 +155,16 @@ class WSAL_LicenseManager {
         return true;
     }
     
-    public function IsLicenseValid($name){
+    public function IsLicenseValid($name)
+    {
         return trim(strtolower($this->plugin->settings->GetLicenseStatus($name))) === 'valid';
     }
     
-    public function DeactivateLicense($name, $license = null){
+    public function DeactivateLicense($name, $license = null)
+    {
         $this->plugin->settings->SetLicenseStatus($name, '');
-        
         // deactivate it on the server (if license was given)
-        if(!is_null($license)){
+        if (!is_null($license)) {
             $plugins = $this->Plugins();
             $api_params = array(
                 'edd_action'=> 'deactivate_license',
@@ -157,17 +175,19 @@ class WSAL_LicenseManager {
 
             $blog_ids = $this->plugin->IsMultisite() ? $this->GetBlogIds() : array(1);
 
-            foreach($blog_ids as $blog_id){
-
-                if($this->plugin->IsMultisite())
+            foreach ($blog_ids as $blog_id) {
+                if ($this->plugin->IsMultisite()) {
                     $api_params['url'] = urlencode(get_home_url($blog_id));
+                }
 
                 $response = wp_remote_get(
                     esc_url_raw(add_query_arg($api_params, $this->GetStoreUrl())),
                     array('timeout' => 15, 'sslverify' => false)
                 );
 
-                if (is_wp_error($response)) return false;
+                if (is_wp_error($response)) {
+                    return false;
+                }
 
                 wp_remote_retrieve_body($response);
             }

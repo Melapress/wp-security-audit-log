@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * @package Wsal
+ *
+ * Interface used by the WSAL_Connector.
+ */
 interface WSAL_Connector_ConnectorInterface
 {
     public function getAdapter($class_name);

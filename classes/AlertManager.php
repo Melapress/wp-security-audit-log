@@ -1,7 +1,12 @@
 <?php
-
-final class WSAL_AlertManager {
-    
+/**
+ * @package Wsal
+ *
+ * WSAL_AlertManager class.
+ * It is the actual trigger for the alerts.
+ */
+final class WSAL_AlertManager
+{
     /**
      * @var WSAL_Alert[]
      */
@@ -18,10 +23,23 @@ final class WSAL_AlertManager {
     protected $plugin;
 
     /**
+     * Contains a list of alerts to trigger.
+     * @var array
+     */
+    protected $_pipeline = array();
+    
+    /**
+     * Contains an array of alerts that have been triggered for this request.
+     * @var int[]
+     */
+    protected $_triggered_types = array();
+
+    /**
      * Create new AlertManager instance.
      * @param WpSecurityAuditLog $plugin
      */
-    public function __construct(WpSecurityAuditLog $plugin){
+    public function __construct(WpSecurityAuditLog $plugin)
+    {
         $this->plugin = $plugin;
         foreach (glob(dirname(__FILE__) . '/Loggers/*.php') as $file) {
             $this->AddFromFile($file);
@@ -34,7 +52,8 @@ final class WSAL_AlertManager {
      * Add new logger from file inside autoloader path.
      * @param string $file Path to file.
      */
-    public function AddFromFile($file){
+    public function AddFromFile($file)
+    {
         $this->AddFromClass($this->plugin->GetClassFileClassName($file));
     }
     
@@ -42,7 +61,8 @@ final class WSAL_AlertManager {
      * Add new logger given class name.
      * @param string $class Class name.
      */
-    public function AddFromClass($class){
+    public function AddFromClass($class)
+    {
         $this->AddInstance(new $class($this->plugin));
     }
     
@@ -50,7 +70,8 @@ final class WSAL_AlertManager {
      * Add newly created logger to list.
      * @param WSAL_AbstractLogger $logger The new logger.
      */
-    public function AddInstance(WSAL_AbstractLogger $logger){
+    public function AddInstance(WSAL_AbstractLogger $logger)
+    {
         $this->_loggers[] = $logger;
     }
     
@@ -68,23 +89,12 @@ final class WSAL_AlertManager {
     }
     
     /**
-     * Contains a list of alerts to trigger.
-     * @var array
-     */
-    protected $_pipeline = array();
-    
-    /**
-     * Contains an array of alerts that have been triggered for this request.
-     * @var int[]
-     */
-    protected $_triggered_types = array();
-    
-    /**
      * Trigger an alert.
      * @param integer $type Alert type.
      * @param array $data Alert data.
      */
-    public function Trigger($type, $data = array(), $delayed = false){
+    public function Trigger($type, $data = array(), $delayed = false)
+    {
         $username = wp_get_current_user()->user_login;
         if (empty($username) && !empty($data["Username"])) {
             $username = $data['Username'];
@@ -111,7 +121,8 @@ final class WSAL_AlertManager {
      * @param array roles
      * @return boolean True if enable false otherwise.
      */
-    public function CheckEnableUserRoles($user, $roles) {
+    public function CheckEnableUserRoles($user, $roles)
+    {
         $is_enable = true;
         if ($user != "" && $this->IsDisabledUser($user)) {
             $is_enable = false;
@@ -128,7 +139,8 @@ final class WSAL_AlertManager {
      * @param array $data Alert data.
      * @param callable $cond A future condition callback (receives an object of type WSAL_AlertManager as parameter).
      */
-    public function TriggerIf($type, $data, $cond = null) {
+    public function TriggerIf($type, $data, $cond = null)
+    {
         $username = wp_get_current_user()->user_login;
         $roles = $this->plugin->settings->GetCurrentUserRoles();
         
@@ -167,7 +179,8 @@ final class WSAL_AlertManager {
     /**
      * @internal Runs over triggered alerts in pipeline and passes them to loggers.
      */
-    public function _CommitPipeline(){
+    public function _CommitPipeline()
+    {
         foreach ($this->_pipeline as $item) {
             $this->_CommitItem($item['type'], $item['data'], $item['cond']);
         }
@@ -191,7 +204,8 @@ final class WSAL_AlertManager {
      * @param int $type Alert type ID.
      * @return boolean True if an alert has been or will be triggered in this request, false otherwise.
      */
-    public function WillOrHasTriggered($type){
+    public function WillOrHasTriggered($type)
+    {
         return in_array($type, $this->_triggered_types)
                 || $this->WillTrigger($type);
     }
@@ -239,7 +253,8 @@ final class WSAL_AlertManager {
      * @param integer $type Alert type.
      * @return boolean True if enabled, false otherwise.
      */
-    public function IsEnabled($type){
+    public function IsEnabled($type)
+    {
         return !in_array($type, $this->GetDisabledAlerts());
     }
     
@@ -247,21 +262,24 @@ final class WSAL_AlertManager {
      * Disables a set of alerts by type.
      * @param int[] $types Alert type codes to be disabled.
      */
-    public function SetDisabledAlerts($types){
+    public function SetDisabledAlerts($types)
+    {
         $this->plugin->settings->SetDisabledAlerts($types);
     }
     
     /**
      * @return int[] Returns an array of disabled alerts' type code.
      */
-    public function GetDisabledAlerts(){
+    public function GetDisabledAlerts()
+    {
         return $this->plugin->settings->GetDisabledAlerts();
     }
     
     /**
      * @return WSAL_AbstractLogger[] Returns an array of loaded loggers.
      */
-    public function GetLoggers(){
+    public function GetLoggers()
+    {
         return $this->_loggers;
     }
     
@@ -340,7 +358,8 @@ final class WSAL_AlertManager {
      * Returns all supported alerts.
      * @return WSAL_Alert[]
      */
-    public function GetAlerts(){
+    public function GetAlerts()
+    {
         return $this->_alerts;
     }
     

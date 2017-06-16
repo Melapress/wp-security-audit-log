@@ -1,13 +1,34 @@
 <?php
-
+/**
+ * @package Wsal
+ * @subpackage Sensors
+ * Database sensor.
+ *
+ * 5010 Plugin created tables
+ * 5011 Plugin modified tables structure
+ * 5012 Plugin deleted tables
+ * 5013 Theme created tables
+ * 5014 Theme modified tables structure
+ * 5015 Theme deleted tables
+ * 5016 Unknown component created tables
+ * 5017 Unknown component modified tables structure
+ * 5018 Unknown component deleted tables
+ */
 class WSAL_Sensors_Database extends WSAL_AbstractSensor
 {
+    /**
+     * Listening to events using WP hooks.
+     */
     public function HookEvents()
     {
         add_action('dbdelta_queries', array($this, 'EventDBDeltaQuery'));
         add_action('query', array($this, 'EventDropQuery'));
     }
 
+    /**
+     * Checks for drop query.
+     * @param WP_Query $query query object
+     */
     public function EventDropQuery($query)
     {
         $table_names = array();
@@ -31,6 +52,10 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor
         return $query;
     }
     
+    /**
+     * Checks DB Delta queries.
+     * @param array $queries array of query
+     */
     public function EventDBDeltaQuery($queries)
     {
         $typeQueries = array(
@@ -74,6 +99,11 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor
         return $queries;
     }
     
+    /**
+     * Get code alert by action and type query.
+     * @param string $type_action (plugins, themes or unknown)
+     * @param string $type_query (create, update or delete)
+     */
     protected function GetEventQueryType($type_action, $type_query)
     {
         switch ($type_action) {
@@ -92,6 +122,10 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor
         }
     }
 
+    /**
+     * Get info by action type.
+     * @param string $actype (plugins, themes or unknown)
+     */
     protected function GetActionType($actype)
     {
         $is_themes = $actype == 'themes';

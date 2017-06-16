@@ -1,18 +1,33 @@
 <?php
-
+/**
+ * @package Wsal
+ * Loggers Class.
+ *
+ * This class store the logs in the Database and adds the promo
+ * alerts, there is also the function to clean up alerts.
+ */
 class WSAL_Loggers_Database extends WSAL_AbstractLogger
 {
-
     public function __construct(WpSecurityAuditLog $plugin)
     {
         parent::__construct($plugin);
         $plugin->AddCleanupHook(array($this, 'CleanUp'));
     }
 
+    /**
+     * Log alert.
+     * @param integer $type alert code
+     * @param array $data Metadata
+     * @param integer $date (Optional) created_on
+     * @param integer $siteid (Optional) site_id
+     * @param bool $migrated (Optional) is_migrated
+     */
     public function Log($type, $data = array(), $date = null, $siteid = null, $migrated = false)
     {
         // is this a php alert, and if so, are we logging such alerts?
-        if ($type < 0010 && !$this->plugin->settings->IsPhpErrorLoggingEnabled()) return;
+        if ($type < 0010 && !$this->plugin->settings->IsPhpErrorLoggingEnabled()) {
+            return;
+        }
 
         // create new occurrence
         $occ = new WSAL_Models_Occurrence();
@@ -32,6 +47,9 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         }
     }
 
+    /**
+     * Clean Up alerts by date OR by max number.
+     */
     public function CleanUp()
     {
         $now = current_time('timestamp');
@@ -57,15 +75,23 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         $query = new WSAL_Models_OccurrenceQuery();
         $query->addOrderBy("created_on", false);
         // TO DO Fixing data
-        if ($is_date_e) $query->addCondition('created_on <= %s', intval($max_stamp));
-        if ($is_limt_e) $query->setLimit($max_items);
+        if ($is_date_e) {
+            $query->addCondition('created_on <= %s', intval($max_stamp));
+        }
+        if ($is_limt_e) {
+            $query->setLimit($max_items);
+        }
 
-        if (($max_items-1) == 0) return; // nothing to delete
+        if (($max_items-1) == 0) {
+            return; // nothing to delete
+        }
 
         $result = $query->getAdapter()->GetSqlDelete($query);
         $deletedCount = $query->getAdapter()->Delete($query);
 
-        if ($deletedCount == 0) return; // nothing to delete
+        if ($deletedCount == 0) {
+            return; // nothing to delete
+        }
         // keep track of what we're doing
         $this->plugin->alerts->Trigger(0003, array(
                 'Message' => 'Running system cleanup.',
@@ -77,6 +103,10 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         do_action('wsal_prune', $deletedCount, vsprintf($result['sql'], $result['args']));
     }
 
+    /**
+     * Inject Promo alert every $count alerts if no Add-ons are activated.
+     * @param WSAL_Models_Occurrence $occurrence occurrence
+     */
     private function AlertInject($occurrence)
     {
         $count = $this->CheckPromoToShow();
@@ -96,6 +126,11 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         }
     }
 
+    /**
+     * Get the promo id, to send each time a different promo,
+     * keeping the last id saved in the DB.
+     * @return integer $promoToSend the array index
+     */
     private function GetPromoAlert()
     {
         $lastPromoSentId = $this->plugin->GetGlobalOption('promo-send-id');
@@ -115,6 +150,10 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         return $promoToSend;
     }
 
+    /**
+     * Array of promo.
+     * @return array $aPromoAlerts the array of promo
+     */
     private function GetActivePromoText()
     {
         $aPromoAlerts = array();
@@ -136,6 +175,10 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger
         return $aPromoAlerts;
     }
 
+    /**
+     * Check condition to show promo.
+     * @return integer|null counter alert
+     */
     private function CheckPromoToShow()
     {
         $promoToShow = null;
