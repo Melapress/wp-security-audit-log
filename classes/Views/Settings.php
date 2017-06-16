@@ -84,7 +84,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                 $this->_plugin->settings->SetDevOptionEnabled($opt, true);
             }
         }
-        $this->_plugin->settings->Set404LogLimit($_REQUEST['404Limit']);
     }
 
     public function AjaxCheckSecurityToken()
