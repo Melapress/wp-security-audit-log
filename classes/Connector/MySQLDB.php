@@ -317,7 +317,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $plugin     = WpSecurityAuditLog::GetInstance();
         $version    = $plugin->GetGlobalOption( 'version', '0.0.0' );
 
-        if ( -1 === version_compare( $version, '3.6.2' ) ) {
+        if ( -1 === version_compare( $version, '2.6.2' ) ) {
             return $this->encryptString_fallback( $plaintext );
         }
 
@@ -372,7 +372,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $plugin     = WpSecurityAuditLog::GetInstance();
         $version    = $plugin->GetGlobalOption( 'version', '0.0.0' );
 
-        if ( -1 === version_compare( $version, '3.6.2' ) ) {
+        if ( -1 === version_compare( $version, '2.6.2' ) ) {
             return $this->decryptString_fallback( $ciphertext_base64 );
         }
 
