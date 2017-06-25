@@ -313,6 +313,14 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
      */
     public function encryptString( $plaintext ) {
 
+        // Check for previous version.
+        $plugin     = WpSecurityAuditLog::GetInstance();
+        $version    = $plugin->GetGlobalOption( 'version', '0.0.0' );
+
+        if ( -1 === version_compare( $version, '3.6.2' ) ) {
+            return $this->encryptString_fallback( $plaintext );
+        }
+
         $ciphertext = false;
 
         $encrypt_method = 'AES-256-CBC';
@@ -359,6 +367,14 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
      * @since  2.6.3
      */
     public function decryptString( $ciphertext_base64 ) {
+
+        // Check for previous version.
+        $plugin     = WpSecurityAuditLog::GetInstance();
+        $version    = $plugin->GetGlobalOption( 'version', '0.0.0' );
+
+        if ( -1 === version_compare( $version, '3.6.2' ) ) {
+            return $this->decryptString_fallback( $ciphertext_base64 );
+        }
 
         $plaintext = false;
 

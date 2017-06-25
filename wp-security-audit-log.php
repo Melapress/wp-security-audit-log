@@ -157,8 +157,8 @@ class WpSecurityAuditLog {
         $this->licensing = new WSAL_LicenseManager($this);
         $this->widgets = new WSAL_WidgetManager($this);
 
-        // listen for installation event
-        register_activation_hook(__FILE__, array($this, 'Install'));
+        // Listen for installation event.
+        register_activation_hook( __FILE__, array( $this, 'Install' ) );
 
         // listen for init event
         add_action('init', array($this, 'Init'));
@@ -315,9 +315,11 @@ class WpSecurityAuditLog {
         $PreInstalled = $this->IsInstalled();
 
         // if system already installed, do updates now (if any)
-        // $OldVersion = $this->GetOldVersion();
-        // $NewVersion = $this->GetNewVersion();
-        // if ($PreInstalled && $OldVersion != $NewVersion) $this->Update($OldVersion, $NewVersion);
+        $OldVersion = $this->GetOldVersion();
+        $NewVersion = $this->GetNewVersion();
+        if ( $PreInstalled && $OldVersion != $NewVersion ) {
+            $this->Update( $OldVersion, $NewVersion );
+        }
 
         // Load options from wp_options table or wp_sitemeta in multisite enviroment
         $data = $this->read_options_prefixed("wsal-");
@@ -388,18 +390,45 @@ class WpSecurityAuditLog {
      */
     public function update_external_db_password() {
 
-        // Get the password.
-        $old_password = $this->settings->GetAdapterConfig( 'adapter-password' );
+        // Get the passwords.
+        $external_password  = $this->settings->GetAdapterConfig( 'adapter-password' );
+        $mirror_password    = $this->settings->GetAdapterConfig( 'mirror-password' );
+        $archive_password   = $this->settings->GetAdapterConfig( 'archive-password' );
 
-        if ( ! empty( $old_password ) ) {
+        // Update external db password.
+        if ( ! empty( $external_password ) ) {
             // Decrypt the password using fallback method.
-            $password   = $this->getConnector()->decryptString_fallback( $old_password );
+            $password   = $this->getConnector()->decryptString_fallback( $external_password );
 
             // Encrypt the password with latest encryption method.
             $encrypted_password   = $this->getConnector()->encryptString( $password );
 
             // Store the new password.
             $this->settings->SetAdapterConfig( 'adapter-password', $encrypted_password );
+        }
+
+        // Update mirror db password.
+        if ( ! empty( $mirror_password ) ) {
+            // Decrypt the password using fallback method.
+            $password   = $this->getConnector()->decryptString_fallback( $mirror_password );
+
+            // Encrypt the password with latest encryption method.
+            $encrypted_password   = $this->getConnector()->encryptString( $password );
+
+            // Store the new password.
+            $this->settings->SetAdapterConfig( 'mirror-password', $encrypted_password );
+        }
+
+        // Update archive db password.
+        if ( ! empty( $archive_password ) ) {
+            // Decrypt the password using fallback method.
+            $password   = $this->getConnector()->decryptString_fallback( $archive_password );
+
+            // Encrypt the password with latest encryption method.
+            $encrypted_password   = $this->getConnector()->encryptString( $password );
+
+            // Store the new password.
+            $this->settings->SetAdapterConfig( 'archive-password', $encrypted_password );
         }
 
     }
