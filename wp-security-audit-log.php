@@ -131,22 +131,6 @@ class WpSecurityAuditLog
         require_once('classes/Models/Option.php');
         require_once('classes/Models/TmpUser.php');
 
-        // Use WP_Session (default)
-        if (!defined('WP_SESSION_COOKIE')) {
-            define('WP_SESSION_COOKIE', 'wsal_wp_session');
-        }
-        if (!class_exists('Recursive_ArrayAccess')) {
-            require_once('classes/Lib/class-recursive-arrayaccess.php');
-        }
-        if (!class_exists('WP_Session')) {
-            require_once('classes/Lib/class-wp-session.php');
-            require_once('classes/Lib/wp-session.php');
-        }
-
-        if (!class_exists('WP_Session_Utils')) {
-            require_once('classes/Lib/class-wp-session-utils.php');
-        }
-
         // load autoloader and register base paths
         require_once('classes/Autoloader.php');
         $this->autoloader = new WSAL_Autoloader($this);
@@ -190,6 +174,23 @@ class WpSecurityAuditLog
     {
         // Start listening to events
         WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
+        
+        if ($this->settings->IsArchivingEnabled()) {
+            // Check the current page
+            if (isset($_REQUEST['page']) && $_REQUEST['page'] == 'wsal-auditlog') {
+                // Keeps the transient
+            } else {
+                if (defined('DOING_AJAX') && DOING_AJAX) {
+                    // It's an AJAX call
+                } else {
+                    $selected_db = get_transient('wsal_wp_selected_db');
+                    if ($selected_db) {
+                        // Delete the transient
+                        delete_transient('wsal_wp_selected_db');
+                    }
+                }
+            }
+        }
     }
 
     
