@@ -223,6 +223,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(6004, E_CRITICAL, __('WordPress was updated', 'wp-security-audit-log'), __('Updated WordPress from version %OldVersion% to %NewVersion%.', 'wp-security-audit-log')),
                 array(6005, E_CRITICAL, __('User changes the WordPress Permalinks', 'wp-security-audit-log'), __('Changed the WordPress permalinks from %OldPattern% to %NewPattern%.', 'wp-security-audit-log')),
                 array(6007, E_CRITICAL, __('User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log'), __('Has requested a non existing page (404 Error Pages) %Attempts% %Msg%. %LinkFile%.', 'wp-security-audit-log')),
+                array( 6023, E_CRITICAL, __( 'Website Visitor User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Website Visitor Has requested a non existing page (404 Error Pages) %Attempts% %Msg%. %LinkFile%.', 'wp-security-audit-log' ) ),
                 array(9999, E_CRITICAL, __('Advertising Add-ons.', 'wp-security-audit-log'), __('%PromoName% %PromoMessage%', 'wp-security-audit-log'))
             ),
             __('Menus', 'wp-security-audit-log') => array(
@@ -266,6 +267,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(1004, E_WARNING, __('Login blocked', 'wp-security-audit-log'), __('Blocked from logging in because the same WordPress user is logged in from %ClientIP%.', 'wp-security-audit-log')),
                 array(1005, E_WARNING, __('User logged in with existing session(s)', 'wp-security-audit-log'), __('Successfully logged in. Another session from %IPAddress% for this user already exist.', 'wp-security-audit-log')),
                 array(1006, E_CRITICAL, __('User logged out all other sessions with the same username', 'wp-security-audit-log'), __('Logged out all other sessions with the same username.', 'wp-security-audit-log')),
+                array( 1007, E_CRITICAL, __( 'User session destroyed and logged out.', 'wp-security-audit-log' ), __( 'Logged out session %TargetSessionID% which belonged to %TargetUserName%', 'wp-security-audit-log' ) ),
                 array(2010, E_NOTICE, __('User uploaded file from Uploads directory', 'wp-security-audit-log'), __('Uploaded the file %FileName% in %FilePath%.', 'wp-security-audit-log')),
                 array(2011, E_WARNING, __('User deleted file from Uploads directory', 'wp-security-audit-log'), __('Deleted the file %FileName% from %FilePath%.', 'wp-security-audit-log'))
             ),

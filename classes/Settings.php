@@ -10,7 +10,7 @@ class WSAL_Settings
      * @var WpSecurityAuditLog
      */
     protected $_plugin;
-    
+
     // <editor-fold desc="Developer Options">
     const OPT_DEV_DATA_INSPECTOR = 'd';
     const OPT_DEV_PHP_ERRORS     = 'p';
@@ -88,7 +88,7 @@ class WSAL_Settings
     {
         return !!$this->_plugin->GetGlobalOption('dev-options', null);
     }
-    
+
     /**
      * Sets whether a developer option is enabled or not.
      * @param string $option See self::OPT_DEV_* constants.
@@ -153,9 +153,9 @@ class WSAL_Settings
     {
         return $this->IsDevOptionEnabled(self::OPT_DEV_BACKTRACE_LOG);
     }
-    
+
     // </editor-fold>
-    
+
     /**
      * @return boolean Whether dashboard widgets are enabled or not.
      */
@@ -195,7 +195,7 @@ class WSAL_Settings
     {
         return 5;
     }
-    
+
     // <editor-fold desc="Pruning Settings">
     /**
      * @return int The maximum number of alerts allowable.
@@ -212,7 +212,7 @@ class WSAL_Settings
     {
         return '1 month';
     }
-    
+
     /**
      * @return string The current pruning date.
      */
@@ -293,7 +293,7 @@ class WSAL_Settings
     {
         $this->_plugin->SetGlobalOption('restrict-admins', (bool)$enable);
     }
-    
+
     // </editor-fold>
     public function GetDefaultDisabledAlerts()
     {
@@ -345,7 +345,7 @@ class WSAL_Settings
     {
         return $this->_plugin->SetGlobalOption('disable-logging', $disabled);
     }
-    
+
     /**
      * Checking if the data will be removed.
      */
@@ -360,7 +360,7 @@ class WSAL_Settings
     }
 
     // <editor-fold desc="Access Control">
-    
+
     public function SetAllowedPluginViewers($usersOrRoles)
     {
         $this->_viewers = $usersOrRoles;
@@ -388,7 +388,7 @@ class WSAL_Settings
         }
         return $this->_editors;
     }
-    
+
     public function SetViewPerPage($newvalue)
     {
         $this->_perpage = max($newvalue, 1);
@@ -521,9 +521,9 @@ class WSAL_Settings
             return false;
         }
     }
-    
+
     // </editor-fold>
-    
+
     // <editor-fold desc="Licensing">
     public function GetLicenses()
     {
@@ -593,10 +593,10 @@ class WSAL_Settings
     {
         $this->SetLicenses(array());
     }
-    
+
     // </editor-fold>
     // <editor-fold desc="Client IP Retrieval">
-    
+
     public function IsMainIPFromProxy()
     {
         return $this->_plugin->GetGlobalOption('use-proxy-ip');
@@ -606,7 +606,7 @@ class WSAL_Settings
     {
         return $this->_plugin->SetGlobalOption('use-proxy-ip', $enabled);
     }
-    
+
     public function IsInternalIPsFiltered()
     {
         return $this->_plugin->GetGlobalOption('filter-internal-ip');
@@ -616,7 +616,7 @@ class WSAL_Settings
     {
         return $this->_plugin->SetGlobalOption('filter-internal-ip', $enabled);
     }
-    
+
     public function GetMainClientIP()
     {
         $result = null;
@@ -633,7 +633,7 @@ class WSAL_Settings
         }
         return $result;
     }
-    
+
     public function GetClientIPs()
     {
         $ips = array();
@@ -649,7 +649,7 @@ class WSAL_Settings
         }
         return $ips;
     }
-    
+
     protected function NormalizeIP($ip)
     {
         $ip = trim($ip);
@@ -664,7 +664,7 @@ class WSAL_Settings
         }
         return $ip;
     }
-    
+
     protected function ValidateIP($ip)
     {
         $opts = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
@@ -856,7 +856,7 @@ class WSAL_Settings
     {
         return $this->_plugin->SetGlobalOption('columns', json_encode($columns));
     }
-    
+
     public function IsWPBackend()
     {
         return $this->_plugin->GetGlobalOption('wp-backend');
@@ -895,6 +895,25 @@ class WSAL_Settings
     public function Get404LogLimit()
     {
         return $this->_plugin->GetGlobalOption('log-404-limit', 99);
+    }
+
+    /**
+     * Sets the 404 log limit for visitor.
+     *
+     * @param  int $value - 404 log limit.
+     * @since  2.6.3
+     */
+    public function SetVisitor404LogLimit( $value ) {
+        return $this->_plugin->SetGlobalOption( 'log-visitor-404-limit', abs( $value ) );
+    }
+
+    /**
+     * Get the 404 log limit for visitor.
+     *
+     * @since  2.6.3
+     */
+    public function GetVisitor404LogLimit() {
+        return $this->_plugin->GetGlobalOption( 'log-visitor-404-limit', 99 );
     }
 
 /*============================== Support Archive Database ==============================*/

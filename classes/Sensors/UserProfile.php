@@ -34,9 +34,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
 
         add_action('edit_user_profile', array($this, 'EventOpenProfile'), 10, 1);
     }
-    
+
     protected $old_superadmins;
-    
+
     /**
      * Triggered when a user accesses the admin area.
      */
@@ -46,7 +46,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
             $this->old_superadmins = get_super_admins();
         }
     }
-    
+
     public function EventUserRegister($user_id)
     {
         $user = get_userdata($user_id);
@@ -65,7 +65,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
             ),
         ), true);
     }
-    
+
     public function EventUserRoleChanged($user_id, $role, $oldRoles)
     {
         $user = get_userdata($user_id);
@@ -131,11 +131,11 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
                 ));
             }
         }
-        
+
         if ($this->IsMultisite()) {
             $username = $user->user_login;
             $enabled = isset($_REQUEST['super_admin']);
-            
+
             if ($user_id != get_current_user_id()) {
                 // super admin enabled
                 if ($enabled && !in_array($username, $this->old_superadmins)) {
@@ -152,11 +152,11 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
                         'TargetUsername' => $user->user_login,
                     ));
                 }
-                
+
             }
         }
     }
-    
+
     public function EventUserDeleted($user_id)
     {
         $user = get_userdata($user_id);
@@ -173,24 +173,24 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
         ), array($this, 'MustNotContainCreateUser'));
     }
 
-    public function EventOpenProfile($user)
-    {
-        if (!empty($user)) {
+    public function EventOpenProfile( $user ) {
+        if ( ! empty( $user ) ) {
             $current_user = wp_get_current_user();
-            if (!empty($current_user) && ($user->ID != $current_user->ID)) {
-                $this->plugin->alerts->Trigger(4014, array(
+            $updated = ( isset( $_GET['updated'] ) ) ? true : false;
+            if ( ! empty( $current_user ) && ( $user->ID !== $current_user->ID ) && empty( $updated ) ) {
+                $this->plugin->alerts->Trigger( 4014, array(
                     'UserChanger' => $current_user->user_login,
-                    'TargetUsername' => $user->user_login
-                ));
+                    'TargetUsername' => $user->user_login,
+                ) );
             }
         }
     }
-    
+
     public function MustNotContainCreateUser(WSAL_AlertManager $mgr)
     {
         return !$mgr->WillTrigger(4012);
     }
-    
+
     public function MustNotContainUserChanges(WSAL_AlertManager $mgr)
     {
         return !(  $mgr->WillOrHasTriggered(4010)

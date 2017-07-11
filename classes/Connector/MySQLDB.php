@@ -7,7 +7,7 @@
 class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements WSAL_Connector_ConnectorInterface
 {
     protected $connectionConfig = null;
-    
+
     /**
      * @param string $dbuser     MySQL database user
      * @param string $dbpassword MySQL database password
@@ -127,22 +127,23 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
             $filePath = explode(DIRECTORY_SEPARATOR, $file);
             $fileName = $filePath[count($filePath) - 1];
             $className = $this->getAdapterClassName(str_replace("Adapter.php", "", $fileName));
-            
+
             $class = new $className($this->getConnection());
             if ($excludeOptions && $class instanceof WSAL_Adapters_MySQL_Option) {
                 continue;
             }
+
             // exclude the tmp_users table
             if (!$excludeOptions && $class instanceof WSAL_Adapters_MySQL_TmpUser) {
                 continue;
             }
-            
+
             if (is_subclass_of($class, "WSAL_Adapters_MySQL_ActiveRecord")) {
                 $class->Install();
             }
         }
     }
-    
+
     /**
      * Uninstall all DB tables.
      */
@@ -313,7 +314,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $offset = ($index * $limit);
         global $wpdb;
         $_wpdb = $this->getConnection();
-        
+
         // Load data Meta from External DB
         $meta = new WSAL_Adapters_MySQL_Meta($_wpdb);
         if (!$meta->IsInstalled()) {
@@ -326,7 +327,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         // Insert data to WP
         if (!empty($metadata)) {
             $metaWP = new WSAL_Adapters_MySQL_Meta($wpdb);
-            
+
             $index++;
             $sql = 'INSERT INTO ' . $metaWP->GetWPTable() . ' (occurrence_id, name, value) VALUES ' ;
             foreach ($metadata as $entry) {
@@ -355,38 +356,114 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
     }
 
     /**
+     * Encrypt plain text.
      * Encrypt string, before saves it to the DB.
-     * @param string $plaintext original text
-     * @return string encrypted text
+     *
+     * @param  string $plaintext - Plain text that is going to be encrypted.
+     * @return string
+     * @since  2.6.3
      */
-    public function encryptString($plaintext)
-    {
-        $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
-        $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND);
-        $key = $this->truncateKey();
-        $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $plaintext, MCRYPT_MODE_CBC, $iv);
-        $ciphertext = $iv . $ciphertext;
-        $ciphertext_base64 = base64_encode($ciphertext);
-        
-        return $ciphertext_base64;
+    public function encryptString( $plaintext ) {
+
+        // Check for previous version.
+        $plugin     = WpSecurityAuditLog::GetInstance();
+        $version    = $plugin->GetGlobalOption( 'version', '0.0.0' );
+
+        if ( -1 === version_compare( $version, '2.6.2' ) ) {
+            return $this->encryptString_fallback( $plaintext );
+        }
+
+        $ciphertext = false;
+
+        $encrypt_method = 'AES-256-CBC';
+        $secret_key     = $this->truncateKey();
+        $secret_iv      = $this->get_openssl_iv();
+
+        // Hash the key.
+        $key = hash( 'sha256', $secret_key );
+
+        // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning.
+        $iv = substr( hash( 'sha256', $secret_iv ), 0, 16 );
+
+        $ciphertext = openssl_encrypt( $plaintext, $encrypt_method, $key, 0, $iv );
+        $ciphertext = base64_encode( $ciphertext );
+
+        return $ciphertext;
+
     }
-    
+
     /**
-     * Decrypt string, after reads it from the DB.
-     * @param string $ciphertext_base64 encrypted text
-     * @return string original text
+     * Encrypt plain text - Fallback.
+     *
+     * @param  string $plaintext - Plain text that is going to be encrypted.
+     * @return string
+     * @since  2.6.3
      */
-    public function decryptString($ciphertext_base64)
-    {
-        $ciphertext_dec = base64_decode($ciphertext_base64);
-        $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
-    
-        $iv_dec = substr($ciphertext_dec, 0, $iv_size);
-        $ciphertext_dec = substr($ciphertext_dec, $iv_size);
-        $key = $this->truncateKey();
-        $plaintext_dec = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
-        
-        return rtrim($plaintext_dec, "\0");
+    public function encryptString_fallback( $plaintext ) {
+
+        $iv_size    = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC );
+        $iv         = mcrypt_create_iv( $iv_size, MCRYPT_RAND );
+        $key        = $this->truncateKey();
+        $ciphertext = mcrypt_encrypt( MCRYPT_RIJNDAEL_128, $key, $plaintext, MCRYPT_MODE_CBC, $iv );
+        $ciphertext = $iv . $ciphertext;
+        $ciphertext_base64 = base64_encode( $ciphertext );
+        return $ciphertext_base64;
+
+    }
+
+    /**
+     * Decrypt the encrypted string.
+     * Decrypt string, after reads it from the DB.
+     *
+     * @param  string $ciphertext_base64 - encrypted string.
+     * @return string
+     * @since  2.6.3
+     */
+    public function decryptString( $ciphertext_base64 ) {
+
+        // Check for previous version.
+        $plugin     = WpSecurityAuditLog::GetInstance();
+        $version    = $plugin->GetGlobalOption( 'version', '0.0.0' );
+
+        if ( -1 === version_compare( $version, '2.6.2' ) ) {
+            return $this->decryptString_fallback( $ciphertext_base64 );
+        }
+
+        $plaintext = false;
+
+        $encrypt_method = 'AES-256-CBC';
+        $secret_key     = $this->truncateKey();
+        $secret_iv      = $this->get_openssl_iv();
+
+        // Hash the key.
+        $key = hash( 'sha256', $secret_key );
+
+        // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning.
+        $iv = substr( hash( 'sha256', $secret_iv ), 0, 16 );
+
+        $plaintext = openssl_decrypt( base64_decode( $ciphertext_base64 ), $encrypt_method, $key, 0, $iv );
+
+        return $plaintext;
+
+    }
+
+    /**
+     * Decrypt the encrypted string - Fallback.
+     *
+     * @param  string $ciphertext_base64 - encrypted string.
+     * @return string
+     * @since  2.6.3
+     */
+    public function decryptString_fallback( $ciphertext_base64 ) {
+
+        $ciphertext_dec = base64_decode( $ciphertext_base64 );
+        $iv_size        = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC );
+        $iv_dec         = substr( $ciphertext_dec, 0, $iv_size );
+        $ciphertext_dec = substr( $ciphertext_dec, $iv_size );
+        $key            = $this->truncateKey();
+        $plaintext_dec  = mcrypt_decrypt( MCRYPT_RIJNDAEL_128, $key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec );
+        return rtrim( $plaintext_dec, "\0" );
+
     }
 
     /**
@@ -469,8 +546,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         }
 
         if (!empty($args['by_limit'])) {
-            $sql = 'SELECT occ.* FROM ' . $occurrence->GetTable() . ' occ    
-            LEFT JOIN (SELECT id FROM ' . $occurrence->GetTable() . ' order by created_on DESC limit ' . $args['by_limit'] . ') as ids 
+            $sql = 'SELECT occ.* FROM ' . $occurrence->GetTable() . ' occ
+            LEFT JOIN (SELECT id FROM ' . $occurrence->GetTable() . ' order by created_on DESC limit ' . $args['by_limit'] . ') as ids
             on ids.id = occ.id
             WHERE ids.id IS NULL';
         }
@@ -549,7 +626,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         $archive_db = $args['archive_db'];
 
         $sOccurenceIds = implode(", ", $args["occurence_ids"]);
-        
+
         $occurrence = new WSAL_Adapters_MySQL_Occurrence($_wpdb);
         $sql = 'DELETE FROM ' . $occurrence->GetTable() . ' WHERE id IN (' . $sOccurenceIds . ')';
         $_wpdb->query($sql);
@@ -575,5 +652,22 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
         } else {
             return AUTH_KEY;
         }
+    }
+
+    /**
+     * Get OpenSSL IV for DB.
+     *
+     * @since 2.6.3
+     */
+    private function get_openssl_iv() {
+
+        $secret_openssl_iv = 'і-(аэ┤#≥и┴зейН';
+        $key_size = strlen( $secret_openssl_iv );
+        if ( $key_size > 32 ) {
+            return substr( $secret_openssl_iv, 0, 32 );
+        } else {
+            return $secret_openssl_iv;
+        }
+
     }
 }
