@@ -177,17 +177,11 @@ class WpSecurityAuditLog
         
         if ($this->settings->IsArchivingEnabled()) {
             // Check the current page
-            if (isset($_REQUEST['page']) && $_REQUEST['page'] == 'wsal-auditlog') {
-                // Keeps the transient
-            } else {
-                if (defined('DOING_AJAX') && DOING_AJAX) {
-                    // It's an AJAX call
-                } else {
-                    $selected_db = get_transient('wsal_wp_selected_db');
-                    if ($selected_db) {
-                        // Delete the transient
-                        delete_transient('wsal_wp_selected_db');
-                    }
+            if ((!isset($_REQUEST['page']) || $_REQUEST['page'] != 'wsal-auditlog') && (!defined('DOING_AJAX') || !DOING_AJAX)) {
+                $selected_db = get_transient('wsal_wp_selected_db');
+                if ($selected_db) {
+                    // Delete the transient
+                    delete_transient('wsal_wp_selected_db');
                 }
             }
         }
