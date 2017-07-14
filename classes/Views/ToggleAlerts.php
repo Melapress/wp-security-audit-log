@@ -4,35 +4,35 @@
  *
  * Enable/Disable Alerts Page.
  */
-class WSAL_Views_ToggleAlerts extends WSAL_AbstractView 
+class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
 {
     public function GetTitle()
     {
         return __('Enable/Disable Alerts', 'wp-security-audit-log');
     }
-    
+
     public function GetIcon()
     {
         return 'dashicons-forms';
     }
-    
+
     public function GetName()
     {
         return __('Enable/Disable Alerts', 'wp-security-audit-log');
     }
-    
+
     public function GetWeight()
     {
         return 2;
     }
-    
+
     protected function GetSafeCatgName($name)
     {
         return strtolower(
             preg_replace('/[^A-Za-z0-9\-]/', '-', $name)
         );
     }
-    
+
     public function Render()
     {
         if (!$this->_plugin->settings->CurrentUserCan('edit')) {
@@ -59,6 +59,12 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
             }
             $this->_plugin->SetGlobalOption('log-404', isset($_REQUEST['log_404']) ? 'on' : 'off');
             $this->_plugin->SetGlobalOption('purge-404-log', isset($_REQUEST['purge_log']) ? 'on' : 'off');
+
+            $this->_plugin->SetGlobalOption( 'log-visitor-404', isset( $_REQUEST['log_visitor_404'] ) ? 'on' : 'off' );
+            $this->_plugin->SetGlobalOption( 'purge-visitor-404-log', isset( $_REQUEST['purge_visitor_log'] ) ? 'on' : 'off' );
+
+            $this->_plugin->settings->Set404LogLimit( $_REQUEST['user_404Limit'] );
+            $this->_plugin->settings->SetVisitor404LogLimit( $_REQUEST['visitor_404Limit'] );
         }
         ?><h2 id="wsal-tabs" class="nav-tab-wrapper"><?php
             foreach ($safeNames as $name => $safe) {
@@ -68,7 +74,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
         <form id="audit-log-viewer" method="post">
             <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
             <?php wp_nonce_field('wsal-togglealerts'); ?>
-            
+
             <div class="nav-tabs"><?php
                 foreach ($groupedAlerts as $name => $group) { ?>
                     <div class="wsal-tab" id="tab-<?php echo $safeNames[$name]; ?>">
@@ -140,10 +146,51 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                             <td></td>
                                             <td><input name="purge_log" type="checkbox" class="check_log" value="1" <?php if ($purge_log == 'on') echo 'checked="checked"'; ?>></td>
                                             <td colspan="2"><?php _e('Purge log files older than one month', 'wp-security-audit-log'); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td colspan="1"><input type="number" id="user_404Limit" name="user_404Limit" value="<?php echo $this->_plugin->settings->Get404LogLimit(); ?>" /></td>
+                                            <td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log', 'wp-security-audit-log' ); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td colspan="2">
+                                                <?php esc_html_e( 'By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?><br />
+                                                <?php esc_html_e( 'Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?>
+                                            </td>
+                                        </tr><?php
+                                    }
+                                    if ( 6023 == $alert->type ) {
+                                        $log_visitor_404 = $this->_plugin->GetGlobalOption( 'log-visitor-404' );
+                                        $purge_visitor_log = $this->_plugin->GetGlobalOption( 'purge-visitor-404-log' );
+                                        ?><tr>
+                                            <td></td>
+                                            <td><input name="log_visitor_404" type="checkbox" class="check_visitor_log" value="1" <?php if ( 'on' == $log_visitor_404 ) echo 'checked="checked"'; ?>></td>
+                                            <td colspan="2"><?php esc_html_e( 'Capture 404 requests to file (the log file are created in the /wp-content/uploads/wp-security-audit-log/404s/ directory)', 'wp-security-audit-log' ); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><input name="purge_visitor_log" type="checkbox" class="check_visitor_log" value="1" <?php if ( 'on' == $purge_visitor_log ) echo 'checked="checked"'; ?>></td>
+                                            <td colspan="2"><?php esc_html_e( 'Purge log files older than one month', 'wp-security-audit-log' ); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td colspan="1"><input type="number" id="visitor_404Limit" name="visitor_404Limit" value="<?php echo esc_attr( $this->_plugin->settings->GetVisitor404LogLimit() ); ?>" /></td>
+                                            <td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log', 'wp-security-audit-log' ); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td colspan="2">
+                                                <?php esc_html_e( 'By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?><br />
+                                                <?php esc_html_e( 'Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?>
+                                            </td>
                                         </tr><?php
                                     }
                                 }
-                            ?></tbody>
+                                ?>
+                            </tbody>
                         </table><?php
                     }
                 ?>
@@ -153,7 +200,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
             <p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr(__('Save Changes', 'wp-security-audit-log')); ?>"></p>
         </form><?php
     }
-    
+
     public function Header()
     {
         ?><style type="text/css">
@@ -173,9 +220,13 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                 background-color: #fff;
                 border-bottom: 1px solid #fff;
             }
+            #user_404Limit,
+            #visitor_404Limit {
+                width: 100%;
+            }
         </style><?php
     }
-    
+
     public function Footer()
     {
         ?><script type="text/javascript">
@@ -208,7 +259,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                     var allchecked = jQuery(this).parents('tbody:first').find('th>:checkbox:not(:checked)').length === 0;
                     jQuery(this).parents('table:first').find('thead>tr>th:first>:checkbox:first').attr('checked', allchecked);
                 });
-                
+
                 var hashlink = jQuery('#wsal-tabs>a[href="' + location.hash + '"]');
                 var hashsublink = jQuery('.wsal-sub-tabs>a[href="' + location.hash + '"]');
                 if (hashlink.length) {
@@ -222,7 +273,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                     jQuery('#wsal-tabs>a:first').click();
                     jQuery('.wsal-sub-tabs>a:first').click();
                 }
-                
+
                 // Specific for alert 6007
                 jQuery("input[value=6007]").on("change", function(){
                     var check = jQuery("input[value=6007]").is(":checked");
@@ -231,7 +282,17 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                     } else {
                         jQuery(".check_log").removeAttr('checked');
                     }
-                }); 
+                });
+
+                // Specific for alert 6023
+                jQuery("input[value=6023]").on("change", function(){
+                    var check = jQuery("input[value=6023]").is(":checked");
+                    if(check) {
+                        jQuery(".check_visitor_log").attr ( "checked" ,"checked" );
+                    } else {
+                        jQuery(".check_visitor_log").removeAttr('checked');
+                    }
+                });
             });
         </script><?php
     }

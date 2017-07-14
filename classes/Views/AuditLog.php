@@ -160,9 +160,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
         $max = 40; // 40*500msec = 20sec
 
         $is_archive = false;
-        $wp_session = WP_Session::get_instance();
-        if (isset($wp_session['selected_db']) && $wp_session['selected_db'] == 'archive') {
-            $is_archive = true;
+        if ($this->_plugin->settings->IsArchivingEnabled()) {
+            $selected_db = get_transient('wsal_wp_selected_db');
+            if ($selected_db && $selected_db == 'archive') {
+                $is_archive = true;
+            }
         }
         
         do {
@@ -217,8 +219,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
     public function AjaxSwitchDB()
     {
         if (isset($_REQUEST['selected_db'])) {
-            $wp_session = WP_Session::get_instance();
-            $wp_session['selected_db'] = $_REQUEST['selected_db'];
+            set_transient('wsal_wp_selected_db', $_REQUEST['selected_db'], HOUR_IN_SECONDS);
         }
     }
     

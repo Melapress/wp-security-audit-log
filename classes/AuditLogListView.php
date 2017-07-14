@@ -88,8 +88,8 @@ class WSAL_AuditLogListView extends WP_List_Table
         // switch to live or archive DB
         if ($this->_plugin->settings->IsArchivingEnabled()) {
             $selected = 'live';
-            $wp_session = WP_Session::get_instance();
-            if (isset($wp_session['selected_db']) && $wp_session['selected_db'] == 'archive') {
+            $selected_db = get_transient('wsal_wp_selected_db');
+            if ($selected_db && $selected_db == 'archive') {
                 $selected = 'archive';
             }
             ?><div class="wsal-ssa wsal-db">
@@ -422,8 +422,8 @@ class WSAL_AuditLogListView extends WP_List_Table
     {
         if ($this->_plugin->settings->IsArchivingEnabled()) {
             // Switch to Archive DB
-            $wp_session = WP_Session::get_instance();
-            if (isset($wp_session['selected_db']) && $wp_session['selected_db'] == 'archive') {
+            $selected_db = get_transient('wsal_wp_selected_db');
+            if ($selected_db && $selected_db == 'archive') {
                 $this->_plugin->settings->SwitchToArchiveDB();
             }
         }

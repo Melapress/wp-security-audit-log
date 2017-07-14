@@ -7,7 +7,7 @@
 class WSAL_Views_Settings extends WSAL_AbstractView
 {
     public $adapterMsg = '';
-    
+
     public function __construct(WpSecurityAuditLog $plugin)
     {
         parent::__construct($plugin);
@@ -17,32 +17,32 @@ class WSAL_Views_Settings extends WSAL_AbstractView
         add_action('wp_ajax_AjaxGetAllUsers', array($this, 'AjaxGetAllUsers'));
         add_action('wp_ajax_AjaxGetAllRoles', array($this, 'AjaxGetAllRoles'));
     }
-    
+
     public function HasPluginShortcutLink()
     {
         return true;
     }
-    
+
     public function GetTitle()
     {
         return __('Settings', 'wp-security-audit-log');
     }
-    
+
     public function GetIcon()
     {
         return 'dashicons-admin-generic';
     }
-    
+
     public function GetName()
     {
         return __('Settings', 'wp-security-audit-log');
     }
-    
+
     public function GetWeight()
     {
         return 3;
     }
-    
+
     protected function GetTokenType($token)
     {
         $users = array();
@@ -50,7 +50,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
             $users[] = $obj->user_login;
         }
         $roles = array_keys(get_editable_roles());
-        
+
         if (in_array($token, $users)) {
             return 'user';
         }
@@ -59,7 +59,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
         }
         return 'other';
     }
-    
+
     protected function Save()
     {
         check_admin_referer('wsal-settings');
@@ -99,9 +99,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                 $this->_plugin->settings->SetDevOptionEnabled($opt, true);
             }
         }
-        $this->_plugin->settings->Set404LogLimit($_REQUEST['404Limit']);
     }
-    
+
     public function AjaxCheckSecurityToken()
     {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
@@ -112,7 +111,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
         }
         die($this->GetTokenType($_REQUEST['token']));
     }
-    
+
     public function AjaxRunCleanup()
     {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
@@ -122,7 +121,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
         wp_redirect($this->GetUrl());
         exit;
     }
-    
+
     public function Render()
     {
         if (!$this->_plugin->settings->CurrentUserCan('edit')) {
@@ -149,7 +148,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
             <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
             <input type="hidden" id="ajaxurl" value="<?php echo esc_attr(admin_url('admin-ajax.php')); ?>" />
             <?php wp_nonce_field('wsal-settings'); ?>
-            
+
             <div id="audit-log-adverts">
             </div>
             <div class="nav-tabs">
@@ -221,7 +220,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                         ?>/> <?php _e('Filter Internal IP Addresses', 'wp-security-audit-log'); ?>
                                     </label>
                                     <br/>
-                                    <span class="description"><?php _e('Enable this option to filter internal IP addresses from the proxy headers.', 'wp-security-audit-log'); ?></span>    
+                                    <span class="description"><?php _e('Enable this option to filter internal IP addresses from the proxy headers.', 'wp-security-audit-log'); ?></span>
                                 </fieldset>
                             </td>
                         </tr>
@@ -530,19 +529,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                 </fieldset>
                             </td>
                         </tr>
-                        <!-- Number of 404 Requests to Log -->
-                        <tr>
-                            <th><label for="404Limit"><?php _e('Number of 404 Requests to Log', 'wp-security-audit-log'); ?></label></th>
-                            <td>
-                                <fieldset>
-                                    <input type="number" id="404Limit" name="404Limit" value="<?php echo $this->_plugin->settings->Get404LogLimit(); ?>" />
-                                </fieldset>
-                                <p class="description">
-                                    <?php _e('By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log'); ?><br />
-                                    <?php _e('Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log'); ?>
-                                </p>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
                 <!-- Third tab -->
@@ -660,7 +646,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                 {
                     if ( window.confirm('Do you want remove all data when the plugin is deleted?') == false )
                     elementRef.checked = false;
-                } 
+                }
             }
 
             jQuery(document).ready(function() {
@@ -681,14 +667,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                 }
                 wsalUpdateLoggingStatus(logging_status, txtNot);
 
-                logging_status.on('change', function() { 
-                    wsalUpdateLoggingStatus(logging_status, txtNot); 
+                logging_status.on('change', function() {
+                    wsalUpdateLoggingStatus(logging_status, txtNot);
                 });
             });
         // -->
         </script><?php
     }
-    
+
     public function Header()
     {
         wp_enqueue_style(
@@ -709,7 +695,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
             }
         </style><?php
     }
-    
+
     public function Footer()
     {
         wp_enqueue_script(
@@ -740,13 +726,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                         if(this.checked) notChecked = 0;
                     })
                     if(notChecked == 1){
-                        alert("You have to select at least one column!");       
+                        alert("You have to select at least one column!");
                     }
                 });
             });
         </script><?php
     }
-    
+
     public function AjaxGetAllUsers()
     {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
