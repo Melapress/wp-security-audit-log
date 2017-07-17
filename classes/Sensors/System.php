@@ -314,10 +314,17 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
     /**
      * Triggered when a user accesses the admin area.
      */
-    public function EventAdminInit()
-    {
-        // make sure user can actually modify target options
-        if (!current_user_can('manage_options')) {
+    public function EventAdminInit() {
+
+        // Destroy all the session of the same user from user profile page.
+        if ( isset( $_REQUEST['action'] ) && ( 'destroy-sessions' == $_REQUEST['action'] ) && isset( $_REQUEST['user_id'] ) ) {
+            $this->plugin->alerts->Trigger( 1006, array(
+                'TargetUserID' => $_REQUEST['user_id'],
+            ) );
+        }
+
+        // Make sure user can actually modify target options.
+        if ( ! current_user_can( 'manage_options' ) ) {
             return;
         }
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
@@ -440,12 +447,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
                     'NewTime' => $newTime2
                 ));
             }
-        }
-        // Destroy all the session of the same user from user profile page
-        if ($action == 'destroy-sessions' && isset($_REQUEST['user_id'])) {
-            $this->plugin->alerts->Trigger(1006, array(
-                'TargetUserID' => $_REQUEST['user_id']
-            ));
         }
     }
 
