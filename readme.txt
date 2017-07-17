@@ -6,8 +6,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 4.7.5
-Stable tag: 2.6.4
+Tested up to: 4.8
+Stable tag: 2.6.5
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -118,6 +118,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * [WPLift](http://wplift.com/audit-wordpress-security-logs) - Review by Ahmad Awais
 * [WP SmackDown](https://wpsmackdown.com/wp-plugins/wp-security-audit-log/)
 * [WPKube](http://www.wpkube.com/improve-wordpress-security-wp-security-audit-log/)
+* [Cloudways](https://www.cloudways.com/blog/monitor-wordpress-with-wp-security-audit-log-plugin/)
 * [ManageWP Plugins of the month](https://managewp.com/free-wordpress-plugins-june-2014)
 * [MyWPExpert](http://www.mywpexpert.com/wp-security-audit-log/)
 * [BlogVault](https://blogvault.net/wp-security-audit-log-plugin-review/)
@@ -185,6 +186,18 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 11. Mirror the WordPress audit trail to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
 
 == Changelog ==
+
+= 2.6.5 (2017-07-18) =
+
+* **New Audit Trail Alerts**
+	* Alert 1007 for when an administrator terminate's a logged in session using the Users Sessions Management Add-On
+	* Alert 6023 to log 404 HTTP errors (requests to non-existing pages) by website visitors (non WordPress users)
+	
+* **Improvements**
+	* Seggregated the logging of 404 HTTP Errors by who generates them. Alert 6007 for logged in users, 6023 for anonymous website visitors.
+	* Improved the logging of Alert 4014 so it is not reported every time a user's profile page is reloaded with a refresh or when a change is applied.
+	* Removed the wsal_wp_session cookie, which was used to store the selected database when [archiving of audit trail alerts is enabled](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-documentation/faq-archiving-wordpress-audit-trail/). Using LocalStorage instead.
+	* Replaced mcrypt (deprecated in PHP 7) with OpenSSL. Mcrypt still used temporarily to convert configured password. Will be removed completely in future updates. [Support Ticket](https://wordpress.org/support/topic/php-issues-9/)
 
 = 2.6.4 (2017-06-01) =
 
