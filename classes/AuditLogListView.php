@@ -15,18 +15,18 @@ class WSAL_AuditLogListView extends WP_List_Table
      */
     protected $_plugin;
     protected $_gmt_offset_sec = 0;
-    
+
     public function __construct($plugin)
     {
         $this->_plugin = $plugin;
-        
+
         $timezone = $this->_plugin->settings->GetTimezone();
         if ($timezone) {
             $this->_gmt_offset_sec = get_option('gmt_offset') * HOUR_IN_SECONDS;
         } else {
             $this->_gmt_offset_sec = date('Z');
         }
-        
+
         parent::__construct(array(
             'singular'  => 'log',
             'plural'    => 'logs',
@@ -39,7 +39,7 @@ class WSAL_AuditLogListView extends WP_List_Table
     {
         _e('No events so far.', 'wp-security-audit-log');
     }
-    
+
     public function extra_tablenav($which)
     {
         // items-per-page widget
@@ -48,7 +48,7 @@ class WSAL_AuditLogListView extends WP_List_Table
         $items = array($o, 5, 10, 15, 30, 50);
         if (!in_array($p, $items)) $items[] = $p;
         if ($p == $o || $p == 0) $p = $o[1]; // a sane default if things goes bust
-        
+
         ?><div class="wsal-ipp wsal-ipp-<?php echo $which; ?>">
             <?php _e('Show ', 'wp-security-audit-log'); ?>
             <select class="wsal-ipps" onfocus="WsalIppsFocus(value);" onchange="WsalIppsChange(value);">
@@ -62,7 +62,7 @@ class WSAL_AuditLogListView extends WP_List_Table
             </select>
             <?php _e(' Items', 'wp-security-audit-log'); ?>
         </div><?php
-        
+
         // show site alerts widget
         if ($this->is_multisite() && $this->is_main_blog()) {
             $curr = $this->get_view_site_id();
@@ -100,7 +100,7 @@ class WSAL_AuditLogListView extends WP_List_Table
             </div><?php
         }
     }
-    
+
     /**
      * @param int|null $limit Maximum number of sites to return (null = no limit).
      * @return object Object with keys: blog_id, blogname, domain
@@ -120,7 +120,7 @@ class WSAL_AuditLogListView extends WP_List_Table
         // return result
         return $res;
     }
-    
+
     /**
      * @return int The number of sites on the network.
      */
@@ -199,12 +199,12 @@ class WSAL_AuditLogListView extends WP_List_Table
             'scip' => array('scip', false)
         );
     }
-    
+
     public function column_default($item, $column_name)
     {
         //example: $item->getMetaValue('CurrentUserID')
         $datetimeFormat = $this->_plugin->settings->GetDatetimeFormat();
-        
+
         switch ($column_name) {
             case 'read':
                 return '<span class="log-read log-read-'
@@ -270,15 +270,32 @@ class WSAL_AuditLogListView extends WP_List_Table
                 return $image . $uhtml . '<br/>' . $roles;
             case 'scip':
                 $scip = $item->GetSourceIP();
-                if (is_string($scip)) {
-                    $scip = str_replace(array("\"", "[", "]"), "", $scip);
+                if ( is_string( $scip ) ) {
+                    $scip = str_replace( array( "\"", "[", "]" ), '', $scip );
                 }
-                $oips = array(); //$item->GetOtherIPs();
+
+                $oips = array(); // $item->GetOtherIPs();
+
                 // if there's no IP...
-                if (is_null($scip) || $scip == '') return '<i>unknown</i>';
+                if ( is_null( $scip ) || '' == $scip ) {
+                    return '<i>unknown</i>';
+                }
+
                 // if there's only one IP...
-                $link = "http://whatismyipaddress.com/ip/" . $scip ."?utm_source=plugin&utm_medium=referral&utm_campaign=WPSAL";
-                if (count($oips) < 2) return "<a target='_blank' href='$link'>". esc_html($scip) .'</a>';
+                $link = 'http://whatismyipaddress.com/ip/' . $scip . '?utm_source=plugin&utm_medium=referral&utm_campaign=WPSAL';
+                if ( class_exists( 'WSAL_SearchExtension' ) ) {
+                    $tooltip = esc_attr( 'Show me all activity originating from this IP Address' );
+                    $data_ip = $scip;
+
+                    if ( count( $oips ) < 2 ) {
+                        return "<a class='search-ip' data-tooltip='$tooltip' data-ip='$data_ip' target='_blank' href='$link'>" . esc_html( $scip ) . '</a>';
+                    }
+                } else {
+                    if ( count( $oips ) < 2 ) {
+                        return "<a target='_blank' href='$link'>" . esc_html( $scip ) . '</a>';
+                    }
+                }
+
                 // if there are many IPs...
                 $html  = "<a target='_blank' href='http://whatismyipaddress.com/ip/$scip'>". esc_html($scip) .'</a>'.' <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
                 foreach ($oips as $ip) if($scip != $ip) $html .= '<div>' . $ip . '</div>';
@@ -306,13 +323,13 @@ class WSAL_AuditLogListView extends WP_List_Table
         $result = strcmp($a->{$this->_orderby}, $b->{$this->_orderby});
         return ($this->_order === 'asc') ? $result : -$result;
     }
-    
+
     public function reorder_items_int($a, $b)
     {
         $result = $a->{$this->_orderby} - $b->{$this->_orderby};
         return ($this->_order === 'asc') ? $result : -$result;
     }
-    
+
     public function meta_formatter($name, $value)
     {
         switch (true) {
@@ -336,27 +353,27 @@ class WSAL_AuditLogListView extends WP_List_Table
 
             case $name == '%RevisionLink%':
                 return ' Click <a target="_blank" href="'.esc_url($value).'">here</a> to see the content changes.';
-                
+
             case $name == '%EditorLinkPost%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the post</a>';
-                
+
             case $name == '%EditorLinkPage%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the page</a>';
-                
+
             case $name == '%CategoryLink%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the category</a>';
 
             case $name == '%EditorLinkForum%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the forum</a>';
-                
+
             case $name == '%EditorLinkTopic%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the topic</a>';
-                
+
             case in_array($name, array('%MetaValue%', '%MetaValueOld%', '%MetaValueNew%')):
                 return '<strong>' . (
                     strlen($value) > 50 ? (esc_html(substr($value, 0, 50)) . '&hellip;') :  esc_html($value)
                 ) . '</strong>';
-            
+
             case $name == '%ClientIP%':
                 if (is_string($value)) {
                     return '<strong>' . str_replace(array("\"", "[", "]"), "", $value) . '</strong>';
@@ -374,32 +391,32 @@ class WSAL_AuditLogListView extends WP_List_Table
             case strncmp($value, 'http://', 7) === 0:
             case strncmp($value, 'https://', 7) === 0:
                 return '<a href="' . esc_html($value) . '"' . ' title="' . esc_html($value) . '"' . ' target="_blank">' . esc_html($value) . '</a>';
-                
+
             default:
                 return '<strong>' . esc_html($value) . '</strong>';
         }
     }
-    
+
     protected function is_multisite()
     {
         return $this->_plugin->IsMultisite();
     }
-    
+
     protected function is_main_blog()
     {
         return get_current_blog_id() == 1;
     }
-    
+
     protected function is_specific_view()
     {
         return isset($_REQUEST['wsal-cbid']) && $_REQUEST['wsal-cbid'] != '0';
     }
-    
+
     protected function get_specific_view()
     {
         return isset($_REQUEST['wsal-cbid']) ? (int)$_REQUEST['wsal-cbid'] : 0;
     }
-    
+
     protected function get_view_site_id()
     {
         switch (true) {
@@ -417,7 +434,7 @@ class WSAL_AuditLogListView extends WP_List_Table
                 return get_current_blog_id();
         }
     }
-    
+
     public function prepare_items()
     {
         if ($this->_plugin->settings->IsArchivingEnabled()) {
@@ -444,9 +461,9 @@ class WSAL_AuditLogListView extends WP_List_Table
         if ($bid) {
             $query->addCondition("site_id = %s ", $bid);
         }
-        
+
         $query = apply_filters('wsal_auditlog_query', $query);
-        
+
         $total_items = $query->getAdapter()->Count($query);
 
         if (empty($_REQUEST["orderby"])) {
