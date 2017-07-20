@@ -238,33 +238,42 @@ class WSAL_AuditLogListView extends WP_List_Table
                     ) : '<i>unknown</i>';
             case 'user':
                 $username = $item->GetUsername();
-                if ($username && ($user = get_user_by('login', $username))) {
-                    $image = get_avatar($user->ID, 32);
-                    $uhtml = '<a href="' . admin_url('user-edit.php?user_id=' . $user->ID)
-                            . '" target="_blank">' . esc_html($user->display_name) . '</a>';
-                    $roles = $item->GetUserRoles();
-                    if (is_array($roles) && count($roles)) {
-                        $roles = __(esc_html(ucwords(implode(', ', $roles))));
-                    } else if (is_string($roles) && $roles != '') {
-                        $roles = __(esc_html(ucwords(str_replace(array("\"", "[", "]"), " ", $roles))));
+                if ( $username && ( $user = get_user_by( 'login', $username ) ) ) {
+                    $image = get_avatar( $user->ID, 32 );
+
+                    if ( class_exists( 'WSAL_SearchExtension' ) ) {
+                        $tooltip = esc_attr__( 'Show me all activity by this User', 'wp-security-audit-log' );
+
+                        $uhtml = '<a class="search-user" data-tooltip="' . $tooltip . '" data-user="' . $user->user_login . '" href="' . admin_url( 'user-edit.php?user_id=' . $user->ID )
+                            . '" target="_blank">' . esc_html( $user->display_name ) . '</a>';
                     } else {
-                        $roles = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
+                        $uhtml = '<a href="' . admin_url( 'user-edit.php?user_id=' . $user->ID )
+                        . '" target="_blank">' . esc_html( $user->display_name ) . '</a>';
                     }
-                } elseif ($username == 'Plugin') {
-                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/plugin-logo.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
-                    $uhtml = '<i>' . __('Plugin', 'wp-security-audit-log') . '</i>';
+
+                    $roles = $item->GetUserRoles();
+                    if ( is_array( $roles ) && count( $roles ) ) {
+                        $roles = esc_html( ucwords( implode( ', ', $roles ) ) );
+                    } elseif ( is_string( $roles ) && $roles != '' ) {
+                        $roles = esc_html( ucwords( str_replace( array( "\"", "[", "]" ), " ", $roles ) ) );
+                    } else {
+                        $roles = '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
+                    }
+                } elseif ( 'Plugin' == $username ) {
+                    $image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/plugin-logo.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';
                     $roles = '';
-                } elseif ($username == 'Plugins') {
-                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
-                    $uhtml = '<i>' . __('Plugins', 'wp-security-audit-log') . '</i>';
+                } elseif ( 'Plugins' == $username ) {
+                    $image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __( 'Plugins', 'wp-security-audit-log' ) . '</i>';
                     $roles = '';
-                } elseif ($username == 'Website Visitor') {
-                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
-                    $uhtml = '<i>' . __('Website Visitor', 'wp-security-audit-log') . '</i>';
+                } elseif ( 'Website Visitor' == $username ) {
+                    $image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __( 'Website Visitor', 'wp-security-audit-log' ) . '</i>';
                     $roles = '';
                 } else {
-                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
-                    $uhtml = '<i>' . __('System', 'wp-security-audit-log') . '</i>';
+                    $image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __( 'System', 'wp-security-audit-log' ) . '</i>';
                     $roles = '';
                 }
                 return $image . $uhtml . '<br/>' . $roles;
