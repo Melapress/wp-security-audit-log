@@ -284,11 +284,10 @@ class WSAL_AuditLogListView extends WP_List_Table
                 // if there's only one IP...
                 $link = 'http://whatismyipaddress.com/ip/' . $scip . '?utm_source=plugin&utm_medium=referral&utm_campaign=WPSAL';
                 if ( class_exists( 'WSAL_SearchExtension' ) ) {
-                    $tooltip = esc_attr( 'Show me all activity originating from this IP Address' );
-                    $data_ip = $scip;
+                    $tooltip = esc_attr__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
 
                     if ( count( $oips ) < 2 ) {
-                        return "<a class='search-ip' data-tooltip='$tooltip' data-ip='$data_ip' target='_blank' href='$link'>" . esc_html( $scip ) . '</a>';
+                        return "<a class='search-ip' data-tooltip='$tooltip' data-ip='$scip' target='_blank' href='$link'>" . esc_html( $scip ) . '</a>';
                     }
                 } else {
                     if ( count( $oips ) < 2 ) {
@@ -297,10 +296,20 @@ class WSAL_AuditLogListView extends WP_List_Table
                 }
 
                 // if there are many IPs...
-                $html  = "<a target='_blank' href='http://whatismyipaddress.com/ip/$scip'>". esc_html($scip) .'</a>'.' <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
-                foreach ($oips as $ip) if($scip != $ip) $html .= '<div>' . $ip . '</div>';
-                $html .= '</div>';
-                return $html;
+                if ( class_exists( 'WSAL_SearchExtension' ) ) {
+                    $tooltip = esc_attr__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
+
+                    $html  = "<a class='search-ip' data-tooltip='$tooltip' data-ip='$scip' target='_blank' href='http://whatismyipaddress.com/ip/$scip'>" . esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
+                    foreach ( $oips as $ip ) if ( $scip != $ip ) $html .= '<div>' . $ip . '</div>';
+                    $html .= '</div>';
+                    return $html;
+                } else {
+                    $html  = "<a target='_blank' href='http://whatismyipaddress.com/ip/$scip'>" . esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
+                    foreach ( $oips as $ip ) if ( $scip != $ip ) $html .= '<div>' . $ip . '</div>';
+                    $html .= '</div>';
+                    return $html;
+                }
+
             case 'site':
                 $info = get_blog_details($item->site_id, true);
                 return !$info ? ('Unknown Site '.$item->site_id)
