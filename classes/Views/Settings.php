@@ -60,43 +60,43 @@ class WSAL_Views_Settings extends WSAL_AbstractView
         return 'other';
     }
 
-    protected function Save()
-    {
-        check_admin_referer('wsal-settings');
-        $this->_plugin->settings->SetPruningDateEnabled($_REQUEST['PruneBy'] == 'date');
-        $this->_plugin->settings->SetPruningDate($_REQUEST['PruningDate']);
-        $this->_plugin->settings->SetPruningLimitEnabled($_REQUEST['PruneBy'] == 'limit');
-        $this->_plugin->settings->SetPruningLimit($_REQUEST['PruningLimit']);
+    protected function Save() {
+        check_admin_referer( 'wsal-settings' );
+        $this->_plugin->settings->SetPruningDateEnabled( $_REQUEST['PruneBy'] == 'date' );
+        $this->_plugin->settings->SetPruningDate( $_REQUEST['PruningDate'] );
+        $this->_plugin->settings->SetPruningLimitEnabled( $_REQUEST['PruneBy'] == 'limit' );
+        $this->_plugin->settings->SetPruningLimit( $_REQUEST['PruningLimit'] );
 
-        $this->_plugin->settings->SetFromEmail($_REQUEST['FromEmail']);
-        $this->_plugin->settings->SetDisplayName($_REQUEST['DisplayName']);
+        $this->_plugin->settings->SetFromEmail( $_REQUEST['FromEmail'] );
+        $this->_plugin->settings->SetDisplayName( $_REQUEST['DisplayName'] );
 
-        $this->_plugin->settings->SetWidgetsEnabled($_REQUEST['EnableDashboardWidgets']);
-        $this->_plugin->settings->SetAllowedPluginViewers(isset($_REQUEST['Viewers']) ? $_REQUEST['Viewers'] : array());
-        $this->_plugin->settings->SetAllowedPluginEditors(isset($_REQUEST['Editors']) ? $_REQUEST['Editors'] : array());
+        $this->_plugin->settings->SetWidgetsEnabled( $_REQUEST['EnableDashboardWidgets'] );
+        $this->_plugin->settings->SetAllowedPluginViewers( isset( $_REQUEST['Viewers'] ) ? $_REQUEST['Viewers'] : array() );
+        $this->_plugin->settings->SetAllowedPluginEditors( isset( $_REQUEST['Editors'] ) ? $_REQUEST['Editors'] : array() );
 
-        $this->_plugin->settings->SetExcludedMonitoringUsers(isset($_REQUEST['ExUsers']) ? $_REQUEST['ExUsers'] : array());
-        $this->_plugin->settings->SetExcludedMonitoringRoles(isset($_REQUEST['ExRoles']) ? $_REQUEST['ExRoles'] : array());
-        $this->_plugin->settings->SetExcludedMonitoringCustom(isset($_REQUEST['Customs']) ? $_REQUEST['Customs'] : array());
-        $this->_plugin->settings->SetExcludedMonitoringIP(isset($_REQUEST['IpAddrs']) ? $_REQUEST['IpAddrs'] : array());
+        $this->_plugin->settings->SetExcludedMonitoringUsers( isset( $_REQUEST['ExUsers'] ) ? $_REQUEST['ExUsers'] : array() );
+        $this->_plugin->settings->SetExcludedMonitoringRoles( isset( $_REQUEST['ExRoles'] ) ? $_REQUEST['ExRoles'] : array() );
+        $this->_plugin->settings->SetExcludedMonitoringCustom( isset( $_REQUEST['Customs'] ) ? $_REQUEST['Customs'] : array() );
+        $this->_plugin->settings->SetExcludedMonitoringIP( isset( $_REQUEST['IpAddrs'] ) ? $_REQUEST['IpAddrs'] : array() );
 
-        $this->_plugin->settings->SetRestrictAdmins(isset($_REQUEST['RestrictAdmins']));
-        $this->_plugin->settings->SetRefreshAlertsEnabled($_REQUEST['EnableAuditViewRefresh']);
-        $this->_plugin->settings->SetMainIPFromProxy(isset($_REQUEST['EnableProxyIpCapture']));
-        $this->_plugin->settings->SetInternalIPsFiltering(isset($_REQUEST['EnableIpFiltering']));
-        $this->_plugin->settings->SetIncognito(isset($_REQUEST['Incognito']));
-        $this->_plugin->settings->SetLoggingDisabled(isset($_REQUEST['Logging']));
-        $this->_plugin->settings->SetDeleteData(isset($_REQUEST['DeleteData']));
-        $this->_plugin->settings->SetTimezone($_REQUEST['Timezone']);
-        $this->_plugin->settings->SetWPBackend(isset($_REQUEST['WPBackend']));
-        if (!empty($_REQUEST['Columns'])) {
-            $this->_plugin->settings->SetColumns($_REQUEST['Columns']);
+        $this->_plugin->settings->SetRestrictAdmins( isset( $_REQUEST['RestrictAdmins'] ) );
+        $this->_plugin->settings->SetRefreshAlertsEnabled( $_REQUEST['EnableAuditViewRefresh'] );
+        $this->_plugin->settings->SetMainIPFromProxy( isset( $_REQUEST['EnableProxyIpCapture'] ) );
+        $this->_plugin->settings->SetInternalIPsFiltering( isset( $_REQUEST['EnableIpFiltering'] ) );
+        $this->_plugin->settings->SetIncognito( isset( $_REQUEST['Incognito'] ) );
+        $this->_plugin->settings->SetLoggingDisabled( isset( $_REQUEST['Logging'] ) );
+        $this->_plugin->settings->SetDeleteData( isset( $_REQUEST['DeleteData'] ) );
+        $this->_plugin->settings->SetTimezone( $_REQUEST['Timezone'] );
+        $this->_plugin->settings->set_type_username( $_REQUEST['type_username'] );
+        $this->_plugin->settings->SetWPBackend( isset( $_REQUEST['WPBackend'] ) );
+        if ( ! empty( $_REQUEST['Columns'] ) ) {
+            $this->_plugin->settings->SetColumns( $_REQUEST['Columns'] );
         }
         $this->_plugin->settings->ClearDevOptions();
 
-        if (isset($_REQUEST['DevOptions'])) {
-            foreach ($_REQUEST['DevOptions'] as $opt) {
-                $this->_plugin->settings->SetDevOptionEnabled($opt, true);
+        if ( isset( $_REQUEST['DevOptions'] ) ) {
+            foreach ( $_REQUEST['DevOptions'] as $opt ) {
+                $this->_plugin->settings->SetDevOptionEnabled( $opt, true );
             }
         }
     }
@@ -491,6 +491,26 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     </label>
                                     <br/>
                                     <span class="description"><?php _e('Select which timestamp the alerts should have in the Audit Log viewer. Note that the WordPress\' timezone might be different from that of the server.', 'wp-security-audit-log'); ?></span>
+                                </fieldset>
+                            </td>
+                        </tr>
+                        <!-- Select type of name -->
+                        <tr>
+                            <th><label for="timezone-default"><?php esc_html_e( 'Select Name Type', 'wp-security-audit-log' ); ?></label></th>
+                            <td>
+                                <fieldset>
+                                    <?php $type_username = $this->_plugin->settings->get_type_username(); ?>
+                                    <label for="column_username">
+                                        <input type="radio" name="type_username" id="column_username" style="margin-top: 2px;" <?php echo ( 'username' == $type_username ) ? 'checked="checked"' : false; ?> value="username">
+                                        <span><?php esc_html_e( 'Username', 'wp-security-audit-log' ); ?></span>
+                                    </label>
+                                    <br/>
+                                    <label for="columns_display_name">
+                                        <input type="radio" name="type_username" id="columns_display_name" style="margin-top: 2px;" <?php echo ( 'display_name' == $type_username ) ? 'checked="checked"' : false; ?> value="display_name">
+                                        <span><?php esc_html_e( 'Display Name', 'wp-security-audit-log' ); ?></span>
+                                    </label>
+                                    <br/>
+                                    <span class="description"><?php esc_html_e( 'Select which type of name to display in the Audit Log Viewer.', 'wp-security-audit-log' ); ?></span>
                                 </fieldset>
                             </td>
                         </tr>

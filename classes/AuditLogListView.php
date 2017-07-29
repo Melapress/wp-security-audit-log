@@ -131,52 +131,57 @@ class WSAL_AuditLogListView extends WP_List_Table
         return (int)$wpdb->get_var($sql);
     }
 
-    public function get_columns()
-    {
+    public function get_columns() {
+        $type_name = $this->_plugin->settings->get_type_username();
+        if ( 'display_name' === $type_name ) {
+            $name_column = __( 'User', 'wp-security-audit-log' );
+        } elseif ( 'username' === $type_name ) {
+            $name_column = __( 'Username', 'wp-security-audit-log' );
+        }
         $cols = array(
             //'cb'   => '<input type="checkbox" />',
             //'read' => __('Read', 'wp-security-audit-log'),
-            'type' => __('Code', 'wp-security-audit-log'),
-            'code' => __('Type', 'wp-security-audit-log'),
-            'crtd' => __('Date', 'wp-security-audit-log'),
-            'user' => __('Username', 'wp-security-audit-log'),
-            'scip' => __('Source IP', 'wp-security-audit-log'),
+            'type' => __( 'Code', 'wp-security-audit-log' ),
+            'code' => __( 'Type', 'wp-security-audit-log' ),
+            'crtd' => __( 'Date', 'wp-security-audit-log' ),
+            'user' => $name_column,
+            'scip' => __( 'Source IP', 'wp-security-audit-log' ),
         );
-        if ($this->is_multisite() && $this->is_main_blog() && !$this->is_specific_view()) {
-            $cols['site'] = __('Site', 'wp-security-audit-log');
+        if ( $this->is_multisite() && $this->is_main_blog() && ! $this->is_specific_view() ) {
+            $cols['site'] = __( 'Site', 'wp-security-audit-log' );
         }
-        $cols['mesg'] = __('Message', 'wp-security-audit-log');
+        $cols['mesg'] = __( 'Message', 'wp-security-audit-log' );
         $sel_columns = $this->_plugin->settings->GetColumnsSelected();
-        if (!empty($sel_columns)) {
-            unset($cols);
-            $sel_columns = (array)json_decode($sel_columns);
-            foreach ($sel_columns as $key => $value) {
-                switch ($key) {
+        if ( ! empty( $sel_columns ) ) {
+            unset( $cols );
+            $sel_columns = (array) json_decode( $sel_columns );
+            foreach ( $sel_columns as $key => $value ) {
+                switch ( $key ) {
                     case 'alert_code':
-                        $cols['type'] = __('Code', 'wp-security-audit-log');
+                        $cols['type'] = __( 'Code', 'wp-security-audit-log' );
                         break;
                     case 'type':
-                        $cols['code'] = __('Type', 'wp-security-audit-log');
+                        $cols['code'] = __( 'Type', 'wp-security-audit-log' );
                         break;
                     case 'date':
-                        $cols['crtd'] = __('Date', 'wp-security-audit-log');
+                        $cols['crtd'] = __( 'Date', 'wp-security-audit-log' );
                         break;
                     case 'username':
-                        $cols['user'] = __('Username', 'wp-security-audit-log');
+                        $cols['user'] = $name_column;
                         break;
                     case 'source_ip':
-                        $cols['scip'] = __('Source IP', 'wp-security-audit-log');
+                        $cols['scip'] = __( 'Source IP', 'wp-security-audit-log' );
                         break;
                     case 'site':
-                        $cols['site'] = __('Site', 'wp-security-audit-log');
+                        $cols['site'] = __( 'Site', 'wp-security-audit-log' );
                         break;
                     case 'message':
-                        $cols['mesg'] = __('Message', 'wp-security-audit-log');
+                        $cols['mesg'] = __( 'Message', 'wp-security-audit-log' );
                         break;
                 }
             }
         }
-        if ($this->_plugin->settings->IsDataInspectorEnabled()) {
+        if ( $this->_plugin->settings->IsDataInspectorEnabled() ) {
             $cols['data'] = '';
         }
         return $cols;
@@ -237,18 +242,24 @@ class WSAL_AuditLogListView extends WP_List_Table
                         )
                     ) : '<i>unknown</i>';
             case 'user':
-                $username = $item->GetUsername();
+                $username   = $item->GetUsername();
+                $type_name  = $this->_plugin->settings->get_type_username();
                 if ( $username && ( $user = get_user_by( 'login', $username ) ) ) {
                     $image = get_avatar( $user->ID, 32 );
+                    if ( 'display_name' == $type_name ) {
+                        $display_name = $user->display_name;
+                    } elseif ( 'username' == $type_name ) {
+                        $display_name = $user->user_login;
+                    }
 
                     if ( class_exists( 'WSAL_SearchExtension' ) ) {
                         $tooltip = esc_attr__( 'Show me all activity by this User', 'wp-security-audit-log' );
 
                         $uhtml = '<a class="search-user" data-tooltip="' . $tooltip . '" data-user="' . $user->user_login . '" href="' . admin_url( 'user-edit.php?user_id=' . $user->ID )
-                            . '" target="_blank">' . esc_html( $user->display_name ) . '</a>';
+                            . '" target="_blank">' . esc_html( $display_name ) . '</a>';
                     } else {
                         $uhtml = '<a href="' . admin_url( 'user-edit.php?user_id=' . $user->ID )
-                        . '" target="_blank">' . esc_html( $user->display_name ) . '</a>';
+                        . '" target="_blank">' . esc_html( $display_name ) . '</a>';
                     }
 
                     $roles = $item->GetUserRoles();
