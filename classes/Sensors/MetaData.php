@@ -35,12 +35,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
      * Check "Excluded Custom Fields" or meta keys starts with "_".
      * @return boolean can log true|false
      */
-    protected function CanLogPostMeta($object_id, $meta_key)
-    {
-        // check if excluded meta key or starts with _
-        if (substr($meta_key, 0, 1) == '_') {
+    protected function CanLogPostMeta( $object_id, $meta_key ) {
+        // Check if excluded meta key or starts with _.
+        if ( substr( $meta_key, 0, 1 ) == '_' ) {
             return false;
-        } else if ($this->IsExcludedCustomFields($meta_key)) {
+        } elseif ( $this->IsExcludedCustomFields( $meta_key ) ) {
             return false;
         } else {
             return true;
@@ -93,7 +92,9 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
             return;
         }
 
-        if ( isset( $_POST['action'] ) && 'editpost' == $_POST['action'] ) {
+        $wp_action = array( 'add-meta' );
+
+        if ( isset( $_POST['action'] ) && ( 'editpost' == $_POST['action'] || in_array( $_POST['action'], $wp_action ) ) ) {
             $editorLink = $this->GetEditorLink( $post );
             switch ( $post->post_type ) {
                 case 'page':
@@ -156,7 +157,9 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
             return;
         }
 
-        if ( isset( $_POST['action'] ) && 'editpost' == $_POST['action'] ) {
+        $wp_action = array( 'add-meta' );
+
+        if ( isset( $_POST['action'] ) && ( 'editpost' == $_POST['action'] || in_array( $_POST['action'], $wp_action ) ) ) {
             $editorLink = $this->GetEditorLink( $post );
             if ( isset( $this->old_meta[ $meta_id ] ) ) {
                 // Check change in meta key.
@@ -250,47 +253,54 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor
     /**
      * Deleted a custom field.
      */
-    public function EventPostMetaDeleted($meta_ids, $object_id, $meta_key, $meta_value) {
-        $post = get_post($object_id);
+    public function EventPostMetaDeleted( $meta_ids, $object_id, $meta_key, $meta_value ) {
 
-        $WPActions = array('delete-meta');
-        if (isset($_POST['action']) && in_array($_POST['action'], $WPActions)) {
-            $editorLink = $this->GetEditorLink($post);
-            foreach ($meta_ids as $meta_id) {
-                if (!$this->CanLogPostMeta($object_id, $meta_key)) {
+        // If meta key starts with "_" then return.
+        if ( '_' == substr( $meta_key, 0, 1 ) ) {
+            return;
+        }
+
+        $post = get_post( $object_id );
+
+        $wp_action = array( 'delete-meta' );
+
+        if ( isset( $_POST['action'] ) && in_array( $_POST['action'], $wp_action ) ) {
+            $editorLink = $this->GetEditorLink( $post );
+            foreach ( $meta_ids as $meta_id ) {
+                if ( ! $this->CanLogPostMeta( $object_id, $meta_key ) ) {
                     continue;
                 }
-                switch ($post->post_type) {
+                switch ( $post->post_type ) {
                     case 'page':
-                        $this->plugin->alerts->Trigger(2061, array(
+                        $this->plugin->alerts->Trigger( 2061, array(
                             'PostID' => $object_id,
                             'PostTitle' => $post->post_title,
                             'MetaID' => $meta_id,
                             'MetaKey' => $meta_key,
                             'MetaValue' => $meta_value,
-                            $editorLink['name'] => $editorLink['value']
-                        ));
+                            $editorLink['name'] => $editorLink['value'],
+                        ) );
                         break;
                     case 'post':
-                        $this->plugin->alerts->Trigger(2055, array(
+                        $this->plugin->alerts->Trigger( 2055, array(
                             'PostID' => $object_id,
                             'PostTitle' => $post->post_title,
                             'MetaID' => $meta_id,
                             'MetaKey' => $meta_key,
                             'MetaValue' => $meta_value,
-                            $editorLink['name'] => $editorLink['value']
-                        ));
+                            $editorLink['name'] => $editorLink['value'],
+                        ) );
                         break;
                     default:
-                        $this->plugin->alerts->Trigger(2058, array(
+                        $this->plugin->alerts->Trigger( 2058, array(
                             'PostID' => $object_id,
                             'PostTitle' => $post->post_title,
                             'PostType' => $post->post_type,
                             'MetaID' => $meta_id,
                             'MetaKey' => $meta_key,
                             'MetaValue' => $meta_value,
-                            $editorLink['name'] => $editorLink['value']
-                        ));
+                            $editorLink['name'] => $editorLink['value'],
+                        ) );
                         break;
                 }
             }
