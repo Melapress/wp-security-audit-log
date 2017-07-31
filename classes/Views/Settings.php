@@ -496,7 +496,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                         </tr>
                         <!-- Select type of name -->
                         <tr>
-                            <th><label for="timezone-default"><?php esc_html_e( 'Select Name Type', 'wp-security-audit-log' ); ?></label></th>
+                            <th><label for="timezone-default"><?php esc_html_e( 'User Information in Audit Log', 'wp-security-audit-log' ); ?></label></th>
                             <td>
                                 <fieldset>
                                     <?php $type_username = $this->_plugin->settings->get_type_username(); ?>
@@ -507,10 +507,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView
                                     <br/>
                                     <label for="columns_display_name">
                                         <input type="radio" name="type_username" id="columns_display_name" style="margin-top: 2px;" <?php echo ( 'display_name' == $type_username ) ? 'checked="checked"' : false; ?> value="display_name">
-                                        <span><?php esc_html_e( 'Display Name', 'wp-security-audit-log' ); ?></span>
+                                        <span><?php esc_html_e( 'First Name & Last Name', 'wp-security-audit-log' ); ?></span>
                                     </label>
                                     <br/>
-                                    <span class="description"><?php esc_html_e( 'Select which type of name to display in the Audit Log Viewer.', 'wp-security-audit-log' ); ?></span>
+                                    <span class="description"><?php esc_html_e( 'Select the type of user information that should be displayed in the audit log.', 'wp-security-audit-log' ); ?></span>
                                 </fieldset>
                             </td>
                         </tr>
