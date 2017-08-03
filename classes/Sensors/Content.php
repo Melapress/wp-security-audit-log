@@ -126,7 +126,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         add_filter('single_post_title', array($this, 'ViewingPost'), 10, 2);
         add_filter('post_edit_form_tag', array($this, 'EditingPost'), 10, 1);
     }
-    
+
     /**
      * Gets the alert code based on the type of post.
      * @param stdClass $post the post
@@ -146,7 +146,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 return $typeCustom;
         }
     }
-    
+
     /**
      * Triggered when a user accesses the admin area.
      */
@@ -157,7 +157,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         // check for category changes
         $this->CheckCategoryDeletion();
     }
-    
+
     /**
      * Retrieve Old data.
      * @global mixed $_POST post data
@@ -176,7 +176,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             $this->_OldStky = in_array($postID, get_option('sticky_posts'));
         }
     }
-    
+
     /**
      * Get the template path.
      * @param stdClass $post the post
@@ -231,9 +231,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($post->post_type == 'revision') {
             return;
         }
-        
+
         $original = isset($_POST['original_post_status']) ? $_POST['original_post_status'] : '';
-        
+
         WSAL_Sensors_Request::SetVars(array(
             '$newStatus' => $newStatus,
             '$oldStatus' => $oldStatus,
@@ -258,7 +258,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                     + $this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post)
                     + $this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post)
                 ;
-                
+
                 if (!$changes) {
                     $changes = $this->CheckDateChange($this->_OldPost, $post);
                     if (!$changes) {
@@ -275,7 +275,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             }
         }
     }
-    
+
     /**
      * Check post creation.
      * @global array $_POST
@@ -335,7 +335,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     {
         $post = get_post($post_id);
         $event = $this->GetEventTypeForPostType($post, 2001, 2005, 2030);
-        
+
         if ($event) {
             $editorLink = $this->GetEditorLink($newPost);
             $this->plugin->alerts->Trigger($event, array(
@@ -347,7 +347,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             ));
         }
     }
-    
+
     /**
      * Post permanently deleted.
      * @param integer $post_id post ID
@@ -371,13 +371,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                     'PostID' => $post->ID,
                     'PostType' => $post->post_type,
                     'PostTitle' => $post->post_title,
-                    'PostUrl' => get_permalink($post->ID),
-                    $editorLink['name'] => $editorLink['value']
                 ));
             }
         }
     }
-    
+
     /**
      * Post moved to the trash.
      * @param integer $post_id post ID
@@ -398,7 +396,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             $editorLink['name'] => $editorLink['value']
         ));
     }
-    
+
     /**
      * Post restored from trash.
      * @param integer $post_id post ID
@@ -418,7 +416,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             $editorLink['name'] => $editorLink['value']
         ));
     }
-    
+
     /**
      * Post date changed.
      * @param stdClass $oldPost old post
@@ -470,7 +468,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
         return 0;
     }
-    
+
     /**
      * Categories changed.
      * @param array $oldCats old categories
@@ -497,7 +495,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             }
         }
     }
-    
+
     /**
      * Author changed.
      * @param stdClass $oldPost old post
@@ -523,7 +521,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return 1;
         }
     }
-    
+
     /**
      * Status changed.
      * @param stdClass $oldPost old post
@@ -558,7 +556,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return 1;
         }
     }
-    
+
     /**
      * Post parent changed.
      * @param stdClass $oldPost old post
@@ -584,7 +582,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             }
         }
     }
-    
+
     /**
      * Permalink changed.
      * @param string $oldLink old permalink
@@ -608,7 +606,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         }
         return 0;
     }
-    
+
     /**
      * Post visibility changed.
      * @param stdClass $oldPost old post
@@ -621,10 +619,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         if ($oldStatus == 'draft' || $newStatus == 'draft') {
             return;
         }
-        
+
         $oldVisibility = '';
         $newVisibility = '';
-        
+
         if ($oldpost->post_password) {
             $oldVisibility = __('Password Protected', 'wp-security-audit-log');
         } elseif ($oldStatus == 'publish') {
@@ -632,7 +630,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         } elseif ($oldStatus == 'private') {
             $oldVisibility = __('Private', 'wp-security-audit-log');
         }
-        
+
         if ($newpost->post_password) {
             $newVisibility = __('Password Protected', 'wp-security-audit-log');
         } elseif ($newStatus == 'publish') {
@@ -640,7 +638,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         } elseif ($newStatus == 'private') {
             $newVisibility = __('Private', 'wp-security-audit-log');
         }
-        
+
         if ($oldVisibility && $newVisibility && ($oldVisibility != $newVisibility)) {
             $event = $this->GetEventTypeForPostType($oldpost, 2025, 2026, 2040);
             $editorLink = $this->GetEditorLink($oldpost);
@@ -655,7 +653,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return 1;
         }
     }
-    
+
     /**
      * Post template changed.
      * @param string $oldTmpl old template path
@@ -682,7 +680,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             }
         }
     }
-    
+
     /**
      * Post sets as sticky changes.
      * @param string $oldTmpl old template path
@@ -704,7 +702,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             return 1;
         }
     }
-    
+
     /**
      * Post modified content.
      * @param integer $post_ID post ID
@@ -719,7 +717,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         $changes = $this->CheckTitleChange($oldpost, $newpost);
         if (!$changes) {
             $contentChanged = $oldpost->post_content != $newpost->post_content; // TODO what about excerpts?
-            
+
             if ($oldpost->post_modified != $newpost->post_modified) {
                 $event = 0;
                 // @see http://codex.wordpress.org/Class_Reference/WP_Query#Status_Parameters
