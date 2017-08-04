@@ -13,7 +13,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
     protected $_listview;
 
     protected $_version;
-    
+
     public function __construct(WpSecurityAuditLog $plugin)
     {
         parent::__construct($plugin);
@@ -48,34 +48,34 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
             }
         }
     }
-    
+
     public function HasPluginShortcutLink()
     {
         return true;
     }
-    
+
     public function GetTitle()
     {
         return __('Audit Log Viewer', 'wp-security-audit-log');
     }
-    
+
     public function GetIcon()
     {
         return $this->_wpversion < 3.8
             ? $this->_plugin->GetBaseUrl() . '/img/logo-main-menu.png'
             : 'dashicons-welcome-view-site';
     }
-    
+
     public function GetName()
     {
         return __('Audit Log Viewer', 'wp-security-audit-log');
     }
-    
+
     public function GetWeight()
     {
         return 1;
     }
-    
+
     protected function GetListView()
     {
         if (is_null($this->_listview)) {
@@ -83,44 +83,74 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
         }
         return $this->_listview;
     }
-    
-    public function Render()
-    {
-        if (!$this->_plugin->settings->CurrentUserCan('view')) {
-            wp_die(__('You do not have sufficient permissions to access this page.', 'wp-security-audit-log'));
+
+    /**
+     * Render view table of Audit Log.
+     *
+     * @since  1.0.0
+     */
+    public function Render() {
+        if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+            wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
         }
-        
+
         $this->GetListView()->prepare_items();
         $occ = new WSAL_Models_Occurrence();
-        
+
         ?><form id="audit-log-viewer" method="post">
             <div id="audit-log-viewer-content">
-                <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
-                <input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr(isset($_REQUEST['wsal-cbid']) ? $_REQUEST['wsal-cbid'] : '0'); ?>" />
-                <?php do_action('wsal_auditlog_before_view', $this->GetListView()); ?>
+                <input type="hidden" name="page" value="<?php echo esc_attr( $_REQUEST['page'] ); ?>" />
+                <input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr( isset( $_REQUEST['wsal-cbid'] ) ? $_REQUEST['wsal-cbid'] : '0' ); ?>" />
+                <?php do_action( 'wsal_auditlog_before_view', $this->GetListView() ); ?>
                 <?php $this->GetListView()->display(); ?>
-                <?php do_action('wsal_auditlog_after_view', $this->GetListView()); ?>
+                <?php do_action( 'wsal_auditlog_after_view', $this->GetListView() ); ?>
             </div>
-        </form><?php
-        
-        ?><script type="text/javascript">
-            jQuery(document).ready(function(){
-                WsalAuditLogInit(<?php echo json_encode(array(
-                    'ajaxurl' => admin_url('admin-ajax.php'),
-                    'tr8n' => array(
-                        'numofitems' => __('Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log'),
-                        'searchback' => __('All Sites', 'wp-security-audit-log'),
-                        'searchnone' =>  __('No Results', 'wp-security-audit-log'),
-                    ),
-                    'autorefresh' => array(
-                        'enabled' => $this->_plugin->settings->IsRefreshAlertsEnabled(),
-                        'token' => (int)$occ->Count(),
-                    ),
-                )); ?>);
-            });
-        </script><?php
+        </form>
+
+        <?php if ( class_exists( 'WSAL_SearchExtension' ) &&
+            ( isset( $_REQUEST['Filters'] ) || ( isset( $_REQUEST['s'] ) && trim( $_REQUEST['s'] ) ) ) ) : ?>
+            <script type="text/javascript">
+                jQuery(document).ready( function() {
+                    WsalAuditLogInit(
+                        <?php echo json_encode( array(
+                            'ajaxurl'   => admin_url( 'admin-ajax.php' ),
+                            'tr8n'      => array(
+                                'numofitems' => __( 'Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log' ),
+                                'searchback' => __( 'All Sites', 'wp-security-audit-log' ),
+                                'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
+                            ),
+                            'autorefresh'   => array(
+                                'enabled'   => false,
+                                'token'     => (int) $occ->Count(),
+                            ),
+                        ) );
+                        ?>
+                    );
+                } );
+            </script>
+        <?php else : ?>
+            <script type="text/javascript">
+                jQuery(document).ready( function() {
+                    WsalAuditLogInit(
+                        <?php echo json_encode( array(
+                            'ajaxurl' => admin_url( 'admin-ajax.php' ),
+                            'tr8n' => array(
+                                'numofitems' => __( 'Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log' ),
+                                'searchback' => __( 'All Sites', 'wp-security-audit-log' ),
+                                'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
+                            ),
+                            'autorefresh' => array(
+                                'enabled' => $this->_plugin->settings->IsRefreshAlertsEnabled(),
+                                'token' => (int) $occ->Count(),
+                            ),
+                        ) );
+                        ?>
+                    );
+                } );
+            </script>
+        <?php endif;
     }
-    
+
     public function AjaxInspector()
     {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
@@ -146,7 +176,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
         echo '</body></html>';
         die;
     }
-    
+
     public function AjaxRefresh()
     {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
@@ -155,7 +185,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
         if (!isset($_REQUEST['logcount'])) {
             die('Log count parameter expected.');
         }
-        
+
         $old = (int)$_REQUEST['logcount'];
         $max = 40; // 40*500msec = 20sec
 
@@ -166,13 +196,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
                 $is_archive = true;
             }
         }
-        
+
         do {
             $occ = new WSAL_Models_Occurrence();
             $new = $occ->Count();
             usleep(500000); // 500msec
         } while (($old == $new) && (--$max > 0));
-        
+
         if ($is_archive) {
             echo 'false';
         } else {
@@ -180,7 +210,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
         }
         die;
     }
-    
+
     public function AjaxSetIpp()
     {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
@@ -192,7 +222,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
         $this->_plugin->settings->SetViewPerPage((int)$_REQUEST['count']);
         die;
     }
-    
+
     public function AjaxSearchSite()
     {
         if (!$this->_plugin->settings->CurrentUserCan('view')) {
@@ -203,9 +233,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
         }
         $grp1 = array();
         $grp2 = array();
-        
+
         $search = $_REQUEST['search'];
-        
+
         foreach ($this->GetListView()->get_sites() as $site) {
             if (stripos($site->blogname, $search) !== false) {
                 $grp1[] = $site;
@@ -222,7 +252,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
             set_transient('wsal_wp_selected_db', $_REQUEST['selected_db'], HOUR_IN_SECONDS);
         }
     }
-    
+
     public function Header()
     {
         add_thickbox();
@@ -234,7 +264,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView
             filemtime($this->_plugin->GetBaseDir() . '/css/auditlog.css')
         );
     }
-    
+
     public function Footer()
     {
         wp_enqueue_script('jquery');
