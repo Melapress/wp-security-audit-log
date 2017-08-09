@@ -123,7 +123,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
         // to do change with 'create_term' instead 'create_category' for trigger Tags
         add_action('create_category', array($this, 'EventCategoryCreation'), 10, 1);
 
-        add_filter('single_post_title', array($this, 'ViewingPost'), 10, 2);
+        add_action( 'wp_head', array( $this, 'ViewingPost' ), 10 );
         add_filter('post_edit_form_tag', array($this, 'EditingPost'), 10, 1);
     }
 
@@ -929,33 +929,32 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
 
     /**
      * Alerts for Viewing of Posts, Pages and Custom Posts.
-     * @param string $title title
-     * @param stdClass $post (Optional) the post
      */
-    public function ViewingPost($title, $post = null)
-    {
-        if (is_user_logged_in()) {
-            if (!is_admin()) {
-                if ($this->CheckOtherSensors($post)) {
+    public function ViewingPost() {
+        // Retrieve the current post object.
+        $post = get_queried_object();
+        if ( is_user_logged_in() ) {
+            if ( ! is_admin() ) {
+                if ( $this->CheckOtherSensors( $post ) ) {
+                    return $post->post_title;
+                }
+
+                $currentPath = $_SERVER['REQUEST_URI'];
+                if ( ! empty( $_SERVER['HTTP_REFERER'] )
+                    && strpos( $_SERVER['HTTP_REFERER'], $currentPath ) !== false ) {
+                    // Ignore this if we were on the same page so we avoid double audit entries.
                     return $title;
                 }
-                $currentPath = $_SERVER["REQUEST_URI"];
-                if (!empty($_SERVER["HTTP_REFERER"])
-                    && strpos($_SERVER["HTTP_REFERER"], $currentPath) !== false) {
-                    // Ignore this if we were on the same page so we avoid double audit entries
-                    return $title;
-                }
-                if (!empty($post->post_title)) {
-                    $event = $this->GetEventTypeForPostType($post, 2101, 2103, 2105);
-                    $this->plugin->alerts->Trigger($event, array(
-                        'PostType' => $post->post_type,
+                if ( ! empty( $post->post_title ) ) {
+                    $event = $this->GetEventTypeForPostType( $post, 2101, 2103, 2105 );
+                    $this->plugin->alerts->Trigger( $event, array(
+                        'PostType'  => $post->post_type,
                         'PostTitle' => $post->post_title,
-                        'PostUrl' => get_permalink($post->ID)
-                    ));
+                        'PostUrl'   => get_permalink( $post->ID ),
+                    ) );
                 }
             }
         }
-        return $title;
     }
 
     /**
@@ -1129,5 +1128,20 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
             'value' => $value,
         );
         return $aLink;
+    }
+}
+
+/**
+ * Function to help in debugging
+ *
+ * @param $message
+ */
+function aa_log( $message ) {
+    if ( WP_DEBUG === true ) {
+        if ( is_array( $message ) || is_object( $message ) ) {
+            error_log( print_r( $message, true ) );
+        } else {
+            error_log( $message );
+        }
     }
 }
