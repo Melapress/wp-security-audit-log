@@ -889,11 +889,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
     /**
      * Ignore post from BBPress, WooCommerce Plugin
      * Triggered on the Sensors
-     * @param stdClass $post the post
+     *
+     * @param stdClass $post the post.
      */
-    private function CheckOtherSensors($post)
-    {
-        switch ($post->post_type) {
+    private function CheckOtherSensors( $post ) {
+        if ( empty( $post ) ) {
+            return false;
+        }
+        switch ( $post->post_type ) {
             case 'forum':
             case 'topic':
             case 'reply':
@@ -943,7 +946,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
                 if ( ! empty( $_SERVER['HTTP_REFERER'] )
                     && strpos( $_SERVER['HTTP_REFERER'], $currentPath ) !== false ) {
                     // Ignore this if we were on the same page so we avoid double audit entries.
-                    return $title;
+                    return;
                 }
                 if ( ! empty( $post->post_title ) ) {
                     $event = $this->GetEventTypeForPostType( $post, 2101, 2103, 2105 );
