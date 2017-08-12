@@ -271,7 +271,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2010, E_NOTICE, __('User uploaded file from Uploads directory', 'wp-security-audit-log'), __('Uploaded the file %FileName% in %FilePath%.', 'wp-security-audit-log')),
                 array(2011, E_WARNING, __('User deleted file from Uploads directory', 'wp-security-audit-log'), __('Deleted the file %FileName% from %FilePath%.', 'wp-security-audit-log'))
             ),
-            __('User Profiles', 'wp-security-audit-log') => array(
+            __( 'User Profiles', 'wp-security-audit-log' ) => array(
                 array(4000, E_CRITICAL, __('New user was created on WordPress', 'wp-security-audit-log'), __('A new user %NewUserData->Username% was created with role of %NewUserData->Roles%.', 'wp-security-audit-log')),
                 array(4001, E_CRITICAL, __('User created another WordPress user', 'wp-security-audit-log'), __('%UserChanger% created a new user %NewUserData->Username% with the role of %NewUserData->Roles%.', 'wp-security-audit-log')),
                 array(4002, E_CRITICAL, __('The role of a user was changed by another WordPress user', 'wp-security-audit-log'), __('Changed the role of the user %TargetUsername% from %OldRole% to %NewRole%.', 'wp-security-audit-log')),
@@ -280,8 +280,10 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(4005, E_NOTICE, __('User changed his or her email address', 'wp-security-audit-log'), __('Changed the email address from %OldEmail% to %NewEmail%.', 'wp-security-audit-log')),
                 array(4006, E_NOTICE, __('User changed another user\'s email address', 'wp-security-audit-log'), __('Changed the email address of the user %TargetUsername% from %OldEmail% to %NewEmail%.', 'wp-security-audit-log')),
                 array(4007, E_CRITICAL, __('User was deleted by another user', 'wp-security-audit-log'), __('Deleted the user %TargetUserData->Username% with the role of %TargetUserData->Roles%.', 'wp-security-audit-log')),
-                array(4014, E_NOTICE, __('User opened the profile page of another user', 'wp-security-audit-log'), __('%UserChanger% opened the profile page of the user %TargetUsername%.', 'wp-security-audit-log'))
-            )
+                array(4014, E_NOTICE, __('User opened the profile page of another user', 'wp-security-audit-log'), __('%UserChanger% opened the profile page of the user %TargetUsername%.', 'wp-security-audit-log')),
+                array( 4015, E_NOTICE, __( 'User updated a custom field value for a user', 'wp-security-audit-log' ), __( 'Changed the value of the custom field %custom_field_name% from %old_value% to %new_value% for the user %TargetUsername%.', 'wp-security-audit-log' ) ),
+                array( 4016, E_NOTICE, __( 'User created a custom field value for a user', 'wp-security-audit-log' ), __( 'Created the value of the custom field %custom_field_name% with %new_value% for the user %TargetUsername%.', 'wp-security-audit-log' ) ),
+            ),
         ),
         __('Third Party Support', 'wp-security-audit-log') => array(
             __('BBPress Forum', 'wp-security-audit-log') => array(

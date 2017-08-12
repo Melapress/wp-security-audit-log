@@ -247,7 +247,7 @@ class WSAL_AuditLogListView extends WP_List_Table
                 if ( $username && ( $user = get_user_by( 'login', $username ) ) ) {
                     $image = get_avatar( $user->ID, 32 );
                     if ( 'display_name' == $type_name ) {
-                        $display_name = $user->display_name;
+                        $display_name = $user->first_name . ' ' . $user->last_name;
                     } elseif ( 'username' == $type_name ) {
                         $display_name = $user->user_login;
                     }
