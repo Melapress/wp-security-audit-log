@@ -1,7 +1,5 @@
 <?php
 /**
- * @package Wsal
- * @subpackage Sensors
  * Custom fields (posts, pages, custom posts and users) sensor.
  *
  * 2053 User created a custom field for a post
@@ -16,6 +14,10 @@
  * 2055 User deleted a custom field from a post
  * 2058 User deleted a custom field from a custom post type
  * 2061 User deleted a custom field from a page
+ *
+ * @package Wsal
+ * @subpackage Sensors
+ * @since 1.0.0
  */
 class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 
@@ -367,7 +369,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		$user = get_user_by( 'ID', $object_id );
 
 		// Check to see if we can log the meta key.
-		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) ) {
+		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) || empty( $meta_value ) ) {
 			return;
 		}
 
@@ -413,7 +415,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		$user = get_user_by( 'ID', $object_id );
 
 		// Check to see if we can log the meta key.
-		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) ) {
+		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
