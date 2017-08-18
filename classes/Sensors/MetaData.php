@@ -29,6 +29,13 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	protected $old_meta = array();
 
 	/**
+	 * Empty meta counter.
+	 *
+	 * @var int
+	 */
+	private $null_meta_counter = 0;
+
+	/**
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
@@ -36,10 +43,12 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		add_action( 'update_post_meta', array( $this, 'EventPostMetaUpdating' ), 10, 3 );
 		add_action( 'updated_post_meta', array( $this, 'EventPostMetaUpdated' ), 10, 4 );
 		add_action( 'deleted_post_meta', array( $this, 'EventPostMetaDeleted' ), 10, 4 );
+		add_action( 'save_post', array( $this, 'reset_null_meta_counter' ), 10 );
 
 		add_action( 'add_user_meta', array( $this, 'event_user_meta_created' ), 10, 3 );
 		add_action( 'update_user_meta', array( $this, 'event_user_meta_updating' ), 10, 3 );
 		add_action( 'updated_user_meta', array( $this, 'event_user_meta_updated' ), 10, 4 );
+		add_action( 'user_register', array( $this, 'reset_null_meta_counter' ), 10 );
 	}
 
 	/**
@@ -103,11 +112,17 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 */
 	public function EventPostMetaCreated( $object_id, $meta_key, $meta_value ) {
 		$post = get_post( $object_id );
-		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) ) {
+		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
 		if ( 'revision' == $post->post_type ) {
+			return;
+		}
+
+		if ( empty( $meta_value ) && ( $this->null_meta_counter < 1 ) ) { // Report only one NULL meta value.
+			$this->null_meta_counter += 1;
+		} else { // Do not report if NULL meta values are more than one.
 			return;
 		}
 
@@ -176,7 +191,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 */
 	public function EventPostMetaUpdated( $meta_id, $object_id, $meta_key, $meta_value ) {
 		$post = get_post( $object_id );
-		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) ) {
+		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
@@ -340,6 +355,15 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	}
 
 	/**
+	 * Method: Reset Null Meta Counter.
+	 *
+	 * @since 2.6.5
+	 */
+	public function reset_null_meta_counter() {
+		$this->null_meta_counter = 0;
+	}
+
+	/**
 	 * Get editor link.
 	 *
 	 * @param stdClass $post the post.
@@ -369,7 +393,13 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		$user = get_user_by( 'ID', $object_id );
 
 		// Check to see if we can log the meta key.
-		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) || empty( $meta_value ) ) {
+		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
+			return;
+		}
+
+		if ( empty( $meta_value ) && ( $this->null_meta_counter < 1 ) ) { // Report only one NULL meta value.
+			$this->null_meta_counter += 1;
+		} else { // Do not report if NULL meta values are more than one.
 			return;
 		}
 
@@ -377,7 +407,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		$post_array = $_POST;
 
 		// If update action is set then trigger the alert.
-		if ( isset( $post_array['action'] ) && 'update' == $post_array['action'] ) {
+		if ( isset( $post_array['action'] ) && ( 'update' == $post_array['action'] || 'createuser' == $post_array['action'] ) ) {
 			$this->plugin->alerts->Trigger( 4016, array(
 				'TargetUsername'	=> $user->user_login,
 				'custom_field_name' => $meta_key,
