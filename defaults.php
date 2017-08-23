@@ -60,7 +60,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2001, E_NOTICE, __('User published a blog post', 'wp-security-audit-log'), __('Published a post called %PostTitle%. Post URL is %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2002, E_NOTICE, __('User modified a published blog post', 'wp-security-audit-log'), __('Modified the published post %PostTitle%. Post URL is %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2003, E_NOTICE, __('User modified a draft blog post', 'wp-security-audit-log'), __('Modified the draft post with the %PostTitle%. %EditorLinkPost%.', 'wp-security-audit-log')),
-                array(2008, E_WARNING, __('User permanently deleted a blog post from the trash', 'wp-security-audit-log'), __('Permanently deleted the post %PostTitle%. Post URL was %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log')),
+                array(2008, E_WARNING, __('User permanently deleted a blog post from the trash', 'wp-security-audit-log'), __('Permanently deleted the post %PostTitle%.', 'wp-security-audit-log')),
                 array(2012, E_WARNING, __('User moved a blog post to the trash', 'wp-security-audit-log'), __('Moved the post %PostTitle% to trash. Post URL is %PostUrl%.', 'wp-security-audit-log')),
                 array(2014, E_CRITICAL, __('User restored a blog post from trash', 'wp-security-audit-log'), __('Post %PostTitle% has been restored from trash. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2016, E_NOTICE, __('User changed blog post category', 'wp-security-audit-log'), __('Changed the category of the post %PostTitle% from %OldCategories% to %NewCategories%. %EditorLinkPost%.', 'wp-security-audit-log')),
@@ -108,7 +108,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2030, E_NOTICE, __('User published a post with custom post type', 'wp-security-audit-log'), __('Published a custom post %PostTitle% of type %PostType%. Post URL is %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2031, E_NOTICE, __('User modified a post with custom post type', 'wp-security-audit-log'), __('Modified the custom post %PostTitle% of type %PostType%. Post URL is %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2032, E_NOTICE, __('User modified a draft post with custom post type', 'wp-security-audit-log'), __('Modified the draft custom post %PostTitle% of type is %PostType%. %EditorLinkPost%.', 'wp-security-audit-log')),
-                array(2033, E_WARNING, __('User permanently deleted post with custom post type', 'wp-security-audit-log'), __('Permanently Deleted the custom post %PostTitle% of type %PostType%. The post URL was %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log')),
+                array(2033, E_WARNING, __('User permanently deleted post with custom post type', 'wp-security-audit-log'), __('Permanently Deleted the custom post %PostTitle% of type %PostType%.', 'wp-security-audit-log')),
                 array(2034, E_WARNING, __('User moved post with custom post type to trash', 'wp-security-audit-log'), __('Moved the custom post %PostTitle% of type %PostType% to trash. Post URL was %PostUrl%.', 'wp-security-audit-log')),
                 array(2035, E_CRITICAL, __('User restored post with custom post type from trash', 'wp-security-audit-log'), __('The custom post %PostTitle% of type %PostType% has been restored from trash. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2036, E_NOTICE, __('User changed the category of a post with custom post type', 'wp-security-audit-log'), __('Changed the category(ies) of the custom post %PostTitle% of type %PostType% from %OldCategories% to %NewCategories%. %EditorLinkPost%.', 'wp-security-audit-log')),
@@ -133,7 +133,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2005, E_NOTICE, __('User published a WordPress page', 'wp-security-audit-log'), __('Published a page called %PostTitle%. Page URL is %PostUrl%. %EditorLinkPage%.', 'wp-security-audit-log')),
                 array(2006, E_NOTICE, __('User modified a published WordPress page', 'wp-security-audit-log'), __('Modified the published page %PostTitle%. Page URL is %PostUrl%. %EditorLinkPage%.', 'wp-security-audit-log')),
                 array(2007, E_NOTICE, __('User modified a draft WordPress page', 'wp-security-audit-log'), __('Modified the draft page %PostTitle%. Page ID is %PostID%. %EditorLinkPage%.', 'wp-security-audit-log')),
-                array(2009, E_WARNING, __('User permanently deleted a page from the trash', 'wp-security-audit-log'), __('Permanently deleted the page %PostTitle%. Page URL was %PostUrl%. %EditorLinkPage%.', 'wp-security-audit-log')),
+                array(2009, E_WARNING, __('User permanently deleted a page from the trash', 'wp-security-audit-log'), __('Permanently deleted the page %PostTitle%.', 'wp-security-audit-log')),
                 array(2013, E_WARNING, __('User moved WordPress page to the trash', 'wp-security-audit-log'), __('Moved the page %PostTitle% to trash. Page URL was %PostUrl%.', 'wp-security-audit-log')),
                 array(2015, E_CRITICAL, __('User restored a WordPress page from trash', 'wp-security-audit-log'), __('Page %PostTitle% has been restored from trash. %EditorLinkPage%.', 'wp-security-audit-log')),
                 array(2018, E_NOTICE, __('User changed page URL', 'wp-security-audit-log'), __('Changed the URL of the page %PostTitle% from %OldUrl% to %NewUrl%. %EditorLinkPage%.', 'wp-security-audit-log')),
@@ -271,7 +271,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2010, E_NOTICE, __('User uploaded file from Uploads directory', 'wp-security-audit-log'), __('Uploaded the file %FileName% in %FilePath%.', 'wp-security-audit-log')),
                 array(2011, E_WARNING, __('User deleted file from Uploads directory', 'wp-security-audit-log'), __('Deleted the file %FileName% from %FilePath%.', 'wp-security-audit-log'))
             ),
-            __('User Profiles', 'wp-security-audit-log') => array(
+            __( 'User Profiles', 'wp-security-audit-log' ) => array(
                 array(4000, E_CRITICAL, __('New user was created on WordPress', 'wp-security-audit-log'), __('A new user %NewUserData->Username% was created with role of %NewUserData->Roles%.', 'wp-security-audit-log')),
                 array(4001, E_CRITICAL, __('User created another WordPress user', 'wp-security-audit-log'), __('%UserChanger% created a new user %NewUserData->Username% with the role of %NewUserData->Roles%.', 'wp-security-audit-log')),
                 array(4002, E_CRITICAL, __('The role of a user was changed by another WordPress user', 'wp-security-audit-log'), __('Changed the role of the user %TargetUsername% from %OldRole% to %NewRole%.', 'wp-security-audit-log')),
@@ -280,8 +280,10 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(4005, E_NOTICE, __('User changed his or her email address', 'wp-security-audit-log'), __('Changed the email address from %OldEmail% to %NewEmail%.', 'wp-security-audit-log')),
                 array(4006, E_NOTICE, __('User changed another user\'s email address', 'wp-security-audit-log'), __('Changed the email address of the user %TargetUsername% from %OldEmail% to %NewEmail%.', 'wp-security-audit-log')),
                 array(4007, E_CRITICAL, __('User was deleted by another user', 'wp-security-audit-log'), __('Deleted the user %TargetUserData->Username% with the role of %TargetUserData->Roles%.', 'wp-security-audit-log')),
-                array(4014, E_NOTICE, __('User opened the profile page of another user', 'wp-security-audit-log'), __('%UserChanger% opened the profile page of the user %TargetUsername%.', 'wp-security-audit-log'))
-            )
+                array(4014, E_NOTICE, __('User opened the profile page of another user', 'wp-security-audit-log'), __('%UserChanger% opened the profile page of the user %TargetUsername%.', 'wp-security-audit-log')),
+                array( 4015, E_NOTICE, __( 'User updated a custom field value for a user', 'wp-security-audit-log' ), __( 'Changed the value of the custom field %custom_field_name% from %old_value% to %new_value% for the user %TargetUsername%.', 'wp-security-audit-log' ) ),
+                array( 4016, E_NOTICE, __( 'User created a custom field value for a user', 'wp-security-audit-log' ), __( 'Created the value of the custom field %custom_field_name% with %new_value% for the user %TargetUsername%.', 'wp-security-audit-log' ) ),
+            ),
         ),
         __('Third Party Support', 'wp-security-audit-log') => array(
             __('BBPress Forum', 'wp-security-audit-log') => array(

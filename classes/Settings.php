@@ -817,6 +817,23 @@ class WSAL_Settings
         return $this->_plugin->SetGlobalOption('timezone', $newvalue);
     }
 
+    /**
+     * Get type of username to display
+     */
+    public function get_type_username() {
+        return $this->_plugin->GetGlobalOption( 'type_username', 'display_name' );
+    }
+
+    /**
+     * Set type of username to display
+     *
+     * @param string $newvalue - New value variable.
+     * @since 2.6.5
+     */
+    public function set_type_username( $newvalue ) {
+        return $this->_plugin->SetGlobalOption( 'type_username', $newvalue );
+    }
+
     public function GetAdapterConfig($name_field)
     {
         return $this->_plugin->GetGlobalOption($name_field);

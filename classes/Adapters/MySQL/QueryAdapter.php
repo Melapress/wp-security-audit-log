@@ -82,7 +82,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         if (!empty($searchCondition)) {
             $args[] = $searchCondition['args'];
         }
-        
+
         $sql = 'SELECT ' . $fields
             . ' FROM ' . implode(',', $fromDataSets)
             . $joinClause
@@ -93,7 +93,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             . $sLimitClause;
         return $sql;
     }
-    
+
     /**
      * Get an instance of the ActiveRecord Adapter.
      * @return WSAL_Adapters_MySQL_ActiveRecord
@@ -102,7 +102,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
     {
         return new WSAL_Adapters_MySQL_ActiveRecord($this->connection);
     }
-    
+
     /**
      * Execute query and return data as $ar_cls objects.
      * @param object $query query object
@@ -121,7 +121,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
             return $this->getActiveRecordAdapter()->LoadMulti($sql, $args);
         }
     }
-    
+
     /**
      * Count query
      * @param object $query query object
@@ -154,7 +154,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         // execute query and return result
         return $this->getActiveRecordAdapter()->CountQuery($result['sql'], $result['args']);
     }
-    
+
     /**
      * Query for deleting records
      * @param object $query query object.
@@ -237,7 +237,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
         $result['args'] = $args;
         // restore columns
         $query->setColumns($cols);
-        
+
         return $result;
     }
 

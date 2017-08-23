@@ -609,51 +609,51 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
         if ( $logged_in ) {
             if ( 'on' == $this->plugin->GetGlobalOption( 'log-404', 'off' ) ) {
-                // Request URL
-                $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
-                // Create/Append to the log file
+                // Request URL.
+                $url = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+                // Create/Append to the log file.
                 $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
-                if (!is_user_logged_in()) {
+                if ( ! is_user_logged_in() ) {
                     $username = '';
                 } else {
                     $username = $username . '_';
                 }
 
-                if ($ip == '127.0.0.1' || $ip == '::1') {
+                if ( '127.0.0.1' == $ip || '::1' == $ip ) {
                     $ip = 'localhost';
                 }
                 $upload_dir = wp_upload_dir();
-                $uploadsDirPath = trailingslashit($upload_dir['basedir']).'wp-security-audit-log/404s/users/';
-                $uploadsURL = trailingslashit($upload_dir['baseurl']).'wp-security-audit-log/404s/users/';
+                $uploadsDirPath = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/users/';
+                $uploadsURL = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/404s/users/';
 
-                // Check directory
-                if ($this->CheckDirectory($uploadsDirPath)) {
-                    $filename = date('Ymd') . '_' . $username . $ip . '.log';
+                // Check directory.
+                if ( $this->CheckDirectory( $uploadsDirPath ) ) {
+                    $filename = '6007_' . date( 'Ymd' ) . '.log';
                     $fp = $uploadsDirPath . $filename;
                     $nameFile = $uploadsURL . $filename;
-                    if (!$file = fopen($fp, 'a')) {
+                    if ( ! $file = fopen( $fp, 'a' ) ) {
                         $i = 1;
                         $fileOpened = false;
                         do {
-                            $fp2 = substr($fp, 0, -4) . '_' . $i . '.log';
-                            if (!file_exists($fp2)) {
-                                if ($file = fopen($fp2, 'a')) {
+                            $fp2 = substr( $fp, 0, -4 ) . '_' . $i . '.log';
+                            if ( ! file_exists( $fp2 ) ) {
+                                if ( $file = fopen( $fp2, 'a' ) ) {
                                     $fileOpened = true;
-                                    $nameFile = $uploadsURL . substr($nameFile, 0, -4) . '_' . $i . '.log';
+                                    $nameFile = $uploadsURL . substr( $nameFile, 0, -4 ) . '_' . $i . '.log';
                                 }
                             } else {
-                                $latestFilename = $this->GetLastModified($uploadsDirPath, $filename);
+                                $latestFilename = $this->GetLastModified( $uploadsDirPath, $filename );
                                 $fpLast = $uploadsDirPath . $latestFilename;
-                                if ($file = fopen($fpLast, 'a')) {
+                                if ( $file = fopen( $fpLast, 'a' ) ) {
                                     $fileOpened = true;
                                     $nameFile = $uploadsURL . $latestFilename;
                                 }
                             }
                             $i++;
-                        } while (!$fileOpened);
+                        } while ( ! $fileOpened );
                     }
-                    fwrite($file, sprintf("%s\n", $data));
-                    fclose($file);
+                    fwrite( $file, sprintf( "%s\n", $data ) );
+                    fclose( $file );
                 }
             }
         } else {
@@ -673,7 +673,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
                 // Check directory.
                 if ( $this->CheckDirectory( $uploadsDirPath ) ) {
-                    $filename = date( 'Ymd' ) . '_' . $username . $ip . '.log';
+                    $filename = '6023_' . date( 'Ymd' ) . '.log';
                     $fp = $uploadsDirPath . $filename;
                     $nameFile = $uploadsURL . $filename;
                     if ( ! $file = fopen( $fp, 'a' ) ) {

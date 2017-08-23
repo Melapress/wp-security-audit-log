@@ -15,18 +15,18 @@ class WSAL_AuditLogListView extends WP_List_Table
      */
     protected $_plugin;
     protected $_gmt_offset_sec = 0;
-    
+
     public function __construct($plugin)
     {
         $this->_plugin = $plugin;
-        
+
         $timezone = $this->_plugin->settings->GetTimezone();
         if ($timezone) {
             $this->_gmt_offset_sec = get_option('gmt_offset') * HOUR_IN_SECONDS;
         } else {
             $this->_gmt_offset_sec = date('Z');
         }
-        
+
         parent::__construct(array(
             'singular'  => 'log',
             'plural'    => 'logs',
@@ -39,7 +39,7 @@ class WSAL_AuditLogListView extends WP_List_Table
     {
         _e('No events so far.', 'wp-security-audit-log');
     }
-    
+
     public function extra_tablenav($which)
     {
         // items-per-page widget
@@ -48,7 +48,7 @@ class WSAL_AuditLogListView extends WP_List_Table
         $items = array($o, 5, 10, 15, 30, 50);
         if (!in_array($p, $items)) $items[] = $p;
         if ($p == $o || $p == 0) $p = $o[1]; // a sane default if things goes bust
-        
+
         ?><div class="wsal-ipp wsal-ipp-<?php echo $which; ?>">
             <?php _e('Show ', 'wp-security-audit-log'); ?>
             <select class="wsal-ipps" onfocus="WsalIppsFocus(value);" onchange="WsalIppsChange(value);">
@@ -62,7 +62,7 @@ class WSAL_AuditLogListView extends WP_List_Table
             </select>
             <?php _e(' Items', 'wp-security-audit-log'); ?>
         </div><?php
-        
+
         // show site alerts widget
         if ($this->is_multisite() && $this->is_main_blog()) {
             $curr = $this->get_view_site_id();
@@ -100,7 +100,7 @@ class WSAL_AuditLogListView extends WP_List_Table
             </div><?php
         }
     }
-    
+
     /**
      * @param int|null $limit Maximum number of sites to return (null = no limit).
      * @return object Object with keys: blog_id, blogname, domain
@@ -120,7 +120,7 @@ class WSAL_AuditLogListView extends WP_List_Table
         // return result
         return $res;
     }
-    
+
     /**
      * @return int The number of sites on the network.
      */
@@ -131,52 +131,57 @@ class WSAL_AuditLogListView extends WP_List_Table
         return (int)$wpdb->get_var($sql);
     }
 
-    public function get_columns()
-    {
+    public function get_columns() {
+        $type_name = $this->_plugin->settings->get_type_username();
+        if ( 'display_name' === $type_name ) {
+            $name_column = __( 'User', 'wp-security-audit-log' );
+        } elseif ( 'username' === $type_name ) {
+            $name_column = __( 'Username', 'wp-security-audit-log' );
+        }
         $cols = array(
             //'cb'   => '<input type="checkbox" />',
             //'read' => __('Read', 'wp-security-audit-log'),
-            'type' => __('Code', 'wp-security-audit-log'),
-            'code' => __('Type', 'wp-security-audit-log'),
-            'crtd' => __('Date', 'wp-security-audit-log'),
-            'user' => __('Username', 'wp-security-audit-log'),
-            'scip' => __('Source IP', 'wp-security-audit-log'),
+            'type' => __( 'Code', 'wp-security-audit-log' ),
+            'code' => __( 'Type', 'wp-security-audit-log' ),
+            'crtd' => __( 'Date', 'wp-security-audit-log' ),
+            'user' => $name_column,
+            'scip' => __( 'Source IP', 'wp-security-audit-log' ),
         );
-        if ($this->is_multisite() && $this->is_main_blog() && !$this->is_specific_view()) {
-            $cols['site'] = __('Site', 'wp-security-audit-log');
+        if ( $this->is_multisite() && $this->is_main_blog() && ! $this->is_specific_view() ) {
+            $cols['site'] = __( 'Site', 'wp-security-audit-log' );
         }
-        $cols['mesg'] = __('Message', 'wp-security-audit-log');
+        $cols['mesg'] = __( 'Message', 'wp-security-audit-log' );
         $sel_columns = $this->_plugin->settings->GetColumnsSelected();
-        if (!empty($sel_columns)) {
-            unset($cols);
-            $sel_columns = (array)json_decode($sel_columns);
-            foreach ($sel_columns as $key => $value) {
-                switch ($key) {
+        if ( ! empty( $sel_columns ) ) {
+            unset( $cols );
+            $sel_columns = (array) json_decode( $sel_columns );
+            foreach ( $sel_columns as $key => $value ) {
+                switch ( $key ) {
                     case 'alert_code':
-                        $cols['type'] = __('Code', 'wp-security-audit-log');
+                        $cols['type'] = __( 'Code', 'wp-security-audit-log' );
                         break;
                     case 'type':
-                        $cols['code'] = __('Type', 'wp-security-audit-log');
+                        $cols['code'] = __( 'Type', 'wp-security-audit-log' );
                         break;
                     case 'date':
-                        $cols['crtd'] = __('Date', 'wp-security-audit-log');
+                        $cols['crtd'] = __( 'Date', 'wp-security-audit-log' );
                         break;
                     case 'username':
-                        $cols['user'] = __('Username', 'wp-security-audit-log');
+                        $cols['user'] = $name_column;
                         break;
                     case 'source_ip':
-                        $cols['scip'] = __('Source IP', 'wp-security-audit-log');
+                        $cols['scip'] = __( 'Source IP', 'wp-security-audit-log' );
                         break;
                     case 'site':
-                        $cols['site'] = __('Site', 'wp-security-audit-log');
+                        $cols['site'] = __( 'Site', 'wp-security-audit-log' );
                         break;
                     case 'message':
-                        $cols['mesg'] = __('Message', 'wp-security-audit-log');
+                        $cols['mesg'] = __( 'Message', 'wp-security-audit-log' );
                         break;
                 }
             }
         }
-        if ($this->_plugin->settings->IsDataInspectorEnabled()) {
+        if ( $this->_plugin->settings->IsDataInspectorEnabled() ) {
             $cols['data'] = '';
         }
         return $cols;
@@ -199,12 +204,12 @@ class WSAL_AuditLogListView extends WP_List_Table
             'scip' => array('scip', false)
         );
     }
-    
+
     public function column_default($item, $column_name)
     {
         //example: $item->getMetaValue('CurrentUserID')
         $datetimeFormat = $this->_plugin->settings->GetDatetimeFormat();
-        
+
         switch ($column_name) {
             case 'read':
                 return '<span class="log-read log-read-'
@@ -237,53 +242,94 @@ class WSAL_AuditLogListView extends WP_List_Table
                         )
                     ) : '<i>unknown</i>';
             case 'user':
-                $username = $item->GetUsername();
-                if ($username && ($user = get_user_by('login', $username))) {
-                    $image = get_avatar($user->ID, 32);
-                    $uhtml = '<a href="' . admin_url('user-edit.php?user_id=' . $user->ID)
-                            . '" target="_blank">' . esc_html($user->display_name) . '</a>';
-                    $roles = $item->GetUserRoles();
-                    if (is_array($roles) && count($roles)) {
-                        $roles = __(esc_html(ucwords(implode(', ', $roles))));
-                    } else if (is_string($roles) && $roles != '') {
-                        $roles = __(esc_html(ucwords(str_replace(array("\"", "[", "]"), " ", $roles))));
-                    } else {
-                        $roles = '<i>' . __('Unknown', 'wp-security-audit-log') . '</i>';
+                $username   = $item->GetUsername();
+                $type_name  = $this->_plugin->settings->get_type_username();
+                if ( $username && ( $user = get_user_by( 'login', $username ) ) ) {
+                    $image = get_avatar( $user->ID, 32 );
+                    if ( 'display_name' == $type_name ) {
+                        $display_name = $user->first_name . ' ' . $user->last_name;
+                    } elseif ( 'username' == $type_name ) {
+                        $display_name = $user->user_login;
                     }
-                } elseif ($username == 'Plugin') {
-                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/plugin-logo.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
-                    $uhtml = '<i>' . __('Plugin', 'wp-security-audit-log') . '</i>';
+
+                    if ( class_exists( 'WSAL_SearchExtension' ) ) {
+                        $tooltip = esc_attr__( 'Show me all activity by this User', 'wp-security-audit-log' );
+
+                        $uhtml = '<a class="search-user" data-tooltip="' . $tooltip . '" data-user="' . $user->user_login . '" href="' . admin_url( 'user-edit.php?user_id=' . $user->ID )
+                            . '" target="_blank">' . esc_html( $display_name ) . '</a>';
+                    } else {
+                        $uhtml = '<a href="' . admin_url( 'user-edit.php?user_id=' . $user->ID )
+                        . '" target="_blank">' . esc_html( $display_name ) . '</a>';
+                    }
+
+                    $roles = $item->GetUserRoles();
+                    if ( is_array( $roles ) && count( $roles ) ) {
+                        $roles = esc_html( ucwords( implode( ', ', $roles ) ) );
+                    } elseif ( is_string( $roles ) && $roles != '' ) {
+                        $roles = esc_html( ucwords( str_replace( array( "\"", "[", "]" ), " ", $roles ) ) );
+                    } else {
+                        $roles = '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
+                    }
+                } elseif ( 'Plugin' == $username ) {
+                    $image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/plugin-logo.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';
                     $roles = '';
-                } elseif ($username == 'Plugins') {
-                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
-                    $uhtml = '<i>' . __('Plugins', 'wp-security-audit-log') . '</i>';
+                } elseif ( 'Plugins' == $username ) {
+                    $image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __( 'Plugins', 'wp-security-audit-log' ) . '</i>';
                     $roles = '';
-                } elseif ($username == 'Website Visitor') {
-                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
-                    $uhtml = '<i>' . __('Website Visitor', 'wp-security-audit-log') . '</i>';
+                } elseif ( 'Website Visitor' == $username ) {
+                    $image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __( 'Website Visitor', 'wp-security-audit-log' ) . '</i>';
                     $roles = '';
                 } else {
-                    $image = '<img src="'. $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
-                    $uhtml = '<i>' . __('System', 'wp-security-audit-log') . '</i>';
+                    $image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+                    $uhtml = '<i>' . __( 'System', 'wp-security-audit-log' ) . '</i>';
                     $roles = '';
                 }
                 return $image . $uhtml . '<br/>' . $roles;
             case 'scip':
                 $scip = $item->GetSourceIP();
-                if (is_string($scip)) {
-                    $scip = str_replace(array("\"", "[", "]"), "", $scip);
+                if ( is_string( $scip ) ) {
+                    $scip = str_replace( array( "\"", "[", "]" ), '', $scip );
                 }
-                $oips = array(); //$item->GetOtherIPs();
+
+                $oips = array(); // $item->GetOtherIPs();
+
                 // if there's no IP...
-                if (is_null($scip) || $scip == '') return '<i>unknown</i>';
+                if ( is_null( $scip ) || '' == $scip ) {
+                    return '<i>unknown</i>';
+                }
+
                 // if there's only one IP...
-                $link = "http://whatismyipaddress.com/ip/" . $scip ."?utm_source=plugin&utm_medium=referral&utm_campaign=WPSAL";
-                if (count($oips) < 2) return "<a target='_blank' href='$link'>". esc_html($scip) .'</a>';
+                $link = 'http://whatismyipaddress.com/ip/' . $scip . '?utm_source=plugin&utm_medium=referral&utm_campaign=WPSAL';
+                if ( class_exists( 'WSAL_SearchExtension' ) ) {
+                    $tooltip = esc_attr__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
+
+                    if ( count( $oips ) < 2 ) {
+                        return "<a class='search-ip' data-tooltip='$tooltip' data-ip='$scip' target='_blank' href='$link'>" . esc_html( $scip ) . '</a>';
+                    }
+                } else {
+                    if ( count( $oips ) < 2 ) {
+                        return "<a target='_blank' href='$link'>" . esc_html( $scip ) . '</a>';
+                    }
+                }
+
                 // if there are many IPs...
-                $html  = "<a target='_blank' href='http://whatismyipaddress.com/ip/$scip'>". esc_html($scip) .'</a>'.' <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
-                foreach ($oips as $ip) if($scip != $ip) $html .= '<div>' . $ip . '</div>';
-                $html .= '</div>';
-                return $html;
+                if ( class_exists( 'WSAL_SearchExtension' ) ) {
+                    $tooltip = esc_attr__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
+
+                    $html  = "<a class='search-ip' data-tooltip='$tooltip' data-ip='$scip' target='_blank' href='http://whatismyipaddress.com/ip/$scip'>" . esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
+                    foreach ( $oips as $ip ) if ( $scip != $ip ) $html .= '<div>' . $ip . '</div>';
+                    $html .= '</div>';
+                    return $html;
+                } else {
+                    $html  = "<a target='_blank' href='http://whatismyipaddress.com/ip/$scip'>" . esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
+                    foreach ( $oips as $ip ) if ( $scip != $ip ) $html .= '<div>' . $ip . '</div>';
+                    $html .= '</div>';
+                    return $html;
+                }
+
             case 'site':
                 $info = get_blog_details($item->site_id, true);
                 return !$info ? ('Unknown Site '.$item->site_id)
@@ -306,13 +352,13 @@ class WSAL_AuditLogListView extends WP_List_Table
         $result = strcmp($a->{$this->_orderby}, $b->{$this->_orderby});
         return ($this->_order === 'asc') ? $result : -$result;
     }
-    
+
     public function reorder_items_int($a, $b)
     {
         $result = $a->{$this->_orderby} - $b->{$this->_orderby};
         return ($this->_order === 'asc') ? $result : -$result;
     }
-    
+
     public function meta_formatter($name, $value)
     {
         switch (true) {
@@ -336,27 +382,27 @@ class WSAL_AuditLogListView extends WP_List_Table
 
             case $name == '%RevisionLink%':
                 return ' Click <a target="_blank" href="'.esc_url($value).'">here</a> to see the content changes.';
-                
+
             case $name == '%EditorLinkPost%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the post</a>';
-                
+
             case $name == '%EditorLinkPage%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the page</a>';
-                
+
             case $name == '%CategoryLink%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the category</a>';
 
             case $name == '%EditorLinkForum%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the forum</a>';
-                
+
             case $name == '%EditorLinkTopic%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the topic</a>';
-                
+
             case in_array($name, array('%MetaValue%', '%MetaValueOld%', '%MetaValueNew%')):
                 return '<strong>' . (
                     strlen($value) > 50 ? (esc_html(substr($value, 0, 50)) . '&hellip;') :  esc_html($value)
                 ) . '</strong>';
-            
+
             case $name == '%ClientIP%':
                 if (is_string($value)) {
                     return '<strong>' . str_replace(array("\"", "[", "]"), "", $value) . '</strong>';
@@ -374,32 +420,32 @@ class WSAL_AuditLogListView extends WP_List_Table
             case strncmp($value, 'http://', 7) === 0:
             case strncmp($value, 'https://', 7) === 0:
                 return '<a href="' . esc_html($value) . '"' . ' title="' . esc_html($value) . '"' . ' target="_blank">' . esc_html($value) . '</a>';
-                
+
             default:
                 return '<strong>' . esc_html($value) . '</strong>';
         }
     }
-    
+
     protected function is_multisite()
     {
         return $this->_plugin->IsMultisite();
     }
-    
+
     protected function is_main_blog()
     {
         return get_current_blog_id() == 1;
     }
-    
+
     protected function is_specific_view()
     {
         return isset($_REQUEST['wsal-cbid']) && $_REQUEST['wsal-cbid'] != '0';
     }
-    
+
     protected function get_specific_view()
     {
         return isset($_REQUEST['wsal-cbid']) ? (int)$_REQUEST['wsal-cbid'] : 0;
     }
-    
+
     protected function get_view_site_id()
     {
         switch (true) {
@@ -417,7 +463,7 @@ class WSAL_AuditLogListView extends WP_List_Table
                 return get_current_blog_id();
         }
     }
-    
+
     public function prepare_items()
     {
         if ($this->_plugin->settings->IsArchivingEnabled()) {
@@ -444,9 +490,9 @@ class WSAL_AuditLogListView extends WP_List_Table
         if ($bid) {
             $query->addCondition("site_id = %s ", $bid);
         }
-        
+
         $query = apply_filters('wsal_auditlog_query', $query);
-        
+
         $total_items = $query->getAdapter()->Count($query);
 
         if (empty($_REQUEST["orderby"])) {
