@@ -6,8 +6,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 4.8
-Stable tag: 2.6.5
+Tested up to: 4.8.1
+Stable tag: 2.6.6
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -115,6 +115,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 
 = As Featured On: =
 
+* [WP Couple](https://wpcouple.com/wordpress-audit-logs/)
 * [WPLift](http://wplift.com/audit-wordpress-security-logs) - Review by Ahmad Awais
 * [WP SmackDown](https://wpsmackdown.com/wp-plugins/wp-security-audit-log/)
 * [WPKube](http://www.wpkube.com/improve-wordpress-security-wp-security-audit-log/)
@@ -186,6 +187,25 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 11. Mirror the WordPress audit trail to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
 
 == Changelog ==
+
+= 2.6.6 (2017-08-30 =
+
+* **New Audit Trail Alerts**
+	* Alert 4015 for when a user creates a custom field in a user profile.
+	* Alert 4016 for when a user updates a custom field value in a user profile.
+	
+* **New Feature**
+	* Logging of changes in custom fields (in posts, pages, custom post types, user profiles) created by Advanced Custom Fields (ACF) or similar plugins.
+	* New option to show either the Username or Firstname and Lastname of the user in the Audit Trail.
+	
+* **Improvements**
+	* 404 errors logfiles are now saved in /uploads/wp-security-audit-log/404s/ directory.
+	* Changed the 404 errors logfile name format to [alert]_[yyyymmdd].log. Thanks to [Enable Security](https://www.enablesecurity.com/) for PoC of vulnerability and advise.
+	* Removed link to view post from Alerts about permanently deleted posts (2008, 2009, 2033).
+	* Added tooltip for filter via IP address.
+	
+* **Bug Fix**
+	* Fixed an issue where the viewing of content was not being logged when Yoast SEO is installed.
 
 = 2.6.5 (2017-07-18) =
 
