@@ -180,7 +180,7 @@ class WpSecurityAuditLog {
 	/**
 	 * Method: Define constants.
 	 *
-	 * @since 1.0.0
+	 * @since 2.6.6
 	 */
 	public function define_constants() {
 
