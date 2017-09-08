@@ -52,7 +52,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_AjaxSwitchDB', array( $this, 'AjaxSwitchDB' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
 		// Check plugin version for to dismiss the notice only until upgrade.
-		$this->_version = $plugin->version;
+		$this->_version = WSAL_VERSION;
 		$this->RegisterNotice( 'premium-wsal-' . $this->_version );
 	}
 
@@ -66,7 +66,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
 		// Check if any of the extensions is activated.
 		if ( ! class_exists( 'WSAL_NP_Plugin' ) && ! class_exists( 'WSAL_SearchExtension' ) && ! class_exists( 'WSAL_Rep_Plugin' ) && ! class_exists( 'WSAL_Ext_Plugin' ) && ! class_exists( 'WSAL_User_Management_Plugin' ) ) {
-			if ( $is_current_view && ! $this->IsNoticeDismissed( 'premium-wsal-' . $this->_version ) ) { ?>
+			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $this->IsNoticeDismissed( 'premium-wsal-' . $this->_version ) ) { ?>
 				<div class="updated" data-notice-name="premium-wsal-<?php echo esc_attr( $this->_version ) ?>">
 					<?php $url = 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/ ?utm_source=auditviewer&utm_medium=page&utm_campaign=plugin'; ?>
 					<p><a href="<?php echo esc_attr( $url ); ?>" target="_blank"><?php esc_html_e( 'Upgrade to Premium', 'wp-security-audit-log' ); ?></a>

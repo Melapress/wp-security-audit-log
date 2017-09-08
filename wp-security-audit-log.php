@@ -127,6 +127,9 @@ class WpSecurityAuditLog {
 	 */
 	public function __construct() {
 
+		// Define important plugin constants.
+		$this->define_constants();
+
 		require_once( 'classes/Helpers/DataHelper.php' );
 
 		// Profiler has to be loaded manually.
@@ -172,9 +175,6 @@ class WpSecurityAuditLog {
 
 		// Handle admin Disable Alerts.
 		add_action( 'wp_ajax_AjaxDisableByCode', array( $this, 'AjaxDisableByCode' ) );
-
-		// Define important plugin constants.
-		$this->define_constants();
 	}
 
 	/**
