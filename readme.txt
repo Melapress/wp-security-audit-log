@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.8.1
-Stable tag: 2.6.6
+Stable tag: 2.6.7
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -188,7 +188,18 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 
 == Changelog ==
 
-= 2.6.6 (2017-08-30 =
+= 2.6.7 (2017-09-09) =
+
+* **Improvements**
+	* Added a new property in WSAL main class to store the current plugin version.
+	* Added a new function in WSAL main class to define constants (to be used throughout the plugin)
+	* Improved the code formatting in AuditLog.php
+
+* **New Audit Trail Alerts**
+	* Alert 4015 for when a user creates a custom field in a user profile.
+	* Alert 4016 for when a user updates a custom field value in a user profile.
+
+= 2.6.6 (2017-08-30) =
 
 * **New Audit Trail Alerts**
 	* Alert 4015 for when a user creates a custom field in a user profile.
