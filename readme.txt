@@ -195,10 +195,6 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 	* Added a new function in WSAL main class to define constants (to be used throughout the plugin)
 	* Improved the code formatting in AuditLog.php
 
-* **New Audit Trail Alerts**
-	* Alert 4015 for when a user creates a custom field in a user profile.
-	* Alert 4016 for when a user updates a custom field value in a user profile.
-
 = 2.6.6 (2017-08-30) =
 
 * **New Audit Trail Alerts**
