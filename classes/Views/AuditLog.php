@@ -68,7 +68,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		if ( ! class_exists( 'WSAL_NP_Plugin' ) && ! class_exists( 'WSAL_SearchExtension' ) && ! class_exists( 'WSAL_Rep_Plugin' ) && ! class_exists( 'WSAL_Ext_Plugin' ) && ! class_exists( 'WSAL_User_Management_Plugin' ) ) {
 			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $this->IsNoticeDismissed( 'premium-wsal-' . $this->_version ) ) { ?>
 				<div class="updated" data-notice-name="premium-wsal-<?php echo esc_attr( $this->_version ) ?>">
-					<?php $url = 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/ ?utm_source=auditviewer&utm_medium=page&utm_campaign=plugin'; ?>
+					<?php $url = 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=auditviewer&utm_medium=page&utm_campaign=plugin'; ?>
 					<p><a href="<?php echo esc_attr( $url ); ?>" target="_blank"><?php esc_html_e( 'Upgrade to Premium', 'wp-security-audit-log' ); ?></a>
 						<?php esc_html_e( 'and add Email Alerts, Reports, Search and Users Login and Session Management.', 'wp-security-audit-log' ); ?>
 						<a href="<?php echo esc_attr( $url ); ?>" target="_blank"><?php esc_html_e( 'Upgrade Now!', 'wp-security-audit-log' ); ?></a>
