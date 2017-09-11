@@ -893,7 +893,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor
      * @param stdClass $post the post.
      */
     private function CheckOtherSensors( $post ) {
-        if ( empty( $post ) ) {
+        if ( empty( $post ) || ! isset( $post->post_type ) ) {
             return false;
         }
         switch ( $post->post_type ) {
