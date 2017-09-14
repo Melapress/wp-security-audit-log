@@ -302,7 +302,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	public function EventPluginPostCreate( $post_id, $post ) {
 		$WPActions = array( 'editpost', 'heartbeat', 'inline-save', 'trash', 'untrash' );
 		if ( isset( $_REQUEST['action'] ) && ! in_array( $_REQUEST['action'], $WPActions ) ) {
-			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset' ) )
+			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
 				|| ! empty( $post->post_title ) ) {
 				// If the plugin modify the post.
 				if ( false !== strpos( $_REQUEST['action'], 'edit' ) ) {
@@ -335,7 +335,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	public function EventPluginPostDelete( $post_id ) {
 		if ( empty( $_REQUEST['action'] ) && isset( $_REQUEST['page'] ) ) {
 			$post = get_post( $post_id );
-			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset' ) )
+			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
 				|| ! empty( $post->post_title ) ) {
 				$event = $this->GetEventTypeForPostType( $post, 5025, 5026, 5027 );
 				$this->plugin->alerts->Trigger($event, array(
