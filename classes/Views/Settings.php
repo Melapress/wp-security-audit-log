@@ -16,16 +16,16 @@
  * @since 1.0.0
  */
 class WSAL_Views_Settings extends WSAL_AbstractView {
+
 	public $adapterMsg = '';
 
-	public function __construct(WpSecurityAuditLog $plugin)
-	{
-		parent::__construct($plugin);
-
-		add_action('wp_ajax_AjaxCheckSecurityToken', array($this, 'AjaxCheckSecurityToken'));
-		add_action('wp_ajax_AjaxRunCleanup', array($this, 'AjaxRunCleanup'));
-		add_action('wp_ajax_AjaxGetAllUsers', array($this, 'AjaxGetAllUsers'));
-		add_action('wp_ajax_AjaxGetAllRoles', array($this, 'AjaxGetAllRoles'));
+	public function __construct( WpSecurityAuditLog $plugin ) {
+		parent::__construct( $plugin );
+		add_action( 'wp_ajax_AjaxCheckSecurityToken', array( $this, 'AjaxCheckSecurityToken' ) );
+		add_action( 'wp_ajax_AjaxRunCleanup', array( $this, 'AjaxRunCleanup' ) );
+		add_action( 'wp_ajax_AjaxGetAllUsers', array( $this, 'AjaxGetAllUsers' ) );
+		add_action( 'wp_ajax_AjaxGetAllRoles', array( $this, 'AjaxGetAllRoles' ) );
+		add_action( 'wp_ajax_AjaxGetAllCPT', array( $this, 'AjaxGetAllCPT' ) );
 	}
 
 	public function HasPluginShortcutLink()
@@ -53,19 +53,28 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		return 3;
 	}
 
-	protected function GetTokenType($token)
-	{
+	protected function GetTokenType( $token ) {
+
+		// Get users.
 		$users = array();
-		foreach (get_users('blog_id=0&fields[]=user_login') as $obj) {
+		foreach ( get_users( 'blog_id=0&fields[]=user_login' ) as $obj ) {
 			$users[] = $obj->user_login;
 		}
-		$roles = array_keys(get_editable_roles());
 
-		if (in_array($token, $users)) {
+		// Get user roles.
+		$roles = array_keys( get_editable_roles() );
+
+		// Get custom post types.
+		$post_types = get_post_types( array(), 'names', 'and' );
+
+		if ( in_array( $token, $users ) ) {
 			return 'user';
 		}
-		if (in_array($token, $roles)) {
+		if ( in_array( $token, $roles ) ) {
 			return 'role';
+		}
+		if ( in_array( $token, $post_types ) ) {
+			return 'cpts';
 		}
 		return 'other';
 	}
@@ -93,6 +102,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetExcludedMonitoringRoles( isset( $_REQUEST['ExRoles'] ) ? $_REQUEST['ExRoles'] : array() );
 		$this->_plugin->settings->SetExcludedMonitoringCustom( isset( $_REQUEST['Customs'] ) ? $_REQUEST['Customs'] : array() );
 		$this->_plugin->settings->SetExcludedMonitoringIP( isset( $_REQUEST['IpAddrs'] ) ? $_REQUEST['IpAddrs'] : array() );
+		$this->_plugin->settings->set_excluded_post_types( isset( $_REQUEST['ExCPTss'] ) ? $_REQUEST['ExCPTss'] : array() );
 
 		$this->_plugin->settings->SetRestrictAdmins( isset( $_REQUEST['RestrictAdmins'] ) );
 		$this->_plugin->settings->SetRefreshAlertsEnabled( $_REQUEST['EnableAuditViewRefresh'] );
@@ -116,15 +126,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 	}
 
-	public function AjaxCheckSecurityToken()
-	{
-		if (!$this->_plugin->settings->CurrentUserCan('view')) {
-			die('Access Denied.');
+	public function AjaxCheckSecurityToken() {
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			die( 'Access Denied.' );
 		}
-		if (!isset($_REQUEST['token'])) {
-			die('Token parameter expected.');
+		if ( ! isset( $_REQUEST['token'] ) ) {
+			die( 'Token parameter expected.' );
 		}
-		die($this->GetTokenType($_REQUEST['token']));
+		die( $this->GetTokenType( $_REQUEST['token'] ) );
 	}
 
 	public function AjaxRunCleanup()
@@ -542,8 +551,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 										</label>
 										<br/>
 									<?php } ?>
-									<span class="description"><?php _e('When you disable any of the above such details won’t be shown in the Audit Log
-	viewer though the plugin will still record such information in the database.', 'wp-security-audit-log'); ?></span>
+									<span class="description"><?php _e( 'When you disable any of the above such details won’t be shown in the Audit Log viewer though the plugin will still record such information in the database.', 'wp-security-audit-log' ); ?></span>
 								</fieldset>
 							</td>
 						</tr>
@@ -570,7 +578,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<table class="form-table wsal-tab widefat" id="tab-exclude">
 					<tbody>
 						<tr>
-							<th><h2>Users &amp; Roles</h2></th>
+							<th><h2><?php esc_html_e( 'Users & Roles', 'wp-security-audit-log' ); ?></h2></th>
 						</tr>
 						<tr>
 							<td colspan="2">Any of the users and roles listed in the below options will be excluded from monitoring. This means that any change they do will not be logged.</td>
@@ -616,7 +624,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><h2>Custom Fields</h2></th>
+							<th><h2><?php esc_html_e( 'Custom Fields', 'wp-security-audit-log' ); ?></h2></th>
 						</tr>
 						<tr>
 							<td colspan="2">All of the custom fields listed below will be excluded from monitoring. This means that if they are changed or updated the plugin will not log such activity.<br>
@@ -643,7 +651,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><h2>IP Addresses</h2></th>
+							<th><h2><?php esc_html_e( 'IP Addresses', 'wp-security-audit-log' ); ?></h2></th>
 						</tr>
 						<tr>
 							<td colspan="2">Any of the IP addresses listed below will be excluded from monitoring. This means that all activity from such IP address will not be recorded.</td>
@@ -668,6 +676,32 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								</fieldset>
 							</td>
 						</tr>
+						<tr>
+							<th><h2><?php esc_html_e( 'Custom Post Types', 'wp-security-audit-log' ); ?></h2></th>
+						</tr>
+						<tr>
+							<td colspan="2"><?php esc_html_e( 'The below list of Custom Post Types are excluded from monitoring. This means that all activity related to these Custom Post Types will not be recorded.', 'wp-security-audit-log' ); ?></td>
+						</tr>
+						<tr>
+							<th><label for="ExCPTsQueryBox"><?php esc_html_e( 'Exclude Custom Post Type from monitoring', 'wp-security-audit-log' ); ?></label></th>
+							<td>
+								<fieldset>
+									<input type="text" id="ExCPTsQueryBox" style="float: left; display: block; width: 250px;">
+									<input type="button" id="ExCPTsQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
+									<br style="clear: both;"/>
+									<div id="ExCPTsList">
+										<?php foreach ( $this->_plugin->settings->get_excluded_post_types() as $item ) : ?>
+											<span class="sectoken-<?php echo esc_attr( $this->GetTokenType( $item ) ); ?>">
+												<input type="hidden" name="ExCPTss[]" value="<?php echo esc_attr( $item ); ?>"/>
+												<?php echo esc_html( $item ); ?>
+												<a href="javascript:;" title="Remove">&times;</a>
+											</span>
+										<?php endforeach; ?>
+									</div>
+								</fieldset>
+							</td>
+						</tr>
+						<!-- Excluded Custom Post Types -->
 					</tbody>
 				</table>
 			</div>
@@ -768,33 +802,55 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</script><?php
 	}
 
-	public function AjaxGetAllUsers()
-	{
-		if (!$this->_plugin->settings->CurrentUserCan('view')) {
-			die('Access Denied.');
+	public function AjaxGetAllUsers() {
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			die( 'Access Denied.' );
 		}
 		$users = array();
-		foreach (get_users() as $user) {
-			if (strpos($user->user_login, $_GET['term']) !== false) {
-				array_push($users, $user->user_login);
+		foreach ( get_users() as $user ) {
+			if ( strpos( $user->user_login, $_GET['term'] ) !== false ) {
+				array_push( $users, $user->user_login );
 			}
 		}
-		echo json_encode($users);
+		echo json_encode( $users );
 		exit;
 	}
 
-	public function AjaxGetAllRoles()
-	{
-		if (!$this->_plugin->settings->CurrentUserCan('view')) {
-			die('Access Denied.');
+	public function AjaxGetAllRoles() {
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			die( 'Access Denied.' );
 		}
 		$roles = array();
-		foreach (get_editable_roles() as $role_name => $role_info) {
-			if (strpos($role_name, $_GET['term']) !== false) {
-				array_push($roles, $role_name);
+		foreach ( get_editable_roles() as $role_name => $role_info ) {
+			if ( strpos( $role_name, $_GET['term'] ) !== false ) {
+				array_push( $roles, $role_name );
 			}
 		}
-		echo json_encode($roles);
+		echo json_encode( $roles );
+		exit;
+	}
+
+	/**
+	 * Method: Get CPTs ajax handle.
+	 *
+	 * @since 2.6.7
+	 */
+	public function AjaxGetAllCPT() {
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			die( 'Access Denied.' );
+		}
+
+		$custom_post_types = array();
+		$output 	= 'names'; // names or objects, note names is the default
+	    $operator 	= 'and'; // Conditions: and, or.
+	    $post_types = get_post_types( array(), $output, $operator );
+	    $post_types = array_diff( $post_types, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) );
+	    foreach ( $post_types as $post_type ) {
+	    	if ( strpos( $post_type, $_GET['term'] ) !== false ) {
+				array_push( $custom_post_types, $post_type );
+			}
+	    }
+	    echo json_encode( $custom_post_types );
 		exit;
 	}
 }
