@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.8.1
-Stable tag: 2.6.7
+Stable tag: 2.6.8
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -187,6 +187,14 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 11. Mirror the WordPress audit trail to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
 
 == Changelog ==
+
+= 2.6.8 (2017-09-19) =
+
+* **Improvement**
+	* Improved the sensor for custom post types so posts with NULL value or other temp custom posts are not reported. This was reported in several support tickets; [here](https://wordpress.org/support/topic/a-plugin-automatically-created-the-following-custom-post-null/), [here](https://wordpress.org/support/topic/would-you-tell-me-about-meanings-of-2-message/) and [here](https://wordpress.org/support/topic/pinpointing-the-plugin/).
+
+* **Bug Fix**
+	* Add a new check to ensure the object is of WP_Post class [Support Ticket](https://wordpress.org/support/topic/undefined-property-wp_post_typepost_type/)
 
 = 2.6.7 (2017-09-09) =
 
