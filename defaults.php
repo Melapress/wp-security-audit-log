@@ -255,7 +255,11 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(6015, E_CRITICAL, __('Enabled/Disabled the option for an author to have previously approved comments for the comments to appear', 'wp-security-audit-log'), __('%Status% the option for an author to have previously approved comments for the comments to appear.', 'wp-security-audit-log')),
                 array(6016, E_CRITICAL, __('Changed the number of links that a comment must have to be held in the queue', 'wp-security-audit-log'), __('Changed the number of links from %OldValue% to %NewValue% that a comment must have to be held in the queue.', 'wp-security-audit-log')),
                 array(6017, E_CRITICAL, __('Modified the list of keywords for comments moderation', 'wp-security-audit-log'), __('Modified the list of keywords for comments moderation.', 'wp-security-audit-log')),
-                array(6018, E_CRITICAL, __('Modified the list of keywords for comments blacklisting', 'wp-security-audit-log'), __('Modified the list of keywords for comments blacklisting.', 'wp-security-audit-log'))
+                array(6018, E_CRITICAL, __('Modified the list of keywords for comments blacklisting', 'wp-security-audit-log'), __('Modified the list of keywords for comments blacklisting.', 'wp-security-audit-log')),
+                array( 6019, E_CRITICAL, __( 'Created a New cron job', 'wp-security-audit-log' ), __( 'A new cron job called %name% was created and is scheduled to run %schedule%.', 'wp-security-audit-log' ) ),
+                array( 6020, E_CRITICAL, __( 'Changed status of the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% was %status%.', 'wp-security-audit-log' ) ),
+                array( 6021, E_CRITICAL, __( 'Deleted the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% was deleted.', 'wp-security-audit-log' ) ),
+                array( 6022, E_NOTICE, __( 'Started the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% has just started.', 'wp-security-audit-log' ) ),
             )
         ),
         __('Users Profiles & Activity', 'wp-security-audit-log') => array(
