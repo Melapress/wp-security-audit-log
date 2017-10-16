@@ -216,8 +216,19 @@ class WSAL_AuditLogListView extends WP_List_Table
                     . ($item->is_read ? 'old' : 'new')
                     . '" title="' . __('Click to toggle.', 'wp-security-audit-log') . '"></span>';
             case 'type':
-                $code = $this->_plugin->alerts->GetAlert($item->alert_id);
-                return '<span class="log-disable" data-tooltip="'. __('Disable this type of alerts.', 'wp-security-audit-log').'<br>'.$item->alert_id.' - '.esc_html($code->desc).'" data-alert-id="'.$item->alert_id.'">'
+                $code = $this->_plugin->alerts->GetAlert( $item->alert_id );
+                $extra_msg = '';
+                $data_link = '';
+                $modification_alerts = array( 1002, 1003, 6007, 6023 );
+                if ( in_array( $item->alert_id, $modification_alerts, true ) ) {
+                    $extra_msg = '. Modify this alert.';
+                    if ( 1002 === $item->alert_id || 1003 === $item->alert_id ) {
+                        $data_link = add_query_arg( 'page', 'wsal-togglealerts#tab-users-profiles---activity', admin_url( 'admin.php' ) );
+                    } elseif ( 6007 === $item->alert_id || 6023 === $item->alert_id ) {
+                        $data_link = add_query_arg( 'page', 'wsal-togglealerts#tab-system-activity', admin_url( 'admin.php' ) );
+                    }
+                }
+                return '<span class="log-disable" data-tooltip="' . __( 'Disable this type of alerts.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . ' - ' . esc_html( $code->desc ) . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
                     . str_pad($item->alert_id, 4, '0', STR_PAD_LEFT) . ' </span>';
             case 'code':
                 $code = $this->_plugin->alerts->GetAlert($item->alert_id);
