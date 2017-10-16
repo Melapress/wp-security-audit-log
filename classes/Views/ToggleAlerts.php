@@ -215,14 +215,21 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                             <td></td>
                                             <td><input name="log_visitor_failed_login" type="checkbox" class="check_visitor_log" value="1" <?php checked( $log_visitor_failed_login, 'on' ); ?>></td>
                                             <td colspan="2">
-                                            	<p><?php esc_html_e( 'Keep a log of failed login attempts.', 'wp-security-audit-log' ); ?></p>
+                                            	<p><?php esc_html_e( 'Keep a log of the usernames used in the failed logins in a log file', 'wp-security-audit-log' ); ?></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td colspan="2">
+                                                <?php esc_html_e( 'The log file is stored in /wp-content/uploads/wp-security-audit-log/failed-logins/', 'wp-security-audit-log' ); ?>
                                             </td>
                                         </tr>
                                     	<tr>
                                             <td></td>
                                             <td><input name="log_visitor_failed_login_limit" type="number" class="check_visitor_log" value="<?php echo esc_attr( $log_visitor_failed_login_limit ); ?>"></td>
                                             <td colspan="2">
-                                            	<p><?php esc_html_e( 'Number of login attempts to log. Enter 0 to log all failed login attempts.', 'wp-security-audit-log' ); ?></p>
+                                            	<p><?php esc_html_e( 'Number of login attempts to log. Enter 0 to log all failed login attempts. (By default the plugin only logs up to 10 failed login because the process can be very resource intensive in case of a brute force attack)', 'wp-security-audit-log' ); ?></p>
                                             </td>
                                         </tr>
                                     	<?php

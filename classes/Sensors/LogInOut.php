@@ -36,6 +36,13 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         add_action('wp_login_failed', array($this, 'EventLoginFailure'));
         add_action('clear_auth_cookie', array($this, 'GetCurrentUser'), 10);
         add_filter('wp_login_blocked', array($this, 'EventLoginBlocked'), 10, 1);
+
+        // Directory for logged in users log files.
+        $user_upload_dir    = wp_upload_dir();
+        $user_upload_path   = trailingslashit( $user_upload_dir['basedir'] . '/wp-security-audit-log/failed-logins/' );
+        if ( ! $this->CheckDirectory( $user_upload_path ) ) {
+            wp_mkdir_p( $user_upload_path );
+        }
     }
 
     /**
@@ -79,11 +86,20 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
 
     /**
      * Login failure limit count.
-     * @return integer limit
+     *
+     * @return int
      */
-    protected function GetLoginFailureLogLimit()
-    {
-        return 10;
+    protected function GetLoginFailureLogLimit() {
+        return $this->plugin->settings->get_failed_login_limit();
+    }
+
+    /**
+     * Non-existing Login failure limit count.
+     *
+     * @return int
+     */
+    protected function GetVisitorLoginFailureLogLimit() {
+        return $this->plugin->settings->get_visitor_failed_login_limit();
     }
 
     /**
@@ -107,10 +123,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
         if ($user) {
             $dataKnown = $get_fn(self::TRANSIENT_FAILEDLOGINS);
-            return ($dataKnown !== false) && isset($dataKnown[$site_id.":".$user->ID.":".$ip]) && ($dataKnown[$site_id.":".$user->ID.":".$ip] > $this->GetLoginFailureLogLimit());
+            return ($dataKnown !== false) && isset($dataKnown[$site_id.":".$user->ID.":".$ip]) && ($dataKnown[$site_id.":".$user->ID.":".$ip] >= $this->GetLoginFailureLogLimit());
         } else {
             $dataUnknown = $get_fn(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
-            return ($dataUnknown !== false) && isset($dataUnknown[$site_id.":".$ip]) && ($dataUnknown[$site_id.":".$ip] > $this->GetLoginFailureLogLimit());
+            return ($dataUnknown !== false) && isset($dataUnknown[$site_id.":".$ip]) && ($dataUnknown[$site_id.":".$ip] >= $this->GetVisitorLoginFailureLogLimit());
         }
     }
 
@@ -201,25 +217,17 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
                 $this->IncrementLoginFailure($ip, $site_id, $user);
                 $new = $occ->GetMetaValue('Attempts', 0) + 1;
 
-                if ( $new <= $this->get_failed_login_limit() ) {
-                    $link_file = $this->WriteLog( $new, $username );
-                }
-
                 if ($new > $this->GetLoginFailureLogLimit()) {
                     $new = $this->GetLoginFailureLogLimit() . '+';
                 }
 
                 $occ->UpdateMetaValue('Attempts', $new);
                 $occ->UpdateMetaValue('Username', $username);
-                if ( ! empty( $link_file ) ) {
-                    $occ->UpdateMetaValue( 'LinkFile', $link_file );
-                }
 
                 //$occ->SetMetaValue('CurrentUserRoles', $userRoles);
                 $occ->created_on = null;
                 $occ->Save();
             } else {
-                $link_file = $this->WriteLog( 1, $username );
                 // create a new record exists user
                 $this->plugin->alerts->Trigger($newAlertCode, array(
                     'Attempts' => 1,
@@ -244,12 +252,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
                 $this->IncrementLoginFailure($ip, $site_id, false);
                 $new = $occUnknown->GetMetaValue('Attempts', 0) + 1;
 
-                if ( $new <= $this->get_visitor_failed_login_limit() && 'on' === $this->plugin->GetGlobalOption( 'log-visitor-failed-login' ) ) {
+                if ( 'on' === $this->plugin->GetGlobalOption( 'log-visitor-failed-login' ) ) {
                     $link_file = $this->WriteLog( $new, $username );
                 }
 
-                if ($new > $this->GetLoginFailureLogLimit()) {
-                    $new = $this->GetLoginFailureLogLimit() . '+';
+                if ($new > $this->GetVisitorLoginFailureLogLimit()) {
+                    $new = $this->GetVisitorLoginFailureLogLimit() . '+';
                 }
 
                 $occUnknown->UpdateMetaValue('Attempts', $new);
@@ -259,7 +267,9 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
                 $occUnknown->created_on = null;
                 $occUnknown->Save();
             } else {
-                $link_file = $this->WriteLog( 1, $username );
+                if ( 'on' === $this->plugin->GetGlobalOption( 'log-visitor-failed-login' ) ) {
+                    $link_file = $this->WriteLog( 1, $username );
+                }
                 // create a new record not exists user
                 $this->plugin->alerts->Trigger($newAlertCode, array('Attempts' => 1));
             }
@@ -314,8 +324,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         $data = 'Attempts: ' . $attempts . ' — Username: ' . $username;
 
         $upload_dir = wp_upload_dir();
-        $uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/';
-        $uploads_url = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/';
+        $uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/failed-logins/';
+        $uploads_url = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/failed-logins/';
 
         // Check directory.
         if ( $this->CheckDirectory( $uploads_dir_path ) ) {
@@ -348,27 +358,5 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
         }
 
         return $name_file;
-    }
-
-    /**
-     * Method: Get failed login attempts limit
-     * for existing users.
-     *
-     * @return int
-     * @since 2.6.9
-     */
-    public function get_failed_login_limit() {
-        return $this->plugin->settings->get_failed_login_limit();
-    }
-
-    /**
-     * Method: Get failed login attempts limit
-     * for non-existing users.
-     *
-     * @return int
-     * @since 2.6.9
-     */
-    public function get_visitor_failed_login_limit() {
-        return $this->plugin->settings->get_visitor_failed_login_limit();
     }
 }
