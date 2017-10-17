@@ -43,11 +43,9 @@ class WSAL_AuditLogListView extends WP_List_Table
     public function extra_tablenav($which)
     {
         // items-per-page widget
-        $o = __('Other', 'wp-security-audit-log');
         $p = $this->_plugin->settings->GetViewPerPage();
-        $items = array($o, 5, 10, 15, 30, 50);
+        $items = array(5, 10, 15, 30, 50);
         if (!in_array($p, $items)) $items[] = $p;
-        if ($p == $o || $p == 0) $p = $o[1]; // a sane default if things goes bust
 
         ?><div class="wsal-ipp wsal-ipp-<?php echo $which; ?>">
             <?php _e('Show ', 'wp-security-audit-log'); ?>

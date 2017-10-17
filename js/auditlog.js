@@ -101,10 +101,6 @@ function WsalIppsFocus(value){
 }
 
 function WsalIppsChange(value){
-	if(value === ''){
-		value = window.prompt(WsalData.tr8n.numofitems, WsalIppsPrev);
-		if(value === null || value === WsalIppsPrev)return this.value = WsalIppsPrev; // operation canceled
-	}
 	jQuery('select.wsal-ipps').attr('disabled', true);
 	jQuery.post(WsalData.ajaxurl, {
 		action: 'AjaxSetIpp',
