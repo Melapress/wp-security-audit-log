@@ -612,7 +612,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
                 // Request URL.
                 $url = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
                 // Create/Append to the log file.
-                $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
+                $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url . ',';
                 if ( ! is_user_logged_in() ) {
                     $username = '';
                 } else {
@@ -661,7 +661,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
                 // Request URL.
                 $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
                 // Create/Append to the log file.
-                $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
+                $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url . ',';
                 $username = '';
 
                 if ( '127.0.0.1' == $ip || '::1' == $ip ) {
