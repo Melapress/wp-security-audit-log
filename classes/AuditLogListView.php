@@ -139,7 +139,7 @@ class WSAL_AuditLogListView extends WP_List_Table
         $cols = array(
             //'cb'   => '<input type="checkbox" />',
             //'read' => __('Read', 'wp-security-audit-log'),
-            'type' => __( 'Code', 'wp-security-audit-log' ),
+            'type' => __( 'Alert ID', 'wp-security-audit-log' ),
             'code' => __( 'Type', 'wp-security-audit-log' ),
             'crtd' => __( 'Date', 'wp-security-audit-log' ),
             'user' => $name_column,
@@ -156,7 +156,7 @@ class WSAL_AuditLogListView extends WP_List_Table
             foreach ( $sel_columns as $key => $value ) {
                 switch ( $key ) {
                     case 'alert_code':
-                        $cols['type'] = __( 'Code', 'wp-security-audit-log' );
+                        $cols['type'] = __( 'Alert ID', 'wp-security-audit-log' );
                         break;
                     case 'type':
                         $cols['code'] = __( 'Type', 'wp-security-audit-log' );

@@ -20,9 +20,11 @@
 
 .column-read,
 .column-more,
-.column-type,
 .column-data {
 	width: 70px;
+}
+.column-type {
+	width: 85px;
 }
 .column-code {
 	width: 50px;
