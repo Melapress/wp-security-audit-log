@@ -89,7 +89,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2111, E_NOTICE, __('User disabled Comments/Trackbacks and Pingbacks on a published post', 'wp-security-audit-log'), __('Disabled %Type% on the published post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
                 array(2112, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a published post', 'wp-security-audit-log'), __('Enabled %Type% on the published post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
                 array(2113, E_NOTICE, __('User disabled Comments/Trackbacks and Pingbacks on a draft post', 'wp-security-audit-log'), __('Disabled %Type% on the draft post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
-                array(2114, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a draft post', 'wp-security-audit-log'), __('Enabled %Type% on the draft post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log'))
+                array(2114, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a draft post', 'wp-security-audit-log'), __('Enabled %Type% on the draft post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
+                array( 2121, E_NOTICE, __( 'User created new tag', 'wp-security-audit-log' ), __( 'Created a new tag called %TagName% .Tag slug is %Slug%. %TagLink%.', 'wp-security-audit-log' ) ),
+                array( 2122, E_WARNING, __( 'User deleted tag', 'wp-security-audit-log' ), __( 'Deleted the tag %TagName%. Tag slug was %Slug%.', 'wp-security-audit-log' ) ),
             ),
             __('Comments', 'wp-security-audit-log') => array(
                 array(2090, E_NOTICE, __('User approved a comment', 'wp-security-audit-log'), __('Approved the comment posted in response to the post %PostTitle% by %Author% on %CommentLink%.', 'wp-security-audit-log')),

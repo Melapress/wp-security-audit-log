@@ -401,6 +401,9 @@ class WSAL_AuditLogListView extends WP_List_Table
             case $name == '%CategoryLink%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the category</a>';
 
+            case $name == '%TagLink%':
+                return ' <a target="_blank" href="'.esc_url($value).'">View the tag</a>';
+
             case $name == '%EditorLinkForum%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the forum</a>';
 
