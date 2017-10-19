@@ -121,7 +121,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_action('publish_future_post', array($this, 'EventPublishFuture'), 10, 1);
 
 		add_action('create_category', array($this, 'EventCategoryCreation'), 10, 1);
-		add_action( 'create_term', array( $this, 'EventTagCreation' ), 10, 1 );
+		add_action( 'create_post_tag', array( $this, 'EventTagCreation' ), 10, 1 );
 
 		add_action( 'wp_head', array( $this, 'ViewingPost' ), 10 );
 		add_filter('post_edit_form_tag', array($this, 'EditingPost'), 10, 1);
@@ -805,7 +805,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if (isset($_POST['taxonomy'])) {
 			if ($action == 'delete' && $_POST['taxonomy'] == 'category' && !empty($_POST['delete_tags'])) {
 				// bulk delete
-				$categoryIds[] = $_POST['delete_tags'];
+				foreach ( $_POST['delete_tags'] as $delete_tag ) {
+					$categoryIds[] = $delete_tag;
+				}
 			} elseif ($action == 'delete-tag' && $_POST['taxonomy'] == 'category' && !empty($_POST['tag_ID'])) {
 				// single delete
 				$categoryIds[] = $_POST['tag_ID'];
@@ -839,7 +841,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		// Check for action.
 		$action = ! empty( $post_array['action'] ) ? $post_array['action']
-			: ( ! empty( $post_array['action2'] ) ? $post_array['action2'] : '');
+			: ( ! empty( $post_array['action2'] ) ? $post_array['action2'] : '' );
 		if ( ! $action ) {
 			return;
 		}
