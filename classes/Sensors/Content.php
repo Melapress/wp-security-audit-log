@@ -125,6 +125,64 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		add_action( 'wp_head', array( $this, 'ViewingPost' ), 10 );
 		add_filter('post_edit_form_tag', array($this, 'EditingPost'), 10, 1);
+
+		add_filter( 'wp_update_term_data', array( $this, 'event_terms_rename' ), 10, 4 );
+	}
+
+	/**
+	 * Method: Triggered when terms are renamed.
+	 *
+	 * @param array  $data     Term data to be updated.
+	 * @param int    $term_id  Term ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 * @param array  $args     Arguments passed to wp_update_term().
+	 * @since 2.6.9
+	 */
+	public function event_terms_rename( $data, $term_id, $taxonomy, $args ) {
+
+		// Check if the taxonomy is term.
+		if ( 'post_tag' !== $taxonomy ) {
+			return $data;
+		}
+
+		// Get data.
+		$new_name = ( isset( $data['name'] ) ) ? $data['name'] : false;
+		$new_slug = ( isset( $data['slug'] ) ) ? $data['slug'] : false;
+		$new_desc = ( isset( $args['description'] ) ) ? $args['description'] : false;
+
+		// Get old data.
+		$term = get_term( $term_id, $taxonomy );
+		$old_name = $term->name;
+		$old_slug = $term->slug;
+		$old_desc = $term->description;
+
+		// Update if both names are not same.
+		if ( $old_name !== $new_name ) {
+			$this->plugin->alerts->Trigger( 2123, array(
+				'old_name' => $old_name,
+				'new_name' => $new_name,
+			) );
+		}
+
+		// Update if both slugs are not same.
+		if ( $old_slug !== $new_slug ) {
+			$this->plugin->alerts->Trigger( 2124, array(
+				'tag' => $new_name,
+				'old_slug' => $old_slug,
+				'new_slug' => $new_slug,
+			) );
+		}
+
+		// Update if both descriptions are not same.
+		if ( $old_desc !== $new_desc ) {
+			$this->plugin->alerts->Trigger( 2125, array(
+				'tag' => $new_name,
+				'old_desc' => $old_desc,
+				'new_desc' => $new_desc,
+			) );
+		}
+		return $data;
+
 	}
 
 	/**

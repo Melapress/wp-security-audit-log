@@ -92,6 +92,9 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2114, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a draft post', 'wp-security-audit-log'), __('Enabled %Type% on the draft post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
                 array( 2121, E_NOTICE, __( 'User created new tag', 'wp-security-audit-log' ), __( 'Created a new tag called %TagName% .Tag slug is %Slug%. %TagLink%.', 'wp-security-audit-log' ) ),
                 array( 2122, E_WARNING, __( 'User deleted tag', 'wp-security-audit-log' ), __( 'Deleted the tag %TagName%. Tag slug was %Slug%.', 'wp-security-audit-log' ) ),
+                array( 2123, E_WARNING, __( 'User renamed tag', 'wp-security-audit-log' ), __( 'Renamed a tag from %old_name% to %new_name%', 'wp-security-audit-log' ) ),
+                array( 2124, E_WARNING, __( 'User changed tag slug', 'wp-security-audit-log' ), __( 'Changed the slug of tag %tag% from %old_slug% to %new_slug%', 'wp-security-audit-log' ) ),
+                array( 2125, E_WARNING, __( 'User changed tag description', 'wp-security-audit-log' ), __( 'Changed the description of %tag% from %old_desc% to %new_desc%', 'wp-security-audit-log' ) ),
             ),
             __('Comments', 'wp-security-audit-log') => array(
                 array(2090, E_NOTICE, __('User approved a comment', 'wp-security-audit-log'), __('Approved the comment posted in response to the post %PostTitle% by %Author% on %CommentLink%.', 'wp-security-audit-log')),
