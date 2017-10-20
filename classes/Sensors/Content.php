@@ -77,6 +77,13 @@
  * 2088 User changed title of a custom post type
  * 2104 User opened a custom post type in the editor
  * 2105 User viewed a custom post type
+ * 2119 User added blog post tag
+ * 2120 User removed blog post tag
+ * 2121 User created new tag
+ * 2122 User deleted tag
+ * 2123 User renamed tag
+ * 2124 User changed tag slug
+ * 2125 User changed tag description
  */
 class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	/**
@@ -93,6 +100,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @var array old categories
 	 */
 	protected $_OldCats = null;
+
+	/**
+	 * Old tags.
+	 *
+	 * @var array
+	 */
+	protected $_old_tags = null;
 
 	/**
 	 * @var string old path to file
@@ -234,6 +248,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$this->_OldLink = get_permalink($postID);
 			$this->_OldTmpl = $this->GetPostTemplate($this->_OldPost);
 			$this->_OldCats = $this->GetPostCategories($this->_OldPost);
+			$this->_old_tags = $this->get_post_tags( $this->_OldPost );
 			$this->_OldStky = in_array($postID, get_option('sticky_posts'));
 		}
 	}
@@ -272,6 +287,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	protected function GetPostCategories($post)
 	{
 		return wp_get_post_categories($post->ID, array('fields' => 'names'));
+	}
+
+	/**
+	 * Get post tags (array of tag names).
+	 *
+	 * @param stdClass $post - The post.
+	 * @return array list of categories
+	 */
+	protected function get_post_tags( $post ) {
+		return wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
 	}
 
 	/**
@@ -318,7 +343,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					+ $this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus)
 					+ $this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post)
 					+ $this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post)
-				;
+					+ $this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
 
 				if (!$changes) {
 					$changes = $this->CheckDateChange($this->_OldPost, $post);
@@ -554,6 +579,62 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				));
 				return 1;
 			}
+		}
+	}
+
+	/**
+	 * Tags changed.
+	 *
+	 * @param array    $old_tags - Old tags.
+	 * @param array    $new_tags - New tags.
+	 * @param stdClass $post - The post.
+	 */
+	protected function check_tags_change( $old_tags, $new_tags, $post ) {
+		// Check for added tags.
+		$added_tags = array_diff( $new_tags, $old_tags );
+
+		// Check for removed tags.
+		$removed_tags = array_diff( $old_tags, $new_tags );
+
+		// Convert tags arrays to string.
+		$old_tags = implode( ', ', $old_tags );
+		$new_tags = implode( ', ', $new_tags );
+		$added_tags = implode( ', ', $added_tags );
+		$removed_tags = implode( ', ', $removed_tags );
+
+		// Declare event variables.
+		$add_event = '';
+		$remove_event = '';
+		if ( $old_tags !== $new_tags && ! empty( $added_tags ) ) {
+			$add_event = $this->GetEventTypeForPostType( $post, 2119, 0, 0 );
+			if ( $add_event ) {
+				$editor_link = $this->GetEditorLink( $post );
+				$this->plugin->alerts->Trigger( $add_event, array(
+					'PostID' => $post->ID,
+					'status' => $post->post_status,
+					'post_title' => $post->post_title,
+					'tag' => $added_tags ? $added_tags : 'no tags',
+					$editor_link['name'] => $editor_link['value'],
+				) );
+			}
+		}
+
+		if ( $old_tags !== $new_tags && ! empty( $removed_tags ) ) {
+			$remove_event = $this->GetEventTypeForPostType( $post, 2120, 0, 0 );
+			if ( $remove_event ) {
+				$editor_link = $this->GetEditorLink( $post );
+				$this->plugin->alerts->Trigger( $remove_event, array(
+					'PostID' => $post->ID,
+					'status' => $post->post_status,
+					'post_title' => $post->post_title,
+					'tag' => $removed_tags ? $removed_tags : 'no tags',
+					$editor_link['name'] => $editor_link['value'],
+				) );
+			}
+		}
+
+		if ( $add_event || $remove_event ) {
+			return 1;
 		}
 	}
 
