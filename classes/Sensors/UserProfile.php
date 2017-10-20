@@ -74,12 +74,12 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor
         if (is_array($oldRoles)) {
             foreach ($oldRoles as $value) {
                 if (in_array($value, $aBbpRoles)) {
-                    if ($_POST['bbp-forums-role'] != $value) {
+                    if ( isset( $_POST['bbp-forums-role'] ) && $_POST['bbp-forums-role'] != $value ) {
                         $current_user = wp_get_current_user();
                         $this->plugin->alerts->TriggerIf(4013, array(
                             'TargetUsername' => $user->user_login,
                             'OldRole' => ucfirst(substr($value, 4)),
-                            'NewRole' => ucfirst(substr($_POST['bbp-forums-role'], 4)),
+                            'NewRole' => ( isset( $_POST['bbp-forums-role'] ) ) ? ucfirst(substr($_POST['bbp-forums-role'], 4)) : false,
                             'UserChanger' => $current_user->user_login
                         ));
                     }
