@@ -14,6 +14,12 @@
  * 2055 User deleted a custom field from a post
  * 2058 User deleted a custom field from a custom post type
  * 2061 User deleted a custom field from a page
+ * 4015 User updated a custom field value for a user
+ * 4016 User created a custom field value for a user
+ * 4017 User changed first name for a user
+ * 4018 User changed last name for a user
+ * 4019 User changed nickname for a user
+ * 4020 User changed the display name for a user
  *
  * @package Wsal
  * @subpackage Sensors
@@ -49,6 +55,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		add_action( 'update_user_meta', array( $this, 'event_user_meta_updating' ), 10, 3 );
 		add_action( 'updated_user_meta', array( $this, 'event_user_meta_updated' ), 10, 4 );
 		add_action( 'user_register', array( $this, 'reset_null_meta_counter' ), 10 );
+		add_action( 'profile_update', array( $this, 'event_userdata_updated' ), 10, 2 );
 	}
 
 	/**
@@ -434,10 +441,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	/**
 	 * Updated a custom field name/value.
 	 *
-	 * @param int 	 $meta_id - Meta ID.
-	 * @param int 	 $object_id - Object ID.
+	 * @param int    $meta_id - Meta ID.
+	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
-	 * @param mix 	 $meta_value - Meta value.
+	 * @param mix    $meta_value - Meta value.
 	 */
 	public function event_user_meta_updated( $meta_id, $object_id, $meta_key, $meta_value ) {
 
@@ -449,24 +456,90 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return;
 		}
 
+		// User profile name related meta.
+		$username_meta = array( 'first_name', 'last_name', 'nickname' );
+
 		// Get POST array.
 		$post_array = $_POST;
 
 		// If update action is set then trigger the alert.
 		if ( isset( $post_array['action'] ) && 'update' == $post_array['action'] ) {
-			if ( isset( $this->old_meta[ $meta_id ] ) ) {
+			if ( isset( $this->old_meta[ $meta_id ] ) && ! in_array( $meta_key, $username_meta, true ) ) {
 				// Check change in meta value.
 				if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
 					$this->plugin->alerts->Trigger( 4015, array(
-						'TargetUsername'	=> $user->user_login,
+						'TargetUsername' => $user->user_login,
 						'custom_field_name' => $meta_key,
-						'new_value' 		=> $meta_value,
-						'old_value' 		=> $this->old_meta[ $meta_id ]->val,
+						'new_value' => $meta_value,
+						'old_value' => $this->old_meta[ $meta_id ]->val,
 					) );
 				}
 				// Remove old meta update data.
 				unset( $this->old_meta[ $meta_id ] );
+			} elseif ( isset( $this->old_meta[ $meta_id ] ) && in_array( $meta_key, $username_meta, true ) ) {
+				// Detect the alert based on meta key.
+				switch ( $meta_key ) {
+					case 'first_name':
+						if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
+							$this->plugin->alerts->Trigger( 4017, array(
+								'TargetUsername' => $user->user_login,
+								'new_firstname' => $meta_value,
+								'old_firstname' => $this->old_meta[ $meta_id ]->val,
+							) );
+						}
+						break;
+
+					case 'last_name':
+						if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
+							$this->plugin->alerts->Trigger( 4018, array(
+								'TargetUsername' => $user->user_login,
+								'new_lastname' => $meta_value,
+								'old_lastname' => $this->old_meta[ $meta_id ]->val,
+							) );
+						}
+						break;
+
+					case 'nickname':
+						if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
+							$this->plugin->alerts->Trigger( 4019, array(
+								'TargetUsername' => $user->user_login,
+								'new_nickname' => $meta_value,
+								'old_nickname' => $this->old_meta[ $meta_id ]->val,
+							) );
+						}
+						break;
+
+					default:
+						break;
+				}
 			}
 		}
+	}
+
+	/**
+	 * Method: Updated user data.
+	 *
+	 * @param int    $user_id       User ID.
+	 * @param object $old_user_data Object containing user's data prior to update.
+	 * @since 2.6.9
+	 */
+	public function event_userdata_updated( $user_id, $old_user_data ) {
+
+		// Get user display name.
+		$old_display_name = $old_user_data->display_name;
+
+		// Get user's current data.
+		$new_userdata = get_userdata( $user_id );
+		$new_display_name = $new_userdata->display_name;
+
+		// Alert if display name is changed.
+		if ( $old_display_name !== $new_display_name ) {
+			$this->plugin->alerts->Trigger( 4020, array(
+				'TargetUsername' => $new_userdata->user_login,
+				'new_displayname' => $new_display_name,
+				'old_displayname' => $old_display_name,
+			) );
+		}
+
 	}
 }

@@ -294,6 +294,10 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(4014, E_NOTICE, __('User opened the profile page of another user', 'wp-security-audit-log'), __('%UserChanger% opened the profile page of the user %TargetUsername%.', 'wp-security-audit-log')),
                 array( 4015, E_NOTICE, __( 'User updated a custom field value for a user', 'wp-security-audit-log' ), __( 'Changed the value of the custom field %custom_field_name% from %old_value% to %new_value% for the user %TargetUsername%.', 'wp-security-audit-log' ) ),
                 array( 4016, E_NOTICE, __( 'User created a custom field value for a user', 'wp-security-audit-log' ), __( 'Created the value of the custom field %custom_field_name% with %new_value% for the user %TargetUsername%.', 'wp-security-audit-log' ) ),
+                array( 4017, E_NOTICE, __( 'User changed first name for a user', 'wp-security-audit-log' ), __( 'Changed the first name of the user %TargetUsername% from %old_firstname% to %new_firstname%', 'wp-security-audit-log' ) ),
+                array( 4018, E_NOTICE, __( 'User changed last name for a user', 'wp-security-audit-log' ), __( 'Changed the last name of the user %TargetUsername% from %old_lastname% to %new_lastname%', 'wp-security-audit-log' ) ),
+                array( 4019, E_NOTICE, __( 'User changed nickname for a user', 'wp-security-audit-log' ), __( 'Changed the nickname of the user %TargetUsername% from %old_nickname% to %new_nickname%', 'wp-security-audit-log' ) ),
+                array( 4020, E_WARNING, __( 'User changed the display name for a user', 'wp-security-audit-log' ), __( 'Changed the Display name publicly of user %TargetUsername% from %old_displayname% to %new_displayname%', 'wp-security-audit-log' ) ),
             ),
         ),
         __('Third Party Support', 'wp-security-audit-log') => array(
