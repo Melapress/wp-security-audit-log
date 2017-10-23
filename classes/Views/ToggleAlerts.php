@@ -59,9 +59,11 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
             }
             $this->_plugin->SetGlobalOption('log-404', isset($_REQUEST['log_404']) ? 'on' : 'off');
             $this->_plugin->SetGlobalOption('purge-404-log', isset($_REQUEST['purge_log']) ? 'on' : 'off');
+            $this->_plugin->SetGlobalOption( 'log-404-referrer', isset( $_REQUEST['log_404_referrer'] ) ? 'on' : 'off' );
 
             $this->_plugin->SetGlobalOption( 'log-visitor-404', isset( $_REQUEST['log_visitor_404'] ) ? 'on' : 'off' );
             $this->_plugin->SetGlobalOption( 'purge-visitor-404-log', isset( $_REQUEST['purge_visitor_log'] ) ? 'on' : 'off' );
+            $this->_plugin->SetGlobalOption( 'log-visitor-404-referrer', isset( $_REQUEST['log_visitor_404_referrer'] ) ? 'on' : 'off' );
 
             $this->_plugin->settings->Set404LogLimit( $_REQUEST['user_404Limit'] );
             $this->_plugin->settings->SetVisitor404LogLimit( $_REQUEST['visitor_404Limit'] );
@@ -138,11 +140,14 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                         <td><?php echo str_pad($alert->type, 4, '0', STR_PAD_LEFT); ?></td>
                                         <td><?php echo $this->_plugin->constants->GetConstantBy('value', $alert->code)->name; ?></td>
                                         <td><?php echo esc_html($alert->desc); ?></td>
-                                    </tr><?php
+                                    </tr>
+                                    <?php
                                     if ($alert->type == 6007) {
                                         $log_404 = $this->_plugin->GetGlobalOption('log-404');
                                         $purge_log = $this->_plugin->GetGlobalOption('purge-404-log');
-                                        ?><tr>
+                                        $log_404_referrer = $this->_plugin->GetGlobalOption( 'log-404-referrer' );
+                                        ?>
+                                        <tr>
                                             <td></td>
                                             <td><input name="log_404" type="checkbox" class="check_log" value="1" <?php if ($log_404 == 'on') echo 'checked="checked"'; ?>></td>
                                             <td colspan="2"><?php _e('Capture 404 requests to file (the log file are created in the /wp-content/uploads/wp-security-audit-log/404s/ directory)', 'wp-security-audit-log'); ?></td>
@@ -164,11 +169,18 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                                 <?php esc_html_e( 'By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?><br />
                                                 <?php esc_html_e( 'Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?>
                                             </td>
-                                        </tr><?php
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><input name="log_404_referrer" type="checkbox" class="check_log" value="1" <?php checked( $log_404_referrer, 'on' ); ?>></td>
+                                            <td colspan="2"><?php esc_html_e( 'Record the referrer that generated the 404 error.', 'wp-security-audit-log' ); ?></td>
+                                        </tr>
+                                        <?php
                                     }
                                     if ( 6023 == $alert->type ) {
                                         $log_visitor_404 = $this->_plugin->GetGlobalOption( 'log-visitor-404' );
                                         $purge_visitor_log = $this->_plugin->GetGlobalOption( 'purge-visitor-404-log' );
+                                        $log_visitor_404_referrer = $this->_plugin->GetGlobalOption( 'log-visitor-404-referrer' );
                                         ?>
                                         <tr>
                                             <td></td>
@@ -192,6 +204,11 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                                 <?php esc_html_e( 'By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?><br />
                                                 <?php esc_html_e( 'Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?>
                                             </td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><input name="log_visitor_404_referrer" type="checkbox" class="check_log" value="1" <?php checked( $log_visitor_404_referrer, 'on' ); ?>></td>
+                                            <td colspan="2"><?php esc_html_e( 'Record the referrer that generated the 404 error.', 'wp-security-audit-log' ); ?></td>
                                         </tr>
                                         <?php
                                     }
