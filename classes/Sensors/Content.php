@@ -191,8 +191,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( $old_desc !== $new_desc ) {
 			$this->plugin->alerts->Trigger( 2125, array(
 				'tag' => $new_name,
-				'old_desc' => $old_desc,
-				'new_desc' => $new_desc,
 			) );
 		}
 		return $data;
