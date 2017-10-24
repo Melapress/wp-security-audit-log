@@ -160,15 +160,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                         <tr>
                                             <td></td>
                                             <td colspan="1"><input type="number" id="user_404Limit" name="user_404Limit" value="<?php echo $this->_plugin->settings->Get404LogLimit(); ?>" /></td>
-                                            <td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log', 'wp-security-audit-log' ); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td></td>
-                                            <td></td>
-                                            <td colspan="2">
-                                                <?php esc_html_e( 'By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?><br />
-                                                <?php esc_html_e( 'Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?>
-                                            </td>
+                                            <td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log. By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?></td>
                                         </tr>
                                         <tr>
                                             <td></td>
@@ -195,15 +187,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                         <tr>
                                             <td></td>
                                             <td colspan="1"><input type="number" id="visitor_404Limit" name="visitor_404Limit" value="<?php echo esc_attr( $this->_plugin->settings->GetVisitor404LogLimit() ); ?>" /></td>
-                                            <td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log', 'wp-security-audit-log' ); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td></td>
-                                            <td></td>
-                                            <td colspan="2">
-                                                <?php esc_html_e( 'By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?><br />
-                                                <?php esc_html_e( 'Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?>
-                                            </td>
+                                            <td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log. By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests. Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?></td>
                                         </tr>
                                         <tr>
                                             <td></td>
