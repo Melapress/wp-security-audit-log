@@ -121,12 +121,20 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
     protected function IsPastLoginFailureLimit($ip, $site_id, $user)
     {
         $get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
-        if ($user) {
-            $dataKnown = $get_fn(self::TRANSIENT_FAILEDLOGINS);
-            return ($dataKnown !== false) && isset($dataKnown[$site_id.":".$user->ID.":".$ip]) && ($dataKnown[$site_id.":".$user->ID.":".$ip] >= $this->GetLoginFailureLogLimit());
+        if ( $user ) {
+            if ( -1 === (int) $this->GetLoginFailureLogLimit() ) {
+                return false;
+            } else {
+                $dataKnown = $get_fn(self::TRANSIENT_FAILEDLOGINS);
+                return ($dataKnown !== false) && isset($dataKnown[$site_id.":".$user->ID.":".$ip]) && ($dataKnown[$site_id.":".$user->ID.":".$ip] >= $this->GetLoginFailureLogLimit());
+            }
         } else {
-            $dataUnknown = $get_fn(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
-            return ($dataUnknown !== false) && isset($dataUnknown[$site_id.":".$ip]) && ($dataUnknown[$site_id.":".$ip] >= $this->GetVisitorLoginFailureLogLimit());
+            if ( -1 === (int) $this->GetVisitorLoginFailureLogLimit() ) {
+                return false;
+            } else {
+                $dataUnknown = $get_fn(self::TRANSIENT_FAILEDLOGINS_UNKNOWN);
+                return ($dataUnknown !== false) && isset($dataUnknown[$site_id.":".$ip]) && ($dataUnknown[$site_id.":".$ip] >= $this->GetVisitorLoginFailureLogLimit());
+            }
         }
     }
 
@@ -194,7 +202,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
             return;
         }
 
-        $objOcc = new  WSAL_Models_Occurrence();
+        $objOcc = new WSAL_Models_Occurrence();
 
         if ($newAlertCode == 1002) {
             if (!$this->plugin->alerts->CheckEnableUserRoles($username, $userRoles)) {
@@ -217,7 +225,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
                 $this->IncrementLoginFailure($ip, $site_id, $user);
                 $new = $occ->GetMetaValue('Attempts', 0) + 1;
 
-                if ($new > $this->GetLoginFailureLogLimit()) {
+                if ( -1 !== (int) $this->GetLoginFailureLogLimit()
+                    && $new > $this->GetLoginFailureLogLimit() ) {
                     $new = $this->GetLoginFailureLogLimit() . '+';
                 }
 
@@ -256,7 +265,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
                     $link_file = $this->WriteLog( $new, $username );
                 }
 
-                if ($new > $this->GetVisitorLoginFailureLogLimit()) {
+                if ( -1 !== (int) $this->GetVisitorLoginFailureLogLimit()
+                    && $new > $this->GetVisitorLoginFailureLogLimit() ) {
                     $new = $this->GetVisitorLoginFailureLogLimit() . '+';
                 }
 

@@ -145,7 +145,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                     if ($alert->type == 6007) {
                                         $log_404 = $this->_plugin->GetGlobalOption('log-404');
                                         $purge_log = $this->_plugin->GetGlobalOption('purge-404-log');
-                                        $log_404_referrer = $this->_plugin->GetGlobalOption( 'log-404-referrer' );
+                                        $log_404_referrer = $this->_plugin->GetGlobalOption( 'log-404-referrer', 'on' );
                                         ?>
                                         <tr>
                                             <td></td>
@@ -180,7 +180,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                     if ( 6023 == $alert->type ) {
                                         $log_visitor_404 = $this->_plugin->GetGlobalOption( 'log-visitor-404' );
                                         $purge_visitor_log = $this->_plugin->GetGlobalOption( 'purge-visitor-404-log' );
-                                        $log_visitor_404_referrer = $this->_plugin->GetGlobalOption( 'log-visitor-404-referrer' );
+                                        $log_visitor_404_referrer = $this->_plugin->GetGlobalOption( 'log-visitor-404-referrer', 'on' );
                                         ?>
                                         <tr>
                                             <td></td>
@@ -213,7 +213,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                         <?php
                                     }
                                     if ( 1002 === $alert->type ) {
-                                    	$log_failed_login_limit = $this->_plugin->GetGlobalOption( 'log-failed-login-limit', 10 );
+                                    	$log_failed_login_limit = (int) $this->_plugin->GetGlobalOption( 'log-failed-login-limit', 10 );
+                                        $log_failed_login_limit = ( -1 === $log_failed_login_limit ) ? '0' : $log_failed_login_limit;
                                     	?>
                                     	<tr>
                                             <td></td>
@@ -226,7 +227,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                     }
                                     if ( 1003 === $alert->type ) {
                                     	$log_visitor_failed_login = $this->_plugin->GetGlobalOption( 'log-visitor-failed-login', 'on' );
-                                    	$log_visitor_failed_login_limit = $this->_plugin->GetGlobalOption( 'log-visitor-failed-login-limit', 10 );
+                                    	$log_visitor_failed_login_limit = (int) $this->_plugin->GetGlobalOption( 'log-visitor-failed-login-limit', 10 );
+                                        $log_visitor_failed_login_limit = ( -1 === $log_visitor_failed_login_limit ) ? '0' : $log_visitor_failed_login_limit;
                                     	?>
                                     	<tr>
                                             <td></td>

@@ -970,7 +970,11 @@ class WSAL_Settings
 	 * @since  2.6.3
 	 */
 	public function set_failed_login_limit( $value ) {
-		return $this->_plugin->SetGlobalOption( 'log-failed-login-limit', abs( $value ) );
+		if ( ! empty( $value ) ) {
+			return $this->_plugin->SetGlobalOption( 'log-failed-login-limit', abs( $value ) );
+		} else {
+			return $this->_plugin->SetGlobalOption( 'log-failed-login-limit', -1 );
+		}
 	}
 
 	/**
@@ -989,7 +993,11 @@ class WSAL_Settings
 	 * @since  2.6.3
 	 */
 	public function set_visitor_failed_login_limit( $value ) {
-		return $this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', abs( $value ) );
+		if ( ! empty( $value ) ) {
+			return $this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', abs( $value ) );
+		} else {
+			return $this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', -1 );
+		}
 	}
 
 	/**
