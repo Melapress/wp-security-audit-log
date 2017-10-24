@@ -342,8 +342,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					+ $this->CheckStickyChange($this->_OldStky, isset($_REQUEST['sticky']), $post)
 					+ $this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus)
 					+ $this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post)
-					+ $this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post)
-					+ $this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
+					+ $this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post);
+				$this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
 
 				if (!$changes) {
 					$changes = $this->CheckDateChange($this->_OldPost, $post);
