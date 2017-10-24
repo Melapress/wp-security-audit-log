@@ -609,9 +609,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$add_event = $this->GetEventTypeForPostType( $post, 2119, 0, 0 );
 			if ( $add_event ) {
 				$editor_link = $this->GetEditorLink( $post );
+				$post_status = ( 'publish' === $post->post_status ) ? 'published' : $this->post_status;
 				$this->plugin->alerts->Trigger( $add_event, array(
 					'PostID' => $post->ID,
-					'status' => $post->post_status,
+					'status' => $post_status,
 					'post_title' => $post->post_title,
 					'tag' => $added_tags ? $added_tags : 'no tags',
 					$editor_link['name'] => $editor_link['value'],
@@ -623,9 +624,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$remove_event = $this->GetEventTypeForPostType( $post, 2120, 0, 0 );
 			if ( $remove_event ) {
 				$editor_link = $this->GetEditorLink( $post );
+				$post_status = ( 'publish' === $post->post_status ) ? 'published' : $this->post_status;
 				$this->plugin->alerts->Trigger( $remove_event, array(
 					'PostID' => $post->ID,
-					'status' => $post->post_status,
+					'status' => $post_status,
 					'post_title' => $post->post_title,
 					'tag' => $removed_tags ? $removed_tags : 'no tags',
 					$editor_link['name'] => $editor_link['value'],
