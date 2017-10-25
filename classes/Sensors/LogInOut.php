@@ -271,17 +271,28 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor
                 }
 
                 $occUnknown->UpdateMetaValue('Attempts', $new);
-                if ( ! empty( $link_file ) ) {
-                    $occUnknown->UpdateMetaValue( 'LinkFile', $link_file );
+                if ( ! empty( $link_file ) && 'on' === $this->plugin->GetGlobalOption( 'log-visitor-failed-login' ) ) {
+                    $occUnknown->UpdateMetaValue( 'LogFileLink', $link_file );
+                } else {
+                    $link_file = site_url() . '/wp-admin/admin.php?page=wsal-togglealerts#tab-users-profiles---activity';
+                    $occUnknown->UpdateMetaValue( 'LogFileLink', $link_file );
                 }
                 $occUnknown->created_on = null;
                 $occUnknown->Save();
             } else {
+                $link_file = site_url() . '/wp-admin/admin.php?page=wsal-togglealerts#tab-users-profiles---activity';
+                $log_file_text = ' in a log file';
                 if ( 'on' === $this->plugin->GetGlobalOption( 'log-visitor-failed-login' ) ) {
                     $link_file = $this->WriteLog( 1, $username );
+                    $log_file_text = ' with the usernames used during these failed login attempts';
                 }
-                // create a new record not exists user
-                $this->plugin->alerts->Trigger($newAlertCode, array('Attempts' => 1));
+
+                // Create a new record not exists user.
+                $this->plugin->alerts->Trigger( $newAlertCode, array(
+                    'Attempts' => 1,
+                    'LogFileLink' => $link_file,
+                    'LogFileText' => $log_file_text,
+                ) );
             }
         }
     }

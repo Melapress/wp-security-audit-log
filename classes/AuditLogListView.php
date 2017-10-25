@@ -429,6 +429,16 @@ class WSAL_AuditLogListView extends WP_List_Table
                     return 'Click <a href="'.esc_url(admin_url("admin.php?page=wsal-togglealerts#tab-system-activity")).'">here</a> to log such requests to file';
                 }
 
+            case '%LogFileLink%' === $name:
+                if ( ! empty( $value ) && 'on' === $this->_plugin->GetGlobalOption( 'log-visitor-failed-login' ) ) {
+                    return '<a href="' . esc_url( $value ) . '" download>Download the Log file</a>';
+                } elseif ( ! empty( $value ) ) {
+                    return '<a href="' . esc_url( $value ) . '">Keep a record of the usernames</a>';
+                }
+                // Failed login file link.
+            case '%LogFileText%' === $name:
+                return esc_html( $value );
+                // Failed login file text.
             case strncmp($value, 'http://', 7) === 0:
             case strncmp($value, 'https://', 7) === 0:
                 return '<a href="' . esc_html($value) . '"' . ' title="' . esc_html($value) . '"' . ' target="_blank">' . esc_html($value) . '</a>';
