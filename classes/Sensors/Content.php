@@ -998,8 +998,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				}
 			} elseif ( 'delete-tag' === $action
 				&& 'post_tag' === $post_array['taxonomy']
-				&& ! empty( $post_array['tag_ID']
-				&& wp_verify_nonce( $post_array['_wpnonce'], 'delete-tag_' . $post_array['tag_ID'] ) ) ) {
+				&& ! empty( $post_array['tag_ID'] )
+				&& wp_verify_nonce( $post_array['_wpnonce'], 'delete-tag_' . $post_array['tag_ID'] ) ) {
 				// Single delete.
 				$tag_ids[] = $post_array['tag_ID'];
 			}
