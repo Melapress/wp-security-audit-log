@@ -547,7 +547,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									<?php foreach ($columns as $key => $value) { ?>
 										<label for="columns">
 											<input type="checkbox" name="Columns[<?php echo $key; ?>]" id="<?php echo $key; ?>" class="sel-columns" style="margin-top: 2px;" <?php if ($value == '1') echo 'checked="checked"'; ?> value="1">
-											<span><?php echo ucwords(str_replace("_", " ", $key)); ?></span>
+											<?php if ( 'alert_code' !== $key ) : ?>
+												<span><?php echo ucwords(str_replace("_", " ", $key)); ?></span>
+											<?php else : ?>
+												<span><?php echo ucwords(str_replace('_code', ' ID', $key)); ?></span>
+											<?php endif; ?>
 										</label>
 										<br/>
 									<?php } ?>

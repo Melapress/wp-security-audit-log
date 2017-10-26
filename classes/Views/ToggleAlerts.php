@@ -59,12 +59,19 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
             }
             $this->_plugin->SetGlobalOption('log-404', isset($_REQUEST['log_404']) ? 'on' : 'off');
             $this->_plugin->SetGlobalOption('purge-404-log', isset($_REQUEST['purge_log']) ? 'on' : 'off');
+            $this->_plugin->SetGlobalOption( 'log-404-referrer', isset( $_REQUEST['log_404_referrer'] ) ? 'on' : 'off' );
 
             $this->_plugin->SetGlobalOption( 'log-visitor-404', isset( $_REQUEST['log_visitor_404'] ) ? 'on' : 'off' );
             $this->_plugin->SetGlobalOption( 'purge-visitor-404-log', isset( $_REQUEST['purge_visitor_log'] ) ? 'on' : 'off' );
+            $this->_plugin->SetGlobalOption( 'log-visitor-404-referrer', isset( $_REQUEST['log_visitor_404_referrer'] ) ? 'on' : 'off' );
 
             $this->_plugin->settings->Set404LogLimit( $_REQUEST['user_404Limit'] );
             $this->_plugin->settings->SetVisitor404LogLimit( $_REQUEST['visitor_404Limit'] );
+
+            $this->_plugin->SetGlobalOption( 'log-visitor-failed-login', isset( $_REQUEST['log_visitor_failed_login'] ) ? 'on' : 'off' );
+
+            $this->_plugin->settings->set_failed_login_limit( $_REQUEST['log_failed_login_limit'] );
+            $this->_plugin->settings->set_visitor_failed_login_limit( $_REQUEST['log_visitor_failed_login_limit'] );
         }
         ?><h2 id="wsal-tabs" class="nav-tab-wrapper"><?php
             foreach ($safeNames as $name => $safe) {
@@ -133,11 +140,14 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                         <td><?php echo str_pad($alert->type, 4, '0', STR_PAD_LEFT); ?></td>
                                         <td><?php echo $this->_plugin->constants->GetConstantBy('value', $alert->code)->name; ?></td>
                                         <td><?php echo esc_html($alert->desc); ?></td>
-                                    </tr><?php
+                                    </tr>
+                                    <?php
                                     if ($alert->type == 6007) {
                                         $log_404 = $this->_plugin->GetGlobalOption('log-404');
                                         $purge_log = $this->_plugin->GetGlobalOption('purge-404-log');
-                                        ?><tr>
+                                        $log_404_referrer = $this->_plugin->GetGlobalOption( 'log-404-referrer', 'on' );
+                                        ?>
+                                        <tr>
                                             <td></td>
                                             <td><input name="log_404" type="checkbox" class="check_log" value="1" <?php if ($log_404 == 'on') echo 'checked="checked"'; ?>></td>
                                             <td colspan="2"><?php _e('Capture 404 requests to file (the log file are created in the /wp-content/uploads/wp-security-audit-log/404s/ directory)', 'wp-security-audit-log'); ?></td>
@@ -150,21 +160,21 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                         <tr>
                                             <td></td>
                                             <td colspan="1"><input type="number" id="user_404Limit" name="user_404Limit" value="<?php echo $this->_plugin->settings->Get404LogLimit(); ?>" /></td>
-                                            <td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log', 'wp-security-audit-log' ); ?></td>
+                                            <td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log. By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?></td>
                                         </tr>
                                         <tr>
                                             <td></td>
-                                            <td></td>
-                                            <td colspan="2">
-                                                <?php esc_html_e( 'By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?><br />
-                                                <?php esc_html_e( 'Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?>
-                                            </td>
-                                        </tr><?php
+                                            <td><input name="log_404_referrer" type="checkbox" class="check_log" value="1" <?php checked( $log_404_referrer, 'on' ); ?>></td>
+                                            <td colspan="2"><?php esc_html_e( 'Record the referrer that generated the 404 error.', 'wp-security-audit-log' ); ?></td>
+                                        </tr>
+                                        <?php
                                     }
                                     if ( 6023 == $alert->type ) {
                                         $log_visitor_404 = $this->_plugin->GetGlobalOption( 'log-visitor-404' );
                                         $purge_visitor_log = $this->_plugin->GetGlobalOption( 'purge-visitor-404-log' );
-                                        ?><tr>
+                                        $log_visitor_404_referrer = $this->_plugin->GetGlobalOption( 'log-visitor-404-referrer', 'on' );
+                                        ?>
+                                        <tr>
                                             <td></td>
                                             <td><input name="log_visitor_404" type="checkbox" class="check_visitor_log" value="1" <?php if ( 'on' == $log_visitor_404 ) echo 'checked="checked"'; ?>></td>
                                             <td colspan="2"><?php esc_html_e( 'Capture 404 requests to file (the log file are created in the /wp-content/uploads/wp-security-audit-log/404s/ directory)', 'wp-security-audit-log' ); ?></td>
@@ -177,16 +187,48 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                                         <tr>
                                             <td></td>
                                             <td colspan="1"><input type="number" id="visitor_404Limit" name="visitor_404Limit" value="<?php echo esc_attr( $this->_plugin->settings->GetVisitor404LogLimit() ); ?>" /></td>
-                                            <td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log', 'wp-security-audit-log' ); ?></td>
+                                            <td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log. By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests. Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?></td>
                                         </tr>
                                         <tr>
                                             <td></td>
+                                            <td><input name="log_visitor_404_referrer" type="checkbox" class="check_log" value="1" <?php checked( $log_visitor_404_referrer, 'on' ); ?>></td>
+                                            <td colspan="2"><?php esc_html_e( 'Record the referrer that generated the 404 error.', 'wp-security-audit-log' ); ?></td>
+                                        </tr>
+                                        <?php
+                                    }
+                                    if ( 1002 === $alert->type ) {
+                                    	$log_failed_login_limit = (int) $this->_plugin->GetGlobalOption( 'log-failed-login-limit', 10 );
+                                        $log_failed_login_limit = ( -1 === $log_failed_login_limit ) ? '0' : $log_failed_login_limit;
+                                    	?>
+                                    	<tr>
                                             <td></td>
+                                            <td><input name="log_failed_login_limit" type="number" class="check_visitor_log" value="<?php echo esc_attr( $log_failed_login_limit ); ?>"></td>
                                             <td colspan="2">
-                                                <?php esc_html_e( 'By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?><br />
-                                                <?php esc_html_e( 'Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?>
+                                            	<?php esc_html_e( 'Number of login attempts to log. Enter 0 to log all failed login attempts. (By default the plugin only logs up to 10 failed login because the process can be very resource intensive in case of a brute force attack)', 'wp-security-audit-log' ); ?>
                                             </td>
-                                        </tr><?php
+                                        </tr>
+                                    	<?php
+                                    }
+                                    if ( 1003 === $alert->type ) {
+                                    	$log_visitor_failed_login = $this->_plugin->GetGlobalOption( 'log-visitor-failed-login', 'on' );
+                                    	$log_visitor_failed_login_limit = (int) $this->_plugin->GetGlobalOption( 'log-visitor-failed-login-limit', 10 );
+                                        $log_visitor_failed_login_limit = ( -1 === $log_visitor_failed_login_limit ) ? '0' : $log_visitor_failed_login_limit;
+                                    	?>
+                                    	<tr>
+                                            <td></td>
+                                            <td><input name="log_visitor_failed_login" type="checkbox" class="check_visitor_log" value="1" <?php checked( $log_visitor_failed_login, 'on' ); ?>></td>
+                                            <td colspan="2">
+                                            	<p><?php esc_html_e( 'Keep a log of the usernames used in the failed logins in a log file. The log file is stored in /wp-content/uploads/wp-security-audit-log/failed-logins/', 'wp-security-audit-log' ); ?></p>
+                                            </td>
+                                        </tr>
+                                    	<tr>
+                                            <td></td>
+                                            <td><input name="log_visitor_failed_login_limit" type="number" class="check_visitor_log" value="<?php echo esc_attr( $log_visitor_failed_login_limit ); ?>"></td>
+                                            <td colspan="2">
+                                            	<p><?php esc_html_e( 'Number of login attempts to log. Enter 0 to log all failed login attempts. (By default the plugin only logs up to 10 failed login because the process can be very resource intensive in case of a brute force attack)', 'wp-security-audit-log' ); ?></p>
+                                            </td>
+                                        </tr>
+                                    	<?php
                                     }
                                 }
                                 ?>
@@ -220,9 +262,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView
                 background-color: #fff;
                 border-bottom: 1px solid #fff;
             }
-            #user_404Limit,
-            #visitor_404Limit {
-                width: 100%;
+            .wsal-tab td input[type=number] {
+            	width: 100%;
             }
         </style><?php
     }

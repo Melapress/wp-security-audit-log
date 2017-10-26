@@ -19,17 +19,42 @@ window['WsalAuditLogRefreshed'] = function(){
 			jQuery('<input type="hidden" name="paged"/>').val(paged)
 		).submit();
 	});
-	// tooltip Confirm disable alert
-	jQuery('.log-disable').darkTooltip({
-        animation: 'fadeIn',
-        size: 'small',
-        gravity: 'west',
-        confirm: true,
-        yes: 'Disable',
-        onYes: function(elem){
-			WsalDisableByCode(elem.attr('data-alert-id'))
+
+	var modification_alerts = [ '1002', '1003', '6007', '6023' ];
+
+	jQuery( '.log-disable' ).each( function() {
+		if ( -1 == modification_alerts.indexOf( this.innerText ) ) {
+			// Tooltip Confirm disable alert.
+			jQuery( this ).darkTooltip( {
+		        animation: 'fadeIn',
+		        size: 'small',
+		        gravity: 'west',
+		        confirm: true,
+		        yes: 'Disable',
+		        no: '',
+		        onYes: function( elem ) {
+					WsalDisableByCode( elem.attr( 'data-alert-id' ) )
+				}
+		    } );
+		} else {
+			// Tooltip Confirm disable alert.
+			jQuery( this ).darkTooltip( {
+		        animation: 'fadeIn',
+		        size: 'small',
+		        gravity: 'west',
+		        confirm: true,
+		        yes: 'Disable',
+		        no: '<span>Modify</span>',
+		        onYes: function( elem ) {
+					WsalDisableByCode( elem.attr( 'data-alert-id' ) );
+				},
+				onNo: function( elem ) {
+					window.location.href = elem.attr( 'data-link' );
+				}
+		    } );
 		}
-    });
+	} );
+
 	// tooltip severity type
 	jQuery('.tooltip').darkTooltip({
 		animation: 'fadeIn',
@@ -41,7 +66,7 @@ window['WsalAuditLogRefreshed'] = function(){
 function WsalAuditLogInit(_WsalData){
 	WsalData = _WsalData;
 	var WsalTkn = WsalData.autorefresh.token;
-	
+
 	// list refresher
 	var WsalAjx = null;
 	var WsalChk = function(){
@@ -65,7 +90,7 @@ function WsalAuditLogInit(_WsalData){
 		setInterval(WsalChk, 40000);
 		WsalChk();
 	}
-	
+
 	WsalSsasInit();
 }
 
@@ -76,10 +101,6 @@ function WsalIppsFocus(value){
 }
 
 function WsalIppsChange(value){
-	if(value === ''){
-		value = window.prompt(WsalData.tr8n.numofitems, WsalIppsPrev);
-		if(value === null || value === WsalIppsPrev)return this.value = WsalIppsPrev; // operation canceled
-	}
 	jQuery('select.wsal-ipps').attr('disabled', true);
 	jQuery.post(WsalData.ajaxurl, {
 		action: 'AjaxSetIpp',
@@ -103,7 +124,7 @@ function WsalSsasInit(){
 		var SsasVal = SsasInp.val();
 		if(SsasAjx)SsasAjx.abort();
 		SsasInp.removeClass('loading');
-		
+
 		// do a new search
 		if(SsasInp.attr('data-oldvalue') !== SsasVal && SsasVal.length > 2){
 			SsasInp.addClass('loading');
@@ -131,7 +152,7 @@ function WsalSsasInit(){
 			}, 'json');
 			SsasInp.attr('data-oldvalue', SsasVal);
 		}
-		
+
 		// handle keys
 	});
 	SsasInps.blur(function(){
@@ -171,9 +192,9 @@ function WsalDBChange(value){
 		type: 'POST',
 		url: ajaxurl,
 		async: true,
-		data: { 
+		data: {
 			action: 'AjaxSwitchDB',
-			selected_db: value 
+			selected_db: value
 		},
 		success: function() {
 			location.reload();

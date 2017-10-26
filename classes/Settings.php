@@ -963,6 +963,52 @@ class WSAL_Settings
 		return $this->_plugin->GetGlobalOption( 'log-visitor-404-limit', 99 );
 	}
 
+	/**
+	 * Sets the log limit for failed login attempts.
+	 *
+	 * @param  int $value - Failed login limit.
+	 * @since  2.6.3
+	 */
+	public function set_failed_login_limit( $value ) {
+		if ( ! empty( $value ) ) {
+			return $this->_plugin->SetGlobalOption( 'log-failed-login-limit', abs( $value ) );
+		} else {
+			return $this->_plugin->SetGlobalOption( 'log-failed-login-limit', -1 );
+		}
+	}
+
+	/**
+	 * Get the log limit for failed login attempts.
+	 *
+	 * @since  2.6.3
+	 */
+	public function get_failed_login_limit() {
+		return $this->_plugin->GetGlobalOption( 'log-failed-login-limit', 10 );
+	}
+
+	/**
+	 * Sets the log limit for failed login attempts for visitor.
+	 *
+	 * @param  int $value - Failed login limit.
+	 * @since  2.6.3
+	 */
+	public function set_visitor_failed_login_limit( $value ) {
+		if ( ! empty( $value ) ) {
+			return $this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', abs( $value ) );
+		} else {
+			return $this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', -1 );
+		}
+	}
+
+	/**
+	 * Get the log limit for failed login attempts for visitor.
+	 *
+	 * @since  2.6.3
+	 */
+	public function get_visitor_failed_login_limit() {
+		return $this->_plugin->GetGlobalOption( 'log-visitor-failed-login-limit', 10 );
+	}
+
 /*============================== Support Archive Database ==============================*/
 
 	public function IsArchivingEnabled()

@@ -611,8 +611,20 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
             if ( 'on' == $this->plugin->GetGlobalOption( 'log-404', 'off' ) ) {
                 // Request URL.
                 $url = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-                // Create/Append to the log file.
-                $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
+
+                // Get option to log referrer.
+                $log_referrer = $this->plugin->GetGlobalOption( 'log-404-referrer' );
+
+                if ( 'on' === $log_referrer ) {
+                    // Get the referer.
+                    $referrer = ( isset( $_SERVER['HTTP_REFERER'] ) ) ? $_SERVER['HTTP_REFERER'] : false;
+                    // Create/Append to the log file.
+                    $data = 'Request URL ' . $url . ' Referer ' . $referrer . ',';
+                } else {
+                    // Create/Append to the log file.
+                    $data = 'Request URL ' . $url . ',';
+                }
+
                 if ( ! is_user_logged_in() ) {
                     $username = '';
                 } else {
@@ -660,8 +672,20 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
             if ( 'on' == $this->plugin->GetGlobalOption( 'log-visitor-404', 'off' ) ) {
                 // Request URL.
                 $url = $_SERVER["HTTP_HOST"] . $_SERVER['REQUEST_URI'];
-                // Create/Append to the log file.
-                $data = 'Attempts: ' . $attempts . ' - Request URL: ' . $url;
+
+                // Get option to log referrer.
+                $log_referrer = $this->plugin->GetGlobalOption( 'log-visitor-404-referrer' );
+
+                if ( 'on' === $log_referrer ) {
+                    // Get the referer.
+                    $referrer = ( isset( $_SERVER['HTTP_REFERER'] ) ) ? $_SERVER['HTTP_REFERER'] : false;
+                    // Create/Append to the log file.
+                    $data = 'Request URL ' . $url . ' Referer ' . $referrer . ',';
+                } else {
+                    // Create/Append to the log file.
+                    $data = 'Request URL ' . $url . ',';
+                }
+
                 $username = '';
 
                 if ( '127.0.0.1' == $ip || '::1' == $ip ) {

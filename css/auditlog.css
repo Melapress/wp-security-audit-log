@@ -20,9 +20,11 @@
 
 .column-read,
 .column-more,
-.column-type,
 .column-data {
 	width: 70px;
+}
+.column-type {
+	width: 85px;
 }
 .column-code {
 	width: 50px;
@@ -234,5 +236,11 @@ td.column-user {
 .dark-tooltip.dark ul.confirm li{ background-color:#0085ba;}
 .dark-tooltip.dark ul.confirm li:hover{ background-color:#008ec2; cursor: pointer;}
 .dark-tooltip.dark ul.confirm li:last-child {
-    display: none;
+    padding: 0;
+}
+.dark-tooltip.dark ul.confirm li:last-child span {
+	display: inline-block;
+	line-height: 8px;
+	padding: 10px;
+	margin: 0;
 }

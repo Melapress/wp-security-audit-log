@@ -67,7 +67,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2017, E_NOTICE, __('User changed blog post URL', 'wp-security-audit-log'), __('Changed the URL of the post %PostTitle% from %OldUrl% to %NewUrl%. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2019, E_NOTICE, __('User changed blog post author', 'wp-security-audit-log'), __('Changed the author of %PostTitle% post from %OldAuthor% to %NewAuthor%. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2021, E_NOTICE, __('User changed blog post status', 'wp-security-audit-log'), __('Changed the status of %PostTitle% post from %OldStatus% to %NewStatus%. %EditorLinkPost%.', 'wp-security-audit-log')),
-                array(2023, E_NOTICE, __('User created new category', 'wp-security-audit-log'), __('Created a new category called %CategoryName% .Category slug is %Slug%. %CategoryLink%.', 'wp-security-audit-log')),
+                array(2023, E_NOTICE, __('User created new category', 'wp-security-audit-log'), __('Created a new category called %CategoryName%. Category slug is %Slug%. %CategoryLink%.', 'wp-security-audit-log')),
                 array(2024, E_WARNING, __('User deleted category', 'wp-security-audit-log'), __('Deleted the category %CategoryName%. Category slug was %Slug%.', 'wp-security-audit-log')),
                 array(2025, E_WARNING, __('User changed the visibility of a blog post', 'wp-security-audit-log'), __('Changed the visibility of the post %PostTitle% from %OldVisibility% to %NewVisibility%. %EditorLinkPost%.', 'wp-security-audit-log')),
                 array(2027, E_NOTICE, __('User changed the date of a blog post', 'wp-security-audit-log'), __('Changed the date of the post %PostTitle% from %OldDate% to %NewDate%. %EditorLinkPost%.', 'wp-security-audit-log')),
@@ -89,7 +89,14 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(2111, E_NOTICE, __('User disabled Comments/Trackbacks and Pingbacks on a published post', 'wp-security-audit-log'), __('Disabled %Type% on the published post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
                 array(2112, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a published post', 'wp-security-audit-log'), __('Enabled %Type% on the published post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
                 array(2113, E_NOTICE, __('User disabled Comments/Trackbacks and Pingbacks on a draft post', 'wp-security-audit-log'), __('Disabled %Type% on the draft post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
-                array(2114, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a draft post', 'wp-security-audit-log'), __('Enabled %Type% on the draft post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log'))
+                array(2114, E_NOTICE, __('User enabled Comments/Trackbacks and Pingbacks on a draft post', 'wp-security-audit-log'), __('Enabled %Type% on the draft post %PostTitle%. View the post: %PostUrl%.', 'wp-security-audit-log')),
+                array( 2119, E_NOTICE, __( 'User added blog post tag', 'wp-security-audit-log' ), __( 'Added the tag %tag% on the %status% post %post_title%. View the post: %EditorLinkPost%.', 'wp-security-audit-log' ) ),
+                array( 2120, E_NOTICE, __( 'User removed blog post tag', 'wp-security-audit-log' ), __( 'Removed the tag %tag% on the %status% post %post_title%. View the post: %EditorLinkPost%.', 'wp-security-audit-log' ) ),
+                array( 2121, E_NOTICE, __( 'User created new tag', 'wp-security-audit-log' ), __( 'Created a new tag called %TagName% .Tag slug is %Slug%. %TagLink%.', 'wp-security-audit-log' ) ),
+                array( 2122, E_NOTICE, __( 'User deleted tag', 'wp-security-audit-log' ), __( 'Deleted the tag %TagName%. Tag slug was %Slug%.', 'wp-security-audit-log' ) ),
+                array( 2123, E_NOTICE, __( 'User renamed tag', 'wp-security-audit-log' ), __( 'Renamed a tag from %old_name% to %new_name%', 'wp-security-audit-log' ) ),
+                array( 2124, E_NOTICE, __( 'User changed tag slug', 'wp-security-audit-log' ), __( 'Changed the slug of tag %tag% from %old_slug% to %new_slug%', 'wp-security-audit-log' ) ),
+                array( 2125, E_NOTICE, __( 'User changed tag description', 'wp-security-audit-log' ), __( 'Changed the description of tag %tag%.', 'wp-security-audit-log' ) ),
             ),
             __('Comments', 'wp-security-audit-log') => array(
                 array(2090, E_NOTICE, __('User approved a comment', 'wp-security-audit-log'), __('Approved the comment posted in response to the post %PostTitle% by %Author% on %CommentLink%.', 'wp-security-audit-log')),
@@ -255,7 +262,11 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(6015, E_CRITICAL, __('Enabled/Disabled the option for an author to have previously approved comments for the comments to appear', 'wp-security-audit-log'), __('%Status% the option for an author to have previously approved comments for the comments to appear.', 'wp-security-audit-log')),
                 array(6016, E_CRITICAL, __('Changed the number of links that a comment must have to be held in the queue', 'wp-security-audit-log'), __('Changed the number of links from %OldValue% to %NewValue% that a comment must have to be held in the queue.', 'wp-security-audit-log')),
                 array(6017, E_CRITICAL, __('Modified the list of keywords for comments moderation', 'wp-security-audit-log'), __('Modified the list of keywords for comments moderation.', 'wp-security-audit-log')),
-                array(6018, E_CRITICAL, __('Modified the list of keywords for comments blacklisting', 'wp-security-audit-log'), __('Modified the list of keywords for comments blacklisting.', 'wp-security-audit-log'))
+                array(6018, E_CRITICAL, __('Modified the list of keywords for comments blacklisting', 'wp-security-audit-log'), __('Modified the list of keywords for comments blacklisting.', 'wp-security-audit-log')),
+                array( 6019, E_CRITICAL, __( 'Created a New cron job', 'wp-security-audit-log' ), __( 'A new cron job called %name% was created and is scheduled to run %schedule%.', 'wp-security-audit-log' ) ),
+                array( 6020, E_CRITICAL, __( 'Changed status of the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% was %status%.', 'wp-security-audit-log' ) ),
+                array( 6021, E_CRITICAL, __( 'Deleted the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% was deleted.', 'wp-security-audit-log' ) ),
+                array( 6022, E_NOTICE, __( 'Started the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% has just started.', 'wp-security-audit-log' ) ),
             )
         ),
         __('Users Profiles & Activity', 'wp-security-audit-log') => array(
@@ -263,7 +274,7 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(1000, E_NOTICE, __('User logged in', 'wp-security-audit-log'), __('Successfully logged in.', 'wp-security-audit-log')),
                 array(1001, E_NOTICE, __('User logged out', 'wp-security-audit-log'), __('Successfully logged out.', 'wp-security-audit-log')),
                 array(1002, E_WARNING, __('Login failed', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected.', 'wp-security-audit-log')),
-                array(1003, E_WARNING, __('Login failed  / non existing user', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected using non existing user.', 'wp-security-audit-log')),
+                array(1003, E_WARNING, __('Login failed  / non existing user', 'wp-security-audit-log'), __('%Attempts% failed login(s) detected using non existing user. %LogFileLink% %LogFileText%.', 'wp-security-audit-log')),
                 array(1004, E_WARNING, __('Login blocked', 'wp-security-audit-log'), __('Blocked from logging in because the same WordPress user is logged in from %ClientIP%.', 'wp-security-audit-log')),
                 array(1005, E_WARNING, __('User logged in with existing session(s)', 'wp-security-audit-log'), __('Successfully logged in. Another session from %IPAddress% for this user already exist.', 'wp-security-audit-log')),
                 array(1006, E_CRITICAL, __('User logged out all other sessions with the same username', 'wp-security-audit-log'), __('Logged out all other sessions with the same username.', 'wp-security-audit-log')),
@@ -283,6 +294,10 @@ function wsaldefaults_wsal_init(WpSecurityAuditLog $wsal)
                 array(4014, E_NOTICE, __('User opened the profile page of another user', 'wp-security-audit-log'), __('%UserChanger% opened the profile page of the user %TargetUsername%.', 'wp-security-audit-log')),
                 array( 4015, E_NOTICE, __( 'User updated a custom field value for a user', 'wp-security-audit-log' ), __( 'Changed the value of the custom field %custom_field_name% from %old_value% to %new_value% for the user %TargetUsername%.', 'wp-security-audit-log' ) ),
                 array( 4016, E_NOTICE, __( 'User created a custom field value for a user', 'wp-security-audit-log' ), __( 'Created the value of the custom field %custom_field_name% with %new_value% for the user %TargetUsername%.', 'wp-security-audit-log' ) ),
+                array( 4017, E_NOTICE, __( 'User changed first name for a user', 'wp-security-audit-log' ), __( 'Changed the first name of the user %TargetUsername% from %old_firstname% to %new_firstname%', 'wp-security-audit-log' ) ),
+                array( 4018, E_NOTICE, __( 'User changed last name for a user', 'wp-security-audit-log' ), __( 'Changed the last name of the user %TargetUsername% from %old_lastname% to %new_lastname%', 'wp-security-audit-log' ) ),
+                array( 4019, E_NOTICE, __( 'User changed nickname for a user', 'wp-security-audit-log' ), __( 'Changed the nickname of the user %TargetUsername% from %old_nickname% to %new_nickname%', 'wp-security-audit-log' ) ),
+                array( 4020, E_WARNING, __( 'User changed the display name for a user', 'wp-security-audit-log' ), __( 'Changed the Display name publicly of user %TargetUsername% from %old_displayname% to %new_displayname%', 'wp-security-audit-log' ) ),
             ),
         ),
         __('Third Party Support', 'wp-security-audit-log') => array(

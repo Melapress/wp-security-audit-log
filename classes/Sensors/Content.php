@@ -77,6 +77,13 @@
  * 2088 User changed title of a custom post type
  * 2104 User opened a custom post type in the editor
  * 2105 User viewed a custom post type
+ * 2119 User added blog post tag
+ * 2120 User removed blog post tag
+ * 2121 User created new tag
+ * 2122 User deleted tag
+ * 2123 User renamed tag
+ * 2124 User changed tag slug
+ * 2125 User changed tag description
  */
 class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	/**
@@ -93,6 +100,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @var array old categories
 	 */
 	protected $_OldCats = null;
+
+	/**
+	 * Old tags.
+	 *
+	 * @var array
+	 */
+	protected $_old_tags = null;
 
 	/**
 	 * @var string old path to file
@@ -119,11 +133,68 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_action('edit_category', array($this, 'EventChangedCategoryParent'));
 		add_action('save_post', array($this, 'SetRevisionLink'), 10, 3);
 		add_action('publish_future_post', array($this, 'EventPublishFuture'), 10, 1);
-		// to do change with 'create_term' instead 'create_category' for trigger Tags
+
 		add_action('create_category', array($this, 'EventCategoryCreation'), 10, 1);
+		add_action( 'create_post_tag', array( $this, 'EventTagCreation' ), 10, 1 );
 
 		add_action( 'wp_head', array( $this, 'ViewingPost' ), 10 );
 		add_filter('post_edit_form_tag', array($this, 'EditingPost'), 10, 1);
+
+		add_filter( 'wp_update_term_data', array( $this, 'event_terms_rename' ), 10, 4 );
+	}
+
+	/**
+	 * Method: Triggered when terms are renamed.
+	 *
+	 * @param array  $data     Term data to be updated.
+	 * @param int    $term_id  Term ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 * @param array  $args     Arguments passed to wp_update_term().
+	 * @since 2.6.9
+	 */
+	public function event_terms_rename( $data, $term_id, $taxonomy, $args ) {
+
+		// Check if the taxonomy is term.
+		if ( 'post_tag' !== $taxonomy ) {
+			return $data;
+		}
+
+		// Get data.
+		$new_name = ( isset( $data['name'] ) ) ? $data['name'] : false;
+		$new_slug = ( isset( $data['slug'] ) ) ? $data['slug'] : false;
+		$new_desc = ( isset( $args['description'] ) ) ? $args['description'] : false;
+
+		// Get old data.
+		$term = get_term( $term_id, $taxonomy );
+		$old_name = $term->name;
+		$old_slug = $term->slug;
+		$old_desc = $term->description;
+
+		// Update if both names are not same.
+		if ( $old_name !== $new_name ) {
+			$this->plugin->alerts->Trigger( 2123, array(
+				'old_name' => $old_name,
+				'new_name' => $new_name,
+			) );
+		}
+
+		// Update if both slugs are not same.
+		if ( $old_slug !== $new_slug ) {
+			$this->plugin->alerts->Trigger( 2124, array(
+				'tag' => $new_name,
+				'old_slug' => $old_slug,
+				'new_slug' => $new_slug,
+			) );
+		}
+
+		// Update if both descriptions are not same.
+		if ( $old_desc !== $new_desc ) {
+			$this->plugin->alerts->Trigger( 2125, array(
+				'tag' => $new_name,
+			) );
+		}
+		return $data;
+
 	}
 
 	/**
@@ -155,6 +226,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$this->RetrieveOldData();
 		// check for category changes
 		$this->CheckCategoryDeletion();
+
+		// Check for tag changes.
+		$this->check_tag_deletion();
 	}
 
 	/**
@@ -172,6 +246,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$this->_OldLink = get_permalink($postID);
 			$this->_OldTmpl = $this->GetPostTemplate($this->_OldPost);
 			$this->_OldCats = $this->GetPostCategories($this->_OldPost);
+			$this->_old_tags = $this->get_post_tags( $this->_OldPost );
 			$this->_OldStky = in_array($postID, get_option('sticky_posts'));
 		}
 	}
@@ -210,6 +285,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	protected function GetPostCategories($post)
 	{
 		return wp_get_post_categories($post->ID, array('fields' => 'names'));
+	}
+
+	/**
+	 * Get post tags (array of tag names).
+	 *
+	 * @param stdClass $post - The post.
+	 * @return array list of categories
+	 */
+	protected function get_post_tags( $post ) {
+		return wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
 	}
 
 	/**
@@ -255,8 +340,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					+ $this->CheckStickyChange($this->_OldStky, isset($_REQUEST['sticky']), $post)
 					+ $this->CheckVisibilityChange($this->_OldPost, $post, $oldStatus, $newStatus)
 					+ $this->CheckTemplateChange($this->_OldTmpl, $this->GetPostTemplate($post), $post)
-					+ $this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post)
-				;
+					+ $this->CheckCategoriesChange($this->_OldCats, $this->GetPostCategories($post), $post);
+				$this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
 
 				if (!$changes) {
 					$changes = $this->CheckDateChange($this->_OldPost, $post);
@@ -492,6 +577,64 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				));
 				return 1;
 			}
+		}
+	}
+
+	/**
+	 * Tags changed.
+	 *
+	 * @param array    $old_tags - Old tags.
+	 * @param array    $new_tags - New tags.
+	 * @param stdClass $post - The post.
+	 */
+	protected function check_tags_change( $old_tags, $new_tags, $post ) {
+		// Check for added tags.
+		$added_tags = array_diff( $new_tags, $old_tags );
+
+		// Check for removed tags.
+		$removed_tags = array_diff( $old_tags, $new_tags );
+
+		// Convert tags arrays to string.
+		$old_tags = implode( ', ', $old_tags );
+		$new_tags = implode( ', ', $new_tags );
+		$added_tags = implode( ', ', $added_tags );
+		$removed_tags = implode( ', ', $removed_tags );
+
+		// Declare event variables.
+		$add_event = '';
+		$remove_event = '';
+		if ( $old_tags !== $new_tags && ! empty( $added_tags ) ) {
+			$add_event = $this->GetEventTypeForPostType( $post, 2119, 0, 0 );
+			if ( $add_event ) {
+				$editor_link = $this->GetEditorLink( $post );
+				$post_status = ( 'publish' === $post->post_status ) ? 'published' : $this->post_status;
+				$this->plugin->alerts->Trigger( $add_event, array(
+					'PostID' => $post->ID,
+					'status' => $post_status,
+					'post_title' => $post->post_title,
+					'tag' => $added_tags ? $added_tags : 'no tags',
+					$editor_link['name'] => $editor_link['value'],
+				) );
+			}
+		}
+
+		if ( $old_tags !== $new_tags && ! empty( $removed_tags ) ) {
+			$remove_event = $this->GetEventTypeForPostType( $post, 2120, 0, 0 );
+			if ( $remove_event ) {
+				$editor_link = $this->GetEditorLink( $post );
+				$post_status = ( 'publish' === $post->post_status ) ? 'published' : $this->post_status;
+				$this->plugin->alerts->Trigger( $remove_event, array(
+					'PostID' => $post->ID,
+					'status' => $post_status,
+					'post_title' => $post->post_title,
+					'tag' => $removed_tags ? $removed_tags : 'no tags',
+					$editor_link['name'] => $editor_link['value'],
+				) );
+			}
+		}
+
+		if ( $add_event || $remove_event ) {
+			return 1;
 		}
 	}
 
@@ -767,6 +910,21 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 
 	/**
+	 * New tag created.
+	 *
+	 * @param int $tag_id - Tag ID.
+	 */
+	public function EventTagCreation( $tag_id ) {
+		$tag = get_tag( $tag_id );
+		$tag_link = $this->get_tag_link( $tag_id );
+		$this->plugin->alerts->Trigger( 2121, array(
+			'TagName' => $tag->name,
+			'Slug' => $tag->slug,
+			'TagLink' => $tag_link,
+		) );
+	}
+
+	/**
 	 * Category deleted.
 	 * @global array $_POST post data
 	 */
@@ -786,7 +944,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if (isset($_POST['taxonomy'])) {
 			if ($action == 'delete' && $_POST['taxonomy'] == 'category' && !empty($_POST['delete_tags'])) {
 				// bulk delete
-				$categoryIds[] = $_POST['delete_tags'];
+				foreach ( $_POST['delete_tags'] as $delete_tag ) {
+					$categoryIds[] = $delete_tag;
+				}
 			} elseif ($action == 'delete-tag' && $_POST['taxonomy'] == 'category' && !empty($_POST['tag_ID'])) {
 				// single delete
 				$categoryIds[] = $_POST['tag_ID'];
@@ -800,6 +960,58 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'CategoryName' => $category->cat_name,
 				'Slug' => $category->slug
 			));
+		}
+	}
+
+	/**
+	 * Tag deleted.
+	 *
+	 * @global array $_POST - Post data
+	 */
+	protected function check_tag_deletion() {
+
+		// Filter global post array for security.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// If post array is empty then return.
+		if ( empty( $post_array ) ) {
+			return;
+		}
+
+		// Check for action.
+		$action = ! empty( $post_array['action'] ) ? $post_array['action']
+			: ( ! empty( $post_array['action2'] ) ? $post_array['action2'] : '' );
+		if ( ! $action ) {
+			return;
+		}
+
+		$tag_ids = array();
+
+		if ( isset( $post_array['taxonomy'] ) ) {
+			if ( 'delete' === $action
+				&& 'post_tag' === $post_array['taxonomy']
+				&& ! empty( $post_array['delete_tags'] )
+				&& wp_verify_nonce( $post_array['_wpnonce'], 'bulk-tags' ) ) {
+				// Bulk delete.
+				foreach ( $post_array['delete_tags'] as $delete_tag ) {
+					$tag_ids[] = $delete_tag;
+				}
+			} elseif ( 'delete-tag' === $action
+				&& 'post_tag' === $post_array['taxonomy']
+				&& ! empty( $post_array['tag_ID']
+				&& wp_verify_nonce( $post_array['_wpnonce'], 'delete-tag_' . $post_array['tag_ID'] ) ) ) {
+				// Single delete.
+				$tag_ids[] = $post_array['tag_ID'];
+			}
+		}
+
+		foreach ( $tag_ids as $tag_id ) {
+			$tag = get_tag( $tag_id );
+			$this->plugin->alerts->Trigger( 2122, array(
+				'TagID' => $tag_id,
+				'TagName' => $tag->name,
+				'Slug' => $tag->slug,
+			) );
 		}
 	}
 
@@ -880,6 +1092,20 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	{
 		if (!empty($category_id)) {
 			return admin_url('term.php?taxnomy=category&tag_ID='.$category_id);
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Builds tag link.
+	 *
+	 * @param integer $tag_id - Tag ID.
+	 * @return string|null link
+	 */
+	private function get_tag_link( $tag_id ) {
+		if ( ! empty( $tag_id ) ) {
+			return admin_url( 'term.php?taxnomy=post_tag&tag_ID=' . $tag_id );
 		} else {
 			return null;
 		}

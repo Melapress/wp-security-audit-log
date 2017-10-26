@@ -43,11 +43,9 @@ class WSAL_AuditLogListView extends WP_List_Table
     public function extra_tablenav($which)
     {
         // items-per-page widget
-        $o = __('Other', 'wp-security-audit-log');
         $p = $this->_plugin->settings->GetViewPerPage();
-        $items = array($o, 5, 10, 15, 30, 50);
+        $items = array(5, 10, 15, 30, 50);
         if (!in_array($p, $items)) $items[] = $p;
-        if ($p == $o || $p == 0) $p = $o[1]; // a sane default if things goes bust
 
         ?><div class="wsal-ipp wsal-ipp-<?php echo $which; ?>">
             <?php _e('Show ', 'wp-security-audit-log'); ?>
@@ -141,7 +139,7 @@ class WSAL_AuditLogListView extends WP_List_Table
         $cols = array(
             //'cb'   => '<input type="checkbox" />',
             //'read' => __('Read', 'wp-security-audit-log'),
-            'type' => __( 'Code', 'wp-security-audit-log' ),
+            'type' => __( 'Alert ID', 'wp-security-audit-log' ),
             'code' => __( 'Type', 'wp-security-audit-log' ),
             'crtd' => __( 'Date', 'wp-security-audit-log' ),
             'user' => $name_column,
@@ -158,7 +156,7 @@ class WSAL_AuditLogListView extends WP_List_Table
             foreach ( $sel_columns as $key => $value ) {
                 switch ( $key ) {
                     case 'alert_code':
-                        $cols['type'] = __( 'Code', 'wp-security-audit-log' );
+                        $cols['type'] = __( 'Alert ID', 'wp-security-audit-log' );
                         break;
                     case 'type':
                         $cols['code'] = __( 'Type', 'wp-security-audit-log' );
@@ -216,8 +214,19 @@ class WSAL_AuditLogListView extends WP_List_Table
                     . ($item->is_read ? 'old' : 'new')
                     . '" title="' . __('Click to toggle.', 'wp-security-audit-log') . '"></span>';
             case 'type':
-                $code = $this->_plugin->alerts->GetAlert($item->alert_id);
-                return '<span class="log-disable" data-tooltip="'. __('Disable this type of alerts.', 'wp-security-audit-log').'<br>'.$item->alert_id.' - '.esc_html($code->desc).'" data-alert-id="'.$item->alert_id.'">'
+                $code = $this->_plugin->alerts->GetAlert( $item->alert_id );
+                $extra_msg = '';
+                $data_link = '';
+                $modification_alerts = array( 1002, 1003, 6007, 6023 );
+                if ( in_array( $item->alert_id, $modification_alerts, true ) ) {
+                    $extra_msg = '. Modify this alert.';
+                    if ( 1002 === $item->alert_id || 1003 === $item->alert_id ) {
+                        $data_link = add_query_arg( 'page', 'wsal-togglealerts#tab-users-profiles---activity', admin_url( 'admin.php' ) );
+                    } elseif ( 6007 === $item->alert_id || 6023 === $item->alert_id ) {
+                        $data_link = add_query_arg( 'page', 'wsal-togglealerts#tab-system-activity', admin_url( 'admin.php' ) );
+                    }
+                }
+                return '<span class="log-disable" data-tooltip="' . __( 'Disable this type of alerts.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . ' - ' . esc_html( $code->desc ) . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
                     . str_pad($item->alert_id, 4, '0', STR_PAD_LEFT) . ' </span>';
             case 'code':
                 $code = $this->_plugin->alerts->GetAlert($item->alert_id);
@@ -392,6 +401,9 @@ class WSAL_AuditLogListView extends WP_List_Table
             case $name == '%CategoryLink%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the category</a>';
 
+            case $name == '%TagLink%':
+                return ' <a target="_blank" href="'.esc_url($value).'">View the tag</a>';
+
             case $name == '%EditorLinkForum%':
                 return ' <a target="_blank" href="'.esc_url($value).'">View the forum</a>';
 
@@ -417,6 +429,16 @@ class WSAL_AuditLogListView extends WP_List_Table
                     return 'Click <a href="'.esc_url(admin_url("admin.php?page=wsal-togglealerts#tab-system-activity")).'">here</a> to log such requests to file';
                 }
 
+            case '%LogFileLink%' === $name:
+                if ( ! empty( $value ) && 'on' === $this->_plugin->GetGlobalOption( 'log-visitor-failed-login' ) ) {
+                    return '<a href="' . esc_url( $value ) . '" download>Download the Log file</a>';
+                } elseif ( ! empty( $value ) ) {
+                    return '<a href="' . esc_url( $value ) . '">Keep a record of the usernames</a>';
+                }
+                // Failed login file link.
+            case '%LogFileText%' === $name:
+                return esc_html( $value );
+                // Failed login file text.
             case strncmp($value, 'http://', 7) === 0:
             case strncmp($value, 'https://', 7) === 0:
                 return '<a href="' . esc_html($value) . '"' . ' title="' . esc_html($value) . '"' . ' target="_blank">' . esc_html($value) . '</a>';
