@@ -7,7 +7,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.8.2
-Stable tag: 2.6.9
+Stable tag: 2.6.9.1
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -190,12 +190,12 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 
 == Changelog ==
 
-= 2.6.9 (2017-10-24) =
+=2.6.9.1 (2017-10-24 =
 
-4017 - changed the first name of a user
-4018 - changed the last name of a user
-4019 - changed the nickname of a user
-4020 - changed the display name of a user
+* **Bug Fix**
+	* Fixed a syntax issue in the code that was affecting installs on PHP lower than 5.4
+
+= 2.6.9 (2017-10-24) =
 
 * **New Audit Trail Alerts for logging of Tag changes**
 	* Alert 2119: User added tag to a post
