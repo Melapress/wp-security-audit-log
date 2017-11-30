@@ -1,5 +1,19 @@
 <?php
 /**
+ * Sensor: Meta Data
+ *
+ * Meta Data sensor file.
+ *
+ * @since 1.0.0
+ * @package Wsal
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
  * Custom fields (posts, pages, custom posts and users) sensor.
  *
  * 2053 User created a custom field for a post
@@ -61,7 +75,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	/**
 	 * Check "Excluded Custom Fields" or meta keys starts with "_".
 	 *
-	 * @param int 	 $object_id - Object ID.
+	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
 	 * @return boolean can log true|false
 	 */
@@ -84,14 +98,14 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @return boolean is excluded from monitoring true|false
 	 */
 	public function IsExcludedCustomFields( $custom ) {
-		$customFields = $this->plugin->settings->GetExcludedMonitoringCustom();
-		if ( in_array( $custom, $customFields ) ) {
+		$custom_fields = $this->plugin->settings->GetExcludedMonitoringCustom();
+		if ( in_array( $custom, $custom_fields ) ) {
 			return true;
 		}
-		foreach ( $customFields as $field ) {
-			if ( false !== strpos( $field, "*" ) ) {
-				// wildcard str[any_character] when you enter (str*)
-				if ( substr( $field, -1 ) == '*') {
+		foreach ( $custom_fields as $field ) {
+			if ( false !== strpos( $field, '*' ) ) {
+				// Wildcard str[any_character] when you enter (str*).
+				if ( substr( $field, -1 ) == '*' ) {
 					$field = rtrim( $field, '*' );
 					if ( preg_match( "/^$field/", $custom ) ) {
 						return true;
@@ -107,15 +121,15 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			}
 		}
 		return false;
-		// return (in_array($custom, $customFields)) ? true : false;
+		// return (in_array($custom, $custom_fields)) ? true : false;.
 	}
 
 	/**
 	 * Created a custom field.
 	 *
-	 * @param int 	 $object_id - Object ID.
+	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
-	 * @param mix 	 $meta_value - Meta value.
+	 * @param mix    $meta_value - Meta value.
 	 */
 	public function EventPostMetaCreated( $object_id, $meta_key, $meta_value ) {
 		$post = get_post( $object_id );
@@ -129,45 +143,61 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 
 		if ( empty( $meta_value ) && ( $this->null_meta_counter < 1 ) ) { // Report only one NULL meta value.
 			$this->null_meta_counter += 1;
-		} else { // Do not report if NULL meta values are more than one.
+		} elseif ( $this->null_meta_counter >= 1 ) { // Do not report if NULL meta values are more than one.
 			return;
+		}
+
+		// Filter $_POST global array for security.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Check nonce.
+		if ( isset( $post_array['_ajax_nonce-add-meta'] ) && ! wp_verify_nonce( $post_array['_ajax_nonce-add-meta'], 'add-meta' ) ) {
+			return false;
+		} elseif ( isset( $post_array['_wpnonce'] ) && isset( $post_array['post_ID'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
+			return false;
 		}
 
 		$wp_action = array( 'add-meta' );
 
-		if ( isset( $_POST['action'] ) && ( 'editpost' == $_POST['action'] || in_array( $_POST['action'], $wp_action ) ) ) {
-			$editorLink = $this->GetEditorLink( $post );
+		if ( isset( $post_array['action'] ) && ( 'editpost' == $post_array['action'] || in_array( $post_array['action'], $wp_action ) ) ) {
+			$editor_link = $this->GetEditorLink( $post );
 			switch ( $post->post_type ) {
 				case 'page':
-					$this->plugin->alerts->Trigger( 2059, array(
-						'PostID' => $object_id,
-						'PostTitle' => $post->post_title,
-						'MetaKey' => $meta_key,
-						'MetaValue' => $meta_value,
-						'MetaLink' => $meta_key,
-						$editorLink['name'] => $editorLink['value'],
-					) );
+					$this->plugin->alerts->Trigger(
+						2059, array(
+							'PostID' => $object_id,
+							'PostTitle' => $post->post_title,
+							'MetaKey' => $meta_key,
+							'MetaValue' => $meta_value,
+							'MetaLink' => $meta_key,
+							$editor_link['name'] => $editor_link['value'],
+						)
+					);
 					break;
 				case 'post':
-					$this->plugin->alerts->Trigger( 2053, array(
-						'PostID' => $object_id,
-						'PostTitle' => $post->post_title,
-						'MetaKey' => $meta_key,
-						'MetaValue' => $meta_value,
-						'MetaLink' => $meta_key,
-						$editorLink['name'] => $editorLink['value'],
-					) );
+					$this->plugin->alerts->Trigger(
+						2053, array(
+							'PostID' => $object_id,
+							'PostTitle' => $post->post_title,
+							'MetaKey' => $meta_key,
+							'MetaValue' => $meta_value,
+							'MetaLink' => $meta_key,
+							$editor_link['name'] => $editor_link['value'],
+						)
+					);
 					break;
 				default:
-					$this->plugin->alerts->Trigger( 2056, array(
-						'PostID' => $object_id,
-						'PostTitle' => $post->post_title,
-						'PostType' => $post->post_type,
-						'MetaKey' => $meta_key,
-						'MetaValue' => $meta_value,
-						'MetaLink' => $meta_key,
-						$editorLink['name'] => $editorLink['value'],
-					) );
+					$this->plugin->alerts->Trigger(
+						2056, array(
+							'PostID' => $object_id,
+							'PostTitle' => $post->post_title,
+							'PostType' => $post->post_type,
+							'MetaKey' => $meta_key,
+							'MetaValue' => $meta_value,
+							'MetaLink' => $meta_key,
+							$editor_link['name'] => $editor_link['value'],
+						)
+					);
 					break;
 			}
 		}
@@ -176,8 +206,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	/**
 	 * Sets the old meta.
 	 *
-	 * @param int 	 $meta_id - Meta ID.
-	 * @param int 	 $object_id - Object ID.
+	 * @param int    $meta_id - Meta ID.
+	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
 	 */
 	public function EventPostMetaUpdating( $meta_id, $object_id, $meta_key ) {
@@ -191,10 +221,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	/**
 	 * Updated a custom field name/value.
 	 *
-	 * @param int 	 $meta_id - Meta ID.
-	 * @param int 	 $object_id - Object ID.
+	 * @param int    $meta_id - Meta ID.
+	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
-	 * @param mix 	 $meta_value - Meta value.
+	 * @param mix    $meta_value - Meta value.
 	 */
 	public function EventPostMetaUpdated( $meta_id, $object_id, $meta_key, $meta_value ) {
 		$post = get_post( $object_id );
@@ -206,90 +236,112 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return;
 		}
 
+		// Filter $_POST global array for security.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Check nonce.
+		if ( isset( $post_array['_ajax_nonce'] ) && ! wp_verify_nonce( $post_array['_ajax_nonce'], 'change-meta' ) ) {
+			return false;
+		} elseif ( isset( $post_array['_wpnonce'] ) && isset( $post_array['post_ID'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
+			return false;
+		}
+
 		$wp_action = array( 'add-meta' );
 
-		if ( isset( $_POST['action'] ) && ( 'editpost' == $_POST['action'] || in_array( $_POST['action'], $wp_action ) ) ) {
-			$editorLink = $this->GetEditorLink( $post );
+		if ( isset( $post_array['action'] ) && ( 'editpost' == $post_array['action'] || in_array( $post_array['action'], $wp_action ) ) ) {
+			$editor_link = $this->GetEditorLink( $post );
 			if ( isset( $this->old_meta[ $meta_id ] ) ) {
 				// Check change in meta key.
 				if ( $this->old_meta[ $meta_id ]->key != $meta_key ) {
 					switch ( $post->post_type ) {
 						case 'page':
-							$this->plugin->alerts->Trigger( 2064, array(
-								'PostID' => $object_id,
-								'PostTitle' => $post->post_title,
-								'MetaID' => $meta_id,
-								'MetaKeyNew' => $meta_key,
-								'MetaKeyOld' => $this->old_meta[$meta_id]->key,
-								'MetaValue' => $meta_value,
-								'MetaLink' => $meta_key,
-								$editorLink['name'] => $editorLink['value'],
-							) );
+							$this->plugin->alerts->Trigger(
+								2064, array(
+									'PostID' => $object_id,
+									'PostTitle' => $post->post_title,
+									'MetaID' => $meta_id,
+									'MetaKeyNew' => $meta_key,
+									'MetaKeyOld' => $this->old_meta[ $meta_id ]->key,
+									'MetaValue' => $meta_value,
+									'MetaLink' => $meta_key,
+									$editor_link['name'] => $editor_link['value'],
+								)
+							);
 							break;
 						case 'post':
-							$this->plugin->alerts->Trigger( 2062, array(
-								'PostID' => $object_id,
-								'PostTitle' => $post->post_title,
-								'MetaID' => $meta_id,
-								'MetaKeyNew' => $meta_key,
-								'MetaKeyOld' => $this->old_meta[$meta_id]->key,
-								'MetaValue' => $meta_value,
-								'MetaLink' => $meta_key,
-								$editorLink['name'] => $editorLink['value'],
-							) );
+							$this->plugin->alerts->Trigger(
+								2062, array(
+									'PostID' => $object_id,
+									'PostTitle' => $post->post_title,
+									'MetaID' => $meta_id,
+									'MetaKeyNew' => $meta_key,
+									'MetaKeyOld' => $this->old_meta[ $meta_id ]->key,
+									'MetaValue' => $meta_value,
+									'MetaLink' => $meta_key,
+									$editor_link['name'] => $editor_link['value'],
+								)
+							);
 							break;
 						default:
-							$this->plugin->alerts->Trigger( 2063, array(
-								'PostID' => $object_id,
-								'PostTitle' => $post->post_title,
-								'PostType' => $post->post_type,
-								'MetaID' => $meta_id,
-								'MetaKeyNew' => $meta_key,
-								'MetaKeyOld' => $this->old_meta[$meta_id]->key,
-								'MetaValue' => $meta_value,
-								'MetaLink' => $smeta_key,
-								$editorLink['name'] => $editorLink['value'],
-							) );
+							$this->plugin->alerts->Trigger(
+								2063, array(
+									'PostID' => $object_id,
+									'PostTitle' => $post->post_title,
+									'PostType' => $post->post_type,
+									'MetaID' => $meta_id,
+									'MetaKeyNew' => $meta_key,
+									'MetaKeyOld' => $this->old_meta[ $meta_id ]->key,
+									'MetaValue' => $meta_value,
+									'MetaLink' => $smeta_key,
+									$editor_link['name'] => $editor_link['value'],
+								)
+							);
 							break;
 					}
 				} elseif ( $this->old_meta[ $meta_id ]->val != $meta_value ) { // Check change in meta value.
 					switch ( $post->post_type ) {
 						case 'page':
-							$this->plugin->alerts->Trigger( 2060, array(
-								'PostID' => $object_id,
-								'PostTitle' => $post->post_title,
-								'MetaID' => $meta_id,
-								'MetaKey' => $meta_key,
-								'MetaValueNew' => $meta_value,
-								'MetaValueOld' => $this->old_meta[$meta_id]->val,
-								'MetaLink' => $meta_key,
-								$editorLink['name'] => $editorLink['value'],
-							) );
+							$this->plugin->alerts->Trigger(
+								2060, array(
+									'PostID' => $object_id,
+									'PostTitle' => $post->post_title,
+									'MetaID' => $meta_id,
+									'MetaKey' => $meta_key,
+									'MetaValueNew' => $meta_value,
+									'MetaValueOld' => $this->old_meta[ $meta_id ]->val,
+									'MetaLink' => $meta_key,
+									$editor_link['name'] => $editor_link['value'],
+								)
+							);
 							break;
 						case 'post':
-							$this->plugin->alerts->Trigger( 2054, array(
-								'PostID' => $object_id,
-								'PostTitle' => $post->post_title,
-								'MetaID' => $meta_id,
-								'MetaKey' => $meta_key,
-								'MetaValueNew' => $meta_value,
-								'MetaValueOld' => $this->old_meta[$meta_id]->val,
-								'MetaLink' => $meta_key,
-								$editorLink['name'] => $editorLink['value'],
-							) );
+							$this->plugin->alerts->Trigger(
+								2054, array(
+									'PostID' => $object_id,
+									'PostTitle' => $post->post_title,
+									'MetaID' => $meta_id,
+									'MetaKey' => $meta_key,
+									'MetaValueNew' => $meta_value,
+									'MetaValueOld' => $this->old_meta[ $meta_id ]->val,
+									'MetaLink' => $meta_key,
+									$editor_link['name'] => $editor_link['value'],
+								)
+							);
 							break;
 						default:
-							$this->plugin->alerts->Trigger( 2057, array(
-								'PostID' => $object_id,
-								'PostTitle' => $post->post_title,
-								'PostType' => $post->post_type,
-								'MetaID' => $meta_id,
-								'MetaKey' => $meta_key,
-								'MetaValueNew' => $meta_value,
-								'MetaValueOld' => $this->old_meta[$meta_id]->val,
-								'MetaLink' => $meta_key,
-								$editorLink['name'] => $editorLink['value'],
-							) );
+							$this->plugin->alerts->Trigger(
+								2057, array(
+									'PostID' => $object_id,
+									'PostTitle' => $post->post_title,
+									'PostType' => $post->post_type,
+									'MetaID' => $meta_id,
+									'MetaKey' => $meta_key,
+									'MetaValueNew' => $meta_value,
+									'MetaValueOld' => $this->old_meta[ $meta_id ]->val,
+									'MetaLink' => $meta_key,
+									$editor_link['name'] => $editor_link['value'],
+								)
+							);
 							break;
 					}
 				}
@@ -302,10 +354,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	/**
 	 * Deleted a custom field.
 	 *
-	 * @param int 	 $meta_ids - Meta IDs.
-	 * @param int 	 $object_id - Object ID.
+	 * @param int    $meta_ids - Meta IDs.
+	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
-	 * @param mix 	 $meta_value - Meta value.
+	 * @param mix    $meta_value - Meta value.
 	 */
 	public function EventPostMetaDeleted( $meta_ids, $object_id, $meta_key, $meta_value ) {
 
@@ -316,45 +368,61 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 
 		$post = get_post( $object_id );
 
+		// Filter $_POST global array for security.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Check nonce.
+		if ( isset( $post_array['_ajax_nonce'] ) && ! wp_verify_nonce( $post_array['_ajax_nonce'], 'delete-meta_' . $post_array['id'] ) ) {
+			return false;
+		} elseif ( isset( $post_array['_wpnonce'] ) && isset( $post_array['post_ID'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
+			return false;
+		}
+
 		$wp_action = array( 'delete-meta' );
 
-		if ( isset( $_POST['action'] ) && in_array( $_POST['action'], $wp_action ) ) {
-			$editorLink = $this->GetEditorLink( $post );
+		if ( isset( $post_array['action'] ) && in_array( $post_array['action'], $wp_action ) ) {
+			$editor_link = $this->GetEditorLink( $post );
 			foreach ( $meta_ids as $meta_id ) {
 				if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) ) {
 					continue;
 				}
 				switch ( $post->post_type ) {
 					case 'page':
-						$this->plugin->alerts->Trigger( 2061, array(
-							'PostID' => $object_id,
-							'PostTitle' => $post->post_title,
-							'MetaID' => $meta_id,
-							'MetaKey' => $meta_key,
-							'MetaValue' => $meta_value,
-							$editorLink['name'] => $editorLink['value'],
-						) );
+						$this->plugin->alerts->Trigger(
+							2061, array(
+								'PostID' => $object_id,
+								'PostTitle' => $post->post_title,
+								'MetaID' => $meta_id,
+								'MetaKey' => $meta_key,
+								'MetaValue' => $meta_value,
+								$editor_link['name'] => $editor_link['value'],
+							)
+						);
 						break;
 					case 'post':
-						$this->plugin->alerts->Trigger( 2055, array(
-							'PostID' => $object_id,
-							'PostTitle' => $post->post_title,
-							'MetaID' => $meta_id,
-							'MetaKey' => $meta_key,
-							'MetaValue' => $meta_value,
-							$editorLink['name'] => $editorLink['value'],
-						) );
+						$this->plugin->alerts->Trigger(
+							2055, array(
+								'PostID' => $object_id,
+								'PostTitle' => $post->post_title,
+								'MetaID' => $meta_id,
+								'MetaKey' => $meta_key,
+								'MetaValue' => $meta_value,
+								$editor_link['name'] => $editor_link['value'],
+							)
+						);
 						break;
 					default:
-						$this->plugin->alerts->Trigger( 2058, array(
-							'PostID' => $object_id,
-							'PostTitle' => $post->post_title,
-							'PostType' => $post->post_type,
-							'MetaID' => $meta_id,
-							'MetaKey' => $meta_key,
-							'MetaValue' => $meta_value,
-							$editorLink['name'] => $editorLink['value'],
-						) );
+						$this->plugin->alerts->Trigger(
+							2058, array(
+								'PostID' => $object_id,
+								'PostTitle' => $post->post_title,
+								'PostType' => $post->post_type,
+								'MetaID' => $meta_id,
+								'MetaKey' => $meta_key,
+								'MetaValue' => $meta_value,
+								$editor_link['name'] => $editor_link['value'],
+							)
+						);
 						break;
 				}
 			}
@@ -373,26 +441,26 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	/**
 	 * Get editor link.
 	 *
-	 * @param stdClass $post the post.
-	 * @return array $aLink name and value link
+	 * @param stdClass $post - The post.
+	 * @return array $editor_link - Name and value link
 	 */
 	private function GetEditorLink( $post ) {
 		$name = 'EditorLink';
 		$name .= ( 'page' == $post->post_type ) ? 'Page' : 'Post';
 		$value = get_edit_post_link( $post->ID );
-		$aLink = array(
+		$editor_link = array(
 			'name' => $name,
 			'value' => $value,
 		);
-		return $aLink;
+		return $editor_link;
 	}
 
 	/**
 	 * Create a custom field name/value.
 	 *
-	 * @param int 	 $object_id - Object ID.
+	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
-	 * @param mix 	 $meta_value - Meta value.
+	 * @param mix    $meta_value - Meta value.
 	 */
 	public function event_user_meta_created( $object_id, $meta_key, $meta_value ) {
 
@@ -406,28 +474,35 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 
 		if ( empty( $meta_value ) && ( $this->null_meta_counter < 1 ) ) { // Report only one NULL meta value.
 			$this->null_meta_counter += 1;
-		} else { // Do not report if NULL meta values are more than one.
+		} elseif ( $this->null_meta_counter >= 1 ) { // Do not report if NULL meta values are more than one.
 			return;
 		}
 
-		// Get POST array.
-		$post_array = $_POST;
+		// Filter $_POST global array for security.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Check nonce.
+		if ( isset( $post_array['_wpnonce'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update-user_' . $user->ID ) ) {
+			return false;
+		}
 
 		// If update action is set then trigger the alert.
 		if ( isset( $post_array['action'] ) && ( 'update' == $post_array['action'] || 'createuser' == $post_array['action'] ) ) {
-			$this->plugin->alerts->Trigger( 4016, array(
-				'TargetUsername'	=> $user->user_login,
-				'custom_field_name' => $meta_key,
-				'new_value' 		=> $meta_value,
-			) );
+			$this->plugin->alerts->Trigger(
+				4016, array(
+					'TargetUsername'    => $user->user_login,
+					'custom_field_name' => $meta_key,
+					'new_value'         => $meta_value,
+				)
+			);
 		}
 	}
 
 	/**
 	 * Sets the old meta.
 	 *
-	 * @param int 	 $meta_id - Meta ID.
-	 * @param int 	 $object_id - Object ID.
+	 * @param int    $meta_id - Meta ID.
+	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
 	 */
 	public function event_user_meta_updating( $meta_id, $object_id, $meta_key ) {
@@ -459,20 +534,27 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		// User profile name related meta.
 		$username_meta = array( 'first_name', 'last_name', 'nickname' );
 
-		// Get POST array.
-		$post_array = $_POST;
+		// Filter $_POST global array for security.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Check nonce.
+		if ( isset( $post_array['_wpnonce'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update-user_' . $user->ID ) ) {
+			return false;
+		}
 
 		// If update action is set then trigger the alert.
 		if ( isset( $post_array['action'] ) && 'update' == $post_array['action'] ) {
 			if ( isset( $this->old_meta[ $meta_id ] ) && ! in_array( $meta_key, $username_meta, true ) ) {
 				// Check change in meta value.
 				if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
-					$this->plugin->alerts->Trigger( 4015, array(
-						'TargetUsername' => $user->user_login,
-						'custom_field_name' => $meta_key,
-						'new_value' => $meta_value,
-						'old_value' => $this->old_meta[ $meta_id ]->val,
-					) );
+					$this->plugin->alerts->Trigger(
+						4015, array(
+							'TargetUsername' => $user->user_login,
+							'custom_field_name' => $meta_key,
+							'new_value' => $meta_value,
+							'old_value' => $this->old_meta[ $meta_id ]->val,
+						)
+					);
 				}
 				// Remove old meta update data.
 				unset( $this->old_meta[ $meta_id ] );
@@ -481,31 +563,37 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				switch ( $meta_key ) {
 					case 'first_name':
 						if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
-							$this->plugin->alerts->Trigger( 4017, array(
-								'TargetUsername' => $user->user_login,
-								'new_firstname' => $meta_value,
-								'old_firstname' => $this->old_meta[ $meta_id ]->val,
-							) );
+							$this->plugin->alerts->Trigger(
+								4017, array(
+									'TargetUsername' => $user->user_login,
+									'new_firstname' => $meta_value,
+									'old_firstname' => $this->old_meta[ $meta_id ]->val,
+								)
+							);
 						}
 						break;
 
 					case 'last_name':
 						if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
-							$this->plugin->alerts->Trigger( 4018, array(
-								'TargetUsername' => $user->user_login,
-								'new_lastname' => $meta_value,
-								'old_lastname' => $this->old_meta[ $meta_id ]->val,
-							) );
+							$this->plugin->alerts->Trigger(
+								4018, array(
+									'TargetUsername' => $user->user_login,
+									'new_lastname' => $meta_value,
+									'old_lastname' => $this->old_meta[ $meta_id ]->val,
+								)
+							);
 						}
 						break;
 
 					case 'nickname':
 						if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
-							$this->plugin->alerts->Trigger( 4019, array(
-								'TargetUsername' => $user->user_login,
-								'new_nickname' => $meta_value,
-								'old_nickname' => $this->old_meta[ $meta_id ]->val,
-							) );
+							$this->plugin->alerts->Trigger(
+								4019, array(
+									'TargetUsername' => $user->user_login,
+									'new_nickname' => $meta_value,
+									'old_nickname' => $this->old_meta[ $meta_id ]->val,
+								)
+							);
 						}
 						break;
 
@@ -534,11 +622,13 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 
 		// Alert if display name is changed.
 		if ( $old_display_name !== $new_display_name ) {
-			$this->plugin->alerts->Trigger( 4020, array(
-				'TargetUsername' => $new_userdata->user_login,
-				'new_displayname' => $new_display_name,
-				'old_displayname' => $old_display_name,
-			) );
+			$this->plugin->alerts->Trigger(
+				4020, array(
+					'TargetUsername' => $new_userdata->user_login,
+					'new_displayname' => $new_display_name,
+					'old_displayname' => $old_display_name,
+				)
+			);
 		}
 
 	}

@@ -1,65 +1,174 @@
 <?php
 /**
- * @package Wsal
+ * View: External DB Page
  *
+ * WSAL external db page.
+ *
+ * @since 1.0.0
+ * @package Wsal
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
  * External DB Add-On promo Page.
  * Used only if the plugin is not activated.
+ *
+ * @package Wsal
  */
-class WSAL_Views_ExternalDB extends WSAL_AbstractView
-{
-    
-    public function GetTitle()
-    {
-        return __('External DB Add-On', 'wp-security-audit-log');
-    }
-    
-    public function GetIcon()
-    {
-        return 'dashicons-external';
-    }
-    
-    public function GetName()
-    {
-        return __('External DB ', 'wp-security-audit-log');
-    }
-    
-    public function GetWeight()
-    {
-        return 10;
-    }
+class WSAL_Views_ExternalDB extends WSAL_AbstractView {
 
-    public function Header()
-    {
-        wp_enqueue_style(
-            'extensions',
-            $this->_plugin->GetBaseUrl() . '/css/extensions.css',
-            array(),
-            filemtime($this->_plugin->GetBaseDir() . '/css/extensions.css')
-        );
-    }
-    
-    public function Render()
-    {
-        ?>
-         <div class="wrap-advertising-page-single">
-            <div class="icon" style='background-image:url("<?=$this->_plugin->GetBaseUrl();?>/img/database.jpg");'></div>
-            <h3><?php _e('External DB', 'wp-security-audit-log'); ?></h3>
-            <p>
-                <?php _e('Meet Legal and Regulatory Compliance Requirements, Improve the Security of Your WordPress and Boost its Performance by storing the WordPress Audit Trail in an external database.', 'wp-security-audit-log'); ?>
-            </p>
-            <?php $url = 'https://www.wpsecurityauditlog.com/extensions/external-database-for-wp-security-audit-log/?utm_source=plugin&utm_medium=externaldbpage&utm_campaign=externaldb'; ?>
-            <p>
-                <a class="button-primary" href="<?php echo esc_attr($url); ?>" target="_blank"><?php _e('Learn More', 'wp-security-audit-log'); ?></a>
-            </p>
-            <div class="clear"></div>
-            <p>
-                <span class="description">
-                    <strong><span class="text-red">70% Off</span> when you purchase this add-on as part of the All Add-On bundle.</strong> 
-                </span>
-            </p>
-            <?php $url = 'https://www.wpsecurityauditlog.com/extensions/all-add-ons-60-off/?utm_source=plugin&utm_medium=extensionspage&utm_campaign=alladdons'; ?>
-            <a class="button-blue" href="<?php echo esc_attr($url); ?>" target="_blank"><?php _e('Buy all Add-Ons Bundle', 'wp-security-audit-log'); ?></a>
-        </div>
-        <?php
-    }
+	/**
+	 * Method: Get View Title.
+	 */
+	public function GetTitle() {
+		return __( 'External DB Add-On', 'wp-security-audit-log' );
+	}
+
+	/**
+	 * Method: Get View Icon.
+	 */
+	public function GetIcon() {
+		return 'dashicons-external';
+	}
+
+	/**
+	 * Method: Get View Name.
+	 */
+	public function GetName() {
+		return __( 'DB & Integrations &#8682;', 'wp-security-audit-log' );
+	}
+
+	/**
+	 * Method: Get View Weight.
+	 */
+	public function GetWeight() {
+		return 10;
+	}
+
+	/**
+	 * Method: Get View Header.
+	 */
+	public function Header() {
+		// Extension Page CSS.
+		wp_enqueue_style(
+			'extensions',
+			$this->_plugin->GetBaseUrl() . '/css/extensions.css',
+			array(),
+			filemtime( $this->_plugin->GetBaseDir() . '/css/extensions.css' )
+		);
+
+		// Swipebox CSS.
+		wp_enqueue_style(
+			'wsal-swipebox-css',
+			$this->_plugin->GetBaseUrl() . '/css/swipebox.min.css',
+			array(),
+			filemtime( $this->_plugin->GetBaseDir() . '/css/swipebox.min.css' )
+		);
+	}
+
+	/**
+	 * Method: Get View Footer.
+	 */
+	public function Footer() {
+		// jQuery.
+		wp_enqueue_script( 'jquery' );
+
+		// Swipebox JS.
+		wp_register_script(
+			'wsal-swipebox-js',
+			$this->_plugin->GetBaseUrl() . '/js/jquery.swipebox.min.js',
+			array( 'jquery' ),
+			filemtime( $this->_plugin->GetBaseDir() . '/js/jquery.swipebox.min.js' )
+		);
+		wp_enqueue_script( 'wsal-swipebox-js' );
+
+		// Extensions JS.
+		wp_register_script(
+			'wsal-extensions-js',
+			$this->_plugin->GetBaseUrl() . '/js/extensions.js',
+			array( 'wsal-swipebox-js' ),
+			filemtime( $this->_plugin->GetBaseDir() . '/js/extensions.js' )
+		);
+		wp_enqueue_script( 'wsal-extensions-js' );
+	}
+
+	/**
+	 * Method: Get View.
+	 */
+	public function Render() {
+		?>
+		<div class="wrap-advertising-page-single">
+			<div class="wsal-row">
+				<div class="wsal-col">
+					<div class="icon" style='background-image:url("<?php echo esc_url( $this->_plugin->GetBaseUrl() ); ?>/img/database.jpg");'></div>
+				</div>
+				<!-- /.wsal-col -->
+
+				<div class="wsal-col">
+					<h3><?php esc_html_e( 'External DB', 'wp-security-audit-log' ); ?></h3>
+					<p>
+						<?php esc_html_e( 'Upgrade to Premium to:', 'wp-security-audit-log' ); ?>
+					</p>
+					<p>
+						<ul class="wsal-features-list">
+							<li><?php esc_html_e( 'Move the audit log to an external database for improved security & performance,', 'wp-security-audit-log' ); ?></li>
+							<li><?php esc_html_e( 'Centralize the audit log in your centralized logging system,', 'wp-security-audit-log' ); ?></li>
+							<li><?php esc_html_e( 'Mirror the audit trail to Syslog, Papertrail etc,', 'wp-security-audit-log' ); ?></li>
+							<li><?php esc_html_e( 'Configure archiving rules to archive old alerts in an archiving database,', 'wp-security-audit-log' ); ?></li>
+							<li><?php esc_html_e( '& more.', 'wp-security-audit-log' ); ?></li>
+						</ul>
+					</p>
+					<?php
+					$buy_now = add_query_arg( 'page', 'wsal-auditlog-pricing', admin_url( 'admin.php' ) );
+					$more_info = add_query_arg(
+						array(
+							'utm_source' => 'plugin',
+							'utm_medium' => 'page',
+							'utm_content' => 'db+more+info',
+							'utm_campaign' => 'upgrade+premium',
+						),
+						'https://www.wpsecurityauditlog.com/premium-features/'
+					);
+					?>
+					<p>
+						<a class="button-primary wsal-extension-btn" href="<?php echo esc_attr( $buy_now ); ?>"><?php esc_html_e( 'Upgrade to Premium', 'wp-security-audit-log' ); ?></a>
+						<a class="button-primary wsal-extension-btn" href="<?php echo esc_attr( $more_info ); ?>" target="_blank"><?php esc_html_e( 'More Information', 'wp-security-audit-log' ); ?></a>
+					</p>
+				</div>
+				<!-- /.wsal-col -->
+			</div>
+			<!-- /.wsal-row -->
+
+			<div class="wsal-row">
+				<div class="wsal-col">
+					<h3><?php esc_html_e( 'Screenshots', 'wp-security-audit-log' ); ?></h3>
+
+					<p>
+						<ul class="wsal-features-list">
+							<li>
+								<?php esc_html_e( 'Configure an external database so the WordPress audit trail is stored on it instead of the WordPress database.', 'wp-security-audit-log' ); ?><br />
+								<a class="swipebox" title="<?php esc_attr_e( 'Configure an external database so the WordPress audit trail is stored on it instead of the WordPress database.', 'wp-security-audit-log' ); ?>"
+									href="<?php echo esc_url( $this->_plugin->GetBaseUrl() ); ?>/img/external-db/external_database_1.png">
+									<img width="500" src="<?php echo esc_url( $this->_plugin->GetBaseUrl() ); ?>/img/external-db/external_database_1.png">
+								</a>
+							</li>
+							<li>
+								<?php esc_html_e( 'Configure mirroring to keep a secondary copy of the WordPress audit trail on Syslog, Papertrail etc.', 'wp-security-audit-log' ); ?><br />
+								<a class="swipebox" title="<?php esc_attr_e( 'Configure mirroring to keep a secondary copy of the WordPress audit trail on Syslog, Papertrail etc.', 'wp-security-audit-log' ); ?>"
+									href="<?php echo esc_url( $this->_plugin->GetBaseUrl() ); ?>/img/external-db/extermal_database_mirroring_options.png">
+									<img width="500" src="<?php echo esc_url( $this->_plugin->GetBaseUrl() ); ?>/img/external-db/extermal_database_mirroring_options.png">
+								</a>
+							</li>
+						</ul>
+					</p>
+				</div>
+			</div>
+			<!-- /.wsal-row -->
+		</div>
+		<?php
+	}
 }

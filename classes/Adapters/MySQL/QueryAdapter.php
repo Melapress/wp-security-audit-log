@@ -1,269 +1,292 @@
 <?php
 /**
+ * Adapter: Query.
+ *
+ * MySQL database Query class.
+ *
  * @package Wsal
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
  * MySQL database Query class.
  *
  * The SQL query is created in this class, here the SQL is filled with
  * the arguments.
+ *
+ * @package Wsal
  */
-class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface
-{
-    protected $connection;
+class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 
-    public function __construct($conn)
-    {
-        $this->connection = $conn;
-    }
+	/**
+	 * DB Connection
+	 *
+	 * @var array
+	 */
+	protected $connection;
 
-    /**
-     * Get the SQL filled with the args.
-     * @param object $query query object
-     * @param array $args args of the query
-     * @return string Generated sql.
-     */
-    protected function GetSql($query, &$args = array())
-    {
-        $conditions = $query->getConditions();
-        $searchCondition = $this->SearchCondition($query);
-        $sWhereClause = "";
-        foreach ($conditions as $fieldName => $fieldValue) {
-            if (empty($sWhereClause)) {
-                $sWhereClause .= " WHERE ";
-            } else {
-                $sWhereClause .= " AND ";
-            }
+	/**
+	 * Method: Constructor.
+	 *
+	 * @param array $conn - Connection array.
+	 */
+	public function __construct( $conn ) {
+		$this->connection = $conn;
+	}
 
-            if (is_array($fieldValue)) {
-                $subWhereClause = "(";
-                foreach ($fieldValue as $orFieldName => $orFieldValue) {
-                    if (is_array($orFieldValue)) {
-                        foreach ($orFieldValue as $value) {
-                            if ($subWhereClause != '(') {
-                                $subWhereClause .= " OR ";
-                            }
-                            $subWhereClause .= $orFieldName;
-                            $args[] = $value;
-                        }
-                    } else {
-                        if ($subWhereClause != '(') {
-                            $subWhereClause .= " OR ";
-                        }
-                        $subWhereClause .= $orFieldName;
-                        $args[] = $orFieldValue;
-                    }
-                }
-                $subWhereClause .= ")";
-                $sWhereClause .= $subWhereClause;
-            } else {
-                $sWhereClause .= $fieldName;
-                $args[] = $fieldValue;
-            }
-        }
+	/**
+	 * Get the SQL filled with the args.
+	 *
+	 * @param object $query - Query object.
+	 * @param array  $args - Args of the query.
+	 * @return string Generated sql.
+	 */
+	protected function GetSql( $query, &$args = array() ) {
+		$conditions = $query->getConditions();
+		$search_condition = $this->SearchCondition( $query );
+		$s_where_clause = '';
+		foreach ( $conditions as $field_name => $field_value ) {
+			if ( empty( $s_where_clause ) ) {
+				$s_where_clause .= ' WHERE ';
+			} else {
+				$s_where_clause .= ' AND ';
+			}
 
-        $fromDataSets = $query->getFrom();
-        $columns = $query->getColumns();
-        $orderBys = $query->getOrderBy();
+			if ( is_array( $field_value ) ) {
+				$sub_where_clause = '(';
+				foreach ( $field_value as $or_field_name => $or_field_value ) {
+					if ( is_array( $or_field_value ) ) {
+						foreach ( $or_field_value as $value ) {
+							if ( '(' != $sub_where_clause ) {
+								$sub_where_clause .= ' OR ';
+							}
+							$sub_where_clause .= $or_field_name;
+							$args[] = $value;
+						}
+					} else {
+						if ( '(' != $sub_where_clause ) {
+							$sub_where_clause .= ' OR ';
+						}
+						$sub_where_clause .= $or_field_name;
+						$args[] = $or_field_value;
+					}
+				}
+				$sub_where_clause .= ')';
+				$s_where_clause .= $sub_where_clause;
+			} else {
+				$s_where_clause .= $field_name;
+				$args[] = $field_value;
+			}
+		}
 
-        $sLimitClause = "";
-        if ($query->getLimit()) {
-            $sLimitClause .= " LIMIT ";
-            if ($query->getOffset()) {
-                $sLimitClause .= $query->getOffset() . ", ";
-            }
-            $sLimitClause .= $query->getLimit();
-        }
-        $joinClause = '';
-        if ($query->hasMetaJoin()) {
-            $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
-            $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
-            $joinClause = ' LEFT JOIN '. $meta->GetTable() .' AS meta ON meta.occurrence_id = '. $occurrence->GetTable() .'.id ';
-        }
-        $fields = (empty($columns))? $fromDataSets[0] . '.*' : implode(',', $columns);
-        if (!empty($searchCondition)) {
-            $args[] = $searchCondition['args'];
-        }
+		$from_data_sets = $query->getFrom();
+		$columns = $query->getColumns();
+		$order_bys = $query->getOrderBy();
 
-        $sql = 'SELECT ' . $fields
-            . ' FROM ' . implode(',', $fromDataSets)
-            . $joinClause
-            . $sWhereClause
-            . (!empty($searchCondition) ? (empty($sWhereClause) ? " WHERE ".$searchCondition['sql'] : " AND ".$searchCondition['sql']) : '')
-            // @todo GROUP BY goes here
-            . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', array_keys($orderBys)) . ' ' . implode(', ', array_values($orderBys))) : '')
-            . $sLimitClause;
-        return $sql;
-    }
+		$s_limit_clause = '';
+		if ( $query->getLimit() ) {
+			$s_limit_clause .= ' LIMIT ';
+			if ( $query->getOffset() ) {
+				$s_limit_clause .= $query->getOffset() . ', ';
+			}
+			$s_limit_clause .= $query->getLimit();
+		}
+		$join_clause = '';
+		if ( $query->hasMetaJoin() ) {
+			$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+			$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
+			$join_clause = ' LEFT JOIN ' . $meta->GetTable() . ' AS meta ON meta.occurrence_id = ' . $occurrence->GetTable() . '.id ';
+		}
+		$fields = (empty( $columns )) ? $from_data_sets[0] . '.*' : implode( ',', $columns );
+		if ( ! empty( $search_condition ) ) {
+			$args[] = $search_condition['args'];
+		}
 
-    /**
-     * Get an instance of the ActiveRecord Adapter.
-     * @return WSAL_Adapters_MySQL_ActiveRecord
-     */
-    protected function getActiveRecordAdapter()
-    {
-        return new WSAL_Adapters_MySQL_ActiveRecord($this->connection);
-    }
+		$sql = 'SELECT ' . $fields
+			. ' FROM ' . implode( ',', $from_data_sets )
+			. $join_clause
+			. $s_where_clause
+			. ( ! empty( $search_condition ) ? (empty( $s_where_clause ) ? ' WHERE ' . $search_condition['sql'] : ' AND ' . $search_condition['sql']) : '')
+			// @todo GROUP BY goes here
+			. ( ! empty( $order_bys ) ? (' ORDER BY ' . implode( ', ', array_keys( $order_bys ) ) . ' ' . implode( ', ', array_values( $order_bys ) )) : '')
+			. $s_limit_clause;
+		return $sql;
+	}
 
-    /**
-     * Execute query and return data as $ar_cls objects.
-     * @param object $query query object
-     * @return WSAL_Models_ActiveRecord[]
-     */
-    public function Execute($query)
-    {
-        $args = array();
-        $sql = $this->GetSql($query, $args);
+	/**
+	 * Get an instance of the ActiveRecord Adapter.
+	 *
+	 * @return WSAL_Adapters_MySQL_ActiveRecord
+	 */
+	protected function getActiveRecordAdapter() {
+		return new WSAL_Adapters_MySQL_ActiveRecord( $this->connection );
+	}
 
-        $occurenceAdapter = $query->getConnector()->getAdapter("Occurrence");
+	/**
+	 * Execute query and return data as $ar_cls objects.
+	 *
+	 * @param object $query - Query object.
+	 * @return WSAL_Models_ActiveRecord[]
+	 */
+	public function Execute( $query ) {
+		$args = array();
+		$sql = $this->GetSql( $query, $args );
 
-        if (in_array($occurenceAdapter->GetTable(), $query->getFrom())) {
-            return $occurenceAdapter->LoadMulti($sql, $args);
-        } else {
-            return $this->getActiveRecordAdapter()->LoadMulti($sql, $args);
-        }
-    }
+		$occurence_adapter = $query->getConnector()->getAdapter( 'Occurrence' );
 
-    /**
-     * Count query
-     * @param object $query query object
-     * @return integer counting records.
-     */
-    public function Count($query)
-    {
-        // back up columns, use COUNT as default column and generate sql
-        $cols = $query->getColumns();
-        $query->clearColumns();
-        $query->addColumn('COUNT(*)');
+		if ( in_array( $occurence_adapter->GetTable(), $query->getFrom() ) ) {
+			return $occurence_adapter->LoadMulti( $sql, $args );
+		} else {
+			return $this->getActiveRecordAdapter()->LoadMulti( $sql, $args );
+		}
+	}
 
-        $args = array();
-        $sql = $this->GetSql($query, $args);
+	/**
+	 * Count query
+	 *
+	 * @param object $query - Query object.
+	 * @return integer counting records.
+	 */
+	public function Count( $query ) {
+		// Back up columns, use COUNT as default column and generate sql.
+		$cols = $query->getColumns();
+		$query->clearColumns();
+		$query->addColumn( 'COUNT(*)' );
 
-        // restore columns
-        $query->setColumns($cols);
-        // execute query and return result
-        return $this->getActiveRecordAdapter()->CountQuery($sql, $args);
-    }
+		$args = array();
+		$sql = $this->GetSql( $query, $args );
 
-    /**
-     * Count DELETE query
-     * @param object $query query object
-     * @return integer counting records.
-     */
-    public function CountDelete($query)
-    {
-        $result = $this->GetSqlDelete($query, true);
-        // execute query and return result
-        return $this->getActiveRecordAdapter()->CountQuery($result['sql'], $result['args']);
-    }
+		// Restore columns.
+		$query->setColumns( $cols );
+		// Execute query and return result.
+		return $this->getActiveRecordAdapter()->CountQuery( $sql, $args );
+	}
 
-    /**
-     * Query for deleting records
-     * @param object $query query object.
-     */
-    public function Delete($query)
-    {
-        $result = $this->GetSqlDelete($query);
-        $this->DeleteMetas($query, $result['args']);
-        return $this->getActiveRecordAdapter()->DeleteQuery($result['sql'], $result['args']);
-    }
+	/**
+	 * Count DELETE query
+	 *
+	 * @param object $query - Query object.
+	 * @return integer counting records.
+	 */
+	public function CountDelete( $query ) {
+		$result = $this->GetSqlDelete( $query, true );
+		// Execute query and return result.
+		return $this->getActiveRecordAdapter()->CountQuery( $result['sql'], $result['args'] );
+	}
 
-    /**
-     * Load occurrence IDs then delete Metadata by occurrence_id
-     * @param object $query query object
-     * @param array $args args of the query
-     */
-    public function DeleteMetas($query, $args)
-    {
-        // back up columns, use COUNT as default column and generate sql
-        $cols = $query->getColumns();
-        $query->clearColumns();
-        $query->addColumn('id');
-        $sql = $this->GetSql($query);
-        // restore columns
-        $query->setColumns($cols);
+	/**
+	 * Query for deleting records
+	 *
+	 * @param object $query query object.
+	 */
+	public function Delete( $query ) {
+		$result = $this->GetSqlDelete( $query );
+		$this->DeleteMetas( $query, $result['args'] );
+		return $this->getActiveRecordAdapter()->DeleteQuery( $result['sql'], $result['args'] );
+	}
 
-        $_wpdb = $this->connection;
-        $occ_ids = array();
-        $sql = (!empty($args) ? $_wpdb->prepare($sql, $args) : $sql);
-        foreach ($_wpdb->get_results($sql, ARRAY_A) as $data) {
-            $occ_ids[] = $data['id'];
-        }
-        $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
-        $meta->DeleteByOccurenceIds($occ_ids);
-    }
+	/**
+	 * Load occurrence IDs then delete Metadata by occurrence_id
+	 *
+	 * @param object $query - Query object.
+	 * @param array  $args - Args of the query.
+	 */
+	public function DeleteMetas( $query, $args ) {
+		// Back up columns, use COUNT as default column and generate sql.
+		$cols = $query->getColumns();
+		$query->clearColumns();
+		$query->addColumn( 'id' );
+		$sql = $this->GetSql( $query );
+		// Restore columns.
+		$query->setColumns( $cols );
 
-    /**
-     * Get the DELETE query SQL filled with the args.
-     * @param object $query query object
-     * @param array $args args of the query
-     * @return string Generated sql.
-     */
-    public function GetSqlDelete($query, $getCount = false)
-    {
-        $result = array();
-        $args = array();
-        // back up columns, remove them for DELETE and generate sql
-        $cols = $query->getColumns();
-        $query->clearColumns();
+		$_wpdb = $this->connection;
+		$occ_ids = array();
+		$sql = ( ! empty( $args ) ? $_wpdb->prepare( $sql, $args ) : $sql);
+		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
+			$occ_ids[] = $data['id'];
+		}
+		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+		$meta->DeleteByOccurenceIds( $occ_ids );
+	}
 
-        $conditions = $query->getConditions();
+	/**
+	 * Get the DELETE query SQL filled with the args.
+	 *
+	 * @param object $query - Query object.
+	 * @param bool   $get_count - Get count.
+	 * @return string - Generated sql.
+	 */
+	public function GetSqlDelete( $query, $get_count = false ) {
+		$result = array();
+		$args = array();
+		// Back up columns, remove them for DELETE and generate sql.
+		$cols = $query->getColumns();
+		$query->clearColumns();
 
-        $sWhereClause = "";
-        foreach ($conditions as $fieldName => $fieldValue) {
-            if (empty($sWhereClause)) {
-                $sWhereClause .= " WHERE ";
-            } else {
-                $sWhereClause .= " AND ";
-            }
-            $sWhereClause .= $fieldName;
-            $args[] = $fieldValue;
-        }
+		$conditions = $query->getConditions();
 
-        $fromDataSets = $query->getFrom();
-        $orderBys = $query->getOrderBy();
+		$s_where_clause = '';
+		foreach ( $conditions as $field_name => $field_value ) {
+			if ( empty( $s_where_clause ) ) {
+				$s_where_clause .= ' WHERE ';
+			} else {
+				$s_where_clause .= ' AND ';
+			}
+			$s_where_clause .= $field_name;
+			$args[] = $field_value;
+		}
 
-        $sLimitClause = "";
-        if ($query->getLimit()) {
-            $sLimitClause .= " LIMIT ";
-            if ($query->getOffset()) {
-                $sLimitClause .= $query->getOffset() . ", ";
-            }
-            $sLimitClause .= $query->getLimit();
-        }
-        $result['sql'] = ($getCount ? 'SELECT COUNT(*) FROM ' : 'DELETE FROM ')
-            . implode(',', $fromDataSets)
-            . $sWhereClause
-            . (!empty($orderBys) ? (' ORDER BY ' . implode(', ', array_keys($orderBys)) . ' ' . implode(', ', array_values($orderBys))) : '')
-            . $sLimitClause;
-        $result['args'] = $args;
-        // restore columns
-        $query->setColumns($cols);
+		$from_data_sets = $query->getFrom();
+		$order_bys = $query->getOrderBy();
 
-        return $result;
-    }
+		$s_limit_clause = '';
+		if ( $query->getLimit() ) {
+			$s_limit_clause .= ' LIMIT ';
+			if ( $query->getOffset() ) {
+				$s_limit_clause .= $query->getOffset() . ', ';
+			}
+			$s_limit_clause .= $query->getLimit();
+		}
+		$result['sql'] = ($get_count ? 'SELECT COUNT(*) FROM ' : 'DELETE FROM ')
+			. implode( ',', $from_data_sets )
+			. $s_where_clause
+			. ( ! empty( $order_bys ) ? (' ORDER BY ' . implode( ', ', array_keys( $order_bys ) ) . ' ' . implode( ', ', array_values( $order_bys ) )) : '')
+			. $s_limit_clause;
+		$result['args'] = $args;
+		// Restore columns.
+		$query->setColumns( $cols );
 
-    /**
-     * Search by alert code OR by Metadata value.
-     * @param object $query query object
-     */
-    public function SearchCondition($query)
-    {
-        $condition = $query->getSearchCondition();
-        if (empty($condition)) {
-            return null;
-        }
-        $searchConditions = array();
-        $meta = new WSAL_Adapters_MySQL_Meta($this->connection);
-        $occurrence = new WSAL_Adapters_MySQL_Occurrence($this->connection);
-        if (is_numeric($condition) && strlen($condition) == 4) {
-            $searchConditions['sql'] = $occurrence->GetTable() .'.alert_id LIKE %s';
-        } else {
-            $searchConditions['sql'] = $occurrence->GetTable() .'.id IN (
-                SELECT DISTINCT occurrence_id
-                    FROM ' . $meta->GetTable() . '
-                    WHERE TRIM(BOTH "\"" FROM value) LIKE %s
-                )';
-        }
-        $searchConditions['args'] = "%". $condition. "%";
-        return $searchConditions;
-    }
+		return $result;
+	}
+
+	/**
+	 * Search by alert code OR by Metadata value.
+	 *
+	 * @param object $query - Query object.
+	 */
+	public function SearchCondition( $query ) {
+		$condition = $query->getSearchCondition();
+		if ( empty( $condition ) ) {
+			return null;
+		}
+		$search_conditions = array();
+		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
+		if ( is_numeric( $condition ) && strlen( $condition ) == 4 ) {
+			$search_conditions['sql'] = $occurrence->GetTable() . '.alert_id LIKE %s';
+		} else {
+			$search_conditions['sql'] = $occurrence->GetTable() . '.id IN (
+				SELECT DISTINCT occurrence_id
+					FROM ' . $meta->GetTable() . '
+					WHERE TRIM(BOTH "\"" FROM value) LIKE %s
+				)';
+		}
+		$search_conditions['args'] = '%' . $condition . '%';
+		return $search_conditions;
+	}
 }
