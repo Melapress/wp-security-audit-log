@@ -218,6 +218,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Register freemius uninstall event.
 			wsal_freemius()->add_action( 'after_uninstall', 'wsal_freemius_uninstall_cleanup' );
+
+			// Add filters to customize freemius welcome message.
+			wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
+			wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
 		}
 
 		/**
@@ -269,6 +273,56 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
 				define( 'WSAL_ISSUE_URL', 'https://wordpress.org/support/plugin/wp-security-audit-log' );
 			}
+		}
+
+		/**
+		 * Customize Freemius connect message for new users.
+		 *
+		 * @param string $message - Connect message.
+		 * @param string $user_first_name - User first name.
+		 * @param string $plugin_title - Plugin title.
+		 * @param string $user_login - Username.
+		 * @param string $site_link - Site link.
+		 * @param string $freemius_link - Freemius link.
+		 * @return string
+		 */
+		function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
+			return sprintf(
+				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
+				esc_html__( 'Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com.', 'wp-security-audit-log' ) .
+				'<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>' .
+				esc_html__( 'NO AUDIT LOG & ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' ),
+				$user_first_name,
+				'<b>' . $plugin_title . '</b>',
+				'<b>' . $user_login . '</b>',
+				$site_link,
+				$freemius_link
+			);
+		}
+
+		/**
+		 * Customize Freemius connect message on update.
+		 *
+		 * @param string $message - Connect message.
+		 * @param string $user_first_name - User first name.
+		 * @param string $plugin_title - Plugin title.
+		 * @param string $user_login - Username.
+		 * @param string $site_link - Site link.
+		 * @param string $freemius_link - Freemius link.
+		 * @return string
+		 */
+		function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
+			return sprintf(
+				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
+				esc_html__( 'Please help us improve %2$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %5$s, a diagnostic tracking service we use. If you skip this, that\'s okay! %2$s will still work just fine.', 'wp-security-audit-log' ) .
+				'<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>' .
+				esc_html__( 'NO AUDIT LOG & ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' ),
+				$user_first_name,
+				'<b>' . $plugin_title . '</b>',
+				'<b>' . $user_login . '</b>',
+				$site_link,
+				$freemius_link
+			);
 		}
 
 		/**
