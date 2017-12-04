@@ -282,7 +282,7 @@ class WSAL_Settings {
 	 * @return string
 	 */
 	public function GetDefaultPruningDate() {
-		return '1 month';
+		return '12 months';
 	}
 
 	/**

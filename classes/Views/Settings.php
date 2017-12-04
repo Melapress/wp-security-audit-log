@@ -122,8 +122,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST );
 
+		// Get pruning date.
+		$pruning_date = isset( $post_array['PruningDate'] ) ? (int) $post_array['PruningDate'] : '';
+		$pruning_date = ( ! empty( $pruning_date ) ) ? $pruning_date . ' months' : '';
+
 		$this->_plugin->settings->SetPruningDateEnabled( isset( $post_array['PruneBy'] ) ? 'date' === $post_array['PruneBy'] : '' );
-		$this->_plugin->settings->SetPruningDate( isset( $post_array['PruningDate'] ) ? $post_array['PruningDate'] : '' );
+		$this->_plugin->settings->SetPruningDate( $pruning_date );
 		$this->_plugin->settings->SetPruningLimitEnabled( isset( $post_array['PruneBy'] ) ? 'limit' === $post_array['PruneBy'] : '' );
 		$this->_plugin->settings->SetPruningLimit( isset( $post_array['PruningLimit'] ) ? $post_array['PruningLimit'] : '' );
 
@@ -489,7 +493,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									</label>
 								</fieldset>
 								<fieldset>
-									<?php $text = __( '(eg: 1 month)', 'wp-security-audit-log' ); ?>
+									<?php $text = __( '(Leave empty or enter 0 to disable automatic pruning.)', 'wp-security-audit-log' ); ?>
 									<?php $nbld = $this->_plugin->settings->IsPruningDateEnabled(); ?>
 									<label for="delete1">
 										<input type="radio" id="delete1" name="PruneBy" value="date"
@@ -497,10 +501,15 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 											<?php echo esc_attr( $disabled ); ?> />
 										<?php echo esc_html__( 'Delete alerts older than', 'wp-security-audit-log' ); ?>
 									</label>
+									<?php
+									// Find and replace ` months` in the string.
+									$pruning_date = str_replace( ' months', '', $this->_plugin->settings->GetPruningDate() );
+									?>
 									<input type="text" id="PruningDate" name="PruningDate" placeholder="<?php echo esc_attr( $text ); ?>"
-										   value="<?php echo esc_attr( $this->_plugin->settings->GetPruningDate() ); ?>"
+										   value="<?php echo esc_attr( $pruning_date ); ?>"
 										   onfocus="jQuery('#delete1').attr('checked', true);" <?php echo esc_attr( $disabled ); ?> />
-									<span><?php echo esc_html( $text ); ?></span>
+									<?php esc_html_e( 'months', 'wp-security-audit-log' ); ?>
+									<span class="description"><?php echo esc_html( $text ); ?></span>
 								</fieldset>
 								<fieldset>
 									<?php $text = __( '(eg: 80)', 'wp-security-audit-log' ); ?>

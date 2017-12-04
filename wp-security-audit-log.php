@@ -579,7 +579,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// $this->settings->ClearDevOptions();
 			// Do version-to-version specific changes.
 			if ( -1 === version_compare( $old_version, $new_version ) ) {
+				// Update External DB password on plugin update.
 				$this->update_external_db_password();
+
+				// Update pruning alerts option.
+				$this->settings->SetPruningDate( '12 months' );
 			}
 		}
 

@@ -193,6 +193,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$old_name = $term->name;
 		$old_slug = $term->slug;
 		$old_desc = $term->description;
+		$term_link = $this->get_tag_link( $term_id );
 
 		// Update if both names are not same.
 		if ( $old_name !== $new_name ) {
@@ -200,6 +201,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				2123, array(
 					'old_name' => $old_name,
 					'new_name' => $new_name,
+					'TagLink' => $term_link,
 				)
 			);
 		}
@@ -211,6 +213,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'tag' => $new_name,
 					'old_slug' => $old_slug,
 					'new_slug' => $new_slug,
+					'TagLink' => $term_link,
 				)
 			);
 		}
@@ -220,6 +223,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				2125, array(
 					'tag' => $new_name,
+					'TagLink' => $term_link,
 				)
 			);
 		}
@@ -412,8 +416,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					+ $this->CheckStickyChange( $this->_old_stky, isset( $post_array['sticky'] ), $post )
 					+ $this->CheckVisibilityChange( $this->_old_post, $post, $old_status, $new_status )
 					+ $this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post )
-					+ $this->CheckCategoriesChange( $this->_old_cats, $this->GetPostCategories( $post ), $post );
-				$this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
+					+ $this->CheckCategoriesChange( $this->_old_cats, $this->GetPostCategories( $post ), $post )
+					+ $this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
 
 				if ( ! $changes ) {
 					$changes = $this->CheckDateChange( $this->_old_post, $post );
