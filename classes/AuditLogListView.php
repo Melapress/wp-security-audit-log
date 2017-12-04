@@ -317,6 +317,11 @@ class WSAL_AuditLogListView extends WP_List_Table {
 						$data_link = add_query_arg( 'page', 'wsal-togglealerts#tab-system-activity', admin_url( 'admin.php' ) );
 					}
 				}
+
+				if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+					return '<span class="log-disable">' . str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
+				}
+
 				return '<span class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item->alert_id ) . '" data-tooltip="' . __( 'Disable this type of alerts.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . ' - ' . esc_html( $code->desc ) . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
 					. str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
 			case 'code':

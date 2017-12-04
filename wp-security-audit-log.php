@@ -363,6 +363,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @internal
 		 */
 		public function AjaxDisableCustomField() {
+			// Die if user does not have permission to disable.
+			if ( ! $this->settings->CurrentUserCan( 'edit' ) ) {
+				echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to disable this custom field.', 'wp-security-audit-log' ) . '</p>';
+				die();
+			}
+
 			// Set filter input args.
 			$filter_input_args = array(
 				'disable_nonce' => FILTER_SANITIZE_STRING,
@@ -393,6 +399,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @internal
 		 */
 		public function AjaxDisableByCode() {
+			// Die if user does not have permission to disable.
+			if ( ! $this->settings->CurrentUserCan( 'edit' ) ) {
+				echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to disable this alert.', 'wp-security-audit-log' ) . '</p>';
+				die();
+			}
+
 			// Set filter input args.
 			$filter_input_args = array(
 				'disable_nonce' => FILTER_SANITIZE_STRING,
