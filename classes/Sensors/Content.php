@@ -296,6 +296,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->_old_tags = $this->get_post_tags( $this->_old_post );
 				$this->_old_stky = in_array( $post_id, get_option( 'sticky_posts' ) );
 			}
+		} elseif ( isset( $post_array['post_ID'] ) && current_user_can( 'edit_post', $post_array['post_ID'] ) ) {
+			$post_id = intval( $post_array['post_ID'] );
+			$this->_old_post = get_post( $post_id );
+			$this->_old_link = get_permalink( $post_id );
+			$this->_old_tmpl = $this->GetPostTemplate( $this->_old_post );
+			$this->_old_cats = $this->GetPostCategories( $this->_old_post );
+			$this->_old_tags = $this->get_post_tags( $this->_old_post );
+			$this->_old_stky = in_array( $post_id, get_option( 'sticky_posts' ) );
 		}
 	}
 
@@ -378,20 +386,40 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			'_wpnonce' => FILTER_SANITIZE_STRING,
 			'original_post_status' => FILTER_SANITIZE_STRING,
 			'sticky' => FILTER_SANITIZE_STRING,
+			'action' => FILTER_SANITIZE_STRING,
+			'_inline_edit' => FILTER_SANITIZE_STRING,
 		);
 
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
 
 		// Verify nonce.
-		if ( ! isset( $post_array['_wpnonce'] )
-			|| ! isset( $post_array['post_ID'] )
-			|| ! wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
-			return false;
+		if ( isset( $post_array['_wpnonce'] )
+			&& isset( $post_array['post_ID'] )
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
+			// Edit Post Screen.
+			$original = isset( $post_array['original_post_status'] ) ? $post_array['original_post_status'] : '';
+			$this->trigger_post_change_alerts( $old_status, $new_status, $post, $original, isset( $post_array['sticky'] ) );
+		} elseif ( isset( $post_array['_inline_edit'] )
+			&& 'inline-save' === $post_array['action']
+			&& wp_verify_nonce( $post_array['_inline_edit'], 'inlineeditnonce' ) ) {
+			// Quick Post Edit.
+			$original = isset( $post_array['original_post_status'] ) ? $post_array['original_post_status'] : '';
+			$this->trigger_post_change_alerts( $old_status, $new_status, $post, $original, isset( $post_array['sticky'] ) );
 		}
+	}
 
-		$original = isset( $post_array['original_post_status'] ) ? $post_array['original_post_status'] : '';
-
+	/**
+	 * Method: Trigger Post Change Alerts.
+	 *
+	 * @param string   $old_status - Old status.
+	 * @param string   $new_status - New status.
+	 * @param stdClass $post - The post.
+	 * @param string   $original - Original Post Status.
+	 * @param string   $sticky - Sticky post.
+	 * @since 1.0.0
+	 */
+	public function trigger_post_change_alerts( $old_status, $new_status, $post, $original, $sticky ) {
 		WSAL_Sensors_Request::SetVars(
 			array(
 				'$new_status' => $new_status,
@@ -413,7 +441,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					+ $this->CheckAuthorChange( $this->_old_post, $post )
 					+ $this->CheckStatusChange( $this->_old_post, $post )
 					+ $this->CheckParentChange( $this->_old_post, $post )
-					+ $this->CheckStickyChange( $this->_old_stky, isset( $post_array['sticky'] ), $post )
+					+ $this->CheckStickyChange( $this->_old_stky, $sticky, $post )
 					+ $this->CheckVisibilityChange( $this->_old_post, $post, $old_status, $new_status )
 					+ $this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post )
 					+ $this->CheckCategoriesChange( $this->_old_cats, $this->GetPostCategories( $post ), $post )
