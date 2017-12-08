@@ -152,9 +152,22 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 						'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
 					);
 					if ( ! username_exists( $comment->comment_author ) ) {
+						// Set the fields.
 						$fields['CommentMsg'] = sprintf( 'A comment was posted in response to the post <strong>%s</strong>. The comment was posted by <strong>%s</strong>', $post->post_title, $this->CheckAuthor( $comment ) );
 						$fields['Username'] = 'Website Visitor';
 					} else {
+						// Get user roles.
+						$user_data = get_user_by( 'login', $comment->comment_author );
+						$user_roles = $user_data->roles;
+
+						// Check if superadmin.
+						if ( function_exists( 'is_super_admin' ) && is_super_admin() ) {
+							$user_roles[] = 'superadmin';
+						}
+
+						// Set the fields.
+						$fields['Username'] = $comment->comment_author;
+						$fields['CurrentUserRoles'] = $user_roles;
 						$fields['CommentMsg'] = sprintf( 'Posted a comment in response to the post <strong>%s</strong>', $post->post_title );
 					}
 
