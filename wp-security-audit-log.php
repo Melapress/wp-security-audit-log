@@ -217,7 +217,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			add_action( 'wp_ajax_AjaxDisableByCode', array( $this, 'AjaxDisableByCode' ) );
 
 			// Register freemius uninstall event.
-			wsal_freemius()->add_action( 'after_uninstall', 'wsal_freemius_uninstall_cleanup' );
+			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
 
 			// Add filters to customize freemius welcome message.
 			wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
