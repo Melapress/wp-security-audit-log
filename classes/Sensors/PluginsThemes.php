@@ -479,11 +479,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			}
 		}
 
-		if ( isset( $_REQUEST['action'] ) && ! in_array( $_REQUEST['action'], $wp_actions ) ) {
+		if ( isset( $post_array['action'] ) && ! in_array( $post_array['action'], $wp_actions ) ) {
 			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
 				|| ! empty( $post->post_title ) ) {
 				// If the plugin modify the post.
-				if ( false !== strpos( $_REQUEST['action'], 'edit' ) ) {
+				if ( false !== strpos( $post_array['action'], 'edit' ) ) {
 					$event = $this->GetEventTypeForPostType( $post, 2106, 2107, 2108 );
 					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
