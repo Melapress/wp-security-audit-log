@@ -117,7 +117,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	public function GetIcon() {
 		return $this->_wpversion < 3.8
 			? $this->_plugin->GetBaseUrl() . '/img/logo-main-menu.png'
-			: 'dashicons-welcome-view-site';
+			: $this->_plugin->GetBaseUrl() . '/img/wsal-menu-icon.svg';
 	}
 
 	/**
