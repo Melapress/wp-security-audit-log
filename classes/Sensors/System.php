@@ -285,7 +285,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( ! empty( $occ ) ) {
 				// update existing record.
 				$this->Increment404( $site_id, $username, $ip );
-				$new = $occ->GetMetaValue( 'Attempts', 0 ) + 1;
+				$new = ( (int) $occ->GetMetaValue( 'Attempts', 0 ) ) + 1;
 
 				if ( $new > $this->Get404LogLimit() ) {
 					$new = 'more than ' . $this->Get404LogLimit();
@@ -342,7 +342,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( ! empty( $occ ) ) {
 				// Update existing record.
 				$this->IncrementVisitor404( $site_id, $username, $ip );
-				$new = $occ->GetMetaValue( 'Attempts', 0 ) + 1;
+				$new = ( (int) $occ->GetMetaValue( 'Attempts', 0 ) ) + 1;
 
 				if ( $new > $this->GetVisitor404LogLimit() ) {
 					$new = 'more than ' . $this->GetVisitor404LogLimit();
