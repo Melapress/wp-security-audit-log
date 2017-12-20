@@ -436,6 +436,7 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 9031, E_CRITICAL, __( 'User changed the currency', 'wp-security-audit-log' ), __( 'Changed the currency from %OldCurrency% to %NewCurrency% in WooCommerce.', 'wp-security-audit-log' ) ),
 					array( 9032, E_CRITICAL, __( 'User Enabled/Disabled the use of coupons during checkout', 'wp-security-audit-log' ), __( '%Status% the use of coupons during checkout in WooCommerce.', 'wp-security-audit-log' ) ),
 					array( 9033, E_CRITICAL, __( 'User Enabled/Disabled guest checkout', 'wp-security-audit-log' ), __( '%Status% guest checkout in WooCommerce.', 'wp-security-audit-log' ) ),
+					array( 9034, E_CRITICAL, __( 'User Enabled/Disabled cash on delivery', 'wp-security-audit-log' ), __( '%Status% the option Enable cash on delivery in WooCommerce.', 'wp-security-audit-log' ) ),
 				),
 			),
 		)

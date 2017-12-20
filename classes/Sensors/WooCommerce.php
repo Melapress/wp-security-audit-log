@@ -1052,7 +1052,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					}
 				}
 			} elseif ( isset( $get_array['tab'] ) && 'checkout' == $get_array['tab'] ) {
-				if ( ! empty( $post_array ) ) {
+				if ( ! empty( $post_array ) && '' == $get_array['section'] ) {
 					$old_enable_coupons = $this->GetConfig( 'enable_coupons' );
 					$new_enable_coupons = isset( $post_array['woocommerce_enable_coupons'] ) ? 'yes' : 'no';
 					if ( $old_enable_coupons != $new_enable_coupons ) {
@@ -1069,6 +1069,18 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						$status = ( 'yes' == $new_enable_guest_checkout ) ? 'Enabled' : 'Disabled';
 						$this->plugin->alerts->Trigger(
 							9033, array(
+								'Status' => $status,
+							)
+						);
+					}
+				} elseif ( ! empty( $post_array ) && 'cod' === $get_array['section'] ) {
+					$old_cash_on_delivery = $this->GetConfig( 'cod_settings' );
+					$old_cash_on_delivery = isset( $old_cash_on_delivery['enabled'] ) ? $old_cash_on_delivery['enabled'] : '';
+					$new_cash_on_delivery = isset( $post_array['woocommerce_cod_enabled'] ) ? 'yes' : 'no';
+					if ( $old_cash_on_delivery !== $new_cash_on_delivery ) {
+						$status = ( 'yes' === $new_cash_on_delivery ) ? 'Enabled' : 'Disabled';
+						$this->plugin->alerts->Trigger(
+							9034, array(
 								'Status' => $status,
 							)
 						);
