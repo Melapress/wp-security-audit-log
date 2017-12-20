@@ -403,6 +403,41 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		$is_network_settings = 'settings' === $actype;
 		$is_permalink_page = 'options-permalink' === $actype;
 
+		// WordPress URL changed.
+		if ( $is_option_page
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
+			&& ! empty( $post_array['siteurl'] ) ) {
+			$old_siteurl = get_option( 'siteurl' );
+			$new_siteurl = isset( $post_array['siteurl'] ) ? $post_array['siteurl'] : '';
+			if ( $old_siteurl !== $new_siteurl ) {
+				$this->plugin->alerts->Trigger(
+					6024, array(
+						'old_url' => $old_siteurl,
+						'new_url' => $new_siteurl,
+						'CurrentUserID' => wp_get_current_user()->ID,
+					)
+				);
+			}
+		}
+
+		// Site URL changed.
+		if ( $is_option_page
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
+			&& ! empty( $post_array['home'] ) ) {
+			$old_url = get_option( 'home' );
+			$new_url = isset( $post_array['home'] ) ? $post_array['home'] : '';
+			if ( $old_url !== $new_url ) {
+				$this->plugin->alerts->Trigger(
+					6025, array(
+						'old_url' => $old_url,
+						'new_url' => $new_url,
+						'CurrentUserID' => wp_get_current_user()->ID,
+					)
+				);
+			}
+		}
+
+		// Registeration Option.
 		if ( $is_option_page
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
 			&& ( get_option( 'users_can_register' ) xor isset( $post_array['users_can_register'] ) ) ) {
@@ -419,6 +454,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 
+		// Default Role option.
 		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['default_role'] ) ) {
 			$old = get_option( 'default_role' );
 			$new = trim( $post_array['default_role'] );
@@ -433,6 +469,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 
+		// Admin Email Option.
 		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['admin_email'] ) ) {
 			$old = get_option( 'admin_email' );
 			$new = trim( $post_array['admin_email'] );
@@ -447,6 +484,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 
+		// Admin Email of Network.
 		if ( $is_network_settings && ! empty( $post_array['admin_email'] ) ) {
 			$old = get_site_option( 'admin_email' );
 			$new = trim( $post_array['admin_email'] );
@@ -461,6 +499,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 
+		// Permalinks changed.
 		if ( $is_permalink_page && ! empty( $post_array['permalink_structure'] ) ) {
 			$old = get_option( 'permalink_structure' );
 			$new = trim( $post_array['permalink_structure'] );
@@ -475,6 +514,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 
+		// Core Update.
 		if ( isset( $get_array['action'] ) && 'do-core-upgrade' === $get_array['action'] && isset( $post_array['version'] ) ) {
 			$old_version = get_bloginfo( 'version' );
 			$new_version = $post_array['version'];
