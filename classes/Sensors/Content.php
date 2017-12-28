@@ -510,8 +510,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					if ( $is_scheduled ) {
 						$this->plugin->alerts->Trigger(
 							$event, array(
+								'PostID' => $new_post->ID,
 								'PostType' => $new_post->post_type,
 								'PostTitle' => $new_post->post_title,
+								'PostStatus' => $new_post->post_status,
+								'PostDate' => $new_post->post_date,
 								'PublishingDate' => $new_post->post_date,
 								$editor_link['name'] => $editor_link['value'],
 							)
@@ -522,6 +525,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 								'PostID' => $new_post->ID,
 								'PostType' => $new_post->post_type,
 								'PostTitle' => $new_post->post_title,
+								'PostStatus' => $new_post->post_status,
+								'PostDate' => $new_post->post_date,
 								'PostUrl' => get_permalink( $new_post->ID ),
 								$editor_link['name'] => $editor_link['value'],
 							)
@@ -548,6 +553,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'PostID' => $post->ID,
 					'PostType' => $post->post_type,
 					'PostTitle' => $post->post_title,
+					'PostStatus' => $post->post_status,
+					'PostDate' => $post->post_date,
 					'PostUrl' => get_permalink( $post->ID ),
 					$editor_link['name'] => $editor_link['value'],
 				)
@@ -592,6 +599,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 							'PostID' => $post->ID,
 							'PostType' => $post->post_type,
 							'PostTitle' => $post->post_title,
+							'PostStatus' => $post->post_status,
+							'PostDate' => $post->post_date,
 						)
 					);
 				}
@@ -616,6 +625,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'PostID' => $post->ID,
 				'PostType' => $post->post_type,
 				'PostTitle' => $post->post_title,
+				'PostStatus' => $post->post_status,
+				'PostDate' => $post->post_date,
 				'PostUrl' => get_permalink( $post->ID ),
 				$editor_link['name'] => $editor_link['value'],
 			)
@@ -639,6 +650,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				'PostID' => $post->ID,
 				'PostType' => $post->post_type,
 				'PostTitle' => $post->post_title,
+				'PostStatus' => $post->post_status,
+				'PostDate' => $post->post_date,
 				$editor_link['name'] => $editor_link['value'],
 			)
 		);
@@ -668,6 +681,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'PostID' => $oldpost->ID,
 					'PostType' => $oldpost->post_type,
 					'PostTitle' => $oldpost->post_title,
+					'PostStatus' => $oldpost->post_status,
+					'PostDate' => $newpost->post_date,
 					'OldDate' => $oldpost->post_date,
 					'NewDate' => $newpost->post_date,
 					$editor_link['name'] => $editor_link['value'],
@@ -692,6 +707,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'PostID' => $oldpost->ID,
 					'PostType' => $oldpost->post_type,
 					'PostTitle' => $oldpost->post_title,
+					'PostStatus' => $oldpost->post_status,
+					'PostDate' => $oldpost->post_date,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -719,6 +736,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						'PostID' => $post->ID,
 						'PostType' => $post->post_type,
 						'PostTitle' => $post->post_title,
+						'PostStatus' => $post->post_status,
+						'PostDate' => $post->post_date,
 						'OldCategories' => $old_cats ? $old_cats : 'no categories',
 						'NewCategories' => $new_cats ? $new_cats : 'no categories',
 						$editor_link['name'] => $editor_link['value'],
@@ -760,8 +779,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					$add_event, array(
 						'PostID' => $post->ID,
-						'status' => $post_status,
-						'post_title' => $post->post_title,
+						'PostStatus' => $post_status,
+						'PostTitle' => $post->post_title,
+						'PostType' => $post->post_type,
+						'PostDate' => $post->post_date,
 						'tag' => $added_tags ? $added_tags : 'no tags',
 						$editor_link['name'] => $editor_link['value'],
 					)
@@ -777,8 +798,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					$remove_event, array(
 						'PostID' => $post->ID,
-						'status' => $post_status,
-						'post_title' => $post->post_title,
+						'PostStatus' => $post_status,
+						'PostTitle' => $post->post_title,
+						'PostType' => $post->post_type,
+						'PostDate' => $post->post_date,
 						'tag' => $removed_tags ? $removed_tags : 'no tags',
 						$editor_link['name'] => $editor_link['value'],
 					)
@@ -810,6 +833,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'PostID' => $oldpost->ID,
 					'PostType' => $oldpost->post_type,
 					'PostTitle' => $oldpost->post_title,
+					'PostStatus' => $oldpost->post_status,
+					'PostDate' => $oldpost->post_date,
 					'OldAuthor' => $old_author,
 					'NewAuthor' => $new_author,
 					$editor_link['name'] => $editor_link['value'],
@@ -849,6 +874,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						'PostID' => $newpost->ID,
 						'PostType' => $newpost->post_type,
 						'PostTitle' => $newpost->post_title,
+						'PostStatus' => $newpost->post_status,
+						'PostDate' => $newpost->post_date,
 						'PostUrl' => get_permalink( $newpost->ID ),
 						$editor_link['name'] => $editor_link['value'],
 					)
@@ -861,6 +888,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						'PostID' => $oldpost->ID,
 						'PostType' => $oldpost->post_type,
 						'PostTitle' => $oldpost->post_title,
+						'PostStatus' => $newpost->post_status,
+						'PostDate' => $oldpost->post_date,
 						'OldStatus' => $oldpost->post_status,
 						'NewStatus' => $newpost->post_status,
 						$editor_link['name'] => $editor_link['value'],
@@ -887,6 +916,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						'PostID' => $oldpost->ID,
 						'PostType' => $oldpost->post_type,
 						'PostTitle' => $oldpost->post_title,
+						'PostStatus' => $oldpost->post_status,
+						'PostDate' => $oldpost->post_date,
 						'OldParent' => $oldpost->post_parent,
 						'NewParent' => $newpost->post_parent,
 						'OldParentName' => $oldpost->post_parent ? get_the_title( $oldpost->post_parent ) : 'no parent',
@@ -915,6 +946,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'PostID' => $post->ID,
 					'PostType' => $post->post_type,
 					'PostTitle' => $post->post_title,
+					'PostStatus' => $post->post_status,
+					'PostDate' => $post->post_date,
 					'OldUrl' => $old_link,
 					'NewUrl' => $new_link,
 					$editor_link['name'] => $editor_link['value'],
@@ -965,6 +998,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'PostID' => $oldpost->ID,
 					'PostType' => $oldpost->post_type,
 					'PostTitle' => $oldpost->post_title,
+					'PostStatus' => $newpost->post_status,
+					'PostDate' => $oldpost->post_date,
 					'OldVisibility' => $old_visibility,
 					'NewVisibility' => $new_visibility,
 					$editor_link['name'] => $editor_link['value'],
@@ -991,6 +1026,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						'PostID' => $post->ID,
 						'PostType' => $post->post_type,
 						'PostTitle' => $post->post_title,
+						'PostStatus' => $post->post_status,
+						'PostDate' => $post->post_date,
 						'OldTemplate' => ucwords( str_replace( array( '-', '_' ), ' ', basename( $old_tmpl, '.php' ) ) ),
 						'NewTemplate' => ucwords( str_replace( array( '-', '_' ), ' ', basename( $new_tmpl, '.php' ) ) ),
 						'OldTemplatePath' => $old_tmpl,
@@ -1019,6 +1056,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'PostID' => $post->ID,
 					'PostType' => $post->post_type,
 					'PostTitle' => $post->post_title,
+					'PostStatus' => $post->post_status,
+					'PostDate' => $post->post_date,
 					'PostUrl' => get_permalink( $post->ID ),
 					$editor_link['name'] => $editor_link['value'],
 				)
@@ -1068,6 +1107,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 							'PostID' => $post_id,
 							'PostType' => $oldpost->post_type,
 							'PostTitle' => $oldpost->post_title,
+							'PostStatus' => $oldpost->post_status,
+							'PostDate' => $oldpost->post_date,
 							'PostUrl' => get_permalink( $post_id ),
 							$editor_link['name'] => $editor_link['value'],
 						)
@@ -1426,8 +1467,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					$event = $this->GetEventTypeForPostType( $post, 2101, 2103, 2105 );
 					$this->plugin->alerts->Trigger(
 						$event, array(
+							'PostID' => $post->ID,
 							'PostType'  => $post->post_type,
 							'PostTitle' => $post->post_title,
+							'PostStatus' => $post->post_status,
+							'PostDate' => $post->post_date,
 							'PostUrl'   => get_permalink( $post->ID ),
 						)
 					);
@@ -1463,8 +1507,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						$editor_link = $this->GetEditorLink( $post );
 						$this->plugin->alerts->Trigger(
 							$event, array(
+								'PostID' => $post->ID,
 								'PostType' => $post->post_type,
 								'PostTitle' => $post->post_title,
+								'PostStatus' => $post->post_status,
+								'PostDate' => $post->post_date,
 								$editor_link['name'] => $editor_link['value'],
 							)
 						);
@@ -1506,6 +1553,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$editor_link = $this->GetEditorLink( $oldpost );
 			$this->plugin->alerts->Trigger(
 				$event, array(
+					'PostID' => $oldpost->ID,
+					'PostTitle' => $newpost->post_title,
+					'PostType' => $oldpost->post_type,
+					'PostStatus' => $oldpost->post_status,
+					'PostDate' => $oldpost->post_date,
 					'OldTitle' => $oldpost->post_title,
 					'NewTitle' => $newpost->post_title,
 					$editor_link['name'] => $editor_link['value'],
@@ -1537,6 +1589,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				$event, array(
 					'Type' => $type,
+					'PostID' => $newpost->ID,
+					'PostType' => $newpost->post_type,
+					'PostStatus' => $newpost->post_status,
+					'PostDate' => $newpost->post_date,
 					'PostTitle' => $newpost->post_title,
 					'PostUrl' => get_permalink( $newpost->ID ),
 				)
@@ -1556,6 +1612,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				$event, array(
 					'Type' => $type,
+					'PostID' => $newpost->ID,
+					'PostType' => $newpost->post_type,
+					'PostStatus' => $newpost->post_status,
+					'PostDate' => $newpost->post_date,
 					'PostTitle' => $newpost->post_title,
 					'PostUrl' => get_permalink( $newpost->ID ),
 				)
