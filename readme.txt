@@ -6,8 +6,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, wordpress log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, security audit trail, wordpress security alerts, wordpress monitor, wordpress security monitor, wordpress admin, wordpress admin monitoring, analytics, activity, admin, multisite, wordpress multisite, actions, dashboard, log, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 4.8.2
-Stable tag: 2.6.9.1
+Tested up to: 4.9.1
+Stable tag: 3.0
 
 Keep an audit trail of all changes and under the hood WordPress activity to ensure productivity and thwart possible WordPress hacker attacks.
 
@@ -119,6 +119,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * [WPLift](http://wplift.com/audit-wordpress-security-logs) - Review by Ahmad Awais
 * [WP SmackDown](https://wpsmackdown.com/wp-plugins/wp-security-audit-log/)
 * [WPKube](http://www.wpkube.com/improve-wordpress-security-wp-security-audit-log/)
+* [SourceWP](https://www.sourcewp.com/wp-security-audit-log-plugin-review/)
 * [KevinMuldoon.com](https://www.kevinmuldoon.com/wp-security-audit-log-review/)
 * [Cloudways](https://www.cloudways.com/blog/monitor-wordpress-with-wp-security-audit-log-plugin/)
 * [ManageWP Plugins of the month](https://managewp.com/free-wordpress-plugins-june-2014)
@@ -190,37 +191,27 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 
 == Changelog ==
 
-=2.6.9.1 (2017-10-24 =
+=3.0 (2017-01-24)
 
-* **Bug Fix**
-	* Fixed a syntax issue in the code that was affecting installs on PHP lower than 5.4
-
-= 2.6.9 (2017-10-24) =
-
-* **New Audit Trail Alerts for logging of Tag changes**
-	* Alert 2119: User added tag to a post
-	* Alert 2120: User removed a tag from a post
-	* Alert 2121: User added new tag on WordPress
-	* Alert 2122: User deleted a tag from WordPress
-	* Alert 2123: User renamed a tag
-	* Alert 2124: User changed the slug of a tag
-	* Alert 2125: User changed the description of a tag
+* **New Features**
+	* Added Freemius to plugin (opt-in is optional)
+	* Code changes to support new [licensing model](https://www.wpsecurityauditlog.com/blog/)
 	
-* **New Audit Trail Alerts for logging of User Profile Changes**
-	* Alert 4017: Changed the first name of a user
-	* Alert 4018: Changed the last name of a user
-	* Alert 4019: Changed the nickname of a user
-	* Alert 4020: Changed the display name of a user
+* **New Alerts**
+	* Alert 9034: Enabled / Disabled the option Cash on Delivery in WooCommerce
+	* Alert 6024: Changed the WordPress address (URL)
+	* Alert 6025: Changed the site address (URL)
 	
-* **New Functionality**
-	* New hover over option to modify alerts' behaviour. This applies to alerts that have configuration such as 1002, 1003, 6007 and 6023.
-	* Option to record referrer URL in log file when logging 404 errors to a log file.
-	* Option to specify how many failed logins the plugin should log.
-	* Option to capture the usernames used during failed login attempts with non WordPress users.
-
 * **Improvements**
-	* Drop down menu to select number of alerts to display in Audit Log Viewer now has only fixed numbers.
-	* Renamed first column to Alert ID (standardising text in plugin)
-	* New French translation by Denis Moscato
+	* Fixed escaping issues, improved security and the code of the plugin up to latest WordPress standards
+	* Improved the Data Retention option (Alerts Pruning). Now users only have to specify the number of months.
+	* Added option to view Tag in all Tag alerts
+	* Plugin now stores Post ID, Type, Status and Created Date records for every post. Capturing of such data is important for future updates.
+	
+* **Update**
+	* Updated Italian translation files.
+	
+* **Bug Fix**
+	* Fixed an issue where users with view audit log privileges could disable alerts from the hover over option.
 
 Refer to the [WP Security Audit Log change log on the plugin page](https://www.wpsecurityauditlog.com/plugin-change-log/) for a complete changelog.
