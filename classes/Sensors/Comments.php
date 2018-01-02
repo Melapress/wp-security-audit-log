@@ -1,8 +1,20 @@
 <?php
 /**
+ * Sensor: Comments
+ *
+ * Comments sensor class file.
+ *
+ * @since 1.0.0
  * @package Wsal
- * @subpackage Sensors
- * Wordpress comments.
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * WordPress Comments.
  *
  * 2090 User approved a comment
  * 2091 User unapproved a comment
@@ -14,173 +26,191 @@
  * 2097 User restored a comment from the trash
  * 2098 User permanently deleted a comment
  * 2099 User posted a comment
+ *
+ * @package Wsal
+ * @subpackage Sensors
  */
-class WSAL_Sensors_Comments extends WSAL_AbstractSensor
-{
-    /**
-     * Listening to events using WP hooks.
-     */
-    public function HookEvents()
-    {
-        add_action('edit_comment', array($this, 'EventCommentEdit'), 10, 1);
-        add_action('transition_comment_status', array($this, 'EventCommentApprove'), 10, 3);
-        add_action('spammed_comment', array($this, 'EventCommentSpam'), 10, 1);
-        add_action('unspammed_comment', array($this, 'EventCommentUnspam'), 10, 1);
-        add_action('trashed_comment', array($this, 'EventCommentTrash'), 10, 1);
-        add_action('untrashed_comment', array($this, 'EventCommentUntrash'), 10, 1);
-        add_action('deleted_comment', array($this, 'EventCommentDeleted'), 10, 1);
-        add_action('comment_post', array($this, 'EventComment'), 10, 2);
-    }
+class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 
-    /**
-     * Trigger comment edit.
-     * @param integer $comment_ID comment ID
-     */
-    public function EventCommentEdit($comment_ID)
-    {
-        $comment = get_comment($comment_ID);
-        $this->EventGeneric($comment_ID, 2093);
-    }
+	/**
+	 * Listening to events using WP hooks.
+	 */
+	public function HookEvents() {
+		add_action( 'edit_comment', array( $this, 'EventCommentEdit' ), 10, 1 );
+		add_action( 'transition_comment_status', array( $this, 'EventCommentApprove' ), 10, 3 );
+		add_action( 'spammed_comment', array( $this, 'EventCommentSpam' ), 10, 1 );
+		add_action( 'unspammed_comment', array( $this, 'EventCommentUnspam' ), 10, 1 );
+		add_action( 'trashed_comment', array( $this, 'EventCommentTrash' ), 10, 1 );
+		add_action( 'untrashed_comment', array( $this, 'EventCommentUntrash' ), 10, 1 );
+		add_action( 'deleted_comment', array( $this, 'EventCommentDeleted' ), 10, 1 );
+		add_action( 'comment_post', array( $this, 'EventComment' ), 10, 2 );
+	}
 
-    /**
-     * Trigger comment status.
-     * @param string $new_status new status
-     * @param string $old_status old status
-     * @param stdClass $comment comment
-     */
-    public function EventCommentApprove($new_status, $old_status, $comment)
-    {
-        if (!empty($comment) && $old_status != $new_status) {
-            $post = get_post($comment->comment_post_ID);
-            $comment_link = get_permalink($post->ID) . "#comment-" . $comment->comment_ID;
-            $fields = array(
-                'PostTitle' => $post->post_title,
-                'Author' => $comment->comment_author,
-                'Date' => $comment->comment_date,
-                'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>'
-            );
+	/**
+	 * Trigger comment edit.
+	 *
+	 * @param integer $comment_id - Comment ID.
+	 */
+	public function EventCommentEdit( $comment_id ) {
+		$comment = get_comment( $comment_id );
+		$this->EventGeneric( $comment_id, 2093 );
+	}
 
-            if ($new_status == 'approved') {
-                $this->plugin->alerts->Trigger(2090, $fields);
-            }
-            if ($new_status == 'unapproved') {
-                $this->plugin->alerts->Trigger(2091, $fields);
-            }
-        }
-    }
+	/**
+	 * Trigger comment status.
+	 *
+	 * @param string   $new_status - New status.
+	 * @param string   $old_status - Old status.
+	 * @param stdClass $comment - Comment.
+	 */
+	public function EventCommentApprove( $new_status, $old_status, $comment ) {
+		if ( ! empty( $comment ) && $old_status != $new_status ) {
+			$post = get_post( $comment->comment_post_ID );
+			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment->comment_ID;
+			$fields = array(
+				'PostTitle' => $post->post_title,
+				'Author' => $comment->comment_author,
+				'Date' => $comment->comment_date,
+				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
+			);
 
-    /**
-     * Trigger comment spam.
-     * @param integer $comment_ID comment ID
-     */
-    public function EventCommentSpam($comment_ID)
-    {
-        $this->EventGeneric($comment_ID, 2094);
-    }
+			if ( 'approved' == $new_status ) {
+				$this->plugin->alerts->Trigger( 2090, $fields );
+			}
+			if ( 'unapproved' == $new_status ) {
+				$this->plugin->alerts->Trigger( 2091, $fields );
+			}
+		}
+	}
 
-    /**
-     * Trigger comment unspam.
-     * @param integer $comment_ID comment ID
-     */
-    public function EventCommentUnspam($comment_ID)
-    {
-        $this->EventGeneric($comment_ID, 2095);
-    }
+	/**
+	 * Trigger comment spam.
+	 *
+	 * @param integer $comment_id - Comment ID.
+	 */
+	public function EventCommentSpam( $comment_id ) {
+		$this->EventGeneric( $comment_id, 2094 );
+	}
 
-    /**
-     * Trigger comment trash.
-     * @param integer $comment_ID comment ID
-     */
-    public function EventCommentTrash($comment_ID)
-    {
-        $this->EventGeneric($comment_ID, 2096);
-    }
+	/**
+	 * Trigger comment unspam.
+	 *
+	 * @param integer $comment_id - Comment ID.
+	 */
+	public function EventCommentUnspam( $comment_id ) {
+		$this->EventGeneric( $comment_id, 2095 );
+	}
 
-    /**
-     * Trigger comment untrash.
-     * @param integer $comment_ID comment ID
-     */
-    public function EventCommentUntrash($comment_ID)
-    {
-        $this->EventGeneric($comment_ID, 2097);
-    }
+	/**
+	 * Trigger comment trash.
+	 *
+	 * @param integer $comment_id - Comment ID.
+	 */
+	public function EventCommentTrash( $comment_id ) {
+		$this->EventGeneric( $comment_id, 2096 );
+	}
 
-    /**
-     * Trigger comment deleted.
-     * @param integer $comment_ID comment ID
-     */
-    public function EventCommentDeleted($comment_ID)
-    {
-        $this->EventGeneric($comment_ID, 2098);
-    }
+	/**
+	 * Trigger comment untrash.
+	 *
+	 * @param integer $comment_id comment ID.
+	 */
+	public function EventCommentUntrash( $comment_id ) {
+		$this->EventGeneric( $comment_id, 2097 );
+	}
 
-    /**
-     * Fires immediately after a comment is inserted into the database.
-     * @param int        $comment_ID       The comment ID.
-     * @param int|string $comment_approved 1 if the comment is approved, 0 if not, 'spam' if spam.
-     */
-    public function EventComment($comment_ID, $comment_approved = null)
-    {
-        if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'replyto-comment') {
-            $this->EventGeneric($comment_ID, 2092);
-        }
-        if (isset($_REQUEST['comment'])) {
-            $comment = get_comment($comment_ID);
-            if (!empty($comment)) {
-                if ($comment->comment_approved != 'spam') {
-                    $post = get_post($comment->comment_post_ID);
-                    $comment_link = get_permalink($post->ID) . "#comment-" . $comment_ID;
-                    $fields = array(
-                        'Date' => $comment->comment_date,
-                        'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>'
-                    );
-                    if (!username_exists($comment->comment_author)) {
-                        $fields['CommentMsg'] = sprintf("A comment was posted in response to the post <strong>%s</strong>. The comment was posted by <strong>%s</strong>", $post->post_title, $this->CheckAuthor($comment));
-                        $fields['Username'] = "Website Visitor";
-                    } else {
-                        $fields['CommentMsg'] = sprintf("Posted a comment in response to the post <strong>%s</strong>", $post->post_title);
-                    }
+	/**
+	 * Trigger comment deleted.
+	 *
+	 * @param integer $comment_id comment ID.
+	 */
+	public function EventCommentDeleted( $comment_id ) {
+		$this->EventGeneric( $comment_id, 2098 );
+	}
 
-                    $this->plugin->alerts->Trigger(2099, $fields);
-                }
-            }
-        }
-    }
+	/**
+	 * Fires immediately after a comment is inserted into the database.
+	 *
+	 * @param int        $comment_id       The comment ID.
+	 * @param int|string $comment_approved 1 if the comment is approved, 0 if not, 'spam' if spam.
+	 */
+	public function EventComment( $comment_id, $comment_approved = null ) {
+		// Filter $_POST array for security.
+		$post_array = filter_input_array( INPUT_POST );
 
-    /**
-     * Trigger generic event.
-     * @param integer $comment_ID comment ID
-     * @param integer $alert_code event code
-     */
-    private function EventGeneric($comment_ID, $alert_code)
-    {
-        $comment = get_comment($comment_ID);
-        if (!empty($comment)) {
-            $post = get_post($comment->comment_post_ID);
-            $comment_link = get_permalink($post->ID) . "#comment-" . $comment_ID;
-            $fields = array(
-                'PostTitle' => $post->post_title,
-                'Author' => $comment->comment_author,
-                'Date' => $comment->comment_date,
-                'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>'
-            );
+		if ( isset( $post_array['action'] ) && 'replyto-comment' == $post_array['action'] ) {
+			$this->EventGeneric( $comment_id, 2092 );
+		}
+		if ( isset( $post_array['comment'] ) ) {
+			$comment = get_comment( $comment_id );
+			if ( ! empty( $comment ) ) {
+				if ( 'spam' != $comment->comment_approved ) {
+					$post = get_post( $comment->comment_post_ID );
+					$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
+					$fields = array(
+						'Date' => $comment->comment_date,
+						'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
+					);
+					if ( ! username_exists( $comment->comment_author ) ) {
+						// Set the fields.
+						$fields['CommentMsg'] = sprintf( 'A comment was posted in response to the post <strong>%s</strong>. The comment was posted by <strong>%s</strong>', $post->post_title, $this->CheckAuthor( $comment ) );
+						$fields['Username'] = 'Website Visitor';
+					} else {
+						// Get user roles.
+						$user_data = get_user_by( 'login', $comment->comment_author );
+						$user_roles = $user_data->roles;
 
-            $this->plugin->alerts->Trigger($alert_code, $fields);
-        }
-    }
+						// Check if superadmin.
+						if ( function_exists( 'is_super_admin' ) && is_super_admin() ) {
+							$user_roles[] = 'superadmin';
+						}
 
-    /**
-     * Shows the username if the comment is owned by a user
-     * and the email if the comment was posted by a non WordPress user
-     * @param stdClass $comment comment
-     * @return string author username or email
-     */
-    private function CheckAuthor($comment)
-    {
-        if (username_exists($comment->comment_author)) {
-            return $comment->comment_author;
-        } else {
-            return $comment->comment_author_email;
-        }
-    }
+						// Set the fields.
+						$fields['Username'] = $comment->comment_author;
+						$fields['CurrentUserRoles'] = $user_roles;
+						$fields['CommentMsg'] = sprintf( 'Posted a comment in response to the post <strong>%s</strong>', $post->post_title );
+					}
+
+					$this->plugin->alerts->Trigger( 2099, $fields );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Trigger generic event.
+	 *
+	 * @param integer $comment_id - Comment ID.
+	 * @param integer $alert_code - Event code.
+	 */
+	private function EventGeneric( $comment_id, $alert_code ) {
+		$comment = get_comment( $comment_id );
+		if ( ! empty( $comment ) ) {
+			$post = get_post( $comment->comment_post_ID );
+			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
+			$fields = array(
+				'PostTitle' => $post->post_title,
+				'Author' => $comment->comment_author,
+				'Date' => $comment->comment_date,
+				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
+			);
+
+			$this->plugin->alerts->Trigger( $alert_code, $fields );
+		}
+	}
+
+	/**
+	 * Shows the username if the comment is owned by a user
+	 * and the email if the comment was posted by a non WordPress user
+	 *
+	 * @param stdClass $comment - Comment.
+	 * @return string - Author username or email.
+	 */
+	private function CheckAuthor( $comment ) {
+		if ( username_exists( $comment->comment_author ) ) {
+			return $comment->comment_author;
+		} else {
+			return $comment->comment_author_email;
+		}
+	}
 }

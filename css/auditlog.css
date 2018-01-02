@@ -1,3 +1,15 @@
+/**
+ * Audit Log admin CSS
+ *
+ */
+
+.top .wsal-ipp {
+	display: none;
+}
+.top .wsal-ssa select {
+	margin-left: 0;
+}
+
 .wsal-ipp,
 .wsal-ssa {
 	display: inline-block;
@@ -195,10 +207,6 @@ td.column-user {
 .wsal-ssas-dd .allsites {
 	border-bottom: 1px solid windowframe;
 }
-.wsal-premium {
-	text-decoration: none;
-	float: right;
-}
 
 .dashicons-dismiss:hover {
 	color:#c00
@@ -243,4 +251,49 @@ td.column-user {
 	line-height: 8px;
 	padding: 10px;
 	margin: 0;
+}
+
+/**
+ * Audit Log Admin Notice
+ */
+.wsal_notice__wrapper {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: start;
+	-ms-flex-align: start;
+    align-items: flex-start;
+	position: relative;
+	margin: 12px 0;
+}
+
+.wsal_notice__btns {
+	position: absolute;
+	right: 0;
+	text-align: right;
+}
+
+.wsal_notice__btns a {
+	display: block;
+}
+
+.wsal_notice__btns a.buy-now {
+	margin-bottom: 10px;
+}
+
+.wsal_notice__wrapper img {
+	width: 70px;
+	height: 70px;
+	margin-right: 5px;
+}
+
+div.wsal_notice__wrapper p {
+	margin-right: 16px;
+}
+
+.wsal-premium {
+	position: absolute;
+	right: 0;
+	top: 0;
+	text-decoration: none;
 }

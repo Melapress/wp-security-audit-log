@@ -1,16 +1,58 @@
 <?php
 /**
- * @package Wsal
+ * Class: Connection Interface
  *
  * Interface used by the WSAL_Connector.
+ *
+ * @package Wsal
  */
-interface WSAL_Connector_ConnectorInterface
-{
-    public function getAdapter($class_name);
-    public function getConnection();
-    public function closeConnection();
-    public function isInstalled();
-    public function canMigrate();
-    public function installAll();
-    public function uninstallAll();
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Interface used by the WSAL_Connector.
+ *
+ * @package Wsal
+ */
+interface WSAL_Connector_ConnectorInterface {
+
+	/**
+	 * Gets the adapter.
+	 *
+	 * @param string $class_name - Class name.
+	 */
+	public function getAdapter( $class_name );
+
+	/**
+	 * Get the connection.
+	 */
+	public function getConnection();
+
+	/**
+	 * Close the connection.
+	 */
+	public function closeConnection();
+
+	/**
+	 * Is installed?
+	 */
+	public function isInstalled();
+
+	/**
+	 * Can migrate?
+	 */
+	public function canMigrate();
+
+	/**
+	 * Install all.
+	 */
+	public function installAll();
+
+	/**
+	 * Uninstall all.
+	 */
+	public function uninstallAll();
 }

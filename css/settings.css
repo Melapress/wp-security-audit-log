@@ -149,3 +149,7 @@ a.disabled {
     cursor: default;
     opacity: 0.6;
 }
+
+#PruningDate {
+	width: 35px;
+}

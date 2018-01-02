@@ -1,7 +1,19 @@
 <?php
 /**
+ * Sensor: Plugins & Themes
+ *
+ * Plugins & Themes sensor file.
+ *
+ * @since 1.0.0
  * @package Wsal
- * @subpackage Sensors
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
  * Plugins & Themes sensor.
  *
  * 5000 User installed a plugin
@@ -22,10 +34,24 @@
  * 2106 A plugin modified a post
  * 2107 A plugin modified a page
  * 2108 A plugin modified a custom post
+ *
+ * @package Wsal
+ * @subpackage Sensors
  */
 class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
+	/**
+	 * List of Themes.
+	 *
+	 * @var array
+	 */
 	protected $old_themes = array();
+
+	/**
+	 * List of Plugins.
+	 *
+	 * @var array
+	 */
 	protected $old_plugins = array();
 
 	/**
@@ -57,165 +83,294 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	/**
 	 * Install, uninstall, activate, deactivate, upgrade and update.
 	 */
-	public function EventAdminShutdown()
-	{
-		$action = (isset($_REQUEST['action']) && $_REQUEST['action'] != "-1")  ? $_REQUEST['action'] : '';
-		$action = (isset($_REQUEST['action2']) && $_REQUEST['action2'] != "-1") ? $_REQUEST['action2'] : $action;
-		$actype = basename($_SERVER['SCRIPT_NAME'], '.php');
-		$is_themes = $actype == 'themes';
-		$is_plugins = $actype == 'plugins';
+	public function EventAdminShutdown() {
+		// Filter global arrays for security.
+		$post_array = filter_input_array( INPUT_POST );
+		$get_array = filter_input_array( INPUT_GET );
+		$server_array = filter_input_array( INPUT_SERVER );
 
-		// install plugin
-		if (in_array($action, array('install-plugin', 'upload-plugin')) && current_user_can("install_plugins")) {
-			$plugin = array_values(array_diff(array_keys(get_plugins()), array_keys($this->old_plugins)));
-			if (count($plugin) != 1) {
+		$action = '';
+		if ( isset( $get_array['action'] ) && '-1' != $get_array['action'] ) {
+			$action = $get_array['action'];
+		} elseif ( isset( $post_array['action'] ) && '-1' != $post_array['action'] ) {
+			$action = $post_array['action'];
+		}
+
+		if ( isset( $get_array['action2'] ) && '-1' != $get_array['action2'] ) {
+			$action = $get_array['action2'];
+		} elseif ( isset( $post_array['action2'] ) && '-1' != $post_array['action2'] ) {
+			$action = $post_array['action2'];
+		}
+
+		$actype = basename( $server_array['SCRIPT_NAME'], '.php' );
+		$is_themes = 'themes' == $actype;
+		$is_plugins = 'plugins' == $actype;
+
+		// Install plugin.
+		if ( in_array( $action, array( 'install-plugin', 'upload-plugin' ) ) && current_user_can( 'install_plugins' ) ) {
+			$plugin = array_values( array_diff( array_keys( get_plugins() ), array_keys( $this->old_plugins ) ) );
+			if ( count( $plugin ) != 1 ) {
 				return $this->LogError(
-					'Expected exactly one new plugin but found ' . count($plugin),
-					array('NewPlugin' => $plugin, 'OldPlugins' => $this->old_plugins, 'NewPlugins' => get_plugins())
+					'Expected exactly one new plugin but found ' . count( $plugin ),
+					array(
+						'NewPlugin' => $plugin,
+						'OldPlugins' => $this->old_plugins,
+						'NewPlugins' => get_plugins(),
+					)
 				);
 			}
-			$pluginPath = $plugin[0];
+			$plugin_path = $plugin[0];
 			$plugin = get_plugins();
-			$plugin = $plugin[$pluginPath];
-			$pluginPath = plugin_dir_path(WP_PLUGIN_DIR . '/' . $pluginPath[0]);
-			$this->plugin->alerts->Trigger(5000, array(
-				'Plugin' => (object)array(
-					'Name' => $plugin['Name'],
-					'PluginURI' => $plugin['PluginURI'],
-					'Version' => $plugin['Version'],
-					'Author' => $plugin['Author'],
-					'Network' => $plugin['Network'] ? 'True' : 'False',
-					'plugin_dir_path' => $pluginPath,
-				),
-			));
-		}
-
-		// activate plugin
-		if ($is_plugins && in_array($action, array('activate', 'activate-selected')) && current_user_can("activate_plugins")) {
-			if (isset($_REQUEST['plugin'])) {
-				if (!isset($_REQUEST['checked'])) {
-					$_REQUEST['checked'] = array();
-				}
-				$_REQUEST['checked'][] = $_REQUEST['plugin'];
-			}
-			foreach ($_REQUEST['checked'] as $pluginFile) {
-				$pluginFile = WP_PLUGIN_DIR . '/' . $pluginFile;
-				$pluginData = get_plugin_data($pluginFile, false, true);
-				$this->plugin->alerts->Trigger(5001, array(
-					'PluginFile' => $pluginFile,
-					'PluginData' => (object)array(
-						'Name' => $pluginData['Name'],
-						'PluginURI' => $pluginData['PluginURI'],
-						'Version' => $pluginData['Version'],
-						'Author' => $pluginData['Author'],
-						'Network' => $pluginData['Network'] ? 'True' : 'False',
+			$plugin = $plugin[ $plugin_path ];
+			$plugin_path = plugin_dir_path( WP_PLUGIN_DIR . '/' . $plugin_path[0] );
+			$this->plugin->alerts->Trigger(
+				5000, array(
+					'Plugin' => (object) array(
+						'Name' => $plugin['Name'],
+						'PluginURI' => $plugin['PluginURI'],
+						'Version' => $plugin['Version'],
+						'Author' => $plugin['Author'],
+						'Network' => $plugin['Network'] ? 'True' : 'False',
+						'plugin_dir_path' => $plugin_path,
 					),
-				));
-			}
+				)
+			);
 		}
 
-		// deactivate plugin
-		if ($is_plugins && in_array($action, array('deactivate', 'deactivate-selected')) && current_user_can("activate_plugins")) {
-			if (isset($_REQUEST['plugin'])) {
-				if (!isset($_REQUEST['checked'])) {
-					$_REQUEST['checked'] = array();
+		// Activate plugin.
+		if ( $is_plugins && in_array( $action, array( 'activate', 'activate-selected' ) ) && current_user_can( 'activate_plugins' ) ) {
+			// Check $_GET array case.
+			if ( isset( $get_array['plugin'] ) ) {
+				if ( ! isset( $get_array['checked'] ) ) {
+					$get_array['checked'] = array();
 				}
-				$_REQUEST['checked'][] = $_REQUEST['plugin'];
+				$get_array['checked'][] = $get_array['plugin'];
 			}
-			foreach ($_REQUEST['checked'] as $pluginFile) {
-				$pluginFile = WP_PLUGIN_DIR . '/' . $pluginFile;
-				$pluginData = get_plugin_data($pluginFile, false, true);
-				$this->plugin->alerts->Trigger(5002, array(
-					'PluginFile' => $pluginFile,
-					'PluginData' => (object)array(
-						'Name' => $pluginData['Name'],
-						'PluginURI' => $pluginData['PluginURI'],
-						'Version' => $pluginData['Version'],
-						'Author' => $pluginData['Author'],
-						'Network' => $pluginData['Network'] ? 'True' : 'False',
-					),
-				));
+
+			// Check $_POST array case.
+			if ( isset( $post_array['plugin'] ) ) {
+				if ( ! isset( $post_array['checked'] ) ) {
+					$post_array['checked'] = array();
+				}
+				$post_array['checked'][] = $post_array['plugin'];
+			}
+
+			if ( isset( $get_array['checked'] ) && ! empty( $get_array['checked'] ) ) {
+				foreach ( $get_array['checked'] as $plugin_file ) {
+					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+					$plugin_data = get_plugin_data( $plugin_file, false, true );
+					$this->plugin->alerts->Trigger(
+						5001, array(
+							'PluginFile' => $plugin_file,
+							'PluginData' => (object) array(
+								'Name' => $plugin_data['Name'],
+								'PluginURI' => $plugin_data['PluginURI'],
+								'Version' => $plugin_data['Version'],
+								'Author' => $plugin_data['Author'],
+								'Network' => $plugin_data['Network'] ? 'True' : 'False',
+							),
+						)
+					);
+				}
+			} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
+				foreach ( $post_array['checked'] as $plugin_file ) {
+					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+					$plugin_data = get_plugin_data( $plugin_file, false, true );
+					$this->plugin->alerts->Trigger(
+						5001, array(
+							'PluginFile' => $plugin_file,
+							'PluginData' => (object) array(
+								'Name' => $plugin_data['Name'],
+								'PluginURI' => $plugin_data['PluginURI'],
+								'Version' => $plugin_data['Version'],
+								'Author' => $plugin_data['Author'],
+								'Network' => $plugin_data['Network'] ? 'True' : 'False',
+							),
+						)
+					);
+				}
 			}
 		}
 
-		// uninstall plugin
-		if ($is_plugins && in_array($action, array('delete-selected')) && current_user_can("delete_plugins")) {
-			if (!isset($_REQUEST['verify-delete'])) {
-				// first step, before user approves deletion
-				// TODO store plugin data in session here
+		// Deactivate plugin.
+		if ( $is_plugins && in_array( $action, array( 'deactivate', 'deactivate-selected' ) ) && current_user_can( 'activate_plugins' ) ) {
+			// Check $_GET array case.
+			if ( isset( $get_array['plugin'] ) ) {
+				if ( ! isset( $get_array['checked'] ) ) {
+					$get_array['checked'] = array();
+				}
+				$get_array['checked'][] = $get_array['plugin'];
+			}
+
+			// Check $_POST array case.
+			if ( isset( $post_array['plugin'] ) ) {
+				if ( ! isset( $post_array['checked'] ) ) {
+					$post_array['checked'] = array();
+				}
+				$post_array['checked'][] = $post_array['plugin'];
+			}
+
+			if ( isset( $get_array['checked'] ) && ! empty( $get_array['checked'] ) ) {
+				foreach ( $get_array['checked'] as $plugin_file ) {
+					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+					$plugin_data = get_plugin_data( $plugin_file, false, true );
+					$this->plugin->alerts->Trigger(
+						5002, array(
+							'PluginFile' => $plugin_file,
+							'PluginData' => (object) array(
+								'Name' => $plugin_data['Name'],
+								'PluginURI' => $plugin_data['PluginURI'],
+								'Version' => $plugin_data['Version'],
+								'Author' => $plugin_data['Author'],
+								'Network' => $plugin_data['Network'] ? 'True' : 'False',
+							),
+						)
+					);
+				}
+			} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
+				foreach ( $post_array['checked'] as $plugin_file ) {
+					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+					$plugin_data = get_plugin_data( $plugin_file, false, true );
+					$this->plugin->alerts->Trigger(
+						5002, array(
+							'PluginFile' => $plugin_file,
+							'PluginData' => (object) array(
+								'Name' => $plugin_data['Name'],
+								'PluginURI' => $plugin_data['PluginURI'],
+								'Version' => $plugin_data['Version'],
+								'Author' => $plugin_data['Author'],
+								'Network' => $plugin_data['Network'] ? 'True' : 'False',
+							),
+						)
+					);
+				}
+			}
+		}
+
+		// Uninstall plugin.
+		if ( $is_plugins && in_array( $action, array( 'delete-selected' ) ) && current_user_can( 'delete_plugins' ) ) {
+			if ( ! isset( $post_array['verify-delete'] ) ) {
+				// First step, before user approves deletion
+				// TODO store plugin data in session here.
 			} else {
 				// second step, after deletion approval
-				// TODO use plugin data from session
-				foreach ($_REQUEST['checked'] as $pluginFile) {
-					$pluginName = basename($pluginFile, '.php');
-					$pluginName = str_replace(array('_', '-', '  '), ' ', $pluginName);
-					$pluginName = ucwords($pluginName);
-					$pluginFile = WP_PLUGIN_DIR . '/' . $pluginFile;
-					$this->plugin->alerts->Trigger(5003, array(
-						'PluginFile' => $pluginFile,
-						'PluginData' => (object)array(
-							'Name' => $pluginName,
-						),
-					));
+				// TODO use plugin data from session.
+				foreach ( $post_array['checked'] as $plugin_file ) {
+					$plugin_name = basename( $plugin_file, '.php' );
+					$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
+					$plugin_name = ucwords( $plugin_name );
+					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+					$this->plugin->alerts->Trigger(
+						5003, array(
+							'PluginFile' => $plugin_file,
+							'PluginData' => (object) array(
+								'Name' => $plugin_name,
+							),
+						)
+					);
 				}
 			}
 		}
 
-		// uninstall plugin for Wordpress version 4.6
-		if (in_array($action, array('delete-plugin')) && current_user_can("delete_plugins")) {
-			if (isset($_REQUEST['plugin'])) {
-				$pluginFile = WP_PLUGIN_DIR . '/' . $_REQUEST['plugin'];
-				$pluginName = basename($pluginFile, '.php');
-				$pluginName = str_replace(array('_', '-', '  '), ' ', $pluginName);
-				$pluginName = ucwords($pluginName);
-				$this->plugin->alerts->Trigger(5003, array(
-					'PluginFile' => $pluginFile,
-					'PluginData' => (object)array(
-						'Name' => $pluginName,
-					),
-				));
+		// Uninstall plugin for WordPress version 4.6.
+		if ( in_array( $action, array( 'delete-plugin' ) ) && current_user_can( 'delete_plugins' ) ) {
+			if ( isset( $post_array['plugin'] ) ) {
+				$plugin_file = WP_PLUGIN_DIR . '/' . $post_array['plugin'];
+				$plugin_name = basename( $plugin_file, '.php' );
+				$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
+				$plugin_name = ucwords( $plugin_name );
+				$this->plugin->alerts->Trigger(
+					5003, array(
+						'PluginFile' => $plugin_file,
+						'PluginData' => (object) array(
+							'Name' => $plugin_name,
+						),
+					)
+				);
 			}
 		}
 
-		// upgrade plugin
-		if (in_array($action, array('upgrade-plugin', 'update-plugin', 'update-selected')) && current_user_can("update_plugins")) {
+		// Upgrade plugin.
+		if ( in_array( $action, array( 'upgrade-plugin', 'update-plugin', 'update-selected' ) ) && current_user_can( 'update_plugins' ) ) {
 			$plugins = array();
-			if (isset($_REQUEST['plugins'])) {
-				$plugins = explode(",", $_REQUEST['plugins']);
-			} else if (isset($_REQUEST['plugin'])) {
-				$plugins[] = $_REQUEST['plugin'];
+
+			// Check $_GET array cases.
+			if ( isset( $get_array['plugins'] ) ) {
+				$plugins = explode( ',', $get_array['plugins'] );
+			} elseif ( isset( $get_array['plugin'] ) ) {
+				$plugins[] = $get_array['plugin'];
 			}
-			if (isset($plugins)) {
-				foreach ($plugins as $pluginFile) {
-					$pluginFile = WP_PLUGIN_DIR . '/' . $pluginFile;
-					$pluginData = get_plugin_data($pluginFile, false, true);
-					$this->plugin->alerts->Trigger(5004, array(
-						'PluginFile' => $pluginFile,
-						'PluginData' => (object)array(
-							'Name' => $pluginData['Name'],
-							'PluginURI' => $pluginData['PluginURI'],
-							'Version' => $pluginData['Version'],
-							'Author' => $pluginData['Author'],
-							'Network' => $pluginData['Network'] ? 'True' : 'False',
-						),
-					));
+
+			// Check $_POST array cases.
+			if ( isset( $post_array['plugins'] ) ) {
+				$plugins = explode( ',', $post_array['plugins'] );
+			} elseif ( isset( $post_array['plugin'] ) ) {
+				$plugins[] = $post_array['plugin'];
+			}
+			if ( isset( $plugins ) ) {
+				foreach ( $plugins as $plugin_file ) {
+					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+					$plugin_data = get_plugin_data( $plugin_file, false, true );
+					$this->plugin->alerts->Trigger(
+						5004, array(
+							'PluginFile' => $plugin_file,
+							'PluginData' => (object) array(
+								'Name' => $plugin_data['Name'],
+								'PluginURI' => $plugin_data['PluginURI'],
+								'Version' => $plugin_data['Version'],
+								'Author' => $plugin_data['Author'],
+								'Network' => $plugin_data['Network'] ? 'True' : 'False',
+							),
+						)
+					);
 				}
 			}
 		}
 
-		// update theme
-		if (in_array($action, array('upgrade-theme', 'update-theme', 'update-selected-themes')) && current_user_can("install_themes")) {
+		// Update theme.
+		if ( in_array( $action, array( 'upgrade-theme', 'update-theme', 'update-selected-themes' ) ) && current_user_can( 'install_themes' ) ) {
+			// Themes.
 			$themes = array();
-			if (isset($_REQUEST['slug']) || isset($_REQUEST['theme'])) {
-				$themes[] = isset($_REQUEST['slug']) ? $_REQUEST['slug'] : $_REQUEST['theme'];
-			} elseif (isset($_REQUEST['themes'])) {
-				$themes = explode(",", $_REQUEST['themes']);
+
+			// Check $_GET array cases.
+			if ( isset( $get_array['slug'] ) || isset( $get_array['theme'] ) ) {
+				$themes[] = isset( $get_array['slug'] ) ? $get_array['slug'] : $get_array['theme'];
+			} elseif ( isset( $get_array['themes'] ) ) {
+				$themes = explode( ',', $get_array['themes'] );
 			}
-			if (isset($themes)) {
-				foreach ($themes as $theme_name) {
-					$theme = wp_get_theme($theme_name);
-					$this->plugin->alerts->Trigger(5031, array(
-						'Theme' => (object)array(
+
+			// Check $_POST array cases.
+			if ( isset( $post_array['slug'] ) || isset( $post_array['theme'] ) ) {
+				$themes[] = isset( $post_array['slug'] ) ? $post_array['slug'] : $post_array['theme'];
+			} elseif ( isset( $post_array['themes'] ) ) {
+				$themes = explode( ',', $post_array['themes'] );
+			}
+			if ( isset( $themes ) ) {
+				foreach ( $themes as $theme_name ) {
+					$theme = wp_get_theme( $theme_name );
+					$this->plugin->alerts->Trigger(
+						5031, array(
+							'Theme' => (object) array(
+								'Name' => $theme->Name,
+								'ThemeURI' => $theme->ThemeURI,
+								'Description' => $theme->Description,
+								'Author' => $theme->Author,
+								'Version' => $theme->Version,
+								'get_template_directory' => $theme->get_template_directory(),
+							),
+						)
+					);
+				}
+			}
+		}
+
+		// Install theme.
+		if ( in_array( $action, array( 'install-theme', 'upload-theme' ) ) && current_user_can( 'install_themes' ) ) {
+			$themes = array_diff( wp_get_themes(), $this->old_themes );
+			foreach ( $themes as $theme ) {
+				$this->plugin->alerts->Trigger(
+					5005, array(
+						'Theme' => (object) array(
 							'Name' => $theme->Name,
 							'ThemeURI' => $theme->ThemeURI,
 							'Description' => $theme->Description,
@@ -223,105 +378,132 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							'Version' => $theme->Version,
 							'get_template_directory' => $theme->get_template_directory(),
 						),
-					));
-				}
+					)
+				);
 			}
 		}
 
-		// install theme
-		if (in_array($action, array('install-theme', 'upload-theme')) && current_user_can("install_themes")) {
-			$themes = array_diff(wp_get_themes(), $this->old_themes);
-			foreach ($themes as $theme) {
-				$this->plugin->alerts->Trigger(5005, array(
-					'Theme' => (object)array(
-						'Name' => $theme->Name,
-						'ThemeURI' => $theme->ThemeURI,
-						'Description' => $theme->Description,
-						'Author' => $theme->Author,
-						'Version' => $theme->Version,
-						'get_template_directory' => $theme->get_template_directory(),
-					),
-				));
-			}
-		}
-
-		// uninstall theme
-		if (in_array($action, array('delete-theme')) && current_user_can("install_themes")) {
-			foreach ($this->GetRemovedThemes() as $theme) {
-				$this->plugin->alerts->Trigger(5007, array(
-					'Theme' => (object)array(
-						'Name' => $theme->Name,
-						'ThemeURI' => $theme->ThemeURI,
-						'Description' => $theme->Description,
-						'Author' => $theme->Author,
-						'Version' => $theme->Version,
-						'get_template_directory' => $theme->get_template_directory(),
-					),
-				));
+		// Uninstall theme.
+		if ( in_array( $action, array( 'delete-theme' ) ) && current_user_can( 'install_themes' ) ) {
+			foreach ( $this->GetRemovedThemes() as $theme ) {
+				$this->plugin->alerts->Trigger(
+					5007, array(
+						'Theme' => (object) array(
+							'Name' => $theme->Name,
+							'ThemeURI' => $theme->ThemeURI,
+							'Description' => $theme->Description,
+							'Author' => $theme->Author,
+							'Version' => $theme->Version,
+							'get_template_directory' => $theme->get_template_directory(),
+						),
+					)
+				);
 			}
 		}
 	}
 
 	/**
 	 * Activated a theme.
-	 * @param string $themeName name
+	 *
+	 * @param string $theme_name - Theme name.
 	 */
-	public function EventThemeActivated($themeName)
-	{
+	public function EventThemeActivated( $theme_name ) {
 		$theme = null;
-		foreach (wp_get_themes() as $item) {
-			if ($item->Name == $themeName) {
+		foreach ( wp_get_themes() as $item ) {
+			if ( $theme_name == $item->Name ) {
 				$theme = $item;
 				break;
 			}
 		}
-		if ($theme == null) {
+		if ( null == $theme ) {
 			return $this->LogError(
 				'Could not locate theme named "' . $theme . '".',
-				array('ThemeName' => $themeName, 'Themes' => wp_get_themes())
+				array(
+					'ThemeName' => $theme_name,
+					'Themes' => wp_get_themes(),
+				)
 			);
 		}
-		$this->plugin->alerts->Trigger(5006, array(
-			'Theme' => (object)array(
-				'Name' => $theme->Name,
-				'ThemeURI' => $theme->ThemeURI,
-				'Description' => $theme->Description,
-				'Author' => $theme->Author,
-				'Version' => $theme->Version,
-				'get_template_directory' => $theme->get_template_directory(),
-			),
-		));
+		$this->plugin->alerts->Trigger(
+			5006, array(
+				'Theme' => (object) array(
+					'Name' => $theme->Name,
+					'ThemeURI' => $theme->ThemeURI,
+					'Description' => $theme->Description,
+					'Author' => $theme->Author,
+					'Version' => $theme->Version,
+					'get_template_directory' => $theme->get_template_directory(),
+				),
+			)
+		);
 	}
 
 	/**
 	 * Plugin creates/modifies posts.
 	 *
-	 * @param int 	 $post_id - Post ID.
+	 * @param int    $post_id - Post ID.
 	 * @param object $post - Post object.
 	 */
 	public function EventPluginPostCreate( $post_id, $post ) {
-		$WPActions = array( 'editpost', 'heartbeat', 'inline-save', 'trash', 'untrash' );
-		if ( isset( $_REQUEST['action'] ) && ! in_array( $_REQUEST['action'], $WPActions ) ) {
+		// Filter $_REQUEST array for security.
+		$get_array = filter_input_array( INPUT_GET );
+		$post_array = filter_input_array( INPUT_POST );
+
+		$wp_actions = array( 'editpost', 'heartbeat', 'inline-save', 'trash', 'untrash' );
+		if ( isset( $get_array['action'] ) && ! in_array( $get_array['action'], $wp_actions ) ) {
 			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
 				|| ! empty( $post->post_title ) ) {
 				// If the plugin modify the post.
-				if ( false !== strpos( $_REQUEST['action'], 'edit' ) ) {
+				if ( false !== strpos( $get_array['action'], 'edit' ) ) {
 					$event = $this->GetEventTypeForPostType( $post, 2106, 2107, 2108 );
-					$editorLink = $this->GetEditorLink( $post );
-					$this->plugin->alerts->Trigger( $event, array(
-						'PostID' 	=> $post->ID,
-						'PostType' 	=> $post->post_type,
-						'PostTitle'	=> $post->post_title,
-						$editorLink['name'] => $editorLink['value'],
-					) );
+					$editor_link = $this->GetEditorLink( $post );
+					$this->plugin->alerts->Trigger(
+						$event, array(
+							'PostID'    => $post->ID,
+							'PostType'  => $post->post_type,
+							'PostTitle' => $post->post_title,
+							$editor_link['name'] => $editor_link['value'],
+						)
+					);
 				} else {
 					$event = $this->GetEventTypeForPostType( $post, 5019, 5020, 5021 );
-					$this->plugin->alerts->Trigger( $event, array(
-						'PostID' 	=> $post->ID,
-						'PostType' 	=> $post->post_type,
-						'PostTitle'	=> $post->post_title,
-						'Username' 	=> 'Plugins',
-					) );
+					$this->plugin->alerts->Trigger(
+						$event, array(
+							'PostID'    => $post->ID,
+							'PostType'  => $post->post_type,
+							'PostTitle' => $post->post_title,
+							'Username'  => 'Plugins',
+						)
+					);
+				}
+			}
+		}
+
+		if ( isset( $post_array['action'] ) && ! in_array( $post_array['action'], $wp_actions ) ) {
+			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
+				|| ! empty( $post->post_title ) ) {
+				// If the plugin modify the post.
+				if ( false !== strpos( $post_array['action'], 'edit' ) ) {
+					$event = $this->GetEventTypeForPostType( $post, 2106, 2107, 2108 );
+					$editor_link = $this->GetEditorLink( $post );
+					$this->plugin->alerts->Trigger(
+						$event, array(
+							'PostID'    => $post->ID,
+							'PostType'  => $post->post_type,
+							'PostTitle' => $post->post_title,
+							$editor_link['name'] => $editor_link['value'],
+						)
+					);
+				} else {
+					$event = $this->GetEventTypeForPostType( $post, 5019, 5020, 5021 );
+					$this->plugin->alerts->Trigger(
+						$event, array(
+							'PostID'    => $post->ID,
+							'PostType'  => $post->post_type,
+							'PostTitle' => $post->post_title,
+							'Username'  => 'Plugins',
+						)
+					);
 				}
 			}
 		}
@@ -333,51 +515,78 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 * @param integer $post_id - Post ID.
 	 */
 	public function EventPluginPostDelete( $post_id ) {
-		if ( empty( $_REQUEST['action'] ) && isset( $_REQUEST['page'] ) ) {
+		// Filter $_REQUEST array for security.
+		$get_array = filter_input_array( INPUT_GET );
+		$post_array = filter_input_array( INPUT_POST );
+
+		if ( empty( $get_array['action'] ) && isset( $get_array['page'] ) ) {
 			$post = get_post( $post_id );
 			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
 				|| ! empty( $post->post_title ) ) {
 				$event = $this->GetEventTypeForPostType( $post, 5025, 5026, 5027 );
-				$this->plugin->alerts->Trigger($event, array(
-					'PostID' 	=> $post->ID,
-					'PostType' 	=> $post->post_type,
-					'PostTitle' => $post->post_title,
-					'Username' 	=> 'Plugins',
-				) );
+				$this->plugin->alerts->Trigger(
+					$event, array(
+						'PostID'    => $post->ID,
+						'PostType'  => $post->post_type,
+						'PostTitle' => $post->post_title,
+						'Username'  => 'Plugins',
+					)
+				);
+			}
+		}
+
+		if ( empty( $post_array['action'] ) && isset( $post_array['page'] ) ) {
+			$post = get_post( $post_id );
+			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
+				|| ! empty( $post->post_title ) ) {
+				$event = $this->GetEventTypeForPostType( $post, 5025, 5026, 5027 );
+				$this->plugin->alerts->Trigger(
+					$event, array(
+						'PostID'    => $post->ID,
+						'PostType'  => $post->post_type,
+						'PostTitle' => $post->post_title,
+						'Username'  => 'Plugins',
+					)
+				);
 			}
 		}
 	}
 
 	/**
 	 * Get removed themes.
+	 *
 	 * @return array of WP_Theme objects
 	 */
-	protected function GetRemovedThemes()
-	{
+	protected function GetRemovedThemes() {
 		$result = $this->old_themes;
-		foreach ($result as $i => $theme) {
-			if (file_exists($theme->get_template_directory())) {
-				unset($result[$i]);
+		foreach ( $result as $i => $theme ) {
+			if ( file_exists( $theme->get_template_directory() ) ) {
+				unset( $result[ $i ] );
 			}
 		}
-		return array_values($result);
+		return array_values( $result );
 	}
 
 	/**
 	 * Get event code by post type.
+	 *
+	 * @param object $post - Post object.
+	 * @param int    $type_post - Code for post.
+	 * @param int    $type_page - Code for page.
+	 * @param int    $type_custom - Code for custom post type.
 	 */
-	protected function GetEventTypeForPostType( $post, $typePost, $typePage, $typeCustom ) {
+	protected function GetEventTypeForPostType( $post, $type_post, $type_page, $type_custom ) {
 		if ( empty( $post ) || ! isset( $post->post_type ) ) {
 			return false;
 		}
 
 		switch ( $post->post_type ) {
 			case 'page':
-				return $typePage;
+				return $type_page;
 			case 'post':
-				return $typePost;
+				return $type_post;
 			default:
-				return $typeCustom;
+				return $type_custom;
 		}
 	}
 
@@ -385,16 +594,16 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 * Get editor link.
 	 *
 	 * @param object $post - The post object.
-	 * @return array $aLink name and value link.
+	 * @return array $editor_link name and value link.
 	 */
 	private function GetEditorLink( $post ) {
 		$name = 'EditorLink';
-		$name .= ( $post->post_type == 'page' ) ? 'Page' : 'Post' ;
+		$name .= ( 'page' == $post->post_type ) ? 'Page' : 'Post' ;
 		$value = get_edit_post_link( $post->ID );
-		$aLink = array(
-			'name' 	=> $name,
+		$editor_link = array(
+			'name'  => $name,
 			'value' => $value,
 		);
-		return $aLink;
+		return $editor_link;
 	}
 }

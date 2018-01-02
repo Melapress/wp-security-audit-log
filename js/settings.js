@@ -63,19 +63,19 @@ jQuery(document).ready(function(){
 		}
 	});
 
-	var usersUrl = ajaxurl + "?action=AjaxGetAllUsers";
+	var usersUrl = ajaxurl + "?action=AjaxGetAllUsers&wsal_nonce=" + wsal_data.wp_nonce;
 	jQuery("#ExUserQueryBox").autocomplete({
 	    source: usersUrl,
 	    minLength:1
 	});
 
-	var rolesUrl = ajaxurl + "?action=AjaxGetAllRoles";
+	var rolesUrl = ajaxurl + "?action=AjaxGetAllRoles&wsal_nonce=" + wsal_data.wp_nonce;
 	jQuery("#ExRoleQueryBox").autocomplete({
 	    source: rolesUrl,
 	    minLength:1
 	});
 
-	var cptsUrl = ajaxurl + "?action=AjaxGetAllCPT";
+	var cptsUrl = ajaxurl + "?action=AjaxGetAllCPT&wsal_nonce=" + wsal_data.wp_nonce;
 	console.log( cptsUrl );
 	jQuery( '#ExCPTsQueryBox' ).autocomplete( {
 	    source: cptsUrl,

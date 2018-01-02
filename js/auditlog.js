@@ -33,7 +33,7 @@ window['WsalAuditLogRefreshed'] = function(){
 		        yes: 'Disable',
 		        no: '',
 		        onYes: function( elem ) {
-					WsalDisableByCode( elem.attr( 'data-alert-id' ) )
+					WsalDisableByCode( elem.attr( 'data-alert-id' ), elem.data( 'disable-alert-nonce' ) )
 				}
 		    } );
 		} else {
@@ -46,7 +46,7 @@ window['WsalAuditLogRefreshed'] = function(){
 		        yes: 'Disable',
 		        no: '<span>Modify</span>',
 		        onYes: function( elem ) {
-					WsalDisableByCode( elem.attr( 'data-alert-id' ) );
+					WsalDisableByCode( elem.attr( 'data-alert-id' ), elem.data( 'disable-alert-nonce' ) );
 				},
 				onNo: function( elem ) {
 					window.location.href = elem.attr( 'data-link' );
@@ -174,12 +174,13 @@ function WsalSsasChange(value){
 
 function WsalDisableCustom(link, meta_key){
 	var nfe = jQuery(this).parents('div:first');
+	var nonce = jQuery( this ).data( 'disable-custom-nonce' );
 	jQuery(link).hide();
 	jQuery.ajax({
 		type: 'POST',
 		url: ajaxurl,
 		async: false,
-		data: { action: 'AjaxDisableCustomField', notice: meta_key },
+		data: { action: 'AjaxDisableCustomField', notice: meta_key, disable_nonce: nonce },
 		success: function(data) {
 			var notice = jQuery('<div class="updated" data-notice-name="notifications-extension"></div>').html(data);
 			jQuery("h2:first").after(notice);
@@ -202,15 +203,15 @@ function WsalDBChange(value){
 	});
 }
 
-function WsalDisableByCode(code){
-	jQuery.ajax({
+function WsalDisableByCode( code, nonce ) {
+	jQuery.ajax( {
 		type: 'POST',
 		url: ajaxurl,
 		async: true,
-		data: { action: 'AjaxDisableByCode', code: code },
-		success: function(data) {
+		data: { action: 'AjaxDisableByCode', code: code, disable_nonce: nonce },
+		success: function( data ) {
 			var notice = jQuery('<div class="updated" data-notice-name="disabled"></div>').html(data);
 			jQuery("h2:first").after(notice);
 		}
-	});
+	} );
 }
