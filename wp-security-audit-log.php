@@ -287,6 +287,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return string
 		 */
 		function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
+			$freemius_link = '<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
 				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
 				esc_html__( 'Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com.', 'wp-security-audit-log' ) .
@@ -312,6 +313,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return string
 		 */
 		function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
+			$freemius_link = '<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
 				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
 				esc_html__( 'Please help us improve %2$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %5$s, a diagnostic tracking service we use. If you skip this, that\'s okay! %2$s will still work just fine.', 'wp-security-audit-log' ) .
