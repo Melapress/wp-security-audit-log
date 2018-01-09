@@ -205,6 +205,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$post_array = filter_input_array( INPUT_POST );
 
 		$username = array_key_exists( 'log', $post_array ) ? $post_array['log'] : $username;
+		$username = sanitize_user( $username );
 		$new_alert_code = 1003;
 		$user = get_user_by( 'login', $username );
 		$site_id = (function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0);
@@ -411,5 +412,35 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		}
 
 		return $name_file;
+	}
+
+	/**
+	 * Get the latest file modified.
+	 *
+	 * @param string $uploads_dir_path - Uploads directory path.
+	 * @param string $filename - File name.
+	 * @return string $latest_filename - File name.
+	 */
+	private function GetLastModified( $uploads_dir_path, $filename ) {
+		$filename = substr( $filename, 0, -4 );
+		$latest_mtime = 0;
+		$latest_filename = '';
+		if ( $handle = opendir( $uploads_dir_path ) ) {
+			while ( false !== ($entry = readdir( $handle )) ) {
+				if ( '.' != $entry && '..' != $entry ) {
+					$entry = strip_tags( $entry ); // Strip HTML Tags.
+					$entry = preg_replace( '/[\r\n\t ]+/', ' ', $entry ); // Remove Break/Tabs/Return Carriage.
+					$entry = preg_replace( '/[\"\*\/\:\<\>\?\'\|]+/', ' ', $entry ); // Remove Illegal Chars for folder and filename.
+					if ( preg_match( '/^' . $filename . '/i', $entry ) > 0 ) {
+						if ( filemtime( $uploads_dir_path . $entry ) > $latest_mtime ) {
+							$latest_mtime = filemtime( $uploads_dir_path . $entry );
+							$latest_filename = $entry;
+						}
+					}
+				}
+			}
+			closedir( $handle );
+		}
+		return $latest_filename;
 	}
 }

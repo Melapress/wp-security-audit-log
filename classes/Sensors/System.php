@@ -790,14 +790,18 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				$server_array = filter_input_array( INPUT_SERVER );
 
 				// Request URL.
-				$url = $server_array['HTTP_HOST'] . $server_array['REQUEST_URI'];
+				$request_uri = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
+				$url = site_url() . $request_uri;
 
 				// Get option to log referrer.
 				$log_referrer = $this->plugin->GetGlobalOption( 'log-404-referrer' );
 
 				if ( 'on' === $log_referrer ) {
 					// Get the referer.
-					$referrer = ( isset( $server_array['HTTP_REFERER'] ) ) ? $server_array['HTTP_REFERER'] : false;
+					if ( isset( $server_array['HTTP_REFERER'] ) ) {
+						$referrer = filter_input( INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_URL );
+					}
+
 					// Create/Append to the log file.
 					$data = 'Request URL ' . $url . ' Referer ' . $referrer . ',';
 				} else {
@@ -854,14 +858,18 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				$server_array = filter_input_array( INPUT_SERVER );
 
 				// Request URL.
-				$url = $server_array['HTTP_HOST'] . $server_array['REQUEST_URI'];
+				$request_uri = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
+				$url = site_url() . $request_uri;
 
 				// Get option to log referrer.
 				$log_referrer = $this->plugin->GetGlobalOption( 'log-visitor-404-referrer' );
 
 				if ( 'on' === $log_referrer ) {
 					// Get the referer.
-					$referrer = ( isset( $server_array['HTTP_REFERER'] ) ) ? $server_array['HTTP_REFERER'] : false;
+					if ( isset( $server_array['HTTP_REFERER'] ) ) {
+						$referrer = filter_input( INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_URL );
+					}
+
 					// Create/Append to the log file.
 					$data = 'Request URL ' . $url . ' Referer ' . $referrer . ',';
 				} else {
@@ -927,6 +935,9 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		if ( $handle = opendir( $uploads_dir_path ) ) {
 			while ( false !== ($entry = readdir( $handle )) ) {
 				if ( '.' != $entry && '..' != $entry ) {
+					$entry = strip_tags( $entry ); // Strip HTML Tags.
+					$entry = preg_replace( '/[\r\n\t ]+/', ' ', $entry ); // Remove Break/Tabs/Return Carriage.
+					$entry = preg_replace( '/[\"\*\/\:\<\>\?\'\|]+/', ' ', $entry ); // Remove Illegal Chars for folder and filename.
 					if ( preg_match( '/^' . $filename . '/i', $entry ) > 0 ) {
 						if ( filemtime( $uploads_dir_path . $entry ) > $latest_mtime ) {
 							$latest_mtime = filemtime( $uploads_dir_path . $entry );
