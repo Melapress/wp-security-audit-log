@@ -213,5 +213,6 @@ Please refer to the [FAQs page](https://www.wpsecurityauditlog.com/documentation
 	
 * **Bug Fix**
 	* Fixed an issue where users with view audit log privileges could disable alerts from the hover over option.
+	* Fixed a security issue reported by [Jahan Khan](https://5dspectrum.com/)
 
 Refer to the [WP Security Audit Log change log on the plugin page](https://www.wpsecurityauditlog.com/plugin-change-log/) for a complete changelog.
