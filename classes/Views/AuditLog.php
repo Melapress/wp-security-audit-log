@@ -63,7 +63,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	public function AdminNoticesPremium() {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
 		// Check if any of the extensions is activated.
-		if ( wsal_freemius()->is_not_paying() ) {
+		if ( ! class_exists( 'WSAL_NP_Plugin' )
+			&& ! class_exists( 'WSAL_Ext_Plugin' )
+			&& ! class_exists( 'WSAL_Rep_Plugin' )
+			&& ! class_exists( 'WSAL_SearchExtension' )
+			&& ! class_exists( 'WSAL_User_Management_Plugin' ) ) {
 			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $this->IsNoticeDismissed( 'premium-wsal-' . $this->_version ) ) { ?>
 				<div class="updated wsal_notice" data-notice-name="premium-wsal-<?php echo esc_attr( $this->_version ); ?>">
 					<div class="wsal_notice__wrapper">
