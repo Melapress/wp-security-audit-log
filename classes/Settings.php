@@ -367,6 +367,43 @@ class WSAL_Settings {
 		$this->_plugin->SetGlobalOption( 'restrict-admins', (bool) $enable );
 	}
 
+	/**
+	 * Method: Set Login Page Notification.
+	 *
+	 * @param bool $enable - Enable/Disable.
+	 */
+	public function set_login_page_notification( $enable ) {
+		$this->_plugin->SetGlobalOption( 'login_page_notification', (bool) $enable );
+	}
+
+	/**
+	 * Method: Check if Login Page Notification is set.
+	 *
+	 * @return bool - True if set, false if not.
+	 */
+	public function is_login_page_notification() {
+		return $this->_plugin->GetGlobalOption( 'login_page_notification', false );
+	}
+
+	/**
+	 * Method: Set Login Page Notification Text.
+	 *
+	 * @param string $text - Login Page Notification Text.
+	 */
+	public function set_login_page_notification_text( $text ) {
+		$text = wp_kses( $text, $this->_plugin->allowed_html_tags );
+		$this->_plugin->SetGlobalOption( 'login_page_notification_text', $text );
+	}
+
+	/**
+	 * Method: Return Login Page Notification Text.
+	 *
+	 * @return string|bool - Text if set, false if not.
+	 */
+	public function get_login_page_notification_text() {
+		return $this->_plugin->GetGlobalOption( 'login_page_notification_text', false );
+	}
+
 	public function GetDefaultDisabledAlerts() {
 		return array( 0000, 0001, 0002, 0003, 0004, 0005 );
 	}

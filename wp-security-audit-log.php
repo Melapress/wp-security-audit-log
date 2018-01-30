@@ -216,6 +216,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Handle admin Disable Alerts.
 			add_action( 'wp_ajax_AjaxDisableByCode', array( $this, 'AjaxDisableByCode' ) );
 
+			// Render Login Page Notification.
+			add_filter( 'login_message', array( $this, 'render_login_page_message' ), 10, 1 );
+
 			// Register freemius uninstall event.
 			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
 
@@ -1058,6 +1061,21 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function UpdateGlobalOption( $option, $value ) {
 			$this->options = new WSAL_Models_Option();
 			return $this->options->SetOptionValue( $option, $value );
+		}
+
+		/**
+		 * Method: Render login page message.
+		 *
+		 * @param string $message - Login message.
+		 */
+		public function render_login_page_message( $message ) {
+			// Check if the option is enabled.
+			if ( $this->settings->is_login_page_notification() ) {
+				// Get login message.
+				$message = $this->settings->get_login_page_notification_text();
+			}
+			// Return message.
+			return $message;
 		}
 
 	}

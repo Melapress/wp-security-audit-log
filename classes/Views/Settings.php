@@ -145,6 +145,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
 
 		$this->_plugin->settings->SetRestrictAdmins( isset( $post_array['RestrictAdmins'] ) );
+		$this->_plugin->settings->set_login_page_notification( isset( $post_array['login_page_notification'] ) );
+		$this->_plugin->settings->set_login_page_notification_text( isset( $post_array['login_page_notification_text'] ) ? $post_array['login_page_notification_text'] : false );
 		$this->_plugin->settings->SetRefreshAlertsEnabled( $post_array['EnableAuditViewRefresh'] );
 		$this->_plugin->settings->SetMainIPFromProxy( isset( $post_array['EnableProxyIpCapture'] ) );
 		$this->_plugin->settings->SetInternalIPsFiltering( isset( $post_array['EnableIpFiltering'] ) );
@@ -350,6 +352,29 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 										<?php esc_html_e( 'If this option is disabled all the administrators on this WordPress have access to manage this plugin.', 'wp-security-audit-log' ); ?><br/>
 										<?php echo wp_kses( __( 'By enabling this option only <strong>You</strong> and the users specified in the <strong>Can Manage Plugin</strong> and <strong>Can View Alerts</strong> can configure this plugin or view the alerts in the WordPress audit trail.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
 									</span>
+								</fieldset>
+							</td>
+						</tr>
+						<!-- Login Page Notification -->
+						<tr>
+							<th><label for="login_page_notification"><?php esc_html_e( 'Login Page Notification', 'wp-security-audit-log' ); ?></label></th>
+							<td>
+								<fieldset>
+									<label for="login_page_notification">
+										<?php $wsal_lpn = $this->_plugin->settings->is_login_page_notification(); ?>
+										<input type="checkbox" name="login_page_notification" id="login_page_notification" <?php checked( $wsal_lpn ); ?> />
+									</label>
+									<br/>
+									<span class="description">
+										<?php echo wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/" target="_blank">WP Security Audit Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
+									</span>
+									<br />
+									<?php $wsal_lpn_text = $this->_plugin->settings->get_login_page_notification_text(); ?>
+									<textarea name="login_page_notification_text"
+										id="login_page_notification_text"
+										cols="50" rows="5"
+										<?php echo ( $wsal_lpn ) ? false : 'disabled'; ?>
+									><?php echo ( $wsal_lpn_text ) ? wp_kses( $wsal_lpn_text, $this->_plugin->allowed_html_tags ) : false; ?></textarea>
 								</fieldset>
 							</td>
 						</tr>
@@ -833,6 +858,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 				logging_status.on( 'change', function() {
 					wsalUpdateLoggingStatus( logging_status, txtNot );
+				} );
+
+				// Enable/disable login notification textarea.
+				function wsal_update_login_page_text( checkbox, textarea ) {
+					if ( checkbox.prop( 'checked' ) ) {
+						textarea.removeProp( 'disabled' );
+					} else {
+						textarea.prop( 'disabled', 'disabled' );
+					}
+				}
+
+				// Login page notification settings.
+				var login_page_notif = jQuery( '#login_page_notification' );
+				var login_page_notif_text = jQuery( '#login_page_notification_text' );
+
+				// Check the change event on checkbox.
+				login_page_notif.on( 'change', function() {
+					wsal_update_login_page_text( login_page_notif, login_page_notif_text );
 				} );
 			} );
 		// -->
