@@ -467,7 +467,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<!-- Second tab -->
 				<table class="form-table wsal-tab widefat" id="tab-audit-log">
 					<tbody>
-						<!-- Security Alerts Pruning -->
+						<!-- Audit Log Retention -->
 						<?php
 						$disabled = '';
 						if ( $this->_plugin->settings->IsArchivingEnabled() ) {
@@ -480,7 +480,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</tr>
 						<?php } ?>
 						<tr>
-							<th><label for="delete1"><?php esc_html_e( 'Security Alerts Pruning', 'wp-security-audit-log' ); ?></label></th>
+							<th><label for="delete1"><?php esc_html_e( 'Audit Log Retention', 'wp-security-audit-log' ); ?></label></th>
 							<td>
 								<fieldset>
 									<?php $text = __( '(eg: 1 month)', 'wp-security-audit-log' ); ?>
