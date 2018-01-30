@@ -1457,8 +1457,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				// Filter $_SERVER array for security.
 				$server_array = filter_input_array( INPUT_SERVER );
 
-				$current_path = $server_array['REQUEST_URI'];
+				$current_path = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;
 				if ( ! empty( $server_array['HTTP_REFERER'] )
+					&& ! empty( $current_path )
 					&& strpos( $server_array['HTTP_REFERER'], $current_path ) !== false ) {
 					// Ignore this if we were on the same page so we avoid double audit entries.
 					return;

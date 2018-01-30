@@ -380,7 +380,13 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 		$server_array = filter_input_array( INPUT_SERVER );
 		$get_array = filter_input_array( INPUT_GET );
 
-		$is_nav_menu = basename( $server_array['SCRIPT_NAME'] ) == 'nav-menus.php';
+		// Check if SCRIPT_NAME exists or not.
+		$script_name = '';
+		if ( ! empty( $server_array['SCRIPT_NAME'] ) ) {
+			$script_name = $server_array['SCRIPT_NAME'];
+		}
+
+		$is_nav_menu = basename( $script_name ) == 'nav-menus.php';
 		if ( $is_nav_menu ) {
 			if ( isset( $get_array['action'] ) && 'delete' == $get_array['action'] ) {
 				if ( isset( $get_array['menu'] ) ) {

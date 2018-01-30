@@ -398,7 +398,11 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			return;
 		}
 
-		$actype = basename( $server_array['SCRIPT_NAME'], '.php' );
+		$actype = '';
+		if ( ! empty( $server_array['SCRIPT_NAME'] ) ) {
+			$actype = basename( $server_array['SCRIPT_NAME'], '.php' );
+		}
+
 		$is_option_page = 'options' === $actype;
 		$is_network_settings = 'settings' === $actype;
 		$is_permalink_page = 'options-permalink' === $actype;

@@ -39,7 +39,15 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 	public function HookEvents() {
 		add_action( 'add_attachment', array( $this, 'EventFileUploaded' ) );
 		add_action( 'delete_attachment', array( $this, 'EventFileUploadedDeleted' ) );
-		add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
+
+		/**
+		 * Commenting the code to detect file changes in plugins and themes.
+		 *
+		 * @todo Figure out a way to detect changes in files of plugins and themes.
+		 * With the introduction of the new code editor in 4.9 the previous code
+		 * stopped working.
+		 */
+		// add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
 	}
 
 	/**
