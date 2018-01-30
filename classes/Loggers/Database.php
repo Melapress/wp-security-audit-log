@@ -209,7 +209,11 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 */
 	private function CheckPromoToShow() {
 		// If the package is free, show the promo.
-		if ( wsal_freemius()->is_not_paying() ) {
+		if ( ! class_exists( 'WSAL_NP_Plugin' )
+			&& ! class_exists( 'WSAL_Ext_Plugin' )
+			&& ! class_exists( 'WSAL_Rep_Plugin' )
+			&& ! class_exists( 'WSAL_SearchExtension' )
+			&& ! class_exists( 'WSAL_User_Management_Plugin' ) ) {
 			return 80;
 		}
 		return null;
