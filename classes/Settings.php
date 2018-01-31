@@ -373,7 +373,7 @@ class WSAL_Settings {
 	 * @param bool $enable - Enable/Disable.
 	 */
 	public function set_login_page_notification( $enable ) {
-		$this->_plugin->SetGlobalOption( 'login_page_notification', (bool) $enable );
+		$this->_plugin->SetGlobalOption( 'login_page_notification', $enable );
 	}
 
 	/**

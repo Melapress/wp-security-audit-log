@@ -145,7 +145,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
 
 		$this->_plugin->settings->SetRestrictAdmins( isset( $post_array['RestrictAdmins'] ) );
-		$this->_plugin->settings->set_login_page_notification( isset( $post_array['login_page_notification'] ) );
+		$this->_plugin->settings->set_login_page_notification( isset( $post_array['login_page_notification'] ) ? 'true' : 'false' );
 		$this->_plugin->settings->set_login_page_notification_text( isset( $post_array['login_page_notification_text'] ) ? $post_array['login_page_notification_text'] : false );
 		$this->_plugin->settings->SetRefreshAlertsEnabled( $post_array['EnableAuditViewRefresh'] );
 		$this->_plugin->settings->SetMainIPFromProxy( isset( $post_array['EnableProxyIpCapture'] ) );
@@ -361,20 +361,36 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<td>
 								<fieldset>
 									<label for="login_page_notification">
-										<?php $wsal_lpn = $this->_plugin->settings->is_login_page_notification(); ?>
+										<?php
+										// Get login page notification checkbox.
+										$wsal_lpn = $this->_plugin->settings->is_login_page_notification();
+										if ( $wsal_lpn && 'true' === $wsal_lpn ) {
+											// If option exists, value is true then set to true.
+											$wsal_lpn = true;
+										} elseif ( $wsal_lpn && 'false' === $wsal_lpn ) {
+											// If option exists, value is false then set to false.
+											$wsal_lpn = false;
+										} elseif ( ! $wsal_lpn ) {
+											// Default option value.
+											$wsal_lpn = true;
+										}
+										?>
 										<input type="checkbox" name="login_page_notification" id="login_page_notification" <?php checked( $wsal_lpn ); ?> />
 									</label>
-									<br/>
-									<span class="description">
-										<?php echo wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/" target="_blank">WP Security Audit Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
-									</span>
 									<br />
-									<?php $wsal_lpn_text = $this->_plugin->settings->get_login_page_notification_text(); ?>
+									<?php
+									// Get login page notification text.
+									$wsal_lpn_text = $this->_plugin->settings->get_login_page_notification_text();
+									?>
 									<textarea name="login_page_notification_text"
 										id="login_page_notification_text"
 										cols="50" rows="5"
 										<?php echo ( $wsal_lpn ) ? false : 'disabled'; ?>
 									><?php echo ( $wsal_lpn_text ) ? wp_kses( $wsal_lpn_text, $this->_plugin->allowed_html_tags ) : false; ?></textarea>
+									<br/>
+									<span class="description">
+										<?php esc_html_e( 'Many compliance regulations (such as the GDRP) require you, as a website administrator to tell all the users of this website that all their actions are being logged.', 'wp-security-audit-log' ); ?>
+									</span>
 								</fieldset>
 							</td>
 						</tr>

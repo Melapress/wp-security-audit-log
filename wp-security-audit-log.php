@@ -1070,9 +1070,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function render_login_page_message( $message ) {
 			// Check if the option is enabled.
-			if ( $this->settings->is_login_page_notification() ) {
+			$login_message_enabled = $this->settings->is_login_page_notification();
+			if ( 'true' === $login_message_enabled
+				|| ( ! $login_message_enabled && 'false' !== $login_message_enabled ) ) {
 				// Get login message.
 				$message = $this->settings->get_login_page_notification_text();
+
+				// Default message.
+				if ( ! $message ) {
+					$message = wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/" target="_blank">WP Security Audit Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), $this->allowed_html_tags );
+				}
 			}
 			// Return message.
 			return $message;
