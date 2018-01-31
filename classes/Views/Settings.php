@@ -145,6 +145,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
 
 		$this->_plugin->settings->SetRestrictAdmins( isset( $post_array['RestrictAdmins'] ) );
+		$this->_plugin->settings->set_login_page_notification( isset( $post_array['login_page_notification'] ) ? 'true' : 'false' );
+		$this->_plugin->settings->set_login_page_notification_text( isset( $post_array['login_page_notification_text'] ) ? $post_array['login_page_notification_text'] : false );
 		$this->_plugin->settings->SetRefreshAlertsEnabled( $post_array['EnableAuditViewRefresh'] );
 		$this->_plugin->settings->SetMainIPFromProxy( isset( $post_array['EnableProxyIpCapture'] ) );
 		$this->_plugin->settings->SetInternalIPsFiltering( isset( $post_array['EnableIpFiltering'] ) );
@@ -353,6 +355,45 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								</fieldset>
 							</td>
 						</tr>
+						<!-- Login Page Notification -->
+						<tr>
+							<th><label for="login_page_notification"><?php esc_html_e( 'Login Page Notification', 'wp-security-audit-log' ); ?></label></th>
+							<td>
+								<fieldset>
+									<label for="login_page_notification">
+										<?php
+										// Get login page notification checkbox.
+										$wsal_lpn = $this->_plugin->settings->is_login_page_notification();
+										if ( $wsal_lpn && 'true' === $wsal_lpn ) {
+											// If option exists, value is true then set to true.
+											$wsal_lpn = true;
+										} elseif ( $wsal_lpn && 'false' === $wsal_lpn ) {
+											// If option exists, value is false then set to false.
+											$wsal_lpn = false;
+										} elseif ( ! $wsal_lpn ) {
+											// Default option value.
+											$wsal_lpn = true;
+										}
+										?>
+										<input type="checkbox" name="login_page_notification" id="login_page_notification" <?php checked( $wsal_lpn ); ?> />
+									</label>
+									<br />
+									<?php
+									// Get login page notification text.
+									$wsal_lpn_text = $this->_plugin->settings->get_login_page_notification_text();
+									?>
+									<textarea name="login_page_notification_text"
+										id="login_page_notification_text"
+										cols="50" rows="5"
+										<?php echo ( $wsal_lpn ) ? false : 'disabled'; ?>
+									><?php echo ( $wsal_lpn_text ) ? wp_kses( $wsal_lpn_text, $this->_plugin->allowed_html_tags ) : false; ?></textarea>
+									<br/>
+									<span class="description">
+										<?php esc_html_e( 'Many compliance regulations (such as the GDRP) require you, as a website administrator to tell all the users of this website that all their actions are being logged.', 'wp-security-audit-log' ); ?>
+									</span>
+								</fieldset>
+							</td>
+						</tr>
 						<!-- Developer Options -->
 						<tr>
 							<th><label><?php esc_html_e( 'Developer Options', 'wp-security-audit-log' ); ?></label></th>
@@ -467,7 +508,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<!-- Second tab -->
 				<table class="form-table wsal-tab widefat" id="tab-audit-log">
 					<tbody>
-						<!-- Security Alerts Pruning -->
+						<!-- Audit Log Retention -->
 						<?php
 						$disabled = '';
 						if ( $this->_plugin->settings->IsArchivingEnabled() ) {
@@ -480,7 +521,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</tr>
 						<?php } ?>
 						<tr>
-							<th><label for="delete1"><?php esc_html_e( 'Security Alerts Pruning', 'wp-security-audit-log' ); ?></label></th>
+							<th><label for="delete1"><?php esc_html_e( 'Audit Log Retention', 'wp-security-audit-log' ); ?></label></th>
 							<td>
 								<fieldset>
 									<?php $text = __( '(eg: 1 month)', 'wp-security-audit-log' ); ?>
@@ -833,6 +874,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 				logging_status.on( 'change', function() {
 					wsalUpdateLoggingStatus( logging_status, txtNot );
+				} );
+
+				// Enable/disable login notification textarea.
+				function wsal_update_login_page_text( checkbox, textarea ) {
+					if ( checkbox.prop( 'checked' ) ) {
+						textarea.removeProp( 'disabled' );
+					} else {
+						textarea.prop( 'disabled', 'disabled' );
+					}
+				}
+
+				// Login page notification settings.
+				var login_page_notif = jQuery( '#login_page_notification' );
+				var login_page_notif_text = jQuery( '#login_page_notification_text' );
+
+				// Check the change event on checkbox.
+				login_page_notif.on( 'change', function() {
+					wsal_update_login_page_text( login_page_notif, login_page_notif_text );
 				} );
 			} );
 		// -->

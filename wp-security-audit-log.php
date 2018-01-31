@@ -4,7 +4,7 @@
  * Plugin URI: http://www.wpsecurityauditlog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 3.0
+ * Version: 3.0.1
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpsecurityauditlog.com/
  * License: GPL2
@@ -54,7 +54,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '3.0';
+		public $version = '3.0.1';
 
 		// Plugin constants.
 		const PLG_CLS_PRFX = 'WSAL_';
@@ -215,6 +215,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Handle admin Disable Alerts.
 			add_action( 'wp_ajax_AjaxDisableByCode', array( $this, 'AjaxDisableByCode' ) );
+
+			// Render Login Page Notification.
+			add_filter( 'login_message', array( $this, 'render_login_page_message' ), 10, 1 );
 
 			// Register freemius uninstall event.
 			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
@@ -1058,6 +1061,28 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function UpdateGlobalOption( $option, $value ) {
 			$this->options = new WSAL_Models_Option();
 			return $this->options->SetOptionValue( $option, $value );
+		}
+
+		/**
+		 * Method: Render login page message.
+		 *
+		 * @param string $message - Login message.
+		 */
+		public function render_login_page_message( $message ) {
+			// Check if the option is enabled.
+			$login_message_enabled = $this->settings->is_login_page_notification();
+			if ( 'true' === $login_message_enabled
+				|| ( ! $login_message_enabled && 'false' !== $login_message_enabled ) ) {
+				// Get login message.
+				$message = $this->settings->get_login_page_notification_text();
+
+				// Default message.
+				if ( ! $message ) {
+					$message = wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/" target="_blank">WP Security Audit Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), $this->allowed_html_tags );
+				}
+			}
+			// Return message.
+			return $message;
 		}
 
 	}
