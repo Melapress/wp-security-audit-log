@@ -5,8 +5,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 4.9.1
-Stable tag: 3.0
+Tested up to: 4.9.2
+Stable tag: 3.0.1
 Requires PHP: 5.3
 
 Keep an audit trail of all changes on your WordPress - ensure productivity & thwart attacks with the most comprehensive audit trail plugin.
@@ -111,6 +111,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * [WP Mayor](http://www.wpmayor.com/wp-security-audit-log-plugin-review-user-activity-logging-wordpress/)
 * [WP SmackDown](https://wpsmackdown.com/wp-plugins/wp-security-audit-log/)
 * [SourceWP](https://www.sourcewp.com/wp-security-audit-log-plugin-review/)
+* [Techwibe](https://www.techwibe.com/wp-security-audit-log-wordpress-plugin/)
 * [KevinMuldoon.com](https://www.kevinmuldoon.com/wp-security-audit-log-review/)
 * [Cloudways](https://www.cloudways.com/blog/monitor-wordpress-with-wp-security-audit-log-plugin/)
 * [ManageWP Plugins of the month](https://managewp.com/free-wordpress-plugins-june-2014)
@@ -178,30 +179,18 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-=3.0 (2017-01-24)
+=3.0.1 (2018-02-01)
 
 * **New Features**
-	* Added [Freemius](https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/) to the plugin (opt-in is optional)
-	* Code changes to support new [licensing model](https://www.wpsecurityauditlog.com/blog/)
-	* Message for blocked users sessions can now be edited (PREMIUM)
-	
-* **New Alerts**
-	* Alert 9034: Enabled / Disabled the option Cash on Delivery in WooCommerce
-	* Alert 6024: Changed the WordPress address (URL)
-	* Alert 6025: Changed the site address (URL)
+	* Added a new editable message that is shown on login page alerting users that their actions are logged (plugin is GDPR compliant).
+	*
 	
 * **Improvements**
-	* Fixed escaping issues, improved security and the code of the plugin up to latest WordPress standards.
-	* Improved the Data Retention option (Alerts Pruning). Now users only have to specify the number of months.
-	* Added option to view Tag in all Tag alerts.
-	* Plugin now stores Post ID, Type, Status and Created Date records for every post. Capturing of such data is important for future updates.
-	
-* **Update**
-	* Updated Italian translation files.
+	* Changed the name of a setting from "Security Alerts Pruning" to "Audit Log Retention" (using correct terms for GDPR compliance).
 	
 * **Bug Fixes**
-	* Fixed an issue where users with view audit log privileges could disable alerts from the hover over option.
-	* Fixed broken links in notification emails (PREMIUM) 
-	* Fixed a security issue reported by [Jahan Khan](https://5dspectrum.com/)
+	* Updated Freemius SDK - Freemius was not firing on new installs.
+	* Fixed an issue where a URL was reported as NULL in email alerts (PREMIUM).
+	* Removed promo alerts when premium add-ons are installed.
 
 Refer to the [WP Security Audit Log change log](https://www.wpsecurityauditlog.com/plugin-change-log/) page for the complete change log.
