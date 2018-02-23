@@ -60,11 +60,6 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 
 		// Set up meta data.
 		$occ->SetMeta( $data );
-
-		// Inject for promoting the paid add-ons.
-		if ( 9999 != $type ) {
-			$this->AlertInject( $occ );
-		}
 	}
 
 	/**
@@ -128,6 +123,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 * Inject Promo alert every $count alerts if no Add-ons are activated.
 	 *
 	 * @param object $occurrence - Occurrence, instance of WSAL_Models_Occurrence.
+	 * @deprecated 3.1.0
 	 */
 	private function AlertInject( $occurrence ) {
 		$count = $this->CheckPromoToShow();
@@ -165,6 +161,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 * keeping the last id saved in the DB.
 	 *
 	 * @return integer $promoToSend - The array index.
+	 * @deprecated 3.1.0
 	 */
 	private function GetPromoAlert() {
 		$last_promo_sent_id = $this->plugin->GetGlobalOption( 'promo-send-id' );
@@ -188,6 +185,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 * Array of promo.
 	 *
 	 * @return array $promo_alerts - The array of promo.
+	 * @deprecated 3.1.0
 	 */
 	private function GetActivePromoText() {
 		$promo_alerts = array();
@@ -206,6 +204,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 * Check condition to show promo.
 	 *
 	 * @return integer|null - Counter alert.
+	 * @deprecated 3.1.0
 	 */
 	private function CheckPromoToShow() {
 		// If the package is free, show the promo.

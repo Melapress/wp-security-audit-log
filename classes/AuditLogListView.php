@@ -218,7 +218,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		}
 		$cols = array(
 			'type' => __( 'Alert ID', 'wp-security-audit-log' ),
-			'code' => __( 'Type', 'wp-security-audit-log' ),
+			'code' => __( 'Severity', 'wp-security-audit-log' ),
 			'crtd' => __( 'Date', 'wp-security-audit-log' ),
 			'user' => $name_column,
 			'scip' => __( 'Source IP', 'wp-security-audit-log' ),
@@ -237,7 +237,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 						$cols['type'] = __( 'Alert ID', 'wp-security-audit-log' );
 						break;
 					case 'type':
-						$cols['code'] = __( 'Type', 'wp-security-audit-log' );
+						$cols['code'] = __( 'Severity', 'wp-security-audit-log' );
 						break;
 					case 'date':
 						$cols['crtd'] = __( 'Date', 'wp-security-audit-log' );
@@ -351,13 +351,16 @@ class WSAL_AuditLogListView extends WP_List_Table {
 						)
 					) : '<i>unknown</i>';
 			case 'user':
-				$username   = $item->GetUsername();
-				$type_name  = $this->_plugin->settings->get_type_username();
-				if ( $username && ( $user = get_user_by( 'login', $username ) ) ) {
+				$username   = $item->GetUsername(); // Get username.
+				$type_name  = $this->_plugin->settings->get_type_username(); // Get the data to display.
+				$user = get_user_by( 'login', $username ); // Get user.
+
+				// Check if the username and user exists.
+				if ( $username && $user ) {
 					$image = get_avatar( $user->ID, 32 );
-					if ( 'display_name' == $type_name ) {
+					if ( 'display_name' === $type_name && ! empty( $user->first_name ) ) {
 						$display_name = $user->first_name . ' ' . $user->last_name;
-					} elseif ( 'username' == $type_name ) {
+					} else {
 						$display_name = $user->user_login;
 					}
 
@@ -516,7 +519,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				}
 
 			case '%RevisionLink%' == $name:
-				return ' Click <a target="_blank" href="' . esc_url( $value ) . '">here</a> to see the content changes.';
+				$check_value = (string) $value;
+				if ( 'NULL' !== $check_value ) {
+					return ' Click <a target="_blank" href="' . esc_url( $value ) . '">here</a> to see the content changes.';
+				} else {
+					return false;
+				}
 
 			case '%EditorLinkPost%' == $name:
 				return ' <a target="_blank" href="' . esc_url( $value ) . '">View the post</a>';
@@ -568,6 +576,13 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			case strncmp( $value, 'http://', 7 ) === 0:
 			case strncmp( $value, 'https://', 7 ) === 0:
 				return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
+
+			case '%PostStatus%' === $name:
+				if ( ! empty( $value ) && 'publish' === $value ) {
+					return '<strong>' . esc_html__( 'published', 'wp-security-audit-log' ) . '</strong>';
+				} else {
+					return '<strong>' . esc_html( $value ) . '</strong>';
+				}
 
 			default:
 				return '<strong>' . esc_html( $value ) . '</strong>';

@@ -129,8 +129,20 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				<?php foreach ( $grouped_alerts as $name => $group ) : ?>
 					<div class="wsal-tab" id="tab-<?php echo esc_attr( $safe_names[ $name ] ); ?>">
 						<h2 class="nav-tab-wrapper wsal-sub-tabs">
-							<?php foreach ( $group as $subname => $alerts ) : ?>
-								<a href="#tab-<?php echo esc_attr( $this->GetSafeCatgName( $subname ) ); ?>" class="nav-tab" data-parent="tab-<?php echo esc_attr( $safe_names[ $name ] ); ?>"><?php echo esc_html( $subname ); ?></a>
+							<?php
+							foreach ( $group as $subname => $alerts ) :
+								$tab_id = $this->GetSafeCatgName( $subname );
+
+								// Skip Pages and CPTs section.
+								if ( 'custom-post-types' === $tab_id || 'pages' === $tab_id ) {
+									continue;
+								}
+								?>
+								<a href="#tab-<?php echo esc_attr( $tab_id ); ?>"
+									class="nav-tab"
+									data-parent="tab-<?php echo esc_attr( $safe_names[ $name ] ); ?>">
+									<?php echo esc_html( $subname ); ?>
+								</a>
 							<?php endforeach; ?>
 						</h2>
 						<?php
@@ -148,6 +160,13 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								if ( ! $active[ $alert->type ] ) {
 									$allactive = false;
 								}
+							}
+
+							$tab_id = $this->GetSafeCatgName( $subname );
+
+							// Skip Pages and CPTs section.
+							if ( 'custom-post-types' === $tab_id || 'pages' === $tab_id ) {
+								continue;
 							}
 							?>
 							<table class="wp-list-table wsal-tab widefat fixed wsal-sub-tab" cellspacing="0" id="tab-<?php echo esc_attr( $this->GetSafeCatgName( $subname ) ); ?>">
