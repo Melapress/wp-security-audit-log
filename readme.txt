@@ -5,8 +5,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 4.9.2
-Stable tag: 3.0.1
+Tested up to: 4.9.4
+Stable tag: 3.1.0
 Requires PHP: 5.3
 
 Keep an audit trail of all changes on your WordPress - ensure productivity & thwart attacks with the most comprehensive audit trail plugin.
@@ -179,18 +179,29 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-=3.0.1 (2018-02-01)
-
+= 3.1.0(2018-02-28)
+	
 * **New Features**
-	* Added a new editable message that is shown on login page alerting users that their actions are logged (plugin is GDPR compliant).
-	*
+	* Added Post Status and Post Type in alerts.
+	* Consolidated all Posts / Pages / Custom Post alerts [Read more](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/version-3-1-post-type-status-alerts/).
+	* Added Post Status and Post Type filters in search.
+	* Added Post Status and Post Type criteria in Email Notifications trigger builder.
+	* Added Post Status and Post Type criteria in Reports.
+	* Fallback system for display names - when user does not have first and last name, the username will be used.
 	
 * **Improvements**
-	* Changed the name of a setting from "Security Alerts Pruning" to "Audit Log Retention" (using correct terms for GDPR compliance).
+	* Improved the priority of our hooks so logins from custom forms are captured (e.g. better support for Restrict Content PRO and similar plugins).
+	* Improved the tabs / UI of the Enable/Disable Alerts section.
+	* Changed the column Type to Severity in Audit Log viewer.
+	* Better handling of errors and variables during plugin activation.
+	* Consolidated Post ID, Page ID and Custom Post ID in just Post ID in Email notifications trigger builder.
+	* Improved the look & feel of the login page notification (GDPR compliance).
+	* Improved the UI and queries used for the Users Sessions management.
+	* Added the IP address requesting the non-existing page in the 404 log files.
+	* Users can now specify the number of 404 and failed login alerts before being alerted in the built-in alerts section.
 	
 * **Bug Fixes**
-	* Updated Freemius SDK - Freemius was not firing on new installs.
-	* Fixed an issue where a URL was reported as NULL in email alerts (PREMIUM).
-	* Removed promo alerts when premium add-ons are installed.
+	* Removed a Disable All Logging option from plugin settings - was redundant.
+	* Improved handling of global arrays [support ticket](https://wordpress.org/support/topic/notice-undefined-index-script_name-sensors-content-php-on-line-1499/#post-10004967)
 
 Refer to the [WP Security Audit Log change log](https://www.wpsecurityauditlog.com/plugin-change-log/) page for the complete change log.
