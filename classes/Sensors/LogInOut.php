@@ -204,7 +204,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		// Filter $_POST global array for security.
 		$post_array = filter_input_array( INPUT_POST );
 
-		$username = array_key_exists( 'log', $post_array ) ? $post_array['log'] : $username;
+		$username = isset( $post_array['log'] ) ? $post_array['log'] : $username;
 		$username = sanitize_user( $username );
 		$new_alert_code = 1003;
 		$user = get_user_by( 'login', $username );
