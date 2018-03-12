@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.9.4
-Stable tag: 3.1.0
+Stable tag: 3.1.1
 Requires PHP: 5.3
 
 Keep an audit trail of all changes on your WordPress - ensure productivity & thwart attacks with the most comprehensive audit trail plugin.
@@ -179,29 +179,23 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.1.0(2018-02-28)
+= 3.1.1(2018-03-14) =
+
+* **New WordPress Activity Log Alert**
+	* Alert 2126: Website visitor posted a comment (segregated from alert 2099 which was used for both logged in users and website visitors).
 
 * **New Features**
-	* Added Post Status and Post Type in alerts.
-	* Consolidated all Posts / Pages / Custom Post alerts [Read more](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/version-3-1-post-type-status-alerts/).
-	* Added Post Status and Post Type filters in search.
-	* Added Post Status and Post Type criteria in Email Notifications trigger builder.
-	* Added Post Status and Post Type criteria in Reports.
-	* Fallback system for display names - when user does not have first and last name, the username will be used.
+	* Logging of user role change at WordPress multisite network level.
+	* New site selection menu for opting-in to sending diagnostic data or activating licenses on WordPress multisite network installations.
+	* New account page for installs on multisite network.
 
 * **Improvements**
-	* Improved the priority of our hooks so logins from custom forms are captured (e.g. better support for Restrict Content PRO and similar plugins).
-	* Improved the tabs / UI of the Enable/Disable Alerts section.
-	* Changed the column Type to Severity in Audit Log viewer.
-	* Better handling of errors and variables during plugin activation.
-	* Consolidated Post ID, Page ID and Custom Post ID in just Post ID in Email notifications trigger builder.
-	* Improved the look & feel of the login page notification (GDPR compliance).
-	* Improved the UI and queries used for the Users Sessions management.
-	* Added the IP address requesting the non-existing page in the 404 log files.
-	* Users can now specify the number of 404 and failed login alerts before being alerted in the built-in alerts section.
-
-* **Bug Fixes**
-	* Removed a Disable All Logging option from plugin settings - was redundant.
-	* Improved handling of global arrays [support ticket](https://wordpress.org/support/topic/notice-undefined-index-script_name-sensors-content-php-on-line-1499/#post-10004967)
+	* Logging of posting of comments from logged in users and website visitors now reported by different alerts.
+	* Improved the logging of multiple post changes that were done at the same time on a post / page / post with custom post type - previously only the last change was being reported.
+	* Post Type selection menu in Email Notifications is not automatically populated on multisite network install so users can specify their custom post type.
+	* Changed severity of alerts 6007 and 6023 (404 errors) from High to Notification.
+	* Improved the plugin menu node for sites on multisite network (added messages on nodes users do not have access to, removed nodes that admins on sites should not have access to).
+	* Added responsiveness to the Archive Now and Mirror Now buttons in the integration tools.
+	* Added product name in alert 9019 (when product stock quantity is updated in WooCommerce).
 
 Refer to the [WP Security Audit Log change log](https://www.wpsecurityauditlog.com/plugin-change-log/) page for the complete change log.

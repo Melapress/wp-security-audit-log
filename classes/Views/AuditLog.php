@@ -79,7 +79,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						<!-- /.wsal_notice__wrapper -->
 						<div class="wsal_notice__btns">
 							<?php
+							// Buy Now button link.
 							$buy_now = add_query_arg( 'page', 'wsal-auditlog-pricing', admin_url( 'admin.php' ) );
+
+							// If user is not super admin and website is multisite then change the URL.
+							if ( $this->_plugin->IsMultisite() && ! is_super_admin() ) {
+								$buy_now = 'https://www.wpsecurityauditlog.com/pricing/';
+							} elseif ( $this->_plugin->IsMultisite() && is_super_admin() ) {
+								$buy_now = add_query_arg( 'page', 'wsal-auditlog-pricing', network_admin_url( 'admin.php' ) );
+							}
+
 							$more_info = add_query_arg(
 								array(
 									'utm_source' => 'plugin',

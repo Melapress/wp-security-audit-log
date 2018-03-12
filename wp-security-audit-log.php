@@ -4,7 +4,7 @@
  * Plugin URI: http://www.wpsecurityauditlog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 3.1.0
+ * Version: 3.1.1
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpsecurityauditlog.com/
  * License: GPL2
@@ -54,7 +54,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '3.1.0';
+		public $version = '3.1.1';
 
 		// Plugin constants.
 		const PLG_CLS_PRFX = 'WSAL_';
@@ -222,11 +222,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Register freemius uninstall event.
 			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
 
-			// Include premium extensions through freemius.
-			if ( wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
-				$this->include_extensions__premium_only();
-			}
-
 			// Add filters to customize freemius welcome message.
 			wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
 			wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
@@ -284,25 +279,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
 				define( 'WSAL_ISSUE_URL', 'https://wordpress.org/support/plugin/wp-security-audit-log' );
 			}
-		}
-
-		/**
-		 * Method: Include extensions for premium version.
-		 *
-		 * @since 2.7.0
-		 */
-		public function include_extensions__premium_only() {
-			/**
-			 * Class for extensions managment.
-			 *
-			 * @since 2.7.0
-			 */
-			if ( file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
-				require_once( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' );
-			}
-
-			// Initiate the extensions manager.
-			$this->extensions = new WSAL_Extension_Manager( $this );
 		}
 
 		/**
@@ -589,7 +565,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$old_disabled = $this->GetGlobalOption( 'disabled-alerts' );
 			// If old setting is empty disable alert 2099 by default.
 			if ( empty( $old_disabled ) ) {
-				$this->settings->SetDisabledAlerts( array( 2099 ) );
+				$this->settings->SetDisabledAlerts( array( 2099, 2126 ) );
 			}
 
 			$log_404 = $this->GetGlobalOption( 'log-404' );
@@ -607,13 +583,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Install cleanup hook (remove older one if it exists).
 			wp_clear_scheduled_hook( 'wsal_cleanup' );
 			wp_schedule_event( current_time( 'timestamp' ) + 600, 'hourly', 'wsal_cleanup' );
-
-			if ( wsal_freemius()->is__premium_only() ) {
-				// Call to user sessions management activation hook function.
-				if ( wsal_freemius()->is_premium() && wsal_freemius()->is_registered() && wsal_freemius()->can_use_premium_code() ) {
-					$this->extensions->activate_sessions_management();
-				}
-			}
 		}
 
 		/**
