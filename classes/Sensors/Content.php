@@ -439,18 +439,20 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->CheckPostCreation( $this->_old_post, $post );
 			} else {
 				// Handle update post events.
-				$this->CheckAuthorChange( $this->_old_post, $post );
-				$this->CheckStatusChange( $this->_old_post, $post );
-				$this->CheckParentChange( $this->_old_post, $post );
-				$this->CheckStickyChange( $this->_old_stky, $sticky, $post );
-				$this->CheckVisibilityChange( $this->_old_post, $post, $old_status, $new_status );
-				$this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post );
-				$this->CheckCategoriesChange( $this->_old_cats, $this->GetPostCategories( $post ), $post );
-				$this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
-				$this->CheckDateChange( $this->_old_post, $post );
-				$this->CheckPermalinkChange( $this->_old_link, get_permalink( $post->ID ), $post );
-				$this->CheckCommentsPings( $this->_old_post, $post );
-				$this->CheckModificationChange( $post->ID, $this->_old_post, $post );
+				$changes = 0;
+				$changes = $this->CheckAuthorChange( $this->_old_post, $post )
+					+ $this->CheckStatusChange( $this->_old_post, $post )
+					+ $this->CheckParentChange( $this->_old_post, $post )
+					+ $this->CheckStickyChange( $this->_old_stky, $sticky, $post )
+					+ $this->CheckVisibilityChange( $this->_old_post, $post, $old_status, $new_status )
+					+ $this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post )
+					+ $this->CheckCategoriesChange( $this->_old_cats, $this->GetPostCategories( $post ), $post )
+					+ $this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post )
+					+ $this->CheckDateChange( $this->_old_post, $post )
+					+ $this->CheckPermalinkChange( $this->_old_link, get_permalink( $post->ID ), $post )
+					+ $this->CheckCommentsPings( $this->_old_post, $post );
+
+				$this->CheckModificationChange( $post->ID, $this->_old_post, $post, $changes );
 			}
 		}
 	}
@@ -898,7 +900,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param stdClass $post - The post.
 	 */
 	protected function CheckPermalinkChange( $old_link, $new_link, $post ) {
-		if ( $old_link != $new_link ) {
+		if ( $old_link !== $new_link ) {
 			$editor_link = $this->GetEditorLink( $post );
 			$this->plugin->alerts->Trigger(
 				2017, array(
@@ -1028,11 +1030,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	/**
 	 * Post modified content.
 	 *
-	 * @param integer  $post_id - Post ID.
-	 * @param stdClass $oldpost - Old post.
-	 * @param stdClass $newpost - New post.
+	 * @param integer  $post_id – Post ID.
+	 * @param stdClass $oldpost – Old post.
+	 * @param stdClass $newpost – New post.
+	 * @param int      $modified – Set to 0 if no changes done to the post.
 	 */
-	public function CheckModificationChange( $post_id, $oldpost, $newpost ) {
+	public function CheckModificationChange( $post_id, $oldpost, $newpost, $modified ) {
 		if ( $this->CheckOtherSensors( $oldpost ) ) {
 			return;
 		}
@@ -1046,7 +1049,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				// Check if content changed.
 				if ( $content_changed ) {
 					$event = 2065;
-				} else {
+				} elseif ( ! $modified ) {
 					$event = 2002;
 				}
 				if ( $event ) {
