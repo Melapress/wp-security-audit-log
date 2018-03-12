@@ -439,29 +439,18 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->CheckPostCreation( $this->_old_post, $post );
 			} else {
 				// Handle update post events.
-				$changes = 0
-					+ $this->CheckAuthorChange( $this->_old_post, $post )
-					+ $this->CheckStatusChange( $this->_old_post, $post )
-					+ $this->CheckParentChange( $this->_old_post, $post )
-					+ $this->CheckStickyChange( $this->_old_stky, $sticky, $post )
-					+ $this->CheckVisibilityChange( $this->_old_post, $post, $old_status, $new_status )
-					+ $this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post )
-					+ $this->CheckCategoriesChange( $this->_old_cats, $this->GetPostCategories( $post ), $post )
-					+ $this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
-
-				if ( ! $changes ) {
-					$changes = $this->CheckDateChange( $this->_old_post, $post );
-					if ( ! $changes ) {
-						$changes = $this->CheckPermalinkChange( $this->_old_link, get_permalink( $post->ID ), $post );
-						// Comments/Trackbacks and Pingbacks.
-						if ( ! $changes ) {
-							$changes = $this->CheckCommentsPings( $this->_old_post, $post );
-							if ( ! $changes ) {
-								$changes = $this->CheckModificationChange( $post->ID, $this->_old_post, $post );
-							}
-						}
-					}
-				}
+				$this->CheckAuthorChange( $this->_old_post, $post );
+				$this->CheckStatusChange( $this->_old_post, $post );
+				$this->CheckParentChange( $this->_old_post, $post );
+				$this->CheckStickyChange( $this->_old_stky, $sticky, $post );
+				$this->CheckVisibilityChange( $this->_old_post, $post, $old_status, $new_status );
+				$this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post );
+				$this->CheckCategoriesChange( $this->_old_cats, $this->GetPostCategories( $post ), $post );
+				$this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
+				$this->CheckDateChange( $this->_old_post, $post );
+				$this->CheckPermalinkChange( $this->_old_link, get_permalink( $post->ID ), $post );
+				$this->CheckCommentsPings( $this->_old_post, $post );
+				$this->CheckModificationChange( $post->ID, $this->_old_post, $post );
 			}
 		}
 	}
@@ -1541,6 +1530,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	private function CheckCommentsPings( $oldpost, $newpost ) {
 		$result = 0;
+		$editor_link = $this->GetEditorLink( $newpost );
+
 		// Comments.
 		if ( $oldpost->comment_status != $newpost->comment_status ) {
 			$type = 'Comments';

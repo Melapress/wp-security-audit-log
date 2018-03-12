@@ -584,6 +584,16 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					return '<strong>' . esc_html( $value ) . '</strong>';
 				}
 
+			case '%multisite_text%' === $name:
+				if ( $this->is_multisite() && $value ) {
+					$site_info = get_blog_details( $value, true );
+					if ( $site_info ) {
+						return ' on site <a href="' . esc_url( $site_info->siteurl ) . '">' . esc_html( $site_info->blogname ) . '</a>';
+					}
+					return;
+				}
+				return;
+
 			default:
 				return '<strong>' . esc_html( $value ) . '</strong>';
 		}

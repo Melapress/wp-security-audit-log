@@ -153,6 +153,14 @@ class WSAL_ViewManager {
 						continue;
 					}
 
+					if ( ( 'wsal-togglealerts' === $view->GetSafeViewName()
+							|| 'wsal-settings' === $view->GetSafeViewName()
+							|| 'wsal-ext-settings' === $view->GetSafeViewName()
+						)
+						&& ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+						continue;
+					}
+
 					$view->hook_suffix = add_submenu_page(
 						$view->IsVisible() ? $this->views[0]->GetSafeViewName() : null,
 						$view->GetTitle(),
