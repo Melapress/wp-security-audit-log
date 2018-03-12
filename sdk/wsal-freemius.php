@@ -27,6 +27,7 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 		global $wsal_freemius;
 
 		if ( ! isset( $wsal_freemius ) ) {
+			define( 'WP_FS__PRODUCT_94_MULTISITE', true );
 			// Include Freemius SDK.
 			require_once dirname( __FILE__ ) . '/freemius/start.php';
 
@@ -41,6 +42,7 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 				'menu'           => array(
 					'slug'    => 'wsal-auditlog',
 					'support' => false,
+					'network' => true,
 				),
 				'live'           => true,
 			) );
