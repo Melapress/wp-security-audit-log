@@ -1078,4 +1078,89 @@ class WSAL_Settings {
 			$this->_plugin->getConnector( $config )->getAdapter( 'Occurrence' );
 		}
 	}
+
+	/**
+	 * Generate index.php file for each wsal sub-directory
+	 * present in the uploads directory.
+	 *
+	 * @since 3.1.2
+	 */
+	public function generate_index_files() {
+		// Get uploads directory.
+		$uploads_dir = wp_upload_dir();
+		$wsal_uploads_dir = trailingslashit( $uploads_dir['basedir'] . '/wp-security-audit-log/' );
+
+		// If the directory exists then generate index.php file for every sub-directory.
+		if ( ! empty( $wsal_uploads_dir ) && is_dir( $wsal_uploads_dir ) ) {
+			// Generate index.php for the main directory.
+			if ( ! file_exists( $wsal_uploads_dir . '/index.php' ) ) {
+				// Generate index.php file.
+				$this->create_index_file( $wsal_uploads_dir );
+			}
+
+			// Generate .htaccess for the main directory.
+			if ( ! file_exists( $wsal_uploads_dir . '/.htaccess' ) ) {
+				// Generate .htaccess file.
+				$this->create_htaccess_file( $wsal_uploads_dir );
+			}
+
+			// Fetch all files in the uploads directory.
+			$sub_directories = glob( $wsal_uploads_dir . '*', GLOB_BRACE );
+			foreach ( $sub_directories as $sub_dir ) {
+				// index.php file.
+				if ( is_dir( $sub_dir ) && ! file_exists( $sub_dir . '/index.php' ) ) {
+					// Generate index.php file.
+					$this->create_index_file( $sub_dir . '/' );
+				}
+
+				// .htaccess file.
+				if ( is_dir( $sub_dir ) && ! file_exists( $sub_dir . '/.htaccess' ) ) {
+					// Check for failed-logins, users, visitors and don't create file in it.
+					if ( strpos( $sub_dir, 'failed-logins' )
+						|| strpos( $sub_dir, 'users' )
+						|| strpos( $sub_dir, 'visitors' ) ) {
+						continue;
+					}
+					// Generate .htaccess file.
+					$this->create_htaccess_file( $sub_dir . '/' );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Create an index.php file, if none exists, in order to
+	 * avoid directory listing in the specified directory.
+	 *
+	 * @param string $dir_path - Directory Path.
+	 * @return bool
+	 * @since 3.1.2
+	 */
+	final public function create_index_file( $dir_path ) {
+		// Check if index.php file exists.
+		$dir_path = trailingslashit( $dir_path );
+		$result = 0;
+		if ( ! is_file( $dir_path . 'index.php' ) ) {
+			$result = @file_put_contents( $dir_path . 'index.php', '<?php // Silence is golden' );
+		}
+		return ($result > 0);
+	}
+
+	/**
+	 * Create an .htaccess file, if none exists, in order to
+	 * block access to directory listing in the specified directory.
+	 *
+	 * @param string $dir_path - Directory Path.
+	 * @return bool
+	 * @since 3.1.2
+	 */
+	final public function create_htaccess_file( $dir_path ) {
+		// Check if .htaccess file exists.
+		$dir_path = trailingslashit( $dir_path );
+		$result = 0;
+		if ( ! is_file( $dir_path . '.htaccess' ) ) {
+			$result = @file_put_contents( $dir_path . '.htaccess', 'Deny from all' );
+		}
+		return ($result > 0);
+	}
 }

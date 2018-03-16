@@ -219,6 +219,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Render Login Page Notification.
 			add_filter( 'login_message', array( $this, 'render_login_page_message' ), 10, 1 );
 
+			// Cron job to delete alert 1003 for the last day.
+			add_action( 'wsal_delete_logins', array( $this, 'delete_failed_logins' ) );
+			if ( ! wp_next_scheduled( 'wsal_delete_logins' ) ) {
+				wp_schedule_event( time(), 'daily', 'wsal_delete_logins' );
+			}
+
 			// Register freemius uninstall event.
 			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
 
@@ -501,6 +507,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( $old_version !== $new_version ) {
 				$this->Update( $old_version, $new_version );
 			}
+
+			// Generate index.php for uploads directory.
+			$this->settings->generate_index_files();
 		}
 
 		/**
@@ -918,6 +927,36 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				call_user_func( $hook );
 			}
 			$s->Stop();
+		}
+
+		/**
+		 * Clear last day's failed login alert.
+		 */
+		public function delete_failed_logins() {
+			// Set the dates.
+			list( $y, $m, $d ) = explode( '-', date( 'Y-m-d' ) );
+
+			// Site id.
+			$site_id = (function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0);
+
+			// New occurrence object.
+			$occurrence = new WSAL_Models_Occurrence();
+			$alerts = $occurrence->check_alert_1003(
+				array(
+					1003,
+					$site_id,
+					mktime( 0, 0, 0, $m, $d - 1, $y ) + 1,
+					mktime( 0, 0, 0, $m, $d, $y ),
+				)
+			);
+
+			// Alerts exists then continue.
+			if ( ! empty( $alerts ) ) {
+				foreach ( $alerts as $alert ) {
+					// Flush the usernames meta data.
+					$alert->UpdateMetaValue( 'Users', array() );
+				}
+			}
 		}
 
 		/**

@@ -215,3 +215,50 @@ function WsalDisableByCode( code, nonce ) {
 		}
 	} );
 }
+
+/**
+ * Create and download a temporary file.
+ *
+ * @param {string} filename - File name.
+ * @param {string} text - File content.
+ */
+function download( filename, text ) {
+	// Create temporary element.
+	var element = document.createElement('a');
+	element.setAttribute( 'href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text) );
+	element.setAttribute( 'download', filename );
+
+	// Set the element to not display.
+	element.style.display = 'none';
+	document.body.appendChild( element );
+
+	// Simlate click on the element.
+	element.click();
+
+	// Remove temporary element.
+	document.body.removeChild( element );
+}
+
+jQuery( document ).ready( function( $ ) {
+	// Failed logins link click.
+	$( '.wsal_download_failed_logins' ).click( function ( event ) {
+		event.preventDefault();
+		nonce = $( this ).data( 'download-nonce' ); // Nonce.
+		alert = $( this ).parent().attr( 'id' ).substring( 5 );
+
+		jQuery.ajax( {
+			type: 'POST',
+			url: ajaxurl,
+			async: true,
+			data: {
+				action: 'wsal_download_failed_login_log',
+				download_nonce: nonce,
+				alert_id: alert
+			},
+			success: function( data ) {
+				// Start file download.
+  				download( 'failed_logins.log', data );
+			}
+		} );
+	} );
+} );

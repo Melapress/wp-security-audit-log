@@ -48,6 +48,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_AjaxSetIpp', array( $this, 'AjaxSetIpp' ) );
 		add_action( 'wp_ajax_AjaxSearchSite', array( $this, 'AjaxSearchSite' ) );
 		add_action( 'wp_ajax_AjaxSwitchDB', array( $this, 'AjaxSwitchDB' ) );
+		add_action( 'wp_ajax_wsal_download_failed_login_log', array( $this, 'wsal_download_failed_login_log' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
 		// Check plugin version for to dismiss the notice only until upgrade.
 		$this->_version = WSAL_VERSION;
@@ -242,6 +243,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		endif;
 	}
 
+	/**
+	 * Ajax callback to display meta data inspector.
+	 */
 	public function AjaxInspector() {
 		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
@@ -271,6 +275,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		die;
 	}
 
+	/**
+	 * Ajax callback to refrest the view.
+	 */
 	public function AjaxRefresh() {
 		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
@@ -308,6 +315,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		die;
 	}
 
+	/**
+	 * Ajax callback to set number of alerts to
+	 * show on a single page.
+	 */
 	public function AjaxSetIpp() {
 		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
@@ -323,6 +334,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		die;
 	}
 
+	/**
+	 * Ajax callback to search.
+	 */
 	public function AjaxSearchSite() {
 		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
@@ -349,6 +363,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		die( json_encode( array_slice( $grp1 + $grp2, 0, 7 ) ) );
 	}
 
+	/**
+	 * Ajax callback to switch database.
+	 */
 	public function AjaxSwitchDB() {
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST );
@@ -358,6 +375,40 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 	}
 
+	/**
+	 * Ajax callback to download failed login log.
+	 */
+	public function wsal_download_failed_login_log() {
+		// Get post array through filter.
+		$download_nonce = filter_input( INPUT_POST, 'download_nonce', FILTER_SANITIZE_STRING );
+		$alert_id = filter_input( INPUT_POST, 'alert_id', FILTER_SANITIZE_NUMBER_INT );
+
+		// Verify nonce.
+		if ( ! empty( $download_nonce ) && wp_verify_nonce( $download_nonce,  'wsal-download-failed-logins' ) ) {
+			// Get alert by id.
+			$alert = new WSAL_Models_Occurrence();
+			$alert->id = (int) $alert_id;
+
+			// Get users using alert meta.
+			$users = $alert->GetMetaValue( 'Users', array() );
+
+			// Check if there are any users.
+			if ( ! empty( $users ) && is_array( $users ) ) {
+				// Prepare content.
+				$content = implode( ', ', $users );
+				echo esc_html( $content );
+			} else {
+				echo esc_html__( 'No users found.', 'wp-security-audit-log' );
+			}
+		} else {
+			echo esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' );
+		}
+		die();
+	}
+
+	/**
+	 * Method: Render header of the view.
+	 */
 	public function Header() {
 		add_thickbox();
 		wp_enqueue_style( 'darktooltip', $this->_plugin->GetBaseUrl() . '/css/darktooltip.css', array(), '' );
@@ -369,6 +420,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		);
 	}
 
+	/**
+	 * Method: Render footer of the view.
+	 */
 	public function Footer() {
 		wp_enqueue_script( 'jquery' );
 		wp_enqueue_script( 'darktooltip', $this->_plugin->GetBaseUrl() . '/js/jquery.darktooltip.js', array( 'jquery' ), '' );
