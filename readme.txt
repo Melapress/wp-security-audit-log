@@ -9,7 +9,7 @@ Tested up to: 4.9.4
 Stable tag: 3.1.1
 Requires PHP: 5.3
 
-Keep an audit trail of all changes on your WordPress - ensure productivity & thwart attacks with the most comprehensive audit trail plugin.
+An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
 
 == Description ==
 
