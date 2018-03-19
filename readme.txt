@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.9.4
-Stable tag: 3.1.1
+Stable tag: 3.1.3
 Requires PHP: 5.3
 
 An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
@@ -179,23 +179,14 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.1.1(2018-03-14) =
-	
-* **New WordPress Activity Log Alert**
-	* Alert 2126: Website visitor posted a comment (segregated from alert 2099 which was used for both logged in users and website visitors).
-	
-* **New Features**
-	* Logging of user role change at WordPress multisite network level.
-	* New site selection menu for opting-in to sending diagnostic data or activating licenses on WordPress multisite network installations.
-	* New account page for installs on multisite network.
+= 3.1.3(2018-03-19) =
 	
 * **Improvements**
-	* Logging of posting of comments from logged in users and website visitors now reported by different alerts.
-	* Improved the logging of multiple post changes that were done at the same time on a post / page / post with custom post type - previously only the last change was being reported.
-	* Post Type selection menu in Email Notifications is not automatically populated on multisite network install so users can specify their custom post type.
-	* Changed severity of alerts 6007 and 6023 (404 errors) from High to Notification.
-	* Improved the plugin menu node for sites on multisite network (added messages on nodes users do not have access to, removed nodes that admins on sites should not have access to).
-	* Added responsiveness to the Archive Now and Mirror Now buttons in the integration tools.
-	* Added product name in alert 9019 (when product stock quantity is updated in WooCommerce).
+	* Reintroduced the count of failed logins for non WordPress users.
+	* Reintroduced the setting to limit the number of failed logins by non WordPress users the plugin should keep a log of.
+	* Improved the formatting of the log file for usernames used in failed logins.
+	
+* **Bug Fix**
+	* Fixed issue where new restrictions in The plugin uploads directory broke the [custom alerts](https://www.wpsecurityauditlog.com/support-documentation/create-custom-alerts-wordpress-audit-trail/)
 	
 Refer to the [WP Security Audit Log change log](https://www.wpsecurityauditlog.com/plugin-change-log/) page for the complete change log.
