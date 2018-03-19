@@ -395,7 +395,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			// Check if there are any users.
 			if ( ! empty( $users ) && is_array( $users ) ) {
 				// Prepare content.
-				$content = implode( ', ', $users );
+				$content = implode( ',', $users );
 				echo esc_html( $content );
 			} else {
 				echo esc_html__( 'No users found.', 'wp-security-audit-log' );

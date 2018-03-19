@@ -305,6 +305,21 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 
 			$occ_unknown = count( $occ_unknown ) ? $occ_unknown[0] : null;
 			if ( ! empty( $occ_unknown ) ) {
+				// Update existing record not exists user.
+				$this->IncrementLoginFailure( $ip, $site_id, false );
+
+				// Increase the number of attempts.
+				$new = $occ_unknown->GetMetaValue( 'Attempts', 0 ) + 1;
+
+				// If login attempts pass allowed number of attempts then stop increasing the attempts.
+				if ( -1 !== (int) $this->GetVisitorLoginFailureLogLimit()
+					&& $new > $this->GetVisitorLoginFailureLogLimit() ) {
+					$new = $this->GetVisitorLoginFailureLogLimit() . '+';
+				}
+
+				// Update the number of login attempts.
+				$occ_unknown->UpdateMetaValue( 'Attempts', $new );
+
 				// Get users from alert.
 				$users = $occ_unknown->GetMetaValue( 'Users' );
 
@@ -327,8 +342,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				// Log an alert for a login attempt with unknown username.
 				$this->plugin->alerts->Trigger(
 					$new_alert_code, array(
+						'Attempts' => 1,
 						'Users' => $users,
 						'LogFileText' => '',
+						'ClientIP' => $ip,
 					)
 				);
 			}
