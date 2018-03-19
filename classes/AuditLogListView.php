@@ -544,6 +544,14 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			case '%LogFileLink%' === $name: // Failed login file link.
 				return '';
 
+			case '%Attempts%' === $name: // Failed login attempts.
+				$check_value = (int) $value;
+				if ( 0 === $check_value ) {
+					return '';
+				} else {
+					return $value;
+				}
+
 			case '%LogFileText%' === $name: // Failed login file text.
 				return '<a href="#" class="wsal_download_failed_logins" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
 

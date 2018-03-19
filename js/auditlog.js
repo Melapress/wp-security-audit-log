@@ -256,6 +256,7 @@ jQuery( document ).ready( function( $ ) {
 				alert_id: alert
 			},
 			success: function( data ) {
+				data = data.replace( /,/g, '\n' );
 				// Start file download.
   				download( 'failed_logins.log', data );
 			}
