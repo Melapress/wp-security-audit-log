@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.9.4
-Stable tag: 3.1.3
+Stable tag: 3.1.4
 Requires PHP: 5.3
 
 An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
@@ -80,7 +80,7 @@ See our [premium features page](https://www.wpsecurityauditlog.com/premium-featu
 
 Support for the WP Security Audit Log plugin on the WordPress forums is free.
 
-Premium world-class support is available via email to all [WP Security Audit Log Premium](https://www.wpsecurityauditlog.com/premium-features/) customers. 
+Premium world-class support is available via email to all [WP Security Audit Log Premium](https://www.wpsecurityauditlog.com/premium-features/) customers.
 
 > <strong>Note</strong>: paid customers support is always given priority  over free support. Paid customers support is provided via one-to-one email and over the phone. [Upgrade to Premium](https://www.wpsecurityauditlog.com/premium-features/) to benefit from priority support.
 >
@@ -91,7 +91,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * Built-in [support for reverse proxies and web application firewalls](http://www.wpsecurityauditlog.com/documentation/automatically-retrieve-originating-wordpress-user-ip-address/)
 * Full [WordPress multisite support](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/)
 * Easily [create your custom alerts](https://www.wpsecurityauditlog.com/support-documentation/create-custom-alerts-wordpress-audit-trail/) to monitor additional functionality
-* Developer tools including the logging of all HTTP GET and POST requests 
+* Developer tools including the logging of all HTTP GET and POST requests
 * Integration with WhatIsMyIpAddress.com so you can get all information about an IP address with just a mouse click
 * Limit who can view the WordPress audit trail by either users or roles
 * Limit who can manage the plugin by either users or roles
@@ -101,7 +101,7 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * Enable or disable any security alerts
 * and much more...
 
-### As Featured On: 
+### As Featured On:
 
 * [GoDaddy](https://www.godaddy.com/garage/decode-security-logs-wordpress/)
 * [Pagely](https://pagely.com/blog/2015/01/log-wordpress-dashboard-activity-improved-security-auditing/)
@@ -179,14 +179,12 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.1.3(2018-03-19) =
-	
+= 3.1.4(2018-03-23) =
+
 * **Improvements**
-	* Reintroduced the count of failed logins for non WordPress users.
-	* Reintroduced the setting to limit the number of failed logins by non WordPress users the plugin should keep a log of.
-	* Improved the formatting of the log file for usernames used in failed logins.
-	
+	* Reintroduced the functionality to download 404 error log files from activity log.
+
 * **Bug Fix**
-	* Fixed issue where new restrictions in The plugin uploads directory broke the [custom alerts](https://www.wpsecurityauditlog.com/support-documentation/create-custom-alerts-wordpress-audit-trail/)
-	
+	* Freemius addressed mutliple issues in SDK for WordPress multisite (updated SDK)
+
 Refer to the [WP Security Audit Log change log](https://www.wpsecurityauditlog.com/plugin-change-log/) page for the complete change log.
