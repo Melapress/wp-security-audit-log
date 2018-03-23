@@ -430,39 +430,26 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Verify nonce.
 		if ( ! empty( $filename ) && ! empty( $nonce ) && wp_verify_nonce( $nonce,  'wsal-download-404-log-' . $filename ) ) {
-			// Set log file URL.
-			$site_url = trailingslashit( site_url() );
-			$log_file_url = $site_url . 'wp-content/uploads/wp-security-audit-log/404s/' . $filename;
+			// Set log file path.
+			$uploads_dir   = wp_upload_dir();
+			$log_file_path = trailingslashit( $uploads_dir['basedir'] ) . 'wp-security-audit-log/404s/' . $filename;
 
 			// Request the file.
-			$response = wp_remote_request( $log_file_url );
+			$response = file_get_contents( $log_file_path, true );
 
 			// Check if the response is valid.
-			if ( ! is_wp_error( $response ) ) {
-				// Get response code.
-				$response_code = (int) wp_remote_retrieve_response_code( $response );
-
-				if ( 200 === $response_code ) {
-					$response_body = wp_remote_retrieve_body( $response );
-
-					// Return the file body.
-					echo wp_json_encode( array(
-						'success' => true,
-						'filename' => $filename,
-						'file_content' => $response_body,
-					) );
-				} else {
-					// Request failed.
-					echo wp_json_encode( array(
-						'success' => false,
-						'message' => esc_html__( 'Request to get log file failed!', 'wp-security-audit-log' ),
-					) );
-				}
+			if ( $response ) {
+				// Return the file body.
+				echo wp_json_encode( array(
+					'success' => true,
+					'filename' => $filename,
+					'file_content' => $response,
+				) );
 			} else {
 				// Request failed.
 				echo wp_json_encode( array(
 					'success' => false,
-					'message' => $response->get_error_message(),
+					'message' => esc_html__( 'Request to get log file failed.', 'wp-security-audit-log' ),
 				) );
 			}
 		} else {
