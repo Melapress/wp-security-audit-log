@@ -2919,14 +2919,16 @@
                 }
             }
 
+            $licenses_by_module_type = self::get_all_licenses_by_module_type();
+
             $vars = array(
                 'plugin_sites'    => $all_plugins_installs,
                 'theme_sites'     => $all_themes_installs,
                 'users'           => self::get_all_users(),
                 'addons'          => self::get_all_addons(),
                 'account_addons'  => self::get_all_account_addons(),
-                'plugin_licenses' => self::get_all_licenses( WP_FS__MODULE_TYPE_PLUGIN ),
-                'theme_licenses'  => self::get_all_licenses( WP_FS__MODULE_TYPE_THEME )
+                'plugin_licenses' => $licenses_by_module_type[ WP_FS__MODULE_TYPE_PLUGIN ],
+                'theme_licenses'  => $licenses_by_module_type[ WP_FS__MODULE_TYPE_THEME ]
             );
 
             fs_enqueue_local_style( 'fs_debug', '/admin/debug.css' );
@@ -3918,12 +3920,30 @@
                         }
                     }
                 }
+            }
 
-                // Check if Freemius is on for the current plugin.
-                // This MUST be executed after all the plugin variables has been loaded.
-                if ( ! $this->is_on() ) {
-                    return;
-                }
+            /**
+             * This should be executed even if Freemius is off for the core module,
+             * otherwise, the add-ons dialogbox won't work properly. This is esepcially
+             * relevant when the developer decided to turn FS off for existing users.
+             *
+             * @author Vova Feldman (@svovaf)
+             */
+            if ( $this->is_user_in_admin() &&
+                 ! $this->is_addon() &&
+                 $this->has_addons() &&
+                 'plugin-information' === fs_request_get( 'tab', false ) &&
+                 $this->get_id() == fs_request_get( 'parent_plugin_id', false )
+            ) {
+                require_once WP_FS__DIR_INCLUDES . '/fs-plugin-info-dialog.php';
+
+                new FS_Plugin_Info_Dialog( $this );
+            }
+
+            // Check if Freemius is on for the current plugin.
+            // This MUST be executed after all the plugin variables has been loaded.
+            if ( ! $this->is_registered() && ! $this->is_on() ) {
+                return;
             }
 
             if ( $this->has_api_connectivity() ) {
@@ -4007,15 +4027,6 @@
                         }
 
 //						$this->deactivate_premium_only_addon_without_license();
-                    }
-                } else {
-                    if ( $this->has_addons() &&
-                         'plugin-information' === fs_request_get( 'tab', false ) &&
-                         $this->get_id() == fs_request_get( 'parent_plugin_id', false )
-                    ) {
-                        require_once WP_FS__DIR_INCLUDES . '/fs-plugin-info-dialog.php';
-
-                        new FS_Plugin_Info_Dialog( $this );
                     }
                 }
 
@@ -8514,6 +8525,36 @@
          * @author Leo Fajardo (@leorw)
          * @since  2.0.0
          *
+         * @return array
+         */
+        private static function get_all_licenses_by_module_type() {
+            $licenses = self::get_account_option( 'all_licenses' );
+
+            $licenses_by_module_type = array(
+                WP_FS__MODULE_TYPE_PLUGIN => array(),
+                WP_FS__MODULE_TYPE_THEME  => array()
+            );
+
+            if ( ! is_array( $licenses ) ) {
+                return $licenses_by_module_type;
+            }
+
+            foreach ( $licenses as $module_id => $module_licenses ) {
+                $fs = self::get_instance_by_id( $module_id );
+                if ( false === $fs ) {
+                    continue;
+                }
+
+                $licenses_by_module_type[ $fs->_module_type ] = array_merge( $licenses_by_module_type[ $fs->_module_type ], $module_licenses );
+            }
+
+            return $licenses_by_module_type;
+        }
+
+        /**
+         * @author Leo Fajardo (@leorw)
+         * @since  2.0.0
+         *
          * @param number      $module_id
          * @param number|null $user_id
          *
@@ -11119,6 +11160,10 @@
 
             if ( $is_trial ) {
                 $params['trial'] = 'true';
+            }
+
+            if ( $this->is_addon() ) {
+                return $this->_parent->addon_url( $this->_slug );
             }
 
             return $this->_get_admin_page_url( 'pricing', $params );
@@ -14030,18 +14075,19 @@
                 return;
             }
 
-            // First of all, set site info - otherwise we won't
+            // Get user information based on parent's plugin.
+            $user = $parent_fs->get_user();
+
+            // First of all, set site and user info - otherwise we won't
             // be able to invoke API calls.
             $this->_site = new FS_Site( $addon_install );
+            $this->_user = $user;
 
             // Sync add-on plans.
             $this->_sync_plans();
 
             // Get site's current plan.
             //$this->_site->plan = $this->_get_plan_by_id( $this->_site->plan->id );
-
-            // Get user information based on parent's plugin.
-            $user = $parent_fs->get_user();
 
             $this->_set_account( $user, $this->_site );
 
@@ -18714,10 +18760,6 @@
          */
         function _add_license_action_link() {
             $this->_logger->entrance();
-
-            if ( $this->is_free_plan() && $this->is_addon() ) {
-                return;
-            }
 
             if ( ! self::is_ajax() ) {
                 // Inject license activation dialog UI and client side code.
