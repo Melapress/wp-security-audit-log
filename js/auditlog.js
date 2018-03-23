@@ -239,27 +239,61 @@ function download( filename, text ) {
 	document.body.removeChild( element );
 }
 
-jQuery( document ).ready( function( $ ) {
-	// Failed logins link click.
-	$( '.wsal_download_failed_logins' ).click( function ( event ) {
-		event.preventDefault();
-		nonce = $( this ).data( 'download-nonce' ); // Nonce.
-		alert = $( this ).parent().attr( 'id' ).substring( 5 );
+/**
+ * Onclick event handler to download 404 log file.
+ *
+ * @param {object} element - Current element.
+ */
+function download_404_log( element ) {
+	download_nonce = jQuery( element ).data( 'nonce-404' ); // Nonce.
+	log_file = jQuery( element ).data( 'log-file' ); // Log file URL.
 
-		jQuery.ajax( {
-			type: 'POST',
-			url: ajaxurl,
-			async: true,
-			data: {
-				action: 'wsal_download_failed_login_log',
-				download_nonce: nonce,
-				alert_id: alert
-			},
-			success: function( data ) {
-				data = data.replace( /,/g, '\n' );
-				// Start file download.
-  				download( 'failed_logins.log', data );
+	if ( ! download_nonce || ! log_file ) {
+		console.log( 'Something went wrong!' );
+	}
+
+	jQuery.ajax( {
+		type: 'POST',
+		url: ajaxurl,
+		async: true,
+		dataType: 'json',
+		data: {
+			action: 'wsal_download_404_log',
+			nonce: download_nonce,
+			log_file: log_file
+		},
+		success: function( data ) {
+			if ( data.success ) {
+				download( data.filename, data.file_content );
+			} else {
+				console.log( data.message );
 			}
-		} );
+		}
 	} );
-} );
+}
+
+/**
+ * Onclick event handler to download failed login log file.
+ *
+ * @param {object} element - Current element.
+ */
+function download_failed_login_log( element ) {
+	nonce = jQuery( element ).data( 'download-nonce' ); // Nonce.
+	alert = jQuery( element ).parent().attr( 'id' ).substring( 5 );
+
+	jQuery.ajax( {
+		type: 'POST',
+		url: ajaxurl,
+		async: true,
+		data: {
+			action: 'wsal_download_failed_login_log',
+			download_nonce: nonce,
+			alert_id: alert
+		},
+		success: function( data ) {
+			data = data.replace( /,/g, '\n' );
+			// Start file download.
+			download( 'failed_logins.log', data );
+		}
+	} );
+}

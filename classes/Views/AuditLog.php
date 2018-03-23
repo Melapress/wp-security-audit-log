@@ -49,6 +49,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_AjaxSearchSite', array( $this, 'AjaxSearchSite' ) );
 		add_action( 'wp_ajax_AjaxSwitchDB', array( $this, 'AjaxSwitchDB' ) );
 		add_action( 'wp_ajax_wsal_download_failed_login_log', array( $this, 'wsal_download_failed_login_log' ) );
+		add_action( 'wp_ajax_wsal_download_404_log', array( $this, 'wsal_download_404_log' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
 		// Check plugin version for to dismiss the notice only until upgrade.
 		$this->_version = WSAL_VERSION;
@@ -402,6 +403,74 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			}
 		} else {
 			echo esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' );
+		}
+		die();
+	}
+
+	/**
+	 * Ajax callback to download 404 log.
+	 */
+	public function wsal_download_404_log() {
+		// Get post array through filter.
+		$nonce = filter_input( INPUT_POST, 'nonce', FILTER_SANITIZE_STRING );
+		$filename = filter_input( INPUT_POST, 'log_file', FILTER_SANITIZE_NUMBER_INT );
+
+		// If file name is empty then return error.
+		if ( empty( $filename ) ) {
+			// Nonce verification failed.
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'Log file does not exist.', 'wp-security-audit-log' ),
+			) );
+			die();
+		}
+
+		// Set file name.
+		$filename = substr_replace( $filename, '_', 4, 0 ) . '.log';
+
+		// Verify nonce.
+		if ( ! empty( $filename ) && ! empty( $nonce ) && wp_verify_nonce( $nonce,  'wsal-download-404-log-' . $filename ) ) {
+			// Set log file URL.
+			$site_url = trailingslashit( site_url() );
+			$log_file_url = $site_url . 'wp-content/uploads/wp-security-audit-log/404s/' . $filename;
+
+			// Request the file.
+			$response = wp_remote_request( $log_file_url );
+
+			// Check if the response is valid.
+			if ( ! is_wp_error( $response ) ) {
+				// Get response code.
+				$response_code = (int) wp_remote_retrieve_response_code( $response );
+
+				if ( 200 === $response_code ) {
+					$response_body = wp_remote_retrieve_body( $response );
+
+					// Return the file body.
+					echo wp_json_encode( array(
+						'success' => true,
+						'filename' => $filename,
+						'file_content' => $response_body,
+					) );
+				} else {
+					// Request failed.
+					echo wp_json_encode( array(
+						'success' => false,
+						'message' => esc_html__( 'Request to get log file failed!', 'wp-security-audit-log' ),
+					) );
+				}
+			} else {
+				// Request failed.
+				echo wp_json_encode( array(
+					'success' => false,
+					'message' => $response->get_error_message(),
+				) );
+			}
+		} else {
+			// Nonce verification failed.
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'Nonce verification failed!', 'wp-security-audit-log' ),
+			) );
 		}
 		die();
 	}

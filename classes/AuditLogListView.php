@@ -496,7 +496,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					return '';
 				}
 
-			case '%RevisionLink%' == $name:
+			case '%RevisionLink%' === $name:
 				$check_value = (string) $value;
 				if ( 'NULL' !== $check_value ) {
 					return ' Click <a target="_blank" href="' . esc_url( $value ) . '">here</a> to see the content changes.';
@@ -534,11 +534,13 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					return '<i>unknown</i>';
 				}
 
-			case '%LinkFile%' == $name:
+			case '%LinkFile%' === $name:
 				if ( 'NULL' != $value ) {
-					return esc_html__( 'View the 404 error log file from the /wp-content/uploads/wp-security-audit-log/404s/ directory', 'wp-security-audit-log' );
+					$site_url = trailingslashit( site_url() );
+					$value = str_replace( $site_url . 'wp-content/uploads/wp-security-audit-log/404s/', '', $value );
+					return '<a href="" onclick="download_404_log( this )" data-log-file="' . esc_attr( $value ) . '" data-nonce-404="' . esc_attr( wp_create_nonce( 'wsal-download-404-log-' . $value ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
 				} else {
-					return 'Click <a href="' . esc_url( admin_url( 'admin.php?page=wsal-togglealerts#tab-system-activity' ) ) . '">here</a> to log such requests to file';
+					return 'Click <a href="' . esc_url( admin_url( 'admin.php?page=wsal-togglealerts#tab-system-activity' ) ) . '">here</a> to log such requests to file.';
 				}
 
 			case '%LogFileLink%' === $name: // Failed login file link.
@@ -553,7 +555,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				}
 
 			case '%LogFileText%' === $name: // Failed login file text.
-				return '<a href="#" class="wsal_download_failed_logins" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
+				return '<a href="" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
 
 			case strncmp( $value, 'http://', 7 ) === 0:
 			case strncmp( $value, 'https://', 7 ) === 0:
