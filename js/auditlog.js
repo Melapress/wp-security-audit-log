@@ -247,6 +247,7 @@ function download( filename, text ) {
 function download_404_log( element ) {
 	download_nonce = jQuery( element ).data( 'nonce-404' ); // Nonce.
 	log_file = jQuery( element ).data( 'log-file' ); // Log file URL.
+	site_id = jQuery( element ).data( 'site-id' ); // Site ID.
 
 	if ( ! download_nonce || ! log_file ) {
 		console.log( 'Something went wrong!' );
@@ -260,7 +261,8 @@ function download_404_log( element ) {
 		data: {
 			action: 'wsal_download_404_log',
 			nonce: download_nonce,
-			log_file: log_file
+			log_file: log_file,
+			site_id: site_id
 		},
 		success: function( data ) {
 			if ( data.success ) {
