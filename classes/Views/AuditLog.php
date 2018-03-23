@@ -413,7 +413,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	public function wsal_download_404_log() {
 		// Get post array through filter.
 		$nonce = filter_input( INPUT_POST, 'nonce', FILTER_SANITIZE_STRING );
-		$filename = filter_input( INPUT_POST, 'log_file', FILTER_SANITIZE_NUMBER_INT );
+		$filename = filter_input( INPUT_POST, 'log_file', FILTER_SANITIZE_STRING );
+		$site_id = filter_input( INPUT_POST, 'site_id', FILTER_SANITIZE_NUMBER_INT );
 
 		// If file name is empty then return error.
 		if ( empty( $filename ) ) {
@@ -425,14 +426,26 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die();
 		}
 
-		// Set file name.
-		$filename = substr_replace( $filename, '_', 4, 0 ) . '.log';
-
 		// Verify nonce.
 		if ( ! empty( $filename ) && ! empty( $nonce ) && wp_verify_nonce( $nonce,  'wsal-download-404-log-' . $filename ) ) {
 			// Set log file path.
 			$uploads_dir   = wp_upload_dir();
-			$log_file_path = trailingslashit( $uploads_dir['basedir'] ) . 'wp-security-audit-log/404s/' . $filename;
+
+			if ( ! $site_id ) {
+				$position = strpos( $filename, '/sites/' );
+
+				if ( $position ) {
+					$filename = substr( $filename, $position );
+				} else {
+					$position = strpos( $filename, '/wp-security-audit-log/' );
+					$filename = substr( $filename, $position );
+				}
+				$log_file_path = trailingslashit( $uploads_dir['basedir'] ) . $filename;
+			} else {
+				$position = strpos( $filename, '/wp-security-audit-log/' );
+				$filename = substr( $filename, $position );
+				$log_file_path = trailingslashit( $uploads_dir['basedir'] ) . $filename;
+			}
 
 			// Request the file.
 			$response = file_get_contents( $log_file_path, true );

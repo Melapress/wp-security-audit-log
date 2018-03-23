@@ -536,16 +536,8 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 			case '%LinkFile%' === $name:
 				if ( 'NULL' != $value ) {
-					$site_url = trailingslashit( site_url() ); // Site URL.
-					$site_url = str_replace( array( 'http://', 'https://' ), '', $site_url ); // Replace HTTP protocol.
-					$value    = str_replace( array( 'http://', 'https://' ), '', $value ); // Replace HTTP protocol.
-					$find_url = $site_url . 'wp-content/uploads/wp-security-audit-log/404s/'; // URL to replace from file URL.
 					$site_id  = $this->get_view_site_id(); // Site id for multisite.
-					if ( $this->is_multisite() && $site_id ) {
-						$find_url = $site_url . 'wp-content/uploads/sites/' . $site_id . '/wp-security-audit-log/404s/';
-					}
-					$value = str_replace( $find_url, '', $value );
-					return '<a href="javascript:;" onclick="download_404_log( this )" data-log-file="' . esc_attr( $value ) . '" data-nonce-404="' . esc_attr( wp_create_nonce( 'wsal-download-404-log-' . $value ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
+					return '<a href="javascript:;" onclick="download_404_log( this )" data-log-file="' . esc_attr( $value ) . '" data-site-id="' . esc_attr( $site_id ) . '" data-nonce-404="' . esc_attr( wp_create_nonce( 'wsal-download-404-log-' . $value ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
 				} else {
 					return 'Click <a href="' . esc_url( admin_url( 'admin.php?page=wsal-togglealerts#tab-system-activity' ) ) . '">here</a> to log such requests to file.';
 				}
