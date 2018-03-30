@@ -818,7 +818,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 				// Request URL.
 				$request_uri = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
-				$url = site_url() . $request_uri;
+				$url = home_url() . $request_uri;
 
 				// Get option to log referrer.
 				$log_referrer = $this->plugin->GetGlobalOption( 'log-404-referrer' );
@@ -898,7 +898,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 				// Request URL.
 				$request_uri = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
-				$url = site_url() . $request_uri;
+				$url = home_url() . $request_uri;
 
 				// Get option to log referrer.
 				$log_referrer = $this->plugin->GetGlobalOption( 'log-visitor-404-referrer' );
