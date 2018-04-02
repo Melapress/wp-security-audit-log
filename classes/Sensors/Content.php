@@ -1053,6 +1053,18 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					$event = 2002;
 				}
 				if ( $event ) {
+					if ( 2002 === $event ) {
+						// Get Yoast alerts.
+						$yoast_alerts = $this->plugin->alerts->get_alerts_by_sub_category( 'Yoast SEO' );
+
+						// Check all alerts.
+						foreach ( $yoast_alerts as $alert_code => $alert ) {
+							if ( $this->plugin->alerts->WillOrHasTriggered( $alert_code ) ) {
+								return 0; // Return if any Yoast alert has or will trigger.
+							}
+						}
+					}
+
 					$editor_link = $this->GetEditorLink( $oldpost );
 					$this->plugin->alerts->Trigger(
 						$event, array(

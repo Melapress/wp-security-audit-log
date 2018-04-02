@@ -66,6 +66,13 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		if ( 9999 !== $type ) {
 			$this->AlertInject( $occ );
 		}
+
+		/**
+		 * Fires immediately after an alert is logged.
+		 *
+		 * @since 3.1.2
+		 */
+		do_action( 'wsal_logged_alert', $occ, $type, $data, $date, $siteid, $migrated );
 	}
 
 	/**
