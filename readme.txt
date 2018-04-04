@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.9.4
-Stable tag: 3.1.4
+Stable tag: 3.1.5
 Requires PHP: 5.3
 
 An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
@@ -179,12 +179,45 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.1.4(2018-03-23) =
+= 3.1.5(2018-04-04) =
 
-* **Improvements**
-	* Reintroduced the functionality to download 404 error log files from activity log.
+* **New Features**
+	* Terminate all logged in sessions button.
+	* Setting to [configure automatic termination of idle logged in sessions](https://www.wpsecurityauditlog.com/support-documentation/automatically-terminate-idle-wordpress-users-sessions/).
+	* Text search with filters for logged in sessions (first & last, username, role, email).
+	* New settings to [limit the number of simultaneous logged in sessions per user in WordPress](https://www.wpsecurityauditlog.com/support-documentation/managing-multiple-same-wordpress-user-sessions/#limiting-simultaneous).
+	* New settings to [configure logged in sessions override in WordPress](https://www.wpsecurityauditlog.com/support-documentation/managing-multiple-same-wordpress-user-sessions/#allow-override).
 
-* **Bug Fix**
-	* Freemius addressed mutliple issues in SDK for WordPress multisite (updated SDK)
+* **New activity log for Yoast SEO**
+	* 8801: Changed the SEO title
+	* 8802: Modified SEO description 
+	* 8803: Changed the option Allow Search engine to show post in search results
+	* 8804: Changed the option Search Engine follow links
+	* 8805: Set the Meta Robots Advanced setting
+	* 8806: Changed the canonical URL
+	* 8807: Changed the focus keyword
+	* 8808: Changed the cornerstone article option
+	* 8809: Changed title separator in Yoast SEO plugin settings
+	* 8810: Changed the Homepage Title
+	* 8811: Changed the Homepage Meta description
+	* 8812: Changed the Knowledge Graph setting
+	* 8813: Changed the option Show Posts / Pages / Attachments in Search Results
+	* 8814: Changed the Posts / pages / Attachments title template
+	* 8815: Changed the SEO Analysis setting
+	* 8816: changed the Readability analysis setting
+	* 8817: Change the cornerstone content plugin setting
+	* 8818: Changed the Text link counter setting
+	* 8819: Changed XML Sitemaps setting
+	* 8820: Changed Ryte Integration setting
+	* 8821: Changed the Admin bar menu setting
+	* 8822: Changed the Posts / Pages / Attachments meta description template
+	* 8823: Changed the option Date in Snippet Preview for Posts / Pages / Attachments
+	* 8824: Changed the option Yoast SEO Metabox for Posts / Pages / Attachments
+	* 8825: Changed the setting Security: no advanced settings for authors 
+
+* **Plugin improvements**
+	* List of logged in users uses displays either first & last name or username.
+	* Automated changes in WooCommerce product stock quantity and statuses done by plugins or order placements are now recorded.
+	* Added checks for when the plugin cannot retrieve the latest change of a session to report in the logged in users section.
 
 Refer to the [WP Security Audit Log change log](https://www.wpsecurityauditlog.com/plugin-change-log/) page for the complete change log.
