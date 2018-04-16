@@ -1,187 +1,1197 @@
-=== WP Security Audit Log ===
-Contributors: WPWhiteSecurity, robert681
-Plugin URI: http://www.wpsecurityauditlog.com
-License: GPLv3
-License URI: http://www.gnu.org/licenses/gpl.html
-Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
-Requires at least: 3.6
-Tested up to: 4.9.4
-Stable tag: 3.1.6
-Requires PHP: 5.3
+<?php
+/**
+ * Plugin Name: WP Security Audit Log
+ * Plugin URI: http://www.wpsecurityauditlog.com/
+ * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
+ * Author: WP White Security
+ * Version: 3.1.6
+ * Text Domain: wp-security-audit-log
+ * Author URI: http://www.wpsecurityauditlog.com/
+ * License: GPL2
+ *
+ * @package Wsal
+ * @fs_premium_only /extensions/
+ */
 
-An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
+/*
+	WP Security Audit Log
+	Copyright(c) 2014  Robert Abela  (email : robert@wpwhitesecurity.com)
 
-== Description ==
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License, version 2, as
+	published by the Free Software Foundation.
 
-<strong>THE MOST COMPREHENSIVE, EASY TO USE & REAL TIME WORDPRESS AUDIT TRAIL PLUGIN</strong><br />
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-Keep an audit log of everything that happens on your WordPress and [WordPress multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/) with the WP Security Audit Log plugin to ensure user productivity, easily spot suspicious behavior before it becomes a WordPress security problem and have an organized website.
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
 
-[WP Security Audit Log](http://www.wpsecurityauditlog.com) is WordPress' most comprehensive real time user activity and monitoring log plugin. It helps thousands of WordPress administrators and security professionals keep an eye on what is happening on their websites. It is also the most highly rated WordPress activity log plugin and have been featured on popular WordPress blogs such as GoDaddy, ManageWP, Pagely, WP Mayor and WPKube.
+if ( ! function_exists( 'wsal_freemius' ) ) {
 
-> <strong>Note</strong>: All logging functionality is and will always remain FREE. Additional features such as reports, instant email alerts and search are available in the <Strong>[Premium Edition](https://www.wpsecurityauditlog.com/premium-features/)</strong>.
->
+	/**
+	 * Freemius SDK.
+	 *
+	 * @since 2.7.0
+	 */
+	if ( file_exists( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' ) ) {
+		require_once( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' );
+	}
 
-[youtube https://www.youtube.com/watch?v=1nopATCS-CQ]
+	/**
+	 * WSAL Main Class.
+	 *
+	 * @package Wsal
+	 */
+	class WpSecurityAuditLog {
 
-#### WordPress Changes & Details the Plugin Keeps a Log Of
-If you are looking for a comprehensive & complete WordPress activity log solution you are in the right place. The WP Security Audit Log plugin does not just tell you that a post, a user profile or an object was updated. It reports what was changed within the post, profile or object in real time.
+		/**
+		 * Plugin version.
+		 *
+		 * @var string
+		 */
+		public $version = '3.1.6';
 
-Below is a summary of the changes that the plugin can keep a record of:
+		// Plugin constants.
+		const PLG_CLS_PRFX = 'WSAL_';
+		const MIN_PHP_VERSION = '5.3.0';
+		const OPT_PRFX = 'wsal-';
 
-* **Post, Page and Custom Post Type changes** such as status, content, title, URL, date and custom field changes
+		/**
+		 * Views supervisor.
+		 *
+		 * @var WSAL_ViewManager
+		 */
+		public $views;
 
-* **Tags and Categories changes** such as creating, modifying or deleting them, and adding or removing them from posts
+		/**
+		 * Logger supervisor.
+		 *
+		 * @var WSAL_AlertManager
+		 */
+		public $alerts;
 
-* **Widgets and Menus changes** such as creating, modifying or deleting them
+		/**
+		 * Sensors supervisor.
+		 *
+		 * @var WSAL_SensorManager
+		 */
+		public $sensors;
 
-* **User changes** such as user created or registered, deleted or added to a site on multisite network
+		/**
+		 * Settings manager.
+		 *
+		 * @var WSAL_Settings
+		 */
+		public $settings;
 
-* **User profile changes** such as password, email, display name and role changes
+		/**
+		 * Class loading manager.
+		 *
+		 * @var WSAL_Autoloader
+		 */
+		public $autoloader;
 
-* **User activity** such as login, logout, failed logins and terminating other sessions
+		/**
+		 * Constants manager.
+		 *
+		 * @var WSAL_ConstantManager
+		 */
+		public $constants;
 
-* **WordPress core and settings changes** such as installed updates, permalinks, default role, URL and other site-wide changes
+		/**
+		 * Licenses manager.
+		 *
+		 * @var WSAL_LicenseManage
+		 */
+		public $licensing;
 
-* **WordPress multisite network changes** such as adding, deleting or archiving sites, adding or removing users from sites etc
+		/**
+		 * Simple profiler.
+		 *
+		 * @var WSAL_SimpleProfiler
+		 */
+		public $profiler;
 
-* **Plugins and Themes changes** such as installing, activating, deactivating, uninstalling and updating them
+		/**
+		 * Options.
+		 *
+		 * @var WSAL_DB_Option
+		 */
+		public $options;
 
-* **WordPress database changes** such as when a plugin adds or removes a table
+		/**
+		 * Contains a list of cleanup callbacks.
+		 *
+		 * @var callable[]
+		 */
+		protected $_cleanup_hooks = array();
 
-* **Changes on BBPress forums**, **WooCommerce Stores and Products** and other popular WordPress plugins.
+		/**
+		 * Add-ons Manager.
+		 *
+		 * @var object
+		 */
+		public $extensions;
 
-For every change the plugin keeps record of it also reports the:
+		/**
+		 * Allowed HTML Tags for strings.
+		 *
+		 * @var array
+		 */
+		public $allowed_html_tags = array();
 
-* Date & time (and milliseconds) of when it happened,
-* User & role of the user who did the change,
-* Source IP address from where the change happened.
+		/**
+		 * Standard singleton pattern.
+		 * WARNING! To ensure the system always works as expected, AVOID using this method.
+		 * Instead, make use of the plugin instance provided by 'wsal_init' action.
+		 *
+		 * @return WpSecurityAuditLog Returns the current plugin instance.
+		 */
+		public static function GetInstance() {
+			static $instance = null;
+			if ( ! $instance ) {
+				$instance = new self();
+			}
+			return $instance;
+		}
 
-Refer to [WordPress Audit Log Alerts](https://www.wpsecurityauditlog.com/support-documentation/list-wordpress-audit-trail-alerts/) for a complete list of all the changes the WP Security Audit Log can keep a record of.
+		/**
+		 * Initialize plugin.
+		 */
+		public function __construct() {
+			// Define important plugin constants.
+			$this->define_constants();
 
-### Extend the Functionality of the WP Security Audit Log Plugin
-<strong>[Upgrade to WP Security Audit Log Premium](https://www.wpsecurityauditlog.com/premium-features/)</strong> to:
+			// Define allowed HTML tags.
+			$this->set_allowed_html_tags();
 
-* See who is logged,
-* See what everyone is doing in real time,
-* Log off any user with just a click,
-* Generate HTML and CSV reports,
-* Export the audit log in CSV (ideal for integrations),
-* Get instantly notified via email of important changes,
-* Search the audit log using text-based searches
-* Use built-in filters to fine tune the searches,
-* Store audit log in an external database to improve security,
-* Integrate & centralize the WordPress audit log in syslog, Paperlog and other third party log management solutions,
-* Configure archiving and mirroring of logs.
+			require_once( 'classes/Helpers/DataHelper.php' );
 
-See our [premium features page](https://www.wpsecurityauditlog.com/premium-features/) for more detailed information.
+			// Profiler has to be loaded manually.
+			require_once( 'classes/SimpleProfiler.php' );
+			$this->profiler = new WSAL_SimpleProfiler();
+			require_once( 'classes/Models/ActiveRecord.php' );
+			require_once( 'classes/Models/Query.php' );
+			require_once( 'classes/Models/OccurrenceQuery.php' );
+			require_once( 'classes/Models/Option.php' );
+			require_once( 'classes/Models/TmpUser.php' );
 
-### Free and Premium Support
+			// Load autoloader and register base paths.
+			require_once( 'classes/Autoloader.php' );
+			$this->autoloader = new WSAL_Autoloader( $this );
+			$this->autoloader->Register( self::PLG_CLS_PRFX, $this->GetBaseDir() . 'classes' . DIRECTORY_SEPARATOR );
 
-Support for the WP Security Audit Log plugin on the WordPress forums is free.
+			// Load dependencies.
+			$this->views = new WSAL_ViewManager( $this );
+			$this->alerts = new WSAL_AlertManager( $this );
+			$this->sensors = new WSAL_SensorManager( $this );
+			$this->settings = new WSAL_Settings( $this );
+			$this->constants = new WSAL_ConstantManager( $this );
+			$this->licensing = new WSAL_LicenseManager( $this );
+			$this->widgets = new WSAL_WidgetManager( $this );
 
-Premium world-class support is available via email to all [WP Security Audit Log Premium](https://www.wpsecurityauditlog.com/premium-features/) customers.
+			// Listen for installation event.
+			register_activation_hook( __FILE__, array( $this, 'Install' ) );
 
-> <strong>Note</strong>: paid customers support is always given priority  over free support. Paid customers support is provided via one-to-one email and over the phone. [Upgrade to Premium](https://www.wpsecurityauditlog.com/premium-features/) to benefit from priority support.
->
+			// Listen for init event.
+			add_action( 'init', array( $this, 'Init' ) );
 
-#### Other Noteworthy Features
-WP Security Audit Log plugin also has a number of features that make WordPress and WordPress multisite monitoring and auditing easier, such as:
+			// Listen for cleanup event.
+			add_action( 'wsal_cleanup', array( $this, 'CleanUp' ) );
 
-* Built-in [support for reverse proxies and web application firewalls](http://www.wpsecurityauditlog.com/documentation/automatically-retrieve-originating-wordpress-user-ip-address/)
-* Full [WordPress multisite support](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/)
-* Easily [create your custom alerts](https://www.wpsecurityauditlog.com/support-documentation/create-custom-alerts-wordpress-audit-trail/) to monitor additional functionality
-* Developer tools including the logging of all HTTP GET and POST requests
-* Integration with WhatIsMyIpAddress.com so you can get all information about an IP address with just a mouse click
-* Limit who can view the WordPress audit trail by either users or roles
-* Limit who can manage the plugin by either users or roles
-* Configurable WordPress dashboard widget highlighting the most recent critical activity
-* Configurable WordPress security audit trail data retention
-* User avatar is shown in the alerts for better recognizability
-* Enable or disable any security alerts
-* and much more...
+			// Render wsal header.
+			add_action( 'admin_enqueue_scripts', array( $this, 'RenderHeader' ) );
 
-### As Featured On:
+			// Render wsal footer.
+			add_action( 'admin_footer', array( $this, 'RenderFooter' ) );
 
-* [GoDaddy](https://www.godaddy.com/garage/decode-security-logs-wordpress/)
-* [Pagely](https://pagely.com/blog/2015/01/log-wordpress-dashboard-activity-improved-security-auditing/)
-* [WP Couple](https://wpcouple.com/wordpress-audit-logs/)
-* [WPKube](http://www.wpkube.com/improve-wordpress-security-wp-security-audit-log/)
-* [WPLift](http://wplift.com/audit-wordpress-security-logs) - Review by Ahmad Awais
-* [WP Mayor](http://www.wpmayor.com/wp-security-audit-log-plugin-review-user-activity-logging-wordpress/)
-* [WP SmackDown](https://wpsmackdown.com/wp-plugins/wp-security-audit-log/)
-* [SourceWP](https://www.sourcewp.com/wp-security-audit-log-plugin-review/)
-* [Techwibe](https://www.techwibe.com/wp-security-audit-log-wordpress-plugin/)
-* [KevinMuldoon.com](https://www.kevinmuldoon.com/wp-security-audit-log-review/)
-* [Cloudways](https://www.cloudways.com/blog/monitor-wordpress-with-wp-security-audit-log-plugin/)
-* [ManageWP Plugins of the month](https://managewp.com/free-wordpress-plugins-june-2014)
-* [MyWPExpert](http://www.mywpexpert.com/wp-security-audit-log/)
-* [BlogVault](https://blogvault.net/wp-security-audit-log-plugin-review/)
-* [Firewall.cx](http://www.firewall.cx/general-topics-reviews/security-articles/1146-wordpress-audit-monitor-log-site-security-alerts.html)
-* [Design Wall](http://www.designwall.com/blog/10-wordpress-multisite-plugins-you-shouldnt-live-without/)
-* [Tourqe News](http://torquemag.io/5-awesome-wordpress-plugins-you-may-not-have-heard-of/)
-* [Shout Me Loud](http://www.shoutmeloud.com/how-to-monitor-user-activities-wordpress-dashboard.html)
-* [Monster Post](http://blog.templatemonster.com/2015/12/15/wp-security-audit-log-plugin-review/)
-* [The Darknet](http://www.darknet.org.uk/2015/10/wp-security-audit-log-a-complete-audit-log-plugin-for-wordpress/)
-* [WebEmpresa](https://www.webempresa.com/blog/auditando-cambios-en-wordpress.html)
-* [KitPloit](http://www.kitploit.com/2016/10/wp-security-audit-log-ultimate.html)
+			// Handle admin Disable Custom Field.
+			add_action( 'wp_ajax_AjaxDisableCustomField', array( $this, 'AjaxDisableCustomField' ) );
 
-#### WordPress Security Audit Log in your Language!
-We need help translating the plugin and the WordPress Security Alerts. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log) to translate the plugin and drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
+			// Handle admin Disable Alerts.
+			add_action( 'wp_ajax_AjaxDisableByCode', array( $this, 'AjaxDisableByCode' ) );
 
-* Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
-* German translation by [Mourad Louha](http://excel-translator.de)
-* Spanish translation by the [WP Body team](https://wpbody.com/)
-* French translations by Denis Moscato
+			// Render Login Page Notification.
+			add_filter( 'login_message', array( $this, 'render_login_page_message' ), 10, 1 );
 
-#### Related Links and Documentation
+			// Cron job to delete alert 1003 for the last day.
+			add_action( 'wsal_delete_logins', array( $this, 'delete_failed_logins' ) );
+			if ( ! wp_next_scheduled( 'wsal_delete_logins' ) ) {
+				wp_schedule_event( time(), 'daily', 'wsal_delete_logins' );
+			}
 
-* [What is a WordPress Audit Trail?](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-documentation/what-is-a-wordpress-audit-trail/)
-* [List of WordPress Audit Trail Alerts](http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/)
-* [WordPress Multisite Features](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/)
-* [WP Security Audit Log and Reverse Proxy and WAFs Support](http://www.wpsecurityauditlog.com/documentation/automatically-retrieve-originating-wordpress-user-ip-address/)
-* [WP Security Audit Log Database Documentation](http://www.wpsecurityauditlog.com/documentation/plugin-wordpress-database-documentation/)
-* [Official WP Security Audit Log Plugin Website](http://www.wpsecurityauditlog.com/)
+			// Register freemius uninstall event.
+			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
 
-== Installation ==
+			// Include premium extensions through freemius.
+			if ( wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
+				$this->include_extensions__premium_only();
+			}
 
-=== Install WP Security Audit Log from within WordPress ===
+			// Add filters to customize freemius welcome message.
+			wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
+			wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
+		}
 
-1. Visit 'Plugins > Add New'
-1. Search for 'WP Security Audit Log'
-1. Install and activate the WP Security Audit Log plugin
-1. Allow or skip diagnostic tracking
+		/**
+		 * Method: Set allowed  HTML tags.
+		 *
+		 * @since 3.0.0
+		 */
+		public function set_allowed_html_tags() {
+			// Set allowed HTML tags.
+			$this->allowed_html_tags = array(
+				'a' => array(
+					'href' => array(),
+					'title' => array(),
+					'target' => array(),
+				),
+				'br' => array(),
+				'em' => array(),
+				'strong' => array(),
+				'p' => array(
+					'class' => array(),
+				),
+			);
+		}
 
-=== Install WP Security Audig Log manually ===
+		/**
+		 * Method: Define constants.
+		 *
+		 * @since 2.6.6
+		 */
+		public function define_constants() {
+			// Plugin version.
+			if ( ! defined( 'WSAL_VERSION' ) ) {
+				define( 'WSAL_VERSION', $this->version );
+			}
+			// Plugin Name.
+			if ( ! defined( 'WSAL_BASE_NAME' ) ) {
+				define( 'WSAL_BASE_NAME', plugin_basename( __FILE__ ) );
+			}
+			// Plugin Directory URL.
+			if ( ! defined( 'WSAL_BASE_URL' ) ) {
+				define( 'WSAL_BASE_URL', plugin_dir_url( __FILE__ ) );
+			}
+			// Plugin Directory Path.
+			if ( ! defined( 'WSAL_BASE_DIR' ) ) {
+				define( 'WSAL_BASE_DIR', plugin_dir_path( __FILE__ ) );
+			}
+			// Plugin Docs URL.
+			if ( ! defined( 'WSAL_DOCS_URL' ) ) {
+				define( 'WSAL_DOCS_URL', 'https://www.wpsecurityauditlog.com/support-documentation/' );
+			}
+			// Plugin Issue Reporting URL.
+			if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
+				define( 'WSAL_ISSUE_URL', 'https://wordpress.org/support/plugin/wp-security-audit-log' );
+			}
+		}
 
-1. Upload the `wp-security-audit-log` directory to the `/wp-content/plugins/` directory
-1. Activate the WP Security Audit Log plugin from the 'Plugins' menu in WordPress
-1. Allow or skip diagnostic tracking
+		/**
+		 * Method: Include extensions for premium version.
+		 *
+		 * @since 2.7.0
+		 */
+		public function include_extensions__premium_only() {
+			/**
+			 * Class for extensions managment.
+			 *
+			 * @since 2.7.0
+			 */
+			if ( file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
+				require_once( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' );
+			}
 
-== Frequently Asked Questions ==
+			// Initiate the extensions manager.
+			$this->extensions = new WSAL_Extension_Manager( $this );
+		}
 
-= Support and Documentation =
-Please refer to our [Support & Documentation pages](https://www.wpsecurityauditlog.com/documentation/frequently-asked-questions-faqs) for all the technical information and support documentation on the WP Security Audit Log plugin.
+		/**
+		 * Customize Freemius connect message for new users.
+		 *
+		 * @param string $message - Connect message.
+		 * @param string $user_first_name - User first name.
+		 * @param string $plugin_title - Plugin title.
+		 * @param string $user_login - Username.
+		 * @param string $site_link - Site link.
+		 * @param string $freemius_link - Freemius link.
+		 * @return string
+		 */
+		function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
+			$freemius_link = '<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
+			return sprintf(
+				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
+				esc_html__( 'Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com.', 'wp-security-audit-log' ) .
+				'<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>' .
+				esc_html__( 'NO AUDIT LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' ),
+				$user_first_name,
+				'<b>' . $plugin_title . '</b>',
+				'<b>' . $user_login . '</b>',
+				$site_link,
+				$freemius_link
+			);
+		}
 
-== Screenshots ==
+		/**
+		 * Customize Freemius connect message on update.
+		 *
+		 * @param string $message - Connect message.
+		 * @param string $user_first_name - User first name.
+		 * @param string $plugin_title - Plugin title.
+		 * @param string $user_login - Username.
+		 * @param string $site_link - Site link.
+		 * @param string $freemius_link - Freemius link.
+		 * @return string
+		 */
+		function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
+			$freemius_link = '<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
+			return sprintf(
+				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
+				esc_html__( 'Please help us improve %2$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %5$s, a diagnostic tracking service we use. If you skip this, that\'s okay! %2$s will still work just fine.', 'wp-security-audit-log' ) .
+				'<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>' .
+				esc_html__( 'NO AUDIT LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' ),
+				$user_first_name,
+				'<b>' . $plugin_title . '</b>',
+				'<b>' . $user_login . '</b>',
+				$site_link,
+				$freemius_link
+			);
+		}
 
-1. The Audit Log Viewer from where the WordPress administrator can see all the security events generated by WP Security Audit Log WordPress plugin.
-2. See who is logged in to your WordPress and manage users sessions with the [Users Sessions Management Add-On](http://www.wpsecurityauditlog.com/extensions/user-sessions-management-wp-security-audit-log/)
-3. The WP Security Audit Log plugin settings from where WordPress administrator can configure generic plugin settings such as [reverse proxy support](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/wp-security-audit-log-supports-reverse-proxies-wordpress-firewalls/), who can manage the plugin etc.
-4. The WordPress audit trail settings from where you can configure automatic pruning of alerts, which timestamp should be used, how many 404 requests should be logged and more.
-5. Configuring WordPress email alerts with the [Email Notifications Add-On](http://www.wpsecurityauditlog.com/extensions/wordpress-email-notifications-add-on/)
-6. Search and filters functionality to automatically search through the WordPress security audit log with the [Search Extension](http://www.wpsecurityauditlog.com/extensions/search-add-on-for-wordpress-security-audit-log/)
-7. The Enable/Disable Alerts settings node from where Administrators can disable or enable WordPress security alerts.
-8. The Audit Log Viewer of a Super Admin in a WordPress multisite network installation with the Site selection drop down menu.
-9. If there are more than 15 sites in a multisite, an auto complete site search shows up instead of the drop down menu (see [screenshots](https://wordpress.org/plugins/wp-security-audit-log/screenshots/) for reference)
-10. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes with WP Security Audit Log Plugin](http://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-releases/record-all-wordpress-content-changes-wp-security-audit-log-plugin/)
-11. Mirror the WordPress audit trail to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
+		/**
+		 * Start to trigger the events after installation.
+		 *
+		 * @internal
+		 */
+		public function Init() {
+			// Start listening to events.
+			WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
 
-== Changelog ==
+			if ( $this->settings->IsArchivingEnabled() ) {
+				// Check the current page.
+				$get_page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+				if ( ( ! isset( $get_page ) || 'wsal-auditlog' !== $get_page ) && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
+					$selected_db = get_transient( 'wsal_wp_selected_db' );
+					if ( $selected_db ) {
+						// Delete the transient.
+						delete_transient( 'wsal_wp_selected_db' );
+					}
+				}
+			}
+		}
 
-= 3.1.6(2018-04-16) =
 
-* **Bug fix**
-	* Fixed an issue in the Freemius SDK - mutisite opt-in was not working.
+		/**
+		 * Render plugin stuff in page header.
+		 *
+		 * @internal
+		 */
+		public function RenderHeader() {
+			// common.css?
+		}
 
-Refer to the [WP Security Audit Log change log](https://www.wpsecurityauditlog.com/plugin-change-log/) page for the complete change log.
+		/**
+		 * Disable Custom Field through ajax.
+		 *
+		 * @internal
+		 */
+		public function AjaxDisableCustomField() {
+			// Die if user does not have permission to disable.
+			if ( ! $this->settings->CurrentUserCan( 'edit' ) ) {
+				echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to disable this custom field.', 'wp-security-audit-log' ) . '</p>';
+				die();
+			}
+
+			// Set filter input args.
+			$filter_input_args = array(
+				'disable_nonce' => FILTER_SANITIZE_STRING,
+				'notice' => FILTER_SANITIZE_STRING,
+			);
+
+			// Filter $_POST array for security.
+			$post_array = filter_input_array( INPUT_POST );
+
+			if ( isset( $post_array['disable_nonce'] ) && ! wp_verify_nonce( $post_array['disable_nonce'], 'disable-custom-nonce' . $post_array['notice'] ) ) {
+				die();
+			}
+
+			$fields = $this->GetGlobalOption( 'excluded-custom' );
+			if ( isset( $fields ) && '' != $fields ) {
+				$fields .= ',' . esc_html( $post_array['notice'] );
+			} else {
+				$fields = esc_html( $post_array['notice'] );
+			}
+			$this->SetGlobalOption( 'excluded-custom', $fields );
+			echo '<p>Custom Field ' . esc_html( $post_array['notice'] ) . ' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude">Excluded Objects</a> tab in the plugin settings</p>';
+			die;
+		}
+
+		/**
+		 * Disable Alert through ajax.
+		 *
+		 * @internal
+		 */
+		public function AjaxDisableByCode() {
+			// Die if user does not have permission to disable.
+			if ( ! $this->settings->CurrentUserCan( 'edit' ) ) {
+				echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to disable this alert.', 'wp-security-audit-log' ) . '</p>';
+				die();
+			}
+
+			// Set filter input args.
+			$filter_input_args = array(
+				'disable_nonce' => FILTER_SANITIZE_STRING,
+				'code' => FILTER_SANITIZE_STRING,
+			);
+
+			// Filter $_POST array for security.
+			$post_array = filter_input_array( INPUT_POST );
+
+			if ( isset( $post_array['disable_nonce'] ) && ! wp_verify_nonce( $post_array['disable_nonce'], 'disable-alert-nonce' . $post_array['code'] ) ) {
+				die();
+			}
+
+			$s_alerts = $this->GetGlobalOption( 'disabled-alerts' );
+			if ( isset( $s_alerts ) && '' != $s_alerts ) {
+				$s_alerts .= ',' . esc_html( $post_array['code'] );
+			} else {
+				$s_alerts = esc_html( $post_array['code'] );
+			}
+			$this->SetGlobalOption( 'disabled-alerts', $s_alerts );
+			echo '<p>Alert ' . esc_html( $post_array['code'] ) . ' is no longer being monitored.<br />';
+			echo 'You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.</p>';
+			die;
+		}
+
+		/**
+		 * Render plugin stuff in page footer.
+		 *
+		 * @internal
+		 */
+		public function RenderFooter() {
+			wp_enqueue_script(
+				'wsal-common',
+				$this->GetBaseUrl() . '/js/common.js',
+				array( 'jquery' ),
+				filemtime( $this->GetBaseDir() . '/js/common.js' )
+			);
+		}
+
+		/**
+		 * Load the rest of the system.
+		 *
+		 * @internal
+		 */
+		public function Load() {
+			$options_table = new WSAL_Models_Option();
+			if ( ! $options_table->IsInstalled() ) {
+				$options_table->Install();
+				// Setting the prunig date with the old value or the default value.
+				$pruning_date = $this->settings->GetPruningDate();
+				$this->settings->SetPruningDate( $pruning_date );
+
+				$pruning_enabled = $this->settings->IsPruningLimitEnabled();
+				$this->settings->SetPruningLimitEnabled( $pruning_enabled );
+				// Setting the prunig limit with the old value or the default value.
+				$pruning_limit = $this->settings->GetPruningLimit();
+				$this->settings->SetPruningLimit( $pruning_limit );
+			}
+			$log_404 = $this->GetGlobalOption( 'log-404' );
+			// If old setting is empty enable 404 logging by default.
+			if ( false === $log_404 ) {
+				$this->SetGlobalOption( 'log-404', 'on' );
+			}
+
+			$purge_log_404 = $this->GetGlobalOption( 'purge-404-log' );
+			// If old setting is empty enable 404 purge log by default.
+			if ( false === $purge_log_404 ) {
+				$this->SetGlobalOption( 'purge-404-log', 'on' );
+			}
+			// Load translations.
+			load_plugin_textdomain( 'wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/' );
+
+			// Tell the world we've just finished loading.
+			$s = $this->profiler->Start( 'WSAL Init Hook' );
+			do_action( 'wsal_init', $this );
+			$s->Stop();
+
+			// Hide plugin.
+			if ( $this->settings->IsIncognito() ) {
+				add_action( 'admin_head', array( $this, 'HidePlugin' ) );
+			}
+
+			// Update routine.
+			$old_version = $this->GetOldVersion();
+			$new_version = $this->GetNewVersion();
+			if ( $old_version !== $new_version ) {
+				$this->Update( $old_version, $new_version );
+			}
+
+			// Generate index.php for uploads directory.
+			$this->settings->generate_index_files();
+		}
+
+		/**
+		 * Install all assets required for a useable system.
+		 */
+		public function Install() {
+			if ( version_compare( PHP_VERSION, self::MIN_PHP_VERSION ) < 0 ) {
+				?>
+				<html>
+					<head>
+						<link rel="stylesheet"
+							href="<?php echo esc_attr( $this->GetBaseUrl() . '/css/install-error.css?v=' . filemtime( $this->GetBaseDir() . '/css/install-error.css' ) ); ?>"
+							type="text/css" media="all"/>
+					</head>
+					<body>
+						<div class="warn-wrap">
+							<div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div>
+							<?php echo sprintf( esc_html__( 'You are using a version of PHP that is older than %s, which is no longer supported.', 'wp-security-audit-log' ), self::MIN_PHP_VERSION ); ?><br />
+							<?php echo wp_kses( __( 'Contact us on <a href="mailto:plugins@wpwhitesecurity.com">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using.', 'wp-security-audit-log' ), $this->allowed_html_tags ); ?>
+						</div>
+					</body>
+				</html>
+				<?php
+				die( 1 );
+			}
+
+			// Ensure that the system is installed and schema is correct.
+			self::getConnector()->installAll();
+
+			$pre_installed = $this->IsInstalled();
+
+			// If system already installed, do updates now (if any).
+			$old_version = $this->GetOldVersion();
+			$new_version = $this->GetNewVersion();
+
+			if ( $pre_installed && $old_version != $new_version ) {
+				$this->Update( $old_version, $new_version );
+			}
+
+			// Load options from wp_options table or wp_sitemeta in multisite enviroment.
+			$data = $this->read_options_prefixed( 'wsal-' );
+			if ( ! empty( $data ) ) {
+				$this->SetOptions( $data );
+			}
+			$this->deleteAllOptions();
+
+			// If system wasn't installed, try migration now.
+			if ( ! $pre_installed && $this->CanMigrate() ) {
+				$this->Migrate();
+			}
+
+			// Setting the prunig date with the old value or the default value.
+			$pruning_date = $this->settings->GetPruningDate();
+			$this->settings->SetPruningDate( $pruning_date );
+
+			// $pruning_enabled = $this->settings->IsPruningLimitEnabled();
+			$this->settings->SetPruningLimitEnabled( true );
+			// Setting the prunig limit with the old value or the default value.
+			$pruning_limit = $this->settings->GetPruningLimit();
+			$this->settings->SetPruningLimit( $pruning_limit );
+
+			$old_disabled = $this->GetGlobalOption( 'disabled-alerts' );
+			// If old setting is empty disable alert 2099 by default.
+			if ( empty( $old_disabled ) ) {
+				$this->settings->SetDisabledAlerts( array( 2099, 2126 ) );
+			}
+
+			$log_404 = $this->GetGlobalOption( 'log-404' );
+			// If old setting is empty enable 404 logging by default.
+			if ( false === $log_404 ) {
+				$this->SetGlobalOption( 'log-404', 'on' );
+			}
+
+			$purge_log_404 = $this->GetGlobalOption( 'purge-404-log' );
+			// If old setting is empty enable 404 purge log by default.
+			if ( false === $purge_log_404 ) {
+				$this->SetGlobalOption( 'purge-404-log', 'on' );
+			}
+
+			// Install cleanup hook (remove older one if it exists).
+			wp_clear_scheduled_hook( 'wsal_cleanup' );
+			wp_schedule_event( current_time( 'timestamp' ) + 600, 'hourly', 'wsal_cleanup' );
+
+			if ( wsal_freemius()->is__premium_only() ) {
+				// Call to user sessions management activation hook function.
+				if ( wsal_freemius()->is_premium() && wsal_freemius()->is_registered() && wsal_freemius()->can_use_premium_code() ) {
+					$this->extensions->activate_sessions_management();
+				}
+			}
+		}
+
+		/**
+		 * Run some code that updates critical components required for a newwer version.
+		 *
+		 * @param string $old_version The old version.
+		 * @param string $new_version The new version.
+		 */
+		public function Update( $old_version, $new_version ) {
+			// Update version in db.
+			$this->SetGlobalOption( 'version', $new_version );
+
+			// Disable all developer options.
+			// $this->settings->ClearDevOptions();
+			// Do version-to-version specific changes.
+			if ( -1 === version_compare( $old_version, $new_version ) ) {
+				// Update External DB password on plugin update.
+				$this->update_external_db_password();
+
+				// Update pruning alerts option.
+				$this->settings->SetPruningDate( '12 months' );
+			}
+		}
+
+		/**
+		 * Method: Update external DB password.
+		 *
+		 * @since 2.6.3
+		 */
+		public function update_external_db_password() {
+			// Get the passwords.
+			$external_password  = $this->settings->GetAdapterConfig( 'adapter-password' );
+			$mirror_password    = $this->settings->GetAdapterConfig( 'mirror-password' );
+			$archive_password   = $this->settings->GetAdapterConfig( 'archive-password' );
+
+			// Update external db password.
+			if ( ! empty( $external_password ) ) {
+				// Decrypt the password using fallback method.
+				$password   = $this->getConnector()->decryptString_fallback( $external_password );
+
+				// Encrypt the password with latest encryption method.
+				$encrypted_password   = $this->getConnector()->encryptString( $password );
+
+				// Store the new password.
+				$this->settings->SetAdapterConfig( 'adapter-password', $encrypted_password );
+			}
+
+			// Update mirror db password.
+			if ( ! empty( $mirror_password ) ) {
+				// Decrypt the password using fallback method.
+				$password   = $this->getConnector()->decryptString_fallback( $mirror_password );
+
+				// Encrypt the password with latest encryption method.
+				$encrypted_password   = $this->getConnector()->encryptString( $password );
+
+				// Store the new password.
+				$this->settings->SetAdapterConfig( 'mirror-password', $encrypted_password );
+			}
+
+			// Update archive db password.
+			if ( ! empty( $archive_password ) ) {
+				// Decrypt the password using fallback method.
+				$password   = $this->getConnector()->decryptString_fallback( $archive_password );
+
+				// Encrypt the password with latest encryption method.
+				$encrypted_password   = $this->getConnector()->encryptString( $password );
+
+				// Store the new password.
+				$this->settings->SetAdapterConfig( 'archive-password', $encrypted_password );
+			}
+		}
+
+		/**
+		 * Method: Freemius method to run after uninstall event.
+		 *
+		 * @since 2.7.0
+		 */
+		public function wsal_freemius_uninstall_cleanup() {
+			// Call the uninstall routine of the plugin.
+			$this->Uninstall();
+		}
+
+		/**
+		 * Uninstall plugin.
+		 */
+		public function Uninstall() {
+			if ( $this->GetGlobalOption( 'delete-data' ) == 1 ) {
+				self::getConnector()->uninstallAll();
+				$this->deleteAllOptions();
+			}
+			wp_clear_scheduled_hook( 'wsal_cleanup' );
+		}
+
+		/**
+		 * Delete from the options table of WP.
+		 *
+		 * @param string $prefix - Table prefix.
+		 * @return boolean - Query result.
+		 */
+		public function delete_options_prefixed( $prefix ) {
+			global $wpdb;
+			if ( $this->IsMultisite() ) {
+				$table_name = $wpdb->prefix . 'sitemeta';
+				$result = $wpdb->query( "DELETE FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'" );
+			} else {
+				$result = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'" );
+			}
+			return ($result) ? true : false;
+		}
+
+		/**
+		 * Delete all the Wsal options from the options table of WP.
+		 */
+		private function deleteAllOptions() {
+			$flag = true;
+			while ( $flag ) {
+				$flag = $this->delete_options_prefixed( self::OPT_PRFX );
+			}
+		}
+
+		/**
+		 * Read options from the options table of WP.
+		 *
+		 * @param string $prefix - Table prefix.
+		 * @return boolean - Query result.
+		 */
+		public function read_options_prefixed( $prefix ) {
+			global $wpdb;
+			if ( $this->IsMultisite() ) {
+				$table_name = $wpdb->prefix . 'sitemeta';
+				$results = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
+			} else {
+				$results = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
+			}
+			return $results;
+		}
+
+		/**
+		 * Set options in the Wsal options table.
+		 *
+		 * @param array $data - Table prefix.
+		 */
+		public function SetOptions( $data ) {
+			foreach ( $data as $key => $option ) {
+				$this->options = new WSAL_Models_Option();
+				if ( $this->IsMultisite() ) {
+					$this->options->SetOptionValue( $option['meta_key'], $option['meta_value'] );
+				} else {
+					$this->options->SetOptionValue( $option['option_name'], $option['option_value'] );
+				}
+			}
+		}
+
+		/**
+		 * Migrate data from old plugin.
+		 */
+		public function Migrate() {
+			global $wpdb;
+			static $mig_types = array(
+				3000 => 5006,
+			);
+
+			// Load data.
+			$sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog_events';
+			$events = array();
+			foreach ( $wpdb->get_results( $sql, ARRAY_A ) as $item ) {
+				$events[ $item['EventID'] ] = $item;
+			}
+			$sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog';
+			$auditlog = $wpdb->get_results( $sql, ARRAY_A );
+
+			// Migrate using db logger.
+			foreach ( $auditlog as $entry ) {
+				$data = array(
+					'ClientIP' => $entry['UserIP'],
+					'UserAgent' => '',
+					'CurrentUserID' => $entry['UserID'],
+				);
+				if ( $entry['UserName'] ) {
+					$data['Username'] = base64_decode( $entry['UserName'] );
+				}
+				$mesg = $events[ $entry['EventID'] ]['EventDescription'];
+				$date = strtotime( $entry['EventDate'] );
+				$type = $entry['EventID'];
+				if ( isset( $mig_types[ $type ] ) ) {
+					$type = $mig_types[ $type ];
+				}
+				// Convert message from '<strong>%s</strong>' to '%Arg1%' format.
+				$c = 0;
+				$n = '<strong>%s</strong>';
+				$l = strlen( $n );
+				while ( ($pos = strpos( $mesg, $n )) !== false ) {
+					$mesg = substr_replace( $mesg, '%MigratedArg' . ($c++) . '%', $pos, $l );
+				}
+				$data['MigratedMesg'] = $mesg;
+				// Generate new meta data args.
+				$temp = unserialize( base64_decode( $entry['EventData'] ) );
+				foreach ( (array) $temp as $i => $item ) {
+					$data[ 'MigratedArg' . $i ] = $item;
+				}
+				// send event data to logger!
+				foreach ( $this->alerts->GetLoggers() as $logger ) {
+					$logger->Log( $type, $data, $date, $entry['BlogId'], true );
+				}
+			}
+
+			// Migrate settings.
+			$this->settings->SetAllowedPluginEditors(
+				get_option( 'WPPH_PLUGIN_ALLOW_CHANGE' )
+			);
+			$this->settings->SetAllowedPluginViewers(
+				get_option( 'WPPH_PLUGIN_ALLOW_ACCESS' )
+			);
+			$s = get_option( 'wpph_plugin_settings' );
+			// $this->settings->SetPruningDate(($s->daysToKeep ? $s->daysToKeep : 30) . ' days');
+			// $this->settings->SetPruningLimit(min($s->eventsToKeep, 1));
+			$this->settings->SetViewPerPage( max( $s->showEventsViewList, 5 ) );
+			$this->settings->SetWidgetsEnabled( ! ! $s->showDW );
+		}
+
+		/**
+		 * The current plugin version (according to plugin file metadata).
+		 *
+		 * @return string
+		 */
+		public function GetNewVersion() {
+			$version = get_plugin_data( __FILE__, false, false );
+			return isset( $version['Version'] ) ? $version['Version'] : '0.0.0';
+		}
+
+		/**
+		 * The plugin version as stored in DB (will be the old version during an update/install).
+		 *
+		 * @return string
+		 */
+		public function GetOldVersion() {
+			return $this->GetGlobalOption( 'version', '0.0.0' );
+		}
+
+		/**
+		 * To be called in admin header for hiding plugin form Plugins list.
+		 *
+		 * @internal
+		 */
+		public function HidePlugin() {
+			$selectr = '';
+			$plugins = array( 'wp-security-audit-log' );
+			foreach ( $plugins as $value ) {
+				$selectr .= '.wp-list-table.plugins tr[data-slug="' . $value . '"], ';
+			}
+			?>
+			<style type="text/css">
+				<?php echo rtrim( $selectr, ', ' ); ?> { display: none; }
+			</style>
+			<?php
+		}
+
+		/**
+		 * Returns the class name of a particular file that contains the class.
+		 *
+		 * @param string $file - File name.
+		 * @return string - Class name.
+		 * @deprecated since 1.2.5 Use autoloader->GetClassFileClassName() instead.
+		 */
+		public function GetClassFileClassName( $file ) {
+			return $this->autoloader->GetClassFileClassName( $file );
+		}
+
+		/**
+		 * Return whether we are running on multisite or not.
+		 *
+		 * @return boolean
+		 */
+		public function IsMultisite() {
+			return function_exists( 'is_multisite' ) && is_multisite();
+		}
+
+		/**
+		 * Get a global option.
+		 *
+		 * @param string $option - Option name.
+		 * @param mixed  $default - (Optional) Value returned when option is not set (defaults to false).
+		 * @param string $prefix - (Optional) A prefix used before option name.
+		 * @return mixed - Option's value or $default if option not set.
+		 */
+		public function GetGlobalOption( $option, $default = false, $prefix = self::OPT_PRFX ) {
+			$this->options = new WSAL_Models_Option();
+			return $this->options->GetOptionValue( $prefix . $option, $default );
+		}
+
+		/**
+		 * Set a global option.
+		 *
+		 * @param string $option - Option name.
+		 * @param mixed  $value - New value for option.
+		 * @param string $prefix - (Optional) A prefix used before option name.
+		 */
+		public function SetGlobalOption( $option, $value, $prefix = self::OPT_PRFX ) {
+			$this->options = new WSAL_Models_Option();
+			$this->options->SetOptionValue( $prefix . $option, $value );
+		}
+
+		/**
+		 * Get a user-specific option.
+		 *
+		 * @param string $option - Option name.
+		 * @param mixed  $default - (Optional) Value returned when option is not set (defaults to false).
+		 * @param string $prefix - (Optional) A prefix used before option name.
+		 * @return mixed - Option's value or $default if option not set.
+		 */
+		public function GetUserOption( $option, $default = false, $prefix = self::OPT_PRFX ) {
+			$result = get_user_option( $prefix . $option, get_current_user_id() );
+			return false === $result ? $default : $result;
+		}
+
+		/**
+		 * Set a user-specific option.
+		 *
+		 * @param string $option - Option name.
+		 * @param mixed  $value - New value for option.
+		 * @param string $prefix - (Optional) A prefix used before option name.
+		 */
+		public function SetUserOption( $option, $value, $prefix = self::OPT_PRFX ) {
+			update_user_option( get_current_user_id(), $prefix . $option, $value, false );
+		}
+
+		/**
+		 * Run cleanup routines.
+		 */
+		public function CleanUp() {
+			$s = $this->profiler->Start( 'Clean Up' );
+			foreach ( $this->_cleanup_hooks as $hook ) {
+				call_user_func( $hook );
+			}
+			$s->Stop();
+		}
+
+		/**
+		 * Clear last day's failed login alert.
+		 */
+		public function delete_failed_logins() {
+			// Set the dates.
+			list( $y, $m, $d ) = explode( '-', date( 'Y-m-d' ) );
+
+			// Site id.
+			$site_id = (function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0);
+
+			// New occurrence object.
+			$occurrence = new WSAL_Models_Occurrence();
+			$alerts = $occurrence->check_alert_1003(
+				array(
+					1003,
+					$site_id,
+					mktime( 0, 0, 0, $m, $d - 1, $y ) + 1,
+					mktime( 0, 0, 0, $m, $d, $y ),
+				)
+			);
+
+			// Alerts exists then continue.
+			if ( ! empty( $alerts ) ) {
+				foreach ( $alerts as $alert ) {
+					// Flush the usernames meta data.
+					$alert->UpdateMetaValue( 'Users', array() );
+				}
+			}
+		}
+
+		/**
+		 * Add callback to be called when a cleanup operation is required.
+		 *
+		 * @param callable $hook - Hook name.
+		 */
+		public function AddCleanupHook( $hook ) {
+			$this->_cleanup_hooks[] = $hook;
+		}
+
+		/**
+		 * Remove a callback from the cleanup callbacks list.
+		 *
+		 * @param callable $hook - Hook name.
+		 */
+		public function RemoveCleanupHook( $hook ) {
+			while ( ($pos = array_search( $hook, $this->_cleanup_hooks )) !== false ) {
+				unset( $this->_cleanup_hooks[ $pos ] );
+			}
+		}
+
+		/**
+		 * DB connection.
+		 *
+		 * @param mixed $config DB configuration.
+		 * @param bool  $reset - True if reset.
+		 * @return WSAL_Connector_ConnectorInterface
+		 */
+		public static function getConnector( $config = null, $reset = false ) {
+			return WSAL_Connector_ConnectorFactory::getConnector( $config, $reset );
+		}
+
+		/**
+		 * Do we have an existing installation? This only applies for version 1.0 onwards.
+		 *
+		 * @return boolean
+		 */
+		public function IsInstalled() {
+			return self::getConnector()->isInstalled();
+		}
+
+		/**
+		 * Whether the old plugin was present or not.
+		 *
+		 * @return boolean
+		 */
+		public function CanMigrate() {
+			return self::getConnector()->canMigrate();
+		}
+
+		/**
+		 * Absolute URL to plugin directory WITHOUT final slash.
+		 *
+		 * @return string
+		 */
+		public function GetBaseUrl() {
+			return plugins_url( '', __FILE__ );
+		}
+
+		/**
+		 * Full path to plugin directory WITH final slash.
+		 *
+		 * @return string
+		 */
+		public function GetBaseDir() {
+			return plugin_dir_path( __FILE__ );
+		}
+
+		/**
+		 * Plugin directory name.
+		 *
+		 * @return string
+		 */
+		public function GetBaseName() {
+			return plugin_basename( __FILE__ );
+		}
+
+		/**
+		 * Load default configuration / data.
+		 */
+		public function LoadDefaults() {
+			$s = $this->profiler->Start( 'Load Defaults' );
+			require_once( 'defaults.php' );
+			$s->Stop();
+		}
+
+		/**
+		 * WSAL-Notifications-Extension Functions.
+		 *
+		 * @param string $opt_prefix - Option prefix.
+		 */
+		public function GetNotificationsSetting( $opt_prefix ) {
+			$this->options = new WSAL_Models_Option();
+			return $this->options->GetNotificationsSetting( self::OPT_PRFX . $opt_prefix );
+		}
+
+		/**
+		 * Get notification.
+		 *
+		 * @param int $id - Option ID.
+		 */
+		public function GetNotification( $id ) {
+			$this->options = new WSAL_Models_Option();
+			return $this->options->GetNotification( $id );
+		}
+
+		/**
+		 * Delete option by name.
+		 *
+		 * @param string $name - Option name.
+		 */
+		public function DeleteByName( $name ) {
+			$this->options = new WSAL_Models_Option();
+			return $this->options->DeleteByName( $name );
+		}
+
+		/**
+		 * Delete option by prefix.
+		 *
+		 * @param string $opt_prefix - Option prefix.
+		 */
+		public function DeleteByPrefix( $opt_prefix ) {
+			$this->options = new WSAL_Models_Option();
+			return $this->options->DeleteByPrefix( self::OPT_PRFX . $opt_prefix );
+		}
+
+		/**
+		 * Count notifications.
+		 *
+		 * @param string $opt_prefix - Option prefix.
+		 */
+		public function CountNotifications( $opt_prefix ) {
+			$this->options = new WSAL_Models_Option();
+			return $this->options->CountNotifications( self::OPT_PRFX . $opt_prefix );
+		}
+
+		/**
+		 * Update global option.
+		 *
+		 * @param string $option - Option name.
+		 * @param mix    $value - Option value.
+		 */
+		public function UpdateGlobalOption( $option, $value ) {
+			$this->options = new WSAL_Models_Option();
+			return $this->options->SetOptionValue( $option, $value );
+		}
+
+		/**
+		 * Method: Render login page message.
+		 *
+		 * @param string $message - Login message.
+		 */
+		public function render_login_page_message( $message ) {
+			// Check if the option is enabled.
+			$login_message_enabled = $this->settings->is_login_page_notification();
+			if ( 'true' === $login_message_enabled
+				|| ( ! $login_message_enabled && 'false' !== $login_message_enabled ) ) {
+				// Get login message.
+				$message = $this->settings->get_login_page_notification_text();
+
+				// Default message.
+				if ( ! $message ) {
+					$message = wp_kses( __( '<p class="message">For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/" target="_blank">WP Security Audit Log plugin</a>. The audit log also includes the IP address where you accessed this site from.</p>', 'wp-security-audit-log' ), $this->allowed_html_tags );
+				} else {
+					$message = '<p class="message">' . $message . '</p>';
+				}
+			}
+
+			// Return message.
+			return $message;
+		}
+
+		/**
+		 * Error Logger
+		 *
+		 * Logs given input into debug.log file in debug mode.
+		 *
+		 * @param mix $message - Error message.
+		 */
+		function wsal_log( $message ) {
+			if ( WP_DEBUG === true ) {
+				if ( is_array( $message ) || is_object( $message ) ) {
+					error_log( print_r( $message, true ) );
+				} else {
+					error_log( $message );
+				}
+			}
+		}
+	}
+
+	// Profile WSAL load time.
+	$s = WpSecurityAuditLog::GetInstance()->profiler->Start( 'WSAL Init' );
+
+	// Begin load sequence.
+	add_action( 'plugins_loaded', array( WpSecurityAuditLog::GetInstance(), 'Load' ) );
+
+	// Load extra files.
+	WpSecurityAuditLog::GetInstance()->LoadDefaults();
+
+	// End profile snapshot.
+	$s->Stop();
+
+	// Create & Run the plugin.
+	return WpSecurityAuditLog::GetInstance();
+
+}
