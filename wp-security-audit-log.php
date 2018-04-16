@@ -228,11 +228,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Register freemius uninstall event.
 			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
 
-			// Include premium extensions through freemius.
-			if ( wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
-				$this->include_extensions__premium_only();
-			}
-
 			// Add filters to customize freemius welcome message.
 			wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
 			wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
@@ -290,25 +285,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
 				define( 'WSAL_ISSUE_URL', 'https://wordpress.org/support/plugin/wp-security-audit-log' );
 			}
-		}
-
-		/**
-		 * Method: Include extensions for premium version.
-		 *
-		 * @since 2.7.0
-		 */
-		public function include_extensions__premium_only() {
-			/**
-			 * Class for extensions managment.
-			 *
-			 * @since 2.7.0
-			 */
-			if ( file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
-				require_once( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' );
-			}
-
-			// Initiate the extensions manager.
-			$this->extensions = new WSAL_Extension_Manager( $this );
 		}
 
 		/**
@@ -616,13 +592,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Install cleanup hook (remove older one if it exists).
 			wp_clear_scheduled_hook( 'wsal_cleanup' );
 			wp_schedule_event( current_time( 'timestamp' ) + 600, 'hourly', 'wsal_cleanup' );
-
-			if ( wsal_freemius()->is__premium_only() ) {
-				// Call to user sessions management activation hook function.
-				if ( wsal_freemius()->is_premium() && wsal_freemius()->is_registered() && wsal_freemius()->can_use_premium_code() ) {
-					$this->extensions->activate_sessions_management();
-				}
-			}
 		}
 
 		/**
