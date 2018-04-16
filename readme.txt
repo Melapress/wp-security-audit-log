@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.9.4
-Stable tag: 3.1.4
+Stable tag: 3.1.6
 Requires PHP: 5.3
 
 An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
@@ -179,12 +179,9 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.1.4(2018-03-23) =
+= 3.1.6(2018-04-16) =
 
-* **Improvements**
-	* Reintroduced the functionality to download 404 error log files from activity log.
-
-* **Bug Fix**
-	* Freemius addressed mutliple issues in SDK for WordPress multisite (updated SDK)
+* **Bug fix**
+	* Fixed an issue in the Freemius SDK - mutisite opt-in was not working.
 
 Refer to the [WP Security Audit Log change log](https://www.wpsecurityauditlog.com/plugin-change-log/) page for the complete change log.
