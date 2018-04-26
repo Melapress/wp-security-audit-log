@@ -304,7 +304,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		// Global variable which returns current page.
 		global $pagenow;
 
-		if ( 'page.php' === $pagenow && $this->CheckWooCommerce( $oldpost ) && is_admin() ) {
+		if ( 'post.php' === $pagenow && $this->CheckWooCommerce( $oldpost ) && is_admin() ) {
 			$changes = 0 + $this->EventCreation( $oldpost, $newpost );
 			if ( ! $changes ) {
 				// Change Categories.
