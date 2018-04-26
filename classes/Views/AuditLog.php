@@ -110,6 +110,20 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				<?php
 			}
 		}
+
+		// Get DB connector.
+		$db_config  = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
+		$wsal_db  = $this->_plugin->getConnector( $db_config )->getConnection(); // Get DB connection.
+		$connection = 0 !== (int) $wsal_db->dbh->errno ? false : true; // Database connection error check.
+
+		// Add connectivity notice.
+		if ( ! $connection ) {
+			?>
+			<div class="notice notice-error">
+				<p><?php esc_html_e( 'There are connectivity issues with the database where the WordPress activity log is stored. The logs will be temporary buffered in the WordPress database until the connection is fully restored.', 'wp-security-audit-log' ); ?></p>
+			</div>
+			<?php
+		}
 	}
 
 	/**
@@ -260,18 +274,19 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 		$occ = new WSAL_Models_Occurrence();
 		$occ->Load( 'id = %d', array( (int) $get_array['occurrence'] ) );
+		$alert_meta = $occ->GetMetaArray();
+		unset( $alert_meta['ReportText'] );
+
+		// Set WSAL_Ref class scripts and styles.
+		WSAL_Ref::config( 'stylePath', esc_url( $this->_plugin->GetBaseDir() ) . '/css/wsal-ref.css' );
+		WSAL_Ref::config( 'scriptPath', esc_url( $this->_plugin->GetBaseDir() ) . '/js/wsal-ref.js' );
 
 		echo '<!DOCTYPE html><html><head>';
-		echo '<link rel="stylesheet" id="open-sans-css" href="' . esc_url( $this->_plugin->GetBaseUrl() ) . '/css/nice_r.css" type="text/css" media="all">';
-		echo '<script type="text/javascript" src="' . esc_url( $this->_plugin->GetBaseUrl() ) . '/js/nice_r.js"></script>';
 		echo '<style type="text/css">';
 		echo 'html, body { margin: 0; padding: 0; }';
-		echo '.nice_r { position: absolute; padding: 8px; }';
-		echo '.nice_r a { overflow: visible; }';
 		echo '</style>';
 		echo '</head><body>';
-		$nicer = new WSAL_Nicer( $occ->GetMetaArray() );
-		$nicer->render();
+		wsal_r( $alert_meta );
 		echo '</body></html>';
 		die;
 	}
@@ -287,13 +302,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST );
 
+		// If log count is not set then return error.
 		if ( ! isset( $post_array['logcount'] ) ) {
 			die( 'Log count parameter expected.' );
 		}
 
+		// Total number of alerts.
 		$old = (int) $post_array['logcount'];
-		$max = 40; // 40*500msec = 20sec
 
+		// Check if the user is viewing archived db.
 		$is_archive = false;
 		if ( $this->_plugin->settings->IsArchivingEnabled() ) {
 			$selected_db = get_transient( 'wsal_wp_selected_db' );
@@ -302,16 +319,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			}
 		}
 
-		do {
-			$occ = new WSAL_Models_Occurrence();
-			$new = $occ->Count();
-			usleep( 500000 ); // 500msec
-		} while ( ($old == $new) && (--$max > 0) );
+		// Check for new total number of alerts.
+		$occ = new WSAL_Models_Occurrence();
+		$new = (int) $occ->Count();
 
+		// If the current view is archive then don't refresh.
 		if ( $is_archive ) {
 			echo 'false';
 		} else {
-			echo $old == $new ? 'false' : esc_html( $new );
+			// If the count is changed, then return the new count.
+			echo $old === $new ? 'false' : esc_html( $new );
 		}
 		die;
 	}

@@ -39,6 +39,16 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	protected $_gmt_offset_sec = 0;
 
 	/**
+	 * Current Alert ID
+	 *
+	 * This class member is used to store the alert ID
+	 * of the alert which is being rendered.
+	 *
+	 * @var integer
+	 */
+	private $current_alert_id = 0;
+
+	/**
 	 * Method: Constructor.
 	 *
 	 * @param object $plugin - Instance of WpSecurityAuditLog.
@@ -235,9 +245,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				}
 			}
 		}
-		if ( $this->_plugin->settings->IsDataInspectorEnabled() ) {
-			$cols['data'] = '';
-		}
+		$cols['data'] = '';
 		return $cols;
 	}
 
@@ -276,6 +284,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	public function column_default( $item, $column_name ) {
 		// Get date format.
 		$datetime_format = $this->_plugin->settings->GetDatetimeFormat();
+
+		// Store current alert id.
+		$this->current_alert_id = $item->id;
 
 		switch ( $column_name ) {
 			case 'read':
@@ -436,7 +447,8 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return '<div id="Event' . $item->id . '">' . $item->GetMessage( array( $this, 'meta_formatter' ) ) . '</div>';
 			case 'data':
 				$url = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $item->id;
-				return '<a class="more-info thickbox" title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
+				$tooltip = esc_attr__( 'View all details of this change', 'wp-security-audit-log' );
+				return '<a class="more-info thickbox" data-tooltip="' . $tooltip . '" title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
 					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
 			default:
 				return isset( $item->$column_name )
@@ -505,22 +517,22 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				}
 
 			case '%EditorLinkPost%' == $name:
-				return ' <a target="_blank" href="' . esc_url( $value ) . '">View the post</a>';
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">post</a>';
 
 			case '%EditorLinkPage%' == $name:
-				return ' <a target="_blank" href="' . esc_url( $value ) . '">View the page</a>';
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">page</a>';
 
 			case '%CategoryLink%' == $name:
-				return ' <a target="_blank" href="' . esc_url( $value ) . '">View the category</a>';
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">category</a>';
 
 			case '%TagLink%' == $name:
-				return ' <a target="_blank" href="' . esc_url( $value ) . '">View the tag</a>';
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">tag</a>';
 
 			case '%EditorLinkForum%' == $name:
-				return ' <a target="_blank" href="' . esc_url( $value ) . '">View the forum</a>';
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">forum</a>';
 
 			case '%EditorLinkTopic%' == $name:
-				return ' <a target="_blank" href="' . esc_url( $value ) . '">View the topic</a>';
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">topic</a>';
 
 			case in_array( $name, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ) ):
 				return '<strong>' . (
@@ -576,6 +588,14 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					return;
 				}
 				return;
+
+			case '%ReportText%' === $name:
+				return;
+
+			case '%ChangeText%' === $name:
+				$url = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $this->current_alert_id;
+				return ' View the changes in <a class="thickbox"  title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
+				. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">data inspector.</a>';
 
 			default:
 				return '<strong>' . esc_html( $value ) . '</strong>';

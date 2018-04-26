@@ -45,8 +45,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		add_action( 'delete_user', array( $this, 'EventUserDeleted' ) );
 		add_action( 'wpmu_delete_user', array( $this, 'EventUserDeleted' ) );
 		add_action( 'set_user_role', array( $this, 'EventUserRoleChanged' ), 10, 3 );
-
 		add_action( 'edit_user_profile', array( $this, 'EventOpenProfile' ), 10, 1 );
+		add_action( 'profile_update', array( $this, 'event_email_changed' ), 10, 2 );
 	}
 
 	/**
@@ -299,5 +299,35 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				|| $mgr->WillOrHasTriggered( 4000 )
 				|| $mgr->WillOrHasTriggered( 4001 )
 			);
+	}
+
+	/**
+	 * Method: Support for Ultimate Member email change
+	 * alert.
+	 *
+	 * @param int     $user_id      - User ID.
+	 * @param WP_User $old_userdata - Old WP_User object.
+	 */
+	public function event_email_changed( $user_id, $old_userdata ) {
+		// Get $_POST global array.
+		$post_array = filter_input_array( INPUT_POST );
+
+		if ( isset( $post_array['_um_account_tab'] ) // Check for UM tab.
+			&& 'general' === $post_array['_um_account_tab'] // Verify `General` UM tab.
+			&& ! empty( $post_array['user_email'] ) ) { // Check if user email is set.
+			$old_email = $old_userdata->user_email; // Old email.
+			$new_email = trim( $post_array['user_email'] ); // New email.
+			if ( $old_email !== $new_email ) { // If both emails don't match then log alert.
+				$event = get_current_user_id() === $user_id ? 4005 : 4006;
+				$this->plugin->alerts->Trigger(
+					$event, array(
+						'TargetUserID'   => $user_id,
+						'TargetUsername' => $old_userdata->user_login,
+						'OldEmail'       => $old_email,
+						'NewEmail'       => $new_email,
+					)
+				);
+			}
+		}
 	}
 }

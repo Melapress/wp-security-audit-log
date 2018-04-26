@@ -235,6 +235,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 					'OldSEOTitle' => $old_title,
 					'NewSEOTitle' => $title,
 					$editor_link['name'] => $editor_link['value'],
+					'ReportText' => $old_title . '|' . $title,
 				)
 			);
 		}
@@ -268,6 +269,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 					'old_desc' => $old_desc,
 					'new_desc' => $desc,
 					$editor_link['name'] => $editor_link['value'],
+					'ReportText' => $old_desc . '|' . $desc,
 				)
 			);
 		}
@@ -412,6 +414,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 					'OldCanonicalUrl' => $old_url,
 					'NewCanonicalUrl' => $canonical_url,
 					$editor_link['name'] => $editor_link['value'],
+					'ReportText' => $old_url . '|' . $canonical_url,
 				)
 			);
 		}
@@ -650,10 +653,12 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 
 			case 'title-home-wpseo':
 				$alert_code = 8810;
+				$alert_args['ReportText'] = $old_value . '|' . $new_value;
 				break;
 
 			case 'metadesc-home-wpseo':
 				$alert_code = 8811;
+				$alert_args['ReportText'] = $old_value . '|' . $new_value;
 				break;
 
 			case 'company_or_person':
