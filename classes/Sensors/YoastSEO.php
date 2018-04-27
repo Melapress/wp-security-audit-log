@@ -419,7 +419,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 					'OldCanonicalUrl' => $old_url,
 					'NewCanonicalUrl' => $canonical_url,
 					$editor_link['name'] => $editor_link['value'],
-					'ReportText' => $old_url . '|' . $canonical_url,
+					'ReportText' => '"' . $old_url . '"|"' . $canonical_url . '"',
 				)
 			);
 		}

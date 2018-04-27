@@ -913,7 +913,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'OldUrl' => $old_link,
 					'NewUrl' => $new_link,
 					$editor_link['name'] => $editor_link['value'],
-					'ReportText' => $old_link . '|' . $new_link,
+					'ReportText' => '"' . $old_link . '"|"' . $new_link . '"',
 				)
 			);
 			return 1;
