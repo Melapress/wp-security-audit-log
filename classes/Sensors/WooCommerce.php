@@ -163,16 +163,47 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @param WC_Product $product - WooCommerce product object.
 	 */
 	public function product_stock_changed( $product ) {
-		// Return if current screen is admin panel.
-		if ( is_admin() ) {
+		// Get product id.
+		$product_id = $product->get_id();
+
+		// Return if current screen is edit post page.
+		global $pagenow;
+		if ( is_admin() && 'post.php' === $pagenow ) {
 			return;
 		}
 
-		$old_stock  = $this->_old_stock; // Get old stock quantity.
-		$new_stock  = $product->get_stock_quantity(); // Get new stock quantity.
-		$old_stock_status = $this->_old_stock_status; // Get old stock status.
+		// Get global $_POST array.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Special conditions for WooCommerce Bulk Stock Management.
+		if ( 'edit.php' === $pagenow
+		&& isset( $post_array['page'] )
+		&& 'woocommerce-bulk-stock-management' === $post_array['page'] ) {
+			$old_acc_stock = isset( $post_array['current_stock_quantity'] ) ? $post_array['current_stock_quantity'] : false;
+			$new_acc_stock = isset( $post_array['stock_quantity'] ) ? $post_array['stock_quantity'] : false;
+
+			// Get old stock quantity.
+			$old_stock = ! empty( $this->_old_stock ) ? $this->_old_stock : $old_acc_stock[ $product_id ];
+
+			// Following cases handle the stock status.
+			if ( '0' === $old_acc_stock[ $product_id ] && '0' !== $new_acc_stock[ $product_id ] ) {
+				$old_stock_status = 'outofstock';
+			} elseif ( '0' !== $old_acc_stock[ $product_id ] && '0' === $new_acc_stock[ $product_id ] ) {
+				$old_stock_status = 'instock';
+			} elseif ( '0' === $old_acc_stock[ $product_id ] && '0' === $new_acc_stock[ $product_id ] ) {
+				$old_stock_status = 'outofstock';
+			} elseif ( '0' !== $old_acc_stock[ $product_id ] && '0' !== $new_acc_stock[ $product_id ] ) {
+				$old_stock_status = 'instock';
+			} else {
+				$old_stock_status = '';
+			}
+		} else {
+			$old_stock = $this->_old_stock; // Get old stock quantity.
+			$old_stock_status = $this->_old_stock_status; // Get old stock status.
+		}
+
+		$new_stock = $product->get_stock_quantity(); // Get new stock quantity.
 		$new_stock_status = $product->get_stock_status(); // Get new stock status.
-		$product_id = $product->get_id(); // Get product id.
 		$product_title = $product->get_title(); // Get product title.
 
 		// Set post object.
@@ -270,7 +301,10 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @param stdClass $oldpost - The old post.
 	 */
 	public function EventChanged( $post_id, $newpost, $oldpost ) {
-		if ( $this->CheckWooCommerce( $oldpost ) && is_admin() ) {
+		// Global variable which returns current page.
+		global $pagenow;
+
+		if ( 'post.php' === $pagenow && $this->CheckWooCommerce( $oldpost ) && is_admin() ) {
 			$changes = 0 + $this->EventCreation( $oldpost, $newpost );
 			if ( ! $changes ) {
 				// Change Categories.
@@ -430,6 +464,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9004, array(
 					'ProductTitle' => $oldpost->post_title,
+					'OldDescription' => $oldpost->post_excerpt,
+					'NewDescription' => $newpost->post_excerpt,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -479,6 +515,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					'OldUrl' => $old_link,
 					'NewUrl' => $new_link,
 					$editor_link['name'] => $editor_link['value'],
+					'ReportText' => '"' . $old_link . '"|"' . $new_link . '"',
 				)
 			);
 			return 1;

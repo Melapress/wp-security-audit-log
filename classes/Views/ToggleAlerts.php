@@ -160,6 +160,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								}
 							}
 
+							// Get tab id.
 							$tab_id = $this->GetSafeCatgName( $subname );
 
 							// Skip Pages and CPTs section.
@@ -178,6 +179,15 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								</thead>
 								<tbody>
 									<?php
+									if ( 'content' === $tab_id ) :
+										?>
+										<tr>
+											<td colspan="4">
+												<p class="wsal-tab-help description"><?php echo wp_kses( __( '<strong>Note:</strong> Post refers to any type of content, i.e. blog post, page or a post with a custom post type.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
+											</td>
+										</tr>
+										<?php
+									endif;
 									foreach ( $alerts as $alert ) {
 										if ( $alert->type <= 0006 ) {
 											continue; // <- Ignore php alerts.
@@ -337,6 +347,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			}
 			.wsal-tab td input[type=number] {
 				width: 100%;
+			}
+			.widefat td .wsal-tab-help {
+				margin: 0 8px;
 			}
 		</style>
 		<?php

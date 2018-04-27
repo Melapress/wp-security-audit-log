@@ -259,6 +259,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'MetaValueOld' => $this->old_meta[ $meta_id ]->val,
 							'MetaLink' => $meta_key,
 							$editor_link['name'] => $editor_link['value'],
+							'ReportText' => $this->old_meta[ $meta_id ]->val . '|' . $meta_value,
 						)
 					);
 				}
@@ -429,13 +430,17 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		// Filter $_POST global array for security.
 		$post_array = filter_input_array( INPUT_POST );
 
-		// Check nonce.
-		if ( isset( $post_array['_wpnonce'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update-user_' . $user->ID ) ) {
-			return false;
-		}
-
 		// If update action is set then trigger the alert.
-		if ( isset( $post_array['action'] ) && 'update' == $post_array['action'] ) {
+		if ( ( isset( $post_array['_wpnonce'] ) // WP Dashboard Support.
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-user_' . $user->ID )
+			&& isset( $post_array['action'] )
+			&& 'update' == $post_array['action'] )
+			||
+			( isset( $post_array['_um_account'] ) // Ultimate Member Plugin support.
+			&& '1' === $post_array['_um_account']
+			&& isset( $post_array['_um_account_tab'] )
+			&& 'general' === $post_array['_um_account_tab'] )
+			) {
 			if ( isset( $this->old_meta[ $meta_id ] ) && ! in_array( $meta_key, $username_meta, true ) ) {
 				// Check change in meta value.
 				if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
@@ -445,6 +450,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'custom_field_name' => $meta_key,
 							'new_value' => $meta_value,
 							'old_value' => $this->old_meta[ $meta_id ]->val,
+							'ReportText' => $this->old_meta[ $meta_id ]->val . '|' . $meta_value,
 						)
 					);
 				}

@@ -235,6 +235,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 					'OldSEOTitle' => $old_title,
 					'NewSEOTitle' => $title,
 					$editor_link['name'] => $editor_link['value'],
+					'ReportText' => $old_title . '|' . $title,
 				)
 			);
 		}
@@ -268,6 +269,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 					'old_desc' => $old_desc,
 					'new_desc' => $desc,
 					$editor_link['name'] => $editor_link['value'],
+					'ReportText' => $old_desc . '|' . $desc,
 				)
 			);
 		}
@@ -367,7 +369,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		$old_adv = $this->get_post_seo_data( 'meta-robots-adv' );
 
 		// If old and new values are empty then don't log the alert.
-		if ( empty( $old_title ) && '-' === $advanced ) {
+		if ( empty( $old_adv ) && ( empty( $advanced ) || '-' === $advanced ) ) {
 			return;
 		}
 
@@ -398,6 +400,11 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		// Get old title value.
 		$old_url = $this->get_post_seo_data( 'canonical' );
 
+		// Check to see if both change value are empty.
+		if ( empty( $old_url ) && empty( $canonical_url ) ) {
+			return; // Return if both are empty.
+		}
+
 		// If title is changed then log alert.
 		if ( $old_url !== $canonical_url ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
@@ -412,6 +419,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 					'OldCanonicalUrl' => $old_url,
 					'NewCanonicalUrl' => $canonical_url,
 					$editor_link['name'] => $editor_link['value'],
+					'ReportText' => '"' . $old_url . '"|"' . $canonical_url . '"',
 				)
 			);
 		}
@@ -650,10 +658,12 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 
 			case 'title-home-wpseo':
 				$alert_code = 8810;
+				$alert_args['ReportText'] = $old_value . '|' . $new_value;
 				break;
 
 			case 'metadesc-home-wpseo':
 				$alert_code = 8811;
+				$alert_args['ReportText'] = $old_value . '|' . $new_value;
 				break;
 
 			case 'company_or_person':
@@ -789,4 +799,3 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		}
 	}
 }
-

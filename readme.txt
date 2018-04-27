@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.9.4
-Stable tag: 3.1.6
+Stable tag: 3.1.7
 Requires PHP: 5.3
 
 An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
@@ -179,9 +179,24 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.1.6(2018-04-16) =
+= 3.1.7(2018-04-27) =
 
-* **Bug fix**
-	* Fixed an issue in the Freemius SDK - mutisite opt-in was not working.
+Release notes: [New Data Inspector and Buffer for External Database](https://www.wpsecurityauditlog.com/releases/3-1-7-new-data-inspector/)
+
+* **New Features**
+	* New [data inspector in the WordPress activity log viewer](https://www.wpsecurityauditlog.com/support-documentation/data-inspector-wordpress-activity-log/).
+	* Alerts buffer for when the [external WordPress activity log database](https://www.wpsecurityauditlog.com/support-documentation/getting-started-external-db/) is unavailable. The alerts are stored in the WordPress database and website operations are not affected.
+	* Option in External Database settings to use WordPress URL as database table prefix.
+
+* **Improvements**
+	* Alerts which contain long values are shortened in the viewer and logged in users list. User can view all details in the data inspector.
+	* Set the default setting for [blocking multiple WordPress users sessions](https://www.wpsecurityauditlog.com/support-documentation/managing-multiple-same-wordpress-user-sessions/#allow-override-terminate) to “do not allow override”.
+	* [WordPress login page notification](https://www.wpsecurityauditlog.com/support-documentation/change-disable-wordpress-login-page-notification/) is disabled by default.
+	* Converted the HTML [WordPress reports](https://www.wpsecurityauditlog.com/support-documentation/getting-started-reports-wordpress/) to responsive.
+	* Better support for changes users do via the Ultimate Member Pro plugin.
+
+* **Bug Fixes**
+	* Plugin now records automated WooCommerce product stock changes done by plugins such as Bulk Stock Management
+	* Fixed a [reported performance issue](https://wordpress.org/support/topic/plugin-hangs-application-solved/). Now plugin audit log refreshes every 30 seconds.
 
 Refer to the [WP Security Audit Log change log](https://www.wpsecurityauditlog.com/plugin-change-log/) page for the complete change log.

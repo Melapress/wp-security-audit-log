@@ -226,6 +226,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'TagLink' => $term_link,
 					'old_desc' => $old_desc,
 					'new_desc' => $new_desc,
+					'ReportText' => $old_desc . '|' . $new_desc,
 				)
 			);
 		}
@@ -912,6 +913,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'OldUrl' => $old_link,
 					'NewUrl' => $new_link,
 					$editor_link['name'] => $editor_link['value'],
+					'ReportText' => '"' . $old_link . '"|"' . $new_link . '"',
 				)
 			);
 			return 1;

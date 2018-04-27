@@ -104,6 +104,8 @@ final class WSAL_AlertManager {
 	 * @param bool    $delayed - False if delayed, true if not.
 	 */
 	public function Trigger( $type, $data = array(), $delayed = false ) {
+		// Log temporary alerts first.
+		$this->log_temp_alerts();
 
 		// Get username.
 		$username = wp_get_current_user()->user_login;
@@ -528,5 +530,43 @@ final class WSAL_AlertManager {
 			$is_disabled = true;
 		}
 		return $is_disabled;
+	}
+
+	/**
+	 * Method: Log temporary stored alerts if DB connection
+	 * is back.
+	 */
+	public function log_temp_alerts() {
+		// Get temporary alerts.
+		$temp_alerts = get_option( 'wsal_temp_alerts', array() );
+
+		if ( empty( $temp_alerts ) ) {
+			return;
+		}
+
+		// Get DB connector.
+		$db_config  = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
+		$connector  = $this->plugin->getConnector( $db_config ); // Get connector for DB.
+		$wsal_db    = $connector->getConnection(); // Get DB connection.
+		$connection = 0 !== (int) $wsal_db->dbh->errno ? false : true; // Database connection error check.
+
+		// Check DB connection.
+		if ( $connection ) { // If connected then log temporary alerts in DB.
+			// Log each alert.
+			foreach ( $temp_alerts as $timestamp => $alert ) {
+				$is_migrated = $alert['alert']['is_migrated'];
+				$created_on  = $alert['alert']['created_on'];
+				$alert_id    = $alert['alert']['alert_id'];
+				$site_id     = $alert['alert']['site_id'];
+
+				// Loggers.
+				foreach ( $this->_loggers as $logger ) {
+					$logger->Log( $alert_id, $alert['alert_data'], $created_on, $site_id, $is_migrated );
+				}
+			}
+
+			// Delete temporary alerts.
+			delete_option( 'wsal_temp_alerts' );
+		}
 	}
 }

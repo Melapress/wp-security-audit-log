@@ -97,6 +97,51 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 * @param object $user - WP_User object.
 	 */
 	public function EventLogin( $user_login, $user = null ) {
+		// Get global POST array.
+		$post_array = filter_input_array( INPUT_POST );
+
+		/**
+		 * Check for Ultimate Member plugin.
+		 *
+		 * @since 3.1.6
+		 */
+		if ( isset( $post_array['_um_account'] )
+		&& isset( $post_array['_um_account_tab'] )
+		&& 'password' === $post_array['_um_account_tab'] ) {
+			/**
+			 * If the data is coming from UM plugin account change
+			 * password page, check for change in password.
+			 *
+			 * 1. Check previous password.
+			 * 2. Check new password.
+			 * 3. Check confirm new password.
+			 * 4. If current & new password don't match.
+			 * 5. And new & confirm password are same then log change password alert.
+			 */
+			if ( isset( $post_array['current_user_password'] ) // Previous password.
+			&& isset( $post_array['user_password'] ) // New password.
+			&& isset( $post_array['confirm_user_password'] ) // Confirm new password.
+			&& $post_array['current_user_password'] !== $post_array['user_password'] // If current & new password don't match.
+			&& $post_array['user_password'] === $post_array['confirm_user_password'] ) { // And new & confirm password are same then.
+				// Get user.
+				if ( empty( $user ) ) {
+					$user = get_user_by( 'login', $user_login );
+				}
+
+				// Log user changed password alert.
+				if ( ! empty( $user ) ) {
+					$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+					$this->plugin->alerts->Trigger(
+						4003, array(
+							'Username' => $user->user_login,
+							'CurrentUserRoles' => $user_roles,
+						), true
+					);
+				}
+			}
+			return; // Return.
+		}
+
 		if ( empty( $user ) ) {
 			$user = get_user_by( 'login', $user_login );
 		}

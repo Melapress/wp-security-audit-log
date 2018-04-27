@@ -49,17 +49,43 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 			return;
 		}
 
+		// Get temporary stored alerts.
+		$temp_alerts = get_option( 'wsal_temp_alerts', array() );
+
 		// Create new occurrence.
 		$occ = new WSAL_Models_Occurrence();
 		$occ->is_migrated = $migrated;
-		$occ->created_on = $date;
+		$occ->created_on = is_null( $date ) ? microtime( true ) : $date;
 		$occ->alert_id = $type;
 		$occ->site_id = ! is_null( $siteid ) ? $siteid
 			: (function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0);
-		$occ->Save();
 
-		// Set up meta data.
-		$occ->SetMeta( $data );
+		// Get DB connector.
+		$db_config  = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
+		$connector  = $this->plugin->getConnector( $db_config ); // Get connector for DB.
+		$wsal_db    = $connector->getConnection(); // Get DB connection.
+		$connection = 0 !== (int) $wsal_db->dbh->errno ? false : true; // Database connection error check.
+
+		// Check DB connection.
+		if ( $connection ) { // If connected then save the alert in DB.
+			// Save the alert occurrence.
+			$occ->Save();
+
+			// Set up meta data of the alert.
+			$occ->SetMeta( $data );
+		} else { // Else store the alerts in temporary option.
+			// Store current alert in temporary option array.
+			$temp_alerts[ $occ->created_on ]['alert'] = array(
+				'is_migrated' => $occ->is_migrated,
+				'created_on'  => $occ->created_on,
+				'alert_id'    => $occ->alert_id,
+				'site_id'     => $occ->site_id,
+			);
+			$temp_alerts[ $occ->created_on ]['alert_data'] = $data;
+		}
+
+		// Save temporary alerts to options.
+		update_option( 'wsal_temp_alerts', $temp_alerts );
 
 		// Inject for promoting the paid add-ons.
 		$type = (int) $type;

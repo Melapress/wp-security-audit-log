@@ -371,7 +371,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 											$wsal_lpn = false;
 										} elseif ( ! $wsal_lpn ) {
 											// Default option value.
-											$wsal_lpn = true;
+											$wsal_lpn = false;
 										}
 										?>
 										<input type="checkbox" name="login_page_notification" id="login_page_notification" <?php checked( $wsal_lpn ); ?> />
@@ -380,15 +380,27 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									<?php
 									// Get login page notification text.
 									$wsal_lpn_text = $this->_plugin->settings->get_login_page_notification_text();
+									$wsal_lpn_text_default = __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/" target="_blank">WP Security Audit Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' );
+
+									// Allowed HTML tags for this setting.
+									$allowed_tags = array(
+										'a' => array(
+											'href' => array(),
+											'title' => array(),
+											'target' => array(),
+										),
+									);
 									?>
 									<textarea name="login_page_notification_text"
 										id="login_page_notification_text"
-										cols="50" rows="5"
+										cols="60" rows="6"
 										<?php echo ( $wsal_lpn ) ? false : 'disabled'; ?>
-									><?php echo ( $wsal_lpn_text ) ? wp_kses( $wsal_lpn_text, $this->_plugin->allowed_html_tags ) : false; ?></textarea>
+									><?php echo ( $wsal_lpn_text ) ? wp_kses( $wsal_lpn_text, $allowed_tags ) : wp_kses( $wsal_lpn_text_default, $allowed_tags ); ?></textarea>
 									<br/>
 									<span class="description">
-										<?php esc_html_e( 'Many compliance regulations (such as the GDRP) require you, as a website administrator to tell all the users of this website that all their actions are being logged.', 'wp-security-audit-log' ); ?>
+										<?php esc_html_e( 'Many compliance regulations (such as the GDRP) require website administrators to tell the users of this website that a log is kept of all the changes they do when logged in.', 'wp-security-audit-log' ); ?>
+										<br />
+										<?php echo wp_kses( __( '<strong>Note: </strong>', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ) . esc_html__( 'The only HTML code allowed in the login page notification is for links ( < a href >...< /a > ).', 'wp-security-audit-log' ); ?>
 									</span>
 								</fieldset>
 							</td>
@@ -409,11 +421,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 										</p>
 										<?php
 										foreach ( array(
+											/**
 											WSAL_Settings::OPT_DEV_DATA_INSPECTOR => array(
 												__( 'Data Inspector', 'wp-security-audit-log' ),
 												__( 'View data logged for each triggered alert.', 'wp-security-audit-log' ),
 											),
-											/**
 											 WSAL_Settings::OPT_DEV_PHP_ERRORS     => array(
 												__('PHP Errors', 'wp-security-audit-log'),
 												__('Enables sensor for alerts generated from PHP.', 'wp-security-audit-log')
