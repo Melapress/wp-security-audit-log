@@ -369,7 +369,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		$old_adv = $this->get_post_seo_data( 'meta-robots-adv' );
 
 		// If old and new values are empty then don't log the alert.
-		if ( empty( $old_title ) && '-' === $advanced ) {
+		if ( empty( $old_adv ) && ( empty( $advanced ) || '-' === $advanced ) ) {
 			return;
 		}
 
@@ -399,6 +399,11 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	protected function check_canonical_url_change( $canonical_url ) {
 		// Get old title value.
 		$old_url = $this->get_post_seo_data( 'canonical' );
+
+		// Check to see if both change value are empty.
+		if ( empty( $old_url ) && empty( $canonical_url ) ) {
+			return; // Return if both are empty.
+		}
 
 		// If title is changed then log alert.
 		if ( $old_url !== $canonical_url ) {
@@ -794,4 +799,3 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		}
 	}
 }
-
