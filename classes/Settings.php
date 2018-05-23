@@ -909,8 +909,8 @@ class WSAL_Settings {
 		return $this->_plugin->SetGlobalOption( 'type_username', $newvalue );
 	}
 
-	public function GetAdapterConfig( $name_field ) {
-		return $this->_plugin->GetGlobalOption( $name_field );
+	public function GetAdapterConfig( $name_field, $default_value = false ) {
+		return $this->_plugin->GetGlobalOption( $name_field, $default_value );
 	}
 
 	public function SetAdapterConfig( $name_field, $newvalue ) {
@@ -1068,13 +1068,18 @@ class WSAL_Settings {
 	 */
 	public function SwitchToArchiveDB() {
 		if ( $this->IsArchivingEnabled() ) {
-			$archive_type = $this->_plugin->GetGlobalOption( 'archive-type' );
-			$archive_user = $this->_plugin->GetGlobalOption( 'archive-user' );
-			$password = $this->_plugin->GetGlobalOption( 'archive-password' );
-			$archive_name = $this->_plugin->GetGlobalOption( 'archive-name' );
-			$archive_hostname = $this->_plugin->GetGlobalOption( 'archive-hostname' );
+			$archive_type       = $this->_plugin->GetGlobalOption( 'archive-type' );
+			$archive_user       = $this->_plugin->GetGlobalOption( 'archive-user' );
+			$password           = $this->_plugin->GetGlobalOption( 'archive-password' );
+			$archive_name       = $this->_plugin->GetGlobalOption( 'archive-name' );
+			$archive_hostname   = $this->_plugin->GetGlobalOption( 'archive-hostname' );
 			$archive_baseprefix = $this->_plugin->GetGlobalOption( 'archive-base-prefix' );
-			$config = WSAL_Connector_ConnectorFactory::GetConfigArray( $archive_type, $archive_user, $password, $archive_name, $archive_hostname, $archive_baseprefix );
+			$archive_ssl        = $this->_plugin->GetGlobalOption( 'archive-ssl', false );
+			$archive_cc         = $this->_plugin->GetGlobalOption( 'archive-client-certificate', false );
+			$archive_ssl_ca     = $this->_plugin->GetGlobalOption( 'archive-ssl-ca', false );
+			$archive_ssl_cert   = $this->_plugin->GetGlobalOption( 'archive-ssl-cert', false );
+			$archive_ssl_key    = $this->_plugin->GetGlobalOption( 'archive-ssl-key', false );
+			$config = WSAL_Connector_ConnectorFactory::GetConfigArray( $archive_type, $archive_user, $password, $archive_name, $archive_hostname, $archive_baseprefix, $archive_ssl, $archive_cc, $archive_ssl_ca, $archive_ssl_cert, $archive_ssl_key );
 			$this->_plugin->getConnector( $config )->getAdapter( 'Occurrence' );
 		}
 	}

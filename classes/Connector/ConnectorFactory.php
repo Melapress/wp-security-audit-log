@@ -89,12 +89,17 @@ abstract class WSAL_Connector_ConnectorFactory {
 			return null;
 		} else {
 			return array(
-				'type' => $conf->GetAdapterConfig( 'adapter-type' ),
-				'user' => $conf->GetAdapterConfig( 'adapter-user' ),
-				'password' => $conf->GetAdapterConfig( 'adapter-password' ),
-				'name' => $conf->GetAdapterConfig( 'adapter-name' ),
-				'hostname' => $conf->GetAdapterConfig( 'adapter-hostname' ),
+				'type'        => $conf->GetAdapterConfig( 'adapter-type' ),
+				'user'        => $conf->GetAdapterConfig( 'adapter-user' ),
+				'password'    => $conf->GetAdapterConfig( 'adapter-password' ),
+				'name'        => $conf->GetAdapterConfig( 'adapter-name' ),
+				'hostname'    => $conf->GetAdapterConfig( 'adapter-hostname' ),
 				'base_prefix' => $conf->GetAdapterConfig( 'adapter-base-prefix' ),
+				'is_ssl'      => $conf->GetAdapterConfig( 'adapter-ssl' ),
+				'is_cc'       => $conf->GetAdapterConfig( 'adapter-client-certificate' ),
+				'ssl_ca'      => $conf->GetAdapterConfig( 'adapter-ssl-ca' ),
+				'ssl_cert'    => $conf->GetAdapterConfig( 'adapter-ssl-cert' ),
+				'ssl_key'     => $conf->GetAdapterConfig( 'adapter-ssl-key' ),
 			);
 		}
 	}
@@ -108,11 +113,16 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 * @param string $name - Adapter name.
 	 * @param string $hostname - Adapter hostname.
 	 * @param string $base_prefix - Adapter base_prefix.
+	 * @param bool   $is_ssl - Set if connection is SSL encrypted.
+	 * @param bool   $is_cc - Set if connection has client certificates.
+	 * @param string $ssl_ca - Certificate Authority.
+	 * @param string $ssl_cert - Client Certificate.
+	 * @param string $ssl_key - Client Key.
 	 * @return boolean true|false
 	 */
-	public static function CheckConfig( $type, $user, $password, $name, $hostname, $base_prefix ) {
+	public static function CheckConfig( $type, $user, $password, $name, $hostname, $base_prefix, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key ) {
 		$result = false;
-		$config = self::GetConfigArray( $type, $user, $password, $name, $hostname, $base_prefix );
+		$config = self::GetConfigArray( $type, $user, $password, $name, $hostname, $base_prefix, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key );
 		switch ( strtolower( $type ) ) {
 			// TO DO: Add other connectors.
 			case 'mysql':
@@ -132,16 +142,26 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 * @param string $name - Adapter name.
 	 * @param string $hostname - Adapter hostname.
 	 * @param string $base_prefix - Adapter base_prefix.
+	 * @param bool   $is_ssl - Set if connection is SSL encrypted.
+	 * @param bool   $is_cc - Set if connection has client certificates.
+	 * @param string $ssl_ca - Certificate Authority.
+	 * @param string $ssl_cert - Client Certificate.
+	 * @param string $ssl_key - Client Key.
 	 * @return array config
 	 */
-	public static function GetConfigArray( $type, $user, $password, $name, $hostname, $base_prefix ) {
+	public static function GetConfigArray( $type, $user, $password, $name, $hostname, $base_prefix, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key ) {
 		return array(
-			'type' => $type,
-			'user' => $user,
-			'password' => $password,
-			'name' => $name,
-			'hostname' => $hostname,
+			'type'        => $type,
+			'user'        => $user,
+			'password'    => $password,
+			'name'        => $name,
+			'hostname'    => $hostname,
 			'base_prefix' => $base_prefix,
+			'is_ssl'      => $is_ssl,
+			'is_cc'       => $is_cc,
+			'ssl_ca'      => $ssl_ca,
+			'ssl_cert'    => $ssl_cert,
+			'ssl_key'     => $ssl_key,
 		);
 	}
 }

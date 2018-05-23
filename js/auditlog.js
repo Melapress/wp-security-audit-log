@@ -314,3 +314,62 @@ function download_failed_login_log(element) {
 		}
 	});
 }
+
+/**
+ * Onclick event handler to implement user's choice to either
+ * opt in or out of freemius.
+ *
+ * @param {string} element - Current element.
+ */
+function wsal_freemius_opt_in( element ) {
+	var nonce  = jQuery( '#wsal-freemius-opt-nonce' ).val(); // Nonce.
+	var choice = jQuery( element ).data( 'opt' ); // Choice.
+
+	jQuery.ajax( {
+		type: 'POST',
+		url: ajaxurl,
+		async: true,
+		data: {
+			action: 'wsal_freemius_opt_in',
+			opt_nonce: nonce,
+			choice: choice
+		},
+		success: function( data ) {
+			location.reload();
+		},
+		error: function( xhr, textStatus, error ) {
+			console.log( xhr.statusText );
+			console.log( textStatus );
+			console.log( error );
+		}
+	} );
+}
+
+/**
+ * Onclick event handler to dismiss privacy notice.
+ *
+ * @param {string} element - Current element.
+ */
+function wsal_dismiss_privacy_notice( element ) {
+	var nonce  = jQuery( '#wsal_dismiss_privacy_nonce' ).val(); // Nonce.
+	var notice = jQuery( element ).data( 'notice-name' ); // Notice name.
+
+	jQuery.ajax( {
+		type: 'POST',
+		url: ajaxurl,
+		async: true,
+		data: {
+			action: 'wsal_dismiss_privacy_notice',
+			dismiss_nonce: nonce,
+			notice: notice
+		},
+		success: function( data ) {
+			jQuery( element ).parents( '#wsal_privacy_notice' ).fadeOut();
+		},
+		error: function( xhr, textStatus, error ) {
+			console.log( xhr.statusText );
+			console.log( textStatus );
+			console.log( error );
+		}
+	} );
+}

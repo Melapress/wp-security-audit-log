@@ -129,14 +129,12 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						<h2 class="nav-tab-wrapper wsal-sub-tabs">
 							<?php
 							foreach ( $group as $subname => $alerts ) :
-								$tab_id = $this->GetSafeCatgName( $subname );
-
 								// Skip Pages and CPTs section.
-								if ( 'custom-post-types' === $tab_id || 'pages' === $tab_id ) {
+								if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
 									continue;
 								}
 								?>
-								<a href="#tab-<?php echo esc_attr( $tab_id ); ?>"
+								<a href="#tab-<?php echo esc_attr( $this->GetSafeCatgName( $subname ) ); ?>"
 									class="nav-tab"
 									data-parent="tab-<?php echo esc_attr( $safe_names[ $name ] ); ?>">
 									<?php echo esc_html( $subname ); ?>
@@ -160,11 +158,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								}
 							}
 
-							// Get tab id.
-							$tab_id = $this->GetSafeCatgName( $subname );
-
 							// Skip Pages and CPTs section.
-							if ( 'custom-post-types' === $tab_id || 'pages' === $tab_id ) {
+							if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
 								continue;
 							}
 							?>

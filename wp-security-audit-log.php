@@ -210,6 +210,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Render wsal footer.
 			add_action( 'admin_footer', array( $this, 'RenderFooter' ) );
 
+			// Plugin redirect on activation.
+			add_action( 'admin_init', array( $this, 'wsal_plugin_redirect' ), 10 );
+
 			// Handle admin Disable Custom Field.
 			add_action( 'wp_ajax_AjaxDisableCustomField', array( $this, 'AjaxDisableCustomField' ) );
 
@@ -218,6 +221,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Render Login Page Notification.
 			add_filter( 'login_message', array( $this, 'render_login_page_message' ), 10, 1 );
+
+			// Add custom schedules for WSAL.
+			add_filter( 'cron_schedules', array( $this, 'wsal_recurring_schedules' ) );
 
 			// Cron job to delete alert 1003 for the last day.
 			add_action( 'wsal_delete_logins', array( $this, 'delete_failed_logins' ) );
@@ -231,6 +237,21 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Add filters to customize freemius welcome message.
 			wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
 			wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
+		}
+
+		/**
+		 * Method: WSAL plugin redirect.
+		 */
+		public function wsal_plugin_redirect() {
+			if (
+				get_option( 'wsal_redirect_on_activate', false )
+				&& get_site_option( 'wpsal_anonymous_mode', true )
+			) { // If the redirect option is true, then continue.
+				delete_option( 'wsal_redirect_on_activate' ); // Delete redirect option.
+				// Redirect to main page.
+				wp_safe_redirect( add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) ) );
+				exit();
+			}
 		}
 
 		/**
@@ -353,9 +374,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$get_page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
 				if ( ( ! isset( $get_page ) || 'wsal-auditlog' !== $get_page ) && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
 					$selected_db = get_transient( 'wsal_wp_selected_db' );
-					if ( $selected_db ) {
+					$selected_db_user = (int) get_transient( 'wsal_wp_selected_db_user' );
+					if ( $selected_db && ( get_current_user_id() === $selected_db_user ) ) {
 						// Delete the transient.
 						delete_transient( 'wsal_wp_selected_db' );
+						delete_transient( 'wsal_wp_selected_db_user' );
 					}
 				}
 			}
@@ -547,6 +570,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			if ( $pre_installed && $old_version != $new_version ) {
 				$this->Update( $old_version, $new_version );
+
+				// If this is an update, then dismiss the notice.
+				if ( '0.0.0' !== $old_version ) {
+					$this->views->FindByClassName( 'WSAL_Views_AuditLog' )->DismissNotice( 'wsal-privacy-notice-3.2' );
+				}
 			}
 
 			// Load options from wp_options table or wp_sitemeta in multisite enviroment.
@@ -592,6 +620,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Install cleanup hook (remove older one if it exists).
 			wp_clear_scheduled_hook( 'wsal_cleanup' );
 			wp_schedule_event( current_time( 'timestamp' ) + 600, 'hourly', 'wsal_cleanup' );
+
+			// WSAL Audit Log page redirect option in anonymous mode.
+			if ( get_site_option( 'wpsal_anonymous_mode', true ) ) {
+				add_option( 'wsal_redirect_on_activate', true );
+			}
 		}
 
 		/**
@@ -1127,6 +1160,32 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Return message.
 			return $message;
+		}
+
+		/**
+		 * Method: Add time intervals for scheduling.
+		 *
+		 * @param  array $schedules - Array of schedules.
+		 * @return array
+		 */
+		public function wsal_recurring_schedules( $schedules ) {
+			$schedules['fortyfiveminutes'] = array(
+				'interval' => 2700,
+				'display' => __( 'Every 45 minutes', 'wp-security-audit-log' ),
+			);
+			$schedules['thirtyminutes'] = array(
+				'interval' => 1800,
+				'display' => __( 'Every 30 minutes', 'wp-security-audit-log' ),
+			);
+			$schedules['tenminutes'] = array(
+				'interval' => 600,
+				'display' => __( 'Every 10 minutes', 'wp-security-audit-log' ),
+			);
+			$schedules['oneminute'] = array(
+				'interval' => 60,
+				'display' => __( 'Every 1 minute', 'wp-security-audit-log' ),
+			);
+			return $schedules;
 		}
 
 		/**

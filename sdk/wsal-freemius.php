@@ -31,6 +31,9 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 			// Include Freemius SDK.
 			require_once dirname( __FILE__ ) . '/freemius/start.php';
 
+			// Check anonymous mode.
+			$is_anonymous = ( true === get_site_option( 'wpsal_anonymous_mode', true ) );
+
 			$wsal_freemius = fs_dynamic_init( array(
 				'id'             => '94',
 				'slug'           => 'wp-security-audit-log',
@@ -44,6 +47,7 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 					'support' => false,
 					'network' => true,
 				),
+				'anonymous_mode' => $is_anonymous,
 				'live'           => true,
 			) );
 		}

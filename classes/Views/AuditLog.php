@@ -50,10 +50,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_AjaxSwitchDB', array( $this, 'AjaxSwitchDB' ) );
 		add_action( 'wp_ajax_wsal_download_failed_login_log', array( $this, 'wsal_download_failed_login_log' ) );
 		add_action( 'wp_ajax_wsal_download_404_log', array( $this, 'wsal_download_404_log' ) );
+		add_action( 'wp_ajax_wsal_freemius_opt_in', array( $this, 'wsal_freemius_opt_in' ) );
+		add_action( 'wp_ajax_wsal_dismiss_privacy_notice', array( $this, 'wsal_dismiss_privacy_notice' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
 		// Check plugin version for to dismiss the notice only until upgrade.
 		$this->_version = WSAL_VERSION;
-		$this->RegisterNotice( 'premium-wsal-' . $this->_version );
+		$this->RegisterNotice( 'premium-wsal-' . $this->_version ); // Upgrade notice.
+		$this->RegisterNotice( 'wsal-privacy-notice-3.2' ); // Privacy notice.
 	}
 
 	/**
@@ -65,11 +68,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	public function AdminNoticesPremium() {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
 		// Check if any of the extensions is activated.
-		if ( ! class_exists( 'WSAL_NP_Plugin' )
+		if (
+			! class_exists( 'WSAL_NP_Plugin' )
 			&& ! class_exists( 'WSAL_Ext_Plugin' )
 			&& ! class_exists( 'WSAL_Rep_Plugin' )
 			&& ! class_exists( 'WSAL_SearchExtension' )
-			&& ! class_exists( 'WSAL_User_Management_Plugin' ) ) {
+			&& ! class_exists( 'WSAL_User_Management_Plugin' )
+			&& ! get_site_option( 'wpsal_anonymous_mode', true ) // Anonymous mode option.
+		) {
 			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $this->IsNoticeDismissed( 'premium-wsal-' . $this->_version ) ) { ?>
 				<div class="updated wsal_notice" data-notice-name="premium-wsal-<?php echo esc_attr( $this->_version ); ?>">
 					<div class="wsal_notice__wrapper">
@@ -124,6 +130,50 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			</div>
 			<?php
 		}
+
+		// Check anonymous mode.
+		if ( wsal_freemius()->is_anonymous() ) { // If user manually opt-out then don't show the notice.
+			if (
+				get_site_option( 'wpsal_anonymous_mode', true ) // Anonymous mode option.
+				&& wsal_freemius()->is_not_paying() // Not paying customer.
+				&& $is_current_view
+				&& $this->_plugin->settings->CurrentUserCan( 'edit' ) // Have permission to edit plugin settings.
+			) {
+				if ( ! is_multisite() || ( is_multisite() && is_network_admin() ) ) :
+					?>
+					<div class="notice notice-success">
+						<p><?php echo wp_kses( __( 'Help us improve WP Security Audit Log! Opt-in to sending us diagnostic non-sensitive data about your plugin usage (<strong>no activity log data is sent</strong>) and subscribe to our newsletter.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
+						<p>
+							<a href="javascript:;" class="button button-primary" onclick="wsal_freemius_opt_in(this)" data-opt="yes">
+								<?php esc_html_e( 'Opt-In', 'wp-security-audit-log' ); ?>
+							</a>
+							<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" class="button button-secondary" target="_blank"><?php esc_html_e( 'Learn More', 'wp-security-audit-log' ); ?></a>
+							<a href="javascript:;" class="button" onclick="wsal_freemius_opt_in(this)" data-opt="no">
+								<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
+							</a>
+							<input type="hidden" id="wsal-freemius-opt-nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-freemius-opt' ) ); ?>" />
+						</p>
+					</div>
+					<?php
+				endif;
+			}
+		}
+
+		if ( current_user_can( 'manage_options' ) && $is_current_view && ! $this->IsNoticeDismissed( 'wsal-privacy-notice-3.2' ) ) :
+			?>
+			<div class="notice notice-info" id="wsal_privacy_notice">
+				<h3><?php esc_html_e( 'WordPress Activity Log', 'wp-security-audit-log' ); ?></h3>
+				<p><?php esc_html_e( 'When a user makes a change on your website the plugin will keep a record of that event here. Right now there is nothing because this is a new install.', 'wp-security-audit-log' ); ?></p>
+				<p><strong><?php esc_html_e( 'Thank you for using WP Security Audit Log', 'wp-security-audit-log' ); ?></strong></p>
+				<p>
+					<a href="javascript:;" onclick="wsal_dismiss_privacy_notice(this)" data-notice-name="wsal-privacy-notice-3.2">
+						<?php esc_html_e( 'Dismiss', 'wp-security-audit-log' ); ?>
+					</a>
+				</p>
+				<input type="hidden" id="wsal_dismiss_privacy_nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-dismiss-privacy-notice' ) ); ?>" />
+			</div>
+			<?php
+		endif;
 	}
 
 	/**
@@ -390,6 +440,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		if ( isset( $post_array['selected_db'] ) ) {
 			set_transient( 'wsal_wp_selected_db', $post_array['selected_db'], HOUR_IN_SECONDS );
+			set_transient( 'wsal_wp_selected_db_user', get_current_user_id(), HOUR_IN_SECONDS );
 		}
 	}
 
@@ -486,10 +537,98 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			// Nonce verification failed.
 			echo wp_json_encode( array(
 				'success' => false,
-				'message' => esc_html__( 'Nonce verification failed!', 'wp-security-audit-log' ),
+				'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
 			) );
 		}
 		die();
+	}
+
+	/**
+	 * Ajax callback to handle freemius opt in/out.
+	 */
+	public function wsal_freemius_opt_in() {
+		// Die if not have access.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			die( 'Access Denied.' );
+		}
+
+		// Get post array through filter.
+		$nonce  = filter_input( INPUT_POST, 'opt_nonce', FILTER_SANITIZE_STRING ); // Nonce.
+		$choice = filter_input( INPUT_POST, 'choice', FILTER_SANITIZE_STRING ); // Choice selected by user.
+
+		// Verify nonce.
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce,  'wsal-freemius-opt' ) ) {
+			// Nonce verification failed.
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
+			) );
+			exit();
+		}
+
+		// Check if choice is not empty.
+		if ( ! empty( $choice ) ) {
+			// Update anonymous mode to false.
+			update_site_option( 'wpsal_anonymous_mode', 0 );
+
+			if ( 'yes' === $choice ) {
+				wsal_freemius()->opt_in(); // Opt in.
+			} elseif ( 'no' === $choice ) {
+				wsal_freemius()->skip_connection(); // Opt out.
+			}
+
+			echo wp_json_encode( array(
+				'success' => true,
+				'message' => esc_html__( 'Freemius opt choice selected.', 'wp-security-audit-log' ),
+			) );
+		} else {
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'Freemius opt choice not found.', 'wp-security-audit-log' ),
+			) );
+		}
+		exit();
+	}
+
+	/**
+	 * Ajax method to dismiss privacy notice.
+	 */
+	public function wsal_dismiss_privacy_notice() {
+		// Die if not have access.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			die( 'Access Denied.' );
+		}
+
+		// Get post array through filter.
+		$nonce  = filter_input( INPUT_POST, 'dismiss_nonce', FILTER_SANITIZE_STRING ); // Nonce.
+		$notice = filter_input( INPUT_POST, 'notice', FILTER_SANITIZE_STRING ); // Choice selected by user.
+
+		// Verify nonce.
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce,  'wsal-dismiss-privacy-notice' ) ) {
+			// Nonce verification failed.
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
+			) );
+			exit();
+		}
+
+		// Check if notice is not empty.
+		if ( ! empty( $notice ) ) {
+			// Update anonymous mode to false.
+			$this->DismissNotice( 'wsal-privacy-notice-3.2' );
+
+			echo wp_json_encode( array(
+				'success' => true,
+				'message' => esc_html__( 'Privacy notice dismissed.', 'wp-security-audit-log' ),
+			) );
+		} else {
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'Notice id not found.', 'wp-security-audit-log' ),
+			) );
+		}
+		exit();
 	}
 
 	/**

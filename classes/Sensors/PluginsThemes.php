@@ -55,6 +55,27 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	protected $old_plugins = array();
 
 	/**
+	 * Website plugins + themes.
+	 *
+	 * Used to keep track of file change alerts. If a plugin/theme is
+	 * installed/updated/uninstalled, then its name is added to the
+	 * respective skip array of this object. These arrays are used in
+	 * Sensors/FileChanges.php to filter the files during a scan.
+	 *
+	 * @var stdClass
+	 */
+	private $site_content;
+
+	/**
+	 * Method: Constructor.
+	 *
+	 * @param WpSecurityAuditLog $wsal – Instance of WpSecurityAuditLog.
+	 */
+	public function __construct( WpSecurityAuditLog $wsal ) {
+		parent::__construct( $wsal );
+	}
+
+	/**
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
@@ -70,6 +91,12 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		// TO DO.
 		add_action( 'wp_insert_post', array( $this, 'EventPluginPostCreate' ), 10, 2 );
 		add_action( 'delete_post', array( $this, 'EventPluginPostDelete' ), 10, 1 );
+
+		// Set site plugins.
+		$this->set_site_plugins();
+
+		// Set site content.
+		$this->set_site_themes();
 	}
 
 	/**
@@ -125,6 +152,13 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			$plugin_path = $plugin[0];
 			$plugin = get_plugins();
 			$plugin = $plugin[ $plugin_path ];
+
+			// Get plugin directory name.
+			$plugin_dir = $this->get_plugin_dir( $plugin_path );
+
+			// Add plugin to site plugins list.
+			$this->set_site_plugins( $plugin_dir );
+
 			$plugin_path = plugin_dir_path( WP_PLUGIN_DIR . '/' . $plugin_path[0] );
 			$this->plugin->alerts->Trigger(
 				5000, array(
@@ -290,6 +324,15 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						),
 					)
 				);
+
+				// Get plugin directory name.
+				$plugin_dir = $this->get_plugin_dir( $post_array['plugin'] );
+
+				// Set plugin to skip file changes alert.
+				$this->skip_plugin_change_alerts( $plugin_dir );
+
+				// Remove it from the list.
+				$this->remove_site_plugin( $plugin_dir );
 			}
 		}
 
@@ -312,6 +355,12 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			}
 			if ( isset( $plugins ) ) {
 				foreach ( $plugins as $plugin_file ) {
+					// Get plugin directory name.
+					$plugin_dir = $this->get_plugin_dir( $plugin_file );
+
+					// Set plugin to skip file changes alert.
+					$this->skip_plugin_change_alerts( $plugin_dir );
+
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
 					$this->plugin->alerts->Trigger(
@@ -363,6 +412,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							),
 						)
 					);
+
+					// Set theme to skip file changes alert.
+					$this->skip_theme_change_alerts( $theme_name );
 				}
 			}
 		}
@@ -370,7 +422,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		// Install theme.
 		if ( in_array( $action, array( 'install-theme', 'upload-theme' ) ) && current_user_can( 'install_themes' ) ) {
 			$themes = array_diff( wp_get_themes(), $this->old_themes );
-			foreach ( $themes as $theme ) {
+			foreach ( $themes as $name => $theme ) {
 				$this->plugin->alerts->Trigger(
 					5005, array(
 						'Theme' => (object) array(
@@ -383,12 +435,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						),
 					)
 				);
+				// Add theme to site themes list.
+				$this->set_site_themes( $name );
 			}
 		}
 
 		// Uninstall theme.
 		if ( in_array( $action, array( 'delete-theme' ) ) && current_user_can( 'install_themes' ) ) {
-			foreach ( $this->GetRemovedThemes() as $theme ) {
+			foreach ( $this->GetRemovedThemes() as $index => $theme ) {
 				$this->plugin->alerts->Trigger(
 					5007, array(
 						'Theme' => (object) array(
@@ -401,6 +455,12 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						),
 					)
 				);
+
+				// Set theme to skip file changes alert.
+				$this->skip_theme_change_alerts( $theme->stylesheet );
+
+				// Remove it from the list.
+				$this->remove_site_theme( $theme->stylesheet );
 			}
 		}
 	}
@@ -497,6 +557,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							$editor_link['name'] => $editor_link['value'],
 						)
 					);
+				} elseif (
+					isset( $post_array['page'] ) // If page index is set in post array.
+					&& 'woocommerce-bulk-stock-management' === $post_array['page']
+				) {
+					// Ignore WooCommerce Bulk Stock Management page.
 				} else {
 					$event = $this->GetEventTypeForPostType( $post, 5019, 5020, 5021 );
 					$this->plugin->alerts->Trigger(
@@ -606,5 +671,254 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			'value' => $value,
 		);
 		return $editor_link;
+	}
+
+	/**
+	 * Method: Add plugins to site plugins list.
+	 *
+	 * @param string $plugin – Plugin directory name.
+	 */
+	public function set_site_plugins( $plugin = '' ) {
+		// Call the wrapper function to setup content.
+		$this->set_site_content( 'plugin', $plugin );
+	}
+
+	/**
+	 * Method: Add themes to site themes list.
+	 *
+	 * @param string $theme – Theme name.
+	 */
+	public function set_site_themes( $theme = '' ) {
+		// Call the wrapper function to setup content.
+		$this->set_site_content( 'theme', $theme );
+	}
+
+	/**
+	 * Method: Add plugins or themes to site content class member.
+	 *
+	 * @param string $type – Type of content i.e. `plugin` or `theme`.
+	 * @param string $content – Name of the content. It can be a plugin or a theme.
+	 */
+	public function set_site_content( $type, $content = '' ) {
+		/**
+		 * $type should not be empty.
+		 * Possible values: `plugin` | `theme`.
+		 */
+		if ( empty( $type ) ) {
+			return;
+		}
+
+		// Set content option.
+		$content_option = 'site_content';
+
+		// Get site plugins options.
+		$this->site_content = $this->plugin->GetGlobalOption( $content_option, false );
+
+		/**
+		 * Initiate the content option.
+		 *
+		 * If option does not exists then set the option.
+		 */
+		if ( false === $this->site_content ) {
+			$this->site_content = new stdClass(); // New stdClass object.
+			$plugins = $this->get_site_plugins(); // Get plugins on the site.
+			$themes  = $this->get_site_themes(); // Get themes on the site.
+
+			// Assign the plugins to content object.
+			foreach ( $plugins as $index => $plugin ) {
+				$this->site_content->plugins[] = strtolower( $plugin );
+				$this->site_content->skip_plugins[] = strtolower( $plugin );
+			}
+
+			// Assign the themes to content object.
+			foreach ( $themes as $index => $theme ) {
+				$this->site_content->themes[] = strtolower( $theme );
+				$this->site_content->skip_themes[] = strtolower( $theme );
+			}
+
+			$this->plugin->SetGlobalOption( $content_option, $this->site_content );
+		}
+
+		// Check if type is plugin and content is not empty.
+		if ( 'plugin' === $type && ! empty( $content ) ) {
+			// If the plugin is not already present in the current list then.
+			if ( ! in_array( $content, $this->site_content->plugins, true ) ) {
+				// Add the plugin to the list and save it.
+				$this->site_content->plugins[] = strtolower( $content );
+				$this->site_content->skip_plugins[] = strtolower( $content );
+				$this->plugin->SetGlobalOption( $content_option, $this->site_content );
+			}
+		} elseif ( 'theme' === $type && ! empty( $content ) ) {
+			// If the theme is not already present in the current list then.
+			if ( ! in_array( $content, $this->site_content->themes, true ) ) {
+				// Add the theme to the list and save it.
+				$this->site_content->themes[] = strtolower( $content );
+				$this->site_content->skip_themes[] = strtolower( $content );
+				$this->plugin->SetGlobalOption( $content_option, $this->site_content );
+			}
+		}
+	}
+
+	/**
+	 * Method: Remove plugin from site plugins list.
+	 *
+	 * @param string $plugin – Plugin name.
+	 * @return bool
+	 */
+	public function remove_site_plugin( $plugin ) {
+		return $this->remove_site_content( 'plugin', $plugin );
+	}
+
+	/**
+	 * Method: Remove theme from site themes list.
+	 *
+	 * @param string $theme – Theme name.
+	 * @return bool
+	 */
+	public function remove_site_theme( $theme ) {
+		return $this->remove_site_content( 'theme', $theme );
+	}
+
+	/**
+	 * Method: Remove content from site content list.
+	 *
+	 * @param string $type – Type of content.
+	 * @param string $content – Name of content.
+	 * @return bool
+	 */
+	public function remove_site_content( $type, $content ) {
+		/**
+		 * $type should not be empty.
+		 * Possible values: `plugin` | `theme`.
+		 */
+		if ( empty( $type ) ) {
+			return;
+		}
+
+		// Check if $content is empty.
+		if ( empty( $content ) ) {
+			return false;
+		}
+
+		// Check if the plugin is already present in the list.
+		if ( 'plugin' === $type && in_array( $content, $this->site_content->plugins, true ) ) {
+			// Get key of the plugin from plugins array.
+			$key = array_search( $content, $this->site_content->plugins, true );
+
+			// If key is found then remove it from the array and save the plugins list.
+			if ( false !== $key ) {
+				unset( $this->site_content->plugins[ $key ] );
+				$this->plugin->SetGlobalOption( 'site_content', $this->site_content );
+				return true;
+			}
+		} elseif ( 'theme' === $type && in_array( $content, $this->site_content->themes, true ) ) {
+			// Get key of the theme from themes array.
+			$key = array_search( $content, $this->site_content->themes, true );
+
+			// If key is found then remove it from the array and save the themes list.
+			if ( false !== $key ) {
+				unset( $this->site_content->themes[ $key ] );
+				$this->plugin->SetGlobalOption( 'site_content', $this->site_content );
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Method: Add plugin to skip file changes alert list.
+	 *
+	 * @param string $plugin – Plugin name.
+	 * @return bool
+	 */
+	public function skip_plugin_change_alerts( $plugin ) {
+		return $this->skip_content_change_alerts( 'plugin', $plugin );
+	}
+
+	/**
+	 * Method: Add theme to skip file changes alert list.
+	 *
+	 * @param string $theme – Theme name.
+	 * @return bool
+	 */
+	public function skip_theme_change_alerts( $theme ) {
+		return $this->skip_content_change_alerts( 'theme', $theme );
+	}
+
+	/**
+	 * Method: Add content to skip file changes alert list.
+	 *
+	 * @param string $type – Type of content.
+	 * @param string $content – Name of content.
+	 * @return bool
+	 */
+	public function skip_content_change_alerts( $type, $content ) {
+		/**
+		 * $type should not be empty.
+		 * Possible values: `plugin` | `theme`.
+		 */
+		if ( empty( $type ) ) {
+			return;
+		}
+
+		// Check if $content is empty.
+		if ( empty( $content ) ) {
+			return false;
+		}
+
+		// Add plugin to skip file alerts list.
+		if ( 'plugin' === $type ) {
+			$this->site_content->skip_plugins[] = $content;
+			$this->plugin->SetGlobalOption( 'site_content', $this->site_content );
+		} elseif ( 'theme' === $type ) {
+			// Add theme to skip file alerts list.
+			$this->site_content->skip_themes[] = $content;
+			$this->plugin->SetGlobalOption( 'site_content', $this->site_content );
+		}
+		return true;
+	}
+
+	/**
+	 * Method: Get site plugin directories.
+	 *
+	 * @return array
+	 */
+	public function get_site_plugins() {
+		// Get plugins.
+		$plugins = array_keys( get_plugins() );
+
+		// Remove php file name from the plugins.
+		$plugins = array_map( array( $this, 'get_plugin_dir' ), $plugins );
+
+		// Return plugins.
+		return $plugins;
+	}
+
+	/**
+	 * Method: Get site themes.
+	 *
+	 * @return array
+	 */
+	public function get_site_themes() {
+		// Get themes.
+		return array_keys( wp_get_themes() );
+	}
+
+	/**
+	 * Method: Remove the PHP file after `/` in the plugin
+	 * directory name.
+	 *
+	 * For example, it will remove `/akismet.php` from
+	 * `akismet/akismet.php`.
+	 *
+	 * @param string $plugin – Plugin name.
+	 * @return string
+	 */
+	public function get_plugin_dir( $plugin ) {
+		$position = strpos( $plugin, '/' );
+		if ( false !== $position ) {
+			$plugin = substr_replace( $plugin, '', $position );
+		}
+		return $plugin;
 	}
 }
