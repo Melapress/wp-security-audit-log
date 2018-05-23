@@ -174,7 +174,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								</thead>
 								<tbody>
 									<?php
-									if ( 'content' === $tab_id ) :
+									if ( __( 'Content', 'wp-security-audit-log' ) === $subname ) :
 										?>
 										<tr>
 											<td colspan="4">
