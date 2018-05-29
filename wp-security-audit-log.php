@@ -570,11 +570,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			if ( $pre_installed && $old_version != $new_version ) {
 				$this->Update( $old_version, $new_version );
-
-				// If this is an update, then dismiss the notice.
-				if ( '0.0.0' !== $old_version ) {
-					$this->views->FindByClassName( 'WSAL_Views_AuditLog' )->DismissNotice( 'wsal-privacy-notice-3.2' );
-				}
 			}
 
 			// Load options from wp_options table or wp_sitemeta in multisite enviroment.
@@ -637,15 +632,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Update version in db.
 			$this->SetGlobalOption( 'version', $new_version );
 
-			// Disable all developer options.
-			// $this->settings->ClearDevOptions();
 			// Do version-to-version specific changes.
-			if ( -1 === version_compare( $old_version, $new_version ) ) {
+			if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
 				// Update External DB password on plugin update.
 				$this->update_external_db_password();
 
 				// Update pruning alerts option.
 				$this->settings->SetPruningDate( '12 months' );
+
+				// Dismiss privacy notice.
+				$this->views->FindByClassName( 'WSAL_Views_AuditLog' )->DismissNotice( 'wsal-privacy-notice-3.2' );
+
+				// Update anonymous mode to false.
+				update_site_option( 'wpsal_anonymous_mode', 0 );
 			}
 		}
 

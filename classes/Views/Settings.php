@@ -128,6 +128,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Method: Load saved settings of this view.
 	 */
 	public function load_file_changes_settings() {
+		if ( ! is_multisite() ) {
+			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads' );
+		} else {
+			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads', 'wp-content/uploads/sites' );
+		}
+
 		// Load saved settings of this view.
 		$this->scan_settings = array(
 			'scan_file_changes' => $this->_plugin->GetGlobalOption( 'scan-file-changes', 'enable' ),
@@ -135,7 +141,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			'scan_hour'         => $this->_plugin->GetGlobalOption( 'scan-hour', '04' ),
 			'scan_day'          => $this->_plugin->GetGlobalOption( 'scan-day', '1' ),
 			'scan_date'         => $this->_plugin->GetGlobalOption( 'scan-date', '10' ),
-			'scan_directories'  => $this->_plugin->GetGlobalOption( 'scan-directories', array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins' ) ),
+			'scan_directories'  => $this->_plugin->GetGlobalOption( 'scan-directories', $default_scan_dirs ),
 			'scan_alert_types'  => $this->_plugin->GetGlobalOption( 'scan-alert-types', array( 'created', 'updated', 'deleted' ) ),
 			'scan_excluded_extensions' => $this->_plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav' ) ),
 			'scan_in_progress'  => $this->_plugin->GetGlobalOption( 'scan-in-progress', false ),
@@ -196,7 +202,43 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 
 		// Check and save enable/disable file changes feature.
-		$this->_plugin->SetGlobalOption( 'scan-file-changes', isset( $post_array['wsal-file-changes'] ) ? $post_array['wsal-file-changes'] : false );
+		if ( isset( $post_array['wsal-file-changes'] ) && ! empty( $post_array['wsal-file-changes'] ) ) {
+			$this->_plugin->SetGlobalOption( 'scan-file-changes', $post_array['wsal-file-changes'] );
+
+			// Get file change scan alerts.
+			$file_change_events = $this->_plugin->alerts->get_alerts_by_sub_category( 'File Changes' );
+			$file_change_events = array_keys( $file_change_events );
+
+			// Enable/disable events based on file changes.
+			if ( 'disable' === $post_array['wsal-file-changes'] ) {
+				// Get disabled events.
+				$disabled_events = $this->_plugin->settings->GetDisabledAlerts();
+
+				// Merge file changes events.
+				$disabled_events = array_merge( $disabled_events, $file_change_events );
+
+				// Save the events.
+				$this->_plugin->alerts->SetDisabledAlerts( $disabled_events );
+			} else {
+				// Get disabled events.
+				$disabled_events = $this->_plugin->settings->GetDisabledAlerts();
+
+				foreach ( $file_change_events as $file_change_event ) {
+					// Search for file change events in disabled events.
+					$key = array_search( $file_change_event, $disabled_events, true );
+
+					// If key is found, then unset it.
+					if ( $key ) {
+						unset( $disabled_events[ $key ] );
+					}
+				}
+
+				// Save the disabled events.
+				$this->_plugin->alerts->SetDisabledAlerts( $disabled_events );
+			}
+		} else {
+			$this->_plugin->SetGlobalOption( 'scan-file-changes', false );
+		}
 
 		// Check and save scan frequency.
 		$this->_plugin->SetGlobalOption( 'scan-frequency', isset( $post_array['wsal-scan-frequency'] ) ? $post_array['wsal-scan-frequency'] : false );
@@ -283,7 +325,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<h2 id="wsal-tabs" class="nav-tab-wrapper">
 			<a href="#tab-general" class="nav-tab"><?php esc_html_e( 'General', 'wp-security-audit-log' ); ?></a>
 			<a href="#tab-audit-log" class="nav-tab"><?php esc_html_e( 'Audit Log', 'wp-security-audit-log' ); ?></a>
-			<a href="#tab-file-changes" class="nav-tab"><?php esc_html_e( 'File Changes Logging', 'wp-security-audit-log' ); ?></a>
+			<a href="#tab-file-changes" class="nav-tab"><?php esc_html_e( 'File Integrity Checks & Warning', 'wp-security-audit-log' ); ?></a>
 			<a href="#tab-exclude" class="nav-tab"><?php esc_html_e( 'Exclude Objects', 'wp-security-audit-log' ); ?></a>
 		</h2>
 
@@ -1054,12 +1096,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<span class="description">
 									<?php esc_html_e( 'Specify the name and extension of the file(s) you want to exclude from the file changes scans. Specify the exact file name and extensions. Wildcard not supported.', 'wp-security-audit-log' ); ?>
 								</span>
+								<span class="error hide" id="wsal_file_name_error"></span>
 							</td>
 						</tr>
 						<!-- wsal_add_file_name -->
 						<tr>
 							<th>
-								<label for="wsal-scan-exclude-extensions"><?php esc_html_e( 'Exclude File Types', 'wp-security-audit-log' ); ?></label>
+								<label for="wsal_add_file_type_name"><?php esc_html_e( 'Exclude File Types', 'wp-security-audit-log' ); ?></label>
 							</th>
 							<td>
 								<div class="wsal_file_containter">
@@ -1082,6 +1125,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<span class="description">
 									<?php esc_html_e( 'Specify the extension of the file types you want to exclude from the file changes scans. Ideally you should exclude any type of logs and backup files that tend to be very big.', 'wp-security-audit-log' ); ?>
 								</span>
+								<span class="error hide" id="wsal_file_type_error"></span>
 							</td>
 						</tr>
 						<!-- wsal-scan-exclude-extensions -->
@@ -1493,20 +1537,33 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		// Check if the file name is set and not empty.
 		if ( isset( $post_array['data_name'] ) && ! empty( $post_array['data_name'] ) ) {
-			// Add to excluded files array.
-			$excluded_option[] = $post_array['data_name'];
+			// Check if option already exists.
+			if ( ! in_array( $post_array['data_name'], $excluded_option, true ) ) {
+				// Add to excluded files array.
+				$excluded_option[] = $post_array['data_name'];
 
-			// Save the option.
-			if ( 'file' === $data_type ) {
-				$this->_plugin->SetGlobalOption( 'scan_excluded_files', $excluded_option );
-			} elseif ( 'extension' === $data_type ) {
-				$this->_plugin->SetGlobalOption( 'scan-excluded-extensions', $excluded_option );
+				// Save the option.
+				if ( 'file' === $data_type ) {
+					$this->_plugin->SetGlobalOption( 'scan_excluded_files', $excluded_option );
+				} elseif ( 'extension' === $data_type ) {
+					$this->_plugin->SetGlobalOption( 'scan-excluded-extensions', $excluded_option );
+				}
+
+				echo wp_json_encode( array(
+					'success' => true,
+					'message' => esc_html__( 'Option added to excluded types.', 'wp-security-audit-log' ),
+				) );
+			} else {
+				if ( 'file' === $data_type ) {
+					$message = esc_html__( 'This file is already excluded from the scan.', 'wp-security-audit-log' );
+				} elseif ( 'extension' === $data_type ) {
+					$message = esc_html__( 'This file extension is already excluded from the scan.', 'wp-security-audit-log' );
+				}
+				echo wp_json_encode( array(
+					'success' => false,
+					'message' => $message,
+				) );
 			}
-
-			echo wp_json_encode( array(
-				'success' => true,
-				'message' => esc_html__( 'Option added to excluded types.', 'wp-security-audit-log' ),
-			) );
 		} else {
 			echo wp_json_encode( array(
 				'success' => false,
@@ -1553,21 +1610,37 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			// Get data_removed.
 			$data_removed = $post_array['data_removed'];
 
+			// Confirmed array of list to be excluded.
+			$to_be_excluded = array();
+
 			foreach ( $data_removed as $file ) {
 				if ( in_array( $file, $excluded_option, true ) ) {
 					$key = array_search( $file, $excluded_option, true );
 
 					if ( false !== $key ) {
+						$to_be_excluded[] = $excluded_option[ $key ];
 						unset( $excluded_option[ $key ] );
 					}
 				}
 			}
 
+			// Get excluded scan content.
+			$site_content = $this->_plugin->GetGlobalOption( 'site_content' );
+			if ( empty( $site_content ) ) {
+				$site_content = new stdClass();
+			}
+
 			// Save the option.
 			if ( 'file' === $data_type ) {
 				$this->_plugin->SetGlobalOption( 'scan_excluded_files', $excluded_option );
+
+				$site_content->skip_files = $to_be_excluded;
+				$this->_plugin->SetGlobalOption( 'site_content', $site_content );
 			} elseif ( 'extension' === $data_type ) {
 				$this->_plugin->SetGlobalOption( 'scan-excluded-extensions', $excluded_option );
+
+				$site_content->skip_extensions = $to_be_excluded;
+				$this->_plugin->SetGlobalOption( 'site_content', $site_content );
 			}
 
 			echo wp_json_encode( array(

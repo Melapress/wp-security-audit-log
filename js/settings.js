@@ -181,12 +181,15 @@ jQuery(document).ready(function(){
 			var setting_value = setting_input.val();
 			var setting_container = jQuery( '#wsal_files' );
 			var setting_nonce = jQuery( '#wsal_scan_exception_file' ).val();
+			var setting_error = jQuery( '#wsal_file_name_error' );
 		} else if ( type === 'extension' ) {
 			var setting_input = jQuery( '#wsal_add_file_type_name' );
 			var setting_value = setting_input.val();
 			var setting_container = jQuery( '#wsal_files_types' );
 			var setting_nonce = jQuery( '#wsal_scan_exception_file_type' ).val();
+			var setting_error = jQuery( '#wsal_file_type_error' );
 		}
+		setting_error.addClass( 'hide' );
 
 		// Validate file name.
 		var pattern = /^\s*[a-z-._\d,\s]+\s*$/i;
@@ -223,6 +226,8 @@ jQuery(document).ready(function(){
 						setting_input.removeAttr( 'value' );
 					} else {
 						console.log( data.message );
+						setting_error.text( data.message );
+						setting_error.removeClass( 'hide' );
 					}
 				},
 				error: function( xhr, textStatus, error ) {

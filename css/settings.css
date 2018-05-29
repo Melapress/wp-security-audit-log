@@ -74,6 +74,16 @@
 .wsal-tab td {
 	padding-left: 20px;
 }
+.wsal-tab .error {
+	display: block;
+	margin-top: 5px;
+	font-size: 13px;
+	font-style: italic;
+	color: red;
+}
+.wsal-tab .error.hide {
+	display: none;
+}
 
 /*
 * IOS button

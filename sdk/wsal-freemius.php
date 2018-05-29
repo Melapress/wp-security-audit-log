@@ -33,13 +33,15 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 
 			// Check anonymous mode.
 			$is_anonymous = ( true === get_site_option( 'wpsal_anonymous_mode', true ) );
+			$is_premium   = false;
+			$is_anonymous = $is_premium ? false : $is_anonymous;
 
 			$wsal_freemius = fs_dynamic_init( array(
 				'id'             => '94',
 				'slug'           => 'wp-security-audit-log',
 				'type'           => 'plugin',
 				'public_key'     => 'pk_d602740d3088272d75906045af9fa',
-				'is_premium'     => false,
+				'is_premium'     => $is_premium,
 				'has_addons'     => false,
 				'has_paid_plans' => true,
 				'menu'           => array(

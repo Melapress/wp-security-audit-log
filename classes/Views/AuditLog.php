@@ -51,8 +51,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_download_failed_login_log', array( $this, 'wsal_download_failed_login_log' ) );
 		add_action( 'wp_ajax_wsal_download_404_log', array( $this, 'wsal_download_404_log' ) );
 		add_action( 'wp_ajax_wsal_freemius_opt_in', array( $this, 'wsal_freemius_opt_in' ) );
-		add_action( 'wp_ajax_wsal_dismiss_privacy_notice', array( $this, 'wsal_dismiss_privacy_notice' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
+		add_filter( 'wsal_pointers_toplevel_page_wsal-auditlog', array( $this, 'register_privacy_pointer' ), 10, 1 );
 		// Check plugin version for to dismiss the notice only until upgrade.
 		$this->_version = WSAL_VERSION;
 		$this->RegisterNotice( 'premium-wsal-' . $this->_version ); // Upgrade notice.
@@ -132,9 +133,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Check anonymous mode.
-		if ( wsal_freemius()->is_anonymous() ) { // If user manually opt-out then don't show the notice.
+		if ( get_site_option( 'wpsal_anonymous_mode', true ) ) { // If user manually opt-out then don't show the notice.
 			if (
-				get_site_option( 'wpsal_anonymous_mode', true ) // Anonymous mode option.
+				wsal_freemius()->is_anonymous() // Anonymous mode option.
 				&& wsal_freemius()->is_not_paying() // Not paying customer.
 				&& $is_current_view
 				&& $this->_plugin->settings->CurrentUserCan( 'edit' ) // Have permission to edit plugin settings.
@@ -158,22 +159,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				endif;
 			}
 		}
-
-		if ( current_user_can( 'manage_options' ) && $is_current_view && ! $this->IsNoticeDismissed( 'wsal-privacy-notice-3.2' ) ) :
-			?>
-			<div class="notice notice-info" id="wsal_privacy_notice">
-				<h3><?php esc_html_e( 'WordPress Activity Log', 'wp-security-audit-log' ); ?></h3>
-				<p><?php esc_html_e( 'When a user makes a change on your website the plugin will keep a record of that event here. Right now there is nothing because this is a new install.', 'wp-security-audit-log' ); ?></p>
-				<p><strong><?php esc_html_e( 'Thank you for using WP Security Audit Log', 'wp-security-audit-log' ); ?></strong></p>
-				<p>
-					<a href="javascript:;" onclick="wsal_dismiss_privacy_notice(this)" data-notice-name="wsal-privacy-notice-3.2">
-						<?php esc_html_e( 'Dismiss', 'wp-security-audit-log' ); ?>
-					</a>
-				</p>
-				<input type="hidden" id="wsal_dismiss_privacy_nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-dismiss-privacy-notice' ) ); ?>" />
-			</div>
-			<?php
-		endif;
 	}
 
 	/**
@@ -591,47 +576,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Ajax method to dismiss privacy notice.
-	 */
-	public function wsal_dismiss_privacy_notice() {
-		// Die if not have access.
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
-			die( 'Access Denied.' );
-		}
-
-		// Get post array through filter.
-		$nonce  = filter_input( INPUT_POST, 'dismiss_nonce', FILTER_SANITIZE_STRING ); // Nonce.
-		$notice = filter_input( INPUT_POST, 'notice', FILTER_SANITIZE_STRING ); // Choice selected by user.
-
-		// Verify nonce.
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce,  'wsal-dismiss-privacy-notice' ) ) {
-			// Nonce verification failed.
-			echo wp_json_encode( array(
-				'success' => false,
-				'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
-			) );
-			exit();
-		}
-
-		// Check if notice is not empty.
-		if ( ! empty( $notice ) ) {
-			// Update anonymous mode to false.
-			$this->DismissNotice( 'wsal-privacy-notice-3.2' );
-
-			echo wp_json_encode( array(
-				'success' => true,
-				'message' => esc_html__( 'Privacy notice dismissed.', 'wp-security-audit-log' ),
-			) );
-		} else {
-			echo wp_json_encode( array(
-				'success' => false,
-				'message' => esc_html__( 'Notice id not found.', 'wp-security-audit-log' ),
-			) );
-		}
-		exit();
-	}
-
-	/**
 	 * Method: Render header of the view.
 	 */
 	public function Header() {
@@ -677,5 +621,102 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			array(),
 			filemtime( $this->_plugin->GetBaseDir() . '/js/auditlog.js' )
 		);
+	}
+
+	/**
+	 * Method: Load WSAL Notice Pointer.
+	 *
+	 * @param string $hook_suffix - Current hook suffix.
+	 * @since 3.2
+	 */
+	function load_pointers( $hook_suffix ) {
+		// Don't run on WP < 3.3.
+		if ( get_bloginfo( 'version' ) < '3.3' ) {
+			return;
+		}
+
+		// Get screen id.
+		$screen = get_current_screen();
+		$screen_id = $screen->id;
+
+		// Get pointers for this screen.
+		$pointers = apply_filters( 'wsal_pointers_' . $screen_id, array() );
+
+		if ( ! $pointers || ! is_array( $pointers ) ) {
+			return;
+		}
+
+		// Get dismissed pointers.
+		$dismissed = explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) );
+		$valid_pointers = array();
+
+		// Check pointers and remove dismissed ones.
+		foreach ( $pointers as $pointer_id => $pointer ) {
+			// Sanity check.
+			if (
+				in_array( $pointer_id, $dismissed )
+				|| empty( $pointer )
+				|| empty( $pointer_id )
+				|| empty( $pointer['target'] )
+				|| empty( $pointer['options'] )
+			) {
+				continue;
+			}
+			$pointer['pointer_id'] = $pointer_id;
+
+			// Add the pointer to $valid_pointers array.
+			$valid_pointers['pointers'][] = $pointer;
+		}
+
+		// No valid pointers? Stop here.
+		if ( empty( $valid_pointers ) ) {
+			return;
+		}
+
+		// Add pointers style to queue.
+		wp_enqueue_style( 'wp-pointer' );
+
+		// Add pointers script to queue. Add custom script.
+		wp_enqueue_script(
+			'auditlog-pointer',
+			$this->_plugin->GetBaseUrl() . '/js/auditlog-pointer.js',
+			array( 'wp-pointer' ),
+			filemtime( $this->_plugin->GetBaseDir() . '/js/auditlog-pointer.js' )
+		);
+
+		// Add pointer options to script.
+		wp_localize_script( 'auditlog-pointer', 'wsalPointer', $valid_pointers );
+	}
+
+	/**
+	 * Method: Register privacy pointer for WSAL.
+	 *
+	 * @param array $pointer - Current screen pointer array.
+	 * @return array
+	 * @since 3.2
+	 */
+	public function register_privacy_pointer( $pointer ) {
+		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
+		if (
+			current_user_can( 'manage_options' )
+			&& $is_current_view
+			&& ! $this->IsNoticeDismissed( 'wsal-privacy-notice-3.2' )
+		) {
+			$pointer['wsal_privacy'] = array(
+				'target' => '#toplevel_page_wsal-auditlog .wp-first-item',
+				'options' => array(
+					'content' => sprintf( '<h3> %s </h3> <p> %s </p> <p><strong>%s</strong></p>',
+						__( 'WordPress Activity Log', 'wp-security-audit-log' ),
+						__( 'When a user makes a change on your website the plugin will keep a record of that event here. Right now there is nothing because this is a new install.', 'wp-security-audit-log' ),
+						__( 'Thank you for using WP Security Audit Log', 'wp-security-audit-log' )
+					),
+					'position' => array(
+						'edge' => 'left',
+						'align' => 'top',
+					),
+				),
+			);
+		}
+		return $pointer;
 	}
 }

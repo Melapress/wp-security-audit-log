@@ -1,375 +1,457 @@
-var WsalData;
+window.WsalAs = ( function() {
+	var o = this;
+	var attachEvents = [];
 
-window['WsalAuditLogRefreshed'] = function () {
-	// fix pagination links causing form params to get lost
-	jQuery('span.pagination-links a').click(function (ev) {
-		ev.preventDefault();
-		var deparam = function (url) {
-			var obj = {};
-			var pairs = url.split('&');
-			for (var i in pairs) {
-				var split = pairs[i].split('=');
-				obj[decodeURIComponent(split[0])] = decodeURIComponent(split[1]);
+	o.AjaxUrl = window['ajaxurl'];
+	o.AjaxAction = 'WsalAsWidgetAjax';
+
+	// listen to auditlog refresh events
+	o._WsalAuditLogRefreshed = window['WsalAuditLogRefreshed'];
+	window['WsalAuditLogRefreshed'] = function(){
+		o.Attach();
+		o._WsalAuditLogRefreshed();
+
+		// IP Tooltip
+		jQuery( '.search-ip' ).darkTooltip( {
+			animation : 'fadeIn',
+	        gravity : 	'west',
+	        size : 		'large',
+	        confirm : 	true,
+	        yes : 		'Search',
+	        no : '',
+	        onYes: function( elem ) {
+				o.SearchByIP( elem.attr( 'data-ip' ) );
 			}
-			return obj;
-		};
-		var paged = deparam(this.href).paged;
-		if (typeof paged === 'undefined') paged = 1;
-		jQuery('#audit-log-viewer').append(
-			jQuery('<input type="hidden" name="paged"/>').val(paged)
-		).submit();
-	});
+		} );
 
-	var modification_alerts = ['1002', '1003', '6007', '6023'];
-
-	jQuery('.log-disable').each(function () {
-		if (-1 == modification_alerts.indexOf(this.innerText)) {
-			// Tooltip Confirm disable alert.
-			jQuery(this).darkTooltip({
-				animation: 'fadeIn',
-				size: 'small',
-				gravity: 'west',
-				confirm: true,
-				yes: 'Disable',
-				no: '',
-				onYes: function (elem) {
-					WsalDisableByCode(elem.attr('data-alert-id'), elem.data('disable-alert-nonce'))
-				}
-			});
-		} else {
-			// Tooltip Confirm disable alert.
-			jQuery(this).darkTooltip({
-				animation: 'fadeIn',
-				size: 'small',
-				gravity: 'west',
-				confirm: true,
-				yes: 'Disable',
-				no: '<span>Modify</span>',
-				onYes: function (elem) {
-					WsalDisableByCode(elem.attr('data-alert-id'), elem.data('disable-alert-nonce'));
-				},
-				onNo: function (elem) {
-					window.location.href = elem.attr('data-link');
-				}
-			});
-		}
-	});
-
-	// tooltip severity type
-	jQuery('.tooltip').darkTooltip({
-		animation: 'fadeIn',
-		gravity: 'west',
-		size: 'medium'
-	});
-
-	// Data inspector tooltip.
-	jQuery('.more-info').darkTooltip({
-		animation: 'fadeIn',
-		gravity: 'east',
-		size: 'medium'
-	});
-};
-
-function WsalAuditLogInit(_WsalData) {
-	WsalData = _WsalData;
-	var WsalTkn = WsalData.autorefresh.token;
-
-	// List refresher.
-	var WsalAjx = null;
-
-	/**
-	 * Check & Load New Alerts.
-	 */
-	var WsalChk = function () {
-		if (WsalAjx) WsalAjx.abort();
-		WsalAjx = jQuery.post(WsalData.ajaxurl, {
-			action: 'AjaxRefresh',
-			logcount: WsalTkn
-		}, function (data) {
-			WsalAjx = null;
-			if (data && data !== 'false') {
-				WsalTkn = data;
-				jQuery('#audit-log-viewer').load(
-					location.href + ' #audit-log-viewer-content',
-					window['WsalAuditLogRefreshed']
-				);
+		// Username Tooltip
+		jQuery( '.search-user' ).darkTooltip( {
+			animation : 'fadeIn',
+	        gravity : 	'west',
+	        size : 		'large',
+	        confirm : 	true,
+	        yes : 		'Search',
+	        no : '',
+	        onYes: function( elem ) {
+				o.SearchByUser( elem.attr( 'data-user' ) );
 			}
-		});
+		} );
+
+		// Search Help Tooltip.
+		jQuery( '#wsal-search-help' ).darkTooltip( {
+			animation : 'fadeIn',
+	        gravity : 	'north',
+	        size : 		'small',
+	        confirm : 	false,
+		} );
 	};
 
-	// If audit log auto refresh is enabled.
-	if (WsalData.autorefresh.enabled) {
-		// Check for new alerts every 30 secs.
-		setInterval(WsalChk, 30000);
-
-		// Make the first call on page load.
-		WsalChk();
+	// Search by IP callback.
+	o.SearchByIP = function ( ip ) {
+		if ( ip.length == 0 ) return;
+		window.WsalAs.real.removeAttr( 'value' );
+		window.WsalAs.ClearFilters();
+		jQuery( '#current-page-selector' ).attr( 'value', '1' );
+		var ip_filter = 'ip:' + ip;
+		o.AddFilter( ip_filter );
+		jQuery( '#audit-log-viewer' ).submit();
 	}
 
-	WsalSsasInit();
-}
+	// Search by username callback.
+	o.SearchByUser = function ( username ) {
+		if ( username.length == 0 ) return;
+		window.WsalAs.real.removeAttr( 'value' );
+		window.WsalAs.ClearFilters();
+		jQuery( '#current-page-selector' ).attr( 'value', '1' );
+		var username_filter = 'username:' + username;
+		o.AddFilter( username_filter );
+		jQuery( '#audit-log-viewer' ).submit();
+	}
 
-var WsalIppsPrev;
+	// add callbacks to attach event
+	o.Attach = function(cb){
+		if(typeof cb === 'undefined'){
+			// call callbacks
+			for(i = 0; i < attachEvents.length; i++)attachEvents[i]();
+		}else{
+			// add callbacks
+			attachEvents.push(cb);
+		}
+	};
 
-function WsalIppsFocus(value) {
-	WsalIppsPrev = value;
-}
+	// extend default search box
+	o.Attach(function(){
+		if (jQuery('#wsal-as-fake-search').length) return; // already attached
 
-function WsalIppsChange(value) {
-	jQuery('select.wsal-ipps').attr('disabled', true);
-	jQuery.post(WsalData.ajaxurl, {
-		action: 'AjaxSetIpp',
-		count: value
-	}, function () {
-		location.reload();
+		// select some important elements
+		o.real = jQuery('#wsal-as-search-search-input');
+		o.flds = jQuery('#wsal-as-filter-fields');
+		o.searchBox = jQuery( '.search-box' );
+
+		// nice search box effects
+		o.real.css('width', '160px')
+			.focus(function(){
+				o.real.animate({ width: '360px' }, 'fast');
+			})
+			.blur(function(){
+				o.real.animate({ width: '160px' }, 'fast');
+			});
+
+		// Search box help.
+		o.search_help = jQuery( '<span />' );
+		o.search_help.attr( 'id', 'wsal-search-help' );
+		o.search_help.text( '?' );
+		o.search_help.attr( 'data-tooltip', '- Use the free-text search to search for text in the alert\'s message.<br>- To search for a particular Alert ID, user, IP address, Post ID or Type or use date ranges, use the filters.' );
+
+		// attach filter counter and dropdown
+		o.fake = jQuery('<span id="wsal-as-fake-search" class="wsal-as-fake-search"/>');
+		o.cntr = jQuery('<a id="wsal-filters-btn" href="javascript:;">0 filters</a>');
+		o.ppup = jQuery('<div class="wsal-as-filter-popup" style="display: none;"/>');
+		o.list = jQuery('<div class="wsal-as-filter-list no-filters"/>');
+		o.real.before(o.ppup.append('', o.flds.show()), o.fake).appendTo(o.fake).after(o.cntr);
+		( o.list ).insertAfter( o.real );
+		( o.search_help ).insertBefore( o.list );
+
+		// Clear Search Button
+		o.clearBtn = jQuery( '<a></a>' );
+		o.clearBtn.attr( 'id', 'clear-search' );
+		o.clearBtn.addClass( 'button' );
+		o.clearBtn.text( 'Clear Search' );
+		o.clearBtn.attr( 'disabled', 'disabled' );
+
+		// Save Search Button
+		o.saveBtn = jQuery( '<a></a>' );
+		o.saveBtn.attr( 'id', 'save-search-btn' );
+		o.saveBtn.addClass( 'button' );
+		o.saveBtn.text( 'Save Search & Filters' );
+
+		// Load Search Button
+		o.loadBtn = jQuery( '<a></a>' );
+		o.loadBtn.attr( 'id', 'load-search-btn' );
+		o.loadBtn.addClass( 'button' );
+		o.loadBtn.text( 'Load Search & Filters' );
+
+		( o.loadBtn ).insertAfter( o.searchBox );
+		( o.saveBtn ).insertAfter( o.searchBox );
+		( o.clearBtn ).insertAfter( o.searchBox );
+
+		// Save Search Popup
+		o.save_popup = jQuery( '<div class="wsal-save-popup" style="display:none" />' );
+		o.save_name = jQuery( '<input name="wsal-save-search-name" id="wsal-save-search-name" placeholder="Search Save Name" />' );
+		o.save_btn = jQuery( '<button type="submit" class="button button-primary">Save</button>' );
+		o.save_error = jQuery( '<label id="wsal-save-search-error">Invalid Name</label>');
+		o.save_tooltip = jQuery( '<p class="wsal-save-tooltip" />' );
+		o.save_tooltip.text( 'Name can only be 12 characters long and only letters, numbers and underscore are allowed.' );
+		( o.save_popup ).insertAfter( o.ppup );
+		o.save_popup.append( o.save_name );
+		o.save_popup.append( o.save_btn );
+		o.save_popup.append( o.save_error );
+		o.save_popup.append( o.save_tooltip );
+
+		// Load Search Popup
+		o.load_popup = jQuery( '<div class="wsal-load-popup" style="display:none" />' );
+		o.load_list  = jQuery( '<div class="wsal-load-result-list" />' );
+		o.load_popup.append( '<a class="close" href="javascript;" title="Remove">&times;</a>' );
+		o.load_popup.append( load_list );
+		( o.load_popup ).insertAfter( o.save_popup );
+
+		o.cntr.click( function() {
+			o.save_popup.hide();
+			o.load_popup.fadeOut('fast');
+			o.ppup.toggle();
+		} );
+
+		o.saveBtn.click( function() {
+			o.ppup.hide();
+			o.load_popup.fadeOut('fast');
+			o.save_popup.toggle();
+		} );
+
+		jQuery( '.wsal-load-popup .close' ).click( function(e) {
+			e.preventDefault();
+			o.load_popup.fadeOut('fast');
+		} );
+
+		// attach suggestion dropdown
+		// TODO suggestions should cause user query to be removed and the selected filter to appear in filters box
 	});
-}
 
-function WsalSsasInit() {
-	var SsasAjx = null;
-	var SsasInps = jQuery("input.wsal-ssas");
-	SsasInps.after('<div class="wsal-ssas-dd" style="display: none;"/>');
-	SsasInps.click(function () {
-		jQuery(this).select();
-	});
-	window['WsalAuditLogRefreshed']();
-	SsasInps.keyup(function () {
-		var SsasInp = jQuery(this);
-		var SsasDiv = SsasInp.next();
-		var SsasVal = SsasInp.val();
-		if (SsasAjx) SsasAjx.abort();
-		SsasInp.removeClass('loading');
+	// add new filter
+	o.AddFilter = function(text){
+		var filter = text.split(':');
+		if (filter[0] == 'from' || filter[0] == 'to') {
+			// Validation date format
+			if (!checkDate(filter[1])) {
+	            return;
+	        }
+		}
+		if(!jQuery('input[name="Filters[]"][value="' + text + '"]').length){
+			o.list.append(
+				jQuery('<span/>').append(
+					jQuery('<input type="text" name="Filters[]"/>').val(text),
+					jQuery('<a href="javascript:;" title="Remove">&times;</a></span>')
+						.click(function(){
+							jQuery(this).parents('span:first').fadeOut('fast', function(){
+								jQuery(this).remove();
+								o.CountFilters();
+							});
+						})
+				)
+			);
+			o.clearBtn.removeAttr( 'disabled' );
+		}
+		o.CountFilters();
+	};
 
-		// do a new search
-		if (SsasInp.attr('data-oldvalue') !== SsasVal && SsasVal.length > 2) {
-			SsasInp.addClass('loading');
-			SsasAjx = jQuery.post(WsalData.ajaxurl, {
-				action: 'AjaxSearchSite',
-				search: SsasVal
-			}, function (data) {
-				if (SsasAjx) SsasAjx = null;
-				SsasInp.removeClass('loading');
-				SsasDiv.hide();
-				SsasDiv.html('');
-				if (data && data.length) {
-					var SsasReg = new RegExp(SsasVal.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'gi');
-					for (var i = 0; i < data.length; i++) {
-						var link = jQuery('<a href="javascript:;" onclick="WsalSsasChange(' + data[i].blog_id + ')"/>')
-							.text(data[i].blogname + ' (' + data[i].domain + ')');
-						link.html(link.text().replace(SsasReg, '<u>$&</u>'));
-						SsasDiv.append(link);
-					}
-				} else {
-					SsasDiv.append(jQuery('<span/>').text(WsalData.tr8n.searchnone));
+	// remove existing filters
+	o.ClearFilters = function(){
+		o.list.html('');
+		o.CountFilters();
+	};
+
+	// update filter count
+	o.CountFilters = function(){
+		var count = o.list.find('>span').length;
+		o.cntr.text(count + ' filters');
+		o.list[count === 0 ? 'addClass' : 'removeClass']('no-filters');
+	};
+
+	// Add new load result.
+	o.AddSaveSearch = function( search ) {
+		if ( ! search ) {
+			var result_item = jQuery( '<div></div>' );
+			result_item.addClass( 'saved-result-item' );
+
+			var result_name = jQuery( '<span></span>' );
+			result_name.addClass( 'save-result-name' );
+			result_name.text( 'Nothing found!' );
+
+			result_item.append( result_name );
+			o.load_list.append( result_item );
+			return;
+		}
+		var result_item = jQuery( '<div></div>' );
+		result_item.addClass( 'saved-result-item' );
+
+		var result_name = jQuery( '<span></span>' );
+		result_name.addClass( 'save-result-name' );
+		result_name.text( search['name'] );
+
+		var result_load = jQuery( '<a></a>' );
+		result_load.addClass( 'button button-primary load-search-result' );
+		result_load.text( 'Load' );
+		result_load.click( function( e ) {
+			e.preventDefault();
+			o.real.val( search.search_input );
+			o.list.empty();
+			if ( search.filters && search.filters.length > 0 ) {
+				for ( var i = 0; i < search.filters.length; i++ ) {
+					o.AddFilter( search.filters[i] );
 				}
-				SsasDiv.prepend(jQuery('<a href="javascript:;" onclick="WsalSsasChange(0)" class="allsites"/>').text(WsalData.tr8n.searchback));
-				SsasDiv.show();
-			}, 'json');
-			SsasInp.attr('data-oldvalue', SsasVal);
-		}
+			}
+			o.load_popup.fadeOut( 'fast' );
+		} );
 
-		// handle keys
-	});
-	SsasInps.blur(function () {
-		setTimeout(function () {
-			var SsasInp = jQuery(this);
-			var SsasDiv = SsasInp.next();
-			SsasInp.attr('data-oldvalue', '');
-			SsasDiv.hide();
-		}, 200);
-	});
-}
+		var result_load_run = jQuery( '<a></a>' );
+		result_load_run.addClass( 'button button-primary load-run-search-result' );
+		result_load_run.text( 'Load & Run' );
+		result_load_run.click( function( e ) {
+			e.preventDefault();
+			o.real.empty();
+			o.real.val( search.search_input );
+			o.list.empty();
+			if ( search.filters && search.filters.length > 0 ) {
+				for ( var i = 0; i < search.filters.length; i++ ) {
+					o.AddFilter( search.filters[i] );
+				}
+			}
+			jQuery( '#audit-log-viewer' ).submit();
+		} );
 
-function WsalSsasChange(value) {
-	jQuery('div.wsal-ssas-dd').hide();
-	jQuery('input.wsal-ssas').attr('disabled', true);
-	jQuery('#wsal-cbid').val(value);
-	jQuery('#audit-log-viewer').submit();
-}
+		var delete_search = jQuery( '<a></a>' );
+		delete_search.addClass( 'button button-primary delete-search-result' );
+		delete_search.text( 'Delete' );
 
-function WsalDisableCustom(link, meta_key) {
-	var nfe = jQuery(this).parents('div:first');
-	var nonce = jQuery(this).data('disable-custom-nonce');
-	jQuery(link).hide();
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		async: false,
-		data: { action: 'AjaxDisableCustomField', notice: meta_key, disable_nonce: nonce },
-		success: function (data) {
-			var notice = jQuery('<div class="updated" data-notice-name="notifications-extension"></div>').html(data);
-			jQuery("h2:first").after(notice);
-		}
-	});
-}
+		// Delete ajax request.
+		delete_search.click( function( e ) {
+			e.preventDefault();
+	    	delete_search.text( 'Deleting...' );
 
-function WsalDBChange(value) {
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		async: true,
-		data: {
-			action: 'AjaxSwitchDB',
-			selected_db: value
-		},
-		success: function () {
-			location.reload();
-		}
-	});
-}
+	    	// Get values of request.
+	    	var load_nonce 	= jQuery( '#load_saved_search_field' ).val();
+	    	var admin_url 	= jQuery( '#wsal-admin-url' ).val();
+			var delete_search_request = jQuery.ajax( {
+	            url : admin_url,
+	            type : "POST",
+	            data : {
+	            	nonce : load_nonce,
+	            	name : search.name,
+	                action : "wsal_delete_save_search",
+	            },
+	            dataType : "json"
+	        } );
 
-function WsalDisableByCode(code, nonce) {
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		async: true,
-		data: { action: 'AjaxDisableByCode', code: code, disable_nonce: nonce },
-		success: function (data) {
-			var notice = jQuery('<div class="updated" data-notice-name="disabled"></div>').html(data);
-			jQuery("h2:first").after(notice);
-		}
-	});
-}
+	        delete_search_request.done( function( response ) {
+	            if ( response.success ) {
+	                delete_search.text( 'Deleted' );
+	                result_item.fadeOut( 'slow' );
+	                // document.location.reload();
+	            } else {
+	                console.log( response.message );
+	            }
+	        });
 
-/**
- * Create and download a temporary file.
- *
- * @param {string} filename - File name.
- * @param {string} text - File content.
- */
-function download(filename, text) {
-	// Create temporary element.
-	var element = document.createElement('a');
-	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-	element.setAttribute('download', filename);
+	        delete_search_request.fail( function( jqXHR, textStatus ) {
+	            console.log( "Request Failed: " + textStatus );
+	        });
+		} );
 
-	// Set the element to not display.
-	element.style.display = 'none';
-	document.body.appendChild(element);
+		result_item.append( result_name );
+		result_item.append( result_load );
+		result_item.append( result_load_run );
+		result_item.append( delete_search );
 
-	// Simlate click on the element.
-	element.click();
+		o.load_list.append( result_item );
 
-	// Remove temporary element.
-	document.body.removeChild(element);
-}
-
-/**
- * Onclick event handler to download 404 log file.
- *
- * @param {object} element - Current element.
- */
-function download_404_log(element) {
-	download_nonce = jQuery(element).data('nonce-404'); // Nonce.
-	log_file = jQuery(element).data('log-file'); // Log file URL.
-	site_id = jQuery(element).data('site-id'); // Site ID.
-
-	if (!download_nonce || !log_file) {
-		console.log('Something went wrong!');
 	}
 
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		async: true,
-		dataType: 'json',
-		data: {
-			action: 'wsal_download_404_log',
-			nonce: download_nonce,
-			log_file: log_file,
-			site_id: site_id
-		},
-		success: function (data) {
-			if (data.success) {
-				download(data.filename, data.file_content);
-			} else {
-				console.log(data.message);
-			}
-		}
-	});
-}
+	return o;
+} )();
 
-/**
- * Onclick event handler to download failed login log file.
- *
- * @param {object} element - Current element.
- */
-function download_failed_login_log(element) {
-	nonce = jQuery(element).data('download-nonce'); // Nonce.
-	alert = jQuery(element).parent().attr('id').substring(5);
+jQuery( document ).ready( function( $ ) {
 
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		async: true,
-		data: {
-			action: 'wsal_download_failed_login_log',
-			download_nonce: nonce,
-			alert_id: alert
-		},
-		success: function (data) {
-			data = data.replace(/,/g, '\n');
-			// Start file download.
-			download('failed_logins.log', data);
-		}
-	});
-}
+	window.WsalAs.Attach();
+    wsal_CreateDatePicker($, $('#wsal_as_widget_from'), null);
+    wsal_CreateDatePicker($, $('#wsal_as_widget_to'), null);
 
-/**
- * Onclick event handler to implement user's choice to either
- * opt in or out of freemius.
- *
- * @param {string} element - Current element.
- */
-function wsal_freemius_opt_in( element ) {
-	var nonce  = jQuery( '#wsal-freemius-opt-nonce' ).val(); // Nonce.
-	var choice = jQuery( element ).data( 'opt' ); // Choice.
+    var wsal_search = window.WsalAs.real;
+    if ( wsal_search.val() != ' ' ) {
+    	window.WsalAs.clearBtn.removeAttr( 'disabled' );
+    }
 
-	jQuery.ajax( {
-		type: 'POST',
-		url: ajaxurl,
-		async: true,
-		data: {
-			action: 'wsal_freemius_opt_in',
-			opt_nonce: nonce,
-			choice: choice
-		},
-		success: function( data ) {
-			location.reload();
-		},
-		error: function( xhr, textStatus, error ) {
-			console.log( xhr.statusText );
-			console.log( textStatus );
-			console.log( error );
+    // Clear Search Button JS.
+    $( window.WsalAs.clearBtn ).click( function( event ) {
+    	event.preventDefault();
+    	if ( 'disabled' == $( window.WsalAs.clearBtn ).attr( 'disabled' ) ) return;
+    	window.WsalAs.real.removeAttr( 'value' );
+    	window.WsalAs.ClearFilters();
+    	location.reload();
+    } );
+
+    // Manually add ip.
+    $( '#wsal-add-ip-filter' ).click( function( event ) {
+    	event.preventDefault();
+    	var ip = $( 'input#wsal_as_widget_ip[data-prefix="ip"]' );
+    	var ip_value = ip.val();
+    	if ( ip_value.length == 0 ) return;
+    	var ip_filter_value = 'ip:' + ip_value;
+    	window.WsalAs.AddFilter( ip_filter_value );
+    	ip.removeAttr( 'value' );
+	} );
+
+	// Trigger search on ENTER.
+	$( '#wsal-as-search-search-input' ).keypress( function( event ) {
+		if ( 13 === event.which ) {
+			$( '#audit-log-viewer' ).submit();
 		}
 	} );
-}
 
-/**
- * Onclick event handler to dismiss privacy notice.
- *
- * @param {string} element - Current element.
- */
-function wsal_dismiss_privacy_notice( element ) {
-	var nonce  = jQuery( '#wsal_dismiss_privacy_nonce' ).val(); // Nonce.
-	var notice = jQuery( element ).data( 'notice-name' ); // Notice name.
+    /**
+     * Load Search Results Ajax Request.
+     *
+     * @since 1.1.7
+     */
+    var load_btn = $( window.WsalAs.loadBtn );
+    var saved_searches; // To store saved search results.
+    load_btn.click( function( event ) {
 
-	jQuery.ajax( {
-		type: 'POST',
-		url: ajaxurl,
-		async: true,
-		data: {
-			action: 'wsal_dismiss_privacy_notice',
-			dismiss_nonce: nonce,
-			notice: notice
-		},
-		success: function( data ) {
-			jQuery( element ).parents( '#wsal_privacy_notice' ).fadeOut();
-		},
-		error: function( xhr, textStatus, error ) {
-			console.log( xhr.statusText );
-			console.log( textStatus );
-			console.log( error );
-		}
-	} );
-}
+    	event.preventDefault();
+    	load_btn.text( 'Loading...' );
+    	window.WsalAs.save_popup.hide();
+		window.WsalAs.ppup.hide();
+
+    	// Get values of request.
+    	var load_nonce 	= $( '#load_saved_search_field' ).val();
+    	var admin_url 	= $( '#wsal-admin-url' ).val();
+
+    	// Get results list container.
+    	var load_popup = $( window.WsalAs.load_popup );
+    	var load_list = $( window.WsalAs.load_list );
+    	load_list.empty();
+
+    	var load_saved_search_request = $.ajax( {
+            url : admin_url,
+            type : "POST",
+            data : {
+            	nonce : load_nonce,
+                action : "wsal_get_save_search",
+            },
+            dataType : "json"
+        } );
+
+        load_saved_search_request.done( function( response ) {
+            if ( response.success ) {
+                load_btn.text( 'Load Search & Filters' );
+                load_popup.fadeIn( 'fast' );
+                if ( response.search_results ) {
+                	var search_count = response.search_results.length;
+                	saved_searches = response.search_results;
+                } else {
+                	window.WsalAs.AddSaveSearch();
+                }
+
+                for ( var i = 0; i < search_count; i++ ) {
+                	window.WsalAs.AddSaveSearch( response.search_results[i] );
+                }
+            } else {
+            	load_btn.text( 'Load Search & Filters' );
+            	load_popup.fadeIn( 'fast' );
+            	window.WsalAs.AddSaveSearch();
+                console.log( response.message );
+            }
+        });
+
+        load_saved_search_request.fail( function( jqXHR, textStatus ) {
+            console.log( "Request Failed: " + textStatus );
+        });
+    } );
+
+    // Search save name pattern detection.
+    $( '#wsal-save-search-name' ).on( "change keyup paste", function() {
+    	var search_name = $( this ).val();
+    	window.WsalAs.save_error.hide();
+    	window.WsalAs.save_btn.removeAttr( 'disabled' );
+    	var name_length = search_name.length;
+    	if ( 12 <= name_length ) {
+    		window.WsalAs.save_error.show();
+    		window.WsalAs.save_btn.attr( 'disabled', 'disabled' );
+    	}
+
+    	var name_pattern = /^[a-z\d\_]+$/i;
+    	if ( name_length && ! name_pattern.test( search_name ) ) {
+    		window.WsalAs.save_error.show();
+    		window.WsalAs.save_btn.attr( 'disabled', 'disabled' );
+    	}
+    } );
+
+    // IP address validation.
+    var ip_error = jQuery( '<span />' );
+    ip_error.addClass( 'wsal-input-error' );
+    ip_error.text( '* Invalid IP' );
+    var ip_label = jQuery( 'label[for="wsal_as_widget_ip"]' );
+    ip_label.append( ip_error );
+
+    $( '#wsal_as_widget_ip' ).on( 'change keyup paste', function() {
+    	var ip_value = $( this ).val();
+    	var ip_add_btn = $( '#wsal-add-ip-filter' );
+    	ip_error.hide();
+    	ip_add_btn.removeAttr( 'disabled' );
+
+    	var ip_pattern = /^(?!.*\.$)((1?\d?\d|25[0-5]|2[0-4]\d)(\.|$)){4}$/;
+    	if ( ip_value.length && ! ip_pattern.test( ip_value ) ) {
+    		ip_error.show();
+    		ip_add_btn.attr( 'disabled', 'disabled' );
+    	}
+    } );
+
+} );

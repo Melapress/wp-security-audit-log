@@ -356,11 +356,6 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 6023, E_NOTICE, __( 'Website Visitor User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Website Visitor Has requested a non existing page (404 Error Pages) %Attempts% %Msg%. %LinkFile%', 'wp-security-audit-log' ) ),
 					array( 6024, E_CRITICAL, __( 'Option WordPress Address (URL) in WordPress settings changed', 'wp-security-audit-log' ), __( 'Changed the WordPress address (URL) from %old_url% to %new_url%.', 'wp-security-audit-log' ) ),
 					array( 6025, E_CRITICAL, __( 'Option Site Address (URL) in WordPress settings changed', 'wp-security-audit-log' ), __( 'Changed the site address (URL) from %old_url% to %new_url%.', 'wp-security-audit-log' ) ),
-					array( 6028, E_CRITICAL, __( 'File content has been modified.', 'wp-security-audit-log' ), __( 'The content of the file %FileLocation% has been modified.', 'wp-security-audit-log' ) ),
-					array( 6029, E_CRITICAL, __( 'File added to the site.', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been added to your website.', 'wp-security-audit-log' ) ),
-					array( 6030, E_CRITICAL, __( 'File deleted from the site.', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been deleted from your website.', 'wp-security-audit-log' ) ),
-					array( 6031, E_CRITICAL, __( 'File not scanned due to large file size.', 'wp-security-audit-log' ), __( 'The file %FileLocation% was not scanned because it is bigger than 2MB. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
-					array( 6032, E_CRITICAL, __( 'File changes scan stopped due to the limit of 1 million files.', 'wp-security-audit-log' ), __( 'The file changes scanning engine has reached the limit of 1 million files and stopped the scan. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
 					array( 9999, E_CRITICAL, __( 'Advertising Add-ons.', 'wp-security-audit-log' ), __( '%PromoName% %PromoMessage%', 'wp-security-audit-log' ) ),
 				),
 
@@ -409,6 +404,14 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 6020, E_CRITICAL, __( 'Changed status of the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% was %status%.', 'wp-security-audit-log' ) ),
 					array( 6021, E_CRITICAL, __( 'Deleted the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% was deleted.', 'wp-security-audit-log' ) ),
 					array( 6022, E_NOTICE, __( 'Started the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% has just started.', 'wp-security-audit-log' ) ),
+				),
+
+				__( 'File Changes', 'wp-security-audit-log' ) => array(
+					array( 6028, E_CRITICAL, __( 'File content has been modified.', 'wp-security-audit-log' ), __( 'The content of the file %FileLocation% has been modified.', 'wp-security-audit-log' ) ),
+					array( 6029, E_CRITICAL, __( 'File added to the site.', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been added to your website.', 'wp-security-audit-log' ) ),
+					array( 6030, E_CRITICAL, __( 'File deleted from the site.', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been deleted from your website.', 'wp-security-audit-log' ) ),
+					array( 6031, E_CRITICAL, __( 'File not scanned due to large file size.', 'wp-security-audit-log' ), __( 'The file %FileLocation% was not scanned because it is bigger than 2MB. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
+					array( 6032, E_CRITICAL, __( 'File changes scan stopped due to the limit of 1 million files.', 'wp-security-audit-log' ), __( 'The file changes scanning engine has reached the limit of 1 million files and stopped the scan. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
 				),
 			),
 
