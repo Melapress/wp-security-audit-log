@@ -249,7 +249,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			) { // If the redirect option is true, then continue.
 				delete_option( 'wsal_redirect_on_activate' ); // Delete redirect option.
 				// Redirect to main page.
-				wp_safe_redirect( add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) ) );
+				$redirect = '';
+				if ( ! $this->IsMultisite() ) {
+					$redirect = add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) );
+				} else {
+					$redirect = add_query_arg( 'page', 'wsal-auditlog', network_admin_url( 'admin.php' ) );
+				}
+				wp_safe_redirect( $redirect );
 				exit();
 			}
 		}
