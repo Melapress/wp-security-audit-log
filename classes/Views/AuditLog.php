@@ -557,7 +557,20 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			update_site_option( 'wpsal_anonymous_mode', 0 );
 
 			if ( 'yes' === $choice ) {
-				wsal_freemius()->opt_in(); // Opt in.
+				if ( ! is_multisite() ) {
+					wsal_freemius()->opt_in(); // Opt in.
+				} else {
+					// Get sites.
+					$sites = Freemius::get_sites();
+					$sites_data = array();
+
+					if ( ! empty( $sites ) ) {
+						foreach ( $sites as $site ) {
+							$sites_data[] = wsal_freemius()->get_site_info( $site );
+						}
+					}
+					wsal_freemius()->opt_in( false, false, false, false, false, false, false, false, $sites_data );
+				}
 			} elseif ( 'no' === $choice ) {
 				wsal_freemius()->skip_connection(); // Opt out.
 			}
