@@ -577,7 +577,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					wsal_freemius()->opt_in( false, false, false, false, false, false, false, false, $sites_data );
 				}
 			} elseif ( 'no' === $choice ) {
-				wsal_freemius()->skip_connection(); // Opt out.
+				if ( ! is_multisite() ) {
+					wsal_freemius()->skip_connection(); // Opt out.
+				} else {
+					wsal_freemius()->skip_connection( null, true ); // Opt out for all websites.
+				}
 			}
 
 			echo wp_json_encode( array(
