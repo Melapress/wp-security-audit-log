@@ -835,33 +835,25 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<!-- wsal-file-changes -->
 						<tr>
 							<th>
-								<label for="wsal-file-alert-types"><?php esc_html_e( 'Alert me when a file is', 'wp-security-audit-log' ); ?></label>
+								<label for="wsal-file-alert-types"><?php esc_html_e( 'Alert me when', 'wp-security-audit-log' ); ?></label>
 							</th>
 							<td>
-								<?php
-								$alert_types = array(
-									'created' => __( 'Created (Alert 6029)', 'wp-security-audit-log' ),
-									'updated' => __( 'Updated (Alert 6028)', 'wp-security-audit-log' ),
-									'deleted' => __( 'Deleted (Alert 6030)', 'wp-security-audit-log' ),
-								);
-								?>
-								<fieldset id="wsal-file-alert-types">
-									<?php foreach ( $alert_types as $value => $html ) : ?>
-										<label>
-											<input
-												name="wsal-file-alert-types[<?php echo esc_attr( $value ); ?>]"
-												type="checkbox"
-												value="<?php echo esc_attr( $value ); ?>"
-												<?php echo esc_attr( in_array( $value, $this->scan_settings['scan_alert_types'], true ) ? 'checked' : false ); ?>
-											/>
-											<?php echo esc_html( $html ); ?>
-										</label>
-										<br />
-									<?php endforeach; ?>
-								</fieldset>
-								<span class="description">
-									<?php esc_html_e( 'Select the type of file change alert to keep a log of.', 'wp-security-audit-log' ); ?>
-								</span>
+								<p>
+									<?php
+									$wsal_events_page = '';
+									if ( ! is_multisite() ) {
+										$wsal_events_page = add_query_arg( 'page', 'wsal-togglealerts', admin_url( 'admin.php' ) );
+									} else {
+										$wsal_events_page = add_query_arg( 'page', 'wsal-togglealerts', network_admin_url( 'admin.php' ) );
+									}
+									?>
+									<a href="<?php echo esc_url( $wsal_events_page . '#tab-file-changes' ); ?>">
+										<?php esc_html_e( 'these events happen', 'wp-security-audit-log' ); ?>
+									</a>
+								</p>
+								<p class="description">
+									<?php esc_html_e( 'Click on the link above to select the type of file changes events you want to keep a log of in the activity log. Save your settings prior to navigating away from this page.', 'wp-security-audit-log' ); ?>
+								</p>
 							</td>
 						</tr>
 						<!-- wsal-file-alert-types -->

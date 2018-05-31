@@ -141,6 +141,12 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 	 * Method: Load file detection settings.
 	 */
 	public function load_file_change_settings() {
+		if ( ! is_multisite() ) {
+			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads' );
+		} else {
+			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads', 'wp-content/uploads/sites' );
+		}
+
 		// Load file detection settings.
 		$this->scan_settings = array(
 			'scan_file_changes'   => $this->plugin->GetGlobalOption( 'scan-file-changes', 'enable' ),
@@ -148,7 +154,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 			'scan_hour'           => $this->plugin->GetGlobalOption( 'scan-hour', '04' ),
 			'scan_day'            => $this->plugin->GetGlobalOption( 'scan-day', '1' ),
 			'scan_date'           => $this->plugin->GetGlobalOption( 'scan-date', '10' ),
-			'scan_directories'    => $this->plugin->GetGlobalOption( 'scan-directories', array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads' ) ),
+			'scan_directories'    => $this->plugin->GetGlobalOption( 'scan-directories', $default_scan_dirs ),
 			'scan_alert_types'    => $this->plugin->GetGlobalOption( 'scan-alert-types', array( 'created', 'updated', 'deleted' ) ),
 			'excluded_extensions' => $this->plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav' ) ),
 			'excluded_files'      => $this->plugin->GetGlobalOption( 'scan_excluded_files', array() ),

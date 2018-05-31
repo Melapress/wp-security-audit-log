@@ -191,6 +191,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								</thead>
 								<tbody id="<?php echo ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) ? 'alerts-file-changes' : false; ?>">
 									<?php
+									// Content section notice.
 									if ( __( 'Content', 'wp-security-audit-log' ) === $subname ) :
 										?>
 										<tr>
@@ -200,6 +201,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										</tr>
 										<?php
 									endif;
+
+									// Events sections loop.
 									foreach ( $alerts as $alert ) {
 										if ( $alert->type <= 0006 ) {
 											continue; // <- Ignore php alerts.
@@ -326,6 +329,25 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<?php
 										}
 									}
+
+									// File integrity scan link.
+									if ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) :
+										$wsal_settings_page = '';
+										if ( ! is_multisite() ) {
+											$wsal_settings_page = add_query_arg( 'page', 'wsal-settings', admin_url( 'admin.php' ) );
+										} else {
+											$wsal_settings_page = add_query_arg( 'page', 'wsal-settings', network_admin_url( 'admin.php' ) );
+										}
+										?>
+										<tr>
+											<td colspan="4">
+												<a href="<?php echo esc_url( $wsal_settings_page . '#tab-file-changes' ); ?>" class="wsal-tab-help">
+													<?php esc_html_e( 'Configure the file integrity scan settings.', 'wp-security-audit-log' ); ?>
+												</a>
+											</td>
+										</tr>
+										<?php
+									endif;
 									?>
 								</tbody>
 							</table>

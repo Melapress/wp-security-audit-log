@@ -120,8 +120,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Get DB connector.
 		$db_config  = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
-		$wsal_db  = $this->_plugin->getConnector( $db_config )->getConnection(); // Get DB connection.
-		$connection = 0 !== (int) $wsal_db->dbh->errno ? false : true; // Database connection error check.
+		$wsal_db    = $this->_plugin->getConnector( $db_config )->getConnection(); // Get DB connection.
+		$connection = true;
+		if ( isset( $wsal_db->dbh->errno ) ) {
+			$connection = 0 !== (int) $wsal_db->dbh->errno ? false : true; // Database connection error check.
+		} elseif ( is_wp_error( $wsal_db->error ) ) {
+			$connection = false;
+		}
 
 		// Add connectivity notice.
 		if ( ! $connection ) {
