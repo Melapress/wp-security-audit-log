@@ -3145,7 +3145,7 @@
             if ( $is_connected ) {
                 FS_GDPR_Manager::instance()->store_is_required( $pong->is_gdpr_required );
             }
-            
+
             $this->store_connectivity_info( $pong, $is_connected );
 
             return $this->_has_api_connection;
@@ -3263,8 +3263,58 @@
          */
         static function _get_current_wp_user() {
             self::require_pluggable_essentials();
-
+            self::wp_cookie_constants();
             return wp_get_current_user();
+        }
+
+        /**
+         * Define cookie constants which are required by Freemius::_get_current_wp_user() since
+         * it uses wp_get_current_user() which needs the cookie constants set. When a plugin
+         * is network activated the cookie constants are only configured after the network
+         * plugins activation, therefore, if we don't define those constants WP will throw
+         * PHP warnings/notices.
+         *
+         * @author   Vova Feldman (@svovaf)
+         * @since    2.1.1
+         */
+        private static function wp_cookie_constants() {
+            if ( defined( 'LOGGED_IN_COOKIE' ) &&
+                ( defined( 'AUTH_COOKIE' ) || defined( 'SECURE_AUTH_COOKIE' ) )
+            ) {
+                return;
+            }
+
+            /**
+             * Used to guarantee unique hash cookies
+             *
+             * @since 1.5.0
+             */
+            if ( ! defined( 'COOKIEHASH' ) ) {
+                $siteurl = get_site_option( 'siteurl' );
+                if ( $siteurl ) {
+                    define( 'COOKIEHASH', md5( $siteurl ) );
+                } else {
+                    define( 'COOKIEHASH', '' );
+                }
+            }
+
+            if ( ! defined( 'LOGGED_IN_COOKIE' ) ) {
+                define( 'LOGGED_IN_COOKIE', 'wordpress_logged_in_' . COOKIEHASH );
+            }
+
+            /**
+             * @since 2.5.0
+             */
+            if ( ! defined( 'AUTH_COOKIE' ) ) {
+                define( 'AUTH_COOKIE', 'wordpress_' . COOKIEHASH );
+            }
+
+            /**
+             * @since 2.6.0
+             */
+            if ( ! defined( 'SECURE_AUTH_COOKIE' ) ) {
+                define( 'SECURE_AUTH_COOKIE', 'wordpress_sec_' . COOKIEHASH );
+            }
         }
 
         /**
@@ -10536,7 +10586,7 @@
          */
         function _activate_license_ajax_action() {
             $this->_logger->entrance();
-            
+
             $this->check_ajax_referer( 'activate_license' );
 
             $license_key = trim( fs_request_get( 'license_key' ) );
