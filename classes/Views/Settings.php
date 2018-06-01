@@ -142,7 +142,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			'scan_day'          => $this->_plugin->GetGlobalOption( 'scan-day', '1' ),
 			'scan_date'         => $this->_plugin->GetGlobalOption( 'scan-date', '10' ),
 			'scan_directories'  => $this->_plugin->GetGlobalOption( 'scan-directories', $default_scan_dirs ),
-			'scan_alert_types'  => $this->_plugin->GetGlobalOption( 'scan-alert-types', array( 'created', 'updated', 'deleted' ) ),
 			'scan_excluded_extensions' => $this->_plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav' ) ),
 			'scan_in_progress'  => $this->_plugin->GetGlobalOption( 'scan-in-progress', false ),
 		);
@@ -251,13 +250,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		&& is_array( $post_array['wsal-scan-directories'] ) ) {
 			$scan_directories = array_keys( $post_array['wsal-scan-directories'] );
 			$this->_plugin->SetGlobalOption( 'scan-directories', $scan_directories );
-		}
-
-		// Check and save scan alert types.
-		if ( isset( $post_array['wsal-file-alert-types'] )
-		&& is_array( $post_array['wsal-file-alert-types'] ) ) {
-			$scan_alert_types = array_keys( $post_array['wsal-file-alert-types'] );
-			$this->_plugin->SetGlobalOption( 'scan-alert-types', $scan_alert_types );
 		}
 	}
 
