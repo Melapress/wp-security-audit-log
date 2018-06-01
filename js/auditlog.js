@@ -314,3 +314,33 @@ function download_failed_login_log(element) {
 		}
 	});
 }
+
+/**
+ * Onclick event handler to implement user's choice to either
+ * opt in or out of freemius.
+ *
+ * @param {string} element - Current element.
+ */
+function wsal_freemius_opt_in( element ) {
+	var nonce  = jQuery( '#wsal-freemius-opt-nonce' ).val(); // Nonce.
+	var choice = jQuery( element ).data( 'opt' ); // Choice.
+
+	jQuery.ajax( {
+		type: 'POST',
+		url: ajaxurl,
+		async: true,
+		data: {
+			action: 'wsal_freemius_opt_in',
+			opt_nonce: nonce,
+			choice: choice
+		},
+		success: function( data ) {
+			location.reload();
+		},
+		error: function( xhr, textStatus, error ) {
+			console.log( xhr.statusText );
+			console.log( textStatus );
+			console.log( error );
+		}
+	} );
+}

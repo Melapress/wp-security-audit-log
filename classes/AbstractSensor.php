@@ -17,7 +17,7 @@ abstract class WSAL_AbstractSensor {
 	/**
 	 * Method: Constructor.
 	 *
-	 * @param  object $plugin - Instance of WpSecurityAuditLog.
+	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->plugin = $plugin;

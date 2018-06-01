@@ -112,6 +112,23 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 			$this->_plugin->settings->set_failed_login_limit( $post_array['log_failed_login_limit'] );
 			$this->_plugin->settings->set_visitor_failed_login_limit( $post_array['log_visitor_failed_login_limit'] );
+
+			// Get file change scan alerts.
+			$file_change_alerts = $this->_plugin->alerts->get_alerts_by_sub_category( 'File Changes' );
+			$file_change_alerts = array_keys( $file_change_alerts );
+
+			// Toggle file change.
+			$file_change_toggle = 'disable';
+
+			// Check each file change alert to see if it is active or not.
+			foreach ( $file_change_alerts as $alert ) {
+				if ( ! in_array( $alert, $disabled, true ) ) { // If any one alert is active, then.
+					$file_change_toggle = 'enable'; // Enable the file change.
+				}
+			}
+
+			// Set the option.
+			$this->_plugin->SetGlobalOption( 'scan-file-changes', $file_change_toggle );
 		}
 		?>
 		<h2 id="wsal-tabs" class="nav-tab-wrapper">
@@ -129,14 +146,12 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						<h2 class="nav-tab-wrapper wsal-sub-tabs">
 							<?php
 							foreach ( $group as $subname => $alerts ) :
-								$tab_id = $this->GetSafeCatgName( $subname );
-
 								// Skip Pages and CPTs section.
-								if ( 'custom-post-types' === $tab_id || 'pages' === $tab_id ) {
+								if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
 									continue;
 								}
 								?>
-								<a href="#tab-<?php echo esc_attr( $tab_id ); ?>"
+								<a href="#tab-<?php echo esc_attr( $this->GetSafeCatgName( $subname ) ); ?>"
 									class="nav-tab"
 									data-parent="tab-<?php echo esc_attr( $safe_names[ $name ] ); ?>">
 									<?php echo esc_html( $subname ); ?>
@@ -160,11 +175,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								}
 							}
 
-							// Get tab id.
-							$tab_id = $this->GetSafeCatgName( $subname );
-
 							// Skip Pages and CPTs section.
-							if ( 'custom-post-types' === $tab_id || 'pages' === $tab_id ) {
+							if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
 								continue;
 							}
 							?>
@@ -177,9 +189,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										<th><?php esc_html_e( 'Description', 'wp-security-audit-log' ); ?></th>
 									</tr>
 								</thead>
-								<tbody>
+								<tbody id="<?php echo ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) ? 'alerts-file-changes' : false; ?>">
 									<?php
-									if ( 'content' === $tab_id ) :
+									// Content section notice.
+									if ( __( 'Content', 'wp-security-audit-log' ) === $subname ) :
 										?>
 										<tr>
 											<td colspan="4">
@@ -188,6 +201,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										</tr>
 										<?php
 									endif;
+
+									// Events sections loop.
 									foreach ( $alerts as $alert ) {
 										if ( $alert->type <= 0006 ) {
 											continue; // <- Ignore php alerts.
@@ -207,9 +222,14 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										?>
 										<tr <?php echo esc_attr( $attrs ); ?>>
 											<th>
-												<input name="alert[]" type="checkbox"
+												<input
+													name="alert[]"
+													type="checkbox"
+													class="alert"
 													<?php checked( $active[ $alert->type ] ); ?>
-													value="<?php echo (int) $alert->type; ?>">
+													value="<?php echo (int) $alert->type; ?>"
+													<?php echo ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) ? 'onclick="wsal_toggle_file_changes(this)"' : false; ?>
+												/>
 											</th>
 											<td><?php echo esc_html( str_pad( $alert->type, 4, '0', STR_PAD_LEFT ) ); ?></td>
 											<td><?php echo esc_html( $this->_plugin->constants->GetConstantBy( 'value', $alert->code )->name ); ?></td>
@@ -309,6 +329,25 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<?php
 										}
 									}
+
+									// File integrity scan link.
+									if ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) :
+										$wsal_settings_page = '';
+										if ( ! is_multisite() ) {
+											$wsal_settings_page = add_query_arg( 'page', 'wsal-settings', admin_url( 'admin.php' ) );
+										} else {
+											$wsal_settings_page = add_query_arg( 'page', 'wsal-settings', network_admin_url( 'admin.php' ) );
+										}
+										?>
+										<tr>
+											<td colspan="4">
+												<a href="<?php echo esc_url( $wsal_settings_page . '#tab-file-changes' ); ?>" class="wsal-tab-help">
+													<?php esc_html_e( 'Configure the file integrity scan settings.', 'wp-security-audit-log' ); ?>
+												</a>
+											</td>
+										</tr>
+										<?php
+									endif;
 									?>
 								</tbody>
 							</table>
@@ -320,6 +359,19 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			</div>
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save Changes', 'wp-security-audit-log' ) ); ?>"></p>
 		</form>
+
+		<!-- Terminal all sessions modal -->
+		<div class="remodal" data-remodal-id="wsal-toggle-file-changes-scan">
+			<button data-remodal-action="close" class="remodal-close"></button>
+			<h3><?php esc_html_e( 'Enable File Integrity Scanner', 'wp-security-audit-log' ); ?></h3>
+			<p>
+				<?php esc_html_e( 'The file integrity scanner is switched off. To enable this event it has to be switched on.', 'wp-security-audit-log' ); ?>
+			</p>
+			<br>
+			<input type="hidden" id="wsal-toggle-file-changes-nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-toggle-file-changes' ) ); ?>">
+			<button data-remodal-action="confirm" class="remodal-confirm"><?php esc_html_e( 'SWITCH ON', 'wp-security-audit-log' ); ?></button>
+			<button data-remodal-action="cancel" class="remodal-cancel"><?php esc_html_e( 'DISABLE EVENT', 'wp-security-audit-log' ); ?></button>
+		</div>
 		<?php
 	}
 
@@ -327,6 +379,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	 * Method: Get View Header.
 	 */
 	public function Header() {
+		// Remodal styles.
+		wp_enqueue_style( 'wsal-remodal', WSAL_BASE_URL . 'css/remodal.css', array(), '1.1.1' );
+		wp_enqueue_style( 'wsal-remodal-theme', WSAL_BASE_URL . 'css/remodal-default-theme.css', array(), '1.1.1' );
 		?>
 		<style type="text/css">
 			.wsal-tab {
@@ -359,6 +414,14 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	 * Method: Get View Footer.
 	 */
 	public function Footer() {
+		// Remodal script.
+		wp_enqueue_script(
+			'wsal-remodal-js',
+			WSAL_BASE_URL . 'js/remodal.min.js',
+			array(),
+			'1.1.1',
+			true
+		);
 		?>
 		<script type="text/javascript">
 			jQuery(document).ready(function(){
@@ -424,6 +487,34 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						jQuery(".check_visitor_log").removeAttr('checked');
 					}
 				});
+			});
+
+			var alerts = jQuery( '#alerts-file-changes .alert' ); // File change alerts.
+			var toggle_modal = jQuery( '[data-remodal-id=wsal-toggle-file-changes-scan]' ); // File change toggle modal.
+
+			function wsal_toggle_file_changes( element ) {
+				if ( jQuery( element ).is( ':checked' ) ) {
+					var alert_count = 0;
+
+					for ( var index = 0; index < alerts.length; index++ ) {
+						if ( jQuery( alerts[ index ] ).is( ':checked' ) ) {
+							alert_count++;
+						}
+					}
+
+					if ( alert_count === 1 ) {
+						var modal = toggle_modal.remodal();
+						modal.open();
+					}
+				}
+			}
+
+			jQuery(document).on('closed', toggle_modal, function (event) {
+				if (event.reason && event.reason === 'cancellation') {
+					for ( var index = 0; index < alerts.length; index++ ) {
+						jQuery( alerts[ index ] ).prop( 'checked', false );
+					}
+				}
 			});
 		</script>
 		<?php

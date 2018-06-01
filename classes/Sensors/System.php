@@ -552,6 +552,15 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 						'NewVersion' => $new_version,
 					)
 				);
+
+				// Get `site_content` option.
+				$site_content = $this->plugin->GetGlobalOption( 'site_content' );
+
+				// Check if the option is instance of stdClass.
+				if ( $site_content instanceof stdClass ) {
+					$site_content->skip_core = true; // Set skip core to true to skip file alerts after a core update.
+					$this->plugin->SetGlobalOption( 'site_content', $site_content ); // Save the option.
+				}
 			}
 		}
 
@@ -626,6 +635,15 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					'NewVersion' => $obj->item->version . ' (auto update)',
 				)
 			);
+
+			// Get `site_content` option.
+			$site_content = $this->plugin->GetGlobalOption( 'site_content' );
+
+			// Check if the option is instance of stdClass.
+			if ( $site_content instanceof stdClass ) {
+				$site_content->skip_core = true; // Set skip core to true to skip file alerts after a core update.
+				$this->plugin->SetGlobalOption( 'site_content', $site_content ); // Save the option.
+			}
 		}
 	}
 

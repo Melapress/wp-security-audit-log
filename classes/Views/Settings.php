@@ -30,6 +30,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	public $adapter_msg = '';
 
 	/**
+	 * Scan settings.
+	 *
+	 * @var array
+	 */
+	private $scan_settings = array();
+
+	/**
 	 * Method: Constructor.
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
@@ -41,6 +48,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		add_action( 'wp_ajax_AjaxGetAllUsers', array( $this, 'AjaxGetAllUsers' ) );
 		add_action( 'wp_ajax_AjaxGetAllRoles', array( $this, 'AjaxGetAllRoles' ) );
 		add_action( 'wp_ajax_AjaxGetAllCPT', array( $this, 'AjaxGetAllCPT' ) );
+		add_action( 'wp_ajax_wsal_scan_add_exception', array( $this, 'scan_add_exception_file' ) );
+		add_action( 'wp_ajax_wsal_scan_remove_exception', array( $this, 'scan_remove_exception_file' ) );
+		add_action( 'wp_ajax_wsal_manual_scan_now', array( $this, 'run_manual_scan_now' ) );
+		add_action( 'wp_ajax_wsal_stop_file_changes_scan', array( $this, 'stop_file_changes_scan' ) );
 	}
 
 	/**
@@ -114,6 +125,29 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	/**
+	 * Method: Load saved settings of this view.
+	 */
+	public function load_file_changes_settings() {
+		if ( ! is_multisite() ) {
+			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads' );
+		} else {
+			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads', 'wp-content/uploads/sites' );
+		}
+
+		// Load saved settings of this view.
+		$this->scan_settings = array(
+			'scan_file_changes' => $this->_plugin->GetGlobalOption( 'scan-file-changes', 'enable' ),
+			'scan_frequency'    => $this->_plugin->GetGlobalOption( 'scan-frequency', 'weekly' ),
+			'scan_hour'         => $this->_plugin->GetGlobalOption( 'scan-hour', '04' ),
+			'scan_day'          => $this->_plugin->GetGlobalOption( 'scan-day', '1' ),
+			'scan_date'         => $this->_plugin->GetGlobalOption( 'scan-date', '10' ),
+			'scan_directories'  => $this->_plugin->GetGlobalOption( 'scan-directories', $default_scan_dirs ),
+			'scan_excluded_extensions' => $this->_plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav' ) ),
+			'scan_in_progress'  => $this->_plugin->GetGlobalOption( 'scan-in-progress', false ),
+		);
+	}
+
+	/**
 	 * Method: Save settings.
 	 */
 	protected function Save() {
@@ -164,6 +198,58 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			foreach ( $post_array['DevOptions'] as $opt ) {
 				$this->_plugin->settings->SetDevOptionEnabled( $opt, true );
 			}
+		}
+
+		// Check and save enable/disable file changes feature.
+		if ( isset( $post_array['wsal-file-changes'] ) && ! empty( $post_array['wsal-file-changes'] ) ) {
+			$this->_plugin->SetGlobalOption( 'scan-file-changes', $post_array['wsal-file-changes'] );
+
+			// Get file change scan alerts.
+			$file_change_events = $this->_plugin->alerts->get_alerts_by_sub_category( 'File Changes' );
+			$file_change_events = array_keys( $file_change_events );
+
+			// Enable/disable events based on file changes.
+			if ( 'disable' === $post_array['wsal-file-changes'] ) {
+				// Get disabled events.
+				$disabled_events = $this->_plugin->settings->GetDisabledAlerts();
+
+				// Merge file changes events.
+				$disabled_events = array_merge( $disabled_events, $file_change_events );
+
+				// Save the events.
+				$this->_plugin->alerts->SetDisabledAlerts( $disabled_events );
+			} else {
+				// Get disabled events.
+				$disabled_events = $this->_plugin->settings->GetDisabledAlerts();
+
+				foreach ( $file_change_events as $file_change_event ) {
+					// Search for file change events in disabled events.
+					$key = array_search( $file_change_event, $disabled_events, true );
+
+					// If key is found, then unset it.
+					if ( $key ) {
+						unset( $disabled_events[ $key ] );
+					}
+				}
+
+				// Save the disabled events.
+				$this->_plugin->alerts->SetDisabledAlerts( $disabled_events );
+			}
+		} else {
+			$this->_plugin->SetGlobalOption( 'scan-file-changes', false );
+		}
+
+		// Check and save scan frequency.
+		$this->_plugin->SetGlobalOption( 'scan-frequency', isset( $post_array['wsal-scan-frequency'] ) ? $post_array['wsal-scan-frequency'] : false );
+		$this->_plugin->SetGlobalOption( 'scan-hour', isset( $post_array['wsal-scan-hour'] ) ? $post_array['wsal-scan-hour'] : false );
+		$this->_plugin->SetGlobalOption( 'scan-day', isset( $post_array['wsal-scan-day'] ) ? $post_array['wsal-scan-day'] : false );
+		$this->_plugin->SetGlobalOption( 'scan-date', isset( $post_array['wsal-scan-date'] ) ? $post_array['wsal-scan-date'] : false );
+
+		// Check and save scan directories.
+		if ( isset( $post_array['wsal-scan-directories'] )
+		&& is_array( $post_array['wsal-scan-directories'] ) ) {
+			$scan_directories = array_keys( $post_array['wsal-scan-directories'] );
+			$this->_plugin->SetGlobalOption( 'scan-directories', $scan_directories );
 		}
 	}
 
@@ -224,10 +310,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<?php
 			}
 		}
+
+		// Load file changes settings.
+		$this->load_file_changes_settings();
 		?>
 		<h2 id="wsal-tabs" class="nav-tab-wrapper">
 			<a href="#tab-general" class="nav-tab"><?php esc_html_e( 'General', 'wp-security-audit-log' ); ?></a>
 			<a href="#tab-audit-log" class="nav-tab"><?php esc_html_e( 'Audit Log', 'wp-security-audit-log' ); ?></a>
+			<a href="#tab-file-changes" class="nav-tab"><?php esc_html_e( 'File Integrity Checks & Warning', 'wp-security-audit-log' ); ?></a>
 			<a href="#tab-exclude" class="nav-tab"><?php esc_html_e( 'Exclude Objects', 'wp-security-audit-log' ); ?></a>
 		</h2>
 
@@ -239,7 +329,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			<div id="audit-log-adverts">
 			</div>
 			<div class="nav-tabs">
-				<!-- First tab -->
+				<!-- General Tab -->
 				<table class="form-table wsal-tab widefat" id="tab-general">
 					<tbody>
 						<!-- From Email & Name -->
@@ -495,7 +585,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</tr>
 					</tbody>
 				</table>
-				<!-- Second tab -->
+				<!-- Audit Log Tab -->
 				<table class="form-table wsal-tab widefat" id="tab-audit-log">
 					<tbody>
 						<!-- Audit Log Retention -->
@@ -700,7 +790,362 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</tr>
 					</tbody>
 				</table>
-				<!-- Third tab -->
+				<!-- File Changes Logging Tab -->
+				<table class="form-table wsal-tab widefat" id="tab-file-changes">
+					<tbody>
+						<tr>
+							<th>
+								<label for="wsal-file-changes"><?php esc_html_e( 'Keep a Log of File Changes', 'wp-security-audit-log' ); ?></label>
+							</th>
+							<td>
+								<fieldset>
+									<label>
+										<input id="enable"
+											name="wsal-file-changes"
+											type="radio"
+											value="enable"
+											<?php checked( $this->scan_settings['scan_file_changes'], 'enable' ); ?>
+										/>
+										<?php esc_html_e( 'Enable', 'wp-security-audit-log' ); ?>
+									</label>
+									<br />
+									<label>
+										<input id="disable"
+											name="wsal-file-changes"
+											type="radio"
+											value="disable"
+											<?php checked( $this->scan_settings['scan_file_changes'], 'disable' ); ?>
+										/>
+										<?php esc_html_e( 'Disable', 'wp-security-audit-log' ); ?>
+									</label>
+								</fieldset>
+								<span class="description">
+									<?php esc_html_e( 'Enable or disable the logging of file changes in the Activity Log.', 'wp-security-audit-log' ); ?>
+								</span>
+							</td>
+						</tr>
+						<!-- wsal-file-changes -->
+						<tr>
+							<th>
+								<label for="wsal-file-alert-types"><?php esc_html_e( 'Alert me when', 'wp-security-audit-log' ); ?></label>
+							</th>
+							<td>
+								<p>
+									<?php
+									$wsal_events_page = '';
+									if ( ! is_multisite() ) {
+										$wsal_events_page = add_query_arg( 'page', 'wsal-togglealerts', admin_url( 'admin.php' ) );
+									} else {
+										$wsal_events_page = add_query_arg( 'page', 'wsal-togglealerts', network_admin_url( 'admin.php' ) );
+									}
+									?>
+									<a href="<?php echo esc_url( $wsal_events_page . '#tab-file-changes' ); ?>">
+										<?php esc_html_e( 'these events happen', 'wp-security-audit-log' ); ?>
+									</a>
+								</p>
+								<p class="description">
+									<?php esc_html_e( 'Click on the link above to select the type of file changes events you want to keep a log of in the activity log. Save your settings prior to navigating away from this page.', 'wp-security-audit-log' ); ?>
+								</p>
+							</td>
+						</tr>
+						<!-- wsal-file-alert-types -->
+						<tr>
+							<th>
+								<label for="wsal-scan-frequency"><?php esc_html_e( 'Scan Frequency', 'wp-security-audit-log' ); ?></label>
+							</th>
+							<td>
+								<?php
+								$frequency_options = array(
+									'daily'   => __( 'Daily', 'wp-security-audit-log' ),
+									'weekly'  => __( 'Weekly', 'wp-security-audit-log' ),
+									'monthly' => __( 'Monthly', 'wp-security-audit-log' ),
+								);
+								?>
+								<fieldset id="wsal-scan-frequency">
+									<select name="wsal-scan-frequency">
+										<?php foreach ( $frequency_options as $value => $html ) : ?>
+											<option
+												value="<?php echo esc_attr( $value ); ?>"
+												<?php echo esc_attr( $value === $this->scan_settings['scan_frequency'] ? 'selected' : false ); ?>>
+												<?php echo esc_html( $html ); ?>
+											</option>
+										<?php endforeach; ?>
+									</select>
+								</fieldset>
+								<span class="description">
+									<?php esc_html_e( 'Select the frequency of the file changes scans.', 'wp-security-audit-log' ); ?>
+								</span>
+							</td>
+						</tr>
+						<!-- wsal-scan-frequency -->
+						<tr id="wsal-scan-time">
+							<th>
+								<label for="wsal-scan-hour"><?php esc_html_e( 'Scan Time', 'wp-security-audit-log' ); ?></label>
+							</th>
+							<td>
+								<?php
+								// Scan hours option.
+								$scan_hours = array(
+									'00' => __( '00:00', 'wp-security-audit-log' ),
+									'01' => __( '01:00', 'wp-security-audit-log' ),
+									'02' => __( '02:00', 'wp-security-audit-log' ),
+									'03' => __( '03:00', 'wp-security-audit-log' ),
+									'04' => __( '04:00', 'wp-security-audit-log' ),
+									'05' => __( '05:00', 'wp-security-audit-log' ),
+									'06' => __( '06:00', 'wp-security-audit-log' ),
+									'07' => __( '07:00', 'wp-security-audit-log' ),
+									'08' => __( '08:00', 'wp-security-audit-log' ),
+									'09' => __( '09:00', 'wp-security-audit-log' ),
+									'10' => __( '10:00', 'wp-security-audit-log' ),
+									'11' => __( '11:00', 'wp-security-audit-log' ),
+									'12' => __( '12:00', 'wp-security-audit-log' ),
+									'13' => __( '13:00', 'wp-security-audit-log' ),
+									'14' => __( '14:00', 'wp-security-audit-log' ),
+									'15' => __( '15:00', 'wp-security-audit-log' ),
+									'16' => __( '16:00', 'wp-security-audit-log' ),
+									'17' => __( '17:00', 'wp-security-audit-log' ),
+									'18' => __( '18:00', 'wp-security-audit-log' ),
+									'19' => __( '19:00', 'wp-security-audit-log' ),
+									'20' => __( '20:00', 'wp-security-audit-log' ),
+									'21' => __( '21:00', 'wp-security-audit-log' ),
+									'22' => __( '22:00', 'wp-security-audit-log' ),
+									'23' => __( '23:00', 'wp-security-audit-log' ),
+								);
+
+								// Scan days option.
+								$scan_days = array(
+									'1' => __( 'Monday', 'wp-security-audit-log' ),
+									'2' => __( 'Tuesday', 'wp-security-audit-log' ),
+									'3' => __( 'Wednesday', 'wp-security-audit-log' ),
+									'4' => __( 'Thursday', 'wp-security-audit-log' ),
+									'5' => __( 'Friday', 'wp-security-audit-log' ),
+									'6' => __( 'Saturday', 'wp-security-audit-log' ),
+									'7' => __( 'Sunday', 'wp-security-audit-log' ),
+								);
+
+								// Scan date option.
+								$scan_date = array(
+									'01' => __( '01', 'wp-security-audit-log' ),
+									'02' => __( '02', 'wp-security-audit-log' ),
+									'03' => __( '03', 'wp-security-audit-log' ),
+									'04' => __( '04', 'wp-security-audit-log' ),
+									'05' => __( '05', 'wp-security-audit-log' ),
+									'06' => __( '06', 'wp-security-audit-log' ),
+									'07' => __( '07', 'wp-security-audit-log' ),
+									'08' => __( '08', 'wp-security-audit-log' ),
+									'09' => __( '09', 'wp-security-audit-log' ),
+									'10' => __( '10', 'wp-security-audit-log' ),
+									'11' => __( '11', 'wp-security-audit-log' ),
+									'12' => __( '12', 'wp-security-audit-log' ),
+									'13' => __( '13', 'wp-security-audit-log' ),
+									'14' => __( '14', 'wp-security-audit-log' ),
+									'15' => __( '15', 'wp-security-audit-log' ),
+									'16' => __( '16', 'wp-security-audit-log' ),
+									'17' => __( '17', 'wp-security-audit-log' ),
+									'18' => __( '18', 'wp-security-audit-log' ),
+									'19' => __( '19', 'wp-security-audit-log' ),
+									'20' => __( '20', 'wp-security-audit-log' ),
+									'21' => __( '21', 'wp-security-audit-log' ),
+									'22' => __( '22', 'wp-security-audit-log' ),
+									'23' => __( '23', 'wp-security-audit-log' ),
+									'24' => __( '24', 'wp-security-audit-log' ),
+									'25' => __( '25', 'wp-security-audit-log' ),
+									'26' => __( '26', 'wp-security-audit-log' ),
+									'27' => __( '27', 'wp-security-audit-log' ),
+									'28' => __( '28', 'wp-security-audit-log' ),
+									'29' => __( '29', 'wp-security-audit-log' ),
+									'30' => __( '30', 'wp-security-audit-log' ),
+								);
+								?>
+								<fieldset>
+									<span class="wsal-scan-time-container" id="wsal-scan-hour">
+										<select name="wsal-scan-hour">
+											<?php foreach ( $scan_hours as $value => $html ) : ?>
+												<option
+													value="<?php echo esc_attr( $value ); ?>"
+													<?php echo esc_attr( $value == $this->scan_settings['scan_hour'] ? 'selected' : false ); ?>>
+													<?php echo esc_html( $html ); ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+										<br />
+										<span class="description">
+											<?php esc_html_e( 'Hour', 'wp-security-audit-log' ); ?>
+										</span>
+									</span>
+
+									<span class="wsal-scan-time-container hide" id="wsal-scan-day">
+										<select name="wsal-scan-day">
+											<?php foreach ( $scan_days as $value => $html ) : ?>
+												<option
+													value="<?php echo esc_attr( $value ); ?>"
+													<?php echo esc_attr( $value == $this->scan_settings['scan_day'] ? 'selected' : false ); ?>>
+													<?php echo esc_html( $html ); ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+										<br />
+										<span class="description">
+											<?php esc_html_e( 'Day', 'wp-security-audit-log' ); ?>
+										</span>
+									</span>
+
+									<span class="wsal-scan-time-container hide" id="wsal-scan-date">
+										<select name="wsal-scan-date">
+											<?php foreach ( $scan_date as $value => $html ) : ?>
+												<option
+													value="<?php echo esc_attr( $value ); ?>"
+													<?php echo esc_attr( $value == $this->scan_settings['scan_date'] ? 'selected' : false ); ?>>
+													<?php echo esc_html( $html ); ?>
+												</option>
+											<?php endforeach; ?>
+										</select>
+										<br />
+										<span class="description">
+											<?php esc_html_e( 'Day', 'wp-security-audit-log' ); ?>
+										</span>
+									</span>
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for="wsal-scan-directories"><?php esc_html_e( 'Directories to scan', 'wp-security-audit-log' ); ?></label>
+							</th>
+							<td>
+								<?php
+								// WP Directories.
+								$wp_directories = array(
+									'root'        => __( 'Root directory of WordPress (excluding sub directories)', 'wp-security-audit-log' ),
+									'wp-admin'    => __( 'WP Admin directory (/wp-admin/)', 'wp-security-audit-log' ),
+									'wp-includes' => __( 'WP Includes directory (/wp-includes/)', 'wp-security-audit-log' ),
+									'wp-content'  => __( '/wp-content/ directory (excluding plugins, themes & uploads directories)', 'wp-security-audit-log' ),
+									'wp-content/themes'  => __( 'Themes directory (/wp-content/themes/)', 'wp-security-audit-log' ),
+									'wp-content/plugins' => __( 'Plugins directory (/wp-content/plugins/)', 'wp-security-audit-log' ),
+									'wp-content/uploads' => __( 'Uploads directory (/wp-content/uploads/)', 'wp-security-audit-log' ),
+								);
+
+								// Check if multisite.
+								if ( is_multisite() ) {
+									// Upload directories of subsites.
+									$wp_directories['wp-content/uploads/sites'] = __( 'Uploads directory of all sub sites on this network (/wp-content/sites/*)', 'wp-security-audit-log' );
+								}
+								?>
+								<fieldset id="wsal-scan-directories">
+									<?php foreach ( $wp_directories as $value => $html ) : ?>
+										<label>
+											<input
+												name="wsal-scan-directories[<?php echo esc_attr( $value ); ?>]"
+												type="checkbox"
+												value="<?php echo esc_attr( $value ); ?>"
+												<?php echo esc_attr( in_array( $value, $this->scan_settings['scan_directories'], true ) ? 'checked' : false ); ?>
+											/>
+											<?php echo esc_html( $html ); ?>
+										</label>
+										<br />
+									<?php endforeach; ?>
+								</fieldset>
+								<span class="description">
+									<?php esc_html_e( 'Select which directories should be scanned for file changes.', 'wp-security-audit-log' ); ?>
+								</span>
+							</td>
+						</tr>
+						<!-- wsal-scan-directories -->
+						<tr>
+							<th>
+								<label for="wsal_add_file_name"><?php esc_html_e( 'Exclude These Files', 'wp-security-audit-log' ); ?></label>
+							</th>
+							<td>
+								<?php
+								// Get files to be excluded.
+								$excluded_files = $this->_plugin->GetGlobalOption( 'scan_excluded_files', array() );
+								?>
+								<div class="wsal_file_containter">
+									<div id="wsal_files">
+										<?php foreach ( $excluded_files as $index => $file ) : ?>
+											<span id="wsal_file-<?php echo esc_attr( $file ); ?>">
+												<input type="checkbox" id="<?php echo esc_attr( $file ); ?>" value="<?php echo esc_attr( $file ); ?>" />
+												<label for="<?php echo esc_attr( $file ); ?>"><?php echo esc_html( $file ); ?></label>
+											</span>
+										<?php endforeach; ?>
+									</div>
+									<?php wp_nonce_field( 'wsal-scan-remove-exception-file', 'wsal_scan_remove_exception_file' ); ?>
+									<input class="button" id="wsal_remove_exception_file" type="button" value="<?php esc_html_e( 'REMOVE', 'wp-security-audit-log' ); ?>" />
+								</div>
+								<div class="wsal_file_containter">
+									<input type="text" id="wsal_add_file_name" />
+									<?php wp_nonce_field( 'wsal-scan-exception-file', 'wsal_scan_exception_file' ); ?>
+									<input id="wsal_add_file" class="button" type="button" value="<?php esc_html_e( 'ADD', 'wp-security-audit-log' ); ?>" />
+								</div>
+								<span class="description">
+									<?php esc_html_e( 'Specify the name and extension of the file(s) you want to exclude from the file changes scans. Specify the exact file name and extensions. Wildcard not supported.', 'wp-security-audit-log' ); ?>
+								</span>
+								<span class="error hide" id="wsal_file_name_error"></span>
+							</td>
+						</tr>
+						<!-- wsal_add_file_name -->
+						<tr>
+							<th>
+								<label for="wsal_add_file_type_name"><?php esc_html_e( 'Exclude File Types', 'wp-security-audit-log' ); ?></label>
+							</th>
+							<td>
+								<div class="wsal_file_containter">
+									<div id="wsal_files_types">
+										<?php foreach ( $this->scan_settings['scan_excluded_extensions'] as $index => $file_type ) : ?>
+											<span id="wsal_file_type-<?php echo esc_attr( $file_type ); ?>">
+												<input type="checkbox" id="<?php echo esc_attr( $file_type ); ?>" value="<?php echo esc_attr( $file_type ); ?>" />
+												<label for="<?php echo esc_attr( $file_type ); ?>"><?php echo esc_html( $file_type ); ?></label>
+											</span>
+										<?php endforeach; ?>
+									</div>
+									<?php wp_nonce_field( 'wsal-scan-remove-exception-file-type', 'wsal_scan_remove_exception_file_type' ); ?>
+									<input class="button" id="wsal_remove_exception_file_type" type="button" value="<?php esc_html_e( 'REMOVE', 'wp-security-audit-log' ); ?>" />
+								</div>
+								<div class="wsal_file_containter">
+									<input type="text" id="wsal_add_file_type_name" />
+									<?php wp_nonce_field( 'wsal-scan-exception-file-type', 'wsal_scan_exception_file_type' ); ?>
+									<input id="wsal_add_file_type" class="button" type="button" value="<?php esc_html_e( 'ADD', 'wp-security-audit-log' ); ?>" />
+								</div>
+								<span class="description">
+									<?php esc_html_e( 'Specify the extension of the file types you want to exclude from the file changes scans. Ideally you should exclude any type of logs and backup files that tend to be very big.', 'wp-security-audit-log' ); ?>
+								</span>
+								<span class="error hide" id="wsal_file_type_error"></span>
+							</td>
+						</tr>
+						<!-- wsal-scan-exclude-extensions -->
+						<tr>
+							<th>
+								<label for="wsal-scan-now"><?php esc_html_e( 'Launch Instant Scan', 'wp-security-audit-log' ); ?></label>
+							</th>
+							<td>
+								<input type="hidden" id="wsal-scan-now-nonce" name="wsal_scan_now_nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-scan-now' ) ); ?>" />
+								<input type="hidden" id="wsal-stop-scan-nonce" name="wsal_stop_scan_nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-stop-scan' ) ); ?>" />
+								<?php if ( ! $this->scan_settings['scan_in_progress'] ) : ?>
+									<a href="javascript:;" class="button button-primary" id="wsal-scan-now">
+										<?php esc_attr_e( 'Scan Now', 'wp-security-audit-log' ); ?>
+									</a>
+									<a href="javascript:;" class="button button-secondary" id="wsal-stop-scan" disabled>
+										<?php esc_attr_e( 'Stop Scan', 'wp-security-audit-log' ); ?>
+									</a>
+								<?php else : ?>
+									<a href="javascript:;" class="button button-primary" id="wsal-scan-now" disabled>
+										<?php esc_attr_e( 'Scan in Progress', 'wp-security-audit-log' ); ?>
+									</a>
+									<a href="javascript:;" class="button button-ui-primary" id="wsal-stop-scan">
+										<?php esc_attr_e( 'Stop Scan', 'wp-security-audit-log' ); ?>
+									</a>
+									<!-- Scan in progress -->
+								<?php endif; ?>
+								<br />
+								<span class="description">
+									<?php esc_html_e( 'Click this button to launch an instant scan for file changes with the configured settings. If you navigate away from this page the scan will keep on running. Note that the instant scan can be more resource intensive than scheduled scans.', 'wp-security-audit-log' ); ?>
+								</span>
+							</td>
+						</tr>
+						<!-- wsal-scan-now -->
+					</tbody>
+				</table>
+				<!-- Exclude Objects Tab -->
 				<table class="form-table wsal-tab widefat" id="tab-exclude">
 					<tbody>
 						<tr>
@@ -1039,5 +1484,255 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 		echo wp_json_encode( $custom_post_types );
 		exit;
+	}
+
+	/**
+	 * Method: Add file to file changes scan exception.
+	 */
+	public function scan_add_exception_file() {
+		// Die if user does not have permission to change settings.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			die( 'Access Denied.' );
+		}
+
+		// Filter $_POST array for security.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Get data type to check file or extension.
+		if ( ! isset( $post_array['data_type'] ) || empty( $post_array['data_type'] ) ) {
+			die( esc_html__( 'Invalid setting type.', 'wp-security-audit-log' ) );
+		} else {
+			$data_type = $post_array['data_type'];
+		}
+
+		// Die if nonce verification failed.
+		if ( 'file' === $data_type && ! wp_verify_nonce( $post_array['nonce'], 'wsal-scan-exception-file' ) ) {
+			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
+		} elseif ( 'extension' === $data_type && ! wp_verify_nonce( $post_array['nonce'], 'wsal-scan-exception-file-type' ) ) {
+			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
+		}
+
+		// Get option type to be excluded.
+		if ( 'file' === $data_type ) {
+			$excluded_option = $this->_plugin->GetGlobalOption( 'scan_excluded_files', array() );
+		} elseif ( 'extension' === $data_type ) {
+			$excluded_option = $this->_plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav' ) );
+		}
+
+		// Check if the file name is set and not empty.
+		if ( isset( $post_array['data_name'] ) && ! empty( $post_array['data_name'] ) ) {
+			// Check if option already exists.
+			if ( ! in_array( $post_array['data_name'], $excluded_option, true ) ) {
+				// Add to excluded files array.
+				$excluded_option[] = $post_array['data_name'];
+
+				// Save the option.
+				if ( 'file' === $data_type ) {
+					$this->_plugin->SetGlobalOption( 'scan_excluded_files', $excluded_option );
+				} elseif ( 'extension' === $data_type ) {
+					$this->_plugin->SetGlobalOption( 'scan-excluded-extensions', $excluded_option );
+				}
+
+				echo wp_json_encode( array(
+					'success' => true,
+					'message' => esc_html__( 'Option added to excluded types.', 'wp-security-audit-log' ),
+				) );
+			} else {
+				if ( 'file' === $data_type ) {
+					$message = esc_html__( 'This file is already excluded from the scan.', 'wp-security-audit-log' );
+				} elseif ( 'extension' === $data_type ) {
+					$message = esc_html__( 'This file extension is already excluded from the scan.', 'wp-security-audit-log' );
+				}
+				echo wp_json_encode( array(
+					'success' => false,
+					'message' => $message,
+				) );
+			}
+		} else {
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'Option name is empty.', 'wp-security-audit-log' ),
+			) );
+		}
+		exit();
+	}
+
+	/**
+	 * Method: Remove files from file changes scan exception.
+	 */
+	public function scan_remove_exception_file() {
+		// Die if user does not have permission to change settings.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			die( 'Access Denied.' );
+		}
+
+		// Filter $_POST array for security.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Get data type to check file or extension.
+		if ( ! isset( $post_array['data_type'] ) || empty( $post_array['data_type'] ) ) {
+			die( esc_html__( 'Invalid setting type.', 'wp-security-audit-log' ) );
+		} else {
+			$data_type = $post_array['data_type'];
+		}
+
+		// Die if nonce verification failed.
+		if ( 'file' === $data_type && ! wp_verify_nonce( $post_array['nonce'], 'wsal-scan-remove-exception-file' ) ) {
+			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
+		} elseif ( 'extension' === $data_type && ! wp_verify_nonce( $post_array['nonce'], 'wsal-scan-remove-exception-file-type' ) ) {
+			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
+		}
+
+		// Get files to be excluded.
+		if ( 'file' === $data_type ) {
+			$excluded_option = $this->_plugin->GetGlobalOption( 'scan_excluded_files', array() );
+		} elseif ( 'extension' === $data_type ) {
+			$excluded_option = $this->_plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav' ) );
+		}
+
+		if ( ! empty( $excluded_option ) && isset( $post_array['data_removed'] ) && ! empty( $post_array['data_removed'] ) ) {
+			// Get data_removed.
+			$data_removed = $post_array['data_removed'];
+
+			// Confirmed array of list to be excluded.
+			$to_be_excluded = array();
+
+			foreach ( $data_removed as $file ) {
+				if ( in_array( $file, $excluded_option, true ) ) {
+					$key = array_search( $file, $excluded_option, true );
+
+					if ( false !== $key ) {
+						$to_be_excluded[] = $excluded_option[ $key ];
+						unset( $excluded_option[ $key ] );
+					}
+				}
+			}
+
+			// Get excluded scan content.
+			$site_content = $this->_plugin->GetGlobalOption( 'site_content' );
+			if ( empty( $site_content ) ) {
+				$site_content = new stdClass();
+			}
+
+			// Save the option.
+			if ( 'file' === $data_type ) {
+				$this->_plugin->SetGlobalOption( 'scan_excluded_files', $excluded_option );
+
+				$site_content->skip_files = $to_be_excluded;
+				$this->_plugin->SetGlobalOption( 'site_content', $site_content );
+			} elseif ( 'extension' === $data_type ) {
+				$this->_plugin->SetGlobalOption( 'scan-excluded-extensions', $excluded_option );
+
+				$site_content->skip_extensions = $to_be_excluded;
+				$this->_plugin->SetGlobalOption( 'site_content', $site_content );
+			}
+
+			echo wp_json_encode( array(
+				'success' => true,
+				'message' => esc_html__( 'Option removed from excluded scan types.', 'wp-security-audit-log' ),
+			) );
+		} else {
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'Something went wrong.', 'wp-security-audit-log' ),
+			) );
+		}
+		exit();
+	}
+
+	/**
+	 * Method: Run a manual file changes scan.
+	 */
+	public function run_manual_scan_now() {
+		// Die if user does not have permission to change settings.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			die( 'Access Denied.' );
+		}
+
+		// Filter $_POST array for security.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Die if nonce verification failed.
+		if ( ! wp_verify_nonce( $post_array['nonce'], 'wsal-scan-now' ) ) {
+			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
+		}
+
+		// Return if a cron is running.
+		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'A cron job is in progress.', 'wp-security-audit-log' ),
+			) );
+			exit();
+		}
+
+		// Get plugin sensors.
+		$sensors = $this->_plugin->sensors->GetSensors();
+
+		// Get file changes sensor.
+		$file_changes = '';
+
+		if ( ! empty( $sensors ) ) {
+			foreach ( $sensors as $sensor ) {
+				if ( $sensor instanceof WSAL_Sensors_FileChanges ) {
+					$file_changes = $sensor;
+				}
+			}
+		}
+
+		// Check for file changes sensor.
+		if ( ! empty( $file_changes ) && $file_changes instanceof WSAL_Sensors_FileChanges ) {
+			// Run a manual scan on all directories.
+			for ( $dir = 0; $dir < 7; $dir++ ) {
+				if ( ! $this->_plugin->GetGlobalOption( 'stop-scan', false ) ) {
+					$file_changes->detect_file_changes( true, $dir );
+				} else {
+					break;
+				}
+			}
+			$this->_plugin->SetGlobalOption( 'stop-scan', false );
+
+			echo wp_json_encode( array(
+				'success' => true,
+				'message' => esc_html__( 'Scan started successfully.', 'wp-security-audit-log' ),
+			) );
+		} else {
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'Something went wrong.', 'wp-security-audit-log' ),
+			) );
+		}
+		exit();
+	}
+
+	/**
+	 * Method: Stop a file changes scan.
+	 */
+	public function stop_file_changes_scan() {
+		// Die if user does not have permission to change settings.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			die( 'Access Denied.' );
+		}
+
+		// Filter $_POST array for security.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Die if nonce verification failed.
+		if ( ! wp_verify_nonce( $post_array['nonce'], 'wsal-stop-scan' ) ) {
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
+			) );
+			exit();
+		}
+
+		// Set stop scan option to true.
+		$this->_plugin->SetGlobalOption( 'stop-scan', true );
+
+		echo wp_json_encode( array(
+			'success' => true,
+			'message' => esc_html__( 'Scan started successfully.', 'wp-security-audit-log' ),
+		) );
+		exit();
 	}
 }

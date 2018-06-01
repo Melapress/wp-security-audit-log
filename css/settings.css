@@ -74,6 +74,16 @@
 .wsal-tab td {
 	padding-left: 20px;
 }
+.wsal-tab .error {
+	display: block;
+	margin-top: 5px;
+	font-size: 13px;
+	font-style: italic;
+	color: red;
+}
+.wsal-tab .error.hide {
+	display: none;
+}
 
 /*
 * IOS button
@@ -152,4 +162,62 @@ a.disabled {
 
 #PruningDate {
 	width: 35px;
+}
+
+.wsal-scan-time-container {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.hide {
+	display: none;
+}
+
+.wsal_file_containter {
+	display: flex;
+	margin-bottom: 3px;
+}
+
+#wsal_files,
+#wsal_files_types {
+	width: 250px;
+	height: 230px;
+	overflow-y: scroll;
+	border: 1px solid #eee;
+	padding: 10px 5px;
+	margin-right: 10px;
+}
+
+#wsal_files label,
+#wsal_files_types label {
+	display: block;
+	margin-bottom: 2px;
+	padding: 3px 5px;
+	transition: all 0.2s linear;
+}
+
+#wsal_files input[type='checkbox'],
+#wsal_files_types input[type='checkbox'] {
+	display: none;
+}
+
+#wsal_files input[type='checkbox']:checked + label,
+#wsal_files_types input[type='checkbox']:checked + label {
+	background: #f1f1f1;
+}
+
+#wsal_files label:hover,
+#wsal_files_types label:hover {
+	background: #f1f1f1;
+	transition: all 0.2s linear;
+}
+
+#wsal_add_file_name,
+#wsal_add_file_type_name {
+	display: inline-block;
+	width: 261px;
+	height: 28px;
+	padding: 3px 5px;
+	margin-right: 10px;
+	box-shadow: none;
 }

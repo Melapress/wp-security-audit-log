@@ -548,7 +548,12 @@ final class WSAL_AlertManager {
 		$db_config  = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
 		$connector  = $this->plugin->getConnector( $db_config ); // Get connector for DB.
 		$wsal_db    = $connector->getConnection(); // Get DB connection.
-		$connection = 0 !== (int) $wsal_db->dbh->errno ? false : true; // Database connection error check.
+		$connection = true;
+		if ( isset( $wsal_db->dbh->errno ) ) {
+			$connection = 0 !== (int) $wsal_db->dbh->errno ? false : true; // Database connection error check.
+		} elseif ( is_wp_error( $wsal_db->error ) ) {
+			$connection = false;
+		}
 
 		// Check DB connection.
 		if ( $connection ) { // If connected then log temporary alerts in DB.
