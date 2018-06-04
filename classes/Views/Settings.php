@@ -1613,17 +1613,23 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			if ( empty( $site_content ) ) {
 				$site_content = new stdClass();
 			}
+			if ( empty( $site_content->skip_files ) ) {
+				$site_content->skip_files = array();
+			}
+			if ( empty( $site_content->skip_extensions ) ) {
+				$site_content->skip_extensions = array();
+			}
 
 			// Save the option.
 			if ( 'file' === $data_type ) {
 				$this->_plugin->SetGlobalOption( 'scan_excluded_files', $excluded_option );
 
-				$site_content->skip_files = $to_be_excluded;
+				$site_content->skip_files = array_merge( $site_content->skip_files, $to_be_excluded );
 				$this->_plugin->SetGlobalOption( 'site_content', $site_content );
 			} elseif ( 'extension' === $data_type ) {
 				$this->_plugin->SetGlobalOption( 'scan-excluded-extensions', $excluded_option );
 
-				$site_content->skip_extensions = $to_be_excluded;
+				$site_content->skip_extensions = array_merge( $site_content->skip_extensions, $to_be_excluded );
 				$this->_plugin->SetGlobalOption( 'site_content', $site_content );
 			}
 
