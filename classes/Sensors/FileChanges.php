@@ -239,12 +239,16 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 		$directories = $this->scan_settings['scan_directories'];
 
 		// Set the next directory to scan.
-		if ( false === $last_scanned || $last_scanned > 5 ) {
-			$next_to_scan = 0;
-		} elseif ( 'root' === $last_scanned ) {
-			$next_to_scan = 1;
+		if ( ! $manual ) {
+			if ( false === $last_scanned || $last_scanned > 5 ) {
+				$next_to_scan = 0;
+			} elseif ( 'root' === $last_scanned ) {
+				$next_to_scan = 1;
+			} else {
+				$next_to_scan = $last_scanned + 1;
+			}
 		} else {
-			$next_to_scan = $last_scanned + 1;
+			$next_to_scan = $last_scanned;
 		}
 
 		// Set the options name for file list.
@@ -369,11 +373,11 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 
 				// Files added alert.
 				if ( count( $files_added ) > 0 ) {
+					// Get excluded site content.
+					$site_content = $this->plugin->GetGlobalOption( 'site_content' );
+
 					// Log the alert.
 					foreach ( $files_added as $file => $file_hash ) {
-						// Get excluded site content.
-						$site_content = $this->plugin->GetGlobalOption( 'site_content' );
-
 						// Get filename from file path.
 						$filename = basename( $file );
 
