@@ -92,7 +92,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		if ( ! in_array( $p, $items ) ) {
 			$items[] = $p;
 		}
-
 		?>
 		<div class="wsal-ipp wsal-ipp-<?php echo esc_attr( $which ); ?>">
 			<?php esc_html_e( 'Show ', 'wp-security-audit-log' ); ?>
@@ -205,7 +204,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			$name_column = __( 'Username', 'wp-security-audit-log' );
 		}
 		$cols = array(
-			'type' => __( 'Alert ID', 'wp-security-audit-log' ),
+			'type' => __( 'Event ID', 'wp-security-audit-log' ),
 			'code' => __( 'Severity', 'wp-security-audit-log' ),
 			'crtd' => __( 'Date', 'wp-security-audit-log' ),
 			'user' => $name_column,
@@ -222,7 +221,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			foreach ( $sel_columns as $key => $value ) {
 				switch ( $key ) {
 					case 'alert_code':
-						$cols['type'] = __( 'Alert ID', 'wp-security-audit-log' );
+						$cols['type'] = __( 'Event ID', 'wp-security-audit-log' );
 						break;
 					case 'type':
 						$cols['code'] = __( 'Severity', 'wp-security-audit-log' );
@@ -311,7 +310,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					return '<span class="log-disable">' . str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
 				}
 
-				return '<span class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item->alert_id ) . '" data-tooltip="' . __( 'Disable this type of alerts.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . ' - ' . esc_html( $code->desc ) . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
+				return '<span class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item->alert_id ) . '" data-tooltip="' . __( 'Disable this type of events.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . ' - ' . esc_html( $code->desc ) . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
 					. str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
 			case 'code':
 				$code = $this->_plugin->alerts->GetAlert( $item->alert_id );
