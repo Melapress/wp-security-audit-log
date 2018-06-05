@@ -5,8 +5,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 4.9.5
-Stable tag: 3.1.7
+Tested up to: 4.9.6
+Stable tag: 3.2.0
 Requires PHP: 5.3
 
 An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
@@ -179,24 +179,31 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.1.7(2018-04-27) =
+= 3.2.0(2018-06-05) =
 
-Release notes: [New Data Inspector and Buffer for External Database](https://www.wpsecurityauditlog.com/releases/3-1-7-new-data-inspector/)
+Release notes: [WordPress file changes warnings & more in WP Security Audit Log 3.2](https://www.wpsecurityauditlog.com/releases/3-2-website-file-changes-logs/)
 
 * **New Features**
-	* New [data inspector in the WordPress activity log viewer](https://www.wpsecurityauditlog.com/support-documentation/data-inspector-wordpress-activity-log/).
-	* Alerts buffer for when the [external WordPress activity log database](https://www.wpsecurityauditlog.com/support-documentation/getting-started-external-db/) is unavailable. The alerts are stored in the WordPress database and website operations are not affected.
-	* Option in External Database settings to use WordPress URL as database table prefix.
-
+	* [File Integrity scans & WordPress file changes warnings in the activity log](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/).
+	* Support for SSL / Client certificates for [activity log external database connections](https://www.wpsecurityauditlog.com/premium-features/database-integration-tools-wordpress-activity-log/) (including archiving and mirroring).
+	
+* **New Activity Log Event IDs**
+	* 6028 - A file on the website has been modified
+	* 6029 - New file has been created on the website
+	* 6030 - A file was deleted from your website
+	
 * **Improvements**
-	* Alerts which contain long values are shortened in the viewer and logged in users list. User can view all details in the data inspector.
-	* Set the default setting for [blocking multiple WordPress users sessions](https://www.wpsecurityauditlog.com/support-documentation/managing-multiple-same-wordpress-user-sessions/#allow-override-terminate) to “do not allow override”.
-	* [WordPress login page notification](https://www.wpsecurityauditlog.com/support-documentation/change-disable-wordpress-login-page-notification/) is disabled by default.
-	* Converted the HTML [WordPress reports](https://www.wpsecurityauditlog.com/support-documentation/getting-started-reports-wordpress/) to responsive.
-	* Better support for changes users do via the Ultimate Member Pro plugin.
+	* Performance enhancement - storing table names in sentients so they are note retrieved every time they are required.
+	* Improved the built-in WordPress email notifications for content.
+	* Changed the Freemius opt-in / opt-out screen to non compulsory.
+	* Updated WhatIsMyIpAddress.com link to HTTPS so traffic is now encrypted.
+	* Added notification on new installs to point out to users where to find the [WordPress activity logs](https://www.wpsecurityauditlog.com/support-documentation/what-wordpress-audit-trail/).
+	* Updated Freemius SDK (now GDPR compliant)
 
 * **Bug Fixes**
-	* Plugin now records automated WooCommerce product stock changes done by plugins such as Bulk Stock Management
-	* Fixed a [reported performance issue](https://wordpress.org/support/topic/plugin-hangs-application-solved/). Now plugin audit log refreshes every 30 seconds.
-
+	* Fixed issue in which the archive / live activity log database was not being saved properly.
+	* Fixed issue in WooCommerce activity log - Alert 2053 was being reported instead of 9001 when a new product is published.
+	* Fixed issue in WooCommerce product SEO change - wrong event was being reported. 
+	* Fixed issue where sorting activity logs events by IP address which tripled the entries displayed in the log.
+		
 Refer to the [WP Security Audit Log change log](https://www.wpsecurityauditlog.com/plugin-change-log/) page for the complete change log.
