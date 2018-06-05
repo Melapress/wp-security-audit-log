@@ -346,7 +346,7 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 0003, E_NOTICE, __( 'PHP notice', 'wp-security-audit-log' ), __( '%Message%.', 'wp-security-audit-log' ) ),
 					array( 0004, E_CRITICAL, __( 'PHP exception', 'wp-security-audit-log' ), __( '%Message%.', 'wp-security-audit-log' ) ),
 					array( 0005, E_CRITICAL, __( 'PHP shutdown error', 'wp-security-audit-log' ), __( '%Message%.', 'wp-security-audit-log' ) ),
-					array( 6000, E_NOTICE, __( 'Events automatically pruned by system', 'wp-security-audit-log' ), __( 'System automatically deleted %EventCount% alert(s).', 'wp-security-audit-log' ) ),
+					array( 6000, E_NOTICE, __( 'Events automatically pruned by system', 'wp-security-audit-log' ), __( 'System automatically deleted %EventCount% event(s).', 'wp-security-audit-log' ) ),
 					array( 6001, E_CRITICAL, __( 'Option Anyone Can Register in WordPress settings changed', 'wp-security-audit-log' ), __( '%NewValue% the option "Anyone can register".', 'wp-security-audit-log' ) ),
 					array( 6002, E_CRITICAL, __( 'New User Default Role changed', 'wp-security-audit-log' ), __( 'Changed the New User Default Role from %OldRole% to %NewRole%.', 'wp-security-audit-log' ) ),
 					array( 6003, E_CRITICAL, __( 'WordPress Administrator Notification email changed', 'wp-security-audit-log' ), __( 'Changed the WordPress administrator notifications email address from %OldEmail% to %NewEmail%.', 'wp-security-audit-log' ) ),

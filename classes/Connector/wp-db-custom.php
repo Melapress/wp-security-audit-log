@@ -128,17 +128,17 @@ class wpdbCustom extends wpdb {
 				}
 			}
 
-			// Set SSL certs if we want to use secure DB connections
+			// Set SSL certs if we want to use secure DB connections.
 			$ssl_opts = array(
-				'KEY'     => ( defined( 'MYSQL_SSL_KEY'     ) && is_file( MYSQL_SSL_KEY     ) ) ? MYSQL_SSL_KEY     : null,
-				'CERT'    => ( defined( 'MYSQL_SSL_CERT'    ) && is_file( MYSQL_SSL_CERT    ) ) ? MYSQL_SSL_CERT    : null,
-				'CA'      => ( defined( 'MYSQL_SSL_CA'      ) && is_file( MYSQL_SSL_CA      ) ) ? MYSQL_SSL_CA      : null,
-				'CA_PATH' => ( defined( 'MYSQL_SSL_CA_PATH' ) && is_dir ( MYSQL_SSL_CA_PATH ) ) ? MYSQL_SSL_CA_PATH : null,
-				'CIPHER'  => ( defined( 'MYSQL_SSL_CIPHER'  ) && !empty ( MYSQL_SSL_CIPHER  ) ) ? MYSQL_SSL_CIPHER  : null,
+				'KEY'     => ( defined( 'MYSQL_SSL_KEY' ) && is_file( MYSQL_SSL_KEY ) ) ? MYSQL_SSL_KEY : null,
+				'CERT'    => ( defined( 'MYSQL_SSL_CERT' ) && is_file( MYSQL_SSL_CERT ) ) ? MYSQL_SSL_CERT : null,
+				'CA'      => ( defined( 'MYSQL_SSL_CA' ) && is_file( MYSQL_SSL_CA ) ) ? MYSQL_SSL_CA : null,
+				'CA_PATH' => ( defined( 'MYSQL_SSL_CA_PATH' ) && is_dir( MYSQL_SSL_CA_PATH ) ) ? MYSQL_SSL_CA_PATH : null,
+				'CIPHER'  => ( defined( 'MYSQL_SSL_CIPHER' ) ) ? MYSQL_SSL_CIPHER : null,
 			);
 			$ssl_opts_set = false;
 			foreach ( $ssl_opts as $ssl_opt_val ) {
-				if ( !is_null( $ssl_opt_val ) ) {
+				if ( ! is_null( $ssl_opt_val ) ) {
 					$ssl_opts_set = true;
 					break;
 				}
@@ -166,11 +166,12 @@ class wpdbCustom extends wpdb {
 			if ( $this->dbh->connect_errno ) {
 				$this->dbh = null;
 
-				/* It's possible ext/mysqli is misconfigured. Fall back to ext/mysql if:
-		 		 *  - We haven't previously connected, and
-		 		 *  - WP_USE_EXT_MYSQL isn't set to false, and
-		 		 *  - ext/mysql is loaded.
-		 		 */
+				/**
+				 * It's possible ext/mysqli is misconfigured. Fall back to ext/mysql if:
+				 *  - We haven't previously connected, and
+				 *  - WP_USE_EXT_MYSQL isn't set to false, and
+				 *  - ext/mysql is loaded.
+				 */
 				$attempt_fallback = true;
 
 				if ( $this->has_connected ) {

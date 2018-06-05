@@ -3,7 +3,7 @@
  *
  */
 
-.top .wsal-ipp {
+ .top .wsal-ipp {
 	display: none;
 }
 .top .wsal-ssa select {
@@ -300,4 +300,8 @@ div.wsal_notice__wrapper p {
 
 .wp-list-table #code {
 	width: 55px;
+}
+
+.wp-list-table #type {
+	width: 87px;
 }

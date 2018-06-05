@@ -118,7 +118,7 @@ class WSAL_Views_ExternalDB extends WSAL_AbstractView {
 							<li><?php esc_html_e( 'Move the audit log to an external database for improved security & performance,', 'wp-security-audit-log' ); ?></li>
 							<li><?php esc_html_e( 'Centralize the audit log in your centralized logging system,', 'wp-security-audit-log' ); ?></li>
 							<li><?php esc_html_e( 'Mirror the audit trail to Syslog, Papertrail etc,', 'wp-security-audit-log' ); ?></li>
-							<li><?php esc_html_e( 'Configure archiving rules to archive old alerts in an archiving database,', 'wp-security-audit-log' ); ?></li>
+							<li><?php esc_html_e( 'Configure archiving rules to archive old events in an archiving database,', 'wp-security-audit-log' ); ?></li>
 							<li><?php esc_html_e( '& more.', 'wp-security-audit-log' ); ?></li>
 						</ul>
 					</p>

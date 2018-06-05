@@ -33,7 +33,7 @@ class WSAL_WidgetManager {
 		&& $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
 			wp_add_dashboard_widget(
 				'wsal',
-				__( 'Latest Alerts', 'wp-security-audit-log' ) . ' | WP Security Audit Log',
+				__( 'Latest Events', 'wp-security-audit-log' ) . ' | WP Security Audit Log',
 				array( $this, 'RenderWidget' )
 			);
 		}

@@ -353,9 +353,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								</p>
 							</td>
 						</tr>
-						<!-- Alerts Dashboard Widget -->
+						<!-- Events Dashboard Widget -->
 						<tr>
-							<th><label for="dwoption_on"><?php esc_html_e( 'Alerts Dashboard Widget', 'wp-security-audit-log' ); ?></label></th>
+							<th><label for="dwoption_on"><?php esc_html_e( 'Events Dashboard Widget', 'wp-security-audit-log' ); ?></label></th>
 							<td>
 								<fieldset>
 									<?php $dwe = $this->_plugin->settings->IsWidgetsEnabled(); ?>
@@ -372,7 +372,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									<p class="description">
 										<?php
 										echo sprintf(
-											esc_html__( 'Display a dashboard widget with the latest %d security alerts.', 'wp-security-audit-log' ),
+											esc_html__( 'Display a dashboard widget with the latest %d security events.', 'wp-security-audit-log' ),
 											esc_html( $this->_plugin->settings->GetDashboardWidgetMaxAlerts() )
 										);
 										?>
@@ -439,7 +439,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									<br/>
 									<span class="description">
 										<?php esc_html_e( 'If this option is disabled all the administrators on this WordPress have access to manage this plugin.', 'wp-security-audit-log' ); ?><br/>
-										<?php echo wp_kses( __( 'By enabling this option only <strong>You</strong> and the users specified in the <strong>Can Manage Plugin</strong> and <strong>Can View Alerts</strong> can configure this plugin or view the alerts in the WordPress audit trail.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
+										<?php echo wp_kses( __( 'By enabling this option only <strong>You</strong> and the users specified in the <strong>Can Manage Plugin</strong> and <strong>Can View Events</strong> can configure this plugin or view the events in the WordPress audit trail.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
 									</span>
 								</fieldset>
 							</td>
@@ -591,7 +591,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<!-- Audit Log Retention -->
 						<?php
 						$disabled = '';
-						if ( $this->_plugin->settings->IsArchivingEnabled() ) {
+						if ( $this->_plugin->settings->IsArchivingEnabled() ) :
 							$disabled = 'disabled';
 							?>
 							<tr>
@@ -599,7 +599,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									<?php esc_html_e( 'The options below are disabled because you enabled archiving of alerts to the archiving table from', 'wp-security-audit-log' ); ?>&nbsp;<a href="<?php echo esc_url( admin_url( 'admin.php?page=wsal-ext-settings#mirroring' ) ); ?>" target="_blank">here</a>
 								</td>
 							</tr>
-						<?php } ?>
+						<?php endif; ?>
 						<tr>
 							<th><label for="delete1"><?php esc_html_e( 'Audit Log Retention', 'wp-security-audit-log' ); ?></label></th>
 							<td>
@@ -620,7 +620,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 										<input type="radio" id="delete1" name="PruneBy" value="date"
 											<?php checked( $nbld ); ?>
 											<?php echo esc_attr( $disabled ); ?> />
-										<?php echo esc_html__( 'Delete alerts older than', 'wp-security-audit-log' ); ?>
+										<?php echo esc_html__( 'Delete events older than', 'wp-security-audit-log' ); ?>
 									</label>
 									<?php
 									// Find and replace ` months` in the string.
@@ -644,7 +644,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									<input type="text" id="PruningLimit" name="PruningLimit" placeholder="<?php echo esc_attr( $text ); ?>"
 										   value="<?php echo esc_attr( $this->_plugin->settings->GetPruningLimit() ); ?>"
 										   onfocus="jQuery('#delete2').attr('checked', true);" <?php echo esc_attr( $disabled ); ?>/>
-									<?php echo esc_html__( 'alerts', 'wp-security-audit-log' ); ?>
+									<?php echo esc_html__( 'events', 'wp-security-audit-log' ); ?>
 									<span><?php echo esc_html( $text ); ?></span>
 								</fieldset>
 								<p class="description">
@@ -663,14 +663,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</tr>
 						<!-- Can View Alerts -->
 						<tr>
-							<th><label for="ViewerQueryBox"><?php esc_html_e( 'Can View Alerts', 'wp-security-audit-log' ); ?></label></th>
+							<th><label for="ViewerQueryBox"><?php esc_html_e( 'Can View Events', 'wp-security-audit-log' ); ?></label></th>
 							<td>
 								<fieldset>
 									<input type="text" id="ViewerQueryBox" style="float: left; display: block; width: 250px;">
 									<input type="button" id="ViewerQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
 									<br style="clear: both;"/>
 									<p class="description">
-										<?php esc_html_e( 'Users and Roles in this list can view the security alerts', 'wp-security-audit-log' ); ?>
+										<?php esc_html_e( 'Users and Roles in this list can view the security events', 'wp-security-audit-log' ); ?>
 									</p>
 									<div id="ViewerList">
 										<?php foreach ( $this->_plugin->settings->GetAllowedPluginViewers() as $item ) : ?>
@@ -695,7 +695,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 											<?php checked( $are ); ?> value="1">
 										<span><?php esc_html_e( 'Automatic', 'wp-security-audit-log' ); ?></span>
 									</label>
-									<span class="description"> — <?php esc_html_e( 'Refresh Audit Log Viewer as soon as there are new alerts.', 'wp-security-audit-log' ); ?></span>
+									<span class="description"> — <?php esc_html_e( 'Refresh Audit Log Viewer as soon as there are new events.', 'wp-security-audit-log' ); ?></span>
 									<br/>
 									<label for="aroption_off">
 										<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: 2px;"
@@ -709,7 +709,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</tr>
 						<!-- Alerts Timestamp -->
 						<tr>
-							<th><label for="timezone-default"><?php esc_html_e( 'Alerts Timestamp', 'wp-security-audit-log' ); ?></label></th>
+							<th><label for="timezone-default"><?php esc_html_e( 'Events Timestamp', 'wp-security-audit-log' ); ?></label></th>
 							<td>
 								<fieldset>
 									<?php $timezone = $this->_plugin->settings->GetTimezone(); ?>
@@ -725,7 +725,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 										<span><?php esc_html_e( 'WordPress\' timezone', 'wp-security-audit-log' ); ?></span>
 									</label>
 									<br/>
-									<span class="description"><?php esc_html_e( 'Select which timestamp the alerts should have in the Audit Log viewer. Note that the WordPress\' timezone might be different from that of the server.', 'wp-security-audit-log' ); ?></span>
+									<span class="description"><?php esc_html_e( 'Select which timestamp the events should have in the Audit Log viewer. Note that the WordPress\' timezone might be different from that of the server.', 'wp-security-audit-log' ); ?></span>
 								</fieldset>
 							</td>
 						</tr>
@@ -762,7 +762,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 											<?php if ( 'alert_code' !== $key ) : ?>
 												<span><?php echo esc_html( ucwords( str_replace( '_', ' ', $key ) ) ); ?></span>
 											<?php else : ?>
-												<span><?php echo esc_html( ucwords( str_replace( '_code', ' ID', $key ) ) ); ?></span>
+												<span><?php esc_html_e( 'Event ID', 'wp-security-audit-log' ); ?></span>
 											<?php endif; ?>
 										</label>
 										<br/>
@@ -773,7 +773,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</tr>
 						<!-- Disable Alerts for WordPress Background activity -->
 						<tr>
-							<th><label for="DeleteData"><?php esc_html_e( 'Disable Alerts for WordPress Background Activity', 'wp-security-audit-log' ); ?></label></th>
+							<th><label for="DeleteData"><?php esc_html_e( 'Disable Events for WordPress Background Activity', 'wp-security-audit-log' ); ?></label></th>
 							<td>
 								<fieldset>
 									<label for="WPBackend">
@@ -783,7 +783,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									</label>
 									<br/>
 									<span class="description">
-										<?php esc_html_e( 'For example do not raise an alert when WordPress deletes the auto drafts.', 'wp-security-audit-log' ); ?>
+										<?php esc_html_e( 'For example do not raise an event when WordPress deletes the auto drafts.', 'wp-security-audit-log' ); ?>
 									</span>
 								</fieldset>
 							</td>

@@ -24,7 +24,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	 * Method: Get View Title.
 	 */
 	public function GetTitle() {
-		return __( 'Enable/Disable Alerts', 'wp-security-audit-log' );
+		return __( 'Enable/Disable Events', 'wp-security-audit-log' );
 	}
 
 	/**
@@ -38,7 +38,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	 * Method: Get View Name.
 	 */
 	public function GetName() {
-		return __( 'Enable/Disable Alerts', 'wp-security-audit-log' );
+		return __( 'Enable/Disable Events', 'wp-security-audit-log' );
 	}
 
 	/**

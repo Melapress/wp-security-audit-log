@@ -99,13 +99,13 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 						<h2><?php esc_html_e( 'Plugin Documentation', 'wp-security-audit-log' ); ?></h2>
 						<p>
 							<?php esc_html_e( 'For more technical information about the WP Security Audit Log plugin please visit the plugin’s knowledge base.', 'wp-security-audit-log' ); ?>
-							<?php esc_html_e( 'Refer to the list of WordPress security alerts for a complete list of Alerts and IDs that the plugin uses to keep a log of all the changes in the WordPress audit log.', 'wp-security-audit-log' ); ?>
+							<?php esc_html_e( 'Refer to the list of WordPress security events for a complete list of Events and IDs that the plugin uses to keep a log of all the changes in the WordPress audit log.', 'wp-security-audit-log' ); ?>
 						</p><p>
 							<a class="button" href="http://www.wpsecurityauditlog.com/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
 							&nbsp;&nbsp;&nbsp;&nbsp;
 							<a class="button" href="https://www.wpsecurityauditlog.com/support-documentation/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
 							&nbsp;&nbsp;&nbsp;&nbsp;
-							<a class="button" href="http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'List of WordPress Security Alerts', 'wp-security-audit-log' ); ?></a>
+							<a class="button" href="http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'List of WordPress Security Events', 'wp-security-audit-log' ); ?></a>
 						</p>
 					</div>
 					<!-- /.activity-block -->
