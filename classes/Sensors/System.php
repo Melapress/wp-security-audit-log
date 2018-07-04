@@ -281,6 +281,22 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$username = wp_get_current_user()->user_login;
 		}
 
+		// Request URL.
+		$request_uri = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_STRING );
+		if ( ! empty( $request_uri ) ) {
+			$url_404 = home_url() . $request_uri;
+		} elseif ( isset( $_SERVER['REQUEST_URI'] ) && ! empty( $_SERVER['REQUEST_URI'] ) ) {
+			$url_404 = home_url() . sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		}
+
+		// Remove forward slash from the URL.
+		$url_404 = untrailingslashit( $url_404 );
+
+		// Check for excluded 404 URls.
+		if ( $this->is_excluded_url( $url_404 ) ) {
+			return;
+		}
+
 		if ( 'Website Visitor' !== $username ) {
 			// Check if the alert is disabled from the "Enable/Disable Alerts" section.
 			if ( ! $this->plugin->alerts->IsEnabled( 6007 ) ) {
@@ -315,23 +331,25 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					$msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
 				}
 
-				$link_file = $this->WriteLog( $new, $ip, $username );
+				$link_file = $this->WriteLog( $new, $ip, $username, true, $url_404 );
 
 				$occ->UpdateMetaValue( 'Attempts', $new );
 				$occ->UpdateMetaValue( 'Username', $username );
 				$occ->UpdateMetaValue( 'Msg', $msg );
+				$occ->UpdateMetaValue( 'URL', $url_404 );
 				if ( ! empty( $link_file ) ) {
 					$occ->UpdateMetaValue( 'LinkFile', $link_file );
 				}
 				$occ->created_on = null;
 				$occ->Save();
 			} else {
-				$link_file = $this->WriteLog( 1, $ip, $username );
+				$link_file = $this->WriteLog( 1, $ip, $username, true, $url_404 );
 				// Create a new record.
 				$fields = array(
 					'Attempts' => 1,
 					'Username' => $username,
-					'Msg' => $msg,
+					'Msg'      => $msg,
+					'URL'      => $url_404,
 				);
 				if ( ! empty( $link_file ) ) {
 					$fields['LinkFile'] = $link_file;
@@ -372,29 +390,48 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					$msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
 				}
 
-				$link_file = $this->WriteLog( $new, $ip, $username, false );
+				$link_file = $this->WriteLog( $new, $ip, $username, false, $url_404 );
 
 				$occ->UpdateMetaValue( 'Attempts', $new );
 				$occ->UpdateMetaValue( 'Username', $username );
 				$occ->UpdateMetaValue( 'Msg', $msg );
+				$occ->UpdateMetaValue( 'URL', $url_404 );
 				if ( ! empty( $link_file ) ) {
 					$occ->UpdateMetaValue( 'LinkFile', $link_file );
 				}
 				$occ->created_on = null;
 				$occ->Save();
 			} else {
-				$link_file = $this->WriteLog( 1, $ip, $username, false );
+				$link_file = $this->WriteLog( 1, $ip, $username, false, $url_404 );
 				// Create a new record.
 				$fields = array(
 					'Attempts'  => 1,
 					'Username'  => $username,
 					'Msg'       => $msg,
+					'URL'       => $url_404,
 				);
 				if ( ! empty( $link_file ) ) {
 					$fields['LinkFile'] = $link_file;
 				}
 				$this->plugin->alerts->Trigger( 6023, $fields );
 			}
+		}
+	}
+
+	/**
+	 * Method: Return true if URL is excluded otherwise false.
+	 *
+	 * @param string $url - 404 URL.
+	 * @return boolean
+	 * @since 3.2.2
+	 */
+	public function is_excluded_url( $url ) {
+		if ( empty( $url ) ) {
+			return false;
+		}
+
+		if ( in_array( $url, $this->plugin->settings->get_excluded_urls() ) ) {
+			return true;
 		}
 	}
 
@@ -825,19 +862,13 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 * @param string $ip - IP address.
 	 * @param string $username - Username.
 	 * @param bool   $logged_in - True if logged in.
+	 * @param string $url - 404 URL.
 	 */
-	private function WriteLog( $attempts, $ip, $username = '', $logged_in = true ) {
+	private function WriteLog( $attempts, $ip, $username = '', $logged_in = true, $url ) {
 		$name_file = null;
 
 		if ( $logged_in ) {
 			if ( 'on' === $this->plugin->GetGlobalOption( 'log-404', 'off' ) ) {
-				// Filter global arrays for security.
-				$server_array = filter_input_array( INPUT_SERVER );
-
-				// Request URL.
-				$request_uri = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
-				$url = home_url() . $request_uri;
-
 				// Get option to log referrer.
 				$log_referrer = $this->plugin->GetGlobalOption( 'log-404-referrer' );
 
@@ -848,7 +879,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 				if ( 'on' === $log_referrer ) {
 					// Get the referer.
-					$referrer = ( isset( $server_array['HTTP_REFERER'] ) ) ? $server_array['HTTP_REFERER'] : false;
+					$referrer = filter_input( INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_STRING );
+					if ( empty( $referrer ) && isset( $_SERVER['HTTP_REFERER'] ) && ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+						$referrer = sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) );
+					}
 
 					// Data to write.
 					$data = '';
@@ -875,9 +909,9 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					$username = $username . '_';
 				}
 
-				$upload_dir = wp_upload_dir();
-				$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
+				$upload_dir  = wp_upload_dir();
 				$uploads_url = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/404s/';
+				$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
 
 				// Check directory.
 				if ( $this->CheckDirectory( $uploads_dir_path ) ) {
@@ -911,13 +945,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		} else {
 			if ( 'on' === $this->plugin->GetGlobalOption( 'log-visitor-404', 'off' ) ) {
-				// Filter global arrays for security.
-				$server_array = filter_input_array( INPUT_SERVER );
-
-				// Request URL.
-				$request_uri = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
-				$url = home_url() . $request_uri;
-
 				// Get option to log referrer.
 				$log_referrer = $this->plugin->GetGlobalOption( 'log-visitor-404-referrer' );
 
@@ -928,7 +955,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 				if ( 'on' === $log_referrer ) {
 					// Get the referer.
-					$referrer = ( isset( $server_array['HTTP_REFERER'] ) ) ? $server_array['HTTP_REFERER'] : false;
+					$referrer = filter_input( INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_STRING );
+					if ( empty( $referrer ) && isset( $_SERVER['HTTP_REFERER'] ) && ! empty( $_SERVER['HTTP_REFERER'] ) ) {
+						$referrer = sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) );
+					}
 
 					// Data to write.
 					$data = '';
@@ -950,9 +980,9 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				}
 
 				$username = '';
-				$upload_dir     = wp_upload_dir();
+				$upload_dir  = wp_upload_dir();
+				$uploads_url = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/404s/';
 				$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
-				$uploads_url     = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/404s/';
 
 				// Check directory.
 				if ( $this->CheckDirectory( $uploads_dir_path ) ) {

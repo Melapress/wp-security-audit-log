@@ -55,7 +55,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	 * Listening to events using hooks.
 	 */
 	public function HookEvents() {
-		// Check if Yoast SEO file exists.
+		// Check if Yoast SEO plugin exists.
 		if ( ! is_plugin_active( 'wordpress-seo/wp-seo.php' ) ) {
 			return false;
 		}
@@ -799,3 +799,4 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		}
 	}
 }
+

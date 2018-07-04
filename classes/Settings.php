@@ -111,6 +111,14 @@ class WSAL_Settings {
 	protected $_excluded_ip = array();
 
 	/**
+	 * URLs excluded from monitoring.
+	 *
+	 * @var array
+	 * @since 3.2.2
+	 */
+	protected $excluded_urls = array();
+
+	/**
 	 * Method: Constructor.
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
@@ -793,13 +801,43 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Roles excluded from monitoring.
+	 * Set URLs excluded from monitoring.
+	 *
+	 * @param array $urls - Array of URLs.
+	 * @since 3.2.2
+	 */
+	public function set_excluded_urls( $urls ) {
+		$urls = array_map( 'untrailingslashit', $urls );
+		$urls = array_unique( $urls );
+		$this->excluded_urls = $urls;
+		$this->_plugin->SetGlobalOption( 'excluded-urls', esc_html( implode( ',', $this->excluded_urls ) ) );
+	}
+
+	/**
+	 * Get URLs excluded from monitoring.
+	 *
+	 * @since 3.2.2
+	 */
+	public function get_excluded_urls() {
+		if ( empty( $this->excluded_urls ) ) {
+			$this->excluded_urls = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalOption( 'excluded-urls' ) ) ) );
+		}
+		return $this->excluded_urls;
+	}
+
+	/**
+	 * Set roles excluded from monitoring.
+	 *
+	 * @param array $roles - Array of roles.
 	 */
 	public function SetExcludedMonitoringRoles( $roles ) {
 		$this->_excluded_roles = $roles;
 		$this->_plugin->SetGlobalOption( 'excluded-roles', esc_html( implode( ',', $this->_excluded_roles ) ) );
 	}
 
+	/**
+	 * Get roles excluded from monitoring.
+	 */
 	public function GetExcludedMonitoringRoles() {
 		if ( empty( $this->_excluded_roles ) ) {
 			$this->_excluded_roles = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalOption( 'excluded-roles' ) ) ) );

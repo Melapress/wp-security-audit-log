@@ -68,10 +68,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
 		}
 
-		$alert = new WSAL_Alert(); // IDE type hinting.
+		$alert          = new WSAL_Alert(); // IDE type hinting.
 		$grouped_alerts = $this->_plugin->alerts->GetCategorizedAlerts();
-		$safe_names = array_map( array( $this, 'GetSafeCatgName' ), array_keys( $grouped_alerts ) );
-		$safe_names = array_combine( array_keys( $grouped_alerts ), $safe_names );
+		$safe_names     = array_map( array( $this, 'GetSafeCatgName' ), array_keys( $grouped_alerts ) );
+		$safe_names     = array_combine( array_keys( $grouped_alerts ), $safe_names );
 
 		// Filter $_POST array.
 		$post_array = filter_input_array( INPUT_POST );
@@ -79,7 +79,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		if ( isset( $post_array['submit'] ) && isset( $post_array['alert'] ) ) {
 			check_admin_referer( 'wsal-togglealerts' );
 			try {
-				$enabled = array_map( 'intval', $post_array['alert'] );
+				$enabled  = array_map( 'intval', $post_array['alert'] );
 				$disabled = array();
 				foreach ( $this->_plugin->alerts->GetAlerts() as $alert ) {
 					if ( ! in_array( $alert->type, $enabled ) ) {
@@ -106,6 +106,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			$this->_plugin->SetGlobalOption( 'log-visitor-404', isset( $post_array['log_visitor_404'] ) ? 'on' : 'off' );
 			$this->_plugin->SetGlobalOption( 'purge-visitor-404-log', isset( $post_array['purge_visitor_log'] ) ? 'on' : 'off' );
 			$this->_plugin->SetGlobalOption( 'log-visitor-404-referrer', isset( $post_array['log_visitor_404_referrer'] ) ? 'on' : 'off' );
+			$this->_plugin->SetGlobalOption( 'wc-all-stock-changes', isset( $post_array['wc_all_stock_changes'] ) ? 'on' : 'off' );
 
 			$this->_plugin->settings->Set404LogLimit( $post_array['user_404Limit'] );
 			$this->_plugin->settings->SetVisitor404LogLimit( $post_array['visitor_404Limit'] );
@@ -160,7 +161,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						</h2>
 						<?php
 						foreach ( $group as $subname => $alerts ) {
-							$active = array();
+							$active    = array();
 							$allactive = true;
 							foreach ( $alerts as $alert ) {
 								if ( $alert->type <= 0006 ) {
@@ -175,28 +176,90 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								}
 							}
 
+							// Disabled alerts.
+							$disabled = '';
+
 							// Skip Pages and CPTs section.
 							if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
 								continue;
+							} elseif (
+								__( 'BBPress Forum', 'wp-security-audit-log' ) === $subname
+								|| __( 'WooCommerce', 'wp-security-audit-log' ) === $subname
+								|| __( 'Yoast SEO', 'wp-security-audit-log' ) === $subname
+								|| __( 'MultiSite', 'wp-security-audit-log' ) === $subname
+							) {
+								switch ( $subname ) {
+									case __( 'BBPress Forum', 'wp-security-audit-log' ):
+										// Check if BBPress plugin exists.
+										if ( ! is_plugin_active( 'bbpress/bbpress.php' ) ) {
+											$disabled = 'disabled';
+										}
+										break;
+
+									case __( 'WooCommerce', 'wp-security-audit-log' ):
+										// Check if WooCommerce plugin exists.
+										if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+											$disabled = 'disabled';
+										}
+										break;
+
+									case __( 'Yoast SEO', 'wp-security-audit-log' ):
+										// Check if Yoast SEO plugin exists.
+										if ( ! is_plugin_active( 'wordpress-seo/wp-seo.php' ) ) {
+											$disabled = 'disabled';
+										}
+										break;
+
+									case __( 'MultiSite', 'wp-security-audit-log' ):
+										// Disable if not multisite.
+										if ( ! is_multisite() ) {
+											$disabled = 'disabled';
+										}
+										break;
+
+									default:
+										break;
+								}
 							}
 							?>
 							<table class="wp-list-table wsal-tab widefat fixed wsal-sub-tab" cellspacing="0" id="tab-<?php echo esc_attr( $this->GetSafeCatgName( $subname ) ); ?>">
 								<thead>
 									<tr>
-										<th width="48"><input type="checkbox" <?php checked( $allactive ); ?> /></th>
+										<th width="48"><input type="checkbox" <?php checked( $allactive ); ?> <?php echo esc_attr( $disabled ); ?> /></th>
 										<th width="80"><?php esc_html_e( 'Code', 'wp-security-audit-log' ); ?></th>
 										<th width="100"><?php esc_html_e( 'Type', 'wp-security-audit-log' ); ?></th>
 										<th><?php esc_html_e( 'Description', 'wp-security-audit-log' ); ?></th>
 									</tr>
 								</thead>
 								<tbody id="<?php echo ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) ? 'alerts-file-changes' : false; ?>">
-									<?php
-									// Content section notice.
-									if ( __( 'Content', 'wp-security-audit-log' ) === $subname ) :
-										?>
+									<?php if ( __( 'Content', 'wp-security-audit-log' ) === $subname ) : ?>
 										<tr>
 											<td colspan="4">
 												<p class="wsal-tab-help description"><?php echo wp_kses( __( '<strong>Note:</strong> Post refers to any type of content, i.e. blog post, page or a post with a custom post type.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
+											</td>
+										</tr>
+									<?php elseif ( __( 'BBPress Forum', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
+										<tr>
+											<td colspan="4">
+												<p class="wsal-tab-help description"><?php echo esc_html__( 'The plugin BBPress is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+											</td>
+										</tr>
+									<?php elseif ( __( 'WooCommerce', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
+										<tr>
+											<td colspan="4">
+												<p class="wsal-tab-help description"><?php echo esc_html__( 'The plugin WooCommerce is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+											</td>
+										</tr>
+									<?php elseif ( __( 'Yoast SEO', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
+										<tr>
+											<td colspan="4">
+												<p class="wsal-tab-help description"><?php echo esc_html__( 'The plugin Yoast SEO is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+											</td>
+										</tr>
+									<?php elseif ( __( 'MultiSite', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
+										<tr>
+											<td colspan="4">
+												<p class="wsal-tab-help description"><?php echo esc_html__( 'Your website is a single site so the multisite events have been disabled.', 'wp-security-audit-log' ); ?></p>
 											</td>
 										</tr>
 										<?php
@@ -227,7 +290,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													type="checkbox"
 													class="alert"
 													<?php checked( $active[ $alert->type ] ); ?>
-													value="<?php echo (int) $alert->type; ?>"
+													value="<?php echo esc_attr( (int) $alert->type ); ?>"
+													<?php echo esc_attr( $disabled ); ?>
 													<?php echo ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) ? 'onclick="wsal_toggle_file_changes(this)"' : false; ?>
 												/>
 											</th>
@@ -237,8 +301,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										</tr>
 										<?php
 										if ( 6007 === $alert->type ) {
-											$log_404 = $this->_plugin->GetGlobalOption( 'log-404' );
-											$purge_log = $this->_plugin->GetGlobalOption( 'purge-404-log' );
+											$log_404          = $this->_plugin->GetGlobalOption( 'log-404' );
+											$purge_log        = $this->_plugin->GetGlobalOption( 'purge-404-log' );
 											$log_404_referrer = $this->_plugin->GetGlobalOption( 'log-404-referrer', 'on' );
 											?>
 											<tr>
@@ -270,8 +334,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<?php
 										}
 										if ( 6023 === $alert->type ) {
-											$log_visitor_404 = $this->_plugin->GetGlobalOption( 'log-visitor-404' );
-											$purge_visitor_log = $this->_plugin->GetGlobalOption( 'purge-visitor-404-log' );
+											$log_visitor_404          = $this->_plugin->GetGlobalOption( 'log-visitor-404' );
+											$purge_visitor_log        = $this->_plugin->GetGlobalOption( 'purge-visitor-404-log' );
 											$log_visitor_404_referrer = $this->_plugin->GetGlobalOption( 'log-visitor-404-referrer', 'on' );
 											?>
 											<tr>
@@ -325,6 +389,18 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												<td colspan="2">
 													<p><?php esc_html_e( 'Number of login attempts to log. Enter 0 to log all failed login attempts. (By default the plugin only logs up to 10 failed login because the process can be very resource intensive in case of a brute force attack)', 'wp-security-audit-log' ); ?></p>
 												</td>
+											</tr>
+											<?php
+										}
+										if ( 9019 === $alert->type ) {
+											$wc_all_stock_changes = $this->_plugin->GetGlobalOption( 'wc-all-stock-changes', 'on' );
+											?>
+											<tr>
+												<td></td>
+												<td>
+													<input name="wc_all_stock_changes" type="checkbox" id="wc_all_stock_changes" value="1" <?php checked( $wc_all_stock_changes, 'on' ); ?> />
+												</td>
+												<td colspan="2"><?php esc_html_e( 'Log all stock changes. Disable this setting to only keep a log of stock changes done manually via the WooCommerce dashboard. Therefore automated stock changes typically done via customers placing orders or via other plugins will not be logged.', 'wp-security-audit-log' ); ?></td>
 											</tr>
 											<?php
 										}
@@ -485,6 +561,16 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						jQuery(".check_visitor_log").attr ( "checked" ,"checked" );
 					} else {
 						jQuery(".check_visitor_log").removeAttr('checked');
+					}
+				});
+
+				// Specific for alert 9019
+				jQuery("input[value=9019]").on("change", function(){
+					var check = jQuery("input[value=9019]").is(":checked");
+					if(check) {
+						jQuery("#wc_all_stock_changes").attr ( "checked" ,"checked" );
+					} else {
+						jQuery("#wc_all_stock_changes").removeAttr('checked');
 					}
 				});
 			});

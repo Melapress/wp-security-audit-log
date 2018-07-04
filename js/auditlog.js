@@ -86,6 +86,8 @@ function WsalAuditLogInit(_WsalData) {
 			action: 'AjaxRefresh',
 			logcount: WsalTkn
 		}, function (data) {
+			data = data.toString();
+			data = data.trim();
 			WsalAjx = null;
 			if (data && data !== 'false') {
 				WsalTkn = data;
@@ -344,3 +346,61 @@ function wsal_freemius_opt_in( element ) {
 		}
 	} );
 }
+
+/**
+ * Onclick event handler to exclude URL.
+ *
+ * @param {string} element - Current element.
+ * @since 3.2.2
+ */
+function wsal_exclude_url(element) {
+	var exclude_nonce = jQuery( element ).data( 'exclude-url-nonce' ); // Nonce.
+	var exclude_url   = jQuery( element ).data( 'exclude-url' ); // Nonce.
+
+	if ( exclude_url ) {
+		jQuery.ajax( {
+			type: 'POST',
+			url: ajaxurl,
+			async: true,
+			data: {
+				action: 'wsal_exclude_url',
+				nonce: exclude_nonce,
+				url: exclude_url
+			},
+			success: function( data ) {
+				var notice = jQuery( '<div class="updated" data-notice-name="notifications-extension"></div>' ).html( data );
+				jQuery( 'h2:first' ).after( notice );
+			},
+			error: function( xhr, textStatus, error ) {
+				console.log( xhr.statusText );
+				console.log( textStatus );
+				console.log( error );
+			}
+		} );
+	}
+}
+
+jQuery( document ).ready( function() {
+	/**
+	 * Dismiss DB disconnect issue notice.
+	 */
+	jQuery( '#wsal-notice-connect-issue' ).click( function() {
+		jQuery.ajax( {
+			type: 'POST',
+			url: ajaxurl,
+			async: true,
+			data: {
+				action: 'wsal_dismiss_notice_disconnect',
+				nonce: jQuery( '#wsal-dismiss-notice-disconnect' ).val()
+			},
+			success: function( data ) {
+				console.log( data );
+			},
+			error: function( xhr, textStatus, error ) {
+				console.log( xhr.statusText );
+				console.log( textStatus );
+				console.log( error );
+			}
+		} );
+	} );
+} );

@@ -38,8 +38,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	 *
 	 * @since 2.7.0
 	 */
-	if ( file_exists( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' ) ) {
-		require_once( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' );
+	if ( file_exists( plugin_dir_path( __FILE__ ) . '/includes/wsal-freemius.php' ) ) {
+		require_once( plugin_dir_path( __FILE__ ) . '/includes/wsal-freemius.php' );
 	}
 
 	/**
@@ -930,6 +930,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function SetGlobalOption( $option, $value, $prefix = self::OPT_PRFX ) {
 			$this->options = new WSAL_Models_Option();
 			$this->options->SetOptionValue( $prefix . $option, $value );
+
+			// Delete options transient.
+			delete_transient( 'wsal_options' );
 		}
 
 		/**

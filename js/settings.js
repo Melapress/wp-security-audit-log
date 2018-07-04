@@ -15,32 +15,38 @@ jQuery(document).ready(function(){
 		}
 	} );
 
-	jQuery( '#ViewerQueryAdd, #EditorQueryAdd, #ExRoleQueryAdd, #ExUserQueryAdd, #CustomQueryAdd, #IpAddrQueryAdd, #ExCPTsQueryAdd' ).click(function(){
-		var type 	= jQuery(this).attr('id').substr(0, 6);
-		var value 	= jQuery.trim(jQuery('#'+type+'QueryBox').val());
-		var existing = jQuery('#'+type+'List input').filter(function() { return this.value === value; });
+	jQuery( '#ViewerQueryAdd, #EditorQueryAdd, #ExRoleQueryAdd, #ExUserQueryAdd, #CustomQueryAdd, #IpAddrQueryAdd, #ExCPTsQueryAdd, #ExURLsQueryAdd' ).click(function(){
+		var type 	 = jQuery(this).attr('id').substr(0, 6);
+		var value 	 = jQuery.trim( jQuery( '#'+type+'QueryBox' ).val() );
+		var existing = jQuery('#'+type+'List input').filter( function() { return this.value === value; } );
 
 		if( ! value || existing.length ) return; // if value is empty or already used, stop here
 
-		jQuery('#'+type+'QueryBox, #'+type+'QueryAdd').attr('disabled', true);
-		jQuery.post(jQuery('#ajaxurl').val(), {action: 'AjaxCheckSecurityToken', token: value}, function(data){
-			jQuery('#'+type+'QueryBox, #'+type+'QueryAdd').attr('disabled', false);
-			if (type != 'Custom' && type != 'IpAddr') {
-				if(data === 'other') {
-					alert('The specified token is not a user nor a role!');
-					jQuery('#'+type+'QueryBox').val('');
+		jQuery( '#'+type+'QueryBox, #'+type+'QueryAdd' ).attr('disabled', true);
+		jQuery.post( jQuery('#ajaxurl').val(), { action: 'AjaxCheckSecurityToken', token: value }, function(data) {
+			jQuery( '#'+type+'QueryBox, #'+type+'QueryAdd' ).attr('disabled', false);
+			if ( type === 'ExURLs') {
+				if ( data === 'other' ) {
+					alert( 'The specified token is not a valid URL!' );
+					jQuery( '#'+type+'QueryBox' ).val('');
+					return;
+				}
+			} else if ( type != 'Custom' && type != 'IpAddr' ) {
+				if ( data === 'other' ) {
+					alert( 'The specified token is not a user nor a role!' );
+					jQuery( '#'+type+'QueryBox' ).val('');
 					return;
 				}
 			}
-			jQuery('#'+type+'QueryBox').val('');
-			jQuery('#'+type+'List').append(jQuery('<span class="sectoken-'+data+'"/>').text(value).append(
-				jQuery('<input type="hidden" name="'+type+'s[]"/>').val(value),
-				jQuery('<a href="javascript:;" title="Remove">&times;</a>').click(RemoveSecToken)
-			));
-		});
+			jQuery( '#'+type+'QueryBox' ).val('');
+			jQuery( '#'+type+'List' ).append( jQuery( '<span class="sectoken-'+data+'"/>' ).text(value).append(
+				jQuery( '<input type="hidden" name="'+type+'s[]"/>' ).val(value),
+				jQuery( '<a href="javascript:;" title="Remove">&times;</a>' ).click(RemoveSecToken)
+			) );
+		} );
 	});
 
-	jQuery( '#ViewerList>span>a, #EditorList>span>a, #ExRoleList>span>a, #ExUserList>span>a, #CustomList>span>a, #IpAddrList>span>a, #ExCPTsList>span>a' ).click( RemoveSecToken );
+	jQuery( '#ViewerList>span>a, #EditorList>span>a, #ExRoleList>span>a, #ExUserList>span>a, #CustomList>span>a, #IpAddrList>span>a, #ExCPTsList>span>a, #ExURLsList>span>a' ).click( RemoveSecToken );
 
 	jQuery('#RestrictAdmins').change(function(){
 		var user = jQuery('#RestrictAdminsDefaultUser').val();
@@ -76,7 +82,6 @@ jQuery(document).ready(function(){
 	});
 
 	var cptsUrl = ajaxurl + "?action=AjaxGetAllCPT&wsal_nonce=" + wsal_data.wp_nonce;
-	console.log( cptsUrl );
 	jQuery( '#ExCPTsQueryBox' ).autocomplete( {
 	    source: cptsUrl,
 	    minLength: 1,
@@ -108,8 +113,12 @@ jQuery(document).ready(function(){
 		jQuery( '#wsal_add_file_type_name' ),
 		jQuery( '#wsal_add_file_type' ),
 		jQuery( '#wsal_remove_exception_file_type' ),
+		jQuery( '#wsal_add_dir_name' ),
+		jQuery( '#wsal_add_dir' ),
+		jQuery( '#wsal_remove_exception_dir' ),
 		jQuery( '#wsal_files input[type=checkbox]' ),
 		jQuery( '#wsal_files_types input[type=checkbox]' ),
+		jQuery( '#wsal_dirs input[type=checkbox]' ),
 	];
 
 	// Update settings of file changes on page load.
@@ -160,6 +169,11 @@ jQuery(document).ready(function(){
 		}
 	}
 
+	// Add directory to scan file exception list.
+	jQuery( '#wsal_add_dir' ).click( function() {
+		wsal_add_scan_exception( 'dir' );
+	} );
+
 	// Add file to scan file exception list.
 	jQuery( '#wsal_add_file' ).click( function() {
 		wsal_add_scan_exception( 'file' );
@@ -182,17 +196,29 @@ jQuery(document).ready(function(){
 			var setting_container = jQuery( '#wsal_files' );
 			var setting_nonce = jQuery( '#wsal_scan_exception_file' ).val();
 			var setting_error = jQuery( '#wsal_file_name_error' );
+
+			// Validate file name.
+			var pattern = /^\s*[a-z-._\d,\s]+\s*$/i;
 		} else if ( type === 'extension' ) {
 			var setting_input = jQuery( '#wsal_add_file_type_name' );
 			var setting_value = setting_input.val();
 			var setting_container = jQuery( '#wsal_files_types' );
 			var setting_nonce = jQuery( '#wsal_scan_exception_file_type' ).val();
 			var setting_error = jQuery( '#wsal_file_type_error' );
+
+			// Validate file name.
+			var pattern = /^\s*[a-z-._\d,\s]+\s*$/i;
+		} else if ( type === 'dir' ) {
+			var setting_input = jQuery( '#wsal_add_dir_name' );
+			var setting_value = setting_input.val();
+			var setting_container = jQuery( '#wsal_dirs' );
+			var setting_nonce = jQuery( '#wsal_scan_exception_dir' ).val();
+			var setting_error = jQuery( '#wsal_dir_error' );
+
+			// Validate file name.
+			var pattern = /^\s*[a-z-._\d,\s/]+\s*$/i;
 		}
 		setting_error.addClass( 'hide' );
-
-		// Validate file name.
-		var pattern = /^\s*[a-z-._\d,\s]+\s*$/i;
 
 		if ( setting_value.match( pattern ) ) {
 			// Ajax request to add file to scan file exception list.
@@ -241,9 +267,16 @@ jQuery(document).ready(function(){
 				alert( 'Filename cannot be added because it contains invalid characters.' );
 			} else if ( type === 'extension' ) {
 				alert( 'File extension cannot be added because it contains invalid characters.' );
+			} else if ( type === 'dir' ) {
+				alert( 'Directory cannot be added because it contains invalid characters.' );
 			}
 		}
 	}
+
+	// Remove directories from scan file exception list.
+	jQuery( '#wsal_remove_exception_dir' ).click( function() {
+		wsal_remove_scan_exception( 'dir' );
+	} );
 
 	// Remove files from scan file exception list.
 	jQuery( '#wsal_remove_exception_file' ).click( function() {
@@ -263,25 +296,20 @@ jQuery(document).ready(function(){
 	function wsal_remove_scan_exception( type ) {
 		if ( type === 'file' ) {
 			var setting_values = jQuery( '#wsal_files input[type=checkbox]' ); // Get files.
-			var removed_values = [];
 			var setting_nonce  = jQuery( '#wsal_scan_remove_exception_file' ).val(); // Nonce.
-
-			// Make array of files which are checked.
-			for ( var index = 0; index < setting_values.length; index++ ) {
-				if ( jQuery( setting_values[ index ] ).is( ':checked' ) ) {
-					removed_values.push( jQuery( setting_values[ index ] ).val() );
-				}
-			}
 		} else if ( type === 'extension' ) {
 			var setting_values = jQuery( '#wsal_files_types input[type=checkbox]' ); // Get files.
-			var removed_values = [];
 			var setting_nonce  = jQuery( '#wsal_scan_remove_exception_file_type' ).val(); // Nonce.
+		} else if ( type === 'dir' ) {
+			var setting_values = jQuery( '#wsal_dirs input[type=checkbox]' ); // Get files.
+			var setting_nonce  = jQuery( '#wsal_scan_remove_exception_dir' ).val(); // Nonce.
+		}
 
-			// Make array of files which are checked.
-			for ( var index = 0; index < setting_values.length; index++ ) {
-				if ( jQuery( setting_values[ index ] ).is( ':checked' ) ) {
-					removed_values.push( jQuery( setting_values[ index ] ).val() );
-				}
+		// Make array of files which are checked.
+		var removed_values = [];
+		for ( var index = 0; index < setting_values.length; index++ ) {
+			if ( jQuery( setting_values[ index ] ).is( ':checked' ) ) {
+				removed_values.push( jQuery( setting_values[ index ] ).val() );
 			}
 		}
 

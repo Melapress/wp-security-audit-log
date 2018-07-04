@@ -19,7 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2000 User created a new blog post and saved it as draft
  * 2001 User published a blog post
  * 2002 User modified a published blog post
- * 2003 User modified a draft blog post
  * 2008 User permanently deleted a blog post from the trash
  * 2012 User moved a blog post to the trash
  * 2014 User restored a blog post from trash
@@ -31,12 +30,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2024 User deleted category
  * 2025 User changed the visibility of a blog post
  * 2027 User changed the date of a blog post
+ * 2047 User changed the parent of a page
+ * 2048 User changed the template of a page
  * 2049 User set a post as sticky
  * 2050 User removed post from sticky
  * 2052 User changed generic tables
  * 2065 User modified content for a published post
- * 2068 User modified content for a draft post
- * 2072 User modified content of a post
  * 2073 User submitted a post for review
  * 2074 User scheduled a post
  * 2086 User changed title of a post
@@ -44,51 +43,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2101 User viewed a post
  * 2111 User disabled Comments/Trackbacks and Pingbacks on a published post
  * 2112 User enabled Comments/Trackbacks and Pingbacks on a published post
- * 2113 User disabled Comments/Trackbacks and Pingbacks on a draft post
- * 2114 User enabled Comments/Trackbacks and Pingbacks on a draft post
- * 2004 User created a new WordPress page and saved it as draft
- * 2005 User published a WordPress page
- * 2006 User modified a published WordPress page
- * 2007 User modified a draft WordPress page
- * 2009 User permanently deleted a page from the trash
- * 2013 User moved WordPress page to the trash
- * 2015 User restored a WordPress page from trash
- * 2018 User changed page URL
- * 2020 User changed page author
- * 2022 User changed page status
- * 2026 User changed the visibility of a page post
- * 2028 User changed the date of a page post
- * 2047 User changed the parent of a page
- * 2048 User changed the template of a page
- * 2066 User modified content for a published page
- * 2069 User modified content for a draft page
- * 2075 User scheduled a page
- * 2087 User changed title of a page
- * 2102 User opened a page in the editor
- * 2103 User viewed a page
- * 2115 User disabled Comments/Trackbacks and Pingbacks on a published page
- * 2116 User enabled Comments/Trackbacks and Pingbacks on a published page
- * 2117 User disabled Comments/Trackbacks and Pingbacks on a draft page
- * 2118 User enabled Comments/Trackbacks and Pingbacks on a draft page
- * 2029 User created a new post with custom post type and saved it as draft
- * 2030 User published a post with custom post type
- * 2031 User modified a post with custom post type
- * 2032 User modified a draft post with custom post type
- * 2033 User permanently deleted post with custom post type
- * 2034 User moved post with custom post type to trash
- * 2035 User restored post with custom post type from trash
- * 2036 User changed the category of a post with custom post type
- * 2037 User changed the URL of a post with custom post type
- * 2038 User changed the author or post with custom post type
- * 2039 User changed the status of post with custom post type
- * 2040 User changed the visibility of a post with custom post type
- * 2041 User changed the date of post with custom post type
- * 2067 User modified content for a published custom post type
- * 2070 User modified content for a draft custom post type
- * 2076 User scheduled a custom post type
- * 2088 User changed title of a custom post type
- * 2104 User opened a custom post type in the editor
- * 2105 User viewed a custom post type
  * 2119 User added blog post tag
  * 2120 User removed blog post tag
  * 2121 User created new tag
@@ -166,6 +120,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_filter( 'post_edit_form_tag', array( $this, 'EditingPost' ), 10, 1 );
 
 		add_filter( 'wp_update_term_data', array( $this, 'event_terms_rename' ), 10, 4 );
+
+		// Check if MainWP Child Plugin exists.
+		if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
+			add_action( 'mainwp_before_post_update', array( $this, 'event_mainwp_init' ), 10, 2 );
+		}
 	}
 
 	/**
@@ -311,6 +270,33 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 
 	/**
+	 * Method: Collect old post data before MainWP Post update event.
+	 *
+	 * @param array $new_post - Array of new post data.
+	 * @param array $post_custom - Array of data related to MainWP.
+	 */
+	public function event_mainwp_init( $new_post, $post_custom ) {
+		// Get post id.
+		$post_id = isset( $post_custom['_mainwp_edit_post_id'][0] ) ? $post_custom['_mainwp_edit_post_id'][0] : false;
+
+		// Check if ID exists.
+		if ( $post_id ) {
+			// Get post.
+			$post = get_post( $post_id );
+
+			// If post exists.
+			if ( ! empty( $post ) ) {
+				$this->_old_post = $post;
+				$this->_old_link = get_permalink( $post_id );
+				$this->_old_tmpl = $this->GetPostTemplate( $this->_old_post );
+				$this->_old_cats = $this->GetPostCategories( $this->_old_post );
+				$this->_old_tags = $this->get_post_tags( $this->_old_post );
+				$this->_old_stky = in_array( $post_id, get_option( 'sticky_posts' ) );
+			}
+		}
+	}
+
+	/**
 	 * Get the template path.
 	 *
 	 * @param stdClass $post - The post.
@@ -391,24 +377,58 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			'sticky' => FILTER_SANITIZE_STRING,
 			'action' => FILTER_SANITIZE_STRING,
 			'_inline_edit' => FILTER_SANITIZE_STRING,
+			'mainwpsignature' => FILTER_SANITIZE_STRING,
+			'function' => FILTER_SANITIZE_STRING,
 		);
 
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
 
+		// Check MainWP $_POST members.
+		$new_post    = filter_input( INPUT_POST, 'new_post' );
+		$post_custom = filter_input( INPUT_POST, 'post_custom' );
+		$post_custom = maybe_unserialize( base64_decode( $post_custom ) );
+
 		// Verify nonce.
-		if ( isset( $post_array['_wpnonce'] )
+		if (
+			isset( $post_array['_wpnonce'] )
 			&& isset( $post_array['post_ID'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] )
+		) {
 			// Edit Post Screen.
 			$original = isset( $post_array['original_post_status'] ) ? $post_array['original_post_status'] : '';
 			$this->trigger_post_change_alerts( $old_status, $new_status, $post, $original, isset( $post_array['sticky'] ) );
-		} elseif ( isset( $post_array['_inline_edit'] )
+		} elseif (
+			isset( $post_array['_inline_edit'] )
 			&& 'inline-save' === $post_array['action']
-			&& wp_verify_nonce( $post_array['_inline_edit'], 'inlineeditnonce' ) ) {
+			&& wp_verify_nonce( $post_array['_inline_edit'], 'inlineeditnonce' )
+		) {
 			// Quick Post Edit.
 			$original = isset( $post_array['original_post_status'] ) ? $post_array['original_post_status'] : '';
 			$this->trigger_post_change_alerts( $old_status, $new_status, $post, $original, isset( $post_array['sticky'] ) );
+		} elseif (
+			isset( $post_array['mainwpsignature'] )
+			&& ! empty( $new_post )
+			&& ! empty( $post_custom )
+		) {
+			// Check sticky post.
+			$sticky = false;
+			if ( isset( $post_custom['_sticky'] ) && is_array( $post_custom['_sticky'] ) ) {
+				foreach ( $post_custom['_sticky'] as $key => $meta_value ) {
+					if ( 'sticky' === base64_decode( $meta_value ) ) {
+						$sticky = true;
+					}
+				}
+			}
+			$this->trigger_post_change_alerts( $old_status, $new_status, $post, false, $sticky, 'mainwp' );
+		} elseif (
+			isset( $post_array['mainwpsignature'] )
+			&& isset( $post_array['function'] )
+			&& 'post_action' === $post_array['function']
+			&& isset( $post_array['action'] )
+			&& ( 'unpublish' === $post_array['action'] || 'publish' === $post_array['action'] )
+		) {
+			$this->check_mainwp_status_change( $post, $old_status, $new_status );
 		}
 	}
 
@@ -417,12 +437,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 *
 	 * @param string   $old_status - Old status.
 	 * @param string   $new_status - New status.
-	 * @param stdClass $post - The post.
-	 * @param string   $original - Original Post Status.
-	 * @param string   $sticky - Sticky post.
+	 * @param stdClass $post       - The post.
+	 * @param string   $original   - Original Post Status.
+	 * @param string   $sticky     - Sticky post.
+	 * @param string   $dashboard  - Dashboard from which the change is coming from.
 	 * @since 1.0.0
 	 */
-	public function trigger_post_change_alerts( $old_status, $new_status, $post, $original, $sticky ) {
+	public function trigger_post_change_alerts( $old_status, $new_status, $post, $original, $sticky, $dashboard = false ) {
 		WSAL_Sensors_Request::SetVars(
 			array(
 				'$new_status' => $new_status,
@@ -431,7 +452,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			)
 		);
 		// Run checks.
-		if ( $this->_old_post ) {
+		if ( $this->_old_post && ! $dashboard ) { // Change is coming from WP Dashboard.
 			if ( $this->CheckOtherSensors( $this->_old_post ) ) {
 				return;
 			}
@@ -449,6 +470,46 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					+ $this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post )
 					+ $this->CheckCategoriesChange( $this->_old_cats, $this->GetPostCategories( $post ), $post )
 					+ $this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post )
+					+ $this->CheckDateChange( $this->_old_post, $post )
+					+ $this->CheckPermalinkChange( $this->_old_link, get_permalink( $post->ID ), $post )
+					+ $this->CheckCommentsPings( $this->_old_post, $post );
+
+				$this->CheckModificationChange( $post->ID, $this->_old_post, $post, $changes );
+			}
+		} elseif ( ! $this->_old_post && 'mainwp' === $dashboard ) {
+			if ( $this->CheckOtherSensors( $this->_old_post ) ) {
+				return;
+			}
+			if ( 'auto-draft' === $old_status ) {
+				// Handle create post events.
+				$this->CheckPostCreation( $this->_old_post, $post );
+			}
+		} elseif ( $this->_old_post && 'mainwp' === $dashboard ) {
+			if ( 'auto-draft' === $old_status ) {
+				// Get MainWP $_POST members.
+				$new_post   = filter_input( INPUT_POST, 'new_post' );
+				$new_post   = maybe_unserialize( base64_decode( $new_post ) );
+				$post_catgs = filter_input( INPUT_POST, 'post_category' );
+
+				// Post categories.
+				$post_categories = rawurldecode( isset( $post_catgs ) ? base64_decode( $post_catgs ) : null );
+				$post_categories = explode( ',', $post_categories );
+
+				// Post tags.
+				$post_tags = rawurldecode( isset( $new_post['post_tags'] ) ? $new_post['post_tags'] : null );
+				$post_tags = str_replace( ' ', '', $post_tags );
+				$post_tags = explode( ',', $post_tags );
+
+				// Handle update post events.
+				$changes = 0;
+				$changes = $this->CheckAuthorChange( $this->_old_post, $post )
+					+ $this->CheckStatusChange( $this->_old_post, $post )
+					+ $this->CheckParentChange( $this->_old_post, $post )
+					+ $this->CheckStickyChange( $this->_old_stky, $sticky, $post )
+					+ $this->CheckVisibilityChange( $this->_old_post, $post, $old_status, $new_status )
+					+ $this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post )
+					+ $this->CheckCategoriesChange( $this->_old_cats, $post_categories, $post )
+					+ $this->check_tags_change( $this->_old_tags, $post_tags, $post )
 					+ $this->CheckDateChange( $this->_old_post, $post )
 					+ $this->CheckPermalinkChange( $this->_old_link, get_permalink( $post->ID ), $post )
 					+ $this->CheckCommentsPings( $this->_old_post, $post );
@@ -473,6 +534,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
+
+		// Check if the post is coming from MainWP.
+		$mainwp = filter_input( INPUT_POST, 'mainwpsignature', FILTER_SANITIZE_STRING );
+
+		if ( ! empty( $mainwp ) ) {
+			$post_array['action'] = 'editpost';
+		}
 
 		/**
 		 * Nonce is already verified at this point.
@@ -574,17 +642,24 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			return;
 		}
 
+		// Get MainWP $_POST members.
+		$filter_post_args = array(
+			'id' => FILTER_VALIDATE_INT,
+			'action' => FILTER_SANITIZE_STRING,
+			'mainwpsignature' => FILTER_SANITIZE_STRING,
+		);
+		$post_array = filter_input_array( INPUT_POST, $filter_post_args );
+
 		// Verify nonce.
 		if ( isset( $get_array['_wpnonce'] ) && wp_verify_nonce( $get_array['_wpnonce'], 'delete-post_' . $post_id ) ) {
 			$wp_actions = array( 'delete' );
-			if ( isset( $get_array['action'] ) && in_array( $get_array['action'], $wp_actions ) ) {
-				if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item' ) ) ) { // Ignore attachments, revisions and menu items.
+			if ( isset( $get_array['action'] ) && in_array( $get_array['action'], $wp_actions, true ) ) {
+				if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item' ), true ) ) { // Ignore attachments, revisions and menu items.
 					$event = 2008;
 					// Check WordPress backend operations.
 					if ( $this->CheckAutoDraft( $event, $post->post_title ) ) {
 						return;
 					}
-					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
 						$event, array(
 							'PostID' => $post->ID,
@@ -596,6 +671,28 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						)
 					);
 				}
+			}
+		} elseif (
+			isset( $post_array['mainwpsignature'] )
+			&& isset( $post_array['action'] )
+			&& 'delete' === $post_array['action']
+			&& ! empty( $post_array['id'] )
+		) {
+			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item' ), true ) ) { // Ignore attachments, revisions and menu items.
+				// Check WordPress backend operations.
+				if ( $this->CheckAutoDraft( 2008, $post->post_title ) ) {
+					return;
+				}
+				$this->plugin->alerts->Trigger(
+					2008, array(
+						'PostID' => $post->ID,
+						'PostType' => $post->post_type,
+						'PostTitle' => $post->post_title,
+						'PostStatus' => $post->post_status,
+						'PostDate' => $post->post_date,
+						'PostUrl' => get_permalink( $post->ID ),
+					)
+				);
 			}
 		}
 	}
@@ -1065,6 +1162,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 								return 0; // Return if any Yoast alert has or will trigger.
 							}
 						}
+
+						// Get post meta events.
+						$meta_events = array( 2053, 2054, 2055, 2062 );
+						foreach ( $meta_events as $meta_event ) {
+							if ( $this->plugin->alerts->WillOrHasTriggered( $meta_event ) ) {
+								return 0; // Return if any meta event has or will trigger.
+							}
+						}
 					}
 
 					$editor_link = $this->GetEditorLink( $oldpost );
@@ -1416,77 +1521,74 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	public function ViewingPost() {
 		// Retrieve the current post object.
 		$post = get_queried_object();
-		if ( is_user_logged_in() ) {
-			if ( ! is_admin() ) {
-				if ( $this->CheckOtherSensors( $post ) ) {
-					return $post->post_title;
-				}
+		if ( is_user_logged_in() && ! is_admin() ) {
+			if ( $this->CheckOtherSensors( $post ) ) {
+				return $post->post_title;
+			}
 
-				// Filter $_SERVER array for security.
-				$server_array = filter_input_array( INPUT_SERVER );
+			// Filter $_SERVER array for security.
+			$server_array = filter_input_array( INPUT_SERVER );
 
-				$current_path = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;
-				if ( ! empty( $server_array['HTTP_REFERER'] )
-					&& ! empty( $current_path )
-					&& strpos( $server_array['HTTP_REFERER'], $current_path ) !== false ) {
-					// Ignore this if we were on the same page so we avoid double audit entries.
-					return;
-				}
-				if ( ! empty( $post->post_title ) ) {
-					$editor_link = $this->GetEditorLink( $post );
-					$this->plugin->alerts->Trigger(
-						2101, array(
-							'PostID'    => $post->ID,
-							'PostType'  => $post->post_type,
-							'PostTitle' => $post->post_title,
-							'PostStatus' => $post->post_status,
-							'PostDate' => $post->post_date,
-							'PostUrl'   => get_permalink( $post->ID ),
-							$editor_link['name'] => $editor_link['value'],
-						)
-					);
-				}
+			$current_path = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;
+			if ( ! empty( $server_array['HTTP_REFERER'] )
+				&& ! empty( $current_path )
+				&& strpos( $server_array['HTTP_REFERER'], $current_path ) !== false ) {
+				// Ignore this if we were on the same page so we avoid double audit entries.
+				return;
+			}
+			if ( ! empty( $post->post_title ) ) {
+				$editor_link = $this->GetEditorLink( $post );
+				$this->plugin->alerts->Trigger(
+					2101, array(
+						'PostID'    => $post->ID,
+						'PostType'  => $post->post_type,
+						'PostTitle' => $post->post_title,
+						'PostStatus' => $post->post_status,
+						'PostDate' => $post->post_date,
+						'PostUrl'   => get_permalink( $post->ID ),
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
 			}
 		}
 	}
 
 	/**
-	 * Alerts for Editing of Posts, Pages and Custom Posts.
+	 * Alerts for Editing of Posts, Pages and Custom Post Types.
 	 *
 	 * @param stdClass $post - Post.
 	 */
 	public function EditingPost( $post ) {
-		if ( is_user_logged_in() ) {
-			if ( is_admin() ) {
-				if ( $this->CheckOtherSensors( $post ) ) {
-					return $post;
-				}
+		if ( is_user_logged_in() && is_admin() ) {
+			// Check ignored post types.
+			if ( $this->CheckOtherSensors( $post ) ) {
+				return $post;
+			}
 
-				// Filter $_SERVER array for security.
-				$server_array = filter_input_array( INPUT_SERVER );
+			// Filter $_SERVER array for security.
+			$server_array = filter_input_array( INPUT_SERVER );
 
-				$current_path = isset( $server_array['SCRIPT_NAME'] ) ? $server_array['SCRIPT_NAME'] . '?post=' . $post->ID : false;
-				if ( ! empty( $server_array['HTTP_REFERER'] )
-					&& strpos( $server_array['HTTP_REFERER'], $current_path ) !== false ) {
-					// Ignore this if we were on the same page so we avoid double audit entries.
-					return $post;
-				}
-				if ( ! empty( $post->post_title ) ) {
-					$event = 2100;
-					if ( ! $this->WasTriggered( $event ) ) {
-						$editor_link = $this->GetEditorLink( $post );
-						$this->plugin->alerts->Trigger(
-							$event, array(
-								'PostID' => $post->ID,
-								'PostType' => $post->post_type,
-								'PostTitle' => $post->post_title,
-								'PostStatus' => $post->post_status,
-								'PostDate' => $post->post_date,
-								'PostUrl' => get_permalink( $post->ID ),
-								$editor_link['name'] => $editor_link['value'],
-							)
-						);
-					}
+			$current_path = isset( $server_array['SCRIPT_NAME'] ) ? $server_array['SCRIPT_NAME'] . '?post=' . $post->ID : false;
+			if ( ! empty( $server_array['HTTP_REFERER'] )
+				&& strpos( $server_array['HTTP_REFERER'], $current_path ) !== false ) {
+				// Ignore this if we were on the same page so we avoid double audit entries.
+				return $post;
+			}
+			if ( ! empty( $post->post_title ) ) {
+				$event = 2100;
+				if ( ! $this->WasTriggered( $event ) ) {
+					$editor_link = $this->GetEditorLink( $post );
+					$this->plugin->alerts->Trigger(
+						$event, array(
+							'PostID' => $post->ID,
+							'PostType' => $post->post_type,
+							'PostTitle' => $post->post_title,
+							'PostStatus' => $post->post_status,
+							'PostDate' => $post->post_date,
+							'PostUrl' => get_permalink( $post->ID ),
+							$editor_link['name'] => $editor_link['value'],
+						)
+					);
 				}
 			}
 		}
@@ -1614,6 +1716,55 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$event = 2112;
 		}
 		return $event;
+	}
+
+	/**
+	 * Method: Check status change of a post from MainWP Dashboard.
+	 *
+	 * @param WP_Post $post       - WP_Post object.
+	 * @param string  $old_status - Old post status.
+	 * @param string  $new_status - New post status.
+	 * @since 3.2.2
+	 */
+	private function check_mainwp_status_change( $post, $old_status, $new_status ) {
+		// Verify function arguments.
+		if ( empty( $post ) || ! $post instanceof WP_Post || empty( $old_status ) || empty( $new_status ) ) {
+			return;
+		}
+
+		// Check to see if old & new statuses don't match.
+		if ( $old_status !== $new_status ) {
+			if ( 'publish' === $new_status ) {
+				// Special case (publishing a post).
+				$editor_link = $this->GetEditorLink( $post );
+				$this->plugin->alerts->Trigger(
+					2001, array(
+						'PostID'     => $post->ID,
+						'PostType'   => $post->post_type,
+						'PostTitle'  => $post->post_title,
+						'PostStatus' => $post->post_status,
+						'PostDate'   => $post->post_date,
+						'PostUrl'    => get_permalink( $post->ID ),
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			} else {
+				$editor_link = $this->GetEditorLink( $post );
+				$this->plugin->alerts->Trigger(
+					2021, array(
+						'PostID'     => $post->ID,
+						'PostType'   => $post->post_type,
+						'PostTitle'  => $post->post_title,
+						'PostStatus' => $post->post_status,
+						'PostDate'   => $post->post_date,
+						'PostUrl'    => get_permalink( $post->ID ),
+						'OldStatus'  => $old_status,
+						'NewStatus'  => $new_status,
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			}
+		}
 	}
 
 	/**
