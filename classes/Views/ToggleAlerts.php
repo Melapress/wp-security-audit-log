@@ -241,25 +241,25 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 									<?php elseif ( __( 'BBPress Forum', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
 										<tr>
 											<td colspan="4">
-												<p class="wsal-tab-help description"><?php echo esc_html__( 'The plugin BBPress is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												<p class="wsal-tab-help wsal-tab-notice description"><?php echo esc_html__( 'The plugin BBPress is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
 											</td>
 										</tr>
 									<?php elseif ( __( 'WooCommerce', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
 										<tr>
 											<td colspan="4">
-												<p class="wsal-tab-help description"><?php echo esc_html__( 'The plugin WooCommerce is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												<p class="wsal-tab-help wsal-tab-notice description"><?php echo esc_html__( 'The plugin WooCommerce is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
 											</td>
 										</tr>
 									<?php elseif ( __( 'Yoast SEO', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
 										<tr>
 											<td colspan="4">
-												<p class="wsal-tab-help description"><?php echo esc_html__( 'The plugin Yoast SEO is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												<p class="wsal-tab-help wsal-tab-notice description"><?php echo esc_html__( 'The plugin Yoast SEO is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
 											</td>
 										</tr>
 									<?php elseif ( __( 'MultiSite', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
 										<tr>
 											<td colspan="4">
-												<p class="wsal-tab-help description"><?php echo esc_html__( 'Your website is a single site so the multisite events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												<p class="wsal-tab-help wsal-tab-notice description"><?php echo esc_html__( 'Your website is a single site so the multisite events have been disabled.', 'wp-security-audit-log' ); ?></p>
 											</td>
 										</tr>
 										<?php
@@ -481,6 +481,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			}
 			.widefat td .wsal-tab-help {
 				margin: 0 8px;
+			}
+			.widefat td .wsal-tab-notice {
+				color: red;
 			}
 		</style>
 		<?php
