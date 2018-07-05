@@ -132,12 +132,15 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @param mix    $meta_value - Meta value.
 	 */
 	public function EventPostMetaCreated( $object_id, $meta_key, $meta_value ) {
-		$post = get_post( $object_id );
 		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
-		if ( 'revision' == $post->post_type ) {
+		// Get post object.
+		$post = get_post( $object_id );
+
+		// Return if the post object is null or the post type is revision.
+		if ( null === $post || 'revision' === $post->post_type ) {
 			return;
 		}
 
@@ -157,9 +160,29 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return false;
 		}
 
+		// WP Dashboard action.
 		$wp_action = array( 'add-meta' );
 
-		if ( isset( $post_array['action'] ) && ( 'editpost' == $post_array['action'] || in_array( $post_array['action'], $wp_action ) ) ) {
+		// Check MainWP $_POST members.
+		$new_post    = filter_input( INPUT_POST, 'new_post' );
+		$post_custom = filter_input( INPUT_POST, 'post_custom' );
+
+		// Check if the post is coming from MainWP.
+		$mainwp = filter_input( INPUT_POST, 'mainwpsignature', FILTER_SANITIZE_STRING );
+
+		if (
+			( // Either coming from WP admin panel.
+				isset( $post_array['action'] )
+				&& (
+					'editpost' === $post_array['action']
+					|| in_array( $post_array['action'], $wp_action, true )
+				)
+			) || ( // OR from MainWP dashboard.
+				! empty( $new_post )
+				&& ! empty( $post_custom )
+				&& ! empty( $mainwp )
+			)
+		) {
 			$editor_link = $this->GetEditorLink( $post );
 			$this->plugin->alerts->Trigger(
 				2053, array(
@@ -202,14 +225,35 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @param mix    $meta_value - Meta value.
 	 */
 	public function EventPostMetaUpdated( $meta_id, $object_id, $meta_key, $meta_value ) {
-		$post = get_post( $object_id );
 		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
-		if ( 'revision' == $post->post_type ) {
+		// Get post object.
+		$post = get_post( $object_id );
+
+		// Return if the post object is null or the post type is revision.
+		if ( null === $post || 'revision' === $post->post_type ) {
 			return;
 		}
+
+		/**
+		 * WSAL Action Hook.
+		 *
+		 * Runs before logging events for post meta updated i.e. 2062 or 2054.
+		 *
+		 * This hook can be used to log events for updated post meta on the
+		 * front-end since the plugin only supports events for updating post
+		 * meta via wp admin panel.
+		 *
+		 * @param int    $meta_id        - Meta ID.
+		 * @param int    $object_id      - Post ID.
+		 * @param array  $this->old_meta - Array of meta data holding keys & values of old meta data before updating the current post.
+		 * @param string $meta_key       - Meta key.
+		 * @param mixed  $meta_value     - Meta value.
+		 * @since 3.2.2
+		 */
+		do_action( 'wsal_post_meta_updated', $meta_id, $object_id, $this->old_meta, $meta_key, $meta_value );
 
 		// Filter $_POST global array for security.
 		$post_array = filter_input_array( INPUT_POST );
@@ -221,9 +265,29 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return false;
 		}
 
+		// WP Dashboard action.
 		$wp_action = array( 'add-meta' );
 
-		if ( isset( $post_array['action'] ) && ( 'editpost' == $post_array['action'] || in_array( $post_array['action'], $wp_action ) ) ) {
+		// Check MainWP $_POST members.
+		$new_post    = filter_input( INPUT_POST, 'new_post' );
+		$post_custom = filter_input( INPUT_POST, 'post_custom' );
+
+		// Check if the post is coming from MainWP.
+		$mainwp = filter_input( INPUT_POST, 'mainwpsignature', FILTER_SANITIZE_STRING );
+
+		if (
+			(
+				isset( $post_array['action'] )
+				&& (
+					'editpost' === $post_array['action']
+					|| in_array( $post_array['action'], $wp_action, true )
+				)
+			) || (
+				! empty( $new_post )
+				&& ! empty( $post_custom )
+				&& ! empty( $mainwp )
+			)
+		) {
 			$editor_link = $this->GetEditorLink( $post );
 			if ( isset( $this->old_meta[ $meta_id ] ) ) {
 				// Check change in meta key.
@@ -278,13 +342,18 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @param mix    $meta_value - Meta value.
 	 */
 	public function EventPostMetaDeleted( $meta_ids, $object_id, $meta_key, $meta_value ) {
-
 		// If meta key starts with "_" then return.
 		if ( '_' == substr( $meta_key, 0, 1 ) ) {
 			return;
 		}
 
+		// Get post object.
 		$post = get_post( $object_id );
+
+		// Return if the post object is null.
+		if ( null === $post ) {
+			return;
+		}
 
 		// Filter $_POST global array for security.
 		$post_array = filter_input_array( INPUT_POST );
@@ -296,9 +365,26 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return false;
 		}
 
+		// WP Dashboard action.
 		$wp_action = array( 'delete-meta' );
 
-		if ( isset( $post_array['action'] ) && in_array( $post_array['action'], $wp_action ) ) {
+		// Check MainWP $_POST members.
+		$new_post    = filter_input( INPUT_POST, 'new_post' );
+		$post_custom = filter_input( INPUT_POST, 'post_custom' );
+
+		// Check if the post is coming from MainWP.
+		$mainwp = filter_input( INPUT_POST, 'mainwpsignature', FILTER_SANITIZE_STRING );
+
+		if (
+			(
+				isset( $post_array['action'] )
+				&& in_array( $post_array['action'], $wp_action, true )
+			) || (
+				! empty( $new_post )
+				&& ! empty( $post_custom )
+				&& ! empty( $mainwp )
+			)
+		) {
 			$editor_link = $this->GetEditorLink( $post );
 			foreach ( $meta_ids as $meta_id ) {
 				if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) ) {
@@ -356,7 +442,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @param mix    $meta_value - Meta value.
 	 */
 	public function event_user_meta_created( $object_id, $meta_key, $meta_value ) {
-
 		// Get user.
 		$user = get_user_by( 'ID', $object_id );
 
@@ -415,7 +500,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @param mix    $meta_value - Meta value.
 	 */
 	public function event_user_meta_updated( $meta_id, $object_id, $meta_key, $meta_value ) {
-
 		// Get user.
 		$user = get_user_by( 'ID', $object_id );
 
@@ -431,25 +515,31 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		$post_array = filter_input_array( INPUT_POST );
 
 		// If update action is set then trigger the alert.
-		if ( ( isset( $post_array['_wpnonce'] ) // WP Dashboard Support.
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-user_' . $user->ID )
-			&& isset( $post_array['action'] )
-			&& 'update' == $post_array['action'] )
-			||
-			( isset( $post_array['_um_account'] ) // Ultimate Member Plugin support.
-			&& '1' === $post_array['_um_account']
-			&& isset( $post_array['_um_account_tab'] )
-			&& 'general' === $post_array['_um_account_tab'] )
-			) {
+		if (
+			(
+				isset( $post_array['_wpnonce'] ) // WP Dashboard Support.
+				&& wp_verify_nonce( $post_array['_wpnonce'], 'update-user_' . $user->ID )
+				&& isset( $post_array['action'] )
+				&& 'update' == $post_array['action']
+			) || (
+				isset( $post_array['_um_account'] ) // Ultimate Member Plugin support.
+				&& '1' === $post_array['_um_account']
+				&& isset( $post_array['_um_account_tab'] )
+				&& 'general' === $post_array['_um_account_tab']
+			) || (
+				isset( $post_array['action'] ) && 'update_user' === $post_array['action'] // MainWP action.
+				&& isset( $post_array['mainwpsignature'] ) && ! empty( $post_array['mainwpsignature'] ) // MainWP Signature.
+			)
+		) {
 			if ( isset( $this->old_meta[ $meta_id ] ) && ! in_array( $meta_key, $username_meta, true ) ) {
 				// Check change in meta value.
 				if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
 					$this->plugin->alerts->Trigger(
 						4015, array(
-							'TargetUsername' => $user->user_login,
+							'TargetUsername'    => $user->user_login,
 							'custom_field_name' => $meta_key,
-							'new_value' => $meta_value,
-							'old_value' => $this->old_meta[ $meta_id ]->val,
+							'new_value'  => $meta_value,
+							'old_value'  => $this->old_meta[ $meta_id ]->val,
 							'ReportText' => $this->old_meta[ $meta_id ]->val . '|' . $meta_value,
 						)
 					);
@@ -464,8 +554,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							$this->plugin->alerts->Trigger(
 								4017, array(
 									'TargetUsername' => $user->user_login,
-									'new_firstname' => $meta_value,
-									'old_firstname' => $this->old_meta[ $meta_id ]->val,
+									'new_firstname'  => $meta_value,
+									'old_firstname'  => $this->old_meta[ $meta_id ]->val,
 								)
 							);
 						}
@@ -476,8 +566,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							$this->plugin->alerts->Trigger(
 								4018, array(
 									'TargetUsername' => $user->user_login,
-									'new_lastname' => $meta_value,
-									'old_lastname' => $this->old_meta[ $meta_id ]->val,
+									'new_lastname'   => $meta_value,
+									'old_lastname'   => $this->old_meta[ $meta_id ]->val,
 								)
 							);
 						}
@@ -488,8 +578,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							$this->plugin->alerts->Trigger(
 								4019, array(
 									'TargetUsername' => $user->user_login,
-									'new_nickname' => $meta_value,
-									'old_nickname' => $this->old_meta[ $meta_id ]->val,
+									'new_nickname'   => $meta_value,
+									'old_nickname'   => $this->old_meta[ $meta_id ]->val,
 								)
 							);
 						}
@@ -510,7 +600,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @since 2.6.9
 	 */
 	public function event_userdata_updated( $user_id, $old_user_data ) {
-
 		// Get user display name.
 		$old_display_name = $old_user_data->display_name;
 
@@ -522,7 +611,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		if ( $old_display_name !== $new_display_name ) {
 			$this->plugin->alerts->Trigger(
 				4020, array(
-					'TargetUsername' => $new_userdata->user_login,
+					'TargetUsername'  => $new_userdata->user_login,
 					'new_displayname' => $new_display_name,
 					'old_displayname' => $old_display_name,
 				)

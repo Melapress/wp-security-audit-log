@@ -51,9 +51,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_download_failed_login_log', array( $this, 'wsal_download_failed_login_log' ) );
 		add_action( 'wp_ajax_wsal_download_404_log', array( $this, 'wsal_download_404_log' ) );
 		add_action( 'wp_ajax_wsal_freemius_opt_in', array( $this, 'wsal_freemius_opt_in' ) );
+		add_action( 'wp_ajax_wsal_exclude_url', array( $this, 'wsal_exclude_url' ) );
+		add_action( 'wp_ajax_wsal_dismiss_notice_disconnect', array( $this, 'dismiss_notice_disconnect' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
 		add_filter( 'wsal_pointers_toplevel_page_wsal-auditlog', array( $this, 'register_privacy_pointer' ), 10, 1 );
+
 		// Check plugin version for to dismiss the notice only until upgrade.
 		$this->_version = WSAL_VERSION;
 		$this->RegisterNotice( 'premium-wsal-' . $this->_version ); // Upgrade notice.
@@ -129,10 +132,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Add connectivity notice.
-		if ( ! $connection ) {
+		$notice_dismissed = get_transient( 'wsal-dismiss-notice-disconnect' );
+		if ( ! $connection && false === $notice_dismissed ) {
 			?>
-			<div class="notice notice-error">
+			<div class="notice notice-error is-dismissible" id="wsal-notice-connect-issue">
 				<p><?php esc_html_e( 'There are connectivity issues with the database where the WordPress activity log is stored. The logs will be temporary buffered in the WordPress database until the connection is fully restored.', 'wp-security-audit-log' ); ?></p>
+				<?php wp_nonce_field( 'wsal_dismiss_notice_disconnect', 'wsal-dismiss-notice-disconnect', false, true ); ?>
 			</div>
 			<?php
 		}
@@ -164,6 +169,24 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				endif;
 			}
 		}
+	}
+
+	/**
+	 * Method: Ajax handler for dismissing DB disconnect issue.
+	 */
+	public function dismiss_notice_disconnect() {
+		// Get $_POST array arguments.
+		$post_array_args = array(
+			'nonce' => FILTER_SANITIZE_STRING,
+		);
+		$post_array      = filter_input_array( INPUT_POST, $post_array_args );
+
+		// Verify nonce.
+		if ( wp_verify_nonce( $post_array['nonce'], 'wsal_dismiss_notice_disconnect' ) ) {
+			set_transient( 'wsal-dismiss-notice-disconnect', 1, 6 * HOUR_IN_SECONDS );
+			die();
+		}
+		die( 'Nonce verification failed!' );
 	}
 
 	/**
@@ -740,5 +763,42 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			);
 		}
 		return $pointer;
+	}
+
+	/**
+	 * Method: Ajax request handler to exclude URL from
+	 * the event.
+	 *
+	 * @since 3.2.2
+	 */
+	public function wsal_exclude_url() {
+		// Die if user does not have permission to disable.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+			echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to exclude this URL.', 'wp-security-audit-log' ) . '</p>';
+			die();
+		}
+
+		// Set filter input args.
+		$filter_input_args = array(
+			'nonce' => FILTER_SANITIZE_STRING,
+			'url'   => FILTER_SANITIZE_STRING,
+		);
+
+		// Filter $_POST array for security.
+		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
+
+		if ( isset( $post_array['nonce'] ) && ! wp_verify_nonce( $post_array['nonce'], 'wsal-exclude-url-' . $post_array['url'] ) ) {
+			die();
+		}
+
+		$excluded_urls = $this->_plugin->GetGlobalOption( 'excluded-urls' );
+		if ( isset( $excluded_urls ) && '' !== $excluded_urls ) {
+			$excluded_urls .= ',' . esc_url( $post_array['url'] );
+		} else {
+			$excluded_urls = esc_url( $post_array['url'] );
+		}
+		$this->_plugin->SetGlobalOption( 'excluded-urls', $excluded_urls );
+		echo '<p>URL ' . esc_html( $post_array['url'] ) . ' is no longer being monitored.<br />Enable the monitoring of this URL again from the <a href="' . esc_url( admin_url( 'admin.php?page=wsal-settings#tab-exclude' ) ) . '">Excluded Objects</a> tab in the plugin settings.</p>';
+		die;
 	}
 }

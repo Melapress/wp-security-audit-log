@@ -176,9 +176,10 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		// Action Plugin Component.
 		$alert_options = array();
 		if ( $is_plugins ) {
+			$plugin_file = '';
 			if ( isset( $get_array['plugin'] ) ) {
 				$plugin_file = $get_array['plugin'];
-			} else {
+			} elseif ( isset( $get_array['checked'] ) ) {
 				$plugin_file = $get_array['checked'][0];
 			}
 			$plugin_name = basename( $plugin_file, '.php' );
@@ -189,9 +190,10 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			);
 			// Action Theme Component.
 		} elseif ( $is_themes ) {
+			$theme_name = '';
 			if ( isset( $get_array['theme'] ) ) {
 				$theme_name = $get_array['theme'];
-			} else {
+			} elseif ( isset( $get_array['checked'] ) ) {
 				$theme_name = $get_array['checked'][0];
 			}
 			$theme_name = str_replace( array( '_', '-', '  ' ), ' ', $theme_name );

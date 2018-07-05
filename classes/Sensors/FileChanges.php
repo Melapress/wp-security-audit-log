@@ -118,6 +118,11 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
+		// Disable the sensor if file changes is disabled.
+		if ( isset( $this->scan_settings['scan_file_changes'] ) && 'enable' !== $this->scan_settings['scan_file_changes'] ) {
+			return;
+		}
+
 		// Filter stored and scanned files to balance scan file exclusion.
 		add_filter( 'wsal_file_scan_stored_files', array( $this, 'filter_scan_files' ), 10, 2 );
 		add_filter( 'wsal_file_scan_scanned_files', array( $this, 'filter_scan_files' ), 10, 2 );
@@ -155,6 +160,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 			'scan_day'            => $this->plugin->GetGlobalOption( 'scan-day', '1' ),
 			'scan_date'           => $this->plugin->GetGlobalOption( 'scan-date', '10' ),
 			'scan_directories'    => $this->plugin->GetGlobalOption( 'scan-directories', $default_scan_dirs ),
+			'excluded_dirs'       => $this->plugin->GetGlobalOption( 'scan-excluded-directories', array() ),
 			'excluded_extensions' => $this->plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav' ) ),
 			'excluded_files'      => $this->plugin->GetGlobalOption( 'scan_excluded_files', array() ),
 			'last_scanned'        => $this->plugin->GetGlobalOption( 'last-scanned', false ),
@@ -378,6 +384,17 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 
 					// Log the alert.
 					foreach ( $files_added as $file => $file_hash ) {
+						// Get directory name.
+						$directory_name = dirname( $file );
+
+						// Check if the directory is in excluded directories list.
+						if (
+							! empty( $site_content->skip_directories )
+							&& in_array( $directory_name, $site_content->skip_directories, true )
+						) {
+							continue; // If true, then skip the loop.
+						}
+
 						// Get filename from file path.
 						$filename = basename( $file );
 
@@ -410,6 +427,14 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 				if ( count( $files_removed ) > 0 ) {
 					// Log the alert.
 					foreach ( $files_removed as $file => $file_hash ) {
+						// Get directory name.
+						$directory_name = dirname( $file );
+
+						// Check if directory is in excluded directories list.
+						if ( in_array( $directory_name, $this->scan_settings['excluded_dirs'], true ) ) {
+							continue; // If true, then skip the loop.
+						}
+
 						// Get filename from file path.
 						$filename = basename( $file );
 
@@ -565,6 +590,11 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					continue;
 				}
 
+				// Check if the directory is in excluded directories list.
+				if ( in_array( $absolute_name, $this->scan_settings['excluded_dirs'], true ) ) {
+					continue; // Skip the directory.
+				}
+
 				// If not multisite then simply scan.
 				if ( ! $is_multisite ) {
 					$files = array_merge( $files, $this->scan_path( $relative_name ) );
@@ -615,8 +645,8 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					break; // And break the loop.
 				}
 
-				// 2MB = 2097152 bytes.
-				if ( filesize( $absolute_name ) < 2097152 ) { // Check if file size is less than 2MB.
+				// 5MB = 5242880 bytes.
+				if ( filesize( $absolute_name ) < 5242880 ) { // Check if file size is less than 5MB.
 					$this->scan_file_count = $this->scan_file_count + 1;
 					// File data.
 					$files[ $absolute_name ] = @md5_file( $absolute_name ); // File hash.
@@ -997,9 +1027,10 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 
 			// Check if the option is instance of stdClass.
 			if ( false !== $site_content && $site_content instanceof stdClass ) {
-				$site_content->skip_core = false; // Reset skip core after the scan is complete.
-				$site_content->skip_files = array(); // Empty the skip files at the end of the scan.
-				$site_content->skip_extensions = array(); // Empty the skip extensions at the end of the scan.
+				$site_content->skip_core        = false;   // Reset skip core after the scan is complete.
+				$site_content->skip_files       = array(); // Empty the skip files at the end of the scan.
+				$site_content->skip_extensions  = array(); // Empty the skip extensions at the end of the scan.
+				$site_content->skip_directories = array(); // Empty the skip directories at the end of the scan.
 				$this->plugin->SetGlobalOption( 'site_content', $site_content ); // Save the option.
 			}
 		}

@@ -43,7 +43,7 @@ class WSAL_ViewManager {
 		$skip_views = array();
 
 		// Array of views to skip for premium version.
-		if ( wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
+		if ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
 			$skip_views[] = dirname( __FILE__ ) . '/Views/EmailNotifications.php';
 			$skip_views[] = dirname( __FILE__ ) . '/Views/ExternalDB.php';
 			$skip_views[] = dirname( __FILE__ ) . '/Views/Licensing.php';

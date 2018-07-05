@@ -52,6 +52,11 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
+		// Check if BBPress plugin exists.
+		if ( ! is_plugin_active( 'bbpress/bbpress.php' ) ) {
+			return false;
+		}
+
 		if ( current_user_can( 'edit_posts' ) ) {
 			add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
 		}

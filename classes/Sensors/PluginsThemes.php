@@ -67,15 +67,6 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	private $site_content;
 
 	/**
-	 * Method: Constructor.
-	 *
-	 * @param WpSecurityAuditLog $wsal – Instance of WpSecurityAuditLog.
-	 */
-	public function __construct( WpSecurityAuditLog $wsal ) {
-		parent::__construct( $wsal );
-	}
-
-	/**
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
@@ -97,14 +88,62 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 		// Set site content.
 		$this->set_site_themes();
+
+		// Check if MainWP Child Plugin exists.
+		if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
+			$this->mainwp_child_init();
+
+			// Handle plugin/theme installation event via MainWP dashboard.
+			add_action( 'mainwp_child_installPluginTheme', array( $this, 'mainwp_child_install_assets' ), 10, 1 );
+
+			// Activate/Deactivate plugin event.
+			add_action( 'activated_plugin', array( $this, 'mainwp_child_plugin_events' ), 10, 1 );
+			add_action( 'deactivated_plugin', array( $this, 'mainwp_child_plugin_events' ), 10, 1 );
+
+			// Uninstall plugin from MainWP dashboard.
+			add_action( 'mainwp_child_plugin_action', array( $this, 'mainwp_child_uninstall_plugin' ), 10, 1 );
+
+			// Uninstall theme from MainWP dashboard.
+			add_action( 'mainwp_child_theme_action', array( $this, 'mainwp_child_uninstall_theme' ), 10, 1 );
+
+			// Update theme/plugin from MainWP dashboard.
+			add_action( 'mainwp_child_upgradePluginTheme', array( $this, 'mainwp_child_update_assets' ), 10, 1 );
+		}
 	}
 
 	/**
 	 * Triggered when a user accesses the admin area.
 	 */
 	public function EventAdminInit() {
-		$this->old_themes = wp_get_themes();
+		$this->old_themes  = wp_get_themes();
 		$this->old_plugins = get_plugins();
+	}
+
+	/**
+	 * Method: Check and initialize class members for MainWP.
+	 */
+	public function mainwp_child_init() {
+		// $_POST array arguments.
+		$post_array_args = array(
+			'function' => FILTER_SANITIZE_STRING,
+			'action'   => FILTER_SANITIZE_STRING,
+			'theme'    => FILTER_SANITIZE_STRING,
+			'mainwpsignature' => FILTER_SANITIZE_STRING,
+		);
+
+		// Get $_POST array.
+		$post_array = filter_input_array( INPUT_POST, $post_array_args );
+
+		if (
+			isset( $post_array['function'] ) && 'theme_action' === $post_array['function']
+			&& isset( $post_array['action'] ) && 'delete' === $post_array['action']
+			&& isset( $post_array['theme'] ) && ! empty( $post_array['theme'] )
+			&& isset( $post_array['mainwpsignature'] ) && ! empty( $post_array['mainwpsignature'] )
+		) {
+			if ( empty( $this->old_themes ) ) {
+				$this->old_themes = wp_get_themes();
+			}
+		}
 	}
 
 	/**
@@ -543,8 +582,10 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 
 		if ( isset( $post_array['action'] ) && ! in_array( $post_array['action'], $wp_actions ) ) {
-			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
-				|| ! empty( $post->post_title ) ) {
+			if (
+				! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
+				|| ! empty( $post->post_title )
+			) {
 				// If the plugin modify the post.
 				if ( false !== strpos( $post_array['action'], 'edit' ) ) {
 					$event = $this->GetEventTypeForPostType( $post, 2106, 2107, 2108 );
@@ -558,10 +599,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						)
 					);
 				} elseif (
-					isset( $post_array['page'] ) // If page index is set in post array.
-					&& 'woocommerce-bulk-stock-management' === $post_array['page']
+					( isset( $post_array['page'] ) && 'woocommerce-bulk-stock-management' === $post_array['page'] ) // If page index is set in post array then ignore.
+					|| (
+						isset( $post_array['mainwpsignature'] )
+						&& ( 'restore' === $post_array['action'] || 'unpublish' === $post_array['action'] || 'publish' === $post_array['action'] )
+					) // OR If the request is coming from MainWP then ignore.
 				) {
 					// Ignore WooCommerce Bulk Stock Management page.
+					// OR MainWP plugin requests.
 				} else {
 					$event = $this->GetEventTypeForPostType( $post, 5019, 5020, 5021 );
 					$this->plugin->alerts->Trigger(
@@ -631,6 +676,321 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			}
 		}
 		return array_values( $result );
+	}
+
+	/**
+	 * Method: Handle plugin/theme install event
+	 * from MainWP dashboard on child site.
+	 *
+	 * @param array $args - Array of arguments related to asset installed.
+	 * @since 3.2.2
+	 */
+	public function mainwp_child_install_assets( $args ) {
+		if ( empty( $args ) || ! is_array( $args ) ) {
+			return;
+		}
+
+		// Verify the action from MainWP.
+		if (
+			isset( $args['action'] ) && 'install' === $args['action']
+			&& isset( $args['success'] ) && ! empty( $args['success'] )
+		) {
+			if ( isset( $args['type'] ) && 'theme' === $args['type'] ) { // Installing theme.
+				// Get theme name & object.
+				$theme_slug = isset( $args['slug'] ) ? $args['slug'] : false;
+				$theme_obj  = wp_get_theme( $theme_slug );
+
+				// Check if theme exists.
+				if ( $theme_obj->exists() ) {
+					$this->plugin->alerts->Trigger(
+						5005, array(
+							'Theme' => (object) array(
+								'Name'        => $theme_obj->Name,
+								'ThemeURI'    => $theme_obj->ThemeURI,
+								'Description' => $theme_obj->Description,
+								'Author'      => $theme_obj->Author,
+								'Version'     => $theme_obj->Version,
+								'get_template_directory' => $theme_obj->get_template_directory(),
+							),
+						)
+					);
+					// Add theme to site themes list.
+					$this->set_site_themes( $theme_slug );
+				}
+			} elseif ( isset( $args['type'] ) && 'plugin' === $args['type'] ) {
+				// Get plugin slug.
+				$plugin_slug = isset( $args['slug'] ) ? $args['slug'] : false;
+
+				$plugins = get_plugins(); // Get all plugins.
+				$plugin  = $plugins[ $plugin_slug ]; // Take out the plugin being installed.
+
+				// Get plugin directory name.
+				$plugin_dir = $this->get_plugin_dir( $plugin_slug );
+
+				// Add plugin to site plugins list.
+				$this->set_site_plugins( $plugin_dir );
+
+				$plugin_path = plugin_dir_path( WP_PLUGIN_DIR . '/' . $plugin_slug );
+				$this->plugin->alerts->Trigger(
+					5000, array(
+						'Plugin' => (object) array(
+							'Name'      => $plugin['Name'],
+							'PluginURI' => $plugin['PluginURI'],
+							'Version'   => $plugin['Version'],
+							'Author'    => $plugin['Author'],
+							'Network'   => $plugin['Network'] ? 'True' : 'False',
+							'plugin_dir_path' => $plugin_path,
+						),
+					)
+				);
+			}
+		}
+	}
+
+	/**
+	 * Method: Handle plugin uninstall event
+	 * from MainWP dashboard on child site.
+	 *
+	 * @param array $args - Array of arguments related to asset uninstalled.
+	 * @since 3.2.2
+	 */
+	public function mainwp_child_uninstall_plugin( $args ) {
+		if ( empty( $args ) || ! is_array( $args ) ) {
+			return;
+		}
+
+		// Get MainWP post data.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Get plugins from MainWP.
+		if ( isset( $post_array['plugin'] ) && ! empty( $post_array['plugin'] ) ) {
+			$wp_plugins = explode( '||', $post_array['plugin'] );
+		}
+
+		// Verify actions from MainWP.
+		if (
+			isset( $args['action'] ) && 'delete' === $args['action']
+			&& isset( $args['Name'] ) && ! empty( $args['Name'] )
+			&& isset( $post_array['mainwpsignature'] ) && ! empty( $post_array['mainwpsignature'] )
+		) {
+			// Get plugin name.
+			$plugin_name = $args['Name'];
+
+			// Get plugin filename.
+			$plugin_filename = $this->get_plugin_file_name( $plugin_name );
+
+			if ( ! empty( $plugin_filename ) && in_array( $plugin_filename, $wp_plugins, true ) ) {
+				$this->plugin->alerts->Trigger(
+					5003, array(
+						'PluginFile' => $plugin_filename,
+						'PluginData' => (object) array(
+							'Name' => $plugin_name,
+						),
+					)
+				);
+
+				// Get plugin directory name.
+				$plugin_dir = $this->get_plugin_dir( $plugin_filename );
+
+				// Set plugin to skip file changes alert.
+				$this->skip_plugin_change_alerts( $plugin_dir );
+
+				// Remove it from the list.
+				$this->remove_site_plugin( $plugin_dir );
+			}
+		}
+	}
+
+	/**
+	 * Method: Handle theme uninstall event
+	 * from MainWP dashboard on child site.
+	 *
+	 * @param array $args - Array of arguments related to asset uninstalled.
+	 * @since 3.2.2
+	 */
+	public function mainwp_child_uninstall_theme( $args ) {
+		if ( empty( $args ) || ! is_array( $args ) ) {
+			return;
+		}
+
+		// Get MainWP post data.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Get themes from MainWP.
+		if ( isset( $post_array['theme'] ) && ! empty( $post_array['theme'] ) ) {
+			$wp_themes = explode( '||', $post_array['theme'] );
+		}
+
+		// Verify actions from MainWP.
+		if (
+			isset( $args['action'] ) && 'delete' === $args['action']
+			&& isset( $args['Name'] ) && ! empty( $args['Name'] )
+			&& isset( $post_array['mainwpsignature'] ) && ! empty( $post_array['mainwpsignature'] )
+		) {
+			// Get theme object.
+			$themes = $this->GetRemovedThemes();
+
+			if ( ! empty( $themes ) ) {
+				foreach ( $themes as $index => $theme ) {
+					if ( ! empty( $theme ) && $theme instanceof WP_Theme && in_array( $theme->Name, $wp_themes, true ) ) {
+						$this->plugin->alerts->Trigger(
+							5007, array(
+								'Theme' => (object) array(
+									'Name'        => $theme->Name,
+									'ThemeURI'    => $theme->ThemeURI,
+									'Description' => $theme->Description,
+									'Author'      => $theme->Author,
+									'Version'     => $theme->Version,
+									'get_template_directory' => $theme->get_template_directory(),
+								),
+							)
+						);
+
+						// Set theme to skip file changes alert.
+						$this->skip_theme_change_alerts( $theme->stylesheet );
+
+						// Remove it from the list.
+						$this->remove_site_theme( $theme->stylesheet );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Method: Handle plugin activation event
+	 * from MainWP dashboard on a child site.
+	 *
+	 * @param string $plugin - Plugin slug.
+	 * @since 3.2.2
+	 */
+	public function mainwp_child_plugin_events( $plugin ) {
+		// Check parameter.
+		if ( empty( $plugin ) ) {
+			return;
+		}
+
+		// Get MainWP post data.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Get plugins from MainWP.
+		if ( isset( $post_array['plugin'] ) && ! empty( $post_array['plugin'] ) ) {
+			$wp_plugins = explode( '||', $post_array['plugin'] );
+		}
+
+		if (
+			isset( $post_array['mainwpsignature'] ) // Check MainWP signature.
+			&& isset( $post_array['action'] ) // Check if action is set.
+			&& in_array( $plugin, $wp_plugins, true ) // Check if plugin being activate/deactivate is in the list of plugins from MainWP.
+		) {
+			if ( 'activate' === $post_array['action'] ) {
+				$event = 5001;
+			} elseif ( 'deactivate' === $post_array['action'] ) {
+				$event = 5002;
+			}
+
+			$plugin = WP_PLUGIN_DIR . '/' . $plugin;
+			$plugin_data = get_plugin_data( $plugin, false, true );
+			$this->plugin->alerts->Trigger(
+				$event, array(
+					'PluginFile' => $plugin,
+					'PluginData' => (object) array(
+						'Name'      => $plugin_data['Name'],
+						'PluginURI' => $plugin_data['PluginURI'],
+						'Version'   => $plugin_data['Version'],
+						'Author'    => $plugin_data['Author'],
+						'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+					),
+				)
+			);
+		}
+	}
+
+	/**
+	 * Method: Handle plugin/theme update event
+	 * from MainWP dashboard on child site.
+	 *
+	 * @param array $args - Array of arguments related to asset updated.
+	 * @since 3.2.2
+	 */
+	public function mainwp_child_update_assets( $args ) {
+		if ( empty( $args ) || ! is_array( $args ) ) {
+			return;
+		}
+
+		// Get MainWP post data.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Check type.
+		if (
+			isset( $post_array['function'] ) && 'upgradeplugintheme' === $post_array['function']
+			&& isset( $post_array['mainwpsignature'] ) && ! empty( $post_array['mainwpsignature'] )
+			&& isset( $post_array['list'] ) && ! empty( $post_array['list'] )
+			&& isset( $args['type'] ) && ! empty( $args['type'] )
+			&& isset( $args['name'] ) && ! empty( $args['name'] )
+		) {
+			if ( 'theme' === $args['type'] ) {
+				// Site themes updated.
+				$site_themes = explode( ',', $post_array['list'] );
+
+				// Theme name.
+				$theme_name = $args['name'];
+
+				// Get theme object.
+				$theme = $this->get_theme_by_name( $theme_name );
+
+				if ( ! empty( $theme ) && $theme instanceof WP_Theme && in_array( $theme->stylesheet, $site_themes, true ) ) {
+					$this->plugin->alerts->Trigger(
+						5031, array(
+							'Theme' => (object) array(
+								'Name'        => $theme->Name,
+								'ThemeURI'    => $theme->ThemeURI,
+								'Description' => $theme->Description,
+								'Author'      => $theme->Author,
+								'Version'     => $theme->Version,
+								'get_template_directory' => $theme->get_template_directory(),
+							),
+						)
+					);
+
+					// Set theme to skip file changes alert.
+					$this->skip_theme_change_alerts( $theme->stylesheet );
+				}
+			} elseif ( 'plugin' === $args['type'] ) {
+				// Plugin name.
+				$plugin_name = $args['name'];
+
+				// Get plugin filename.
+				$plugin_file = $this->get_plugin_file_name( $plugin_name );
+
+				// If plugin file is empty then return.
+				if ( empty( $plugin_file ) ) {
+					return;
+				}
+
+				// Get plugin directory name.
+				$plugin_dir = $this->get_plugin_dir( $plugin_file );
+
+				// Set plugin to skip file changes alert.
+				$this->skip_plugin_change_alerts( $plugin_dir );
+
+				$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+				$plugin_data = get_plugin_data( $plugin_file, false, true );
+
+				$this->plugin->alerts->Trigger(
+					5004, array(
+						'PluginFile' => $plugin_file,
+						'PluginData' => (object) array(
+							'Name'      => $plugin_data['Name'],
+							'PluginURI' => $plugin_data['PluginURI'],
+							'Version'   => $plugin_data['Version'],
+							'Author'    => $plugin_data['Author'],
+							'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+						),
+					)
+				);
+			}
+		}
 	}
 
 	/**
@@ -920,5 +1280,57 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			$plugin = substr_replace( $plugin, '', $position );
 		}
 		return $plugin;
+	}
+
+	/**
+	 * Method: Return plugin file name.
+	 *
+	 * @param string $plugin_name - Plugin name.
+	 * @return string
+	 */
+	public function get_plugin_file_name( $plugin_name ) {
+		// Verify parameter.
+		if ( empty( $plugin_name ) ) {
+			return;
+		}
+
+		// Get all plugins.
+		$all_plugins = get_plugins();
+
+		$plugin_filename = '';
+		if ( ! empty( $all_plugins ) && is_array( $all_plugins ) ) {
+			foreach ( $all_plugins as $plugin_file => $plugin_data ) {
+				if ( $plugin_name === $plugin_data['Name'] ) {
+					$plugin_filename = $plugin_file;
+				}
+			}
+		}
+		return $plugin_filename;
+	}
+
+	/**
+	 * Method: Search and return theme object by name.
+	 *
+	 * @param string $theme_name - Theme name.
+	 * @return WP_Theme
+	 */
+	public function get_theme_by_name( $theme_name ) {
+		// Check if $theme_name is empty.
+		if ( empty( $theme_name ) ) {
+			return;
+		}
+
+		// Get all themes.
+		$all_themes = wp_get_themes();
+
+		$theme = '';
+		if ( ! empty( $all_themes ) ) {
+			foreach ( $all_themes as $stylesheet => $theme_obj ) {
+				if ( $theme_name === $theme_obj->Name ) {
+					$theme = $theme_obj;
+				}
+			}
+		}
+		return $theme;
 	}
 }

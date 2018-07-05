@@ -43,6 +43,13 @@ final class WSAL_AlertManager {
 	protected $_triggered_types = array();
 
 	/**
+	 * Log events schedule hook name
+	 *
+	 * @var string
+	 */
+	private static $log_events_schedule_hook = 'wsal_log_events_ext_db';
+
+	/**
 	 * Create new AlertManager instance.
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
@@ -54,6 +61,33 @@ final class WSAL_AlertManager {
 		}
 
 		add_action( 'shutdown', array( $this, '_CommitPipeline' ) );
+		add_action( 'wsal_init', array( $this, 'schedule_log_events' ) );
+	}
+
+	/**
+	 * Method: Schedule log events for External DB
+	 * if buffer is enabled.
+	 */
+	public function schedule_log_events() {
+		// Get external buffer option.
+		$use_buffer = $this->plugin->GetGlobalOption( 'adapter-use-buffer' );
+
+		// If external DB buffer is enabled then set the cron.
+		if ( $use_buffer ) {
+			// Hook scheduled method.
+			add_action( self::$log_events_schedule_hook, array( $this, 'log_temp_alerts' ) );
+
+			// Schedule event if there isn't any already.
+			if ( ! wp_next_scheduled( self::$log_events_schedule_hook ) ) {
+				wp_schedule_event(
+					time(), // Timestamp.
+					'tenminutes', // Frequency.
+					self::$log_events_schedule_hook // Scheduled event.
+				);
+			}
+		} elseif ( ! $use_buffer && wp_next_scheduled( self::$log_events_schedule_hook ) ) {
+			wp_clear_scheduled_hook( self::$log_events_schedule_hook );
+		}
 	}
 
 	/**
@@ -104,8 +138,13 @@ final class WSAL_AlertManager {
 	 * @param bool    $delayed - False if delayed, true if not.
 	 */
 	public function Trigger( $type, $data = array(), $delayed = false ) {
+		// Get buffer use option.
+		$use_buffer = $this->plugin->GetGlobalOption( 'adapter-use-buffer' );
+
 		// Log temporary alerts first.
-		$this->log_temp_alerts();
+		if ( ! $use_buffer ) {
+			$this->log_temp_alerts();
+		}
 
 		// Get username.
 		$username = wp_get_current_user()->user_login;
@@ -535,6 +574,8 @@ final class WSAL_AlertManager {
 	/**
 	 * Method: Log temporary stored alerts if DB connection
 	 * is back.
+	 *
+	 * @return boolean
 	 */
 	public function log_temp_alerts() {
 		// Get temporary alerts.
@@ -566,12 +607,13 @@ final class WSAL_AlertManager {
 
 				// Loggers.
 				foreach ( $this->_loggers as $logger ) {
-					$logger->Log( $alert_id, $alert['alert_data'], $created_on, $site_id, $is_migrated );
+					$logger->Log( $alert_id, $alert['alert_data'], $created_on, $site_id, $is_migrated, true );
 				}
 			}
 
 			// Delete temporary alerts.
 			delete_option( 'wsal_temp_alerts' );
+			return true;
 		}
 	}
 }

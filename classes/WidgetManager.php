@@ -2,6 +2,20 @@
 /**
  * Widget Manager
  *
+ * Manager class for WSAL's WP Dashboard widget.
+ *
+ * @since   1.0.0
+ * @package Wsal
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Widget Manager
+ *
  * Plugin Widget used in the WordPress Dashboard.
  *
  * @package Wsal
@@ -22,19 +36,24 @@ class WSAL_WidgetManager {
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->_plugin = $plugin;
-		add_action( 'wp_dashboard_setup', array( $this, 'AddWidgets' ) );
+		add_action( 'wp_dashboard_setup', array( $this, 'add_widgets' ) );
 	}
 
 	/**
 	 * Method: Add widgets.
 	 */
-	public function AddWidgets() {
-		if ( $this->_plugin->settings->IsWidgetsEnabled()
-		&& $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+	public function add_widgets() {
+		global $pagenow;
+
+		if (
+			$this->_plugin->settings->IsWidgetsEnabled() // If widget is enabled.
+			&& $this->_plugin->settings->CurrentUserCan( 'view' ) // If user has permission to view.
+			&& 'index.php' === $pagenow // If the current page is dashboard.
+		) {
 			wp_add_dashboard_widget(
 				'wsal',
 				__( 'Latest Events', 'wp-security-audit-log' ) . ' | WP Security Audit Log',
-				array( $this, 'RenderWidget' )
+				array( $this, 'render_widget' )
 			);
 		}
 	}
@@ -42,7 +61,7 @@ class WSAL_WidgetManager {
 	/**
 	 * Method: Render widget.
 	 */
-	public function RenderWidget() {
+	public function render_widget() {
 		$query = new WSAL_Models_OccurrenceQuery();
 
 		$bid = (int) $this->get_view_site_id();
@@ -62,7 +81,7 @@ class WSAL_WidgetManager {
 		} else {
 			?>
 			<table class="wp-list-table widefat" cellspacing="0" cellpadding="0"
-			   style="display: block; overflow-x: auto;">
+				style="display: block; overflow-x: auto;">
 				<thead>
 					<th class="manage-column" style="width: 15%;" scope="col"><?php esc_html_e( 'User', 'wp-security-audit-log' ); ?></th>
 					<th class="manage-column" style="width: 85%;" scope="col"><?php esc_html_e( 'Description', 'wp-security-audit-log' ); ?></th>
@@ -76,7 +95,8 @@ class WSAL_WidgetManager {
 						<tr>
 							<td>
 								<?php
-								echo ($un = $entry->GetUsername()) ? esc_html( $un ) : '<i>unknown</i>';
+								$username = $entry->GetUsername();
+								echo ( $username ) ? esc_html( $username ) : '<i>unknown</i>';
 								?>
 							</td>
 							<td>
@@ -87,8 +107,8 @@ class WSAL_WidgetManager {
 						</tr>
 						<?php
 					}
-				?>
-					</tbody>
+					?>
+				</tbody>
 			</table>
 			<?php
 		}

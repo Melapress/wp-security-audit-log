@@ -47,6 +47,11 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		add_action( 'set_user_role', array( $this, 'EventUserRoleChanged' ), 10, 3 );
 		add_action( 'edit_user_profile', array( $this, 'EventOpenProfile' ), 10, 1 );
 		add_action( 'profile_update', array( $this, 'event_email_changed' ), 10, 2 );
+
+		// Check if MainWP Child Plugin exists.
+		if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
+			add_action( 'profile_update', array( $this, 'mainwp_child_user_update' ), 20, 2 );
+		}
 	}
 
 	/**
@@ -312,9 +317,11 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		// Get $_POST global array.
 		$post_array = filter_input_array( INPUT_POST );
 
-		if ( isset( $post_array['_um_account_tab'] ) // Check for UM tab.
+		if (
+			isset( $post_array['_um_account_tab'] ) // Check for UM tab.
 			&& 'general' === $post_array['_um_account_tab'] // Verify `General` UM tab.
-			&& ! empty( $post_array['user_email'] ) ) { // Check if user email is set.
+			&& ! empty( $post_array['user_email'] ) // Check if user email is set.
+		) {
 			$old_email = $old_userdata->user_email; // Old email.
 			$new_email = trim( $post_array['user_email'] ); // New email.
 			if ( $old_email !== $new_email ) { // If both emails don't match then log alert.
@@ -327,6 +334,73 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 						'NewEmail'       => $new_email,
 					)
 				);
+			}
+		}
+	}
+
+	/**
+	 * Method: Support for user profile changes via MainWP dashboard.
+	 *
+	 * @param int     $user_id      - User ID.
+	 * @param WP_User $old_userdata - Old WP_User object.
+	 */
+	public function mainwp_child_user_update( $user_id, $old_userdata ) {
+		// Check parameters.
+		if ( empty( $user_id ) || empty( $old_userdata ) ) {
+			return;
+		}
+
+		// Get MainWP post data.
+		$post_array = filter_input_array( INPUT_POST );
+
+		if (
+			isset( $post_array['action'] ) && 'update_user' === $post_array['action']
+			&& isset( $post_array['mainwpsignature'] ) && ! empty( $post_array['mainwpsignature'] )
+		) {
+			// Get the user by id.
+			$user = get_user_by( 'id', $user_id );
+
+			// If user exists then continue.
+			if ( ! empty( $user ) && $user instanceof WP_User ) {
+				// Email changed.
+				if ( ! empty( $post_array['extra']['email'] ) ) {
+					$old_email = $old_userdata->user_email; // Old email address.
+					$new_email = trim( $post_array['extra']['email'] ); // New email address.
+					$new_email = sanitize_text_field( wp_unslash( $new_email ) ); // Filter data for security.
+
+					// If old email does not matches the new email then log the event.
+					if ( $old_email !== $new_email ) {
+						$event = get_current_user_id() === $user_id ? 4005 : 4006;
+						$this->plugin->alerts->Trigger(
+							$event, array(
+								'TargetUserID'   => $user_id,
+								'TargetUsername' => $user->user_login,
+								'OldEmail' => $old_email,
+								'NewEmail' => $new_email,
+							)
+						);
+					}
+				}
+
+				// Password changed.
+				if ( ! empty( $post_array['extra']['pass1'] ) && ! empty( $post_array['extra']['pass2'] ) ) {
+					$pass1 = trim( $post_array['extra']['pass1'] );
+					$pass2 = trim( $post_array['extra']['pass2'] );
+					$match = wp_check_password( $pass1, $old_userdata->user_pass, $user_id ); // Check if current pass matches the old one.
+
+					if ( $pass1 === $pass2 && ! $match ) {
+						$event = get_current_user_id() === $user_id ? 4003 : 4004;
+						$this->plugin->alerts->Trigger(
+							$event, array(
+								'TargetUserID'   => $user_id,
+								'TargetUserData' => (object) array(
+									'Username' => $user->user_login,
+									'Roles'    => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+								),
+							)
+						);
+					}
+				}
 			}
 		}
 	}

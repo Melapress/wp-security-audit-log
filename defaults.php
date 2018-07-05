@@ -352,8 +352,8 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 6003, E_CRITICAL, __( 'WordPress Administrator Notification email changed', 'wp-security-audit-log' ), __( 'Changed the WordPress administrator notifications email address from %OldEmail% to %NewEmail%.', 'wp-security-audit-log' ) ),
 					array( 6004, E_CRITICAL, __( 'WordPress was updated', 'wp-security-audit-log' ), __( 'Updated WordPress from version %OldVersion% to %NewVersion%.', 'wp-security-audit-log' ) ),
 					array( 6005, E_CRITICAL, __( 'User changes the WordPress Permalinks', 'wp-security-audit-log' ), __( 'Changed the WordPress permalinks from %OldPattern% to %NewPattern%.', 'wp-security-audit-log' ) ),
-					array( 6007, E_NOTICE, __( 'User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Has requested a non existing page (404 Error Pages) %Attempts% %Msg%. %LinkFile%', 'wp-security-audit-log' ) ),
-					array( 6023, E_NOTICE, __( 'Website Visitor User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Website Visitor Has requested a non existing page (404 Error Pages) %Attempts% %Msg%. %LinkFile%', 'wp-security-audit-log' ) ),
+					array( 6007, E_NOTICE, __( 'User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Has requested a non existing page (404 Error Pages) %Attempts% %Msg%. %LinkFile%%URL%', 'wp-security-audit-log' ) ),
+					array( 6023, E_NOTICE, __( 'Website Visitor User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Website Visitor Has requested a non existing page (404 Error Pages) %Attempts% %Msg%. %LinkFile%%URL%', 'wp-security-audit-log' ) ),
 					array( 6024, E_CRITICAL, __( 'Option WordPress Address (URL) in WordPress settings changed', 'wp-security-audit-log' ), __( 'Changed the WordPress address (URL) from %old_url% to %new_url%.', 'wp-security-audit-log' ) ),
 					array( 6025, E_CRITICAL, __( 'Option Site Address (URL) in WordPress settings changed', 'wp-security-audit-log' ), __( 'Changed the site address (URL) from %old_url% to %new_url%.', 'wp-security-audit-log' ) ),
 					array( 9999, E_CRITICAL, __( 'Advertising Add-ons.', 'wp-security-audit-log' ), __( '%PromoName% %PromoMessage%', 'wp-security-audit-log' ) ),
@@ -410,7 +410,7 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 6028, E_CRITICAL, __( 'File content has been modified.', 'wp-security-audit-log' ), __( 'The content of the file %FileLocation% has been modified.', 'wp-security-audit-log' ) ),
 					array( 6029, E_CRITICAL, __( 'File added to the site.', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been added to your website.', 'wp-security-audit-log' ) ),
 					array( 6030, E_CRITICAL, __( 'File deleted from the site.', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been deleted from your website.', 'wp-security-audit-log' ) ),
-					array( 6031, E_CRITICAL, __( 'File not scanned because it is bigger than 2MB.', 'wp-security-audit-log' ), __( 'The file %FileLocation% was not scanned because it is bigger than 2MB. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
+					array( 6031, E_CRITICAL, __( 'File not scanned because it is bigger than 5MB.', 'wp-security-audit-log' ), __( 'The file %FileLocation% was not scanned because it is bigger than 5MB. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
 					array( 6032, E_CRITICAL, __( 'File integrity scan stopped due to the limit of 1 million files.', 'wp-security-audit-log' ), __( 'The file changes scanning engine has reached the limit of 1 million files and stopped the scan. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
 				),
 			),
@@ -529,7 +529,13 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 9032, E_CRITICAL, __( 'User Enabled/Disabled the use of coupons during checkout', 'wp-security-audit-log' ), __( '%Status% the use of coupons during checkout in WooCommerce.', 'wp-security-audit-log' ) ),
 					array( 9033, E_CRITICAL, __( 'User Enabled/Disabled guest checkout', 'wp-security-audit-log' ), __( '%Status% guest checkout in WooCommerce.', 'wp-security-audit-log' ) ),
 					array( 9034, E_CRITICAL, __( 'User Enabled/Disabled cash on delivery', 'wp-security-audit-log' ), __( '%Status% the option Enable cash on delivery in WooCommerce.', 'wp-security-audit-log' ) ),
+					array( 9072, E_NOTICE, __( 'User opened a product in the editor', 'wp-security-audit-log' ), __( 'Opened the %ProductStatus% product page %ProductTitle% in editor. View the product: %EditorLinkProduct%.', 'wp-security-audit-log' ) ),
+					array( 9073, E_NOTICE, __( 'User viewed a product', 'wp-security-audit-log' ), __( 'Viewed the %ProductStatus% product page %ProductTitle%. View the product: %EditorLinkProduct%.', 'wp-security-audit-log' ) ),
 				),
+
+				/**
+				 * Alerts: Yoast SEO
+				 */
 				__( 'Yoast SEO', 'wp-security-audit-log' ) => array(
 					array( 8801, E_NOTICE, __( 'User changed title of a SEO post', 'wp-security-audit-log' ), __( 'Changed the SEO title of the %PostStatus% %PostType%%ReportText%.%ChangeText% %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 8802, E_NOTICE, __( 'User changed the meta description of a SEO post', 'wp-security-audit-log' ), __( 'Changed the Meta description of the %PostStatus% %PostType% titled %PostTitle%%ReportText%.%ChangeText% %EditorLinkPost%.', 'wp-security-audit-log' ) ),

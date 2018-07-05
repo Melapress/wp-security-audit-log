@@ -121,6 +121,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		if ( in_array( $token, $post_types ) ) {
 			return 'cpts';
 		}
+
+		// Check if the token matches a URL.
+		if ( ( false !== strpos( $token, home_url() ) ) && filter_var( $token, FILTER_VALIDATE_URL ) ) {
+			return 'urls';
+		}
+
 		return 'other';
 	}
 
@@ -136,14 +142,15 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		// Load saved settings of this view.
 		$this->scan_settings = array(
-			'scan_file_changes' => $this->_plugin->GetGlobalOption( 'scan-file-changes', 'enable' ),
-			'scan_frequency'    => $this->_plugin->GetGlobalOption( 'scan-frequency', 'weekly' ),
-			'scan_hour'         => $this->_plugin->GetGlobalOption( 'scan-hour', '04' ),
-			'scan_day'          => $this->_plugin->GetGlobalOption( 'scan-day', '1' ),
-			'scan_date'         => $this->_plugin->GetGlobalOption( 'scan-date', '10' ),
-			'scan_directories'  => $this->_plugin->GetGlobalOption( 'scan-directories', $default_scan_dirs ),
+			'scan_file_changes'  => $this->_plugin->GetGlobalOption( 'scan-file-changes', 'enable' ),
+			'scan_frequency'     => $this->_plugin->GetGlobalOption( 'scan-frequency', 'weekly' ),
+			'scan_hour'          => $this->_plugin->GetGlobalOption( 'scan-hour', '04' ),
+			'scan_day'           => $this->_plugin->GetGlobalOption( 'scan-day', '1' ),
+			'scan_date'          => $this->_plugin->GetGlobalOption( 'scan-date', '10' ),
+			'scan_directories'   => $this->_plugin->GetGlobalOption( 'scan-directories', $default_scan_dirs ),
+			'scan_excluded_dirs' => $this->_plugin->GetGlobalOption( 'scan-excluded-directories', array() ),
 			'scan_excluded_extensions' => $this->_plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav' ) ),
-			'scan_in_progress'  => $this->_plugin->GetGlobalOption( 'scan-in-progress', false ),
+			'scan_in_progress'   => $this->_plugin->GetGlobalOption( 'scan-in-progress', false ),
 		);
 	}
 
@@ -177,6 +184,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetExcludedMonitoringCustom( isset( $post_array['Customs'] ) ? $post_array['Customs'] : array() );
 		$this->_plugin->settings->SetExcludedMonitoringIP( isset( $post_array['IpAddrs'] ) ? $post_array['IpAddrs'] : array() );
 		$this->_plugin->settings->set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
+		$this->_plugin->settings->set_excluded_urls( isset( $post_array['ExURLss'] ) ? $post_array['ExURLss'] : array() );
 
 		$this->_plugin->settings->SetRestrictAdmins( isset( $post_array['RestrictAdmins'] ) );
 		$this->_plugin->settings->set_login_page_notification( isset( $post_array['login_page_notification'] ) ? 'true' : 'false' );
@@ -590,77 +598,73 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<tbody>
 						<!-- Audit Log Retention -->
 						<?php
-						$disabled = '';
 						if ( $this->_plugin->settings->IsArchivingEnabled() ) :
-							$disabled = 'disabled';
 							?>
 							<tr>
 								<td colspan="2">
-									<?php esc_html_e( 'The options below are disabled because you enabled archiving of alerts to the archiving table from', 'wp-security-audit-log' ); ?>&nbsp;<a href="<?php echo esc_url( admin_url( 'admin.php?page=wsal-ext-settings#mirroring' ) ); ?>" target="_blank">here</a>
+									<?php
+									$archiving_page = admin_url( 'admin.php?page=wsal-ext-settings#archiving' );
+									echo sprintf( esc_html__( 'Retention settings moved to %1$s archiving settings %2$s because archiving is enabled', 'wp-security-audit-log' ), '<a href="' . esc_url( $archiving_page ) . '" target="_blank">', '</a>' );
+									?>
+								</td>
+							</tr>
+						<?php else : ?>
+							<tr>
+								<th><label for="delete1"><?php esc_html_e( 'Audit Log Retention', 'wp-security-audit-log' ); ?></label></th>
+								<td>
+									<fieldset>
+										<?php $text = __( '(eg: 1 month)', 'wp-security-audit-log' ); ?>
+										<?php $nbld = ! ($this->_plugin->settings->IsPruningDateEnabled() || $this->_plugin->settings->IsPruningLimitEnabled()); ?>
+										<label for="delete0">
+											<input type="radio" id="delete0" name="PruneBy" value="" <?php checked( $nbld ); ?> />
+											<?php echo esc_html__( 'None', 'wp-security-audit-log' ); ?>
+										</label>
+									</fieldset>
+									<fieldset>
+										<?php $text = __( '(Leave empty or enter 0 to disable automatic pruning.)', 'wp-security-audit-log' ); ?>
+										<?php $nbld = $this->_plugin->settings->IsPruningDateEnabled(); ?>
+										<label for="delete1">
+											<input type="radio" id="delete1" name="PruneBy" value="date" <?php checked( $nbld ); ?> />
+											<?php echo esc_html__( 'Delete events older than', 'wp-security-audit-log' ); ?>
+										</label>
+										<?php
+										// Find and replace ` months` in the string.
+										$pruning_date = str_replace( ' months', '', $this->_plugin->settings->GetPruningDate() );
+										?>
+										<input type="text" id="PruningDate" name="PruningDate" placeholder="<?php echo esc_attr( $text ); ?>"
+											value="<?php echo esc_attr( $pruning_date ); ?>"
+											onfocus="jQuery('#delete1').attr('checked', true);" />
+										<?php esc_html_e( 'months', 'wp-security-audit-log' ); ?>
+										<span class="description"><?php echo esc_html( $text ); ?></span>
+									</fieldset>
+									<fieldset>
+										<?php $text = __( '(eg: 80)', 'wp-security-audit-log' ); ?>
+										<?php $nbld = $this->_plugin->settings->IsPruningLimitEnabled(); ?>
+										<label for="delete2">
+											<input type="radio" id="delete2" name="PruneBy" value="limit" <?php checked( $nbld ); ?> />
+											<?php echo esc_html__( 'Keep up to', 'wp-security-audit-log' ); ?>
+										</label>
+										<input type="text" id="PruningLimit" name="PruningLimit" placeholder="<?php echo esc_attr( $text ); ?>"
+											value="<?php echo esc_attr( $this->_plugin->settings->GetPruningLimit() ); ?>"
+											onfocus="jQuery('#delete2').attr('checked', true);" />
+										<?php echo esc_html__( 'events', 'wp-security-audit-log' ); ?>
+										<span><?php echo esc_html( $text ); ?></span>
+									</fieldset>
+									<p class="description">
+										<?php
+										$next = wp_next_scheduled( 'wsal_cleanup' );
+										echo esc_html__( 'Next Scheduled Cleanup is in ', 'wp-security-audit-log' );
+										echo esc_html( human_time_diff( current_time( 'timestamp' ), $next ) );
+										echo '<!-- ' . esc_html( date( 'dMy H:i:s', $next ) ) . ' --> ';
+										echo sprintf(
+											esc_html__( '(or %s)', 'wp-security-audit-log' ),
+											'<a href="' . esc_url( add_query_arg( 'action', 'AjaxRunCleanup', admin_url( 'admin-ajax.php' ) ) ) . '">' . esc_html__( 'Run Manually', 'wp-security-audit-log' ) . '</a>'
+										);
+										?>
+									</p>
 								</td>
 							</tr>
 						<?php endif; ?>
-						<tr>
-							<th><label for="delete1"><?php esc_html_e( 'Audit Log Retention', 'wp-security-audit-log' ); ?></label></th>
-							<td>
-								<fieldset>
-									<?php $text = __( '(eg: 1 month)', 'wp-security-audit-log' ); ?>
-									<?php $nbld = ! ($this->_plugin->settings->IsPruningDateEnabled() || $this->_plugin->settings->IsPruningLimitEnabled()); ?>
-									<label for="delete0">
-										<input type="radio" id="delete0" name="PruneBy" value=""
-											<?php checked( $nbld ); ?>
-											<?php echo esc_attr( $disabled ); ?> />
-										<?php echo esc_html__( 'None', 'wp-security-audit-log' ); ?>
-									</label>
-								</fieldset>
-								<fieldset>
-									<?php $text = __( '(Leave empty or enter 0 to disable automatic pruning.)', 'wp-security-audit-log' ); ?>
-									<?php $nbld = $this->_plugin->settings->IsPruningDateEnabled(); ?>
-									<label for="delete1">
-										<input type="radio" id="delete1" name="PruneBy" value="date"
-											<?php checked( $nbld ); ?>
-											<?php echo esc_attr( $disabled ); ?> />
-										<?php echo esc_html__( 'Delete events older than', 'wp-security-audit-log' ); ?>
-									</label>
-									<?php
-									// Find and replace ` months` in the string.
-									$pruning_date = str_replace( ' months', '', $this->_plugin->settings->GetPruningDate() );
-									?>
-									<input type="text" id="PruningDate" name="PruningDate" placeholder="<?php echo esc_attr( $text ); ?>"
-										   value="<?php echo esc_attr( $pruning_date ); ?>"
-										   onfocus="jQuery('#delete1').attr('checked', true);" <?php echo esc_attr( $disabled ); ?> />
-									<?php esc_html_e( 'months', 'wp-security-audit-log' ); ?>
-									<span class="description"><?php echo esc_html( $text ); ?></span>
-								</fieldset>
-								<fieldset>
-									<?php $text = __( '(eg: 80)', 'wp-security-audit-log' ); ?>
-									<?php $nbld = $this->_plugin->settings->IsPruningLimitEnabled(); ?>
-									<label for="delete2">
-										<input type="radio" id="delete2" name="PruneBy" value="limit"
-											<?php checked( $nbld ); ?>
-											<?php echo esc_attr( $disabled ); ?> />
-										<?php echo esc_html__( 'Keep up to', 'wp-security-audit-log' ); ?>
-									</label>
-									<input type="text" id="PruningLimit" name="PruningLimit" placeholder="<?php echo esc_attr( $text ); ?>"
-										   value="<?php echo esc_attr( $this->_plugin->settings->GetPruningLimit() ); ?>"
-										   onfocus="jQuery('#delete2').attr('checked', true);" <?php echo esc_attr( $disabled ); ?>/>
-									<?php echo esc_html__( 'events', 'wp-security-audit-log' ); ?>
-									<span><?php echo esc_html( $text ); ?></span>
-								</fieldset>
-								<p class="description">
-									<?php
-									$next = wp_next_scheduled( 'wsal_cleanup' );
-									echo esc_html__( 'Next Scheduled Cleanup is in ', 'wp-security-audit-log' );
-									echo esc_html( human_time_diff( current_time( 'timestamp' ), $next ) );
-									echo '<!-- ' . esc_html( date( 'dMy H:i:s', $next ) ) . ' --> ';
-									echo sprintf(
-										esc_html__( '(or %s)', 'wp-security-audit-log' ),
-										'<a class="' . esc_attr( $disabled ) . '" href="' . esc_url( add_query_arg( 'action', 'AjaxRunCleanup', admin_url( 'admin-ajax.php' ) ) ) . '">' . esc_html__( 'Run Manually', 'wp-security-audit-log' ) . '</a>'
-									);
-									?>
-								</p>
-							</td>
-						</tr>
 						<!-- Can View Alerts -->
 						<tr>
 							<th><label for="ViewerQueryBox"><?php esc_html_e( 'Can View Events', 'wp-security-audit-log' ); ?></label></th>
@@ -1053,6 +1057,36 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<!-- wsal-scan-directories -->
 						<tr>
 							<th>
+								<label for="wsal_add_dir_name"><?php esc_html_e( 'Exclude All Files in These Directories', 'wp-security-audit-log' ); ?></label>
+							</th>
+							<td>
+								<div class="wsal_file_containter">
+									<div id="wsal_dirs">
+										<?php foreach ( $this->scan_settings['scan_excluded_dirs'] as $index => $dir ) : ?>
+											<span id="wsal_dir-<?php echo esc_attr( $dir ); ?>">
+												<input type="checkbox" id="<?php echo esc_attr( $dir ); ?>" value="<?php echo esc_attr( $dir ); ?>" />
+												<label for="<?php echo esc_attr( $dir ); ?>"><?php echo esc_html( $dir ); ?></label>
+											</span>
+										<?php endforeach; ?>
+									</div>
+									<?php wp_nonce_field( 'wsal-scan-remove-exception-dir', 'wsal_scan_remove_exception_dir' ); ?>
+									<input class="button" id="wsal_remove_exception_dir" type="button" value="<?php esc_html_e( 'REMOVE', 'wp-security-audit-log' ); ?>" />
+								</div>
+								<div class="wsal_file_containter">
+									<input type="text" id="wsal_add_dir_name" />
+									<?php wp_nonce_field( 'wsal-scan-exception-dir', 'wsal_scan_exception_dir' ); ?>
+									<input id="wsal_add_dir" class="button" type="button" value="<?php esc_html_e( 'ADD', 'wp-security-audit-log' ); ?>" />
+								</div>
+								<span class="description">
+									<?php echo sprintf( esc_html__( 'Specify the name of the directory and the path to it in relation to the website\'s root. For example, if you want to want to exclude all files in the sub directory dir1/dir2 specify the following: %s.', 'wp-security-audit-log' ), esc_html( trailingslashit( ABSPATH ) ) . 'dir1/dir2/' ); ?>
+									<?php esc_html_e( 'Note that when you exclude a sub directory, all the files in that sub directory and all sub directories underneath it will be excluded from the scan.', 'wp-security-audit-log' ); ?>
+								</span>
+								<span class="error hide" id="wsal_dir_error"></span>
+							</td>
+						</tr>
+						<!-- wsal-scan-exclude-dirs -->
+						<tr>
+							<th>
 								<label for="wsal_add_file_name"><?php esc_html_e( 'Exclude These Files', 'wp-security-audit-log' ); ?></label>
 							</th>
 							<td>
@@ -1149,7 +1183,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<table class="form-table wsal-tab widefat" id="tab-exclude">
 					<tbody>
 						<tr>
-							<th><h2><?php esc_html_e( 'Users & Roles', 'wp-security-audit-log' ); ?></h2></th>
+							<th><h2 class="wsal-tab__heading"><?php esc_html_e( 'Users & Roles', 'wp-security-audit-log' ); ?></h2></th>
 						</tr>
 						<tr>
 							<td colspan="2"><?php esc_html_e( 'Any of the users and roles listed in the below options will be excluded from monitoring. This means that any change they do will not be logged.', 'wp-security-audit-log' ); ?></td>
@@ -1195,7 +1229,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><h2><?php esc_html_e( 'Custom Fields', 'wp-security-audit-log' ); ?></h2></th>
+							<td><h2 class="wsal-tab__heading"><?php esc_html_e( 'Custom Fields', 'wp-security-audit-log' ); ?></h2></td>
 						</tr>
 						<tr>
 							<td colspan="2">
@@ -1224,7 +1258,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><h2><?php esc_html_e( 'IP Addresses', 'wp-security-audit-log' ); ?></h2></th>
+							<th><h2 class="wsal-tab__heading"><?php esc_html_e( 'IP Addresses', 'wp-security-audit-log' ); ?></h2></th>
 						</tr>
 						<tr>
 							<td colspan="2"><?php esc_html_e( 'Any of the IP addresses listed below will be excluded from monitoring. This means that all activity from such IP address will not be recorded.', 'wp-security-audit-log' ); ?></td>
@@ -1250,13 +1284,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<tr>
-							<th><h2><?php esc_html_e( 'Custom Post Types', 'wp-security-audit-log' ); ?></h2></th>
+							<th><h2 class="wsal-tab__heading"><?php esc_html_e( 'Post Types', 'wp-security-audit-log' ); ?></h2></th>
 						</tr>
 						<tr>
-							<td colspan="2"><?php esc_html_e( 'The below list of Custom Post Types are excluded from monitoring. This means that all activity related to these Custom Post Types will not be recorded.', 'wp-security-audit-log' ); ?></td>
+							<td colspan="2"><?php esc_html_e( 'The below list of Post Types are excluded from monitoring. This means that all activity related to these post types will not be recorded.', 'wp-security-audit-log' ); ?></td>
 						</tr>
 						<tr>
-							<th><label for="ExCPTsQueryBox"><?php esc_html_e( 'Exclude Custom Post Type from monitoring', 'wp-security-audit-log' ); ?></label></th>
+							<th><label for="ExCPTsQueryBox"><?php esc_html_e( 'Exclude Post Type from monitoring', 'wp-security-audit-log' ); ?></label></th>
 							<td>
 								<fieldset>
 									<input type="text" id="ExCPTsQueryBox" style="float: left; display: block; width: 250px;">
@@ -1275,6 +1309,40 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<!-- Excluded Custom Post Types -->
+						<tr>
+							<th colspan="2">
+								<h2 class="wsal-tab__heading"><?php esc_html_e( 'Non-Existing URLs (404)', 'wp-security-audit-log' ); ?></h2>
+							</th>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<?php esc_html_e( 'Add the non existing URLs for which you do not want to be alerted of HTTP 404 errors in the activity log by specifying the whole URL.', 'wp-security-audit-log' ); ?>
+								<br />
+								<br />
+								<?php echo sprintf( esc_html__( 'Example for file: %s/subdirectory/file.php', 'wp-security-audit-log' ), esc_url( home_url() ) ); ?>
+								<br />
+								<?php echo sprintf( esc_html__( 'Example for directory: %s/subdirectory/subdirectory2', 'wp-security-audit-log' ), esc_url( home_url() ) ); ?>
+							</td>
+						</tr>
+						<tr>
+							<th><label for="ExURLsQueryBox"><?php esc_html_e( 'Excluded Non-Existing URLs', 'wp-security-audit-log' ); ?></label></th>
+							<td>
+								<fieldset>
+									<input type="text" id="ExURLsQueryBox" style="float: left; display: block; width: 250px;">
+									<input type="button" id="ExURLsQueryAdd" style="float: left; display: block;" class="button-primary" value="Add">
+									<br style="clear: both;"/>
+									<div id="ExURLsList">
+										<?php foreach ( $this->_plugin->settings->get_excluded_urls() as $item ) : ?>
+											<span class="sectoken-<?php echo esc_attr( $this->GetTokenType( $item ) ); ?>">
+												<input type="hidden" name="ExURLss[]" value="<?php echo esc_attr( $item ); ?>"/>
+												<?php echo esc_html( $item ); ?>
+												<a href="javascript:;" title="Remove">&times;</a>
+											</span>
+										<?php endforeach; ?>
+									</div>
+								</fieldset>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
@@ -1308,8 +1376,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					wsal_update_login_page_text( login_page_notif, login_page_notif_text );
 				} );
 			} );
-		// -->
-		</script>
+		// --></script>
 		<?php
 	}
 
@@ -1391,8 +1458,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						alert("You have to select at least one column!");
 					}
 				});
-			});
-		</script>
+			});</script>
 		<?php
 	}
 
@@ -1510,6 +1576,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
 		} elseif ( 'extension' === $data_type && ! wp_verify_nonce( $post_array['nonce'], 'wsal-scan-exception-file-type' ) ) {
 			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
+		} elseif ( 'dir' === $data_type && ! wp_verify_nonce( $post_array['nonce'], 'wsal-scan-exception-dir' ) ) {
+			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
 		}
 
 		// Get option type to be excluded.
@@ -1517,6 +1585,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			$excluded_option = $this->_plugin->GetGlobalOption( 'scan_excluded_files', array() );
 		} elseif ( 'extension' === $data_type ) {
 			$excluded_option = $this->_plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav' ) );
+		} elseif ( 'dir' === $data_type ) {
+			$excluded_option = $this->_plugin->GetGlobalOption( 'scan-excluded-directories', array() );
 		}
 
 		// Check if the file name is set and not empty.
@@ -1524,13 +1594,47 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			// Check if option already exists.
 			if ( ! in_array( $post_array['data_name'], $excluded_option, true ) ) {
 				// Add to excluded files array.
-				$excluded_option[] = $post_array['data_name'];
+				if ( 'dir' === $data_type ) {
+					// Prepare directories array.
+					// @todo Store this in transient to cache the value. We don't need to load it every time.
+					$uploads_dir = wp_upload_dir();
+
+					// Server directories.
+					$server_dirs = array(
+						untrailingslashit( ABSPATH ), // Root directory.
+						ABSPATH . 'wp-admin', // WordPress Admin.
+						ABSPATH . WPINC, // wp-includes.
+						WP_CONTENT_DIR, // wp-content.
+						WP_CONTENT_DIR . '/themes', // Themes.
+						WP_PLUGIN_DIR, // Plugins.
+						$uploads_dir['basedir'], // Uploads.
+					);
+
+					$dir_name = $post_array['data_name'];
+					if ( '/' === substr( $dir_name, -1 ) ) {
+						$dir_name = untrailingslashit( $dir_name );
+					}
+
+					if ( ! in_array( $dir_name, $server_dirs, true ) ) {
+						$excluded_option[] = $dir_name;
+					} else {
+						echo wp_json_encode( array(
+							'success' => false,
+							'message' => esc_html__( 'You can exclude this directory using the check boxes above.', 'wp-security-audit-log' ),
+						) );
+						exit();
+					}
+				} else {
+					$excluded_option[] = $post_array['data_name'];
+				}
 
 				// Save the option.
 				if ( 'file' === $data_type ) {
 					$this->_plugin->SetGlobalOption( 'scan_excluded_files', $excluded_option );
 				} elseif ( 'extension' === $data_type ) {
 					$this->_plugin->SetGlobalOption( 'scan-excluded-extensions', $excluded_option );
+				} elseif ( 'dir' === $data_type ) {
+					$this->_plugin->SetGlobalOption( 'scan-excluded-directories', $excluded_option );
 				}
 
 				echo wp_json_encode( array(
@@ -1542,6 +1646,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					$message = esc_html__( 'This file is already excluded from the scan.', 'wp-security-audit-log' );
 				} elseif ( 'extension' === $data_type ) {
 					$message = esc_html__( 'This file extension is already excluded from the scan.', 'wp-security-audit-log' );
+				} elseif ( 'dir' === $data_type ) {
+					$message = esc_html__( 'This directory is already excluded from the scan.', 'wp-security-audit-log' );
 				}
 				echo wp_json_encode( array(
 					'success' => false,
@@ -1581,6 +1687,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
 		} elseif ( 'extension' === $data_type && ! wp_verify_nonce( $post_array['nonce'], 'wsal-scan-remove-exception-file-type' ) ) {
 			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
+		} elseif ( 'dir' === $data_type && ! wp_verify_nonce( $post_array['nonce'], 'wsal-scan-remove-exception-dir' ) ) {
+			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
 		}
 
 		// Get files to be excluded.
@@ -1588,6 +1696,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			$excluded_option = $this->_plugin->GetGlobalOption( 'scan_excluded_files', array() );
 		} elseif ( 'extension' === $data_type ) {
 			$excluded_option = $this->_plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav' ) );
+		} elseif ( 'dir' === $data_type ) {
+			$excluded_option = $this->_plugin->GetGlobalOption( 'scan-excluded-directories', array() );
 		}
 
 		if ( ! empty( $excluded_option ) && isset( $post_array['data_removed'] ) && ! empty( $post_array['data_removed'] ) ) {
@@ -1619,6 +1729,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			if ( empty( $site_content->skip_extensions ) ) {
 				$site_content->skip_extensions = array();
 			}
+			if ( empty( $site_content->skip_directories ) ) {
+				$site_content->skip_directories = array();
+			}
 
 			// Save the option.
 			if ( 'file' === $data_type ) {
@@ -1630,6 +1743,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				$this->_plugin->SetGlobalOption( 'scan-excluded-extensions', $excluded_option );
 
 				$site_content->skip_extensions = array_merge( $site_content->skip_extensions, $to_be_excluded );
+				$this->_plugin->SetGlobalOption( 'site_content', $site_content );
+			} elseif ( 'dir' === $data_type ) {
+				$this->_plugin->SetGlobalOption( 'scan-excluded-directories', $excluded_option );
+
+				$site_content->skip_directories = array_merge( $site_content->skip_directories, $to_be_excluded );
 				$this->_plugin->SetGlobalOption( 'site_content', $site_content );
 			}
 
