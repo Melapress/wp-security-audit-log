@@ -56,8 +56,6 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 			return;
 		}
 
-		// Get temporary stored alerts.
-		$temp_alerts = get_option( 'wsal_temp_alerts', array() );
 
 		// Create new occurrence.
 		$occ = new WSAL_Models_Occurrence();
@@ -97,6 +95,9 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 				$occ->SetMeta( $data );
 			} else { // Else store the alerts in temporary option.
 				// Store current alert in temporary option array.
+				// Get temporary stored alerts.
+				$temp_alerts = get_option( 'wsal_temp_alerts', array() );
+
 				$temp_alerts[ $occ->created_on ]['alert'] = array(
 					'is_migrated' => $occ->is_migrated,
 					'created_on'  => $occ->created_on,
@@ -104,12 +105,17 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 					'site_id'     => $occ->site_id,
 				);
 				$temp_alerts[ $occ->created_on ]['alert_data'] = $data;
+
+				// Save temporary alerts to options.
+				update_option( 'wsal_temp_alerts', $temp_alerts );
 			}
 
-			// Save temporary alerts to options.
-			update_option( 'wsal_temp_alerts', $temp_alerts );
+
 		} elseif ( is_array( $db_config ) && $use_buffer ) { // External DB.
 			// Store current event in a temporary buffer.
+			// Get temporary stored alerts.
+			$temp_alerts = get_option( 'wsal_temp_alerts', array() );
+
 			$temp_alerts[ $occ->created_on ]['alert'] = array(
 				'is_migrated' => $occ->is_migrated,
 				'created_on'  => $occ->created_on,
