@@ -181,7 +181,7 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 = 3.2.2(2018-07-17) =
 
-Release Notes: [click here](https://www.wpsecurityauditlog.com)
+Release Notes: [click here](https://www.wpsecurityauditlog.com/releases/3-2-2-mainwp-integration/)
 
 * **New Events**
 	* Event ID 9072: User opened WooCommerce product in editor
@@ -211,4 +211,3 @@ Release Notes: [click here](https://www.wpsecurityauditlog.com)
 	* Updated Search filters to handle role names and role slugs (e.g. shop-manager and shop manager).
 	* Fixed issue in which database selection (archive or live DB) was not stored properly.
 	* Fixed issue where audit log viewer was auto refreshing to page one automatically when browsing other pages.
-	
