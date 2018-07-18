@@ -5,8 +5,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 4.9.6
-Stable tag: 3.2.2
+Tested up to: 4.9.7
+Stable tag: 3.2.2.1
 Requires PHP: 5.4.43
 
 An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
@@ -178,6 +178,11 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 11. Mirror the WordPress audit trail to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
 
 == Changelog ==
+
+= 3.2.2.1 (2018-07-18) =
+
+* **Bug fix**
+	* fixed issues related to SDK path
 
 = 3.2.2(2018-07-17) =
 
