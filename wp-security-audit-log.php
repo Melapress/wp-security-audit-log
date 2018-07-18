@@ -640,8 +640,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Do version-to-version specific changes.
 			if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
-				// Update External DB password on plugin update.
-				$this->update_external_db_password();
+				/**
+				 * This is a version specific update. It only needs to run
+				 * when old version of the plugin is less than 2.6.5 & the
+				 * plugin is being updated to version 2.6.5 or later versions.
+				 */
+				if ( version_compare( $old_version, '2.6.5', '<' ) && version_compare( $new_version, '2.6.4', '>' ) ) {
+					// Update External DB password on plugin update.
+					$this->update_external_db_password();
+				}
 
 				// Update pruning alerts option.
 				$this->settings->SetPruningDate( '12 months' );
@@ -661,17 +668,17 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function update_external_db_password() {
 			// Get the passwords.
-			$external_password  = $this->settings->GetAdapterConfig( 'adapter-password' );
-			$mirror_password    = $this->settings->GetAdapterConfig( 'mirror-password' );
-			$archive_password   = $this->settings->GetAdapterConfig( 'archive-password' );
+			$external_password = $this->settings->GetAdapterConfig( 'adapter-password' );
+			$mirror_password   = $this->settings->GetAdapterConfig( 'mirror-password' );
+			$archive_password  = $this->settings->GetAdapterConfig( 'archive-password' );
 
 			// Update external db password.
 			if ( ! empty( $external_password ) ) {
 				// Decrypt the password using fallback method.
-				$password   = $this->getConnector()->decryptString_fallback( $external_password );
+				$password = $this->getConnector()->decryptString_fallback( $external_password );
 
 				// Encrypt the password with latest encryption method.
-				$encrypted_password   = $this->getConnector()->encryptString( $password );
+				$encrypted_password = $this->getConnector()->encryptString( $password );
 
 				// Store the new password.
 				$this->settings->SetAdapterConfig( 'adapter-password', $encrypted_password );
@@ -680,10 +687,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Update mirror db password.
 			if ( ! empty( $mirror_password ) ) {
 				// Decrypt the password using fallback method.
-				$password   = $this->getConnector()->decryptString_fallback( $mirror_password );
+				$password = $this->getConnector()->decryptString_fallback( $mirror_password );
 
 				// Encrypt the password with latest encryption method.
-				$encrypted_password   = $this->getConnector()->encryptString( $password );
+				$encrypted_password = $this->getConnector()->encryptString( $password );
 
 				// Store the new password.
 				$this->settings->SetAdapterConfig( 'mirror-password', $encrypted_password );
@@ -692,10 +699,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Update archive db password.
 			if ( ! empty( $archive_password ) ) {
 				// Decrypt the password using fallback method.
-				$password   = $this->getConnector()->decryptString_fallback( $archive_password );
+				$password = $this->getConnector()->decryptString_fallback( $archive_password );
 
 				// Encrypt the password with latest encryption method.
-				$encrypted_password   = $this->getConnector()->encryptString( $password );
+				$encrypted_password = $this->getConnector()->encryptString( $password );
 
 				// Store the new password.
 				$this->settings->SetAdapterConfig( 'archive-password', $encrypted_password );
