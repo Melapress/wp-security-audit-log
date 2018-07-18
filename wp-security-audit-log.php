@@ -38,8 +38,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	 *
 	 * @since 2.7.0
 	 */
-	if ( file_exists( plugin_dir_path( __FILE__ ) . '/includes/wsal-freemius.php' ) ) {
-		require_once( plugin_dir_path( __FILE__ ) . '/includes/wsal-freemius.php' );
+	if ( file_exists( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' ) ) {
+		require_once( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' );
 	}
 
 	/**

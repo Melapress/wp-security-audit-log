@@ -266,10 +266,10 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		$sysinfo .= 'Multisite:                ' . ( is_multisite() ? 'Yes' : 'No' ) . "\n";
 
 		// Browser information.
-		if ( ! class_exists( 'WSAL_Browser' ) && file_exists( WSAL_BASE_DIR . 'includes/class-wsal-browser.php' ) ) {
-			require_once( WSAL_BASE_DIR . 'includes/class-wsal-browser.php' );
+		if ( ! class_exists( 'WSAL_Browser' ) && file_exists( WSAL_BASE_DIR . 'sdk/class-wsal-browser.php' ) ) {
+			require_once( WSAL_BASE_DIR . 'sdk/class-wsal-browser.php' );
 
-			$browser = new WSAL_Browser();
+			$browser  = new WSAL_Browser();
 			$sysinfo .= "\n" . '-- User Browser --' . "\n\n";
 			$sysinfo .= $browser;
 		}
