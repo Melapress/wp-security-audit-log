@@ -245,7 +245,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function wsal_plugin_redirect() {
 			if (
 				get_option( 'wsal_redirect_on_activate', false )
-				&& get_site_option( 'anonymous' === 'wsal_freemius_state', 'anonymous' )
+				&& 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' )
 			) { // If the redirect option is true, then continue.
 				delete_option( 'wsal_redirect_on_activate' ); // Delete redirect option.
 				// Redirect to main page.
