@@ -672,6 +672,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						// Update freemius state.
 						update_site_option( 'wsal_freemius_state', 'skipped' );
 					}
+
+					// Remove connect account notice of Freemius.
+					FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
 				}
 			}
 		}
