@@ -245,7 +245,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function wsal_plugin_redirect() {
 			if (
 				get_option( 'wsal_redirect_on_activate', false )
-				&& get_site_option( 'wpsal_anonymous_mode', true )
+				&& get_site_option( 'anonymous' === 'wsal_freemius_state', 'anonymous' )
 			) { // If the redirect option is true, then continue.
 				delete_option( 'wsal_redirect_on_activate' ); // Delete redirect option.
 				// Redirect to main page.
@@ -623,7 +623,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			wp_schedule_event( current_time( 'timestamp' ) + 600, 'hourly', 'wsal_cleanup' );
 
 			// WSAL Audit Log page redirect option in anonymous mode.
-			if ( get_site_option( 'wpsal_anonymous_mode', true ) ) {
+			if ( 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) ) {
 				add_option( 'wsal_redirect_on_activate', true );
 			}
 		}
@@ -656,8 +656,23 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Dismiss privacy notice.
 				$this->views->FindByClassName( 'WSAL_Views_AuditLog' )->DismissNotice( 'wsal-privacy-notice-3.2' );
 
-				// Update anonymous mode to false.
-				update_site_option( 'wpsal_anonymous_mode', 0 );
+				/**
+				 * IMPORTANT: VERSION SPECIFIC UPDATE
+				 *
+				 * It only needs to run when old version of the plugin is older/less than 3.0.0.
+				 *
+				 * @since 3.2.2.2
+				 */
+				if ( version_compare( $old_version, '3.0.0', '>' ) ) {
+					// Check if the user has opted-in.
+					if ( wsal_freemius()->is_registered() ) {
+						// Update freemius state.
+						update_site_option( 'wsal_freemius_state', 'in' );
+					} else {
+						// Update freemius state.
+						update_site_option( 'wsal_freemius_state', 'skipped' );
+					}
+				}
 			}
 		}
 

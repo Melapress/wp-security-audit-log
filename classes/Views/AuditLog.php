@@ -78,7 +78,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			&& ! class_exists( 'WSAL_Rep_Plugin' )
 			&& ! class_exists( 'WSAL_SearchExtension' )
 			&& ! class_exists( 'WSAL_User_Management_Plugin' )
-			&& ! get_site_option( 'wpsal_anonymous_mode', true ) // Anonymous mode option.
+			&& get_site_option( 'anonymous' !== 'wsal_freemius_state', 'anonymous' ) // Anonymous mode option.
 		) {
 			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $this->IsNoticeDismissed( 'premium-wsal-' . $this->_version ) ) { ?>
 				<div class="updated wsal_notice" data-notice-name="premium-wsal-<?php echo esc_attr( $this->_version ); ?>">
@@ -143,7 +143,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Check anonymous mode.
-		if ( get_site_option( 'wpsal_anonymous_mode', true ) ) { // If user manually opt-out then don't show the notice.
+		if ( 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) ) { // If user manually opt-out then don't show the notice.
 			if (
 				wsal_freemius()->is_anonymous() // Anonymous mode option.
 				&& wsal_freemius()->is_not_paying() // Not paying customer.
@@ -570,7 +570,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$choice = filter_input( INPUT_POST, 'choice', FILTER_SANITIZE_STRING ); // Choice selected by user.
 
 		// Verify nonce.
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce,  'wsal-freemius-opt' ) ) {
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal-freemius-opt' ) ) {
 			// Nonce verification failed.
 			echo wp_json_encode( array(
 				'success' => false,
@@ -581,9 +581,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Check if choice is not empty.
 		if ( ! empty( $choice ) ) {
-			// Update anonymous mode to false.
-			update_site_option( 'wpsal_anonymous_mode', 0 );
-
 			if ( 'yes' === $choice ) {
 				if ( ! is_multisite() ) {
 					wsal_freemius()->opt_in(); // Opt in.
@@ -599,12 +596,18 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					}
 					wsal_freemius()->opt_in( false, false, false, false, false, false, false, false, $sites_data );
 				}
+
+				// Update freemius state.
+				update_site_option( 'wsal_freemius_state', 'in' );
 			} elseif ( 'no' === $choice ) {
 				if ( ! is_multisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
 				} else {
 					wsal_freemius()->skip_connection( null, true ); // Opt out for all websites.
 				}
+
+				// Update freemius state.
+				update_site_option( 'wsal_freemius_state', 'skipped' );
 			}
 
 			echo wp_json_encode( array(

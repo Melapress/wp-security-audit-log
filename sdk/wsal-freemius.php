@@ -32,7 +32,8 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 			require_once dirname( __FILE__ ) . '/freemius/start.php';
 
 			// Check anonymous mode.
-			$is_anonymous = ( true === get_site_option( 'wpsal_anonymous_mode', true ) );
+			// $is_anonymous = ( true === get_site_option( 'wpsal_anonymous_mode', true ) );
+			$is_anonymous = ( 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) );
 			$is_premium   = false;
 			$is_anonymous = $is_premium ? false : $is_anonymous;
 
