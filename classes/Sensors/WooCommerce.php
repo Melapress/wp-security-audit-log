@@ -115,11 +115,6 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
-		// Check if WooCommerce plugin exists.
-		if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-			return false;
-		}
-
 		if ( current_user_can( 'edit_posts' ) ) {
 			add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
 		}

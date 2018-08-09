@@ -41,25 +41,20 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	 * @var array
 	 */
 	private $post_seo_data = array(
-		'_yoast_wpseo_title' => '',
-		'_yoast_wpseo_metadesc' => '',
-		'_yoast_wpseo_focuskw' => '',
-		'_yst_is_cornerstone' => '',
-		'_yoast_wpseo_meta-robots-noindex' => '',
+		'_yoast_wpseo_title'                => '',
+		'_yoast_wpseo_metadesc'             => '',
+		'_yoast_wpseo_focuskw'              => '',
+		'_yst_is_cornerstone'               => '',
+		'_yoast_wpseo_meta-robots-noindex'  => '',
 		'_yoast_wpseo_meta-robots-nofollow' => '',
-		'_yoast_wpseo_meta-robots-adv' => '',
-		'_yoast_wpseo_canonical' => '',
+		'_yoast_wpseo_meta-robots-adv'      => '',
+		'_yoast_wpseo_canonical'            => '',
 	);
 
 	/**
 	 * Listening to events using hooks.
 	 */
 	public function HookEvents() {
-		// Check if Yoast SEO plugin exists.
-		if ( ! is_plugin_active( 'wordpress-seo/wp-seo.php' ) ) {
-			return false;
-		}
-
 		// If user can edit post then hook this function.
 		if ( current_user_can( 'edit_posts' ) ) {
 			add_action( 'admin_init', array( $this, 'event_admin_init' ) );
