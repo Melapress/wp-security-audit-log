@@ -750,11 +750,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<p class="description">
 			<?php
 			esc_html_e( 'The plugin uses an efficient way to store the activity log data in the WordPress database, though the more data you keep the more disk space will be required. ', 'wp-security-audit-log' );
+			$retention_help_text = __( '<a href="https://www.wpsecurityauditlog.com/pricing/" target="_blank">Upgrade to Premium</a> to store the activity log data in an external database.', 'wp-security-audit-log' );
 
-			// If premium version then remove this message.
-			if ( ! wsal_freemius()->is__premium_only() ) {
-				echo wp_kses( __( '<a href="https://www.wpsecurityauditlog.com/pricing/" target="_blank">Upgrade to Premium</a> to store the activity log data in an external database.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags );
-			}
+			echo wp_kses( $retention_help_text, $this->_plugin->allowed_html_tags );
 			?>
 		</p>
 		<?php if ( $this->_plugin->settings->IsArchivingEnabled() ) : ?>

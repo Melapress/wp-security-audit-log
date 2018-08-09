@@ -418,10 +418,6 @@ final class WSAL_Views_SetupWizard {
 				// Step help text.
 				$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to <a href="https://www.wpsecurityauditlog.com/premium-features/" target="_blank">upgrade to Premium</a> and use the Database tools to store the WordPress activity log in an external database.', 'wp-security-audit-log' );
 
-				if ( wsal_freemius()->is__premium_only() ) {
-					// Change the help text if premium version of the plugin is active.
-					$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to store the WordPress activity log in an external database or enable archiving.', 'wp-security-audit-log' );
-				}
 				echo wp_kses( $step_help, $this->wsal->allowed_html_tags );
 				?>
 			</em>
