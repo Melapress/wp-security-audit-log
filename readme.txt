@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.9.7
-Stable tag: 3.2.2.2
+Stable tag: 3.2.3
 Requires PHP: 5.4.43
 
 An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
@@ -179,45 +179,29 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.2.2.2 (2018-08-01) =
+= 3.2.3 (2018-08-16) =
 
-* **Bug fix**
-	* fixed an issue with an incorrect opt-in prompt from the SDK
-
-= 3.2.2.1 (2018-07-18) =
-
-* **Bug fix**
-	* fixed issues related to SDK path
-
-= 3.2.2(2018-07-17) =
-
-Release Notes: [click here](https://www.wpsecurityauditlog.com/releases/3-2-2-mainwp-integration/)
-
-* **New Events**
-	* Event ID 9072: User opened WooCommerce product in editor
-	* Event ID 9073: User viewed WooCommernce product
+Release Notes: [click here](https://www.wpsecurityauditlog.com/releases/3-2-3-setup-wizard-ease-of-use/)
 
 * **New Features**
-	* Support for MainWP - plugin now keeps a log of changes done on websites from MainWP dashboard.
-	* Added new option to allow users to trial the premium edition for free.
-	* Added built-in email notifications for [WordPress file changes](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/).
-	* Buffer for external database to cater for slow connections.
-	* Retention settings for [WordPress activity logs archiving](https://www.wpsecurityauditlog.com/support-documentation/archive-alerts-wordpress-audit-trail/). 
-	* New setting to exclude non-existing URLs so they are not reported in the logs.
-	* System info module that captures diagnostic data required by support.
-	
+	* Added a startup wizard to assist new users with new installs.
+	* Introduced the [WordPress activity log levels](https://www.wpsecurityauditlog.com/support-documentation/default-wordpress-activity-log-levels/).
+	* New search filters in the WordPress activity log viewer.
+	* Added a new test button to all external database connections, including those for [WordPress activity log archiving](https://www.wpsecurityauditlog.com/support-documentation/archive-alerts-wordpress-audit-trail/) and mirroring.
+	* Added several new settings to [purge the WordPress activity log](https://www.wpsecurityauditlog.com/support-documentation/wordpress-activity-log-deleted-plugin-uninstall-option/) and reset plugin settings to default.
+
 * **Improvements**
-	* Ability to exclude directories from the WordPress file integrity scanner.
-	* Increased file size limit to 5MB in the WordPress file integrity scanner.
-	* Monitoring sensors now only loaded if source being monitored is active / installed (performance enhancement)
-	* Views will not be loaded unless accessed (performance enhancement)
-	* Updated 404 detection sensor to use $wp_query (fallback to $_SERVER global array) 
-	* New setting to exclude the logging of automated changes to WooCommerce products' stock.
-	* Sub sites admins on multisite can now see who is logged in to the websites they administer.
-	* Updated exclusion settings to allow users to exclude any post type from the logs.
-	
+	* Performance improvement: optimized the logic of the plugin sensors to load only required ones during user action.
+	* Redesigned all the settings pages and included more help text, making them more user friendly.
+	* Added links to [plugin knowledge base](https://www.wpsecurityauditlog.com/support-documentation/) where possible in the plugin settings.
+	* Improved the [WordPress activity log pruning setting](https://www.wpsecurityauditlog.com/support-documentation/can-prune-alerts-audit-trail/) so now it is possible to configure retention based on a period of time.
+	* Database improvement: changed the option_value column in the plugin tables to long text.
+	* [WordPress website file changes](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/) results are now stored in the plugin's options table.
+	* Improved the list of excluded file extensions in the WordPress file changes scanner.
+	* Added sorting in the [logged in WordPress users](https://www.wpsecurityauditlog.com/support-documentation/getting-started-wordpress-users-sessions-management/#who-logged-in-wordpress) view.
+	* Added more checks to ensure opt-in and other plugin messages are shown when needed only.
+	* Removed affiliate network message in plugin.
+
 * **Bug Fixes**
-	* Added a check on post type value to handle an unhandled error.
-	* Updated Search filters to handle role names and role slugs (e.g. shop-manager and shop manager).
-	* Fixed issue in which database selection (archive or live DB) was not stored properly.
-	* Fixed issue where audit log viewer was auto refreshing to page one automatically when browsing other pages.
+	* Fixed an issue where stored passwords might have been changed because of change from Mcrypt to OpenSSL.
+	* Fixed an issue in which retention settings were reset when moved to archiving settings.
