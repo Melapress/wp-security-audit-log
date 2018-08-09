@@ -381,11 +381,12 @@ function wsal_exclude_url(element) {
 }
 
 jQuery( document ).ready( function() {
+
 	/**
 	 * Dismiss DB disconnect issue notice.
 	 */
 	jQuery( '#wsal-notice-connect-issue' ).click( function() {
-		jQuery.ajax( {
+		jQuery.ajax({
 			type: 'POST',
 			url: ajaxurl,
 			async: true,
@@ -401,6 +402,6 @@ jQuery( document ).ready( function() {
 				console.log( textStatus );
 				console.log( error );
 			}
-		} );
-	} );
-} );
+		});
+	});
+});
