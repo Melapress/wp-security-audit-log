@@ -69,7 +69,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		}
 
 		$alert          = new WSAL_Alert(); // IDE type hinting.
-		$grouped_alerts = $this->_plugin->alerts->GetCategorizedAlerts();
+		$grouped_alerts = $this->_plugin->alerts->GetCategorizedAlerts( false );
 		$safe_names     = array_map( array( $this, 'GetSafeCatgName' ), array_keys( $grouped_alerts ) );
 		$safe_names     = array_combine( array_keys( $grouped_alerts ), $safe_names );
 
@@ -131,7 +131,54 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			// Set the option.
 			$this->_plugin->SetGlobalOption( 'scan-file-changes', $file_change_toggle );
 		}
+
+		// Log level form submission.
+		$log_level       = isset( $post_array['wsal-log-level'] ) ? sanitize_text_field( $post_array['wsal-log-level'] ) : false;
+		$log_level_nonce = isset( $post_array['wsal-log-level-nonce'] ) ? sanitize_text_field( $post_array['wsal-log-level-nonce'] ) : false;
+
+		if ( wp_verify_nonce( $log_level_nonce, 'wsal-log-level' ) ) {
+			$this->_plugin->SetGlobalOption( 'details-level', $log_level );
+
+			if ( 'basic' === $log_level ) {
+				$this->_plugin->settings->set_basic_mode();
+			} elseif ( 'geek' === $log_level ) {
+				$this->_plugin->settings->set_geek_mode();
+			}
+		}
+
+		$disabled_events = $this->_plugin->GetGlobalOption( 'disabled-alerts' ); // Get disabled events.
+		$disabled_events = explode( ',', $disabled_events );
+		$events_diff     = array_diff( $disabled_events, $this->_plugin->settings->geek_alerts ); // Calculate the difference of events.
+		$events_diff     = array_filter( $events_diff ); // Remove empty values.
+		$is_custom       = ! empty( $events_diff ) ? true : false; // If difference is not empty then mode is custom.
+		$log_details     = $this->_plugin->GetGlobalOption( 'details-level', false ); // Get log level option.
 		?>
+		<p>
+			<form method="post" id="wsal-alerts-level">
+				<?php wp_nonce_field( 'wsal-log-level', 'wsal-log-level-nonce' ); ?>
+				<fieldset>
+					<label for="wsal-log-level"><?php esc_html_e( 'Log Level: ', 'wp-security-audit-log' ); ?></label>
+					<select name="wsal-log-level" id="wsal-log-level" onchange="this.form.submit()">
+						<option value="basic"
+							<?php echo ( ! empty( $log_details ) && 'basic' === $log_details ) ? esc_attr( 'selected' ) : false; ?>
+						>
+							<?php esc_html_e( 'Basic', 'wp-security-audit-log' ); ?>
+						</option>
+						<option value="geek"
+							<?php echo ( ! empty( $log_details ) && 'geek' === $log_details ) ? esc_attr( 'selected' ) : false; ?>
+						>
+							<?php esc_html_e( 'Geek', 'wp-security-audit-log' ); ?>
+						</option>
+						<option value="custom" <?php echo ( $is_custom ) ? esc_attr( 'selected' ) : false; ?>>
+							<?php esc_html_e( 'Custom', 'wp-security-audit-log' ); ?>
+						</option>
+					</select>
+					<p class="description">
+						<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://www.wpsecurityauditlog.com/support-documentation/list-wordpress-audit-trail-alerts/" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
+					</p>
+				</fieldset>
+			</form>
+		</p>
 		<h2 id="wsal-tabs" class="nav-tab-wrapper">
 			<?php foreach ( $safe_names as $name => $safe ) : ?>
 				<a href="#tab-<?php echo esc_attr( $safe ); ?>" class="nav-tab"><?php echo esc_html( $name ); ?></a>
@@ -227,7 +274,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 									<tr>
 										<th width="48"><input type="checkbox" <?php checked( $allactive ); ?> <?php echo esc_attr( $disabled ); ?> /></th>
 										<th width="80"><?php esc_html_e( 'Code', 'wp-security-audit-log' ); ?></th>
-										<th width="100"><?php esc_html_e( 'Type', 'wp-security-audit-log' ); ?></th>
+										<th width="100"><?php esc_html_e( 'Severity', 'wp-security-audit-log' ); ?></th>
 										<th><?php esc_html_e( 'Description', 'wp-security-audit-log' ); ?></th>
 									</tr>
 								</thead>
@@ -409,15 +456,19 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 									// File integrity scan link.
 									if ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) :
 										$wsal_settings_page = '';
+										$redirect_args      = array(
+											'page' => 'wsal-settings',
+											'tab'  => 'file-changes',
+										);
 										if ( ! is_multisite() ) {
-											$wsal_settings_page = add_query_arg( 'page', 'wsal-settings', admin_url( 'admin.php' ) );
+											$wsal_settings_page = add_query_arg( $redirect_args, admin_url( 'admin.php' ) );
 										} else {
-											$wsal_settings_page = add_query_arg( 'page', 'wsal-settings', network_admin_url( 'admin.php' ) );
+											$wsal_settings_page = add_query_arg( $redirect_args, network_admin_url( 'admin.php' ) );
 										}
 										?>
 										<tr>
 											<td colspan="4">
-												<a href="<?php echo esc_url( $wsal_settings_page . '#tab-file-changes' ); ?>" class="wsal-tab-help">
+												<a href="<?php echo esc_url( $wsal_settings_page ); ?>" class="wsal-tab-help">
 													<?php esc_html_e( 'Configure the file integrity scan settings.', 'wp-security-audit-log' ); ?>
 												</a>
 											</td>

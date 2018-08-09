@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 /**
  * Audit Log Viewer Page
@@ -56,6 +56,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
 		add_filter( 'wsal_pointers_toplevel_page_wsal-auditlog', array( $this, 'register_privacy_pointer' ), 10, 1 );
+		add_action( 'admin_init', array( $this, 'handle_form_submission' ) );
 
 		// Check plugin version for to dismiss the notice only until upgrade.
 		$this->_version = WSAL_VERSION;
@@ -103,9 +104,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 							$more_info = add_query_arg(
 								array(
-									'utm_source' => 'plugin',
-									'utm_medium' => 'banner',
-									'utm_content' => 'audit+log+viewier+more+info',
+									'utm_source'   => 'plugin',
+									'utm_medium'   => 'banner',
+									'utm_content'  => 'audit+log+viewier+more+info',
 									'utm_campaign' => 'upgrade+premium',
 								),
 								'https://www.wpsecurityauditlog.com/premium-features/'
@@ -237,31 +238,73 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 
 	/**
+	 * Handle Audit Log Form Submission
+	 *
+	 * @since 3.2.3
+	 */
+	public function handle_form_submission() {
+		// @codingStandardsIgnoreStart
+		$wpnonce     = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( $_GET['_wpnonce'] ) : false; // View nonce.
+		$search      = isset( $_GET['s'] ) ? sanitize_text_field( $_GET['s'] ) : false; // Search.
+		$site_id     = isset( $_GET['wsal-cbid'] ) ? (int) sanitize_text_field( $_GET['wsal-cbid'] ) : false; // Site id.
+		$search_save = ( isset( $_REQUEST['wsal-save-search-name'] ) && ! empty( $_REQUEST['wsal-save-search-name'] ) ) ? trim( sanitize_text_field( $_REQUEST['wsal-save-search-name'] ) ) : false;
+		// @codingStandardsIgnoreEnd
+
+		if ( ! empty( $wpnonce ) ) {
+			// Remove args array.
+			$remove_args = array(
+				'_wp_http_referer',
+				'_wpnonce',
+				'wsal_as_widget_ip',
+				'load_saved_search_field',
+			);
+
+			if ( empty( $site_id ) ) {
+				$remove_args[] = 'wsal-cbid';
+			}
+
+			if ( empty( $search_save ) ) {
+				$remove_args[] = 'wsal-save-search-name';
+			}
+
+			if ( empty( $search ) ) {
+				$remove_args[] = 's';
+			}
+			wp_safe_redirect( remove_query_arg( $remove_args ) );
+			exit();
+		}
+	}
+
+	/**
 	 * Render view table of Audit Log.
 	 *
-	 * @since  1.0.0
+	 * @since 1.0.0
 	 */
 	public function Render() {
 		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
 		}
 
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
-
 		// Verify nonce for security.
-		if ( isset( $post_array['_wpnonce'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'bulk-logs' ) ) {
-			wp_die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
+		if ( isset( $_GET['_wpnonce'] ) ) {
+			check_admin_referer( 'bulk-logs' );
 		}
+
+		// @codingStandardsIgnoreStart
+		$wsal_page      = isset( $_GET['page'] ) ? sanitize_text_field( $_GET['page'] ) : false; // Admin WSAL Page.
+		$site_id        = isset( $_GET['wsal-cbid'] ) ? (int) sanitize_text_field( $_GET['wsal-cbid'] ) : false; // Site id.
+		$search_term    = ( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ) ? trim( sanitize_text_field( $_REQUEST['s'] ) ) : false;
+		$search_filters = ( isset( $_REQUEST['Filters'] ) && is_array( $_REQUEST['Filters'] ) ) ? array_map( 'sanitize_text_field', $_REQUEST['Filters'] ) : false;
+		// @codingStandardsIgnoreEnd
 
 		$this->GetListView()->prepare_items();
 		$occ = new WSAL_Models_Occurrence();
 
 		?>
-		<form id="audit-log-viewer" method="post">
+		<form id="audit-log-viewer" method="get">
 			<div id="audit-log-viewer-content">
-				<input type="hidden" name="page" value="<?php echo filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING ); ?>" />
-				<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr( isset( $post_array['wsal-cbid'] ) ? $post_array['wsal-cbid'] : '0' ); ?>" />
+				<input type="hidden" name="page" value="<?php echo esc_attr( $wsal_page ); ?>" />
+				<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr( empty( $site_id ) ? '0' : $site_id ); ?>" />
 				<?php do_action( 'wsal_auditlog_before_view', $this->GetListView() ); ?>
 				<?php $this->GetListView()->display(); ?>
 				<?php do_action( 'wsal_auditlog_after_view', $this->GetListView() ); ?>
@@ -269,8 +312,44 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		</form>
 
 		<?php
+		if (
+			'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-complete', 'no' )
+			&& 'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' )
+		) :
+		?>
+			<div data-remodal-id="wsal-setup-modal">
+				<button data-remodal-action="close" class="remodal-close"></button>
+				<p>
+					<?php esc_html_e( 'Thank you very much for using the WP Security Audit Log plugin. We have created a wizard to ease the process of configuring the plugin so you can get the best out of it. Would you like to run the wizard?', 'wp-security-audit-log' ); ?>
+				</p>
+				<br>
+				<button data-remodal-action="confirm" class="remodal-confirm"><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></button>
+				<button data-remodal-action="cancel" class="remodal-cancel"><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></button>
+			</div>
+			<script type="text/javascript">
+				jQuery( document ).ready( function() {
+					var wsal_setup_modal = jQuery( '[data-remodal-id="wsal-setup-modal"]' );
+					wsal_setup_modal.remodal().open();
+
+					jQuery(document).on('confirmation', wsal_setup_modal, function () {
+						<?php $this->_plugin->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' ); ?>
+						window.location = '<?php echo esc_url( add_query_arg( 'page', 'wsal-setup', admin_url( 'index.php' ) ) ); ?>';
+					});
+
+					jQuery(document).on('cancellation', wsal_setup_modal, function () {
+						<?php $this->_plugin->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' ); ?>
+					});
+
+					jQuery(document).on('closed', wsal_setup_modal, function () {
+						<?php $this->_plugin->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' ); ?>
+					});
+				});
+			</script>
+		<?php endif; ?>
+
+		<?php
 		if ( class_exists( 'WSAL_SearchExtension' ) &&
-			( isset( $post_array['Filters'] ) || ( isset( $post_array['s'] ) && trim( $post_array['s'] ) ) ) ) :
+			( ! empty( $search_filters ) || ( ! empty( $search_term ) && trim( $search_term ) ) ) ) :
 			?>
 			<script type="text/javascript">
 				jQuery(document).ready( function() {
@@ -278,15 +357,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						<?php
 						echo json_encode(
 							array(
-								'ajaxurl'   => admin_url( 'admin-ajax.php' ),
-								'tr8n'      => array(
+								'ajaxurl'     => admin_url( 'admin-ajax.php' ),
+								'tr8n'        => array(
 									'numofitems' => __( 'Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log' ),
 									'searchback' => __( 'All Sites', 'wp-security-audit-log' ),
 									'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
 								),
-								'autorefresh'   => array(
-									'enabled'   => false,
-									'token'     => (int) $occ->Count(),
+								'autorefresh' => array(
+									'enabled' => false,
+									'token'   => (int) $occ->Count(),
 								),
 							)
 						);
@@ -301,15 +380,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						<?php
 						echo json_encode(
 							array(
-								'ajaxurl' => admin_url( 'admin-ajax.php' ),
-								'tr8n' => array(
+								'ajaxurl'     => admin_url( 'admin-ajax.php' ),
+								'tr8n'        => array(
 									'numofitems' => __( 'Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log' ),
 									'searchback' => __( 'All Sites', 'wp-security-audit-log' ),
 									'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
 								),
 								'autorefresh' => array(
 									'enabled' => $this->_plugin->settings->IsRefreshAlertsEnabled(),
-									'token' => (int) $occ->Count(),
+									'token'   => (int) $occ->Count(),
 								),
 							)
 						);
@@ -317,7 +396,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					);
 				} );
 			</script>
-		<?php
+			<?php
 		endif;
 	}
 
@@ -335,6 +414,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		if ( ! isset( $get_array['occurrence'] ) ) {
 			die( 'Occurrence parameter expected.' );
 		}
+
+		// Get selected db.
+		$selected_db      = get_transient( 'wsal_wp_selected_db' );
+		$selected_db_user = (int) get_transient( 'wsal_wp_selected_db_user' );
+
+		// Check if archive db is enabled and the current user matches the one who selected archive db.
+		if ( ! empty( $selected_db ) && 'archive' === $selected_db && get_current_user_id() === $selected_db_user ) {
+			$this->_plugin->settings->SwitchToArchiveDB(); // Switch to archive DB.
+		}
+
 		$occ = new WSAL_Models_Occurrence();
 		$occ->Load( 'id = %d', array( (int) $get_array['occurrence'] ) );
 		$alert_meta = $occ->GetMetaArray();
@@ -463,12 +552,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	public function wsal_download_failed_login_log() {
 		// Get post array through filter.
 		$download_nonce = filter_input( INPUT_POST, 'download_nonce', FILTER_SANITIZE_STRING );
-		$alert_id = filter_input( INPUT_POST, 'alert_id', FILTER_SANITIZE_NUMBER_INT );
+		$alert_id       = filter_input( INPUT_POST, 'alert_id', FILTER_SANITIZE_NUMBER_INT );
 
 		// Verify nonce.
-		if ( ! empty( $download_nonce ) && wp_verify_nonce( $download_nonce,  'wsal-download-failed-logins' ) ) {
+		if ( ! empty( $download_nonce ) && wp_verify_nonce( $download_nonce, 'wsal-download-failed-logins' ) ) {
 			// Get alert by id.
-			$alert = new WSAL_Models_Occurrence();
+			$alert     = new WSAL_Models_Occurrence();
 			$alert->id = (int) $alert_id;
 
 			// Get users using alert meta.
@@ -493,24 +582,26 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function wsal_download_404_log() {
 		// Get post array through filter.
-		$nonce = filter_input( INPUT_POST, 'nonce', FILTER_SANITIZE_STRING );
+		$nonce    = filter_input( INPUT_POST, 'nonce', FILTER_SANITIZE_STRING );
 		$filename = filter_input( INPUT_POST, 'log_file', FILTER_SANITIZE_STRING );
-		$site_id = filter_input( INPUT_POST, 'site_id', FILTER_SANITIZE_NUMBER_INT );
+		$site_id  = filter_input( INPUT_POST, 'site_id', FILTER_SANITIZE_NUMBER_INT );
 
 		// If file name is empty then return error.
 		if ( empty( $filename ) ) {
 			// Nonce verification failed.
-			echo wp_json_encode( array(
-				'success' => false,
-				'message' => esc_html__( 'Log file does not exist.', 'wp-security-audit-log' ),
-			) );
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Log file does not exist.', 'wp-security-audit-log' ),
+				)
+			);
 			die();
 		}
 
 		// Verify nonce.
-		if ( ! empty( $filename ) && ! empty( $nonce ) && wp_verify_nonce( $nonce,  'wsal-download-404-log-' . $filename ) ) {
+		if ( ! empty( $filename ) && ! empty( $nonce ) && wp_verify_nonce( $nonce, 'wsal-download-404-log-' . $filename ) ) {
 			// Set log file path.
-			$uploads_dir   = wp_upload_dir();
+			$uploads_dir = wp_upload_dir();
 
 			if ( ! $site_id ) {
 				$position = strpos( $filename, '/sites/' );
@@ -523,8 +614,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 				$log_file_path = trailingslashit( $uploads_dir['basedir'] ) . $filename;
 			} else {
-				$position = strpos( $filename, '/wp-security-audit-log/' );
-				$filename = substr( $filename, $position );
+				$position      = strpos( $filename, '/wp-security-audit-log/' );
+				$filename      = substr( $filename, $position );
 				$log_file_path = trailingslashit( $uploads_dir['basedir'] ) . $filename;
 			}
 
@@ -534,24 +625,30 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			// Check if the response is valid.
 			if ( $response ) {
 				// Return the file body.
-				echo wp_json_encode( array(
-					'success' => true,
-					'filename' => $filename,
-					'file_content' => $response,
-				) );
+				echo wp_json_encode(
+					array(
+						'success'      => true,
+						'filename'     => $filename,
+						'file_content' => $response,
+					)
+				);
 			} else {
 				// Request failed.
-				echo wp_json_encode( array(
-					'success' => false,
-					'message' => esc_html__( 'Request to get log file failed.', 'wp-security-audit-log' ),
-				) );
+				echo wp_json_encode(
+					array(
+						'success' => false,
+						'message' => esc_html__( 'Request to get log file failed.', 'wp-security-audit-log' ),
+					)
+				);
 			}
 		} else {
 			// Nonce verification failed.
-			echo wp_json_encode( array(
-				'success' => false,
-				'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
-			) );
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
+				)
+			);
 		}
 		die();
 	}
@@ -572,10 +669,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Verify nonce.
 		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal-freemius-opt' ) ) {
 			// Nonce verification failed.
-			echo wp_json_encode( array(
-				'success' => false,
-				'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
-			) );
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
+				)
+			);
 			exit();
 		}
 
@@ -586,7 +685,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					wsal_freemius()->opt_in(); // Opt in.
 				} else {
 					// Get sites.
-					$sites = Freemius::get_sites();
+					$sites      = Freemius::get_sites();
 					$sites_data = array();
 
 					if ( ! empty( $sites ) ) {
@@ -610,15 +709,19 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				update_site_option( 'wsal_freemius_state', 'skipped' );
 			}
 
-			echo wp_json_encode( array(
-				'success' => true,
-				'message' => esc_html__( 'Freemius opt choice selected.', 'wp-security-audit-log' ),
-			) );
+			echo wp_json_encode(
+				array(
+					'success' => true,
+					'message' => esc_html__( 'Freemius opt choice selected.', 'wp-security-audit-log' ),
+				)
+			);
 		} else {
-			echo wp_json_encode( array(
-				'success' => false,
-				'message' => esc_html__( 'Freemius opt choice not found.', 'wp-security-audit-log' ),
-			) );
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Freemius opt choice not found.', 'wp-security-audit-log' ),
+				)
+			);
 		}
 		exit();
 	}
@@ -636,6 +739,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			array(),
 			'0.4.0'
 		);
+
+		// Remodal styles.
+		wp_enqueue_style( 'wsal-remodal', $this->_plugin->GetBaseUrl() . '/css/remodal.css', array(), '1.1.1' );
+		wp_enqueue_style( 'wsal-remodal-theme', $this->_plugin->GetBaseUrl() . '/css/remodal-default-theme.css', array(), '1.1.1' );
 
 		// Audit log styles.
 		wp_enqueue_style(
@@ -660,6 +767,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			'0.4.0' // Script version.
 		);
 
+		// Remodal script.
+		wp_enqueue_script(
+			'wsal-remodal-js',
+			$this->_plugin->GetBaseUrl() . '/js/remodal.min.js',
+			array(),
+			'1.1.1',
+			true
+		);
+
 		wp_enqueue_script( 'suggest' );
 
 		// Audit log script.
@@ -677,14 +793,22 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @param string $hook_suffix - Current hook suffix.
 	 * @since 3.2
 	 */
-	function load_pointers( $hook_suffix ) {
+	public function load_pointers( $hook_suffix ) {
 		// Don't run on WP < 3.3.
 		if ( get_bloginfo( 'version' ) < '3.3' ) {
 			return;
 		}
 
+		// Don't display notice if the wizard notice is showing.
+		if (
+			'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-complete', 'no' )
+			&& 'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' )
+		) {
+			return;
+		}
+
 		// Get screen id.
-		$screen = get_current_screen();
+		$screen    = get_current_screen();
 		$screen_id = $screen->id;
 
 		// Get pointers for this screen.
@@ -695,7 +819,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Get dismissed pointers.
-		$dismissed = explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) );
+		$dismissed      = explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) );
 		$valid_pointers = array();
 
 		// Check pointers and remove dismissed ones.
@@ -729,7 +853,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			'auditlog-pointer',
 			$this->_plugin->GetBaseUrl() . '/js/auditlog-pointer.js',
 			array( 'wp-pointer' ),
-			filemtime( $this->_plugin->GetBaseDir() . '/js/auditlog-pointer.js' )
+			filemtime( $this->_plugin->GetBaseDir() . '/js/auditlog-pointer.js' ),
+			true
 		);
 
 		// Add pointer options to script.
@@ -751,15 +876,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			&& ! $this->IsNoticeDismissed( 'wsal-privacy-notice-3.2' )
 		) {
 			$pointer['wsal_privacy'] = array(
-				'target' => '#toplevel_page_wsal-auditlog .wp-first-item',
+				'target'  => '#toplevel_page_wsal-auditlog .wp-first-item',
 				'options' => array(
-					'content' => sprintf( '<h3> %s </h3> <p> %s </p> <p><strong>%s</strong></p>',
+					'content'  => sprintf(
+						'<h3> %s </h3> <p> %s </p> <p><strong>%s</strong></p>',
 						__( 'WordPress Activity Log', 'wp-security-audit-log' ),
 						__( 'When a user makes a change on your website the plugin will keep a record of that event here. Right now there is nothing because this is a new install.', 'wp-security-audit-log' ),
 						__( 'Thank you for using WP Security Audit Log', 'wp-security-audit-log' )
 					),
 					'position' => array(
-						'edge' => 'left',
+						'edge'  => 'left',
 						'align' => 'top',
 					),
 				),

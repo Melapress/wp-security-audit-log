@@ -257,7 +257,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		// System info.
 		global $wpdb;
 
-		$sysinfo  = '### System Info → Begin ###' . "\n\n";
+		$sysinfo = '### System Info → Begin ###' . "\n\n";
 
 		// Start with the basics...
 		$sysinfo .= '-- Site Info --' . "\n\n";
@@ -267,7 +267,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 
 		// Browser information.
 		if ( ! class_exists( 'WSAL_Browser' ) && file_exists( WSAL_BASE_DIR . 'sdk/class-wsal-browser.php' ) ) {
-			require_once( WSAL_BASE_DIR . 'sdk/class-wsal-browser.php' );
+			require_once WSAL_BASE_DIR . 'sdk/class-wsal-browser.php';
 
 			$browser  = new WSAL_Browser();
 			$sysinfo .= "\n" . '-- User Browser --' . "\n\n";
@@ -300,7 +300,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		// Only show page specs if frontpage is set to 'page'.
 		if ( 'page' === get_option( 'show_on_front' ) ) {
 			$front_page_id = (int) get_option( 'page_on_front' );
-			$blog_page_id = (int) get_option( 'page_for_posts' );
+			$blog_page_id  = (int) get_option( 'page_for_posts' );
 
 			$sysinfo .= 'Page On Front:            ' . ( 0 !== $front_page_id ? get_the_title( $front_page_id ) . ' (#' . $front_page_id . ')' : 'Unset' ) . "\n";
 			$sysinfo .= 'Page For Posts:           ' . ( 0 !== $blog_page_id ? get_the_title( $blog_page_id ) . ' (#' . $blog_page_id . ')' : 'Unset' ) . "\n";
@@ -327,15 +327,24 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		// WordPress active plugins.
 		$sysinfo .= "\n" . '-- WordPress Active Plugins --' . "\n\n";
 
-		$plugins = get_plugins();
+		$plugins        = get_plugins();
 		$active_plugins = get_option( 'active_plugins', array() );
 
 		foreach ( $plugins as $plugin_path => $plugin ) {
-			if ( ! in_array( $plugin_path, $active_plugins ) )
+			if ( ! in_array( $plugin_path, $active_plugins ) ) {
 				continue;
+			}
 
-			$update = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
-			$sysinfo .= $plugin['Name'] . ': ' . $plugin['Version'] . $update . "\n";
+			if (
+				'WP Security Audit Log' === $plugin['Name']
+				&& wsal_freemius()->can_use_premium_code()
+			) {
+				$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
+				$sysinfo .= $plugin['Name'] . ' Premium: ' . $plugin['Version'] . $update . "\n";
+			} else {
+				$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
+				$sysinfo .= $plugin['Name'] . ': ' . $plugin['Version'] . $update . "\n";
+			}
 		}
 
 		// WordPress inactive plugins.
@@ -346,15 +355,23 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				continue;
 			}
 
-			$update = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
-			$sysinfo .= $plugin['Name'] . ': ' . $plugin['Version'] . $update . "\n";
+			if (
+				'WP Security Audit Log' === $plugin['Name']
+				&& wsal_freemius()->can_use_premium_code()
+			) {
+				$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
+				$sysinfo .= $plugin['Name'] . ' Premium: ' . $plugin['Version'] . $update . "\n";
+			} else {
+				$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
+				$sysinfo .= $plugin['Name'] . ': ' . $plugin['Version'] . $update . "\n";
+			}
 		}
 
 		if ( is_multisite() ) {
 			// WordPress Multisite active plugins.
 			$sysinfo .= "\n" . '-- Network Active Plugins --' . "\n\n";
 
-			$plugins = wp_get_active_network_plugins();
+			$plugins        = wp_get_active_network_plugins();
 			$active_plugins = get_site_option( 'active_sitewide_plugins', array() );
 
 			foreach ( $plugins as $plugin_path ) {
@@ -364,17 +381,26 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 					continue;
 				}
 
-				$update = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
-				$plugin  = get_plugin_data( $plugin_path );
-				$sysinfo .= $plugin['Name'] . ': ' . $plugin['Version'] . $update . "\n";
+				if (
+					'WP Security Audit Log' === $plugin['Name']
+					&& wsal_freemius()->can_use_premium_code()
+				) {
+					$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
+					$plugin   = get_plugin_data( $plugin_path );
+					$sysinfo .= $plugin['Name'] . ' Premium: ' . $plugin['Version'] . $update . "\n";
+				} else {
+					$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
+					$plugin   = get_plugin_data( $plugin_path );
+					$sysinfo .= $plugin['Name'] . ': ' . $plugin['Version'] . $update . "\n";
+				}
 			}
 		}
 
 		// Server configuration.
 		$server_software = filter_input( INPUT_SERVER, 'SERVER_SOFTWARE', FILTER_SANITIZE_STRING );
-		$sysinfo .= "\n" . '-- Webserver Configuration --' . "\n\n";
-		$sysinfo .= 'PHP Version:              ' . PHP_VERSION . "\n";
-		$sysinfo .= 'MySQL Version:            ' . $wpdb->db_version() . "\n";
+		$sysinfo        .= "\n" . '-- Webserver Configuration --' . "\n\n";
+		$sysinfo        .= 'PHP Version:              ' . PHP_VERSION . "\n";
+		$sysinfo        .= 'MySQL Version:            ' . $wpdb->db_version() . "\n";
 
 		if ( isset( $server_software ) ) {
 			$sysinfo .= 'Webserver Info:           ' . $server_software . "\n";
@@ -396,7 +422,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 
 		// WSAL options.
 		$sysinfo .= "\n" . '-- WSAL Options --' . "\n\n";
-		$options = $this->get_wsal_options();
+		$options  = $this->get_wsal_options();
 
 		if ( ! empty( $options ) && is_array( $options ) ) {
 			foreach ( $options as $index => $option ) {
