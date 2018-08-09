@@ -118,8 +118,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			return false;
 		}
 
-		$user = get_userdata( $user_id );
+		$user          = get_userdata( $user_id );
 		$bbpress_roles = array( 'bbp_spectator', 'bbp_moderator', 'bbp_participant', 'bbp_keymaster', 'bbp_blocked' );
+
 		// Remove any BBPress roles.
 		if ( is_array( $old_roles ) ) {
 			foreach ( $old_roles as $value ) {
@@ -152,13 +153,15 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		// Alert if roles are changed.
 		if ( $old_role != $new_role ) {
 			$this->plugin->alerts->TriggerIf(
-				4002, array(
-					'TargetUserID' => $user_id,
+				4002,
+				array(
+					'TargetUserID'   => $user_id,
 					'TargetUsername' => $user->user_login,
-					'OldRole' => $old_role,
-					'NewRole' => $new_role,
+					'OldRole'        => $old_role,
+					'NewRole'        => $new_role,
 					'multisite_text' => $this->plugin->IsMultisite() ? $site_id : false,
-				), array( $this, 'MustNotContainUserChanges' )
+				),
+				array( $this, 'MustNotContainUserChanges' )
 			);
 		}
 	}
@@ -298,12 +301,13 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 * @param WSAL_AlertManager $mgr - Instance of WSAL_AlertManager.
 	 */
 	public function MustNotContainUserChanges( WSAL_AlertManager $mgr ) {
-		return ! (  $mgr->WillOrHasTriggered( 4010 )
-				|| $mgr->WillOrHasTriggered( 4011 )
-				|| $mgr->WillOrHasTriggered( 4012 )
-				|| $mgr->WillOrHasTriggered( 4000 )
-				|| $mgr->WillOrHasTriggered( 4001 )
-			);
+		return ! (
+			$mgr->WillOrHasTriggered( 4010 )
+			|| $mgr->WillOrHasTriggered( 4011 )
+			|| $mgr->WillOrHasTriggered( 4012 )
+			|| $mgr->WillOrHasTriggered( 4000 )
+			|| $mgr->WillOrHasTriggered( 4001 )
+		);
 	}
 
 	/**

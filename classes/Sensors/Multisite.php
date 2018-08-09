@@ -44,20 +44,18 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
-		if ( $this->plugin->IsMultisite() ) {
-			add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
-			if ( current_user_can( 'switch_themes' ) ) {
-				add_action( 'shutdown', array( $this, 'EventAdminShutdown' ) );
-			}
-			add_action( 'wpmu_new_blog', array( $this, 'EventNewBlog' ), 10, 1 );
-			add_action( 'archive_blog', array( $this, 'EventArchiveBlog' ) );
-			add_action( 'unarchive_blog', array( $this, 'EventUnarchiveBlog' ) );
-			add_action( 'activate_blog', array( $this, 'EventActivateBlog' ) );
-			add_action( 'deactivate_blog', array( $this, 'EventDeactivateBlog' ) );
-			add_action( 'delete_blog', array( $this, 'EventDeleteBlog' ) );
-			add_action( 'add_user_to_blog', array( $this, 'EventUserAddedToBlog' ), 10, 3 );
-			add_action( 'remove_user_from_blog', array( $this, 'EventUserRemovedFromBlog' ), 10, 2 );
+		add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
+		if ( current_user_can( 'switch_themes' ) ) {
+			add_action( 'shutdown', array( $this, 'EventAdminShutdown' ) );
 		}
+		add_action( 'wpmu_new_blog', array( $this, 'EventNewBlog' ), 10, 1 );
+		add_action( 'archive_blog', array( $this, 'EventArchiveBlog' ) );
+		add_action( 'unarchive_blog', array( $this, 'EventUnarchiveBlog' ) );
+		add_action( 'activate_blog', array( $this, 'EventActivateBlog' ) );
+		add_action( 'deactivate_blog', array( $this, 'EventDeactivateBlog' ) );
+		add_action( 'delete_blog', array( $this, 'EventDeleteBlog' ) );
+		add_action( 'add_user_to_blog', array( $this, 'EventUserAddedToBlog' ), 10, 3 );
+		add_action( 'remove_user_from_blog', array( $this, 'EventUserRemovedFromBlog' ), 10, 2 );
 	}
 
 	/**

@@ -881,6 +881,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		if (
 			isset( $post_array['mainwpsignature'] ) // Check MainWP signature.
 			&& isset( $post_array['action'] ) // Check if action is set.
+			&& isset( $post_array['function'] ) // Check if function is set.
+			&& 'plugin_action' === $post_array['function']
 			&& in_array( $plugin, $wp_plugins, true ) // Check if plugin being activate/deactivate is in the list of plugins from MainWP.
 		) {
 			if ( 'activate' === $post_array['action'] ) {
@@ -889,10 +891,31 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				$event = 5002;
 			}
 
-			$plugin = WP_PLUGIN_DIR . '/' . $plugin;
+			$plugin      = WP_PLUGIN_DIR . '/' . $plugin;
 			$plugin_data = get_plugin_data( $plugin, false, true );
 			$this->plugin->alerts->Trigger(
 				$event, array(
+					'PluginFile' => $plugin,
+					'PluginData' => (object) array(
+						'Name'      => $plugin_data['Name'],
+						'PluginURI' => $plugin_data['PluginURI'],
+						'Version'   => $plugin_data['Version'],
+						'Author'    => $plugin_data['Author'],
+						'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+					),
+				)
+			);
+		} elseif (
+			isset( $post_array['mainwpsignature'] ) // Check MainWP signature.
+			&& isset( $post_array['function'] ) // Check if function is set.
+			&& 'installplugintheme' === $post_array['function']
+			&& isset( $post_array['type'] ) // Check if type is set.
+			&& 'plugin' === $post_array['type']
+		) {
+			$plugin      = WP_PLUGIN_DIR . '/' . $plugin;
+			$plugin_data = get_plugin_data( $plugin, false, true );
+			$this->plugin->alerts->Trigger(
+				5001, array(
 					'PluginFile' => $plugin,
 					'PluginData' => (object) array(
 						'Name'      => $plugin_data['Name'],
