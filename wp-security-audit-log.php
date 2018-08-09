@@ -4,7 +4,7 @@
  * Plugin URI: http://www.wpsecurityauditlog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 3.2.2.2
+ * Version: 3.2.3
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpsecurityauditlog.com/
  * License: GPL2
@@ -39,7 +39,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	 * @since 2.7.0
 	 */
 	if ( file_exists( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' ) ) {
-		require_once( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' );
+		require_once plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php';
 	}
 
 	/**
@@ -54,12 +54,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '3.2.2.2';
+		public $version = '3.2.3';
 
 		// Plugin constants.
-		const PLG_CLS_PRFX = 'WSAL_';
+		const PLG_CLS_PRFX    = 'WSAL_';
 		const MIN_PHP_VERSION = '5.3.0';
-		const OPT_PRFX = 'wsal-';
+		const OPT_PRFX        = 'wsal-';
 
 		/**
 		 * Views supervisor.
@@ -187,13 +187,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$this->autoloader->Register( self::PLG_CLS_PRFX, $this->GetBaseDir() . 'classes' . DIRECTORY_SEPARATOR );
 
 			// Load dependencies.
-			$this->views = new WSAL_ViewManager( $this );
-			$this->alerts = new WSAL_AlertManager( $this );
-			$this->sensors = new WSAL_SensorManager( $this );
-			$this->settings = new WSAL_Settings( $this );
+			$this->views     = new WSAL_ViewManager( $this );
+			$this->alerts    = new WSAL_AlertManager( $this );
+			$this->sensors   = new WSAL_SensorManager( $this );
+			$this->settings  = new WSAL_Settings( $this );
 			$this->constants = new WSAL_ConstantManager( $this );
 			$this->licensing = new WSAL_LicenseManager( $this );
-			$this->widgets = new WSAL_WidgetManager( $this );
+			$this->widgets   = new WSAL_WidgetManager( $this );
 
 			// Listen for installation event.
 			register_activation_hook( __FILE__, array( $this, 'Install' ) );
@@ -237,6 +237,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Add filters to customize freemius welcome message.
 			wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
 			wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
+			wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
+			wsal_freemius()->add_filter( 'show_first_trial_after_n_sec', array( $this, 'change_show_first_trial_period' ), 10, 1 );
+			wsal_freemius()->add_filter( 'reshow_trial_after_every_n_sec', array( $this, 'change_reshow_trial_period' ), 10, 1 );
 		}
 
 		/**
@@ -251,9 +254,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Redirect to main page.
 				$redirect = '';
 				if ( ! $this->IsMultisite() ) {
-					$redirect = add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) );
+					// By default, set it to wizard setup page.
+					$redirect = add_query_arg( 'page', 'wsal-setup', admin_url( 'index.php' ) );
 				} else {
-					$redirect = add_query_arg( 'page', 'wsal-auditlog', network_admin_url( 'admin.php' ) );
+					// Only allow super-admins on multisite to view wizard.
+					if ( $this->settings->CurrentUserCan( 'edit' ) ) {
+						$redirect = add_query_arg( 'page', 'wsal-setup', admin_url( 'index.php' ) );
+					} else {
+						$redirect = add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) );
+					}
 				}
 				wp_safe_redirect( $redirect );
 				exit();
@@ -268,15 +277,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function set_allowed_html_tags() {
 			// Set allowed HTML tags.
 			$this->allowed_html_tags = array(
-				'a' => array(
-					'href' => array(),
-					'title' => array(),
+				'a'      => array(
+					'href'   => array(),
+					'title'  => array(),
 					'target' => array(),
 				),
-				'br' => array(),
-				'em' => array(),
+				'br'     => array(),
+				'em'     => array(),
 				'strong' => array(),
-				'p' => array(
+				'p'      => array(
 					'class' => array(),
 				),
 			);
@@ -325,9 +334,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @param string $freemius_link - Freemius link.
 		 * @return string
 		 */
-		function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
+		public function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
 			$freemius_link = '<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
+				/* translators: Username */
 				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
 				esc_html__( 'Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com.', 'wp-security-audit-log' ) .
 				'<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>' .
@@ -351,10 +361,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @param string $freemius_link - Freemius link.
 		 * @return string
 		 */
-		function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
+		public function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
 			$freemius_link = '<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
+				/* translators: Username */
 				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
+				/* translators: 1: Plugin name. 2: Freemius link. */
 				esc_html__( 'Please help us improve %2$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %5$s, a diagnostic tracking service we use. If you skip this, that\'s okay! %2$s will still work just fine.', 'wp-security-audit-log' ) .
 				'<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>' .
 				esc_html__( 'NO AUDIT LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' ),
@@ -367,19 +379,58 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
+		 * Filter trial message of Freemius.
+		 *
+		 * @param string $message – Trial message.
+		 * @return string
+		 * @since 3.2.3
+		 */
+		public function freemius_trial_promotion_message( $message ) {
+			return sprintf(
+				/* translators: Plugin name */
+				__( 'Get a free 7-day trial of the premium edition of %s. No credit card required, no commitments!', 'wp-security-audit-log' ),
+				'<strong>' . __( 'WP Security Audit Log', 'wp-security-audit-log' ) . '</strong>'
+			);
+		}
+
+		/**
+		 * Filter the time period to show the first trial message.
+		 * Display it after 20 days.
+		 *
+		 * @param int $day_in_sec – Time period in seconds.
+		 * @return int
+		 * @since 3.2.3
+		 */
+		public function change_show_first_trial_period( $day_in_sec ) {
+			return 20 * DAY_IN_SECONDS;
+		}
+
+		/**
+		 * Filter the time period to re-show the trial message.
+		 * Display it after 60 days.
+		 *
+		 * @param int $thirty_days_in_sec – Time period in seconds.
+		 * @return int
+		 * @since 3.2.3
+		 */
+		public function change_reshow_trial_period( $thirty_days_in_sec ) {
+			return 60 * DAY_IN_SECONDS;
+		}
+
+		/**
 		 * Start to trigger the events after installation.
 		 *
 		 * @internal
 		 */
 		public function Init() {
 			// Start listening to events.
-			WpSecurityAuditLog::GetInstance()->sensors->HookEvents();
+			self::GetInstance()->sensors->HookEvents();
 
 			if ( $this->settings->IsArchivingEnabled() ) {
 				// Check the current page.
 				$get_page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
 				if ( ( ! isset( $get_page ) || 'wsal-auditlog' !== $get_page ) && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
-					$selected_db = get_transient( 'wsal_wp_selected_db' );
+					$selected_db      = get_transient( 'wsal_wp_selected_db' );
 					$selected_db_user = (int) get_transient( 'wsal_wp_selected_db_user' );
 					if ( $selected_db && ( get_current_user_id() === $selected_db_user ) ) {
 						// Delete the transient.
@@ -496,15 +547,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$options_table = new WSAL_Models_Option();
 			if ( ! $options_table->IsInstalled() ) {
 				$options_table->Install();
+
 				// Setting the prunig date with the old value or the default value.
 				$pruning_date = $this->settings->GetPruningDate();
 				$this->settings->SetPruningDate( $pruning_date );
-
-				$pruning_enabled = $this->settings->IsPruningLimitEnabled();
-				$this->settings->SetPruningLimitEnabled( $pruning_enabled );
-				// Setting the prunig limit with the old value or the default value.
-				$pruning_limit = $this->settings->GetPruningLimit();
-				$this->settings->SetPruningLimit( $pruning_limit );
 			}
 			$log_404 = $this->GetGlobalOption( 'log-404' );
 			// If old setting is empty enable 404 logging by default.
@@ -591,14 +637,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 
 			// Setting the prunig date with the old value or the default value.
-			$pruning_date = $this->settings->GetPruningDate();
-			$this->settings->SetPruningDate( $pruning_date );
-
-			// $pruning_enabled = $this->settings->IsPruningLimitEnabled();
-			$this->settings->SetPruningLimitEnabled( true );
-			// Setting the prunig limit with the old value or the default value.
-			$pruning_limit = $this->settings->GetPruningLimit();
-			$this->settings->SetPruningLimit( $pruning_limit );
+			// $pruning_date = $this->settings->GetPruningDate();
+			// $this->settings->SetPruningDate( $pruning_date );
 
 			$old_disabled = $this->GetGlobalOption( 'disabled-alerts' );
 			// If old setting is empty disable alert 2099 by default.
@@ -641,17 +681,24 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Do version-to-version specific changes.
 			if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
 				/**
-				 * This is a version specific update. It only needs to run
-				 * when old version of the plugin is less than 2.6.5 & the
-				 * plugin is being updated to version 2.6.5 or later versions.
+				 * IMPORTANT: VERSION SPECIFIC UPDATE
+				 *
+				 * It only needs to run when old version of the plugin is less than 2.6.5
+				 * & the plugin is being updated to version 2.6.5 or later versions.
 				 */
 				if ( version_compare( $old_version, '2.6.5', '<' ) && version_compare( $new_version, '2.6.4', '>' ) ) {
 					// Update External DB password on plugin update.
 					$this->update_external_db_password();
 				}
 
-				// Update pruning alerts option.
-				$this->settings->SetPruningDate( '12 months' );
+				// Update pruning alerts option if purning limit is enabled for backwards compatibility.
+				if ( $this->settings->IsPruningLimitEnabled() ) {
+					$pruning_date = '6';
+					$pruning_unit = 'months';
+					$this->settings->SetPruningDate( $pruning_date . ' ' . $pruning_unit );
+					$this->settings->SetPruningDateEnabled( true );
+					$this->settings->SetPruningLimitEnabled( false );
+				}
 
 				// Dismiss privacy notice.
 				$this->views->FindByClassName( 'WSAL_Views_AuditLog' )->DismissNotice( 'wsal-privacy-notice-3.2' );
@@ -697,22 +744,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				/**
 				 * IMPORTANT: VERSION SPECIFIC UPDATE
 				 *
-				 * It only needs to run when old version of the plugin is older/less than 3.0.0.
+				 * It only needs to run when old version of the plugin is later than 3.0.0.
 				 *
 				 * @since 3.2.2.2
 				 */
 				if ( version_compare( $old_version, '3.0.0', '>' ) ) {
-					// Check if the user has opted-in.
-					if ( wsal_freemius()->is_registered() ) {
-						// Update freemius state.
-						update_site_option( 'wsal_freemius_state', 'in' );
-					} else {
-						// Update freemius state.
-						update_site_option( 'wsal_freemius_state', 'skipped' );
-					}
+					// If the freemius state option does not exists then run this update.
+					if ( false === get_site_option( 'wsal_freemius_state', false ) ) {
+						// Check if the user has opted-in.
+						if ( wsal_freemius()->is_registered() ) {
+							// Update freemius state.
+							update_site_option( 'wsal_freemius_state', 'in' );
+						} else {
+							// Update freemius state.
+							update_site_option( 'wsal_freemius_state', 'skipped' );
+						}
 
-					// Remove connect account notice of Freemius.
-					FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
+						// Remove connect account notice of Freemius.
+						FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
+					}
 				}
 			}
 		}
@@ -907,8 +957,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				get_option( 'WPPH_PLUGIN_ALLOW_ACCESS' )
 			);
 			$s = get_option( 'wpph_plugin_settings' );
-			// $this->settings->SetPruningDate(($s->daysToKeep ? $s->daysToKeep : 30) . ' days');
-			// $this->settings->SetPruningLimit(min($s->eventsToKeep, 1));
 			$this->settings->SetViewPerPage( max( $s->showEventsViewList, 5 ) );
 			$this->settings->SetWidgetsEnabled( ! ! $s->showDW );
 		}
