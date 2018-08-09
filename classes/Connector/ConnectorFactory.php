@@ -127,7 +127,7 @@ abstract class WSAL_Connector_ConnectorFactory {
 			// TO DO: Add other connectors.
 			case 'mysql':
 			default:
-				$test = new WSAL_Connector_MySQLDB( $config );
+				$test   = new WSAL_Connector_MySQLDB( $config );
 				$result = $test->TestConnection();
 		}
 		return $result;
