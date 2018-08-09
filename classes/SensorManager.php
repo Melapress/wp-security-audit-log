@@ -37,6 +37,9 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		parent::__construct( $plugin );
 
+		// Check sensors before loading for optimization.
+		add_filter( 'wsal_before_sensor_load', array( $this, 'check_sensor_before_load' ), 10, 2 );
+
 		foreach ( glob( dirname( __FILE__ ) . '/Sensors/*.php' ) as $file ) {
 			$this->AddFromFile( $file );
 		}
@@ -44,15 +47,15 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		/**
 		 * Load Custom Sensor files from /wp-content/uploads/wp-security-audit-log/custom-sensors/
 		 */
-		$upload_dir = wp_upload_dir();
+		$upload_dir       = wp_upload_dir();
 		$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log' . DIRECTORY_SEPARATOR . 'custom-sensors' . DIRECTORY_SEPARATOR;
 
 		// Check directory.
 		if ( is_dir( $uploads_dir_path ) && is_readable( $uploads_dir_path ) ) {
 			foreach ( glob( $uploads_dir_path . '*.php' ) as $file ) {
 				// Include custom sensor file.
-				require_once( $file );
-				$file = substr( $file, 0, -4 );
+				require_once $file;
+				$file   = substr( $file, 0, -4 );
 				$sensor = str_replace( $uploads_dir_path, '', $file );
 
 				// Skip if the file is index.php for security.
@@ -89,7 +92,20 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 * @param string $file Path to file.
 	 */
 	public function AddFromFile( $file ) {
-		$this->AddFromClass( $this->plugin->GetClassFileClassName( $file ) );
+		/**
+		 * Filter: `wsal_before_sensor_load`
+		 *
+		 * Check to see if sensor is to be initiaited or not.
+		 *
+		 * @param bool   $load_sensor – Set to true if sensor is to be loaded.
+		 * @param string $file        – File path.
+		 */
+		$load_sensor = apply_filters( 'wsal_before_sensor_load', true, $file );
+
+		// Initiate the sensor if $load_sensor is true.
+		if ( $load_sensor ) {
+			$this->AddFromClass( $this->plugin->GetClassFileClassName( $file ) );
+		}
 	}
 
 	/**
@@ -108,5 +124,127 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 */
 	public function AddInstance( WSAL_AbstractSensor $sensor ) {
 		$this->sensors[] = $sensor;
+	}
+
+	/**
+	 * Check sensor before loading.
+	 *
+	 * @param bool   $load_sensor – Whether to load sensor or not.
+	 * @param string $filepath    – File path.
+	 * @return bool
+	 */
+	public function check_sensor_before_load( $load_sensor, $filepath ) {
+		global $pagenow;
+
+		// WSAL views array.
+		$wsal_views = array(
+			'wsal-auditlog',
+			'wsal-togglealerts',
+			'wsal-settings',
+			'wsal-emailnotifications',
+			'wsal-loginusers',
+			'wsal-reports',
+			'wsal-search',
+			'wsal-externaldb',
+			'wsal-user-management-views',
+			'wsal-rep-views-main',
+			'wsal-np-notifications',
+			'wsal-np-addnotification',
+			'wsal-np-editnotification',
+			'wsal-ext-settings',
+			'wsal-help',
+			'wsal-auditlog-account',
+			'wsal-auditlog-contact',
+			'wsal-auditlog-pricing',
+		);
+
+		// Get current page query argument via $_GET array.
+		$current_page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+
+		// Check these conditions before loading sensors.
+		if (
+			is_admin()
+			&& (
+				in_array( $current_page, $wsal_views, true ) // WSAL Views.
+				|| 'index.php' === $pagenow  // Dashboard.
+				|| 'tools.php' === $pagenow  // Tools page.
+				|| 'export.php' === $pagenow // Export page.
+				|| 'import.php' === $pagenow // Import page.
+			)
+		) {
+			return false;
+		}
+
+		// Get file name.
+		$filename = basename( $filepath, '.php' );
+
+		// If filename exists then continue.
+		if ( $filename ) {
+			// Conditional loading based on filename.
+			switch ( $filename ) {
+				case 'BBPress':
+					// Check if BBPress plugin exists.
+					if ( ! is_plugin_active( 'bbpress/bbpress.php' ) ) {
+						$load_sensor = false;
+					}
+					break;
+
+				case 'WooCommerce':
+					// Check if WooCommerce plugin exists.
+					if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+						$load_sensor = false;
+					}
+					break;
+
+				case 'YoastSEO':
+					// Check if Yoast SEO plugin exists.
+					if ( ! is_plugin_active( 'wordpress-seo/wp-seo.php' ) ) {
+						$load_sensor = false;
+					}
+					break;
+
+				case 'Multisite':
+					// If site is not multisite then don't load it.
+					if ( ! $this->plugin->IsMultisite() ) {
+						$load_sensor = false;
+					}
+					break;
+
+				case 'Menus':
+					// If the current page is not Menus page in themes tab or customizer then don't load menu sensor.
+					if ( 'nav-menus.php' === $pagenow || 'customize.php' === $pagenow ) {
+						$load_sensor = true;
+					} else {
+						$load_sensor = false;
+					}
+					break;
+
+				case 'Widgets':
+					// If the current page is not Widgets page in themes tab or customizer then don't load menu sensor.
+					if ( 'widgets.php' === $pagenow || 'customize.php' === $pagenow || 'admin-ajax.php' === $pagenow ) {
+						$load_sensor = true;
+					} else {
+						$load_sensor = false;
+					}
+					break;
+
+				case 'FileChanges':
+					// If file changes is disabled then don't load file changes sensor.
+					if ( 'enable' !== $this->plugin->GetGlobalOption( 'scan-file-changes', 'enable' ) ) {
+						$load_sensor = false;
+
+						// Clear scheduled hook if there is any hook scheduled.
+						if ( wp_next_scheduled( WSAL_Sensors_FileChanges::$schedule_hook ) ) {
+							wp_clear_scheduled_hook( WSAL_Sensors_FileChanges::$schedule_hook );
+						}
+					}
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		return $load_sensor;
 	}
 }
