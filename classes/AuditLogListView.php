@@ -13,8 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once( ABSPATH . 'wp-admin/includes/admin.php' );
-require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+require_once ABSPATH . 'wp-admin/includes/admin.php';
+require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 
 /**
  * This view is included in Audit Log Viewer Page.
@@ -57,18 +57,30 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		$this->_plugin = $plugin;
 
 		$timezone = $this->_plugin->settings->GetTimezone();
-		if ( $timezone ) {
-			$this->_gmt_offset_sec = get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
-		} else {
+
+		/**
+		 * Transform timezone values.
+		 *
+		 * @since 3.2.3
+		 */
+		if ( '0' === $timezone ) {
+			$timezone = 'utc';
+		} elseif ( '1' === $timezone ) {
+			$timezone = 'wp';
+		}
+
+		if ( 'utc' === $timezone ) {
 			$this->_gmt_offset_sec = date( 'Z' );
+		} else {
+			$this->_gmt_offset_sec = get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
 		}
 
 		parent::__construct(
 			array(
-				'singular'  => 'log',
-				'plural'    => 'logs',
-				'ajax'      => true,
-				'screen'    => 'interval-list',
+				'singular' => 'log',
+				'plural'   => 'logs',
+				'ajax'     => true,
+				'screen'   => 'interval-list',
 			)
 		);
 	}
@@ -81,33 +93,68 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	}
 
 	/**
+	 * Generate the table navigation above or below the table
+	 *
+	 * @since 3.2.3
+	 * @param string $which – Position of the nav.
+	 */
+	protected function display_tablenav( $which ) {
+		if ( 'top' === $which ) {
+			wp_nonce_field( 'bulk-' . $this->_args['plural'] );
+		}
+		?>
+		<div class="tablenav <?php echo esc_attr( $which ); ?>">
+			<?php
+			$this->extra_tablenav( $which );
+
+			/**
+			 * Action: `wsal_search_filters_list`
+			 *
+			 * Display list of search filters of WSAL.
+			 *
+			 * @param string $which – Navigation position; value is either top or bottom.
+			 * @since 3.2.3
+			 */
+			do_action( 'wsal_search_filters_list', $which );
+
+			$this->pagination( $which );
+			?>
+			<br class="clear" />
+		</div>
+		<?php
+	}
+
+	/**
 	 * Table navigation.
 	 *
 	 * @param string $which - Position of the nav.
 	 */
 	public function extra_tablenav( $which ) {
-		// Items-per-page widget.
-		$p = $this->_plugin->settings->GetViewPerPage();
-		$items = array( 5, 10, 15, 30, 50 );
-		if ( ! in_array( $p, $items ) ) {
-			$items[] = $p;
-		}
-		?>
-		<div class="wsal-ipp wsal-ipp-<?php echo esc_attr( $which ); ?>">
-			<?php esc_html_e( 'Show ', 'wp-security-audit-log' ); ?>
-			<select class="wsal-ipps" onfocus="WsalIppsFocus(value);" onchange="WsalIppsChange(value);">
-				<?php foreach ( $items as $item ) { ?>
-					<option
-						value="<?php echo is_string( $item ) ? '' : esc_attr( $item ); ?>"
-						<?php echo ( $item == $p ) ? 'selected="selected"' : false; ?>>
-						<?php echo esc_html( $item ); ?>
-					</option>
-				<?php } ?>
-			</select>
-			<?php esc_html_e( ' Items', 'wp-security-audit-log' ); ?>
-		</div>
+		// If the position is not top then render.
+		if ( 'top' !== $which ) :
+			// Items-per-page widget.
+			$p     = $this->_plugin->settings->GetViewPerPage();
+			$items = array( 5, 10, 15, 30, 50 );
+			if ( ! in_array( $p, $items ) ) {
+				$items[] = $p;
+			}
+			?>
+			<div class="wsal-ipp wsal-ipp-<?php echo esc_attr( $which ); ?>">
+				<?php esc_html_e( 'Show ', 'wp-security-audit-log' ); ?>
+				<select class="wsal-ipps" onfocus="WsalIppsFocus(value);" onchange="WsalIppsChange(value);">
+					<?php foreach ( $items as $item ) { ?>
+						<option
+							value="<?php echo is_string( $item ) ? '' : esc_attr( $item ); ?>"
+							<?php echo ( $item == $p ) ? 'selected="selected"' : false; ?>>
+							<?php echo esc_html( $item ); ?>
+						</option>
+					<?php } ?>
+				</select>
+				<?php esc_html_e( ' Items', 'wp-security-audit-log' ); ?>
+			</div>
+			<?php
+		endif;
 
-		<?php
 		// Show site alerts widget.
 		if ( $this->is_multisite() && $this->is_main_blog() ) {
 			$curr = $this->get_view_site_id();
@@ -115,7 +162,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			<div class="wsal-ssa wsal-ssa-<?php echo esc_attr( $which ); ?>">
 				<?php if ( $this->get_site_count() > 15 ) { ?>
 					<?php $curr = $curr ? get_blog_details( $curr ) : null; ?>
-					<?php $curr = $curr ? ($curr->blogname . ' (' . $curr->domain . ')') : 'All Sites'; ?>
+					<?php $curr = $curr ? ( $curr->blogname . ' (' . $curr->domain . ')' ) : 'All Sites'; ?>
 					<input type="text" class="wsal-ssas" value="<?php echo esc_attr( $curr ); ?>"/>
 				<?php } else { ?>
 					<select class="wsal-ssas" onchange="WsalSsasChange(value);">
@@ -134,7 +181,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 		// Switch to live or archive DB.
 		if ( $this->_plugin->settings->IsArchivingEnabled() ) {
-			$selected = 'live';
+			$selected    = 'live';
 			$selected_db = get_transient( 'wsal_wp_selected_db' );
 			if ( $selected_db && 'archive' == $selected_db ) {
 				$selected = 'archive';
@@ -197,12 +244,15 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_columns() {
+		// Get user information from settings.
 		$type_name = $this->_plugin->settings->get_type_username();
-		if ( 'display_name' === $type_name ) {
+		if ( 'display_name' === $type_name || 'first_last_name' === $type_name ) {
 			$name_column = __( 'User', 'wp-security-audit-log' );
 		} elseif ( 'username' === $type_name ) {
 			$name_column = __( 'Username', 'wp-security-audit-log' );
 		}
+
+		// Audit log columns.
 		$cols = array(
 			'type' => __( 'Event ID', 'wp-security-audit-log' ),
 			'code' => __( 'Severity', 'wp-security-audit-log' ),
@@ -210,11 +260,18 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			'user' => $name_column,
 			'scip' => __( 'Source IP', 'wp-security-audit-log' ),
 		);
+
+		// If multisite then add "Site" column to the view.
 		if ( $this->is_multisite() && $this->is_main_blog() && ! $this->is_specific_view() ) {
 			$cols['site'] = __( 'Site', 'wp-security-audit-log' );
 		}
+
 		$cols['mesg'] = __( 'Message', 'wp-security-audit-log' );
+
+		// Get selected columns from settings.
 		$sel_columns = $this->_plugin->settings->GetColumnsSelected();
+
+		// If selected columns are not empty, then unset default columns.
 		if ( ! empty( $sel_columns ) ) {
 			unset( $cols );
 			$sel_columns = (array) json_decode( $sel_columns );
@@ -255,8 +312,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $item ) {
-		return '<input type="checkbox" value="' . $item->id . '" '
-			. 'name="' . esc_attr( $this->_args['singular'] ) . '[]"/>';
+		return '<input type="checkbox" value="' . $item->id . '" name="' . esc_attr( $this->_args['singular'] ) . '[]" />';
 	}
 
 	/**
@@ -290,12 +346,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		switch ( $column_name ) {
 			case 'read':
 				return '<span class="log-read log-read-'
-					. ($item->is_read ? 'old' : 'new')
+					. ( $item->is_read ? 'old' : 'new' )
 					. '" title="' . __( 'Click to toggle.', 'wp-security-audit-log' ) . '"></span>';
 			case 'type':
-				$code = $this->_plugin->alerts->GetAlert( $item->alert_id );
-				$extra_msg = '';
-				$data_link = '';
+				$code                = $this->_plugin->alerts->GetAlert( $item->alert_id );
+				$extra_msg           = '';
+				$data_link           = '';
 				$modification_alerts = array( 1002, 1003, 6007, 6023 );
 				if ( in_array( $item->alert_id, $modification_alerts, true ) ) {
 					$extra_msg = '. Modify this alert.';
@@ -313,23 +369,22 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return '<span class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item->alert_id ) . '" data-tooltip="' . __( 'Disable this type of events.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . ' - ' . esc_html( $code->desc ) . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
 					. str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
 			case 'code':
-				$code = $this->_plugin->alerts->GetAlert( $item->alert_id );
-				$code = $code ? $code->code : 0;
+				$code  = $this->_plugin->alerts->GetAlert( $item->alert_id );
+				$code  = $code ? $code->code : 0;
 				$const = (object) array(
-					'name' => 'E_UNKNOWN',
-					'value' => 0,
+					'name'        => 'E_UNKNOWN',
+					'value'       => 0,
 					'description' => __( 'Unknown error code.', 'wp-security-audit-log' ),
 				);
 				$const = $this->_plugin->constants->GetConstantBy( 'value', $code, $const );
-				if ( 'E_CRITICAL' == $const->name ) {
-					$const->name = 'Critical';
-				} elseif ( 'E_WARNING' == $const->name ) {
-					$const->name = 'Warning';
-				} elseif ( 'E_NOTICE' == $const->name ) {
-					$const->name = 'Notification';
+				if ( 'E_CRITICAL' === $const->name ) {
+					$const->name = __( 'Critical', 'wp-security-audit-log' );
+				} elseif ( 'E_WARNING' === $const->name ) {
+					$const->name = __( 'Warning', 'wp-security-audit-log' );
+				} elseif ( 'E_NOTICE' === $const->name ) {
+					$const->name = __( 'Notification', 'wp-security-audit-log' );
 				}
-				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="log-type log-type-' . $const->value
-					. '"></span></a>';
+				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="log-type log-type-' . $const->value . '"></span></a>';
 			case 'crtd':
 				return $item->created_on ? (
 						str_replace(
@@ -337,16 +392,24 @@ class WSAL_AuditLogListView extends WP_List_Table {
 							substr( number_format( fmod( $item->created_on + $this->_gmt_offset_sec, 1 ), 3 ), 2 ),
 							date( $datetime_format, $item->created_on + $this->_gmt_offset_sec )
 						)
-					) : '<i>unknown</i>';
+					) : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 			case 'user':
-				$username   = $item->GetUsername(); // Get username.
-				$type_name  = $this->_plugin->settings->get_type_username(); // Get the data to display.
-				$user = get_user_by( 'login', $username ); // Get user.
+				$username  = $item->GetUsername(); // Get username.
+				$type_name = $this->_plugin->settings->get_type_username(); // Get the data to display.
+				$user      = get_user_by( 'login', $username ); // Get user.
 
 				// Check if the username and user exists.
 				if ( $username && $user ) {
+					// Get user avatar.
 					$image = get_avatar( $user->ID, 32 );
-					if ( 'display_name' === $type_name && ! empty( $user->first_name ) ) {
+
+					// Checks for display name.
+					if ( 'display_name' === $type_name && ! empty( $user->display_name ) ) {
+						$display_name = $user->display_name;
+					} elseif (
+						'first_last_name' === $type_name
+						&& ( ! empty( $user->first_name ) || ! empty( $user->last_name ) )
+					) {
 						$display_name = $user->first_name . ' ' . $user->last_name;
 					} else {
 						$display_name = $user->user_login;
@@ -419,7 +482,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				if ( class_exists( 'WSAL_SearchExtension' ) ) {
 					$tooltip = esc_attr__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
 
-					$html  = "<a class='search-ip' data-tooltip='$tooltip' data-ip='$scip' target='_blank' href='https://whatismyipaddress.com/ip/$scip'>" . esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
+					$html = "<a class='search-ip' data-tooltip='$tooltip' data-ip='$scip' target='_blank' href='https://whatismyipaddress.com/ip/$scip'>" . esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
 					foreach ( $oips as $ip ) {
 						if ( $scip != $ip ) {
 							$html .= '<div>' . $ip . '</div>';
@@ -428,7 +491,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$html .= '</div>';
 					return $html;
 				} else {
-					$html  = "<a target='_blank' href='https://whatismyipaddress.com/ip/$scip'>" . esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
+					$html = "<a target='_blank' href='https://whatismyipaddress.com/ip/$scip'>" . esc_html( $scip ) . '</a> <a href="javascript:;" onclick="jQuery(this).hide().next().show();">(more&hellip;)</a><div style="display: none;">';
 					foreach ( $oips as $ip ) {
 						if ( $scip != $ip ) {
 							$html .= '<div>' . $ip . '</div>';
@@ -440,12 +503,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 			case 'site':
 				$info = get_blog_details( $item->site_id, true );
-				return ! $info ? ('Unknown Site ' . $item->site_id)
-					: ('<a href="' . esc_attr( $info->siteurl ) . '">' . esc_html( $info->blogname ) . '</a>');
+				return ! $info ? ( 'Unknown Site ' . $item->site_id )
+					: ( '<a href="' . esc_attr( $info->siteurl ) . '">' . esc_html( $info->blogname ) . '</a>' );
 			case 'mesg':
 				return '<div id="Event' . $item->id . '">' . $item->GetMessage( array( $this, 'meta_formatter' ) ) . '</div>';
 			case 'data':
-				$url = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $item->id;
+				$url     = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $item->id;
 				$tooltip = esc_attr__( 'View all details of this change', 'wp-security-audit-log' );
 				return '<a class="more-info thickbox" data-tooltip="' . $tooltip . '" title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
 					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
@@ -535,7 +598,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 			case in_array( $name, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ) ):
 				return '<strong>' . (
-					strlen( $value ) > 50 ? (esc_html( substr( $value, 0, 50 ) ) . '&hellip;') : esc_html( $value )
+					strlen( $value ) > 50 ? ( esc_html( substr( $value, 0, 50 ) ) . '&hellip;' ) : esc_html( $value )
 				) . '</strong>';
 
 			case '%ClientIP%' == $name:
@@ -547,7 +610,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 			case '%LinkFile%' === $name:
 				if ( 'NULL' != $value ) {
-					$site_id  = $this->get_view_site_id(); // Site id for multisite.
+					$site_id = $this->get_view_site_id(); // Site id for multisite.
 					return '<a href="javascript:;" onclick="download_404_log( this )" data-log-file="' . esc_attr( $value ) . '" data-site-id="' . esc_attr( $site_id ) . '" data-nonce-404="' . esc_attr( wp_create_nonce( 'wsal-download-404-log-' . $value ) ) . '" title="' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '</a>';
 				} else {
 					return 'Click <a href="' . esc_url( admin_url( 'admin.php?page=wsal-togglealerts#tab-system-activity' ) ) . '">here</a> to log such requests to file';
@@ -628,10 +691,10 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @return bool
 	 */
 	protected function is_specific_view() {
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
+		// Filter $_GET array for security.
+		$get_array = filter_input_array( INPUT_GET );
 
-		return isset( $post_array['wsal-cbid'] ) && '0' != $post_array['wsal-cbid'];
+		return isset( $get_array['wsal-cbid'] ) && '0' != $get_array['wsal-cbid'];
 	}
 
 	/**
@@ -640,10 +703,10 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @return int
 	 */
 	protected function get_specific_view() {
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
+		// Filter $_GET array for security.
+		$get_array = filter_input_array( INPUT_GET );
 
-		return isset( $post_array['wsal-cbid'] ) ? (int) $post_array['wsal-cbid'] : 0;
+		return isset( $get_array['wsal-cbid'] ) ? (int) $get_array['wsal-cbid'] : 0;
 	}
 
 	/**
@@ -682,8 +745,8 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 		$per_page = $this->_plugin->settings->GetViewPerPage();
 
-		$columns = $this->get_columns();
-		$hidden = array();
+		$columns  = $this->get_columns();
+		$hidden   = array();
 		$sortable = $this->get_sortable_columns();
 
 		$this->_column_headers = array( $columns, $hidden, $sortable );
@@ -739,7 +802,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		// @todo Modify $query instead
 		// @deprecated
 		// $data = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page);
-		$query->setOffset( ($this->get_pagenum() - 1) * $per_page );
+		$query->setOffset( ( $this->get_pagenum() - 1 ) * $per_page );
 		$query->setLimit( $per_page );
 
 		$this->items = $query->getAdapter()->Execute( $query );
@@ -765,6 +828,102 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			echo '</tr>';
 		} else {
 			parent::single_row( $item );
+		}
+	}
+
+	/**
+	 * Print column headers, accounting for hidden and sortable columns.
+	 *
+	 * @static var int $cb_counter
+	 *
+	 * @param bool $with_id – Whether to set the id attribute or not.
+	 * @since 3.2.3
+	 */
+	public function print_column_headers( $with_id = true ) {
+		list( $columns, $hidden, $sortable, $primary ) = $this->get_column_info();
+
+		$current_url = set_url_scheme( esc_url_raw( wp_unslash( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ) ) );
+		$current_url = remove_query_arg( 'paged', $current_url );
+
+		// Get $_GET global array.
+		$get_array = filter_input_array( INPUT_GET );
+		if ( isset( $get_array['orderby'] ) ) {
+			$current_orderby = sanitize_text_field( $get_array['orderby'] );
+		} else {
+			$current_orderby = '';
+		}
+
+		if ( isset( $get_array['order'] ) && 'desc' === $get_array['order'] ) {
+			$current_order = 'desc';
+		} else {
+			$current_order = 'asc';
+		}
+
+		if ( ! empty( $columns['cb'] ) ) {
+			static $cb_counter = 1;
+			$columns['cb'] = '<label class="screen-reader-text" for="cb-select-all-' . $cb_counter . '">' . __( 'Select All' ) . '</label>'
+				. '<input id="cb-select-all-' . $cb_counter . '" type="checkbox" />';
+			$cb_counter++;
+		}
+
+		foreach ( $columns as $column_key => $column_display_name ) {
+			$class = array( 'manage-column', "column-$column_key" );
+
+			if ( in_array( $column_key, $hidden ) ) {
+				$class[] = 'hidden';
+			}
+
+			if ( 'cb' === $column_key ) {
+				$class[] = 'check-column';
+			} elseif ( in_array( $column_key, array( 'posts', 'comments', 'links' ) ) ) {
+				$class[] = 'num';
+			}
+
+			if ( $column_key === $primary ) {
+				$class[] = 'column-primary';
+			}
+
+			if ( isset( $sortable[ $column_key ] ) ) {
+				list( $orderby, $desc_first ) = $sortable[ $column_key ];
+
+				if ( $current_orderby === $orderby ) {
+					$order   = 'asc' === $current_order ? 'desc' : 'asc';
+					$class[] = 'sorted';
+					$class[] = $current_order;
+				} else {
+					$order   = $desc_first ? 'desc' : 'asc';
+					$class[] = 'sortable';
+					$class[] = $desc_first ? 'asc' : 'desc';
+				}
+
+				$column_display_name = '<a href="' . esc_url( add_query_arg( compact( 'orderby', 'order' ), $current_url ) ) . '"><span>' . $column_display_name . '</span><span class="sorting-indicator"></span></a>';
+			}
+
+			$tag   = ( 'cb' === $column_key ) ? 'td' : 'th';
+			$scope = ( 'th' === $tag ) ? 'scope="col"' : '';
+			$id    = $with_id ? "id='$column_key'" : '';
+
+			if ( ! empty( $class ) ) {
+				$class = "class='" . join( ' ', $class ) . "'";
+			}
+
+			echo "<$tag $scope $id $class>";
+
+			echo $column_display_name;
+
+			if ( $with_id ) {
+				/**
+				 * Action: `wsal_audit_log_column_header`
+				 *
+				 * Action hook to add search filters in the audit log
+				 * column headers.
+				 *
+				 * @param string $column_key – Column key.
+				 */
+				do_action( 'wsal_audit_log_column_header', $column_key );
+			}
+
+			echo "</$tag>";
 		}
 	}
 }
