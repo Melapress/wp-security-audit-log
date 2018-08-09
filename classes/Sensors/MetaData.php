@@ -466,12 +466,14 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 
 		// If update action is set then trigger the alert.
 		if ( isset( $post_array['action'] ) && ( 'update' == $post_array['action'] || 'createuser' == $post_array['action'] ) ) {
-			$this->plugin->alerts->Trigger(
-				4016, array(
+			$this->plugin->alerts->TriggerIf(
+				4016,
+				array(
 					'TargetUsername'    => $user->user_login,
 					'custom_field_name' => $meta_key,
 					'new_value'         => $meta_value,
-				)
+				),
+				array( $this, 'must_not_contain_new_user_alert' )
 			);
 		}
 	}
@@ -485,8 +487,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 */
 	public function event_user_meta_updating( $meta_id, $object_id, $meta_key ) {
 		static $meta_type = 'user';
+		$meta             = get_metadata_by_mid( $meta_type, $meta_id );
+
+		// Set old meta array.
 		$this->old_meta[ $meta_id ] = (object) array(
-			'key' => ( $meta = get_metadata_by_mid( $meta_type, $meta_id ) ) ? $meta->meta_key : $meta_key,
+			'key' => ( $meta ) ? $meta->meta_key : $meta_key,
 			'val' => get_metadata( $meta_type, $object_id, $meta_key, true ),
 		);
 	}
@@ -534,14 +539,16 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			if ( isset( $this->old_meta[ $meta_id ] ) && ! in_array( $meta_key, $username_meta, true ) ) {
 				// Check change in meta value.
 				if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
-					$this->plugin->alerts->Trigger(
-						4015, array(
+					$this->plugin->alerts->TriggerIf(
+						4015,
+						array(
 							'TargetUsername'    => $user->user_login,
 							'custom_field_name' => $meta_key,
-							'new_value'  => $meta_value,
-							'old_value'  => $this->old_meta[ $meta_id ]->val,
-							'ReportText' => $this->old_meta[ $meta_id ]->val . '|' . $meta_value,
-						)
+							'new_value'         => $meta_value,
+							'old_value'         => $this->old_meta[ $meta_id ]->val,
+							'ReportText'        => $this->old_meta[ $meta_id ]->val . '|' . $meta_value,
+						),
+						array( $this, 'must_not_contain_role_changes' )
 					);
 				}
 				// Remove old meta update data.
@@ -604,7 +611,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		$old_display_name = $old_user_data->display_name;
 
 		// Get user's current data.
-		$new_userdata = get_userdata( $user_id );
+		$new_userdata     = get_userdata( $user_id );
 		$new_display_name = $new_userdata->display_name;
 
 		// Alert if display name is changed.
@@ -617,6 +624,29 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				)
 			);
 		}
+	}
 
+	/**
+	 * Method: This function make sures that alert 4002
+	 * has not been triggered before updating user meta.
+	 *
+	 * @param WSAL_AlertManager $manager - WSAL Alert Manager.
+	 * @return bool
+	 * @since 3.2.3
+	 */
+	public function must_not_contain_role_changes( WSAL_AlertManager $manager ) {
+		return ! $manager->WillOrHasTriggered( 4002 );
+	}
+
+	/**
+	 * Method: This function make sures that alert 4001
+	 * has not been triggered before creating user meta.
+	 *
+	 * @param WSAL_AlertManager $manager - WSAL Alert Manager.
+	 * @return bool
+	 * @since 3.2.3
+	 */
+	public function must_not_contain_new_user_alert( WSAL_AlertManager $manager ) {
+		return ! $manager->WillOrHasTriggered( 4001 );
 	}
 }
