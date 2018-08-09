@@ -133,9 +133,9 @@ final class WSAL_AlertManager {
 	/**
 	 * Trigger an alert.
 	 *
-	 * @param integer $type Alert type.
-	 * @param array   $data Alert data.
-	 * @param bool    $delayed - False if delayed, true if not.
+	 * @param integer $type - Alert type.
+	 * @param array   $data - Alert data.
+	 * @param mix     $delayed - False if delayed, function if not.
 	 */
 	public function Trigger( $type, $data = array(), $delayed = false ) {
 		// Get buffer use option.
@@ -208,7 +208,7 @@ final class WSAL_AlertManager {
 	 */
 	public function TriggerIf( $type, $data, $cond = null ) {
 		$username = wp_get_current_user()->user_login;
-		$roles = $this->plugin->settings->GetCurrentUserRoles();
+		$roles    = $this->plugin->settings->GetCurrentUserRoles();
 
 		if ( $this->CheckEnableUserRoles( $username, $roles ) ) {
 			$this->_pipeline[] = array(
@@ -228,7 +228,7 @@ final class WSAL_AlertManager {
 	 * @param bool  $_retry - Retry.
 	 * @internal
 	 *
-	 * @throws string - Error if alert is not registered.
+	 * @throws Exception - Error if alert is not registered.
 	 */
 	protected function _CommitItem( $type, $data, $cond, $_retry = true ) {
 		if ( ! $cond || ! ! call_user_func( $cond, $this ) ) {
@@ -243,7 +243,8 @@ final class WSAL_AlertManager {
 					return $this->_CommitItem( $type, $data, $cond, false );
 				} else {
 					// In general this shouldn't happen, but it could, so we handle it here.
-					throw new Exception( 'Alert with code "' . $type . '" has not be registered.' );
+					/* translators: Event ID */
+					throw new Exception( sprintf( esc_html__( 'Event with code %d has not be registered.', 'wp-security-audit-log' ), $type ) );
 				}
 			}
 		}
@@ -476,9 +477,10 @@ final class WSAL_AlertManager {
 	/**
 	 * Returns all supported alerts.
 	 *
+	 * @param bool $sorted – Sort the alerts array or not.
 	 * @return array
 	 */
-	public function GetCategorizedAlerts() {
+	public function GetCategorizedAlerts( $sorted = true ) {
 		$result = array();
 		foreach ( $this->_alerts as $alert ) {
 			if ( ! isset( $result[ $alert->catg ] ) ) {
@@ -489,7 +491,10 @@ final class WSAL_AlertManager {
 			}
 			$result[ $alert->catg ][ $alert->subcatg ][] = $alert;
 		}
-		ksort( $result );
+
+		if ( $sorted ) {
+			ksort( $result );
+		}
 		return $result;
 	}
 
