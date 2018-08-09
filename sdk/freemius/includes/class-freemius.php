@@ -1348,7 +1348,10 @@
                 add_action( 'make_ham_blog', array( &$this, '_after_site_reactivated_callback' ) );
             }
 
-            if ( $this->is_theme() && self::is_customizer() ) {
+            if ( $this->is_theme() &&
+                 self::is_customizer() &&
+                 $this->apply_filters( 'show_customizer_upsell', true )
+            ) {
                 // Register customizer upsell.
                 add_action( 'customize_register', array( &$this, '_customizer_register' ) );
             }
@@ -1487,13 +1490,6 @@
                 'submit_uninstall_reason',
                 array( &$this, '_submit_uninstall_reason_action' )
             );
-
-            if ( $this->is_theme() && $this->is_premium() && ! $this->has_active_valid_license() ) {
-                $this->add_ajax_action(
-                    'delete_theme_update_data',
-                    array( &$this, '_delete_theme_update_data_action' )
-                );
-            }
 
             if ( ! $this->is_addon() || $this->is_parent_plugin_installed() ) {
                 if ( ( $this->is_plugin() && self::is_plugins_page() ) ||
@@ -3145,7 +3141,7 @@
             if ( $is_connected ) {
                 FS_GDPR_Manager::instance()->store_is_required( $pong->is_gdpr_required );
             }
-
+            
             $this->store_connectivity_info( $pong, $is_connected );
 
             return $this->_has_api_connection;
@@ -3264,6 +3260,7 @@
         static function _get_current_wp_user() {
             self::require_pluggable_essentials();
             self::wp_cookie_constants();
+
             return wp_get_current_user();
         }
 
@@ -3279,7 +3276,7 @@
          */
         private static function wp_cookie_constants() {
             if ( defined( 'LOGGED_IN_COOKIE' ) &&
-                ( defined( 'AUTH_COOKIE' ) || defined( 'SECURE_AUTH_COOKIE' ) )
+                 ( defined( 'AUTH_COOKIE' ) || defined( 'SECURE_AUTH_COOKIE' ) )
             ) {
                 return;
             }
@@ -3959,6 +3956,13 @@
             $this->_logger->entrance();
 
             $this->parse_settings( $plugin_info );
+
+            if ( is_admin() && $this->is_theme() && $this->is_premium() && ! $this->has_active_valid_license() ) {
+                $this->add_ajax_action(
+                    'delete_theme_update_data',
+                    array( &$this, '_delete_theme_update_data_action' )
+                );
+            }
 
             if ( ! self::is_ajax() ) {
                 if ( ! $this->is_addon() || $this->is_only_premium() ) {
@@ -6191,19 +6195,21 @@
                         }
 
                         if ( $this->is_plugin_new_install() || $this->is_only_premium() ) {
-                            // Show notice for new plugin installations.
-                            $this->_admin_notices->add(
-                                sprintf(
-                                    $this->get_text_inline( 'You are just one step away - %s', 'you-are-step-away' ),
-                                    sprintf( '<b><a href="%s">%s</a></b>',
-                                        $this->get_activation_url( array(), ! $this->is_delegated_connection() ),
-                                        sprintf( $this->get_text_x_inline( 'Complete "%s" Activation Now',
-                                            '%s - plugin name. As complete "PluginX" activation now', 'activate-x-now' ), $this->get_plugin_name() )
-                                    )
-                                ),
-                                '',
-                                'update-nag'
-                            );
+                            if ( ! $this->_anonymous_mode ) {
+                                // Show notice for new plugin installations.
+                                $this->_admin_notices->add(
+                                    sprintf(
+                                        $this->get_text_inline( 'You are just one step away - %s', 'you-are-step-away' ),
+                                        sprintf( '<b><a href="%s">%s</a></b>',
+                                            $this->get_activation_url( array(), ! $this->is_delegated_connection() ),
+                                            sprintf( $this->get_text_x_inline( 'Complete "%s" Activation Now',
+                                                '%s - plugin name. As complete "PluginX" activation now', 'activate-x-now' ), $this->get_plugin_name() )
+                                        )
+                                    ),
+                                    '',
+                                    'update-nag'
+                                );
+                            }
                         } else {
                             if ( $this->should_add_sticky_optin_notice() ) {
                                 $this->add_sticky_optin_admin_notice();
@@ -10586,7 +10592,7 @@
          */
         function _activate_license_ajax_action() {
             $this->_logger->entrance();
-
+            
             $this->check_ajax_referer( 'activate_license' );
 
             $license_key = trim( fs_request_get( 'license_key' ) );
@@ -10855,7 +10861,7 @@
                     $next_page = $this->get_after_activation_url( 'after_network_activation_url' );
                 }
             } else {
-                $error = $this->get_text_inline( 'invalid_site_details_collection', 'Invalid site details collection.' );
+                $error = $this->get_text_inline( 'Invalid site details collection.', 'invalid_site_details_collection' );
             }
 
             $result = array(
@@ -14381,15 +14387,16 @@
                 unset( $parent_fs->_storage->is_pending_activation );
             }
 
+            // Get user information based on parent's plugin.
+            $user = $this->get_user();
+
             // First of all, set site info - otherwise we won't
             // be able to invoke API calls.
             $parent_fs->_site = new FS_Site( $parent_install );
+            $parent_fs->_user = $user;
 
             // Sync add-on plans.
             $parent_fs->_sync_plans();
-
-            // Get user information based on parent's plugin.
-            $user = $this->get_user();
 
             $parent_fs->_set_account( $user, $parent_fs->_site );
         }
@@ -14754,13 +14761,15 @@
         private function add_submenu_items() {
             $this->_logger->entrance();
 
+            $is_activation_mode = $this->is_activation_mode();
+
             if ( $this->is_addon() ) {
                 // No submenu items for add-ons.
                 $add_submenu_items = false;
             } else if ( $this->is_free_wp_org_theme() && ! fs_is_network_admin() ) {
                 // Also add submenu items when running in a free .org theme so the tabs will be visible.
                 $add_submenu_items = true;
-            } else if ( $this->is_activation_mode() && ! $this->is_free_wp_org_theme() ) {
+            } else if ( $is_activation_mode && ! $this->is_free_wp_org_theme() ) {
                 $add_submenu_items = false;
             } else if ( fs_is_network_admin() ) {
                 /**
@@ -14791,7 +14800,15 @@
                         $this->is_submenu_item_visible( 'affiliation' )
                     );
                 }
+            }
 
+            if ( $add_submenu_items ||
+                ( $is_activation_mode &&
+                    $this->is_only_premium() &&
+                    $this->is_admin_page( 'account' ) &&
+                    fs_request_is_action( $this->get_unique_affix() . '_sync_license' )
+                )
+            ) {
                 if ( ! WP_FS__DEMO_MODE && $this->is_registered() ) {
                     $show_account = (
                         $this->is_submenu_item_visible( 'account' ) &&
@@ -14810,10 +14827,12 @@
                         'account',
                         array( &$this, '_account_page_load' ),
                         WP_FS__DEFAULT_PRIORITY,
-                        $show_account
+                        ( $add_submenu_items && $show_account )
                     );
                 }
+            }
 
+            if ( $add_submenu_items ) {
                 // Add contact page.
                 $this->add_submenu_item(
                     $this->get_text_inline( 'Contact Us', 'contact-us' ),
@@ -14838,7 +14857,11 @@
                         $this->is_submenu_item_visible( 'addons' )
                     );
                 }
+            }
 
+            if ( $add_submenu_items ||
+                ( $is_activation_mode && $this->is_only_premium() && $this->is_admin_page( 'pricing' ) )
+            ) {
                 if ( ! WP_FS__DEMO_MODE ) {
                     $show_pricing = (
                         $this->is_submenu_item_visible( 'pricing' ) &&
@@ -14860,14 +14883,14 @@
 
                     // Add upgrade/pricing page.
                     $this->add_submenu_item(
-                        $pricing_cta_text . '&nbsp;&nbsp;' . ( is_rtl() ? '&#x2190;' : '&#x27a4;' ),
+                        $pricing_cta_text . '&nbsp;&nbsp;' . ( is_rtl() ? $this->get_text_x_inline( '&#x2190;', 'ASCII arrow left icon', 'symbol_arrow-left' ) : $this->get_text_x_inline( '&#x27a4;', 'ASCII arrow right icon', 'symbol_arrow-right' ) ),
                         array( &$this, '_pricing_page_render' ),
                         $this->get_plugin_name() . ' &ndash; ' . $this->get_text_x_inline( 'Pricing', 'noun', 'pricing' ),
                         'manage_options',
                         'pricing',
                         'Freemius::_clean_admin_content_section',
                         WP_FS__LOWEST_PRIORITY,
-                        $show_pricing,
+                        ( $add_submenu_items && $show_pricing ),
                         $pricing_class
                     );
                 }
@@ -15935,7 +15958,7 @@
             /**
              * @since 1.2.3 When running in DEV mode, retrieve pending plans as well.
              */
-            $result = $api->get( "/plugins/{$this->_module_id}/plans.json?show_pending=" . ( $this->has_secret_key() ? 'true' : 'false' ), true );
+            $result = $api->get( $this->add_show_pending( "/plugins/{$this->_module_id}/plans.json" ), true );
 
             if ( $this->is_api_result_object( $result, 'plans' ) && is_array( $result->plans ) ) {
                 for ( $i = 0, $len = count( $result->plans ); $i < $len; $i ++ ) {
@@ -16403,7 +16426,7 @@
                 $this->_update_licenses( $licenses, $addon->id );
 
                 if ( ! $this->is_addon_installed( $addon->id ) && FS_License_Manager::has_premium_license( $licenses ) ) {
-                    $plans_result = $this->get_api_site_or_plugin_scope()->get( "/addons/{$addon_id}/plans.json" );
+                    $plans_result = $this->get_api_site_or_plugin_scope()->get( $this->add_show_pending( "/addons/{$addon_id}/plans.json" ) );
 
                     if ( ! isset( $plans_result->error ) ) {
                         $plans = array();
@@ -16731,6 +16754,7 @@
                             'trial_promotion',
                             'trial_expired',
                             'activation_complete',
+                            'license_expired',
                         ) );
                         break;
                     case 'changed':
@@ -17285,9 +17309,10 @@
 
             $is_premium = null;
             if ( ! $is_addon ) {
-                $is_premium = $this->is_premium();
+                $is_premium = ( $this->is_premium() || $this->_can_download_premium() );
             } else if ( $this->is_addon_activated( $addon_id ) ) {
-                $is_premium = self::get_instance_by_id( $addon_id )->is_premium();
+                $fs_addon   = self::get_instance_by_id( $addon_id );
+                $is_premium = ( $fs_addon->is_premium() || $fs_addon->_can_download_premium() );
             }
 
             // If add-on, then append add-on ID.
@@ -17483,9 +17508,15 @@
 
             if ( ! empty( $plugin_id ) ) {
                 $params['plugin_id'] = $plugin_id;
+            } else if ( $this->is_addon() ) {
+                $params['plugin_id'] = $this->get_id();
             }
 
-            return $this->get_account_url( 'download_latest', $params );
+            $fs = $this->is_addon() ?
+                $this->get_parent_instance() :
+                $this;
+
+            return $fs->get_account_url( 'download_latest', $params );
         }
 
         #endregion Download Plugin ------------------------------------------------------------------
@@ -17561,19 +17592,21 @@
 
             $api = $this->get_api_site_or_plugin_scope();
 
+            $path = $this->add_show_pending( '/addons.json?enriched=true' );
+
             /**
              * @since 1.2.1
              *
              * If there's a cached version of the add-ons and not asking
              * for a flush, just use the currently stored add-ons.
              */
-            if ( ! $flush && $api->is_cached( '/addons.json?enriched=true' ) ) {
+            if ( ! $flush && $api->is_cached( $path ) ) {
                 $addons = self::get_all_addons();
 
                 return $addons[ $this->_plugin->id ];
             }
 
-            $result = $api->get( '/addons.json?enriched=true', $flush );
+            $result = $api->get( $path, $flush );
 
             $addons = array();
             if ( $this->is_api_result_object( $result, 'plugins' ) &&
@@ -18389,9 +18422,9 @@
             $vars = array( 'id' => $this->_module_id );
 
             if ( 'true' === fs_request_get( 'checkout', false ) ) {
-                fs_require_once_template( 'checkout.php', $vars );
+                echo $this->apply_filters( 'templates/checkout.php', fs_get_template( 'checkout.php', $vars ) );
             } else {
-                fs_require_once_template( 'pricing.php', $vars );
+                echo $this->apply_filters( 'templates/pricing.php', fs_get_template( 'pricing.php', $vars ) );
             }
         }
 
@@ -18506,7 +18539,9 @@
          * @return FS_Api
          */
         private function get_current_or_network_user_api_scope( $flush = false ) {
-            if ( ! $this->_is_network_active || isset( $this->_user ) ) {
+            if ( ! $this->_is_network_active ||
+                 ( isset( $this->_user ) && $this->_user instanceof FS_User )
+            ) {
                 return $this->get_api_user_scope( $flush );
             }
 
@@ -18594,9 +18629,19 @@
          * @author Vova Feldman (@svovaf)
          * @since  1.0.9
          *
-         * @param $plans
+         * @param FS_Plugin_Plan[] $plans
          */
         function _check_for_trial_plans( $plans ) {
+            /**
+             * For some reason core's do_action() flattens arrays when it has a single object item. Therefore, we need to restructure the array as expected.
+             *
+             * @author Vova Feldman (@svovaf)
+             * @since  2.1.2
+             */
+            if ( ! is_array( $plans ) && is_object( $plans ) ) {
+                $plans = array( $plans );
+            }
+
             $this->_storage->has_trial_plan = FS_Plan_Manager::instance()->has_trial_plan( $plans );
         }
 
@@ -18703,14 +18748,14 @@
 
             // Show promotion if never shown before and 24 hours after initial activation with FS.
             if ( ! $was_promotion_shown_before &&
-                 $this->_storage->install_timestamp > ( time() - WP_FS__TIME_24_HOURS_IN_SEC )
+                 $this->_storage->install_timestamp > ( time() - $this->apply_filters( 'show_first_trial_after_n_sec', WP_FS__TIME_24_HOURS_IN_SEC ) )
             ) {
                 return false;
             }
 
             // OR if promotion was shown before, try showing it every 30 days.
             if ( $was_promotion_shown_before &&
-                 30 * WP_FS__TIME_24_HOURS_IN_SEC > time() - $last_time_trial_promotion_shown
+                 $this->apply_filters( 'reshow_trial_after_every_n_sec', 30 * WP_FS__TIME_24_HOURS_IN_SEC ) > time() - $last_time_trial_promotion_shown
             ) {
                 return false;
             }
@@ -19335,14 +19380,16 @@
          * @param array       $request
          * @param int         $success_cache_expiration
          * @param int         $failure_cache_expiration
+         * @param bool        $maybe_enrich_request_for_debug
          *
          * @return WP_Error|array
          */
-        private static function safe_remote_post(
+        static function safe_remote_post(
             &$url,
             $request,
             $success_cache_expiration = 0,
-            $failure_cache_expiration = 0
+            $failure_cache_expiration = 0,
+            $maybe_enrich_request_for_debug = true
         ) {
             $should_cache = ($success_cache_expiration + $failure_cache_expiration > 0);
 
@@ -19353,7 +19400,9 @@
                 false;
 
             if ( false === $response ) {
-                self::enrich_request_for_debug( $url, $request );
+                if ( $maybe_enrich_request_for_debug ) {
+                    self::enrich_request_for_debug( $url, $request );
+                }
 
                 $response = wp_remote_post( $url, $request );
 
@@ -20108,6 +20157,10 @@
                         $icon_found = false;
                         $local_path = fs_normalize_path( "{$img_dir}/{$this->_slug}.png" );
 
+                        if ( ! function_exists( 'get_filesystem_method' ) ) {
+                            require_once ABSPATH . 'wp-admin/includes/file.php';
+                        }
+
                         $have_write_permissions = ( 'direct' === get_filesystem_method( array(), fs_normalize_path( $img_dir ) ) );
 
                         /**
@@ -20624,9 +20677,7 @@
          * @since  2.1.0
          */
         function _maybe_add_gdpr_optin_ajax_handler() {
-            if ( $this->is_activation_mode() ) {
-                $this->add_ajax_action( 'fetch_is_marketing_required_flag_value', array( &$this, '_fetch_is_marketing_required_flag_value_ajax_action' ) );
-            }
+            $this->add_ajax_action( 'fetch_is_marketing_required_flag_value', array( &$this, '_fetch_is_marketing_required_flag_value_ajax_action' ) );
 
             if ( FS_GDPR_Manager::instance()->is_opt_in_notice_shown() ) {
                 $this->add_gdpr_optin_ajax_handler_and_style();
@@ -20807,6 +20858,30 @@
         function is_business() {
             // TODO: Implement is_business() method.
             throw new Exception( 'not implemented' );
+        }
+
+        #endregion
+
+        #----------------------------------------------------------------------------------
+        #region Helper
+        #----------------------------------------------------------------------------------
+
+        /**
+         * If running with a secret key, assume it's the developer and show pending plans as well.
+         *
+         * @author Vova Feldman (@svovaf)
+         * @since  2.1.2
+         *
+         * @param string $path
+         *
+         * @return string
+         */
+        function add_show_pending( $path ) {
+            if ( ! $this->has_secret_key() ) {
+                return $path;
+            }
+
+            return $path . ( false !== strpos( $path, '?' ) ? '&' : '?' ) . 'show_pending=true';
         }
 
         #endregion
