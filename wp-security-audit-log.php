@@ -659,6 +659,44 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				/**
 				 * IMPORTANT: VERSION SPECIFIC UPDATE
 				 *
+				 * It only needs to run when old version of the plugin is less than 3.2.3
+				 * & the plugin is being updated to version 3.2.3 or later versions.
+				 *
+				 * @since 3.2.3
+				 */
+				if ( version_compare( $old_version, '3.2.3', '<' ) && version_compare( $new_version, '3.2.2', '>' ) ) {
+					$this->getConnector()->getAdapter( 'Option' )->update_value_column();
+
+					// Migrate file scan options to WSAL Options table.
+					$initial_scan_option         = 'wsal_is_initial_scan_';
+					$initial_scan_option_migrate = 'is_initial_scan_';
+					$local_scan_files            = 'wsal_local_files_';
+					$local_scan_files_migrate    = 'local_files_';
+
+					for ( $index = 0; $index < 7; $index++ ) {
+						// Initial scan option.
+						$initial_option_value = get_site_option( $initial_scan_option . $index, 'yes' );
+						delete_site_option( $initial_scan_option . $index );
+
+						// If option already does not exist then create it.
+						if ( ! $this->GetGlobalOption( $initial_scan_option_migrate . $index, false ) ) {
+							$this->SetGlobalOption( $initial_scan_option_migrate . $index, $initial_option_value );
+						}
+
+						// Local files option.
+						$local_files_value = get_site_option( $local_scan_files . $index, array() );
+						delete_site_option( $local_scan_files . $index );
+
+						// If option already does not exist then create it.
+						if ( ! $this->GetGlobalOption( $local_scan_files_migrate . $index, false ) ) {
+							$this->SetGlobalOption( $local_scan_files_migrate . $index, $local_files_value );
+						}
+					}
+				}
+
+				/**
+				 * IMPORTANT: VERSION SPECIFIC UPDATE
+				 *
 				 * It only needs to run when old version of the plugin is older/less than 3.0.0.
 				 *
 				 * @since 3.2.2.2

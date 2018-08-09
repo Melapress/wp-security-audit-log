@@ -377,12 +377,11 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @return string - Must return SQL for creating table.
 	 */
 	protected function _GetInstallQuery( $prefix = false ) {
-		$_wpdb = $this->connection;
-
-		$class = get_class( $this );
-		$copy = new $class( $this->connection );
-		$table_name = ($prefix) ? $this->GetWPTable() : $this->GetTable();
-		$sql = 'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (' . PHP_EOL;
+		$_wpdb      = $this->connection;
+		$class      = get_class( $this );
+		$copy       = new $class( $this->connection );
+		$table_name = ( $prefix ) ? $this->GetWPTable() : $this->GetTable();
+		$sql        = 'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (' . PHP_EOL;
 
 		foreach ( $this->GetColumns() as $key ) {
 			$sql .= '    ';
@@ -401,7 +400,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 					if ( property_exists( $class, $maxlength ) ) {
 						$sql .= $key . ' VARCHAR(' . intval( $class::$$maxlength ) . ') NOT NULL,' . PHP_EOL;
 					} else {
-						$sql .= $key . ' TEXT NOT NULL,' . PHP_EOL;
+						$sql .= $key . ' LONGTEXT NOT NULL,' . PHP_EOL;
 					}
 					break;
 				case is_bool( $copy->$key ):
@@ -423,6 +422,19 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		}
 
 		return $sql;
+	}
+
+	/**
+	 * Update `option_value` column of the Options table
+	 * of WSAL to LONGTEXT.
+	 *
+	 * @since 3.2.3
+	 */
+	public function update_value_column() {
+		global $wpdb;
+		$sql  = 'ALTER TABLE ' . $this->GetTable();
+		$sql .= ' MODIFY COLUMN option_value LONGTEXT NOT NULL';
+		$wpdb->query( $sql );
 	}
 
 	/**
