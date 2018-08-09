@@ -3,11 +3,10 @@
  *
  */
 
- .top .wsal-ipp {
-	display: none;
-}
-.top .wsal-ssa select {
-	margin-left: 0;
+ .top .wsal-ssa select {
+	margin: 0 3px 0 0;
+	vertical-align: top;
+	height: 30px;
 }
 
 .wsal-ipp,
@@ -303,5 +302,5 @@ div.wsal_notice__wrapper p {
 }
 
 .wp-list-table #type {
-	width: 87px;
+	width: 92px;
 }

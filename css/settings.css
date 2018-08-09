@@ -1,5 +1,4 @@
 #audit-log-settings {
-	padding-right: 256px;
 	position: relative;
 }
 
@@ -72,11 +71,14 @@
 .sectoken-other { background: #FFE; border-color: #ED5; }
 .sectoken-del { background: #FEE; border-color: #EBB; }
 
+#wsal-tabs {
+	margin: 0 0 1.5em;
+}
 .wsal-tab {
 	margin-top: 0px;
 }
 .wsal-tab th {
-	padding-left: 20px;
+	/* padding-left: 20px; */
 }
 .wsal-tab td {
 	padding-left: 20px;
@@ -90,6 +92,18 @@
 }
 .wsal-tab .error.hide {
 	display: none;
+}
+.wsal-tab input[type=text],
+.wsal-tab input[type=email] {
+	display: inline-block;
+	width: 350px;
+	padding: 5px;
+	margin: 0;
+}
+.wsal-tab input[type=button],
+.wsal-tab button {
+	display: inline-block;
+	vertical-align: top;
 }
 
 /*
@@ -188,10 +202,11 @@ a.disabled {
 #wsal_files,
 #wsal_files_types,
 #wsal_dirs {
+	background: #fff;
 	width: 250px;
 	height: 230px;
 	overflow-y: scroll;
-	border: 1px solid #eee;
+	border: 1px solid #ddd;
 	padding: 10px 5px;
 	margin-right: 10px;
 }
