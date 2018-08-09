@@ -1,8 +1,22 @@
 <?php
 /**
+ * Manager: View
+ *
+ * View manager class file.
+ *
+ * @since 1.0.0
+ * @package Wsal
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
  * View Manager.
  *
- * This Class load all the views, initialize them and shows the active one.
+ * This class includes all the views, initialize them and shows the active one.
  * It creates also the menu items.
  *
  * @package Wsal
@@ -40,17 +54,38 @@ class WSAL_ViewManager {
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->_plugin = $plugin;
 
+		// Skipped views array.
 		$skip_views = array();
 
 		// Array of views to skip for premium version.
 		if ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
-			$skip_views[] = dirname( __FILE__ ) . '/Views/EmailNotifications.php';
-			$skip_views[] = dirname( __FILE__ ) . '/Views/ExternalDB.php';
-			$skip_views[] = dirname( __FILE__ ) . '/Views/Licensing.php';
-			$skip_views[] = dirname( __FILE__ ) . '/Views/LogInUsers.php';
-			$skip_views[] = dirname( __FILE__ ) . '/Views/Reports.php';
-			$skip_views[] = dirname( __FILE__ ) . '/Views/Search.php';
+			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/EmailNotifications.php';
+			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/ExternalDB.php';
+			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Licensing.php';
+			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/LogInUsers.php';
+			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Reports.php';
+			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Search.php';
 		}
+
+		/**
+		 * Add setup wizard page to skip views. It will only be initialized
+		 * one time.
+		 *
+		 * @since 3.2.3
+		 */
+		if ( file_exists( $this->_plugin->GetBaseDir() . 'classes/Views/SetupWizard.php' ) ) {
+			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/SetupWizard.php';
+		}
+
+		/**
+		 * Skipped Views.
+		 *
+		 * Array of views which are skipped before plugin views are initialized.
+		 *
+		 * @param array $skip_views - Skipped views.
+		 * @since 3.2.3
+		 */
+		$skip_views = apply_filters( 'wsal_skip_views', $skip_views );
 
 		// Load views.
 		foreach ( glob( dirname( __FILE__ ) . '/Views/*.php' ) as $file ) {
@@ -71,6 +106,14 @@ class WSAL_ViewManager {
 
 		// Render footer.
 		add_action( 'admin_footer', array( $this, 'RenderViewFooter' ) );
+
+		// Initialize setup wizard.
+		if (
+			'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-complete', 'no' )
+			|| 'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' )
+		) {
+			new WSAL_Views_SetupWizard( $plugin );
+		}
 	}
 
 	/**
@@ -266,6 +309,8 @@ class WSAL_ViewManager {
 	 */
 	public function RenderViewBody() {
 		$view = $this->GetActiveView();
+
+		if ( $view && $view instanceof WSAL_AbstractView ) :
 			?>
 			<div class="wrap">
 				<?php
@@ -275,6 +320,7 @@ class WSAL_ViewManager {
 				?>
 			</div>
 		<?php
+		endif;
 	}
 
 	/**
