@@ -1,5 +1,19 @@
 <?php
 /**
+ * Abstract Class: Sensor
+ *
+ * Abstract sensor class file.
+ *
+ * @since 1.0.0
+ * @package Wsal
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
  * Abstract class used in all the sensors.
  *
  * @see Sensors/*.php
@@ -40,9 +54,9 @@ abstract class WSAL_AbstractSensor {
 	/**
 	 * Method: Log the message for sensor.
 	 *
-	 * @param int    $type - Type of alert.
+	 * @param int    $type    - Type of alert.
 	 * @param string $message - Alert message.
-	 * @param mix    $args - Message arguments.
+	 * @param mix    $args    - Message arguments.
 	 */
 	protected function Log( $type, $message, $args ) {
 		$this->plugin->alerts->Trigger(
@@ -58,7 +72,7 @@ abstract class WSAL_AbstractSensor {
 	 * Method: Log error message for sensor.
 	 *
 	 * @param string $message - Alert message.
-	 * @param mix    $args - Message arguments.
+	 * @param mix    $args    - Message arguments.
 	 */
 	protected function LogError( $message, $args ) {
 		$this->Log( 0001, $message, $args );
@@ -68,7 +82,7 @@ abstract class WSAL_AbstractSensor {
 	 * Method: Log warning message for sensor.
 	 *
 	 * @param string $message - Alert message.
-	 * @param mix    $args - Message arguments.
+	 * @param mix    $args    - Message arguments.
 	 */
 	protected function LogWarn( $message, $args ) {
 		$this->Log( 0002, $message, $args );
@@ -78,14 +92,14 @@ abstract class WSAL_AbstractSensor {
 	 * Method: Log info message for sensor.
 	 *
 	 * @param string $message - Alert message.
-	 * @param mix    $args - Message arguments.
+	 * @param mix    $args    - Message arguments.
 	 */
 	protected function LogInfo( $message, $args ) {
 		$this->Log( 0003, $message, $args );
 	}
 
 	/**
-	 * Check to see whether or not the specified directory is accessible
+	 * Check to see whether or not the specified directory is accessible.
 	 *
 	 * @param string $dir_path - Directory path.
 	 * @return boolean
