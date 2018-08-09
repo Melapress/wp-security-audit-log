@@ -130,6 +130,48 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 	$wsal->alerts->RegisterGroup(
 		array(
 			/**
+			 * Section: Users Profiles & Activity
+			 */
+			__( 'Users Profiles & Activity', 'wp-security-audit-log' ) => array(
+				/**
+				 * Alerts: Other User Activity
+				 */
+				__( 'Other User Activity', 'wp-security-audit-log' ) => array(
+					array( 1000, E_NOTICE, __( 'User logged in', 'wp-security-audit-log' ), __( 'Successfully logged in.', 'wp-security-audit-log' ) ),
+					array( 1001, E_NOTICE, __( 'User logged out', 'wp-security-audit-log' ), __( 'Successfully logged out.', 'wp-security-audit-log' ) ),
+					array( 1002, E_WARNING, __( 'Login failed', 'wp-security-audit-log' ), __( '%Attempts% failed login(s) detected.', 'wp-security-audit-log' ) ),
+					array( 1003, E_WARNING, __( 'Login failed  / non existing user', 'wp-security-audit-log' ), __( '%Attempts% failed login(s) detected using non existing user. %LogFileText%', 'wp-security-audit-log' ) ),
+					array( 1004, E_WARNING, __( 'Login blocked', 'wp-security-audit-log' ), __( 'Blocked from logging in because the same WordPress user is logged in from %ClientIP%.', 'wp-security-audit-log' ) ),
+					array( 1005, E_WARNING, __( 'User logged in with existing session(s)', 'wp-security-audit-log' ), __( 'Successfully logged in. Another session from %IPAddress% for this user already exist.', 'wp-security-audit-log' ) ),
+					array( 1006, E_CRITICAL, __( 'User logged out all other sessions with the same username', 'wp-security-audit-log' ), __( 'Logged out all other sessions with the same username.', 'wp-security-audit-log' ) ),
+					array( 1007, E_CRITICAL, __( 'User session destroyed and logged out.', 'wp-security-audit-log' ), __( 'Logged out session %TargetSessionID% which belonged to %TargetUserName%', 'wp-security-audit-log' ) ),
+					array( 2010, E_NOTICE, __( 'User uploaded file from Uploads directory', 'wp-security-audit-log' ), __( 'Uploaded the file %FileName% in %FilePath%.', 'wp-security-audit-log' ) ),
+					array( 2011, E_WARNING, __( 'User deleted file from Uploads directory', 'wp-security-audit-log' ), __( 'Deleted the file %FileName% from %FilePath%.', 'wp-security-audit-log' ) ),
+				),
+
+				/**
+				 * Alerts: User Profiles
+				 */
+				__( 'User Profiles', 'wp-security-audit-log' ) => array(
+					array( 4000, E_CRITICAL, __( 'New user was created on WordPress', 'wp-security-audit-log' ), __( 'A new user %NewUserData->Username% was created with role of %NewUserData->Roles%.', 'wp-security-audit-log' ) ),
+					array( 4001, E_CRITICAL, __( 'User created another WordPress user', 'wp-security-audit-log' ), __( '%UserChanger% created a new user %NewUserData->Username% with the role of %NewUserData->Roles%.', 'wp-security-audit-log' ) ),
+					array( 4002, E_CRITICAL, __( 'The role of a user was changed by another WordPress user', 'wp-security-audit-log' ), __( 'Changed the role of the user %TargetUsername% from %OldRole% to %NewRole%%multisite_text%.', 'wp-security-audit-log' ) ),
+					array( 4003, E_CRITICAL, __( 'User has changed his or her password', 'wp-security-audit-log' ), __( 'Changed the password.', 'wp-security-audit-log' ) ),
+					array( 4004, E_CRITICAL, __( 'User changed another user\'s password', 'wp-security-audit-log' ), __( 'Changed the password for the user %TargetUserData->Username% with the role of %TargetUserData->Roles%.', 'wp-security-audit-log' ) ),
+					array( 4005, E_NOTICE, __( 'User changed his or her email address', 'wp-security-audit-log' ), __( 'Changed the email address from %OldEmail% to %NewEmail%.', 'wp-security-audit-log' ) ),
+					array( 4006, E_NOTICE, __( 'User changed another user\'s email address', 'wp-security-audit-log' ), __( 'Changed the email address of the user %TargetUsername% from %OldEmail% to %NewEmail%.', 'wp-security-audit-log' ) ),
+					array( 4007, E_CRITICAL, __( 'User was deleted by another user', 'wp-security-audit-log' ), __( 'Deleted the user %TargetUserData->Username% with the role of %TargetUserData->Roles%.', 'wp-security-audit-log' ) ),
+					array( 4014, E_NOTICE, __( 'User opened the profile page of another user', 'wp-security-audit-log' ), __( '%UserChanger% opened the profile page of the user %TargetUsername%.', 'wp-security-audit-log' ) ),
+					array( 4015, E_NOTICE, __( 'User updated a custom field value for a user', 'wp-security-audit-log' ), __( 'Changed the value of the custom field %custom_field_name%%ReportText% for the user %TargetUsername%.%ChangeText%', 'wp-security-audit-log' ) ),
+					array( 4016, E_NOTICE, __( 'User created a custom field value for a user', 'wp-security-audit-log' ), __( 'Created the value of the custom field %custom_field_name% with %new_value% for the user %TargetUsername%.', 'wp-security-audit-log' ) ),
+					array( 4017, E_NOTICE, __( 'User changed first name for a user', 'wp-security-audit-log' ), __( 'Changed the first name of the user %TargetUsername% from %old_firstname% to %new_firstname%', 'wp-security-audit-log' ) ),
+					array( 4018, E_NOTICE, __( 'User changed last name for a user', 'wp-security-audit-log' ), __( 'Changed the last name of the user %TargetUsername% from %old_lastname% to %new_lastname%', 'wp-security-audit-log' ) ),
+					array( 4019, E_NOTICE, __( 'User changed nickname for a user', 'wp-security-audit-log' ), __( 'Changed the nickname of the user %TargetUsername% from %old_nickname% to %new_nickname%', 'wp-security-audit-log' ) ),
+					array( 4020, E_WARNING, __( 'User changed the display name for a user', 'wp-security-audit-log' ), __( 'Changed the Display name publicly of user %TargetUsername% from %old_displayname% to %new_displayname%', 'wp-security-audit-log' ) ),
+				),
+			),
+
+			/**
 			 * Section: Content & Comments
 			 */
 			__( 'Content & Comments', 'wp-security-audit-log' ) => array(
@@ -273,9 +315,9 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 			),
 
 			/**
-			 * Section: WordPress & Multisite Management
+			 * Section: WordPress Install
 			 */
-			__( 'WordPress & Multisite Management', 'wp-security-audit-log' ) => array(
+			__( 'WordPress Install', 'wp-security-audit-log' ) => array(
 				/**
 				 * Alerts: Database
 				 */
@@ -289,26 +331,6 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 5016, E_CRITICAL, __( 'Unknown component created tables', 'wp-security-audit-log' ), __( 'An unknown component created these tables in the database: %TableNames%.', 'wp-security-audit-log' ) ),
 					array( 5017, E_CRITICAL, __( 'Unknown component modified tables structure', 'wp-security-audit-log' ), __( 'An unknown component modified the structure of these database tables: %TableNames%.', 'wp-security-audit-log' ) ),
 					array( 5018, E_CRITICAL, __( 'Unknown component deleted tables', 'wp-security-audit-log' ), __( 'An unknown component deleted the following tables from the database: %TableNames%.', 'wp-security-audit-log' ) ),
-				),
-
-				/**
-				 * Alerts: MultiSite
-				 */
-				__( 'MultiSite', 'wp-security-audit-log' ) => array(
-					array( 4008, E_CRITICAL, __( 'User granted Super Admin privileges', 'wp-security-audit-log' ), __( 'Granted Super Admin privileges to %TargetUsername%.', 'wp-security-audit-log' ) ),
-					array( 4009, E_CRITICAL, __( 'User revoked from Super Admin privileges', 'wp-security-audit-log' ), __( 'Revoked Super Admin privileges from %TargetUsername%.', 'wp-security-audit-log' ) ),
-					array( 4010, E_CRITICAL, __( 'Existing user added to a site', 'wp-security-audit-log' ), __( 'Added the existing user %TargetUsername% with %TargetUserRole% role to site %SiteName%.', 'wp-security-audit-log' ) ),
-					array( 4011, E_CRITICAL, __( 'User removed from site', 'wp-security-audit-log' ), __( 'Removed the user %TargetUsername% with role %TargetUserRole% from %SiteName% site.', 'wp-security-audit-log' ) ),
-					array( 4012, E_CRITICAL, __( 'New network user created', 'wp-security-audit-log' ), __( 'Created a new network user %NewUserData->Username%.', 'wp-security-audit-log' ) ),
-					array( 4013, E_CRITICAL, __( 'The forum role of a user was changed by another WordPress user', 'wp-security-audit-log' ), __( 'Change the forum role of the user %TargetUsername% from %OldRole% to %NewRole% by %UserChanger%.', 'wp-security-audit-log' ) ),
-					array( 7000, E_CRITICAL, __( 'New site added on the network', 'wp-security-audit-log' ), __( 'Added the site %SiteName% to the network.', 'wp-security-audit-log' ) ),
-					array( 7001, E_CRITICAL, __( 'Existing site archived', 'wp-security-audit-log' ), __( 'Archived the site %SiteName%.', 'wp-security-audit-log' ) ),
-					array( 7002, E_CRITICAL, __( 'Archived site has been unarchived', 'wp-security-audit-log' ), __( 'Unarchived the site %SiteName%.', 'wp-security-audit-log' ) ),
-					array( 7003, E_CRITICAL, __( 'Deactivated site has been activated', 'wp-security-audit-log' ), __( 'Activated the site %SiteName%.', 'wp-security-audit-log' ) ),
-					array( 7004, E_CRITICAL, __( 'Site has been deactivated', 'wp-security-audit-log' ), __( 'Deactivated the site %SiteName%.', 'wp-security-audit-log' ) ),
-					array( 7005, E_CRITICAL, __( 'Existing site deleted from network', 'wp-security-audit-log' ), __( 'Deleted the site %SiteName%.', 'wp-security-audit-log' ) ),
-					array( 5008, E_CRITICAL, __( 'Activated theme on network', 'wp-security-audit-log' ), __( 'Network activated the theme %Theme->Name% installed in %Theme->get_template_directory%.', 'wp-security-audit-log' ) ),
-					array( 5009, E_CRITICAL, __( 'Deactivated theme from network', 'wp-security-audit-log' ), __( 'Network deactivated the theme %Theme->Name% installed in %Theme->get_template_directory%.', 'wp-security-audit-log' ) ),
 				),
 
 				/**
@@ -416,51 +438,34 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 			),
 
 			/**
-			 * Section: Users Profiles & Activity
+			 * Section: Multisite Network
 			 */
-			__( 'Users Profiles & Activity', 'wp-security-audit-log' ) => array(
+			__( 'Multisite Network', 'wp-security-audit-log' ) => array(
 				/**
-				 * Alerts: Other User Activity
+				 * Alerts: MultiSite
 				 */
-				__( 'Other User Activity', 'wp-security-audit-log' ) => array(
-					array( 1000, E_NOTICE, __( 'User logged in', 'wp-security-audit-log' ), __( 'Successfully logged in.', 'wp-security-audit-log' ) ),
-					array( 1001, E_NOTICE, __( 'User logged out', 'wp-security-audit-log' ), __( 'Successfully logged out.', 'wp-security-audit-log' ) ),
-					array( 1002, E_WARNING, __( 'Login failed', 'wp-security-audit-log' ), __( '%Attempts% failed login(s) detected.', 'wp-security-audit-log' ) ),
-					array( 1003, E_WARNING, __( 'Login failed  / non existing user', 'wp-security-audit-log' ), __( '%Attempts% failed login(s) detected using non existing user. %LogFileText%', 'wp-security-audit-log' ) ),
-					array( 1004, E_WARNING, __( 'Login blocked', 'wp-security-audit-log' ), __( 'Blocked from logging in because the same WordPress user is logged in from %ClientIP%.', 'wp-security-audit-log' ) ),
-					array( 1005, E_WARNING, __( 'User logged in with existing session(s)', 'wp-security-audit-log' ), __( 'Successfully logged in. Another session from %IPAddress% for this user already exist.', 'wp-security-audit-log' ) ),
-					array( 1006, E_CRITICAL, __( 'User logged out all other sessions with the same username', 'wp-security-audit-log' ), __( 'Logged out all other sessions with the same username.', 'wp-security-audit-log' ) ),
-					array( 1007, E_CRITICAL, __( 'User session destroyed and logged out.', 'wp-security-audit-log' ), __( 'Logged out session %TargetSessionID% which belonged to %TargetUserName%', 'wp-security-audit-log' ) ),
-					array( 2010, E_NOTICE, __( 'User uploaded file from Uploads directory', 'wp-security-audit-log' ), __( 'Uploaded the file %FileName% in %FilePath%.', 'wp-security-audit-log' ) ),
-					array( 2011, E_WARNING, __( 'User deleted file from Uploads directory', 'wp-security-audit-log' ), __( 'Deleted the file %FileName% from %FilePath%.', 'wp-security-audit-log' ) ),
-				),
-
-				/**
-				 * Alerts: User Profiles
-				 */
-				__( 'User Profiles', 'wp-security-audit-log' ) => array(
-					array( 4000, E_CRITICAL, __( 'New user was created on WordPress', 'wp-security-audit-log' ), __( 'A new user %NewUserData->Username% was created with role of %NewUserData->Roles%.', 'wp-security-audit-log' ) ),
-					array( 4001, E_CRITICAL, __( 'User created another WordPress user', 'wp-security-audit-log' ), __( '%UserChanger% created a new user %NewUserData->Username% with the role of %NewUserData->Roles%.', 'wp-security-audit-log' ) ),
-					array( 4002, E_CRITICAL, __( 'The role of a user was changed by another WordPress user', 'wp-security-audit-log' ), __( 'Changed the role of the user %TargetUsername% from %OldRole% to %NewRole%%multisite_text%.', 'wp-security-audit-log' ) ),
-					array( 4003, E_CRITICAL, __( 'User has changed his or her password', 'wp-security-audit-log' ), __( 'Changed the password.', 'wp-security-audit-log' ) ),
-					array( 4004, E_CRITICAL, __( 'User changed another user\'s password', 'wp-security-audit-log' ), __( 'Changed the password for the user %TargetUserData->Username% with the role of %TargetUserData->Roles%.', 'wp-security-audit-log' ) ),
-					array( 4005, E_NOTICE, __( 'User changed his or her email address', 'wp-security-audit-log' ), __( 'Changed the email address from %OldEmail% to %NewEmail%.', 'wp-security-audit-log' ) ),
-					array( 4006, E_NOTICE, __( 'User changed another user\'s email address', 'wp-security-audit-log' ), __( 'Changed the email address of the user %TargetUsername% from %OldEmail% to %NewEmail%.', 'wp-security-audit-log' ) ),
-					array( 4007, E_CRITICAL, __( 'User was deleted by another user', 'wp-security-audit-log' ), __( 'Deleted the user %TargetUserData->Username% with the role of %TargetUserData->Roles%.', 'wp-security-audit-log' ) ),
-					array( 4014, E_NOTICE, __( 'User opened the profile page of another user', 'wp-security-audit-log' ), __( '%UserChanger% opened the profile page of the user %TargetUsername%.', 'wp-security-audit-log' ) ),
-					array( 4015, E_NOTICE, __( 'User updated a custom field value for a user', 'wp-security-audit-log' ), __( 'Changed the value of the custom field %custom_field_name%%ReportText% for the user %TargetUsername%.%ChangeText%', 'wp-security-audit-log' ) ),
-					array( 4016, E_NOTICE, __( 'User created a custom field value for a user', 'wp-security-audit-log' ), __( 'Created the value of the custom field %custom_field_name% with %new_value% for the user %TargetUsername%.', 'wp-security-audit-log' ) ),
-					array( 4017, E_NOTICE, __( 'User changed first name for a user', 'wp-security-audit-log' ), __( 'Changed the first name of the user %TargetUsername% from %old_firstname% to %new_firstname%', 'wp-security-audit-log' ) ),
-					array( 4018, E_NOTICE, __( 'User changed last name for a user', 'wp-security-audit-log' ), __( 'Changed the last name of the user %TargetUsername% from %old_lastname% to %new_lastname%', 'wp-security-audit-log' ) ),
-					array( 4019, E_NOTICE, __( 'User changed nickname for a user', 'wp-security-audit-log' ), __( 'Changed the nickname of the user %TargetUsername% from %old_nickname% to %new_nickname%', 'wp-security-audit-log' ) ),
-					array( 4020, E_WARNING, __( 'User changed the display name for a user', 'wp-security-audit-log' ), __( 'Changed the Display name publicly of user %TargetUsername% from %old_displayname% to %new_displayname%', 'wp-security-audit-log' ) ),
+				__( 'MultiSite', 'wp-security-audit-log' ) => array(
+					array( 4008, E_CRITICAL, __( 'User granted Super Admin privileges', 'wp-security-audit-log' ), __( 'Granted Super Admin privileges to %TargetUsername%.', 'wp-security-audit-log' ) ),
+					array( 4009, E_CRITICAL, __( 'User revoked from Super Admin privileges', 'wp-security-audit-log' ), __( 'Revoked Super Admin privileges from %TargetUsername%.', 'wp-security-audit-log' ) ),
+					array( 4010, E_CRITICAL, __( 'Existing user added to a site', 'wp-security-audit-log' ), __( 'Added the existing user %TargetUsername% with %TargetUserRole% role to site %SiteName%.', 'wp-security-audit-log' ) ),
+					array( 4011, E_CRITICAL, __( 'User removed from site', 'wp-security-audit-log' ), __( 'Removed the user %TargetUsername% with role %TargetUserRole% from %SiteName% site.', 'wp-security-audit-log' ) ),
+					array( 4012, E_CRITICAL, __( 'New network user created', 'wp-security-audit-log' ), __( 'Created a new network user %NewUserData->Username%.', 'wp-security-audit-log' ) ),
+					array( 4013, E_CRITICAL, __( 'The forum role of a user was changed by another WordPress user', 'wp-security-audit-log' ), __( 'Change the forum role of the user %TargetUsername% from %OldRole% to %NewRole% by %UserChanger%.', 'wp-security-audit-log' ) ),
+					array( 7000, E_CRITICAL, __( 'New site added on the network', 'wp-security-audit-log' ), __( 'Added the site %SiteName% to the network.', 'wp-security-audit-log' ) ),
+					array( 7001, E_CRITICAL, __( 'Existing site archived', 'wp-security-audit-log' ), __( 'Archived the site %SiteName%.', 'wp-security-audit-log' ) ),
+					array( 7002, E_CRITICAL, __( 'Archived site has been unarchived', 'wp-security-audit-log' ), __( 'Unarchived the site %SiteName%.', 'wp-security-audit-log' ) ),
+					array( 7003, E_CRITICAL, __( 'Deactivated site has been activated', 'wp-security-audit-log' ), __( 'Activated the site %SiteName%.', 'wp-security-audit-log' ) ),
+					array( 7004, E_CRITICAL, __( 'Site has been deactivated', 'wp-security-audit-log' ), __( 'Deactivated the site %SiteName%.', 'wp-security-audit-log' ) ),
+					array( 7005, E_CRITICAL, __( 'Existing site deleted from network', 'wp-security-audit-log' ), __( 'Deleted the site %SiteName%.', 'wp-security-audit-log' ) ),
+					array( 5008, E_CRITICAL, __( 'Activated theme on network', 'wp-security-audit-log' ), __( 'Network activated the theme %Theme->Name% installed in %Theme->get_template_directory%.', 'wp-security-audit-log' ) ),
+					array( 5009, E_CRITICAL, __( 'Deactivated theme from network', 'wp-security-audit-log' ), __( 'Network deactivated the theme %Theme->Name% installed in %Theme->get_template_directory%.', 'wp-security-audit-log' ) ),
 				),
 			),
 
 			/**
 			 * Section: Third Party Support
 			 */
-			__( 'Third Party Support', 'wp-security-audit-log' ) => array(
+			__( 'Third Party Plugins', 'wp-security-audit-log' ) => array(
 				/**
 				 * Alerts: BBPress Forum
 				 */
