@@ -243,6 +243,22 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @since 3.2.3
 	 */
 	public function handle_form_submission() {
+		// Global WP page now variable.
+		global $pagenow;
+
+		// Only run the function on audit log custom page.
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // Current page.
+		if ( 'admin.php' !== $pagenow ) {
+			return;
+		} elseif ( 'wsal-auditlog' !== $page ) { // Page is admin.php, now check auditlog page.
+			return; // Return if the current page is not auditlog's.
+		}
+
+		// Verify nonce for security.
+		if ( isset( $_GET['_wpnonce'] ) ) {
+			check_admin_referer( 'bulk-logs' );
+		}
+
 		// @codingStandardsIgnoreStart
 		$wpnonce     = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( $_GET['_wpnonce'] ) : false; // View nonce.
 		$search      = isset( $_GET['s'] ) ? sanitize_text_field( $_GET['s'] ) : false; // Search.
