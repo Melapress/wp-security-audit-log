@@ -43,36 +43,34 @@ jQuery( document ).ready( function() {
 				data = JSON.parse( data );
 				jQuery( '#' + type + 'QueryBox, #' + type + 'QueryAdd' ).attr( 'disabled', false );
 				if ( data.success ) {
-					data = data.tokenType;
-					value = data.token;
 					if ( 'ExURLs' === type ) {
-						if ( 'other' === data ) {
+						if ( 'other' === data.tokenType ) {
 							alert( wsal_data.invalidURL );
 							jQuery( '#' + type + 'QueryBox' ).val( '' );
 							return;
 						}
 					} else if ( 'ExCPTs' === type ) {
-						if ( 'other' === data ) {
+						if ( 'other' === data.tokenType ) {
 							alert( wsal_data.invalidCPT );
 							jQuery( '#' + type + 'QueryBox' ).val( '' );
 							return;
 						}
 					} else if ( 'IpAddr' === type ) {
-						if ( 'other' === data ) {
+						if ( 'other' === data.tokenType ) {
 							alert( wsal_data.invalidIP );
 							jQuery( '#' + type + 'QueryBox' ).val( '' );
 							return;
 						}
 					} else if ( 'Custom' != type && 'IpAddr' != type ) {
-						if ( 'other' === data ) {
+						if ( 'other' === data.tokenType ) {
 							alert( wsal_data.invalidUser );
 							jQuery( '#' + type + 'QueryBox' ).val( '' );
 							return;
 						}
 					}
 					jQuery( '#' + type + 'QueryBox' ).val( '' );
-					jQuery( '#' + type + 'List' ).append( jQuery( '<span class="sectoken-' + data + '"/>' ).text( value ).append(
-						jQuery( '<input type="hidden" name="' + type + 's[]"/>' ).val( value ),
+					jQuery( '#' + type + 'List' ).append( jQuery( '<span class="sectoken-' + data.tokenType + '"/>' ).text( data.token ).append(
+						jQuery( '<input type="hidden" name="' + type + 's[]"/>' ).val( data.token ),
 						jQuery( '<a href="javascript:;" title="Remove">&times;</a>' ).click( RemoveSecToken )
 					) );
 				} else {

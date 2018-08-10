@@ -22,6 +22,7 @@
 .sectoken-role,
 .sectoken-cpts,
 .sectoken-urls,
+.sectoken-ip,
 .sectoken-other {
 	display: inline-block;
 	border-width: 1px;
@@ -40,6 +41,7 @@
 .sectoken-role a,
 .sectoken-cpts a,
 .sectoken-urls a,
+.sectoken-ip a,
 .sectoken-other a {
 	text-decoration: none;
 	font-size: 12px;
@@ -60,6 +62,7 @@
 .sectoken-role a:hover,
 .sectoken-cpts a:hover,
 .sectoken-urls a:hover,
+.sectoken-ip a:hover,
 .sectoken-other a:hover {
 	background: #FB9;
 }
@@ -68,6 +71,7 @@
 .sectoken-role { background: #EFE; border-color: #5B5; }
 .sectoken-cpts { background: #EFF; border-color: #5BE; }
 .sectoken-urls { background: #EFF; border-color: #5BE; }
+.sectoken-ip { background: #FFE; border-color: #ED5; }
 .sectoken-other { background: #FFE; border-color: #ED5; }
 .sectoken-del { background: #FEE; border-color: #EBB; }
 
