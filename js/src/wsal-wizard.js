@@ -42,25 +42,34 @@ jQuery( document ).ready( function() {
 				token: tokenValue,
 				nonce: wsalData.nonce
 			},
+			dataType: 'json',
 			success: function( data ) {
 
 				// Remove disabled attribute.
 				jQuery( `#${type}-${tokenType}-box, #${type}-${tokenType}-add` ).removeAttr( 'disabled' );
 				jQuery( `#${type}-${tokenType}-box` ).val( '' );
 
-				// Error handling.
-				if ( 'other' === data && ( 'users' === tokenType || 'exuser' === type ) ) {
-					alert( wsalData.usersError );
-					return;
-				} else if ( 'other' === data && ( 'roles' === tokenType || 'exrole' === type ) ) {
-					alert( wsalData.rolesError );
-					return;
-				}
+				if ( data.success ) {
 
-				jQuery( `#${type}-list` ).append( jQuery( `<span class="sectoken-${data}"/>` ).text( tokenValue ).append(
-					jQuery( `<input type="hidden" name="${type}s[]"/>` ).val( tokenValue ),
-					jQuery( '<a href="javascript:;" title="Remove">&times;</a>' ).click( removeSecToken )
-				) );
+					// Error handling.
+					if ( 'other' === data.tokenType && ( 'users' === tokenType || 'exuser' === type ) ) {
+						alert( wsalData.usersError );
+						return;
+					} else if ( 'other' === data.tokenType && ( 'roles' === tokenType || 'exrole' === type ) ) {
+						alert( wsalData.rolesError );
+						return;
+					} else if ( 'other' === data.tokenType && ( 'ip' === tokenType || 'ipaddr' === type ) ) {
+						alert( wsalData.ipError );
+						return;
+					}
+
+					jQuery( `#${type}-list` ).append( jQuery( `<span class="sectoken-${data.tokenType}"/>` ).text( data.token ).append(
+						jQuery( `<input type="hidden" name="${type}s[]"/>` ).val( data.token ),
+						jQuery( '<a href="javascript:;" title="Remove">&times;</a>' ).click( removeSecToken )
+					) );
+				} else {
+					alert( data.message );
+				}
 			},
 			error: function( xhr, textStatus, error ) {
 				console.log( xhr.statusText );

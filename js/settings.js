@@ -32,33 +32,56 @@ jQuery( document ).ready( function() {
 		} // if value is empty or already used, stop here
 
 		jQuery( '#' + type + 'QueryBox, #' + type + 'QueryAdd' ).attr( 'disabled', true );
-		jQuery.post( jQuery( '#ajaxurl' ).val(), { action: 'AjaxCheckSecurityToken', token: value }, function( data ) {
-			jQuery( '#' + type + 'QueryBox, #' + type + 'QueryAdd' ).attr( 'disabled', false );
-			if ( 'ExURLs' === type ) {
-				if ( 'other' === data ) {
-					alert( wsal_data.invalidURL );
+		jQuery.post(
+			jQuery( '#ajaxurl' ).val(),
+			{
+				action: 'AjaxCheckSecurityToken',
+				token: value,
+				nonce: wsal_data.wp_nonce
+			},
+			function( data ) {
+				data = JSON.parse( data );
+				jQuery( '#' + type + 'QueryBox, #' + type + 'QueryAdd' ).attr( 'disabled', false );
+				if ( data.success ) {
+					data = data.tokenType;
+					value = data.token;
+					if ( 'ExURLs' === type ) {
+						if ( 'other' === data ) {
+							alert( wsal_data.invalidURL );
+							jQuery( '#' + type + 'QueryBox' ).val( '' );
+							return;
+						}
+					} else if ( 'ExCPTs' === type ) {
+						if ( 'other' === data ) {
+							alert( wsal_data.invalidCPT );
+							jQuery( '#' + type + 'QueryBox' ).val( '' );
+							return;
+						}
+					} else if ( 'IpAddr' === type ) {
+						if ( 'other' === data ) {
+							alert( wsal_data.invalidIP );
+							jQuery( '#' + type + 'QueryBox' ).val( '' );
+							return;
+						}
+					} else if ( 'Custom' != type && 'IpAddr' != type ) {
+						if ( 'other' === data ) {
+							alert( wsal_data.invalidUser );
+							jQuery( '#' + type + 'QueryBox' ).val( '' );
+							return;
+						}
+					}
 					jQuery( '#' + type + 'QueryBox' ).val( '' );
-					return;
-				}
-			} else if ( 'ExCPTs' === type ) {
-				if ( 'other' === data ) {
-					alert( wsal_data.invalidCPT );
-					jQuery( '#' + type + 'QueryBox' ).val( '' );
-					return;
-				}
-			} else if ( 'Custom' != type && 'IpAddr' != type ) {
-				if ( 'other' === data ) {
-					alert( wsal_data.invalidUser );
+					jQuery( '#' + type + 'List' ).append( jQuery( '<span class="sectoken-' + data + '"/>' ).text( value ).append(
+						jQuery( '<input type="hidden" name="' + type + 's[]"/>' ).val( value ),
+						jQuery( '<a href="javascript:;" title="Remove">&times;</a>' ).click( RemoveSecToken )
+					) );
+				} else {
+					alert( data.message );
 					jQuery( '#' + type + 'QueryBox' ).val( '' );
 					return;
 				}
 			}
-			jQuery( '#' + type + 'QueryBox' ).val( '' );
-			jQuery( '#' + type + 'List' ).append( jQuery( '<span class="sectoken-' + data + '"/>' ).text( value ).append(
-				jQuery( '<input type="hidden" name="' + type + 's[]"/>' ).val( value ),
-				jQuery( '<a href="javascript:;" title="Remove">&times;</a>' ).click( RemoveSecToken )
-			) );
-		});
+		);
 	});
 
 	jQuery( '#ViewerList>span>a, #EditorList>span>a, #ExRoleList>span>a, #ExUserList>span>a, #CustomList>span>a, #IpAddrList>span>a, #ExCPTsList>span>a, #ExURLsList>span>a' ).click( RemoveSecToken );

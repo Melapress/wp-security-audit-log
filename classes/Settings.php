@@ -1305,4 +1305,54 @@ class WSAL_Settings {
 		}
 		return ($result > 0);
 	}
+
+	/**
+	 * Method: Get Token Type.
+	 *
+	 * @param string $token - Token type.
+	 * @since 3.2.3
+	 */
+	public function get_token_type( $token ) {
+		// Get users.
+		$users = array();
+		foreach ( get_users( 'blog_id=0&fields[]=user_login' ) as $obj ) {
+			$users[] = $obj->user_login;
+		}
+
+		// Get user roles.
+		$roles = array_keys( get_editable_roles() );
+
+		// Get custom post types.
+		$post_types = get_post_types( array(), 'names', 'and' );
+
+		// Check if the token matched users.
+		if ( in_array( $token, $users ) ) {
+			return 'user';
+		}
+
+		// Check if the token matched user roles.
+		if ( in_array( $token, $roles ) ) {
+			return 'role';
+		}
+
+		// Check if the token matched post types.
+		if ( in_array( $token, $post_types ) ) {
+			return 'cpts';
+		}
+
+		// Check if the token matches a URL.
+		if ( ( false !== strpos( $token, home_url() ) ) && filter_var( $token, FILTER_VALIDATE_URL ) ) {
+			return 'urls';
+		}
+
+		// Check if the token matches an IP address.
+		if (
+			filter_var( $token, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) // Validate IPv4.
+			|| filter_var( $token, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) // Validate IPv6.
+		) {
+			return 'ip';
+		}
+
+		return 'other';
+	}
 }

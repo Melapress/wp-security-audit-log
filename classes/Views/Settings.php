@@ -169,39 +169,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * @param string $token - Token type.
 	 */
 	protected function GetTokenType( $token ) {
-		// Get users.
-		$users = array();
-		foreach ( get_users( 'blog_id=0&fields[]=user_login' ) as $obj ) {
-			$users[] = $obj->user_login;
-		}
-
-		// Get user roles.
-		$roles = array_keys( get_editable_roles() );
-
-		// Get custom post types.
-		$post_types = get_post_types( array(), 'names', 'and' );
-
-		// Check if the token matched users.
-		if ( in_array( $token, $users ) ) {
-			return 'user';
-		}
-
-		// Check if the token matched user roles.
-		if ( in_array( $token, $roles ) ) {
-			return 'role';
-		}
-
-		// Check if the token matched post types.
-		if ( in_array( $token, $post_types ) ) {
-			return 'cpts';
-		}
-
-		// Check if the token matches a URL.
-		if ( ( false !== strpos( $token, home_url() ) ) && filter_var( $token, FILTER_VALIDATE_URL ) ) {
-			return 'urls';
-		}
-
-		return 'other';
+		return $this->_plugin->settings->get_token_type( $token );
 	}
 
 	/**
@@ -249,16 +217,48 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 */
 	public function AjaxCheckSecurityToken() {
 		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
-			die( 'Access Denied.' );
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Access Denied.', 'wp-security-audit-log' ),
+				)
+			);
+			die();
 		}
 
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
+		//@codingStandardsIgnoreStart
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : false;
+		$token = isset( $_POST['token'] ) ? sanitize_text_field( $_POST['token'] ) : false;
+		//@codingStandardsIgnoreEnd
 
-		if ( ! isset( $post_array['token'] ) ) {
-			die( 'Token parameter expected.' );
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal-exclude-nonce' ) ) {
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
+				)
+			);
+			die();
 		}
-		die( esc_html( $this->GetTokenType( $post_array['token'] ) ) );
+
+		if ( empty( $token ) ) {
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Invalid input.', 'wp-security-audit-log' ),
+				)
+			);
+			die();
+		}
+
+		echo wp_json_encode(
+			array(
+				'success'   => true,
+				'token'     => $token,
+				'tokenType' => esc_html( $this->GetTokenType( $token ) ),
+			)
+		);
+		die();
 	}
 
 	/**
@@ -1887,6 +1887,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			'wp_nonce'       => wp_create_nonce( 'wsal-exclude-nonce' ),
 			'invalidURL'     => esc_html__( 'The specified token is not a valid URL!', 'wp-security-audit-log' ),
 			'invalidCPT'     => esc_html__( 'The specified token is not a valid post type!', 'wp-security-audit-log' ),
+			'invalidIP'      => esc_html__( 'The specified token is not a valid IP address!', 'wp-security-audit-log' ),
 			'invalidUser'    => esc_html__( 'The specified token is not a user nor a role!', 'wp-security-audit-log' ),
 			'invalidFile'    => esc_html__( 'Filename cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),
 			'invalidFileExt' => esc_html__( 'File extension cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),

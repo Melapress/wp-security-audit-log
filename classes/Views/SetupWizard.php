@@ -60,24 +60,48 @@ final class WSAL_Views_SetupWizard {
 	 */
 	public function setup_check_security_token() {
 		if ( ! $this->wsal->settings->CurrentUserCan( 'view' ) ) {
-			die( 'Access Denied.' );
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Access Denied.', 'wp-security-audit-log' ),
+				)
+			);
+			die();
 		}
 
-		// Filter $_POST array for security.
-		$post_array_args = array(
-			'token' => FILTER_SANITIZE_STRING,
-			'nonce' => FILTER_SANITIZE_STRING,
+		//@codingStandardsIgnoreStart
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : false;
+		$token = isset( $_POST['token'] ) ? sanitize_text_field( $_POST['token'] ) : false;
+		//@codingStandardsIgnoreEnd
+
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal-verify-wizard-page' ) ) {
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
+				)
+			);
+			die();
+		}
+
+		if ( empty( $token ) ) {
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Invalid input.', 'wp-security-audit-log' ),
+				)
+			);
+			die();
+		}
+
+		echo wp_json_encode(
+			array(
+				'success'   => true,
+				'token'     => $token,
+				'tokenType' => esc_html( $this->get_token_type( $token ) ),
+			)
 		);
-		$post_array      = filter_input_array( INPUT_POST, $post_array_args );
-
-		if ( ! isset( $post_array['nonce'] ) || ! wp_verify_nonce( $post_array['nonce'], 'wsal-verify-wizard-page' ) ) {
-			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
-		}
-
-		if ( ! isset( $post_array['token'] ) ) {
-			die( esc_html__( 'Token parameter expected.', 'wp-security-audit-log' ) );
-		}
-		die( esc_html( $this->get_token_type( $post_array['token'] ) ) );
+		die();
 	}
 
 	/**
@@ -160,9 +184,9 @@ final class WSAL_Views_SetupWizard {
 		 */
 		wp_register_script(
 			'wsal-wizard-js',
-			$this->wsal->GetBaseUrl() . '/js/dist/wsal-wizard.js',
+			$this->wsal->GetBaseUrl() . '/js/dist/wsal-wizard.min.js',
 			array(),
-			filemtime( $this->wsal->GetBaseDir() . 'js/dist/wsal-wizard.js' ),
+			filemtime( $this->wsal->GetBaseDir() . 'js/dist/wsal-wizard.min.js' ),
 			false
 		);
 
@@ -172,6 +196,7 @@ final class WSAL_Views_SetupWizard {
 			'nonce'      => wp_create_nonce( 'wsal-verify-wizard-page' ),
 			'usersError' => esc_html__( 'Specified token in not a user.', 'wp-security-audit-log' ),
 			'rolesError' => esc_html__( 'Specified token in not a role.', 'wp-security-audit-log' ),
+			'ipError'    => esc_html__( 'Specified token in not an IP.', 'wp-security-audit-log' ),
 		);
 		wp_localize_script( 'wsal-wizard-js', 'wsalData', $data_array );
 
@@ -472,39 +497,7 @@ final class WSAL_Views_SetupWizard {
 	 * @param string $token - Token type.
 	 */
 	protected function get_token_type( $token ) {
-		// Get users.
-		$users = array();
-		foreach ( get_users( 'blog_id=0&fields[]=user_login' ) as $obj ) {
-			$users[] = $obj->user_login;
-		}
-
-		// Get user roles.
-		$roles = array_keys( get_editable_roles() );
-
-		// Get custom post types.
-		$post_types = get_post_types( array(), 'names', 'and' );
-
-		// Check if the token matched users.
-		if ( in_array( $token, $users ) ) {
-			return 'user';
-		}
-
-		// Check if the token matched user roles.
-		if ( in_array( $token, $roles ) ) {
-			return 'role';
-		}
-
-		// Check if the token matched post types.
-		if ( in_array( $token, $post_types ) ) {
-			return 'cpts';
-		}
-
-		// Check if the token matches a URL.
-		if ( ( false !== strpos( $token, home_url() ) ) && filter_var( $token, FILTER_VALIDATE_URL ) ) {
-			return 'urls';
-		}
-
-		return 'other';
+		return $this->wsal->settings->get_token_type( $token );
 	}
 
 	/**

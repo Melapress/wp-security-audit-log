@@ -1,7 +1,7 @@
 /**
  * WSAL Wizard Styles
  */
-body {
+ body {
   margin: 65px auto 24px;
   -webkit-box-shadow: none;
   box-shadow: none;
@@ -114,6 +114,7 @@ body {
 
 .sectoken-user,
 .sectoken-role,
+.sectoken-ip,
 .sectoken-other {
   display: inline-block;
   border-width: 1px;
@@ -126,6 +127,7 @@ body {
   font-size: 14px; }
   .sectoken-user a,
   .sectoken-role a,
+  .sectoken-ip a,
   .sectoken-other a {
     text-decoration: none;
     font-size: 12px;
@@ -142,6 +144,7 @@ body {
     line-height: 12px; }
     .sectoken-user a:hover,
     .sectoken-role a:hover,
+    .sectoken-ip a:hover,
     .sectoken-other a:hover {
       background: #FB9; }
 
@@ -157,8 +160,10 @@ body {
   background: #EFF;
   border-color: #5BE; }
 
-.sectoken-other {
+.sectoken-ip {
   background: #FFE;
   border-color: #ED5; }
 
-/*# sourceMappingURL=wsal-wizard.build.css.map*/
+.sectoken-other {
+  background: #FFE;
+  border-color: #ED5; }
