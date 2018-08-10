@@ -548,33 +548,38 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 */
 	public function EventPluginPostCreate( $post_id, $post ) {
 		// Filter $_REQUEST array for security.
-		$get_array = filter_input_array( INPUT_GET );
+		$get_array  = filter_input_array( INPUT_GET );
 		$post_array = filter_input_array( INPUT_POST );
 
 		$wp_actions = array( 'editpost', 'heartbeat', 'inline-save', 'trash', 'untrash' );
 		if ( isset( $get_array['action'] ) && ! in_array( $get_array['action'], $wp_actions ) ) {
-			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
-				|| ! empty( $post->post_title ) ) {
+			if (
+				! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
+				|| ! empty( $post->post_title )
+			) {
+				// Get post editor link.
+				$editor_link = $this->GetEditorLink( $post );
+
 				// If the plugin modify the post.
 				if ( false !== strpos( $get_array['action'], 'edit' ) ) {
-					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
 						2106, array(
-							'PostID'    => $post->ID,
-							'PostType'  => $post->post_type,
-							'PostTitle' => $post->post_title,
-							'PostStatus' => $post->post_status,
-							'PostUrl' => get_permalink( $post->ID ),
+							'PostID'             => $post->ID,
+							'PostType'           => $post->post_type,
+							'PostTitle'          => $post->post_title,
+							'PostStatus'         => $post->post_status,
+							'PostUrl'            => get_permalink( $post->ID ),
 							$editor_link['name'] => $editor_link['value'],
 						)
 					);
 				} else {
 					$this->plugin->alerts->Trigger(
 						5019, array(
-							'PostID'    => $post->ID,
-							'PostType'  => $post->post_type,
-							'PostTitle' => $post->post_title,
-							'Username'  => 'Plugins',
+							'PostID'             => $post->ID,
+							'PostType'           => $post->post_type,
+							'PostTitle'          => $post->post_title,
+							'Username'           => 'Plugins',
+							$editor_link['name'] => $editor_link['value'],
 						)
 					);
 				}
@@ -588,13 +593,13 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			) {
 				// If the plugin modify the post.
 				if ( false !== strpos( $post_array['action'], 'edit' ) ) {
-					$event = $this->GetEventTypeForPostType( $post, 2106, 2107, 2108 );
+					$event       = $this->GetEventTypeForPostType( $post, 2106, 2107, 2108 );
 					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
 						$event, array(
-							'PostID'    => $post->ID,
-							'PostType'  => $post->post_type,
-							'PostTitle' => $post->post_title,
+							'PostID'             => $post->ID,
+							'PostType'           => $post->post_type,
+							'PostTitle'          => $post->post_title,
 							$editor_link['name'] => $editor_link['value'],
 						)
 					);
@@ -608,13 +613,15 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					// Ignore WooCommerce Bulk Stock Management page.
 					// OR MainWP plugin requests.
 				} else {
-					$event = $this->GetEventTypeForPostType( $post, 5019, 5020, 5021 );
+					$event       = $this->GetEventTypeForPostType( $post, 5019, 5020, 5021 );
+					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
 						$event, array(
-							'PostID'    => $post->ID,
-							'PostType'  => $post->post_type,
-							'PostTitle' => $post->post_title,
-							'Username'  => 'Plugins',
+							'PostID'             => $post->ID,
+							'PostType'           => $post->post_type,
+							'PostTitle'          => $post->post_title,
+							'Username'           => 'Plugins',
+							$editor_link['name'] => $editor_link['value'],
 						)
 					);
 				}
