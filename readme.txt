@@ -6,14 +6,14 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.9.7
-Stable tag: 3.2.3
+Stable tag: 3.2.3.1
 Requires PHP: 5.4.43
 
-An easy to use and comprehensive monitoring & activity log solution that keeps a log of all changes & user activity on your WordPress site.
+An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
 
 == Description ==
 
-<strong>THE MOST COMPREHENSIVE, EASY TO USE & REAL TIME WORDPRESS AUDIT TRAIL PLUGIN</strong><br />
+<strong>THE MOST COMPREHENSIVE & EASY TO USE WORDPRESS ACTIVITY LOG PLUGIN</strong><br />
 
 Keep an audit log of everything that happens on your WordPress and [WordPress multisite](http://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/) with the WP Security Audit Log plugin to ensure user productivity, easily spot suspicious behavior before it becomes a WordPress security problem and have an organized website.
 
@@ -179,17 +179,22 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.2.3 (2018-08-16) =
+= 3.2.3.1 (2018-08-15) =
+
+* **Bug fix**
+	* Fixed a compatibility problem with Windows server.
+	
+= 3.2.3 (2018-08-13) =
 
 Release Notes: [click here](https://www.wpsecurityauditlog.com/releases/3-2-3-setup-wizard-ease-of-use/)
 
 * **New Features**
 	* Added a startup wizard to assist new users with new installs.
-	* Introduced the [WordPress activity log levels](https://www.wpsecurityauditlog.com/support-documentation/default-wordpress-activity-log-levels/).
+	* Introduced the [WordPress activity log levels](https://www.wpsecurityauditlog.com/support-documentation/default-wordpress-activity-log-levels/). 
 	* New search filters in the WordPress activity log viewer.
 	* Added a new test button to all external database connections, including those for [WordPress activity log archiving](https://www.wpsecurityauditlog.com/support-documentation/archive-alerts-wordpress-audit-trail/) and mirroring.
 	* Added several new settings to [purge the WordPress activity log](https://www.wpsecurityauditlog.com/support-documentation/wordpress-activity-log-deleted-plugin-uninstall-option/) and reset plugin settings to default.
-
+	
 * **Improvements**
 	* Performance improvement: optimized the logic of the plugin sensors to load only required ones during user action.
 	* Redesigned all the settings pages and included more help text, making them more user friendly.
