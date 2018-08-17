@@ -586,9 +586,18 @@ final class WSAL_Views_SetupWizard {
 		// @codingStandardsIgnoreEnd
 
 		if ( ! empty( $wsal_access ) && 'yes' === $wsal_access ) {
+			if ( 1 === count( $wsal_editors ) && $this->wsal->settings->IsRestrictAdmins() ) {
+				$this->wsal->settings->set_restrict_plugin_setting( 'only_me' );
+			} else {
+				$this->wsal->settings->set_restrict_plugin_setting( 'only_selected_users' );
+			}
 			$this->wsal->settings->SetAllowedPluginEditors( ! empty( $wsal_editors ) ? $wsal_editors : array() );
 		} elseif ( ! empty( $wsal_access ) && 'no' === $wsal_access ) {
-			$this->wsal->settings->SetAllowedPluginEditors( array() );
+			if ( $this->wsal->settings->IsRestrictAdmins() ) {
+				$this->wsal->settings->set_restrict_plugin_setting( 'only_me' );
+			} else {
+				$this->wsal->settings->SetAllowedPluginEditors( array() );
+			}
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
