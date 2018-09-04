@@ -66,7 +66,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		 */
 		if ( is_dir( $failed_login_dir ) ) {
 			// Get all files inside failed logins folder.
-			$files = glob( $failed_login_dir . '*', GLOB_BRACE );
+			$files = glob( $failed_login_dir . '*' );
 
 			if ( ! empty( $files ) ) {
 				// Unlink each file.

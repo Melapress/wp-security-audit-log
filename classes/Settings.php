@@ -1229,7 +1229,7 @@ class WSAL_Settings {
 	 */
 	public function generate_index_files() {
 		// Get uploads directory.
-		$uploads_dir = wp_upload_dir();
+		$uploads_dir      = wp_upload_dir();
 		$wsal_uploads_dir = trailingslashit( $uploads_dir['basedir'] . '/wp-security-audit-log/' );
 
 		// If the directory exists then generate index.php file for every sub-directory.
@@ -1247,7 +1247,7 @@ class WSAL_Settings {
 			}
 
 			// Fetch all files in the uploads directory.
-			$sub_directories = glob( $wsal_uploads_dir . '*', GLOB_BRACE );
+			$sub_directories = glob( $wsal_uploads_dir . '*' );
 			foreach ( $sub_directories as $sub_dir ) {
 				// index.php file.
 				if ( is_dir( $sub_dir ) && ! file_exists( $sub_dir . '/index.php' ) ) {

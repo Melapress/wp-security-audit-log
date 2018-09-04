@@ -103,7 +103,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		// Check if subdirectory exists.
 		if ( is_dir( $sub_dir ) ) {
 			// Get all files inside failed logins folder.
-			$files = glob( $sub_dir . '*', GLOB_BRACE );
+			$files = glob( $sub_dir . '*' );
 
 			if ( ! empty( $files ) ) {
 				// Unlink each file.
