@@ -600,7 +600,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Get post array through filter.
 		$nonce    = filter_input( INPUT_POST, 'nonce', FILTER_SANITIZE_STRING );
 		$filename = filter_input( INPUT_POST, 'log_file', FILTER_SANITIZE_STRING );
-		$site_id  = filter_input( INPUT_POST, 'site_id', FILTER_SANITIZE_NUMBER_INT );
 
 		// If file name is empty then return error.
 		if ( empty( $filename ) ) {
@@ -616,23 +615,27 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Verify nonce.
 		if ( ! empty( $filename ) && ! empty( $nonce ) && wp_verify_nonce( $nonce, 'wsal-download-404-log-' . $filename ) ) {
-			// Set log file path.
-			$uploads_dir = wp_upload_dir();
+			$is_subsite = strpos( $filename, '/sites/' ); // Check for subsite on a multisite network.
 
-			if ( ! $site_id ) {
-				$position = strpos( $filename, '/sites/' );
+			if ( ! $is_subsite ) {
+				// Site is not a subsite on a multisite network.
+				$uploads_dir = wp_upload_dir(); // Get uploads directory.
+				$filename    = basename( $filename ); // Get basename to prevent path traversal attack.
 
-				if ( $position ) {
-					$filename = substr( $filename, $position );
-				} else {
-					$position = strpos( $filename, '/wp-security-audit-log/' );
-					$filename = substr( $filename, $position );
-				}
-				$log_file_path = trailingslashit( $uploads_dir['basedir'] ) . $filename;
+				// Construct log file path to eliminate the risks of path traversal attack.
+				$log_file_path = trailingslashit( $uploads_dir['basedir'] ) . 'wp-security-audit-log/404s/' . $filename;
 			} else {
-				$position      = strpos( $filename, '/wp-security-audit-log/' );
-				$filename      = substr( $filename, $position );
-				$log_file_path = trailingslashit( $uploads_dir['basedir'] ) . $filename;
+				// Site is a subsite on a multisite network.
+				$filepath = substr( $filename, $is_subsite ); // Get the chunk of string from `/sites/` to find the site id.
+
+				// Get basename to prevent path traversal attack.
+				$filename = basename( $filename );
+
+				// Search for site id in the file path by replacing the remaining known chunks such as `/sites/` and the path after site id.
+				$site_id = str_replace( array( '/sites/', '/wp-security-audit-log/404s/' . $filename ), '', $filepath );
+
+				// Construct log file path to eliminate the risks of path traversal attack.
+				$log_file_path = trailingslashit( WP_CONTENT_DIR ) . 'uploads/sites/' . $site_id . '/wp-security-audit-log/404s/' . $filename;
 			}
 
 			// Request the file.
