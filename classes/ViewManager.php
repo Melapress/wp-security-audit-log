@@ -199,6 +199,8 @@ class WSAL_ViewManager {
 					if ( ( 'wsal-togglealerts' === $view->GetSafeViewName()
 							|| 'wsal-settings' === $view->GetSafeViewName()
 							|| 'wsal-ext-settings' === $view->GetSafeViewName()
+							|| 'wsal-rep-views-main' === $view->GetSafeViewName()
+							|| 'wsal-np-notifications' === $view->GetSafeViewName()
 						)
 						&& ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
 						continue;
