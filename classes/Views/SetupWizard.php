@@ -194,9 +194,9 @@ final class WSAL_Views_SetupWizard {
 		$data_array = array(
 			'ajaxURL'    => admin_url( 'admin-ajax.php' ),
 			'nonce'      => wp_create_nonce( 'wsal-verify-wizard-page' ),
-			'usersError' => esc_html__( 'Specified token in not a user.', 'wp-security-audit-log' ),
-			'rolesError' => esc_html__( 'Specified token in not a role.', 'wp-security-audit-log' ),
-			'ipError'    => esc_html__( 'Specified token in not an IP.', 'wp-security-audit-log' ),
+			'usersError' => esc_html__( 'Specified value in not a user.', 'wp-security-audit-log' ),
+			'rolesError' => esc_html__( 'Specified value in not a role.', 'wp-security-audit-log' ),
+			'ipError'    => esc_html__( 'Specified value in not an IP address.', 'wp-security-audit-log' ),
 		);
 		wp_localize_script( 'wsal-wizard-js', 'wsalData', $data_array );
 
