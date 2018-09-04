@@ -76,20 +76,20 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 * @param int $user_id - User ID of the registered user.
 	 */
 	public function EventUserRegister( $user_id ) {
-		$user = get_userdata( $user_id );
-		$ismu = function_exists( 'is_multisite' ) && is_multisite();
-		$event = $ismu ? 4012 : (is_user_logged_in() ? 4001 : 4000);
+		$user         = get_userdata( $user_id );
+		$ismu         = function_exists( 'is_multisite' ) && is_multisite();
+		$event        = $ismu ? 4012 : ( is_user_logged_in() ? 4001 : 4000 );
 		$current_user = wp_get_current_user();
 		$this->plugin->alerts->Trigger(
 			$event, array(
-				'NewUserID' => $user_id,
+				'NewUserID'   => $user_id,
 				'UserChanger' => ! empty( $current_user ) ? $current_user->user_login : '',
 				'NewUserData' => (object) array(
-					'Username' => $user->user_login,
+					'Username'  => $user->user_login,
 					'FirstName' => $user->user_firstname,
-					'LastName' => $user->user_lastname,
-					'Email' => $user->user_email,
-					'Roles' => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+					'LastName'  => $user->user_lastname,
+					'Email'     => $user->user_email,
+					'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 				),
 			), true
 		);
