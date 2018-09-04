@@ -290,11 +290,11 @@ final class WSAL_AlertManager {
 	/**
 	 * Register an alert type.
 	 *
-	 * @param array $info - Array of [type, code, category, description, message] respectively.
-	 * @throws string - Error if alert is already registered.
+	 * @param array $info - Array of [type, code, category, sub-category, description, message] respectively.
+	 * @throws Exception - Error if alert is already registered.
 	 */
 	public function Register( $info ) {
-		if ( func_num_args() == 1 ) {
+		if ( func_num_args() === 1 ) {
 			// Handle single item.
 			list($type, $code, $catg, $subcatg, $desc, $mesg) = $info;
 			if ( isset( $this->_alerts[ $type ] ) ) {

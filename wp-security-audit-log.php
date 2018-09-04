@@ -4,7 +4,7 @@
  * Plugin URI: http://www.wpsecurityauditlog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 3.2.3.2
+ * Version: 3.2.3.3
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpsecurityauditlog.com/
  * License: GPL2
@@ -54,7 +54,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '3.2.3.2';
+		public $version = '3.2.3.3';
 
 		// Plugin constants.
 		const PLG_CLS_PRFX    = 'WSAL_';
@@ -386,11 +386,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @since 3.2.3
 		 */
 		public function freemius_trial_promotion_message( $message ) {
-			return sprintf(
+			// Message.
+			$message = sprintf(
 				/* translators: Plugin name */
 				__( 'Get a free 7-day trial of the premium edition of %s. No credit card required, no commitments!', 'wp-security-audit-log' ),
 				'<strong>' . __( 'WP Security Audit Log', 'wp-security-audit-log' ) . '</strong>'
 			);
+
+			// Trial link.
+			$message .= '<a style="margin-left: 10px; vertical-align: super;" href="' . wsal_freemius()->get_trial_url() . '"><button class="button button-primary">' . __( 'Start free trial', 'wp-security-audit-log' ) . ' &nbsp;&#10140;</button></a>';
+			return $message;
 		}
 
 		/**
@@ -680,17 +685,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Do version-to-version specific changes.
 			if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
-				/**
-				 * IMPORTANT: VERSION SPECIFIC UPDATE
-				 *
-				 * It only needs to run when old version of the plugin is less than 2.6.5
-				 * & the plugin is being updated to version 2.6.5 or later versions.
-				 */
-				if ( version_compare( $old_version, '2.6.5', '<' ) && version_compare( $new_version, '2.6.4', '>' ) ) {
-					// Update External DB password on plugin update.
-					$this->update_external_db_password();
-				}
-
 				// Update pruning alerts option if purning limit is enabled for backwards compatibility.
 				if ( $this->settings->IsPruningLimitEnabled() ) {
 					$pruning_date = '6';
@@ -764,6 +758,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
 					}
 				}
+
+				/**
+				 * IMPORTANT: VERSION SPECIFIC UPDATE
+				 *
+				 * It only needs to run when new version of the plugin is newwer than 3.2.3.2.
+				 *
+				 * @since 3.2.3.3
+				 */
+				if ( version_compare( $new_version, '3.2.3', '>' ) ) {
+					if ( 'yes' !== $this->GetGlobalOption( 'wsal-setup-modal-dismissed', false ) ) {
+						$this->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' );
+					}
+				}
 			}
 		}
 
@@ -771,48 +778,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Method: Update external DB password.
 		 *
 		 * @since 2.6.3
+		 * @deprecated 3.2.3.3
 		 */
 		public function update_external_db_password() {
-			// Get the passwords.
-			$external_password = $this->settings->GetAdapterConfig( 'adapter-password' );
-			$mirror_password   = $this->settings->GetAdapterConfig( 'mirror-password' );
-			$archive_password  = $this->settings->GetAdapterConfig( 'archive-password' );
-
-			// Update external db password.
-			if ( ! empty( $external_password ) ) {
-				// Decrypt the password using fallback method.
-				$password = $this->getConnector()->decryptString_fallback( $external_password );
-
-				// Encrypt the password with latest encryption method.
-				$encrypted_password = $this->getConnector()->encryptString( $password );
-
-				// Store the new password.
-				$this->settings->SetAdapterConfig( 'adapter-password', $encrypted_password );
-			}
-
-			// Update mirror db password.
-			if ( ! empty( $mirror_password ) ) {
-				// Decrypt the password using fallback method.
-				$password = $this->getConnector()->decryptString_fallback( $mirror_password );
-
-				// Encrypt the password with latest encryption method.
-				$encrypted_password = $this->getConnector()->encryptString( $password );
-
-				// Store the new password.
-				$this->settings->SetAdapterConfig( 'mirror-password', $encrypted_password );
-			}
-
-			// Update archive db password.
-			if ( ! empty( $archive_password ) ) {
-				// Decrypt the password using fallback method.
-				$password = $this->getConnector()->decryptString_fallback( $archive_password );
-
-				// Encrypt the password with latest encryption method.
-				$encrypted_password = $this->getConnector()->encryptString( $password );
-
-				// Store the new password.
-				$this->settings->SetAdapterConfig( 'archive-password', $encrypted_password );
-			}
+			$this->wsal_deprecate( __METHOD__, '3.2.3.3' );
 		}
 
 		/**
@@ -1308,13 +1277,26 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
+		 * Prints error for deprecated functions.
+		 *
+		 * @param string $method  — Method deprecated.
+		 * @param string $version — Version since deprecated.
+		 */
+		public function wsal_deprecate( $method, $version ) {
+			if ( WP_DEBUG ) {
+				/* translators: 1. Deprecated method name 2. Version since deprecated */
+				trigger_error( sprintf( esc_html__( 'Method %1$s is deprecated since version %2$s!', 'wp-security-audit-log' ), $method, $version ) );
+			}
+		}
+
+		/**
 		 * Error Logger
 		 *
 		 * Logs given input into debug.log file in debug mode.
 		 *
 		 * @param mix $message - Error message.
 		 */
-		function wsal_log( $message ) {
+		public function wsal_log( $message ) {
 			if ( WP_DEBUG === true ) {
 				if ( is_array( $message ) || is_object( $message ) ) {
 					error_log( print_r( $message, true ) );
