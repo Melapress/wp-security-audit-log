@@ -946,7 +946,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			$excluded_urls = esc_url( $post_array['url'] );
 		}
 		$this->_plugin->SetGlobalOption( 'excluded-urls', $excluded_urls );
-		echo '<p>URL ' . esc_html( $post_array['url'] ) . ' is no longer being monitored.<br />Enable the monitoring of this URL again from the <a href="' . esc_url( admin_url( 'admin.php?page=wsal-settings#tab-exclude' ) ) . '">Excluded Objects</a> tab in the plugin settings.</p>';
+		$settings_exclude_url = add_query_arg(
+			array(
+				'page' => 'wsal-settings',
+				'tab'  => 'exclude-objects',
+			),
+			admin_url( 'admin.php' )
+		);
+		echo '<p>URL ' . esc_html( $post_array['url'] ) . ' is no longer being monitored.<br />Enable the monitoring of this URL again from the <a href="' . esc_url( $settings_exclude_url ) . '">Excluded Objects</a> tab in the plugin settings.</p>';
 		die;
 	}
 }
