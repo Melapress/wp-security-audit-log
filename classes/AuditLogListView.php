@@ -662,6 +662,13 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return ' View the changes in <a class="thickbox"  title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
 				. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">data inspector.</a>';
 
+			case '%ScanError%' === $name:
+				if ( 'NULL' === $value ) {
+					return false;
+				}
+				/* translators: Mailto link for support. */
+				return ' with errors. ' . sprintf( __( 'Contact us on %s for assistance', 'wp-security-audit-log' ), '<a href="mailto:support@wpsecurityauditlog.com" target="_blank">support@wpsecurityauditlog.com</a>' );
+
 			default:
 				return '<strong>' . esc_html( $value ) . '</strong>';
 		}
