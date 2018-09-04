@@ -393,15 +393,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	public function encryptString( $plaintext ) {
 		// Check for previous version.
-		$plugin     = WpSecurityAuditLog::GetInstance();
-		$version    = $plugin->GetGlobalOption( 'version', '0.0.0' );
+		$plugin  = WpSecurityAuditLog::GetInstance();
+		$version = $plugin->GetGlobalOption( 'version', '0.0.0' );
 
-		if ( -1 === version_compare( $version, '2.6.2' ) ) {
-			return $this->encryptString_fallback( $plaintext );
-		}
-
-		$ciphertext = false;
-
+		$ciphertext     = false;
 		$encrypt_method = 'AES-256-CBC';
 		$secret_key     = $this->truncateKey();
 		$secret_iv      = $this->get_openssl_iv();
@@ -421,18 +416,12 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	/**
 	 * Encrypt plain text - Fallback.
 	 *
-	 * @param  string $plaintext - Plain text that is going to be encrypted.
-	 * @return string
-	 * @since  2.6.3
+	 * @param string $plaintext - Plain text that is going to be encrypted.
+	 * @deprecated 3.2.3.3
 	 */
 	public function encryptString_fallback( $plaintext ) {
-		$iv_size    = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC );
-		$iv         = mcrypt_create_iv( $iv_size, MCRYPT_RAND );
-		$key        = $this->truncateKey();
-		$ciphertext = mcrypt_encrypt( MCRYPT_RIJNDAEL_128, $key, $plaintext, MCRYPT_MODE_CBC, $iv );
-		$ciphertext = $iv . $ciphertext;
-		$ciphertext_base64 = base64_encode( $ciphertext );
-		return $ciphertext_base64;
+		$wsal = WpSecurityAuditLog::GetInstance();
+		$wsal->wsal_deprecate( __METHOD__, '3.2.3.3' );
 	}
 
 	/**
@@ -448,12 +437,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 		$plugin  = WpSecurityAuditLog::GetInstance();
 		$version = $plugin->GetGlobalOption( 'version', '0.0.0' );
 
-		if ( -1 === version_compare( $version, '2.6.2' ) ) {
-			return $this->decryptString_fallback( $ciphertext_base64 );
-		}
-
-		$plaintext = false;
-
+		$plaintext      = false;
 		$encrypt_method = 'AES-256-CBC';
 		$secret_key     = $this->truncateKey();
 		$secret_iv      = $this->get_openssl_iv();
@@ -472,18 +456,12 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	/**
 	 * Decrypt the encrypted string - Fallback.
 	 *
-	 * @param  string $ciphertext_base64 - encrypted string.
-	 * @return string
-	 * @since  2.6.3
+	 * @param string $ciphertext_base64 - Encrypted string.
+	 * @deprecated 3.2.3.3
 	 */
 	public function decryptString_fallback( $ciphertext_base64 ) {
-		$ciphertext_dec = base64_decode( $ciphertext_base64 );
-		$iv_size        = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC );
-		$iv_dec         = substr( $ciphertext_dec, 0, $iv_size );
-		$ciphertext_dec = substr( $ciphertext_dec, $iv_size );
-		$key            = $this->truncateKey();
-		$plaintext_dec  = mcrypt_decrypt( MCRYPT_RIJNDAEL_128, $key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec );
-		return rtrim( $plaintext_dec, "\0" );
+		$wsal = WpSecurityAuditLog::GetInstance();
+		$wsal->wsal_deprecate( __METHOD__, '3.2.3.3' );
 	}
 
 	/**
@@ -658,8 +636,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
 	/**
 	 * Truncate string longer than 32 characters.
-	 * Authentication Unique Key @see wp-config.php
+	 * Authentication Unique Key
 	 *
+	 * @see wp-config.php
 	 * @return string AUTH_KEY
 	 */
 	private function truncateKey() {
@@ -681,7 +660,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	private function get_openssl_iv() {
 		$secret_openssl_iv = 'і-(аэ┤#≥и┴зейН';
-		$key_size = strlen( $secret_openssl_iv );
+		$key_size          = strlen( $secret_openssl_iv );
 		if ( $key_size > 32 ) {
 			return substr( $secret_openssl_iv, 0, 32 );
 		} else {
