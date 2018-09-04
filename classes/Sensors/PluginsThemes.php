@@ -151,9 +151,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 */
 	public function EventAdminShutdown() {
 		// Filter global arrays for security.
-		$post_array = filter_input_array( INPUT_POST );
-		$get_array = filter_input_array( INPUT_GET );
-		$server_array = filter_input_array( INPUT_SERVER );
+		$post_array  = filter_input_array( INPUT_POST );
+		$get_array   = filter_input_array( INPUT_GET );
+		$script_name = isset( $_SERVER['SCRIPT_NAME'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : false;
 
 		$action = '';
 		if ( isset( $get_array['action'] ) && '-1' != $get_array['action'] ) {
@@ -169,11 +169,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 
 		$actype = '';
-		if ( isset( $server_array['SCRIPT_NAME'] ) ) {
-			$actype = basename( $server_array['SCRIPT_NAME'], '.php' );
+		if ( ! empty( $script_name ) ) {
+			$actype = basename( $script_name, '.php' );
 		}
-		$is_themes = 'themes' == $actype;
-		$is_plugins = 'plugins' == $actype;
+		$is_themes  = 'themes' === $actype;
+		$is_plugins = 'plugins' === $actype;
 
 		// Install plugin.
 		if ( in_array( $action, array( 'install-plugin', 'upload-plugin' ) ) && current_user_can( 'install_plugins' ) ) {
@@ -593,10 +593,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			) {
 				// If the plugin modify the post.
 				if ( false !== strpos( $post_array['action'], 'edit' ) ) {
-					$event       = $this->GetEventTypeForPostType( $post, 2106, 2107, 2108 );
 					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
-						$event, array(
+						2106, array(
 							'PostID'             => $post->ID,
 							'PostType'           => $post->post_type,
 							'PostTitle'          => $post->post_title,
@@ -613,10 +612,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					// Ignore WooCommerce Bulk Stock Management page.
 					// OR MainWP plugin requests.
 				} else {
-					$event       = $this->GetEventTypeForPostType( $post, 5019, 5020, 5021 );
 					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
-						$event, array(
+						5019, array(
 							'PostID'             => $post->ID,
 							'PostType'           => $post->post_type,
 							'PostTitle'          => $post->post_title,
@@ -636,7 +634,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 */
 	public function EventPluginPostDelete( $post_id ) {
 		// Filter $_REQUEST array for security.
-		$get_array = filter_input_array( INPUT_GET );
+		$get_array  = filter_input_array( INPUT_GET );
 		$post_array = filter_input_array( INPUT_POST );
 
 		if ( empty( $get_array['action'] ) && isset( $get_array['page'] ) ) {
