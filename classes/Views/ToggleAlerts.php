@@ -152,6 +152,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$events_diff     = array_filter( $events_diff ); // Remove empty values.
 		$is_custom       = ! empty( $events_diff ) ? true : false; // If difference is not empty then mode is custom.
 		$log_details     = $this->_plugin->GetGlobalOption( 'details-level', false ); // Get log level option.
+
+		$subcat_alerts = array( 1004, 2010, 6007, 2111, 2119, 2016, 2053, 7000, 8009, 8014, 9007, 9027, 9002, 8809, 8813, 6000, 6001, 6019 );
 		?>
 		<p>
 			<form method="post" id="wsal-alerts-level">
@@ -232,6 +234,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 							} elseif (
 								__( 'BBPress Forum', 'wp-security-audit-log' ) === $subname
 								|| __( 'WooCommerce', 'wp-security-audit-log' ) === $subname
+								|| __( 'WooCommerce Products', 'wp-security-audit-log' ) === $subname
 								|| __( 'Yoast SEO', 'wp-security-audit-log' ) === $subname
 								|| __( 'MultiSite', 'wp-security-audit-log' ) === $subname
 							) {
@@ -244,6 +247,13 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										break;
 
 									case __( 'WooCommerce', 'wp-security-audit-log' ):
+										// Check if WooCommerce plugin exists.
+										if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+											$disabled = 'disabled';
+										}
+										break;
+
+									case __( 'WooCommerce Products', 'wp-security-audit-log' ):
 										// Check if WooCommerce plugin exists.
 										if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 											$disabled = 'disabled';
@@ -285,33 +295,69 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												<p class="wsal-tab-help description"><?php echo wp_kses( __( '<strong>Note:</strong> Post refers to any type of content, i.e. blog post, page or a post with a custom post type.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
 											</td>
 										</tr>
-									<?php elseif ( __( 'BBPress Forum', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
+									<?php elseif ( __( 'BBPress Forum', 'wp-security-audit-log' ) === $subname ) : ?>
+										<?php if ( ! empty( $disabled ) ) : ?>
+											<tr>
+												<td colspan="4">
+													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'The plugin BBPress is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												</td>
+											</tr>
+										<?php endif; ?>
 										<tr>
 											<td colspan="4">
-												<p class="wsal-tab-help wsal-tab-notice description"><?php echo esc_html__( 'The plugin BBPress is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												<h3 class="sub-category"><?php esc_html_e( 'Forums', 'wp-security-audit-log' ); ?></h3>
 											</td>
 										</tr>
-									<?php elseif ( __( 'WooCommerce', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
+									<?php elseif ( __( 'WooCommerce', 'wp-security-audit-log' ) === $subname || __( 'WooCommerce Products', 'wp-security-audit-log' ) === $subname ) : ?>
+										<?php if ( ! empty( $disabled ) ) : ?>
+											<tr>
+												<td colspan="4">
+													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'The plugin WooCommerce is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												</td>
+											</tr>
+										<?php endif; ?>
+										<?php if ( __( 'WooCommerce Products', 'wp-security-audit-log' ) === $subname ) : ?>
+											<tr>
+												<td colspan="4">
+													<h3 class="sub-category"><?php esc_html_e( 'Products', 'wp-security-audit-log' ); ?></h3>
+												</td>
+											</tr>
+										<?php endif; ?>
+									<?php elseif ( __( 'Yoast SEO', 'wp-security-audit-log' ) === $subname ) : ?>
+										<?php if ( ! empty( $disabled ) ) : ?>
+											<tr>
+												<td colspan="4">
+													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'The plugin Yoast SEO is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												</td>
+											</tr>
+										<?php endif; ?>
 										<tr>
 											<td colspan="4">
-												<p class="wsal-tab-help wsal-tab-notice description"><?php echo esc_html__( 'The plugin WooCommerce is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												<h3 class="sub-category"><?php esc_html_e( 'Post Changes', 'wp-security-audit-log' ); ?></h3>
 											</td>
 										</tr>
-									<?php elseif ( __( 'Yoast SEO', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
+									<?php elseif ( __( 'MultiSite', 'wp-security-audit-log' ) === $subname ) : ?>
+										<?php if ( ! empty( $disabled ) ) : ?>
+											<tr>
+												<td colspan="4">
+													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'Your website is a single site so the multisite events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												</td>
+											</tr>
+										<?php endif; ?>
 										<tr>
 											<td colspan="4">
-												<p class="wsal-tab-help wsal-tab-notice description"><?php echo esc_html__( 'The plugin Yoast SEO is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												<h3 class="sub-category"><?php esc_html_e( 'User Profiles', 'wp-security-audit-log' ); ?></h3>
 											</td>
 										</tr>
-									<?php elseif ( __( 'MultiSite', 'wp-security-audit-log' ) === $subname && ! empty( $disabled ) ) : ?>
+									<?php elseif ( __( 'Other User Activity', 'wp-security-audit-log' ) === $subname ) : ?>
 										<tr>
 											<td colspan="4">
-												<p class="wsal-tab-help wsal-tab-notice description"><?php echo esc_html__( 'Your website is a single site so the multisite events have been disabled.', 'wp-security-audit-log' ); ?></p>
+												<h3 class="sub-category"><?php esc_html_e( 'Logins & Logouts', 'wp-security-audit-log' ); ?></h3>
 											</td>
 										</tr>
-										<?php
-									endif;
+									<?php endif; ?>
 
+									<?php
 									// Events sections loop.
 									foreach ( $alerts as $alert ) {
 										if ( $alert->type <= 0006 ) {
@@ -328,6 +374,55 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											case false:
 												$attrs = 'title="' . __( 'Not Available', 'wp-security-audit-log' ) . '" class="alert-unavailable"';
 												break;
+										}
+										if ( in_array( $alert->type, $subcat_alerts, true ) ) {
+											?>
+											<tr>
+												<td colspan="4">
+													<h3 class="sub-category">
+														<?php
+														if ( 1004 === $alert->type ) {
+															esc_html_e( 'User Sessions', 'wp-security-audit-log' );
+														} elseif ( 2010 === $alert->type ) {
+															esc_html_e( 'Files', 'wp-security-audit-log' );
+														} elseif ( 6007 === $alert->type ) {
+															esc_html_e( 'System', 'wp-security-audit-log' );
+														} elseif ( 2111 === $alert->type ) {
+															esc_html_e( 'Post Settings', 'wp-security-audit-log' );
+														} elseif ( 2119 === $alert->type ) {
+															esc_html_e( 'Tags', 'wp-security-audit-log' );
+														} elseif ( 2016 === $alert->type ) {
+															esc_html_e( 'Categories', 'wp-security-audit-log' );
+														} elseif ( 2053 === $alert->type ) {
+															esc_html_e( 'Custom Fields', 'wp-security-audit-log' );
+														} elseif ( 7000 === $alert->type ) {
+															esc_html_e( 'Sites', 'wp-security-audit-log' );
+														} elseif ( 8009 === $alert->type ) {
+															esc_html_e( 'Settings', 'wp-security-audit-log' );
+														} elseif ( 8014 === $alert->type ) {
+															esc_html_e( 'Topics', 'wp-security-audit-log' );
+														} elseif ( 9007 === $alert->type ) {
+															esc_html_e( 'Product Admin', 'wp-security-audit-log' );
+														} elseif ( 9027 === $alert->type ) {
+															esc_html_e( 'Store Admin', 'wp-security-audit-log' );
+														} elseif ( 9002 === $alert->type ) {
+															esc_html_e( 'Categories', 'wp-security-audit-log' );
+														} elseif ( 8809 === $alert->type ) {
+															esc_html_e( 'Website Changes', 'wp-security-audit-log' );
+														} elseif ( 8813 === $alert->type ) {
+															esc_html_e( 'Plugin Settings', 'wp-security-audit-log' );
+														} elseif ( 6000 === $alert->type ) {
+															esc_html_e( 'System', 'wp-security-audit-log' );
+														} elseif ( 6001 === $alert->type ) {
+															esc_html_e( 'Settings', 'wp-security-audit-log' );
+														} elseif ( 6019 === $alert->type ) {
+															esc_html_e( 'Cron Jobs', 'wp-security-audit-log' );
+														}
+														?>
+													</h3>
+												</td>
+											</tr>
+											<?php
 										}
 										?>
 										<tr <?php echo esc_attr( $attrs ); ?>>
@@ -487,6 +582,29 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save Changes', 'wp-security-audit-log' ) ); ?>"></p>
 		</form>
 
+		<?php if ( ! empty( $log_level ) ) : ?>
+			<!-- Log level updated modal -->
+			<div class="remodal" data-remodal-id="wsal-log-level-updated">
+				<button data-remodal-action="close" class="remodal-close"></button>
+				<h3><?php esc_html_e( 'Log Level Updated', 'wp-security-audit-log' ); ?></h3>
+				<p>
+					<?php
+					/* translators: Alerts log level. */
+					echo sprintf( esc_html__( 'The %s log level has been successfully loaded and applied.', 'wp-security-audit-log' ), $log_level );
+					?>
+				</p>
+				<br>
+				<button data-remodal-action="confirm" class="remodal-confirm"><?php esc_html_e( 'OK', 'wp-security-audit-log' ); ?></button>
+			</div>
+			<script type="text/javascript">
+				jQuery( document ).ready( function() {
+					var wsal_log_level_modal = jQuery( '[data-remodal-id="wsal-log-level-updated"]' );
+					wsal_log_level_modal.remodal().open();
+				} );
+			</script><?php
+		endif;
+		?>
+
 		<!-- Terminal all sessions modal -->
 		<div class="remodal" data-remodal-id="wsal-toggle-file-changes-scan">
 			<button data-remodal-action="close" class="remodal-close"></button>
@@ -535,6 +653,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			}
 			.widefat td .wsal-tab-notice {
 				color: red;
+			}
+			.widefat .sub-category {
+				margin: 0.5em 0;
+				margin-left: 8px;
 			}
 		</style>
 		<?php
