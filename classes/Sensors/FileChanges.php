@@ -319,6 +319,13 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 			// Reset scan counter.
 			$this->reset_scan_counter();
 
+			// Scan started alert.
+			$this->plugin->alerts->Trigger( 6033, array(
+				'CurrentUserID' => '0',
+				'ScanStatus'    => 'started',
+				'ScanLocation'  => ! empty( $path_to_scan ) ? $path_to_scan : ABSPATH,
+			) );
+
 			// Scan the path.
 			$scanned_files = $this->scan_path( $path_to_scan );
 
@@ -474,6 +481,21 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger( 6032, array(
 						'CurrentUserID' => '0',
 					) );
+
+					// Scan stopped with errors.
+					$this->plugin->alerts->Trigger( 6033, array(
+						'CurrentUserID' => '0',
+						'ScanStatus'    => 'stopped',
+						'ScanLocation'  => ! empty( $path_to_scan ) ? $path_to_scan : ABSPATH,
+						'ScanError'     => 1,
+					) );
+				} else {
+					// Scan stopped.
+					$this->plugin->alerts->Trigger( 6033, array(
+						'CurrentUserID' => '0',
+						'ScanStatus'    => 'stopped',
+						'ScanLocation'  => ! empty( $path_to_scan ) ? $path_to_scan : ABSPATH,
+					) );
 				}
 
 				/**
@@ -484,6 +506,13 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 				do_action( 'wsal_last_scanned_directory', $next_to_scan );
 			} else {
 				$this->plugin->SetGlobalOption( "is_initial_scan_$next_to_scan", 'no' ); // Initial scan check set to false.
+
+				// Scan stopped.
+				$this->plugin->alerts->Trigger( 6033, array(
+					'CurrentUserID' => '0',
+					'ScanStatus'    => 'stopped',
+					'ScanLocation'  => ! empty( $path_to_scan ) ? $path_to_scan : ABSPATH,
+				) );
 			}
 
 			// Store scanned files list.
