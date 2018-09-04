@@ -371,22 +371,24 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		// Set filter input args.
 		$filter_input_args = array(
-			'post_ID' => FILTER_VALIDATE_INT,
-			'_wpnonce' => FILTER_SANITIZE_STRING,
+			'post_ID'              => FILTER_VALIDATE_INT,
+			'_wpnonce'             => FILTER_SANITIZE_STRING,
 			'original_post_status' => FILTER_SANITIZE_STRING,
-			'sticky' => FILTER_SANITIZE_STRING,
-			'action' => FILTER_SANITIZE_STRING,
-			'_inline_edit' => FILTER_SANITIZE_STRING,
-			'mainwpsignature' => FILTER_SANITIZE_STRING,
-			'function' => FILTER_SANITIZE_STRING,
+			'sticky'               => FILTER_SANITIZE_STRING,
+			'action'               => FILTER_SANITIZE_STRING,
+			'_inline_edit'         => FILTER_SANITIZE_STRING,
+			'mainwpsignature'      => FILTER_SANITIZE_STRING,
+			'function'             => FILTER_SANITIZE_STRING,
+			'new_post'             => FILTER_SANITIZE_STRING,
+			'post_custom'          => FILTER_SANITIZE_STRING,
 		);
 
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
 
 		// Check MainWP $_POST members.
-		$new_post    = filter_input( INPUT_POST, 'new_post' );
-		$post_custom = filter_input( INPUT_POST, 'post_custom' );
+		$new_post    = isset( $post_array['new_post'] ) ? $post_array['new_post'] : false;
+		$post_custom = isset( $post_array['post_custom'] ) ? $post_array['post_custom'] : false;
 		$post_custom = maybe_unserialize( base64_decode( $post_custom ) );
 
 		// Verify nonce.
@@ -448,7 +450,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			array(
 				'$new_status' => $new_status,
 				'$old_status' => $old_status,
-				'$original' => $original,
+				'$original'   => $original,
 			)
 		);
 		// Run checks.
@@ -487,9 +489,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		} elseif ( $this->_old_post && 'mainwp' === $dashboard ) {
 			if ( 'auto-draft' === $old_status ) {
 				// Get MainWP $_POST members.
-				$new_post   = filter_input( INPUT_POST, 'new_post' );
+				$new_post   = filter_input( INPUT_POST, 'new_post', FILTER_SANITIZE_STRING );
 				$new_post   = maybe_unserialize( base64_decode( $new_post ) );
-				$post_catgs = filter_input( INPUT_POST, 'post_category' );
+				$post_catgs = filter_input( INPUT_POST, 'post_category', FILTER_SANITIZE_STRING );
 
 				// Post categories.
 				$post_categories = rawurldecode( isset( $post_catgs ) ? base64_decode( $post_catgs ) : null );
@@ -497,6 +499,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 				// Post tags.
 				$post_tags = rawurldecode( isset( $new_post['post_tags'] ) ? $new_post['post_tags'] : null );
+				$post_tags = sanitize_text_field( $post_tags ); // Sanitize the string of tags.
 				$post_tags = str_replace( ' ', '', $post_tags );
 				$post_tags = explode( ',', $post_tags );
 
@@ -826,27 +829,27 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$removed_tags = array_diff( $old_tags, $new_tags );
 
 		// Convert tags arrays to string.
-		$old_tags = implode( ', ', $old_tags );
-		$new_tags = implode( ', ', $new_tags );
-		$added_tags = implode( ', ', $added_tags );
+		$old_tags     = implode( ', ', $old_tags );
+		$new_tags     = implode( ', ', $new_tags );
+		$added_tags   = implode( ', ', $added_tags );
 		$removed_tags = implode( ', ', $removed_tags );
 
 		// Declare event variables.
-		$add_event = '';
+		$add_event    = '';
 		$remove_event = '';
 		if ( $old_tags !== $new_tags && ! empty( $added_tags ) ) {
-			$add_event = 2119;
+			$add_event   = 2119;
 			$editor_link = $this->GetEditorLink( $post );
 			$post_status = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
 			$this->plugin->alerts->Trigger(
 				$add_event, array(
-					'PostID' => $post->ID,
-					'PostType' => $post->post_type,
-					'PostStatus' => $post_status,
-					'PostTitle' => $post->post_title,
-					'PostDate' => $post->post_date,
-					'PostUrl' => get_permalink( $post->ID ),
-					'tag' => $added_tags ? $added_tags : 'no tags',
+					'PostID'             => $post->ID,
+					'PostType'           => $post->post_type,
+					'PostStatus'         => $post_status,
+					'PostTitle'          => $post->post_title,
+					'PostDate'           => $post->post_date,
+					'PostUrl'            => get_permalink( $post->ID ),
+					'tag'                => $added_tags ? $added_tags : 'no tags',
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -854,17 +857,17 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		if ( $old_tags !== $new_tags && ! empty( $removed_tags ) ) {
 			$remove_event = 2120;
-			$editor_link = $this->GetEditorLink( $post );
-			$post_status = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
+			$editor_link  = $this->GetEditorLink( $post );
+			$post_status  = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
 			$this->plugin->alerts->Trigger(
 				$remove_event, array(
-					'PostID' => $post->ID,
-					'PostType' => $post->post_type,
-					'PostStatus' => $post_status,
-					'PostTitle' => $post->post_title,
-					'PostDate' => $post->post_date,
-					'PostUrl' => get_permalink( $post->ID ),
-					'tag' => $removed_tags ? $removed_tags : 'no tags',
+					'PostID'             => $post->ID,
+					'PostType'           => $post->post_type,
+					'PostStatus'         => $post_status,
+					'PostTitle'          => $post->post_title,
+					'PostDate'           => $post->post_date,
+					'PostUrl'            => get_permalink( $post->ID ),
+					'tag'                => $removed_tags ? $removed_tags : 'no tags',
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -1739,12 +1742,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$editor_link = $this->GetEditorLink( $post );
 				$this->plugin->alerts->Trigger(
 					2001, array(
-						'PostID'     => $post->ID,
-						'PostType'   => $post->post_type,
-						'PostTitle'  => $post->post_title,
-						'PostStatus' => $post->post_status,
-						'PostDate'   => $post->post_date,
-						'PostUrl'    => get_permalink( $post->ID ),
+						'PostID'             => $post->ID,
+						'PostType'           => $post->post_type,
+						'PostTitle'          => $post->post_title,
+						'PostStatus'         => $post->post_status,
+						'PostDate'           => $post->post_date,
+						'PostUrl'            => get_permalink( $post->ID ),
 						$editor_link['name'] => $editor_link['value'],
 					)
 				);
@@ -1752,14 +1755,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$editor_link = $this->GetEditorLink( $post );
 				$this->plugin->alerts->Trigger(
 					2021, array(
-						'PostID'     => $post->ID,
-						'PostType'   => $post->post_type,
-						'PostTitle'  => $post->post_title,
-						'PostStatus' => $post->post_status,
-						'PostDate'   => $post->post_date,
-						'PostUrl'    => get_permalink( $post->ID ),
-						'OldStatus'  => $old_status,
-						'NewStatus'  => $new_status,
+						'PostID'             => $post->ID,
+						'PostType'           => $post->post_type,
+						'PostTitle'          => $post->post_title,
+						'PostStatus'         => $post->post_status,
+						'PostDate'           => $post->post_date,
+						'PostUrl'            => get_permalink( $post->ID ),
+						'OldStatus'          => $old_status,
+						'NewStatus'          => $new_status,
 						$editor_link['name'] => $editor_link['value'],
 					)
 				);
