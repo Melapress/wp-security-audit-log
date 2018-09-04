@@ -75,31 +75,31 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$wsal_setting_tabs = array(
 			'general'           => array(
 				'name'   => __( 'General', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'general' ),
+				'link'   => add_query_arg( 'tab', 'general', $this->GetUrl() ),
 				'render' => array( $this, 'tab_general' ),
 				'save'   => array( $this, 'tab_general_save' ),
 			),
 			'audit-log'         => array(
 				'name'   => __( 'Activity Log', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'audit-log' ),
+				'link'   => add_query_arg( 'tab', 'audit-log', $this->GetUrl() ),
 				'render' => array( $this, 'tab_audit_log' ),
 				'save'   => array( $this, 'tab_audit_log_save' ),
 			),
 			'file-changes'      => array(
 				'name'   => __( 'File Integrity Scan', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'file-changes' ),
+				'link'   => add_query_arg( 'tab', 'file-changes', $this->GetUrl() ),
 				'render' => array( $this, 'tab_file_changes' ),
 				'save'   => array( $this, 'tab_file_changes_save' ),
 			),
 			'exclude-objects'   => array(
 				'name'   => __( 'Exclude Objects', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'exclude-objects' ),
+				'link'   => add_query_arg( 'tab', 'exclude-objects', $this->GetUrl() ),
 				'render' => array( $this, 'tab_exclude_objects' ),
 				'save'   => array( $this, 'tab_exclude_objects_save' ),
 			),
 			'advanced-settings' => array(
 				'name'   => __( 'Advanced Settings', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'advanced-settings' ),
+				'link'   => add_query_arg( 'tab', 'advanced-settings', $this->GetUrl() ),
 				'render' => array( $this, 'tab_advanced_settings' ),
 				'save'   => array( $this, 'tab_advanced_settings_save' ),
 			),
@@ -268,14 +268,47 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
 		}
-		$this->_plugin->CleanUp();
 
-		if ( $this->_plugin->settings->IsArchivingEnabled() ) {
+		$now       = current_time( 'timestamp' ); // Current time.
+		$max_sdate = $this->_plugin->settings->GetPruningDate(); // Pruning date.
+
+		// If archiving is enabled then events are deleted from the archive database.
+		$archiving = $this->_plugin->settings->IsArchivingEnabled();
+		if ( $archiving ) {
+			// Switch to Archive DB.
+			$this->_plugin->settings->SwitchToArchiveDB();
+		}
+
+		// Calculate limit timestamp.
+		$max_stamp = $now - ( strtotime( $max_sdate ) - $now );
+
+		$query = new WSAL_Models_OccurrenceQuery();
+		$query->addOrderBy( 'created_on', false ); // Descending order.
+		$query->addCondition( 'created_on <= %s', intval( $max_stamp ) ); // Add limits of timestamp.
+		$results = $query->getAdapter()->Execute( $query );
+		$items   = count( $results );
+
+		if ( $items ) {
+			$this->_plugin->CleanUp();
+		}
+
+		if ( $archiving ) {
 			$redirect_url  = add_query_arg( 'page', 'wsal-ext-settings', admin_url( 'admin.php' ) );
 			$redirect_url .= '#archiving';
 			wp_safe_redirect( $redirect_url );
 		} else {
-			wp_safe_redirect( $this->GetUrl() );
+			if ( $items ) {
+				$redirect_args = array(
+					'tab'     => 'audit-log',
+					'pruning' => 1,
+				);
+			} else {
+				$redirect_args = array(
+					'tab'     => 'audit-log',
+					'pruning' => 0,
+				);
+			}
+			wp_safe_redirect( add_query_arg( $redirect_args, $this->GetUrl() ) );
 		}
 		exit;
 	}
@@ -307,6 +340,20 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<div class="error"><p><?php esc_html_e( 'Error: ', 'wp-security-audit-log' ); ?><?php echo esc_html( $ex->getMessage() ); ?></p></div>
 				<?php
 			}
+		}
+
+		if ( isset( $_GET['pruning'] ) && '1' === $_GET['pruning'] ) {
+			?>
+			<div class="updated">
+				<p><?php esc_html_e( 'Old data successfully purged.', 'wp-security-audit-log' ); ?></p>
+			</div>
+			<?php
+		} elseif ( isset( $_GET['pruning'] ) && '0' === $_GET['pruning'] ) {
+			?>
+			<div class="error">
+				<p><?php esc_html_e( 'No data is old enough to be purged.', 'wp-security-audit-log' ); ?></p>
+			</div>
+			<?php
 		}
 
 		?>
@@ -1091,7 +1138,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								$wsal_events_page = add_query_arg( 'page', 'wsal-togglealerts', network_admin_url( 'admin.php' ) );
 							}
 							?>
-							<a href="<?php echo esc_url( $wsal_events_page . '#tab-file-changes' ); ?>">
+							<a href="<?php echo esc_url( $wsal_events_page . '#tab-system' ); ?>">
 								<?php esc_html_e( 'Configure Events', 'wp-security-audit-log' ); ?>
 							</a>
 						</p>
@@ -1885,10 +1932,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Passing nonce for security to JS file.
 		$wsal_data = array(
 			'wp_nonce'       => wp_create_nonce( 'wsal-exclude-nonce' ),
-			'invalidURL'     => esc_html__( 'The specified token is not a valid URL!', 'wp-security-audit-log' ),
-			'invalidCPT'     => esc_html__( 'The specified token is not a valid post type!', 'wp-security-audit-log' ),
-			'invalidIP'      => esc_html__( 'The specified token is not a valid IP address!', 'wp-security-audit-log' ),
-			'invalidUser'    => esc_html__( 'The specified token is not a user nor a role!', 'wp-security-audit-log' ),
+			'invalidURL'     => esc_html__( 'The specified value is not a valid URL!', 'wp-security-audit-log' ),
+			'invalidCPT'     => esc_html__( 'The specified value is not a valid post type!', 'wp-security-audit-log' ),
+			'invalidIP'      => esc_html__( 'The specified value is not a valid IP address!', 'wp-security-audit-log' ),
+			'invalidUser'    => esc_html__( 'The specified value is not a user nor a role!', 'wp-security-audit-log' ),
 			'invalidFile'    => esc_html__( 'Filename cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),
 			'invalidFileExt' => esc_html__( 'File extension cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),
 			'invalidDir'     => esc_html__( 'Directory cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),
@@ -2330,6 +2377,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			$result     = $wpdb->query( "TRUNCATE {$table_name}" );
 
 			if ( $result ) {
+				// Log settings reset event.
+				$this->_plugin->alerts->Trigger( 6006 );
 				die( esc_html__( 'Tables has been reset.', 'wp-security-audit-log' ) );
 			} else {
 				die( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );
@@ -2355,6 +2404,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			$result    = $connector->purge_activity();
 
 			if ( $result ) {
+				// Log purge activity event.
+				$this->_plugin->alerts->Trigger( 6034 );
 				die( esc_html__( 'Tables has been reset.', 'wp-security-audit-log' ) );
 			} else {
 				die( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );
