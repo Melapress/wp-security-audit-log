@@ -673,7 +673,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				add_option( 'wsal_redirect_on_activate', true );
 			}
 
-			// Run on each install/update.
+			// Run on each install.
 			if ( '1' !== $this->GetGlobalOption( 'mwp-child-stealth-mode', '0' ) // If MainWP Child Stealth Mode is not already active.
 				&& is_plugin_active( 'mainwp-child/mainwp-child.php' ) // And if MainWP Child plugin is installed & active.
 				&& ! $this->IsMultisite() ) { // And the website is not multisite.
@@ -790,6 +790,34 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				if ( version_compare( $new_version, '3.2.3', '>' ) ) {
 					if ( 'yes' !== $this->GetGlobalOption( 'wsal-setup-modal-dismissed', false ) ) {
 						$this->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' );
+					}
+				}
+
+				/**
+				 * IMPORTANT: VERSION SPECIFIC UPDATE
+				 *
+				 * It only needs to run when the new version is newwer than 3.2.3.2.
+				 *
+				 * @since 3.2.3.3
+				 */
+				if ( version_compare( $new_version, '3.2.3.2', '>' ) ) {
+					if ( '1' !== $this->GetGlobalOption( 'mwp-child-stealth-mode', '0' ) // If MainWP Child Stealth Mode is not already active.
+						&& is_plugin_active( 'mainwp-child/mainwp-child.php' ) // And if MainWP Child plugin is installed & active.
+						&& ! $this->IsMultisite() ) { // And the website is not multisite.
+						// Update freemius state to skipped.
+						update_site_option( 'wsal_freemius_state', 'skipped' );
+						wsal_freemius()->skip_connection(); // Opt out.
+
+						// Remove notices of Freemius.
+						FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
+						FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'trial_promotion' );
+
+						$this->settings->SetIncognito( '1' );
+						$this->settings->SetRestrictAdmins( true );
+						$editors   = array();
+						$editors[] = wp_get_current_user()->user_login;
+						$this->settings->SetAllowedPluginEditors( $editors );
+						$this->SetGlobalOption( 'mwp-child-stealth-mode', '1' );
 					}
 				}
 			}
