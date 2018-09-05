@@ -408,7 +408,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @since 3.2.3
 		 */
 		public function change_show_first_trial_period( $day_in_sec ) {
-			return 20;
+			return 20 * DAY_IN_SECONDS;
 		}
 
 		/**
