@@ -134,7 +134,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Add connectivity notice.
 		$notice_dismissed = get_transient( 'wsal-dismiss-notice-disconnect' );
-		if ( ! $connection && false === $notice_dismissed ) {
+		if ( ! $connection && false === $notice_dismissed && $is_current_view ) {
 			?>
 			<div class="notice notice-error is-dismissible" id="wsal-notice-connect-issue">
 				<p><?php esc_html_e( 'There are connectivity issues with the database where the WordPress activity log is stored. The logs will be temporary buffered in the WordPress database until the connection is fully restored.', 'wp-security-audit-log' ); ?></p>

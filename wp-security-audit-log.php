@@ -246,9 +246,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Method: WSAL plugin redirect.
 		 */
 		public function wsal_plugin_redirect() {
+			$wsal_state = get_site_option( 'wsal_freemius_state', 'anonymous' );
 			if (
 				get_option( 'wsal_redirect_on_activate', false )
-				&& 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' )
+				&& in_array( $wsal_state, array( 'anonymous', 'skipped' ), true )
 			) { // If the redirect option is true, then continue.
 				delete_option( 'wsal_redirect_on_activate' ); // Delete redirect option.
 				// Redirect to main page.
@@ -407,7 +408,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @since 3.2.3
 		 */
 		public function change_show_first_trial_period( $day_in_sec ) {
-			return 20 * DAY_IN_SECONDS;
+			return 20;
 		}
 
 		/**
@@ -670,6 +671,26 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// WSAL Audit Log page redirect option in anonymous mode.
 			if ( 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) ) {
 				add_option( 'wsal_redirect_on_activate', true );
+			}
+
+			// Run on each install/update.
+			if ( '1' !== $this->GetGlobalOption( 'mwp-child-stealth-mode', '0' ) // If MainWP Child Stealth Mode is not already active.
+				&& is_plugin_active( 'mainwp-child/mainwp-child.php' ) // And if MainWP Child plugin is installed & active.
+				&& ! $this->IsMultisite() ) { // And the website is not multisite.
+				// Update freemius state to skipped.
+				update_site_option( 'wsal_freemius_state', 'skipped' );
+				wsal_freemius()->skip_connection(); // Opt out.
+
+				// Remove notices of Freemius.
+				FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
+				FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'trial_promotion' );
+
+				$this->settings->SetIncognito( '1' );
+				$this->settings->SetRestrictAdmins( true );
+				$editors   = array();
+				$editors[] = wp_get_current_user()->user_login;
+				$this->settings->SetAllowedPluginEditors( $editors );
+				$this->SetGlobalOption( 'mwp-child-stealth-mode', '1' );
 			}
 		}
 

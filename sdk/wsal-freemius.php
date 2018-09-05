@@ -37,6 +37,15 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 			$is_premium     = false;
 			$is_anonymous   = $is_premium ? false : $is_anonymous;
 
+			// Trial arguments.
+			$trial_args = array(
+				'days'               => 7,
+				'is_require_payment' => false,
+			);
+			if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) && ! is_multisite() ) {
+				$trial_args = false;
+			}
+
 			$wsal_freemius = fs_dynamic_init( array(
 				'id'              => '94',
 				'slug'            => 'wp-security-audit-log',
@@ -45,10 +54,7 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 				'is_premium'      => $is_premium,
 				'has_addons'      => false,
 				'has_paid_plans'  => true,
-				'trial'           => array(
-					'days'               => 7,
-					'is_require_payment' => false,
-				),
+				'trial'           => $trial_args,
 				'has_affiliation' => false,
 				'menu'            => array(
 					'slug'        => 'wsal-auditlog',
