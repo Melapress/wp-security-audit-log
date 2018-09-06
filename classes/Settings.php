@@ -1379,13 +1379,17 @@ class WSAL_Settings {
 			! wsal_freemius()->is_premium()
 			&& 'yes' !== $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' ) // MainWP Child Stealth Mode is not already active.
 			&& is_plugin_active( 'mainwp-child/mainwp-child.php' ) // And if MainWP Child plugin is installed & active.
-			&& ! $this->_plugin->IsMultisite() // And the website is not multisite.
 		) {
 			// Check if freemius state is anonymous.
 			if ( 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) ) {
 				// Update freemius state to skipped.
 				update_site_option( 'wsal_freemius_state', 'skipped' );
-				wsal_freemius()->skip_connection(); // Opt out.
+
+				if ( ! $this->_plugin->IsMultisite() ) {
+					wsal_freemius()->skip_connection(); // Opt out.
+				} else {
+					wsal_freemius()->skip_connection( null, true ); // Opt out for all websites.
+				}
 
 				// Connect account notice.
 				FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
