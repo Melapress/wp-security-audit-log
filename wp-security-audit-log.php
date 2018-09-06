@@ -786,7 +786,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				 * @since 3.2.3.3
 				 */
 				if ( ! wsal_freemius()->is_premium()
-					&& false === $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', false ) ) {
+					&& false === $this->GetGlobalOption( 'mwp-child-stealth-mode', false ) ) {
 					$this->settings->set_mainwp_child_stealth_mode();
 				}
 			}
