@@ -1798,6 +1798,35 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			</tbody>
 		</table>
 
+		<h3><?php esc_html_e( 'MainWP Child Site Stealth Mode', 'wp-security-audit-log' ); ?></h3>
+		<p class="description"><?php esc_html_e( 'This option is enabled automatically when the plugin detects the MainWP Child plugin on the site. When this setting is enabled plugin access is restricted to the administrator who installs the plugin, the plugin is not shown in the list of installed plugins and no admin notifications are shown. Disable this option to change the plugin to the default setup.', 'wp-security-audit-log' ); ?></p>
+		<table class="form-table wsal-tab">
+			<tbody>
+				<tr>
+					<th><label for="mwp_stealth_mode"><?php esc_html_e( 'Enable MainWP Child Site Stealth Mode', 'wp-security-audit-log' ); ?></label></th>
+					<td>
+						<fieldset <?php echo wsal_freemius()->is_premium() ? 'disabled' : false; ?>>
+							<label for="mwp_stealth_yes">
+								<?php $stealth_mode = $this->_plugin->settings->is_stealth_mode(); ?>
+								<input type="radio" name="mwp_stealth_mode" value="yes" id="mwp_stealth_yes"
+									<?php checked( $stealth_mode ); ?>
+								/>
+								<?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?>
+							</label>
+							<br>
+							<label for="mwp_stealth_no">
+								<input type="radio" name="mwp_stealth_mode" value="no" id="mwp_stealth_no"
+									<?php checked( $stealth_mode, false ); ?>
+								/>
+								<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
+							</label>
+						</fieldset>
+					</td>
+				</tr>
+				<!-- / Remove Data on Uninstall -->
+			</tbody>
+		</table>
+
 		<h3><?php esc_html_e( 'Do you want to delete the plugin data from the database upon uninstall?', 'wp-security-audit-log' ); ?></h3>
 		<p class="description"><?php esc_html_e( 'The plugin saves the activity log data and settings in the WordPress database. By default upon uninstalling the plugin the data is kept in the database so if it is installed again, you can still access the data. If the data is deleted it is not possible to recover it so you won\'t be able to access it again even when you reinstall the plugin.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
@@ -1861,6 +1890,17 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			$this->_plugin->settings->SetDevOptionEnabled( 'r', true );
 		} else {
 			$this->_plugin->settings->SetDevOptionEnabled( 'r', false );
+		}
+
+		$stealth_mode = isset( $post_array['mwp_stealth_mode'] ) ? $post_array['mwp_stealth_mode'] : false;
+		if ( 'yes' === $stealth_mode ) {
+			if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
+				$this->_plugin->settings->set_mainwp_child_stealth_mode();
+			} else {
+				throw new Exception( __( 'MainWP Child plugin is not active on this website.', 'wp-security-audit-log' ) );
+			}
+		} else {
+			$this->_plugin->settings->deactivate_mainwp_child_stealth_mode();
 		}
 	}
 

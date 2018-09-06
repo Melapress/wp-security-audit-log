@@ -1375,18 +1375,24 @@ class WSAL_Settings {
 	 */
 	public function set_mainwp_child_stealth_mode() {
 		// If wsal is not premium.
-		if ( ! wsal_freemius()->is_premium()
+		if (
+			! wsal_freemius()->is_premium()
 			&& 'yes' !== $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' ) // MainWP Child Stealth Mode is not already active.
 			&& is_plugin_active( 'mainwp-child/mainwp-child.php' ) // And if MainWP Child plugin is installed & active.
-			&& ! $this->_plugin->IsMultisite() ) { // And the website is not multisite.
+			&& ! $this->_plugin->IsMultisite() // And the website is not multisite.
+		) {
+			// Check if freemius state is anonymous.
+			if ( 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) ) {
+				// Update freemius state to skipped.
+				update_site_option( 'wsal_freemius_state', 'skipped' );
+				wsal_freemius()->skip_connection(); // Opt out.
 
-			// Update freemius state to skipped.
-			update_site_option( 'wsal_freemius_state', 'skipped' );
-			wsal_freemius()->skip_connection(); // Opt out.
+				// Connect account notice.
+				FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
+			}
 
-			// Remove notices of Freemius.
-			FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' ); // Connect account notice.
-			FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'trial_promotion' ); // Trial promotion notice.
+			// Remove Freemius trial promotion notice.
+			FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'trial_promotion' );
 
 			$this->SetIncognito( '1' ); // Incognito mode to hide WSAL on plugins page.
 			$this->SetRestrictAdmins( true ); // Restrict other admins.
@@ -1422,5 +1428,18 @@ class WSAL_Settings {
 		if ( 'yes' === $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' ) ) {
 			$this->deactivate_mainwp_child_stealth_mode();
 		}
+	}
+
+	/**
+	 * Check and return if stealth mode is active.
+	 *
+	 * @return boolean
+	 */
+	public function is_stealth_mode() {
+		$stealth_mode = $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' );
+		if ( 'yes' === $stealth_mode ) {
+			return true;
+		}
+		return false;
 	}
 }
