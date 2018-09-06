@@ -1355,4 +1355,55 @@ class WSAL_Settings {
 
 		return 'other';
 	}
+
+	/**
+	 * Set MainWP Child Stealth Mode
+	 *
+	 * Set the plugin in stealth mode for MainWP child sites.
+	 *
+	 * Following steps are taken in stealth mode:
+	 *   1. Freemius connection is skipped.
+	 *   2. Freemius notices are removed.
+	 *   3. WSAL's incognito mode is set.
+	 *   4. Other site admins are restricted.
+	 *   5. The current user is set as the sole editor of WSAL.
+	 *   6. Stealth mode option is saved.
+	 *
+	 * @since 3.2.3.3
+	 */
+	public function set_mainwp_child_stealth_mode() {
+		// If wsal is not premium.
+		if ( ! wsal_freemius()->is_premium()
+			&& 'yes' !== $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' ) // MainWP Child Stealth Mode is not already active.
+			&& is_plugin_active( 'mainwp-child/mainwp-child.php' ) // And if MainWP Child plugin is installed & active.
+			&& ! $this->_plugin->IsMultisite() ) { // And the website is not multisite.
+
+			// Update freemius state to skipped.
+			update_site_option( 'wsal_freemius_state', 'skipped' );
+			wsal_freemius()->skip_connection(); // Opt out.
+
+			// Remove notices of Freemius.
+			FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' ); // Connect account notice.
+			FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'trial_promotion' ); // Trial promotion notice.
+
+			$this->SetIncognito( '1' ); // Incognito mode to hide WSAL on plugins page.
+			$this->SetRestrictAdmins( true ); // Restrict other admins.
+			$editors   = array();
+			$editors[] = wp_get_current_user()->user_login; // Set the current user as the editor of WSAL.
+			$this->SetAllowedPluginEditors( $editors ); // Save the editors.
+			$this->_plugin->SetGlobalOption( 'mwp-child-stealth-mode', 'yes' ); // Save stealth mode option.
+		}
+	}
+
+	/**
+	 * Deactivate MainWP Child Stealth Mode.
+	 *
+	 * @since 3.2.3.3
+	 */
+	public function deactivate_mainwp_child_stealth_mode() {
+		$this->SetIncognito( '0' ); // Disable incognito mode to hide WSAL on plugins page.
+		$this->SetRestrictAdmins( false ); // Give access to other admins.
+		$this->SetAllowedPluginEditors( array() ); // Empty the editors.
+		$this->_plugin->SetGlobalOption( 'mwp-child-stealth-mode', 'no' ); // Disable stealth mode option.
+	}
 }
