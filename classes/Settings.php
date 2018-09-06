@@ -132,6 +132,8 @@ class WSAL_Settings {
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->_plugin = $plugin;
+
+		add_action( 'deactivated_plugin', array( $this, 'reset_stealth_mode' ), 10, 1 );
 	}
 
 	/**
@@ -1405,5 +1407,20 @@ class WSAL_Settings {
 		$this->SetRestrictAdmins( false ); // Give access to other admins.
 		$this->SetAllowedPluginEditors( array() ); // Empty the editors.
 		$this->_plugin->SetGlobalOption( 'mwp-child-stealth-mode', 'no' ); // Disable stealth mode option.
+	}
+
+	/**
+	 * Reset Stealth Mode on MainWP Child plugin deactivation.
+	 *
+	 * @param string $plugin — Plugin.
+	 */
+	public function reset_stealth_mode( $plugin ) {
+		if ( 'mainwp-child/mainwp-child.php' !== $plugin ) {
+			return;
+		}
+
+		if ( 'yes' === $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' ) ) {
+			$this->deactivate_mainwp_child_stealth_mode();
+		}
 	}
 }
