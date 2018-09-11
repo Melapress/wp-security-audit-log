@@ -6,7 +6,7 @@
  * Author: WP White Security
  * Version: 3.2.3.3
  * Text Domain: wp-security-audit-log
- * Author URI: http://www.wpsecurityauditlog.com/
+ * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
  *
  * @package Wsal
