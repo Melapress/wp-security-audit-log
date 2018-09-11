@@ -193,6 +193,9 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 Release Notes: [click here](https://www.wpsecurityauditlog.com/releases/3-2-3-3-hotfix-update/)
 
+* **New Feature**
+	* [MainWP Child Site Stealth Mode](https://www.wpsecurityauditlog.com/support-documentation/mainwp-child-site-stealth-mode/) plugin setting.
+
 * **New Activity Log Events**
 	* Event 6006: User reset the plugin settings to default
 	* Event 6033: [WordPress file integrity scans](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/) status updates (started & stopped)
