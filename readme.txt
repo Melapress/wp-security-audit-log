@@ -56,7 +56,7 @@ Below is a summary of the changes that the plugin can keep a record of:
 
 * **WordPress database changes** such as when a plugin adds or removes a table
 
-* **Changes on **WooCommerce Stores and Products**, **Yoast SEO**, **Advanced Custom Fields (ACF)** and other popular WordPress plugins.
+* **Changes on WooCommerce Stores and Products**, **Yoast SEO**, **Advanced Custom Fields (ACF)** and other popular WordPress plugins.
 
 * Changes done on sites via **MainWP WordPress managemet platform**.
 
