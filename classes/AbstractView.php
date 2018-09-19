@@ -88,8 +88,9 @@ abstract class WSAL_AbstractView {
 	 * @return boolean — Whether notice got dismissed or not.
 	 */
 	public function IsNoticeDismissed( $name ) {
-		$user_id = get_current_user_id();
+		$user_id  = get_current_user_id();
 		$meta_key = 'wsal-notice-' . $name;
+
 		self::$AllowedNoticeNames[] = $name;
 		return ! ! get_user_meta( $user_id, $meta_key, true );
 	}
@@ -100,8 +101,8 @@ abstract class WSAL_AbstractView {
 	 * @param string $name — Name of notice to dismiss.
 	 */
 	public function DismissNotice( $name ) {
-		$user_id = get_current_user_id();
-		$meta_key = 'wsal-notice-' . $name;
+		$user_id   = get_current_user_id();
+		$meta_key  = 'wsal-notice-' . $name;
 		$old_value = get_user_meta( $user_id, $meta_key, true );
 		if ( in_array( $name, self::$AllowedNoticeNames ) || false === $old_value ) {
 			update_user_meta( $user_id, $meta_key, '1' );

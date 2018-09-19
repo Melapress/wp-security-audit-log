@@ -37,6 +37,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	protected $_version;
 
 	/**
+	 * WSAL Adverts.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @var array
+	 */
+	private $adverts;
+
+	/**
 	 * Method: Constructor
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
@@ -60,8 +69,22 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Check plugin version for to dismiss the notice only until upgrade.
 		$this->_version = WSAL_VERSION;
-		$this->RegisterNotice( 'premium-wsal-' . $this->_version ); // Upgrade notice.
 		$this->RegisterNotice( 'wsal-privacy-notice-3.2' ); // Privacy notice.
+
+		// Set adverts array.
+		$this->adverts = array(
+			0 => array(
+				'head' => __( 'Get instantly alerted of important changes via email, do text based searches and filter results, generate reports, see who is logged in and more!', 'wp-security-audit-log' ),
+				'desc' => __( 'Upgrade to premium to unlock these powerful activity log features.', 'wp-security-audit-log' ),
+			),
+			1 => array(
+				'head' => __( 'Instant email alerts, text search & filters, reports, see who is logged in to your system real-time, reports activity log archiving and mirroring, integration with other systems and much more!', 'wp-security-audit-log' ),
+			),
+			2 => array(
+				'head' => __( 'See who is logged in to your WordPress, create user productivity reports, get alerted via email of important changes and more!', 'wp-security-audit-log' ),
+				'desc' => __( 'Unlock these powerful features and much more with the premium edition of WP Security Audit Log.', 'wp-security-audit-log' ),
+			),
+		);
 	}
 
 	/**
@@ -81,15 +104,23 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			&& ! class_exists( 'WSAL_User_Management_Plugin' )
 			&& 'anonymous' !== get_site_option( 'wsal_freemius_state', 'anonymous' ) // Anonymous mode option.
 		) {
-			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $this->IsNoticeDismissed( 'premium-wsal-' . $this->_version ) ) { ?>
-				<div class="updated wsal_notice" data-notice-name="premium-wsal-<?php echo esc_attr( $this->_version ); ?>">
+			$wsal_is_advert_dismissed = get_transient( 'wsal-is-advert-dismissed' ); // Check if advert has been dismissed.
+			$wsal_is_advert_dismissed = false !== $wsal_is_advert_dismissed ? $wsal_is_advert_dismissed : false; // Set the default.
+			$wsal_premium_advert      = get_transient( 'wsal-premium-advert' ); // Get the previously active advert.
+			$wsal_premium_advert      = false !== $wsal_premium_advert ? $wsal_premium_advert : 0; // Set the default.
+
+			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $wsal_is_advert_dismissed ) : ?>
+				<div class="updated wsal_notice">
 					<div class="wsal_notice__wrapper">
-						<img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wsal-logo@2x.png">
-						<p>
-							<strong><?php esc_html_e( 'See who is logged in to your WordPress, create user productivity reports, get alerted via email of important changes and more!', 'wp-security-audit-log' ); ?></strong><br />
-							<?php esc_html_e( 'Unlock these powerful features and much more with the premium edition of WP Security Audit Log.', 'wp-security-audit-log' ); ?>
-						</p>
-						<!-- /.wsal_notice__wrapper -->
+						<div class="wsal_notice__content">
+							<img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wsal-logo@2x.png">
+							<p>
+								<strong><?php echo esc_html( $this->adverts[ $wsal_premium_advert ]['head'] ); ?></strong><br />
+								<?php echo esc_html( $this->adverts[ $wsal_premium_advert ]['desc'] ); ?>
+							</p>
+						</div>
+						<!-- /.wsal_notice__content -->
+
 						<div class="wsal_notice__btns">
 							<?php
 							// Buy Now button link.
@@ -112,14 +143,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 								'https://www.wpsecurityauditlog.com/premium-features/'
 							);
 							?>
-							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary buy-now"><?php esc_html_e( 'Buy Now', 'wp-security-audit-log' ); ?></a>
-							<a href="<?php echo esc_url( $more_info ); ?>" target="_blank"><?php esc_html_e( 'More Information', 'wp-security-audit-log' ); ?></a>
+							<a href="javascript:;" id="wsal-dismiss-advert" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>"><span class="dashicons dashicons-dismiss"></span></a>
+							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary wsal_notice__btn"><?php esc_html_e( 'UPGRADE', 'wp-security-audit-log' ); ?></a>
+							<a href="<?php echo esc_url( $more_info ); ?>" class="wsal_notice__btn" target="_blank"><?php esc_html_e( 'Tell me more', 'wp-security-audit-log' ); ?></a>
 						</div>
 						<!-- /.wsal_notice__btns -->
 					</div>
+					<!-- /.wsal_notice__wrapper -->
 				</div>
 				<?php
-			}
+			endif;
 		}
 
 		// Get DB connector.

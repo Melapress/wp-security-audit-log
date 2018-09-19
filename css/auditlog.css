@@ -261,32 +261,44 @@ td.column-user {
 	display: flex;
 	-webkit-box-align: start;
 	-ms-flex-align: start;
-    align-items: flex-start;
+	align-items: flex-start;
+	-webkit-box-pack: justify;
+	-ms-flex-pack: justify;
+	justify-content: space-between;
 	position: relative;
 	margin: 12px 0;
 }
 
+.wsal_notice__wrapper .wsal_notice__content {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: start;
+	-ms-flex-align: start;
+	align-items: flex-start;
+}
+
 .wsal_notice__btns {
-	position: absolute;
-	right: 0;
 	text-align: right;
 }
 
-.wsal_notice__btns a {
+.wsal_notice__btns a.wsal_notice__btn {
 	display: block;
+	margin-top: 5px;
 }
 
-.wsal_notice__btns a.buy-now {
-	margin-bottom: 10px;
+.wsal_notice__btns a.wsal_notice__btn_dismiss {
+	text-decoration: none;
 }
 
 .wsal_notice__wrapper img {
-	width: 70px;
 	height: 70px;
 	margin-right: 5px;
 }
 
 div.wsal_notice__wrapper p {
+	display: inline-block;
+	vertical-align: top;
 	margin-right: 16px;
 }
 
