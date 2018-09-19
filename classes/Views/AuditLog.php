@@ -61,6 +61,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_download_404_log', array( $this, 'wsal_download_404_log' ) );
 		add_action( 'wp_ajax_wsal_freemius_opt_in', array( $this, 'wsal_freemius_opt_in' ) );
 		add_action( 'wp_ajax_wsal_exclude_url', array( $this, 'wsal_exclude_url' ) );
+		add_action( 'wp_ajax_wsal_dismiss_advert', array( $this, 'wsal_dismiss_advert' ) );
 		add_action( 'wp_ajax_wsal_dismiss_notice_disconnect', array( $this, 'dismiss_notice_disconnect' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
@@ -106,8 +107,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		) {
 			$wsal_is_advert_dismissed = get_transient( 'wsal-is-advert-dismissed' ); // Check if advert has been dismissed.
 			$wsal_is_advert_dismissed = false !== $wsal_is_advert_dismissed ? $wsal_is_advert_dismissed : false; // Set the default.
-			$wsal_premium_advert      = get_transient( 'wsal-premium-advert' ); // Get the previously active advert.
-			$wsal_premium_advert      = false !== $wsal_premium_advert ? $wsal_premium_advert : 0; // Set the default.
+			$wsal_premium_advert      = $this->_plugin->GetGlobalOption( 'premium-advert', false ); // Get the advert to display.
+			$wsal_premium_advert      = false !== $wsal_premium_advert ? (int) $wsal_premium_advert : 0; // Set the default.
 
 			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $wsal_is_advert_dismissed ) : ?>
 				<div class="updated wsal_notice">
@@ -115,8 +116,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						<div class="wsal_notice__content">
 							<img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wsal-logo@2x.png">
 							<p>
-								<strong><?php echo esc_html( $this->adverts[ $wsal_premium_advert ]['head'] ); ?></strong><br />
-								<?php echo esc_html( $this->adverts[ $wsal_premium_advert ]['desc'] ); ?>
+								<strong><?php echo isset( $this->adverts[ $wsal_premium_advert ]['head'] ) ? esc_html( $this->adverts[ $wsal_premium_advert ]['head'] ) : false; ?></strong><br>
+								<?php echo isset( $this->adverts[ $wsal_premium_advert ]['desc'] ) ? esc_html( $this->adverts[ $wsal_premium_advert ]['desc'] ) : false; ?>
 							</p>
 						</div>
 						<!-- /.wsal_notice__content -->
@@ -143,7 +144,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 								'https://www.wpsecurityauditlog.com/premium-features/'
 							);
 							?>
-							<a href="javascript:;" id="wsal-dismiss-advert" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>"><span class="dashicons dashicons-dismiss"></span></a>
+							<a href="javascript:;" data-advert="<?php echo esc_attr( $wsal_premium_advert ); ?>" onclick="wsal_dismiss_advert(this)" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>">
+								<span class="dashicons dashicons-dismiss"></span>
+							</a>
+							<?php wp_nonce_field( 'wsal_dismiss_advert', 'wsal-dismiss-advert', false, true ); ?>
 							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary wsal_notice__btn"><?php esc_html_e( 'UPGRADE', 'wp-security-audit-log' ); ?></a>
 							<a href="<?php echo esc_url( $more_info ); ?>" class="wsal_notice__btn" target="_blank"><?php esc_html_e( 'Tell me more', 'wp-security-audit-log' ); ?></a>
 						</div>
@@ -444,8 +448,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						?>
 					);
 				} );
-			</script>
-			<?php
+			</script><?php
 		endif;
 	}
 
@@ -988,5 +991,50 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		);
 		echo '<p>URL ' . esc_html( $post_array['url'] ) . ' is no longer being monitored.<br />Enable the monitoring of this URL again from the <a href="' . esc_url( $settings_exclude_url ) . '">Excluded Objects</a> tab in the plugin settings.</p>';
 		die;
+	}
+
+	/**
+	 * Method: Ajax request handler to dismiss adverts.
+	 *
+	 * @since 3.2.4
+	 */
+	public function wsal_dismiss_advert() {
+		// Die if user does not have permission to dismiss.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'You do not have sufficient permissions to dismiss this notice.', 'wp-security-audit-log' ),
+				)
+			);
+			die();
+		}
+
+		// Filter $_POST array for security.
+		// @codingStandardsIgnoreStart
+		$nonce  = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
+		$advert = isset( $_POST['advert'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['advert'] ) ) : false;
+		// @codingStandardsIgnoreEnd
+
+		if ( ! empty( $nonce ) && ! wp_verify_nonce( $nonce, 'wsal_dismiss_advert' ) ) {
+			// Nonce verification failed.
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
+				)
+			);
+			die();
+		}
+
+		$advert = 2 === $advert ? '0' : $advert + 1;
+		$this->_plugin->SetGlobalOption( 'premium-advert', $advert );
+		set_transient( 'wsal-is-advert-dismissed', true, MONTH_IN_SECONDS );
+		echo wp_json_encode(
+			array(
+				'success' => true,
+			)
+		);
+		die();
 	}
 }
