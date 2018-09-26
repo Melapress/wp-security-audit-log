@@ -231,6 +231,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				wp_schedule_event( time(), 'daily', 'wsal_delete_logins' );
 			}
 
+			add_filter( 'mainwp_child_extra_excution', array( $this, 'mainwp_dashboard_callback' ), 10, 2 );
+
 			// Register freemius uninstall event.
 			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
 
@@ -240,6 +242,54 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
 			wsal_freemius()->add_filter( 'show_first_trial_after_n_sec', array( $this, 'change_show_first_trial_period' ), 10, 1 );
 			wsal_freemius()->add_filter( 'reshow_trial_after_every_n_sec', array( $this, 'change_reshow_trial_period' ), 10, 1 );
+		}
+
+		/**
+		 * MainWP Dashboard Handler.
+		 *
+		 * @param array $info      – Information to return.
+		 * @param array $post_data – Post data array from MainWP.
+		 * @return mixed
+		 */
+		public function mainwp_dashboard_callback( $info, $post_data ) {
+			if ( isset( $post_data['action'] ) ) {
+				switch ( $post_data['action'] ) {
+					case 'check_wsal':
+						$info = new stdClass();
+						$info->wsal_installed = true;
+						$info->is_premium     = false;
+
+						if ( wsal_freemius()->is__premium_only() ) {
+							$info->is_premium = true;
+						}
+						break;
+
+					case 'get_events':
+						$limit = isset( $post_data['events_count'] ) ? $post_data['events_count'] : false;
+						$info  = $this->alerts->get_mainwp_extension_events( $limit );
+						break;
+
+					case 'latest_event':
+						$event_query = new WSAL_Models_OccurrenceQuery();
+						$event_query->addOrderBy( 'created_on', true );
+						$event_query->setLimit( 1 );
+						$event = $event_query->getAdapter()->Execute( $event_query );
+
+						// Set the return object.
+						if ( isset( $event[0] ) ) {
+							$info = new stdClass();
+							$info->alert_id   = $event[0]->alert_id;
+							$info->created_on = $event[0]->created_on;
+						} else {
+							$info = false;
+						}
+						break;
+
+					default:
+						break;
+				}
+			}
+			return $info;
 		}
 
 		/**

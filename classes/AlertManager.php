@@ -50,6 +50,15 @@ final class WSAL_AlertManager {
 	private static $log_events_schedule_hook = 'wsal_log_events_ext_db';
 
 	/**
+	 * WP Users
+	 *
+	 * Store WP Users for caching purposes.
+	 *
+	 * @var array
+	 */
+	private $wp_users = array();
+
+	/**
 	 * Create new AlertManager instance.
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
@@ -620,5 +629,88 @@ final class WSAL_AlertManager {
 			delete_option( 'wsal_temp_alerts' );
 			return true;
 		}
+	}
+
+	/**
+	 * Return alerts for MainWP Extension.
+	 *
+	 * @param integer $limit – Number of alerts to retrieve.
+	 * @return stdClass
+	 */
+	public function get_mainwp_extension_events( $limit = 100 ) {
+		$mwp_events = new stdClass();
+
+		// Check if limit is not empty.
+		if ( empty( $limit ) ) {
+			return $mwp_events;
+		}
+
+		// Initiate query occurrence object.
+		$events_query = new WSAL_Models_OccurrenceQuery();
+		$events_query->addCondition( 'site_id = %s ', 1 );
+		$events_query->addOrderBy( 'created_on', true );
+		$events_query->setLimit( $limit );
+		$events = $events_query->getAdapter()->Execute( $events_query );
+
+		if ( ! empty( $events ) && is_array( $events ) ) {
+			foreach ( $events as $event ) {
+				// Get event meta.
+				$meta_data             = $event->GetMetaArray();
+				$meta_data['UserData'] = $this->get_event_user_data( $event->GetUsername() );
+
+				$mwp_events->events[ $event->id ]             = new stdClass();
+				$mwp_events->events[ $event->id ]->id         = $event->id;
+				$mwp_events->events[ $event->id ]->alert_id   = $event->alert_id;
+				$mwp_events->events[ $event->id ]->created_on = $event->created_on;
+				$mwp_events->events[ $event->id ]->meta_data  = $meta_data;
+			}
+		}
+
+		return $mwp_events;
+	}
+
+	/**
+	 * Return user data array of the events.
+	 *
+	 * @param string $username – Username.
+	 * @return stdClass
+	 */
+	public function get_event_user_data( $username ) {
+		// User data.
+		$user_data = new stdClass();
+
+		// Handle WSAL usernames.
+		if ( empty( $username ) ) {
+			$user_data->username = 'System';
+		} elseif ( 'Plugin' === $username ) {
+			$user_data->username = 'Plugin';
+		} elseif ( 'Plugins' === $username ) {
+			$user_data->username = 'Plugins';
+		} elseif ( 'Website Visitor' === $username ) {
+			$user_data->username = 'Website Visitor';
+		} else {
+			// Check WP user.
+			if ( isset( $this->wp_users[ $username ] ) ) {
+				// Retrieve from users cache.
+				$user = $this->wp_users[ $username ];
+			} else {
+				// Get user from WP.
+				$user = get_user_by( 'login', $username );
+
+				// Store the object in class member.
+				$this->wp_users[ $username ] = $user;
+			}
+
+			// Set user data.
+			if ( $user && $user instanceof WP_User ) {
+				$user_data->user_id      = $user->ID;
+				$user_data->username     = $user->login;
+				$user_data->first_name   = $user->first_name;
+				$user_data->last_name    = $user->last_name;
+				$user_data->display_name = $user->display_name;
+				$user_data->user_email   = $user->user_email;
+			}
+		}
+		return $user_data;
 	}
 }
