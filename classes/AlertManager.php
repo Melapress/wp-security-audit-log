@@ -709,6 +709,8 @@ final class WSAL_AlertManager {
 				$user_data->last_name    = $user->last_name;
 				$user_data->display_name = $user->display_name;
 				$user_data->user_email   = $user->user_email;
+			} else {
+				$user_data->username = 'System';
 			}
 		}
 		return $user_data;
