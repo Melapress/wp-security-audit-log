@@ -187,10 +187,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$this->autoloader->Register( self::PLG_CLS_PRFX, $this->GetBaseDir() . 'classes' . DIRECTORY_SEPARATOR );
 
 			// Load dependencies.
+			$this->settings  = new WSAL_Settings( $this );
 			$this->views     = new WSAL_ViewManager( $this );
 			$this->alerts    = new WSAL_AlertManager( $this );
 			$this->sensors   = new WSAL_SensorManager( $this );
-			$this->settings  = new WSAL_Settings( $this );
 			$this->constants = new WSAL_ConstantManager( $this );
 			$this->licensing = new WSAL_LicenseManager( $this );
 			$this->widgets   = new WSAL_WidgetManager( $this );
@@ -536,12 +536,26 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @internal
 		 */
 		public function RenderFooter() {
-			wp_enqueue_script(
+			// Register common script.
+			wp_register_script(
 				'wsal-common',
 				$this->GetBaseUrl() . '/js/common.js',
 				array( 'jquery' ),
-				filemtime( $this->GetBaseDir() . '/js/common.js' )
+				filemtime( $this->GetBaseDir() . '/js/common.js' ),
+				true
 			);
+
+			// Set data array for common script.
+			$occurrence  = new WSAL_Models_Occurrence();
+			$script_data = array(
+				'ajaxURL'     => admin_url( 'admin-ajax.php' ),
+				'eventsCount' => (int) $occurrence->Count(),
+				'commonNonce' => wp_create_nonce( 'wsal-common-js-nonce' ),
+			);
+			wp_localize_script( 'wsal-common', 'wsalCommonData', $script_data );
+
+			// Enqueue script.
+			wp_enqueue_script( 'wsal-common' );
 		}
 
 		/**
@@ -673,10 +687,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				add_option( 'wsal_redirect_on_activate', true );
 			}
 
-			// Run on each install if WSAL is not premium.
-			if ( ! wsal_freemius()->is_premium() ) {
-				$this->settings->set_mainwp_child_stealth_mode();
-			}
+			// Run on each install to check MainWP Child plugin.
+			$this->settings->set_mainwp_child_stealth_mode();
 		}
 
 		/**
@@ -785,9 +797,20 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				 *
 				 * @since 3.2.3.3
 				 */
-				if ( ! wsal_freemius()->is_premium()
-					&& false === $this->GetGlobalOption( 'mwp-child-stealth-mode', false ) ) {
+				if ( false === $this->GetGlobalOption( 'mwp-child-stealth-mode', false ) ) {
 					$this->settings->set_mainwp_child_stealth_mode();
+				}
+
+				/**
+				 * IMPORTANT: VERSION SPECIFIC UPDATE
+				 *
+				 * It only needs to run when old version of the plugin is less than 3.2.4
+				 * & the plugin is being updated to version 3.2.4 or later versions.
+				 *
+				 * @since 3.2.4
+				 */
+				if ( version_compare( $old_version, '3.2.4', '<' ) && version_compare( $new_version, '3.2.3.3', '>' ) ) {
+					$this->SetGlobalOption( 'dismissed-privacy-notice', '1,wsal_privacy' );
 				}
 			}
 		}
@@ -1069,22 +1092,22 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
-		 * Clear last day's failed login alert.
+		 * Clear last 30 day's failed login alert usernames.
 		 */
 		public function delete_failed_logins() {
 			// Set the dates.
 			list( $y, $m, $d ) = explode( '-', date( 'Y-m-d' ) );
 
 			// Site id.
-			$site_id = (function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0);
+			$site_id = function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0;
 
 			// New occurrence object.
 			$occurrence = new WSAL_Models_Occurrence();
-			$alerts = $occurrence->check_alert_1003(
+			$alerts     = $occurrence->check_alert_1003(
 				array(
 					1003,
 					$site_id,
-					mktime( 0, 0, 0, $m, $d - 1, $y ) + 1,
+					mktime( 0, 0, 0, $m - 1, $d, $y ) + 1,
 					mktime( 0, 0, 0, $m, $d, $y ),
 				)
 			);
