@@ -294,36 +294,36 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				if ( $this->old_meta[ $meta_id ]->key != $meta_key ) {
 					$this->plugin->alerts->Trigger(
 						2062, array(
-							'PostID' => $object_id,
-							'PostTitle' => $post->post_title,
-							'PostStatus' => $post->post_status,
-							'PostType' => $post->post_type,
-							'PostDate' => $post->post_date,
-							'PostUrl' => get_permalink( $post->ID ),
-							'MetaID' => $meta_id,
-							'MetaKeyNew' => $meta_key,
-							'MetaKeyOld' => $this->old_meta[ $meta_id ]->key,
-							'MetaValue' => $meta_value,
-							'MetaLink' => $meta_key,
+							'PostID'             => $object_id,
+							'PostTitle'          => $post->post_title,
+							'PostStatus'         => $post->post_status,
+							'PostType'           => $post->post_type,
+							'PostDate'           => $post->post_date,
+							'PostUrl'            => get_permalink( $post->ID ),
+							'MetaID'             => $meta_id,
+							'MetaKeyNew'         => $meta_key,
+							'MetaKeyOld'         => $this->old_meta[ $meta_id ]->key,
+							'MetaValue'          => $meta_value,
+							'MetaLink'           => $meta_key,
 							$editor_link['name'] => $editor_link['value'],
 						)
 					);
 				} elseif ( $this->old_meta[ $meta_id ]->val != $meta_value ) { // Check change in meta value.
 					$this->plugin->alerts->Trigger(
 						2054, array(
-							'PostID' => $object_id,
-							'PostTitle' => $post->post_title,
-							'PostStatus' => $post->post_status,
-							'PostType' => $post->post_type,
-							'PostDate' => $post->post_date,
-							'PostUrl' => get_permalink( $post->ID ),
-							'MetaID' => $meta_id,
-							'MetaKey' => $meta_key,
-							'MetaValueNew' => $meta_value,
-							'MetaValueOld' => $this->old_meta[ $meta_id ]->val,
-							'MetaLink' => $meta_key,
+							'PostID'             => $object_id,
+							'PostTitle'          => $post->post_title,
+							'PostStatus'         => $post->post_status,
+							'PostType'           => $post->post_type,
+							'PostDate'           => $post->post_date,
+							'PostUrl'            => get_permalink( $post->ID ),
+							'MetaID'             => $meta_id,
+							'MetaKey'            => $meta_key,
+							'MetaValueNew'       => $meta_value,
+							'MetaValueOld'       => $this->old_meta[ $meta_id ]->val,
+							'MetaLink'           => $meta_key,
 							$editor_link['name'] => $editor_link['value'],
-							'ReportText' => $this->old_meta[ $meta_id ]->val . '|' . $meta_value,
+							'ReportText'         => is_string( $this->old_meta[ $meta_id ]->val ) ? $this->old_meta[ $meta_id ]->val . '|' . $meta_value : false,
 						)
 					);
 				}
@@ -546,7 +546,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							'custom_field_name' => $meta_key,
 							'new_value'         => $meta_value,
 							'old_value'         => $this->old_meta[ $meta_id ]->val,
-							'ReportText'        => $this->old_meta[ $meta_id ]->val . '|' . $meta_value,
+							'ReportText'        => is_string( $this->old_meta[ $meta_id ]->val ) ? $this->old_meta[ $meta_id ]->val . '|' . $meta_value : false,
 						),
 						array( $this, 'must_not_contain_role_changes' )
 					);
