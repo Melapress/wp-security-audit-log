@@ -66,10 +66,20 @@ td.column-user {
 .column-user img {
 	float: left;
 	margin-right: 4px;
+}
+
+.column-user img.avatar {
 	-webkit-border-radius: 50px;
 	-moz-border-radius: 50px;
 	-ms-border-radius: 50px;
 	border-radius: 50px;
+}
+
+.wsal-system-icon {
+	width: 32px;
+	font-size: 32px;
+	height: 32px;
+	margin-right: 4px;
 }
 
 .column-scip {
