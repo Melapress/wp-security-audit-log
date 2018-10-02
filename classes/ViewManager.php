@@ -114,6 +114,16 @@ class WSAL_ViewManager {
 		) {
 			new WSAL_Views_SetupWizard( $plugin );
 		}
+
+		// Reorder WSAL submenu.
+		add_filter( 'custom_menu_order', array( $this, 'reorder_wsal_submenu' ), 10, 1 );
+
+		if ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
+			if ( $this->_plugin->settings->is_admin_bar_notif() ) {
+				add_action( 'admin_bar_menu', array( $this, 'live_notifications' ), 1000, 1 );
+				add_action( 'wp_ajax_wsal_adminbar_events_refresh', array( $this, 'wsal_adminbar_events_refresh' ) );
+			}
+		}
 	}
 
 	/**
@@ -378,5 +388,120 @@ class WSAL_ViewManager {
 				break;
 		}
 		return $not_show;
+	}
+
+	/**
+	 * Reorder WSAL Submenu.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @param boolean $menu_order - Custom order.
+	 * @return boolean
+	 */
+	public function reorder_wsal_submenu( $menu_order ) {
+		// Get global $submenu order.
+		global $submenu;
+
+		// Get WSAL admin menu.
+		$auditlog_menu = isset( $submenu['wsal-auditlog'] ) ? $submenu['wsal-auditlog'] : false;
+		$help_link     = new stdClass();
+		$account_link  = new stdClass();
+
+		if ( ! empty( $auditlog_menu ) ) {
+			foreach ( $auditlog_menu as $key => $auditlog_submenu ) {
+				if ( 'wsal-help' === $auditlog_submenu[2] ) {
+					$help_link->key  = $key;
+					$help_link->menu = $auditlog_submenu;
+				} elseif ( 'wsal-auditlog-account' === $auditlog_submenu[2] ) {
+					$account_link->key  = $key;
+					$account_link->menu = $auditlog_submenu;
+				}
+			}
+		}
+
+		if ( ! empty( $help_link ) && ! empty( $account_link ) ) {
+			// Swap the menus at their positions.
+			if ( isset( $help_link->key ) && isset( $account_link->menu ) ) {
+				$submenu['wsal-auditlog'][ $help_link->key ] = $account_link->menu;
+			}
+			if ( isset( $account_link->key ) && isset( $help_link->menu ) ) {
+				$submenu['wsal-auditlog'][ $account_link->key ] = $help_link->menu;
+			}
+			if ( isset( $submenu['wsal-auditlog'] ) && is_array( $submenu['wsal-auditlog'] ) ) {
+				ksort( $submenu['wsal-auditlog'] );
+			}
+		}
+		return $menu_order;
+	}
+
+	/**
+	 * Add WSAL to WP-Admin menu bar.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @param WP_Admin_Bar $admin_bar - Instance of WP_Admin_Bar.
+	 */
+	public function live_notifications( $admin_bar ) {
+		if ( $this->_plugin->settings->CurrentUserCan( 'view' ) && is_admin() ) {
+			$event = $this->_plugin->alerts->get_admin_bar_event();
+
+			if ( $event ) {
+				$code = $this->_plugin->alerts->GetAlert( $event->alert_id );
+				$admin_bar->add_node( array(
+					'id'    => 'wsal-menu',
+					'title' => 'LIVE: ' . $code->desc . ' from ' . $event->GetSourceIp(),
+					'href'  => add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) ),
+					'meta'  => array( 'class' => 'wsal-live-notif-item' ),
+				) );
+			}
+		}
+	}
+
+	/**
+	 * WP-Admin bar refresh event handler.
+	 *
+	 * @since 3.2.4
+	 */
+	public function wsal_adminbar_events_refresh() {
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => __( 'Access Denied.', 'wp-security-audit-log' ),
+			) );
+			die();
+		}
+
+		if ( isset( $_POST['nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wsal-common-js-nonce' ) ) {
+			$events_count = isset( $_POST['eventsCount'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['eventsCount'] ) ) : false;
+
+			if ( $events_count ) {
+				$occurrence = new WSAL_Models_Occurrence();
+				$new_count  = (int) $occurrence->Count();
+
+				if ( $events_count !== $new_count ) {
+					$event = $this->_plugin->alerts->get_admin_bar_event( true );
+					$code  = $this->_plugin->alerts->GetAlert( $event->alert_id );
+
+					echo wp_json_encode( array(
+						'success' => true,
+						'count'   => $new_count,
+						'message' => 'LIVE: ' . $code->desc . ' from ' . $event->GetSourceIp(),
+					) );
+				} else {
+					echo wp_json_encode( array( 'success' => false ) );
+				}
+			} else {
+				echo wp_json_encode( array(
+					'success' => false,
+					'message' => __( 'Log count parameter expected.', 'wp-security-audit-log' ),
+				) );
+			}
+		} else {
+			echo wp_json_encode( array(
+				'success' => false,
+				'message' => __( 'Nonce verification failed.', 'wp-security-audit-log' ),
+			) );
+		}
+		die();
 	}
 }
