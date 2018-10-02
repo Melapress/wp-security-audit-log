@@ -63,6 +63,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_exclude_url', array( $this, 'wsal_exclude_url' ) );
 		add_action( 'wp_ajax_wsal_dismiss_advert', array( $this, 'wsal_dismiss_advert' ) );
 		add_action( 'wp_ajax_wsal_dismiss_notice_disconnect', array( $this, 'dismiss_notice_disconnect' ) );
+		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( $this, 'dismiss_wp_pointer' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
 		add_filter( 'wsal_pointers_toplevel_page_wsal-auditlog', array( $this, 'register_privacy_pointer' ), 10, 1 );
@@ -70,7 +71,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Check plugin version for to dismiss the notice only until upgrade.
 		$this->_version = WSAL_VERSION;
-		$this->RegisterNotice( 'wsal-privacy-notice-3.2' ); // Privacy notice.
 
 		// Set adverts array.
 		$this->adverts = array(
@@ -105,7 +105,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			&& ! class_exists( 'WSAL_User_Management_Plugin' )
 			&& 'anonymous' !== get_site_option( 'wsal_freemius_state', 'anonymous' ) // Anonymous mode option.
 		) {
-			$wsal_is_advert_dismissed = get_transient( 'wsal-is-advert-dismissed' ); // Check if advert has been dismissed.
+			$get_transient_fn         = $this->_plugin->IsMultisite() ? 'get_site_transient' : 'get_transient'; // Check for multisite.
+			$wsal_is_advert_dismissed = $get_transient_fn( 'wsal-is-advert-dismissed' ); // Check if advert has been dismissed.
 			$wsal_is_advert_dismissed = false !== $wsal_is_advert_dismissed ? $wsal_is_advert_dismissed : false; // Set the default.
 			$wsal_premium_advert      = $this->_plugin->GetGlobalOption( 'premium-advert', false ); // Get the advert to display.
 			$wsal_premium_advert      = false !== $wsal_premium_advert ? (int) $wsal_premium_advert : 0; // Set the default.
@@ -874,7 +875,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Get dismissed pointers.
-		$dismissed      = explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) );
+		$dismissed      = explode( ',', (string) $this->_plugin->GetGlobalOption( 'dismissed-privacy-notice', true ) );
 		$valid_pointers = array();
 
 		// Check pointers and remove dismissed ones.
@@ -925,11 +926,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function register_privacy_pointer( $pointer ) {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
-		if (
-			current_user_can( 'manage_options' )
-			&& $is_current_view
-			&& ! $this->IsNoticeDismissed( 'wsal-privacy-notice-3.2' )
-		) {
+		if ( current_user_can( 'manage_options' ) && $is_current_view && ! isset( $pointer['wsal_privacy'] ) ) {
 			$pointer['wsal_privacy'] = array(
 				'target'  => '#toplevel_page_wsal-auditlog .wp-first-item',
 				'options' => array(
@@ -1029,12 +1026,40 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		$advert = 2 === $advert ? '0' : $advert + 1;
 		$this->_plugin->SetGlobalOption( 'premium-advert', $advert );
-		set_transient( 'wsal-is-advert-dismissed', true, MONTH_IN_SECONDS );
+		$set_transient_fn = $this->_plugin->IsMultisite() ? 'set_site_transient' : 'set_transient';
+		$set_transient_fn( 'wsal-is-advert-dismissed', true, MONTH_IN_SECONDS );
 		echo wp_json_encode(
 			array(
 				'success' => true,
 			)
 		);
 		die();
+	}
+
+	/**
+	 * Method: Ajax request handler to dismiss pointers.
+	 *
+	 * @since 3.2.4
+	 */
+	public function dismiss_wp_pointer() {
+		// @codingStandardsIgnoreStart
+		$pointer = sanitize_text_field( wp_unslash( $_POST['pointer'] ) );
+		// @codingStandardsIgnoreEnd
+
+		if ( $pointer != sanitize_key( $pointer ) ) {
+			wp_die( 0 );
+		}
+
+		$dismissed = array_filter( explode( ',', (string) $this->_plugin->GetGlobalOption( 'dismissed-privacy-notice', true ) ) );
+
+		if ( in_array( $pointer, $dismissed ) ) {
+			wp_die( 0 );
+		}
+
+		$dismissed[] = $pointer;
+		$dismissed   = implode( ',', $dismissed );
+
+		$this->_plugin->SetGlobalOption( 'dismissed-privacy-notice', $dismissed );
+		wp_die( 1 );
 	}
 }

@@ -46,7 +46,7 @@ class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
 	 * Method: Get View Weight.
 	 */
 	public function GetWeight() {
-		return 9;
+		return 8;
 	}
 
 	/**

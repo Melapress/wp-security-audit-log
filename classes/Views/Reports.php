@@ -46,7 +46,7 @@ class WSAL_Views_Reports extends WSAL_AbstractView {
 	 * Method: Get View Weight.
 	 */
 	public function GetWeight() {
-		return 8;
+		return 9;
 	}
 
 	/**
