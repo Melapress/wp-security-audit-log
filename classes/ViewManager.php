@@ -120,8 +120,8 @@ class WSAL_ViewManager {
 
 		if ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
 			if ( $this->_plugin->settings->is_admin_bar_notif() ) {
-				add_action( 'admin_bar_menu', array( $this, 'live_notifications' ), 1000, 1 );
-				add_action( 'wp_ajax_wsal_adminbar_events_refresh', array( $this, 'wsal_adminbar_events_refresh' ) );
+				add_action( 'admin_bar_menu', array( $this, 'live_notifications__premium_only' ), 1000, 1 );
+				add_action( 'wp_ajax_wsal_adminbar_events_refresh', array( $this, 'wsal_adminbar_events_refresh__premium_only' ) );
 			}
 		}
 	}
@@ -432,76 +432,5 @@ class WSAL_ViewManager {
 			}
 		}
 		return $menu_order;
-	}
-
-	/**
-	 * Add WSAL to WP-Admin menu bar.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @param WP_Admin_Bar $admin_bar - Instance of WP_Admin_Bar.
-	 */
-	public function live_notifications( $admin_bar ) {
-		if ( $this->_plugin->settings->CurrentUserCan( 'view' ) && is_admin() ) {
-			$event = $this->_plugin->alerts->get_admin_bar_event();
-
-			if ( $event ) {
-				$code = $this->_plugin->alerts->GetAlert( $event->alert_id );
-				$admin_bar->add_node( array(
-					'id'    => 'wsal-menu',
-					'title' => 'LIVE: ' . $code->desc . ' from ' . $event->GetSourceIp(),
-					'href'  => add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) ),
-					'meta'  => array( 'class' => 'wsal-live-notif-item' ),
-				) );
-			}
-		}
-	}
-
-	/**
-	 * WP-Admin bar refresh event handler.
-	 *
-	 * @since 3.2.4
-	 */
-	public function wsal_adminbar_events_refresh() {
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
-			echo wp_json_encode( array(
-				'success' => false,
-				'message' => __( 'Access Denied.', 'wp-security-audit-log' ),
-			) );
-			die();
-		}
-
-		if ( isset( $_POST['nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wsal-common-js-nonce' ) ) {
-			$events_count = isset( $_POST['eventsCount'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['eventsCount'] ) ) : false;
-
-			if ( $events_count ) {
-				$occurrence = new WSAL_Models_Occurrence();
-				$new_count  = (int) $occurrence->Count();
-
-				if ( $events_count !== $new_count ) {
-					$event = $this->_plugin->alerts->get_admin_bar_event( true );
-					$code  = $this->_plugin->alerts->GetAlert( $event->alert_id );
-
-					echo wp_json_encode( array(
-						'success' => true,
-						'count'   => $new_count,
-						'message' => 'LIVE: ' . $code->desc . ' from ' . $event->GetSourceIp(),
-					) );
-				} else {
-					echo wp_json_encode( array( 'success' => false ) );
-				}
-			} else {
-				echo wp_json_encode( array(
-					'success' => false,
-					'message' => __( 'Log count parameter expected.', 'wp-security-audit-log' ),
-				) );
-			}
-		} else {
-			echo wp_json_encode( array(
-				'success' => false,
-				'message' => __( 'Nonce verification failed.', 'wp-security-audit-log' ),
-			) );
-		}
-		die();
 	}
 }

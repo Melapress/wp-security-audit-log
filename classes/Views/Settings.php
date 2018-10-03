@@ -470,9 +470,17 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<!-- / Events Dashboard Widget -->
 
 				<tr>
-					<th><label for="admin_bar_notif_on"><?php esc_html_e( 'Admin Bar Notification', 'wp-security-audit-log' ); ?></label></th>
+					<?php
+					$disabled = '';
+					$label    = __( 'Admin Bar Notification', 'wp-security-audit-log' );
+					if ( wsal_freemius()->is_free_plan() ) {
+						$disabled = 'disabled';
+						$label    = __( 'Admin Bar Notification (Premium)', 'wp-security-audit-log' );
+					}
+					?>
+					<th><label for="admin_bar_notif_on"><?php echo esc_html( $label ); ?></label></th>
 					<td>
-						<fieldset>
+						<fieldset <?php echo esc_attr( $disabled ); ?>>
 							<?php $abn = $this->_plugin->settings->is_admin_bar_notif(); ?>
 							<label for="admin_bar_notif_on">
 								<input type="radio" name="admin_bar_notif" id="admin_bar_notif_on" style="margin-top: -2px;" <?php checked( $abn ); ?> value="1">

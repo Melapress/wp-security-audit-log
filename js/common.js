@@ -11,31 +11,33 @@ jQuery( document ).ready( function() {
 	 *
 	 * @since 3.2.4
 	 */
-	var wsalRefresh = function() {
-		jQuery.ajax({
-			type: 'POST',
-			url: wsalCommonData.ajaxURL,
-			async: true,
-			dataType: 'json',
-			data: {
-				action: 'wsal_adminbar_events_refresh',
-				nonce: wsalCommonData.commonNonce,
-				eventsCount: wsalCommonData.eventsCount
-			},
-			success: function( data ) {
-				if ( data.success ) {
-					wsalCommonData.eventsCount = data.count;
-					jQuery( '.wsal-live-notif-item a' ).html( data.message );
+	if ( wsalCommonData.liveEvents ) {
+		function wsalRefresh() {
+			jQuery.ajax({
+				type: 'POST',
+				url: wsalCommonData.ajaxURL,
+				async: true,
+				dataType: 'json',
+				data: {
+					action: 'wsal_adminbar_events_refresh',
+					nonce: wsalCommonData.commonNonce,
+					eventsCount: wsalCommonData.eventsCount
+				},
+				success: function( data ) {
+					if ( data.success ) {
+						wsalCommonData.eventsCount = data.count;
+						jQuery( '.wsal-live-notif-item a' ).html( data.message );
+					}
 				}
-			}
-		});
-	};
+			});
+		};
 
-	// Check for new alerts every 30 secs.
-	setInterval( wsalRefresh, 30000 );
+		// Check for new alerts every 30 secs.
+		setInterval( wsalRefresh, 30000 );
 
-	// Make the first call on page load.
-	wsalRefresh();
+		// Make the first call on page load.
+		wsalRefresh();
+	}
 
 	jQuery( 'a.wsal-dismiss-notification' ).click( function() {
 		var nfe = jQuery( this ).parents( 'div:first' );

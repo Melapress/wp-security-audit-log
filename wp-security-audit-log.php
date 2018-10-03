@@ -547,11 +547,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Set data array for common script.
 			$occurrence  = new WSAL_Models_Occurrence();
+			$is_premium  = wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' );
 			$script_data = array(
-				'ajaxURL'     => admin_url( 'admin-ajax.php' ),
-				'eventsCount' => (int) $occurrence->Count(),
-				'commonNonce' => wp_create_nonce( 'wsal-common-js-nonce' ),
+				'ajaxURL'    => admin_url( 'admin-ajax.php' ),
+				'liveEvents' => $is_premium && $this->settings->is_admin_bar_notif(),
 			);
+			if ( $is_premium && $this->settings->is_admin_bar_notif() ) {
+				$script_data['eventsCount'] = (int) $occurrence->Count();
+				$script_data['commonNonce'] = wp_create_nonce( 'wsal-common-js-nonce' );
+			}
 			wp_localize_script( 'wsal-common', 'wsalCommonData', $script_data );
 
 			// Enqueue script.
