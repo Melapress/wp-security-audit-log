@@ -66,10 +66,20 @@ td.column-user {
 .column-user img {
 	float: left;
 	margin-right: 4px;
+}
+
+.column-user img.avatar {
 	-webkit-border-radius: 50px;
 	-moz-border-radius: 50px;
 	-ms-border-radius: 50px;
 	border-radius: 50px;
+}
+
+.wsal-system-icon {
+	width: 32px;
+	font-size: 32px;
+	height: 32px;
+	margin-right: 4px;
 }
 
 .column-scip {
@@ -259,34 +269,53 @@ td.column-user {
 	display: -webkit-box;
 	display: -ms-flexbox;
 	display: flex;
-	-webkit-box-align: start;
-	-ms-flex-align: start;
-    align-items: flex-start;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: justify;
+	-ms-flex-pack: justify;
+	justify-content: space-between;
 	position: relative;
 	margin: 12px 0;
 }
 
+.wsal_notice__wrapper .wsal_notice__content {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: start;
+	-ms-flex-align: start;
+	align-items: flex-start;
+}
+
 .wsal_notice__btns {
-	position: absolute;
-	right: 0;
 	text-align: right;
 }
 
-.wsal_notice__btns a {
-	display: block;
+.wsal_notice__btns a.wsal_notice__btn {
+	/* display: block; */
+	margin-bottom: 5px;
 }
 
-.wsal_notice__btns a.buy-now {
-	margin-bottom: 10px;
+.wsal_notice__btns > div {
+	width: 110px;
+	margin-top: 5px;
+}
+
+.wsal_notice__btns a.wsal_notice__btn_dismiss {
+	color: #AAA;
+	margin-left: 2px;
+	text-decoration: none;
 }
 
 .wsal_notice__wrapper img {
-	width: 70px;
 	height: 70px;
 	margin-right: 5px;
 }
 
 div.wsal_notice__wrapper p {
+	display: inline-block;
+	vertical-align: top;
 	margin-right: 16px;
 }
 

@@ -160,7 +160,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Method: Get View Weight.
 	 */
 	public function GetWeight() {
-		return 3;
+		return 12;
 	}
 
 	/**
@@ -438,12 +438,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			<?php echo wp_kses( __( 'Need help with setting up the plugin to meet your requirements? <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">Schedule a 20 minutes consultation and setup call</a> with our experts for just $50.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
 		</p>
 
-		<h3><?php esc_html_e( 'Display latest events widget in dashboard', 'wp-security-audit-log' ); ?></h3>
+		<h3><?php esc_html_e( 'Display latest events widget in dashboard & Admin bar', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
 			<?php
 			echo sprintf(
 				/* translators: Max number of dashboard widget alerts. */
-				esc_html__( 'The events widget displays the latest %d security events in the dashboard so you can get an overview of the latest events once you login.', 'wp-security-audit-log' ),
+				esc_html__( 'The events widget displays the latest %d security events in the dashboard and the admin bar notification displays the latest event.', 'wp-security-audit-log' ),
 				esc_html( $this->_plugin->settings->GetDashboardWidgetMaxAlerts() )
 			);
 			?>
@@ -456,18 +456,45 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<fieldset>
 							<?php $dwe = $this->_plugin->settings->IsWidgetsEnabled(); ?>
 							<label for="dwoption_on">
-								<input type="radio" name="EnableDashboardWidgets" id="dwoption_on" style="margin-top: 2px;" <?php checked( $dwe ); ?> value="1">
+								<input type="radio" name="EnableDashboardWidgets" id="dwoption_on" style="margin-top: -2px;" <?php checked( $dwe ); ?> value="1">
 								<span><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></span>
 							</label>
 							<br/>
 							<label for="dwoption_off">
-								<input type="radio" name="EnableDashboardWidgets" id="dwoption_off" style="margin-top: 2px;" <?php checked( $dwe, false ); ?>  value="0">
+								<input type="radio" name="EnableDashboardWidgets" id="dwoption_off" style="margin-top: -2px;" <?php checked( $dwe, false ); ?>  value="0">
 								<span><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></span>
 							</label>
 						</fieldset>
 					</td>
 				</tr>
 				<!-- / Events Dashboard Widget -->
+
+				<tr>
+					<?php
+					$disabled = '';
+					$label    = __( 'Admin Bar Notification', 'wp-security-audit-log' );
+					if ( wsal_freemius()->is_free_plan() ) {
+						$disabled = 'disabled';
+						$label    = __( 'Admin Bar Notification (Premium)', 'wp-security-audit-log' );
+					}
+					?>
+					<th><label for="admin_bar_notif_on"><?php echo esc_html( $label ); ?></label></th>
+					<td>
+						<fieldset <?php echo esc_attr( $disabled ); ?>>
+							<?php $abn = $this->_plugin->settings->is_admin_bar_notif(); ?>
+							<label for="admin_bar_notif_on">
+								<input type="radio" name="admin_bar_notif" id="admin_bar_notif_on" style="margin-top: -2px;" <?php checked( $abn ); ?> value="1">
+								<span><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></span>
+							</label>
+							<br/>
+							<label for="admin_bar_notif_off">
+								<input type="radio" name="admin_bar_notif" id="admin_bar_notif_off" style="margin-top: -2px;" <?php checked( $abn, false ); ?>  value="0">
+								<span><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></span>
+							</label>
+						</fieldset>
+					</td>
+				</tr>
+				<!-- / Admin Bar Notification -->
 			</tbody>
 		</table>
 		<!-- Dashboard Widget -->
@@ -756,6 +783,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetDisplayName( sanitize_text_field( $post_array['DisplayName'] ) );
 
 		$this->_plugin->settings->SetWidgetsEnabled( sanitize_text_field( $post_array['EnableDashboardWidgets'] ) );
+		$this->_plugin->settings->set_admin_bar_notif( sanitize_text_field( $post_array['admin_bar_notif'] ) );
 
 		// Get plugin viewers.
 		$viewers = isset( $post_array['Viewers'] ) ? array_map( 'sanitize_text_field', $post_array['Viewers'] ) : array();
@@ -799,6 +827,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			esc_html_e( 'The plugin uses an efficient way to store the activity log data in the WordPress database, though the more data you keep the more disk space will be required. ', 'wp-security-audit-log' );
 			$retention_help_text = __( '<a href="https://www.wpsecurityauditlog.com/pricing/" target="_blank">Upgrade to Premium</a> to store the activity log data in an external database.', 'wp-security-audit-log' );
 
+			if ( wsal_freemius()->is__premium_only() ) {
+				// If premium version then remove this message.
+				$retention_help_text = '';
+			}
 			echo wp_kses( $retention_help_text, $this->_plugin->allowed_html_tags );
 			?>
 		</p>
@@ -1805,7 +1837,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<tr>
 					<th><label for="mwp_stealth_mode"><?php esc_html_e( 'Enable MainWP Child Site Stealth Mode', 'wp-security-audit-log' ); ?></label></th>
 					<td>
-						<fieldset <?php echo wsal_freemius()->is_premium() ? 'disabled' : false; ?>>
+						<fieldset <?php echo ! is_plugin_active( 'mainwp-child/mainwp-child.php' ) ? 'disabled' : false; ?>>
 							<label for="mwp_stealth_yes">
 								<?php $stealth_mode = $this->_plugin->settings->is_stealth_mode(); ?>
 								<input type="radio" name="mwp_stealth_mode" value="yes" id="mwp_stealth_yes"
@@ -1879,6 +1911,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 	/**
 	 * Save: `Advanced Settings`
+	 *
+	 * @throws Exception - MainWP Child plugin not active exception.
 	 */
 	private function tab_advanced_settings_save() {
 		// Get $_POST global array.

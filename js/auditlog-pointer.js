@@ -12,7 +12,7 @@ jQuery(document).ready( function($) {
 			close: function() {
 				$.post( ajaxurl, {
 					pointer: pointer.pointer_id,
-					action: 'dismiss-wp-pointer'
+					action: 'wsal_dismiss_wp_pointer'
 				});
 			}
 		});

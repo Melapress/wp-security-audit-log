@@ -283,8 +283,7 @@ final class WSAL_AlertManager {
 	 * @return boolean
 	 */
 	public function WillOrHasTriggered( $type ) {
-		return in_array( $type, $this->_triggered_types )
-				|| $this->WillTrigger( $type );
+		return in_array( $type, $this->_triggered_types ) || $this->WillTrigger( $type );
 	}
 
 	/**
@@ -296,9 +295,11 @@ final class WSAL_AlertManager {
 	public function Register( $info ) {
 		if ( func_num_args() === 1 ) {
 			// Handle single item.
-			list($type, $code, $catg, $subcatg, $desc, $mesg) = $info;
+			list( $type, $code, $catg, $subcatg, $desc, $mesg ) = $info;
 			if ( isset( $this->_alerts[ $type ] ) ) {
-				throw new Exception( "Alert $type already registered with Alert Manager." );
+				add_action( 'admin_notices', array( $this, 'duplicate_event_notice' ) );
+				/* Translators: Event ID */
+				throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Security Audit Log.', 'wp-security-audit-log' ), $type ) );
 			}
 			$this->_alerts[ $type ] = new WSAL_Alert( $type, $code, $catg, $subcatg, $desc, $mesg );
 		} else {
@@ -324,6 +325,24 @@ final class WSAL_AlertManager {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Duplicate Event Notice
+	 *
+	 * @since 3.2.4
+	 */
+	public function duplicate_event_notice() {
+		$class   = 'notice notice-error';
+		$message = __( 'You have custom events that are using the same ID or IDs which are already registered in the plugin, so they have been disabled.', 'wp-security-audit-log' );
+		printf(
+			/* Translators: 1.CSS classes, 2. Notice, 3. Contact us link */
+			'<div class="%1$s"><p>%2$s %3$s ' . esc_html__( '%4$s to help you solve this issue.', 'wp-security-audit-log' ) . '</p></div>',
+			esc_attr( $class ),
+			'<span style="color:#dc3232; font-weight:bold;">' . esc_html__( 'ERROR:', 'wp-security-audit-log' ) . '</span>',
+			esc_html( $message ),
+			'<a href="https://www.wpsecurityauditlog.com/contact" target="_blank">' . esc_html__( 'Contact us', 'wp-security-audit-log' ) . '</a>'
+		);
 	}
 
 	/**
@@ -620,5 +639,61 @@ final class WSAL_AlertManager {
 			delete_option( 'wsal_temp_alerts' );
 			return true;
 		}
+	}
+
+	/**
+	 * Get latest events from DB.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @param integer $limit – Number of events.
+	 * @return array|boolean
+	 */
+	public function get_latest_events( $limit = 1 ) {
+		// Occurrence query.
+		$occ_query = new WSAL_Models_OccurrenceQuery();
+
+		// Get site id.
+		$site_id = (int) $this->plugin->settings->get_view_site_id();
+		if ( $site_id ) {
+			$occ_query->addCondition( 'site_id = %d ', $site_id );
+		}
+
+		$occ_query->addOrderBy( 'created_on', true ); // Set order for latest events.
+		$occ_query->setLimit( $limit ); // Set limit.
+		$events = $occ_query->getAdapter()->Execute( $occ_query );
+
+		if ( ! empty( $events ) && is_array( $events ) ) {
+			return $events;
+		}
+		return false;
+	}
+
+	/**
+	 * Get event for WP-Admin bar.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @param boolean $from_db - Query from DB if set to true.
+	 * @return WSAL_Models_Occurrence|boolean
+	 */
+	public function get_admin_bar_event( $from_db = false ) {
+		// Get event from transient.
+		$event_transient = 'wsal_admin_bar_event';
+
+		// Check for multisite.
+		$get_fn = $this->plugin->IsMultisite() ? 'get_site_transient' : 'get_transient';
+		$set_fn = $this->plugin->IsMultisite() ? 'set_site_transient' : 'set_transient';
+
+		$admin_bar_event = $get_fn( $event_transient );
+		if ( false === $admin_bar_event || false !== $from_db ) {
+			$event = $this->get_latest_events( 1 );
+
+			if ( $event ) {
+				$set_fn( $event_transient, $event[0], 30 * MINUTE_IN_SECONDS );
+				$admin_bar_event = $event[0];
+			}
+		}
+		return $admin_bar_event;
 	}
 }

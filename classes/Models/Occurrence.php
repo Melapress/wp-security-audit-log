@@ -156,10 +156,12 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * Gets alert message.
 	 *
 	 * @see WSAL_Alert::GetMessage()
-	 * @param callable|null $meta_formatter (Optional) Meta formatter callback.
+	 *
+	 * @param callable|null $meta_formatter - (Optional) Meta formatter callback.
+	 * @param mixed         $highlight      - (Optional) Highlight format.
 	 * @return string Full-formatted message.
 	 */
-	public function GetMessage( $meta_formatter = null ) {
+	public function GetMessage( $meta_formatter = null, $highlight = false ) {
 		if ( ! isset( $this->_cachedmessage ) ) {
 			// Get correct message entry.
 			if ( $this->is_migrated ) {
@@ -169,7 +171,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 				$this->_cachedmessage = $this->GetAlert()->mesg;
 			}
 			// Fill variables in message.
-			$this->_cachedmessage = $this->GetAlert()->GetMessage( $this->GetMetaArray(), $meta_formatter, $this->_cachedmessage );
+			$this->_cachedmessage = $this->GetAlert()->GetMessage( $this->GetMetaArray(), $meta_formatter, $this->_cachedmessage, $this->getId(), $highlight );
 		}
 		return $this->_cachedmessage;
 	}

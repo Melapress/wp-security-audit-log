@@ -380,6 +380,43 @@ function wsal_exclude_url(element) {
 	}
 }
 
+/**
+ * Onclick event handler to dismiss advert.
+ *
+ * @since 3.2.4
+ *
+ * @param {string} element - Current element.
+ */
+function wsal_dismiss_advert(element) {
+	var advertNonce   = jQuery( '#wsal-dismiss-advert' ).val(); // Nonce.
+	var dismissAdvert = jQuery( element ).data( 'advert' ); // Advert to be dismissed.
+
+	jQuery.ajax( {
+		type: 'POST',
+		url: ajaxurl,
+		async: true,
+		dataType: 'json',
+		data: {
+			action: 'wsal_dismiss_advert',
+			nonce: advertNonce,
+			advert: dismissAdvert
+		},
+		success: function( data ) {
+			if ( data.success ) {
+				var advertNotice = jQuery( element ).parents( 'div.wsal_notice' );
+				advertNotice.fadeOut();
+			} else {
+				console.log( data.message );
+			}
+		},
+		error: function( xhr, textStatus, error ) {
+			console.log( xhr.statusText );
+			console.log( textStatus );
+			console.log( error );
+		}
+	} );
+}
+
 jQuery( document ).ready( function() {
 
 	/**

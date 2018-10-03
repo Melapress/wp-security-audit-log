@@ -43,12 +43,12 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 *
 	 * 2. If external DB is in action then send the event to a temp buffer.
 	 *
-	 * @param integer $type - Alert code.
-	 * @param array   $data - Metadata.
-	 * @param integer $date (Optional) - created_on.
-	 * @param integer $siteid (Optional) - site_id.
-	 * @param bool    $migrated (Optional) - is_migrated.
-	 * @param bool    $override_buffer (Optional) - Override buffer to log event immediately.
+	 * @param integer $type            - Alert code.
+	 * @param array   $data            - Metadata.
+	 * @param integer $date            - (Optional) created_on.
+	 * @param integer $siteid          - (Optional) site_id.
+	 * @param bool    $migrated        - (Optional) is_migrated.
+	 * @param bool    $override_buffer - (Optional) Override buffer to log event immediately.
 	 */
 	public function Log( $type, $data = array(), $date = null, $siteid = null, $migrated = false, $override_buffer = false ) {
 		// Is this a php alert, and if so, are we logging such alerts?
@@ -61,8 +61,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$occ->is_migrated = $migrated;
 		$occ->created_on  = is_null( $date ) ? microtime( true ) : $date;
 		$occ->alert_id    = $type;
-		$occ->site_id     = ! is_null( $siteid ) ? $siteid
-			: ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
+		$occ->site_id     = ! is_null( $siteid ) ? $siteid : ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
 
 		// Get DB connector.
 		$db_config = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
@@ -99,11 +98,15 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 			$this->store_events_in_buffer( $occ, $data );
 		}
 
-		// Inject for promoting the paid add-ons.
-		$type = (int) $type;
-		if ( 9999 !== $type ) {
-			$this->AlertInject( $occ );
-		}
+		/**
+		 * Inject for promoting the paid add-ons.
+		 *
+		 * @deprecated 3.2.4
+		 */
+		// $type = (int) $type;
+		// if ( 9999 !== $type ) {
+		// 	$this->AlertInject( $occ );
+		// }
 
 		/**
 		 * Fires immediately after an alert is logged.
@@ -218,6 +221,8 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 * Inject Promo alert every $count alerts if no Add-ons are activated.
 	 *
 	 * @param WSAL_Models_Occurrence $occurrence - Occurrence, instance of WSAL_Models_Occurrence.
+	 *
+	 * @deprecated 3.2.4
 	 */
 	private function AlertInject( $occurrence ) {
 		$count = $this->CheckPromoToShow();

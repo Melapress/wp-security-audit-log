@@ -59,12 +59,12 @@ final class WSAL_Alert {
 	 * @param string  $mesg - Alert message.
 	 */
 	public function __construct( $type = 0, $code = 0, $catg = '', $subcatg = '', $desc = '', $mesg = '' ) {
-		$this->type = $type;
-		$this->code = $code;
-		$this->catg = $catg;
+		$this->type    = $type;
+		$this->code    = $code;
+		$this->catg    = $catg;
 		$this->subcatg = $subcatg;
-		$this->desc = $desc;
-		$this->mesg = $mesg;
+		$this->desc    = $desc;
+		$this->mesg    = $mesg;
 	}
 
 	/**
@@ -91,12 +91,14 @@ final class WSAL_Alert {
 	/**
 	 * Expands a message with variables by replacing variables with meta data values.
 	 *
-	 * @param string        $orig_mesg The original message.
-	 * @param array         $meta_data (Optional) Meta data relevant to message.
-	 * @param callable|null $meta_formatter (Optional) Callback for formatting meta values.
+	 * @param string        $orig_mesg      - The original message.
+	 * @param array         $meta_data      - (Optional) Meta data relevant to message.
+	 * @param callable|null $meta_formatter - (Optional) Callback for formatting meta values.
+	 * @param integer       $occurrence_id  - (Optional) Event occurrence ID.
+	 * @param mixed         $highlight      - (Optional) Highlight format.
 	 * @return string The expanded message.
 	 */
-	protected function GetFormattedMesg( $orig_mesg, $meta_data = array(), $meta_formatter = null ) {
+	protected function GetFormattedMesg( $orig_mesg, $meta_data = array(), $meta_formatter = null, $occurrence_id = 0, $highlight ) {
 		// Tokenize message with regex.
 		$mesg = preg_split( '/(%.*?%)/', (string) $orig_mesg, -1, PREG_SPLIT_DELIM_CAPTURE );
 		if ( ! is_array( $mesg ) ) {
@@ -111,7 +113,7 @@ final class WSAL_Alert {
 				// Handle complex expressions.
 				$mesg[ $i ] = $this->GetMetaExprValue( substr( $token, 1, -1 ), $meta_data );
 				if ( $meta_formatter ) {
-					$mesg[ $i ] = call_user_func( $meta_formatter, $token, $mesg[ $i ] );
+					$mesg[ $i ] = call_user_func( $meta_formatter, $token, $mesg[ $i ], $occurrence_id, $highlight );
 				}
 			}
 		}
@@ -122,12 +124,14 @@ final class WSAL_Alert {
 	/**
 	 * Gets alert message.
 	 *
-	 * @param array         $meta_data (Optional) Meta data relevant to message.
-	 * @param callable|null $meta_formatter (Optional) Meta formatter callback.
-	 * @param string|null   $mesg (Optional) Override message template to use.
+	 * @param array         $meta_data      - (Optional) Meta data relevant to message.
+	 * @param callable|null $meta_formatter - (Optional) Meta formatter callback.
+	 * @param string|null   $mesg           - (Optional) Override message template to use.
+	 * @param integer       $occurrence_id  - (Optional) Event occurrence ID.
+	 * @param mixed         $highlight      - (Optional) Highlight format.
 	 * @return string Fully formatted message.
 	 */
-	public function GetMessage( $meta_data = array(), $meta_formatter = null, $mesg = null ) {
-		return $this->GetFormattedMesg( is_null( $mesg ) ? $this->mesg : $mesg, $meta_data, $meta_formatter );
+	public function GetMessage( $meta_data = array(), $meta_formatter = null, $mesg = null, $occurrence_id = 0, $highlight = false ) {
+		return $this->GetFormattedMesg( is_null( $mesg ) ? $this->mesg : $mesg, $meta_data, $meta_formatter, $occurrence_id, $highlight );
 	}
 }

@@ -30,15 +30,19 @@ defined( 'E_USER_DEPRECATED' ) || define( 'E_USER_DEPRECATED', 'E_USER_DEPRECATE
  * @param WpSecurityAuditLog $wsal - Instance of main plugin.
  */
 function load_include_custom_file( $wsal ) {
-	$upload_dir = wp_upload_dir();
+	$upload_dir       = wp_upload_dir();
 	$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log';
 	// Check directory.
 	if ( is_dir( $uploads_dir_path ) && is_readable( $uploads_dir_path ) ) {
 		$file = $uploads_dir_path . DIRECTORY_SEPARATOR . 'custom-alerts.php';
 		if ( file_exists( $file ) ) {
-			require_once( $file );
-			if ( is_array( $custom_alerts ) ) {
-				$wsal->alerts->RegisterGroup( $custom_alerts );
+			require_once $file;
+			if ( ! empty( $custom_alerts ) && is_array( $custom_alerts ) ) {
+				try {
+					$wsal->alerts->RegisterGroup( $custom_alerts );
+				} catch ( Exception $ex ) {
+					$wsal->wsal_log( $ex->getMessage() );
+				}
 			}
 		}
 	}
@@ -144,7 +148,7 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 1004, E_WARNING, __( 'Login blocked', 'wp-security-audit-log' ), __( 'Blocked from logging in because the same WordPress user is logged in from %ClientIP%.', 'wp-security-audit-log' ) ),
 					array( 1005, E_WARNING, __( 'User logged in with existing session(s)', 'wp-security-audit-log' ), __( 'Successfully logged in. Another session from %IPAddress% for this user already exist.', 'wp-security-audit-log' ) ),
 					array( 1006, E_CRITICAL, __( 'User logged out all other sessions with the same username', 'wp-security-audit-log' ), __( 'Logged out all other sessions with the same username.', 'wp-security-audit-log' ) ),
-					array( 1007, E_CRITICAL, __( 'User session destroyed and logged out.', 'wp-security-audit-log' ), __( 'Logged out session %TargetSessionID% which belonged to %TargetUserName%', 'wp-security-audit-log' ) ),
+					array( 1007, E_CRITICAL, __( 'User session destroyed and logged out', 'wp-security-audit-log' ), __( 'Logged out session %TargetSessionID% which belonged to %TargetUserName%', 'wp-security-audit-log' ) ),
 					array( 2010, E_NOTICE, __( 'User uploaded file from Uploads directory', 'wp-security-audit-log' ), __( 'Uploaded the file %FileName% in %FilePath%.', 'wp-security-audit-log' ) ),
 					array( 2011, E_WARNING, __( 'User deleted file from Uploads directory', 'wp-security-audit-log' ), __( 'Deleted the file %FileName% from %FilePath%.', 'wp-security-audit-log' ) ),
 					array( 6007, E_NOTICE, __( 'User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Has requested a non existing page (404 Error Pages) %Attempts% %Msg%. %LinkFile%%URL%', 'wp-security-audit-log' ) ),
@@ -196,15 +200,15 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 2048, E_CRITICAL, __( 'User changed the template of a page', 'wp-security-audit-log' ), __( 'Changed the template of the %PostStatus% %PostType% titled %PostTitle% from %OldTemplate% to %NewTemplate%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2049, E_NOTICE, __( 'User set a post as sticky', 'wp-security-audit-log' ), __( 'Set the post %PostTitle% as Sticky. Post URL is %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2050, E_NOTICE, __( 'User removed post from sticky', 'wp-security-audit-log' ), __( 'Removed the post %PostTitle% from Sticky. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
-					array( 2065, E_WARNING, __( 'User modified the content of a post.', 'wp-security-audit-log' ), __( 'Modified the content of the %PostStatus% %PostType% titled %PostTitle%. Post URL is %PostUrl%. %RevisionLink% %EditorLinkPost%.', 'wp-security-audit-log' ) ),
+					array( 2065, E_WARNING, __( 'User modified the content of a post', 'wp-security-audit-log' ), __( 'Modified the content of the %PostStatus% %PostType% titled %PostTitle%. Post URL is %PostUrl%. %RevisionLink% %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2073, E_NOTICE, __( 'User submitted a post for review', 'wp-security-audit-log' ), __( 'Submitted the %PostType% titled %PostTitle% for review. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2074, E_NOTICE, __( 'User scheduled a post', 'wp-security-audit-log' ), __( 'Scheduled the %PostType% titled %PostTitle% to be published on %PublishingDate%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2086, E_NOTICE, __( 'User changed title of a post', 'wp-security-audit-log' ), __( 'Changed the title of the %PostStatus% %PostType% from %OldTitle% to %NewTitle%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2100, E_NOTICE, __( 'User opened a post in the editor', 'wp-security-audit-log' ), __( 'Opened the %PostStatus% %PostType% titled %PostTitle% in the editor. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2101, E_NOTICE, __( 'User viewed a post', 'wp-security-audit-log' ), __( 'Viewed the %PostStatus% %PostType% titled %PostTitle%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2106, E_NOTICE, __( 'A plugin modified a post', 'wp-security-audit-log' ), __( 'Plugin modified the %PostStatus% %PostType% titled %PostTitle% of type %PostType%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
-					array( 2111, E_NOTICE, __( 'User disabled Comments/Trackbacks and Pingbacks in a post.', 'wp-security-audit-log' ), __( 'Disabled %Type% on the %PostStatus% %PostType% titled %PostTitle%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
-					array( 2112, E_NOTICE, __( 'User enabled Comments/Trackbacks and Pingbacks in a post.', 'wp-security-audit-log' ), __( 'Enabled %Type% on the %PostStatus% %PostType% titled %PostTitle%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
+					array( 2111, E_NOTICE, __( 'User disabled Comments/Trackbacks and Pingbacks in a post', 'wp-security-audit-log' ), __( 'Disabled %Type% on the %PostStatus% %PostType% titled %PostTitle%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
+					array( 2112, E_NOTICE, __( 'User enabled Comments/Trackbacks and Pingbacks in a post', 'wp-security-audit-log' ), __( 'Enabled %Type% on the %PostStatus% %PostType% titled %PostTitle%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2119, E_NOTICE, __( 'User added post tag', 'wp-security-audit-log' ), __( 'Added the tag %tag% to the %PostStatus% post titled %PostTitle%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2120, E_NOTICE, __( 'User removed post tag', 'wp-security-audit-log' ), __( 'Removed the tag %tag% from the %PostStatus% post titled %PostTitle%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2121, E_NOTICE, __( 'User created new tag', 'wp-security-audit-log' ), __( 'Added a new tag called %TagName%. View the tag: %TagLink%.', 'wp-security-audit-log' ) ),
@@ -215,7 +219,7 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 2016, E_NOTICE, __( 'User changed post category', 'wp-security-audit-log' ), __( 'Changed the category of the %PostStatus% %PostType% titled %PostTitle% from %OldCategories% to %NewCategories%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
 					array( 2023, E_NOTICE, __( 'User created new category', 'wp-security-audit-log' ), __( 'Created a new category called %CategoryName%. Category slug is %Slug%. %CategoryLink%.', 'wp-security-audit-log' ) ),
 					array( 2024, E_WARNING, __( 'User deleted category', 'wp-security-audit-log' ), __( 'Deleted the %CategoryName% category. Category slug was %Slug%. %CategoryLink%.', 'wp-security-audit-log' ) ),
-					array( 2052, E_NOTICE, __( 'Changed the parent of a category.', 'wp-security-audit-log' ), __( 'Changed the parent of the category %CategoryName% from %OldParent% to %NewParent%. %CategoryLink%.', 'wp-security-audit-log' ) ),
+					array( 2052, E_NOTICE, __( 'Changed the parent of a category', 'wp-security-audit-log' ), __( 'Changed the parent of the category %CategoryName% from %OldParent% to %NewParent%. %CategoryLink%.', 'wp-security-audit-log' ) ),
 					array( 2053, E_CRITICAL, __( 'User created a custom field for a post', 'wp-security-audit-log' ), __( 'Created a new custom field called %MetaKey% with value %MetaValue% in the %PostStatus% %PostType% titled %PostTitle%. URL is: %PostUrl%. %EditorLinkPost%.<br>%MetaLink%.', 'wp-security-audit-log' ) ),
 					array( 2054, E_CRITICAL, __( 'User updated a custom field value for a post', 'wp-security-audit-log' ), __( 'Modified the value of the custom field %MetaKey%%ReportText% in the %PostStatus% %PostType% titled %PostTitle%.%ChangeText% URL is: %PostUrl%. %EditorLinkPost%.<br>%MetaLink%.', 'wp-security-audit-log' ) ),
 					array( 2055, E_CRITICAL, __( 'User deleted a custom field from a post', 'wp-security-audit-log' ), __( 'Deleted the custom field %MetaKey% with value %MetaValue% from %PostStatus% %PostType% titled %PostTitle%. URL is: %PostUrl%. %EditorLinkPost%.', 'wp-security-audit-log' ) ),
@@ -380,15 +384,15 @@ function wsaldefaults_wsal_init( WpSecurityAuditLog $wsal ) {
 					array( 0005, E_CRITICAL, __( 'PHP shutdown error', 'wp-security-audit-log' ), __( '%Message%.', 'wp-security-audit-log' ) ),
 					array( 6000, E_NOTICE, __( 'Events automatically pruned by system', 'wp-security-audit-log' ), __( 'System automatically deleted %EventCount% event(s).', 'wp-security-audit-log' ) ),
 					array( 6004, E_CRITICAL, __( 'WordPress was updated', 'wp-security-audit-log' ), __( 'Updated WordPress from version %OldVersion% to %NewVersion%.', 'wp-security-audit-log' ) ),
-					array( 6006, E_NOTICE, __( 'Reset plugin\'s settings to default.', 'wp-security-audit-log' ), __( 'Reset plugin\'s settings to default.', 'wp-security-audit-log' ) ),
-					array( 6028, E_CRITICAL, __( 'File content has been modified.', 'wp-security-audit-log' ), __( 'The content of the file %FileLocation% has been modified.', 'wp-security-audit-log' ) ),
-					array( 6029, E_CRITICAL, __( 'File added to the site.', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been added to your website.', 'wp-security-audit-log' ) ),
-					array( 6030, E_CRITICAL, __( 'File deleted from the site.', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been deleted from your website.', 'wp-security-audit-log' ) ),
-					array( 6031, E_CRITICAL, __( 'File not scanned because it is bigger than 5MB.', 'wp-security-audit-log' ), __( 'The file %FileLocation% was not scanned because it is bigger than 5MB. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
-					array( 6032, E_CRITICAL, __( 'File integrity scan stopped due to the limit of 1 million files.', 'wp-security-audit-log' ), __( 'The file changes scanning engine has reached the limit of 1 million files and stopped the scan. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
-					array( 6033, E_NOTICE, __( 'File integrity scan started/stopped.', 'wp-security-audit-log' ), __( 'The file integrity scanner has %ScanStatus% scanning %ScanLocation%%ScanError%.', 'wp-security-audit-log' ) ),
-					array( 6034, E_NOTICE, __( 'Purged the activity log.', 'wp-security-audit-log' ), __( 'Purged the activity log.', 'wp-security-audit-log' ) ),
-					array( 9999, E_CRITICAL, __( 'Advertising Add-ons.', 'wp-security-audit-log' ), __( '%PromoName% %PromoMessage%', 'wp-security-audit-log' ) ),
+					array( 6006, E_NOTICE, __( 'Reset plugin\'s settings to default', 'wp-security-audit-log' ), __( 'Reset plugin\'s settings to default.', 'wp-security-audit-log' ) ),
+					array( 6028, E_CRITICAL, __( 'File content has been modified', 'wp-security-audit-log' ), __( 'The content of the file %FileLocation% has been modified.', 'wp-security-audit-log' ) ),
+					array( 6029, E_CRITICAL, __( 'File added to the site', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been added to your website.', 'wp-security-audit-log' ) ),
+					array( 6030, E_CRITICAL, __( 'File deleted from the site', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been deleted from your website.', 'wp-security-audit-log' ) ),
+					array( 6031, E_CRITICAL, __( 'File not scanned because it is bigger than 5MB', 'wp-security-audit-log' ), __( 'The file %FileLocation% was not scanned because it is bigger than 5MB. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
+					array( 6032, E_CRITICAL, __( 'File integrity scan stopped due to the limit of 1 million files', 'wp-security-audit-log' ), __( 'The file changes scanning engine has reached the limit of 1 million files and stopped the scan. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
+					array( 6033, E_NOTICE, __( 'File integrity scan started/stopped', 'wp-security-audit-log' ), __( 'The file integrity scanner has %ScanStatus% scanning %ScanLocation%%ScanError%.', 'wp-security-audit-log' ) ),
+					array( 6034, E_NOTICE, __( 'Purged the activity log', 'wp-security-audit-log' ), __( 'Purged the activity log.', 'wp-security-audit-log' ) ),
+					array( 9999, E_CRITICAL, __( 'Advertising Add-ons', 'wp-security-audit-log' ), __( '%PromoName% %PromoMessage%', 'wp-security-audit-log' ) ),
 				),
 
 				/**

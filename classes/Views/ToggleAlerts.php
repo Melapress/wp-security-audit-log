@@ -262,7 +262,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 									case __( 'Yoast SEO', 'wp-security-audit-log' ):
 										// Check if Yoast SEO plugin exists.
-										if ( ! is_plugin_active( 'wordpress-seo/wp-seo.php' ) ) {
+										if ( is_plugin_active( 'wordpress-seo/wp-seo.php' ) || is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' ) ) {
+											$disabled = '';
+										} else {
 											$disabled = 'disabled';
 										}
 										break;

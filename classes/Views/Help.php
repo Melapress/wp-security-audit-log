@@ -48,7 +48,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 * Method: Get View Weight.
 	 */
 	public function GetWeight() {
-		return 14;
+		return 13;
 	}
 
 	/**
@@ -216,12 +216,12 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 
 								// If user is not super admin and website is multisite then change the URL.
 								if ( $this->_plugin->IsMultisite() && ! is_super_admin() ) {
-									$buy_now = 'https://www.wpsecurityauditlog.com/pricing/';
+									$buy_now        = 'https://www.wpsecurityauditlog.com/pricing/';
 									$buy_now_target = 'target="_blank"';
 								} elseif ( $this->_plugin->IsMultisite() && is_super_admin() ) {
 									$buy_now = add_query_arg( 'page', 'wsal-auditlog-pricing', network_admin_url( 'admin.php' ) );
 								} elseif ( ! $this->_plugin->IsMultisite() && ! current_user_can( 'manage_options' ) ) {
-									$buy_now = 'https://www.wpsecurityauditlog.com/pricing/';
+									$buy_now        = 'https://www.wpsecurityauditlog.com/pricing/';
 									$buy_now_target = 'target="_blank"';
 								}
 
