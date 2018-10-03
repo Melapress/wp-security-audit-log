@@ -716,6 +716,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$this->views->FindByClassName( 'WSAL_Views_AuditLog' )->DismissNotice( 'wsal-privacy-notice-3.2' );
 
 				/**
+				 * Delete advert transient on every update.
+				 *
+				 * @since 3.2.4
+				 */
+				if ( wsal_freemius()->is_free_plan() ) {
+					$delete_transient_fn = $this->IsMultisite() ? 'delete_site_transient' : 'delete_transient'; // Check for multisite.
+					$delete_transient_fn( 'wsal-is-advert-dismissed' ); // Delete advert transient.
+				}
+
+				/**
 				 * IMPORTANT: VERSION SPECIFIC UPDATE
 				 *
 				 * It only needs to run when old version of the plugin is less than 3.2.3
