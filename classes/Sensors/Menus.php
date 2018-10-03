@@ -294,24 +294,24 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 
 			$nav_menu_locations = get_nav_menu_locations();
 
-			$location_primary = null;
-			if ( isset( $this->_old_menu_locations['primary'] ) && isset( $nav_menu_locations['primary'] ) ) {
-				if ( $nav_menu_locations['primary'] == $menu_id && $this->_old_menu_locations['primary'] != $nav_menu_locations['primary'] ) {
-					$location_primary = 'Enabled';
+			$location_top = null;
+			if ( isset( $this->_old_menu_locations['top'] ) && isset( $nav_menu_locations['top'] ) ) {
+				if ( $nav_menu_locations['top'] == $menu_id && $this->_old_menu_locations['top'] != $nav_menu_locations['top'] ) {
+					$location_top = 'Enabled';
 				}
-			} elseif ( empty( $this->_old_menu_locations['primary'] ) && isset( $nav_menu_locations['primary'] ) ) {
-				if ( $nav_menu_locations['primary'] == $menu_id ) {
-					$location_primary = 'Enabled';
+			} elseif ( empty( $this->_old_menu_locations['top'] ) && isset( $nav_menu_locations['top'] ) ) {
+				if ( $nav_menu_locations['top'] == $menu_id ) {
+					$location_top = 'Enabled';
 				}
-			} elseif ( isset( $this->_old_menu_locations['primary'] ) && empty( $nav_menu_locations['primary'] ) ) {
-				if ( $this->_old_menu_locations['primary'] == $menu_id ) {
-					$location_primary = 'Disabled';
+			} elseif ( isset( $this->_old_menu_locations['top'] ) && empty( $nav_menu_locations['top'] ) ) {
+				if ( $this->_old_menu_locations['top'] == $menu_id ) {
+					$location_top = 'Disabled';
 				}
 			}
 
-			// Alert 2082 Primary menu.
-			if ( ! empty( $location_primary ) ) {
-				$this->EventMenuSetting( $menu_data['menu-name'], $location_primary, 'Location: primary menu' );
+			// Alert 2082 top menu.
+			if ( ! empty( $location_top ) ) {
+				$this->EventMenuSetting( $menu_data['menu-name'], $location_top, 'Location: top menu' );
 			}
 
 			$location_social = null;
@@ -501,13 +501,13 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 							if ( false !== strpos( $key, 'nav_menu_locations[' ) ) {
 								$loc = substr( trim( $key, ']' ), 19 );
 								if ( ! empty( $value ) ) {
-									$menu = wp_get_nav_menu_object( $value );
-									$menu_name = ! empty( $customized['new_menu_name'] ) ? $customized['new_menu_name'] : ( ! empty( $menu ) ? $menu->name : '');
+									$menu      = wp_get_nav_menu_object( $value );
+									$menu_name = ! empty( $customized['new_menu_name'] ) ? $customized['new_menu_name'] : ( ! empty( $menu ) ? $menu->name : '' );
 									$this->EventMenuSetting( $menu_name, 'Enabled', 'Location: ' . $loc . ' menu' );
 								} else {
 									if ( ! empty( $this->_old_menu_locations[ $loc ] ) ) {
-										$menu = wp_get_nav_menu_object( $this->_old_menu_locations[ $loc ] );
-										$menu_name = ! empty( $customized['new_menu_name'] ) ? $customized['new_menu_name'] : ( ! empty( $menu ) ? $menu->name : '');
+										$menu      = wp_get_nav_menu_object( $this->_old_menu_locations[ $loc ] );
+										$menu_name = ! empty( $customized['new_menu_name'] ) ? $customized['new_menu_name'] : ( ! empty( $menu ) ? $menu->name : '' );
 										$this->EventMenuSetting( $menu_name, 'Disabled', 'Location: ' . $loc . ' menu' );
 									}
 								}
