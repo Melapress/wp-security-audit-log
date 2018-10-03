@@ -260,9 +260,9 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 							$this->EventChangeName( $old_menu_term['name'], $post_array['menu-name'] );
 						} else {
 							// Remove the last menu item.
-							if ( count( $content_names_old ) == 1 && count( $content_types_old ) == 1 ) {
-								$this->EventRemoveItems( $content_types_old[0], $content_names_old[0], $post_array['menu-name'] );
-							}
+							// if ( count( $content_names_old ) == 1 && count( $content_types_old ) == 1 ) {
+							// 	$this->EventRemoveItems( $content_types_old[0], $content_names_old[0], $post_array['menu-name'] );
+							// }
 						}
 					}
 				}
@@ -652,7 +652,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 * @param int $item_id - Item ID.
 	 */
 	private function GetItemName( $term_id, $item_id ) {
-		$item_name = '';
+		$item_name  = '';
 		$menu_items = wp_get_nav_menu_items( $term_id );
 		foreach ( $menu_items as $menu_item ) {
 			if ( $menu_item->ID == $item_id ) {
