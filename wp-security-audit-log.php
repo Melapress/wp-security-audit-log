@@ -231,7 +231,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				wp_schedule_event( time(), 'daily', 'wsal_delete_logins' );
 			}
 
-			add_filter( 'mainwp_child_extra_excution', array( $this, 'mainwp_dashboard_callback' ), 10, 2 );
+			add_filter( 'mainwp_child_extra_execution', array( $this, 'mainwp_dashboard_callback' ), 10, 2 );
 
 			// Register freemius uninstall event.
 			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
