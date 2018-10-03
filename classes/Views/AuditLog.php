@@ -79,7 +79,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'desc' => __( 'Upgrade to premium to unlock these powerful activity log features.', 'wp-security-audit-log' ),
 			),
 			1 => array(
-				'head' => __( 'Instant email alerts, text search & filters, reports, see who is logged in to your system real-time, reports activity log archiving and mirroring, integration with other systems and much more!', 'wp-security-audit-log' ),
+				'head' => __( 'Instant email notifications, search & filters, reports, users sessions management, integration tools and more!', 'wp-security-audit-log' ),
+				'desc' => __( 'Upgrade to unlock these powerful features and gain more from your activity logs.', 'wp-security-audit-log' ),
 			),
 			2 => array(
 				'head' => __( 'See who is logged in to your WordPress, create user productivity reports, get alerted via email of important changes and more!', 'wp-security-audit-log' ),
