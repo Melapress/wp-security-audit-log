@@ -294,10 +294,11 @@ td.column-user {
 
 .wsal_notice__btns a.wsal_notice__btn {
 	display: block;
-	margin-top: 5px;
+	margin-bottom: 5px;
 }
 
 .wsal_notice__btns a.wsal_notice__btn_dismiss {
+	color: #AAA;
 	text-decoration: none;
 }
 

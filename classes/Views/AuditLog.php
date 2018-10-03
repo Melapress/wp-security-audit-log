@@ -145,12 +145,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 								'https://www.wpsecurityauditlog.com/premium-features/'
 							);
 							?>
-							<a href="javascript:;" data-advert="<?php echo esc_attr( $wsal_premium_advert ); ?>" onclick="wsal_dismiss_advert(this)" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>">
-								<span class="dashicons dashicons-dismiss"></span>
-							</a>
 							<?php wp_nonce_field( 'wsal_dismiss_advert', 'wsal-dismiss-advert', false, true ); ?>
 							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary wsal_notice__btn"><?php esc_html_e( 'UPGRADE', 'wp-security-audit-log' ); ?></a>
 							<a href="<?php echo esc_url( $more_info ); ?>" class="wsal_notice__btn" target="_blank"><?php esc_html_e( 'Tell me more', 'wp-security-audit-log' ); ?></a>
+							<a href="javascript:;" data-advert="<?php echo esc_attr( $wsal_premium_advert ); ?>" onclick="wsal_dismiss_advert(this)" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>">
+								<span class="dashicons dashicons-dismiss"></span>
+							</a>
 						</div>
 						<!-- /.wsal_notice__btns -->
 					</div>
