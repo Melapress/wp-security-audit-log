@@ -547,15 +547,25 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 * @param object $post - Post object.
 	 */
 	public function EventPluginPostCreate( $post_id, $post ) {
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return;
+		}
+
 		// Filter $_REQUEST array for security.
 		$get_array  = filter_input_array( INPUT_GET );
 		$post_array = filter_input_array( INPUT_POST );
 
+		// Check if Yoast SEO is active.
+		$is_yoast = is_plugin_active( 'wordpress-seo/wp-seo.php' ) || is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' );
+		if ( $is_yoast && isset( $get_array['classic-editor'] ) ) {
+			return;
+		}
+
 		$wp_actions = array( 'editpost', 'heartbeat', 'inline-save', 'trash', 'untrash' );
 		if ( isset( $get_array['action'] ) && ! in_array( $get_array['action'], $wp_actions ) ) {
 			if (
-				! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
-				|| ! empty( $post->post_title )
+				! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ), true )
+				&& ! empty( $post->post_title )
 			) {
 				// Get post editor link.
 				$editor_link = $this->GetEditorLink( $post );
@@ -588,8 +598,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 		if ( isset( $post_array['action'] ) && ! in_array( $post_array['action'], $wp_actions ) ) {
 			if (
-				! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
-				|| ! empty( $post->post_title )
+				! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ), true )
+				&& ! empty( $post->post_title )
 			) {
 				// If the plugin modify the post.
 				if ( false !== strpos( $post_array['action'], 'edit' ) ) {
@@ -739,11 +749,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					5000, array(
 						'Plugin' => (object) array(
-							'Name'      => $plugin['Name'],
-							'PluginURI' => $plugin['PluginURI'],
-							'Version'   => $plugin['Version'],
-							'Author'    => $plugin['Author'],
-							'Network'   => $plugin['Network'] ? 'True' : 'False',
+							'Name'            => $plugin['Name'],
+							'PluginURI'       => $plugin['PluginURI'],
+							'Version'         => $plugin['Version'],
+							'Author'          => $plugin['Author'],
+							'Network'         => $plugin['Network'] ? 'True' : 'False',
 							'plugin_dir_path' => $plugin_path,
 						),
 					)

@@ -114,6 +114,16 @@ class WSAL_ViewManager {
 		) {
 			new WSAL_Views_SetupWizard( $plugin );
 		}
+
+		// Reorder WSAL submenu.
+		add_filter( 'custom_menu_order', array( $this, 'reorder_wsal_submenu' ), 10, 1 );
+
+		if ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
+			if ( $this->_plugin->settings->is_admin_bar_notif() ) {
+				add_action( 'admin_bar_menu', array( $this, 'live_notifications__premium_only' ), 1000, 1 );
+				add_action( 'wp_ajax_wsal_adminbar_events_refresh', array( $this, 'wsal_adminbar_events_refresh__premium_only' ) );
+			}
+		}
 	}
 
 	/**
@@ -378,5 +388,49 @@ class WSAL_ViewManager {
 				break;
 		}
 		return $not_show;
+	}
+
+	/**
+	 * Reorder WSAL Submenu.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @param boolean $menu_order - Custom order.
+	 * @return boolean
+	 */
+	public function reorder_wsal_submenu( $menu_order ) {
+		// Get global $submenu order.
+		global $submenu;
+
+		// Get WSAL admin menu.
+		$auditlog_menu = isset( $submenu['wsal-auditlog'] ) ? $submenu['wsal-auditlog'] : false;
+		$help_link     = new stdClass();
+		$account_link  = new stdClass();
+
+		if ( ! empty( $auditlog_menu ) ) {
+			foreach ( $auditlog_menu as $key => $auditlog_submenu ) {
+				if ( 'wsal-help' === $auditlog_submenu[2] ) {
+					$help_link->key  = $key;
+					$help_link->menu = $auditlog_submenu;
+				} elseif ( 'wsal-auditlog-account' === $auditlog_submenu[2] ) {
+					$account_link->key  = $key;
+					$account_link->menu = $auditlog_submenu;
+				}
+			}
+		}
+
+		if ( ! empty( $help_link ) && ! empty( $account_link ) ) {
+			// Swap the menus at their positions.
+			if ( isset( $help_link->key ) && isset( $account_link->menu ) ) {
+				$submenu['wsal-auditlog'][ $help_link->key ] = $account_link->menu;
+			}
+			if ( isset( $account_link->key ) && isset( $help_link->menu ) ) {
+				$submenu['wsal-auditlog'][ $account_link->key ] = $help_link->menu;
+			}
+			if ( isset( $submenu['wsal-auditlog'] ) && is_array( $submenu['wsal-auditlog'] ) ) {
+				ksort( $submenu['wsal-auditlog'] );
+			}
+		}
+		return $menu_order;
 	}
 }

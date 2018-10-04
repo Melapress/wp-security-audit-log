@@ -37,6 +37,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	protected $_version;
 
 	/**
+	 * WSAL Adverts.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @var array
+	 */
+	private $adverts;
+
+	/**
 	 * Method: Constructor
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
@@ -52,7 +61,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_download_404_log', array( $this, 'wsal_download_404_log' ) );
 		add_action( 'wp_ajax_wsal_freemius_opt_in', array( $this, 'wsal_freemius_opt_in' ) );
 		add_action( 'wp_ajax_wsal_exclude_url', array( $this, 'wsal_exclude_url' ) );
+		add_action( 'wp_ajax_wsal_dismiss_advert', array( $this, 'wsal_dismiss_advert' ) );
 		add_action( 'wp_ajax_wsal_dismiss_notice_disconnect', array( $this, 'dismiss_notice_disconnect' ) );
+		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( $this, 'dismiss_wp_pointer' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
 		add_filter( 'wsal_pointers_toplevel_page_wsal-auditlog', array( $this, 'register_privacy_pointer' ), 10, 1 );
@@ -60,8 +71,22 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Check plugin version for to dismiss the notice only until upgrade.
 		$this->_version = WSAL_VERSION;
-		$this->RegisterNotice( 'premium-wsal-' . $this->_version ); // Upgrade notice.
-		$this->RegisterNotice( 'wsal-privacy-notice-3.2' ); // Privacy notice.
+
+		// Set adverts array.
+		$this->adverts = array(
+			0 => array(
+				'head' => __( 'Get instantly alerted of important changes via email, do text based searches and filter results, generate reports, see who is logged in and more!', 'wp-security-audit-log' ),
+				'desc' => __( 'Upgrade to premium to unlock these powerful activity log features.', 'wp-security-audit-log' ),
+			),
+			1 => array(
+				'head' => __( 'Instant email notifications, search & filters, reports, users sessions management, integration tools and more!', 'wp-security-audit-log' ),
+				'desc' => __( 'Upgrade to unlock these powerful features and gain more from your activity logs.', 'wp-security-audit-log' ),
+			),
+			2 => array(
+				'head' => __( 'See who is logged in to your WordPress, create user productivity reports, get alerted via email of important changes and more!', 'wp-security-audit-log' ),
+				'desc' => __( 'Unlock these powerful features and much more with the premium edition of WP Security Audit Log.', 'wp-security-audit-log' ),
+			),
+		);
 	}
 
 	/**
@@ -81,15 +106,24 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			&& ! class_exists( 'WSAL_User_Management_Plugin' )
 			&& 'anonymous' !== get_site_option( 'wsal_freemius_state', 'anonymous' ) // Anonymous mode option.
 		) {
-			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $this->IsNoticeDismissed( 'premium-wsal-' . $this->_version ) ) { ?>
-				<div class="updated wsal_notice" data-notice-name="premium-wsal-<?php echo esc_attr( $this->_version ); ?>">
+			$get_transient_fn         = $this->_plugin->IsMultisite() ? 'get_site_transient' : 'get_transient'; // Check for multisite.
+			$wsal_is_advert_dismissed = $get_transient_fn( 'wsal-is-advert-dismissed' ); // Check if advert has been dismissed.
+			$wsal_is_advert_dismissed = false !== $wsal_is_advert_dismissed ? $wsal_is_advert_dismissed : false; // Set the default.
+			$wsal_premium_advert      = $this->_plugin->GetGlobalOption( 'premium-advert', false ); // Get the advert to display.
+			$wsal_premium_advert      = false !== $wsal_premium_advert ? (int) $wsal_premium_advert : 0; // Set the default.
+
+			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $wsal_is_advert_dismissed ) : ?>
+				<div class="updated wsal_notice">
 					<div class="wsal_notice__wrapper">
-						<img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wsal-logo@2x.png">
-						<p>
-							<strong><?php esc_html_e( 'See who is logged in to your WordPress, create user productivity reports, get alerted via email of important changes and more!', 'wp-security-audit-log' ); ?></strong><br />
-							<?php esc_html_e( 'Unlock these powerful features and much more with the premium edition of WP Security Audit Log.', 'wp-security-audit-log' ); ?>
-						</p>
-						<!-- /.wsal_notice__wrapper -->
+						<div class="wsal_notice__content">
+							<img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wsal-logo@2x.png">
+							<p>
+								<strong><?php echo isset( $this->adverts[ $wsal_premium_advert ]['head'] ) ? esc_html( $this->adverts[ $wsal_premium_advert ]['head'] ) : false; ?></strong><br>
+								<?php echo isset( $this->adverts[ $wsal_premium_advert ]['desc'] ) ? esc_html( $this->adverts[ $wsal_premium_advert ]['desc'] ) : false; ?>
+							</p>
+						</div>
+						<!-- /.wsal_notice__content -->
+
 						<div class="wsal_notice__btns">
 							<?php
 							// Buy Now button link.
@@ -112,14 +146,21 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 								'https://www.wpsecurityauditlog.com/premium-features/'
 							);
 							?>
-							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary buy-now"><?php esc_html_e( 'Buy Now', 'wp-security-audit-log' ); ?></a>
-							<a href="<?php echo esc_url( $more_info ); ?>" target="_blank"><?php esc_html_e( 'More Information', 'wp-security-audit-log' ); ?></a>
+							<?php wp_nonce_field( 'wsal_dismiss_advert', 'wsal-dismiss-advert', false, true ); ?>
+							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary wsal_notice__btn"><?php esc_html_e( 'UPGRADE', 'wp-security-audit-log' ); ?></a>
+							<div>
+								<a href="<?php echo esc_url( $more_info ); ?>" target="_blank"><?php esc_html_e( 'Tell me more', 'wp-security-audit-log' ); ?></a>
+								<a href="javascript:;" data-advert="<?php echo esc_attr( $wsal_premium_advert ); ?>" onclick="wsal_dismiss_advert(this)" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>">
+									<span class="dashicons dashicons-dismiss"></span>
+								</a>
+							</div>
 						</div>
 						<!-- /.wsal_notice__btns -->
 					</div>
+					<!-- /.wsal_notice__wrapper -->
 				</div>
 				<?php
-			}
+			endif;
 		}
 
 		// Get DB connector.
@@ -411,8 +452,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						?>
 					);
 				} );
-			</script>
-			<?php
+			</script><?php
 		endif;
 	}
 
@@ -838,7 +878,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Get dismissed pointers.
-		$dismissed      = explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) );
+		$dismissed      = explode( ',', (string) $this->_plugin->GetGlobalOption( 'dismissed-privacy-notice', true ) );
 		$valid_pointers = array();
 
 		// Check pointers and remove dismissed ones.
@@ -889,11 +929,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function register_privacy_pointer( $pointer ) {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
-		if (
-			current_user_can( 'manage_options' )
-			&& $is_current_view
-			&& ! $this->IsNoticeDismissed( 'wsal-privacy-notice-3.2' )
-		) {
+		if ( current_user_can( 'manage_options' ) && $is_current_view && ! isset( $pointer['wsal_privacy'] ) ) {
 			$pointer['wsal_privacy'] = array(
 				'target'  => '#toplevel_page_wsal-auditlog .wp-first-item',
 				'options' => array(
@@ -955,5 +991,78 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		);
 		echo '<p>URL ' . esc_html( $post_array['url'] ) . ' is no longer being monitored.<br />Enable the monitoring of this URL again from the <a href="' . esc_url( $settings_exclude_url ) . '">Excluded Objects</a> tab in the plugin settings.</p>';
 		die;
+	}
+
+	/**
+	 * Method: Ajax request handler to dismiss adverts.
+	 *
+	 * @since 3.2.4
+	 */
+	public function wsal_dismiss_advert() {
+		// Die if user does not have permission to dismiss.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'You do not have sufficient permissions to dismiss this notice.', 'wp-security-audit-log' ),
+				)
+			);
+			die();
+		}
+
+		// Filter $_POST array for security.
+		// @codingStandardsIgnoreStart
+		$nonce  = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
+		$advert = isset( $_POST['advert'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['advert'] ) ) : false;
+		// @codingStandardsIgnoreEnd
+
+		if ( ! empty( $nonce ) && ! wp_verify_nonce( $nonce, 'wsal_dismiss_advert' ) ) {
+			// Nonce verification failed.
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
+				)
+			);
+			die();
+		}
+
+		$advert = 2 === $advert ? '0' : $advert + 1;
+		$this->_plugin->SetGlobalOption( 'premium-advert', $advert );
+		$set_transient_fn = $this->_plugin->IsMultisite() ? 'set_site_transient' : 'set_transient';
+		$set_transient_fn( 'wsal-is-advert-dismissed', true, MONTH_IN_SECONDS );
+		echo wp_json_encode(
+			array(
+				'success' => true,
+			)
+		);
+		die();
+	}
+
+	/**
+	 * Method: Ajax request handler to dismiss pointers.
+	 *
+	 * @since 3.2.4
+	 */
+	public function dismiss_wp_pointer() {
+		// @codingStandardsIgnoreStart
+		$pointer = sanitize_text_field( wp_unslash( $_POST['pointer'] ) );
+		// @codingStandardsIgnoreEnd
+
+		if ( $pointer != sanitize_key( $pointer ) ) {
+			wp_die( 0 );
+		}
+
+		$dismissed = array_filter( explode( ',', (string) $this->_plugin->GetGlobalOption( 'dismissed-privacy-notice', true ) ) );
+
+		if ( in_array( $pointer, $dismissed ) ) {
+			wp_die( 0 );
+		}
+
+		$dismissed[] = $pointer;
+		$dismissed   = implode( ',', $dismissed );
+
+		$this->_plugin->SetGlobalOption( 'dismissed-privacy-notice', $dismissed );
+		wp_die( 1 );
 	}
 }

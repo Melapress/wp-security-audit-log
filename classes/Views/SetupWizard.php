@@ -318,6 +318,10 @@ final class WSAL_Views_SetupWizard {
 	 * Step View: `Welcome`
 	 */
 	private function wsal_step_welcome() {
+		// Dismiss the setup modal on audit log.
+		if ( 'no' === $this->wsal->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' ) ) {
+			$this->wsal->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' );
+		}
 		?>
 		<p><?php esc_html_e( 'Thank you for installing the WP Security Audit Log plugin.', 'wp-security-audit-log' ); ?></p>
 		<p><?php esc_html_e( 'This wizard will help you configure your WordPress activity log plugin and get you started quickly.', 'wp-security-audit-log' ); ?></p>

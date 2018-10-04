@@ -135,6 +135,22 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 */
 	public function check_sensor_before_load( $load_sensor, $filepath ) {
 		global $pagenow;
+		if ( ! $this->plugin->IsMultisite() ) {
+			$admin_page = $pagenow;
+		} else {
+			/**
+			 * Global $pagenow is not set in multisite while plugins are loading.
+			 * So we use the wp-core code to create one for ourselves before it is
+			 * set.
+			 *
+			 * @see wp-includes/vars.php
+			 */
+			$php_self = isset( $_SERVER['PHP_SELF'] ) ? sanitize_text_field( wp_unslash( $_SERVER['PHP_SELF'] ) ) : false;
+			preg_match( '#/wp-admin/?(.*?)$#i', $php_self, $self_matches );
+			$admin_page = isset( $self_matches[1] ) ? $self_matches[1] : false;
+			$admin_page = trim( $admin_page, '/' );
+			$admin_page = preg_replace( '#\?.*?$#', '', $admin_page );
+		}
 
 		// WSAL views array.
 		$wsal_views = array(
@@ -166,10 +182,10 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 			is_admin()
 			&& (
 				in_array( $current_page, $wsal_views, true ) // WSAL Views.
-				|| 'index.php' === $pagenow  // Dashboard.
-				|| 'tools.php' === $pagenow  // Tools page.
-				|| 'export.php' === $pagenow // Export page.
-				|| 'import.php' === $pagenow // Import page.
+				|| 'index.php' === $admin_page  // Dashboard.
+				|| 'tools.php' === $admin_page  // Tools page.
+				|| 'export.php' === $admin_page // Export page.
+				|| 'import.php' === $admin_page // Import page.
 			)
 		) {
 			return false;
@@ -197,8 +213,10 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 					break;
 
 				case 'YoastSEO':
-					// Check if Yoast SEO plugin exists.
-					if ( ! is_plugin_active( 'wordpress-seo/wp-seo.php' ) ) {
+					// Check if Yoast SEO (Free or Premium) plugin exists.
+					if ( is_plugin_active( 'wordpress-seo/wp-seo.php' ) || is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' ) ) {
+						$load_sensor = true;
+					} else {
 						$load_sensor = false;
 					}
 					break;
@@ -212,7 +230,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 				case 'Menus':
 					// If the current page is not Menus page in themes tab or customizer then don't load menu sensor.
-					if ( 'nav-menus.php' === $pagenow || 'customize.php' === $pagenow ) {
+					if ( 'nav-menus.php' === $admin_page || 'customize.php' === $admin_page ) {
 						$load_sensor = true;
 					} else {
 						$load_sensor = false;
@@ -221,7 +239,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 				case 'Widgets':
 					// If the current page is not Widgets page in themes tab or customizer then don't load menu sensor.
-					if ( 'widgets.php' === $pagenow || 'customize.php' === $pagenow || 'admin-ajax.php' === $pagenow ) {
+					if ( 'widgets.php' === $admin_page || 'customize.php' === $admin_page || 'admin-ajax.php' === $admin_page ) {
 						$load_sensor = true;
 					} else {
 						$load_sensor = false;

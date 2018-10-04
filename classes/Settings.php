@@ -274,6 +274,28 @@ class WSAL_Settings {
 	}
 
 	/**
+	 * Check whether admin bar notifications are enabled or not.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @return boolean
+	 */
+	public function is_admin_bar_notif() {
+		return ! $this->_plugin->GetGlobalOption( 'disable-admin-bar-notif' );
+	}
+
+	/**
+	 * Set admin bar notifications.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @param boolean $newvalue - True if enabled.
+	 */
+	public function set_admin_bar_notif( $newvalue ) {
+		$this->_plugin->SetGlobalOption( 'disable-admin-bar-notif', ! $newvalue );
+	}
+
+	/**
 	 * Check whether alerts in audit log view refresh automatically or not.
 	 *
 	 * @return boolean
@@ -1374,14 +1396,12 @@ class WSAL_Settings {
 	 * @since 3.2.3.3
 	 */
 	public function set_mainwp_child_stealth_mode() {
-		// If wsal is not premium.
 		if (
-			! wsal_freemius()->is_premium()
-			&& 'yes' !== $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' ) // MainWP Child Stealth Mode is not already active.
+			'yes' !== $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' ) // MainWP Child Stealth Mode is not already active.
 			&& is_plugin_active( 'mainwp-child/mainwp-child.php' ) // And if MainWP Child plugin is installed & active.
 		) {
 			// Check if freemius state is anonymous.
-			if ( 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) ) {
+			if ( ! wsal_freemius()->is_premium() && 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) ) {
 				// Update freemius state to skipped.
 				update_site_option( 'wsal_freemius_state', 'skipped' );
 
@@ -1395,8 +1415,10 @@ class WSAL_Settings {
 				FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
 			}
 
-			// Remove Freemius trial promotion notice.
-			FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'trial_promotion' );
+			if ( ! wsal_freemius()->is_premium() ) {
+				// Remove Freemius trial promotion notice.
+				FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'trial_promotion' );
+			}
 
 			$this->SetIncognito( '1' ); // Incognito mode to hide WSAL on plugins page.
 			$this->SetRestrictAdmins( true ); // Restrict other admins.
@@ -1445,5 +1467,224 @@ class WSAL_Settings {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Method: Meta data formater.
+	 *
+	 * @param string  $name      - Name of the data.
+	 * @param mix     $value     - Value of the data.
+	 * @param integer $occ_id    - Event occurrence ID.
+	 * @param mixed   $highlight - Highlight format.
+	 * @return string
+	 */
+	public function meta_formatter( $name, $value, $occ_id, $highlight ) {
+		if ( $highlight && 'daily-report' === $highlight ) {
+			$highlight_start_tag = '<span style="color: #149247;">';
+			$highlight_end_tag   = '</span>';
+		} else {
+			$highlight_start_tag = '<strong>';
+			$highlight_end_tag   = '</strong>';
+		}
+
+		switch ( true ) {
+			case '%Message%' == $name:
+				return esc_html( $value );
+
+			case '%PromoMessage%' == $name:
+				return '<p class="promo-alert">' . $value . '</p>';
+
+			case '%PromoLink%' == $name:
+			case '%CommentLink%' == $name:
+			case '%CommentMsg%' == $name:
+				return $value;
+
+			case '%MetaLink%' == $name:
+				if ( ! empty( $value ) ) {
+					return "<a href=\"#\" data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"WsalDisableCustom(this, '" . $value . "');\"> Exclude Custom Field from the Monitoring</a>";
+				} else {
+					return '';
+				}
+
+			case '%RevisionLink%' === $name:
+				$check_value = (string) $value;
+				if ( 'NULL' !== $check_value ) {
+					return ' Click <a target="_blank" href="' . esc_url( $value ) . '">here</a> to see the content changes.';
+				} else {
+					return false;
+				}
+
+			case '%EditorLinkPost%' == $name:
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">post</a>';
+
+			case '%EditorLinkPage%' == $name:
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">page</a>';
+
+			case '%CategoryLink%' == $name:
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">category</a>';
+
+			case '%TagLink%' == $name:
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">tag</a>';
+
+			case '%EditorLinkForum%' == $name:
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">forum</a>';
+
+			case '%EditorLinkTopic%' == $name:
+				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">topic</a>';
+
+			case in_array( $name, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ) ):
+				return $highlight_start_tag . (
+					strlen( $value ) > 50 ? ( esc_html( substr( $value, 0, 50 ) ) . '&hellip;' ) : esc_html( $value )
+				) . $highlight_end_tag;
+
+			case '%ClientIP%' == $name:
+				if ( is_string( $value ) ) {
+					return $highlight_start_tag . str_replace( array( '"', '[', ']' ), '', $value ) . $highlight_end_tag;
+				} else {
+					return '<i>unknown</i>';
+				}
+
+			case '%LinkFile%' === $name:
+				if ( 'NULL' != $value ) {
+					$site_id = $this->get_view_site_id(); // Site id for multisite.
+					return '<a href="javascript:;" onclick="download_404_log( this )" data-log-file="' . esc_attr( $value ) . '" data-site-id="' . esc_attr( $site_id ) . '" data-nonce-404="' . esc_attr( wp_create_nonce( 'wsal-download-404-log-' . $value ) ) . '" title="' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '</a>';
+				} else {
+					return 'Click <a href="' . esc_url( add_query_arg( 'page', 'wsal-togglealerts', admin_url( 'admin.php' ) ) ) . '">here</a> to log such requests to file';
+				}
+
+			case '%URL%' === $name:
+				return ' or <a href="javascript:;" data-exclude-url="' . esc_url( $value ) . '" data-exclude-url-nonce="' . wp_create_nonce( 'wsal-exclude-url-' . $value ) . '" onclick="wsal_exclude_url( this )">exclude this URL</a> from being reported.';
+
+			case '%LogFileLink%' === $name: // Failed login file link.
+				return '';
+
+			case '%Attempts%' === $name: // Failed login attempts.
+				$check_value = (int) $value;
+				if ( 0 === $check_value ) {
+					return '';
+				} else {
+					return $value;
+				}
+
+			case '%LogFileText%' === $name: // Failed login file text.
+				return '<a href="javascript:;" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
+
+			case strncmp( $value, 'http://', 7 ) === 0:
+			case strncmp( $value, 'https://', 7 ) === 0:
+				return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
+
+			case '%PostStatus%' === $name:
+				if ( ! empty( $value ) && 'publish' === $value ) {
+					return $highlight_start_tag . esc_html__( 'published', 'wp-security-audit-log' ) . $highlight_end_tag;
+				} else {
+					return $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
+				}
+
+			case '%multisite_text%' === $name:
+				if ( $this->_plugin->IsMultisite() && $value ) {
+					$site_info = get_blog_details( $value, true );
+					if ( $site_info ) {
+						return ' on site <a href="' . esc_url( $site_info->siteurl ) . '">' . esc_html( $site_info->blogname ) . '</a>';
+					}
+					return;
+				}
+				return;
+
+			case '%ReportText%' === $name:
+				return;
+
+			case '%ChangeText%' === $name:
+				if ( $occ_id ) {
+					$url_args = array(
+						'action'     => 'AjaxInspector',
+						'occurrence' => $occ_id,
+						'TB_iframe'  => 'true',
+						'width'      => 600,
+						'height'     => 550,
+					);
+					$url      = add_query_arg( $url_args, admin_url( 'admin-ajax.php' ) );
+					return ' View the changes in <a class="thickbox"  title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
+					. ' href="' . $url . '">data inspector.</a>';
+				} else {
+					return;
+				}
+
+			case '%ScanError%' === $name:
+				if ( 'NULL' === $value ) {
+					return false;
+				}
+				/* translators: Mailto link for support. */
+				return ' with errors. ' . sprintf( __( 'Contact us on %s for assistance', 'wp-security-audit-log' ), '<a href="mailto:support@wpsecurityauditlog.com" target="_blank">support@wpsecurityauditlog.com</a>' );
+
+			case '%TableNames%' === $name:
+				$value = str_replace( ',', ', ', $value );
+				return $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
+
+			default:
+				return $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
+		}
+	}
+
+	/**
+	 * Method: Get view site id.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @return int
+	 */
+	public function get_view_site_id() {
+		switch ( true ) {
+			// Non-multisite.
+			case ! $this->_plugin->IsMultisite():
+				return 0;
+			// Multisite + main site view.
+			case $this->is_main_blog() && ! $this->is_specific_view():
+				return 0;
+			// Multisite + switched site view.
+			case $this->is_main_blog() && $this->is_specific_view():
+				return $this->get_specific_view();
+			// Multisite + local site view.
+			default:
+				return get_current_blog_id();
+		}
+	}
+
+	/**
+	 * Method: Check if the blog is main blog.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @return bool
+	 */
+	protected function is_main_blog() {
+		return get_current_blog_id() === 1;
+	}
+
+	/**
+	 * Method: Check if it is a specific view.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @return bool
+	 */
+	protected function is_specific_view() {
+		// Filter $_GET array for security.
+		$get_array = filter_input_array( INPUT_GET );
+
+		return isset( $get_array['wsal-cbid'] ) && '0' != $get_array['wsal-cbid'];
+	}
+
+	/**
+	 * Method: Get a specific view.
+	 *
+	 * @since 3.2.4
+	 *
+	 * @return int
+	 */
+	protected function get_specific_view() {
+		// Filter $_GET array for security.
+		$get_array = filter_input_array( INPUT_GET );
+
+		return isset( $get_array['wsal-cbid'] ) ? (int) $get_array['wsal-cbid'] : 0;
 	}
 }

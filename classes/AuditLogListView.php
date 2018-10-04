@@ -434,19 +434,19 @@ class WSAL_AuditLogListView extends WP_List_Table {
 						$roles = '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 					}
 				} elseif ( 'Plugin' == $username ) {
-					$image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/plugin-logo.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+					$image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wsal-logo.png" width="32" alt="WSAL Logo"/>';
 					$uhtml = '<i>' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
 				} elseif ( 'Plugins' == $username ) {
-					$image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+					$image = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
 					$uhtml = '<i>' . __( 'Plugins', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
 				} elseif ( 'Website Visitor' == $username ) {
-					$image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+					$image = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
 					$uhtml = '<i>' . __( 'Website Visitor', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
 				} else {
-					$image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wordpress-logo-32.png" class="avatar avatar-32 photo" width="32" height="32" alt=""/>';
+					$image = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
 					$uhtml = '<i>' . __( 'System', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
 				}
@@ -506,7 +506,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return ! $info ? ( 'Unknown Site ' . $item->site_id )
 					: ( '<a href="' . esc_attr( $info->siteurl ) . '">' . esc_html( $info->blogname ) . '</a>' );
 			case 'mesg':
-				return '<div id="Event' . $item->id . '">' . $item->GetMessage( array( $this, 'meta_formatter' ) ) . '</div>';
+				return '<div id="Event' . $item->id . '">' . $item->GetMessage( array( $this->_plugin->settings, 'meta_formatter' ) ) . '</div>';
 			case 'data':
 				$url     = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $item->id;
 				$tooltip = esc_attr__( 'View all details of this change', 'wp-security-audit-log' );
