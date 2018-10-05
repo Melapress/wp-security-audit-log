@@ -723,7 +723,7 @@ final class WSAL_AlertManager {
 			// Set user data.
 			if ( $user && $user instanceof WP_User ) {
 				$user_data->user_id      = $user->ID;
-				$user_data->username     = $user->login;
+				$user_data->username     = $user->user_login;
 				$user_data->first_name   = $user->first_name;
 				$user_data->last_name    = $user->last_name;
 				$user_data->display_name = $user->display_name;
