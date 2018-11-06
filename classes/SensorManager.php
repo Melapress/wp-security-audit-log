@@ -194,6 +194,14 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		// Get file name.
 		$filename = basename( $filepath, '.php' );
 
+		// If not wp-admin then only load `Comments`, `Content` and `System` sensor.
+		if ( ! is_admin() ) {
+			if ( 'Comments' === $filename || 'Content' === $filename || 'System' === $filename ) {
+				return true;
+			}
+			return false;
+		}
+
 		// If filename exists then continue.
 		if ( $filename ) {
 			// Conditional loading based on filename.
