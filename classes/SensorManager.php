@@ -174,6 +174,14 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 			'wsal-auditlog-pricing',
 		);
 
+		// Get file name.
+		$filename = basename( $filepath, '.php' );
+
+		// Only load Public sensor when the user is not on wp-admin.
+		if ( ! is_admin() && 'Public' !== $filename ) {
+			return false;
+		}
+
 		// Get current page query argument via $_GET array.
 		$current_page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
 
@@ -190,17 +198,6 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		) {
 			return false;
 		}
-
-		// Get file name.
-		$filename = basename( $filepath, '.php' );
-
-		// If not wp-admin then only load `Comments`, `Content` and `System` sensor.
-		// if ( ! is_admin() ) {
-		// 	if ( 'Comments' === $filename || 'Content' === $filename || 'System' === $filename ) {
-		// 		return true;
-		// 	}
-		// 	return false;
-		// }
 
 		// If filename exists then continue.
 		if ( $filename ) {
