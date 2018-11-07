@@ -123,7 +123,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_action( 'create_category', array( $this, 'EventCategoryCreation' ), 10, 1 );
 		add_action( 'create_post_tag', array( $this, 'EventTagCreation' ), 10, 1 );
 
-		add_action( 'wp_head', array( $this, 'ViewingPost' ), 10 );
 		add_filter( 'post_edit_form_tag', array( $this, 'EditingPost' ), 10, 1 );
 
 		add_filter( 'wp_update_term_data', array( $this, 'event_terms_rename' ), 10, 4 );
@@ -1713,7 +1712,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * Ignore post from BBPress, WooCommerce Plugin
 	 * Triggered on the Sensors
 	 *
-	 * @param stdClass $post - The post.
+	 * @param WP_Post $post - The post.
 	 */
 	private function CheckOtherSensors( $post ) {
 		if ( empty( $post ) || ! isset( $post->post_type ) ) {
@@ -1754,44 +1753,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				if ( ! empty( $revision_link ) ) {
 					$occ->SetMetaValue( 'RevisionLink', $revision_link );
 				}
-			}
-		}
-	}
-
-	/**
-	 * Alerts for Viewing of Posts, Pages and Custom Posts.
-	 */
-	public function ViewingPost() {
-		// Retrieve the current post object.
-		$post = get_queried_object();
-		if ( is_user_logged_in() && ! is_admin() ) {
-			if ( $this->CheckOtherSensors( $post ) ) {
-				return $post->post_title;
-			}
-
-			// Filter $_SERVER array for security.
-			$server_array = filter_input_array( INPUT_SERVER );
-
-			$current_path = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;
-			if ( ! empty( $server_array['HTTP_REFERER'] )
-				&& ! empty( $current_path )
-				&& strpos( $server_array['HTTP_REFERER'], $current_path ) !== false ) {
-				// Ignore this if we were on the same page so we avoid double audit entries.
-				return;
-			}
-			if ( ! empty( $post->post_title ) ) {
-				$editor_link = $this->GetEditorLink( $post );
-				$this->plugin->alerts->Trigger(
-					2101, array(
-						'PostID'             => $post->ID,
-						'PostType'           => $post->post_type,
-						'PostTitle'          => $post->post_title,
-						'PostStatus'         => $post->post_status,
-						'PostDate'           => $post->post_date,
-						'PostUrl'            => get_permalink( $post->ID ),
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
 			}
 		}
 	}

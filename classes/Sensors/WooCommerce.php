@@ -129,7 +129,6 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		add_filter( 'woocommerce_order_item_quantity', array( $this, 'set_old_stock' ), 10, 3 );
 		add_action( 'woocommerce_product_set_stock', array( $this, 'product_stock_changed' ), 10, 1 );
 
-		add_action( 'wp_head', array( $this, 'viewing_product' ), 10 );
 		add_filter( 'post_edit_form_tag', array( $this, 'editing_product' ), 10, 1 );
 	}
 
@@ -1379,45 +1378,6 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		}
 
 		return $editor_link;
-	}
-
-	/**
-	 * Alerts for viewing of product post type for WooCommerce.
-	 */
-	public function viewing_product() {
-		// Retrieve the current post object.
-		$product = get_queried_object();
-
-		// Check product post type.
-		if ( ! empty( $product ) && $product instanceof WP_Post && 'product' !== $product->post_type ) {
-			return $product;
-		}
-
-		if ( is_user_logged_in() && ! is_admin() ) {
-			// Filter $_SERVER array for security.
-			$server_array = filter_input_array( INPUT_SERVER );
-
-			$current_path = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;
-			if ( ! empty( $server_array['HTTP_REFERER'] )
-				&& ! empty( $current_path )
-				&& strpos( $server_array['HTTP_REFERER'], $current_path ) !== false ) {
-				// Ignore this if we were on the same page so we avoid double audit entries.
-				return;
-			}
-			if ( ! empty( $product->post_title ) ) {
-				$editor_link = $this->GetEditorLink( $product );
-				$this->plugin->alerts->Trigger(
-					9073, array(
-						'PostID'             => $product->ID,
-						'PostType'           => $product->post_type,
-						'ProductStatus'      => $product->post_status,
-						'ProductTitle'       => $product->post_title,
-						'ProductUrl'         => get_permalink( $product->ID ),
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-			}
-		}
 	}
 
 	/**

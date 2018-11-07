@@ -65,12 +65,12 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 */
 	public function EventCommentApprove( $new_status, $old_status, $comment ) {
 		if ( ! empty( $comment ) && $old_status != $new_status ) {
-			$post = get_post( $comment->comment_post_ID );
+			$post         = get_post( $comment->comment_post_ID );
 			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment->comment_ID;
-			$fields = array(
-				'PostTitle' => $post->post_title,
-				'Author' => $comment->comment_author,
-				'Date' => $comment->comment_date,
+			$fields       = array(
+				'PostTitle'   => $post->post_title,
+				'Author'      => $comment->comment_author,
+				'Date'        => $comment->comment_date,
 				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
 			);
 
@@ -145,22 +145,17 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 			$comment = get_comment( $comment_id );
 			if ( ! empty( $comment ) ) {
 				if ( 'spam' != $comment->comment_approved ) {
-					$post = get_post( $comment->comment_post_ID );
+					$post         = get_post( $comment->comment_post_ID );
 					$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
-					$fields = array(
-						'Date' => $comment->comment_date,
+					$fields       = array(
+						'Date'        => $comment->comment_date,
 						'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
 					);
 
 					// Get user data.
 					$user_data = get_user_by( 'email', $comment->comment_author_email );
 
-					if ( ! $user_data ) {
-						// Set the fields.
-						$fields['CommentMsg'] = sprintf( 'A comment was posted in response to the post <strong>%s</strong>. The comment was posted by <strong>%s</strong>', $post->post_title, $this->CheckAuthor( $comment ) );
-						$fields['Username'] = 'Website Visitor';
-						$this->plugin->alerts->Trigger( 2126, $fields );
-					} else {
+					if ( $user_data && $user_data instanceof WP_User ) {
 						// Get user roles.
 						$user_roles = $user_data->roles;
 
@@ -170,9 +165,9 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 						}
 
 						// Set the fields.
-						$fields['Username'] = $user_data->user_login;
+						$fields['Username']         = $user_data->user_login;
 						$fields['CurrentUserRoles'] = $user_roles;
-						$fields['CommentMsg'] = sprintf( 'Posted a comment in response to the post <strong>%s</strong>', $post->post_title );
+						$fields['CommentMsg']       = sprintf( 'Posted a comment in response to the post <strong>%s</strong>', $post->post_title );
 						$this->plugin->alerts->Trigger( 2099, $fields );
 					}
 				}
@@ -189,12 +184,12 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	private function EventGeneric( $comment_id, $alert_code ) {
 		$comment = get_comment( $comment_id );
 		if ( ! empty( $comment ) ) {
-			$post = get_post( $comment->comment_post_ID );
+			$post         = get_post( $comment->comment_post_ID );
 			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
-			$fields = array(
-				'PostTitle' => $post->post_title,
-				'Author' => $comment->comment_author,
-				'Date' => $comment->comment_date,
+			$fields       = array(
+				'PostTitle'   => $post->post_title,
+				'Author'      => $comment->comment_author,
+				'Date'        => $comment->comment_date,
 				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
 			);
 
