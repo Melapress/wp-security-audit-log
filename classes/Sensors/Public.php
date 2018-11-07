@@ -30,12 +30,30 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	const TRANSIENT_VISITOR_404 = 'wsal-visitor-404-attempts';
 
 	/**
+	 * Visitor Events.
+	 *
+	 * @var boolean
+	 */
+	protected $visitor_events;
+
+	/**
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
+		// Set if visitor events is enabled/disabled.
+		$disabled_visitor_events = $this->plugin->GetGlobalOption( 'disable-visitor-events', 'no' );
+
+		// Viewing post event.
 		add_action( 'wp_head', array( $this, 'viewing_post' ), 10 );
-		add_action( 'comment_post', array( $this, 'event_comment' ), 10, 2 );
-		add_filter( 'template_redirect', array( $this, 'event_404' ) );
+
+		// If user is visitor & visitor events are not disabled then hook the following events.
+		if ( ! is_user_logged_in() && 'no' === $disabled_visitor_events ) {
+			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 2 );
+			add_filter( 'template_redirect', array( $this, 'event_404' ) );
+		} elseif ( is_user_logged_in() ) {
+			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 2 );
+			add_filter( 'template_redirect', array( $this, 'event_404' ) );
+		}
 
 		// Check if WooCommerce plugin exists.
 		if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {

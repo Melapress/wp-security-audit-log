@@ -130,6 +130,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 			// Set the option.
 			$this->_plugin->SetGlobalOption( 'scan-file-changes', $file_change_toggle );
+
+			// Set the visitor events option.
+			$this->_plugin->SetGlobalOption( 'disable-visitor-events', isset( $post_array['disable-visitor-events'] ) ? 'no' : 'yes' );
 		}
 
 		// Log level form submission.
@@ -182,7 +185,14 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			</form>
 		</p>
 		<h2 id="wsal-tabs" class="nav-tab-wrapper">
-			<?php foreach ( $safe_names as $name => $safe ) : ?>
+			<?php
+			foreach ( $safe_names as $name => $safe ) :
+				if ( __( 'Third Party Plugins', 'wp-security-audit-log' ) === $name ) :
+					?>
+					<a href="#tab-visitor-events" class="nav-tab">
+						<?php esc_html_e( 'Visitor Events', 'wp-security-audit-log' ); ?>
+					</a>
+				<?php endif; ?>
 				<a href="#tab-<?php echo esc_attr( $safe ); ?>" class="nav-tab"><?php echo esc_html( $name ); ?></a>
 			<?php endforeach; ?>
 		</h2>
@@ -580,6 +590,28 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						?>
 					</div>
 				<?php endforeach; ?>
+				<div class="wsal-tab" id="tab-visitor-events">
+					<h4><?php esc_html_e( 'The plugin also keeps a log of some events that website visitors (non-logged in users) do because it is typically required by site admins. You can disable these events from here:', 'wp-security-audit-log' ); ?></h4>
+					<table class="form-table">
+						<th><label for="enable-visitor-events"><?php esc_html_e( 'Enable website visitors events', 'wp-security-audit-log' ); ?></label></th>
+						<td>
+							<fieldset>
+								<?php $disable_visitor_events = $this->_plugin->GetGlobalOption( 'disable-visitor-events', 'no' ); ?>
+								<label for="disable-visitor-events">
+									<input type="checkbox" id="disable-visitor-events" name="disable-visitor-events" <?php checked( $disable_visitor_events, 'no' ); ?> value="no" />
+									<?php esc_html_e( 'Enable', 'wp-security-audit-log' ); ?>
+								</label>
+							</fieldset>
+						</td>
+					</table>
+					<p class="description"><?php esc_html_e( 'Below is the list of the events which are disabled when the above option is disabled:', 'wp-security-audit-log' ); ?></p>
+					<ul>
+						<li><?php echo '2101 — ' . esc_html__( 'User viewed a post', 'wp-security-audit-log' ); ?></li>
+						<li><?php echo '2126 — ' . esc_html__( 'Visitor posted a comment', 'wp-security-audit-log' ); ?></li>
+						<li><?php echo '6023 — ' . esc_html__( 'Website Visitor User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ); ?></li>
+						<li><?php echo '9073 — ' . esc_html__( 'User viewed a product', 'wp-security-audit-log' ); ?></li>
+					</ul>
+				</div>
 			</div>
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save Changes', 'wp-security-audit-log' ) ); ?>"></p>
 		</form>
