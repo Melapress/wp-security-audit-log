@@ -172,9 +172,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			require_once( 'classes/Helpers/DataHelper.php' );
 
-			// Profiler has to be loaded manually.
-			require_once( 'classes/SimpleProfiler.php' );
-			$this->profiler = new WSAL_SimpleProfiler();
 			require_once( 'classes/Models/ActiveRecord.php' );
 			require_once( 'classes/Models/Query.php' );
 			require_once( 'classes/Models/OccurrenceQuery.php' );
@@ -590,10 +587,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Load translations.
 			load_plugin_textdomain( 'wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 
-			// Tell the world we've just finished loading.
-			$s = $this->profiler->Start( 'WSAL Init Hook' );
+			// WSAL Initialized.
 			do_action( 'wsal_init', $this );
-			$s->Stop();
 
 			// Hide plugin.
 			if ( $this->settings->IsIncognito() ) {
@@ -1098,11 +1093,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Run cleanup routines.
 		 */
 		public function CleanUp() {
-			$s = $this->profiler->Start( 'Clean Up' );
 			foreach ( $this->_cleanup_hooks as $hook ) {
 				call_user_func( $hook );
 			}
-			$s->Stop();
 		}
 
 		/**
@@ -1215,9 +1208,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Load default configuration / data.
 		 */
 		public function LoadDefaults() {
-			$s = $this->profiler->Start( 'Load Defaults' );
 			require_once( 'defaults.php' );
-			$s->Stop();
 		}
 
 		/**
@@ -1362,17 +1353,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 	}
 
-	// Profile WSAL load time.
-	$s = WpSecurityAuditLog::GetInstance()->profiler->Start( 'WSAL Init' );
 
 	// Begin load sequence.
 	add_action( 'plugins_loaded', array( WpSecurityAuditLog::GetInstance(), 'Load' ) );
 
 	// Load extra files.
 	WpSecurityAuditLog::GetInstance()->LoadDefaults();
-
-	// End profile snapshot.
-	$s->Stop();
 
 	// Create & Run the plugin.
 	return WpSecurityAuditLog::GetInstance();
