@@ -96,7 +96,8 @@ final class WSAL_AlertManager {
 	 * @param string $file Path to file.
 	 */
 	public function AddFromFile( $file ) {
-		$this->AddFromClass( $this->plugin->GetClassFileClassName( $file ) );
+		$file = basename( $file, '.php' );
+		$this->AddFromClass( WSAL_CLASS_PREFIX . 'Loggers_' . $file );
 	}
 
 	/**

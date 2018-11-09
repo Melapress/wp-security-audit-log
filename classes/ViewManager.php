@@ -132,7 +132,8 @@ class WSAL_ViewManager {
 	 * @param string $file Path to file.
 	 */
 	public function AddFromFile( $file ) {
-		$this->AddFromClass( $this->_plugin->GetClassFileClassName( $file ) );
+		$file = basename( $file, '.php' );
+		$this->AddFromClass( WSAL_CLASS_PREFIX . 'Views_' . $file );
 	}
 
 	/**

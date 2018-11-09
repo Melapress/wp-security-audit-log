@@ -178,7 +178,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		$filename = basename( $filepath, '.php' );
 
 		// Only load Public sensor when the user is not on wp-admin.
-		if ( ! is_admin() && 'Public' !== $filename ) {
+		if ( ! is_admin() && ! is_user_logged_in() && 'Public' !== $filename ) {
 			return false;
 		}
 

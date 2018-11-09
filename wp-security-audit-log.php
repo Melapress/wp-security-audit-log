@@ -111,13 +111,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public $licensing;
 
 		/**
-		 * Simple profiler.
-		 *
-		 * @var WSAL_SimpleProfiler
-		 */
-		public $profiler;
-
-		/**
 		 * Options.
 		 *
 		 * @var WSAL_DB_Option
@@ -146,6 +139,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public $allowed_html_tags = array();
 
 		/**
+		 * Load WSAL on Front-end?
+		 *
+		 * @var boolean
+		 */
+		public $load_on_frontend = null;
+
+		/**
 		 * Standard singleton pattern.
 		 * WARNING! To ensure the system always works as expected, AVOID using this method.
 		 * Instead, make use of the plugin instance provided by 'wsal_init' action.
@@ -164,48 +164,90 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Initialize plugin.
 		 */
 		public function __construct() {
-			// Define important plugin constants.
 			$this->define_constants();
-
-			// Define allowed HTML tags.
 			$this->set_allowed_html_tags();
+			$this->includes();
+			$this->init_hooks();
+		}
 
-			require_once( 'classes/Helpers/DataHelper.php' );
+		/**
+		 * Include Plugin Files.
+		 *
+		 * @since 3.3
+		 */
+		public function includes() {
+			require_once 'classes/Models/ActiveRecord.php';
+			require_once 'classes/Models/Option.php';
 
-			require_once( 'classes/Models/ActiveRecord.php' );
-			require_once( 'classes/Models/Query.php' );
-			require_once( 'classes/Models/OccurrenceQuery.php' );
-			require_once( 'classes/Models/Option.php' );
-			require_once( 'classes/Models/TmpUser.php' );
+			if ( is_admin() ) {
+				// Models.
+				require_once 'classes/Models/Meta.php';
+				require_once 'classes/Models/Occurrence.php';
+				require_once 'classes/Models/Query.php';
+				require_once 'classes/Models/OccurrenceQuery.php';
+				require_once 'classes/Models/TmpUser.php';
+
+				// Data helper.
+				require_once 'classes/Helpers/DataHelper.php';
+
+				// Managers.
+				require_once 'classes/ViewManager.php';
+				require_once 'classes/LicenseManager.php';
+				require_once 'classes/WidgetManager.php';
+
+				// Views.
+				require_once 'classes/AbstractView.php';
+				require_once 'classes/AuditLogListView.php';
+				require_once 'classes/Views/AuditLog.php';
+				require_once 'classes/Views/EmailNotifications.php';
+				require_once 'classes/Views/ExternalDB.php';
+				require_once 'classes/Views/Help.php';
+				require_once 'classes/Views/Licensing.php';
+				require_once 'classes/Views/LogInUsers.php';
+				require_once 'classes/Views/Reports.php';
+				require_once 'classes/Views/Search.php';
+				require_once 'classes/Views/Settings.php';
+				require_once 'classes/Views/ToggleAlerts.php';
+			}
+
+			// Connectors.
+			require_once 'classes/Connector/AbstractConnector.php';
+			require_once 'classes/Connector/ConnectorInterface.php';
+			require_once 'classes/Connector/ConnectorFactory.php';
+			require_once 'classes/Connector/MySQLDB.php';
+
+			// Adapters.
+			require_once 'classes/Adapters/ActiveRecordInterface.php';
+			require_once 'classes/Adapters/MetaInterface.php';
+			require_once 'classes/Adapters/OccurrenceInterface.php';
+			require_once 'classes/Adapters/QueryInterface.php';
 
 			// Load autoloader and register base paths.
-			require_once( 'classes/Autoloader.php' );
+			require_once 'classes/Autoloader.php';
 			$this->autoloader = new WSAL_Autoloader( $this );
 			$this->autoloader->Register( self::PLG_CLS_PRFX, $this->GetBaseDir() . 'classes' . DIRECTORY_SEPARATOR );
+		}
 
-			// Load dependencies.
-			$this->settings  = new WSAL_Settings( $this );
-			$this->views     = new WSAL_ViewManager( $this );
-			$this->alerts    = new WSAL_AlertManager( $this );
-			$this->sensors   = new WSAL_SensorManager( $this );
-			$this->constants = new WSAL_ConstantManager( $this );
-			$this->licensing = new WSAL_LicenseManager( $this );
-			$this->widgets   = new WSAL_WidgetManager( $this );
-
+		/**
+		 * Initialize Plugin Hooks.
+		 *
+		 * @since 3.3
+		 */
+		public function init_hooks() {
 			// Listen for installation event.
 			register_activation_hook( __FILE__, array( $this, 'Install' ) );
 
 			// Listen for init event.
-			add_action( 'init', array( $this, 'Init' ) );
+			add_action( 'init', array( $this, 'init' ) );
 
 			// Listen for cleanup event.
 			add_action( 'wsal_cleanup', array( $this, 'CleanUp' ) );
 
 			// Render wsal header.
-			add_action( 'admin_enqueue_scripts', array( $this, 'RenderHeader' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'render_header' ) );
 
 			// Render wsal footer.
-			add_action( 'admin_footer', array( $this, 'RenderFooter' ) );
+			add_action( 'admin_footer', array( $this, 'render_footer' ) );
 
 			// Plugin redirect on activation.
 			add_action( 'admin_init', array( $this, 'wsal_plugin_redirect' ), 10 );
@@ -237,6 +279,22 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
 			wsal_freemius()->add_filter( 'show_first_trial_after_n_sec', array( $this, 'change_show_first_trial_period' ), 10, 1 );
 			wsal_freemius()->add_filter( 'reshow_trial_after_every_n_sec', array( $this, 'change_reshow_trial_period' ), 10, 1 );
+		}
+
+		/**
+		 * Check if WSAL should be loaded on front-end.
+		 *
+		 * @return boolean
+		 */
+		public function load_wsal_on_frontend() {
+			if ( null === $this->load_on_frontend ) {
+				if ( ! is_user_logged_in() ) {
+					$this->load_on_frontend = 'no' === $this->GetGlobalOption( 'disable-visitor-events', 'no' );
+				} else {
+					return true;
+				}
+			}
+			return $this->load_on_frontend;
 		}
 
 		/**
@@ -318,6 +376,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Plugin Issue Reporting URL.
 			if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
 				define( 'WSAL_ISSUE_URL', 'https://wordpress.org/support/plugin/wp-security-audit-log' );
+			}
+			// Plugin Classes Prefix.
+			if ( ! defined( 'WSAL_CLASS_PREFIX' ) ) {
+				define( 'WSAL_CLASS_PREFIX', 'WSAL_' );
 			}
 		}
 
@@ -425,32 +487,64 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @internal
 		 */
-		public function Init() {
-			// Start listening to events.
-			self::GetInstance()->sensors->HookEvents();
+		public function init() {
+			if ( is_admin() || $this->load_wsal_on_frontend() ) {
+				// Load dependencies.
+				$this->settings  = new WSAL_Settings( $this );
+				$this->alerts    = new WSAL_AlertManager( $this );
+				$this->sensors   = new WSAL_SensorManager( $this );
+				$this->constants = new WSAL_ConstantManager( $this );
+			}
 
-			if ( $this->settings->IsArchivingEnabled() ) {
-				// Check the current page.
-				$get_page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
-				if ( ( ! isset( $get_page ) || 'wsal-auditlog' !== $get_page ) && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
-					$selected_db      = get_transient( 'wsal_wp_selected_db' );
-					$selected_db_user = (int) get_transient( 'wsal_wp_selected_db_user' );
-					if ( $selected_db && ( get_current_user_id() === $selected_db_user ) ) {
-						// Delete the transient.
-						delete_transient( 'wsal_wp_selected_db' );
-						delete_transient( 'wsal_wp_selected_db_user' );
+			if ( is_admin() ) {
+				$this->views     = new WSAL_ViewManager( $this );
+				$this->licensing = new WSAL_LicenseManager( $this );
+				$this->widgets   = new WSAL_WidgetManager( $this );
+			}
+
+			// Start listening to events.
+			if ( ! empty( $this->sensors ) && $this->sensors instanceof WSAL_SensorManager ) {
+				$this->sensors->HookEvents();
+			}
+
+			if ( is_admin() || $this->load_wsal_on_frontend() ) {
+				if ( $this->settings->IsArchivingEnabled() ) {
+					// Check the current page.
+					$get_page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+					if ( ( ! isset( $get_page ) || 'wsal-auditlog' !== $get_page ) && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
+						$selected_db      = get_transient( 'wsal_wp_selected_db' );
+						$selected_db_user = (int) get_transient( 'wsal_wp_selected_db_user' );
+						if ( $selected_db && ( get_current_user_id() === $selected_db_user ) ) {
+							// Delete the transient.
+							delete_transient( 'wsal_wp_selected_db' );
+							delete_transient( 'wsal_wp_selected_db_user' );
+						}
 					}
 				}
+
+				// Hide plugin.
+				if ( $this->settings->IsIncognito() ) {
+					add_action( 'admin_head', array( $this, 'HidePlugin' ) );
+				}
+
+				// Update routine.
+				$old_version = $this->GetOldVersion();
+				$new_version = $this->GetNewVersion();
+				if ( $old_version !== $new_version ) {
+					$this->Update( $old_version, $new_version );
+				}
+
+				// Generate index.php for uploads directory.
+				$this->settings->generate_index_files();
 			}
 		}
-
 
 		/**
 		 * Render plugin stuff in page header.
 		 *
 		 * @internal
 		 */
-		public function RenderHeader() {
+		public function render_header() {
 			// common.css?
 		}
 
@@ -532,7 +626,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @internal
 		 */
-		public function RenderFooter() {
+		public function render_footer() {
 			// Register common script.
 			wp_register_script(
 				'wsal-common',
@@ -564,7 +658,20 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @internal
 		 */
-		public function Load() {
+		public function load_wsal() {
+			// Lazy load these files if required.
+			if ( is_admin() || $this->load_wsal_on_frontend() ) {
+				require_once 'classes/Alert.php';
+				require_once 'classes/AbstractLogger.php';
+				require_once 'classes/AbstractSensor.php';
+				require_once 'classes/AlertManager.php';
+				require_once 'classes/ConstantManager.php';
+				require_once 'classes/Loggers/Database.php';
+				require_once 'classes/SensorManager.php';
+				require_once 'classes/Sensors/Public.php';
+				require_once 'classes/Settings.php';
+			}
+
 			$options_table = new WSAL_Models_Option();
 			if ( ! $options_table->IsInstalled() ) {
 				$options_table->Install();
@@ -589,21 +696,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// WSAL Initialized.
 			do_action( 'wsal_init', $this );
-
-			// Hide plugin.
-			if ( $this->settings->IsIncognito() ) {
-				add_action( 'admin_head', array( $this, 'HidePlugin' ) );
-			}
-
-			// Update routine.
-			$old_version = $this->GetOldVersion();
-			$new_version = $this->GetNewVersion();
-			if ( $old_version !== $new_version ) {
-				$this->Update( $old_version, $new_version );
-			}
-
-			// Generate index.php for uploads directory.
-			$this->settings->generate_index_files();
 		}
 
 		/**
@@ -925,19 +1017,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			);
 
 			// Load data.
-			$sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog_events';
+			$sql    = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog_events';
 			$events = array();
 			foreach ( $wpdb->get_results( $sql, ARRAY_A ) as $item ) {
 				$events[ $item['EventID'] ] = $item;
 			}
-			$sql = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog';
+			$sql      = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog';
 			$auditlog = $wpdb->get_results( $sql, ARRAY_A );
 
 			// Migrate using db logger.
 			foreach ( $auditlog as $entry ) {
 				$data = array(
-					'ClientIP' => $entry['UserIP'],
-					'UserAgent' => '',
+					'ClientIP'      => $entry['UserIP'],
+					'UserAgent'     => '',
 					'CurrentUserID' => $entry['UserID'],
 				);
 				if ( $entry['UserName'] ) {
@@ -1207,8 +1299,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Load default configuration / data.
 		 */
-		public function LoadDefaults() {
-			require_once( 'defaults.php' );
+		public function load_defaults() {
+			require_once 'defaults.php';
 		}
 
 		/**
@@ -1305,19 +1397,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function wsal_recurring_schedules( $schedules ) {
 			$schedules['fortyfiveminutes'] = array(
 				'interval' => 2700,
-				'display' => __( 'Every 45 minutes', 'wp-security-audit-log' ),
+				'display'  => __( 'Every 45 minutes', 'wp-security-audit-log' ),
 			);
-			$schedules['thirtyminutes'] = array(
+			$schedules['thirtyminutes']    = array(
 				'interval' => 1800,
-				'display' => __( 'Every 30 minutes', 'wp-security-audit-log' ),
+				'display'  => __( 'Every 30 minutes', 'wp-security-audit-log' ),
 			);
-			$schedules['tenminutes'] = array(
+			$schedules['tenminutes']       = array(
 				'interval' => 600,
-				'display' => __( 'Every 10 minutes', 'wp-security-audit-log' ),
+				'display'  => __( 'Every 10 minutes', 'wp-security-audit-log' ),
 			);
-			$schedules['oneminute'] = array(
+			$schedules['oneminute']        = array(
 				'interval' => 60,
-				'display' => __( 'Every 1 minute', 'wp-security-audit-log' ),
+				'display'  => __( 'Every 1 minute', 'wp-security-audit-log' ),
 			);
 			return $schedules;
 		}
@@ -1355,10 +1447,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 
 	// Begin load sequence.
-	add_action( 'plugins_loaded', array( WpSecurityAuditLog::GetInstance(), 'Load' ) );
+	add_action( 'plugins_loaded', array( WpSecurityAuditLog::GetInstance(), 'load_wsal' ) );
 
 	// Load extra files.
-	WpSecurityAuditLog::GetInstance()->LoadDefaults();
+	WpSecurityAuditLog::GetInstance()->load_defaults();
 
 	// Create & Run the plugin.
 	return WpSecurityAuditLog::GetInstance();
