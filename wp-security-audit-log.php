@@ -1370,11 +1370,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @param string $message - Login message.
 		 */
 		public function render_login_page_message( $message ) {
+			// Set WSAL Settings.
+			$wsal_settings = new WSAL_Settings( $this );
+
 			// Check if the option is enabled.
-			$login_message_enabled = $this->settings->is_login_page_notification();
+			$login_message_enabled = $wsal_settings->is_login_page_notification();
 			if ( 'true' === $login_message_enabled ) {
 				// Get login message.
-				$message = $this->settings->get_login_page_notification_text();
+				$message = $wsal_settings->get_login_page_notification_text();
 
 				// Default message.
 				if ( ! $message ) {
