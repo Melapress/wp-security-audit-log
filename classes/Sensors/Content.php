@@ -174,60 +174,92 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @since 2.6.9
 	 */
 	public function event_terms_rename( $data, $term_id, $taxonomy, $args ) {
-		// Check if the taxonomy is term.
-		if ( 'post_tag' !== $taxonomy ) {
-			return $data;
+		// Check if the taxonomy is `post tag`.
+		if ( 'post_tag' === $taxonomy ) {
+			// Get data.
+			$new_name = ( isset( $data['name'] ) ) ? $data['name'] : false;
+			$new_slug = ( isset( $data['slug'] ) ) ? $data['slug'] : false;
+			$new_desc = ( isset( $args['description'] ) ) ? $args['description'] : false;
+
+			// Get old data.
+			$term      = get_term( $term_id, $taxonomy );
+			$old_name  = $term->name;
+			$old_slug  = $term->slug;
+			$old_desc  = $term->description;
+			$term_link = $this->get_tag_link( $term_id );
+
+			// Update if both names are not same.
+			if ( $old_name !== $new_name ) {
+				$this->plugin->alerts->Trigger(
+					2123, array(
+						'old_name' => $old_name,
+						'new_name' => $new_name,
+						'TagLink'  => $term_link,
+					)
+				);
+			}
+
+			// Update if both slugs are not same.
+			if ( $old_slug !== $new_slug ) {
+				$this->plugin->alerts->Trigger(
+					2124, array(
+						'tag'      => $new_name,
+						'old_slug' => $old_slug,
+						'new_slug' => $new_slug,
+						'TagLink'  => $term_link,
+					)
+				);
+			}
+
+			// Update if both descriptions are not same.
+			if ( $old_desc !== $new_desc ) {
+				$this->plugin->alerts->Trigger(
+					2125, array(
+						'tag'        => $new_name,
+						'TagLink'    => $term_link,
+						'old_desc'   => $old_desc,
+						'new_desc'   => $new_desc,
+						'ReportText' => $old_desc . '|' . $new_desc,
+					)
+				);
+			}
+		} elseif ( 'category' === $taxonomy ) { // Check if the taxonomy is `category`.
+			// Get new data.
+			$new_name = ( isset( $data['name'] ) ) ? $data['name'] : false;
+			$new_slug = ( isset( $data['slug'] ) ) ? $data['slug'] : false;
+
+			// Get old data.
+			$term      = get_term( $term_id, $taxonomy );
+			$old_name  = $term->name;
+			$old_slug  = $term->slug;
+			$term_link = $this->get_tag_link( $term_id );
+
+			// Log event if both names are not same.
+			if ( $old_name !== $new_name ) {
+				$this->plugin->alerts->Trigger(
+					2127, array(
+						'old_name' => $old_name,
+						'new_name' => $new_name,
+						'cat_link' => $term_link,
+					)
+				);
+			}
+
+			// Log event if both slugs are not same.
+			if ( $old_slug !== $new_slug ) {
+				$this->plugin->alerts->Trigger(
+					2128, array(
+						'CategoryName' => $new_name,
+						'old_slug'     => $old_slug,
+						'new_slug'     => $new_slug,
+						'cat_link'     => $term_link,
+					)
+				);
+			}
 		}
 
-		// Get data.
-		$new_name = ( isset( $data['name'] ) ) ? $data['name'] : false;
-		$new_slug = ( isset( $data['slug'] ) ) ? $data['slug'] : false;
-		$new_desc = ( isset( $args['description'] ) ) ? $args['description'] : false;
-
-		// Get old data.
-		$term      = get_term( $term_id, $taxonomy );
-		$old_name  = $term->name;
-		$old_slug  = $term->slug;
-		$old_desc  = $term->description;
-		$term_link = $this->get_tag_link( $term_id );
-
-		// Update if both names are not same.
-		if ( $old_name !== $new_name ) {
-			$this->plugin->alerts->Trigger(
-				2123, array(
-					'old_name' => $old_name,
-					'new_name' => $new_name,
-					'TagLink'  => $term_link,
-				)
-			);
-		}
-
-		// Update if both slugs are not same.
-		if ( $old_slug !== $new_slug ) {
-			$this->plugin->alerts->Trigger(
-				2124, array(
-					'tag'      => $new_name,
-					'old_slug' => $old_slug,
-					'new_slug' => $new_slug,
-					'TagLink'  => $term_link,
-				)
-			);
-		}
-
-		// Update if both descriptions are not same.
-		if ( $old_desc !== $new_desc ) {
-			$this->plugin->alerts->Trigger(
-				2125, array(
-					'tag'        => $new_name,
-					'TagLink'    => $term_link,
-					'old_desc'   => $old_desc,
-					'new_desc'   => $new_desc,
-					'ReportText' => $old_desc . '|' . $new_desc,
-				)
-			);
-		}
+		// Return data for the filter.
 		return $data;
-
 	}
 
 	/**
