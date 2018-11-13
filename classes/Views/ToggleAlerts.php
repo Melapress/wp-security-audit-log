@@ -606,10 +606,17 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					</table>
 					<p class="description"><?php esc_html_e( 'Below is the list of the events which are disabled when the above option is disabled:', 'wp-security-audit-log' ); ?></p>
 					<ul>
-						<li><?php echo '2101 — ' . esc_html__( 'User viewed a post', 'wp-security-audit-log' ); ?></li>
-						<li><?php echo '2126 — ' . esc_html__( 'Visitor posted a comment', 'wp-security-audit-log' ); ?></li>
-						<li><?php echo '6023 — ' . esc_html__( 'Website Visitor User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ); ?></li>
-						<li><?php echo '9073 — ' . esc_html__( 'User viewed a product', 'wp-security-audit-log' ); ?></li>
+						<?php
+						$wsal_alerts   = $this->_plugin->alerts->GetAlerts(); // Get alerts list.
+						$public_alerts = array( 1000, 1002, 1003, 1004, 2101, 2126, 6023, 9073 ); // Public events.
+						foreach ( $public_alerts as $public_alert ) :
+							if ( isset( $wsal_alerts[ $public_alert ] ) ) :
+								?>
+								<li><?php echo esc_html( $wsal_alerts[ $public_alert ]->type . ' — ' . $wsal_alerts[ $public_alert ]->desc ); ?></li>
+								<?php
+							endif;
+						endforeach;
+						?>
 					</ul>
 				</div>
 			</div>

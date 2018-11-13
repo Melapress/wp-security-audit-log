@@ -240,7 +240,7 @@ final class WSAL_AlertManager {
 					$this->Log( $type, $data );
 				} elseif ( $_retry ) {
 					// This is the last attempt at loading alerts from default file.
-					$this->plugin->LoadDefaults();
+					$this->plugin->load_defaults();
 					return $this->_CommitItem( $type, $data, $cond, false );
 				} else {
 					// In general this shouldn't happen, but it could, so we handle it here.
@@ -438,15 +438,13 @@ final class WSAL_AlertManager {
 	/**
 	 * Return alert given alert type.
 	 *
-	 * @param integer $type - Alert type.
+	 * @param integer $type    - Alert type.
 	 * @param mixed   $default - Returned if alert is not found.
 	 * @return WSAL_Alert
 	 */
 	public function GetAlert( $type, $default = null ) {
-		foreach ( $this->_alerts as $alert ) {
-			if ( $alert->type == $type ) {
-				return $alert;
-			}
+		if ( isset( $this->_alerts[ $type ] ) ) {
+			return $this->_alerts[ $type ];
 		}
 		return $default;
 	}

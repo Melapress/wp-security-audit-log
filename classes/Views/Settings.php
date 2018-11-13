@@ -783,7 +783,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetDisplayName( sanitize_text_field( $post_array['DisplayName'] ) );
 
 		$this->_plugin->settings->SetWidgetsEnabled( sanitize_text_field( $post_array['EnableDashboardWidgets'] ) );
-		$this->_plugin->settings->set_admin_bar_notif( sanitize_text_field( $post_array['admin_bar_notif'] ) );
+
+		if ( ! wsal_freemius()->is_free_plan() ) {
+			$this->_plugin->settings->set_admin_bar_notif( sanitize_text_field( $post_array['admin_bar_notif'] ) );
+		}
 
 		// Get plugin viewers.
 		$viewers = isset( $post_array['Viewers'] ) ? array_map( 'sanitize_text_field', $post_array['Viewers'] ) : array();

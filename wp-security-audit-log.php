@@ -494,6 +494,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$this->alerts    = new WSAL_AlertManager( $this );
 				$this->sensors   = new WSAL_SensorManager( $this );
 				$this->constants = new WSAL_ConstantManager( $this );
+			} else {
+				global $pagenow;
+				if ( 'wp-login.php' === $pagenow && $this->load_wsal_on_frontend() ) {
+					// Load dependencies.
+					$this->settings  = new WSAL_Settings( $this );
+					$this->alerts    = new WSAL_AlertManager( $this );
+					$this->sensors   = new WSAL_SensorManager( $this );
+					$this->constants = new WSAL_ConstantManager( $this );
+				}
 			}
 
 			if ( is_admin() ) {

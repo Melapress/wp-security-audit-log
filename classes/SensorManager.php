@@ -177,6 +177,11 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		// Get file name.
 		$filename = basename( $filepath, '.php' );
 
+		// Load LogInOut sensor on login page.
+		if ( 'wp-login.php' === $admin_page && 'LogInOut' === $filename ) {
+			return true;
+		}
+
 		// Only load Public sensor when the user is not on wp-admin.
 		if ( ! is_admin() && ! is_user_logged_in() && 'Public' !== $filename ) {
 			return false;
