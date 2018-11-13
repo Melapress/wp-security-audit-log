@@ -806,9 +806,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			}
 		}
 
-		// @todo Modify $query instead
-		// @deprecated
-		// $data = array_slice($data, ($this->get_pagenum() - 1) * $per_page, $per_page);
 		$query->setOffset( ( $this->get_pagenum() - 1 ) * $per_page );
 		$query->setLimit( $per_page );
 
