@@ -715,20 +715,29 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				?>
 				<html>
 					<head>
-						<link rel="stylesheet"
-							href="<?php echo esc_attr( $this->GetBaseUrl() . '/css/install-error.css?v=' . filemtime( $this->GetBaseDir() . '/css/install-error.css' ) ); ?>"
-							type="text/css" media="all"/>
+						<style>
+							.warn-icon-tri{top:5px;left:5px;position:absolute;border-left:16px solid #FFF;border-right:16px solid #FFF;border-bottom:28px solid #C33;height:3px;width:4px}.warn-icon-chr{top:8px;left:18px;position:absolute;color:#FFF;font:26px Georgia}.warn-icon-cir{top:2px;left:0;position:absolute;overflow:hidden;border:6px solid #FFF;border-radius:32px;width:34px;height:34px}.warn-wrap{position:relative;color:#A00;font:14px Arial;padding:6px 48px}.warn-wrap a,.warn-wrap a:hover{color:#F56}
+						</style>
 					</head>
 					<body>
 						<div class="warn-wrap">
 							<div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div>
-							<?php echo sprintf( esc_html__( 'You are using a version of PHP that is older than %s, which is no longer supported.', 'wp-security-audit-log' ), self::MIN_PHP_VERSION ); ?><br />
+							<?php
+							/* Translators: PHP Version */
+							echo sprintf( esc_html__( 'You are using a version of PHP that is older than %s, which is no longer supported.', 'wp-security-audit-log' ), self::MIN_PHP_VERSION );
+							?>
+							<br />
 							<?php echo wp_kses( __( 'Contact us on <a href="mailto:plugins@wpwhitesecurity.com">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using.', 'wp-security-audit-log' ), $this->allowed_html_tags ); ?>
 						</div>
 					</body>
 				</html>
 				<?php
 				die( 1 );
+			}
+
+			// Set the settings object temporarily.
+			if ( empty( $this->settings ) ) {
+				$this->settings = new WSAL_Settings( $this );
 			}
 
 			// Ensure that the system is installed and schema is correct.

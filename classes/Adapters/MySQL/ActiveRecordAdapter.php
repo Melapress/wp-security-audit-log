@@ -127,7 +127,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 */
 	public function IsInstalled() {
 		$_wpdb = $this->connection;
-		$sql = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
+		$sql   = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
 
 		// Table transient.
 		$wsal_table_transient = 'wsal_' . strtolower( $this->GetTable() ) . '_status';
@@ -179,7 +179,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
 		// Query table exists.
 		$table_exists_query = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
-		$result = $_wpdb->query( $table_exists_query );
+		$result             = $_wpdb->query( $table_exists_query );
 		return $result;
 	}
 
@@ -190,9 +190,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @return integer|boolean - Either the number of modified/inserted rows or false on failure.
 	 */
 	public function Save( $active_record ) {
-		$_wpdb = $this->connection;
-		$copy = $active_record;
-		$data = array();
+		$_wpdb  = $this->connection;
+		$copy   = $active_record;
+		$data   = array();
 		$format = array();
 
 		foreach ( $this->GetColumns() as $index => $key ) {
@@ -200,7 +200,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 				$_id_index = $index;
 			}
 
-			$val = $copy->$key;
+			$val    = $copy->$key;
 			$deffmt = '%s';
 			if ( is_int( $copy->$key ) ) {
 				$deffmt = '%d';
@@ -239,8 +239,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 */
 	public function Load( $cond = '%d', $args = array( 1 ) ) {
 		$_wpdb = $this->connection;
-		$sql = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
-		$data = $_wpdb->get_row( $sql, ARRAY_A );
+		$sql   = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
+		$data  = $_wpdb->get_row( $sql, ARRAY_A );
 		return $data;
 	}
 
