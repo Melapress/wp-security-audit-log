@@ -494,15 +494,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$this->alerts    = new WSAL_AlertManager( $this );
 				$this->sensors   = new WSAL_SensorManager( $this );
 				$this->constants = new WSAL_ConstantManager( $this );
-			} else {
-				global $pagenow;
-				if ( 'wp-login.php' === $pagenow && $this->load_wsal_on_frontend() ) {
-					// Load dependencies.
-					$this->settings  = new WSAL_Settings( $this );
-					$this->alerts    = new WSAL_AlertManager( $this );
-					$this->sensors   = new WSAL_SensorManager( $this );
-					$this->constants = new WSAL_ConstantManager( $this );
-				}
 			}
 
 			if ( is_admin() ) {
@@ -516,7 +507,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$this->sensors->HookEvents();
 			}
 
-			if ( is_admin() || $this->load_wsal_on_frontend() ) {
+			if ( is_admin() ) {
 				if ( $this->settings->IsArchivingEnabled() ) {
 					// Check the current page.
 					$get_page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
@@ -681,27 +672,31 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				require_once 'classes/Settings.php';
 			}
 
-			$options_table = new WSAL_Models_Option();
-			if ( ! $options_table->IsInstalled() ) {
-				$options_table->Install();
+			if ( is_admin() ) {
+				$options_table = new WSAL_Models_Option();
+				if ( ! $options_table->IsInstalled() ) {
+					$options_table->Install();
 
-				// Setting the prunig date with the old value or the default value.
-				$pruning_date = $this->settings->GetPruningDate();
-				$this->settings->SetPruningDate( $pruning_date );
-			}
-			$log_404 = $this->GetGlobalOption( 'log-404' );
-			// If old setting is empty enable 404 logging by default.
-			if ( false === $log_404 ) {
-				$this->SetGlobalOption( 'log-404', 'on' );
-			}
+					// Setting the prunig date with the old value or the default value.
+					$pruning_date = $this->settings->GetPruningDate();
+					$this->settings->SetPruningDate( $pruning_date );
+				}
 
-			$purge_log_404 = $this->GetGlobalOption( 'purge-404-log' );
-			// If old setting is empty enable 404 purge log by default.
-			if ( false === $purge_log_404 ) {
-				$this->SetGlobalOption( 'purge-404-log', 'on' );
+				$log_404 = $this->GetGlobalOption( 'log-404' );
+				// If old setting is empty enable 404 logging by default.
+				if ( false === $log_404 ) {
+					$this->SetGlobalOption( 'log-404', 'on' );
+				}
+
+				$purge_log_404 = $this->GetGlobalOption( 'purge-404-log' );
+				// If old setting is empty enable 404 purge log by default.
+				if ( false === $purge_log_404 ) {
+					$this->SetGlobalOption( 'purge-404-log', 'on' );
+				}
+
+				// Load translations.
+				load_plugin_textdomain( 'wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 			}
-			// Load translations.
-			load_plugin_textdomain( 'wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 
 			// WSAL Initialized.
 			do_action( 'wsal_init', $this );
