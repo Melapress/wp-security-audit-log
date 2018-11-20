@@ -359,20 +359,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if (
 				get_option( 'wsal_redirect_on_activate', false )
 				&& in_array( $wsal_state, array( 'anonymous', 'skipped' ), true )
-			) { // If the redirect option is true, then continue.
+			) {
+				// If the redirect option is true, then continue.
 				delete_option( 'wsal_redirect_on_activate' ); // Delete redirect option.
-				// Redirect to main page.
+
+				// Redirect URL.
 				$redirect = '';
-				if ( ! $this->IsMultisite() ) {
-					// By default, set it to wizard setup page.
-					$redirect = add_query_arg( 'page', 'wsal-setup', admin_url( 'index.php' ) );
+
+				// If current site is multisite and user is super-admin then redirect to network audit log.
+				if ( $this->IsMultisite() && $this->settings->CurrentUserCan( 'edit' ) && is_super_admin() ) {
+					$redirect = add_query_arg( 'page', 'wsal-auditlog', network_admin_url( 'admin.php' ) );
 				} else {
-					// Only allow super-admins on multisite to view wizard.
-					if ( $this->settings->CurrentUserCan( 'edit' ) ) {
-						$redirect = add_query_arg( 'page', 'wsal-setup', admin_url( 'index.php' ) );
-					} else {
-						$redirect = add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) );
-					}
+					// Otherwise redirect to main audit log view.
+					$redirect = add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) );
 				}
 				wp_safe_redirect( $redirect );
 				exit();
