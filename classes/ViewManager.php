@@ -58,13 +58,18 @@ class WSAL_ViewManager {
 		$skip_views = array();
 
 		// Array of views to skip for premium version.
-		if ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
+		if ( wsal_freemius()->is_plan_or_trial__premium_only( 'starter' ) ) {
 			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/EmailNotifications.php';
+			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Search.php';
+		}
+
+		if ( wsal_freemius()->is_plan_or_trial__premium_only( 'professional' ) ) {
+			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/EmailNotifications.php';
+			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Search.php';
 			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/ExternalDB.php';
 			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Licensing.php';
 			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/LogInUsers.php';
 			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Reports.php';
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Search.php';
 		}
 
 		/**
@@ -118,7 +123,7 @@ class WSAL_ViewManager {
 		// Reorder WSAL submenu.
 		add_filter( 'custom_menu_order', array( $this, 'reorder_wsal_submenu' ), 10, 1 );
 
-		if ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
+		if ( wsal_freemius()->is__premium_only() ) {
 			if ( $this->_plugin->settings->is_admin_bar_notif() ) {
 				add_action( 'admin_bar_menu', array( $this, 'live_notifications__premium_only' ), 1000, 1 );
 				add_action( 'wp_ajax_wsal_adminbar_events_refresh', array( $this, 'wsal_adminbar_events_refresh__premium_only' ) );

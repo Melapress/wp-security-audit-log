@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 4.9.7
-Stable tag: 3.2.4
+Stable tag: 3.2.5
 Requires PHP: 5.4.43
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -19,24 +19,23 @@ Keep an activity log of everything that happens on your WordPress and [WordPress
 
 * Ensure user productivity
 * Ease troubleshooting
-* Better manage and organize your WordPress site
-* Easily spot suspicious behavior before it becomes a security problem.
+* Know exactly what all your users are doing
+* Better manage & organize your WordPress site
+* Easily spot suspicious behavior before there are security problems.
 
-[WP Security Audit Log](http://www.wpsecurityauditlog.com) is WordPress' most comprehensive real time user activity and monitoring log plugin. It helps thousands of WordPress administrators and security professionals keep an eye on what is happening on their websites. It is also the most highly rated WordPress activity log plugin and have been featured on popular WordPress blogs such as GoDaddy, ManageWP, Pagely, Shout Me Loud and WPKube.
-
-Refer to the [WordPress activity log plugin datasheet](https://www.wpsecurityauditlog.com/plugin-datasheet/) for a detailed list of all the features and settings.
-
-> <strong>Note</strong>: All logging functionality is and will always remain FREE. Additional features such as reports, instant email alerts and search are available in the <Strong>[Premium Edition](https://www.wpsecurityauditlog.com/premium-features/)</strong>.
->
+[WP Security Audit Log](http://www.wpsecurityauditlog.com) is the most comprehensive real time user activity and monitoring log plugin. It helps thousands of WordPress administrators and security professionals keep an eye on what is happening on their websites. It is also the most highly rated WordPress activity log plugin and have been featured on popular sites such as GoDaddy, ManageWP, Pagely, Shout Me Loud and WPKube.
 
 [youtube https://www.youtube.com/watch?v=1nopATCS-CQ]
 
+> <strong>Note</strong>: All WrodPress logging functionality is FREE. Features such as reports, email notifications & search are available in the <Strong>[Premium Edition](https://www.wpsecurityauditlog.com/premium-features/)</strong>.
+>
+
 #### WordPress Changes & Details the Plugin Keeps a Log Of
-If you are looking for a comprehensive & complete WordPress activity log solution you are in the right place. The WP Security Audit Log plugin does not just tell you that a post, a user profile or an object was updated. It reports what was changed within the post, profile or object in real time.
+As a comprehensive & complete WordPress activity log solution WP Security Audit Log does not just tell you that a post, a user profile, or an object was updated. It keeps a log of what was changed within the post, profile or object.
 
 Below is a summary of the changes that the plugin can keep a record of:
 
-* **Post, Page and Custom Post Type changes** such as status, content, title, URL, date and custom field changes
+* **Post, Page and Custom Post Type changes** such as status, [content changes](https://www.wpsecurityauditlog.com/support-documentation/how-keep-record-of-content-changes/), title, URL, date and custom field changes
 
 * **Tags and Categories changes** such as creating, modifying or deleting them, and adding or removing them from posts
 
@@ -50,17 +49,17 @@ Below is a summary of the changes that the plugin can keep a record of:
 
 * **WordPress core and settings changes** such as installed updates, permalinks, default role, URL and other site-wide changes
 
-* **WordPress multisite network changes** such as adding, deleting or archiving sites, adding or removing users from sites etc
+* **WordPress multisite network changes** such as adding, deleting or archiving sites, adding or removing users from sites etc ([activity logs for multisite networks](https://www.wpsecurityauditlog.com/support-documentation/audit-trail-features-wordpress-multisite/)).
 
 * **Plugins and Themes changes** such as installing, activating, deactivating, uninstalling and updating them
 
 * **WordPress database changes** such as when a plugin adds or removes a table
 
-* Changes on **WooCommerce Stores and Products**, **Yoast SEO**, **Advanced Custom Fields (ACF)**, **MainWP** and other popular WordPress plugins.
+* Changes on **WooCommerce Stores & Products**, **Yoast SEO**, **Advanced Custom Fields (ACF)**, **MainWP** and other popular WordPress plugins.
 
 * **[WordPress site file changes](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/)** such as new files are added, or existing ones are modified or deleted.
 
-For every change the plugin keeps record of it also reports the:
+For every event that the plugin keeps a log of it also reports the:
 
 * Date & time (and milliseconds) of when it happened,
 * User & role of the user who did the change,
@@ -110,15 +109,17 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * Enable or disable any security alerts
 * and much more...
 
+Refer to the <strong>[WordPress activity log plugin datasheet](https://www.wpsecurityauditlog.com/plugin-datasheet/)</strong> for a complete list of features.
+
 ### As Featured On:
 
 * [GoDaddy](https://www.godaddy.com/garage/decode-security-logs-wordpress/)
+* [Kinsta](https://kinsta.com/blog/wordpress-activity-log/) 
 * [Pagely](https://pagely.com/blog/2015/01/log-wordpress-dashboard-activity-improved-security-auditing/)
 * [Shout Me Loud](https://www.shoutmeloud.com/wordpress-security-audit-log.html)
-* [WP Couple](https://wpcouple.com/wp-security-audit-log-review/)
+* [The Dev Couple](https://thedevcouple.com/wp-security-audit-log-review/)
 * [WPKube](http://www.wpkube.com/improve-wordpress-security-wp-security-audit-log/)
-* [WPLift](http://wplift.com/audit-wordpress-security-logs) - Review by Ahmad Awais
-* [WP Mayor](http://www.wpmayor.com/wp-security-audit-log-plugin-review-user-activity-logging-wordpress/)
+* [WPLift](http://wplift.com/audit-wordpress-security-logs)
 * [WP SmackDown](https://wpsmackdown.com/wp-plugins/wp-security-audit-log/)
 * [SourceWP](https://www.sourcewp.com/wp-security-audit-log-plugin-review/)
 * [Techwibe](https://www.techwibe.com/wp-security-audit-log-wordpress-plugin/)
@@ -130,11 +131,11 @@ WP Security Audit Log plugin also has a number of features that make WordPress a
 * [Firewall.cx](http://www.firewall.cx/general-topics-reviews/security-articles/1146-wordpress-audit-monitor-log-site-security-alerts.html)
 * [Design Wall](http://www.designwall.com/blog/10-wordpress-multisite-plugins-you-shouldnt-live-without/)
 * [Tidy Repo](https://tidyrepo.com/wp-security-audit-log-wordpress-activity-log/)
-* [Shout Me Loud](http://www.shoutmeloud.com/how-to-monitor-user-activities-wordpress-dashboard.html)
 * [Monster Post](http://blog.templatemonster.com/2015/12/15/wp-security-audit-log-plugin-review/)
 * [The Darknet](http://www.darknet.org.uk/2015/10/wp-security-audit-log-a-complete-audit-log-plugin-for-wordpress/)
 * [WebEmpresa](https://www.webempresa.com/blog/auditando-cambios-en-wordpress.html)
 * [KitPloit](http://www.kitploit.com/2016/10/wp-security-audit-log-ultimate.html)
+* [EHacking](https://www.ehacking.net/2018/10/how-activity-log-wordpress-plugin.html)
 
 #### WordPress Security Audit Log in your Language!
 We need help translating the plugin and the WordPress Security Alerts. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log) to translate the plugin and drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
@@ -144,6 +145,10 @@ We need help translating the plugin and the WordPress Security Alerts. Please vi
 * Spanish translation by the [WP Body team](https://wpbody.com/)
 * French translations by Denis Moscato
 
+#### Activity Log Extensions
+
+* <strong>[Activity Log for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/)</strong>: This extension allows you to keep a log of MainWP network changes and to view the activity logs of all child sites from one central location - the MainWP dashboard.
+
 #### Related Links and Documentation
 
 * [What is a WordPress Activity Log?](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-documentation/what-is-a-wordpress-audit-trail/)
@@ -152,6 +157,7 @@ We need help translating the plugin and the WordPress Security Alerts. Please vi
 * [WP Security Audit Log and Reverse Proxy and WAFs Support](http://www.wpsecurityauditlog.com/documentation/automatically-retrieve-originating-wordpress-user-ip-address/)
 * [WP Security Audit Log Database Documentation](http://www.wpsecurityauditlog.com/documentation/plugin-wordpress-database-documentation/)
 * [Official WP Security Audit Log Plugin Website](http://www.wpsecurityauditlog.com/)
+* [Activity logs for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/)
 
 == Installation ==
 
@@ -162,7 +168,7 @@ We need help translating the plugin and the WordPress Security Alerts. Please vi
 1. Install and activate the WP Security Audit Log plugin
 1. Allow or skip diagnostic tracking
 
-=== Install WP Security Audig Log manually ===
+=== Install WP Security Audit Log manually ===
 
 1. Upload the `wp-security-audit-log` directory to the `/wp-content/plugins/` directory
 1. Activate the WP Security Audit Log plugin from the 'Plugins' menu in WordPress
@@ -189,30 +195,16 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.2.4 (2018-10-04) =
+= 3.2.5 (2018-11-15) =
 
-Release Notes: [click here](https://www.wpsecurityauditlog.com/releases/3-2-4-gutenberg-support/)
+Release Notes: [Announcing Activity Log for MainWP](https://www.wpsecurityauditlog.com/releases/announcing-activity-log-mainwp-extension/)
 
-* **New Activity Log Features**
-	* Support for Gutenberg
-	* [Daily activity log overview email](https://www.wpsecurityauditlog.com/support-documentation/daily-activity-logs-overview-email/).
-	* Live notification of latest event in the WordPress admin bar.
+* **New Events for the activity log**
+	* Event ID 2127: Changed the name of a category
+	* Event ID 2128: Changed the slug of a category
 
-* **Plugin Improvements**
-	* Revamped the [Users management module and settings](https://www.wpsecurityauditlog.com/premium-features/wordpress-users-sessions-management-tools/) - part of the easy to use updates.
-	* Error message for blocked simultaneous users sessions can now be configured.
-	* Updated the order of the plugin menu entries to a more convenient one.
-	* Invalid usernames used in failed logins are now kept for 30 days in the database.
-	* Improved WordPress menu sensor - added coverage and improved accuracy.
-	* Changed Event Code to Event ID in [email notifications trigger builder](https://www.wpsecurityauditlog.com/support-documentation/getting-started-email-notifications-add/).
-	* Improved MainWP Child Site Stealth Mode for premium edition.
-	* Sidebar admin notification on first install now only shown to the first user accessing the activity log.
-	* Removed in activity log adverts.
-	* Updated top banner adverts in activity log - now users can hide them.
-	* Updated WordPress icon used to report system events in activity log.
+* **New Functionality**
+	* Added support in the plugin for the [Activity Log for MainWP extension](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/).
 
 * **Bug Fixes**
-	* Added support for arrays in ACF [Support Ticket](https://wordpress.org/support/topic/array-to-string-warning/)
-	* Handled an exception error in which user has same event ID. Now instead plugin shows an show error and disable custom sensor.
-	* Fixed an issue in which the startup wizard was shown twice on the free edition of the plugin.
-	* Fixed an issue in which reports were not generated because of non-standard paths.
+	* Fixed an issue in the licensing which allowed users with Starter plan to access features from the professional plan.

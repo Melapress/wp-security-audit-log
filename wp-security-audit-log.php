@@ -4,7 +4,7 @@
  * Plugin URI: http://www.wpsecurityauditlog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 3.2.4
+ * Version: 3.2.5
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -54,7 +54,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '3.2.4';
+		public $version = '3.2.5';
 
 		// Plugin constants.
 		const PLG_CLS_PRFX    = 'WSAL_';
@@ -270,6 +270,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				wp_schedule_event( time(), 'daily', 'wsal_delete_logins' );
 			}
 
+			add_filter( 'mainwp_child_extra_execution', array( $this, 'mainwp_dashboard_callback' ), 10, 2 );
+
 			// Register freemius uninstall event.
 			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
 
@@ -284,6 +286,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Check if WSAL should be loaded on front-end.
 		 *
+		 * @since 3.3
+		 *
 		 * @return boolean
 		 */
 		public function load_wsal_on_frontend() {
@@ -295,6 +299,56 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				}
 			}
 			return $this->load_on_frontend;
+		}
+
+		/**
+		 * MainWP Dashboard Handler.
+		 *
+		 * @since 3.2.5
+		 *
+		 * @param array $info      – Information to return.
+		 * @param array $post_data – Post data array from MainWP.
+		 * @return mixed
+		 */
+		public function mainwp_dashboard_callback( $info, $post_data ) {
+			if ( isset( $post_data['action'] ) ) {
+				switch ( $post_data['action'] ) {
+					case 'check_wsal':
+						$info = new stdClass();
+						$info->wsal_installed = true;
+						$info->is_premium     = false;
+
+						if ( wsal_freemius()->is__premium_only() ) {
+							$info->is_premium = true;
+						}
+						break;
+
+					case 'get_events':
+						$limit = isset( $post_data['events_count'] ) ? $post_data['events_count'] : false;
+						$info  = $this->alerts->get_mainwp_extension_events( $limit );
+						break;
+
+					case 'latest_event':
+						$event_query = new WSAL_Models_OccurrenceQuery();
+						$event_query->addOrderBy( 'created_on', true );
+						$event_query->setLimit( 1 );
+						$event = $event_query->getAdapter()->Execute( $event_query );
+
+						// Set the return object.
+						if ( isset( $event[0] ) ) {
+							$info = new stdClass();
+							$info->alert_id   = $event[0]->alert_id;
+							$info->created_on = $event[0]->created_on;
+						} else {
+							$info = false;
+						}
+						break;
+
+					default:
+						break;
+				}
+			}
+			return $info;
 		}
 
 		/**
