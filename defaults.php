@@ -52,8 +52,6 @@ function load_include_custom_file( $wsal ) {
  * Define Default Alerts.
  *
  * Define default alerts for the plugin.
- *
- * @param WpSecurityAuditLog $wsal - Instance of main plugin.
  */
 function wsaldefaults_wsal_init() {
 	$wsal = WpSecurityAuditLog::GetInstance();
@@ -395,7 +393,7 @@ function wsaldefaults_wsal_init() {
 						array( 6030, E_CRITICAL, __( 'File deleted from the site', 'wp-security-audit-log' ), __( 'The file %FileLocation% has been deleted from your website.', 'wp-security-audit-log' ) ),
 						array( 6031, E_CRITICAL, __( 'File not scanned because it is bigger than 5MB', 'wp-security-audit-log' ), __( 'The file %FileLocation% was not scanned because it is bigger than 5MB. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
 						array( 6032, E_CRITICAL, __( 'File integrity scan stopped due to the limit of 1 million files', 'wp-security-audit-log' ), __( 'The file changes scanning engine has reached the limit of 1 million files and stopped the scan. Please <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact our support</a> for more information.', 'wp-security-audit-log' ) ),
-						array( 6033, E_NOTICE, __( 'File integrity scan started/stopped', 'wp-security-audit-log' ), __( 'The file integrity scanner has %ScanStatus% scanning %ScanLocation%%ScanError%.', 'wp-security-audit-log' ) ),
+						array( 6033, E_NOTICE, __( 'File integrity scan started/stopped', 'wp-security-audit-log' ), __( 'The file integrity scanner has %ScanStatus%.', 'wp-security-audit-log' ) ),
 						array( 6034, E_NOTICE, __( 'Purged the activity log', 'wp-security-audit-log' ), __( 'Purged the activity log.', 'wp-security-audit-log' ) ),
 						array( 9999, E_CRITICAL, __( 'Advertising Add-ons', 'wp-security-audit-log' ), __( '%PromoName% %PromoMessage%', 'wp-security-audit-log' ) ),
 					),

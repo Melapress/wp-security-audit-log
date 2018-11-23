@@ -1,7 +1,7 @@
 /**
  * WSAL Wizard Styles
  */
- body {
+body {
   margin: 65px auto 24px;
   -webkit-box-shadow: none;
   box-shadow: none;
@@ -167,3 +167,5 @@
 .sectoken-other {
   background: #FFE;
   border-color: #ED5; }
+
+/*# sourceMappingURL=wsal-wizard.build.css.map*/
