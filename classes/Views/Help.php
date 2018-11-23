@@ -410,8 +410,6 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 
 		// PHP configs.
 		$sysinfo .= "\n" . '-- PHP Configuration --' . "\n\n";
-		$sysinfo .= 'PHP Safe Mode:            ';
-		$sysinfo .= ini_get( 'safe_mode' ) ? 'Yes' . "\n" : 'No' . "\n";
 		$sysinfo .= 'Memory Limit:             ' . ini_get( 'memory_limit' ) . "\n";
 		$sysinfo .= 'Upload Max Size:          ' . ini_get( 'upload_max_filesize' ) . "\n";
 		$sysinfo .= 'Post Max Size:            ' . ini_get( 'post_max_size' ) . "\n";
