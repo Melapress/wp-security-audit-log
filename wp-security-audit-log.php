@@ -244,7 +244,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			add_action( 'wsal_cleanup', array( $this, 'CleanUp' ) );
 
 			// Render wsal header.
-			add_action( 'admin_enqueue_scripts', array( $this, 'render_header' ) );
+			// add_action( 'admin_enqueue_scripts', array( $this, 'render_header' ) );
 
 			// Render wsal footer.
 			add_action( 'admin_footer', array( $this, 'render_footer' ) );
@@ -281,6 +281,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
 			wsal_freemius()->add_filter( 'show_first_trial_after_n_sec', array( $this, 'change_show_first_trial_period' ), 10, 1 );
 			wsal_freemius()->add_filter( 'reshow_trial_after_every_n_sec', array( $this, 'change_reshow_trial_period' ), 10, 1 );
+			wsal_freemius()->add_filter( 'show_admin_notice', array( $this, 'freemius_show_admin_notice' ), 10, 2 );
 		}
 
 		/**
@@ -355,9 +356,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Method: WSAL plugin redirect.
 		 */
 		public function wsal_plugin_redirect() {
+			// WSAL State.
 			$wsal_state = get_site_option( 'wsal_freemius_state', 'anonymous' );
+
 			if (
-				get_option( 'wsal_redirect_on_activate', false )
+				get_option( 'wsal_redirect_on_activate', false ) // Redirect flag.
 				&& in_array( $wsal_state, array( 'anonymous', 'skipped' ), true )
 			) {
 				// If the redirect option is true, then continue.
@@ -536,6 +539,33 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
+		 * Fremius Admin Notice View Permission.
+		 *
+		 * Check to see if the user has permission to view freemius
+		 * admin notices or not.
+		 *
+		 * @since 3.3
+		 *
+		 * @param bool  $show – If show then set to true, otherwise false.
+		 * @param array $msg {
+		 *     @var string $message The actual message.
+		 *     @var string $title An optional message title.
+		 *     @var string $type The type of the message ('success', 'update', 'warning', 'promotion').
+		 *     @var string $id The unique identifier of the message.
+		 *     @var string $manager_id The unique identifier of the notices manager. For plugins it would be the plugin's slug, for themes - `<slug>-theme`.
+		 *     @var string $plugin The product's title.
+		 *     @var string $wp_user_id An optional WP user ID that this admin notice is for.
+		 * }
+		 * @return bool
+		 */
+		public function freemius_show_admin_notice( $show, $msg ) {
+			if ( $this->settings->CurrentUserCan( 'edit' ) ) {
+				return $show;
+			}
+			return false;
+		}
+
+		/**
 		 * Start to trigger the events after installation.
 		 *
 		 * @internal
@@ -590,6 +620,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Generate index.php for uploads directory.
 				$this->settings->generate_index_files();
 			}
+
+			/**
+			 * Action: `wsal_init`
+			 *
+			 * Action hook to mark that WSAL has initialized.
+			 *
+			 * @param WpSecurityAuditLog $this – Instance of main plugin class.
+			 */
+			do_action( 'wsal_init', $this );
 		}
 
 		/**
@@ -616,11 +655,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Set filter input args.
 			$filter_input_args = array(
 				'disable_nonce' => FILTER_SANITIZE_STRING,
-				'notice' => FILTER_SANITIZE_STRING,
+				'notice'        => FILTER_SANITIZE_STRING,
 			);
 
 			// Filter $_POST array for security.
-			$post_array = filter_input_array( INPUT_POST );
+			$post_array = filter_input_array( INPUT_POST, $filter_input_args );
 
 			if ( isset( $post_array['disable_nonce'] ) && ! wp_verify_nonce( $post_array['disable_nonce'], 'disable-custom-nonce' . $post_array['notice'] ) ) {
 				die();
@@ -652,11 +691,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Set filter input args.
 			$filter_input_args = array(
 				'disable_nonce' => FILTER_SANITIZE_STRING,
-				'code' => FILTER_SANITIZE_STRING,
+				'code'          => FILTER_SANITIZE_STRING,
 			);
 
 			// Filter $_POST array for security.
-			$post_array = filter_input_array( INPUT_POST );
+			$post_array = filter_input_array( INPUT_POST, $filter_input_args );
 
 			if ( isset( $post_array['disable_nonce'] ) && ! wp_verify_nonce( $post_array['disable_nonce'], 'disable-alert-nonce' . $post_array['code'] ) ) {
 				die();
@@ -688,6 +727,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				filemtime( $this->GetBaseDir() . '/js/common.js' ),
 				true
 			);
+
+			// Check settings object.
+			if ( ! isset( $this->settings ) ) {
+				$this->settings = new WSAL_Settings( $this );
+			}
 
 			// Set data array for common script.
 			$occurrence  = new WSAL_Models_Occurrence();
@@ -750,9 +794,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Load translations.
 				load_plugin_textdomain( 'wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 			}
-
-			// WSAL Initialized.
-			do_action( 'wsal_init', $this );
 		}
 
 		/**
@@ -1023,11 +1064,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			global $wpdb;
 			if ( $this->IsMultisite() ) {
 				$table_name = $wpdb->prefix . 'sitemeta';
-				$result = $wpdb->query( "DELETE FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'" );
+				$result     = $wpdb->query( "DELETE FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'" );
 			} else {
 				$result = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'" );
 			}
-			return ($result) ? true : false;
+			return ( $result ) ? true : false;
 		}
 
 		/**
@@ -1050,7 +1091,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			global $wpdb;
 			if ( $this->IsMultisite() ) {
 				$table_name = $wpdb->prefix . 'sitemeta';
-				$results = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
+				$results    = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
 			} else {
 				$results = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
 			}
@@ -1514,7 +1555,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 	}
 
-
 	// Begin load sequence.
 	add_action( 'plugins_loaded', array( WpSecurityAuditLog::GetInstance(), 'load_wsal' ) );
 
@@ -1523,5 +1563,4 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 	// Create & Run the plugin.
 	return WpSecurityAuditLog::GetInstance();
-
 }
