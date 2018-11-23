@@ -39,7 +39,6 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 */
 	public function HookEvents() {
 		add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
-		add_action( 'user_register', array( $this, 'EventUserRegister' ) );
 		add_action( 'edit_user_profile_update', array( $this, 'EventUserChanged' ) );
 		add_action( 'personal_options_update', array( $this, 'EventUserChanged' ) );
 		add_action( 'delete_user', array( $this, 'EventUserDeleted' ) );
@@ -68,31 +67,6 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		if ( $this->IsMultisite() ) {
 			$this->old_superadmins = get_super_admins();
 		}
-	}
-
-	/**
-	 * Triggered when a user is registered.
-	 *
-	 * @param int $user_id - User ID of the registered user.
-	 */
-	public function EventUserRegister( $user_id ) {
-		$user         = get_userdata( $user_id );
-		$ismu         = function_exists( 'is_multisite' ) && is_multisite();
-		$event        = $ismu ? 4012 : ( is_user_logged_in() ? 4001 : 4000 );
-		$current_user = wp_get_current_user();
-		$this->plugin->alerts->Trigger(
-			$event, array(
-				'NewUserID'   => $user_id,
-				'UserChanger' => ! empty( $current_user ) ? $current_user->user_login : '',
-				'NewUserData' => (object) array(
-					'Username'  => $user->user_login,
-					'FirstName' => $user->user_firstname,
-					'LastName'  => $user->user_lastname,
-					'Email'     => $user->user_email,
-					'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
-				),
-			), true
-		);
 	}
 
 	/**
