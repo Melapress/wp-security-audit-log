@@ -164,6 +164,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 			'excluded_extensions' => $this->plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav', 'gif', 'ico', 'jpe', 'psd', 'raw', 'svg', 'tif', 'tiff', 'aif', 'flac', 'm4a', 'oga', 'ogg', 'ra', 'wma', 'asf', 'avi', 'mkv', 'mov', 'mp4', 'mpe', 'mpeg', 'mpg', 'ogv', 'qt', 'rm', 'vob', 'webm', 'wm', 'wmv' ) ),
 			'excluded_files'      => $this->plugin->GetGlobalOption( 'scan_excluded_files', array() ),
 			'last_scanned'        => $this->plugin->GetGlobalOption( 'last-scanned', false ),
+			'file_size_limit'     => $this->plugin->GetGlobalOption( 'scan-file-size-limit', 5 ),
 		);
 
 		// Set the scan hours.
@@ -318,13 +319,6 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 
 			// Reset scan counter.
 			$this->reset_scan_counter();
-
-			// Scan started alert.
-			$this->plugin->alerts->Trigger( 6033, array(
-				'CurrentUserID' => '0',
-				'ScanStatus'    => 'started',
-				'ScanLocation'  => ! empty( $path_to_scan ) ? $path_to_scan : ABSPATH,
-			) );
 
 			// Scan the path.
 			$scanned_files = $this->scan_path( $path_to_scan );
@@ -481,21 +475,6 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger( 6032, array(
 						'CurrentUserID' => '0',
 					) );
-
-					// Scan stopped with errors.
-					$this->plugin->alerts->Trigger( 6033, array(
-						'CurrentUserID' => '0',
-						'ScanStatus'    => 'stopped',
-						'ScanLocation'  => ! empty( $path_to_scan ) ? $path_to_scan : ABSPATH,
-						'ScanError'     => 1,
-					) );
-				} else {
-					// Scan stopped.
-					$this->plugin->alerts->Trigger( 6033, array(
-						'CurrentUserID' => '0',
-						'ScanStatus'    => 'stopped',
-						'ScanLocation'  => ! empty( $path_to_scan ) ? $path_to_scan : ABSPATH,
-					) );
 				}
 
 				/**
@@ -506,13 +485,6 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 				do_action( 'wsal_last_scanned_directory', $next_to_scan );
 			} else {
 				$this->plugin->SetGlobalOption( "is_initial_scan_$next_to_scan", 'no' ); // Initial scan check set to false.
-
-				// Scan stopped.
-				$this->plugin->alerts->Trigger( 6033, array(
-					'CurrentUserID' => '0',
-					'ScanStatus'    => 'stopped',
-					'ScanLocation'  => ! empty( $path_to_scan ) ? $path_to_scan : ABSPATH,
-				) );
 			}
 
 			// Store scanned files list.
@@ -533,6 +505,20 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 		if ( ! $manual ) {
 			if ( 0 === $next_to_scan ) {
 				$this->plugin->SetGlobalOption( 'last-scanned', 'root' );
+
+				// Scan started alert.
+				$this->plugin->alerts->Trigger( 6033, array(
+					'CurrentUserID' => '0',
+					'ScanStatus'    => 'started',
+				) );
+			} elseif ( 6 === $next_to_scan ) {
+				$this->plugin->SetGlobalOption( 'last-scanned', $next_to_scan );
+
+				// Scan stopped.
+				$this->plugin->alerts->Trigger( 6033, array(
+					'CurrentUserID' => '0',
+					'ScanStatus'    => 'stopped',
+				) );
 			} else {
 				$this->plugin->SetGlobalOption( 'last-scanned', $next_to_scan );
 			}
@@ -564,9 +550,10 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 			return $files; // Return if directory fails to open.
 		}
 
-		// Multsite checks.
-		$is_multisite = is_multisite();
-		$directories  = $this->scan_settings['scan_directories']; // Get directories to be scanned.
+		$is_multisite    = is_multisite(); // Multsite checks.
+		$directories     = $this->scan_settings['scan_directories']; // Get directories to be scanned.
+		$file_size_limit = $this->scan_settings['file_size_limit']; // Get file size limit.
+		$file_size_limit = $file_size_limit * 1048576; // Calculate file size limit in bytes; 1MB = 1048576 bytes.
 
 		// Scan the directory for files.
 		while ( false !== ( $item = @readdir( $dir_handle ) ) ) {
@@ -674,13 +661,13 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					break; // And break the loop.
 				}
 
-				// 5MB = 5242880 bytes.
-				if ( filesize( $absolute_name ) < 5242880 ) { // Check if file size is less than 5MB.
+				// Check file size limit.
+				if ( filesize( $absolute_name ) < $file_size_limit ) {
 					$this->scan_file_count = $this->scan_file_count + 1;
 					// File data.
 					$files[ $absolute_name ] = @md5_file( $absolute_name ); // File hash.
 				} else {
-					// File size is more than 2MB event.
+					// File size is more than the limit.
 					$this->plugin->alerts->Trigger( 6031, array(
 						'FileLocation'  => $absolute_name,
 						'CurrentUserID' => '0',
