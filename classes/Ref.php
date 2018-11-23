@@ -1483,24 +1483,17 @@ class WSAL_Ref {
 					// mysql connection (mysql extension is deprecated from php 5.4/5.5)
 					case 'mysql link':
 					case 'mysql link persistent':
-						$dbs = array();
-						$query = @mysql_list_dbs( $subject );
-						while ( $row = @mysql_fetch_array( $query ) ) {
-							$dbs[] = $row['Database'];
-						}
-
 						$meta = array(
-							'host'             => ltrim( @mysql_get_host_info( $subject ), 'MySQL host info: ' ),
-							'server_version'   => @mysql_get_server_info( $subject ),
-							'protocol_version' => @mysql_get_proto_info( $subject ),
-							'databases'        => $dbs,
+							'host'             => ltrim( @mysqli_get_host_info( $subject ), 'MySQL host info: ' ),
+							'server_version'   => @mysqli_get_server_info( $subject ),
+							'protocol_version' => @mysqli_get_proto_info( $subject ),
 						);
 
 						break;
 
 					// mysql result
 					case 'mysql result':
-						while ( $row = @mysql_fetch_object( $subject ) ) {
+						while ( $row = @mysqli_fetch_object( $subject ) ) {
 							$meta[] = (array) $row;
 
 							if ( $this->hasInstanceTimedOut() ) {
