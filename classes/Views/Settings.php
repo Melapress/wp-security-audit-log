@@ -39,16 +39,18 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	/**
 	 * WSAL Setting Tabs.
 	 *
-	 * @var array
 	 * @since 3.2.3
+	 *
+	 * @var array
 	 */
 	private $wsal_setting_tabs = array();
 
 	/**
 	 * Current Setting Tab.
 	 *
-	 * @var string
 	 * @since 3.2.3
+	 *
+	 * @var string
 	 */
 	private $current_tab = '';
 
@@ -193,6 +195,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			'scan_excluded_dirs'       => $this->_plugin->GetGlobalOption( 'scan-excluded-directories', array() ),
 			'scan_excluded_extensions' => $this->_plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav', 'gif', 'ico', 'jpe', 'psd', 'raw', 'svg', 'tif', 'tiff', 'aif', 'flac', 'm4a', 'oga', 'ogg', 'ra', 'wma', 'asf', 'avi', 'mkv', 'mov', 'mp4', 'mpe', 'mpeg', 'mpg', 'ogv', 'qt', 'rm', 'vob', 'webm', 'wm', 'wmv' ) ),
 			'scan_in_progress'         => $this->_plugin->GetGlobalOption( 'scan-in-progress', false ),
+			'scan_file_size_limit'     => $this->_plugin->GetGlobalOption( 'scan-file-size-limit', 5 ),
 		);
 	}
 
@@ -372,7 +375,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</nav>
 
 		<form id="audit-log-settings" method="post">
-			<input type="hidden" name="page" value="<?php echo filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING ); ?>" />
+			<input type="hidden" name="page" value="<?php echo isset( $_GET['page'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; ?>" />
 			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr( admin_url( 'admin-ajax.php' ) ); ?>" />
 			<?php wp_nonce_field( 'wsal-settings' ); ?>
 
@@ -434,9 +437,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 */
 	private function tab_general() {
 		?>
-		<p class="description">
-			<?php echo wp_kses( __( 'Need help with setting up the plugin to meet your requirements? <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">Schedule a 20 minutes consultation and setup call</a> with our experts for just $50.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
-		</p>
+		<p class="description"><?php echo wp_kses( __( 'Need help with setting up the plugin to meet your requirements? <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">Schedule a 20 minutes consultation and setup call</a> with our experts for just $50.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
 
 		<h3><?php esc_html_e( 'Display latest events widget in dashboard & Admin bar', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
@@ -500,9 +501,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- Dashboard Widget -->
 
 		<h3><?php esc_html_e( 'Add user notification on the WordPress login page', 'wp-security-audit-log' ); ?></h3>
-		<p class="description">
-			<?php esc_html_e( 'Many compliance regulations (such as the GDRP) require website administrators to tell the users of their website that all the changes they do when logged in are being logged.', 'wp-security-audit-log' ); ?>
-		</p>
+		<p class="description"><?php esc_html_e( 'Many compliance regulations (such as the GDRP) require website administrators to tell the users of their website that all the changes they do when logged in are being logged.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -605,9 +604,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- Reverse Proxy -->
 
 		<h3><?php esc_html_e( 'Who can change the plugin settings?', 'wp-security-audit-log' ); ?></h3>
-		<p class="description">
-			<?php esc_html_e( 'By default only users with administrator or super administrator (multisite) roles can change the settings of the plugin. Though you can change these privileges from this section.', 'wp-security-audit-log' ); ?>
-		</p>
+		<p class="description"><?php esc_html_e( 'By default only users with administrator or super administrator (multisite) roles can change the settings of the plugin. Though you can change these privileges from this section.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -625,20 +622,22 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<?php esc_html_e( 'Only administrators', 'wp-security-audit-log' ); ?>
 							</label>
 							<br/>
+							<?php if ( $this->_plugin->IsMultisite() ) : ?>
+								<label for="only_superadmins">
+									<input type="radio" name="restrict-plugin-settings" id="only_superadmins" value="only_superadmins" <?php checked( $restrict_settings, 'only_superadmins' ); ?> />
+									<?php esc_html_e( 'Only superadmins', 'wp-security-audit-log' ); ?>
+								</label>
+								<br/>
+							<?php endif; ?>
 							<label for="only_selected_users">
 								<input type="radio" name="restrict-plugin-settings" id="only_selected_users" value="only_selected_users" <?php checked( $restrict_settings, 'only_selected_users' ); ?> />
 								<?php esc_html_e( 'All these users or users with these roles', 'wp-security-audit-log' ); ?>
 							</label>
-
-							<p class="description">
-								<?php esc_html_e( 'Specify the username or the users which can change the plugin settings. You can also specify roles.', 'wp-security-audit-log' ); ?>
-							</p>
-
+							<p class="description"><?php esc_html_e( 'Specify the username or the users which can change the plugin settings. You can also specify roles.', 'wp-security-audit-log' ); ?></p>
 							<label>
 								<input type="text" id="EditorQueryBox" style="width: 250px;">
 								<input type="button" id="EditorQueryAdd" style="" class="button-primary" value="Add">
 							</label>
-
 							<div id="EditorList">
 								<?php
 								foreach ( $this->_plugin->settings->GetAllowedPluginEditors() as $item ) :
@@ -664,9 +663,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- Restrict Plugin Access -->
 
 		<h3><?php esc_html_e( 'Allow other users to view the activity log', 'wp-security-audit-log' ); ?></h3>
-		<p class="description">
-			<?php esc_html_e( 'By default only users with administrator and super administrator (multisite) role can view the WordPress activity log. Though you can allow other users with no admin role to view the events.', 'wp-security-audit-log' ); ?>
-		</p>
+		<p class="description"><?php esc_html_e( 'By default only users with administrator and super administrator (multisite) role can view the WordPress activity log. Though you can allow other users with no admin role to view the events.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -705,9 +702,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- Can View Events -->
 
 		<h3><?php esc_html_e( 'Which email address should the plugin use as a from address?', 'wp-security-audit-log' ); ?></h3>
-		<p class="description">
-			<?php esc_html_e( 'By default when the plugin sends an email notification it uses the email address specified in this website’s general settings. Though you can change the email address and display name from this section.', 'wp-security-audit-log' ); ?>
-		</p>
+		<p class="description"><?php esc_html_e( 'By default when the plugin sends an email notification it uses the email address specified in this website’s general settings. Though you can change the email address and display name from this section.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -743,9 +738,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- From Email & Name -->
 
 		<h3><?php esc_html_e( 'Do you want to hide the plugin from the list of installed plugins?', 'wp-security-audit-log' ); ?></h3>
-		<p class="description">
-			<?php esc_html_e( 'By default all installed plugins are listed in the plugins page. If you do not want other administrators to see that you installed this plugin set this option to Yes so the WP Security Audit Log is not listed as an installed plugin on this website.', 'wp-security-audit-log' ); ?>
-		</p>
+		<p class="description"><?php esc_html_e( 'By default all installed plugins are listed in the plugins page. If you do not want other administrators to see that you installed this plugin set this option to Yes so the WP Security Audit Log is not listed as an installed plugin on this website.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -795,13 +788,15 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Get plugin editors.
 		$editors           = isset( $post_array['Editors'] ) ? array_map( 'sanitize_text_field', $post_array['Editors'] ) : array();
 		$restrict_settings = isset( $post_array['restrict-plugin-settings'] ) ? sanitize_text_field( $post_array['restrict-plugin-settings'] ) : false;
-		if ( ! empty( $restrict_settings ) && 'only_me' === $restrict_settings ) {
-			// Add current username to plugin editors.
-			$editors   = array(); // Empty the array to remove previous editors in restrict mode.
-			$editors[] = wp_get_current_user()->user_login;
-		} elseif ( ! empty( $restrict_settings ) && 'only_selected_users' !== $restrict_settings ) {
-			// Empty the editors if option is not user or user roles.
-			$editors = array();
+		if ( ! empty( $restrict_settings ) ) {
+			if ( 'only_me' === $restrict_settings ) {
+				// Add current username to plugin editors.
+				$editors   = array(); // Empty the array to remove previous editors in restrict mode.
+				$editors[] = wp_get_current_user()->user_login;
+			} elseif ( 'only_selected_users' !== $restrict_settings ) {
+				// Empty the editors if option is not user or user roles.
+				$editors = array();
+			}
 		}
 		$this->_plugin->settings->SetAllowedPluginEditors( $editors );
 
@@ -1397,6 +1392,19 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</table>
 		<!-- wsal-scan-directories -->
 
+		<h3><?php esc_html_e( 'What is the biggest file size the plugin should scan?', 'wp-security-audit-log' ); ?></h3>
+		<p class="description"><?php esc_html_e( 'By default the plugin does not scan files that are bigger than 5MB. Such files are not common, hence typically not a target. Though if you are getting a lot of 6032 Events, it is recommended to increase the file size limit from the below option.', 'wp-security-audit-log' ); ?></p>
+		<table class="form-table wsal-tab">
+			<tr>
+				<th><label for="wsal-scan-file-size"><?php esc_html_e( 'File Size Limit', 'wp-security-audit-log' ); ?></label></th>
+				<td>
+					<fieldset>
+						<input type="number" id="wsal-scan-file-size" name="wsal-scan-file-size" min="1" max="100" value="<?php echo isset( $this->scan_settings['scan_file_size_limit'] ) ? esc_attr( $this->scan_settings['scan_file_size_limit'] ) : false ?>" /> <?php esc_html_e( 'MB', 'wp-security-audit-log' ); ?>
+					</fieldset>
+				</td>
+			</tr>
+		</table>
+
 		<h3><?php esc_html_e( 'Do you want to exclude specific files or files with a particular extension from the scan?', 'wp-security-audit-log' ); ?></h3>
 		<p class="description"><?php esc_html_e( 'The plugin will scan everything that is in the WordPress root directory or below, even if the files and directories are not part of WordPress. It is recommended to scan all source code files and only exclude files that cannot be tampered, such as text files, media files etc, most of which are already excluded by default.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
@@ -1588,6 +1596,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->SetGlobalOption( 'scan-hour', isset( $post_array['wsal-scan-hour'] ) ? $post_array['wsal-scan-hour'] : false );
 		$this->_plugin->SetGlobalOption( 'scan-day', isset( $post_array['wsal-scan-day'] ) ? $post_array['wsal-scan-day'] : false );
 		$this->_plugin->SetGlobalOption( 'scan-date', isset( $post_array['wsal-scan-date'] ) ? $post_array['wsal-scan-date'] : false );
+		$this->_plugin->SetGlobalOption( 'scan-file-size-limit', isset( $post_array['wsal-scan-file-size'] ) ? $post_array['wsal-scan-file-size'] : false );
 
 		// Check and save scan directories.
 		if (
@@ -2385,6 +2394,19 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			// Run a manual scan on all directories.
 			for ( $dir = 0; $dir < 7; $dir++ ) {
 				if ( ! $this->_plugin->GetGlobalOption( 'stop-scan', false ) ) {
+					if ( 0 === $dir ) {
+						// Scan started alert.
+						$this->_plugin->alerts->Trigger( 6033, array(
+							'CurrentUserID' => '0',
+							'ScanStatus'    => 'started',
+						) );
+					} elseif ( 6 === $dir ) {
+						// Scan stopped.
+						$this->_plugin->alerts->Trigger( 6033, array(
+							'CurrentUserID' => '0',
+							'ScanStatus'    => 'stopped',
+						) );
+					}
 					$file_changes->detect_file_changes( true, $dir );
 				} else {
 					break;

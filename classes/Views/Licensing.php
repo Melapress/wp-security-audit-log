@@ -105,7 +105,7 @@ class WSAL_Views_Licensing extends WSAL_AbstractView {
 		}
 		?>
 		<form id="audit-log-licensing" method="post">
-			<input type="hidden" name="page" value="<?php echo filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING ); ?>" />
+			<input type="hidden" name="page" value="<?php echo isset( $_GET['page'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; ?>" />
 			<?php wp_nonce_field( 'wsal-licensing' ); ?>
 			<table class="wp-list-table widefat fixed">
 				<thead>
