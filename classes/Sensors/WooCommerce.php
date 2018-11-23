@@ -123,6 +123,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		add_action( 'wp_trash_post', array( $this, 'EventTrashed' ), 10, 1 );
 		add_action( 'untrash_post', array( $this, 'EventUntrashed' ) );
 
+		// Product category events.
 		add_action( 'create_product_cat', array( $this, 'EventCategoryCreation' ), 10, 1 );
 
 		// Detect live change in stock.

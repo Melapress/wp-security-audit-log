@@ -653,8 +653,8 @@ class WSAL_Settings {
 	 * Returns access tokens for a particular action.
 	 *
 	 * @param string $action - Type of action.
-	 * @throws Exception - Unknown action exception.
-	 * @return string[] List of tokens (usernames, roles etc).
+	 * @throws Exception     - Unknown action exception.
+	 * @return array         - List of tokens (usernames, roles etc).
 	 */
 	public function GetAccessTokens( $action ) {
 		$allowed = array();
@@ -662,9 +662,16 @@ class WSAL_Settings {
 			case 'view':
 				$allowed = $this->GetAllowedPluginViewers();
 				$allowed = array_merge( $allowed, $this->GetAllowedPluginEditors() );
-				if ( ! $this->IsRestrictAdmins() ) {
+				if ( ! $this->_plugin->IsMultisite() && ! $this->IsRestrictAdmins() ) {
 					$allowed = array_merge( $allowed, $this->GetSuperAdmins() );
 					$allowed = array_merge( $allowed, $this->GetAdmins() );
+				} elseif ( $this->_plugin->IsMultisite() && ! $this->IsRestrictAdmins() ) {
+					if ( 'only_superadmins' === $this->get_restrict_plugin_setting() ) {
+						$allowed = array_merge( $allowed, $this->GetSuperAdmins() );
+					} else {
+						$allowed = array_merge( $allowed, $this->GetSuperAdmins() );
+						$allowed = array_merge( $allowed, $this->GetAdmins() );
+					}
 				}
 				break;
 			case 'edit':
@@ -1620,6 +1627,14 @@ class WSAL_Settings {
 				$value = str_replace( ',', ', ', $value );
 				return $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
 
+			case '%FileSettings%' === $name:
+				$file_settings_args = array(
+					'page' => 'wsal-settings',
+					'tab'  => 'file-changes',
+				);
+				$file_settings      = add_query_arg( $file_settings_args, admin_url( 'admin.php' ) );
+				return '<a href="' . esc_url( $file_settings ) . '">' . esc_html__( 'plugin settings', 'wp-security-audit-log' ) . '</a>';
+
 			default:
 				return $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
 		}
@@ -1686,5 +1701,140 @@ class WSAL_Settings {
 		$get_array = filter_input_array( INPUT_GET );
 
 		return isset( $get_array['wsal-cbid'] ) ? (int) $get_array['wsal-cbid'] : 0;
+	}
+
+	/**
+	 * Method: Meta data formater.
+	 *
+	 * @since 3.3
+	 *
+	 * @param string  $name      - Name of the data.
+	 * @param mix     $value     - Value of the data.
+	 * @param integer $occ_id    - Event occurrence ID.
+	 * @param mixed   $highlight - Highlight format.
+	 * @return string
+	 */
+	public function slack_meta_formatter( $name, $value, $occ_id, $highlight ) {
+		switch ( true ) {
+			case '%Message%' === $name:
+				return esc_html( $value );
+
+			case '%PromoLink%' === $name:
+			case '%CommentLink%' === $name:
+			case '%CommentMsg%' === $name:
+				return $value;
+
+			case '%MetaLink%' === $name:
+				return '';
+
+			case '%RevisionLink%' === $name:
+				$check_value = (string) $value;
+				if ( 'NULL' !== $check_value ) {
+					return ' Click <' . esc_url( $value ) . '|here> to see the content changes.';
+				} else {
+					return false;
+				}
+
+			case '%EditorLinkPost%' === $name:
+				return ' View the <' . esc_url( $value ) . '|post>';
+
+			case '%EditorLinkPage%' === $name:
+				return ' View the <' . esc_url( $value ) . '|page>';
+
+			case '%CategoryLink%' === $name:
+				return ' View the <' . esc_url( $value ) . '|category>';
+
+			case '%TagLink%' === $name:
+				return ' View the <' . esc_url( $value ) . '|tag>';
+
+			case '%EditorLinkForum%' === $name:
+				return ' View the <' . esc_url( $value ) . '|forum>';
+
+			case '%EditorLinkTopic%' === $name:
+				return ' View the <' . esc_url( $value ) . '|topic>';
+
+			case in_array( $name, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ), true ):
+				return '*' . ( strlen( $value ) > 50 ? ( esc_html( substr( $value, 0, 50 ) ) . '...' ) : esc_html( $value ) ) . '*';
+
+			case '%ClientIP%' === $name:
+				if ( is_string( $value ) ) {
+					return '*' . str_replace( array( '"', '[', ']' ), '', $value ) . '*';
+				} else {
+					return '_unknown_';
+				}
+
+			case '%LinkFile%' === $name:
+				if ( 'NULL' != $value ) {
+					return '';
+				} else {
+					return 'Click <' . esc_url( add_query_arg( 'page', 'wsal-togglealerts', admin_url( 'admin.php' ) ) ) . '|here> to log such requests to file';
+				}
+
+			case '%URL%' === $name:
+				return '.';
+
+			case '%LogFileLink%' === $name: // Failed login file link.
+				return '';
+
+			case '%Attempts%' === $name: // Failed login attempts.
+				$check_value = (int) $value;
+				if ( 0 === $check_value ) {
+					return '';
+				} else {
+					return $value;
+				}
+
+			case '%LogFileText%' === $name: // Failed login file text.
+				return '';
+
+			case strncmp( $value, 'http://', 7 ) === 0:
+			case strncmp( $value, 'https://', 7 ) === 0:
+				return '<' . esc_html( $value ) . '|' . esc_html( $value ) . '>';
+
+			case '%PostStatus%' === $name:
+				if ( ! empty( $value ) && 'publish' === $value ) {
+					return '*' . esc_html__( 'published', 'wp-security-audit-log' ) . '*';
+				} else {
+					return '*' . esc_html( $value ) . '*';
+				}
+
+			case '%multisite_text%' === $name:
+				if ( $this->_plugin->IsMultisite() && $value ) {
+					$site_info = get_blog_details( $value, true );
+					if ( $site_info ) {
+						return ' on site <' . esc_url( $site_info->siteurl ) . '|' . esc_html( $site_info->blogname ) . '>';
+					}
+					return;
+				}
+				return;
+
+			case '%ReportText%' === $name:
+				return;
+
+			case '%ChangeText%' === $name:
+				return;
+
+			case '%ScanError%' === $name:
+				if ( 'NULL' === $value ) {
+					return false;
+				}
+				/* translators: Mailto link for support. */
+				return ' with errors. ' . sprintf( __( 'Contact us on %s for assistance', 'wp-security-audit-log' ), '<mailto:support@wpsecurityauditlog.com|support@wpsecurityauditlog.com>' );
+
+			case '%TableNames%' === $name:
+				$value = str_replace( ',', ', ', $value );
+				return '*' . esc_html( $value ) . '*';
+
+			case '%FileSettings%' === $name:
+				$file_settings_args = array(
+					'page' => 'wsal-settings',
+					'tab'  => 'file-changes',
+				);
+				$file_settings      = add_query_arg( $file_settings_args, admin_url( 'admin.php' ) );
+				return '<' . esc_url( $file_settings ) . '|' . esc_html__( 'plugin settings', 'wp-security-audit-log' ) . '>';
+
+			default:
+				return '*' . esc_html( $value ) . '*';
+		}
 	}
 }
