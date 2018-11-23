@@ -51,10 +51,11 @@ class wpdbCustom extends wpdb {
 				$this->use_mysqli = true;
 			}
 		}
-		$this->dbuser = $dbuser;
+		$this->dbuser     = $dbuser;
 		$this->dbpassword = $dbpassword;
-		$this->dbname = $dbname;
-		$this->dbhost = $dbhost;
+		$this->dbname     = $dbname;
+		$this->dbhost     = $dbhost;
+
 		// wp-config.php creation will manually connect when ready.
 		if ( defined( 'WP_SETUP_CONFIG' ) ) {
 			return;
@@ -102,7 +103,7 @@ class wpdbCustom extends wpdb {
 		 * Deprecated in 3.9+ when using MySQLi. No equivalent
 		 * $new_link parameter exists for mysqli_* functions.
 		 */
-		$new_link = defined( 'MYSQL_NEW_LINK' ) ? MYSQL_NEW_LINK : true;
+		$new_link     = defined( 'MYSQL_NEW_LINK' ) ? MYSQL_NEW_LINK : true;
 		$client_flags = defined( 'MYSQL_CLIENT_FLAGS' ) ? MYSQL_CLIENT_FLAGS : 0;
 
 		if ( $this->use_mysqli ) {
@@ -110,15 +111,15 @@ class wpdbCustom extends wpdb {
 
 			// mysqli_real_connect doesn't support the host param including a port or socket
 			// like mysql_connect does. This duplicates how mysql_connect detects a port and/or socket file.
-			$port = null;
-			$socket = null;
-			$host = $this->dbhost;
+			$port           = null;
+			$socket         = null;
+			$host           = $this->dbhost;
 			$port_or_socket = strstr( $host, ':' );
 			if ( ! empty( $port_or_socket ) ) {
-				$host = substr( $host, 0, strpos( $host, ':' ) );
+				$host           = substr( $host, 0, strpos( $host, ':' ) );
 				$port_or_socket = substr( $port_or_socket, 1 );
 				if ( 0 !== strpos( $port_or_socket, '/' ) ) {
-					$port = intval( $port_or_socket );
+					$port         = intval( $port_or_socket );
 					$maybe_socket = strstr( $port_or_socket, ':' );
 					if ( ! empty( $maybe_socket ) ) {
 						$socket = substr( $maybe_socket, 1 );
@@ -149,11 +150,11 @@ class wpdbCustom extends wpdb {
 			if ( $ssl_opts_set ) {
 				mysqli_ssl_set(
 					$this->dbh,
-					$ssl_opts[ 'KEY'     ],
-					$ssl_opts[ 'CERT'    ],
-					$ssl_opts[ 'CA'      ],
-					$ssl_opts[ 'CA_PATH' ],
-					$ssl_opts[ 'CIPHER'  ]
+					$ssl_opts['KEY'],
+					$ssl_opts['CERT'],
+					$ssl_opts['CA'],
+					$ssl_opts['CA_PATH'],
+					$ssl_opts['CIPHER']
 				);
 			}
 
