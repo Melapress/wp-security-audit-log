@@ -197,7 +197,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			<?php endforeach; ?>
 		</h2>
 		<form id="audit-log-viewer" method="post">
-			<input type="hidden" name="page" value="<?php echo filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING ); ?>" />
+			<input type="hidden" name="page" value="<?php echo isset( $_GET['page'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; ?>" />
 			<?php wp_nonce_field( 'wsal-togglealerts' ); ?>
 
 			<div class="nav-tabs">
@@ -608,7 +608,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					<ul>
 						<?php
 						$wsal_alerts   = $this->_plugin->alerts->GetAlerts(); // Get alerts list.
-						$public_alerts = array( 1000, 1002, 1003, 1004, 2101, 2126, 6023, 9073 ); // Public events.
+						$public_alerts = array( 1000, 1002, 1003, 1004, 2101, 2126, 4000, 4001, 4012, 6023, 9073 ); // Public events.
 						foreach ( $public_alerts as $public_alert ) :
 							if ( isset( $wsal_alerts[ $public_alert ] ) ) :
 								?>
