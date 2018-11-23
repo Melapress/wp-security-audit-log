@@ -17,7 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * System Activity sensor.
  *
  * @package Wsal
- * @subpackage Sensors
  */
 class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 
@@ -48,9 +47,11 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 
 		// If user is visitor & visitor events are not disabled then hook the following events.
 		if ( ! is_user_logged_in() && 'no' === $disabled_visitor_events ) {
+			add_action( 'user_register', array( $this, 'event_user_register' ) );
 			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 2 );
 			add_filter( 'template_redirect', array( $this, 'event_404' ) );
 		} elseif ( is_user_logged_in() ) {
+			add_action( 'user_register', array( $this, 'event_user_register' ) );
 			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 2 );
 			add_filter( 'template_redirect', array( $this, 'event_404' ) );
 		}
@@ -59,6 +60,31 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			add_action( 'wp_head', array( $this, 'viewing_product' ), 10 );
 		}
+	}
+
+	/**
+	 * Triggered when a user is registered.
+	 *
+	 * @param int $user_id - User ID of the registered user.
+	 */
+	public function event_user_register( $user_id ) {
+		$user         = get_userdata( $user_id );
+		$ismu         = function_exists( 'is_multisite' ) && is_multisite();
+		$event        = $ismu ? 4012 : ( is_user_logged_in() ? 4001 : 4000 );
+		$current_user = wp_get_current_user();
+		$this->plugin->alerts->Trigger(
+			$event, array(
+				'NewUserID'   => $user_id,
+				'UserChanger' => ! empty( $current_user ) ? $current_user->user_login : '',
+				'NewUserData' => (object) array(
+					'Username'  => $user->user_login,
+					'FirstName' => $user->user_firstname,
+					'LastName'  => $user->user_lastname,
+					'Email'     => $user->user_email,
+					'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+				),
+			), true
+		);
 	}
 
 	/**
@@ -515,4 +541,3 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		return $editor_link;
 	}
 }
-
