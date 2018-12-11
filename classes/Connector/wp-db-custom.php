@@ -26,15 +26,15 @@ class wpdbCustom extends wpdb {
 	 * and hide the print of the error
 	 *
 	 * @global string $wp_version
-	 * @param string $dbuser     - MySQL database user.
-	 * @param string $dbpassword - MySQL database password.
-	 * @param string $dbname     - MySQL database name.
-	 * @param string $dbhost     - MySQL database host.
-	 * @param bool   $is_ssl     - Set if connection is SSL encrypted.
-	 * @param bool   $is_cc      - Set if connection has client certificates.
-	 * @param string $ssl_ca     - Certificate Authority.
-	 * @param string $ssl_cert   - Client Certificate.
-	 * @param string $ssl_key    - Client Key.
+	 * @param string $dbuser          - MySQL database user.
+	 * @param string $dbpassword      - MySQL database password.
+	 * @param string $dbname          - MySQL database name.
+	 * @param string $dbhost          - MySQL database host.
+	 * @param bool   $is_ssl          - Set if connection is SSL encrypted.
+	 * @param bool   $is_cc           - Set if connection has client certificates.
+	 * @param string $ssl_ca          - Certificate Authority.
+	 * @param string $ssl_cert        - Client Certificate.
+	 * @param string $ssl_key         - Client Key.
 	 * @param bool   $test_connection - Set to true if testing connection.
 	 */
 	public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key, $test_connection = false ) {

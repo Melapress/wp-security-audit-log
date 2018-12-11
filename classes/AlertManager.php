@@ -362,7 +362,11 @@ final class WSAL_AlertManager {
 	 * @return boolean True if enabled, false otherwise.
 	 */
 	public function IsEnabled( $type ) {
-		return ! in_array( $type, $this->GetDisabledAlerts() );
+		$disabled_events = $this->GetDisabledAlerts();
+		if ( 'no' !== $this->plugin->GetGlobalOption( 'disable-visitor-events', 'no' ) ) {
+			$disabled_events = array_merge( $disabled_events, $this->get_public_events() );
+		}
+		return ! in_array( $type, $disabled_events, true );
 	}
 
 	/**
@@ -788,5 +792,23 @@ final class WSAL_AlertManager {
 			}
 		}
 		return $admin_bar_event;
+	}
+
+	/**
+	 * Return Public Event IDs.
+	 *
+	 * @since 3.3
+	 *
+	 * @return array
+	 */
+	public function get_public_events() {
+		/**
+		 * Filter: `wsal_public_event_ids`
+		 *
+		 * Filter array of public event ids.
+		 *
+		 * @param array $public_events - Array of public event ids.
+		 */
+		return apply_filters( 'wsal_public_event_ids', array( 1000, 1002, 1003, 1004, 1005, 1007, 2101, 2126, 4000, 4001, 4012, 6023, 9073 ) ); // Public events.
 	}
 }
