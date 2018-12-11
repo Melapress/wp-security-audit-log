@@ -119,12 +119,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_action( 'edit_category', array( $this, 'EventChangedCategoryParent' ) );
 		add_action( 'wp_insert_post', array( $this, 'SetRevisionLink' ), 10, 3 );
 		add_action( 'publish_future_post', array( $this, 'EventPublishFuture' ), 10, 1 );
+		add_filter( 'post_edit_form_tag', array( $this, 'EditingPost' ), 10, 1 );
 
 		add_action( 'create_category', array( $this, 'EventCategoryCreation' ), 10, 1 );
 		add_action( 'create_post_tag', array( $this, 'EventTagCreation' ), 10, 1 );
-
-		add_filter( 'post_edit_form_tag', array( $this, 'EditingPost' ), 10, 1 );
-
 		add_filter( 'wp_update_term_data', array( $this, 'event_terms_rename' ), 10, 4 );
 
 		// Check if MainWP Child Plugin exists.
@@ -535,6 +533,38 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			&& ( 'unpublish' === $post_array['action'] || 'publish' === $post_array['action'] )
 		) {
 			$this->check_mainwp_status_change( $post, $old_status, $new_status );
+		} else {
+			// Ignore nav menu post type or post revision.
+			if ( 'nav_menu_item' === get_post_type( $post->ID ) || wp_is_post_revision( $post->ID ) ) {
+				return;
+			}
+
+			$event = 0;
+			if ( 'auto-draft' === $old_status && ( 'auto-draft' !== $new_status && 'inherit' !== $new_status ) ) {
+				// Post published.
+				$event = 2001;
+			} elseif ( 'auto-draft' === $new_status || ( 'new' === $old_status && 'inherit' === $new_status ) ) {
+				// Ignore it.
+			} elseif ( 'trash' === $new_status ) {
+				// Post deleted.
+			} elseif ( 'trash' === $old_status ) {
+				// Post restored.
+			} else {
+				// Post edited.
+				$event = 2002;
+			}
+
+			if ( $event ) {
+				// Get event data.
+				$editor_link = $this->GetEditorLink( $post ); // Editor link.
+				$event_data  = $this->get_post_event_data( $post ); // Post event data.
+
+				// Set editor link in the event data.
+				$event_data[ $editor_link['name'] ] = $editor_link['value'];
+
+				// Log the event.
+				$this->plugin->alerts->Trigger( $event, $event_data );
+			}
 		}
 	}
 
@@ -593,7 +623,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		} elseif ( $this->_old_post && 'mainwp' === $dashboard ) {
 			if ( 'auto-draft' === $old_status ) {
 				// Get MainWP $_POST members.
-				$new_post   = filter_input( INPUT_POST, 'new_post', FILTER_SANITIZE_STRING );
+				// @codingStandardsIgnoreStart
+				$new_post = isset( $_POST['new_post'] ) ? sanitize_text_field( wp_unslash( $_POST['new_post'] ) ) : false;
+				// @codingStandardsIgnoreEnd
+
+				// Get WordPress Post.
 				$new_post   = maybe_unserialize( base64_decode( $new_post ) );
 				$post_catgs = filter_input( INPUT_POST, 'post_category', FILTER_SANITIZE_STRING );
 
@@ -892,7 +926,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	protected function CheckDateChange( $oldpost, $newpost ) {
 		$from = strtotime( $oldpost->post_date );
-		$to = strtotime( $newpost->post_date );
+		$to   = strtotime( $newpost->post_date );
 
 		if ( 'draft' == $oldpost->post_status ) {
 			return 0;
@@ -902,14 +936,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$editor_link = $this->GetEditorLink( $oldpost );
 			$this->plugin->alerts->Trigger(
 				2027, array(
-					'PostID' => $oldpost->ID,
-					'PostType' => $oldpost->post_type,
-					'PostTitle' => $oldpost->post_title,
-					'PostStatus' => $oldpost->post_status,
-					'PostDate' => $newpost->post_date,
-					'PostUrl' => get_permalink( $oldpost->ID ),
-					'OldDate' => $oldpost->post_date,
-					'NewDate' => $newpost->post_date,
+					'PostID'             => $oldpost->ID,
+					'PostType'           => $oldpost->post_type,
+					'PostTitle'          => $oldpost->post_title,
+					'PostStatus'         => $oldpost->post_status,
+					'PostDate'           => $newpost->post_date,
+					'PostUrl'            => get_permalink( $oldpost->ID ),
+					'OldDate'            => $oldpost->post_date,
+					'NewDate'            => $newpost->post_date,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -926,8 +960,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param stdClass $post - The post.
 	 */
 	protected function CheckCategoriesChange( $old_cats, $new_cats, $post ) {
-		$old_cats = implode( ', ', $old_cats );
-		$new_cats = implode( ', ', $new_cats );
+		$old_cats = implode( ', ', (array) $old_cats );
+		$new_cats = implode( ', ', (array) $new_cats );
 
 		if ( $old_cats !== $new_cats ) {
 			$event = $this->GetEventTypeForPostType( $post, 2016, 0, 2016 );
@@ -1071,10 +1105,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$removed_tags = array_diff( $old_tags, $new_tags );
 
 		// Convert tags arrays to string.
-		$old_tags     = implode( ', ', $old_tags );
-		$new_tags     = implode( ', ', $new_tags );
-		$added_tags   = implode( ', ', $added_tags );
-		$removed_tags = implode( ', ', $removed_tags );
+		$old_tags     = implode( ', ', (array) $old_tags );
+		$new_tags     = implode( ', ', (array) $new_tags );
+		$added_tags   = implode( ', ', (array) $added_tags );
+		$removed_tags = implode( ', ', (array) $removed_tags );
 
 		// Declare event variables.
 		$add_event    = '';
@@ -1666,14 +1700,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	/**
 	 * Check auto draft and the setting: Hide Plugin in Plugins Page
 	 *
-	 * @param integer $code - Alert code.
+	 * @param integer $code  - Alert code.
 	 * @param string  $title - Title.
 	 * @return boolean
 	 */
 	private function CheckAutoDraft( $code, $title ) {
 		if ( 2008 == $code && 'auto-draft' == $title ) {
 			// To do: Check setting else return false.
-			if ( $this->plugin->settings->IsWPBackend() == 1 ) {
+			if ( 1 == $this->plugin->settings->IsWPBackend() ) {
 				return true;
 			} else {
 				return false;
