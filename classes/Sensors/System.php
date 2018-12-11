@@ -58,7 +58,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
-
 		add_action( 'wsal_prune', array( $this, 'EventPruneEvents' ), 10, 2 );
 		add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
 
@@ -804,31 +803,31 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				$username = $username . '_';
 			}
 
-			$upload_dir  = wp_upload_dir();
-			$uploads_url = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/404s/';
+			$upload_dir       = wp_upload_dir();
+			$uploads_url      = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/404s/';
 			$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
 
 			// Check directory.
 			if ( $this->CheckDirectory( $uploads_dir_path ) ) {
-				$filename = '6007_' . date( 'Ymd' ) . '.log';
-				$fp = $uploads_dir_path . $filename;
+				$filename  = '6007_' . date( 'Ymd' ) . '.log';
+				$fp        = $uploads_dir_path . $filename;
 				$name_file = $uploads_url . $filename;
 				if ( ! $file = fopen( $fp, 'a' ) ) {
-					$i = 1;
+					$i           = 1;
 					$file_opened = false;
 					do {
 						$fp2 = substr( $fp, 0, -4 ) . '_' . $i . '.log';
 						if ( ! file_exists( $fp2 ) ) {
 							if ( $file = fopen( $fp2, 'a' ) ) {
 								$file_opened = true;
-								$name_file = $uploads_url . substr( $name_file, 0, -4 ) . '_' . $i . '.log';
+								$name_file   = $uploads_url . substr( $name_file, 0, -4 ) . '_' . $i . '.log';
 							}
 						} else {
 							$latest_filename = $this->GetLastModified( $uploads_dir_path, $filename );
-							$fp_last = $uploads_dir_path . $latest_filename;
+							$fp_last         = $uploads_dir_path . $latest_filename;
 							if ( $file = fopen( $fp_last, 'a' ) ) {
 								$file_opened = true;
-								$name_file = $uploads_url . $latest_filename;
+								$name_file   = $uploads_url . $latest_filename;
 							}
 						}
 						$i++;

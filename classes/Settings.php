@@ -1635,6 +1635,9 @@ class WSAL_Settings {
 				$file_settings      = add_query_arg( $file_settings_args, admin_url( 'admin.php' ) );
 				return '<a href="' . esc_url( $file_settings ) . '">' . esc_html__( 'plugin settings', 'wp-security-audit-log' ) . '</a>';
 
+			case '%ContactSupport%' === $name:
+				return '<a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">' . esc_html__( 'contact our support', 'wp-security-audit-log' ) . '</a>';
+
 			default:
 				return $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
 		}
@@ -1832,6 +1835,9 @@ class WSAL_Settings {
 				);
 				$file_settings      = add_query_arg( $file_settings_args, admin_url( 'admin.php' ) );
 				return '<' . esc_url( $file_settings ) . '|' . esc_html__( 'plugin settings', 'wp-security-audit-log' ) . '>';
+
+			case '%ContactSupport%' === $name:
+				return '<https://www.wpsecurityauditlog.com/contact|' . esc_html__( 'contact our support', 'wp-security-audit-log' ) . '>';
 
 			default:
 				return '*' . esc_html( $value ) . '*';
