@@ -53,6 +53,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		add_action( 'clear_auth_cookie', array( $this, 'GetCurrentUser' ), 10 );
 		add_filter( 'wp_login_blocked', array( $this, 'EventLoginBlocked' ), 10, 1 );
 
+		if ( is_plugin_active( 'two-factor/two-factor.php' ) ) {
+			add_action( 'login_redirect', array( $this, 'event_2fa_login' ), 10, 1 );
+		}
+
 		// Directory for logged in users log files.
 		$user_upload_dir  = wp_upload_dir();
 		$failed_login_dir = trailingslashit( $user_upload_dir['basedir'] . '/wp-security-audit-log/failed-logins/' );
@@ -88,6 +92,47 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 */
 	public function GetCurrentUser() {
 		$this->_current_user = wp_get_current_user();
+	}
+
+	/**
+	 * Login Event for Two-Factor plugin.
+	 *
+	 * @since 3.3
+	 *
+	 * @param string $redirect_url – Redirect URL.
+	 * @return string
+	 */
+	public function event_2fa_login( $redirect_url ) {
+		// @codingStandardsIgnoreStart
+		$provider = isset( $_POST['provider'] ) ? sanitize_text_field( wp_unslash( $_POST['provider'] ) ) : '';
+		$user_id  = isset( $_POST['wp-auth-id'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['wp-auth-id'] ) ) : '';
+		// @codingStandardsIgnoreEnd
+
+		// Default Two-Factor options.
+		$providers_2fa = array( 'Two_Factor_Email', 'Two_Factor_Totp', 'Two_Factor_FIDO_U2F', 'Two_Factor_Backup_Codes', 'Two_Factor_Dummy' );
+
+		// Get users.
+		$user = get_userdata( $user_id );
+		if ( ! $user ) {
+			return $redirect_url;
+		}
+
+		// If provider and user are set and provider is known then log the event.
+		if ( $provider && $user && in_array( $provider, $providers_2fa, true ) ) {
+			// Get user roles.
+			$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+			if ( $this->plugin->settings->IsLoginSuperAdmin( $user->user_login ) ) {
+				$user_roles[] = 'superadmin';
+			}
+
+			$this->plugin->alerts->Trigger(
+				1000, array(
+					'Username'         => $user->user_login,
+					'CurrentUserRoles' => $user_roles,
+				), true
+			);
+		}
+		return $redirect_url;
 	}
 
 	/**

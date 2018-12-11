@@ -1052,4 +1052,3 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 		}
 	}
 }
-
