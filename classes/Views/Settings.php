@@ -296,9 +296,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 
 		if ( $archiving ) {
-			$redirect_url  = add_query_arg( 'page', 'wsal-ext-settings', admin_url( 'admin.php' ) );
-			$redirect_url .= '#archiving';
-			wp_safe_redirect( $redirect_url );
+			$archiving_args = array(
+				'page' => 'wsal-ext-settings',
+				'tab'  => 'archiving',
+			);
+			$archiving_url  = add_query_arg( $archiving_args, admin_url( 'admin.php' ) );
+			wp_safe_redirect( $archiving_url );
 		} else {
 			if ( $items ) {
 				$redirect_args = array(
@@ -535,8 +538,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							// Allowed HTML tags for this setting.
 							$allowed_tags = array(
 								'a' => array(
-									'href' => array(),
-									'title' => array(),
+									'href'   => array(),
+									'title'  => array(),
 									'target' => array(),
 								),
 							);
@@ -835,7 +838,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<?php if ( $this->_plugin->settings->IsArchivingEnabled() ) : ?>
 			<p class="description">
 				<?php
-				$archiving_page = add_query_arg( 'page', 'wsal-ext-settings', admin_url( 'admin.php' ) ) . '#archiving';
+				$archiving_args = array(
+					'page' => 'wsal-ext-settings',
+					'tab'  => 'archiving',
+				);
+				$archiving_page = add_query_arg( $archiving_args, admin_url( 'admin.php' ) );
 				/* translators: 1: Archive page link tag. 2: Link closing tag. */
 				echo '<span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Retention settings moved to %1$s archiving settings %2$s because archiving is enabled', 'wp-security-audit-log' ), '<a href="' . esc_url( $archiving_page ) . '" target="_blank">', '</a>' );
 				?>
@@ -1059,18 +1066,16 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
-					<th><label for="wp_backend_no"><?php esc_html_e( 'Disable Events for WordPress Background Activity', 'wp-security-audit-log' ); ?></label></th>
+					<th><label for="wp_backend_no"><?php esc_html_e( 'Enable Events for WordPress Background Activity', 'wp-security-audit-log' ); ?></label></th>
 					<td>
 						<fieldset>
 							<label for="wp_backend_yes">
-								<input type="radio" name="WPBackend" value="1" id="wp_backend_yes"
-									<?php checked( $this->_plugin->settings->IsWPBackend() ); ?> />
+								<input type="radio" name="WPBackend" value="1" id="wp_backend_yes" <?php checked( $this->_plugin->settings->IsWPBackend() ); ?> />
 								<?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?>
 							</label>
 							<br/>
 							<label for="wp_backend_no">
-								<input type="radio" name="WPBackend" value="0" id="wp_backend_no"
-									<?php checked( $this->_plugin->settings->IsWPBackend(), false ); ?> />
+								<input type="radio" name="WPBackend" value="0" id="wp_backend_no" <?php checked( $this->_plugin->settings->IsWPBackend(), false ); ?> />
 								<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
 							</label>
 						</fieldset>
