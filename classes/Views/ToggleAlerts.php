@@ -156,7 +156,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$is_custom       = ! empty( $events_diff ) ? true : false; // If difference is not empty then mode is custom.
 		$log_details     = $this->_plugin->GetGlobalOption( 'details-level', false ); // Get log level option.
 
-		$subcat_alerts = array( 1004, 2010, 6007, 2111, 2119, 2016, 2053, 7000, 8009, 8014, 9007, 9027, 9002, 8809, 8813, 6000, 6001, 6019 );
+		$subcat_alerts = array( 1004, 2010, 6007, 2111, 2119, 2016, 2053, 7000, 8009, 8014, 9007, 9027, 9002, 8809, 8813, 6000, 6001, 6019, 6028 );
+		$public_events = $this->_plugin->alerts->get_public_events(); // Get public events.
 		?>
 		<p>
 			<form method="post" id="wsal-alerts-level">
@@ -429,6 +430,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 															esc_html_e( 'Settings', 'wp-security-audit-log' );
 														} elseif ( 6019 === $alert->type ) {
 															esc_html_e( 'Cron Jobs', 'wp-security-audit-log' );
+														} elseif ( 6028 === $alert->type ) {
+															esc_html_e( 'File Changes Scanning', 'wp-security-audit-log' );
 														}
 														?>
 													</h3>
@@ -445,7 +448,13 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													class="alert"
 													<?php checked( $active[ $alert->type ] ); ?>
 													value="<?php echo esc_attr( (int) $alert->type ); ?>"
-													<?php echo esc_attr( $disabled ); ?>
+													<?php
+													if ( ! empty( $disabled ) ) {
+														echo esc_attr( $disabled );
+													} elseif ( 'no' !== $this->_plugin->GetGlobalOption( 'disable-visitor-events', 'no' ) && in_array( $alert->type, $public_events, true ) ) {
+														echo 'disabled';
+													}
+													?>
 													<?php echo ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) ? 'onclick="wsal_toggle_file_changes(this)"' : false; ?>
 												/>
 											</th>
@@ -607,12 +616,11 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					<p class="description"><?php esc_html_e( 'Below is the list of the events which are disabled when the above option is disabled:', 'wp-security-audit-log' ); ?></p>
 					<ul>
 						<?php
-						$wsal_alerts   = $this->_plugin->alerts->GetAlerts(); // Get alerts list.
-						$public_alerts = array( 1000, 1002, 1003, 1004, 2101, 2126, 4000, 4001, 4012, 6023, 9073 ); // Public events.
-						foreach ( $public_alerts as $public_alert ) :
-							if ( isset( $wsal_alerts[ $public_alert ] ) ) :
+						$wsal_alerts = $this->_plugin->alerts->GetAlerts(); // Get alerts list.
+						foreach ( $public_events as $public_event ) :
+							if ( isset( $wsal_alerts[ $public_event ] ) ) :
 								?>
-								<li><?php echo esc_html( $wsal_alerts[ $public_alert ]->type . ' — ' . $wsal_alerts[ $public_alert ]->desc ); ?></li>
+								<li><?php echo esc_html( $wsal_alerts[ $public_event ]->type . ' — ' . $wsal_alerts[ $public_event ]->desc ); ?></li>
 								<?php
 							endif;
 						endforeach;
