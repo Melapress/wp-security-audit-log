@@ -636,9 +636,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @internal
 		 */
-		public function render_header() {
-			// common.css?
-		}
+		public function render_header() {}
 
 		/**
 		 * Disable Custom Field through ajax.
@@ -1001,7 +999,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				/**
 				 * MainWP Child Stealth Mode Update
 				 *
-				 * This update only needs to run if the stealth mode option does not exist.
+				 * This update only needs to run if the stealth mode option
+				 * does not exist on free version.
 				 *
 				 * @since 3.2.3.3
 				 */
@@ -1019,6 +1018,20 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				 */
 				if ( version_compare( $old_version, '3.2.4', '<' ) && version_compare( $new_version, '3.2.3.3', '>' ) ) {
 					$this->SetGlobalOption( 'dismissed-privacy-notice', '1,wsal_privacy' );
+				}
+
+				/**
+				 * IMPORTANT: VERSION SPECIFIC UPDATE
+				 *
+				 * It only needs to run when old version of the plugin is less than 3.3
+				 * & the new version is later than 3.2.5.
+				 *
+				 * @since 3.3
+				 */
+				if ( version_compare( $old_version, '3.3', '<' ) && version_compare( $new_version, '3.2.5', '>' ) ) {
+					if ( wsal_freemius()->is__premium_only() && wsal_freemius()->is_plan_or_trial__premium_only( 'professional' ) ) {
+						$this->extensions->update_external_db_options( $this );
+					}
 				}
 			}
 		}
@@ -1152,7 +1165,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$c = 0;
 				$n = '<strong>%s</strong>';
 				$l = strlen( $n );
-				while ( ($pos = strpos( $mesg, $n )) !== false ) {
+				while ( ( $pos = strpos( $mesg, $n ) ) !== false ) {
 					$mesg = substr_replace( $mesg, '%MigratedArg' . ($c++) . '%', $pos, $l );
 				}
 				$data['MigratedMesg'] = $mesg;
@@ -1205,7 +1218,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function HidePlugin() {
 			$selectr = '';
-			$plugins = array( 'wp-security-audit-log' );
+			$plugins = array( 'wp-security-audit-log', 'wp-security-audit-log-premium' );
 			foreach ( $plugins as $value ) {
 				$selectr .= '.wp-list-table.plugins tr[data-slug="' . $value . '"], ';
 			}
@@ -1342,7 +1355,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @param callable $hook - Hook name.
 		 */
 		public function RemoveCleanupHook( $hook ) {
-			while ( ($pos = array_search( $hook, $this->_cleanup_hooks )) !== false ) {
+			while ( ( $pos = array_search( $hook, $this->_cleanup_hooks ) ) !== false ) {
 				unset( $this->_cleanup_hooks[ $pos ] );
 			}
 		}
@@ -1505,6 +1518,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return array
 		 */
 		public function wsal_recurring_schedules( $schedules ) {
+			$schedules['sixhours']         = array(
+				'interval' => 21600,
+				'display'  => __( 'Every 6 hours', 'wp-security-audit-log' ),
+			);
 			$schedules['fortyfiveminutes'] = array(
 				'interval' => 2700,
 				'display'  => __( 'Every 45 minutes', 'wp-security-audit-log' ),
@@ -1512,6 +1529,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$schedules['thirtyminutes']    = array(
 				'interval' => 1800,
 				'display'  => __( 'Every 30 minutes', 'wp-security-audit-log' ),
+			);
+			$schedules['fifteenminutes']   = array(
+				'interval' => 900,
+				'display'  => __( 'Every 15 minutes', 'wp-security-audit-log' ),
 			);
 			$schedules['tenminutes']       = array(
 				'interval' => 600,
