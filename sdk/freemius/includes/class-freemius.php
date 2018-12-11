@@ -34,6 +34,12 @@
          */
         private $_plugin_basename;
         /**
+         * @since 2.2.1
+         *
+         * @var string
+         */
+        private $_premium_plugin_basename;
+        /**
          * @since 1.0.0
          *
          * @var string
@@ -671,11 +677,12 @@
                  version_compare( $sdk_version, '1.2.3', '>=' )
             ) {
                 /**
-                 * Starting from version 1.2.3, paths are stored as relative paths and not absolute paths; so when upgrading to 1.2.3, make paths relative.
+                 * Starting from version 1.2.3, paths are stored as relative instead of absolute and some of them can be
+                 * invalid.
                  *
                  * @author Leo Fajardo (@leorw)
                  */
-                $this->make_paths_relative();
+                $this->remove_invalid_paths();
             }
 
             if ( version_compare( $sdk_prev_version, '1.1.5', '<' ) &&
@@ -698,6 +705,25 @@
                     }
 
                 }
+            }
+
+            if (
+                version_compare( $sdk_prev_version, '2.2.1', '<' ) &&
+                version_compare( $sdk_version, '2.2.1', '>=' )
+            ) {
+                /**
+                 * Clear the file cache without storing the previous path since it could be a wrong path. For example,
+                 * in the versions of the SDK lower than 2.2.1, it's possible for the path of an add-on to be the same
+                 * as the parent plugin's when the add-on was auto-installed since the relevant method names were not
+                 * skipped in the logic that determines the right path in the `get_caller_main_file_and_type` method
+                 * (e.g. `try_activate_plugin`). Since it was an auto-installation, the caller was the parent plugin
+                 * and so its path was used. In case the stored path is wrong, clearing the cache will resolve issues
+                 * related to data mix-up between plugins (e.g. titles and versions of an add-on and its parent plugin).
+                 *
+                 * @author Leo Fajardo (@leorw)
+                 * @since 2.2.1
+                 */
+                $this->clear_module_main_file_cache( false );
             }
         }
 
@@ -824,30 +850,12 @@
         }
 
         /**
-         * Makes paths relative.
+         * Remove invalid paths.
          *
          * @author Leo Fajardo (@leorw)
          * @since  1.2.3
          */
-        private function make_paths_relative() {
-            $id_slug_type_path_map = self::$_accounts->get_option( 'id_slug_type_path_map', array() );
-
-            if ( isset( $id_slug_type_path_map[ $this->_module_id ]['path'] ) ) {
-                $id_slug_type_path_map[ $this->_module_id ]['path'] = $this->get_relative_path( $id_slug_type_path_map[ $this->_module_id ]['path'] );
-
-                self::$_accounts->set_option( 'id_slug_type_path_map', $id_slug_type_path_map, true );
-            }
-
-            if ( isset( $this->_storage->plugin_main_file ) ) {
-                $plugin_main_file = $this->_storage->plugin_main_file;
-
-                if ( isset( $plugin_main_file->path ) ) {
-                    $this->_storage->plugin_main_file->path = $this->get_relative_path( $this->_storage->plugin_main_file->path );
-                } else if ( isset( $plugin_main_file->prev_path ) ) {
-                    $this->_storage->plugin_main_file->prev_path = $this->get_relative_path( $this->_storage->plugin_main_file->prev_path );
-                }
-            }
-
+        private function remove_invalid_paths() {
             // Remove invalid path that is still associated with the current slug if there's any.
             $file_slug_map = self::$_accounts->get_option( 'file_slug_map', array() );
             foreach ( $file_slug_map as $plugin_basename => $slug ) {
@@ -1444,23 +1452,37 @@
 
         /**
          * @since 1.2.0 Invalidate module's main file cache, otherwise, FS_Plugin_Updater will not fetch updates.
+         *
+         * @param bool $store_prev_path
          */
-        private function clear_module_main_file_cache() {
+        private function clear_module_main_file_cache( $store_prev_path = true ) {
             if ( ! isset( $this->_storage->plugin_main_file ) ||
-                 empty( $this->_storage->plugin_main_file->path )
+                empty( $this->_storage->plugin_main_file->path )
             ) {
                 return;
             }
 
-            $plugin_main_file = clone $this->_storage->plugin_main_file;
+            if ( ! $store_prev_path ) {
+                /**
+                 * Storing the previous path is not needed when clearing the cache after an SDK version update since
+                 * the main purpose of the cache clearing in that event is to correct a wrong plugin main file path
+                 * which causes data mix-up between plugins (e.g. titles and versions of an add-on and its parent plugin).
+                 *
+                 * @author Leo Fajardo (@leorw)
+                 * @since 2.2.1
+                 */
+                unset( $this->_storage->plugin_main_file->path );
+            } else {
+                $plugin_main_file = clone $this->_storage->plugin_main_file;
 
-            // Store cached path (2nd layer cache).
-            $plugin_main_file->prev_path = $plugin_main_file->path;
+                // Store cached path (2nd layer cache).
+                $plugin_main_file->prev_path = $plugin_main_file->path;
 
-            // Clear cached path.
-            unset( $plugin_main_file->path );
+                // Clear cached path.
+                unset( $plugin_main_file->path );
 
-            $this->_storage->plugin_main_file = $plugin_main_file;
+                $this->_storage->plugin_main_file = $plugin_main_file;
+            }
 
             /**
              * Clear global cached path.
@@ -2116,9 +2138,9 @@
          * @author Leo Fajardo (@leorw)
          * @since  2.1.4
          *
-         * @return object
-         *
          * @param number $plugin_id
+         *
+         * @return object
          */
         private function cancel_subscription_or_trial( $plugin_id ) {
             $fs = null;
@@ -2215,16 +2237,18 @@
          * @since  1.2.2
          *
          * @param  string|number $id_or_slug
+         * @param  string        $module_type
          *
          * @return number|false
          */
-        private static function get_module_id( $id_or_slug ) {
+        private static function get_module_id( $id_or_slug, $module_type = WP_FS__MODULE_TYPE_PLUGIN ) {
             if ( is_numeric( $id_or_slug ) ) {
                 return $id_or_slug;
             }
 
             foreach ( self::$_instances as $instance ) {
-                if ( $instance->is_plugin() && ( $id_or_slug === $instance->get_slug() ) ) {
+                // Also check the module type since there can be a plugin and a theme with the same slug.
+                if ( ( $module_type === $instance->get_module_type() ) && ( $id_or_slug === $instance->get_slug() ) ) {
                     return $instance->get_id();
                 }
             }
@@ -2251,15 +2275,16 @@
          * @author Vova Feldman (@svovaf)
          * @since  1.0.1
          *
-         * @param $plugin_file
+         * @param string $plugin_file
+         * @param string $module_type
          *
          * @return false|Freemius
          */
-        static function get_instance_by_file( $plugin_file ) {
+        static function get_instance_by_file( $plugin_file, $module_type = WP_FS__MODULE_TYPE_PLUGIN ) {
             $slug = self::find_slug_by_basename( $plugin_file );
 
             return ( false !== $slug ) ?
-                self::instance( self::get_module_id( $slug ) ) :
+                self::instance( self::get_module_id( $slug, $module_type ) ) :
                 false;
         }
 
@@ -3251,7 +3276,7 @@
             if ( $is_connected ) {
                 FS_GDPR_Manager::instance()->store_is_required( $pong->is_gdpr_required );
             }
-            
+
             $this->store_connectivity_info( $pong, $is_connected );
 
             return $this->_has_api_connection;
@@ -4755,16 +4780,20 @@
                 $this->_plugin :
                 new FS_Plugin();
 
+            $premium_suffix = $this->get_option( $plugin_info, 'premium_suffix', '(Premium)' );
+
             $plugin->update( array(
                 'id'                   => $id,
                 'type'                 => $this->get_option( $plugin_info, 'type', $this->_module_type ),
                 'public_key'           => $public_key,
                 'slug'                 => $this->_slug,
+                'premium_slug'         => $this->get_option( $plugin_info, 'premium_slug', "{$this->_slug}-premium" ),
                 'parent_plugin_id'     => $parent_id,
                 'version'              => $this->get_plugin_version(),
-                'title'                => $this->get_plugin_name(),
+                'title'                => $this->get_plugin_name( $premium_suffix ),
                 'file'                 => $this->_plugin_basename,
                 'is_premium'           => $this->get_bool_option( $plugin_info, 'is_premium', true ),
+                'premium_suffix'       => $premium_suffix,
                 'is_live'              => $this->get_bool_option( $plugin_info, 'is_live', true ),
                 'affiliate_moderation' => $this->get_option( $plugin_info, 'has_affiliation' ),
             ) );
@@ -5145,7 +5174,7 @@
             }
 
             $addon            = $this->get_addon( $addon_id );
-            $premium_basename = "{$addon->slug}-premium/{$addon->slug}.php";
+            $premium_basename = "{$addon->premium_slug}/{$addon->slug}.php";
 
             if ( file_exists( fs_normalize_path( WP_PLUGIN_DIR . '/' . $premium_basename ) ) ) {
                 return $premium_basename;
@@ -5155,7 +5184,7 @@
 
             foreach ( $all_plugins as $basename => $data ) {
                 if ( $addon->slug === $data['slug'] ||
-                     $addon->slug . '-premium' === $data['slug']
+                     $addon->premium_slug === $data['slug']
                 ) {
                     return $basename;
                 }
@@ -6870,7 +6899,11 @@
                 $is_premium_version_activation &&
                 (
                     $this->is_anonymous() ||
-                    ( $this->is_registered() && ! $this->has_features_enabled_license() )
+                    (
+                        $this->is_registered() &&
+                        ! $this->is_trial() &&
+                        ! $this->has_features_enabled_license()
+                    )
                 )
             ) {
                 $this->_storage->require_license_activation = true;
@@ -7817,14 +7850,13 @@
                 }
             }
 
-            return array_merge( array(
+            $versions = $this->get_versions();
+
+            return array_merge( $versions, array(
                 'version'                      => $this->get_plugin_version(),
                 'is_premium'                   => $this->is_premium(),
                 'language'                     => get_bloginfo( 'language' ),
                 'charset'                      => get_bloginfo( 'charset' ),
-                'platform_version'             => get_bloginfo( 'version' ),
-                'sdk_version'                  => $this->version,
-                'programming_language_version' => phpversion(),
                 'title'                        => get_bloginfo( 'name' ),
                 'url'                          => get_site_url(),
                 // Special params.
@@ -7875,12 +7907,10 @@
 //            }
 
             // Common properties.
-            $common = array_merge( array(
-                'version'                      => $this->get_plugin_version(),
-                'is_premium'                   => $this->is_premium(),
-                'sdk_version'                  => $this->version,
-                'programming_language_version' => phpversion(),
-                'platform_version'             => get_bloginfo( 'version' ),
+            $versions = $this->get_versions();
+            $common   = array_merge( $versions, array(
+                'version'    => $this->get_plugin_version(),
+                'is_premium' => $this->is_premium(),
             ), $override );
 
 
@@ -8297,13 +8327,58 @@
         }
 
         /**
+         * Set the basename of the current product and hook _activate_plugin_event_hook() to the activation action.
+         *
+         * @author Vova Feldman (@svovaf)
+         * @since  2.2.1
+         *
+         * @param string $is_premium
+         * @param string $caller
+         *
+         * @return string
+         */
+        function set_basename( $is_premium, $caller ) {
+            $basename = plugin_basename( $caller );
+
+            $current_basename = $is_premium ?
+                $this->_premium_plugin_basename :
+                $this->_free_plugin_basename;
+
+            if ( $current_basename == $basename ) {
+                // Basename value set correctly.
+                return;
+            }
+
+            if ( $is_premium ) {
+                $this->_premium_plugin_basename = $basename;
+            } else {
+                $this->_free_plugin_basename = $basename;
+            }
+
+            $plugin_dir = dirname( $this->_plugin_dir_path ) . '/';
+
+            register_activation_hook(
+                $plugin_dir . $basename,
+                array( &$this, '_activate_plugin_event_hook' )
+            );
+        }
+
+        /**
          * @author Vova Feldman (@svovaf)
          * @since  1.1.1
+         * @since  2.2.1 If the context product is in its premium version, use the current module's basename, even if it was renamed.
          *
          * @return string
          */
         function premium_plugin_basename() {
-            return "{$this->_slug}-premium/" . basename( $this->_free_plugin_basename );
+            if ( ! isset( $this->_premium_plugin_basename ) ) {
+                $this->_premium_plugin_basename = $this->is_premium() ?
+                    // The product is premium, so use the current basename.
+                    $this->_plugin_basename :
+                    $this->get_premium_slug() . '/' . basename( $this->_free_plugin_basename );
+            }
+
+            return $this->_premium_plugin_basename;
         }
 
         /**
@@ -8442,13 +8517,29 @@
         }
 
         /**
+         * @author Leo Fajardo (@leorw)
+         * @since 2.2.1
+         *
+         * @return string
+         */
+        function get_premium_slug() {
+            return is_object( $this->_plugin ) ?
+                $this->_plugin->premium_slug :
+                "{$this->_slug}-premium";
+        }
+
+        /**
+         * Retrieve the desired folder name for the product.
+         *
          * @author Vova Feldman (@svovaf)
          * @since  1.2.1.7
          *
          * @return string Plugin slug.
          */
         function get_target_folder_name() {
-            return $this->_slug . ( $this->can_use_premium_code() ? '-premium' : '' );
+            return $this->can_use_premium_code() ?
+                $this->_plugin->premium_slug :
+                $this->_slug;
         }
 
         /**
@@ -8519,31 +8610,63 @@
          * @author Vova Feldman (@svovaf)
          * @since  1.0.9
          *
+         * @param string|bool $premium_suffix
+         *
          * @return string
          */
-        function get_plugin_name() {
+        function get_plugin_name( $premium_suffix = false ) {
             $this->_logger->entrance();
 
+            /**
+             * This `if-else` can be squeezed into a single `if` but I intentionally split it for code readability.
+             *
+             * @author Vova Feldman
+             */
             if ( ! isset( $this->_plugin_name ) ) {
-                $plugin_data = $this->get_plugin_data();
-
-                // Get name.
-                $this->_plugin_name = $plugin_data['Name'];
-
-                // Check if plugin name contains "(Premium)" suffix and remove it.
-                $suffix     = ' (premium)';
-                $suffix_len = strlen( $suffix );
-
-                if ( strlen( $plugin_data['Name'] ) > $suffix_len &&
-                     $suffix === substr( strtolower( $plugin_data['Name'] ), - $suffix_len )
-                ) {
-                    $this->_plugin_name = substr( $plugin_data['Name'], 0, - $suffix_len );
-                }
-
-                $this->_logger->departure( 'Name = ' . $this->_plugin_name );
+                // Name is not yet set.
+                $this->set_name( $premium_suffix );
+            } else if (
+                ! empty( $premium_suffix ) &&
+                ( ! is_object( $this->_plugin ) || $this->_plugin->premium_suffix !== $premium_suffix )
+            ) {
+                // Name is already set, but there's a change in the premium suffix.
+                $this->set_name( $premium_suffix );
             }
 
             return $this->_plugin_name;
+        }
+
+        /**
+         * Calculates and stores the product's name. This helper function was created specifically for get_plugin_name() just to make the code clearer.
+         *
+         * @author Vova Feldman (@svovaf)
+         * @since  2.2.1
+         *
+         * @param string $premium_suffix
+         */
+        private function set_name( $premium_suffix = '' ) {
+            $plugin_data = $this->get_plugin_data();
+
+            // Get name.
+            $this->_plugin_name = $plugin_data['Name'];
+
+            if ( is_string( $premium_suffix ) ) {
+                $premium_suffix = trim( $premium_suffix );
+
+                if ( ! empty( $premium_suffix ) ) {
+                    // Check if plugin name contains " (premium)" or a custom suffix and remove it.
+                    $suffix     = ( ' ' . strtolower( $premium_suffix ) );
+                    $suffix_len = strlen( $suffix );
+
+                    if ( strlen( $plugin_data['Name'] ) > $suffix_len &&
+                         $suffix === substr( strtolower( $plugin_data['Name'] ), - $suffix_len )
+                    ) {
+                        $this->_plugin_name = substr( $plugin_data['Name'], 0, - $suffix_len );
+                    }
+                }
+            }
+
+            $this->_logger->departure( 'Name = ' . $this->_plugin_name );
         }
 
         /**
@@ -9249,7 +9372,16 @@
          * @return bool
          */
         function is_premium() {
-            return $this->_plugin->is_premium;
+            /**
+             * `$this->_plugin` will be `false` when `is_activation_mode` calls this method directly from the
+             * `_register_hooks` method.
+             *
+             * @author Leo Fajardo (@leorw)
+             * @since 2.2.3
+             */
+            return is_object( $this->_plugin ) ?
+                $this->_plugin->is_premium :
+                false;
         }
 
         /**
@@ -10640,6 +10772,56 @@
         }
 
         /**
+         * Displays a subscription cancellation dialog box when the user clicks on the "Deactivate License"
+         * link on the "Account" page or deactivates a plugin and there's an active subscription that is
+         * either associated with a non-lifetime single-site license or non-lifetime multisite license that
+         * is only activated on a single production site.
+         *
+         * @author Leo Fajardo (@leorw)
+         * @since  2.2.1
+         *
+         * @param bool $is_license_deactivation
+         */
+        function _maybe_add_subscription_cancellation_dialog_box( $is_license_deactivation = false ) {
+            if ( fs_is_network_admin() ) {
+                // Subscription cancellation dialog box is currently not supported for multisite networks.
+                return;
+            }
+
+            $license = $this->_get_license();
+
+            /**
+             * If the installation is associated with a non-lifetime license, which is either a single-site or only activated on a single production site (or zero), and connected to an active subscription, suggest the customer to cancel the subscription upon deactivation.
+             *
+             * @author Leo Fajardo (@leorw) (Comment added by Vova Feldman @svovaf)
+             * @since 2.2.1
+             */
+            if ( ! is_object( $license ) ||
+                $license->is_lifetime() ||
+                ( ! $license->is_single_site() && $license->activated > 1 )
+            ) {
+                return;
+            }
+
+            /**
+             * @var FS_Subscription $subscription
+             */
+            $subscription = $this->_get_subscription( $license->id );
+            if ( ! is_object( $subscription ) || ! $subscription->is_active() ) {
+                return;
+            }
+
+            $vars = array(
+                'id'                      => $this->_module_id,
+                'license'                 => $license,
+                'has_trial'               => $this->is_paid_trial(),
+                'is_license_deactivation' => $is_license_deactivation,
+            );
+
+            fs_require_template( 'forms/subscription-cancellation.php', $vars );
+        }
+
+        /**
          * @author Leo Fajardo (@leorw)
          * @since  2.0.2
          */
@@ -10741,7 +10923,7 @@
          */
         function _activate_license_ajax_action() {
             $this->_logger->entrance();
-            
+
             $this->check_ajax_referer( 'activate_license' );
 
             $license_key = trim( fs_request_get( 'license_key' ) );
@@ -13363,6 +13545,30 @@
         }
 
         /**
+         * Get a sanitized array with the WordPress version, SDK version, and PHP version.
+         * Each version is trimmed after the 16th char.
+         *
+         * @author Vova Feldman (@svovaf)
+         * @since  2.2.1
+         *
+         * @return array
+         */
+        private function get_versions() {
+            $versions = array();
+            $versions['platform_version']             = get_bloginfo( 'version' );
+            $versions['sdk_version']                  = $this->version;
+            $versions['programming_language_version'] = phpversion();
+
+            foreach ( $versions as $k => $version ) {
+                if ( is_string( $versions[ $k ] ) && ! empty( $versions[ $k ] ) ) {
+                    $versions[ $k ] = substr( $versions[ $k ], 0, 16 );
+                }
+            }
+
+            return $versions;
+        }
+
+        /**
          * @author Vova Feldman (@svovaf)
          * @since  1.1.7.4
          *
@@ -13383,7 +13589,9 @@
                 // Return to the module's main page.
                 $this->get_after_activation_url( 'after_connect_url', array( 'fs_action' => $activation_action ) );
 
-            $params = array(
+            $versions = $this->get_versions();
+
+            $params = array_merge( $versions, array(
                 'user_firstname'               => $current_user->user_firstname,
                 'user_lastname'                => $current_user->user_lastname,
                 'user_nickname'                => $current_user->user_nicename,
@@ -13398,13 +13606,10 @@
                     'account',
                     array( 'fs_action' => 'sync_user' )
                 ), 'sync_user' ),
-                'platform_version'             => get_bloginfo( 'version' ),
-                'sdk_version'                  => $this->version,
-                'programming_language_version' => phpversion(),
                 'is_premium'                   => $this->is_premium(),
                 'is_active'                    => true,
                 'is_uninstalled'               => false,
-            );
+            ) );
 
             if ( true === $network_level_or_blog_id ) {
                 if ( ! isset( $override_with['sites'] ) ) {
@@ -15095,15 +15300,25 @@
                 }
             }
 
-            if ( 0 < count( $this->_menu_items ) ) {
-                if ( ! $this->_menu->is_top_level() ) {
-                    fs_enqueue_local_style( 'fs_common', '/admin/common.css' );
+            if ( ! $is_activation_mode || ( true !== $this->_storage->require_license_activation ) ) {
+                /**
+                 * Add the other menu items if there are any when not in activation mode or license activation is not
+                 * required (license activation is required for registered or anonymous users after activating the
+                 * premium version when the site is not in trial mode or there's no active valid license).
+                 *
+                 * @author Leo Fajardo (@leorw)
+                 * @since 2.2.1
+                 */
+                if ( 0 < count( $this->_menu_items ) ) {
+                    if ( ! $this->_menu->is_top_level() ) {
+                        fs_enqueue_local_style( 'fs_common', '/admin/common.css' );
 
-                    // Append submenu items right after the plugin's submenu item.
-                    $this->order_sub_submenu_items();
-                } else {
-                    // Append submenu items.
-                    $this->embed_submenu_items();
+                        // Append submenu items right after the plugin's submenu item.
+                        $this->order_sub_submenu_items();
+                    } else {
+                        // Append submenu items.
+                        $this->embed_submenu_items();
+                    }
                 }
             }
         }
@@ -17254,6 +17469,18 @@
             $api     = $this->get_api_site_scope();
             $license = $api->call( "/licenses/{$this->_site->license_id}.json", 'delete' );
 
+            $this->handle_license_deactivation_result( $license, $hmm_text, $show_notice );
+        }
+
+        /**
+         * @author Leo Fajardo (@leorw)
+         * @since 2.2.1
+         *
+         * @param FS_Plugin_License $license
+         * @param bool|string       $hmm_text
+         * @param bool              $show_notice
+         */
+        private function handle_license_deactivation_result( $license, $hmm_text = false, $show_notice = true ) {
             if ( isset( $license->error ) ) {
                 $this->_admin_notices->add(
                     $this->get_text_inline( 'It looks like the license deactivation failed.', 'license-deactivation-failed-message' ) . '<br> ' .
@@ -17274,7 +17501,7 @@
                 }
             }
 
-            // Updated site plan to default.
+            // Update site plan to default.
             $this->_sync_plans();
             $this->_site->plan_id = $this->_plans[0]->id;
             // Unlink license from site.
@@ -17308,8 +17535,10 @@
         private function _downgrade_site() {
             $this->_logger->entrance();
 
+            $deactivate_license = fs_request_get_bool( 'deactivate_license' );
+
             $api  = $this->get_api_site_scope();
-            $site = $api->call( 'downgrade.json', 'put' );
+            $site = $api->call( 'downgrade.json', 'put', array( 'deactivate_license' => $deactivate_license ) );
 
             $plan_downgraded = false;
             $plan            = false;
@@ -17327,7 +17556,10 @@
                                    ( is_object( $subscription ) && ! isset( $subscription->error ) && ! $subscription->is_active() );
             } else {
                 // handle different error cases.
-
+                $this->handle_license_deactivation_result(
+                    $site,
+                    $this->get_text_x_inline( 'Hmm', 'something somebody says when they are thinking about what you have just said.', 'hmm' ) . '...'
+                );
             }
 
             if ( ! $plan_downgraded ) {
@@ -17350,6 +17582,19 @@
 
             // Store site updates.
             $this->_store_site();
+
+            if ( $deactivate_license &&
+                 ! FS_Plugin_License::is_valid_id( $site->license_id )
+            ) {
+                if ( $this->_site->is_localhost() ) {
+                    $this->_license->activated_local = max( 0, $this->_license->activated_local - 1 );
+                } else {
+                    $this->_license->activated = max( 0, $this->_license->activated - 1 );
+                }
+
+                // Handle successful license deactivation result.
+                $this->handle_license_deactivation_result( $this->_license );
+            }
 
             return $site;
         }
