@@ -208,6 +208,7 @@ Release Notes: [Slack Support & New External Connections UI](https://www.wpsecur
 	* Maximum file size for [WordPress file integrity scans](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/) is now configurable.
 	* Updated the Freemius SDK to 2.2.2 (addresses a MainWP conflict fix).
 	* Multiple scan started / stopped events per directory merged into one.
+	* Added 1 and 4 hours option to terminate idle users sessions setting.
 	* Plugin now always keeps a log a post updates, even if update is not done via the editor.
 	* Better handling of terminated users sessions (in hung state, blocking legit logins).
 	* Access to plugin now can be restricted to super admin role on multisite networks.
@@ -222,4 +223,3 @@ Release Notes: [Slack Support & New External Connections UI](https://www.wpsecur
 	* Fixed a number of minor warnings when running the plugin on PHP7.
 	* Logins when using the [Two-Factor plugin](https://wordpress.org/plugins/two-factor/) are now logged properly.
 	* Fixed - first time setup wizard prompt not always showing.
-	
