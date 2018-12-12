@@ -15,6 +15,15 @@ final class WSAL_AlertManager {
 	protected $_alerts = array();
 
 	/**
+	 * Array of Deprecated Events
+	 *
+	 * @since 3.3
+	 *
+	 * @var array
+	 */
+	protected $deprecated_events = array();
+
+	/**
 	 * Array of loggers (WSAL_AbstractLogger).
 	 *
 	 * @var array
@@ -71,6 +80,17 @@ final class WSAL_AlertManager {
 
 		add_action( 'shutdown', array( $this, '_CommitPipeline' ) );
 		add_action( 'wsal_init', array( $this, 'schedule_log_events' ) );
+
+		/**
+		 * Filter: `wsal_deprecated_event_ids`
+		 *
+		 * Deprecated event ids filter.
+		 *
+		 * @since 3.3
+		 *
+		 * @param array $deprecated_events - Array of deprecated event ids.
+		 */
+		$this->deprecated_events = apply_filters( 'wsal_deprecated_event_ids', array( 2004, 2005, 2006, 2007, 2009, 2013, 2015, 2018, 2020, 2022, 2026, 2028, 2059, 2060, 2061, 2064, 2066, 2069, 2075, 2087, 2102, 2103, 2113, 2114, 2115, 2116, 2117, 2118, 5020, 5026, 2107, 2003, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037, 2038, 2039, 2040, 2041, 2056, 2057, 2058, 2063, 2067, 2068, 2070, 2072, 2076, 2088, 2104, 2105, 5021, 5027, 2108 ) );
 	}
 
 	/**
@@ -469,6 +489,17 @@ final class WSAL_AlertManager {
 	 */
 	public function GetAlerts() {
 		return $this->_alerts;
+	}
+
+	/**
+	 * Returns all deprecated events.
+	 *
+	 * @since 3.3
+	 *
+	 * @return WSAL_Alert[]
+	 */
+	public function get_deprecated_events() {
+		return $this->deprecated_events;
 	}
 
 	/**
