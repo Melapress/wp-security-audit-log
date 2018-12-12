@@ -114,7 +114,7 @@ Refer to the <strong>[WordPress activity log plugin datasheet](https://www.wpsec
 ### As Featured On:
 
 * [GoDaddy](https://www.godaddy.com/garage/decode-security-logs-wordpress/)
-* [Kinsta](https://kinsta.com/blog/wordpress-activity-log/) 
+* [Kinsta](https://kinsta.com/blog/wordpress-activity-log/)
 * [Pagely](https://pagely.com/blog/2015/01/log-wordpress-dashboard-activity-improved-security-auditing/)
 * [Shout Me Loud](https://www.shoutmeloud.com/wordpress-security-audit-log.html)
 * [The Dev Couple](https://thedevcouple.com/wp-security-audit-log-review/)
@@ -207,6 +207,7 @@ Release Notes: [Slack Support & New External Connections UI](https://www.wpsecur
 * **Improvements**
 	* Maximum file size for [WordPress file integrity scans](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/) is now configurable.
 	* Updated the Freemius SDK to 2.2.2 (addresses a MainWP conflict fix).
+	* Plugin access can now be restricted to super administrators only on a multisite network.
 	* Multiple scan started / stopped events per directory merged into one.
 	* Added 1 and 4 hours option to terminate idle users sessions setting.
 	* Plugin now always keeps a log a post updates, even if update is not done via the editor.
@@ -215,7 +216,7 @@ Release Notes: [Slack Support & New External Connections UI](https://www.wpsecur
 	* User info in daily activity log summary email is now variable - the same as configured in the plugin settings.
 	* Limited Freemius user messages to users who can view & manage the plugin.
 	* Addded support for a dot in the time format (e.g: d.-m-Y G:i)
-	
+
 	* **Bug Fixes**
 	* Better handling of data from the REST API [Support ticket](https://wordpress.org/support/topic/error-implode-invalid-arguments-when-using-register_rest_route/).
 	* Fixed: two daily activity log emails were being sent instead of one.
