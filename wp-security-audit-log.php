@@ -909,6 +909,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				}
 
 				// Dismiss privacy notice.
+				if ( empty( $this->views ) ) {
+					$this->views = new WSAL_ViewManager( $this );
+				}
 				$this->views->FindByClassName( 'WSAL_Views_AuditLog' )->DismissNotice( 'wsal-privacy-notice-3.2' );
 
 				/**
