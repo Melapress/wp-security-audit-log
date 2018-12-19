@@ -188,12 +188,6 @@ class wpdbCustom extends wpdb {
 					return $this->db_connect( $allow_bail );
 				}
 			}
-		} else {
-			if ( WP_DEBUG ) {
-				$this->dbh = mysql_connect( $this->dbhost, $this->dbuser, $this->dbpassword, $new_link, $client_flags );
-			} else {
-				$this->dbh = @mysql_connect( $this->dbhost, $this->dbuser, $this->dbpassword, $new_link, $client_flags );
-			}
 		}
 
 		if ( ! $this->dbh && $allow_bail ) {
