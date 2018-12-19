@@ -57,6 +57,14 @@ function wsaldefaults_wsal_init() {
 	$wsal = WpSecurityAuditLog::GetInstance();
 
 	if ( is_admin() || $wsal->load_wsal_on_frontend() ) {
+		if ( ! isset( $wsal->constants ) ) {
+			$wsal->constants = new WSAL_ConstantManager( $wsal );
+		}
+
+		if ( ! isset( $wsal->alerts ) ) {
+			$wsal->alerts = new WSAL_AlertManager( $wsal );
+		}
+
 		$wsal->constants->UseConstants(
 			array(
 				// Default PHP constants.
