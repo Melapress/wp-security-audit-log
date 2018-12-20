@@ -1707,6 +1707,41 @@ class WSAL_Settings {
 	}
 
 	/**
+	 * Query sites from WPDB.
+	 *
+	 * @since 3.3.0.1
+	 *
+	 * @param int|null $limit — Maximum number of sites to return (null = no limit).
+	 * @return object — Object with keys: blog_id, blogname, domain
+	 */
+	public function get_sites( $limit = null ) {
+		global $wpdb;
+
+		$sql = 'SELECT blog_id, domain FROM ' . $wpdb->blogs;
+		if ( ! is_null( $limit ) ) {
+			$sql .= ' LIMIT ' . $limit;
+		}
+		$res = $wpdb->get_results( $sql );
+		foreach ( $res as $row ) {
+			$row->blogname = get_blog_option( $row->blog_id, 'blogname' );
+		}
+		return $res;
+	}
+
+	/**
+	 * The number of sites on the network.
+	 *
+	 * @since 3.3.0.1
+	 *
+	 * @return int
+	 */
+	public function get_site_count() {
+		global $wpdb;
+		$sql = 'SELECT COUNT(*) FROM ' . $wpdb->blogs;
+		return (int) $wpdb->get_var( $sql );
+	}
+
+	/**
 	 * Method: Meta data formater.
 	 *
 	 * @since 3.3
