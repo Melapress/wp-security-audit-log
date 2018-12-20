@@ -686,7 +686,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		}
 
 		if ( $update && defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			if ( 'draft' === $this->_old_post->post_status && 'publish' === $post->post_status ) {
+			if (
+				( 'auto-draft' === $this->_old_post->post_status && 'Auto Draft' === $this->_old_post->post_title && 'draft' === $post->post_status ) // Saving draft.
+				|| ( 'draft' === $this->_old_post->post_status && 'publish' === $post->post_status ) // Publishing post.
+			) {
 				$this->CheckPostCreation( $this->_old_post, $post, true );
 			} else {
 				// Handle update post events.
