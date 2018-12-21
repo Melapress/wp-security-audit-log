@@ -122,6 +122,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		add_action( 'delete_post', array( $this, 'EventDeleted' ), 10, 1 );
 		add_action( 'wp_trash_post', array( $this, 'EventTrashed' ), 10, 1 );
 		add_action( 'untrash_post', array( $this, 'EventUntrashed' ) );
+		add_action( 'wp_head', array( $this, 'viewing_product' ), 10 );
 
 		// Product category events.
 		add_action( 'create_product_cat', array( $this, 'EventCategoryCreation' ), 10, 1 );
@@ -711,6 +712,47 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
+		}
+	}
+
+	/**
+	 * Viewing Product Event.
+	 *
+	 * Alerts for viewing of product post type for WooCommerce.
+	 */
+	public function viewing_product() {
+		// Retrieve the current post object.
+		$product = get_queried_object();
+
+		// Check product post type.
+		if ( ! empty( $product ) && $product instanceof WP_Post && 'product' !== $product->post_type ) {
+			return $product;
+		}
+
+		if ( is_user_logged_in() && ! is_admin() ) {
+			$current_path = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : false;
+			if (
+				! empty( $_SERVER['HTTP_REFERER'] )
+				&& ! empty( $current_path )
+				&& false !== strpos( sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) ), $current_path )
+			) {
+				// Ignore this if we were on the same page so we avoid double audit entries.
+				return;
+			}
+
+			if ( ! empty( $product->post_title ) ) {
+				$editor_link = $this->GetEditorLink( $product );
+				$this->plugin->alerts->Trigger(
+					9073, array(
+						'PostID'             => $product->ID,
+						'PostType'           => $product->post_type,
+						'ProductStatus'      => $product->post_status,
+						'ProductTitle'       => $product->post_title,
+						'ProductUrl'         => get_permalink( $product->ID ),
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			}
 		}
 	}
 
