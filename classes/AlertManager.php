@@ -840,6 +840,6 @@ final class WSAL_AlertManager {
 		 *
 		 * @param array $public_events - Array of public event ids.
 		 */
-		return apply_filters( 'wsal_public_event_ids', array( 1000, 1002, 1003, 1004, 1005, 1007, 2101, 2126, 4000, 4001, 4012, 6023, 9073 ) ); // Public events.
+		return apply_filters( 'wsal_public_event_ids', array( 1000, 1002, 1003, 1004, 1005, 1007, 2126, 4000, 4012, 6023 ) ); // Public events.
 	}
 }
