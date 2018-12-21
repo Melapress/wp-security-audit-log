@@ -120,7 +120,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_action( 'wp_insert_post', array( $this, 'SetRevisionLink' ), 10, 3 );
 		add_action( 'publish_future_post', array( $this, 'EventPublishFuture' ), 10, 1 );
 		add_filter( 'post_edit_form_tag', array( $this, 'EditingPost' ), 10, 1 );
-
+		add_action( 'wp_head', array( $this, 'viewing_post' ), 10 );
 		add_action( 'create_category', array( $this, 'EventCategoryCreation' ), 10, 1 );
 		add_action( 'create_post_tag', array( $this, 'EventTagCreation' ), 10, 1 );
 		add_filter( 'wp_update_term_data', array( $this, 'event_terms_rename' ), 10, 4 );
@@ -2090,13 +2090,46 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return array $editor_link - Name and value link.
 	 */
 	private function GetEditorLink( $post ) {
-		$name = 'EditorLinkPost';
-		// $name .= ( 'page' == $post->post_type ) ? 'Page' : 'Post' ;
+		$name        = 'EditorLinkPost';
 		$value       = get_edit_post_link( $post->ID );
 		$editor_link = array(
 			'name'  => $name,
 			'value' => $value,
 		);
 		return $editor_link;
+	}
+
+	/**
+	 * Post View Event.
+	 *
+	 * Alerts for Viewing of Posts and Custom Post Types.
+	 */
+	public function viewing_post() {
+		// Retrieve the current post object.
+		$post = get_queried_object();
+		if ( is_user_logged_in() && ! is_admin() ) {
+			if ( $this->CheckOtherSensors( $post ) ) {
+				return $post->post_title;
+			}
+
+			$current_path = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : false;
+			if (
+				! empty( $_SERVER['HTTP_REFERER'] )
+				&& ! empty( $current_path )
+				&& false !== strpos( sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) ), $current_path )
+			) {
+				// Ignore this if we were on the same page so we avoid double audit entries.
+				return;
+			}
+
+			if ( ! empty( $post->post_title ) ) {
+				$edit_link = $this->GetEditorLink( $post );       // Get editor link.
+				$post_data = $this->get_post_event_data( $post ); // Get event post data.
+
+				// Set editor link.
+				$post_data[ $edit_link['name'] ] = $edit_link['value'];
+				$this->plugin->alerts->Trigger( 2101, $post_data );
+			}
+		}
 	}
 }
