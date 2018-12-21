@@ -39,26 +39,10 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
-		// Set if visitor events is enabled/disabled.
-		$disabled_visitor_events = $this->plugin->GetGlobalOption( 'disable-visitor-events', 'no' );
-
-		// Viewing post event.
-		add_action( 'wp_head', array( $this, 'viewing_post' ), 10 );
-
-		// If user is visitor & visitor events are not disabled then hook the following events.
-		if ( ! is_user_logged_in() && 'no' === $disabled_visitor_events ) {
+		if ( $this->plugin->load_wsal_on_frontend() ) {
 			add_action( 'user_register', array( $this, 'event_user_register' ) );
 			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 2 );
 			add_filter( 'template_redirect', array( $this, 'event_404' ) );
-		} elseif ( is_user_logged_in() ) {
-			add_action( 'user_register', array( $this, 'event_user_register' ) );
-			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 2 );
-			add_filter( 'template_redirect', array( $this, 'event_404' ) );
-		}
-
-		// Check if WooCommerce plugin exists.
-		if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-			add_action( 'wp_head', array( $this, 'viewing_product' ), 10 );
 		}
 	}
 
@@ -85,67 +69,6 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 				),
 			), true
 		);
-	}
-
-	/**
-	 * Post View Event.
-	 *
-	 * Alerts for Viewing of Posts and Custom Post Types.
-	 */
-	public function viewing_post() {
-		// Retrieve the current post object.
-		$post = get_queried_object();
-		if ( is_user_logged_in() && ! is_admin() ) {
-			if ( $this->check_other_sensors( $post ) ) {
-				return $post->post_title;
-			}
-
-			// Filter $_SERVER array for security.
-			$server_array = filter_input_array( INPUT_SERVER );
-
-			$current_path = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;
-			if ( ! empty( $server_array['HTTP_REFERER'] )
-				&& ! empty( $current_path )
-				&& strpos( $server_array['HTTP_REFERER'], $current_path ) !== false ) {
-				// Ignore this if we were on the same page so we avoid double audit entries.
-				return;
-			}
-
-			if ( ! empty( $post->post_title ) ) {
-				$this->plugin->alerts->Trigger(
-					2101, array(
-						'PostID'         => $post->ID,
-						'PostType'       => $post->post_type,
-						'PostTitle'      => $post->post_title,
-						'PostStatus'     => $post->post_status,
-						'PostDate'       => $post->post_date,
-						'PostUrl'        => get_permalink( $post->ID ),
-						'EditorLinkPost' => get_edit_post_link( $post->ID ),
-					)
-				);
-			}
-		}
-	}
-
-	/**
-	 * Ignore post from BBPress, WooCommerce Plugin
-	 * Triggered on the Sensors
-	 *
-	 * @param WP_Post $post - The post.
-	 */
-	private function check_other_sensors( $post ) {
-		if ( empty( $post ) || ! isset( $post->post_type ) ) {
-			return false;
-		}
-		switch ( $post->post_type ) {
-			case 'forum':
-			case 'topic':
-			case 'reply':
-			case 'product':
-				return true;
-			default:
-				return false;
-		}
 	}
 
 	/**
@@ -446,98 +369,5 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 			}
 		}
 		return $name_file;
-	}
-
-	/**
-	 * Viewing Product Event.
-	 *
-	 * Alerts for viewing of product post type for WooCommerce.
-	 */
-	public function viewing_product() {
-		// Retrieve the current post object.
-		$product = get_queried_object();
-
-		// Check product post type.
-		if ( ! empty( $product ) && $product instanceof WP_Post && 'product' !== $product->post_type ) {
-			return $product;
-		}
-
-		if ( is_user_logged_in() && ! is_admin() ) {
-			// Filter $_SERVER array for security.
-			$server_array = filter_input_array( INPUT_SERVER );
-
-			$current_path = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;
-			if ( ! empty( $server_array['HTTP_REFERER'] )
-				&& ! empty( $current_path )
-				&& strpos( $server_array['HTTP_REFERER'], $current_path ) !== false ) {
-				// Ignore this if we were on the same page so we avoid double audit entries.
-				return;
-			}
-			if ( ! empty( $product->post_title ) ) {
-				$editor_link = $this->get_product_editor_link( $product );
-				$this->plugin->alerts->Trigger(
-					9073, array(
-						'PostID'             => $product->ID,
-						'PostType'           => $product->post_type,
-						'ProductStatus'      => $product->post_status,
-						'ProductTitle'       => $product->post_title,
-						'ProductUrl'         => get_permalink( $product->ID ),
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-			}
-		}
-	}
-
-	/**
-	 * Get editor link.
-	 *
-	 * @param WP_Post $post        - Product post object.
-	 * @return array  $editor_link - Name and value link.
-	 */
-	private function get_product_editor_link( $post ) {
-		// Meta value key.
-		$name = 'EditorLinkProduct';
-
-		// Get editor post link URL.
-		$value = get_edit_post_link( $post->ID );
-
-		// If the URL is not empty then set values.
-		if ( ! empty( $value ) ) {
-			$editor_link = array(
-				'name'  => $name, // Meta key.
-				'value' => $value, // Meta value.
-			);
-		} else {
-			// Get post object.
-			$post = get_post( $post->ID );
-
-			// Set URL action.
-			if ( 'revision' === $post->post_type ) {
-				$action = '';
-			} else {
-				$action = '&action=edit';
-			}
-
-			// Get and check post type object.
-			$post_type_object = get_post_type_object( $post->post_type );
-			if ( ! $post_type_object ) {
-				return;
-			}
-
-			// Set editor link manually.
-			if ( $post_type_object->_edit_link ) {
-				$link = admin_url( sprintf( $post_type_object->_edit_link . $action, $post->ID ) );
-			} else {
-				$link = '';
-			}
-
-			$editor_link = array(
-				'name'  => $name, // Meta key.
-				'value' => $link, // Meta value.
-			);
-		}
-
-		return $editor_link;
 	}
 }
