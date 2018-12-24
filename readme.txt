@@ -5,8 +5,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 5.0.1
-Stable tag: 3.3
+Tested up to: 5.0.2
+Stable tag: 3.3.0.1
 Requires PHP: 5.4.43
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -195,32 +195,16 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.3 (2018-12-13) =
-
-Release Notes: [Slack Support & New External Connections UI](https://www.wpsecurityauditlog.com/category/releases/external-connections-update-slack-support-3-3/)
-
-* **New Features**
-	* Slack support - [mirror WordPress activity log for Slack](https://www.wpsecurityauditlog.com/support-documentation/mirror-wordpress-activity-logs-slack-channel/).
-	* New UI and totally revamped the [external databases & services connections module](https://www.wpsecurityauditlog.com/support-documentation/getting-started-external-databases-third-party-services/).
-	* Ability to mirror the WordPress activity logs to multiple destinations.
+= 3.3.0.1 (2018-12-26) =
 
 * **Improvements**
-	* Maximum file size for [WordPress file integrity scans](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/) is now configurable.
-	* Updated the Freemius SDK to 2.2.2 (addresses a MainWP conflict fix).
-	* Plugin access can now be restricted to super administrators only on a multisite network.
-	* Multiple scan started / stopped events per directory merged into one.
-	* Added 1 and 4 hours option to terminate idle users sessions setting.
-	* Plugin now always keeps a log a post updates, even if update is not done via the editor.
-	* Better handling of terminated users sessions (in hung state, blocking legit logins).
-	* Access to plugin now can be restricted to super admin role on multisite networks.
-	* User info in daily activity log summary email is now variable - the same as configured in the plugin settings.
-	* Limited Freemius user messages to users who can view & manage the plugin.
-	* Addded support for a dot in the time format (e.g: d.-m-Y G:i)
+	* Improved handling of logged in users sessions data.
+	* Terminate All Sessions button now also purges sessions data from the WordPress database.
+	* Improved the events for when saving a draft post in the Gutenberg editor.
+	* Checks for the [Papertrail activity log mirroring](https://www.wpsecurityauditlog.com/support-documentation/mirroring-wordpress-audit-trail-papertrail/) connectivity improved.
 
-	* **Bug Fixes**
-	* Better handling of data from the REST API [Support ticket](https://wordpress.org/support/topic/error-implode-invalid-arguments-when-using-register_rest_route/).
-	* Fixed: two daily activity log emails were being sent instead of one.
-	* Restricted the starter license (had access to some pro features).
-	* Fixed a number of minor warnings when running the plugin on PHP7.
-	* Logins when using the [Two-Factor plugin](https://wordpress.org/plugins/two-factor/) are now logged properly.
-	* Fixed - first time setup wizard prompt not always showing.
+* **Bug Fixes**
+	* Fixed an issue in which the plugin was sending two daily activity log summary.
+	* Removed code for backward compatibility but was not PHP 7.2 compatible ([Support Ticket](https://wordpress.org/support/topic/php-7-2-compatibility-still-failing/)).
+	* Updated the list of website visitor events in Enable/Disable events section.
+	* Fixed an issue with the auto refresh of users sessions.
