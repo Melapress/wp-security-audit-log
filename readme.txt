@@ -197,6 +197,9 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 = 3.3.0.1 (2018-12-26) =
 
+* **New Feature**
+	* A setting to configure the number of logged in sessions the plugin retrieves when checking for logged in sessions.
+
 * **Improvements**
 	* Improved handling of logged in users sessions data.
 	* Terminate All Sessions button now also purges sessions data from the WordPress database.
