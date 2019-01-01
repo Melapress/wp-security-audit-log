@@ -60,6 +60,65 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	}
 
 	/**
+	 * View Save.
+	 *
+	 * @since 3.3
+	 */
+	private function save() {
+		// Filter $_POST array.
+		$post_array = filter_input_array( INPUT_POST );
+
+		$enabled  = array_map( 'intval', $post_array['alert'] );
+		$disabled = array();
+		foreach ( $this->_plugin->alerts->GetAlerts() as $alert ) {
+			if ( ! in_array( $alert->type, $enabled, true ) ) {
+				$disabled[] = $alert->type;
+			}
+		}
+
+		if ( isset( $post_array['disable-visitor-events'] ) && 'yes' === $this->_plugin->GetGlobalOption( 'disable-visitor-events', 'no' ) ) {
+			$public_events = $this->_plugin->alerts->get_public_events();
+			$disabled      = array_diff( $disabled, $public_events );
+		}
+		$this->_plugin->alerts->SetDisabledAlerts( $disabled );
+
+		$this->_plugin->SetGlobalOption( 'log-404', isset( $post_array['log_404'] ) ? 'on' : 'off' );
+		$this->_plugin->SetGlobalOption( 'purge-404-log', isset( $post_array['purge_log'] ) ? 'on' : 'off' );
+		$this->_plugin->SetGlobalOption( 'log-404-referrer', isset( $post_array['log_404_referrer'] ) ? 'on' : 'off' );
+
+		$this->_plugin->SetGlobalOption( 'log-visitor-404', isset( $post_array['log_visitor_404'] ) ? 'on' : 'off' );
+		$this->_plugin->SetGlobalOption( 'purge-visitor-404-log', isset( $post_array['purge_visitor_log'] ) ? 'on' : 'off' );
+		$this->_plugin->SetGlobalOption( 'log-visitor-404-referrer', isset( $post_array['log_visitor_404_referrer'] ) ? 'on' : 'off' );
+		$this->_plugin->SetGlobalOption( 'wc-all-stock-changes', isset( $post_array['wc_all_stock_changes'] ) ? 'on' : 'off' );
+
+		$this->_plugin->settings->Set404LogLimit( $post_array['user_404Limit'] );
+		$this->_plugin->settings->SetVisitor404LogLimit( $post_array['visitor_404Limit'] );
+
+		$this->_plugin->settings->set_failed_login_limit( $post_array['log_failed_login_limit'] );
+		$this->_plugin->settings->set_visitor_failed_login_limit( $post_array['log_visitor_failed_login_limit'] );
+
+		// Get file change scan alerts.
+		$file_change_alerts = $this->_plugin->alerts->get_alerts_by_sub_category( 'File Changes' );
+		$file_change_alerts = array_keys( $file_change_alerts );
+
+		// Toggle file change.
+		$file_change_toggle = 'disable';
+
+		// Check each file change alert to see if it is active or not.
+		foreach ( $file_change_alerts as $alert ) {
+			if ( ! in_array( $alert, $disabled, true ) ) { // If any one alert is active, then.
+				$file_change_toggle = 'enable'; // Enable the file change.
+			}
+		}
+
+		// Set the option.
+		$this->_plugin->SetGlobalOption( 'scan-file-changes', $file_change_toggle );
+
+		// Set the visitor events option.
+		$this->_plugin->SetGlobalOption( 'disable-visitor-events', isset( $post_array['disable-visitor-events'] ) ? 'no' : 'yes' );
+	}
+
+	/**
 	 * Method: Get View.
 	 */
 	public function Render() {
@@ -79,14 +138,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		if ( isset( $post_array['submit'] ) && isset( $post_array['alert'] ) ) {
 			check_admin_referer( 'wsal-togglealerts' );
 			try {
-				$enabled  = array_map( 'intval', $post_array['alert'] );
-				$disabled = array();
-				foreach ( $this->_plugin->alerts->GetAlerts() as $alert ) {
-					if ( ! in_array( $alert->type, $enabled ) ) {
-						$disabled[] = $alert->type;
-					}
-				}
-				$this->_plugin->alerts->SetDisabledAlerts( $disabled );
+				$this->save();
 				?>
 				<div class="updated">
 					<p><?php esc_html_e( 'Settings have been saved.', 'wp-security-audit-log' ); ?></p>
@@ -99,40 +151,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				</div>
 				<?php
 			}
-			$this->_plugin->SetGlobalOption( 'log-404', isset( $post_array['log_404'] ) ? 'on' : 'off' );
-			$this->_plugin->SetGlobalOption( 'purge-404-log', isset( $post_array['purge_log'] ) ? 'on' : 'off' );
-			$this->_plugin->SetGlobalOption( 'log-404-referrer', isset( $post_array['log_404_referrer'] ) ? 'on' : 'off' );
-
-			$this->_plugin->SetGlobalOption( 'log-visitor-404', isset( $post_array['log_visitor_404'] ) ? 'on' : 'off' );
-			$this->_plugin->SetGlobalOption( 'purge-visitor-404-log', isset( $post_array['purge_visitor_log'] ) ? 'on' : 'off' );
-			$this->_plugin->SetGlobalOption( 'log-visitor-404-referrer', isset( $post_array['log_visitor_404_referrer'] ) ? 'on' : 'off' );
-			$this->_plugin->SetGlobalOption( 'wc-all-stock-changes', isset( $post_array['wc_all_stock_changes'] ) ? 'on' : 'off' );
-
-			$this->_plugin->settings->Set404LogLimit( $post_array['user_404Limit'] );
-			$this->_plugin->settings->SetVisitor404LogLimit( $post_array['visitor_404Limit'] );
-
-			$this->_plugin->settings->set_failed_login_limit( $post_array['log_failed_login_limit'] );
-			$this->_plugin->settings->set_visitor_failed_login_limit( $post_array['log_visitor_failed_login_limit'] );
-
-			// Get file change scan alerts.
-			$file_change_alerts = $this->_plugin->alerts->get_alerts_by_sub_category( 'File Changes' );
-			$file_change_alerts = array_keys( $file_change_alerts );
-
-			// Toggle file change.
-			$file_change_toggle = 'disable';
-
-			// Check each file change alert to see if it is active or not.
-			foreach ( $file_change_alerts as $alert ) {
-				if ( ! in_array( $alert, $disabled, true ) ) { // If any one alert is active, then.
-					$file_change_toggle = 'enable'; // Enable the file change.
-				}
-			}
-
-			// Set the option.
-			$this->_plugin->SetGlobalOption( 'scan-file-changes', $file_change_toggle );
-
-			// Set the visitor events option.
-			$this->_plugin->SetGlobalOption( 'disable-visitor-events', isset( $post_array['disable-visitor-events'] ) ? 'no' : 'yes' );
 		}
 
 		// Log level form submission.
