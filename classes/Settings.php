@@ -148,8 +148,8 @@ class WSAL_Settings {
 	 * Enable Geek Mode.
 	 */
 	public function set_geek_mode() {
-		// Disable alerts of geek mode.
-		$this->SetDisabledAlerts( array() );
+		$this->_plugin->SetGlobalOption( 'disable-visitor-events', 'no' ); // Set disable visitor events to no.
+		$this->SetDisabledAlerts( array() ); // Disable alerts of geek mode.
 	}
 
 	/**
