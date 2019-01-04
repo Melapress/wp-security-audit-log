@@ -58,7 +58,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 		// Plugin constants.
 		const PLG_CLS_PRFX    = 'WSAL_';
-		const MIN_PHP_VERSION = '5.5.0';
+		const MIN_PHP_VERSION = '5.3.0';
 		const OPT_PRFX        = 'wsal-';
 
 		/**
