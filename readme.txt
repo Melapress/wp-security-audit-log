@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.0.2
-Stable tag: 3.3.0.1
+Stable tag: 3.3.0.2
 Requires PHP: 5.4.43
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -195,19 +195,10 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.3.0.1 (2018-12-26) =
-
-* **New Feature**
-	* A setting to configure the number of logged in sessions the plugin retrieves when checking for logged in sessions.
+= 3.3.0.2 (2019-01-07) =
 
 * **Improvements**
-	* Improved handling of logged in users sessions data.
-	* Terminate All Sessions button now also purges sessions data from the WordPress database.
-	* Improved the events for when saving a draft post in the Gutenberg editor.
-	* Checks for the [Papertrail activity log mirroring](https://www.wpsecurityauditlog.com/support-documentation/mirroring-wordpress-audit-trail-papertrail/) connectivity improved.
-
+	* Better support for custom login pages.
+	
 * **Bug Fixes**
-	* Fixed an issue in which the plugin was sending two daily activity log summary.
-	* Removed code for backward compatibility but was not PHP 7.2 compatible ([Support Ticket](https://wordpress.org/support/topic/php-7-2-compatibility-still-failing/)).
-	* Updated the list of website visitor events in Enable/Disable events section.
-	* Fixed an issue with the auto refresh of users sessions.
+	* Fixed an issue where the visitor logs sensor remains disabled when [activity log level](https://www.wpsecurityauditlog.com/support-documentation/default-wordpress-activity-log-levels/) is switched to guru.
