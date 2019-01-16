@@ -64,7 +64,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		add_action( 'updated_post_meta', array( $this, 'EventPostMetaUpdated' ), 10, 4 );
 		add_action( 'deleted_post_meta', array( $this, 'EventPostMetaDeleted' ), 10, 4 );
 		add_action( 'save_post', array( $this, 'reset_null_meta_counter' ), 10 );
-
 		add_action( 'add_user_meta', array( $this, 'event_user_meta_created' ), 10, 3 );
 		add_action( 'update_user_meta', array( $this, 'event_user_meta_updating' ), 10, 3 );
 		add_action( 'updated_user_meta', array( $this, 'event_user_meta_updated' ), 10, 4 );
@@ -81,7 +80,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 */
 	protected function CanLogMetaKey( $object_id, $meta_key ) {
 		// Check if excluded meta key or starts with _.
-		if ( substr( $meta_key, 0, 1 ) == '_' ) {
+		if ( '_' === substr( $meta_key, 0, 1 ) ) {
 			return false;
 		} elseif ( $this->IsExcludedCustomFields( $meta_key ) ) {
 			return false;
@@ -112,7 +111,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 					}
 				}
 				// Wildcard [any_character]str when you enter (*str).
-				if ( '*' == substr( $field, 0, 1 ) ) {
+				if ( '*' === substr( $field, 0, 1 ) ) {
 					$field = ltrim( $field, '*' );
 					if ( preg_match( "/$field$/", $custom ) ) {
 						return true;
@@ -121,7 +120,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			}
 		}
 		return false;
-		// return (in_array($custom, $custom_fields)) ? true : false;.
 	}
 
 	/**
@@ -161,7 +159,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		}
 
 		// WP Dashboard action.
-		$wp_action = array( 'add-meta' );
+		$wp_action = array( 'add-meta', 'editpost' );
 
 		// Check MainWP $_POST members.
 		$new_post    = filter_input( INPUT_POST, 'new_post' );
@@ -171,33 +169,41 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		$mainwp = filter_input( INPUT_POST, 'mainwpsignature', FILTER_SANITIZE_STRING );
 
 		if (
-			( // Either coming from WP admin panel.
-				isset( $post_array['action'] )
-				&& (
-					'editpost' === $post_array['action']
-					|| in_array( $post_array['action'], $wp_action, true )
-				)
-			) || ( // OR from MainWP dashboard.
-				! empty( $new_post )
-				&& ! empty( $post_custom )
-				&& ! empty( $mainwp )
-			)
+			( isset( $post_array['action'] ) && in_array( $post_array['action'], $wp_action, true ) ) // Either coming from WP admin panel.
+			|| ( ! empty( $new_post ) && ! empty( $post_custom ) && ! empty( $mainwp ) ) // OR from MainWP dashboard.
 		) {
-			$editor_link = $this->GetEditorLink( $post );
-			$this->plugin->alerts->Trigger(
-				2053, array(
-					'PostID' => $object_id,
-					'PostTitle' => $post->post_title,
-					'PostStatus' => $post->post_status,
-					'PostType' => $post->post_type,
-					'PostDate' => $post->post_date,
-					'PostUrl' => get_permalink( $post->ID ),
-					'MetaKey' => $meta_key,
-					'MetaValue' => $meta_value,
-					'MetaLink' => $meta_key,
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
+			/**
+			 * WSAL Filter: `wsal_before_post_meta_create_event`
+			 *
+			 * Runs before logging event for post meta created i.e. 2053.
+			 * This filter can be used as check to whether log this event or not.
+			 *
+			 * @since 3.3.1
+			 *
+			 * @param bool    $log_event  - True if log meta event, false if not.
+			 * @param string  $meta_key   - Meta key.
+			 * @param mixed   $meta_value - Meta value.
+			 * @param WP_Post $post       - Post object.
+			 */
+			$log_meta_event = apply_filters( 'wsal_before_post_meta_create_event', true, $meta_key, $meta_value, $post );
+
+			if ( $log_meta_event ) {
+				$editor_link = $this->GetEditorLink( $post );
+				$this->plugin->alerts->Trigger(
+					2053, array(
+						'PostID'             => $object_id,
+						'PostTitle'          => $post->post_title,
+						'PostStatus'         => $post->post_status,
+						'PostType'           => $post->post_type,
+						'PostDate'           => $post->post_date,
+						'PostUrl'            => get_permalink( $post->ID ),
+						'MetaKey'            => $meta_key,
+						'MetaValue'          => $meta_value,
+						'MetaLink'           => $meta_key,
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			}
 		}
 	}
 
@@ -210,8 +216,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 */
 	public function EventPostMetaUpdating( $meta_id, $object_id, $meta_key ) {
 		static $meta_type = 'post';
+		$meta             = get_metadata_by_mid( $meta_type, $meta_id );
+
 		$this->old_meta[ $meta_id ] = (object) array(
-			'key' => ( $meta = get_metadata_by_mid( $meta_type, $meta_id ) ) ? $meta->meta_key : $meta_key,
+			'key' => ( $meta ) ? $meta->meta_key : $meta_key,
 			'val' => get_metadata( $meta_type, $object_id, $meta_key, true ),
 		);
 	}
@@ -266,7 +274,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		}
 
 		// WP Dashboard action.
-		$wp_action = array( 'add-meta' );
+		$wp_action = array( 'add-meta', 'editpost' );
 
 		// Check MainWP $_POST members.
 		$new_post    = filter_input( INPUT_POST, 'new_post' );
@@ -276,22 +284,30 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		$mainwp = filter_input( INPUT_POST, 'mainwpsignature', FILTER_SANITIZE_STRING );
 
 		if (
-			(
-				isset( $post_array['action'] )
-				&& (
-					'editpost' === $post_array['action']
-					|| in_array( $post_array['action'], $wp_action, true )
-				)
-			) || (
-				! empty( $new_post )
-				&& ! empty( $post_custom )
-				&& ! empty( $mainwp )
-			)
+			( isset( $post_array['action'] ) && in_array( $post_array['action'], $wp_action, true ) )
+			|| ( ! empty( $new_post ) && ! empty( $post_custom ) && ! empty( $mainwp ) )
 		) {
-			$editor_link = $this->GetEditorLink( $post );
 			if ( isset( $this->old_meta[ $meta_id ] ) ) {
+				/**
+				 * WSAL Filter: `wsal_before_post_meta_update_event`
+				 *
+				 * Runs before logging events for post meta updated i.e. 2054 or 2062.
+				 * This filter can be used as check to whether log these events or not.
+				 *
+				 * @since 3.3.1
+				 *
+				 * @param bool     $log_event                  - True if log meta event 2054 or 2062, false if not.
+				 * @param string   $meta_key                   - Meta key.
+				 * @param mixed    $meta_value                 - Meta value.
+				 * @param stdClass $this->old_meta[ $meta_id ] - Old meta value and key object.
+				 * @param WP_Post  $post                       - Post object.
+				 * @param integer  $meta_id                    - Meta ID.
+				 */
+				$log_meta_event = apply_filters( 'wsal_before_post_meta_update_event', true, $meta_key, $meta_value, $this->old_meta[ $meta_id ], $post, $meta_id );
+
 				// Check change in meta key.
-				if ( $this->old_meta[ $meta_id ]->key != $meta_key ) {
+				if ( $log_meta_event && $this->old_meta[ $meta_id ]->key != $meta_key ) {
+					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
 						2062, array(
 							'PostID'             => $object_id,
@@ -308,7 +324,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 							$editor_link['name'] => $editor_link['value'],
 						)
 					);
-				} elseif ( $this->old_meta[ $meta_id ]->val != $meta_value ) { // Check change in meta value.
+				} elseif ( $log_meta_event && $this->old_meta[ $meta_id ]->val != $meta_value ) { // Check change in meta value.
+					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
 						2054, array(
 							'PostID'             => $object_id,
@@ -343,7 +360,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 */
 	public function EventPostMetaDeleted( $meta_ids, $object_id, $meta_key, $meta_value ) {
 		// If meta key starts with "_" then return.
-		if ( '_' == substr( $meta_key, 0, 1 ) ) {
+		if ( '_' === substr( $meta_key, 0, 1 ) ) {
 			return;
 		}
 
@@ -390,17 +407,39 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) ) {
 					continue;
 				}
+
+				/**
+				 * WSAL Filter: `wsal_before_post_meta_delete_event`
+				 *
+				 * Runs before logging event for post meta deleted i.e. 2054.
+				 * This filter can be used as check to whether log this event or not.
+				 *
+				 * @since 3.3.1
+				 *
+				 * @param bool     $log_event  - True if log meta event 2055, false if not.
+				 * @param string   $meta_key   - Meta key.
+				 * @param mixed    $meta_value - Meta value.
+				 * @param WP_Post  $post       - Post object.
+				 * @param integer  $meta_id    - Meta ID.
+				 */
+				$log_meta_event = apply_filters( 'wsal_before_post_meta_delete_event', true, $meta_key, $meta_value, $post, $meta_id );
+
+				// If not allowed to log meta event then skip it.
+				if ( ! $log_meta_event ) {
+					continue;
+				}
+
 				$this->plugin->alerts->Trigger(
 					2055, array(
-						'PostID' => $object_id,
-						'PostTitle' => $post->post_title,
-						'PostStatus' => $post->post_status,
-						'PostType' => $post->post_type,
-						'PostDate' => $post->post_date,
-						'PostUrl' => get_permalink( $post->ID ),
-						'MetaID' => $meta_id,
-						'MetaKey' => $meta_key,
-						'MetaValue' => $meta_value,
+						'PostID'             => $object_id,
+						'PostTitle'          => $post->post_title,
+						'PostStatus'         => $post->post_status,
+						'PostType'           => $post->post_type,
+						'PostDate'           => $post->post_date,
+						'PostUrl'            => get_permalink( $post->ID ),
+						'MetaID'             => $meta_id,
+						'MetaKey'            => $meta_key,
+						'MetaValue'          => $meta_value,
 						$editor_link['name'] => $editor_link['value'],
 					)
 				);
@@ -424,14 +463,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @return array $editor_link - Name and value link
 	 */
 	private function GetEditorLink( $post ) {
-		$name = 'EditorLink';
-		$name .= ( 'page' == $post->post_type ) ? 'Page' : 'Post';
-		$value = get_edit_post_link( $post->ID );
-		$editor_link = array(
-			'name' => $name,
-			'value' => $value,
+		return array(
+			'name'  => 'EditorLinkPost',
+			'value' => get_edit_post_link( $post->ID ),
 		);
-		return $editor_link;
 	}
 
 	/**
