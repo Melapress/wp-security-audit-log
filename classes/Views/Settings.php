@@ -192,7 +192,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			'scan_day'                 => $this->_plugin->GetGlobalOption( 'scan-day', '1' ),
 			'scan_date'                => $this->_plugin->GetGlobalOption( 'scan-date', '10' ),
 			'scan_directories'         => $this->_plugin->GetGlobalOption( 'scan-directories', $default_scan_dirs ),
-			'scan_excluded_dirs'       => $this->_plugin->GetGlobalOption( 'scan-excluded-directories', array() ),
+			'scan_excluded_dirs'       => $this->_plugin->GetGlobalOption( 'scan-excluded-directories', array( trailingslashit( WP_CONTENT_DIR ) . 'cache' ) ),
 			'scan_excluded_extensions' => $this->_plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav', 'gif', 'ico', 'jpe', 'psd', 'raw', 'svg', 'tif', 'tiff', 'aif', 'flac', 'm4a', 'oga', 'ogg', 'ra', 'wma', 'asf', 'avi', 'mkv', 'mov', 'mp4', 'mpe', 'mpeg', 'mpg', 'ogv', 'qt', 'rm', 'vob', 'webm', 'wm', 'wmv' ) ),
 			'scan_in_progress'         => $this->_plugin->GetGlobalOption( 'scan-in-progress', false ),
 			'scan_file_size_limit'     => $this->_plugin->GetGlobalOption( 'scan-file-size-limit', 5 ),
@@ -442,7 +442,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		?>
 		<p class="description"><?php echo wp_kses( __( 'Need help with setting up the plugin to meet your requirements? <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">Schedule a 20 minutes consultation and setup call</a> with our experts for just $50.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
 
-		<h3><?php esc_html_e( 'Display latest events widget in dashboard & Admin bar', 'wp-security-audit-log' ); ?></h3>
+		<h3><?php esc_html_e( 'Display latest events widget in Dashboard & Admin bar', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
 			<?php
 			echo sprintf(
@@ -499,6 +499,33 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					</td>
 				</tr>
 				<!-- / Admin Bar Notification -->
+
+				<tr>
+					<?php
+					$disabled = '';
+					$label    = __( 'Admin Bar Notification Updates', 'wp-security-audit-log' );
+					if ( wsal_freemius()->is_free_plan() ) {
+						$disabled = 'disabled';
+						$label    = __( 'Admin Bar Notification Updates (Premium)', 'wp-security-audit-log' );
+					}
+					?>
+					<th><label for="admin_bar_notif_refresh"><?php echo esc_html( $label ); ?></label></th>
+					<td>
+						<fieldset <?php echo esc_attr( $disabled ); ?>>
+							<?php $abn_updates = $this->_plugin->settings->get_admin_bar_notif_updates(); ?>
+							<label for="admin_bar_notif_realtime">
+								<input type="radio" name="admin_bar_notif_updates" id="admin_bar_notif_realtime" style="margin-top: -2px;" <?php checked( $abn_updates, 'real-time' ); ?> value="real-time">
+								<span><?php esc_html_e( 'Update in near real time', 'wp-security-audit-log' ); ?></span>
+							</label>
+							<br/>
+							<label for="admin_bar_notif_refresh">
+								<input type="radio" name="admin_bar_notif_updates" id="admin_bar_notif_refresh" style="margin-top: -2px;" <?php checked( $abn_updates, 'page-refresh' ); ?>  value="page-refresh">
+								<span><?php esc_html_e( 'Update only on page refreshes', 'wp-security-audit-log' ); ?></span>
+							</label>
+						</fieldset>
+					</td>
+				</tr>
+				<!-- / Admin Bar Notification Updates -->
 			</tbody>
 		</table>
 		<!-- Dashboard Widget -->
@@ -782,6 +809,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		if ( ! wsal_freemius()->is_free_plan() ) {
 			$this->_plugin->settings->set_admin_bar_notif( sanitize_text_field( $post_array['admin_bar_notif'] ) );
+			$this->_plugin->settings->set_admin_bar_notif_updates( sanitize_text_field( $post_array['admin_bar_notif_updates'] ) );
 		}
 
 		// Get plugin viewers.
