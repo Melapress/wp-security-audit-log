@@ -174,7 +174,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$is_custom       = ! empty( $events_diff ) ? true : false; // If difference is not empty then mode is custom.
 		$log_details     = $this->_plugin->GetGlobalOption( 'details-level', false ); // Get log level option.
 
-		$subcat_alerts = array( 1004, 2010, 6007, 2111, 2119, 2016, 2053, 7000, 8009, 8014, 9007, 9027, 9002, 8809, 8813, 6000, 6001, 6019, 6028 );
+		$subcat_alerts = array( 1004, 2010, 6007, 2111, 2119, 2016, 2053, 7000, 8009, 8014, 9007, 9047, 9027, 9002, 9057, 9063, 9035, 8809, 8813, 6000, 6001, 6019, 6028 );
 		$public_events = $this->_plugin->alerts->get_public_events(); // Get public events.
 		?>
 		<p>
@@ -434,10 +434,18 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 															esc_html_e( 'Topics', 'wp-security-audit-log' );
 														} elseif ( 9007 === $alert->type ) {
 															esc_html_e( 'Product Admin', 'wp-security-audit-log' );
+														} elseif ( 9047 === $alert->type ) {
+															esc_html_e( 'Product Attribute', 'wp-security-audit-log' );
 														} elseif ( 9027 === $alert->type ) {
 															esc_html_e( 'Store Admin', 'wp-security-audit-log' );
 														} elseif ( 9002 === $alert->type ) {
 															esc_html_e( 'Categories', 'wp-security-audit-log' );
+														} elseif ( 9057 === $alert->type ) {
+															esc_html_e( 'Attributes', 'wp-security-audit-log' );
+														} elseif ( 9063 === $alert->type ) {
+															esc_html_e( 'Coupons', 'wp-security-audit-log' );
+														} elseif ( 9035 === $alert->type ) {
+															esc_html_e( 'Orders', 'wp-security-audit-log' );
 														} elseif ( 8809 === $alert->type ) {
 															esc_html_e( 'Website Changes', 'wp-security-audit-log' );
 														} elseif ( 8813 === $alert->type ) {
