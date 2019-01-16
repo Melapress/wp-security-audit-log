@@ -561,10 +561,10 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			return;
 		}
 
-		$wp_actions = array( 'editpost', 'heartbeat', 'inline-save', 'trash', 'untrash' );
-		if ( isset( $get_array['action'] ) && ! in_array( $get_array['action'], $wp_actions ) ) {
+		$wp_actions = array( 'editpost', 'heartbeat', 'inline-save', 'trash', 'untrash', 'vc_save' );
+		if ( isset( $get_array['action'] ) && ! in_array( $get_array['action'], $wp_actions, true ) ) {
 			if (
-				! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ), true )
+				! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true )
 				&& ! empty( $post->post_title )
 			) {
 				// Get post editor link.
@@ -596,9 +596,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			}
 		}
 
-		if ( isset( $post_array['action'] ) && ! in_array( $post_array['action'], $wp_actions ) ) {
+		if ( isset( $post_array['action'] ) && ! in_array( $post_array['action'], $wp_actions, true ) ) {
 			if (
-				! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ), true )
+				! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true )
 				&& ! empty( $post->post_title )
 			) {
 				// If the plugin modify the post.
@@ -649,7 +649,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 		if ( empty( $get_array['action'] ) && isset( $get_array['page'] ) ) {
 			$post = get_post( $post_id );
-			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
+			if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true )
 				|| ! empty( $post->post_title ) ) {
 				$this->plugin->alerts->Trigger(
 					5025, array(
@@ -664,7 +664,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 		if ( empty( $post_array['action'] ) && isset( $post_array['page'] ) ) {
 			$post = get_post( $post_id );
-			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) )
+			if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true )
 				|| ! empty( $post->post_title ) ) {
 				$this->plugin->alerts->Trigger(
 					5025, array(
