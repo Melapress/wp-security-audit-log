@@ -1,6 +1,21 @@
 <?php
 /**
+ * Manager: Alert Manager Class
+ *
+ * CLass file for alert manager.
+ *
+ * @since 1.0.0
+ * @package Wsal
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
  * WSAL_AlertManager class.
+ *
  * It is the actual trigger for the alerts.
  *
  * @package Wsal
