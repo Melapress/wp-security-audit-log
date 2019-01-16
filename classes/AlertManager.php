@@ -464,36 +464,36 @@ final class WSAL_AlertManager {
 	 * Converts an Alert into a Log entry (by invoking loggers).
 	 * You should not call this method directly.
 	 *
-	 * @param integer $type - Alert type.
-	 * @param array   $data - Misc alert data.
+	 * @param integer $event_id   - Alert type.
+	 * @param array   $event_data - Misc alert data.
 	 */
-	protected function Log( $type, $data = array() ) {
-		if ( ! isset( $data['ClientIP'] ) ) {
+	protected function Log( $event_id, $event_data = array() ) {
+		if ( ! isset( $event_data['ClientIP'] ) ) {
 			$client_ip = $this->plugin->settings->GetMainClientIP();
 			if ( ! empty( $client_ip ) ) {
-				$data['ClientIP'] = $client_ip;
+				$event_data['ClientIP'] = $client_ip;
 			}
 		}
-		if ( ! isset( $data['OtherIPs'] ) && $this->plugin->settings->IsMainIPFromProxy() ) {
+		if ( ! isset( $event_data['OtherIPs'] ) && $this->plugin->settings->IsMainIPFromProxy() ) {
 			$other_ips = $this->plugin->settings->GetClientIPs();
 			if ( ! empty( $other_ips ) ) {
-				$data['OtherIPs'] = $other_ips;
+				$event_data['OtherIPs'] = $other_ips;
 			}
 		}
-		if ( ! isset( $data['UserAgent'] ) ) {
+		if ( ! isset( $event_data['UserAgent'] ) ) {
 			if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
-				$data['UserAgent'] = $_SERVER['HTTP_USER_AGENT'];
+				$event_data['UserAgent'] = $_SERVER['HTTP_USER_AGENT'];
 			}
 		}
-		if ( ! isset( $data['Username'] ) && ! isset( $data['CurrentUserID'] ) ) {
+		if ( ! isset( $event_data['Username'] ) && ! isset( $event_data['CurrentUserID'] ) ) {
 			if ( function_exists( 'get_current_user_id' ) ) {
-				$data['CurrentUserID'] = get_current_user_id();
+				$event_data['CurrentUserID'] = get_current_user_id();
 			}
 		}
-		if ( ! isset( $data['CurrentUserRoles'] ) && function_exists( 'is_user_logged_in' ) && is_user_logged_in() ) {
+		if ( ! isset( $event_data['CurrentUserRoles'] ) && function_exists( 'is_user_logged_in' ) && is_user_logged_in() ) {
 			$current_user_roles = $this->plugin->settings->GetCurrentUserRoles();
 			if ( ! empty( $current_user_roles ) ) {
-				$data['CurrentUserRoles'] = $current_user_roles;
+				$event_data['CurrentUserRoles'] = $current_user_roles;
 			}
 		}
 		// Check if the user management plugin is loaded and adds the SessionID.
@@ -502,13 +502,38 @@ final class WSAL_AlertManager {
 				$session_tokens = get_user_meta( get_current_user_id(), 'session_tokens', true );
 				if ( ! empty( $session_tokens ) ) {
 					end( $session_tokens );
-					$data['SessionID'] = key( $session_tokens );
+					$event_data['SessionID'] = key( $session_tokens );
 				}
 			}
 		}
+		}
+
+		/**
+		 * WSAL Filter: `wsal_event_id_before_log`
+		 *
+		 * Filters event id before logging it to the database.
+		 *
+		 * @since 3.3.1
+		 *
+		 * @param integer $event_id   - Event ID.
+		 * @param array   $event_data - Event data.
+		 */
+		$event_id = apply_filters( 'wsal_event_id_before_log', $event_id, $event_data );
+
+		/**
+		 * WSAL Filter: `wsal_event_data_before_log`
+		 *
+		 * Filters event data before logging it to the database.
+		 *
+		 * @since 3.3.1
+		 *
+		 * @param array   $event_data - Event data.
+		 * @param integer $event_id   - Event ID.
+		 */
+		$event_data = apply_filters( 'wsal_event_data_before_log', $event_data, $event_id );
 
 		foreach ( $this->_loggers as $logger ) {
-			$logger->Log( $type, $data );
+			$logger->Log( $event_id, $event_data );
 		}
 	}
 
