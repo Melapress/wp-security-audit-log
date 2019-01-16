@@ -128,9 +128,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @return bool true|false
 	 */
 	public function isInstalled() {
-		global $wpdb;
+		$wpdb  = $this->getConnection();
 		$table = $wpdb->base_prefix . 'wsal_occurrences';
-		return ($wpdb->get_var( 'SHOW TABLES LIKE "' . $table . '"' ) == $table);
+		return $table === $wpdb->get_var( 'SHOW TABLES LIKE "' . $table . '"' );
 	}
 
 	/**
@@ -139,9 +139,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @return bool true|false
 	 */
 	public function canMigrate() {
-		$wpdb = $this->getConnection();
+		$wpdb  = $this->getConnection();
 		$table = $wpdb->base_prefix . 'wordpress_auditlog_events';
-		return ($wpdb->get_var( 'SHOW TABLES LIKE "' . $table . '"' ) == $table);
+		return $table === $wpdb->get_var( 'SHOW TABLES LIKE "' . $table . '"' );
 	}
 
 	/**
@@ -153,8 +153,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 		$plugin = WpSecurityAuditLog::GetInstance();
 
 		foreach ( glob( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php' ) as $file ) {
-			$file_path = explode( DIRECTORY_SEPARATOR, $file );
-			$file_name = $file_path[ count( $file_path ) - 1 ];
+			$file_path  = explode( DIRECTORY_SEPARATOR, $file );
+			$file_name  = $file_path[ count( $file_path ) - 1 ];
 			$class_name = $this->getAdapterClassName( str_replace( 'Adapter.php', '', $file_name ) );
 
 			$class = new $class_name( $this->getConnection() );
@@ -180,8 +180,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 		$plugin = WpSecurityAuditLog::GetInstance();
 
 		foreach ( glob( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php' ) as $file ) {
-			$file_path = explode( DIRECTORY_SEPARATOR, $file );
-			$file_name = $file_path[ count( $file_path ) - 1 ];
+			$file_path  = explode( DIRECTORY_SEPARATOR, $file );
+			$file_name  = $file_path[ count( $file_path ) - 1 ];
 			$class_name = $this->getAdapterClassName( str_replace( 'Adapter.php', '', $file_name ) );
 
 			$class = new $class_name( $this->getConnection() );
