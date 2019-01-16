@@ -450,7 +450,19 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$uhtml = '<i>' . __( 'System', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
 				}
-				return $image . $uhtml . '<br/>' . $roles;
+				$row_user_data = $image . $uhtml . '<br/>' . $roles;
+
+				/**
+				 * WSAL Filter: `wsal_auditlog_row_user_data`
+				 *
+				 * Filters user data before displaying on the audit log.
+				 *
+				 * @since 3.3.1
+				 *
+				 * @param string  $row_user_data          - User data to display in audit log row.
+				 * @param integer $this->current_alert_id - Event database ID.
+				 */
+				return apply_filters( 'wsal_auditlog_row_user_data', $row_user_data, $this->current_alert_id );
 			case 'scip':
 				$scip = $item->GetSourceIP();
 				if ( is_string( $scip ) ) {
