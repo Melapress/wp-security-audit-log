@@ -43,6 +43,13 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 			add_action( 'user_register', array( $this, 'event_user_register' ) );
 			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 2 );
 			add_filter( 'template_redirect', array( $this, 'event_404' ) );
+
+			// Check if WooCommerce plugin exists.
+			if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+				add_action( 'woocommerce_new_order', array( $this, 'event_new_order' ), 10, 1 );
+				add_filter( 'woocommerce_order_item_quantity', array( $this, 'set_old_stock' ), 10, 3 );
+				add_action( 'woocommerce_product_set_stock', array( $this, 'product_stock_changed' ), 10, 1 );
+			}
 		}
 	}
 
@@ -369,5 +376,203 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 			}
 		}
 		return $name_file;
+	}
+
+	/**
+	 * Get editor link.
+	 *
+	 * @since 3.3.1
+	 *
+	 * @param WP_Post $post        - Product post object.
+	 * @return array  $editor_link - Name and value link.
+	 */
+	private function get_product_editor_link( $post ) {
+		// Meta value key.
+		$name = 'EditorLinkProduct';
+
+		// Get editor post link URL.
+		$value = get_edit_post_link( $post->ID );
+
+		// If the URL is not empty then set values.
+		if ( ! empty( $value ) ) {
+			$editor_link = array(
+				'name'  => $name, // Meta key.
+				'value' => $value, // Meta value.
+			);
+		} else {
+			// Get post object.
+			$post = get_post( $post->ID );
+
+			// Set URL action.
+			if ( 'revision' === $post->post_type ) {
+				$action = '';
+			} else {
+				$action = '&action=edit';
+			}
+
+			// Get and check post type object.
+			$post_type_object = get_post_type_object( $post->post_type );
+			if ( ! $post_type_object ) {
+				return;
+			}
+
+			// Set editor link manually.
+			if ( $post_type_object->_edit_link ) {
+				$link = admin_url( sprintf( $post_type_object->_edit_link . $action, $post->ID ) );
+			} else {
+				$link = '';
+			}
+
+			$editor_link = array(
+				'name'  => $name, // Meta key.
+				'value' => $link, // Meta value.
+			);
+		}
+
+		return $editor_link;
+	}
+
+	/**
+	 * New WooCommerce Order Event.
+	 *
+	 * @since 3.3.1
+	 *
+	 * @param integer $order_id – Order id.
+	 */
+	public function event_new_order( $order_id ) {
+		if ( empty( $order_id ) ) {
+			return;
+		}
+
+		// Get order object.
+		$new_order = new WC_Order( $order_id );
+
+		if ( $new_order && $new_order instanceof WC_Order ) {
+			$order_post  = get_post( $order_id ); // Get order post object.
+			$order_title = ( null !== $order_post && $order_post instanceof WP_Post ) ? $order_post->post_title : false;
+
+			$this->plugin->alerts->Trigger( 9035, array(
+				'OrderID'     => $order_id,
+				'OrderTitle'  => $order_title,
+				'OrderStatus' => $new_order->get_status(),
+			) );
+		}
+	}
+
+	/**
+	 * Triggered before updating stock quantity on customer order.
+	 *
+	 * @param int           $order_quantity - Order quantity.
+	 * @param WC_Order      $order          - Order object.
+	 * @param WC_Order_Item $item           - Order item object.
+	 *
+	 * @return int - Order quantity.
+	 */
+	public function set_old_stock( $order_quantity, $order, $item ) {
+		// Get product from order item.
+		$product = $item->get_product();
+
+		// Get product id.
+		$product_id_with_stock = $product->get_stock_managed_by_id();
+
+		// Get product with stock.
+		$product_with_stock = wc_get_product( $product_id_with_stock );
+
+		// Set stock attributes of the product.
+		$this->_old_stock        = $product_with_stock->get_stock_quantity();
+		$this->_old_stock_status = $product_with_stock->get_stock_status();
+
+		// Return original stock quantity.
+		return $order_quantity;
+	}
+
+	/**
+	 * Triggered when stock of a product is changed.
+	 *
+	 * @param WC_Product $product - WooCommerce product object.
+	 */
+	public function product_stock_changed( $product ) {
+		// Get product id.
+		$product_id = $product->get_id();
+
+		// Return if current screen is edit post page.
+		global $pagenow;
+		if ( is_admin() && 'post.php' === $pagenow ) {
+			return;
+		}
+
+		// Get global $_POST array.
+		$post_array = filter_input_array( INPUT_POST );
+
+		// Special conditions for WooCommerce Bulk Stock Management.
+		if ( 'edit.php' === $pagenow && isset( $post_array['page'] ) && 'woocommerce-bulk-stock-management' === $post_array['page'] ) {
+			$old_acc_stock = isset( $post_array['current_stock_quantity'] ) ? $post_array['current_stock_quantity'] : false;
+			$new_acc_stock = isset( $post_array['stock_quantity'] ) ? $post_array['stock_quantity'] : false;
+
+			// Get old stock quantity.
+			$old_stock = ! empty( $this->_old_stock ) ? $this->_old_stock : $old_acc_stock[ $product_id ];
+
+			// Following cases handle the stock status.
+			if ( '0' === $old_acc_stock[ $product_id ] && '0' !== $new_acc_stock[ $product_id ] ) {
+				$old_stock_status = 'outofstock';
+			} elseif ( '0' !== $old_acc_stock[ $product_id ] && '0' === $new_acc_stock[ $product_id ] ) {
+				$old_stock_status = 'instock';
+			} elseif ( '0' === $old_acc_stock[ $product_id ] && '0' === $new_acc_stock[ $product_id ] ) {
+				$old_stock_status = 'outofstock';
+			} elseif ( '0' !== $old_acc_stock[ $product_id ] && '0' !== $new_acc_stock[ $product_id ] ) {
+				$old_stock_status = 'instock';
+			} else {
+				$old_stock_status = '';
+			}
+		} else {
+			$old_stock        = $this->_old_stock; // Get old stock quantity.
+			$old_stock_status = $this->_old_stock_status; // Get old stock status.
+		}
+
+		$new_stock        = $product->get_stock_quantity(); // Get new stock quantity.
+		$new_stock_status = $product->get_stock_status(); // Get new stock status.
+		$product_title    = $product->get_title(); // Get product title.
+
+		// Set post object.
+		$post     = new stdClass();
+		$post->ID = $product_id;
+
+		// Set username.
+		$username = '';
+		if ( ! is_user_logged_in() ) {
+			$username = 'Website Visitor';
+		} else {
+			$username = wp_get_current_user()->user_login;
+		}
+
+		// If stock status has changed then trigger the alert.
+		if ( ( $old_stock_status && $new_stock_status ) && ( $old_stock_status !== $new_stock_status ) ) {
+			$editor_link = $this->get_product_editor_link( $post );
+			$this->plugin->alerts->Trigger(
+				9018, array(
+					'ProductTitle'       => $product_title,
+					'OldStatus'          => $this->GetStockStatusName( $old_stock_status ),
+					'NewStatus'          => $this->GetStockStatusName( $new_stock_status ),
+					'Username'           => $username,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+		}
+
+		$wc_all_stock_changes = $this->plugin->GetGlobalOption( 'wc-all-stock-changes', 'on' );
+
+		// If stock has changed then trigger the alert.
+		if ( ( $old_stock !== $new_stock ) && ( 'on' === $wc_all_stock_changes ) ) {
+			$editor_link = $this->get_product_editor_link( $post );
+			$this->plugin->alerts->Trigger(
+				9019, array(
+					'ProductTitle'       => $product_title,
+					'OldValue'           => ( ! empty( $old_stock ) ? $old_stock : 0 ),
+					'NewValue'           => $new_stock,
+					'Username'           => $username,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+		}
 	}
 }
