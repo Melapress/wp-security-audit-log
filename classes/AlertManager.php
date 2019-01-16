@@ -506,6 +506,19 @@ final class WSAL_AlertManager {
 				}
 			}
 		}
+
+		// Get event severity.
+		$alert_obj  = $this->GetAlert( $event_id );
+		$alert_code = $alert_obj ? $alert_obj->code : 0;
+		$severity   = $this->plugin->constants->GetConstantBy( 'value', $alert_code );
+
+		// Add event severity to the meta data of the event.
+		if ( 'E_CRITICAL' === $severity->name ) {
+			$event_data['Severity'] = 'high';
+		} elseif ( 'E_WARNING' === $severity->name ) {
+			$event_data['Severity'] = 'warning';
+		} elseif ( 'E_NOTICE' === $severity->name ) {
+			$event_data['Severity'] = 'notice';
 		}
 
 		/**
