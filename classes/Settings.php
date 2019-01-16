@@ -296,6 +296,28 @@ class WSAL_Settings {
 	}
 
 	/**
+	 * Check admin bar notification updates refresh option.
+	 *
+	 * @since 3.3.1
+	 *
+	 * @return string
+	 */
+	public function get_admin_bar_notif_updates() {
+		return $this->_plugin->GetGlobalOption( 'admin-bar-notif-updates', 'page-refresh' );
+	}
+
+	/**
+	 * Set admin bar notifications.
+	 *
+	 * @since 3.3.1
+	 *
+	 * @param string $newvalue - New option value.
+	 */
+	public function set_admin_bar_notif_updates( $newvalue ) {
+		$this->_plugin->SetGlobalOption( 'admin-bar-notif-updates', $newvalue );
+	}
+
+	/**
 	 * Check whether alerts in audit log view refresh automatically or not.
 	 *
 	 * @return boolean
