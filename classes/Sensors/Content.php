@@ -124,18 +124,17 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_action( 'create_category', array( $this, 'EventCategoryCreation' ), 10, 1 );
 		add_action( 'create_post_tag', array( $this, 'EventTagCreation' ), 10, 1 );
 		add_filter( 'wp_update_term_data', array( $this, 'event_terms_rename' ), 10, 4 );
-
-		// Check if MainWP Child Plugin exists.
-		if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
-			add_action( 'mainwp_before_post_update', array( $this, 'event_mainwp_init' ), 10, 2 );
-		}
-
 		add_action( 'admin_action_edit', array( $this, 'edit_post_in_gutenberg' ), 10 );
 		add_action( 'pre_post_update', array( $this, 'gutenberg_post_edit_init' ), 10, 2 );
 		add_action( 'save_post', array( $this, 'gutenberg_post_changed' ), 10, 3 );
 		add_action( 'set_object_terms', array( $this, 'gutenberg_post_terms_changed' ), 10, 4 );
 		add_action( 'post_stuck', array( $this, 'gutenberg_post_stuck' ), 10, 1 );
 		add_action( 'post_unstuck', array( $this, 'gutenberg_post_unstuck' ), 10, 1 );
+
+		// Check if MainWP Child Plugin exists.
+		if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
+			add_action( 'mainwp_before_post_update', array( $this, 'event_mainwp_init' ), 10, 2 );
+		}
 	}
 
 	/**
@@ -458,7 +457,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( empty( $post->post_type ) ) {
 			return;
 		}
-		if ( 'revision' == $post->post_type ) {
+		if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
 			return;
 		}
 		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
@@ -535,7 +534,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$this->check_mainwp_status_change( $post, $old_status, $new_status );
 		} else {
 			// Ignore nav menu post type or post revision.
-			if ( 'nav_menu_item' === get_post_type( $post->ID ) || wp_is_post_revision( $post->ID ) ) {
+			if ( wp_is_post_revision( $post->ID ) ) {
 				return;
 			}
 
@@ -738,8 +737,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		 * @see $this->EventPostChanged();
 		 */
 		$wp_actions = array( 'editpost', 'heartbeat' );
-		if ( isset( $post_array['action'] ) && in_array( $post_array['action'], $wp_actions ) && ! $is_gutenberg ) {
-			if ( ! in_array( $new_post->post_type, array( 'attachment', 'revision', 'nav_menu_item' ) ) ) {
+		if ( isset( $post_array['action'] ) && in_array( $post_array['action'], $wp_actions, true ) && ! $is_gutenberg ) {
+			if ( ! in_array( $new_post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
 				$this->log_post_creation_event( $new_post );
 			}
 		} elseif ( $is_gutenberg ) {
@@ -844,7 +843,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( isset( $get_array['_wpnonce'] ) && wp_verify_nonce( $get_array['_wpnonce'], 'delete-post_' . $post_id ) ) {
 			$wp_actions = array( 'delete' );
 			if ( isset( $get_array['action'] ) && in_array( $get_array['action'], $wp_actions, true ) ) {
-				if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item' ), true ) ) { // Ignore attachments, revisions and menu items.
+				if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) { // Ignore attachments, revisions and menu items.
 					$event = 2008;
 					// Check WordPress backend operations.
 					if ( $this->CheckAutoDraft( $event, $post->post_title ) ) {
@@ -861,7 +860,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			&& 'delete' === $post_array['action']
 			&& ! empty( $post_array['id'] )
 		) {
-			if ( ! in_array( $post->post_type, array( 'attachment', 'revision', 'nav_menu_item' ), true ) ) { // Ignore attachments, revisions and menu items.
+			if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) { // Ignore attachments, revisions and menu items.
 				// Check WordPress backend operations.
 				if ( $this->CheckAutoDraft( 2008, $post->post_title ) ) {
 					return;
@@ -886,12 +885,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$editor_link = $this->GetEditorLink( $post );
 		$this->plugin->alerts->Trigger(
 			2012, array(
-				'PostID' => $post->ID,
-				'PostType' => $post->post_type,
-				'PostTitle' => $post->post_title,
-				'PostStatus' => $post->post_status,
-				'PostDate' => $post->post_date,
-				'PostUrl' => get_permalink( $post->ID ),
+				'PostID'             => $post->ID,
+				'PostType'           => $post->post_type,
+				'PostTitle'          => $post->post_title,
+				'PostStatus'         => $post->post_status,
+				'PostDate'           => $post->post_date,
+				'PostUrl'            => get_permalink( $post->ID ),
 				$editor_link['name'] => $editor_link['value'],
 			)
 		);
@@ -1792,6 +1791,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			case 'topic':
 			case 'reply':
 			case 'product':
+			case 'shop_order':
+			case 'shop_coupon':
 				return true;
 			default:
 				return false;
@@ -1879,7 +1880,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			return;
 		}
 
-		// Check ignored post types.
+		// Check other sensors.
 		if ( $this->CheckOtherSensors( $post ) ) {
 			return $post;
 		}
