@@ -1,6 +1,21 @@
 <?php
 /**
- * Class used for Constants,
+ * Manager: Constant Manager Class
+ *
+ * CLass file for constant manager.
+ *
+ * @since 1.0.0
+ * @package Wsal
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Class used for Constants.
+ *
  * E_NOTICE, E_WARNING, E_CRITICAL, etc.
  *
  * @package Wsal
@@ -15,15 +30,22 @@ class WSAL_ConstantManager {
 	protected $_constants = array();
 
 	/**
+	 * Constants Cache.
+	 *
+	 * @var array
+	 */
+	protected $constants_cache = array();
+
+	/**
 	 * Use an existing PHP constant.
 	 *
-	 * @param string $name - Constant name.
+	 * @param string $name        - Constant name.
 	 * @param string $description - Constant description.
 	 */
 	public function UseConstant( $name, $description = '' ) {
 		$this->_constants[] = (object) array(
-			'name' => $name,
-			'value' => constant( $name ),
+			'name'        => $name,
+			'value'       => constant( $name ),
 			'description' => $description,
 		);
 	}
@@ -31,10 +53,11 @@ class WSAL_ConstantManager {
 	/**
 	 * Add new PHP constant.
 	 *
-	 * @param string         $name - Constant name.
-	 * @param integer|string $value - Constant value.
+	 * @param string         $name        - Constant name.
+	 * @param integer|string $value       - Constant value.
 	 * @param string         $description - Constant description.
-	 * @throws string - Error if a constant is already defined.
+	 *
+	 * @throws Exception - Error if a constant is already defined.
 	 */
 	public function AddConstant( $name, $value, $description = '' ) {
 		// Check for constant conflict and define new one if required.
@@ -54,11 +77,7 @@ class WSAL_ConstantManager {
 	 */
 	public function AddConstants( $items ) {
 		foreach ( $items as $item ) {
-			$this->AddConstant(
-				$item['name'],
-				$item['value'],
-				$item['description']
-			);
+			$this->AddConstant( $item['name'], $item['value'], $item['description'] );
 		}
 	}
 
@@ -69,20 +88,19 @@ class WSAL_ConstantManager {
 	 */
 	public function UseConstants( $items ) {
 		foreach ( $items as $item ) {
-			$this->UseConstant(
-				$item['name'],
-				$item['description']
-			);
+			$this->UseConstant( $item['name'], $item['description'] );
 		}
 	}
 
 	/**
 	 * Get constant details by a particular detail.
 	 *
-	 * @param string $what - The type of detail: 'name', 'value'.
-	 * @param mixed  $value - The detail expected value.
+	 * @param string $what    - The type of detail: 'name', 'value'.
+	 * @param mixed  $value   - The detail expected value.
 	 * @param mix    $default - Default value of constant.
-	 * @throws string - Error if detail type is unexpected.
+	 *
+	 * @throws Exception - Error if detail type is unexpected.
+	 *
 	 * @return mixed Either constant details (props: name, value, description) or $default if not found.
 	 */
 	public function GetConstantBy( $what, $value, $default = null ) {
@@ -92,9 +110,16 @@ class WSAL_ConstantManager {
 			if ( ! isset( $this->_constants[0]->$what ) ) {
 				throw new Exception( 'Unexpected detail type "' . $what . '".' );
 			}
+
+			// Check cache.
+			if ( isset( $this->constants_cache[ $value ] ) ) {
+				return $this->constants_cache[ $value ];
+			}
+
 			// Return constant match the property value.
 			foreach ( $this->_constants as $constant ) {
-				if ( $constant->$what == $value ) {
+				if ( $value == $constant->$what ) {
+					$this->constants_cache[ $value ] = $constant;
 					return $constant;
 				}
 			}
