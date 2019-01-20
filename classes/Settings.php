@@ -1480,7 +1480,7 @@ class WSAL_Settings {
 	 * Method: Meta data formater.
 	 *
 	 * @param string  $name      - Name of the data.
-	 * @param mix     $value     - Value of the data.
+	 * @param mixed   $value     - Value of the data.
 	 * @param integer $occ_id    - Event occurrence ID.
 	 * @param mixed   $highlight - Highlight format.
 	 * @return string
@@ -1747,7 +1747,7 @@ class WSAL_Settings {
 	 * @since 3.3
 	 *
 	 * @param string  $name      - Name of the data.
-	 * @param mix     $value     - Value of the data.
+	 * @param mixed   $value     - Value of the data.
 	 * @param integer $occ_id    - Event occurrence ID.
 	 * @param mixed   $highlight - Highlight format.
 	 * @return string

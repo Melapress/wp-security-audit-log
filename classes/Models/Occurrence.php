@@ -273,10 +273,10 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	}
 
 	/**
-	 * Finds occurences of the alert 1003.
+	 * Finds occurrences of the alert 1003.
 	 *
 	 * @param array $args - Query args.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function check_alert_1003( $args = array() ) {
 		return $this->getAdapter()->check_alert_1003( $args );

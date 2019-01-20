@@ -1566,7 +1566,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * Logs given input into debug.log file in debug mode.
 		 *
-		 * @param mix $message - Error message.
+		 * @param mixed $message - Error message.
 		 */
 		public function wsal_log( $message ) {
 			if ( WP_DEBUG === true ) {

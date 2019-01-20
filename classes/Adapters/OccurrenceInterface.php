@@ -45,14 +45,14 @@ interface WSAL_Adapters_OccurrenceInterface {
 	public function GetFirstNamedMeta( $occurrence, $names );
 
 	/**
-	 * Gets occurences of the same type by IP and Username within specified time frame.
+	 * Gets occurrences of the same type by IP and Username within specified time frame.
 	 *
 	 * @param array $args - Arguments.
 	 */
 	public function CheckKnownUsers( $args = array() );
 
 	/**
-	 * Gets occurences of the same type by IP within specified time frame.
+	 * Gets occurrences of the same type by IP within specified time frame.
 	 *
 	 * @param array $args - Arguments.
 	 */

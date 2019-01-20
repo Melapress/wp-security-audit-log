@@ -219,13 +219,13 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	}
 
 	/**
-	 * Gets occurences of the alert 1003.
+	 * Gets occurrences of the alert 1003.
 	 *
 	 * @param array $args - User arguments.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function check_alert_1003( $args = array() ) {
-		return self::LoadMultiQuery(
+		return $this->LoadMultiQuery(
 			'SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence
 			WHERE (occurrence.alert_id = %d)
 			AND (occurrence.site_id = %d)
@@ -291,7 +291,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	}
 
 	/**
-	 * Gets occurences of the same type by IP within specified time frame.
+	 * Gets occurrences of the same type by IP within specified time frame.
 	 *
 	 * @param array $args - Query Arguments.
 	 * @return WSAL_Models_Occurrence[]
