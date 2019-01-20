@@ -52,7 +52,7 @@ class WSAL_Adapters_MySQL_TmpUser extends WSAL_Adapters_MySQL_ActiveRecord {
 	/**
 	 * Must return SQL for creating table.
 	 *
-	 * @param mix $prefix - Prefix.
+	 * @param mixed $prefix - Prefix.
 	 * @return string
 	 */
 	protected function _GetInstallQuery( $prefix = false ) {

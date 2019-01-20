@@ -59,7 +59,7 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord {
 	/**
 	 * Option value.
 	 *
-	 * @var mix
+	 * @var mixed
 	 */
 	public $option_value = '';
 

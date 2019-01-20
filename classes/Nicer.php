@@ -15,7 +15,7 @@ class WSAL_Nicer {
 	/**
 	 * Input string.
 	 *
-	 * @var mix
+	 * @var mixed
 	 */
 	protected $value;
 

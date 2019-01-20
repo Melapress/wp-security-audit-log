@@ -39,17 +39,10 @@ interface WSAL_Adapters_OccurrenceInterface {
 	 * Useful when you have a mix of items that could provide
 	 * a particular detail.
 	 *
-	 * @param object $occurence - Instance of occurence object.
+	 * @param object $occurrence - Instance of occurrence object.
 	 * @param array  $names - List of Meta names.
 	 */
-	public function GetFirstNamedMeta( $occurence, $names );
-
-	/**
-	 * Returns newest unique occurrences.
-	 *
-	 * @param integer $limit - Maximum limit.
-	 */
-	public static function GetNewestUnique( $limit = PHP_INT_MAX );
+	public function GetFirstNamedMeta( $occurrence, $names );
 
 	/**
 	 * Gets occurences of the same type by IP and Username within specified time frame.

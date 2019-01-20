@@ -396,6 +396,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return string - Full path to file.
 	 */
 	protected function GetPostTemplate( $post ) {
+		if ( ! isset( $post->ID ) ) {
+			return '';
+		}
+
 		$id       = $post->ID;
 		$template = get_page_template_slug( $id );
 		$pagename = $post->post_name;
@@ -422,6 +426,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return array - List of categories.
 	 */
 	protected function GetPostCategories( $post ) {
+		if ( ! isset( $post->ID ) ) {
+			return array();
+		}
+
 		return wp_get_post_categories(
 			$post->ID, array(
 				'fields' => 'names',
@@ -436,6 +444,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return array - List of tags.
 	 */
 	protected function get_post_tags( $post ) {
+		if ( ! isset( $post->ID ) ) {
+			return array();
+		}
+
 		return wp_get_post_tags(
 			$post->ID, array(
 				'fields' => 'names',
@@ -1102,16 +1114,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	protected function check_tags_change( $old_tags, $new_tags, $post ) {
 		// Check for added tags.
-		$added_tags = array_diff( $new_tags, $old_tags );
+		$added_tags = array_diff( (array) $new_tags, (array) $old_tags );
 
 		// Check for removed tags.
-		$removed_tags = array_diff( $old_tags, $new_tags );
+		$removed_tags = array_diff( (array) $old_tags, (array) $new_tags );
 
 		// Convert tags arrays to string.
 		$old_tags     = implode( ', ', (array) $old_tags );
 		$new_tags     = implode( ', ', (array) $new_tags );
-		$added_tags   = implode( ', ', (array) $added_tags );
-		$removed_tags = implode( ', ', (array) $removed_tags );
+		$added_tags   = implode( ', ', $added_tags );
+		$removed_tags = implode( ', ', $removed_tags );
 
 		// Declare event variables.
 		$add_event    = '';
