@@ -386,9 +386,13 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	 * @param WP_Post $post        - Product post object.
 	 * @return array  $editor_link - Name and value link.
 	 */
-	private function get_product_editor_link( $post ) {
+	private function get_editor_link( $post ) {
 		// Meta value key.
-		$name = 'EditorLinkProduct';
+		if ( 'shop_order' === $post->post_type ) {
+			$name = 'EditorLinkOrder';
+		} else {
+			$name = 'EditorLinkProduct';
+		}
 
 		// Get editor post link URL.
 		$value = get_edit_post_link( $post->ID );
@@ -433,6 +437,36 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	}
 
 	/**
+	 * Formulate Order Title as done by WooCommerce.
+	 *
+	 * @since 3.3.1
+	 *
+	 * @param int|WC_Order $order - Order id or WC Order object.
+	 * @return string
+	 */
+	private function get_order_title( $order ) {
+		if ( ! $order ) {
+			return false;
+		}
+		if ( is_integer( $order ) ) {
+			$order = new WC_Order( $order );
+		}
+		if ( ! $order instanceof WC_Order ) {
+			return false;
+		}
+
+		if ( $order->get_billing_first_name() || $order->get_billing_last_name() ) {
+			$buyer = trim( sprintf( '%1$s %2$s', $order->get_billing_first_name(), $order->get_billing_last_name() ) );
+		} elseif ( $order->get_billing_company() ) {
+			$buyer = trim( $order->get_billing_company() );
+		} elseif ( $order->get_customer_id() ) {
+			$user  = get_user_by( 'id', $order->get_customer_id() );
+			$buyer = ucwords( $user->display_name );
+		}
+		return '#' . $order->get_order_number() . ' ' . $buyer;
+	}
+
+	/**
 	 * New WooCommerce Order Event.
 	 *
 	 * @since 3.3.1
@@ -450,11 +484,13 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		if ( $new_order && $new_order instanceof WC_Order ) {
 			$order_post  = get_post( $order_id ); // Get order post object.
 			$order_title = ( null !== $order_post && $order_post instanceof WP_Post ) ? $order_post->post_title : false;
+			$editor_link = $this->get_editor_link( $order_post );
 
 			$this->plugin->alerts->Trigger( 9035, array(
-				'OrderID'     => $order_id,
-				'OrderTitle'  => $order_title,
-				'OrderStatus' => $new_order->get_status(),
+				'OrderID'            => $order_id,
+				'OrderTitle'         => $this->get_order_title( $new_order ),
+				'OrderStatus'        => $new_order->get_status(),
+				$editor_link['name'] => $editor_link['value'],
 			) );
 		}
 	}
@@ -462,10 +498,11 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	/**
 	 * Triggered before updating stock quantity on customer order.
 	 *
+	 * @since 3.3.1
+	 *
 	 * @param int           $order_quantity - Order quantity.
 	 * @param WC_Order      $order          - Order object.
 	 * @param WC_Order_Item $item           - Order item object.
-	 *
 	 * @return int - Order quantity.
 	 */
 	public function set_old_stock( $order_quantity, $order, $item ) {
@@ -488,6 +525,8 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 
 	/**
 	 * Triggered when stock of a product is changed.
+	 *
+	 * @since 3.3.1
 	 *
 	 * @param WC_Product $product - WooCommerce product object.
 	 */
@@ -534,8 +573,7 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		$product_title    = $product->get_title(); // Get product title.
 
 		// Set post object.
-		$post     = new stdClass();
-		$post->ID = $product_id;
+		$post = get_post( $product_id );
 
 		// Set username.
 		$username = '';
@@ -547,12 +585,13 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 
 		// If stock status has changed then trigger the alert.
 		if ( ( $old_stock_status && $new_stock_status ) && ( $old_stock_status !== $new_stock_status ) ) {
-			$editor_link = $this->get_product_editor_link( $post );
+			$editor_link = $this->get_editor_link( $post );
 			$this->plugin->alerts->Trigger(
 				9018, array(
 					'ProductTitle'       => $product_title,
-					'OldStatus'          => $this->GetStockStatusName( $old_stock_status ),
-					'NewStatus'          => $this->GetStockStatusName( $new_stock_status ),
+					'ProductStatus'      => $post->post_status,
+					'OldStatus'          => $this->get_stock_status( $old_stock_status ),
+					'NewStatus'          => $this->get_stock_status( $new_stock_status ),
 					'Username'           => $username,
 					$editor_link['name'] => $editor_link['value'],
 				)
@@ -563,16 +602,35 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 
 		// If stock has changed then trigger the alert.
 		if ( ( $old_stock !== $new_stock ) && ( 'on' === $wc_all_stock_changes ) ) {
-			$editor_link = $this->get_product_editor_link( $post );
+			$editor_link = $this->get_editor_link( $post );
 			$this->plugin->alerts->Trigger(
 				9019, array(
 					'ProductTitle'       => $product_title,
+					'ProductStatus'      => $post->post_status,
 					'OldValue'           => ( ! empty( $old_stock ) ? $old_stock : 0 ),
 					'NewValue'           => $new_stock,
 					'Username'           => $username,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
+		}
+	}
+
+	/**
+	 * Get Stock Status Name.
+	 *
+	 * @since 3.3.1
+	 *
+	 * @param string $slug - Stock slug.
+	 * @return string
+	 */
+	private function get_stock_status( $slug ) {
+		if ( 'instock' === $slug ) {
+			return __( 'In stock', 'wp-security-audit-log' );
+		} elseif ( 'outofstock' === $slug ) {
+			return __( 'Out of stock', 'wp-security-audit-log' );
+		} elseif ( 'onbackorder' === $slug ) {
+			return __( 'On backorder', 'wp-security-audit-log' );
 		}
 	}
 }
