@@ -253,30 +253,30 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	}
 
 	/**
-	 * Finds occurences of the same type by IP and Username within specified time frame.
+	 * Finds occurrences of the same type by IP and Username within specified time frame.
 	 *
 	 * @param array $args - Query args.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function CheckKnownUsers( $args = array() ) {
 		return $this->getAdapter()->CheckKnownUsers( $args );
 	}
 
 	/**
-	 * Finds occurences of the same type by IP within specified time frame.
+	 * Finds occurrences of the same type by IP within specified time frame.
 	 *
 	 * @param array $args - Query args.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function CheckUnKnownUsers( $args = array() ) {
 		return $this->getAdapter()->CheckUnKnownUsers( $args );
 	}
 
 	/**
-	 * Finds occurences of the alert 1003.
+	 * Finds occurrences of the alert 1003.
 	 *
 	 * @param array $args - Query args.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function check_alert_1003( $args = array() ) {
 		return $this->getAdapter()->check_alert_1003( $args );
@@ -287,18 +287,18 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 *
 	 * @see WSAL_Adapters_MySQL_Occurrence::GetByPostID()
 	 * @param integer $post_id - Post ID.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function GetByPostID( $post_id ) {
 		return $this->getAdapter()->GetByPostID( $post_id );
 	}
 
 	/**
-	 * Gets occurences of the same type by IP within specified time frame.
+	 * Gets occurrences of the same type by IP within specified time frame.
 	 *
 	 * @see WSAL_Adapters_MySQL_Occurrence::CheckAlert404()
 	 * @param array $args - Query args.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function CheckAlert404( $args = array() ) {
 		return $this->getAdapter()->CheckAlert404( $args );

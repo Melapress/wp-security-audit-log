@@ -67,7 +67,7 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 	/**
 	 * Meta value.
 	 *
-	 * @var mix
+	 * @var mixed
 	 */
 	public $value = array(); // Force mixed type.
 
@@ -117,7 +117,7 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 	 *
 	 * @param string $meta_name - Metadata name.
 	 * @param string $occurence_id - Metadata occurrence_id.
-	 * @return WSAL_Meta[]
+	 * @return WSAL_Models_Meta[]
 	 */
 	public function LoadByNameAndOccurenceId( $meta_name, $occurence_id ) {
 		return $this->Load( 'occurrence_id = %d AND name = %s', array( $occurence_id, $meta_name ) );

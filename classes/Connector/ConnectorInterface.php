@@ -23,6 +23,8 @@ interface WSAL_Connector_ConnectorInterface {
 	 * Gets the adapter.
 	 *
 	 * @param string $class_name - Class name.
+	 *
+	 * @return WSAL_Adapters_ActiveRecordInterface
 	 */
 	public function getAdapter( $class_name );
 

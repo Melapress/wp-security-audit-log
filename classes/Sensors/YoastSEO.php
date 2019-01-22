@@ -119,7 +119,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	 * Method: Get Post SEO Data.
 	 *
 	 * @param string $key – Meta Key.
-	 * @return mix
+	 * @return mixed
 	 */
 	protected function get_post_seo_data( $key = '' ) {
 		// If empty key then return false.
@@ -491,8 +491,8 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	 * Method: Yoast SEO options trigger.
 	 *
 	 * @param string $option – Option name.
-	 * @param mix    $old_value – Option old value.
-	 * @param mix    $new_value – Option new value.
+	 * @param mixed  $old_value – Option old value.
+	 * @param mixed  $new_value – Option new value.
 	 */
 	public function yoast_options_trigger( $option, $old_value, $new_value ) {
 		// Detect the SEO option.
@@ -687,7 +687,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	 * Method: Trigger Yoast Enable/Disable Setting Alerts.
 	 *
 	 * @param string $key – Setting index to alert.
-	 * @param mix    $new_value – Setting new value.
+	 * @param mixed  $new_value – Setting new value.
 	 */
 	private function yoast_setting_switch_alert( $key, $new_value ) {
 		// If key is empty, then return.

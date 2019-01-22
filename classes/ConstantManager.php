@@ -81,7 +81,7 @@ class WSAL_ConstantManager {
 	 *
 	 * @param string $what - The type of detail: 'name', 'value'.
 	 * @param mixed  $value - The detail expected value.
-	 * @param mix    $default - Default value of constant.
+	 * @param mixed  $default - Default value of constant.
 	 * @throws string - Error if detail type is unexpected.
 	 * @return mixed Either constant details (props: name, value, description) or $default if not found.
 	 */

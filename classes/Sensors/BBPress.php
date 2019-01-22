@@ -83,7 +83,7 @@ class WSAL_Sensors_BBPress extends WSAL_AbstractSensor {
 		if ( isset( $post_array['post_ID'] )
 			&& isset( $post_array['_wpnonce'] )
 			&& ! wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
-			return false;
+			return;
 		}
 
 		if ( isset( $post_array ) && isset( $post_array['post_ID'] )

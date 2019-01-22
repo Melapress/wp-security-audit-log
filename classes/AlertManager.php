@@ -165,7 +165,7 @@ final class WSAL_AlertManager {
 	 *
 	 * @param integer $type - Alert type.
 	 * @param array   $data - Alert data.
-	 * @param mix     $delayed - False if delayed, function if not.
+	 * @param mixed   $delayed - False if delayed, function if not.
 	 */
 	public function Trigger( $type, $data = array(), $delayed = false ) {
 		// Get buffer use option.

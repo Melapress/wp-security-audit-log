@@ -62,7 +62,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	/**
 	 * Creates a connection and returns it
 	 *
-	 * @return Instance of WPDB
+	 * @return wpdb Instance of WPDB
 	 */
 	private function createConnection() {
 		if ( ! empty( $this->connectionConfig ) ) {
@@ -105,7 +105,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * Gets an adapter for the specified model.
 	 *
 	 * @param string $class_name - Class name.
-	 * @return WSAL_Adapters_MySQL_{class_name}
+	 * @return WSAL_Adapters_ActiveRecordInterface
 	 */
 	public function getAdapter( $class_name ) {
 		$obj_name = $this->getAdapterClassName( $class_name );
@@ -116,7 +116,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * Gets an adapter class name for the specified model.
 	 *
 	 * @param string $class_name - Class name.
-	 * @return WSAL_Adapters_MySQL_{class_name}
+	 * @return string
 	 */
 	protected function getAdapterClassName( $class_name ) {
 		return 'WSAL_Adapters_MySQL_' . $class_name;

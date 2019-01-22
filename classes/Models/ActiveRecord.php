@@ -142,6 +142,8 @@ abstract class WSAL_Models_ActiveRecord {
 	 * based on the adapter name.
 	 *
 	 * @see WSAL_Connector_ConnectorInterface::getAdapter()
+	 *
+	 * @return WSAL_Adapters_ActiveRecordInterface
 	 */
 	public function getAdapter() {
 		return $this->getConnector()->getAdapter( $this->adapterName );

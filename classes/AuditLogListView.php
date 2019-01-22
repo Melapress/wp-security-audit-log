@@ -547,7 +547,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * Method: Meta data formater.
 	 *
 	 * @param string $name - Name of the data.
-	 * @param mix    $value - Value of the data.
+	 * @param mixed  $value - Value of the data.
 	 * @return string
 	 */
 	public function meta_formatter( $name, $value ) {
@@ -634,7 +634,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return '<a href="javascript:;" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
 
 			case strncmp( $value, 'http://', 7 ) === 0:
-			case strncmp( $value, 'https://', 7 ) === 0:
+			case strncmp( $value, 'https://', 8 ) === 0:
 				return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
 
 			case '%PostStatus%' === $name:

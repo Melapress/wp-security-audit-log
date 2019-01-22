@@ -129,7 +129,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 *
 	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
-	 * @param mix    $meta_value - Meta value.
+	 * @param mixed  $meta_value - Meta value.
 	 */
 	public function EventPostMetaCreated( $object_id, $meta_key, $meta_value ) {
 		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
@@ -222,7 +222,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @param int    $meta_id - Meta ID.
 	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
-	 * @param mix    $meta_value - Meta value.
+	 * @param mixed  $meta_value - Meta value.
 	 */
 	public function EventPostMetaUpdated( $meta_id, $object_id, $meta_key, $meta_value ) {
 		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
@@ -339,7 +339,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @param int    $meta_ids - Meta IDs.
 	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
-	 * @param mix    $meta_value - Meta value.
+	 * @param mixed  $meta_value - Meta value.
 	 */
 	public function EventPostMetaDeleted( $meta_ids, $object_id, $meta_key, $meta_value ) {
 		// If meta key starts with "_" then return.
@@ -439,7 +439,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 *
 	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
-	 * @param mix    $meta_value - Meta value.
+	 * @param mixed  $meta_value - Meta value.
 	 */
 	public function event_user_meta_created( $object_id, $meta_key, $meta_value ) {
 		// Get user.
@@ -502,7 +502,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @param int    $meta_id - Meta ID.
 	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
-	 * @param mix    $meta_value - Meta value.
+	 * @param mixed  $meta_value - Meta value.
 	 */
 	public function event_user_meta_updated( $meta_id, $object_id, $meta_key, $meta_value ) {
 		// Get user.

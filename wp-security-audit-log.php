@@ -106,14 +106,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Licenses manager.
 		 *
-		 * @var WSAL_LicenseManage
+		 * @var WSAL_LicenseManager
 		 */
 		public $licensing;
 
 		/**
 		 * Options.
 		 *
-		 * @var WSAL_DB_Option
+		 * @var WSAL_Models_Option
 		 */
 		public $options;
 
@@ -1480,7 +1480,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Update global option.
 		 *
 		 * @param string $option - Option name.
-		 * @param mix    $value - Option value.
+		 * @param mixed  $value - Option value.
 		 */
 		public function UpdateGlobalOption( $option, $value ) {
 			$this->options = new WSAL_Models_Option();
@@ -1566,7 +1566,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * Logs given input into debug.log file in debug mode.
 		 *
-		 * @param mix $message - Error message.
+		 * @param mixed $message - Error message.
 		 */
 		public function wsal_log( $message ) {
 			if ( WP_DEBUG === true ) {

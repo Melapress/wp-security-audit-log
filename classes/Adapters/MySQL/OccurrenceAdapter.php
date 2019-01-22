@@ -38,7 +38,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	/**
 	 * Meta data.
 	 *
-	 * @var WSAL_Meta
+	 * @var WSAL_Models_Meta
 	 */
 	protected $_meta;
 
@@ -117,7 +117,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 *
 	 * @param object $occurence - Occurrence model instance.
 	 * @see WSAL_Adapters_MySQL_ActiveRecord::Load()
-	 * @return WSAL_Meta
+	 * @return WSAL_Models_Meta
 	 */
 	public function GetMeta( $occurence ) {
 		if ( ! isset( $this->_meta ) ) {
@@ -132,7 +132,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 *
 	 * @param object $occurence - Occurrence model instance.
 	 * @see WSAL_Adapters_MySQL_ActiveRecord::LoadArray()
-	 * @return WSAL_Meta[]
+	 * @return WSAL_Models_Meta[]
 	 */
 	public function GetMultiMeta( $occurence ) {
 		if ( ! isset( $this->_meta ) ) {
@@ -148,7 +148,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 * @param object $occurence - Occurrence model instance.
 	 * @param string $name - Meta name.
 	 * @see WSAL_Adapters_MySQL_ActiveRecord::Load()
-	 * @return WSAL_Meta The meta item, be sure to checked if it was loaded successfully.
+	 * @return WSAL_Models_Meta The meta item, be sure to checked if it was loaded successfully.
 	 */
 	public function GetNamedMeta( $occurence, $name ) {
 		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
@@ -159,53 +159,32 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	/**
 	 * Returns the first meta value from a given set of names. Useful when you have a mix of items that could provide a particular detail.
 	 *
-	 * @param object $occurence - Occurrence model instance.
+	 * @param object $occurrence - Occurrence model instance.
 	 * @param array  $names - List of meta names.
-	 * @return WSAL_Meta The first meta item that exists.
+	 * @return WSAL_Models_Meta The first meta item that exists.
 	 */
-	public function GetFirstNamedMeta( $occurence, $names ) {
+	public function GetFirstNamedMeta( $occurrence, $names ) {
 		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
 		$query = '(' . str_repeat( 'name = %s OR ', count( $names ) ) . '0)';
 		$query = 'occurrence_id = %d AND ' . $query . ' ORDER BY name DESC LIMIT 1';
-		array_unshift( $names, $occurence->id ); // Prepend args with occurrence id.
+		array_unshift( $names, $occurrence->id ); // Prepend args with occurrence id.
 
 				$this->_meta = $meta->Load( $query, $names );
 		return $meta->getModel()->LoadData( $this->_meta );
 
-		// TO DO: Do we want to reintroduce is loaded check/logic?
+		// TODO: Do we want to reintroduce is loaded check/logic?
 		// return $meta->IsLoaded() ? $meta : null;
 	}
 
 	/**
-	 * Returns newest unique occurrences.
-	 *
-	 * @param integer $limit Maximum limit.
-	 * @return WSAL_Occurrence[]
-	 */
-	public static function GetNewestUnique( $limit = PHP_INT_MAX ) {
-		$temp = new self();
-		return self::LoadMultiQuery('
-			SELECT *, COUNT(alert_id) as count
-			FROM (
-				SELECT *
-				FROM ' . $temp->GetTable() . '
-				ORDER BY created_on DESC
-			) AS temp_table
-			GROUP BY alert_id
-			LIMIT %d
-			', array( $limit )
-		);
-	}
-
-	/**
-	 * Gets occurences of the same type by IP and Username within specified time frame.
+	 * Gets occurrences of the same type by IP and Username within specified time frame.
 	 *
 	 * @param array $args - User arguments.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function CheckKnownUsers( $args = array() ) {
 		$tt2 = new WSAL_Adapters_MySQL_Meta( $this->connection );
-		return self::LoadMultiQuery(
+		return $this->LoadMultiQuery(
 			'SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence
 			INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
 			and ipMeta.name = "ClientIP"
@@ -221,14 +200,14 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	}
 
 	/**
-	 * Gets occurences of the same type by IP within specified time frame.
+	 * Gets occurrences of the same type by IP within specified time frame.
 	 *
 	 * @param array $args - User arguments.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function CheckUnKnownUsers( $args = array() ) {
 		$tt2 = new WSAL_Adapters_MySQL_Meta( $this->connection );
-		return self::LoadMultiQuery(
+		return $this->LoadMultiQuery(
 			'SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence
 			INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
 			and ipMeta.name = "ClientIP" and ipMeta.value = %s
@@ -240,13 +219,13 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	}
 
 	/**
-	 * Gets occurences of the alert 1003.
+	 * Gets occurrences of the alert 1003.
 	 *
 	 * @param array $args - User arguments.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function check_alert_1003( $args = array() ) {
-		return self::LoadMultiQuery(
+		return $this->LoadMultiQuery(
 			'SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence
 			WHERE (occurrence.alert_id = %d)
 			AND (occurrence.site_id = %d)
@@ -260,6 +239,8 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 * Add conditions to the Query
 	 *
 	 * @param string $query - Query.
+	 *
+	 * @return string[]
 	 */
 	protected function prepareOccurrenceQuery( $query ) {
 		$search_query_parameters = array();
@@ -294,11 +275,11 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 * Gets occurrence by Post_id.
 	 *
 	 * @param int $post_id - Post ID.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function GetByPostID( $post_id ) {
 		$tt2 = new WSAL_Adapters_MySQL_Meta( $this->connection );
-		return self::LoadMultiQuery(
+		return $this->LoadMultiQuery(
 			'SELECT occurrence.* FROM `' . $this->GetTable() . '`AS occurrence
 			INNER JOIN `' . $tt2->GetTable() . '`AS postMeta ON postMeta.occurrence_id = occurrence.id
 			and postMeta.name = "PostID"
@@ -310,14 +291,14 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	}
 
 	/**
-	 * Gets occurences of the same type by IP within specified time frame.
+	 * Gets occurrences of the same type by IP within specified time frame.
 	 *
 	 * @param array $args - Query Arguments.
-	 * @return WSAL_Occurrence[]
+	 * @return WSAL_Models_Occurrence[]
 	 */
 	public function CheckAlert404( $args = array() ) {
 		$tt2 = new WSAL_Adapters_MySQL_Meta( $this->connection );
-		return self::LoadMultiQuery(
+		return $this->LoadMultiQuery(
 			'SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence
 			INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
 			and ipMeta.name = "ClientIP" and ipMeta.value = %s

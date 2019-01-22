@@ -56,7 +56,7 @@ abstract class WSAL_AbstractSensor {
 	 *
 	 * @param int    $type    - Type of alert.
 	 * @param string $message - Alert message.
-	 * @param mix    $args    - Message arguments.
+	 * @param mixed  $args    - Message arguments.
 	 */
 	protected function Log( $type, $message, $args ) {
 		$this->plugin->alerts->Trigger(
@@ -72,7 +72,7 @@ abstract class WSAL_AbstractSensor {
 	 * Method: Log error message for sensor.
 	 *
 	 * @param string $message - Alert message.
-	 * @param mix    $args    - Message arguments.
+	 * @param mixed  $args    - Message arguments.
 	 */
 	protected function LogError( $message, $args ) {
 		$this->Log( 0001, $message, $args );
@@ -82,7 +82,7 @@ abstract class WSAL_AbstractSensor {
 	 * Method: Log warning message for sensor.
 	 *
 	 * @param string $message - Alert message.
-	 * @param mix    $args    - Message arguments.
+	 * @param mixed  $args    - Message arguments.
 	 */
 	protected function LogWarn( $message, $args ) {
 		$this->Log( 0002, $message, $args );
@@ -92,7 +92,7 @@ abstract class WSAL_AbstractSensor {
 	 * Method: Log info message for sensor.
 	 *
 	 * @param string $message - Alert message.
-	 * @param mix    $args    - Message arguments.
+	 * @param mixed  $args    - Message arguments.
 	 */
 	protected function LogInfo( $message, $args ) {
 		$this->Log( 0003, $message, $args );

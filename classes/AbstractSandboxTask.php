@@ -79,7 +79,7 @@ abstract class WSAL_AbstractSandboxTask {
 	/**
 	 * Method: Show progress.
 	 *
-	 * @param mix $percent - Progress percentage.
+	 * @param mixed $percent - Progress percentage.
 	 */
 	protected function Progress( $percent ) {
 		echo '<script>bar.style.width=prg.innerHTML="' . number_format( $percent, 2 ) . '%";</script>';
