@@ -1546,6 +1546,9 @@ class WSAL_Settings {
 			case '%EditorLinkPost%' == $name:
 				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">post</a>';
 
+			case '%EditorLinkOrder%' == $name:
+				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View Order', 'wp-security-audit-log' ) . '</a>';
+
 			case '%EditorLinkPage%' == $name:
 				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">page</a>';
 
@@ -1602,7 +1605,7 @@ class WSAL_Settings {
 			case strncmp( $value, 'https://', 7 ) === 0:
 				return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
 
-			case '%PostStatus%' === $name:
+			case in_array( $name, array( '%PostStatus%', '%ProductStatus%' ), true ):
 				if ( ! empty( $value ) && 'publish' === $value ) {
 					return $highlight_start_tag . esc_html__( 'published', 'wp-security-audit-log' ) . $highlight_end_tag;
 				} else {
@@ -1798,6 +1801,9 @@ class WSAL_Settings {
 			case '%EditorLinkPost%' === $name:
 				return ' View the <' . esc_url( $value ) . '|post>';
 
+			case '%EditorLinkOrder%' === $name:
+				return ' <' . esc_url( $value ) . '|View Order>';
+
 			case '%EditorLinkPage%' === $name:
 				return ' View the <' . esc_url( $value ) . '|page>';
 
@@ -1851,7 +1857,7 @@ class WSAL_Settings {
 			case strncmp( $value, 'https://', 7 ) === 0:
 				return '<' . esc_html( $value ) . '|' . esc_html( $value ) . '>';
 
-			case '%PostStatus%' === $name:
+			case in_array( $name, array( '%PostStatus%', '%ProductStatus%' ), true ):
 				if ( ! empty( $value ) && 'publish' === $value ) {
 					return '*' . esc_html__( 'published', 'wp-security-audit-log' ) . '*';
 				} else {
