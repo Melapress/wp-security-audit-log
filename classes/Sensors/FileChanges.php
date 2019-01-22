@@ -370,8 +370,10 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					// Check if it exists in already stored array of files, ignore if the key does not exists.
 					if ( array_key_exists( $file, $stored_files_minus_deleted ) ) {
 						// If key exists, then check if the file hash is set and compare it to already stored hash.
-						if ( ! empty( $file_hash )
-						&& 0 !== strcmp( $file_hash, $stored_files_minus_deleted[ $file ] ) ) {
+						if (
+							! empty( $file_hash ) && ! empty( $stored_files_minus_deleted[ $file ] )
+							&& 0 !== strcmp( $file_hash, $stored_files_minus_deleted[ $file ] )
+						) {
 							// If the file hashes don't match then store the file in changed files array.
 							$files_changed[ $file ] = $file_hash;
 						}
