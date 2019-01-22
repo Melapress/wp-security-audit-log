@@ -1602,7 +1602,7 @@ class WSAL_Settings {
 				return '<a href="javascript:;" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
 
 			case strncmp( $value, 'http://', 7 ) === 0:
-			case strncmp( $value, 'https://', 7 ) === 0:
+			case strncmp( $value, 'https://', 8 ) === 0:
 				return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
 
 			case in_array( $name, array( '%PostStatus%', '%ProductStatus%' ), true ):
@@ -1854,7 +1854,7 @@ class WSAL_Settings {
 				return '';
 
 			case strncmp( $value, 'http://', 7 ) === 0:
-			case strncmp( $value, 'https://', 7 ) === 0:
+			case strncmp( $value, 'https://', 8 ) === 0:
 				return '<' . esc_html( $value ) . '|' . esc_html( $value ) . '>';
 
 			case in_array( $name, array( '%PostStatus%', '%ProductStatus%' ), true ):
