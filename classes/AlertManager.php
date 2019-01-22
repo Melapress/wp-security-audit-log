@@ -512,13 +512,21 @@ final class WSAL_AlertManager {
 		$alert_code = $alert_obj ? $alert_obj->code : 0;
 		$severity   = $this->plugin->constants->GetConstantBy( 'value', $alert_code );
 
-		// Add event severity to the meta data of the event.
+		/**
+		 * Events Severity.
+		 *
+		 * Add event severity to the meta data of the event.
+		 * The lower the number, the higher is the severity.
+		 *
+		 * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
+		 * @since 3.3.1
+		 */
 		if ( 'E_CRITICAL' === $severity->name ) {
-			$event_data['Severity'] = 'high';
+			$event_data['Severity'] = 2;
 		} elseif ( 'E_WARNING' === $severity->name ) {
-			$event_data['Severity'] = 'warning';
+			$event_data['Severity'] = 4;
 		} elseif ( 'E_NOTICE' === $severity->name ) {
-			$event_data['Severity'] = 'notice';
+			$event_data['Severity'] = 5;
 		}
 
 		/**
