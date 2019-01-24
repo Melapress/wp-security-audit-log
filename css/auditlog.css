@@ -330,5 +330,10 @@ div.wsal_notice__wrapper p {
 }
 
 .wp-list-table #type {
-	width: 92px;
+	width: 101px;
+}
+
+.wsal-filter-wrap {
+	display: flex;
+	align-items: center;
 }
