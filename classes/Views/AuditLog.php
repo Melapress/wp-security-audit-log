@@ -353,7 +353,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// @codingStandardsIgnoreEnd
 
 		$this->GetListView()->prepare_items();
-		$occ = new WSAL_Models_Occurrence();
 
 		?>
 		<form id="audit-log-viewer" method="get">
@@ -420,7 +419,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 								),
 								'autorefresh' => array(
 									'enabled' => false,
-									'token'   => (int) $occ->Count(),
+									'token'   => $this->GetListView()->get_total_items(),
 								),
 							)
 						);
@@ -443,7 +442,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 								),
 								'autorefresh' => array(
 									'enabled' => $this->_plugin->settings->IsRefreshAlertsEnabled(),
-									'token'   => (int) $occ->Count(),
+									'token'   => $this->GetListView()->get_total_items(),
 								),
 							)
 						);
