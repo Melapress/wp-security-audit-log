@@ -21,11 +21,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 abstract class WSAL_Models_ActiveRecord {
 
-	const STATE_UNKNOWN  = 'unknown';
-	const STATE_CREATED  = 'created';
-	const STATE_UPDATED  = 'updated';
-	const STATE_DELETED  = 'deleted';
-	const STATE_LOADED   = 'loaded';
+	const STATE_UNKNOWN = 'unknown';
+	const STATE_CREATED = 'created';
+	const STATE_UPDATED = 'updated';
+	const STATE_DELETED = 'deleted';
+	const STATE_LOADED  = 'loaded';
 
 	/**
 	 * Data connector
@@ -142,6 +142,8 @@ abstract class WSAL_Models_ActiveRecord {
 	 * based on the adapter name.
 	 *
 	 * @see WSAL_Connector_ConnectorInterface::getAdapter()
+	 *
+	 * @return WSAL_Adapters_ActiveRecordInterface
 	 */
 	public function getAdapter() {
 		return $this->getConnector()->getAdapter( $this->adapterName );
@@ -250,8 +252,7 @@ abstract class WSAL_Models_ActiveRecord {
 	 * @return int count
 	 */
 	public function Count( $cond = '%d', $args = array( 1 ) ) {
-		$result = $this->getAdapter()->Count( $cond, $args );
-		return $result;
+		return (int) $this->getAdapter()->Count( $cond, $args );
 	}
 
 	/**
@@ -260,7 +261,7 @@ abstract class WSAL_Models_ActiveRecord {
 	 * @return bool
 	 */
 	public function IsLoaded() {
-		return self::STATE_LOADED == $this->_state;
+		return self::STATE_LOADED === $this->_state;
 	}
 
 	/**
@@ -269,8 +270,8 @@ abstract class WSAL_Models_ActiveRecord {
 	 * @return bool
 	 */
 	public function IsSaved() {
-		return self::STATE_CREATED == $this->_state
-			|| self::STATE_UPDATED == $this->_state;
+		return self::STATE_CREATED === $this->_state
+			|| self::STATE_UPDATED === $this->_state;
 	}
 
 	/**
@@ -279,7 +280,7 @@ abstract class WSAL_Models_ActiveRecord {
 	 * @return bool
 	 */
 	public function IsCreated() {
-		return self::STATE_CREATED == $this->_state;
+		return self::STATE_CREATED === $this->_state;
 	}
 
 	/**
@@ -288,7 +289,16 @@ abstract class WSAL_Models_ActiveRecord {
 	 * @return bool
 	 */
 	public function IsUpdated() {
-		return self::STATE_UPDATED == $this->_state;
+		return self::STATE_UPDATED === $this->_state;
+	}
+
+	/**
+	 * Check state deleted.
+	 *
+	 * @return bool
+	 */
+	public function IsDeleted() {
+		return self::STATE_DELETED === $this->_state;
 	}
 
 	/**
@@ -308,15 +318,6 @@ abstract class WSAL_Models_ActiveRecord {
 	 */
 	public function Install() {
 		return $this->getAdapter()->Install();
-	}
-
-	/**
-	 * Check state deleted.
-	 *
-	 * @return bool
-	 */
-	public function IsDeleted() {
-		return self::STATE_DELETED == $this->_state;
 	}
 
 	/**
@@ -381,9 +382,6 @@ abstract class WSAL_Models_ActiveRecord {
 	 * @return bool result validation
 	 */
 	private function is_ip_address( $ip_address ) {
-		if ( filter_var( $ip_address, FILTER_VALIDATE_IP ) !== false ) {
-			return true;
-		}
-		return false;
+		return filter_var( $ip_address, FILTER_VALIDATE_IP ) !== false;
 	}
 }

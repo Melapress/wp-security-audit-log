@@ -57,17 +57,25 @@ class WSAL_Models_Option extends WSAL_Models_ActiveRecord {
 	protected $useDefaultAdapter = true;
 
 	/**
+	 * Option Cache.
+	 *
+	 * @var array
+	 */
+	private $option_cache = array();
+
+	/**
 	 * Sets Option record.
 	 *
 	 * @param string $name - Option name.
 	 * @param mixed  $value - Option value.
 	 */
 	public function SetOptionValue( $name, $value ) {
-		$option = $this->getAdapter()->GetNamedOption( $name );
-		$this->id = $option['id'];
+		$option            = $this->getAdapter()->GetNamedOption( $name );
+		$this->id          = $option['id'];
 		$this->option_name = $name;
+
 		// Serialize if $value is array or object.
-		$value = maybe_serialize( $value );
+		$value              = maybe_serialize( $value );
 		$this->option_value = $value;
 		return $this->Save();
 	}
@@ -80,14 +88,23 @@ class WSAL_Models_Option extends WSAL_Models_ActiveRecord {
 	 * @return mixed option value
 	 */
 	public function GetOptionValue( $name, $default = array() ) {
-		$option = $this->getAdapter()->GetNamedOption( $name );
-		$this->option_value = ( ! empty( $option )) ? $option['option_value'] : null;
-		if ( ! empty( $this->option_value ) ) {
-			$this->_state = self::STATE_LOADED;
+		if ( array_key_exists( $name, $this->option_cache ) ) {
+			$this->option_value = ! empty( $this->option_cache[ $name ] ) ? $this->option_cache[ $name ]['option_value'] : null;
+		} else {
+			$option                      = $this->getAdapter()->GetNamedOption( $name );
+			$this->option_cache[ $name ] = $option;
+			$this->option_value          = ( ! empty( $option ) ) ? $option['option_value'] : null;
 		}
+
+		if ( empty( $this->option_value ) ) {
+			// $this->_state = self::STATE_LOADED;
+			$this->option_value = $default;
+		}
+
 		// Unserialize if $value is array or object.
 		$this->option_value = maybe_unserialize( $this->option_value );
-		return $this->IsLoaded() ? $this->option_value : $default;
+		// return $this->IsLoaded() ? $this->option_value : $default;
+		return $this->option_value;
 	}
 
 	/**
@@ -100,10 +117,10 @@ class WSAL_Models_Option extends WSAL_Models_ActiveRecord {
 		$this->_state = self::STATE_UNKNOWN;
 
 		$update_id = $this->getId();
-		$result = $this->getAdapter()->Save( $this );
+		$result    = $this->getAdapter()->Save( $this );
 
 		if ( false !== $result ) {
-			$this->_state = ( ! empty( $update_id )) ? self::STATE_UPDATED : self::STATE_CREATED;
+			$this->_state = ( ! empty( $update_id ) ) ? self::STATE_UPDATED : self::STATE_CREATED;
 		}
 		return $result;
 	}
