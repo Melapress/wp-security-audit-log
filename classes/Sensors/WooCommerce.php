@@ -300,7 +300,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					+ $this->check_backorders_setting( $oldpost )
 					+ $this->check_upsells_change( $oldpost )
 					+ $this->check_cross_sell_change( $oldpost )
-					+ $this->check_attributes_change( $oldpost );
+					+ $this->check_attributes_change( $oldpost )
+					+ $this->check_title_change( $oldpost, $newpost );
 			}
 			if ( ! $changes ) {
 				// Change Permalink.
@@ -654,6 +655,24 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 			// Log the event.
 			$this->plugin->alerts->Trigger( 9071, $coupon_data );
+			return 1;
+		} elseif ( 'product' === $newpost->post_type && $oldpost->post_title !== $newpost->post_title ) {
+			// Get editor link.
+			$editor_link = $this->GetEditorLink( $newpost );
+
+			// Log the event.
+			$this->plugin->alerts->Trigger(
+				9077, array(
+					'PostID'             => $newpost->ID,
+					'PostType'           => $newpost->post_type,
+					'ProductStatus'      => $newpost->post_status,
+					'ProductTitle'       => $newpost->post_title,
+					'OldTitle'           => $oldpost->post_title,
+					'NewTitle'           => $newpost->post_title,
+					'ProductUrl'         => get_permalink( $newpost->ID ),
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
 			return 1;
 		}
 		return 0;
@@ -1999,7 +2018,6 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			'LRD' => '&#36;',
 			'LSL' => 'L',
 			'LYD' => '&#x644;.&#x62f;',
-			'MAD' => '&#x62f;. &#x645;.',
 			'MAD' => '&#x62f;.&#x645;.',
 			'MDL' => 'L',
 			'MGA' => 'Ar',
@@ -2413,6 +2431,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 */
 	private function check_attributes_change( $oldpost, $data = false ) {
 		$post_attributes = get_post_meta( $oldpost->ID, '_product_attributes', true ); // Get post attribute meta.
+		$post_attributes = ! $post_attributes ? array() : $post_attributes;
 
 		if ( ! $data ) {
 			// @codingStandardsIgnoreStart
