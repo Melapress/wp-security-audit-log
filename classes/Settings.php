@@ -30,8 +30,14 @@ class WSAL_Settings {
 	const OPT_DEV_PHP_ERRORS     = 'p';
 	const OPT_DEV_REQUEST_LOG    = 'r';
 	const OPT_DEV_BACKTRACE_LOG  = 'b';
+	const ERROR_CODE_INVALID_IP  = 901;
 
-	const ERROR_CODE_INVALID_IP = 901;
+	/**
+	 * List of Site Admins.
+	 *
+	 * @var array
+	 */
+	private $site_admins = array();
 
 	/**
 	 * Dev Options.
@@ -648,27 +654,32 @@ class WSAL_Settings {
 	 */
 	protected function GetAdmins() {
 		if ( $this->_plugin->IsMultisite() ) {
-			/**
-			 * Get list of admins.
-			 *
-			 * @see https://gist.github.com/1508426/65785a15b8638d43a9905effb59e4d97319ef8f8
-			 */
-			global $wpdb;
-			$cap = $wpdb->prefix . 'capabilities';
-			$sql = "SELECT DISTINCT $wpdb->users.user_login"
-				. " FROM $wpdb->users"
-				. " INNER JOIN $wpdb->usermeta ON ($wpdb->users.ID = $wpdb->usermeta.user_id )"
-				. " WHERE $wpdb->usermeta.meta_key = '$cap'"
-				. " AND CAST($wpdb->usermeta.meta_value AS CHAR) LIKE  '%\"administrator\"%'";
-			return $wpdb->get_col( $sql );
-		} else {
-			$result = array();
-			$query = 'role=administrator&fields[]=user_login';
-			foreach ( get_users( $query ) as $user ) {
-				$result[] = $user->user_login;
+			if ( empty( $this->site_admins ) ) {
+				/**
+				 * Get list of admins.
+				 *
+				 * @see https://gist.github.com/1508426/65785a15b8638d43a9905effb59e4d97319ef8f8
+				 */
+				global $wpdb;
+				$cap = $wpdb->prefix . 'capabilities';
+				$sql = "SELECT DISTINCT $wpdb->users.user_login"
+					. " FROM $wpdb->users"
+					. " INNER JOIN $wpdb->usermeta ON ($wpdb->users.ID = $wpdb->usermeta.user_id )"
+					. " WHERE $wpdb->usermeta.meta_key = '$cap'"
+					. " AND CAST($wpdb->usermeta.meta_value AS CHAR) LIKE  '%\"administrator\"%'";
+
+				// Get admins.
+				$this->site_admins = $wpdb->get_col( $sql );
 			}
-			return $result;
+		} else {
+			if ( empty( $this->site_admins ) ) {
+				$query = 'role=administrator&fields[]=user_login';
+				foreach ( get_users( $query ) as $user ) {
+					$this->site_admins[] = $user->user_login;
+				}
+			}
 		}
+		return $this->site_admins;
 	}
 
 	/**
@@ -1127,7 +1138,7 @@ class WSAL_Settings {
 	}
 
 	public function GetColumnsSelected() {
-		return $this->_plugin->GetGlobalOption( 'columns' );
+		return $this->_plugin->GetGlobalOption( 'columns', array() );
 	}
 
 	public function SetColumns( $columns ) {
@@ -1502,7 +1513,7 @@ class WSAL_Settings {
 	 * Method: Meta data formater.
 	 *
 	 * @param string  $name      - Name of the data.
-	 * @param mix     $value     - Value of the data.
+	 * @param mixed   $value     - Value of the data.
 	 * @param integer $occ_id    - Event occurrence ID.
 	 * @param mixed   $highlight - Highlight format.
 	 * @return string
@@ -1772,7 +1783,7 @@ class WSAL_Settings {
 	 * @since 3.3
 	 *
 	 * @param string  $name      - Name of the data.
-	 * @param mix     $value     - Value of the data.
+	 * @param mixed   $value     - Value of the data.
 	 * @param integer $occ_id    - Event occurrence ID.
 	 * @param mixed   $highlight - Highlight format.
 	 * @return string
