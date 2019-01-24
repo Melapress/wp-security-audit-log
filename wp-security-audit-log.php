@@ -780,9 +780,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 
 			if ( is_admin() ) {
-				$options_table = new WSAL_Models_Option();
-				if ( ! $options_table->IsInstalled() ) {
-					$options_table->Install();
+				$this->options = new WSAL_Models_Option();
+				if ( ! $this->options->IsInstalled() ) {
+					$this->options->Install();
 
 					// Setting the prunig date with the old value or the default value.
 					$pruning_date = $this->settings->GetPruningDate();
@@ -1152,8 +1152,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @param array $data - Table prefix.
 		 */
 		public function SetOptions( $data ) {
-			foreach ( $data as $key => $option ) {
+			if ( empty( $this->options ) ) {
 				$this->options = new WSAL_Models_Option();
+			}
+			foreach ( $data as $key => $option ) {
 				if ( $this->IsMultisite() ) {
 					$this->options->SetOptionValue( $option['meta_key'], $option['meta_value'] );
 				} else {
@@ -1287,13 +1289,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Get a global option.
 		 *
-		 * @param string $option - Option name.
+		 * @param string $option  - Option name.
 		 * @param mixed  $default - (Optional) Value returned when option is not set (defaults to false).
-		 * @param string $prefix - (Optional) A prefix used before option name.
+		 * @param string $prefix  - (Optional) A prefix used before option name.
 		 * @return mixed - Option's value or $default if option not set.
 		 */
 		public function GetGlobalOption( $option, $default = false, $prefix = self::OPT_PRFX ) {
-			$this->options = new WSAL_Models_Option();
+			if ( empty( $this->options ) ) {
+				$this->options = new WSAL_Models_Option();
+			}
 			return $this->options->GetOptionValue( $prefix . $option, $default );
 		}
 
@@ -1301,11 +1305,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Set a global option.
 		 *
 		 * @param string $option - Option name.
-		 * @param mixed  $value - New value for option.
+		 * @param mixed  $value  - New value for option.
 		 * @param string $prefix - (Optional) A prefix used before option name.
 		 */
 		public function SetGlobalOption( $option, $value, $prefix = self::OPT_PRFX ) {
-			$this->options = new WSAL_Models_Option();
+			if ( empty( $this->options ) ) {
+				$this->options = new WSAL_Models_Option();
+			}
 			$this->options->SetOptionValue( $prefix . $option, $value );
 
 			// Delete options transient.
