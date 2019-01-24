@@ -390,6 +390,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return string - Full path to file.
 	 */
 	protected function GetPostTemplate( $post ) {
+		if ( ! isset( $post->ID ) ) {
+			return '';
+		}
+
 		$id       = $post->ID;
 		$template = get_page_template_slug( $id );
 		$pagename = $post->post_name;
@@ -416,6 +420,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return array - List of categories.
 	 */
 	protected function GetPostCategories( $post ) {
+		if ( ! isset( $post->ID ) ) {
+			return array();
+		}
+
 		return wp_get_post_categories(
 			$post->ID, array(
 				'fields' => 'names',
@@ -430,6 +438,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return array - List of tags.
 	 */
 	protected function get_post_tags( $post ) {
+		if ( ! isset( $post->ID ) ) {
+			return array();
+		}
+
 		return wp_get_post_tags(
 			$post->ID, array(
 				'fields' => 'names',
@@ -459,9 +471,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			return;
 		}
 
-		// Check if Yoast SEO is active.
+		// Check if Yoast SEO is active; only on websites with WordPress version greater than 5.0.
 		$is_yoast = is_plugin_active( 'wordpress-seo/wp-seo.php' ) || is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' );
-		if ( $is_yoast && ! isset( $_POST['classic-editor'] ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.0.0', '>' ) && $is_yoast && ! isset( $_POST['classic-editor'] ) ) {
 			return;
 		}
 
@@ -1096,16 +1108,16 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	protected function check_tags_change( $old_tags, $new_tags, $post ) {
 		// Check for added tags.
-		$added_tags = array_diff( $new_tags, $old_tags );
+		$added_tags = array_diff( (array) $new_tags, (array) $old_tags );
 
 		// Check for removed tags.
-		$removed_tags = array_diff( $old_tags, $new_tags );
+		$removed_tags = array_diff( (array) $old_tags, (array) $new_tags );
 
 		// Convert tags arrays to string.
 		$old_tags     = implode( ', ', (array) $old_tags );
 		$new_tags     = implode( ', ', (array) $new_tags );
-		$added_tags   = implode( ', ', (array) $added_tags );
-		$removed_tags = implode( ', ', (array) $removed_tags );
+		$added_tags   = implode( ', ', $added_tags );
+		$removed_tags = implode( ', ', $removed_tags );
 
 		// Declare event variables.
 		$add_event    = '';
@@ -1897,18 +1909,18 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param stdClass $newpost - New post.
 	 */
 	private function CheckTitleChange( $oldpost, $newpost ) {
-		if ( $oldpost->post_title != $newpost->post_title ) {
+		if ( $oldpost->post_title !== $newpost->post_title ) {
 			$editor_link = $this->GetEditorLink( $oldpost );
 			$this->plugin->alerts->Trigger(
 				2086, array(
-					'PostID' => $newpost->ID,
-					'PostType' => $newpost->post_type,
-					'PostTitle' => $newpost->post_title,
-					'PostStatus' => $newpost->post_status,
-					'PostDate' => $newpost->post_date,
-					'PostUrl' => get_permalink( $newpost->ID ),
-					'OldTitle' => $oldpost->post_title,
-					'NewTitle' => $newpost->post_title,
+					'PostID'             => $newpost->ID,
+					'PostType'           => $newpost->post_type,
+					'PostTitle'          => $newpost->post_title,
+					'PostStatus'         => $newpost->post_status,
+					'PostDate'           => $newpost->post_date,
+					'PostUrl'            => get_permalink( $newpost->ID ),
+					'OldTitle'           => $oldpost->post_title,
+					'NewTitle'           => $newpost->post_title,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
