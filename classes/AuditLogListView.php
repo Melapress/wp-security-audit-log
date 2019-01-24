@@ -561,6 +561,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @param string $name - Name of the data.
 	 * @param mix    $value - Value of the data.
 	 * @return string
+	 * @deprecated 3.3
 	 */
 	public function meta_formatter( $name, $value ) {
 		switch ( true ) {
@@ -912,7 +913,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$class[] = $desc_first ? 'asc' : 'desc';
 				}
 
-				$column_display_name = '<a href="' . esc_url( add_query_arg( compact( 'orderby', 'order' ), $current_url ) ) . '"><span>' . $column_display_name . '</span><span class="sorting-indicator"></span></a>';
+				$column_display_name = '<a class="wsal-column-name" href="' . esc_url( add_query_arg( compact( 'orderby', 'order' ), $current_url ) ) . '"><span>' . $column_display_name . '</span><span class="sorting-indicator"></span></a>';
 			}
 
 			$tag   = ( 'cb' === $column_key ) ? 'td' : 'th';
@@ -924,8 +925,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			}
 
 			echo "<$tag $scope $id $class>";
-
-			echo $column_display_name;
+			echo '<div class="wsal-filter-wrap">';
 
 			if ( $with_id ) {
 				/**
@@ -939,6 +939,8 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				do_action( 'wsal_audit_log_column_header', $column_key );
 			}
 
+			echo $column_display_name;
+			echo '</div>';
 			echo "</$tag>";
 		}
 	}
