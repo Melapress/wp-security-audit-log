@@ -1,6 +1,21 @@
 <?php
 /**
+ * Manager: Alert Manager Class
+ *
+ * CLass file for alert manager.
+ *
+ * @since 1.0.0
+ * @package Wsal
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
  * WSAL_AlertManager class.
+ *
  * It is the actual trigger for the alerts.
  *
  * @package Wsal
@@ -68,6 +83,13 @@ final class WSAL_AlertManager {
 	private $wp_users = array();
 
 	/**
+	 * Ignored Custom Post Types.
+	 *
+	 * @var array
+	 */
+	public $ignored_cpts = array();
+
+	/**
 	 * Create new AlertManager instance.
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
@@ -91,6 +113,28 @@ final class WSAL_AlertManager {
 		 * @param array $deprecated_events - Array of deprecated event ids.
 		 */
 		$this->deprecated_events = apply_filters( 'wsal_deprecated_event_ids', array( 2004, 2005, 2006, 2007, 2009, 2013, 2015, 2018, 2020, 2022, 2026, 2028, 2059, 2060, 2061, 2064, 2066, 2069, 2075, 2087, 2102, 2103, 2113, 2114, 2115, 2116, 2117, 2118, 5020, 5026, 2107, 2003, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037, 2038, 2039, 2040, 2041, 2056, 2057, 2058, 2063, 2067, 2068, 2070, 2072, 2076, 2088, 2104, 2105, 5021, 5027, 2108 ) );
+
+		/**
+		 * Filter: `wsal_ignored_custom_post_types`
+		 *
+		 * Ignored custom post types filter.
+		 *
+		 * @since 3.3.1
+		 *
+		 * @param array $ignored_cpts - Array of custom post types.
+		 */
+		$this->ignored_cpts = apply_filters(
+			'wsal_ignored_custom_post_types',
+			array(
+				'attachment',          // Attachment CPT.
+				'revision',            // Revision CPT.
+				'nav_menu_item',       // Nav menu item CPT.
+				'customize_changeset', // Customize changeset CPT.
+				'custom_css',          // Custom CSS CPT.
+				'shop_order',          // WooCommerce Order CPT.
+				'shop_order_refund',   // WooCommerce Order Refund CPT.
+			)
+		);
 	}
 
 	/**
@@ -420,36 +464,36 @@ final class WSAL_AlertManager {
 	 * Converts an Alert into a Log entry (by invoking loggers).
 	 * You should not call this method directly.
 	 *
-	 * @param integer $type - Alert type.
-	 * @param array   $data - Misc alert data.
+	 * @param integer $event_id   - Alert type.
+	 * @param array   $event_data - Misc alert data.
 	 */
-	protected function Log( $type, $data = array() ) {
-		if ( ! isset( $data['ClientIP'] ) ) {
+	protected function Log( $event_id, $event_data = array() ) {
+		if ( ! isset( $event_data['ClientIP'] ) ) {
 			$client_ip = $this->plugin->settings->GetMainClientIP();
 			if ( ! empty( $client_ip ) ) {
-				$data['ClientIP'] = $client_ip;
+				$event_data['ClientIP'] = $client_ip;
 			}
 		}
-		if ( ! isset( $data['OtherIPs'] ) && $this->plugin->settings->IsMainIPFromProxy() ) {
+		if ( ! isset( $event_data['OtherIPs'] ) && $this->plugin->settings->IsMainIPFromProxy() ) {
 			$other_ips = $this->plugin->settings->GetClientIPs();
 			if ( ! empty( $other_ips ) ) {
-				$data['OtherIPs'] = $other_ips;
+				$event_data['OtherIPs'] = $other_ips;
 			}
 		}
-		if ( ! isset( $data['UserAgent'] ) ) {
+		if ( ! isset( $event_data['UserAgent'] ) ) {
 			if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
-				$data['UserAgent'] = $_SERVER['HTTP_USER_AGENT'];
+				$event_data['UserAgent'] = $_SERVER['HTTP_USER_AGENT'];
 			}
 		}
-		if ( ! isset( $data['Username'] ) && ! isset( $data['CurrentUserID'] ) ) {
+		if ( ! isset( $event_data['Username'] ) && ! isset( $event_data['CurrentUserID'] ) ) {
 			if ( function_exists( 'get_current_user_id' ) ) {
-				$data['CurrentUserID'] = get_current_user_id();
+				$event_data['CurrentUserID'] = get_current_user_id();
 			}
 		}
-		if ( ! isset( $data['CurrentUserRoles'] ) && function_exists( 'is_user_logged_in' ) && is_user_logged_in() ) {
+		if ( ! isset( $event_data['CurrentUserRoles'] ) && function_exists( 'is_user_logged_in' ) && is_user_logged_in() ) {
 			$current_user_roles = $this->plugin->settings->GetCurrentUserRoles();
 			if ( ! empty( $current_user_roles ) ) {
-				$data['CurrentUserRoles'] = $current_user_roles;
+				$event_data['CurrentUserRoles'] = $current_user_roles;
 			}
 		}
 		// Check if the user management plugin is loaded and adds the SessionID.
@@ -458,13 +502,59 @@ final class WSAL_AlertManager {
 				$session_tokens = get_user_meta( get_current_user_id(), 'session_tokens', true );
 				if ( ! empty( $session_tokens ) ) {
 					end( $session_tokens );
-					$data['SessionID'] = key( $session_tokens );
+					$event_data['SessionID'] = key( $session_tokens );
 				}
 			}
 		}
 
+		// Get event severity.
+		$alert_obj  = $this->GetAlert( $event_id );
+		$alert_code = $alert_obj ? $alert_obj->code : 0;
+		$severity   = $this->plugin->constants->GetConstantBy( 'value', $alert_code );
+
+		/**
+		 * Events Severity.
+		 *
+		 * Add event severity to the meta data of the event.
+		 * The lower the number, the higher is the severity.
+		 *
+		 * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
+		 * @since 3.3.1
+		 */
+		if ( 'E_CRITICAL' === $severity->name ) {
+			$event_data['Severity'] = 2;
+		} elseif ( 'E_WARNING' === $severity->name ) {
+			$event_data['Severity'] = 4;
+		} elseif ( 'E_NOTICE' === $severity->name ) {
+			$event_data['Severity'] = 5;
+		}
+
+		/**
+		 * WSAL Filter: `wsal_event_id_before_log`
+		 *
+		 * Filters event id before logging it to the database.
+		 *
+		 * @since 3.3.1
+		 *
+		 * @param integer $event_id   - Event ID.
+		 * @param array   $event_data - Event data.
+		 */
+		$event_id = apply_filters( 'wsal_event_id_before_log', $event_id, $event_data );
+
+		/**
+		 * WSAL Filter: `wsal_event_data_before_log`
+		 *
+		 * Filters event data before logging it to the database.
+		 *
+		 * @since 3.3.1
+		 *
+		 * @param array   $event_data - Event data.
+		 * @param integer $event_id   - Event ID.
+		 */
+		$event_data = apply_filters( 'wsal_event_data_before_log', $event_data, $event_id );
+
 		foreach ( $this->_loggers as $logger ) {
-			$logger->Log( $type, $data );
+			$logger->Log( $event_id, $event_data );
 		}
 	}
 

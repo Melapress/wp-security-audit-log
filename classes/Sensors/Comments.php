@@ -193,7 +193,9 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
 			);
 
-			$this->plugin->alerts->Trigger( $alert_code, $fields );
+			if ( 'shop_order' !== $post->post_type ) {
+				$this->plugin->alerts->Trigger( $alert_code, $fields );
+			}
 		}
 	}
 

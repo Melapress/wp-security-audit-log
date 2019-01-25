@@ -49,6 +49,20 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	private $current_alert_id = 0;
 
 	/**
+	 * Selected Columns.
+	 *
+	 * @var array()
+	 */
+	private $selected_columns = '';
+
+	/**
+	 * Display Name Type.
+	 *
+	 * @var string
+	 */
+	private $name_type = '';
+
+	/**
 	 * Method: Constructor.
 	 *
 	 * @param object $plugin - Instance of WpSecurityAuditLog.
@@ -245,10 +259,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 */
 	public function get_columns() {
 		// Get user information from settings.
-		$type_name = $this->_plugin->settings->get_type_username();
-		if ( 'display_name' === $type_name || 'first_last_name' === $type_name ) {
+		if ( empty( $this->name_type ) ) {
+			$this->name_type = $this->_plugin->settings->get_type_username();
+		}
+		if ( 'display_name' === $this->name_type || 'first_last_name' === $this->name_type ) {
 			$name_column = __( 'User', 'wp-security-audit-log' );
-		} elseif ( 'username' === $type_name ) {
+		} elseif ( 'username' === $this->name_type ) {
 			$name_column = __( 'Username', 'wp-security-audit-log' );
 		}
 
@@ -269,13 +285,15 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		$cols['mesg'] = __( 'Message', 'wp-security-audit-log' );
 
 		// Get selected columns from settings.
-		$sel_columns = $this->_plugin->settings->GetColumnsSelected();
+		if ( empty( $this->selected_columns ) && ! is_array( $this->selected_columns ) ) {
+			$this->selected_columns = $this->_plugin->settings->GetColumnsSelected();
+		}
 
 		// If selected columns are not empty, then unset default columns.
-		if ( ! empty( $sel_columns ) ) {
+		if ( ! empty( $this->selected_columns ) ) {
 			unset( $cols );
-			$sel_columns = (array) json_decode( $sel_columns );
-			foreach ( $sel_columns as $key => $value ) {
+			$this->selected_columns = (array) json_decode( $this->selected_columns );
+			foreach ( $this->selected_columns as $key => $value ) {
 				switch ( $key ) {
 					case 'alert_code':
 						$cols['type'] = __( 'Event ID', 'wp-security-audit-log' );
@@ -394,9 +412,11 @@ class WSAL_AuditLogListView extends WP_List_Table {
 						)
 					) : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 			case 'user':
-				$username  = $item->GetUsername(); // Get username.
-				$type_name = $this->_plugin->settings->get_type_username(); // Get the data to display.
-				$user      = get_user_by( 'login', $username ); // Get user.
+				$username = $item->GetUsername(); // Get username.
+				$user     = get_user_by( 'login', $username ); // Get user.
+				if ( empty( $this->name_type ) ) {
+					$this->name_type = $this->_plugin->settings->get_type_username();
+				}
 
 				// Check if the username and user exists.
 				if ( $username && $user ) {
@@ -404,10 +424,10 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$image = get_avatar( $user->ID, 32 );
 
 					// Checks for display name.
-					if ( 'display_name' === $type_name && ! empty( $user->display_name ) ) {
+					if ( 'display_name' === $this->name_type && ! empty( $user->display_name ) ) {
 						$display_name = $user->display_name;
 					} elseif (
-						'first_last_name' === $type_name
+						'first_last_name' === $this->name_type
 						&& ( ! empty( $user->first_name ) || ! empty( $user->last_name ) )
 					) {
 						$display_name = $user->first_name . ' ' . $user->last_name;
@@ -450,7 +470,19 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$uhtml = '<i>' . __( 'System', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
 				}
-				return $image . $uhtml . '<br/>' . $roles;
+				$row_user_data = $image . $uhtml . '<br/>' . $roles;
+
+				/**
+				 * WSAL Filter: `wsal_auditlog_row_user_data`
+				 *
+				 * Filters user data before displaying on the audit log.
+				 *
+				 * @since 3.3.1
+				 *
+				 * @param string  $row_user_data          - User data to display in audit log row.
+				 * @param integer $this->current_alert_id - Event database ID.
+				 */
+				return apply_filters( 'wsal_auditlog_row_user_data', $row_user_data, $this->current_alert_id );
 			case 'scip':
 				$scip = $item->GetSourceIP();
 				if ( is_string( $scip ) ) {
@@ -549,6 +581,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @param string $name - Name of the data.
 	 * @param mixed  $value - Value of the data.
 	 * @return string
+	 * @deprecated 3.3
 	 */
 	public function meta_formatter( $name, $value ) {
 		switch ( true ) {
@@ -900,7 +933,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$class[] = $desc_first ? 'asc' : 'desc';
 				}
 
-				$column_display_name = '<a href="' . esc_url( add_query_arg( compact( 'orderby', 'order' ), $current_url ) ) . '"><span>' . $column_display_name . '</span><span class="sorting-indicator"></span></a>';
+				$column_display_name = '<a class="wsal-column-name" href="' . esc_url( add_query_arg( compact( 'orderby', 'order' ), $current_url ) ) . '"><span>' . $column_display_name . '</span><span class="sorting-indicator"></span></a>';
 			}
 
 			$tag   = ( 'cb' === $column_key ) ? 'td' : 'th';
@@ -912,8 +945,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			}
 
 			echo "<$tag $scope $id $class>";
-
-			echo $column_display_name;
+			echo '<div class="wsal-filter-wrap">';
 
 			if ( $with_id ) {
 				/**
@@ -927,7 +959,18 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				do_action( 'wsal_audit_log_column_header', $column_key );
 			}
 
+			echo $column_display_name;
+			echo '</div>';
 			echo "</$tag>";
 		}
+	}
+
+	/**
+	 * Returns total events in the Audit Log.
+	 *
+	 * @return int
+	 */
+	public function get_total_items() {
+		return $this->_pagination_args['total_items'];
 	}
 }

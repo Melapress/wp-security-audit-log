@@ -4,7 +4,7 @@
  * Plugin URI: http://www.wpsecurityauditlog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 3.3.0.2
+ * Version: 3.3.1
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -54,7 +54,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '3.3.0.2';
+		public $version = '3.3.1';
 
 		// Plugin constants.
 		const PLG_CLS_PRFX    = 'WSAL_';
@@ -243,8 +243,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Listen for cleanup event.
 			add_action( 'wsal_cleanup', array( $this, 'CleanUp' ) );
 
-			// Render wsal header.
-			// add_action( 'admin_enqueue_scripts', array( $this, 'render_header' ) );
+			// Plugin Deactivation Actions.
+			register_deactivation_hook( __FILE__, array( $this, 'deactivate_actions' ) );
 
 			// Render wsal footer.
 			add_action( 'admin_footer', array( $this, 'render_footer' ) );
@@ -632,11 +632,20 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
-		 * Render plugin stuff in page header.
+		 * Plugin Deactivation Actions.
 		 *
-		 * @internal
+		 * This function runs on plugin deactivation to send
+		 * deactivation email.
+		 *
+		 * @since 3.3.1
 		 */
-		public function render_header() {}
+		public function deactivate_actions() {
+			// Send deactivation email.
+			if ( class_exists( 'WSAL_Utilities_Emailer' ) ) {
+				// Get email template.
+				WSAL_Utilities_Emailer::send_deactivation_email();
+			}
+		}
 
 		/**
 		 * Disable Custom Field through ajax.
@@ -731,14 +740,17 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$this->settings = new WSAL_Settings( $this );
 			}
 
+			// Check if plugin is premium and live events are enabled.
+			$is_premium          = wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' );
+			$live_events_enabled = $is_premium && $this->settings->is_admin_bar_notif() && 'real-time' === $this->settings->get_admin_bar_notif_updates();
+
 			// Set data array for common script.
-			$occurrence  = new WSAL_Models_Occurrence();
-			$is_premium  = wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' );
 			$script_data = array(
 				'ajaxURL'    => admin_url( 'admin-ajax.php' ),
-				'liveEvents' => $is_premium && $this->settings->is_admin_bar_notif(),
+				'liveEvents' => $live_events_enabled,
 			);
-			if ( $is_premium && $this->settings->is_admin_bar_notif() ) {
+			if ( $live_events_enabled ) {
+				$occurrence                 = new WSAL_Models_Occurrence();
 				$script_data['eventsCount'] = (int) $occurrence->Count();
 				$script_data['commonNonce'] = wp_create_nonce( 'wsal-common-js-nonce' );
 			}
@@ -768,9 +780,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 
 			if ( is_admin() ) {
-				$options_table = new WSAL_Models_Option();
-				if ( ! $options_table->IsInstalled() ) {
-					$options_table->Install();
+				$this->options = new WSAL_Models_Option();
+				if ( ! $this->options->IsInstalled() ) {
+					$this->options->Install();
 
 					// Setting the prunig date with the old value or the default value.
 					$pruning_date = $this->settings->GetPruningDate();
@@ -798,7 +810,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Install all assets required for a useable system.
 		 */
 		public function Install() {
-			if ( version_compare( PHP_VERSION, self::MIN_PHP_VERSION ) < 0 ) {
+			if ( version_compare( PHP_VERSION, self::MIN_PHP_VERSION ) < 0 ) :
 				?>
 				<html>
 					<head>
@@ -809,10 +821,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					<body>
 						<div class="warn-wrap">
 							<div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div>
-							<?php
-							/* Translators: PHP Version */
-							echo sprintf( esc_html__( 'You are using a version of PHP that is older than %s, which is no longer supported.', 'wp-security-audit-log' ), self::MIN_PHP_VERSION );
-							?>
+							<?php /* Translators: %s: PHP Version */ echo sprintf( esc_html__( 'You are using a version of PHP that is older than %s, which is no longer supported.', 'wp-security-audit-log' ), esc_html( self::MIN_PHP_VERSION ) ); ?>
 							<br />
 							<?php echo wp_kses( __( 'Contact us on <a href="mailto:plugins@wpwhitesecurity.com">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using.', 'wp-security-audit-log' ), $this->allowed_html_tags ); ?>
 						</div>
@@ -820,7 +829,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				</html>
 				<?php
 				die( 1 );
-			}
+			endif;
 
 			// Set the settings object temporarily.
 			if ( empty( $this->settings ) ) {
@@ -828,9 +837,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 
 			// Ensure that the system is installed and schema is correct.
-			self::getConnector()->installAll();
-
 			$pre_installed = $this->IsInstalled();
+			self::getConnector()->installAll();
 
 			// If system already installed, do updates now (if any).
 			$old_version = $this->GetOldVersion();
@@ -885,6 +893,30 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Run on each install to check MainWP Child plugin.
 			$this->settings->set_mainwp_child_stealth_mode();
+
+			// If plugin tables have not installed correctly then don't activate the plugin.
+			if ( ! $this->IsInstalled() ) :
+				?>
+				<html>
+					<head>
+						<style>
+							.warn-icon-tri{top:5px;left:5px;position:absolute;border-left:16px solid #FFF;border-right:16px solid #FFF;border-bottom:28px solid #C33;height:3px;width:4px}.warn-icon-chr{top:8px;left:18px;position:absolute;color:#FFF;font:26px Georgia}.warn-icon-cir{top:2px;left:0;position:absolute;overflow:hidden;border:6px solid #FFF;border-radius:32px;width:34px;height:34px}.warn-wrap{position:relative;color:#A00;font:14px Arial;padding:6px 48px}.warn-wrap a,.warn-wrap a:hover{color:#F56}
+						</style>
+					</head>
+					<body>
+						<div class="warn-wrap">
+							<div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div>
+							<?php esc_html_e( 'This plugin uses 3 tables in the WordPress database to store the activity log and settings. It seems that these tables were not created.', 'wp-security-audit-log' ); ?>
+							<br />
+							<?php esc_html_e( 'This could happen because the database user does not have the right privileges to create the tables in the database. We recommend you to update the privileges and try enabling the plugin again.', 'wp-security-audit-log' ); ?>
+							<br />
+							<?php /* Translators: %s: Support Hyperlink */ echo sprintf( esc_html__( 'If after doing so you still have issues, please send us an email on %s for assistance.', 'wp-security-audit-log' ), '<a href="mailto:support@wpsecurityauditlog.com" target="_blank">' . esc_html__( 'support@wpsecurityauditlog.com', 'wp-security-audit-log' ) . '</a>' ); ?>
+						</div>
+					</body>
+				</html>
+				<?php
+				die( 1 );
+			endif;
 		}
 
 		/**
@@ -1120,8 +1152,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @param array $data - Table prefix.
 		 */
 		public function SetOptions( $data ) {
-			foreach ( $data as $key => $option ) {
+			if ( empty( $this->options ) ) {
 				$this->options = new WSAL_Models_Option();
+			}
+			foreach ( $data as $key => $option ) {
 				if ( $this->IsMultisite() ) {
 					$this->options->SetOptionValue( $option['meta_key'], $option['meta_value'] );
 				} else {
@@ -1255,13 +1289,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Get a global option.
 		 *
-		 * @param string $option - Option name.
+		 * @param string $option  - Option name.
 		 * @param mixed  $default - (Optional) Value returned when option is not set (defaults to false).
-		 * @param string $prefix - (Optional) A prefix used before option name.
+		 * @param string $prefix  - (Optional) A prefix used before option name.
 		 * @return mixed - Option's value or $default if option not set.
 		 */
 		public function GetGlobalOption( $option, $default = false, $prefix = self::OPT_PRFX ) {
-			$this->options = new WSAL_Models_Option();
+			if ( empty( $this->options ) ) {
+				$this->options = new WSAL_Models_Option();
+			}
 			return $this->options->GetOptionValue( $prefix . $option, $default );
 		}
 
@@ -1269,11 +1305,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Set a global option.
 		 *
 		 * @param string $option - Option name.
-		 * @param mixed  $value - New value for option.
+		 * @param mixed  $value  - New value for option.
 		 * @param string $prefix - (Optional) A prefix used before option name.
 		 */
 		public function SetGlobalOption( $option, $value, $prefix = self::OPT_PRFX ) {
-			$this->options = new WSAL_Models_Option();
+			if ( empty( $this->options ) ) {
+				$this->options = new WSAL_Models_Option();
+			}
 			$this->options->SetOptionValue( $prefix . $option, $value );
 
 			// Delete options transient.

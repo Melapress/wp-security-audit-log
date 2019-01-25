@@ -160,7 +160,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 			'scan_day'            => $this->plugin->GetGlobalOption( 'scan-day', '1' ),
 			'scan_date'           => $this->plugin->GetGlobalOption( 'scan-date', '10' ),
 			'scan_directories'    => $this->plugin->GetGlobalOption( 'scan-directories', $default_scan_dirs ),
-			'excluded_dirs'       => $this->plugin->GetGlobalOption( 'scan-excluded-directories', array() ),
+			'excluded_dirs'       => $this->plugin->GetGlobalOption( 'scan-excluded-directories', array( trailingslashit( WP_CONTENT_DIR ) . 'cache' ) ),
 			'excluded_extensions' => $this->plugin->GetGlobalOption( 'scan-excluded-extensions', array( 'jpg', 'jpeg', 'png', 'bmp', 'pdf', 'txt', 'log', 'mo', 'po', 'mp3', 'wav', 'gif', 'ico', 'jpe', 'psd', 'raw', 'svg', 'tif', 'tiff', 'aif', 'flac', 'm4a', 'oga', 'ogg', 'ra', 'wma', 'asf', 'avi', 'mkv', 'mov', 'mp4', 'mpe', 'mpeg', 'mpg', 'ogv', 'qt', 'rm', 'vob', 'webm', 'wm', 'wmv' ) ),
 			'excluded_files'      => $this->plugin->GetGlobalOption( 'scan_excluded_files', array() ),
 			'last_scanned'        => $this->plugin->GetGlobalOption( 'last-scanned', false ),
@@ -370,8 +370,10 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					// Check if it exists in already stored array of files, ignore if the key does not exists.
 					if ( array_key_exists( $file, $stored_files_minus_deleted ) ) {
 						// If key exists, then check if the file hash is set and compare it to already stored hash.
-						if ( ! empty( $file_hash )
-						&& 0 !== strcmp( $file_hash, $stored_files_minus_deleted[ $file ] ) ) {
+						if (
+							! empty( $file_hash ) && ! empty( $stored_files_minus_deleted[ $file ] )
+							&& 0 !== strcmp( $file_hash, $stored_files_minus_deleted[ $file ] )
+						) {
 							// If the file hashes don't match then store the file in changed files array.
 							$files_changed[ $file ] = $file_hash;
 						}
