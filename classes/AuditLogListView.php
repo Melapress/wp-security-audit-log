@@ -27,7 +27,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	/**
 	 * Instance of WpSecurityAuditLog.
 	 *
-	 * @var object
+	 * @var WpSecurityAuditLog
 	 */
 	protected $_plugin;
 
@@ -51,6 +51,8 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	/**
 	 * Selected Columns.
 	 *
+	 * @since 3.3.1
+	 *
 	 * @var array()
 	 */
 	private $selected_columns = '';
@@ -58,19 +60,31 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	/**
 	 * Display Name Type.
 	 *
+	 * @since 3.3.1
+	 *
 	 * @var string
 	 */
 	private $name_type = '';
 
 	/**
+	 * Events Query Arguments.
+	 *
+	 * @since 3.3.1.1
+	 *
+	 * @var stdClass
+	 */
+	private $query_args;
+
+	/**
 	 * Method: Constructor.
 	 *
-	 * @param object $plugin - Instance of WpSecurityAuditLog.
+	 * @param object   $plugin     - Instance of WpSecurityAuditLog.
+	 * @param stdClass $query_args - Events query arguments.
 	 */
-	public function __construct( $plugin ) {
-		$this->_plugin = $plugin;
-
-		$timezone = $this->_plugin->settings->GetTimezone();
+	public function __construct( $plugin, $query_args ) {
+		$this->_plugin    = $plugin;
+		$this->query_args = $query_args;
+		$timezone         = $this->_plugin->settings->GetTimezone();
 
 		/**
 		 * Transform timezone values.
@@ -145,73 +159,86 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 */
 	public function extra_tablenav( $which ) {
 		// If the position is not top then render.
-		if ( 'top' !== $which ) :
+		if ( 'top' !== $which && ! $this->_plugin->settings->is_infinite_scroll() ) :
 			// Items-per-page widget.
 			$p     = $this->_plugin->settings->GetViewPerPage();
 			$items = array( 5, 10, 15, 30, 50 );
-			if ( ! in_array( $p, $items ) ) {
+			if ( ! in_array( $p, $items, true ) ) {
 				$items[] = $p;
 			}
 			?>
 			<div class="wsal-ipp wsal-ipp-<?php echo esc_attr( $which ); ?>">
 				<?php esc_html_e( 'Show ', 'wp-security-audit-log' ); ?>
 				<select class="wsal-ipps" onfocus="WsalIppsFocus(value);" onchange="WsalIppsChange(value);">
-					<?php foreach ( $items as $item ) { ?>
-						<option
-							value="<?php echo is_string( $item ) ? '' : esc_attr( $item ); ?>"
-							<?php echo ( $item == $p ) ? 'selected="selected"' : false; ?>>
+					<?php foreach ( $items as $item ) : ?>
+						<option value="<?php echo is_string( $item ) ? '' : esc_attr( $item ); ?>" <?php echo ( $item === $p ) ? 'selected="selected"' : false; ?>>
 							<?php echo esc_html( $item ); ?>
 						</option>
-					<?php } ?>
+					<?php endforeach; ?>
 				</select>
 				<?php esc_html_e( ' Items', 'wp-security-audit-log' ); ?>
 			</div>
 			<?php
 		endif;
 
+		if ( 'top' !== $which && $this->_plugin->settings->is_infinite_scroll() ) :
+			?>
+			<div id="wsal-event-loader"><div class="wsal-lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
+			<?php
+		endif;
+
 		// Show site alerts widget.
 		if ( $this->is_multisite() && $this->is_main_blog() ) {
-			$curr = $this->get_view_site_id();
-			?>
-			<div class="wsal-ssa wsal-ssa-<?php echo esc_attr( $which ); ?>">
-				<?php if ( $this->get_site_count() > 15 ) { ?>
-					<?php $curr = $curr ? get_blog_details( $curr ) : null; ?>
-					<?php $curr = $curr ? ( $curr->blogname . ' (' . $curr->domain . ')' ) : 'All Sites'; ?>
-					<input type="text" class="wsal-ssas" value="<?php echo esc_attr( $curr ); ?>"/>
-				<?php } else { ?>
-					<select class="wsal-ssas" onchange="WsalSsasChange(value);">
-						<option value="0"><?php esc_html_e( 'All Sites', 'wp-security-audit-log' ); ?></option>
-						<?php foreach ( $this->get_sites() as $info ) { ?>
-							<option value="<?php echo esc_attr( $info->blog_id ); ?>"
-								<?php echo ( $info->blog_id == $curr ) ? 'selected="selected"' : false; ?>>
-								<?php echo esc_html( $info->blogname ) . ' (' . esc_html( $info->domain ) . ')'; ?>
-							</option>
-						<?php } ?>
-					</select>
-				<?php } ?>
-			</div>
-			<?php
+			if (
+				( 'top' === $which && $this->_plugin->settings->is_infinite_scroll() )
+				|| ! $this->_plugin->settings->is_infinite_scroll()
+			) {
+				$curr = $this->get_view_site_id();
+				?>
+				<div class="wsal-ssa wsal-ssa-<?php echo esc_attr( $which ); ?>">
+					<?php if ( $this->get_site_count() > 15 ) : ?>
+						<?php $curr = $curr ? get_blog_details( $curr ) : null; ?>
+						<?php $curr = $curr ? ( $curr->blogname . ' (' . $curr->domain . ')' ) : 'All Sites'; ?>
+						<input type="text" class="wsal-ssas" value="<?php echo esc_attr( $curr ); ?>"/>
+					<?php else : ?>
+						<select class="wsal-ssas" onchange="WsalSsasChange(value);">
+							<option value="0"><?php esc_html_e( 'All Sites', 'wp-security-audit-log' ); ?></option>
+							<?php foreach ( $this->get_sites() as $info ) : ?>
+								<option value="<?php echo esc_attr( $info->blog_id ); ?>" <?php echo ( $info->blog_id == $curr ) ? 'selected="selected"' : false; ?>>
+									<?php echo esc_html( $info->blogname ) . ' (' . esc_html( $info->domain ) . ')'; ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					<?php endif; ?>
+				</div>
+				<?php
+			}
 		}
 
 		// Switch to live or archive DB.
 		if ( $this->_plugin->settings->IsArchivingEnabled() ) {
-			$selected    = 'live';
-			$selected_db = get_transient( 'wsal_wp_selected_db' );
-			if ( $selected_db && 'archive' == $selected_db ) {
-				$selected = 'archive';
+			if (
+				( 'top' === $which && $this->_plugin->settings->is_infinite_scroll() )
+				|| ! $this->_plugin->settings->is_infinite_scroll()
+			) {
+				$selected    = 'live';
+				$selected_db = get_transient( 'wsal_wp_selected_db' );
+				if ( $selected_db && 'archive' === $selected_db ) {
+					$selected = 'archive';
+				}
+				?>
+				<div class="wsal-ssa wsal-db">
+					<select class="wsal-db" onchange="WsalDBChange(value);">
+						<option value="live" <?php echo ( 'live' == $selected ) ? 'selected="selected"' : false; ?>>
+							<?php esc_html_e( 'Live Database', 'wp-security-audit-log' ); ?>
+						</option>
+						<option value="archive" <?php echo ( 'archive' == $selected ) ? 'selected="selected"' : false; ?>>
+							<?php esc_html_e( 'Archive Database', 'wp-security-audit-log' ); ?>
+						</option>
+					</select>
+				</div>
+				<?php
 			}
-			?>
-			<div class="wsal-ssa wsal-db">
-				<select class="wsal-db" onchange="WsalDBChange(value);">
-					<option value="live" <?php echo ( 'live' == $selected ) ? 'selected="selected"' : false; ?>>
-						<?php esc_html_e( 'Live Database', 'wp-security-audit-log' ); ?>
-					</option>
-					<option value="archive" <?php echo ( 'archive' == $selected ) ? 'selected="selected"' : false; ?>>
-						<?php esc_html_e( 'Archive Database', 'wp-security-audit-log' ); ?>
-					</option>
-				</select>
-			</div>
-			<?php
 		}
 	}
 
@@ -292,7 +319,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		// If selected columns are not empty, then unset default columns.
 		if ( ! empty( $this->selected_columns ) ) {
 			unset( $cols );
-			$this->selected_columns = (array) json_decode( $this->selected_columns );
+			$this->selected_columns = is_string( $this->selected_columns ) ? (array) json_decode( $this->selected_columns ) : $this->selected_columns;
 			foreach ( $this->selected_columns as $key => $value ) {
 				switch ( $key ) {
 					case 'alert_code':
@@ -579,7 +606,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * Method: Meta data formater.
 	 *
 	 * @param string $name - Name of the data.
-	 * @param mixed  $value - Value of the data.
+	 * @param mix    $value - Value of the data.
 	 * @return string
 	 * @deprecated 3.3
 	 */
@@ -667,7 +694,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return '<a href="javascript:;" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
 
 			case strncmp( $value, 'http://', 7 ) === 0:
-			case strncmp( $value, 'https://', 8 ) === 0:
+			case strncmp( $value, 'https://', 7 ) === 0:
 				return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
 
 			case '%PostStatus%' === $name:
@@ -731,10 +758,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @return bool
 	 */
 	protected function is_specific_view() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
-
-		return isset( $get_array['wsal-cbid'] ) && '0' != $get_array['wsal-cbid'];
+		return isset( $this->query_args->site_id ) && '0' != $this->query_args->site_id;
 	}
 
 	/**
@@ -743,10 +767,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @return int
 	 */
 	protected function get_specific_view() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
-
-		return isset( $get_array['wsal-cbid'] ) ? (int) $get_array['wsal-cbid'] : 0;
+		return isset( $this->query_args->site_id ) ? (int) $this->query_args->site_id : 0;
 	}
 
 	/**
@@ -772,85 +793,28 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	}
 
 	/**
-	 * Method: Prepare items.
+	 * Set Events for Audit Log Viewer.
 	 */
 	public function prepare_items() {
-		if ( $this->_plugin->settings->IsArchivingEnabled() ) {
-			// Switch to Archive DB.
-			$selected_db = get_transient( 'wsal_wp_selected_db' );
-			if ( $selected_db && 'archive' == $selected_db ) {
-				$this->_plugin->settings->SwitchToArchiveDB();
-			}
-		}
-
-		$per_page = $this->_plugin->settings->GetViewPerPage();
-
-		$columns  = $this->get_columns();
-		$hidden   = array();
-		$sortable = $this->get_sortable_columns();
-
+		$columns               = $this->get_columns();
+		$hidden                = array();
+		$sortable              = $this->get_sortable_columns();
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
-		// $this->process_bulk_action();
-		// TO DO: Get rid of OccurrenceQuery and use the Occurence Model.
-		$query = new WSAL_Models_OccurrenceQuery();
+		$query_events = $this->query_events();
+		$this->items  = isset( $query_events['items'] ) ? $query_events['items'] : false;
+		$total_items  = isset( $query_events['total_items'] ) ? $query_events['total_items'] : false;
+		$per_page     = isset( $query_events['per_page'] ) ? $query_events['per_page'] : false;
 
-		$bid = (int) $this->get_view_site_id();
-		if ( $bid ) {
-			$query->addCondition( 'site_id = %s ', $bid );
+		if ( ! $this->_plugin->settings->is_infinite_scroll() ) {
+			$this->set_pagination_args(
+				array(
+					'total_items' => $total_items,
+					'per_page'    => $per_page,
+					'total_pages' => ceil( $total_items / $per_page ),
+				)
+			);
 		}
-
-		$query = apply_filters( 'wsal_auditlog_query', $query );
-
-		$total_items = $query->getAdapter()->Count( $query );
-
-		// Filter $_GET and $_POST arrays for security.
-		$get_array = filter_input_array( INPUT_GET );
-
-		if ( empty( $get_array['orderby'] ) ) {
-			$query->addOrderBy( 'created_on', true );
-		} else {
-			$order_by_field = $get_array['orderby'];
-
-			$is_descending = true;
-			if ( ! empty( $get_array['order'] ) && 'asc' == $get_array['order'] ) {
-				$is_descending = false;
-			}
-
-			// TO DO: Allow order by meta values.
-			if ( 'scip' == $order_by_field ) {
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'ClientIP' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "ClientIP" THEN meta.value END', $is_descending );
-			} elseif ( 'user' == $order_by_field ) {
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'CurrentUserID' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "CurrentUserID" THEN meta.value END', $is_descending );
-			} else {
-				$tmp = new WSAL_Models_Occurrence();
-				// Making sure the field exists to order by.
-				if ( isset( $tmp->{$order_by_field} ) ) {
-					// TODO: We used to use a custom comparator ... is it safe to let MySQL do the ordering now?.
-					$query->addOrderBy( $get_array['orderby'], $is_descending );
-
-				} else {
-					$query->addOrderBy( 'created_on', true );
-				}
-			}
-		}
-
-		$query->setOffset( ( $this->get_pagenum() - 1 ) * $per_page );
-		$query->setLimit( $per_page );
-
-		$this->items = $query->getAdapter()->Execute( $query );
-
-		$this->set_pagination_args(
-			array(
-				'total_items' => $total_items,
-				'per_page'    => $per_page,
-				'total_pages' => ceil( $total_items / $per_page ),
-			)
-		);
 	}
 
 	/**
@@ -859,7 +823,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @param object $item - Item.
 	 */
 	public function single_row( $item ) {
-		if ( 9999 == $item->alert_id ) {
+		if ( 9999 === $item->alert_id ) {
 			echo '<tr style="background-color: #D5E46E">';
 			$this->single_row_columns( $item );
 			echo '</tr>';
@@ -882,15 +846,14 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		$current_url = set_url_scheme( esc_url_raw( wp_unslash( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ) ) );
 		$current_url = remove_query_arg( 'paged', $current_url );
 
-		// Get $_GET global array.
-		$get_array = filter_input_array( INPUT_GET );
-		if ( isset( $get_array['orderby'] ) ) {
-			$current_orderby = sanitize_text_field( $get_array['orderby'] );
+		// Set order by query arg.
+		if ( isset( $this->query_args->order_by ) ) {
+			$current_orderby = $this->query_args->order_by;
 		} else {
 			$current_orderby = '';
 		}
 
-		if ( isset( $get_array['order'] ) && 'desc' === $get_array['order'] ) {
+		if ( isset( $this->query_args->order ) && 'desc' === $this->query_args->order ) {
 			$current_order = 'desc';
 		} else {
 			$current_order = 'asc';
@@ -898,7 +861,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 		if ( ! empty( $columns['cb'] ) ) {
 			static $cb_counter = 1;
-			$columns['cb'] = '<label class="screen-reader-text" for="cb-select-all-' . $cb_counter . '">' . __( 'Select All' ) . '</label>'
+			$columns['cb']     = '<label class="screen-reader-text" for="cb-select-all-' . $cb_counter . '">' . __( 'Select All' ) . '</label>'
 				. '<input id="cb-select-all-' . $cb_counter . '" type="checkbox" />';
 			$cb_counter++;
 		}
@@ -971,6 +934,94 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @return int
 	 */
 	public function get_total_items() {
-		return $this->_pagination_args['total_items'];
+		return isset( $this->_pagination_args['total_items'] ) ? $this->_pagination_args['total_items'] : false;
+	}
+
+	/**
+	 * Query Events from WSAL DB.
+	 *
+	 * @since 3.3.1.1
+	 *
+	 * @param integer $paged - Page number.
+	 * @return array
+	 */
+	public function query_events( $paged = 0 ) {
+		if ( $this->_plugin->settings->IsArchivingEnabled() ) {
+			// Switch to Archive DB.
+			$selected_db = get_transient( 'wsal_wp_selected_db' );
+			if ( $selected_db && 'archive' === $selected_db ) {
+				$this->_plugin->settings->SwitchToArchiveDB();
+			}
+		}
+
+		// TO DO: Get rid of OccurrenceQuery and use the Occurence Model.
+		$query = new WSAL_Models_OccurrenceQuery();
+
+		$bid = (int) $this->query_args->site_id;
+		if ( $bid ) {
+			$query->addCondition( 'site_id = %s ', $bid );
+		}
+
+		/**
+		 * Hook: `wsal_auditlog_query`
+		 *
+		 * This hook is used to filter events query object.
+		 * It is used to support search by filters.
+		 *
+		 * @see WSAL_SearchExtension()->__construct()
+		 * @param WSAL_Models_OccurrenceQuery $query - Audit log events query object.
+		 */
+		$query = apply_filters( 'wsal_auditlog_query', $query );
+
+		if ( ! $this->_plugin->settings->is_infinite_scroll() ) {
+			$total_items = $query->getAdapter()->Count( $query );
+			$per_page    = $this->_plugin->settings->GetViewPerPage();
+			$offset      = ( $this->get_pagenum() - 1 ) * $per_page;
+		} else {
+			$total_items = false;
+			$per_page    = 25; // Manually set per page events for infinite scroll.
+			$offset      = ( max( 1, $paged ) - 1 ) * $per_page;
+		}
+
+		// Set query order arguments.
+		$order_by = isset( $this->query_args->order_by ) ? $this->query_args->order_by : false;
+		$order    = isset( $this->query_args->order ) ? $this->query_args->order : false;
+
+		if ( ! $order_by ) {
+			$query->addOrderBy( 'created_on', true );
+		} else {
+			$is_descending = true;
+			if ( $order && 'asc' === $order ) {
+				$is_descending = false;
+			}
+
+			// TO DO: Allow order by meta values.
+			if ( 'scip' === $order_by ) {
+				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
+				$query->addCondition( 'meta.name = %s', 'ClientIP' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
+				$query->addOrderBy( 'CASE WHEN meta.name = "ClientIP" THEN meta.value END', $is_descending );
+			} elseif ( 'user' === $order_by ) {
+				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
+				$query->addCondition( 'meta.name = %s', 'CurrentUserID' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
+				$query->addOrderBy( 'CASE WHEN meta.name = "CurrentUserID" THEN meta.value END', $is_descending );
+			} else {
+				$tmp = new WSAL_Models_Occurrence();
+				// Making sure the field exists to order by.
+				if ( isset( $tmp->{$order_by} ) ) {
+					// TODO: We used to use a custom comparator ... is it safe to let MySQL do the ordering now?.
+					$query->addOrderBy( $order_by, $is_descending );
+				} else {
+					$query->addOrderBy( 'created_on', true );
+				}
+			}
+		}
+
+		$query->setOffset( $offset );  // Set query offset.
+		$query->setLimit( $per_page ); // Set number of events per page.
+		return array(
+			'total_items' => $total_items,
+			'per_page'    => $per_page,
+			'items'       => $query->getAdapter()->Execute( $query ),
+		);
 	}
 }
