@@ -51,6 +51,7 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 				'slug'            => 'wp-security-audit-log',
 				'type'            => 'plugin',
 				'public_key'      => 'pk_d602740d3088272d75906045af9fa',
+				'premium_suffix'  => '(Premium)',
 				'is_premium'      => $is_premium,
 				'has_addons'      => false,
 				'has_paid_plans'  => true,
