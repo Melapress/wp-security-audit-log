@@ -133,7 +133,8 @@ jQuery( document ).ready( function() {
 		jQuery( '#wsal_remove_exception_dir' ),
 		jQuery( '#wsal_files input[type=checkbox]' ),
 		jQuery( '#wsal_files_types input[type=checkbox]' ),
-		jQuery( '#wsal_dirs input[type=checkbox]' )
+		jQuery( '#wsal_dirs input[type=checkbox]' ),
+		jQuery( '#wsal-scan-now' )
 	];
 
 	// Update settings of file changes on page load.
@@ -370,7 +371,7 @@ jQuery( document ).ready( function() {
 		// Change button text.
 		var scan_btn = jQuery( this );
 		scan_btn.attr( 'disabled', 'disabled' );
-		scan_btn.text( wsal_data.scanInProgress );
+		scan_btn.val( wsal_data.scanInProgress );
 
 		// Stop scan button.
 		var stop_scan_btn = jQuery( '#wsal-stop-scan' );
@@ -394,11 +395,11 @@ jQuery( document ).ready( function() {
 				if ( data.success ) {
 
 					// Change button text.
-					scan_btn.text( wsal_data.scanNow );
+					scan_btn.val( wsal_data.scanNow );
 					scan_btn.removeAttr( 'disabled' );
 					stop_scan_btn.attr( 'disabled', 'disabled' );
 				} else {
-					scan_btn.text( wsal_data.scanFailed );
+					scan_btn.val( wsal_data.scanFailed );
 					console.log( data.message );
 				}
 			},
