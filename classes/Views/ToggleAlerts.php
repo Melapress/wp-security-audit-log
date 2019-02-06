@@ -485,7 +485,20 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												/>
 											</th>
 											<td><?php echo esc_html( str_pad( $alert->type, 4, '0', STR_PAD_LEFT ) ); ?></td>
-											<td><?php echo esc_html( $this->_plugin->constants->GetConstantBy( 'value', $alert->code )->name ); ?></td>
+											<td>
+												<?php
+												$severity_obj = $this->_plugin->constants->GetConstantBy( 'value', $alert->code );
+												if ( 'E_CRITICAL' === $severity_obj->name ) {
+													esc_html_e( 'Critical', 'wp-security-audit-log' );
+												} elseif ( 'E_WARNING' === $severity_obj->name ) {
+													esc_html_e( 'Warning', 'wp-security-audit-log' );
+												} elseif ( 'E_NOTICE' === $severity_obj->name ) {
+													esc_html_e( 'Notification', 'wp-security-audit-log' );
+												} else {
+													esc_html_e( 'Notification', 'wp-security-audit-log' );
+												}
+												?>
+											</td>
 											<td><?php echo esc_html( $alert->desc ); ?></td>
 										</tr>
 										<?php
