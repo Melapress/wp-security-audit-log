@@ -2144,13 +2144,29 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		$order_title = ( null !== $order_post && $order_post instanceof WP_Post ) ? $order_post->post_title : false;
 		$order_post  = get_post( $order_id );
 		$edit_link   = $this->GetEditorLink( $order_post );
-
-		$this->plugin->alerts->Trigger( 9036, array(
+		$event_data  = array(
 			'OrderID'          => $order_id,
 			'OrderTitle'       => $this->get_order_title( $order ),
 			'OrderStatus'      => $status_to,
 			$edit_link['name'] => $edit_link['value'],
-		) );
+		);
+		$this->plugin->alerts->TriggerIf( 9036, $event_data, array( $this, 'must_not_contain_refund' ) );
+	}
+
+	/**
+	 * Checks if event 9041 has triggered or if it will
+	 * trigger.
+	 *
+	 * @since 3.3.1.1
+	 *
+	 * @param WSAL_AlertManager $manager - Alert manager instance.
+	 * @return boolean
+	 */
+	public function must_not_contain_refund( WSAL_AlertManager $manager ) {
+		if ( $manager->WillOrHasTriggered( 9041 ) ) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -2170,13 +2186,16 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		// Get editor link.
 		$edit_link = $this->GetEditorLink( $oldorder );
 
-		// Log event.
-		$this->plugin->alerts->Trigger( 9040, array(
+		// Set event data.
+		$event_data = array(
 			'OrderID'          => $order_id,
 			'OrderTitle'       => $this->get_order_title( $order_id ),
 			'OrderStatus'      => $neworder->post_status,
 			$edit_link['name'] => $edit_link['value'],
-		) );
+		);
+
+		// Log event.
+		$this->plugin->alerts->TriggerIf( 9040, $event_data, array( $this, 'must_not_contain_refund' ) );
 	}
 
 	/**
