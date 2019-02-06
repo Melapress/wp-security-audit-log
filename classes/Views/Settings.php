@@ -442,6 +442,40 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		?>
 		<p class="description"><?php echo wp_kses( __( 'Need help with setting up the plugin to meet your requirements? <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">Schedule a 20 minutes consultation and setup call</a> with our experts for just $50.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
 
+		<h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
+		<p class="description">
+			<?php
+			echo sprintf(
+				/* translators: Learn more link. */
+				esc_html__( 'When using infinite scroll the event viewer and search results %s load up much faster and require less resources.', 'wp-security-audit-log' ),
+				'<a href="https://www.wpsecurityauditlog.com/premium-features/search-filters-wordpress-activity-log/" target="_blank">' . esc_html__( '(Premium feature)', 'wp-security-audit-log' ) . '</a>'
+			);
+			?>
+		</p>
+		<table class="form-table wsal-tab">
+			<tbody>
+				<tr>
+					<th><label for="infinite-scroll"><?php esc_html_e( 'Select event viewer view type:', 'wp-security-audit-log' ); ?></label></th>
+					<td>
+						<fieldset>
+							<label for="infinite-scroll">
+								<input type="radio" name="events-type-nav" value="infinite-scroll" id="infinite-scroll" <?php checked( $this->_plugin->settings->get_events_type_nav(), 'infinite-scroll' ); ?> />
+								<?php esc_html_e( 'Infinite Scroll (Recommended)', 'wp-security-audit-log' ); ?>
+							</label>
+							<br/>
+							<label for="pagination">
+								<input type="radio" name="events-type-nav" value="pagination" id="pagination" <?php checked( $this->_plugin->settings->get_events_type_nav(), 'pagination' ); ?> />
+								<?php esc_html_e( 'Pagination', 'wp-security-audit-log' ); ?>
+							</label>
+							<br />
+						</fieldset>
+					</td>
+				</tr>
+				<!-- / Reverse Proxy / Firewall Options -->
+			</tbody>
+		</table>
+		<!-- Reverse Proxy -->
+
 		<h3><?php esc_html_e( 'Display latest events widget in Dashboard & Admin bar', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
 			<?php
@@ -801,6 +835,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Get $_POST global array.
 		$post_array = filter_input_array( INPUT_POST );
 
+		$this->_plugin->settings->set_events_type_nav( sanitize_text_field( $post_array['events-type-nav'] ) );
 		$this->_plugin->settings->set_use_email( sanitize_text_field( $post_array['use-email'] ) );
 		$this->_plugin->settings->SetFromEmail( sanitize_email( $post_array['FromEmail'] ) );
 		$this->_plugin->settings->SetDisplayName( sanitize_text_field( $post_array['DisplayName'] ) );
@@ -1553,21 +1588,16 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<td>
 						<input type="hidden" id="wsal-scan-now-nonce" name="wsal_scan_now_nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-scan-now' ) ); ?>" />
 						<input type="hidden" id="wsal-stop-scan-nonce" name="wsal_stop_scan_nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-stop-scan' ) ); ?>" />
-						<?php if ( ! $this->scan_settings['scan_in_progress'] ) : ?>
-							<a href="javascript:;" class="button button-primary" id="wsal-scan-now">
-								<?php esc_attr_e( 'Scan Now', 'wp-security-audit-log' ); ?>
-							</a>
-							<a href="javascript:;" class="button button-secondary" id="wsal-stop-scan" disabled>
-								<?php esc_attr_e( 'Stop Scan', 'wp-security-audit-log' ); ?>
-							</a>
-						<?php else : ?>
-							<a href="javascript:;" class="button button-primary" id="wsal-scan-now" disabled>
-								<?php esc_attr_e( 'Scan in Progress', 'wp-security-audit-log' ); ?>
-							</a>
-							<a href="javascript:;" class="button button-ui-primary" id="wsal-stop-scan">
-								<?php esc_attr_e( 'Stop Scan', 'wp-security-audit-log' ); ?>
-							</a>
+						<?php if ( 'enable' === $this->scan_settings['scan_file_changes'] && ! $this->scan_settings['scan_in_progress'] ) : ?>
+							<input type="button" class="button button-primary" id="wsal-scan-now" value="<?php esc_attr_e( 'Scan Now', 'wp-security-audit-log' ); ?>">
+							<input type="button" class="button button-secondary" id="wsal-stop-scan" value="<?php esc_attr_e( 'Stop Scan', 'wp-security-audit-log' ); ?>" disabled>
+						<?php elseif ( 'enable' === $this->scan_settings['scan_file_changes'] && $this->scan_settings['scan_in_progress'] ) : ?>
+							<input type="button" class="button button-primary" id="wsal-scan-now" value="<?php esc_attr_e( 'Scan in Progress', 'wp-security-audit-log' ); ?>" disabled>
+							<input type="button" class="button button-ui-primary" id="wsal-stop-scan" value="<?php esc_attr_e( 'Stop Scan', 'wp-security-audit-log' ); ?>">
 							<!-- Scan in progress -->
+						<?php else : ?>
+							<input type="button" class="button button-primary" id="wsal-scan-now" value="<?php esc_attr_e( 'Scan Now', 'wp-security-audit-log' ); ?>" disabled>
+							<input type="button" class="button button-secondary" id="wsal-stop-scan" value="<?php esc_attr_e( 'Stop Scan', 'wp-security-audit-log' ); ?>" disabled>
 						<?php endif; ?>
 					</td>
 				</tr>
