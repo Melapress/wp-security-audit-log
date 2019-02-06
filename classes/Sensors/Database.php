@@ -45,8 +45,9 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 * @param WP_Query $query - Query object.
 	 */
 	public function EventDropQuery( $query ) {
+		global $wpdb;
 		$table_names = array();
-		$str = explode( ' ', $query );
+		$str         = explode( ' ', $query );
 
 		if ( preg_match( '|DROP TABLE ([^ ]*)|', $query ) ) {
 			if ( ! empty( $str[4] ) ) {
@@ -55,15 +56,25 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 				array_push( $table_names, $str[2] );
 			}
 
-			// Filter $_SERVER array for security.
-			$server_array = filter_input_array( INPUT_SERVER );
-
-			$actype = ( isset( $server_array['SCRIPT_NAME'] ) ) ? basename( $server_array['SCRIPT_NAME'], '.php' ) : false;
+			$actype        = isset( $_SERVER['SCRIPT_NAME'] ) ? basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ), '.php' ) : false;
 			$alert_options = $this->GetActionType( $actype );
+			$type_query    = 'delete';
+		} elseif ( preg_match( '|CREATE TABLE IF NOT EXISTS ([^ ]*)|', $query ) ) {
+			if ( $str[5] !== $wpdb->get_var( "SHOW TABLES LIKE '" . $str[5] . "'" ) ) {
+				/**
+				 * Some plugins keep trying to create tables even
+				 * when they already exist- would result in too
+				 * many alerts.
+				 */
+				array_push( $table_names, $str[5] );
+				$actype        = isset( $_SERVER['SCRIPT_NAME'] ) ? basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ), '.php' ) : false;
+				$alert_options = $this->GetActionType( $actype );
+				$type_query    = 'create';
+			}
 		}
 
 		if ( ! empty( $table_names ) ) {
-			$event_code = $this->GetEventQueryType( $actype, 'delete' );
+			$event_code                  = $this->GetEventQueryType( $actype, $type_query );
 			$alert_options['TableNames'] = implode( ',', $table_names );
 			$this->plugin->alerts->Trigger( $event_code, $alert_options );
 		}
@@ -106,21 +117,17 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		}
 
 		if ( ! empty( $type_queries['create'] ) || ! empty( $type_queries['update'] ) || ! empty( $type_queries['delete'] ) ) {
-			// Filter $_SERVER array for security.
-			$server_array = filter_input_array( INPUT_SERVER );
-
-			$actype = ( isset( $server_array['SCRIPT_NAME'] ) ) ? basename( $server_array['SCRIPT_NAME'], '.php' ) : false;
+			$actype        = isset( $_SERVER['SCRIPT_NAME'] ) ? basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ), '.php' ) : false;
 			$alert_options = $this->GetActionType( $actype );
 
 			foreach ( $type_queries as $query_type => $table_names ) {
 				if ( ! empty( $table_names ) ) {
-					$event_code = $this->GetEventQueryType( $actype, $query_type );
+					$event_code                  = $this->GetEventQueryType( $actype, $query_type );
 					$alert_options['TableNames'] = implode( ',', $table_names );
 					$this->plugin->alerts->Trigger( $event_code, $alert_options );
 				}
 			}
 		}
-
 		return $queries;
 	}
 
@@ -133,29 +140,29 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	protected function GetEventQueryType( $type_action, $type_query ) {
 		switch ( $type_action ) {
 			case 'plugins':
-				if ( 'create' == $type_query ) {
+				if ( 'create' === $type_query ) {
 					return 5010;
-				} elseif ( 'update' == $type_query ) {
+				} elseif ( 'update' === $type_query ) {
 					return 5011;
-				} elseif ( 'delete' == $type_query ) {
+				} elseif ( 'delete' === $type_query ) {
 					return 5012;
 				}
 				// In case of plugins.
 			case 'themes':
-				if ( 'create' == $type_query ) {
+				if ( 'create' === $type_query ) {
 					return 5013;
-				} elseif ( 'update' == $type_query ) {
+				} elseif ( 'update' === $type_query ) {
 					return 5014;
-				} elseif ( 'delete' == $type_query ) {
+				} elseif ( 'delete' === $type_query ) {
 					return 5015;
 				}
 				// In case of themes.
 			default:
-				if ( 'create' == $type_query ) {
+				if ( 'create' === $type_query ) {
 					return 5016;
-				} elseif ( 'update' == $type_query ) {
+				} elseif ( 'update' === $type_query ) {
 					return 5017;
-				} elseif ( 'delete' == $type_query ) {
+				} elseif ( 'delete' === $type_query ) {
 					return 5018;
 				}
 		}
@@ -167,45 +174,58 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 * @param string $actype - Plugins, themes or unknown.
 	 */
 	protected function GetActionType( $actype ) {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
-
-		$is_themes = 'themes' == $actype;
-		$is_plugins = 'plugins' == $actype;
+		// Check the component type (theme or plugin).
+		$is_themes  = 'themes' === $actype;
+		$is_plugins = 'plugins' === $actype;
 
 		// Action Plugin Component.
 		$alert_options = array();
 		if ( $is_plugins ) {
 			$plugin_file = '';
-			if ( isset( $get_array['plugin'] ) ) {
-				$plugin_file = $get_array['plugin'];
-			} elseif ( isset( $get_array['checked'] ) ) {
-				$plugin_file = $get_array['checked'][0];
+			// @codingStandardsIgnoreStart
+			if ( isset( $_GET['plugin'] ) ) {
+				$plugin_file = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
+			} elseif ( isset( $_GET['checked'] ) ) {
+				$plugin_file = sanitize_text_field( wp_unslash( $_GET['checked'][0] ) );
 			}
-			$plugin_name = basename( $plugin_file, '.php' );
-			$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
-			$plugin_name = ucwords( $plugin_name );
-			$alert_options['Plugin'] = (object) array(
-				'Name' => $plugin_name,
-			);
-			// Action Theme Component.
+			// @codingStandardsIgnoreEnd
+
+			// Get plugin data.
+			$plugins = get_plugins();
+			if ( isset( $plugins[ $plugin_file ] ) ) {
+				$plugin = $plugins[ $plugin_file ];
+
+				// Set alert options.
+				$alert_options['Plugin'] = (object) array(
+					'Name'      => $plugin['Name'],
+					'PluginURI' => $plugin['PluginURI'],
+					'Version'   => $plugin['Version'],
+				);
+			} else {
+				$plugin_name             = basename( $plugin_file, '.php' );
+				$plugin_name             = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
+				$plugin_name             = ucwords( $plugin_name );
+				$alert_options['Plugin'] = (object) array( 'Name' => $plugin_name );
+			}
 		} elseif ( $is_themes ) {
+			// Action Theme Component.
 			$theme_name = '';
-			if ( isset( $get_array['theme'] ) ) {
-				$theme_name = $get_array['theme'];
-			} elseif ( isset( $get_array['checked'] ) ) {
-				$theme_name = $get_array['checked'][0];
+
+			// @codingStandardsIgnoreStart
+			if ( isset( $_GET['theme'] ) ) {
+				$theme_name = sanitize_text_field( wp_unslash( $_GET['theme'] ) );
+			} elseif ( isset( $_GET['checked'] ) ) {
+				$theme_name = sanitize_text_field( wp_unslash( $_GET['checked'][0] ) );
 			}
-			$theme_name = str_replace( array( '_', '-', '  ' ), ' ', $theme_name );
-			$theme_name = ucwords( $theme_name );
-			$alert_options['Theme'] = (object) array(
-				'Name' => $theme_name,
-			);
-			// Action Unknown Component.
+			// @codingStandardsIgnoreEnd
+
+			$theme_name             = str_replace( array( '_', '-', '  ' ), ' ', $theme_name );
+			$theme_name             = ucwords( $theme_name );
+			$alert_options['Theme'] = (object) array( 'Name' => $theme_name );
 		} else {
+			// Action Unknown Component.
 			$alert_options['Component'] = 'Unknown';
 		}
-
 		return $alert_options;
 	}
 }
