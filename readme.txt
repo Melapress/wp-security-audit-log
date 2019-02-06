@@ -195,6 +195,8 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
+Release notes: [Infinite scroll for activity logs & performance enhancement](https://www.wpsecurityauditlog.com/releases/infinite-scroll-performance-improvements-update-3-3-1-1)
+
 = 3.3.1.1 (2019-02-06) =
 
 * **New Features**
