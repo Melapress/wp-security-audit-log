@@ -417,6 +417,42 @@ function wsal_dismiss_advert(element) {
 	} );
 }
 
+/**
+ * Load Events for Infinite Scroll.
+ *
+ * @since 3.3.1.1
+ *
+ * @param {integer} pageNumber - Log viewer page number.
+ */
+function wsalLoadEvents( pageNumber ) {
+	jQuery( '#wsal-event-loader' ).show( 'fast' );
+	jQuery.ajax( {
+		type:'POST',
+		url: ajaxurl,
+		data: {
+			action: 'wsal_infinite_scroll_events',
+			wsal_viewer_security: wsalAuditLogArgs.viewerNonce,
+			page_number: pageNumber,
+			page : wsalAuditLogArgs.page,
+			'wsal-cbid' : wsalAuditLogArgs.siteId,
+			orderby : wsalAuditLogArgs.orderBy,
+			order : wsalAuditLogArgs.order,
+			s : wsalAuditLogArgs.searchTerm,
+			filters : wsalAuditLogArgs.searchFilters,
+		},
+		success: function( html ) {
+			jQuery( '#wsal-event-loader' ).hide( '1000' );
+			jQuery( '#audit-log-viewer #the-list' ).append( html ); // This will be the div where our content will be loaded.
+		},
+		error: function( xhr, textStatus, error ) {
+			console.log( xhr.statusText );
+			console.log( textStatus );
+			console.log( error );
+		}
+	});
+	return false;
+}
+
 jQuery( document ).ready( function() {
 
 	/**
@@ -441,4 +477,19 @@ jQuery( document ).ready( function() {
 			}
 		});
 	});
+
+	/**
+	 * Load events for Infinite Scroll.
+	 *
+	 * @since 3.3.1.1
+	 */
+	if ( wsalAuditLogArgs.infiniteScroll ) {
+		var count = 2;
+		jQuery( window ).scroll( function() {
+			if ( jQuery( window ).scrollTop() === jQuery( document ).height() - jQuery( window ).height() ) {
+				wsalLoadEvents( count );
+				count++;
+			}
+		});
+	}
 });
