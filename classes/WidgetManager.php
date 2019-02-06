@@ -73,13 +73,9 @@ class WSAL_WidgetManager {
 		$results = $query->getAdapter()->Execute( $query );
 
 		?><div>
-		<?php
-		if ( ! count( $results ) ) {
-			?>
-				<p><?php esc_html_e( 'No alerts found.', 'wp-security-audit-log' ); ?></p>
-				<?php
-		} else {
-			?>
+		<?php if ( ! count( $results ) ) : ?>
+			<p><?php esc_html_e( 'No alerts found.', 'wp-security-audit-log' ); ?></p>
+		<?php else : ?>
 			<table class="wp-list-table widefat" cellspacing="0" cellpadding="0"
 				style="display: block; overflow-x: auto;">
 				<thead>
@@ -89,8 +85,8 @@ class WSAL_WidgetManager {
 				<tbody>
 					<?php
 					$url = 'admin.php?page=' . $this->_plugin->views->views[0]->GetSafeViewName();
-					$fmt = array( new WSAL_AuditLogListView( $this->_plugin ), 'meta_formatter' );
-					foreach ( $results as $entry ) {
+					$fmt = array( $this->_plugin->settings, 'meta_formatter' );
+					foreach ( $results as $entry ) :
 						?>
 						<tr>
 							<td>
@@ -105,14 +101,10 @@ class WSAL_WidgetManager {
 								</a>
 							</td>
 						</tr>
-						<?php
-					}
-					?>
+					<?php endforeach; ?>
 				</tbody>
 			</table>
-			<?php
-		}
-		?>
+		<?php endif; ?>
 		</div>
 		<?php
 	}
