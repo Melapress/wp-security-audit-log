@@ -1917,4 +1917,44 @@ class WSAL_Settings {
 				return '*' . esc_html( $value ) . '*';
 		}
 	}
+
+	/**
+	 * Checks Infinite Scroll.
+	 *
+	 * Returns true if infinite scroll is enabled.
+	 *
+	 * @since 3.3.1.1
+	 *
+	 * @return boolean
+	 */
+	public function is_infinite_scroll() {
+		return 'infinite-scroll' === $this->get_events_type_nav() ? true : false;
+	}
+
+	/**
+	 * Checks Events Navigation Type.
+	 *
+	 * Returns type of navigation for events log viewer.
+	 *
+	 * @since 3.3.1.1
+	 *
+	 * @return string
+	 */
+	public function get_events_type_nav() {
+		return $this->_plugin->GetGlobalOption( 'events-nav-type', 'infinite-scroll' );
+	}
+
+	/**
+	 * Sets Events Navigation Type.
+	 *
+	 * Sets type of navigation for events log viewer.
+	 *
+	 * @since 3.3.1.1
+	 *
+	 * @param string $nav_type - Navigation type.
+	 * @return string
+	 */
+	public function set_events_type_nav( $nav_type ) {
+		$this->_plugin->SetGlobalOption( 'events-nav-type', $nav_type );
+	}
 }

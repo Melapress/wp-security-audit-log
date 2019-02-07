@@ -93,7 +93,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 			&& ! ( isset( $post_array['action'] ) && 'autosave' === $post_array['action'] )
 		) {
 			$this->post_id = intval( $post_array['post_ID'] );
-			$this->post = get_post( $this->post_id );
+			$this->post    = get_post( $this->post_id );
 			$this->set_post_seo_data();
 		}
 	}
@@ -104,14 +104,14 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	private function set_post_seo_data() {
 		// Set post SEO meta data.
 		$this->post_seo_data = array(
-			'_yoast_wpseo_title' => get_post_meta( $this->post_id, '_yoast_wpseo_title', true ),
-			'_yoast_wpseo_metadesc' => get_post_meta( $this->post_id, '_yoast_wpseo_metadesc', true ),
-			'_yoast_wpseo_focuskw' => get_post_meta( $this->post_id, '_yoast_wpseo_focuskw', true ),
-			'_yst_is_cornerstone' => get_post_meta( $this->post_id, '_yst_is_cornerstone', true ),
-			'_yoast_wpseo_meta-robots-noindex' => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-noindex', true ),
+			'_yoast_wpseo_title'                => get_post_meta( $this->post_id, '_yoast_wpseo_title', true ),
+			'_yoast_wpseo_metadesc'             => get_post_meta( $this->post_id, '_yoast_wpseo_metadesc', true ),
+			'_yoast_wpseo_focuskw'              => get_post_meta( $this->post_id, '_yoast_wpseo_focuskw', true ),
+			'_yst_is_cornerstone'               => get_post_meta( $this->post_id, '_yst_is_cornerstone', true ),
+			'_yoast_wpseo_meta-robots-noindex'  => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-noindex', true ),
 			'_yoast_wpseo_meta-robots-nofollow' => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-nofollow', true ),
-			'_yoast_wpseo_meta-robots-adv' => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-adv', true ),
-			'_yoast_wpseo_canonical' => get_post_meta( $this->post_id, '_yoast_wpseo_canonical', true ),
+			'_yoast_wpseo_meta-robots-adv'      => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-adv', true ),
+			'_yoast_wpseo_canonical'            => get_post_meta( $this->post_id, '_yoast_wpseo_canonical', true ),
 		);
 	}
 
@@ -154,9 +154,9 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	 * @return array $editor_link - Name and value link.
 	 */
 	private function get_editor_link( $post_id ) {
-		$value = get_edit_post_link( $post_id );
+		$value       = get_edit_post_link( $post_id );
 		$editor_link = array(
-			'name' => 'EditorLinkPost',
+			'name'  => 'EditorLinkPost',
 			'value' => $value,
 		);
 		return $editor_link;
@@ -168,19 +168,19 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	protected function check_seo_data_change() {
 		// Set filter input args.
 		$filter_input_args = array(
-			'post_ID' => FILTER_VALIDATE_INT,
-			'_wpnonce' => FILTER_SANITIZE_STRING,
-			'action' => FILTER_SANITIZE_STRING,
-			'yoast_wpseo_title' => FILTER_SANITIZE_STRING,
-			'yoast_wpseo_metadesc' => FILTER_SANITIZE_STRING,
-			'yoast_wpseo_focuskw' => FILTER_SANITIZE_STRING,
-			'_yst_is_cornerstone' => FILTER_VALIDATE_INT,
-			'yoast_wpseo_meta-robots-noindex' => FILTER_VALIDATE_INT,
+			'post_ID'                          => FILTER_VALIDATE_INT,
+			'_wpnonce'                         => FILTER_SANITIZE_STRING,
+			'action'                           => FILTER_SANITIZE_STRING,
+			'yoast_wpseo_title'                => FILTER_SANITIZE_STRING,
+			'yoast_wpseo_metadesc'             => FILTER_SANITIZE_STRING,
+			'yoast_wpseo_focuskw'              => FILTER_SANITIZE_STRING,
+			'_yst_is_cornerstone'              => FILTER_VALIDATE_INT,
+			'yoast_wpseo_meta-robots-noindex'  => FILTER_VALIDATE_INT,
 			'yoast_wpseo_meta-robots-nofollow' => FILTER_VALIDATE_INT,
-			'yoast_wpseo_meta-robots-adv' => array(
+			'yoast_wpseo_meta-robots-adv'      => array(
 				'flags' => FILTER_REQUIRE_ARRAY,
 			),
-			'yoast_wpseo_canonical' => FILTER_VALIDATE_URL,
+			'yoast_wpseo_canonical'            => FILTER_VALIDATE_URL,
 		);
 
 		// Filter POST global array.
@@ -216,21 +216,25 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 			return;
 		}
 
+		// Remove whitespaces at the ends of the titles.
+		$old_title = trim( $old_title );
+		$title     = trim( $title );
+
 		// If title is changed then log alert.
 		if ( $old_title !== $title ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
 			$this->plugin->alerts->Trigger(
 				8801, array(
-					'PostID' => $this->post->ID,
-					'PostType' => $this->post->post_type,
-					'PostTitle' => $this->post->post_title,
-					'PostStatus' => $this->post->post_status,
-					'PostDate' => $this->post->post_date,
-					'PostUrl' => get_permalink( $this->post->ID ),
-					'OldSEOTitle' => $old_title,
-					'NewSEOTitle' => $title,
+					'PostID'             => $this->post->ID,
+					'PostType'           => $this->post->post_type,
+					'PostTitle'          => $this->post->post_title,
+					'PostStatus'         => $this->post->post_status,
+					'PostDate'           => $this->post->post_date,
+					'PostUrl'            => get_permalink( $this->post->ID ),
+					'OldSEOTitle'        => $old_title,
+					'NewSEOTitle'        => $title,
 					$editor_link['name'] => $editor_link['value'],
-					'ReportText' => $old_title . '|' . $title,
+					'ReportText'         => $old_title . '|' . $title,
 				)
 			);
 		}
@@ -243,7 +247,8 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	 */
 	protected function check_desc_change( $desc ) {
 		// Get old desc value.
-		$old_desc = $this->get_post_seo_data( 'metadesc' );
+		$old_desc = esc_html( $this->get_post_seo_data( 'metadesc' ) );
+		$desc     = esc_html( $desc );
 
 		// If old and new values are empty then don't log the alert.
 		if ( empty( $old_desc ) && empty( $desc ) ) {
@@ -255,16 +260,16 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 			$editor_link = $this->get_editor_link( $this->post_id );
 			$this->plugin->alerts->Trigger(
 				8802, array(
-					'PostID' => $this->post->ID,
-					'PostType' => $this->post->post_type,
-					'PostTitle' => $this->post->post_title,
-					'PostStatus' => $this->post->post_status,
-					'PostDate' => $this->post->post_date,
-					'PostUrl' => get_permalink( $this->post->ID ),
-					'old_desc' => $old_desc,
-					'new_desc' => $desc,
+					'PostID'             => $this->post->ID,
+					'PostType'           => $this->post->post_type,
+					'PostTitle'          => $this->post->post_title,
+					'PostStatus'         => $this->post->post_status,
+					'PostDate'           => $this->post->post_date,
+					'PostUrl'            => get_permalink( $this->post->ID ),
+					'old_desc'           => $old_desc,
+					'new_desc'           => $desc,
 					$editor_link['name'] => $editor_link['value'],
-					'ReportText' => $old_desc . '|' . $desc,
+					'ReportText'         => $old_desc . '|' . $desc,
 				)
 			);
 		}
@@ -794,4 +799,3 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		}
 	}
 }
-

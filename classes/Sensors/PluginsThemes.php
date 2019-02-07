@@ -557,7 +557,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 		// Check if Yoast SEO is active.
 		$is_yoast = is_plugin_active( 'wordpress-seo/wp-seo.php' ) || is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' );
-		if ( $is_yoast && isset( $get_array['classic-editor'] ) ) {
+		if ( $is_yoast ) {
 			return;
 		}
 
