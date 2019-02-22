@@ -36,7 +36,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	public function __construct( $connection_config = null ) {
 		$this->connectionConfig = $connection_config;
 		parent::__construct( 'MySQL' );
-		require_once( $this->getAdaptersDirectory() . '/OptionAdapter.php' );
+		require_once $this->getAdaptersDirectory() . '/OptionAdapter.php';
 	}
 
 	/**
@@ -62,7 +62,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	/**
 	 * Creates a connection and returns it
 	 *
-	 * @return wpdb Instance of WPDB
+	 * @return wpdb Instance of WPDB.
 	 */
 	private function createConnection() {
 		if ( ! empty( $this->connectionConfig ) ) {
@@ -97,7 +97,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	public function closeConnection() {
 		$current_wpdb = $this->getConnection();
-		$result = $current_wpdb->close();
+		$result       = $current_wpdb->close();
 		return $result;
 	}
 
@@ -197,9 +197,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @return integer MAX(id)
 	 */
 	private function GetIncreaseOccurrence() {
-		$_wpdb = $this->getConnection();
+		$_wpdb          = $this->getConnection();
 		$occurrence_new = new WSAL_Adapters_MySQL_Occurrence( $_wpdb );
-		$sql = 'SELECT MAX(id) FROM ' . $occurrence_new->GetTable();
+		$sql            = 'SELECT MAX(id) FROM ' . $occurrence_new->GetTable();
 		return (int) $_wpdb->get_var( $sql );
 	}
 
@@ -211,7 +211,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	public function MigrateMeta( $index, $limit ) {
 		$result = null;
-		$offset = ($index * $limit);
+		$offset = ( $index * $limit );
 		global $wpdb;
 		$_wpdb = $this->getConnection();
 		// Add +1 because an alert is generated after delete the metadata table.
@@ -223,7 +223,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$result['empty'] = true;
 			return $result;
 		}
-		$sql = 'SELECT * FROM ' . $meta->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+		$sql      = 'SELECT * FROM ' . $meta->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
 		$metadata = $wpdb->get_results( $sql, ARRAY_A );
 
 		// Insert data to External DB.
@@ -231,10 +231,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$meta_new = new WSAL_Adapters_MySQL_Meta( $_wpdb );
 
 			$index++;
-			$sql = 'INSERT INTO ' . $meta_new->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
+			$sql = 'INSERT INTO ' . $meta_new->GetTable() . ' (occurrence_id, name, value) VALUES ';
 			foreach ( $metadata as $entry ) {
 				$occurrence_id = intval( $entry['occurrence_id'] ) + $increase_occurrence_id;
-				$sql .= '(' . $occurrence_id . ', \'' . $entry['name'] . '\', \'' . str_replace( array( "'", "\'" ), "\'", $entry['value'] ) . '\'), ';
+				$sql          .= '(' . $occurrence_id . ', \'' . $entry['name'] . '\', \'' . str_replace( array( "'", "\'" ), "\'", $entry['value'] ) . '\'), ';
 			}
 			$sql = rtrim( $sql, ', ' );
 			$_wpdb->query( $sql );
@@ -256,7 +256,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	public function MigrateOccurrence( $index, $limit ) {
 		$result = null;
-		$offset = ($index * $limit);
+		$offset = ( $index * $limit );
 		global $wpdb;
 		$_wpdb = $this->getConnection();
 
@@ -266,7 +266,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$result['empty'] = true;
 			return $result;
 		}
-		$sql = 'SELECT * FROM ' . $occurrence->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+		$sql         = 'SELECT * FROM ' . $occurrence->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
 		$occurrences = $wpdb->get_results( $sql, ARRAY_A );
 
 		// Insert data to External DB.
@@ -274,7 +274,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$occurrence_new = new WSAL_Adapters_MySQL_Occurrence( $_wpdb );
 
 			$index++;
-			$sql = 'INSERT INTO ' . $occurrence_new->GetTable() . ' (site_id, alert_id, created_on, is_read) VALUES ' ;
+			$sql = 'INSERT INTO ' . $occurrence_new->GetTable() . ' (site_id, alert_id, created_on, is_read) VALUES ';
 			foreach ( $occurrences as $entry ) {
 				$sql .= '(' . $entry['site_id'] . ', ' . $entry['alert_id'] . ', ' . $entry['created_on'] . ', ' . $entry['is_read'] . '), ';
 			}
@@ -298,7 +298,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	public function MigrateBackOccurrence( $index, $limit ) {
 		$result = null;
-		$offset = ($index * $limit);
+		$offset = ( $index * $limit );
 		global $wpdb;
 		$_wpdb = $this->getConnection();
 
@@ -308,7 +308,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$result['empty'] = true;
 			return $result;
 		}
-		$sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+		$sql         = 'SELECT * FROM ' . $occurrence->GetTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
 		$occurrences = $_wpdb->get_results( $sql, ARRAY_A );
 
 		// Insert data to WP.
@@ -316,7 +316,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$occurrence_wp = new WSAL_Adapters_MySQL_Occurrence( $wpdb );
 
 			$index++;
-			$sql = 'INSERT INTO ' . $occurrence_wp->GetWPTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
+			$sql = 'INSERT INTO ' . $occurrence_wp->GetWPTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ';
 			foreach ( $occurrences as $entry ) {
 				$sql .= '(' . $entry['id'] . ', ' . $entry['site_id'] . ', ' . $entry['alert_id'] . ', ' . $entry['created_on'] . ', ' . $entry['is_read'] . '), ';
 			}
@@ -339,7 +339,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	public function MigrateBackMeta( $index, $limit ) {
 		$result = null;
-		$offset = ($index * $limit);
+		$offset = ( $index * $limit );
 		global $wpdb;
 		$_wpdb = $this->getConnection();
 
@@ -349,7 +349,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$result['empty'] = true;
 			return $result;
 		}
-		$sql = 'SELECT * FROM ' . $meta->GetTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+		$sql      = 'SELECT * FROM ' . $meta->GetTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
 		$metadata = $_wpdb->get_results( $sql, ARRAY_A );
 
 		// Insert data to WP.
@@ -357,7 +357,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$meta_wp = new WSAL_Adapters_MySQL_Meta( $wpdb );
 
 			$index++;
-			$sql = 'INSERT INTO ' . $meta_wp->GetWPTable() . ' (occurrence_id, name, value) VALUES ' ;
+			$sql = 'INSERT INTO ' . $meta_wp->GetWPTable() . ' (occurrence_id, name, value) VALUES ';
 			foreach ( $metadata as $entry ) {
 				$sql .= '(' . $entry['occurrence_id'] . ', \'' . $entry['name'] . '\', \'' . str_replace( array( "'", "\'" ), "\'", $entry['value'] ) . '\'), ';
 			}
@@ -539,7 +539,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @param array $args - Archive Database and limit by count OR by date.
 	 */
 	public function ArchiveOccurrence( $args ) {
-		$_wpdb = $this->getConnection();
+		$_wpdb      = $this->getConnection();
 		$archive_db = $args['archive_db'];
 
 		// Load data Occurrences from WP.
@@ -568,15 +568,15 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
 		// Insert data to Archive DB.
 		if ( ! empty( $occurrences ) ) {
-			$last = end( $occurrences );
+			$last                    = end( $occurrences );
 			$args['last_created_on'] = $last['created_on'];
-			$args['occurence_ids'] = array();
+			$args['occurence_ids']   = array();
 
 			$occurrence_new = new WSAL_Adapters_MySQL_Occurrence( $archive_db );
 
-			$sql = 'INSERT INTO ' . $occurrence_new->GetTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ' ;
+			$sql = 'INSERT INTO ' . $occurrence_new->GetTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ';
 			foreach ( $occurrences as $entry ) {
-				$sql .= '(' . $entry['id'] . ', ' . $entry['site_id'] . ', ' . $entry['alert_id'] . ', ' . $entry['created_on'] . ', ' . $entry['is_read'] . '), ';
+				$sql                    .= '(' . $entry['id'] . ', ' . $entry['site_id'] . ', ' . $entry['alert_id'] . ', ' . $entry['created_on'] . ', ' . $entry['is_read'] . '), ';
 				$args['occurence_ids'][] = $entry['id'];
 			}
 			$sql = rtrim( $sql, ', ' );
@@ -594,7 +594,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @param array $args - Archive Database and occurrences IDs.
 	 */
 	public function ArchiveMeta( $args ) {
-		$_wpdb = $this->getConnection();
+		$_wpdb      = $this->getConnection();
 		$archive_db = $args['archive_db'];
 
 		// Load data Meta from WP.
@@ -603,14 +603,14 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			return null;
 		}
 		$s_occurence_ids = implode( ', ', $args['occurence_ids'] );
-		$sql = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id IN (' . $s_occurence_ids . ')';
-		$metadata = $_wpdb->get_results( $sql, ARRAY_A );
+		$sql             = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id IN (' . $s_occurence_ids . ')';
+		$metadata        = $_wpdb->get_results( $sql, ARRAY_A );
 
 		// Insert data to Archive DB.
 		if ( ! empty( $metadata ) ) {
 			$meta_new = new WSAL_Adapters_MySQL_Meta( $archive_db );
 
-			$sql = 'INSERT INTO ' . $meta_new->GetTable() . ' (occurrence_id, name, value) VALUES ' ;
+			$sql = 'INSERT INTO ' . $meta_new->GetTable() . ' (occurrence_id, name, value) VALUES ';
 			foreach ( $metadata as $entry ) {
 				$sql .= '(' . $entry['occurrence_id'] . ', \'' . $entry['name'] . '\', \'' . str_replace( array( "'", "\'" ), "\'", $entry['value'] ) . '\'), ';
 			}
@@ -628,17 +628,17 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @param array $args - Archive Database and occurrences IDs.
 	 */
 	public function DeleteAfterArchive( $args ) {
-		$_wpdb = $this->getConnection();
+		$_wpdb      = $this->getConnection();
 		$archive_db = $args['archive_db'];
 
 		$s_occurence_ids = implode( ', ', $args['occurence_ids'] );
 
 		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $_wpdb );
-		$sql = 'DELETE FROM ' . $occurrence->GetTable() . ' WHERE id IN (' . $s_occurence_ids . ')';
+		$sql        = 'DELETE FROM ' . $occurrence->GetTable() . ' WHERE id IN (' . $s_occurence_ids . ')';
 		$_wpdb->query( $sql );
 
 		$meta = new WSAL_Adapters_MySQL_Meta( $_wpdb );
-		$sql = 'DELETE FROM ' . $meta->GetTable() . ' WHERE occurrence_id IN (' . $s_occurence_ids . ')';
+		$sql  = 'DELETE FROM ' . $meta->GetTable() . ' WHERE occurrence_id IN (' . $s_occurence_ids . ')';
 		$_wpdb->query( $sql );
 	}
 
@@ -696,9 +696,6 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 		$query_meta = $wpdb->query( $sql );
 
 		// If both queries are successful, then return true.
-		if ( $query_occ && $query_meta ) {
-			return true;
-		}
-		return false;
+		return $query_occ && $query_meta;
 	}
 }
