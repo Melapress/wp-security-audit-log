@@ -203,7 +203,7 @@ class WSAL_Settings {
 		// Make sure options have been loaded.
 		$this->IsDevOptionEnabled( '' );
 		// Remove option if it exists.
-		while ( ($p = array_search( $option, $this->_devoption )) !== false ) {
+		while ( ( $p = array_search( $option, $this->_devoption ) ) !== false ) {
 			unset( $this->_devoption[ $p ] );
 		}
 		// Add option if callee wants it enabled.
@@ -539,7 +539,7 @@ class WSAL_Settings {
 	}
 
 	public function SetIncognito( $enabled ) {
-		return $this->_plugin->SetGlobalOption( 'hide-plugin', $enabled );
+		$this->_plugin->SetGlobalOption( 'hide-plugin', $enabled );
 	}
 
 	/**
@@ -550,7 +550,7 @@ class WSAL_Settings {
 	}
 
 	public function SetDeleteData( $enabled ) {
-		return $this->_plugin->SetGlobalOption( 'delete-data', $enabled );
+		$this->_plugin->SetGlobalOption( 'delete-data', $enabled );
 	}
 
 	/**
@@ -738,7 +738,7 @@ class WSAL_Settings {
 			$user = get_userdata( $user );
 		}
 		$allowed = $this->GetAccessTokens( $action );
-		$check = array_merge( $user->roles, array( $user->user_login ) );
+		$check   = array_merge( $user->roles, array( $user->user_login ) );
 		foreach ( $check as $item ) {
 			if ( in_array( $item, $allowed ) ) {
 				return true;
@@ -759,11 +759,7 @@ class WSAL_Settings {
 
 	public function IsLoginSuperAdmin( $username ) {
 		$user_id = username_exists( $username );
-		if ( function_exists( 'is_super_admin' ) && is_super_admin( $user_id ) ) {
-			return true;
-		} else {
-			return false;
-		}
+		return function_exists( 'is_super_admin' ) && is_super_admin( $user_id );
 	}
 
 	public function GetLicenses() {
@@ -831,7 +827,7 @@ class WSAL_Settings {
 	}
 
 	public function SetMainIPFromProxy( $enabled ) {
-		return $this->_plugin->SetGlobalOption( 'use-proxy-ip', $enabled );
+		$this->_plugin->SetGlobalOption( 'use-proxy-ip', $enabled );
 	}
 
 	public function IsInternalIPsFiltered() {
@@ -839,7 +835,7 @@ class WSAL_Settings {
 	}
 
 	public function SetInternalIPsFiltering( $enabled ) {
-		return $this->_plugin->SetGlobalOption( 'filter-internal-ip', $enabled );
+		$this->_plugin->SetGlobalOption( 'filter-internal-ip', $enabled );
 	}
 
 	public function GetMainClientIP() {
@@ -952,8 +948,8 @@ class WSAL_Settings {
 	 * @since 3.2.2
 	 */
 	public function set_excluded_urls( $urls ) {
-		$urls = array_map( 'untrailingslashit', $urls );
-		$urls = array_unique( $urls );
+		$urls                = array_map( 'untrailingslashit', $urls );
+		$urls                = array_unique( $urls );
 		$this->excluded_urls = $urls;
 		$this->_plugin->SetGlobalOption( 'excluded-urls', esc_html( implode( ',', $this->excluded_urls ) ) );
 	}
@@ -1023,6 +1019,8 @@ class WSAL_Settings {
 
 	/**
 	 * Datetime used in the Alerts.
+	 *
+	 * @param boolean $line_break - True if line break otherwise false.
 	 */
 	public function GetDatetimeFormat( $line_break = true ) {
 		if ( $line_break ) {
@@ -1031,11 +1029,26 @@ class WSAL_Settings {
 			$date_time_format = $this->GetDateFormat() . ' ' . $this->GetTimeFormat();
 		}
 
-		$wp_time_format = get_option( 'time_format' );
-		if ( stripos( $wp_time_format, 'A' ) !== false ) {
-			$date_time_format .= '.$$$&\n\b\s\p;A';
+		$wp_time_format = get_option( 'time_format' ); // WP time format.
+
+		// Check if the time format does not have seconds.
+		if ( stripos( $wp_time_format, 's' ) === false ) {
+			if ( stripos( $wp_time_format, '.v' ) !== false ) {
+				$date_time_format = str_replace( '.v', '', $date_time_format );
+			}
+			$date_time_format .= ':s'; // Add seconds to time format.
+			$date_time_format .= '.$$$'; // Add milliseconds to time format.
 		} else {
-			$date_time_format .= '.$$$';
+			// Check if the time format does have milliseconds.
+			if ( stripos( $wp_time_format, '.v' ) !== false ) {
+				$date_time_format = str_replace( '.v', '.$$$', $date_time_format );
+			} else {
+				$date_time_format .= '.$$$';
+			}
+		}
+
+		if ( stripos( $wp_time_format, 'A' ) !== false ) {
+			$date_time_format .= '&\n\b\s\p;A';
 		}
 		return $date_time_format;
 	}
@@ -1056,9 +1069,9 @@ class WSAL_Settings {
 	 */
 	public function GetTimeFormat() {
 		$wp_time_format = get_option( 'time_format' );
-		$search = array( 'a', 'A', 'T', ' ' );
-		$replace = array( '', '', '', '' );
-		$time_format = str_replace( $search, $replace, $wp_time_format );
+		$search         = array( 'a', 'A', 'T', ' ' );
+		$replace        = array( '', '', '', '' );
+		$time_format    = str_replace( $search, $replace, $wp_time_format );
 		return $time_format;
 	}
 
@@ -1072,7 +1085,7 @@ class WSAL_Settings {
 	}
 
 	public function SetTimezone( $newvalue ) {
-		return $this->_plugin->SetGlobalOption( 'timezone', $newvalue );
+		$this->_plugin->SetGlobalOption( 'timezone', $newvalue );
 	}
 
 	/**
@@ -1089,7 +1102,7 @@ class WSAL_Settings {
 	 * @since 2.6.5
 	 */
 	public function set_type_username( $newvalue ) {
-		return $this->_plugin->SetGlobalOption( 'type_username', $newvalue );
+		$this->_plugin->SetGlobalOption( 'type_username', $newvalue );
 	}
 
 	public function GetAdapterConfig( $name_field, $default_value = false ) {
@@ -1097,7 +1110,7 @@ class WSAL_Settings {
 	}
 
 	public function SetAdapterConfig( $name_field, $newvalue ) {
-		return $this->_plugin->SetGlobalOption( $name_field, trim( $newvalue ) );
+		$this->_plugin->SetGlobalOption( $name_field, trim( $newvalue ) );
 	}
 
 	public function GetColumns() {
@@ -1130,7 +1143,7 @@ class WSAL_Settings {
 				) + array_slice( $columns, 5, null, true );
 			}
 			$selected = (array) json_decode( $selected );
-			$columns = array_merge( $columns, $selected );
+			$columns  = array_merge( $columns, $selected );
 			return $columns;
 		} else {
 			return $columns;
@@ -1142,7 +1155,7 @@ class WSAL_Settings {
 	}
 
 	public function SetColumns( $columns ) {
-		return $this->_plugin->SetGlobalOption( 'columns', json_encode( $columns ) );
+		$this->_plugin->SetGlobalOption( 'columns', json_encode( $columns ) );
 	}
 
 	public function IsWPBackend() {
@@ -1150,7 +1163,7 @@ class WSAL_Settings {
 	}
 
 	public function SetWPBackend( $enabled ) {
-		return $this->_plugin->SetGlobalOption( 'wp-backend', $enabled );
+		$this->_plugin->SetGlobalOption( 'wp-backend', $enabled );
 	}
 
 	/**
@@ -1159,7 +1172,7 @@ class WSAL_Settings {
 	 * @param string $use – Setting value.
 	 */
 	public function set_use_email( $use ) {
-		return $this->_plugin->SetGlobalOption( 'use-email', $use );
+		$this->_plugin->SetGlobalOption( 'use-email', $use );
 	}
 
 	/**
@@ -1172,7 +1185,7 @@ class WSAL_Settings {
 	}
 
 	public function SetFromEmail( $email_address ) {
-		return $this->_plugin->SetGlobalOption( 'from-email', trim( $email_address ) );
+		$this->_plugin->SetGlobalOption( 'from-email', trim( $email_address ) );
 	}
 
 	public function GetFromEmail() {
@@ -1180,7 +1193,7 @@ class WSAL_Settings {
 	}
 
 	public function SetDisplayName( $display_name ) {
-		return $this->_plugin->SetGlobalOption( 'display-name', trim( $display_name ) );
+		$this->_plugin->SetGlobalOption( 'display-name', trim( $display_name ) );
 	}
 
 	public function GetDisplayName() {
@@ -1188,7 +1201,7 @@ class WSAL_Settings {
 	}
 
 	public function Set404LogLimit( $value ) {
-		return $this->_plugin->SetGlobalOption( 'log-404-limit', abs( $value ) );
+		$this->_plugin->SetGlobalOption( 'log-404-limit', abs( $value ) );
 	}
 
 	public function Get404LogLimit() {
@@ -1202,7 +1215,7 @@ class WSAL_Settings {
 	 * @since  2.6.3
 	 */
 	public function SetVisitor404LogLimit( $value ) {
-		return $this->_plugin->SetGlobalOption( 'log-visitor-404-limit', abs( $value ) );
+		$this->_plugin->SetGlobalOption( 'log-visitor-404-limit', abs( $value ) );
 	}
 
 	/**
@@ -1222,9 +1235,9 @@ class WSAL_Settings {
 	 */
 	public function set_failed_login_limit( $value ) {
 		if ( ! empty( $value ) ) {
-			return $this->_plugin->SetGlobalOption( 'log-failed-login-limit', abs( $value ) );
+			$this->_plugin->SetGlobalOption( 'log-failed-login-limit', abs( $value ) );
 		} else {
-			return $this->_plugin->SetGlobalOption( 'log-failed-login-limit', -1 );
+			$this->_plugin->SetGlobalOption( 'log-failed-login-limit', -1 );
 		}
 	}
 
@@ -1245,9 +1258,9 @@ class WSAL_Settings {
 	 */
 	public function set_visitor_failed_login_limit( $value ) {
 		if ( ! empty( $value ) ) {
-			return $this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', abs( $value ) );
+			$this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', abs( $value ) );
 		} else {
-			return $this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', -1 );
+			$this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', -1 );
 		}
 	}
 
@@ -1345,11 +1358,11 @@ class WSAL_Settings {
 	final public function create_index_file( $dir_path ) {
 		// Check if index.php file exists.
 		$dir_path = trailingslashit( $dir_path );
-		$result = 0;
+		$result   = 0;
 		if ( ! is_file( $dir_path . 'index.php' ) ) {
 			$result = @file_put_contents( $dir_path . 'index.php', '<?php // Silence is golden' );
 		}
-		return ($result > 0);
+		return ( $result > 0 );
 	}
 
 	/**
@@ -1363,11 +1376,11 @@ class WSAL_Settings {
 	final public function create_htaccess_file( $dir_path ) {
 		// Check if .htaccess file exists.
 		$dir_path = trailingslashit( $dir_path );
-		$result = 0;
+		$result   = 0;
 		if ( ! is_file( $dir_path . '.htaccess' ) ) {
 			$result = @file_put_contents( $dir_path . '.htaccess', 'Deny from all' );
 		}
-		return ($result > 0);
+		return ( $result > 0 );
 	}
 
 	/**
@@ -1503,10 +1516,7 @@ class WSAL_Settings {
 	 */
 	public function is_stealth_mode() {
 		$stealth_mode = $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' );
-		if ( 'yes' === $stealth_mode ) {
-			return true;
-		}
-		return false;
+		return 'yes' === $stealth_mode;
 	}
 
 	/**
