@@ -183,6 +183,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 		if ( 'top' !== $which && $this->_plugin->settings->is_infinite_scroll() ) :
 			?>
+			<div id="wsal-auditlog-end"><p><?php esc_html_e( '— End of Activity Log —', 'wp-security-audit-log' ); ?></p></div>
 			<div id="wsal-event-loader"><div class="wsal-lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
 			<?php
 		endif;
@@ -378,8 +379,8 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	/**
 	 * Method: Get default column values.
 	 *
-	 * @param object $item - Column item.
-	 * @param string $column_name - Name of the column.
+	 * @param WSAL_Models_Occurrence $item        - Column item.
+	 * @param string                 $column_name - Name of the column.
 	 */
 	public function column_default( $item, $column_name ) {
 		// Get date format.
@@ -606,7 +607,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * Method: Meta data formater.
 	 *
 	 * @param string $name - Name of the data.
-	 * @param mix    $value - Value of the data.
+	 * @param mixed  $value - Value of the data.
 	 * @return string
 	 * @deprecated 3.3
 	 */
@@ -694,7 +695,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return '<a href="javascript:;" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
 
 			case strncmp( $value, 'http://', 7 ) === 0:
-			case strncmp( $value, 'https://', 7 ) === 0:
+			case strncmp( $value, 'https://', 8 ) === 0:
 				return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
 
 			case '%PostStatus%' === $name:
@@ -904,7 +905,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			$id    = $with_id ? "id='$column_key'" : '';
 
 			if ( ! empty( $class ) ) {
-				$class = "class='" . join( ' ', $class ) . "'";
+				$class = "class='" . implode( ' ', $class ) . "'";
 			}
 
 			echo "<$tag $scope $id $class>";
