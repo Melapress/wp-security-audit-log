@@ -133,6 +133,7 @@ final class WSAL_AlertManager {
 				'custom_css',          // Custom CSS CPT.
 				'shop_order',          // WooCommerce Order CPT.
 				'shop_order_refund',   // WooCommerce Order Refund CPT.
+				'product_variation',   // WooCommerce Product Variation CPT.
 			)
 		);
 	}
@@ -207,8 +208,8 @@ final class WSAL_AlertManager {
 	/**
 	 * Trigger an alert.
 	 *
-	 * @param integer $type - Alert type.
-	 * @param array   $data - Alert data.
+	 * @param integer $type    - Alert type.
+	 * @param array   $data    - Alert data.
 	 * @param mixed   $delayed - False if delayed, function if not.
 	 */
 	public function Trigger( $type, $data = array(), $delayed = false ) {
@@ -719,8 +720,8 @@ final class WSAL_AlertManager {
 	 * Method: Returns if IP is disabled or not.
 	 */
 	private function IsDisabledIP() {
-		$is_disabled = false;
-		$ip = $this->plugin->settings->GetMainClientIP();
+		$is_disabled  = false;
+		$ip           = $this->plugin->settings->GetMainClientIP();
 		$excluded_ips = $this->plugin->settings->GetExcludedMonitoringIP();
 		if ( in_array( $ip, $excluded_ips ) ) {
 			$is_disabled = true;
