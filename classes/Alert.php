@@ -98,7 +98,7 @@ final class WSAL_Alert {
 	 * @param mixed         $highlight      - (Optional) Highlight format.
 	 * @return string The expanded message.
 	 */
-	protected function GetFormattedMesg( $orig_mesg, $meta_data = array(), $meta_formatter = null, $occurrence_id = 0, $highlight ) {
+	protected function GetFormattedMesg( $orig_mesg, $meta_data = array(), $meta_formatter = null, $occurrence_id = 0, $highlight = null ) {
 		// Tokenize message with regex.
 		$mesg = preg_split( '/(%.*?%)/', (string) $orig_mesg, -1, PREG_SPLIT_DELIM_CAPTURE );
 		if ( ! is_array( $mesg ) ) {
