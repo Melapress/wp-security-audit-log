@@ -338,8 +338,12 @@ div.wsal_notice__wrapper p {
 	align-items: center;
 }
 
-#wsal-event-loader {
+#wsal-event-loader,
+#wsal-auditlog-end {
 	text-align: center;
+}
+#wsal-auditlog-end {
+	display: none;
 }
 
 .wsal-lds-ellipsis {
