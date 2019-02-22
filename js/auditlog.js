@@ -442,7 +442,13 @@ function wsalLoadEvents( pageNumber ) {
 		},
 		success: function( html ) {
 			jQuery( '#wsal-event-loader' ).hide( '1000' );
-			jQuery( '#audit-log-viewer #the-list' ).append( html ); // This will be the div where our content will be loaded.
+			if ( html ) {
+				wsalLoadEventsResponse = true;
+				jQuery( '#audit-log-viewer #the-list' ).append( html ); // This will be the div where our content will be loaded.
+			} else {
+				wsalLoadEventsResponse = false;
+				jQuery( '#wsal-auditlog-end' ).show( 'fast' );
+			}
 		},
 		error: function( xhr, textStatus, error ) {
 			console.log( xhr.statusText );
@@ -450,8 +456,12 @@ function wsalLoadEvents( pageNumber ) {
 			console.log( error );
 		}
 	});
-	return false;
+	if ( wsalLoadEventsResponse ) {
+		return pageNumber + 1;
+	}
+	return 0;
 }
+var wsalLoadEventsResponse = true; // Global variable to check events loading response.
 
 jQuery( document ).ready( function() {
 
@@ -487,8 +497,9 @@ jQuery( document ).ready( function() {
 		var count = 2;
 		jQuery( window ).scroll( function() {
 			if ( jQuery( window ).scrollTop() === jQuery( document ).height() - jQuery( window ).height() ) {
-				wsalLoadEvents( count );
-				count++;
+				if ( 0 !== count ) {
+					count = wsalLoadEvents( count );
+				}
 			}
 		});
 	}
