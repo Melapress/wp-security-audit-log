@@ -453,10 +453,6 @@ function wsaldefaults_wsal_init() {
 						array( 6018, E_CRITICAL, __( 'Modified the list of keywords for comments blacklisting', 'wp-security-audit-log' ), __( 'Modified the list of keywords for comments blacklisting.', 'wp-security-audit-log' ) ),
 						array( 6024, E_CRITICAL, __( 'Option WordPress Address (URL) in WordPress settings changed', 'wp-security-audit-log' ), __( 'Changed the WordPress address (URL) from %old_url% to %new_url%.', 'wp-security-audit-log' ) ),
 						array( 6025, E_CRITICAL, __( 'Option Site Address (URL) in WordPress settings changed', 'wp-security-audit-log' ), __( 'Changed the site address (URL) from %old_url% to %new_url%.', 'wp-security-audit-log' ) ),
-						array( 6019, E_CRITICAL, __( 'Created a New cron job', 'wp-security-audit-log' ), __( 'A new cron job called %name% was created and is scheduled to run %schedule%.', 'wp-security-audit-log' ) ),
-						array( 6020, E_CRITICAL, __( 'Changed status of the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% was %status%.', 'wp-security-audit-log' ) ),
-						array( 6021, E_CRITICAL, __( 'Deleted the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% was deleted.', 'wp-security-audit-log' ) ),
-						array( 6022, E_NOTICE, __( 'Started the cron job', 'wp-security-audit-log' ), __( 'The cron job %name% has just started.', 'wp-security-audit-log' ) ),
 					),
 				),
 
