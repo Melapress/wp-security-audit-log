@@ -174,7 +174,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$is_custom       = ! empty( $events_diff ) ? true : false; // If difference is not empty then mode is custom.
 		$log_details     = $this->_plugin->GetGlobalOption( 'details-level', false ); // Get log level option.
 
-		$subcat_alerts = array( 1004, 2010, 6007, 2111, 2119, 2016, 2053, 7000, 8009, 8014, 9007, 9047, 9027, 9002, 9057, 9063, 9035, 8809, 8813, 6000, 6001, 6019, 6028 );
+		$subcat_alerts = array( 1004, 2010, 6007, 2111, 2119, 2016, 2053, 7000, 8009, 8014, 9007, 9047, 9027, 9002, 9057, 9063, 9035, 8809, 8813, 6000, 6001, 6028 );
 		$public_events = $this->_plugin->alerts->get_public_events(); // Get public events.
 		?>
 		<p>
@@ -454,8 +454,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 															esc_html_e( 'System', 'wp-security-audit-log' );
 														} elseif ( 6001 === $alert->type ) {
 															esc_html_e( 'Settings', 'wp-security-audit-log' );
-														} elseif ( 6019 === $alert->type ) {
-															esc_html_e( 'Cron Jobs', 'wp-security-audit-log' );
 														} elseif ( 6028 === $alert->type ) {
 															esc_html_e( 'File Changes Scanning', 'wp-security-audit-log' );
 														}
@@ -689,7 +687,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					var wsal_log_level_modal = jQuery( '[data-remodal-id="wsal-log-level-updated"]' );
 					wsal_log_level_modal.remodal().open();
 				} );
-			</script><?php
+			</script>
+			<?php
 		endif;
 		?>
 
