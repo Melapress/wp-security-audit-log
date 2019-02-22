@@ -42,10 +42,10 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor {
 	 */
 	public function EventShutdown() {
 		// Filter global arrays for security.
-		$post_array = filter_input_array( INPUT_POST );
+		$post_array   = filter_input_array( INPUT_POST );
 		$server_array = filter_input_array( INPUT_SERVER );
 
-		$upload_dir = wp_upload_dir();
+		$upload_dir       = wp_upload_dir();
 		$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/';
 		if ( ! $this->CheckDirectory( $uploads_dir_path ) ) {
 			wp_mkdir_p( $uploads_dir_path );
@@ -54,21 +54,22 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor {
 		$file = $uploads_dir_path . 'Request.log.php';
 
 		$request_method = isset( $server_array['REQUEST_METHOD'] ) ? $server_array['REQUEST_METHOD'] : false;
-		$request_uri = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;
+		$request_uri    = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;
 
 		$line = '[' . date( 'Y-m-d H:i:s' ) . '] '
 			. $request_method . ' '
 			. $request_uri . ' '
-			. ( ! empty( $post_array ) ? str_pad( PHP_EOL, 24 ) . json_encode( $post_array ) : '')
-			. ( ! empty( self::$envvars ) ? str_pad( PHP_EOL, 24 ) . json_encode( self::$envvars ) : '')
+			. ( ! empty( $post_array ) ? str_pad( PHP_EOL, 24 ) . json_encode( $post_array ) : '' )
+			. ( ! empty( self::$envvars ) ? str_pad( PHP_EOL, 24 ) . json_encode( self::$envvars ) : '' )
 			. PHP_EOL;
 
 		if ( ! file_exists( $file ) && ! file_put_contents( $file, '<' . '?php die(\'Access Denied\'); ?>' . PHP_EOL ) ) {
-			return $this->LogError(
+			$this->LogError(
 				'Could not initialize request log file', array(
 					'file' => $file,
 				)
 			);
+			return;
 		}
 
 		$f = fopen( $file, 'a' );
