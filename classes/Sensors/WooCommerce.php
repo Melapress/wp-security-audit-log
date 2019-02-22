@@ -272,7 +272,18 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		// Global variable which returns current page.
 		global $pagenow;
 
-		if ( 'post.php' === $pagenow && $this->CheckWooCommerce( $oldpost ) && is_admin() ) {
+		// @codingStandardsIgnoreStart
+		$wpnonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : false;
+		$post_id = isset( $_POST['post_ID'] ) ? sanitize_text_field( wp_unslash( $_POST['post_ID'] ) ) : false;
+		// @codingStandardsIgnoreEnd
+
+		if (
+			'post.php' === $pagenow // Check post edit page.
+			&& $this->CheckWooCommerce( $oldpost ) // Check WooCommerce CPT.
+			&& is_admin() // Check if admin.
+			&& $wpnonce && $post_id // Check post id and nonce exists.
+			&& wp_verify_nonce( $wpnonce, 'update-post_' . $post_id ) // Verify nonce.
+		) {
 			$changes = 0 + $this->EventCreation( $oldpost, $newpost );
 			if ( ! $changes ) {
 				// Change Categories.
@@ -335,45 +346,39 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @param object $new_post - New Post.
 	 */
 	private function EventCreation( $old_post, $new_post ) {
-		// Filter POST global array.
-		$post_array = filter_input_array( INPUT_POST );
+		// Original post status.
+		$original = isset( $_POST['original_post_status'] ) ? sanitize_text_field( wp_unslash( $_POST['original_post_status'] ) ) : ''; // @codingStandardsIgnoreLine
 
-		// @codingStandardsIgnoreStart
-		$wpnonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : false;
-		$post_id = isset( $_POST['post_ID'] ) ? sanitize_text_field( wp_unslash( $_POST['post_ID'] ) ) : false;
-		// @codingStandardsIgnoreEnd
+		// Ignore if original or new post type is draft.
+		if ( 'draft' === $original && 'draft' === $new_post->post_status ) {
+			return 0;
+		}
 
-		if ( ! empty( $post_id ) && ! empty( $wpnonce ) && wp_verify_nonce( $wpnonce, 'update-post_' . $post_id ) ) {
-			// Original post status.
-			$original = isset( $_POST['original_post_status'] ) ? sanitize_text_field( wp_unslash( $_POST['original_post_status'] ) ) : '';
-
-			// Ignore if original or new post type is draft.
-			if ( 'draft' === $original && 'draft' === $new_post->post_status ) {
-				return 0;
-			}
-
-			if ( 'draft' === $old_post->post_status || 'auto-draft' === $original ) {
-				if ( 'product' === $old_post->post_type ) {
-					$editor_link = $this->GetEditorLink( $new_post );
-					if ( 'draft' === $new_post->post_status ) {
-						$this->plugin->alerts->Trigger( 9000, array(
+		if ( 'draft' === $old_post->post_status || 'auto-draft' === $original ) {
+			if ( 'product' === $old_post->post_type ) {
+				$editor_link = $this->GetEditorLink( $new_post );
+				if ( 'draft' === $new_post->post_status ) {
+					$this->plugin->alerts->Trigger(
+						9000, array(
 							'ProductTitle'       => $new_post->post_title,
 							$editor_link['name'] => $editor_link['value'],
-						) );
-						return 1;
-					} elseif ( 'publish' === $new_post->post_status ) {
-						$this->plugin->alerts->Trigger( 9001, array(
+						)
+					);
+					return 1;
+				} elseif ( 'publish' === $new_post->post_status ) {
+					$this->plugin->alerts->Trigger(
+						9001, array(
 							'ProductTitle'       => $new_post->post_title,
 							'ProductUrl'         => get_post_permalink( $new_post->ID ),
 							$editor_link['name'] => $editor_link['value'],
-						) );
-						return 1;
-					}
-				} elseif ( 'shop_coupon' === $old_post->post_type && 'publish' === $new_post->post_status ) {
-					$coupon_data = $this->get_coupon_event_data( $new_post );
-					$this->plugin->alerts->Trigger( 9063, $coupon_data );
+						)
+					);
 					return 1;
 				}
+			} elseif ( 'shop_coupon' === $old_post->post_type && 'publish' === $new_post->post_status ) {
+				$coupon_data = $this->get_coupon_event_data( $new_post );
+				$this->plugin->alerts->Trigger( 9063, $coupon_data );
+				return 1;
 			}
 		}
 		return 0;
@@ -497,7 +502,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function CheckPermalinkChange( $old_link, $new_link, $post ) {
-		if ( ( $old_link && $new_link ) && ( $old_link != $new_link ) ) {
+		if ( $old_link && $new_link && ( $old_link != $new_link ) ) {
 			$editor_link = $this->GetEditorLink( $post );
 			$this->plugin->alerts->Trigger(
 				9006, array(
@@ -522,33 +527,25 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function CheckProductDataChange( $old_data, $post ) {
-		// Check nonce.
-		if (
-			isset( $_POST['post_ID'] )
-			&& isset( $_POST['_wpnonce'] )
-			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . sanitize_text_field( wp_unslash( $_POST['post_ID'] ) ) )
-		) {
-			if ( isset( $_POST['product-type'] ) ) {
-				$old_data = is_array( $old_data ) ? implode( ', ', $old_data ) : $old_data;
-				$new_data = sanitize_text_field( wp_unslash( $_POST['product-type'] ) );
+		if ( isset( $_POST['product-type'] ) ) { // @codingStandardsIgnoreLine
+			$old_data = is_array( $old_data ) ? implode( ', ', $old_data ) : $old_data;
+			$new_data = sanitize_text_field( wp_unslash( $_POST['product-type'] ) ); // @codingStandardsIgnoreLine
 
-				if ( $old_data !== $new_data ) {
-					$editor_link = $this->GetEditorLink( $post );
-					$this->plugin->alerts->Trigger(
-						9007, array(
-							'ProductTitle'       => $post->post_title,
-							'ProductStatus'      => $post->post_status,
-							'OldType'            => $old_data,
-							'NewType'            => $new_data,
-							$editor_link['name'] => $editor_link['value'],
-						)
-					);
-					return 1;
-				}
+			if ( $old_data !== $new_data ) {
+				$editor_link = $this->GetEditorLink( $post );
+				$this->plugin->alerts->Trigger(
+					9007, array(
+						'ProductTitle'       => $post->post_title,
+						'ProductStatus'      => $post->post_status,
+						'OldType'            => $old_data,
+						'NewType'            => $new_data,
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+				return 1;
 			}
-			return 0;
 		}
-		return false;
+		return 0;
 	}
 
 	/**
@@ -589,44 +586,38 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function CheckVisibilityChange( $oldpost ) {
-		// Filter POST global array.
-		$post_array = filter_input_array( INPUT_POST );
+		// Get visibility data.
+		// @codingStandardsIgnoreStart
+		$old_visibility = isset( $_POST['hidden_post_visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['hidden_post_visibility'] ) ) : null;
+		$new_visibility = isset( $_POST['visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['visibility'] ) ) : null;
+		// @codingStandardsIgnoreEnd
 
-		if (
-			isset( $post_array['post_ID'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] )
-		) {
-			$old_visibility = isset( $post_array['hidden_post_visibility'] ) ? $post_array['hidden_post_visibility'] : null;
-			$new_visibility = isset( $post_array['visibility'] ) ? $post_array['visibility'] : null;
-
-			if ( 'password' === $old_visibility ) {
-				$old_visibility = __( 'Password Protected', 'wp-security-audit-log' );
-			} else {
-				$old_visibility = ucfirst( $old_visibility );
-			}
-
-			if ( 'password' === $new_visibility ) {
-				$new_visibility = __( 'Password Protected', 'wp-security-audit-log' );
-			} else {
-				$new_visibility = ucfirst( $new_visibility );
-			}
-
-			if ( ( $old_visibility && $new_visibility ) && ( $old_visibility != $new_visibility ) ) {
-				$editor_link = $this->GetEditorLink( $oldpost );
-				$this->plugin->alerts->Trigger(
-					9009, array(
-						'ProductTitle'       => $oldpost->post_title,
-						'ProductStatus'      => $oldpost->post_status,
-						'OldVisibility'      => $old_visibility,
-						'NewVisibility'      => $new_visibility,
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-				return 1;
-			}
-			return 0;
+		if ( 'password' === $old_visibility ) {
+			$old_visibility = __( 'Password Protected', 'wp-security-audit-log' );
+		} else {
+			$old_visibility = ucfirst( $old_visibility );
 		}
-		return false;
+
+		if ( 'password' === $new_visibility ) {
+			$new_visibility = __( 'Password Protected', 'wp-security-audit-log' );
+		} else {
+			$new_visibility = ucfirst( $new_visibility );
+		}
+
+		if ( ( $old_visibility && $new_visibility ) && ( $old_visibility != $new_visibility ) ) {
+			$editor_link = $this->GetEditorLink( $oldpost );
+			$this->plugin->alerts->Trigger(
+				9009, array(
+					'ProductTitle'       => $oldpost->post_title,
+					'ProductStatus'      => $oldpost->post_status,
+					'OldVisibility'      => $old_visibility,
+					'NewVisibility'      => $new_visibility,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			return 1;
+		}
+		return 0;
 	}
 
 	/**
@@ -687,34 +678,28 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function check_catalog_visibility_change( $oldpost ) {
-		if (
-			isset( $_POST['post_ID'] ) && isset( $_POST['_wpnonce'] )
-			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . sanitize_text_field( wp_unslash( $_POST['post_ID'] ) ) )
-		) {
-			// Get product data.
-			$product_object = new WC_Product( $oldpost->ID );
-			$old_visibility = $product_object->get_catalog_visibility();
-			$new_visibility = isset( $_POST['_visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['_visibility'] ) ) : false;
+		// Get product data.
+		$product_object = new WC_Product( $oldpost->ID );
+		$old_visibility = $product_object->get_catalog_visibility();
+		$new_visibility = isset( $_POST['_visibility'] ) ? sanitize_text_field( wp_unslash( $_POST['_visibility'] ) ) : false; // @codingStandardsIgnoreLine
 
-			// Get WooCommerce visibility options.
-			$visibility_options = wc_get_product_visibility_options();
+		// Get WooCommerce visibility options.
+		$visibility_options = wc_get_product_visibility_options();
 
-			if ( ( $old_visibility && $new_visibility ) && ( $old_visibility !== $new_visibility ) ) {
-				$editor_link = $this->GetEditorLink( $oldpost );
-				$this->plugin->alerts->Trigger(
-					9042, array(
-						'ProductTitle'       => $oldpost->post_title,
-						'ProductStatus'      => $oldpost->post_status,
-						'OldVisibility'      => isset( $visibility_options[ $old_visibility ] ) ? $visibility_options[ $old_visibility ] : false,
-						'NewVisibility'      => isset( $visibility_options[ $new_visibility ] ) ? $visibility_options[ $new_visibility ] : false,
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-				return 1;
-			}
-			return 0;
+		if ( ( $old_visibility && $new_visibility ) && ( $old_visibility !== $new_visibility ) ) {
+			$editor_link = $this->GetEditorLink( $oldpost );
+			$this->plugin->alerts->Trigger(
+				9042, array(
+					'ProductTitle'       => $oldpost->post_title,
+					'ProductStatus'      => $oldpost->post_status,
+					'OldVisibility'      => isset( $visibility_options[ $old_visibility ] ) ? $visibility_options[ $old_visibility ] : false,
+					'NewVisibility'      => isset( $visibility_options[ $new_visibility ] ) ? $visibility_options[ $new_visibility ] : false,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			return 1;
 		}
-		return false;
+		return 0;
 	}
 
 	/**
@@ -726,30 +711,24 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function check_featured_product( $oldpost ) {
-		if (
-			isset( $_POST['post_ID'] ) && isset( $_POST['_wpnonce'] )
-			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . sanitize_text_field( wp_unslash( $_POST['post_ID'] ) ) )
-		) {
-			// Get product data.
-			$product_object = new WC_Product( $oldpost->ID );
-			$old_featured   = $product_object->get_featured();
-			$new_featured   = isset( $_POST['_featured'] );
+		// Get product data.
+		$product_object = new WC_Product( $oldpost->ID );
+		$old_featured   = $product_object->get_featured();
+		$new_featured   = isset( $_POST['_featured'] ); // @codingStandardsIgnoreLine
 
-			if ( $old_featured !== $new_featured ) {
-				$editor_link = $this->GetEditorLink( $oldpost );
-				$this->plugin->alerts->Trigger(
-					9043, array(
-						'ProductTitle'       => $oldpost->post_title,
-						'ProductStatus'      => $oldpost->post_status,
-						'Status'             => ( $new_featured ) ? 'Enabled' : 'Disabled',
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-				return 1;
-			}
-			return 0;
+		if ( $old_featured !== $new_featured ) {
+			$editor_link = $this->GetEditorLink( $oldpost );
+			$this->plugin->alerts->Trigger(
+				9043, array(
+					'ProductTitle'       => $oldpost->post_title,
+					'ProductStatus'      => $oldpost->post_status,
+					'Status'             => ( $new_featured ) ? 'Enabled' : 'Disabled',
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			return 1;
 		}
-		return false;
+		return 0;
 	}
 
 	/**
@@ -757,34 +736,34 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 *
 	 * @since 3.3.1
 	 *
-	 * @param object $oldpost - Old product object.
+	 * @param object $oldpost       - Old product object.
+	 * @param string $old_backorder - Old backorder value.
+	 * @param string $new_backorder - New backorder value.
 	 * @return int
 	 */
-	protected function check_backorders_setting( $oldpost ) {
-		if (
-			isset( $_POST['post_ID'] ) && isset( $_POST['_wpnonce'] )
-			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . sanitize_text_field( wp_unslash( $_POST['post_ID'] ) ) )
-		) {
-			// Get product data.
+	protected function check_backorders_setting( $oldpost, $old_backorder = '', $new_backorder = '' ) {
+		// Get product data.
+		if ( '' === $old_backorder ) {
 			$old_backorder = get_post_meta( $oldpost->ID, '_backorders', true );
-			$new_backorder = isset( $_POST['_backorders'] ) ? sanitize_text_field( wp_unslash( $_POST['_backorders'] ) ) : false;
-
-			if ( $old_backorder !== $new_backorder ) {
-				$editor_link = $this->GetEditorLink( $oldpost );
-				$this->plugin->alerts->Trigger(
-					9044, array(
-						'ProductTitle'       => $oldpost->post_title,
-						'ProductStatus'      => $oldpost->post_status,
-						'OldStatus'          => $old_backorder,
-						'NewStatus'          => $new_backorder,
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-				return 1;
-			}
-			return 0;
 		}
-		return false;
+		if ( '' === $new_backorder ) {
+			$new_backorder = isset( $_POST['_backorders'] ) ? sanitize_text_field( wp_unslash( $_POST['_backorders'] ) ) : false; // @codingStandardsIgnoreLine
+		}
+
+		if ( $old_backorder !== $new_backorder ) {
+			$editor_link = $this->GetEditorLink( $oldpost );
+			$this->plugin->alerts->Trigger(
+				9044, array(
+					'ProductTitle'       => $oldpost->post_title,
+					'ProductStatus'      => $oldpost->post_status,
+					'OldStatus'          => $old_backorder,
+					'NewStatus'          => $new_backorder,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			return 1;
+		}
+		return 0;
 	}
 
 	/**
@@ -796,66 +775,60 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function check_upsells_change( $oldpost ) {
-		if (
-			isset( $_POST['post_ID'] ) && isset( $_POST['_wpnonce'] )
-			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . sanitize_text_field( wp_unslash( $_POST['post_ID'] ) ) )
-		) {
-			// Get product data.
-			$old_upsell_ids = get_post_meta( $oldpost->ID, '_upsell_ids', true );
-			$new_upsell_ids = isset( $_POST['upsell_ids'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['upsell_ids'] ) ) : false;
+		// Get product data.
+		$old_upsell_ids = get_post_meta( $oldpost->ID, '_upsell_ids', true );
+		$new_upsell_ids = isset( $_POST['upsell_ids'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['upsell_ids'] ) ) : false; // @codingStandardsIgnoreLine
 
-			// Compute the difference.
-			$added_upsells   = array();
-			$removed_upsells = array();
-			if ( is_array( $new_upsell_ids ) && is_array( $old_upsell_ids ) ) {
-				$added_upsells   = array_diff( $new_upsell_ids, $old_upsell_ids );
-				$removed_upsells = array_diff( $old_upsell_ids, $new_upsell_ids );
-			}
-
-			// Get editor link.
-			$editor_link = $this->GetEditorLink( $oldpost );
-
-			// Return.
-			$return = 0;
-
-			// Added upsell products.
-			if ( ! empty( $added_upsells ) && is_array( $added_upsells ) ) {
-				foreach ( $added_upsells as $added_upsell ) {
-					$upsell_title = get_the_title( $added_upsell );
-					$this->plugin->alerts->Trigger(
-						9045, array(
-							'Status'             => 'Added',
-							'ProductTitle'       => $oldpost->post_title,
-							'ProductStatus'      => $oldpost->post_status,
-							'UpsellTitle'        => $upsell_title,
-							'UpsellID'           => $added_upsell,
-							$editor_link['name'] => $editor_link['value'],
-						)
-					);
-				}
-				$return = 1;
-			}
-
-			// Removed upsell products.
-			if ( ! empty( $removed_upsells ) && is_array( $removed_upsells ) ) {
-				foreach ( $removed_upsells as $removed_upsell ) {
-					$upsell_title = get_the_title( $removed_upsell );
-					$this->plugin->alerts->Trigger(
-						9045, array(
-							'Status'             => 'Removed',
-							'ProductTitle'       => $oldpost->post_title,
-							'ProductStatus'      => $oldpost->post_status,
-							'UpsellTitle'        => $upsell_title,
-							'UpsellID'           => $removed_upsell,
-							$editor_link['name'] => $editor_link['value'],
-						)
-					);
-				}
-				$return = 1;
-			}
-			return $return;
+		// Compute the difference.
+		$added_upsells   = array();
+		$removed_upsells = array();
+		if ( is_array( $new_upsell_ids ) && is_array( $old_upsell_ids ) ) {
+			$added_upsells   = array_diff( $new_upsell_ids, $old_upsell_ids );
+			$removed_upsells = array_diff( $old_upsell_ids, $new_upsell_ids );
 		}
-		return false;
+
+		// Get editor link.
+		$editor_link = $this->GetEditorLink( $oldpost );
+
+		// Return.
+		$return = 0;
+
+		// Added upsell products.
+		if ( ! empty( $added_upsells ) && is_array( $added_upsells ) ) {
+			foreach ( $added_upsells as $added_upsell ) {
+				$upsell_title = get_the_title( $added_upsell );
+				$this->plugin->alerts->Trigger(
+					9045, array(
+						'Status'             => 'Added',
+						'ProductTitle'       => $oldpost->post_title,
+						'ProductStatus'      => $oldpost->post_status,
+						'UpsellTitle'        => $upsell_title,
+						'UpsellID'           => $added_upsell,
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			}
+			$return = 1;
+		}
+
+		// Removed upsell products.
+		if ( ! empty( $removed_upsells ) && is_array( $removed_upsells ) ) {
+			foreach ( $removed_upsells as $removed_upsell ) {
+				$upsell_title = get_the_title( $removed_upsell );
+				$this->plugin->alerts->Trigger(
+					9045, array(
+						'Status'             => 'Removed',
+						'ProductTitle'       => $oldpost->post_title,
+						'ProductStatus'      => $oldpost->post_status,
+						'UpsellTitle'        => $upsell_title,
+						'UpsellID'           => $removed_upsell,
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			}
+			$return = 1;
+		}
+		return $return;
 	}
 
 	/**
@@ -867,66 +840,60 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function check_cross_sell_change( $oldpost ) {
-		if (
-			isset( $_POST['post_ID'] ) && isset( $_POST['_wpnonce'] )
-			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . sanitize_text_field( wp_unslash( $_POST['post_ID'] ) ) )
-		) {
-			// Get product data.
-			$old_cross_sell_ids = get_post_meta( $oldpost->ID, '_crosssell_ids', true );
-			$new_cross_sell_ids = isset( $_POST['crosssell_ids'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['crosssell_ids'] ) ) : false;
+		// Get product data.
+		$old_cross_sell_ids = get_post_meta( $oldpost->ID, '_crosssell_ids', true );
+		$new_cross_sell_ids = isset( $_POST['crosssell_ids'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['crosssell_ids'] ) ) : false; // @codingStandardsIgnoreLine
 
-			// Compute the difference.
-			$added_cross_sells   = array();
-			$removed_cross_sells = array();
-			if ( is_array( $new_cross_sell_ids ) && is_array( $old_cross_sell_ids ) ) {
-				$added_cross_sells   = array_diff( $new_cross_sell_ids, $old_cross_sell_ids );
-				$removed_cross_sells = array_diff( $old_cross_sell_ids, $new_cross_sell_ids );
-			}
-
-			// Get editor link.
-			$editor_link = $this->GetEditorLink( $oldpost );
-
-			// Return.
-			$return = 0;
-
-			// Added cross-sell products.
-			if ( ! empty( $added_cross_sells ) && is_array( $added_cross_sells ) ) {
-				foreach ( $added_cross_sells as $added_cross_sell ) {
-					$cross_sell_title = get_the_title( $added_cross_sell );
-					$this->plugin->alerts->Trigger(
-						9046, array(
-							'Status'             => 'Added',
-							'ProductTitle'       => $oldpost->post_title,
-							'ProductStatus'      => $oldpost->post_status,
-							'CrossSellTitle'     => $cross_sell_title,
-							'CrossSellID'        => $added_cross_sell,
-							$editor_link['name'] => $editor_link['value'],
-						)
-					);
-				}
-				$return = 1;
-			}
-
-			// Removed cross-sell products.
-			if ( ! empty( $removed_cross_sells ) && is_array( $removed_cross_sells ) ) {
-				foreach ( $removed_cross_sells as $removed_cross_sell ) {
-					$cross_sell_title = get_the_title( $removed_cross_sell );
-					$this->plugin->alerts->Trigger(
-						9046, array(
-							'Status'             => 'Removed',
-							'ProductTitle'       => $oldpost->post_title,
-							'ProductStatus'      => $oldpost->post_status,
-							'CrossSellTitle'     => $cross_sell_title,
-							'CrossSellID'        => $removed_cross_sell,
-							$editor_link['name'] => $editor_link['value'],
-						)
-					);
-				}
-				$return = 1;
-			}
-			return $return;
+		// Compute the difference.
+		$added_cross_sells   = array();
+		$removed_cross_sells = array();
+		if ( is_array( $new_cross_sell_ids ) && is_array( $old_cross_sell_ids ) ) {
+			$added_cross_sells   = array_diff( $new_cross_sell_ids, $old_cross_sell_ids );
+			$removed_cross_sells = array_diff( $old_cross_sell_ids, $new_cross_sell_ids );
 		}
-		return false;
+
+		// Get editor link.
+		$editor_link = $this->GetEditorLink( $oldpost );
+
+		// Return.
+		$return = 0;
+
+		// Added cross-sell products.
+		if ( ! empty( $added_cross_sells ) && is_array( $added_cross_sells ) ) {
+			foreach ( $added_cross_sells as $added_cross_sell ) {
+				$cross_sell_title = get_the_title( $added_cross_sell );
+				$this->plugin->alerts->Trigger(
+					9046, array(
+						'Status'             => 'Added',
+						'ProductTitle'       => $oldpost->post_title,
+						'ProductStatus'      => $oldpost->post_status,
+						'CrossSellTitle'     => $cross_sell_title,
+						'CrossSellID'        => $added_cross_sell,
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			}
+			$return = 1;
+		}
+
+		// Removed cross-sell products.
+		if ( ! empty( $removed_cross_sells ) && is_array( $removed_cross_sells ) ) {
+			foreach ( $removed_cross_sells as $removed_cross_sell ) {
+				$cross_sell_title = get_the_title( $removed_cross_sell );
+				$this->plugin->alerts->Trigger(
+					9046, array(
+						'Status'             => 'Removed',
+						'ProductTitle'       => $oldpost->post_title,
+						'ProductStatus'      => $oldpost->post_status,
+						'CrossSellTitle'     => $cross_sell_title,
+						'CrossSellID'        => $removed_cross_sell,
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			}
+			$return = 1;
+		}
+		return $return;
 	}
 
 	/**
@@ -974,17 +941,21 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		}
 
 		if ( 'product' === $post->post_type ) {
-			$this->plugin->alerts->Trigger( 9012, array(
-				'ProductTitle'  => $post->post_title,
-				'ProductStatus' => $post->post_status,
-				'ProductUrl'    => get_post_permalink( $post->ID ),
-			) );
+			$this->plugin->alerts->Trigger(
+				9012, array(
+					'ProductTitle'  => $post->post_title,
+					'ProductStatus' => $post->post_status,
+					'ProductUrl'    => get_post_permalink( $post->ID ),
+				)
+			);
 		} elseif ( 'shop_order' === $post->post_type ) {
-			$this->plugin->alerts->Trigger( 9037, array(
-				'OrderID'     => $post->ID,
-				'OrderTitle'  => $this->get_order_title( $post->ID ),
-				'OrderStatus' => $post->post_status,
-			) );
+			$this->plugin->alerts->Trigger(
+				9037, array(
+					'OrderID'     => $post->ID,
+					'OrderTitle'  => $this->get_order_title( $post->ID ),
+					'OrderStatus' => $post->post_status,
+				)
+			);
 		}
 	}
 
@@ -1019,18 +990,22 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 		if ( 'product' === $post->post_type ) {
 			$editor_link = $this->GetEditorLink( $post );
-			$this->plugin->alerts->Trigger( 9014, array(
-				'ProductTitle'       => $post->post_title,
-				$editor_link['name'] => $editor_link['value'],
-			) );
+			$this->plugin->alerts->Trigger(
+				9014, array(
+					'ProductTitle'       => $post->post_title,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
 		} elseif ( 'shop_order' === $post->post_type ) {
 			$editor_link = $this->GetEditorLink( $post );
-			$this->plugin->alerts->Trigger( 9038, array(
-				'OrderID'            => $post->ID,
-				'OrderTitle'         => $this->get_order_title( $post_id ),
-				'OrderStatus'        => $post->post_status,
-				$editor_link['name'] => $editor_link['value'],
-			) );
+			$this->plugin->alerts->Trigger(
+				9038, array(
+					'OrderID'            => $post->ID,
+					'OrderTitle'         => $this->get_order_title( $post_id ),
+					'OrderStatus'        => $post->post_status,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
 		}
 	}
 
@@ -1123,28 +1098,22 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function CheckPriceChange( $oldpost ) {
-		// Filter POST global array.
-		$post_array = filter_input_array( INPUT_POST );
+		$result         = 0;
+		$old_price      = get_post_meta( $oldpost->ID, '_regular_price', true );
+		$old_sale_price = get_post_meta( $oldpost->ID, '_sale_price', true );
 
-		if (
-			isset( $post_array['post_ID'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] )
-		) {
-			$result         = 0;
-			$old_price      = get_post_meta( $oldpost->ID, '_regular_price', true );
-			$old_sale_price = get_post_meta( $oldpost->ID, '_sale_price', true );
-			$new_price      = isset( $post_array['_regular_price'] ) ? $post_array['_regular_price'] : null;
-			$new_sale_price = isset( $post_array['_sale_price'] ) ? $post_array['_sale_price'] : null;
+		// @codingStandardsIgnoreStart
+		$new_price      = isset( $_POST['_regular_price'] ) ? sanitize_text_field( wp_unslash( $_POST['_regular_price'] ) ) : null;
+		$new_sale_price = isset( $_POST['_sale_price'] ) ? sanitize_text_field( wp_unslash( $_POST['_sale_price'] ) ) : null;
+		// @codingStandardsIgnoreEnd
 
-			if ( ( $new_price ) && ( $old_price != $new_price ) ) {
-				$result = $this->EventPrice( $oldpost, 'Regular price', $old_price, $new_price );
-			}
-			if ( ( $new_sale_price ) && ( $old_sale_price != $new_sale_price ) ) {
-				$result = $this->EventPrice( $oldpost, 'Sale price', $old_sale_price, $new_sale_price );
-			}
-			return $result;
+		if ( ( $new_price ) && ( $old_price !== $new_price ) ) {
+			$result = $this->EventPrice( $oldpost, 'Regular price', $old_price, $new_price );
 		}
-		return false;
+		if ( ( $new_sale_price ) && ( $old_sale_price !== $new_sale_price ) ) {
+			$result = $this->EventPrice( $oldpost, 'Sale price', $old_sale_price, $new_sale_price );
+		}
+		return $result;
 	}
 
 	/**
@@ -1176,103 +1145,88 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * Trigger events 9017
 	 *
 	 * @param object $oldpost - Old product object.
+	 * @param string $old_sku - Old SKU.
+	 * @param string $new_sku - New SKU.
 	 * @return int
 	 */
-	protected function CheckSKUChange( $oldpost ) {
-		// Filter POST global array.
-		$post_array = filter_input_array( INPUT_POST );
-
-		if (
-			isset( $post_array['post_ID'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] )
-		) {
+	protected function CheckSKUChange( $oldpost, $old_sku = '', $new_sku = '' ) {
+		if ( '' === $old_sku && '' === $new_sku ) {
 			$old_sku = get_post_meta( $oldpost->ID, '_sku', true );
-			$new_sku = isset( $post_array['_sku'] ) ? $post_array['_sku'] : null;
-
-			if ( ( $new_sku ) && ( $old_sku != $new_sku ) ) {
-				$editor_link = $this->GetEditorLink( $oldpost );
-				$this->plugin->alerts->Trigger(
-					9017, array(
-						'ProductTitle'       => $oldpost->post_title,
-						'ProductStatus'      => $oldpost->post_status,
-						'OldSku'             => ( ! empty( $old_sku ) ? $old_sku : 0 ),
-						'NewSku'             => $new_sku,
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-				return 1;
-			}
-			return 0;
+			$new_sku = isset( $_POST['_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['_sku'] ) ) : null; // @codingStandardsIgnoreLine
 		}
-		return false;
+
+		if ( $new_sku && ( $old_sku !== $new_sku ) ) {
+			$editor_link = $this->GetEditorLink( $oldpost );
+			$this->plugin->alerts->Trigger(
+				9017, array(
+					'ProductTitle'       => $oldpost->post_title,
+					'ProductStatus'      => $oldpost->post_status,
+					'OldSku'             => ( ! empty( $old_sku ) ? $old_sku : 0 ),
+					'NewSku'             => $new_sku,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			return 1;
+		}
+		return 0;
 	}
 
 	/**
 	 * Trigger events 9018
 	 *
-	 * @param object $oldpost - Old product object.
+	 * @param object $oldpost    - Old product object.
+	 * @param string $old_status - Old status.
+	 * @param string $new_status - New status.
 	 * @return int
 	 */
-	protected function CheckStockStatusChange( $oldpost ) {
-		// Filter POST global array.
-		$post_array = filter_input_array( INPUT_POST );
-
-		if (
-			isset( $post_array['post_ID'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] )
-		) {
+	protected function CheckStockStatusChange( $oldpost, $old_status = '', $new_status = '' ) {
+		if ( '' === $old_status && '' === $new_status ) {
 			$old_status = $this->_old_stock_status;
-			$new_status = isset( $post_array['_stock_status'] ) ? $post_array['_stock_status'] : null;
-
-			if ( ( $old_status && $new_status ) && ( $old_status != $new_status ) ) {
-				$editor_link = $this->GetEditorLink( $oldpost );
-				$this->plugin->alerts->Trigger(
-					9018, array(
-						'ProductTitle'       => $oldpost->post_title,
-						'ProductStatus'      => $oldpost->post_status,
-						'OldStatus'          => $this->GetStockStatusName( $old_status ),
-						'NewStatus'          => $this->GetStockStatusName( $new_status ),
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-				return 1;
-			}
-			return 0;
+			$new_status = isset( $_POST['_stock_status'] ) ? sanitize_text_field( wp_unslash( $_POST['_stock_status'] ) ) : null; // @codingStandardsIgnoreLine
 		}
-		return false;
+
+		if ( ( $old_status && $new_status ) && ( $old_status !== $new_status ) ) {
+			$editor_link = $this->GetEditorLink( $oldpost );
+			$this->plugin->alerts->Trigger(
+				9018, array(
+					'ProductTitle'       => $oldpost->post_title,
+					'ProductStatus'      => $oldpost->post_status,
+					'OldStatus'          => $this->GetStockStatusName( $old_status ),
+					'NewStatus'          => $this->GetStockStatusName( $new_status ),
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			return 1;
+		}
+		return 0;
 	}
 
 	/**
 	 * Trigger events 9019
 	 *
-	 * @param object $oldpost - Old product object.
+	 * @param object $oldpost   - Old product object.
+	 * @param mixed  $old_value - Old stock quantity.
+	 * @param mixed  $new_value - New stock quantity.
 	 * @return int
 	 */
-	protected function CheckStockQuantityChange( $oldpost ) {
-		// Filter POST global array.
-		$post_array = filter_input_array( INPUT_POST );
-
-		if (
-			isset( $post_array['post_ID'] )
-			&& isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] )
-		) {
+	protected function CheckStockQuantityChange( $oldpost, $old_value = false, $new_value = false ) {
+		if ( false === $old_value && false === $new_value ) {
 			$old_value = (int) get_post_meta( $oldpost->ID, '_stock', true );
-			$new_value = isset( $post_array['_stock'] ) ? (int) $post_array['_stock'] : null;
+			$new_value = isset( $_POST['_stock'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['_stock'] ) ) : null; // @codingStandardsIgnoreLine
+		}
 
-			if ( $new_value && ( $old_value !== $new_value ) ) {
-				$editor_link = $this->GetEditorLink( $oldpost );
-				$this->plugin->alerts->Trigger(
-					9019, array(
-						'ProductTitle'       => $oldpost->post_title,
-						'ProductStatus'      => $oldpost->post_status,
-						'OldValue'           => ( ! empty( $old_value ) ? $old_value : 0 ),
-						'NewValue'           => $new_value,
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-				return 1;
-			}
+		if ( $new_value && ( $old_value !== $new_value ) ) {
+			$editor_link = $this->GetEditorLink( $oldpost );
+			$this->plugin->alerts->Trigger(
+				9019, array(
+					'ProductTitle'       => $oldpost->post_title,
+					'ProductStatus'      => $oldpost->post_status,
+					'OldValue'           => ! empty( $old_value ) ? $old_value : 0,
+					'NewValue'           => $new_value,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			return 1;
 		}
 		return 0;
 	}
@@ -1280,59 +1234,76 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	/**
 	 * Trigger events 9020
 	 *
-	 * @param object $oldpost - Old product object.
-	 * @param object $newpost - New product object.
+	 * @param object $oldpost  - Old product object.
+	 * @param object $newpost  - New product object.
+	 * @param mixed  $virtual  - Product virtual data.
+	 * @param mixed  $download - Product downloadable data.
 	 * @return int
 	 */
-	protected function CheckTypeChange( $oldpost, $newpost ) {
-		if (
-			isset( $_POST['post_ID'] ) && isset( $_POST['_wpnonce'] )
-			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'update-post_' . sanitize_text_field( wp_unslash( $_POST['post_ID'] ) ) )
-		) {
-			if ( 'trash' !== $oldpost->post_status && 'trash' !== $newpost->post_status ) {
-				// Get simple product virtual data.
-				$old_virtual = get_post_meta( $oldpost->ID, '_virtual', true );
-				$new_virtual = isset( $_POST['_virtual'] ) ? 'yes' : 'no';
-
-				// Get simple product downloadable data.
-				$old_download = get_post_meta( $oldpost->ID, '_downloadable', true );
-				$new_download = isset( $_POST['_downloadable'] ) ? 'yes' : 'no';
-
-				// Return variable.
-				$result = 0;
-
-				if ( $old_virtual && $new_virtual && $old_virtual !== $new_virtual ) {
-					$editor_link = $this->GetEditorLink( $oldpost );
-					$this->plugin->alerts->Trigger(
-						9020, array(
-							'ProductTitle'       => $oldpost->post_title,
-							'ProductStatus'      => $oldpost->post_status,
-							'OldType'            => ( 'yes' === $old_virtual ) ? 'Virtual' : 'Non-Virtual',
-							'NewType'            => ( 'yes' === $new_virtual ) ? 'Virtual' : 'Non-Virtual',
-							$editor_link['name'] => $editor_link['value'],
-						)
-					);
-					$result = 1;
-				}
-
-				if ( $old_download && $new_download && $old_download !== $new_download ) {
-					$editor_link = $this->GetEditorLink( $oldpost );
-					$this->plugin->alerts->Trigger(
-						9020, array(
-							'ProductTitle'       => $oldpost->post_title,
-							'ProductStatus'      => $oldpost->post_status,
-							'OldType'            => ( 'yes' === $old_download ) ? 'Downloadable' : 'Non-Downloadable',
-							'NewType'            => ( 'yes' === $new_download ) ? 'Downloadable' : 'Non-Downloadable',
-							$editor_link['name'] => $editor_link['value'],
-						)
-					);
-					$result = 1;
-				}
-				return $result;
-			}
+	protected function CheckTypeChange( $oldpost, $newpost = null, $virtual = false, $download = false ) {
+		if ( 'trash' === $oldpost->post_status ) {
 			return 0;
 		}
-		return false;
+
+		if ( $newpost && $newpost instanceof WP_Post && 'trash' === $newpost->post_status ) {
+			return 0;
+		}
+
+		// Set initial variables.
+		$old_virtual  = false;
+		$new_virtual  = false;
+		$old_download = false;
+		$new_download = false;
+
+		// Get simple product virtual data.
+		if ( false === $virtual ) {
+			$old_virtual = get_post_meta( $oldpost->ID, '_virtual', true );
+			$new_virtual = isset( $_POST['_virtual'] ) ? 'yes' : 'no'; // @codingStandardsIgnoreLine
+		} elseif ( is_array( $virtual ) ) {
+			$old_virtual = ( isset( $virtual['old'] ) && $virtual['old'] ) ? 'yes' : 'no';
+			$new_virtual = ( isset( $virtual['new'] ) && $virtual['new'] ) ? 'yes' : 'no';
+		}
+
+		// Get simple product downloadable data.
+		if ( false === $download ) {
+			$old_download = get_post_meta( $oldpost->ID, '_downloadable', true );
+			$new_download = isset( $_POST['_downloadable'] ) ? 'yes' : 'no'; // @codingStandardsIgnoreLine
+		} elseif ( is_array( $download ) ) {
+			$old_download = ( isset( $download['old'] ) && $download['old'] ) ? 'yes' : 'no';
+			$new_download = ( isset( $download['new'] ) && $download['new'] ) ? 'yes' : 'no';
+		}
+
+		// Return variable.
+		$result = 0;
+
+		if ( $old_virtual && $new_virtual && $old_virtual !== $new_virtual ) {
+			$editor_link = $this->GetEditorLink( $oldpost );
+			$this->plugin->alerts->Trigger(
+				9020, array(
+					'ProductTitle'       => $oldpost->post_title,
+					'ProductStatus'      => $oldpost->post_status,
+					'OldType'            => ( 'yes' === $old_virtual ) ? 'Virtual' : 'Non-Virtual',
+					'NewType'            => ( 'yes' === $new_virtual ) ? 'Virtual' : 'Non-Virtual',
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			$result = 1;
+		}
+
+		if ( $old_download && $new_download && $old_download !== $new_download ) {
+			$editor_link = $this->GetEditorLink( $oldpost );
+			$this->plugin->alerts->Trigger(
+				9020, array(
+					'ProductTitle'       => $oldpost->post_title,
+					'ProductStatus'      => $oldpost->post_status,
+					'OldType'            => ( 'yes' === $old_download ) ? 'Downloadable' : 'Non-Downloadable',
+					'NewType'            => ( 'yes' === $new_download ) ? 'Downloadable' : 'Non-Downloadable',
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			$result = 1;
+		}
+		return $result;
 	}
 
 	/**
@@ -1359,79 +1330,98 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	/**
 	 * Trigger events 9021
 	 *
-	 * @param object $oldpost - Old product object.
+	 * @param object $oldpost    - Old product object.
+	 * @param string $old_weight - (Optional) Old weight.
+	 * @param string $new_weight - (Optional) New weight.
 	 * @return int
 	 */
-	protected function CheckWeightChange( $oldpost ) {
-		// Filter POST global array.
-		$post_array = filter_input_array( INPUT_POST );
-
-		if (
-			isset( $post_array['post_ID'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] )
-		) {
+	protected function CheckWeightChange( $oldpost, $old_weight = '', $new_weight = '' ) {
+		if ( '' === $old_weight && '' === $new_weight ) {
 			$old_weight = get_post_meta( $oldpost->ID, '_weight', true );
-			$new_weight = isset( $post_array['_weight'] ) ? $post_array['_weight'] : null;
-
-			if ( ( $new_weight ) && ( $old_weight != $new_weight ) ) {
-				$editor_link = $this->GetEditorLink( $oldpost );
-				$this->plugin->alerts->Trigger(
-					9021, array(
-						'ProductTitle'       => $oldpost->post_title,
-						'ProductStatus'      => $oldpost->post_status,
-						'OldWeight'          => ( ! empty( $old_weight ) ? $old_weight : 0 ),
-						'NewWeight'          => $new_weight,
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-				return 1;
-			}
-			return 0;
+			$new_weight = isset( $_POST['_weight'] ) ? sanitize_text_field( wp_unslash( $_POST['_weight'] ) ) : null; // @codingStandardsIgnoreLine
 		}
-		return false;
+
+		if ( $new_weight && ( $old_weight !== $new_weight ) ) {
+			$weight_unit = $this->GetConfig( 'weight_unit' );
+			$editor_link = $this->GetEditorLink( $oldpost );
+			$this->plugin->alerts->Trigger(
+				9021, array(
+					'ProductTitle'       => $oldpost->post_title,
+					'ProductStatus'      => $oldpost->post_status,
+					'OldWeight'          => ! empty( $old_weight ) ? $old_weight . ' ' . $weight_unit : 0,
+					'NewWeight'          => $new_weight . ' ' . $weight_unit,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			return 1;
+		}
+		return 0;
 	}
 
 	/**
 	 * Trigger events 9022
 	 *
 	 * @param object $oldpost - Old product object.
+	 * @param mixed  $length  - (Optional) Product lenght.
+	 * @param mixed  $width   - (Optional) Product width.
+	 * @param mixed  $height  - (Optional) Product height.
 	 * @return int
 	 */
-	protected function CheckDimensionsChange( $oldpost ) {
-		// Filter POST global array.
-		$post_array = filter_input_array( INPUT_POST );
+	protected function CheckDimensionsChange( $oldpost, $length = false, $width = false, $height = false ) {
+		// Get product dimensions data.
+		$result = 0;
 
-		if (
-			isset( $post_array['post_ID'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] )
-		) {
-			$result     = 0;
+		$old_length = false;
+		$new_length = false;
+		$old_width  = false;
+		$new_width  = false;
+		$old_height = false;
+		$new_height = false;
+
+		// Length.
+		if ( false === $length ) {
 			$old_length = get_post_meta( $oldpost->ID, '_length', true );
-			$new_length = isset( $post_array['_length'] ) ? $post_array['_length'] : null;
-			$old_width  = get_post_meta( $oldpost->ID, '_width', true );
-			$new_width  = isset( $post_array['_width'] ) ? $post_array['_width'] : null;
-			$old_height = get_post_meta( $oldpost->ID, '_height', true );
-			$new_height = isset( $post_array['_height'] ) ? $post_array['_height'] : null;
-
-			if ( ( $new_length ) && ( $old_length != $new_length ) ) {
-				$result = $this->EventDimension( $oldpost, 'Length', $old_length, $new_length );
-			}
-			if ( ( $new_width ) && ( $old_width != $new_width ) ) {
-				$result = $this->EventDimension( $oldpost, 'Width', $old_width, $new_width );
-			}
-			if ( ( $new_height ) && ( $old_height != $new_height ) ) {
-				$result = $this->EventDimension( $oldpost, 'Height', $old_height, $new_height );
-			}
-			return $result;
+			$new_length = isset( $_POST['_length'] ) ? sanitize_text_field( wp_unslash( $_POST['_length'] ) ) : null; // @codingStandardsIgnoreLine
+		} elseif ( is_array( $length ) ) {
+			$old_length = isset( $length['old'] ) ? $length['old'] : false;
+			$new_length = isset( $length['new'] ) ? $length['new'] : false;
 		}
-		return false;
+
+		// Width.
+		if ( false === $width ) {
+			$old_width = get_post_meta( $oldpost->ID, '_width', true );
+			$new_width = isset( $_POST['_width'] ) ? sanitize_text_field( wp_unslash( $_POST['_width'] ) ) : null; // @codingStandardsIgnoreLine
+		} elseif ( is_array( $width ) ) {
+			$old_width = isset( $width['old'] ) ? $width['old'] : false;
+			$new_width = isset( $width['new'] ) ? $width['new'] : false;
+		}
+
+		// Height.
+		if ( false === $height ) {
+			$old_height = get_post_meta( $oldpost->ID, '_height', true );
+			$new_height = isset( $_POST['_height'] ) ? sanitize_text_field( wp_unslash( $_POST['_height'] ) ) : null; // @codingStandardsIgnoreLine
+		} elseif ( is_array( $height ) ) {
+			$old_height = isset( $height['old'] ) ? $height['old'] : false;
+			$new_height = isset( $height['new'] ) ? $height['new'] : false;
+		}
+
+		if ( $new_length && ( $old_length !== $new_length ) ) {
+			$result = $this->EventDimension( $oldpost, 'Length', $old_length, $new_length );
+		}
+		if ( $new_width && ( $old_width !== $new_width ) ) {
+			$result = $this->EventDimension( $oldpost, 'Width', $old_width, $new_width );
+		}
+		if ( $new_height && ( $old_height !== $new_height ) ) {
+			$result = $this->EventDimension( $oldpost, 'Height', $old_height, $new_height );
+		}
+		return $result;
 	}
 
 	/**
 	 * Group the Dimension changes in one function.
 	 *
-	 * @param object $oldpost - Old Product object.
-	 * @param string $type - Dimension type.
+	 * @param object $oldpost       - Old Product object.
+	 * @param string $type          - Dimension type.
 	 * @param string $old_dimension - Old dimension.
 	 * @param string $new_dimension - New dimension.
 	 * @return int
@@ -1444,8 +1434,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				'ProductTitle'       => $oldpost->post_title,
 				'ProductStatus'      => $oldpost->post_status,
 				'DimensionType'      => $type,
-				'OldDimension'       => ( ! empty( $old_dimension ) ? $dimension_unit . ' ' . $old_dimension : 0 ),
-				'NewDimension'       => $dimension_unit . ' ' . $new_dimension,
+				'OldDimension'       => ! empty( $old_dimension ) ? $old_dimension . ' ' . $dimension_unit : 0,
+				'NewDimension'       => $new_dimension . ' ' . $dimension_unit,
 				$editor_link['name'] => $editor_link['value'],
 			)
 		);
@@ -1455,105 +1445,110 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	/**
 	 * Trigger events 9023, 9024, 9025, 9026
 	 *
-	 * @param object $oldpost - Old product object.
+	 * @param object $oldpost    - Old product object.
+	 * @param mixed  $file_names - (Optional) New product file names.
+	 * @param mixed  $file_urls  - (Optional) New product file urls.
 	 * @return int
 	 */
-	protected function CheckDownloadableFileChange( $oldpost ) {
-		// Filter POST global array.
-		$post_array = filter_input_array( INPUT_POST );
+	protected function CheckDownloadableFileChange( $oldpost, $file_names = false, $file_urls = false ) {
+		// Get product data.
+		$result          = 0;
+		$is_url_changed  = false;
+		$is_name_changed = false;
+		$editor_link     = $this->GetEditorLink( $oldpost );
 
-		if (
-			isset( $post_array['post_ID'] ) && isset( $post_array['_wpnonce'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] )
-		) {
-			$result          = 0;
-			$is_url_changed  = false;
-			$is_name_changed = false;
-			$new_file_names  = ! empty( $post_array['_wc_file_names'] ) ? $post_array['_wc_file_names'] : array();
-			$new_file_urls   = ! empty( $post_array['_wc_file_urls'] ) ? $post_array['_wc_file_urls'] : array();
-			$editor_link     = $this->GetEditorLink( $oldpost );
-			$added_urls      = array_diff( $new_file_urls, $this->_old_file_urls );
+		if ( false === $file_names ) {
+			$new_file_names = ! empty( $_POST['_wc_file_names'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['_wc_file_names'] ) ) : array(); // @codingStandardsIgnoreLine
+		} else {
+			$new_file_names = $file_names;
+		}
 
-			// Added files to the product.
-			if ( count( $added_urls ) > 0 ) {
-				// If the file has only changed URL.
-				if ( count( $new_file_urls ) == count( $this->_old_file_urls ) ) {
-					$is_url_changed = true;
-				} else {
-					foreach ( $added_urls as $key => $url ) {
-						$this->plugin->alerts->Trigger(
-							9023, array(
-								'ProductTitle'       => $oldpost->post_title,
-								'ProductStatus'      => $oldpost->post_status,
-								'FileName'           => $new_file_names[ $key ],
-								'FileUrl'            => $url,
-								$editor_link['name'] => $editor_link['value'],
-							)
-						);
-					}
-					$result = 1;
-				}
-			}
+		if ( false === $file_urls ) {
+			$new_file_urls = ! empty( $_POST['_wc_file_urls'] ) ? array_map( 'esc_url_raw', wp_unslash( $_POST['_wc_file_urls'] ) ) : array(); // @codingStandardsIgnoreLine
+		} else {
+			$new_file_urls = $file_urls;
+		}
 
-			$removed_urls = array_diff( $this->_old_file_urls, $new_file_urls );
-			// Removed files from the product.
-			if ( count( $removed_urls ) > 0 ) {
-				// If the file has only changed URL.
-				if ( count( $new_file_urls ) == count( $this->_old_file_urls ) ) {
-					$is_url_changed = true;
-				} else {
-					foreach ( $removed_urls as $key => $url ) {
-						$this->plugin->alerts->Trigger(
-							9024, array(
-								'ProductTitle'       => $oldpost->post_title,
-								'ProductStatus'      => $oldpost->post_status,
-								'FileName'           => $this->_old_file_names[ $key ],
-								'FileUrl'            => $url,
-								$editor_link['name'] => $editor_link['value'],
-							)
-						);
-					}
-					$result = 1;
-				}
-			}
+		$added_urls   = array_diff( $new_file_urls, $this->_old_file_urls );
+		$removed_urls = array_diff( $this->_old_file_urls, $new_file_urls );
+		$added_names  = array_diff( $new_file_names, $this->_old_file_names );
 
-			$added_names = array_diff( $new_file_names, $this->_old_file_names );
-			if ( count( $added_names ) > 0 ) {
-				// If the file has only changed Name.
-				if ( count( $new_file_names ) == count( $this->_old_file_names ) ) {
-					foreach ( $added_names as $key => $name ) {
-						$this->plugin->alerts->Trigger(
-							9025, array(
-								'ProductTitle'       => $oldpost->post_title,
-								'ProductStatus'      => $oldpost->post_status,
-								'OldName'            => $this->_old_file_names[ $key ],
-								'NewName'            => $name,
-								$editor_link['name'] => $editor_link['value'],
-							)
-						);
-					}
-					$result = 1;
-				}
-			}
-
-			if ( $is_url_changed ) {
+		// Added files to the product.
+		if ( count( $added_urls ) > 0 ) {
+			// If the file has only changed URL.
+			if ( count( $new_file_urls ) === count( $this->_old_file_urls ) ) {
+				$is_url_changed = true;
+			} else {
 				foreach ( $added_urls as $key => $url ) {
 					$this->plugin->alerts->Trigger(
-						9026, array(
+						9023, array(
 							'ProductTitle'       => $oldpost->post_title,
 							'ProductStatus'      => $oldpost->post_status,
 							'FileName'           => $new_file_names[ $key ],
-							'OldUrl'             => $removed_urls[ $key ],
-							'NewUrl'             => $url,
+							'FileUrl'            => $url,
 							$editor_link['name'] => $editor_link['value'],
 						)
 					);
 				}
 				$result = 1;
 			}
-			return $result;
 		}
-		return false;
+
+		// Removed files from the product.
+		if ( count( $removed_urls ) > 0 ) {
+			// If the file has only changed URL.
+			if ( count( $new_file_urls ) === count( $this->_old_file_urls ) ) {
+				$is_url_changed = true;
+			} else {
+				foreach ( $removed_urls as $key => $url ) {
+					$this->plugin->alerts->Trigger(
+						9024, array(
+							'ProductTitle'       => $oldpost->post_title,
+							'ProductStatus'      => $oldpost->post_status,
+							'FileName'           => $this->_old_file_names[ $key ],
+							'FileUrl'            => $url,
+							$editor_link['name'] => $editor_link['value'],
+						)
+					);
+				}
+				$result = 1;
+			}
+		}
+
+		if ( count( $added_names ) > 0 ) {
+			// If the file has only changed Name.
+			if ( count( $new_file_names ) === count( $this->_old_file_names ) ) {
+				foreach ( $added_names as $key => $name ) {
+					$this->plugin->alerts->Trigger(
+						9025, array(
+							'ProductTitle'       => $oldpost->post_title,
+							'ProductStatus'      => $oldpost->post_status,
+							'OldName'            => $this->_old_file_names[ $key ],
+							'NewName'            => $name,
+							$editor_link['name'] => $editor_link['value'],
+						)
+					);
+				}
+				$result = 1;
+			}
+		}
+
+		if ( $is_url_changed ) {
+			foreach ( $added_urls as $key => $url ) {
+				$this->plugin->alerts->Trigger(
+					9026, array(
+						'ProductTitle'       => $oldpost->post_title,
+						'ProductStatus'      => $oldpost->post_status,
+						'FileName'           => $new_file_names[ $key ],
+						'OldUrl'             => $removed_urls[ $key ],
+						'NewUrl'             => $url,
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			}
+			$result = 1;
+		}
+		return $result;
 	}
 
 	/**
@@ -1570,10 +1565,12 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						$old_unit = $this->GetConfig( 'weight_unit' );
 						$new_unit = sanitize_text_field( wp_unslash( $_POST['woocommerce_weight_unit'] ) );
 						if ( $old_unit !== $new_unit ) {
-							$this->plugin->alerts->Trigger( 9027, array(
-								'OldUnit' => $old_unit,
-								'NewUnit' => $new_unit,
-							) );
+							$this->plugin->alerts->Trigger(
+								9027, array(
+									'OldUnit' => $old_unit,
+									'NewUnit' => $new_unit,
+								)
+							);
 						}
 					}
 
@@ -1582,10 +1579,12 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						$old_unit = $this->GetConfig( 'dimension_unit' );
 						$new_unit = sanitize_text_field( wp_unslash( $_POST['woocommerce_dimension_unit'] ) );
 						if ( $old_unit !== $new_unit ) {
-							$this->plugin->alerts->Trigger( 9028, array(
-								'OldUnit' => $old_unit,
-								'NewUnit' => $new_unit,
-							) );
+							$this->plugin->alerts->Trigger(
+								9028, array(
+									'OldUnit' => $old_unit,
+									'NewUnit' => $new_unit,
+								)
+							);
 						}
 					}
 				} elseif ( isset( $_GET['tab'] ) && 'account' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
@@ -1626,16 +1625,20 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						if ( $old_gateway_status !== $new_gateway_status ) {
 							if ( 'yes' === $new_gateway_status ) {
 								// Gateway enabled.
-								$this->plugin->alerts->Trigger( 9074, array(
-									'GatewayID'   => $gateway,
-									'GatewayName' => isset( $gateway_settings['title'] ) ? $gateway_settings['title'] : false,
-								) );
+								$this->plugin->alerts->Trigger(
+									9074, array(
+										'GatewayID'   => $gateway,
+										'GatewayName' => isset( $gateway_settings['title'] ) ? $gateway_settings['title'] : false,
+									)
+								);
 							} else {
 								// Gateway disabled.
-								$this->plugin->alerts->Trigger( 9075, array(
-									'GatewayID'   => $gateway,
-									'GatewayName' => isset( $gateway_settings['title'] ) ? $gateway_settings['title'] : false,
-								) );
+								$this->plugin->alerts->Trigger(
+									9075, array(
+										'GatewayID'   => $gateway,
+										'GatewayName' => isset( $gateway_settings['title'] ) ? $gateway_settings['title'] : false,
+									)
+								);
 							}
 							$status_change = true;
 						}
@@ -1643,10 +1646,80 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 					if ( $gateway && ! $status_change ) {
 						$gateway_settings = $this->GetConfig( $gateway . '_settings' );
-						$this->plugin->alerts->Trigger( 9076, array(
-							'GatewayID'   => $gateway,
-							'GatewayName' => isset( $gateway_settings['title'] ) ? $gateway_settings['title'] : false,
-						) );
+						$this->plugin->alerts->Trigger(
+							9076, array(
+								'GatewayID'   => $gateway,
+								'GatewayName' => isset( $gateway_settings['title'] ) ? $gateway_settings['title'] : false,
+							)
+						);
+					}
+				} elseif ( isset( $_GET['tab'] ) && 'tax' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
+					// Check prices entered with tax setting.
+					if ( isset( $_POST['woocommerce_prices_include_tax'] ) ) {
+						$old_price_tax = $this->GetConfig( 'prices_include_tax' );
+						$new_price_tax = sanitize_text_field( wp_unslash( $_POST['woocommerce_prices_include_tax'] ) );
+						if ( $old_price_tax !== $new_price_tax ) {
+							$this->plugin->alerts->Trigger( 9078, array( 'TaxStatus' => 'yes' === $new_price_tax ? 'including' : 'excluding' ) );
+						}
+					}
+
+					// Check calculate tax based on setting.
+					if ( isset( $_POST['woocommerce_tax_based_on'] ) ) {
+						$old_tax_base = $this->GetConfig( 'tax_based_on' );
+						$new_tax_base = sanitize_text_field( wp_unslash( $_POST['woocommerce_tax_based_on'] ) );
+						if ( $old_tax_base !== $new_tax_base ) {
+							$setting = '';
+							if ( 'shipping' === $new_tax_base ) {
+								$setting = 'Customer shipping address';
+							} elseif ( 'billing' === $new_tax_base ) {
+								$setting = 'Customer billing address';
+							} elseif ( 'base' === $new_tax_base ) {
+								$setting = 'Shop base address';
+							} else {
+								$setting = 'Customer shipping address';
+							}
+							$this->plugin->alerts->Trigger(
+								9079, array(
+									'Setting'    => $setting,
+									'OldTaxBase' => $old_tax_base,
+									'NewTaxBase' => $new_tax_base,
+								)
+							);
+						}
+					}
+
+					// Check shipping tax class setting.
+					if ( isset( $_POST['woocommerce_shipping_tax_class'] ) ) {
+						$old_tax_class = $this->GetConfig( 'shipping_tax_class' );
+						$new_tax_class = sanitize_text_field( wp_unslash( $_POST['woocommerce_shipping_tax_class'] ) );
+						if ( $old_tax_class !== $new_tax_class ) {
+							$setting = '';
+							if ( 'inherit' === $new_tax_class ) {
+								$setting = 'Shipping tax class based on cart items';
+							} elseif ( 'reduced-rate' === $new_tax_class ) {
+								$setting = 'Reduced rate';
+							} elseif ( 'zero-rate' === $new_tax_class ) {
+								$setting = 'Zero rate';
+							} elseif ( empty( $new_tax_class ) ) {
+								$setting = 'Standard';
+							} else {
+								$setting = 'Shipping tax class based on cart items';
+							}
+							$this->plugin->alerts->Trigger(
+								9080, array(
+									'Setting'     => $setting,
+									'OldTaxClass' => $old_tax_class,
+									'NewTaxClass' => $new_tax_class,
+								)
+							);
+						}
+					}
+
+					// Check rounding of tax setting.
+					$old_tax_round = $this->GetConfig( 'tax_round_at_subtotal' );
+					$new_tax_round = isset( $_POST['woocommerce_tax_round_at_subtotal'] ) ? 'yes' : 'no';
+					if ( $old_tax_round !== $new_tax_round ) {
+						$this->plugin->alerts->Trigger( 9081, array( 'Status' => 'yes' === $new_tax_round ? 'Enabled' : 'Disabled' ) );
 					}
 				} else {
 					// "Enable Coupon" event.
@@ -1662,10 +1735,12 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						$old_location = $this->GetConfig( 'default_country' );
 						$new_location = sanitize_text_field( wp_unslash( $_POST['woocommerce_default_country'] ) );
 						if ( $old_location !== $new_location ) {
-							$this->plugin->alerts->Trigger( 9029, array(
-								'OldLocation' => $old_location,
-								'NewLocation' => $new_location,
-							) );
+							$this->plugin->alerts->Trigger(
+								9029, array(
+									'OldLocation' => $old_location,
+									'NewLocation' => $new_location,
+								)
+							);
 						}
 
 						// Calculate taxes event.
@@ -1682,10 +1757,12 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						$old_currency = $this->GetConfig( 'currency' );
 						$new_currency = sanitize_text_field( wp_unslash( $_POST['woocommerce_currency'] ) );
 						if ( $old_currency !== $new_currency ) {
-							$this->plugin->alerts->Trigger( 9031, array(
-								'OldCurrency' => $old_currency,
-								'NewCurrency' => $new_currency,
-							) );
+							$this->plugin->alerts->Trigger(
+								9031, array(
+									'OldCurrency' => $old_currency,
+									'NewCurrency' => $new_currency,
+								)
+							);
 						}
 					}
 				}
@@ -1719,18 +1796,73 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						} else {
 							if ( ! wc_string_to_bool( $enabled ) ) {
 								// Gateway enabled.
-								$this->plugin->alerts->Trigger( 9074, array(
-									'GatewayID'   => $gateway->id,
-									'GatewayName' => $gateway->title,
-								) );
+								$this->plugin->alerts->Trigger(
+									9074, array(
+										'GatewayID'   => $gateway->id,
+										'GatewayName' => $gateway->title,
+									)
+								);
 							} else {
 								// Gateway disabled.
-								$this->plugin->alerts->Trigger( 9075, array(
-									'GatewayID'   => $gateway->id,
-									'GatewayName' => $gateway->title,
-								) );
+								$this->plugin->alerts->Trigger(
+									9075, array(
+										'GatewayID'   => $gateway->id,
+										'GatewayName' => $gateway->title,
+									)
+								);
 							}
 						}
+					}
+				}
+			}
+		}
+
+		// Verify nonce for shipping zones events.
+		if ( isset( $_POST['wc_shipping_zones_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wc_shipping_zones_nonce'] ) ), 'wc_shipping_zones_nonce' ) ) {
+			if ( isset( $_POST['zone_id'] ) ) {
+				// Get zone details.
+				$zone_id = sanitize_text_field( wp_unslash( $_POST['zone_id'] ) );
+
+				if ( ! $zone_id && isset( $_POST['changes']['zone_name'] ) ) {
+					// Get zone details.
+					$zone_name = sanitize_text_field( wp_unslash( $_POST['changes']['zone_name'] ) );
+
+					$this->plugin->alerts->Trigger(
+						9082, array(
+							'ShippingZoneStatus' => 'Added',
+							'ShippingZoneName'   => $zone_name,
+						)
+					);
+				} elseif ( ! empty( $_POST['changes'] ) ) {
+					$shipping_zone = new WC_Shipping_Zone( $zone_id );
+					$zone_name     = isset( $_POST['changes']['zone_name'] ) ? sanitize_text_field( wp_unslash( $_POST['changes']['zone_name'] ) ) : false;
+					$this->plugin->alerts->Trigger(
+						9082, array(
+							'ShippingZoneID'     => $zone_id,
+							'ShippingZoneStatus' => 'Modified',
+							'ShippingZoneName'   => $zone_name ? $zone_name : $shipping_zone->get_zone_name(),
+						)
+					);
+				}
+			}
+
+			if ( isset( $_POST['changes'] ) && ! empty( $_POST['changes'] ) ) {
+				// @codingStandardsIgnoreLine
+				$changes = $_POST['changes'];
+				foreach ( $changes as $key => $zone ) {
+					if ( ! is_integer( $key ) ) {
+						continue;
+					}
+
+					if ( isset( $zone['zone_id'], $zone['deleted'] ) && 'deleted' === $zone['deleted'] ) {
+						$zone_obj = new WC_Shipping_Zone( $zone['zone_id'] );
+						$this->plugin->alerts->Trigger(
+							9082, array(
+								'ShippingZoneID'     => $zone['zone_id'],
+								'ShippingZoneStatus' => 'Deleted',
+								'ShippingZoneName'   => $zone_obj->get_zone_name(),
+							)
+						);
 					}
 				}
 			}
@@ -1760,11 +1892,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return array
 	 */
 	protected function GetProductCategories( $post ) {
-		return wp_get_post_terms(
-			$post->ID, 'product_cat', array(
-				'fields' => 'names',
-			)
-		);
+		return wp_get_post_terms( $post->ID, 'product_cat', array( 'fields' => 'names' ) );
 	}
 
 	/**
@@ -2110,7 +2238,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		if ( ! $order ) {
 			return false;
 		}
-		if ( is_integer( $order ) ) {
+		if ( is_int( $order ) ) {
 			$order = new WC_Order( $order );
 		}
 		if ( ! $order instanceof WC_Order ) {
@@ -2217,12 +2345,14 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				$edit_link = $this->GetEditorLink( $order_post );
 
 				// Log event.
-				$this->plugin->alerts->Trigger( 9040, array(
-					'OrderID'          => $order_id,
-					'OrderTitle'       => $this->get_order_title( $order_id ),
-					'OrderStatus'      => $order_post->post_status,
-					$edit_link['name'] => $edit_link['value'],
-				) );
+				$this->plugin->alerts->Trigger(
+					9040, array(
+						'OrderID'          => $order_id,
+						'OrderTitle'       => $this->get_order_title( $order_id ),
+						'OrderStatus'      => $order_post->post_status,
+						$edit_link['name'] => $edit_link['value'],
+					)
+				);
 			}
 		}
 		return $order_ids;
@@ -2241,13 +2371,15 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		$order_obj = get_post( $order_id );
 		$edit_link = $this->GetEditorLink( $order_obj );
 
-		$this->plugin->alerts->Trigger( 9041, array(
-			'OrderID'          => $order_id,
-			'RefundID'         => $refund_id,
-			'OrderTitle'       => $this->get_order_title( $order_id ),
-			'OrderStatus'      => $order_obj->post_status,
-			$edit_link['name'] => $edit_link['value'],
-		) );
+		$this->plugin->alerts->Trigger(
+			9041, array(
+				'OrderID'          => $order_id,
+				'RefundID'         => $refund_id,
+				'OrderTitle'       => $this->get_order_title( $order_id ),
+				'OrderStatus'      => $order_obj->post_status,
+				$edit_link['name'] => $edit_link['value'],
+			)
+		);
 	}
 
 	/**
@@ -2279,15 +2411,17 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 		// Check id and attribute object.
 		if ( $id && ! is_null( $attribute ) ) {
-			$this->plugin->alerts->Trigger( 9058, array(
-				'AttributeID'      => $id,
-				'AttributeName'    => isset( $attribute->name ) ? $attribute->name : false,
-				'AttributeSlug'    => isset( $attribute->slug ) ? str_replace( 'pa_', '', $attribute->slug ) : false,
-				'AttributeType'    => isset( $attribute->type ) ? $attribute->type : false,
-				'AttributeOrderby' => isset( $attribute->order_by ) ? $attribute->order_by : false,
-				'AttributePublic'  => isset( $attribute->has_archives ) ? $attribute->has_archives : '0',
-				'Taxonomy'         => $taxonomy,
-			) );
+			$this->plugin->alerts->Trigger(
+				9058, array(
+					'AttributeID'      => $id,
+					'AttributeName'    => isset( $attribute->name ) ? $attribute->name : false,
+					'AttributeSlug'    => isset( $attribute->slug ) ? str_replace( 'pa_', '', $attribute->slug ) : false,
+					'AttributeType'    => isset( $attribute->type ) ? $attribute->type : false,
+					'AttributeOrderby' => isset( $attribute->order_by ) ? $attribute->order_by : false,
+					'AttributePublic'  => isset( $attribute->has_archives ) ? $attribute->has_archives : '0',
+					'Taxonomy'         => $taxonomy,
+				)
+			);
 		}
 	}
 
@@ -2413,6 +2547,20 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			// Get the attributes data.
 			parse_str( $_POST['data'], $data );
 			$this->check_attributes_change( $post, $data );
+		} elseif ( 'woocommerce_save_variations' === $action ) {
+			// Check nonce.
+			check_ajax_referer( 'save-variations', 'security' );
+
+			$product_id = isset( $_POST['product_id'] ) ? sanitize_text_field( wp_unslash( $_POST['product_id'] ) ) : false;
+			if ( ! $product_id ) {
+				return;
+			}
+
+			$post = get_post( $product_id );
+			if ( ! $post ) {
+				return;
+			}
+			$this->check_variations_change( $post );
 		} elseif ( in_array( $action, $wc_order_actions, true ) ) {
 			// Check nonce.
 			check_ajax_referer( 'order-item', 'security' );
@@ -2430,12 +2578,14 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$edit_link = $this->GetEditorLink( $order );
 
 			// Log event.
-			$this->plugin->alerts->Trigger( 9040, array(
-				'OrderID'          => $order_id,
-				'OrderTitle'       => $this->get_order_title( $order_id ),
-				'OrderStatus'      => isset( $order->post_status ) ? $order->post_status : false,
-				$edit_link['name'] => $edit_link['value'],
-			) );
+			$this->plugin->alerts->Trigger(
+				9040, array(
+					'OrderID'          => $order_id,
+					'OrderTitle'       => $this->get_order_title( $order_id ),
+					'OrderStatus'      => isset( $order->post_status ) ? $order->post_status : false,
+					$edit_link['name'] => $edit_link['value'],
+				)
+			);
 		}
 	}
 
@@ -2489,14 +2639,16 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			if ( ! empty( $added_attributes ) ) {
 				foreach ( $added_attributes as $added_attribute ) {
 					if ( $added_attribute && ! empty( $added_attribute['name'] ) ) {
-						$this->plugin->alerts->Trigger( 9047, array(
-							'AttributeName'      => $added_attribute['name'],
-							'AttributeValue'     => $added_attribute['value'],
-							'ProductID'          => $oldpost->ID,
-							'ProductTitle'       => $oldpost->post_title,
-							'ProductStatus'      => $oldpost->post_status,
-							$editor_link['name'] => $editor_link['value'],
-						) );
+						$this->plugin->alerts->Trigger(
+							9047, array(
+								'AttributeName'      => $added_attribute['name'],
+								'AttributeValue'     => $added_attribute['value'],
+								'ProductID'          => $oldpost->ID,
+								'ProductTitle'       => $oldpost->post_title,
+								'ProductStatus'      => $oldpost->post_status,
+								$editor_link['name'] => $editor_link['value'],
+							)
+						);
 						$result = 1;
 					}
 				}
@@ -2505,15 +2657,17 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			// Event 9050.
 			if ( ! empty( $deleted_attributes ) ) {
 				foreach ( $deleted_attributes as $deleted_attribute ) {
-					$this->plugin->alerts->Trigger( 9050, array(
-						'AttributeName'      => $deleted_attribute['name'],
-						'AttributeValue'     => $deleted_attribute['value'],
-						'ProductID'          => $oldpost->ID,
-						'ProductTitle'       => $oldpost->post_title,
-						'ProductStatus'      => $oldpost->post_status,
-						'ProductUrl'         => get_permalink( $oldpost->ID ),
-						$editor_link['name'] => $editor_link['value'],
-					) );
+					$this->plugin->alerts->Trigger(
+						9050, array(
+							'AttributeName'      => $deleted_attribute['name'],
+							'AttributeValue'     => $deleted_attribute['value'],
+							'ProductID'          => $oldpost->ID,
+							'ProductTitle'       => $oldpost->post_title,
+							'ProductStatus'      => $oldpost->post_status,
+							'ProductUrl'         => get_permalink( $oldpost->ID ),
+							$editor_link['name'] => $editor_link['value'],
+						)
+					);
 					$result = 1;
 				}
 			}
@@ -2540,43 +2694,49 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 					// Value change.
 					if ( $old_value && $new_value && $old_value !== $new_value ) {
-						$this->plugin->alerts->Trigger( 9048, array(
-							'AttributeName'      => $new_attr['name'],
-							'OldValue'           => $old_value,
-							'NewValue'           => $new_value,
-							'ProductID'          => $oldpost->ID,
-							'ProductTitle'       => $oldpost->post_title,
-							'ProductStatus'      => $oldpost->post_status,
-							$editor_link['name'] => $editor_link['value'],
-						) );
+						$this->plugin->alerts->Trigger(
+							9048, array(
+								'AttributeName'      => $new_attr['name'],
+								'OldValue'           => $old_value,
+								'NewValue'           => $new_value,
+								'ProductID'          => $oldpost->ID,
+								'ProductTitle'       => $oldpost->post_title,
+								'ProductStatus'      => $oldpost->post_status,
+								$editor_link['name'] => $editor_link['value'],
+							)
+						);
 						$result = 1;
 					}
 
 					// Name change.
 					if ( $old_name && $new_name && $old_name !== $new_name ) {
-						$this->plugin->alerts->Trigger( 9049, array(
-							'AttributeName'      => $new_attr['name'],
-							'OldValue'           => $old_name,
-							'NewValue'           => $new_name,
-							'ProductID'          => $oldpost->ID,
-							'ProductTitle'       => $oldpost->post_title,
-							'ProductStatus'      => $oldpost->post_status,
-							'ProductUrl'         => get_permalink( $oldpost->ID ),
-							$editor_link['name'] => $editor_link['value'],
-						) );
+						$this->plugin->alerts->Trigger(
+							9049, array(
+								'AttributeName'      => $new_attr['name'],
+								'OldValue'           => $old_name,
+								'NewValue'           => $new_name,
+								'ProductID'          => $oldpost->ID,
+								'ProductTitle'       => $oldpost->post_title,
+								'ProductStatus'      => $oldpost->post_status,
+								'ProductUrl'         => get_permalink( $oldpost->ID ),
+								$editor_link['name'] => $editor_link['value'],
+							)
+						);
 						$result = 1;
 					}
 
 					// Visibility change.
 					if ( ! empty( $new_attr['name'] ) && $old_visible !== $new_visible ) {
-						$this->plugin->alerts->Trigger( 9051, array(
-							'AttributeName'       => $new_attr['name'],
-							'AttributeVisiblilty' => 1 === $new_visible ? __( 'Visible', 'wp-security-audit-log' ) : __( 'Non-Visible', 'wp-security-audit-log' ),
-							'ProductID'           => $oldpost->ID,
-							'ProductTitle'        => $oldpost->post_title,
-							'ProductStatus'       => $oldpost->post_status,
-							$editor_link['name']  => $editor_link['value'],
-						) );
+						$this->plugin->alerts->Trigger(
+							9051, array(
+								'AttributeName'       => $new_attr['name'],
+								'AttributeVisiblilty' => 1 === $new_visible ? __( 'Visible', 'wp-security-audit-log' ) : __( 'Non-Visible', 'wp-security-audit-log' ),
+								'ProductID'           => $oldpost->ID,
+								'ProductTitle'        => $oldpost->post_title,
+								'ProductStatus'       => $oldpost->post_status,
+								$editor_link['name']  => $editor_link['value'],
+							)
+						);
 						$result = 1;
 					}
 				}
@@ -2584,6 +2744,119 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			return $result;
 		}
 		return 0;
+	}
+
+	/**
+	 * Check Product Variations Change.
+	 *
+	 * @since 3.3.1.2
+	 *
+	 * @param WP_Post $oldpost - WP Post type object.
+	 * @param array   $data    - Data array.
+	 * @return int
+	 */
+	private function check_variations_change( $oldpost, $data = false ) {
+		if ( ! $data ) {
+			// @codingStandardsIgnoreLine
+			$data = $_POST;
+		}
+
+		if ( ! empty( $data['variable_post_id'] ) ) {
+			foreach ( $data['variable_post_id'] as $key => $post_id ) {
+				$post_id   = absint( $post_id );
+				$variation = new WC_Product_Variation( $post_id );
+
+				// Copy and set the product variation.
+				$product              = $oldpost;
+				$product->post_title  = $variation->get_name();
+				$product->post_status = $variation->get_status();
+
+				// Check regular price.
+				$old_price = (int) $variation->get_regular_price();
+				$new_price = isset( $data['variable_regular_price'][ $key ] ) ? (int) sanitize_text_field( wp_unslash( $data['variable_regular_price'][ $key ] ) ) : false;
+				if ( $old_price !== $new_price ) {
+					$result = $this->EventPrice( $product, 'Regular price', $old_price, $new_price );
+				}
+
+				// Check sale price.
+				$old_sale_price = (int) $variation->get_sale_price();
+				$new_sale_price = isset( $data['variable_sale_price'][ $key ] ) ? (int) sanitize_text_field( wp_unslash( $data['variable_sale_price'][ $key ] ) ) : false;
+				if ( $old_sale_price !== $new_sale_price ) {
+					$result = $this->EventPrice( $product, 'Sale price', $old_sale_price, $new_sale_price );
+				}
+
+				// Check product SKU.
+				$old_sku = $variation->get_sku();
+				$new_sku = isset( $data['variable_sku'][ $key ] ) ? sanitize_text_field( wp_unslash( $data['variable_sku'][ $key ] ) ) : false;
+				if ( $old_sku !== $new_sku ) {
+					$result = $this->CheckSKUChange( $product, $old_sku, $new_sku );
+				}
+
+				// Check product virtual.
+				$virtual['old'] = $variation->is_virtual();
+				$virtual['new'] = isset( $data['variable_is_virtual'][ $key ] ) ? true : false;
+				if ( $virtual['old'] !== $virtual['new'] ) {
+					$result = $this->CheckTypeChange( $product, null, $virtual );
+				}
+
+				// Check product downloadable.
+				$download['old'] = $variation->is_downloadable();
+				$download['new'] = isset( $data['variable_is_downloadable'][ $key ] ) ? true : false;
+				if ( $download['old'] !== $download['new'] ) {
+					$result = $this->CheckTypeChange( $product, null, false, $download );
+				}
+
+				// Check product stock status.
+				$old_stock_status = $variation->get_stock_status();
+				$new_stock_status = isset( $data['variable_stock_status'][ $key ] ) ? sanitize_text_field( wp_unslash( $data['variable_stock_status'][ $key ] ) ) : false;
+				if ( $old_stock_status !== $new_stock_status ) {
+					$result = $this->CheckStockStatusChange( $product, $old_stock_status, $new_stock_status );
+				}
+
+				// Check product stock quantity.
+				$old_stock = $variation->get_stock_quantity();
+				$new_stock = isset( $data['variable_stock'][ $key ] ) ? (int) sanitize_text_field( wp_unslash( $data['variable_stock'][ $key ] ) ) : false;
+				if ( $old_stock !== $new_stock ) {
+					$result = $this->CheckStockQuantityChange( $product, $old_stock, $new_stock );
+				}
+
+				// Check product weight.
+				$old_weight = $variation->get_weight();
+				$new_weight = isset( $data['variable_weight'][ $key ] ) ? sanitize_text_field( wp_unslash( $data['variable_weight'][ $key ] ) ) : false;
+				if ( $old_weight !== $new_weight ) {
+					$result = $this->CheckWeightChange( $product, $old_weight, $new_weight );
+				}
+
+				// Check product dimensions change.
+				$length['old'] = $variation->get_length();
+				$length['new'] = isset( $data['variable_length'][ $key ] ) ? sanitize_text_field( wp_unslash( $data['variable_length'][ $key ] ) ) : false;
+				$width['old']  = $variation->get_width();
+				$width['new']  = isset( $data['variable_width'][ $key ] ) ? sanitize_text_field( wp_unslash( $data['variable_width'][ $key ] ) ) : false;
+				$height['old'] = $variation->get_height();
+				$height['new'] = isset( $data['variable_height'][ $key ] ) ? sanitize_text_field( wp_unslash( $data['variable_height'][ $key ] ) ) : false;
+				$this->CheckDimensionsChange( $product, $length, $width, $height );
+
+				// Check product downloads change.
+				$new_file_names = isset( $data['_wc_variation_file_names'][ $post_id ] ) ? array_map( 'sanitize_text_field', wp_unslash( $data['_wc_variation_file_names'][ $post_id ] ) ) : false;
+				$new_file_urls  = isset( $data['_wc_variation_file_urls'][ $post_id ] ) ? array_map( 'esc_url_raw', wp_unslash( $data['_wc_variation_file_urls'][ $post_id ] ) ) : false;
+				$wc_downloads   = $variation->get_downloads();
+
+				// Set product old downloads data.
+				if ( empty( $this->_old_file_names ) && empty( $this->_old_file_urls ) ) {
+					foreach ( $wc_downloads as $download ) {
+						array_push( $this->_old_file_names, $download->get_name() );
+						array_push( $this->_old_file_urls, $download->get_file() );
+					}
+				}
+				$this->CheckDownloadableFileChange( $product, $new_file_names, $new_file_urls );
+
+				// Check backorders change.
+				$old_backorder = $variation->get_backorders();
+				$new_backorder = isset( $data['variable_backorders'][ $key ] ) ? sanitize_text_field( wp_unslash( $data['variable_backorders'][ $key ] ) ) : false;
+				$this->check_backorders_setting( $product, $old_backorder, $new_backorder );
+			}
+		}
+		return 1;
 	}
 
 	/**
@@ -2687,34 +2960,40 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 			// Update if both slugs are not same.
 			if ( $old_slug !== $new_slug ) {
-				$this->plugin->alerts->Trigger( 9053, array(
-					'CategoryID'   => $term_id,
-					'CategoryName' => $new_name,
-					'OldSlug'      => $old_slug,
-					'NewSlug'      => $new_slug,
-				) );
+				$this->plugin->alerts->Trigger(
+					9053, array(
+						'CategoryID'   => $term_id,
+						'CategoryName' => $new_name,
+						'OldSlug'      => $old_slug,
+						'NewSlug'      => $new_slug,
+					)
+				);
 			}
 
 			// Update if both parent categories are not same.
 			if ( $term->parent !== $new_parent_id ) {
-				$this->plugin->alerts->Trigger( 9054, array(
-					'CategoryID'   => $term_id,
-					'CategoryName' => $new_name,
-					'OldParentID'  => isset( $old_parent_cat->term_id ) ? $old_parent_cat->term_id : false,
-					'OldParentCat' => isset( $old_parent_cat->name ) ? $old_parent_cat->name : false,
-					'NewParentID'  => isset( $new_parent_cat->term_id ) ? $new_parent_cat->term_id : false,
-					'NewParentCat' => isset( $new_parent_cat->name ) ? $new_parent_cat->name : false,
-				) );
+				$this->plugin->alerts->Trigger(
+					9054, array(
+						'CategoryID'   => $term_id,
+						'CategoryName' => $new_name,
+						'OldParentID'  => isset( $old_parent_cat->term_id ) ? $old_parent_cat->term_id : false,
+						'OldParentCat' => isset( $old_parent_cat->name ) ? $old_parent_cat->name : false,
+						'NewParentID'  => isset( $new_parent_cat->term_id ) ? $new_parent_cat->term_id : false,
+						'NewParentCat' => isset( $new_parent_cat->name ) ? $new_parent_cat->name : false,
+					)
+				);
 			}
 
 			// Update if both names are not same.
 			if ( $old_name !== $new_name ) {
-				$this->plugin->alerts->Trigger( 9056, array(
-					'CategoryID'   => $term_id,
-					'CategoryName' => $new_name,
-					'OldName'      => $old_name,
-					'NewName'      => $new_name,
-				) );
+				$this->plugin->alerts->Trigger(
+					9056, array(
+						'CategoryID'   => $term_id,
+						'CategoryName' => $new_name,
+						'OldName'      => $old_name,
+						'NewName'      => $new_name,
+					)
+				);
 			}
 		}
 		return $data;
@@ -2744,12 +3023,14 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 		// Check if display type changed.
 		if ( $meta_value !== $old_display ) {
-			$this->plugin->alerts->Trigger( 9055, array(
-				'CategoryID'     => $object_id,
-				'CategoryName'   => $term->name,
-				'OldDisplayType' => $old_display,
-				'NewDisplayType' => $meta_value,
-			) );
+			$this->plugin->alerts->Trigger(
+				9055, array(
+					'CategoryID'     => $object_id,
+					'CategoryName'   => $term->name,
+					'OldDisplayType' => $old_display,
+					'NewDisplayType' => $meta_value,
+				)
+			);
 		}
 	}
 
@@ -2765,11 +3046,13 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 */
 	public function event_product_cat_deleted( $term_id, $tt_id, $deleted_term, $object_ids ) {
 		if ( 'product_cat' === $deleted_term->taxonomy ) {
-			$this->plugin->alerts->Trigger( 9052, array(
-				'CategoryID'   => $deleted_term->term_id,
-				'CategoryName' => $deleted_term->name,
-				'CategorySlug' => $deleted_term->slug,
-			) );
+			$this->plugin->alerts->Trigger(
+				9052, array(
+					'CategoryID'   => $deleted_term->term_id,
+					'CategoryName' => $deleted_term->name,
+					'CategorySlug' => $deleted_term->slug,
+				)
+			);
 		}
 	}
 
