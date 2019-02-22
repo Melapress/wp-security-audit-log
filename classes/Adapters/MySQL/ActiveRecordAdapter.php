@@ -65,10 +65,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	/**
 	 * Returns the model class for adapter.
 	 *
-	 * @return WSAL_Models_ActiveRecord
+	 * @throws RuntimeException - Throw exception if the function is not overriden.
 	 */
 	public function GetModel() {
-		throw new RuntimeException('GetModel() should have been overridden in ' . get_class($this));
+		throw new RuntimeException( 'GetModel() should have been overridden in ' . get_class( $this ) );
 	}
 
 	/**
@@ -251,9 +251,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @param array  $args (Optional) Load condition arguments.
 	 */
 	public function LoadArray( $cond, $args = array() ) {
-		$_wpdb = $this->connection;
+		$_wpdb  = $this->connection;
 		$result = array();
-		$sql = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
+		$sql    = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
 		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
 			$result[] = $this->getModel()->LoadData( $data );
 		}
@@ -267,7 +267,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @return int|boolean - Either the amount of deleted rows or False on error.
 	 */
 	public function Delete( $active_record ) {
-		$_wpdb = $this->connection;
+		$_wpdb  = $this->connection;
 		$result = $_wpdb->delete(
 			$this->GetTable(),
 			$active_record->getId()
@@ -282,8 +282,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @param array  $args (Optional) Query arguments.
 	 */
 	public function DeleteQuery( $query, $args = array() ) {
-		$_wpdb = $this->connection;
-		$sql = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
+		$_wpdb  = $this->connection;
+		$sql    = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
 		$result = $_wpdb->query( $sql );
 		return $result;
 	}
@@ -296,10 +296,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @return self[] List of loaded records.
 	 */
 	public function LoadMulti( $cond, $args = array() ) {
-		$_wpdb = $this->connection;
+		$_wpdb  = $this->connection;
 		$result = array();
-		$sql = ( ! is_array( $args ) || ! count( $args )) // Do we really need to prepare() or not?
-			? ($cond)
+		$sql    = ( ! is_array( $args ) || ! count( $args ) ) // Do we really need to prepare() or not?
+			? ( $cond )
 			: $_wpdb->prepare( $cond, $args );
 		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
 			$result[] = $this->getModel()->LoadData( $data );
@@ -318,7 +318,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	public function LoadAndCallForEach( $callback, $cond = '%d', $args = array( 1 ) ) {
 		$_wpdb = $this->connection;
 		$class = get_called_class();
-		$sql = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
+		$sql   = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
 		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
 			call_user_func( $callback, new $class( $data ) );
 		}
@@ -335,7 +335,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	public function Count( $cond = '%d', $args = array( 1 ) ) {
 		$_wpdb = $this->connection;
 		$class = get_called_class();
-		$sql = $_wpdb->prepare( 'SELECT COUNT(*) FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
+		$sql   = $_wpdb->prepare( 'SELECT COUNT(*) FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
 		return (int) $_wpdb->get_var( $sql );
 	}
 
@@ -348,7 +348,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 */
 	public function CountQuery( $query, $args = array() ) {
 		$_wpdb = $this->connection;
-		$sql = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
+		$sql   = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
 		return (int) $_wpdb->get_var( $sql );
 	}
 
@@ -360,10 +360,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @return array List of loaded records.
 	 */
 	public function LoadMultiQuery( $query, $args = array() ) {
-		$_wpdb = $this->connection;
-		$class = get_called_class();
+		$_wpdb  = $this->connection;
+		$class  = get_called_class();
 		$result = array();
-		$sql = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
+		$sql    = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
 		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
 			$result[] = $this->getModel()->LoadData( $data );
 		}
@@ -389,7 +389,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 				case $key == $copy->_idkey:
 					$sql .= $key . ' BIGINT NOT NULL AUTO_INCREMENT,' . PHP_EOL;
 					break;
-				case is_integer( $copy->$key ):
+				case is_int( $copy->$key ):
 					$sql .= $key . ' BIGINT NOT NULL,' . PHP_EOL;
 					break;
 				case is_float( $copy->$key ):
@@ -398,7 +398,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 				case is_string( $copy->$key ):
 					$maxlength = $key . '_maxlength';
 					if ( property_exists( $class, $maxlength ) ) {
-						$sql .= $key . ' VARCHAR(' . intval( $class::$$maxlength ) . ') NOT NULL,' . PHP_EOL;
+						$sql .= $key . ' VARCHAR(' . (int) $class::$$maxlength . ') NOT NULL,' . PHP_EOL;
 					} else {
 						$sql .= $key . ' LONGTEXT NOT NULL,' . PHP_EOL;
 					}
@@ -443,7 +443,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @return string
 	 */
 	protected function _GetUninstallQuery() {
-		return  'DROP TABLE ' . $this->GetTable();
+		return 'DROP TABLE ' . $this->GetTable();
 	}
 
 	/**
@@ -459,7 +459,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		if ( ! empty( $_user_id ) && 'null' != $_user_id ) {
 			$sql = 'SELECT user_login FROM ' . $wpdb->users . ' WHERE find_in_set(ID, @userId) > 0';
 			$wpdb->query( "SET @userId = $_user_id" );
-			$result = $wpdb->get_results( $sql, ARRAY_A );
+			$result      = $wpdb->get_results( $sql, ARRAY_A );
 			$users_array = array();
 			foreach ( $result as $item ) {
 				$users_array[] = '"' . $item['user_login'] . '"';
@@ -472,16 +472,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	/**
 	 * Function used in WSAL reporting extension.
 	 *
-	 * @param int       $_site_id - Site ID.
-	 * @param int       $_user_id - User ID.
-	 * @param string    $_role_name - User role.
-	 * @param int       $_alert_code - Alert code.
-	 * @param timestamp $_start_timestamp - From created_on.
-	 * @param timestamp $_end_timestamp - To created_on.
-	 * @param timestamp $_next_date - (Optional) Created on >.
-	 * @param int       $_limit - (Optional) Limit.
-	 * @param string    $_post_types - (Optional) Post types.
-	 * @param string    $_post_statuses - (Optional) Post statuses.
+	 * @param int    $_site_id - Site ID.
+	 * @param int    $_user_id - User ID.
+	 * @param string $_role_name - User role.
+	 * @param int    $_alert_code - Alert code.
+	 * @param int    $_start_timestamp - From created_on.
+	 * @param int    $_end_timestamp - To created_on.
+	 * @param int    $_next_date - (Optional) Created on >.
+	 * @param int    $_limit - (Optional) Limit.
+	 * @param string $_post_types - (Optional) Post types.
+	 * @param string $_post_statuses - (Optional) Post statuses.
 	 * @return array Report results
 	 */
 	public function GetReporting( $_site_id, $_user_id, $_role_name, $_alert_code, $_start_timestamp, $_end_timestamp, $_next_date = null, $_limit = 0, $_post_types = '', $_post_statuses = '' ) {
@@ -492,10 +492,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$_wpdb->set_charset( $_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci' );
 
 		// Tables.
-		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+		$meta       = new WSAL_Adapters_MySQL_Meta( $this->connection );
 		$table_meta = $meta->GetTable(); // Metadata.
 		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
-		$table_occ = $occurrence->GetTable(); // Occurrences.
+		$table_occ  = $occurrence->GetTable(); // Occurrences.
 
 		$condition_date = ! empty( $_next_date ) ? ' AND occ.created_on < ' . $_next_date : '';
 
@@ -604,13 +604,13 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
 		if ( ! empty( $results ) ) {
 			foreach ( $results as $row ) {
-				$sql = "SELECT t6.ID FROM $wpdb->users AS t6 WHERE t6.user_login = \"$row->user_id\"";
+				$sql     = "SELECT t6.ID FROM $wpdb->users AS t6 WHERE t6.user_login = \"$row->user_id\"";
 				$user_id = $wpdb->get_var( $sql );
 				if ( null == $user_id ) {
-					$sql = "SELECT t4.ID FROM $wpdb->users AS t4 WHERE t4.ID = \"$row->user_id\"";
+					$sql     = "SELECT t4.ID FROM $wpdb->users AS t4 WHERE t4.ID = \"$row->user_id\"";
 					$user_id = $wpdb->get_var( $sql );
 				}
-				$row->user_id = $user_id;
+				$row->user_id        = $user_id;
 				$results['lastDate'] = $row->created_on;
 			}
 		}
@@ -626,23 +626,23 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @return int count of distinct values
 	 */
 	public function CheckMatchReportCriteria( $criteria ) {
-		$_site_id = $criteria['siteId'];
-		$_user_id = $criteria['userId'];
-		$_post_types = $criteria['post_types'];
-		$_post_statuses = $criteria['post_statuses'];
-		$_role_name = $criteria['roleName'];
-		$_alert_code = $criteria['alertCode'];
+		$_site_id         = $criteria['siteId'];
+		$_user_id         = $criteria['userId'];
+		$_post_types      = $criteria['post_types'];
+		$_post_statuses   = $criteria['post_statuses'];
+		$_role_name       = $criteria['roleName'];
+		$_alert_code      = $criteria['alertCode'];
 		$_start_timestamp = $criteria['startTimestamp'];
-		$_end_timestamp = $criteria['endTimestamp'];
-		$_ip_address = $criteria['ipAddress'];
+		$_end_timestamp   = $criteria['endTimestamp'];
+		$_ip_address      = $criteria['ipAddress'];
 
 		$_wpdb = $this->connection;
 		$_wpdb->set_charset( $_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci' );
 		// Tables.
-		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+		$meta       = new WSAL_Adapters_MySQL_Meta( $this->connection );
 		$table_meta = $meta->GetTable(); // Metadata.
 		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
-		$table_occ = $occurrence->GetTable(); // Occurrences.
+		$table_occ  = $occurrence->GetTable(); // Occurrences.
 
 		$user_names = $this->GetUserNames( $_user_id );
 
@@ -720,14 +720,14 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * Function used in WSAL reporting extension.
 	 * List of unique IP addresses used by the same user.
 	 *
-	 * @param int       $_site_id - Site ID.
-	 * @param timestamp $_start_timestamp - From created_on.
-	 * @param timestamp $_end_timestamp - To created_on.
-	 * @param int       $_user_id - (Optional) User ID.
-	 * @param string    $_role_name - (Optional) User role.
-	 * @param string    $_ip_address - (Optional) IP address.
-	 * @param int       $_alert_code - (Optional) Alert code.
-	 * @param int       $_limit - (Optional) Limit.
+	 * @param int        $_site_id - Site ID.
+	 * @param int        $_start_timestamp - From created_on.
+	 * @param int        $_end_timestamp - To created_on.
+	 * @param string|int $_user_id - (Optional) User ID.
+	 * @param string     $_role_name - (Optional) User role.
+	 * @param string     $_ip_address - (Optional) IP address.
+	 * @param string|int $_alert_code - (Optional) Alert code.
+	 * @param int        $_limit - (Optional) Limit.
 	 * @return array Report results grouped by IP and Username
 	 */
 	public function GetReportGrouped( $_site_id, $_start_timestamp, $_end_timestamp, $_user_id = 'null', $_role_name = 'null', $_ip_address = 'null', $_alert_code = 'null', $_limit = 0 ) {
@@ -737,10 +737,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$_wpdb = $this->connection;
 		$_wpdb->set_charset( $_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci' );
 		// Tables.
-		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+		$meta       = new WSAL_Adapters_MySQL_Meta( $this->connection );
 		$table_meta = $meta->GetTable(); // Metadata.
 		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
-		$table_occ = $occurrence->GetTable(); // Occurrences.
+		$table_occ  = $occurrence->GetTable(); // Occurrences.
 		// Get temp table `wsal_tmp_users`.
 		$tmp_users = new WSAL_Adapters_MySQL_TmpUser( $this->connection );
 		// If the table exist.
@@ -814,22 +814,22 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		}
 
 		$grouped_types = array();
-		$results = $_wpdb->get_results( $sql );
+		$results       = $_wpdb->get_results( $sql );
 		if ( ! empty( $results ) ) {
 			foreach ( $results as $key => $row ) {
 				// Get the display_name only for the first row & if the user_login changed from the previous row.
-				if ( 0 == $key || ($key > 1 && $results[ ($key - 1) ]->user_login != $row->user_login) ) {
-					$sql = "SELECT t5.display_name FROM $wpdb->users AS t5 WHERE t5.user_login = \"$row->user_login\"";
+				if ( 0 == $key || ( $key > 1 && $results[ ( $key - 1 ) ]->user_login != $row->user_login ) ) {
+					$sql          = "SELECT t5.display_name FROM $wpdb->users AS t5 WHERE t5.user_login = \"$row->user_login\"";
 					$display_name = $wpdb->get_var( $sql );
 				}
 				$row->display_name = $display_name;
 
 				if ( ! isset( $grouped_types[ $row->user_login ] ) ) {
 					$grouped_types[ $row->user_login ] = array(
-						'site_id' => $row->site_id,
-						'user_login' => $row->user_login,
+						'site_id'      => $row->site_id,
+						'user_login'   => $row->user_login,
 						'display_name' => $row->display_name,
-						'ips' => array(),
+						'ips'          => array(),
 					);
 				}
 
@@ -848,10 +848,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 */
 	private function TempUsers( $table_users ) {
 		$_wpdb = $this->connection;
-		$sql = "DELETE FROM $table_users";
+		$sql   = "DELETE FROM $table_users";
 		$_wpdb->query( $sql );
 
-		$sql = "INSERT INTO $table_users (ID, user_login) VALUES " ;
+		$sql   = "INSERT INTO $table_users (ID, user_login) VALUES ";
 		$users = get_users(
 			array(
 				'fields' => array( 'ID', 'user_login' ),
