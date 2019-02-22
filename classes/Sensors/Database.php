@@ -60,13 +60,14 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			$alert_options = $this->GetActionType( $actype );
 			$type_query    = 'delete';
 		} elseif ( preg_match( '|CREATE TABLE IF NOT EXISTS ([^ ]*)|', $query ) ) {
-			if ( $str[5] !== $wpdb->get_var( "SHOW TABLES LIKE '" . $str[5] . "'" ) ) {
+			$table_name = str_replace( '`', '', $str[5] );
+			if ( $table_name !== $wpdb->get_var( "SHOW TABLES LIKE '" . $table_name . "'" ) ) {
 				/**
 				 * Some plugins keep trying to create tables even
 				 * when they already exist- would result in too
 				 * many alerts.
 				 */
-				array_push( $table_names, $str[5] );
+				array_push( $table_names, $table_name );
 				$actype        = isset( $_SERVER['SCRIPT_NAME'] ) ? basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ), '.php' ) : false;
 				$alert_options = $this->GetActionType( $actype );
 				$type_query    = 'create';
@@ -95,9 +96,10 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		global $wpdb;
 
 		foreach ( $queries as $qry ) {
+			$qry = str_replace( '`', '', $qry );
 			$str = explode( ' ', $qry );
 			if ( preg_match( '|CREATE TABLE ([^ ]*)|', $qry ) ) {
-				if ( $wpdb->get_var( "SHOW TABLES LIKE '" . $str[2] . "'" ) != $str[2] ) {
+				if ( $str[2] !== $wpdb->get_var( "SHOW TABLES LIKE '" . $str[2] . "'" ) ) {
 					/**
 					 * Some plugins keep trying to create tables even
 					 * when they already exist- would result in too
@@ -147,7 +149,8 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 				} elseif ( 'delete' === $type_query ) {
 					return 5012;
 				}
-				// In case of plugins.
+				break;
+
 			case 'themes':
 				if ( 'create' === $type_query ) {
 					return 5013;
@@ -156,7 +159,8 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 				} elseif ( 'delete' === $type_query ) {
 					return 5015;
 				}
-				// In case of themes.
+				break;
+
 			default:
 				if ( 'create' === $type_query ) {
 					return 5016;
@@ -165,6 +169,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 				} elseif ( 'delete' === $type_query ) {
 					return 5018;
 				}
+				break;
 		}
 	}
 
