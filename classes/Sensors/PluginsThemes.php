@@ -125,9 +125,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	public function mainwp_child_init() {
 		// $_POST array arguments.
 		$post_array_args = array(
-			'function' => FILTER_SANITIZE_STRING,
-			'action'   => FILTER_SANITIZE_STRING,
-			'theme'    => FILTER_SANITIZE_STRING,
+			'function'        => FILTER_SANITIZE_STRING,
+			'action'          => FILTER_SANITIZE_STRING,
+			'theme'           => FILTER_SANITIZE_STRING,
 			'mainwpsignature' => FILTER_SANITIZE_STRING,
 		);
 
@@ -179,18 +179,19 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		if ( in_array( $action, array( 'install-plugin', 'upload-plugin' ) ) && current_user_can( 'install_plugins' ) ) {
 			$plugin = array_values( array_diff( array_keys( get_plugins() ), array_keys( $this->old_plugins ) ) );
 			if ( count( $plugin ) != 1 ) {
-				return $this->LogError(
+				$this->LogError(
 					'Expected exactly one new plugin but found ' . count( $plugin ),
 					array(
-						'NewPlugin' => $plugin,
+						'NewPlugin'  => $plugin,
 						'OldPlugins' => $this->old_plugins,
 						'NewPlugins' => get_plugins(),
 					)
 				);
+				return;
 			}
 			$plugin_path = $plugin[0];
-			$plugin = get_plugins();
-			$plugin = $plugin[ $plugin_path ];
+			$plugin      = get_plugins();
+			$plugin      = $plugin[ $plugin_path ];
 
 			// Get plugin directory name.
 			$plugin_dir = $this->get_plugin_dir( $plugin_path );
@@ -202,11 +203,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				5000, array(
 					'Plugin' => (object) array(
-						'Name' => $plugin['Name'],
-						'PluginURI' => $plugin['PluginURI'],
-						'Version' => $plugin['Version'],
-						'Author' => $plugin['Author'],
-						'Network' => $plugin['Network'] ? 'True' : 'False',
+						'Name'            => $plugin['Name'],
+						'PluginURI'       => $plugin['PluginURI'],
+						'Version'         => $plugin['Version'],
+						'Author'          => $plugin['Author'],
+						'Network'         => $plugin['Network'] ? 'True' : 'False',
 						'plugin_dir_path' => $plugin_path,
 					),
 				)
@@ -239,11 +240,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						5001, array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
-								'Name' => $plugin_data['Name'],
+								'Name'      => $plugin_data['Name'],
 								'PluginURI' => $plugin_data['PluginURI'],
-								'Version' => $plugin_data['Version'],
-								'Author' => $plugin_data['Author'],
-								'Network' => $plugin_data['Network'] ? 'True' : 'False',
+								'Version'   => $plugin_data['Version'],
+								'Author'    => $plugin_data['Author'],
+								'Network'   => $plugin_data['Network'] ? 'True' : 'False',
 							),
 						)
 					);
@@ -256,11 +257,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						5001, array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
-								'Name' => $plugin_data['Name'],
+								'Name'      => $plugin_data['Name'],
 								'PluginURI' => $plugin_data['PluginURI'],
-								'Version' => $plugin_data['Version'],
-								'Author' => $plugin_data['Author'],
-								'Network' => $plugin_data['Network'] ? 'True' : 'False',
+								'Version'   => $plugin_data['Version'],
+								'Author'    => $plugin_data['Author'],
+								'Network'   => $plugin_data['Network'] ? 'True' : 'False',
 							),
 						)
 					);
@@ -294,11 +295,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						5002, array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
-								'Name' => $plugin_data['Name'],
+								'Name'      => $plugin_data['Name'],
 								'PluginURI' => $plugin_data['PluginURI'],
-								'Version' => $plugin_data['Version'],
-								'Author' => $plugin_data['Author'],
-								'Network' => $plugin_data['Network'] ? 'True' : 'False',
+								'Version'   => $plugin_data['Version'],
+								'Author'    => $plugin_data['Author'],
+								'Network'   => $plugin_data['Network'] ? 'True' : 'False',
 							),
 						)
 					);
@@ -311,11 +312,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						5002, array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
-								'Name' => $plugin_data['Name'],
+								'Name'      => $plugin_data['Name'],
 								'PluginURI' => $plugin_data['PluginURI'],
-								'Version' => $plugin_data['Version'],
-								'Author' => $plugin_data['Author'],
-								'Network' => $plugin_data['Network'] ? 'True' : 'False',
+								'Version'   => $plugin_data['Version'],
+								'Author'    => $plugin_data['Author'],
+								'Network'   => $plugin_data['Network'] ? 'True' : 'False',
 							),
 						)
 					);
@@ -406,11 +407,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						5004, array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
-								'Name' => $plugin_data['Name'],
+								'Name'      => $plugin_data['Name'],
 								'PluginURI' => $plugin_data['PluginURI'],
-								'Version' => $plugin_data['Version'],
-								'Author' => $plugin_data['Author'],
-								'Network' => $plugin_data['Network'] ? 'True' : 'False',
+								'Version'   => $plugin_data['Version'],
+								'Author'    => $plugin_data['Author'],
+								'Network'   => $plugin_data['Network'] ? 'True' : 'False',
 							),
 						)
 					);
@@ -442,11 +443,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger(
 						5031, array(
 							'Theme' => (object) array(
-								'Name' => $theme->Name,
-								'ThemeURI' => $theme->ThemeURI,
-								'Description' => $theme->Description,
-								'Author' => $theme->Author,
-								'Version' => $theme->Version,
+								'Name'                   => $theme->Name,
+								'ThemeURI'               => $theme->ThemeURI,
+								'Description'            => $theme->Description,
+								'Author'                 => $theme->Author,
+								'Version'                => $theme->Version,
 								'get_template_directory' => $theme->get_template_directory(),
 							),
 						)
@@ -465,11 +466,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					5005, array(
 						'Theme' => (object) array(
-							'Name' => $theme->Name,
-							'ThemeURI' => $theme->ThemeURI,
-							'Description' => $theme->Description,
-							'Author' => $theme->Author,
-							'Version' => $theme->Version,
+							'Name'                   => $theme->Name,
+							'ThemeURI'               => $theme->ThemeURI,
+							'Description'            => $theme->Description,
+							'Author'                 => $theme->Author,
+							'Version'                => $theme->Version,
 							'get_template_directory' => $theme->get_template_directory(),
 						),
 					)
@@ -485,11 +486,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					5007, array(
 						'Theme' => (object) array(
-							'Name' => $theme->Name,
-							'ThemeURI' => $theme->ThemeURI,
-							'Description' => $theme->Description,
-							'Author' => $theme->Author,
-							'Version' => $theme->Version,
+							'Name'                   => $theme->Name,
+							'ThemeURI'               => $theme->ThemeURI,
+							'Description'            => $theme->Description,
+							'Author'                 => $theme->Author,
+							'Version'                => $theme->Version,
 							'get_template_directory' => $theme->get_template_directory(),
 						),
 					)
@@ -518,22 +519,23 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			}
 		}
 		if ( null == $theme ) {
-			return $this->LogError(
+			$this->LogError(
 				'Could not locate theme named "' . $theme . '".',
 				array(
 					'ThemeName' => $theme_name,
-					'Themes' => wp_get_themes(),
+					'Themes'    => wp_get_themes(),
 				)
 			);
+			return;
 		}
 		$this->plugin->alerts->Trigger(
 			5006, array(
 				'Theme' => (object) array(
-					'Name' => $theme->Name,
-					'ThemeURI' => $theme->ThemeURI,
-					'Description' => $theme->Description,
-					'Author' => $theme->Author,
-					'Version' => $theme->Version,
+					'Name'                   => $theme->Name,
+					'ThemeURI'               => $theme->ThemeURI,
+					'Description'            => $theme->Description,
+					'Author'                 => $theme->Author,
+					'Version'                => $theme->Version,
 					'get_template_directory' => $theme->get_template_directory(),
 				),
 			)
@@ -720,11 +722,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger(
 						5005, array(
 							'Theme' => (object) array(
-								'Name'        => $theme_obj->Name,
-								'ThemeURI'    => $theme_obj->ThemeURI,
-								'Description' => $theme_obj->Description,
-								'Author'      => $theme_obj->Author,
-								'Version'     => $theme_obj->Version,
+								'Name'                   => $theme_obj->Name,
+								'ThemeURI'               => $theme_obj->ThemeURI,
+								'Description'            => $theme_obj->Description,
+								'Author'                 => $theme_obj->Author,
+								'Version'                => $theme_obj->Version,
 								'get_template_directory' => $theme_obj->get_template_directory(),
 							),
 						)
@@ -981,11 +983,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger(
 						5031, array(
 							'Theme' => (object) array(
-								'Name'        => $theme->Name,
-								'ThemeURI'    => $theme->ThemeURI,
-								'Description' => $theme->Description,
-								'Author'      => $theme->Author,
-								'Version'     => $theme->Version,
+								'Name'                   => $theme->Name,
+								'ThemeURI'               => $theme->ThemeURI,
+								'Description'            => $theme->Description,
+								'Author'                 => $theme->Author,
+								'Version'                => $theme->Version,
 								'get_template_directory' => $theme->get_template_directory(),
 							),
 						)
@@ -1061,9 +1063,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 * @return array $editor_link name and value link.
 	 */
 	private function GetEditorLink( $post ) {
-		$name = 'EditorLink';
-		$name .= ( 'page' == $post->post_type ) ? 'Page' : 'Post' ;
-		$value = get_edit_post_link( $post->ID );
+		$name        = 'EditorLink';
+		$name       .= ( 'page' == $post->post_type ) ? 'Page' : 'Post';
+		$value       = get_edit_post_link( $post->ID );
 		$editor_link = array(
 			'name'  => $name,
 			'value' => $value,
@@ -1119,18 +1121,18 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		 */
 		if ( false === $this->site_content ) {
 			$this->site_content = new stdClass(); // New stdClass object.
-			$plugins = $this->get_site_plugins(); // Get plugins on the site.
-			$themes  = $this->get_site_themes(); // Get themes on the site.
+			$plugins            = $this->get_site_plugins(); // Get plugins on the site.
+			$themes             = $this->get_site_themes(); // Get themes on the site.
 
 			// Assign the plugins to content object.
 			foreach ( $plugins as $index => $plugin ) {
-				$this->site_content->plugins[] = strtolower( $plugin );
+				$this->site_content->plugins[]      = strtolower( $plugin );
 				$this->site_content->skip_plugins[] = strtolower( $plugin );
 			}
 
 			// Assign the themes to content object.
 			foreach ( $themes as $index => $theme ) {
-				$this->site_content->themes[] = strtolower( $theme );
+				$this->site_content->themes[]      = strtolower( $theme );
 				$this->site_content->skip_themes[] = strtolower( $theme );
 			}
 
@@ -1142,7 +1144,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			// If the plugin is not already present in the current list then.
 			if ( ! in_array( $content, $this->site_content->plugins, true ) ) {
 				// Add the plugin to the list and save it.
-				$this->site_content->plugins[] = strtolower( $content );
+				$this->site_content->plugins[]      = strtolower( $content );
 				$this->site_content->skip_plugins[] = strtolower( $content );
 				$this->plugin->SetGlobalOption( $content_option, $this->site_content );
 			}
@@ -1150,7 +1152,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			// If the theme is not already present in the current list then.
 			if ( ! in_array( $content, $this->site_content->themes, true ) ) {
 				// Add the theme to the list and save it.
-				$this->site_content->themes[] = strtolower( $content );
+				$this->site_content->themes[]      = strtolower( $content );
 				$this->site_content->skip_themes[] = strtolower( $content );
 				$this->plugin->SetGlobalOption( $content_option, $this->site_content );
 			}
