@@ -36,6 +36,20 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	protected $visitor_events;
 
 	/**
+	 * Old Product Stock Quantity.
+	 *
+	 * @var int
+	 */
+	protected $_old_stock = null;
+
+	/**
+	 * Old Product Stock Status.
+	 *
+	 * @var string
+	 */
+	protected $_old_stock_status = null;
+
+	/**
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
@@ -49,6 +63,7 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 				add_action( 'woocommerce_new_order', array( $this, 'event_new_order' ), 10, 1 );
 				add_filter( 'woocommerce_order_item_quantity', array( $this, 'set_old_stock' ), 10, 3 );
 				add_action( 'woocommerce_product_set_stock', array( $this, 'product_stock_changed' ), 10, 1 );
+				add_action( 'woocommerce_variation_set_stock', array( $this, 'product_stock_changed' ), 10, 1 );
 			}
 		}
 	}
@@ -302,7 +317,7 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	 * @param string $username - Username.
 	 * @param string $url      - 404 URL.
 	 */
-	private function write_log( $attempts, $ip, $username = '', $url ) {
+	private function write_log( $attempts, $ip, $username = '', $url = null ) {
 		$name_file = null;
 
 		if ( 'on' === $this->plugin->GetGlobalOption( 'log-visitor-404', 'off' ) ) {
@@ -448,7 +463,7 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		if ( ! $order ) {
 			return false;
 		}
-		if ( is_integer( $order ) ) {
+		if ( is_int( $order ) ) {
 			$order = new WC_Order( $order );
 		}
 		if ( ! $order instanceof WC_Order ) {
@@ -486,12 +501,14 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 			$order_title = ( null !== $order_post && $order_post instanceof WP_Post ) ? $order_post->post_title : false;
 			$editor_link = $this->get_editor_link( $order_post );
 
-			$this->plugin->alerts->Trigger( 9035, array(
-				'OrderID'            => $order_id,
-				'OrderTitle'         => $this->get_order_title( $new_order ),
-				'OrderStatus'        => $new_order->get_status(),
-				$editor_link['name'] => $editor_link['value'],
-			) );
+			$this->plugin->alerts->Trigger(
+				9035, array(
+					'OrderID'            => $order_id,
+					'OrderTitle'         => $this->get_order_title( $new_order ),
+					'OrderStatus'        => $new_order->get_status(),
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
 		}
 	}
 
@@ -531,8 +548,16 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	 * @param WC_Product $product - WooCommerce product object.
 	 */
 	public function product_stock_changed( $product ) {
-		// Get product id.
-		$product_id = $product->get_id();
+		// Get product data.
+		$product_status = false;
+		if ( $product->is_type( 'variation' ) ) {
+			$product_id     = $product->get_parent_id();
+			$product_title  = $product->get_name(); // Get product title.
+			$product_status = $product->get_status();
+		} else {
+			$product_id    = $product->get_id();
+			$product_title = $product->get_title(); // Get product title.
+		}
 
 		// Return if current screen is edit post page.
 		global $pagenow;
@@ -570,7 +595,6 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 
 		$new_stock        = $product->get_stock_quantity(); // Get new stock quantity.
 		$new_stock_status = $product->get_stock_status(); // Get new stock status.
-		$product_title    = $product->get_title(); // Get product title.
 
 		// Set post object.
 		$post = get_post( $product_id );
@@ -589,7 +613,7 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9018, array(
 					'ProductTitle'       => $product_title,
-					'ProductStatus'      => $post->post_status,
+					'ProductStatus'      => ( ! $product_status ) ? $post->post_status : $product_status,
 					'OldStatus'          => $this->get_stock_status( $old_stock_status ),
 					'NewStatus'          => $this->get_stock_status( $new_stock_status ),
 					'Username'           => $username,
@@ -606,7 +630,7 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9019, array(
 					'ProductTitle'       => $product_title,
-					'ProductStatus'      => $post->post_status,
+					'ProductStatus'      => ( ! $product_status ) ? $post->post_status : $product_status,
 					'OldValue'           => ( ! empty( $old_stock ) ? $old_stock : 0 ),
 					'NewValue'           => $new_stock,
 					'Username'           => $username,
