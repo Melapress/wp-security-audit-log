@@ -103,10 +103,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Method: Add premium extensions notice.
+	 * Add premium extensions notice.
 	 *
-	 * @author Ashar Irfan
-	 * @since  1.0.0
+	 * Notices:
+	 *   1. Plugin advert.
+	 *   2. DB disconnection notice.
+	 *   3. Freemius opt-in/out notice.
 	 */
 	public function AdminNoticesPremium() {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
@@ -121,7 +123,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		) {
 			$get_transient_fn         = $this->_plugin->IsMultisite() ? 'get_site_transient' : 'get_transient'; // Check for multisite.
 			$wsal_is_advert_dismissed = $get_transient_fn( 'wsal-is-advert-dismissed' ); // Check if advert has been dismissed.
-			$wsal_is_advert_dismissed = false !== $wsal_is_advert_dismissed ? $wsal_is_advert_dismissed : false; // Set the default.
 			$wsal_premium_advert      = $this->_plugin->GetGlobalOption( 'premium-advert', false ); // Get the advert to display.
 			$wsal_premium_advert      = false !== $wsal_premium_advert ? (int) $wsal_premium_advert : 0; // Set the default.
 
@@ -200,6 +201,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			if (
 				wsal_freemius()->is_anonymous() // Anonymous mode option.
 				&& wsal_freemius()->is_not_paying() // Not paying customer.
+				&& wsal_freemius()->has_api_connectivity() // Check API connectivity.
 				&& $is_current_view
 				&& $this->_plugin->settings->CurrentUserCan( 'edit' ) // Have permission to edit plugin settings.
 			) {
@@ -318,7 +320,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		global $pagenow;
 
 		// Only run the function on audit log custom page.
-		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // Current page.
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // @codingStandardsIgnoreLine
 		if ( 'admin.php' !== $pagenow ) {
 			return;
 		} elseif ( 'wsal-auditlog' !== $page ) { // Page is admin.php, now check auditlog page.
@@ -492,7 +494,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						?>
 					);
 				} );
-			</script><?php
+			</script>
+			<?php
 		endif;
 	}
 
@@ -1135,12 +1138,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Verify nonce.
 		if ( isset( $_POST['wsal_viewer_security'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wsal_viewer_security'] ) ), 'wsal_auditlog_viewer_nonce' ) ) {
 			// Get $_POST arguments.
-			$paged    = isset( $_POST['page_number'] ) ? sanitize_text_field( wp_unslash( $_POST['page_number'] ) ) : 0;
-			$per_page = 25;
+			$paged = isset( $_POST['page_number'] ) ? sanitize_text_field( wp_unslash( $_POST['page_number'] ) ) : 0;
 
 			// Query events.
 			$events_query = $this->GetListView()->query_events( $paged );
-			if ( isset( $events_query['items'] ) ) {
+			if ( ! empty( $events_query['items'] ) ) {
 				foreach ( $events_query['items'] as $event ) {
 					$this->GetListView()->single_row( $event );
 				}
