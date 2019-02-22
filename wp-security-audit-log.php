@@ -234,7 +234,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @since 3.3
 		 */
 		public function init_hooks() {
-			// Listen for installation event.
+			// Register plugin specific activation hook.
 			register_activation_hook( __FILE__, array( $this, 'Install' ) );
 
 			// Listen for init event.
@@ -282,6 +282,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			wsal_freemius()->add_filter( 'show_first_trial_after_n_sec', array( $this, 'change_show_first_trial_period' ), 10, 1 );
 			wsal_freemius()->add_filter( 'reshow_trial_after_every_n_sec', array( $this, 'change_reshow_trial_period' ), 10, 1 );
 			wsal_freemius()->add_filter( 'show_admin_notice', array( $this, 'freemius_show_admin_notice' ), 10, 2 );
+			wsal_freemius()->add_filter( 'show_delegation_option', '__return_false' );
 		}
 
 		/**
@@ -315,7 +316,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( isset( $post_data['action'] ) ) {
 				switch ( $post_data['action'] ) {
 					case 'check_wsal':
-						$info = new stdClass();
+						$info                 = new stdClass();
 						$info->wsal_installed = true;
 						$info->is_premium     = false;
 
@@ -337,7 +338,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 						// Set the return object.
 						if ( isset( $event[0] ) ) {
-							$info = new stdClass();
+							$info             = new stdClass();
 							$info->alert_id   = $event[0]->alert_id;
 							$info->created_on = $event[0]->created_on;
 						} else {
@@ -810,26 +811,29 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Install all assets required for a useable system.
 		 */
 		public function Install() {
-			if ( version_compare( PHP_VERSION, self::MIN_PHP_VERSION ) < 0 ) :
+			$installation_errors = false;
+
+			// Check for minimum PHP version.
+			if ( version_compare( PHP_VERSION, self::MIN_PHP_VERSION ) < 0 ) {
+				/* Translators: %s: PHP Version */
+				$installation_errors  = sprintf( esc_html__( 'You are using a version of PHP that is older than %s, which is no longer supported.', 'wp-security-audit-log' ), esc_html( self::MIN_PHP_VERSION ) );
+				$installation_errors .= '<br />';
+				$installation_errors .= __( 'Contact us on <a href="mailto:plugins@wpwhitesecurity.com">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using.', 'wp-security-audit-log' );
+			} elseif ( $this->IsMultisite() && is_super_admin() && ! is_network_admin() ) {
+				$installation_errors  = esc_html__( 'The WP Security Audit Log plugin is a multisite network tool, so it has to be activated at network level.', 'wp-security-audit-log' );
+				$installation_errors .= '<br />';
+				$installation_errors .= '<a href="javascript:;" onclick="window.top.location.href=\'' . esc_url( network_admin_url( 'plugins.php' ) ) . '\'">' . esc_html__( 'Redirect me to the network dashboard', 'wp-security-audit-log' ) . '</a> ';
+			}
+
+			if ( $installation_errors ) {
 				?>
 				<html>
-					<head>
-						<style>
-							.warn-icon-tri{top:5px;left:5px;position:absolute;border-left:16px solid #FFF;border-right:16px solid #FFF;border-bottom:28px solid #C33;height:3px;width:4px}.warn-icon-chr{top:8px;left:18px;position:absolute;color:#FFF;font:26px Georgia}.warn-icon-cir{top:2px;left:0;position:absolute;overflow:hidden;border:6px solid #FFF;border-radius:32px;width:34px;height:34px}.warn-wrap{position:relative;color:#A00;font:14px Arial;padding:6px 48px}.warn-wrap a,.warn-wrap a:hover{color:#F56}
-						</style>
-					</head>
-					<body>
-						<div class="warn-wrap">
-							<div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div>
-							<?php /* Translators: %s: PHP Version */ echo sprintf( esc_html__( 'You are using a version of PHP that is older than %s, which is no longer supported.', 'wp-security-audit-log' ), esc_html( self::MIN_PHP_VERSION ) ); ?>
-							<br />
-							<?php echo wp_kses( __( 'Contact us on <a href="mailto:plugins@wpwhitesecurity.com">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using.', 'wp-security-audit-log' ), $this->allowed_html_tags ); ?>
-						</div>
-					</body>
+					<head><style>body{margin:0;}.warn-icon-tri{top:7px;left:5px;position:absolute;border-left:16px solid #FFF;border-right:16px solid #FFF;border-bottom:28px solid #C33;height:3px;width:4px}.warn-icon-chr{top:10px;left:18px;position:absolute;color:#FFF;font:26px Georgia}.warn-icon-cir{top:4px;left:0;position:absolute;overflow:hidden;border:6px solid #FFF;border-radius:32px;width:34px;height:34px}.warn-wrap{position:relative;font-size:13px;font-family:sans-serif;padding:6px 48px;line-height:1.4;}</style></head>
+					<body><div class="warn-wrap"><div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div><span><?php echo $installation_errors; // @codingStandardsIgnoreLine ?></span></div></body>
 				</html>
 				<?php
 				die( 1 );
-			endif;
+			}
 
 			// Set the settings object temporarily.
 			if ( empty( $this->settings ) ) {
@@ -863,7 +867,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Setting the prunig date with the old value or the default value.
 			// $pruning_date = $this->settings->GetPruningDate();
 			// $this->settings->SetPruningDate( $pruning_date );
-
 			$old_disabled = $this->GetGlobalOption( 'disabled-alerts' );
 			// If old setting is empty disable alert 2099 by default.
 			if ( empty( $old_disabled ) ) {
@@ -898,11 +901,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! $this->IsInstalled() ) :
 				?>
 				<html>
-					<head>
-						<style>
-							.warn-icon-tri{top:5px;left:5px;position:absolute;border-left:16px solid #FFF;border-right:16px solid #FFF;border-bottom:28px solid #C33;height:3px;width:4px}.warn-icon-chr{top:8px;left:18px;position:absolute;color:#FFF;font:26px Georgia}.warn-icon-cir{top:2px;left:0;position:absolute;overflow:hidden;border:6px solid #FFF;border-radius:32px;width:34px;height:34px}.warn-wrap{position:relative;color:#A00;font:14px Arial;padding:6px 48px}.warn-wrap a,.warn-wrap a:hover{color:#F56}
-						</style>
-					</head>
+					<head><style>body{margin:0;}.warn-icon-tri{top:7px;left:5px;position:absolute;border-left:16px solid #FFF;border-right:16px solid #FFF;border-bottom:28px solid #C33;height:3px;width:4px}.warn-icon-chr{top:10px;left:18px;position:absolute;color:#FFF;font:26px Georgia}.warn-icon-cir{top:4px;left:0;position:absolute;overflow:hidden;border:6px solid #FFF;border-radius:32px;width:34px;height:34px}.warn-wrap{position:relative;color:#A00;font-size:13px;font-family:sans-serif;padding:6px 48px;line-height:1.4;}.warn-wrap a,.warn-wrap a:hover{color:#F56}</style></head>
 					<body>
 						<div class="warn-wrap">
 							<div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div>
@@ -1203,7 +1202,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$n = '<strong>%s</strong>';
 				$l = strlen( $n );
 				while ( ( $pos = strpos( $mesg, $n ) ) !== false ) {
-					$mesg = substr_replace( $mesg, '%MigratedArg' . ($c++) . '%', $pos, $l );
+					$mesg = substr_replace( $mesg, '%MigratedArg' . ( $c++ ) . '%', $pos, $l );
 				}
 				$data['MigratedMesg'] = $mesg;
 				// Generate new meta data args.
