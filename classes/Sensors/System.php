@@ -134,8 +134,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( $old_value != $new_value ) {
 				$this->plugin->alerts->Trigger(
 					6003, array(
-						'OldEmail' => $old_value,
-						'NewEmail' => $new_value,
+						'OldEmail'      => $old_value,
+						'NewEmail'      => $new_value,
 						'CurrentUserID' => wp_get_current_user()->ID,
 					)
 				);
@@ -187,7 +187,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	protected function IsPast404Limit( $site_id, $username, $ip ) {
 		$get_fn = $this->IsMultisite() ? 'get_site_transient' : 'get_transient';
 		$data   = $get_fn( self::TRANSIENT_404 );
-		return ( false !== $data ) && isset( $data[ $site_id . ':' . $username . ':' . $ip ] ) && ($data[ $site_id . ':' . $username . ':' . $ip ] > $this->Get404LogLimit());
+		return ( false !== $data ) && isset( $data[ $site_id . ':' . $username . ':' . $ip ] ) && ( $data[ $site_id . ':' . $username . ':' . $ip ] > $this->Get404LogLimit() );
 	}
 
 	/**
@@ -281,7 +281,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				$new = ( (int) $occ->GetMetaValue( 'Attempts', 0 ) ) + 1;
 
 				if ( $new > $this->Get404LogLimit() ) {
-					$new = 'more than ' . $this->Get404LogLimit();
+					$new  = 'more than ' . $this->Get404LogLimit();
 					$msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
 				}
 
@@ -335,8 +335,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 */
 	public function EventAdminInit() {
 		// Filter global arrays for security.
-		$post_array = filter_input_array( INPUT_POST );
-		$get_array = filter_input_array( INPUT_GET );
+		$post_array   = filter_input_array( INPUT_POST );
+		$get_array    = filter_input_array( INPUT_GET );
 		$server_array = filter_input_array( INPUT_SERVER );
 
 		// Destroy all the session of the same user from user profile page.
@@ -358,9 +358,9 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$actype = basename( $server_array['SCRIPT_NAME'], '.php' );
 		}
 
-		$is_option_page = 'options' === $actype;
+		$is_option_page      = 'options' === $actype;
 		$is_network_settings = 'settings' === $actype;
-		$is_permalink_page = 'options-permalink' === $actype;
+		$is_permalink_page   = 'options-permalink' === $actype;
 
 		// WordPress URL changed.
 		if ( $is_option_page
@@ -371,8 +371,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( $old_siteurl !== $new_siteurl ) {
 				$this->plugin->alerts->Trigger(
 					6024, array(
-						'old_url' => $old_siteurl,
-						'new_url' => $new_siteurl,
+						'old_url'       => $old_siteurl,
+						'new_url'       => $new_siteurl,
 						'CurrentUserID' => wp_get_current_user()->ID,
 					)
 				);
@@ -388,8 +388,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( $old_url !== $new_url ) {
 				$this->plugin->alerts->Trigger(
 					6025, array(
-						'old_url' => $old_url,
-						'new_url' => $new_url,
+						'old_url'       => $old_url,
+						'new_url'       => $new_url,
 						'CurrentUserID' => wp_get_current_user()->ID,
 					)
 				);
@@ -405,8 +405,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
 					6001, array(
-						'OldValue' => $old,
-						'NewValue' => $new,
+						'OldValue'      => $old,
+						'NewValue'      => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
 					)
 				);
@@ -420,8 +420,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
 					6002, array(
-						'OldRole' => $old,
-						'NewRole' => $new,
+						'OldRole'       => $old,
+						'NewRole'       => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
 					)
 				);
@@ -435,8 +435,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
 					6003, array(
-						'OldEmail' => $old,
-						'NewEmail' => $new,
+						'OldEmail'      => $old,
+						'NewEmail'      => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
 					)
 				);
@@ -450,8 +450,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
 					6003, array(
-						'OldEmail' => $old,
-						'NewEmail' => $new,
+						'OldEmail'      => $old,
+						'NewEmail'      => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
 					)
 				);
@@ -465,8 +465,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
 					6005, array(
-						'OldPattern' => $old,
-						'NewPattern' => $new,
+						'OldPattern'    => $old,
+						'NewPattern'    => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
 					)
 				);
@@ -513,8 +513,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		if ( isset( $post_array['action'] ) && 'update' === $post_array['action'] && isset( $post_array['option_page'] ) && ( 'bbpress' === $post_array['option_page'] ) ) {
 			// Anonymous posting.
 			$allow_anonymous = get_option( '_bbp_allow_anonymous' );
-			$old_status = ! empty( $allow_anonymous ) ? 1 : 0;
-			$new_status = ! empty( $post_array['_bbp_allow_anonymous'] ) ? 1 : 0;
+			$old_status      = ! empty( $allow_anonymous ) ? 1 : 0;
+			$new_status      = ! empty( $post_array['_bbp_allow_anonymous'] ) ? 1 : 0;
 			if ( $old_status !== $new_status ) {
 				$status = ( 1 === $new_status ) ? 'Enabled' : 'Disabled';
 				$this->plugin->alerts->Trigger(
@@ -526,8 +526,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 			// Disallow editing after.
 			$bbp_edit_lock = get_option( '_bbp_edit_lock' );
-			$old_time = ! empty( $bbp_edit_lock ) ? $bbp_edit_lock : '';
-			$new_time = ! empty( $post_array['_bbp_edit_lock'] ) ? $post_array['_bbp_edit_lock'] : '';
+			$old_time      = ! empty( $bbp_edit_lock ) ? $bbp_edit_lock : '';
+			$new_time      = ! empty( $post_array['_bbp_edit_lock'] ) ? $post_array['_bbp_edit_lock'] : '';
 			if ( $old_time != $new_time ) {
 				$this->plugin->alerts->Trigger(
 					8012, array(
@@ -539,8 +539,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 			// Throttle posting every.
 			$bbp_throttle_time = get_option( '_bbp_throttle_time' );
-			$old_time2 = ! empty( $bbp_throttle_time ) ? $bbp_throttle_time : '';
-			$new_time2 = ! empty( $post_array['_bbp_throttle_time'] ) ? $post_array['_bbp_throttle_time'] : '';
+			$old_time2         = ! empty( $bbp_throttle_time ) ? $bbp_throttle_time : '';
+			$new_time2         = ! empty( $post_array['_bbp_throttle_time'] ) ? $post_array['_bbp_throttle_time'] : '';
 			if ( $old_time2 != $new_time2 ) {
 				$this->plugin->alerts->Trigger(
 					8013, array(
@@ -559,7 +559,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 */
 	public function WPUpdate( $automatic ) {
 		if ( isset( $automatic['core'][0] ) ) {
-			$obj = $automatic['core'][0];
+			$obj         = $automatic['core'][0];
 			$old_version = get_bloginfo( 'version' );
 			$this->plugin->alerts->Trigger(
 				6004, array(
@@ -584,11 +584,11 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 */
 	public function LogFilesPruning() {
 		if ( $this->plugin->GetGlobalOption( 'purge-404-log', 'off' ) == 'on' ) {
-			$upload_dir = wp_upload_dir();
+			$upload_dir       = wp_upload_dir();
 			$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
 			if ( is_dir( $uploads_dir_path ) ) {
 				if ( $handle = opendir( $uploads_dir_path ) ) {
-					while ( false !== ($entry = readdir( $handle )) ) {
+					while ( false !== ( $entry = readdir( $handle ) ) ) {
 						if ( '.' != $entry && '..' != $entry ) {
 							if ( strpos( $entry, '6007' ) && file_exists( $uploads_dir_path . $entry ) ) {
 								$modified = filemtime( $uploads_dir_path . $entry );
@@ -604,7 +604,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 		if ( 'on' == $this->plugin->GetGlobalOption( 'purge-visitor-404-log', 'off' ) ) {
-			$upload_dir = wp_upload_dir();
+			$upload_dir       = wp_upload_dir();
 			$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
 			if ( is_dir( $uploads_dir_path ) ) {
 				if ( $handle = opendir( $uploads_dir_path ) ) {
@@ -633,7 +633,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	public function EventOptions( $whitelist = null ) {
 		// Filter global arrays for security.
 		$post_array = filter_input_array( INPUT_POST );
-		$get_array = filter_input_array( INPUT_GET );
+		$get_array  = filter_input_array( INPUT_GET );
 
 		if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] ) {
 			$old_status = (int) get_option( 'blog_public', 1 );
@@ -685,7 +685,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					6012, array(
 						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
-						'Value' => $value,
+						'Value'  => $value,
 					)
 				);
 			}
@@ -759,7 +759,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 * @param bool   $logged_in - True if logged in.
 	 * @param string $url       - 404 URL.
 	 */
-	private function WriteLog( $attempts, $ip, $username = '', $logged_in = true, $url ) {
+	private function WriteLog( $attempts, $ip, $username = '', $logged_in = true, $url = null ) {
 		$name_file = null;
 
 		if ( $logged_in && 'on' === $this->plugin->GetGlobalOption( 'log-404', 'off' ) ) {
@@ -848,18 +848,18 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 * @return string $latest_filename - File name.
 	 */
 	private function GetLastModified( $uploads_dir_path, $filename ) {
-		$filename = substr( $filename, 0, -4 );
-		$latest_mtime = 0;
+		$filename        = substr( $filename, 0, -4 );
+		$latest_mtime    = 0;
 		$latest_filename = '';
 		if ( $handle = opendir( $uploads_dir_path ) ) {
-			while ( false !== ($entry = readdir( $handle )) ) {
+			while ( false !== ( $entry = readdir( $handle ) ) ) {
 				if ( '.' != $entry && '..' != $entry ) {
 					$entry = strip_tags( $entry ); // Strip HTML Tags.
 					$entry = preg_replace( '/[\r\n\t ]+/', ' ', $entry ); // Remove Break/Tabs/Return Carriage.
 					$entry = preg_replace( '/[\"\*\/\:\<\>\?\'\|]+/', ' ', $entry ); // Remove Illegal Chars for folder and filename.
 					if ( preg_match( '/^' . $filename . '/i', $entry ) > 0 ) {
 						if ( filemtime( $uploads_dir_path . $entry ) > $latest_mtime ) {
-							$latest_mtime = filemtime( $uploads_dir_path . $entry );
+							$latest_mtime    = filemtime( $uploads_dir_path . $entry );
 							$latest_filename = $entry;
 						}
 					}
