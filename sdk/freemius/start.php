@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 *
 	 * @var string
 	 */
-	$this_sdk_version = '2.2.3.1';
+	$this_sdk_version = '2.2.4';
 
 	// region SDK Selection Logic --------------------------------------------------------------------
 	/**
