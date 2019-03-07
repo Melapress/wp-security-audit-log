@@ -158,6 +158,7 @@ function wsaldefaults_wsal_init() {
 						array( 1005, E_WARNING, __( 'User logged in with existing session(s)', 'wp-security-audit-log' ), __( 'Successfully logged in. Another session from %IPAddress% for this user already exist.', 'wp-security-audit-log' ) ),
 						array( 1006, E_CRITICAL, __( 'User logged out all other sessions with the same username', 'wp-security-audit-log' ), __( 'Logged out all other sessions with the same username.', 'wp-security-audit-log' ) ),
 						array( 1007, E_CRITICAL, __( 'User session destroyed and logged out', 'wp-security-audit-log' ), __( 'Logged out session %TargetSessionID% which belonged to %TargetUserName%', 'wp-security-audit-log' ) ),
+						array( 1008, E_WARNING, __( 'Switched to another user', 'wp-security-audit-log' ), __( 'Switched to %TargetUserName% with role %TargetUserRole%.', 'wp-security-audit-log' ) ),
 						array( 2010, E_NOTICE, __( 'User uploaded file from Uploads directory', 'wp-security-audit-log' ), __( 'Uploaded the file %FileName% in %FilePath%.', 'wp-security-audit-log' ) ),
 						array( 2011, E_WARNING, __( 'User deleted file from Uploads directory', 'wp-security-audit-log' ), __( 'Deleted the file %FileName% from %FilePath%.', 'wp-security-audit-log' ) ),
 						array( 6007, E_NOTICE, __( 'User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Has requested a non existing page (404 Error Pages) %Attempts% %Msg%. %LinkFile%%URL%', 'wp-security-audit-log' ) ),
