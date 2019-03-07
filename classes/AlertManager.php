@@ -131,6 +131,7 @@ final class WSAL_AlertManager {
 				'nav_menu_item',       // Nav menu item CPT.
 				'customize_changeset', // Customize changeset CPT.
 				'custom_css',          // Custom CSS CPT.
+				'product',             // WooCommerce Product CPT.
 				'shop_order',          // WooCommerce Order CPT.
 				'shop_order_refund',   // WooCommerce Order Refund CPT.
 				'product_variation',   // WooCommerce Product Variation CPT.
