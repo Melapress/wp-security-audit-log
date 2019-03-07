@@ -39,15 +39,7 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 	public function HookEvents() {
 		add_action( 'add_attachment', array( $this, 'EventFileUploaded' ) );
 		add_action( 'delete_attachment', array( $this, 'EventFileUploadedDeleted' ) );
-
-		/**
-		 * Commenting the code to detect file changes in plugins and themes.
-		 *
-		 * @todo Figure out a way to detect changes in files of plugins and themes.
-		 * With the introduction of the new code editor in 4.9 the previous code
-		 * stopped working.
-		 */
-		// add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
+		add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
 	}
 
 	/**
@@ -65,8 +57,8 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				2010, array(
 					'AttachmentID' => $attachment_id,
-					'FileName' => basename( $file ),
-					'FilePath' => dirname( $file ),
+					'FileName'     => basename( $file ),
+					'FilePath'     => dirname( $file ),
 				)
 			);
 		}
@@ -86,41 +78,50 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 		$this->plugin->alerts->Trigger(
 			2011, array(
 				'AttachmentID' => $attachment_id,
-				'FileName' => basename( $file ),
-				'FilePath' => dirname( $file ),
+				'FileName'     => basename( $file ),
+				'FilePath'     => dirname( $file ),
 			)
 		);
 	}
 
 	/**
-	 * Triggered when a user accesses the admin area.
+	 * File Changes Event.
+	 *
+	 * Detect file changes in plugins/themes using plugin/theme editor.
 	 */
 	public function EventAdminInit() {
-		// Filter global arrays for security.
-		$post_array = filter_input_array( INPUT_POST );
-		$server_array = filter_input_array( INPUT_SERVER );
+		// @codingStandardsIgnoreStart
+		$nonce   = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
+		$file    = isset( $_POST['file'] ) ? sanitize_text_field( wp_unslash( $_POST['file'] ) ) : false;
+		$action  = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : false;
+		$referer = isset( $_POST['_wp_http_referer'] ) ? sanitize_text_field( wp_unslash( $_POST['_wp_http_referer'] ) ) : false;
+		$referer = remove_query_arg( array( 'file', 'theme', 'plugin' ), $referer );
+		$referer = basename( $referer, '.php' );
+		// @codingStandardsIgnoreEnd
 
-		$action = isset( $post_array['action'] ) ? $post_array['action'] : '';
-		$script_name = isset( $server_array['SCRIPT_NAME'] ) ? basename( $server_array['SCRIPT_NAME'] ) : false;
-		$is_theme_editor = 'theme-editor.php' == $script_name;
-		$is_plugin_editor = 'plugin-editor.php' == $script_name;
+		if ( 'edit-theme-plugin-file' === $action ) {
+			if ( 'plugin-editor' === $referer && wp_verify_nonce( $nonce, 'edit-plugin_' . $file ) ) {
+				$plugin = isset( $_POST['plugin'] ) ? sanitize_text_field( wp_unslash( $_POST['plugin'] ) ) : false;
+				$this->plugin->alerts->Trigger(
+					2051, array(
+						'File'   => $file,
+						'Plugin' => $plugin,
+					)
+				);
+			} elseif ( 'theme-editor' === $referer ) {
+				$stylesheet = isset( $_POST['theme'] ) ? sanitize_text_field( wp_unslash( $_POST['theme'] ) ) : false;
 
-		if ( $is_theme_editor && 'update' === $action ) {
-			$this->plugin->alerts->Trigger(
-				2046, array(
-					'File' => $post_array['file'],
-					'Theme' => $post_array['theme'],
-				)
-			);
-		}
+				if ( ! wp_verify_nonce( $nonce, 'edit-theme_' . $stylesheet . '_' . $file ) ) {
+					return;
+				}
 
-		if ( $is_plugin_editor && 'update' === $action ) {
-			$this->plugin->alerts->Trigger(
-				2051, array(
-					'File' => $post_array['file'],
-					'Plugin' => $post_array['plugin'],
-				)
-			);
+				$this->plugin->alerts->Trigger(
+					2046, array(
+						'File'  => $file,
+						'Theme' => $stylesheet,
+					)
+				);
+			}
 		}
 	}
 }
