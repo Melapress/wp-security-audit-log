@@ -57,6 +57,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			add_action( 'login_redirect', array( $this, 'event_2fa_login' ), 10, 1 );
 		}
 
+		if ( is_plugin_active( 'user-switching/user-switching.php' ) ) {
+			add_action( 'switch_to_user', array( $this, 'user_switched_event' ), 10, 2 );
+		}
+
 		// Directory for logged in users log files.
 		$user_upload_dir  = wp_upload_dir();
 		$failed_login_dir = trailingslashit( $user_upload_dir['basedir'] . '/wp-security-audit-log/failed-logins/' );
@@ -178,7 +182,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 					$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
 					$this->plugin->alerts->Trigger(
 						4003, array(
-							'Username' => $user->user_login,
+							'Username'         => $user->user_login,
 							'CurrentUserRoles' => $user_roles,
 						), true
 					);
@@ -206,7 +210,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 * Event Logout.
 	 */
 	public function EventLogout() {
-		if ( 0 != $this->_current_user->ID ) {
+		if ( $this->_current_user->ID ) {
 			$this->plugin->alerts->Trigger(
 				1001, array(
 					'CurrentUserID'    => $this->_current_user->ID,
@@ -258,14 +262,14 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				return false;
 			} else {
 				$data_known = $get_fn( self::TRANSIENT_FAILEDLOGINS );
-				return ( false !== $data_known ) && isset( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] ) && ($data_known[ $site_id . ':' . $user->ID . ':' . $ip ] >= $this->GetLoginFailureLogLimit());
+				return ( false !== $data_known ) && isset( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] ) && ( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] >= $this->GetLoginFailureLogLimit() );
 			}
 		} else {
 			if ( -1 === (int) $this->GetVisitorLoginFailureLogLimit() ) {
 				return false;
 			} else {
 				$data_unknown = $get_fn( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
-				return ( false !== $data_unknown ) && isset( $data_unknown[ $site_id . ':' . $ip ] ) && ($data_unknown[ $site_id . ':' . $ip ] >= $this->GetVisitorLoginFailureLogLimit());
+				return ( false !== $data_unknown ) && isset( $data_unknown[ $site_id . ':' . $ip ] ) && ( $data_unknown[ $site_id . ':' . $ip ] >= $this->GetVisitorLoginFailureLogLimit() );
 			}
 		}
 	}
@@ -376,8 +380,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				// Create a new record exists user.
 				$this->plugin->alerts->Trigger(
 					$new_alert_code, array(
-						'Attempts' => 1,
-						'Username' => $username,
+						'Attempts'         => 1,
+						'Username'         => $username,
 						'CurrentUserRoles' => $user_roles,
 					)
 				);
@@ -508,5 +512,32 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			closedir( $handle );
 		}
 		return $latest_filename;
+	}
+
+	/**
+	 * User Switched.
+	 *
+	 * Current user switched to another user event.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param int $new_user_id - New user id.
+	 * @param int $old_user_id - Old user id.
+	 */
+	public function user_switched_event( $new_user_id, $old_user_id ) {
+		$target_user       = get_user_by( 'ID', $new_user_id );
+		$target_user_roles = $this->plugin->settings->GetCurrentUserRoles( $target_user->roles );
+		$target_user_roles = implode( ', ', $target_user_roles );
+		$old_user          = get_user_by( 'ID', $old_user_id );
+		$old_user_roles    = $this->plugin->settings->GetCurrentUserRoles( $old_user->roles );
+
+		$this->plugin->alerts->Trigger(
+			1008, array(
+				'TargetUserName'   => $target_user->user_login,
+				'TargetUserRole'   => $target_user_roles,
+				'Username'         => $old_user->user_login,
+				'CurrentUserRoles' => $old_user_roles,
+			)
+		);
 	}
 }
