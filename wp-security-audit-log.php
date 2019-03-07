@@ -398,6 +398,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					'target' => array(),
 				),
 				'br'     => array(),
+				'code'   => array(),
 				'em'     => array(),
 				'strong' => array(),
 				'p'      => array(
