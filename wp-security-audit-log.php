@@ -284,6 +284,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			wsal_freemius()->add_filter( 'show_admin_notice', array( $this, 'freemius_show_admin_notice' ), 10, 2 );
 			wsal_freemius()->add_filter( 'show_delegation_option', '__return_false' );
 			wsal_freemius()->add_filter( 'enable_per_site_activation', '__return_false' );
+			wsal_freemius()->add_filter( 'show_trial', '__return_false' );
 		}
 
 		/**
