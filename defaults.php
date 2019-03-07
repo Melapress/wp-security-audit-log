@@ -470,7 +470,6 @@ function wsaldefaults_wsal_init() {
 						array( 4010, E_CRITICAL, __( 'Existing user added to a site', 'wp-security-audit-log' ), __( 'Added the existing user %TargetUsername% with %TargetUserRole% role to site %SiteName%.', 'wp-security-audit-log' ) ),
 						array( 4011, E_CRITICAL, __( 'User removed from site', 'wp-security-audit-log' ), __( 'Removed the user %TargetUsername% with role %TargetUserRole% from %SiteName% site.', 'wp-security-audit-log' ) ),
 						array( 4012, E_CRITICAL, __( 'New network user created', 'wp-security-audit-log' ), __( 'Created a new network user %NewUserData->Username%.', 'wp-security-audit-log' ) ),
-						array( 4013, E_CRITICAL, __( 'The forum role of a user was changed by another WordPress user', 'wp-security-audit-log' ), __( 'Change the forum role of the user %TargetUsername% from %OldRole% to %NewRole% by %UserChanger%.', 'wp-security-audit-log' ) ),
 						array( 7000, E_CRITICAL, __( 'New site added on the network', 'wp-security-audit-log' ), __( 'Added the site %SiteName% to the network.', 'wp-security-audit-log' ) ),
 						array( 7001, E_CRITICAL, __( 'Existing site archived', 'wp-security-audit-log' ), __( 'Archived the site %SiteName%.', 'wp-security-audit-log' ) ),
 						array( 7002, E_CRITICAL, __( 'Archived site has been unarchived', 'wp-security-audit-log' ), __( 'Unarchived the site %SiteName%.', 'wp-security-audit-log' ) ),
@@ -511,6 +510,7 @@ function wsaldefaults_wsal_init() {
 						array( 8020, E_WARNING, __( 'User permanently deleted topic', 'wp-security-audit-log' ), __( 'Permanently deleted the topic %TopicName%.', 'wp-security-audit-log' ) ),
 						array( 8021, E_WARNING, __( 'User restored topic from trash', 'wp-security-audit-log' ), __( 'Restored the topic %TopicName% from trash.' . ' %EditorLinkTopic%.', 'wp-security-audit-log' ) ),
 						array( 8022, E_NOTICE, __( 'User changed visibility of a topic', 'wp-security-audit-log' ), __( 'Changed the visibility of the topic %TopicName% from %OldVisibility% to %NewVisibility%.' . ' %EditorLinkTopic%.', 'wp-security-audit-log' ) ),
+						array( 4013, E_CRITICAL, __( 'The forum role of a user was changed by another WordPress user', 'wp-security-audit-log' ), __( 'Change the forum role of the user %TargetUsername% from %OldRole% to %NewRole% by %UserChanger%.', 'wp-security-audit-log' ) ),
 					),
 
 					/**
