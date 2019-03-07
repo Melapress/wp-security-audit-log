@@ -68,7 +68,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		add_action( 'update_user_meta', array( $this, 'event_user_meta_updating' ), 10, 3 );
 		add_action( 'updated_user_meta', array( $this, 'event_user_meta_updated' ), 10, 4 );
 		add_action( 'user_register', array( $this, 'reset_null_meta_counter' ), 10 );
-		add_action( 'profile_update', array( $this, 'event_userdata_updated' ), 10, 2 );
 	}
 
 	/**
@@ -134,6 +133,12 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return;
 		}
 
+		if ( empty( $meta_value ) && ( $this->null_meta_counter < 1 ) ) { // Report only one NULL meta value.
+			$this->null_meta_counter += 1;
+		} elseif ( $this->null_meta_counter >= 1 ) { // Do not report if NULL meta values are more than one.
+			return;
+		}
+
 		// Get post object.
 		$post = get_post( $object_id );
 
@@ -142,68 +147,36 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return;
 		}
 
-		if ( empty( $meta_value ) && ( $this->null_meta_counter < 1 ) ) { // Report only one NULL meta value.
-			$this->null_meta_counter += 1;
-		} elseif ( $this->null_meta_counter >= 1 ) { // Do not report if NULL meta values are more than one.
-			return;
-		}
-
-		// Filter $_POST global array for security.
-		$post_array = filter_input_array( INPUT_POST );
-
-		// Check nonce.
-		if ( isset( $post_array['_ajax_nonce-add-meta'] ) && ! wp_verify_nonce( $post_array['_ajax_nonce-add-meta'], 'add-meta' ) ) {
-			return false;
-		} elseif ( isset( $post_array['_wpnonce'] ) && isset( $post_array['post_ID'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
-			return false;
-		}
-
-		// WP Dashboard action.
-		$wp_action = array( 'add-meta', 'editpost' );
-
-		// Check MainWP $_POST members.
-		$new_post    = filter_input( INPUT_POST, 'new_post' );
-		$post_custom = filter_input( INPUT_POST, 'post_custom' );
-
-		// Check if the post is coming from MainWP.
-		$mainwp = filter_input( INPUT_POST, 'mainwpsignature', FILTER_SANITIZE_STRING );
-
-		if (
-			( isset( $post_array['action'] ) && in_array( $post_array['action'], $wp_action, true ) ) // Either coming from WP admin panel.
-			|| ( ! empty( $new_post ) && ! empty( $post_custom ) && ! empty( $mainwp ) ) // OR from MainWP dashboard.
-		) {
-			/**
-			 * WSAL Filter: `wsal_before_post_meta_create_event`
-			 *
-			 * Runs before logging event for post meta created i.e. 2053.
-			 * This filter can be used as check to whether log this event or not.
-			 *
-			 * @since 3.3.1
-			 *
-			 * @param bool    $log_event  - True if log meta event, false if not.
-			 * @param string  $meta_key   - Meta key.
-			 * @param mixed   $meta_value - Meta value.
-			 * @param WP_Post $post       - Post object.
-			 */
-			$log_meta_event = apply_filters( 'wsal_before_post_meta_create_event', true, $meta_key, $meta_value, $post );
-
-			if ( $log_meta_event ) {
-				$editor_link = $this->GetEditorLink( $post );
-				$this->plugin->alerts->Trigger(
-					2053, array(
-						'PostID'             => $object_id,
-						'PostTitle'          => $post->post_title,
-						'PostStatus'         => $post->post_status,
-						'PostType'           => $post->post_type,
-						'PostDate'           => $post->post_date,
-						'PostUrl'            => get_permalink( $post->ID ),
-						'MetaKey'            => $meta_key,
-						'MetaValue'          => $meta_value,
-						'MetaLink'           => $meta_key,
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-			}
+		/**
+		 * WSAL Filter: `wsal_before_post_meta_create_event`
+		 *
+		 * Runs before logging event for post meta created i.e. 2053.
+		 * This filter can be used as check to whether log this event or not.
+		 *
+		 * @since 3.3.1
+		 *
+		 * @param bool    $log_event  - True if log meta event, false if not.
+		 * @param string  $meta_key   - Meta key.
+		 * @param mixed   $meta_value - Meta value.
+		 * @param WP_Post $post       - Post object.
+		 */
+		$log_meta_event = apply_filters( 'wsal_before_post_meta_create_event', true, $meta_key, $meta_value, $post );
+		if ( $log_meta_event ) {
+			$editor_link = $this->GetEditorLink( $post );
+			$this->plugin->alerts->Trigger(
+				2053, array(
+					'PostID'             => $object_id,
+					'PostTitle'          => $post->post_title,
+					'PostStatus'         => $post->post_status,
+					'PostType'           => $post->post_type,
+					'PostDate'           => $post->post_date,
+					'PostUrl'            => get_permalink( $post->ID ),
+					'MetaKey'            => $meta_key,
+					'MetaValue'          => $meta_value,
+					'MetaLink'           => $meta_key,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
 		}
 	}
 
@@ -263,90 +236,65 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		 */
 		do_action( 'wsal_post_meta_updated', $meta_id, $object_id, $this->old_meta, $meta_key, $meta_value );
 
-		// Filter $_POST global array for security.
-		$post_array = filter_input_array( INPUT_POST );
+		if ( isset( $this->old_meta[ $meta_id ] ) ) {
+			/**
+			 * WSAL Filter: `wsal_before_post_meta_update_event`
+			 *
+			 * Runs before logging events for post meta updated i.e. 2054 or 2062.
+			 * This filter can be used as check to whether log these events or not.
+			 *
+			 * @since 3.3.1
+			 *
+			 * @param bool     $log_event                  - True if log meta event 2054 or 2062, false if not.
+			 * @param string   $meta_key                   - Meta key.
+			 * @param mixed    $meta_value                 - Meta value.
+			 * @param stdClass $this->old_meta[ $meta_id ] - Old meta value and key object.
+			 * @param WP_Post  $post                       - Post object.
+			 * @param integer  $meta_id                    - Meta ID.
+			 */
+			$log_meta_event = apply_filters( 'wsal_before_post_meta_update_event', true, $meta_key, $meta_value, $this->old_meta[ $meta_id ], $post, $meta_id );
 
-		// Check nonce.
-		if ( isset( $post_array['_ajax_nonce'] ) && ! wp_verify_nonce( $post_array['_ajax_nonce'], 'change-meta' ) ) {
-			return false;
-		} elseif ( isset( $post_array['_wpnonce'] ) && isset( $post_array['post_ID'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
-			return false;
-		}
-
-		// WP Dashboard action.
-		$wp_action = array( 'add-meta', 'editpost' );
-
-		// Check MainWP $_POST members.
-		$new_post    = filter_input( INPUT_POST, 'new_post' );
-		$post_custom = filter_input( INPUT_POST, 'post_custom' );
-
-		// Check if the post is coming from MainWP.
-		$mainwp = filter_input( INPUT_POST, 'mainwpsignature', FILTER_SANITIZE_STRING );
-
-		if (
-			( isset( $post_array['action'] ) && in_array( $post_array['action'], $wp_action, true ) )
-			|| ( ! empty( $new_post ) && ! empty( $post_custom ) && ! empty( $mainwp ) )
-		) {
-			if ( isset( $this->old_meta[ $meta_id ] ) ) {
-				/**
-				 * WSAL Filter: `wsal_before_post_meta_update_event`
-				 *
-				 * Runs before logging events for post meta updated i.e. 2054 or 2062.
-				 * This filter can be used as check to whether log these events or not.
-				 *
-				 * @since 3.3.1
-				 *
-				 * @param bool     $log_event                  - True if log meta event 2054 or 2062, false if not.
-				 * @param string   $meta_key                   - Meta key.
-				 * @param mixed    $meta_value                 - Meta value.
-				 * @param stdClass $this->old_meta[ $meta_id ] - Old meta value and key object.
-				 * @param WP_Post  $post                       - Post object.
-				 * @param integer  $meta_id                    - Meta ID.
-				 */
-				$log_meta_event = apply_filters( 'wsal_before_post_meta_update_event', true, $meta_key, $meta_value, $this->old_meta[ $meta_id ], $post, $meta_id );
-
-				// Check change in meta key.
-				if ( $log_meta_event && $this->old_meta[ $meta_id ]->key != $meta_key ) {
-					$editor_link = $this->GetEditorLink( $post );
-					$this->plugin->alerts->Trigger(
-						2062, array(
-							'PostID'             => $object_id,
-							'PostTitle'          => $post->post_title,
-							'PostStatus'         => $post->post_status,
-							'PostType'           => $post->post_type,
-							'PostDate'           => $post->post_date,
-							'PostUrl'            => get_permalink( $post->ID ),
-							'MetaID'             => $meta_id,
-							'MetaKeyNew'         => $meta_key,
-							'MetaKeyOld'         => $this->old_meta[ $meta_id ]->key,
-							'MetaValue'          => $meta_value,
-							'MetaLink'           => $meta_key,
-							$editor_link['name'] => $editor_link['value'],
-						)
-					);
-				} elseif ( $log_meta_event && $this->old_meta[ $meta_id ]->val != $meta_value ) { // Check change in meta value.
-					$editor_link = $this->GetEditorLink( $post );
-					$this->plugin->alerts->Trigger(
-						2054, array(
-							'PostID'             => $object_id,
-							'PostTitle'          => $post->post_title,
-							'PostStatus'         => $post->post_status,
-							'PostType'           => $post->post_type,
-							'PostDate'           => $post->post_date,
-							'PostUrl'            => get_permalink( $post->ID ),
-							'MetaID'             => $meta_id,
-							'MetaKey'            => $meta_key,
-							'MetaValueNew'       => $meta_value,
-							'MetaValueOld'       => $this->old_meta[ $meta_id ]->val,
-							'MetaLink'           => $meta_key,
-							$editor_link['name'] => $editor_link['value'],
-							'ReportText'         => is_string( $this->old_meta[ $meta_id ]->val ) ? $this->old_meta[ $meta_id ]->val . '|' . $meta_value : false,
-						)
-					);
-				}
-				// Remove old meta update data.
-				unset( $this->old_meta[ $meta_id ] );
+			// Check change in meta key.
+			if ( $log_meta_event && $this->old_meta[ $meta_id ]->key !== $meta_key ) {
+				$editor_link = $this->GetEditorLink( $post );
+				$this->plugin->alerts->Trigger(
+					2062, array(
+						'PostID'             => $object_id,
+						'PostTitle'          => $post->post_title,
+						'PostStatus'         => $post->post_status,
+						'PostType'           => $post->post_type,
+						'PostDate'           => $post->post_date,
+						'PostUrl'            => get_permalink( $post->ID ),
+						'MetaID'             => $meta_id,
+						'MetaKeyNew'         => $meta_key,
+						'MetaKeyOld'         => $this->old_meta[ $meta_id ]->key,
+						'MetaValue'          => $meta_value,
+						'MetaLink'           => $meta_key,
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			} elseif ( $log_meta_event && $this->old_meta[ $meta_id ]->val !== $meta_value ) { // Check change in meta value.
+				$editor_link = $this->GetEditorLink( $post );
+				$this->plugin->alerts->Trigger(
+					2054, array(
+						'PostID'             => $object_id,
+						'PostTitle'          => $post->post_title,
+						'PostStatus'         => $post->post_status,
+						'PostType'           => $post->post_type,
+						'PostDate'           => $post->post_date,
+						'PostUrl'            => get_permalink( $post->ID ),
+						'MetaID'             => $meta_id,
+						'MetaKey'            => $meta_key,
+						'MetaValueNew'       => $meta_value,
+						'MetaValueOld'       => $this->old_meta[ $meta_id ]->val,
+						'MetaLink'           => $meta_key,
+						$editor_link['name'] => $editor_link['value'],
+						'ReportText'         => is_string( $this->old_meta[ $meta_id ]->val ) ? $this->old_meta[ $meta_id ]->val . '|' . $meta_value : false,
+					)
+				);
 			}
+			// Remove old meta update data.
+			unset( $this->old_meta[ $meta_id ] );
 		}
 	}
 
@@ -372,78 +320,47 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return;
 		}
 
-		// Filter $_POST global array for security.
-		$post_array = filter_input_array( INPUT_POST );
-
-		// Check nonce.
-		if ( isset( $post_array['_ajax_nonce'] ) && ! wp_verify_nonce( $post_array['_ajax_nonce'], 'delete-meta_' . $post_array['id'] ) ) {
-			return false;
-		} elseif ( isset( $post_array['_wpnonce'] ) && isset( $post_array['post_ID'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
-			return false;
-		}
-
-		// WP Dashboard action.
-		$wp_action = array( 'delete-meta' );
-
-		// Check MainWP $_POST members.
-		$new_post    = filter_input( INPUT_POST, 'new_post' );
-		$post_custom = filter_input( INPUT_POST, 'post_custom' );
-
-		// Check if the post is coming from MainWP.
-		$mainwp = filter_input( INPUT_POST, 'mainwpsignature', FILTER_SANITIZE_STRING );
-
-		if (
-			(
-				isset( $post_array['action'] )
-				&& in_array( $post_array['action'], $wp_action, true )
-			) || (
-				! empty( $new_post )
-				&& ! empty( $post_custom )
-				&& ! empty( $mainwp )
-			)
-		) {
-			$editor_link = $this->GetEditorLink( $post );
-			foreach ( $meta_ids as $meta_id ) {
-				if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) ) {
-					continue;
-				}
-
-				/**
-				 * WSAL Filter: `wsal_before_post_meta_delete_event`
-				 *
-				 * Runs before logging event for post meta deleted i.e. 2054.
-				 * This filter can be used as check to whether log this event or not.
-				 *
-				 * @since 3.3.1
-				 *
-				 * @param bool     $log_event  - True if log meta event 2055, false if not.
-				 * @param string   $meta_key   - Meta key.
-				 * @param mixed    $meta_value - Meta value.
-				 * @param WP_Post  $post       - Post object.
-				 * @param integer  $meta_id    - Meta ID.
-				 */
-				$log_meta_event = apply_filters( 'wsal_before_post_meta_delete_event', true, $meta_key, $meta_value, $post, $meta_id );
-
-				// If not allowed to log meta event then skip it.
-				if ( ! $log_meta_event ) {
-					continue;
-				}
-
-				$this->plugin->alerts->Trigger(
-					2055, array(
-						'PostID'             => $object_id,
-						'PostTitle'          => $post->post_title,
-						'PostStatus'         => $post->post_status,
-						'PostType'           => $post->post_type,
-						'PostDate'           => $post->post_date,
-						'PostUrl'            => get_permalink( $post->ID ),
-						'MetaID'             => $meta_id,
-						'MetaKey'            => $meta_key,
-						'MetaValue'          => $meta_value,
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
+		$editor_link = $this->GetEditorLink( $post );
+		foreach ( $meta_ids as $meta_id ) {
+			if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) ) {
+				continue;
 			}
+
+			/**
+			 * WSAL Filter: `wsal_before_post_meta_delete_event`
+			 *
+			 * Runs before logging event for post meta deleted i.e. 2054.
+			 * This filter can be used as check to whether log this event or not.
+			 *
+			 * @since 3.3.1
+			 *
+			 * @param bool     $log_event  - True if log meta event 2055, false if not.
+			 * @param string   $meta_key   - Meta key.
+			 * @param mixed    $meta_value - Meta value.
+			 * @param WP_Post  $post       - Post object.
+			 * @param integer  $meta_id    - Meta ID.
+			 */
+			$log_meta_event = apply_filters( 'wsal_before_post_meta_delete_event', true, $meta_key, $meta_value, $post, $meta_id );
+
+			// If not allowed to log meta event then skip it.
+			if ( ! $log_meta_event ) {
+				continue;
+			}
+
+			$this->plugin->alerts->Trigger(
+				2055, array(
+					'PostID'             => $object_id,
+					'PostTitle'          => $post->post_title,
+					'PostStatus'         => $post->post_status,
+					'PostType'           => $post->post_type,
+					'PostDate'           => $post->post_date,
+					'PostUrl'            => get_permalink( $post->ID ),
+					'MetaID'             => $meta_id,
+					'MetaKey'            => $meta_key,
+					'MetaValue'          => $meta_value,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
 		}
 	}
 
@@ -477,9 +394,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @param mixed  $meta_value - Meta value.
 	 */
 	public function event_user_meta_created( $object_id, $meta_key, $meta_value ) {
-		// Get user.
-		$user = get_user_by( 'ID', $object_id );
-
 		// Check to see if we can log the meta key.
 		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
@@ -491,26 +405,18 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return;
 		}
 
-		// Filter $_POST global array for security.
-		$post_array = filter_input_array( INPUT_POST );
+		// Get user.
+		$user = get_user_by( 'ID', $object_id );
 
-		// Check nonce.
-		if ( isset( $post_array['_wpnonce'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update-user_' . $user->ID ) ) {
-			return false;
-		}
-
-		// If update action is set then trigger the alert.
-		if ( isset( $post_array['action'] ) && ( 'update' == $post_array['action'] || 'createuser' == $post_array['action'] ) ) {
-			$this->plugin->alerts->TriggerIf(
-				4016,
-				array(
-					'TargetUsername'    => $user->user_login,
-					'custom_field_name' => $meta_key,
-					'new_value'         => $meta_value,
-				),
-				array( $this, 'must_not_contain_new_user_alert' )
-			);
-		}
+		$this->plugin->alerts->TriggerIf(
+			4016,
+			array(
+				'TargetUsername'    => $user->user_login,
+				'custom_field_name' => $meta_key,
+				'new_value'         => $meta_value,
+			),
+			array( $this, 'must_not_contain_new_user_alert' )
+		);
 	}
 
 	/**
@@ -540,124 +446,77 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @param mixed  $meta_value - Meta value.
 	 */
 	public function event_user_meta_updated( $meta_id, $object_id, $meta_key, $meta_value ) {
-		// Get user.
-		$user = get_user_by( 'ID', $object_id );
-
 		// Check to see if we can log the meta key.
 		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
-		// User profile name related meta.
-		$username_meta = array( 'first_name', 'last_name', 'nickname' );
-
-		// Filter $_POST global array for security.
-		$post_array = filter_input_array( INPUT_POST );
-
-		// If update action is set then trigger the alert.
-		if (
-			(
-				isset( $post_array['_wpnonce'] ) // WP Dashboard Support.
-				&& wp_verify_nonce( $post_array['_wpnonce'], 'update-user_' . $user->ID )
-				&& isset( $post_array['action'] )
-				&& 'update' == $post_array['action']
-			) || (
-				isset( $post_array['_um_account'] ) // Ultimate Member Plugin support.
-				&& '1' === $post_array['_um_account']
-				&& isset( $post_array['_um_account_tab'] )
-				&& 'general' === $post_array['_um_account_tab']
-			) || (
-				isset( $post_array['action'] ) && 'update_user' === $post_array['action'] // MainWP action.
-				&& isset( $post_array['mainwpsignature'] ) && ! empty( $post_array['mainwpsignature'] ) // MainWP Signature.
-			)
-		) {
-			if ( isset( $this->old_meta[ $meta_id ] ) && ! in_array( $meta_key, $username_meta, true ) ) {
-				// Check change in meta value.
-				if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
-					$this->plugin->alerts->TriggerIf(
-						4015,
-						array(
-							'TargetUsername'    => $user->user_login,
-							'custom_field_name' => $meta_key,
-							'new_value'         => $meta_value,
-							'old_value'         => $this->old_meta[ $meta_id ]->val,
-							'ReportText'        => is_string( $this->old_meta[ $meta_id ]->val ) ? $this->old_meta[ $meta_id ]->val . '|' . $meta_value : false,
-						),
-						array( $this, 'must_not_contain_role_changes' )
-					);
-				}
-				// Remove old meta update data.
-				unset( $this->old_meta[ $meta_id ] );
-			} elseif ( isset( $this->old_meta[ $meta_id ] ) && in_array( $meta_key, $username_meta, true ) ) {
-				// Detect the alert based on meta key.
-				switch ( $meta_key ) {
-					case 'first_name':
-						if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
-							$this->plugin->alerts->Trigger(
-								4017, array(
-									'TargetUsername' => $user->user_login,
-									'new_firstname'  => $meta_value,
-									'old_firstname'  => $this->old_meta[ $meta_id ]->val,
-								)
-							);
-						}
-						break;
-
-					case 'last_name':
-						if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
-							$this->plugin->alerts->Trigger(
-								4018, array(
-									'TargetUsername' => $user->user_login,
-									'new_lastname'   => $meta_value,
-									'old_lastname'   => $this->old_meta[ $meta_id ]->val,
-								)
-							);
-						}
-						break;
-
-					case 'nickname':
-						if ( $this->old_meta[ $meta_id ]->val != $meta_value ) {
-							$this->plugin->alerts->Trigger(
-								4019, array(
-									'TargetUsername' => $user->user_login,
-									'new_nickname'   => $meta_value,
-									'old_nickname'   => $this->old_meta[ $meta_id ]->val,
-								)
-							);
-						}
-						break;
-
-					default:
-						break;
-				}
-			}
+		if ( 'last_update' === $meta_key ) { // Contains timestamp for last user update so ignore it.
+			return;
 		}
-	}
 
-	/**
-	 * Method: Updated user data.
-	 *
-	 * @param int    $user_id       User ID.
-	 * @param object $old_user_data Object containing user's data prior to update.
-	 * @since 2.6.9
-	 */
-	public function event_userdata_updated( $user_id, $old_user_data ) {
-		// Get user display name.
-		$old_display_name = $old_user_data->display_name;
+		$username_meta = array( 'first_name', 'last_name', 'nickname' ); // User profile name related meta.
+		$user          = get_user_by( 'ID', $object_id ); // Get user.
 
-		// Get user's current data.
-		$new_userdata     = get_userdata( $user_id );
-		$new_display_name = $new_userdata->display_name;
+		if ( isset( $this->old_meta[ $meta_id ] ) && ! in_array( $meta_key, $username_meta, true ) ) {
+			// Check change in meta value.
+			if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
+				$this->plugin->alerts->TriggerIf(
+					4015,
+					array(
+						'TargetUsername'    => $user->user_login,
+						'custom_field_name' => $meta_key,
+						'new_value'         => $meta_value,
+						'old_value'         => $this->old_meta[ $meta_id ]->val,
+						'ReportText'        => is_string( $this->old_meta[ $meta_id ]->val ) ? $this->old_meta[ $meta_id ]->val . '|' . $meta_value : false,
+					),
+					array( $this, 'must_not_contain_role_changes' )
+				);
+			}
+			// Remove old meta update data.
+			unset( $this->old_meta[ $meta_id ] );
+		} elseif ( isset( $this->old_meta[ $meta_id ] ) && in_array( $meta_key, $username_meta, true ) ) {
+			// Detect the alert based on meta key.
+			switch ( $meta_key ) {
+				case 'first_name':
+					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
+						$this->plugin->alerts->Trigger(
+							4017, array(
+								'TargetUsername' => $user->user_login,
+								'new_firstname'  => $meta_value,
+								'old_firstname'  => $this->old_meta[ $meta_id ]->val,
+							)
+						);
+					}
+					break;
 
-		// Alert if display name is changed.
-		if ( $old_display_name !== $new_display_name ) {
-			$this->plugin->alerts->Trigger(
-				4020, array(
-					'TargetUsername'  => $new_userdata->user_login,
-					'new_displayname' => $new_display_name,
-					'old_displayname' => $old_display_name,
-				)
-			);
+				case 'last_name':
+					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
+						$this->plugin->alerts->Trigger(
+							4018, array(
+								'TargetUsername' => $user->user_login,
+								'new_lastname'   => $meta_value,
+								'old_lastname'   => $this->old_meta[ $meta_id ]->val,
+							)
+						);
+					}
+					break;
+
+				case 'nickname':
+					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
+						$this->plugin->alerts->Trigger(
+							4019, array(
+								'TargetUsername' => $user->user_login,
+								'new_nickname'   => $meta_value,
+								'old_nickname'   => $this->old_meta[ $meta_id ]->val,
+							)
+						);
+					}
+					break;
+
+				default:
+					break;
+			}
 		}
 	}
 
