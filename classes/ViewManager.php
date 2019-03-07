@@ -247,12 +247,18 @@ class WSAL_ViewManager {
 		$new_links = array();
 		foreach ( $this->views as $view ) {
 			if ( $view->HasPluginShortcutLink() ) {
-				$new_links[] =
-					'<a href="'
-						. admin_url( 'admin.php?page=' . $view->GetSafeViewName() )
-						. '">'
-						. $view->GetName()
-					. '</a>';
+				$new_links[] = '<a href="' . add_query_arg( 'page', $view->GetSafeViewName(), admin_url( 'admin.php' ) ) . '">' . $view->GetName() . '</a>';
+
+				if ( 1 === count( $new_links ) && wsal_freemius()->is_free_plan() ) {
+					// Trial link arguments.
+					$trial_args  = array(
+						'page'          => 'wsal-auditlog-pricing',
+						'billing_cycle' => 'annual',
+						'trial'         => 'true',
+					);
+					$admin_url   = $this->_plugin->IsMultisite() ? network_admin_url( 'admin.php' ) : admin_url( 'admin.php' );
+					$new_links[] = '<a style="font-weight:bold" href="' . add_query_arg( $trial_args, $admin_url ) . '">' . __( 'Free Premium Trial', 'wp-security-audit-log' ) . '</a>';
+				}
 			}
 		}
 		return array_merge( $new_links, $old_links );
@@ -308,7 +314,7 @@ class WSAL_ViewManager {
 	 * Render header of the current view.
 	 */
 	public function RenderViewHeader() {
-		if ( ! ! ($view = $this->GetActiveView()) ) {
+		if ( ! ! ( $view = $this->GetActiveView() ) ) {
 			$view->Header();
 		}
 	}
@@ -317,7 +323,7 @@ class WSAL_ViewManager {
 	 * Render footer of the current view.
 	 */
 	public function RenderViewFooter() {
-		if ( ! ! ($view = $this->GetActiveView()) ) {
+		if ( ! ! ( $view = $this->GetActiveView() ) ) {
 			$view->Footer();
 		}
 	}
