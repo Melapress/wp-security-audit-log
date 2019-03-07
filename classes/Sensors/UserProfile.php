@@ -35,25 +35,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 
 	/**
-	 * Listening to events using WP hooks.
-	 */
-	public function HookEvents() {
-		add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
-		add_action( 'edit_user_profile_update', array( $this, 'EventUserChanged' ) );
-		add_action( 'personal_options_update', array( $this, 'EventUserChanged' ) );
-		add_action( 'delete_user', array( $this, 'EventUserDeleted' ) );
-		add_action( 'wpmu_delete_user', array( $this, 'EventUserDeleted' ) );
-		add_action( 'set_user_role', array( $this, 'EventUserRoleChanged' ), 10, 3 );
-		add_action( 'edit_user_profile', array( $this, 'EventOpenProfile' ), 10, 1 );
-		add_action( 'profile_update', array( $this, 'event_email_changed' ), 10, 2 );
-
-		// Check if MainWP Child Plugin exists.
-		if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
-			add_action( 'profile_update', array( $this, 'mainwp_child_user_update' ), 20, 2 );
-		}
-	}
-
-	/**
 	 * List of super admins.
 	 *
 	 * @var array
@@ -61,156 +42,141 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	protected $old_superadmins;
 
 	/**
-	 * Triggered when a user accesses the admin area.
+	 * Listening to events using WP hooks.
 	 */
-	public function EventAdminInit() {
-		if ( $this->IsMultisite() ) {
-			$this->old_superadmins = get_super_admins();
+	public function HookEvents() {
+		add_action( 'profile_update', array( $this, 'event_user_updated' ), 10, 2 );
+		add_action( 'set_user_role', array( $this, 'event_user_role_changed' ), 10, 3 );
+		add_action( 'delete_user', array( $this, 'event_user_deleted' ) );
+		add_action( 'wpmu_delete_user', array( $this, 'event_user_deleted' ) );
+		add_action( 'edit_user_profile', array( $this, 'event_open_profile' ), 10, 1 );
+		add_action( 'grant_super_admin', array( $this, 'get_super_admins' ) );
+		add_action( 'revoke_super_admin', array( $this, 'get_super_admins' ) );
+		add_action( 'granted_super_admin', array( $this, 'event_super_access_granted' ), 10, 1 );
+		add_action( 'revoked_super_admin', array( $this, 'event_super_access_revoked' ), 10, 1 );
+	}
+
+	/**
+	 * Method: Support for Ultimate Member email change
+	 * alert.
+	 *
+	 * @param int     $user_id      - User ID.
+	 * @param WP_User $old_userdata - Old WP_User object.
+	 */
+	public function event_user_updated( $user_id, $old_userdata ) {
+		// Get new user data.
+		$new_userdata = get_userdata( $user_id );
+
+		if ( is_plugin_active( 'bbpress/bbpress.php' ) ) {
+			// BBPress user roles.
+			$bbpress_roles = array( 'bbp_spectator', 'bbp_moderator', 'bbp_participant', 'bbp_keymaster', 'bbp_blocked' );
+
+			// Get bbpress user roles data.
+			$old_bbpress_roles = array_intersect( $bbpress_roles, $old_userdata->roles );
+			$new_bbpress_roles = array_intersect( $bbpress_roles, $new_userdata->roles );
+
+			$old_bbpress_roles = array_map( array( $this, 'filter_role_names' ), $old_bbpress_roles );
+			$new_bbpress_roles = array_map( array( $this, 'filter_role_names' ), $new_bbpress_roles );
+
+			// Convert array to string.
+			$old_bbpress_roles = is_array( $old_bbpress_roles ) ? implode( ', ', $old_bbpress_roles ) : '';
+			$new_bbpress_roles = is_array( $new_bbpress_roles ) ? implode( ', ', $new_bbpress_roles ) : '';
+
+			if ( $old_bbpress_roles !== $new_bbpress_roles ) {
+				$current_user = wp_get_current_user();
+				$this->plugin->alerts->Trigger(
+					4013, array(
+						'TargetUsername' => $new_userdata->user_login,
+						'OldRole'        => $old_bbpress_roles,
+						'NewRole'        => $new_bbpress_roles,
+						'UserChanger'    => $current_user->user_login,
+					)
+				);
+			}
+		}
+
+		// Alert if user password is changed.
+		if ( $old_userdata->user_pass !== $new_userdata->user_pass ) {
+			$event      = get_current_user_id() === $user_id ? 4003 : 4004;
+			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $new_userdata->roles ) );
+			$this->plugin->alerts->Trigger(
+				$event, array(
+					'TargetUserID'   => $user_id,
+					'TargetUserData' => (object) array(
+						'Username' => $new_userdata->user_login,
+						'Roles'    => $user_roles,
+					),
+				)
+			);
+		}
+
+		// Alert if user email is changed.
+		if ( $old_userdata->user_email !== $new_userdata->user_email ) {
+			$event = get_current_user_id() === $user_id ? 4005 : 4006;
+			$this->plugin->alerts->Trigger(
+				$event, array(
+					'TargetUserID'   => $user_id,
+					'TargetUsername' => $new_userdata->user_login,
+					'OldEmail'       => $old_userdata->user_email,
+					'NewEmail'       => $new_userdata->user_email,
+				)
+			);
+		}
+
+		// Alert if display name is changed.
+		if ( $old_userdata->display_name !== $new_userdata->display_name ) {
+			$this->plugin->alerts->Trigger(
+				4020, array(
+					'TargetUsername'  => $new_userdata->user_login,
+					'old_displayname' => $old_userdata->display_name,
+					'new_displayname' => $new_userdata->display_name,
+				)
+			);
 		}
 	}
 
 	/**
 	 * Triggered when a user role is changed.
 	 *
-	 * @param int    $user_id - User ID of the user.
-	 * @param string $role - String of new roles.
-	 * @param string $old_roles - String of old roles.
+	 * @param int    $user_id   - User ID of the user.
+	 * @param string $new_role  - New role.
+	 * @param array  $old_roles - Array of old roles.
 	 */
-	public function EventUserRoleChanged( $user_id, $role, $old_roles ) {
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
+	public function event_user_role_changed( $user_id, $new_role, $old_roles ) {
+		$user = get_userdata( $user_id );
 
-		if ( ! isset( $post_array['changeit'] ) ) {
-			if ( isset( $post_array['_wpnonce'] )
-				&& ! wp_verify_nonce( $post_array['_wpnonce'], 'update-user_' . $user_id ) ) {
-				return false;
-			}
-		} elseif ( isset( $post_array['changeit'] )
-			&& 'Change' === $post_array['changeit']
-			&& isset( $post_array['_wpnonce'] )
-			&& ! wp_verify_nonce( $post_array['_wpnonce'], 'bulk-users' ) ) {
-			return false;
-		}
+		// If BBPress plugin is active then check for user roles change.
+		if ( is_plugin_active( 'bbpress/bbpress.php' ) ) {
+			// BBPress user roles.
+			$bbpress_roles = array( 'bbp_spectator', 'bbp_moderator', 'bbp_participant', 'bbp_keymaster', 'bbp_blocked' );
 
-		$user          = get_userdata( $user_id );
-		$bbpress_roles = array( 'bbp_spectator', 'bbp_moderator', 'bbp_participant', 'bbp_keymaster', 'bbp_blocked' );
-
-		// Remove any BBPress roles.
-		if ( is_array( $old_roles ) ) {
-			foreach ( $old_roles as $value ) {
-				if ( in_array( $value, $bbpress_roles ) ) {
-					if ( isset( $post_array['bbp-forums-role'] ) && $post_array['bbp-forums-role'] != $value ) {
-						$current_user = wp_get_current_user();
-						$this->plugin->alerts->TriggerIf(
-							4013, array(
-								'TargetUsername' => $user->user_login,
-								'OldRole' => ucfirst( substr( $value, 4 ) ),
-								'NewRole' => ( isset( $post_array['bbp-forums-role'] ) ) ? ucfirst( substr( $post_array['bbp-forums-role'], 4 ) ) : false,
-								'UserChanger' => $current_user->user_login,
-							)
-						);
-					}
-				}
-			}
+			// Set WP roles.
 			$old_roles = array_diff( $old_roles, $bbpress_roles );
+			$new_roles = array_diff( $user->roles, $bbpress_roles );
+			$old_roles = array_map( array( $this, 'filter_role_names' ), $old_roles );
+			$new_roles = array_map( array( $this, 'filter_role_names' ), $new_roles );
+		} else {
+			$old_roles = array_map( array( $this, 'filter_role_names' ), $old_roles );
+			$new_roles = array_map( array( $this, 'filter_role_names' ), $user->roles );
 		}
 
 		// Get roles.
-		$old_role = count( $old_roles ) ? implode( ', ', $old_roles ) : '';
-		$new_role = $role;
-
-		// If multisite, then get its URL.
-		if ( $this->plugin->IsMultisite() ) {
-			$site_id = get_current_blog_id();
-		}
+		$old_roles = is_array( $old_roles ) ? implode( ', ', $old_roles ) : '';
+		$new_roles = is_array( $new_roles ) ? implode( ', ', $new_roles ) : '';
 
 		// Alert if roles are changed.
-		if ( $old_role != $new_role ) {
+		if ( $old_roles !== $new_roles ) {
 			$this->plugin->alerts->TriggerIf(
 				4002,
 				array(
 					'TargetUserID'   => $user_id,
 					'TargetUsername' => $user->user_login,
-					'OldRole'        => $old_role,
-					'NewRole'        => $new_role,
-					'multisite_text' => $this->plugin->IsMultisite() ? $site_id : false,
+					'OldRole'        => $old_roles,
+					'NewRole'        => $new_roles,
+					'multisite_text' => $this->plugin->IsMultisite() ? get_current_blog_id() : false,
 				),
 				array( $this, 'MustNotContainUserChanges' )
 			);
-		}
-	}
-
-	/**
-	 * Triggered when a user changes email, password
-	 * or user is granted or revoked super admin access.
-	 *
-	 * @param int $user_id - User ID of the registered user.
-	 */
-	public function EventUserChanged( $user_id ) {
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
-
-		// Get user data.
-		$user = get_userdata( $user_id );
-
-		// Password changed.
-		if ( ! empty( $post_array['pass1'] ) && ! empty( $post_array['pass2'] ) ) {
-			if ( trim( $post_array['pass1'] ) == trim( $post_array['pass2'] ) ) {
-				$event = get_current_user_id() == $user_id ? 4003 : 4004;
-				$this->plugin->alerts->Trigger(
-					$event, array(
-						'TargetUserID' => $user_id,
-						'TargetUserData' => (object) array(
-							'Username' => $user->user_login,
-							'Roles' => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
-						),
-					)
-				);
-			}
-		}
-
-		// Email changed.
-		if ( ! empty( $post_array['email'] ) ) {
-			$old_email = $user->user_email;
-			$new_email = trim( $post_array['email'] );
-			if ( $old_email != $new_email ) {
-				$event = get_current_user_id() == $user_id ? 4005 : 4006;
-				$this->plugin->alerts->Trigger(
-					$event, array(
-						'TargetUserID' => $user_id,
-						'TargetUsername' => $user->user_login,
-						'OldEmail' => $old_email,
-						'NewEmail' => $new_email,
-					)
-				);
-			}
-		}
-
-		if ( $this->IsMultisite() ) {
-			$username = $user->user_login;
-			$enabled = isset( $post_array['super_admin'] );
-
-			if ( get_current_user_id() != $user_id ) {
-				// Super admin enabled.
-				if ( $enabled && ! in_array( $username, $this->old_superadmins ) ) {
-					$this->plugin->alerts->Trigger(
-						4008, array(
-							'TargetUserID' => $user_id,
-							'TargetUsername' => $user->user_login,
-						)
-					);
-				}
-
-				// Super admin disabled.
-				if ( ! $enabled && in_array( $username, $this->old_superadmins ) ) {
-					$this->plugin->alerts->Trigger(
-						4009, array(
-							'TargetUserID' => $user_id,
-							'TargetUsername' => $user->user_login,
-						)
-					);
-				}
-			}
 		}
 	}
 
@@ -219,18 +185,18 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 *
 	 * @param int $user_id - User ID of the registered user.
 	 */
-	public function EventUserDeleted( $user_id ) {
+	public function event_user_deleted( $user_id ) {
 		$user = get_userdata( $user_id );
 		$role = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
 		$this->plugin->alerts->TriggerIf(
 			4007, array(
-				'TargetUserID' => $user_id,
+				'TargetUserID'   => $user_id,
 				'TargetUserData' => (object) array(
-					'Username' => $user->user_login,
+					'Username'  => $user->user_login,
 					'FirstName' => $user->user_firstname,
-					'LastName' => $user->user_lastname,
-					'Email' => $user->user_email,
-					'Roles' => $role ? $role : 'none',
+					'LastName'  => $user->user_lastname,
+					'Email'     => $user->user_email,
+					'Roles'     => $role ? $role : 'none',
 				),
 			), array( $this, 'MustNotContainCreateUser' )
 		);
@@ -241,23 +207,82 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 *
 	 * @param object $user - Instance of WP_User.
 	 */
-	public function EventOpenProfile( $user ) {
-		if ( ! empty( $user ) ) {
-			$current_user = wp_get_current_user();
-
-			// Filter $_GET array for security.
-			$get_array = filter_input_array( INPUT_GET );
-
-			$updated = ( isset( $get_array['updated'] ) ) ? true : false;
-			if ( ! empty( $current_user ) && ( $user->ID !== $current_user->ID ) && empty( $updated ) ) {
-				$this->plugin->alerts->Trigger(
-					4014, array(
-						'UserChanger' => $current_user->user_login,
-						'TargetUsername' => $user->user_login,
-					)
-				);
-			}
+	public function event_open_profile( $user ) {
+		if ( ! $user ) {
+			return;
 		}
+		$current_user = wp_get_current_user();
+		$updated      = isset( $_GET['updated'] ); // @codingStandardsIgnoreLine
+		if ( $current_user && ( $user->ID !== $current_user->ID ) && ! $updated ) {
+			$this->plugin->alerts->Trigger(
+				4014, array(
+					'UserChanger'    => $current_user->user_login,
+					'TargetUsername' => $user->user_login,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Triggered when a user accesses the admin area.
+	 */
+	public function get_super_admins() {
+		$this->old_superadmins = $this->IsMultisite() ? get_super_admins() : null;
+	}
+
+	/**
+	 * Super Admin Enabled.
+	 *
+	 * Triggers when a user is granted super admin access.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param int $user_id - ID of the user that was granted Super Admin privileges.
+	 */
+	public function event_super_access_granted( $user_id ) {
+		$user = get_userdata( $user_id );
+		if ( $user && ! in_array( $user->user_login, $this->old_superadmins, true ) ) {
+			$this->plugin->alerts->Trigger(
+				4008, array(
+					'TargetUserID'   => $user_id,
+					'TargetUsername' => $user->user_login,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Super Admin Disabled.
+	 *
+	 * Triggers when a user is revoked super admin access.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param int $user_id - ID of the user that was revoked Super Admin privileges.
+	 */
+	public function event_super_access_revoked( $user_id ) {
+		$user = get_userdata( $user_id );
+		if ( $user && in_array( $user->user_login, $this->old_superadmins, true ) ) {
+			$this->plugin->alerts->Trigger(
+				4009, array(
+					'TargetUserID'   => $user_id,
+					'TargetUsername' => $user->user_login,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Remove BBPress Prefix from User Role.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param string $user_role - User role.
+	 * @return string
+	 */
+	public function filter_role_names( $user_role ) {
+		global $wp_roles;
+		return isset( $wp_roles->role_names[ $user_role ] ) ? $wp_roles->role_names[ $user_role ] : false;
 	}
 
 	/**
@@ -282,104 +307,5 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			|| $mgr->WillOrHasTriggered( 4000 )
 			|| $mgr->WillOrHasTriggered( 4001 )
 		);
-	}
-
-	/**
-	 * Method: Support for Ultimate Member email change
-	 * alert.
-	 *
-	 * @param int     $user_id      - User ID.
-	 * @param WP_User $old_userdata - Old WP_User object.
-	 */
-	public function event_email_changed( $user_id, $old_userdata ) {
-		// Get $_POST global array.
-		$post_array = filter_input_array( INPUT_POST );
-
-		if (
-			isset( $post_array['_um_account_tab'] ) // Check for UM tab.
-			&& 'general' === $post_array['_um_account_tab'] // Verify `General` UM tab.
-			&& ! empty( $post_array['user_email'] ) // Check if user email is set.
-		) {
-			$old_email = $old_userdata->user_email; // Old email.
-			$new_email = trim( $post_array['user_email'] ); // New email.
-			if ( $old_email !== $new_email ) { // If both emails don't match then log alert.
-				$event = get_current_user_id() === $user_id ? 4005 : 4006;
-				$this->plugin->alerts->Trigger(
-					$event, array(
-						'TargetUserID'   => $user_id,
-						'TargetUsername' => $old_userdata->user_login,
-						'OldEmail'       => $old_email,
-						'NewEmail'       => $new_email,
-					)
-				);
-			}
-		}
-	}
-
-	/**
-	 * Method: Support for user profile changes via MainWP dashboard.
-	 *
-	 * @param int     $user_id      - User ID.
-	 * @param WP_User $old_userdata - Old WP_User object.
-	 */
-	public function mainwp_child_user_update( $user_id, $old_userdata ) {
-		// Check parameters.
-		if ( empty( $user_id ) || empty( $old_userdata ) ) {
-			return;
-		}
-
-		// Get MainWP post data.
-		$post_array = filter_input_array( INPUT_POST );
-
-		if (
-			isset( $post_array['action'] ) && 'update_user' === $post_array['action']
-			&& isset( $post_array['mainwpsignature'] ) && ! empty( $post_array['mainwpsignature'] )
-		) {
-			// Get the user by id.
-			$user = get_user_by( 'id', $user_id );
-
-			// If user exists then continue.
-			if ( ! empty( $user ) && $user instanceof WP_User ) {
-				// Email changed.
-				if ( ! empty( $post_array['extra']['email'] ) ) {
-					$old_email = $old_userdata->user_email; // Old email address.
-					$new_email = trim( $post_array['extra']['email'] ); // New email address.
-					$new_email = sanitize_text_field( wp_unslash( $new_email ) ); // Filter data for security.
-
-					// If old email does not matches the new email then log the event.
-					if ( $old_email !== $new_email ) {
-						$event = get_current_user_id() === $user_id ? 4005 : 4006;
-						$this->plugin->alerts->Trigger(
-							$event, array(
-								'TargetUserID'   => $user_id,
-								'TargetUsername' => $user->user_login,
-								'OldEmail' => $old_email,
-								'NewEmail' => $new_email,
-							)
-						);
-					}
-				}
-
-				// Password changed.
-				if ( ! empty( $post_array['extra']['pass1'] ) && ! empty( $post_array['extra']['pass2'] ) ) {
-					$pass1 = trim( $post_array['extra']['pass1'] );
-					$pass2 = trim( $post_array['extra']['pass2'] );
-					$match = wp_check_password( $pass1, $old_userdata->user_pass, $user_id ); // Check if current pass matches the old one.
-
-					if ( $pass1 === $pass2 && ! $match ) {
-						$event = get_current_user_id() === $user_id ? 4003 : 4004;
-						$this->plugin->alerts->Trigger(
-							$event, array(
-								'TargetUserID'   => $user_id,
-								'TargetUserData' => (object) array(
-									'Username' => $user->user_login,
-									'Roles'    => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
-								),
-							)
-						);
-					}
-				}
-			}
-		}
 	}
 }
