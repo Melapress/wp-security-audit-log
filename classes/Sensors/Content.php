@@ -16,43 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WordPress contents (posts, pages and custom posts).
  *
- * 2000 User created a new blog post and saved it as draft
- * 2001 User published a blog post
- * 2002 User modified a published blog post
- * 2008 User permanently deleted a blog post from the trash
- * 2012 User moved a blog post to the trash
- * 2014 User restored a blog post from trash
- * 2016 User changed blog post category
- * 2017 User changed blog post URL
- * 2019 User changed blog post author
- * 2021 User changed blog post status
- * 2023 User created new category
- * 2024 User deleted category
- * 2025 User changed the visibility of a blog post
- * 2027 User changed the date of a blog post
- * 2047 User changed the parent of a page
- * 2048 User changed the template of a page
- * 2049 User set a post as sticky
- * 2050 User removed post from sticky
- * 2052 User changed generic tables
- * 2065 User modified content for a published post
- * 2073 User submitted a post for review
- * 2074 User scheduled a post
- * 2086 User changed title of a post
- * 2100 User opened a post in the editor
- * 2101 User viewed a post
- * 2111 User disabled Comments/Trackbacks and Pingbacks on a published post
- * 2112 User enabled Comments/Trackbacks and Pingbacks on a published post
- * 2119 User added blog post tag
- * 2120 User removed blog post tag
- * 2121 User created new tag
- * 2122 User deleted tag
- * 2123 User renamed tag
- * 2124 User changed tag slug
- * 2125 User changed tag description
- *
  * @package Wsal
- * @subpackage Sensors
  */
 class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
@@ -109,28 +73,23 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
-		if ( current_user_can( 'edit_posts' ) ) {
-			add_action( 'admin_init', array( $this, 'EventWordPressInit' ) );
-		}
-		add_action( 'transition_post_status', array( $this, 'EventPostChanged' ), 10, 3 );
-		add_action( 'delete_post', array( $this, 'EventPostDeleted' ), 10, 1 );
-		add_action( 'wp_trash_post', array( $this, 'EventPostTrashed' ), 10, 1 );
-		add_action( 'untrash_post', array( $this, 'EventPostUntrashed' ) );
-		add_action( 'edit_category', array( $this, 'EventChangedCategoryParent' ) );
-		add_action( 'wp_insert_post', array( $this, 'SetRevisionLink' ), 10, 3 );
-		add_action( 'publish_future_post', array( $this, 'EventPublishFuture' ), 10, 1 );
-		add_filter( 'post_edit_form_tag', array( $this, 'EditingPost' ), 10, 1 );
-		add_action( 'wp_head', array( $this, 'viewing_post' ), 10 );
-		add_action( 'create_category', array( $this, 'EventCategoryCreation' ), 10, 1 );
-		add_action( 'create_post_tag', array( $this, 'EventTagCreation' ), 10, 1 );
-		add_filter( 'wp_update_term_data', array( $this, 'event_terms_rename' ), 10, 4 );
+		add_action( 'pre_post_update', array( $this, 'get_before_post_edit_data' ), 10, 2 );
+		add_action( 'save_post', array( $this, 'post_changed' ), 10, 3 );
+		add_action( 'set_object_terms', array( $this, 'post_terms_changed' ), 10, 4 );
+		add_action( 'post_stuck', array( $this, 'post_stuck_event' ), 10, 1 );
+		add_action( 'post_unstuck', array( $this, 'post_unstuck_event' ), 10, 1 );
+		add_action( 'delete_post', array( $this, 'event_post_deleted' ), 10, 1 );
+		add_action( 'wp_trash_post', array( $this, 'event_post_trashed' ), 10, 1 );
+		add_action( 'untrash_post', array( $this, 'event_post_untrashed' ) );
+		add_action( 'future_to_publish', array( $this, 'event_publish_future' ), 10, 1 );
 		add_action( 'admin_action_edit', array( $this, 'edit_post_in_gutenberg' ), 10 );
-		add_action( 'pre_post_update', array( $this, 'gutenberg_post_edit_init' ), 10, 2 );
-		add_action( 'save_post', array( $this, 'gutenberg_post_changed' ), 10, 3 );
-		add_action( 'set_object_terms', array( $this, 'gutenberg_post_terms_changed' ), 10, 4 );
-		add_action( 'post_stuck', array( $this, 'gutenberg_post_stuck' ), 10, 1 );
-		add_action( 'post_unstuck', array( $this, 'gutenberg_post_unstuck' ), 10, 1 );
+		add_filter( 'post_edit_form_tag', array( $this, 'edit_post_in_classic' ), 10, 1 );
+		add_action( 'wp_head', array( $this, 'viewing_post' ), 10 );
+		add_action( 'create_category', array( $this, 'event_category_creation' ), 10, 1 );
+		add_action( 'create_post_tag', array( $this, 'event_tag_creation' ), 10, 1 );
 		add_action( 'pre_delete_term', array( $this, 'check_taxonomy_term_deletion' ), 10, 2 );
+		add_filter( 'wp_update_term_data', array( $this, 'event_update_term_data' ), 10, 4 );
+		add_action( 'updated_post_meta', array( $this, 'check_template_change' ), 10, 4 );
 
 		// Check if MainWP Child Plugin exists.
 		if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
@@ -139,52 +98,401 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 
 	/**
-	 * Return Post Event Data.
+	 * Get Post Data.
 	 *
-	 * @since 3.2.4
+	 * Collect old post data before post update event.
 	 *
-	 * @param WP_Post $post - WP Post object.
-	 * @return mixed
+	 * @param int $post_id - Post ID.
 	 */
-	public function get_post_event_data( $post ) {
+	public function get_before_post_edit_data( $post_id ) {
+		$post_id = (int) $post_id; // Making sure that the post id is integer.
+		$post    = get_post( $post_id ); // Get post.
+
+		// If post exists.
 		if ( ! empty( $post ) && $post instanceof WP_Post ) {
-			$event_data = array(
-				'PostID'     => $post->ID,
-				'PostType'   => $post->post_type,
-				'PostTitle'  => $post->post_title,
-				'PostStatus' => $post->post_status,
-				'PostDate'   => $post->post_date,
-				'PostUrl'    => get_permalink( $post->ID ),
-			);
-			return $event_data;
+			$this->_old_post  = $post;
+			$this->_old_link  = get_permalink( $post_id );
+			$this->_old_tmpl  = $this->get_post_template( $this->_old_post );
+			$this->_old_cats  = $this->get_post_categories( $this->_old_post );
+			$this->_old_tags  = $this->get_post_tags( $this->_old_post );
+			$this->_old_stky  = in_array( $post_id, get_option( 'sticky_posts' ), true );
+			$this->old_status = $post->post_status;
 		}
-		return false;
 	}
 
 	/**
-	 * Method: Triggered when terms are renamed.
+	 * Check all the post changes.
+	 *
+	 * @param integer $post_id - Post ID.
+	 * @param WP_Post $post    - WP Post object.
+	 * @param boolean $update  - True if post update, false if post is new.
+	 */
+	public function post_changed( $post_id, $post, $update ) {
+		// Ignore if post type is empty, revision or trash.
+		if ( empty( $post->post_type ) || 'revision' === $post->post_type || 'trash' === $post->post_status ) {
+			return;
+		}
+
+		// Ignore updates from ignored custom post types.
+		if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
+			return;
+		}
+
+		// Ignorable states.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			// Check post creation event.
+			if ( $this->_old_post && 'auto-draft' === $this->_old_post->post_status && 'draft' === $post->post_status ) {
+				$this->check_post_creation( $this->_old_post, $post );
+			}
+			return;
+		}
+
+		if ( $update ) {
+			if (
+				( 'auto-draft' === $this->_old_post->post_status && 'Auto Draft' === $this->_old_post->post_title && 'draft' === $post->post_status ) // Saving draft.
+				|| ( 'draft' === $this->_old_post->post_status && 'publish' === $post->post_status ) // Publishing post.
+			) {
+				$this->check_post_creation( $this->_old_post, $post );
+			} else {
+				// Handle update post events.
+				$changes = 0;
+				$changes = $this->check_author_change( $this->_old_post, $post )
+				+ $this->check_status_change( $this->_old_post, $post )
+				+ $this->check_parent_change( $this->_old_post, $post )
+				+ $this->check_visibility_change( $this->_old_post, $post, $this->old_status, $post->post_status )
+				+ $this->check_date_change( $this->_old_post, $post )
+				+ $this->check_permalink_change( $this->_old_link, get_permalink( $post->ID ), $post )
+				+ $this->check_comments_pings( $this->_old_post, $post );
+				$this->check_modification_change( $post->ID, $this->_old_post, $post, $changes );
+			}
+		} else {
+			// If not update then check post creation.
+			$this->check_post_creation( $this->_old_post, $post );
+		}
+	}
+
+	/**
+	 * Check if post terms changed via Gutenberg.
+	 *
+	 * @param int    $post_id  - Post ID.
+	 * @param array  $terms    - Array of terms.
+	 * @param array  $tt_ids   - Array of taxonomy term ids.
+	 * @param string $taxonomy - Taxonomy slug.
+	 */
+	public function post_terms_changed( $post_id, $terms, $tt_ids, $taxonomy ) {
+		$post = get_post( $post_id );
+
+		if ( is_wp_error( $post ) ) {
+			return;
+		}
+
+		if ( 'auto-draft' === $post->post_status ) {
+			return;
+		}
+
+		if ( 'post_tag' === $taxonomy ) {
+			// Check tags change event.
+			$this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
+		} else {
+			// Check categories change event.
+			$this->check_categories_change( $this->_old_cats, $this->get_post_categories( $post ), $post );
+		}
+	}
+
+	/**
+	 * Post Stuck Event.
+	 *
+	 * @param integer $post_id - Post ID.
+	 */
+	public function post_stuck_event( $post_id ) {
+		$this->log_sticky_post_event( $post_id, 2049 );
+	}
+
+	/**
+	 * Post Unstuck Event.
+	 *
+	 * @param integer $post_id - Post ID.
+	 */
+	public function post_unstuck_event( $post_id ) {
+		$this->log_sticky_post_event( $post_id, 2050 );
+	}
+
+	/**
+	 * Post permanently deleted.
+	 *
+	 * @param integer $post_id - Post ID.
+	 */
+	public function event_post_deleted( $post_id ) {
+		// Exclude CPTs from external plugins.
+		$post = get_post( $post_id );
+		if ( $this->check_other_sensors( $post ) ) {
+			return;
+		}
+
+		// Ignore attachments, revisions and menu items.
+		if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
+			$event = 2008;
+			// Check WordPress backend operations.
+			if ( $this->check_auto_draft( $event, $post->post_title ) ) {
+				return;
+			}
+
+			$event_data = $this->get_post_event_data( $post ); // Get event data.
+			$this->plugin->alerts->Trigger( $event, $event_data ); // Log event.
+		}
+	}
+
+	/**
+	 * Post moved to the trash.
+	 *
+	 * @param integer $post_id - Post ID.
+	 */
+	public function event_post_trashed( $post_id ) {
+		$post = get_post( $post_id );
+
+		if ( $this->check_other_sensors( $post ) ) {
+			return;
+		}
+
+		if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
+			$editor_link = $this->get_editor_link( $post );
+
+			$this->plugin->alerts->Trigger(
+				2012, array(
+					'PostID'             => $post->ID,
+					'PostType'           => $post->post_type,
+					'PostTitle'          => $post->post_title,
+					'PostStatus'         => $post->post_status,
+					'PostDate'           => $post->post_date,
+					'PostUrl'            => get_permalink( $post->ID ),
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+		}
+	}
+
+	/**
+	 * Post restored from trash.
+	 *
+	 * @param integer $post_id - Post ID.
+	 */
+	public function event_post_untrashed( $post_id ) {
+		$post = get_post( $post_id );
+
+		if ( $this->check_other_sensors( $post ) ) {
+			return;
+		}
+
+		if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
+			$editor_link = $this->get_editor_link( $post );
+
+			$this->plugin->alerts->Trigger(
+				2014, array(
+					'PostID'             => $post->ID,
+					'PostType'           => $post->post_type,
+					'PostTitle'          => $post->post_title,
+					'PostStatus'         => $post->post_status,
+					'PostDate'           => $post->post_date,
+					'PostUrl'            => get_permalink( $post->ID ),
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			remove_action( 'save_post', array( $this, 'post_changed' ), 10, 3 );
+		}
+	}
+
+	/**
+	 * Post future publishing.
+	 *
+	 * @param integer $post_id - Post ID.
+	 */
+	public function event_publish_future( $post_id ) {
+		$post = get_post( $post_id );
+
+		if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
+			$editor_link = $this->get_editor_link( $post );
+
+			$this->plugin->alerts->Trigger(
+				2001, array(
+					'PostID'             => $post->ID,
+					'PostType'           => $post->post_type,
+					'PostTitle'          => $post->post_title,
+					'PostStatus'         => $post->post_status,
+					'PostDate'           => $post->post_date,
+					'PostUrl'            => get_permalink( $post->ID ),
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			remove_action( 'save_post', array( $this, 'post_changed' ), 10, 3 );
+		}
+	}
+
+	/**
+	 * Alert for Editing of Posts and Custom Post Types in Gutenberg.
+	 *
+	 * @since 3.2.4
+	 */
+	public function edit_post_in_gutenberg() {
+		global $pagenow;
+
+		if ( 'post.php' !== $pagenow ) {
+			return;
+		}
+
+		// @codingStandardsIgnoreStart
+		$post_id = isset( $_GET['post'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['post'] ) ) : false;
+		// @codingStandardsIgnoreEnd
+
+		// Check post id.
+		if ( empty( $post_id ) ) {
+			return;
+		}
+
+		if ( is_user_logged_in() && is_admin() ) {
+			// Get post.
+			$post = get_post( $post_id );
+
+			// Log event.
+			$this->post_opened_in_editor( $post );
+		}
+	}
+
+	/**
+	 * Alerts for Editing of Posts, Pages and Custom Post Types.
+	 *
+	 * @param WP_Post $post - Post.
+	 */
+	public function edit_post_in_classic( $post ) {
+		if ( is_user_logged_in() && is_admin() ) {
+			// Log event.
+			$this->post_opened_in_editor( $post );
+		}
+		return $post;
+	}
+
+	/**
+	 * Post View Event.
+	 *
+	 * Alerts for Viewing of Posts and Custom Post Types.
+	 */
+	public function viewing_post() {
+		// Retrieve the current post object.
+		$post = get_queried_object();
+		if ( is_user_logged_in() && ! is_admin() ) {
+			if ( $this->check_other_sensors( $post ) ) {
+				return $post->post_title;
+			}
+
+			$current_path = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : false;
+			if (
+				! empty( $_SERVER['HTTP_REFERER'] )
+				&& ! empty( $current_path )
+				&& false !== strpos( sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) ), $current_path )
+			) {
+				// Ignore this if we were on the same page so we avoid double audit entries.
+				return;
+			}
+
+			if ( ! empty( $post->post_title ) ) {
+				$edit_link = $this->get_editor_link( $post );       // Get editor link.
+				$post_data = $this->get_post_event_data( $post ); // Get event post data.
+
+				// Set editor link.
+				$post_data[ $edit_link['name'] ] = $edit_link['value'];
+				$this->plugin->alerts->Trigger( 2101, $post_data );
+			}
+		}
+	}
+
+	/**
+	 * New category created.
+	 *
+	 * @param integer $category_id - Category ID.
+	 */
+	public function event_category_creation( $category_id ) {
+		$category      = get_category( $category_id );
+		$category_link = $this->get_taxonomy_edit_link( $category_id, 'category' );
+		$this->plugin->alerts->Trigger(
+			2023, array(
+				'CategoryName' => $category->name,
+				'Slug'         => $category->slug,
+				'CategoryLink' => $category_link,
+			)
+		);
+	}
+
+	/**
+	 * New tag created.
+	 *
+	 * @param int $tag_id - Tag ID.
+	 */
+	public function event_tag_creation( $tag_id ) {
+		$tag      = get_tag( $tag_id );
+		$tag_link = $this->get_taxonomy_edit_link( $tag_id );
+		$this->plugin->alerts->Trigger(
+			2121, array(
+				'TagName' => $tag->name,
+				'Slug'    => $tag->slug,
+				'TagLink' => $tag_link,
+			)
+		);
+	}
+
+	/**
+	 * Taxonomy Terms Deleted Events.
+	 *
+	 * @param integer $term_id  - Term ID.
+	 * @param string  $taxonomy - Taxonomy Name.
+	 */
+	public function check_taxonomy_term_deletion( $term_id, $taxonomy ) {
+		if ( 'post_tag' === $taxonomy ) {
+			$tag = get_tag( $term_id );
+			$this->plugin->alerts->Trigger(
+				2122, array(
+					'TagID'   => $term_id,
+					'TagName' => $tag->name,
+					'Slug'    => $tag->slug,
+				)
+			);
+		} elseif ( 'category' === $taxonomy ) {
+			$category      = get_category( $term_id );
+			$category_link = $this->get_taxonomy_edit_link( $term_id, $taxonomy );
+			$this->plugin->alerts->Trigger(
+				2024, array(
+					'CategoryID'   => $term_id,
+					'CategoryName' => $category->cat_name,
+					'Slug'         => $category->slug,
+					'CategoryLink' => $category_link,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Triggered when term data is updated.
 	 *
 	 * @param array  $data     Term data to be updated.
 	 * @param int    $term_id  Term ID.
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param array  $args     Arguments passed to wp_update_term().
-	 * @since 2.6.9
 	 */
-	public function event_terms_rename( $data, $term_id, $taxonomy, $args ) {
+	public function event_update_term_data( $data, $term_id, $taxonomy, $args ) {
+		// Get new data.
+		$new_name   = ( isset( $data['name'] ) ) ? $data['name'] : false;
+		$new_slug   = ( isset( $data['slug'] ) ) ? $data['slug'] : false;
+		$new_desc   = ( isset( $args['description'] ) ) ? $args['description'] : false;
+		$new_parent = ( isset( $args['parent'] ) ) ? $args['parent'] : false;
+
+		// Get old data.
+		$term       = get_term( $term_id, $taxonomy );
+		$old_name   = $term->name;
+		$old_slug   = $term->slug;
+		$old_desc   = $term->description;
+		$old_parent = $term->parent;
+		$term_link  = $this->get_taxonomy_edit_link( $term_id, $taxonomy );
+
 		// Check if the taxonomy is `post tag`.
 		if ( 'post_tag' === $taxonomy ) {
-			// Get data.
-			$new_name = ( isset( $data['name'] ) ) ? $data['name'] : false;
-			$new_slug = ( isset( $data['slug'] ) ) ? $data['slug'] : false;
-			$new_desc = ( isset( $args['description'] ) ) ? $args['description'] : false;
-
-			// Get old data.
-			$term      = get_term( $term_id, $taxonomy );
-			$old_name  = $term->name;
-			$old_slug  = $term->slug;
-			$old_desc  = $term->description;
-			$term_link = $this->get_tag_link( $term_id );
-
 			// Update if both names are not same.
 			if ( $old_name !== $new_name ) {
 				$this->plugin->alerts->Trigger(
@@ -221,16 +529,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				);
 			}
 		} elseif ( 'category' === $taxonomy ) { // Check if the taxonomy is `category`.
-			// Get new data.
-			$new_name = ( isset( $data['name'] ) ) ? $data['name'] : false;
-			$new_slug = ( isset( $data['slug'] ) ) ? $data['slug'] : false;
-
-			// Get old data.
-			$term      = get_term( $term_id, $taxonomy );
-			$old_name  = $term->name;
-			$old_slug  = $term->slug;
-			$term_link = $this->get_tag_link( $term_id );
-
 			// Log event if both names are not same.
 			if ( $old_name !== $new_name ) {
 				$this->plugin->alerts->Trigger(
@@ -253,91 +551,85 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					)
 				);
 			}
-		}
 
-		// Return data for the filter.
-		return $data;
-	}
-
-	/**
-	 * Gets the alert code based on the type of post.
-	 *
-	 * @param stdClass $post - The post.
-	 * @param integer  $type_post - Alert code type post.
-	 * @param integer  $type_page - Alert code type page.
-	 * @param integer  $type_custom - Alert code type custom.
-	 * @return integer - Alert code.
-	 */
-	protected function GetEventTypeForPostType( $post, $type_post, $type_page, $type_custom ) {
-		switch ( $post->post_type ) {
-			case 'page':
-				return $type_page;
-			case 'post':
-				return $type_post;
-			default:
-				return $type_custom;
-		}
-	}
-
-	/**
-	 * Triggered when a user accesses the admin area.
-	 */
-	public function EventWordPressInit() {
-		// Load old data, if applicable.
-		$this->RetrieveOldData();
-	}
-
-	/**
-	 * Retrieve Old data.
-	 *
-	 * @global mixed $_POST - Post data.
-	 */
-	protected function RetrieveOldData() {
-		// Set filter input args.
-		$filter_input_args = array(
-			'post_ID'  => FILTER_VALIDATE_INT,
-			'_wpnonce' => FILTER_SANITIZE_STRING,
-			'action'   => FILTER_SANITIZE_STRING,
-		);
-
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
-
-		if ( isset( $post_array['_wpnonce'] )
-			&& isset( $post_array['post_ID'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
-			if ( isset( $post_array ) && isset( $post_array['post_ID'] )
-				&& ! ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
-				&& ! ( isset( $post_array['action'] ) && 'autosave' == $post_array['action'] )
-			) {
-				$post_id         = intval( $post_array['post_ID'] );
-				$this->_old_post = get_post( $post_id );
-				$this->_old_link = get_permalink( $post_id );
-				$this->_old_tmpl = $this->GetPostTemplate( $this->_old_post );
-				$this->_old_cats = $this->GetPostCategories( $this->_old_post );
-				$this->_old_tags = $this->get_post_tags( $this->_old_post );
-				$this->_old_stky = in_array( $post_id, get_option( 'sticky_posts' ) );
+			if ( 0 !== $old_parent ) {
+				$old_parent_obj  = get_category( $old_parent );
+				$old_parent_name = empty( $old_parent_obj ) ? 'no parent' : $old_parent_obj->name;
+			} else {
+				$old_parent_name = 'no parent';
 			}
-		} elseif ( isset( $post_array['post_ID'] ) && current_user_can( 'edit_post', $post_array['post_ID'] ) ) {
-			$post_id         = intval( $post_array['post_ID'] );
-			$this->_old_post = get_post( $post_id );
-			$this->_old_link = get_permalink( $post_id );
-			$this->_old_tmpl = $this->GetPostTemplate( $this->_old_post );
-			$this->_old_cats = $this->GetPostCategories( $this->_old_post );
-			$this->_old_tags = $this->get_post_tags( $this->_old_post );
-			$this->_old_stky = in_array( $post_id, get_option( 'sticky_posts' ) );
+			if ( 0 !== $new_parent ) {
+				$new_parent_obj  = get_category( $new_parent );
+				$new_parent_name = empty( $new_parent_obj ) ? 'no parent' : $new_parent_obj->name;
+			} else {
+				$new_parent_name = 'no parent';
+			}
+
+			if ( $old_parent_name !== $new_parent_name ) {
+				$this->plugin->alerts->Trigger(
+					2052, array(
+						'CategoryName' => $new_name,
+						'OldParent'    => $old_parent_name,
+						'NewParent'    => $new_parent_name,
+						'CategoryLink' => $term_link,
+					)
+				);
+			}
+		}
+		return $data; // Return data for the filter.
+	}
+
+	/**
+	 * Check Page Template Update.
+	 *
+	 * @param int    $meta_id    ID of updated metadata entry.
+	 * @param int    $post_id    Post ID.
+	 * @param string $meta_key   Meta key.
+	 * @param mixed  $meta_value Meta value.
+	 */
+	public function check_template_change( $meta_id, $post_id, $meta_key, $meta_value ) {
+		if ( '_wp_page_template' !== $meta_key ) {
+			return;
+		}
+
+		if ( ! $post_id ) {
+			return;
+		}
+
+		$post          = get_post( $post_id );
+		$old_tmpl      = ucwords( str_replace( array( '-', '_' ), ' ', basename( $this->_old_tmpl, '.php' ) ) );
+		$new_tmpl_path = $this->get_post_template( $post );
+		$new_tmpl      = ucwords( str_replace( array( '-', '_' ), ' ', basename( $new_tmpl_path, '.php' ) ) );
+
+		if ( $old_tmpl !== $new_tmpl ) {
+			$editor_link = $this->get_editor_link( $post );
+			$this->plugin->alerts->Trigger(
+				2048, array(
+					'PostID'             => $post->ID,
+					'PostType'           => $post->post_type,
+					'PostTitle'          => $post->post_title,
+					'PostStatus'         => $post->post_status,
+					'PostDate'           => $post->post_date,
+					'OldTemplate'        => $old_tmpl,
+					'NewTemplate'        => $new_tmpl,
+					'OldTemplatePath'    => $this->_old_tmpl,
+					'NewTemplatePath'    => $new_tmpl_path,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
 		}
 	}
 
 	/**
-	 * Method: Collect old post data before MainWP Post update event.
+	 * Collect old post data before MainWP Post update event.
 	 *
-	 * @param array $new_post - Array of new post data.
+	 * @param array $new_post    - Array of new post data.
 	 * @param array $post_custom - Array of data related to MainWP.
 	 */
 	public function event_mainwp_init( $new_post, $post_custom ) {
 		// Get post id.
 		$post_id = isset( $post_custom['_mainwp_edit_post_id'][0] ) ? $post_custom['_mainwp_edit_post_id'][0] : false;
+		$post_id = (int) $post_id;
 
 		// Check if ID exists.
 		if ( $post_id ) {
@@ -348,37 +640,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			if ( ! empty( $post ) ) {
 				$this->_old_post = $post;
 				$this->_old_link = get_permalink( $post_id );
-				$this->_old_tmpl = $this->GetPostTemplate( $this->_old_post );
-				$this->_old_cats = $this->GetPostCategories( $this->_old_post );
+				$this->_old_tmpl = $this->get_post_template( $this->_old_post );
+				$this->_old_cats = $this->get_post_categories( $this->_old_post );
 				$this->_old_tags = $this->get_post_tags( $this->_old_post );
-				$this->_old_stky = in_array( $post_id, get_option( 'sticky_posts' ) );
-			}
-		}
-	}
-
-	/**
-	 * Method: Collect old post data before post update event in gutenberg.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @param int   $post_id   - Post ID.
-	 * @param array $post_data - Array of post data.
-	 */
-	public function gutenberg_post_edit_init( $post_id, $post_data ) {
-		// Check if rest api request constant is set.
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			// Get post.
-			$post = get_post( $post_id );
-
-			// If post exists.
-			if ( ! empty( $post ) && $post instanceof WP_Post ) {
-				$this->_old_post  = $post;
-				$this->_old_link  = get_permalink( $post_id );
-				$this->_old_tmpl  = $this->GetPostTemplate( $this->_old_post );
-				$this->_old_cats  = $this->GetPostCategories( $this->_old_post );
-				$this->_old_tags  = $this->get_post_tags( $this->_old_post );
-				$this->_old_stky  = in_array( $post_id, get_option( 'sticky_posts' ) );
-				$this->old_status = $post->post_status;
+				$this->_old_stky = in_array( $post_id, get_option( 'sticky_posts' ), true );
 			}
 		}
 	}
@@ -389,7 +654,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param WP_Post $post - The post.
 	 * @return string - Full path to file.
 	 */
-	protected function GetPostTemplate( $post ) {
+	protected function get_post_template( $post ) {
 		if ( ! isset( $post->ID ) ) {
 			return '';
 		}
@@ -419,16 +684,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param stdClass $post - The post.
 	 * @return array - List of categories.
 	 */
-	protected function GetPostCategories( $post ) {
-		if ( ! isset( $post->ID ) ) {
-			return array();
-		}
-
-		return wp_get_post_categories(
-			$post->ID, array(
-				'fields' => 'names',
-			)
-		);
+	protected function get_post_categories( $post ) {
+		return ! isset( $post->ID ) ? array() : wp_get_post_categories( $post->ID, array( 'fields' => 'names' ) );
 	}
 
 	/**
@@ -438,279 +695,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return array - List of tags.
 	 */
 	protected function get_post_tags( $post ) {
-		if ( ! isset( $post->ID ) ) {
-			return array();
-		}
-
-		return wp_get_post_tags(
-			$post->ID, array(
-				'fields' => 'names',
-			)
-		);
-	}
-
-	/**
-	 * Check all the post changes.
-	 *
-	 * @param string   $new_status - New status.
-	 * @param string   $old_status - Old status.
-	 * @param stdClass $post - The post.
-	 */
-	public function EventPostChanged( $new_status, $old_status, $post ) {
-		// Ignorable states.
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
-		}
-		if ( empty( $post->post_type ) ) {
-			return;
-		}
-		if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
-			return;
-		}
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			return;
-		}
-
-		// Check if Yoast SEO is active; only on websites with WordPress version greater than 5.0.
-		$is_yoast = is_plugin_active( 'wordpress-seo/wp-seo.php' ) || is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' );
-		if ( version_compare( get_bloginfo( 'version' ), '5.0.0', '>' ) && $is_yoast && ! isset( $_POST['classic-editor'] ) ) {
-			return;
-		}
-
-		// Set filter input args.
-		$filter_input_args = array(
-			'post_ID'              => FILTER_VALIDATE_INT,
-			'_wpnonce'             => FILTER_SANITIZE_STRING,
-			'original_post_status' => FILTER_SANITIZE_STRING,
-			'sticky'               => FILTER_SANITIZE_STRING,
-			'action'               => FILTER_SANITIZE_STRING,
-			'_inline_edit'         => FILTER_SANITIZE_STRING,
-			'mainwpsignature'      => FILTER_SANITIZE_STRING,
-			'function'             => FILTER_SANITIZE_STRING,
-			'new_post'             => FILTER_SANITIZE_STRING,
-			'post_custom'          => FILTER_SANITIZE_STRING,
-		);
-
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
-
-		// Check MainWP $_POST members.
-		$new_post    = isset( $post_array['new_post'] ) ? $post_array['new_post'] : false;
-		$post_custom = isset( $post_array['post_custom'] ) ? $post_array['post_custom'] : false;
-		$post_custom = maybe_unserialize( base64_decode( $post_custom ) );
-
-		// Verify nonce.
-		if (
-			isset( $post_array['_wpnonce'] )
-			&& isset( $post_array['post_ID'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] )
-		) {
-			// Edit Post Screen.
-			$original = isset( $post_array['original_post_status'] ) ? $post_array['original_post_status'] : '';
-			$this->trigger_post_change_alerts( $old_status, $new_status, $post, $original, isset( $post_array['sticky'] ) );
-		} elseif (
-			isset( $post_array['_inline_edit'] )
-			&& 'inline-save' === $post_array['action']
-			&& wp_verify_nonce( $post_array['_inline_edit'], 'inlineeditnonce' )
-		) {
-			// Quick Post Edit.
-			$original = isset( $post_array['original_post_status'] ) ? $post_array['original_post_status'] : '';
-			$this->trigger_post_change_alerts( $old_status, $new_status, $post, $original, isset( $post_array['sticky'] ) );
-		} elseif (
-			isset( $post_array['mainwpsignature'] )
-			&& ! empty( $new_post )
-			&& ! empty( $post_custom )
-		) {
-			// Check sticky post.
-			$sticky = false;
-			if ( isset( $post_custom['_sticky'] ) && is_array( $post_custom['_sticky'] ) ) {
-				foreach ( $post_custom['_sticky'] as $key => $meta_value ) {
-					if ( 'sticky' === base64_decode( $meta_value ) ) {
-						$sticky = true;
-					}
-				}
-			}
-			$this->trigger_post_change_alerts( $old_status, $new_status, $post, false, $sticky, 'mainwp' );
-		} elseif (
-			isset( $post_array['mainwpsignature'] )
-			&& isset( $post_array['function'] )
-			&& 'post_action' === $post_array['function']
-			&& isset( $post_array['action'] )
-			&& ( 'unpublish' === $post_array['action'] || 'publish' === $post_array['action'] )
-		) {
-			$this->check_mainwp_status_change( $post, $old_status, $new_status );
-		} else {
-			// Ignore nav menu post type or post revision.
-			if ( wp_is_post_revision( $post->ID ) ) {
-				return;
-			}
-
-			$event = 0;
-			if ( 'auto-draft' === $old_status && ( 'auto-draft' !== $new_status && 'inherit' !== $new_status ) ) {
-				// Post published.
-				$event = 2001;
-			} elseif ( 'auto-draft' === $new_status || ( 'new' === $old_status && 'inherit' === $new_status ) ) {
-				// Ignore it.
-			} elseif ( 'trash' === $new_status ) {
-				// Post deleted.
-			} elseif ( 'trash' === $old_status ) {
-				// Post restored.
-			} else {
-				// Post edited.
-				$event = 2002;
-			}
-
-			if ( $event ) {
-				// Get event data.
-				$editor_link = $this->GetEditorLink( $post ); // Editor link.
-				$event_data  = $this->get_post_event_data( $post ); // Post event data.
-
-				// Set editor link in the event data.
-				$event_data[ $editor_link['name'] ] = $editor_link['value'];
-
-				// Log the event.
-				$this->plugin->alerts->Trigger( $event, $event_data );
-			}
-		}
-	}
-
-	/**
-	 * Method: Trigger Post Change Alerts.
-	 *
-	 * @param string   $old_status - Old status.
-	 * @param string   $new_status - New status.
-	 * @param stdClass $post       - The post.
-	 * @param string   $original   - Original Post Status.
-	 * @param string   $sticky     - Sticky post.
-	 * @param string   $dashboard  - Dashboard from which the change is coming from.
-	 * @since 1.0.0
-	 */
-	public function trigger_post_change_alerts( $old_status, $new_status, $post, $original, $sticky, $dashboard = false ) {
-		WSAL_Sensors_Request::SetVars(
-			array(
-				'$new_status' => $new_status,
-				'$old_status' => $old_status,
-				'$original'   => $original,
-			)
-		);
-		// Run checks.
-		if ( $this->_old_post && ! $dashboard ) { // Change is coming from WP Dashboard.
-			if ( $this->CheckOtherSensors( $this->_old_post ) ) {
-				return;
-			}
-			if ( 'auto-draft' == $old_status || 'auto-draft' == $original ) {
-				// Handle create post events.
-				$this->CheckPostCreation( $this->_old_post, $post );
-			} else {
-				// Handle update post events.
-				$changes = 0;
-				$changes = $this->CheckAuthorChange( $this->_old_post, $post )
-					+ $this->CheckStatusChange( $this->_old_post, $post )
-					+ $this->CheckParentChange( $this->_old_post, $post )
-					+ $this->CheckStickyChange( $this->_old_stky, $sticky, $post )
-					+ $this->CheckVisibilityChange( $this->_old_post, $post, $old_status, $new_status )
-					+ $this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post )
-					+ $this->CheckCategoriesChange( $this->_old_cats, $this->GetPostCategories( $post ), $post )
-					+ $this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post )
-					+ $this->CheckDateChange( $this->_old_post, $post )
-					+ $this->CheckPermalinkChange( $this->_old_link, get_permalink( $post->ID ), $post )
-					+ $this->CheckCommentsPings( $this->_old_post, $post );
-
-				$this->CheckModificationChange( $post->ID, $this->_old_post, $post, $changes );
-			}
-		} elseif ( ! $this->_old_post && 'mainwp' === $dashboard ) {
-			if ( $this->CheckOtherSensors( $this->_old_post ) ) {
-				return;
-			}
-			if ( 'auto-draft' === $old_status ) {
-				// Handle create post events.
-				$this->CheckPostCreation( $this->_old_post, $post );
-			}
-		} elseif ( $this->_old_post && 'mainwp' === $dashboard ) {
-			if ( 'auto-draft' === $old_status ) {
-				// Get MainWP $_POST members.
-				// @codingStandardsIgnoreStart
-				$new_post = isset( $_POST['new_post'] ) ? sanitize_text_field( wp_unslash( $_POST['new_post'] ) ) : false;
-				// @codingStandardsIgnoreEnd
-
-				// Get WordPress Post.
-				$new_post   = maybe_unserialize( base64_decode( $new_post ) );
-				$post_catgs = filter_input( INPUT_POST, 'post_category', FILTER_SANITIZE_STRING );
-
-				// Post categories.
-				$post_categories = rawurldecode( isset( $post_catgs ) ? base64_decode( $post_catgs ) : null );
-				$post_categories = explode( ',', $post_categories );
-
-				// Post tags.
-				$post_tags = rawurldecode( isset( $new_post['post_tags'] ) ? $new_post['post_tags'] : null );
-				$post_tags = sanitize_text_field( $post_tags ); // Sanitize the string of tags.
-				$post_tags = str_replace( ' ', '', $post_tags );
-				$post_tags = explode( ',', $post_tags );
-
-				// Handle update post events.
-				$changes = 0;
-				$changes = $this->CheckAuthorChange( $this->_old_post, $post )
-					+ $this->CheckStatusChange( $this->_old_post, $post )
-					+ $this->CheckParentChange( $this->_old_post, $post )
-					+ $this->CheckStickyChange( $this->_old_stky, $sticky, $post )
-					+ $this->CheckVisibilityChange( $this->_old_post, $post, $old_status, $new_status )
-					+ $this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post )
-					+ $this->CheckCategoriesChange( $this->_old_cats, $post_categories, $post )
-					+ $this->check_tags_change( $this->_old_tags, $post_tags, $post )
-					+ $this->CheckDateChange( $this->_old_post, $post )
-					+ $this->CheckPermalinkChange( $this->_old_link, get_permalink( $post->ID ), $post )
-					+ $this->CheckCommentsPings( $this->_old_post, $post );
-
-				$this->CheckModificationChange( $post->ID, $this->_old_post, $post, $changes );
-			}
-		}
-	}
-
-	/**
-	 * Check all the post changes.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @param integer $post_id - Post ID.
-	 * @param WP_Post $post    - WP Post object.
-	 * @param boolean $update  - True if post update, false if post is new.
-	 */
-	public function gutenberg_post_changed( $post_id, $post, $update ) {
-		// Ignorable states.
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-				// Check post creation event.
-				if ( 'auto-draft' === $this->_old_post->post_status && 'draft' === $post->post_status ) {
-					$this->CheckPostCreation( $this->_old_post, $post, true );
-				}
-			}
-			return;
-		}
-
-		if ( empty( $post->post_type ) || 'revision' === $post->post_type || 'trash' === $post->post_status ) {
-			return;
-		}
-
-		if ( $update && defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			if (
-				( 'auto-draft' === $this->_old_post->post_status && 'Auto Draft' === $this->_old_post->post_title && 'draft' === $post->post_status ) // Saving draft.
-				|| ( 'draft' === $this->_old_post->post_status && 'publish' === $post->post_status ) // Publishing post.
-			) {
-				$this->CheckPostCreation( $this->_old_post, $post, true );
-			} else {
-				// Handle update post events.
-				$changes = 0;
-				$changes = $this->CheckAuthorChange( $this->_old_post, $post )
-					+ $this->CheckStatusChange( $this->_old_post, $post )
-					+ $this->CheckParentChange( $this->_old_post, $post )
-					+ $this->CheckVisibilityChange( $this->_old_post, $post, $this->old_status, $post->post_status )
-					+ $this->CheckTemplateChange( $this->_old_tmpl, $this->GetPostTemplate( $post ), $post )
-					+ $this->CheckDateChange( $this->_old_post, $post )
-					+ $this->CheckPermalinkChange( $this->_old_link, get_permalink( $post->ID ), $post )
-					+ $this->CheckCommentsPings( $this->_old_post, $post );
-				$this->CheckModificationChange( $post->ID, $this->_old_post, $post, $changes );
-			}
-		}
+		return ! isset( $post->ID ) ? array() : wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
 	}
 
 	/**
@@ -718,49 +703,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 *
 	 * @global array $_POST
 	 *
-	 * @param WP_Post $old_post     - Old post.
-	 * @param WP_Post $new_post     - New post.
-	 * @param boolean $is_gutenberg - Gutenberg flag.
+	 * @param WP_Post $old_post - Old post.
+	 * @param WP_Post $new_post - New post.
 	 */
-	protected function CheckPostCreation( $old_post, $new_post, $is_gutenberg = false ) {
-		// Set filter input args.
-		$filter_input_args = array(
-			'action' => FILTER_SANITIZE_STRING,
-		);
-
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
-
-		// Check if the post is coming from MainWP.
-		$mainwp = filter_input( INPUT_POST, 'mainwpsignature', FILTER_SANITIZE_STRING );
-
-		if ( ! empty( $mainwp ) ) {
-			$post_array['action'] = 'editpost';
-		}
-
-		/**
-		 * Nonce is already verified at this point.
-		 *
-		 * @see $this->EventPostChanged();
-		 */
-		$wp_actions = array( 'editpost', 'heartbeat' );
-		if ( isset( $post_array['action'] ) && in_array( $post_array['action'], $wp_actions, true ) && ! $is_gutenberg ) {
-			if ( ! in_array( $new_post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
-				$this->log_post_creation_event( $new_post );
-			}
-		} elseif ( $is_gutenberg ) {
-			$this->log_post_creation_event( $new_post );
-		}
-	}
-
-	/**
-	 * Log Post Creation Event.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @param WP_Post $new_post – New WP post object.
-	 */
-	private function log_post_creation_event( $new_post ) {
+	protected function check_post_creation( $old_post, $new_post ) {
 		if ( ! empty( $new_post ) && $new_post instanceof WP_Post ) {
 			$event        = 0;
 			$is_scheduled = false;
@@ -778,9 +724,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				case 'pending':
 					$event = 2073;
 					break;
+				default:
+					break;
 			}
 			if ( $event ) {
-				$editor_link = $this->GetEditorLink( $new_post ); // Editor link.
+				$editor_link = $this->get_editor_link( $new_post ); // Editor link.
 				$event_data  = $this->get_post_event_data( $new_post ); // Post event data.
 
 				// Set editor link in the event data.
@@ -797,370 +745,40 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 
 	/**
-	 * Post future publishing.
+	 * Get editor link.
 	 *
-	 * @param integer $post_id - Post ID.
-	 */
-	public function EventPublishFuture( $post_id ) {
-		$post        = get_post( $post_id );
-		$editor_link = $this->GetEditorLink( $post );
-		$this->plugin->alerts->Trigger(
-			2001, array(
-				'PostID'             => $post->ID,
-				'PostType'           => $post->post_type,
-				'PostTitle'          => $post->post_title,
-				'PostStatus'         => $post->post_status,
-				'PostDate'           => $post->post_date,
-				'PostUrl'            => get_permalink( $post->ID ),
-				$editor_link['name'] => $editor_link['value'],
-			)
-		);
-	}
-
-	/**
-	 * Post permanently deleted.
-	 *
-	 * @param integer $post_id - Post ID.
-	 */
-	public function EventPostDeleted( $post_id ) {
-		// Set filter input args.
-		$filter_input_args = array(
-			'action'   => FILTER_SANITIZE_STRING,
-			'_wpnonce' => FILTER_SANITIZE_STRING,
-		);
-
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET, $filter_input_args );
-
-		// Exclude CPTs from external plugins.
-		$post = get_post( $post_id );
-		if ( $this->CheckOtherSensors( $post ) ) {
-			return;
-		}
-
-		// Get MainWP $_POST members.
-		$filter_post_args = array(
-			'id'              => FILTER_VALIDATE_INT,
-			'action'          => FILTER_SANITIZE_STRING,
-			'mainwpsignature' => FILTER_SANITIZE_STRING,
-		);
-		$post_array       = filter_input_array( INPUT_POST, $filter_post_args );
-
-		// Verify nonce.
-		if ( isset( $get_array['_wpnonce'] ) && wp_verify_nonce( $get_array['_wpnonce'], 'delete-post_' . $post_id ) ) {
-			$wp_actions = array( 'delete' );
-			if ( isset( $get_array['action'] ) && in_array( $get_array['action'], $wp_actions, true ) ) {
-				if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) { // Ignore attachments, revisions and menu items.
-					$event = 2008;
-					// Check WordPress backend operations.
-					if ( $this->CheckAutoDraft( $event, $post->post_title ) ) {
-						return;
-					}
-
-					$event_data = $this->get_post_event_data( $post ); // Get event data.
-					$this->plugin->alerts->Trigger( $event, $event_data ); // Log event.
-				}
-			}
-		} elseif (
-			isset( $post_array['mainwpsignature'] )
-			&& isset( $post_array['action'] )
-			&& 'delete' === $post_array['action']
-			&& ! empty( $post_array['id'] )
-		) {
-			if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) { // Ignore attachments, revisions and menu items.
-				// Check WordPress backend operations.
-				if ( $this->CheckAutoDraft( 2008, $post->post_title ) ) {
-					return;
-				}
-
-				$event_data = $this->get_post_event_data( $post ); // Get event data.
-				$this->plugin->alerts->Trigger( 2008, $event_data ); // Log event.
-			}
-		}
-	}
-
-	/**
-	 * Post moved to the trash.
-	 *
-	 * @param integer $post_id - Post ID.
-	 */
-	public function EventPostTrashed( $post_id ) {
-		$post = get_post( $post_id );
-		if ( $this->CheckOtherSensors( $post ) ) {
-			return;
-		}
-		$editor_link = $this->GetEditorLink( $post );
-		$this->plugin->alerts->Trigger(
-			2012, array(
-				'PostID'             => $post->ID,
-				'PostType'           => $post->post_type,
-				'PostTitle'          => $post->post_title,
-				'PostStatus'         => $post->post_status,
-				'PostDate'           => $post->post_date,
-				'PostUrl'            => get_permalink( $post->ID ),
-				$editor_link['name'] => $editor_link['value'],
-			)
-		);
-	}
-
-	/**
-	 * Post restored from trash.
-	 *
-	 * @param integer $post_id - Post ID.
-	 */
-	public function EventPostUntrashed( $post_id ) {
-		$post = get_post( $post_id );
-		if ( $this->CheckOtherSensors( $post ) ) {
-			return;
-		}
-		$editor_link = $this->GetEditorLink( $post );
-		$this->plugin->alerts->Trigger(
-			2014, array(
-				'PostID'             => $post->ID,
-				'PostType'           => $post->post_type,
-				'PostTitle'          => $post->post_title,
-				'PostStatus'         => $post->post_status,
-				'PostDate'           => $post->post_date,
-				'PostUrl'            => get_permalink( $post->ID ),
-				$editor_link['name'] => $editor_link['value'],
-			)
-		);
-	}
-
-	/**
-	 * Post date changed.
-	 *
-	 * @param stdClass $oldpost - Old post.
-	 * @param stdClass $newpost - New post.
-	 */
-	protected function CheckDateChange( $oldpost, $newpost ) {
-		$from = strtotime( $oldpost->post_date );
-		$to   = strtotime( $newpost->post_date );
-
-		if ( 'draft' == $oldpost->post_status ) {
-			return 0;
-		}
-
-		if ( $from != $to ) {
-			$editor_link = $this->GetEditorLink( $oldpost );
-			$this->plugin->alerts->Trigger(
-				2027, array(
-					'PostID'             => $oldpost->ID,
-					'PostType'           => $oldpost->post_type,
-					'PostTitle'          => $oldpost->post_title,
-					'PostStatus'         => $oldpost->post_status,
-					'PostDate'           => $newpost->post_date,
-					'PostUrl'            => get_permalink( $oldpost->ID ),
-					'OldDate'            => $oldpost->post_date,
-					'NewDate'            => $newpost->post_date,
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
-			return 1;
-		}
-		return 0;
-	}
-
-	/**
-	 * Categories changed.
-	 *
-	 * @param array    $old_cats - Old categories.
-	 * @param array    $new_cats - New categories.
 	 * @param stdClass $post - The post.
+	 * @return array $editor_link - Name and value link.
 	 */
-	protected function CheckCategoriesChange( $old_cats, $new_cats, $post ) {
-		$old_cats = implode( ', ', (array) $old_cats );
-		$new_cats = implode( ', ', (array) $new_cats );
-
-		if ( $old_cats !== $new_cats ) {
-			$event = $this->GetEventTypeForPostType( $post, 2016, 0, 2016 );
-			if ( $event ) {
-				$editor_link = $this->GetEditorLink( $post );
-				$alert_data  = array(
-					'PostID'             => $post->ID,
-					'PostType'           => $post->post_type,
-					'PostTitle'          => $post->post_title,
-					'PostStatus'         => $post->post_status,
-					'PostDate'           => $post->post_date,
-					'PostUrl'            => get_permalink( $post->ID ),
-					'OldCategories'      => $old_cats ? $old_cats : 'no categories',
-					'NewCategories'      => $new_cats ? $new_cats : 'no categories',
-					$editor_link['name'] => $editor_link['value'],
-				);
-				$this->plugin->alerts->Trigger( $event, $alert_data );
-				return 1;
-			}
-		}
+	private function get_editor_link( $post ) {
+		$name        = 'EditorLinkPost';
+		$value       = get_edit_post_link( $post->ID );
+		$editor_link = array(
+			'name'  => $name,
+			'value' => $value,
+		);
+		return $editor_link;
 	}
 
 	/**
-	 * Method: This function make sures that alert 2016
-	 * has not been triggered before triggering categories
-	 * & tags events.
+	 * Return Post Event Data.
 	 *
-	 * @since 3.2.4
-	 *
-	 * @param WSAL_AlertManager $manager - WSAL Alert Manager.
-	 * @return bool
+	 * @param WP_Post $post - WP Post object.
+	 * @return array
 	 */
-	public function must_not_contain_events( WSAL_AlertManager $manager ) {
-		if ( $manager->WillOrHasTriggered( 2016 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2119 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2120 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2049 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2050 ) ) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Check if post terms changed via Gutenberg.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @param int    $post_id  - Post ID.
-	 * @param array  $terms    - Array of terms.
-	 * @param array  $tt_ids   - Array of taxonomy term ids.
-	 * @param string $taxonomy - Taxonomy slug.
-	 */
-	public function gutenberg_post_terms_changed( $post_id, $terms, $tt_ids, $taxonomy ) {
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			$post = get_post( $post_id );
-
-			if ( is_wp_error( $post ) ) {
-				return;
-			}
-
-			if ( 'auto-draft' === $post->post_status ) {
-				return;
-			}
-
-			if ( 'post_tag' === $taxonomy ) {
-				// Check tags change event.
-				$this->check_tags_change( $this->_old_tags, $this->get_post_tags( $post ), $post );
-			} else {
-				// Check categories change event.
-				$this->CheckCategoriesChange( $this->_old_cats, $this->GetPostCategories( $post ), $post );
-			}
-		}
-	}
-
-	/**
-	 * Post Stuck Event.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @param integer $post_id - Post ID.
-	 */
-	public function gutenberg_post_stuck( $post_id ) {
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			$this->log_sticky_post_event( $post_id, 2049 );
-		}
-	}
-
-	/**
-	 * Post Unstuck Event.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @param integer $post_id - Post ID.
-	 */
-	public function gutenberg_post_unstuck( $post_id ) {
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			$this->log_sticky_post_event( $post_id, 2050 );
-		}
-	}
-
-	/**
-	 * Log post stuck/unstuck events.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @param integer $post_id - Post ID.
-	 * @param integer $event   - Event ID.
-	 */
-	private function log_sticky_post_event( $post_id, $event ) {
-		// Get post.
-		$post = get_post( $post_id );
-
-		if ( is_wp_error( $post ) ) {
-			return;
-		}
-
-		$editor_link = $this->GetEditorLink( $post ); // Editor link.
-		$event_data  = $this->get_post_event_data( $post ); // Event data.
-
-		$event_data[ $editor_link['name'] ] = $editor_link['value'];
-		$this->plugin->alerts->Trigger( $event, $event_data );
-	}
-
-	/**
-	 * Tags changed.
-	 *
-	 * @param array    $old_tags - Old tags.
-	 * @param array    $new_tags - New tags.
-	 * @param stdClass $post - The post.
-	 */
-	protected function check_tags_change( $old_tags, $new_tags, $post ) {
-		// Check for added tags.
-		$added_tags = array_diff( (array) $new_tags, (array) $old_tags );
-
-		// Check for removed tags.
-		$removed_tags = array_diff( (array) $old_tags, (array) $new_tags );
-
-		// Convert tags arrays to string.
-		$old_tags     = implode( ', ', (array) $old_tags );
-		$new_tags     = implode( ', ', (array) $new_tags );
-		$added_tags   = implode( ', ', $added_tags );
-		$removed_tags = implode( ', ', $removed_tags );
-
-		// Declare event variables.
-		$add_event    = '';
-		$remove_event = '';
-		if ( $old_tags !== $new_tags && ! empty( $added_tags ) ) {
-			$add_event   = 2119;
-			$editor_link = $this->GetEditorLink( $post );
-			$post_status = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
-			$this->plugin->alerts->Trigger(
-				$add_event, array(
-					'PostID'             => $post->ID,
-					'PostType'           => $post->post_type,
-					'PostStatus'         => $post_status,
-					'PostTitle'          => $post->post_title,
-					'PostDate'           => $post->post_date,
-					'PostUrl'            => get_permalink( $post->ID ),
-					'tag'                => $added_tags ? $added_tags : 'no tags',
-					$editor_link['name'] => $editor_link['value'],
-				)
+	public function get_post_event_data( $post ) {
+		if ( ! empty( $post ) && $post instanceof WP_Post ) {
+			$event_data = array(
+				'PostID'     => $post->ID,
+				'PostType'   => $post->post_type,
+				'PostTitle'  => $post->post_title,
+				'PostStatus' => $post->post_status,
+				'PostDate'   => $post->post_date,
+				'PostUrl'    => get_permalink( $post->ID ),
 			);
+			return $event_data;
 		}
-
-		if ( $old_tags !== $new_tags && ! empty( $removed_tags ) ) {
-			$remove_event = 2120;
-			$editor_link  = $this->GetEditorLink( $post );
-			$post_status  = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
-			$this->plugin->alerts->Trigger(
-				$remove_event, array(
-					'PostID'             => $post->ID,
-					'PostType'           => $post->post_type,
-					'PostStatus'         => $post_status,
-					'PostTitle'          => $post->post_title,
-					'PostDate'           => $post->post_date,
-					'PostUrl'            => get_permalink( $post->ID ),
-					'tag'                => $removed_tags ? $removed_tags : 'no tags',
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
-		}
-
-		if ( $add_event || $remove_event ) {
-			return 1;
-		}
+		return array();
 	}
 
 	/**
@@ -1169,9 +787,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param stdClass $oldpost - Old post.
 	 * @param stdClass $newpost - New post.
 	 */
-	protected function CheckAuthorChange( $oldpost, $newpost ) {
-		if ( $oldpost->post_author != $newpost->post_author ) {
-			$editor_link = $this->GetEditorLink( $oldpost );
+	protected function check_author_change( $oldpost, $newpost ) {
+		if ( $oldpost->post_author !== $newpost->post_author ) {
+			$editor_link = $this->get_editor_link( $oldpost );
 			$old_author  = get_userdata( $oldpost->post_author );
 			$old_author  = ( is_object( $old_author ) ) ? $old_author->user_login : 'N/A';
 			$new_author  = get_userdata( $newpost->post_author );
@@ -1199,24 +817,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param stdClass $oldpost - Old post.
 	 * @param stdClass $newpost - New post.
 	 */
-	protected function CheckStatusChange( $oldpost, $newpost ) {
-		// Set filter input args.
-		$filter_input_args = array(
-			'publish' => FILTER_SANITIZE_STRING,
-		);
-
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
-
-		/**
-		 * Nonce is already verified at this point.
-		 *
-		 * @see $this->EventPostChanged();
-		 */
-		if ( $oldpost->post_status != $newpost->post_status ) {
-			if ( isset( $post_array['publish'] ) ) {
+	protected function check_status_change( $oldpost, $newpost ) {
+		if ( $oldpost->post_status !== $newpost->post_status ) {
+			if ( 'publish' === $newpost->post_status ) {
 				// Special case (publishing a post).
-				$editor_link = $this->GetEditorLink( $newpost );
+				$editor_link = $this->get_editor_link( $newpost );
 				$this->plugin->alerts->Trigger(
 					2001, array(
 						'PostID'             => $newpost->ID,
@@ -1229,7 +834,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					)
 				);
 			} else {
-				$editor_link = $this->GetEditorLink( $oldpost );
+				$editor_link = $this->get_editor_link( $oldpost );
 				$this->plugin->alerts->Trigger(
 					2021, array(
 						'PostID'             => $oldpost->ID,
@@ -1254,27 +859,24 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param stdClass $oldpost - Old post.
 	 * @param stdClass $newpost - New post.
 	 */
-	protected function CheckParentChange( $oldpost, $newpost ) {
-		if ( $oldpost->post_parent != $newpost->post_parent ) {
-			$event = $this->GetEventTypeForPostType( $oldpost, 0, 2047, 0 );
-			if ( $event ) {
-				$editor_link = $this->GetEditorLink( $oldpost );
-				$this->plugin->alerts->Trigger(
-					$event, array(
-						'PostID'             => $oldpost->ID,
-						'PostType'           => $oldpost->post_type,
-						'PostTitle'          => $oldpost->post_title,
-						'PostStatus'         => $oldpost->post_status,
-						'PostDate'           => $oldpost->post_date,
-						'OldParent'          => $oldpost->post_parent,
-						'NewParent'          => $newpost->post_parent,
-						'OldParentName'      => $oldpost->post_parent ? get_the_title( $oldpost->post_parent ) : 'no parent',
-						'NewParentName'      => $newpost->post_parent ? get_the_title( $newpost->post_parent ) : 'no parent',
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-				return 1;
-			}
+	protected function check_parent_change( $oldpost, $newpost ) {
+		if ( $oldpost->post_parent !== $newpost->post_parent && 'page' === $newpost->post_type ) {
+			$editor_link = $this->get_editor_link( $oldpost );
+			$this->plugin->alerts->Trigger(
+				2047, array(
+					'PostID'             => $oldpost->ID,
+					'PostType'           => $oldpost->post_type,
+					'PostTitle'          => $oldpost->post_title,
+					'PostStatus'         => $oldpost->post_status,
+					'PostDate'           => $oldpost->post_date,
+					'OldParent'          => $oldpost->post_parent,
+					'NewParent'          => $newpost->post_parent,
+					'OldParentName'      => $oldpost->post_parent ? get_the_title( $oldpost->post_parent ) : 'no parent',
+					'NewParentName'      => $newpost->post_parent ? get_the_title( $newpost->post_parent ) : 'no parent',
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			return 1;
 		}
 	}
 
@@ -1285,9 +887,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param string   $new_link - New permalink.
 	 * @param stdClass $post - The post.
 	 */
-	protected function CheckPermalinkChange( $old_link, $new_link, $post ) {
+	protected function check_permalink_change( $old_link, $new_link, $post ) {
 		if ( $old_link !== $new_link ) {
-			$editor_link = $this->GetEditorLink( $post );
+			$editor_link = $this->get_editor_link( $post );
 			$this->plugin->alerts->Trigger(
 				2017, array(
 					'PostID'             => $post->ID,
@@ -1314,8 +916,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param string   $old_status - Old status.
 	 * @param string   $new_status - New status.
 	 */
-	protected function CheckVisibilityChange( $oldpost, $newpost, $old_status, $new_status ) {
-		if ( 'draft' == $old_status || 'draft' == $new_status ) {
+	protected function check_visibility_change( $oldpost, $newpost, $old_status, $new_status ) {
+		if ( 'draft' === $old_status || 'draft' === $new_status ) {
 			return;
 		}
 
@@ -1324,22 +926,22 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		if ( $oldpost->post_password ) {
 			$old_visibility = __( 'Password Protected', 'wp-security-audit-log' );
-		} elseif ( 'publish' == $old_status ) {
+		} elseif ( 'publish' === $old_status ) {
 			$old_visibility = __( 'Public', 'wp-security-audit-log' );
-		} elseif ( 'private' == $old_status ) {
+		} elseif ( 'private' === $old_status ) {
 			$old_visibility = __( 'Private', 'wp-security-audit-log' );
 		}
 
 		if ( $newpost->post_password ) {
 			$new_visibility = __( 'Password Protected', 'wp-security-audit-log' );
-		} elseif ( 'publish' == $new_status ) {
+		} elseif ( 'publish' === $new_status ) {
 			$new_visibility = __( 'Public', 'wp-security-audit-log' );
-		} elseif ( 'private' == $new_status ) {
+		} elseif ( 'private' === $new_status ) {
 			$new_visibility = __( 'Private', 'wp-security-audit-log' );
 		}
 
-		if ( $old_visibility && $new_visibility && ( $old_visibility != $new_visibility ) ) {
-			$editor_link = $this->GetEditorLink( $oldpost );
+		if ( $old_visibility && $new_visibility && ( $old_visibility !== $new_visibility ) ) {
+			$editor_link = $this->get_editor_link( $oldpost );
 			$this->plugin->alerts->Trigger(
 				2025, array(
 					'PostID'             => $oldpost->ID,
@@ -1358,563 +960,31 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 
 	/**
-	 * Post template changed.
-	 *
-	 * @param string   $old_tmpl - Old template path.
-	 * @param string   $new_tmpl - New template path.
-	 * @param stdClass $post - The post.
-	 */
-	protected function CheckTemplateChange( $old_tmpl, $new_tmpl, $post ) {
-		if ( $old_tmpl != $new_tmpl ) {
-			$event = $this->GetEventTypeForPostType( $post, 0, 2048, 0 );
-			if ( $event ) {
-				$editor_link = $this->GetEditorLink( $post );
-				$this->plugin->alerts->Trigger(
-					$event, array(
-						'PostID'             => $post->ID,
-						'PostType'           => $post->post_type,
-						'PostTitle'          => $post->post_title,
-						'PostStatus'         => $post->post_status,
-						'PostDate'           => $post->post_date,
-						'OldTemplate'        => ucwords( str_replace( array( '-', '_' ), ' ', basename( $old_tmpl, '.php' ) ) ),
-						'NewTemplate'        => ucwords( str_replace( array( '-', '_' ), ' ', basename( $new_tmpl, '.php' ) ) ),
-						'OldTemplatePath'    => $old_tmpl,
-						'NewTemplatePath'    => $new_tmpl,
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-				return 1;
-			}
-		}
-	}
-
-	/**
-	 * Post sets as sticky changes.
-	 *
-	 * @param string  $old_stky - Old template path.
-	 * @param string  $new_stky - New template path.
-	 * @param WP_Post $post     - The post.
-	 */
-	protected function CheckStickyChange( $old_stky, $new_stky, $post ) {
-		if ( $old_stky != $new_stky ) {
-			$event       = $new_stky ? 2049 : 2050;
-			$editor_link = $this->GetEditorLink( $post );
-			$this->plugin->alerts->Trigger(
-				$event, array(
-					'PostID'             => $post->ID,
-					'PostType'           => $post->post_type,
-					'PostTitle'          => $post->post_title,
-					'PostStatus'         => $post->post_status,
-					'PostDate'           => $post->post_date,
-					'PostUrl'            => get_permalink( $post->ID ),
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
-			return 1;
-		}
-	}
-
-	/**
-	 * Post modified content.
-	 *
-	 * @param integer  $post_id  – Post ID.
-	 * @param stdClass $oldpost  – Old post.
-	 * @param stdClass $newpost  – New post.
-	 * @param int      $modified – Set to 0 if no changes done to the post.
-	 */
-	public function CheckModificationChange( $post_id, $oldpost, $newpost, $modified ) {
-		if ( $this->CheckOtherSensors( $oldpost ) ) {
-			return;
-		}
-		$changes = $this->CheckTitleChange( $oldpost, $newpost );
-		if ( ! $changes ) {
-			$content_changed = $oldpost->post_content != $newpost->post_content; // TODO what about excerpts?
-
-			if ( $oldpost->post_modified != $newpost->post_modified ) {
-				$event = 0;
-
-				// Check if content changed.
-				if ( $content_changed ) {
-					$event = 2065;
-				} elseif ( ! $modified ) {
-					$event = 2002;
-				}
-				if ( $event ) {
-					if ( 2002 === $event ) {
-						// Get Yoast alerts.
-						$yoast_alerts = $this->plugin->alerts->get_alerts_by_sub_category( 'Yoast SEO' );
-
-						// Check all alerts.
-						foreach ( $yoast_alerts as $alert_code => $alert ) {
-							if ( $this->plugin->alerts->WillOrHasTriggered( $alert_code ) ) {
-								return 0; // Return if any Yoast alert has or will trigger.
-							}
-						}
-
-						// Get post meta events.
-						$meta_events = array( 2053, 2054, 2055, 2062 );
-						foreach ( $meta_events as $meta_event ) {
-							if ( $this->plugin->alerts->WillOrHasTriggered( $meta_event ) ) {
-								return 0; // Return if any meta event has or will trigger.
-							}
-						}
-					}
-
-					$editor_link = $this->GetEditorLink( $oldpost );
-					$event_data  = array(
-						'PostID'             => $post_id,
-						'PostType'           => $oldpost->post_type,
-						'PostTitle'          => $oldpost->post_title,
-						'PostStatus'         => $oldpost->post_status,
-						'PostDate'           => $oldpost->post_date,
-						'PostUrl'            => get_permalink( $post_id ),
-						$editor_link['name'] => $editor_link['value'],
-					);
-
-					if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-						$event_data['RevisionLink'] = $this->get_post_revision( $post_id, $oldpost );
-
-						if ( 2002 === $event ) {
-							$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'must_not_contain_events' ) );
-						} else {
-							$this->plugin->alerts->Trigger( $event, $event_data );
-						}
-					} else {
-						$this->plugin->alerts->Trigger( $event, $event_data );
-					}
-					return 1;
-				}
-			}
-		}
-	}
-
-	/**
-	 * New category created.
-	 *
-	 * @param integer $category_id - Category ID.
-	 */
-	public function EventCategoryCreation( $category_id ) {
-		$category      = get_category( $category_id );
-		$category_link = $this->getCategoryLink( $category_id );
-		$this->plugin->alerts->Trigger(
-			2023, array(
-				'CategoryName' => $category->name,
-				'Slug'         => $category->slug,
-				'CategoryLink' => $category_link,
-			)
-		);
-	}
-
-	/**
-	 * New tag created.
-	 *
-	 * @param int $tag_id - Tag ID.
-	 */
-	public function EventTagCreation( $tag_id ) {
-		$tag      = get_tag( $tag_id );
-		$tag_link = $this->get_tag_link( $tag_id );
-		$this->plugin->alerts->Trigger(
-			2121, array(
-				'TagName' => $tag->name,
-				'Slug'    => $tag->slug,
-				'TagLink' => $tag_link,
-			)
-		);
-	}
-
-	/**
-	 * Category deleted.
-	 *
-	 * @deprecated 3.3.1
-	 */
-	protected function CheckCategoryDeletion() {
-		// Set filter input args.
-		$filter_input_args = array(
-			'_wpnonce'    => FILTER_SANITIZE_STRING,
-			'action'      => FILTER_SANITIZE_STRING,
-			'action2'     => FILTER_SANITIZE_STRING,
-			'taxonomy'    => FILTER_SANITIZE_STRING,
-			'delete_tags' => array(
-				'filter' => FILTER_SANITIZE_STRING,
-				'flags'  => FILTER_REQUIRE_ARRAY,
-			),
-			'tag_ID'      => FILTER_VALIDATE_INT,
-		);
-
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
-
-		if ( empty( $post_array ) ) {
-			return;
-		}
-		$action = ! empty( $post_array['action'] ) ? $post_array['action']
-			: ( ! empty( $post_array['action2'] ) ? $post_array['action2'] : '' );
-		if ( ! $action ) {
-			return;
-		}
-
-		$category_ids = array();
-
-		if ( isset( $post_array['taxonomy'] ) ) {
-			if ( 'delete' == $action
-				&& 'category' == $post_array['taxonomy']
-				&& ! empty( $post_array['delete_tags'] )
-				&& wp_verify_nonce( $post_array['_wpnonce'], 'bulk-tags' ) ) {
-				// Bulk delete.
-				foreach ( $post_array['delete_tags'] as $delete_tag ) {
-					$category_ids[] = $delete_tag;
-				}
-			} elseif ( 'delete-tag' == $action
-				&& 'category' == $post_array['taxonomy']
-				&& ! empty( $post_array['tag_ID'] )
-				&& wp_verify_nonce( $post_array['_wpnonce'], 'delete-tag_' . $post_array['tag_ID'] ) ) {
-				// Single delete.
-				$category_ids[] = $post_array['tag_ID'];
-			}
-		}
-
-		foreach ( $category_ids as $category_id ) {
-			$category      = get_category( $category_id );
-			$category_link = $this->getCategoryLink( $category_id );
-			$this->plugin->alerts->Trigger(
-				2024, array(
-					'CategoryID'   => $category_id,
-					'CategoryName' => $category->cat_name,
-					'Slug'         => $category->slug,
-					'CategoryLink' => $category_link,
-				)
-			);
-		}
-	}
-
-	/**
-	 * Taxonomy Terms Deleted Events.
-	 *
-	 * @param integer $term_id  - Term ID.
-	 * @param string  $taxonomy - Taxonomy Name.
-	 */
-	public function check_taxonomy_term_deletion( $term_id, $taxonomy ) {
-		if ( 'post_tag' === $taxonomy ) {
-			$tag = get_tag( $term_id );
-			$this->plugin->alerts->Trigger(
-				2122, array(
-					'TagID'   => $term_id,
-					'TagName' => $tag->name,
-					'Slug'    => $tag->slug,
-				)
-			);
-		} elseif ( 'category' === $taxonomy ) {
-			$category      = get_category( $term_id );
-			$category_link = $this->getCategoryLink( $term_id );
-			$this->plugin->alerts->Trigger(
-				2024, array(
-					'CategoryID'   => $term_id,
-					'CategoryName' => $category->cat_name,
-					'Slug'         => $category->slug,
-					'CategoryLink' => $category_link,
-				)
-			);
-		}
-	}
-
-	/**
-	 * Changed the parent of the category.
-	 *
-	 * @global array $_POST - Post data.
-	 */
-	public function EventChangedCategoryParent() {
-		// Set filter input args.
-		$filter_input_args = array(
-			'_wpnonce' => FILTER_SANITIZE_STRING,
-			'name'     => FILTER_SANITIZE_STRING,
-			'parent'   => FILTER_SANITIZE_STRING,
-			'tag_ID'   => FILTER_VALIDATE_INT,
-		);
-
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
-
-		if ( empty( $post_array ) ) {
-			return;
-		}
-		if ( ! current_user_can( 'manage_categories' ) ) {
-			return;
-		}
-		if ( isset( $post_array['_wpnonce'] )
-			&& isset( $post_array['name'] )
-			&& isset( $post_array['tag_ID'] )
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-tag_' . $post_array['tag_ID'] ) ) {
-			$category      = get_category( $post_array['tag_ID'] );
-			$category_link = $this->getCategoryLink( $post_array['tag_ID'] );
-			if ( 0 != $category->parent ) {
-				$old_parent      = get_category( $category->parent );
-				$old_parent_name = ( empty( $old_parent ) ) ? 'no parent' : $old_parent->name;
-			} else {
-				$old_parent_name = 'no parent';
-			}
-			if ( isset( $post_array['parent'] ) ) {
-				$new_parent      = get_category( $post_array['parent'] );
-				$new_parent_name = ( empty( $new_parent ) ) ? 'no parent' : $new_parent->name;
-			}
-
-			if ( $old_parent_name !== $new_parent_name ) {
-				$this->plugin->alerts->Trigger(
-					2052, array(
-						'CategoryName' => $category->name,
-						'OldParent'    => $old_parent_name,
-						'NewParent'    => $new_parent_name,
-						'CategoryLink' => $category_link,
-					)
-				);
-			}
-		}
-	}
-
-	/**
-	 * Check auto draft and the setting: Hide Plugin in Plugins Page
-	 *
-	 * @param integer $code  - Alert code.
-	 * @param string  $title - Title.
-	 * @return boolean
-	 */
-	private function CheckAutoDraft( $code, $title ) {
-		if ( 2008 == $code && 'auto-draft' == $title ) {
-			// To do: Check setting else return false.
-			return 1 == $this->plugin->settings->IsWPBackend();
-		}
-		return false;
-	}
-
-	/**
-	 * Builds revision link.
-	 *
-	 * @param integer $revision_id - Revision ID.
-	 * @return string|null - Link.
-	 */
-	private function getRevisionLink( $revision_id ) {
-		if ( ! empty( $revision_id ) ) {
-			return admin_url( 'revision.php?revision=' . $revision_id );
-		}
-		return null;
-	}
-
-	/**
-	 * Return post revision link.
-	 *
-	 * @param integer $post_id - Post ID.
-	 * @param WP_Post $post    - WP Post object.
-	 * @return string
-	 */
-	private function get_post_revision( $post_id, $post ) {
-		$revisions = wp_get_post_revisions( $post_id );
-		if ( ! empty( $revisions ) ) {
-			$revision = array_shift( $revisions );
-			return $this->getRevisionLink( $revision->ID );
-		}
-	}
-
-	/**
-	 * Builds category link.
-	 *
-	 * @param integer $category_id - Category ID.
-	 * @return string|null - Link.
-	 */
-	private function getCategoryLink( $category_id ) {
-		if ( ! empty( $category_id ) ) {
-			return admin_url( 'term.php?taxnomy=category&tag_ID=' . $category_id );
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Builds tag link.
-	 *
-	 * @param integer $tag_id - Tag ID.
-	 * @return string|null - Link.
-	 */
-	private function get_tag_link( $tag_id ) {
-		if ( ! empty( $tag_id ) ) {
-			return admin_url( 'term.php?taxnomy=post_tag&tag_ID=' . $tag_id );
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Ignore post from BBPress, WooCommerce Plugin
-	 * Triggered on the Sensors
-	 *
-	 * @param WP_Post $post - The post.
-	 */
-	private function CheckOtherSensors( $post ) {
-		if ( empty( $post ) || ! isset( $post->post_type ) ) {
-			return false;
-		}
-		switch ( $post->post_type ) {
-			case 'forum':
-			case 'topic':
-			case 'reply':
-			case 'product':
-			case 'shop_order':
-			case 'shop_coupon':
-				return true;
-			default:
-				return false;
-		}
-	}
-
-	/**
-	 * Triggered after save post for add revision link.
-	 *
-	 * @param integer  $post_id - Post ID.
-	 * @param stdClass $post    - Post.
-	 * @param bool     $update  - True if update.
-	 */
-	public function SetRevisionLink( $post_id, $post, $update ) {
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			return;
-		}
-
-		$revisions = wp_get_post_revisions( $post_id );
-		if ( ! empty( $revisions ) ) {
-			$revision = array_shift( $revisions );
-
-			$obj_occ = new WSAL_Models_Occurrence();
-			$occ     = $obj_occ->GetByPostID( $post_id );
-			$occ     = count( $occ ) ? $occ[0] : null;
-			if ( ! empty( $occ ) ) {
-				$revision_link = $this->getRevisionLink( $revision->ID );
-				if ( ! empty( $revision_link ) ) {
-					$occ->SetMetaValue( 'RevisionLink', $revision_link );
-				}
-			}
-		}
-	}
-
-	/**
-	 * Alerts for Editing of Posts, Pages and Custom Post Types.
-	 *
-	 * @param WP_Post $post - Post.
-	 */
-	public function EditingPost( $post ) {
-		if ( is_user_logged_in() && is_admin() ) {
-			// Log event.
-			$this->post_opened_in_editor( $post );
-		}
-		return $post;
-	}
-
-	/**
-	 * Alert for Editing of Posts and Custom Post Types in Gutenberg.
-	 *
-	 * @since 3.2.4
-	 */
-	public function edit_post_in_gutenberg() {
-		global $pagenow;
-
-		if ( 'post.php' !== $pagenow ) {
-			return;
-		}
-
-		// @codingStandardsIgnoreStart
-		$post_id = isset( $_GET['post'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['post'] ) ) : false;
-		// @codingStandardsIgnoreEnd
-
-		// Check post id.
-		if ( empty( $post_id ) ) {
-			return;
-		}
-
-		if ( is_user_logged_in() && is_admin() ) {
-			// Get post.
-			$post = get_post( $post_id );
-
-			// Log event.
-			$this->post_opened_in_editor( $post );
-		}
-	}
-
-	/**
-	 * Post Opened for Editing in WP Editors.
-	 *
-	 * @param WP_Post $post – Post object.
-	 */
-	public function post_opened_in_editor( $post ) {
-		if ( empty( $post ) || ! $post instanceof WP_Post ) {
-			return;
-		}
-
-		// Check other sensors.
-		if ( $this->CheckOtherSensors( $post ) ) {
-			return $post;
-		}
-
-		$current_path = isset( $_SERVER['SCRIPT_NAME'] ) ? esc_url_raw( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) . '?post=' . $post->ID : false;
-		$referrer     = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : false;
-
-		if ( ! empty( $referrer )
-			&& strpos( $referrer, $current_path ) !== false ) {
-			// Ignore this if we were on the same page so we avoid double audit entries.
-			return $post;
-		}
-		if ( ! empty( $post->post_title ) ) {
-			$event = 2100;
-			if ( ! $this->WasTriggered( $event ) ) {
-				$editor_link = $this->GetEditorLink( $post );
-				$this->plugin->alerts->Trigger(
-					$event, array(
-						'PostID'             => $post->ID,
-						'PostType'           => $post->post_type,
-						'PostTitle'          => $post->post_title,
-						'PostStatus'         => $post->post_status,
-						'PostDate'           => $post->post_date,
-						'PostUrl'            => get_permalink( $post->ID ),
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-			}
-		}
-	}
-
-	/**
-	 * Check if the alert was triggered.
-	 *
-	 * @param integer $alert_id - Alert code.
-	 * @return boolean
-	 */
-	private function WasTriggered( $alert_id ) {
-		$query = new WSAL_Models_OccurrenceQuery();
-		$query->addOrderBy( 'created_on', true );
-		$query->setLimit( 1 );
-		$last_occurence = $query->getAdapter()->Execute( $query );
-		if ( ! empty( $last_occurence ) ) {
-			if ( $last_occurence[0]->alert_id == $alert_id ) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Changed title of a post.
+	 * Post date changed.
 	 *
 	 * @param stdClass $oldpost - Old post.
 	 * @param stdClass $newpost - New post.
 	 */
-	private function CheckTitleChange( $oldpost, $newpost ) {
-		if ( $oldpost->post_title !== $newpost->post_title ) {
-			$editor_link = $this->GetEditorLink( $oldpost );
+	protected function check_date_change( $oldpost, $newpost ) {
+		$from = strtotime( $oldpost->post_date );
+		$to   = strtotime( $newpost->post_date );
+
+		if ( 'draft' === $oldpost->post_status ) {
+			return 0;
+		}
+
+		if ( $from !== $to ) {
+			$editor_link = $this->get_editor_link( $oldpost );
 			$this->plugin->alerts->Trigger(
-				2086, array(
-					'PostID'             => $newpost->ID,
-					'PostType'           => $newpost->post_type,
-					'PostTitle'          => $newpost->post_title,
-					'PostStatus'         => $newpost->post_status,
+				2027, array(
+					'PostID'             => $oldpost->ID,
+					'PostType'           => $oldpost->post_type,
+					'PostTitle'          => $oldpost->post_title,
+					'PostStatus'         => $oldpost->post_status,
 					'PostDate'           => $newpost->post_date,
-					'PostUrl'            => get_permalink( $newpost->ID ),
-					'OldTitle'           => $oldpost->post_title,
-					'NewTitle'           => $newpost->post_title,
+					'PostUrl'            => get_permalink( $oldpost->ID ),
+					'OldDate'            => $oldpost->post_date,
+					'NewDate'            => $newpost->post_date,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -1929,18 +999,18 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param stdClass $oldpost - Old post.
 	 * @param stdClass $newpost - New post.
 	 */
-	private function CheckCommentsPings( $oldpost, $newpost ) {
+	private function check_comments_pings( $oldpost, $newpost ) {
 		$result      = 0;
-		$editor_link = $this->GetEditorLink( $newpost );
+		$editor_link = $this->get_editor_link( $newpost );
 
 		// Comments.
-		if ( $oldpost->comment_status != $newpost->comment_status ) {
+		if ( $oldpost->comment_status !== $newpost->comment_status ) {
 			$type = 'Comments';
 
-			if ( 'open' == $newpost->comment_status ) {
-				$event = $this->GetCommentsPingsEvent( $newpost, 'enable' );
+			if ( 'open' === $newpost->comment_status ) {
+				$event = $this->get_comments_pings_event( $newpost, 'enable' );
 			} else {
-				$event = $this->GetCommentsPingsEvent( $newpost, 'disable' );
+				$event = $this->get_comments_pings_event( $newpost, 'disable' );
 			}
 
 			$this->plugin->alerts->Trigger(
@@ -1951,6 +1021,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'PostStatus'         => $newpost->post_status,
 					'PostDate'           => $newpost->post_date,
 					'PostTitle'          => $newpost->post_title,
+					'PostStatus'         => $newpost->post_status,
 					'PostUrl'            => get_permalink( $newpost->ID ),
 					$editor_link['name'] => $editor_link['value'],
 				)
@@ -1958,13 +1029,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$result = 1;
 		}
 		// Trackbacks and Pingbacks.
-		if ( $oldpost->ping_status != $newpost->ping_status ) {
+		if ( $oldpost->ping_status !== $newpost->ping_status ) {
 			$type = 'Trackbacks and Pingbacks';
 
-			if ( 'open' == $newpost->ping_status ) {
-				$event = $this->GetCommentsPingsEvent( $newpost, 'enable' );
+			if ( 'open' === $newpost->ping_status ) {
+				$event = $this->get_comments_pings_event( $newpost, 'enable' );
 			} else {
-				$event = $this->GetCommentsPingsEvent( $newpost, 'disable' );
+				$event = $this->get_comments_pings_event( $newpost, 'disable' );
 			}
 
 			$this->plugin->alerts->Trigger(
@@ -1985,13 +1056,306 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 
 	/**
+	 * Categories changed.
+	 *
+	 * @param array   $old_cats - Old categories.
+	 * @param array   $new_cats - New categories.
+	 * @param WP_Post $post     - The post.
+	 */
+	protected function check_categories_change( $old_cats, $new_cats, $post ) {
+		$old_cats = implode( ', ', (array) $old_cats );
+		$new_cats = implode( ', ', (array) $new_cats );
+
+		if ( $old_cats !== $new_cats && 'page' !== $post->post_type ) {
+			$editor_link = $this->get_editor_link( $post );
+			$alert_data  = array(
+				'PostID'             => $post->ID,
+				'PostType'           => $post->post_type,
+				'PostTitle'          => $post->post_title,
+				'PostStatus'         => $post->post_status,
+				'PostDate'           => $post->post_date,
+				'PostUrl'            => get_permalink( $post->ID ),
+				'OldCategories'      => $old_cats ? $old_cats : 'no categories',
+				'NewCategories'      => $new_cats ? $new_cats : 'no categories',
+				$editor_link['name'] => $editor_link['value'],
+			);
+			$this->plugin->alerts->Trigger( 2016, $alert_data );
+			return 1;
+		}
+	}
+
+	/**
+	 * Tags changed.
+	 *
+	 * @param array   $old_tags - Old tags.
+	 * @param array   $new_tags - New tags.
+	 * @param WP_Post $post - The post.
+	 */
+	protected function check_tags_change( $old_tags, $new_tags, $post ) {
+		// Check for added tags.
+		$added_tags = array_diff( (array) $new_tags, (array) $old_tags );
+
+		// Check for removed tags.
+		$removed_tags = array_diff( (array) $old_tags, (array) $new_tags );
+
+		// Convert tags arrays to string.
+		$old_tags     = implode( ', ', (array) $old_tags );
+		$new_tags     = implode( ', ', (array) $new_tags );
+		$added_tags   = implode( ', ', $added_tags );
+		$removed_tags = implode( ', ', $removed_tags );
+
+		// Declare event variables.
+		$add_event    = '';
+		$remove_event = '';
+		if ( $old_tags !== $new_tags && ! empty( $added_tags ) ) {
+			$add_event   = 2119;
+			$editor_link = $this->get_editor_link( $post );
+			$post_status = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
+			$this->plugin->alerts->Trigger(
+				$add_event, array(
+					'PostID'             => $post->ID,
+					'PostType'           => $post->post_type,
+					'PostStatus'         => $post_status,
+					'PostTitle'          => $post->post_title,
+					'PostDate'           => $post->post_date,
+					'PostUrl'            => get_permalink( $post->ID ),
+					'tag'                => $added_tags ? $added_tags : 'no tags',
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+		}
+
+		if ( $old_tags !== $new_tags && ! empty( $removed_tags ) ) {
+			$remove_event = 2120;
+			$editor_link  = $this->get_editor_link( $post );
+			$post_status  = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
+			$this->plugin->alerts->Trigger(
+				$remove_event, array(
+					'PostID'             => $post->ID,
+					'PostType'           => $post->post_type,
+					'PostStatus'         => $post_status,
+					'PostTitle'          => $post->post_title,
+					'PostDate'           => $post->post_date,
+					'PostUrl'            => get_permalink( $post->ID ),
+					'tag'                => $removed_tags ? $removed_tags : 'no tags',
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+		}
+
+		if ( $add_event || $remove_event ) {
+			return 1;
+		}
+	}
+
+	/**
+	 * Post modified content.
+	 *
+	 * @param integer  $post_id  – Post ID.
+	 * @param stdClass $oldpost  – Old post.
+	 * @param stdClass $newpost  – New post.
+	 * @param int      $modified – Set to 0 if no changes done to the post.
+	 */
+	public function check_modification_change( $post_id, $oldpost, $newpost, $modified ) {
+		if ( $this->check_other_sensors( $oldpost ) ) {
+			return;
+		}
+		if ( $this->check_title_change( $oldpost, $newpost ) ) {
+			return;
+		}
+
+		$content_changed = $oldpost->post_content != $newpost->post_content;
+		if ( $oldpost->post_modified !== $newpost->post_modified ) {
+			$event = 0;
+
+			// Check if content changed.
+			if ( $content_changed ) {
+				$event = 2065;
+			} elseif ( ! $modified && ! defined( 'REST_REQUEST' ) ) {
+				$event = 2002;
+			}
+			if ( $event ) {
+				if ( 2002 === $event ) {
+					// Get Yoast alerts.
+					$yoast_alerts = $this->plugin->alerts->get_alerts_by_sub_category( 'Yoast SEO' );
+
+					// Check all alerts.
+					foreach ( $yoast_alerts as $alert_code => $alert ) {
+						if ( $this->plugin->alerts->WillOrHasTriggered( $alert_code ) ) {
+							return 0; // Return if any Yoast alert has or will trigger.
+						}
+					}
+
+					// Get post meta events.
+					$meta_events = array( 2053, 2054, 2055, 2062 );
+					foreach ( $meta_events as $meta_event ) {
+						if ( $this->plugin->alerts->WillOrHasTriggered( $meta_event ) ) {
+							return 0; // Return if any meta event has or will trigger.
+						}
+					}
+
+					if ( ! defined( 'REST_REQUEST' ) ) {
+						$post_update_events = array( 2001, 2016, 2017, 2019, 2021, 2025, 2027, 2047, 2048, 2065, 2086, 2111, 2112, 2119, 2120 );
+						if ( $this->was_triggered( $post_update_events ) ) {
+							return;
+						}
+					}
+				}
+
+				$event_data                         = $this->get_post_event_data( $oldpost );
+				$editor_link                        = $this->get_editor_link( $oldpost );
+				$event_data[ $editor_link['name'] ] = $editor_link['value'];
+				$event_data['RevisionLink']         = $this->get_post_revision( $post_id, $oldpost );
+				if ( 2002 === $event ) {
+					$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'must_not_contain_events' ) );
+				} else {
+					$this->plugin->alerts->Trigger( $event, $event_data );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Ignore post from BBPress, WooCommerce Plugin
+	 * Triggered on the Sensors
+	 *
+	 * @param WP_Post $post - The post.
+	 */
+	private function check_other_sensors( $post ) {
+		if ( empty( $post ) || ! isset( $post->post_type ) ) {
+			return false;
+		}
+		switch ( $post->post_type ) {
+			case 'forum':
+			case 'topic':
+			case 'reply':
+			case 'product':
+			case 'shop_order':
+			case 'shop_coupon':
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Changed title of a post.
+	 *
+	 * @param stdClass $oldpost - Old post.
+	 * @param stdClass $newpost - New post.
+	 */
+	private function check_title_change( $oldpost, $newpost ) {
+		if ( $oldpost->post_title !== $newpost->post_title ) {
+			$editor_link = $this->get_editor_link( $oldpost );
+			$this->plugin->alerts->Trigger(
+				2086, array(
+					'PostID'             => $newpost->ID,
+					'PostType'           => $newpost->post_type,
+					'PostTitle'          => $newpost->post_title,
+					'PostStatus'         => $newpost->post_status,
+					'PostDate'           => $newpost->post_date,
+					'PostUrl'            => get_permalink( $newpost->ID ),
+					'OldTitle'           => $oldpost->post_title,
+					'NewTitle'           => $newpost->post_title,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+			return 1;
+		}
+		return 0;
+	}
+
+	/**
+	 * Return post revision link.
+	 *
+	 * @param integer $post_id - Post ID.
+	 * @param WP_Post $post    - WP Post object.
+	 * @return string
+	 */
+	private function get_post_revision( $post_id, $post ) {
+		$revisions = wp_get_post_revisions( $post_id );
+		if ( ! empty( $revisions ) ) {
+			$revision = array_shift( $revisions );
+			return $this->get_revision_link( $revision->ID );
+		}
+	}
+
+	/**
+	 * Builds revision link.
+	 *
+	 * @param integer $revision_id - Revision ID.
+	 * @return string|null - Link.
+	 */
+	private function get_revision_link( $revision_id ) {
+		return ! empty( $revision_id ) ? add_query_arg( 'revision', $revision_id, admin_url( 'revision.php' ) ) : null;
+	}
+
+	/**
+	 * Method: This function make sures that alert 2016
+	 * has not been triggered before triggering categories
+	 * & tags events.
+	 *
+	 * @param WSAL_AlertManager $manager - WSAL Alert Manager.
+	 * @return bool
+	 */
+	public function must_not_contain_events( WSAL_AlertManager $manager ) {
+		if ( $manager->WillOrHasTriggered( 2016 ) ) {
+			return false;
+		} elseif ( $manager->WillOrHasTriggered( 2119 ) ) {
+			return false;
+		} elseif ( $manager->WillOrHasTriggered( 2120 ) ) {
+			return false;
+		} elseif ( $manager->WillOrHasTriggered( 2049 ) ) {
+			return false;
+		} elseif ( $manager->WillOrHasTriggered( 2050 ) ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Log post stuck/unstuck events.
+	 *
+	 * @param integer $post_id - Post ID.
+	 * @param integer $event   - Event ID.
+	 */
+	private function log_sticky_post_event( $post_id, $event ) {
+		// Get post.
+		$post = get_post( $post_id );
+
+		if ( is_wp_error( $post ) ) {
+			return;
+		}
+
+		$editor_link = $this->get_editor_link( $post ); // Editor link.
+		$event_data  = $this->get_post_event_data( $post ); // Event data.
+
+		$event_data[ $editor_link['name'] ] = $editor_link['value'];
+		$this->plugin->alerts->Trigger( $event, $event_data );
+	}
+
+	/**
+	 * Check auto draft and the setting: Hide Plugin in Plugins Page
+	 *
+	 * @param integer $code  - Alert code.
+	 * @param string  $title - Title.
+	 * @return boolean
+	 */
+	private function check_auto_draft( $code, $title ) {
+		if ( 2008 === $code && 'auto-draft' === $title ) {
+			return 1 === (int) $this->plugin->settings->IsWPBackend();
+		}
+		return false;
+	}
+
+	/**
 	 * Comments/Trackbacks and Pingbacks event code.
 	 *
 	 * @param stdClass $post - The post.
 	 * @param string   $status - The status.
 	 */
-	private function GetCommentsPingsEvent( $post, $status ) {
-		if ( 'disable' == $status ) {
+	private function get_comments_pings_event( $post, $status ) {
+		if ( 'disable' === $status ) {
 			$event = 2111;
 		} else {
 			$event = 2112;
@@ -2000,47 +1364,40 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 
 	/**
-	 * Method: Check status change of a post from MainWP Dashboard.
+	 * Post Opened for Editing in WP Editors.
 	 *
-	 * @param WP_Post $post       - WP_Post object.
-	 * @param string  $old_status - Old post status.
-	 * @param string  $new_status - New post status.
-	 * @since 3.2.2
+	 * @param WP_Post $post – Post object.
 	 */
-	private function check_mainwp_status_change( $post, $old_status, $new_status ) {
-		// Verify function arguments.
-		if ( empty( $post ) || ! $post instanceof WP_Post || empty( $old_status ) || empty( $new_status ) ) {
+	public function post_opened_in_editor( $post ) {
+		if ( empty( $post ) || ! $post instanceof WP_Post ) {
 			return;
 		}
 
-		// Check to see if old & new statuses don't match.
-		if ( $old_status !== $new_status ) {
-			if ( 'publish' === $new_status ) {
-				// Special case (publishing a post).
-				$editor_link = $this->GetEditorLink( $post );
+		// Check other sensors.
+		if ( $this->check_other_sensors( $post ) ) {
+			return $post;
+		}
+
+		$current_path = isset( $_SERVER['SCRIPT_NAME'] ) ? esc_url_raw( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) . '?post=' . $post->ID : false;
+		$referrer     = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : false;
+
+		if ( ! empty( $referrer )
+			&& strpos( $referrer, $current_path ) !== false ) {
+			// Ignore this if we were on the same page so we avoid double audit entries.
+			return $post;
+		}
+		if ( ! empty( $post->post_title ) ) {
+			$event = 2100;
+			if ( ! $this->was_triggered( $event ) ) {
+				$editor_link = $this->get_editor_link( $post );
 				$this->plugin->alerts->Trigger(
-					2001, array(
+					$event, array(
 						'PostID'             => $post->ID,
 						'PostType'           => $post->post_type,
 						'PostTitle'          => $post->post_title,
 						'PostStatus'         => $post->post_status,
 						'PostDate'           => $post->post_date,
 						'PostUrl'            => get_permalink( $post->ID ),
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
-			} else {
-				$editor_link = $this->GetEditorLink( $post );
-				$this->plugin->alerts->Trigger(
-					2021, array(
-						'PostID'             => $post->ID,
-						'PostType'           => $post->post_type,
-						'PostTitle'          => $post->post_title,
-						'PostStatus'         => $post->post_status,
-						'PostDate'           => $post->post_date,
-						'PostUrl'            => get_permalink( $post->ID ),
-						'OldStatus'          => $old_status,
-						'NewStatus'          => $new_status,
 						$editor_link['name'] => $editor_link['value'],
 					)
 				);
@@ -2049,52 +1406,38 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 
 	/**
-	 * Get editor link.
+	 * Check if the alert was triggered.
 	 *
-	 * @param stdClass $post - The post.
-	 * @return array $editor_link - Name and value link.
+	 * @param integer|array $alert_id - Alert code.
+	 * @return boolean
 	 */
-	private function GetEditorLink( $post ) {
-		$name        = 'EditorLinkPost';
-		$value       = get_edit_post_link( $post->ID );
-		$editor_link = array(
-			'name'  => $name,
-			'value' => $value,
+	private function was_triggered( $alert_id ) {
+		$query = new WSAL_Models_OccurrenceQuery();
+		$query->addOrderBy( 'created_on', true );
+		$query->setLimit( 1 );
+		$last_occurence = $query->getAdapter()->Execute( $query );
+		if ( ! empty( $last_occurence ) ) {
+			if ( ! is_array( $alert_id ) && $last_occurence[0]->alert_id === $alert_id ) {
+				return true;
+			} elseif ( is_array( $alert_id ) && in_array( $last_occurence[0]->alert_id, $alert_id, true ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Builds category link.
+	 *
+	 * @param integer $tag_id   - Tag ID.
+	 * @param string  $taxonomy - Taxonomy.
+	 * @return string|null - Link.
+	 */
+	private function get_taxonomy_edit_link( $tag_id, $taxonomy = 'post_tag' ) {
+		$tag_args = array(
+			'taxonomy' => $taxonomy,
+			'tag_ID'   => $tag_id,
 		);
-		return $editor_link;
-	}
-
-	/**
-	 * Post View Event.
-	 *
-	 * Alerts for Viewing of Posts and Custom Post Types.
-	 */
-	public function viewing_post() {
-		// Retrieve the current post object.
-		$post = get_queried_object();
-		if ( is_user_logged_in() && ! is_admin() ) {
-			if ( $this->CheckOtherSensors( $post ) ) {
-				return $post->post_title;
-			}
-
-			$current_path = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : false;
-			if (
-				! empty( $_SERVER['HTTP_REFERER'] )
-				&& ! empty( $current_path )
-				&& false !== strpos( sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) ), $current_path )
-			) {
-				// Ignore this if we were on the same page so we avoid double audit entries.
-				return;
-			}
-
-			if ( ! empty( $post->post_title ) ) {
-				$edit_link = $this->GetEditorLink( $post );       // Get editor link.
-				$post_data = $this->get_post_event_data( $post ); // Get event post data.
-
-				// Set editor link.
-				$post_data[ $edit_link['name'] ] = $edit_link['value'];
-				$this->plugin->alerts->Trigger( 2101, $post_data );
-			}
-		}
+		return ! empty( $tag_id ) ? add_query_arg( $tag_args, admin_url( 'term.php' ) ) : null;
 	}
 }
