@@ -55,7 +55,7 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	public function HookEvents() {
 		if ( $this->plugin->load_wsal_on_frontend() ) {
 			add_action( 'user_register', array( $this, 'event_user_register' ) );
-			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 2 );
+			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 3 );
 			add_filter( 'template_redirect', array( $this, 'event_404' ) );
 
 			// Check if WooCommerce plugin exists.
@@ -96,36 +96,78 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	/**
 	 * Fires immediately after a comment is inserted into the database.
 	 *
-	 * @param int   $comment_id       – The comment ID.
-	 * @param mixed $comment_approved – 1 if the comment is approved, 0 if not, 'spam' if spam.
+	 * @param int   $comment_id       - The comment ID.
+	 * @param mixed $comment_approved - 1 if the comment is approved, 0 if not, 'spam' if spam.
+	 * @param array $comment_data     - Comment data.
 	 */
-	public function event_comment( $comment_id, $comment_approved = null ) {
-		// @codingStandardsIgnoreStart
-		$post_comment = isset( $_POST['comment'] ) ? sanitize_text_field( wp_unslash( $_POST['comment'] ) ) : false;
-		// @codingStandardsIgnoreEnd
+	public function event_comment( $comment_id, $comment_approved, $comment_data ) {
+		if ( ! $comment_id ) {
+			return;
+		}
+		// Check if the comment is response to another comment.
+		if ( isset( $comment_data['comment_parent'] ) && $comment_data['comment_parent'] ) {
+			$this->event_generic( $comment_id, 2092 );
+			return;
+		}
 
-		if ( $post_comment ) {
-			$comment = get_comment( $comment_id );
-			if ( ! empty( $comment ) ) {
-				if ( 'spam' !== $comment->comment_approved ) {
-					$post         = get_post( $comment->comment_post_ID );
-					$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
-					$fields       = array(
-						'Date'        => $comment->comment_date,
-						'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
-					);
+		$comment = get_comment( $comment_id );
+		if ( $comment ) {
+			if ( 'spam' !== $comment->comment_approved ) {
+				$post         = get_post( $comment->comment_post_ID );
+				$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
+				$fields       = array(
+					'Date'        => $comment->comment_date,
+					'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
+				);
 
-					// Get user data.
-					$user_data = get_user_by( 'email', $comment->comment_author_email );
+				// Get user data.
+				$user_data = get_user_by( 'email', $comment->comment_author_email );
 
-					if ( ! $user_data ) {
-						// Set the fields.
-						/* Translators: 1: Post Title, 2: Comment Author */
-						$fields['CommentMsg'] = sprintf( esc_html__( 'A comment was posted in response to the post %1$s. The comment was posted by %2$s', 'wp-security-audit-log' ), '<strong>' . $post->post_title . '</strong>', '<strong>' . $this->check_author( $comment ) . '</strong>' );
-						$fields['Username']   = 'Website Visitor';
-						$this->plugin->alerts->Trigger( 2126, $fields );
+				if ( ! $user_data ) {
+					// Set the fields.
+					/* Translators: 1: Post Title, 2: Comment Author */
+					$fields['CommentMsg'] = sprintf( esc_html__( 'A comment was posted in response to the post %1$s. The comment was posted by %2$s', 'wp-security-audit-log' ), '<strong>' . $post->post_title . '</strong>', '<strong>' . $this->check_author( $comment ) . '</strong>' );
+					$fields['Username']   = 'Website Visitor';
+					$this->plugin->alerts->Trigger( 2126, $fields );
+				} else {
+					// Get user roles.
+					$user_roles = $user_data->roles;
+					if ( function_exists( 'is_super_admin' ) && is_super_admin() ) { // Check if superadmin.
+						$user_roles[] = 'superadmin';
 					}
+
+					// Set the fields.
+					$fields['Username']         = $user_data->user_login;
+					$fields['CurrentUserRoles'] = $user_roles;
+					$fields['CommentMsg']       = sprintf( 'Posted a comment in response to the post <strong>%s</strong>', $post->post_title );
+					$this->plugin->alerts->Trigger( 2099, $fields );
 				}
+			}
+		}
+	}
+
+	/**
+	 * Trigger generic event.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param integer $comment_id - Comment ID.
+	 * @param integer $alert_code - Event code.
+	 */
+	private function event_generic( $comment_id, $alert_code ) {
+		$comment = get_comment( $comment_id );
+		if ( $comment ) {
+			$post         = get_post( $comment->comment_post_ID );
+			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
+			$fields       = array(
+				'PostTitle'   => $post->post_title,
+				'Author'      => $comment->comment_author,
+				'Date'        => $comment->comment_date,
+				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
+			);
+
+			if ( 'shop_order' !== $post->post_type ) {
+				$this->plugin->alerts->Trigger( $alert_code, $fields );
 			}
 		}
 	}
@@ -561,7 +603,7 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 
 		// Return if current screen is edit post page.
 		global $pagenow;
-		if ( is_admin() && 'post.php' === $pagenow ) {
+		if ( is_admin() && ( 'post.php' === $pagenow || defined( 'DOING_AJAX' ) ) ) {
 			return;
 		}
 
