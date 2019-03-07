@@ -25,7 +25,7 @@ class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
 	 * Method: Get View Title.
 	 */
 	public function GetTitle() {
-		return __( 'Email Notifications Add-On', 'wp-security-audit-log' );
+		return __( 'Notifications Add-On', 'wp-security-audit-log' );
 	}
 
 	/**
@@ -111,7 +111,7 @@ class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
 				<!-- /.wsal-col -->
 
 				<div class="wsal-col">
-					<h3><?php esc_html_e( 'Email Notifications', 'wp-security-audit-log' ); ?></h3>
+					<h3><?php esc_html_e( 'Notifications', 'wp-security-audit-log' ); ?></h3>
 					<p>
 						<?php esc_html_e( 'Upgrade to Premium to:', 'wp-security-audit-log' ); ?>
 					</p>
