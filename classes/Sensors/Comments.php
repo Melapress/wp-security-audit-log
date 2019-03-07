@@ -43,7 +43,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 		add_action( 'trashed_comment', array( $this, 'EventCommentTrash' ), 10, 1 );
 		add_action( 'untrashed_comment', array( $this, 'EventCommentUntrash' ), 10, 1 );
 		add_action( 'deleted_comment', array( $this, 'EventCommentDeleted' ), 10, 1 );
-		add_action( 'comment_post', array( $this, 'EventComment' ), 10, 2 );
+		add_action( 'comment_post', array( $this, 'EventComment' ), 10, 3 );
 	}
 
 	/**
@@ -52,7 +52,6 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 * @param integer $comment_id - Comment ID.
 	 */
 	public function EventCommentEdit( $comment_id ) {
-		$comment = get_comment( $comment_id );
 		$this->EventGeneric( $comment_id, 2093 );
 	}
 
@@ -64,7 +63,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 * @param stdClass $comment - Comment.
 	 */
 	public function EventCommentApprove( $new_status, $old_status, $comment ) {
-		if ( ! empty( $comment ) && $old_status != $new_status ) {
+		if ( ! empty( $comment ) && $old_status !== $new_status ) {
 			$post         = get_post( $comment->comment_post_ID );
 			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment->comment_ID;
 			$fields       = array(
@@ -74,10 +73,10 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
 			);
 
-			if ( 'approved' == $new_status ) {
+			if ( 'approved' === $new_status ) {
 				$this->plugin->alerts->Trigger( 2090, $fields );
 			}
-			if ( 'unapproved' == $new_status ) {
+			if ( 'unapproved' === $new_status ) {
 				$this->plugin->alerts->Trigger( 2091, $fields );
 			}
 		}
@@ -133,43 +132,42 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 *
 	 * @param int        $comment_id       The comment ID.
 	 * @param int|string $comment_approved 1 if the comment is approved, 0 if not, 'spam' if spam.
+	 * @param array      $comment_data     Comment data.
 	 */
-	public function EventComment( $comment_id, $comment_approved = null ) {
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
-
-		if ( isset( $post_array['action'] ) && 'replyto-comment' == $post_array['action'] ) {
+	public function EventComment( $comment_id, $comment_approved, $comment_data ) {
+		// Check if the comment is response to another comment.
+		if ( isset( $comment_data['comment_parent'] ) && $comment_data['comment_parent'] ) {
 			$this->EventGeneric( $comment_id, 2092 );
+			return;
 		}
-		if ( isset( $post_array['comment'] ) ) {
-			$comment = get_comment( $comment_id );
-			if ( ! empty( $comment ) ) {
-				if ( 'spam' != $comment->comment_approved ) {
-					$post         = get_post( $comment->comment_post_ID );
-					$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
-					$fields       = array(
-						'Date'        => $comment->comment_date,
-						'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
-					);
 
-					// Get user data.
-					$user_data = get_user_by( 'email', $comment->comment_author_email );
+		$comment = get_comment( $comment_id );
+		if ( $comment ) {
+			if ( 'spam' !== $comment->comment_approved ) {
+				$post         = get_post( $comment->comment_post_ID );
+				$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
+				$fields       = array(
+					'Date'        => $comment->comment_date,
+					'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
+				);
 
-					if ( $user_data && $user_data instanceof WP_User ) {
-						// Get user roles.
-						$user_roles = $user_data->roles;
+				// Get user data.
+				$user_data = get_user_by( 'email', $comment->comment_author_email );
 
-						// Check if superadmin.
-						if ( function_exists( 'is_super_admin' ) && is_super_admin() ) {
-							$user_roles[] = 'superadmin';
-						}
+				if ( $user_data && $user_data instanceof WP_User ) {
+					// Get user roles.
+					$user_roles = $user_data->roles;
 
-						// Set the fields.
-						$fields['Username']         = $user_data->user_login;
-						$fields['CurrentUserRoles'] = $user_roles;
-						$fields['CommentMsg']       = sprintf( 'Posted a comment in response to the post <strong>%s</strong>', $post->post_title );
-						$this->plugin->alerts->Trigger( 2099, $fields );
+					// Check if superadmin.
+					if ( function_exists( 'is_super_admin' ) && is_super_admin() ) {
+						$user_roles[] = 'superadmin';
 					}
+
+					// Set the fields.
+					$fields['Username']         = $user_data->user_login;
+					$fields['CurrentUserRoles'] = $user_roles;
+					$fields['CommentMsg']       = sprintf( 'Posted a comment in response to the post <strong>%s</strong>', $post->post_title );
+					$this->plugin->alerts->Trigger( 2099, $fields );
 				}
 			}
 		}
@@ -183,7 +181,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 */
 	private function EventGeneric( $comment_id, $alert_code ) {
 		$comment = get_comment( $comment_id );
-		if ( ! empty( $comment ) ) {
+		if ( $comment ) {
 			$post         = get_post( $comment->comment_post_ID );
 			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
 			$fields       = array(
