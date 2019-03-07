@@ -266,35 +266,50 @@ td.column-user {
  * Audit Log Admin Notice
  */
 .wsal_notice__wrapper {
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-align: center;
-	-ms-flex-align: center;
-	align-items: center;
-	-webkit-box-pack: justify;
-	-ms-flex-pack: justify;
-	justify-content: space-between;
+	display: table;
+	width: 100%;
 	position: relative;
 	margin: 12px 0;
 }
 
 .wsal_notice__wrapper .wsal_notice__content {
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-align: start;
-	-ms-flex-align: start;
-	align-items: flex-start;
+	display: table-cell;
+	vertical-align: middle;
+	padding-right: 12px;
+}
+
+.wsal_notice__wrapper img {
+	height: 70px;
+	margin-right: 5px;
+}
+
+div.wsal_notice__wrapper p {
+	display: inline-block;
+	width: 89%;
+	vertical-align: top;
 }
 
 .wsal_notice__btns {
+	display: table-cell;
+	vertical-align: middle;
+	width: 235px;
 	text-align: right;
 }
 
 .wsal_notice__btns a.wsal_notice__btn {
-	/* display: block; */
-	margin-bottom: 5px;
+	background: #00ad50;
+	border-color: #00ad50 #009344 #009344 #009344;
+	box-shadow: 0 1px 0 #00ad50;
+	text-shadow: none;
+}
+
+.wsal_notice__btns a.wsal_notice__btn:hover {
+	background: #00b353;
+	border-color: #00ad50 #009344 #009344 #009344;
+}
+
+.wsal_notice__btns a.button-primary {
+	margin-bottom: 7px;
 }
 
 .wsal_notice__btns > div {
@@ -305,17 +320,7 @@ td.column-user {
 .wsal_notice__btns a.wsal_notice__btn_dismiss {
 	color: #AAA;
 	margin-left: 2px;
-}
-
-.wsal_notice__wrapper img {
-	height: 70px;
-	margin-right: 5px;
-}
-
-div.wsal_notice__wrapper p {
-	display: inline-block;
-	vertical-align: top;
-	margin-right: 16px;
+	text-decoration: none;
 }
 
 .wsal-premium {
