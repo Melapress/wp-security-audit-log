@@ -299,7 +299,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 			// @codingStandardsIgnoreStart
 			$this->page_args->page    = isset( $_REQUEST['page'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) : false;
-			$this->page_args->site_id = isset( $_REQUEST['wsal-cbid'] ) ? (int) sanitize_text_field( wp_unslash( $_REQUEST['wsal-cbid'] ) ) : false;
+			$this->page_args->site_id = $this->_plugin->settings->get_view_site_id();
 
 			// Order arguments.
 			$this->page_args->order_by = isset( $_REQUEST['orderby'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) : false;
