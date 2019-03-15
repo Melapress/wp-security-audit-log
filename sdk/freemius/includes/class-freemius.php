@@ -11351,7 +11351,7 @@
             );
 
             if ( false !== $error ) {
-                $result['error'] = $error;
+                $result['error'] = $this->apply_filters( 'opt_in_error_message', $error );
             } else {
                 $result['next_page'] = $next_page;
             }

@@ -285,6 +285,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			wsal_freemius()->add_filter( 'show_delegation_option', '__return_false' );
 			wsal_freemius()->add_filter( 'enable_per_site_activation', '__return_false' );
 			wsal_freemius()->add_filter( 'show_trial', '__return_false' );
+			wsal_freemius()->add_filter( 'opt_in_error_message', array( $this, 'limited_license_activation_error' ), 10, 1 );
 		}
 
 		/**
@@ -567,6 +568,23 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				return $show;
 			}
 			return false;
+		}
+
+		/**
+		 * Limited License Activation Error.
+		 *
+		 * @param string $error - Error Message.
+		 * @return string
+		 */
+		public function limited_license_activation_error( $error ) {
+			$site_count = null;
+			preg_match( '!\d+!', $error, $site_count );
+
+			if ( ! empty( $site_count[0] ) ) {
+				/* Translators: Number of sites */
+				$error = sprintf( esc_html__( 'The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network.', 'wp-security-audit-log' ), $site_count[0] );
+			}
+			return $error;
 		}
 
 		/**
