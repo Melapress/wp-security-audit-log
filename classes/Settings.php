@@ -1540,10 +1540,8 @@ class WSAL_Settings {
 		switch ( true ) {
 			case '%Message%' == $name:
 				return esc_html( $value );
-
 			case '%PromoMessage%' == $name:
 				return '<p class="promo-alert">' . $value . '</p>';
-
 			case '%PromoLink%' == $name:
 			case '%CommentLink%' == $name:
 			case '%CommentMsg%' == $name:
@@ -1732,10 +1730,7 @@ class WSAL_Settings {
 	 * @return bool
 	 */
 	protected function is_specific_view() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
-
-		return isset( $get_array['wsal-cbid'] ) && '0' != $get_array['wsal-cbid'];
+		return isset( $_REQUEST['wsal-cbid'] ) && 0 !== (int) $_REQUEST['wsal-cbid']; // @codingStandardsIgnoreLine
 	}
 
 	/**
@@ -1746,10 +1741,7 @@ class WSAL_Settings {
 	 * @return int
 	 */
 	protected function get_specific_view() {
-		// Filter $_GET array for security.
-		$get_array = filter_input_array( INPUT_GET );
-
-		return isset( $get_array['wsal-cbid'] ) ? (int) $get_array['wsal-cbid'] : 0;
+		return isset( $_REQUEST['wsal-cbid'] ) ? (int) sanitize_text_field( wp_unslash( $_REQUEST['wsal-cbid'] ) ) : 0; // @codingStandardsIgnoreLine
 	}
 
 	/**
