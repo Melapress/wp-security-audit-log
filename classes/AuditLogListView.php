@@ -76,6 +76,15 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	private $query_args;
 
 	/**
+	 * Event Items Meta Array.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @var array
+	 */
+	private $item_meta = array();
+
+	/**
 	 * Method: Constructor.
 	 *
 	 * @param object   $plugin     - Instance of WpSecurityAuditLog.
@@ -194,7 +203,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				( 'top' === $which && $this->_plugin->settings->is_infinite_scroll() )
 				|| ! $this->_plugin->settings->is_infinite_scroll()
 			) {
-				$curr = $this->get_view_site_id();
+				$curr = $this->_plugin->settings->get_view_site_id();
 				?>
 				<div class="wsal-ssa wsal-ssa-<?php echo esc_attr( $which ); ?>">
 					<?php if ( $this->get_site_count() > 15 ) : ?>
@@ -386,6 +395,11 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		// Get date format.
 		$datetime_format = $this->_plugin->settings->GetDatetimeFormat();
 
+		// Store meta if not set.
+		if ( ! isset( $this->item_meta[ $item->getId() ] ) ) {
+			$this->item_meta[ $item->getId() ] = $item->GetMetaArray();
+		}
+
 		// Store current alert id.
 		$this->current_alert_id = $item->id;
 
@@ -440,7 +454,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 						)
 					) : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 			case 'user':
-				$username = $item->GetUsername(); // Get username.
+				$username = $item->GetUsername( $this->item_meta[ $item->getId() ] ); // Get username.
 				$user     = get_user_by( 'login', $username ); // Get user.
 				if ( empty( $this->name_type ) ) {
 					$this->name_type = $this->_plugin->settings->get_type_username();
@@ -473,7 +487,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 						. '" target="_blank">' . esc_html( $display_name ) . '</a>';
 					}
 
-					$roles = $item->GetUserRoles();
+					$roles = $item->GetUserRoles( $this->item_meta[ $item->getId() ] );
 					if ( is_array( $roles ) && count( $roles ) ) {
 						$roles = esc_html( ucwords( implode( ', ', $roles ) ) );
 					} elseif ( is_string( $roles ) && '' != $roles ) {
@@ -512,7 +526,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				 */
 				return apply_filters( 'wsal_auditlog_row_user_data', $row_user_data, $this->current_alert_id );
 			case 'scip':
-				$scip = $item->GetSourceIP();
+				$scip = $item->GetSourceIP( $this->item_meta[ $item->getId() ] );
 				if ( is_string( $scip ) ) {
 					$scip = str_replace( array( '"', '[', ']' ), '', $scip );
 				}
@@ -566,7 +580,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return ! $info ? ( 'Unknown Site ' . $item->site_id )
 					: ( '<a href="' . esc_attr( $info->siteurl ) . '">' . esc_html( $info->blogname ) . '</a>' );
 			case 'mesg':
-				return '<div id="Event' . $item->id . '">' . $item->GetMessage( array( $this->_plugin->settings, 'meta_formatter' ) ) . '</div>';
+				return '<div id="Event' . $item->id . '">' . $item->GetMessage( array( $this->_plugin->settings, 'meta_formatter' ), false, $this->item_meta[ $item->getId() ] ) . '</div>';
 			case 'data':
 				$url     = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $item->id;
 				$tooltip = esc_attr__( 'View all details of this change', 'wp-security-audit-log' );
