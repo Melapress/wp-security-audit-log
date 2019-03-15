@@ -139,6 +139,7 @@ function wsaldefaults_wsal_init() {
 				),
 			)
 		);
+
 		// Create list of default alerts.
 		$wsal->alerts->RegisterGroup(
 			array(
@@ -606,6 +607,8 @@ function wsaldefaults_wsal_init() {
 						array( 9039, E_WARNING, __( 'User permanently deleted a WooCommerce order', 'wp-security-audit-log' ), __( 'Permanently deleted the WooCommerce order %OrderTitle%.', 'wp-security-audit-log' ) ),
 						array( 9040, E_NOTICE, __( 'User edited a WooCommerce order', 'wp-security-audit-log' ), __( 'Edited the WooCommerce order %OrderTitle%. %EditorLinkOrder%.', 'wp-security-audit-log' ) ),
 						array( 9041, E_WARNING, __( 'User refunded a WooCommerce order', 'wp-security-audit-log' ), __( 'Refunded the WooCommerce order %OrderTitle%. %EditorLinkOrder%.', 'wp-security-audit-log' ) ),
+						array( 9083, E_NOTICE, __( 'User changed the billing address details', 'wp-security-audit-log' ), __( 'Changed the %AddressField% in the user\'s %TargetUsername% billing address.%ChangeText%', 'wp-security-audit-log' ) ),
+						array( 9084, E_NOTICE, __( 'User changed the shipping address details', 'wp-security-audit-log' ), __( 'Changed the %AddressField% in the user\'s %TargetUsername% shipping address.%ChangeText%', 'wp-security-audit-log' ) ),
 					),
 
 					/**
