@@ -106,6 +106,15 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	);
 
 	/**
+	 * WC User Meta.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @var array
+	 */
+	private $wc_user_meta = array();
+
+	/**
 	 * Is Event 9067 Logged?
 	 *
 	 * @since 3.3.1
@@ -150,6 +159,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		add_action( 'wsal_before_post_meta_create_event', array( $this, 'log_coupon_meta_created_event' ), 10, 4 );
 		add_action( 'wsal_before_post_meta_update_event', array( $this, 'log_coupon_meta_update_events' ), 10, 5 );
 		add_action( 'wsal_before_post_meta_delete_event', array( $this, 'log_coupon_meta_delete_event' ), 10, 4 );
+		add_action( 'update_user_meta', array( $this, 'before_wc_user_meta_update' ), 10, 3 );
+		add_action( 'added_user_meta', array( $this, 'wc_user_meta_updated' ), 10, 4 );
+		add_action( 'updated_user_meta', array( $this, 'wc_user_meta_updated' ), 10, 4 );
 	}
 
 	/**
@@ -3146,5 +3158,112 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			return false;
 		}
 		return $log_event;
+	}
+
+	/**
+	 * Get WC User Meta Data before updating.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param integer $meta_id  - Meta id.
+	 * @param integer $user_id  - User id.
+	 * @param string  $meta_key - Meta key.
+	 */
+	public function before_wc_user_meta_update( $meta_id, $user_id, $meta_key ) {
+		if ( ! $this->is_woocommerce_user_meta( $meta_key ) ) {
+			return;
+		}
+
+		$this->wc_user_meta[ $meta_id ] = (object) array(
+			'key'   => $meta_key,
+			'value' => get_user_meta( $user_id, $meta_key, true ),
+		);
+	}
+
+	/**
+	 * WC User Meta data updated.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param integer $meta_id    - Meta id.
+	 * @param integer $user_id    - User id.
+	 * @param string  $meta_key   - Meta key.
+	 * @param mixed   $meta_value - Meta value.
+	 */
+	public function wc_user_meta_updated( $meta_id, $user_id, $meta_key, $meta_value ) {
+		if ( ! $this->is_woocommerce_user_meta( $meta_key ) ) {
+			return;
+		}
+
+		// Check meta creation event.
+		if ( ! isset( $this->wc_user_meta[ $meta_id ] ) ) {
+			$this->wc_user_meta[ $meta_id ] = (object) array( 'value' => false );
+		}
+
+		if ( isset( $this->wc_user_meta[ $meta_id ] ) ) {
+			if ( $meta_value && $this->wc_user_meta[ $meta_id ]->value !== $meta_value ) {
+				// Event id.
+				$event_id = false;
+
+				if ( false !== strpos( $meta_key, 'billing_' ) ) {
+					$event_id = 9083;
+				} elseif ( false !== strpos( $meta_key, 'shipping_' ) ) {
+					$event_id = 9084;
+				}
+
+				if ( $event_id ) {
+					$user            = get_user_by( 'ID', $user_id );
+					$old_address_key = 'Old' . $this->get_key_for_event( $meta_key );
+					$new_address_key = 'New' . $this->get_key_for_event( $meta_key );
+					$address_field   = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
+					$address_field   = ucwords( str_replace( '_', ' ', $address_field ) );
+
+					$this->plugin->alerts->Trigger(
+						$event_id, array(
+							'TargetUsername' => $user ? $user->user_login : false,
+							'AddressField'   => $address_field,
+							$old_address_key => $this->wc_user_meta[ $meta_id ]->value,
+							$new_address_key => $meta_value,
+						)
+					);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Check if meta key belongs to WooCommerce user meta.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param string $meta_key - Meta key.
+	 * @return boolean
+	 */
+	private function is_woocommerce_user_meta( $meta_key ) {
+		// Remove the prefix to avoid redundancy in the meta keys.
+		$address_key = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
+
+		// WC address meta keys without prefix.
+		$meta_keys = array( 'first_name', 'last_name', 'company', 'country', 'address_1', 'address_2', 'city', 'state', 'postcode', 'phone', 'email' );
+
+		if ( in_array( $address_key, $meta_keys, true ) ) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Get Meta Key for Event Meta.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param string $meta_key - Meta key.
+	 * @return string
+	 */
+	private function get_key_for_event( $meta_key ) {
+		$meta_key = str_replace( '_', ' ', $meta_key );
+		$meta_key = ucwords( $meta_key );
+		$meta_key = str_replace( ' ', '', $meta_key );
+		return $meta_key;
 	}
 }

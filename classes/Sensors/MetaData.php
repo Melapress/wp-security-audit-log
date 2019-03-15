@@ -399,6 +399,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return;
 		}
 
+		if ( $this->is_woocommerce_user_meta( $meta_key ) ) {
+			return;
+		}
+
 		if ( empty( $meta_value ) && ( $this->null_meta_counter < 1 ) ) { // Report only one NULL meta value.
 			$this->null_meta_counter += 1;
 		} elseif ( $this->null_meta_counter >= 1 ) { // Do not report if NULL meta values are more than one.
@@ -448,6 +452,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	public function event_user_meta_updated( $meta_id, $object_id, $meta_key, $meta_value ) {
 		// Check to see if we can log the meta key.
 		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
+			return;
+		}
+
+		if ( $this->is_woocommerce_user_meta( $meta_key ) ) {
 			return;
 		}
 
@@ -542,5 +550,24 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 */
 	public function must_not_contain_new_user_alert( WSAL_AlertManager $manager ) {
 		return ! $manager->WillOrHasTriggered( 4001 );
+	}
+
+	/**
+	 * Check if meta key belongs to WooCommerce user meta.
+	 *
+	 * @param string $meta_key - Meta key.
+	 * @return boolean
+	 */
+	private function is_woocommerce_user_meta( $meta_key ) {
+		// Remove the prefix to avoid redundancy in the meta keys.
+		$address_key = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
+
+		// WC address meta keys without prefix.
+		$meta_keys = array( 'first_name', 'last_name', 'company', 'country', 'address_1', 'address_2', 'city', 'state', 'postcode', 'phone', 'email' );
+
+		if ( in_array( $address_key, $meta_keys, true ) ) {
+			return true;
+		}
+		return false;
 	}
 }
