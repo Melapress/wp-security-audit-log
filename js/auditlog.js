@@ -100,12 +100,9 @@ function WsalAuditLogInit(_WsalData) {
 	};
 
 	// If audit log auto refresh is enabled.
-	if (WsalData.autorefresh.enabled) {
+	if ( WsalData.autorefresh.enabled ) {
 		// Check for new alerts every 30 secs.
 		setInterval(WsalChk, 30000);
-
-		// Make the first call on page load.
-		WsalChk();
 	}
 
 	WsalSsasInit();
