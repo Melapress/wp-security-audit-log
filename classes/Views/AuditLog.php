@@ -452,59 +452,34 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					});
 				});
 			</script>
-		<?php endif; ?>
-
-		<?php
-		if ( class_exists( 'WSAL_SearchExtension' ) &&
-			( ! empty( $this->page_args->search_filters ) || ( ! empty( $this->page_args->search_term ) && trim( $this->page_args->search_term ) ) ) ) :
-			?>
-			<script type="text/javascript">
-				jQuery(document).ready( function() {
-					WsalAuditLogInit(
-						<?php
-						echo json_encode(
-							array(
-								'ajaxurl'     => admin_url( 'admin-ajax.php' ),
-								'tr8n'        => array(
-									'numofitems' => __( 'Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log' ),
-									'searchback' => __( 'All Sites', 'wp-security-audit-log' ),
-									'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
-								),
-								'autorefresh' => array(
-									'enabled' => false,
-									'token'   => $this->GetListView()->get_total_items(),
-								),
-							)
-						);
-						?>
-					);
-				} );
-			</script>
-		<?php else : ?>
-			<script type="text/javascript">
-				jQuery(document).ready( function() {
-					WsalAuditLogInit(
-						<?php
-						echo json_encode(
-							array(
-								'ajaxurl'     => admin_url( 'admin-ajax.php' ),
-								'tr8n'        => array(
-									'numofitems' => __( 'Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log' ),
-									'searchback' => __( 'All Sites', 'wp-security-audit-log' ),
-									'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
-								),
-								'autorefresh' => array(
-									'enabled' => ! $this->_plugin->settings->is_infinite_scroll() ? $this->_plugin->settings->IsRefreshAlertsEnabled() : false,
-									'token'   => $this->GetListView()->get_total_items(),
-								),
-							)
-						);
-						?>
-					);
-				} );
-			</script>
 			<?php
 		endif;
+
+		$is_search_view = class_exists( 'WSAL_SearchExtension' ) && ( ! empty( $this->page_args->search_filters ) || ! empty( trim( $this->page_args->search_term ) ) );
+		?>
+		<script type="text/javascript">
+			jQuery( document ).ready( function() {
+				WsalAuditLogInit(
+					<?php
+					echo wp_json_encode(
+						array(
+							'ajaxurl'     => admin_url( 'admin-ajax.php' ),
+							'tr8n'        => array(
+								'numofitems' => __( 'Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log' ),
+								'searchback' => __( 'All Sites', 'wp-security-audit-log' ),
+								'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
+							),
+							'autorefresh' => array(
+								'enabled' => ! $is_search_view ? $this->_plugin->settings->IsRefreshAlertsEnabled() : false,
+								'token'   => $this->GetListView()->get_total_items(),
+							),
+						)
+					);
+					?>
+				);
+			} );
+		</script>
+		<?php
 	}
 
 	/**
