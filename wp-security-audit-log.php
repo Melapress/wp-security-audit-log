@@ -58,7 +58,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 		// Plugin constants.
 		const PLG_CLS_PRFX    = 'WSAL_';
-		const MIN_PHP_VERSION = '5.3.0';
+		const MIN_PHP_VERSION = '5.5.0';
 		const OPT_PRFX        = 'wsal-';
 
 		/**
@@ -1325,7 +1325,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Set a global option.
 		 *
 		 * @param string $option - Option name.
-		 * @param mixed  $value  - New value for option.
+		 * @param mixed  $value - New value for option.
 		 * @param string $prefix - (Optional) A prefix used before option name.
 		 */
 		public function SetGlobalOption( $option, $value, $prefix = self::OPT_PRFX ) {
