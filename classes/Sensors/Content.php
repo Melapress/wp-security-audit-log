@@ -147,17 +147,18 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			return;
 		}
 
+		$post_update_events = array( 2000, 2001, 2002, 2016, 2049, 2050, 2073, 2074, 2119, 2120 );
+		if ( ! defined( 'REST_REQUEST' ) && $this->was_triggered( $post_update_events ) ) {
+			return;
+		}
+
 		if ( $update ) {
-			if (
-				( 'auto-draft' === $this->_old_post->post_status && 'Auto Draft' === $this->_old_post->post_title && 'draft' === $post->post_status ) // Saving draft.
-				|| ( 'draft' === $this->_old_post->post_status && 'publish' === $post->post_status ) // Publishing post.
-			) {
-				$this->check_post_creation( $this->_old_post, $post );
-			} else {
+			$is_published = $this->check_status_change( $this->_old_post, $post );
+
+			if ( ! $is_published && 'auto-draft' !== $this->_old_post->post_status ) {
 				// Handle update post events.
 				$changes = 0;
 				$changes = $this->check_author_change( $this->_old_post, $post )
-				+ $this->check_status_change( $this->_old_post, $post )
 				+ $this->check_parent_change( $this->_old_post, $post )
 				+ $this->check_visibility_change( $this->_old_post, $post, $this->old_status, $post->post_status )
 				+ $this->check_date_change( $this->_old_post, $post )
@@ -819,37 +820,46 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	protected function check_status_change( $oldpost, $newpost ) {
 		if ( $oldpost->post_status !== $newpost->post_status ) {
-			if ( 'publish' === $newpost->post_status ) {
-				// Special case (publishing a post).
-				$editor_link = $this->get_editor_link( $newpost );
-				$this->plugin->alerts->Trigger(
-					2001, array(
-						'PostID'             => $newpost->ID,
-						'PostType'           => $newpost->post_type,
-						'PostTitle'          => $newpost->post_title,
-						'PostStatus'         => $newpost->post_status,
-						'PostDate'           => $newpost->post_date,
-						'PostUrl'            => get_permalink( $newpost->ID ),
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
+			$event        = 0;
+			$is_scheduled = false;
+
+			if ( 'auto-draft' === $oldpost->post_status && 'draft' === $newpost->post_status ) {
+				$event = 2000;
+			} elseif ( 'publish' === $newpost->post_status ) {
+				$event = 2001;
+			} elseif ( 'pending' === $newpost->post_status ) {
+				$event = 2073;
+			} elseif ( 'future' === $newpost->post_status ) {
+				$event        = 2074;
+				$is_scheduled = true;
 			} else {
-				$editor_link = $this->get_editor_link( $oldpost );
-				$this->plugin->alerts->Trigger(
-					2021, array(
-						'PostID'             => $oldpost->ID,
-						'PostType'           => $oldpost->post_type,
-						'PostTitle'          => $oldpost->post_title,
-						'PostStatus'         => $newpost->post_status,
-						'PostDate'           => $oldpost->post_date,
-						'PostUrl'            => get_permalink( $oldpost->ID ),
-						'OldStatus'          => $oldpost->post_status,
-						'NewStatus'          => $newpost->post_status,
-						$editor_link['name'] => $editor_link['value'],
-					)
-				);
+				$event = 2021;
 			}
-			return 1;
+
+			if ( $event ) {
+				$editor_link = $this->get_editor_link( $newpost ); // Editor link.
+				$event_data  = $this->get_post_event_data( $newpost ); // Post event data.
+
+				// Set editor link in the event data.
+				$event_data[ $editor_link['name'] ] = $editor_link['value'];
+
+				if ( $is_scheduled ) {
+					$event_data['PublishingDate'] = $newpost->post_date;
+					$this->plugin->alerts->Trigger( $event, $event_data );
+				} elseif ( 2021 === $event ) {
+					$event_data['OldStatus'] = $oldpost->post_status;
+					$event_data['NewStatus'] = $newpost->post_status;
+					$this->plugin->alerts->Trigger( $event, $event_data );
+				} else {
+					$this->plugin->alerts->Trigger( $event, $event_data );
+				}
+			}
+
+			if ( 2001 === $event ) { // If publishing event then return true.
+				return true;
+			}
+
+			return false;
 		}
 	}
 
@@ -969,7 +979,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$from = strtotime( $oldpost->post_date );
 		$to   = strtotime( $newpost->post_date );
 
-		if ( 'draft' === $oldpost->post_status ) {
+		if ( 'draft' === $oldpost->post_status || 'pending' === $oldpost->post_status ) {
 			return 0;
 		}
 
@@ -1160,20 +1170,22 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( $this->check_other_sensors( $oldpost ) ) {
 			return;
 		}
+
 		if ( $this->check_title_change( $oldpost, $newpost ) ) {
 			return;
 		}
 
 		$content_changed = $oldpost->post_content != $newpost->post_content;
+
 		if ( $oldpost->post_modified !== $newpost->post_modified ) {
 			$event = 0;
 
-			// Check if content changed.
-			if ( $content_changed ) {
+			if ( $content_changed ) { // Check if content changed.
 				$event = 2065;
-			} elseif ( ! $modified && ! defined( 'REST_REQUEST' ) ) {
+			} elseif ( ! $modified ) {
 				$event = 2002;
 			}
+
 			if ( $event ) {
 				if ( 2002 === $event ) {
 					// Get Yoast alerts.
@@ -1206,6 +1218,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$editor_link                        = $this->get_editor_link( $oldpost );
 				$event_data[ $editor_link['name'] ] = $editor_link['value'];
 				$event_data['RevisionLink']         = $this->get_post_revision( $post_id, $oldpost );
+
 				if ( 2002 === $event ) {
 					$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'must_not_contain_events' ) );
 				} else {
@@ -1416,6 +1429,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$query->addOrderBy( 'created_on', true );
 		$query->setLimit( 1 );
 		$last_occurence = $query->getAdapter()->Execute( $query );
+
 		if ( ! empty( $last_occurence ) ) {
 			if ( ! is_array( $alert_id ) && $last_occurence[0]->alert_id === $alert_id ) {
 				return true;
@@ -1423,6 +1437,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
