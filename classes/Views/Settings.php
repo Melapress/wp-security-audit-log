@@ -502,7 +502,33 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<!-- / Reverse Proxy / Firewall Options -->
 			</tbody>
 		</table>
-		<!-- Reverse Proxy -->
+		<!-- Events Navigation Type -->
+
+		<h3><?php esc_html_e( 'Do you want the activity log viewer to auto refresh?', 'wp-security-audit-log' ); ?></h3>
+		<p class="description"><?php esc_html_e( 'The activity log viewer auto refreshes every 30 seconds when opened so you can see the latest events as they happen almost in real time.', 'wp-security-audit-log' ); ?></p>
+		<table class="form-table wsal-tab">
+			<tbody>
+				<tr>
+					<th><label for="aroption_on"><?php esc_html_e( 'Refresh Audit Log Viewer', 'wp-security-audit-log' ); ?></label></th>
+					<td>
+						<fieldset>
+							<?php $are = $this->_plugin->settings->IsRefreshAlertsEnabled(); ?>
+							<label for="aroption_on">
+								<input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: -2px;" <?php checked( $are ); ?> value="1">
+								<span><?php esc_html_e( 'Auto refresh', 'wp-security-audit-log' ); ?></span>
+							</label>
+							<br/>
+							<label for="aroption_off">
+								<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: -2px;" <?php checked( $are, false ); ?> value="0">
+								<span><?php esc_html_e( 'Do not auto refresh', 'wp-security-audit-log' ); ?></span>
+							</label>
+						</fieldset>
+					</td>
+				</tr>
+				<!-- Refresh Audit Log Viewer -->
+			</tbody>
+		</table>
+		<!-- Refresh Audit Log -->
 
 		<h3><?php esc_html_e( 'Display latest events widget in Dashboard & Admin bar', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
@@ -863,6 +889,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Get $_POST global array.
 		$post_array = filter_input_array( INPUT_POST );
 
+		$this->_plugin->settings->SetRefreshAlertsEnabled( $post_array['EnableAuditViewRefresh'] );
 		$this->_plugin->settings->set_events_type_nav( sanitize_text_field( $post_array['events-type-nav'] ) );
 		$this->_plugin->settings->set_use_email( sanitize_text_field( $post_array['use-email'] ) );
 		$this->_plugin->settings->SetFromEmail( sanitize_email( $post_array['FromEmail'] ) );
@@ -1122,34 +1149,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</table>
 		<!-- Audit Log Columns -->
 
-		<h3><?php esc_html_e( 'Do you want the activity log viewer to auto refresh?', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'The activity log viewer auto refreshes every 30 seconds when opened so you can see the latest events as they happen almost in real time.', 'wp-security-audit-log' ); ?></p>
-		<table class="form-table wsal-tab">
-			<tbody>
-				<tr>
-					<th><label for="aroption_on"><?php esc_html_e( 'Refresh Audit Log Viewer', 'wp-security-audit-log' ); ?></label></th>
-					<td>
-						<fieldset>
-							<?php $are = $this->_plugin->settings->IsRefreshAlertsEnabled(); ?>
-							<label for="aroption_on">
-								<input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: -2px;"
-									<?php checked( $are ); ?> value="1">
-								<span><?php esc_html_e( 'Auto refresh', 'wp-security-audit-log' ); ?></span>
-							</label>
-							<br/>
-							<label for="aroption_off">
-								<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: -2px;"
-									<?php checked( $are, false ); ?> value="0">
-								<span><?php esc_html_e( 'Do not auto refresh', 'wp-security-audit-log' ); ?></span>
-							</label>
-						</fieldset>
-					</td>
-				</tr>
-				<!-- Refresh Audit Log Viewer -->
-			</tbody>
-		</table>
-		<!-- Refresh Audit Log -->
-
 		<h3><?php esc_html_e( 'Do you want to keep a log of WordPress background activity?', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
 			<?php esc_html_e( 'WordPress does a lot of things in the background that you do not necessarily need to know about, such as; deletion of post revisions, deletion of auto saved drafts etc. By default the plugin does not report them since there might be a lot and are irrelevant to the user.', 'wp-security-audit-log' ); ?>
@@ -1194,7 +1193,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetPruningDateEnabled( isset( $post_array['PruneBy'] ) ? 'date' === $post_array['PruneBy'] : '' );
 		$this->_plugin->settings->SetPruningDate( $pruning_date );
 		$this->_plugin->settings->set_pruning_unit( $pruning_unit );
-		$this->_plugin->settings->SetRefreshAlertsEnabled( $post_array['EnableAuditViewRefresh'] );
 		$this->_plugin->settings->SetTimezone( $post_array['Timezone'] );
 		$this->_plugin->settings->set_type_username( $post_array['type_username'] );
 		$this->_plugin->settings->SetWPBackend( isset( $post_array['WPBackend'] ) ? sanitize_text_field( $post_array['WPBackend'] ) : false );
