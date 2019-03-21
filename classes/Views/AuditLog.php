@@ -173,7 +173,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary wsal_notice__btn"><?php esc_html_e( 'UPGRADE NOW', 'wp-security-audit-log' ); ?></a>
 							<a href="<?php echo esc_url( $trial_link ); ?>" class="button button-primary"><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>
 							<a href="<?php echo esc_url( $more_info ); ?>" target="_blank"><?php esc_html_e( 'Tell me more', 'wp-security-audit-log' ); ?></a>
-							<a href="javascript:;" data-advert="<?php echo esc_attr( $wsal_premium_advert ); ?>" onclick="wsal_dismiss_advert(this)" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>"><span class="dashicons dashicons-dismiss"></span></a>
+							<br>
+							<a href="javascript:;" data-advert="<?php echo esc_attr( $wsal_premium_advert ); ?>" onclick="wsal_dismiss_advert(this)" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Close', 'wp-security-audit-log' ); ?></a>
 						</div>
 						<!-- /.wsal_notice__btns -->
 					</div>
