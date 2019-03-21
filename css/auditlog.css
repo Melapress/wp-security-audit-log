@@ -265,10 +265,13 @@ td.column-user {
 /**
  * Audit Log Admin Notice
  */
+.wsal_notice {
+	position: relative;
+}
+
 .wsal_notice__wrapper {
 	display: table;
 	width: 100%;
-	position: relative;
 	margin: 12px 0;
 }
 
@@ -291,7 +294,7 @@ div.wsal_notice__wrapper p {
 
 .wsal_notice__btns {
 	display: table-cell;
-	vertical-align: middle;
+	vertical-align: top;
 	width: 235px;
 	text-align: right;
 }
@@ -318,9 +321,14 @@ div.wsal_notice__wrapper p {
 }
 
 .wsal_notice__btns a.wsal_notice__btn_dismiss {
+	display: inline-block;
 	color: #AAA;
-	margin-left: 2px;
+	font-size: 11px;
 	text-decoration: none;
+	padding: 0;
+	position: absolute;
+	right: 14px;
+	bottom: 3px;
 }
 
 .wsal-premium {
