@@ -559,6 +559,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @return boolean
 	 */
 	private function is_woocommerce_user_meta( $meta_key ) {
+		// Check for WordPress user profile keys.
+		if ( false === strpos( $meta_key, 'shipping_' ) || false === strpos( $meta_key, 'billing_' ) ) {
+			return false;
+		}
+
 		// Remove the prefix to avoid redundancy in the meta keys.
 		$address_key = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
 
