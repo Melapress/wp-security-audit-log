@@ -108,7 +108,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	/**
 	 * WC User Meta.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @var array
 	 */
@@ -3163,7 +3163,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	/**
 	 * Get WC User Meta Data before updating.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @param integer $meta_id  - Meta id.
 	 * @param integer $user_id  - User id.
@@ -3183,7 +3183,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	/**
 	 * WC User Meta data updated.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @param integer $meta_id    - Meta id.
 	 * @param integer $user_id    - User id.
@@ -3234,7 +3234,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	/**
 	 * Check if meta key belongs to WooCommerce user meta.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @param string $meta_key - Meta key.
 	 * @return boolean
@@ -3255,7 +3255,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	/**
 	 * Get Meta Key for Event Meta.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @param string $meta_key - Meta key.
 	 * @return string

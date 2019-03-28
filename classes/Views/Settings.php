@@ -78,7 +78,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	/**
 	 * Setup WSAL Settings Page Tabs.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 */
 	public function setup_settings_tabs() {
 		// @codingStandardsIgnoreStart

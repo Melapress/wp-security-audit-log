@@ -78,7 +78,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	/**
 	 * Event Items Meta Array.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @var array
 	 */

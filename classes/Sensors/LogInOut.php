@@ -519,7 +519,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 *
 	 * Current user switched to another user event.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @param int $new_user_id - New user id.
 	 * @param int $old_user_id - Old user id.

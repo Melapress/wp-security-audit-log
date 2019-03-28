@@ -235,7 +235,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 *
 	 * Triggers when a user is granted super admin access.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @param int $user_id - ID of the user that was granted Super Admin privileges.
 	 */
@@ -256,7 +256,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 *
 	 * Triggers when a user is revoked super admin access.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @param int $user_id - ID of the user that was revoked Super Admin privileges.
 	 */
@@ -275,7 +275,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	/**
 	 * Remove BBPress Prefix from User Role.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @param string $user_role - User role.
 	 * @return string

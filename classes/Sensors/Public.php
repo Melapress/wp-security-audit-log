@@ -149,7 +149,7 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	/**
 	 * Trigger generic event.
 	 *
-	 * @since 3.3.2
+	 * @since 3.4
 	 *
 	 * @param integer $comment_id - Comment ID.
 	 * @param integer $alert_code - Event code.
