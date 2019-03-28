@@ -148,7 +148,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		}
 
 		$post_update_events = array( 2000, 2001, 2002, 2016, 2049, 2050, 2073, 2074, 2119, 2120 );
-		if ( ! defined( 'REST_REQUEST' ) && $this->was_triggered( $post_update_events ) ) {
+		if ( ! defined( 'REST_REQUEST' ) && ! isset( $_REQUEST['classic-editor'] ) && $this->was_triggered( $post_update_events ) ) {
 			return;
 		}
 
@@ -1206,7 +1206,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						}
 					}
 
-					if ( ! defined( 'REST_REQUEST' ) ) {
+					if ( ! defined( 'REST_REQUEST' ) && ! isset( $_REQUEST['classic-editor'] ) ) {
 						$post_update_events = array( 2001, 2016, 2017, 2019, 2021, 2025, 2027, 2047, 2048, 2065, 2086, 2111, 2112, 2119, 2120 );
 						if ( $this->was_triggered( $post_update_events ) ) {
 							return;
