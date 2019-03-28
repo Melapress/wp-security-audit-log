@@ -99,116 +99,32 @@ class WSAL_Views_LogInUsers extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Method: Get View.
+	 * Page View.
 	 */
 	public function Render() {
-		?>
-		<div class="wrap-advertising-page-single">
-			<div class="wsal-row">
-				<div class="wsal-col">
-					<div class="icon" style='background-image:url("<?php echo esc_url( $this->_plugin->GetBaseUrl() ); ?>/img/monitoring.jpg");'></div>
-				</div>
-				<!-- /.wsal-col -->
+		$title        = __( 'Real-Time Users Sessions Management', 'wp-security-audit-log' );
+		$description  = __( 'Better manage your users’ logins and sessions. Upgrade to premium and:', 'wp-security-audit-log' );
+		$addon_img    = trailingslashit( WSAL_BASE_URL ) . 'img/' . $this->GetSafeViewName() . '.png';
+		$subtext      = false;
+		$premium_list = array(
+			__( 'See who is logged in to your site', 'wp-security-audit-log' ),
+			__( 'When they logged in and from where', 'wp-security-audit-log' ),
+			__( 'The last change they have done in real-time', 'wp-security-audit-log' ),
+			__( 'Terminate any users’ session with a click of a button', 'wp-security-audit-log' ),
+			__( 'Limit or block multiple sessions for the same user', 'wp-security-audit-log' ),
+			__( 'Get alerted of multiple same user sessions', 'wp-security-audit-log' ),
+		);
+		$screenshots  = array(
+			array(
+				'desc' => __( 'See who is logged in to your WordPress site and multisite network in real-time.', 'wp-security-audit-log' ),
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/users-sessions-management/user_sessions_1.png',
+			),
+			array(
+				'desc' => __( 'Limit, manage and block multiple same user sessions easily.', 'wp-security-audit-log' ),
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/users-sessions-management/user_sessions_2.png',
+			),
+		);
 
-				<div class="wsal-col">
-					<h3><?php esc_html_e( 'Users Login and Management', 'wp-security-audit-log' ); ?></h3>
-					<p>
-						<?php esc_html_e( 'Upgrade to Premium to:', 'wp-security-audit-log' ); ?>
-					</p>
-					<p>
-						<ul class="wsal-features-list">
-							<li><?php esc_html_e( 'See who is logged in to your WordPress website,', 'wp-security-audit-log' ); ?></li>
-							<li><?php esc_html_e( 'When they logged in and from where,', 'wp-security-audit-log' ); ?></li>
-							<li><?php esc_html_e( 'The last change they did on your WordPress website,', 'wp-security-audit-log' ); ?></li>
-							<li><?php esc_html_e( 'Terminate their session with just a click of a button,', 'wp-security-audit-log' ); ?></li>
-							<li><?php esc_html_e( 'Block multiple sessions for the same user,', 'wp-security-audit-log' ); ?></li>
-							<li><?php esc_html_e( 'Get alerted when there are multiple sessions with the same username,', 'wp-security-audit-log' ); ?></li>
-							<li><?php esc_html_e( '& more.', 'wp-security-audit-log' ); ?></li>
-						</ul>
-					</p>
-					<?php
-					// Trial link arguments.
-					$trial_args = array(
-						'page'          => 'wsal-auditlog-pricing',
-						'billing_cycle' => 'annual',
-						'trial'         => 'true',
-					);
-
-					// Buy Now button link.
-					$buy_now        = add_query_arg( 'page', 'wsal-auditlog-pricing', admin_url( 'admin.php' ) );
-					$buy_now_target = '';
-					$trial_link     = add_query_arg( $trial_args, admin_url( 'admin.php' ) );
-
-					// If user is not super admin and website is multisite then change the URL.
-					if ( $this->_plugin->IsMultisite() && ! is_super_admin() ) {
-						$buy_now        = 'https://www.wpsecurityauditlog.com/pricing/';
-						$trial_link     = 'https://www.wpsecurityauditlog.com/pricing/';
-						$buy_now_target = 'target="_blank"';
-					} elseif ( $this->_plugin->IsMultisite() && is_super_admin() ) {
-						$buy_now    = add_query_arg( 'page', 'wsal-auditlog-pricing', network_admin_url( 'admin.php' ) );
-						$trial_link = add_query_arg( $trial_args, network_admin_url( 'admin.php' ) );
-					} elseif ( ! $this->_plugin->IsMultisite() && ! current_user_can( 'manage_options' ) ) {
-						$buy_now        = 'https://www.wpsecurityauditlog.com/pricing/';
-						$trial_link     = 'https://www.wpsecurityauditlog.com/pricing/';
-						$buy_now_target = 'target="_blank"';
-					}
-					?>
-					<p>
-						<a class="button-primary wsal-extension-btn" href="<?php echo esc_attr( $buy_now ); ?>" <?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Upgrade to Premium', 'wp-security-audit-log' ); ?></a>
-						<a class="button-primary wsal-extension-btn" href="<?php echo esc_attr( $trial_link ); ?>" <?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>
-					</p>
-				</div>
-				<!-- /.wsal-col -->
-			</div>
-			<!-- /.wsal-row -->
-
-			<div class="wsal-row">
-				<div class="wsal-col">
-					<p>
-						<?php
-						$more_info = add_query_arg(
-							array(
-								'utm_source'   => 'plugin',
-								'utm_medium'   => 'page',
-								'utm_content'  => 'users+sessions+more+info',
-								'utm_campaign' => 'upgrade+premium',
-							),
-							'https://www.wpsecurityauditlog.com/premium-features/'
-						);
-						echo sprintf(
-							/* Translators: Learn more hyperlink */
-							esc_html__( '%s about all the other premium features and how you can use them to better manage your WordPress site and users.', 'wp-security-audit-log' ),
-							'<a href="' . esc_url( $more_info ) . '" target="_blank">' . esc_html__( 'Learn more', 'wp-security-audit-log' ) . '</a>'
-						);
-						?>
-					</p>
-					<h3><?php esc_html_e( 'Screenshots', 'wp-security-audit-log' ); ?></h3>
-					<p>
-						<ul class="wsal-features-list">
-							<li>
-								<?php esc_html_e( 'See who is logged in to your WordPress website and WordPress multisite network.', 'wp-security-audit-log' ); ?><br />
-								<a class="swipebox" title="<?php esc_attr_e( 'See who is logged in to your WordPress website and WordPress multisite network.', 'wp-security-audit-log' ); ?>"
-									href="<?php echo esc_url( $this->_plugin->GetBaseUrl() ); ?>/img/users-sessions-management/logged_in_users.png">
-									<img width="500" src="<?php echo esc_url( $this->_plugin->GetBaseUrl() ); ?>/img/users-sessions-management/logged_in_users.png">
-								</a>
-							</li>
-							<li>
-								<?php esc_html_e( 'Block multiple sessions for the same user and configure related email notifications.', 'wp-security-audit-log' ); ?><br />
-								<a class="swipebox" title="<?php esc_attr_e( 'Block multiple sessions for the same user and configure related email notifications.', 'wp-security-audit-log' ); ?>"
-									href="<?php echo esc_url( $this->_plugin->GetBaseUrl() ); ?>/img/users-sessions-management/users_session_management_config.png">
-									<img width="500" src="<?php echo esc_url( $this->_plugin->GetBaseUrl() ); ?>/img/users-sessions-management/users_session_management_config.png">
-								</a>
-							</li>
-						</ul>
-					</p>
-					<p>
-						<a class="button-primary wsal-extension-btn" href="<?php echo esc_attr( $buy_now ); ?>" <?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Upgrade to Premium', 'wp-security-audit-log' ); ?></a>
-						<a class="button-primary wsal-extension-btn" href="<?php echo esc_attr( $trial_link ); ?>" <?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>
-					</p>
-				</div>
-			</div>
-			<!-- /.wsal-row -->
-		</div>
-		<?php
+		require_once dirname( __FILE__ ) . '/addons/html-view.php';
 	}
 }
