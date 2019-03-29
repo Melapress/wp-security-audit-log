@@ -5,8 +5,8 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 5.1.0
-Stable tag: 3.3.1.2
+Tested up to: 5.1.1
+Stable tag: 3.4
 Requires PHP: 5.4.43
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -197,18 +197,42 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 Release notes: [Infinite scroll for activity logs & performance enhancement](https://www.wpsecurityauditlog.com/releases/infinite-scroll-performance-improvements-update-3-3-1-1)
 
-= 3.3.1.2 (2019-02-25) =
+Release notes: [Announcing SMS Notifications for the WordPress audit logs](https://www.wpsecurityauditlog.com/releases/update-3-4-sms-notifications-integration/)
 
-Release notes: [Activity Log Coverage of WooCommerce Variable Products](https://www.wpsecurityauditlog.com/releases/support-woocommerce-variable-products)
-* **New Activity Log Events for WooCommerce**
-	* Event ID 9078: Changed the option to include / exclude taxes in product prices.
-	* Event ID 9079: Changed the option on what type of shipping to calculate tax on.
-	* Event ID 9080: Changed the shipping tax class.
-	* Event ID 9081: Enabled / Disabled the rounding of the sub total.
-	* Event ID 9082: Added / Deleted / Modified a shipping zone on WooCommerce. 
+= 3.4 (2019-04-03) =
+
+* **New Features**
+	* [SMS notifications (integration with Twilio)](https://www.wpsecurityauditlog.com/releases/support-woocommerce-variable-products/) for the WordPress audit logs.
+	* Integration with Bit.ly to shorten URL in SMSs.
+	* Added buttons to test email and SMS notifications.
+	* Support for User Switching plugin.
+
+* **New Activity Log Event IDs**
+	* Event ID 1008: user logged in as another user.
+	* Event ID 9083: user changed the billing address (WooCommerce).
+	* Event ID 9084: user changed the shipping address (WooCommerce).
 
 * **Plugin Improvements**
-	* Better handling of plugin activation on multisite - plugin can only be activated from the network dashboard.
+	* Added more pre-configured SMS & email notifications.
+	* Improved all sensors to also detect changes that are not done via the dashboard.
+	* Optimized some metadata database queries (reduced qeuries by 75%).
+	* Improved the content sensor (better detection of content changes).
+	* Optimized the database query that fetches list of logged in users.
+	* Removed email notifications wizard.
+	* Standardized all tabs and titles in the [Emails & SMS Notifications](https://www.wpsecurityauditlog.com/premium-features/email-notifications-wordpress-activity-log/) feature.
+	* Improved the help text in the Emails & SMS Notifications feature.
+	* Removed the limit of 5 criteria in the notifications trigger builder.
+	* Removed declaration of emails' Mime-type - this is automatically set so there is no need for it.
 
 * **Bug Fixes**
-	* Updated Freemius SDK which includes a security fix.
+	* WooCommerce order name was not reported in event ID 9040 (changed order detail) in some edge cases.
+	* Maximum execution time configured in the [WordPress activity log reports](https://www.wpsecurityauditlog.com/premium-features/reports-wordpress-activity-log/) engine now is only used when generating a report.
+	* CSV reports were not being generated.
+	* Audit trail auto refresh was not working when using infinite scroll viewer option.
+	* Plugin reporting event 9032 (disabled use of WooCommerce coupons) by mistake.
+	* Event IDs 2046 and 2051 were not being reported when files were modified via the editors.
+	* Plugin reporting event 2002 when there were changes in a post's Yoast SEO metabox.
+	* Removed all reference to obsolete plugin setting: wsal-archiving-date-e.
+	* Admins on multisite child sites could see the activity logs of other sites.
+	* Event ID 2073 (post submitted for review) was not being reported in Gutenberg.
+	* Event 2074 (scheduled post) was not being reported in Gutenberg.
