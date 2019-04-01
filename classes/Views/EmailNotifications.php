@@ -22,35 +22,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
 
 	/**
-	 * Method: Get View Title.
+	 * Get View Title.
 	 */
 	public function GetTitle() {
 		return __( 'Notifications Add-On', 'wp-security-audit-log' );
 	}
 
 	/**
-	 * Method: Get View Icon.
+	 * Get View Icon.
 	 */
 	public function GetIcon() {
 		return 'dashicons-external';
 	}
 
 	/**
-	 * Method: Get View Name.
+	 * Get View Name.
 	 */
 	public function GetName() {
 		return __( 'Notifications &#8682;', 'wp-security-audit-log' );
 	}
 
 	/**
-	 * Method: Get View Weight.
+	 * Get View Weight.
 	 */
 	public function GetWeight() {
 		return 8;
 	}
 
 	/**
-	 * Method: Get View Header.
+	 * Check if the page title is visible.
+	 *
+	 * @return boolean
+	 */
+	public function is_title_visible() {
+		return false;
+	}
+
+	/**
+	 * Get View Header.
 	 */
 	public function Header() {
 		// Extension Page CSS.
@@ -71,7 +80,7 @@ class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Method: Get View Footer.
+	 * Get View Footer.
 	 */
 	public function Footer() {
 		// jQuery.
