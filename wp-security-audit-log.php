@@ -238,7 +238,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			register_activation_hook( __FILE__, array( $this, 'Install' ) );
 
 			// Listen for init event.
-			add_action( 'init', array( $this, 'init' ) );
+			add_action( 'init', array( $this, 'init' ), 5 );
 
 			// Listen for cleanup event.
 			add_action( 'wsal_cleanup', array( $this, 'CleanUp' ) );

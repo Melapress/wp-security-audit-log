@@ -648,4 +648,4 @@ function wsaldefaults_wsal_init() {
 		load_include_custom_file( $wsal );
 	}
 }
-add_action( 'init', 'wsaldefaults_wsal_init' );
+add_action( 'init', 'wsaldefaults_wsal_init', 5 );
