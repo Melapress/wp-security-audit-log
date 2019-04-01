@@ -50,6 +50,15 @@ class WSAL_Views_Reports extends WSAL_AbstractView {
 	}
 
 	/**
+	 * Check if the page title is visible.
+	 *
+	 * @return boolean
+	 */
+	public function is_title_visible() {
+		return false;
+	}
+
+	/**
 	 * Method: Get View Header.
 	 */
 	public function Header() {
