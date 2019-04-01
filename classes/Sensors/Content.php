@@ -147,15 +147,24 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			return;
 		}
 
-		$post_update_events = array( 2000, 2001, 2002, 2016, 2049, 2050, 2073, 2074, 2119, 2120 );
-		if ( ! defined( 'REST_REQUEST' ) && ! isset( $_REQUEST['classic-editor'] ) && $this->was_triggered( $post_update_events ) ) {
+		/**
+		 * Post Changed.
+		 *
+		 * Don't let the second request for meta update from Gutenberg pass this checkpoint.
+		 *
+		 * Only pass these requests:
+		 *   1. Rest request from Gutenberg.
+		 *   2. Classic editor request.
+		 *   3. Quick edit ajax request.
+		 */
+		if ( ! isset( $_REQUEST['classic-editor'] ) && ! defined( 'REST_REQUEST' ) && ! defined( 'DOING_AJAX' ) ) {
 			return;
 		}
 
 		if ( $update ) {
-			$is_published = $this->check_status_change( $this->_old_post, $post );
+			$status_event = $this->check_status_change( $this->_old_post, $post );
 
-			if ( ! $is_published && 'auto-draft' !== $this->_old_post->post_status ) {
+			if ( 2001 !== $status_event && 'auto-draft' !== $this->_old_post->post_status ) {
 				// Handle update post events.
 				$changes = 0;
 				$changes = $this->check_author_change( $this->_old_post, $post )
@@ -164,6 +173,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				+ $this->check_date_change( $this->_old_post, $post )
 				+ $this->check_permalink_change( $this->_old_link, get_permalink( $post->ID ), $post )
 				+ $this->check_comments_pings( $this->_old_post, $post );
+
+				// If a status change event has occurred, then don't log event 2002 (post modified).
+				$changes = $status_event ? true : $changes;
 				$this->check_modification_change( $post->ID, $this->_old_post, $post, $changes );
 			}
 		} else {
@@ -817,6 +829,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 *
 	 * @param stdClass $oldpost - Old post.
 	 * @param stdClass $newpost - New post.
+	 * @return integer
 	 */
 	protected function check_status_change( $oldpost, $newpost ) {
 		if ( $oldpost->post_status !== $newpost->post_status ) {
@@ -855,11 +868,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				}
 			}
 
-			if ( 2001 === $event ) { // If publishing event then return true.
-				return true;
-			}
-
-			return false;
+			return $event;
 		}
 	}
 
@@ -1203,13 +1212,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					foreach ( $meta_events as $meta_event ) {
 						if ( $this->plugin->alerts->WillOrHasTriggered( $meta_event ) ) {
 							return 0; // Return if any meta event has or will trigger.
-						}
-					}
-
-					if ( ! defined( 'REST_REQUEST' ) && ! isset( $_REQUEST['classic-editor'] ) ) {
-						$post_update_events = array( 2001, 2016, 2017, 2019, 2021, 2025, 2027, 2047, 2048, 2065, 2086, 2111, 2112, 2119, 2120 );
-						if ( $this->was_triggered( $post_update_events ) ) {
-							return;
 						}
 					}
 				}
