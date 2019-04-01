@@ -164,9 +164,9 @@ abstract class WSAL_AbstractView {
 	 * Renders the view title.
 	 */
 	public function RenderTitle() {
-		?>
-		<h2><?php echo esc_html( $this->GetTitle() ); ?></h2>
-		<?php
+		if ( $this->is_title_visible() ) {
+			echo '<h2>' . esc_html( $this->GetTitle() ) . '</h2>';
+		}
 	}
 
 	/**
@@ -197,16 +197,23 @@ abstract class WSAL_AbstractView {
 	}
 
 	/**
+	 * Check if the page title is visible.
+	 *
+	 * @return boolean
+	 */
+	public function is_title_visible() {
+		return true;
+	}
+
+	/**
 	 * Used for rendering stuff into head tag.
 	 */
-	public function Header() {
-	}
+	public function Header() {}
 
 	/**
 	 * Used for rendering stuff in page fotoer.
 	 */
-	public function Footer() {
-	}
+	public function Footer() {}
 
 	/**
 	 * Method: Safe view menu name.
