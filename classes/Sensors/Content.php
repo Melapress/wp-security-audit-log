@@ -156,9 +156,22 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		 *   1. Rest request from Gutenberg.
 		 *   2. Classic editor request.
 		 *   3. Quick edit ajax request.
+		 *
+		 * @since 3.4
 		 */
-		if ( ! isset( $_REQUEST['classic-editor'] ) && ! defined( 'REST_REQUEST' ) && ! defined( 'DOING_AJAX' ) ) {
-			return;
+		if ( ! defined( 'REST_REQUEST' ) && ! defined( 'DOING_AJAX' ) ) {
+			// Either Gutenberg's second post request or classic editor's request.
+			if ( ! isset( $_REQUEST['classic-editor'] ) ) {
+				$editor_replace = get_option( 'classic-editor-replace', 'classic' );
+				$allow_users    = get_option( 'classic-editor-allow-users', 'disallow' );
+
+				// If block editor is selected and users are not allowed to switch editors then it is Gutenberg's second request.
+				if ( 'block' === $editor_replace && 'disallow' === $allow_users ) {
+					return;
+				} elseif ( 'allow' === $allow_users ) { // Else if users are allowed to switch then it is Gutenberg's second request.
+					return;
+				}
+			}
 		}
 
 		if ( $update ) {
@@ -271,7 +284,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$editor_link = $this->get_editor_link( $post );
 
 			$this->plugin->alerts->Trigger(
-				2012, array(
+				2012,
+				array(
 					'PostID'             => $post->ID,
 					'PostType'           => $post->post_type,
 					'PostTitle'          => $post->post_title,
@@ -300,7 +314,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$editor_link = $this->get_editor_link( $post );
 
 			$this->plugin->alerts->Trigger(
-				2014, array(
+				2014,
+				array(
 					'PostID'             => $post->ID,
 					'PostType'           => $post->post_type,
 					'PostTitle'          => $post->post_title,
@@ -326,7 +341,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$editor_link = $this->get_editor_link( $post );
 
 			$this->plugin->alerts->Trigger(
-				2001, array(
+				2001,
+				array(
 					'PostID'             => $post->ID,
 					'PostType'           => $post->post_type,
 					'PostTitle'          => $post->post_title,
@@ -426,7 +442,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$category      = get_category( $category_id );
 		$category_link = $this->get_taxonomy_edit_link( $category_id, 'category' );
 		$this->plugin->alerts->Trigger(
-			2023, array(
+			2023,
+			array(
 				'CategoryName' => $category->name,
 				'Slug'         => $category->slug,
 				'CategoryLink' => $category_link,
@@ -443,7 +460,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$tag      = get_tag( $tag_id );
 		$tag_link = $this->get_taxonomy_edit_link( $tag_id );
 		$this->plugin->alerts->Trigger(
-			2121, array(
+			2121,
+			array(
 				'TagName' => $tag->name,
 				'Slug'    => $tag->slug,
 				'TagLink' => $tag_link,
@@ -461,7 +479,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( 'post_tag' === $taxonomy ) {
 			$tag = get_tag( $term_id );
 			$this->plugin->alerts->Trigger(
-				2122, array(
+				2122,
+				array(
 					'TagID'   => $term_id,
 					'TagName' => $tag->name,
 					'Slug'    => $tag->slug,
@@ -471,7 +490,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$category      = get_category( $term_id );
 			$category_link = $this->get_taxonomy_edit_link( $term_id, $taxonomy );
 			$this->plugin->alerts->Trigger(
-				2024, array(
+				2024,
+				array(
 					'CategoryID'   => $term_id,
 					'CategoryName' => $category->cat_name,
 					'Slug'         => $category->slug,
@@ -509,7 +529,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			// Update if both names are not same.
 			if ( $old_name !== $new_name ) {
 				$this->plugin->alerts->Trigger(
-					2123, array(
+					2123,
+					array(
 						'old_name' => $old_name,
 						'new_name' => $new_name,
 						'TagLink'  => $term_link,
@@ -520,7 +541,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			// Update if both slugs are not same.
 			if ( $old_slug !== $new_slug ) {
 				$this->plugin->alerts->Trigger(
-					2124, array(
+					2124,
+					array(
 						'tag'      => $new_name,
 						'old_slug' => $old_slug,
 						'new_slug' => $new_slug,
@@ -532,7 +554,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			// Update if both descriptions are not same.
 			if ( $old_desc !== $new_desc ) {
 				$this->plugin->alerts->Trigger(
-					2125, array(
+					2125,
+					array(
 						'tag'        => $new_name,
 						'TagLink'    => $term_link,
 						'old_desc'   => $old_desc,
@@ -545,7 +568,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			// Log event if both names are not same.
 			if ( $old_name !== $new_name ) {
 				$this->plugin->alerts->Trigger(
-					2127, array(
+					2127,
+					array(
 						'old_name' => $old_name,
 						'new_name' => $new_name,
 						'cat_link' => $term_link,
@@ -556,7 +580,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			// Log event if both slugs are not same.
 			if ( $old_slug !== $new_slug ) {
 				$this->plugin->alerts->Trigger(
-					2128, array(
+					2128,
+					array(
 						'CategoryName' => $new_name,
 						'old_slug'     => $old_slug,
 						'new_slug'     => $new_slug,
@@ -580,7 +605,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 			if ( $old_parent_name !== $new_parent_name ) {
 				$this->plugin->alerts->Trigger(
-					2052, array(
+					2052,
+					array(
 						'CategoryName' => $new_name,
 						'OldParent'    => $old_parent_name,
 						'NewParent'    => $new_parent_name,
@@ -617,7 +643,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( $old_tmpl !== $new_tmpl ) {
 			$editor_link = $this->get_editor_link( $post );
 			$this->plugin->alerts->Trigger(
-				2048, array(
+				2048,
+				array(
 					'PostID'             => $post->ID,
 					'PostType'           => $post->post_type,
 					'PostTitle'          => $post->post_title,
@@ -808,7 +835,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$new_author  = get_userdata( $newpost->post_author );
 			$new_author  = ( is_object( $new_author ) ) ? $new_author->user_login : 'N/A';
 			$this->plugin->alerts->Trigger(
-				2019, array(
+				2019,
+				array(
 					'PostID'             => $oldpost->ID,
 					'PostType'           => $oldpost->post_type,
 					'PostTitle'          => $oldpost->post_title,
@@ -882,7 +910,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( $oldpost->post_parent !== $newpost->post_parent && 'page' === $newpost->post_type ) {
 			$editor_link = $this->get_editor_link( $oldpost );
 			$this->plugin->alerts->Trigger(
-				2047, array(
+				2047,
+				array(
 					'PostID'             => $oldpost->ID,
 					'PostType'           => $oldpost->post_type,
 					'PostTitle'          => $oldpost->post_title,
@@ -910,7 +939,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( $old_link !== $new_link ) {
 			$editor_link = $this->get_editor_link( $post );
 			$this->plugin->alerts->Trigger(
-				2017, array(
+				2017,
+				array(
 					'PostID'             => $post->ID,
 					'PostType'           => $post->post_type,
 					'PostTitle'          => $post->post_title,
@@ -962,7 +992,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( $old_visibility && $new_visibility && ( $old_visibility !== $new_visibility ) ) {
 			$editor_link = $this->get_editor_link( $oldpost );
 			$this->plugin->alerts->Trigger(
-				2025, array(
+				2025,
+				array(
 					'PostID'             => $oldpost->ID,
 					'PostType'           => $oldpost->post_type,
 					'PostTitle'          => $oldpost->post_title,
@@ -995,7 +1026,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( $from !== $to ) {
 			$editor_link = $this->get_editor_link( $oldpost );
 			$this->plugin->alerts->Trigger(
-				2027, array(
+				2027,
+				array(
 					'PostID'             => $oldpost->ID,
 					'PostType'           => $oldpost->post_type,
 					'PostTitle'          => $oldpost->post_title,
@@ -1033,7 +1065,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			}
 
 			$this->plugin->alerts->Trigger(
-				$event, array(
+				$event,
+				array(
 					'Type'               => $type,
 					'PostID'             => $newpost->ID,
 					'PostType'           => $newpost->post_type,
@@ -1058,7 +1091,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			}
 
 			$this->plugin->alerts->Trigger(
-				$event, array(
+				$event,
+				array(
 					'Type'               => $type,
 					'PostID'             => $newpost->ID,
 					'PostType'           => $newpost->post_type,
@@ -1131,7 +1165,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$editor_link = $this->get_editor_link( $post );
 			$post_status = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
 			$this->plugin->alerts->Trigger(
-				$add_event, array(
+				$add_event,
+				array(
 					'PostID'             => $post->ID,
 					'PostType'           => $post->post_type,
 					'PostStatus'         => $post_status,
@@ -1149,7 +1184,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			$editor_link  = $this->get_editor_link( $post );
 			$post_status  = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
 			$this->plugin->alerts->Trigger(
-				$remove_event, array(
+				$remove_event,
+				array(
 					'PostID'             => $post->ID,
 					'PostType'           => $post->post_type,
 					'PostStatus'         => $post_status,
@@ -1263,7 +1299,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( $oldpost->post_title !== $newpost->post_title ) {
 			$editor_link = $this->get_editor_link( $oldpost );
 			$this->plugin->alerts->Trigger(
-				2086, array(
+				2086,
+				array(
 					'PostID'             => $newpost->ID,
 					'PostType'           => $newpost->post_type,
 					'PostTitle'          => $newpost->post_title,
@@ -1406,7 +1443,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			if ( ! $this->was_triggered( $event ) ) {
 				$editor_link = $this->get_editor_link( $post );
 				$this->plugin->alerts->Trigger(
-					$event, array(
+					$event,
+					array(
 						'PostID'             => $post->ID,
 						'PostType'           => $post->post_type,
 						'PostTitle'          => $post->post_title,
