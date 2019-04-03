@@ -3,7 +3,7 @@ Contributors: WPWhiteSecurity, robert681
 Plugin URI: http://www.wpsecurityauditlog.com
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
-Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
+Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.1.1
 Stable tag: 3.4
@@ -75,11 +75,12 @@ Refer to [WordPress Activity Log Events](https://www.wpsecurityauditlog.com/supp
 * Log off any user with just a click,
 * Generate HTML and CSV reports,
 * Export the activity log in CSV (ideal for integrations),
-* Get instantly notified via email of important changes,
+* Get notified via email of important changes,
+* Get instant SMS message notifications of critical site changes,
 * Search the activity log using text-based searches,
 * Use built-in filters to fine tune the searches,
 * Store activity log in an external database to improve security,
-* Integrate & centralize the WordPress activity log in syslog, Papertrail and other third party log management solutions,
+* Mirror the WordPress activity logs to Slack, Papertrail, Syslog and other central log management and collaboration solutions,
 * Configure archiving and mirroring of logs.
 
 See our [premium features page](https://www.wpsecurityauditlog.com/premium-features/) for more detailed information.
