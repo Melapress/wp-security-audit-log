@@ -143,6 +143,7 @@ We need help translating the plugin and the WordPress Security Alerts. Please vi
 
 * Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
 * German translation by [Mourad Louha](http://excel-translator.de)
+* Brazilian Portuguese translation by [Hudson Santos](https://www.smallbee.com.br/)
 * Spanish translation by the [WP Body team](https://wpbody.com/)
 * French translations by Denis Moscato
 
