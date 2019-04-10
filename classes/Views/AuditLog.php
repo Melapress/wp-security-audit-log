@@ -424,7 +424,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-complete', 'no' )
 			&& 'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' )
 		) :
-		?>
+			?>
 			<div data-remodal-id="wsal-setup-modal">
 				<button data-remodal-action="close" class="remodal-close"></button>
 				<p>
@@ -456,7 +456,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			<?php
 		endif;
 
-		$is_search_view = class_exists( 'WSAL_SearchExtension' ) && ( ! empty( $this->page_args->search_filters ) || ! empty( trim( $this->page_args->search_term ) ) );
+		$is_search_view = class_exists( 'WSAL_SearchExtension' ) && ( ! empty( $this->page_args->search_filters ) || ! empty( $this->page_args->search_term ) );
 		?>
 		<script type="text/javascript">
 			jQuery( document ).ready( function() {
