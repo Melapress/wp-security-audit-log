@@ -1748,7 +1748,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<!-- Exclude Roles -->
 
 				<tr>
-					<th><label for="IpAddrQueryBox"><?php esc_html_e( 'Exclude IP Addresses:', 'wp-security-audit-log' ); ?></label></th>
+					<th><label for="IpAddrQueryBox"><?php esc_html_e( 'Exclude IP Address(es):', 'wp-security-audit-log' ); ?></label></th>
 					<td>
 						<fieldset>
 							<input type="text" id="IpAddrQueryBox" style="width: 250px;">
@@ -1764,6 +1764,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<?php endforeach; ?>
 							</div>
 						</fieldset>
+						<p class="description"><?php esc_html_e( 'You can exclude an individual IP address or a range of IP addresses. To exclude a range use the following format: [first IP]-[last octet of the last IP]. Example: 172.16.180.6-127.', 'wp-security-audit-log' ); ?></p>
 					</td>
 				</tr>
 				<!-- Exclude IP Addresses -->
@@ -1784,8 +1785,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									</span>
 								<?php endforeach; ?>
 							</div>
-							<p class="description"><?php esc_html_e( 'WordPress has the post and page post types by default though your website might use more post types (custom post types). You can exclude all post types, including the default WordPress ones.', 'wp-security-audit-log' ); ?></p>
 						</fieldset>
+						<p class="description"><?php esc_html_e( 'WordPress has the post and page post types by default though your website might use more post types (custom post types). You can exclude all post types, including the default WordPress ones.', 'wp-security-audit-log' ); ?></p>
 					</td>
 				</tr>
 				<!-- Exclude Custom Post Types -->
@@ -1806,8 +1807,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									</span>
 								<?php endforeach; ?>
 							</div>
-							<p class="description"><?php esc_html_e( 'You can use the * wildcard to exclude multiple matching custom fields. For example to exclude all custom fields starting with wp123 enter wp123*', 'wp-security-audit-log' ); ?></p>
 						</fieldset>
+						<p class="description"><?php esc_html_e( 'You can use the * wildcard to exclude multiple matching custom fields. For example to exclude all custom fields starting with wp123 enter wp123*', 'wp-security-audit-log' ); ?></p>
 					</td>
 				</tr>
 				<!-- Exclude Custom Fields -->
@@ -1828,14 +1829,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									</span>
 								<?php endforeach; ?>
 							</div>
-							<p class="description">
-								<?php esc_html_e( 'Add the non existing URLs for which you do not want to be alerted of HTTP 404 errors in the activity log by specifying the complete URL.	Examples below:', 'wp-security-audit-log' ); ?>
-								<br>
-								<?php echo esc_html__( 'File: ', 'wp-security-audit-log' ) . esc_url( home_url() ) . '/subdirectory/file.php'; ?>
-								<br>
-								<?php echo esc_html__( 'Directory: ', 'wp-security-audit-log' ) . esc_url( home_url() ) . '/subdirectory/subdirectory2'; ?>
-							</p>
 						</fieldset>
+						<p class="description"><?php esc_html_e( 'Add the non existing URLs for which you do not want to be alerted of HTTP 404 errors in the activity log by specifying the complete URL.	Examples below:', 'wp-security-audit-log' ); ?><br><?php echo esc_html__( 'File: ', 'wp-security-audit-log' ) . esc_url( home_url() ) . '/subdirectory/file.php'; ?><br><?php echo esc_html__( 'Directory: ', 'wp-security-audit-log' ) . esc_url( home_url() ) . '/subdirectory/subdirectory2'; ?></p>
 					</td>
 				</tr>
 				<!-- Exclude 404 URLs -->
