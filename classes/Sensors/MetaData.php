@@ -559,20 +559,20 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @return boolean
 	 */
 	private function is_woocommerce_user_meta( $meta_key ) {
-		// Check for WordPress user profile keys.
-		if ( false === strpos( $meta_key, 'shipping_' ) || false === strpos( $meta_key, 'billing_' ) ) {
-			return false;
+		// Check for WooCommerce user profile keys.
+		if ( false !== strpos( $meta_key, 'shipping_' ) || false !== strpos( $meta_key, 'billing_' ) ) {
+			// Remove the prefix to avoid redundancy in the meta keys.
+			$address_key = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
+
+			// WC address meta keys without prefix.
+			$meta_keys = array( 'first_name', 'last_name', 'company', 'country', 'address_1', 'address_2', 'city', 'state', 'postcode', 'phone', 'email' );
+
+			if ( in_array( $address_key, $meta_keys, true ) ) {
+				return true;
+			}
 		}
 
-		// Remove the prefix to avoid redundancy in the meta keys.
-		$address_key = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
-
-		// WC address meta keys without prefix.
-		$meta_keys = array( 'first_name', 'last_name', 'company', 'country', 'address_1', 'address_2', 'city', 'state', 'postcode', 'phone', 'email' );
-
-		if ( in_array( $address_key, $meta_keys, true ) ) {
-			return true;
-		}
+		// Meta key does not belong to WooCommerce.
 		return false;
 	}
 }
