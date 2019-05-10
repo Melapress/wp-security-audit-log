@@ -77,6 +77,12 @@ class WSAL_Models_Option extends WSAL_Models_ActiveRecord {
 		// Serialize if $value is array or object.
 		$value              = maybe_serialize( $value );
 		$this->option_value = $value;
+
+		// Replace the value present in the option cache.
+		if ( array_key_exists( $name, $this->option_cache ) ) {
+			$this->option_cache[ $name ]['option_value'] = $value;
+		}
+
 		return $this->Save();
 	}
 
