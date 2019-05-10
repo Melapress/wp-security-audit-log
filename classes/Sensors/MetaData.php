@@ -109,9 +109,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 */
 	public function IsExcludedCustomFields( $custom ) {
 		$custom_fields = $this->plugin->settings->GetExcludedMonitoringCustom();
+
 		if ( in_array( $custom, $custom_fields ) ) {
 			return true;
 		}
+
 		foreach ( $custom_fields as $field ) {
 			if ( false !== strpos( $field, '*' ) ) {
 				// Wildcard str[any_character] when you enter (str*).
@@ -121,6 +123,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 						return true;
 					}
 				}
+
 				// Wildcard [any_character]str when you enter (*str).
 				if ( '*' === substr( $field, 0, 1 ) ) {
 					$field = ltrim( $field, '*' );
@@ -176,7 +179,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		if ( $log_meta_event ) {
 			$editor_link = $this->GetEditorLink( $post );
 			$this->plugin->alerts->Trigger(
-				2053, array(
+				2053,
+				array(
 					'PostID'             => $object_id,
 					'PostTitle'          => $post->post_title,
 					'PostStatus'         => $post->post_status,
@@ -270,7 +274,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			if ( $log_meta_event && $this->old_meta[ $meta_id ]->key !== $meta_key ) {
 				$editor_link = $this->GetEditorLink( $post );
 				$this->plugin->alerts->Trigger(
-					2062, array(
+					2062,
+					array(
 						'PostID'             => $object_id,
 						'PostTitle'          => $post->post_title,
 						'PostStatus'         => $post->post_status,
@@ -288,7 +293,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			} elseif ( $log_meta_event && $this->old_meta[ $meta_id ]->val !== $meta_value ) { // Check change in meta value.
 				$editor_link = $this->GetEditorLink( $post );
 				$this->plugin->alerts->Trigger(
-					2054, array(
+					2054,
+					array(
 						'PostID'             => $object_id,
 						'PostTitle'          => $post->post_title,
 						'PostStatus'         => $post->post_status,
@@ -360,7 +366,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			}
 
 			$this->plugin->alerts->Trigger(
-				2055, array(
+				2055,
+				array(
 					'PostID'             => $object_id,
 					'PostTitle'          => $post->post_title,
 					'PostStatus'         => $post->post_status,
@@ -501,7 +508,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				case 'first_name':
 					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
 						$this->plugin->alerts->Trigger(
-							4017, array(
+							4017,
+							array(
 								'TargetUsername' => $user->user_login,
 								'new_firstname'  => $meta_value,
 								'old_firstname'  => $this->old_meta[ $meta_id ]->val,
@@ -513,7 +521,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				case 'last_name':
 					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
 						$this->plugin->alerts->Trigger(
-							4018, array(
+							4018,
+							array(
 								'TargetUsername' => $user->user_login,
 								'new_lastname'   => $meta_value,
 								'old_lastname'   => $this->old_meta[ $meta_id ]->val,
@@ -525,7 +534,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				case 'nickname':
 					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
 						$this->plugin->alerts->Trigger(
-							4019, array(
+							4019,
+							array(
 								'TargetUsername' => $user->user_login,
 								'new_nickname'   => $meta_value,
 								'old_nickname'   => $this->old_meta[ $meta_id ]->val,
