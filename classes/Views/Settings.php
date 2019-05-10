@@ -93,34 +93,46 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Tab links.
 		$wsal_setting_tabs = array(
 			'general'           => array(
-				'name'   => __( 'General', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'general', $this->GetUrl() ),
-				'render' => array( $this, 'tab_general' ),
-				'save'   => array( $this, 'tab_general_save' ),
+				'name'     => __( 'General', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'general', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_general' ),
+				'save'     => array( $this, 'tab_general_save' ),
+				'priority' => 10,
 			),
 			'audit-log'         => array(
-				'name'   => __( 'Activity Log', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'audit-log', $this->GetUrl() ),
-				'render' => array( $this, 'tab_audit_log' ),
-				'save'   => array( $this, 'tab_audit_log_save' ),
+				'name'     => __( 'Activity Log', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'audit-log', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_audit_log' ),
+				'save'     => array( $this, 'tab_audit_log_save' ),
+				'priority' => 20,
 			),
 			'file-changes'      => array(
-				'name'   => __( 'File Integrity Scan', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'file-changes', $this->GetUrl() ),
-				'render' => array( $this, 'tab_file_changes' ),
-				'save'   => array( $this, 'tab_file_changes_save' ),
+				'name'     => __( 'File Integrity Scan', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'file-changes', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_file_changes' ),
+				'save'     => array( $this, 'tab_file_changes_save' ),
+				'priority' => 30,
 			),
 			'exclude-objects'   => array(
-				'name'   => __( 'Exclude Objects', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'exclude-objects', $this->GetUrl() ),
-				'render' => array( $this, 'tab_exclude_objects' ),
-				'save'   => array( $this, 'tab_exclude_objects_save' ),
+				'name'     => __( 'Exclude Objects', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'exclude-objects', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_exclude_objects' ),
+				'save'     => array( $this, 'tab_exclude_objects_save' ),
+				'priority' => 40,
+			),
+			'import-settings'   => array(
+				'name'     => __( 'Import/Export', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'import-settings', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_import_settings' ),
+				'save'     => array( $this, 'tab_import_settings_save' ),
+				'priority' => 40,
 			),
 			'advanced-settings' => array(
-				'name'   => __( 'Advanced Settings', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'advanced-settings', $this->GetUrl() ),
-				'render' => array( $this, 'tab_advanced_settings' ),
-				'save'   => array( $this, 'tab_advanced_settings_save' ),
+				'name'     => __( 'Advanced Settings', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'advanced-settings', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_advanced_settings' ),
+				'save'     => array( $this, 'tab_advanced_settings_save' ),
+				'priority' => 100,
 			),
 		);
 
@@ -131,16 +143,22 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		 *
 		 * Setting tabs structure:
 		 *     $wsal_setting_tabs['unique-tab-id'] = array(
-		 *         'name'   => Name of the tab,
-		 *         'link'   => Link of the tab,
-		 *         'render' => This function is used to render HTML elements in the tab,
-		 *         'name'   => This function is used to save the related setting of the tab,
+		 *         'name'     => Name of the tab,
+		 *         'link'     => Link of the tab,
+		 *         'render'   => This function is used to render HTML elements in the tab,
+		 *         'name'     => This function is used to save the related setting of the tab,
+		 *         'priority' => Priority of the tab,
 		 *     );
 		 *
 		 * @param array $wsal_setting_tabs – Array of WSAL Setting Tabs.
 		 * @since 3.2.3
 		 */
-		$this->wsal_setting_tabs = apply_filters( 'wsal_setting_tabs', $wsal_setting_tabs );
+		$wsal_setting_tabs = apply_filters( 'wsal_setting_tabs', $wsal_setting_tabs );
+
+		// Sort by priority.
+		array_multisort( array_column( $wsal_setting_tabs, 'priority' ), SORT_ASC, $wsal_setting_tabs );
+
+		$this->wsal_setting_tabs = $wsal_setting_tabs;
 
 		// Get the current tab.
 		$current_tab       = filter_input( INPUT_GET, 'tab', FILTER_SANITIZE_STRING );
