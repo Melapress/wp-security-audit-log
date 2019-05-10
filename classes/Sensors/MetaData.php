@@ -80,6 +80,18 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	protected function CanLogMetaKey( $object_id, $meta_key ) {
 		// Check if excluded meta key or starts with _.
 		if ( '_' === substr( $meta_key, 0, 1 ) ) {
+			/**
+			 * List of hidden keys allowed to log.
+			 *
+			 * @since 3.4.1
+			 */
+			$log_hidden_keys = apply_filters( 'wsal_log_hidden_meta_keys', array() );
+
+			// If the meta key is allowed to log then return true.
+			if ( in_array( $meta_key, $log_hidden_keys, true ) ) {
+				return true;
+			}
+
 			return false;
 		} elseif ( $this->IsExcludedCustomFields( $meta_key ) ) {
 			return false;
