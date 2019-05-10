@@ -44,6 +44,15 @@ abstract class WSAL_Connector_ConnectorFactory {
 	public static $adapter;
 
 	/**
+	 * Occurrence is installed.
+	 *
+	 * @since 3.4.1
+	 *
+	 * @var bool
+	 */
+	private static $is_installed;
+
+	/**
 	 * Returns the a default WPDB connector for saving options
 	 */
 	public static function GetDefaultConnector() {
@@ -85,6 +94,18 @@ abstract class WSAL_Connector_ConnectorFactory {
 	public static function GetConfig() {
 		$conf = new WSAL_Settings( WpSecurityAuditLog::GetInstance() );
 		$type = $conf->GetAdapterConfig( 'adapter-type' );
+
+		if ( $type && wsal_freemius()->is_not_paying() ) {
+			$connector = new WSAL_Connector_MySQLDB();
+
+			if ( ! self::$is_installed ) {
+				self::$is_installed = $connector->isInstalled();
+				$connector->installAll();
+			}
+
+			$type = null;
+		}
+
 		if ( empty( $type ) ) {
 			return null;
 		} else {
