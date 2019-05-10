@@ -553,6 +553,16 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			return;
 		}
 
+		// Ignore if the request is coming from post editor.
+		if ( isset( $_REQUEST['_wp_http_referer'] ) ) { // phpcs:ignore
+			$referrer   = esc_url_raw( wp_unslash( $_REQUEST['_wp_http_referer'] ) ); // phpcs:ignore
+			$parsed_url = wp_parse_url( $referrer );
+
+			if ( isset( $parsed_url['path'] ) && 'post' === basename( $parsed_url['path'], '.php' ) ) {
+				return;
+			}
+		}
+
 		// Filter $_REQUEST array for security.
 		$get_array  = filter_input_array( INPUT_GET );
 		$post_array = filter_input_array( INPUT_POST );
