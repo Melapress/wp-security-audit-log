@@ -423,6 +423,7 @@ function wsal_dismiss_advert(element) {
  */
 function wsalLoadEvents( pageNumber ) {
 	jQuery( '#wsal-event-loader' ).show( 'fast' );
+
 	jQuery.ajax( {
 		type:'POST',
 		url: ajaxurl,
@@ -439,6 +440,7 @@ function wsalLoadEvents( pageNumber ) {
 		},
 		success: function( html ) {
 			jQuery( '#wsal-event-loader' ).hide( '1000' );
+
 			if ( html ) {
 				wsalLoadEventsResponse = true;
 				jQuery( '#audit-log-viewer #the-list' ).append( html ); // This will be the div where our content will be loaded.
@@ -453,9 +455,11 @@ function wsalLoadEvents( pageNumber ) {
 			console.log( error );
 		}
 	});
+
 	if ( wsalLoadEventsResponse ) {
 		return pageNumber + 1;
 	}
+
 	return 0;
 }
 var wsalLoadEventsResponse = true; // Global variable to check events loading response.
@@ -493,7 +497,8 @@ jQuery( document ).ready( function() {
 	if ( wsalAuditLogArgs.infiniteScroll ) {
 		var count = 2;
 		jQuery( window ).scroll( function() {
-			if ( jQuery( window ).scrollTop() === jQuery( document ).height() - jQuery( window ).height() ) {
+			var scrollToTop = Math.round( jQuery( window ).scrollTop() );
+			if ( scrollToTop === ( jQuery( document ).height() - jQuery( window ).height() ) ) {
 				if ( 0 !== count ) {
 					count = wsalLoadEvents( count );
 				}
