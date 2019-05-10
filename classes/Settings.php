@@ -1422,6 +1422,15 @@ class WSAL_Settings {
 			return 'urls';
 		}
 
+		// Check for IP range.
+		if ( strpos( $token, '-' ) !== false ) {
+			$ip_range = $this->get_ipv4_by_range( $token );
+
+			if ( $ip_range && filter_var( $ip_range->lower, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) && filter_var( $ip_range->upper, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) { // Validate IPv4.
+				return 'ip';
+			}
+		}
+
 		// Check if the token matches an IP address.
 		if (
 			filter_var( $token, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) // Validate IPv4.
