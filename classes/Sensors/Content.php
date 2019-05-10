@@ -161,7 +161,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		 */
 		if ( ! defined( 'REST_REQUEST' ) && ! defined( 'DOING_AJAX' ) ) {
 			// Either Gutenberg's second post request or classic editor's request.
-			if ( ! isset( $_REQUEST['classic-editor'] ) ) {
+			if ( ! isset( $_REQUEST['classic-editor'] ) ) { // phpcs:ignore
 				$editor_replace = get_option( 'classic-editor-replace', 'classic' );
 				$allow_users    = get_option( 'classic-editor-allow-users', 'disallow' );
 
@@ -1019,7 +1019,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$from = strtotime( $oldpost->post_date );
 		$to   = strtotime( $newpost->post_date );
 
-		if ( 'draft' === $oldpost->post_status || 'pending' === $oldpost->post_status ) {
+		if ( 'pending' === $oldpost->post_status ) {
 			return 0;
 		}
 
@@ -1353,13 +1353,15 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	public function must_not_contain_events( WSAL_AlertManager $manager ) {
 		if ( $manager->WillOrHasTriggered( 2016 ) ) {
 			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2119 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2120 ) ) {
+		} elseif ( $manager->WillOrHasTriggered( 2048 ) ) {
 			return false;
 		} elseif ( $manager->WillOrHasTriggered( 2049 ) ) {
 			return false;
 		} elseif ( $manager->WillOrHasTriggered( 2050 ) ) {
+			return false;
+		} elseif ( $manager->WillOrHasTriggered( 2119 ) ) {
+			return false;
+		} elseif ( $manager->WillOrHasTriggered( 2120 ) ) {
 			return false;
 		}
 		return true;
@@ -1433,11 +1435,22 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$current_path = isset( $_SERVER['SCRIPT_NAME'] ) ? esc_url_raw( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) . '?post=' . $post->ID : false;
 		$referrer     = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : false;
 
-		if ( ! empty( $referrer )
-			&& strpos( $referrer, $current_path ) !== false ) {
+		// Check referrer URL.
+		if ( ! empty( $referrer ) ) {
+			// Parse the referrer.
+			$parsed_url = wp_parse_url( $referrer );
+
+			// If the referrer is post-new then we can ignore this one.
+			if ( isset( $parsed_url['path'] ) && 'post-new' === basename( $parsed_url['path'], '.php' ) ) {
+				return $post;
+			}
+		}
+
+		if ( ! empty( $referrer ) && strpos( $referrer, $current_path ) !== false ) {
 			// Ignore this if we were on the same page so we avoid double audit entries.
 			return $post;
 		}
+
 		if ( ! empty( $post->post_title ) ) {
 			$event = 2100;
 			if ( ! $this->was_triggered( $event ) ) {
