@@ -389,6 +389,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			}
 		}
 
+		if ( isset( $_POST['import'] ) ) {
+			call_user_func( $this->wsal_setting_tabs[ $this->current_tab ]['save'] );
+		}
+
 		if ( isset( $_GET['pruning'] ) && '1' === $_GET['pruning'] ) {
 			?>
 			<div class="updated">
@@ -405,19 +409,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		?>
 		<nav id="wsal-tabs" class="nav-tab-wrapper">
 			<?php foreach ( $this->wsal_setting_tabs as $tab_id => $tab ) : ?>
-				<?php if ( empty( $this->current_tab ) ) : ?>
-					<a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( 'general' === $tab_id ) ? 'nav-tab-active' : false; ?>">
-						<?php echo esc_html( $tab['name'] ); ?>
-					</a>
-				<?php else : ?>
-					<a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( $tab_id === $this->current_tab ) ? 'nav-tab-active' : false; ?>">
-						<?php echo esc_html( $tab['name'] ); ?>
-					</a>
-				<?php endif; ?>
+				<a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( $tab_id === $this->current_tab ) ? 'nav-tab-active' : false; ?>">
+					<?php echo esc_html( $tab['name'] ); ?>
+				</a>
 			<?php endforeach; ?>
 		</nav>
 
-		<form id="audit-log-settings" method="post">
+		<form id="audit-log-settings" method="post"<?php echo 'import-settings' === $this->current_tab ? ' enctype="multipart/form-data"' : false; ?>>
 			<input type="hidden" name="page" value="<?php echo isset( $_GET['page'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; ?>" />
 			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr( admin_url( 'admin-ajax.php' ) ); ?>" />
 			<?php wp_nonce_field( 'wsal-settings' ); ?>
@@ -436,7 +434,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			<?php
 			if ( 'sms-provider' === $this->current_tab && $section && 'test' === $section ) {
 				submit_button( __( 'Send Message', 'wp-security-audit-log' ) );
-			} else {
+			} elseif ( 'import-settings' !== $this->current_tab ) {
 				submit_button();
 			}
 			?>
@@ -1871,6 +1869,139 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetExcludedMonitoringIP( isset( $post_array['IpAddrs'] ) ? $post_array['IpAddrs'] : array() );
 		$this->_plugin->settings->set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
 		$this->_plugin->settings->set_excluded_urls( isset( $post_array['ExURLss'] ) ? $post_array['ExURLss'] : array() );
+	}
+
+	/**
+	 * Tab: `Import/Export`
+	 */
+	private function tab_import_settings() {
+		$blogname  = str_replace( ' ', '', get_option( 'blogname' ) );
+		$date      = date( 'm-d-Y' );
+		$json_name = $blogname . '-' . $date; // Export file name.
+
+		/* Translators: Export settings */
+		$description = __( 'When you click %s button, system will generate a JSON file for you to save on your computer. This backup file contains all WSAL options on your website. Note that it do NOT contain posts, pages, or any relevant data, just your all options. After exporting, you can either use the backup file to restore your settings on this site again or another WordPress site.', 'wp-security-audit-log' );
+		?>
+		<p class="description"><?php echo sprintf( esc_html( $description ), '<strong>' . esc_html__( 'Export Settings', 'wp-security-audit-log' ) . '</strong>' ); ?></p>
+
+		<h3><?php esc_html_e( 'Export Settings', 'wp-security-audit-log' ); ?></h3>
+		<table class="form-table wsal-tab">
+			<tbody>
+				<tr>
+					<th><label><?php esc_html_e( 'Export Settings', 'wp-security-audit-log' ); ?></label></th>
+					<td>
+						<fieldset>
+							<?php
+							$export_options = array();
+
+							$options = $this->_plugin->settings->get_wsal_options();
+
+							$ignored_options = array( 'site_content', 'local_files_0', 'local_files_1', 'local_files_2', 'local_files_3', 'local_files_4', 'local_files_5', 'local_files_6', 'is_initial_scan_0', 'is_initial_scan_1', 'is_initial_scan_2', 'is_initial_scan_3', 'is_initial_scan_4', 'is_initial_scan_5', 'is_initial_scan_6' );
+
+							foreach ( $options as $option ) {
+								$option_name = str_replace( 'wsal-', '', $option->option_name );
+
+								if ( in_array( $option_name, $ignored_options, true ) ) {
+									continue;
+								}
+
+								$export_options[ $option_name ] = $option->option_value;
+							}
+
+							$json_file = wp_json_encode( $export_options );
+							?>
+							<input type="hidden" value="<?php echo esc_attr( $json_file ); ?>">
+							<button type="button" name="export" id="wsal-export-options" class="button"><?php esc_html_e( 'Export Settings', 'wp-security-audit-log' ); ?></button>
+						</fieldset>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<!-- Export Settings -->
+
+		<h3><?php esc_html_e( 'Import Settings', 'wp-security-audit-log' ); ?></h3>
+		<table class="form-table wsal-tab">
+			<tbody>
+				<tr>
+					<th><label><?php esc_html_e( 'Import Settings', 'wp-security-audit-log' ); ?></label></th>
+					<td>
+						<fieldset>
+							<input type="file" name="import-settings" accept="application/json">
+							<p><button type="submit" name="import" class="button"><?php esc_html_e( 'Import Settings', 'wp-security-audit-log' ); ?></button></p>
+						</fieldset>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<!-- Import Settings -->
+
+		<script>
+			/**
+			 * Create and download a temporary file.
+			 *
+			 * @param {string} filename - File name.
+			 * @param {string} text - File content.
+			 */
+			function download(filename, text) {
+				// Create temporary element.
+				var element = document.createElement('a');
+				element.setAttribute('href', 'data:application/json;charset=<?php echo esc_html( get_option( 'blog_charset' ) ); ?>,' + encodeURIComponent(text));
+				element.setAttribute('download', filename);
+
+				// Set the element to not display.
+				element.style.display = 'none';
+				document.body.appendChild(element);
+
+				// Simlate click on the element.
+				element.click();
+
+				// Remove temporary element.
+				document.body.removeChild(element);
+			}
+
+			jQuery( document ).ready( function() {
+				var export_btn = jQuery( '#wsal-export-options' );
+				export_btn.click( function( event ) {
+					event.preventDefault();
+					download( '<?php echo esc_html( $json_name ); ?>', jQuery( this ).parent().find( 'input' ).val() );
+				} );
+			} );
+		</script>
+		<?php
+	}
+
+	/**
+	 * Save: `Import/Export`
+	 */
+	private function tab_import_settings_save() {
+		if ( isset( $_FILES['import-settings'] ) ) {
+			if ( 0 === $_FILES['import-settings']['error'] ) {
+				$filename  = isset( $_FILES['import-settings']['name'] ) ? sanitize_text_field( wp_unslash( $_FILES['import-settings']['name'] ) ) : false;
+				$file_type = isset( $_FILES['import-settings']['type'] ) ? sanitize_text_field( wp_unslash( $_FILES['import-settings']['type'] ) ) : false;
+				$file_size = isset( $_FILES['import-settings']['size'] ) ? (int) sanitize_text_field( wp_unslash( $_FILES['import-settings']['size'] ) ) : false;
+
+				if ( 'application/json' === $file_type && $file_size < 500000 ) {
+					$encoded_options = isset( $_FILES['import-settings']['tmp_name'] ) ? file_get_contents( sanitize_text_field( wp_unslash( $_FILES['import-settings']['tmp_name'] ) ) ) : false; // phpcs:ignore
+					$options         = json_decode( $encoded_options );
+
+					if ( $options ) {
+						foreach ( $options as $key => $value ) {
+							if ( ! $this->_plugin->GetGlobalOption( $key, false ) ) {
+								$this->_plugin->SetGlobalOption( $key, maybe_unserialize( $value ) );
+							}
+						}
+
+						echo '<div class="notice notice-success"><p>' . esc_html__( 'All options are restored successfully.', 'wp-security-audit-log' ) . '</p></div>';
+					} else {
+						echo '<div class="notice notice-error"><p>' . esc_html__( 'No options found to import.', 'wp-security-audit-log' ) . '</p></div>';
+					}
+				} else {
+					echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid file or file size is too large.', 'wp-security-audit-log' ) . '</p></div>';
+				}
+			} else {
+				echo '<div class="notice notice-error"><p>' . esc_html__( 'Error occurred while uploading the file.', 'wp-security-audit-log' ) . '</p></div>';
+			}
+		}
 	}
 
 	/**
