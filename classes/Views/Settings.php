@@ -213,11 +213,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Method: Load saved settings of this view.
 	 */
 	public function load_file_changes_settings() {
-		if ( ! is_multisite() ) {
-			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads' );
-		} else {
-			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads', 'wp-content/uploads/sites' );
-		}
+		$default_scan_dirs = array_keys( $this->_plugin->settings->get_server_directories( 'display' ) );
 
 		// Load saved settings of this view.
 		$this->scan_settings = array(
@@ -1464,24 +1460,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<label for="wsal-scan-directories"><?php esc_html_e( 'Directories to scan', 'wp-security-audit-log' ); ?></label>
 					</th>
 					<td>
-						<?php
-						// WP Directories.
-						$wp_directories = array(
-							'root'               => __( 'Root directory of WordPress (excluding sub directories)', 'wp-security-audit-log' ),
-							'wp-admin'           => __( 'WP Admin directory (/wp-admin/)', 'wp-security-audit-log' ),
-							'wp-includes'        => __( 'WP Includes directory (/wp-includes/)', 'wp-security-audit-log' ),
-							'wp-content'         => __( '/wp-content/ directory (excluding plugins, themes & uploads directories)', 'wp-security-audit-log' ),
-							'wp-content/themes'  => __( 'Themes directory (/wp-content/themes/)', 'wp-security-audit-log' ),
-							'wp-content/plugins' => __( 'Plugins directory (/wp-content/plugins/)', 'wp-security-audit-log' ),
-							'wp-content/uploads' => __( 'Uploads directory (/wp-content/uploads/)', 'wp-security-audit-log' ),
-						);
-
-						// Check if multisite.
-						if ( is_multisite() ) {
-							// Upload directories of subsites.
-							$wp_directories['wp-content/uploads/sites'] = __( 'Uploads directory of all sub sites on this network (/wp-content/sites/*)', 'wp-security-audit-log' );
-						}
-						?>
+						<?php $wp_directories = $this->_plugin->settings->get_server_directories( 'display' ); ?>
 						<fieldset id="wsal-scan-directories">
 							<?php foreach ( $wp_directories as $value => $html ) : ?>
 								<label>
@@ -2644,7 +2623,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					if ( 0 === $dir ) {
 						// Scan started alert.
 						$this->_plugin->alerts->Trigger(
-							6033, array(
+							6033,
+							array(
 								'CurrentUserID' => '0',
 								'ScanStatus'    => 'started',
 							)
@@ -2652,7 +2632,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					} elseif ( 6 === $dir ) {
 						// Scan stopped.
 						$this->_plugin->alerts->Trigger(
-							6033, array(
+							6033,
+							array(
 								'CurrentUserID' => '0',
 								'ScanStatus'    => 'stopped',
 							)
