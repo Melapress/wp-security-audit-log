@@ -1959,4 +1959,50 @@ class WSAL_Settings {
 	public function set_events_type_nav( $nav_type ) {
 		$this->_plugin->SetGlobalOption( 'events-nav-type', $nav_type );
 	}
+
+	/**
+	 * Query WSAL Options from DB.
+	 *
+	 * @return array - WSAL Options array.
+	 */
+	public function get_wsal_options() {
+		// Get options transient.
+		$wsal_options = get_transient( 'wsal_options' );
+
+		// If options transient is not set then query and set options.
+		if ( false === $wsal_options ) {
+			// Get raw options from DB.
+			$raw_options = $this->query_wsal_options();
+
+			if ( ! empty( $raw_options ) && is_array( $raw_options ) ) {
+				foreach ( $raw_options as $option ) {
+					if ( ! empty( $option->option_value ) ) {
+						$wsal_options[] = $option;
+					}
+				}
+			}
+
+			// Store the results in a transient.
+			set_transient( 'wsal_options', $wsal_options, DAY_IN_SECONDS );
+		}
+
+		return $wsal_options;
+	}
+
+	/**
+	 * Query WSAL Options from DB.
+	 *
+	 * @return array - Array of options.
+	 */
+	public function query_wsal_options() {
+		// Query WSAL options.
+		global $wpdb;
+
+		// Set table name.
+		$options_table = $wpdb->prefix . 'wsal_options';
+
+		// Query the options.
+		return $wpdb->get_results( "SELECT * FROM $options_table" ); // phpcs:ignore
+	}
+
 }
