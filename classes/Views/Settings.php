@@ -1857,12 +1857,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$blogname  = str_replace( ' ', '', get_option( 'blogname' ) );
 		$date      = date( 'm-d-Y' );
 		$json_name = $blogname . '-' . $date; // Export file name.
-
-		/* Translators: Export settings */
-		$description = __( 'When you click %s button, system will generate a JSON file for you to save on your computer. This backup file contains all WSAL options on your website. Note that it do NOT contain posts, pages, or any relevant data, just your all options. After exporting, you can either use the backup file to restore your settings on this site again or another WordPress site.', 'wp-security-audit-log' );
 		?>
-		<p class="description"><?php echo sprintf( esc_html( $description ), '<strong>' . esc_html__( 'Export Settings', 'wp-security-audit-log' ) . '</strong>' ); ?></p>
-
+		<p class="description"><?php esc_html_e( 'You can export and import the plugin settings from here, which can also be used as a plugin configuration backup. The plugin settings are exported to a JSON file.', 'wp-security-audit-log' ); ?></p>
 		<h3><?php esc_html_e( 'Export Settings', 'wp-security-audit-log' ); ?></h3>
 		<table class="form-table wsal-tab">
 			<tbody>
@@ -1890,14 +1886,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							$json_file = wp_json_encode( $export_options );
 							?>
 							<input type="hidden" value="<?php echo esc_attr( $json_file ); ?>">
-							<button type="button" name="export" id="wsal-export-options" class="button"><?php esc_html_e( 'Export Settings', 'wp-security-audit-log' ); ?></button>
+							<button type="button" name="export" id="wsal-export-options" class="button-primary"><?php esc_html_e( 'Export Settings', 'wp-security-audit-log' ); ?></button>
 						</fieldset>
 					</td>
 				</tr>
 			</tbody>
 		</table>
 		<!-- Export Settings -->
-
 		<h3><?php esc_html_e( 'Import Settings', 'wp-security-audit-log' ); ?></h3>
 		<table class="form-table wsal-tab">
 			<tbody>
@@ -1905,15 +1900,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<th><label><?php esc_html_e( 'Import Settings', 'wp-security-audit-log' ); ?></label></th>
 					<td>
 						<fieldset>
-							<input type="file" name="import-settings" accept="application/json">
-							<p><button type="submit" name="import" class="button"><?php esc_html_e( 'Import Settings', 'wp-security-audit-log' ); ?></button></p>
+							<input type="file" name="import-settings" id="wsal-import-settings" accept="application/json">
+							<p><button type="submit" name="import" id="wsal-import-settings-btn" class="button-primary button-disabled" disabled><?php esc_html_e( 'Import Settings', 'wp-security-audit-log' ); ?></button></p>
 						</fieldset>
 					</td>
 				</tr>
 			</tbody>
 		</table>
 		<!-- Import Settings -->
-
 		<script>
 			/**
 			 * Create and download a temporary file.
@@ -1939,10 +1933,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			}
 
 			jQuery( document ).ready( function() {
-				var export_btn = jQuery( '#wsal-export-options' );
-				export_btn.click( function( event ) {
+				jQuery( '#wsal-export-options' ).click( function( event ) {
 					event.preventDefault();
 					download( '<?php echo esc_html( $json_name ); ?>', jQuery( this ).parent().find( 'input' ).val() );
+				} );
+
+				jQuery( '#wsal-import-settings' ).change( function() {
+					jQuery( '#wsal-import-settings-btn' ).removeAttr( 'disabled' );
+					jQuery( '#wsal-import-settings-btn' ).removeClass( 'button-disabled' );
 				} );
 			} );
 		</script>
@@ -1965,14 +1963,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 					if ( $options ) {
 						foreach ( $options as $key => $value ) {
-							if ( ! $this->_plugin->GetGlobalOption( $key, false ) ) {
-								$this->_plugin->SetGlobalOption( $key, maybe_unserialize( $value ) );
-							}
+							$value = maybe_unserialize( sanitize_text_field( $value ) );
+							$this->_plugin->SetGlobalOption( $key, $value );
 						}
 
-						echo '<div class="notice notice-success"><p>' . esc_html__( 'All options are restored successfully.', 'wp-security-audit-log' ) . '</p></div>';
+						echo '<div class="notice notice-success"><p>' . esc_html__( 'The plugin settings have been imported successfully.', 'wp-security-audit-log' ) . '</p></div>';
 					} else {
-						echo '<div class="notice notice-error"><p>' . esc_html__( 'No options found to import.', 'wp-security-audit-log' ) . '</p></div>';
+						echo '<div class="notice notice-error"><p>' . esc_html__( 'No settings found to import.', 'wp-security-audit-log' ) . '</p></div>';
 					}
 				} else {
 					echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid file or file size is too large.', 'wp-security-audit-log' ) . '</p></div>';
