@@ -266,8 +266,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$result['empty'] = true;
 			return $result;
 		}
-		$sql         = 'SELECT * FROM ' . $occurrence->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
-		$occurrences = $wpdb->get_results( $sql, ARRAY_A );
+		$sql             = 'SELECT * FROM ' . $occurrence->GetWPTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+		$occurrences     = $wpdb->get_results( $sql, ARRAY_A );
+		$result['count'] = count( $occurrences );
 
 		// Insert data to External DB.
 		if ( ! empty( $occurrences ) ) {
@@ -308,8 +309,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$result['empty'] = true;
 			return $result;
 		}
-		$sql         = 'SELECT * FROM ' . $occurrence->GetTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
-		$occurrences = $_wpdb->get_results( $sql, ARRAY_A );
+		$sql             = 'SELECT * FROM ' . $occurrence->GetTable() . ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+		$occurrences     = $_wpdb->get_results( $sql, ARRAY_A );
+		$result['count'] = count( $occurrences );
 
 		// Insert data to WP.
 		if ( ! empty( $occurrences ) ) {
