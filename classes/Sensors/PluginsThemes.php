@@ -201,7 +201,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 			$plugin_path = plugin_dir_path( WP_PLUGIN_DIR . '/' . $plugin_path[0] );
 			$this->plugin->alerts->Trigger(
-				5000, array(
+				5000,
+				array(
 					'Plugin' => (object) array(
 						'Name'            => $plugin['Name'],
 						'PluginURI'       => $plugin['PluginURI'],
@@ -237,7 +238,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
 					$this->plugin->alerts->Trigger(
-						5001, array(
+						5001,
+						array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
 								'Name'      => $plugin_data['Name'],
@@ -254,7 +256,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
 					$this->plugin->alerts->Trigger(
-						5001, array(
+						5001,
+						array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
 								'Name'      => $plugin_data['Name'],
@@ -292,7 +295,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
 					$this->plugin->alerts->Trigger(
-						5002, array(
+						5002,
+						array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
 								'Name'      => $plugin_data['Name'],
@@ -309,7 +313,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
 					$this->plugin->alerts->Trigger(
-						5002, array(
+						5002,
+						array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
 								'Name'      => $plugin_data['Name'],
@@ -338,7 +343,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_name = ucwords( $plugin_name );
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$this->plugin->alerts->Trigger(
-						5003, array(
+						5003,
+						array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
 								'Name' => $plugin_name,
@@ -357,7 +363,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
 				$plugin_name = ucwords( $plugin_name );
 				$this->plugin->alerts->Trigger(
-					5003, array(
+					5003,
+					array(
 						'PluginFile' => $plugin_file,
 						'PluginData' => (object) array(
 							'Name' => $plugin_name,
@@ -404,7 +411,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
 					$this->plugin->alerts->Trigger(
-						5004, array(
+						5004,
+						array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
 								'Name'      => $plugin_data['Name'],
@@ -441,7 +449,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				foreach ( $themes as $theme_name ) {
 					$theme = wp_get_theme( $theme_name );
 					$this->plugin->alerts->Trigger(
-						5031, array(
+						5031,
+						array(
 							'Theme' => (object) array(
 								'Name'                   => $theme->Name,
 								'ThemeURI'               => $theme->ThemeURI,
@@ -464,7 +473,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			$themes = array_diff( wp_get_themes(), $this->old_themes );
 			foreach ( $themes as $name => $theme ) {
 				$this->plugin->alerts->Trigger(
-					5005, array(
+					5005,
+					array(
 						'Theme' => (object) array(
 							'Name'                   => $theme->Name,
 							'ThemeURI'               => $theme->ThemeURI,
@@ -484,7 +494,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		if ( in_array( $action, array( 'delete-theme' ) ) && current_user_can( 'install_themes' ) ) {
 			foreach ( $this->GetRemovedThemes() as $index => $theme ) {
 				$this->plugin->alerts->Trigger(
-					5007, array(
+					5007,
+					array(
 						'Theme' => (object) array(
 							'Name'                   => $theme->Name,
 							'ThemeURI'               => $theme->ThemeURI,
@@ -529,7 +540,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			return;
 		}
 		$this->plugin->alerts->Trigger(
-			5006, array(
+			5006,
+			array(
 				'Theme' => (object) array(
 					'Name'                   => $theme->Name,
 					'ThemeURI'               => $theme->ThemeURI,
@@ -551,6 +563,16 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	public function EventPluginPostCreate( $post_id, $post ) {
 		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 			return;
+		}
+
+		// Ignore if the request is coming from post editor.
+		if ( isset( $_REQUEST['_wp_http_referer'] ) ) { // phpcs:ignore
+			$referrer   = esc_url_raw( wp_unslash( $_REQUEST['_wp_http_referer'] ) ); // phpcs:ignore
+			$parsed_url = wp_parse_url( $referrer );
+
+			if ( isset( $parsed_url['path'] ) && 'post' === basename( $parsed_url['path'], '.php' ) ) {
+				return;
+			}
 		}
 
 		// Filter $_REQUEST array for security.
@@ -575,7 +597,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				// If the plugin modify the post.
 				if ( false !== strpos( $get_array['action'], 'edit' ) ) {
 					$this->plugin->alerts->Trigger(
-						2106, array(
+						2106,
+						array(
 							'PostID'             => $post->ID,
 							'PostType'           => $post->post_type,
 							'PostTitle'          => $post->post_title,
@@ -586,7 +609,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					);
 				} else {
 					$this->plugin->alerts->Trigger(
-						5019, array(
+						5019,
+						array(
 							'PostID'             => $post->ID,
 							'PostType'           => $post->post_type,
 							'PostTitle'          => $post->post_title,
@@ -607,7 +631,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				if ( false !== strpos( $post_array['action'], 'edit' ) ) {
 					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
-						2106, array(
+						2106,
+						array(
 							'PostID'             => $post->ID,
 							'PostType'           => $post->post_type,
 							'PostTitle'          => $post->post_title,
@@ -626,7 +651,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				} else {
 					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
-						5019, array(
+						5019,
+						array(
 							'PostID'             => $post->ID,
 							'PostType'           => $post->post_type,
 							'PostTitle'          => $post->post_title,
@@ -654,7 +680,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true )
 				|| ! empty( $post->post_title ) ) {
 				$this->plugin->alerts->Trigger(
-					5025, array(
+					5025,
+					array(
 						'PostID'    => $post->ID,
 						'PostType'  => $post->post_type,
 						'PostTitle' => $post->post_title,
@@ -669,7 +696,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true )
 				|| ! empty( $post->post_title ) ) {
 				$this->plugin->alerts->Trigger(
-					5025, array(
+					5025,
+					array(
 						'PostID'    => $post->ID,
 						'PostType'  => $post->post_type,
 						'PostTitle' => $post->post_title,
@@ -720,7 +748,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				// Check if theme exists.
 				if ( $theme_obj->exists() ) {
 					$this->plugin->alerts->Trigger(
-						5005, array(
+						5005,
+						array(
 							'Theme' => (object) array(
 								'Name'                   => $theme_obj->Name,
 								'ThemeURI'               => $theme_obj->ThemeURI,
@@ -749,7 +778,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 				$plugin_path = plugin_dir_path( WP_PLUGIN_DIR . '/' . $plugin_slug );
 				$this->plugin->alerts->Trigger(
-					5000, array(
+					5000,
+					array(
 						'Plugin' => (object) array(
 							'Name'            => $plugin['Name'],
 							'PluginURI'       => $plugin['PluginURI'],
@@ -798,7 +828,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 			if ( ! empty( $plugin_filename ) && in_array( $plugin_filename, $wp_plugins, true ) ) {
 				$this->plugin->alerts->Trigger(
-					5003, array(
+					5003,
+					array(
 						'PluginFile' => $plugin_filename,
 						'PluginData' => (object) array(
 							'Name' => $plugin_name,
@@ -851,7 +882,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				foreach ( $themes as $index => $theme ) {
 					if ( ! empty( $theme ) && $theme instanceof WP_Theme && in_array( $theme->Name, $wp_themes, true ) ) {
 						$this->plugin->alerts->Trigger(
-							5007, array(
+							5007,
+							array(
 								'Theme' => (object) array(
 									'Name'        => $theme->Name,
 									'ThemeURI'    => $theme->ThemeURI,
@@ -911,7 +943,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			$plugin      = WP_PLUGIN_DIR . '/' . $plugin;
 			$plugin_data = get_plugin_data( $plugin, false, true );
 			$this->plugin->alerts->Trigger(
-				$event, array(
+				$event,
+				array(
 					'PluginFile' => $plugin,
 					'PluginData' => (object) array(
 						'Name'      => $plugin_data['Name'],
@@ -932,7 +965,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			$plugin      = WP_PLUGIN_DIR . '/' . $plugin;
 			$plugin_data = get_plugin_data( $plugin, false, true );
 			$this->plugin->alerts->Trigger(
-				5001, array(
+				5001,
+				array(
 					'PluginFile' => $plugin,
 					'PluginData' => (object) array(
 						'Name'      => $plugin_data['Name'],
@@ -981,7 +1015,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 				if ( ! empty( $theme ) && $theme instanceof WP_Theme && in_array( $theme->stylesheet, $site_themes, true ) ) {
 					$this->plugin->alerts->Trigger(
-						5031, array(
+						5031,
+						array(
 							'Theme' => (object) array(
 								'Name'                   => $theme->Name,
 								'ThemeURI'               => $theme->ThemeURI,
@@ -1018,7 +1053,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				$plugin_data = get_plugin_data( $plugin_file, false, true );
 
 				$this->plugin->alerts->Trigger(
-					5004, array(
+					5004,
+					array(
 						'PluginFile' => $plugin_file,
 						'PluginData' => (object) array(
 							'Name'      => $plugin_data['Name'],

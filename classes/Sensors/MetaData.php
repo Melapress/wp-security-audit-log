@@ -80,6 +80,18 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	protected function CanLogMetaKey( $object_id, $meta_key ) {
 		// Check if excluded meta key or starts with _.
 		if ( '_' === substr( $meta_key, 0, 1 ) ) {
+			/**
+			 * List of hidden keys allowed to log.
+			 *
+			 * @since 3.4.1
+			 */
+			$log_hidden_keys = apply_filters( 'wsal_log_hidden_meta_keys', array() );
+
+			// If the meta key is allowed to log then return true.
+			if ( in_array( $meta_key, $log_hidden_keys, true ) ) {
+				return true;
+			}
+
 			return false;
 		} elseif ( $this->IsExcludedCustomFields( $meta_key ) ) {
 			return false;
@@ -97,9 +109,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 */
 	public function IsExcludedCustomFields( $custom ) {
 		$custom_fields = $this->plugin->settings->GetExcludedMonitoringCustom();
+
 		if ( in_array( $custom, $custom_fields ) ) {
 			return true;
 		}
+
 		foreach ( $custom_fields as $field ) {
 			if ( false !== strpos( $field, '*' ) ) {
 				// Wildcard str[any_character] when you enter (str*).
@@ -109,6 +123,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 						return true;
 					}
 				}
+
 				// Wildcard [any_character]str when you enter (*str).
 				if ( '*' === substr( $field, 0, 1 ) ) {
 					$field = ltrim( $field, '*' );
@@ -164,7 +179,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		if ( $log_meta_event ) {
 			$editor_link = $this->GetEditorLink( $post );
 			$this->plugin->alerts->Trigger(
-				2053, array(
+				2053,
+				array(
 					'PostID'             => $object_id,
 					'PostTitle'          => $post->post_title,
 					'PostStatus'         => $post->post_status,
@@ -258,7 +274,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			if ( $log_meta_event && $this->old_meta[ $meta_id ]->key !== $meta_key ) {
 				$editor_link = $this->GetEditorLink( $post );
 				$this->plugin->alerts->Trigger(
-					2062, array(
+					2062,
+					array(
 						'PostID'             => $object_id,
 						'PostTitle'          => $post->post_title,
 						'PostStatus'         => $post->post_status,
@@ -276,7 +293,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			} elseif ( $log_meta_event && $this->old_meta[ $meta_id ]->val !== $meta_value ) { // Check change in meta value.
 				$editor_link = $this->GetEditorLink( $post );
 				$this->plugin->alerts->Trigger(
-					2054, array(
+					2054,
+					array(
 						'PostID'             => $object_id,
 						'PostTitle'          => $post->post_title,
 						'PostStatus'         => $post->post_status,
@@ -348,7 +366,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			}
 
 			$this->plugin->alerts->Trigger(
-				2055, array(
+				2055,
+				array(
 					'PostID'             => $object_id,
 					'PostTitle'          => $post->post_title,
 					'PostStatus'         => $post->post_status,
@@ -489,7 +508,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				case 'first_name':
 					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
 						$this->plugin->alerts->Trigger(
-							4017, array(
+							4017,
+							array(
 								'TargetUsername' => $user->user_login,
 								'new_firstname'  => $meta_value,
 								'old_firstname'  => $this->old_meta[ $meta_id ]->val,
@@ -501,7 +521,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				case 'last_name':
 					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
 						$this->plugin->alerts->Trigger(
-							4018, array(
+							4018,
+							array(
 								'TargetUsername' => $user->user_login,
 								'new_lastname'   => $meta_value,
 								'old_lastname'   => $this->old_meta[ $meta_id ]->val,
@@ -513,7 +534,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				case 'nickname':
 					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
 						$this->plugin->alerts->Trigger(
-							4019, array(
+							4019,
+							array(
 								'TargetUsername' => $user->user_login,
 								'new_nickname'   => $meta_value,
 								'old_nickname'   => $this->old_meta[ $meta_id ]->val,
@@ -559,20 +581,20 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @return boolean
 	 */
 	private function is_woocommerce_user_meta( $meta_key ) {
-		// Check for WordPress user profile keys.
-		if ( false === strpos( $meta_key, 'shipping_' ) || false === strpos( $meta_key, 'billing_' ) ) {
-			return false;
+		// Check for WooCommerce user profile keys.
+		if ( false !== strpos( $meta_key, 'shipping_' ) || false !== strpos( $meta_key, 'billing_' ) ) {
+			// Remove the prefix to avoid redundancy in the meta keys.
+			$address_key = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
+
+			// WC address meta keys without prefix.
+			$meta_keys = array( 'first_name', 'last_name', 'company', 'country', 'address_1', 'address_2', 'city', 'state', 'postcode', 'phone', 'email' );
+
+			if ( in_array( $address_key, $meta_keys, true ) ) {
+				return true;
+			}
 		}
 
-		// Remove the prefix to avoid redundancy in the meta keys.
-		$address_key = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
-
-		// WC address meta keys without prefix.
-		$meta_keys = array( 'first_name', 'last_name', 'company', 'country', 'address_1', 'address_2', 'city', 'state', 'postcode', 'phone', 'email' );
-
-		if ( in_array( $address_key, $meta_keys, true ) ) {
-			return true;
-		}
+		// Meta key does not belong to WooCommerce.
 		return false;
 	}
 }

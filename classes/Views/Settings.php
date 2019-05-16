@@ -93,34 +93,46 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Tab links.
 		$wsal_setting_tabs = array(
 			'general'           => array(
-				'name'   => __( 'General', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'general', $this->GetUrl() ),
-				'render' => array( $this, 'tab_general' ),
-				'save'   => array( $this, 'tab_general_save' ),
+				'name'     => __( 'General', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'general', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_general' ),
+				'save'     => array( $this, 'tab_general_save' ),
+				'priority' => 10,
 			),
 			'audit-log'         => array(
-				'name'   => __( 'Activity Log', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'audit-log', $this->GetUrl() ),
-				'render' => array( $this, 'tab_audit_log' ),
-				'save'   => array( $this, 'tab_audit_log_save' ),
+				'name'     => __( 'Activity Log', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'audit-log', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_audit_log' ),
+				'save'     => array( $this, 'tab_audit_log_save' ),
+				'priority' => 20,
 			),
 			'file-changes'      => array(
-				'name'   => __( 'File Integrity Scan', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'file-changes', $this->GetUrl() ),
-				'render' => array( $this, 'tab_file_changes' ),
-				'save'   => array( $this, 'tab_file_changes_save' ),
+				'name'     => __( 'File Integrity Scan', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'file-changes', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_file_changes' ),
+				'save'     => array( $this, 'tab_file_changes_save' ),
+				'priority' => 30,
 			),
 			'exclude-objects'   => array(
-				'name'   => __( 'Exclude Objects', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'exclude-objects', $this->GetUrl() ),
-				'render' => array( $this, 'tab_exclude_objects' ),
-				'save'   => array( $this, 'tab_exclude_objects_save' ),
+				'name'     => __( 'Exclude Objects', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'exclude-objects', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_exclude_objects' ),
+				'save'     => array( $this, 'tab_exclude_objects_save' ),
+				'priority' => 40,
+			),
+			'import-settings'   => array(
+				'name'     => __( 'Import/Export', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'import-settings', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_import_settings' ),
+				'save'     => array( $this, 'tab_import_settings_save' ),
+				'priority' => 40,
 			),
 			'advanced-settings' => array(
-				'name'   => __( 'Advanced Settings', 'wp-security-audit-log' ),
-				'link'   => add_query_arg( 'tab', 'advanced-settings', $this->GetUrl() ),
-				'render' => array( $this, 'tab_advanced_settings' ),
-				'save'   => array( $this, 'tab_advanced_settings_save' ),
+				'name'     => __( 'Advanced Settings', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'advanced-settings', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_advanced_settings' ),
+				'save'     => array( $this, 'tab_advanced_settings_save' ),
+				'priority' => 100,
 			),
 		);
 
@@ -131,16 +143,22 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		 *
 		 * Setting tabs structure:
 		 *     $wsal_setting_tabs['unique-tab-id'] = array(
-		 *         'name'   => Name of the tab,
-		 *         'link'   => Link of the tab,
-		 *         'render' => This function is used to render HTML elements in the tab,
-		 *         'name'   => This function is used to save the related setting of the tab,
+		 *         'name'     => Name of the tab,
+		 *         'link'     => Link of the tab,
+		 *         'render'   => This function is used to render HTML elements in the tab,
+		 *         'name'     => This function is used to save the related setting of the tab,
+		 *         'priority' => Priority of the tab,
 		 *     );
 		 *
 		 * @param array $wsal_setting_tabs – Array of WSAL Setting Tabs.
 		 * @since 3.2.3
 		 */
-		$this->wsal_setting_tabs = apply_filters( 'wsal_setting_tabs', $wsal_setting_tabs );
+		$wsal_setting_tabs = apply_filters( 'wsal_setting_tabs', $wsal_setting_tabs );
+
+		// Sort by priority.
+		array_multisort( array_column( $wsal_setting_tabs, 'priority' ), SORT_ASC, $wsal_setting_tabs );
+
+		$this->wsal_setting_tabs = $wsal_setting_tabs;
 
 		// Get the current tab.
 		$current_tab       = filter_input( INPUT_GET, 'tab', FILTER_SANITIZE_STRING );
@@ -195,11 +213,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Method: Load saved settings of this view.
 	 */
 	public function load_file_changes_settings() {
-		if ( ! is_multisite() ) {
-			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads' );
-		} else {
-			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads', 'wp-content/uploads/sites' );
-		}
+		$default_scan_dirs = array_keys( $this->_plugin->settings->get_server_directories( 'display' ) );
 
 		// Load saved settings of this view.
 		$this->scan_settings = array(
@@ -371,6 +385,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			}
 		}
 
+		if ( isset( $_POST['import'] ) ) {
+			call_user_func( $this->wsal_setting_tabs[ $this->current_tab ]['save'] );
+		}
+
 		if ( isset( $_GET['pruning'] ) && '1' === $_GET['pruning'] ) {
 			?>
 			<div class="updated">
@@ -387,19 +405,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		?>
 		<nav id="wsal-tabs" class="nav-tab-wrapper">
 			<?php foreach ( $this->wsal_setting_tabs as $tab_id => $tab ) : ?>
-				<?php if ( empty( $this->current_tab ) ) : ?>
-					<a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( 'general' === $tab_id ) ? 'nav-tab-active' : false; ?>">
-						<?php echo esc_html( $tab['name'] ); ?>
-					</a>
-				<?php else : ?>
-					<a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( $tab_id === $this->current_tab ) ? 'nav-tab-active' : false; ?>">
-						<?php echo esc_html( $tab['name'] ); ?>
-					</a>
-				<?php endif; ?>
+				<a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( $tab_id === $this->current_tab ) ? 'nav-tab-active' : false; ?>">
+					<?php echo esc_html( $tab['name'] ); ?>
+				</a>
 			<?php endforeach; ?>
 		</nav>
 
-		<form id="audit-log-settings" method="post">
+		<form id="audit-log-settings" method="post"<?php echo 'import-settings' === $this->current_tab ? ' enctype="multipart/form-data"' : false; ?>>
 			<input type="hidden" name="page" value="<?php echo isset( $_GET['page'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; ?>" />
 			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr( admin_url( 'admin-ajax.php' ) ); ?>" />
 			<?php wp_nonce_field( 'wsal-settings' ); ?>
@@ -418,7 +430,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			<?php
 			if ( 'sms-provider' === $this->current_tab && $section && 'test' === $section ) {
 				submit_button( __( 'Send Message', 'wp-security-audit-log' ) );
-			} else {
+			} elseif ( 'import-settings' !== $this->current_tab ) {
 				submit_button();
 			}
 			?>
@@ -1448,24 +1460,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<label for="wsal-scan-directories"><?php esc_html_e( 'Directories to scan', 'wp-security-audit-log' ); ?></label>
 					</th>
 					<td>
-						<?php
-						// WP Directories.
-						$wp_directories = array(
-							'root'               => __( 'Root directory of WordPress (excluding sub directories)', 'wp-security-audit-log' ),
-							'wp-admin'           => __( 'WP Admin directory (/wp-admin/)', 'wp-security-audit-log' ),
-							'wp-includes'        => __( 'WP Includes directory (/wp-includes/)', 'wp-security-audit-log' ),
-							'wp-content'         => __( '/wp-content/ directory (excluding plugins, themes & uploads directories)', 'wp-security-audit-log' ),
-							'wp-content/themes'  => __( 'Themes directory (/wp-content/themes/)', 'wp-security-audit-log' ),
-							'wp-content/plugins' => __( 'Plugins directory (/wp-content/plugins/)', 'wp-security-audit-log' ),
-							'wp-content/uploads' => __( 'Uploads directory (/wp-content/uploads/)', 'wp-security-audit-log' ),
-						);
-
-						// Check if multisite.
-						if ( is_multisite() ) {
-							// Upload directories of subsites.
-							$wp_directories['wp-content/uploads/sites'] = __( 'Uploads directory of all sub sites on this network (/wp-content/sites/*)', 'wp-security-audit-log' );
-						}
-						?>
+						<?php $wp_directories = $this->_plugin->settings->get_server_directories( 'display' ); ?>
 						<fieldset id="wsal-scan-directories">
 							<?php foreach ( $wp_directories as $value => $html ) : ?>
 								<label>
@@ -1748,7 +1743,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<!-- Exclude Roles -->
 
 				<tr>
-					<th><label for="IpAddrQueryBox"><?php esc_html_e( 'Exclude IP Addresses:', 'wp-security-audit-log' ); ?></label></th>
+					<th><label for="IpAddrQueryBox"><?php esc_html_e( 'Exclude IP Address(es):', 'wp-security-audit-log' ); ?></label></th>
 					<td>
 						<fieldset>
 							<input type="text" id="IpAddrQueryBox" style="width: 250px;">
@@ -1764,6 +1759,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								<?php endforeach; ?>
 							</div>
 						</fieldset>
+						<p class="description"><?php esc_html_e( 'You can exclude an individual IP address or a range of IP addresses. To exclude a range use the following format: [first IP]-[last octet of the last IP]. Example: 172.16.180.6-127.', 'wp-security-audit-log' ); ?></p>
 					</td>
 				</tr>
 				<!-- Exclude IP Addresses -->
@@ -1784,8 +1780,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									</span>
 								<?php endforeach; ?>
 							</div>
-							<p class="description"><?php esc_html_e( 'WordPress has the post and page post types by default though your website might use more post types (custom post types). You can exclude all post types, including the default WordPress ones.', 'wp-security-audit-log' ); ?></p>
 						</fieldset>
+						<p class="description"><?php esc_html_e( 'WordPress has the post and page post types by default though your website might use more post types (custom post types). You can exclude all post types, including the default WordPress ones.', 'wp-security-audit-log' ); ?></p>
 					</td>
 				</tr>
 				<!-- Exclude Custom Post Types -->
@@ -1806,8 +1802,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									</span>
 								<?php endforeach; ?>
 							</div>
-							<p class="description"><?php esc_html_e( 'You can use the * wildcard to exclude multiple matching custom fields. For example to exclude all custom fields starting with wp123 enter wp123*', 'wp-security-audit-log' ); ?></p>
 						</fieldset>
+						<p class="description"><?php esc_html_e( 'You can use the * wildcard to exclude multiple matching custom fields. For example to exclude all custom fields starting with wp123 enter wp123*', 'wp-security-audit-log' ); ?></p>
 					</td>
 				</tr>
 				<!-- Exclude Custom Fields -->
@@ -1828,14 +1824,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 									</span>
 								<?php endforeach; ?>
 							</div>
-							<p class="description">
-								<?php esc_html_e( 'Add the non existing URLs for which you do not want to be alerted of HTTP 404 errors in the activity log by specifying the complete URL.	Examples below:', 'wp-security-audit-log' ); ?>
-								<br>
-								<?php echo esc_html__( 'File: ', 'wp-security-audit-log' ) . esc_url( home_url() ) . '/subdirectory/file.php'; ?>
-								<br>
-								<?php echo esc_html__( 'Directory: ', 'wp-security-audit-log' ) . esc_url( home_url() ) . '/subdirectory/subdirectory2'; ?>
-							</p>
 						</fieldset>
+						<p class="description"><?php esc_html_e( 'Add the non existing URLs for which you do not want to be alerted of HTTP 404 errors in the activity log by specifying the complete URL.	Examples below:', 'wp-security-audit-log' ); ?><br><?php echo esc_html__( 'File: ', 'wp-security-audit-log' ) . esc_url( home_url() ) . '/subdirectory/file.php'; ?><br><?php echo esc_html__( 'Directory: ', 'wp-security-audit-log' ) . esc_url( home_url() ) . '/subdirectory/subdirectory2'; ?></p>
 					</td>
 				</tr>
 				<!-- Exclude 404 URLs -->
@@ -1858,6 +1848,136 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings->SetExcludedMonitoringIP( isset( $post_array['IpAddrs'] ) ? $post_array['IpAddrs'] : array() );
 		$this->_plugin->settings->set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
 		$this->_plugin->settings->set_excluded_urls( isset( $post_array['ExURLss'] ) ? $post_array['ExURLss'] : array() );
+	}
+
+	/**
+	 * Tab: `Import/Export`
+	 */
+	private function tab_import_settings() {
+		$blogname  = str_replace( ' ', '', get_option( 'blogname' ) );
+		$date      = date( 'm-d-Y' );
+		$json_name = $blogname . '-' . $date; // Export file name.
+		?>
+		<p class="description"><?php esc_html_e( 'You can export and import the plugin settings from here, which can also be used as a plugin configuration backup. The plugin settings are exported to a JSON file.', 'wp-security-audit-log' ); ?></p>
+		<h3><?php esc_html_e( 'Export Settings', 'wp-security-audit-log' ); ?></h3>
+		<table class="form-table wsal-tab">
+			<tbody>
+				<tr>
+					<th><label><?php esc_html_e( 'Export Settings', 'wp-security-audit-log' ); ?></label></th>
+					<td>
+						<fieldset>
+							<?php
+							$export_options = array();
+
+							$options = $this->_plugin->settings->get_wsal_options();
+
+							$ignored_options = array( 'site_content', 'local_files_0', 'local_files_1', 'local_files_2', 'local_files_3', 'local_files_4', 'local_files_5', 'local_files_6', 'is_initial_scan_0', 'is_initial_scan_1', 'is_initial_scan_2', 'is_initial_scan_3', 'is_initial_scan_4', 'is_initial_scan_5', 'is_initial_scan_6' );
+
+							foreach ( $options as $option ) {
+								$option_name = str_replace( 'wsal-', '', $option->option_name );
+
+								if ( in_array( $option_name, $ignored_options, true ) ) {
+									continue;
+								}
+
+								$export_options[ $option_name ] = $option->option_value;
+							}
+
+							$json_file = wp_json_encode( $export_options );
+							?>
+							<input type="hidden" value="<?php echo esc_attr( $json_file ); ?>">
+							<button type="button" name="export" id="wsal-export-options" class="button-primary"><?php esc_html_e( 'Export Settings', 'wp-security-audit-log' ); ?></button>
+						</fieldset>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<!-- Export Settings -->
+		<h3><?php esc_html_e( 'Import Settings', 'wp-security-audit-log' ); ?></h3>
+		<table class="form-table wsal-tab">
+			<tbody>
+				<tr>
+					<th><label><?php esc_html_e( 'Import Settings', 'wp-security-audit-log' ); ?></label></th>
+					<td>
+						<fieldset>
+							<input type="file" name="import-settings" id="wsal-import-settings" accept="application/json">
+							<p><button type="submit" name="import" id="wsal-import-settings-btn" class="button-primary button-disabled" disabled><?php esc_html_e( 'Import Settings', 'wp-security-audit-log' ); ?></button></p>
+						</fieldset>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<!-- Import Settings -->
+		<script>
+			/**
+			 * Create and download a temporary file.
+			 *
+			 * @param {string} filename - File name.
+			 * @param {string} text - File content.
+			 */
+			function download(filename, text) {
+				// Create temporary element.
+				var element = document.createElement('a');
+				element.setAttribute('href', 'data:application/json;charset=<?php echo esc_html( get_option( 'blog_charset' ) ); ?>,' + encodeURIComponent(text));
+				element.setAttribute('download', filename);
+
+				// Set the element to not display.
+				element.style.display = 'none';
+				document.body.appendChild(element);
+
+				// Simlate click on the element.
+				element.click();
+
+				// Remove temporary element.
+				document.body.removeChild(element);
+			}
+
+			jQuery( document ).ready( function() {
+				jQuery( '#wsal-export-options' ).click( function( event ) {
+					event.preventDefault();
+					download( '<?php echo esc_html( $json_name ); ?>', jQuery( this ).parent().find( 'input' ).val() );
+				} );
+
+				jQuery( '#wsal-import-settings' ).change( function() {
+					jQuery( '#wsal-import-settings-btn' ).removeAttr( 'disabled' );
+					jQuery( '#wsal-import-settings-btn' ).removeClass( 'button-disabled' );
+				} );
+			} );
+		</script>
+		<?php
+	}
+
+	/**
+	 * Save: `Import/Export`
+	 */
+	private function tab_import_settings_save() {
+		if ( isset( $_FILES['import-settings'] ) ) {
+			if ( 0 === $_FILES['import-settings']['error'] ) {
+				$filename  = isset( $_FILES['import-settings']['name'] ) ? sanitize_text_field( wp_unslash( $_FILES['import-settings']['name'] ) ) : false;
+				$file_type = isset( $_FILES['import-settings']['type'] ) ? sanitize_text_field( wp_unslash( $_FILES['import-settings']['type'] ) ) : false;
+				$file_size = isset( $_FILES['import-settings']['size'] ) ? (int) sanitize_text_field( wp_unslash( $_FILES['import-settings']['size'] ) ) : false;
+
+				if ( 'application/json' === $file_type && $file_size < 500000 ) {
+					$encoded_options = isset( $_FILES['import-settings']['tmp_name'] ) ? file_get_contents( sanitize_text_field( wp_unslash( $_FILES['import-settings']['tmp_name'] ) ) ) : false; // phpcs:ignore
+					$options         = json_decode( $encoded_options );
+
+					if ( $options ) {
+						foreach ( $options as $key => $value ) {
+							$value = maybe_unserialize( sanitize_text_field( $value ) );
+							$this->_plugin->SetGlobalOption( $key, $value );
+						}
+
+						echo '<div class="notice notice-success"><p>' . esc_html__( 'The plugin settings have been imported successfully.', 'wp-security-audit-log' ) . '</p></div>';
+					} else {
+						echo '<div class="notice notice-error"><p>' . esc_html__( 'No settings found to import.', 'wp-security-audit-log' ) . '</p></div>';
+					}
+				} else {
+					echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid file or file size is too large.', 'wp-security-audit-log' ) . '</p></div>';
+				}
+			} else {
+				echo '<div class="notice notice-error"><p>' . esc_html__( 'Error occurred while uploading the file.', 'wp-security-audit-log' ) . '</p></div>';
+			}
+		}
 	}
 
 	/**
@@ -2500,7 +2620,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					if ( 0 === $dir ) {
 						// Scan started alert.
 						$this->_plugin->alerts->Trigger(
-							6033, array(
+							6033,
+							array(
 								'CurrentUserID' => '0',
 								'ScanStatus'    => 'started',
 							)
@@ -2508,7 +2629,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					} elseif ( 6 === $dir ) {
 						// Scan stopped.
 						$this->_plugin->alerts->Trigger(
-							6033, array(
+							6033,
+							array(
 								'CurrentUserID' => '0',
 								'ScanStatus'    => 'stopped',
 							)

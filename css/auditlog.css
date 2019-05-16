@@ -2,8 +2,7 @@
  * Audit Log admin CSS
  *
  */
-
- .top .wsal-ssa select {
+.top .wsal-ssa select {
 	margin: 0 3px 0 0;
 	vertical-align: top;
 	height: 30px;
@@ -351,12 +350,17 @@ div.wsal_notice__wrapper p {
 	align-items: center;
 }
 
+#wsal-event-loader {
+	display: none;
+}
+
+#wsal-auditlog-end {
+	display: none;
+}
+
 #wsal-event-loader,
 #wsal-auditlog-end {
 	text-align: center;
-}
-#wsal-auditlog-end {
-	display: none;
 }
 
 .wsal-lds-ellipsis {

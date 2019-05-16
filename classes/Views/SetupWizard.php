@@ -323,9 +323,7 @@ final class WSAL_Views_SetupWizard {
 			$this->wsal->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' );
 		}
 		?>
-		<p><?php esc_html_e( 'Thank you for installing the WP Security Audit Log plugin.', 'wp-security-audit-log' ); ?></p>
-		<p><?php esc_html_e( 'This wizard will help you configure your WordPress activity log plugin and get you started quickly.', 'wp-security-audit-log' ); ?></p>
-		<p><?php esc_html_e( 'Anything that can be configured in this wizard can be changed at a later stage from the plugin settings. If you are an experienced user of this plugin you can exit this wizard and configure all the settings manually.', 'wp-security-audit-log' ); ?></p>
+		<p><?php esc_html_e( 'This wizard helps you configure the basic plugin settings. All these settings can be changed at a later stage from the plugin settings.', 'wp-security-audit-log' ); ?></p>
 
 		<div class="wsal-setup-actions">
 			<a class="button button-primary"
@@ -446,6 +444,11 @@ final class WSAL_Views_SetupWizard {
 				<?php
 				// Step help text.
 				$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to <a href="https://www.wpsecurityauditlog.com/premium-features/" target="_blank">upgrade to Premium</a> and use the Database tools to store the WordPress activity log in an external database.', 'wp-security-audit-log' );
+
+				if ( wsal_freemius()->is__premium_only() ) {
+					// Change the help text if premium version of the plugin is active.
+					$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to store the WordPress activity log in an external database or enable archiving.', 'wp-security-audit-log' );
+				}
 				echo wp_kses( $step_help, $this->wsal->allowed_html_tags );
 				?>
 			</em>

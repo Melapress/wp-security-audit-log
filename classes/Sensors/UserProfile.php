@@ -85,7 +85,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			if ( $old_bbpress_roles !== $new_bbpress_roles ) {
 				$current_user = wp_get_current_user();
 				$this->plugin->alerts->Trigger(
-					4013, array(
+					4013,
+					array(
 						'TargetUsername' => $new_userdata->user_login,
 						'OldRole'        => $old_bbpress_roles,
 						'NewRole'        => $new_bbpress_roles,
@@ -100,7 +101,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			$event      = get_current_user_id() === $user_id ? 4003 : 4004;
 			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $new_userdata->roles ) );
 			$this->plugin->alerts->Trigger(
-				$event, array(
+				$event,
+				array(
 					'TargetUserID'   => $user_id,
 					'TargetUserData' => (object) array(
 						'Username' => $new_userdata->user_login,
@@ -114,7 +116,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		if ( $old_userdata->user_email !== $new_userdata->user_email ) {
 			$event = get_current_user_id() === $user_id ? 4005 : 4006;
 			$this->plugin->alerts->Trigger(
-				$event, array(
+				$event,
+				array(
 					'TargetUserID'   => $user_id,
 					'TargetUsername' => $new_userdata->user_login,
 					'OldEmail'       => $old_userdata->user_email,
@@ -126,7 +129,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		// Alert if display name is changed.
 		if ( $old_userdata->display_name !== $new_userdata->display_name ) {
 			$this->plugin->alerts->Trigger(
-				4020, array(
+				4020,
+				array(
 					'TargetUsername'  => $new_userdata->user_login,
 					'old_displayname' => $old_userdata->display_name,
 					'new_displayname' => $new_userdata->display_name,
@@ -143,7 +147,13 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 * @param array  $old_roles - Array of old roles.
 	 */
 	public function event_user_role_changed( $user_id, $new_role, $old_roles ) {
+		// Get WP_User object.
 		$user = get_userdata( $user_id );
+
+		// Check if $user is false then return.
+		if ( ! $user ) {
+			return;
+		}
 
 		// If BBPress plugin is active then check for user roles change.
 		if ( is_plugin_active( 'bbpress/bbpress.php' ) ) {
@@ -189,7 +199,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		$user = get_userdata( $user_id );
 		$role = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
 		$this->plugin->alerts->TriggerIf(
-			4007, array(
+			4007,
+			array(
 				'TargetUserID'   => $user_id,
 				'TargetUserData' => (object) array(
 					'Username'  => $user->user_login,
@@ -198,7 +209,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 					'Email'     => $user->user_email,
 					'Roles'     => $role ? $role : 'none',
 				),
-			), array( $this, 'MustNotContainCreateUser' )
+			),
+			array( $this, 'MustNotContainCreateUser' )
 		);
 	}
 
@@ -215,7 +227,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		$updated      = isset( $_GET['updated'] ); // @codingStandardsIgnoreLine
 		if ( $current_user && ( $user->ID !== $current_user->ID ) && ! $updated ) {
 			$this->plugin->alerts->Trigger(
-				4014, array(
+				4014,
+				array(
 					'UserChanger'    => $current_user->user_login,
 					'TargetUsername' => $user->user_login,
 				)
@@ -243,7 +256,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		$user = get_userdata( $user_id );
 		if ( $user && ! in_array( $user->user_login, $this->old_superadmins, true ) ) {
 			$this->plugin->alerts->Trigger(
-				4008, array(
+				4008,
+				array(
 					'TargetUserID'   => $user_id,
 					'TargetUsername' => $user->user_login,
 				)
@@ -264,7 +278,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		$user = get_userdata( $user_id );
 		if ( $user && in_array( $user->user_login, $this->old_superadmins, true ) ) {
 			$this->plugin->alerts->Trigger(
-				4009, array(
+				4009,
+				array(
 					'TargetUserID'   => $user_id,
 					'TargetUsername' => $user->user_login,
 				)

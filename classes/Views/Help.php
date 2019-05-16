@@ -432,10 +432,10 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 
 		// WSAL options.
 		$sysinfo .= "\n" . '-- WSAL Options --' . "\n\n";
-		$options  = $this->get_wsal_options();
+		$options  = $this->_plugin->settings->get_wsal_options();
 
 		if ( ! empty( $options ) && is_array( $options ) ) {
-			foreach ( $options as $index => $option ) {
+			foreach ( $options as $option ) {
 				$sysinfo .= 'Option: ' . $option->option_name . "\n";
 				$sysinfo .= 'Value: ' . $option->option_value . "\n\n";
 			}
@@ -444,51 +444,6 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		$sysinfo .= "\n" . '### System Info → End ###' . "\n\n";
 
 		return $sysinfo;
-	}
-
-	/**
-	 * Method: Query WSAL Options from DB.
-	 *
-	 * @return array - WSAL Options array.
-	 */
-	public function get_wsal_options() {
-		// Get options transient.
-		$wsal_options = get_transient( 'wsal_options' );
-
-		// If options transient is not set then query and set options.
-		if ( false === $wsal_options ) {
-			// Get raw options from DB.
-			$raw_options = $this->query_wsal_options();
-
-			if ( ! empty( $raw_options ) && is_array( $raw_options ) ) {
-				foreach ( $raw_options as $option_id => $option ) {
-					if ( ! empty( $option->option_value ) ) {
-						$wsal_options[] = $option;
-					}
-				}
-			}
-
-			// Store the results in a transient.
-			set_transient( 'wsal_options', $wsal_options, DAY_IN_SECONDS );
-		}
-
-		return $wsal_options;
-	}
-
-	/**
-	 * Method: Query WSAL Options from DB.
-	 *
-	 * @return array - Array of options.
-	 */
-	public function query_wsal_options() {
-		// Query WSAL options.
-		global $wpdb;
-
-		// Set table name.
-		$options_table = $wpdb->prefix . 'wsal_options';
-
-		// Query the options.
-		return $wpdb->get_results( "SELECT * FROM $options_table" );
 	}
 
 	/**

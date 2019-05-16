@@ -724,9 +724,24 @@ final class WSAL_AlertManager {
 		$is_disabled  = false;
 		$ip           = $this->plugin->settings->GetMainClientIP();
 		$excluded_ips = $this->plugin->settings->GetExcludedMonitoringIP();
-		if ( in_array( $ip, $excluded_ips ) ) {
-			$is_disabled = true;
+
+		if ( ! empty( $excluded_ips ) ) {
+			foreach ( $excluded_ips as $excluded_ip ) {
+				if ( false !== strpos( $excluded_ip, '-' ) ) {
+					$ip_range = $this->plugin->settings->get_ipv4_by_range( $excluded_ip );
+					$ip_range = $ip_range->lower . '-' . $ip_range->upper;
+
+					if ( $this->plugin->settings->check_ipv4_in_range( $ip, $ip_range ) ) {
+						$is_disabled = true;
+						break;
+					}
+				} elseif ( $ip === $excluded_ip ) {
+					$is_disabled = true;
+					break;
+				}
+			}
 		}
+
 		return $is_disabled;
 	}
 

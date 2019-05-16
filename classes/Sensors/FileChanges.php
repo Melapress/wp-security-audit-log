@@ -88,6 +88,13 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 	private $scan_limit_file = false;
 
 	/**
+	 * WP uploads directory.
+	 *
+	 * @var array
+	 */
+	private $uploads_dir = array();
+
+	/**
 	 * Class constants.
 	 */
 	const SCAN_DAILY      = 'daily';
@@ -146,11 +153,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 	 * Method: Load file detection settings.
 	 */
 	public function load_file_change_settings() {
-		if ( ! is_multisite() ) {
-			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads' );
-		} else {
-			$default_scan_dirs = array( 'root', 'wp-admin', 'wp-includes', 'wp-content', 'wp-content/themes', 'wp-content/plugins', 'wp-content/uploads', 'wp-content/uploads/sites' );
-		}
+		$default_scan_dirs = array_keys( $this->plugin->settings->get_server_directories( 'display' ) );
 
 		// Load file detection settings.
 		$this->scan_settings = array(
@@ -261,26 +264,8 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 		// Set the options name for file list.
 		$file_list = "local_files_$next_to_scan";
 
-		// Prepare directories array.
-		// @todo Store this in transient to cache the value. We don't need to load it every time.
-		$uploads_dir = wp_upload_dir();
-
 		// Server directories.
-		$server_dirs = array(
-			'', // Root directory.
-			'wp-admin', // WordPress Admin.
-			WPINC, // wp-includes.
-			WP_CONTENT_DIR, // wp-content.
-			WP_CONTENT_DIR . '/themes', // Themes.
-			WP_PLUGIN_DIR, // Plugins.
-			$uploads_dir['basedir'], // Uploads.
-		);
-
-		// Prepare directories path.
-		foreach ( $server_dirs as $index => $server_dir ) {
-			$server_dir            = untrailingslashit( $server_dir );
-			$server_dirs[ $index ] = preg_replace( '/^' . preg_quote( ABSPATH, '/' ) . '/', '', $server_dir );
-		}
+		$server_dirs = $this->plugin->settings->get_server_directories();
 
 		// Get directory path to scan.
 		$path_to_scan = $server_dirs[ $next_to_scan ];
@@ -418,11 +403,14 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 						}
 
 						// Created file event.
-						$this->plugin->alerts->Trigger( 6029, array(
-							'FileLocation'  => $file,
-							'FileHash'      => $file_hash,
-							'CurrentUserID' => '0',
-						) );
+						$this->plugin->alerts->Trigger(
+							6029,
+							array(
+								'FileLocation'  => $file,
+								'FileHash'      => $file_hash,
+								'CurrentUserID' => '0',
+							)
+						);
 					}
 				}
 
@@ -452,11 +440,14 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 						}
 
 						// Removed file event.
-						$this->plugin->alerts->Trigger( 6030, array(
-							'FileLocation'  => $file,
-							'FileHash'      => $file_hash,
-							'CurrentUserID' => '0',
-						) );
+						$this->plugin->alerts->Trigger(
+							6030,
+							array(
+								'FileLocation'  => $file,
+								'FileHash'      => $file_hash,
+								'CurrentUserID' => '0',
+							)
+						);
 					}
 				}
 
@@ -464,19 +455,25 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 				if ( count( $files_changed ) > 0 ) {
 					// Log the alert.
 					foreach ( $files_changed as $file => $file_hash ) {
-						$this->plugin->alerts->Trigger( 6028, array(
-							'FileLocation'  => $file,
-							'FileHash'      => $file_hash,
-							'CurrentUserID' => '0',
-						) );
+						$this->plugin->alerts->Trigger(
+							6028,
+							array(
+								'FileLocation'  => $file,
+								'FileHash'      => $file_hash,
+								'CurrentUserID' => '0',
+							)
+						);
 					}
 				}
 
 				// Check for files limit alert.
 				if ( $this->scan_limit_file ) {
-					$this->plugin->alerts->Trigger( 6032, array(
-						'CurrentUserID' => '0',
-					) );
+					$this->plugin->alerts->Trigger(
+						6032,
+						array(
+							'CurrentUserID' => '0',
+						)
+					);
 				}
 
 				/**
@@ -509,18 +506,24 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 				$this->plugin->SetGlobalOption( 'last-scanned', 'root' );
 
 				// Scan started alert.
-				$this->plugin->alerts->Trigger( 6033, array(
-					'CurrentUserID' => '0',
-					'ScanStatus'    => 'started',
-				) );
+				$this->plugin->alerts->Trigger(
+					6033,
+					array(
+						'CurrentUserID' => '0',
+						'ScanStatus'    => 'started',
+					)
+				);
 			} elseif ( 6 === $next_to_scan ) {
 				$this->plugin->SetGlobalOption( 'last-scanned', $next_to_scan );
 
 				// Scan stopped.
-				$this->plugin->alerts->Trigger( 6033, array(
-					'CurrentUserID' => '0',
-					'ScanStatus'    => 'stopped',
-				) );
+				$this->plugin->alerts->Trigger(
+					6033,
+					array(
+						'CurrentUserID' => '0',
+						'ScanStatus'    => 'stopped',
+					)
+				);
 			} else {
 				$this->plugin->SetGlobalOption( 'last-scanned', $next_to_scan );
 			}
@@ -557,6 +560,9 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 		$file_size_limit = $this->scan_settings['file_size_limit']; // Get file size limit.
 		$file_size_limit = $file_size_limit * 1048576; // Calculate file size limit in bytes; 1MB = 1048576 bytes.
 
+		$uploads_dir    = $this->plugin->settings->get_server_directory( $this->get_uploads_dir_path() );
+		$mu_uploads_dir = $uploads_dir . '/sites'; // Multisite uploads directory.
+
 		// Scan the directory for files.
 		while ( false !== ( $item = @readdir( $dir_handle ) ) ) {
 			// Ignore `.` and `..` from directory.
@@ -569,19 +575,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 				continue;
 			}
 
-			// If we're on root then ignore `wp-admin`, `wp-content` & `wp-includes`.
-			if (
-				empty( $path )
-				&& (
-					false !== strpos( $item, 'wp-admin' )
-					|| false !== strpos( $item, 'wp-content' )
-					|| false !== strpos( $item, 'wp-includes' )
-				)
-			) {
-				continue;
-			}
-
-			// Ignore `.git`, `.svn`, & `node_modules` from scan.
+			// Ignore .git, .svn, & node_modules from scan.
 			if ( false !== strpos( $item, '.git' ) || false !== strpos( $item, '.svn' ) || false !== strpos( $item, 'node_modules' ) ) {
 				continue;
 			}
@@ -594,6 +588,11 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 				// If path is empty then it is root.
 				$relative_name = $path . $item; // Relative file path w.r.t. the location in major 7 folders.
 				$absolute_name = $dir_path . $item; // Complete file path w.r.t. ABSPATH.
+			}
+
+			// If we're on root then ignore `wp-admin`, `wp-content` & `wp-includes`.
+			if ( empty( $path ) && ( false !== strpos( $absolute_name, 'wp-admin' ) || false !== strpos( $absolute_name, WP_CONTENT_DIR ) || false !== strpos( $absolute_name, WPINC ) ) ) {
+				continue;
 			}
 
 			// Check for directory.
@@ -621,15 +620,9 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					 * Check if `wp-content/uploads/sites` is present in the
 					 * relative name of the directory & it is allowed to scan.
 					 */
-					if (
-						false !== strpos( $relative_name, 'wp-content/uploads/sites' )
-						&& in_array( 'wp-content/uploads/sites', $directories, true )
-					) {
+					if ( false !== strpos( $relative_name, $mu_uploads_dir ) && in_array( $mu_uploads_dir, $directories, true ) ) {
 						$files = array_merge( $files, $this->scan_path( $relative_name ) );
-					} elseif (
-						false !== strpos( $relative_name, 'wp-content/uploads/sites' )
-						&& ! in_array( 'wp-content/uploads/sites', $directories, true )
-					) {
+					} elseif ( false !== strpos( $relative_name, $mu_uploads_dir ) && ! in_array( $mu_uploads_dir, $directories, true ) ) {
 						// If `wp-content/uploads/sites` is not allowed to scan then skip the loop.
 						continue;
 					} else {
@@ -670,10 +663,13 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					$files[ $absolute_name ] = @md5_file( $absolute_name ); // File hash.
 				} else {
 					// File size is more than the limit.
-					$this->plugin->alerts->Trigger( 6031, array(
-						'FileLocation'  => $absolute_name,
-						'CurrentUserID' => '0',
-					) );
+					$this->plugin->alerts->Trigger(
+						6031,
+						array(
+							'FileLocation'  => $absolute_name,
+							'CurrentUserID' => '0',
+						)
+					);
 
 					// File data.
 					$files[ $absolute_name ] = '';
@@ -708,19 +704,15 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 	 */
 	public function filter_scan_files( $scan_files, $path_to_scan ) {
 		// If the path to scan is of plugins.
-		if (
-			false !== strpos( $path_to_scan, 'wp-content/plugins' )
-		) {
+		if ( false !== strpos( $path_to_scan, $this->plugin->settings->get_server_directory( WP_PLUGIN_DIR ) ) ) {
 			// Filter plugin files.
 			$scan_files = $this->filter_excluded_scan_files( $scan_files, 'plugins' );
-		} elseif (
-			false !== strpos( $path_to_scan, 'wp-content/themes' ) // And if the path to scan is of themes then.
-		) {
+		} elseif ( false !== strpos( $path_to_scan, $this->plugin->settings->get_server_directory( get_theme_root() ) ) ) { // And if the path to scan is of themes then.
 			// Filter theme files.
 			$scan_files = $this->filter_excluded_scan_files( $scan_files, 'themes' );
 		} elseif (
-			false !== strpos( $path_to_scan, 'wp-admin' ) // If the path is wp-admin or
-			|| false !== strpos( $path_to_scan, 'wp-includes' ) // wp-includes then check it for core updates skip.
+			false !== strpos( $path_to_scan, 'wp-admin' ) // WP Admin.
+			|| false !== strpos( $path_to_scan, WPINC )   // WP Includes.
 		) {
 			// Get `site_content` option.
 			$site_content = $this->plugin->GetGlobalOption( 'site_content', false );
@@ -748,8 +740,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 	 * @return array
 	 */
 	public function filter_excluded_scan_files( $scan_files, $excluded_type ) {
-		// Check if any one of the two parameters are empty.
-		if ( empty( $scan_files ) || empty( $excluded_type ) ) {
+		if ( empty( $scan_files ) ) {
 			return $scan_files;
 		}
 
@@ -764,37 +755,21 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 			// An array of files to exclude from scan files array.
 			$files_to_exclude = array();
 
+			// Type of content to skip.
+			$skip_type = 'skip_' . $excluded_type; // Possitble values: `plugins` or `themes`.
+
 			if (
-				'plugins' === $excluded_type
-				&& isset( $excluded_contents->skip_plugins ) // Skip plugins array exists.
-				&& is_array( $excluded_contents->skip_plugins ) // Skip plugins is array.
-				&& ! empty( $excluded_contents->skip_plugins ) // And if it is not empty.
+				in_array( $excluded_type, array( 'plugins', 'themes' ), true ) // Only two skip types are allowed.
+				&& isset( $excluded_contents->$skip_type )                     // Skip type array exists.
+				&& is_array( $excluded_contents->$skip_type )                  // Skip type is array.
+				&& ! empty( $excluded_contents->$skip_type )                   // And is not empty.
 			) {
 				// Go through each plugin to be skipped.
-				foreach ( $excluded_contents->skip_plugins as $plugin ) {
+				foreach ( $excluded_contents->$skip_type as $content ) {
 					// Path of plugin to search in stored files.
-					$search_path = '/plugins/' . $plugin;
+					$search_path = '/' . $excluded_type . '/' . $content;
 
 					// Get array of files to exclude of plugins from scan files array.
-					foreach ( $files as $file ) {
-						if ( false !== strpos( $file, $search_path ) ) {
-							$files_to_exclude[] = $file;
-						}
-					}
-				}
-			} elseif (
-				'themes' === $excluded_type
-				&& isset( $excluded_contents->skip_themes ) // Skip themes array exists.
-				&& is_array( $excluded_contents->skip_themes ) // Skip themes is array.
-				&& ! empty( $excluded_contents->skip_themes ) // And if it is not empty.
-			) {
-				// Go through each theme to be skipped.
-				foreach ( $excluded_contents->skip_themes as $theme ) {
-					// Path of theme to search in stored files.
-					$search_path = '/themes/' . $theme;
-
-					// Get array of files to exclude of themes from scan files array.
-					$files_to_exclude = array();
 					foreach ( $files as $file ) {
 						if ( false !== strpos( $file, $search_path ) ) {
 							$files_to_exclude[] = $file;
@@ -813,6 +788,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 				}
 			}
 		}
+
 		return $scan_files;
 	}
 
@@ -829,7 +805,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 		}
 
 		// If path to scan is of plugins then empty the skip plugins array.
-		if ( false !== strpos( $path_to_scan, 'wp-content/plugins' ) ) {
+		if ( false !== strpos( $path_to_scan, $this->plugin->settings->get_server_directory( WP_PLUGIN_DIR ) ) ) {
 			// Get contents list.
 			$site_content = $this->plugin->GetGlobalOption( 'site_content', false );
 
@@ -840,7 +816,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 			$this->plugin->SetGlobalOption( 'site_content', $site_content );
 
 			// If path to scan is of themes then empty the skip themes array.
-		} elseif ( false !== strpos( $path_to_scan, 'wp-content/themes' ) ) {
+		} elseif ( false !== strpos( $path_to_scan, $this->plugin->settings->get_server_directory( get_theme_root() ) ) ) {
 			// Get contents list.
 			$site_content = $this->plugin->GetGlobalOption( 'site_content', false );
 
@@ -965,15 +941,17 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 	 * @return bool
 	 */
 	public function dir_left_to_scan( $scan_directories ) {
-		// Return false if $scan_directories is empty.
 		if ( empty( $scan_directories ) ) {
 			return false;
 		}
 
 		// If multisite then remove all the subsites uploads of multisite from scan directories.
 		if ( is_multisite() ) {
+			$uploads_dir    = $this->plugin->settings->get_server_directory( $this->get_uploads_dir_path() );
+			$mu_uploads_dir = $uploads_dir . '/sites'; // Multisite uploads directory.
+
 			foreach ( $scan_directories as $index => $dir ) {
-				if ( false !== strpos( $dir, 'wp-content/uploads/sites' ) ) {
+				if ( false !== strpos( $dir, $mu_uploads_dir ) ) {
 					unset( $scan_directories[ $index ] );
 				}
 			}
@@ -1052,5 +1030,17 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 				$this->plugin->SetGlobalOption( 'site_content', $site_content ); // Save the option.
 			}
 		}
+	}
+
+	/**
+	 * Returns the path of WP uploads directory.
+	 *
+	 * @return string
+	 */
+	private function get_uploads_dir_path() {
+		if ( ! isset( $this->uploads_dir['basedir'] ) ) {
+			$this->uploads_dir = wp_upload_dir(); // Get WP uploads directory.
+		}
+		return $this->uploads_dir['basedir'];
 	}
 }

@@ -88,16 +88,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Set adverts array.
 		$this->adverts = array(
 			0 => array(
-				'head' => __( 'Get instantly alerted of important changes via email, search the activity log and use filters, generate reports, see who is logged in and more!', 'wp-security-audit-log' ),
-				'desc' => __( 'Upgrade to premium to unlock these powerful activity log features.', 'wp-security-audit-log' ),
+				'head' => __( 'Get instantly alerted of critical changes via SMS & email, search the activity log, generate user reports, see who is logged in and more!', 'wp-security-audit-log' ),
+				'desc' => __( 'Upgrade to premium to unlock these powerful activity log features & more!', 'wp-security-audit-log' ),
 			),
 			1 => array(
-				'head' => __( 'Instant email notifications, search & filters, reports, users sessions management, integration tools and more!', 'wp-security-audit-log' ),
-				'desc' => __( 'Upgrade to benefit more from the activity logs.', 'wp-security-audit-log' ),
+				'head' => __( 'Instant SMS & email alerts, search & filters, reports, users sessions management and much more!', 'wp-security-audit-log' ),
+				'desc' => __( 'Upgrade to premium to get more out of your activity logs!', 'wp-security-audit-log' ),
 			),
 			2 => array(
-				'head' => __( 'See who is logged in real-time, generate reports, get alerted via email of important changes and more!', 'wp-security-audit-log' ),
-				'desc' => __( 'Unlock these and other features with the premium edition of WP Security Audit Log.', 'wp-security-audit-log' ),
+				'head' => __( 'See who logged in on your site in real-time, generate reports, get SMS & email alerts of critical changes and more!', 'wp-security-audit-log' ),
+				'desc' => __( 'Unlock these and other powerful features with WP Security Audit Log Premium.', 'wp-security-audit-log' ),
 			),
 		);
 	}
@@ -112,6 +112,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function AdminNoticesPremium() {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
+
 		// Check if any of the extensions is activated.
 		if (
 			! class_exists( 'WSAL_NP_Plugin' )
@@ -427,9 +428,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			?>
 			<div data-remodal-id="wsal-setup-modal">
 				<button data-remodal-action="close" class="remodal-close"></button>
-				<p>
-					<?php esc_html_e( 'Thank you very much for using the WP Security Audit Log plugin. We have created a wizard to ease the process of configuring the plugin so you can get the best out of it. Would you like to run the wizard?', 'wp-security-audit-log' ); ?>
-				</p>
+				<p><?php esc_html_e( 'Thank you for installing WP Security Audit Log. Do you want to run the wizard to configure the basic plugin settings?', 'wp-security-audit-log' ); ?></p>
 				<br>
 				<button data-remodal-action="confirm" class="remodal-confirm"><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></button>
 				<button data-remodal-action="cancel" class="remodal-cancel"><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></button>

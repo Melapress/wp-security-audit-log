@@ -5,9 +5,9 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 5.1.1
-Stable tag: 3.4.0.1
-Requires PHP: 5.4.43
+Tested up to: 5.2
+Stable tag: 3.4.1
+Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
 
@@ -198,8 +198,32 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.4.0.1 (2019-04-10) =
+= 3.4.1 (2019-05-16) =
 
+Release notes: [New plugin settings import/export tool & hooks for theme developers](https://www.wpsecurityauditlog.com/releases/update-3-4-1-import-export-plugin-settings/)
+
+* **New Features**
+	* Tool to export and import plugin configuration & settings.
+	* Exclude range of IP addresses from the activity log.
+	* New [hooks for theme developers](https://www.wpsecurityauditlog.com/support-documentation/list-hooks/) to display the custom login messages the plugin shows when multiple user sessions are blocked.
+	* New hook to add a list of hidden meta keys the plugin should keep a log of.
+	
+* **Plugin Improvements**
+	* First time plugin use texts is now easier to read and much shorter.
+	* Added support for more time & date formats in the (activity log reports for WordPress](https://www.wpsecurityauditlog.com/premium-features/reports-wordpress-activity-log/).
+	* Improved content sensor - previously reporting events not neccessarily needed (background processes)
+	* Removed hardcoded paths from the [WordPress file integrity scanner](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/).
+	* Removed Sites filter from audit log viewer - made redundant by the site selector drop down menu.
+	
 * **Bug Fixes**
-	* Backward compatibility issue for PHP 5.4.
-	* Fix for audit log page search extension check function.
+	* Multiple events reporting the same thing generated when user changes WooCommerce shipping / billing address.
+	* Updated incorrect tags used in test SMS message.
+	* Event 2002 (modified post) reported even when there is a specific change event ID.
+	* Event 2016 (plugin modified post) reported whenever a post is updated by user.
+	* External database connection cannot be deleted because it is marked in use even when not.
+	* Plugin generating error when set_user_role is set to NUL in request.
+	* Infinite scroll stops working on Firefox (intermittent issue).
+	
+= Earlier versions =
+
+Please refer to the [complete plugin changelog](https://www.wpsecurityauditlog.com/support-documentation/plugin-changelog/) for more detailed information about what was new, improved and fixed in previous versions of the WP Security Audit Log plugin.

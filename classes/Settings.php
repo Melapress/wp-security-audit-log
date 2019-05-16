@@ -1422,6 +1422,15 @@ class WSAL_Settings {
 			return 'urls';
 		}
 
+		// Check for IP range.
+		if ( strpos( $token, '-' ) !== false ) {
+			$ip_range = $this->get_ipv4_by_range( $token );
+
+			if ( $ip_range && filter_var( $ip_range->lower, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) && filter_var( $ip_range->upper, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) { // Validate IPv4.
+				return 'ip';
+			}
+		}
+
 		// Check if the token matches an IP address.
 		if (
 			filter_var( $token, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) // Validate IPv4.
@@ -1958,5 +1967,214 @@ class WSAL_Settings {
 	 */
 	public function set_events_type_nav( $nav_type ) {
 		$this->_plugin->SetGlobalOption( 'events-nav-type', $nav_type );
+	}
+
+	/**
+	 * Query WSAL Options from DB.
+	 *
+	 * @return array - WSAL Options array.
+	 */
+	public function get_wsal_options() {
+		// Get options transient.
+		$wsal_options = get_transient( 'wsal_options' );
+
+		// If options transient is not set then query and set options.
+		if ( false === $wsal_options ) {
+			// Get raw options from DB.
+			$raw_options = $this->query_wsal_options();
+
+			if ( ! empty( $raw_options ) && is_array( $raw_options ) ) {
+				foreach ( $raw_options as $option ) {
+					if ( ! empty( $option->option_value ) ) {
+						$wsal_options[] = $option;
+					}
+				}
+			}
+
+			// Store the results in a transient.
+			set_transient( 'wsal_options', $wsal_options, DAY_IN_SECONDS );
+		}
+
+		return $wsal_options;
+	}
+
+	/**
+	 * Query WSAL Options from DB.
+	 *
+	 * @return array - Array of options.
+	 */
+	public function query_wsal_options() {
+		// Query WSAL options.
+		global $wpdb;
+
+		// Set table name.
+		$options_table = $wpdb->prefix . 'wsal_options';
+
+		// Query the options.
+		return $wpdb->get_results( "SELECT * FROM $options_table" ); // phpcs:ignore
+	}
+
+	/**
+	 * Check if IP is in range for IPv4.
+	 *
+	 * This function takes 2 arguments, an IP address and a "range" in several different formats.
+	 *
+	 * Network ranges can be specified as:
+	 * 1. Wildcard format:     1.2.3.*
+	 * 2. CIDR format:         1.2.3/24  OR  1.2.3.4/255.255.255.0
+	 * 3. Start-End IP format: 1.2.3.0-1.2.3.255
+	 *
+	 * The function will return true if the supplied IP is within the range.
+	 * Note little validation is done on the range inputs - it expects you to
+	 * use one of the above 3 formats.
+	 *
+	 * @link https://github.com/cloudflarearchive/Cloudflare-Tools/blob/master/cloudflare/ip_in_range.php#L55
+	 *
+	 * @param string $ip    - IP address.
+	 * @param string $range - Range of IP address.
+	 * @return boolean
+	 */
+	public function check_ipv4_in_range( $ip, $range ) {
+		if ( strpos( $range, '/' ) !== false ) {
+			// $range is in IP/NETMASK format.
+			list($range, $netmask) = explode( '/', $range, 2 );
+
+			if ( strpos( $netmask, '.' ) !== false ) {
+				// $netmask is a 255.255.0.0 format.
+				$netmask     = str_replace( '*', '0', $netmask );
+				$netmask_dec = ip2long( $netmask );
+				return ( ( ip2long( $ip ) & $netmask_dec ) === ( ip2long( $range ) & $netmask_dec ) );
+			} else {
+				// $netmask is a CIDR size block
+				// fix the range argument.
+				$x       = explode( '.', $range );
+				$x_count = count( $x );
+
+				while ( $x_count < 4 ) {
+					$x[]     = '0';
+					$x_count = count( $x );
+				}
+
+				list($a,$b,$c,$d) = $x;
+				$range            = sprintf( '%u.%u.%u.%u', empty( $a ) ? '0' : $a, empty( $b ) ? '0' : $b, empty( $c ) ? '0' : $c, empty( $d ) ? '0' : $d );
+				$range_dec        = ip2long( $range );
+				$ip_dec           = ip2long( $ip );
+
+				// Strategy 1 - Create the netmask with 'netmask' 1s and then fill it to 32 with 0s
+				// $netmask_dec = bindec(str_pad('', $netmask, '1') . str_pad('', 32-$netmask, '0'));
+				// Strategy 2 - Use math to create it.
+				$wildcard_dec = pow( 2, ( 32 - $netmask ) ) - 1;
+				$netmask_dec  = ~ $wildcard_dec;
+
+				return ( ( $ip_dec & $netmask_dec ) === ( $range_dec & $netmask_dec ) );
+			}
+		} else {
+			// Range might be 255.255.*.* or 1.2.3.0-1.2.3.255.
+			if ( strpos( $range, '*' ) !== false ) { // a.b.*.* format
+				// Just convert to A-B format by setting * to 0 for A and 255 for B.
+				$lower = str_replace( '*', '0', $range );
+				$upper = str_replace( '*', '255', $range );
+				$range = "$lower-$upper";
+			}
+
+			// A-B format.
+			if ( strpos( $range, '-' ) !== false ) {
+				list($lower, $upper) = explode( '-', $range, 2 );
+				$lower_dec           = (float) sprintf( '%u', ip2long( $lower ) );
+				$upper_dec           = (float) sprintf( '%u', ip2long( $upper ) );
+				$ip_dec              = (float) sprintf( '%u', ip2long( $ip ) );
+				return ( ( $ip_dec >= $lower_dec ) && ( $ip_dec <= $upper_dec ) );
+			}
+
+			return false;
+		}
+	}
+
+	/**
+	 * Return the range of IP address from 127.0.0.0-24 to 127.0.0.0-127.0.0.24 format.
+	 *
+	 * @param string $range - Range of IP address.
+	 * @return object
+	 */
+	public function get_ipv4_by_range( $range ) {
+		list($lower_ip, $upper_ip) = explode( '-', $range, 2 );
+
+		$lower_arr = explode( '.', $lower_ip );
+		$count     = count( $lower_arr );
+		unset( $lower_arr[ $count - 1 ] );
+		$upper_ip = implode( '.', $lower_arr ) . '.' . $upper_ip;
+
+		return (object) array(
+			'lower' => $lower_ip,
+			'upper' => $upper_ip,
+		);
+	}
+
+	/**
+	 * Returns site server directories.
+	 *
+	 * @param string $context - Context of the directories.
+	 * @return array
+	 */
+	public function get_server_directories( $context = '' ) {
+		$wp_directories = array();
+
+		// Get WP uploads directory.
+		$wp_uploads  = wp_upload_dir();
+		$uploads_dir = $wp_uploads['basedir'];
+
+		if ( 'display' === $context ) {
+			$wp_directories = array(
+				'root'           => __( 'Root directory of WordPress (excluding sub directories)', 'wp-security-audit-log' ),
+				'wp-admin'       => __( 'WP Admin directory (/wp-admin/)', 'wp-security-audit-log' ),
+				WPINC            => __( 'WP Includes directory (/wp-includes/)', 'wp-security-audit-log' ),
+				WP_CONTENT_DIR   => __( '/wp-content/ directory (excluding plugins, themes & uploads directories)', 'wp-security-audit-log' ),
+				get_theme_root() => __( 'Themes directory (/wp-content/themes/)', 'wp-security-audit-log' ),
+				WP_PLUGIN_DIR    => __( 'Plugins directory (/wp-content/plugins/)', 'wp-security-audit-log' ),
+				$uploads_dir     => __( 'Uploads directory (/wp-content/uploads/)', 'wp-security-audit-log' ),
+			);
+
+			if ( is_multisite() ) {
+				// Upload directories of subsites.
+				$wp_directories[ $uploads_dir . '/sites' ] = __( 'Uploads directory of all sub sites on this network (/wp-content/sites/*)', 'wp-security-audit-log' );
+			}
+		} else {
+			// Server directories.
+			$wp_directories = array(
+				'',               // Root directory.
+				'wp-admin',       // WordPress Admin.
+				WPINC,            // wp-includes.
+				WP_CONTENT_DIR,   // wp-content.
+				get_theme_root(), // Themes.
+				WP_PLUGIN_DIR,    // Plugins.
+				$uploads_dir,     // Uploads.
+			);
+		}
+
+		// Prepare directories path.
+		foreach ( $wp_directories as $index => $server_dir ) {
+			if ( 'display' === $context && false !== strpos( $index, ABSPATH ) ) {
+				unset( $wp_directories[ $index ] );
+				$index = untrailingslashit( $index );
+				$index = $this->get_server_directory( $index );
+			} else {
+				$server_dir = untrailingslashit( $server_dir );
+				$server_dir = $this->get_server_directory( $server_dir );
+			}
+
+			$wp_directories[ $index ] = $server_dir;
+		}
+
+		return $wp_directories;
+	}
+
+	/**
+	 * Returns a WP directory without ABSPATH.
+	 *
+	 * @param string $directory - Directory.
+	 * @return string
+	 */
+	public function get_server_directory( $directory ) {
+		return preg_replace( '/^' . preg_quote( ABSPATH, '/' ) . '/', '', $directory );
 	}
 }
