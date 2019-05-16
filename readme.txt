@@ -7,7 +7,7 @@ Tags: wordpress security plugin, wordpress security audit log, audit log, activi
 Requires at least: 3.6
 Tested up to: 5.2
 Stable tag: 3.4.0.1
-Requires PHP: 5.4.43
+Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
 
