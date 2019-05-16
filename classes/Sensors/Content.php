@@ -960,33 +960,29 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	/**
 	 * Post visibility changed.
 	 *
-	 * @param stdClass $oldpost - Old post.
-	 * @param stdClass $newpost - New post.
-	 * @param string   $old_status - Old status.
-	 * @param string   $new_status - New status.
+	 * @param WP_Post $oldpost - Old post.
+	 * @param WP_Post $newpost - New post.
+	 * @param string  $old_status - Old status.
+	 * @param string  $new_status - New status.
 	 */
 	protected function check_visibility_change( $oldpost, $newpost, $old_status, $new_status ) {
-		if ( 'draft' === $old_status || 'draft' === $new_status ) {
-			return;
-		}
-
 		$old_visibility = '';
 		$new_visibility = '';
 
 		if ( $oldpost->post_password ) {
 			$old_visibility = __( 'Password Protected', 'wp-security-audit-log' );
-		} elseif ( 'publish' === $old_status ) {
-			$old_visibility = __( 'Public', 'wp-security-audit-log' );
-		} elseif ( 'private' === $old_status ) {
+		} elseif ( 'private' === $oldpost->post_status ) {
 			$old_visibility = __( 'Private', 'wp-security-audit-log' );
+		} else {
+			$old_visibility = __( 'Public', 'wp-security-audit-log' );
 		}
 
 		if ( $newpost->post_password ) {
 			$new_visibility = __( 'Password Protected', 'wp-security-audit-log' );
-		} elseif ( 'publish' === $new_status ) {
-			$new_visibility = __( 'Public', 'wp-security-audit-log' );
-		} elseif ( 'private' === $new_status ) {
+		} elseif ( 'private' === $newpost->post_status ) {
 			$new_visibility = __( 'Private', 'wp-security-audit-log' );
+		} else {
+			$new_visibility = __( 'Public', 'wp-security-audit-log' );
 		}
 
 		if ( $old_visibility && $new_visibility && ( $old_visibility !== $new_visibility ) ) {
