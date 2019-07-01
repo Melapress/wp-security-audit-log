@@ -133,7 +133,7 @@
                 if (optionValue) {
                     $.post(ajaxurl, {
                         action      : 'fs_set_db_option',
-                        _wpnonce    : '<?php echo wp_create_nonce( 'fs_set_db_option' ) ?>',
+                        _wpnonce   : '<?php echo wp_create_nonce( 'fs_set_db_option' ) ?>',
                         option_name : optionName,
                         option_value: optionValue
                     }, function () {
