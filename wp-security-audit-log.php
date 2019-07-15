@@ -846,6 +846,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$installation_errors .= '<a href="javascript:;" onclick="window.top.location.href=\'' . esc_url( network_admin_url( 'plugins.php' ) ) . '\'">' . esc_html__( 'Redirect me to the network dashboard', 'wp-security-audit-log' ) . '</a> ';
 			}
 
+			if ( is_plugin_active( 'mainwp/mainwp.php' ) ) {
+				/* Translators: %s: Activity Log for MainWP plugin hyperlink */
+				$installation_errors = sprintf( __( 'Please install the %s plugin on the MainWP dashboard.', 'wp-security-audit-log' ), '<a href="https://wordpress.org/plugins/activity-log-mainwp/" target="_blank">' . __( 'Activity Log for MainWP', 'wp-security-audit-log' ) . '</a>' );
+				/* Translators: %s: Getting started guide hyperlink */
+				$installation_errors .= sprintf( __( 'The WP Security Audit Log should be installed on the child sites only. Refer to the %s for more information.', 'wp-security-audit-log' ), '<a href="https://www.wpsecurityauditlog.com/support-documentation/gettting-started-activity-log-mainwp-extension/" target="_blank">' . __( 'getting started guide', 'wp-security-audit-log' ) . '</a>' );
+				/* Translators: %s: Activity Log for MainWP hyperlink */
+				$installation_errors .= sprintf( __( 'For more information please refer to the %s.', 'wp-security-audit-log' ), '<a href="https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/" target="_blank">' . __( 'Activity log for MainWP plugin page', 'wp-security-audit-log' ) . '</a>' );
+			}
+
 			if ( $installation_errors ) {
 				?>
 				<html>
