@@ -121,7 +121,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 */
 	public function GetMeta( $occurence ) {
 		if ( ! isset( $this->_meta ) ) {
-			$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+			$meta        = new WSAL_Adapters_MySQL_Meta( $this->connection );
 			$this->_meta = $meta->Load( 'occurrence_id = %d', array( $occurence->id ) );
 		}
 		return $this->_meta;
@@ -136,7 +136,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 */
 	public function GetMultiMeta( $occurence ) {
 		if ( ! isset( $this->_meta ) ) {
-			$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+			$meta        = new WSAL_Adapters_MySQL_Meta( $this->connection );
 			$this->_meta = $meta->LoadArray( 'occurrence_id = %d', array( $occurence->id ) );
 		}
 		return $this->_meta;
@@ -151,25 +151,27 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 * @return WSAL_Models_Meta The meta item, be sure to checked if it was loaded successfully.
 	 */
 	public function GetNamedMeta( $occurence, $name ) {
-		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+		$meta        = new WSAL_Adapters_MySQL_Meta( $this->connection );
 		$this->_meta = $meta->Load( 'occurrence_id = %d AND name = %s', array( $occurence->id, $name ) );
 		return $this->_meta;
 	}
 
 	/**
-	 * Returns the first meta value from a given set of names. Useful when you have a mix of items that could provide a particular detail.
+	 * Returns the first meta value from a given set of names.
+	 * Useful when you have a mix of items that could provide
+	 * a particular detail.
 	 *
 	 * @param object $occurrence - Occurrence model instance.
-	 * @param array  $names - List of meta names.
+	 * @param array  $names     - List of meta names.
 	 * @return WSAL_Models_Meta The first meta item that exists.
 	 */
 	public function GetFirstNamedMeta( $occurrence, $names ) {
-		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+		$meta  = new WSAL_Adapters_MySQL_Meta( $this->connection );
 		$query = '(' . str_repeat( 'name = %s OR ', count( $names ) ) . '0)';
 		$query = 'occurrence_id = %d AND ' . $query . ' ORDER BY name DESC LIMIT 1';
 		array_unshift( $names, $occurrence->id ); // Prepend args with occurrence id.
 
-				$this->_meta = $meta->Load( $query, $names );
+		$this->_meta = $meta->Load( $query, $names );
 		return $meta->getModel()->LoadData( $this->_meta );
 
 		// TODO: Do we want to reintroduce is loaded check/logic?
@@ -244,18 +246,18 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 */
 	protected function prepareOccurrenceQuery( $query ) {
 		$search_query_parameters = array();
-		$search_conditions = array();
-		$conditions = $query->getConditions();
+		$search_conditions       = array();
+		$conditions              = $query->getConditions();
 
 		// BUG: not all conditions are occurence related. maybe it's just a field site_id. need seperate arrays.
 		if ( ! empty( $conditions ) ) {
-			$tmp = new WSAL_Adapters_MySQL_Meta( $this->connection );
+			$tmp            = new WSAL_Adapters_MySQL_Meta( $this->connection );
 			$s_where_clause = '';
 			foreach ( $conditions as $field => $value ) {
 				if ( ! empty( $s_where_clause ) ) {
 					$s_where_clause .= ' AND ';
 				}
-				$s_where_clause .= 'name = %s AND value = %s';
+				$s_where_clause           .= 'name = %s AND value = %s';
 				$search_query_parameters[] = $field;
 				$search_query_parameters[] = $value;
 			}
@@ -309,5 +311,13 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 			GROUP BY occurrence.id',
 			$args
 		);
+	}
+
+	/**
+	 * Create relevant indexes on the occurrence table.
+	 */
+	public function create_indexes() {
+		$db_connection = $this->get_connection();
+		$db_connection->query( 'CREATE INDEX created_on ON ' . $this->GetTable() . ' (created_on)' );
 	}
 }

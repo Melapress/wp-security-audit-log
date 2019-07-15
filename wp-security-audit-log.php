@@ -874,6 +874,18 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$pre_installed = $this->IsInstalled();
 			self::getConnector()->installAll();
 
+			if ( ! $pre_installed ) {
+				self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
+				self::getConnector()->getAdapter( 'Meta' )->create_indexes();
+				self::getConnector()->getAdapter( 'Option' )->create_indexes();
+
+				if ( $this->settings->IsArchivingEnabled() ) {
+					$this->settings->SwitchToArchiveDB();
+					self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
+					self::getConnector()->getAdapter( 'Meta' )->create_indexes();
+				}
+			}
+
 			// If system already installed, do updates now (if any).
 			$old_version = $this->GetOldVersion();
 			$new_version = $this->GetNewVersion();
@@ -1095,6 +1107,26 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				if ( version_compare( $old_version, '3.3', '<' ) && version_compare( $new_version, '3.2.5', '>' ) ) {
 					if ( wsal_freemius()->is__premium_only() && wsal_freemius()->is_plan_or_trial__premium_only( 'professional' ) ) {
 						$this->extensions->update_external_db_options( $this );
+					}
+				}
+
+				/**
+				 * IMPORTANT: VERSION SPECIFIC UPDATE
+				 *
+				 * It only needs to run when old version of the plugin is less than 3.4.2
+				 * & the new version is later than 3.4.1.1.
+				 *
+				 * @since 3.4.2
+				 */
+				if ( version_compare( $old_version, '3.4.2', '<' ) && version_compare( $new_version, '3.4.1.1', '>' ) ) {
+					self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
+					self::getConnector()->getAdapter( 'Meta' )->create_indexes();
+					self::getConnector()->getAdapter( 'Option' )->create_indexes();
+
+					if ( $this->settings->IsArchivingEnabled() ) {
+						$this->settings->SwitchToArchiveDB();
+						self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
+						self::getConnector()->getAdapter( 'Meta' )->create_indexes();
 					}
 				}
 			}

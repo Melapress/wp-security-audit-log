@@ -163,7 +163,15 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord {
 	 */
 	public function CountNotifications( $opt_prefix ) {
 		$_wpdb = $this->connection;
-		$sql = 'SELECT COUNT(id) FROM ' . $this->GetTable() . " WHERE option_name LIKE '" . $opt_prefix . "%'";
+		$sql   = 'SELECT COUNT(id) FROM ' . $this->GetTable() . " WHERE option_name LIKE '" . $opt_prefix . "%'";
 		return (int) $_wpdb->get_var( $sql );
+	}
+
+	/**
+	 * Create relevant indexes on the option table.
+	 */
+	public function create_indexes() {
+		$db_connection = $this->get_connection();
+		$db_connection->query( 'CREATE INDEX option_name ON ' . $this->GetTable() . ' (option_name)' );
 	}
 }

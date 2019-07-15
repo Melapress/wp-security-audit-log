@@ -131,7 +131,7 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 	 */
 	public function GetMatchingIPs( $limit = null ) {
 		$_wpdb = $this->connection;
-		$sql = "SELECT DISTINCT value FROM {$this->GetTable()} WHERE name = \"ClientIP\"";
+		$sql   = "SELECT DISTINCT value FROM {$this->GetTable()} WHERE name = \"ClientIP\"";
 		if ( ! is_null( $limit ) ) {
 			$sql .= ' LIMIT ' . $limit;
 		}
@@ -140,5 +140,13 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 			$ips[ $key ] = str_replace( '"', '', $ip );
 		}
 		return array_unique( $ips );
+	}
+
+	/**
+	 * Create relevant indexes on the metadata table.
+	 */
+	public function create_indexes() {
+		$db_connection = $this->get_connection();
+		$db_connection->query( 'CREATE INDEX name_value ON ' . $this->GetTable() . ' (name, value(64))' );
 	}
 }
