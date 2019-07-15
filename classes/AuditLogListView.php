@@ -994,7 +994,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			$offset      = ( $this->get_pagenum() - 1 ) * $per_page;
 		} else {
 			$total_items = false;
-			$per_page    = 25; // Manually set per page events for infinite scroll.
+			$per_page    = apply_filters( 'wsal_infinite_scroll_events', 25 ); // Manually set per page events for infinite scroll.
 			$offset      = ( max( 1, $paged ) - 1 ) * $per_page;
 		}
 
