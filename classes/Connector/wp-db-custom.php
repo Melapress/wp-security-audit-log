@@ -22,6 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class wpdbCustom extends wpdb {
 
 	/**
+	 * Allow bail?
+	 *
+	 * @var boolean
+	 */
+	private $allow_bail = true;
+
+	/**
 	 * Overwrite wpdb class for set $allow_bail to false
 	 * and hide the print of the error
 	 *
@@ -39,9 +46,11 @@ class wpdbCustom extends wpdb {
 	 */
 	public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key, $test_connection = false ) {
 		register_shutdown_function( array( $this, '__destruct' ) );
+
 		if ( WP_DEBUG && WP_DEBUG_DISPLAY ) {
 			$this->show_errors();
 		}
+
 		if ( function_exists( 'mysqli_connect' ) ) {
 			if ( defined( 'WP_USE_EXT_MYSQL' ) ) {
 				$this->use_mysqli = ! WP_USE_EXT_MYSQL;
@@ -51,6 +60,7 @@ class wpdbCustom extends wpdb {
 				$this->use_mysqli = true;
 			}
 		}
+
 		$this->dbuser     = $dbuser;
 		$this->dbpassword = $dbpassword;
 		$this->dbname     = $dbname;
@@ -78,6 +88,7 @@ class wpdbCustom extends wpdb {
 		}
 
 		if ( $test_connection ) {
+			$this->allow_bail = false;
 			$this->db_connect( false );
 		} else {
 			$this->db_connect();
@@ -130,7 +141,7 @@ class wpdbCustom extends wpdb {
 			}
 
 			// Set SSL certs if we want to use secure DB connections.
-			$ssl_opts = array(
+			$ssl_opts     = array(
 				'KEY'     => ( defined( 'MYSQL_SSL_KEY' ) && is_file( MYSQL_SSL_KEY ) ) ? MYSQL_SSL_KEY : null,
 				'CERT'    => ( defined( 'MYSQL_SSL_CERT' ) && is_file( MYSQL_SSL_CERT ) ) ? MYSQL_SSL_CERT : null,
 				'CA'      => ( defined( 'MYSQL_SSL_CA' ) && is_file( MYSQL_SSL_CA ) ) ? MYSQL_SSL_CA : null,
@@ -195,7 +206,7 @@ class wpdbCustom extends wpdb {
 
 			// Load custom DB error template, if present.
 			if ( file_exists( WP_CONTENT_DIR . '/db-error.php' ) ) {
-				require_once( WP_CONTENT_DIR . '/db-error.php' );
+				require_once WP_CONTENT_DIR . '/db-error.php';
 				die();
 			}
 
@@ -240,5 +251,72 @@ class wpdbCustom extends wpdb {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Selects a database using the current database connection.
+	 *
+	 * The database name will be changed based on the current database
+	 * connection. On failure, the execution will bail and display an DB error.
+	 *
+	 * @since 0.71
+	 *
+	 * @param string        $db  MySQL database name
+	 * @param resource|null $dbh Optional link identifier.
+	 */
+	public function select( $db, $dbh = null ) {
+		if ( is_null( $dbh ) ) {
+			$dbh = $this->dbh;
+		}
+
+		if ( $this->use_mysqli ) {
+			$success = mysqli_select_db( $dbh, $db );
+		} else {
+			$success = mysql_select_db( $db, $dbh );
+		}
+
+		if ( ! $success ) {
+			$this->ready = false;
+
+			if ( ! did_action( 'template_redirect' ) && $this->allow_bail ) {
+				wp_load_translations_early();
+
+				$message = '<h1>' . __( 'Can&#8217;t select database' ) . "</h1>\n";
+
+				$message .= '<p>' . sprintf(
+					/* translators: %s: database name */
+					__( 'We were able to connect to the database server (which means your username and password is okay) but not able to select the %s database.' ),
+					'<code>' . htmlspecialchars( $db, ENT_QUOTES ) . '</code>'
+				) . "</p>\n";
+
+				$message .= "<ul>\n";
+				$message .= '<li>' . __( 'Are you sure it exists?' ) . "</li>\n";
+
+				$message .= '<li>' . sprintf(
+					/* translators: 1: database user, 2: database name */
+					__( 'Does the user %1$s have permission to use the %2$s database?' ),
+					'<code>' . htmlspecialchars( $this->dbuser, ENT_QUOTES ) . '</code>',
+					'<code>' . htmlspecialchars( $db, ENT_QUOTES ) . '</code>'
+				) . "</li>\n";
+
+				$message .= '<li>' . sprintf(
+					/* translators: %s: database name */
+					__( 'On some systems the name of your database is prefixed with your username, so it would be like <code>username_%1$s</code>. Could that be the problem?' ),
+					htmlspecialchars( $db, ENT_QUOTES )
+				) . "</li>\n";
+
+				$message .= "</ul>\n";
+
+				$message .= '<p>' . sprintf(
+					/* translators: %s: support forums URL */
+					__( 'If you don&#8217;t know how to set up a database you should <strong>contact your host</strong>. If all else fails you may find help at the <a href="%s">WordPress Support Forums</a>.' ),
+					__( 'https://wordpress.org/support/forums/' )
+				) . "</p>\n";
+
+				$this->bail( $message, 'db_select_fail' );
+			} else {
+				$this->db_select_error = true;
+			}
+		}
 	}
 }

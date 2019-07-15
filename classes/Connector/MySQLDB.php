@@ -49,11 +49,25 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 		error_reporting( E_ALL ^ ( E_NOTICE | E_WARNING | E_DEPRECATED ) );
 		$connection_config = $this->connectionConfig;
 		$password          = $this->decryptString( $connection_config['password'] );
-		$new_wpdb          = new wpdbCustom( $connection_config['user'], $password, $connection_config['name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'], true );
 
-		// Database Error.
-		if ( ! $new_wpdb->has_connected ) {
-			throw new Exception( 'Connection failed. Please check your connection details.' );
+		$new_wpdb = new wpdbCustom( $connection_config['user'], $password, $connection_config['name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'], true );
+
+		if ( isset( $new_wpdb->error ) && isset( $new_wpdb->dbh ) ) {
+			throw new Exception( $new_wpdb->dbh->error, $new_wpdb->dbh->errno );
+		} elseif ( ! isset( $new_wpdb->dbh ) ) {
+			$error_code = mysqli_connect_errno();
+
+			if ( 2002 === $error_code ) {
+				throw new Exception( __( 'Error establishing a database connection. Hostname is not valid.' ), $error_code );
+			} elseif ( 1045 === $error_code ) {
+				throw new Exception( __( 'Error establishing a database connection. DB username or password are not valid.' ), $error_code );
+			} else {
+				throw new Exception( mysqli_connect_error(), $error_code );
+			}
+		} elseif ( isset( $new_wpdb->db_select_error ) ) {
+			throw new Exception( 'Error: Database ' . $connection_config['name'] . ' is unknown.', '1046' );
+		} elseif ( ! $new_wpdb->has_connected ) {
+			throw new Exception( 'Error establishing a database connection.' );
 		} else {
 			return true;
 		}
