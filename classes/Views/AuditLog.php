@@ -218,15 +218,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				if ( ! is_multisite() || ( is_multisite() && is_network_admin() ) ) :
 					?>
 					<div class="notice notice-success">
-						<p><?php echo wp_kses( __( 'Help us improve WP Security Audit Log! Opt-in to sending us diagnostic non-sensitive data about your plugin usage (<strong>no activity log data is sent</strong>) and subscribe to our newsletter.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
+						<p><strong><?php esc_html_e( 'Help WP Security Audit Log improve.', 'wp-security-audit-log' ); ?></strong></p>
+						<p><?php echo esc_html__( 'Gathering non-sensitive diagnostic data about the plugin install helps us improve the plugin. When you opt-in, you also subscribe to our announcements (you can opt-out at any time). If you would rather opt-out, we will not collect any data.', 'wp-security-audit-log' ) . ' <a href="https://www.wpsecurityauditlog.com/support-documentation/non-sensitive-diagnostic-data/" target="_blank">' . esc_html__( 'Read more about what we collect.', 'wp-security-audit-log' ) . '</a>'; ?></p>
 						<p>
-							<a href="javascript:;" class="button button-primary" onclick="wsal_freemius_opt_in(this)" data-opt="yes">
-								<?php esc_html_e( 'Opt-In', 'wp-security-audit-log' ); ?>
-							</a>
-							<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" class="button button-secondary" target="_blank"><?php esc_html_e( 'Learn More', 'wp-security-audit-log' ); ?></a>
-							<a href="javascript:;" class="button" onclick="wsal_freemius_opt_in(this)" data-opt="no">
-								<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
-							</a>
+							<a href="javascript:;" class="button button-primary" onclick="wsal_freemius_opt_in(this)" data-opt="yes"><?php esc_html_e( 'Sure, opt-in', 'wp-security-audit-log' ); ?></a>
+							<a href="javascript:;" class="button" onclick="wsal_freemius_opt_in(this)" data-opt="no"><?php esc_html_e( 'No, thank you', 'wp-security-audit-log' ); ?></a>
 							<input type="hidden" id="wsal-freemius-opt-nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-freemius-opt' ) ); ?>" />
 						</p>
 					</div>
@@ -827,7 +823,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Remodal styles.
 		wp_enqueue_style( 'wsal-remodal', $this->_plugin->GetBaseUrl() . '/css/remodal.css', array(), '1.1.1' );
-		wp_enqueue_style( 'wsal-remodal-theme', $this->_plugin->GetBaseUrl() . '/css/remodal-default-theme.css', array(), '1.1.1' );
+		wp_enqueue_style( 'wsal-remodal-theme', $this->_plugin->GetBaseUrl() . '/css/remodal-default-theme.css', array(), '1.1.1.1' );
 
 		// Audit log styles.
 		wp_enqueue_style(
