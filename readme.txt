@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.2.2
-Stable tag: 3.4.1.1
+Stable tag: 3.4.2
 Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -198,36 +198,26 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.4.2 (2019-07-01) =
+Release notes: [Update 3.4.2 - Plugin UX & Performance Improvements](https://www.wpsecurityauditlog.com/releases/update-3-4-2-improved-ux-search-performance/)
 
-* **Minor Update**
-	* Updated the Freemius SDK to address an issue introduced because of a core change.
+= 3.4.2 (2019-07-17) =
 
-= 3.4.1 (2019-05-16) =
+* **New Feature**
+	* A [hook to specify the number of events](https://www.wpsecurityauditlog.com/support-documentation/list-hooks/#wsal_infinite_scroll_events) shown by default in the audit log viewer when in [infinite scroll view mode](https://www.wpsecurityauditlog.com/support-documentation/change-audit-log-viewer-pagination-infinite-scroll/).
 
-Release notes: [New plugin settings import/export tool & hooks for theme developers](https://www.wpsecurityauditlog.com/releases/update-3-4-1-import-export-plugin-settings/)
+* **Improvements**
+	* Optimized the database queries used for search and filters (30x faster!).
+	* Improved tracking of mirrored events to avoid mirroring duplicate events.
+	* Specific error messages that help you troubleshoot are now shown when [integrating Twilio for SMS notitications](https://www.wpsecurityauditlog.com/wordpress-admin/sms-notifications-alerts-wordpress-administrators/).
+	* Plugin shows warning to install [Activity Log for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/) when installed on MainWP website.
+	* Added website URL in default [email notifications for WordPress](https://www.wpsecurityauditlog.com/premium-features/email-notifications-wordpress-activity-log/).
+	* MySQL response errors are now displayed when configuring an [external database connection](https://www.wpsecurityauditlog.com/premium-features/database-integration-tools-wordpress-activity-log/).
+	* Improved the first time install message about non-sensitive diagnostic data.
+	* Width of first install wizard prompt is responsive.
 
-* **New Features**
-	* Tool to export and import plugin configuration & settings.
-	* Exclude range of IP addresses from the activity log.
-	* New [hooks for theme developers](https://www.wpsecurityauditlog.com/support-documentation/list-hooks/) to display the custom login messages the plugin shows when multiple user sessions are blocked.
-	* New hook to add a list of hidden meta keys the plugin should keep a log of.
-	
-* **Plugin Improvements**
-	* First time plugin use texts is now easier to read and much shorter.
-	* Added support for more time & date formats in the (activity log reports for WordPress](https://www.wpsecurityauditlog.com/premium-features/reports-wordpress-activity-log/).
-	* Improved content sensor - previously reporting events not neccessarily needed (background processes)
-	* Removed hardcoded paths from the [WordPress file integrity scanner](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/).
-	* Removed Sites filter from audit log viewer - made redundant by the site selector drop down menu.
-	
-* **Bug Fixes**
-	* Multiple events reporting the same thing generated when user changes WooCommerce shipping / billing address.
-	* Updated incorrect tags used in test SMS message.
-	* Event 2002 (modified post) reported even when there is a specific change event ID.
-	* Event 2016 (plugin modified post) reported whenever a post is updated by user.
-	* External database connection cannot be deleted because it is marked in use even when not.
-	* Plugin generating error when set_user_role is set to NUL in request.
-	* Infinite scroll stops working on Firefox (intermittent issue).
+* **Bug fixes**
+	* Plugin logs an error when a non exising WooCommerce page is requested (HTTP 404).
+	* Handling of infinite loop when Freemius API is unavailable during plugin first install.
 	
 = Earlier versions =
 
