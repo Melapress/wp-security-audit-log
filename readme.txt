@@ -30,7 +30,11 @@ Keep an activity log of everything that happens on your WordPress and [WordPress
 > <strong>Note</strong>: All WordPress logging functionality is FREE. Features such as reports, email notifications & search are available in the <Strong>[Premium Edition](https://www.wpsecurityauditlog.com/premium-features/)</strong>.
 >
 
-#### WordPress Changes & Details the Plugin Keeps a Log Of
+#### Maintained & Supported by WP White Security
+
+WP White Security builds high-quality niche WordPress security & admin plugins like [Password Policy Manager for WordPress](https://www.wpwhitesecurity.com/wordpress-plugins/password-policy-manager-wordpress/), a plugin with which you can ensure all your users use strong passwords. Browse our list of [WordPress plugins](https://www.wpwhitesecurity.com/wordpress-plugins/ that help you better manage and improve the security of your WordPress website.
+
+### WordPress Changes & Details the Plugin Keeps a Log Of
 As a comprehensive & complete WordPress activity log solution WP Security Audit Log does not just tell you that a post, a user profile, or an object was updated. It keeps a log of what was changed within the post, profile or object.
 
 Below is a summary of the changes that the plugin can keep a record of:
