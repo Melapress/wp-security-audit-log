@@ -27,7 +27,7 @@ Keep an activity log of everything that happens on your WordPress and [WordPress
 
 [youtube https://www.youtube.com/watch?v=1nopATCS-CQ]
 
-> <strong>Note</strong>: All WrodPress logging functionality is FREE. Features such as reports, email notifications & search are available in the <Strong>[Premium Edition](https://www.wpsecurityauditlog.com/premium-features/)</strong>.
+> <strong>Note</strong>: All WordPress logging functionality is FREE. Features such as reports, email notifications & search are available in the <Strong>[Premium Edition](https://www.wpsecurityauditlog.com/premium-features/)</strong>.
 >
 
 #### WordPress Changes & Details the Plugin Keeps a Log Of
