@@ -329,8 +329,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						break;
 
 					case 'get_events':
-						$limit = isset( $post_data['events_count'] ) ? $post_data['events_count'] : false;
-						$info  = $this->alerts->get_mainwp_extension_events( $limit );
+						$limit      = isset( $post_data['events_count'] ) ? $post_data['events_count'] : false;
+						$offset     = isset( $post_data['events_offset'] ) ? $post_data['events_offset'] : false;
+						$query_args = isset( $post_data['query_args'] ) ? $post_data['query_args'] : false;
+						$info       = $this->alerts->get_mainwp_extension_events( $limit, $offset, $query_args );
+						break;
+
+					case 'get_report':
+						$filters     = isset( $post_data['filters'] ) ? $post_data['filters'] : array();
+						$report_type = isset( $post_data['report_type'] ) ? $post_data['report_type'] : false;
+						$info        = $this->alerts->get_mainwp_extension_report( $filters, $report_type );
 						break;
 
 					case 'latest_event':
