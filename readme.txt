@@ -146,7 +146,6 @@ Refer to the <strong>[WordPress activity log plugin datasheet](https://www.wpsec
 We need help translating the plugin and the WordPress Security Alerts. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log) to translate the plugin and drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
 
 * Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
-* Brazilian Portuguese by [Hudson Santos](https://www.smallbee.com.br/)
 * German translation by [Mourad Louha](http://excel-translator.de)
 * Brazilian Portuguese translation by [Hudson Santos](https://www.smallbee.com.br/)
 * Spanish translation by the [WP Body team](https://wpbody.com/)
