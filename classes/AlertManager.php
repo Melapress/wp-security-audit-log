@@ -1271,7 +1271,7 @@ final class WSAL_AlertManager {
 	 */
 	private function generate_report( $filters ) {
 		// Filters.
-		$sites         = empty( $filters['sites'] ) ? null : $filters['sites'];
+		$sites         = null;
 		$users         = empty( $filters['users'] ) ? array() : $filters['users'];
 		$roles         = empty( $filters['roles'] ) ? null : $filters['roles'];
 		$ip_addresses  = empty( $filters['ip-addresses'] ) ? null : $filters['ip-addresses'];
