@@ -1421,7 +1421,7 @@ final class WSAL_AlertManager {
 	private function generate_statistics_unique_ips( $filters ) {
 		$date_start = ! empty( $filters['date-range']['start'] ) ? $filters['date-range']['start'] : null;
 		$date_end   = ! empty( $filters['date-range']['end'] ) ? $filters['date-range']['end'] : null;
-		$sites      = ! empty( $filters['sites'] ) ? $filters['sites'] : null;
+		$sites      = null;
 
 		$user_id    = ! empty( $filters['users'] ) ? $filters['users'] : 'null';
 		$role_name  = ! empty( $filters['roles'] ) ? $filters['roles'] : 'null';
