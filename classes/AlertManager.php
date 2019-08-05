@@ -1656,7 +1656,7 @@ final class WSAL_AlertManager {
 			'code'       => $const->name,
 			'message'    => $occurrence->GetAlert()->GetMessage( $occurrence->GetMetaArray(), array( $this->plugin->settings, 'meta_formatter' ), $occurrence->_cachedmessage ),
 			'user_name'  => $username,
-			'user_data'  => $this->get_event_user_data( $username ),
+			'user_data'  => $user_id ? $this->get_event_user_data( $username ) : false,
 			'role'       => $roles,
 			'user_ip'    => $ip,
 			'user_agent' => $ua,
