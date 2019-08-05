@@ -138,6 +138,7 @@ final class WSAL_AlertManager {
 			)
 		);
 
+		$this->date_format     = $this->plugin->settings->GetDateFormat();
 		$this->datetime_format = $this->plugin->settings->GetDatetimeFormat();
 		$timezone              = $this->plugin->settings->GetTimezone();
 
@@ -1578,13 +1579,13 @@ final class WSAL_AlertManager {
 	 * @param int          $alert_id   - Alert ID.
 	 * @param int          $site_id    - Site ID.
 	 * @param string       $created_on - Alert generation time.
-	 * @param string       $username   - Username.
+	 * @param int          $user_id    - User id.
 	 * @param string|array $roles      - User roles.
 	 * @param string       $ip         - IP address of the user.
 	 * @param string       $ua         - User agent.
 	 * @return array|false details
 	 */
-	private function get_alert_details( $entry_id, $alert_id, $site_id, $created_on, $username = null, $roles = null, $ip = '', $ua = '' ) {
+	private function get_alert_details( $entry_id, $alert_id, $site_id, $created_on, $user_id = null, $roles = null, $ip = '', $ua = '' ) {
 		// Must be a new instance every time, otherwise the alert message is not retrieved properly.
 		$occurrence = new WSAL_Models_Occurrence();
 
@@ -1634,9 +1635,11 @@ final class WSAL_AlertManager {
 			$occurrence->_cachedmessage = $occurrence->GetAlert()->mesg;
 		}
 
-		if ( ! $username ) {
+		if ( ! $user_id ) {
 			$username = __( 'System', 'wp-security-audit-log' );
 			$roles    = '';
+		} else {
+			$username = $occurrence->GetUsername();
 		}
 
 		// Meta details.
@@ -1653,7 +1656,7 @@ final class WSAL_AlertManager {
 			'code'       => $const->name,
 			'message'    => $occurrence->GetAlert()->GetMessage( $occurrence->GetMetaArray(), array( $this->plugin->settings, 'meta_formatter' ), $occurrence->_cachedmessage ),
 			'user_name'  => $username,
-			'user_data'  => $this->get_event_user_data( $occurrence->GetUsername() ),
+			'user_data'  => $this->get_event_user_data( $username ),
 			'role'       => $roles,
 			'user_ip'    => $ip,
 			'user_agent' => $ua,
