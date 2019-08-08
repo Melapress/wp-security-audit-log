@@ -139,7 +139,7 @@ final class WSAL_AlertManager {
 		);
 
 		$this->date_format     = $this->plugin->settings->GetDateFormat();
-		$this->datetime_format = $this->plugin->settings->GetDatetimeFormat();
+		$this->datetime_format = $this->plugin->settings->GetDatetimeFormat( false );
 		$timezone              = $this->plugin->settings->GetTimezone();
 
 		if ( '0' === $timezone ) {
