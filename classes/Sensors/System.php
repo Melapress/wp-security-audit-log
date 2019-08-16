@@ -62,6 +62,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
 
 		add_action( 'automatic_updates_complete', array( $this, 'WPUpdate' ), 10, 1 );
+
 		add_filter( 'template_redirect', array( $this, 'Event404' ) );
 
 		// Get WP upload directory.
@@ -133,7 +134,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			&& ! empty( $option ) && 'admin_email' === $option ) {
 			if ( $old_value != $new_value ) {
 				$this->plugin->alerts->Trigger(
-					6003, array(
+					6003,
+					array(
 						'OldEmail'      => $old_value,
 						'NewEmail'      => $new_value,
 						'CurrentUserID' => wp_get_current_user()->ID,
@@ -151,7 +153,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 */
 	public function EventPruneEvents( $count, $query ) {
 		$this->plugin->alerts->Trigger(
-			6000, array(
+			6000,
+			array(
 				'EventCount' => $count,
 				'PruneQuery' => $query,
 			)
@@ -342,7 +345,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		// Destroy all the session of the same user from user profile page.
 		if ( isset( $post_array['action'] ) && ( 'destroy-sessions' == $post_array['action'] ) && isset( $post_array['user_id'] ) ) {
 			$this->plugin->alerts->Trigger(
-				1006, array(
+				1006,
+				array(
 					'TargetUserID' => $post_array['user_id'],
 				)
 			);
@@ -370,7 +374,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_siteurl = isset( $post_array['siteurl'] ) ? $post_array['siteurl'] : '';
 			if ( $old_siteurl !== $new_siteurl ) {
 				$this->plugin->alerts->Trigger(
-					6024, array(
+					6024,
+					array(
 						'old_url'       => $old_siteurl,
 						'new_url'       => $new_siteurl,
 						'CurrentUserID' => wp_get_current_user()->ID,
@@ -387,7 +392,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_url = isset( $post_array['home'] ) ? $post_array['home'] : '';
 			if ( $old_url !== $new_url ) {
 				$this->plugin->alerts->Trigger(
-					6025, array(
+					6025,
+					array(
 						'old_url'       => $old_url,
 						'new_url'       => $new_url,
 						'CurrentUserID' => wp_get_current_user()->ID,
@@ -404,7 +410,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new = isset( $post_array['users_can_register'] ) ? 'Enabled' : 'Disabled';
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
-					6001, array(
+					6001,
+					array(
 						'OldValue'      => $old,
 						'NewValue'      => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
@@ -419,7 +426,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new = trim( $post_array['default_role'] );
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
-					6002, array(
+					6002,
+					array(
 						'OldRole'       => $old,
 						'NewRole'       => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
@@ -434,7 +442,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new = trim( $post_array['admin_email'] );
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
-					6003, array(
+					6003,
+					array(
 						'OldEmail'      => $old,
 						'NewEmail'      => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
@@ -449,7 +458,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new = trim( $post_array['admin_email'] );
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
-					6003, array(
+					6003,
+					array(
 						'OldEmail'      => $old,
 						'NewEmail'      => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
@@ -464,7 +474,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new = trim( $post_array['permalink_structure'] );
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
-					6005, array(
+					6005,
+					array(
 						'OldPattern'    => $old,
 						'NewPattern'    => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
@@ -479,7 +490,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_version = $post_array['version'];
 			if ( $old_version != $new_version ) {
 				$this->plugin->alerts->Trigger(
-					6004, array(
+					6004,
+					array(
 						'OldVersion' => $old_version,
 						'NewVersion' => $new_version,
 					)
@@ -502,7 +514,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_role = $post_array['_bbp_default_role'];
 			if ( $old_role != $new_role ) {
 				$this->plugin->alerts->Trigger(
-					8009, array(
+					8009,
+					array(
 						'OldRole' => $old_role,
 						'NewRole' => $new_role,
 					)
@@ -518,7 +531,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( $old_status !== $new_status ) {
 				$status = ( 1 === $new_status ) ? 'Enabled' : 'Disabled';
 				$this->plugin->alerts->Trigger(
-					8010, array(
+					8010,
+					array(
 						'Status' => $status,
 					)
 				);
@@ -530,7 +544,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_time      = ! empty( $post_array['_bbp_edit_lock'] ) ? $post_array['_bbp_edit_lock'] : '';
 			if ( $old_time != $new_time ) {
 				$this->plugin->alerts->Trigger(
-					8012, array(
+					8012,
+					array(
 						'OldTime' => $old_time,
 						'NewTime' => $new_time,
 					)
@@ -543,7 +558,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_time2         = ! empty( $post_array['_bbp_throttle_time'] ) ? $post_array['_bbp_throttle_time'] : '';
 			if ( $old_time2 != $new_time2 ) {
 				$this->plugin->alerts->Trigger(
-					8013, array(
+					8013,
+					array(
 						'OldTime' => $old_time2,
 						'NewTime' => $new_time2,
 					)
@@ -562,7 +578,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$obj         = $automatic['core'][0];
 			$old_version = get_bloginfo( 'version' );
 			$this->plugin->alerts->Trigger(
-				6004, array(
+				6004,
+				array(
 					'OldVersion' => $old_version,
 					'NewVersion' => $obj->item->version . ' (auto update)',
 				)
@@ -640,7 +657,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_status = isset( $post_array['blog_public'] ) ? 0 : 1;
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
-					6008, array(
+					6008,
+					array(
 						'Status' => ( 0 === $new_status ) ? 'Enabled' : 'Disabled',
 					)
 				);
@@ -652,7 +670,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_status = isset( $post_array['default_comment_status'] ) ? 'open' : 'closed';
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
-					6009, array(
+					6009,
+					array(
 						'Status' => ( 'open' === $new_status ) ? 'Enabled' : 'Disabled',
 					)
 				);
@@ -662,7 +681,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_status = isset( $post_array['require_name_email'] ) ? 1 : 0;
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
-					6010, array(
+					6010,
+					array(
 						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
 					)
 				);
@@ -672,7 +692,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_status = isset( $post_array['comment_registration'] ) ? 1 : 0;
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
-					6011, array(
+					6011,
+					array(
 						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
 					)
 				);
@@ -683,7 +704,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			if ( $old_status !== $new_status ) {
 				$value = isset( $post_array['close_comments_days_old'] ) ? $post_array['close_comments_days_old'] : 0;
 				$this->plugin->alerts->Trigger(
-					6012, array(
+					6012,
+					array(
 						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
 						'Value'  => $value,
 					)
@@ -694,7 +716,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_value = isset( $post_array['close_comments_days_old'] ) ? $post_array['close_comments_days_old'] : 0;
 			if ( $old_value !== $new_value ) {
 				$this->plugin->alerts->Trigger(
-					6013, array(
+					6013,
+					array(
 						'OldValue' => $old_value,
 						'NewValue' => $new_value,
 					)
@@ -705,7 +728,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_status = isset( $post_array['comment_moderation'] ) ? 1 : 0;
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
-					6014, array(
+					6014,
+					array(
 						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
 					)
 				);
@@ -715,7 +739,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_status = isset( $post_array['comment_whitelist'] ) ? 1 : 0;
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
-					6015, array(
+					6015,
+					array(
 						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
 					)
 				);
@@ -725,7 +750,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$new_value = isset( $post_array['comment_max_links'] ) ? $post_array['comment_max_links'] : 0;
 			if ( $old_value !== $new_value ) {
 				$this->plugin->alerts->Trigger(
-					6016, array(
+					6016,
+					array(
 						'OldValue' => $old_value,
 						'NewValue' => $new_value,
 					)
