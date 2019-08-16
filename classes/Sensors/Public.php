@@ -53,13 +53,17 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
-		if ( $this->plugin->load_wsal_on_frontend() ) {
+		if ( $this->plugin->alerts->IsEnabled( 6023 ) || $this->plugin->alerts->IsEnabled( 6027 ) ) {
+			add_filter( 'template_redirect', array( $this, 'event_404' ) );
+		}
+
+		// Hook the events if user is logged in OR if user is not logged in and visitor events are allowed to load.
+		if ( is_user_logged_in() || ( ! is_user_logged_in() && $this->plugin->load_for_visitor_events() ) ) {
 			add_action( 'user_register', array( $this, 'event_user_register' ) );
 			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 3 );
-			add_filter( 'template_redirect', array( $this, 'event_404' ) );
 
 			// Check if WooCommerce plugin exists.
-			if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			if ( WpSecurityAuditLog::is_woocommerce_active() ) {
 				add_action( 'woocommerce_new_order', array( $this, 'event_new_order' ), 10, 1 );
 				add_filter( 'woocommerce_order_item_quantity', array( $this, 'set_old_stock' ), 10, 3 );
 				add_action( 'woocommerce_product_set_stock', array( $this, 'product_stock_changed' ), 10, 1 );
@@ -79,7 +83,8 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		$event        = $ismu ? 4012 : ( is_user_logged_in() ? 4001 : 4000 );
 		$current_user = wp_get_current_user();
 		$this->plugin->alerts->Trigger(
-			$event, array(
+			$event,
+			array(
 				'NewUserID'   => $user_id,
 				'UserChanger' => ! empty( $current_user ) ? $current_user->user_login : '',
 				'NewUserData' => (object) array(
@@ -89,7 +94,8 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 					'Email'     => $user->user_email,
 					'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 				),
-			), true
+			),
+			true
 		);
 	}
 
@@ -544,7 +550,8 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 			$editor_link = $this->get_editor_link( $order_post );
 
 			$this->plugin->alerts->Trigger(
-				9035, array(
+				9035,
+				array(
 					'OrderID'            => $order_id,
 					'OrderTitle'         => $this->get_order_title( $new_order ),
 					'OrderStatus'        => $new_order->get_status(),
@@ -653,7 +660,8 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		if ( ( $old_stock_status && $new_stock_status ) && ( $old_stock_status !== $new_stock_status ) ) {
 			$editor_link = $this->get_editor_link( $post );
 			$this->plugin->alerts->Trigger(
-				9018, array(
+				9018,
+				array(
 					'ProductTitle'       => $product_title,
 					'ProductStatus'      => ( ! $product_status ) ? $post->post_status : $product_status,
 					'OldStatus'          => $this->get_stock_status( $old_stock_status ),
@@ -670,7 +678,8 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		if ( ( $old_stock !== $new_stock ) && ( 'on' === $wc_all_stock_changes ) ) {
 			$editor_link = $this->get_editor_link( $post );
 			$this->plugin->alerts->Trigger(
-				9019, array(
+				9019,
+				array(
 					'ProductTitle'       => $product_title,
 					'ProductStatus'      => ( ! $product_status ) ? $post->post_status : $product_status,
 					'OldValue'           => ( ! empty( $old_stock ) ? $old_stock : 0 ),
