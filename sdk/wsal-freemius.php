@@ -42,30 +42,33 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 				'days'               => 7,
 				'is_require_payment' => false,
 			);
-			if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) && ! is_multisite() ) {
+
+			if ( WpSecurityAuditLog::is_plugin_active( 'mainwp-child/mainwp-child.php' ) && ! is_multisite() ) {
 				$trial_args = false;
 			}
 
-			$wsal_freemius = fs_dynamic_init( array(
-				'id'              => '94',
-				'slug'            => 'wp-security-audit-log',
-				'type'            => 'plugin',
-				'public_key'      => 'pk_d602740d3088272d75906045af9fa',
-				'premium_suffix'  => '(Premium)',
-				'is_premium'      => $is_premium,
-				'has_addons'      => false,
-				'has_paid_plans'  => true,
-				'trial'           => $trial_args,
-				'has_affiliation' => false,
-				'menu'            => array(
-					'slug'        => 'wsal-auditlog',
-					'support'     => false,
-					'affiliation' => false,
-					'network'     => true,
-				),
-				'anonymous_mode'  => $is_anonymous,
-				'live'            => true,
-			) );
+			$wsal_freemius = fs_dynamic_init(
+				array(
+					'id'              => '94',
+					'slug'            => 'wp-security-audit-log',
+					'type'            => 'plugin',
+					'public_key'      => 'pk_d602740d3088272d75906045af9fa',
+					'premium_suffix'  => '(Premium)',
+					'is_premium'      => $is_premium,
+					'has_addons'      => false,
+					'has_paid_plans'  => true,
+					'trial'           => $trial_args,
+					'has_affiliation' => false,
+					'menu'            => array(
+						'slug'        => 'wsal-auditlog',
+						'support'     => false,
+						'affiliation' => false,
+						'network'     => true,
+					),
+					'anonymous_mode'  => $is_anonymous,
+					'live'            => true,
+				)
+			);
 		}
 
 		return $wsal_freemius;
