@@ -74,7 +74,7 @@ class WSAL_WidgetManager {
 
 		?><div>
 		<?php if ( ! count( $results ) ) : ?>
-			<p><?php esc_html_e( 'No alerts found.', 'wp-security-audit-log' ); ?></p>
+			<p><?php esc_html_e( 'No events found.', 'wp-security-audit-log' ); ?></p>
 		<?php else : ?>
 			<table class="wp-list-table widefat" cellspacing="0" cellpadding="0"
 				style="display: block; overflow-x: auto;">
@@ -87,14 +87,10 @@ class WSAL_WidgetManager {
 					$url = 'admin.php?page=' . $this->_plugin->views->views[0]->GetSafeViewName();
 					$fmt = array( $this->_plugin->settings, 'meta_formatter' );
 					foreach ( $results as $entry ) :
+						$username = $entry->GetUsername();
 						?>
 						<tr>
-							<td>
-								<?php
-								$username = $entry->GetUsername();
-								echo ( $username ) ? esc_html( $username ) : '<i>unknown</i>';
-								?>
-							</td>
+							<td><?php echo ( $username ) ? esc_html( $username ) : '<i>unknown</i>'; ?></td>
 							<td>
 								<a href="<?php echo esc_url( $url ) . '#Event' . esc_attr( $entry->id ); ?>">
 									<?php echo wp_kses( $entry->GetMessage( $fmt ), $this->_plugin->allowed_html_tags ); ?>
