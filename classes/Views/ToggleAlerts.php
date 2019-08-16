@@ -270,30 +270,22 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								switch ( $subname ) {
 									case __( 'BBPress Forum', 'wp-security-audit-log' ):
 										// Check if BBPress plugin exists.
-										if ( ! is_plugin_active( 'bbpress/bbpress.php' ) ) {
+										if ( ! WpSecurityAuditLog::is_bbpress_active() ) {
 											$disabled = 'disabled';
 										}
 										break;
 
 									case __( 'WooCommerce', 'wp-security-audit-log' ):
-										// Check if WooCommerce plugin exists.
-										if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-											$disabled = 'disabled';
-										}
-										break;
-
 									case __( 'WooCommerce Products', 'wp-security-audit-log' ):
 										// Check if WooCommerce plugin exists.
-										if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+										if ( ! WpSecurityAuditLog::is_woocommerce_active() ) {
 											$disabled = 'disabled';
 										}
 										break;
 
 									case __( 'Yoast SEO', 'wp-security-audit-log' ):
 										// Check if Yoast SEO plugin exists.
-										if ( is_plugin_active( 'wordpress-seo/wp-seo.php' ) || is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' ) ) {
-											$disabled = '';
-										} else {
+										if ( ! WpSecurityAuditLog::is_wpseo_active() ) {
 											$disabled = 'disabled';
 										}
 										break;
