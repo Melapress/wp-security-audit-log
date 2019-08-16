@@ -132,13 +132,19 @@ class WSAL_Settings {
 	public $geek_alerts = array( 1004, 1005, 1006, 1007, 2023, 2024, 2053, 2054, 2055, 2062, 2100, 2106, 2111, 2112, 2124, 2125, 2094, 2095, 2043, 2071, 2082, 2083, 2085, 2089, 4014, 4015, 4016, 5010, 5011, 5012, 5019, 5025, 5013, 5014, 5015, 5016, 5017, 5018, 6001, 6002, 6007, 6008, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6023, 6024, 6025 );
 
 	/**
+	 * Current screen object.
+	 *
+	 * @var WP_Screen
+	 */
+	private $current_screen = '';
+
+	/**
 	 * Method: Constructor.
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->_plugin = $plugin;
-
 		add_action( 'deactivated_plugin', array( $this, 'reset_stealth_mode' ), 10, 1 );
 	}
 
@@ -838,40 +844,66 @@ class WSAL_Settings {
 		$this->_plugin->SetGlobalOption( 'filter-internal-ip', $enabled );
 	}
 
+	/**
+	 * Get main client IP.
+	 *
+	 * @return string|null
+	 */
 	public function GetMainClientIP() {
 		$result = null;
+
 		if ( $this->IsMainIPFromProxy() ) {
 			// TODO: The algorithm below just gets the first IP in the list...we might want to make this more intelligent somehow.
 			$result = $this->GetClientIPs();
 			$result = reset( $result );
 			$result = isset( $result[0] ) ? $result[0] : null;
 		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-			$result = $this->NormalizeIP( $_SERVER['REMOTE_ADDR'] );
+			$ip     = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+			$result = $this->NormalizeIP( $ip );
+
 			if ( ! $this->ValidateIP( $result ) ) {
 				$result = 'Error ' . self::ERROR_CODE_INVALID_IP . ': Invalid IP Address';
 			}
 		}
+
 		return $result;
 	}
 
+	/**
+	 * Get client IP addresses.
+	 *
+	 * @return array
+	 */
 	public function GetClientIPs() {
 		$ips = array();
+
 		foreach ( array( 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR' ) as $key ) {
 			if ( isset( $_SERVER[ $key ] ) ) {
 				$ips[ $key ] = array();
+
 				foreach ( explode( ',', $_SERVER[ $key ] ) as $ip ) {
-					if ( $this->ValidateIP( $ip = $this->NormalizeIP( $ip ) ) ) {
+					$ip = $this->NormalizeIP( $ip );
+
+					if ( $this->ValidateIP( $ip ) ) {
 						$ips[ $key ][] = $ip;
 					}
 				}
 			}
 		}
+
 		return $ips;
 	}
 
+	/**
+	 * Normalize IP address, i.e., remove the port number.
+	 *
+	 * @param string $ip - IP address.
+	 * @return string
+	 */
 	protected function NormalizeIP( $ip ) {
 		$ip = trim( $ip );
-		if ( strpos( $ip, ':' ) !== false && substr_count( $ip, '.' ) == 3 && strpos( $ip, '[' ) === false ) {
+
+		if ( strpos( $ip, ':' ) !== false && substr_count( $ip, '.' ) === 3 && strpos( $ip, '[' ) === false ) {
 			// IPv4 with a port (eg: 11.22.33.44:80).
 			$ip = explode( ':', $ip );
 			$ip = $ip[0];
@@ -880,23 +912,34 @@ class WSAL_Settings {
 			$ip = explode( ']', $ip );
 			$ip = ltrim( $ip[0], '[' );
 		}
+
 		return $ip;
 	}
 
+	/**
+	 * Validate IP address.
+	 *
+	 * @param string $ip - IP address.
+	 * @return string|bool
+	 */
 	protected function ValidateIP( $ip ) {
 		$opts = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
+
 		if ( $this->IsInternalIPsFiltered() ) {
 			$opts = $opts | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
 		}
+
 		$filtered_ip = filter_var( $ip, FILTER_VALIDATE_IP, $opts );
+
 		if ( ! $filtered_ip || empty( $filtered_ip ) ) {
 			// Regex IPV4.
 			if ( preg_match( '/^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/', $ip ) ) {
 				return $ip;
-			} // Regex IPV6.
-			elseif ( preg_match( '/^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/', $ip ) ) {
+			} elseif ( preg_match( '/^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/', $ip ) ) {
+				// Regex IPV6.
 				return $ip;
 			}
+
 			return false;
 		} else {
 			return $filtered_ip;
@@ -1460,7 +1503,7 @@ class WSAL_Settings {
 	public function set_mainwp_child_stealth_mode() {
 		if (
 			'yes' !== $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' ) // MainWP Child Stealth Mode is not already active.
-			&& is_plugin_active( 'mainwp-child/mainwp-child.php' ) // And if MainWP Child plugin is installed & active.
+			&& WpSecurityAuditLog::is_mainwp_active() // And if MainWP Child plugin is installed & active.
 		) {
 			// Check if freemius state is anonymous.
 			if ( ! wsal_freemius()->is_premium() && 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) ) {
@@ -1605,15 +1648,21 @@ class WSAL_Settings {
 				}
 
 			case '%LinkFile%' === $name:
-				if ( 'NULL' != $value ) {
-					$site_id = $this->get_view_site_id(); // Site id for multisite.
-					return '<a href="javascript:;" onclick="download_404_log( this )" data-log-file="' . esc_attr( $value ) . '" data-site-id="' . esc_attr( $site_id ) . '" data-nonce-404="' . esc_attr( wp_create_nonce( 'wsal-download-404-log-' . $value ) ) . '" title="' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '</a>';
-				} else {
-					return 'Click <a href="' . esc_url( add_query_arg( 'page', 'wsal-togglealerts', admin_url( 'admin.php' ) ) ) . '">here</a> to log such requests to file';
+				if ( ! $this->is_current_page( 'dashboard' ) ) {
+					if ( 'NULL' != $value ) {
+						$site_id = $this->get_view_site_id(); // Site id for multisite.
+						return '<a href="javascript:;" onclick="download_404_log( this )" data-log-file="' . esc_attr( $value ) . '" data-site-id="' . esc_attr( $site_id ) . '" data-nonce-404="' . esc_attr( wp_create_nonce( 'wsal-download-404-log-' . $value ) ) . '" title="' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '</a>';
+					} else {
+						return 'Click <a href="' . esc_url( add_query_arg( 'page', 'wsal-togglealerts', admin_url( 'admin.php' ) ) ) . '">here</a> to log such requests to file';
+					}
 				}
+				return '';
 
 			case '%URL%' === $name:
-				return ' or <a href="javascript:;" data-exclude-url="' . esc_url( $value ) . '" data-exclude-url-nonce="' . wp_create_nonce( 'wsal-exclude-url-' . $value ) . '" onclick="wsal_exclude_url( this )">exclude this URL</a> from being reported.';
+				if ( ! $this->is_current_page( 'dashboard' ) ) {
+					return ' or <a href="javascript:;" data-exclude-url="' . esc_url( $value ) . '" data-exclude-url-nonce="' . wp_create_nonce( 'wsal-exclude-url-' . $value ) . '" onclick="wsal_exclude_url( this )">exclude this URL</a> from being reported.';
+				}
+				return '';
 
 			case '%LogFileLink%' === $name: // Failed login file link.
 				return '';
@@ -2176,5 +2225,23 @@ class WSAL_Settings {
 	 */
 	public function get_server_directory( $directory ) {
 		return preg_replace( '/^' . preg_quote( ABSPATH, '/' ) . '/', '', $directory );
+	}
+
+	/**
+	 * Check the current page screen id against current screen id of WordPress.
+	 *
+	 * @param string $page - Page screen id.
+	 * @return boolean
+	 */
+	public function is_current_page( $page ) {
+		if ( ! $this->current_screen ) {
+			$this->current_screen = get_current_screen();
+		}
+
+		if ( isset( $this->current_screen->id ) ) {
+			return $page === $this->current_screen->id;
+		}
+
+		return false;
 	}
 }
