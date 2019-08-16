@@ -57,7 +57,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			add_action( 'login_redirect', array( $this, 'event_2fa_login' ), 10, 1 );
 		}
 
-		if ( is_plugin_active( 'user-switching/user-switching.php' ) ) {
+		if ( WpSecurityAuditLog::is_plugin_active( 'user-switching/user-switching.php' ) ) {
 			add_action( 'switch_to_user', array( $this, 'user_switched_event' ), 10, 2 );
 		}
 

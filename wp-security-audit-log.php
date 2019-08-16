@@ -1086,7 +1086,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$installation_errors .= '<a href="javascript:;" onclick="window.top.location.href=\'' . esc_url( network_admin_url( 'plugins.php' ) ) . '\'">' . esc_html__( 'Redirect me to the network dashboard', 'wp-security-audit-log' ) . '</a> ';
 			}
 
-			if ( is_plugin_active( 'mainwp/mainwp.php' ) ) {
+			if ( self::is_plugin_active( 'mainwp/mainwp.php' ) ) {
 				/* Translators: %s: Activity Log for MainWP plugin hyperlink */
 				$installation_errors = sprintf( __( 'Please install the %s plugin on the MainWP dashboard.', 'wp-security-audit-log' ), '<a href="https://wordpress.org/plugins/activity-log-mainwp/" target="_blank">' . __( 'Activity Log for MainWP', 'wp-security-audit-log' ) . '</a>' ) . ' ';
 				/* Translators: %s: Getting started guide hyperlink */
