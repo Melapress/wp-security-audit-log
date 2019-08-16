@@ -465,17 +465,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				return;
 			}
 
-			// Add filters to customize freemius welcome message.
-			wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
-			wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
-			wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
-			wsal_freemius()->add_filter( 'show_first_trial_after_n_sec', array( $this, 'change_show_first_trial_period' ), 10, 1 );
-			wsal_freemius()->add_filter( 'reshow_trial_after_every_n_sec', array( $this, 'change_reshow_trial_period' ), 10, 1 );
-			wsal_freemius()->add_filter( 'show_admin_notice', array( $this, 'freemius_show_admin_notice' ), 10, 2 );
-			wsal_freemius()->add_filter( 'show_delegation_option', '__return_false' );
-			wsal_freemius()->add_filter( 'enable_per_site_activation', '__return_false' );
-			wsal_freemius()->add_filter( 'show_trial', '__return_false' );
-			wsal_freemius()->add_filter( 'opt_in_error_message', array( $this, 'limited_license_activation_error' ), 10, 1 );
+			if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
+				// Add filters to customize freemius welcome message.
+				wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
+				wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
+				wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
+				wsal_freemius()->add_filter( 'show_first_trial_after_n_sec', array( $this, 'change_show_first_trial_period' ), 10, 1 );
+				wsal_freemius()->add_filter( 'reshow_trial_after_every_n_sec', array( $this, 'change_reshow_trial_period' ), 10, 1 );
+				wsal_freemius()->add_filter( 'show_admin_notice', array( $this, 'freemius_show_admin_notice' ), 10, 2 );
+				wsal_freemius()->add_filter( 'show_delegation_option', '__return_false' );
+				wsal_freemius()->add_filter( 'enable_per_site_activation', '__return_false' );
+				wsal_freemius()->add_filter( 'show_trial', '__return_false' );
+				wsal_freemius()->add_filter( 'opt_in_error_message', array( $this, 'limited_license_activation_error' ), 10, 1 );
+			}
 		}
 
 		/**
@@ -1925,6 +1927,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	if ( WpSecurityAuditLog::should_load_freemius() && file_exists( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' ) ) {
 		require_once plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php';
 
-		wsal_freemius()->add_action( 'after_uninstall', array( 'WpSecurityAuditLog', 'uninstall' ) );
+		if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
+			wsal_freemius()->add_action( 'after_uninstall', array( 'WpSecurityAuditLog', 'uninstall' ) );
+		}
 	}
 }
