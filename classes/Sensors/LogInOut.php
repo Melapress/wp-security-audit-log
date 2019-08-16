@@ -53,7 +53,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		add_action( 'clear_auth_cookie', array( $this, 'GetCurrentUser' ), 10 );
 		add_filter( 'wp_login_blocked', array( $this, 'EventLoginBlocked' ), 10, 1 );
 
-		if ( is_plugin_active( 'two-factor/two-factor.php' ) ) {
+		if ( WpSecurityAuditLog::is_twofactor_active() ) {
 			add_action( 'login_redirect', array( $this, 'event_2fa_login' ), 10, 1 );
 		}
 
@@ -130,10 +130,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			}
 
 			$this->plugin->alerts->Trigger(
-				1000, array(
+				1000,
+				array(
 					'Username'         => $user->user_login,
 					'CurrentUserRoles' => $user_roles,
-				), true
+				),
+				true
 			);
 		}
 		return $redirect_url;
@@ -181,10 +183,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				if ( ! empty( $user ) ) {
 					$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
 					$this->plugin->alerts->Trigger(
-						4003, array(
+						4003,
+						array(
 							'Username'         => $user->user_login,
 							'CurrentUserRoles' => $user_roles,
-						), true
+						),
+						true
 					);
 				}
 			}
@@ -199,10 +203,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			$user_roles[] = 'superadmin';
 		}
 		$this->plugin->alerts->Trigger(
-			1000, array(
+			1000,
+			array(
 				'Username'         => $user_login,
 				'CurrentUserRoles' => $user_roles,
-			), true
+			),
+			true
 		);
 	}
 
@@ -212,10 +218,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	public function EventLogout() {
 		if ( $this->_current_user->ID ) {
 			$this->plugin->alerts->Trigger(
-				1001, array(
+				1001,
+				array(
 					'CurrentUserID'    => $this->_current_user->ID,
 					'CurrentUserRoles' => $this->plugin->settings->GetCurrentUserRoles( $this->_current_user->roles ),
-				), true
+				),
+				true
 			);
 		}
 	}
@@ -379,7 +387,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			} else {
 				// Create a new record exists user.
 				$this->plugin->alerts->Trigger(
-					$new_alert_code, array(
+					$new_alert_code,
+					array(
 						'Attempts'         => 1,
 						'Username'         => $username,
 						'CurrentUserRoles' => $user_roles,
@@ -435,7 +444,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 
 				// Log an alert for a login attempt with unknown username.
 				$this->plugin->alerts->Trigger(
-					$new_alert_code, array(
+					$new_alert_code,
+					array(
 						'Attempts'    => 1,
 						'Users'       => $users,
 						'LogFileText' => '',
@@ -456,10 +466,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		if ( ! empty( $user ) ) {
 			$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
 			$this->plugin->alerts->Trigger(
-				4003, array(
+				4003,
+				array(
 					'Username'         => $user->user_login,
 					'CurrentUserRoles' => $user_roles,
-				), true
+				),
+				true
 			);
 		}
 	}
@@ -477,10 +489,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			$user_roles[] = 'superadmin';
 		}
 		$this->plugin->alerts->Trigger(
-			1004, array(
+			1004,
+			array(
 				'Username'         => $username,
 				'CurrentUserRoles' => $user_roles,
-			), true
+			),
+			true
 		);
 	}
 
@@ -532,7 +546,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$old_user_roles    = $this->plugin->settings->GetCurrentUserRoles( $old_user->roles );
 
 		$this->plugin->alerts->Trigger(
-			1008, array(
+			1008,
+			array(
 				'TargetUserName'   => $target_user->user_login,
 				'TargetUserRole'   => $target_user_roles,
 				'Username'         => $old_user->user_login,
