@@ -92,7 +92,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_action( 'updated_post_meta', array( $this, 'check_template_change' ), 10, 4 );
 
 		// Check if MainWP Child Plugin exists.
-		if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
+		if ( WpSecurityAuditLog::is_mainwp_active() ) {
 			add_action( 'mainwp_before_post_update', array( $this, 'event_mainwp_init' ), 10, 2 );
 		}
 	}
@@ -214,6 +214,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		if ( 'auto-draft' === $post->post_status ) {
 			return;
+		}
+
+		// Support for Admin Columns Pro plugin and its add-on.
+		if ( isset( $_POST['_ajax_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_ajax_nonce'] ) ), 'ac-ajax' ) ) {
+			if ( isset( $_POST['action'] ) && 'acp_editing_single_request' === sanitize_text_field( wp_unslash( $_POST['action'] ) ) ) {
+				return;
+			}
 		}
 
 		if ( 'post_tag' === $taxonomy ) {
@@ -936,6 +943,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param stdClass $post - The post.
 	 */
 	protected function check_permalink_change( $old_link, $new_link, $post ) {
+		if ( in_array( $post->post_status, array( 'draft', 'pending' ), true ) ) {
+			$old_link = $this->_old_post->post_name;
+			$new_link = $post->post_name;
+		}
+
 		if ( $old_link !== $new_link ) {
 			$editor_link = $this->get_editor_link( $post );
 			$this->plugin->alerts->Trigger(
