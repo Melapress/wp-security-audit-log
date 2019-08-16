@@ -35,8 +35,10 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
-		add_action( 'dbdelta_queries', array( $this, 'EventDBDeltaQuery' ) );
-		add_action( 'query', array( $this, 'EventDropQuery' ) );
+		if ( $this->plugin->IsInstalled() ) {
+			add_action( 'dbdelta_queries', array( $this, 'EventDBDeltaQuery' ) );
+			add_filter( 'query', array( $this, 'EventDropQuery' ) );
+		}
 	}
 
 	/**
@@ -79,6 +81,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			$alert_options['TableNames'] = implode( ',', $table_names );
 			$this->plugin->alerts->Trigger( $event_code, $alert_options );
 		}
+
 		return $query;
 	}
 
