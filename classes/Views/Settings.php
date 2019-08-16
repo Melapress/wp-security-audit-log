@@ -2058,7 +2058,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<tr>
 					<th><label for="mwp_stealth_mode"><?php esc_html_e( 'Enable MainWP Child Site Stealth Mode', 'wp-security-audit-log' ); ?></label></th>
 					<td>
-						<fieldset <?php echo ! is_plugin_active( 'mainwp-child/mainwp-child.php' ) ? 'disabled' : false; ?>>
+						<fieldset <?php echo ! WpSecurityAuditLog::is_mainwp_active() ? 'disabled' : false; ?>>
 							<label for="mwp_stealth_yes">
 								<?php $stealth_mode = $this->_plugin->settings->is_stealth_mode(); ?>
 								<input type="radio" name="mwp_stealth_mode" value="yes" id="mwp_stealth_yes"
@@ -2149,11 +2149,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		$stealth_mode = isset( $post_array['mwp_stealth_mode'] ) ? $post_array['mwp_stealth_mode'] : false;
 		if ( 'yes' === $stealth_mode ) {
-			if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
-				$this->_plugin->settings->set_mainwp_child_stealth_mode();
-			} else {
+			if ( ! WpSecurityAuditLog::is_mainwp_active() ) {
 				throw new Exception( __( 'MainWP Child plugin is not active on this website.', 'wp-security-audit-log' ) );
 			}
+			$this->_plugin->settings->set_mainwp_child_stealth_mode();
 		} else {
 			$this->_plugin->settings->deactivate_mainwp_child_stealth_mode();
 		}
