@@ -10,7 +10,9 @@
  * License: GPL2
  *
  * @package Wsal
+ *
  * @fs_premium_only /extensions/
+ * @fs_premium_only /sdk/twilio-php/
  */
 
 /*
@@ -32,15 +34,6 @@
 */
 
 if ( ! function_exists( 'wsal_freemius' ) ) {
-
-	/**
-	 * Freemius SDK.
-	 *
-	 * @since 2.7.0
-	 */
-	if ( file_exists( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' ) ) {
-		require_once plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php';
-	}
 
 	/**
 	 * WSAL Main Class.
@@ -83,11 +76,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public $sensors;
 
 		/**
-		 * Settings manager.
+		 * Settings manager. Accessed via $this->settings, which lazy-loads it.
 		 *
 		 * @var WSAL_Settings
 		 */
-		public $settings;
+		protected $_settings;
 
 		/**
 		 * Class loading manager.
@@ -143,7 +136,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var boolean
 		 */
-		public $load_on_frontend = null;
+		public $load_for_404s = null;
 
 		/**
 		 * Standard singleton pattern.
@@ -164,10 +157,129 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Initialize plugin.
 		 */
 		public function __construct() {
+			$bootstrap_hook = [ 'plugins_loaded', 9 ];
+
+			// Frontend requests should only log for certain 404 requests.
+			// For that to happen, we need to delay until template_redirect.
+			if ( self::is_frontend() ) {
+				$bootstrap_hook = [ 'wp', 0 ];
+			}
+
+			add_action( $bootstrap_hook[0], array( $this, 'setup' ), $bootstrap_hook[1] );
+
+			// Register plugin specific activation hook.
+			register_activation_hook( __FILE__, array( $this, 'Install' ) );
+
+			// Plugin Deactivation Actions.
+			register_deactivation_hook( __FILE__, array( $this, 'deactivate_actions' ) );
+
+			// Add custom schedules for WSAL early otherwise they won't work.
+			add_filter( 'cron_schedules', array( $this, 'recurring_schedules' ) );
+		}
+
+		/**
+		 * PHP magic __get function to get class properties.
+		 *
+		 * @param string $property - Class property.
+		 * @return object
+		 */
+		public function __get( $property ) {
+			if ( 'settings' === $property ) {
+				return $this->settings();
+			}
+		}
+
+		/**
+		 * Return the settings object, lazily instantiating, if needed.
+		 *
+		 * @return WSAL_Settings
+		 */
+		public function settings() {
+			if ( ! isset( $this->_settings ) ) {
+				$this->_settings = new WSAL_Settings( $this );
+			}
+
+			return $this->_settings;
+		}
+
+		/**
+		 * Whether the current request is a REST API request.
+		 *
+		 * @return bool
+		 */
+		public static function is_rest_api() {
+			$is_rest = false;
+
+			if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
+				$rest_url_path = trim( parse_url( home_url( '/wp-json/' ), PHP_URL_PATH ), '/' );
+				$request_path  = trim( $_SERVER['REQUEST_URI'], '/' );
+				$is_rest       = ( strpos( $request_path, $rest_url_path ) === 0 ) || isset( $_GET['rest_route'] );
+			}
+
+			return $is_rest;
+		}
+
+		/**
+		 * Whether the current request is a frontend request.
+		 *
+		 * @return bool
+		 */
+		public static function is_frontend() {
+			return ! is_admin() && ! self::is_login_screen() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) && ( ! defined( 'DOING_CRON' ) || ! DOING_CRON ) && ! self::is_rest_api();
+		}
+
+		/**
+		 * Decides if the plugin should run, sets up constants, includes, inits hooks, etc.
+		 *
+		 * @return bool
+		 */
+		public function setup() {
+			if ( ! $this->should_load() ) {
+				return;
+			}
+
 			$this->define_constants();
 			$this->set_allowed_html_tags();
 			$this->includes();
 			$this->init_hooks();
+			$this->load_defaults();
+			$this->load_wsal();
+
+			if ( did_action( 'init' ) ) {
+				$this->init();
+			}
+		}
+
+		/**
+		 * Returns whether the plugin should load.
+		 *
+		 * @return bool Whether the plugin should load.
+		 */
+		public function should_load() {
+			// Always load on the admin.
+			if ( is_admin() ) {
+				return true;
+			}
+
+			// If this is a frontend request, it's a 404, and 404 logging is disabled.
+			if ( self::is_frontend() ) {
+				if ( is_404() ) {
+					if ( ! $this->load_for_404s() ) {
+						// This is a frontend request, and it's a 404, but we are not logging 404s.
+						return false;
+					}
+				} elseif ( ! is_user_logged_in() && ! $this->load_for_visitor_events() ) {
+					// This is not a 404, and the user isn't logged in, and we aren't logging visitor events.
+					return false;
+				}
+			}
+
+			// If this is a rest API request and the user is not logged in, bail.
+			if ( self::is_rest_api() && ! is_user_logged_in() && ! $this->load_for_visitor_events() ) {
+				return false;
+			}
+
+			return true;
 		}
 
 		/**
@@ -234,17 +346,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @since 3.3
 		 */
 		public function init_hooks() {
-			// Register plugin specific activation hook.
-			register_activation_hook( __FILE__, array( $this, 'Install' ) );
-
-			// Listen for init event.
 			add_action( 'init', array( $this, 'init' ), 5 );
 
 			// Listen for cleanup event.
 			add_action( 'wsal_cleanup', array( $this, 'CleanUp' ) );
-
-			// Plugin Deactivation Actions.
-			register_deactivation_hook( __FILE__, array( $this, 'deactivate_actions' ) );
 
 			// Render wsal footer.
 			add_action( 'admin_footer', array( $this, 'render_footer' ) );
@@ -261,9 +366,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Render Login Page Notification.
 			add_filter( 'login_message', array( $this, 'render_login_page_message' ), 10, 1 );
 
-			// Add custom schedules for WSAL.
-			add_filter( 'cron_schedules', array( $this, 'wsal_recurring_schedules' ) );
-
 			// Cron job to delete alert 1003 for the last day.
 			add_action( 'wsal_delete_logins', array( $this, 'delete_failed_logins' ) );
 			if ( ! wp_next_scheduled( 'wsal_delete_logins' ) ) {
@@ -272,8 +374,96 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			add_filter( 'mainwp_child_extra_execution', array( $this, 'mainwp_dashboard_callback' ), 10, 2 );
 
-			// Register freemius uninstall event.
-			wsal_freemius()->add_action( 'after_uninstall', array( $this, 'wsal_freemius_uninstall_cleanup' ) );
+			$this->init_freemius();
+		}
+
+		/**
+		 * Whether the current page is the login screen.
+		 *
+		 * @return bool
+		 */
+		public static function is_login_screen() {
+			return parse_url( wp_login_url(), PHP_URL_PATH ) === parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+		}
+
+		/**
+		 * Returns whether the plugin should load Freemius.
+		 *
+		 * @return bool
+		 */
+		public static function should_load_freemius() {
+			return is_admin() || self::is_login_screen() || defined( 'DOING_CRON' );
+		}
+
+		/**
+		 * Determines whether a plugin is active.
+		 *
+		 * @uses is_plugin_active() Uses this WP core function after making sure that this function is available.
+		 * @param string $plugin Path to the main plugin file from plugins directory.
+		 * @return bool True, if in the active plugins list. False, not in the list.
+		 */
+		public static function is_plugin_active( $plugin ) {
+			if ( ! function_exists( 'is_plugin_active' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			return is_plugin_active( $plugin );
+		}
+
+		/**
+		 * Check if BBPress plugin is active or not.
+		 *
+		 * @return boolean
+		 */
+		public static function is_bbpress_active() {
+			return self::is_plugin_active( 'bbpress/bbpress.php' );
+		}
+
+		/**
+		 * Check if WooCommerce plugin is active or not.
+		 *
+		 * @return boolean
+		 */
+		public static function is_woocommerce_active() {
+			return self::is_plugin_active( 'woocommerce/woocommerce.php' );
+		}
+
+		/**
+		 * Check if Yoast SEO plugin is active or not.
+		 *
+		 * @return boolean
+		 */
+		public static function is_wpseo_active() {
+			return self::is_plugin_active( 'wordpress-seo/wp-seo.php' ) || self::is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' );
+		}
+
+		/**
+		 * Check if MainWP plugin is active or not.
+		 *
+		 * @return boolean
+		 */
+		public static function is_mainwp_active() {
+			return self::is_plugin_active( 'mainwp-child/mainwp-child.php' );
+		}
+
+		/**
+		 * Check if Two Factor plugin is active or not.
+		 *
+		 * @return boolean
+		 */
+		public static function is_twofactor_active() {
+			return self::is_plugin_active( 'two-factor/two-factor.php' );
+		}
+
+		/**
+		 * Initializes Freemius and its hooks, conditionally.
+		 *
+		 * @return void
+		 */
+		public function init_freemius() {
+			if ( ! self::should_load_freemius() ) {
+				return;
+			}
 
 			// Add filters to customize freemius welcome message.
 			wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
@@ -289,21 +479,61 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
-		 * Check if WSAL should be loaded on front-end.
+		 * Check if WSAL should be loaded for logged-in 404s.
 		 *
 		 * @since 3.3
 		 *
 		 * @return boolean
 		 */
-		public function load_wsal_on_frontend() {
-			if ( null === $this->load_on_frontend ) {
-				if ( ! is_user_logged_in() ) {
-					$this->load_on_frontend = 'no' === $this->GetGlobalOption( 'disable-visitor-events', 'no' );
+		public function load_for_404s() {
+			if ( null === $this->load_for_404s ) {
+				global $wpdb;
+				$table_name = $wpdb->prefix . 'wsal_options';
+
+				if ( ! is_user_logged_in() && ! self::load_for_visitor_events() ) {
+					// This overrides the setting.
+					$this->load_for_404s = false;
 				} else {
-					return true;
+					// We are doing a raw lookup here because The WSAL options system might not be loaded.
+					$this->load_for_404s = self::raw_alert_is_enabled( is_user_logged_in() ? 6007 : 6023 );
 				}
 			}
-			return $this->load_on_frontend;
+
+			return $this->load_for_404s;
+		}
+
+		/**
+		 * Whether visitor events should be logged.
+		 *
+		 * @return bool
+		 */
+		public function load_for_visitor_events() {
+			return 'no' === self::get_raw_option( 'disable-visitor-events' );
+		}
+
+		/**
+		 * Query option from the WSAL options table directly.
+		 *
+		 * @param string $name - Option name.
+		 * @return mixed
+		 */
+		public static function get_raw_option( $name ) {
+			global $wpdb;
+			$table_name = $wpdb->base_prefix . 'wsal_options'; // Using base_prefix because we don't have multiple tables on multisite.
+			$name       = 'wsal-' . $name;
+			return $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM $table_name WHERE option_name = %s", $name ) );
+		}
+
+		/**
+		 * Whether an alert is enabled. For use before loading the settings.
+		 *
+		 * @param string|int $alert The alert to check.
+		 * @return bool Whether the alert is enabled.
+		 */
+		public static function raw_alert_is_enabled( $alert ) {
+			$alerts = self::get_raw_option( 'disabled-alerts' );
+			$alerts = explode( ',', $alerts );
+			return ! in_array( $alert, $alerts );
 		}
 
 		/**
@@ -460,10 +690,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @param string $plugin_title - Plugin title.
 		 * @param string $user_login - Username.
 		 * @param string $site_link - Site link.
-		 * @param string $freemius_link - Freemius link.
+		 * @param string $_freemius_link - Freemius link.
 		 * @return string
 		 */
-		public function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
+		public function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
 			$freemius_link = '<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
 				/* translators: Username */
@@ -487,10 +717,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @param string $plugin_title - Plugin title.
 		 * @param string $user_login - Username.
 		 * @param string $site_link - Site link.
-		 * @param string $freemius_link - Freemius link.
+		 * @param string $_freemius_link - Freemius link.
 		 * @return string
 		 */
-		public function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $freemius_link ) {
+		public function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
 			$freemius_link = '<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
 				/* translators: Username */
@@ -510,11 +740,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Filter trial message of Freemius.
 		 *
-		 * @param string $message – Trial message.
+		 * @param string $_message – Trial message.
 		 * @return string
 		 * @since 3.2.3
 		 */
-		public function freemius_trial_promotion_message( $message ) {
+		public function freemius_trial_promotion_message( $_message ) {
 			// Message.
 			$message = sprintf(
 				/* translators: Plugin name */
@@ -601,13 +831,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @internal
 		 */
 		public function init() {
-			if ( is_admin() || $this->load_wsal_on_frontend() ) {
-				// Load dependencies.
-				$this->settings  = new WSAL_Settings( $this );
-				$this->alerts    = new WSAL_AlertManager( $this );
-				$this->sensors   = new WSAL_SensorManager( $this );
-				$this->constants = new WSAL_ConstantManager( $this );
+			// Load dependencies.
+			if ( ! isset( $this->alerts ) ) {
+				$this->alerts = new WSAL_AlertManager( $this );
 			}
+
+			if ( ! isset( $this->constants ) ) {
+				$this->constants = new WSAL_ConstantManager();
+			}
+
+			$this->sensors = new WSAL_SensorManager( $this );
 
 			if ( is_admin() ) {
 				$this->views     = new WSAL_ViewManager( $this );
@@ -765,11 +998,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				true
 			);
 
-			// Check settings object.
-			if ( ! isset( $this->settings ) ) {
-				$this->settings = new WSAL_Settings( $this );
-			}
-
 			// Check if plugin is premium and live events are enabled.
 			$is_premium          = wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' );
 			$live_events_enabled = $is_premium && $this->settings->is_admin_bar_notif() && 'real-time' === $this->settings->get_admin_bar_notif_updates();
@@ -796,23 +1024,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @internal
 		 */
 		public function load_wsal() {
-			// Lazy load these files if required.
-			if ( is_admin() || $this->load_wsal_on_frontend() ) {
-				require_once 'classes/Alert.php';
-				require_once 'classes/AbstractLogger.php';
-				require_once 'classes/AbstractSensor.php';
-				require_once 'classes/AlertManager.php';
-				require_once 'classes/ConstantManager.php';
-				require_once 'classes/Loggers/Database.php';
-				require_once 'classes/SensorManager.php';
-				require_once 'classes/Sensors/Public.php';
-				require_once 'classes/Settings.php';
-			}
+			require_once 'classes/Alert.php';
+			require_once 'classes/AbstractLogger.php';
+			require_once 'classes/AbstractSensor.php';
+			require_once 'classes/AlertManager.php';
+			require_once 'classes/ConstantManager.php';
+			require_once 'classes/Loggers/Database.php';
+			require_once 'classes/SensorManager.php';
+			require_once 'classes/Sensors/Public.php';
+			require_once 'classes/Settings.php';
 
 			if ( is_admin() ) {
 				$this->options = new WSAL_Models_Option();
 				if ( ! $this->options->IsInstalled() ) {
 					$this->options->Install();
+
+					// Initiate settings object if not set.
+					if ( ! $this->settings ) {
+						$this->settings = new WSAL_Settings( $this );
+					}
 
 					// Setting the prunig date with the old value or the default value.
 					$pruning_date = $this->settings->GetPruningDate();
@@ -871,10 +1101,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				die( 1 );
 			}
 
-			// Set the settings object temporarily.
-			if ( empty( $this->settings ) ) {
-				$this->settings = new WSAL_Settings( $this );
-			}
+			// Fully set up the plugin.
+			$this->setup();
+			$this->init();
 
 			// Ensure that the system is installed and schema is correct.
 			$pre_installed = $this->IsInstalled();
@@ -896,7 +1125,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$old_version = $this->GetOldVersion();
 			$new_version = $this->GetNewVersion();
 
-			if ( $pre_installed && $old_version != $new_version ) {
+			if ( $pre_installed && $old_version !== $new_version ) {
 				$this->Update( $old_version, $new_version );
 			}
 
@@ -913,9 +1142,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 
 			// Setting the prunig date with the old value or the default value.
-			// $pruning_date = $this->settings->GetPruningDate();
-			// $this->settings->SetPruningDate( $pruning_date );
 			$old_disabled = $this->GetGlobalOption( 'disabled-alerts' );
+
 			// If old setting is empty disable alert 2099 by default.
 			if ( empty( $old_disabled ) ) {
 				$this->settings->SetDisabledAlerts( array( 2099, 2126 ) );
@@ -1146,27 +1374,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function update_external_db_password() {
 			$this->wsal_deprecate( __METHOD__, '3.2.3.3' );
-		}
-
-		/**
-		 * Method: Freemius method to run after uninstall event.
-		 *
-		 * @since 2.7.0
-		 */
-		public function wsal_freemius_uninstall_cleanup() {
-			// Call the uninstall routine of the plugin.
-			$this->Uninstall();
-		}
-
-		/**
-		 * Uninstall plugin.
-		 */
-		public function Uninstall() {
-			if ( $this->GetGlobalOption( 'delete-data' ) == 1 ) {
-				self::getConnector()->uninstallAll();
-				$this->deleteAllOptions();
-			}
-			wp_clear_scheduled_hook( 'wsal_cleanup' );
 		}
 
 		/**
@@ -1545,6 +1752,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Get notification.
 		 *
 		 * @param int $id - Option ID.
+		 *
+		 * @return string|null
 		 */
 		public function GetNotification( $id ) {
 			$this->options = new WSAL_Models_Option();
@@ -1555,6 +1764,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Delete option by name.
 		 *
 		 * @param string $name - Option name.
+		 *
+		 * @return bool
 		 */
 		public function DeleteByName( $name ) {
 			$this->options = new WSAL_Models_Option();
@@ -1575,6 +1786,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Count notifications.
 		 *
 		 * @param string $opt_prefix - Option prefix.
+		 *
+		 * @return int
 		 */
 		public function CountNotifications( $opt_prefix ) {
 			$this->options = new WSAL_Models_Option();
@@ -1586,6 +1799,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @param string $option - Option name.
 		 * @param mixed  $value - Option value.
+		 *
+		 * @return bool|int
 		 */
 		public function UpdateGlobalOption( $option, $value ) {
 			$this->options = new WSAL_Models_Option();
@@ -1596,6 +1811,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Method: Render login page message.
 		 *
 		 * @param string $message - Login message.
+		 *
+		 * @return string
 		 */
 		public function render_login_page_message( $message ) {
 			// Set WSAL Settings.
@@ -1620,12 +1837,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
-		 * Method: Add time intervals for scheduling.
+		 * Extend WP cron time intervals for scheduling.
 		 *
 		 * @param  array $schedules - Array of schedules.
 		 * @return array
 		 */
-		public function wsal_recurring_schedules( $schedules ) {
+		public function recurring_schedules( $schedules ) {
 			$schedules['sixhours']         = array(
 				'interval' => 21600,
 				'display'  => __( 'Every 6 hours', 'wp-security-audit-log' ),
@@ -1667,6 +1884,17 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
+		 * Uninstall routine for the plugin.
+		 */
+		public static function uninstall() {
+			if ( ! class_exists( 'WSAL_Uninstall' ) ) {
+				require_once trailingslashit( plugin_dir_path( __FILE__ ) ) . 'classes/Uninstall.php';
+			}
+
+			WSAL_Uninstall::uninstall();
+		}
+
+		/**
 		 * Error Logger
 		 *
 		 * Logs given input into debug.log file in debug mode.
@@ -1685,11 +1913,18 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	}
 
 	// Begin load sequence.
-	add_action( 'plugins_loaded', array( WpSecurityAuditLog::GetInstance(), 'load_wsal' ) );
+	WpSecurityAuditLog::GetInstance();
 
-	// Load extra files.
-	WpSecurityAuditLog::GetInstance()->load_defaults();
+	/**
+	 * Freemius SDK.
+	 *
+	 * Only include the SDK on wp-admin or WP login screen.
+	 *
+	 * @since 2.7.0
+	 */
+	if ( WpSecurityAuditLog::should_load_freemius() && file_exists( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' ) ) {
+		require_once plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php';
 
-	// Create & Run the plugin.
-	return WpSecurityAuditLog::GetInstance();
+		wsal_freemius()->add_action( 'after_uninstall', array( 'WpSecurityAuditLog', 'uninstall' ) );
+	}
 }
