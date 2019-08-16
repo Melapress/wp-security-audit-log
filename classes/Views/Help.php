@@ -24,6 +24,80 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WSAL_Views_Help extends WSAL_AbstractView {
 
 	/**
+	 * WSAL Help Tabs.
+	 *
+	 * @var array
+	 */
+	private $wsal_help_tabs = array();
+
+	/**
+	 * Current Help Tab.
+	 *
+	 * @var string
+	 */
+	private $current_tab = '';
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct( $plugin ) {
+		parent::__construct( $plugin );
+		add_action( 'admin_init', array( $this, 'setup_help_tabs' ) );
+	}
+
+	/**
+	 * Setup help page tabs.
+	 */
+	public function setup_help_tabs() {
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore
+
+		// Verify that the current page is WSAL settings page.
+		if ( empty( $page ) || $this->GetSafeViewName() !== $page ) {
+			return;
+		}
+
+		// Tab links.
+		$wsal_help_tabs = array(
+			'help'        => array(
+				'name'     => __( 'Help', 'wp-security-audit-log' ),
+				'link'     => $this->GetUrl(),
+				'render'   => array( $this, 'tab_help' ),
+				'priority' => 10,
+			),
+			'system-info' => array(
+				'name'     => __( 'System Info', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'system-info', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_system_info' ),
+				'priority' => 20,
+			),
+		);
+
+		/**
+		 * Filter: `wsal_help_tabs`
+		 *
+		 * Help tabs structure:
+		 *     $wsal_help_tabs['unique-tab-id'] = array(
+		 *         'name'     => Name of the tab,
+		 *         'link'     => Link of the tab,
+		 *         'render'   => This function is used to render HTML elements in the tab,
+		 *         'priority' => Priority of the tab,
+		 *     );
+		 *
+		 * @param array $wsal_help_tabs – Array of WSAL Help Tabs.
+		 */
+		$wsal_help_tabs = apply_filters( 'wsal_help_tabs', $wsal_help_tabs );
+
+		// Sort by priority.
+		array_multisort( array_column( $wsal_help_tabs, 'priority' ), SORT_ASC, $wsal_help_tabs );
+
+		$this->wsal_help_tabs = $wsal_help_tabs;
+
+		// Get the current tab.
+		$current_tab       = filter_input( INPUT_GET, 'tab', FILTER_SANITIZE_STRING );
+		$this->current_tab = empty( $current_tab ) ? 'help' : $current_tab;
+	}
+
+	/**
 	 * Method: Get View Title.
 	 */
 	public function GetTitle() {
@@ -55,20 +129,6 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 * Method: Get View Header.
 	 */
 	public function Header() {
-		// Information display style.
-		?>
-		<style>
-			#system-info-textarea {
-				font-family: monospace;
-				white-space: pre;
-				overflow: auto;
-				width: 100%;
-				height: 400px;
-				margin: 0;
-			}
-		</style>
-		<?php
-
 		wp_enqueue_style(
 			'extensions',
 			$this->_plugin->GetBaseUrl() . '/css/extensions.css',
@@ -82,181 +142,147 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 */
 	public function Render() {
 		?>
-		<h2 id="wsal-tabs" class="nav-tab-wrapper">
-			<a href="#tab-help" class="nav-tab"><?php esc_html_e( 'Help', 'wp-security-audit-log' ); ?></a>
-			<?php if ( $this->_plugin->settings->CurrentUserCan( 'edit' ) ) : ?>
-				<a href="#tab-system-info" class="nav-tab"><?php esc_html_e( 'System Info', 'wp-security-audit-log' ); ?></a>
-			<?php endif; ?>
-		</h2>
-		<div class="wsal-nav-tabs-wrap">
-			<div class="nav-tabs">
-				<table class="form-table wsal-tab widefat" id="tab-help">
-					<tbody>
-						<tr class="postbox">
-							<td>
-								<h2 class="wsal-tab__heading"><?php esc_html_e( 'Getting Started', 'wp-security-audit-log' ); ?></h2>
-								<p>
-									<?php esc_html_e( 'Getting started with WP Security Audit Log is really easy; once the plugin is installed it will automatically keep a log of everything that is happening on your website and you do not need to do anything. Watch the video below for a quick overview of the plugin.', 'wp-security-audit-log' ); ?>
-								</p>
-								<p>
-									<iframe class="wsal-youtube-embed" width="560" height="315" src="https://www.youtube.com/embed/1nopATCS-CQ?rel=0" frameborder="0" allowfullscreen></iframe>
-								</p>
-							</td>
-						</tr>
-						<tr class="postbox">
-							<td>
-								<h2 class="wsal-tab__heading"><?php esc_html_e( 'Plugin Support', 'wp-security-audit-log' ); ?></h2>
-								<p>
-									<?php esc_html_e( 'Have you encountered or noticed any issues while using WP Security Audit Log plugin?', 'wp-security-audit-log' ); ?>
-									<?php esc_html_e( 'Or you want to report something to us? Click any of the options below to post on the plugin\'s forum or contact our support directly.', 'wp-security-audit-log' ); ?>
-								</p><p>
-									<a class="button" href="https://wordpress.org/support/plugin/wp-security-audit-log" target="_blank"><?php esc_html_e( 'Free Support Forum', 'wp-security-audit-log' ); ?></a>
-									&nbsp;&nbsp;&nbsp;&nbsp;
-									<a class="button" href="http://www.wpsecurityauditlog.com/contact/" target="_blank"><?php esc_html_e( 'Free Support Email', 'wp-security-audit-log' ); ?></a>
-								</p>
-							</td>
-						</tr>
-						<tr class="postbox">
-							<td>
-								<h2 class="wsal-tab__heading"><?php esc_html_e( 'Plugin Documentation', 'wp-security-audit-log' ); ?></h2>
-								<p>
-									<?php esc_html_e( 'For more technical information about the WP Security Audit Log plugin please visit the plugin’s knowledge base.', 'wp-security-audit-log' ); ?>
-									<?php esc_html_e( 'Refer to the list of WordPress security events for a complete list of Events and IDs that the plugin uses to keep a log of all the changes in the WordPress audit log.', 'wp-security-audit-log' ); ?>
-								</p><p>
-									<a class="button" href="http://www.wpsecurityauditlog.com/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
-									&nbsp;&nbsp;&nbsp;&nbsp;
-									<a class="button" href="https://www.wpsecurityauditlog.com/support-documentation/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
-									&nbsp;&nbsp;&nbsp;&nbsp;
-									<a class="button" href="http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'List of WordPress Security Events', 'wp-security-audit-log' ); ?></a>
-								</p>
-							</td>
-						</tr>
-						<tr class="postbox">
-							<td>
-								<h2 class="wsal-tab__heading"><?php esc_html_e( 'Rate WP Security Audit Log', 'wp-security-audit-log' ); ?></h2>
-								<p>
-									<?php esc_html_e( 'We work really hard to deliver a plugin that enables you to keep a record of all the changes that are happening on your WordPress.', 'wp-security-audit-log' ); ?>
-									<?php esc_html_e( 'It takes thousands of man-hours every year and endless amount of dedication to research, develop and maintain the free edition of WP Security Audit Log.', 'wp-security-audit-log' ); ?>
-									<?php esc_html_e( 'Therefore if you like what you see, and find WP Security Audit Log useful we ask you nothing more than to please rate our plugin.', 'wp-security-audit-log' ); ?>
-									<?php esc_html_e( 'We appreciate every star!', 'wp-security-audit-log' ); ?>
-								</p>
-								<p>
-									<a class="rating-link" href="https://en-gb.wordpress.org/plugins/wp-security-audit-log/#reviews" target="_blank">
-										<span class="dashicons dashicons-star-filled"></span>
-										<span class="dashicons dashicons-star-filled"></span>
-										<span class="dashicons dashicons-star-filled"></span>
-										<span class="dashicons dashicons-star-filled"></span>
-										<span class="dashicons dashicons-star-filled"></span>
-									</a>
-									<a class="button" href="https://en-gb.wordpress.org/plugins/wp-security-audit-log/#reviews" target="_blank"><?php esc_html_e( 'Rate Plugin', 'wp-security-audit-log' ); ?></a>
-								</p>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				<?php
-				// Check user permissions to view page.
-				if ( $this->_plugin->settings->CurrentUserCan( 'edit' ) ) :
-					?>
-					<table class="form-table wsal-tab widefat" id="tab-system-info">
-						<tbody>
-							<tr>
-								<td>
-									<h3><?php esc_html_e( 'System Info', 'wp-security-audit-log' ); ?></h3>
-									<form method="post" dir="ltr">
-										<textarea readonly="readonly" onclick="this.focus(); this.select()" id="system-info-textarea" name="wsal-sysinfo"><?php echo esc_html( $this->get_sysinfo() ); ?></textarea>
-										<p class="submit">
-											<input type="hidden" name="wsal-action" value="download_sysinfo" />
-											<?php submit_button( 'Download System Info File', 'primary', 'wsal-download-sysinfo', false ); ?>
-										</p>
-									</form>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				<?php endif; ?>
-			</div>
-
+		<nav id="wsal-tabs" class="nav-tab-wrapper">
 			<?php
-			$is_current_view = $this->_plugin->views->GetActiveView() == $this;
-			// Check if any of the extensions is activated.
-			if ( wsal_freemius()->is_not_paying() ) :
-				if ( current_user_can( 'manage_options' ) && $is_current_view ) :
+			foreach ( $this->wsal_help_tabs as $tab_id => $tab ) :
+				if ( 'system-info' !== $this->current_tab || ( 'system-info' === $this->current_tab && $this->_plugin->settings->CurrentUserCan( 'edit' ) ) ) :
 					?>
-					<div class="wsal-sidebar-advert">
-						<div class="postbox">
-							<h3 class="hndl"><span><?php esc_html_e( 'Upgrade to Premium', 'wp-security-audit-log' ); ?></span></h3>
-							<div class="inside">
-								<ul class="wsal-features-list">
-									<li>
-										<?php esc_html_e( 'See who is logged in', 'wp-security-audit-log' ); ?><br />
-										<?php esc_html_e( 'And remotely terminate sessions', 'wp-security-audit-log' ); ?>
-									</li>
-									<li>
-										<?php esc_html_e( 'Generate reports', 'wp-security-audit-log' ); ?><br />
-										<?php esc_html_e( 'Or configure automated email reports', 'wp-security-audit-log' ); ?>
-									</li>
-									<li>
-										<?php esc_html_e( 'Configure email notifications', 'wp-security-audit-log' ); ?><br />
-										<?php esc_html_e( 'Get instantly notified of important changes', 'wp-security-audit-log' ); ?>
-									</li>
-									<li>
-										<?php esc_html_e( 'Add Search', 'wp-security-audit-log' ); ?><br />
-										<?php esc_html_e( 'Easily track down suspicious behaviour', 'wp-security-audit-log' ); ?>
-									</li>
-									<li>
-										<?php esc_html_e( 'Integrate & Centralise', 'wp-security-audit-log' ); ?><br />
-										<?php esc_html_e( 'Export the logs to your centralised logging system', 'wp-security-audit-log' ); ?>
-									</li>
-								</ul>
-								<?php
-								// Trial link arguments.
-								$trial_args = array(
-									'page'          => 'wsal-auditlog-pricing',
-									'billing_cycle' => 'annual',
-									'trial'         => 'true',
-								);
+					<a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( $tab_id === $this->current_tab ) ? 'nav-tab-active' : false; ?>"><?php echo esc_html( $tab['name'] ); ?></a>
+					<?php
+				endif;
+			endforeach;
+			?>
+		</nav>
+		<div class="nav-tabs">
+			<div class="wsal-help-sidebar our-wordpress-plugins side-bar"><?php $this->sidebar(); ?></div>
+			<div class="wsal-help-main">
+				<?php
+				if ( ! empty( $this->current_tab ) && ! empty( $this->wsal_help_tabs[ $this->current_tab ]['render'] ) ) {
+					if ( 'system-info' !== $this->current_tab || ( 'system-info' === $this->current_tab && $this->_plugin->settings->CurrentUserCan( 'edit' ) ) ) {
+						call_user_func( $this->wsal_help_tabs[ $this->current_tab ]['render'] );
+					}
+				}
+				?>
+			</div>
+		</div>
+		<?php
+	}
 
-								// Buy Now button link.
-								$buy_now        = add_query_arg( 'page', 'wsal-auditlog-pricing', admin_url( 'admin.php' ) );
-								$buy_now_target = '';
-								$trial_link     = add_query_arg( $trial_args, admin_url( 'admin.php' ) );
+	/**
+	 * Tab: Help.
+	 */
+	public function tab_help() {
+		?>
+		<div class="wsal-help-section">
+			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Getting Started', 'wp-security-audit-log' ); ?></h2>
+			<p><?php esc_html_e( 'Getting started with WP Security Audit Log is really easy; once the plugin is installed it will automatically keep a log of everything that is happening on your website and you do not need to do anything. Watch the video below for a quick overview of the plugin.', 'wp-security-audit-log' ); ?></p>
+			<p><iframe class="wsal-youtube-embed" width="100%" height="315" src="https://www.youtube.com/embed/1nopATCS-CQ?rel=0" frameborder="0" allowfullscreen></iframe></p>
+		</div>
+		<div class="wsal-help-section">
+			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Plugin Support', 'wp-security-audit-log' ); ?></h2>
+			<p>
+				<?php esc_html_e( 'Have you encountered or noticed any issues while using WP Security Audit Log plugin?', 'wp-security-audit-log' ); ?>
+				<?php esc_html_e( 'Or you want to report something to us? Click any of the options below to post on the plugin\'s forum or contact our support directly.', 'wp-security-audit-log' ); ?>
+			</p><p>
+				<a class="button" href="https://wordpress.org/support/plugin/wp-security-audit-log" target="_blank"><?php esc_html_e( 'Free Support Forum', 'wp-security-audit-log' ); ?></a>
+				&nbsp;&nbsp;&nbsp;&nbsp;
+				<a class="button" href="http://www.wpsecurityauditlog.com/contact/" target="_blank"><?php esc_html_e( 'Free Support Email', 'wp-security-audit-log' ); ?></a>
+			</p>
+		</div>
+		<div class="wsal-help-section">
+			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Plugin Documentation', 'wp-security-audit-log' ); ?></h2>
+			<p>
+				<?php esc_html_e( 'For more technical information about the WP Security Audit Log plugin please visit the plugin’s knowledge base.', 'wp-security-audit-log' ); ?>
+				<?php esc_html_e( 'Refer to the list of WordPress security events for a complete list of Events and IDs that the plugin uses to keep a log of all the changes in the WordPress audit log.', 'wp-security-audit-log' ); ?>
+			</p><p>
+				<a class="button" href="http://www.wpsecurityauditlog.com/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
+				&nbsp;&nbsp;&nbsp;&nbsp;
+				<a class="button" href="https://www.wpsecurityauditlog.com/support-documentation/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
+				&nbsp;&nbsp;&nbsp;&nbsp;
+				<a class="button" href="http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'List of WordPress Security Events', 'wp-security-audit-log' ); ?></a>
+			</p>
+		</div>
+		<div class="wsal-help-section">
+			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Rate WP Security Audit Log', 'wp-security-audit-log' ); ?></h2>
+			<p>
+				<?php esc_html_e( 'We work really hard to deliver a plugin that enables you to keep a record of all the changes that are happening on your WordPress.', 'wp-security-audit-log' ); ?>
+				<?php esc_html_e( 'It takes thousands of man-hours every year and endless amount of dedication to research, develop and maintain the free edition of WP Security Audit Log.', 'wp-security-audit-log' ); ?>
+				<?php esc_html_e( 'Therefore if you like what you see, and find WP Security Audit Log useful we ask you nothing more than to please rate our plugin.', 'wp-security-audit-log' ); ?>
+				<?php esc_html_e( 'We appreciate every star!', 'wp-security-audit-log' ); ?>
+			</p>
+			<p>
+				<a class="rating-link" href="https://en-gb.wordpress.org/plugins/wp-security-audit-log/#reviews" target="_blank">
+					<span class="dashicons dashicons-star-filled"></span>
+					<span class="dashicons dashicons-star-filled"></span>
+					<span class="dashicons dashicons-star-filled"></span>
+					<span class="dashicons dashicons-star-filled"></span>
+					<span class="dashicons dashicons-star-filled"></span>
+				</a>
+				<a class="button" href="https://en-gb.wordpress.org/plugins/wp-security-audit-log/#reviews" target="_blank"><?php esc_html_e( 'Rate Plugin', 'wp-security-audit-log' ); ?></a>
+			</p>
+		</div>
+		<?php
+	}
 
-								// If user is not super admin and website is multisite then change the URL.
-								if ( $this->_plugin->IsMultisite() && ! is_super_admin() ) {
-									$buy_now        = 'https://www.wpsecurityauditlog.com/pricing/';
-									$trial_link     = 'https://www.wpsecurityauditlog.com/pricing/';
-									$buy_now_target = 'target="_blank"';
-								} elseif ( $this->_plugin->IsMultisite() && is_super_admin() ) {
-									$buy_now    = add_query_arg( 'page', 'wsal-auditlog-pricing', network_admin_url( 'admin.php' ) );
-									$trial_link = add_query_arg( $trial_args, network_admin_url( 'admin.php' ) );
-								} elseif ( ! $this->_plugin->IsMultisite() && ! current_user_can( 'manage_options' ) ) {
-									$buy_now        = 'https://www.wpsecurityauditlog.com/pricing/';
-									$trial_link     = 'https://www.wpsecurityauditlog.com/pricing/';
-									$buy_now_target = 'target="_blank"';
-								}
+	/**
+	 * Tab: System info.
+	 */
+	public function tab_system_info() {
+		?>
+		<h3 class="wsal-tab__heading"><?php esc_html_e( 'System Info', 'wp-security-audit-log' ); ?></h3>
+		<form method="post" dir="ltr">
+			<textarea readonly="readonly" onclick="this.focus(); this.select()" id="system-info-textarea" name="wsal-sysinfo"><?php echo esc_html( $this->get_sysinfo() ); ?></textarea>
+			<p class="submit">
+				<input type="hidden" name="wsal-action" value="download_sysinfo" />
+				<?php submit_button( 'Download System Info File', 'primary', 'wsal-download-sysinfo', false ); ?>
+			</p>
+		</form>
+		<?php
+	}
 
-								$more_info = add_query_arg(
-									array(
-										'utm_source'   => 'plugin',
-										'utm_medium'   => 'page',
-										'utm_content'  => 'update+more+info',
-										'utm_campaign' => 'upgrade+premium',
-									),
-									'https://www.wpsecurityauditlog.com/premium-features/'
-								);
-								?>
-								<p>
-									<a class="button-primary wsal-extension-btn" href="<?php echo esc_attr( $trial_link ); ?>" <?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>
-									<a class="button-primary wsal-extension-btn" href="<?php echo esc_attr( $buy_now ); ?>" <?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Upgrade to Premium', 'wp-security-audit-log' ); ?></a>
-									<a class="button-primary wsal-extension-btn" href="<?php echo esc_attr( $more_info ); ?>" target="_blank"><?php esc_html_e( 'More Information', 'wp-security-audit-log' ); ?></a>
-								</p>
+	/**
+	 * Sidebar.
+	 */
+	private function sidebar() {
+		$plugins_data = array(
+			array(
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/password-policy-manager.jpg',
+				'desc' => __( 'Enforce strong password policies on WordPress', 'wp-security-audit-log' ),
+				'alt'  => 'Password Policy Manager',
+				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/password-policy-manager-wordpress/',
+			),
+			array(
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/website-file-changes-monitor.jpg',
+				'desc' => __( 'Automatically identify unauthorized file changes on WordPress', 'wp-security-audit-log' ),
+				'alt'  => 'Website File Changes Monitor',
+				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/',
+			),
+			array(
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/activity-log-for-mainwp.jpg',
+				'desc' => __( 'See the child sites activity logs from the central MainWP dashboard', 'wp-security-audit-log' ),
+				'alt'  => 'Activity Log for MainWP',
+				'link' => 'https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/',
+			),
+		);
+		?>
+		<h3><?php esc_html_e( 'Our other WordPress plugins', 'wp-security-audit-log' ); ?></h3>
+		<ul>
+			<?php foreach ( $plugins_data as $data ) : ?>
+				<li>
+					<div class="plugin-box">
+						<div class="plugin-img">
+							<img src="<?php echo esc_url( $data['img'] ); ?>" alt="<?php echo esc_attr( $data['alt'] ); ?>">
+						</div>
+						<div class="plugin-desc">
+							<p><?php echo esc_html( $data['desc'] ); ?></p>
+							<div class="cta-btn">
+								<a href="<?php echo esc_url( $data['link'] ); ?>" target="_blank"><?php esc_html_e( 'LEARN MORE', 'wp-security-audit-log' ); ?></a>
 							</div>
 						</div>
 					</div>
-				<?php endif; ?>
-			<?php endif; ?>
-		</div>
+				</li>
+			<?php endforeach; ?>
+		</ul>
 		<?php
 	}
 
@@ -450,63 +476,41 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 * Method: Render footer content.
 	 */
 	public function Footer() {
-		?>
-		<script>
-			/**
-			 * Create and download a temporary file.
-			 *
-			 * @param {string} filename - File name.
-			 * @param {string} text - File content.
-			 */
-			function download(filename, text) {
-				// Create temporary element.
-				var element = document.createElement('a');
-				element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-				element.setAttribute('download', filename);
+		if ( 'system-info' === $this->current_tab && $this->_plugin->settings->CurrentUserCan( 'edit' ) ) :
+			?>
+			<script>
+				/**
+				 * Create and download a temporary file.
+				 *
+				 * @param {string} filename - File name.
+				 * @param {string} text - File content.
+				 */
+				function download(filename, text) {
+					// Create temporary element.
+					var element = document.createElement('a');
+					element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+					element.setAttribute('download', filename);
 
-				// Set the element to not display.
-				element.style.display = 'none';
-				document.body.appendChild(element);
+					// Set the element to not display.
+					element.style.display = 'none';
+					document.body.appendChild(element);
 
-				// Simlate click on the element.
-				element.click();
+					// Simlate click on the element.
+					element.click();
 
-				// Remove temporary element.
-				document.body.removeChild(element);
-			}
-
-			jQuery( document ).ready( function() {
-				var download_btn = jQuery( '#wsal-download-sysinfo' );
-				download_btn.click( function( event ) {
-					event.preventDefault();
-					download( 'wsal-system-info.txt', jQuery( '#system-info-textarea' ).val() );
-				} );
-			} );
-
-			// tab handling code
-			jQuery('#wsal-tabs>a').click(function(){
-				jQuery('#wsal-tabs>a').removeClass('nav-tab-active');
-				jQuery('table.wsal-tab').hide();
-				jQuery(jQuery(this).addClass('nav-tab-active').attr('href')).show();
-			});
-			// show relevant tab
-			var hashlink = jQuery('#wsal-tabs>a[href="' + location.hash + '"]');
-			if (hashlink.length) {
-				hashlink.click();
-			} else {
-				jQuery('#wsal-tabs>a:first').click();
-			}
-
-			jQuery(".sel-columns").change(function(){
-				var notChecked = 1;
-				jQuery(".sel-columns").each(function(){
-					if(this.checked) notChecked = 0;
-				})
-				if(notChecked == 1){
-					alert("You have to select at least one column!");
+					// Remove temporary element.
+					document.body.removeChild(element);
 				}
-			});
-		</script>
-		<?php
+
+				jQuery( document ).ready( function() {
+					var download_btn = jQuery( '#wsal-download-sysinfo' );
+					download_btn.click( function( event ) {
+						event.preventDefault();
+						download( 'wsal-system-info.txt', jQuery( '#system-info-textarea' ).val() );
+					} );
+				} );
+			</script>
+			<?php
+		endif;
 	}
 }
