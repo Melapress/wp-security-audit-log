@@ -195,11 +195,11 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				<?php esc_html_e( 'For more technical information about the WP Security Audit Log plugin please visit the plugin’s knowledge base.', 'wp-security-audit-log' ); ?>
 				<?php esc_html_e( 'Refer to the list of WordPress security events for a complete list of Events and IDs that the plugin uses to keep a log of all the changes in the WordPress audit log.', 'wp-security-audit-log' ); ?>
 			</p><p>
-				<a class="button" href="http://www.wpsecurityauditlog.com/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
+				<a class="button" href="http://www.wpsecurityauditlog.com/?utm_source=plugin&utm_medium=helppage&utm_campaign=support" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="https://www.wpsecurityauditlog.com/support-documentation/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
+				<a class="button" href="https://www.wpsecurityauditlog.com/support-documentation/?utm_source=plugin&utm_medium=helppage&utm_campaign=support" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/?utm_source=plugin&amp;utm_medium=helppage&amp;utm_campaign=support" target="_blank"><?php esc_html_e( 'List of WordPress Security Events', 'wp-security-audit-log' ); ?></a>
+				<a class="button" href="http://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/?utm_source=plugin&utm_medium=helppage&utm_campaign=support" target="_blank"><?php esc_html_e( 'List of WordPress Security Events', 'wp-security-audit-log' ); ?></a>
 			</p>
 		</div>
 		<div class="wsal-help-section">
@@ -249,19 +249,19 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/password-policy-manager.jpg',
 				'desc' => __( 'Enforce strong password policies on WordPress', 'wp-security-audit-log' ),
 				'alt'  => 'Password Policy Manager',
-				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/password-policy-manager-wordpress/',
+				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/password-policy-manager-wordpress/?utm_source=plugin&utm_medium=wsal&utm_campaign=xpromo',
 			),
 			array(
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/website-file-changes-monitor.jpg',
 				'desc' => __( 'Automatically identify unauthorized file changes on WordPress', 'wp-security-audit-log' ),
 				'alt'  => 'Website File Changes Monitor',
-				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/',
+				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/?utm_source=plugin&utm_medium=wsal&utm_campaign=xpromo',
 			),
 			array(
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/activity-log-for-mainwp.jpg',
 				'desc' => __( 'See the child sites activity logs from the central MainWP dashboard', 'wp-security-audit-log' ),
 				'alt'  => 'Activity Log for MainWP',
-				'link' => 'https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/',
+				'link' => 'https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/?utm_source=plugin&utm_medium=wsal&utm_campaign=xpromo',
 			),
 		);
 		?>
