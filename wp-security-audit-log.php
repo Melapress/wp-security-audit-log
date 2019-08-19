@@ -396,6 +396,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
+		 * Load Freemius SDK.
+		 */
+		public static function load_freemius() {
+			require_once plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php';
+		}
+
+		/**
 		 * Determines whether a plugin is active.
 		 *
 		 * @uses is_plugin_active() Uses this WP core function after making sure that this function is available.
@@ -461,9 +468,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return void
 		 */
 		public function init_freemius() {
-			if ( ! self::should_load_freemius() ) {
-				return;
-			}
+			// Lazy load Freemius if not already loaded.
+			self::load_freemius();
 
 			if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
 				// Add filters to customize freemius welcome message.
@@ -1919,15 +1925,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	// Begin load sequence.
 	WpSecurityAuditLog::GetInstance();
 
-	/**
-	 * Freemius SDK.
-	 *
-	 * Only include the SDK on wp-admin or WP login screen.
-	 *
-	 * @since 2.7.0
-	 */
+	// Freemius SDK.
 	if ( WpSecurityAuditLog::should_load_freemius() && file_exists( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' ) ) {
-		require_once plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php';
+		WpSecurityAuditLog::load_freemius();
 
 		if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
 			wsal_freemius()->add_action( 'after_uninstall', array( 'WpSecurityAuditLog', 'uninstall' ) );
