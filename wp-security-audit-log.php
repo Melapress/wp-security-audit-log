@@ -1931,4 +1931,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			wsal_freemius()->add_action( 'after_uninstall', array( 'WpSecurityAuditLog', 'uninstall' ) );
 		}
 	}
+} else {
+	wsal_freemius()->set_basename( true, __FILE__ );
 }
