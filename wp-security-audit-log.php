@@ -516,14 +516,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Query option from the WSAL options table directly.
 		 *
-		 * @param string $name - Option name.
+		 * @param string $name    - Option name.
+		 * @param mixed  $default - Option default value.
 		 * @return mixed
 		 */
-		public static function get_raw_option( $name ) {
+		public static function get_raw_option( $name, $default = false ) {
 			global $wpdb;
 			$table_name = $wpdb->base_prefix . 'wsal_options'; // Using base_prefix because we don't have multiple tables on multisite.
 			$name       = 'wsal-' . $name;
-			return $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM $table_name WHERE option_name = %s", $name ) );
+			$value      = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM $table_name WHERE option_name = %s", $name ) );
+			return $value ? $value : $default;
 		}
 
 		/**

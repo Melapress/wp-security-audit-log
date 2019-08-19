@@ -80,8 +80,9 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 	public function event_user_register( $user_id ) {
 		$user         = get_userdata( $user_id );
 		$ismu         = function_exists( 'is_multisite' ) && is_multisite();
-		$event        = $ismu ? 4012 : ( is_user_logged_in() ? 4001 : 4000 );
+		$event        = $ismu ? 4012 : is_user_logged_in() ? 4001 : 4000;
 		$current_user = wp_get_current_user();
+
 		$this->plugin->alerts->Trigger(
 			$event,
 			array(
