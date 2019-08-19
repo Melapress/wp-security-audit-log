@@ -897,15 +897,17 @@ final class WSAL_AlertManager {
 				// Get user from WP.
 				$user = get_user_by( 'login', $username );
 
-				// Store the user data in class member.
-				$this->wp_users[ $username ] = (object) array(
-					'ID'           => $user->ID,
-					'user_login'   => $user->user_login,
-					'first_name'   => $user->first_name,
-					'last_name'    => $user->last_name,
-					'display_name' => $user->display_name,
-					'user_email'   => $user->user_email,
-				);
+				if ( $user && $user instanceof WP_User ) {
+					// Store the user data in class member.
+					$this->wp_users[ $username ] = (object) array(
+						'ID'           => $user->ID,
+						'user_login'   => $user->user_login,
+						'first_name'   => $user->first_name,
+						'last_name'    => $user->last_name,
+						'display_name' => $user->display_name,
+						'user_email'   => $user->user_email,
+					);
+				}
 			}
 
 			// Set user data.
