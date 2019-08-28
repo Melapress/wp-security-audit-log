@@ -408,20 +408,20 @@ ul.premium-list li:before {
 }
 
 .wsal-tab__heading {
-font-size: 23px;
-font-weight: 400;
-margin: 0;
-padding: 9px 0;
-line-height: 29px;
+	font-size: 23px;
+	font-weight: 400;
+	margin: 0;
+	padding: 9px 0;
+	line-height: 29px;
 }
 
 #system-info-textarea {
-font-family: monospace;
-white-space: pre;
-overflow: auto;
-width: 100%;
-height: 400px;
-margin: 0;
+	font-family: monospace;
+	white-space: pre;
+	overflow: auto;
+	width: 100%;
+	height: 400px;
+	margin: 0;
 }
 
 .nav-tabs {
