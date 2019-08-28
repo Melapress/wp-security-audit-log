@@ -133,6 +133,13 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	private $is_9068_logged = false;
 
 	/**
+	 * Stores $_REQUEST global variable data.
+	 *
+	 * @var array
+	 */
+	private $request_data = array();
+
+	/**
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
@@ -163,6 +170,17 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		add_action( 'added_user_meta', array( $this, 'wc_user_meta_updated' ), 10, 4 );
 		add_action( 'updated_user_meta', array( $this, 'wc_user_meta_updated' ), 10, 4 );
 		add_action( 'woocommerce_before_product_object_save', array( $this, 'check_product_changes_before_save' ), 10, 1 );
+		add_action( 'woocommerce_product_quick_edit_save', array( $this, 'inline_product_changed' ), 10, 1 );
+	}
+
+	/**
+	 * Trigger inline product change events.
+	 *
+	 * @param WC_Product $product - WooCommerce product.
+	 */
+	public function inline_product_changed( $product ) {
+		unset( $this->request_data['woocommerce_quick_edit'] );
+		$this->EventChanged( $product->get_id(), get_post( $product->get_id() ), true );
 	}
 
 	/**
@@ -194,6 +212,18 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	}
 
 	/**
+	 * Checks if the product update is inline-edit or not.
+	 *
+	 * @return bool
+	 */
+	public function check_inline_edit() {
+		if ( empty( $this->request_data ) ) {
+			$this->request_data = $_REQUEST; // phpcs:ignore
+		}
+		return ! empty( $this->request_data['woocommerce_quick_edit'] );
+	}
+
+	/**
 	 * WooCommerce Product Updated.
 	 *
 	 * @param integer $post_id - Post ID.
@@ -213,6 +243,11 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			) {
 				$this->EventCreation( $this->_old_post, $post );
 			} else {
+				// Delay the checks to accomodate WooCommerce inline product changes.
+				if ( $this->check_inline_edit() ) {
+					return;
+				}
+
 				// Get new woocommerce product object.
 				$new_product    = wc_get_product( $post->ID );
 				$this->new_data = $this->GetProductData( $new_product );
