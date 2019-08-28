@@ -374,6 +374,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			add_filter( 'mainwp_child_extra_execution', array( $this, 'mainwp_dashboard_callback' ), 10, 2 );
 
+			add_action( 'admin_init', array( $this, 'sync_premium_freemius' ) );
+
 			$this->init_freemius();
 		}
 
@@ -384,15 +386,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public static function is_login_screen() {
 			return parse_url( wp_login_url(), PHP_URL_PATH ) === parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
-		}
-
-		/**
-		 * Returns whether the plugin should load Freemius.
-		 *
-		 * @return bool
-		 */
-		public static function should_load_freemius() {
-			return is_admin() || self::is_login_screen() || defined( 'DOING_CRON' );
 		}
 
 		/**
@@ -468,21 +461,36 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return void
 		 */
 		public function init_freemius() {
-			// Lazy load Freemius if not already loaded.
-			self::load_freemius();
+			if ( self::is_frontend() && 'no' !== self::is_premium_freemius() && file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
+				require_once WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php';
 
-			if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
-				// Add filters to customize freemius welcome message.
-				wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
-				wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
-				wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
-				wsal_freemius()->add_filter( 'show_first_trial_after_n_sec', array( $this, 'change_show_first_trial_period' ), 10, 1 );
-				wsal_freemius()->add_filter( 'reshow_trial_after_every_n_sec', array( $this, 'change_reshow_trial_period' ), 10, 1 );
-				wsal_freemius()->add_filter( 'show_admin_notice', array( $this, 'freemius_show_admin_notice' ), 10, 2 );
-				wsal_freemius()->add_filter( 'show_delegation_option', '__return_false' );
-				wsal_freemius()->add_filter( 'enable_per_site_activation', '__return_false' );
-				wsal_freemius()->add_filter( 'show_trial', '__return_false' );
-				wsal_freemius()->add_filter( 'opt_in_error_message', array( $this, 'limited_license_activation_error' ), 10, 1 );
+				if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+					WSAL_Extension_Manager::include_extension( 'reports' );
+					WSAL_Extension_Manager::include_extension( 'sessions' );
+					WSAL_Extension_Manager::include_extension( 'external-db' );
+				} elseif ( $this->should_load() ) {
+					WSAL_Extension_Manager::include_extension( 'notifications' );
+				}
+
+				return;
+			}
+
+			if ( is_admin() || self::is_login_screen() || ( is_admin() && defined( 'DOING_CRON' ) ) ) {
+				self::load_freemius();
+
+				if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
+					wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
+					wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
+					wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
+					wsal_freemius()->add_filter( 'show_first_trial_after_n_sec', array( $this, 'change_show_first_trial_period' ), 10, 1 );
+					wsal_freemius()->add_filter( 'reshow_trial_after_every_n_sec', array( $this, 'change_reshow_trial_period' ), 10, 1 );
+					wsal_freemius()->add_filter( 'show_admin_notice', array( $this, 'freemius_show_admin_notice' ), 10, 2 );
+					wsal_freemius()->add_filter( 'show_delegation_option', '__return_false' );
+					wsal_freemius()->add_filter( 'enable_per_site_activation', '__return_false' );
+					wsal_freemius()->add_filter( 'show_trial', '__return_false' );
+					wsal_freemius()->add_filter( 'opt_in_error_message', array( $this, 'limited_license_activation_error' ), 10, 1 );
+					wsal_freemius()->add_action( 'after_account_plan_sync', array( $this, 'sync_premium_freemius' ), 10, 1 );
+				}
 			}
 		}
 
@@ -495,9 +503,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function load_for_404s() {
 			if ( null === $this->load_for_404s ) {
-				global $wpdb;
-				$table_name = $wpdb->prefix . 'wsal_options';
-
 				if ( ! is_user_logged_in() && ! self::load_for_visitor_events() ) {
 					// This overrides the setting.
 					$this->load_for_404s = false;
@@ -516,7 +521,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return bool
 		 */
 		public function load_for_visitor_events() {
-			return 'no' === self::get_raw_option( 'disable-visitor-events' );
+			return 'no' === self::get_raw_option( 'disable-visitor-events', 'no' );
 		}
 
 		/**
@@ -1905,6 +1910,34 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
+		 * Sync premium freemius transient on daily basis.
+		 */
+		public function sync_premium_freemius() {
+			$is_fs_premium_opt = self::OPT_PRFX . 'is-fs-premium';
+			$is_fs_premium     = get_option( $is_fs_premium_opt, false );
+
+			if ( ! wsal_freemius()->is_registered() ) {
+				if ( 'no' !== $is_fs_premium ) {
+					update_option( $is_fs_premium, 'no' );
+				}
+			} else {
+				$has_active_valid_license = wsal_freemius()->has_active_valid_license() ? 'yes' : 'no';
+				if ( $has_active_valid_license !== $is_fs_premium ) {
+					update_option( $is_fs_premium_opt, $has_active_valid_license );
+				}
+			}
+		}
+
+		/**
+		 * Get premium freemius transient.
+		 *
+		 * @return boolean
+		 */
+		public static function is_premium_freemius() {
+			return get_option( self::OPT_PRFX . 'is-fs-premium' );
+		}
+
+		/**
 		 * Error Logger
 		 *
 		 * Logs given input into debug.log file in debug mode.
@@ -1925,8 +1958,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	// Begin load sequence.
 	WpSecurityAuditLog::GetInstance();
 
-	// Freemius SDK.
-	if ( WpSecurityAuditLog::should_load_freemius() && file_exists( plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php' ) ) {
+	if ( is_admin() && ! WpSecurityAuditLog::is_plugin_active( plugin_basename( __FILE__ ) ) ) {
 		WpSecurityAuditLog::load_freemius();
 
 		if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
