@@ -1913,15 +1913,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Sync premium freemius transient on daily basis.
 		 */
 		public function sync_premium_freemius() {
-			$is_fs_premium_opt = self::OPT_PRFX . 'is-fs-premium';
-			$is_fs_premium     = get_option( $is_fs_premium_opt, false );
+			$is_fs_premium_opt = 'fs_wsalp';
+			$is_fs_premium     = get_option( $is_fs_premium_opt );
 
 			if ( ! wsal_freemius()->is_registered() ) {
 				if ( 'no' !== $is_fs_premium ) {
-					update_option( $is_fs_premium, 'no' );
+					update_option( $is_fs_premium_opt, 'no' );
 				}
 			} else {
 				$has_active_valid_license = wsal_freemius()->has_active_valid_license() ? 'yes' : 'no';
+
 				if ( $has_active_valid_license !== $is_fs_premium ) {
 					update_option( $is_fs_premium_opt, $has_active_valid_license );
 				}
@@ -1934,7 +1935,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return boolean
 		 */
 		public static function is_premium_freemius() {
-			return get_option( self::OPT_PRFX . 'is-fs-premium' );
+			return get_option( 'fs_wsalp' );
 		}
 
 		/**
