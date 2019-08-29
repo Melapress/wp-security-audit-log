@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.2.2
-Stable tag: 3.4.2
+Stable tag: 3.4.3
 Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -27,10 +27,14 @@ Keep an activity log of everything that happens on your WordPress and [WordPress
 
 [youtube https://www.youtube.com/watch?v=1nopATCS-CQ]
 
-> <strong>Note</strong>: All WrodPress logging functionality is FREE. Features such as reports, email notifications & search are available in the <Strong>[Premium Edition](https://www.wpsecurityauditlog.com/premium-features/)</strong>.
+> <strong>Note</strong>: All WordPress logging functionality is FREE. Features such as reports, email notifications & search are available in the <Strong>[Premium Edition](https://www.wpsecurityauditlog.com/premium-features/)</strong>.
 >
 
-#### WordPress Changes & Details the Plugin Keeps a Log Of
+#### Maintained & Supported by WP White Security
+
+WP White Security builds high-quality niche WordPress security & admin plugins like [Password Policy Manager for WordPress](https://www.wpwhitesecurity.com/wordpress-plugins/password-policy-manager-wordpress/), a plugin with which you can ensure all your users use strong passwords. Browse our list of [WordPress plugins](https://www.wpwhitesecurity.com/wordpress-plugins/ that help you better manage and improve the security of your WordPress website.
+
+### WordPress Changes & Details the Plugin Keeps a Log Of
 As a comprehensive & complete WordPress activity log solution WP Security Audit Log does not just tell you that a post, a user profile, or an object was updated. It keeps a log of what was changed within the post, profile or object.
 
 Below is a summary of the changes that the plugin can keep a record of:
@@ -142,7 +146,6 @@ Refer to the <strong>[WordPress activity log plugin datasheet](https://www.wpsec
 We need help translating the plugin and the WordPress Security Alerts. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log) to translate the plugin and drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
 
 * Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
-* Brazilian Portuguese by [Hudson Santos](https://www.smallbee.com.br/)
 * German translation by [Mourad Louha](http://excel-translator.de)
 * Brazilian Portuguese translation by [Hudson Santos](https://www.smallbee.com.br/)
 * Spanish translation by the [WP Body team](https://wpbody.com/)
@@ -198,26 +201,27 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-Release notes: [Update 3.4.2 - Plugin UX & Performance Improvements](https://www.wpsecurityauditlog.com/releases/update-3-4-2-improved-ux-search-performance/)
+Release notes: [Update 3.4.3 – Front-end plugin performance improvements & MainWP extension support](https://www.wpsecurityauditlog.com/releases/update-3-4-3/)
 
-= 3.4.2 (2019-07-17) =
+= 3.4.3 (2019-08-28) =
 
-* **New Feature**
-	* A [hook to specify the number of events](https://www.wpsecurityauditlog.com/support-documentation/list-hooks/#wsal_infinite_scroll_events) shown by default in the audit log viewer when in [infinite scroll view mode](https://www.wpsecurityauditlog.com/support-documentation/change-audit-log-viewer-pagination-infinite-scroll/).
+* **New Features**
+	* Plugin performance improved five fold.
+	* Improved [log coverage of WooCommerce](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/) products - plugin keeps log of changes done to products via quick edit.
+	* Added coverage of WooCommerce product changes done with Admin Columns Pro.
+	* Support for the new Search and Reports features coming up in the [Activity Log for MainWP extension](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/).
 
 * **Improvements**
-	* Optimized the database queries used for search and filters (30x faster!).
-	* Improved tracking of mirrored events to avoid mirroring duplicate events.
-	* Specific error messages that help you troubleshoot are now shown when [integrating Twilio for SMS notitications](https://www.wpsecurityauditlog.com/wordpress-admin/sms-notifications-alerts-wordpress-administrators/).
-	* Plugin shows warning to install [Activity Log for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/) when installed on MainWP website.
-	* Added website URL in default [email notifications for WordPress](https://www.wpsecurityauditlog.com/premium-features/email-notifications-wordpress-activity-log/).
-	* MySQL response errors are now displayed when configuring an [external database connection](https://www.wpsecurityauditlog.com/premium-features/database-integration-tools-wordpress-activity-log/).
-	* Improved the first time install message about non-sensitive diagnostic data.
-	* Width of first install wizard prompt is responsive.
+	* Improved log coverage of draft posts - now plugin reports the details of changes on draft posts.
+	* Added report title in HTML reports.
+	* Maximum number of logged in user sessions the plugin retrieves is now be configured.
+	* Removed plugin branding from [WordPress activity log HTML reports](https://www.wpsecurityauditlog.com/premium-features/reports-wordpress-activity-log/) and automated emails.
+	* Removed a number of redundant files from old premium extensions.
+	* Events in activity log dashboard widget have been shortened for better readability.* Removed broken links from 404 error email notifications.
 
 * **Bug fixes**
-	* Plugin logs an error when a non exising WooCommerce page is requested (HTTP 404).
-	* Handling of infinite loop when Freemius API is unavailable during plugin first install.
+	* Plugin now sends the IP address when [mirroring WordPress activity log to Slack](https://www.wpsecurityauditlog.com/premium-features/integration-mirroring-tools-wordpress-activity-log/).
+	* Fixed an edge case in which cron jobs for mirroring of activity log were not firing.
 	
 = Earlier versions =
 

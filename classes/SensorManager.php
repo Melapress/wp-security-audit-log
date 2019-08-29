@@ -221,21 +221,21 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 			switch ( $filename ) {
 				case 'BBPress':
 					// Check if BBPress plugin exists.
-					if ( ! is_plugin_active( 'bbpress/bbpress.php' ) ) {
+					if ( ! WpSecurityAuditLog::is_bbpress_active() ) {
 						$load_sensor = false;
 					}
 					break;
 
 				case 'WooCommerce':
 					// Check if WooCommerce plugin exists.
-					if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+					if ( ! WpSecurityAuditLog::is_woocommerce_active() ) {
 						$load_sensor = false;
 					}
 					break;
 
 				case 'YoastSEO':
 					// Check if Yoast SEO (Free or Premium) plugin exists.
-					if ( is_plugin_active( 'wordpress-seo/wp-seo.php' ) || is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' ) ) {
+					if ( WpSecurityAuditLog::is_wpseo_active() ) {
 						$load_sensor = true;
 					} else {
 						$load_sensor = false;

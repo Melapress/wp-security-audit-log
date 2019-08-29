@@ -67,7 +67,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		// Get new user data.
 		$new_userdata = get_userdata( $user_id );
 
-		if ( is_plugin_active( 'bbpress/bbpress.php' ) ) {
+		if ( WpSecurityAuditLog::is_bbpress_active() ) {
 			// BBPress user roles.
 			$bbpress_roles = array( 'bbp_spectator', 'bbp_moderator', 'bbp_participant', 'bbp_keymaster', 'bbp_blocked' );
 
@@ -156,7 +156,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		}
 
 		// If BBPress plugin is active then check for user roles change.
-		if ( is_plugin_active( 'bbpress/bbpress.php' ) ) {
+		if ( WpSecurityAuditLog::is_bbpress_active() ) {
 			// BBPress user roles.
 			$bbpress_roles = array( 'bbp_spectator', 'bbp_moderator', 'bbp_participant', 'bbp_keymaster', 'bbp_blocked' );
 

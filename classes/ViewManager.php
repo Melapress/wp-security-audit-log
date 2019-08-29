@@ -129,6 +129,8 @@ class WSAL_ViewManager {
 				add_action( 'wp_ajax_wsal_adminbar_events_refresh', array( $this, 'wsal_adminbar_events_refresh__premium_only' ) );
 			}
 		}
+
+		add_action( 'admin_head', array( $this, 'hide_freemius_sites_section' ) );
 	}
 
 	/**
@@ -343,7 +345,7 @@ class WSAL_ViewManager {
 					$view->RenderContent();
 				?>
 			</div>
-		<?php
+			<?php
 		endif;
 	}
 
@@ -526,5 +528,35 @@ class WSAL_ViewManager {
 			);
 		}
 		die();
+	}
+
+	/**
+	 * Hide Freemius sites section on the account page
+	 * of a multisite WordPress network.
+	 */
+	public function hide_freemius_sites_section() {
+		global $pagenow;
+
+		// Return if not multisite.
+		if ( ! is_multisite() ) {
+			return;
+		}
+
+		// Return if multisite but not on the network admin.
+		if ( is_multisite() && ! is_network_admin() ) {
+			return;
+		}
+
+		// Return if the pagenow is not on admin.php page.
+		if ( 'admin.php' !== $pagenow ) {
+			return;
+		}
+
+		// Get page query parameter.
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore
+
+		if ( 'wsal-auditlog-account' === $page ) {
+			echo '<style type="text/css">#fs_sites {display:none;}</style>';
+		}
 	}
 }

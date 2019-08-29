@@ -90,7 +90,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$this->set_site_themes();
 
 		// Check if MainWP Child Plugin exists.
-		if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) ) {
+		if ( WpSecurityAuditLog::is_mainwp_active() ) {
 			$this->mainwp_child_init();
 
 			// Handle plugin/theme installation event via MainWP dashboard.
@@ -234,9 +234,20 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			}
 
 			if ( isset( $get_array['checked'] ) && ! empty( $get_array['checked'] ) ) {
+				$latest_event = $this->plugin->alerts->get_latest_events();
+				$latest_event = isset( $latest_event[0] ) ? $latest_event[0] : false;
+				$event_meta   = $latest_event ? $latest_event->GetMetaArray() : false;
+
 				foreach ( $get_array['checked'] as $plugin_file ) {
+					if ( $latest_event && 5001 === $latest_event->alert_id && $event_meta && isset( $event_meta['PluginFile'] ) ) {
+						if ( basename( WSAL_BASE_NAME ) === basename( $event_meta['PluginFile'] ) ) {
+							continue;
+						}
+					}
+
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
+
 					$this->plugin->alerts->Trigger(
 						5001,
 						array(
@@ -255,6 +266,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				foreach ( $post_array['checked'] as $plugin_file ) {
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
+
 					$this->plugin->alerts->Trigger(
 						5001,
 						array(
@@ -580,8 +592,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$post_array = filter_input_array( INPUT_POST );
 
 		// Check if Yoast SEO is active.
-		$is_yoast = is_plugin_active( 'wordpress-seo/wp-seo.php' ) || is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' );
-		if ( $is_yoast ) {
+		if ( WpSecurityAuditLog::is_wpseo_active() ) {
 			return;
 		}
 

@@ -14,20 +14,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
+
+	if ( WpSecurityAuditLog::is_plugin_active( 'nofs/wsal-nofs.php' ) ) {
+		require_once WP_PLUGIN_DIR . '/nofs/wsal-nofs.php';
+	}
+
 	/**
 	 * Freemius SDK
 	 *
 	 * Create a helper function for easy SDK access.
 	 *
-	 * @return array
+	 * @return Freemius
 	 * @author Ashar Irfan
-	 * @since  2.7.0
 	 */
 	function wsal_freemius() {
 		global $wsal_freemius;
 
-		if ( ! isset( $wsal_freemius ) ) {
+		if ( ! isset( $wsal_freemius ) && ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
 			define( 'WP_FS__PRODUCT_94_MULTISITE', true );
+
 			// Include Freemius SDK.
 			require_once dirname( __FILE__ ) . '/freemius/start.php';
 
@@ -42,33 +47,36 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 				'days'               => 7,
 				'is_require_payment' => false,
 			);
-			if ( is_plugin_active( 'mainwp-child/mainwp-child.php' ) && ! is_multisite() ) {
+
+			if ( WpSecurityAuditLog::is_mainwp_active() && ! is_multisite() ) {
 				$trial_args = false;
 			}
 
-			$wsal_freemius = fs_dynamic_init( array(
-				'id'              => '94',
-				'slug'            => 'wp-security-audit-log',
-				'type'            => 'plugin',
-				'public_key'      => 'pk_d602740d3088272d75906045af9fa',
-				'premium_suffix'  => '(Premium)',
-				'is_premium'      => $is_premium,
-				'has_addons'      => false,
-				'has_paid_plans'  => true,
-				'trial'           => $trial_args,
-				'has_affiliation' => false,
-				'menu'            => array(
-					'slug'        => 'wsal-auditlog',
-					'support'     => false,
-					'affiliation' => false,
-					'network'     => true,
-				),
-				'anonymous_mode'  => $is_anonymous,
-				'live'            => true,
-			) );
+			$wsal_freemius = fs_dynamic_init(
+				array(
+					'id'              => '94',
+					'slug'            => 'wp-security-audit-log',
+					'type'            => 'plugin',
+					'public_key'      => 'pk_d602740d3088272d75906045af9fa',
+					'premium_suffix'  => '(Premium)',
+					'is_premium'      => $is_premium,
+					'has_addons'      => false,
+					'has_paid_plans'  => true,
+					'trial'           => $trial_args,
+					'has_affiliation' => false,
+					'menu'            => array(
+						'slug'        => 'wsal-auditlog',
+						'support'     => false,
+						'affiliation' => false,
+						'network'     => true,
+					),
+					'anonymous_mode'  => $is_anonymous,
+					'live'            => true,
+				)
+			);
 		}
 
-		return $wsal_freemius;
+		return apply_filters( 'wsal_freemius_sdk_object', $wsal_freemius );
 	}
 
 	// Init Freemius.
