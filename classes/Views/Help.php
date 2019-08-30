@@ -186,7 +186,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			</p><p>
 				<a class="button" href="https://wordpress.org/support/plugin/wp-security-audit-log" target="_blank"><?php esc_html_e( 'Free Support Forum', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="http://www.wpsecurityauditlog.com/contact/" target="_blank"><?php esc_html_e( 'Free Support Email', 'wp-security-audit-log' ); ?></a>
+				<a class="button" href="https://www.wpsecurityauditlog.com/support/submit-ticket/" target="_blank"><?php esc_html_e( 'Free Support Email', 'wp-security-audit-log' ); ?></a>
 			</p>
 		</div>
 		<div class="wsal-help-section">
