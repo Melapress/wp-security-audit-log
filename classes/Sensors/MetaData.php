@@ -571,7 +571,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 * @since 3.2.3
 	 */
 	public function must_not_contain_new_user_alert( WSAL_AlertManager $manager ) {
-		return ! $manager->WillOrHasTriggered( 4001 );
+		return ! $manager->WillOrHasTriggered( 4001 ) && ! $manager->WillOrHasTriggered( 4012 );
 	}
 
 	/**
