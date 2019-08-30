@@ -95,7 +95,13 @@ abstract class WSAL_Connector_ConnectorFactory {
 		$conf = new WSAL_Settings( WpSecurityAuditLog::GetInstance() );
 		$type = $conf->GetAdapterConfig( 'adapter-type' );
 
-		if ( $type && wsal_freemius()->is_not_paying() ) {
+		if ( function_exists( 'wsal_freemius' ) && ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
+			$is_not_paying = wsal_freemius()->is_not_paying();
+		} else {
+			$is_not_paying = 'no' === WpSecurityAuditLog::is_premium_freemius();
+		}
+
+		if ( $type && $is_not_paying ) {
 			$connector = new WSAL_Connector_MySQLDB();
 
 			if ( ! self::$is_installed ) {
