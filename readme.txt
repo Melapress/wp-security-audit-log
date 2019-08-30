@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.2.2
-Stable tag: 3.4.3
+Stable tag: 3.4.3.1
 Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -32,7 +32,9 @@ Keep an activity log of everything that happens on your WordPress and [WordPress
 
 #### Maintained & Supported by WP White Security
 
-WP White Security builds high-quality niche WordPress security & admin plugins like [Password Policy Manager for WordPress](https://www.wpwhitesecurity.com/wordpress-plugins/password-policy-manager-wordpress/), a plugin with which you can ensure all your users use strong passwords. Browse our list of [WordPress plugins](https://www.wpwhitesecurity.com/wordpress-plugins/ that help you better manage and improve the security of your WordPress website.
+WP White Security builds high-quality niche WordPress security & admin plugins such as [Password Policy Manager for WordPress](https://www.wpwhitesecurity.com/wordpress-plugins/password-policy-manager-wordpress/), a plugin with which you can ensure all your users use strong passwords.
+
+Browse our list of [WordPress plugins](https://www.wpwhitesecurity.com/wordpress-plugins/) that can help you better manage and improve the security of your WordPress websites and users.
 
 ### WordPress Changes & Details the Plugin Keeps a Log Of
 As a comprehensive & complete WordPress activity log solution WP Security Audit Log does not just tell you that a post, a user profile, or an object was updated. It keeps a log of what was changed within the post, profile or object.
@@ -201,6 +203,16 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
+=3.4.3.1 (2019-08-29)
+
+* **Improvements**
+	* Added confirmation for when daily summary email is sent manually.
+	* Updated the support links in the help page.
+	
+* **Bug fixes**
+	* Fixed cases in which event ID 4012 was not being reported.
+	* Fixed a PHP fatal error caused when public events are disabled.
+	
 Release notes: [Update 3.4.3 – Front-end plugin performance improvements & MainWP extension support](https://www.wpsecurityauditlog.com/releases/update-3-4-3/)
 
 = 3.4.3 (2019-08-28) =
