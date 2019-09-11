@@ -186,7 +186,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 		// Check to see if LogInOut, FrontendLogin, and FrontendRegister sensors should load on login page.
 		if ( WpSecurityAuditLog::is_login_screen() ) {
-			if ( ( 'FrontendLogin' === $filename && ! empty( $frontend_events['login'] ) ) || ( 'FrontendRegister' === $filename && ! empty( $frontend_events['register'] ) ) ) {
+			if ( 'FrontendRegister' === $filename && ! empty( $frontend_events['register'] ) ) {
 				return true;
 			} elseif ( 'LogInOut' === $filename ) {
 				return true;
@@ -205,7 +205,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		 *
 		 * @param array $public_sensors - List of sensors to be loaded for visitors.
 		 */
-		$public_sensors = apply_filters( 'wsal_load_public_sensors', array( 'LogInOut', 'FrontendLogin', 'FrontendSystem', 'FrontendRegister', 'FrontendWooCommerce' ) );
+		$public_sensors = apply_filters( 'wsal_load_public_sensors', array( 'FrontendLogin', 'FrontendSystem', 'FrontendRegister', 'FrontendWooCommerce' ) );
 
 		if ( WpSecurityAuditLog::is_frontend() && ! is_user_logged_in() && ! in_array( $filename, $public_sensors, true ) ) {
 			return false;

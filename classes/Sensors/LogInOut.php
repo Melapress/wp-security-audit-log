@@ -53,6 +53,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		add_action( 'clear_auth_cookie', array( $this, 'GetCurrentUser' ), 10 );
 		add_filter( 'wp_login_blocked', array( $this, 'EventLoginBlocked' ), 10, 1 );
 
+		if ( WpSecurityAuditLog::is_twofactor_active() ) {
+			add_action( 'login_redirect', array( $this, 'event_2fa_login' ), 10, 1 );
+		}
+
 		if ( WpSecurityAuditLog::is_plugin_active( 'user-switching/user-switching.php' ) ) {
 			add_action( 'switch_to_user', array( $this, 'user_switched_event' ), 10, 2 );
 		}
@@ -95,12 +99,57 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	}
 
 	/**
+	 * Login Event for Two-Factor plugin.
+	 *
+	 * @since 3.3
+	 *
+	 * @param string $redirect_url – Redirect URL.
+	 * @return string
+	 */
+	public function event_2fa_login( $redirect_url ) {
+		// @codingStandardsIgnoreStart
+		$provider = isset( $_POST['provider'] ) ? sanitize_text_field( wp_unslash( $_POST['provider'] ) ) : '';
+		$user_id  = isset( $_POST['wp-auth-id'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['wp-auth-id'] ) ) : '';
+		// @codingStandardsIgnoreEnd
+
+		// Default Two-Factor options.
+		$providers_2fa = array( 'Two_Factor_Email', 'Two_Factor_Totp', 'Two_Factor_FIDO_U2F', 'Two_Factor_Backup_Codes', 'Two_Factor_Dummy' );
+
+		// Get users.
+		$user = get_userdata( $user_id );
+		if ( ! $user ) {
+			return $redirect_url;
+		}
+
+		// If provider and user are set and provider is known then log the event.
+		if ( $provider && $user && in_array( $provider, $providers_2fa, true ) ) {
+			// Get user roles.
+			$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+
+			if ( $this->plugin->settings->IsLoginSuperAdmin( $user->user_login ) ) {
+				$user_roles[] = 'superadmin';
+			}
+
+			$this->plugin->alerts->Trigger(
+				1000,
+				array(
+					'Username'         => $user->user_login,
+					'CurrentUserRoles' => $user_roles,
+				),
+				true
+			);
+		}
+
+		return $redirect_url;
+	}
+
+	/**
 	 * Event Login.
 	 *
 	 * @param string $user_login - Username.
 	 * @param object $user - WP_User object.
 	 */
-	public function EventLogin( $user_login, $user = null ) {
+	public function EventLogin( $user_login, $user ) {
 		// Get global POST array.
 		$post_array = filter_input_array( INPUT_POST );
 
@@ -109,9 +158,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		 *
 		 * @since 3.1.6
 		 */
-		if ( isset( $post_array['_um_account'] )
-		&& isset( $post_array['_um_account_tab'] )
-		&& 'password' === $post_array['_um_account_tab'] ) {
+		if ( isset( $post_array['_um_account'] ) && isset( $post_array['_um_account_tab'] ) && 'password' === $post_array['_um_account_tab'] ) {
 			/**
 			 * If the data is coming from UM plugin account change
 			 * password page, check for change in password.
@@ -147,6 +194,25 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			}
 			return; // Return.
 		}
+
+		if ( empty( $user ) ) {
+			$user = get_user_by( 'login', $user_login );
+		}
+
+		$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+
+		if ( $this->plugin->settings->IsLoginSuperAdmin( $user_login ) ) {
+			$user_roles[] = 'superadmin';
+		}
+
+		$this->plugin->alerts->Trigger(
+			1000,
+			array(
+				'Username'         => $user_login,
+				'CurrentUserRoles' => $user_roles,
+			),
+			true
+		);
 	}
 
 	/**
