@@ -2243,4 +2243,26 @@ class WSAL_Settings {
 
 		return false;
 	}
+
+	/**
+	 * Get WSAL's frontend events option.
+	 *
+	 * @param mixed $default - Default value.
+	 * @return array
+	 */
+	public function get_frontend_events( $default = false ) {
+		$event_opt = 'wsal-frontend-events';
+		return ! is_multisite() ? get_option( $event_opt, $default ) : get_network_option( get_main_network_id(), $event_opt, $default );
+	}
+
+	/**
+	 * Set WSAL's frontend events option.
+	 *
+	 * @param array $value - Option values.
+	 * @return bool
+	 */
+	public function set_frontend_events( $value = array() ) {
+		$event_opt = 'wsal-frontend-events';
+		return ! is_multisite() ? update_option( $event_opt, $value ) : update_network_option( get_main_network_id(), $event_opt, $value );
+	}
 }

@@ -69,15 +69,16 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$post_array = filter_input_array( INPUT_POST );
 
 		$frontend_events = array(
-			'register' => false,
-			'login'    => false,
-			'system'   => false,
+			'register'    => false,
+			'login'       => false,
+			'system'      => false,
+			'woocommerce' => false,
 		);
 
 		if ( isset( $post_array['frontend-events'] ) ) {
 			$frontend_events = array_merge( $frontend_events, $post_array['frontend-events'] );
 		}
-		update_option( 'wsal-frontend-events', $frontend_events );
+		$this->_plugin->settings->set_frontend_events( $frontend_events );
 
 		$enabled  = array_map( 'intval', $post_array['alert'] );
 		$disabled = array();
@@ -608,65 +609,89 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						?>
 					</div>
 				<?php endforeach; ?>
-				<!-- <div class="wsal-tab" id="tab-frontend-events"> -->
-					<?php
-					$defaults        = array(
-						'register' => false,
-						'login'    => false,
-						'system'   => false,
-						'comments' => false,
-					);
-					$frontend_events = get_option( 'wsal-frontend-events', $defaults );
-					?>
-					<table id="tab-frontend-events" class="form-table wp-list-table wsal-tab widefat fixed"  style="display: table;" cellspacing="0">
-						<tbody>
-							<tr>
-								<td>
-									<p><?php esc_html_e( 'This plugin keeps a log of what your website users are doing when they are logged in. On top of that it can also keep a log of some important events of (non logged in) website visitors. Use the below settings to enable / disable any of the front-end sensors:', 'wp-security-audit-log' ); ?></p>
-								</td>
-							</tr>
-							<tr>
-								<th><input type="checkbox" name="frontend-events[register]" id="frontend-events-register" value="1" <?php checked( $frontend_events['register'] ); ?>></th>
-								<td>
-									<label for="frontend-events-register"><?php esc_html_e( 'Keep a log when a website visitor registers a user on the website. Only enable this if you allow users to register on your website. User registration is disabled by default in WordPress.', 'wp-security-audit-log' ); ?></label>
-								</td>
-							</tr>
-							<tr>
-								<th><input type="checkbox" name="frontend-events[login]" id="frontend-events-login" value="1" <?php checked( $frontend_events['login'] ); ?>></th>
-								<td>
-									<label for="frontend-events-login"><?php esc_html_e( 'Keep a log when users login to your website from other login pages / forms other than the default WordPress login page.', 'wp-security-audit-log' ); ?></label>
-								</td>
-							</tr>
-							<tr>
-								<th><input type="checkbox" name="frontend-events[system]" id="frontend-events-system" value="1" <?php checked( $frontend_events['system'] ); ?>></th>
-								<td >
-									<label for="frontend-events-system"><?php esc_html_e( 'Event 6023: Keep a log when a website visitor requests a non-existing URL (HTTP 404 response error).', 'wp-security-audit-log' ); ?></label>
-								</td>
-							</tr>
-							<?php
-							$log_visitor_404          = $this->_plugin->GetGlobalOption( 'log-visitor-404' );
-							$purge_visitor_log        = $this->_plugin->GetGlobalOption( 'purge-visitor-404-log' );
-							$log_visitor_404_referrer = $this->_plugin->GetGlobalOption( 'log-visitor-404-referrer', 'on' );
-							?>
-							<tr>
-								<td><input name="log_visitor_404" type="checkbox" class="check_visitor_log" value="1" <?php checked( $log_visitor_404, 'on' ); ?> /></td>
-								<td><?php esc_html_e( 'Capture 404 requests to file (the log file are created in the /wp-content/uploads/wp-security-audit-log/404s/ directory)', 'wp-security-audit-log' ); ?></td>
-							</tr>
-							<tr>
-								<td><input name="purge_visitor_log" type="checkbox" class="check_visitor_log" value="1" <?php checked( $purge_visitor_log, 'on' ); ?> /></td>
-								<td><?php esc_html_e( 'Purge log files older than one month', 'wp-security-audit-log' ); ?></td>
-							</tr>
-							<tr>
-								<td><input type="number" id="visitor_404Limit" name="visitor_404Limit" value="<?php echo esc_attr( $this->_plugin->settings->GetVisitor404LogLimit() ); ?>" /></td>
-								<td><?php esc_html_e( 'Number of 404 Requests to Log. By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests. Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?></td>
-							</tr>
-							<tr>
-								<td><input name="log_visitor_404_referrer" type="checkbox" class="check_log" value="1" <?php checked( $log_visitor_404_referrer, 'on' ); ?>></td>
-								<td><?php esc_html_e( 'Record the referrer that generated the 404 error.', 'wp-security-audit-log' ); ?></td>
-							</tr>
-						</tbody>
-					</table>
-				<!-- </div> -->
+				<?php
+				$defaults        = array(
+					'register'    => false,
+					'login'       => false,
+					'system'      => false,
+					'woocommerce' => false,
+				);
+				$frontend_events = $this->_plugin->settings->get_frontend_events( $defaults );
+				?>
+				<table id="tab-frontend-events" class="form-table wp-list-table wsal-tab widefat fixed"  style="display: table;" cellspacing="0">
+					<tbody>
+						<tr>
+							<td>
+								<p><?php esc_html_e( 'This plugin keeps a log of what your website users are doing when they are logged in. On top of that it can also keep a log of some important events of (non logged in) website visitors. Use the below settings to enable / disable any of the front-end sensors:', 'wp-security-audit-log' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<h3 style="margin:0"><?php esc_html_e( 'Front-end users registrations', 'wp-security-audit-log' ); ?></h3>
+							</td>
+						</tr>
+						<tr>
+							<th><input type="checkbox" name="frontend-events[register]" id="frontend-events-register" value="1" <?php checked( $frontend_events['register'] ); ?>></th>
+							<td>
+								<label for="frontend-events-register"><?php esc_html_e( 'Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress.', 'wp-security-audit-log' ); ?></label>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<h3 style="margin:0"><?php esc_html_e( 'Front-end users logins', 'wp-security-audit-log' ); ?></h3>
+							</td>
+						</tr>
+						<tr>
+							<th><input type="checkbox" name="frontend-events[login]" id="frontend-events-login" value="1" <?php checked( $frontend_events['login'] ); ?>></th>
+							<td>
+								<label for="frontend-events-login"><?php esc_html_e( 'Keep a log when users login to the website from other login pages / forms other than the default WordPress login page.', 'wp-security-audit-log' ); ?></label>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<h3 style="margin:0"><?php esc_html_e( 'Website visitors 404 errors', 'wp-security-audit-log' ); ?></h3>
+							</td>
+						</tr>
+						<tr>
+							<th><input type="checkbox" name="frontend-events[system]" id="frontend-events-system" value="1" <?php checked( $frontend_events['system'] ); ?>></th>
+							<td >
+								<label for="frontend-events-system"><?php esc_html_e( 'Event ID 6023: Keep a log when a website visitor requests a non-existing URL (HTTP 404 response error).', 'wp-security-audit-log' ); ?></label>
+							</td>
+						</tr>
+						<?php
+						$log_visitor_404          = $this->_plugin->GetGlobalOption( 'log-visitor-404' );
+						$purge_visitor_log        = $this->_plugin->GetGlobalOption( 'purge-visitor-404-log' );
+						$log_visitor_404_referrer = $this->_plugin->GetGlobalOption( 'log-visitor-404-referrer', 'on' );
+						?>
+						<tr>
+							<td><input name="log_visitor_404" type="checkbox" class="check_visitor_log" value="1" <?php checked( $log_visitor_404, 'on' ); ?> /></td>
+							<td><?php esc_html_e( 'Capture 404 requests to file (the log file are created in the /wp-content/uploads/wp-security-audit-log/404s/ directory)', 'wp-security-audit-log' ); ?></td>
+						</tr>
+						<tr>
+							<td><input name="purge_visitor_log" type="checkbox" class="check_visitor_log" value="1" <?php checked( $purge_visitor_log, 'on' ); ?> /></td>
+							<td><?php esc_html_e( 'Purge log files older than one month', 'wp-security-audit-log' ); ?></td>
+						</tr>
+						<tr>
+							<td><input type="number" id="visitor_404Limit" name="visitor_404Limit" value="<?php echo esc_attr( $this->_plugin->settings->GetVisitor404LogLimit() ); ?>" /></td>
+							<td><?php esc_html_e( 'Number of 404 Requests to Log. By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests. Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?></td>
+						</tr>
+						<tr>
+							<td><input name="log_visitor_404_referrer" type="checkbox" class="check_log" value="1" <?php checked( $log_visitor_404_referrer, 'on' ); ?>></td>
+							<td><?php esc_html_e( 'Record the referrer that generated the 404 error.', 'wp-security-audit-log' ); ?></td>
+						</tr>
+						<tr>
+							<td>
+								<h3 style="margin:0"><?php esc_html_e( 'Front-end WooCommerce activity', 'wp-security-audit-log' ); ?></h3>
+							</td>
+						</tr>
+						<tr>
+							<th><input type="checkbox" name="frontend-events[woocommerce]" id="frontend-events-woocommerce" value="1" <?php checked( $frontend_events['woocommerce'] ); ?>></th>
+							<td >
+								<label for="frontend-events-woocommerce"><?php esc_html_e( 'Keep a log of product stocks and orders changes done by website visitors (non-logged in). Regardless of the state of this setting, the plugin always keeps a log of changes done by logged in users.', 'wp-security-audit-log' ); ?></label>
+							</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save Changes', 'wp-security-audit-log' ) ); ?>"></p>
 		</form>
@@ -771,6 +796,13 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			}
 
 			table#tab-frontend-events tr:first-child td:first-child {
+				padding-left: 10px;
+			}
+
+			table#tab-frontend-events tr:nth-child(2) td:first-child,
+			table#tab-frontend-events tr:nth-child(4) td:first-child,
+			table#tab-frontend-events tr:nth-child(6) td:first-child,
+			table#tab-frontend-events tr:nth-child(12) td:first-child {
 				padding-left: 10px;
 			}
 		</style>

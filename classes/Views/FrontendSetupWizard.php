@@ -43,13 +43,6 @@ final class WSAL_Views_FrontendSetupWizard {
 	private $current_step;
 
 	/**
-	 * Option name
-	 *
-	 * @var string
-	 */
-	private $option_name = 'frontend-events';
-
-	/**
 	 * Method: Constructor.
 	 *
 	 * @param WpSecurityAuditLog $wsal – Instance of main plugin.
@@ -359,12 +352,12 @@ final class WSAL_Views_FrontendSetupWizard {
 
 		if ( isset( $_POST['wsal-front-end-register'] ) ) {
 			// Save frontend register sensors.
-			$sensors_option               = $this->wsal::OPT_PRFX . $this->option_name;
-			$frontend_sensors             = get_option( $sensors_option ); // Get the frontend sensors setting.
+			$frontend_sensors             = $this->wsal->settings->get_frontend_events();
 			$register_sensor              = sanitize_text_field( wp_unslash( $_POST['wsal-front-end-register'] ) );
 			$frontend_sensors['register'] = $register_sensor;
-			// Update option
-			update_option( $sensors_option, $frontend_sensors );
+
+			// Update option.
+			$this->wsal->settings->set_frontend_events( $frontend_sensors );
 		}
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
 		exit();
@@ -406,13 +399,13 @@ final class WSAL_Views_FrontendSetupWizard {
 		check_admin_referer( 'wsal-step-login' );
 
 		if ( isset( $_POST['wsal-frontend-login'] ) ) {
-			$sensors_option   = $this->wsal::OPT_PRFX . $this->option_name;
-			$frontend_sensors = get_option( $sensors_option ); // Get the frontend sensors setting.
-			$login_sensor     = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-login'] ) );
-			$login_sensor     = '0' === $login_sensor ? false : $login_sensor; // Update the sensor option.
-
+			$frontend_sensors          = $this->wsal->settings->get_frontend_events();
+			$login_sensor              = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-login'] ) );
+			$login_sensor              = '0' === $login_sensor ? false : $login_sensor; // Update the sensor option.
 			$frontend_sensors['login'] = $login_sensor;
-			update_option( $sensors_option, $frontend_sensors );
+
+			// Update option.
+			$this->wsal->settings->set_frontend_events( $frontend_sensors );
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
@@ -453,15 +446,15 @@ final class WSAL_Views_FrontendSetupWizard {
 		// Check nonce.
 		check_admin_referer( 'wsal-step-frontend-system' );
 
-		// Update system field
+		// Update system field.
 		if ( isset( $_POST['wsal-frontend-system'] ) ) {
-			$sensors_option   = $this->wsal::OPT_PRFX . $this->option_name;
-			$frontend_sensors = get_option( $sensors_option ); // Get the frontend sensors setting.
-			$system_sensor    = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-system'] ) );
-			$system_sensor    = '0' === $system_sensor ? false : $system_sensor; // Update the sensor option.
-
+			$frontend_sensors           = $this->wsal->settings->get_frontend_events();
+			$system_sensor              = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-system'] ) );
+			$system_sensor              = '0' === $system_sensor ? false : $system_sensor; // Update the sensor option.
 			$frontend_sensors['system'] = $system_sensor;
-			update_option( $sensors_option, $frontend_sensors );
+
+			// Update option.
+			$this->wsal->settings->set_frontend_events( $frontend_sensors );
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
