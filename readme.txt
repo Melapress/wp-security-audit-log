@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.2.2
-Stable tag: 3.4.3.1
+Stable tag: 3.5
 Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -203,37 +203,26 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-=3.4.3.1 (2019-08-29)
+Release notes: [Update 3.5 - New configurable front-end sensors & improved wizard](https://www.wpsecurityauditlog.com/releases/update-3-5/)
 
-* **Improvements**
-	* Added confirmation for when daily summary email is sent manually.
-	* Updated the support links in the help page.
-	
-* **Bug fixes**
-	* Fixed cases in which event ID 4012 was not being reported.
-	* Fixed a PHP fatal error caused when public events are disabled.
-	
-Release notes: [Update 3.4.3 – Front-end plugin performance improvements & MainWP extension support](https://www.wpsecurityauditlog.com/releases/update-3-4-3/)
-
-= 3.4.3 (2019-08-28) =
+= 3.5 (2019-09-12) =
 
 * **New Features**
-	* Plugin performance improved five fold.
-	* Improved [log coverage of WooCommerce](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/) products - plugin keeps log of changes done to products via quick edit.
-	* Added coverage of WooCommerce product changes done with Admin Columns Pro.
-	* Support for the new Search and Reports features coming up in the [Activity Log for MainWP extension](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/).
+
+	* 3 new front-end sensors that can be individually enabled / disabled individually (used for front end activity, such as logins from non-default WordPress login page).
 
 * **Improvements**
-	* Improved log coverage of draft posts - now plugin reports the details of changes on draft posts.
-	* Added report title in HTML reports.
-	* Maximum number of logged in user sessions the plugin retrieves is now be configured.
-	* Removed plugin branding from [WordPress activity log HTML reports](https://www.wpsecurityauditlog.com/premium-features/reports-wordpress-activity-log/) and automated emails.
-	* Removed a number of redundant files from old premium extensions.
-	* Events in activity log dashboard widget have been shortened for better readability.* Removed broken links from 404 error email notifications.
 
-* **Bug fixes**
-	* Plugin now sends the IP address when [mirroring WordPress activity log to Slack](https://www.wpsecurityauditlog.com/premium-features/integration-mirroring-tools-wordpress-activity-log/).
-	* Fixed an edge case in which cron jobs for mirroring of activity log were not firing.
+	* Improved the hide plugin feature: number of installed plugins is also adjusted when plugin is hidden.
+	* Added new steps in the wizard to help users configure the front-end sensors when they install the plugin.
+	* Plugin keeps log of stock changes when orders are placed manually or items in orders are changed ([WooCommerce Activity Log](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/)).
+	* Removed event ID 2126 (visitor posted a comment): noticed almost all users disable it since this is trivial information / change.
+
+* **Bug Fixes**
+
+	* Plugin was not reporting correct product name & stock quantity when WooCommerce Tab Manager was installed.
+	* Mirroring cron jobs not firing / not copying logs to mirror.
+	* Unhandled error when using custom login pages.
 	
 = Earlier versions =
 
