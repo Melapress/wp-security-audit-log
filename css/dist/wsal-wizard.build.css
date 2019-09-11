@@ -168,4 +168,6 @@
   background: #FFE;
   border-color: #ED5; }
 
-/*# sourceMappingURL=wsal-wizard.build.css.map*/
+p.description {
+  font-size: 13px;
+  font-style: italic; }
