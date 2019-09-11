@@ -11,8 +11,7 @@
  *
  * @package Wsal
  *
- * @fs_premium_only /extensions/
- * @fs_premium_only /sdk/twilio-php/
+ * @fs_premium_only /extensions/, /sdk/twilio-php/
  */
 
 /*
@@ -162,7 +161,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Frontend requests should only log for certain 404 requests.
 			// For that to happen, we need to delay until template_redirect.
 			if ( self::is_frontend() ) {
-				$bootstrap_hook = [ 'wp', 0 ];
+				$bootstrap_hook = [ 'wp_loaded', 0 ];
+				add_action( 'wp', array( $this, 'setup_404' ) );
 			}
 
 			add_action( $bootstrap_hook[0], array( $this, 'setup' ), $bootstrap_hook[1] );
@@ -229,6 +229,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
+		 * Decides if the plugin should run for 404 events on `wp` hook
+		 * IF not already loaded on `wp_loaded` hook for frontend request.
+		 */
+		public function setup_404() {
+			// If a user is logged in OR if the frontend sensors are allowed to load, then bail.
+			if ( is_user_logged_in() || self::should_load_frontend() ) {
+				return;
+			}
+
+			// If the current page is not 404 OR if the loading of 404 frontend sensor is not allowed, then bail.
+			if ( ! is_404() || ! $this->load_for_404s() ) {
+				return;
+			}
+
+			// Otherwise load WSAL on wp hook.
+			$this->setup();
+		}
+
+		/**
 		 * Decides if the plugin should run, sets up constants, includes, inits hooks, etc.
 		 *
 		 * @return bool
@@ -268,18 +287,28 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						// This is a frontend request, and it's a 404, but we are not logging 404s.
 						return false;
 					}
-				} elseif ( ! is_user_logged_in() && ! $this->load_for_visitor_events() ) {
+				} elseif ( ! is_user_logged_in() && ! self::should_load_frontend() ) {
 					// This is not a 404, and the user isn't logged in, and we aren't logging visitor events.
 					return false;
 				}
 			}
 
 			// If this is a rest API request and the user is not logged in, bail.
-			if ( self::is_rest_api() && ! is_user_logged_in() && ! $this->load_for_visitor_events() ) {
+			if ( self::is_rest_api() && ! is_user_logged_in() ) {
 				return false;
 			}
 
 			return true;
+		}
+
+		/**
+		 * Checks to see if WSAL should be loaded for register, login, and comment events.
+		 *
+		 * @return bool
+		 */
+		public static function should_load_frontend() {
+			$frontend_events = get_option( 'wsal-frontend-events' );
+			return ! empty( $frontend_events['register'] ) || ! empty( $frontend_events['login'] );
 		}
 
 		/**
@@ -385,7 +414,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return bool
 		 */
 		public static function is_login_screen() {
-			return parse_url( wp_login_url(), PHP_URL_PATH ) === parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+			return parse_url( site_url( 'wp-login.php' ), PHP_URL_PATH ) === parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 		}
 
 		/**
@@ -475,7 +504,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				return;
 			}
 
-			if ( is_admin() || self::is_login_screen() || ( is_admin() && defined( 'DOING_CRON' ) ) ) {
+			if ( is_admin() || self::is_login_screen() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 				self::load_freemius();
 
 				if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
@@ -503,12 +532,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function load_for_404s() {
 			if ( null === $this->load_for_404s ) {
-				if ( ! is_user_logged_in() && ! self::load_for_visitor_events() ) {
+				if ( ! is_user_logged_in() ) {
+					// Get the frontend sensors setting.
+					$frontend_sensors = get_option( 'wsal-frontend-events' );
+
 					// This overrides the setting.
-					$this->load_for_404s = false;
+					$this->load_for_404s = ! empty( $frontend_sensors['system'] ) ? true : false;
 				} else {
 					// We are doing a raw lookup here because The WSAL options system might not be loaded.
-					$this->load_for_404s = self::raw_alert_is_enabled( is_user_logged_in() ? 6007 : 6023 );
+					$this->load_for_404s = self::raw_alert_is_enabled( 6007 );
 				}
 			}
 
@@ -634,6 +666,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					$redirect = add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) );
 				}
 				wp_safe_redirect( $redirect );
+				exit();
+			}
+
+			if ( get_option( 'wsal-redirect-to-frontend-wizard', false ) ) {
+				delete_option( 'wsal-redirect-to-frontend-wizard' );
+				wp_safe_redirect( add_query_arg( 'page', 'wsal-front-setup', admin_url( 'index.php' ) ) );
 				exit();
 			}
 		}
@@ -886,6 +924,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Hide plugin.
 				if ( $this->settings->IsIncognito() ) {
 					add_action( 'admin_head', array( $this, 'HidePlugin' ) );
+					add_filter( 'all_plugins', array( $this, 'wsal_hide_plugin' ) );
 				}
 
 				// Update routine.
@@ -957,7 +996,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$fields = esc_html( $post_array['notice'] );
 			}
 			$this->SetGlobalOption( 'excluded-custom', $fields );
-			echo '<p>Custom Field ' . esc_html( $post_array['notice'] ) . ' is no longer being monitored.<br />Enable the monitoring of this custom field again from the <a href="admin.php?page=wsal-settings#tab-exclude">Excluded Objects</a> tab in the plugin settings</p>';
+
+			// Exclude object link.
+			$exclude_objects_link = add_query_arg(
+				array(
+					'page' => 'wsal-settings',
+					'tab'  => 'exclude-objects',
+				),
+				admin_url( 'admin.php' )
+			);
+			echo wp_sprintf( '<p>' . __( 'Custom Field %1$s is no longer being monitored.<br />Enable the monitoring of this custom field again from the', 'wp-security-audit-log' ) . ' <a href="%2$s">%3$s</a>%4$s</p>', $post_array['notice'], $exclude_objects_link, __( 'Excluded Objects', 'wp-security-audit-log' ), __( ' tab in the plugin settings', 'wp-security-audit-log' ) );
 			die;
 		}
 
@@ -993,8 +1041,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$s_alerts = esc_html( $post_array['code'] );
 			}
 			$this->SetGlobalOption( 'disabled-alerts', $s_alerts );
-			echo '<p>Alert ' . esc_html( $post_array['code'] ) . ' is no longer being monitored.<br />';
-			echo 'You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.</p>';
+			echo wp_sprintf( '<p>' . __( 'Alert %1$s is no longer being monitored.<br /> %2$s', 'wp-security-audit-log' ) . '</p>', esc_html( $post_array['code'] ), __( 'You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.', 'wp-security-audit-log' ) );
 			die;
 		}
 
@@ -1377,6 +1424,32 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
 						self::getConnector()->getAdapter( 'Meta' )->create_indexes();
 					}
+				}
+
+				/**
+				 * IMPORTANT: VERSION SPECIFIC UPDATE
+				 *
+				 * It only needs to run when old version of the plugin is less than 3.5
+				 * & the new version is later than 3.4.3.1.
+				 *
+				 * @since 3.5
+				 */
+				if ( version_compare( $old_version, '3.5', '<' ) && version_compare( $new_version, '3.4.3.1', '>' ) ) {
+					$frontend_events = array(
+						'register' => true, // Enabled by default to ensure users to not loose any functionality.
+						'login'    => true, // Enabled by default to ensure users to not loose any functionality.
+						'system'   => false,
+					);
+					$update_events   = array();
+
+					// If event 6023 is enabled.
+					if ( self::raw_alert_is_enabled( 6023 ) ) {
+						$update_events['system'] = true; // Then enable it for the frontend.
+					}
+
+					$frontend_events = array_merge( $frontend_events, $update_events );
+					update_option( 'wsal-frontend-events', $frontend_events );
+					add_option( 'wsal-redirect-to-frontend-wizard', true );
 				}
 			}
 		}
@@ -1953,6 +2026,29 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					error_log( $message );
 				}
 			}
+		}
+
+		/**
+		 * Hide WSAL plugin from plugin list
+		 *
+		 * @param  array $plugins All plugins.
+		 * @return array
+		 */
+		public function wsal_hide_plugin( $plugins ) {
+			global $pagenow;
+
+			// Check current page.
+			if ( 'plugins.php' !== $pagenow ) {
+				return;
+			}
+
+			// Find WSAL by plugin basename.
+			if ( array_key_exists( WSAL_BASE_NAME, $plugins ) ) {
+				// Remove WSAL plugin from plugin list page.
+				unset( $plugins[ WSAL_BASE_NAME ] );
+			}
+
+			return $plugins;
 		}
 	}
 
