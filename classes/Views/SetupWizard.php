@@ -134,6 +134,21 @@ final class WSAL_Views_SetupWizard {
 				'content' => array( $this, 'wsal_step_log_details' ),
 				'save'    => array( $this, 'wsal_step_log_details_save' ),
 			),
+			'login'          => array(
+				'name'    => __( 'Log In', 'wp-security-audit-log' ),
+				'content' => array( $this, 'wsal_step_login' ),
+				'save'    => array( $this, 'wsal_step_login_save' ),
+			),
+			'404s'           => array(
+				'name'    => __( '404s', 'wp-security-audit-log' ),
+				'content' => array( $this, 'wsal_step_404s' ),
+				'save'    => array( $this, 'wsal_step_404s_save' ),
+			),
+			'register'       => array(
+				'name'    => __( 'User Registrations', 'wp-security-audit-log' ),
+				'content' => array( $this, 'wsal_step_register' ),
+				'save'    => array( $this, 'wsal_step_register_save' ),
+			),
 			'log_retention'  => array(
 				'name'    => __( 'Log Retention', 'wp-security-audit-log' ),
 				'content' => array( $this, 'wsal_step_log_retention' ),
@@ -262,10 +277,8 @@ final class WSAL_Views_SetupWizard {
 				if ( $key === $this->current_step ) :
 					?>
 					<li class="is-active"><?php echo esc_html( $step['name'] ); ?></li>
-					<?php
-				else :
-					?>
-					<li><?php echo esc_html( $step['name'] ); ?></li>
+				<?php else : ?>
+					<li></li>
 					<?php
 				endif;
 			endforeach;
@@ -345,9 +358,7 @@ final class WSAL_Views_SetupWizard {
 		?>
 		<form method="post" class="wsal-setup-form">
 			<?php wp_nonce_field( 'wsal-step-log-details' ); ?>
-			<h4>
-				<?php esc_html_e( 'Please select the level of detail for your WordPress activity logs:', 'wp-security-audit-log' ); ?>
-			</h4>
+			<h4><?php esc_html_e( 'Please select the level of detail for your WordPress activity logs:', 'wp-security-audit-log' ); ?></h4>
 			<fieldset>
 				<label for="basic">
 					<input id="basic" name="wsal-details-level" type="radio" value="basic">
@@ -358,18 +369,10 @@ final class WSAL_Views_SetupWizard {
 					<input id="geek" name="wsal-details-level" type="radio" value="geek" checked>
 					<?php esc_html_e( 'Geek (I want to know everything that is happening on my WordPress)', 'wp-security-audit-log' ); ?>
 				</label>
-				<p class="description">
-					<?php esc_html_e( 'Note: You can change the WordPress logging level from the plugin’s settings anytime.', 'wp-security-audit-log' ); ?>
-				</p>
+				<p class="description"><?php esc_html_e( 'Note: You can change the WordPress logging level from the plugin’s settings anytime.', 'wp-security-audit-log' ); ?></p>
 			</fieldset>
-
 			<div class="wsal-setup-actions">
-				<button class="button button-primary"
-					type="submit"
-					name="save_step"
-					value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>">
-					<?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?>
-				</button>
+				<button class="button button-primary" type="submit" name="save_step" value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?></button>
 			</div>
 		</form>
 		<?php
@@ -393,6 +396,155 @@ final class WSAL_Views_SetupWizard {
 			$this->wsal->settings->set_basic_mode();
 		} elseif ( ! empty( $log_details ) && 'geek' === $log_details ) {
 			$this->wsal->settings->set_geek_mode();
+		}
+
+		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
+		exit();
+	}
+
+	/**
+	 * Step View: `Login Sensor`
+	 */
+	private function wsal_step_login() {
+		?>
+		<form method="post" class="wsal-setup-form">
+			<?php wp_nonce_field( 'wsal-step-login' ); ?>
+			<h4><?php esc_html_e( 'Do you or your users use other pages to log in to WordPress other than the default login page ( /wp-admin/ )?', 'wp-security-audit-log' ); ?></h4>
+			<fieldset>
+				<label for="wsal-frontend-events-login-yes">
+					<input id="wsal-frontend-events-login-yes" name="wsal-frontend-login" type="radio" value="1">
+					<?php esc_html_e( 'Yes, we use other pages to login to WordPress.', 'wp-security-audit-log' ); ?>
+				</label>
+				<br />
+				<label for="wsal-frontend-events-login-no">
+					<input id="wsal-frontend-events-login-no" name="wsal-frontend-login" type="radio" value="0" checked>
+					<?php esc_html_e( 'No, we only use the default WordPress login page.', 'wp-security-audit-log' ); ?>
+				</label>
+				<p class="description"><?php esc_html_e( 'If your website is a membership or ecommerce website most probably you have more than one area from where the users can login. If you are not sure, select Yes.', 'wp-security-audit-log' ); ?></p>
+			</fieldset>
+			<!-- Question -->
+			<p class="description"><?php esc_html_e( 'Note: You can change the WordPress activity log retention settings at any time from the plugin settings later on.', 'wp-security-audit-log' ); ?></p>
+			<div class="wsal-setup-actions">
+				<button class="button button-primary" type="submit" name="save_step" value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?></button>
+			</div>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Step Save: `Login Sensor`
+	 */
+	private function wsal_step_login_save() {
+		// Check nonce.
+		check_admin_referer( 'wsal-step-login' );
+
+		if ( isset( $_POST['wsal-frontend-login'] ) ) {
+			$sensors_option   = 'wsal-frontend-events';
+			$frontend_sensors = get_option( $sensors_option ); // Get the frontend sensors setting.
+			$login_sensor     = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-login'] ) );
+			$login_sensor     = '0' === $login_sensor ? false : $login_sensor; // Update the sensor option.
+
+			$frontend_sensors['login'] = $login_sensor;
+			update_option( $sensors_option, $frontend_sensors );
+		}
+
+		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
+		exit();
+	}
+
+	/**
+	 * Step View: `404s Sensor`
+	 */
+	private function wsal_step_404s() {
+		?>
+		<form method="post" class="wsal-setup-form">
+			<?php wp_nonce_field( 'wsal-step-404s' ); ?>
+			<h4><?php esc_html_e( 'Do you want to keep a log of (non-logged in) visitors’ requests to non-existing URLs which generate a HTTP 404 error response?', 'wp-security-audit-log' ); ?></h4>
+			<fieldset>
+				<label for="wsal-frontend-events-system-yes">
+					<input id="wsal-frontend-events-system-yes" name="wsal-frontend-system" type="radio" value="1">
+					<?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?>
+				</label>
+				<br />
+				<label for="wsal-frontend-events-system-no">
+					<input id="wsal-frontend-events-system-no" name="wsal-frontend-system" type="radio" value="0" checked>
+					<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
+				</label>
+			</fieldset>
+			<!-- Question -->
+			<p class="description"><?php esc_html_e( 'Note: You can change the WordPress activity log retention settings at any time from the plugin settings later on.', 'wp-security-audit-log' ); ?></p>
+			<div class="wsal-setup-actions">
+				<button class="button button-primary" type="submit" name="save_step" value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?></button>
+			</div>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Step Save: `404s Sensor`
+	 */
+	private function wsal_step_404s_save() {
+		// Check nonce.
+		check_admin_referer( 'wsal-step-404s' );
+
+		if ( isset( $_POST['wsal-frontend-system'] ) ) {
+			$sensors_option   = 'wsal-frontend-events';
+			$frontend_sensors = get_option( $sensors_option ); // Get the frontend sensors setting.
+			$system_sensor    = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-system'] ) );
+			$system_sensor    = '0' === $system_sensor ? false : $system_sensor; // Update the sensor option.
+
+			$frontend_sensors['system'] = $system_sensor;
+			update_option( $sensors_option, $frontend_sensors );
+		}
+
+		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
+		exit();
+	}
+
+	/**
+	 * Step View: `Register Sensor`
+	 */
+	private function wsal_step_register() {
+		?>
+		<form method="post" class="wsal-setup-form">
+			<?php wp_nonce_field( 'wsal-step-frontend-register' ); ?>
+			<h4><?php esc_html_e( 'Can visitors register for a user on your website?', 'wp-security-audit-log' ); ?></h4>
+			<fieldset>
+				<label for="wsal-frontend-events-register-yes">
+					<input id="wsal-frontend-events-register-yes" name="wsal-frontend-register" type="radio" value="1">
+					<?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?>
+				</label>
+				<br />
+				<label for="wsal-frontend-events-register-no">
+					<input id="wsal-frontend-events-register-no" name="wsal-frontend-register" type="radio" value="0" checked>
+					<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
+				</label>
+				<p class="description"><?php esc_html_e( 'If you are not sure about this setting, check if the Membership setting in the WordPress General settings is checked or not. If it is not checked (default) select No.', 'wp-security-audit-log' ); ?></p>
+			</fieldset>
+			<!-- Question -->
+			<p class="description"><?php esc_html_e( 'Note: You can change the WordPress activity log retention settings at any time from the plugin settings later on.', 'wp-security-audit-log' ); ?></p>
+			<div class="wsal-setup-actions">
+				<button class="button button-primary" type="submit" name="save_step" value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?></button>
+			</div>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Step Save: `Register Sensor`
+	 */
+	private function wsal_step_register_save() {
+		// Check nonce.
+		check_admin_referer( 'wsal-step-frontend-register' );
+
+		if ( isset( $_POST['wsal-frontend-register'] ) ) {
+			$sensors_option   = 'wsal-frontend-events';
+			$frontend_sensors = get_option( $sensors_option ); // Get the frontend sensors setting.
+			$register_sensor  = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-register'] ) );
+			$register_sensor  = '0' === $register_sensor ? false : $register_sensor; // Update the sensor option.
+
+			$frontend_sensors['register'] = $register_sensor;
+			update_option( $sensors_option, $frontend_sensors );
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
