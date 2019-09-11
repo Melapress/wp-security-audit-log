@@ -135,6 +135,7 @@ final class WSAL_AlertManager {
 				'shop_order',          // WooCommerce Order CPT.
 				'shop_order_refund',   // WooCommerce Order Refund CPT.
 				'product_variation',   // WooCommerce Product Variation CPT.
+				'wc_product_tab',      // WooCommerce Product Tab CPT.
 			)
 		);
 
@@ -445,9 +446,6 @@ final class WSAL_AlertManager {
 	 */
 	public function IsEnabled( $type ) {
 		$disabled_events = $this->GetDisabledAlerts();
-		if ( 'no' !== $this->plugin->GetGlobalOption( 'disable-visitor-events', 'no' ) ) {
-			$disabled_events = array_merge( $disabled_events, $this->get_public_events() );
-		}
 		return ! in_array( $type, $disabled_events, true );
 	}
 

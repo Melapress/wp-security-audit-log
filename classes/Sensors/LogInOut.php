@@ -125,6 +125,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		if ( $provider && $user && in_array( $provider, $providers_2fa, true ) ) {
 			// Get user roles.
 			$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+
 			if ( $this->plugin->settings->IsLoginSuperAdmin( $user->user_login ) ) {
 				$user_roles[] = 'superadmin';
 			}
@@ -138,6 +139,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				true
 			);
 		}
+
 		return $redirect_url;
 	}
 
@@ -147,7 +149,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 * @param string $user_login - Username.
 	 * @param object $user - WP_User object.
 	 */
-	public function EventLogin( $user_login, $user = null ) {
+	public function EventLogin( $user_login, $user ) {
 		// Get global POST array.
 		$post_array = filter_input_array( INPUT_POST );
 
@@ -156,9 +158,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		 *
 		 * @since 3.1.6
 		 */
-		if ( isset( $post_array['_um_account'] )
-		&& isset( $post_array['_um_account_tab'] )
-		&& 'password' === $post_array['_um_account_tab'] ) {
+		if ( isset( $post_array['_um_account'] ) && isset( $post_array['_um_account_tab'] ) && 'password' === $post_array['_um_account_tab'] ) {
 			/**
 			 * If the data is coming from UM plugin account change
 			 * password page, check for change in password.
@@ -198,10 +198,13 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		if ( empty( $user ) ) {
 			$user = get_user_by( 'login', $user_login );
 		}
+
 		$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+
 		if ( $this->plugin->settings->IsLoginSuperAdmin( $user_login ) ) {
 			$user_roles[] = 'superadmin';
 		}
+
 		$this->plugin->alerts->Trigger(
 			1000,
 			array(

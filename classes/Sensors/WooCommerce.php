@@ -201,7 +201,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		$post_id = (int) $post_id; // Making sure that the post id is integer.
 		$post    = get_post( $post_id ); // Get post.
 
-		if ( ! empty( $post ) && $post instanceof WP_Post ) {
+		if ( ! empty( $post ) && $post instanceof WP_Post && in_array( $post->post_type, array( 'product', 'shop_order', 'shop_coupon' ), true ) ) {
 			$this->_old_post   = $post;
 			$this->old_product = 'product' === $post->post_type ? wc_get_product( $post->ID ) : null;
 			$this->old_status  = $post->post_status;
