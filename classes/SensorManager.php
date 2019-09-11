@@ -182,7 +182,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		// Get file name.
 		$filename = basename( $filepath, '.php' );
 
-		$frontend_events = get_option( 'wsal-frontend-events' );
+		$frontend_events = $this->plugin->settings->get_frontend_events();
 
 		// Check to see if LogInOut, FrontendLogin, and FrontendRegister sensors should load on login page.
 		if ( WpSecurityAuditLog::is_login_screen() ) {
@@ -293,7 +293,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 					break;
 
 				case 'FrontendWooCommerce':
-					if ( is_user_logged_in() || ! WpSecurityAuditLog::is_woocommerce_active() ) {
+					if ( is_user_logged_in() || ! WpSecurityAuditLog::is_woocommerce_active() || empty( $frontend_events['woocommerce'] ) ) {
 						$load_sensor = false;
 					}
 					break;
@@ -331,7 +331,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 * frontend, i.e., just before setting up wp query.
 	 */
 	public function load_frontend_system_sensor() {
-		$frontend_events = get_option( 'wsal-frontend-events' );
+		$frontend_events = $this->plugin->settings->get_frontend_events();
 
 		if ( ! empty( $frontend_events['system'] ) && is_404() ) {
 			$sensor = new WSAL_Sensors_FrontendSystem( $this->plugin );

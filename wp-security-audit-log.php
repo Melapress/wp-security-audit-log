@@ -4,7 +4,7 @@
  * Plugin URI: http://www.wpsecurityauditlog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 3.4.3.1
+ * Version: 3.5
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -46,7 +46,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '3.4.3.1';
+		public $version = '3.5';
 
 		// Plugin constants.
 		const PLG_CLS_PRFX    = 'WSAL_';
@@ -307,8 +307,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return bool
 		 */
 		public static function should_load_frontend() {
-			$frontend_events = get_option( 'wsal-frontend-events' );
-			return ! empty( $frontend_events['register'] ) || ! empty( $frontend_events['login'] );
+			$event_opt       = 'wsal-frontend-events';
+			$frontend_events = ! is_multisite() ? get_option( $event_opt ) : get_network_option( get_main_network_id(), $event_opt );
+			return ! empty( $frontend_events['register'] ) || ! empty( $frontend_events['login'] ) || ! empty( $frontend_events['woocommerce'] );
 		}
 
 		/**
@@ -534,10 +535,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( null === $this->load_for_404s ) {
 				if ( ! is_user_logged_in() ) {
 					// Get the frontend sensors setting.
-					$frontend_sensors = get_option( 'wsal-frontend-events' );
+					$event_opt       = 'wsal-frontend-events';
+					$frontend_events = ! is_multisite() ? get_option( $event_opt ) : get_network_option( get_main_network_id(), $event_opt );
 
 					// This overrides the setting.
-					$this->load_for_404s = ! empty( $frontend_sensors['system'] ) ? true : false;
+					$this->load_for_404s = ! empty( $frontend_events['system'] ) ? true : false;
 				} else {
 					// We are doing a raw lookup here because The WSAL options system might not be loaded.
 					$this->load_for_404s = self::raw_alert_is_enabled( 6007 );
@@ -1436,19 +1438,22 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				 */
 				if ( version_compare( $old_version, '3.5', '<' ) && version_compare( $new_version, '3.4.3.1', '>' ) ) {
 					$frontend_events = array(
-						'register' => true, // Enabled by default to ensure users to not loose any functionality.
-						'login'    => true, // Enabled by default to ensure users to not loose any functionality.
-						'system'   => false,
+						'register'    => true, // Enabled by default to ensure users to not loose any functionality.
+						'login'       => true, // Enabled by default to ensure users to not loose any functionality.
+						'system'      => false,
+						'woocommerce' => false,
 					);
-					$update_events   = array();
 
 					// If event 6023 is enabled.
 					if ( self::raw_alert_is_enabled( 6023 ) ) {
-						$update_events['system'] = true; // Then enable it for the frontend.
+						$frontend_events['system'] = true; // Then enable it for the frontend.
 					}
 
-					$frontend_events = array_merge( $frontend_events, $update_events );
-					update_option( 'wsal-frontend-events', $frontend_events );
+					if ( self::is_woocommerce_active() ) {
+						$frontend_events['woocommerce'] = true;
+					}
+
+					$this->settings->set_frontend_events( $frontend_events );
 					add_option( 'wsal-redirect-to-frontend-wizard', true );
 				}
 			}
