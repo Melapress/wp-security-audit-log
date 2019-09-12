@@ -1193,13 +1193,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$this->Update( $old_version, $new_version );
 			}
 
-			// Load options from wp_options table or wp_sitemeta in multisite enviroment.
-			$data = $this->read_options_prefixed( 'wsal-' );
-			if ( ! empty( $data ) ) {
-				$this->SetOptions( $data );
-			}
-			$this->deleteAllOptions();
-
 			// If system wasn't installed, try migration now.
 			if ( ! $pre_installed && $this->CanMigrate() ) {
 				$this->Migrate();
@@ -1467,68 +1460,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function update_external_db_password() {
 			$this->wsal_deprecate( __METHOD__, '3.2.3.3' );
-		}
-
-		/**
-		 * Delete from the options table of WP.
-		 *
-		 * @param string $prefix - Table prefix.
-		 * @return boolean - Query result.
-		 */
-		public function delete_options_prefixed( $prefix ) {
-			global $wpdb;
-			if ( $this->IsMultisite() ) {
-				$table_name = $wpdb->prefix . 'sitemeta';
-				$result     = $wpdb->query( "DELETE FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'" );
-			} else {
-				$result = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'" );
-			}
-			return ( $result ) ? true : false;
-		}
-
-		/**
-		 * Delete all the Wsal options from the options table of WP.
-		 */
-		private function deleteAllOptions() {
-			$flag = true;
-			while ( $flag ) {
-				$flag = $this->delete_options_prefixed( self::OPT_PRFX );
-			}
-		}
-
-		/**
-		 * Read options from the options table of WP.
-		 *
-		 * @param string $prefix - Table prefix.
-		 * @return boolean - Query result.
-		 */
-		public function read_options_prefixed( $prefix ) {
-			global $wpdb;
-			if ( $this->IsMultisite() ) {
-				$table_name = $wpdb->prefix . 'sitemeta';
-				$results    = $wpdb->get_results( "SELECT site_id,meta_key,meta_value FROM {$table_name} WHERE meta_key LIKE '{$prefix}%'", ARRAY_A );
-			} else {
-				$results = $wpdb->get_results( "SELECT option_name,option_value FROM {$wpdb->options} WHERE option_name LIKE '{$prefix}%'", ARRAY_A );
-			}
-			return $results;
-		}
-
-		/**
-		 * Set options in the Wsal options table.
-		 *
-		 * @param array $data - Table prefix.
-		 */
-		public function SetOptions( $data ) {
-			if ( empty( $this->options ) ) {
-				$this->options = new WSAL_Models_Option();
-			}
-			foreach ( $data as $key => $option ) {
-				if ( $this->IsMultisite() ) {
-					$this->options->SetOptionValue( $option['meta_key'], $option['meta_value'] );
-				} else {
-					$this->options->SetOptionValue( $option['option_name'], $option['option_value'] );
-				}
-			}
 		}
 
 		/**
