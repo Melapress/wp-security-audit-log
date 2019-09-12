@@ -2247,12 +2247,22 @@ class WSAL_Settings {
 	/**
 	 * Get WSAL's frontend events option.
 	 *
-	 * @param mixed $default - Default value.
 	 * @return array
 	 */
-	public function get_frontend_events( $default = false ) {
-		$event_opt            = 'wsal-frontend-events';
-		$value                = ! is_multisite() ? get_option( $event_opt, $default ) : get_network_option( get_main_network_id(), $event_opt, $default );
+	public function get_frontend_events() {
+		// Option defaults.
+		$default = array(
+			'register'    => false,
+			'login'       => false,
+			'system'      => false,
+			'woocommerce' => WpSecurityAuditLog::is_woocommerce_active(),
+		);
+
+		// Get the option.
+		$event_opt = 'wsal-frontend-events';
+		$value     = ! is_multisite() ? get_option( $event_opt, $default ) : get_network_option( get_main_network_id(), $event_opt, $default );
+
+		// Check for WooCommerce in case it is not stored.
 		$value['woocommerce'] = ! isset( $value['woocommerce'] ) ? WpSecurityAuditLog::is_woocommerce_active() : $value['woocommerce'];
 		return $value;
 	}

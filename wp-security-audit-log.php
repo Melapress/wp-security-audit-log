@@ -1434,7 +1434,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						'register'    => true, // Enabled by default to ensure users to not loose any functionality.
 						'login'       => true, // Enabled by default to ensure users to not loose any functionality.
 						'system'      => false,
-						'woocommerce' => false,
+						'woocommerce' => self::is_woocommerce_active(),
 					);
 
 					// If event 6023 is enabled.

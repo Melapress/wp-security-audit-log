@@ -610,13 +610,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					</div>
 				<?php endforeach; ?>
 				<?php
-				$defaults        = array(
-					'register'    => false,
-					'login'       => false,
-					'system'      => false,
-					'woocommerce' => false,
-				);
-				$frontend_events = $this->_plugin->settings->get_frontend_events( $defaults );
+				$frontend_events = $this->_plugin->settings->get_frontend_events();
 				?>
 				<table id="tab-frontend-events" class="form-table wp-list-table wsal-tab widefat fixed"  style="display: table;" cellspacing="0">
 					<tbody>
