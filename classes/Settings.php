@@ -2251,8 +2251,10 @@ class WSAL_Settings {
 	 * @return array
 	 */
 	public function get_frontend_events( $default = false ) {
-		$event_opt = 'wsal-frontend-events';
-		return ! is_multisite() ? get_option( $event_opt, $default ) : get_network_option( get_main_network_id(), $event_opt, $default );
+		$event_opt            = 'wsal-frontend-events';
+		$value                = ! is_multisite() ? get_option( $event_opt, $default ) : get_network_option( get_main_network_id(), $event_opt, $default );
+		$value['woocommerce'] = ! isset( $value['woocommerce'] ) ? WpSecurityAuditLog::is_woocommerce_active() : $value['woocommerce'];
+		return $value;
 	}
 
 	/**
