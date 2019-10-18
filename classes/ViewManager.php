@@ -245,8 +245,7 @@ class WSAL_ViewManager {
 						$view->GetName(),
 						'read', // No capability requirement.
 						$view->GetSafeViewName(),
-						array( $this, 'RenderViewBody' ),
-						$view->GetIcon()
+						array( $this, 'RenderViewBody' )
 					);
 				}
 			}
