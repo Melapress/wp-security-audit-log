@@ -139,7 +139,8 @@ td.column-user {
 	background: #CCC;
 	text-align: center;
 	border-radius: 32px;
-	margin-left: 8px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 /* errors */
@@ -337,11 +338,8 @@ div.wsal_notice__wrapper p {
 	text-decoration: none;
 }
 
+.wp-list-table #type,
 .wp-list-table #code {
-	width: 55px;
-}
-
-.wp-list-table #type {
 	width: 101px;
 }
 
