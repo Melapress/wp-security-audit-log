@@ -1031,6 +1031,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			return 0;
 		}
 
+		/*
+		 * Return early if this looks like a re-save on a draft.
+		 */
+		if ( $this->is_draft_resave( $oldpost, $newpost ) ) {
+			return 0;
+		}
+
 		if ( $from !== $to ) {
 			$editor_link = $this->get_editor_link( $oldpost );
 			$this->plugin->alerts->Trigger(
@@ -1229,6 +1236,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		}
 
 		$content_changed = $oldpost->post_content != $newpost->post_content;
+
+		/*
+		 * If the content hasn't changed and this looks to be a draft resave
+		 * then we won't track anything for this modification.
+		 */
+		if ( ! $content_changed && $this->is_draft_resave( $oldpost, $newpost ) ) {
+			return;
+		}
 
 		if ( $oldpost->post_modified !== $newpost->post_modified ) {
 			$event = 0;
@@ -1515,5 +1530,30 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			'tag_ID'   => $tag_id,
 		);
 		return ! empty( $tag_id ) ? add_query_arg( $tag_args, admin_url( 'term.php' ) ) : null;
+	}
+
+	/**
+	 * Returns true if this looks like a re-save on a draft.
+	 *
+	 * @method is_draft_resave
+	 * @since  3.5.1
+	 *
+	 * @param  \WP_Post $oldpost The old post object if one exists.
+	 * @param  \WP_Post $newpost The new post object.
+	 * @return boolean
+	 */
+	private function is_draft_resave( $oldpost, $newpost ) {
+		/*
+		 * If this is a 'draft' and used to be a 'draft' plus the gmt dates
+		 * match and it contains only characters that would appear in the
+		 * a default unpublished post then...
+		 */
+		if ( 'draft' === $oldpost->post_status
+		&& $oldpost->post_status === $newpost->post_status
+		&& $oldpost->post_date_gmt === $newpost->post_date_gmt
+		&& preg_match( '/^[0\-\ \:]+$/', $oldpost->post_date_gmt ) ) {
+			// Don't track this as a date change.
+			return true;
+		}
 	}
 }
