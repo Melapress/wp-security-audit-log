@@ -48,7 +48,6 @@ class WSAL_ViewManager {
 	 * Method: Constructor.
 	 *
 	 * @param  WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
-	 * @author Ashar Irfan
 	 * @since  1.0.0
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
