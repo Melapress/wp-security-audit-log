@@ -1063,7 +1063,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			);
 
 			// Check if plugin is premium and live events are enabled.
-			$is_premium          = wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' );
+			$is_premium          = ( function_exists( 'wsal_freemius' ) ) && ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) );
 			$live_events_enabled = $is_premium && $this->settings->is_admin_bar_notif() && 'real-time' === $this->settings->get_admin_bar_notif_updates();
 
 			// Set data array for common script.
