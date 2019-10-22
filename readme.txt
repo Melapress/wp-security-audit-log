@@ -220,9 +220,9 @@ Release notes: [Update 3.5.1 - New filters for the activity log viewer & other i
 
 * **Bug Fixes**
 
-	* Plugin was not reporting correct product name & stock quantity when WooCommerce Tab Manager was installed.
-	* Mirroring cron jobs not firing / not copying logs to mirror in some edge cases.
-	* Unhandled error when using custom login pages.
+	* Multiple events reported when a new post is saved with the Classic Editor 
+	* List of failed logins IP addresses not displayed properly in daily email when using outlook.
+	* Fixed compatibility issue with the Newspaper news theme.
 	* Removed incorrect use of parameter in add_submenu_page (credits: [Chris Van Patten](https://github.com/chrisvanpatten)).
 	
 = Earlier versions =
