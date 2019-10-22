@@ -6,7 +6,7 @@ License URI: http://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.2.2
-Stable tag: 3.5
+Stable tag: 3.5.1
 Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -203,26 +203,27 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-Release notes: [Update 3.5 - New configurable front-end sensors & improved wizard](https://www.wpsecurityauditlog.com/releases/update-3-5/)
+Release notes: [Update 3.5.1 - New filters for the activity log viewer & other improvements](https://www.wpsecurityauditlog.com/releases/update-3-5-1/)
 
-= 3.5 (2019-09-12) =
+= 3.5.1 (2019-10-22) =
 
 * **New Features**
 
-	* 3 new front-end sensors that can be individually enabled / disabled individually (used for front end activity, such as logins from non-default WordPress login page).
+	* Filters and sorting capabitilies added to the Severity column in the activity log viewer.
 
 * **Improvements**
 
-	* Improved the hide plugin feature: number of installed plugins is also adjusted when plugin is hidden.
-	* Added new steps in the wizard to help users configure the front-end sensors when they install the plugin.
-	* Plugin keeps log of stock changes when orders are placed manually or items in orders are changed ([WooCommerce Activity Log](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/)).
-	* Removed event ID 2126 (visitor posted a comment): noticed almost all users disable it since this is trivial information / change.
+	* Improved the way data is reported in some [WooCommerce activity log events](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/).
+	* Added more links to the [plugin documentation](https://www.wpsecurityauditlog.com/support-documentation/) in the settings pages.
+	* Improved the reporting of Event ID 2022 (date change), it is no longer reported with every change on draft post.
+	* Improved user logout detection to detect logouts when using plugins such as Login and Logout Redirect.
 
 * **Bug Fixes**
 
 	* Plugin was not reporting correct product name & stock quantity when WooCommerce Tab Manager was installed.
-	* Mirroring cron jobs not firing / not copying logs to mirror.
+	* Mirroring cron jobs not firing / not copying logs to mirror in some edge cases.
 	* Unhandled error when using custom login pages.
+	* Removed incorrect use of parameter in add_submenu_page (credits: [Chris Van Patten](https://github.com/chrisvanpatten)).
 	
 = Earlier versions =
 
