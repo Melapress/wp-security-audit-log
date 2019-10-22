@@ -25,7 +25,6 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 	 * Create a helper function for easy SDK access.
 	 *
 	 * @return Freemius
-	 * @author Ashar Irfan
 	 */
 	function wsal_freemius() {
 		global $wsal_freemius;

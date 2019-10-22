@@ -47,7 +47,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 */
 	public function HookEvents() {
 		add_action( 'wp_login', array( $this, 'EventLogin' ), 10, 2 );
-		add_action( 'wp_logout', array( $this, 'EventLogout' ) );
+		add_action( 'wp_logout', array( $this, 'EventLogout' ), 5 );
 		add_action( 'password_reset', array( $this, 'EventPasswordReset' ), 10, 2 );
 		add_action( 'wp_login_failed', array( $this, 'EventLoginFailure' ) );
 		add_action( 'clear_auth_cookie', array( $this, 'GetCurrentUser' ), 10 );
