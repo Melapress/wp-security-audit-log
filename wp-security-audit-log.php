@@ -671,11 +671,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				exit();
 			}
 
-			if ( get_option( 'wsal-redirect-to-frontend-wizard', false ) ) {
-				delete_option( 'wsal-redirect-to-frontend-wizard' );
-				wp_safe_redirect( add_query_arg( 'page', 'wsal-front-setup', admin_url( 'index.php' ) ) );
-				exit();
-			}
 		}
 
 		/**
@@ -1447,7 +1442,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					}
 
 					$this->settings->set_frontend_events( $frontend_events );
-					add_option( 'wsal-redirect-to-frontend-wizard', true );
 				}
 			}
 		}
