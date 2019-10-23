@@ -82,16 +82,6 @@ class WSAL_ViewManager {
 		}
 
 		/**
-		 * Add frontend setup wizard page to skip views. It will only be initialized
-		 * one time.
-		 *
-		 * @since 3.5
-		 */
-		if ( file_exists( $this->_plugin->GetBaseDir() . 'classes/Views/FrontendSetupWizard.php' ) ) {
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/FrontendSetupWizard.php';
-		}
-
-		/**
 		 * Skipped Views.
 		 *
 		 * Array of views which are skipped before plugin views are initialized.
@@ -127,11 +117,6 @@ class WSAL_ViewManager {
 			|| 'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' )
 		) {
 			new WSAL_Views_SetupWizard( $plugin );
-		}
-
-		// Initialize setup frontend wizard.
-		if ( 'no' === $this->_plugin->GetGlobalOption( 'front-end-setup-complete', 'no' ) ) {
-			new WSAL_Views_FrontendSetupWizard( $plugin );
 		}
 
 		// Reorder WSAL submenu.
