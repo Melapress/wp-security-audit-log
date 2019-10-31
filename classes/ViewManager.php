@@ -148,7 +148,12 @@ class WSAL_ViewManager {
 	 * @param string $class Class name.
 	 */
 	public function AddFromClass( $class ) {
-		$this->AddInstance( new $class( $this->_plugin ) );
+		$view = new $class( $this->_plugin );
+		// only load WSAL_AbstractView instances to prevent lingering classes
+		// that did not impliment this from throwing fatals by being autoloaded.
+		if ( is_a( $view, '\WSAL_AbstractView' ) ) {
+			$this->AddInstance( $view );
+		}
 	}
 
 	/**
