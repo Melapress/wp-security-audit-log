@@ -1439,6 +1439,32 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					$this->settings->set_frontend_events( $frontend_events );
 				}
 
+				/**
+				 * Upgrade routine for versions of the plugin prior to 3.5.2+
+				 *
+				 * NOTE: this uses a version compare of 1 minor version in the
+				 * future to enure that when old crons need removed they are.
+				 *
+				 * @since 3.5.2
+				 */
+				if ( version_compare( $old_version, '3.5.2', '<=' ) ) {
+					/*
+					 * Handle remapping old, unprefixed, cron tasks to new ones
+					 * that have the prefix in the handle.
+					 *
+					 * NOTE: Not using 'wsal_init' because `wsalCommonClass`
+					 * isn't set on WpSecurityAuditLog that early.
+					 */
+					add_action(
+						'init',
+						function() {
+							require_once 'classes/Update/Task/CronNameRemap.php';
+							$cron_name_remapper = new WSAL\Update\Task\CronNameRemap( WpSecurityAuditLog::GetInstance() );
+							$cron_name_remapper->run();
+						}
+					);
+				}
+			}
 		}
 
 		/**
