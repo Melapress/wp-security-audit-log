@@ -132,6 +132,7 @@ final class WSAL_AlertManager {
 				'customize_changeset', // Customize changeset CPT.
 				'custom_css',          // Custom CSS CPT.
 				'product',             // WooCommerce Product CPT.
+				'shop_coupon',         // WooCommerse Coupon CPT.
 				'shop_order',          // WooCommerce Order CPT.
 				'shop_order_refund',   // WooCommerce Order Refund CPT.
 				'product_variation',   // WooCommerce Product Variation CPT.
