@@ -60,8 +60,20 @@ class WSAL_Utilities_Emailer {
 		/* Translators: 1. User display name, 2. Home URL, 3. Date and time */
 		$body .= sprintf( esc_html__( 'This is a notification to let you know that the user %1$s has deactivated the plugin WP Security Audit Log on the website %2$s on %3$s.', 'wp-security-audit-log' ), $display_name, '<a href="' . $home_url . '" target="_blank">' . $safe_url . '</a>', $date_time );
 
-		// Send the email.
-		self::send_email( get_bloginfo( 'admin_email' ), $subject, $body );
+		/**
+		 * Get the email address to deliver the deactivation email to.
+		 *
+		 * Filterable and defaults to the admin email address.
+		 *
+		 * @since 3.5.2
+		 *
+		 * @var string
+		 */
+		$delivery_address = apply_filters( 'wsal_filter_deactivation_email_delivery_address', get_bloginfo( 'admin_email' ) );
+		if ( filter_var( $delivery_address, FILTER_VALIDATE_EMAIL ) ) {
+			// Send the email.
+			self::send_email( $delivery_address, $subject, $body );
+		}
 	}
 
 	/**

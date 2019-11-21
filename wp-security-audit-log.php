@@ -954,6 +954,18 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @since 3.3.1
 		 */
 		public function deactivate_actions() {
+			/**
+			 * Allow short circuting of the deactivation email sending by using
+			 * this filter to return true here instead of default false.
+			 *
+			 * @since 3.5.2
+			 *
+			 * @var bool
+			 */
+			if ( apply_filters( 'wsal_filter_prevent_deactivation_email_delivery', false ) ) {
+				return;
+			}
+
 			// Send deactivation email.
 			if ( class_exists( 'WSAL_Utilities_Emailer' ) ) {
 				// Get email template.
