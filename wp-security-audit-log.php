@@ -1358,19 +1358,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				}
 
 				/**
-				 * IMPORTANT: VERSION SPECIFIC UPDATE
-				 *
-				 * It only needs to run when new version of the plugin is newwer than 3.2.3.2.
-				 *
-				 * @since 3.2.3.3
-				 */
-				if ( version_compare( $new_version, '3.2.3', '>' ) ) {
-					if ( 'yes' !== $this->GetGlobalOption( 'wsal-setup-modal-dismissed', false ) ) {
-						$this->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' );
-					}
-				}
-
-				/**
 				 * MainWP Child Stealth Mode Update
 				 *
 				 * This update only needs to run if the stealth mode option
@@ -1392,20 +1379,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				 */
 				if ( version_compare( $old_version, '3.2.4', '<' ) && version_compare( $new_version, '3.2.3.3', '>' ) ) {
 					$this->SetGlobalOption( 'dismissed-privacy-notice', '1,wsal_privacy' );
-				}
-
-				/**
-				 * IMPORTANT: VERSION SPECIFIC UPDATE
-				 *
-				 * It only needs to run when old version of the plugin is less than 3.3
-				 * & the new version is later than 3.2.5.
-				 *
-				 * @since 3.3
-				 */
-				if ( version_compare( $old_version, '3.3', '<' ) && version_compare( $new_version, '3.2.5', '>' ) ) {
-					if ( wsal_freemius()->is__premium_only() && wsal_freemius()->is_plan_or_trial__premium_only( 'professional' ) ) {
-						$this->extensions->update_external_db_options( $this );
-					}
 				}
 
 				/**
@@ -1455,17 +1428,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 					$this->settings->set_frontend_events( $frontend_events );
 				}
-			}
-		}
 
-		/**
-		 * Method: Update external DB password.
-		 *
-		 * @since 2.6.3
-		 * @deprecated 3.2.3.3
-		 */
-		public function update_external_db_password() {
-			$this->wsal_deprecate( __METHOD__, '3.2.3.3' );
 		}
 
 		/**
