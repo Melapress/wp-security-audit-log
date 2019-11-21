@@ -127,7 +127,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 */
 	public function IsInstalled() {
 		$_wpdb = $this->connection;
-		$sql   = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
+		$sql   = "SHOW TABLES LIKE '" . $this->GetTable() . "'";
 
 		// Table transient.
 		$wsal_table_transient = 'wsal_' . strtolower( $this->GetTable() ) . '_status';
@@ -178,7 +178,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$_wpdb = $this->connection;
 
 		// Query table exists.
-		$table_exists_query = 'SHOW TABLES LIKE "' . $this->GetTable() . '"';
+		$table_exists_query = "SHOW TABLES LIKE '" . $this->GetTable() . "'";
 		$result             = $_wpdb->query( $table_exists_query );
 		return $result;
 	}
