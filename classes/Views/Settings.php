@@ -2357,10 +2357,16 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		// Get custom post types.
 		$custom_post_types = array();
-		$output            = 'names'; // names or objects, note names is the default
-		$operator          = 'and'; // Conditions: and, or.
-		$post_types        = get_post_types( array(), $output, $operator );
-		$post_types        = array_diff( $post_types, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) );
+		$post_types        = get_post_types( array(), 'names' );
+		// if we are running multisite and have networkwide cpt tracker get the
+		// list from and merge to the post_types array.
+		if ( is_multisite() && class_exists( '\WSAL\Multisite\NetworkWide\CPTsTracker' ) ) {
+			$network_cpts = \WSAL\Multisite\NetworkWide\CPTsTracker::get_network_data_list();
+			foreach ( $network_cpts as $cpt ) {
+				$post_types[ $cpt ] = $cpt;
+			}
+		}
+		$post_types = array_diff( $post_types, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) );
 		foreach ( $post_types as $post_type ) {
 			if ( strpos( $post_type, $get_array['term'] ) !== false ) {
 				array_push( $custom_post_types, $post_type );

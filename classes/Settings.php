@@ -1470,6 +1470,14 @@ class WSAL_Settings {
 
 		// Get custom post types.
 		$post_types = get_post_types( array(), 'names', 'and' );
+		// if we are running multisite and have networkwide cpt tracker get the
+		// list from and merge to the post_types array.
+		if ( is_multisite() && class_exists( '\WSAL\Multisite\NetworkWide\CPTsTracker' ) ) {
+			$network_cpts = \WSAL\Multisite\NetworkWide\CPTsTracker::get_network_data_list();
+			foreach ( $network_cpts as $cpt ) {
+				$post_types[ $cpt ] = $cpt;
+			}
+		}
 
 		// Check if the token matched users.
 		if ( in_array( $token, $users ) ) {

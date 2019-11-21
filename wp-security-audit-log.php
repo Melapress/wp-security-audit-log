@@ -364,6 +364,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			require_once 'classes/Adapters/OccurrenceInterface.php';
 			require_once 'classes/Adapters/QueryInterface.php';
 
+			// Only include these if we are in multisite envirnoment.
+			if ( $this->isMultisite() ) {
+				require_once 'classes/Multisite/NetworkWide/TrackerInterface.php';
+				require_once 'classes/Multisite/NetworkWide/AbstractTracker.php';
+				require_once 'classes/Multisite/NetworkWide/CPTsTracker.php';
+				// setup the CPT tracker across the network.
+				$cpts_tracker = new \WSAL\Multisite\NetworkWide\CPTsTracker( $this );
+				$cpts_tracker->setup();
+			}
+
 			// Load autoloader and register base paths.
 			require_once 'classes/Autoloader.php';
 			$this->autoloader = new WSAL_Autoloader( $this );
