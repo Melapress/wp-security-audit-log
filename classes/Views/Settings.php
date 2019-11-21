@@ -1089,6 +1089,29 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					</td>
 				</tr>
 				<!-- Alerts Timestamp -->
+				<tr>
+					<th><?php esc_html_e( 'Show Microseconds', 'wp-security-audit-log' ); ?></th>
+					<td>
+						<fieldset>
+							<?php
+							$show_microseconds = $this->_plugin->settings->get_show_microseconds();
+
+							/**
+							 * Transform microsecond values incase of bool.
+							 */
+							if ( 'no' !== $show_microseconds ) {
+								$show_microseconds = 'yes';
+							}
+							?>
+							<label for="show_microseconds">
+								<input type="checkbox" name="show_microseconds" id="show_microseconds" style="margin-top: -2px;"
+									<?php checked( $show_microseconds, 'yes' ); ?> value="yes">
+								<?php esc_html_e( 'Show Microseconds in list view', 'wp-security-audit-log' ); ?>
+							</label>
+						</fieldset>
+					</td>
+				</tr>
+				<!-- Alerts Timestamp -->
 			</tbody>
 		</table>
 		<!-- Timestamp -->
@@ -1211,6 +1234,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		if ( ! empty( $post_array['Columns'] ) ) {
 			$this->_plugin->settings->SetColumns( $post_array['Columns'] );
 		}
+		$show_microseconds = ( isset( $post_array['show_microseconds'] ) && 'yes' === $post_array['show_microseconds'] ) ? true : false;
+		$this->_plugin->settings->set_show_microseconds( $show_microseconds );
 	}
 
 	/**

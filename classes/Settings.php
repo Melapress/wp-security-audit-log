@@ -1131,6 +1131,33 @@ class WSAL_Settings {
 	}
 
 	/**
+	 * Helper method to get the stored setting to determine if microseconds
+	 * appear in the admin list view. This should always be a bool.
+	 *
+	 * @method get_show_microseconds
+	 * @since  3.5.2
+	 * @return bool
+	 */
+	public function get_show_microseconds() {
+		return $this->_plugin->GetGlobalOption( 'show_microseconds', 'yes' );
+	}
+
+	/**
+	 * Stores the option that dicates if microseconds show in admin list view
+	 * for event times. This is always a bool. When it's not a bool it's set
+	 * to `true` to match default.
+	 *
+	 * @method set_show_microseconds
+	 * @since  3.5.2
+	 * @param  mixed $newvalue ideally always bool. If not bool then it's cast to true.
+	 */
+	public function set_show_microseconds( $newvalue ) {
+		$newvalue = ( ! empty( $newvalue ) ) ? 'yes' : 'no';
+		$this->_plugin->SetGlobalOption( 'show_microseconds', $newvalue );
+	}
+
+
+	/**
 	 * Get type of username to display.
 	 */
 	public function get_type_username() {

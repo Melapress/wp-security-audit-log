@@ -447,6 +447,11 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				}
 				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="log-type log-type-' . $const->value . '"></span></a>';
 			case 'crtd':
+				$show_microseconds = $this->_plugin->settings->get_show_microseconds();
+				if ( 'no' === $show_microseconds ) {
+					// remove the microseconds placeholder from format string.
+					$datetime_format = str_replace( '.$$$', '', $datetime_format );
+				}
 				return $item->created_on ? (
 						str_replace(
 							'$$$',
