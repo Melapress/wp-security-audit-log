@@ -46,6 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
+	const SCHEDULED_HOOK_LOG_FILE_PRUDING = 'wsal_log_files_pruning';
 	/**
 	 * 404 User Transient.
 	 *
@@ -81,11 +82,12 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		$visitor_upload_path = trailingslashit( $upload_dir['basedir'] . '/wp-security-audit-log/404s/visitors/' );
 		$this->remove_sub_directories( $visitor_upload_path ); // Remove it.
 
-		// Cron Job 404 log files pruning.
-		add_action( 'log_files_pruning', array( $this, 'LogFilesPruning' ) );
-		if ( ! wp_next_scheduled( 'log_files_pruning' ) ) {
-			wp_schedule_event( time(), 'daily', 'log_files_pruning' );
+
+		if ( ! wp_next_scheduled( self::SCHEDULED_HOOK_LOG_FILE_PRUDING ) ) {
+			wp_schedule_event( time(), 'daily', self::SCHEDULED_HOOK_LOG_FILE_PRUDING );
 		}
+		// Cron Job 404 log files pruning.
+		add_action( self::SCHEDULED_HOOK_LOG_FILE_PRUDING, array( $this, 'LogFilesPruning' ) );
 		// whitelist options.
 		add_action( 'whitelist_options', array( $this, 'EventOptions' ), 10, 1 );
 

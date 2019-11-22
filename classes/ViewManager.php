@@ -464,7 +464,13 @@ class WSAL_ViewManager {
 			$event       = $this->_plugin->alerts->get_admin_bar_event( 'page-refresh' === $adn_updates ? true : false );
 
 			if ( $event ) {
-				$code = $this->_plugin->alerts->GetAlert( $event->alert_id );
+				$code = $this->_plugin->alerts->GetAlert(
+					$event->alert_id,
+					(object) array(
+						'mesg' => __( 'Alert message not found.', 'wp-security-audit-log' ),
+						'desc' => __( 'Alert description not found.', 'wp-security-audit-log' ),
+					)
+				);
 				$admin_bar->add_node(
 					array(
 						'id'    => 'wsal-menu',

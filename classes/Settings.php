@@ -1131,6 +1131,33 @@ class WSAL_Settings {
 	}
 
 	/**
+	 * Helper method to get the stored setting to determine if microseconds
+	 * appear in the admin list view. This should always be a bool.
+	 *
+	 * @method get_show_microseconds
+	 * @since  3.5.2
+	 * @return bool
+	 */
+	public function get_show_microseconds() {
+		return $this->_plugin->GetGlobalOption( 'show_microseconds', 'yes' );
+	}
+
+	/**
+	 * Stores the option that dicates if microseconds show in admin list view
+	 * for event times. This is always a bool. When it's not a bool it's set
+	 * to `true` to match default.
+	 *
+	 * @method set_show_microseconds
+	 * @since  3.5.2
+	 * @param  mixed $newvalue ideally always bool. If not bool then it's cast to true.
+	 */
+	public function set_show_microseconds( $newvalue ) {
+		$newvalue = ( ! empty( $newvalue ) ) ? 'yes' : 'no';
+		$this->_plugin->SetGlobalOption( 'show_microseconds', $newvalue );
+	}
+
+
+	/**
 	 * Get type of username to display.
 	 */
 	public function get_type_username() {
@@ -1443,6 +1470,14 @@ class WSAL_Settings {
 
 		// Get custom post types.
 		$post_types = get_post_types( array(), 'names', 'and' );
+		// if we are running multisite and have networkwide cpt tracker get the
+		// list from and merge to the post_types array.
+		if ( is_multisite() && class_exists( '\WSAL\Multisite\NetworkWide\CPTsTracker' ) ) {
+			$network_cpts = \WSAL\Multisite\NetworkWide\CPTsTracker::get_network_data_list();
+			foreach ( $network_cpts as $cpt ) {
+				$post_types[ $cpt ] = $cpt;
+			}
+		}
 
 		// Check if the token matched users.
 		if ( in_array( $token, $users ) ) {

@@ -4,7 +4,7 @@
  * Plugin URI: http://www.wpsecurityauditlog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 3.5.1.1
+ * Version: 3.5.2
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -46,7 +46,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '3.5.1.1';
+		public $version = '3.5.2';
 
 		// Plugin constants.
 		const PLG_CLS_PRFX    = 'WSAL_';
@@ -363,6 +363,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			require_once 'classes/Adapters/MetaInterface.php';
 			require_once 'classes/Adapters/OccurrenceInterface.php';
 			require_once 'classes/Adapters/QueryInterface.php';
+
+			// Only include these if we are in multisite envirnoment.
+			if ( $this->isMultisite() ) {
+				require_once 'classes/Multisite/NetworkWide/TrackerInterface.php';
+				require_once 'classes/Multisite/NetworkWide/AbstractTracker.php';
+				require_once 'classes/Multisite/NetworkWide/CPTsTracker.php';
+				// setup the CPT tracker across the network.
+				$cpts_tracker = new \WSAL\Multisite\NetworkWide\CPTsTracker( $this );
+				$cpts_tracker->setup();
+			}
 
 			// Load autoloader and register base paths.
 			require_once 'classes/Autoloader.php';
@@ -954,6 +964,18 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @since 3.3.1
 		 */
 		public function deactivate_actions() {
+			/**
+			 * Allow short circuting of the deactivation email sending by using
+			 * this filter to return true here instead of default false.
+			 *
+			 * @since 3.5.2
+			 *
+			 * @var bool
+			 */
+			if ( apply_filters( 'wsal_filter_prevent_deactivation_email_delivery', false ) ) {
+				return;
+			}
+
 			// Send deactivation email.
 			if ( class_exists( 'WSAL_Utilities_Emailer' ) ) {
 				// Get email template.
@@ -1346,19 +1368,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				}
 
 				/**
-				 * IMPORTANT: VERSION SPECIFIC UPDATE
-				 *
-				 * It only needs to run when new version of the plugin is newwer than 3.2.3.2.
-				 *
-				 * @since 3.2.3.3
-				 */
-				if ( version_compare( $new_version, '3.2.3', '>' ) ) {
-					if ( 'yes' !== $this->GetGlobalOption( 'wsal-setup-modal-dismissed', false ) ) {
-						$this->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' );
-					}
-				}
-
-				/**
 				 * MainWP Child Stealth Mode Update
 				 *
 				 * This update only needs to run if the stealth mode option
@@ -1380,20 +1389,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				 */
 				if ( version_compare( $old_version, '3.2.4', '<' ) && version_compare( $new_version, '3.2.3.3', '>' ) ) {
 					$this->SetGlobalOption( 'dismissed-privacy-notice', '1,wsal_privacy' );
-				}
-
-				/**
-				 * IMPORTANT: VERSION SPECIFIC UPDATE
-				 *
-				 * It only needs to run when old version of the plugin is less than 3.3
-				 * & the new version is later than 3.2.5.
-				 *
-				 * @since 3.3
-				 */
-				if ( version_compare( $old_version, '3.3', '<' ) && version_compare( $new_version, '3.2.5', '>' ) ) {
-					if ( wsal_freemius()->is__premium_only() && wsal_freemius()->is_plan_or_trial__premium_only( 'professional' ) ) {
-						$this->extensions->update_external_db_options( $this );
-					}
 				}
 
 				/**
@@ -1443,17 +1438,33 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 					$this->settings->set_frontend_events( $frontend_events );
 				}
-			}
-		}
 
-		/**
-		 * Method: Update external DB password.
-		 *
-		 * @since 2.6.3
-		 * @deprecated 3.2.3.3
-		 */
-		public function update_external_db_password() {
-			$this->wsal_deprecate( __METHOD__, '3.2.3.3' );
+				/**
+				 * Upgrade routine for versions of the plugin prior to 3.5.2+
+				 *
+				 * NOTE: this uses a version compare of 1 minor version in the
+				 * future to enure that when old crons need removed they are.
+				 *
+				 * @since 3.5.2
+				 */
+				if ( version_compare( $old_version, '3.5.2', '<=' ) ) {
+					/*
+					 * Handle remapping old, unprefixed, cron tasks to new ones
+					 * that have the prefix in the handle.
+					 *
+					 * NOTE: Not using 'wsal_init' because `wsalCommonClass`
+					 * isn't set on WpSecurityAuditLog that early.
+					 */
+					add_action(
+						'init',
+						function() {
+							require_once 'classes/Update/Task/CronNameRemap.php';
+							$cron_name_remapper = new WSAL\Update\Task\CronNameRemap( WpSecurityAuditLog::GetInstance() );
+							$cron_name_remapper->run();
+						}
+					);
+				}
+			}
 		}
 
 		/**

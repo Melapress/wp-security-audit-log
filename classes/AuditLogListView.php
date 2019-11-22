@@ -410,7 +410,13 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					. ( $item->is_read ? 'old' : 'new' )
 					. '" title="' . __( 'Click to toggle.', 'wp-security-audit-log' ) . '"></span>';
 			case 'type':
-				$code                = $this->_plugin->alerts->GetAlert( $item->alert_id );
+				$code                = $this->_plugin->alerts->GetAlert(
+					$item->alert_id,
+					(object) array(
+						'mesg' => __( 'Alert message not found.', 'wp-security-audit-log' ),
+						'desc' => __( 'Alert description not found.', 'wp-security-audit-log' ),
+					)
+				);
 				$extra_msg           = '';
 				$data_link           = '';
 				$modification_alerts = array( 1002, 1003, 6007, 6023 );
@@ -447,6 +453,11 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				}
 				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="log-type log-type-' . $const->value . '"></span></a>';
 			case 'crtd':
+				$show_microseconds = $this->_plugin->settings->get_show_microseconds();
+				if ( 'no' === $show_microseconds ) {
+					// remove the microseconds placeholder from format string.
+					$datetime_format = str_replace( '.$$$', '', $datetime_format );
+				}
 				return $item->created_on ? (
 						str_replace(
 							'$$$',
@@ -1020,19 +1031,19 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
 				$query->addCondition( 'meta.name = %s', 'CurrentUserID' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
 				$query->addOrderBy( 'CASE WHEN meta.name = "CurrentUserID" THEN meta.value END', $is_descending );
+			} elseif ( 'code' === $order_by ) {
+				/*
+				 * Handle the 'code' (Severity) column sorting.
+				 */
+				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
+				$query->addCondition( 'meta.name = %s', 'Severity' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
+				$query->addOrderBy( 'CASE WHEN meta.name = "Severity" THEN meta.value END', $is_descending );
 			} else {
 				$tmp = new WSAL_Models_Occurrence();
 				// Making sure the field exists to order by.
 				if ( isset( $tmp->{$order_by} ) ) {
 					// TODO: We used to use a custom comparator ... is it safe to let MySQL do the ordering now?.
 					$query->addOrderBy( $order_by, $is_descending );
-				} elseif ( 'code' === $order_by ) {
-					/*
-					 * Handle the 'code' (Severity) column sorting.
-					 */
-					$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-					$query->addCondition( 'meta.name = %s', 'Severity' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-					$query->addOrderBy( 'CASE WHEN meta.name = "Severity" THEN meta.value END', $is_descending );
 				} else {
 					$query->addOrderBy( 'created_on', true );
 				}

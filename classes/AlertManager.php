@@ -132,6 +132,7 @@ final class WSAL_AlertManager {
 				'customize_changeset', // Customize changeset CPT.
 				'custom_css',          // Custom CSS CPT.
 				'product',             // WooCommerce Product CPT.
+				'shop_coupon',         // WooCommerse Coupon CPT.
 				'shop_order',          // WooCommerce Order CPT.
 				'shop_order_refund',   // WooCommerce Order Refund CPT.
 				'product_variation',   // WooCommerce Product Variation CPT.
@@ -241,12 +242,35 @@ final class WSAL_AlertManager {
 
 		// Get username.
 		$username = wp_get_current_user()->user_login;
+		// if user switching plugin class exists and filter is set to disable then try get the old user.
+		if ( apply_filters( 'wsal_disable_user_switching_plugin_tracking', false ) && class_exists( 'user_switching' ) ) {
+			$old_user = user_switching::get_old_user();
+			if ( isset( $old_user->user_login ) ) {
+				// looks like this is a switched user so setup original user
+				// values for use when logging.
+				$username              = $old_user->user_login;
+				$data['Username']      = $old_user->user_login;
+				$data['CurrentUserID'] = $old_user->ID;
+			}
+		}
+
 		if ( empty( $username ) && ! empty( $data['Username'] ) ) {
 			$username = $data['Username'];
 		}
 
 		// Get current user roles.
-		$roles = $this->plugin->settings->GetCurrentUserRoles();
+		if ( isset( $old_user ) ) {
+			// looks like this is a switched user so setup original user
+			// roles and values for later user.
+			$roles = $old_user->roles;
+			if ( function_exists( 'is_super_admin' ) && is_super_admin() ) {
+				$roles[] = 'superadmin';
+			}
+			$data['CurrentUserRoles'] = $roles;
+		} else {
+			// not a switched user so get the current user roles.
+			$roles = $this->plugin->settings->GetCurrentUserRoles();
+		}
 		if ( empty( $roles ) && ! empty( $data['CurrentUserRoles'] ) ) {
 			$roles = $data['CurrentUserRoles'];
 		}

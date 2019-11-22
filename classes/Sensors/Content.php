@@ -1419,10 +1419,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return boolean
 	 */
 	private function check_auto_draft( $code, $title ) {
-		if ( 2008 === $code && 'auto-draft' === $title ) {
-			return 1 === (int) $this->plugin->settings->IsWPBackend();
+		$ignore = 0;
+		if ( 2008 === $code && ( 'auto-draft' === $title || 'Auto Draft' === $title ) ) {
+			$ignore = ( $this->plugin->settings->IsWPBackend() ) ? 0 : 1;
 		}
-		return false;
+		return $ignore;
 	}
 
 	/**

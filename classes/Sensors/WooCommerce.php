@@ -355,7 +355,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				);
 				return 1;
 			}
-		} elseif ( 'shop_coupon' === $old_post->post_type && 'publish' === $new_post->post_status ) {
+		} elseif ( 'shop_coupon' === $old_post->post_type && 'publish' === $new_post->post_status && 'publish' !== $old_post->post_status ) {
 			$coupon_data = $this->get_coupon_event_data( $new_post );
 			$this->plugin->alerts->Trigger( 9063, $coupon_data );
 			return 1;

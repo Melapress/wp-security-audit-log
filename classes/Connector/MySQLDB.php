@@ -144,7 +144,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	public function isInstalled() {
 		$wpdb  = $this->getConnection();
 		$table = $wpdb->base_prefix . 'wsal_occurrences';
-		return $table === $wpdb->get_var( 'SHOW TABLES LIKE "' . $table . '"' );
+		return $table === $wpdb->get_var( "SHOW TABLES LIKE '" . $table . "'" );
 	}
 
 	/**
@@ -155,7 +155,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	public function canMigrate() {
 		$wpdb  = $this->getConnection();
 		$table = $wpdb->base_prefix . 'wordpress_auditlog_events';
-		return $table === $wpdb->get_var( 'SHOW TABLES LIKE "' . $table . '"' );
+		return $table === $wpdb->get_var( "SHOW TABLES LIKE '" . $table . "'" );
 	}
 
 	/**
