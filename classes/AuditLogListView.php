@@ -410,7 +410,13 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					. ( $item->is_read ? 'old' : 'new' )
 					. '" title="' . __( 'Click to toggle.', 'wp-security-audit-log' ) . '"></span>';
 			case 'type':
-				$code                = $this->_plugin->alerts->GetAlert( $item->alert_id );
+				$code                = $this->_plugin->alerts->GetAlert(
+					$item->alert_id,
+					(object) array(
+						'mesg' => __( 'Alert message not found.', 'wp-security-audit-log' ),
+						'desc' => __( 'Alert description not found.', 'wp-security-audit-log' ),
+					)
+				);
 				$extra_msg           = '';
 				$data_link           = '';
 				$modification_alerts = array( 1002, 1003, 6007, 6023 );

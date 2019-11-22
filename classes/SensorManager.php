@@ -55,22 +55,39 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		$upload_dir       = wp_upload_dir();
 		$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log' . DIRECTORY_SEPARATOR . 'custom-sensors' . DIRECTORY_SEPARATOR;
 
-		// Check directory.
-		if ( is_dir( $uploads_dir_path ) && is_readable( $uploads_dir_path ) ) {
-			foreach ( glob( $uploads_dir_path . '*.php' ) as $file ) {
-				// Include custom sensor file.
-				require_once $file;
-				$file   = substr( $file, 0, -4 );
-				$sensor = str_replace( $uploads_dir_path, '', $file );
+		/*
+		 * Get an array of directories to loop through to add custom sensors.
+		 *
+		 * Passed through a filter so other plugins or code can add own custom
+		 * sensor class files by adding the containing directory to this array.
+		 *
+		 * @since 3.5.2 - Added the `wsal_custom_sensors_classes_dirs` filter.
+		 */
+		$paths = apply_filters( 'wsal_custom_sensors_classes_dirs', array( $uploads_dir_path ) );
+		foreach ( $paths as $inc_path ) {
+			// Check directory.
+			if ( is_dir( $inc_path ) && is_readable( $inc_path ) ) {
+				foreach ( glob( $inc_path . '*.php' ) as $file ) {
+					// Include custom sensor file.
+					require_once $file;
+					$file   = substr( $file, 0, -4 );
+					$sensor = str_replace( $inc_path, '', $file );
 
-				// Skip if the file is index.php for security.
-				if ( 'index' === $sensor ) {
-					continue;
+					// Skip if the file is index.php for security.
+					if ( 'index' === $sensor ) {
+						continue;
+					}
+
+					/*
+					 * @since 3.5.2 Allow loading classes where names match the
+					 * filename 1:1. Prior to version 3.5.2 sensors were always
+					 * asummed to be defined WITH `WSAL_Sensors_` prefis in the
+					 * class name but WITHOUT it in the filename. This behavor
+					 * is retained for back-compat.
+					 */
+					$class = ( class_exists( $sensor ) ) ? $sensor : 'WSAL_Sensors_' . $sensor;
+					$this->AddFromClass( $class );
 				}
-
-				// Generate and initiate custom sensor file.
-				$class = 'WSAL_Sensors_' . $sensor;
-				$this->AddFromClass( $class );
 			}
 		}
 	}

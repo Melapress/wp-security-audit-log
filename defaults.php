@@ -30,18 +30,33 @@ defined( 'E_USER_DEPRECATED' ) || define( 'E_USER_DEPRECATED', 'E_USER_DEPRECATE
  * @param WpSecurityAuditLog $wsal - Instance of main plugin.
  */
 function load_include_custom_file( $wsal ) {
+	// Custom alerts can be added via a special file inside the file and dir
+	// wp-uploads/wp-security-audit-log/custom-alerts.php.
 	$upload_dir       = wp_upload_dir();
 	$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log';
-	// Check directory.
-	if ( is_dir( $uploads_dir_path ) && is_readable( $uploads_dir_path ) ) {
-		$file = $uploads_dir_path . DIRECTORY_SEPARATOR . 'custom-alerts.php';
-		if ( file_exists( $file ) ) {
-			require_once $file;
-			if ( ! empty( $custom_alerts ) && is_array( $custom_alerts ) ) {
-				try {
-					$wsal->alerts->RegisterGroup( $custom_alerts );
-				} catch ( Exception $ex ) {
-					$wsal->wsal_log( $ex->getMessage() );
+
+	/*
+	 * Get an array of directories to loop through to add custom alerts.
+	 *
+	 * Passed through a filter so other plugins or code can add own custom
+	 * alerts files by adding the containing directory to this array.
+	 *
+	 * @since 3.5.2 - Added the `wsal_custom_alerts_dirs` filter.
+	 */
+	$paths = apply_filters( 'wsal_custom_alerts_dirs', array( $uploads_dir_path ) );
+	foreach ( $paths as $inc_path ) {
+		// Check directory.
+		if ( is_dir( $inc_path ) && is_readable( $inc_path ) ) {
+			$file = $inc_path . DIRECTORY_SEPARATOR . 'custom-alerts.php';
+			if ( file_exists( $file ) ) {
+				// A file exists that should contain custom alerts - require it.
+				require_once $file;
+				if ( ! empty( $custom_alerts ) && is_array( $custom_alerts ) ) {
+					try {
+						$wsal->alerts->RegisterGroup( $custom_alerts );
+					} catch ( Exception $ex ) {
+						$wsal->wsal_log( $ex->getMessage() );
+					}
 				}
 			}
 		}

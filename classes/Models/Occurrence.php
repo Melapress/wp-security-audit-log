@@ -77,7 +77,13 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * @return WSAL_Alert
 	 */
 	public function GetAlert() {
-		return WpSecurityAuditLog::GetInstance()->alerts->GetAlert( $this->alert_id );
+		return WpSecurityAuditLog::GetInstance()->alerts->GetAlert(
+			$this->alert_id,
+			(object) array(
+				'mesg' => __( 'Alert message not found.', 'wp-security-audit-log' ),
+				'desc' => __( 'Alert description not found.', 'wp-security-audit-log' ),
+			)
+		);
 	}
 
 	/**
