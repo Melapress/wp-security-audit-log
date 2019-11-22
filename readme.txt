@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.3
-Stable tag: 3.5.1.1
+Stable tag: 3.5.2
 Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -203,33 +203,31 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 3.5.1.1 (2019-10-31) =
+= 3.5.2 (2019-10-26) =
 
-* **Improvement**
+Release notes: [Update 3.5.2 - New filter hooks & better support for CPT on multisite networks](https://www.wpsecurityauditlog.com/releases/update-3-5-2/)
 
-	* Prevent classes of the wrong instance from being added to $views.
+* **New Filter Hooks**
 
-= 3.5.1 (2019-10-22) =
-
-Release notes: [Update 3.5.1 - New filters for the activity log viewer & other improvements](https://www.wpsecurityauditlog.com/releases/update-3-5-1/)
-
-* **New Features**
-
-	* Filters and sorting capabitilies added to the Severity column in the activity log viewer.
-
+	* [Disable the email notification sent when plugin is deactivated](https://www.wpsecurityauditlog.com/support-documentation/list-hooks/#wsal_filter_prevent_deactivation_email_delivery).
+	* [Change the email address of the notification email sent when plugin is deactivated](https://www.wpsecurityauditlog.com/support-documentation/list-hooks/#wsal_filter_deactivation_email_delivery_address).
+	* [Disable support for User Switching plugin](https://www.wpsecurityauditlog.com/support-documentation/list-hooks/#wsal_disable_user_switching_plugin_tracking).
+	
 * **Improvements**
 
-	* Improved the way data is reported in some [WooCommerce activity log events](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/).
-	* Added more links to the [plugin documentation](https://www.wpsecurityauditlog.com/support-documentation/) in the settings pages.
-	* Improved the reporting of Event ID 2022 (date change), it is no longer reported with every change on draft post.
-	* Improved user logout detection to detect logouts when using plugins such as Login and Logout Redirect.
+	* Updated database queries to better support MySQL 8.
+	* New setting to enable/disable milliseconds in timestamps.
+	* New option in wizard to enable the [WordPress activity log mirror](https://www.wpsecurityauditlog.com/premium-features/integration-mirroring-tools-wordpress-activity-log/) once set up.
+	* Added the wsal_ prefix to all cron jobs.
+	* Fine tuned the [WooCommerce activity log](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/) sensor to report only the neccessary events when there are coupon changes.
+	* Updated the [WordPress activity log custom events API](https://www.wpsecurityauditlog.com/support-documentation/create-custom-alerts-wordpress-audit-trail/) to only require one sensor on a multisite network.
+	* Removed old version specific checks used during upgrades.
+	* Daily summary email now includes more accurate user logins details.
 
 * **Bug Fixes**
 
-	* Multiple events reported when a new post is saved with the Classic Editor 
-	* List of failed logins IP addresses not displayed properly in daily email when using outlook.
-	* Fixed compatibility issue with the Newspaper news theme.
-	* Removed incorrect use of parameter in add_submenu_page (credits: [Chris Van Patten](https://github.com/chrisvanpatten)).
+	* Custom post types on sub sites were not recognized on multisite network install.
+	* Background events were not being excluded from the logs even when the plugin is configured to exclude them.
 	
 = Earlier versions =
 
