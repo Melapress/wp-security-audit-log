@@ -178,8 +178,18 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 				$this->_cachedmessage = $this->GetAlert()->mesg;
 			}
 			// Fill variables in message.
-			$meta_array           = null === $meta ? $this->GetMetaArray() : $meta;
-			$this->_cachedmessage = $this->GetAlert()->GetMessage( $meta_array, $meta_formatter, $this->_cachedmessage, $this->getId(), $highlight );
+			$meta_array   = null === $meta ? $this->GetMetaArray() : $meta;
+			$alert_object = $this->GetAlert();
+			if ( null !== $alert_object && method_exists( $alert_object, 'GetMessage' ) ) {
+				$this->_cachedmessage = $alert_object->GetMessage( $meta_array, $meta_formatter, $this->_cachedmessage, $this->getId(), $highlight );
+			} else {
+				$this->_cachedmessage = sprintf(
+					/* Translators: 1: html that opens a link, 2: html that closes a link. */
+					__( 'Alert message was not available, this may have been a custom alert that no longer exists. Read more about custom events %1$shere%2$s.', 'wp-security-audit-log' ),
+					'<a href="https://www.wpsecurityauditlog.com/support-documentation/create-custom-alerts-wordpress-audit-trail/" target="_blank">',
+					'</a>'
+				);
+			}
 		}
 		return $this->_cachedmessage;
 	}

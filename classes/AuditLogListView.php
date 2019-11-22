@@ -1031,19 +1031,19 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
 				$query->addCondition( 'meta.name = %s', 'CurrentUserID' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
 				$query->addOrderBy( 'CASE WHEN meta.name = "CurrentUserID" THEN meta.value END', $is_descending );
+			} elseif ( 'code' === $order_by ) {
+				/*
+				 * Handle the 'code' (Severity) column sorting.
+				 */
+				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
+				$query->addCondition( 'meta.name = %s', 'Severity' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
+				$query->addOrderBy( 'CASE WHEN meta.name = "Severity" THEN meta.value END', $is_descending );
 			} else {
 				$tmp = new WSAL_Models_Occurrence();
 				// Making sure the field exists to order by.
 				if ( isset( $tmp->{$order_by} ) ) {
 					// TODO: We used to use a custom comparator ... is it safe to let MySQL do the ordering now?.
 					$query->addOrderBy( $order_by, $is_descending );
-				} elseif ( 'code' === $order_by ) {
-					/*
-					 * Handle the 'code' (Severity) column sorting.
-					 */
-					$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-					$query->addCondition( 'meta.name = %s', 'Severity' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-					$query->addOrderBy( 'CASE WHEN meta.name = "Severity" THEN meta.value END', $is_descending );
 				} else {
 					$query->addOrderBy( 'created_on', true );
 				}

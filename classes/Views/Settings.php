@@ -734,7 +734,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- Reverse Proxy -->
 
 		<h3><?php esc_html_e( 'Who can change the plugin settings?', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'By default only users with administrator or super administrator (multisite) roles can change the settings of the plugin. Though you can change these privileges from this section.', 'wp-security-audit-log' ); ?></p>
+		<p class="description">
+		<?php
+		$allowed_tags = array(
+			'a' => array(
+				'href'   => true,
+				'target' => true,
+			),
+		);
+		echo wp_kses(
+			sprintf(
+				/* translators: Learn more link. */
+				esc_html__( 'By default only users with administrator or super administrator (multisite) roles can change the settings of the plugin. Though you can change these privileges from this section - %s.', 'wp-security-audit-log' ),
+				'<a href="https://www.wpsecurityauditlog.com/support-documentation/managing-wordpress-activity-log-plugin-privileges/" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
+			),
+			$allowed_tags
+		);
+		?>
+		</p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -793,7 +810,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- Restrict Plugin Access -->
 
 		<h3><?php esc_html_e( 'Allow other users to view the activity log', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'By default only users with administrator and super administrator (multisite) role can view the WordPress activity log. Though you can allow other users with no admin role to view the events.', 'wp-security-audit-log' ); ?></p>
+		<p class="description">
+		<?php
+		$allowed_tags = array(
+			'a' => array(
+				'href'   => true,
+				'target' => true,
+			),
+		);
+		echo wp_kses(
+			sprintf(
+				/* translators: Learn more link. */
+				esc_html__( 'By default only users with administrator and super administrator (multisite) role can view the WordPress activity log. Though you can allow other users with no admin role to view the events - %s.', 'wp-security-audit-log' ),
+				'<a href="https://www.wpsecurityauditlog.com/support-documentation/can-allow-users-access-audit-trail/" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
+			),
+			$allowed_tags
+		);
+		?>
+		</p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
