@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.3
-Stable tag: 3.5.2
+Stable tag: 3.5.2.1
 Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -203,6 +203,11 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
+= 3.5.2.1 (2019-10-26) =
+
+* **Bug fix**
+	* Fixed an unhandled exception in an upgrade script used to delete old cron jobs.
+	
 = 3.5.2 (2019-10-26) =
 
 Release notes: [Update 3.5.2 - New filter hooks & better support for CPT on multisite networks](https://www.wpsecurityauditlog.com/releases/update-3-5-2/)
