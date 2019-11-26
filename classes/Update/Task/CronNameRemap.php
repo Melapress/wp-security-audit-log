@@ -42,19 +42,21 @@ class CronNameRemap {
 	 */
 	public function run() {
 		// Get crons to be remapped.
-		$crons = $this->get_crons_to_remap();
+		if ( null === $this->wsal || ! is_a( $this->wsal, 'WpSecurityAuditLog' ) ) {
+			$crons = $this->get_crons_to_remap();
 
-		// Loop through list of crons and check if scheduled.
-		foreach ( $crons as $cron ) {
-			$args = ( isset( $cron['args'] ) ) ? $cron['args'] : array();
-			$time = wp_next_scheduled( $cron['name_old'], $args );
-			if ( $time ) {
-				// Cron with old name is scheduled - unschedule.
-				wp_unschedule_event( $time, $cron['name_old'], $args );
-				$rescheduled = wp_next_scheduled( $cron['name_new'], $args );
-				if ( ! $rescheduled ) {
-					// New cron is not scheduled already - schedule it.
-					wp_schedule_event( $time, $cron['frequency'], $cron['name_new'], $args );
+			// Loop through list of crons and check if scheduled.
+			foreach ( $crons as $cron ) {
+				$args = ( isset( $cron['args'] ) ) ? $cron['args'] : array();
+				$time = wp_next_scheduled( $cron['name_old'], $args );
+				if ( $time ) {
+					// Cron with old name is scheduled - unschedule.
+					wp_unschedule_event( $time, $cron['name_old'], $args );
+					$rescheduled = wp_next_scheduled( $cron['name_new'], $args );
+					if ( ! $rescheduled ) {
+						// New cron is not scheduled already - schedule it.
+						wp_schedule_event( $time, $cron['frequency'], $cron['name_new'], $args );
+					}
 				}
 			}
 		}
@@ -69,7 +71,8 @@ class CronNameRemap {
 	 */
 	private function get_crons_to_remap() {
 		// Get an array of crons that have args.
-		$complex_crons = $this->get_crons_with_args_for_remap();
+		$complex_crons       = $this->get_crons_with_args_for_remap();
+		$archiving_frequency = $this->wsal->GetGlobalOption( 'archiving-run-every', 'hourly' );
 		// This is a list of _mostly_ static crons that are to be remapped.
 		$simple_crons = array(
 			array(
@@ -95,7 +98,7 @@ class CronNameRemap {
 			array(
 				'name_old'  => 'run_archiving',
 				'name_new'  => 'wsal_run_archiving',
-				'frequency' => strtolower( $this->wsal->wsalCommonClass->GetArchivingRunEvery() ), // this is not static data.
+				'frequency' => strtolower( $archiving_frequency ), // this is not static data.
 			),
 		);
 
