@@ -207,6 +207,7 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 * **Bug fix**
 	* Fixed an unhandled exception in an upgrade script used to delete old cron jobs.
+	
 = 3.5.2 (2019-10-26) =
 
 Release notes: [Update 3.5.2 - New filter hooks & better support for CPT on multisite networks](https://www.wpsecurityauditlog.com/releases/update-3-5-2/)
