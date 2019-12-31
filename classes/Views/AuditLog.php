@@ -956,6 +956,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			'searchFilters'  => isset( $this->page_args->search_filters ) ? $this->page_args->search_filters : false,
 			'viewerNonce'    => wp_create_nonce( 'wsal_auditlog_viewer_nonce' ),
 			'infiniteScroll' => $this->_plugin->settings->is_infinite_scroll(),
+			'userView'       => ( in_array( $this->user_last_view, $this->supported_view_types(), true ) ) ? $this->user_last_view : 'list',
 		);
 		wp_localize_script( 'auditlog', 'wsalAuditLogArgs', $audit_log_data );
 		wp_enqueue_script( 'auditlog' );
