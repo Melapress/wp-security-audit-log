@@ -174,9 +174,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							$more_info = add_query_arg(
 								array(
 									'utm_source'   => 'plugin',
-									'utm_medium'   => 'banner',
-									'utm_content'  => 'audit+log+viewier+more+info',
-									'utm_campaign' => 'upgrade+premium',
+									'utm_medium'   => 'referral',
+									'utm_campaign' => 'WSAL',
+									'utm_content'  => 'tell+me+more',
 								),
 								'https://www.wpsecurityauditlog.com/premium-features/'
 							);
