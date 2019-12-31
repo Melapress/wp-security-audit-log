@@ -75,15 +75,16 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		$this->plugin->alerts->Trigger(
 			$event,
 			array(
-				'NewUserID'   => $user_id,
-				'UserChanger' => ! empty( $current_user ) ? $current_user->user_login : '',
-				'NewUserData' => (object) array(
+				'NewUserID'    => $user_id,
+				'UserChanger'  => ! empty( $current_user ) ? $current_user->user_login : '',
+				'NewUserData'  => (object) array(
 					'Username'  => $user->user_login,
 					'FirstName' => $user->user_firstname,
 					'LastName'  => $user->user_lastname,
 					'Email'     => $user->user_email,
 					'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 				),
+				'EditUserLink' => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 			),
 			true
 		);
@@ -110,34 +111,36 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		// Get WP comment object.
 		$comment = get_comment( $comment_id );
 
-		if ( $comment && 'spam' !== $comment->comment_approved ) {
-			$post         = get_post( $comment->comment_post_ID );
-			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
-			$fields       = array(
-				'Date'        => $comment->comment_date,
-				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
-			);
+		if ( $comment ) {
+			if ( 'spam' !== $comment->comment_approved ) {
+				$post         = get_post( $comment->comment_post_ID );
+				$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
+				$fields       = array(
+					'PostTitle'   => $post->post_title,
+					'PostID'      => $post->ID,
+					'PostType'    => $post->post_type,
+					'PostStatus'  => $post->post_status,
+					'CommentID'   => $comment->comment_ID,
+					'Date'        => $comment->comment_date,
+					'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
+				);
 
-			// Get user data.
-			$user_data = get_user_by( 'email', $comment->comment_author_email );
+				// Get user data.
+				$user_data = get_user_by( 'email', $comment->comment_author_email );
 
-			if ( $user_data ) {
-				// Get user roles.
-				$user_roles = $user_data->roles;
+				if ( $user_data ) {
+					// Get user roles.
+					$user_roles = $user_data->roles;
+					if ( function_exists( 'is_super_admin' ) && is_super_admin() ) { // Check if superadmin.
+						$user_roles[] = 'superadmin';
+					}
 
-				// Check if superadmin.
-				if ( function_exists( 'is_super_admin' ) && is_super_admin() ) {
-					$user_roles[] = 'superadmin';
+					// Set the fields.
+					$fields['Username']         = $user_data->user_login;
+					$fields['CurrentUserRoles'] = $user_roles;
+					$fields['CommentMsg']       = sprintf( 'Posted a comment in response to the post <strong>%s</strong>', $post->post_title );
+					$this->plugin->alerts->Trigger( 2099, $fields );
 				}
-
-				/* Translators: %s: Post title */
-				$comment_msg = sprintf( __( 'Posted a comment in response to the post %s', 'wp-security-audit-log' ), '<strong>' . $post->post_title . '</strong>' );
-
-				// Set the fields.
-				$fields['Username']         = $user_data->user_login;
-				$fields['CurrentUserRoles'] = $user_roles;
-				$fields['CommentMsg']       = $comment_msg;
-				$this->plugin->alerts->Trigger( 2099, $fields );
 			}
 		}
 	}
@@ -424,8 +427,9 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9018,
 				array(
+					'PostID'             => $post->ID,
 					'ProductTitle'       => $product_title,
-					'ProductStatus'      => ( ! $product_status ) ? $post->post_status : $product_status,
+					'ProductStatus'      => ! $product_status ? $post->post_status : $product_status,
 					'OldStatus'          => $this->get_stock_status( $old_stock_status ),
 					'NewStatus'          => $this->get_stock_status( $new_stock_status ),
 					'Username'           => $username,
@@ -442,9 +446,10 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9019,
 				array(
+					'PostID'             => $post->ID,
 					'ProductTitle'       => $product_title,
-					'ProductStatus'      => ( ! $product_status ) ? $post->post_status : $product_status,
-					'OldValue'           => ( ! empty( $old_stock ) ? $old_stock : 0 ),
+					'ProductStatus'      => ! $product_status ? $post->post_status : $product_status,
+					'OldValue'           => ! empty( $old_stock ) ? $old_stock : 0,
 					'NewValue'           => $new_stock,
 					'Username'           => $username,
 					$editor_link['name'] => $editor_link['value'],

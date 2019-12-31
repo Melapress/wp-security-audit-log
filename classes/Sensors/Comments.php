@@ -68,6 +68,10 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment->comment_ID;
 			$fields       = array(
 				'PostTitle'   => $post->post_title,
+				'PostID'      => $post->ID,
+				'PostType'    => $post->post_type,
+				'PostStatus'  => $post->post_status,
+				'CommentID'   => $comment->comment_ID,
 				'Author'      => $comment->comment_author,
 				'Date'        => $comment->comment_date,
 				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
@@ -147,6 +151,11 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 				$post         = get_post( $comment->comment_post_ID );
 				$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
 				$fields       = array(
+					'PostTitle'   => $post->post_title,
+					'PostID'      => $post->ID,
+					'PostType'    => $post->post_type,
+					'PostStatus'  => $post->post_status,
+					'CommentID'   => $comment->comment_ID,
 					'Date'        => $comment->comment_date,
 					'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
 				);
@@ -186,6 +195,11 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
 			$fields       = array(
 				'PostTitle'   => $post->post_title,
+				'PostTitle'   => $post->post_title,
+				'PostID'      => $post->ID,
+				'PostType'    => $post->post_type,
+				'PostStatus'  => $post->post_status,
+				'CommentID'   => $comment->comment_ID,
 				'Author'      => $comment->comment_author,
 				'Date'        => $comment->comment_date,
 				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',

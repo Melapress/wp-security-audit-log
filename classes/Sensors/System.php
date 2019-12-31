@@ -405,17 +405,15 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		}
 
 		// Registeration Option.
-		if ( $is_option_page
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
-			&& ( get_option( 'users_can_register' ) xor isset( $post_array['users_can_register'] ) ) ) {
-			$old = get_option( 'users_can_register' ) ? 'Enabled' : 'Disabled';
-			$new = isset( $post_array['users_can_register'] ) ? 'Enabled' : 'Disabled';
-			if ( $old != $new ) {
+		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ( get_option( 'users_can_register' ) xor isset( $post_array['users_can_register'] ) ) ) {
+			$old = get_option( 'users_can_register' ) ? 'enabled' : 'disabled';
+			$new = isset( $post_array['users_can_register'] ) ? 'enabled' : 'disabled';
+
+			if ( $old !== $new ) {
 				$this->plugin->alerts->Trigger(
 					6001,
 					array(
-						'OldValue'      => $old,
-						'NewValue'      => $new,
+						'EventType'     => $new,
 						'CurrentUserID' => wp_get_current_user()->ID,
 					)
 				);
@@ -530,13 +528,11 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$allow_anonymous = get_option( '_bbp_allow_anonymous' );
 			$old_status      = ! empty( $allow_anonymous ) ? 1 : 0;
 			$new_status      = ! empty( $post_array['_bbp_allow_anonymous'] ) ? 1 : 0;
+
 			if ( $old_status !== $new_status ) {
-				$status = ( 1 === $new_status ) ? 'Enabled' : 'Disabled';
 				$this->plugin->alerts->Trigger(
 					8010,
-					array(
-						'Status' => $status,
-					)
+					array( 'EventType' => ( 1 === $new_status ) ? 'enabled' : 'disabled' )
 				);
 			}
 
@@ -652,17 +648,15 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	public function EventOptions( $whitelist = null ) {
 		// Filter global arrays for security.
 		$post_array = filter_input_array( INPUT_POST );
-		$get_array  = filter_input_array( INPUT_GET );
 
 		if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] ) {
 			$old_status = (int) get_option( 'blog_public', 1 );
 			$new_status = isset( $post_array['blog_public'] ) ? 0 : 1;
+
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
 					6008,
-					array(
-						'Status' => ( 0 === $new_status ) ? 'Enabled' : 'Disabled',
-					)
+					array( 'EventType' => ( 0 === $new_status ) ? 'enabled' : 'disabled' )
 				);
 			}
 		}
@@ -670,46 +664,44 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		if ( isset( $post_array['option_page'] ) && 'discussion' === $post_array['option_page'] ) {
 			$old_status = get_option( 'default_comment_status', 'closed' );
 			$new_status = isset( $post_array['default_comment_status'] ) ? 'open' : 'closed';
+
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
 					6009,
-					array(
-						'Status' => ( 'open' === $new_status ) ? 'Enabled' : 'Disabled',
-					)
+					array( 'EventType' => ( 'open' === $new_status ) ? 'enabled' : 'disabled' )
 				);
 			}
 
 			$old_status = (int) get_option( 'require_name_email', 0 );
 			$new_status = isset( $post_array['require_name_email'] ) ? 1 : 0;
+
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
 					6010,
-					array(
-						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
-					)
+					array( 'EventType' => ( 1 === $new_status ) ? 'enabled' : 'disabled' )
 				);
 			}
 
 			$old_status = (int) get_option( 'comment_registration', 0 );
 			$new_status = isset( $post_array['comment_registration'] ) ? 1 : 0;
+
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
 					6011,
-					array(
-						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
-					)
+					array( 'EventType' => ( 1 === $new_status ) ? 'enabled' : 'disabled' )
 				);
 			}
 
 			$old_status = (int) get_option( 'close_comments_for_old_posts', 0 );
 			$new_status = isset( $post_array['close_comments_for_old_posts'] ) ? 1 : 0;
+
 			if ( $old_status !== $new_status ) {
 				$value = isset( $post_array['close_comments_days_old'] ) ? $post_array['close_comments_days_old'] : 0;
 				$this->plugin->alerts->Trigger(
 					6012,
 					array(
-						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
-						'Value'  => $value,
+						'EventType' => ( 1 === $new_status ) ? 'enabled' : 'disabled',
+						'Value'     => $value,
 					)
 				);
 			}
@@ -728,23 +720,21 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 			$old_status = (int) get_option( 'comment_moderation', 0 );
 			$new_status = isset( $post_array['comment_moderation'] ) ? 1 : 0;
+
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
 					6014,
-					array(
-						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
-					)
+					array( 'EventType' => ( 1 === $new_status ) ? 'enabled' : 'disabled' )
 				);
 			}
 
 			$old_status = (int) get_option( 'comment_whitelist', 0 );
 			$new_status = isset( $post_array['comment_whitelist'] ) ? 1 : 0;
+
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
 					6015,
-					array(
-						'Status' => ( 1 === $new_status ) ? 'Enabled' : 'Disabled',
-					)
+					array( 'EventType' => ( 1 === $new_status ) ? 'enabled' : 'disabled' )
 				);
 			}
 
