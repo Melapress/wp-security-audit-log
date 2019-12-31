@@ -631,7 +631,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- Dashboard Widget -->
 
 		<h3><?php esc_html_e( 'Add user notification on the WordPress login page', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'Many compliance regulations (such as the GDRP) require website administrators to tell the users of their website that all the changes they do when logged in are being logged.', 'wp-security-audit-log' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Many compliance regulations (such as the GDPR) require website administrators to tell the users of their website that all the changes they do when logged in are being logged.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
