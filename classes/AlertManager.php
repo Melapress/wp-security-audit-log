@@ -569,6 +569,29 @@ final class WSAL_AlertManager {
 			$event_data['Severity'] = 4;
 		} elseif ( 'E_NOTICE' === $severity->name ) {
 			$event_data['Severity'] = 5;
+		} elseif ( 'WSAL_CRITICAL' === $severity->name ) {
+			$event_data['Severity'] = 1;
+		} elseif ( 'WSAL_HIGH' === $severity->name ) {
+			$event_data['Severity'] = 6;
+		} elseif ( 'WSAL_MEDIUM' === $severity->name ) {
+			$event_data['Severity'] = 10;
+		} elseif ( 'WSAL_LOW' === $severity->name ) {
+			$event_data['Severity'] = 15;
+		} elseif ( 'WSAL_INFORMATIONAL' === $severity->name ) {
+			$event_data['Severity'] = 20;
+		} else {
+			// assuming this is a missclasified item and using info code.
+			$code = 20;
+		}
+
+		// Add event object.
+		if ( $alert_obj && ! isset( $event_data['Object'] ) ) {
+			$event_data['Object'] = $alert_obj->object;
+		}
+
+		// Add event type.
+		if ( $alert_obj && ! isset( $event_data['EventType'] ) ) {
+			$event_data['EventType'] = $alert_obj->event_type;
 		}
 
 		/**
