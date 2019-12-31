@@ -130,6 +130,18 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	}
 
 	/**
+	 * Array of class names that are applied to the table for this view.
+	 *
+	 * @method get_table_classes
+	 * @since  4.0.0
+	 * @return array of strings
+	 */
+	protected function get_table_classes() {
+		$table_classes = array( 'widefat', 'fixed', 'striped', $this->_args['plural'], 'wsal-table' );
+		return $table_classes;
+	}
+
+	/**
 	 * Generate the table navigation above or below the table
 	 *
 	 * @since 3.2.3
@@ -153,10 +165,18 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			 * @since 3.2.3
 			 */
 			do_action( 'wsal_search_filters_list', $which );
-
+			?>
+			<div class="display-type-buttons">
+				<?php
+				$user_selected_view = $this->_plugin->views->views[0]->detect_view_type();
+				$view_link          = get_admin_url( null, 'admin.php?page=wsal-auditlog' );
+				?>
+				<a id ="wsal-list-view-toggle" href="<?php echo esc_url( add_query_arg( 'view', 'list', $view_link ) ); ?>" class="button wsal-button dashicons-before dashicons-list-view" <?php echo ( 'list' === $user_selected_view ) ? esc_attr( 'disabled' ) : ''; ?>><?php esc_html_e( 'List View', 'wp-security-audit-log' ); ?></a>
+				<a id ="wsal-grid-view-toggle" href="<?php echo esc_url( add_query_arg( 'view', 'grid', $view_link ) ); ?>" class="button wsal-button dashicons-before dashicons-grid-view" <?php echo ( 'grid' === $user_selected_view ) ? esc_attr( 'disabled' ) : ''; ?>><?php esc_html_e( 'Grid View', 'wp-security-audit-log' ); ?></a>
+			</div>
+			<?php
 			$this->pagination( $which );
 			?>
-			<br class="clear" />
 		</div>
 		<?php
 	}
