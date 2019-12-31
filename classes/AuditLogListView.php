@@ -218,7 +218,8 @@ class WSAL_AuditLogListView extends WP_List_Table {
 		endif;
 
 		// Show site alerts widget.
-		if ( $this->is_multisite() && $this->is_main_blog() ) {
+		// NOTE: this is shown when the filter IS NOT true.
+		if ( $this->is_multisite() && $this->is_main_blog() && ! apply_filters( 'search_extensition_active', false ) ) {
 			if (
 				( 'top' === $which && $this->_plugin->settings->is_infinite_scroll() )
 				|| ! $this->_plugin->settings->is_infinite_scroll()
