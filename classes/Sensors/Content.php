@@ -518,10 +518,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	public function event_update_term_data( $data, $term_id, $taxonomy, $args ) {
 		// Get new data.
-		$new_name   = ( isset( $data['name'] ) ) ? $data['name'] : false;
-		$new_slug   = ( isset( $data['slug'] ) ) ? $data['slug'] : false;
-		$new_desc   = ( isset( $args['description'] ) ) ? $args['description'] : false;
-		$new_parent = ( isset( $args['parent'] ) ) ? $args['parent'] : false;
+		$new_name   = isset( $data['name'] ) ? $data['name'] : false;
+		$new_slug   = isset( $data['slug'] ) ? $data['slug'] : false;
+		$new_desc   = isset( $args['description'] ) ? $args['description'] : false;
+		$new_parent = isset( $args['parent'] ) ? $args['parent'] : false;
 
 		// Get old data.
 		$term       = get_term( $term_id, $taxonomy );
@@ -567,7 +567,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						'TagLink'    => $term_link,
 						'old_desc'   => $old_desc,
 						'new_desc'   => $new_desc,
-						'ReportText' => $old_desc . '|' . $new_desc,
 					)
 				);
 			}
@@ -618,6 +617,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						'OldParent'    => $old_parent_name,
 						'NewParent'    => $new_parent_name,
 						'CategoryLink' => $term_link,
+						'Slug'         => $new_slug,
 					)
 				);
 			}
@@ -961,7 +961,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'OldUrl'             => $old_link,
 					'NewUrl'             => $new_link,
 					$editor_link['name'] => $editor_link['value'],
-					'ReportText'         => '"' . $old_link . '"|"' . $new_link . '"',
 				)
 			);
 			return 1;
@@ -1071,18 +1070,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		// Comments.
 		if ( $oldpost->comment_status !== $newpost->comment_status ) {
-			$type = 'Comments';
-
-			if ( 'open' === $newpost->comment_status ) {
-				$event = $this->get_comments_pings_event( $newpost, 'enable' );
-			} else {
-				$event = $this->get_comments_pings_event( $newpost, 'disable' );
-			}
-
 			$this->plugin->alerts->Trigger(
-				$event,
+				2111,
 				array(
-					'Type'               => $type,
 					'PostID'             => $newpost->ID,
 					'PostType'           => $newpost->post_type,
 					'PostStatus'         => $newpost->post_status,
@@ -1091,24 +1081,17 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'PostStatus'         => $newpost->post_status,
 					'PostUrl'            => get_permalink( $newpost->ID ),
 					$editor_link['name'] => $editor_link['value'],
+					'EventType'          => 'open' === $newpost->comment_status ? 'enabled' : 'disabled',
 				)
 			);
 			$result = 1;
 		}
+
 		// Trackbacks and Pingbacks.
 		if ( $oldpost->ping_status !== $newpost->ping_status ) {
-			$type = 'Trackbacks and Pingbacks';
-
-			if ( 'open' === $newpost->ping_status ) {
-				$event = $this->get_comments_pings_event( $newpost, 'enable' );
-			} else {
-				$event = $this->get_comments_pings_event( $newpost, 'disable' );
-			}
-
 			$this->plugin->alerts->Trigger(
-				$event,
+				2112,
 				array(
-					'Type'               => $type,
 					'PostID'             => $newpost->ID,
 					'PostType'           => $newpost->post_type,
 					'PostTitle'          => $newpost->post_title,
@@ -1116,6 +1099,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					'PostDate'           => $newpost->post_date,
 					'PostUrl'            => get_permalink( $newpost->ID ),
 					$editor_link['name'] => $editor_link['value'],
+					'EventType'          => 'open' === $newpost->ping_status ? 'enabled' : 'disabled',
 				)
 			);
 			$result = 1;
@@ -1257,7 +1241,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			if ( $event ) {
 				if ( 2002 === $event ) {
 					// Get Yoast alerts.
-					$yoast_alerts = $this->plugin->alerts->get_alerts_by_sub_category( 'Yoast SEO' );
+					$yoast_alerts = $this->plugin->alerts->get_alerts_by_category( 'Yoast SEO' );
 
 					// Check all alerts.
 					foreach ( $yoast_alerts as $alert_code => $alert ) {

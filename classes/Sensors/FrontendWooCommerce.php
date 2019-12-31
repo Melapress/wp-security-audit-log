@@ -160,8 +160,9 @@ class WSAL_Sensors_FrontendWooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9018,
 				array(
+					'PostID'             => $post->ID,
 					'ProductTitle'       => $product_title,
-					'ProductStatus'      => ( ! $product_status ) ? $post->post_status : $product_status,
+					'ProductStatus'      => ! $product_status ? $post->post_status : $product_status,
 					'OldStatus'          => $this->get_stock_status( $old_stock_status ),
 					'NewStatus'          => $this->get_stock_status( $new_stock_status ),
 					'Username'           => $username,
@@ -178,9 +179,10 @@ class WSAL_Sensors_FrontendWooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9019,
 				array(
+					'PostID'             => $post->ID,
 					'ProductTitle'       => $product_title,
-					'ProductStatus'      => ( ! $product_status ) ? $post->post_status : $product_status,
-					'OldValue'           => ( ! empty( $old_stock ) ? $old_stock : 0 ),
+					'ProductStatus'      => ! $product_status ? $post->post_status : $product_status,
+					'OldValue'           => ! empty( $old_stock ) ? $old_stock : 0,
 					'NewValue'           => $new_stock,
 					'Username'           => $username,
 					$editor_link['name'] => $editor_link['value'],

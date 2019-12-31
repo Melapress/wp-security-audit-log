@@ -89,7 +89,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		}
 
 		if ( isset( $post_array ) && isset( $post_array['post_ID'] )
-			&& ! ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE)
+			&& ! ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 			&& ! ( isset( $post_array['action'] ) && 'autosave' === $post_array['action'] )
 		) {
 			$this->post_id = intval( $post_array['post_ID'] );
@@ -224,7 +224,8 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		if ( $old_title !== $title ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
 			$this->plugin->alerts->Trigger(
-				8801, array(
+				8801,
+				array(
 					'PostID'             => $this->post->ID,
 					'PostType'           => $this->post->post_type,
 					'PostTitle'          => $this->post->post_title,
@@ -234,7 +235,6 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 					'OldSEOTitle'        => $old_title,
 					'NewSEOTitle'        => $title,
 					$editor_link['name'] => $editor_link['value'],
-					'ReportText'         => $old_title . '|' . $title,
 				)
 			);
 		}
@@ -259,7 +259,8 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		if ( $old_desc !== $desc ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
 			$this->plugin->alerts->Trigger(
-				8802, array(
+				8802,
+				array(
 					'PostID'             => $this->post->ID,
 					'PostType'           => $this->post->post_type,
 					'PostTitle'          => $this->post->post_title,
@@ -269,7 +270,6 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 					'old_desc'           => $old_desc,
 					'new_desc'           => $desc,
 					$editor_link['name'] => $editor_link['value'],
-					'ReportText'         => $old_desc . '|' . $desc,
 				)
 			);
 		}
@@ -300,15 +300,16 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		if ( $old_index !== $index ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
 			$this->plugin->alerts->Trigger(
-				8803, array(
-					'PostID' => $this->post->ID,
-					'PostType' => $this->post->post_type,
-					'PostTitle' => $this->post->post_title,
-					'PostStatus' => $this->post->post_status,
-					'PostDate' => $this->post->post_date,
-					'PostUrl' => get_permalink( $this->post->ID ),
-					'OldStatus' => $old_index,
-					'NewStatus' => $index,
+				8803,
+				array(
+					'PostID'             => $this->post->ID,
+					'PostType'           => $this->post->post_type,
+					'PostTitle'          => $this->post->post_title,
+					'PostStatus'         => $this->post->post_status,
+					'PostDate'           => $this->post->post_date,
+					'PostUrl'            => get_permalink( $this->post->ID ),
+					'OldStatus'          => $old_index,
+					'NewStatus'          => $index,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -325,29 +326,30 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		$old_follow = (int) $this->get_post_seo_data( 'meta-robots-nofollow' );
 
 		if ( 1 === $old_follow ) {
-			$old_follow = 'Disabled';
+			$old_follow = 'disabled';
 		} else {
-			$old_follow = 'Enabled';
+			$old_follow = 'enabled';
 		}
 
 		if ( 1 === $follow ) {
-			$follow = 'Disabled';
+			$follow = 'disabled';
 		} else {
-			$follow = 'Enabled';
+			$follow = 'enabled';
 		}
 
 		// If setting is changed then log alert.
 		if ( $old_follow !== $follow ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
 			$this->plugin->alerts->Trigger(
-				8804, array(
-					'PostID' => $this->post->ID,
-					'PostType' => $this->post->post_type,
-					'PostTitle' => $this->post->post_title,
-					'PostStatus' => $this->post->post_status,
-					'PostDate' => $this->post->post_date,
-					'PostUrl' => get_permalink( $this->post->ID ),
-					'NewStatus' => $follow,
+				8804,
+				array(
+					'PostID'             => $this->post->ID,
+					'PostType'           => $this->post->post_type,
+					'PostTitle'          => $this->post->post_title,
+					'PostStatus'         => $this->post->post_status,
+					'PostDate'           => $this->post->post_date,
+					'PostUrl'            => get_permalink( $this->post->ID ),
+					'EventType'          => $follow,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -377,14 +379,16 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		if ( $old_adv !== $advanced ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
 			$this->plugin->alerts->Trigger(
-				8805, array(
-					'PostID' => $this->post->ID,
-					'PostType' => $this->post->post_type,
-					'PostTitle' => $this->post->post_title,
-					'PostStatus' => $this->post->post_status,
-					'PostDate' => $this->post->post_date,
-					'PostUrl' => get_permalink( $this->post->ID ),
-					'NewStatus' => $advanced,
+				8805,
+				array(
+					'PostID'             => $this->post->ID,
+					'PostType'           => $this->post->post_type,
+					'PostTitle'          => $this->post->post_title,
+					'PostStatus'         => $this->post->post_status,
+					'PostDate'           => $this->post->post_date,
+					'PostUrl'            => get_permalink( $this->post->ID ),
+					'OldStatus'          => $old_adv,
+					'NewStatus'          => $advanced,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -409,17 +413,17 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		if ( $old_url !== $canonical_url ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
 			$this->plugin->alerts->Trigger(
-				8806, array(
-					'PostID' => $this->post->ID,
-					'PostType' => $this->post->post_type,
-					'PostTitle' => $this->post->post_title,
-					'PostStatus' => $this->post->post_status,
-					'PostDate' => $this->post->post_date,
-					'PostUrl' => get_permalink( $this->post->ID ),
-					'OldCanonicalUrl' => $old_url,
-					'NewCanonicalUrl' => $canonical_url,
+				8806,
+				array(
+					'PostID'             => $this->post->ID,
+					'PostType'           => $this->post->post_type,
+					'PostTitle'          => $this->post->post_title,
+					'PostStatus'         => $this->post->post_status,
+					'PostDate'           => $this->post->post_date,
+					'PostUrl'            => get_permalink( $this->post->ID ),
+					'OldCanonicalUrl'    => $old_url,
+					'NewCanonicalUrl'    => $canonical_url,
 					$editor_link['name'] => $editor_link['value'],
-					'ReportText' => '"' . $old_url . '"|"' . $canonical_url . '"',
 				)
 			);
 		}
@@ -443,15 +447,16 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		if ( $old_focus_keys !== $focus_keys ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
 			$this->plugin->alerts->Trigger(
-				8807, array(
-					'PostID' => $this->post->ID,
-					'PostType' => $this->post->post_type,
-					'PostTitle' => $this->post->post_title,
-					'PostStatus' => $this->post->post_status,
-					'PostDate' => $this->post->post_date,
-					'PostUrl' => get_permalink( $this->post->ID ),
-					'old_keywords' => $old_focus_keys,
-					'new_keywords' => $focus_keys,
+				8807,
+				array(
+					'PostID'             => $this->post->ID,
+					'PostType'           => $this->post->post_type,
+					'PostTitle'          => $this->post->post_title,
+					'PostStatus'         => $this->post->post_status,
+					'PostDate'           => $this->post->post_date,
+					'PostUrl'            => get_permalink( $this->post->ID ),
+					'old_keywords'       => $old_focus_keys,
+					'new_keywords'       => $focus_keys,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -466,26 +471,27 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 	protected function check_cornerstone_change( $cornerstone ) {
 		// Get old title value.
 		$old_cornerstone = (int) $this->get_post_seo_data( 'is_cornerstone' );
-		$cornerstone = (int) $cornerstone;
+		$cornerstone     = (int) $cornerstone;
 
 		if ( 1 === $cornerstone ) {
-			$alert_status = 'Enabled';
+			$alert_status = 'enabled';
 		} else {
-			$alert_status = 'Disabled';
+			$alert_status = 'disabled';
 		}
 
 		// If setting is changed then log alert.
 		if ( $old_cornerstone !== $cornerstone ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
 			$this->plugin->alerts->Trigger(
-				8808, array(
-					'PostID' => $this->post->ID,
-					'PostType' => $this->post->post_type,
-					'PostTitle' => $this->post->post_title,
-					'PostStatus' => $this->post->post_status,
-					'PostDate' => $this->post->post_date,
-					'PostUrl' => get_permalink( $this->post->ID ),
-					'Status' => $alert_status,
+				8808,
+				array(
+					'PostID'             => $this->post->ID,
+					'PostType'           => $this->post->post_type,
+					'PostTitle'          => $this->post->post_title,
+					'PostStatus'         => $this->post->post_status,
+					'PostDate'           => $this->post->post_date,
+					'PostUrl'            => get_permalink( $this->post->ID ),
+					'EventType'          => $alert_status,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -629,8 +635,8 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 
 		// Find title-* in the key.
 		if ( false !== strpos( $key, 'title-' ) ) {
-			$seo_post_type = str_replace( 'title-', '', $key );
-			$seo_post_type = ucfirst( $seo_post_type );
+			$seo_post_type  = str_replace( 'title-', '', $key );
+			$seo_post_type  = ucfirst( $seo_post_type );
 			$seo_post_type .= 's';
 
 			// Set alert meta data.
@@ -639,8 +645,8 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 
 		// Find metadesc-* in the key.
 		if ( false !== strpos( $key, 'metadesc-' ) ) {
-			$seo_post_type = str_replace( 'metadesc-', '', $key );
-			$seo_post_type = ucfirst( $seo_post_type );
+			$seo_post_type  = str_replace( 'metadesc-', '', $key );
+			$seo_post_type  = ucfirst( $seo_post_type );
 			$seo_post_type .= 's';
 
 			// Set alert meta data.
@@ -658,12 +664,10 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 
 			case 'title-home-wpseo':
 				$alert_code = 8810;
-				$alert_args['ReportText'] = $old_value . '|' . $new_value;
 				break;
 
 			case 'metadesc-home-wpseo':
 				$alert_code = 8811;
-				$alert_args['ReportText'] = $old_value . '|' . $new_value;
 				break;
 
 			case 'company_or_person':
@@ -708,19 +712,19 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 
 		// Find noindex-* in the key.
 		if ( false !== strpos( $key, 'noindex-' ) ) {
-			$seo_post_type = str_replace( 'noindex-', '', $key );
-			$seo_post_type = ucfirst( $seo_post_type );
+			$seo_post_type  = str_replace( 'noindex-', '', $key );
+			$seo_post_type  = ucfirst( $seo_post_type );
 			$seo_post_type .= 's';
 
 			// Set alert meta data.
 			$alert_args['SEOPostType'] = $seo_post_type;
-			$status = ( 1 === $status ) ? 0 : 1;
+			$status                    = 1 === $status ? 0 : 1;
 		}
 
 		// Find showdate-* in the key.
 		if ( false !== strpos( $key, 'showdate-' ) ) {
-			$seo_post_type = str_replace( 'showdate-', '', $key );
-			$seo_post_type = ucfirst( $seo_post_type );
+			$seo_post_type  = str_replace( 'showdate-', '', $key );
+			$seo_post_type  = ucfirst( $seo_post_type );
 			$seo_post_type .= 's';
 
 			// Set alert meta data.
@@ -729,16 +733,15 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 
 		// Find display-metabox-pt-* in the key.
 		if ( false !== strpos( $key, 'display-metabox-pt-' ) ) {
-			$seo_post_type = str_replace( 'display-metabox-pt-', '', $key );
-			$seo_post_type = ucfirst( $seo_post_type );
+			$seo_post_type  = str_replace( 'display-metabox-pt-', '', $key );
+			$seo_post_type  = ucfirst( $seo_post_type );
 			$seo_post_type .= 's';
 
 			// Set alert meta data.
 			$alert_args['SEOPostType'] = $seo_post_type;
 		}
 
-		$status = ( 1 === $status ) ? 'Enabled' : 'Disabled';
-		$alert_args['Status'] = $status;
+		$alert_args['EventType'] = 1 === $status ? 'enabled' : 'disabled';
 
 		// Set alert code to NULL initially.
 		$alert_code = null;

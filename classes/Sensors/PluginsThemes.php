@@ -619,12 +619,17 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 						)
 					);
 				} else {
+					$plugin_name = isset( $get_array['plugin'] ) ? $get_array['plugin'] : false;
+					$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name ) : false;
+
 					$this->plugin->alerts->Trigger(
 						5019,
 						array(
+							'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
 							'PostID'             => $post->ID,
 							'PostType'           => $post->post_type,
 							'PostTitle'          => $post->post_title,
+							'PostStatus'         => $post->post_status,
 							'Username'           => 'Plugins',
 							$editor_link['name'] => $editor_link['value'],
 						)
@@ -660,13 +665,17 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					// Ignore WooCommerce Bulk Stock Management page.
 					// OR MainWP plugin requests.
 				} else {
+					$plugin_name = isset( $get_array['plugin'] ) ? $get_array['plugin'] : false;
+					$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name ) : false;
 					$editor_link = $this->GetEditorLink( $post );
 					$this->plugin->alerts->Trigger(
 						5019,
 						array(
+							'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
 							'PostID'             => $post->ID,
 							'PostType'           => $post->post_type,
 							'PostTitle'          => $post->post_title,
+							'PostStatus'         => $post->post_status,
 							'Username'           => 'Plugins',
 							$editor_link['name'] => $editor_link['value'],
 						)

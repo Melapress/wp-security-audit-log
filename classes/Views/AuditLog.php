@@ -25,7 +25,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 *
 	 * @var object
 	 */
-	protected $_listview;
+	protected $_view;
 
 	/**
 	 * Plugin version.
@@ -51,6 +51,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @var stdClass
 	 */
 	private $page_args;
+
+	/**
+	 * Stores the value of the last view the user requested.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @var string
+	 */
+	public $user_last_view = '';
 
 	/**
 	 * Method: Constructor
@@ -98,6 +107,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'desc' => __( 'Unlock these and other powerful features with WP Security Audit Log Premium.', 'wp-security-audit-log' ),
 			),
 		);
+
+		// Setup the users last view by getting the value from user meta.
+		$last_view            = get_user_meta( get_current_user_id(), 'wsal-selected-main-view', true );
+		$this->user_last_view = ( in_array( $last_view, $this->supported_view_types(), true ) ) ? $last_view : 'list';
 	}
 
 	/**
@@ -161,9 +174,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							$more_info = add_query_arg(
 								array(
 									'utm_source'   => 'plugin',
-									'utm_medium'   => 'banner',
-									'utm_content'  => 'audit+log+viewier+more+info',
-									'utm_campaign' => 'upgrade+premium',
+									'utm_medium'   => 'referral',
+									'utm_campaign' => 'WSAL',
+									'utm_content'  => 'tell+me+more',
 								),
 								'https://www.wpsecurityauditlog.com/premium-features/'
 							);
@@ -268,7 +281,18 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	public function GetIcon() {
 		return $this->_wpversion < 3.8
 			? $this->_plugin->GetBaseUrl() . '/img/logo-main-menu.png'
-			: $this->_plugin->GetBaseUrl() . '/img/wsal-menu-icon.svg';
+			: $this->get_icon_encoded();
+	}
+
+	/**
+	 * Returns an encoded SVG strin gfor the menu icon.
+	 *
+	 * @method get_icon_encoded
+	 * @since
+	 * @return [type]
+	 */
+	private function get_icon_encoded() {
+		return 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTEycHgiIGhlaWdodD0iMTEwcHgiIHZpZXdCb3g9IjAgMCAxMTIgMTEwIiB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPgogICAgPCEtLSBHZW5lcmF0b3I6IHNrZXRjaHRvb2wgNTIuNiAoNjc0OTEpIC0gaHR0cDovL3d3dy5ib2hlbWlhbmNvZGluZy5jb20vc2tldGNoIC0tPgogICAgPHRpdGxlPkE2QUQyNDUyLUZERDItNDIwQS05ODMzLTQ3QkJDOTlBQjEzNzwvdGl0bGU+CiAgICA8ZGVzYz5DcmVhdGVkIHdpdGggc2tldGNodG9vbC48L2Rlc2M+CiAgICA8ZyBpZD0iV1BTQUwtU2NyZWVucyIgc3Ryb2tlPSJub25lIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI+CiAgICAgICAgPGcgaWQ9IkN1c3RvbS1pY29ucyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTEwMjQuMDAwMDAwLCAtNDYxLjAwMDAwMCkiIGZpbGw9IiNGRkZGRkYiIGZpbGwtcnVsZT0ibm9uemVybyI+CiAgICAgICAgICAgIDxnIGlkPSJDdXN0b20tSWNvbnMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MS4wMDAwMDAsIDIyOC4wMDAwMDApIj4KICAgICAgICAgICAgICAgIDxnIGlkPSJMb2dvIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4MDcuMDAwMDAwLCAyMDQuNjY2NjY3KSI+CiAgICAgICAgICAgICAgICAgICAgPGcgaWQ9IkF0b21zLS8taWNvbnMtLy1jdXN0b20tcmV2ZXJzZWQtYXVkaXQtbG9nIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1Mi4wMDAwMDAsIDE1LjAwMDAwMCkiPgogICAgICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNzAuMDg0ODc0NSw3OC4zNjU1MDAyIEM3Ny44MDAwOTQyLDc4LjM2NTUwMDIgODQuMDU0OTE2MSw3Mi4xMTA2NzgxIDg0LjA1NDkxNjEsNjQuMzk0NTE5MiBDODQuMDU0OTE2MSw1Ni4xMTk1NTg2IDc2Ljg3Njg5NzUsNDkuNTk2MTM2IDY4LjU1MzEwMDYsNTAuNTExODE5NSBDNjkuMDMxMTM0Myw1MS45MjE1MDIzIDY5LjMwMjU1MjIsNTMuNDI2MDQwNiA2OS4zMDI1NTIyLDU0Ljk5NzI1OTQgQzY5LjMwMjU1MjIsNjIuMTk1MDAwNyA2My44NTcyODgzLDY4LjExNzM1OTMgNTYuODYyNDA2Myw2OC44Nzk5NTkyIEM1OC43MzMyMTc5LDc0LjM5Mjg0MjkgNjMuOTM5OTM0Niw3OC4zNjU1MDAyIDcwLjA4NDg3NDUsNzguMzY1NTAwMiBaIE03MC4wNDA3MzIyLDI1LjU3NzA1NTcgTDEwOC4yNzMwOTUsMjkuNjk5MDM5OCBDMTI0LjgyOTU5LDYzLjc3MDkxNTUgMTA2LjA0NTQwMiwxMDIuODE5NDEzIDY5Ljk4ODEzOTEsMTExLjUyNDUxIEM2OS41NDEwOTc4LDExMS40MTU1NjcgNjkuMTE5NDEzOCwxMTEuMjgzMTQ1IDY4LjY3ODAwNzUsMTExLjE2NzYyOCBMNjguNjc2MTI5Miw5My44NzIwMTIyIEM2OC42NzIzNzI1LDkzLjg3MjAxMjIgNjguNjY5NTU1LDkzLjg3MjAxMjIgNjguNjY1Nzk4NCw5My44NzIwMTIyIEM1My4wNzQ3NjI5LDkzLjEyOTEzNDYgNDAuNjE4NjUxNiw4MC4yMTE4OTM5IDQwLjYxODY1MTYsNjQuNDM4NjYgQzQwLjYxODY1MTYsNTQuOTA4MDM5MSA0Ny41ODI1NDEsMzYuMDA5MjcyNSA2OC42NjU3OTg0LDM1LjAwNjI0NyBDNjguNjY5NTU1LDM1LjAwNjI0NyA2OC42NzIzNzI1LDM1LjAwNTMwNzggNjguNjc2MTI5MiwzNS4wMDUzMDc4IEw2OC42ODE3NjQxLDI1LjcyOTIgQzY5LjczMTc0NzcsMjUuNjEwODY1NSA2OS44NTc1OTU1LDI1LjU5NDg5OTggNzAuMDQwNzMyMiwyNS41NzcwNTU3IFogTTExNC40MjkxMTksODEuNTc0NjE1NCBDMTIyLjYxMjA0MSw2My43NjgwOTU4IDEyMi4wNzAxNDUsNDMuMDc0NTkwOCAxMTIuOTg4NDQ0LDI0LjU2NjUxNjggTDcwLjAwMDE2MTEsMTkuODI2NTY0IEwyNy4wMTA5MzkyLDI0LjU2NjUxNjggQzE3LjkyOTIzODQsNDMuMDczNjUxNiAxNy4zODczNDE2LDYzLjc2NzE1NjYgMjUuNTcxMjAzMiw4MS41NzQ2MTU0IEMzMy43ODIzMDA1LDk5LjQ0MjE4MDcgNDkuOTUwOTIxMiwxMTIuNDc0OTM4IDcwLjAwMDE2MTEsMTE3LjQxNzc1IEM5MC4wNDk0MDEsMTEyLjQ3NDkzOCAxMDYuMjE4MDIyLDk5LjQ0MzExOTggMTE0LjQyOTExOSw4MS41NzQ2MTU0IFogTTExNy40NDEwMTQsMjAuNTMwOTM1NyBDMTI4LjAwNzUzLDQwLjk4MDI1OTIgMTI4LjgyODM1OCw2NC4xMTA4OTE0IDExOS42OTIxODYsODMuOTkyOTYwNyBDMTEwLjYzOTU5OSwxMDMuNjkwMDE1IDkyLjc3MTA5NDIsMTE3Ljk4NTk0NiA3MC42NjY5NjY3LDEyMy4yMTUyMDMgTDcwLjAwMDE2MTQsMTIzLjM3MjA0MyBMNjkuMzMzMzU2LDEyMy4yMTUyMDMgQzQ3LjIyOTIyODUsMTE3Ljk4NTk0NiAyOS4zNTk3ODQ1LDEwMy42OTAwMTUgMjAuMzA4MTM2OCw4My45OTI5NjA3IEMxMS4xNzE5NjQ1LDY0LjExMDg5MTQgMTEuOTkxODUzMyw0MC45NzkzMiAyMi41NTkzMDkyLDIwLjUzMDkzNTcgTDIzLjI3MjEzMzUsMTkuMTUyMjQ1MyBMNzAuMDAwMTYxNCwxNCBMMTE2LjcyODE4OSwxOS4xNTIyNDUzIEwxMTcuNDQxMDE0LDIwLjUzMDkzNTcgWiIgaWQ9ImN1c3RvbS1yZXZlcnNlZC1hdWRpdC1sb2ciPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8L2c+CiAgICAgICAgICAgICAgICA8L2c+CiAgICAgICAgICAgIDwvZz4KICAgICAgICA8L2c+CiAgICA8L2c+Cjwvc3ZnPg==';
 	}
 
 	/**
@@ -288,7 +312,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	/**
 	 * Method: Get View.
 	 */
-	protected function GetListView() {
+	protected function GetView() {
 		// Set page arguments.
 		if ( ! $this->page_args ) {
 			$this->page_args = new stdClass();
@@ -308,10 +332,64 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Set events listing view class.
-		if ( is_null( $this->_listview ) ) {
-			$this->_listview = new WSAL_AuditLogListView( $this->_plugin, $this->page_args );
+		if ( is_null( $this->_view ) ) {
+			// Set the requested view based on POST or GET value. We only care
+			// if the view is 'grid' specifically.
+			$requested_view = $this->detect_view_type();
+
+			// If 'grid' is requested use it otherwise use list view by default.
+			if ( 'grid' !== $requested_view ) {
+				$this->_view = new WSAL_AuditLogListView( $this->_plugin, $this->page_args );
+			} else {
+				$this->_view = new WSAL_AuditLogGridView( $this->_plugin, $this->page_args );
+			}
+
+			// if the requested view didn't match the view users last viewed
+			// then update their preference.
+			if ( $requested_view !== $this->user_last_view ) {
+				update_user_meta( get_current_user_id(), 'wsal-selected-main-view', ( in_array( $requested_view, array( 'list', 'grid' ), true ) ) ? $requested_view : 'list' );
+				$this->user_last_view = $requested_view;
+			}
 		}
-		return $this->_listview;
+		return $this->_view;
+	}
+
+	/**
+	 * Helper to store the views that are supported for the plugins lists.
+	 *
+	 * @method supported_view_types
+	 * @since  4.0.0
+	 * @return array
+	 */
+	public function supported_view_types() {
+		return array(
+			'list',
+			'grid',
+		);
+	}
+
+	/**
+	 * Helper to get the current user selected view.
+	 *
+	 * @method detect_view_type
+	 * @since  4.0.0
+	 * @return string
+	 */
+	public function detect_view_type() {
+		// First check if there is a GET/POST request for a specific view.
+		if ( defined( 'DOING_AJAX' ) ) {
+			$requested_view = ( isset( $_POST['view'] ) ) ? wp_unslash( filter_input( INPUT_POST, 'view', FILTER_SANITIZE_STRING ) ) : '';
+		} else {
+			$requested_view = ( isset( $_GET['view'] ) ) ? wp_unslash( filter_input( INPUT_GET, 'view', FILTER_SANITIZE_STRING ) ) : '';
+		}
+
+		// When there is no GET/POST view requested use the user value.
+		if ( empty( $requested_view ) ) {
+			$requested_view = $this->user_last_view;
+		}
+
+		// return the requested view. This is 'list' by default.
+		return ( in_array( $requested_view, $this->supported_view_types(), true ) ) ? $requested_view : 'list';
 	}
 
 	/**
@@ -350,6 +428,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'_wpnonce',
 				'wsal_as_widget_ip',
 				'load_saved_search_field',
+				'view',
 			);
 
 			if ( empty( $site_id ) ) {
@@ -383,33 +462,34 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			check_admin_referer( 'bulk-logs' );
 		}
 
-		$this->GetListView()->prepare_items();
+		$this->GetView()->prepare_items();
 		?>
 		<form id="audit-log-viewer" method="get">
 			<div id="audit-log-viewer-content">
 				<input type="hidden" name="page" value="<?php echo esc_attr( $this->page_args->page ); ?>" />
 				<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr( empty( $this->page_args->site_id ) ? '0' : $this->page_args->site_id ); ?>" />
+				<input type="hidden" id="view" name="view" value="<?php echo ( isset( $_GET['view'] ) && 'grid' === wp_unslash( $_GET['view'] ) ) ? 'grid' : 'list'; ?>" />
 				<?php
 				/**
 				 * Hook: `wsal_auditlog_before_view`
 				 *
 				 * This action hook is triggered before displaying the audit log view.
 				 *
-				 * @param WSAL_AuditLogListView $this->_listview - Audit log list view object.
+				 * @param WSAL_AuditLogListView $this->_view - Audit log view object.
 				 */
-				do_action( 'wsal_auditlog_before_view', $this->GetListView() );
+				do_action( 'wsal_auditlog_before_view', $this->GetView() );
 
 				// Display the audit log list.
-				$this->GetListView()->display();
+				$this->GetView()->display();
 
 				/**
 				 * Hook: `wsal_auditlog_after_view`
 				 *
 				 * This action hook is triggered after displaying the audit log view.
 				 *
-				 * @param WSAL_AuditLogListView $this->_listview - Audit log list view object.
+				 * @param WSAL_AuditLogListView $this->_view - Audit log view object.
 				 */
-				do_action( 'wsal_auditlog_after_view', $this->GetListView() );
+				do_action( 'wsal_auditlog_after_view', $this->GetView() );
 				?>
 			</div>
 		</form>
@@ -465,7 +545,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							),
 							'autorefresh' => array(
 								'enabled' => ! $is_search_view ? $this->_plugin->settings->IsRefreshAlertsEnabled() : false,
-								'token'   => $this->GetListView()->get_total_items(),
+								'token'   => $this->_plugin->settings->is_infinite_scroll() ? $this->get_total_events() : $this->GetView()->get_total_items(),
 							),
 						)
 					);
@@ -599,7 +679,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		$search = $post_array['search'];
 
-		foreach ( $this->GetListView()->get_sites() as $site ) {
+		foreach ( $this->GetView()->get_sites() as $site ) {
 			if ( stripos( $site->blogname, $search ) !== false ) {
 				$grp1[] = $site;
 			} elseif ( stripos( $site->domain, $search ) !== false ) {
@@ -876,6 +956,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			'searchFilters'  => isset( $this->page_args->search_filters ) ? $this->page_args->search_filters : false,
 			'viewerNonce'    => wp_create_nonce( 'wsal_auditlog_viewer_nonce' ),
 			'infiniteScroll' => $this->_plugin->settings->is_infinite_scroll(),
+			'userView'       => ( in_array( $this->user_last_view, $this->supported_view_types(), true ) ) ? $this->user_last_view : 'list',
 		);
 		wp_localize_script( 'auditlog', 'wsalAuditLogArgs', $audit_log_data );
 		wp_enqueue_script( 'auditlog' );
@@ -1118,15 +1199,25 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			$paged = isset( $_POST['page_number'] ) ? sanitize_text_field( wp_unslash( $_POST['page_number'] ) ) : 0;
 
 			// Query events.
-			$events_query = $this->GetListView()->query_events( $paged );
+			$events_query = $this->GetView()->query_events( $paged );
 			if ( ! empty( $events_query['items'] ) ) {
 				foreach ( $events_query['items'] as $event ) {
-					$this->GetListView()->single_row( $event );
+					$this->GetView()->single_row( $event );
 				}
 			}
 			exit();
 		} else {
 			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
 		}
+	}
+
+	/**
+	 * Return the total number of events in audit log.
+	 *
+	 * @return int
+	 */
+	public function get_total_events() {
+		$occ = new WSAL_Models_Occurrence();
+		return (int) $occ->Count();
 	}
 }

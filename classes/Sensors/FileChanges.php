@@ -406,7 +406,8 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 						$this->plugin->alerts->Trigger(
 							6029,
 							array(
-								'FileLocation'  => $file,
+								'File'          => basename( $file ),
+								'FileLocation'  => dirname( $file ),
 								'FileHash'      => $file_hash,
 								'CurrentUserID' => '0',
 							)
@@ -443,7 +444,8 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 						$this->plugin->alerts->Trigger(
 							6030,
 							array(
-								'FileLocation'  => $file,
+								'File'          => basename( $file ),
+								'FileLocation'  => dirname( $file ),
 								'FileHash'      => $file_hash,
 								'CurrentUserID' => '0',
 							)
@@ -458,7 +460,8 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 						$this->plugin->alerts->Trigger(
 							6028,
 							array(
-								'FileLocation'  => $file,
+								'File'          => basename( $file ),
+								'FileLocation'  => dirname( $file ),
 								'FileHash'      => $file_hash,
 								'CurrentUserID' => '0',
 							)
@@ -511,6 +514,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					array(
 						'CurrentUserID' => '0',
 						'ScanStatus'    => 'started',
+						'EventType'     => 'started',
 					)
 				);
 			} elseif ( 6 === $next_to_scan ) {
@@ -522,6 +526,7 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					array(
 						'CurrentUserID' => '0',
 						'ScanStatus'    => 'stopped',
+						'EventType'     => 'stopped',
 					)
 				);
 			} else {
@@ -666,7 +671,8 @@ class WSAL_Sensors_FileChanges extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger(
 						6031,
 						array(
-							'FileLocation'  => $absolute_name,
+							'File'          => basename( $absolute_name ),
+							'FileLocation'  => dirname( $absolute_name ),
 							'CurrentUserID' => '0',
 						)
 					);

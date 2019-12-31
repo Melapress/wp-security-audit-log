@@ -307,7 +307,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 						'MetaValueOld'       => $this->old_meta[ $meta_id ]->val,
 						'MetaLink'           => $meta_key,
 						$editor_link['name'] => $editor_link['value'],
-						'ReportText'         => is_string( $this->old_meta[ $meta_id ]->val ) ? $this->old_meta[ $meta_id ]->val . '|' . $meta_value : false,
 					)
 				);
 			}
@@ -437,6 +436,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				'TargetUsername'    => $user->user_login,
 				'custom_field_name' => $meta_key,
 				'new_value'         => $meta_value,
+				'FirstName'         => $user->user_firstname,
+				'LastName'          => $user->user_lastname,
+				'Roles'             => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+				'EditUserLink'      => add_query_arg( 'user_id', $user->ID, admin_url( 'user-edit.php' ) ),
 			),
 			array( $this, 'must_not_contain_new_user_alert' )
 		);
@@ -495,7 +498,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 						'custom_field_name' => $meta_key,
 						'new_value'         => $meta_value,
 						'old_value'         => $this->old_meta[ $meta_id ]->val,
-						'ReportText'        => is_string( $this->old_meta[ $meta_id ]->val ) ? $this->old_meta[ $meta_id ]->val . '|' . $meta_value : false,
+						'FirstName'         => $user->user_firstname,
+						'LastName'          => $user->user_lastname,
+						'Roles'             => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+						'EditUserLink'      => add_query_arg( 'user_id', $user->ID, admin_url( 'user-edit.php' ) ),
 					),
 					array( $this, 'must_not_contain_role_changes' )
 				);
@@ -513,6 +519,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 								'TargetUsername' => $user->user_login,
 								'new_firstname'  => $meta_value,
 								'old_firstname'  => $this->old_meta[ $meta_id ]->val,
+								'FirstName'      => $user->user_firstname,
+								'LastName'       => $user->user_lastname,
+								'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+								'EditUserLink'   => add_query_arg( 'user_id', $user->ID, admin_url( 'user-edit.php' ) ),
 							)
 						);
 					}
@@ -526,6 +536,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 								'TargetUsername' => $user->user_login,
 								'new_lastname'   => $meta_value,
 								'old_lastname'   => $this->old_meta[ $meta_id ]->val,
+								'FirstName'      => $user->user_firstname,
+								'LastName'       => $user->user_lastname,
+								'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+								'EditUserLink'   => add_query_arg( 'user_id', $user->ID, admin_url( 'user-edit.php' ) ),
 							)
 						);
 					}
@@ -539,6 +553,10 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 								'TargetUsername' => $user->user_login,
 								'new_nickname'   => $meta_value,
 								'old_nickname'   => $this->old_meta[ $meta_id ]->val,
+								'FirstName'      => $user->user_firstname,
+								'LastName'       => $user->user_lastname,
+								'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+								'EditUserLink'   => add_query_arg( 'user_id', $user->ID, admin_url( 'user-edit.php' ) ),
 							)
 						);
 					}

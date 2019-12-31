@@ -233,10 +233,10 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 					$upgrade_link   = add_query_arg( 'page', 'wsal-auditlog-pricing', admin_url( 'admin.php' ) );
 					$more_info_link = add_query_arg(
 						array(
-							'utm_source'   => 'alert',
-							'utm_medium'   => 'page',
-							'utm_content'  => 'alert+more+info',
-							'utm_campaign' => 'upgrade+premium',
+							'utm_source'   => 'plugin',
+							'utm_medium'   => 'referral',
+							'utm_campaign' => 'WSAL',
+							'utm_content'  => 'db+integrations',
 						),
 						'https://www.wpsecurityauditlog.com/premium-features/'
 					);

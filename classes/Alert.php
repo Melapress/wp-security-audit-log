@@ -49,22 +49,39 @@ final class WSAL_Alert {
 	public $mesg = '';
 
 	/**
-	 * Method: Constructor.
+	 * Event object.
 	 *
-	 * @param integer $type - Type of alert.
-	 * @param integer $code - Code of alert.
-	 * @param string  $catg - Category of alert.
-	 * @param string  $subcatg - Subcategory of alert.
-	 * @param string  $desc - Description.
-	 * @param string  $mesg - Alert message.
+	 * @var string
 	 */
-	public function __construct( $type = 0, $code = 0, $catg = '', $subcatg = '', $desc = '', $mesg = '' ) {
-		$this->type    = $type;
-		$this->code    = $code;
-		$this->catg    = $catg;
-		$this->subcatg = $subcatg;
-		$this->desc    = $desc;
-		$this->mesg    = $mesg;
+	public $object = '';
+
+	/**
+	 * Event type.
+	 *
+	 * @var string
+	 */
+	public $event_type = '';
+
+	/**
+	 * Constructor.
+	 *
+	 * @param integer $type    - Type of alert.
+	 * @param integer $code    - Code of alert.
+	 * @param string  $catg    - Category of alert.
+	 * @param string  $subcatg - Subcategory of alert.
+	 * @param string  $desc    - Description.
+	 * @param string  $mesg    - Alert message.
+	 * @param string  $object  - Event object.
+	 */
+	public function __construct( $type = 0, $code = 0, $catg = '', $subcatg = '', $desc = '', $mesg = '', $object = '', $event_type = '' ) {
+		$this->type       = $type;
+		$this->code       = $code;
+		$this->catg       = $catg;
+		$this->subcatg    = $subcatg;
+		$this->desc       = $desc;
+		$this->mesg       = $mesg;
+		$this->object     = $object;
+		$this->event_type = $event_type;
 	}
 
 	/**
@@ -83,7 +100,7 @@ final class WSAL_Alert {
 			if ( is_scalar( $meta ) || is_null( $meta ) ) {
 				return $meta; // This isn't 100% correct.
 			}
-			$meta = is_array( $meta ) ? $meta[ $part ] : $meta->$part;
+			$meta = is_array( $meta ) ? $meta[ $part ] : ( isset( $meta->$part ) ? $meta->$part : 'NULL' );
 		}
 		return is_scalar( $meta ) ? (string) $meta : var_export( $meta, true );
 	}

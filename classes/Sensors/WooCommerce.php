@@ -312,11 +312,14 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		if ( empty( $coupon ) || ! $coupon instanceof WP_Post ) {
 			return array();
 		}
+
+		$editor_link = $this->GetEditorLink( $coupon );
 		return array(
-			'CouponID'      => $coupon->ID,
-			'CouponName'    => $coupon->post_title,
-			'CouponStatus'  => $coupon->post_status,
-			'CouponExcerpt' => $coupon->post_excerpt,
+			'CouponID'           => $coupon->ID,
+			'CouponName'         => $coupon->post_title,
+			'CouponStatus'       => $coupon->post_status,
+			'CouponExcerpt'      => $coupon->post_excerpt,
+			$editor_link['name'] => $editor_link['value'],
 		);
 	}
 
@@ -341,6 +344,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					array(
 						'ProductTitle'       => $new_post->post_title,
 						'ProductUrl'         => get_post_permalink( $new_post->ID ),
+						'PostID'             => $new_post->ID,
+						'ProductStatus'      => $new_post->post_status,
 						$editor_link['name'] => $editor_link['value'],
 					)
 				);
@@ -350,6 +355,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					9000,
 					array(
 						'ProductTitle'       => $new_post->post_title,
+						'PostID'             => $new_post->ID,
+						'ProductStatus'      => $new_post->post_status,
 						$editor_link['name'] => $editor_link['value'],
 					)
 				);
@@ -374,8 +381,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9002,
 				array(
-					'CategoryName' => $term->name,
-					'Slug'         => $term->slug,
+					'CategoryName'   => $term->name,
+					'Slug'           => $term->slug,
+					'ProductCatLink' => $this->get_taxonomy_edit_link( $term_id ),
 				)
 			);
 		}
@@ -405,6 +413,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				array(
 					'ProductTitle'       => $newpost->post_title,
 					'ProductStatus'      => $newpost->post_status,
+					'PostID'             => $newpost->ID,
 					'OldCategories'      => $old_cats ? $old_cats : 'no categories',
 					'NewCategories'      => $new_cats ? $new_cats : 'no categories',
 					$editor_link['name'] => $editor_link['value'],
@@ -433,6 +442,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					9004,
 					array(
+						'PostID'             => $oldpost->ID,
 						'ProductTitle'       => $oldpost->post_title,
 						'ProductStatus'      => $oldpost->post_status,
 						'OldDescription'     => $oldpost->post_excerpt,
@@ -442,7 +452,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				);
 				return 1;
 			} elseif ( 'shop_coupon' === $newpost->post_type ) {
-				$coupon_data = $this->get_coupon_event_data( $newpost );
+				$coupon_data                   = $this->get_coupon_event_data( $newpost );
+				$coupon_data['OldDescription'] = $oldpost->post_excerpt;
+				$coupon_data['NewDescription'] = $newpost->post_excerpt;
 				$this->plugin->alerts->Trigger( 9069, $coupon_data );
 				return 1;
 			}
@@ -466,6 +478,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9005,
 				array(
+					'PostID'             => $oldpost->ID,
 					'ProductTitle'       => $oldpost->post_title,
 					'ProductStatus'      => $oldpost->post_status,
 					$editor_link['name'] => $editor_link['value'],
@@ -490,6 +503,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9006,
 				array(
+					'PostID'             => $post->ID,
 					'ProductTitle'       => $post->post_title,
 					'ProductStatus'      => $post->post_status,
 					'OldUrl'             => $old_link,
@@ -518,6 +532,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9007,
 				array(
+					'PostID'             => $post->ID,
 					'ProductTitle'       => $post->post_title,
 					'ProductStatus'      => $post->post_status,
 					'OldType'            => $old_type,
@@ -550,6 +565,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9008,
 				array(
+					'PostID'             => $oldpost->ID,
 					'ProductTitle'       => $oldpost->post_title,
 					'ProductStatus'      => $oldpost->post_status,
 					'OldDate'            => $oldpost->post_date,
@@ -598,6 +614,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9009,
 				array(
+					'PostID'             => $oldpost->ID,
 					'ProductTitle'       => $oldpost->post_title,
 					'ProductStatus'      => $oldpost->post_status,
 					'OldVisibility'      => $old_visibility,
@@ -681,6 +698,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9042,
 				array(
+					'PostID'             => $post->ID,
 					'ProductTitle'       => $post->post_title,
 					'ProductStatus'      => $post->post_status,
 					'OldVisibility'      => isset( $wc_visibilities[ $old_visibility ] ) ? $wc_visibilities[ $old_visibility ] : false,
@@ -710,9 +728,10 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9043,
 				array(
+					'PostID'             => $post->ID,
 					'ProductTitle'       => $post->post_title,
 					'ProductStatus'      => $post->post_status,
-					'Status'             => $new_featured ? 'Enabled' : 'Disabled',
+					'EventType'          => $new_featured ? 'enabled' : 'disabled',
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -745,6 +764,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9044,
 				array(
+					'PostID'             => $oldpost->ID,
 					'ProductTitle'       => $oldpost->post_title,
 					'ProductStatus'      => $oldpost->post_status,
 					'OldStatus'          => $old_backorder,
@@ -773,6 +793,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		// Compute the difference.
 		$added_upsells   = array();
 		$removed_upsells = array();
+
 		if ( is_array( $new_upsell_ids ) && is_array( $old_upsell_ids ) ) {
 			$added_upsells   = array_diff( $new_upsell_ids, $old_upsell_ids );
 			$removed_upsells = array_diff( $old_upsell_ids, $new_upsell_ids );
@@ -791,7 +812,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					9045,
 					array(
-						'Status'             => 'Added',
+						'EventType'          => 'added',
+						'PostID'             => $oldpost->ID,
 						'ProductTitle'       => $oldpost->post_title,
 						'ProductStatus'      => $oldpost->post_status,
 						'UpsellTitle'        => $upsell_title,
@@ -810,7 +832,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					9045,
 					array(
-						'Status'             => 'Removed',
+						'EventType'          => 'removed',
+						'PostID'             => $oldpost->ID,
 						'ProductTitle'       => $oldpost->post_title,
 						'ProductStatus'      => $oldpost->post_status,
 						'UpsellTitle'        => $upsell_title,
@@ -858,7 +881,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					9046,
 					array(
-						'Status'             => 'Added',
+						'EventType'          => 'added',
+						'PostID'             => $oldpost->ID,
 						'ProductTitle'       => $oldpost->post_title,
 						'ProductStatus'      => $oldpost->post_status,
 						'CrossSellTitle'     => $cross_sell_title,
@@ -877,7 +901,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					9046,
 					array(
-						'Status'             => 'Removed',
+						'EventType'          => 'removed',
+						'PostID'             => $oldpost->ID,
 						'ProductTitle'       => $oldpost->post_title,
 						'ProductStatus'      => $oldpost->post_status,
 						'CrossSellTitle'     => $cross_sell_title,
@@ -917,6 +942,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		$this->plugin->alerts->Trigger(
 			9010,
 			array(
+				'PostID'             => $oldpost->ID,
 				'ProductTitle'       => $oldpost->post_title,
 				'ProductStatus'      => $oldpost->post_status,
 				'ProductUrl'         => get_post_permalink( $oldpost->ID ),
@@ -940,6 +966,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9012,
 				array(
+					'PostID'        => $post->ID,
 					'ProductTitle'  => $post->post_title,
 					'ProductStatus' => $post->post_status,
 					'ProductUrl'    => get_post_permalink( $post->ID ),
@@ -969,7 +996,13 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		}
 
 		if ( 'product' === $post->post_type ) {
-			$this->plugin->alerts->Trigger( 9013, array( 'ProductTitle' => $post->post_title ) );
+			$this->plugin->alerts->Trigger(
+				9013,
+				array(
+					'PostID'       => $post->ID,
+					'ProductTitle' => $post->post_title,
+				)
+			);
 		} elseif ( 'shop_order' === $post->post_type ) {
 			$this->plugin->alerts->Trigger( 9039, array( 'OrderTitle' => $this->get_order_title( $post_id ) ) );
 		}
@@ -991,7 +1024,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9014,
 				array(
+					'PostID'             => $post->ID,
 					'ProductTitle'       => $post->post_title,
+					'ProductStatus'      => $post->post_status,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -1069,6 +1104,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger(
 						9015,
 						array(
+							'PostID'             => $oldpost->ID,
 							'ProductTitle'       => $oldpost->post_title,
 							'OldStatus'          => $oldpost->post_status,
 							'NewStatus'          => $newpost->post_status,
@@ -1076,18 +1112,17 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						)
 					);
 					return 1;
-				} elseif ( 'shop_coupon' === $newpost->post_type ) {
-					// Get coupon data.
-					$coupon_data = $this->get_coupon_event_data( $newpost );
-
-					// Set status event data.
-					$coupon_data['OldStatus'] = $oldpost->post_status;
-					$coupon_data['NewStatus'] = $newpost->post_status;
-
-					// Log the event.
-					$this->plugin->alerts->Trigger( 9070, $coupon_data );
-					return 1;
 				}
+				// elseif ( 'shop_coupon' === $newpost->post_type ) {
+				// Get coupon data.
+				// $coupon_data = $this->get_coupon_event_data( $newpost );
+				// Set status event data.
+				// $coupon_data['OldStatus'] = $oldpost->post_status;
+				// $coupon_data['NewStatus'] = $newpost->post_status;
+				// Log the event.
+				// $this->plugin->alerts->Trigger( 9070, $coupon_data );
+				// return 1;
+				// }
 			}
 		}
 		return 0;
@@ -1130,6 +1165,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		$this->plugin->alerts->Trigger(
 			9016,
 			array(
+				'PostID'             => $post->ID,
 				'ProductTitle'       => $post->post_title,
 				'ProductStatus'      => $post->post_status,
 				'PriceType'          => $type,
@@ -1160,6 +1196,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9017,
 				array(
+					'PostID'             => $oldpost->ID,
 					'ProductTitle'       => $oldpost->post_title,
 					'ProductStatus'      => $oldpost->post_status,
 					'OldSku'             => ! empty( $old_sku ) ? $old_sku : 0,
@@ -1191,6 +1228,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9018,
 				array(
+					'PostID'             => $oldpost->ID,
 					'ProductTitle'       => $oldpost->post_title,
 					'ProductStatus'      => $oldpost->post_status,
 					'OldStatus'          => $this->GetStockStatusName( $old_status ),
@@ -1222,6 +1260,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9019,
 				array(
+					'PostID'             => $oldpost->ID,
 					'ProductTitle'       => $oldpost->post_title,
 					'ProductStatus'      => $oldpost->post_status,
 					'OldValue'           => ! empty( $old_value ) ? $old_value : 0,
@@ -1284,10 +1323,11 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9020,
 				array(
+					'PostID'             => $oldpost->ID,
 					'ProductTitle'       => $oldpost->post_title,
 					'ProductStatus'      => $oldpost->post_status,
-					'OldType'            => ( 'yes' === $old_virtual ) ? 'Virtual' : 'Non-Virtual',
-					'NewType'            => ( 'yes' === $new_virtual ) ? 'Virtual' : 'Non-Virtual',
+					'OldType'            => 'yes' === $old_virtual ? 'Virtual' : 'Non-Virtual',
+					'NewType'            => 'yes' === $new_virtual ? 'Virtual' : 'Non-Virtual',
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
@@ -1299,6 +1339,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9020,
 				array(
+					'PostID'             => $oldpost->ID,
 					'ProductTitle'       => $oldpost->post_title,
 					'ProductStatus'      => $oldpost->post_status,
 					'OldType'            => ( 'yes' === $old_download ) ? 'Downloadable' : 'Non-Downloadable',
@@ -1309,28 +1350,6 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$result = 1;
 		}
 		return $result;
-	}
-
-	/**
-	 * Group the Type changes in one function.
-	 *
-	 * @deprecated 3.3.1
-	 *
-	 * @param object $oldpost - Old product object.
-	 * @param string $type    - Product Type.
-	 * @return int
-	 */
-	private function EventType( $oldpost, $type ) {
-		$editor_link = $this->GetEditorLink( $oldpost );
-		$this->plugin->alerts->Trigger(
-			9020,
-			array(
-				'ProductTitle'       => $oldpost->post_title,
-				'Type'               => $type,
-				$editor_link['name'] => $editor_link['value'],
-			)
-		);
-		return 1;
 	}
 
 	/**
@@ -1353,6 +1372,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->plugin->alerts->Trigger(
 				9021,
 				array(
+					'PostID'             => $oldpost->ID,
 					'ProductTitle'       => $oldpost->post_title,
 					'ProductStatus'      => $oldpost->post_status,
 					'OldWeight'          => ! empty( $old_weight ) ? $old_weight . ' ' . $weight_unit : 0,
@@ -1439,6 +1459,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		$this->plugin->alerts->Trigger(
 			9022,
 			array(
+				'PostID'             => $oldpost->ID,
 				'ProductTitle'       => $oldpost->post_title,
 				'ProductStatus'      => $oldpost->post_status,
 				'DimensionType'      => $type,
@@ -1494,6 +1515,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger(
 						9023,
 						array(
+							'PostID'             => $oldpost->ID,
 							'ProductTitle'       => $oldpost->post_title,
 							'ProductStatus'      => $oldpost->post_status,
 							'FileName'           => $new_file_names[ $key ],
@@ -1516,6 +1538,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger(
 						9024,
 						array(
+							'PostID'             => $oldpost->ID,
 							'ProductTitle'       => $oldpost->post_title,
 							'ProductStatus'      => $oldpost->post_status,
 							'FileName'           => $old_file_names[ $key ],
@@ -1535,6 +1558,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger(
 						9025,
 						array(
+							'PostID'             => $oldpost->ID,
 							'ProductTitle'       => $oldpost->post_title,
 							'ProductStatus'      => $oldpost->post_status,
 							'OldName'            => $old_file_names[ $key ],
@@ -1552,6 +1576,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					9026,
 					array(
+						'PostID'             => $oldpost->ID,
 						'ProductTitle'       => $oldpost->post_title,
 						'ProductStatus'      => $oldpost->post_status,
 						'FileName'           => $new_file_names[ $key ],
@@ -1609,8 +1634,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					$old_enable_guest_checkout = $this->GetConfig( 'enable_guest_checkout' );
 					$new_enable_guest_checkout = isset( $_POST['woocommerce_enable_guest_checkout'] ) ? 'yes' : 'no';
 					if ( $old_enable_guest_checkout !== $new_enable_guest_checkout ) {
-						$status = 'yes' === $new_enable_guest_checkout ? 'Enabled' : 'Disabled';
-						$this->plugin->alerts->Trigger( 9033, array( 'Status' => $status ) );
+						$status = 'yes' === $new_enable_guest_checkout ? 'enabled' : 'disabled';
+						$this->plugin->alerts->Trigger( 9033, array( 'EventType' => $status ) );
 					}
 				} elseif ( isset( $_GET['tab'] ) && 'checkout' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
 					// Get payment method.
@@ -1628,8 +1653,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 						// Check status change.
 						if ( $old_cash_on_delivery !== $new_cash_on_delivery ) {
-							$status = ( 'yes' === $new_cash_on_delivery ) ? 'Enabled' : 'Disabled';
-							$this->plugin->alerts->Trigger( 9034, array( 'Status' => $status ) );
+							$status = 'yes' === $new_cash_on_delivery ? 'enabled' : 'disabled';
+							$this->plugin->alerts->Trigger( 9034, array( 'EventType' => $status ) );
 							$status_change = true;
 						}
 					} elseif ( $gateway ) {
@@ -1640,25 +1665,15 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 						// Check status change.
 						if ( $old_gateway_status !== $new_gateway_status ) {
-							if ( 'yes' === $new_gateway_status ) {
-								// Gateway enabled.
-								$this->plugin->alerts->Trigger(
-									9074,
-									array(
-										'GatewayID'   => $gateway,
-										'GatewayName' => isset( $gateway_settings['title'] ) ? $gateway_settings['title'] : false,
-									)
-								);
-							} else {
-								// Gateway disabled.
-								$this->plugin->alerts->Trigger(
-									9075,
-									array(
-										'GatewayID'   => $gateway,
-										'GatewayName' => isset( $gateway_settings['title'] ) ? $gateway_settings['title'] : false,
-									)
-								);
-							}
+							// Gateway enabled.
+							$this->plugin->alerts->Trigger(
+								9074,
+								array(
+									'GatewayID'   => $gateway,
+									'GatewayName' => isset( $gateway_settings['title'] ) ? $gateway_settings['title'] : false,
+									'EventType'   => 'yes' === $new_gateway_status ? 'enabled' : 'disabled',
+								)
+							);
 							$status_change = true;
 						}
 					}
@@ -1741,15 +1756,15 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					$old_tax_round = $this->GetConfig( 'tax_round_at_subtotal' );
 					$new_tax_round = isset( $_POST['woocommerce_tax_round_at_subtotal'] ) ? 'yes' : 'no';
 					if ( $old_tax_round !== $new_tax_round ) {
-						$this->plugin->alerts->Trigger( 9081, array( 'Status' => 'yes' === $new_tax_round ? 'Enabled' : 'Disabled' ) );
+						$this->plugin->alerts->Trigger( 9081, array( 'EventType' => 'yes' === $new_tax_round ? 'enabled' : 'disabled' ) );
 					}
 				} elseif ( empty( $_GET['tab'] ) || 'general' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
 					// "Enable Coupon" event.
 					$old_enable_coupons = $this->GetConfig( 'enable_coupons' );
 					$new_enable_coupons = isset( $_POST['woocommerce_enable_coupons'] ) ? 'yes' : 'no';
 					if ( $old_enable_coupons !== $new_enable_coupons ) {
-						$status = 'yes' === $new_enable_coupons ? 'Enabled' : 'Disabled';
-						$this->plugin->alerts->Trigger( 9032, array( 'Status' => $status ) );
+						$status = 'yes' === $new_enable_coupons ? 'enabled' : 'disabled';
+						$this->plugin->alerts->Trigger( 9032, array( 'EventType' => $status ) );
 					}
 
 					if ( isset( $_POST['woocommerce_default_country'] ) ) {
@@ -1770,8 +1785,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						$old_calc_taxes = $this->GetConfig( 'calc_taxes' );
 						$new_calc_taxes = isset( $_POST['woocommerce_calc_taxes'] ) ? 'yes' : 'no';
 						if ( $old_calc_taxes !== $new_calc_taxes ) {
-							$status = ( 'yes' == $new_calc_taxes ) ? 'Enabled' : 'Disabled';
-							$this->plugin->alerts->Trigger( 9030, array( 'Status' => $status ) );
+							$status = 'yes' === $new_calc_taxes ? 'enabled' : 'disabled';
+							$this->plugin->alerts->Trigger( 9030, array( 'EventType' => $status ) );
 						}
 					}
 
@@ -1811,32 +1826,18 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						$enabled = $gateway->get_option( 'enabled', 'no' );
 
 						if ( 'cod' === $gateway->id ) {
-							if ( ! wc_string_to_bool( $enabled ) ) {
-								$status = 'Enabled';
-							} else {
-								$status = 'Disabled';
-							}
-							$this->plugin->alerts->Trigger( 9034, array( 'Status' => $status ) );
+							$status = ! wc_string_to_bool( $enabled ) ? 'enabled' : 'disabled';
+							$this->plugin->alerts->Trigger( 9034, array( 'EventType' => $status ) );
 						} else {
-							if ( ! wc_string_to_bool( $enabled ) ) {
-								// Gateway enabled.
-								$this->plugin->alerts->Trigger(
-									9074,
-									array(
-										'GatewayID'   => $gateway->id,
-										'GatewayName' => $gateway->title,
-									)
-								);
-							} else {
-								// Gateway disabled.
-								$this->plugin->alerts->Trigger(
-									9075,
-									array(
-										'GatewayID'   => $gateway->id,
-										'GatewayName' => $gateway->title,
-									)
-								);
-							}
+							// Gateway enabled.
+							$this->plugin->alerts->Trigger(
+								9074,
+								array(
+									'GatewayID'   => $gateway->id,
+									'GatewayName' => $gateway->title,
+									'EventType'   => ! wc_string_to_bool( $enabled ) ? 'enabled' : 'disabled',
+								)
+							);
 						}
 					}
 				}
@@ -1855,8 +1856,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger(
 						9082,
 						array(
-							'ShippingZoneStatus' => 'Added',
-							'ShippingZoneName'   => $zone_name,
+							'EventType'        => 'created',
+							'ShippingZoneName' => $zone_name,
 						)
 					);
 				} elseif ( ! empty( $_POST['changes'] ) ) {
@@ -1865,9 +1866,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger(
 						9082,
 						array(
-							'ShippingZoneID'     => $zone_id,
-							'ShippingZoneStatus' => 'Modified',
-							'ShippingZoneName'   => $zone_name ? $zone_name : $shipping_zone->get_zone_name(),
+							'ShippingZoneID'   => $zone_id,
+							'EventType'        => 'modified',
+							'ShippingZoneName' => $zone_name ? $zone_name : $shipping_zone->get_zone_name(),
 						)
 					);
 				}
@@ -1886,9 +1887,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 						$this->plugin->alerts->Trigger(
 							9082,
 							array(
-								'ShippingZoneID'     => $zone['zone_id'],
-								'ShippingZoneStatus' => 'Deleted',
-								'ShippingZoneName'   => $zone_obj->get_zone_name(),
+								'ShippingZoneID'   => $zone['zone_id'],
+								'EventType'        => 'deleted',
+								'ShippingZoneName' => $zone_obj->get_zone_name(),
 							)
 						);
 					}
@@ -2017,6 +2018,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		// Meta value key.
 		if ( 'shop_order' === $post->post_type ) {
 			$name = 'EditorLinkOrder';
+		} elseif ( 'shop_coupon' === $post->post_type ) {
+			$name = 'EditorLinkCoupon';
 		} else {
 			$name = 'EditorLinkProduct';
 		}
@@ -2561,8 +2564,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 		// Check the attribute archives.
 		if ( isset( $data['attribute_public'] ) && isset( $this->old_attr_data->has_archives ) && $data['attribute_public'] !== (int) $this->old_attr_data->has_archives ) {
-			$attr_event                   = $this->get_attribute_event_data( $id, $data );
-			$attr_event['ArchivesStatus'] = 1 === $data['attribute_public'] ? 'Enabled' : 'Disabled';
+			$attr_event              = $this->get_attribute_event_data( $id, $data );
+			$attr_event['EventType'] = 1 === $data['attribute_public'] ? 'enabled' : 'disabled';
 			$this->plugin->alerts->Trigger( 9062, $attr_event );
 		}
 	}
@@ -3046,10 +3049,11 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					9053,
 					array(
-						'CategoryID'   => $term_id,
-						'CategoryName' => $new_name,
-						'OldSlug'      => $old_slug,
-						'NewSlug'      => $new_slug,
+						'CategoryID'     => $term_id,
+						'CategoryName'   => $new_name,
+						'OldSlug'        => $old_slug,
+						'NewSlug'        => $new_slug,
+						'ProductCatLink' => $this->get_taxonomy_edit_link( $term_id ),
 					)
 				);
 			}
@@ -3059,12 +3063,14 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					9054,
 					array(
-						'CategoryID'   => $term_id,
-						'CategoryName' => $new_name,
-						'OldParentID'  => isset( $old_parent_cat->term_id ) ? $old_parent_cat->term_id : false,
-						'OldParentCat' => isset( $old_parent_cat->name ) ? $old_parent_cat->name : false,
-						'NewParentID'  => isset( $new_parent_cat->term_id ) ? $new_parent_cat->term_id : false,
-						'NewParentCat' => isset( $new_parent_cat->name ) ? $new_parent_cat->name : false,
+						'CategoryID'     => $term_id,
+						'CategoryName'   => $new_name,
+						'CategorySlug'   => $term->slug,
+						'ProductCatLink' => $this->get_taxonomy_edit_link( $term_id ),
+						'OldParentID'    => isset( $old_parent_cat->term_id ) ? $old_parent_cat->term_id : false,
+						'OldParentCat'   => isset( $old_parent_cat->name ) ? $old_parent_cat->name : false,
+						'NewParentID'    => isset( $new_parent_cat->term_id ) ? $new_parent_cat->term_id : false,
+						'NewParentCat'   => isset( $new_parent_cat->name ) ? $new_parent_cat->name : false,
 					)
 				);
 			}
@@ -3074,10 +3080,12 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					9056,
 					array(
-						'CategoryID'   => $term_id,
-						'CategoryName' => $new_name,
-						'OldName'      => $old_name,
-						'NewName'      => $new_name,
+						'CategoryID'     => $term_id,
+						'CategoryName'   => $new_name,
+						'OldName'        => $old_name,
+						'NewName'        => $new_name,
+						'CategorySlug'   => $term->slug,
+						'ProductCatLink' => $this->get_taxonomy_edit_link( $term_id ),
 					)
 				);
 			}
@@ -3114,8 +3122,10 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				array(
 					'CategoryID'     => $object_id,
 					'CategoryName'   => $term->name,
+					'CategorySlug'   => $term->slug,
 					'OldDisplayType' => $old_display,
 					'NewDisplayType' => $meta_value,
+					'ProductCatLink' => $this->get_taxonomy_edit_link( $object_id ),
 				)
 			);
 		}
@@ -3316,19 +3326,21 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 				}
 
 				if ( $event_id ) {
-					$user            = get_user_by( 'ID', $user_id );
-					$old_address_key = 'Old' . $this->get_key_for_event( $meta_key );
-					$new_address_key = 'New' . $this->get_key_for_event( $meta_key );
-					$address_field   = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
-					$address_field   = ucwords( str_replace( '_', ' ', $address_field ) );
+					$user = get_user_by( 'ID', $user_id );
+					// $old_address_key = 'Old' . $this->get_key_for_event( $meta_key );
+					// $new_address_key = 'New' . $this->get_key_for_event( $meta_key );
+					$address_field = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
+					$address_field = ucwords( str_replace( '_', ' ', $address_field ) );
 
 					$this->plugin->alerts->Trigger(
 						$event_id,
 						array(
 							'TargetUsername' => $user ? $user->user_login : false,
 							'AddressField'   => $address_field,
-							$old_address_key => $this->wc_user_meta[ $meta_id ]->value,
-							$new_address_key => $meta_value,
+							'OldValue'       => $this->wc_user_meta[ $meta_id ]->value,
+							'NewValue'       => $meta_value,
+							'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+							'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 						)
 					);
 				}
@@ -3389,5 +3401,21 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			// Check for stock quantity changes.
 			$this->CheckStockQuantityChange( $old_product_post, $old_product->get_stock_quantity(), $product->get_stock_quantity() );
 		}
+	}
+
+	/**
+	 * Builds category link.
+	 *
+	 * @param integer $tag_id   - Tag ID.
+	 * @param string  $taxonomy - Taxonomy.
+	 * @return string|null - Link.
+	 */
+	private function get_taxonomy_edit_link( $tag_id, $taxonomy = 'product_cat' ) {
+		$tag_args = array(
+			'post_type' => 'product',
+			'taxonomy'  => $taxonomy,
+			'tag_ID'    => $tag_id,
+		);
+		return ! empty( $tag_id ) ? add_query_arg( $tag_args, admin_url( 'term.php' ) ) : null;
 	}
 }
