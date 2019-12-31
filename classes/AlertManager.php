@@ -439,8 +439,16 @@ final class WSAL_AlertManager {
 		foreach ( $groups as $name => $group ) {
 			foreach ( $group as $subname => $subgroup ) {
 				foreach ( $subgroup as $item ) {
-					list($type, $code, $desc, $mesg) = $item;
-					$this->Register( array( $type, $code, $name, $subname, $desc, $mesg ) );
+					if ( ! isset( $item[4] ) ) {
+						$item[4] = ''; // Set default event object.
+					}
+
+					if ( ! isset( $item[5] ) ) {
+						$item[5] = ''; // Set default event type.
+					}
+
+					list( $type, $code, $desc, $mesg, $object, $event_type ) = $item;
+					$this->Register( array( $type, $code, $name, $subname, $desc, $mesg, $object, $event_type ) );
 				}
 			}
 		}
