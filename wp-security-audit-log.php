@@ -417,6 +417,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			add_action( 'admin_init', array( $this, 'sync_premium_freemius' ) );
 
+			add_action( 'wsal_freemius_loaded', array( $this, 'adjust_freemius_strings' ) );
+
 			$this->init_freemius();
 		}
 
@@ -520,6 +522,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				self::load_freemius();
 
 				if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
+					// Add filters to customize freemius welcome message.
 					wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
 					wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
 					wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
@@ -867,6 +870,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				return $show;
 			}
 			return false;
+		}
+
+		/**
+		 * Changes some of the strings that freemius outputs with out own.
+		 *
+		 * @method adjust_freemius_strings
+		 * @since  4.0.0
+		 */
+		public function adjust_freemius_strings() {
+			// only update these messages if using premium plugin.
+			if ( ! wsal_freemius()->is_premium() ) {
+				return;
+			}
+			wsal_freemius()->override_i18n(
+				array(
+					'few-plugin-tweaks' => __( 'You need to activate the licence key to use WP Securitity Audit Log Premium. %2$s', 'wp-security-audit-log' ),
+					'optin-x-now'       => __( 'Activate the licence key now', 'wp-security-audit-log' ),
+				)
+			);
 		}
 
 		/**
