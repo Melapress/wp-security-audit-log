@@ -259,7 +259,7 @@ final class WSAL_AlertManager {
 		}
 
 		// Get current user roles.
-		if ( isset( $old_user ) ) {
+		if ( isset( $old_user ) && ! false === $old_user ) {
 			// looks like this is a switched user so setup original user
 			// roles and values for later user.
 			$roles = $old_user->roles;

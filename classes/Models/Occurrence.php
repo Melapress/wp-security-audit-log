@@ -295,7 +295,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	/**
 	 * Method: Get Microtime.
 	 *
-	 * @return float - Number of seconds (and microseconds as fraction) since unix Day 0.
+	 * @return float - Number of seconds (and milliseconds as fraction) since unix Day 0.
 	 * @todo This needs some caching.
 	 */
 	protected function GetMicrotime() {

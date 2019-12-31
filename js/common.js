@@ -44,7 +44,7 @@ jQuery( document ).ready( function() {
 		var nfn = nfe.attr( 'data-notice-name' );
 		jQuery.ajax({
 			type: 'POST',
-			url: ajaxurl,
+			url: wsalCommonData.ajaxURL,
 			async: false,
 			data: { action: 'AjaxDismissNotice', notice: nfn }
 		});

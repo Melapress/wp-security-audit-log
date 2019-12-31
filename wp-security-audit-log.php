@@ -518,7 +518,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				return;
 			}
 
-			if ( is_admin() || self::is_login_screen() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			if ( is_admin() || self::is_login_screen() || self::is_rest_api() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 				self::load_freemius();
 
 				if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
