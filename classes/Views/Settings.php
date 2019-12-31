@@ -1182,7 +1182,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- User Information -->
 
 		<h3><?php esc_html_e( 'Select the columns to be displayed in the WordPress activity log', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'When you deselect a column it won’t be shown in the activity log viewer but the data will still be recorded by the plugin, so when you select it again all the data will be displayed.', 'wp-security-audit-log' ); ?></p>
+		<p class="description"><?php esc_html_e( 'When you deselect a column it won’t be shown in the activity log viewer in both views. The data will still be recorded by the plugin.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -1204,6 +1204,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 										<span><?php esc_html_e( 'User', 'wp-security-audit-log' ); ?></span>
 									<?php elseif ( 'source_ip' === $key ) : ?>
 										<span><?php esc_html_e( 'Source IP Address', 'wp-security-audit-log' ); ?></span>
+									<?php elseif ( 'info' === $key ) : ?>
+										<span><?php esc_html_e( 'Info (used in Grid view mode only)', 'wp-security-audit-log' ); ?></span>
 									<?php else : ?>
 										<span><?php echo esc_html( ucwords( str_replace( '_', ' ', $key ) ) ); ?></span>
 									<?php endif; ?>
