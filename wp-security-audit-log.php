@@ -340,6 +340,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Views.
 				require_once 'classes/AbstractView.php';
 				require_once 'classes/AuditLogListView.php';
+				require_once 'classes/AuditLogGridView.php';
 				require_once 'classes/Views/AuditLog.php';
 				require_once 'classes/Views/EmailNotifications.php';
 				require_once 'classes/Views/ExternalDB.php';
@@ -1461,6 +1462,27 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 							require_once 'classes/Update/Task/CronNameRemap.php';
 							$cron_name_remapper = new WSAL\Update\Task\CronNameRemap( WpSecurityAuditLog::GetInstance() );
 							$cron_name_remapper->run();
+						}
+					);
+				}
+
+				if ( version_compare( $old_version, '4.0.0', '<=' ) ) {
+					/*
+					 * Ensure that the grid view 'info' colum is set to display.
+					 */
+					add_action(
+						'init',
+						function() {
+							$cols = $this->settings->GetColumns();
+							// if the `info` col does not exist in the array then add it now.
+							if ( ! isset( $cols['info'] ) ) {
+								// add this at position 3 in the array.
+								$cols = array_slice( $cols, 0, 2, true ) + array( 'info' => '1' ) + array_slice( $cols, 2, null, true );
+								$this->settings->SetColumns( $cols );
+							} else {
+								$cols['info'] = '1';
+								$this->settings->SetColumns( $cols );
+							}
 						}
 					);
 				}
