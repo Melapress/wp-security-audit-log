@@ -208,6 +208,17 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	}
 
 	/**
+	 * Gets the actual alert event ID.
+	 *
+	 * @method get_alert_id
+	 * @since  4.0.0
+	 * @return int
+	 */
+	public function get_alert_id() {
+		return ( isset( $this->alert_id ) ) ? $this->alert_id : 0;
+	}
+
+	/**
 	 * Gets the username.
 	 *
 	 * @see WSAL_Adapters_MySQL_Occurrence::GetFirstNamedMeta()

@@ -484,7 +484,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @param string $_post_statuses - (Optional) Post statuses.
 	 * @return array Report results
 	 */
-	public function GetReporting( $_site_id, $_user_id, $_role_name, $_alert_code, $_start_timestamp, $_end_timestamp, $_next_date = null, $_limit = 0, $_post_types = '', $_post_statuses = '' ) {
+	public function GetReporting( $_site_id, $_user_id, $_role_name, $_alert_code, $_start_timestamp, $_end_timestamp, $_next_date = null, $_limit = 0, $_post_types = '', $_post_statuses = '', $_objects = '', $_event_types = '' ) {
 		global $wpdb;
 		$user_names = $this->GetUserNames( $_user_id );
 
@@ -531,6 +531,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 							AND
 							replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName
 						)
+					)
+					AND (
+						@object is NULL
+						OR
+						EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='Object' AND find_in_set(meta.value, @object) > 0)
+					)
+					AND (
+						@eventType is NULL
+						OR
+						EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='EventType' AND find_in_set(meta.value, @eventType) > 0)
 					)
 					AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
 					AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
@@ -582,6 +592,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 					OR
 					EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='PostStatus' AND find_in_set(meta.value, @postStatus) > 0)
 				)
+				AND (
+					@object is NULL
+					OR
+					EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='Object' AND find_in_set(meta.value, @object) > 0)
+				)
+				AND (
+					@eventType is NULL
+					OR
+					EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='EventType' AND find_in_set(meta.value, @eventType) > 0)
+				)
 				{$condition_date}
 			ORDER BY
 				created_on DESC
@@ -592,6 +612,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$_wpdb->query( "SET @userId = $_user_id" );
 		$_wpdb->query( "SET @postType = $_post_types" );
 		$_wpdb->query( "SET @postStatus = $_post_statuses" );
+		$_wpdb->query( "SET @object = $_objects" );
+		$_wpdb->query( "SET @eventType = $_event_types" );
 		$_wpdb->query( "SET @roleName = $_role_name" );
 		$_wpdb->query( "SET @alertCode = $_alert_code" );
 		$_wpdb->query( "SET @startTimestamp = $_start_timestamp" );

@@ -2688,6 +2688,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							array(
 								'CurrentUserID' => '0',
 								'ScanStatus'    => 'started',
+								'EventType'     => 'started',
 							)
 						);
 					} elseif ( 6 === $dir ) {
@@ -2697,6 +2698,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							array(
 								'CurrentUserID' => '0',
 								'ScanStatus'    => 'stopped',
+								'EventType'     => 'stopped',
 							)
 						);
 					}
