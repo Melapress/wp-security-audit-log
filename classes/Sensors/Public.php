@@ -48,7 +48,6 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		// Hook the events if user is logged in OR if user is not logged in and visitor events are allowed to load.
 		if ( is_user_logged_in() ) {
 			add_action( 'user_register', array( $this, 'event_user_register' ) );
-			add_action( 'comment_post', array( $this, 'event_comment' ), 10, 3 );
 
 			// Check if WooCommerce plugin exists.
 			if ( WpSecurityAuditLog::is_woocommerce_active() ) {
@@ -88,87 +87,6 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 			),
 			true
 		);
-	}
-
-	/**
-	 * Fires immediately after a comment is inserted into the database.
-	 *
-	 * @param int   $comment_id       - The comment ID.
-	 * @param mixed $comment_approved - 1 if the comment is approved, 0 if not, 'spam' if spam.
-	 * @param array $comment_data     - Comment data.
-	 */
-	public function event_comment( $comment_id, $comment_approved, $comment_data ) {
-		if ( ! $comment_id ) {
-			return;
-		}
-
-		// Check if the comment is response to another comment.
-		if ( isset( $comment_data['comment_parent'] ) && $comment_data['comment_parent'] ) {
-			$this->event_generic( $comment_id, 2092 );
-			return;
-		}
-
-		// Get WP comment object.
-		$comment = get_comment( $comment_id );
-
-		if ( $comment ) {
-			if ( 'spam' !== $comment->comment_approved ) {
-				$post         = get_post( $comment->comment_post_ID );
-				$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
-				$fields       = array(
-					'PostTitle'   => $post->post_title,
-					'PostID'      => $post->ID,
-					'PostType'    => $post->post_type,
-					'PostStatus'  => $post->post_status,
-					'CommentID'   => $comment->comment_ID,
-					'Date'        => $comment->comment_date,
-					'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
-				);
-
-				// Get user data.
-				$user_data = get_user_by( 'email', $comment->comment_author_email );
-
-				if ( $user_data ) {
-					// Get user roles.
-					$user_roles = $user_data->roles;
-					if ( function_exists( 'is_super_admin' ) && is_super_admin() ) { // Check if superadmin.
-						$user_roles[] = 'superadmin';
-					}
-
-					// Set the fields.
-					$fields['Username']         = $user_data->user_login;
-					$fields['CurrentUserRoles'] = $user_roles;
-					$fields['CommentMsg']       = sprintf( 'Posted a comment in response to the post <strong>%s</strong>', $post->post_title );
-					$this->plugin->alerts->Trigger( 2099, $fields );
-				}
-			}
-		}
-	}
-
-	/**
-	 * Trigger generic event.
-	 *
-	 * @since 3.4
-	 *
-	 * @param integer $comment_id - Comment ID.
-	 * @param integer $alert_code - Event code.
-	 */
-	private function event_generic( $comment_id, $alert_code ) {
-		$comment = get_comment( $comment_id );
-		if ( $comment ) {
-			$post         = get_post( $comment->comment_post_ID );
-			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment_id;
-			$fields       = array(
-				'PostTitle'   => $post->post_title,
-				'Author'      => $comment->comment_author,
-				'Date'        => $comment->comment_date,
-				'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
-			);
-
-			if ( 'shop_order' !== $post->post_type ) {
-				$this->plugin->alerts->Trigger( $alert_code, $fields );
-			}
-		}
 	}
 
 	/**
