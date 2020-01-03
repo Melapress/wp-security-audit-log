@@ -247,6 +247,10 @@ function wsaldefaults_wsal_init() {
 					array( 2097, WSAL_INFORMATIONAL, __( 'User restored a comment from the trash', 'wp-security-audit-log' ), __( 'Restored the comment posted by %Author% on the post %PostTitle% from trash %LineBreak% Post ID: %PostID% %LineBreak% Post Type: %PostType% %LineBreak% Post Status: %PostStatus% %LineBreak% Comment ID: %CommentID% %PostUrlIfPlublished%  %LineBreak% %CommentLink%', 'wp-security-audit-log' ), 'comment', 'restored' ),
 					array( 2098, WSAL_LOW, __( 'User permanently deleted a comment', 'wp-security-audit-log' ), __( 'Permanently deleted the comment posted by %Author% on the post %PostTitle% %LineBreak% Post ID: %PostID% %LineBreak% Post Type: %PostType% %LineBreak% Post Status: %PostStatus% %PostUrlIfPlublished% %LineBreak% Comment ID: %CommentID%', 'wp-security-audit-log' ), 'comment', 'deleted' ),
 					array( 2099, WSAL_INFORMATIONAL, __( 'User posted a comment', 'wp-security-audit-log' ), __( 'Posted a comment on the post %PostTitle% %LineBreak% Post ID: %PostID% %LineBreak% Post Type: %PostType% %LineBreak% Post Status: %PostStatus% %LineBreak% Comment ID: %CommentID% %PostUrlIfPlublished%  %LineBreak% %CommentLink%', 'wp-security-audit-log' ), 'comment', 'created' ),
+					/**
+					 * IMPORTANT: This alert is depricated but should not be
+					 * removed from the definitions for backwards compatibilty.
+					 */
 					array( 2126, WSAL_INFORMATIONAL, __( 'Visitor posted a comment', 'wp-security-audit-log' ), __( 'Posted a comment on the post %PostTitle% %LineBreak% Post ID: %PostID% %LineBreak% Post Type: %PostType% %LineBreak% Post Status: %PostStatus% %LineBreak% Comment ID: %CommentID% %PostUrlIfPlublished%  %LineBreak% %CommentLink%', 'wp-security-audit-log' ), 'comment', 'created' ),
 				),
 
