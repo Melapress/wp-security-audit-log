@@ -4,7 +4,7 @@
  * Plugin URI: http://www.wpsecurityauditlog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 3.5.2.1
+ * Version: 4.0.0
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -16,7 +16,7 @@
 
 /*
 	WP Security Audit Log
-	Copyright(c) 2019  WP White Security  (email : info@wpwhitesecurity.com)
+	Copyright(c) 2020  WP White Security  (email : info@wpwhitesecurity.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License, version 2, as
@@ -46,7 +46,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '3.5.2.1';
+		public $version = '4.0.0';
 
 		// Plugin constants.
 		const PLG_CLS_PRFX    = 'WSAL_';
@@ -340,6 +340,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Views.
 				require_once 'classes/AbstractView.php';
 				require_once 'classes/AuditLogListView.php';
+				require_once 'classes/AuditLogGridView.php';
 				require_once 'classes/Views/AuditLog.php';
 				require_once 'classes/Views/EmailNotifications.php';
 				require_once 'classes/Views/ExternalDB.php';
@@ -415,6 +416,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			add_filter( 'mainwp_child_extra_execution', array( $this, 'mainwp_dashboard_callback' ), 10, 2 );
 
 			add_action( 'admin_init', array( $this, 'sync_premium_freemius' ) );
+
+			add_action( 'wsal_freemius_loaded', array( $this, 'adjust_freemius_strings' ) );
 
 			$this->init_freemius();
 		}
@@ -515,10 +518,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				return;
 			}
 
-			if ( is_admin() || self::is_login_screen() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+			if ( is_admin() || self::is_login_screen() || self::is_rest_api() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 				self::load_freemius();
 
 				if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
+					// Add filters to customize freemius welcome message.
 					wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
 					wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
 					wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
@@ -866,6 +870,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				return $show;
 			}
 			return false;
+		}
+
+		/**
+		 * Changes some of the strings that freemius outputs with out own.
+		 *
+		 * @method adjust_freemius_strings
+		 * @since  4.0.0
+		 */
+		public function adjust_freemius_strings() {
+			// only update these messages if using premium plugin.
+			if ( ! wsal_freemius()->is_premium() ) {
+				return;
+			}
+			wsal_freemius()->override_i18n(
+				array(
+					'few-plugin-tweaks' => __( 'You need to activate the licence key to use WP Securitity Audit Log Premium. %2$s', 'wp-security-audit-log' ),
+					'optin-x-now'       => __( 'Activate the licence key now', 'wp-security-audit-log' ),
+				)
+			);
 		}
 
 		/**
@@ -1461,6 +1484,27 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 							require_once 'classes/Update/Task/CronNameRemap.php';
 							$cron_name_remapper = new WSAL\Update\Task\CronNameRemap( WpSecurityAuditLog::GetInstance() );
 							$cron_name_remapper->run();
+						}
+					);
+				}
+
+				if ( version_compare( $old_version, '4.0.0', '<=' ) ) {
+					/*
+					 * Ensure that the grid view 'info' colum is set to display.
+					 */
+					add_action(
+						'init',
+						function() {
+							$cols = $this->settings->GetColumns();
+							// if the `info` col does not exist in the array then add it now.
+							if ( ! isset( $cols['info'] ) ) {
+								// add this at position 3 in the array.
+								$cols = array_slice( $cols, 0, 2, true ) + array( 'info' => '1' ) + array_slice( $cols, 2, null, true );
+								$this->settings->SetColumns( $cols );
+							} else {
+								$cols['info'] = '1';
+								$this->settings->SetColumns( $cols );
+							}
 						}
 					);
 				}

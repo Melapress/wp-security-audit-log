@@ -220,6 +220,20 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 */
 	public function EventLogout() {
 		if ( $this->_current_user->ID ) {
+			// get the list of excluded users.
+			$excluded_users    = $this->plugin->settings->GetExcludedMonitoringUsers();
+			$excluded_user_ids = array();
+			// convert excluded usernames into IDs.
+			if ( ! empty( $excluded_users ) && is_array( $excluded_users ) ) {
+				foreach ( $excluded_users as $excluded_user ) {
+					$user                = get_user_by( 'login', $excluded_user );
+					$excluded_user_ids[] = $user->ID;
+				}
+			}
+			// bail early if this user is in the excluded ids list.
+			if ( in_array( $this->_current_user->ID, $excluded_user_ids, true ) ) {
+				return;
+			}
 			$this->plugin->alerts->Trigger(
 				1001,
 				array(

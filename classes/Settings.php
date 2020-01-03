@@ -1131,29 +1131,29 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Helper method to get the stored setting to determine if microseconds
+	 * Helper method to get the stored setting to determine if milliseconds
 	 * appear in the admin list view. This should always be a bool.
 	 *
-	 * @method get_show_microseconds
+	 * @method get_show_milliseconds
 	 * @since  3.5.2
 	 * @return bool
 	 */
-	public function get_show_microseconds() {
-		return $this->_plugin->GetGlobalOption( 'show_microseconds', 'yes' );
+	public function get_show_milliseconds() {
+		return $this->_plugin->GetGlobalOption( 'show_milliseconds', 'yes' );
 	}
 
 	/**
-	 * Stores the option that dicates if microseconds show in admin list view
+	 * Stores the option that dicates if milliseconds show in admin list view
 	 * for event times. This is always a bool. When it's not a bool it's set
 	 * to `true` to match default.
 	 *
-	 * @method set_show_microseconds
+	 * @method set_show_milliseconds
 	 * @since  3.5.2
 	 * @param  mixed $newvalue ideally always bool. If not bool then it's cast to true.
 	 */
-	public function set_show_microseconds( $newvalue ) {
+	public function set_show_milliseconds( $newvalue ) {
 		$newvalue = ( ! empty( $newvalue ) ) ? 'yes' : 'no';
-		$this->_plugin->SetGlobalOption( 'show_microseconds', $newvalue );
+		$this->_plugin->SetGlobalOption( 'show_milliseconds', $newvalue );
 	}
 
 
@@ -1182,41 +1182,53 @@ class WSAL_Settings {
 		$this->_plugin->SetGlobalOption( $name_field, trim( $newvalue ) );
 	}
 
+	/**
+	 * Returns audit log columns.
+	 *
+	 * @return array
+	 */
 	public function GetColumns() {
 		$columns = array(
 			'alert_code' => '1',
 			'type'       => '1',
+			'info'       => '1',
 			'date'       => '1',
 			'username'   => '1',
 			'source_ip'  => '1',
+			'object'     => '1',
+			'event_type' => '1',
 			'message'    => '1',
+			'info'       => '1',
 		);
+
 		if ( $this->_plugin->IsMultisite() ) {
-			$columns = array_slice( $columns, 0, 5, true ) + array(
-				'site' => '1',
-			) + array_slice( $columns, 5, null, true );
+			$columns = array_slice( $columns, 0, 6, true ) + array( 'site' => '1' ) + array_slice( $columns, 6, null, true );
 		}
+
 		$selected = $this->GetColumnsSelected();
+
 		if ( ! empty( $selected ) ) {
 			$columns = array(
 				'alert_code' => '0',
 				'type'       => '0',
+				'info'       => '0',
 				'date'       => '0',
 				'username'   => '0',
 				'source_ip'  => '0',
+				'object'     => '0',
+				'event_type' => '0',
 				'message'    => '0',
 			);
+
 			if ( $this->_plugin->IsMultisite() ) {
-				$columns = array_slice( $columns, 0, 5, true ) + array(
-					'site' => '0',
-				) + array_slice( $columns, 5, null, true );
+				$columns = array_slice( $columns, 0, 6, true ) + array( 'site' => '0' ) + array_slice( $columns, 6, null, true );
 			}
+
 			$selected = (array) json_decode( $selected );
 			$columns  = array_merge( $columns, $selected );
-			return $columns;
-		} else {
-			return $columns;
 		}
+
+		return $columns;
 	}
 
 	public function GetColumnsSelected() {
@@ -1643,31 +1655,36 @@ class WSAL_Settings {
 			case '%RevisionLink%' === $name:
 				$check_value = (string) $value;
 				if ( 'NULL' !== $check_value ) {
-					return ' Click <a target="_blank" href="' . esc_url( $value ) . '">here</a> to see the content changes.';
-				} else {
-					return false;
+					return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View the content changes', 'wp-security-audit-log' ) . '</a>';
 				}
+				return false;
 
-			case '%EditorLinkPost%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">post</a>';
+			case in_array( $name, array( '%EditorLinkPost%', '%EditorLinkProduct%', '%EditorLinkCoupon%' ) ):
+				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View post in the editor', 'wp-security-audit-log' ) . '</a>';
 
 			case '%EditorLinkOrder%' == $name:
 				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View Order', 'wp-security-audit-log' ) . '</a>';
 
 			case '%EditorLinkPage%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">page</a>';
+				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View post in the editor', 'wp-security-audit-log' ) . '</a>';
 
 			case '%CategoryLink%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">category</a>';
+				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View category', 'wp-security-audit-log' ) . '</a>';
 
 			case '%TagLink%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">tag</a>';
+				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View tag', 'wp-security-audit-log' ) . '</a>';
 
 			case '%EditorLinkForum%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">forum</a>';
+				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View the Forum in editor', 'wp-security-audit-log' ) . '</a>';
 
 			case '%EditorLinkTopic%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">topic</a>';
+				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View the Topic in editor', 'wp-security-audit-log' ) . '</a>';
+
+			case '%EditUserLink%' === $name:
+				if ( 'NULL' !== $value ) {
+					return '<a href="' . $value . '" target="_blank">' . __( 'User profile page', 'wp-security-audit-log' ) . '</a>';
+				}
+				return '';
 
 			case in_array( $name, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ) ):
 				return $highlight_start_tag . (
@@ -1697,6 +1714,23 @@ class WSAL_Settings {
 					return ' or <a href="javascript:;" data-exclude-url="' . esc_url( $value ) . '" data-exclude-url-nonce="' . wp_create_nonce( 'wsal-exclude-url-' . $value ) . '" onclick="wsal_exclude_url( this )">exclude this URL</a> from being reported.';
 				}
 				return '';
+
+			case '%PostUrlIfPlublished%' === $name:
+				// get connection.
+				$db_config = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
+				$connector = $this->_plugin->getConnector( $db_config ); // Get connector for DB.
+				$wsal_db   = $connector->getConnection(); // Get DB connection.
+				// get values needed.
+				$meta_adapter = new WSAL_Adapters_MySQL_Meta( $wsal_db );
+				$post_id      = $meta_adapter->LoadByNameAndOccurenceId( 'PostID', $occ_id );
+				$occ_post     = ( isset( $post_id['value'] ) ) ? get_post( $post_id['value'] ) : null;
+				// start with an empty string.
+				$return_value = '';
+				if ( null !== $occ_post && 'publish' === $occ_post->post_status ) {
+					$post_permalink = get_permalink( $occ_post->ID );
+					$return_value   = '<br>URL: <a href="' . esc_url( $post_permalink ) . '" title="' . esc_attr( $occ_post->post_title ) . '" target="_blank">' . esc_html( $post_permalink ) . '</a>';
+				}
+				return $return_value;
 
 			case '%LogFileLink%' === $name: // Failed login file link.
 				return '';
@@ -1737,20 +1771,7 @@ class WSAL_Settings {
 				return;
 
 			case '%ChangeText%' === $name:
-				if ( $occ_id ) {
-					$url_args = array(
-						'action'     => 'AjaxInspector',
-						'occurrence' => $occ_id,
-						'TB_iframe'  => 'true',
-						'width'      => 600,
-						'height'     => 550,
-					);
-					$url      = add_query_arg( $url_args, admin_url( 'admin-ajax.php' ) );
-					return ' View the changes in <a class="thickbox"  title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
-					. ' href="' . $url . '">data inspector.</a>';
-				} else {
-					return;
-				}
+				return;
 
 			case '%ScanError%' === $name:
 				if ( 'NULL' === $value ) {
@@ -1769,10 +1790,16 @@ class WSAL_Settings {
 					'tab'  => 'file-changes',
 				);
 				$file_settings      = add_query_arg( $file_settings_args, admin_url( 'admin.php' ) );
-				return '<a href="' . esc_url( $file_settings ) . '">' . esc_html__( 'plugin settings', 'wp-security-audit-log' ) . '</a>';
+				return '<a href="' . esc_url( $file_settings ) . '">' . esc_html__( 'Increase maximum file size limit', 'wp-security-audit-log' ) . '</a>';
 
 			case '%ContactSupport%' === $name:
-				return '<a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">' . esc_html__( 'contact our support', 'wp-security-audit-log' ) . '</a>';
+				return '<a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">' . esc_html__( 'Contact Support', 'wp-security-audit-log' ) . '</a>';
+
+			case '%LineBreak%' === $name:
+				return '<br>';
+
+			case '%PluginFile%' === $name:
+				return $highlight_start_tag . dirname( $value ) . $highlight_end_tag;
 
 			default:
 				return $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
@@ -2006,6 +2033,9 @@ class WSAL_Settings {
 
 			case '%ContactSupport%' === $name:
 				return '<https://www.wpsecurityauditlog.com/contact|' . esc_html__( 'contact our support', 'wp-security-audit-log' ) . '>';
+
+			case '%LineBreak%' === $name:
+				return;
 
 			default:
 				return '*' . esc_html( $value ) . '*';

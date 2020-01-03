@@ -259,7 +259,7 @@ final class WSAL_AlertManager {
 		}
 
 		// Get current user roles.
-		if ( isset( $old_user ) ) {
+		if ( isset( $old_user ) && ! false === $old_user ) {
 			// looks like this is a switched user so setup original user
 			// roles and values for later user.
 			$roles = $old_user->roles;
@@ -412,13 +412,15 @@ final class WSAL_AlertManager {
 	public function Register( $info ) {
 		if ( func_num_args() === 1 ) {
 			// Handle single item.
-			list( $type, $code, $catg, $subcatg, $desc, $mesg ) = $info;
+			list( $type, $code, $catg, $subcatg, $desc, $mesg, $object, $event_type ) = $info;
+
 			if ( isset( $this->_alerts[ $type ] ) ) {
 				add_action( 'admin_notices', array( $this, 'duplicate_event_notice' ) );
 				/* Translators: Event ID */
 				throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Security Audit Log.', 'wp-security-audit-log' ), $type ) );
 			}
-			$this->_alerts[ $type ] = new WSAL_Alert( $type, $code, $catg, $subcatg, $desc, $mesg );
+
+			$this->_alerts[ $type ] = new WSAL_Alert( $type, $code, $catg, $subcatg, $desc, $mesg, $object, $event_type );
 		} else {
 			// Handle multiple items.
 			foreach ( func_get_args() as $arg ) {
@@ -437,8 +439,16 @@ final class WSAL_AlertManager {
 		foreach ( $groups as $name => $group ) {
 			foreach ( $group as $subname => $subgroup ) {
 				foreach ( $subgroup as $item ) {
-					list($type, $code, $desc, $mesg) = $item;
-					$this->Register( array( $type, $code, $name, $subname, $desc, $mesg ) );
+					if ( ! isset( $item[4] ) ) {
+						$item[4] = ''; // Set default event object.
+					}
+
+					if ( ! isset( $item[5] ) ) {
+						$item[5] = ''; // Set default event type.
+					}
+
+					list( $type, $code, $desc, $mesg, $object, $event_type ) = $item;
+					$this->Register( array( $type, $code, $name, $subname, $desc, $mesg, $object, $event_type ) );
 				}
 			}
 		}
@@ -567,6 +577,29 @@ final class WSAL_AlertManager {
 			$event_data['Severity'] = 4;
 		} elseif ( 'E_NOTICE' === $severity->name ) {
 			$event_data['Severity'] = 5;
+		} elseif ( 'WSAL_CRITICAL' === $severity->name ) {
+			$event_data['Severity'] = 1;
+		} elseif ( 'WSAL_HIGH' === $severity->name ) {
+			$event_data['Severity'] = 6;
+		} elseif ( 'WSAL_MEDIUM' === $severity->name ) {
+			$event_data['Severity'] = 10;
+		} elseif ( 'WSAL_LOW' === $severity->name ) {
+			$event_data['Severity'] = 15;
+		} elseif ( 'WSAL_INFORMATIONAL' === $severity->name ) {
+			$event_data['Severity'] = 20;
+		} else {
+			// assuming this is a missclasified item and using info code.
+			$code = 20;
+		}
+
+		// Add event object.
+		if ( $alert_obj && ! isset( $event_data['Object'] ) ) {
+			$event_data['Object'] = $alert_obj->object;
+		}
+
+		// Add event type.
+		if ( $alert_obj && ! isset( $event_data['EventType'] ) ) {
+			$event_data['EventType'] = $alert_obj->event_type;
 		}
 
 		/**
@@ -1019,6 +1052,279 @@ final class WSAL_AlertManager {
 		 * @param array $public_events - Array of public event ids.
 		 */
 		return apply_filters( 'wsal_public_event_ids', array( 1000, 1002, 1003, 1004, 1005, 1007, 2126, 4000, 4012, 6023 ) ); // Public events.
+	}
+
+	/**
+	 * Get event objects.
+	 *
+	 * @return array
+	 */
+	public function get_event_objects_data() {
+		$objects = array(
+			'user'                => __( 'User', 'wp-security-audit-log' ),
+			'system'              => __( 'System', 'wp-security-audit-log' ),
+			'plugin'              => __( 'Plugin', 'wp-security-audit-log' ),
+			'database'            => __( 'Database', 'wp-security-audit-log' ),
+			'post'                => __( 'Post', 'wp-security-audit-log' ),
+			'file'                => __( 'File', 'wp-security-audit-log' ),
+			'tag'                 => __( 'Tag', 'wp-security-audit-log' ),
+			'comment'             => __( 'Comment', 'wp-security-audit-log' ),
+			'setting'             => __( 'Setting', 'wp-security-audit-log' ),
+			'file'                => __( 'File', 'wp-security-audit-log' ),
+			'system-setting'      => __( 'System Setting', 'wp-security-audit-log' ),
+			'bbpress'             => __( 'BBPress', 'wp-security-audit-log' ),
+			'bbpress-forum'       => __( 'BBPress Forum', 'wp-security-audit-log' ),
+			'woocommerce-product' => __( 'WooCommerce Product', 'wp-security-audit-log' ),
+			'woocommerce-store'   => __( 'WooCommerce Store', 'wp-security-audit-log' ),
+			'mainwp-network'      => __( 'MainWP Network', 'wp-security-audit-log' ),
+			'mainwp'              => __( 'MainWP', 'wp-security-audit-log' ),
+			'yoast-seo'           => __( 'Yoast SEO', 'wp-security-audit-log' ),
+			'category'            => __( 'Category', 'wp-security-audit-log' ),
+			'custom-field'        => __( 'Custom Field', 'wp-security-audit-log' ),
+			'widget'              => __( 'Widget', 'wp-security-audit-log' ),
+			'menu'                => __( 'Menu', 'wp-security-audit-log' ),
+			'theme'               => __( 'Theme', 'wp-security-audit-log' ),
+			'activity-logs'       => __( 'Activity Logs', 'wp-security-audit-log' ),
+			'multisite-network'   => __( 'Multisite Network', 'wp-security-audit-log' ),
+			'ip-address'          => __( 'IP Address', 'wp-security-audit-log' ),
+		);
+		asort( $objects );
+		return apply_filters(
+			'wsal_event_objects',
+			$objects
+		);
+	}
+
+	/**
+	 * Returns the text to display for object.
+	 *
+	 * @param string $object - Object.
+	 * @return string
+	 */
+	public function get_display_object_text( $object ) {
+		$display = '';
+
+		switch ( $object ) {
+			case 'user':
+				$display = __( 'User', 'wp-security-audit-log' );
+				break;
+			case 'system':
+				$display = __( 'System', 'wp-security-audit-log' );
+				break;
+			case 'plugin':
+				$display = __( 'Plugin', 'wp-security-audit-log' );
+				break;
+			case 'database':
+				$display = __( 'Database', 'wp-security-audit-log' );
+				break;
+			case 'post':
+				$display = __( 'Post', 'wp-security-audit-log' );
+				break;
+			case 'file':
+				$display = __( 'File', 'wp-security-audit-log' );
+				break;
+			case 'tag':
+				$display = __( 'Tag', 'wp-security-audit-log' );
+				break;
+			case 'comment':
+				$display = __( 'Comment', 'wp-security-audit-log' );
+				break;
+			case 'setting':
+				$display = __( 'Setting', 'wp-security-audit-log' );
+				break;
+			case 'file':
+				$display = __( 'File', 'wp-security-audit-log' );
+				break;
+			case 'system-setting':
+				$display = __( 'System Setting', 'wp-security-audit-log' );
+				break;
+			case 'bbpress':
+				$display = __( 'BBPress', 'wp-security-audit-log' );
+				break;
+			case 'bbpress-forum':
+				$display = __( 'BBPress Forum', 'wp-security-audit-log' );
+				break;
+			case 'woocommerce-product':
+				$display = __( 'WooCommerce Product', 'wp-security-audit-log' );
+				break;
+			case 'woocommerce-store':
+				$display = __( 'WooCommerce Store', 'wp-security-audit-log' );
+				break;
+			case 'mainwp-network':
+				$display = __( 'MainWP Network', 'wp-security-audit-log' );
+				break;
+			case 'mainwp':
+				$display = __( 'MainWP', 'wp-security-audit-log' );
+				break;
+			case 'yoast-seo':
+				$display = __( 'Yoast SEO', 'wp-security-audit-log' );
+				break;
+			case 'category':
+				$display = __( 'Category', 'wp-security-audit-log' );
+				break;
+			case 'custom-field':
+				$display = __( 'Custom Field', 'wp-security-audit-log' );
+				break;
+			case 'widget':
+				$display = __( 'Widget', 'wp-security-audit-log' );
+				break;
+			case 'menu':
+				$display = __( 'Menu', 'wp-security-audit-log' );
+				break;
+			case 'theme':
+				$display = __( 'Theme', 'wp-security-audit-log' );
+				break;
+			case 'activity-logs':
+				$display = __( 'Activity Logs', 'wp-security-audit-log' );
+				break;
+			case 'multisite-network':
+				$display = __( 'Multisite Network', 'wp-security-audit-log' );
+				break;
+			case 'ip-address':
+				$display = __( 'IP Address', 'wp-security-audit-log' );
+				break;
+			default:
+				break;
+		}
+
+		return $display;
+	}
+
+	/**
+	 * Get event type data.
+	 *
+	 * @return array
+	 */
+	public function get_event_type_data() {
+		$types = array(
+			'login'        => __( 'Login', 'wp-security-audit-log' ),
+			'logout'       => __( 'Logout', 'wp-security-audit-log' ),
+			'installed'    => __( 'Installed', 'wp-security-audit-log' ),
+			'activated'    => __( 'Activated', 'wp-security-audit-log' ),
+			'deactivated'  => __( 'Deactivated', 'wp-security-audit-log' ),
+			'uninstalled'  => __( 'Uninstalled', 'wp-security-audit-log' ),
+			'updated'      => __( 'Updated', 'wp-security-audit-log' ),
+			'created'      => __( 'Created', 'wp-security-audit-log' ),
+			'modified'     => __( 'Modified', 'wp-security-audit-log' ),
+			'deleted'      => __( 'Deleted', 'wp-security-audit-log' ),
+			'published'    => __( 'Published', 'wp-security-audit-log' ),
+			'approved'     => __( 'Approved', 'wp-security-audit-log' ),
+			'unapproved'   => __( 'Unapproved', 'wp-security-audit-log' ),
+			'enabled'      => __( 'Enabled', 'wp-security-audit-log' ),
+			'disabled'     => __( 'Disabled', 'wp-security-audit-log' ),
+			'added'        => __( 'Added', 'wp-security-audit-log' ),
+			'failed-login' => __( 'Failed Login', 'wp-security-audit-log' ),
+			'blocked'      => __( 'Blocked', 'wp-security-audit-log' ),
+			'uploaded'     => __( 'Uploaded', 'wp-security-audit-log' ),
+			'restored'     => __( 'Restored', 'wp-security-audit-log' ),
+			'opened'       => __( 'Opened', 'wp-security-audit-log' ),
+			'viewed'       => __( 'Viewed', 'wp-security-audit-log' ),
+			'started'      => __( 'Started', 'wp-security-audit-log' ),
+			'stopped'      => __( 'Stopped', 'wp-security-audit-log' ),
+			'removed'      => __( 'Removed', 'wp-security-audit-log' ),
+			'unblocked'    => __( 'Unblocked', 'wp-security-audit-log' ),
+		);
+		// sort the types alphabetically.
+		asort( $types );
+		return apply_filters(
+			'wsal_event_type_data',
+			$types
+		);
+	}
+
+	/**
+	 * Returns the text to display for event type.
+	 *
+	 * @param string $event_type - Event type.
+	 * @return string
+	 */
+	public function get_display_event_type_text( $event_type ) {
+		$display = '';
+
+		switch ( $event_type ) {
+			case 'login':
+				$display = __( 'Login', 'wp-security-audit-log' );
+				break;
+			case 'logout':
+				$display = __( 'Logout', 'wp-security-audit-log' );
+				break;
+			case 'installed':
+				$display = __( 'Installed', 'wp-security-audit-log' );
+				break;
+			case 'activated':
+				$display = __( 'Activated', 'wp-security-audit-log' );
+				break;
+			case 'deactivated':
+				$display = __( 'Deactivated', 'wp-security-audit-log' );
+				break;
+			case 'uninstalled':
+				$display = __( 'Uninstalled', 'wp-security-audit-log' );
+				break;
+			case 'updated':
+				$display = __( 'Updated', 'wp-security-audit-log' );
+				break;
+			case 'created':
+				$display = __( 'Created', 'wp-security-audit-log' );
+				break;
+			case 'modified':
+				$display = __( 'Modified', 'wp-security-audit-log' );
+				break;
+			case 'deleted':
+				$display = __( 'Deleted', 'wp-security-audit-log' );
+				break;
+			case 'published':
+				$display = __( 'Published', 'wp-security-audit-log' );
+				break;
+			case 'approved':
+				$display = __( 'Approved', 'wp-security-audit-log' );
+				break;
+			case 'unapproved':
+				$display = __( 'Unapproved', 'wp-security-audit-log' );
+				break;
+			case 'enabled':
+				$display = __( 'Enabled', 'wp-security-audit-log' );
+				break;
+			case 'disabled':
+				$display = __( 'Disabled', 'wp-security-audit-log' );
+				break;
+			case 'added':
+				$display = __( 'Added', 'wp-security-audit-log' );
+				break;
+			case 'failed-login':
+				$display = __( 'Failed Login', 'wp-security-audit-log' );
+				break;
+			case 'blocked':
+				$display = __( 'Blocked', 'wp-security-audit-log' );
+				break;
+			case 'uploaded':
+				$display = __( 'Uploaded', 'wp-security-audit-log' );
+				break;
+			case 'restored':
+				$display = __( 'Restored', 'wp-security-audit-log' );
+				break;
+			case 'opened':
+				$display = __( 'Opened', 'wp-security-audit-log' );
+				break;
+			case 'viewed':
+				$display = __( 'Viewed', 'wp-security-audit-log' );
+				break;
+			case 'started':
+				$display = __( 'Started', 'wp-security-audit-log' );
+				break;
+			case 'stopped':
+				$display = __( 'Stopped', 'wp-security-audit-log' );
+				break;
+			case 'removed':
+				$display = __( 'Removed', 'wp-security-audit-log' );
+				break;
+			case 'unblocked':
+				$display = __( 'Unblocked', 'wp-security-audit-log' );
+				break;
+			default:
+				break;
+		}
+
+		return $display;
 	}
 
 	/**

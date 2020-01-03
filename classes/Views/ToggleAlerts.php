@@ -187,7 +187,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$is_custom       = ! empty( $events_diff ) ? true : false; // If difference is not empty then mode is custom.
 		$log_details     = $this->_plugin->GetGlobalOption( 'details-level', false ); // Get log level option.
 
-		$subcat_alerts = array( 1004, 2010, 6007, 2111, 2119, 2016, 2053, 7000, 8009, 8014, 4013, 9007, 9047, 9027, 9002, 9057, 9063, 9035, 9083, 8809, 8813, 6000, 6001, 6028 );
+		$subcat_alerts   = array( 1004, 2010, 2111, 9007, 9047 );
+		$obsolete_events = array( 9999, 2126, 6023, 9011, 9070, 9075 );
 		?>
 		<p>
 			<form method="post" id="wsal-alerts-level">
@@ -218,7 +219,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		<h2 id="wsal-tabs" class="nav-tab-wrapper">
 			<?php foreach ( $safe_names as $name => $safe ) : ?>
 				<a href="#tab-<?php echo esc_attr( $safe ); ?>" class="nav-tab"><?php echo esc_html( $name ); ?></a>
-				<?php if ( __( 'Third Party Plugins', 'wp-security-audit-log' ) === $name ) : ?>
+				<?php if ( __( 'Yoast SEO', 'wp-security-audit-log' ) === $name ) : ?>
 					<a href="#tab-frontend-events" class="nav-tab">
 						<?php esc_html_e( 'Front-end Events', 'wp-security-audit-log' ); ?>
 					</a>
@@ -255,7 +256,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								if ( $alert->type <= 0006 ) {
 									continue; // <- Ignore php alerts.
 								}
-								if ( 9999 === $alert->type ) {
+								if ( in_array( $alert->type, $obsolete_events, true ) ) {
 									continue; // <- Ignore promo alerts.
 								}
 								$active[ $alert->type ] = $this->_plugin->alerts->IsEnabled( $alert->type );
@@ -271,36 +272,49 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 							if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
 								continue;
 							} elseif (
-								__( 'BBPress Forum', 'wp-security-audit-log' ) === $subname
-								|| __( 'WooCommerce', 'wp-security-audit-log' ) === $subname
-								|| __( 'WooCommerce Products', 'wp-security-audit-log' ) === $subname
-								|| __( 'Yoast SEO', 'wp-security-audit-log' ) === $subname
-								|| __( 'MultiSite', 'wp-security-audit-log' ) === $subname
+								'bbPress Forums' === $name
+								|| 'WooCommerce' === $name
+								|| 'Yoast SEO' === $name
+								|| 'Multisite Network Sites' === $name
+								|| 'User Accounts' === $name
 							) {
-								switch ( $subname ) {
-									case __( 'BBPress Forum', 'wp-security-audit-log' ):
+								switch ( $name ) {
+									case 'User Accounts':
+										if ( 'Multisite User Profiles' === $subname ) {
+											// Check if this is a multisite.
+											if ( ! is_multisite() ) {
+												$disabled = 'disabled';
+											}
+										} elseif ( 'bbPress User Profiles' === $subname ) {
+											// Check if BBPress plugin exists.
+											if ( ! WpSecurityAuditLog::is_bbpress_active() ) {
+												$disabled = 'disabled';
+											}
+										}
+										break;
+									case 'bbPress Forums':
 										// Check if BBPress plugin exists.
 										if ( ! WpSecurityAuditLog::is_bbpress_active() ) {
 											$disabled = 'disabled';
 										}
 										break;
 
-									case __( 'WooCommerce', 'wp-security-audit-log' ):
-									case __( 'WooCommerce Products', 'wp-security-audit-log' ):
+									case 'WooCommerce':
+									case 'WooCommerce Products':
 										// Check if WooCommerce plugin exists.
 										if ( ! WpSecurityAuditLog::is_woocommerce_active() ) {
 											$disabled = 'disabled';
 										}
 										break;
 
-									case __( 'Yoast SEO', 'wp-security-audit-log' ):
+									case 'Yoast SEO':
 										// Check if Yoast SEO plugin exists.
 										if ( ! WpSecurityAuditLog::is_wpseo_active() ) {
 											$disabled = 'disabled';
 										}
 										break;
 
-									case __( 'MultiSite', 'wp-security-audit-log' ):
+									case 'Multisite Network Sites':
 										// Disable if not multisite.
 										if ( ! is_multisite() ) {
 											$disabled = 'disabled';
@@ -377,11 +391,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												</td>
 											</tr>
 										<?php endif; ?>
-										<tr>
-											<td colspan="4">
-												<h3 class="sub-category"><?php esc_html_e( 'User Profiles', 'wp-security-audit-log' ); ?></h3>
-											</td>
-										</tr>
 									<?php elseif ( __( 'Other User Activity', 'wp-security-audit-log' ) === $subname ) : ?>
 										<tr>
 											<td colspan="4">
@@ -397,7 +406,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											continue; // <- Ignore php alerts.
 										}
 
-										if ( in_array( $alert->type, array( 9999, 2126, 6023 ), true ) ) {
+										if ( in_array( $alert->type, $obsolete_events, true ) ) {
 											continue; // <- Ignore promo alerts.
 										}
 
@@ -420,50 +429,12 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 															esc_html_e( 'User Sessions', 'wp-security-audit-log' );
 														} elseif ( 2010 === $alert->type ) {
 															esc_html_e( 'Files', 'wp-security-audit-log' );
-														} elseif ( 6007 === $alert->type ) {
-															esc_html_e( 'System', 'wp-security-audit-log' );
 														} elseif ( 2111 === $alert->type ) {
 															esc_html_e( 'Post Settings', 'wp-security-audit-log' );
-														} elseif ( 2119 === $alert->type ) {
-															esc_html_e( 'Tags', 'wp-security-audit-log' );
-														} elseif ( 2016 === $alert->type ) {
-															esc_html_e( 'Categories', 'wp-security-audit-log' );
-														} elseif ( 2053 === $alert->type ) {
-															esc_html_e( 'Custom Fields', 'wp-security-audit-log' );
-														} elseif ( 7000 === $alert->type ) {
-															esc_html_e( 'Sites', 'wp-security-audit-log' );
-														} elseif ( 8009 === $alert->type ) {
-															esc_html_e( 'Settings', 'wp-security-audit-log' );
-														} elseif ( 8014 === $alert->type ) {
-															esc_html_e( 'Topics', 'wp-security-audit-log' );
-														} elseif ( 4013 === $alert->type ) {
-															esc_html_e( 'User Profile', 'wp-security-audit-log' );
 														} elseif ( 9007 === $alert->type ) {
 															esc_html_e( 'Product Admin', 'wp-security-audit-log' );
 														} elseif ( 9047 === $alert->type ) {
-															esc_html_e( 'Product Attribute', 'wp-security-audit-log' );
-														} elseif ( 9027 === $alert->type ) {
-															esc_html_e( 'Store Admin', 'wp-security-audit-log' );
-														} elseif ( 9002 === $alert->type ) {
-															esc_html_e( 'Categories', 'wp-security-audit-log' );
-														} elseif ( 9057 === $alert->type ) {
-															esc_html_e( 'Attributes', 'wp-security-audit-log' );
-														} elseif ( 9063 === $alert->type ) {
-															esc_html_e( 'Coupons', 'wp-security-audit-log' );
-														} elseif ( 9035 === $alert->type ) {
-															esc_html_e( 'Orders', 'wp-security-audit-log' );
-														} elseif ( 9083 === $alert->type ) {
-															esc_html_e( 'User Profile', 'wp-security-audit-log' );
-														} elseif ( 8809 === $alert->type ) {
-															esc_html_e( 'Website Changes', 'wp-security-audit-log' );
-														} elseif ( 8813 === $alert->type ) {
-															esc_html_e( 'Plugin Settings', 'wp-security-audit-log' );
-														} elseif ( 6000 === $alert->type ) {
-															esc_html_e( 'System', 'wp-security-audit-log' );
-														} elseif ( 6001 === $alert->type ) {
-															esc_html_e( 'Settings', 'wp-security-audit-log' );
-														} elseif ( 6028 === $alert->type ) {
-															esc_html_e( 'File Changes Scanning', 'wp-security-audit-log' );
+															esc_html_e( 'Product Attributes', 'wp-security-audit-log' );
 														}
 														?>
 													</h3>
@@ -498,6 +469,16 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													esc_html_e( 'Warning', 'wp-security-audit-log' );
 												} elseif ( 'E_NOTICE' === $severity_obj->name ) {
 													esc_html_e( 'Notification', 'wp-security-audit-log' );
+												} elseif ( 'WSAL_CRITICAL' === $severity_obj->name ) {
+													esc_html_e( 'Critical', 'wp-security-audit-log' );
+												} elseif ( 'WSAL_HIGH' === $severity_obj->name ) {
+													esc_html_e( 'High', 'wp-security-audit-log' );
+												} elseif ( 'WSAL_MEDIUM' === $severity_obj->name ) {
+													esc_html_e( 'Medium', 'wp-security-audit-log' );
+												} elseif ( 'WSAL_LOW' === $severity_obj->name ) {
+													esc_html_e( 'Low', 'wp-security-audit-log' );
+												} elseif ( 'WSAL_INFORMATIONAL' === $severity_obj->name ) {
+													esc_html_e( 'Informational', 'wp-security-audit-log' );
 												} else {
 													esc_html_e( 'Notification', 'wp-security-audit-log' );
 												}

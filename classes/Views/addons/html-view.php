@@ -9,14 +9,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+$utm_params = array(
+	'utm_source'   => 'plugin',
+	'utm_medium'   => 'referral',
+	'utm_campaign' => 'WSAL',
+);
+switch ( $this->hook_suffix ) {
+	case 'audit-log_page_wsal-loginusers':
+		$utm_params['utm_content'] = 'users+sessions';
+		break;
+	case 'audit-log_page_wsal-reports':
+		$utm_params['utm_content'] = 'reports';
+		break;
+	case 'audit-log_page_wsal-emailnotifications':
+		$utm_params['utm_content'] = 'notifications';
+		break;
+	case 'audit-log_page_wsal-externaldb':
+		$utm_params['utm_content'] = 'db+integrations';
+		break;
+	case 'audit-log_page_wsal-search':
+		$utm_params['utm_content'] = 'search';
+		break;
+}
 // Links.
 $more_info = add_query_arg(
-	array(
-		'utm_source'   => 'plugin',
-		'utm_medium'   => 'page',
-		'utm_content'  => 'users+sessions+more+info',
-		'utm_campaign' => 'upgrade+premium',
-	),
+	$utm_params,
 	'https://www.wpsecurityauditlog.com/premium-features/'
 );
 

@@ -480,7 +480,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 */
 	private function tab_general() {
 		?>
-		<p class="description"><?php echo wp_kses( __( 'Need help with setting up the plugin to meet your requirements? <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">Schedule a 20 minutes consultation and setup call</a> with our experts for just $50.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
+		<p class="description"><?php echo wp_kses( __( 'Need help with setting up the plugin to meet your requirements? <a href="https://www.wpsecurityauditlog.com/contact/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">Schedule a 20 minutes consultation and setup call</a> with our experts for just $50.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
 
 		<h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
@@ -488,7 +488,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			echo sprintf(
 				/* translators: Learn more link. */
 				esc_html__( 'When using infinite scroll the event viewer and search results %s load up much faster and require less resources.', 'wp-security-audit-log' ),
-				'<a href="https://www.wpsecurityauditlog.com/premium-features/search-filters-wordpress-activity-log/" target="_blank">' . esc_html__( '(Premium feature)', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://www.wpsecurityauditlog.com/premium-features/search-filters-wordpress-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . esc_html__( '(Premium feature)', 'wp-security-audit-log' ) . '</a>'
 			);
 			?>
 		</p>
@@ -631,7 +631,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- Dashboard Widget -->
 
 		<h3><?php esc_html_e( 'Add user notification on the WordPress login page', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'Many compliance regulations (such as the GDRP) require website administrators to tell the users of their website that all the changes they do when logged in are being logged.', 'wp-security-audit-log' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Many compliance regulations (such as the GDPR) require website administrators to tell the users of their website that all the changes they do when logged in are being logged.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -660,7 +660,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<?php
 							// Get login page notification text.
 							$wsal_lpn_text         = $this->_plugin->settings->get_login_page_notification_text();
-							$wsal_lpn_text_default = __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/" target="_blank">WP Security Audit Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' );
+							$wsal_lpn_text_default = __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">WP Security Audit Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' );
 
 							// Allowed HTML tags for this setting.
 							$allowed_tags = array(
@@ -700,7 +700,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			echo sprintf(
 				/* translators: Learn more link. */
 				esc_html__( 'If your website is running behind a firewall set this option to yes so the plugin retrieves the end user’s IP address from the proxy header - %s.', 'wp-security-audit-log' ),
-				'<a href="https://www.wpsecurityauditlog.com/support-documentation/support-reverse-proxies-web-application-firewalls/" target="_blank">' . esc_html__( 'learn more', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://www.wpsecurityauditlog.com/support-documentation/support-reverse-proxies-web-application-firewalls/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . esc_html__( 'learn more', 'wp-security-audit-log' ) . '</a>'
 			);
 			?>
 		</p>
@@ -746,7 +746,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			sprintf(
 				/* translators: Learn more link. */
 				esc_html__( 'By default only users with administrator or super administrator (multisite) roles can change the settings of the plugin. Though you can change these privileges from this section - %s.', 'wp-security-audit-log' ),
-				'<a href="https://www.wpsecurityauditlog.com/support-documentation/managing-wordpress-activity-log-plugin-privileges/" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://www.wpsecurityauditlog.com/support-documentation/managing-wordpress-activity-log-plugin-privileges/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
 			),
 			$allowed_tags
 		);
@@ -822,7 +822,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			sprintf(
 				/* translators: Learn more link. */
 				esc_html__( 'By default only users with administrator and super administrator (multisite) role can view the WordPress activity log. Though you can allow other users with no admin role to view the events - %s.', 'wp-security-audit-log' ),
-				'<a href="https://www.wpsecurityauditlog.com/support-documentation/can-allow-users-access-audit-trail/" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://www.wpsecurityauditlog.com/support-documentation/can-allow-users-access-audit-trail/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
 			),
 			$allowed_tags
 		);
@@ -990,7 +990,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<p class="description">
 			<?php
 			esc_html_e( 'The plugin uses an efficient way to store the activity log data in the WordPress database, though the more data you keep the more disk space will be required. ', 'wp-security-audit-log' );
-			$retention_help_text = __( '<a href="https://www.wpsecurityauditlog.com/pricing/" target="_blank">Upgrade to Premium</a> to store the activity log data in an external database.', 'wp-security-audit-log' );
+			$retention_help_text = __( '<a href="https://www.wpsecurityauditlog.com/pricing/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">Upgrade to Premium</a> to store the activity log data in an external database.', 'wp-security-audit-log' );
 
 			if ( wsal_freemius()->is__premium_only() ) {
 				// If premium version then remove this message.
@@ -1124,23 +1124,23 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				</tr>
 				<!-- Alerts Timestamp -->
 				<tr>
-					<th><?php esc_html_e( 'Show Microseconds', 'wp-security-audit-log' ); ?></th>
+					<th><?php esc_html_e( 'Show Milliseconds', 'wp-security-audit-log' ); ?></th>
 					<td>
 						<fieldset>
 							<?php
-							$show_microseconds = $this->_plugin->settings->get_show_microseconds();
+							$show_milliseconds = $this->_plugin->settings->get_show_milliseconds();
 
 							/**
 							 * Transform microsecond values incase of bool.
 							 */
-							if ( 'no' !== $show_microseconds ) {
-								$show_microseconds = 'yes';
+							if ( 'no' !== $show_milliseconds ) {
+								$show_milliseconds = 'yes';
 							}
 							?>
-							<label for="show_microseconds">
-								<input type="checkbox" name="show_microseconds" id="show_microseconds" style="margin-top: -2px;"
-									<?php checked( $show_microseconds, 'yes' ); ?> value="yes">
-								<?php esc_html_e( 'Show Microseconds in list view', 'wp-security-audit-log' ); ?>
+							<label for="show_milliseconds">
+								<input type="checkbox" name="show_milliseconds" id="show_milliseconds" style="margin-top: -2px;"
+									<?php checked( $show_milliseconds, 'yes' ); ?> value="yes">
+								<?php esc_html_e( 'Show Milliseconds in list view', 'wp-security-audit-log' ); ?>
 							</label>
 						</fieldset>
 					</td>
@@ -1182,7 +1182,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- User Information -->
 
 		<h3><?php esc_html_e( 'Select the columns to be displayed in the WordPress activity log', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'When you deselect a column it won’t be shown in the activity log viewer but the data will still be recorded by the plugin, so when you select it again all the data will be displayed.', 'wp-security-audit-log' ); ?></p>
+		<p class="description"><?php esc_html_e( 'When you deselect a column it won’t be shown in the activity log viewer in both views. The data will still be recorded by the plugin.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
@@ -1204,6 +1204,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 										<span><?php esc_html_e( 'User', 'wp-security-audit-log' ); ?></span>
 									<?php elseif ( 'source_ip' === $key ) : ?>
 										<span><?php esc_html_e( 'Source IP Address', 'wp-security-audit-log' ); ?></span>
+									<?php elseif ( 'info' === $key ) : ?>
+										<span><?php esc_html_e( 'Info (used in Grid view mode only)', 'wp-security-audit-log' ); ?></span>
 									<?php else : ?>
 										<span><?php echo esc_html( ucwords( str_replace( '_', ' ', $key ) ) ); ?></span>
 									<?php endif; ?>
@@ -1268,8 +1270,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		if ( ! empty( $post_array['Columns'] ) ) {
 			$this->_plugin->settings->SetColumns( $post_array['Columns'] );
 		}
-		$show_microseconds = ( isset( $post_array['show_microseconds'] ) && 'yes' === $post_array['show_microseconds'] ) ? true : false;
-		$this->_plugin->settings->set_show_microseconds( $show_microseconds );
+		$show_milliseconds = ( isset( $post_array['show_milliseconds'] ) && 'yes' === $post_array['show_milliseconds'] ) ? true : false;
+		$this->_plugin->settings->set_show_milliseconds( $show_milliseconds );
 	}
 
 	/**
@@ -1281,7 +1283,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		?>
 		<p class="description">
 			<?php esc_html_e( 'The plugin runs file integrity scans on your website so it keeps a log when a file is added, modified or deleted. All the settings for the file integrity scans can be found in this page.', 'wp-security-audit-log' ); ?>
-			<?php echo wp_kses( __( '<a href="https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/" target="_blank">Refer to the WordPress file integrity scans feature page</a> for more information.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
+			<?php echo wp_kses( __( '<a href="https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">Refer to the WordPress file integrity scans feature page</a> for more information.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
 		</p>
 
 		<h3><?php esc_html_e( 'Do you want the plugin to scan your website for file changes?', 'wp-security-audit-log' ); ?></h3>
@@ -2046,7 +2048,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		?>
 		<p class="description">
 			<?php esc_html_e( 'These settings are for advanced users.', 'wp-security-audit-log' ); ?>
-			<?php echo sprintf( __( 'If you have any questions <a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">contact us</a>.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
+			<?php echo sprintf( __( 'If you have any questions <a href="https://www.wpsecurityauditlog.com/contact/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">contact us</a>.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
 		</p>
 
 		<h3><?php esc_html_e( 'Troubleshooting setting: Keep a debug log of all the requests this website receives', 'wp-security-audit-log' ); ?></h3>
@@ -2688,6 +2690,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							array(
 								'CurrentUserID' => '0',
 								'ScanStatus'    => 'started',
+								'EventType'     => 'started',
 							)
 						);
 					} elseif ( 6 === $dir ) {
@@ -2697,6 +2700,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							array(
 								'CurrentUserID' => '0',
 								'ScanStatus'    => 'stopped',
+								'EventType'     => 'stopped',
 							)
 						);
 					}

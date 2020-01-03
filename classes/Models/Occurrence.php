@@ -208,6 +208,17 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	}
 
 	/**
+	 * Gets the actual alert event ID.
+	 *
+	 * @method get_alert_id
+	 * @since  4.0.0
+	 * @return int
+	 */
+	public function get_alert_id() {
+		return ( isset( $this->alert_id ) ) ? $this->alert_id : 0;
+	}
+
+	/**
 	 * Gets the username.
 	 *
 	 * @see WSAL_Adapters_MySQL_Occurrence::GetFirstNamedMeta()
@@ -284,7 +295,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	/**
 	 * Method: Get Microtime.
 	 *
-	 * @return float - Number of seconds (and microseconds as fraction) since unix Day 0.
+	 * @return float - Number of seconds (and milliseconds as fraction) since unix Day 0.
 	 * @todo This needs some caching.
 	 */
 	protected function GetMicrotime() {

@@ -127,7 +127,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 			}
 			if ( $is_sub_item && wp_verify_nonce( $post_array['update-nav-menu-nonce'], 'update-nav_menu' ) ) {
 				$item_parent_id = $args['menu-item-parent-id'];
-				$item_name = $old_menu_items[ $menu_item_db_id ]['title'];
+				$item_name      = $old_menu_items[ $menu_item_db_id ]['title'];
 				if ( $old_menu_items[ $menu_item_db_id ]['parent'] != $item_parent_id ) {
 					$parent_name = isset( $old_menu_items[ $item_parent_id ]['title'] ) ? $old_menu_items[ $item_parent_id ]['title'] : false;
 					$this->EventChangeSubItem( $item_name, $parent_name, $post_array['menu-name'] );
@@ -162,9 +162,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 */
 	public function CreateMenu( $term_id, $menu_data ) {
 		$this->plugin->alerts->Trigger(
-			2078, array(
-				'MenuName' => $menu_data['menu-name'],
-			)
+			2078,
+			array( 'MenuName' => $menu_data['menu-name'] )
 		);
 	}
 
@@ -221,7 +220,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	public function DeleteMenu( $term_id ) {
 		if ( $this->_old_menu ) {
 			$this->plugin->alerts->Trigger(
-				2081, array(
+				2081,
+				array(
 					'MenuName' => $this->_old_menu->name,
 				)
 			);
@@ -261,7 +261,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 						} else {
 							// Remove the last menu item.
 							// if ( count( $content_names_old ) == 1 && count( $content_types_old ) == 1 ) {
-							// 	$this->EventRemoveItems( $content_types_old[0], $content_names_old[0], $post_array['menu-name'] );
+							// $this->EventRemoveItems( $content_types_old[0], $content_names_old[0], $post_array['menu-name'] );
 							// }
 						}
 					}
@@ -270,7 +270,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 
 			// Enable/Disable menu setting.
 			$nav_menu_options = maybe_unserialize( get_option( 'nav_menu_options' ) );
-			$auto_add = null;
+			$auto_add         = null;
 			if ( isset( $nav_menu_options['auto_add'] ) ) {
 				if ( in_array( $menu_id, $nav_menu_options['auto_add'] ) ) {
 					if ( empty( $post_array['auto-add-pages'] ) ) {
@@ -344,7 +344,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 		if ( ! empty( $menus ) ) {
 			foreach ( $menus as $menu ) {
 				array_push(
-					$this->_old_menu_terms, array(
+					$this->_old_menu_terms,
+					array(
 						'term_id' => $menu->term_id,
 						'name'    => $menu->name,
 					)
@@ -353,7 +354,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 				if ( ! empty( $items ) ) {
 					foreach ( $items as $item ) {
 						array_push(
-							$this->_old_menu_items, array(
+							$this->_old_menu_items,
+							array(
 								'menu_id'          => $menu->term_id,
 								'item_id'          => $item->ID,
 								'title'            => $item->title,
@@ -414,7 +416,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 		if ( ! empty( $menus ) ) {
 			foreach ( $menus as $menu ) {
 				array_push(
-					$update_menus, array(
+					$update_menus,
+					array(
 						'term_id' => $menu->term_id,
 						'name'    => $menu->name,
 					)
@@ -430,7 +433,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 			if ( isset( $terms ) && count( $terms ) > 0 ) {
 				foreach ( $terms as $term ) {
 					$this->plugin->alerts->Trigger(
-						2081, array(
+						2081,
+						array(
 							'MenuName' => $term['name'],
 						)
 					);
@@ -539,7 +543,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 */
 	private function EventAddItems( $content_type, $content_name, $menu_name ) {
 		$this->plugin->alerts->Trigger(
-			2079, array(
+			2079,
+			array(
 				'ContentType' => 'custom' === $content_type ? 'custom link' : $content_type,
 				'ContentName' => $content_name,
 				'MenuName'    => $menu_name,
@@ -556,7 +561,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 */
 	private function EventRemoveItems( $content_type, $content_name, $menu_name ) {
 		$this->plugin->alerts->Trigger(
-			2080, array(
+			2080,
+			array(
 				'ContentType' => 'custom' === $content_type ? 'custom link' : $content_type,
 				'ContentName' => $content_name,
 				'MenuName'    => $menu_name,
@@ -572,9 +578,11 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 * @param string $menu_setting - Menu setting.
 	 */
 	private function EventMenuSetting( $menu_name, $status, $menu_setting ) {
+		$status = 'Enabled' === $status ? 'enabled' : 'disabled';
 		$this->plugin->alerts->Trigger(
-			2082, array(
-				'Status'      => $status,
+			2082,
+			array(
+				'EventType'   => $status,
 				'MenuSetting' => $menu_setting,
 				'MenuName'    => $menu_name,
 			)
@@ -590,7 +598,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 */
 	private function EventModifiedItems( $content_type, $content_name, $menu_name ) {
 		$this->plugin->alerts->Trigger(
-			2083, array(
+			2083,
+			array(
 				'ContentType' => 'custom' === $content_type ? 'custom link' : $content_type,
 				'ContentName' => $content_name,
 				'MenuName'    => $menu_name,
@@ -606,7 +615,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 */
 	private function EventChangeName( $old_menu_name, $new_menu_name ) {
 		$this->plugin->alerts->Trigger(
-			2084, array(
+			2084,
+			array(
 				'OldMenuName' => $old_menu_name,
 				'NewMenuName' => $new_menu_name,
 			)
@@ -621,7 +631,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 */
 	private function EventChangeOrder( $item_name, $menu_name ) {
 		$this->plugin->alerts->Trigger(
-			2085, array(
+			2085,
+			array(
 				'ItemName' => $item_name,
 				'MenuName' => $menu_name,
 			)
@@ -637,7 +648,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 */
 	private function EventChangeSubItem( $item_name, $parent_name, $menu_name ) {
 		$this->plugin->alerts->Trigger(
-			2089, array(
+			2089,
+			array(
 				'ItemName'   => $item_name,
 				'ParentName' => $parent_name,
 				'MenuName'   => $menu_name,

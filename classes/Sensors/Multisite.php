@@ -79,13 +79,14 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 			if ( ! in_array( $theme, (array) $this->old_allowedthemes ) ) {
 				$theme = wp_get_theme( $theme );
 				$this->plugin->alerts->Trigger(
-					5008, array(
+					5008,
+					array(
 						'Theme' => (object) array(
-							'Name' => $theme->Name,
-							'ThemeURI' => $theme->ThemeURI,
-							'Description' => $theme->Description,
-							'Author' => $theme->Author,
-							'Version' => $theme->Version,
+							'Name'                   => $theme->Name,
+							'ThemeURI'               => $theme->ThemeURI,
+							'Description'            => $theme->Description,
+							'Author'                 => $theme->Author,
+							'Version'                => $theme->Version,
 							'get_template_directory' => $theme->get_template_directory(),
 						),
 					)
@@ -98,13 +99,14 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 			if ( ! in_array( $theme, $new_allowedthemes ) ) {
 				$theme = wp_get_theme( $theme );
 				$this->plugin->alerts->Trigger(
-					5009, array(
+					5009,
+					array(
 						'Theme' => (object) array(
-							'Name' => $theme->Name,
-							'ThemeURI' => $theme->ThemeURI,
-							'Description' => $theme->Description,
-							'Author' => $theme->Author,
-							'Version' => $theme->Version,
+							'Name'                   => $theme->Name,
+							'ThemeURI'               => $theme->ThemeURI,
+							'Description'            => $theme->Description,
+							'Author'                 => $theme->Author,
+							'Version'                => $theme->Version,
 							'get_template_directory' => $theme->get_template_directory(),
 						),
 					)
@@ -120,9 +122,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 */
 	public function EventNewBlog( $blog_id ) {
 		$this->plugin->alerts->Trigger(
-			7000, array(
-				'BlogID' => $blog_id,
+			7000,
+			array(
+				'BlogID'   => $blog_id,
 				'SiteName' => get_blog_option( $blog_id, 'blogname' ),
+				'BlogURL'  => get_home_url( $blog_id ),
 			)
 		);
 	}
@@ -134,9 +138,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 */
 	public function EventArchiveBlog( $blog_id ) {
 		$this->plugin->alerts->Trigger(
-			7001, array(
-				'BlogID' => $blog_id,
+			7001,
+			array(
+				'BlogID'   => $blog_id,
 				'SiteName' => get_blog_option( $blog_id, 'blogname' ),
+				'BlogURL'  => get_home_url( $blog_id ),
 			)
 		);
 	}
@@ -148,9 +154,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 */
 	public function EventUnarchiveBlog( $blog_id ) {
 		$this->plugin->alerts->Trigger(
-			7002, array(
-				'BlogID' => $blog_id,
+			7002,
+			array(
+				'BlogID'   => $blog_id,
 				'SiteName' => get_blog_option( $blog_id, 'blogname' ),
+				'BlogURL'  => get_home_url( $blog_id ),
 			)
 		);
 	}
@@ -162,9 +170,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 */
 	public function EventActivateBlog( $blog_id ) {
 		$this->plugin->alerts->Trigger(
-			7003, array(
-				'BlogID' => $blog_id,
+			7003,
+			array(
+				'BlogID'   => $blog_id,
 				'SiteName' => get_blog_option( $blog_id, 'blogname' ),
+				'BlogURL'  => get_home_url( $blog_id ),
 			)
 		);
 	}
@@ -176,9 +186,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 */
 	public function EventDeactivateBlog( $blog_id ) {
 		$this->plugin->alerts->Trigger(
-			7004, array(
-				'BlogID' => $blog_id,
+			7004,
+			array(
+				'BlogID'   => $blog_id,
 				'SiteName' => get_blog_option( $blog_id, 'blogname' ),
+				'BlogURL'  => get_home_url( $blog_id ),
 			)
 		);
 	}
@@ -190,9 +202,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 */
 	public function EventDeleteBlog( $blog_id ) {
 		$this->plugin->alerts->Trigger(
-			7005, array(
-				'BlogID' => $blog_id,
+			7005,
+			array(
+				'BlogID'   => $blog_id,
 				'SiteName' => get_blog_option( $blog_id, 'blogname' ),
+				'BlogURL'  => get_home_url( $blog_id ),
 			)
 		);
 	}
@@ -205,14 +219,20 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 * @param int    $blog_id - Blog ID.
 	 */
 	public function EventUserAddedToBlog( $user_id, $role, $blog_id ) {
+		$user = get_userdata( $user_id );
 		$this->plugin->alerts->TriggerIf(
-			4010, array(
-				'TargetUserID' => $user_id,
-				'TargetUsername' => get_userdata( $user_id )->user_login,
+			4010,
+			array(
+				'TargetUserID'   => $user_id,
+				'TargetUsername' => $user ? $user->user_login : false,
 				'TargetUserRole' => $role,
-				'BlogID' => $blog_id,
-				'SiteName' => get_blog_option( $blog_id, 'blogname' ),
-			), array( $this, 'MustNotContainCreateUser' )
+				'BlogID'         => $blog_id,
+				'SiteName'       => get_blog_option( $blog_id, 'blogname' ),
+				'FirstName'      => $user ? $user->user_firstname : false,
+				'LastName'       => $user ? $user->user_lastname : false,
+				'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+			),
+			array( $this, 'MustNotContainCreateUser' )
 		);
 	}
 
@@ -224,15 +244,19 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 */
 	public function EventUserRemovedFromBlog( $user_id, $blog_id ) {
 		$user = get_userdata( $user_id );
-		// $blog_id = (isset( $_REQUEST['id'] ) ? $_REQUEST['id'] : 0);
 		$this->plugin->alerts->TriggerIf(
-			4011, array(
-				'TargetUserID' => $user_id,
+			4011,
+			array(
+				'TargetUserID'   => $user_id,
 				'TargetUsername' => $user->user_login,
 				'TargetUserRole' => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
-				'BlogID' => $blog_id,
-				'SiteName' => get_blog_option( $blog_id, 'blogname' ),
-			), array( $this, 'MustNotContainCreateUser' )
+				'BlogID'         => $blog_id,
+				'SiteName'       => get_blog_option( $blog_id, 'blogname' ),
+				'FirstName'      => $user ? $user->user_firstname : false,
+				'LastName'       => $user ? $user->user_lastname : false,
+				'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+			),
+			array( $this, 'MustNotContainCreateUser' )
 		);
 	}
 

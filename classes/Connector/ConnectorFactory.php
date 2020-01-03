@@ -75,7 +75,7 @@ abstract class WSAL_Connector_ConnectorFactory {
 
 		// TO DO: Load connection config.
 		if ( null == self::$connector || ! empty( $config ) || $reset ) {
-			switch ( strtolower( $connection_config['type'] ) ) {
+			switch ( strtolower( isset( $connection_config['type'] ) ? $connection_config['type'] : '' ) ) {
 				// TO DO: Add other connectors.
 				case 'mysql':
 				default:

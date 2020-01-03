@@ -97,7 +97,7 @@ class WSAL_ConstantManager {
 	 *
 	 * @param string $what    - The type of detail: 'name', 'value'.
 	 * @param mixed  $value   - The detail expected value.
-	 * @param mix    $default - Default value of constant.
+	 * @param mixed  $default - Default value of constant.
 	 *
 	 * @throws Exception - Error if detail type is unexpected.
 	 *
@@ -116,14 +116,56 @@ class WSAL_ConstantManager {
 				return $this->constants_cache[ $value ];
 			}
 
+			$possible_matches = array();
 			// Return constant match the property value.
 			foreach ( $this->_constants as $constant ) {
 				if ( $value == $constant->$what ) {
 					$this->constants_cache[ $value ] = $constant;
-					return $constant;
+					$possible_matches[]              = $constant;
 				}
+			}
+
+			// If we got matches then get the last one in the array,
+			if ( count( $possible_matches ) >= 1 ) {
+				return end( $possible_matches );
 			}
 		}
 		return $default;
+	}
+
+	/**
+	 * Get constant object for displaying.
+	 *
+	 * @param integer $code - Value of the constant.
+	 * @return stdClass
+	 */
+	public function get_constant_to_display( $code ) {
+		$const = (object) array(
+			'name'        => 'E_UNKNOWN',
+			'value'       => 0,
+			'description' => __( 'Unknown error code.', 'wp-security-audit-log' ),
+		);
+
+		$const = $this->GetConstantBy( 'value', $code, $const );
+
+		if ( 'E_CRITICAL' === $const->name ) {
+			$const->name = __( 'Critical', 'wp-security-audit-log' );
+		} elseif ( 'E_WARNING' === $const->name ) {
+			$const->name = __( 'Warning', 'wp-security-audit-log' );
+		} elseif ( 'E_NOTICE' === $const->name ) {
+			$const->name = __( 'Notification', 'wp-security-audit-log' );
+		} elseif ( 'WSAL_CRITICAL' === $const->name ) {
+			$const->name = __( 'Critical', 'wp-security-audit-log' );
+		} elseif ( 'WSAL_HIGH' === $const->name ) {
+			$const->name = __( 'High', 'wp-security-audit-log' );
+		} elseif ( 'WSAL_MEDIUM' === $const->name ) {
+			$const->name = __( 'Medium', 'wp-security-audit-log' );
+		} elseif ( 'WSAL_LOW' === $const->name ) {
+			$const->name = __( 'Low', 'wp-security-audit-log' );
+		} elseif ( 'WSAL_INFORMATIONAL' === $const->name ) {
+			$const->name = __( 'Informational', 'wp-security-audit-log' );
+		}
+
+		return $const;
 	}
 }

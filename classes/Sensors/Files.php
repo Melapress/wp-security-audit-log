@@ -118,7 +118,7 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					2046, array(
 						'File'  => $file,
-						'Theme' => $stylesheet,
+						'Theme' => trailingslashit( get_theme_root() ) . $stylesheet,
 					)
 				);
 			}

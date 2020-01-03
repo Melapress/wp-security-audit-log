@@ -423,7 +423,14 @@ function wsal_dismiss_advert(element) {
  */
 function wsalLoadEvents( pageNumber ) {
 	jQuery( '#wsal-event-loader' ).show( 'fast' );
-
+	/*
+	 * Gets the view type. Defaults to 'list' but could be 'grid'. Only those 2
+	 * types are supported. Validation handled server side.
+	 */
+	var view = wsalAuditLogArgs.userView;
+	if ( null === view || view.length < 1 ) {
+		view = 'list';
+	}
 	jQuery.ajax( {
 		type:'POST',
 		url: ajaxurl,
@@ -437,6 +444,7 @@ function wsalLoadEvents( pageNumber ) {
 			order : wsalAuditLogArgs.order,
 			s : wsalAuditLogArgs.searchTerm,
 			filters : wsalAuditLogArgs.searchFilters,
+			view: view,
 		},
 		success: function( html ) {
 			jQuery( '#wsal-event-loader' ).hide( '1000' );

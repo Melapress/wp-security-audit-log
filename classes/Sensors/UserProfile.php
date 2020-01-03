@@ -91,6 +91,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 						'OldRole'        => $old_bbpress_roles,
 						'NewRole'        => $new_bbpress_roles,
 						'UserChanger'    => $current_user->user_login,
+						'FirstName'      => $new_userdata->user_firstname,
+						'LastName'       => $new_userdata->user_lastname,
+						'EditUserLink'   => add_query_arg( 'user_id', $new_userdata->ID, admin_url( 'user-edit.php' ) )
 					)
 				);
 			}
@@ -105,16 +108,20 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				array(
 					'TargetUserID'   => $user_id,
 					'TargetUserData' => (object) array(
-						'Username' => $new_userdata->user_login,
-						'Roles'    => $user_roles,
+						'Username'  => $new_userdata->user_login,
+						'Roles'     => $user_roles,
+						'FirstName' => $new_userdata->user_firstname,
+						'LastName'  => $new_userdata->user_lastname,
 					),
+					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 				)
 			);
 		}
 
 		// Alert if user email is changed.
 		if ( $old_userdata->user_email !== $new_userdata->user_email ) {
-			$event = get_current_user_id() === $user_id ? 4005 : 4006;
+			$event      = get_current_user_id() === $user_id ? 4005 : 4006;
+			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $new_userdata->roles ) );
 			$this->plugin->alerts->Trigger(
 				$event,
 				array(
@@ -122,18 +129,27 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 					'TargetUsername' => $new_userdata->user_login,
 					'OldEmail'       => $old_userdata->user_email,
 					'NewEmail'       => $new_userdata->user_email,
+					'Roles'          => $user_roles,
+					'FirstName'      => $new_userdata->user_firstname,
+					'LastName'       => $new_userdata->user_lastname,
+					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 				)
 			);
 		}
 
 		// Alert if display name is changed.
 		if ( $old_userdata->display_name !== $new_userdata->display_name ) {
+			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $new_userdata->roles ) );
 			$this->plugin->alerts->Trigger(
 				4020,
 				array(
 					'TargetUsername'  => $new_userdata->user_login,
 					'old_displayname' => $old_userdata->display_name,
 					'new_displayname' => $new_userdata->display_name,
+					'Roles'           => $user_roles,
+					'FirstName'       => $new_userdata->user_firstname,
+					'LastName'        => $new_userdata->user_lastname,
+					'EditUserLink'    => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 				)
 			);
 		}
@@ -183,6 +199,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 					'TargetUsername' => $user->user_login,
 					'OldRole'        => $old_roles,
 					'NewRole'        => $new_roles,
+					'FirstName'      => $user->user_firstname,
+					'LastName'       => $user->user_lastname,
+					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 					'multisite_text' => $this->plugin->IsMultisite() ? get_current_blog_id() : false,
 				),
 				array( $this, 'MustNotContainUserChanges' )
@@ -226,11 +245,16 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		$current_user = wp_get_current_user();
 		$updated      = isset( $_GET['updated'] ); // @codingStandardsIgnoreLine
 		if ( $current_user && ( $user->ID !== $current_user->ID ) && ! $updated ) {
+			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $user->roles ) );
 			$this->plugin->alerts->Trigger(
 				4014,
 				array(
 					'UserChanger'    => $current_user->user_login,
 					'TargetUsername' => $user->user_login,
+					'FirstName'      => $user->user_firstname,
+					'LastName'       => $user->user_lastname,
+					'Roles'          => $user_roles,
+					'EditUserLink'   => add_query_arg( 'user_id', $user->ID, admin_url( 'user-edit.php' ) ),
 				)
 			);
 		}
@@ -260,6 +284,10 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				array(
 					'TargetUserID'   => $user_id,
 					'TargetUsername' => $user->user_login,
+					'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+					'FirstName'      => $user->user_firstname,
+					'LastName'       => $user->user_lastname,
+					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 				)
 			);
 		}
@@ -282,6 +310,10 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				array(
 					'TargetUserID'   => $user_id,
 					'TargetUsername' => $user->user_login,
+					'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+					'FirstName'      => $user->user_firstname,
+					'LastName'       => $user->user_lastname,
+					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 				)
 			);
 		}
