@@ -1117,8 +1117,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Set data array for common script.
 			$script_data = array(
-				'ajaxURL'    => admin_url( 'admin-ajax.php' ),
-				'liveEvents' => $live_events_enabled,
+				'ajaxURL'           => admin_url( 'admin-ajax.php' ),
+				'liveEvents'        => $live_events_enabled,
+				'installing'        => __( 'Installing, please wait', 'wp-security-audit-log' ),
+				'already_installed' => __( 'Already installed', 'wp-security-audit-log' ),
+				'installed'         => __( 'Addon installed', 'wp-security-audit-log' ),
+				'activated'         => __( 'Addon activated', 'wp-security-audit-log' ),
+				'failed'            => __( 'Install failed', 'wp-security-audit-log' ),
 			);
 			if ( $live_events_enabled ) {
 				$occurrence                 = new WSAL_Models_Occurrence();
