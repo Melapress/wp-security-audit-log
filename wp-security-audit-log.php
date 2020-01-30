@@ -351,6 +351,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				require_once 'classes/Views/Search.php';
 				require_once 'classes/Views/Settings.php';
 				require_once 'classes/Views/ToggleAlerts.php';
+
+				// Utilities.
+				require_once 'classes/Utilities/PluginInstallAndActivate.php';
+				require_once 'classes/Utilities/PluginInstallerAction.php';
 			}
 
 			// Connectors.
@@ -420,6 +424,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			add_action( 'wsal_freemius_loaded', array( $this, 'adjust_freemius_strings' ) );
 
 			$this->init_freemius();
+
+			if ( is_admin() ) {
+				$plugin_installer_ajax = new WSAL_PluginInstallerAction();
+				$plugin_installer_ajax->register();
+			}
 		}
 
 		/**
@@ -880,7 +889,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function adjust_freemius_strings() {
 			// only update these messages if using premium plugin.
-			if ( ! wsal_freemius()->is_premium() ) {
+			if ( ( ! wsal_freemius()->is_premium() ) || ( ! method_exists( wsal_freemius(), 'override_il8n' ) ) ) {
 				return;
 			}
 			wsal_freemius()->override_i18n(
@@ -1108,8 +1117,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Set data array for common script.
 			$script_data = array(
-				'ajaxURL'    => admin_url( 'admin-ajax.php' ),
-				'liveEvents' => $live_events_enabled,
+				'ajaxURL'           => admin_url( 'admin-ajax.php' ),
+				'liveEvents'        => $live_events_enabled,
+				'installing'        => __( 'Installing, please wait', 'wp-security-audit-log' ),
+				'already_installed' => __( 'Already installed', 'wp-security-audit-log' ),
+				'installed'         => __( 'Addon installed', 'wp-security-audit-log' ),
+				'activated'         => __( 'Addon activated', 'wp-security-audit-log' ),
+				'failed'            => __( 'Install failed', 'wp-security-audit-log' ),
 			);
 			if ( $live_events_enabled ) {
 				$occurrence                 = new WSAL_Models_Occurrence();

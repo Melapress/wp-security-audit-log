@@ -1187,7 +1187,7 @@ final class WSAL_AlertManager {
 				break;
 		}
 
-		return $display;
+		return apply_filters( 'wsal_event_object_text', $display, $object );
 	}
 
 	/**
@@ -1223,6 +1223,8 @@ final class WSAL_AlertManager {
 			'stopped'      => __( 'Stopped', 'wp-security-audit-log' ),
 			'removed'      => __( 'Removed', 'wp-security-audit-log' ),
 			'unblocked'    => __( 'Unblocked', 'wp-security-audit-log' ),
+			'renamed'    	 => __( 'Renamed', 'wp-security-audit-log' ),
+			'duplicated'   => __( 'Duplicated', 'wp-security-audit-log' ),
 		);
 		// sort the types alphabetically.
 		asort( $types );
@@ -1320,11 +1322,17 @@ final class WSAL_AlertManager {
 			case 'unblocked':
 				$display = __( 'Unblocked', 'wp-security-audit-log' );
 				break;
+			case 'renamed':
+				$display = __( 'Renamed', 'wp-security-audit-log' );
+				break;
+			case 'duplicated':
+				$display = __( 'Duplicated', 'wp-security-audit-log' );
+				break;
 			default:
 				break;
 		}
 
-		return $display;
+		return apply_filters( 'wsal_event_type_text', $display, $event_type );
 	}
 
 	/**
