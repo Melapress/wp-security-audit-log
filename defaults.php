@@ -154,11 +154,11 @@ function wsaldefaults_wsal_init() {
 		)
 	);
 
-	$wsal->constants->AddConstant( 'WSAL_CRITICAL', 1, __( 'Critical, high-impact messages.', 'wp-security-audit-log' ) );
-	$wsal->constants->AddConstant( 'WSAL_HIGH', 6, __( 'High severity messages.', 'wp-security-audit-log' ) );
-	$wsal->constants->AddConstant( 'WSAL_MEDIUM', 10, __( 'Medium severity messages.', 'wp-security-audit-log' ) );
-	$wsal->constants->AddConstant( 'WSAL_LOW', 15, __( 'Low severity messages.', 'wp-security-audit-log' ) );
-	$wsal->constants->AddConstant( 'WSAL_INFORMATIONAL', 20, __( 'Run-time notice.', 'wp-security-audit-log' ) );
+	$wsal->constants->AddConstant( 'WSAL_CRITICAL', 1, __( 'Critical severity events.', 'wp-security-audit-log' ) );
+	$wsal->constants->AddConstant( 'WSAL_HIGH', 6, __( 'High severity events.', 'wp-security-audit-log' ) );
+	$wsal->constants->AddConstant( 'WSAL_MEDIUM', 10, __( 'Medium severity events.', 'wp-security-audit-log' ) );
+	$wsal->constants->AddConstant( 'WSAL_LOW', 15, __( 'Low severity events.', 'wp-security-audit-log' ) );
+	$wsal->constants->AddConstant( 'WSAL_INFORMATIONAL', 20, __( 'Informational events.', 'wp-security-audit-log' ) );
 
 	// Create list of default alerts.
 	$wsal->alerts->RegisterGroup(
