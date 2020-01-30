@@ -351,6 +351,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				require_once 'classes/Views/Search.php';
 				require_once 'classes/Views/Settings.php';
 				require_once 'classes/Views/ToggleAlerts.php';
+
+				// Utilities.
+				require_once 'classes/Utilities/PluginInstallAndActivate.php';
+				require_once 'classes/Utilities/PluginInstallerAction.php';
 			}
 
 			// Connectors.
@@ -420,6 +424,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			add_action( 'wsal_freemius_loaded', array( $this, 'adjust_freemius_strings' ) );
 
 			$this->init_freemius();
+
+			if ( is_admin() ) {
+				$plugin_installer_ajax = new WSAL_PluginInstallerAction();
+				$plugin_installer_ajax->register();
+			}
 		}
 
 		/**

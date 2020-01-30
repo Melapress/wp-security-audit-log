@@ -225,6 +225,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					</a>
 				<?php endif; ?>
 			<?php endforeach; ?>
+			<a href="#tab-third-party-plugins" class="nav-tab">
+				<?php esc_html_e( 'Third party plugins', 'wp-security-audit-log' ); ?>
+			</a>
 		</h2>
 		<form id="audit-log-viewer" method="post">
 			<input type="hidden" name="page" value="<?php echo isset( $_GET['page'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; ?>" />
@@ -667,6 +670,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						</tr>
 					</tbody>
 				</table>
+				<?php
+					$addons = new WSAL_PluginInstallAndActivate();
+					$addons->render();
+				?>
 			</div>
 			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save Changes', 'wp-security-audit-log' ) ); ?>"></p>
 		</form>
