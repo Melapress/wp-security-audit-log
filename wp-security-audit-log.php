@@ -889,7 +889,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function adjust_freemius_strings() {
 			// only update these messages if using premium plugin.
-			if ( ! wsal_freemius()->is_premium() ) {
+			if ( ( ! wsal_freemius()->is_premium() ) || ( ! method_exists( wsal_freemius(), 'override_il8n' ) ) ) {
 				return;
 			}
 			wsal_freemius()->override_i18n(
