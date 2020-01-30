@@ -1187,7 +1187,7 @@ final class WSAL_AlertManager {
 				break;
 		}
 
-		return $display;
+		return apply_filters( 'wsal_event_object_text', $display, $object );
 	}
 
 	/**
@@ -1324,7 +1324,7 @@ final class WSAL_AlertManager {
 				break;
 		}
 
-		return $display;
+		return apply_filters( 'wsal_event_type_text', $display, $event_type );
 	}
 
 	/**
