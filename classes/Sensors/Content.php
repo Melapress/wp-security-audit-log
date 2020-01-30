@@ -541,6 +541,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 						'old_name' => $old_name,
 						'new_name' => $new_name,
 						'TagLink'  => $term_link,
+						'Slug'     => $new_slug,
 					)
 				);
 			}
