@@ -129,13 +129,13 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 				// 	'plugin_url'     => 'https://downloads.wordpress.org/plugin/wp-bootstrap-blocks.latest-stable.zip', // TODO: make this match live url.
 				// 	'event_tab_id'   => '#tab-bbpress-forums',
 				// ),
-				// array(
-				// 	'title'          => 'WPForms Add-on',
-				// 	'image_filename' => 'wpforms.png',
-				// 	'plugin_slug'    => 'google-sitemap-generator/sitemap.php',
-				// 	'plugin_url'     => 'https://downloads.wordpress.org/plugin/google-sitemap-generator.latest-stable.zip', // TODO: make this match live URL.
-				// 	'event_tab_id'   => '#tab-wpforms',
-				// ),
+				array(
+					'title'          => 'WPForms Add-on',
+					'image_filename' => 'wpforms.png',
+					'plugin_slug'    => 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php',
+					'plugin_url'     => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-wpforms.latest-stable.zip',
+					'event_tab_id'   => '#tab-wpforms',
+				),
 				array(
 					'title'          => 'Yoast SEO',
 					'image_filename' => 'yoast.png',
