@@ -106,4 +106,18 @@ jQuery( document ).ready( function() {
 
 	// Totally disabling the button.
 	jQuery(".install-addon.disabled").prop('disabled', true);
+
+	// Hide save button when 3rd party plugins tab is Opened
+	jQuery('.nav-tab').click(function(){
+		if( jQuery('[href="#tab-third-party-plugins"]').hasClass('nav-tab-active') ) {
+			jQuery('.submit #submit').hide(0);
+		} else {
+			jQuery('.submit #submit').show(0);
+		}
+	});
+	if( jQuery('[href="#tab-third-party-plugins"]').hasClass('nav-tab-active') ) {
+		jQuery('.submit #submit').hide(0);
+	} else {
+		jQuery('.submit #submit').show(0);
+	}
 });

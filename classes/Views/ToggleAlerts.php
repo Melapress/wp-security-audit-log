@@ -787,6 +787,22 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			table#tab-frontend-events tr:nth-child(12) td:first-child {
 				padding-left: 10px;
 			}
+			[href="#tab-0" i], [data-parent="tab-wpforms"] {
+				display: none;
+			}
+			.addon-wrapper img {
+				max-width: 200px;
+			}
+			.addon-wrapper {
+				max-width: 25%;
+				display: inline-block;
+				border: 1px solid #eee;
+				padding: 20px;
+				text-align: center;
+			}
+			.addon-wrapper:hover {
+				border: 1px solid #ccc;
+			}
 		</style>
 		<?php
 	}
