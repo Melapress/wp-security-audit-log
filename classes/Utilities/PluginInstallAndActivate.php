@@ -76,38 +76,42 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 			$our_plugins = $this->get_installable_plugins();
 			?>
 			<table id="tab-third-party-plugins" class="form-table wp-list-table wsal-tab widefat fixed"  style="display: table;" cellspacing="0">
-				<p><?php esc_html_e( 'To keep a log of changes done in any of the below plugins install the add-on for that plugin by clicking the Install Add-on button.', 'wp-security-audit-log' ); ?></p>
+				<p class="description"><?php esc_html_e( 'WP Security Audit Log can keep a log of changes done on other plugins. Install the relevant add-on from the below list to keep a log of changes done on that plugin.', 'wp-security-audit-log' ); ?></p>
 				<tbody>
 					<tr>
-						<?php
-						// Create a nonce to pass through via data attr.
-						$nonce = wp_create_nonce( 'wsal-install-addon' );
-						// Loop through plugins and output.
-						foreach ( $our_plugins as $details ) {
-							$disable_button = '';
-							if ( is_plugin_active( $details['plugin_slug'] ) ) {
-								$disable_button = 'disabled';
-							}
-							?>
-							<td style="width: 50%;">
+						<td class="addon-td">
+							<?php
+							// Create a nonce to pass through via data attr.
+							$nonce = wp_create_nonce( 'wsal-install-addon' );
+							// Loop through plugins and output.
+							foreach ( $our_plugins as $details ) {
+								$disable_button = '';
+								if ( is_plugin_active( $details['plugin_slug'] ) ) {
+									$disable_button = 'disabled';
+								}
+								?>
+
 								<div class="addon-wrapper">
 									<img src="<?php echo esc_url( trailingslashit( WSAL_BASE_URL ) . 'img/addons/' . $details['image_filename'] ); ?>">
+									<h4><?php esc_html_e( 'Add-on for ', 'wp-security-audit-log' ); ?><?php echo esc_html( $details['title'] ); ?></h4>
+									<p><?php echo sanitize_text_field( $details['plugin_description'] ); ?></p><br>
 									<p><button class="install-addon button button-primary <?php echo esc_attr( $disable_button ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-plugin-slug="<?php echo esc_attr( $details['plugin_slug'] ); ?>" data-plugin-download-url="<?php echo esc_url( $details['plugin_url'] ); ?>" data-plugin-event-tab-id="<?php echo esc_attr( $details['event_tab_id'] ); ?>">
 									<?php
 									if ( $this->is_plugin_installed( $details['plugin_slug'] ) && ! is_plugin_active( $details['plugin_slug'] ) ) {
-										esc_html_e( 'Addon installed, activate now?', 'wp-security-audit-log' );
+										esc_html_e( 'Add-on installed, activate now?', 'wp-security-audit-log' );
 									} elseif ( $this->is_plugin_installed( $details['plugin_slug'] ) && is_plugin_active( $details['plugin_slug'] ) ) {
-										esc_html_e( 'Addon installed', 'wp-security-audit-log' );
+										esc_html_e( 'Add-on installed', 'wp-security-audit-log' );
 									} else {
 											esc_html_e( 'Install Add-on', 'wp-security-audit-log' );
 									}
 									?>
 								</button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span></p>
 								</div>
-							</td>
-							<?php
-						}
-						?>
+
+								<?php
+							}
+							?>
+						</td>
 					</tr>
 				</tbody>
 			</table>
@@ -130,18 +134,12 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 				// 	'event_tab_id'   => '#tab-bbpress-forums',
 				// ),
 				array(
-					'title'          => 'WPForms Add-on',
-					'image_filename' => 'wpforms.png',
-					'plugin_slug'    => 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php',
-					'plugin_url'     => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-wpforms.latest-stable.zip',
-					'event_tab_id'   => '#tab-wpforms',
-				),
-				array(
-					'title'          => 'Yoast SEO',
-					'image_filename' => 'yoast.png',
-					'plugin_slug'    => 'wordpress-seo/wp-seo.php',
-					'plugin_url'     => 'https://downloads.wordpress.org/plugin/wordpress-seo.latest-stable.zip', // TODO: make this match live URL.
-					'event_tab_id'   => '#tab-yoast-seo',
+					'title'              => 'WPForms',
+					'image_filename'     => 'wpforms.png',
+					'plugin_slug'        => 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php',
+					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-wpforms.latest-stable.zip',
+					'event_tab_id'       => '#tab-wpforms',
+					'plugin_description' => 'Keep a record of when someone adds, modified or delete forms, entries and more in the WPForms plugin.',
 				),
 			);
 			// runs through a filter so it can be added to programatically.
