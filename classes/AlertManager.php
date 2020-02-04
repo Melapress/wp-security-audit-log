@@ -433,25 +433,54 @@ final class WSAL_AlertManager {
 	 * Register a whole group of items.
 	 *
 	 * @param array $groups - An array with group name as the index and an array of group items as the value.
-	 * Item values is an array of [type, code, description, message] respectively.
+	 * Item values is an array of [type, code, description, message, object, event type] respectively.
 	 */
 	public function RegisterGroup( $groups ) {
 		foreach ( $groups as $name => $group ) {
 			foreach ( $group as $subname => $subgroup ) {
-				foreach ( $subgroup as $item ) {
-					if ( ! isset( $item[4] ) ) {
-						$item[4] = ''; // Set default event object.
-					}
+				// Check to see if this ground has any subgroups
+				if( $this->GetArrayDepth( $group ) > 1 ) {
+					foreach ( $subgroup as $item ) {
+						if ( ! isset( $item[4] ) ) {
+							$item[4] = ''; // Set default event object.
+						}
 
-					if ( ! isset( $item[5] ) ) {
-						$item[5] = ''; // Set default event type.
-					}
+						if ( ! isset( $item[5] ) ) {
+							$item[5] = ''; // Set default event type.
+						}
 
-					list( $type, $code, $desc, $mesg, $object, $event_type ) = $item;
-					$this->Register( array( $type, $code, $name, $subname, $desc, $mesg, $object, $event_type ) );
+						list( $type, $code, $desc, $mesg, $object, $event_type ) = $item;
+						$this->Register( array( $type, $code, $name, $subname, $desc, $mesg, $object, $event_type ) );
+					}
+				// If no subgroups are found, process them accordingly.
+				} else {
+					foreach ( $group as $item ) {
+						if ( ! isset( $item[4] ) ) {
+							$item[4] = ''; // Set default event object.
+						}
+
+						if ( ! isset( $item[5] ) ) {
+							$item[5] = ''; // Set default event type.
+						}
+
+						list( $type, $code, $desc, $mesg, $object, $event_type ) = $item;
+						$this->Register( array( $type, $code, $name, $subname, $desc, $mesg, $object, $event_type ) );
+					}
 				}
 			}
 		}
+	}
+
+	public function GetArrayDepth( $array ) {
+		$depth = 0;
+		$iteIte = new RecursiveIteratorIterator( new RecursiveArrayIterator( $array ) );
+
+		foreach ($iteIte as $ite) {
+		    $d = $iteIte->getDepth();
+		    $depth = $d > $depth ? $d : $depth;
+		}
+
+		return $depth;
 	}
 
 	/**
