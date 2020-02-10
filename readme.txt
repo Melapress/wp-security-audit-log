@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.3.2
-Stable tag: 4.0.0
+Stable tag: 4.0.1
 Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -153,9 +153,10 @@ We need help translating the plugin and the WordPress Security Alerts. Please vi
 * Spanish translation by the [WP Body team](https://wpbody.com/)
 * French translations by Denis Moscato
 
-#### Activity Log Extensions
+#### Activity Log add-ons for third party plugins
 
-* <strong>[Activity Log for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>: This extension allows you to keep a log of MainWP network changes and to view the activity logs of all child sites from one central location - the MainWP dashboard.
+* <strong>[Activity Log for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/)</strong>: This MainWP extension allows you to keep a log of MainWP network changes and to view the activity logs of all child sites from one central location - the MainWP dashboard.
+* <strong>[Activity Log add-on for WPForms](https://www.wpsecurityauditlog.com/integrations/activity-log-wpforms/)</strong>: Install this add-on with the WP Security Audit Log to keep a log of changes in WPForms plugin, forms, form files, entries (leads) and more. 
 
 #### Related Links and Documentation
 
@@ -202,30 +203,31 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 4.0.0 (2020-01-09) =
+= 4.0.1 (2020-02-13) =
 
-Release notes: [Update 4.0.0 - New UI & activity log metadata](https://www.wpsecurityauditlog.com/releases/update-4/)
+Release notes: [Update 4.0.1 - activity logs for WPForms](https://www.wpsecurityauditlog.com/releases/update-4-0-1/)
 
 * **New features**
 
-	* New activity log viewer with two different view modes: grid and list view.
-	* Two new types of [WodPress activity log metadata](https://www.wpsecurityauditlog.com/support-documentation/metadata-wordpress-activity-log-events/): event type and object. OPTIONAL: [Upgrade old activity log data to v4](https://www.wpsecurityauditlog.com/support-documentation/activity-log-data-upgrade-plugin/).
-	* New [WordPress activity log severity levels](https://www.wpsecurityauditlog.com/support-documentation/severity-levels-wordpress-activity-log/) (and icons).
-	* New UI / UX for the [WordPress activity log search & filters](https://www.wpsecurityauditlog.com/premium-features/search-filters-wordpress-activity-log/).
-	* Added search filters for the two new metadata types in the activity logs: event type and object.
+	* [Activity logs for WPForms](http://www.wpsecurityauditlog.com/integrations/activity-log-wpforms/'
+	* One-click installation and activation feature for new third party plugins add-ons.
+	* New Third Party Plugins tab in Enable/Disable Events section to allow users to install add-ons for third party plugins.
+	* Added the new event types "Renamed" and "Duplicated" (more on [activity log event types](https://www.wpsecurityauditlog.com/support-documentation/objects-event-types-wordpress-activity-log/)).
+	* Added several new [hooks in the plugin](https://www.wpsecurityauditlog.com/support-documentation/list-hooks/), mainly to allow custom editor link, to add custom column to the logs viewer, to add new event types and objects.
 	
 * **Improvements**
 
-	* Updated the severity levels of all activity log events.
-	* Included the two new metadata types in the email notification templates (event type and object metadata).
-	* Added a notification to refresh search when the filters change.
-	* Added several new reference links in the plugin's help text.
-	
+	* Updated event IDs 2123, 2062, 2084, 9077 and 9071 so they now use the "Renamed" event type.
+	* Updated the [activity log severity levels](https://www.wpsecurityauditlog.com/support-documentation/severity-levels-wordpress-activity-log/' definitions in defaults.php)
+	* Updated / improved some of the help text messages.
+	* Plugin does not automatically retrieve the IP addresses and latest change of logged in users if there are 100+ sessions (performance improvement).
+	* Localized text in JS files.
+	* Started removing obsolete code.
+	* Added new filter to allow custom %EditorLinkWPForm% from custom events add-ons.
+
 * **Bug fixes**
 
-	* Addressed a warning message in the logs generated by the connector when using PHP 7.4.
-	* Fixed an issue which was triggered when using the User Switching filter hook.
-	* Few spelling mistakes in the plugin's UI and settings pages.
+	* Only the path of the added, modified or deleted file was reported in daily summary email.
 	
 = Earlier versions =
 
