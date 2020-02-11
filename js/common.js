@@ -52,4 +52,72 @@ jQuery( document ).ready( function() {
 	});
 
 	jQuery( 'head' ).append( '<style>.wp-submenu .dashicons-external:before{vertical-align: bottom;}</style>' );
+
+	// Add on installer
+	jQuery(".install-addon").not('.disabled').click( function(e) {
+		// Disable other buttons whilst the process is happening.
+		jQuery(".install-addon").not(this).prop('disabled', true);
+
+		jQuery(this).html( wsalCommonData.installing );
+		var currentButton = jQuery(this);
+		var PluginSlug = jQuery(this).attr('data-plugin-slug');
+		var nonceValue = jQuery(this).attr('data-nonce');
+		var PluginDownloadUrl = jQuery(this).attr('data-plugin-download-url');
+		var RedirectToTab = jQuery(this).attr('data-plugin-event-tab-id');
+		jQuery(currentButton).next('.spinner').show('200');
+		e.preventDefault();
+		jQuery.ajax({
+			type: 'POST',
+			dataType : "json",
+			url: wsalCommonData.ajaxURL,
+			data : {
+				action: "run_addon_install",
+				plugin_slug: PluginSlug,
+				plugin_url: PluginDownloadUrl,
+				_wpnonce: nonceValue
+			},
+			complete: function( data ) {
+				if( data.responseText == '"already_installed"' ) {
+					jQuery(currentButton).html( wsalCommonData.already_installed ).addClass('disabled');
+					jQuery(currentButton).next('.spinner').hide('200');
+					window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
+					jQuery('[href="' + RedirectToTab + '"]').trigger('click');
+					jQuery(currentButton).addClass('disabled');
+				} else if ( data.responseText == '"activated"' ) {
+					jQuery(currentButton).html( wsalCommonData.activated ).addClass('disabled');
+					jQuery(currentButton).next('.spinner').hide('200');
+					window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
+					jQuery('[href="' + RedirectToTab + '"]').trigger('click');
+					jQuery(currentButton).addClass('disabled');
+			 } else if ( JSON.stringify(data.responseText).toLowerCase().indexOf('failed') >= 0 ) {
+					jQuery(currentButton).html( wsalCommonData.failed ).addClass('disabled');
+					jQuery(currentButton).next('.spinner').hide('200');
+			 } else if ( data.responseText == '"success"' || JSON.stringify(data.responseText).toLowerCase().indexOf('success') >= 0 ) {
+				 jQuery(currentButton).html( wsalCommonData.installed ).addClass('disabled');
+				 jQuery(currentButton).next('.spinner').hide('200');
+				 window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
+				 // Reload as tabs are not present on page.
+				 location.reload();
+			 }
+			 jQuery(".install-addon").not(this).prop('disabled', false);
+			},
+		});
+	});
+
+	// Totally disabling the button.
+	jQuery(".install-addon.disabled").prop('disabled', true);
+
+	// Hide save button when 3rd party plugins tab is Opened
+	jQuery('.nav-tab').click(function(){
+		if( jQuery('[href="#tab-third-party-plugins"]').hasClass('nav-tab-active') ) {
+			jQuery('.submit #submit').hide(0);
+		} else {
+			jQuery('.submit #submit').show(0);
+		}
+	});
+	if( jQuery('[href="#tab-third-party-plugins"]').hasClass('nav-tab-active') ) {
+		jQuery('.submit #submit').hide(0);
+	} else {
+		jQuery('.submit #submit').show(0);
+	}
 });

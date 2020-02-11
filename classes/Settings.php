@@ -1748,7 +1748,12 @@ class WSAL_Settings {
 
 			case strncmp( $value, 'http://', 7 ) === 0:
 			case strncmp( $value, 'https://', 8 ) === 0:
-				return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
+				$updated_line = apply_filters( 'wsal_link_filter', $value, $name );
+				if ( $updated_line !== $value ) {
+					return $updated_line;
+				} else {
+					return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
+				}
 
 			case in_array( $name, array( '%PostStatus%', '%ProductStatus%' ), true ):
 				if ( ! empty( $value ) && 'publish' === $value ) {
@@ -1802,7 +1807,9 @@ class WSAL_Settings {
 				return $highlight_start_tag . dirname( $value ) . $highlight_end_tag;
 
 			default:
-				return $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
+				// if we didn't get a match already try get one via a filter.
+				$filtered_formatted_value = apply_filters( 'wsal_meta_formatter_custom_formatter', $value, $name );
+				return ( $value !== $filtered_formatted_value  ) ? $filtered_formatted_value : $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
 		}
 	}
 
