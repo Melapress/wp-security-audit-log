@@ -43,6 +43,20 @@ final class WSAL_Views_SetupWizard {
 	private $current_step;
 
 	/**
+	 * List of all the valid inputs we will accept for log levels.
+	 *
+	 * @var array
+	 */
+	private $valid_log_levels = array( 'geek', 'basic' );
+
+	/**
+	 * List if all the valid inputs we will accept for prune times.
+	 *
+	 * @var array
+	 */
+	private $valid_prune_times = array( '6', '12', 'none' );
+
+	/**
 	 * Method: Constructor.
 	 *
 	 * @param WpSecurityAuditLog $wsal – Instance of main plugin.
@@ -50,16 +64,19 @@ final class WSAL_Views_SetupWizard {
 	public function __construct( WpSecurityAuditLog $wsal ) {
 		$this->wsal = $wsal;
 
+		if ( current_user_can( 'manage_options' ) ) {
+			add_action( 'admin_init', array( $this, 'setup_page' ), 10 );
+		}
 		add_action( 'admin_menu', array( $this, 'admin_menus' ), 10 );
-		add_action( 'admin_init', array( $this, 'setup_page' ), 10 );
 		add_action( 'wp_ajax_setup_check_security_token', array( $this, 'setup_check_security_token' ) );
+
 	}
 
 	/**
 	 * Ajax handler to verify setting token.
 	 */
 	public function setup_check_security_token() {
-		if ( ! $this->wsal->settings->CurrentUserCan( 'view' ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			echo wp_json_encode(
 				array(
 					'success' => false,
@@ -69,10 +86,8 @@ final class WSAL_Views_SetupWizard {
 			die();
 		}
 
-		//@codingStandardsIgnoreStart
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : false;
-		$token = isset( $_POST['token'] ) ? sanitize_text_field( $_POST['token'] ) : false;
-		//@codingStandardsIgnoreEnd
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
+		$token = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : false;
 
 		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal-verify-wizard-page' ) ) {
 			echo wp_json_encode(
@@ -117,7 +132,7 @@ final class WSAL_Views_SetupWizard {
 	public function setup_page() {
 		// Get page argument from $_GET array.
 		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
-		if ( empty( $page ) || 'wsal-setup' !== $page ) {
+		if ( empty( $page ) || 'wsal-setup' !== $page || ! ( current_user_can( 'manage_options' ) ) ) {
 			return;
 		}
 
@@ -154,16 +169,6 @@ final class WSAL_Views_SetupWizard {
 				'content' => array( $this, 'wsal_step_log_retention' ),
 				'save'    => array( $this, 'wsal_step_log_retention_save' ),
 			),
-			'access'         => array(
-				'name'    => __( 'Access', 'wp-security-audit-log' ),
-				'content' => array( $this, 'wsal_step_access' ),
-				'save'    => array( $this, 'wsal_step_access_save' ),
-			),
-			'exclude_object' => array(
-				'name'    => __( 'Exclude Objects', 'wp-security-audit-log' ),
-				'content' => array( $this, 'wsal_step_exclude_object' ),
-				'save'    => array( $this, 'wsal_step_exclude_object_save' ),
-			),
 			'finish'         => array(
 				'name'    => __( 'Finish', 'wp-security-audit-log' ),
 				'content' => array( $this, 'wsal_step_finish' ),
@@ -183,6 +188,11 @@ final class WSAL_Views_SetupWizard {
 		// Set current step.
 		$current_step       = filter_input( INPUT_GET, 'current-step', FILTER_SANITIZE_STRING );
 		$this->current_step = ! empty( $current_step ) ? $current_step : current( array_keys( $this->wizard_steps ) );
+
+		// check if current step is a valid one.
+		if ( ! array_key_exists( $this->current_step, $this->wizard_steps ) ) {
+			$this->current_step = 'invalid-step';
+		}
 
 		/**
 		 * Enqueue Styles.
@@ -208,7 +218,7 @@ final class WSAL_Views_SetupWizard {
 		// Data array.
 		$data_array = array(
 			'ajaxURL'    => admin_url( 'admin-ajax.php' ),
-			'nonce'      => wp_create_nonce( 'wsal-verify-wizard-page' ),
+			'nonce'      => ( ( ! $this->wsal->settings->CurrentUserCan( 'edit' ) ) && ! 'invalid-step' === $this->current_step ) ? wp_create_nonce( 'wsal-verify-wizard-page' ) : '',
 			'usersError' => esc_html__( 'Specified value in not a user.', 'wp-security-audit-log' ),
 			'rolesError' => esc_html__( 'Specified value in not a role.', 'wp-security-audit-log' ),
 			'ipError'    => esc_html__( 'Specified value in not an IP address.', 'wp-security-audit-log' ),
@@ -223,7 +233,6 @@ final class WSAL_Views_SetupWizard {
 			call_user_func( $this->wizard_steps[ $this->current_step ]['save'] );
 		}
 
-		ob_start();
 		$this->setup_page_header();
 		$this->setup_page_steps();
 		$this->setup_page_content();
@@ -313,17 +322,49 @@ final class WSAL_Views_SetupWizard {
 	}
 
 	/**
+	 * Gets a link to the first wizard step.
+	 *
+	 * @method get_welcome_step
+	 * @since  4.0.2
+	 * @return string
+	 */
+	private function get_welcome_step() {
+		return remove_query_arg( 'current-step' );
+	}
+
+	/**
 	 * Setup Page Content.
 	 */
 	private function setup_page_content() {
 		?>
 		<div class="wsal-setup-content">
 			<?php
-			if ( ! empty( $this->wizard_steps[ $this->current_step ]['content'] ) ) {
+			if ( isset( $this->wizard_steps[ $this->current_step ]['content'] ) && ! empty( $this->wizard_steps[ $this->current_step ]['content'] && is_callable( $this->wizard_steps[ $this->current_step ]['content'] ) ) ) {
 				call_user_func( $this->wizard_steps[ $this->current_step ]['content'] );
+			} else {
+				$this->render_invalid_step();
 			}
 			?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render method for any invalid steps a user happens to land on.
+	 *
+	 * @method render_invalid_step
+	 * @since  4.0.2
+	 */
+	private function render_invalid_step() {
+		?>
+		<p><?php
+		printf(
+			/* translators: 1 - an opening link tag, 2 - a closing link tag. */
+			esc_html__( 'You have reached an invaild step - %1$sreturn to the start of the wizard%2$s.', 'wp-security-audit-log' ),
+			'<a href="' . esc_url( $this->get_welcome_step() ) . '">',
+			'</a>'
+		);
+		?></p>
 		<?php
 	}
 
@@ -385,10 +426,14 @@ final class WSAL_Views_SetupWizard {
 		// Check nonce.
 		check_admin_referer( 'wsal-step-log-details' );
 
-		// Save Log Details Step setting.
-		// @codingStandardsIgnoreStart
-		$log_details = isset( $_POST['wsal-details-level'] ) ? sanitize_text_field( $_POST['wsal-details-level'] ) : false;
-		// @codingStandardsIgnoreEnd
+		// Get Log Details Step setting.
+		$log_details = isset( $_POST['wsal-details-level'] ) ? sanitize_text_field( wp_unslash( $_POST['wsal-details-level'] ) ) : false;
+
+		// Validate we have a level that is allowed.
+		if ( ! in_array( $log_details, $this->valid_log_levels, true ) ) {
+			// if we have an unexpected log level then use default: 'geek'.
+			$log_details = $this->valid_log_levels[0];
+		}
 
 		// Save log details option.
 		$this->wsal->SetGlobalOption( 'details-level', $log_details );
@@ -441,7 +486,7 @@ final class WSAL_Views_SetupWizard {
 		if ( isset( $_POST['wsal-frontend-login'] ) ) {
 			$frontend_sensors = $this->wsal->settings->get_frontend_events(); // Get the frontend sensors setting.
 			$login_sensor     = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-login'] ) );
-			$login_sensor     = '0' === $login_sensor ? false : $login_sensor; // Update the sensor option.
+			$login_sensor     = '1' === $login_sensor ? true : false; // Update the sensor option.
 
 			$frontend_sensors['login'] = $login_sensor;
 			$this->wsal->settings->set_frontend_events( $frontend_sensors );
@@ -489,7 +534,7 @@ final class WSAL_Views_SetupWizard {
 		if ( isset( $_POST['wsal-frontend-system'] ) ) {
 			$frontend_sensors = $this->wsal->settings->get_frontend_events(); // Get the frontend sensors setting.
 			$system_sensor    = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-system'] ) );
-			$system_sensor    = '0' === $system_sensor ? false : $system_sensor; // Update the sensor option.
+			$system_sensor    = '1' === $system_sensor ? true : false; // Update the sensor option.
 
 			$frontend_sensors['system'] = $system_sensor;
 			$this->wsal->settings->set_frontend_events( $frontend_sensors );
@@ -538,7 +583,7 @@ final class WSAL_Views_SetupWizard {
 		if ( isset( $_POST['wsal-frontend-register'] ) ) {
 			$frontend_sensors = $this->wsal->settings->get_frontend_events(); // Get the frontend sensors setting.
 			$register_sensor  = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-register'] ) );
-			$register_sensor  = '0' === $register_sensor ? false : $register_sensor; // Update the sensor option.
+			$register_sensor  = '1' === $register_sensor ? true : false; // Update the sensor option.
 
 			$frontend_sensors['register'] = $register_sensor;
 			$this->wsal->settings->set_frontend_events( $frontend_sensors );
@@ -612,10 +657,14 @@ final class WSAL_Views_SetupWizard {
 		// Verify nonce.
 		check_admin_referer( 'wsal-step-log-retention' );
 
-		// Save Log Retention Step setting.
-		// @codingStandardsIgnoreStart
-		$pruning_limit = isset( $_POST['wsal-pruning-limit'] ) ? sanitize_text_field( $_POST['wsal-pruning-limit'] ) : false;
-		// @codingStandardsIgnoreEnd
+		// Get log retention time setting.
+		$pruning_limit = isset( $_POST['wsal-pruning-limit'] ) ? sanitize_text_field( wp_unslash( $_POST['wsal-pruning-limit'] ) ) : false;
+
+		// validate the prune time.
+		if ( ! in_array( (string) $pruning_limit, $this->valid_prune_times, true ) ) {
+			// if $pruning_limit is not valid value then use default - 6.
+			$pruning_limit = $this->valid_prune_times[0];
+		}
 
 		// Save log retention setting.
 		if ( ! empty( $pruning_limit ) ) {
@@ -653,221 +702,6 @@ final class WSAL_Views_SetupWizard {
 	 */
 	protected function get_token_type( $token ) {
 		return $this->wsal->settings->get_token_type( $token );
-	}
-
-	/**
-	 * Step View: `Access`
-	 */
-	private function wsal_step_access() {
-		?>
-		<form method="post" class="wsal-setup-form">
-			<?php wp_nonce_field( 'wsal-step-access' ); ?>
-			<h4>
-				<?php esc_html_e( 'By default only the users with administrator role can access the WordPress activity log. Would you like to allow any other user or users with a role to access the WordPress activity log?', 'wp-security-audit-log' ); ?>
-			</h4>
-			<fieldset>
-				<label for="no">
-					<input id="no" name="wsal-access" type="radio" value="no" checked />
-					<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
-				</label>
-				<br />
-				<label for="yes">
-					<input id="yes" name="wsal-access" type="radio" value="yes" />
-					<?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?>
-				</label>
-			</fieldset>
-
-			<fieldset>
-				<label for="editor-users-box">
-					<span><?php esc_html_e( 'Usernames: ', 'wp-security-audit-log' ); ?></span>
-					<input id="editor-users-box" class="editor-query-box" name="editor-users-box" type="text" />
-					<a href="javascript:;" class="button button-primary" id="editor-users-add">
-						<?php esc_html_e( 'ADD', 'wp-security-audit-log' ); ?>
-					</a>
-				</label>
-				<br />
-				<label for="editor-roles-box">
-					<span><?php esc_html_e( 'Roles: ', 'wp-security-audit-log' ); ?></span>
-					<input id="editor-roles-box" class="editor-query-box" name="editor-roles-box" type="text" />
-					<a href="javascript:;" class="button button-primary" id="editor-roles-add">
-						<?php esc_html_e( 'ADD', 'wp-security-audit-log' ); ?>
-					</a>
-				</label>
-				<br />
-				<div id="editor-list">
-					<?php foreach ( $this->wsal->settings->GetAllowedPluginEditors() as $item ) : ?>
-						<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
-							<input type="hidden" name="editors[]" value="<?php echo esc_attr( $item ); ?>"/>
-							<?php echo esc_html( $item ); ?>
-							<?php if ( wp_get_current_user()->user_login !== $item ) { ?>
-								<a href="javascript:;" title="Remove">&times;</a>
-							<?php } ?>
-						</span>
-					<?php endforeach; ?>
-				</div>
-			</fieldset>
-
-			<p class="description">
-				<?php esc_html_e( 'Note: you can change the WordPress activity log privileges settings at any time from the plugin settings.', 'wp-security-audit-log' ); ?>
-			</p>
-
-			<div class="wsal-setup-actions">
-				<button class="button button-primary"
-					type="submit"
-					name="save_step"
-					value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>">
-					<?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?>
-				</button>
-			</div>
-		</form>
-
-		<p class="description">
-			<em><?php echo esc_html__( 'The WordPress activity log contains sensitive data such as who logged in, from where, when, and what they did.', 'wp-security-audit-log' ); ?></em>
-		</p>
-		<?php
-	}
-
-	/**
-	 * Step Save: `Access`
-	 */
-	private function wsal_step_access_save() {
-		// Verify nonce.
-		check_admin_referer( 'wsal-step-access' );
-
-		// Get Access Step setting.
-		// @codingStandardsIgnoreStart
-		$wsal_access  = isset( $_POST['wsal-access'] ) ? sanitize_text_field( $_POST['wsal-access'] ) : false;
-		$wsal_editors = isset( $_POST['editors'] ) ? array_map( 'sanitize_text_field', $_POST['editors'] ) : false;
-		// @codingStandardsIgnoreEnd
-
-		if ( ! empty( $wsal_access ) && 'yes' === $wsal_access ) {
-			if ( 1 === count( $wsal_editors ) && $this->wsal->settings->IsRestrictAdmins() ) {
-				$this->wsal->settings->set_restrict_plugin_setting( 'only_me' );
-			} else {
-				$this->wsal->settings->set_restrict_plugin_setting( 'only_selected_users' );
-			}
-			$this->wsal->settings->SetAllowedPluginEditors( ! empty( $wsal_editors ) ? $wsal_editors : array() );
-		} elseif ( ! empty( $wsal_access ) && 'no' === $wsal_access ) {
-			if ( $this->wsal->settings->IsRestrictAdmins() ) {
-				$this->wsal->settings->set_restrict_plugin_setting( 'only_me' );
-			} else {
-				$this->wsal->settings->SetAllowedPluginEditors( array() );
-			}
-		}
-
-		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
-		exit();
-	}
-
-	/**
-	 * Step View: `Exclude Objects`
-	 */
-	private function wsal_step_exclude_object() {
-		?>
-		<form method="post" class="wsal-setup-form">
-			<?php wp_nonce_field( 'wsal-step-exclude-objects' ); ?>
-			<p>
-				<?php esc_html_e( 'The plugin will keep a log of everything that happens on your WordPress website. If you would like to exclude a particular user, users with a role or an IP address from the log specify them below. If not just click the Next button.', 'wp-security-audit-log' ); ?>
-			</p>
-
-			<fieldset>
-				<label for="exuser-query-box">
-					<span><?php esc_html_e( 'Usernames: ', 'wp-security-audit-log' ); ?></span>
-					<input id="exuser-query-box" class="exuser-query-box" name="exuser-query-box" type="text" />
-					<a href="javascript:;" class="button button-primary" id="exuser-query-add">
-						<?php esc_html_e( 'ADD', 'wp-security-audit-log' ); ?>
-					</a>
-				</label>
-				<div id="exuser-list">
-					<?php foreach ( $this->wsal->settings->GetExcludedMonitoringUsers() as $item ) : ?>
-						<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
-						<input type="hidden" name="exusers[]" value="<?php echo esc_attr( $item ); ?>"/>
-						<?php echo esc_html( $item ); ?>
-						<a href="javascript:;" title="Remove">&times;</a>
-						</span>
-					<?php endforeach; ?>
-				</div>
-			</fieldset>
-
-			<fieldset>
-				<label for="exrole-query-box">
-					<span><?php esc_html_e( 'Roles: ', 'wp-security-audit-log' ); ?></span>
-					<input id="exrole-query-box" class="exrole-query-box" name="exrole-query-box" type="text" />
-					<a href="javascript:;" class="button button-primary" id="exrole-query-add">
-						<?php esc_html_e( 'ADD', 'wp-security-audit-log' ); ?>
-					</a>
-				</label>
-				<div id="exrole-list">
-					<?php foreach ( $this->wsal->settings->GetExcludedMonitoringRoles() as $item ) : ?>
-						<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
-						<input type="hidden" name="exroles[]" value="<?php echo esc_attr( $item ); ?>"/>
-						<?php echo esc_html( $item ); ?>
-						<a href="javascript:;" title="Remove">&times;</a>
-						</span>
-					<?php endforeach; ?>
-				</div>
-			</fieldset>
-
-			<fieldset>
-				<label for="ipaddr-query-box">
-					<span><?php esc_html_e( 'IP Address: ', 'wp-security-audit-log' ); ?></span>
-					<input id="ipaddr-query-box" class="ipaddr-query-box" name="ipaddr-query-box" type="text" />
-					<a href="javascript:;" class="button button-primary" id="ipaddr-query-add">
-						<?php esc_html_e( 'ADD', 'wp-security-audit-log' ); ?>
-					</a>
-				</label>
-				<div id="ipaddr-list">
-					<?php foreach ( $this->wsal->settings->GetExcludedMonitoringIP() as $item ) : ?>
-						<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
-							<input type="hidden" name="ipaddrs[]" value="<?php echo esc_attr( $item ); ?>"/>
-							<?php echo esc_html( $item ); ?>
-							<a href="javascript:;" title="Remove">&times;</a>
-						</span>
-					<?php endforeach; ?>
-				</div>
-			</fieldset>
-
-			<p class="description">
-				<?php esc_html_e( 'Note: You can change these exclusions anytime from the plugin settings.', 'wp-security-audit-log' ); ?>
-			</p>
-
-			<div class="wsal-setup-actions">
-				<button class="button button-primary"
-					type="submit"
-					name="save_step"
-					value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>">
-					<?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?>
-				</button>
-			</div>
-		</form>
-
-		<p class="description">
-			<em><?php echo esc_html__( 'The WordPress activity log contains sensitive data such as who logged in, from where, when and what they did.', 'wp-security-audit-log' ); ?></em>
-		</p>
-		<?php
-	}
-
-	/**
-	 * Step Save: `Exclude Objects`
-	 */
-	private function wsal_step_exclude_object_save() {
-		// Verify nonce.
-		check_admin_referer( 'wsal-step-exclude-objects' );
-
-		// Get exclude objects step settings.
-		// @codingStandardsIgnoreStart
-		$wsal_exusers = isset( $_POST['exusers'] ) ? array_map( 'sanitize_text_field', $_POST['exusers'] ) : false;
-		$wsal_exroles = isset( $_POST['exroles'] ) ? array_map( 'sanitize_text_field', $_POST['exroles'] ) : false;
-		$wsal_ipaddrs = isset( $_POST['ipaddrs'] ) ? array_map( 'sanitize_text_field', $_POST['ipaddrs'] ) : false;
-		// @codingStandardsIgnoreEnd
-
-		// Save the settings.
-		$this->wsal->settings->SetExcludedMonitoringUsers( ! empty( $wsal_exusers ) ? $wsal_exusers : array() );
-		$this->wsal->settings->SetExcludedMonitoringRoles( ! empty( $wsal_exroles ) ? $wsal_exroles : array() );
-		$this->wsal->settings->SetExcludedMonitoringIP( ! empty( $wsal_ipaddrs ) ? $wsal_ipaddrs : array() );
-
-		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
-		exit();
 	}
 
 	/**

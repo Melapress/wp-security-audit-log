@@ -236,6 +236,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * @throws Exception - Unrecognized settings tab error.
 	 */
 	protected function Save() {
+		// Bail early if user does not have sufficient permissions to save.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+			throw new Exception( esc_html__( 'Current user is not allowed to save settings.', 'wp-security-audit-log' ) );
+		}
 		// Call respective tab save functions if they are set. Nonce is already verified at this point.
 		if ( ! empty( $this->current_tab ) && ! empty( $this->wsal_setting_tabs[ $this->current_tab ]['save'] ) ) {
 			call_user_func( $this->wsal_setting_tabs[ $this->current_tab ]['save'] );
@@ -745,7 +749,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		echo wp_kses(
 			sprintf(
 				/* translators: Learn more link. */
-				esc_html__( 'By default only users with administrator or super administrator (multisite) roles can change the settings of the plugin. Though you can change these privileges from this section - %s.', 'wp-security-audit-log' ),
+				esc_html__( 'By default only users with administrator role (single site) and super administrator role (multisite) can change the settings of the plugin. Though you can restrict the privileges to just your user - %s.', 'wp-security-audit-log' ),
 				'<a href="https://www.wpsecurityauditlog.com/support-documentation/managing-wordpress-activity-log-plugin-privileges/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
 			),
 			$allowed_tags
@@ -766,41 +770,16 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<br/>
 							<label for="only_admins">
 								<input type="radio" name="restrict-plugin-settings" id="only_admins" value="only_admins" <?php checked( $restrict_settings, 'only_admins' ); ?> />
-								<?php esc_html_e( 'Only administrators', 'wp-security-audit-log' ); ?>
+								<?php
+								if ( $this->_plugin->IsMultisite() ) {
+									esc_html_e( 'Only superadmins', 'wp-security-audit-log' );
+								} else {
+									esc_html_e( 'Only administrators', 'wp-security-audit-log' );
+								}
+								?>
+								<?php  ?>
 							</label>
 							<br/>
-							<?php if ( $this->_plugin->IsMultisite() ) : ?>
-								<label for="only_superadmins">
-									<input type="radio" name="restrict-plugin-settings" id="only_superadmins" value="only_superadmins" <?php checked( $restrict_settings, 'only_superadmins' ); ?> />
-									<?php esc_html_e( 'Only superadmins', 'wp-security-audit-log' ); ?>
-								</label>
-								<br/>
-							<?php endif; ?>
-							<label for="only_selected_users">
-								<input type="radio" name="restrict-plugin-settings" id="only_selected_users" value="only_selected_users" <?php checked( $restrict_settings, 'only_selected_users' ); ?> />
-								<?php esc_html_e( 'All these users or users with these roles', 'wp-security-audit-log' ); ?>
-							</label>
-							<p class="description"><?php esc_html_e( 'Specify the username or the users which can change the plugin settings. You can also specify roles.', 'wp-security-audit-log' ); ?></p>
-							<label>
-								<input type="text" id="EditorQueryBox" style="width: 250px;">
-								<input type="button" id="EditorQueryAdd" style="" class="button-primary" value="Add">
-							</label>
-							<div id="EditorList">
-								<?php
-								foreach ( $this->_plugin->settings->GetAllowedPluginEditors() as $item ) :
-									if ( wp_get_current_user()->user_login === $item ) {
-										continue;
-									}
-									?>
-									<span class="sectoken-<?php echo esc_attr( $this->GetTokenType( $item ) ); ?>">
-										<input type="hidden" name="Editors[]" value="<?php echo esc_attr( $item ); ?>"/>
-										<?php echo esc_html( $item ); ?>
-										<?php if ( wp_get_current_user()->user_login !== $item ) : ?>
-											<a href="javascript:;" title="Remove">&times;</a>
-										<?php endif; ?>
-									</span>
-								<?php endforeach; ?>
-							</div>
 						</fieldset>
 					</td>
 				</tr>
@@ -2012,6 +1991,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Save: `Import/Export`
 	 */
 	private function tab_import_settings_save() {
+		// bail early if user does not have sufficient permissions to import.
+		if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+			echo '<div class="notice notice-error"><p>' . esc_html__( 'Current user is not allowed to import files.', 'wp-security-audit-log' ) . '</p></div>';
+			return;
+		}
 		if ( isset( $_FILES['import-settings'] ) ) {
 			if ( 0 === $_FILES['import-settings']['error'] ) {
 				$filename  = isset( $_FILES['import-settings']['name'] ) ? sanitize_text_field( wp_unslash( $_FILES['import-settings']['name'] ) ) : false;
