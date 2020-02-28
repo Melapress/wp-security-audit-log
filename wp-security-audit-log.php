@@ -400,7 +400,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			add_action( 'admin_footer', array( $this, 'render_footer' ) );
 
 			// Plugin redirect on activation.
-			add_action( 'admin_init', array( $this, 'wsal_plugin_redirect' ), 10 );
+			if ( current_user_can( 'manage_options' ) ) {
+				add_action( 'admin_init', array( $this, 'wsal_plugin_redirect' ) );
+			}
 
 			// Handle admin Disable Custom Field.
 			add_action( 'wp_ajax_AjaxDisableCustomField', array( $this, 'AjaxDisableCustomField' ) );
@@ -1519,6 +1521,22 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 								$cols['info'] = '1';
 								$this->settings->SetColumns( $cols );
 							}
+						}
+					);
+				}
+
+				/**
+				 * Upgrade routine for versions of the plugin prior to 4.0.2
+				 *
+				 * @since 4.0.2
+				 */
+				if ( version_compare( $old_version, '4.0.1', '<=' ) ) {
+					add_action(
+						'init',
+						function() {
+							require_once 'classes/Update/Task/SettingsEditConfig.php';
+							$settings_edit_update = new WSAL\Update\Task\SettingsEditConfig( WpSecurityAuditLog::GetInstance() );
+							$settings_edit_update->run();
 						}
 					);
 				}
