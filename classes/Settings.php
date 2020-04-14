@@ -1881,6 +1881,8 @@ class WSAL_Settings {
 				return ' View the <' . esc_url( $value ) . '|page>';
 
 			case '%CategoryLink%' === $name:
+			case '%cat_link%' === $name:
+			case '%ProductCatLink%' == $name:
 				return ' View the <' . esc_url( $value ) . '|category>';
 
 			case '%TagLink%' === $name:

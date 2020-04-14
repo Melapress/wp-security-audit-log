@@ -2127,9 +2127,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function wsal_hide_plugin( $plugins ) {
 			global $pagenow;
 
-			// Check current page.
+			// Check current page, bail early if this isn't the plugins page.
 			if ( 'plugins.php' !== $pagenow ) {
-				return;
+				return $plugins;
 			}
 
 			// Find WSAL by plugin basename.
