@@ -24,7 +24,9 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 		 * @since  4.0.1
 		 */
 		public function register() {
+			// @TODO: remove this unprefixed call and swap to prefixed only.
 			add_action( 'wp_ajax_run_addon_install', array( $this, 'run_addon_install' ) );
+			add_action( 'wp_ajax_wsal_run_addon_install', array( $this, 'run_addon_install' ) );
 		}
 
 		/**
@@ -36,10 +38,26 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 		public function run_addon_install() {
 			check_ajax_referer( 'wsal-install-addon' );
 
-			$plugin_zip  = ( isset( $_POST['plugin_url'] ) ) ? esc_url_raw( wp_unslash( $_POST['plugin_url'] ) ) : '';
-			$plugin_slug = ( isset( $_POST['plugin_slug'] ) ) ? sanitize_textarea_field( wp_unslash( $_POST['plugin_slug'] ) ) : '';
-
 			$predefined_plugins = WSAL_PluginInstallAndActivate::get_installable_plugins();
+
+			if ( ! ( isset( $_POST['addon_for'] ) && is_array( $predefined_plugins ) ) ) {
+				// no 'addon_for' passed, check for a zip and slug.
+				$plugin_zip  = ( isset( $_POST['plugin_url'] ) ) ? esc_url_raw( wp_unslash( $_POST['plugin_url'] ) ) : '';
+				$plugin_slug = ( isset( $_POST['plugin_slug'] ) ) ? sanitize_textarea_field( wp_unslash( $_POST['plugin_slug'] ) ) : '';
+			} else {
+				/*
+				 * Key POSTed as an 'addon_for', try get the zip and slug.
+				 *
+				 * @since 4.0.2
+				 */
+				$addon = sanitize_text_field( wp_unslash( $_POST['addon_for'] ) );
+				foreach ( $predefined_plugins as $plugin ) {
+					if ( strtolower( $plugin['addon_for'] ) === $addon ) {
+						$plugin_zip  = $plugin['plugin_url'];
+						$plugin_slug = $plugin['plugin_slug'];
+					}
+				}
+			}
 
 			// validate that the plugin is in the allowed list.
 			$valid = false;

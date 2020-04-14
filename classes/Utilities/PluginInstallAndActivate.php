@@ -126,14 +126,17 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 		 */
 		public static function get_installable_plugins() {
 			$plugins = array(
-				// array(
-				// 	'title'          => 'BBPress Add-on',
-				// 	'image_filename' => 'bbpress.png',
-				// 	'plugin_slug'    => 'wp-bootstrap-blocks/wp-bootstrap-blocks.php',
-				// 	'plugin_url'     => 'https://downloads.wordpress.org/plugin/wp-bootstrap-blocks.latest-stable.zip', // TODO: make this match live url.
-				// 	'event_tab_id'   => '#tab-bbpress-forums',
-				// ),
 				array(
+					'addon_for'          => 'bbpress',
+					'title'              => 'BBPress Add-on',
+					'image_filename'     => 'bbpress.png',
+					'plugin_slug'        => 'wp-security-audit-log-add-on-for-bbpress/wsal-bbpress.php',
+					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-bbpress.latest-stable.zip',
+					'event_tab_id'       => '#tab-bbpress-forums',
+					'plugin_description' => 'Keep a log of your sites bbPress activity, from forum and topic creation, user profile changes and more.',
+				),
+				array(
+					'addon_for'          => 'wpforms',
 					'title'              => 'WPForms',
 					'image_filename'     => 'wpforms.png',
 					'plugin_slug'        => 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php',

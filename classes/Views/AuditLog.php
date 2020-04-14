@@ -948,15 +948,29 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			true
 		);
 		$audit_log_data = array(
-			'page'           => isset( $this->page_args->page ) ? $this->page_args->page : false,
-			'siteId'         => isset( $this->page_args->site_id ) ? $this->page_args->site_id : false,
-			'orderBy'        => isset( $this->page_args->order_by ) ? $this->page_args->order_by : false,
-			'order'          => isset( $this->page_args->order ) ? $this->page_args->order : false,
-			'searchTerm'     => isset( $this->page_args->search_term ) ? $this->page_args->search_term : false,
-			'searchFilters'  => isset( $this->page_args->search_filters ) ? $this->page_args->search_filters : false,
-			'viewerNonce'    => wp_create_nonce( 'wsal_auditlog_viewer_nonce' ),
-			'infiniteScroll' => $this->_plugin->settings->is_infinite_scroll(),
-			'userView'       => ( in_array( $this->user_last_view, $this->supported_view_types(), true ) ) ? $this->user_last_view : 'list',
+			'page'                => isset( $this->page_args->page ) ? $this->page_args->page : false,
+			'siteId'              => isset( $this->page_args->site_id ) ? $this->page_args->site_id : false,
+			'orderBy'             => isset( $this->page_args->order_by ) ? $this->page_args->order_by : false,
+			'order'               => isset( $this->page_args->order ) ? $this->page_args->order : false,
+			'searchTerm'          => isset( $this->page_args->search_term ) ? $this->page_args->search_term : false,
+			'searchFilters'       => isset( $this->page_args->search_filters ) ? $this->page_args->search_filters : false,
+			'viewerNonce'         => wp_create_nonce( 'wsal_auditlog_viewer_nonce' ),
+			'infiniteScroll'      => $this->_plugin->settings->is_infinite_scroll(),
+			'userView'            => ( in_array( $this->user_last_view, $this->supported_view_types(), true ) ) ? $this->user_last_view : 'list',
+			'installAddonStrings' => array(
+				'defaultButton'   => esc_html( 'Install and activate add-on', 'wp-security-audit-log' ),
+				'installingText'  => esc_html( 'Installing add-on', 'wp-security-audit-log' ),
+				'otherInstalling' => esc_html( 'Other add-on installing', 'wp-security-audit-log' ),
+				'addonInstalled'  => esc_html( 'Installed', 'wp-security-audit-log' ),
+				'installedReload' => esc_html( 'Installed... reloading page', 'wp-security-audit-log' ),
+				'buttonError'     => esc_html( 'Problem enabling', 'wp-security-audit-log' ),
+				'msgError'        => sprintf(
+					/* translators: 1 - an opening link tag, 2 - the closing tag. */
+					__( '<br>An error occured when trying to install and activate the plugin. Please try install it again from the %1$sevent settings%2$s page.', 'wp-security-audit-log' ),
+					'<a href="' . esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', admin_url( 'admin.php' ) ) ) . '">',
+					'</a>'
+				),
+			),
 		);
 		wp_localize_script( 'auditlog', 'wsalAuditLogArgs', $audit_log_data );
 		wp_enqueue_script( 'auditlog' );

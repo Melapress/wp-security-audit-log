@@ -456,6 +456,14 @@ function wsalLoadEvents( pageNumber ) {
 				wsalLoadEventsResponse = false;
 				jQuery( '#wsal-auditlog-end' ).show( 'fast' );
 			}
+
+			// need to bind a click handler to this button if any more have been added.
+			jQuery( '.wsal-addon-install-trigger' ).unbind( 'click' );
+			jQuery( '.wsal-addon-install-trigger' ).click(
+				function( e ) {
+					wsal_addon_installer_ajax( this );
+				}
+			);
 		},
 		error: function( xhr, textStatus, error ) {
 			console.log( xhr.statusText );
@@ -498,6 +506,30 @@ jQuery( document ).ready( function() {
 	});
 
 	/**
+	 * Trigger to attempt to install a missing addon.
+	 */
+	jQuery( '.wsal-addon-install-trigger' ).click(
+		function() {
+			var button = this;
+			wsal_addon_installer_ajax( button );
+			// disable this button.
+			jQuery( '.wsal-addon-install-trigger' ).attr( 'disabled', true );
+			jQuery( '.wsal-addon-install-trigger:not([data-addon-name="' + jQuery( this ).data( 'addon-name' ) + '"])' ).text( wsalAuditLogArgs.installAddonStrings.otherInstalling );
+			jQuery( button ).text( wsalAuditLogArgs.installAddonStrings.installingText );
+			spinner = document.createElement( 'span' );
+			jQuery( spinner ).addClass( 'spinner is-active' );
+			jQuery( spinner ).css(
+				{
+					'float':'none',
+					'margin': '0',
+					'margin-left': '5px'
+				}
+			);
+			jQuery( button ).after( spinner );
+		}
+	);
+
+	/**
 	 * Load events for Infinite Scroll.
 	 *
 	 * @since 3.3.1.1
@@ -514,3 +546,39 @@ jQuery( document ).ready( function() {
 		});
 	}
 });
+
+function wsal_addon_installer_ajax( button ) {
+	jQuery.ajax(
+		{
+			type: 'POST',
+			url: ajaxurl,
+			async: true,
+			data: {
+				action: 'wsal_run_addon_install',
+				_wpnonce: jQuery( button ).data( 'nonce' ),
+				addon_for: jQuery( button ).data( 'addon-name' )
+			},
+			success: function( data ) {
+				console.log( data );
+				jQuery( button ).next( '.spinner' ).remove();
+				if ( data.success === 'undefined' || data.success === false ) {
+					jQuery( button ).after( wsalAuditLogArgs.installAddonStrings.errorInstalling );
+				} else {
+					jQuery( '.wsal-addon-install-trigger[data-addon-name="' + jQuery( button ).data( 'addon-name' ) + '"]' ).text( wsalAuditLogArgs.installAddonStrings.addonInstalled );
+					jQuery( '.wsal-addon-install-trigger:not([data-addon-name="' + jQuery( button ).data( 'addon-name' ) + '"])' ).attr( 'disabled', false );
+					jQuery( button ).text( wsalAuditLogArgs.installAddonStrings.installedReload );
+					jQuery( button ).attr( 'disabled', true );
+					location.reload();
+				}
+
+			},
+			error: function( xhr, textStatus, error ) {
+				jQuery( button ).after( wsalAuditLogArgs.installAddonStrings.errorInstalling );
+				jQuery( button ).next( '.spinner' ).remove();
+				console.log( xhr.statusText );
+				console.log( textStatus );
+				console.log( error );
+			}
+		}
+	);
+}
