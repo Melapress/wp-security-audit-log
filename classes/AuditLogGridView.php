@@ -582,9 +582,9 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 
 
-				$eventobj = isset( $this->item_meta[ $item->getId() ]['Object'] ) ? $this->_plugin->alerts->get_display_object_text( $this->item_meta[ $item->getId() ]['Object'] ) : '';
+				$eventobj = isset( $this->item_meta[ $item->getId() ]['Object'] ) ? $this->_plugin->alerts->get_event_objects_data( $this->item_meta[ $item->getId() ]['Object'] ) : '';
 
-				$eventtypeobj = isset( $this->item_meta[ $item->getId() ]['EventType'] ) ? $this->_plugin->alerts->get_display_event_type_text( $this->item_meta[ $item->getId() ]['EventType'] ) : '';
+				$eventtypeobj = isset( $this->item_meta[ $item->getId() ]['EventType'] ) ? $this->_plugin->alerts->get_event_type_data( $this->item_meta[ $item->getId() ]['EventType'] ) : '';
 
 				ob_start();
 				?>

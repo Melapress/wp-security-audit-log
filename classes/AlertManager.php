@@ -1088,9 +1088,12 @@ final class WSAL_AlertManager {
 	/**
 	 * Get event objects.
 	 *
-	 * @return array
+	 * @since 4.0.3 - added param to request an individual object.
+	 * @param string $object An object the string is requested for (optional).
+	 *
+	 * @return array|string
 	 */
-	public function get_event_objects_data() {
+	public function get_event_objects_data( $object = '' ) {
 		$objects = array(
 			'user'                 => __( 'User', 'wp-security-audit-log' ),
 			'system'               => __( 'System', 'wp-security-audit-log' ),
@@ -1121,107 +1124,55 @@ final class WSAL_AlertManager {
 			'ip-address'           => __( 'IP Address', 'wp-security-audit-log' ),
 		);
 		asort( $objects );
-		return apply_filters(
+		$objects = apply_filters(
 			'wsal_event_objects',
 			$objects
 		);
+
+		/**
+		 * If a specific object was requested then try return that otherwise
+		 * the full array gets returned.
+		 *
+		 * @since 4.0.3
+		 */
+		if ( ! empty( $object ) ) {
+			// NOTE: if we requested object doesn't exist returns 'unknown object'.
+			return ( isset( $objects[ $object ] ) ) ? $objects[ $object ] : __( 'unknown object', 'wp-security-audit-log' );
+		}
+
+		// if a specific object was not requested return the full array.
+		return $objects;
 	}
 
 	/**
 	 * Returns the text to display for object.
 	 *
-	 * @param string $object - Object.
+	 * @deprecated 4.0.3 - please use get_event_objects_data() directly.
+	 * @since 4.0.3 - adjusted to return directly from companion data method.
+	 *
+	 * NOTE: along with this depreciation the filter `wsal_event_object_text`
+	 * is being removed, use `wsal_event_objects` filter instead.
+	 *
+	 * @TODO: this is to be removed shortly after version 4.0.3 - after other
+	 * plugins have had a chance to adjust to using the get_event_objects_data()
+	 * function directly.
+	 *
+	 * @param string $object - Object type.
 	 * @return string
 	 */
 	public function get_display_object_text( $object ) {
-		$display = '';
-
-		switch ( $object ) {
-			case 'user':
-				$display = __( 'User', 'wp-security-audit-log' );
-				break;
-			case 'system':
-				$display = __( 'System', 'wp-security-audit-log' );
-				break;
-			case 'plugin':
-				$display = __( 'Plugin', 'wp-security-audit-log' );
-				break;
-			case 'database':
-				$display = __( 'Database', 'wp-security-audit-log' );
-				break;
-			case 'post':
-				$display = __( 'Post', 'wp-security-audit-log' );
-				break;
-			case 'file':
-				$display = __( 'File', 'wp-security-audit-log' );
-				break;
-			case 'tag':
-				$display = __( 'Tag', 'wp-security-audit-log' );
-				break;
-			case 'comment':
-				$display = __( 'Comment', 'wp-security-audit-log' );
-				break;
-			case 'setting':
-				$display = __( 'Setting', 'wp-security-audit-log' );
-				break;
-			case 'file':
-				$display = __( 'File', 'wp-security-audit-log' );
-				break;
-			case 'system-setting':
-				$display = __( 'System Setting', 'wp-security-audit-log' );
-				break;
-			case 'woocommerce-product':
-				$display = __( 'WooCommerce Product', 'wp-security-audit-log' );
-				break;
-			case 'woocommerce-store':
-				$display = __( 'WooCommerce Store', 'wp-security-audit-log' );
-				break;
-			case 'mainwp-network':
-				$display = __( 'MainWP Network', 'wp-security-audit-log' );
-				break;
-			case 'mainwp':
-				$display = __( 'MainWP', 'wp-security-audit-log' );
-				break;
-			case 'yoast-seo':
-				$display = __( 'Yoast SEO', 'wp-security-audit-log' );
-				break;
-			case 'category':
-				$display = __( 'Category', 'wp-security-audit-log' );
-				break;
-			case 'custom-field':
-				$display = __( 'Custom Field', 'wp-security-audit-log' );
-				break;
-			case 'widget':
-				$display = __( 'Widget', 'wp-security-audit-log' );
-				break;
-			case 'menu':
-				$display = __( 'Menu', 'wp-security-audit-log' );
-				break;
-			case 'theme':
-				$display = __( 'Theme', 'wp-security-audit-log' );
-				break;
-			case 'activity-logs':
-				$display = __( 'Activity Logs', 'wp-security-audit-log' );
-				break;
-			case 'multisite-network':
-				$display = __( 'Multisite Network', 'wp-security-audit-log' );
-				break;
-			case 'ip-address':
-				$display = __( 'IP Address', 'wp-security-audit-log' );
-				break;
-			default:
-				break;
-		}
-
-		return apply_filters( 'wsal_event_object_text', $display, $object );
+		return get_event_objects_data( $object );
 	}
 
 	/**
-	 * Get event type data.
+	 * Get event type data array or optionally just value of a single type.
 	 *
-	 * @return array
+	 * @since 4.0.3 - added param to request an individual type.
+	 * @param string $type A type that the string is requested for (optional).
+	 *
+	 * @return array|string
 	 */
-	public function get_event_type_data() {
+	public function get_event_type_data( $type = '' ) {
 		$types = array(
 			'login'        => __( 'Login', 'wp-security-audit-log' ),
 			'logout'       => __( 'Logout', 'wp-security-audit-log' ),
@@ -1249,116 +1200,51 @@ final class WSAL_AlertManager {
 			'stopped'      => __( 'Stopped', 'wp-security-audit-log' ),
 			'removed'      => __( 'Removed', 'wp-security-audit-log' ),
 			'unblocked'    => __( 'Unblocked', 'wp-security-audit-log' ),
-			'renamed'    	 => __( 'Renamed', 'wp-security-audit-log' ),
+			'renamed'      => __( 'Renamed', 'wp-security-audit-log' ),
 			'duplicated'   => __( 'Duplicated', 'wp-security-audit-log' ),
 		);
 		// sort the types alphabetically.
 		asort( $types );
-		return apply_filters(
+		$types = apply_filters(
 			'wsal_event_type_data',
 			$types
 		);
+
+		/**
+		 * If a specific type was requested then try return that otherwise the
+		 * full array gets returned.
+		 *
+		 * @since 4.0.3
+		 */
+		if ( ! empty( $type ) ) {
+			// NOTE: if we requested type doesn't exist returns 'unknown type'.
+			return ( isset( $types[ $type ] ) ) ? $types[ $type ] : __( 'unknown type', 'wp-security-audit-log' );
+		}
+
+		// if a specific type was not requested return the full array.
+		return $types;
+
 	}
 
 	/**
 	 * Returns the text to display for event type.
 	 *
+	 * @deprecated 4.0.3 - please use get_event_type_data() directly.
+	 * @since 4.0.3 - adjusted to return directly from companion data method.
+	 *
+	 * NOTE: along with this depreciation the filter `wsal_event_type_text` is
+	 * being removed, use `wsal_event_type_data` filter instead.
+	 *
+	 * @TODO: this is to be removed shortly after version 4.0.3 - after other
+	 * plugins have had a chance to adjust to using the get_event_type_data()
+	 * function directly.
+	 *
 	 * @param string $event_type - Event type.
 	 * @return string
 	 */
 	public function get_display_event_type_text( $event_type ) {
-		$display = '';
-
-		switch ( $event_type ) {
-			case 'login':
-				$display = __( 'Login', 'wp-security-audit-log' );
-				break;
-			case 'logout':
-				$display = __( 'Logout', 'wp-security-audit-log' );
-				break;
-			case 'installed':
-				$display = __( 'Installed', 'wp-security-audit-log' );
-				break;
-			case 'activated':
-				$display = __( 'Activated', 'wp-security-audit-log' );
-				break;
-			case 'deactivated':
-				$display = __( 'Deactivated', 'wp-security-audit-log' );
-				break;
-			case 'uninstalled':
-				$display = __( 'Uninstalled', 'wp-security-audit-log' );
-				break;
-			case 'updated':
-				$display = __( 'Updated', 'wp-security-audit-log' );
-				break;
-			case 'created':
-				$display = __( 'Created', 'wp-security-audit-log' );
-				break;
-			case 'modified':
-				$display = __( 'Modified', 'wp-security-audit-log' );
-				break;
-			case 'deleted':
-				$display = __( 'Deleted', 'wp-security-audit-log' );
-				break;
-			case 'published':
-				$display = __( 'Published', 'wp-security-audit-log' );
-				break;
-			case 'approved':
-				$display = __( 'Approved', 'wp-security-audit-log' );
-				break;
-			case 'unapproved':
-				$display = __( 'Unapproved', 'wp-security-audit-log' );
-				break;
-			case 'enabled':
-				$display = __( 'Enabled', 'wp-security-audit-log' );
-				break;
-			case 'disabled':
-				$display = __( 'Disabled', 'wp-security-audit-log' );
-				break;
-			case 'added':
-				$display = __( 'Added', 'wp-security-audit-log' );
-				break;
-			case 'failed-login':
-				$display = __( 'Failed Login', 'wp-security-audit-log' );
-				break;
-			case 'blocked':
-				$display = __( 'Blocked', 'wp-security-audit-log' );
-				break;
-			case 'uploaded':
-				$display = __( 'Uploaded', 'wp-security-audit-log' );
-				break;
-			case 'restored':
-				$display = __( 'Restored', 'wp-security-audit-log' );
-				break;
-			case 'opened':
-				$display = __( 'Opened', 'wp-security-audit-log' );
-				break;
-			case 'viewed':
-				$display = __( 'Viewed', 'wp-security-audit-log' );
-				break;
-			case 'started':
-				$display = __( 'Started', 'wp-security-audit-log' );
-				break;
-			case 'stopped':
-				$display = __( 'Stopped', 'wp-security-audit-log' );
-				break;
-			case 'removed':
-				$display = __( 'Removed', 'wp-security-audit-log' );
-				break;
-			case 'unblocked':
-				$display = __( 'Unblocked', 'wp-security-audit-log' );
-				break;
-			case 'renamed':
-				$display = __( 'Renamed', 'wp-security-audit-log' );
-				break;
-			case 'duplicated':
-				$display = __( 'Duplicated', 'wp-security-audit-log' );
-				break;
-			default:
-				break;
-		}
-
-		return apply_filters( 'wsal_event_type_text', $display, $event_type );
+		// Try get string from the companion data method.
+		return get_event_type_data( $event_type );
 	}
 
 	/**
