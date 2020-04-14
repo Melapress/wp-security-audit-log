@@ -136,6 +136,26 @@ final class WSAL_Views_SetupWizard {
 			return;
 		}
 
+		// Grab list of instaleld plugins.
+		$all_plugins      = get_plugins();
+		$plugin_filenames = array();
+		foreach ( $all_plugins as $plugin => $info ) {
+			// here we strip all of the plugin slug, leaving just the filename itself. Neat!
+			$plugin_filenames[] = preg_replace( '/\\.[^.\\s]{3,4}$/', '', substr( basename( json_encode( $plugin ) ), 0, -1 ) );
+		}
+
+		// Grab list of plugins we have addons for.
+		$predefined_plugins = WSAL_PluginInstallAndActivate::get_installable_plugins();
+		$predefined_plugins = array_column( $predefined_plugins, 'addon_for' );
+
+		// Loop through plugins and create an array of slugs, we will compare these agains the plugins we have addons for.
+		$we_have_addon = array_intersect( $plugin_filenames, $predefined_plugins );
+
+		// Check if we have a match, if so, lets fire up out nifty slide.
+		if ( ! empty( $we_have_addon ) ) {
+			add_filter( 'wsal_wizard_default_steps', array( $this, 'wsal_add_wizard_step' ) );
+		}
+
 		/**
 		 * Wizard Steps.
 		 */
@@ -207,13 +227,21 @@ final class WSAL_Views_SetupWizard {
 		/**
 		 * Enqueue Scripts.
 		 */
+		 wp_register_script(
+ 			'wsal-wizard-js',
+ 			$this->wsal->GetBaseUrl() . '/js/dist/wsal-wizard.min.js',
+ 			array(  ),
+ 			filemtime( $this->wsal->GetBaseDir() . 'js/dist/wsal-wizard.min.js' ),
+ 			false
+ 		);
+
 		wp_register_script(
-			'wsal-wizard-js',
-			$this->wsal->GetBaseUrl() . '/js/dist/wsal-wizard.min.js',
-			array(),
-			filemtime( $this->wsal->GetBaseDir() . 'js/dist/wsal-wizard.min.js' ),
-			false
-		);
+			'wsal-common',
+			$this->wsal->GetBaseUrl() . '/js/common.js',
+			array( 'jquery' ),
+			filemtime( $this->wsal->GetBaseDir() . '/js/common.js' ),
+			true
+ 		);
 
 		// Data array.
 		$data_array = array(
@@ -224,6 +252,17 @@ final class WSAL_Views_SetupWizard {
 			'ipError'    => esc_html__( 'Specified value in not an IP address.', 'wp-security-audit-log' ),
 		);
 		wp_localize_script( 'wsal-wizard-js', 'wsalData', $data_array );
+
+		$installer_script_data = array(
+			'ajaxURL'           => admin_url( 'admin-ajax.php' ),
+			'installing'        => __( 'Installing, please wait', 'wp-security-audit-log' ),
+			'already_installed' => __( 'Already installed', 'wp-security-audit-log' ),
+			'installed'         => __( 'Add-on installed', 'wp-security-audit-log' ),
+			'activated'         => __( 'Add-on activated', 'wp-security-audit-log' ),
+			'failed'            => __( 'Install failed', 'wp-security-audit-log' ),
+		);
+		wp_localize_script( 'wsal-common', 'wsalCommonData', $installer_script_data );
+
 
 		/**
 		 * Save Wizard Settings.
@@ -252,6 +291,8 @@ final class WSAL_Views_SetupWizard {
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 			<title><?php esc_html_e( 'WP Security Audit Log &rsaquo; Setup Wizard', 'wp-security-audit-log' ); ?></title>
 			<?php wp_print_scripts( 'wsal-wizard-js' ); ?>
+			<?php wp_print_scripts( 'wsal-common' ); ?>
+
 			<?php do_action( 'admin_print_styles' ); ?>
 			<?php do_action( 'admin_head' ); ?>
 		</head>
@@ -759,4 +800,94 @@ final class WSAL_Views_SetupWizard {
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
 		exit();
 	}
+
+	/**
+	 * 3rd Party plugins
+	 */
+	function wsal_add_wizard_step( $wizard_steps ) {
+		$new_wizard_steps = array(
+			'test'        => array(
+				'name'    => __( 'Third Party Add-ons', 'wp-security-audit-log' ),
+				'content' => array( $this, 'addons_step' ),
+				'save'    => array( $this, 'addons_step_save' ),
+			),
+		);
+
+		// Count number of items in the array.
+		$number_of_steps = count( $wizard_steps );
+		// Subtract 1, as we want to insert our step one before the last item.
+		$number_of_steps = $number_of_steps - 1;
+
+		// Slice the steps up, so we have 2 parts we can insert our slide between.
+		$first_part = array_slice( $wizard_steps, 0, $number_of_steps, true );
+		$last_part = array_slice( $wizard_steps, -1, 1, true  );
+
+		// combine the two arrays.
+		$wizard_steps = $first_part + $new_wizard_steps + $last_part;
+
+		return $wizard_steps;
+	}
+
+	private function addons_step() {
+		$our_plugins = WSAL_PluginInstallAndActivate::get_installable_plugins();
+		?>
+		<form method="post" class="wsal-setup-form">
+			<?php wp_nonce_field( 'wsal-step-addon' ); ?>
+			<h4><?php esc_html_e( 'Monitoring changes done in third party plugins', 'wp-security-audit-log' ); ?></h4>
+			<p><?php esc_html_e( 'We noticed that the below plugins are installed on this website. You can install our add-ons to also keep a log of changes users do on these plugins.', 'wp-security-audit-log' ); ?></p>
+			<?php
+			// Create a nonce to pass through via data attr.
+			$nonce = wp_create_nonce( 'wsal-install-addon' );
+			// Loop through plugins and output.
+			foreach ( $our_plugins as $details ) {
+				$disable_button = '';
+				if ( is_plugin_active( $details['plugin_slug'] ) ) {
+					$disable_button = 'disabled';
+				}
+				?>
+
+				<div class="addon-wrapper">
+					<img src="<?php echo esc_url( trailingslashit( WSAL_BASE_URL ) . 'img/addons/' . $details['image_filename'] ); ?>">
+					<div class="addon-content">
+						<h5><?php esc_html_e( 'Add-on for ', 'wp-security-audit-log' ); ?><?php echo esc_html( $details['title'] ); ?></h5>
+						<p><?php echo sanitize_text_field( $details['plugin_description'] ); ?></p>
+						<p><button class="install-addon button button-primary <?php echo esc_attr( $disable_button ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-plugin-slug="<?php echo esc_attr( $details['plugin_slug'] ); ?>" data-plugin-download-url="<?php echo esc_url( $details['plugin_url'] ); ?>" data-plugin-event-tab-id="<?php echo esc_attr( $details['event_tab_id'] ); ?>">
+							<?php
+							if ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && ! is_plugin_active( $details['plugin_slug'] ) ) {
+								esc_html_e( 'Add-on installed, activate now?', 'wp-security-audit-log' );
+							} elseif ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && is_plugin_active( $details['plugin_slug'] ) ) {
+								esc_html_e( 'Add-on installed', 'wp-security-audit-log' );
+							} else {
+									esc_html_e( 'Install Add-on', 'wp-security-audit-log' );
+							}
+							?>
+						</button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span></p>
+					</div>
+				</div>
+				<?php
+				}
+				?>
+				<div class="wsal-setup-actions">
+					<button class="button button-primary"
+						type="submit"
+						name="save_step"
+						value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>">
+						<?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?>
+					</button>
+				</div>
+			</form>
+		<?php
+	}
+
+	/**
+	 * Step Save: `Addons`
+	 */
+	private function addons_step_save() {
+		// Check nonce.
+		check_admin_referer( 'wsal-step-addon' );
+
+		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
+		exit();
+	}
+
 }

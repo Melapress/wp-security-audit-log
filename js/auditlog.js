@@ -506,6 +506,29 @@ jQuery( document ).ready( function() {
 	});
 
 	/**
+	 * Dismiss addon-available notice.
+	 */
+	jQuery( '#wsal-notice-addon-available .notice-dismiss' ).click( function() {
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			async: true,
+			data: {
+				action: 'wsal_dismiss_notice_addon_available',
+				nonce: jQuery( '#wsal-dismiss-notice-addon-available' ).val()
+			},
+			success: function( data ) {
+				console.log( data );
+			},
+			error: function( xhr, textStatus, error ) {
+				console.log( xhr.statusText );
+				console.log( textStatus );
+				console.log( error );
+			}
+		});
+	});
+
+	/**
 	 * Trigger to attempt to install a missing addon.
 	 */
 	jQuery( '.wsal-addon-install-trigger' ).click(

@@ -79,6 +79,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_exclude_url', array( $this, 'wsal_exclude_url' ) );
 		add_action( 'wp_ajax_wsal_dismiss_advert', array( $this, 'wsal_dismiss_advert' ) );
 		add_action( 'wp_ajax_wsal_dismiss_notice_disconnect', array( $this, 'dismiss_notice_disconnect' ) );
+		add_action( 'wp_ajax_wsal_dismiss_notice_addon_available', array( $this, 'dismiss_notice_addon_available' ) );
 		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( $this, 'dismiss_wp_pointer' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
@@ -241,6 +242,63 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				endif;
 			}
 		}
+
+		// Display add-on available notice.
+		$screen = get_current_screen();
+		$notice_already_dismissed = get_option( 'wsal_addon_available_notice_dismissed' );
+		if ( $screen->base === 'toplevel_page_wsal-auditlog' && $is_current_view && ! $notice_already_dismissed ) {
+			$addons_available         = get_option( 'wsal_installed_plugin_addon_available' );
+			$all_plugins              = get_plugins();
+			$all_plugins              = array_keys( $all_plugins );
+			$predefined_plugins       = WSAL_PluginInstallAndActivate::get_installable_plugins();
+			$predefined_plugins_slugs = array_column( $predefined_plugins, 'plugin_slug' );
+			$is_addon_installed       = array_intersect( $all_plugins, $predefined_plugins_slugs );
+			$display_notice           = false;
+
+			if ( isset( $addons_available ) && is_array( $addons_available ) ) {
+				$addon_names = '';
+				$i           = 0;
+				foreach ( $addons_available as $addon ) {
+					$addon_slug         = array( array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ) );
+					$is_addon_installed = array_intersect( $all_plugins, $addon_slug );
+
+					if ( empty( $is_addon_installed ) ) {
+						$addon = str_replace( '-', ' ', $addon);
+						if ( $addon === 'bbpress' ) {
+							$addon = 'bbPress';
+						}
+						if ( $addon === 'wpforms' ) {
+							$addon = 'WPForms';
+						}
+						if ( empty( $addon_names ) ) {
+							$addon_names .= $addon;
+							$button_label = esc_html__( 'Install add-on', 'wp-2fa' );
+						} else {
+							$addon_names .= ' & ' .$addon;
+							$button_label = esc_html__( 'Install add-ons', 'wp-2fa' );
+						}
+						$display_notice = true;
+					}
+					$i++;
+				}
+				?>
+				<?php if ( $display_notice ) : ?>
+				<div class="notice notice-information is-dismissible" id="wsal-notice-addon-available">
+					<p><?php $message = printf(
+						/* translators: %1$s: is the user name, %2$s is the website name */
+						'%1$s %2$s %3$s %4$s. <a href="%6$s" class="button button-primary">%5$s</a>',
+						esc_html__( 'You have', 'wp-2fa' ),
+						$addon_names,
+						esc_html__( 'installed. Keep a log of changes in', 'wp-2fa' ),
+						$addon_names,
+						$button_label,
+						esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', admin_url( 'admin.php' ) ) )
+					); ?></p>
+					<?php wp_nonce_field( 'wsal_dismiss_notice_addon_available', 'wsal-dismiss-notice-addon-available', false, true ); ?>
+				</div>
+				<?php endif;
+			}
+		}
 	}
 
 	/**
@@ -260,6 +318,25 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 		die( 'Nonce verification failed!' );
 	}
+
+	/**
+	 * Method: Ajax handler for dismissing addon notice.
+	 */
+	public function dismiss_notice_addon_available() {
+		// Get $_POST array arguments.
+		$post_array_args = array(
+			'nonce' => FILTER_SANITIZE_STRING,
+		);
+		$post_array      = filter_input_array( INPUT_POST, $post_array_args );
+
+		// Verify nonce.
+		if ( wp_verify_nonce( $post_array['nonce'], 'wsal_dismiss_notice_addon_available' ) ) {
+			add_option( 'wsal_addon_available_notice_dismissed', true );
+			die();
+		}
+		die( 'Nonce verification failed!' );
+	}
+
 
 	/**
 	 * Method: Check if view has shortcut link.

@@ -27,7 +27,7 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 		 * @param  string $plugin_slug installed plugin slug.
 		 * @return void|bool
 		 */
-		public function is_plugin_installed( $plugin_slug = '' ) {
+		public static function is_plugin_installed( $plugin_slug = '' ) {
 			// bail early if we don't have a slug to work with.
 			if ( empty( $plugin_slug ) ) {
 				return;
