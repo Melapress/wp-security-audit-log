@@ -674,10 +674,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						break;
 
 					case 'latest_event':
-						$event_query = new WSAL_Models_OccurrenceQuery();
-						$event_query->addOrderBy( 'created_on', true );
-						$event_query->setLimit( 1 );
-						$event = $event_query->getAdapter()->Execute( $event_query );
+						// run the query and return it.
+						$event = $this->query_for_latest_event();
+						$event->getAdapter()->Execute( $event );
 
 						// Set the return object.
 						if ( isset( $event[0] ) ) {
@@ -694,6 +693,22 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				}
 			}
 			return $info;
+		}
+
+		/**
+		 * Performs a query to retrieve the latest event in the logs.
+		 *
+		 * @method query_for_latest_event
+		 * @since  4.0.3
+		 * @return array
+		 */
+		public function query_for_latest_event() {
+			$event_query = new WSAL_Models_OccurrenceQuery();
+			// order by creation.
+			$event_query->addOrderBy( 'created_on', true );
+			// only request 1 item.
+			$event_query->setLimit( 1 );
+			return $event_query;
 		}
 
 		/**
@@ -783,6 +798,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! defined( 'WSAL_CLASS_PREFIX' ) ) {
 				define( 'WSAL_CLASS_PREFIX', 'WSAL_' );
 			}
+		}
+
+		/**
+		 * Method: Include extensions for premium version.
+		 *
+		 * @since 2.7.0
+		 */
+		public function include_extensions__premium_only() {
+			/**
+			 * Class for extensions managment.
+			 *
+			 * @since 2.7.0
+			 */
+			if ( file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
+				require_once WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php';
+			}
+
+			// Initiate the extensions manager.
+			$this->extensions = new WSAL_Extension_Manager( $this );
 		}
 
 		/**
