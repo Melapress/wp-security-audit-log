@@ -96,18 +96,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public $constants;
 
 		/**
-		 * Licenses manager.
 		 *
-		 * @var WSAL_LicenseManager
 		 */
-		public $licensing;
 
 		/**
-		 * Options.
 		 *
-		 * @var WSAL_Models_Option
 		 */
-		public $options;
 
 		/**
 		 * Contains a list of cleanup callbacks.
@@ -343,7 +337,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// Managers.
 				require_once 'classes/ViewManager.php';
-				require_once 'classes/LicenseManager.php';
 				require_once 'classes/WidgetManager.php';
 
 				// Views.
@@ -354,7 +347,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				require_once 'classes/Views/EmailNotifications.php';
 				require_once 'classes/Views/ExternalDB.php';
 				require_once 'classes/Views/Help.php';
-				require_once 'classes/Views/Licensing.php';
 				require_once 'classes/Views/LogInUsers.php';
 				require_once 'classes/Views/Reports.php';
 				require_once 'classes/Views/Search.php';
@@ -947,7 +939,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			if ( is_admin() ) {
 				$this->views     = new WSAL_ViewManager( $this );
-				$this->licensing = new WSAL_LicenseManager( $this );
 				$this->widgets   = new WSAL_WidgetManager( $this );
 			}
 

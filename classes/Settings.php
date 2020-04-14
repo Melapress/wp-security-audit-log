@@ -464,8 +464,6 @@ class WSAL_Settings {
 	 * @deprecated
 	 */
 	public function IsSandboxPageEnabled() {
-		// $plugins = $this->_plugin->licensing->plugins();
-		// return isset($plugins['wsal-sandbox-extensionphp']);
 		return esc_html__( 'This function is deprecated', 'wp-security-audit-log' );
 	}
 
@@ -765,66 +763,6 @@ class WSAL_Settings {
 	public function IsLoginSuperAdmin( $username ) {
 		$user_id = username_exists( $username );
 		return function_exists( 'is_super_admin' ) && is_super_admin( $user_id );
-	}
-
-	public function GetLicenses() {
-		return $this->_plugin->GetGlobalOption( 'licenses' );
-	}
-
-	public function GetLicense( $name ) {
-		$data = $this->GetLicenses();
-		$name = sanitize_key( basename( $name ) );
-		return isset( $data[ $name ] ) ? $data[ $name ] : array();
-	}
-
-	public function SetLicenses( $data ) {
-		$this->_plugin->SetGlobalOption( 'licenses', $data );
-	}
-
-	public function GetLicenseKey( $name ) {
-		$data = $this->GetLicense( $name );
-		return isset( $data['key'] ) ? $data['key'] : '';
-	}
-
-	public function GetLicenseStatus( $name ) {
-		$data = $this->GetLicense( $name );
-		return isset( $data['sts'] ) ? $data['sts'] : '';
-	}
-
-	public function GetLicenseErrors( $name ) {
-		$data = $this->GetLicense( $name );
-		return isset( $data['err'] ) ? $data['err'] : '';
-	}
-
-	public function SetLicenseKey( $name, $key ) {
-		$data = $this->GetLicenses();
-		if ( ! isset( $data[ $name ] ) ) {
-			$data[ $name ] = array();
-		}
-		$data[ $name ]['key'] = $key;
-		$this->SetLicenses( $data );
-	}
-
-	public function SetLicenseStatus( $name, $status ) {
-		$data = $this->GetLicenses();
-		if ( ! isset( $data[ $name ] ) ) {
-			$data[ $name ] = array();
-		}
-		$data[ $name ]['sts'] = $status;
-		$this->SetLicenses( $data );
-	}
-
-	public function SetLicenseErrors( $name, $errors ) {
-		$data = $this->GetLicenses();
-		if ( ! isset( $data[ $name ] ) ) {
-			$data[ $name ] = array();
-		}
-		$data[ $name ]['err'] = $errors;
-		$this->SetLicenses( $data );
-	}
-
-	public function ClearLicenses() {
-		$this->SetLicenses( array() );
 	}
 
 	public function IsMainIPFromProxy() {
