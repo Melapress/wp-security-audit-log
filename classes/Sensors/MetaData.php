@@ -364,21 +364,23 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				continue;
 			}
 
-			$this->plugin->alerts->Trigger(
-				2055,
-				array(
-					'PostID'             => $object_id,
-					'PostTitle'          => $post->post_title,
-					'PostStatus'         => $post->post_status,
-					'PostType'           => $post->post_type,
-					'PostDate'           => $post->post_date,
-					'PostUrl'            => get_permalink( $post->ID ),
-					'MetaID'             => $meta_id,
-					'MetaKey'            => $meta_key,
-					'MetaValue'          => $meta_value,
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
+			if( 'trash' !== $post->post_status ) {
+				$this->plugin->alerts->Trigger(
+					2055,
+					array(
+						'PostID'             => $object_id,
+						'PostTitle'          => $post->post_title,
+						'PostStatus'         => $post->post_status,
+						'PostType'           => $post->post_type,
+						'PostDate'           => $post->post_date,
+						'PostUrl'            => get_permalink( $post->ID ),
+						'MetaID'             => $meta_id,
+						'MetaKey'            => $meta_key,
+						'MetaValue'          => $meta_value,
+						$editor_link['name'] => $editor_link['value'],
+					)
+				);
+			}
 		}
 	}
 
