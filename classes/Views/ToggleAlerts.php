@@ -188,7 +188,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$log_details     = $this->_plugin->GetGlobalOption( 'details-level', false ); // Get log level option.
 
 		$subcat_alerts   = array( 1004, 2010, 2111, 9007, 9047 );
-		$obsolete_events = array( 9999, 2126, 6023, 9011, 9070, 9075 );
+		$obsolete_events = array( 9999, 2126, 6023, 9011, 9070, 9075, 4013 );
 		?>
 		<p>
 			<form method="post" id="wsal-alerts-level">
@@ -288,17 +288,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											if ( ! is_multisite() ) {
 												$disabled = 'disabled';
 											}
-										} elseif ( 'bbPress User Profiles' === $subname ) {
-											// Check if BBPress plugin exists.
-											if ( ! WpSecurityAuditLog::is_bbpress_active() ) {
-												$disabled = 'disabled';
-											}
-										}
-										break;
-									case 'bbPress Forums':
-										// Check if BBPress plugin exists.
-										if ( ! WpSecurityAuditLog::is_bbpress_active() ) {
-											$disabled = 'disabled';
 										}
 										break;
 
@@ -343,19 +332,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										<tr>
 											<td colspan="4">
 												<p class="wsal-tab-help description"><?php echo wp_kses( __( '<strong>Note:</strong> Post refers to any type of content, i.e. blog post, page or a post with a custom post type.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
-											</td>
-										</tr>
-									<?php elseif ( __( 'BBPress Forum', 'wp-security-audit-log' ) === $subname ) : ?>
-										<?php if ( ! empty( $disabled ) ) : ?>
-											<tr>
-												<td colspan="4">
-													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'The plugin BBPress is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
-												</td>
-											</tr>
-										<?php endif; ?>
-										<tr>
-											<td colspan="4">
-												<h3 class="sub-category"><?php esc_html_e( 'Forums', 'wp-security-audit-log' ); ?></h3>
 											</td>
 										</tr>
 									<?php elseif ( __( 'WooCommerce', 'wp-security-audit-log' ) === $subname || __( 'WooCommerce Products', 'wp-security-audit-log' ) === $subname ) : ?>

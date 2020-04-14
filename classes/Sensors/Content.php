@@ -138,6 +138,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			return;
 		}
 
+		// Check other sensors.
+		if ( $this->check_other_sensors( $post ) ) {
+			return;
+		}
+
 		// Ignorable states.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			// Check post creation event.

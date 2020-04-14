@@ -1169,12 +1169,6 @@ final class WSAL_AlertManager {
 			case 'system-setting':
 				$display = __( 'System Setting', 'wp-security-audit-log' );
 				break;
-			case 'bbpress':
-				$display = __( 'BBPress', 'wp-security-audit-log' );
-				break;
-			case 'bbpress-forum':
-				$display = __( 'BBPress Forum', 'wp-security-audit-log' );
-				break;
 			case 'woocommerce-product':
 				$display = __( 'WooCommerce Product', 'wp-security-audit-log' );
 				break;
