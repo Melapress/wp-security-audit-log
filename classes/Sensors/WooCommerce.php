@@ -414,8 +414,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 		$old_cats = is_array( $old_cats ) ? implode( ', ', $old_cats ) : $old_cats;
 		$new_cats = is_array( $new_cats ) ? implode( ', ', $new_cats ) : $new_cats;
-
-		if ( $old_cats !== $new_cats ) {
+		if ( ! empty( $old_cats ) && $old_cats !== $new_cats ) {
 			$editor_link = $this->GetEditorLink( $newpost );
 			$this->plugin->alerts->Trigger(
 				9003,
@@ -507,7 +506,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function CheckPermalinkChange( $old_link, $new_link, $post ) {
-		if ( $old_link && $new_link && ( $old_link !== $new_link ) ) {
+		if ( ! empty( $old_cats ) && $old_link && $new_link && ( $old_link !== $new_link ) ) {
 			$editor_link = $this->GetEditorLink( $post );
 			$this->plugin->alerts->Trigger(
 				9006,
@@ -933,12 +932,12 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function CheckModifyChange( $oldpost, $newpost ) {
-		if ( 'trash' === $oldpost->post_status || 'trash' === $newpost->post_status ) {
+		if ( 'trash' === $oldpost->post_status || 'trash' === $newpost->post_status || 'auto-draft' === $oldpost->post_status ) {
 			return 0;
 		}
 
 		// Get Yoast alerts.
-		$yoast_alerts = $this->plugin->alerts->get_alerts_by_sub_category( 'Yoast SEO' );
+		$yoast_alerts         = $this->plugin->alerts->get_alerts_by_category( 'Yoast SEO' );
 
 		// Check all alerts.
 		foreach ( $yoast_alerts as $alert_code => $alert ) {
@@ -2350,7 +2349,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			}
 			if ( ! empty( $product->post_title ) ) {
 				$event = 9072;
-				if ( ! $this->WasTriggered( $event ) ) {
+				if ( ! $this->WasTriggered( $event ) && ! $this->WasTriggered( 9001 ) ) {
 					$editor_link = $this->GetEditorLink( $product );
 					$this->plugin->alerts->Trigger(
 						$event,
@@ -3428,6 +3427,10 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 */
 	public function log_coupon_meta_created_event( $log_event, $meta_key, $meta_value, $coupon ) {
 		if ( ! empty( $meta_key ) && 'shop_coupon' === $coupon->post_type && in_array( $meta_key, $this->coupon_meta, true ) ) {
+			return false;
+		}
+		// Do not report total sales as its added automatically when a product is published.
+		if ( ! empty( $meta_key ) && 'total_sales' === $meta_key ) {
 			return false;
 		}
 		return $log_event;
