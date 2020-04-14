@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.4
-Stable tag: 4.0.1
+Stable tag: 4.0.2
 Requires PHP: 5.5
 
 An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
@@ -156,7 +156,7 @@ We need help translating the plugin and the WordPress Security Alerts. Please vi
 #### Activity Log add-ons for third party plugins
 
 * <strong>[Activity Log for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/)</strong>: This MainWP extension allows you to keep a log of MainWP network changes and to view the activity logs of all child sites from one central location - the MainWP dashboard.
-* <strong>[Activity Log add-on for WPForms](https://www.wpsecurityauditlog.com/integrations/activity-log-wpforms/)</strong>: Install this add-on with the WP Security Audit Log to keep a log of changes in WPForms plugin, forms, form files, entries (leads) and more. 
+* <strong>[Activity Log add-on for WPForms](https://www.wpsecurityauditlog.com/integrations/activity-log-wpforms/)</strong>: Install this add-on with the WP Security Audit Log to keep a log of changes in WPForms plugin, forms, form files, entries (leads) and more.
 
 #### Related Links and Documentation
 
@@ -203,32 +203,18 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 == Changelog ==
 
-= 4.0.1 (2020-02-13) =
+= 4.0.2 (2020-02-28) =
 
-Release notes: [Update 4.0.1 - activity logs for WPForms](https://www.wpsecurityauditlog.com/releases/update-4-0-1/)
+* **Security fix**
 
-* **New features**
+	* Added authentication check for the first-time install wizard. This addresses an edge case in which if the wizard was never completed by the user, unauthenticated users could run the wizard and gain acccess to plugin settings.
 
-	* [Activity logs for WPForms](http://www.wpsecurityauditlog.com/integrations/activity-log-wpforms/'
-	* One-click installation and activation feature for new third party plugins add-ons.
-	* New Third Party Plugins tab in Enable/Disable Events section to allow users to install add-ons for third party plugins.
-	* Added the new event types "Renamed" and "Duplicated" (more on [activity log event types](https://www.wpsecurityauditlog.com/support-documentation/objects-event-types-wordpress-activity-log/)).
-	* Added several new [hooks in the plugin](https://www.wpsecurityauditlog.com/support-documentation/list-hooks/), mainly to allow custom editor link, to add custom column to the logs viewer, to add new event types and objects.
-	
 * **Improvements**
 
-	* Updated event IDs 2123, 2062, 2084, 9077 and 9071 so they now use the "Renamed" event type.
-	* Updated the [activity log severity levels](https://www.wpsecurityauditlog.com/support-documentation/severity-levels-wordpress-activity-log/' definitions in defaults.php)
-	* Updated / improved some of the help text messages.
-	* Plugin does not automatically retrieve the IP addresses and latest change of logged in users if there are 100+ sessions (performance improvement).
-	* Localized text in JS files.
-	* Started removing obsolete code.
-	* Added new filter to allow custom %EditorLinkWPForm% from custom events add-ons.
+	* Removed the setting / functionality to allow access to users with non-admin role to the plugin settings. Now users who require access to the plugin settings need to have the admin role.
+	* Removed the "activity log view access" and the "exclude objects" steps from the install wizard. These are advanced settings.
+	* Check the role of users trying to import settings file and deny if it does not have admin role.
 
-* **Bug fixes**
-
-	* Only the path of the added, modified or deleted file was reported in daily summary email.
-	
 = Earlier versions =
 
 Please refer to the [complete plugin changelog](https://www.wpsecurityauditlog.com/support-documentation/plugin-changelog/) for more detailed information about what was new, improved and fixed in previous versions of the WP Security Audit Log plugin.
