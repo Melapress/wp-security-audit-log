@@ -44,7 +44,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		'_yoast_wpseo_title'                => '',
 		'_yoast_wpseo_metadesc'             => '',
 		'_yoast_wpseo_focuskw'              => '',
-		'_yst_is_cornerstone'               => '',
+		'_yoast_wpseo_is_cornerstone'       => '',
 		'_yoast_wpseo_meta-robots-noindex'  => '',
 		'_yoast_wpseo_meta-robots-nofollow' => '',
 		'_yoast_wpseo_meta-robots-adv'      => '',
@@ -107,7 +107,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 			'_yoast_wpseo_title'                => get_post_meta( $this->post_id, '_yoast_wpseo_title', true ),
 			'_yoast_wpseo_metadesc'             => get_post_meta( $this->post_id, '_yoast_wpseo_metadesc', true ),
 			'_yoast_wpseo_focuskw'              => get_post_meta( $this->post_id, '_yoast_wpseo_focuskw', true ),
-			'_yst_is_cornerstone'               => get_post_meta( $this->post_id, '_yst_is_cornerstone', true ),
+			'_yoast_wpseo_is_cornerstone'       => get_post_meta( $this->post_id, '_yoast_wpseo_is_cornerstone', true ),
 			'_yoast_wpseo_meta-robots-noindex'  => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-noindex', true ),
 			'_yoast_wpseo_meta-robots-nofollow' => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-nofollow', true ),
 			'_yoast_wpseo_meta-robots-adv'      => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-adv', true ),
@@ -129,11 +129,6 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 
 		// Set prefix of meta data.
 		$prefix = '_yoast_wpseo_';
-
-		// Check prefix.
-		if ( 'is_cornerstone' === $key ) {
-			$prefix = '_yst_';
-		}
 
 		// Option to retrieve.
 		$option = $prefix . $key;
@@ -174,7 +169,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 			'yoast_wpseo_title'                => FILTER_SANITIZE_STRING,
 			'yoast_wpseo_metadesc'             => FILTER_SANITIZE_STRING,
 			'yoast_wpseo_focuskw'              => FILTER_SANITIZE_STRING,
-			'_yst_is_cornerstone'              => FILTER_VALIDATE_INT,
+			'yoast_wpseo_is_cornerstone'       => FILTER_VALIDATE_BOOLEAN,
 			'yoast_wpseo_meta-robots-noindex'  => FILTER_VALIDATE_INT,
 			'yoast_wpseo_meta-robots-nofollow' => FILTER_VALIDATE_INT,
 			'yoast_wpseo_meta-robots-adv'      => array(
@@ -198,7 +193,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 			$this->check_robots_advanced_change( $post_array['yoast_wpseo_meta-robots-adv'] ); // Meta Robots Advanced.
 			$this->check_canonical_url_change( $post_array['yoast_wpseo_canonical'] ); // Canonical URL.
 			$this->check_focus_keys_change( $post_array['yoast_wpseo_focuskw'] ); // Focus keywords.
-			$this->check_cornerstone_change( $post_array['_yst_is_cornerstone'] ); // Cornerstone.
+			$this->check_cornerstone_change( $post_array['yoast_wpseo_is_cornerstone'] ); // Cornerstone.
 		}
 	}
 
@@ -219,7 +214,6 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		// Remove whitespaces at the ends of the titles.
 		$old_title = trim( $old_title );
 		$title     = trim( $title );
-
 		// If title is changed then log alert.
 		if ( $old_title !== $title ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
