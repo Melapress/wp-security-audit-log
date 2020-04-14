@@ -57,12 +57,22 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 		} elseif ( ! isset( $new_wpdb->dbh ) ) {
 			$error_code = mysqli_connect_errno();
 
-			if ( 2002 === $error_code ) {
-				throw new Exception( __( 'Error establishing a database connection. Hostname is not valid.' ), $error_code );
-			} elseif ( 1045 === $error_code ) {
+			if ( 1045 === $error_code ) {
 				throw new Exception( __( 'Error establishing a database connection. DB username or password are not valid.' ), $error_code );
 			} else {
-				throw new Exception( mysqli_connect_error(), $error_code );
+				$error_message = mysqli_connect_error();
+				// if we get an error message from mysqli then use it otherwise use a generic message.
+				if ( $error_message ) {
+					throw new Exception(
+						sprintf(
+							/* translators: 1 - mysqli error code, 2 - mysqli error message */
+							__( 'Code %1$d: %2$s', 'wp-security-audit-log' ),
+							$error_code,
+							$error_message
+						),
+						$error_code
+					);
+				}
 			}
 		} elseif ( isset( $new_wpdb->db_select_error ) ) {
 			throw new Exception( 'Error: Database ' . $connection_config['name'] . ' is unknown.', '1046' );
@@ -410,7 +420,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	public function encryptString( $plaintext ) {
 		// Check for previous version.
 		$plugin  = WpSecurityAuditLog::GetInstance();
-		$version = $plugin->GetGlobalOption( 'version', '0.0.0' );
+		$version = $plugin->options_helper->get_option_value( 'version', '0.0.0' );
 
 		$ciphertext     = false;
 		$encrypt_method = 'AES-256-CBC';
@@ -451,7 +461,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	public function decryptString( $ciphertext_base64 ) {
 		// Check for previous version.
 		$plugin  = WpSecurityAuditLog::GetInstance();
-		$version = $plugin->GetGlobalOption( 'version', '0.0.0' );
+		$version = $plugin->options_helper->get_option_value( 'version', '0.0.0' );
 
 		$plaintext      = false;
 		$encrypt_method = 'AES-256-CBC';

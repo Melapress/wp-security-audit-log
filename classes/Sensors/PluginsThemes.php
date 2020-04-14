@@ -213,6 +213,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					),
 				)
 			);
+
+			$this->run_addon_check( $plugin_dir );
 		}
 
 		// Activate plugin.
@@ -261,6 +263,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							),
 						)
 					);
+
+					$this->run_addon_check( $plugin_file );
 				}
 			} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
 				foreach ( $post_array['checked'] as $plugin_file ) {
@@ -280,6 +284,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							),
 						)
 					);
+
+					$this->run_addon_check( $plugin_file );
 				}
 			}
 		}
@@ -319,6 +325,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							),
 						)
 					);
+					$this->run_addon_removal_check( $plugin_file );
 				}
 			} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
 				foreach ( $post_array['checked'] as $plugin_file ) {
@@ -337,6 +344,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							),
 						)
 					);
+					$this->run_addon_removal_check( $plugin_file );
 				}
 			}
 		}
@@ -363,6 +371,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							),
 						)
 					);
+					$this->run_addon_removal_check( $plugin_file );
 				}
 			}
 		}
@@ -392,6 +401,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 				// Remove it from the list.
 				$this->remove_site_plugin( $plugin_dir );
+
+				$this->run_addon_removal_check( $plugin_file );
 			}
 		}
 
@@ -1428,5 +1439,68 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			}
 		}
 		return $theme;
+	}
+
+	public function run_addon_check( $plugin_dir ) {
+		$plugin_filename = basename( preg_replace( '/\\.[^.\\s]{3,4}$/', '', $plugin_dir ) );
+
+		if ( is_array( $plugin_filename ) ) {
+			$plugin_filename = array_map( 'strval', $plugin_filename );
+		}
+
+		// Grab list of plugins we have addons for.
+		$predefined_plugins       = WSAL_PluginInstallAndActivate::get_installable_plugins();
+		$predefined_plugins_addon = array_column( $predefined_plugins, 'addon_for' );
+		$predefined_plugins_slugs = array_column( $predefined_plugins, 'plugin_slug' );
+		$all_plugins              = get_plugins();
+		$all_plugins              = array_keys( $all_plugins );
+
+		foreach ( $predefined_plugins_addon as $plugin ) {
+			// Check if plugin file starts with the same string as our addon_for, or if its equal.
+			if ( $plugin_filename === $plugin ) {
+				$addon_slug         = array( array_search( $plugin, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ) );
+				$is_addon_installed = array_intersect( $all_plugins, $addon_slug );
+				if ( empty( $is_addon_installed ) ) {
+					$current_value   = get_option( 'wsal_installed_plugin_addon_available' );
+					$plugin_filename = array( $plugin_filename );
+					if ( isset( $current_value ) && is_array( $current_value ) ) {
+						$new_plugin_filenames = array_unique( array_merge( $current_value, $plugin_filename ) );
+					} else {
+						$new_plugin_filenames = $plugin_filename;
+					}
+					$this->plugin->options_helper->set_option_value( 'installed_plugin_addon_available', $new_plugin_filenames );
+					delete_option( 'wsal_addon_available_notice_dismissed' );
+				}
+			}
+		}
+	}
+
+	public function run_addon_removal_check( $plugin_dir ) {
+		$plugin_filename = basename( preg_replace( '/\\.[^.\\s]{3,4}$/', '', $plugin_dir ) );
+
+		if ( is_array( $plugin_filename ) ) {
+			$plugin_filename = array_map( 'strval', $plugin_filename );
+		}
+
+		// Grab list of plugins we have addons for.
+		$predefined_plugins       = WSAL_PluginInstallAndActivate::get_installable_plugins();
+		$predefined_plugins_addon = array_column( $predefined_plugins, 'addon_for' );
+		$predefined_plugins_slugs = array_column( $predefined_plugins, 'plugin_slug' );
+		$all_plugins              = get_plugins();
+		$all_plugins              = array_keys( $all_plugins );
+
+		foreach ( $predefined_plugins_addon as $plugin ) {
+			// Check if plugin file starts with the same string as our addon_for, or if its equal.
+			if ( $plugin_filename === $plugin ) {
+				$current_installed = get_option( 'wsal_installed_plugin_addon_available' );
+				if ( isset( $current_installed ) && ! empty( $current_installed  ) ) {
+					if ( ( $key = array_search( $plugin, $current_installed ) ) !== false ) {
+						unset( $current_installed[$key] );
+					}
+				}
+
+				$this->plugin->options_helper->set_option_value( 'installed_plugin_addon_available', $current_installed );
+			}
+		}
 	}
 }

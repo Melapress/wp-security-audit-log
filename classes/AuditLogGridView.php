@@ -163,10 +163,9 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 			<div class="display-type-buttons">
 				<?php
 				$user_selected_view = $this->_plugin->views->views[0]->detect_view_type();
-				$view_link          = get_admin_url( null, 'admin.php?page=wsal-auditlog' );
 				?>
-				<a id ="wsal-list-view-toggle" href="<?php echo esc_url( add_query_arg( 'view', 'list', $view_link ) ); ?>" class="button wsal-button dashicons-before dashicons-list-view" <?php echo ( 'list' === $user_selected_view ) ? esc_attr( 'disabled' ) : ''; ?>><?php esc_html_e( 'List View', 'wp-security-audit-log' ); ?></a>
-				<a id ="wsal-grid-view-toggle" href="<?php echo esc_url( add_query_arg( 'view', 'grid', $view_link ) ); ?>" class="button wsal-button dashicons-before dashicons-grid-view" <?php echo ( 'grid' === $user_selected_view ) ? esc_attr( 'disabled' ) : ''; ?>><?php esc_html_e( 'Grid View', 'wp-security-audit-log' ); ?></a>
+				<a id ="wsal-list-view-toggle" href="<?php echo esc_url( add_query_arg( 'view', 'list' ) ); ?>" class="button wsal-button dashicons-before dashicons-list-view" <?php echo ( 'list' === $user_selected_view ) ? esc_attr( 'disabled' ) : ''; ?>><?php esc_html_e( 'List View', 'wp-security-audit-log' ); ?></a>
+				<a id ="wsal-grid-view-toggle" href="<?php echo esc_url( add_query_arg( 'view', 'grid' ) ); ?>" class="button wsal-button dashicons-before dashicons-grid-view" <?php echo ( 'grid' === $user_selected_view ) ? esc_attr( 'disabled' ) : ''; ?>><?php esc_html_e( 'Grid View', 'wp-security-audit-log' ); ?></a>
 			</div>
 			<?php
 			$this->pagination( $which );
@@ -412,9 +411,11 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
 					return '<span class="log-disable">' . str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
 				}
-
-				return '<span class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item->alert_id ) . '" data-tooltip="' . __( 'Disable this type of events.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . ' - ' . esc_html( $code->desc ) . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
+				// add description to $extra_msg only if one is available.
+				$extra_msg = ( isset( $code->desc ) ) ? ' - ' . esc_html( $code->desc ) . $extra_msg : $extra_msg;
+				return '<span class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item->alert_id ) . '" data-tooltip="' . __( 'Disable this type of events.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
 					. str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
+
 			case 'code':
 				$code  = $this->_plugin->alerts->GetAlert( $item->alert_id );
 				$code  = $code ? $code->code : 0;
@@ -581,9 +582,9 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 
 
-				$eventobj = isset( $this->item_meta[ $item->getId() ]['Object'] ) ? $this->_plugin->alerts->get_display_object_text( $this->item_meta[ $item->getId() ]['Object'] ) : '';
+				$eventobj = isset( $this->item_meta[ $item->getId() ]['Object'] ) ? $this->_plugin->alerts->get_event_objects_data( $this->item_meta[ $item->getId() ]['Object'] ) : '';
 
-				$eventtypeobj = isset( $this->item_meta[ $item->getId() ]['EventType'] ) ? $this->_plugin->alerts->get_display_event_type_text( $this->item_meta[ $item->getId() ]['EventType'] ) : '';
+				$eventtypeobj = isset( $this->item_meta[ $item->getId() ]['EventType'] ) ? $this->_plugin->alerts->get_event_type_data( $this->item_meta[ $item->getId() ]['EventType'] ) : '';
 
 				ob_start();
 				?>

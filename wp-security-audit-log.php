@@ -4,7 +4,7 @@
  * Plugin URI: http://www.wpsecurityauditlog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 4.0.2
+ * Version: 4.0.3
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -46,12 +46,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '4.0.2';
+		public $version = '4.0.3';
 
 		// Plugin constants.
 		const PLG_CLS_PRFX    = 'WSAL_';
 		const MIN_PHP_VERSION = '5.5.0';
 		const OPT_PRFX        = 'wsal-';
+		// Plugins new options prefix.
+		const OPTIONS_PREFIX = 'wsal_';
 
 		/**
 		 * Views supervisor.
@@ -96,18 +98,18 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public $constants;
 
 		/**
-		 * Licenses manager.
-		 *
-		 * @var WSAL_LicenseManager
-		 */
-		public $licensing;
-
-		/**
 		 * Options.
 		 *
 		 * @var WSAL_Models_Option
 		 */
 		public $options;
+
+		/**
+		 * WP Options table options handler.
+		 *
+		 * @var WSAL\Helpers\Options;
+		 */
+		public $options_helper;
 
 		/**
 		 * Contains a list of cleanup callbacks.
@@ -175,6 +177,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Add custom schedules for WSAL early otherwise they won't work.
 			add_filter( 'cron_schedules', array( $this, 'recurring_schedules' ) );
+			// make the options helper class available.
+			$this->include_options_helper();
 		}
 
 		/**
@@ -203,6 +207,21 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
+		 * Gets and instansiates the options helper.
+		 *
+		 * @method include_options_helper
+		 * @since  4.0.3
+		 * @return \WSAL\Helpers\Options
+		 */
+		public function include_options_helper() {
+			require_once 'classes/Helpers/Options.php';
+			if ( ! isset( $this->options_helper ) ) {
+				$this->options_helper = new \WSAL\Helpers\Options( $this, self::OPTIONS_PREFIX );
+			}
+			return $this->options_helper;
+		}
+
+		/**
 		 * Whether the current request is a REST API request.
 		 *
 		 * @return bool
@@ -213,7 +232,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
 				$rest_url_path = trim( parse_url( home_url( '/wp-json/' ), PHP_URL_PATH ), '/' );
 				$request_path  = trim( $_SERVER['REQUEST_URI'], '/' );
-				$is_rest       = ( strpos( $request_path, $rest_url_path ) === 0 ) || isset( $_GET['rest_route'] );
+
+				/*
+				 * If we have both a url and a request patch check if this is
+				 * a rest request.
+				 *
+				 * @since 4.0..3
+				 */
+				if ( $rest_url_path && $request_path ) {
+					$is_rest = ( strpos( $request_path, $rest_url_path ) === 0 ) || isset( $_GET['rest_route'] );
+				}
 			}
 
 			return $is_rest;
@@ -334,7 +362,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// Managers.
 				require_once 'classes/ViewManager.php';
-				require_once 'classes/LicenseManager.php';
 				require_once 'classes/WidgetManager.php';
 
 				// Views.
@@ -345,7 +372,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				require_once 'classes/Views/EmailNotifications.php';
 				require_once 'classes/Views/ExternalDB.php';
 				require_once 'classes/Views/Help.php';
-				require_once 'classes/Views/Licensing.php';
 				require_once 'classes/Views/LogInUsers.php';
 				require_once 'classes/Views/Reports.php';
 				require_once 'classes/Views/Search.php';
@@ -601,11 +627,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Whether an alert is enabled. For use before loading the settings.
 		 *
+		 * @since 4.0.2 - updated to use get_option instead of self::get_raw_option.
+		 *
 		 * @param string|int $alert The alert to check.
 		 * @return bool Whether the alert is enabled.
 		 */
 		public static function raw_alert_is_enabled( $alert ) {
-			$alerts = self::get_raw_option( 'disabled-alerts' );
+			$alerts = get_option( self::OPTIONS_PREFIX . 'disabled-alerts' );
 			$alerts = explode( ',', $alerts );
 			return ! in_array( $alert, $alerts );
 		}
@@ -646,10 +674,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						break;
 
 					case 'latest_event':
-						$event_query = new WSAL_Models_OccurrenceQuery();
-						$event_query->addOrderBy( 'created_on', true );
-						$event_query->setLimit( 1 );
-						$event = $event_query->getAdapter()->Execute( $event_query );
+						// run the query and return it.
+						$event = $this->query_for_latest_event();
+						$event->getAdapter()->Execute( $event );
 
 						// Set the return object.
 						if ( isset( $event[0] ) ) {
@@ -666,6 +693,22 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				}
 			}
 			return $info;
+		}
+
+		/**
+		 * Performs a query to retrieve the latest event in the logs.
+		 *
+		 * @method query_for_latest_event
+		 * @since  4.0.3
+		 * @return array
+		 */
+		public function query_for_latest_event() {
+			$event_query = new WSAL_Models_OccurrenceQuery();
+			// order by creation.
+			$event_query->addOrderBy( 'created_on', true );
+			// only request 1 item.
+			$event_query->setLimit( 1 );
+			return $event_query;
 		}
 
 		/**
@@ -755,6 +798,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! defined( 'WSAL_CLASS_PREFIX' ) ) {
 				define( 'WSAL_CLASS_PREFIX', 'WSAL_' );
 			}
+		}
+
+		/**
+		 * Method: Include extensions for premium version.
+		 *
+		 * @since 2.7.0
+		 */
+		public function include_extensions__premium_only() {
+			/**
+			 * Class for extensions managment.
+			 *
+			 * @since 2.7.0
+			 */
+			if ( file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
+				require_once WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php';
+			}
+
+			// Initiate the extensions manager.
+			$this->extensions = new WSAL_Extension_Manager( $this );
 		}
 
 		/**
@@ -938,7 +1000,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			if ( is_admin() ) {
 				$this->views     = new WSAL_ViewManager( $this );
-				$this->licensing = new WSAL_LicenseManager( $this );
 				$this->widgets   = new WSAL_WidgetManager( $this );
 			}
 
@@ -1087,13 +1148,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				die();
 			}
 
-			$s_alerts = $this->GetGlobalOption( 'disabled-alerts' );
+			$s_alerts = $this->options_helper->get_option_value( 'disabled-alerts' );
 			if ( isset( $s_alerts ) && '' != $s_alerts ) {
 				$s_alerts .= ',' . esc_html( $post_array['code'] );
 			} else {
 				$s_alerts = esc_html( $post_array['code'] );
 			}
-			$this->SetGlobalOption( 'disabled-alerts', $s_alerts );
+			$this->options_helper->set_option_value( 'disabled-alerts', $s_alerts );
 			echo wp_sprintf( '<p>' . __( 'Alert %1$s is no longer being monitored.<br /> %2$s', 'wp-security-audit-log' ) . '</p>', esc_html( $post_array['code'] ), __( 'You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.', 'wp-security-audit-log' ) );
 			die;
 		}
@@ -1255,7 +1316,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 
 			// Setting the prunig date with the old value or the default value.
-			$old_disabled = $this->GetGlobalOption( 'disabled-alerts' );
+			$old_disabled = $this->options_helper->get_option_value( 'disabled-alerts' );
 
 			// If old setting is empty disable alert 2099 by default.
 			if ( empty( $old_disabled ) ) {
@@ -1315,7 +1376,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function Update( $old_version, $new_version ) {
 			// Update version in db.
-			$this->SetGlobalOption( 'version', $new_version );
+			$this->options_helper->set_option_value( 'version', $new_version );
 
 			// Do version-to-version specific changes.
 			if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
@@ -1427,7 +1488,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				 * @since 3.2.4
 				 */
 				if ( version_compare( $old_version, '3.2.4', '<' ) && version_compare( $new_version, '3.2.3.3', '>' ) ) {
-					$this->SetGlobalOption( 'dismissed-privacy-notice', '1,wsal_privacy' );
+					$this->options_helper->set_option_value( 'dismissed-privacy-notice', '1,wsal_privacy' );
 				}
 
 				/**
@@ -1525,20 +1586,21 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					);
 				}
 
-				/**
-				 * Upgrade routine for versions of the plugin prior to 4.0.2
+				/*
+				 * From version 4.0.2 onwards options have been getting moved
+				 * over to the standard WP options table. This handles migrating
+				 * any for each new version we release.
 				 *
-				 * @since 4.0.2
+				 * @since 4.0.3
 				 */
-				if ( version_compare( $old_version, '4.0.1', '<=' ) ) {
-					add_action(
-						'init',
-						function() {
-							require_once 'classes/Update/Task/SettingsEditConfig.php';
-							$settings_edit_update = new WSAL\Update\Task\SettingsEditConfig( WpSecurityAuditLog::GetInstance() );
-							$settings_edit_update->run();
-						}
-					);
+				if ( version_compare( $old_version, '4.0.3', '<=' ) ) {
+
+					require_once 'classes/Update/Task/MoveSettingsToOptionsTable.php';
+					// run the update routine.
+					$settings_mover = new WSAL\Update\Task\MoveSettingsToOptionsTable( self::GetInstance() );
+					$settings_mover->set_versions( $old_version, $new_version );
+					$settings_mover->run();
+
 				}
 			}
 		}
@@ -1624,7 +1686,18 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return string
 		 */
 		public function GetOldVersion() {
-			return $this->GetGlobalOption( 'version', '0.0.0' );
+			$old_version = $this->options_helper->get_option_value( 'version', '0.0.0' );
+
+			/*
+			 * This GetGlobalOption is retained for back compatibility for
+			 * update routines before version 4.0.2.
+			 *
+			 * TODO: remove this AFTER version 4.1.0.
+			 */
+			if ( ! $old_version || '0.0.0' === $old_version ) {
+				$old_version = $this->GetGlobalOption( 'version', '0.0.0' );
+			}
+			return $old_version;
 		}
 
 		/**
@@ -2054,9 +2127,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function wsal_hide_plugin( $plugins ) {
 			global $pagenow;
 
-			// Check current page.
+			// Check current page, bail early if this isn't the plugins page.
 			if ( 'plugins.php' !== $pagenow ) {
-				return;
+				return $plugins;
 			}
 
 			// Find WSAL by plugin basename.

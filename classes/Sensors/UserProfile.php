@@ -67,38 +67,6 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		// Get new user data.
 		$new_userdata = get_userdata( $user_id );
 
-		if ( WpSecurityAuditLog::is_bbpress_active() ) {
-			// BBPress user roles.
-			$bbpress_roles = array( 'bbp_spectator', 'bbp_moderator', 'bbp_participant', 'bbp_keymaster', 'bbp_blocked' );
-
-			// Get bbpress user roles data.
-			$old_bbpress_roles = array_intersect( $bbpress_roles, $old_userdata->roles );
-			$new_bbpress_roles = array_intersect( $bbpress_roles, $new_userdata->roles );
-
-			$old_bbpress_roles = array_map( array( $this, 'filter_role_names' ), $old_bbpress_roles );
-			$new_bbpress_roles = array_map( array( $this, 'filter_role_names' ), $new_bbpress_roles );
-
-			// Convert array to string.
-			$old_bbpress_roles = is_array( $old_bbpress_roles ) ? implode( ', ', $old_bbpress_roles ) : '';
-			$new_bbpress_roles = is_array( $new_bbpress_roles ) ? implode( ', ', $new_bbpress_roles ) : '';
-
-			if ( $old_bbpress_roles !== $new_bbpress_roles ) {
-				$current_user = wp_get_current_user();
-				$this->plugin->alerts->Trigger(
-					4013,
-					array(
-						'TargetUsername' => $new_userdata->user_login,
-						'OldRole'        => $old_bbpress_roles,
-						'NewRole'        => $new_bbpress_roles,
-						'UserChanger'    => $current_user->user_login,
-						'FirstName'      => $new_userdata->user_firstname,
-						'LastName'       => $new_userdata->user_lastname,
-						'EditUserLink'   => add_query_arg( 'user_id', $new_userdata->ID, admin_url( 'user-edit.php' ) )
-					)
-				);
-			}
-		}
-
 		// Alert if user password is changed.
 		if ( $old_userdata->user_pass !== $new_userdata->user_pass ) {
 			$event      = get_current_user_id() === $user_id ? 4003 : 4004;
@@ -171,20 +139,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			return;
 		}
 
-		// If BBPress plugin is active then check for user roles change.
-		if ( WpSecurityAuditLog::is_bbpress_active() ) {
-			// BBPress user roles.
-			$bbpress_roles = array( 'bbp_spectator', 'bbp_moderator', 'bbp_participant', 'bbp_keymaster', 'bbp_blocked' );
-
-			// Set WP roles.
-			$old_roles = array_diff( $old_roles, $bbpress_roles );
-			$new_roles = array_diff( $user->roles, $bbpress_roles );
-			$old_roles = array_map( array( $this, 'filter_role_names' ), $old_roles );
-			$new_roles = array_map( array( $this, 'filter_role_names' ), $new_roles );
-		} else {
-			$old_roles = array_map( array( $this, 'filter_role_names' ), $old_roles );
-			$new_roles = array_map( array( $this, 'filter_role_names' ), $user->roles );
-		}
+		$old_roles = array_map( array( $this, 'filter_role_names' ), $old_roles );
+		$new_roles = array_map( array( $this, 'filter_role_names' ), $user->roles );
 
 		// Get roles.
 		$old_roles = is_array( $old_roles ) ? implode( ', ', $old_roles ) : '';

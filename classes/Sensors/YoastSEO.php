@@ -44,7 +44,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		'_yoast_wpseo_title'                => '',
 		'_yoast_wpseo_metadesc'             => '',
 		'_yoast_wpseo_focuskw'              => '',
-		'_yst_is_cornerstone'               => '',
+		'_yoast_wpseo_is_cornerstone'       => '',
 		'_yoast_wpseo_meta-robots-noindex'  => '',
 		'_yoast_wpseo_meta-robots-nofollow' => '',
 		'_yoast_wpseo_meta-robots-adv'      => '',
@@ -107,7 +107,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 			'_yoast_wpseo_title'                => get_post_meta( $this->post_id, '_yoast_wpseo_title', true ),
 			'_yoast_wpseo_metadesc'             => get_post_meta( $this->post_id, '_yoast_wpseo_metadesc', true ),
 			'_yoast_wpseo_focuskw'              => get_post_meta( $this->post_id, '_yoast_wpseo_focuskw', true ),
-			'_yst_is_cornerstone'               => get_post_meta( $this->post_id, '_yst_is_cornerstone', true ),
+			'_yoast_wpseo_is_cornerstone'       => get_post_meta( $this->post_id, '_yoast_wpseo_is_cornerstone', true ),
 			'_yoast_wpseo_meta-robots-noindex'  => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-noindex', true ),
 			'_yoast_wpseo_meta-robots-nofollow' => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-nofollow', true ),
 			'_yoast_wpseo_meta-robots-adv'      => get_post_meta( $this->post_id, '_yoast_wpseo_meta-robots-adv', true ),
@@ -129,11 +129,6 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 
 		// Set prefix of meta data.
 		$prefix = '_yoast_wpseo_';
-
-		// Check prefix.
-		if ( 'is_cornerstone' === $key ) {
-			$prefix = '_yst_';
-		}
 
 		// Option to retrieve.
 		$option = $prefix . $key;
@@ -174,7 +169,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 			'yoast_wpseo_title'                => FILTER_SANITIZE_STRING,
 			'yoast_wpseo_metadesc'             => FILTER_SANITIZE_STRING,
 			'yoast_wpseo_focuskw'              => FILTER_SANITIZE_STRING,
-			'_yst_is_cornerstone'              => FILTER_VALIDATE_INT,
+			'yoast_wpseo_is_cornerstone'       => FILTER_VALIDATE_BOOLEAN,
 			'yoast_wpseo_meta-robots-noindex'  => FILTER_VALIDATE_INT,
 			'yoast_wpseo_meta-robots-nofollow' => FILTER_VALIDATE_INT,
 			'yoast_wpseo_meta-robots-adv'      => array(
@@ -198,7 +193,7 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 			$this->check_robots_advanced_change( $post_array['yoast_wpseo_meta-robots-adv'] ); // Meta Robots Advanced.
 			$this->check_canonical_url_change( $post_array['yoast_wpseo_canonical'] ); // Canonical URL.
 			$this->check_focus_keys_change( $post_array['yoast_wpseo_focuskw'] ); // Focus keywords.
-			$this->check_cornerstone_change( $post_array['_yst_is_cornerstone'] ); // Cornerstone.
+			$this->check_cornerstone_change( $post_array['yoast_wpseo_is_cornerstone'] ); // Cornerstone.
 		}
 	}
 
@@ -219,7 +214,6 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 		// Remove whitespaces at the ends of the titles.
 		$old_title = trim( $old_title );
 		$title     = trim( $title );
-
 		// If title is changed then log alert.
 		if ( $old_title !== $title ) {
 			$editor_link = $this->get_editor_link( $this->post_id );
@@ -567,43 +561,66 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 			// Webmaster URL alerts.
 			if ( 'wpseo' === $option ) {
 				// SEO analysis.
-				if ( $old_value['keyword_analysis_active'] !== $new_value['keyword_analysis_active'] ) {
-					$this->yoast_setting_switch_alert( 'keyword_analysis_active', $new_value['keyword_analysis_active'] );
+				if ( isset( $old_value['keyword_analysis_active'] ) && isset( $new_value['keyword_analysis_active'] ) ) {
+					if ( $old_value['keyword_analysis_active'] !== $new_value['keyword_analysis_active'] ) {
+						$this->yoast_setting_switch_alert( 'keyword_analysis_active', $new_value['keyword_analysis_active'] );
+					}
 				}
 
 				// Readability analysis.
-				if ( $old_value['content_analysis_active'] !== $new_value['content_analysis_active'] ) {
-					$this->yoast_setting_switch_alert( 'content_analysis_active', $new_value['content_analysis_active'] );
+				if ( isset( $old_value['content_analysis_active'] ) && isset( $new_value['content_analysis_active'] ) ) {
+					if ( $old_value['content_analysis_active'] !== $new_value['content_analysis_active'] ) {
+						$this->yoast_setting_switch_alert( 'content_analysis_active', $new_value['content_analysis_active'] );
+					}
 				}
 
 				// Cornerstone Content.
-				if ( $old_value['enable_cornerstone_content'] !== $new_value['enable_cornerstone_content'] ) {
-					$this->yoast_setting_switch_alert( 'enable_cornerstone_content', $new_value['enable_cornerstone_content'] );
+				if ( isset( $old_value['enable_cornerstone_content'] ) && isset( $new_value['enable_cornerstone_content'] ) ) {
+					if ( $old_value['enable_cornerstone_content'] !== $new_value['enable_cornerstone_content'] ) {
+						$this->yoast_setting_switch_alert( 'enable_cornerstone_content', $new_value['enable_cornerstone_content'] );
+					}
 				}
 
 				// Text Link Counter.
-				if ( $old_value['enable_text_link_counter'] !== $new_value['enable_text_link_counter'] ) {
-					$this->yoast_setting_switch_alert( 'enable_text_link_counter', $new_value['enable_text_link_counter'] );
+				if ( isset( $old_value['enable_text_link_counter'] ) && isset( $new_value['enable_text_link_counter'] ) ) {
+					if ( $old_value['enable_text_link_counter'] !== $new_value['enable_text_link_counter'] ) {
+						$this->yoast_setting_switch_alert( 'enable_text_link_counter', $new_value['enable_text_link_counter'] );
+					}
 				}
 
 				// XML Sitemaps.
-				if ( $old_value['enable_xml_sitemap'] !== $new_value['enable_xml_sitemap'] ) {
-					$this->yoast_setting_switch_alert( 'enable_xml_sitemap', $new_value['enable_xml_sitemap'] );
+				if ( isset( $old_value['enable_xml_sitemap'] ) && isset( $new_value['enable_xml_sitemap'] ) ) {
+					if ( $old_value['enable_xml_sitemap'] !== $new_value['enable_xml_sitemap'] ) {
+						$this->yoast_setting_switch_alert( 'enable_xml_sitemap', $new_value['enable_xml_sitemap'] );
+					}
 				}
 
-				// Ryte integration.
-				if ( $old_value['onpage_indexability'] !== $new_value['onpage_indexability'] ) {
-					$this->yoast_setting_switch_alert( 'onpage_indexability', $new_value['onpage_indexability'] );
+
+				/**
+				 * Ryte integration.
+				 *
+				 * NOTE: Reenamed in yoast plugin v13.2.
+				 *
+				 * @see: https://github.com/Yoast/wordpress-seo/pull/14123
+				 */
+				if ( isset( $old_value['ryte_indexability'] ) && isset( $new_value['ryte_indexability'] ) ) {
+					if ( $old_value['ryte_indexability'] !== $new_value['ryte_indexability'] ) {
+						$this->yoast_setting_switch_alert( 'ryte_indexability', $new_value['ryte_indexability'] );
+					}
 				}
 
 				// Admin bar menu.
-				if ( $old_value['enable_admin_bar_menu'] !== $new_value['enable_admin_bar_menu'] ) {
-					$this->yoast_setting_switch_alert( 'enable_admin_bar_menu', $new_value['enable_admin_bar_menu'] );
+				if ( isset( $old_value['enable_admin_bar_menu'] ) && isset( $new_value['enable_admin_bar_menu'] ) ) {
+					if ( $old_value['enable_admin_bar_menu'] !== $new_value['enable_admin_bar_menu'] ) {
+						$this->yoast_setting_switch_alert( 'enable_admin_bar_menu', $new_value['enable_admin_bar_menu'] );
+					}
 				}
 
 				// Advanced settings for authors.
-				if ( $old_value['disableadvanced_meta'] !== $new_value['disableadvanced_meta'] ) {
-					$this->yoast_setting_switch_alert( 'disableadvanced_meta', $new_value['disableadvanced_meta'] );
+				if ( isset( $old_value['disableadvanced_meta'] ) && isset( $new_value['disableadvanced_meta'] ) ) {
+					if ( $old_value['disableadvanced_meta'] !== $new_value['disableadvanced_meta'] ) {
+						$this->yoast_setting_switch_alert( 'disableadvanced_meta', $new_value['disableadvanced_meta'] );
+					}
 				}
 			}
 		}
@@ -772,7 +789,9 @@ class WSAL_Sensors_YoastSEO extends WSAL_AbstractSensor {
 				$alert_code = 8819;
 				break;
 
+			// renamed to ryte_integration. see: https://github.com/Yoast/wordpress-seo/pull/14123
 			case 'onpage_indexability':
+			case 'ryte_indexability':
 				$alert_code = 8820;
 				break;
 
