@@ -938,6 +938,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 		// Get Yoast alerts.
 		$yoast_alerts         = $this->plugin->alerts->get_alerts_by_category( 'Yoast SEO' );
+		$yoast_metabox_alerts = $this->plugin->alerts->get_alerts_by_category( 'Yoast SEO Meta Box' );
+		$yoast_alerts         = $yoast_alerts + $yoast_metabox_alerts;
 
 		// Check all alerts.
 		foreach ( $yoast_alerts as $alert_code => $alert ) {

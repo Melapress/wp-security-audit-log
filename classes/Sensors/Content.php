@@ -194,6 +194,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 				// If a status change event has occurred, then don't log event 2002 (post modified).
 				$changes = $status_event ? true : $changes;
+				if ( '1' === $changes ) {
+					remove_action( 'save_post', array( $this, 'post_changed' ), 10, 3 );
+				}
 				$this->check_modification_change( $post->ID, $this->_old_post, $post, $changes );
 			}
 		} else {
@@ -1250,8 +1253,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			if ( $event ) {
 				if ( 2002 === $event ) {
 					// Get Yoast alerts.
-					$yoast_alerts = $this->plugin->alerts->get_alerts_by_category( 'Yoast SEO' );
-
+					$yoast_alerts         = $this->plugin->alerts->get_alerts_by_category( 'Yoast SEO' );
+					$yoast_metabox_alerts = $this->plugin->alerts->get_alerts_by_category( 'Yoast SEO Meta Box' );
+					$yoast_alerts         = $yoast_alerts + $yoast_metabox_alerts;
 					// Check all alerts.
 					foreach ( $yoast_alerts as $alert_code => $alert ) {
 						if ( $this->plugin->alerts->WillOrHasTriggered( $alert_code ) ) {
@@ -1260,7 +1264,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					}
 
 					// Get post meta events.
-					$meta_events = array( 2053, 2054, 2055, 2062 );
+					$meta_events = array( 2053, 2054, 2055, 2062, 2016, 2120, 2119 );
 					foreach ( $meta_events as $meta_event ) {
 						if ( $this->plugin->alerts->WillOrHasTriggered( $meta_event ) ) {
 							return 0; // Return if any meta event has or will trigger.
@@ -1274,7 +1278,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$event_data['RevisionLink']         = $this->get_post_revision( $post_id, $oldpost );
 
 				if ( 2002 === $event ) {
-					$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'must_not_contain_events' ) );
+					if ( ! $this->was_triggered_recently( 2112 ) ) {
+						if ( $content_changed ) {
+							$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'must_not_contain_events' ) );
+						}
+					}
 				} else {
 					$this->plugin->alerts->Trigger( $event, $event_data );
 				}
@@ -1378,6 +1386,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		} elseif ( $manager->WillOrHasTriggered( 2119 ) ) {
 			return false;
 		} elseif ( $manager->WillOrHasTriggered( 2120 ) ) {
+			return false;
+		} elseif ( $manager->WillOrHasTriggered( 2016 ) ) {
+			return false;
+		} elseif ( $manager->WillOrHasTriggered( 2017 ) ) {
 			return false;
 		}
 		return true;
@@ -1565,5 +1577,40 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$triggered = $manager->WillOrHasTriggered( 5019 );
 		// inverting value here to account for the double NOT in _CommitItem().
 		return ! $triggered;
+	}
+
+	/**
+	 * Check if the alert was triggered recently.
+	 *
+	 * Checks last 5 events if they occured less than 20 seconds ago.
+	 *
+	 * @param integer|array $alert_id - Alert code.
+	 * @return boolean
+	 */
+	private function was_triggered_recently( $alert_id ) {
+		// if we have already checked this don't check again.
+		if ( isset( $this->cached_alert_checks ) && array_key_exists( $alert_id, $this->cached_alert_checks ) && $this->cached_alert_checks[$alert_id] ) {
+			return true;
+		}
+		$query = new WSAL_Models_OccurrenceQuery();
+		$query->addOrderBy( 'created_on', true );
+		$query->setLimit( 5 );
+		$last_occurences  = $query->getAdapter()->Execute( $query );
+		$known_to_trigger = false;
+		foreach ( $last_occurences as $last_occurence ) {
+			if ( $known_to_trigger ) {
+				break;
+			}
+			if ( ! empty( $last_occurence ) && ( $last_occurence->created_on + 5 ) > time() ) {
+				if ( ! is_array( $alert_id ) && $last_occurence->alert_id === $alert_id ) {
+					$known_to_trigger = true;
+				} elseif ( is_array( $alert_id ) && in_array( $last_occurence[0]->alert_id, $alert_id, true ) ) {
+					$known_to_trigger = true;
+				}
+			}
+		}
+		// once we know the answer to this don't check again to avoid queries.
+		$this->cached_alert_checks[ $alert_id ] = $known_to_trigger;
+		return $known_to_trigger;
 	}
 }
