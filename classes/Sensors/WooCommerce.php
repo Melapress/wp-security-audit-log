@@ -3451,7 +3451,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			return $log_meta_event;
 		}
 
-		$ignore_coupon_meta     = array( 'date_expires', 'usage_count', 'free_shipping' ); // Ignore these meta keys.
+		$ignore_coupon_meta     = array( 'usage_count', 'free_shipping' ); // Ignore these meta keys.
 		$usage_restriction_meta = array( 'individual_use', 'product_ids', 'exclude_product_ids', 'product_categories', 'exclude_product_categories', 'exclude_sale_items', 'minimum_amount', 'maximum_amount', 'customer_email' ); // Event 9067.
 		$usage_limits_meta      = array( 'usage_limit', 'usage_limit_per_user', 'limit_usage_to_x_items' ); // Event 9068.
 
@@ -3478,10 +3478,10 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 				// Set event id.
 				$event_id = 9065;
-			} elseif ( 'expiry_date' === $meta_key ) {
+			} elseif ( 'date_expires' === $meta_key ) {
 				// Set coupon expiry date data.
-				$coupon_data['OldDate'] = isset( $old_meta_obj->val ) ? $old_meta_obj->val : false;
-				$coupon_data['NewDate'] = $meta_value;
+				$coupon_data['OldDate'] = isset( $old_meta_obj->val ) ? date( get_option('date_format'), $old_meta_obj->val ) : false;
+				$coupon_data['NewDate'] = date( get_option('date_format'), $meta_value );
 
 				// Set event id.
 				$event_id = 9066;
