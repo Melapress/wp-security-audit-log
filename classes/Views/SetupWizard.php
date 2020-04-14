@@ -671,19 +671,19 @@ final class WSAL_Views_SetupWizard {
 			switch ( $pruning_limit ) {
 				case '6':
 					// 6 months.
-					$this->wsal->SetGlobalOption( 'pruning-date-e', true );
-					$this->wsal->SetGlobalOption( 'pruning-date', $pruning_limit . ' months' );
+					$this->wsal->options_helper->set_option_value( 'pruning-date-e', true );
+					$this->wsal->options_helper->set_option_value( 'pruning-date', $pruning_limit . ' months' );
 					break;
 
 				case '12':
 					// 12 months.
-					$this->wsal->SetGlobalOption( 'pruning-date-e', true );
-					$this->wsal->SetGlobalOption( 'pruning-date', $pruning_limit . ' months' );
+					$this->wsal->options_helper->set_option_value( 'pruning-date-e', true );
+					$this->wsal->options_helper->set_option_value( 'pruning-date', $pruning_limit . ' months' );
 					break;
 
 				case 'none':
 					// None.
-					$this->wsal->SetGlobalOption( 'pruning-date-e', false );
+					$this->wsal->options_helper->set_option_value( 'pruning-date-e', false );
 					break;
 
 				default:

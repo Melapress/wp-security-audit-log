@@ -180,7 +180,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			}
 		}
 
-		$disabled_events = $this->_plugin->GetGlobalOption( 'disabled-alerts' ); // Get disabled events.
+		$disabled_events = $this->_plugin->options_helper->get_option_value( 'disabled-alerts' ); // Get disabled events.
 		$disabled_events = explode( ',', $disabled_events );
 		$events_diff     = array_diff( $disabled_events, $this->_plugin->settings->geek_alerts ); // Calculate the difference of events.
 		$events_diff     = array_filter( $events_diff ); // Remove empty values.

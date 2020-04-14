@@ -994,7 +994,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Get dismissed pointers.
-		$dismissed      = explode( ',', (string) $this->_plugin->GetGlobalOption( 'dismissed-privacy-notice', true ) );
+		$dismissed      = explode( ',', (string) $this->_plugin->options_helper->get_option_value( 'dismissed-privacy-notice', true ) );
 		$valid_pointers = array();
 
 		// Check pointers and remove dismissed ones.
@@ -1169,7 +1169,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			wp_die( 0 );
 		}
 
-		$dismissed = array_filter( explode( ',', (string) $this->_plugin->GetGlobalOption( 'dismissed-privacy-notice', true ) ) );
+		$dismissed = array_filter( explode( ',', (string) $this->_plugin->options_helper->get_option_value( 'dismissed-privacy-notice', true ) ) );
 
 		if ( in_array( $pointer, $dismissed ) ) {
 			wp_die( 0 );
@@ -1178,7 +1178,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$dismissed[] = $pointer;
 		$dismissed   = implode( ',', $dismissed );
 
-		$this->_plugin->SetGlobalOption( 'dismissed-privacy-notice', $dismissed );
+		$this->_plugin->options_helper->set_option_value( 'dismissed-privacy-notice', $dismissed );
 		wp_die( 1 );
 	}
 

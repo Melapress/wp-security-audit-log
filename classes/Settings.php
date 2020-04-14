@@ -380,7 +380,7 @@ class WSAL_Settings {
 	 */
 	public function GetPruningDate() {
 		if ( ! $this->_pruning ) {
-			$this->_pruning = $this->_plugin->GetGlobalOption( 'pruning-date' );
+			$this->_pruning = $this->_plugin->options_helper->get_option_value( 'pruning-date' );
 			if ( ! strtotime( $this->_pruning ) ) {
 				$this->_pruning = $this->GetDefaultPruningDate();
 			}
@@ -395,7 +395,7 @@ class WSAL_Settings {
 	 */
 	public function SetPruningDate( $newvalue ) {
 		if ( strtotime( $newvalue ) ) {
-			$this->_plugin->SetGlobalOption( 'pruning-date', $newvalue );
+			$this->_plugin->options_helper->set_option_value( 'pruning-date', $newvalue );
 			$this->_pruning = $newvalue;
 		}
 	}
@@ -406,7 +406,7 @@ class WSAL_Settings {
 	 * @return string
 	 */
 	public function get_pruning_unit() {
-		return $this->_plugin->GetGlobalOption( 'pruning-unit', 'months' );
+		return $this->_plugin->options_helper->get_option_value( 'pruning-unit', 'months' );
 	}
 
 	/**
@@ -415,7 +415,7 @@ class WSAL_Settings {
 	 * @param string $newvalue – New value of pruning unit.
 	 */
 	public function set_pruning_unit( $newvalue ) {
-		$this->_plugin->SetGlobalOption( 'pruning-unit', $newvalue );
+		$this->_plugin->options_helper->set_option_value( 'pruning-unit', $newvalue );
 	}
 
 	/**
@@ -424,7 +424,7 @@ class WSAL_Settings {
 	 * @return integer
 	 */
 	public function GetPruningLimit() {
-		$val = (int) $this->_plugin->GetGlobalOption( 'pruning-limit' );
+		$val = (int) $this->_plugin->options_helper->get_option_value( 'pruning-limit' );
 		return $val ? $val : $this->GetMaxAllowedAlerts();
 	}
 
@@ -435,23 +435,23 @@ class WSAL_Settings {
 	 */
 	public function SetPruningLimit( $newvalue ) {
 		$newvalue = max( /*min(*/ (int) $newvalue/*, $this->GetMaxAllowedAlerts())*/, 1 );
-		$this->_plugin->SetGlobalOption( 'pruning-limit', $newvalue );
+		$this->_plugin->options_helper->set_option_value( 'pruning-limit', $newvalue );
 	}
 
 	public function SetPruningDateEnabled( $enabled ) {
-		$this->_plugin->SetGlobalOption( 'pruning-date-e', $enabled );
+		$this->_plugin->options_helper->set_option_value( 'pruning-date-e', $enabled );
 	}
 
 	public function SetPruningLimitEnabled( $enabled ) {
-		$this->_plugin->SetGlobalOption( 'pruning-limit-e', $enabled );
+		$this->_plugin->options_helper->set_option_value( 'pruning-limit-e', $enabled );
 	}
 
 	public function IsPruningDateEnabled() {
-		return $this->_plugin->GetGlobalOption( 'pruning-date-e' );
+		return $this->_plugin->options_helper->get_option_value( 'pruning-date-e' );
 	}
 
 	public function IsPruningLimitEnabled() {
-		return $this->_plugin->GetGlobalOption( 'pruning-limit-e' );
+		return $this->_plugin->options_helper->get_option_value( 'pruning-limit-e' );
 	}
 
 	public function IsRestrictAdmins() {
@@ -520,7 +520,7 @@ class WSAL_Settings {
 	public function GetDisabledAlerts() {
 		if ( ! $this->_disabled ) {
 			$this->_disabled = implode( ',', $this->GetDefaultDisabledAlerts() );
-			$this->_disabled = $this->_plugin->GetGlobalOption( 'disabled-alerts', $this->_disabled );
+			$this->_disabled = $this->_plugin->options_helper->get_option_value( 'disabled-alerts', $this->_disabled );
 			$this->_disabled = ( '' == $this->_disabled ) ? array() : explode( ',', $this->_disabled );
 			$this->_disabled = array_map( 'intval', $this->_disabled );
 		}
@@ -534,7 +534,7 @@ class WSAL_Settings {
 	 */
 	public function SetDisabledAlerts( $types ) {
 		$this->_disabled = array_unique( array_map( 'intval', $types ) );
-		$this->_plugin->SetGlobalOption( 'disabled-alerts', implode( ',', $this->_disabled ) );
+		$this->_plugin->options_helper->set_option_value( 'disabled-alerts', implode( ',', $this->_disabled ) );
 	}
 
 	public function IsIncognito() {
@@ -1061,11 +1061,11 @@ class WSAL_Settings {
 	 * Server's timezone or WordPress' timezone.
 	 */
 	public function GetTimezone() {
-		return $this->_plugin->GetGlobalOption( 'timezone', 'wp' );
+		return $this->_plugin->options_helper->get_option_value( 'timezone', 'wp' );
 	}
 
 	public function SetTimezone( $newvalue ) {
-		$this->_plugin->SetGlobalOption( 'timezone', $newvalue );
+		$this->_plugin->options_helper->set_option_value( 'timezone', $newvalue );
 	}
 
 	/**
@@ -1099,7 +1099,7 @@ class WSAL_Settings {
 	 * Get type of username to display.
 	 */
 	public function get_type_username() {
-		return $this->_plugin->GetGlobalOption( 'type_username', 'display_name' );
+		return $this->_plugin->options_helper->get_option_value( 'type_username', 'display_name' );
 	}
 
 	/**
@@ -1109,7 +1109,7 @@ class WSAL_Settings {
 	 * @since 2.6.5
 	 */
 	public function set_type_username( $newvalue ) {
-		$this->_plugin->SetGlobalOption( 'type_username', $newvalue );
+		$this->_plugin->options_helper->set_option_value( 'type_username', $newvalue );
 	}
 
 	public function GetAdapterConfig( $name_field, $default_value = false ) {
@@ -1170,19 +1170,19 @@ class WSAL_Settings {
 	}
 
 	public function GetColumnsSelected() {
-		return $this->_plugin->GetGlobalOption( 'columns', array() );
+		return $this->_plugin->options_helper->get_option_value( 'columns', array() );
 	}
 
 	public function SetColumns( $columns ) {
-		$this->_plugin->SetGlobalOption( 'columns', json_encode( $columns ) );
+		$this->_plugin->options_helper->set_option_value( 'columns', json_encode( $columns ) );
 	}
 
 	public function IsWPBackend() {
-		return $this->_plugin->GetGlobalOption( 'wp-backend' );
+		return $this->_plugin->options_helper->get_option_value( 'wp-backend' );
 	}
 
 	public function SetWPBackend( $enabled ) {
-		$this->_plugin->SetGlobalOption( 'wp-backend', $enabled );
+		$this->_plugin->options_helper->set_option_value( 'wp-backend', $enabled );
 	}
 
 	/**
