@@ -411,9 +411,11 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
 					return '<span class="log-disable">' . str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
 				}
-
-				return '<span class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item->alert_id ) . '" data-tooltip="' . __( 'Disable this type of events.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . ' - ' . esc_html( $code->desc ) . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
+				// add description to $extra_msg only if one is available.
+				$extra_msg = ( isset( $code->desc ) ) ? ' - ' . esc_html( $code->desc ) . $extra_msg : $extra_msg;
+				return '<span class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item->alert_id ) . '" data-tooltip="' . __( 'Disable this type of events.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
 					. str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
+
 			case 'code':
 				$code  = $this->_plugin->alerts->GetAlert( $item->alert_id );
 				$code  = $code ? $code->code : 0;
