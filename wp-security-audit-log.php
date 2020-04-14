@@ -213,7 +213,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
 				$rest_url_path = trim( parse_url( home_url( '/wp-json/' ), PHP_URL_PATH ), '/' );
 				$request_path  = trim( $_SERVER['REQUEST_URI'], '/' );
-				$is_rest       = ( strpos( $request_path, $rest_url_path ) === 0 ) || isset( $_GET['rest_route'] );
+
+				/*
+				 * If we have both a url and a request patch check if this is
+				 * a rest request.
+				 *
+				 * @since 4.0..3
+				 */
+				if ( $rest_url_path && $request_path ) {
+					$is_rest = ( strpos( $request_path, $rest_url_path ) === 0 ) || isset( $_GET['rest_route'] );
+				}
 			}
 
 			return $is_rest;
