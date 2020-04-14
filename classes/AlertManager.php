@@ -1110,6 +1110,7 @@ final class WSAL_AlertManager {
 			'mainwp-network'       => __( 'MainWP Network', 'wp-security-audit-log' ),
 			'mainwp'               => __( 'MainWP', 'wp-security-audit-log' ),
 			'yoast-seo'            => __( 'Yoast SEO', 'wp-security-audit-log' ),
+			'yoast-seo-metabox'    => __( 'Yoast SEO Meta Box', 'wp-security-audit-log' ),
 			'category'             => __( 'Category', 'wp-security-audit-log' ),
 			'custom-field'         => __( 'Custom Field', 'wp-security-audit-log' ),
 			'widget'               => __( 'Widget', 'wp-security-audit-log' ),
