@@ -787,7 +787,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					$event_data['PublishingDate'] = $new_post->post_date;
 					$this->plugin->alerts->Trigger( $event, $event_data );
 				} else {
-					$this->plugin->alerts->Trigger( $event, $event_data );
+					// NOTE: this triggers if NOT firing event 5019.
+					$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'plugin_not_created_post' ) );
 				}
 			}
 		}
@@ -901,7 +902,8 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					$event_data['NewStatus'] = $newpost->post_status;
 					$this->plugin->alerts->Trigger( $event, $event_data );
 				} else {
-					$this->plugin->alerts->Trigger( $event, $event_data );
+					// NOTE: this triggers if NOT firing event 5019.
+					$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'plugin_not_created_post' ) );
 				}
 			}
 
@@ -1542,5 +1544,21 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			// Don't track this as a date change.
 			return true;
 		}
+	}
+
+	/**
+	 * Callback to test if a post was just made by a plugin.
+	 *
+	 * NOTE: the return is flipped to handle a double NOT in _CommitItem().
+	 *
+	 * @method plugin_not_created_post
+	 * @since  4.0.2
+	 * @param  WSAL_AlertManager $manager the alert manager from the plugin.
+	 * @return boolean
+	 */
+	public function plugin_not_created_post( $manager ) {
+		$triggered = $manager->WillOrHasTriggered( 5019 );
+		// inverting value here to account for the double NOT in _CommitItem().
+		return ! $triggered;
 	}
 }

@@ -348,6 +348,8 @@ final class WSAL_AlertManager {
 	 * @throws Exception - Error if alert is not registered.
 	 */
 	protected function _CommitItem( $type, $data, $cond, $_retry = true ) {
+		// Double NOT operation here is intentional. Same as ! ( bool ) [ $value ]
+		// NOTE: return false on a true condition to compensate.
 		if ( ! $cond || ! ! call_user_func( $cond, $this ) ) {
 			if ( $this->IsEnabled( $type ) ) {
 				if ( isset( $this->_alerts[ $type ] ) ) {
