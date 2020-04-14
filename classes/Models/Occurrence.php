@@ -110,7 +110,8 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * @param mixed  $value - Meta value.
 	 */
 	public function SetMetaValue( $name, $value ) {
-		if ( ! empty( $value ) ) {
+		// check explicitly for `0` string values.
+		if ( '0' === $value || ! empty( $value ) ) {
 			// Get meta adapter.
 			$model                = new WSAL_Models_Meta();
 			$model->occurrence_id = $this->getId();
