@@ -19,10 +19,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 // Define custom / new PHP constants.
 defined( 'E_CRITICAL' ) || define( 'E_CRITICAL', 'E_CRITICAL' );
-defined( 'E_DEBUG' ) || define( 'E_DEBUG', 'E_DEBUG' );
-defined( 'E_RECOVERABLE_ERROR' ) || define( 'E_RECOVERABLE_ERROR', 'E_RECOVERABLE_ERROR' );
-defined( 'E_DEPRECATED' ) || define( 'E_DEPRECATED', 'E_DEPRECATED' );
-defined( 'E_USER_DEPRECATED' ) || define( 'E_USER_DEPRECATED', 'E_USER_DEPRECATED' );
 
 /**
  * Load Custom Alerts from uploads/wp-security-audit-log/custom-alerts.php if exists
@@ -78,81 +74,6 @@ function wsaldefaults_wsal_init() {
 	if ( ! isset( $wsal->alerts ) ) {
 		$wsal->alerts = new WSAL_AlertManager( $wsal );
 	}
-
-	$wsal->constants->UseConstants(
-		array(
-			// Default PHP constants.
-			array(
-				'name'        => 'E_ERROR',
-				'description' => __( 'Fatal run-time error.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_WARNING',
-				'description' => __( 'Run-time warning (non-fatal error).', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_PARSE',
-				'description' => __( 'Compile-time parse error.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_NOTICE',
-				'description' => __( 'Run-time notice.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_CORE_ERROR',
-				'description' => __( 'Fatal error that occurred during startup.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_CORE_WARNING',
-				'description' => __( 'Warnings that occurred during startup.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_COMPILE_ERROR',
-				'description' => __( 'Fatal compile-time error.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_COMPILE_WARNING',
-				'description' => __( 'Compile-time warning.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_USER_ERROR',
-				'description' => __( 'User-generated error message.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_USER_WARNING',
-				'description' => __( 'User-generated warning message.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_USER_NOTICE',
-				'description' => __( 'User-generated notice message.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_STRICT',
-				'description' => __( 'Non-standard/optimal code warning.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_RECOVERABLE_ERROR',
-				'description' => __( 'Catchable fatal error.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_DEPRECATED',
-				'description' => __( 'Run-time deprecation notices.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_USER_DEPRECATED',
-				'description' => __( 'Run-time user deprecation notices.', 'wp-security-audit-log' ),
-			),
-			// Custom constants.
-			array(
-				'name'        => 'E_CRITICAL',
-				'description' => __( 'Critical, high-impact messages.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_DEBUG',
-				'description' => __( 'Debug informational messages.', 'wp-security-audit-log' ),
-			),
-		)
-	);
 
 	$wsal->constants->AddConstant( 'WSAL_CRITICAL', 1, __( 'Critical severity events.', 'wp-security-audit-log' ) );
 	$wsal->constants->AddConstant( 'WSAL_HIGH', 6, __( 'High severity events.', 'wp-security-audit-log' ) );
