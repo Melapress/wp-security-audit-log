@@ -140,6 +140,12 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	private $request_data = array();
 
 	/**
+	 * Count changed meta fields.
+	 */
+	private $updated_field_count = 0;
+	private $updated_shipping_field_count = 0;
+
+	/**
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
@@ -171,6 +177,8 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		add_action( 'updated_user_meta', array( $this, 'wc_user_meta_updated' ), 10, 4 );
 		add_action( 'woocommerce_before_product_object_save', array( $this, 'check_product_changes_before_save' ), 10, 1 );
 		add_action( 'woocommerce_product_quick_edit_save', array( $this, 'inline_product_changed' ), 10, 1 );
+
+		add_action( 'updated_option', array( $this, 'settings_updated' ), 10, 3 );
 	}
 
 	/**
@@ -208,6 +216,7 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			$this->_old_link   = get_post_permalink( $post_id, false, true );
 			$this->_old_cats   = 'product' === $post->post_type ? $this->GetProductCategories( $this->_old_post ) : null;
 			$this->_old_data   = 'product' === $post->post_type ? $this->GetProductData( $this->old_product ) : null;
+			$this->_old_product_attributes = get_post_meta( $post->ID, '_product_attributes' );
 		}
 	}
 
@@ -1113,16 +1122,16 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					);
 					return 1;
 				}
-				// elseif ( 'shop_coupon' === $newpost->post_type ) {
-				// Get coupon data.
-				// $coupon_data = $this->get_coupon_event_data( $newpost );
-				// Set status event data.
-				// $coupon_data['OldStatus'] = $oldpost->post_status;
-				// $coupon_data['NewStatus'] = $newpost->post_status;
-				// Log the event.
-				// $this->plugin->alerts->Trigger( 9070, $coupon_data );
-				// return 1;
-				// }
+				if ( 'shop_coupon' === $newpost->post_type ) {
+					// Get coupon data.
+					$coupon_data = $this->get_coupon_event_data( $newpost );
+					// Set status event data.
+					$coupon_data['OldStatus'] = $oldpost->post_status;
+					$coupon_data['NewStatus'] = $newpost->post_status;
+					// Log the event.
+					$this->plugin->alerts->Trigger( 9070, $coupon_data );
+					return 1;
+				}
 			}
 		}
 		return 0;
@@ -1592,18 +1601,25 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	}
 
 	/**
+	 * Get the config setting
+	 *
+	 * @param string $option_name - Option Name.
+	 * @return string
+	 */
+
+	/**
 	 * Trigger events Settings: 9027, 9028, 9029, 9030, 9031, 9032, 9033
 	 */
-	protected function CheckSettingsChange() {
+	public function settings_updated( $option, $old_value, $value ) {
 		// Verify WooCommerce settings page nonce.
 		if ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'woocommerce-settings' ) ) {
 			// Verify settings page via $_GET array.
 			if ( isset( $_GET['page'] ) && 'wc-settings' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) {
 				if ( isset( $_GET['tab'] ) && 'products' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
 					// Check weight unit event.
-					if ( isset( $_POST['woocommerce_weight_unit'] ) ) {
-						$old_unit = $this->GetConfig( 'weight_unit' );
-						$new_unit = sanitize_text_field( wp_unslash( $_POST['woocommerce_weight_unit'] ) );
+					if ( isset( $_POST['woocommerce_weight_unit'] ) && $option === 'woocommerce_weight_unit' ) {
+						$old_unit = $old_value;
+						$new_unit = sanitize_text_field( wp_unslash( $value ) );
 						if ( $old_unit !== $new_unit ) {
 							$this->plugin->alerts->Trigger(
 								9027,
@@ -1616,9 +1632,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					}
 
 					// Check dimension unit event.
-					if ( isset( $_POST['woocommerce_dimension_unit'] ) ) {
-						$old_unit = $this->GetConfig( 'dimension_unit' );
-						$new_unit = sanitize_text_field( wp_unslash( $_POST['woocommerce_dimension_unit'] ) );
+					if ( isset( $_POST['woocommerce_dimension_unit'] ) && $option === 'woocommerce_dimension_unit' ) {
+						$old_unit = $old_value;
+						$new_unit = sanitize_text_field( wp_unslash( $value ) );
 						if ( $old_unit !== $new_unit ) {
 							$this->plugin->alerts->Trigger(
 								9028,
@@ -1631,13 +1647,374 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 					}
 				} elseif ( isset( $_GET['tab'] ) && 'account' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
 					// Guest Checkout event.
-					$old_enable_guest_checkout = $this->GetConfig( 'enable_guest_checkout' );
-					$new_enable_guest_checkout = isset( $_POST['woocommerce_enable_guest_checkout'] ) ? 'yes' : 'no';
-					if ( $old_enable_guest_checkout !== $new_enable_guest_checkout ) {
-						$status = 'yes' === $new_enable_guest_checkout ? 'enabled' : 'disabled';
-						$this->plugin->alerts->Trigger( 9033, array( 'EventType' => $status ) );
+					if ( $option === 'woocommerce_enable_guest_checkout' ) {
+						$old_enable_guest_checkout = $old_value;
+						$new_enable_guest_checkout = isset( $_POST['woocommerce_enable_guest_checkout'] ) ? 'yes' : 'no';
+						if ( $old_enable_guest_checkout !== $new_enable_guest_checkout ) {
+							$status = ( 'yes' === $new_enable_guest_checkout ) ? 'enabled' : 'disabled';
+							$this->plugin->alerts->Trigger( 9033, array( 'EventType' => $status ) );
+						}
 					}
-				} elseif ( isset( $_GET['tab'] ) && 'checkout' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
+				} if ( isset( $_GET['tab'] ) && 'tax' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
+					// Check prices entered with tax setting.
+					if ( isset( $_POST['woocommerce_prices_include_tax'] ) && $option === 'woocommerce_prices_include_tax' ) {
+						$old_price_tax = $old_value;
+						$new_price_tax = sanitize_text_field( wp_unslash( $_POST['woocommerce_prices_include_tax'] ) );
+						if ( $old_price_tax !== $new_price_tax ) {
+							$this->plugin->alerts->Trigger( 9078, array( 'TaxStatus' => 'yes' === $new_price_tax ? 'including' : 'excluding' ) );
+						}
+					}
+
+					// Check calculate tax based on setting.
+					if ( isset( $_POST['woocommerce_tax_based_on'] ) && $option === 'woocommerce_tax_based_on' ) {
+						$old_tax_base = $old_value;
+						$new_tax_base = sanitize_text_field( wp_unslash( $_POST['woocommerce_tax_based_on'] ) );
+						if ( $old_tax_base !== $new_tax_base ) {
+							$setting = '';
+							if ( 'shipping' === $new_tax_base ) {
+								$setting = 'Customer shipping address';
+							} elseif ( 'billing' === $new_tax_base ) {
+								$setting = 'Customer billing address';
+							} elseif ( 'base' === $new_tax_base ) {
+								$setting = 'Shop base address';
+							} else {
+								$setting = 'Customer shipping address';
+							}
+							$this->plugin->alerts->Trigger(
+								9079,
+								array(
+									'Setting'    => $setting,
+									'OldTaxBase' => $old_tax_base,
+									'NewTaxBase' => $new_tax_base,
+								)
+							);
+						}
+					}
+
+					// Check shipping tax class setting.
+					if ( isset( $_POST['woocommerce_shipping_tax_class'] ) && $option === 'woocommerce_shipping_tax_class' ) {
+						$old_tax_class = $old_value;
+						$new_tax_class = sanitize_text_field( wp_unslash( $_POST['woocommerce_shipping_tax_class'] ) );
+						if ( $old_tax_class !== $new_tax_class ) {
+							$setting = '';
+							if ( 'inherit' === $new_tax_class ) {
+								$setting = 'Shipping tax class based on cart items';
+							} elseif ( 'reduced-rate' === $new_tax_class ) {
+								$setting = 'Reduced rate';
+							} elseif ( 'zero-rate' === $new_tax_class ) {
+								$setting = 'Zero rate';
+							} elseif ( empty( $new_tax_class ) ) {
+								$setting = 'Standard';
+							} else {
+								$setting = 'Shipping tax class based on cart items';
+							}
+							$this->plugin->alerts->Trigger(
+								9080,
+								array(
+									'Setting'     => $setting,
+									'OldTaxClass' => $old_tax_class,
+									'NewTaxClass' => $new_tax_class,
+								)
+							);
+						}
+					}
+
+					// Check rounding of tax setting.
+					if ( $option === 'woocommerce_tax_round_at_subtotal' ) {
+						$old_tax_round = $old_value;
+						$new_tax_round = isset( $_POST['woocommerce_tax_round_at_subtotal'] ) ? 'yes' : 'no';
+						if ( $old_tax_round !== $new_tax_round ) {
+							$this->plugin->alerts->Trigger( 9081, array( 'EventType' => 'yes' === $new_tax_round ? 'enabled' : 'disabled' ) );
+						}
+					}
+				} elseif ( empty( $_GET['tab'] ) || 'general' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
+					// "Enable Coupon" event.
+					if ( $option === 'woocommerce_enable_coupons' ) {
+						$old_enable_coupons = $old_value;
+						$new_enable_coupons = isset( $_POST['woocommerce_enable_coupons'] ) ? 'yes' : 'no';
+						if ( $old_enable_coupons !== $new_enable_coupons ) {
+							$status = 'yes' === $new_enable_coupons ? 'enabled' : 'disabled';
+							$this->plugin->alerts->Trigger( 9032, array( 'EventType' => $status ) );
+						}
+					}
+
+					if ( isset( $_POST['woocommerce_store_address'] ) && $option === 'woocommerce_store_address' || isset( $_POST['woocommerce_store_address_2'] ) && $option === 'woocommerce_store_address_2' || isset( $_POST['woocommerce_store_city'] ) && $option === 'woocommerce_store_city' || isset( $_POST['woocommerce_default_country'] ) && $option === 'woocommerce_default_country' || isset( $_POST['woocommerce_store_postcode'] ) && $option === 'woocommerce_store_postcode' ) {
+						// Default country event.
+						$old_location_array = array();
+						if ( $option === 'woocommerce_store_address' ) {
+							$old_location = $old_value . ', ' . $this->GetConfig( 'store_address_2' ) . ', ' . $this->GetConfig( 'store_city' ) . ', ' . WC()->countries->countries[ strtok( $this->GetConfig( 'default_country' ), ':') ] . ', ' . $this->GetConfig( 'store_postcode' );
+							$new_location = sanitize_text_field( wp_unslash( $_POST['woocommerce_store_address'] ) ) . ', ' . $this->GetConfig( 'store_address_2' ) . ', ' . $this->GetConfig( 'store_city' ) . ', ' . WC()->countries->countries[ strtok( $this->GetConfig( 'default_country' ), ':') ] . ', ' . $this->GetConfig( 'store_postcode' );
+						}
+						if ( $option === 'woocommerce_store_address_2' ) {
+							$old_location = $this->GetConfig( 'store_address' ) . ', ' . $old_value . ', ' . $this->GetConfig( 'store_city' ) . ', ' .  WC()->countries->countries[ strtok( $this->GetConfig( 'default_country' ), ':') ] . ', ' . $this->GetConfig( 'store_postcode' );
+							$new_location = $this->GetConfig( 'store_address' ) . ', ' . sanitize_text_field( wp_unslash( $_POST['woocommerce_store_address'] ) ) . ', ' . $this->GetConfig( 'store_city' ) . ', ' . WC()->countries->countries[ strtok( $this->GetConfig( 'default_country' ), ':') ] . ', ' . $this->GetConfig( 'store_postcode' );
+						}
+						if ( $option === 'woocommerce_store_city' ) {
+							$old_location = $this->GetConfig( 'store_address' ) . ', ' . $this->GetConfig( 'store_address_2' ) . ', ' . $old_value . ', ' . $this->GetConfig( 'default_country' ) . ', ' . $this->GetConfig( 'store_postcode' );
+							$new_location = $this->GetConfig( 'store_address' ) . ', ' . $this->GetConfig( 'store_address_2' ) . ', ' . sanitize_text_field( wp_unslash( $_POST['woocommerce_store_city'] ) ) . ', ' . WC()->countries->countries[ strtok( $this->GetConfig( 'default_country' ), ':') ] . ', ' . $this->GetConfig( 'store_postcode' );
+						}
+						if ( $option === 'woocommerce_default_country' ) {
+							$old_location = $this->GetConfig( 'store_address' ) . ', ' . $this->GetConfig( 'store_address_2' ) . ', ' . $this->GetConfig( 'store_address' ) . ', ' . WC()->countries->countries[ strtok( $old_value, ':') ] . ', ' . $old_value;
+							$new_location = $this->GetConfig( 'store_address' ) . ', ' . $this->GetConfig( 'store_address_2' ) . ', ' . $this->GetConfig( 'store_address' ) . ', ' . WC()->countries->countries[ strtok( $_POST['woocommerce_default_country'], ':') ] . ', ' . $this->GetConfig( 'store_postcode' );
+						}
+						if ( $option === 'woocommerce_store_postcode' ) {
+							$old_location = $this->GetConfig( 'store_address' ) . ', ' . $this->GetConfig( 'store_address_2' ) . ', ' . $this->GetConfig( 'store_address' ) . ', ' . $this->GetConfig( 'default_country' ) . ', ' . $old_value;
+							$new_location = $this->GetConfig( 'store_address' ) . ', ' . $this->GetConfig( 'store_address_2' ) . ', ' . $this->GetConfig( 'store_address' ) . ', ' . WC()->countries->countries[ strtok( $this->GetConfig( 'default_country' ), ':') ] . ', ' . sanitize_text_field( wp_unslash( $_POST['woocommerce_store_postcode'] ) );
+						}
+
+						if ( $old_location !== $new_location ) {
+							if ( ! $this->was_triggered_recently( 9029 ) ) {
+								$this->plugin->alerts->Trigger(
+									9029,
+									array(
+										'OldLocation' => $old_location,
+										'NewLocation' => $new_location,
+									)
+								);
+							}
+						}
+					}
+
+					if ( $option === 'woocommerce_allowed_countries' ) {
+						if ( $old_value !== $value ) {
+							$this->plugin->alerts->Trigger(
+								9085,
+								array(
+									'old' => $old_value,
+									'new' => $value,
+								)
+							);
+						}
+					}
+
+					if ( $option === 'woocommerce_specific_allowed_countries' ) {
+						if ( empty( $old_value ) ) {
+							$old_value = get_option( 'woocommerce_specific_allowed_countries' );
+						}
+						if ( $old_value !== $value ) {
+							// Check if any old values are present
+							if ( ! empty( $old_value ) ) {
+								$old_country_codes = '';
+								// add each old country to a string to output in alert.
+								foreach ($old_value as $old_country_code) {
+									$old_country_codes .= WC()->countries->countries[$old_country_code] . ', ';
+								}
+							} else {
+								$old_country_codes = __( 'None, ', 'wp-security-audit-log' );
+							}
+							// Check if any new values are present
+							if ( ! empty( $value  ) ) {
+								$country_codes = '';
+								foreach ($value as $country_code) {
+									$country_codes .= WC()->countries->countries[$country_code] . ', ';
+								}
+							} else {
+								$country_codes = __( 'None', 'wp-security-audit-log' );
+							}
+							$this->plugin->alerts->Trigger(
+								9086,
+								array(
+									'old' => rtrim( $old_country_codes, ', ' ),
+									'new' => rtrim( $country_codes, ', ' ),
+								)
+							);
+						}
+					}
+
+					if ( $option === 'woocommerce_all_except_countries' ) {
+						if ( empty( $old_value ) ) {
+							$old_value = get_option( 'woocommerce_all_except_countries' );
+						}
+						if ( $old_value !== $value ) {
+							// Check if any old values are present
+							if ( ! empty( $old_value ) ) {
+								$old_country_codes = '';
+								// add each old country to a string to output in alert.
+								foreach ($old_value as $old_country_code) {
+									$old_country_codes .= WC()->countries->countries[$old_country_code] . ', ';
+								}
+							} else {
+								$old_country_codes = __( 'None, ', 'wp-security-audit-log' );
+							}
+							// Check if any new values are present
+							if ( ! empty( $value  ) ) {
+								$country_codes = '';
+								foreach ($value as $country_code) {
+									$country_codes .= WC()->countries->countries[$country_code] . ', ';
+								}
+							} else {
+								$country_codes = __( 'None', 'wp-security-audit-log' );
+							}
+							$this->plugin->alerts->Trigger(
+								9087,
+								array(
+									'old' => rtrim( $old_country_codes, ', ' ),
+									'new' => rtrim( $country_codes, ', ' ),
+								)
+							);
+						}
+					}
+
+					if ( $option === 'woocommerce_ship_to_countries' && $value !== 'NULL' ) {
+						if ( $old_value !== $value ) {
+							$this->plugin->alerts->Trigger(
+								9088,
+								array(
+									'old' => $old_value,
+									'new' => $value,
+								)
+							);
+						}
+					}
+
+					if ( $option === 'woocommerce_specific_ship_to_countries' && $value !== 'NULL' ) {
+						if ( empty( $old_value ) ) {
+							$old_value = get_option( 'woocommerce_specific_ship_to_countries' );
+						}
+						if ( $old_value !== $value ) {
+							// Check if any old values are present
+							if ( ! empty( $old_value ) ) {
+								$old_country_codes = '';
+								// add each old country to a string to output in alert.
+								foreach ($old_value as $old_country_code) {
+									$old_country_codes .= WC()->countries->countries[$old_country_code] . ', ';
+								}
+							} else {
+								$old_country_codes = __( 'None, ', 'wp-security-audit-log' );
+							}
+							// Check if any new values are present
+							if ( ! empty( $value  ) ) {
+								$country_codes = '';
+								foreach ($value as $country_code) {
+									$country_codes .= WC()->countries->countries[$country_code] . ', ';
+								}
+							} else {
+								$country_codes = __( 'None', 'wp-security-audit-log' );
+							}
+							$this->plugin->alerts->Trigger(
+								9089,
+								array(
+									'old' => rtrim( $old_country_codes, ', ' ),
+									'new' => rtrim( $country_codes, ', ' ),
+								)
+							);
+						}
+					}
+
+					if ( $option === 'woocommerce_default_customer_address' ) {
+						if ( $old_value !== $value ) {
+							$this->plugin->alerts->Trigger(
+								9090,
+								array(
+									'old' => $old_value,
+									'new' => $value,
+								)
+							);
+						}
+					}
+
+					// Calculate taxes event.
+					if ( $option === 'woocommerce_calc_taxes' ) {
+						$old_calc_taxes = $old_value;
+						$new_calc_taxes = isset( $_POST['woocommerce_calc_taxes'] ) ? 'yes' : 'no';
+						if ( $old_calc_taxes !== $new_calc_taxes ) {
+							$status = 'yes' === $new_calc_taxes ? 'enabled' : 'disabled';
+							$this->plugin->alerts->Trigger( 9030, array( 'EventType' => $status ) );
+						}
+					}
+
+					// Store current event.
+					if ( $option === 'woocommerce_currency' ) {
+						if ( isset( $_POST['woocommerce_currency'] ) ) {
+							if( $old_value === 'NULL' ) {
+								$old_value = get_option(' woocommerce_currency' );
+							} else {
+								$old_currency = $old_value;
+							}
+							$new_currency = sanitize_text_field( wp_unslash( $_POST['woocommerce_currency'] ) );
+							if ( $old_currency !== $new_currency ) {
+								$this->plugin->alerts->Trigger(
+									9031,
+									array(
+										'OldCurrency' => $old_currency,
+										'NewCurrency' => $new_currency,
+									)
+								);
+							}
+						}
+					}
+				} elseif ( empty( $_GET['tab'] ) || 'advanced' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
+					if ( $option === 'woocommerce_cart_page_id' ) {
+						if ( $old_value !== $value ) {
+							if( $old_value === 'NULL' ) {
+								$old_value = get_option(' woocommerce_cart_page_id' );
+							} else {
+								$old_value = get_the_title( $old_value );
+							}
+							$this->plugin->alerts->Trigger(
+								9091,
+								array(
+									'old' => $old_value,
+									'new' => get_the_title( $value ),
+								)
+							);
+						}
+					}
+
+					if ( $option === 'woocommerce_checkout_page_id' ) {
+						if ( $old_value !== $value ) {
+							if( $old_value === 'NULL' ) {
+								$old_value = get_option(' woocommerce_cart_page_id' );
+							} else {
+								$old_value = get_the_title( $old_value );
+							}
+							$this->plugin->alerts->Trigger(
+								9092,
+								array(
+									'old' => $old_value,
+									'new' => get_the_title( $value ),
+								)
+							);
+						}
+					}
+
+					if ( $option === 'woocommerce_myaccount_page_id' ) {
+						if ( $old_value !== $value ) {
+							$this->plugin->alerts->Trigger(
+								9093,
+								array(
+									'old' => get_the_title( $old_value ),
+									'new' => get_the_title( $value ),
+								)
+							);
+						}
+					}
+
+					if ( $option === 'woocommerce_terms_page_id' ) {
+						if ( $old_value !== $value ) {
+							$this->plugin->alerts->Trigger(
+								9094,
+								array(
+									'old' => get_the_title( $old_value ),
+									'new' => get_the_title( $value ),
+								)
+							);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Trigger events Settings: 9027, 9028, 9029, 9030, 9031, 9032, 9033
+	 */
+	protected function CheckSettingsChange() {
+		// Verify WooCommerce settings page nonce.
+		if ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'woocommerce-settings' ) ) {
+			// Verify settings page via $_GET array.
+			if ( isset( $_GET['page'] ) && 'wc-settings' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) {
+				if ( isset( $_GET['tab'] ) && 'checkout' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
 					// Get payment method.
 					$gateway = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : false;
 
@@ -1687,122 +2064,6 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 								'GatewayName' => isset( $gateway_settings['title'] ) ? $gateway_settings['title'] : false,
 							)
 						);
-					}
-				} elseif ( isset( $_GET['tab'] ) && 'tax' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
-					// Check prices entered with tax setting.
-					if ( isset( $_POST['woocommerce_prices_include_tax'] ) ) {
-						$old_price_tax = $this->GetConfig( 'prices_include_tax' );
-						$new_price_tax = sanitize_text_field( wp_unslash( $_POST['woocommerce_prices_include_tax'] ) );
-						if ( $old_price_tax !== $new_price_tax ) {
-							$this->plugin->alerts->Trigger( 9078, array( 'TaxStatus' => 'yes' === $new_price_tax ? 'including' : 'excluding' ) );
-						}
-					}
-
-					// Check calculate tax based on setting.
-					if ( isset( $_POST['woocommerce_tax_based_on'] ) ) {
-						$old_tax_base = $this->GetConfig( 'tax_based_on' );
-						$new_tax_base = sanitize_text_field( wp_unslash( $_POST['woocommerce_tax_based_on'] ) );
-						if ( $old_tax_base !== $new_tax_base ) {
-							$setting = '';
-							if ( 'shipping' === $new_tax_base ) {
-								$setting = 'Customer shipping address';
-							} elseif ( 'billing' === $new_tax_base ) {
-								$setting = 'Customer billing address';
-							} elseif ( 'base' === $new_tax_base ) {
-								$setting = 'Shop base address';
-							} else {
-								$setting = 'Customer shipping address';
-							}
-							$this->plugin->alerts->Trigger(
-								9079,
-								array(
-									'Setting'    => $setting,
-									'OldTaxBase' => $old_tax_base,
-									'NewTaxBase' => $new_tax_base,
-								)
-							);
-						}
-					}
-
-					// Check shipping tax class setting.
-					if ( isset( $_POST['woocommerce_shipping_tax_class'] ) ) {
-						$old_tax_class = $this->GetConfig( 'shipping_tax_class' );
-						$new_tax_class = sanitize_text_field( wp_unslash( $_POST['woocommerce_shipping_tax_class'] ) );
-						if ( $old_tax_class !== $new_tax_class ) {
-							$setting = '';
-							if ( 'inherit' === $new_tax_class ) {
-								$setting = 'Shipping tax class based on cart items';
-							} elseif ( 'reduced-rate' === $new_tax_class ) {
-								$setting = 'Reduced rate';
-							} elseif ( 'zero-rate' === $new_tax_class ) {
-								$setting = 'Zero rate';
-							} elseif ( empty( $new_tax_class ) ) {
-								$setting = 'Standard';
-							} else {
-								$setting = 'Shipping tax class based on cart items';
-							}
-							$this->plugin->alerts->Trigger(
-								9080,
-								array(
-									'Setting'     => $setting,
-									'OldTaxClass' => $old_tax_class,
-									'NewTaxClass' => $new_tax_class,
-								)
-							);
-						}
-					}
-
-					// Check rounding of tax setting.
-					$old_tax_round = $this->GetConfig( 'tax_round_at_subtotal' );
-					$new_tax_round = isset( $_POST['woocommerce_tax_round_at_subtotal'] ) ? 'yes' : 'no';
-					if ( $old_tax_round !== $new_tax_round ) {
-						$this->plugin->alerts->Trigger( 9081, array( 'EventType' => 'yes' === $new_tax_round ? 'enabled' : 'disabled' ) );
-					}
-				} elseif ( empty( $_GET['tab'] ) || 'general' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) ) {
-					// "Enable Coupon" event.
-					$old_enable_coupons = $this->GetConfig( 'enable_coupons' );
-					$new_enable_coupons = isset( $_POST['woocommerce_enable_coupons'] ) ? 'yes' : 'no';
-					if ( $old_enable_coupons !== $new_enable_coupons ) {
-						$status = 'yes' === $new_enable_coupons ? 'enabled' : 'disabled';
-						$this->plugin->alerts->Trigger( 9032, array( 'EventType' => $status ) );
-					}
-
-					if ( isset( $_POST['woocommerce_default_country'] ) ) {
-						// Default country event.
-						$old_location = $this->GetConfig( 'default_country' );
-						$new_location = sanitize_text_field( wp_unslash( $_POST['woocommerce_default_country'] ) );
-						if ( $old_location !== $new_location ) {
-							$this->plugin->alerts->Trigger(
-								9029,
-								array(
-									'OldLocation' => $old_location,
-									'NewLocation' => $new_location,
-								)
-							);
-						}
-
-						// Calculate taxes event.
-						$old_calc_taxes = $this->GetConfig( 'calc_taxes' );
-						$new_calc_taxes = isset( $_POST['woocommerce_calc_taxes'] ) ? 'yes' : 'no';
-						if ( $old_calc_taxes !== $new_calc_taxes ) {
-							$status = 'yes' === $new_calc_taxes ? 'enabled' : 'disabled';
-							$this->plugin->alerts->Trigger( 9030, array( 'EventType' => $status ) );
-						}
-					}
-
-					// Store current event.
-					if ( isset( $_POST['woocommerce_currency'] ) ) {
-						$old_currency = $this->GetConfig( 'currency' );
-						$new_currency = sanitize_text_field( wp_unslash( $_POST['woocommerce_currency'] ) );
-						if ( $old_currency !== $new_currency ) {
-							$this->plugin->alerts->Trigger(
-								9031,
-								array(
-									'OldCurrency' => $old_currency,
-									'NewCurrency' => $new_currency,
-								)
-							);
-						}
 					}
 				}
 			}
@@ -2680,158 +2941,158 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 	 * @param array   $data    - Data array.
 	 * @return int
 	 */
-	private function check_attributes_change( $oldpost, $data = false ) {
-		$post_attributes = get_post_meta( $oldpost->ID, '_product_attributes', true ); // Get post attribute meta.
-		$post_attributes = ! $post_attributes ? array() : $post_attributes;
+	 private function check_attributes_change( $oldpost, $data = false ) {
+ 		$post_attributes = get_post_meta( $oldpost->ID, '_product_attributes', true ); // Get post attribute meta.
+ 		$post_attributes = ! $post_attributes ? array() : $post_attributes;
 
-		if ( ! $data ) {
-			// @codingStandardsIgnoreStart
-			$data = $_POST;
-			// @codingStandardsIgnoreEnd
-		}
+ 		if ( ! $data ) {
+ 			// @codingStandardsIgnoreStart
+ 			$data = $_POST;
+ 			// @codingStandardsIgnoreEnd
+ 		}
 
-		$attribute_names      = isset( $data['attribute_names'] ) ? array_map( 'sanitize_text_field', wp_unslash( $data['attribute_names'] ) ) : false;
-		$attribute_position   = isset( $data['attribute_position'] ) ? array_map( 'sanitize_text_field', wp_unslash( $data['attribute_position'] ) ) : false;
-		$attribute_visibility = isset( $data['attribute_visibility'] ) ? array_map( 'sanitize_text_field', wp_unslash( $data['attribute_visibility'] ) ) : false;
-		$attribute_values     = isset( $data['attribute_values'] ) ? $data['attribute_values'] : false;
+ 		$attribute_names      = isset( $data['attribute_names'] ) ? array_map( 'sanitize_text_field', wp_unslash( $data['attribute_names'] ) ) : false;
+ 		$attribute_position   = isset( $data['attribute_position'] ) ? array_map( 'sanitize_text_field', wp_unslash( $data['attribute_position'] ) ) : false;
+ 		$attribute_visibility = isset( $data['attribute_visibility'] ) ? array_map( 'sanitize_text_field', wp_unslash( $data['attribute_visibility'] ) ) : false;
+ 		$attribute_values     = isset( $data['attribute_values'] ) ? $data['attribute_values'] : false;
 
-		if ( ! empty( $attribute_names ) && ! empty( $attribute_values ) ) {
-			$new_attributes = array();
-			foreach ( $attribute_names as $key => $name ) {
-				$attr_key                    = $this->get_attribute_key( $name );
-				$new_attributes[ $attr_key ] = array(
-					'name'       => $name,
-					'value'      => isset( $attribute_values[ $key ] ) ? $this->get_string_attribute_value( $attribute_values[ $key ] ) : false,
-					'position'   => isset( $attribute_position[ $key ] ) ? $attribute_position[ $key ] : false,
-					'is_visible' => isset( $attribute_visibility[ $key ] ) ? $attribute_visibility[ $key ] : false,
-				);
-			}
+ 		if ( ! empty( $attribute_names ) && ! empty( $attribute_values ) ) {
+ 			$new_attributes = array();
+ 			foreach ( $attribute_names as $key => $name ) {
+ 				$attr_key                    = $this->get_attribute_key( $name );
+ 				$new_attributes[ $attr_key ] = array(
+ 					'name'       => $name,
+ 					'value'      => isset( $attribute_values[ $key ] ) ? $this->get_string_attribute_value( $attribute_values[ $key ] ) : false,
+ 					'position'   => isset( $attribute_position[ $key ] ) ? $attribute_position[ $key ] : false,
+ 					'is_visible' => isset( $attribute_visibility[ $key ] ) ? $attribute_visibility[ $key ] : false,
+ 				);
+ 			}
 
-			// Compare old and new attributes.
-			$added_attributes   = array_diff_key( $new_attributes, $post_attributes );
-			$deleted_attributes = array_diff_key( $post_attributes, $new_attributes );
+ 			// Compare old and new attributes.
+ 			$added_attributes   = array_diff_key( $new_attributes, $post_attributes );
+ 			$deleted_attributes = array_diff_key( $post_attributes, $new_attributes );
 
-			// Get product editor link.
-			$editor_link = $this->GetEditorLink( $oldpost );
+ 			// Get product editor link.
+ 			$editor_link = $this->GetEditorLink( $oldpost );
 
-			// Result.
-			$result = 0;
+ 			// Result.
+ 			$result = 0;
 
-			// Event 9047.
-			if ( ! empty( $added_attributes ) ) {
-				foreach ( $added_attributes as $added_attribute ) {
-					if ( $added_attribute && ! empty( $added_attribute['name'] ) ) {
-						$this->plugin->alerts->Trigger(
-							9047,
-							array(
-								'AttributeName'      => $added_attribute['name'],
-								'AttributeValue'     => $added_attribute['value'],
-								'ProductID'          => $oldpost->ID,
-								'ProductTitle'       => $oldpost->post_title,
-								'ProductStatus'      => $oldpost->post_status,
-								$editor_link['name'] => $editor_link['value'],
-							)
-						);
-						$result = 1;
-					}
-				}
-			}
+ 			// Event 9047.
+ 			if ( ! empty( $added_attributes ) ) {
+ 				foreach ( $added_attributes as $added_attribute ) {
+ 					if ( $added_attribute && ! empty( $added_attribute['name'] ) ) {
+ 						$this->plugin->alerts->Trigger(
+ 							9047,
+ 							array(
+ 								'AttributeName'      => $added_attribute['name'],
+ 								'AttributeValue'     => $added_attribute['value'],
+ 								'ProductID'          => $oldpost->ID,
+ 								'ProductTitle'       => $oldpost->post_title,
+ 								'ProductStatus'      => $oldpost->post_status,
+ 								$editor_link['name'] => $editor_link['value'],
+ 							)
+ 						);
+ 						$result = 1;
+ 					}
+ 				}
+ 			}
 
-			// Event 9050.
-			if ( ! empty( $deleted_attributes ) ) {
-				foreach ( $deleted_attributes as $deleted_attribute ) {
-					$this->plugin->alerts->Trigger(
-						9050,
-						array(
-							'AttributeName'      => $deleted_attribute['name'],
-							'AttributeValue'     => $deleted_attribute['value'],
-							'ProductID'          => $oldpost->ID,
-							'ProductTitle'       => $oldpost->post_title,
-							'ProductStatus'      => $oldpost->post_status,
-							'ProductUrl'         => get_permalink( $oldpost->ID ),
-							$editor_link['name'] => $editor_link['value'],
-						)
-					);
-					$result = 1;
-				}
-			}
+ 			// Event 9050.
+ 			if ( ! empty( $deleted_attributes ) ) {
+ 				foreach ( $deleted_attributes as $deleted_attribute ) {
+ 					$this->plugin->alerts->Trigger(
+ 						9050,
+ 						array(
+ 							'AttributeName'      => $deleted_attribute['name'],
+ 							'AttributeValue'     => $deleted_attribute['value'],
+ 							'ProductID'          => $oldpost->ID,
+ 							'ProductTitle'       => $oldpost->post_title,
+ 							'ProductStatus'      => $oldpost->post_status,
+ 							'ProductUrl'         => get_permalink( $oldpost->ID ),
+ 							$editor_link['name'] => $editor_link['value'],
+ 						)
+ 					);
+ 					$result = 1;
+ 				}
+ 			}
 
-			// Event 9048, 9049 & 9051.
-			if ( ! empty( $new_attributes ) ) {
-				foreach ( $new_attributes as $attr_key => $new_attr ) {
-					// Get old attribute value.
-					$old_value = '';
-					if ( false !== strpos( $attr_key, 'pa_' ) ) {
-						$old_value = $this->get_wc_product_attributes( $oldpost, $attr_key );
-					} else {
-						$old_value = isset( $post_attributes[ $attr_key ]['value'] ) ? $post_attributes[ $attr_key ]['value'] : false;
-					}
-					$new_value = isset( $new_attr['value'] ) ? $new_attr['value'] : false; // Get new attribute value.
+ 			// Event 9048, 9049 & 9051.
+ 			if ( ! empty( $new_attributes ) ) {
+ 				foreach ( $new_attributes as $attr_key => $new_attr ) {
+ 					// Get old attribute value.
+ 					$old_value = '';
+ 					if ( false !== strpos( $attr_key, 'pa_' ) ) {
+ 						$old_value = $this->get_wc_product_attributes( $oldpost, $attr_key );
+ 					} else {
+ 						$old_value = isset( $post_attributes[ $attr_key ]['value'] ) ? $post_attributes[ $attr_key ]['value'] : false;
+ 					}
+ 					$new_value = isset( $new_attr['value'] ) ? $new_attr['value'] : false; // Get new attribute value.
 
-					// Get old and new attribute names.
-					$old_name = isset( $post_attributes[ $attr_key ]['name'] ) ? $post_attributes[ $attr_key ]['name'] : false;
-					$new_name = isset( $new_attr['name'] ) ? $new_attr['name'] : false;
+ 					// Get old and new attribute names.
+ 					$old_name = isset( $post_attributes[ $attr_key ]['name'] ) ? $post_attributes[ $attr_key ]['name'] : false;
+ 					$new_name = isset( $new_attr['name'] ) ? $new_attr['name'] : false;
 
-					// Get old and new attribute visibility.
-					$old_visible = isset( $post_attributes[ $attr_key ]['is_visible'] ) ? (int) $post_attributes[ $attr_key ]['is_visible'] : false;
-					$new_visible = isset( $new_attr['is_visible'] ) ? (int) $new_attr['is_visible'] : false;
+ 					// Get old and new attribute visibility.
+ 					$old_visible = isset( $post_attributes[ $attr_key ]['is_visible'] ) ? (int) $post_attributes[ $attr_key ]['is_visible'] : false;
+ 					$new_visible = isset( $new_attr['is_visible'] ) ? (int) $new_attr['is_visible'] : false;
 
-					// Value change.
-					if ( $old_value && $new_value && $old_value !== $new_value ) {
-						$this->plugin->alerts->Trigger(
-							9048,
-							array(
-								'AttributeName'      => $new_attr['name'],
-								'OldValue'           => $old_value,
-								'NewValue'           => $new_value,
-								'ProductID'          => $oldpost->ID,
-								'ProductTitle'       => $oldpost->post_title,
-								'ProductStatus'      => $oldpost->post_status,
-								$editor_link['name'] => $editor_link['value'],
-							)
-						);
-						$result = 1;
-					}
+ 					// Value change.
+ 					if ( $old_value && $new_value && $old_value !== $new_value ) {
+ 						$this->plugin->alerts->Trigger(
+ 							9048,
+ 							array(
+ 								'AttributeName'      => $new_attr['name'],
+ 								'OldValue'           => $old_value,
+ 								'NewValue'           => $new_value,
+ 								'ProductID'          => $oldpost->ID,
+ 								'ProductTitle'       => $oldpost->post_title,
+ 								'ProductStatus'      => $oldpost->post_status,
+ 								$editor_link['name'] => $editor_link['value'],
+ 							)
+ 						);
+ 						$result = 1;
+ 					}
 
-					// Name change.
-					if ( $old_name && $new_name && $old_name !== $new_name ) {
-						$this->plugin->alerts->Trigger(
-							9049,
-							array(
-								'AttributeName'      => $new_attr['name'],
-								'OldValue'           => $old_name,
-								'NewValue'           => $new_name,
-								'ProductID'          => $oldpost->ID,
-								'ProductTitle'       => $oldpost->post_title,
-								'ProductStatus'      => $oldpost->post_status,
-								'ProductUrl'         => get_permalink( $oldpost->ID ),
-								$editor_link['name'] => $editor_link['value'],
-							)
-						);
-						$result = 1;
-					}
+ 					// Name change.
+ 					if ( $old_name && $new_name && $old_name !== $new_name ) {
+ 						$this->plugin->alerts->Trigger(
+ 							9049,
+ 							array(
+ 								'AttributeName'      => $new_attr['name'],
+ 								'OldValue'           => $old_name,
+ 								'NewValue'           => $new_name,
+ 								'ProductID'          => $oldpost->ID,
+ 								'ProductTitle'       => $oldpost->post_title,
+ 								'ProductStatus'      => $oldpost->post_status,
+ 								'ProductUrl'         => get_permalink( $oldpost->ID ),
+ 								$editor_link['name'] => $editor_link['value'],
+ 							)
+ 						);
+ 						$result = 1;
+ 					}
 
-					// Visibility change.
-					if ( ! empty( $new_attr['name'] ) && $old_visible !== $new_visible ) {
-						$this->plugin->alerts->Trigger(
-							9051,
-							array(
-								'AttributeName'       => $new_attr['name'],
-								'AttributeVisiblilty' => 1 === $new_visible ? __( 'Visible', 'wp-security-audit-log' ) : __( 'Non-Visible', 'wp-security-audit-log' ),
-								'ProductID'           => $oldpost->ID,
-								'ProductTitle'        => $oldpost->post_title,
-								'ProductStatus'       => $oldpost->post_status,
-								$editor_link['name']  => $editor_link['value'],
-							)
-						);
-						$result = 1;
-					}
-				}
-			}
-			return $result;
-		}
-		return 0;
-	}
+ 					// Visibility change.
+ 					if ( ! empty( $new_attr['name'] ) && $old_visible !== $new_visible ) {
+ 						$this->plugin->alerts->Trigger(
+ 							9051,
+ 							array(
+ 								'AttributeName'       => $new_attr['name'],
+ 								'AttributeVisiblilty' => 1 === $new_visible ? __( 'Visible', 'wp-security-audit-log' ) : __( 'Non-Visible', 'wp-security-audit-log' ),
+ 								'ProductID'           => $oldpost->ID,
+ 								'ProductTitle'        => $oldpost->post_title,
+ 								'ProductStatus'       => $oldpost->post_status,
+ 								$editor_link['name']  => $editor_link['value'],
+ 							)
+ 						);
+ 						$result = 1;
+ 					}
+ 				}
+ 			}
+ 			return $result;
+ 		}
+ 		return 0;
+ 	}
 
 	/**
 	 * Check Product Variations Change.
@@ -3321,31 +3582,155 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 
 				if ( false !== strpos( $meta_key, 'billing_' ) ) {
 					$event_id = 9083;
+					if( $meta_key === 'billing_first_name') {
+					  $new_address = $meta_value . ' ' . get_user_meta( $user_id, 'billing_last_name', true ) . ', ' . get_user_meta( $user_id, 'billing_company', true ) . ', ' . get_user_meta( $user_id, 'billing_country', true ) . ', ' . get_user_meta( $user_id, 'billing_address_1', true ) . ', ' . get_user_meta( $user_id, 'billing_address_2', true ) . ', ' . get_user_meta( $user_id, 'billing_city', true ) . ' ' . get_user_meta( $user_id, 'billing_state', true ) . ', ' . get_user_meta( $user_id, 'billing_postcode', true ) . ', ' . get_user_meta( $user_id, 'billing_phone', true ) . ', ' . get_user_meta( $user_id, 'billing_email', true );
+					}
+
+					if( $meta_key === 'billing_last_name') {
+					  $new_address = get_user_meta( $user_id, 'billing_first_name', true ) . ' ' . $meta_value . ', ' . get_user_meta( $user_id, 'billing_company', true ) . ', ' . get_user_meta( $user_id, 'billing_country', true ) . ', ' . get_user_meta( $user_id, 'billing_address_1', true ) . ', ' . get_user_meta( $user_id, 'billing_address_2', true ) . ', ' . get_user_meta( $user_id, 'billing_city', true ) . ' ' . get_user_meta( $user_id, 'billing_state', true ) . ',  ' . get_user_meta( $user_id, 'billing_postcode', true ) . ', ' . get_user_meta( $user_id, 'billing_phone', true ) . ', ' . get_user_meta( $user_id, 'billing_email', true );
+					}
+
+					if( $meta_key === 'billing_company') {
+					  $new_address = get_user_meta( $user_id, 'billing_first_name', true ) . ' ' . get_user_meta( $user_id, 'billing_last_name', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'billing_country', true ) . ', ' . get_user_meta( $user_id, 'billing_address_1', true ) . ', ' . get_user_meta( $user_id, 'billing_address_2', true ) . ', ' . get_user_meta( $user_id, 'billing_city', true ) . ', ' . get_user_meta( $user_id, 'billing_state', true ) . ', ' . get_user_meta( $user_id, 'billing_postcode', true ) . ', ' . get_user_meta( $user_id, 'billing_phone', true ) . ', ' . get_user_meta( $user_id, 'billing_email', true );
+					}
+
+					if( $meta_key === 'billing_country') {
+					  $new_address = get_user_meta( $user_id, 'billing_first_name', true ) . ' ' . get_user_meta( $user_id, 'billing_last_name', true ) . ', ' . get_user_meta( $user_id, 'billing_company', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'billing_address_1', true ) . ', ' . get_user_meta( $user_id, 'billing_address_2', true ) . ', ' . get_user_meta( $user_id, 'billing_city', true ) . ', ' . get_user_meta( $user_id, 'billing_state', true ) . ', ' . get_user_meta( $user_id, 'billing_postcode', true ) . ', ' . get_user_meta( $user_id, 'billing_phone', true ) . ', ' . get_user_meta( $user_id, 'billing_email', true );
+					}
+
+					if( $meta_key === 'billing_address_1') {
+					  $new_address = get_user_meta( $user_id, 'billing_first_name', true ) . ' ' . get_user_meta( $user_id, 'billing_last_name', true ) . ', ' . get_user_meta( $user_id, 'billing_company', true ) . ', ' . get_user_meta( $user_id, 'billing_country', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'billing_address_2', true ) . ', ' . get_user_meta( $user_id, 'billing_city', true ) . ' ' . get_user_meta( $user_id, 'billing_state', true ) . ', ' . get_user_meta( $user_id, 'billing_postcode', true ) . ', ' . get_user_meta( $user_id, 'billing_phone', true ) . ', ' . get_user_meta( $user_id, 'billing_email', true );
+					}
+
+					if( $meta_key === 'billing_address_2') {
+					  $new_address = get_user_meta( $user_id, 'billing_first_name', true ) . ' ' . get_user_meta( $user_id, 'billing_last_name', true ) . ', ' . get_user_meta( $user_id, 'billing_company', true ) . ', ' . get_user_meta( $user_id, 'billing_country', true ) . ', ' . get_user_meta( $user_id, 'billing_address_1', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'billing_city', true ) . ', ' . get_user_meta( $user_id, 'billing_state', true ) . ', ' . get_user_meta( $user_id, 'billing_postcode', true ) . ', ' . get_user_meta( $user_id, 'billing_phone', true ) . ', ' . get_user_meta( $user_id, 'billing_email', true );
+					}
+
+					if( $meta_key === 'billing_city') {
+					  $new_address = get_user_meta( $user_id, 'billing_first_name', true ) . ' ' . get_user_meta( $user_id, 'billing_last_name', true ) . ' ' . get_user_meta( $user_id, 'billing_company', true ) . ' ' . get_user_meta( $user_id, 'billing_country', true ) . ' ' . get_user_meta( $user_id, 'billing_address_1', true ) . ' ' . get_user_meta( $user_id, 'billing_address_2', true ) . ' ' . $meta_value . ' ' . get_user_meta( $user_id, 'billing_state', true ) . '  ' . get_user_meta( $user_id, 'billing_postcode', true ) . ' ' . get_user_meta( $user_id, 'billing_phone', true ) . ' ' . get_user_meta( $user_id, 'billing_email', true );
+					}
+
+					if( $meta_key === 'billing_state') {
+					  $new_address = get_user_meta( $user_id, 'billing_first_name', true ) . ' ' . get_user_meta( $user_id, 'billing_last_name', true ) . ', ' . get_user_meta( $user_id, 'billing_state', true ) . ', ' . get_user_meta( $user_id, 'billing_country', true ) . ', ' . get_user_meta( $user_id, 'billing_address_1', true ) . ', ' . get_user_meta( $user_id, 'billing_address_2', true ) . ', ' . get_user_meta( $user_id, 'billing_city', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'billing_postcode', true ) . ', ' . get_user_meta( $user_id, 'billing_phone', true ) . ', ' . get_user_meta( $user_id, 'billing_email', true );
+					}
+
+					if( $meta_key === 'billing_postcode') {
+					  $new_address = get_user_meta( $user_id, 'billing_first_name', true ) . ' ' . get_user_meta( $user_id, 'billing_last_name', true ) . ', ' . get_user_meta( $user_id, 'billing_company', true ) . ', ' . get_user_meta( $user_id, 'billing_country', true ) . ', ' . get_user_meta( $user_id, 'billing_address_1', true ) . ', ' . get_user_meta( $user_id, 'billing_address_2', true ) . ', ' . get_user_meta( $user_id, 'billing_city', true ) . ', ' . get_user_meta( $user_id, 'billing_state', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'billing_phone', true ) . ', ' . get_user_meta( $user_id, 'billing_email', true );
+					}
+
+					if( $meta_key === 'billing_phone') {
+					  $new_address = get_user_meta( $user_id, 'billing_first_name', true ) . ' ' . get_user_meta( $user_id, 'billing_last_name', true ) . ', ' . get_user_meta( $user_id, 'billing_company', true ) . ', ' . get_user_meta( $user_id, 'billing_country', true ) . ', ' . get_user_meta( $user_id, 'billing_address_1', true ) . ', ' . get_user_meta( $user_id, 'billing_address_2', true ) . ', ' . get_user_meta( $user_id, 'billing_city', true ) . ', ' . get_user_meta( $user_id, 'billing_state', true ) . ',  ' . get_user_meta( $user_id, 'billing_postcode', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'billing_email', true );
+					}
+
+					if( $meta_key === 'billing_email') {
+					  $new_address = get_user_meta( $user_id, 'billing_first_name', true ) . ' ' . get_user_meta( $user_id, 'billing_last_name', true ) . ', ' . get_user_meta( $user_id, 'billing_company', true ) . ', ' . get_user_meta( $user_id, 'billing_country', true ) . ', ' . get_user_meta( $user_id, 'billing_address_1', true ) . ', ' . get_user_meta( $user_id, 'billing_address_2', true ) . ', ' . get_user_meta( $user_id, 'billing_city', true ) . ', ' . get_user_meta( $user_id, 'billing_state', true ) . ', ' . get_user_meta( $user_id, 'billing_postcode', true ) . ', ' . get_user_meta( $user_id, 'billing_phone', true ) . ', ' . $meta_value;
+					}
+
+					$new_address = str_replace( ' ,', '', $new_address );
+
+					if ( $event_id ) {
+						$user = get_user_by( 'ID', $user_id );
+						if ( $event_id === 9083 ) {
+							// Add 1 to our changed fields counter
+							$this->updated_field_count++;
+							$this->plugin->alerts->TriggerIf(
+								$event_id,
+								array(
+									'TargetUsername' => $user ? $user->user_login : false,
+									'NewValue'       => $new_address,
+									'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+									'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+								),
+								array(
+									$this,
+									'must_not_repeat_billing'
+								)
+							);
+						}
+					}
+
 				} elseif ( false !== strpos( $meta_key, 'shipping_' ) ) {
 					$event_id = 9084;
+					if( $meta_key === 'shipping_first_name') {
+					  $new_address = $meta_value . ' ' . get_user_meta( $user_id, 'shipping_last_name', true ) . ', ' . get_user_meta( $user_id, 'shipping_company', true ) . ', ' . get_user_meta( $user_id, 'shipping_country', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_1', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_2', true ) . ', ' . get_user_meta( $user_id, 'shipping_city', true ) . ' ' . get_user_meta( $user_id, 'shipping_state', true ) . ', ' . get_user_meta( $user_id, 'shipping_postcode', true );
+					}
+
+					if( $meta_key === 'shipping_last_name') {
+					  $new_address = get_user_meta( $user_id, 'shipping_first_name', true ) . ' ' . $meta_value . ', ' . get_user_meta( $user_id, 'shipping_company', true ) . ', ' . get_user_meta( $user_id, 'shipping_country', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_1', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_2', true ) . ', ' . get_user_meta( $user_id, 'shipping_city', true ) . ' ' . get_user_meta( $user_id, 'shipping_state', true ) . ',  ' . get_user_meta( $user_id, 'shipping_postcode', true );
+					}
+
+					if( $meta_key === 'shipping_company') {
+					  $new_address = get_user_meta( $user_id, 'shipping_first_name', true ) . ' ' . get_user_meta( $user_id, 'shipping_last_name', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'shipping_country', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_1', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_2', true ) . ', ' . get_user_meta( $user_id, 'shipping_city', true ) . ', ' . get_user_meta( $user_id, 'shipping_state', true ) . ', ' . get_user_meta( $user_id, 'shipping_postcode', true );
+					}
+
+					if( $meta_key === 'shipping_country') {
+					  $new_address = get_user_meta( $user_id, 'shipping_first_name', true ) . ' ' . get_user_meta( $user_id, 'shipping_last_name', true ) . ', ' . get_user_meta( $user_id, 'shipping_company', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'shipping_address_1', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_2', true ) . ', ' . get_user_meta( $user_id, 'shipping_city', true ) . ', ' . get_user_meta( $user_id, 'shipping_state', true ) . ', ' . get_user_meta( $user_id, 'shipping_postcode', true );
+					}
+
+					if( $meta_key === 'shipping_address_1') {
+					  $new_address = get_user_meta( $user_id, 'shipping_first_name', true ) . ' ' . get_user_meta( $user_id, 'shipping_last_name', true ) . ', ' . get_user_meta( $user_id, 'shipping_company', true ) . ', ' . get_user_meta( $user_id, 'shipping_country', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'shipping_address_2', true ) . ', ' . get_user_meta( $user_id, 'shipping_city', true ) . ' ' . get_user_meta( $user_id, 'shipping_state', true ) . ', ' . get_user_meta( $user_id, 'shipping_postcode', true );
+					}
+
+					if( $meta_key === 'shipping_address_2') {
+					  $new_address = get_user_meta( $user_id, 'shipping_first_name', true ) . ' ' . get_user_meta( $user_id, 'shipping_last_name', true ) . ', ' . get_user_meta( $user_id, 'shipping_company', true ) . ', ' . get_user_meta( $user_id, 'shipping_country', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_1', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'shipping_city', true ) . ', ' . get_user_meta( $user_id, 'shipping_state', true ) . ', ' . get_user_meta( $user_id, 'shipping_postcode', true );
+					}
+
+					if( $meta_key === 'shipping_city') {
+					  $new_address = get_user_meta( $user_id, 'shipping_first_name', true ) . ' ' . get_user_meta( $user_id, 'shipping_last_name', true ) . ' ' . get_user_meta( $user_id, 'shipping_company', true ) . ' ' . get_user_meta( $user_id, 'shipping_country', true ) . ' ' . get_user_meta( $user_id, 'shipping_address_1', true ) . ' ' . get_user_meta( $user_id, 'shipping_address_2', true ) . ' ' . $meta_value . ' ' . get_user_meta( $user_id, 'shipping_state', true ) . '  ' . get_user_meta( $user_id, 'shipping_postcode', true );
+					}
+
+					if( $meta_key === 'shipping_state') {
+					  $new_address = get_user_meta( $user_id, 'shipping_first_name', true ) . ' ' . get_user_meta( $user_id, 'shipping_last_name', true ) . ', ' . get_user_meta( $user_id, 'shipping_state', true ) . ', ' . get_user_meta( $user_id, 'shipping_country', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_1', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_2', true ) . ', ' . get_user_meta( $user_id, 'shipping_city', true ) . ', ' . $meta_value . ', ' . get_user_meta( $user_id, 'shipping_postcode', true );
+					}
+
+					if( $meta_key === 'shipping_postcode') {
+					  $new_address = get_user_meta( $user_id, 'shipping_first_name', true ) . ' ' . get_user_meta( $user_id, 'shipping_last_name', true ) . ', ' . get_user_meta( $user_id, 'shipping_company', true ) . ', ' . get_user_meta( $user_id, 'shipping_country', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_1', true ) . ', ' . get_user_meta( $user_id, 'shipping_address_2', true ) . ', ' . get_user_meta( $user_id, 'shipping_city', true ) . ', ' . get_user_meta( $user_id, 'shipping_state', true ) . ', ' . $meta_value;
+					}
+
+					// Strip address of, ', ,' in case a field is missing something.
+					$new_address = str_replace( ' ,', '', $new_address );
+
+					if ( $event_id ) {
+					  $user = get_user_by( 'ID', $user_id );
+
+					  if ( $event_id === 9084 ) {
+							$this->updated_shipping_field_count++;
+							$this->plugin->alerts->TriggerIf(
+								$event_id,
+								array(
+									'TargetUsername' => $user ? $user->user_login : false,
+									'NewValue'       => $new_address,
+									'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+									'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+								),
+								array(
+									$this,
+									'must_not_repeat_shipping'
+								)
+							);
+					  }
+					}
 				}
 
-				if ( $event_id ) {
-					$user = get_user_by( 'ID', $user_id );
-					// $old_address_key = 'Old' . $this->get_key_for_event( $meta_key );
-					// $new_address_key = 'New' . $this->get_key_for_event( $meta_key );
-					$address_field = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
-					$address_field = ucwords( str_replace( '_', ' ', $address_field ) );
 
-					$this->plugin->alerts->Trigger(
-						$event_id,
-						array(
-							'TargetUsername' => $user ? $user->user_login : false,
-							'AddressField'   => $address_field,
-							'OldValue'       => $this->wc_user_meta[ $meta_id ]->value,
-							'NewValue'       => $meta_value,
-							'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
-							'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
-						)
-					);
-				}
 			}
 		}
+	}
+
+	public function must_not_repeat_billing( WSAL_AlertManager $manager ) {
+		$this->updated_field_count--;
+		if ( $this->updated_field_count == 1 ) {
+			return true;
+		}
+		return false;
+	}
+
+	public function must_not_repeat_shipping( WSAL_AlertManager $manager ) {
+		$this->updated_shipping_field_count--;
+		if ( $this->updated_shipping_field_count == 1 ) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -3417,5 +3802,40 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 			'tag_ID'    => $tag_id,
 		);
 		return ! empty( $tag_id ) ? add_query_arg( $tag_args, admin_url( 'term.php' ) ) : null;
+	}
+
+	/**
+	 * Check if the alert was triggered recently.
+	 *
+	 * Checks last 5 events if they occured less than 20 seconds ago.
+	 *
+	 * @param integer|array $alert_id - Alert code.
+	 * @return boolean
+	 */
+	private function was_triggered_recently( $alert_id ) {
+		// if we have already checked this don't check again.
+		if ( isset( $this->cached_alert_checks ) && array_key_exists( $alert_id, $this->cached_alert_checks ) && $this->cached_alert_checks[$alert_id] ) {
+			return true;
+		}
+		$query = new WSAL_Models_OccurrenceQuery();
+		$query->addOrderBy( 'created_on', true );
+		$query->setLimit( 5 );
+		$last_occurences  = $query->getAdapter()->Execute( $query );
+		$known_to_trigger = false;
+		foreach ( $last_occurences as $last_occurence ) {
+			if ( $known_to_trigger ) {
+				break;
+			}
+			if ( ! empty( $last_occurence ) && ( $last_occurence->created_on + 20 ) > time() ) {
+				if ( ! is_array( $alert_id ) && $last_occurence->alert_id === $alert_id ) {
+					$known_to_trigger = true;
+				} elseif ( is_array( $alert_id ) && in_array( $last_occurence[0]->alert_id, $alert_id, true ) ) {
+					$known_to_trigger = true;
+				}
+			}
+		}
+		// once we know the answer to this don't check again to avoid queries.
+		$this->cached_alert_checks[ $alert_id ] = $known_to_trigger;
+		return $known_to_trigger;
 	}
 }
