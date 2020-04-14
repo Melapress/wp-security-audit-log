@@ -1669,16 +1669,12 @@ class WSAL_Settings {
 				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View post in the editor', 'wp-security-audit-log' ) . '</a>';
 
 			case '%CategoryLink%' == $name:
+			case '%cat_link%' == $name:
+			case '%ProductCatLink%' == $name:
 				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View category', 'wp-security-audit-log' ) . '</a>';
 
 			case '%TagLink%' == $name:
 				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View tag', 'wp-security-audit-log' ) . '</a>';
-
-			case '%EditorLinkForum%' == $name:
-				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View the Forum in editor', 'wp-security-audit-log' ) . '</a>';
-
-			case '%EditorLinkTopic%' == $name:
-				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View the Topic in editor', 'wp-security-audit-log' ) . '</a>';
 
 			case '%EditUserLink%' === $name:
 				if ( 'NULL' !== $value ) {

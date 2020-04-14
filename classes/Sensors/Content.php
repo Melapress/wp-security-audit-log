@@ -579,6 +579,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					array(
 						'old_name' => $old_name,
 						'new_name' => $new_name,
+						'slug'     => $new_slug,
 						'cat_link' => $term_link,
 					)
 				);
