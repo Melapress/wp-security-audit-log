@@ -240,7 +240,6 @@ final class WSAL_AlertManager {
 			$this->log_temp_alerts();
 		}
 
-		// Get username.
 		$username = wp_get_current_user()->user_login;
 		// if user switching plugin class exists and filter is set to disable then try get the old user.
 		if ( apply_filters( 'wsal_disable_user_switching_plugin_tracking', false ) && class_exists( 'user_switching' ) ) {
@@ -602,25 +601,35 @@ final class WSAL_AlertManager {
 		 * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
 		 * @since 3.3.1
 		 */
-		if ( 'E_CRITICAL' === $severity->name ) {
-			$event_data['Severity'] = 2;
-		} elseif ( 'E_WARNING' === $severity->name ) {
-			$event_data['Severity'] = 4;
-		} elseif ( 'E_NOTICE' === $severity->name ) {
-			$event_data['Severity'] = 5;
-		} elseif ( 'WSAL_CRITICAL' === $severity->name ) {
-			$event_data['Severity'] = 1;
-		} elseif ( 'WSAL_HIGH' === $severity->name ) {
-			$event_data['Severity'] = 6;
-		} elseif ( 'WSAL_MEDIUM' === $severity->name ) {
-			$event_data['Severity'] = 10;
-		} elseif ( 'WSAL_LOW' === $severity->name ) {
-			$event_data['Severity'] = 15;
-		} elseif ( 'WSAL_INFORMATIONAL' === $severity->name ) {
-			$event_data['Severity'] = 20;
-		} else {
+		if ( is_object( $severity ) && property_exists( $severity, 'name' ) ) {
+			if ( 'E_CRITICAL' === $severity->name ) {
+				$event_data['Severity'] = 2;
+			} elseif ( 'E_WARNING' === $severity->name ) {
+				$event_data['Severity'] = 4;
+			} elseif ( 'E_NOTICE' === $severity->name ) {
+				$event_data['Severity'] = 5;
+			} elseif ( 'WSAL_CRITICAL' === $severity->name ) {
+				$event_data['Severity'] = 1;
+			} elseif ( 'WSAL_HIGH' === $severity->name ) {
+				$event_data['Severity'] = 6;
+			} elseif ( 'WSAL_MEDIUM' === $severity->name ) {
+				$event_data['Severity'] = 10;
+			} elseif ( 'WSAL_LOW' === $severity->name ) {
+				$event_data['Severity'] = 15;
+			} elseif ( 'WSAL_INFORMATIONAL' === $severity->name ) {
+				$event_data['Severity'] = 20;
+			}
+		}
+
+		/*
+		 * In cases where we were not able to figure out a severity already
+		 * use a default of 20: info.
+		 *
+		 * @since 4.3.0
+		 */
+		if ( ! isset( $event_data['Severity'] ) ) {
 			// assuming this is a missclasified item and using info code.
-			$code = 20;
+			$event_data['Severity'] = 20;
 		}
 
 		// Add event object.
