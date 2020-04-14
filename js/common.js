@@ -80,14 +80,18 @@ jQuery( document ).ready( function() {
 				if( data.responseText == '"already_installed"' ) {
 					jQuery(currentButton).html( wsalCommonData.already_installed ).addClass('disabled');
 					jQuery(currentButton).next('.spinner').hide('200');
-					window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
-					jQuery('[href="' + RedirectToTab + '"]').trigger('click');
+					if (typeof RedirectToTab !== 'undefined') {
+						window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
+						jQuery('[href="' + RedirectToTab + '"]').trigger('click');
+					}
 					jQuery(currentButton).addClass('disabled');
 				} else if ( data.responseText == '"activated"' ) {
 					jQuery(currentButton).html( wsalCommonData.activated ).addClass('disabled');
 					jQuery(currentButton).next('.spinner').hide('200');
-					window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
-					jQuery('[href="' + RedirectToTab + '"]').trigger('click');
+					if (typeof RedirectToTab !== 'undefined') {
+						window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
+						jQuery('[href="' + RedirectToTab + '"]').trigger('click');
+					}
 					jQuery(currentButton).addClass('disabled');
 			 } else if ( JSON.stringify(data.responseText).toLowerCase().indexOf('failed') >= 0 ) {
 					jQuery(currentButton).html( wsalCommonData.failed ).addClass('disabled');
@@ -95,7 +99,9 @@ jQuery( document ).ready( function() {
 			 } else if ( data.responseText == '"success"' || JSON.stringify(data.responseText).toLowerCase().indexOf('success') >= 0 ) {
 				 jQuery(currentButton).html( wsalCommonData.installed ).addClass('disabled');
 				 jQuery(currentButton).next('.spinner').hide('200');
-				 window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
+				 if (typeof RedirectToTab !== 'undefined') {
+					 window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
+				 }
 				 // Reload as tabs are not present on page.
 				 location.reload();
 			 }
