@@ -19,10 +19,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 // Define custom / new PHP constants.
 defined( 'E_CRITICAL' ) || define( 'E_CRITICAL', 'E_CRITICAL' );
-defined( 'E_DEBUG' ) || define( 'E_DEBUG', 'E_DEBUG' );
-defined( 'E_RECOVERABLE_ERROR' ) || define( 'E_RECOVERABLE_ERROR', 'E_RECOVERABLE_ERROR' );
-defined( 'E_DEPRECATED' ) || define( 'E_DEPRECATED', 'E_DEPRECATED' );
-defined( 'E_USER_DEPRECATED' ) || define( 'E_USER_DEPRECATED', 'E_USER_DEPRECATED' );
 
 /**
  * Load Custom Alerts from uploads/wp-security-audit-log/custom-alerts.php if exists
@@ -79,81 +75,6 @@ function wsaldefaults_wsal_init() {
 		$wsal->alerts = new WSAL_AlertManager( $wsal );
 	}
 
-	$wsal->constants->UseConstants(
-		array(
-			// Default PHP constants.
-			array(
-				'name'        => 'E_ERROR',
-				'description' => __( 'Fatal run-time error.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_WARNING',
-				'description' => __( 'Run-time warning (non-fatal error).', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_PARSE',
-				'description' => __( 'Compile-time parse error.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_NOTICE',
-				'description' => __( 'Run-time notice.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_CORE_ERROR',
-				'description' => __( 'Fatal error that occurred during startup.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_CORE_WARNING',
-				'description' => __( 'Warnings that occurred during startup.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_COMPILE_ERROR',
-				'description' => __( 'Fatal compile-time error.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_COMPILE_WARNING',
-				'description' => __( 'Compile-time warning.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_USER_ERROR',
-				'description' => __( 'User-generated error message.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_USER_WARNING',
-				'description' => __( 'User-generated warning message.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_USER_NOTICE',
-				'description' => __( 'User-generated notice message.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_STRICT',
-				'description' => __( 'Non-standard/optimal code warning.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_RECOVERABLE_ERROR',
-				'description' => __( 'Catchable fatal error.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_DEPRECATED',
-				'description' => __( 'Run-time deprecation notices.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_USER_DEPRECATED',
-				'description' => __( 'Run-time user deprecation notices.', 'wp-security-audit-log' ),
-			),
-			// Custom constants.
-			array(
-				'name'        => 'E_CRITICAL',
-				'description' => __( 'Critical, high-impact messages.', 'wp-security-audit-log' ),
-			),
-			array(
-				'name'        => 'E_DEBUG',
-				'description' => __( 'Debug informational messages.', 'wp-security-audit-log' ),
-			),
-		)
-	);
-
 	$wsal->constants->AddConstant( 'WSAL_CRITICAL', 1, __( 'Critical severity events.', 'wp-security-audit-log' ) );
 	$wsal->constants->AddConstant( 'WSAL_HIGH', 6, __( 'High severity events.', 'wp-security-audit-log' ) );
 	$wsal->constants->AddConstant( 'WSAL_MEDIUM', 10, __( 'Medium severity events.', 'wp-security-audit-log' ) );
@@ -185,7 +106,7 @@ function wsaldefaults_wsal_init() {
 					array( 2001, WSAL_LOW, __( 'User published a post', 'wp-security-audit-log' ), __( 'Published the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'published' ),
 					array( 2002, WSAL_LOW, __( 'User modified a post', 'wp-security-audit-log' ), __( 'Modified the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'modified' ),
 					array( 2008, WSAL_MEDIUM, __( 'User permanently deleted a post from the trash', 'wp-security-audit-log' ), __( 'Permanently deleted the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType%', 'wp-security-audit-log' ), 'post', 'deleted' ),
-					array( 2012, WSAL_MEDIUM, __( 'User moved a post to the trash', 'wp-security-audit-log' ), __( 'Moved the post %PostTitle% to trash %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'deleted' ),
+					array( 2012, WSAL_MEDIUM, __( 'User moved a post to the trash', 'wp-security-audit-log' ), __( 'Moved the post %PostTitle% to trash %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %PostUrlIfPlublished%', 'wp-security-audit-log' ), 'post', 'deleted' ),
 					array( 2014, WSAL_LOW, __( 'User restored a post from trash', 'wp-security-audit-log' ), __( 'Restored the post %PostTitle% from trash %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'restored' ),
 					array( 2017, WSAL_INFORMATIONAL, __( 'User changed post URL', 'wp-security-audit-log' ), __( 'Changed the URL of the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous URL: %OldUrl% %LineBreak% New URL: %NewUrl% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'modified' ),
 					array( 2019, WSAL_INFORMATIONAL, __( 'User changed post author', 'wp-security-audit-log' ), __( 'Changed the author of the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous author: %OldAuthor% %LineBreak% New author: %NewAuthor% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost%.', 'wp-security-audit-log' ), 'post', 'modified' ),
@@ -222,7 +143,7 @@ function wsaldefaults_wsal_init() {
 					array( 2023, WSAL_MEDIUM, __( 'User created new category', 'wp-security-audit-log' ), __( 'Created the category %CategoryName% %LineBreak% Slug: %Slug% %LineBreak% %CategoryLink%', 'wp-security-audit-log' ), 'category', 'created' ),
 					array( 2024, WSAL_MEDIUM, __( 'User deleted category', 'wp-security-audit-log' ), __( 'Deleted the category %CategoryName% %LineBreak% Slug: %Slug%', 'wp-security-audit-log' ), 'category', 'deleted' ),
 					array( 2052, WSAL_LOW, __( 'Changed the parent of a category', 'wp-security-audit-log' ), __( 'Changed the parent of the category %CategoryName% %LineBreak% Slug: %Slug% %LineBreak% Previous parent: %OldParent% %LineBreak% New parent: %NewParent% %LineBreak% %CategoryLink%', 'wp-security-audit-log' ), 'category', 'modified' ),
-					array( 2127, WSAL_LOW, __( 'User changed category name', 'wp-security-audit-log' ), __( 'Changed the name of the category: %new_name% %LineBreak% Slug: %Slug% %LineBreak% Previous name: %old_name% %LineBreak% %cat_link%', 'wp-security-audit-log' ), 'category', 'modified' ),
+					array( 2127, WSAL_LOW, __( 'User changed category name', 'wp-security-audit-log' ), __( 'Previous name: %old_name% %LineBreak% New name: %new_name% %LineBreak% Slug: %slug% %LineBreak%  %cat_link%', 'wp-security-audit-log' ), 'category', 'renamed' ),
 					array( 2128, WSAL_LOW, __( 'User changed category slug', 'wp-security-audit-log' ), __( 'Changed the slug of the category: %CategoryName% %LineBreak% Previous slug: %old_slug% %LineBreak% New slug: %new_slug% %LineBreak% %cat_link%', 'wp-security-audit-log' ), 'category', 'modified' ),
 				),
 
@@ -230,7 +151,7 @@ function wsaldefaults_wsal_init() {
 					array( 2053, WSAL_LOW, __( 'User created a custom field for a post', 'wp-security-audit-log' ), __( 'Created a new custom field called %MetaKey% in the post %PostTitle% %LineBreak% Post ID: %PostID% %LineBreak% Post Type: %PostType% %LineBreak% Post Status: %PostStatus% %LineBreak% Custom field value: %MetaValue% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost% %LineBreak% %MetaLink%', 'wp-security-audit-log' ), 'post', 'modified' ),
 					array( 2054, WSAL_LOW, __( 'User updated a custom field value for a post', 'wp-security-audit-log' ), __( 'Modified the value of the custom field %MetaKey% in the post %PostTitle% %LineBreak% Post ID: %PostID% %LineBreak% Post Type: %PostType% %LineBreak% Post Status: %PostStatus% %LineBreak% Previous custom field value: %MetaValueOld% %LineBreak% New custom field value: %MetaValueNew% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost% %LineBreak% %MetaLink%.', 'wp-security-audit-log' ), 'custom-field', 'modified' ),
 					array( 2055, WSAL_MEDIUM, __( 'User deleted a custom field from a post', 'wp-security-audit-log' ), __( 'Deleted the custom field %MetaKey% from the post %PostTitle% %LineBreak% Post ID: %PostID% %LineBreak% Post Type: %PostType% %LineBreak% Post Status: %PostStatus% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'custom-field', 'deleted' ),
-					array( 2062, WSAL_LOW, __( 'User updated a custom field name for a post', 'wp-security-audit-log' ), __( 'Old custom field name: %MetaKeyOld% %LineBreak% New custom field name: %MetaKeyNew% %LineBreak% Post: %PostTitle% %LineBreak% Post ID: %PostID% %LineBreak% Post Type:%PostType% %LineBreak% Post Status: %PostStatus% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'custom-field', 'renamed' ),
+					array( 2062, WSAL_LOW, __( 'User updated a custom field name for a post', 'wp-security-audit-log' ), __( 'Old custom field name: %MetaKeyOld% %LineBreak% New custom field name: %MetaKeyNew% %LineBreak% Post: %PostTitle% %LineBreak% Post ID: %PostID% %LineBreak% Post Type: %PostType% %LineBreak% Post Status: %PostStatus% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'custom-field', 'renamed' ),
 				),
 
 				/**
@@ -389,10 +310,6 @@ function wsaldefaults_wsal_init() {
 					array( 4011, WSAL_MEDIUM, __( 'User removed from site', 'wp-security-audit-log' ), __( 'Removed user %TargetUsername% from site: %SiteName% %LineBreak% Previous role: %TargetUserRole% %LineBreak% First name: %FirstName% %LineBreak% Last name: %LastName% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'modified' ),
 					array( 4012, WSAL_CRITICAL, __( 'New network user created', 'wp-security-audit-log' ), __( 'Created a new network user %NewUserData->Username% %LineBreak% First name: %NewUserData->FirstName% %LineBreak% Last name: %NewUserData->LastName% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'created' ),
 				),
-
-				__( 'bbPress User Profiles', 'wp-security-audit-log' ) => array(
-					array( 4013, WSAL_LOW, __( 'The forum role of a user was changed by another WordPress user', 'wp-security-audit-log' ), __( 'Change the forum role of user %TargetUsername% %LineBreak% Previous role: %OldRole% %LineBreak% New role: %NewRole% %LineBreak% First name: %FirstName% %LineBreak% Last name: %LastName% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'modified' ),
-				),
 			),
 
 			__( 'Plugins & Themes', 'wp-security-audit-log' ) => array(
@@ -486,40 +403,6 @@ function wsaldefaults_wsal_init() {
 				),
 			),
 
-			__( 'bbPress Forums', 'wp-security-audit-log' ) => array(
-				__( 'Forums', 'wp-security-audit-log' ) => array(
-					array( 8000, WSAL_INFORMATIONAL, __( 'User created new forum', 'wp-security-audit-log' ), __( 'New forum called %ForumName% %LineBreak% %EditorLinkForum%', 'wp-security-audit-log' ), 'bbpress-forum', 'created' ),
-					array( 8001, WSAL_MEDIUM, __( 'User changed status of a forum', 'wp-security-audit-log' ), __( 'Changed the status of the forum %ForumName% %LineBreak% Previous Status: %OldStatus% %LineBreak% New Status: %NewStatus% %LineBreak% %EditorLinkForum%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-					array( 8002, WSAL_MEDIUM, __( 'User changed visibility of a forum', 'wp-security-audit-log' ), __( 'Changed the visibility of the forum %ForumName% %LineBreak% Previous visibility: %OldVisibility% %LineBreak% New visibility: %NewVisibility% %LineBreak% %EditorLinkForum%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-					array( 8003, WSAL_LOW, __( 'User changed the URL of a forum', 'wp-security-audit-log' ), __( 'Changed the URL of the forum %ForumName% %LineBreak% Previous URL: %OldUrl% %LineBreak% New URL: %NewUrl% %LineBreak% %EditorLinkForum%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-					array( 8004, WSAL_INFORMATIONAL, __( 'User changed order of a forum', 'wp-security-audit-log' ), __( 'Changed the sorting order of the forum %ForumName% %LineBreak% Previous sorting order: %OldOrder% %LineBreak% New sorting order: %NewOrder% %LineBreak% %EditorLinkForum%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-					array( 8005, WSAL_HIGH, __( 'User moved forum to trash', 'wp-security-audit-log' ), __( 'Moved the forum %ForumName% to trash', 'wp-security-audit-log' ), 'bbpress-forum', 'deleted' ),
-					array( 8006, WSAL_HIGH, __( 'User permanently deleted forum', 'wp-security-audit-log' ), __( 'Permanently deleted the forum %ForumName%', 'wp-security-audit-log' ), 'bbpress-forum', 'deleted' ),
-					array( 8007, WSAL_HIGH, __( 'User restored forum from trash', 'wp-security-audit-log' ), __( 'Restored the forum %ForumName% from trash', 'wp-security-audit-log' ), 'bbpress-forum', 'restored' ),
-					array( 8008, WSAL_LOW, __( 'User changed the parent of a forum', 'wp-security-audit-log' ), __( 'Changed the parent of the forum %ForumName% %LineBreak% Previous parent: %OldParent% %LineBreak% New parent: %NewParent% %LineBreak% %EditorLinkForum%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-					array( 8011, WSAL_LOW, __( 'User changed type of a forum', 'wp-security-audit-log' ), __( 'Changed the type of the forum %ForumName% %LineBreak% Previous type: %OldType% %LineBreak% New type: %NewType% %LineBreak% %EditorLinkForum%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-				),
-
-				__( 'bbPress Forum Topics', 'wp-security-audit-log' ) => array(
-					array( 8014, WSAL_INFORMATIONAL, __( 'User created new topic', 'wp-security-audit-log' ), __( 'New topic called %TopicName% %LineBreak% %EditorLinkTopic%', 'wp-security-audit-log' ), 'bbpress-forum', 'created' ),
-					array( 8015, WSAL_INFORMATIONAL, __( 'User changed status of a topic', 'wp-security-audit-log' ), __( 'Changed the status of the topic %TopicName% %LineBreak% Previous status: %OldStatus% %LineBreak% New status: %NewStatus% %LineBreak% %EditorLinkTopic%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-					array( 8016, WSAL_INFORMATIONAL, __( 'User changed type of a topic', 'wp-security-audit-log' ), __( 'Changed the type of the topic %TopicName% %LineBreak% Previous type: %OldType% %LineBreak% New type: %NewType% %LineBreak% %EditorLinkTopic%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-					array( 8017, WSAL_INFORMATIONAL, __( 'User changed URL of a topic', 'wp-security-audit-log' ), __( 'Changed the URL of the topic %TopicName% %LineBreak% Previous URL: %OldUrl% %LineBreak% New URL: %NewUrl% %LineBreak% %EditorLinkTopic%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-					array( 8018, WSAL_INFORMATIONAL, __( 'User changed the forum of a topic', 'wp-security-audit-log' ), __( 'Changed the forum of the topic %TopicName% %LineBreak% Previous forum: %OldForum% %LineBreak% New forum: %NewForum% %LineBreak% %EditorLinkTopic%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-					array( 8019, WSAL_MEDIUM, __( 'User moved topic to trash', 'wp-security-audit-log' ), __( 'Moved the %TopicName% to trash', 'wp-security-audit-log' ), 'bbpress-forum', 'deleted' ),
-					array( 8020, WSAL_MEDIUM, __( 'User permanently deleted topic', 'wp-security-audit-log' ), __( 'Permanently deleted the topic %TopicName%', 'wp-security-audit-log' ), 'bbpress-forum', 'deleted' ),
-					array( 8021, WSAL_INFORMATIONAL, __( 'User restored topic from trash', 'wp-security-audit-log' ), __( 'Restored the topic %TopicName% from trash', 'wp-security-audit-log' ), 'bbpress-forum', 'restored' ),
-					array( 8022, WSAL_LOW, __( 'User changed visibility of a topic', 'wp-security-audit-log' ), __( 'Changed the visibility of the topic %TopicName% %LineBreak% Previous visibility: %OldVisibility% %LineBreak% New visibility: %NewVisibility% %LineBreak% %EditorLinkTopic%', 'wp-security-audit-log' ), 'bbpress-forum', 'modified' ),
-				),
-
-				__( 'bbPress Settings', 'wp-security-audit-log' ) => array(
-					array( 8009, WSAL_HIGH, __( 'User changed forum\'s role', 'wp-security-audit-log' ), __( 'Changed the forum user\'s auto role %LineBreak% Previous role: %OldRole% %LineBreak% New role: %NewRole%', 'wp-security-audit-log' ), 'bbpress', 'modified' ),
-					array( 8010, WSAL_CRITICAL, __( 'User changed option of a forum', 'wp-security-audit-log' ), __( 'The option for anonymous posting on the forums', 'wp-security-audit-log' ), 'bbpress', 'enabled' ),
-					array( 8012, WSAL_MEDIUM, __( 'User changed time to disallow post editing', 'wp-security-audit-log' ), __( 'Changed the time to disallow post editing in the forums %LineBreak% Previous time: %OldTime% %LineBreak% New time: %NewTime%', 'wp-security-audit-log' ), 'bbpress', 'modified' ),
-					array( 8013, WSAL_HIGH, __( 'User changed the forum setting posting throttle time', 'wp-security-audit-log' ), __( 'Changed the posting throttle time in the forums %LineBreak% Previous time: %OldTime% %LineBreak% New time: %NewTime%', 'wp-security-audit-log' ), 'bbpress', 'modified' ),
-				),
-			),
-
 			__( 'Multisite Network Sites', 'wp-security-audit-log' ) => array(
 				__( 'MultiSite', 'wp-security-audit-log' ) => array(
 					array( 7000, WSAL_CRITICAL, __( 'New site added on the network', 'wp-security-audit-log' ), __( 'New site on the network: %SiteName% %LineBreak% URL: %BlogURL%', 'wp-security-audit-log' ), 'multisite-network', 'added' ),
@@ -534,7 +417,7 @@ function wsaldefaults_wsal_init() {
 			__( 'WooCommerce', 'wp-security-audit-log' ) => array(
 				__( 'Products', 'wp-security-audit-log' ) => array(
 					array( 9000, WSAL_LOW, __( 'User created a new product', 'wp-security-audit-log' ), __( 'Created a new product called %ProductTitle% %LineBreak% ID: %PostID% %LineBreak% Status: %ProductStatus% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'created' ),
-					array( 9001, WSAL_MEDIUM, __( 'User published a product', 'wp-security-audit-log' ), __( 'Published the product called %ProductTitle% %LineBreak% ID: %PostID% %LineBreak% Status: %ProductStatus% %LineBreak% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'published' ),
+					array( 9001, WSAL_MEDIUM, __( 'User published a product', 'wp-security-audit-log' ), __( 'Published the product called %ProductTitle% %LineBreak% ID: %PostID% %LineBreak% Status: %ProductStatus% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'published' ),
 					array( 9003, WSAL_LOW, __( 'User changed the category of a product', 'wp-security-audit-log' ), __( 'Changed the category of the product %ProductTitle% %LineBreak% ID: %PostID% %LineBreak% Status: %ProductStatus% %LineBreak% Previous categories: %OldCategories% %LineBreak% New categories: %NewCategories% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'modified' ),
 					array( 9004, WSAL_INFORMATIONAL, __( 'User modified the short description of a product', 'wp-security-audit-log' ), __( 'Changed the short description of the product %ProductTitle% %LineBreak% ID: %PostID% %LineBreak% Status: %ProductStatus% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'modified' ),
 					array( 9005, WSAL_LOW, __( 'User modified the text of a product', 'wp-security-audit-log' ), __( 'Changed the text of the product %ProductTitle% %LineBreak% ID: %PostID% %LineBreak% Status: %ProductStatus% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'modified' ),
@@ -567,9 +450,10 @@ function wsaldefaults_wsal_init() {
 					array( 9044, WSAL_INFORMATIONAL, __( 'User changed the Allow Backorders setting of a product', 'wp-security-audit-log' ), __( 'Changed the Allow Backorders setting for the product %ProductTitle% %LineBreak% ID: %PostID% %LineBreak% Status: %ProductStatus% %LineBreak% Previous status: %OldStatus% %LineBreak% New status: %NewStatus% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'modified' ),
 					array( 9045, WSAL_MEDIUM, __( 'User added/removed products to upsell of a product', 'wp-security-audit-log' ), __( 'Products to Upsell in the product %ProductTitle% %LineBreak% ID: %PostID% %LineBreak% Status: %ProductStatus% %LineBreak% Product: %UpsellTitle% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'added' ),
 					array( 9046, WSAL_MEDIUM, __( 'User added/removed products to cross-sells of a product', 'wp-security-audit-log' ), __( 'Product to Cross-sell in the product %ProductTitle% %LineBreak% ID: %PostID% %LineBreak% Status: %ProductStatus% %LineBreak% Product: %CrossSellTitle% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'added' ),
+					array( 9105, WSAL_LOW, __( 'System changed the stock quantity of a product', 'wp-security-audit-log' ), __( 'The stock quantity of the product %ProductTitle% was changed due to a purchase. %LineBreak% ID: %PostID% %LineBreak% Status: %ProductStatus% %LineBreak% Previous quantity: %OldValue% %LineBreak% New quantity: %NewValue% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'modified' ),
 					array( 9047, WSAL_LOW, __( 'Added a new attribute of a product', 'wp-security-audit-log' ), __( 'A new attribute to the product %ProductTitle% %LineBreak% ID: %ProductID% %LineBreak% Status: %ProductStatus% %LineBreak% Attribute name: %AttributeName% %LineBreak% Attribute value: %AttributeValue% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'added' ),
 					array( 9048, WSAL_LOW, __( 'Modified the value of an attribute of a product', 'wp-security-audit-log' ), __( 'Modified the value of an attribute in the product %ProductTitle% %LineBreak% ID: %ProductID% %LineBreak% Status: %ProductStatus% %LineBreak% Attribute name: %AttributeName% %LineBreak% Previous attribute value: %OldValue% %LineBreak% New attribute value: %NewValue% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'modified' ),
-					array( 9049, WSAL_LOW, __( 'Changed the name of an attribute of a product', 'wp-security-audit-log' ), __( 'Changed the name of an attribute in the product %ProductTitle% %LineBreak% ID: %ProductID% %LineBreak% Status: %ProductStatus% %LineBreak% Previous attribute name: %OldValue% %LineBreak% New attribute name: %NewValue% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'modified' ),
+					array( 9049, WSAL_LOW, __( 'Changed the name of an attribute of a product', 'wp-security-audit-log' ), __( 'Changed the name of an attribute in the product %ProductTitle% %LineBreak% ID: %ProductID% %LineBreak% Status: %ProductStatus% %LineBreak% Previous attribute name: %OldValue% %LineBreak% New attribute name: %NewValue% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'renamed' ),
 					array( 9050, WSAL_LOW, __( 'Deleted an attribute of a product', 'wp-security-audit-log' ), __( 'An attribute from the product %ProductTitle% %LineBreak% ID: %ProductID% %LineBreak% Status: %ProductStatus% %LineBreak% Attribute name: %AttributeName% %LineBreak% Attribute value: %AttributeValue% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'deleted' ),
 					array( 9051, WSAL_LOW, __( 'Set the attribute visibility of a product', 'wp-security-audit-log' ), __( 'Changed the visibility of an attribute in the product %ProductTitle% %LineBreak% ID: %ProductID% %LineBreak% Status: %ProductStatus% %LineBreak% Attribute name: %AttributeName% %LineBreak% Attribute visibility: %AttributeVisiblilty% %LineBreak% %EditorLinkProduct%', 'wp-security-audit-log' ), 'woocommerce-product', 'modified' ),
 				),
@@ -577,12 +461,22 @@ function wsaldefaults_wsal_init() {
 				__( 'Store', 'wp-security-audit-log' ) => array(
 					array( 9027, WSAL_HIGH, __( 'User changed the Weight Unit', 'wp-security-audit-log' ), __( 'Changed the weight unit of the store %LineBreak% Previous weight unit: %OldUnit% %LineBreak% New weight unit: %NewUnit%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
 					array( 9028, WSAL_HIGH, __( 'User changed the Dimensions Unit', 'wp-security-audit-log' ), __( 'Changed the dimensions unit of the store %LineBreak% Previous dimensions unit: %OldUnit% %LineBreak% New dimensions unit: %NewUnit%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
-					array( 9029, WSAL_HIGH, __( 'User changed the Base Location', 'wp-security-audit-log' ), __( 'Changed the base location %LineBreak% Previous location: %OldLocation% %LineBreak% New location: %NewLocation%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
-					array( 9030, WSAL_HIGH, __( 'User enabled/disabled taxes', 'wp-security-audit-log' ), __( 'Taxes in the WooCommerce store', 'wp-security-audit-log' ), 'woocommerce-store', 'enabled' ),
+					array( 9029, WSAL_HIGH, __( 'User changed the Base Location', 'wp-security-audit-log' ), __( 'Changed the base location %LineBreak% Previous address: %OldLocation% %LineBreak% New address: %NewLocation%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9030, WSAL_HIGH, __( 'User enabled/disabled taxes', 'wp-security-audit-log' ), __( 'Taxes in WooCommerce', 'wp-security-audit-log' ), 'woocommerce-store', 'enabled' ),
 					array( 9031, WSAL_HIGH, __( 'User changed the currency', 'wp-security-audit-log' ), __( 'Changed the currency of the store %LineBreak% Previous currency: %OldCurrency% %LineBreak% New currency: %NewCurrency%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
 					array( 9032, WSAL_HIGH, __( 'User enabled/disabled the use of coupons during checkout', 'wp-security-audit-log' ), __( 'The use of coupons during checkout', 'wp-security-audit-log' ), 'woocommerce-store', 'enabled' ),
 					array( 9033, WSAL_MEDIUM, __( 'User enabled/disabled guest checkout', 'wp-security-audit-log' ), __( 'Guest checkout in the store', 'wp-security-audit-log' ), 'woocommerce-store', 'enabled' ),
 					array( 9034, WSAL_HIGH, __( 'User enabled/disabled cash on delivery', 'wp-security-audit-log' ), __( 'The option cash on delivery', 'wp-security-audit-log' ), 'woocommerce-store', 'enabled' ),
+					array( 9085, WSAL_HIGH, __( 'User modified selling location(s)', 'wp-security-audit-log' ), __( 'The setting Selling location(s) %LineBreak% Old setting: %old% %LineBreak% New Setting: %new%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9086, WSAL_HIGH, __( 'User modified excluded selling location(s)', 'wp-security-audit-log' ), __( 'Changed the list of excluded countries to sell to %LineBreak% Old setting: %old% %LineBreak% New Setting: %new%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9087, WSAL_HIGH, __( 'User modified exclusive selling location(s)', 'wp-security-audit-log' ), __( 'Changed the list of countries to sell to %LineBreak% Old setting: %old% %LineBreak% New Setting: %new%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9088, WSAL_HIGH, __( 'User modified shipping location(s)', 'wp-security-audit-log' ), __( 'The setting Shipping location(s) %LineBreak% Old setting: %old% %LineBreak% New Setting: %new%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9089, WSAL_HIGH, __( 'User modified exclusive shipping location(s)', 'wp-security-audit-log' ), __( 'Changed the list of specific countries to ship to %LineBreak% Old setting: %old% %LineBreak% New Setting: %new%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9090, WSAL_HIGH, __( 'User modified default customer location', 'wp-security-audit-log' ), __( 'The setting Default customer location %LineBreak% Old setting: %old% %LineBreak% New Setting: %new%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9091, WSAL_HIGH, __( 'User modified the cart page', 'wp-security-audit-log' ), __( 'Changed the Cart Page %LineBreak% Old page: %old% %LineBreak% New page: %new%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9092, WSAL_HIGH, __( 'User modified the checkout page', 'wp-security-audit-log' ), __( 'Changed the Checkout page %LineBreak% Old page: %old% %LineBreak% New page: %new%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9093, WSAL_HIGH, __( 'User modified the my account page', 'wp-security-audit-log' ), __( 'Changed the My Account Page %LineBreak% Old page: %old% %LineBreak% New page: %new%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9094, WSAL_HIGH, __( 'User modified the terms and conditions page', 'wp-security-audit-log' ), __( 'Changed the Terms and Conditions Page %LineBreak% Old page: %old% %LineBreak% New page: %new%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
 				),
 
 				__( 'Payment Gateways', 'wp-security-audit-log' ) => array(
@@ -600,12 +494,12 @@ function wsaldefaults_wsal_init() {
 				),
 
 				__( 'WC Categories', 'wp-security-audit-log' ) => array(
-					array( 9002, WSAL_INFORMATIONAL, __( 'User created a new product category', 'wp-security-audit-log' ), __( 'A new product category called %CategoryName% %LineBreak% Category slug is %Slug% %LineBreak% %ProductCatLink%', 'wp-security-audit-log' ), 'woocommerce-store', 'created' ),
-					array( 9052, WSAL_MEDIUM, __( 'User deleted a product category', 'wp-security-audit-log' ), __( 'The product category called %CategoryName% %LineBreak% Category slug: %CategorySlug%', 'wp-security-audit-log' ), 'woocommerce-store', 'deleted' ),
-					array( 9053, WSAL_INFORMATIONAL, __( 'User changed the slug of a product category', 'wp-security-audit-log' ), __( 'Changed the slug of the product category called %CategoryName% %LineBreak% Previous category slug: %OldSlug% %LineBreak% New category slug: %NewSlug% %LineBreak% %ProductCatLink%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
-					array( 9054, WSAL_MEDIUM, __( 'User changed the parent category of a product category', 'wp-security-audit-log' ), __( 'Changed the parent of the product category %CategoryName% %LineBreak% Category slug: %CategorySlug% Previous parent: %OldParentCat% %LineBreak% New parent: %NewParentCat% %LineBreak% %ProductCatLink%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
-					array( 9055, WSAL_INFORMATIONAL, __( 'User changed the display type of a product category', 'wp-security-audit-log' ), __( 'Changed the display type of the product category %CategoryName% %LineBreak% %CategorySlug% %LineBreak% Previous display type: %OldDisplayType% %LineBreak% New display type: %NewDisplayType% %LineBreak% %ProductCatLink%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
-					array( 9056, WSAL_LOW, __( 'User changed the name of a product category', 'wp-security-audit-log' ), __( 'Changed the name of the product category %CategoryName% %LineBreak% %CategorySlug% %LineBreak% Previous name: %OldName% %LineBreak% New name: %NewName% %LineBreak% %ProductCatLink%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
+					array( 9002, WSAL_INFORMATIONAL, __( 'User created a new product category', 'wp-security-audit-log' ), __( 'A new product category called %CategoryName% %LineBreak% Category slug is %Slug% %LineBreak% %ProductCatLink%', 'wp-security-audit-log' ), 'woocommerce-category', 'created' ),
+					array( 9052, WSAL_MEDIUM, __( 'User deleted a product category', 'wp-security-audit-log' ), __( 'The product category called %CategoryName% %LineBreak% Category slug: %CategorySlug%', 'wp-security-audit-log' ), 'woocommerce-category', 'deleted' ),
+					array( 9053, WSAL_INFORMATIONAL, __( 'User changed the slug of a product category', 'wp-security-audit-log' ), __( 'Changed the slug of the product category called %CategoryName% %LineBreak% Previous category slug: %OldSlug% %LineBreak% New category slug: %NewSlug% %LineBreak% %ProductCatLink%', 'wp-security-audit-log' ), 'woocommerce-category', 'modified' ),
+					array( 9054, WSAL_MEDIUM, __( 'User changed the parent category of a product category', 'wp-security-audit-log' ), __( 'Changed the parent of the product category %CategoryName% %LineBreak% Category slug: %CategorySlug% %LineBreak% Previous parent: %OldParentCat% %LineBreak% New parent: %NewParentCat% %LineBreak% %ProductCatLink%', 'wp-security-audit-log' ), 'woocommerce-category', 'modified' ),
+					array( 9055, WSAL_INFORMATIONAL, __( 'User changed the display type of a product category', 'wp-security-audit-log' ), __( 'Changed the display type of the product category %CategoryName% %LineBreak% %CategorySlug% %LineBreak% Previous display type: %OldDisplayType% %LineBreak% New display type: %NewDisplayType% %LineBreak% %ProductCatLink%', 'wp-security-audit-log' ), 'woocommerce-category', 'modified' ),
+					array( 9056, WSAL_LOW, __( 'User changed the name of a product category', 'wp-security-audit-log' ), __( 'Previous name: %OldName% %LineBreak% New name: %NewName% %LineBreak% Category slug: %CategorySlug% %LineBreak% %ProductCatLink%', 'wp-security-audit-log' ), 'woocommerce-category', 'renamed' ),
 				),
 
 				__( 'Attributes', 'wp-security-audit-log' ) => array(
@@ -618,15 +512,15 @@ function wsaldefaults_wsal_init() {
 				),
 
 				__( 'Coupons', 'wp-security-audit-log' ) => array(
-					array( 9063, WSAL_LOW, __( 'User published a new coupon', 'wp-security-audit-log' ), __( 'Published a new coupon called %CouponName% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-store', 'published' ),
+					array( 9063, WSAL_LOW, __( 'User published a new coupon', 'wp-security-audit-log' ), __( 'Published a new coupon called %CouponName% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-coupon', 'published' ),
 					array( 9064, WSAL_LOW, __( 'User changed the discount type of a coupon', 'wp-security-audit-log' ), __( 'Changed the Discount Type in coupon %CouponName% %LineBreak% Previous discount type: %OldDiscountType% %LineBreak% New discount type: %NewDiscountType% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
 					array( 9065, WSAL_LOW, __( 'User changed the coupon amount of a coupon', 'wp-security-audit-log' ), __( 'Changed the Coupon amount in coupon %CouponName% %LineBreak% Previous amount: %OldAmount% %LineBreak% New amount: %NewAmount% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
 					array( 9066, WSAL_LOW, __( 'User changed the coupon expire date of a coupon', 'wp-security-audit-log' ), __( 'Changed the expire date of the coupon %CouponName% %LineBreak% Previous date: %OldDate% %LineBreak% New date: %NewDate% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
 					array( 9067, WSAL_LOW, __( 'User changed the usage restriction settings of a coupon', 'wp-security-audit-log' ), __( 'Changed the Usage Restriction of the coupon %CouponName% %LineBreak% Previous usage restriction: %OldMetaValue% %LineBreak% New usage restriction: %NewMetaValue% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
 					array( 9068, WSAL_LOW, __( 'User changed the usage limits settings of a coupon', 'wp-security-audit-log' ), __( 'Changed the Usage Limits of the coupon %CouponName% %LineBreak% Previous usage limits: %OldMetaValue% %LineBreak% New usage limits: %NewMetaValue% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
-					array( 9069, WSAL_INFORMATIONAL, __( 'User changed the description of a coupon', 'wp-security-audit-log' ), __( 'Changed the description of the coupon %CouponName% %LineBreak% Previous description: %OldDescription% %LineBreak% New description: %NewDescription% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-store', 'modified' ),
-					array( 9070, E_WARNING, __( 'User changed the status of a coupon', 'wp-security-audit-log' ), __( 'Changed the Status of the WooCommerce coupon %CouponName% from %OldStatus% to %NewStatus%.', 'wp-security-audit-log' ), 'woocommerce-store' ),
-					array( 9071, WSAL_INFORMATIONAL, __( 'User renamed a WooCommerce coupon', 'wp-security-audit-log' ), __( 'Old coupon name: %OldName% %LineBreak% New coupon name: %NewName% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-store', 'renamed' ),
+					array( 9069, WSAL_INFORMATIONAL, __( 'User changed the description of a coupon', 'wp-security-audit-log' ), __( 'Changed the description of the coupon %CouponName% %LineBreak% Previous description: %OldDescription% %LineBreak% New description: %NewDescription% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-coupon', 'modified' ),
+					array( 9070, E_WARNING, __( 'User changed the status of a coupon', 'wp-security-audit-log' ), __( 'Changed the Status of the WooCommerce coupon %CouponName% from %OldStatus% to %NewStatus%.', 'wp-security-audit-log' ), 'woocommerce-coupon', 'modified' ),
+					array( 9071, WSAL_INFORMATIONAL, __( 'User renamed a WooCommerce coupon', 'wp-security-audit-log' ), __( 'Old coupon name: %OldName% %LineBreak% New coupon name: %NewName% %LineBreak% %EditorLinkCoupon%', 'wp-security-audit-log' ), 'woocommerce-coupon', 'renamed' ),
 				),
 
 				__( 'Orders', 'wp-security-audit-log' ) => array(
@@ -640,21 +534,21 @@ function wsaldefaults_wsal_init() {
 				),
 
 				__( 'User Profile', 'wp-security-audit-log' ) => array(
-					array( 9083, WSAL_INFORMATIONAL, __( 'User changed the billing address details', 'wp-security-audit-log' ), __( 'Changed the billing address details of the user %TargetUsername% %LineBreak% Role: %Roles% %LineBreak% Billing address field: %AddressField% %LineBreak% Previous value: %OldValue% %LineBreak% New value: %NewValue% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'modified' ),
-					array( 9084, WSAL_INFORMATIONAL, __( 'User changed the shipping address details', 'wp-security-audit-log' ), __( 'Changed the shipping address details of the user %TargetUsername% %LineBreak% Role: %Roles% %LineBreak% Shipping address field: %AddressField% %LineBreak% Previous value: %OldValue% %LineBreak% New value: %NewValue% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'modified' ),
+					array( 9083, WSAL_INFORMATIONAL, __( 'User changed the billing address details', 'wp-security-audit-log' ), __( 'Changed the billing address details of the user %TargetUsername% %LineBreak% Role: %Roles% %LineBreak% New Billing address: %NewValue% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'modified' ),
+					array( 9084, WSAL_INFORMATIONAL, __( 'User changed the shipping address details', 'wp-security-audit-log' ), __( 'Changed the shipping address details of the user %TargetUsername% %LineBreak% Role: %Roles% %LineBreak% New Shipping address: %NewValue% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'modified' ),
 				),
 			),
 
 			__( 'Yoast SEO', 'wp-security-audit-log' ) => array(
 				__( 'Post Changes', 'wp-security-audit-log' ) => array(
-					array( 8801, WSAL_INFORMATIONAL, __( 'User changed title of a SEO post', 'wp-security-audit-log' ), __( 'Changed the Meta title of the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous title: %OldSEOTitle% %LineBreak% New title: %NewSEOTitle% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'modified' ),
-					array( 8802, WSAL_INFORMATIONAL, __( 'User changed the meta description of a SEO post', 'wp-security-audit-log' ), __( 'Changed the Meta Description of the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous description: %old_desc% %LineBreak% New description: %new_desc% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'modified' ),
-					array( 8803, WSAL_INFORMATIONAL, __( 'User changed setting to allow search engines to show post in search results of a SEO post', 'wp-security-audit-log' ), __( 'Changed the setting to allow search engines to show post in search results for the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous setting: %OldStatus% %LineBreak% New setting: %NewStatus% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'modified' ),
-					array( 8804, WSAL_INFORMATIONAL, __( 'User Enabled/Disabled the option for search engine to follow links of a SEO post', 'wp-security-audit-log' ), __( 'The option for search engine to follow links in post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'enabled' ),
-					array( 8805, WSAL_LOW, __( 'User set the meta robots advanced setting of a SEO post', 'wp-security-audit-log' ), __( 'Changed the Meta Robots Advanced setting for the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous setting: %OldStatus% %LineBreak% New setting: %NewStatus% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'modified' ),
-					array( 8806, WSAL_INFORMATIONAL, __( 'User changed the canonical URL of a SEO post', 'wp-security-audit-log' ), __( 'Changed the Canonical URL of the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous URL: %OldCanonicalUrl% %LineBreak% New URL: %NewCanonicalUrl% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'modified' ),
-					array( 8807, WSAL_INFORMATIONAL, __( 'User changed the focus keyword of a SEO post', 'wp-security-audit-log' ), __( 'Changed the focus keyword for the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous keyword: %old_keywords% %LineBreak% New keyword: %new_keywords% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'modified' ),
-					array( 8808, WSAL_INFORMATIONAL, __( 'User Enabled/Disabled the option Cornerston Content of a SEO post', 'wp-security-audit-log' ), __( 'The option Cornerstone Content in the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'post', 'enabled' ),
+					array( 8801, WSAL_INFORMATIONAL, __( 'User changed title of a SEO post', 'wp-security-audit-log' ), __( 'Changed the Meta title of the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous title: %OldSEOTitle% %LineBreak% New title: %NewSEOTitle% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'yoast-seo-metabox', 'modified' ),
+					array( 8802, WSAL_INFORMATIONAL, __( 'User changed the meta description of a SEO post', 'wp-security-audit-log' ), __( 'Changed the Meta Description of the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous description: %old_desc% %LineBreak% New description: %new_desc% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'yoast-seo-metabox', 'modified' ),
+					array( 8803, WSAL_INFORMATIONAL, __( 'User changed setting to allow search engines to show post in search results of a SEO post', 'wp-security-audit-log' ), __( 'Changed the setting to allow search engines to show post in search results for the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous setting: %OldStatus% %LineBreak% New setting: %NewStatus% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'yoast-seo-metabox', 'modified' ),
+					array( 8804, WSAL_INFORMATIONAL, __( 'User Enabled/Disabled the option for search engine to follow links of a SEO post', 'wp-security-audit-log' ), __( 'The option for search engine to follow links in post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'yoast-seo-metabox', 'enabled' ),
+					array( 8805, WSAL_LOW, __( 'User set the meta robots advanced setting of a SEO post', 'wp-security-audit-log' ), __( 'Changed the Meta Robots Advanced setting for the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous setting: %OldStatus% %LineBreak% New setting: %NewStatus% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'yoast-seo-metabox', 'modified' ),
+					array( 8806, WSAL_INFORMATIONAL, __( 'User changed the canonical URL of a SEO post', 'wp-security-audit-log' ), __( 'Changed the Canonical URL of the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous URL: %OldCanonicalUrl% %LineBreak% New URL: %NewCanonicalUrl% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'yoast-seo-metabox', 'modified' ),
+					array( 8807, WSAL_INFORMATIONAL, __( 'User changed the focus keyword of a SEO post', 'wp-security-audit-log' ), __( 'Changed the focus keyword for the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% Previous keyword: %old_keywords% %LineBreak% New keyword: %new_keywords% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'yoast-seo-metabox', 'modified' ),
+					array( 8808, WSAL_INFORMATIONAL, __( 'User Enabled/Disabled the option Cornerston Content of a SEO post', 'wp-security-audit-log' ), __( 'The option Cornerstone Content in the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %LineBreak% %EditorLinkPost%', 'wp-security-audit-log' ), 'yoast-seo-metabox', 'enabled' ),
 				),
 
 				__( 'Website Changes', 'wp-security-audit-log' ) => array(

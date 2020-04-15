@@ -507,63 +507,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				}
 			}
 		}
-
-		/* BBPress Forum support  Setting */
-		if ( isset( $post_array['action'] ) && 'update' === $post_array['action'] && isset( $post_array['_bbp_default_role'] ) ) {
-			$old_role = get_option( '_bbp_default_role' );
-			$new_role = $post_array['_bbp_default_role'];
-			if ( $old_role != $new_role ) {
-				$this->plugin->alerts->Trigger(
-					8009,
-					array(
-						'OldRole' => $old_role,
-						'NewRole' => $new_role,
-					)
-				);
-			}
-		}
-
-		if ( isset( $post_array['action'] ) && 'update' === $post_array['action'] && isset( $post_array['option_page'] ) && ( 'bbpress' === $post_array['option_page'] ) ) {
-			// Anonymous posting.
-			$allow_anonymous = get_option( '_bbp_allow_anonymous' );
-			$old_status      = ! empty( $allow_anonymous ) ? 1 : 0;
-			$new_status      = ! empty( $post_array['_bbp_allow_anonymous'] ) ? 1 : 0;
-
-			if ( $old_status !== $new_status ) {
-				$this->plugin->alerts->Trigger(
-					8010,
-					array( 'EventType' => ( 1 === $new_status ) ? 'enabled' : 'disabled' )
-				);
-			}
-
-			// Disallow editing after.
-			$bbp_edit_lock = get_option( '_bbp_edit_lock' );
-			$old_time      = ! empty( $bbp_edit_lock ) ? $bbp_edit_lock : '';
-			$new_time      = ! empty( $post_array['_bbp_edit_lock'] ) ? $post_array['_bbp_edit_lock'] : '';
-			if ( $old_time != $new_time ) {
-				$this->plugin->alerts->Trigger(
-					8012,
-					array(
-						'OldTime' => $old_time,
-						'NewTime' => $new_time,
-					)
-				);
-			}
-
-			// Throttle posting every.
-			$bbp_throttle_time = get_option( '_bbp_throttle_time' );
-			$old_time2         = ! empty( $bbp_throttle_time ) ? $bbp_throttle_time : '';
-			$new_time2         = ! empty( $post_array['_bbp_throttle_time'] ) ? $post_array['_bbp_throttle_time'] : '';
-			if ( $old_time2 != $new_time2 ) {
-				$this->plugin->alerts->Trigger(
-					8013,
-					array(
-						'OldTime' => $old_time2,
-						'NewTime' => $new_time2,
-					)
-				);
-			}
-		}
 	}
 
 	/**

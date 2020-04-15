@@ -380,7 +380,7 @@ class WSAL_Settings {
 	 */
 	public function GetPruningDate() {
 		if ( ! $this->_pruning ) {
-			$this->_pruning = $this->_plugin->GetGlobalOption( 'pruning-date' );
+			$this->_pruning = $this->_plugin->options_helper->get_option_value( 'pruning-date' );
 			if ( ! strtotime( $this->_pruning ) ) {
 				$this->_pruning = $this->GetDefaultPruningDate();
 			}
@@ -395,7 +395,7 @@ class WSAL_Settings {
 	 */
 	public function SetPruningDate( $newvalue ) {
 		if ( strtotime( $newvalue ) ) {
-			$this->_plugin->SetGlobalOption( 'pruning-date', $newvalue );
+			$this->_plugin->options_helper->set_option_value( 'pruning-date', $newvalue );
 			$this->_pruning = $newvalue;
 		}
 	}
@@ -406,7 +406,7 @@ class WSAL_Settings {
 	 * @return string
 	 */
 	public function get_pruning_unit() {
-		return $this->_plugin->GetGlobalOption( 'pruning-unit', 'months' );
+		return $this->_plugin->options_helper->get_option_value( 'pruning-unit', 'months' );
 	}
 
 	/**
@@ -415,7 +415,7 @@ class WSAL_Settings {
 	 * @param string $newvalue – New value of pruning unit.
 	 */
 	public function set_pruning_unit( $newvalue ) {
-		$this->_plugin->SetGlobalOption( 'pruning-unit', $newvalue );
+		$this->_plugin->options_helper->set_option_value( 'pruning-unit', $newvalue );
 	}
 
 	/**
@@ -424,7 +424,7 @@ class WSAL_Settings {
 	 * @return integer
 	 */
 	public function GetPruningLimit() {
-		$val = (int) $this->_plugin->GetGlobalOption( 'pruning-limit' );
+		$val = (int) $this->_plugin->options_helper->get_option_value( 'pruning-limit' );
 		return $val ? $val : $this->GetMaxAllowedAlerts();
 	}
 
@@ -435,23 +435,23 @@ class WSAL_Settings {
 	 */
 	public function SetPruningLimit( $newvalue ) {
 		$newvalue = max( /*min(*/ (int) $newvalue/*, $this->GetMaxAllowedAlerts())*/, 1 );
-		$this->_plugin->SetGlobalOption( 'pruning-limit', $newvalue );
+		$this->_plugin->options_helper->set_option_value( 'pruning-limit', $newvalue );
 	}
 
 	public function SetPruningDateEnabled( $enabled ) {
-		$this->_plugin->SetGlobalOption( 'pruning-date-e', $enabled );
+		$this->_plugin->options_helper->set_option_value( 'pruning-date-e', $enabled );
 	}
 
 	public function SetPruningLimitEnabled( $enabled ) {
-		$this->_plugin->SetGlobalOption( 'pruning-limit-e', $enabled );
+		$this->_plugin->options_helper->set_option_value( 'pruning-limit-e', $enabled );
 	}
 
 	public function IsPruningDateEnabled() {
-		return $this->_plugin->GetGlobalOption( 'pruning-date-e' );
+		return $this->_plugin->options_helper->get_option_value( 'pruning-date-e' );
 	}
 
 	public function IsPruningLimitEnabled() {
-		return $this->_plugin->GetGlobalOption( 'pruning-limit-e' );
+		return $this->_plugin->options_helper->get_option_value( 'pruning-limit-e' );
 	}
 
 	public function IsRestrictAdmins() {
@@ -464,8 +464,6 @@ class WSAL_Settings {
 	 * @deprecated
 	 */
 	public function IsSandboxPageEnabled() {
-		// $plugins = $this->_plugin->licensing->plugins();
-		// return isset($plugins['wsal-sandbox-extensionphp']);
 		return esc_html__( 'This function is deprecated', 'wp-security-audit-log' );
 	}
 
@@ -522,7 +520,7 @@ class WSAL_Settings {
 	public function GetDisabledAlerts() {
 		if ( ! $this->_disabled ) {
 			$this->_disabled = implode( ',', $this->GetDefaultDisabledAlerts() );
-			$this->_disabled = $this->_plugin->GetGlobalOption( 'disabled-alerts', $this->_disabled );
+			$this->_disabled = $this->_plugin->options_helper->get_option_value( 'disabled-alerts', $this->_disabled );
 			$this->_disabled = ( '' == $this->_disabled ) ? array() : explode( ',', $this->_disabled );
 			$this->_disabled = array_map( 'intval', $this->_disabled );
 		}
@@ -536,7 +534,7 @@ class WSAL_Settings {
 	 */
 	public function SetDisabledAlerts( $types ) {
 		$this->_disabled = array_unique( array_map( 'intval', $types ) );
-		$this->_plugin->SetGlobalOption( 'disabled-alerts', implode( ',', $this->_disabled ) );
+		$this->_plugin->options_helper->set_option_value( 'disabled-alerts', implode( ',', $this->_disabled ) );
 	}
 
 	public function IsIncognito() {
@@ -765,66 +763,6 @@ class WSAL_Settings {
 	public function IsLoginSuperAdmin( $username ) {
 		$user_id = username_exists( $username );
 		return function_exists( 'is_super_admin' ) && is_super_admin( $user_id );
-	}
-
-	public function GetLicenses() {
-		return $this->_plugin->GetGlobalOption( 'licenses' );
-	}
-
-	public function GetLicense( $name ) {
-		$data = $this->GetLicenses();
-		$name = sanitize_key( basename( $name ) );
-		return isset( $data[ $name ] ) ? $data[ $name ] : array();
-	}
-
-	public function SetLicenses( $data ) {
-		$this->_plugin->SetGlobalOption( 'licenses', $data );
-	}
-
-	public function GetLicenseKey( $name ) {
-		$data = $this->GetLicense( $name );
-		return isset( $data['key'] ) ? $data['key'] : '';
-	}
-
-	public function GetLicenseStatus( $name ) {
-		$data = $this->GetLicense( $name );
-		return isset( $data['sts'] ) ? $data['sts'] : '';
-	}
-
-	public function GetLicenseErrors( $name ) {
-		$data = $this->GetLicense( $name );
-		return isset( $data['err'] ) ? $data['err'] : '';
-	}
-
-	public function SetLicenseKey( $name, $key ) {
-		$data = $this->GetLicenses();
-		if ( ! isset( $data[ $name ] ) ) {
-			$data[ $name ] = array();
-		}
-		$data[ $name ]['key'] = $key;
-		$this->SetLicenses( $data );
-	}
-
-	public function SetLicenseStatus( $name, $status ) {
-		$data = $this->GetLicenses();
-		if ( ! isset( $data[ $name ] ) ) {
-			$data[ $name ] = array();
-		}
-		$data[ $name ]['sts'] = $status;
-		$this->SetLicenses( $data );
-	}
-
-	public function SetLicenseErrors( $name, $errors ) {
-		$data = $this->GetLicenses();
-		if ( ! isset( $data[ $name ] ) ) {
-			$data[ $name ] = array();
-		}
-		$data[ $name ]['err'] = $errors;
-		$this->SetLicenses( $data );
-	}
-
-	public function ClearLicenses() {
-		$this->SetLicenses( array() );
 	}
 
 	public function IsMainIPFromProxy() {
@@ -1123,11 +1061,11 @@ class WSAL_Settings {
 	 * Server's timezone or WordPress' timezone.
 	 */
 	public function GetTimezone() {
-		return $this->_plugin->GetGlobalOption( 'timezone', 'wp' );
+		return $this->_plugin->options_helper->get_option_value( 'timezone', 'wp' );
 	}
 
 	public function SetTimezone( $newvalue ) {
-		$this->_plugin->SetGlobalOption( 'timezone', $newvalue );
+		$this->_plugin->options_helper->set_option_value( 'timezone', $newvalue );
 	}
 
 	/**
@@ -1161,7 +1099,7 @@ class WSAL_Settings {
 	 * Get type of username to display.
 	 */
 	public function get_type_username() {
-		return $this->_plugin->GetGlobalOption( 'type_username', 'display_name' );
+		return $this->_plugin->options_helper->get_option_value( 'type_username', 'display_name' );
 	}
 
 	/**
@@ -1171,7 +1109,7 @@ class WSAL_Settings {
 	 * @since 2.6.5
 	 */
 	public function set_type_username( $newvalue ) {
-		$this->_plugin->SetGlobalOption( 'type_username', $newvalue );
+		$this->_plugin->options_helper->set_option_value( 'type_username', $newvalue );
 	}
 
 	public function GetAdapterConfig( $name_field, $default_value = false ) {
@@ -1232,19 +1170,19 @@ class WSAL_Settings {
 	}
 
 	public function GetColumnsSelected() {
-		return $this->_plugin->GetGlobalOption( 'columns', array() );
+		return $this->_plugin->options_helper->get_option_value( 'columns', array() );
 	}
 
 	public function SetColumns( $columns ) {
-		$this->_plugin->SetGlobalOption( 'columns', json_encode( $columns ) );
+		$this->_plugin->options_helper->set_option_value( 'columns', json_encode( $columns ) );
 	}
 
 	public function IsWPBackend() {
-		return $this->_plugin->GetGlobalOption( 'wp-backend' );
+		return $this->_plugin->options_helper->get_option_value( 'wp-backend' );
 	}
 
 	public function SetWPBackend( $enabled ) {
-		$this->_plugin->SetGlobalOption( 'wp-backend', $enabled );
+		$this->_plugin->options_helper->set_option_value( 'wp-backend', $enabled );
 	}
 
 	/**
@@ -1669,16 +1607,12 @@ class WSAL_Settings {
 				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View post in the editor', 'wp-security-audit-log' ) . '</a>';
 
 			case '%CategoryLink%' == $name:
+			case '%cat_link%' == $name:
+			case '%ProductCatLink%' == $name:
 				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View category', 'wp-security-audit-log' ) . '</a>';
 
 			case '%TagLink%' == $name:
 				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View tag', 'wp-security-audit-log' ) . '</a>';
-
-			case '%EditorLinkForum%' == $name:
-				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View the Forum in editor', 'wp-security-audit-log' ) . '</a>';
-
-			case '%EditorLinkTopic%' == $name:
-				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View the Topic in editor', 'wp-security-audit-log' ) . '</a>';
 
 			case '%EditUserLink%' === $name:
 				if ( 'NULL' !== $value ) {
@@ -1947,6 +1881,8 @@ class WSAL_Settings {
 				return ' View the <' . esc_url( $value ) . '|page>';
 
 			case '%CategoryLink%' === $name:
+			case '%cat_link%' === $name:
+			case '%ProductCatLink%' == $name:
 				return ' View the <' . esc_url( $value ) . '|category>';
 
 			case '%TagLink%' === $name:

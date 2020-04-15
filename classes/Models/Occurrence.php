@@ -110,7 +110,8 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * @param mixed  $value - Meta value.
 	 */
 	public function SetMetaValue( $name, $value ) {
-		if ( ! empty( $value ) ) {
+		// check explicitly for `0` string values.
+		if ( '0' === $value || ! empty( $value ) ) {
 			// Get meta adapter.
 			$model                = new WSAL_Models_Meta();
 			$model->occurrence_id = $this->getId();
@@ -183,7 +184,44 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 			if ( null !== $alert_object && method_exists( $alert_object, 'GetMessage' ) ) {
 				$this->_cachedmessage = $alert_object->GetMessage( $meta_array, $meta_formatter, $this->_cachedmessage, $this->getId(), $highlight );
 			} else {
-				$this->_cachedmessage = sprintf(
+				/**
+				 * Reaching this point means we have an event we don't know
+				 * about. It could be a custom event or possibly a removed
+				 * event.
+				 *
+				 * We currently have 2 sets of custom events that we can flag
+				 * specific messages about. WPForms and BBPress. Both are
+				 * available as plugin add-ons.
+				 *
+				 * @since 4.0.2
+				 */
+				$addon_event_codes = array(
+					'wpforms' => array(
+						'name'      => __( 'WPForms', 'wp-security-audit-log' ),
+						'event_ids' => array( 5500, 5501, 5502, 5503, 5504, 5505, 5506 ),
+					),
+					'bbpress' => array(
+						'name'      => __( 'BBPress', 'wp-security-audit-log' ),
+						'event_ids' => array( 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8016, 8017, 8018, 8019, 8020, 8021, 8022, 8023 ),
+					),
+				);
+				$installer_nonce   = wp_create_nonce( 'wsal-install-addon' );
+				foreach ( $addon_event_codes as $key => $addon ) {
+					$f1 = in_array( $this->alert_id, $addon['event_ids'], true );
+					if ( in_array( $this->alert_id, $addon['event_ids'], true ) ) {
+						// check key and update message here.
+						$message = sprintf(
+							'The details of this event are unknown. You need to install the add-on for %1$s to see the details.%2$s%3$sInstall and activate add-on%4$s',
+							esc_html( $addon['name'] ),
+							'<br />',
+							'<button type="button" class="button-primary wsal-addon-install-trigger" data-nonce="' . esc_attr( $installer_nonce ) . '" data-addon-name="' . esc_attr( $key ) . '">',
+							'</button>'
+						);
+						// return this message early.
+						return $message;
+					}
+				}
+				$this->_cachedmessage = isset( $cached_message ) ? $cached_message : sprintf(
 					/* Translators: 1: html that opens a link, 2: html that closes a link. */
 					__( 'Alert message was not available, this may have been a custom alert that no longer exists. Read more about custom events %1$shere%2$s.', 'wp-security-audit-log' ),
 					'<a href="https://www.wpsecurityauditlog.com/support-documentation/create-custom-alerts-wordpress-audit-trail/" target="_blank">',

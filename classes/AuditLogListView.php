@@ -169,10 +169,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			<div class="display-type-buttons">
 				<?php
 				$user_selected_view = $this->_plugin->views->views[0]->detect_view_type();
-				$view_link          = get_admin_url( null, 'admin.php?page=wsal-auditlog' );
 				?>
-				<a id ="wsal-list-view-toggle" href="<?php echo esc_url( add_query_arg( 'view', 'list', $view_link ) ); ?>" class="button wsal-button dashicons-before dashicons-list-view" <?php echo ( 'list' === $user_selected_view ) ? esc_attr( 'disabled' ) : ''; ?>><?php esc_html_e( 'List View', 'wp-security-audit-log' ); ?></a>
-				<a id ="wsal-grid-view-toggle" href="<?php echo esc_url( add_query_arg( 'view', 'grid', $view_link ) ); ?>" class="button wsal-button dashicons-before dashicons-grid-view" <?php echo ( 'grid' === $user_selected_view ) ? esc_attr( 'disabled' ) : ''; ?>><?php esc_html_e( 'Grid View', 'wp-security-audit-log' ); ?></a>
+				<a id ="wsal-list-view-toggle" href="<?php echo esc_url( add_query_arg( 'view', 'list' ) ); ?>" class="button wsal-button dashicons-before dashicons-list-view" <?php echo ( 'list' === $user_selected_view ) ? esc_attr( 'disabled' ) : ''; ?>><?php esc_html_e( 'List View', 'wp-security-audit-log' ); ?></a>
+				<a id ="wsal-grid-view-toggle" href="<?php echo esc_url( add_query_arg( 'view', 'grid' ) ); ?>" class="button wsal-button dashicons-before dashicons-grid-view" <?php echo ( 'grid' === $user_selected_view ) ? esc_attr( 'disabled' ) : ''; ?>><?php esc_html_e( 'Grid View', 'wp-security-audit-log' ); ?></a>
 			</div>
 			<?php
 			$this->pagination( $which );
@@ -618,9 +617,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return '<a class="more-info thickbox" data-tooltip="' . $tooltip . '" title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
 					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
 			case 'object':
-				return isset( $this->item_meta[ $item->getId() ]['Object'] ) ? $this->_plugin->alerts->get_display_object_text( $this->item_meta[ $item->getId() ]['Object'] ) : '';
+				return isset( $this->item_meta[ $item->getId() ]['Object'] ) ? $this->_plugin->alerts->get_event_objects_data( $this->item_meta[ $item->getId() ]['Object'] ) : '';
 			case 'event_type':
-				return isset( $this->item_meta[ $item->getId() ]['EventType'] ) ? $this->_plugin->alerts->get_display_event_type_text( $this->item_meta[ $item->getId() ]['EventType'] ) : '';
+				return isset( $this->item_meta[ $item->getId() ]['EventType'] ) ? $this->_plugin->alerts->get_event_type_data( $this->item_meta[ $item->getId() ]['EventType'] ) : '';
 			default:
 				return isset( $item->$column_name )
 					? esc_html( $item->$column_name )

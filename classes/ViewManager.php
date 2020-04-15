@@ -66,7 +66,6 @@ class WSAL_ViewManager {
 			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/EmailNotifications.php';
 			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Search.php';
 			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/ExternalDB.php';
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Licensing.php';
 			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/LogInUsers.php';
 			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Reports.php';
 		}

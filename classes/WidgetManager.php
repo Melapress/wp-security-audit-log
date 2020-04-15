@@ -62,14 +62,8 @@ class WSAL_WidgetManager {
 	 * Method: Render widget.
 	 */
 	public function render_widget() {
-		$query = new WSAL_Models_OccurrenceQuery();
-
-		$bid = (int) $this->get_view_site_id();
-		if ( $bid ) {
-			$query->addCondition( 'site_id = %s ', $bid );
-		}
-		$query->addOrderBy( 'created_on', true );
-		$query->setLimit( $this->_plugin->settings->GetDashboardWidgetMaxAlerts() );
+		// get the events for the dashboard widget.
+		$query   = $this->get_dashboard_widget_query();
 		$results = $query->getAdapter()->Execute( $query );
 
 		?><div>
@@ -103,6 +97,27 @@ class WSAL_WidgetManager {
 		<?php endif; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Gets the query for the events displayed in the dashboard widget.
+	 *
+	 * @method get_dashboard_widget_query
+	 * @since  4.0.3
+	 * @return WSAL_Models_OccurrenceQuery
+	 */
+	public function get_dashboard_widget_query() {
+		$query = new WSAL_Models_OccurrenceQuery();
+		// get the site we are on (of multisite).
+		$bid = (int) $this->get_view_site_id();
+		if ( $bid ) {
+			$query->addCondition( 'site_id = %s ', $bid );
+		}
+		// order by date of creation.
+		$query->addOrderBy( 'created_on', true );
+		// set the limit based on the limit option for dashboard alerts.
+		$query->setLimit( $this->_plugin->settings->GetDashboardWidgetMaxAlerts() );
+		return $query;
 	}
 
 	/**

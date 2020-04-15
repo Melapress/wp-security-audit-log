@@ -204,14 +204,6 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		if ( 0 == $deleted_count ) {
 			return; // Nothing to delete.
 		}
-		// Keep track of what we're doing.
-		$this->plugin->alerts->Trigger(
-			0003, array(
-				'Message'    => 'Running system cleanup.',
-				'Query SQL'  => $result['sql'],
-				'Query Args' => $result['args'],
-			), true
-		);
 
 		// Notify system.
 		do_action( 'wsal_prune', $deleted_count, vsprintf( $result['sql'], $result['args'] ) );

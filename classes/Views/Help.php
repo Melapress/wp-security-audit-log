@@ -258,6 +258,12 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/?utm_source=plugin&utm_medium=referral&utm_campaign=WFCM&utm_content=WSAL+banner',
 			),
 			array(
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/wp-2fa-img.jpg',
+				'desc' => __( 'Add an extra layer of security to your login pages with 2FA & require your users to use it.', 'wp-security-audit-log' ),
+				'alt'  => 'WP 2FA',
+				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/wp-2fa/?utm_source=plugin&utm_medium=referral&utm_campaign=WP2FA&utm_content=WSAL+banner',
+			),
+			array(
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/activity-log-for-mainwp.jpg',
 				'desc' => __( 'See the child sites activity logs from the central MainWP dashboard', 'wp-security-audit-log' ),
 				'alt'  => 'Activity Log for MainWP',

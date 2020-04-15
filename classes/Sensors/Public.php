@@ -361,8 +361,13 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		// If stock has changed then trigger the alert.
 		if ( ( $old_stock !== $new_stock ) && ( 'on' === $wc_all_stock_changes ) ) {
 			$editor_link = $this->get_editor_link( $post );
+			/**
+			 * Event was changed from 9019 to 9105
+			 *
+			 * @since 4.0.3
+			 */
 			$this->plugin->alerts->Trigger(
-				9019,
+				9105,
 				array(
 					'PostID'             => $post->ID,
 					'ProductTitle'       => $product_title,
