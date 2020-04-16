@@ -81,6 +81,15 @@ class WSAL_ViewManager {
 		}
 
 		/**
+		 * Removed in version 4.0.3 however some upgrade methods result in the
+		 * file being left behind and `AddFromFile()` tries to load it as a
+		 * class resulting in a fatal error because of it not existing.
+		 *
+		 * @since 4.0.4
+		 */
+		$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Licensing.php';
+
+		/**
 		 * Skipped Views.
 		 *
 		 * Array of views which are skipped before plugin views are initialized.
