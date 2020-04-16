@@ -209,39 +209,42 @@ Release notes: [Update 4.0.3 - New bbPress add-on & improved WooCommerce activit
 
 * **BREAKING CHANGE**
 
-	* Individual add-ons no longer supported (pre 2018).
+	* Individual add-ons (pre 2018) will not be supported anymore.
 
 * **New features**
 
-	* Two new [activity log objects](https://www.wpsecurityauditlog.com/support-documentation/objects-event-types-wordpress-activity-log/): WooCommerce category, WooCommerce coupon and Yoast SEO metabox.
-	* Plugin detector to detect [plugins for which we have add-ons](https://www.wpsecurityauditlog.com/integrations/) so to prompt the user to install the add-ons.
-
+	* Two new [activity log objects](https://www.wpsecurityauditlog.com/support-documentation/objects-event-types-wordpress-activity-log/): WooCommerce coupon and Yoast SEO metabox.
+	* Plugin detector that detects [plugins for which we have add-ons](https://www.wpsecurityauditlog.com/integrations/) and prompts the user to install the add-ons.
+	
 * **New activity log event IDs**
 
-	* Event ID 9105: The stock quantity of a product was changed due to an order.
-	* Event ID 9085: The WooCommerce setting "Selling location(s)" was changed.
-	* Event ID 9086: List of excluded countries to sell to in WooCommerce was changed.
-	* Event ID 9087: List of countries to sell to in WooCommerce was changed.
-	* Event ID 9088: The WooCommerce setting "Shipping location(s)" was changed.
-	* Event ID 9090: The WooCommerce setting "Default custom location" was changed.
-	* Event ID 9091: The "Cart page" in the WooCommerce settings was changed.
-	* Event ID 9092: The "Checkout page" in the WooCommerce settings was changed.
-	* Event ID 9093: The "My Account page" in the WooCommerce settings was changed.
-	* Event ID 9094: The "Terms & conditions page" in the WooCommerce settings was changed.
-
+	* 9105: The stock quantity of a product was changed due to an order.
+	* 9085: The WooCommerce setting "Selling location(s)" was changed.
+	* 9086: List of excluded countries to sell to in WooCommerce was changed.
+	* 9087: List of countries to sell to in WooCommerce was changed.
+	* 9088: The WooCommerce setting "Shipping location(s)" was changed.
+	* 9090: The WooCommerce setting "Default custom location" was changed.
+	* 9091: The "Cart page" in the WooCommerce settings was changed.
+	* 9092: The "Checkout page" in the WooCommerce settings was changed.
+	* 9093: The "My Account page" in the WooCommerce settings was changed.
+	* 9094: The "Terms & conditions page" in the WooCommerce settings was changed.
+	
 Refer to the [activity logs for WooCommerce](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/) for more details on WooCommerce support.
-
+	
 * **Improvements**
 
-	* WooCommerce sensor now detects changes done from the new interface.
+	* Drastically improved the coverage of the [WooCommerce activity log](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/) sensor.
+	* WooCommerce sensor now detects changes done from the new interface (WooCommerce Admin).
 	* Event 9029 (WooCommerce store base location change) now reports  both the old and new address.
-	* Updated WooCommerce sensor to detect all  the changes in tax options (event IDs 9078 - 9081).
-	* Changed the event type from Modified to Renamed in the events where in which the object is renamed.
+	* Updated WooCommerce sensor to detect all  the changes in the tax options (event IDs 9078 - 9081).
+	* Changed the event type from "Modified" to "Renamed" in the events where in which the object is renamed.
 	* "Plugins" is reported instead of a username when a change is done automatically by a plugin.
+	* Improved the [activity logs external database](https://www.wpsecurityauditlog.com/premium-features/database-integration-tools-wordpress-activity-log/) connection test during connection setup.
 	* Removed obsolete code which was only used in previous versions from the defaults.php file.
 	* Improved event ID 2055 (deleted custom field) so it is not reported when a custom field is deleted autoamtically due to the post being deleted.
 	* Removed redundant filters wsal_event_type_text and wsal_event_object_text.
 	* Moved 10 plugin settings to the WordPress options table as part of the plugin improvement project.
+	* External database connector now reports actual MySQL error for improved troubleshooting.
 	* All the changes done to a bbPress forum or topic are reported, even when done at the same time.
 
 * **Bug fixes**
@@ -251,8 +254,9 @@ Refer to the [activity logs for WooCommerce](https://www.wpsecurityauditlog.com/
 	* Plugin reporting event ID 2001 instead of 5019 when a plugin automatically creates posts.
 	* Fixed a minor compatibility issue in the Hide plugin functionality ([support ticket](https://wordpress.org/support/topic/you-do-not-appear-to-have-any-plugins-available-at-this-time-5/#post-12280792)).
 	* Event ID 9063 reported instead of event ID 9071 when reporting a WooCommerce coupon change.
+	* Events ID 1005 (multiple sessions detected) and 1007 (user terminated another user's session) were only working when frontend sensor was enabled.
 	* Activity logs view buttons link to first site on network instead of network dashboard on multisite network.
-	* Error reported when the role property was undefined.
+	* Error reported when the role property was undefined. 
 	* Fixed a PHP 7.3 compatibility issue ([support ticket](https://wordpress.org/support/topic/wp-cli-php-7-reports-empty-needle-in-wp-security-audit-log-php-strpos-call/)).
 
-Please refer to the [complete plugin changelog](https://www.wpsecurityauditlog.com/support-documentation/plugin-changelog/) for more detailed information about what was new, improved and fixed in previous versions of the WP Security Audit Log plugin.
+Please refer to the [complete plugin change log](https://www.wpsecurityauditlog.com/support-documentation/plugin-changelog/) for more detailed information about what was new, improved and fixed in previous versions of the WP Security Audit Log plugin.
