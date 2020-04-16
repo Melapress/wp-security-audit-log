@@ -156,7 +156,8 @@ We need help translating the plugin and the WordPress Security Alerts. Please vi
 #### Activity Log add-ons for third party plugins
 
 * <strong>[Activity Log for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/)</strong>: This MainWP extension allows you to keep a log of MainWP network changes and to view the activity logs of all child sites from one central location - the MainWP dashboard.
-* <strong>[Activity Log add-on for WPForms](https://www.wpsecurityauditlog.com/integrations/activity-log-wpforms/)</strong>: Install this add-on with the WP Security Audit Log to keep a log of changes in WPForms plugin, forms, form files, entries (leads) and more.
+* <strong>[Activity Log add-on for WPForms](https://www.wpsecurityauditlog.com/integrations/activity-log-wpforms/)</strong>: Install this add-on to keep a log of changes in WPForms plugin, forms, form files, entries (leads) and more.
+* <strong>[Activity Log add-on for bbPress](https://wordpress.org/plugins/wp-security-audit-log-add-on-for-bbpress/)</strong>: Install this add-on with to keep a log of changes in bbPress forums, topics, bbPress settings and more.
 
 #### Related Links and Documentation
 
