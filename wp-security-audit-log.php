@@ -676,7 +676,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					case 'latest_event':
 						// run the query and return it.
 						$event = $this->query_for_latest_event();
-						$event->getAdapter()->Execute( $event );
+						$event = $event->getAdapter()->Execute( $event );
 
 						// Set the return object.
 						if ( isset( $event[0] ) ) {
