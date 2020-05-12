@@ -1,4 +1,4 @@
-=== WP Activity Log ===
+=== WP Activity Log (formerly known as WP Security Audit Log) ===
 Contributors: WPWhiteSecurity, robert681
 Plugin URI: https://www.wpsecurityauditlog.com
 License: GPLv3
