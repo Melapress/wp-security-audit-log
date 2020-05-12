@@ -678,7 +678,7 @@ final class WSAL_Views_SetupWizard {
 			<em>
 				<?php
 				// Step help text.
-				$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to <a href="https://www.wpsecurityauditlog.com/premium-features/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">upgrade to Premium</a> and use the Database tools to store the WordPress activity log in an external database.', 'wp-security-audit-log' );
+				$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to <a href="https://wpactivitylog.com/premium-features/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">upgrade to Premium</a> and use the Database tools to store the WordPress activity log in an external database.', 'wp-security-audit-log' );
 
 				if ( wsal_freemius()->is__premium_only() ) {
 					// Change the help text if premium version of the plugin is active.
@@ -755,23 +755,23 @@ final class WSAL_Views_SetupWizard {
 
 		<ul>
 			<li>
-				<a href="https://www.wpsecurityauditlog.com/support-documentation/getting-started-wp-security-audit-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
+				<a href="https://wpactivitylog.com/support-documentation/getting-started-wp-security-audit-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
 					<?php esc_html_e( 'Getting started with the WP Activity Log plugin', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 			<li>
-				<a href="https://www.wpsecurityauditlog.com/support-documentation/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
+				<a href="https://wpactivitylog.com/support-documentation/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
 					<?php esc_html_e( 'Knowledge Base & Support Documents', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 			<li>
-				<a href="https://www.wpsecurityauditlog.com/benefits-wordpress-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
+				<a href="https://wpactivitylog.com/benefits-wordpress-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
 					<?php esc_html_e( 'Benefits of keeping a WordPress activity log', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 		</ul>
 
-		<p><?php echo wp_kses( __( 'We trust this plugin meets all your activity log requirements. Should you encounter any problems, have feature requests or would like to share some feedback, <a href="https://www.wpsecurityauditlog.com/contact/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">please get in touch!</a>', 'wp-security-audit-log' ), $this->wsal->allowed_html_tags ); ?></p>
+		<p><?php echo wp_kses( __( 'We trust this plugin meets all your activity log requirements. Should you encounter any problems, have feature requests or would like to share some feedback, <a href="https://wpactivitylog.com/contact/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">please get in touch!</a>', 'wp-security-audit-log' ), $this->wsal->allowed_html_tags ); ?></p>
 
 		<form method="post" class="wsal-setup-form">
 			<?php wp_nonce_field( 'wsal-step-finish' ); ?>

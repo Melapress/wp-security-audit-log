@@ -165,8 +165,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 							// If user is not super admin and website is multisite then change the URL.
 							if ( $this->_plugin->IsMultisite() && ! is_super_admin() ) {
-								$buy_now    = 'https://www.wpsecurityauditlog.com/pricing/';
-								$trial_link = 'https://www.wpsecurityauditlog.com/pricing/';
+								$buy_now    = 'https://wpactivitylog.com/pricing/';
+								$trial_link = 'https://wpactivitylog.com/pricing/';
 							} elseif ( $this->_plugin->IsMultisite() && is_super_admin() ) {
 								$buy_now    = add_query_arg( 'page', 'wsal-auditlog-pricing', network_admin_url( 'admin.php' ) );
 								$trial_link = add_query_arg( $trial_args, network_admin_url( 'admin.php' ) );
@@ -179,7 +179,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 									'utm_campaign' => 'WSAL',
 									'utm_content'  => 'tell+me+more',
 								),
-								'https://www.wpsecurityauditlog.com/premium-features/'
+								'https://wpactivitylog.com/premium-features/'
 							);
 							?>
 							<?php wp_nonce_field( 'wsal_dismiss_advert', 'wsal-dismiss-advert', false, true ); ?>
@@ -231,7 +231,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					?>
 					<div class="notice notice-success">
 						<p><strong><?php esc_html_e( 'Help WP Activity Log improve.', 'wp-security-audit-log' ); ?></strong></p>
-						<p><?php echo esc_html__( 'Gathering non-sensitive diagnostic data about the plugin install helps us improve the plugin. When you opt-in, you also subscribe to our announcements (you can opt-out at any time). If you would rather opt-out, we will not collect any data.', 'wp-security-audit-log' ) . ' <a href="https://www.wpsecurityauditlog.com/support-documentation/non-sensitive-diagnostic-data/" target="_blank">' . esc_html__( 'Read more about what we collect.', 'wp-security-audit-log' ) . '</a>'; ?></p>
+						<p><?php echo esc_html__( 'Gathering non-sensitive diagnostic data about the plugin install helps us improve the plugin. When you opt-in, you also subscribe to our announcements (you can opt-out at any time). If you would rather opt-out, we will not collect any data.', 'wp-security-audit-log' ) . ' <a href="https://wpactivitylog.com/support-documentation/non-sensitive-diagnostic-data/" target="_blank">' . esc_html__( 'Read more about what we collect.', 'wp-security-audit-log' ) . '</a>'; ?></p>
 						<p>
 							<a href="javascript:;" class="button button-primary" onclick="wsal_freemius_opt_in(this)" data-opt="yes"><?php esc_html_e( 'Sure, opt-in', 'wp-security-audit-log' ); ?></a>
 							<a href="javascript:;" class="button" onclick="wsal_freemius_opt_in(this)" data-opt="no"><?php esc_html_e( 'No, thank you', 'wp-security-audit-log' ); ?></a>

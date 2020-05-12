@@ -211,7 +211,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						</option>
 					</select>
 					<p class="description">
-						<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://www.wpsecurityauditlog.com/support-documentation/list-wordpress-audit-trail-alerts/" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
+						<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://wpactivitylog.com/support-documentation/list-wordpress-audit-trail-alerts/" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
 					</p>
 				</fieldset>
 			</form>

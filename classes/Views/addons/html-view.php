@@ -34,7 +34,7 @@ switch ( $this->hook_suffix ) {
 // Links.
 $more_info = add_query_arg(
 	$utm_params,
-	'https://www.wpsecurityauditlog.com/premium-features/'
+	'https://wpactivitylog.com/premium-features/'
 );
 
 // Trial link arguments.
@@ -51,15 +51,15 @@ $trial_link     = add_query_arg( $trial_args, admin_url( 'admin.php' ) );
 
 // If user is not super admin and website is multisite then change the URL.
 if ( $this->_plugin->IsMultisite() && ! is_super_admin() ) {
-	$buy_now        = 'https://www.wpsecurityauditlog.com/pricing/';
-	$trial_link     = 'https://www.wpsecurityauditlog.com/pricing/';
+	$buy_now        = 'https://wpactivitylog.com/pricing/';
+	$trial_link     = 'https://wpactivitylog.com/pricing/';
 	$buy_now_target = ' target="_blank"';
 } elseif ( $this->_plugin->IsMultisite() && is_super_admin() ) {
 	$buy_now    = add_query_arg( 'page', 'wsal-auditlog-pricing', network_admin_url( 'admin.php' ) );
 	$trial_link = add_query_arg( $trial_args, network_admin_url( 'admin.php' ) );
 } elseif ( ! $this->_plugin->IsMultisite() && ! current_user_can( 'manage_options' ) ) {
-	$buy_now        = 'https://www.wpsecurityauditlog.com/pricing/';
-	$trial_link     = 'https://www.wpsecurityauditlog.com/pricing/';
+	$buy_now        = 'https://wpactivitylog.com/pricing/';
+	$trial_link     = 'https://wpactivitylog.com/pricing/';
 	$buy_now_target = ' target="_blank"';
 }
 ?>

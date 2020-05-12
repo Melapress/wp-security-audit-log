@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WP Activity Log
- * Plugin URI: http://www.wpsecurityauditlog.com/
+ * Plugin URI: http://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
  * Version: 4.0.3
@@ -788,7 +788,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 			// Plugin Docs URL.
 			if ( ! defined( 'WSAL_DOCS_URL' ) ) {
-				define( 'WSAL_DOCS_URL', 'https://www.wpsecurityauditlog.com/support-documentation/' );
+				define( 'WSAL_DOCS_URL', 'https://wpactivitylog.com/support-documentation/' );
 			}
 			// Plugin Issue Reporting URL.
 			if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
@@ -831,7 +831,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return string
 		 */
 		public function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
-			$freemius_link = '<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
+			$freemius_link = '<a href="https://wpactivitylog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
 				/* translators: Username */
 				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
@@ -858,7 +858,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return string
 		 */
 		public function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
-			$freemius_link = '<a href="https://www.wpsecurityauditlog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
+			$freemius_link = '<a href="https://wpactivitylog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
 				/* translators: Username */
 				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
@@ -1269,7 +1269,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				/* Translators: %s: Activity Log for MainWP plugin hyperlink */
 				$installation_errors = sprintf( __( 'Please install the %s plugin on the MainWP dashboard.', 'wp-security-audit-log' ), '<a href="https://wordpress.org/plugins/activity-log-mainwp/" target="_blank">' . __( 'Activity Log for MainWP', 'wp-security-audit-log' ) . '</a>' ) . ' ';
 				/* Translators: %s: Getting started guide hyperlink */
-				$installation_errors .= sprintf( __( 'The WP Activity Log should be installed on the child sites only. Refer to the %s for more information.', 'wp-security-audit-log' ), '<a href="https://www.wpsecurityauditlog.com/support-documentation/gettting-started-activity-log-mainwp-extension/" target="_blank">' . __( 'getting started guide', 'wp-security-audit-log' ) . '</a>' );
+				$installation_errors .= sprintf( __( 'The WP Activity Log should be installed on the child sites only. Refer to the %s for more information.', 'wp-security-audit-log' ), '<a href="https://wpactivitylog.com/support-documentation/gettting-started-activity-log-mainwp-extension/" target="_blank">' . __( 'getting started guide', 'wp-security-audit-log' ) . '</a>' );
 			}
 
 			if ( $installation_errors ) {
@@ -2004,7 +2004,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// Default message.
 				if ( ! $message ) {
-					$message = '<p class="message">' . wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), $this->allowed_html_tags ) . '</p>';
+					$message = '<p class="message">' . wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://wpactivitylog.com/" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), $this->allowed_html_tags ) . '</p>';
 				} else {
 					$message = '<p class="message">' . $message . '</p>';
 				}
