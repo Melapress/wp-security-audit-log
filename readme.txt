@@ -9,7 +9,7 @@ Tested up to: 5.4
 Stable tag: 4.0.3
 Requires PHP: 5.5
 
-An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
+The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
 
 == Description ==
 
