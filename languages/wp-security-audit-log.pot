@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
-"Project-Id-Version: WP Security Audit Log\n"
+"Project-Id-Version: WP Activity Log\n"
 "POT-Creation-Date: 2020-04-15 17:04+0100\n"
 "PO-Revision-Date: 2020-04-15 17:04+0100\n"
 "Last-Translator: \n"
@@ -28,7 +28,7 @@ msgstr ""
 
 #: classes/AlertManager.php:421
 #, php-format
-msgid "Event %s already registered with WP Security Audit Log."
+msgid "Event %s already registered with WP Activity Log."
 msgstr ""
 
 #: classes/AlertManager.php:494
@@ -763,7 +763,7 @@ msgstr ""
 
 #: classes/Utilities/Emailer.php:53
 #, php-format
-msgid "WP Security Audit Log plugin disabled on %s"
+msgid "WP Activity Log plugin disabled on %s"
 msgstr ""
 
 #: classes/Utilities/Emailer.php:56
@@ -774,12 +774,12 @@ msgstr ""
 #, php-format
 msgid ""
 "This is a notification to let you know that the user %1$s has deactivated "
-"the plugin WP Security Audit Log on the website %2$s on %3$s."
+"the plugin WP Activity Log on the website %2$s on %3$s."
 msgstr ""
 
 #: classes/Utilities/PluginInstallAndActivate.php:79
 msgid ""
-"WP Security Audit Log can keep a log of changes done on other plugins. "
+"WP Activity Log can keep a log of changes done on other plugins. "
 "Install the relevant add-on from the below list to keep a log of changes "
 "done on that plugin."
 msgstr ""
@@ -865,7 +865,7 @@ msgstr ""
 
 #: classes/Views/AuditLog.php:108
 msgid ""
-"Unlock these and other powerful features with WP Security Audit Log Premium."
+"Unlock these and other powerful features with WP Activity Log Premium."
 msgstr ""
 
 #: classes/Views/AuditLog.php:186
@@ -896,7 +896,7 @@ msgid ""
 msgstr ""
 
 #: classes/Views/AuditLog.php:233
-msgid "Help WP Security Audit Log improve."
+msgid "Help WP Activity Log improve."
 msgstr ""
 
 #: classes/Views/AuditLog.php:234
@@ -946,7 +946,7 @@ msgstr ""
 
 #: classes/Views/AuditLog.php:582
 msgid ""
-"Thank you for installing WP Security Audit Log. Do you want to run the "
+"Thank you for installing WP Activity Log. Do you want to run the "
 "wizard to configure the basic plugin settings?"
 msgstr ""
 
@@ -1016,7 +1016,7 @@ msgid ""
 msgstr ""
 
 #: classes/Views/AuditLog.php:1147
-msgid "Thank you for using WP Security Audit Log"
+msgid "Thank you for using WP Activity Log"
 msgstr ""
 
 #: classes/Views/AuditLog.php:1168
@@ -1176,7 +1176,7 @@ msgstr ""
 
 #: classes/Views/Help.php:178
 msgid ""
-"Getting started with WP Security Audit Log is really easy; once the plugin "
+"Getting started with WP Activity Log is really easy; once the plugin "
 "is installed it will automatically keep a log of everything that is "
 "happening on your website and you do not need to do anything. Watch the "
 "video below for a quick overview of the plugin."
@@ -1188,7 +1188,7 @@ msgstr ""
 
 #: classes/Views/Help.php:184
 msgid ""
-"Have you encountered or noticed any issues while using WP Security Audit Log "
+"Have you encountered or noticed any issues while using WP Activity Log "
 "plugin?"
 msgstr ""
 
@@ -1212,7 +1212,7 @@ msgstr ""
 
 #: classes/Views/Help.php:195
 msgid ""
-"For more technical information about the WP Security Audit Log plugin please "
+"For more technical information about the WP Activity Log plugin please "
 "visit the plugin’s knowledge base."
 msgstr ""
 
@@ -1236,7 +1236,7 @@ msgid "List of activity logs event IDs"
 msgstr ""
 
 #: classes/Views/Help.php:206
-msgid "Rate WP Security Audit Log"
+msgid "Rate WP Activity Log"
 msgstr ""
 
 #: classes/Views/Help.php:208
@@ -1248,12 +1248,12 @@ msgstr ""
 #: classes/Views/Help.php:209
 msgid ""
 "It takes thousands of man-hours every year and endless amount of dedication "
-"to research, develop and maintain the free edition of WP Security Audit Log."
+"to research, develop and maintain the free edition of WP Activity Log."
 msgstr ""
 
 #: classes/Views/Help.php:210
 msgid ""
-"Therefore if you like what you see, and find WP Security Audit Log useful we "
+"Therefore if you like what you see, and find WP Activity Log useful we "
 "ask you nothing more than to please rate our plugin."
 msgstr ""
 
@@ -1635,7 +1635,7 @@ msgid ""
 "actions and changes within the WordPress dashboard will be recorded in an "
 "audit log with the <a href=\"https://www.wpsecurityauditlog.com/?"
 "utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings"
-"+pages\" target=\"_blank\">WP Security Audit Log plugin</a>. The audit log "
+"+pages\" target=\"_blank\">WP Activity Log plugin</a>. The audit log "
 "also includes the IP address where you accessed this site from."
 msgstr ""
 
@@ -1768,7 +1768,7 @@ msgstr ""
 msgid ""
 "By default all installed plugins are listed in the plugins page. If you do "
 "not want other administrators to see that you installed this plugin set this "
-"option to Yes so the WP Security Audit Log is not listed as an installed "
+"option to Yes so the WP Activity Log is not listed as an installed "
 "plugin on this website."
 msgstr ""
 
@@ -2772,7 +2772,7 @@ msgid "Install failed"
 msgstr ""
 
 #: classes/Views/SetupWizard.php:292
-msgid "WP Security Audit Log &rsaquo; Setup Wizard"
+msgid "WP Activity Log &rsaquo; Setup Wizard"
 msgstr ""
 
 #: classes/Views/SetupWizard.php:311
@@ -2916,7 +2916,7 @@ msgid "Below are a few useful links you might need to refer to:"
 msgstr ""
 
 #: classes/Views/SetupWizard.php:759
-msgid "Getting started with the WP Security Audit Log plugin"
+msgid "Getting started with the WP Activity Log plugin"
 msgstr ""
 
 #: classes/Views/SetupWizard.php:764
@@ -5155,7 +5155,7 @@ msgid "Reset plugin's settings to default"
 msgstr ""
 
 #: defaults.php:367
-msgid "Reset the WP Security Audit Log plugin settings to default"
+msgid "Reset the WP Activity Log plugin settings to default"
 msgstr ""
 
 #: defaults.php:368
@@ -6768,7 +6768,7 @@ msgstr ""
 
 #. Plugin Name of the plugin/theme
 #: wp-security-audit-log.php:889
-msgid "WP Security Audit Log"
+msgid "WP Activity Log"
 msgstr ""
 
 #: wp-security-audit-log.php:893
@@ -6844,7 +6844,7 @@ msgstr ""
 
 #: wp-security-audit-log.php:1263
 msgid ""
-"The WP Security Audit Log plugin is a multisite network tool, so it has to "
+"The WP Activity Log plugin is a multisite network tool, so it has to "
 "be activated at network level."
 msgstr ""
 
@@ -6864,7 +6864,7 @@ msgstr ""
 #: wp-security-audit-log.php:1272
 #, php-format
 msgid ""
-"The WP Security Audit Log should be installed on the child sites only. Refer "
+"The WP Activity Log should be installed on the child sites only. Refer "
 "to the %s for more information."
 msgstr ""
 
@@ -6901,7 +6901,7 @@ msgid ""
 "For security and auditing purposes, a record of all of your logged-in "
 "actions and changes within the WordPress dashboard will be recorded in an "
 "audit log with the <a href=\"https://www.wpsecurityauditlog.com/\" target="
-"\"_blank\">WP Security Audit Log plugin</a>. The audit log also includes the "
+"\"_blank\">WP Activity Log plugin</a>. The audit log also includes the "
 "IP address where you accessed this site from."
 msgstr ""
 

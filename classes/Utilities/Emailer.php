@@ -50,7 +50,7 @@ class WSAL_Utilities_Emailer {
 		}
 
 		/* Translators: %s: Home URL */
-		$subject = sprintf( esc_html__( 'WP Security Audit Log plugin disabled on %s', 'wp-security-audit-log' ), $safe_url );
+		$subject = sprintf( esc_html__( 'WP Activity Log plugin disabled on %s', 'wp-security-audit-log' ), $safe_url );
 
 		// Set template body.
 		$body  = esc_html__( 'Hello admin,', 'wp-security-audit-log' );
@@ -58,7 +58,7 @@ class WSAL_Utilities_Emailer {
 		$body .= '<br>';
 
 		/* Translators: 1. User display name, 2. Home URL, 3. Date and time */
-		$body .= sprintf( esc_html__( 'This is a notification to let you know that the user %1$s has deactivated the plugin WP Security Audit Log on the website %2$s on %3$s.', 'wp-security-audit-log' ), $display_name, '<a href="' . $home_url . '" target="_blank">' . $safe_url . '</a>', $date_time );
+		$body .= sprintf( esc_html__( 'This is a notification to let you know that the user %1$s has deactivated the plugin WP Activity Log on the website %2$s on %3$s.', 'wp-security-audit-log' ), $display_name, '<a href="' . $home_url . '" target="_blank">' . $safe_url . '</a>', $date_time );
 
 		/**
 		 * Get the email address to deliver the deactivation email to.

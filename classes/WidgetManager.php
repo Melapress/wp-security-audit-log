@@ -52,7 +52,7 @@ class WSAL_WidgetManager {
 		) {
 			wp_add_dashboard_widget(
 				'wsal',
-				__( 'Latest Events', 'wp-security-audit-log' ) . ' | WP Security Audit Log',
+				__( 'Latest Events', 'wp-security-audit-log' ) . ' | WP Activity Log',
 				array( $this, 'render_widget' )
 			);
 		}

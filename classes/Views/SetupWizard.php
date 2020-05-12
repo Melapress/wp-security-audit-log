@@ -289,7 +289,7 @@ final class WSAL_Views_SetupWizard {
 		<head>
 			<meta name="viewport" content="width=device-width" />
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-			<title><?php esc_html_e( 'WP Security Audit Log &rsaquo; Setup Wizard', 'wp-security-audit-log' ); ?></title>
+			<title><?php esc_html_e( 'WP Activity Log &rsaquo; Setup Wizard', 'wp-security-audit-log' ); ?></title>
 			<?php wp_print_scripts( 'wsal-wizard-js' ); ?>
 			<?php wp_print_scripts( 'wsal-common' ); ?>
 
@@ -297,7 +297,7 @@ final class WSAL_Views_SetupWizard {
 			<?php do_action( 'admin_head' ); ?>
 		</head>
 		<body class="wsal-setup wp-core-ui">
-			<h1 id="wsal-logo"><a href="https://wpsecurityauditlog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank"><img src="<?php echo esc_url( $this->wsal->GetBaseUrl() ); ?>/img/wsal-logo-full.png" alt="WP Security Audit Log" /></a></h1>
+			<h1 id="wsal-logo"><a href="https://wpsecurityauditlog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank"><img src="<?php echo esc_url( $this->wsal->GetBaseUrl() ); ?>/img/wsal-logo-full.png" alt="WP Activity Log" /></a></h1>
 		<?php
 	}
 
@@ -756,7 +756,7 @@ final class WSAL_Views_SetupWizard {
 		<ul>
 			<li>
 				<a href="https://www.wpsecurityauditlog.com/support-documentation/getting-started-wp-security-audit-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
-					<?php esc_html_e( 'Getting started with the WP Security Audit Log plugin', 'wp-security-audit-log' ); ?>
+					<?php esc_html_e( 'Getting started with the WP Activity Log plugin', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 			<li>

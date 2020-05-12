@@ -364,7 +364,7 @@ function wsaldefaults_wsal_init() {
 
 				__( 'Activity log plugin', 'wp-security-audit-log' ) => array(
 					array( 6000, WSAL_INFORMATIONAL, __( 'Events automatically pruned by system', 'wp-security-audit-log' ), __( 'System automatically deleted %EventCount% event(s)', 'wp-security-audit-log' ), 'activity-logs', 'deleted' ),
-					array( 6006, WSAL_MEDIUM, __( 'Reset plugin\'s settings to default', 'wp-security-audit-log' ), __( 'Reset the WP Security Audit Log plugin settings to default', 'wp-security-audit-log' ), 'plugin', 'modified' ),
+					array( 6006, WSAL_MEDIUM, __( 'Reset plugin\'s settings to default', 'wp-security-audit-log' ), __( 'Reset the WP Activity Log plugin settings to default', 'wp-security-audit-log' ), 'plugin', 'modified' ),
 					array( 6034, WSAL_CRITICAL, __( 'Purged the activity log', 'wp-security-audit-log' ), __( 'Purged the activity log', 'wp-security-audit-log' ), 'activity-logs', 'deleted' ),
 				),
 

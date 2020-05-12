@@ -664,7 +664,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<?php
 							// Get login page notification text.
 							$wsal_lpn_text         = $this->_plugin->settings->get_login_page_notification_text();
-							$wsal_lpn_text_default = __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">WP Security Audit Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' );
+							$wsal_lpn_text_default = __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' );
 
 							// Allowed HTML tags for this setting.
 							$allowed_tags = array(
@@ -881,7 +881,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<!-- From Email & Name -->
 
 		<h3><?php esc_html_e( 'Do you want to hide the plugin from the list of installed plugins?', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'By default all installed plugins are listed in the plugins page. If you do not want other administrators to see that you installed this plugin set this option to Yes so the WP Security Audit Log is not listed as an installed plugin on this website.', 'wp-security-audit-log' ); ?></p>
+		<p class="description"><?php esc_html_e( 'By default all installed plugins are listed in the plugins page. If you do not want other administrators to see that you installed this plugin set this option to Yes so the WP Activity Log is not listed as an installed plugin on this website.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>

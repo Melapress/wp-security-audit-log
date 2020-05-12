@@ -105,7 +105,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			),
 			2 => array(
 				'head' => __( 'See who logged in on your site in real-time, generate reports, get SMS & email alerts of critical changes and more!', 'wp-security-audit-log' ),
-				'desc' => __( 'Unlock these and other powerful features with WP Security Audit Log Premium.', 'wp-security-audit-log' ),
+				'desc' => __( 'Unlock these and other powerful features with WP Activity Log Premium.', 'wp-security-audit-log' ),
 			),
 		);
 
@@ -230,7 +230,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				if ( ! is_multisite() || ( is_multisite() && is_network_admin() ) ) :
 					?>
 					<div class="notice notice-success">
-						<p><strong><?php esc_html_e( 'Help WP Security Audit Log improve.', 'wp-security-audit-log' ); ?></strong></p>
+						<p><strong><?php esc_html_e( 'Help WP Activity Log improve.', 'wp-security-audit-log' ); ?></strong></p>
 						<p><?php echo esc_html__( 'Gathering non-sensitive diagnostic data about the plugin install helps us improve the plugin. When you opt-in, you also subscribe to our announcements (you can opt-out at any time). If you would rather opt-out, we will not collect any data.', 'wp-security-audit-log' ) . ' <a href="https://www.wpsecurityauditlog.com/support-documentation/non-sensitive-diagnostic-data/" target="_blank">' . esc_html__( 'Read more about what we collect.', 'wp-security-audit-log' ) . '</a>'; ?></p>
 						<p>
 							<a href="javascript:;" class="button button-primary" onclick="wsal_freemius_opt_in(this)" data-opt="yes"><?php esc_html_e( 'Sure, opt-in', 'wp-security-audit-log' ); ?></a>
@@ -579,7 +579,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			?>
 			<div data-remodal-id="wsal-setup-modal">
 				<button data-remodal-action="close" class="remodal-close"></button>
-				<p><?php esc_html_e( 'Thank you for installing WP Security Audit Log. Do you want to run the wizard to configure the basic plugin settings?', 'wp-security-audit-log' ); ?></p>
+				<p><?php esc_html_e( 'Thank you for installing WP Activity Log. Do you want to run the wizard to configure the basic plugin settings?', 'wp-security-audit-log' ); ?></p>
 				<br>
 				<button data-remodal-action="confirm" class="remodal-confirm"><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></button>
 				<button data-remodal-action="cancel" class="remodal-cancel"><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></button>
@@ -1144,7 +1144,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						'<h3> %s </h3> <p> %s </p> <p><strong>%s</strong></p>',
 						__( 'WordPress Activity Log', 'wp-security-audit-log' ),
 						__( 'When a user makes a change on your website the plugin will keep a record of that event here. Right now there is nothing because this is a new install.', 'wp-security-audit-log' ),
-						__( 'Thank you for using WP Security Audit Log', 'wp-security-audit-log' )
+						__( 'Thank you for using WP Activity Log', 'wp-security-audit-log' )
 					),
 					'position' => array(
 						'edge'  => 'left',

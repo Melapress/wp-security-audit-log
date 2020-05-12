@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: WP Security Audit Log
+ * Plugin Name: WP Activity Log
  * Plugin URI: http://www.wpsecurityauditlog.com/
- * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Security Audit Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
+ * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
  * Version: 4.0.3
  * Text Domain: wp-security-audit-log
@@ -15,7 +15,7 @@
  */
 
 /*
-	WP Security Audit Log
+	WP Activity Log
 	Copyright(c) 2020  WP White Security  (email : info@wpwhitesecurity.com)
 
 	This program is free software; you can redistribute it and/or modify
@@ -886,7 +886,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$message = sprintf(
 				/* translators: Plugin name */
 				__( 'Get a free 7-day trial of the premium edition of %s. No credit card required, no commitments!', 'wp-security-audit-log' ),
-				'<strong>' . __( 'WP Security Audit Log', 'wp-security-audit-log' ) . '</strong>'
+				'<strong>' . __( 'WP Activity Log', 'wp-security-audit-log' ) . '</strong>'
 			);
 
 			// Trial link.
@@ -1260,7 +1260,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$installation_errors .= '<br />';
 				$installation_errors .= __( 'Contact us on <a href="mailto:plugins@wpwhitesecurity.com">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using.', 'wp-security-audit-log' );
 			} elseif ( $this->IsMultisite() && is_super_admin() && ! is_network_admin() ) {
-				$installation_errors  = esc_html__( 'The WP Security Audit Log plugin is a multisite network tool, so it has to be activated at network level.', 'wp-security-audit-log' );
+				$installation_errors  = esc_html__( 'The WP Activity Log plugin is a multisite network tool, so it has to be activated at network level.', 'wp-security-audit-log' );
 				$installation_errors .= '<br />';
 				$installation_errors .= '<a href="javascript:;" onclick="window.top.location.href=\'' . esc_url( network_admin_url( 'plugins.php' ) ) . '\'">' . esc_html__( 'Redirect me to the network dashboard', 'wp-security-audit-log' ) . '</a> ';
 			}
@@ -1269,7 +1269,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				/* Translators: %s: Activity Log for MainWP plugin hyperlink */
 				$installation_errors = sprintf( __( 'Please install the %s plugin on the MainWP dashboard.', 'wp-security-audit-log' ), '<a href="https://wordpress.org/plugins/activity-log-mainwp/" target="_blank">' . __( 'Activity Log for MainWP', 'wp-security-audit-log' ) . '</a>' ) . ' ';
 				/* Translators: %s: Getting started guide hyperlink */
-				$installation_errors .= sprintf( __( 'The WP Security Audit Log should be installed on the child sites only. Refer to the %s for more information.', 'wp-security-audit-log' ), '<a href="https://www.wpsecurityauditlog.com/support-documentation/gettting-started-activity-log-mainwp-extension/" target="_blank">' . __( 'getting started guide', 'wp-security-audit-log' ) . '</a>' );
+				$installation_errors .= sprintf( __( 'The WP Activity Log should be installed on the child sites only. Refer to the %s for more information.', 'wp-security-audit-log' ), '<a href="https://www.wpsecurityauditlog.com/support-documentation/gettting-started-activity-log-mainwp-extension/" target="_blank">' . __( 'getting started guide', 'wp-security-audit-log' ) . '</a>' );
 			}
 
 			if ( $installation_errors ) {
@@ -2004,7 +2004,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// Default message.
 				if ( ! $message ) {
-					$message = '<p class="message">' . wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/" target="_blank">WP Security Audit Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), $this->allowed_html_tags ) . '</p>';
+					$message = '<p class="message">' . wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an audit log with the <a href="https://www.wpsecurityauditlog.com/" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), $this->allowed_html_tags ) . '</p>';
 				} else {
 					$message = '<p class="message">' . $message . '</p>';
 				}

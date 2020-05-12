@@ -418,7 +418,7 @@ final class WSAL_AlertManager {
 			if ( isset( $this->_alerts[ $type ] ) ) {
 				add_action( 'admin_notices', array( $this, 'duplicate_event_notice' ) );
 				/* Translators: Event ID */
-				throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Security Audit Log.', 'wp-security-audit-log' ), $type ) );
+				throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Activity Log.', 'wp-security-audit-log' ), $type ) );
 			}
 
 			$this->_alerts[ $type ] = new WSAL_Alert( $type, $code, $catg, $subcatg, $desc, $mesg, $object, $event_type );
