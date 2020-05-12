@@ -755,12 +755,12 @@ final class WSAL_Views_SetupWizard {
 
 		<ul>
 			<li>
-				<a href="https://wpactivitylog.com/support-documentation/getting-started-wp-security-audit-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
+				<a href="https://wpactivitylog.com/support/getting-started-wp-security-audit-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
 					<?php esc_html_e( 'Getting started with the WP Activity Log plugin', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 			<li>
-				<a href="https://wpactivitylog.com/support-documentation/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
+				<a href="https://wpactivitylog.com/support/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
 					<?php esc_html_e( 'Knowledge Base & Support Documents', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>

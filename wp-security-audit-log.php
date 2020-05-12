@@ -788,7 +788,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 			// Plugin Docs URL.
 			if ( ! defined( 'WSAL_DOCS_URL' ) ) {
-				define( 'WSAL_DOCS_URL', 'https://wpactivitylog.com/support-documentation/' );
+				define( 'WSAL_DOCS_URL', 'https://wpactivitylog.com/support/' );
 			}
 			// Plugin Issue Reporting URL.
 			if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
@@ -831,7 +831,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return string
 		 */
 		public function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
-			$freemius_link = '<a href="https://wpactivitylog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
+			$freemius_link = '<a href="https://wpactivitylog.com/support/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
 				/* translators: Username */
 				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
@@ -858,7 +858,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return string
 		 */
 		public function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
-			$freemius_link = '<a href="https://wpactivitylog.com/support-documentation/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
+			$freemius_link = '<a href="https://wpactivitylog.com/support/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
 				/* translators: Username */
 				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
@@ -1269,7 +1269,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				/* Translators: %s: Activity Log for MainWP plugin hyperlink */
 				$installation_errors = sprintf( __( 'Please install the %s plugin on the MainWP dashboard.', 'wp-security-audit-log' ), '<a href="https://wordpress.org/plugins/activity-log-mainwp/" target="_blank">' . __( 'Activity Log for MainWP', 'wp-security-audit-log' ) . '</a>' ) . ' ';
 				/* Translators: %s: Getting started guide hyperlink */
-				$installation_errors .= sprintf( __( 'The WP Activity Log should be installed on the child sites only. Refer to the %s for more information.', 'wp-security-audit-log' ), '<a href="https://wpactivitylog.com/support-documentation/gettting-started-activity-log-mainwp-extension/" target="_blank">' . __( 'getting started guide', 'wp-security-audit-log' ) . '</a>' );
+				$installation_errors .= sprintf( __( 'The WP Activity Log should be installed on the child sites only. Refer to the %s for more information.', 'wp-security-audit-log' ), '<a href="https://wpactivitylog.com/support/gettting-started-activity-log-mainwp-extension/" target="_blank">' . __( 'getting started guide', 'wp-security-audit-log' ) . '</a>' );
 			}
 
 			if ( $installation_errors ) {
