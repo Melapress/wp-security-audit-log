@@ -359,7 +359,7 @@ function wsaldefaults_wsal_init() {
 					array( 0004, E_CRITICAL, __( 'PHP exception', 'wp-security-audit-log' ), __( '%Message%.', 'wp-security-audit-log' ) ),
 					array( 0005, E_CRITICAL, __( 'PHP shutdown error', 'wp-security-audit-log' ), __( '%Message%.', 'wp-security-audit-log' ) ),
 					array( 6004, WSAL_MEDIUM, __( 'WordPress was updated', 'wp-security-audit-log' ), __( 'Updated WordPress %LineBreak% Previous version: %OldVersion% %LineBreak% New version: %NewVersion%', 'wp-security-audit-log' ), 'system', 'updated' ),
-					array( 9999, E_CRITICAL, __( 'Advertising Add-ons', 'wp-security-audit-log' ), __( '%PromoName% %PromoMessage%', 'wp-security-audit-log' ) ),
+					array( 9999, E_CRITICAL, __( 'Advertising Extensions', 'wp-security-audit-log' ), __( '%PromoName% %PromoMessage%', 'wp-security-audit-log' ) ),
 				),
 
 				__( 'Activity log plugin', 'wp-security-audit-log' ) => array(

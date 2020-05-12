@@ -780,29 +780,29 @@ msgstr ""
 #: classes/Utilities/PluginInstallAndActivate.php:79
 msgid ""
 "WP Activity Log can keep a log of changes done on other plugins. "
-"Install the relevant add-on from the below list to keep a log of changes "
+"Install the relevant extension from the below list to keep a log of changes "
 "done on that plugin."
 msgstr ""
 
 #: classes/Utilities/PluginInstallAndActivate.php:96
 #: classes/Views/SetupWizard.php:852
-msgid "Add-on for "
+msgid "Extension for "
 msgstr ""
 
 #: classes/Utilities/PluginInstallAndActivate.php:101
 #: classes/Views/SetupWizard.php:857
-msgid "Add-on installed, activate now?"
+msgid "Extension installed, activate now?"
 msgstr ""
 
 #: classes/Utilities/PluginInstallAndActivate.php:103
 #: classes/Views/SetupWizard.php:260 classes/Views/SetupWizard.php:859
 #: wp-security-audit-log.php:1187
-msgid "Add-on installed"
+msgid "Extension installed"
 msgstr ""
 
 #: classes/Utilities/PluginInstallAndActivate.php:105
 #: classes/Views/SetupWizard.php:861
-msgid "Install Add-on"
+msgid "Install Extension"
 msgstr ""
 
 #: classes/Utilities/PluginInstallerAction.php:76
@@ -920,11 +920,11 @@ msgid "No, thank you"
 msgstr ""
 
 #: classes/Views/AuditLog.php:275
-msgid "Install add-on"
+msgid "Install extension"
 msgstr ""
 
 #: classes/Views/AuditLog.php:278
-msgid "Install add-ons"
+msgid "Install extensions"
 msgstr ""
 
 #: classes/Views/AuditLog.php:290
@@ -1032,7 +1032,7 @@ msgid "Access Denied"
 msgstr ""
 
 #: classes/Views/EmailNotifications.php:28
-msgid "Notifications Add-On"
+msgid "Notifications Extension"
 msgstr ""
 
 #: classes/Views/EmailNotifications.php:42
@@ -1107,7 +1107,7 @@ msgid ""
 msgstr ""
 
 #: classes/Views/ExternalDB.php:28
-msgid "External DB Add-On"
+msgid "External DB Extension"
 msgstr ""
 
 #: classes/Views/ExternalDB.php:42
@@ -1292,7 +1292,7 @@ msgid "LEARN MORE"
 msgstr ""
 
 #: classes/Views/LogInUsers.php:28
-msgid "User Sessions Management Add-On"
+msgid "User Sessions Management Extension"
 msgstr ""
 
 #: classes/Views/LogInUsers.php:42
@@ -1342,7 +1342,7 @@ msgid "Limit, manage and block multiple same user sessions easily."
 msgstr ""
 
 #: classes/Views/Reports.php:28
-msgid "Reports Add-On"
+msgid "Reports Extension"
 msgstr ""
 
 #: classes/Views/Reports.php:42
@@ -1397,7 +1397,7 @@ msgid "Schedule reports that are sent to you by email automatically."
 msgstr ""
 
 #: classes/Views/Search.php:28
-msgid "Search Add-On"
+msgid "Search Extension"
 msgstr ""
 
 #: classes/Views/Search.php:42
@@ -2764,7 +2764,7 @@ msgid "Already installed"
 msgstr ""
 
 #: classes/Views/SetupWizard.php:261 wp-security-audit-log.php:1188
-msgid "Add-on activated"
+msgid "Extension activated"
 msgstr ""
 
 #: classes/Views/SetupWizard.php:262 wp-security-audit-log.php:1189
@@ -2937,7 +2937,7 @@ msgid ""
 msgstr ""
 
 #: classes/Views/SetupWizard.php:810
-msgid "Third Party Add-ons"
+msgid "Third Party Extensions"
 msgstr ""
 
 #: classes/Views/SetupWizard.php:836
@@ -2947,7 +2947,7 @@ msgstr ""
 #: classes/Views/SetupWizard.php:837
 msgid ""
 "We noticed that the below plugins are installed on this website. You can "
-"install our add-ons to also keep a log of changes users do on these plugins."
+"install our extensions to also keep a log of changes users do on these plugins."
 msgstr ""
 
 #: classes/Views/ToggleAlerts.php:27 classes/Views/ToggleAlerts.php:41
@@ -5131,7 +5131,7 @@ msgid ""
 msgstr ""
 
 #: defaults.php:362
-msgid "Advertising Add-ons"
+msgid "Advertising Extensions"
 msgstr ""
 
 #: defaults.php:362

@@ -153,11 +153,11 @@ We need help translating the plugin and the WordPress Security Alerts. Please vi
 * Spanish translation by the [WP Body team](https://wpbody.com/)
 * French translations by Denis Moscato
 
-#### Activity Log add-ons for third party plugins
+#### Activity Log extensions for third party plugins
 
 * <strong>[Activity Log for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/)</strong>: This MainWP extension allows you to keep a log of MainWP network changes and to view the activity logs of all child sites from one central location - the MainWP dashboard.
-* <strong>[Activity Log add-on for WPForms](https://www.wpsecurityauditlog.com/integrations/activity-log-wpforms/)</strong>: Install this add-on to keep a log of changes in WPForms plugin, forms, form files, entries (leads) and more.
-* <strong>[Activity Log add-on for bbPress](https://wordpress.org/plugins/wp-security-audit-log-add-on-for-bbpress/)</strong>: Install this add-on with to keep a log of changes in bbPress forums, topics, bbPress settings and more.
+* <strong>[Activity Log extension for WPForms](https://www.wpsecurityauditlog.com/integrations/activity-log-wpforms/)</strong>: Install this extension to keep a log of changes in WPForms plugin, forms, form files, entries (leads) and more.
+* <strong>[Activity Log extension for bbPress](https://wordpress.org/plugins/wp-security-audit-log-add-on-for-bbpress/)</strong>: Install this extension with to keep a log of changes in bbPress forums, topics, bbPress settings and more.
 
 #### Related Links and Documentation
 
@@ -206,17 +206,17 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 
 = 4.0.3 (2020-04-16) =
 
-Release notes: [Update 4.0.3 - New bbPress add-on & improved WooCommerce activity logs](https://www.wpsecurityauditlog.com/releases/update-4-0-3/)
+Release notes: [Update 4.0.3 - New bbPress extension & improved WooCommerce activity logs](https://www.wpsecurityauditlog.com/releases/update-4-0-3/)
 
 * **BREAKING CHANGE**
 
-	* Individual add-ons (pre 2018) will not be supported anymore.
+	* Individual extensions (pre 2018) will not be supported anymore.
 
 * **New features**
 
 	* Two new [activity log objects](https://www.wpsecurityauditlog.com/support-documentation/objects-event-types-wordpress-activity-log/): WooCommerce coupon and Yoast SEO metabox.
-	* Plugin detector that detects [plugins for which we have add-ons](https://www.wpsecurityauditlog.com/integrations/) and prompts the user to install the add-ons.
-	
+	* Plugin detector that detects [plugins for which we have extensions](https://www.wpsecurityauditlog.com/integrations/) and prompts the user to install the extensions.
+
 * **New activity log event IDs**
 
 	* 9105: The stock quantity of a product was changed due to an order.
@@ -229,9 +229,9 @@ Release notes: [Update 4.0.3 - New bbPress add-on & improved WooCommerce activit
 	* 9092: The "Checkout page" in the WooCommerce settings was changed.
 	* 9093: The "My Account page" in the WooCommerce settings was changed.
 	* 9094: The "Terms & conditions page" in the WooCommerce settings was changed.
-	
+
 Refer to the [activity logs for WooCommerce](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/) for more details on WooCommerce support.
-	
+
 * **Improvements**
 
 	* Drastically improved the coverage of the [WooCommerce activity log](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/) sensor.
@@ -257,7 +257,7 @@ Refer to the [activity logs for WooCommerce](https://www.wpsecurityauditlog.com/
 	* Event ID 9063 reported instead of event ID 9071 when reporting a WooCommerce coupon change.
 	* Events ID 1005 (multiple sessions detected) and 1007 (user terminated another user's session) were only working when frontend sensor was enabled.
 	* Activity logs view buttons link to first site on network instead of network dashboard on multisite network.
-	* Error reported when the role property was undefined. 
+	* Error reported when the role property was undefined.
 	* Fixed a PHP 7.3 compatibility issue ([support ticket](https://wordpress.org/support/topic/wp-cli-php-7-reports-empty-needle-in-wp-security-audit-log-php-strpos-call/)).
 
 Please refer to the [complete plugin change log](https://www.wpsecurityauditlog.com/support-documentation/plugin-changelog/) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
