@@ -100,7 +100,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				'priority' => 10,
 			),
 			'audit-log'         => array(
-				'name'     => __( 'Activity Log', 'wp-security-audit-log' ),
+				'name'     => __( 'Activity Log Viewer', 'wp-security-audit-log' ),
 				'link'     => add_query_arg( 'tab', 'audit-log', $this->GetUrl() ),
 				'render'   => array( $this, 'tab_audit_log' ),
 				'save'     => array( $this, 'tab_audit_log_save' ),

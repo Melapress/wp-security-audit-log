@@ -349,7 +349,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * Method: Get View Title.
 	 */
 	public function GetTitle() {
-		return __( 'Audit Log Viewer', 'wp-security-audit-log' );
+		return __( 'Activity Log Viewer', 'wp-security-audit-log' );
 	}
 
 	/**
@@ -376,7 +376,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * Method: Get View Name.
 	 */
 	public function GetName() {
-		return __( 'Audit Log Viewer', 'wp-security-audit-log' );
+		return __( 'Activity Log Viewer', 'wp-security-audit-log' );
 	}
 
 	/**

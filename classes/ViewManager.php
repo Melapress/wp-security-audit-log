@@ -211,7 +211,7 @@ class WSAL_ViewManager {
 			// Add main menu.
 			$this->views[0]->hook_suffix = add_menu_page(
 				'WP Activity Log',
-				'Audit Log',
+				'WP Activity Log',
 				'read', // No capability requirement.
 				$this->views[0]->GetSafeViewName(),
 				array( $this, 'RenderViewBody' ),
