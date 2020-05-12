@@ -1960,7 +1960,7 @@ msgstr ""
 
 #: classes/Views/Settings.php:1265
 msgid ""
-"<a href=\"https://wpactivitylog.com/support/wordpress-"
+"<a href=\"https://wpactivitylog.com/support/kb/wordpress-"
 "files-changes-warning-activity-logs/?"
 "utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings"
 "+pages\" target=\"_blank\">Refer to the WordPress file integrity scans "

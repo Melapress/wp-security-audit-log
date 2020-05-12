@@ -199,7 +199,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				&nbsp;&nbsp;&nbsp;&nbsp;
 				<a class="button" href="https://wpactivitylog.com/support/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=knowledge+base" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="https://wpactivitylog.com/support/list-wordpress-audit-trail-alerts/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=list+events" target="_blank"><?php esc_html_e( 'List of activity logs event IDs', 'wp-security-audit-log' ); ?></a>
+				<a class="button" href="https://wpactivitylog.com/support/kb/list-wordpress-audit-trail-alerts/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=list+events" target="_blank"><?php esc_html_e( 'List of activity logs event IDs', 'wp-security-audit-log' ); ?></a>
 			</p>
 		</div>
 		<div class="wsal-help-section">

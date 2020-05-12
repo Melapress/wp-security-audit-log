@@ -704,7 +704,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			echo sprintf(
 				/* translators: Learn more link. */
 				esc_html__( 'If your website is running behind a firewall set this option to yes so the plugin retrieves the end user’s IP address from the proxy header - %s.', 'wp-security-audit-log' ),
-				'<a href="https://wpactivitylog.com/support/support-reverse-proxies-web-application-firewalls/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . esc_html__( 'learn more', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://wpactivitylog.com/support/kb/support-reverse-proxies-web-application-firewalls/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . esc_html__( 'learn more', 'wp-security-audit-log' ) . '</a>'
 			);
 			?>
 		</p>
@@ -750,7 +750,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			sprintf(
 				/* translators: Learn more link. */
 				esc_html__( 'By default only users with administrator role (single site) and super administrator role (multisite) can change the settings of the plugin. Though you can restrict the privileges to just your user - %s.', 'wp-security-audit-log' ),
-				'<a href="https://wpactivitylog.com/support/managing-wordpress-activity-log-plugin-privileges/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://wpactivitylog.com/support/kb/managing-wordpress-activity-log-plugin-privileges/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
 			),
 			$allowed_tags
 		);
@@ -801,7 +801,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			sprintf(
 				/* translators: Learn more link. */
 				esc_html__( 'By default only users with administrator and super administrator (multisite) role can view the WordPress activity log. Though you can allow other users with no admin role to view the events - %s.', 'wp-security-audit-log' ),
-				'<a href="https://wpactivitylog.com/support/can-allow-users-access-audit-trail/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://wpactivitylog.com/support/kb/can-allow-users-access-audit-trail/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
 			),
 			$allowed_tags
 		);
@@ -1262,7 +1262,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		?>
 		<p class="description">
 			<?php esc_html_e( 'The plugin runs file integrity scans on your website so it keeps a log when a file is added, modified or deleted. All the settings for the file integrity scans can be found in this page.', 'wp-security-audit-log' ); ?>
-			<?php echo wp_kses( __( '<a href="https://wpactivitylog.com/support/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">Refer to the WordPress file integrity scans feature page</a> for more information.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
+			<?php echo wp_kses( __( '<a href="https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">Refer to the WordPress file integrity scans feature page</a> for more information.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
 		</p>
 
 		<h3><?php esc_html_e( 'Do you want the plugin to scan your website for file changes?', 'wp-security-audit-log' ); ?></h3>
