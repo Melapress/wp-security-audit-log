@@ -199,7 +199,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				&nbsp;&nbsp;&nbsp;&nbsp;
 				<a class="button" href="https://wpactivitylog.com/support/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=knowledge+base" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="https://wpactivitylog.com/support/kb/list-wordpress-audit-trail-alerts/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=list+events" target="_blank"><?php esc_html_e( 'List of activity logs event IDs', 'wp-security-audit-log' ); ?></a>
+				<a class="button" href="https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=list+events" target="_blank"><?php esc_html_e( 'List of activity logs event IDs', 'wp-security-audit-log' ); ?></a>
 			</p>
 		</div>
 		<div class="wsal-help-section">
@@ -267,7 +267,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/activity-log-for-mainwp.jpg',
 				'desc' => __( 'See the child sites activity logs from the central MainWP dashboard', 'wp-security-audit-log' ),
 				'alt'  => 'Activity Log for MainWP',
-				'link' => 'https://wpactivitylog.com/activity-log-mainwp-extension/?utm_source=plugin&utm_medium=referral&utm_campaign=AL4MWP&utm_content=WSAL+banner',
+				'link' => 'https://wpactivitylog.com/extensions/mainwp-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=AL4MWP&utm_content=WSAL+banner',
 			),
 		);
 		?>
