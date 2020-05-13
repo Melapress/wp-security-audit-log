@@ -492,7 +492,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			echo sprintf(
 				/* translators: Learn more link. */
 				esc_html__( 'When using infinite scroll the event viewer and search results %s load up much faster and require less resources.', 'wp-security-audit-log' ),
-				'<a href="https://wpactivitylog.com/premium-features/search-filters-wordpress-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . esc_html__( '(Premium feature)', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://wpactivitylog.com/features/search-filters-wordpress-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . esc_html__( '(Premium feature)', 'wp-security-audit-log' ) . '</a>'
 			);
 			?>
 		</p>
@@ -801,7 +801,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			sprintf(
 				/* translators: Learn more link. */
 				esc_html__( 'By default only users with administrator and super administrator (multisite) role can view the WordPress activity log. Though you can allow other users with no admin role to view the events - %s.', 'wp-security-audit-log' ),
-				'<a href="https://wpactivitylog.com/support/kb/can-allow-users-access-audit-trail/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://wpactivitylog.com/support/kb/allow-users-read-access-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
 			),
 			$allowed_tags
 		);
