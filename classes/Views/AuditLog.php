@@ -179,7 +179,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 									'utm_campaign' => 'WSAL',
 									'utm_content'  => 'tell+me+more',
 								),
-								'https://wpactivitylog.com/premium-features/'
+								'https://wpactivitylog.com/features/'
 							);
 							?>
 							<?php wp_nonce_field( 'wsal_dismiss_advert', 'wsal-dismiss-advert', false, true ); ?>
