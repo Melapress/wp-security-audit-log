@@ -858,7 +858,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return string
 		 */
 		public function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
-			$freemius_link = '<a href="https://wpactivitylog.com/support/kb/what-is-freemius/" target="_blank" tabindex="1">freemius.com</a>';
+			$freemius_link = '<a href="https://wpactivitylog.com/support/kb/non-sensitive-diagnostic-data/" target="_blank" tabindex="1">freemius.com</a>';
 			return sprintf(
 				/* translators: Username */
 				esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
