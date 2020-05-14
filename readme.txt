@@ -206,7 +206,7 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 = 4.0.4 (2020-05-20) =
 
-Release notes: [Introducing WP Activity Log (the new name for WP Security Audit Log)](https://wpactivitylog.com/wsal-4-0-4)
+Release notes: [Introducing WP Activity Log (the new name for WP Security Audit Log)](https://wpactivitylog.com/wp-security-audit-log-renamed-wp-activity-log/)
 
 * **Name Change**
 	* In this update we renamed WP Security Audit Log to WP Activity log. No code changes are included in this release.
