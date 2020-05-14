@@ -76,7 +76,7 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 			$our_plugins = $this->get_installable_plugins();
 			?>
 			<table id="tab-third-party-plugins" class="form-table wp-list-table wsal-tab widefat fixed"  style="display: table;" cellspacing="0">
-				<p class="description"><?php esc_html_e( 'WP Security Audit Log can keep a log of changes done on other plugins. Install the relevant add-on from the below list to keep a log of changes done on that plugin.', 'wp-security-audit-log' ); ?></p>
+				<p class="description"><?php esc_html_e( 'WP Activity Log can keep a log of changes done on other plugins. Install the relevant add-on from the below list to keep a log of changes done on that plugin.', 'wp-security-audit-log' ); ?></p>
 				<tbody>
 					<tr>
 						<td class="addon-td">

@@ -25,7 +25,7 @@ class WSAL_Views_Reports extends WSAL_AbstractView {
 	 * Method: Get View Title.
 	 */
 	public function GetTitle() {
-		return __( 'Reports Add-On', 'wp-security-audit-log' );
+		return __( 'Reports Extension', 'wp-security-audit-log' );
 	}
 
 	/**

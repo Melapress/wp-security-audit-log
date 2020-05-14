@@ -210,8 +210,8 @@ class WSAL_ViewManager {
 		if ( $this->_plugin->settings->CurrentUserCan( 'view' ) && count( $this->views ) ) {
 			// Add main menu.
 			$this->views[0]->hook_suffix = add_menu_page(
-				'WP Security Audit Log',
-				'Audit Log',
+				'WP Activity Log',
+				'WP Activity Log',
 				'read', // No capability requirement.
 				$this->views[0]->GetSafeViewName(),
 				array( $this, 'RenderViewBody' ),

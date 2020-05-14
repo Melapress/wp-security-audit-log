@@ -359,12 +359,12 @@ function wsaldefaults_wsal_init() {
 					array( 0004, E_CRITICAL, __( 'PHP exception', 'wp-security-audit-log' ), __( '%Message%.', 'wp-security-audit-log' ) ),
 					array( 0005, E_CRITICAL, __( 'PHP shutdown error', 'wp-security-audit-log' ), __( '%Message%.', 'wp-security-audit-log' ) ),
 					array( 6004, WSAL_MEDIUM, __( 'WordPress was updated', 'wp-security-audit-log' ), __( 'Updated WordPress %LineBreak% Previous version: %OldVersion% %LineBreak% New version: %NewVersion%', 'wp-security-audit-log' ), 'system', 'updated' ),
-					array( 9999, E_CRITICAL, __( 'Advertising Add-ons', 'wp-security-audit-log' ), __( '%PromoName% %PromoMessage%', 'wp-security-audit-log' ) ),
+					array( 9999, E_CRITICAL, __( 'Advertising Extensions', 'wp-security-audit-log' ), __( '%PromoName% %PromoMessage%', 'wp-security-audit-log' ) ),
 				),
 
 				__( 'Activity log plugin', 'wp-security-audit-log' ) => array(
 					array( 6000, WSAL_INFORMATIONAL, __( 'Events automatically pruned by system', 'wp-security-audit-log' ), __( 'System automatically deleted %EventCount% event(s)', 'wp-security-audit-log' ), 'activity-logs', 'deleted' ),
-					array( 6006, WSAL_MEDIUM, __( 'Reset plugin\'s settings to default', 'wp-security-audit-log' ), __( 'Reset the WP Security Audit Log plugin settings to default', 'wp-security-audit-log' ), 'plugin', 'modified' ),
+					array( 6006, WSAL_MEDIUM, __( 'Reset plugin\'s settings to default', 'wp-security-audit-log' ), __( 'Reset the WP Activity Log plugin settings to default', 'wp-security-audit-log' ), 'plugin', 'modified' ),
 					array( 6034, WSAL_CRITICAL, __( 'Purged the activity log', 'wp-security-audit-log' ), __( 'Purged the activity log', 'wp-security-audit-log' ), 'activity-logs', 'deleted' ),
 				),
 

@@ -230,7 +230,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 							'utm_campaign' => 'WSAL',
 							'utm_content'  => 'db+integrations',
 						),
-						'https://www.wpsecurityauditlog.com/premium-features/'
+						'https://wpactivitylog.com/features/'
 					);
 					$upgrade        = '<a href="' . $upgrade_link . '">' . __( 'Upgrade to Premium', 'wp-security-audit-log' ) . '</a>';
 					$more_info      = '<a href="' . $more_info_link . '" target="_blank">' . __( 'More Information', 'wp-security-audit-log' ) . '</a>';

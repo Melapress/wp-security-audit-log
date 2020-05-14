@@ -25,7 +25,7 @@ class WSAL_Views_LogInUsers extends WSAL_AbstractView {
 	 * Method: Get View Title.
 	 */
 	public function GetTitle() {
-		return __( 'User Sessions Management Add-On', 'wp-security-audit-log' );
+		return __( 'User Sessions Management Extension', 'wp-security-audit-log' );
 	}
 
 	/**

@@ -25,7 +25,7 @@ class WSAL_Views_Search extends WSAL_AbstractView {
 	 * Method: Get View Title.
 	 */
 	public function GetTitle() {
-		return __( 'Search Add-On', 'wp-security-audit-log' );
+		return __( 'Search Extension', 'wp-security-audit-log' );
 	}
 
 	/**

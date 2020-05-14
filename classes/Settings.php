@@ -1732,7 +1732,7 @@ class WSAL_Settings {
 				return '<a href="' . esc_url( $file_settings ) . '">' . esc_html__( 'Increase maximum file size limit', 'wp-security-audit-log' ) . '</a>';
 
 			case '%ContactSupport%' === $name:
-				return '<a href="https://www.wpsecurityauditlog.com/contact/" target="_blank">' . esc_html__( 'Contact Support', 'wp-security-audit-log' ) . '</a>';
+				return '<a href="https://wpactivitylog.com/contact/" target="_blank">' . esc_html__( 'Contact Support', 'wp-security-audit-log' ) . '</a>';
 
 			case '%LineBreak%' === $name:
 				return '<br>';
@@ -1975,7 +1975,7 @@ class WSAL_Settings {
 				return '<' . esc_url( $file_settings ) . '|' . esc_html__( 'plugin settings', 'wp-security-audit-log' ) . '>';
 
 			case '%ContactSupport%' === $name:
-				return '<https://www.wpsecurityauditlog.com/contact|' . esc_html__( 'contact our support', 'wp-security-audit-log' ) . '>';
+				return '<https://wpactivitylog.com/contact|' . esc_html__( 'contact our support', 'wp-security-audit-log' ) . '>';
 
 			case '%LineBreak%' === $name:
 				return;

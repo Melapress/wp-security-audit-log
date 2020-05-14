@@ -418,7 +418,7 @@ final class WSAL_AlertManager {
 			if ( isset( $this->_alerts[ $type ] ) ) {
 				add_action( 'admin_notices', array( $this, 'duplicate_event_notice' ) );
 				/* Translators: Event ID */
-				throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Security Audit Log.', 'wp-security-audit-log' ), $type ) );
+				throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Activity Log.', 'wp-security-audit-log' ), $type ) );
 			}
 
 			$this->_alerts[ $type ] = new WSAL_Alert( $type, $code, $catg, $subcatg, $desc, $mesg, $object, $event_type );
@@ -498,7 +498,7 @@ final class WSAL_AlertManager {
 			esc_attr( $class ),
 			'<span style="color:#dc3232; font-weight:bold;">' . esc_html__( 'ERROR:', 'wp-security-audit-log' ) . '</span>',
 			esc_html( $message ),
-			'<a href="https://www.wpsecurityauditlog.com/contact" target="_blank">' . esc_html__( 'Contact us', 'wp-security-audit-log' ) . '</a>'
+			'<a href="https://wpactivitylog.com/contact" target="_blank">' . esc_html__( 'Contact us', 'wp-security-audit-log' ) . '</a>'
 		);
 	}
 

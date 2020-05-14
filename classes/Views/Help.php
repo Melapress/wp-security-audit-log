@@ -175,39 +175,39 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		?>
 		<div class="wsal-help-section">
 			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Getting Started', 'wp-security-audit-log' ); ?></h2>
-			<p><?php esc_html_e( 'Getting started with WP Security Audit Log is really easy; once the plugin is installed it will automatically keep a log of everything that is happening on your website and you do not need to do anything. Watch the video below for a quick overview of the plugin.', 'wp-security-audit-log' ); ?></p>
+			<p><?php esc_html_e( 'Getting started with WP Activity Log is really easy; once the plugin is installed it will automatically keep a log of everything that is happening on your website and you do not need to do anything. Watch the video below for a quick overview of the plugin.', 'wp-security-audit-log' ); ?></p>
 			<p><iframe class="wsal-youtube-embed" width="100%" height="315" src="https://www.youtube.com/embed/1nopATCS-CQ?rel=0" frameborder="0" allowfullscreen></iframe></p>
 		</div>
 		<div class="wsal-help-section">
 			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Plugin Support', 'wp-security-audit-log' ); ?></h2>
 			<p>
-				<?php esc_html_e( 'Have you encountered or noticed any issues while using WP Security Audit Log plugin?', 'wp-security-audit-log' ); ?>
+				<?php esc_html_e( 'Have you encountered or noticed any issues while using WP Activity Log plugin?', 'wp-security-audit-log' ); ?>
 				<?php esc_html_e( 'Or you want to report something to us? Click any of the options below to post on the plugin\'s forum or contact our support directly.', 'wp-security-audit-log' ); ?>
 			</p><p>
 				<a class="button" href="https://wordpress.org/support/plugin/wp-security-audit-log" target="_blank"><?php esc_html_e( 'Free Support Forum', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="https://www.wpsecurityauditlog.com/support/submit-ticket/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=free+support+email" target="_blank"><?php esc_html_e( 'Free Support Email', 'wp-security-audit-log' ); ?></a>
+				<a class="button" href="https://wpactivitylog.com/support/submit-ticket/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=free+support+email" target="_blank"><?php esc_html_e( 'Free Support Email', 'wp-security-audit-log' ); ?></a>
 			</p>
 		</div>
 		<div class="wsal-help-section">
 			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Plugin Documentation', 'wp-security-audit-log' ); ?></h2>
 			<p>
-				<?php esc_html_e( 'For more technical information about the WP Security Audit Log plugin please visit the plugin’s knowledge base.', 'wp-security-audit-log' ); ?>
+				<?php esc_html_e( 'For more technical information about the WP Activity Log plugin please visit the plugin’s knowledge base.', 'wp-security-audit-log' ); ?>
 				<?php esc_html_e( 'Refer to the list of WordPress security events for a complete list of Events and IDs that the plugin uses to keep a log of all the changes in the WordPress audit log.', 'wp-security-audit-log' ); ?>
 			</p><p>
-				<a class="button" href="https://www.wpsecurityauditlog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+website" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
+				<a class="button" href="https://wpactivitylog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+website" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="https://www.wpsecurityauditlog.com/support-documentation/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=knowledge+base" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
+				<a class="button" href="https://wpactivitylog.com/support/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=knowledge+base" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="https://www.wpsecurityauditlog.com/support-documentation/list-wordpress-audit-trail-alerts/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=list+events" target="_blank"><?php esc_html_e( 'List of activity logs event IDs', 'wp-security-audit-log' ); ?></a>
+				<a class="button" href="https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=list+events" target="_blank"><?php esc_html_e( 'List of activity logs event IDs', 'wp-security-audit-log' ); ?></a>
 			</p>
 		</div>
 		<div class="wsal-help-section">
-			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Rate WP Security Audit Log', 'wp-security-audit-log' ); ?></h2>
+			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Rate WP Activity Log', 'wp-security-audit-log' ); ?></h2>
 			<p>
 				<?php esc_html_e( 'We work really hard to deliver a plugin that enables you to keep a record of all the changes that are happening on your WordPress.', 'wp-security-audit-log' ); ?>
-				<?php esc_html_e( 'It takes thousands of man-hours every year and endless amount of dedication to research, develop and maintain the free edition of WP Security Audit Log.', 'wp-security-audit-log' ); ?>
-				<?php esc_html_e( 'Therefore if you like what you see, and find WP Security Audit Log useful we ask you nothing more than to please rate our plugin.', 'wp-security-audit-log' ); ?>
+				<?php esc_html_e( 'It takes thousands of man-hours every year and endless amount of dedication to research, develop and maintain the free edition of WP Activity Log.', 'wp-security-audit-log' ); ?>
+				<?php esc_html_e( 'Therefore if you like what you see, and find WP Activity Log useful we ask you nothing more than to please rate our plugin.', 'wp-security-audit-log' ); ?>
 				<?php esc_html_e( 'We appreciate every star!', 'wp-security-audit-log' ); ?>
 			</p>
 			<p>
@@ -267,7 +267,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/activity-log-for-mainwp.jpg',
 				'desc' => __( 'See the child sites activity logs from the central MainWP dashboard', 'wp-security-audit-log' ),
 				'alt'  => 'Activity Log for MainWP',
-				'link' => 'https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/?utm_source=plugin&utm_medium=referral&utm_campaign=AL4MWP&utm_content=WSAL+banner',
+				'link' => 'https://wpactivitylog.com/extensions/mainwp-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=AL4MWP&utm_content=WSAL+banner',
 			),
 		);
 		?>
@@ -380,7 +380,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			}
 
 			if (
-				'WP Security Audit Log' === $plugin['Name']
+				'WP Activity Log' === $plugin['Name']
 				&& wsal_freemius()->can_use_premium_code()
 			) {
 				$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
@@ -400,7 +400,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			}
 
 			if (
-				'WP Security Audit Log' === $plugin['Name']
+				'WP Activity Log' === $plugin['Name']
 				&& wsal_freemius()->can_use_premium_code()
 			) {
 				$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
@@ -426,7 +426,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				}
 
 				if (
-					'WP Security Audit Log' === $plugin['Name']
+					'WP Activity Log' === $plugin['Name']
 					&& wsal_freemius()->can_use_premium_code()
 				) {
 					$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';

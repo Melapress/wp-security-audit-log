@@ -1,47 +1,48 @@
-=== WP Security Audit Log ===
+=== WP Activity Log ===
 Contributors: WPWhiteSecurity, robert681
-Plugin URI: https://www.wpsecurityauditlog.com
+Plugin URI: https://wpactivitylog.com
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
-Tags: wordpress security plugin, wordpress security audit log, audit log, activity logs, event log wordpress, wordpress user tracking, wordpress activity log, wordpress audit, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, dashboard, notification, wordpress monitoring, email notification, wordpress email alerts, SMS messages, tracking, user tracking, user activity report, wordpress audit trail
+Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.4
-Stable tag: 4.0.3
+Stable tag: 4.0.4
 Requires PHP: 5.5
 
-An easy to use & comprehensive WordPress activity log plugin to log all changes on WordPress sites & multisite networks.
+The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
 
 == Description ==
 
 <strong>THE MOST COMPREHENSIVE & EASY TO USE WORDPRESS ACTIVITY LOG PLUGIN</strong><br />
 
-Keep an activity log of everything that happens on your WordPress and [WordPress multisite](https://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) with the WP Security Audit Log plugin to:
+Keep an [activity log](https://wpactivitylog.com/wordpress-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) of everything that happens on your WordPress sites and multisite networks with the WP Activity Log plugin to:
 
 * Ensure user productivity
+* Improve user accountability
 * Ease troubleshooting
 * Know exactly what all your users are doing
-* Better manage & organize your WordPress site
+* Better manage & organize your WordPress site & users
 * Easily spot suspicious behavior before there are security problems.
 
-[WP Security Audit Log](https://www.wpsecurityauditlog.com/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) is the most comprehensive real time user activity and monitoring log plugin. It helps thousands of WordPress administrators and security professionals keep an eye on what is happening on their websites. It is also the most highly rated WordPress activity log plugin and have been featured on popular sites such as GoDaddy, ManageWP, Pagely, Shout Me Loud and WPKube.
+[WP Activity Log](https://wpactivitylog.com/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) is the most comprehensive real time user activity and monitoring log plugin. It helps thousands of WordPress administrators and security professionals keep an eye on what is happening on their websites. It is also the most highly rated WordPress activity log plugin and have been featured on popular sites such as GoDaddy, Kinsta and WPBeginner.
 
 [youtube https://www.youtube.com/watch?v=1nopATCS-CQ]
 
-> <strong>Note</strong>: All WordPress logging functionality is FREE. Features such as reports, email notifications & search are available in the <Strong>[Premium Edition](https://www.wpsecurityauditlog.com/premium-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>.
+> <strong>Note</strong>: The WordPress activity log is FREE. Features such as reports, email notifications, SMS alerts, search and many others are available in the <Strong>[Premium Edition](https://wpactivitylog.com/features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>.
 >
 
 #### Maintained & Supported by WP White Security
 
-WP White Security builds high-quality niche WordPress security & admin plugins such as [Password Policy Manager for WordPress](https://www.wpwhitesecurity.com/wordpress-plugins/password-policy-manager-wordpress/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=PPMWP&utm_content=plugin+repos+description), a plugin with which you can ensure all your users use strong passwords.
+WP White Security builds high-quality niche WordPress security & management plugins such as [Password Policy Manager for WordPress](https://www.wpwhitesecurity.com/wordpress-plugins/password-policy-manager-wordpress/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=PPMWP&utm_content=plugin+repos+description), a plugin with which you can ensure all your users use strong passwords.
 
 Browse our list of [WordPress plugins](https://www.wpwhitesecurity.com/wordpress-plugins/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=all+plugins&utm_content=plugin+repos+description) that can help you better manage and improve the security of your WordPress websites and users.
 
 ### WordPress Changes & Details the Plugin Keeps a Log Of
-As a comprehensive & complete WordPress activity log solution WP Security Audit Log does not just tell you that a post, a user profile, or an object was updated. It keeps a log of what was changed within the post, profile or object.
+As a comprehensive & complete WordPress activity log solution WP Activity Log does not just tell you that a post, a user profile, or an object was updated. It tells you exactly what was changed within the post, the user profile, or the object.
 
 Below is a summary of the changes that the plugin can keep a record of:
 
-* **Post, Page and Custom Post Type changes** such as status, [content changes](https://www.wpsecurityauditlog.com/support-documentation/how-keep-record-of-content-changes/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description), title, URL, date and custom field changes
+* **Post, Page and Custom Post Type changes** such as status, [content changes](https://wpactivitylog.com/support/kb/how-keep-record-of-content-changes/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description), title, URL, custom field & other metadata changes
 
 * **Tags and Categories changes** such as creating, modifying or deleting them, and adding or removing them from posts
 
@@ -55,7 +56,7 @@ Below is a summary of the changes that the plugin can keep a record of:
 
 * **WordPress core and settings changes** such as installed updates, permalinks, default role, URL and other site-wide changes
 
-* **WordPress multisite network changes** such as adding, deleting or archiving sites, adding or removing users from sites etc ([activity logs for multisite networks](https://www.wpsecurityauditlog.com/support-documentation/audit-trail-features-wordpress-multisite/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)).
+* **WordPress multisite network changes** such as adding, deleting or archiving sites, adding or removing users from sites etc ([activity logs for multisite networks](https://wpactivitylog.com/support/kb/activity-log-multisite-network-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)).
 
 * **Plugins and Themes changes** such as installing, activating, deactivating, uninstalling and updating them
 
@@ -63,7 +64,7 @@ Below is a summary of the changes that the plugin can keep a record of:
 
 * Changes on **WooCommerce Stores & Products**, **Yoast SEO**, **Advanced Custom Fields (ACF)**, **MainWP** and other popular WordPress plugins.
 
-* **[WordPress site file changes](https://www.wpsecurityauditlog.com/support-documentation/wordpress-files-changes-warning-activity-logs/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)** such as new files are added, or existing ones are modified or deleted.
+* **[WordPress site file changes](https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)** such as new files are added, or existing ones are modified or deleted.
 
 For every event that the plugin keeps a log of it also reports the:
 
@@ -71,10 +72,10 @@ For every event that the plugin keeps a log of it also reports the:
 * User & role of the user who did the change,
 * Source IP address from where the change happened.
 
-Refer to [WordPress Activity Log Events](https://www.wpsecurityauditlog.com/support-documentation/list-wordpress-audit-trail-alerts/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for a complete list of all the changes the WP Security Audit Log can keep a record of.
+Refer to [WordPress activity log event IDs](https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for a complete list of all the changes WP Activity Log can keep a record of.
 
-### Extend the Functionality of the WP Security Audit Log Plugin
-<strong>[Upgrade to WP Security Audit Log Premium](https://www.wpsecurityauditlog.com/premium-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong> to:
+### Extend the Functionality of WP Activity Log
+<strong>[Upgrade to WP Activity Log Premium](https://wpactivitylog.com/pricing/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong> to:
 
 * See who is logged,
 * See what everyone is doing in real time,
@@ -89,34 +90,34 @@ Refer to [WordPress Activity Log Events](https://www.wpsecurityauditlog.com/supp
 * Mirror the WordPress activity logs to Slack, Papertrail, Syslog and other central log management and collaboration solutions,
 * Configure archiving and mirroring of logs.
 
-See our [premium features page](https://www.wpsecurityauditlog.com/premium-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information.
+Refer to the [features page](https://wpactivitylog.com/features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information on the plugin's features.
 
 ### Free and Premium Support
 
-Support for the WP Security Audit Log plugin on the WordPress forums is free.
+Support for WP Activity Log is free on the WordPress support forums.
 
-Premium world-class support is available via email to all [WP Security Audit Log Premium](https://www.wpsecurityauditlog.com/premium-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) customers.
+Premium world-class support is available via email to all [WP Activity Log Premium](https://wpactivitylog.com/features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) customers.
 
-> <strong>Note</strong>: paid customers support is always given priority  over free support. Paid customers support is provided via one-to-one email and over the phone. [Upgrade to Premium](https://www.wpsecurityauditlog.com/pricing/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) to benefit from priority support.
+> <strong>Note</strong>: paid customers support is given priority and is provided via one-to-one email and over the phone. [Upgrade to Premium](https://wpactivitylog.com/pricing/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) to benefit from priority support.
 >
 
 #### Other Noteworthy Features
-WP Security Audit Log plugin also has a number of features that make WordPress and WordPress multisite monitoring and auditing easier, such as:
+Apart from the activity logs and the already mentioned features, WP Activity Log has a number of non-logging specific features that make it a complete WordPress logging solution, such as:
 
-* Built-in [support for reverse proxies and web application firewalls](https://www.wpsecurityauditlog.com/documentation/automatically-retrieve-originating-wordpress-user-ip-address/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* Built-in [support for reverse proxies and web application firewalls](https://wpactivitylog.com/support/kb/support-reverse-proxies-web-application-firewalls/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 * Full [WordPress multisite support](https://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* Easily [create your custom alerts](https://www.wpsecurityauditlog.com/support-documentation/create-custom-alerts-wordpress-audit-trail/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) to monitor additional functionality
+* Easily [create your custom alerts](https://wpactivitylog.com/support/kb/activity-log-multisite-network-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) to monitor additional functionality
 * Developer tools including the logging of all HTTP GET and POST requests
 * Integration with WhatIsMyIpAddress.com so you can get all information about an IP address with just a mouse click
 * Limit who can view the WordPress activity log by either users or roles
-* Limit who can manage the plugin by either users or roles
-* Configurable WordPress dashboard widget highlighting the most recent critical activity
-* Configurable WordPress security audit trail data retention
-* User avatar is shown in the alerts for better recognizability
-* Enable or disable any security alerts
+* Limit who can manage the plugin
+* Settings to enable or [disable individual event IDs from the activity log](https://wpactivitylog.com/support/kb/exclude-logging-specific-change-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* Configurable dashboard widget highlighting the most recent critical activity
+* Configurable [WordPress activity log retention policies](https://wpactivitylog.com/support/kb/activity-log-retention-policies/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* User avatar is shown in the events for better recognizability
 * and much more...
 
-Refer to the <strong>[WordPress activity log plugin datasheet](https://www.wpsecurityauditlog.com/plugin-datasheet/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong> for a complete list of features.
+Refer to the <strong>[WordPress activity log plugin datasheet](https://wpactivitylog.com/activity-log-plugin-datasheet/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong> for a complete list of features.
 
 ### As Featured On:
 
@@ -133,7 +134,6 @@ Refer to the <strong>[WordPress activity log plugin datasheet](https://www.wpsec
 * [KevinMuldoon.com](https://www.kevinmuldoon.com/wp-security-audit-log-review/)
 * [Cloudways](https://www.cloudways.com/blog/monitor-wordpress-with-wp-security-audit-log-plugin/)
 * [Collective Ray](https://www.collectiveray.com/wp/plugins/wordpress-security-audit-log)
-* [MyWPExpert](http://www.mywpexpert.com/wp-security-audit-log/)
 * [BlogVault](https://blogvault.net/wp-security-audit-log-plugin-review/)
 * [Firewall.cx](http://www.firewall.cx/general-topics-reviews/security-articles/1146-wordpress-audit-monitor-log-site-security-alerts.html)
 * [Design Wall](http://www.designwall.com/blog/10-wordpress-multisite-plugins-you-shouldnt-live-without/)
@@ -144,8 +144,8 @@ Refer to the <strong>[WordPress activity log plugin datasheet](https://www.wpsec
 * [KitPloit](http://www.kitploit.com/2016/10/wp-security-audit-log-ultimate.html)
 * [EHacking](https://www.ehacking.net/2018/10/how-activity-log-wordpress-plugin.html)
 
-#### WordPress Security Audit Log in your Language!
-We need help translating the plugin and the WordPress Security Alerts. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log) to translate the plugin and drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
+#### WP Activity Log in your language!
+We need help translating the plugin and the activity log events. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log/) to translate the plugin. Drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
 
 * Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
 * German translation by [Mourad Louha](http://excel-translator.de)
@@ -153,41 +153,41 @@ We need help translating the plugin and the WordPress Security Alerts. Please vi
 * Spanish translation by the [WP Body team](https://wpbody.com/)
 * French translations by Denis Moscato
 
-#### Activity Log add-ons for third party plugins
+#### WP Activity Log extensions for third party plugins
 
-* <strong>[Activity Log for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/)</strong>: This MainWP extension allows you to keep a log of MainWP network changes and to view the activity logs of all child sites from one central location - the MainWP dashboard.
-* <strong>[Activity Log add-on for WPForms](https://www.wpsecurityauditlog.com/integrations/activity-log-wpforms/)</strong>: Install this add-on to keep a log of changes in WPForms plugin, forms, form files, entries (leads) and more.
-* <strong>[Activity Log add-on for bbPress](https://wordpress.org/plugins/wp-security-audit-log-add-on-for-bbpress/)</strong>: Install this add-on with to keep a log of changes in bbPress forums, topics, bbPress settings and more.
+* <strong>[Activity Log for MainWP](https://wpactivitylog.com/extensions/mainwp-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>: With this MainWP extension you keep a log of the MainWP network changes and can see the activity logs of all child sites from one central location - the MainWP dashboard.
+* <strong>[WP Activity Log for WPForms](https://wpactivitylog.com/extensions/wpforms-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>: When you install this extension you keep a log of changes your team does in the WPForms plugin, forms, form files, entries (leads) and more.
+* <strong>[WP Activity Log for bbPress](https://wordpress.org/plugins/wp-security-audit-log-add-on-for-bbpress/)</strong>: With this extension you can keep a log of changes in bbPress forums, topics, bbPress settings and more.
 
 #### Related Links and Documentation
 
-* [What is a WordPress Activity Log?](https://www.wpsecurityauditlog.com/wordpress-user-monitoring-plugin-documentation/what-is-a-wordpress-audit-trail/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* [List of WordPress Activity Log events](https://www.wpsecurityauditlog.com/documentation/list-monitoring-wordpress-security-alerts-audit-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* [WordPress Multisite Features](https://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* [WP Security Audit Log and Reverse Proxy and WAFs Support](https://www.wpsecurityauditlog.com/documentation/automatically-retrieve-originating-wordpress-user-ip-address/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* [WP Security Audit Log Database Documentation](https://www.wpsecurityauditlog.com/documentation/plugin-wordpress-database-documentation/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* [Official WP Security Audit Log Plugin Website](https://www.wpsecurityauditlog.com/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* [Activity logs for MainWP](https://www.wpsecurityauditlog.com/activity-log-mainwp-extension/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* [What is the WordPress activity log?](https://wpactivitylog.com/wordpress-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* [List of WordPress activity log event IDs](https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* [WordPress Multisite Features](https://wpactivitylog.com/support/kb/activity-log-multisite-network-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* [WP Activity Log support for reverse proxies & WAFs](https://wpactivitylog.com/support/kb/support-reverse-proxies-web-application-firewalls/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* [WP Activity Log database documentation](https://wpactivitylog.com/support/kb/plugin-database-documentation/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* [The WP Activity Log plugin website](https://wpactivitylog.com/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* [Activity logs for MainWP](https://wpactivitylog.com/extensions/mainwp-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 
 == Installation ==
 
-=== Install WP Security Audit Log from within WordPress ===
+=== Install WP Activity Log from within WordPress ===
 
 1. Visit 'Plugins > Add New'
-1. Search for 'WP Security Audit Log'
-1. Install and activate the WP Security Audit Log plugin
+1. Search for 'WP Activity Log'
+1. Install and activate the WP Activity Log plugin
 1. Allow or skip diagnostic tracking
 
-=== Install WP Security Audit Log manually ===
+=== Install WP Activity Log manually ===
 
 1. Upload the `wp-security-audit-log` directory to the `/wp-content/plugins/` directory
-1. Activate the WP Security Audit Log plugin from the 'Plugins' menu in WordPress
+1. Activate the WP Activity Log plugin from the 'Plugins' menu in WordPress
 1. Allow or skip diagnostic tracking
 
 == Frequently Asked Questions ==
 
 = Support and Documentation =
-Please refer to our [Support & Documentation pages](https://www.wpsecurityauditlog.com/support-documentation/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for all the technical information and support documentation on the WP Security Audit Log plugin.
+Please refer to our [support pages](https://wpactivitylog.com/support/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for all the technical information and product documentation.
 
 == Screenshots ==
 
@@ -196,68 +196,19 @@ Please refer to our [Support & Documentation pages](https://www.wpsecurityauditl
 3. The plugin settings from where site administrator can configure generic plugin settings such as [reverse proxy support](https://www.wpsecurityauditlog.com/support-documentation/support-reverse-proxies-web-application-firewalls/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description), who can manage the plugin etc.
 4. The WordPress audit trail settings from where you can configure automatic pruning of alerts, which timestamp should be used, how many 404 requests should be logged and more.
 5. Configuring WordPress email and SMS alerts with the [Email & SMS Notifications module](https://www.wpsecurityauditlog.com/premium-features/email-notifications-wordpress-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-6. Search in the WordPress security audit log with the use filters to fine tune the search results.
+6. Search in the WordPress activity log with the use filters to fine tune the search results.
 7. The Enable/Disable events section from where Administrators can disable or enable activity log events.
-8. The Audit Log Viewer of a Super Admin in a WordPress multisite network installation with the Site selection drop down menu.
-9. WP Security Audit Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes](https://www.wpsecurityauditlog.com/support-documentation/how-keep-record-of-content-changes/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+8. The Log Viewer of a Super Admin in a WordPress multisite network installation with the Site selection drop down menu.
+9. WP Activity Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes](https://www.wpsecurityauditlog.com/support-documentation/how-keep-record-of-content-changes/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 10. Mirror the WordPress activity log to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
 
 == Changelog ==
 
-= 4.0.3 (2020-04-16) =
+= 4.0.4 (2020-05-20) =
 
-Release notes: [Update 4.0.3 - New bbPress add-on & improved WooCommerce activity logs](https://www.wpsecurityauditlog.com/releases/update-4-0-3/)
+Release notes: [Introducing WP Activity Log (the new name for WP Security Audit Log)](https://wpactivitylog.com/wp-security-audit-log-renamed-wp-activity-log/)
 
-* **BREAKING CHANGE**
+* **Name Change**
+	* In this update we renamed WP Security Audit Log to WP Activity log. No code changes are included in this release.
 
-	* Individual add-ons (pre 2018) will not be supported anymore.
-
-* **New features**
-
-	* Two new [activity log objects](https://www.wpsecurityauditlog.com/support-documentation/objects-event-types-wordpress-activity-log/): WooCommerce coupon and Yoast SEO metabox.
-	* Plugin detector that detects [plugins for which we have add-ons](https://www.wpsecurityauditlog.com/integrations/) and prompts the user to install the add-ons.
-	
-* **New activity log event IDs**
-
-	* 9105: The stock quantity of a product was changed due to an order.
-	* 9085: The WooCommerce setting "Selling location(s)" was changed.
-	* 9086: List of excluded countries to sell to in WooCommerce was changed.
-	* 9087: List of countries to sell to in WooCommerce was changed.
-	* 9088: The WooCommerce setting "Shipping location(s)" was changed.
-	* 9090: The WooCommerce setting "Default custom location" was changed.
-	* 9091: The "Cart page" in the WooCommerce settings was changed.
-	* 9092: The "Checkout page" in the WooCommerce settings was changed.
-	* 9093: The "My Account page" in the WooCommerce settings was changed.
-	* 9094: The "Terms & conditions page" in the WooCommerce settings was changed.
-	
-Refer to the [activity logs for WooCommerce](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/) for more details on WooCommerce support.
-	
-* **Improvements**
-
-	* Drastically improved the coverage of the [WooCommerce activity log](https://www.wpsecurityauditlog.com/woocommerce-activity-log-datasheet/) sensor.
-	* WooCommerce sensor now detects changes done from the new interface (WooCommerce Admin).
-	* Event 9029 (WooCommerce store base location change) now reports  both the old and new address.
-	* Updated WooCommerce sensor to detect all  the changes in the tax options (event IDs 9078 - 9081).
-	* Changed the event type from "Modified" to "Renamed" in the events where in which the object is renamed.
-	* "Plugins" is reported instead of a username when a change is done automatically by a plugin.
-	* Improved the [activity logs external database](https://www.wpsecurityauditlog.com/premium-features/database-integration-tools-wordpress-activity-log/) connection test during connection setup.
-	* Removed obsolete code which was only used in previous versions from the defaults.php file.
-	* Improved event ID 2055 (deleted custom field) so it is not reported when a custom field is deleted autoamtically due to the post being deleted.
-	* Removed redundant filters wsal_event_type_text and wsal_event_object_text.
-	* Moved 10 plugin settings to the WordPress options table as part of the plugin improvement project.
-	* External database connector now reports actual MySQL error for improved troubleshooting.
-	* All the changes done to a bbPress forum or topic are reported, even when done at the same time.
-
-* **Bug fixes**
-
-	* Event ID 8808 not firing when Cornerstone article setting is enabled or disabled in a post.
-	* Event ID 9066 not firing when the expiry date of a WooCommerce coupon is changed.
-	* Plugin reporting event ID 2001 instead of 5019 when a plugin automatically creates posts.
-	* Fixed a minor compatibility issue in the Hide plugin functionality ([support ticket](https://wordpress.org/support/topic/you-do-not-appear-to-have-any-plugins-available-at-this-time-5/#post-12280792)).
-	* Event ID 9063 reported instead of event ID 9071 when reporting a WooCommerce coupon change.
-	* Events ID 1005 (multiple sessions detected) and 1007 (user terminated another user's session) were only working when frontend sensor was enabled.
-	* Activity logs view buttons link to first site on network instead of network dashboard on multisite network.
-	* Error reported when the role property was undefined. 
-	* Fixed a PHP 7.3 compatibility issue ([support ticket](https://wordpress.org/support/topic/wp-cli-php-7-reports-empty-needle-in-wp-security-audit-log-php-strpos-call/)).
-
-Please refer to the [complete plugin change log](https://www.wpsecurityauditlog.com/support-documentation/plugin-changelog/) for more detailed information about what was new, improved and fixed in previous versions of the WP Security Audit Log plugin.
+Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
