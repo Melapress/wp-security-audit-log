@@ -390,7 +390,7 @@ class WSAL_ViewManager {
 				}
 				break;
 			case 'wsal-loginusers':
-				if ( class_exists( 'WSAL_User_Management_Plugin' ) ) {
+				if ( class_exists( 'WSAL_UserSessions_Plugin' ) ) {
 					$not_show = true;
 				}
 				break;
