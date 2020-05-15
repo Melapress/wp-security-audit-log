@@ -123,7 +123,21 @@ final class WSAL_Views_SetupWizard {
 	 * Add setup admin page.
 	 */
 	public function admin_menus() {
+		// this is an empty title because we do not want it to display.
 		add_dashboard_page( '', '', 'manage_options', 'wsal-setup', '' );
+		// hide it via CSS as well so screen readers pass over it.
+		add_action(
+			'admin_head',
+			function() {
+				?>
+				<style>
+				.wp-submenu a[href="wsal-setup"]{
+					display: none !important;
+				}
+				</style>
+				<?php
+			}
+		);
 	}
 
 	/**
