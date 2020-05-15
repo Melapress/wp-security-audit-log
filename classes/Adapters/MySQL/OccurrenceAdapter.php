@@ -318,6 +318,14 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 */
 	public function create_indexes() {
 		$db_connection = $this->get_connection();
-		$db_connection->query( 'CREATE INDEX created_on ON ' . $this->GetTable() . ' (created_on)' );
+		// check if an index exists.
+		if ( $db_connection->query( 'SELECT COUNT(1) IndexIsThere FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema=DATABASE() AND table_name="' . $this->GetTable() . '" AND index_name="created_on"' ) ) {
+			// query succeeded, does index exist?
+			$index_exists = ( isset( $db_connection->last_result[0]->IndexIsThere ) ) ? $db_connection->last_result[0]->IndexIsThere : false;
+		}
+		// if no index exists then make one.
+		if ( ! $index_exists ) {
+			$db_connection->query( 'CREATE INDEX created_on ON ' . $this->GetTable() . ' (created_on)' );
+		}
 	}
 }
