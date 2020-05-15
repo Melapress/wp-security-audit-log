@@ -414,8 +414,8 @@ final class WSAL_Views_SetupWizard {
 	 */
 	private function wsal_step_welcome() {
 		// Dismiss the setup modal on audit log.
-		if ( 'no' === $this->wsal->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' ) ) {
-			$this->wsal->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' );
+		if ( 'no' === $this->wsal->options_helper->get_option_value( 'setup-modal-dismissed', 'no' ) ) {
+			$this->wsal->options_helper->set_option_value( 'setup-modal-dismissed', 'yes' );
 		}
 		?>
 		<p><?php esc_html_e( 'This wizard helps you configure the basic plugin settings. All these settings can be changed at a later stage from the plugin settings.', 'wp-security-audit-log' ); ?></p>

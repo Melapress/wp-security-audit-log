@@ -1226,11 +1226,11 @@ class WSAL_Settings {
 	}
 
 	public function Set404LogLimit( $value ) {
-		$this->_plugin->SetGlobalOption( 'log-404-limit', abs( $value ) );
+		$this->_plugin->options_helper->set_option_value( 'log-404-limit', abs( $value ) );
 	}
 
 	public function Get404LogLimit() {
-		return $this->_plugin->GetGlobalOption( 'log-404-limit', 99 );
+		return $this->_plugin->options_helper->get_option_value( 'log-404-limit', 99 );
 	}
 
 	/**
@@ -1240,7 +1240,7 @@ class WSAL_Settings {
 	 * @since  2.6.3
 	 */
 	public function SetVisitor404LogLimit( $value ) {
-		$this->_plugin->SetGlobalOption( 'log-visitor-404-limit', abs( $value ) );
+		$this->_plugin->options_helper->set_option_value( 'log-visitor-404-limit', abs( $value ) );
 	}
 
 	/**
@@ -1249,7 +1249,7 @@ class WSAL_Settings {
 	 * @since  2.6.3
 	 */
 	public function GetVisitor404LogLimit() {
-		return $this->_plugin->GetGlobalOption( 'log-visitor-404-limit', 99 );
+		return $this->_plugin->options_helper->get_option_value( 'log-visitor-404-limit', 99 );
 	}
 
 	/**
@@ -1260,9 +1260,9 @@ class WSAL_Settings {
 	 */
 	public function set_failed_login_limit( $value ) {
 		if ( ! empty( $value ) ) {
-			$this->_plugin->SetGlobalOption( 'log-failed-login-limit', abs( $value ) );
+			$this->_plugin->options_helper->set_option_value( 'log-failed-login-limit', abs( $value ) );
 		} else {
-			$this->_plugin->SetGlobalOption( 'log-failed-login-limit', -1 );
+			$this->_plugin->options_helper->set_option_value( 'log-failed-login-limit', -1 );
 		}
 	}
 
@@ -1272,7 +1272,7 @@ class WSAL_Settings {
 	 * @since  2.6.3
 	 */
 	public function get_failed_login_limit() {
-		return $this->_plugin->GetGlobalOption( 'log-failed-login-limit', 10 );
+		return $this->_plugin->options_helper->get_option_value( 'log-failed-login-limit', 10 );
 	}
 
 	/**
@@ -1283,9 +1283,9 @@ class WSAL_Settings {
 	 */
 	public function set_visitor_failed_login_limit( $value ) {
 		if ( ! empty( $value ) ) {
-			$this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', abs( $value ) );
+			$this->_plugin->options_helper->set_option_value( 'log-visitor-failed-login-limit', abs( $value ) );
 		} else {
-			$this->_plugin->SetGlobalOption( 'log-visitor-failed-login-limit', -1 );
+			$this->_plugin->options_helper->set_option_value( 'log-visitor-failed-login-limit', -1 );
 		}
 	}
 
@@ -1295,7 +1295,7 @@ class WSAL_Settings {
 	 * @since  2.6.3
 	 */
 	public function get_visitor_failed_login_limit() {
-		return $this->_plugin->GetGlobalOption( 'log-visitor-failed-login-limit', 10 );
+		return $this->_plugin->options_helper->get_option_value( 'log-visitor-failed-login-limit', 10 );
 	}
 
 	public function IsArchivingEnabled() {

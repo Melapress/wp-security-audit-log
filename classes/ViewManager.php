@@ -122,7 +122,7 @@ class WSAL_ViewManager {
 		// Initialize setup wizard.
 		if (
 			'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-complete', 'no' )
-			|| 'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' )
+			|| 'no' === $this->_plugin->options_helper->get_option_value( 'setup-modal-dismissed', 'no' )
 		) {
 			new WSAL_Views_SetupWizard( $plugin );
 		}

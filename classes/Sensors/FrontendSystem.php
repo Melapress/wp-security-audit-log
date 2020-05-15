@@ -204,9 +204,9 @@ class WSAL_Sensors_FrontendSystem extends WSAL_AbstractSensor {
 	private function write_log( $attempts, $ip, $username = '', $url = null ) {
 		$name_file = null;
 
-		if ( 'on' === $this->plugin->GetGlobalOption( 'log-visitor-404', 'off' ) ) {
+		if ( 'on' === $this->plugin->options_helper->get_option_value( 'log-visitor-404', 'off' ) ) {
 			// Get option to log referrer.
-			$log_referrer = $this->plugin->GetGlobalOption( 'log-visitor-404-referrer' );
+			$log_referrer = $this->plugin->options_helper->get_option_value( 'log-visitor-404-referrer' );
 
 			// Check localhost.
 			if ( '127.0.0.1' == $ip || '::1' == $ip ) {

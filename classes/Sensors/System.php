@@ -544,7 +544,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 * Purge log files older than one month.
 	 */
 	public function LogFilesPruning() {
-		if ( $this->plugin->GetGlobalOption( 'purge-404-log', 'off' ) == 'on' ) {
+		if ( $this->plugin->options_helper->get_option_value( 'purge-404-log', 'off' ) == 'on' ) {
 			$custom_logging_path = $this->plugin->options_helper->get_logging_path();
 			$custom_logging_path = $custom_logging_path . '404s/';
 			if ( is_dir( $custom_logging_path ) ) {
@@ -564,7 +564,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				}
 			}
 		}
-		if ( 'on' == $this->plugin->GetGlobalOption( 'purge-visitor-404-log', 'off' ) ) {
+		if ( 'on' == $this->plugin->options_helper->get_option_value( 'purge-visitor-404-log', 'off' ) ) {
 			$custom_logging_path = $this->plugin->options_helper->get_logging_path();
 			$custom_logging_path = $custom_logging_path . '404s/';
 			if ( is_dir( $custom_logging_path ) ) {
@@ -726,9 +726,9 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	private function WriteLog( $attempts, $ip, $username = '', $logged_in = true, $url = null ) {
 		$name_file = null;
 
-		if ( $logged_in && 'on' === $this->plugin->GetGlobalOption( 'log-404', 'off' ) ) {
+		if ( $logged_in && 'on' === $this->plugin->options_helper->get_option_value( 'log-404', 'off' ) ) {
 			// Get option to log referrer.
-			$log_referrer = $this->plugin->GetGlobalOption( 'log-404-referrer' );
+			$log_referrer = $this->plugin->options_helper->get_option_value( 'log-404-referrer' );
 
 			// Check localhost.
 			if ( '127.0.0.1' == $ip || '::1' == $ip ) {
