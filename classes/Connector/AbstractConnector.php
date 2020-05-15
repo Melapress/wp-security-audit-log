@@ -64,6 +64,7 @@ abstract class WSAL_Connector_AbstractConnector {
 			require_once( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'OccurrenceAdapter.php' );
 			require_once( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'QueryAdapter.php' );
 			require_once( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'TmpUserAdapter.php' );
+			do_action( 'wsal_require_additional_adapters' );
 		}
 	}
 

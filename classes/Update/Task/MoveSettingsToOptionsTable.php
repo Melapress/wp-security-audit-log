@@ -58,6 +58,7 @@ class MoveSettingsToOptionstable {
 		$this->wsal   = $wsal;
 		$this->prefix = $prefix;
 		add_filter( 'wsal_update_move_settings', array( $this, 'settings_to_move_4_0_3' ) );
+		add_filter( 'wsal_update_move_settings', array( $this, 'settings_to_move_4_0_1' ) );
 	}
 
 	/**
@@ -97,6 +98,10 @@ class MoveSettingsToOptionstable {
 
 		// Loop through array of options to move to WP options table.
 		foreach ( $settings_to_move as $setting ) {
+			// the wsal- prefix needs stripped from this option.
+			if ( false !== ( 'wsal-' === substr( $setting, 0, 5 ) ) ) {
+				$setting = str_replace( 'wsal-', '', $setting );
+			}
 			$value = $this->wsal->options_helper->get_option_value( $setting );
 			// to prevent override of already migrated data we will first check
 			// if option value exists in the standard options table.
@@ -126,7 +131,7 @@ class MoveSettingsToOptionstable {
 	 * @return array
 	 */
 	public function settings_to_move_4_0_3( $settings ) {
-		if ( \version_compare( $this->old_version, '4.0.2', '>=' ) && \version_compare( $this->new_version, '4.0.3', '<=' ) ) {
+		if ( \version_compare( $this->old_version, '4.0.2', '>=' ) && \version_compare( $this->old_version, '4.0.3', '<' ) ) {
 			// settings moved in this version update.
 			$settings = array_merge(
 				$settings,
@@ -141,6 +146,40 @@ class MoveSettingsToOptionstable {
 					'columns',
 					'disabled-alerts',
 					'wp-backend',
+				)
+			);
+		}
+		// Return an array of all the setting we are wanting moved.
+		return $settings;
+	}
+
+	/**
+	 * Filters in a list of settings to move in the 4.0.3 update.
+	 *
+	 * NOTE: Should fire if coming from before 4.0.1 to 4.0.3 or later.
+	 *
+	 * @method settings_to_move_4_0_3
+	 * @since  4.1.0
+	 * @param  array $settings An array of settings to move.
+	 * @return array
+	 */
+	public function settings_to_move_4_0_1( $settings ) {
+		if ( \version_compare( $this->old_version, '4.0.2', '>=' ) && \version_compare( $this->old_version, '4.1.0', '<' ) ) {
+			// settings moved in this version update.
+			$settings = array_merge(
+				$settings,
+				array(
+					'log-404',
+					'log-404-limit',
+					'log-404-referrer',
+					'purge-404-log',
+					'wsal-setup-modal-dismissed',
+					'log-visitor-failed-login-limit',
+					'log-failed-login-limit',
+					'log-visitor-404-limit',
+					'log-visitor-404-referrer',
+					'purge-visitor-404-log',
+					'log-visitor-404',
 				)
 			);
 		}

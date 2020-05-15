@@ -545,7 +545,7 @@ ul.premium-list li:before {
 .our-wordpress-plugins.side-bar {
 	width: 30%;
 	margin-bottom: 30px;
-}
+} 
 
 @media (max-width: 991px) {
 	.our-wordpress-plugins.full ul li{
@@ -568,3 +568,4 @@ ul.premium-list li:before {
 		margin: 0 auto 20px auto;
 	}
 }
+ 

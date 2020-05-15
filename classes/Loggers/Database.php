@@ -300,7 +300,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 			&& ! class_exists( 'WSAL_Ext_Plugin' )
 			&& ! class_exists( 'WSAL_Rep_Plugin' )
 			&& ! class_exists( 'WSAL_SearchExtension' )
-			&& ! class_exists( 'WSAL_User_Management_Plugin' ) ) {
+			&& ! class_exists( 'WSAL_UserSessions_Plugin' ) ) {
 			return 150;
 		}
 		return null;

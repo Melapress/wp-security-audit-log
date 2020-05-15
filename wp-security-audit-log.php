@@ -801,25 +801,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
-		 * Method: Include extensions for premium version.
-		 *
-		 * @since 2.7.0
-		 */
-		public function include_extensions__premium_only() {
-			/**
-			 * Class for extensions managment.
-			 *
-			 * @since 2.7.0
-			 */
-			if ( file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
-				require_once WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php';
-			}
-
-			// Initiate the extensions manager.
-			$this->extensions = new WSAL_Extension_Manager( $this );
-		}
-
-		/**
 		 * Customize Freemius connect message for new users.
 		 *
 		 * @param string $message - Connect message.

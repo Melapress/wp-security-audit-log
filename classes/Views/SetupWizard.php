@@ -123,7 +123,21 @@ final class WSAL_Views_SetupWizard {
 	 * Add setup admin page.
 	 */
 	public function admin_menus() {
+		// this is an empty title because we do not want it to display.
 		add_dashboard_page( '', '', 'manage_options', 'wsal-setup', '' );
+		// hide it via CSS as well so screen readers pass over it.
+		add_action(
+			'admin_head',
+			function() {
+				?>
+				<style>
+				.wp-submenu a[href="wsal-setup"]{
+					display: none !important;
+				}
+				</style>
+				<?php
+			}
+		);
 	}
 
 	/**
@@ -414,8 +428,8 @@ final class WSAL_Views_SetupWizard {
 	 */
 	private function wsal_step_welcome() {
 		// Dismiss the setup modal on audit log.
-		if ( 'no' === $this->wsal->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' ) ) {
-			$this->wsal->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' );
+		if ( 'no' === $this->wsal->options_helper->get_option_value( 'setup-modal-dismissed', 'no' ) ) {
+			$this->wsal->options_helper->set_option_value( 'setup-modal-dismissed', 'yes' );
 		}
 		?>
 		<p><?php esc_html_e( 'This wizard helps you configure the basic plugin settings. All these settings can be changed at a later stage from the plugin settings.', 'wp-security-audit-log' ); ?></p>

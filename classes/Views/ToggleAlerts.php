@@ -98,13 +98,13 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		// Save the disabled events.
 		$this->_plugin->alerts->SetDisabledAlerts( $disabled );
 
-		$this->_plugin->SetGlobalOption( 'log-404', isset( $post_array['log_404'] ) ? 'on' : 'off' );
-		$this->_plugin->SetGlobalOption( 'purge-404-log', isset( $post_array['purge_log'] ) ? 'on' : 'off' );
-		$this->_plugin->SetGlobalOption( 'log-404-referrer', isset( $post_array['log_404_referrer'] ) ? 'on' : 'off' );
+		$this->_plugin->options_helper->set_option_value( 'log-404', isset( $post_array['log_404'] ) ? 'on' : 'off' );
+		$this->_plugin->options_helper->set_option_value( 'purge-404-log', isset( $post_array['purge_log'] ) ? 'on' : 'off' );
+		$this->_plugin->options_helper->set_option_value( 'log-404-referrer', isset( $post_array['log_404_referrer'] ) ? 'on' : 'off' );
 
-		$this->_plugin->SetGlobalOption( 'log-visitor-404', isset( $post_array['log_visitor_404'] ) ? 'on' : 'off' );
-		$this->_plugin->SetGlobalOption( 'purge-visitor-404-log', isset( $post_array['purge_visitor_log'] ) ? 'on' : 'off' );
-		$this->_plugin->SetGlobalOption( 'log-visitor-404-referrer', isset( $post_array['log_visitor_404_referrer'] ) ? 'on' : 'off' );
+		$this->_plugin->options_helper->set_option_value( 'log-visitor-404', isset( $post_array['log_visitor_404'] ) ? 'on' : 'off' );
+		$this->_plugin->options_helper->set_option_value( 'purge-visitor-404-log', isset( $post_array['purge_visitor_log'] ) ? 'on' : 'off' );
+		$this->_plugin->options_helper->set_option_value( 'log-visitor-404-referrer', isset( $post_array['log_visitor_404_referrer'] ) ? 'on' : 'off' );
 		$this->_plugin->SetGlobalOption( 'wc-all-stock-changes', isset( $post_array['wc_all_stock_changes'] ) ? 'on' : 'off' );
 
 		$this->_plugin->settings->Set404LogLimit( $post_array['user_404Limit'] );
@@ -467,9 +467,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										</tr>
 										<?php
 										if ( 6007 === $alert->type ) {
-											$log_404          = $this->_plugin->GetGlobalOption( 'log-404' );
-											$purge_log        = $this->_plugin->GetGlobalOption( 'purge-404-log' );
-											$log_404_referrer = $this->_plugin->GetGlobalOption( 'log-404-referrer', 'on' );
+											$log_404          = $this->_plugin->options_helper->get_option_value( 'log-404' );
+											$purge_log        = $this->_plugin->options_helper->get_option_value( 'purge-404-log' );
+											$log_404_referrer = $this->_plugin->options_helper->get_option_value( 'log-404-referrer', 'on' );
 											?>
 											<tr>
 												<td></td>
@@ -500,7 +500,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<?php
 										}
 										if ( 1002 === $alert->type ) {
-											$log_failed_login_limit = (int) $this->_plugin->GetGlobalOption( 'log-failed-login-limit', 10 );
+											$log_failed_login_limit = (int) $this->_plugin->options_helper->get_option_value( 'log-failed-login-limit', 10 );
 											$log_failed_login_limit = ( -1 === $log_failed_login_limit ) ? '0' : $log_failed_login_limit;
 											?>
 											<tr>
@@ -513,7 +513,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<?php
 										}
 										if ( 1003 === $alert->type ) {
-											$log_visitor_failed_login_limit = (int) $this->_plugin->GetGlobalOption( 'log-visitor-failed-login-limit', 10 );
+											$log_visitor_failed_login_limit = (int) $this->_plugin->options_helper->get_option_value(  'log-visitor-failed-login-limit', 10 );
 											$log_visitor_failed_login_limit = ( -1 === $log_visitor_failed_login_limit ) ? '0' : $log_visitor_failed_login_limit;
 											?>
 											<tr>
@@ -613,9 +613,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 							</td>
 						</tr>
 						<?php
-						$log_visitor_404          = $this->_plugin->GetGlobalOption( 'log-visitor-404' );
-						$purge_visitor_log        = $this->_plugin->GetGlobalOption( 'purge-visitor-404-log' );
-						$log_visitor_404_referrer = $this->_plugin->GetGlobalOption( 'log-visitor-404-referrer', 'on' );
+						$log_visitor_404          = $this->_plugin->options_helper->get_option_value( 'log-visitor-404' );
+						$purge_visitor_log        = $this->_plugin->options_helper->get_option_value( 'purge-visitor-404-log' );
+						$log_visitor_404_referrer = $this->_plugin->options_helper->get_option_value( 'log-visitor-404-referrer', 'on' );
 						?>
 						<tr>
 							<td><input name="log_visitor_404" type="checkbox" class="check_visitor_log" value="1" <?php checked( $log_visitor_404, 'on' ); ?> /></td>
