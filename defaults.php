@@ -88,7 +88,7 @@ function wsaldefaults_wsal_init() {
 				__( 'User Activity', 'wp-security-audit-log' ) => array(
 					array( 1000, WSAL_LOW, __( 'User logged in', 'wp-security-audit-log' ), '', 'user', 'login' ),
 					array( 1001, WSAL_LOW, __( 'User logged out', 'wp-security-audit-log' ), '', 'user', 'logout' ),
-					array( 1002, WSAL_MEDIUM, __( 'Login failed', 'wp-security-audit-log' ), '', 'user', 'failed-login' ),
+					array( 1002, WSAL_MEDIUM, __( 'Login failed', 'wp-security-audit-log' ), '%Attempts% failed login(s) %LineBreak% %LogFileText%', 'user', 'failed-login' ),
 					array( 1003, WSAL_LOW, __( 'Login failed  / non existing user', 'wp-security-audit-log' ), __( '%Attempts% failed login(s) %LineBreak% %LogFileText%', 'wp-security-audit-log' ), 'system', 'failed-login' ),
 					array( 1004, WSAL_MEDIUM, __( 'Login blocked', 'wp-security-audit-log' ), __( 'Login blocked because other session(s) already exist for this user. %LineBreak% IP address: %ClientIP%', 'wp-security-audit-log' ), 'user', 'blocked' ),
 					array( 1005, WSAL_LOW, __( 'User logged in with existing session(s)', 'wp-security-audit-log' ), __( 'User logged in however there are other session(s) already exist for this user. %LineBreak% IP address: %IPAddress%', 'wp-security-audit-log' ), 'user', 'login' ),
