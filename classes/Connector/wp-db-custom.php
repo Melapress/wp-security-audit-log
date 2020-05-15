@@ -45,7 +45,6 @@ class wpdbCustom extends wpdb {
 	 * @param bool   $test_connection - Set to true if testing connection.
 	 */
 	public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key, $test_connection = false ) {
-		register_shutdown_function( array( $this, '__destruct' ) );
 
 		if ( WP_DEBUG && WP_DEBUG_DISPLAY ) {
 			$this->show_errors();
@@ -319,4 +318,5 @@ class wpdbCustom extends wpdb {
 			}
 		}
 	}
+
 }
