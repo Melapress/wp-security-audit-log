@@ -32,6 +32,8 @@ class WSAL_Settings {
 	const OPT_DEV_BACKTRACE_LOG  = 'b';
 	const ERROR_CODE_INVALID_IP  = 901;
 
+	const DEFAULT_LOGGING_DIR = '/wp-content/uploads/wp-security-audit-log/';
+
 	/**
 	 * List of Site Admins.
 	 *
@@ -145,6 +147,10 @@ class WSAL_Settings {
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->_plugin = $plugin;
+		// some settings here may be called before the options helper is setup.
+		if ( ! isset( $this->_plugin->options_helper ) ) {
+			$this->_plugin->include_options_helper();
+		}
 		add_action( 'deactivated_plugin', array( $this, 'reset_stealth_mode' ), 10, 1 );
 	}
 

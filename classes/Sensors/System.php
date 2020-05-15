@@ -66,20 +66,23 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 
 		add_filter( 'template_redirect', array( $this, 'Event404' ) );
 
-		// Get WP upload directory.
-		$upload_dir = wp_upload_dir();
-
-		$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
-		if ( ! $this->CheckDirectory( $uploads_dir_path ) ) {
-			wp_mkdir_p( $uploads_dir_path );
+		// get the logging location.
+		$custom_logging_path_base = $this->plugin->options_helper->get_logging_path();
+		$custom_logging_path      = $custom_logging_path_base . '404s/';
+		if ( ! $this->CheckDirectory( $custom_logging_path ) ) {
+			$dir_made = wp_mkdir_p( $custom_logging_path );
+			if ( $dir_made ) {
+				// make an empty index.php in the directory.
+				@file_put_contents( $custom_logging_path . 'index.php', '<?php // Silence is golden' );
+			}
 		}
 
 		// Directory for logged in users log files.
-		$user_upload_path = trailingslashit( $upload_dir['basedir'] . '/wp-security-audit-log/404s/users/' );
+		$user_upload_path = trailingslashit( $custom_logging_path_base . '404s/users/' );
 		$this->remove_sub_directories( $user_upload_path ); // Remove it.
 
 		// Directory for visitor log files.
-		$visitor_upload_path = trailingslashit( $upload_dir['basedir'] . '/wp-security-audit-log/404s/visitors/' );
+		$visitor_upload_path = trailingslashit( $custom_logging_path_base . '/404s/visitors/' );
 		$this->remove_sub_directories( $visitor_upload_path ); // Remove it.
 
 
@@ -542,17 +545,17 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 */
 	public function LogFilesPruning() {
 		if ( $this->plugin->GetGlobalOption( 'purge-404-log', 'off' ) == 'on' ) {
-			$upload_dir       = wp_upload_dir();
-			$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
-			if ( is_dir( $uploads_dir_path ) ) {
-				if ( $handle = opendir( $uploads_dir_path ) ) {
+			$custom_logging_path = $this->plugin->options_helper->get_logging_path();
+			$custom_logging_path = $custom_logging_path . '404s/';
+			if ( is_dir( $custom_logging_path ) ) {
+				if ( $handle = opendir( $custom_logging_path ) ) {
 					while ( false !== ( $entry = readdir( $handle ) ) ) {
 						if ( '.' != $entry && '..' != $entry ) {
-							if ( strpos( $entry, '6007' ) && file_exists( $uploads_dir_path . $entry ) ) {
-								$modified = filemtime( $uploads_dir_path . $entry );
+							if ( strpos( $entry, '6007' ) && file_exists( $custom_logging_path . $entry ) ) {
+								$modified = filemtime( $custom_logging_path . $entry );
 								if ( $modified < strtotime( '-4 weeks' ) ) {
 									// Delete file.
-									unlink( $uploads_dir_path . $entry );
+									unlink( $custom_logging_path . $entry );
 								}
 							}
 						}
@@ -562,17 +565,17 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 		if ( 'on' == $this->plugin->GetGlobalOption( 'purge-visitor-404-log', 'off' ) ) {
-			$upload_dir       = wp_upload_dir();
-			$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
-			if ( is_dir( $uploads_dir_path ) ) {
-				if ( $handle = opendir( $uploads_dir_path ) ) {
+			$custom_logging_path = $this->plugin->options_helper->get_logging_path();
+			$custom_logging_path = $custom_logging_path . '404s/';
+			if ( is_dir( $custom_logging_path ) ) {
+				if ( $handle = opendir( $custom_logging_path ) ) {
 					while ( false !== ( $entry = readdir( $handle ) ) ) {
 						if ( $entry != '.' && $entry != '..' ) {
-							if ( strpos( $entry, '6023' ) && file_exists( $uploads_dir_path . $entry ) ) {
-								$modified = filemtime( $uploads_dir_path . $entry );
+							if ( strpos( $entry, '6023' ) && file_exists( $custom_logging_path . $entry ) ) {
+								$modified = filemtime( $custom_logging_path . $entry );
 								if ( $modified < strtotime( '-4 weeks' ) ) {
 									// Delete file.
-									unlink( $uploads_dir_path . $entry );
+									unlink( $custom_logging_path . $entry );
 								}
 							}
 						}
@@ -764,15 +767,23 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				$username = $username . '_';
 			}
 
-			$upload_dir       = wp_upload_dir();
-			$uploads_url      = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/404s/';
-			$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
+			// get the custom logging path from settings.
+			$custom_logging_path = $this->plugin->options_helper->get_logging_path() . '404s/';
+			$custom_logging_url  = $this->plugin->options_helper->get_logging_url() . '404s/';
+
+			if ( ! $this->CheckDirectory( $custom_logging_path ) ) {
+				$dir_made = wp_mkdir_p( $custom_logging_path );
+				if ( $dir_made ) {
+					// make an empty index.php in the directory.
+					@file_put_contents( $custom_logging_path . 'index.php', '<?php // Silence is golden' );
+				}
+			}
 
 			// Check directory.
-			if ( $this->CheckDirectory( $uploads_dir_path ) ) {
+			if ( $this->CheckDirectory( $custom_logging_path ) ) {
 				$filename  = '6007_' . date( 'Ymd' ) . '.log';
-				$fp        = $uploads_dir_path . $filename;
-				$name_file = $uploads_url . $filename;
+				$fp        = $custom_logging_path . $filename;
+				$name_file = $custom_logging_url . $filename;
 				if ( ! $file = fopen( $fp, 'a' ) ) {
 					$i           = 1;
 					$file_opened = false;
@@ -781,14 +792,14 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 						if ( ! file_exists( $fp2 ) ) {
 							if ( $file = fopen( $fp2, 'a' ) ) {
 								$file_opened = true;
-								$name_file   = $uploads_url . substr( $name_file, 0, -4 ) . '_' . $i . '.log';
+								$name_file   = $custom_logging_url . substr( $name_file, 0, -4 ) . '_' . $i . '.log';
 							}
 						} else {
-							$latest_filename = $this->GetLastModified( $uploads_dir_path, $filename );
-							$fp_last         = $uploads_dir_path . $latest_filename;
+							$latest_filename = $this->GetLastModified( $custom_logging_path, $filename );
+							$fp_last         = $custom_logging_path . $latest_filename;
 							if ( $file = fopen( $fp_last, 'a' ) ) {
 								$file_opened = true;
-								$name_file   = $uploads_url . $latest_filename;
+								$name_file   = $custom_logging_url . $latest_filename;
 							}
 						}
 						$i++;
