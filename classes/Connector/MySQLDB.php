@@ -175,13 +175,17 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	public function installAll( $exclude_options = false ) {
 		$plugin = WpSecurityAuditLog::GetInstance();
-
-		foreach ( glob( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php' ) as $file ) {
+		$adapter_list = glob( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php' );
+		$adapter_list = apply_filters( 'wsal_install_apapters_list', $adapter_list );
+		foreach ( $adapter_list as $file ) {
 			$file_path  = explode( DIRECTORY_SEPARATOR, $file );
 			$file_name  = $file_path[ count( $file_path ) - 1 ];
 			$class_name = $this->getAdapterClassName( str_replace( 'Adapter.php', '', $file_name ) );
 
-			$class = new $class_name( $this->getConnection() );
+			if ( class_exists( $class_name ) ) {
+				$class = new $class_name( $this->getConnection() );
+			}
+
 			if ( $exclude_options && $class instanceof WSAL_Adapters_MySQL_Option ) {
 				continue;
 			}
@@ -418,9 +422,6 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @since  2.6.3
 	 */
 	public function encryptString( $plaintext ) {
-		// Check for previous version.
-		$plugin  = WpSecurityAuditLog::GetInstance();
-		$version = $plugin->options_helper->get_option_value( 'version', '0.0.0' );
 
 		$ciphertext     = false;
 		$encrypt_method = 'AES-256-CBC';
@@ -459,9 +460,6 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @since  2.6.3
 	 */
 	public function decryptString( $ciphertext_base64 ) {
-		// Check for previous version.
-		$plugin  = WpSecurityAuditLog::GetInstance();
-		$version = $plugin->options_helper->get_option_value( 'version', '0.0.0' );
 
 		$plaintext      = false;
 		$encrypt_method = 'AES-256-CBC';

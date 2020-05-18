@@ -46,7 +46,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
-		add_action( 'wp_login', array( $this, 'EventLogin' ), 10, 2 );
+		add_action( 'set_auth_cookie', array( $this, 'EventLogin' ), 10, 6 );
 		add_action( 'wp_logout', array( $this, 'EventLogout' ), 5 );
 		add_action( 'password_reset', array( $this, 'EventPasswordReset' ), 10, 2 );
 		add_action( 'wp_login_failed', array( $this, 'EventLoginFailure' ) );
@@ -146,10 +146,9 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	/**
 	 * Event Login.
 	 *
-	 * @param string $user_login - Username.
-	 * @param object $user - WP_User object.
+	 * TODO: update params doc block to match the new hook it's attached to.
 	 */
-	public function EventLogin( $user_login, $user ) {
+	public function EventLogin( $auth_cookie, $expire, $expiration, $user_id, $scheme, $token ) {
 		// Get global POST array.
 		$post_array = filter_input_array( INPUT_POST );
 
@@ -175,9 +174,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			&& $post_array['current_user_password'] !== $post_array['user_password'] // If current & new password don't match.
 			&& $post_array['user_password'] === $post_array['confirm_user_password'] ) { // And new & confirm password are same then.
 				// Get user.
-				if ( empty( $user ) ) {
-					$user = get_user_by( 'login', $user_login );
-				}
+				$user = get_user_by( 'id', $user_id );
 
 				// Log user changed password alert.
 				if ( ! empty( $user ) ) {
@@ -195,24 +192,32 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			return; // Return.
 		}
 
-		if ( empty( $user ) ) {
-			$user = get_user_by( 'login', $user_login );
+		$user = get_user_by( 'id', $user_id );
+		// bail early if we did not get a user object.
+		if ( ! is_a( $user, '\WP_User' ) ) {
+			return;
 		}
-
+		$user_login = $user->data->user_login;
 		$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
 
 		if ( $this->plugin->settings->IsLoginSuperAdmin( $user_login ) ) {
 			$user_roles[] = 'superadmin';
 		}
 
+		$alert_data = array(
+			'Username'         => $user_login,
+			'CurrentUserRoles' => $user_roles,
+		);
+		if ( class_exists( 'WSAL_UserSessions_Helpers' ) ) {
+			$alert_data['SessionID'] = WSAL_UserSessions_Helpers::hash_token( $token );
+		}
+
 		$this->plugin->alerts->Trigger(
 			1000,
-			array(
-				'Username'         => $user_login,
-				'CurrentUserRoles' => $user_roles,
-			),
+			$alert_data,
 			true
 		);
+
 	}
 
 	/**
@@ -408,6 +413,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 					array(
 						'Attempts'         => 1,
 						'Username'         => $username,
+						'LogFileText'      => '',
 						'CurrentUserRoles' => $user_roles,
 					)
 				);
@@ -499,16 +505,27 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 * @param string $username - Username.
 	 */
 	public function EventLoginBlocked( $username ) {
-		$user       = get_user_by( 'login', $username );
-		$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+		// try get the user object first by login and then by email.
+		$user = get_user_by( 'login', $username );
+		if ( ! $user ) {
+			$user = get_user_by( 'email', $username );
+		}
+		// bail early if we could not get a WP_User.
+		if ( ! is_a( $user, '\WP_User' ) ) {
+			return;
+		}
 
+		// get the users roles.
+		$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
 		if ( $this->plugin->settings->IsLoginSuperAdmin( $username ) ) {
 			$user_roles[] = 'superadmin';
 		}
+
+		// record a login blocked event.
 		$this->plugin->alerts->Trigger(
 			1004,
 			array(
-				'Username'         => $username,
+				'Username'         => $user->user_login,
 				'CurrentUserRoles' => $user_roles,
 			),
 			true

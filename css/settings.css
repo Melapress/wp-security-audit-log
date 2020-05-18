@@ -84,6 +84,9 @@
 .wsal-tab th {
 	/* padding-left: 20px; */
 }
+.wsal-tab.wsal-twilio-settings-tab th {
+	width: 220px;
+}
 .wsal-tab td {
 	padding-left: 20px;
 }
@@ -101,7 +104,6 @@
 .wsal-tab input[type=email] {
 	display: inline-block;
 	width: 350px;
-	padding: 5px;
 	margin: 0;
 }
 .wsal-tab input[type=button],
@@ -279,4 +281,8 @@ a.disabled {
 	color: #000;
 	font-weight: 600;
 	border: none;
+}
+
+fieldset #pruning-unit {
+	margin-top: -2px;
 }

@@ -61,7 +61,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		 * Passed through a filter so other plugins or code can add own custom
 		 * sensor class files by adding the containing directory to this array.
 		 *
-		 * @since 3.5.2 - Added the `wsal_custom_sensors_classes_dirs` filter.
+		 * @since 3.5.1 - Added the `wsal_custom_sensors_classes_dirs` filter.
 		 */
 		$paths = apply_filters( 'wsal_custom_sensors_classes_dirs', array( $uploads_dir_path ) );
 		foreach ( $paths as $inc_path ) {
@@ -79,8 +79,8 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 					}
 
 					/*
-					 * @since 3.5.2 Allow loading classes where names match the
-					 * filename 1:1. Prior to version 3.5.2 sensors were always
+					 * @since 3.5.1 Allow loading classes where names match the
+					 * filename 1:1. Prior to version 3.5.1 sensors were always
 					 * asummed to be defined WITH `WSAL_Sensors_` prefis in the
 					 * class name but WITHOUT it in the filename. This behavor
 					 * is retained for back-compat.

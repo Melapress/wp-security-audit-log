@@ -676,7 +676,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					case 'latest_event':
 						// run the query and return it.
 						$event = $this->query_for_latest_event();
-						$event->getAdapter()->Execute( $event );
+						$event = $event->getAdapter()->Execute( $event );
 
 						// Set the return object.
 						if ( isset( $event[0] ) ) {
@@ -798,25 +798,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! defined( 'WSAL_CLASS_PREFIX' ) ) {
 				define( 'WSAL_CLASS_PREFIX', 'WSAL_' );
 			}
-		}
-
-		/**
-		 * Method: Include extensions for premium version.
-		 *
-		 * @since 2.7.0
-		 */
-		public function include_extensions__premium_only() {
-			/**
-			 * Class for extensions managment.
-			 *
-			 * @since 2.7.0
-			 */
-			if ( file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
-				require_once WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php';
-			}
-
-			// Initiate the extensions manager.
-			$this->extensions = new WSAL_Extension_Manager( $this );
 		}
 
 		/**

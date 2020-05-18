@@ -131,7 +131,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			&& ! class_exists( 'WSAL_Ext_Plugin' )
 			&& ! class_exists( 'WSAL_Rep_Plugin' )
 			&& ! class_exists( 'WSAL_SearchExtension' )
-			&& ! class_exists( 'WSAL_User_Management_Plugin' )
+			&& ! class_exists( 'WSAL_UserSessions_Plugin' )
 			&& 'anonymous' !== get_site_option( 'wsal_freemius_state', 'anonymous' ) // Anonymous mode option.
 		) {
 			$get_transient_fn         = $this->_plugin->IsMultisite() ? 'get_site_transient' : 'get_transient'; // Check for multisite.
@@ -574,7 +574,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		<?php
 		if (
 			'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-complete', 'no' )
-			&& 'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' )
+			&& 'no' === $this->_plugin->options_helper->get_option_value( 'setup-modal-dismissed', 'no' )
 		) :
 			?>
 			<div data-remodal-id="wsal-setup-modal">
@@ -590,16 +590,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					wsal_setup_modal.remodal().open();
 
 					jQuery(document).on('confirmation', wsal_setup_modal, function () {
-						<?php $this->_plugin->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' ); ?>
+						<?php $this->_plugin->options_helper->set_option_value( 'setup-modal-dismissed', 'yes' ); ?>
 						window.location = '<?php echo esc_url( add_query_arg( 'page', 'wsal-setup', admin_url( 'index.php' ) ) ); ?>';
 					});
 
 					jQuery(document).on('cancellation', wsal_setup_modal, function () {
-						<?php $this->_plugin->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' ); ?>
+						<?php $this->_plugin->options_helper->set_option_value( 'setup-modal-dismissed', 'yes' ); ?>
 					});
 
 					jQuery(document).on('closed', wsal_setup_modal, function () {
-						<?php $this->_plugin->SetGlobalOption( 'wsal-setup-modal-dismissed', 'yes' ); ?>
+						<?php $this->_plugin->options_helper->set_option_value( 'setup-modal-dismissed', 'yes' ); ?>
 					});
 				});
 			</script>
@@ -1068,7 +1068,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Don't display notice if the wizard notice is showing.
 		if (
 			'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-complete', 'no' )
-			&& 'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-modal-dismissed', 'no' )
+			&& 'no' === $this->_plugin->options_helper->get_option_value( 'setup-modal-dismissed', 'no' )
 		) {
 			return;
 		}

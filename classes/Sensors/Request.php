@@ -42,16 +42,17 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor {
 	 */
 	public function EventShutdown() {
 		// Filter global arrays for security.
-		$post_array = filter_input_array( INPUT_POST );
+		$post_array   = filter_input_array( INPUT_POST );
 		$server_array = filter_input_array( INPUT_SERVER );
 
-		$upload_dir = wp_upload_dir();
-		$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/';
-		if ( ! $this->CheckDirectory( $uploads_dir_path ) ) {
-			wp_mkdir_p( $uploads_dir_path );
+		// get the custom logging path from settings.
+		$custom_logging_path = $this->plugin->options_helper->get_logging_path();
+
+		if ( ! $this->CheckDirectory( $custom_logging_path ) ) {
+			wp_mkdir_p( $custom_logging_path );
 		}
 
-		$file = $uploads_dir_path . 'Request.log.php';
+		$file = $custom_logging_path . 'Request.log.php';
 
 		$request_method = isset( $server_array['REQUEST_METHOD'] ) ? $server_array['REQUEST_METHOD'] : false;
 		$request_uri = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;

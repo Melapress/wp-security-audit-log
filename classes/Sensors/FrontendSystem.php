@@ -204,9 +204,9 @@ class WSAL_Sensors_FrontendSystem extends WSAL_AbstractSensor {
 	private function write_log( $attempts, $ip, $username = '', $url = null ) {
 		$name_file = null;
 
-		if ( 'on' === $this->plugin->GetGlobalOption( 'log-visitor-404', 'off' ) ) {
+		if ( 'on' === $this->plugin->options_helper->get_option_value( 'log-visitor-404', 'off' ) ) {
 			// Get option to log referrer.
-			$log_referrer = $this->plugin->GetGlobalOption( 'log-visitor-404-referrer' );
+			$log_referrer = $this->plugin->options_helper->get_option_value( 'log-visitor-404-referrer' );
 
 			// Check localhost.
 			if ( '127.0.0.1' == $ip || '::1' == $ip ) {
@@ -239,16 +239,26 @@ class WSAL_Sensors_FrontendSystem extends WSAL_AbstractSensor {
 				$data = $data . 'Request URL ' . $url . ',';
 			}
 
-			$username         = '';
-			$upload_dir       = wp_upload_dir();
-			$uploads_url      = trailingslashit( $upload_dir['baseurl'] ) . 'wp-security-audit-log/404s/';
-			$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log/404s/';
+			// don't store username in a public viewable logfile.
+			$username = '';
+
+			// get the custom logging path from settings.
+			$custom_logging_path = $this->plugin->options_helper->get_logging_path() . '404s/';
+			$custom_logging_url  = $this->plugin->options_helper->get_logging_url() . '404s/';
+
+			if ( ! $this->CheckDirectory( $custom_logging_path ) ) {
+				$dir_made = wp_mkdir_p( $custom_logging_path );
+				if ( $dir_made ) {
+					// make an empty index.php in the directory.
+					@file_put_contents( $custom_logging_path . 'index.php', '<?php // Silence is golden' );
+				}
+			}
 
 			// Check directory.
-			if ( $this->CheckDirectory( $uploads_dir_path ) ) {
+			if ( $this->CheckDirectory( $custom_logging_path ) ) {
 				$filename  = '6023_' . date( 'Ymd' ) . '.log';
-				$fp        = $uploads_dir_path . $filename;
-				$name_file = $uploads_url . $filename;
+				$fp        = $custom_logging_path . $filename;
+				$name_file = $custom_logging_url . $filename;
 				if ( ! $file = fopen( $fp, 'a' ) ) {
 					$i           = 1;
 					$file_opened = false;
@@ -257,14 +267,14 @@ class WSAL_Sensors_FrontendSystem extends WSAL_AbstractSensor {
 						if ( ! file_exists( $fp2 ) ) {
 							if ( $file = fopen( $fp2, 'a' ) ) {
 								$file_opened = true;
-								$name_file   = $uploads_url . substr( $name_file, 0, -4 ) . '_' . $i . '.log';
+								$name_file   = $custom_logging_url . substr( $name_file, 0, -4 ) . '_' . $i . '.log';
 							}
 						} else {
-							$latest_filename = $this->GetLastModified( $uploads_dir_path, $filename );
-							$fp_last         = $uploads_dir_path . $latest_filename;
+							$latest_filename = $this->GetLastModified( $custom_logging_path, $filename );
+							$fp_last         = $custom_logging_path . $latest_filename;
 							if ( $file = fopen( $fp_last, 'a' ) ) {
 								$file_opened = true;
-								$name_file   = $uploads_url . $latest_filename;
+								$name_file   = $custom_logging_url . $latest_filename;
 							}
 						}
 						$i++;

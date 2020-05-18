@@ -2035,6 +2035,36 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			<?php echo sprintf( __( 'If you have any questions <a href="https://wpactivitylog.com/contact/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">contact us</a>.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
 		</p>
 
+		<h3><?php esc_html_e( 'Where do you want to save the log files?', 'wp-security-audit-log' ); ?></h3>
+		<p class="description"><?php esc_html_e( 'The plugin uses a number of log files. It uses these log files to keep a log of 1) requests to non-existing URLs from logged in users (event ID 6007) and non-logged in users (6023), 2) the request log. Use the below setting to save the log files in different location. Please specify the relative path.', 'wp-security-audit-log' ); ?></p>
+		<table class="form-table wsal-tab">
+			<tbody>
+				<!-- custom log directory -->
+				<tr>
+					<th><label><?php esc_html_e( 'Log files location', 'wp-security-audit-log' ); ?></label></th>
+					<td>
+						<fieldset>
+							<?php $location = $this->_plugin->options_helper->get_option_value( 'custom-logging-dir', \WSAL_Settings::DEFAULT_LOGGING_DIR ); ?>
+							<label for="wsal-custom-logs-dir">
+								<input type="text" name="wsal-custom-logs-dir" id="wsal-custom-logs-dir"
+									value="<?php echo esc_attr( $location ); ?>">
+							</label>
+							<p class="description">
+								<?php
+								echo wp_kses(
+									__( '<strong>Note:</strong> Enter a path from the root of your website: eg "/wp-content/uploads/wp-security-audit-log/".' ),
+									$this->_plugin->allowed_html_tags
+								);
+								?>
+							</p>
+						</fieldset>
+					</td>
+				</tr>
+				<!-- / custom log directory -->
+			</tbody>
+		</table>
+
+
 		<h3><?php esc_html_e( 'Troubleshooting setting: Keep a debug log of all the requests this website receives', 'wp-security-audit-log' ); ?></h3>
 		<p class="description"><?php esc_html_e( 'Only enable the request log on testing, staging and development website. Never enable logging on a live website unless instructed to do so. Enabling request logging on a live website may degrade the performance of the website.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
@@ -2200,6 +2230,33 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			$this->_plugin->settings->set_mainwp_child_stealth_mode();
 		} else {
 			$this->_plugin->settings->deactivate_mainwp_child_stealth_mode();
+		}
+
+		$custom_logging_dir = ( isset( $post_array['wsal-custom-logs-dir'] ) ) ? filter_var( $post_array['wsal-custom-logs-dir'], FILTER_SANITIZE_STRING ) : WSAL_Settings::DEFAULT_LOGGING_DIR;
+		if ( ! empty( $custom_logging_dir ) ) {
+			$custom_logging_path = trailingslashit( get_home_path() ) . ltrim( trailingslashit( $custom_logging_dir ), '/' );
+			if ( ! is_dir( $custom_logging_path ) || ! is_readable( $custom_logging_path ) || ! is_writable( $custom_logging_path ) ) {
+				if ( is_writable( dirname( $custom_logging_path ) ) ) {
+					$dir_made = wp_mkdir_p( $custom_logging_path );
+					if ( $dir_made ) {
+						// make an empty index.php in the directory.
+						@file_put_contents( $custom_logging_path . 'index.php', '<?php // Silence is golden' );
+					}
+				}
+
+				// if the directory was not made then we will try revert or use default value.
+				if ( ! $dir_made ) {
+					// revert to old/default.
+					$previous_path = $this->_plugin->options_helper->get_option_value( 'custom-logging-dir', false );
+					if ( ! false === $previous_path && is_writable( $previous_path ) ) {
+						$custom_logging_dir = $previous_path;
+					} else {
+						$custom_logging_dir = WSAL_Settings::DEFAULT_LOGGING_DIR;
+					}
+				}
+			}
+			// save.
+			$this->_plugin->options_helper->set_option_value( 'custom-logging-dir', $custom_logging_dir );
 		}
 	}
 

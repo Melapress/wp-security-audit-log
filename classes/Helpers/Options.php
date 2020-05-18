@@ -103,7 +103,8 @@ class Options {
 	/**
 	 * Deletes an option from the WP options table.
 	 *
-	 * NOTE: This is just a strait wrapper around the core function.
+	 * NOTE: This is just a strait wrapper around the core function - if the
+	 * item is prefixed then pass the prefix in the option name.
 	 *
 	 * @method delete_option
 	 * @since  4.0.2
@@ -112,6 +113,46 @@ class Options {
 	 */
 	public function delete_option( $option_name = '' ) {
 		return \delete_option( $option_name );
+	}
+
+	/**
+	 * Retrieves the logging directory from the settings. Returns a file path
+	 * with a trailing slash.
+	 *
+	 * Uses as default:
+	 * /wp-content/uploads/wp-security-audit-log/
+	 *
+	 * @method get_logging_path
+	 * @since  4.1.0
+	 * @return string
+	 */
+	public function get_logging_path() {
+		if ( ! \function_exists( 'get_home_path' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		$relative_path = $this->get_option_value( 'custom-logging-dir', \WSAL_Settings::DEFAULT_LOGGING_DIR );
+		$absolute_path = trailingslashit( \get_home_path() ) . trailingslashit( ltrim( $relative_path, '/' ) );
+		return $absolute_path;
+	}
+
+	/**
+	 * Retrieves the logging directory from the settings to generate a url.
+	 * Returns a url with a trailing slash.
+	 *
+	 * Uses as default:
+	 * /wp-content/uploads/wp-security-audit-log/
+	 *
+	 * @method get_logging_url
+	 * @since  4.1.0
+	 * @return string
+	 */
+	public function get_logging_url() {
+		if ( ! \function_exists( 'get_home_url' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		$relative_url = $this->get_option_value( 'custom-logging-dir', \WSAL_Settings::DEFAULT_LOGGING_DIR );
+		$absolute_url = trailingslashit( \get_site_url() ) . trailingslashit( ltrim( $relative_url, '/' ) );
+		return $absolute_url;
 	}
 
 }

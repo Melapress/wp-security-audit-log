@@ -172,6 +172,14 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord {
 	 */
 	public function create_indexes() {
 		$db_connection = $this->get_connection();
-		$db_connection->query( 'CREATE INDEX option_name ON ' . $this->GetTable() . ' (option_name)' );
+		// check if an index exists.
+		if ( $db_connection->query( 'SELECT COUNT(1) IndexIsThere FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema=DATABASE() AND table_name="' . $this->GetTable() . '" AND index_name="option_name"' ) ) {
+			// query succeeded, does index exist?
+			$index_exists = ( isset( $db_connection->last_result[0]->IndexIsThere ) ) ? $db_connection->last_result[0]->IndexIsThere : false;
+		}
+		// if no index exists then make one.
+		if ( ! $index_exists ) {
+			$db_connection->query( 'CREATE INDEX option_name ON ' . $this->GetTable() . ' (option_name)' );
+		}
 	}
 }

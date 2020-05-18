@@ -15,10 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 
-	if ( WpSecurityAuditLog::is_plugin_active( 'nofs/wsal-nofs.php' ) ) {
-		require_once WP_PLUGIN_DIR . '/nofs/wsal-nofs.php';
-	}
-
 	/**
 	 * Freemius SDK
 	 *

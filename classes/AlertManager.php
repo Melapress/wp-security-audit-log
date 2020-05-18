@@ -576,14 +576,14 @@ final class WSAL_AlertManager {
 				$event_data['CurrentUserRoles'] = $current_user_roles;
 			}
 		}
-		// Check if the user management plugin is loaded and adds the SessionID.
-		if ( class_exists( 'WSAL_User_Management_Plugin' ) ) {
-			if ( function_exists( 'get_current_user_id' ) ) {
-				$session_tokens = get_user_meta( get_current_user_id(), 'session_tokens', true );
-				if ( ! empty( $session_tokens ) ) {
-					end( $session_tokens );
-					$event_data['SessionID'] = key( $session_tokens );
-				}
+
+		// If the user sessions plugin is loaded try attach the SessionID.
+		if ( ! isset( $event_data['SessionID'] ) && class_exists( 'WSAL_UserSessions_Helpers' ) ) {
+			// try get the session id generated from logged in cookie.
+			$session_id = WSAL_UserSessions_Helpers::get_session_id_from_logged_in_user_cookie();
+			// if we have a SessionID then add it to event_data.
+			if ( ! empty( $session_id ) ) {
+				$event_data['SessionID'] = $session_id;
 			}
 		}
 
