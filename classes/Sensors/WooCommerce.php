@@ -248,8 +248,9 @@ class WSAL_Sensors_WooCommerce extends WSAL_AbstractSensor {
 		if ( 'product' === $post->post_type ) {
 			if (
 				( 'auto-draft' === $this->_old_post->post_status && 'draft' === $post->post_status ) // Saving draft.
-				|| ( 'draft' === $this->_old_post->post_status && 'publish' === $post->post_status ) // Publishing post.
-			) {
+					|| ( 'draft' === $this->_old_post->post_status && 'publish' === $post->post_status ) // Publishing post.
+					|| ( 'auto-draft' === $this->_old_post->post_status && 'publish' === $post->post_status )
+				) {
 				$this->EventCreation( $this->_old_post, $post );
 			} else {
 				// Delay the checks to accomodate WooCommerce inline product changes.
