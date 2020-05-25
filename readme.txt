@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.4
-Stable tag: 4.0.4
+Stable tag: 4.1.0
 Requires PHP: 5.5
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -204,11 +204,26 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.0.4 (2020-05-20) =
+= 4.1.0 (2020-05-26) =
 
-Release notes: [Introducing WP Activity Log (the new name for WP Security Audit Log)](https://wpactivitylog.com/wp-security-audit-log-renamed-wp-activity-log/)
+Release notes: [New session policies per user roles & other improvements(https://wpactivitylog.com/wsal-4-1/)
 
-* **Name Change**
-	* In this update we renamed WP Security Audit Log to WP Activity log. No code changes are included in this release.
+* **New Features**
+	* New [WordPress users sessions management](https://wpactivitylog.com/features/wordpress-users-sessions-management-tools/) module with configurable policies per user role.
+	* Setting to configure the log files location (request log file, 6007 and 6023 events).
+
+* **Plugin Improvements**
+	* [Activity log reports](https://wpactivitylog.com/features/reports-wordpress-activity-log/) now support user roles which have the space character in the name.
+	* Removed more legacy code from the plugin (the check for encryption method).
+	* Removed old update scripts (for when updating from versions prior to 3.5.2).
+	* Moved 10 more plugin settings from the custom table to the wp_options table (performance improvement).
+	* Standardized the format of all placeholders in the UI (now they are all using default WordPress format).
+	* Removed premium only code from free edition.
+
+* **Bug fixes**
+	* Scheduled daily reports included data of the last 24 hours instead of the previous day.
+	* Resaving the activity logs archiving settings generated errors (didn't check if connection was already setup).
+	* Issue with the plugin when installed on MainWP child sites ([https://wordpress.org/support/topic/cannot-use-object-of-type-wsal_models_occurrencequery-as-array/](support ticket)).
+	* Plugin adding Menu entry with no title (used by the wizard).
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
