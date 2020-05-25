@@ -223,7 +223,7 @@ Release notes: [New session policies per user roles & other improvements(https:/
 * **Bug fixes**
 	* Scheduled daily reports included data of the last 24 hours instead of the previous day.
 	* Resaving the activity logs archiving settings generated errors (didn't check if connection was already setup).
-	* Issue with the plugin when installed on MainWP child sites ([https://wordpress.org/support/topic/cannot-use-object-of-type-wsal_models_occurrencequery-as-array/](support ticket)).
+	* Issue with the plugin when installed on MainWP child sites ([support ticket](https://wordpress.org/support/topic/cannot-use-object-of-type-wsal_models_occurrencequery-as-array/)).
 	* Plugin adding Menu entry with no title (used by the wizard).
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
