@@ -3913,7 +3913,7 @@
             if ( $is_connected ) {
                 FS_GDPR_Manager::instance()->store_is_required( $pong->is_gdpr_required );
             }
-            
+
             $this->store_connectivity_info( $pong, $is_connected );
 
             return $this->_has_api_connection;
@@ -9546,7 +9546,7 @@
 
             if ( is_object( $fs ) ) {
                 $fs->remove_sdk_reference();
-                
+
                 self::require_plugin_essentials();
 
                 if ( is_plugin_active( $fs->_free_plugin_basename ) ||
@@ -12594,7 +12594,7 @@
                 // Subscription cancellation dialog box is currently not supported for multisite networks.
                 return array();
             }
-            
+
             if ( $this->is_whitelabeled() ) {
                 return array();
             }
@@ -12690,7 +12690,7 @@
                 ! $this->is_premium() &&
                 /**
                  * Also handle the case when an upgrade was made using the free version.
-                 * 
+                 *
                  * @author Leo Fajardo (@leorw)
                  * @since 2.3.2
                  */
@@ -12860,7 +12860,7 @@
          */
         function _activate_license_ajax_action() {
             $this->_logger->entrance();
-            
+
             $this->check_ajax_referer( 'activate_license' );
 
             $license_key = trim( fs_request_get( 'license_key' ) );
@@ -12918,7 +12918,7 @@
             foreach ( $installs_info_by_slug_map as $slug => $install_info ) {
                 $install_ids[ $slug ] = $install_info['install']->id;
             }
-            
+
             $params['install_ids'] = implode( ',', array_values( $install_ids ) );
 
             $install = $this->get_api_site_scope()->call( $this->add_show_pending( '/' ), 'put', $params );
@@ -12971,7 +12971,7 @@
          *
          * @author Vova Feldman (@svovaf)
          * @since  2.3.0
-         *         
+         *
          * @param string      $license_key
          * @param null|bool   $is_marketing_allowed
          * @param null|number $plugin_id

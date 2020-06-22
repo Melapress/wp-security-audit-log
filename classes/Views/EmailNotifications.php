@@ -25,7 +25,7 @@ class WSAL_Views_EmailNotifications extends WSAL_AbstractView {
 	 * Get View Title.
 	 */
 	public function GetTitle() {
-		return __( 'Notifications Add-On', 'wp-security-audit-log' );
+		return __( 'Notifications Extension', 'wp-security-audit-log' );
 	}
 
 	/**

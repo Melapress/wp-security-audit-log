@@ -76,7 +76,7 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 			$our_plugins = $this->get_installable_plugins();
 			?>
 			<table id="tab-third-party-plugins" class="form-table wp-list-table wsal-tab widefat fixed"  style="display: table;" cellspacing="0">
-				<p class="description"><?php esc_html_e( 'WP Activity Log can keep a log of changes done on other plugins. Install the relevant add-on from the below list to keep a log of changes done on that plugin.', 'wp-security-audit-log' ); ?></p>
+				<p class="description"><?php esc_html_e( 'WP Activity Log can keep a log of changes done on other plugins. Install the relevant extension from the below list to keep a log of changes done on that plugin.', 'wp-security-audit-log' ); ?></p>
 				<tbody>
 					<tr>
 						<td class="addon-td">
@@ -89,20 +89,24 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 								if ( is_plugin_active( $details['plugin_slug'] ) ) {
 									$disable_button = 'disabled';
 								}
+								// Check if this is actually an addon for something, otherwise bail.
+								if ( ! isset( $details['addon_for'] ) || ! isset( $details['image_filename'] ) ) {
+									break;
+								}
 								?>
 
 								<div class="addon-wrapper">
 									<img src="<?php echo esc_url( trailingslashit( WSAL_BASE_URL ) . 'img/addons/' . $details['image_filename'] ); ?>">
-									<h4><?php esc_html_e( 'Add-on for ', 'wp-security-audit-log' ); ?><?php echo esc_html( $details['title'] ); ?></h4>
+									<h4><?php esc_html_e( 'Extension for ', 'wp-security-audit-log' ); ?><?php echo esc_html( $details['title'] ); ?></h4>
 									<p><?php echo sanitize_text_field( $details['plugin_description'] ); ?></p><br>
 									<p><button class="install-addon button button-primary <?php echo esc_attr( $disable_button ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-plugin-slug="<?php echo esc_attr( $details['plugin_slug'] ); ?>" data-plugin-download-url="<?php echo esc_url( $details['plugin_url'] ); ?>" data-plugin-event-tab-id="<?php echo esc_attr( $details['event_tab_id'] ); ?>">
 									<?php
 									if ( $this->is_plugin_installed( $details['plugin_slug'] ) && ! is_plugin_active( $details['plugin_slug'] ) ) {
-										esc_html_e( 'Add-on installed, activate now?', 'wp-security-audit-log' );
+										esc_html_e( 'Extension installed, activate now?', 'wp-security-audit-log' );
 									} elseif ( $this->is_plugin_installed( $details['plugin_slug'] ) && is_plugin_active( $details['plugin_slug'] ) ) {
-										esc_html_e( 'Add-on installed', 'wp-security-audit-log' );
+										esc_html_e( 'Extension installed', 'wp-security-audit-log' );
 									} else {
-											esc_html_e( 'Install Add-on', 'wp-security-audit-log' );
+											esc_html_e( 'Install Extension', 'wp-security-audit-log' );
 									}
 									?>
 								</button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span></p>
@@ -128,7 +132,7 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 			$plugins = array(
 				array(
 					'addon_for'          => 'bbpress',
-					'title'              => 'BBPress Add-on',
+					'title'              => 'BBPress Extension',
 					'image_filename'     => 'bbpress.png',
 					'plugin_slug'        => 'wp-security-audit-log-add-on-for-bbpress/wsal-bbpress.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-bbpress.latest-stable.zip',
@@ -137,12 +141,18 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 				),
 				array(
 					'addon_for'          => 'wpforms',
-					'title'              => 'WPForms',
+					'title'              => 'WPForms Extension',
 					'image_filename'     => 'wpforms.png',
 					'plugin_slug'        => 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-wpforms.latest-stable.zip',
 					'event_tab_id'       => '#tab-wpforms',
 					'plugin_description' => 'Keep a record of when someone adds, modified or delete forms, entries and more in the WPForms plugin.',
+				),
+				array(
+					'addon_for'          => 'wfcm',
+					'title'              => 'Website File Changes Monitor',
+					'plugin_slug'        => 'website-file-changes-monitor/website-file-changes-monitor.php',
+					'plugin_url'         => 'https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip',
 				),
 			);
 			// runs through a filter so it can be added to programatically.

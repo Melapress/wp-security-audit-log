@@ -272,10 +272,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						}
 						if ( empty( $addon_names ) ) {
 							$addon_names .= $addon;
-							$button_label = esc_html__( 'Install add-on', 'wp-2fa' );
+							$button_label = esc_html__( 'Install Extension', 'wp-2fa' );
 						} else {
 							$addon_names .= ' & ' .$addon;
-							$button_label = esc_html__( 'Install add-ons', 'wp-2fa' );
+							$button_label = esc_html__( 'Install Extensions', 'wp-2fa' );
 						}
 						$display_notice = true;
 					}
@@ -376,7 +376,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * Method: Get View Name.
 	 */
 	public function GetName() {
-		return __( 'Activity Log Viewer', 'wp-security-audit-log' );
+		return __( 'Log Viewer', 'wp-security-audit-log' );
 	}
 
 	/**
@@ -1035,9 +1035,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			'infiniteScroll'      => $this->_plugin->settings->is_infinite_scroll(),
 			'userView'            => ( in_array( $this->user_last_view, $this->supported_view_types(), true ) ) ? $this->user_last_view : 'list',
 			'installAddonStrings' => array(
-				'defaultButton'   => esc_html( 'Install and activate add-on', 'wp-security-audit-log' ),
-				'installingText'  => esc_html( 'Installing add-on', 'wp-security-audit-log' ),
-				'otherInstalling' => esc_html( 'Other add-on installing', 'wp-security-audit-log' ),
+				'defaultButton'   => esc_html( 'Install and activate extension', 'wp-security-audit-log' ),
+				'installingText'  => esc_html( 'Installing extension', 'wp-security-audit-log' ),
+				'otherInstalling' => esc_html( 'Other extension installing', 'wp-security-audit-log' ),
 				'addonInstalled'  => esc_html( 'Installed', 'wp-security-audit-log' ),
 				'installedReload' => esc_html( 'Installed... reloading page', 'wp-security-audit-log' ),
 				'buttonError'     => esc_html( 'Problem enabling', 'wp-security-audit-log' ),

@@ -25,7 +25,7 @@ class WSAL_Views_ExternalDB extends WSAL_AbstractView {
 	 * Method: Get View Title.
 	 */
 	public function GetTitle() {
-		return __( 'External DB Add-On', 'wp-security-audit-log' );
+		return __( 'External DB Extension', 'wp-security-audit-log' );
 	}
 
 	/**
