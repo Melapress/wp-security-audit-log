@@ -245,6 +245,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			}
 		}
 
+
 		// Switch to live or archive DB.
 		if ( $this->_plugin->settings->IsArchivingEnabled() ) {
 			if (

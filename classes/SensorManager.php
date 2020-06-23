@@ -81,8 +81,8 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 					/*
 					 * @since 3.5.1 Allow loading classes where names match the
 					 * filename 1:1. Prior to version 3.5.1 sensors were always
-					 * asummed to be defined WITH `WSAL_Sensors_` prefis in the
-					 * class name but WITHOUT it in the filename. This behavor
+					 * assumed to be defined WITH `WSAL_Sensors_` prefix in the
+					 * class name but WITHOUT it in the filename. This behavior
 					 * is retained for back-compat.
 					 */
 					$class = ( class_exists( $sensor ) ) ? $sensor : 'WSAL_Sensors_' . $sensor;
@@ -294,18 +294,6 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 						$load_sensor = true;
 					} else {
 						$load_sensor = false;
-					}
-					break;
-
-				case 'FileChanges':
-					// If file changes is disabled then don't load file changes sensor.
-					if ( 'enable' !== $this->plugin->GetGlobalOption( 'scan-file-changes', 'enable' ) ) {
-						$load_sensor = false;
-
-						// Clear scheduled hook if there is any hook scheduled.
-						if ( wp_next_scheduled( WSAL_Sensors_FileChanges::$schedule_hook ) ) {
-							wp_clear_scheduled_hook( WSAL_Sensors_FileChanges::$schedule_hook );
-						}
 					}
 					break;
 

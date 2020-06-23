@@ -24,7 +24,7 @@ abstract class WSAL_AbstractSensor {
 	/**
 	 * Instance of WpSecurityAuditLog.
 	 *
-	 * @var object
+	 * @var WpSecurityAuditLog
 	 */
 	protected $plugin;
 

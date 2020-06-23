@@ -385,6 +385,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											continue; // <- Ignore php alerts.
 										}
 
+										if ( __( 'Monitor File Changes', 'wp-security-audit-log' ) === $subname && ! is_plugin_active( 'website-file-changes-monitor/website-file-changes-monitor.php' ) ) {
+											break;
+										}
+
 										if ( in_array( $alert->type, $obsolete_events, true ) ) {
 											continue; // <- Ignore promo alerts.
 										}
@@ -540,7 +544,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 									}
 
 									// File integrity scan link.
-									if ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) :
+									if ( __( 'Monitor File Changes', 'wp-security-audit-log' ) === $subname && ! is_plugin_active( 'website-file-changes-monitor/website-file-changes-monitor.php' ) ) :
 										$wsal_settings_page = '';
 										$redirect_args      = array(
 											'page' => 'wsal-settings',
@@ -553,12 +557,20 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										}
 										?>
 										<tr>
-											<td colspan="4">
-												<a href="<?php echo esc_url( $wsal_settings_page ); ?>" class="wsal-tab-help">
-													<?php esc_html_e( 'Configure the file integrity scan settings.', 'wp-security-audit-log' ); ?>
-												</a>
+											<td>
+												<div class="addon-wrapper">
+													<img src="<?php echo trailingslashit( WSAL_BASE_URL ) . 'img/help/website-file-changes-monitor.jpg'; ?>">
+													<h4><?php echo esc_html__( 'Website File Changes Monitor', 'wp-security-audit-log'  ); ?></h4>
+													<p><?php echo esc_html__( 'To keep a log of file changes please install Website File Changes Monitor, a plugin which is also developed by us.', 'wp-security-audit-log'  ); ?></p><br>
+													<p><button class="install-addon button button-primary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-install-addon' ) ); ?>" data-plugin-slug="website-file-changes-monitor/website-file-changes-monitor.php" data-plugin-download-url="https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip"><?php _e( 'Install plugin now', 'wp-security-audit-log' ); ?></button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span> <a href="https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank" style="margin-left: 15px;"><?php echo esc_html__( 'Learn More', 'wp-security-audit-log'  ); ?></a></p>
+												</div>
 											</td>
 										</tr>
+										<style type="text/css">
+										#tab-monitor-file-changes thead {
+											display: none;
+										}
+										</style>
 										<?php
 									endif;
 									?>

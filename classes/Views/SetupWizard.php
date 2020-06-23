@@ -774,7 +774,7 @@ final class WSAL_Views_SetupWizard {
 				</a>
 			</li>
 			<li>
-				<a href="https://wpactivitylog.com/support/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
+				<a href="https://wpactivitylog.com/support/kb/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
 					<?php esc_html_e( 'Knowledge Base & Support Documents', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
@@ -857,6 +857,10 @@ final class WSAL_Views_SetupWizard {
 				$disable_button = '';
 				if ( is_plugin_active( $details['plugin_slug'] ) ) {
 					$disable_button = 'disabled';
+				}
+				// Check if this is actually an addon for something, otherwise bail.
+				if ( ! isset( $details['addon_for'] ) || ! isset( $details['image_filename'] ) ) {
+					break;
 				}
 				?>
 

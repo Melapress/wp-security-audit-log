@@ -162,6 +162,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			return;
 		}
 
+		// Ignore updates from ignored custom post types.
+		if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
+			return;
+		}
+		
 		/**
 		 * WSAL Filter: `wsal_before_post_meta_create_event`
 		 *
