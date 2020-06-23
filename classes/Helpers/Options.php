@@ -131,7 +131,7 @@ class Options {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
 		$relative_path = $this->get_option_value( 'custom-logging-dir', \WSAL_Settings::DEFAULT_LOGGING_DIR );
-		$absolute_path = trailingslashit( \get_home_path() ) . trailingslashit( ltrim( $relative_path, '/' ) );
+		$absolute_path = trailingslashit( ABSPATH ) . trailingslashit( ltrim( $relative_path, '/' ) );
 		return $absolute_path;
 	}
 
@@ -153,6 +153,7 @@ class Options {
 		$relative_url = $this->get_option_value( 'custom-logging-dir', \WSAL_Settings::DEFAULT_LOGGING_DIR );
 		$absolute_url = trailingslashit( \get_site_url() ) . trailingslashit( ltrim( $relative_url, '/' ) );
 		return $absolute_url;
+
 	}
 
 }

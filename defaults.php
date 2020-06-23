@@ -569,7 +569,7 @@ function wsaldefaults_wsal_init() {
 	);
 
 	// Dummy item to hold WFCM installer.
-	if ( function_exists( 'is_plugin_active' ) && ! is_plugin_active( 'website-file-changes-monitor/website-file-changes-monitor.php' ) ) {
+	if ( function_exists( 'is_plugin_active' ) && ! defined( 'WFCM_PLUGIN_FILE' ) ) {
 		$file_changes_tab = array (
 			__( 'File Changes', 'wp-security-audit-log' ) => array(
 				__( 'Monitor File Changes', 'wp-security-audit-log' ) => array(
