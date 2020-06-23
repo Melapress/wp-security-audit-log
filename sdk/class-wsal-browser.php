@@ -616,16 +616,16 @@ class WSAL_Browser {
 	 * Reset all properties
 	 */
 	public function reset() {
-		$http_user_agent     = filter_input( INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_STRING );
-		$this->_agent        = ! empty( $http_user_agent ) ? $http_user_agent : '';
+		$http_user_agent = filter_input( INPUT_SERVER, 'HTTP_USER_AGENT', FILTER_SANITIZE_STRING );
+		$this->_agent = ! empty( $http_user_agent ) ? $http_user_agent : '';
 		$this->_browser_name = $this->BROWSER_UNKNOWN;
-		$this->_version      = $this->VERSION_UNKNOWN;
-		$this->_platform     = $this->PLATFORM_UNKNOWN;
-		$this->_os           = $this->OPERATING_SYSTEM_UNKNOWN;
-		$this->_is_aol       = false;
-		$this->_is_mobile    = false;
-		$this->_is_robot     = false;
-		$this->_aol_version  = $this->VERSION_UNKNOWN;
+		$this->_version = $this->VERSION_UNKNOWN;
+		$this->_platform = $this->PLATFORM_UNKNOWN;
+		$this->_os = $this->OPERATING_SYSTEM_UNKNOWN;
+		$this->_is_aol = false;
+		$this->_is_mobile = false;
+		$this->_is_robot = false;
+		$this->_aol_version = $this->VERSION_UNKNOWN;
 	}
 
 	/**
@@ -801,10 +801,10 @@ class WSAL_Browser {
 	 * @return string formatted string with a summary of the browser
 	 */
 	public function __toString() {
-		$text1     = $this->getUserAgent(); // Grabs the UA (user agent) string.
-		$ua_line1  = substr( $text1, 0, 32 ); // The first line we print should only be the first 32 characters of the UA string.
-		$text2     = $this->getUserAgent(); // Now we grab it again and save it to a string.
-		$towrap_ua = str_replace( $ua_line1, '', $text2 ); // The rest of the printoff (other than first line) is equivolent.
+		$text1   = $this->getUserAgent(); // Grabs the UA (user agent) string.
+		$ua_line1 = substr( $text1, 0, 32 ); // The first line we print should only be the first 32 characters of the UA string.
+		$text2       = $this->getUserAgent(); // Now we grab it again and save it to a string.
+		$towrap_ua    = str_replace( $ua_line1, '', $text2 ); // The rest of the printoff (other than first line) is equivolent.
 
 		/**
 		 * To the whole string minus the part we printed off. IE
@@ -905,7 +905,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserBlackBerry() {
 		if ( stripos( $this->_agent, 'blackberry' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'BlackBerry' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'BlackBerry' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( $aversion[0] );
 			$this->_browser_name = $this->BROWSER_BLACKBERRY;
@@ -940,7 +940,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserGoogleBot() {
 		if ( stripos( $this->_agent, 'googlebot' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'googlebot' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'googlebot' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( str_replace( ';', '', $aversion[0] ) );
 			$this->_browser_name = $this->BROWSER_GOOGLEBOT;
@@ -957,7 +957,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserMSNBot() {
 		if ( stripos( $this->_agent, 'msnbot' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'msnbot' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'msnbot' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( str_replace( ';', '', $aversion[0] ) );
 			$this->_browser_name = $this->BROWSER_MSNBOT;
@@ -974,15 +974,15 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserW3CValidator() {
 		if ( stripos( $this->_agent, 'W3C-checklink' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'W3C-checklink' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'W3C-checklink' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( $aversion[0] );
 			$this->_browser_name = $this->BROWSER_W3CVALIDATOR;
 			return true;
 		} elseif ( stripos( $this->_agent, 'W3C_Validator' ) !== false ) {
 			// Some of the Validator versions do not delineate w/ a slash - add it back in.
-			$ua       = str_replace( 'W3C_Validator ', 'W3C_Validator/', $this->_agent );
-			$aresult  = explode( '/', stristr( $ua, 'W3C_Validator' ) );
+			$ua = str_replace( 'W3C_Validator ', 'W3C_Validator/', $this->_agent );
+			$aresult = explode( '/', stristr( $ua, 'W3C_Validator' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( $aversion[0] );
 			$this->_browser_name = $this->BROWSER_W3CVALIDATOR;
@@ -998,7 +998,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserSlurp() {
 		if ( stripos( $this->_agent, 'slurp' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'Slurp' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'Slurp' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( $aversion[0] );
 			$this->_browser_name = $this->BROWSER_SLURP;
@@ -1067,7 +1067,7 @@ class WSAL_Browser {
 		if ( stripos( $this->_agent, 'opera mini' ) !== false ) {
 			$resultant = stristr( $this->_agent, 'opera mini' );
 			if ( preg_match( '/\//', $resultant ) ) {
-				$aresult  = explode( '/', $resultant );
+				$aresult = explode( '/', $resultant );
 				$aversion = explode( ' ', $aresult[1] );
 				$this->setVersion( $aversion[0] );
 			} else {
@@ -1082,7 +1082,7 @@ class WSAL_Browser {
 			if ( preg_match( '/Version\/(10.*)$/', $resultant, $matches ) ) {
 				$this->setVersion( $matches[1] );
 			} elseif ( preg_match( '/\//', $resultant ) ) {
-				$aresult  = explode( '/', str_replace( '(', ' ', $resultant ) );
+				$aresult = explode( '/', str_replace( '(', ' ', $resultant ) );
 				$aversion = explode( ' ', $aresult[1] );
 				$this->setVersion( $aversion[0] );
 			} else {
@@ -1102,7 +1102,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserChrome() {
 		if ( stripos( $this->_agent, 'Chrome' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'Chrome' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'Chrome' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( $aversion[0] );
 			$this->setBrowser( $this->BROWSER_CHROME );
@@ -1119,7 +1119,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserWebTv() {
 		if ( stripos( $this->_agent, 'webtv' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'webtv' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'webtv' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( $aversion[0] );
 			$this->setBrowser( $this->BROWSER_WEBTV );
@@ -1135,7 +1135,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserNetPositive() {
 		if ( stripos( $this->_agent, 'NetPositive' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'NetPositive' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'NetPositive' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( str_replace( array( '(', ')', ';' ), '', $aversion[0] ) );
 			$this->setBrowser( $this->BROWSER_NETPOSITIVE );
@@ -1151,7 +1151,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserGaleon() {
 		if ( stripos( $this->_agent, 'galeon' ) !== false ) {
-			$aresult  = explode( ' ', stristr( $this->_agent, 'galeon' ) );
+			$aresult = explode( ' ', stristr( $this->_agent, 'galeon' ) );
 			$aversion = explode( '/', $aresult[0] );
 			$this->setVersion( $aversion[1] );
 			$this->setBrowser( $this->BROWSER_GALEON );
@@ -1167,7 +1167,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserKonqueror() {
 		if ( stripos( $this->_agent, 'Konqueror' ) !== false ) {
-			$aresult  = explode( ' ', stristr( $this->_agent, 'Konqueror' ) );
+			$aresult = explode( ' ', stristr( $this->_agent, 'Konqueror' ) );
 			$aversion = explode( '/', $aresult[0] );
 			$this->setVersion( $aversion[1] );
 			$this->setBrowser( $this->BROWSER_KONQUEROR );
@@ -1198,7 +1198,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserOmniWeb() {
 		if ( stripos( $this->_agent, 'omniweb' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'omniweb' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'omniweb' ) );
 			$aversion = explode( ' ', isset( $aresult[1] ) ? $aresult[1] : '' );
 			$this->setVersion( $aversion[0] );
 			$this->setBrowser( $this->BROWSER_OMNIWEB );
@@ -1330,7 +1330,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserIceweasel() {
 		if ( stripos( $this->_agent, 'Iceweasel' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'Iceweasel' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'Iceweasel' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( $aversion[0] );
 			$this->setBrowser( $this->BROWSER_ICEWEASEL );
@@ -1371,7 +1371,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserLynx() {
 		if ( stripos( $this->_agent, 'lynx' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'Lynx' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'Lynx' ) );
 			$aversion = explode( ' ', ( isset( $aresult[1] ) ? $aresult[1] : '' ) );
 			$this->setVersion( $aversion[0] );
 			$this->setBrowser( $this->BROWSER_LYNX );
@@ -1387,7 +1387,7 @@ class WSAL_Browser {
 	 */
 	public function checkBrowserAmaya() {
 		if ( stripos( $this->_agent, 'amaya' ) !== false ) {
-			$aresult  = explode( '/', stristr( $this->_agent, 'Amaya' ) );
+			$aresult = explode( '/', stristr( $this->_agent, 'Amaya' ) );
 			$aversion = explode( ' ', $aresult[1] );
 			$this->setVersion( $aversion[0] );
 			$this->setBrowser( $this->BROWSER_AMAYA );

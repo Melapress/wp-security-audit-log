@@ -184,7 +184,7 @@ abstract class WSAL_Models_ActiveRecord {
 					case is_array( $copy->$key ):
 					case is_object( $copy->$key ):
 						$json_decoded_val = WSAL_Helpers_DataHelper::JsonDecode( $val );
-						$this->$key       = ( null == $json_decoded_val ) ? $val : $json_decoded_val;
+						$this->$key = ( null == $json_decoded_val ) ? $val : $json_decoded_val;
 						break;
 					case is_int( $copy->$key ):
 						$this->$key = (int) $val;
@@ -220,10 +220,10 @@ abstract class WSAL_Models_ActiveRecord {
 			$this->created_on = $this->GetMicrotime();
 		}
 		$update_id = $this->getId();
-		$result    = $this->getAdapter()->Save( $this );
+		$result = $this->getAdapter()->Save( $this );
 
 		if ( false !== $result ) {
-			$this->_state = ( ! empty( $update_id ) ) ? self::STATE_UPDATED : self::STATE_CREATED;
+			$this->_state = ( ! empty( $update_id )) ? self::STATE_UPDATED : self::STATE_CREATED;
 		}
 		return $result;
 	}
@@ -236,7 +236,7 @@ abstract class WSAL_Models_ActiveRecord {
 	 */
 	public function Delete() {
 		$this->_state = self::STATE_UNKNOWN;
-		$result       = $this->getAdapter()->Delete( $this );
+		$result = $this->getAdapter()->Delete( $this );
 		if ( false !== $result ) {
 			$this->_state = self::STATE_DELETED;
 		}

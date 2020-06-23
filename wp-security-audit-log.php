@@ -2059,6 +2059,69 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			return $plugins;
 		}
+
+		/**
+		 * Temporary autoloader for WSAL classes that somehow bypassed regular means of including
+		 * them during the plugin runtime.
+		 *
+		 * As far as we know, only the UserSessionsTracking object will fall into this autoloader.
+		 *
+		 * We could optimize the code below by caching the list of extension folders.
+		 *
+		 * @param string $class Fully qualified class name.
+		 *
+		 * @return bool
+		 */
+		public function autoloader( $class ) {
+			if ( ! preg_match( '/^WSAL_/', $class ) ) {
+				return false;
+			}
+
+			$base_path  = plugin_dir_path( __FILE__ );
+			$subfolders = array();
+			$matches    = explode( '_', $class );
+			if ( count( $matches ) > 2 ) {
+				//  remove first (WSAL) and last one (actual file name)
+				array_shift( $matches );
+				array_pop( $matches );
+				$subfolders = $matches;
+
+				//  workaround for MySQL adapter classes
+				if ( count( $subfolders ) == 2 && $subfolders[0] === 'Adapters' && $subfolders[1] === 'MySQL' ) {
+					$class .= 'Adapter';
+				}
+			}
+
+			//  use last part of the class name as the actual file name to look for
+			$file_name = substr( $class, strrpos( $class, '_' ) + 1 );
+
+			//  try the main "classes" folder first
+			$partial_path_to_file = 'classes' . DIRECTORY_SEPARATOR . implode( DIRECTORY_SEPARATOR, $subfolders ) . DIRECTORY_SEPARATOR . $file_name . '.php';
+			$path_to_file         = $base_path . $partial_path_to_file;
+			if ( file_exists( $path_to_file ) ) {
+				require_once $path_to_file;
+
+				return true;
+			}
+
+			if ( ! function_exists( 'list_files' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+			}
+
+			$extension_folders = list_files( $base_path . 'extensions', 1 );
+			foreach ( $extension_folders as $extension_folder ) {
+				if ( ! is_dir( $extension_folder ) ) {
+					continue;
+				}
+
+				$path_to_file = $extension_folder . $partial_path_to_file;
+				if ( file_exists( $path_to_file ) ) {
+					require_once $path_to_file;
+
+					return true;
+				}
+			}
+		}
 	}
 
 	// Begin load sequence.
