@@ -385,7 +385,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											continue; // <- Ignore php alerts.
 										}
 
-										if ( __( 'Monitor File Changes', 'wp-security-audit-log' ) === $subname && ! is_plugin_active( 'website-file-changes-monitor/website-file-changes-monitor.php' ) ) {
+										if ( __( 'Monitor File Changes', 'wp-security-audit-log' ) === $subname && ! defined( 'WFCM_PLUGIN_FILE' ) ) {
 											break;
 										}
 
@@ -544,7 +544,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 									}
 
 									// File integrity scan link.
-									if ( __( 'Monitor File Changes', 'wp-security-audit-log' ) === $subname && ! is_plugin_active( 'website-file-changes-monitor/website-file-changes-monitor.php' ) ) :
+									if ( __( 'Monitor File Changes', 'wp-security-audit-log' ) === $subname && ! defined( 'WFCM_PLUGIN_FILE' ) ) :
 										$wsal_settings_page = '';
 										$redirect_args      = array(
 											'page' => 'wsal-settings',

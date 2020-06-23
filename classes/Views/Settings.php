@@ -1229,7 +1229,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<table class="form-table wsal-tab">
 			<tbody>
 				<tr>
-					<?php if ( ! is_plugin_active( 'website-file-changes-monitor/website-file-changes-monitor.php' ) ) : ?>
+					<?php if ( ! defined( 'WFCM_PLUGIN_FILE' ) ) : ?>
 						<div class="addon-wrapper" style="max-width: 380px; text-align: center; border: 1px solid #ccc; padding: 25px;">
 							<img src="<?php echo trailingslashit( WSAL_BASE_URL ) . 'img/help/website-file-changes-monitor.jpg'; ?>">
 							<h4><?php echo esc_html__( 'Website File Changes Monitor', 'wp-security-audit-log'  ); ?></h4>
@@ -1767,7 +1767,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 
 		if ( ! empty( $custom_logging_dir ) ) {
-			$custom_logging_path = trailingslashit( get_home_path() ) . ltrim( trailingslashit( $custom_logging_dir ), '/' );
+			$custom_logging_path = trailingslashit( ABSPATH ) . ltrim( trailingslashit( $custom_logging_dir ), '/' );
 			if ( ! is_dir( $custom_logging_path ) || ! is_readable( $custom_logging_path ) || ! is_writable( $custom_logging_path ) ) {
 				if ( is_writable( dirname( $custom_logging_path ) ) ) {
 					$dir_made = wp_mkdir_p( $custom_logging_path );
