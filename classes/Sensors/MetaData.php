@@ -166,7 +166,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
 			return;
 		}
-		
+
 		/**
 		 * WSAL Filter: `wsal_before_post_meta_create_event`
 		 *
@@ -363,6 +363,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			 * @param integer  $meta_id    - Meta ID.
 			 */
 			$log_meta_event = apply_filters( 'wsal_before_post_meta_delete_event', true, $meta_key, $meta_value, $post, $meta_id );
+
+			// Ignore updates from ignored custom post types.
+			if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
+				return;
+			}
 
 			// If not allowed to log meta event then skip it.
 			if ( ! $log_meta_event ) {
