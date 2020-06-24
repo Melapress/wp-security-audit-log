@@ -573,7 +573,7 @@ function wsaldefaults_wsal_init() {
 		$file_changes_tab = array (
 			__( 'File Changes', 'wp-security-audit-log' ) => array(
 				__( 'Monitor File Changes', 'wp-security-audit-log' ) => array(
-					array( 99999, WSAL_HIGH, __( 'Dummy', 'wp-security-audit-log' ), __( '', 'wp-security-audit-log' ), 'file', 'modified' ),
+					array( 99999, WSAL_HIGH, __( 'Dummy', 'wp-security-audit-log' ), '', 'file', 'modified' ),
 				)
 			),
 		);
