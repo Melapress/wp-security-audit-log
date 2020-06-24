@@ -4,7 +4,7 @@
  * Plugin URI: http://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Audit Log Viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 4.1.0
+ * Version: 4.1.2
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -46,7 +46,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @var string
 		 */
-		public $version = '4.1.0';
+		public $version = '4.1.2';
 
 		// Plugin constants.
 		const PLG_CLS_PRFX    = 'WSAL_';
@@ -788,7 +788,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 			// Plugin Docs URL.
 			if ( ! defined( 'WSAL_DOCS_URL' ) ) {
-				define( 'WSAL_DOCS_URL', 'https://wpactivitylog.com/support/kb/' );
+				define( 'WSAL_DOCS_URL', 'https://wpactivitylog.com/support/' );
 			}
 			// Plugin Issue Reporting URL.
 			if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
@@ -1211,16 +1211,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					$this->settings->SetPruningDate( $pruning_date );
 				}
 
-				$log_404 = $this->GetGlobalOption( 'log-404' );
+				$log_404 = $this->options_helper->get_option_value( 'log-404' );
 				// If old setting is empty enable 404 logging by default.
 				if ( false === $log_404 ) {
-					$this->SetGlobalOption( 'log-404', 'on' );
+					$this->options_helper->set_option_value( 'log-404', 'on' );
 				}
 
-				$purge_log_404 = $this->GetGlobalOption( 'purge-404-log' );
+				$purge_log_404 = $this->options_helper->get_option_value( 'purge-404-log' );
 				// If old setting is empty enable 404 purge log by default.
 				if ( false === $purge_log_404 ) {
-					$this->SetGlobalOption( 'purge-404-log', 'on' );
+					$this->options_helper->set_option_value( 'purge-404-log', 'on' );
 				}
 
 				// Load translations.
@@ -1304,16 +1304,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$this->settings->SetDisabledAlerts( array( 2099, 2126 ) );
 			}
 
-			$log_404 = $this->GetGlobalOption( 'log-404' );
+			$log_404 = $this->options_helper->get_option_value( 'log-404' );
 			// If old setting is empty enable 404 logging by default.
 			if ( false === $log_404 ) {
-				$this->SetGlobalOption( 'log-404', 'on' );
+				$this->options_helper->set_option_value( 'log-404', 'on' );
 			}
 
-			$purge_log_404 = $this->GetGlobalOption( 'purge-404-log' );
+			$purge_log_404 = $this->options_helper->get_option_value( 'purge-404-log' );
 			// If old setting is empty enable 404 purge log by default.
 			if ( false === $purge_log_404 ) {
-				$this->SetGlobalOption( 'purge-404-log', 'on' );
+				$this->options_helper->set_option_value( 'purge-404-log', 'on' );
 			}
 
 			// Install cleanup hook (remove older one if it exists).
@@ -1384,44 +1384,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				if ( wsal_freemius()->is_free_plan() ) {
 					$delete_transient_fn = $this->IsMultisite() ? 'delete_site_transient' : 'delete_transient'; // Check for multisite.
 					$delete_transient_fn( 'wsal-is-advert-dismissed' ); // Delete advert transient.
-				}
-
-				/**
-				 * IMPORTANT: VERSION SPECIFIC UPDATE
-				 *
-				 * It only needs to run when old version of the plugin is less than 3.2.3
-				 * & the plugin is being updated to version 3.2.3 or later versions.
-				 *
-				 * @since 3.2.3
-				 */
-				if ( version_compare( $old_version, '3.2.3', '<' ) && version_compare( $new_version, '3.2.2', '>' ) ) {
-					$this->getConnector()->getAdapter( 'Option' )->update_value_column();
-
-					// Migrate file scan options to WSAL Options table.
-					$initial_scan_option         = 'wsal_is_initial_scan_';
-					$initial_scan_option_migrate = 'is_initial_scan_';
-					$local_scan_files            = 'wsal_local_files_';
-					$local_scan_files_migrate    = 'local_files_';
-
-					for ( $index = 0; $index < 7; $index++ ) {
-						// Initial scan option.
-						$initial_option_value = get_site_option( $initial_scan_option . $index, 'yes' );
-						delete_site_option( $initial_scan_option . $index );
-
-						// If option already does not exist then create it.
-						if ( ! $this->GetGlobalOption( $initial_scan_option_migrate . $index, false ) ) {
-							$this->SetGlobalOption( $initial_scan_option_migrate . $index, $initial_option_value );
-						}
-
-						// Local files option.
-						$local_files_value = get_site_option( $local_scan_files . $index, array() );
-						delete_site_option( $local_scan_files . $index );
-
-						// If option already does not exist then create it.
-						if ( ! $this->GetGlobalOption( $local_scan_files_migrate . $index, false ) ) {
-							$this->SetGlobalOption( $local_scan_files_migrate . $index, $local_files_value );
-						}
-					}
 				}
 
 				/**
@@ -1520,32 +1482,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					$this->settings->set_frontend_events( $frontend_events );
 				}
 
-				/**
-				 * Upgrade routine for versions of the plugin prior to 3.5.2+
-				 *
-				 * NOTE: this uses a version compare of 1 minor version in the
-				 * future to enure that when old crons need removed they are.
-				 *
-				 * @since 3.5.2
-				 */
-				if ( version_compare( $old_version, '3.5.2', '<=' ) ) {
-					/*
-					 * Handle remapping old, unprefixed, cron tasks to new ones
-					 * that have the prefix in the handle.
-					 *
-					 * NOTE: Not using 'wsal_init' because `wsalCommonClass`
-					 * isn't set on WpSecurityAuditLog that early.
-					 */
-					add_action(
-						'init',
-						function() {
-							require_once 'classes/Update/Task/CronNameRemap.php';
-							$cron_name_remapper = new WSAL\Update\Task\CronNameRemap( WpSecurityAuditLog::GetInstance() );
-							$cron_name_remapper->run();
-						}
-					);
-				}
-
 				if ( version_compare( $old_version, '4.0.0', '<=' ) ) {
 					/*
 					 * Ensure that the grid view 'info' colum is set to display.
@@ -1573,8 +1509,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				 * any for each new version we release.
 				 *
 				 * @since 4.0.3
+				 * @since 4.1.0 - updated the compare tag.
 				 */
-				if ( version_compare( $old_version, '4.0.3', '<=' ) ) {
+				if ( version_compare( $old_version, '4.1.0', '<=' ) ) {
 
 					require_once 'classes/Update/Task/MoveSettingsToOptionsTable.php';
 					// run the update routine.
@@ -2121,6 +2058,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			return $plugins;
 		}
+
 	}
 
 	// Begin load sequence.

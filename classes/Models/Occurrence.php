@@ -204,6 +204,10 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 						'name'      => __( 'BBPress', 'wp-security-audit-log' ),
 						'event_ids' => array( 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8016, 8017, 8018, 8019, 8020, 8021, 8022, 8023 ),
 					),
+					'wfcm' => array(
+						'name'      => __( 'WFCM', 'wp-security-audit-log' ),
+						'event_ids' => array( 6028, 6029, 6030, 6031, 6032, 6033 ),
+					),
 				);
 				$installer_nonce   = wp_create_nonce( 'wsal-install-addon' );
 				foreach ( $addon_event_codes as $key => $addon ) {
@@ -211,7 +215,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 					if ( in_array( $this->alert_id, $addon['event_ids'], true ) ) {
 						// check key and update message here.
 						$message = sprintf(
-							'The details of this event are unknown. You need to install the add-on for %1$s to see the details.%2$s%3$sInstall and activate add-on%4$s',
+							'The details of this event are unknown. You need to install the add-on for %1$s to see the details.%2$s%3$sInstall and activate extension %4$s',
 							esc_html( $addon['name'] ),
 							'<br />',
 							'<button type="button" class="button-primary wsal-addon-install-trigger" data-nonce="' . esc_attr( $installer_nonce ) . '" data-addon-name="' . esc_attr( $key ) . '">',

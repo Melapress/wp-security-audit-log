@@ -368,15 +368,6 @@ function wsaldefaults_wsal_init() {
 					array( 6034, WSAL_CRITICAL, __( 'Purged the activity log', 'wp-security-audit-log' ), __( 'Purged the activity log', 'wp-security-audit-log' ), 'activity-logs', 'deleted' ),
 				),
 
-				__( 'File Changes', 'wp-security-audit-log' ) => array(
-					array( 6028, WSAL_HIGH, __( 'File content has been modified', 'wp-security-audit-log' ), __( 'Content of the file on site modified %LineBreak% File: %File% %LineBreak% Location: %FileLocation%', 'wp-security-audit-log' ), 'file', 'modified' ),
-					array( 6029, WSAL_CRITICAL, __( 'File added to the site', 'wp-security-audit-log' ), __( 'File added to site %LineBreak% File: %File% %LineBreak% Location: %FileLocation%', 'wp-security-audit-log' ), 'file', 'added' ),
-					array( 6030, WSAL_MEDIUM, __( 'File deleted from the site', 'wp-security-audit-log' ), __( 'File deleted from site %LineBreak% File: %File% %LineBreak% Location: %FileLocation%', 'wp-security-audit-log' ), 'file', 'deleted' ),
-					array( 6031, WSAL_INFORMATIONAL, __( 'File not scanned because it is bigger than the maximum file size limit', 'wp-security-audit-log' ), __( 'File not scanned because it is bigger than the maximum file size limit %LineBreak% File: %File% %LineBreak% Location: %FileLocation% %LineBreak% %FileSettings%', 'wp-security-audit-log' ), 'system', 'blocked' ),
-					array( 6032, WSAL_INFORMATIONAL, __( 'File integrity scan stopped due to the limit of 1 million files', 'wp-security-audit-log' ), __( 'Your website has more than 1 million files so the file integrity scanner cannot scan them all. Contact support for more information. %LineBreak% %ContactSupport%', 'wp-security-audit-log' ), 'system', 'blocked' ),
-					array( 6033, WSAL_INFORMATIONAL, __( 'File integrity scan started/stopped', 'wp-security-audit-log' ), __( 'The file integrity scan has %ScanStatus%.', 'wp-security-audit-log' ), 'system', 'started' ),
-				),
-
 				__( 'User/Visitor Actions', 'wp-security-audit-log' ) => array(
 					array( 6007, WSAL_INFORMATIONAL, __( 'User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Has requested a non existing page (404 error) %LineBreak% Number of times: %Attempts%', 'wp-security-audit-log' ), 'system', 'opened' ),
 					array( 6023, WSAL_INFORMATIONAL, __( 'Website Visitor User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Website visitor has requested a non existing page (404 error) %LineBreak% Number of times: %Attempts%', 'wp-security-audit-log' ), 'system', 'opened' ),
@@ -576,6 +567,18 @@ function wsaldefaults_wsal_init() {
 			),
 		)
 	);
+
+	// Dummy item to hold WFCM installer.
+	if ( function_exists( 'is_plugin_active' ) && ! defined( 'WFCM_PLUGIN_FILE' ) ) {
+		$file_changes_tab = array (
+			__( 'File Changes', 'wp-security-audit-log' ) => array(
+				__( 'Monitor File Changes', 'wp-security-audit-log' ) => array(
+					array( 99999, WSAL_HIGH, __( 'Dummy', 'wp-security-audit-log' ), '', 'file', 'modified' ),
+				)
+			),
+		);
+		$wsal->alerts->RegisterGroup( $file_changes_tab );
+	}
 
 	// Load Custom alerts.
 	load_include_custom_file( $wsal );

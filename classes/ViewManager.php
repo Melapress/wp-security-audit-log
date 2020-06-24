@@ -138,7 +138,26 @@ class WSAL_ViewManager {
 		}
 
 		add_action( 'admin_head', array( $this, 'hide_freemius_sites_section' ) );
+
+		// Check if WFCM is running by seeing if we have the version defined.
+		if ( defined( 'WFCM_VERSION' ) && ( version_compare( WFCM_VERSION, '1.6.0', '<' ) ) ) {
+			add_action( 'admin_notices', array( $this, 'update_wfcm_notice' ) );
+		}
 	}
+
+	/**
+	 * Display notice if user is using older version of WFCM
+	 */
+	public function update_wfcm_notice() {
+		if ( defined( 'WFCM_VERSION' ) ) {
+			if ( version_compare( WFCM_VERSION, '1.6.0', '<' ) ) {
+				echo '<div class="notice notice-success">
+					<p>' . __( 'WP Activity Log requires Website File Changes Monitor 1.6.0. Please upgrade that plugin.', 'wp-security-audit-log' ) . '</p>
+				</div>';
+			}
+		}
+	}
+
 
 	/**
 	 * Add new view from file inside autoloader path.

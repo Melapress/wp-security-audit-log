@@ -292,7 +292,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					$new  = 'more than ' . $this->Get404LogLimit();
 					$msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
 				}
-
 				$link_file = $this->WriteLog( $new, $ip, $username, true, $url_404 );
 
 				$occ->UpdateMetaValue( 'Attempts', $new );
@@ -725,7 +724,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 */
 	private function WriteLog( $attempts, $ip, $username = '', $logged_in = true, $url = null ) {
 		$name_file = null;
-
 		if ( $logged_in && 'on' === $this->plugin->options_helper->get_option_value( 'log-404', 'off' ) ) {
 			// Get option to log referrer.
 			$log_referrer = $this->plugin->options_helper->get_option_value( 'log-404-referrer' );
@@ -771,13 +769,15 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			$custom_logging_path = $this->plugin->options_helper->get_logging_path() . '404s/';
 			$custom_logging_url  = $this->plugin->options_helper->get_logging_url() . '404s/';
 
-			if ( ! $this->CheckDirectory( $custom_logging_path ) ) {
+			if ( ! $this->CheckDirectory( ABSPATH . $custom_logging_path ) ) {
 				$dir_made = wp_mkdir_p( $custom_logging_path );
 				if ( $dir_made ) {
 					// make an empty index.php in the directory.
 					@file_put_contents( $custom_logging_path . 'index.php', '<?php // Silence is golden' );
 				}
 			}
+
+
 
 			// Check directory.
 			if ( $this->CheckDirectory( $custom_logging_path ) ) {
