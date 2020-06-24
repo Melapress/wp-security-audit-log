@@ -152,7 +152,7 @@ class WSAL_ViewManager {
 		if ( defined( 'WFCM_VERSION' ) ) {
 			if ( version_compare( WFCM_VERSION, '1.6.0', '<' ) ) {
 				echo '<div class="notice notice-success">
-					<p>' . __( 'This plugin requires Website File Changes Monitor 1.6.0. Please upgrade that plugin.', 'wp-security-audit-log' ) . '</p>
+					<p>' . __( 'WP Activity Log requires Website File Changes Monitor 1.6.0. Please upgrade that plugin.', 'wp-security-audit-log' ) . '</p>
 				</div>';
 			}
 		}
