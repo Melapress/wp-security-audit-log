@@ -13,7 +13,7 @@ namespace WSAL\Helpers;
 /**
  * WordPress options are always loaded from the default WordPress database.
  *
- * NOTE: there is primiarily a wrapper class around core functions and it has
+ * NOTE: there is primarily a wrapper class around core functions and it has
  * no cache layer here as wp has an internal options cache of it's own.
  *
  * @since 4.0.2
@@ -65,9 +65,6 @@ class Options {
 	/**
 	 * Gets the value of an option.
 	 *
-	 * First attempts to get it from the class cache, then looks in the WP
-	 * options table. If it gets fetched then store it in the cache.
-	 *
 	 * @method get_option_value
 	 * @since  4.0.2
 	 * @param  string $option_name option name we want to get a value for.
@@ -79,7 +76,14 @@ class Options {
 		if ( empty( $option_name ) || ! is_string( $option_name ) ) {
 			return;
 		}
-		return \get_option( $this->prefix . $option_name, $default );
+
+		$actual_option_name = $option_name;
+		if (!preg_match( '/\A' .preg_quote($this->prefix) . '/', $option_name)) {
+			//  remove prefix duplicate if present
+			$actual_option_name = $this->prefix . $option_name;
+		}
+
+		return self::_get_option_value( $actual_option_name, $default);
 	}
 
 	/**
@@ -97,13 +101,27 @@ class Options {
 		if ( empty( $option_name ) || null === $value ) {
 			return;
 		}
-		return \update_option( $this->prefix . $option_name, $value, $autoload );
+
+		$actual_option_name = $option_name;
+		if (preg_match( '/\A' .preg_quote(\WpSecurityAuditLog::OPT_PRFX) . '/', $option_name)) {
+			//  remove legacy prefix
+			$actual_option_name = substr($option_name, strlen(\WpSecurityAuditLog::OPT_PRFX));
+		}
+
+		if (!preg_match( '/\A' .preg_quote($this->prefix) . '/', $option_name)) {
+			//  prepend prefix if not already present
+			$actual_option_name = $this->prefix . $option_name;
+		}
+
+		$result = self::_set_option_value($actual_option_name, $value, $autoload);
+
+		return $result;
 	}
 
 	/**
 	 * Deletes an option from the WP options table.
 	 *
-	 * NOTE: This is just a strait wrapper around the core function - if the
+	 * NOTE: This is just a straight wrapper around the core function - if the
 	 * item is prefixed then pass the prefix in the option name.
 	 *
 	 * @method delete_option
@@ -112,48 +130,184 @@ class Options {
 	 * @return bool
 	 */
 	public function delete_option( $option_name = '' ) {
-		return \delete_option( $option_name );
+		if (is_multisite()) {
+			switch_to_blog(get_main_network_id());
+		}
+
+		$result = \delete_option( $option_name );
+
+		if (is_multisite()) {
+			restore_current_blog();
+		}
+
+		return $result;
 	}
 
 	/**
-	 * Retrieves the logging directory from the settings. Returns a file path
-	 * with a trailing slash.
+	 * Get options by prefix (notifications stored in json format).
 	 *
-	 * Uses as default:
-	 * /wp-content/uploads/wp-security-audit-log/
-	 *
-	 * @method get_logging_path
-	 * @since  4.1.0
-	 * @return string
+	 * @param string $opt_prefix - Prefix.
+	 * @return array|null - Options.
 	 */
-	public function get_logging_path() {
-		if ( ! \function_exists( 'get_home_path' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-		$relative_path = $this->get_option_value( 'custom-logging-dir', \WSAL_Settings::DEFAULT_LOGGING_DIR );
-		$absolute_path = trailingslashit( ABSPATH ) . trailingslashit( ltrim( $relative_path, '/' ) );
-		return $absolute_path;
+	public function GetNotificationsSetting( $opt_prefix ) {
+		global $wpdb;
+		$prepared_query	= $wpdb->prepare(
+		"SELECT * FROM {$wpdb->options} WHERE option_name LIKE %s;",
+		$opt_prefix . '%%'
+		);
+		return $wpdb->get_results($prepared_query);
 	}
 
 	/**
-	 * Retrieves the logging directory from the settings to generate a url.
-	 * Returns a url with a trailing slash.
+	 * @param int $id Notification ID.
 	 *
-	 * Uses as default:
-	 * /wp-content/uploads/wp-security-audit-log/
-	 *
-	 * @method get_logging_url
-	 * @since  4.1.0
-	 * @return string
+	 * @return array|object|void|null
+	 * @since 4.1.3
 	 */
-	public function get_logging_url() {
-		if ( ! \function_exists( 'get_home_url' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-		$relative_url = $this->get_option_value( 'custom-logging-dir', \WSAL_Settings::DEFAULT_LOGGING_DIR );
-		$absolute_url = trailingslashit( \get_site_url() ) . trailingslashit( ltrim( $relative_url, '/' ) );
-		return $absolute_url;
+	public function GetNotification($id) {
+		global $wpdb;
+		$prepared_query = $wpdb->prepare("SELECT * FROM {$wpdb->options} WHERE option_id = %d LIMIT 1;", $id);
+		return $wpdb->get_row( $prepared_query );
+	}
+
+	/**
+	 * Number of options start with prefix.
+	 *
+	 * @param string $opt_prefix - Prefix.
+	 * @return integer Indicates the number of items.
+	 */
+	public function CountNotifications( $opt_prefix ) {
+		global $wpdb;
+
+		$prepared_query	= $wpdb->prepare(
+			"SELECT COUNT(option_id) FROM {$wpdb->options} WHERE option_name LIKE %s;",
+			$opt_prefix . '%%'
+		);
+		return (int) $wpdb->get_var( $prepared_query );
 
 	}
 
+	/**
+	 * Static function for retrieving an option value statically.
+	 *
+	 * WARNING!
+	 * ========
+	 * This should be used only when absolutely necessary. For example in very early stages of WordPress application
+	 * lifecycle before the whole plugin is loaded. At the time of writing this function, only frontend events settings
+	 * was needed to be treated this way.
+	 *
+	 * In all other cases function \WpSecurityAuditLog::GetGlobalSetting() should be used instead.
+	 *
+	 * @see \WpSecurityAuditLog::GetGlobalSetting()
+	 * @since  4.1.3
+	 * @param  string $option_name Option name we want to get a value for including necessary plugin prefix.
+	 * @param  mixed  $default     a default value to use when one doesn't exist.
+	 * @return mixed
+	 */
+	public static function get_option_value_ignore_prefix( $option_name = '', $default = null) {
+		return self::_get_option_value($option_name, $default);
+	}
+
+	/**
+	 * Internal function used to get the value of an option. Any necessary prefixes are already contained in the option
+	 * name.
+	 *
+	 * @since  4.1.3
+	 * @param  string $option_name Option name we want to get a value for including necessary plugin prefix.
+	 * @param  mixed  $default     a default value to use when one doesn't exist.
+	 * @return mixed
+	 */
+	private static function _get_option_value( $option_name = '', $default = null ) {
+		// bail early if no option name was requested.
+		if ( empty( $option_name ) || ! is_string( $option_name ) ) {
+			return;
+		}
+
+		if (is_multisite()) {
+			switch_to_blog(get_main_network_id());
+		}
+
+		$result = \get_option( $option_name, $default );
+
+		if (is_multisite()) {
+			restore_current_blog();
+		}
+		return maybe_unserialize($result);
+	}
+
+	/**
+	 * Static function for saving an option value statically.
+	 *
+	 * WARNING!
+	 * ========
+	 * This should be used only when absolutely necessary. For example in very early stages of WordPress application
+	 * lifecycle before the whole plugin is loaded. At the time of writing this function, only frontend events settings
+	 * was needed to be treated this way.
+	 *
+	 * In all other cases function \WpSecurityAuditLog::SetGlobalSetting() should be used instead.
+	 *
+	 * @see \WpSecurityAuditLog::SetGlobalSetting()
+	 * @since  4.1.3
+	 * @param  string $option_name Option name we want to get a value for including necessary plugin prefix.
+	 * @param  mixed  $value     A value to store under the option name.
+	 * @param  bool   $autoload    Whether or not to autoload this option.
+	 * @return mixed
+	 */
+	public static function set_option_value_ignore_prefix( $option_name = '', $value = null, $autoload = true ) {
+		return self::_set_option_value( $option_name, $value, $autoload = true );
+	}
+
+	/**
+	 * Internal function used to set the value of an option. Any necessary prefixes are already contained in the option
+	 * name.
+	 *
+	 * @since  4.1.3
+	 * @param  string $option_name Option name we want to save a value for including necessary plugin prefix.
+	 * @param  mixed  $value       A value to store under the option name.
+	 * @param  bool   $autoload    Whether or not to autoload this option.
+	 * @return bool Whether or not the option was updated.
+	 */
+	private static function _set_option_value( $option_name = '', $value = null, $autoload = true ) {
+		// bail early if no option name or value was passed.
+		if ( empty( $option_name ) || null === $value ) {
+			return;
+		}
+
+		if (is_multisite()) {
+			switch_to_blog(get_main_network_id());
+		}
+
+		$result = \update_option( $option_name, $value, $autoload );
+
+		if (is_multisite()) {
+			restore_current_blog();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Converts a string (e.g. 'yes' or 'no') to a bool.
+	 *
+	 * @since 4.1.3
+	 * @param string $string String to convert.
+	 * @return bool
+	 */
+	public static function string_to_bool( $string ) {
+		return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || 'true' === $string || '1' === $string || 'on' === $string || 'enable' === $string);
+	}
+
+	/**
+	 * Converts a bool to a 'yes' or 'no'.
+	 *
+	 * @since 4.1.3
+	 * @param bool $bool String to convert.
+	 * @return string
+	 */
+	public static function bool_to_string( $bool ) {
+		if ( ! is_bool( $bool ) ) {
+			$bool = self::string_to_bool( $bool );
+		}
+		return true === $bool ? 'yes' : 'no';
+	}
 }

@@ -259,10 +259,10 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 						if ( $old_menu_term['name'] != $post_array['menu-name'] ) {
 							$this->EventChangeName( $old_menu_term['name'], $post_array['menu-name'] );
 						} else {
-							// Remove the last menu item.
-							// if ( count( $content_names_old ) == 1 && count( $content_types_old ) == 1 ) {
-							// $this->EventRemoveItems( $content_types_old[0], $content_names_old[0], $post_array['menu-name'] );
-							// }
+							//Remove the last menu item.
+							if ( count( $content_names_old ) == 1 && count( $content_types_old ) == 1 ) {
+								$this->EventRemoveItems( $content_types_old[0], $content_names_old[0], $post_array['menu-name'] );
+							}
 						}
 					}
 				}

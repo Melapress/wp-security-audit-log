@@ -27,8 +27,25 @@ class WSAL_Uninstall {
 			self::drop_table( 'metadata' );
 		}
 
+		// Check if we have set things to delete upon uninstall.
+		if ( 'yes' === get_option( 'wsal_delete-data' ) ) {
+			self::delete_options_from_wp_options();
+		}
+
 		// Clear scheduled hooks.
 		wp_clear_scheduled_hook( 'wsal_cleanup' );
+	}
+
+	/**
+	 * Delete wsal options from wp_options table.
+	 */
+	private static function delete_options_from_wp_options() {
+		global $wpdb;
+		$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" );
+
+		foreach( $plugin_options as $option ) {
+	    delete_option( $option->option_name );
+		}
 	}
 
 	/**

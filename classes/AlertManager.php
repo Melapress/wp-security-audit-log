@@ -125,24 +125,22 @@ final class WSAL_AlertManager {
 		 */
 		$this->ignored_cpts = apply_filters(
 			'wsal_ignored_custom_post_types',
-			array(
-				'attachment',          // Attachment CPT.
-				'revision',            // Revision CPT.
-				'nav_menu_item',       // Nav menu item CPT.
-				'customize_changeset', // Customize changeset CPT.
-				'custom_css',          // Custom CSS CPT.
-				'product',             // WooCommerce Product CPT.
-				'shop_coupon',         // WooCommerse Coupon CPT.
-				'shop_order',          // WooCommerce Order CPT.
-				'shop_order_refund',   // WooCommerce Order Refund CPT.
-				'product_variation',   // WooCommerce Product Variation CPT.
-				'wc_product_tab',      // WooCommerce Product Tab CPT.
+			array_unique(
+				array_merge(
+					$this->get_disabled_post_types(), array(
+						'attachment',          // Attachment CPT.
+						'revision',            // Revision CPT.
+						'nav_menu_item',       // Nav menu item CPT.
+						'customize_changeset', // Customize changeset CPT.
+						'custom_css',          // Custom CSS CPT.
+					)
+				)
 			)
 		);
 
-		$this->date_format     = $this->plugin->settings->GetDateFormat();
-		$this->datetime_format = $this->plugin->settings->GetDatetimeFormat( false );
-		$timezone              = $this->plugin->settings->GetTimezone();
+		$this->date_format     = $this->plugin->settings()->GetDateFormat();
+		$this->datetime_format = $this->plugin->settings()->GetDatetimeFormat( false );
+		$timezone              = $this->plugin->settings()->GetTimezone();
 
 		if ( '0' === $timezone ) {
 			$timezone = 'utc';
@@ -163,7 +161,7 @@ final class WSAL_AlertManager {
 	 */
 	public function schedule_log_events() {
 		// Get external buffer option.
-		$use_buffer = $this->plugin->GetGlobalOption( 'adapter-use-buffer' );
+		$use_buffer = $this->plugin->GetGlobalBooleanSetting( 'adapter-use-buffer' );
 
 		// If external DB buffer is enabled then set the cron.
 		if ( $use_buffer ) {
@@ -233,7 +231,7 @@ final class WSAL_AlertManager {
 	 */
 	public function Trigger( $type, $data = array(), $delayed = false ) {
 		// Get buffer use option.
-		$use_buffer = $this->plugin->GetGlobalOption( 'adapter-use-buffer' );
+		$use_buffer = $this->plugin->GetGlobalBooleanSetting( 'adapter-use-buffer' );
 
 		// Log temporary alerts first.
 		if ( ! $use_buffer ) {
@@ -268,7 +266,7 @@ final class WSAL_AlertManager {
 			$data['CurrentUserRoles'] = $roles;
 		} else {
 			// not a switched user so get the current user roles.
-			$roles = $this->plugin->settings->GetCurrentUserRoles();
+			$roles = $this->plugin->settings()->GetCurrentUserRoles();
 		}
 		if ( empty( $roles ) && ! empty( $data['CurrentUserRoles'] ) ) {
 			$roles = $data['CurrentUserRoles'];
@@ -324,7 +322,7 @@ final class WSAL_AlertManager {
 	 */
 	public function TriggerIf( $type, $data, $cond = null ) {
 		$username = wp_get_current_user()->user_login;
-		$roles    = $this->plugin->settings->GetCurrentUserRoles();
+		$roles    = $this->plugin->settings()->GetCurrentUserRoles();
 
 		if ( $this->CheckEnableUserRoles( $username, $roles ) ) {
 			$this->_pipeline[] = array(
@@ -519,7 +517,7 @@ final class WSAL_AlertManager {
 	 * @param int[] $types Alert type codes to be disabled.
 	 */
 	public function SetDisabledAlerts( $types ) {
-		$this->plugin->settings->SetDisabledAlerts( $types );
+		$this->plugin->settings()->SetDisabledAlerts( $types );
 	}
 
 	/**
@@ -528,7 +526,7 @@ final class WSAL_AlertManager {
 	 * @return int[]
 	 */
 	public function GetDisabledAlerts() {
-		return $this->plugin->settings->GetDisabledAlerts();
+		return $this->plugin->settings()->GetDisabledAlerts();
 	}
 
 	/**
@@ -549,13 +547,13 @@ final class WSAL_AlertManager {
 	 */
 	protected function Log( $event_id, $event_data = array() ) {
 		if ( ! isset( $event_data['ClientIP'] ) ) {
-			$client_ip = $this->plugin->settings->GetMainClientIP();
+			$client_ip = $this->plugin->settings()->GetMainClientIP();
 			if ( ! empty( $client_ip ) ) {
 				$event_data['ClientIP'] = $client_ip;
 			}
 		}
-		if ( ! isset( $event_data['OtherIPs'] ) && $this->plugin->settings->IsMainIPFromProxy() ) {
-			$other_ips = $this->plugin->settings->GetClientIPs();
+		if ( ! isset( $event_data['OtherIPs'] ) && $this->plugin->settings()->IsMainIPFromProxy() ) {
+			$other_ips = $this->plugin->settings()->GetClientIPs();
 			if ( ! empty( $other_ips ) ) {
 				$event_data['OtherIPs'] = $other_ips;
 			}
@@ -571,7 +569,7 @@ final class WSAL_AlertManager {
 			}
 		}
 		if ( ! isset( $event_data['CurrentUserRoles'] ) && function_exists( 'is_user_logged_in' ) && is_user_logged_in() ) {
-			$current_user_roles = $this->plugin->settings->GetCurrentUserRoles();
+			$current_user_roles = $this->plugin->settings()->GetCurrentUserRoles();
 			if ( ! empty( $current_user_roles ) ) {
 				$event_data['CurrentUserRoles'] = $current_user_roles;
 			}
@@ -779,7 +777,7 @@ final class WSAL_AlertManager {
 	 * @return array.
 	 */
 	public function GetDisabledUsers() {
-		return $this->plugin->settings->GetExcludedMonitoringUsers();
+		return $this->plugin->settings()->GetExcludedMonitoringUsers();
 	}
 
 	/**
@@ -804,7 +802,7 @@ final class WSAL_AlertManager {
 	 * @return array
 	 */
 	public function GetDisabledRoles() {
-		return $this->plugin->settings->GetExcludedMonitoringRoles();
+		return $this->plugin->settings()->GetExcludedMonitoringRoles();
 	}
 
 	/**
@@ -825,7 +823,7 @@ final class WSAL_AlertManager {
 	 * @since 2.6.7
 	 */
 	public function get_disabled_post_types() {
-		return $this->plugin->settings->get_excluded_post_types();
+		return $this->plugin->settings()->get_excluded_post_types();
 	}
 
 	/**
@@ -833,16 +831,16 @@ final class WSAL_AlertManager {
 	 */
 	private function IsDisabledIP() {
 		$is_disabled  = false;
-		$ip           = $this->plugin->settings->GetMainClientIP();
-		$excluded_ips = $this->plugin->settings->GetExcludedMonitoringIP();
+		$ip           = $this->plugin->settings()->GetMainClientIP();
+		$excluded_ips = $this->plugin->settings()->GetExcludedMonitoringIP();
 
 		if ( ! empty( $excluded_ips ) ) {
 			foreach ( $excluded_ips as $excluded_ip ) {
 				if ( false !== strpos( $excluded_ip, '-' ) ) {
-					$ip_range = $this->plugin->settings->get_ipv4_by_range( $excluded_ip );
+					$ip_range = $this->plugin->settings()->get_ipv4_by_range( $excluded_ip );
 					$ip_range = $ip_range->lower . '-' . $ip_range->upper;
 
-					if ( $this->plugin->settings->check_ipv4_in_range( $ip, $ip_range ) ) {
+					if ( $this->plugin->settings()->check_ipv4_in_range( $ip, $ip_range ) ) {
 						$is_disabled = true;
 						break;
 					}
@@ -864,7 +862,7 @@ final class WSAL_AlertManager {
 	 */
 	public function log_temp_alerts() {
 		// Get temporary alerts.
-		$temp_alerts = get_option( 'wsal_temp_alerts', array() );
+		$temp_alerts = $this->plugin->GetGlobalSetting('temp_alerts', array() );
 
 		if ( empty( $temp_alerts ) ) {
 			return;
@@ -897,7 +895,7 @@ final class WSAL_AlertManager {
 			}
 
 			// Delete temporary alerts.
-			delete_option( 'wsal_temp_alerts' );
+			$this->plugin->options_helper->delete_option( 'wsal_temp_alerts' );
 			return true;
 		}
 	}
@@ -944,6 +942,7 @@ final class WSAL_AlertManager {
 		}
 
 		// Execute the query.
+		/** @var \WSAL\MainWPExtension\Models\Occurrence[] $events */
 		$events = $events_query->getAdapter()->Execute( $events_query );
 
 		if ( ! empty( $events ) && is_array( $events ) ) {
@@ -1033,7 +1032,7 @@ final class WSAL_AlertManager {
 		$occ_query = new WSAL_Models_OccurrenceQuery();
 
 		// Get site id.
-		$site_id = (int) $this->plugin->settings->get_view_site_id();
+		$site_id = (int) $this->plugin->settings()->get_view_site_id();
 		if ( $site_id ) {
 			$occ_query->addCondition( 'site_id = %d ', $site_id );
 		}
@@ -1115,10 +1114,6 @@ final class WSAL_AlertManager {
 			'setting'              => __( 'Setting', 'wp-security-audit-log' ),
 			'file'                 => __( 'File', 'wp-security-audit-log' ),
 			'system-setting'       => __( 'System Setting', 'wp-security-audit-log' ),
-			'woocommerce-product'  => __( 'WooCommerce Product', 'wp-security-audit-log' ),
-			'woocommerce-store'    => __( 'WooCommerce Store', 'wp-security-audit-log' ),
-			'woocommerce-coupon'   => __( 'WooCommerce Coupon', 'wp-security-audit-log' ),
-			'woocommerce-category' => __( 'WooCommerce Category', 'wp-security-audit-log' ),
 			'mainwp-network'       => __( 'MainWP Network', 'wp-security-audit-log' ),
 			'mainwp'               => __( 'MainWP', 'wp-security-audit-log' ),
 			'yoast-seo'            => __( 'Yoast SEO', 'wp-security-audit-log' ),

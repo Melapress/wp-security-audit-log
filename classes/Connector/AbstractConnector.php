@@ -52,11 +52,6 @@ abstract class WSAL_Connector_AbstractConnector {
 	 */
 	public function __construct( $adapters_dir_name = null ) {
 		$this->adaptersBasePath = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Adapters' . DIRECTORY_SEPARATOR;
-
-		// require_once($this->adaptersBasePath . 'ActiveRecordInterface.php');
-		// require_once($this->adaptersBasePath . 'MetaInterface.php');
-		// require_once($this->adaptersBasePath . 'OccurrenceInterface.php');
-		// require_once($this->adaptersBasePath . 'QueryInterface.php');
 		if ( ! empty( $adapters_dir_name ) ) {
 			$this->adaptersDirName = $adapters_dir_name;
 			require_once( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'ActiveRecordAdapter.php' );

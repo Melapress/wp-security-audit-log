@@ -27,14 +27,7 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 *
 	 * @var array
 	 */
-	public static $connector;
-
-	/**
-	 * Default Connector.
-	 *
-	 * @var bool
-	 */
-	public static $defaultConnector;
+	private static $connector;
 
 	/**
 	 * Adapter.
@@ -53,7 +46,8 @@ abstract class WSAL_Connector_ConnectorFactory {
 	private static $is_installed;
 
 	/**
-	 * Returns the a default WPDB connector for saving options
+	 * Returns the a default WPDB connector that must be always used for some data, for example user sessions and
+	 * also custom options table in the past.
 	 */
 	public static function GetDefaultConnector() {
 		return new WSAL_Connector_MySQLDB();
@@ -63,8 +57,10 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 * Returns a connector singleton
 	 *
 	 * @param array $config - Connection config.
-	 * @param bool  $reset - True if reset.
+	 * @param bool $reset - True if reset.
+	 *
 	 * @return WSAL_Connector_ConnectorInterface
+	 * @throws Freemius_Exception
 	 */
 	public static function GetConnector( $config = null, $reset = false ) {
 		if ( ! empty( $config ) ) {
@@ -90,6 +86,7 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 * Get the adapter config stored in the DB
 	 *
 	 * @return array|null adapter config
+	 * @throws Freemius_Exception
 	 */
 	public static function GetConfig() {
 		$conf = new WSAL_Settings( WpSecurityAuditLog::GetInstance() );

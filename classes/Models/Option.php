@@ -18,6 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Option Model gets and sets the options of the wsal_options table in the database.
  *
  * @package Wsal
+ *
+ * @deprecated 4.1.3
+ * @see \WSAL\Helpers\Options
  */
 class WSAL_Models_Option extends WSAL_Models_ActiveRecord {
 
@@ -67,10 +70,16 @@ class WSAL_Models_Option extends WSAL_Models_ActiveRecord {
 	 * Sets Option record.
 	 *
 	 * @param string $name - Option name.
-	 * @param mixed  $value - Option value.
+	 * @param mixed $value - Option value.
+	 *
+	 * @return bool|int|void
 	 */
 	public function SetOptionValue( $name, $value ) {
-		$option            = $this->getAdapter()->GetNamedOption( $name );
+		$option = $this->getAdapter()->GetNamedOption( $name );
+		if ( $option == null ) {
+			return;
+		}
+
 		$this->id          = $option['id'];
 		$this->option_name = $name;
 

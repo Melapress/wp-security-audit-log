@@ -58,7 +58,7 @@ class WSAL_Sensors_PhpErrors extends WSAL_AbstractSensor {
 	 * Listening to Php events.
 	 */
 	public function HookEvents() {
-		if ( $this->plugin->settings->IsPhpErrorLoggingEnabled() ) {
+		if ( $this->plugin->settings()->IsPhpErrorLoggingEnabled() ) {
 			set_error_handler( array( $this, 'EventError' ), E_ALL );
 			set_exception_handler( array( $this, 'EventException' ) );
 			register_shutdown_function( array( $this, 'EventShutdown' ) );
@@ -92,7 +92,7 @@ class WSAL_Sensors_PhpErrors extends WSAL_AbstractSensor {
 		}
 
 		$errbacktrace = 'No Backtrace';
-		if ( $this->plugin->settings->IsBacktraceLoggingEnabled() ) {
+		if ( $this->plugin->settings()->IsBacktraceLoggingEnabled() ) {
 			ob_start();
 			debug_print_backtrace();
 			$errbacktrace = ob_get_clean();
@@ -131,7 +131,7 @@ class WSAL_Sensors_PhpErrors extends WSAL_AbstractSensor {
 		}
 
 		$errbacktrace = 'No Backtrace';
-		if ( $this->plugin->settings->IsBacktraceLoggingEnabled() ) {
+		if ( $this->plugin->settings()->IsBacktraceLoggingEnabled() ) {
 			$errbacktrace = $ex->getTraceAsString();
 		}
 

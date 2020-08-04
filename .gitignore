@@ -1,5 +1,5 @@
 # Netbeans
-/nbproject/
+**/nbproject/*
 
 # Windows image file caches
 Thumbs.db
@@ -8,13 +8,84 @@ ehthumbs.db
 # Folder config file
 Desktop.ini
 
-# Log files
-*.log
-Request.log.php
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.bz2
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+*.tgz
+*.map
 
-# VS and VSPHP
-*.cache
-*.phpproj
-*.puo
-*.sln
-*.suo
+# Logs and databases #
+######################
+*.log
+*.sql
+
+# OS generated files #
+######################
+**.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+._*
+
+# Vim generated files #
+######################
+*.un~
+
+# SASS #
+##########
+**/.sass-cache
+**/.sass-cache/*
+**/.map
+
+# Composer #
+##########
+library/vendors/composer/
+!resources/js/vendor/
+wpcs/
+composer.lock
+
+# Bower #
+##########
+resources/bower_components/*
+
+# Codekit #
+##########
+/codekit-config.json
+*.codekit
+**.codekit-cache/*
+
+# NPM #
+##########
+node_modules
+
+# Compiled Files and Build Dirs #
+##########
+/README.html
+/build/
+
+# PhpStrom Project Files #
+.idea/
+library/vendors/composer
+resources/img/.DS_Store
+resources/sass/HTML
+resources/sass/Rails
+HTML
+Rails
+
+# Sublime Project Files #
+##########
+# workspace files are user-specific
+*.sublime-workspace
+
+# project files should be checked into the repository, unless a significant
+# proportion of contributors will probably not be using SublimeText
+*.sublime-project
+

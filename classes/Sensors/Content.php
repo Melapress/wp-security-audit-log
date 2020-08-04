@@ -1264,7 +1264,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					}
 
 					// Get post meta events.
-					$meta_events = array( 2053, 2054, 2055, 2062, 2016, 2120, 2119 );
+					$meta_events = array( 2053, 2054, 2055, 2062, 2016, 2120, 2119, 2131, 2132 );
 					foreach ( $meta_events as $meta_event ) {
 						if ( $this->plugin->alerts->WillOrHasTriggered( $meta_event ) ) {
 							return 0; // Return if any meta event has or will trigger.
@@ -1426,7 +1426,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	private function check_auto_draft( $code, $title ) {
 		$ignore = 0;
 		if ( 2008 === $code && ( 'auto-draft' === $title || 'Auto Draft' === $title ) ) {
-			$ignore = ( $this->plugin->settings->IsWPBackend() ) ? 0 : 1;
+			$ignore = ! $this->plugin->settings()->IsWPBackend();
 		}
 		return $ignore;
 	}

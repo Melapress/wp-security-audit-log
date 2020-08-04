@@ -60,35 +60,6 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		if ( WpSecurityAuditLog::is_plugin_active( 'user-switching/user-switching.php' ) ) {
 			add_action( 'switch_to_user', array( $this, 'user_switched_event' ), 10, 2 );
 		}
-
-		// Directory for logged in users log files.
-		$user_upload_dir  = wp_upload_dir();
-		$failed_login_dir = trailingslashit( $user_upload_dir['basedir'] . '/wp-security-audit-log/failed-logins/' );
-
-		/**
-		 * Check if failed login directory exists then
-		 * delete all files within this directory and
-		 * remove the directory itself.
-		 *
-		 * @since 3.1.2
-		 */
-		if ( is_dir( $failed_login_dir ) ) {
-			// Get all files inside failed logins folder.
-			$files = glob( $failed_login_dir . '*' );
-
-			if ( ! empty( $files ) ) {
-				// Unlink each file.
-				foreach ( $files as $file ) {
-					// Check if valid file.
-					if ( is_file( $file ) ) {
-						// Delete the file.
-						unlink( $file );
-					}
-				}
-			}
-			// Remove the directory.
-			rmdir( $failed_login_dir );
-		}
 	}
 
 	/**
@@ -124,9 +95,9 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		// If provider and user are set and provider is known then log the event.
 		if ( $provider && $user && in_array( $provider, $providers_2fa, true ) ) {
 			// Get user roles.
-			$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+			$user_roles = $this->plugin->settings()->GetCurrentUserRoles( $user->roles );
 
-			if ( $this->plugin->settings->IsLoginSuperAdmin( $user->user_login ) ) {
+			if ( $this->plugin->settings()->IsLoginSuperAdmin( $user->user_login ) ) {
 				$user_roles[] = 'superadmin';
 			}
 
@@ -178,7 +149,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 
 				// Log user changed password alert.
 				if ( ! empty( $user ) ) {
-					$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+					$user_roles = $this->plugin->settings()->GetCurrentUserRoles( $user->roles );
 					$this->plugin->alerts->Trigger(
 						4003,
 						array(
@@ -198,9 +169,9 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			return;
 		}
 		$user_login = $user->data->user_login;
-		$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+		$user_roles = $this->plugin->settings()->GetCurrentUserRoles( $user->roles );
 
-		if ( $this->plugin->settings->IsLoginSuperAdmin( $user_login ) ) {
+		if ( $this->plugin->settings()->IsLoginSuperAdmin( $user_login ) ) {
 			$user_roles[] = 'superadmin';
 		}
 
@@ -212,10 +183,17 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			$alert_data['SessionID'] = WSAL_UserSessions_Helpers::hash_token( $token );
 		}
 
-		$this->plugin->alerts->Trigger(
+		$this->plugin->alerts->TriggerIf(
 			1000,
 			$alert_data,
-			true
+			/**
+			 * @param WSAL_AlertManager$manager
+			 * @return bool
+			 */
+			function ( $manager ) {
+				//  don't fire if the user is changing their password via admin profile page
+				return ! $manager->WillOrHasTriggered(4003);
+			}
 		);
 
 	}
@@ -226,7 +204,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	public function EventLogout() {
 		if ( $this->_current_user->ID ) {
 			// get the list of excluded users.
-			$excluded_users    = $this->plugin->settings->GetExcludedMonitoringUsers();
+			$excluded_users    = $this->plugin->settings()->GetExcludedMonitoringUsers();
 			$excluded_user_ids = array();
 			// convert excluded usernames into IDs.
 			if ( ! empty( $excluded_users ) && is_array( $excluded_users ) ) {
@@ -243,7 +221,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				1001,
 				array(
 					'CurrentUserID'    => $this->_current_user->ID,
-					'CurrentUserRoles' => $this->plugin->settings->GetCurrentUserRoles( $this->_current_user->roles ),
+					'CurrentUserRoles' => $this->plugin->settings()->GetCurrentUserRoles( $this->_current_user->roles ),
 				),
 				true
 			);
@@ -256,7 +234,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function GetLoginFailureLogLimit() {
-		return $this->plugin->settings->get_failed_login_limit();
+		return $this->plugin->settings()->get_failed_login_limit();
 	}
 
 	/**
@@ -265,7 +243,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 * @return int
 	 */
 	protected function GetVisitorLoginFailureLogLimit() {
-		return $this->plugin->settings->get_visitor_failed_login_limit();
+		return $this->plugin->settings()->get_visitor_failed_login_limit();
 	}
 
 	/**
@@ -345,7 +323,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	public function EventLoginFailure( $username ) {
 		list($y, $m, $d) = explode( '-', date( 'Y-m-d' ) );
 
-		$ip = $this->plugin->settings->GetMainClientIP();
+		$ip = $this->plugin->settings()->GetMainClientIP();
 
 		// Filter $_POST global array for security.
 		$post_array = filter_input_array( INPUT_POST );
@@ -357,8 +335,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$site_id        = ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
 		if ( $user ) {
 			$new_alert_code = 1002;
-			$user_roles     = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
-			if ( $this->plugin->settings->IsLoginSuperAdmin( $username ) ) {
+			$user_roles     = $this->plugin->settings()->GetCurrentUserRoles( $user->roles );
+			if ( $this->plugin->settings()->IsLoginSuperAdmin( $username ) ) {
 				$user_roles[] = 'superadmin';
 			}
 		}
@@ -390,13 +368,19 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			);
 			$occ = count( $occ ) ? $occ[0] : null;
 
+			if ($this->plugin->alerts->WillOrHasTriggered(1004)) {
+				//  skip if 1004 (session block) is already in place
+				return;
+			}
+
 			if ( ! empty( $occ ) ) {
 				// Update existing record exists user.
 				$this->IncrementLoginFailure( $ip, $site_id, $user );
 				$new = $occ->GetMetaValue( 'Attempts', 0 ) + 1;
 
-				if ( -1 !== (int) $this->GetLoginFailureLogLimit()
-					&& $new > $this->GetLoginFailureLogLimit() ) {
+				$login_failure_log_limit = $this->GetLoginFailureLogLimit();
+				if ( - 1 !== (int) $this->GetLoginFailureLogLimit()
+				     && $new > $this->GetLoginFailureLogLimit() ) {
 					$new = $this->GetLoginFailureLogLimit() . '+';
 				}
 
@@ -415,7 +399,16 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 						'Username'         => $username,
 						'LogFileText'      => '',
 						'CurrentUserRoles' => $user_roles,
-					)
+					),
+					/**
+					 * @param WSAL_AlertManager $manager
+					 *
+					 * @return bool
+					 */
+					function ($manager) {
+						//  skip if 1004 (session block) is already in place
+						return !$manager->WillOrHasTriggered(1004);
+					}
 				);
 			}
 		} else {
@@ -487,7 +480,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 */
 	public function EventPasswordReset( $user, $new_pass ) {
 		if ( ! empty( $user ) ) {
-			$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+			$user_roles = $this->plugin->settings()->GetCurrentUserRoles( $user->roles );
 			$this->plugin->alerts->Trigger(
 				4003,
 				array(
@@ -516,8 +509,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		}
 
 		// get the users roles.
-		$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
-		if ( $this->plugin->settings->IsLoginSuperAdmin( $username ) ) {
+		$user_roles = $this->plugin->settings()->GetCurrentUserRoles( $user->roles );
+		if ( $this->plugin->settings()->IsLoginSuperAdmin( $username ) ) {
 			$user_roles[] = 'superadmin';
 		}
 
@@ -574,10 +567,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 */
 	public function user_switched_event( $new_user_id, $old_user_id ) {
 		$target_user       = get_user_by( 'ID', $new_user_id );
-		$target_user_roles = $this->plugin->settings->GetCurrentUserRoles( $target_user->roles );
+		$target_user_roles = $this->plugin->settings()->GetCurrentUserRoles( $target_user->roles );
 		$target_user_roles = implode( ', ', $target_user_roles );
 		$old_user          = get_user_by( 'ID', $old_user_id );
-		$old_user_roles    = $this->plugin->settings->GetCurrentUserRoles( $old_user->roles );
+		$old_user_roles    = $this->plugin->settings()->GetCurrentUserRoles( $old_user->roles );
 
 		$this->plugin->alerts->Trigger(
 			1008,

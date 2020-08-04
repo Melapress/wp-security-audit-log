@@ -885,4 +885,23 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$sql = rtrim( $sql, ', ' );
 		$_wpdb->query( $sql );
 	}
+
+	/**
+	 * Updates records in DB matching a query.
+	 *
+	 * @param string       $table        Table name
+	 * @param array        $data         Data to update (in column => value pairs).
+	 *                                   Both $data columns and $data values should be "raw" (neither should be SQL escaped).
+	 *                                   Sending a null value will cause the column to be set to NULL - the corresponding
+	 *                                   format is ignored in this case.
+	 * @param array        $where        A named array of WHERE clauses (in column => value pairs).
+	 *                                   Multiple clauses will be joined with ANDs.
+	 *                                   Both $where columns and $where values should be "raw".
+	 *                                   Sending a null value will create an IS NULL comparison - the corresponding format will be ignored in this case.
+	 * @return int|false The number of rows updated, or false on error.
+	 * @since 4.1.3
+	 */
+	public function UpdateQuery( $table, $data, $where ) {
+		return $this->connection->update( $table, $data, $where );
+	}
 }

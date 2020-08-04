@@ -39,14 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @subpackage Sensors
  * @since 1.0.0
  */
-class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
-
-	/**
-	 * Array of meta data being updated.
-	 *
-	 * @var array
-	 */
-	protected $old_meta = array();
+class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 
 	/**
 	 * Empty meta counter.
@@ -68,72 +61,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 		add_action( 'update_user_meta', array( $this, 'event_user_meta_updating' ), 10, 3 );
 		add_action( 'updated_user_meta', array( $this, 'event_user_meta_updated' ), 10, 4 );
 		add_action( 'user_register', array( $this, 'reset_null_meta_counter' ), 10 );
-	}
-
-	/**
-	 * Check "Excluded Custom Fields" or meta keys starts with "_".
-	 *
-	 * @param int    $object_id - Object ID.
-	 * @param string $meta_key - Meta key.
-	 * @return boolean can log true|false
-	 */
-	protected function CanLogMetaKey( $object_id, $meta_key ) {
-		// Check if excluded meta key or starts with _.
-		if ( '_' === substr( $meta_key, 0, 1 ) ) {
-			/**
-			 * List of hidden keys allowed to log.
-			 *
-			 * @since 3.4.1
-			 */
-			$log_hidden_keys = apply_filters( 'wsal_log_hidden_meta_keys', array() );
-
-			// If the meta key is allowed to log then return true.
-			if ( in_array( $meta_key, $log_hidden_keys, true ) ) {
-				return true;
-			}
-
-			return false;
-		} elseif ( $this->IsExcludedCustomFields( $meta_key ) ) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-	/**
-	 * Check "Excluded Custom Fields".
-	 * Used in the above function.
-	 *
-	 * @param string $custom - Custom meta key.
-	 * @return boolean is excluded from monitoring true|false
-	 */
-	public function IsExcludedCustomFields( $custom ) {
-		$custom_fields = $this->plugin->settings->GetExcludedMonitoringCustom();
-
-		if ( in_array( $custom, $custom_fields ) ) {
-			return true;
-		}
-
-		foreach ( $custom_fields as $field ) {
-			if ( false !== strpos( $field, '*' ) ) {
-				// Wildcard str[any_character] when you enter (str*).
-				if ( substr( $field, -1 ) == '*' ) {
-					$field = rtrim( $field, '*' );
-					if ( preg_match( "/^$field/", $custom ) ) {
-						return true;
-					}
-				}
-
-				// Wildcard [any_character]str when you enter (*str).
-				if ( '*' === substr( $field, 0, 1 ) ) {
-					$field = ltrim( $field, '*' );
-					if ( preg_match( "/$field$/", $custom ) ) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -297,7 +224,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 				);
 			} elseif ( $log_meta_event && $this->old_meta[ $meta_id ]->val !== $meta_value ) { // Check change in meta value.
 				$editor_link = $this->GetEditorLink( $post );
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->TriggerIf(
 					2054,
 					array(
 						'PostID'             => $object_id,
@@ -312,7 +239,16 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 						'MetaValueOld'       => $this->old_meta[ $meta_id ]->val,
 						'MetaLink'           => $meta_key,
 						$editor_link['name'] => $editor_link['value'],
-					)
+					),
+					/**
+					 * @param WSAL_AlertManager$manager
+					 * @return bool
+					 */
+					function ( $manager ) {
+						//  don't fire if there's already an event 2131 or 2132 (ACF relationship change)
+						return ! $manager->WillOrHasTriggered( 2131 )
+						       && ! $manager->WillOrHasTriggered( 2132 );
+					}
 				);
 			}
 			// Remove old meta update data.
@@ -368,7 +304,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 			if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
 				return;
 			}
-
+			
 			// If not allowed to log meta event then skip it.
 			if ( ! $log_meta_event ) {
 				continue;
@@ -401,19 +337,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractSensor {
 	 */
 	public function reset_null_meta_counter() {
 		$this->null_meta_counter = 0;
-	}
-
-	/**
-	 * Get editor link.
-	 *
-	 * @param stdClass $post - The post.
-	 * @return array $editor_link - Name and value link
-	 */
-	private function GetEditorLink( $post ) {
-		return array(
-			'name'  => 'EditorLinkPost',
-			'value' => get_edit_post_link( $post->ID ),
-		);
 	}
 
 	/**

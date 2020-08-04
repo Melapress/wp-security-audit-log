@@ -92,6 +92,9 @@ final class WSAL_Alert {
 	 * @return mixed The value nearest to the expression.
 	 */
 	protected function GetMetaExprValue( $expr, $meta_data = array() ) {
+		if ( 'IPAddress' == $expr ) {
+			return implode(', ', $meta_data['IPAddress']);
+		}
 		// TODO: Handle function calls (and methods?).
 		$expr = explode( '->', $expr );
 		$meta = array_shift( $expr );

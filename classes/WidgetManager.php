@@ -46,8 +46,8 @@ class WSAL_WidgetManager {
 		global $pagenow;
 
 		if (
-			$this->_plugin->settings->IsWidgetsEnabled() // If widget is enabled.
-			&& $this->_plugin->settings->CurrentUserCan( 'view' ) // If user has permission to view.
+			$this->_plugin->settings()->IsWidgetsEnabled() // If widget is enabled.
+			&& $this->_plugin->settings()->CurrentUserCan( 'view' ) // If user has permission to view.
 			&& 'index.php' === $pagenow // If the current page is dashboard.
 		) {
 			wp_add_dashboard_widget(
@@ -116,7 +116,7 @@ class WSAL_WidgetManager {
 		// order by date of creation.
 		$query->addOrderBy( 'created_on', true );
 		// set the limit based on the limit option for dashboard alerts.
-		$query->setLimit( $this->_plugin->settings->GetDashboardWidgetMaxAlerts() );
+		$query->setLimit( $this->_plugin->settings()->GetDashboardWidgetMaxAlerts() );
 		return $query;
 	}
 

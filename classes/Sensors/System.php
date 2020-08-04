@@ -67,28 +67,26 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		add_filter( 'template_redirect', array( $this, 'Event404' ) );
 
 		// get the logging location.
-		$custom_logging_path_base = $this->plugin->options_helper->get_logging_path();
-		$custom_logging_path      = $custom_logging_path_base . '404s/';
-		if ( ! $this->CheckDirectory( $custom_logging_path ) ) {
-			$dir_made = wp_mkdir_p( $custom_logging_path );
-			if ( $dir_made ) {
+		$custom_logging_path_base = $this->plugin->settings()->get_working_dir_path( '404s' );
+		if ( ! is_wp_error( $custom_logging_path_base ) ) {
+			if ( ! file_exists( $custom_logging_path_base . 'index.php' ) ) {
 				// make an empty index.php in the directory.
-				@file_put_contents( $custom_logging_path . 'index.php', '<?php // Silence is golden' );
+				@file_put_contents( $custom_logging_path_base . 'index.php', '<?php // Silence is golden' );
 			}
+
+			// Directory for logged in users log files.
+			$user_upload_path = $custom_logging_path_base . 'users' . DIRECTORY_SEPARATOR;
+			$this->remove_sub_directories( $user_upload_path ); // Remove it.
+
+			// Directory for visitor log files.
+			$visitor_upload_path = $custom_logging_path_base . 'visitors' . DIRECTORY_SEPARATOR;
+			$this->remove_sub_directories( $visitor_upload_path ); // Remove it.
 		}
-
-		// Directory for logged in users log files.
-		$user_upload_path = trailingslashit( $custom_logging_path_base . '404s/users/' );
-		$this->remove_sub_directories( $user_upload_path ); // Remove it.
-
-		// Directory for visitor log files.
-		$visitor_upload_path = trailingslashit( $custom_logging_path_base . '/404s/visitors/' );
-		$this->remove_sub_directories( $visitor_upload_path ); // Remove it.
-
 
 		if ( ! wp_next_scheduled( self::SCHEDULED_HOOK_LOG_FILE_PRUDING ) ) {
 			wp_schedule_event( time(), 'daily', self::SCHEDULED_HOOK_LOG_FILE_PRUDING );
 		}
+
 		// Cron Job 404 log files pruning.
 		add_action( self::SCHEDULED_HOOK_LOG_FILE_PRUDING, array( $this, 'LogFilesPruning' ) );
 		// whitelist options.
@@ -172,7 +170,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 * @return integer limit
 	 */
 	protected function Get404LogLimit() {
-		return $this->plugin->settings->Get404LogLimit();
+		return $this->plugin->settings()->Get404LogLimit();
 	}
 
 	/**
@@ -235,7 +233,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		list( $y, $m, $d ) = explode( '-', date( 'Y-m-d' ) );
 
 		$site_id = ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
-		$ip      = $this->plugin->settings->GetMainClientIP();
+		$ip      = $this->plugin->settings()->GetMainClientIP();
 
 		if ( ! is_user_logged_in() ) {
 			$username = 'Website Visitor';
@@ -292,6 +290,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					$new  = 'more than ' . $this->Get404LogLimit();
 					$msg .= ' This could possible be a scan, therefore keep an eye on the activity from this IP Address';
 				}
+
 				$link_file = $this->WriteLog( $new, $ip, $username, true, $url_404 );
 
 				$occ->UpdateMetaValue( 'Attempts', $new );
@@ -332,7 +331,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			return false;
 		}
 
-		if ( in_array( $url, $this->plugin->settings->get_excluded_urls() ) ) {
+		if ( in_array( $url, $this->plugin->settings()->get_excluded_urls() ) ) {
 			return true;
 		}
 	}
@@ -500,12 +499,12 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				);
 
 				// Get `site_content` option.
-				$site_content = $this->plugin->GetGlobalOption( 'site_content' );
+				$site_content = $this->plugin->GetGlobalSetting( 'site_content' );
 
 				// Check if the option is instance of stdClass.
 				if ( $site_content instanceof stdClass ) {
 					$site_content->skip_core = true; // Set skip core to true to skip file alerts after a core update.
-					$this->plugin->SetGlobalOption( 'site_content', $site_content ); // Save the option.
+					$this->plugin->SetGlobalSetting( 'site_content', $site_content ); // Save the option.
 				}
 			}
 		}
@@ -529,12 +528,12 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			);
 
 			// Get `site_content` option.
-			$site_content = $this->plugin->GetGlobalOption( 'site_content' );
+			$site_content = $this->plugin->GetGlobalSetting( 'site_content' );
 
 			// Check if the option is instance of stdClass.
 			if ( $site_content instanceof stdClass ) {
 				$site_content->skip_core = true; // Set skip core to true to skip file alerts after a core update.
-				$this->plugin->SetGlobalOption( 'site_content', $site_content ); // Save the option.
+				$this->plugin->SetGlobalSetting( 'site_content', $site_content ); // Save the option.
 			}
 		}
 	}
@@ -543,44 +542,42 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 * Purge log files older than one month.
 	 */
 	public function LogFilesPruning() {
-		if ( $this->plugin->options_helper->get_option_value( 'purge-404-log', 'off' ) == 'on' ) {
-			$custom_logging_path = $this->plugin->options_helper->get_logging_path();
-			$custom_logging_path = $custom_logging_path . '404s/';
-			if ( is_dir( $custom_logging_path ) ) {
-				if ( $handle = opendir( $custom_logging_path ) ) {
-					while ( false !== ( $entry = readdir( $handle ) ) ) {
-						if ( '.' != $entry && '..' != $entry ) {
-							if ( strpos( $entry, '6007' ) && file_exists( $custom_logging_path . $entry ) ) {
-								$modified = filemtime( $custom_logging_path . $entry );
-								if ( $modified < strtotime( '-4 weeks' ) ) {
-									// Delete file.
-									unlink( $custom_logging_path . $entry );
-								}
-							}
-						}
-					}
-					closedir( $handle );
-				}
-			}
+		if ( $this->plugin->GetGlobalBooleanSetting( 'purge-404-log', false ) ) {
+			$this->Prune404FilesByPrefix( '6007' );
 		}
-		if ( 'on' == $this->plugin->options_helper->get_option_value( 'purge-visitor-404-log', 'off' ) ) {
-			$custom_logging_path = $this->plugin->options_helper->get_logging_path();
-			$custom_logging_path = $custom_logging_path . '404s/';
-			if ( is_dir( $custom_logging_path ) ) {
-				if ( $handle = opendir( $custom_logging_path ) ) {
-					while ( false !== ( $entry = readdir( $handle ) ) ) {
-						if ( $entry != '.' && $entry != '..' ) {
-							if ( strpos( $entry, '6023' ) && file_exists( $custom_logging_path . $entry ) ) {
-								$modified = filemtime( $custom_logging_path . $entry );
-								if ( $modified < strtotime( '-4 weeks' ) ) {
-									// Delete file.
-									unlink( $custom_logging_path . $entry );
-								}
+
+		if ( $this->plugin->GetGlobalBooleanSetting( 'purge-visitor-404-log', false ) ) {
+			$this->Prune404FilesByPrefix( '6023' );
+		}
+	}
+
+	/**
+	 * Deletes files in 404s log folder that start with a specific prefix.
+	 *
+	 * @param string $prefix
+	 * @since 4.1.3
+	 */
+	private function Prune404FilesByPrefix( $prefix ) {
+		//  prevent deleting all files by accident when the prefix is empty or not what we expect
+		if ( ! is_string( $prefix ) || empty( $prefix ) ) {
+			return;
+		}
+
+		$custom_logging_path = $this->plugin->settings()->get_working_dir_path( '404s', true );
+		if ( is_dir( $custom_logging_path ) ) {
+			if ( $handle = opendir( $custom_logging_path ) ) {
+				while ( false !== ( $entry = readdir( $handle ) ) ) {
+					if ( '.' != $entry && '..' != $entry ) {
+						if ( strpos( $entry, $prefix ) && file_exists( $custom_logging_path . $entry ) ) {
+							$modified = filemtime( $custom_logging_path . $entry );
+							if ( $modified < strtotime( '-4 weeks' ) ) {
+								// Delete file.
+								unlink( $custom_logging_path . $entry );
 							}
 						}
 					}
-					closedir( $handle );
 				}
+				closedir( $handle );
 			}
 		}
 	}
@@ -714,26 +711,28 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 	 * Write Log.
 	 *
 	 * Write a new line on 404 log file.
-	 * Folder: /uploads/wp-security-audit-log/404s/
+	 * Folder: {plugin working folder}/404s/
 	 *
-	 * @param int    $attempts  - Number of attempt.
-	 * @param string $ip        - IP address.
-	 * @param string $username  - Username.
-	 * @param bool   $logged_in - True if logged in.
-	 * @param string $url       - 404 URL.
+	 * @param int $attempts - Number of attempt.
+	 * @param string $ip - IP address.
+	 * @param string $username - Username.
+	 * @param bool $logged_in - True if logged in.
+	 * @param string $url - 404 URL.
+	 *
+	 * @return string|null
 	 */
 	private function WriteLog( $attempts, $ip, $username = '', $logged_in = true, $url = null ) {
 		$name_file = null;
-		if ( $logged_in && 'on' === $this->plugin->options_helper->get_option_value( 'log-404', 'off' ) ) {
+		if ( $logged_in && $this->plugin->GetGlobalBooleanSetting( 'log-404', false ) ) {
 			// Get option to log referrer.
-			$log_referrer = $this->plugin->options_helper->get_option_value( 'log-404-referrer' );
+			$log_referrer = $this->plugin->GetGlobalBooleanSetting( 'log-404-referrer' );
 
 			// Check localhost.
 			if ( '127.0.0.1' == $ip || '::1' == $ip ) {
 				$ip = 'localhost';
 			}
 
-			if ( 'on' === $log_referrer ) {
+			if ( $log_referrer ) {
 				// Get the referer.
 				$referrer = filter_input( INPUT_SERVER, 'HTTP_REFERER', FILTER_SANITIZE_STRING );
 				if ( empty( $referrer ) && isset( $_SERVER['HTTP_REFERER'] ) && ! empty( $_SERVER['HTTP_REFERER'] ) ) {
@@ -766,47 +765,43 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 
 			// get the custom logging path from settings.
-			$custom_logging_path = $this->plugin->options_helper->get_logging_path() . '404s/';
-			$custom_logging_url  = $this->plugin->options_helper->get_logging_url() . '404s/';
-
-			if ( ! $this->CheckDirectory( ABSPATH . $custom_logging_path ) ) {
-				$dir_made = wp_mkdir_p( $custom_logging_path );
-				if ( $dir_made ) {
+			$custom_logging_path = $this->plugin->settings()->get_working_dir_path( '404s' );
+			if ( ! is_wp_error( $custom_logging_path ) ) {
+				if ( ! file_exists( $custom_logging_path . 'index.php' ) ) {
 					// make an empty index.php in the directory.
 					@file_put_contents( $custom_logging_path . 'index.php', '<?php // Silence is golden' );
 				}
-			}
 
-
-
-			// Check directory.
-			if ( $this->CheckDirectory( $custom_logging_path ) ) {
-				$filename  = '6007_' . date( 'Ymd' ) . '.log';
-				$fp        = $custom_logging_path . $filename;
-				$name_file = $custom_logging_url . $filename;
-				if ( ! $file = fopen( $fp, 'a' ) ) {
-					$i           = 1;
-					$file_opened = false;
-					do {
-						$fp2 = substr( $fp, 0, -4 ) . '_' . $i . '.log';
-						if ( ! file_exists( $fp2 ) ) {
-							if ( $file = fopen( $fp2, 'a' ) ) {
-								$file_opened = true;
-								$name_file   = $custom_logging_url . substr( $name_file, 0, -4 ) . '_' . $i . '.log';
+				// Check directory.
+				if ( $this->CheckDirectory( $custom_logging_path ) ) {
+					$filename  = '6007_' . date( 'Ymd' ) . '.log';
+					$fp        = $custom_logging_path . $filename;
+					$custom_logging_url  = $this->plugin->settings()->get_working_dir_url( '404s' );
+					$name_file = $custom_logging_url . $filename;
+					if ( ! $file = fopen( $fp, 'a' ) ) {
+						$i           = 1;
+						$file_opened = false;
+						do {
+							$fp2 = substr( $fp, 0, - 4 ) . '_' . $i . '.log';
+							if ( ! file_exists( $fp2 ) ) {
+								if ( $file = fopen( $fp2, 'a' ) ) {
+									$file_opened = true;
+									$name_file   = $custom_logging_url . substr( $name_file, 0, - 4 ) . '_' . $i . '.log';
+								}
+							} else {
+								$latest_filename = $this->GetLastModified( $custom_logging_path, $filename );
+								$fp_last         = $custom_logging_path . $latest_filename;
+								if ( $file = fopen( $fp_last, 'a' ) ) {
+									$file_opened = true;
+									$name_file   = $custom_logging_url . $latest_filename;
+								}
 							}
-						} else {
-							$latest_filename = $this->GetLastModified( $custom_logging_path, $filename );
-							$fp_last         = $custom_logging_path . $latest_filename;
-							if ( $file = fopen( $fp_last, 'a' ) ) {
-								$file_opened = true;
-								$name_file   = $custom_logging_url . $latest_filename;
-							}
-						}
-						$i++;
-					} while ( ! $file_opened );
+							$i ++;
+						} while ( ! $file_opened );
+					}
+					fwrite( $file, sprintf( "%s\n", $data ) );
+					fclose( $file );
 				}
-				fwrite( $file, sprintf( "%s\n", $data ) );
-				fclose( $file );
 			}
 		}
 		return $name_file;

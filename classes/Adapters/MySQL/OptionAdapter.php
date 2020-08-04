@@ -182,4 +182,23 @@ class WSAL_Adapters_MySQL_Option extends WSAL_Adapters_MySQL_ActiveRecord {
 			$db_connection->query( 'CREATE INDEX option_name ON ' . $this->GetTable() . ' (option_name)' );
 		}
 	}
+
+	/**
+	 * Renames option,
+	 *
+	 * @param $old_name
+	 * @param $new_name
+	 *
+	 * @return false|int
+	 * @since 4.1.3
+	 */
+	public function Rename( $old_name, $new_name ) {
+		return parent::UpdateQuery(
+			$this->GetTable(), [
+				'option_name' => $new_name
+			], [
+				'option_name' => $old_name
+			]
+		);
+	}
 }

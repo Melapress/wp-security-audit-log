@@ -56,20 +56,6 @@ class WSAL_ViewManager {
 		// Skipped views array.
 		$skip_views = array();
 
-		// Array of views to skip for premium version.
-		if ( wsal_freemius()->is_plan_or_trial__premium_only( 'starter' ) ) {
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/EmailNotifications.php';
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Search.php';
-		}
-
-		if ( wsal_freemius()->is_plan_or_trial__premium_only( 'professional' ) ) {
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/EmailNotifications.php';
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Search.php';
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/ExternalDB.php';
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/LogInUsers.php';
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Reports.php';
-		}
-
 		/**
 		 * Add setup wizard page to skip views. It will only be initialized
 		 * one time.
@@ -106,6 +92,9 @@ class WSAL_ViewManager {
 			}
 		}
 
+		//  stop Freemius from hiding the menu on sub sites under certain circumstances
+		add_filter('fs_should_hide_site_admin_settings_on_network_activation_mode_wp-security-audit-log', array( $this, 'bypass_freemius_menu_hiding'));
+
 		// Add menus.
 		add_action( 'admin_menu', array( $this, 'AddAdminMenus' ) );
 		add_action( 'network_admin_menu', array( $this, 'AddAdminMenus' ) );
@@ -121,8 +110,8 @@ class WSAL_ViewManager {
 
 		// Initialize setup wizard.
 		if (
-			'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-complete', 'no' )
-			|| 'no' === $this->_plugin->options_helper->get_option_value( 'setup-modal-dismissed', 'no' )
+			! $this->_plugin->GetGlobalBooleanSetting( 'setup-complete', false )
+			|| ! $this->_plugin->GetGlobalBooleanSetting( 'setup-modal-dismissed', false )
 		) {
 			new WSAL_Views_SetupWizard( $plugin );
 		}
@@ -130,18 +119,12 @@ class WSAL_ViewManager {
 		// Reorder WSAL submenu.
 		add_filter( 'custom_menu_order', array( $this, 'reorder_wsal_submenu' ), 10, 1 );
 
-		if ( wsal_freemius()->is__premium_only() ) {
-			if ( $this->_plugin->settings->is_admin_bar_notif() ) {
-				add_action( 'admin_bar_menu', array( $this, 'live_notifications__premium_only' ), 1000, 1 );
-				add_action( 'wp_ajax_wsal_adminbar_events_refresh', array( $this, 'wsal_adminbar_events_refresh__premium_only' ) );
-			}
-		}
-
 		add_action( 'admin_head', array( $this, 'hide_freemius_sites_section' ) );
 
 		// Check if WFCM is running by seeing if we have the version defined.
 		if ( defined( 'WFCM_VERSION' ) && ( version_compare( WFCM_VERSION, '1.6.0', '<' ) ) ) {
 			add_action( 'admin_notices', array( $this, 'update_wfcm_notice' ) );
+			add_action( 'network_admin_notices', array( $this, 'update_wfcm_notice' ) );
 		}
 	}
 
@@ -226,41 +209,50 @@ class WSAL_ViewManager {
 	public function AddAdminMenus() {
 		$this->ReorderViews();
 
-		if ( $this->_plugin->settings->CurrentUserCan( 'view' ) && count( $this->views ) ) {
+		if ( $this->_plugin->settings()->CurrentUserCan( 'view' ) && count( $this->views ) ) {
 			// Add main menu.
+            $main_view_menu_slug = $this->views[0]->GetSafeViewName();
 			$this->views[0]->hook_suffix = add_menu_page(
 				'WP Activity Log',
 				'WP Activity Log',
 				'read', // No capability requirement.
-				$this->views[0]->GetSafeViewName(),
+				$main_view_menu_slug,
 				array( $this, 'RenderViewBody' ),
 				$this->views[0]->GetIcon(),
 				'2.5' // Right after dashboard.
 			);
 
+			//  protected views to be displayed only to user with full plugin access
+			$protected_views = array(
+                'wsal-togglealerts',
+                'wsal-usersessions-views',
+                'wsal-settings',
+                'wsal-ext-settings',
+                'wsal-rep-views-main',
+                'wsal-np-notifications'
+            );
+
+			//  check edit privileges of the current user
+			$has_current_user_edit_priv = $this->_plugin->settings()->CurrentUserCan( 'edit' );
+
 			// Add menu items.
 			foreach ( $this->views as $view ) {
 				if ( $view->IsAccessible() ) {
-					if ( $this->GetClassNameByView( $view->GetSafeViewName() ) ) {
+				    $safe_view_name = $view->GetSafeViewName();
+					if ( $this->GetClassNameByView( $safe_view_name ) ) {
 						continue;
 					}
 
-					if ( ( 'wsal-togglealerts' === $view->GetSafeViewName()
-							|| 'wsal-settings' === $view->GetSafeViewName()
-							|| 'wsal-ext-settings' === $view->GetSafeViewName()
-							|| 'wsal-rep-views-main' === $view->GetSafeViewName()
-							|| 'wsal-np-notifications' === $view->GetSafeViewName()
-						)
-						&& ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+					if ( in_array( $safe_view_name, $protected_views ) && ! $has_current_user_edit_priv ) {
 						continue;
 					}
 
 					$view->hook_suffix = add_submenu_page(
-						$view->IsVisible() ? $this->views[0]->GetSafeViewName() : null,
+						$view->IsVisible() ? $main_view_menu_slug : null,
 						$view->GetTitle(),
 						$view->GetName(),
 						'read', // No capability requirement.
-						$view->GetSafeViewName(),
+						$safe_view_name,
 						array( $this, 'RenderViewBody' )
 					);
 				}
@@ -280,17 +272,6 @@ class WSAL_ViewManager {
 		foreach ( $this->views as $view ) {
 			if ( $view->HasPluginShortcutLink() ) {
 				$new_links[] = '<a href="' . add_query_arg( 'page', $view->GetSafeViewName(), admin_url( 'admin.php' ) ) . '">' . $view->GetName() . '</a>';
-
-				if ( 1 === count( $new_links ) && ! wsal_freemius()->is__premium_only() ) {
-					// Trial link arguments.
-					$trial_args  = array(
-						'page'          => 'wsal-auditlog-pricing',
-						'billing_cycle' => 'annual',
-						'trial'         => 'true',
-					);
-					$admin_url   = $this->_plugin->IsMultisite() ? network_admin_url( 'admin.php' ) : admin_url( 'admin.php' );
-					$new_links[] = '<a style="font-weight:bold" href="' . add_query_arg( $trial_args, $admin_url ) . '">' . __( 'Free Premium Trial', 'wp-security-audit-log' ) . '</a>';
-				}
 			}
 		}
 		return array_merge( $new_links, $old_links );
@@ -383,7 +364,7 @@ class WSAL_ViewManager {
 	 * Returns view instance corresponding to its class name.
 	 *
 	 * @param string $class_name View class name.
-	 * @return WSAL_AbstractView The view or false on failure.
+	 * @return WSAL_AbstractView|bool The view or false on failure.
 	 */
 	public function FindByClassName( $class_name ) {
 		foreach ( $this->views as $view ) {
@@ -479,94 +460,6 @@ class WSAL_ViewManager {
 	}
 
 	/**
-	 * Add WSAL to WP-Admin menu bar.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @param WP_Admin_Bar $admin_bar - Instance of WP_Admin_Bar.
-	 */
-	public function live_notifications__premium_only( $admin_bar ) {
-		if ( $this->_plugin->settings->CurrentUserCan( 'view' ) && is_admin() ) {
-			$adn_updates = $this->_plugin->settings->get_admin_bar_notif_updates();
-			$event       = $this->_plugin->alerts->get_admin_bar_event( 'page-refresh' === $adn_updates ? true : false );
-
-			if ( $event ) {
-				$code = $this->_plugin->alerts->GetAlert(
-					$event->alert_id,
-					(object) array(
-						'mesg' => __( 'Alert message not found.', 'wp-security-audit-log' ),
-						'desc' => __( 'Alert description not found.', 'wp-security-audit-log' ),
-					)
-				);
-				$admin_bar->add_node(
-					array(
-						'id'    => 'wsal-menu',
-						'title' => 'LIVE: ' . $code->desc . ' from ' . $event->GetSourceIp(),
-						'href'  => add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) ),
-						'meta'  => array( 'class' => 'wsal-live-notif-item' ),
-					)
-				);
-			}
-		}
-	}
-
-	/**
-	 * WP-Admin bar refresh event handler.
-	 *
-	 * @since 3.2.4
-	 */
-	public function wsal_adminbar_events_refresh__premium_only() {
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
-			echo wp_json_encode(
-				array(
-					'success' => false,
-					'message' => __( 'Access Denied.', 'wp-security-audit-log' ),
-				)
-			);
-			die();
-		}
-
-		if ( isset( $_POST['nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wsal-common-js-nonce' ) ) {
-			$events_count = isset( $_POST['eventsCount'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['eventsCount'] ) ) : false;
-
-			if ( $events_count ) {
-				$occurrence = new WSAL_Models_Occurrence();
-				$new_count  = (int) $occurrence->Count();
-
-				if ( $events_count !== $new_count ) {
-					$event = $this->_plugin->alerts->get_admin_bar_event( true );
-					$code  = $this->_plugin->alerts->GetAlert( $event->alert_id );
-
-					echo wp_json_encode(
-						array(
-							'success' => true,
-							'count'   => $new_count,
-							'message' => 'LIVE: ' . $code->desc . ' from ' . $event->GetSourceIp(),
-						)
-					);
-				} else {
-					echo wp_json_encode( array( 'success' => false ) );
-				}
-			} else {
-				echo wp_json_encode(
-					array(
-						'success' => false,
-						'message' => __( 'Log count parameter expected.', 'wp-security-audit-log' ),
-					)
-				);
-			}
-		} else {
-			echo wp_json_encode(
-				array(
-					'success' => false,
-					'message' => __( 'Nonce verification failed.', 'wp-security-audit-log' ),
-				)
-			);
-		}
-		die();
-	}
-
-	/**
 	 * Hide Freemius sites section on the account page
 	 * of a multisite WordPress network.
 	 */
@@ -594,5 +487,14 @@ class WSAL_ViewManager {
 		if ( 'wsal-auditlog-account' === $page ) {
 			echo '<style type="text/css">#fs_sites {display:none;}</style>';
 		}
+	}
+
+	/**
+	 * @param bool $should_hide
+	 *
+	 * @return bool
+	 */
+	public function bypass_freemius_menu_hiding($should_hide) {
+	    return false;
 	}
 }

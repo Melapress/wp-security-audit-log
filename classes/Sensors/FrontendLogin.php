@@ -35,9 +35,9 @@ class WSAL_Sensors_FrontendLogin extends WSAL_AbstractSensor {
 		}
 
 		$user_login = $user->data->user_login;
-		$user_roles = $this->plugin->settings->GetCurrentUserRoles( $user->roles );
+		$user_roles = $this->plugin->settings()->GetCurrentUserRoles( $user->roles );
 
-		if ( $this->plugin->settings->IsLoginSuperAdmin( $user_login ) ) {
+		if ( $this->plugin->settings()->IsLoginSuperAdmin( $user_login ) ) {
 			$user_roles[] = 'superadmin';
 		}
 
