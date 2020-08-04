@@ -56,8 +56,6 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 					'public_key'          => 'pk_d602740d3088272d75906045af9fa',
 					'premium_suffix'      => '(Premium)',
 					'is_premium'          => $is_premium,
-					// If your plugin is a serviceware, set this option to false.
-					'has_premium_version' => true,
 					'has_addons'          => false,
 					'has_paid_plans'      => true,
 					'trial'               => $trial_args,
@@ -68,7 +66,8 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 						'affiliation' => false,
 						'network'     => true,
 					),
-					'anonymous_mode'      => $is_anonymous,
+					'anonymous_mode'  => $is_anonymous,
+					'live'            => true,
 				)
 			);
 		}
