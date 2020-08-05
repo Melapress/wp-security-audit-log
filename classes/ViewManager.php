@@ -272,6 +272,12 @@ class WSAL_ViewManager {
 		foreach ( $this->views as $view ) {
 			if ( $view->HasPluginShortcutLink() ) {
 				$new_links[] = '<a href="' . add_query_arg( 'page', $view->GetSafeViewName(), admin_url( 'admin.php' ) ) . '">' . $view->GetName() . '</a>';
+
+				if ( 1 === count( $new_links ) && ! wsal_freemius()->is__premium_only() ) {
+					// Trial link
+					$trial_link = 'https://wpactivitylog.com/trial-premium-edition-plugin/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL';
+					$new_links[] = '<a style="font-weight:bold" href="' . $trial_link . '">' . __( 'Free Premium Trial', 'wp-security-audit-log' ) . '</a>';
+				}
 			}
 		}
 		return array_merge( $new_links, $old_links );
