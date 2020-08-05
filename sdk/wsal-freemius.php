@@ -35,7 +35,7 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 			// Check anonymous mode.
 			$freemius_state = \WSAL\Helpers\Options::get_option_value_ignore_prefix( 'wsal_freemius_state', 'anonymous' );
 			$is_anonymous   = ( 'anonymous' === $freemius_state || 'skipped' === $freemius_state );
-			$is_premium     = true;
+			$is_premium     = false;
 			$is_anonymous   = $is_premium ? false : $is_anonymous;
 
 			// Trial arguments.
@@ -50,17 +50,17 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 
 			$wsal_freemius = fs_dynamic_init(
 				array(
-					'id'                  => '94',
-					'slug'                => 'wp-security-audit-log',
-					'type'                => 'plugin',
-					'public_key'          => 'pk_d602740d3088272d75906045af9fa',
-					'premium_suffix'      => '(Premium)',
-					'is_premium'          => $is_premium,
-					'has_addons'          => false,
-					'has_paid_plans'      => true,
-					'trial'               => $trial_args,
-					'has_affiliation'     => false,
-					'menu'                => array(
+					'id'              => '94',
+					'slug'            => 'wp-security-audit-log',
+					'type'            => 'plugin',
+					'public_key'      => 'pk_d602740d3088272d75906045af9fa',
+					'premium_suffix'  => '(Premium)',
+					'is_premium'      => $is_premium,
+					'has_addons'      => false,
+					'has_paid_plans'  => true,
+					'trial'           => $trial_args,
+					'has_affiliation' => false,
+					'menu'            => array(
 						'slug'        => 'wsal-auditlog',
 						'support'     => false,
 						'affiliation' => false,
