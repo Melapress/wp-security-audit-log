@@ -640,6 +640,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				self::load_freemius();
 
+				// Include premium extensions through freemius.
+				if ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) ) {
+					$this->include_extensions__premium_only();
+				}
+
 				if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
 					// Add filters to customize freemius welcome message.
 					wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
@@ -740,6 +745,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						$info                 = new stdClass();
 						$info->wsal_installed = true;
 						$info->is_premium     = false;
+
+						if ( wsal_freemius()->is__premium_only() ) {
+							$info->is_premium = true;
+						}
 						break;
 
 					case 'get_events':
@@ -881,6 +890,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! defined( 'WSAL_CLASS_PREFIX' ) ) {
 				define( 'WSAL_CLASS_PREFIX', 'WSAL_' );
 			}
+		}
+
+		/**
+		 * Method: Include extensions for premium version.
+		 *
+		 * @since 2.7.0
+		 */
+		public function include_extensions__premium_only() {
+			/**
+			 * Class for extensions managment.
+			 *
+			 * @since 2.7.0
+			 */
+			if ( file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
+				require_once WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php';
+			}
+
+			// Initiate the extensions manager.
+			$this->extensions = new WSAL_Extension_Manager( $this );
 		}
 
 		/**
@@ -1238,9 +1266,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				true
 			);
 
-			// Check if plugin is premium and live events are enabled.
-			$is_premium          = ( function_exists( 'wsal_freemius' ) ) && ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) );
+			//  live events disabled in free version of the plugin
 			$live_events_enabled = false;
+
 
 			// Set data array for common script.
 			$script_data = array(
