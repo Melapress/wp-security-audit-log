@@ -692,6 +692,7 @@ final class WSAL_Views_SetupWizard {
 				<?php
 				// Step help text.
 				$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to <a href="https://wpactivitylog.com/features/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">upgrade to Premium</a> and use the Database tools to store the WordPress activity log in an external database.', 'wp-security-audit-log' );
+
 				echo wp_kses( $step_help, $this->wsal->allowed_html_tags );
 				?>
 			</em>
