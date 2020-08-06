@@ -639,7 +639,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( $is_admin_blocking_plugins_support_enabled || is_admin() || self::is_login_screen() || self::is_rest_api() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 
 				self::load_freemius();
-
 				if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
 					// Add filters to customize freemius welcome message.
 					wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
@@ -882,7 +881,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				define( 'WSAL_CLASS_PREFIX', 'WSAL_' );
 			}
 		}
-
 		/**
 		 * Customize Freemius connect message for new users.
 		 *
@@ -1238,10 +1236,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				true
 			);
 
-			// Check if plugin is premium and live events are enabled.
-			$is_premium          = ( function_exists( 'wsal_freemius' ) ) && ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) );
+			//  live events disabled in free version of the plugin
 			$live_events_enabled = false;
-
 			// Set data array for common script.
 			$script_data = array(
 				'ajaxURL'           => admin_url( 'admin-ajax.php' ),
