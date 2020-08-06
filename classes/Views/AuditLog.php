@@ -300,7 +300,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						esc_html__( 'installed. Keep a log of changes in', 'wp-security-audit-log' ),
 						$addon_names,
 						$button_label,
-						esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', admin_url( 'admin.php' ) ) )
+						esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', network_admin_url( 'admin.php' ) ) )
 					); ?></p>
 					<?php wp_nonce_field( 'wsal_dismiss_notice_addon_available', 'wsal-dismiss-notice-addon-available', false, true ); ?>
 				</div>
@@ -1035,8 +1035,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'buttonError'     => esc_html( 'Problem enabling', 'wp-security-audit-log' ),
 				'msgError'        => sprintf(
 					/* translators: 1 - an opening link tag, 2 - the closing tag. */
-					__( '<br>An error occured when trying to install and activate the plugin. Please try install it again from the %1$sevent settings%2$s page.', 'wp-security-audit-log' ),
-					'<a href="' . esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', admin_url( 'admin.php' ) ) ) . '">',
+					__( '<br>An error occurred when trying to install and activate the plugin. Please try install it again from the %1$sevent settings%2$s page.', 'wp-security-audit-log' ),
+					'<a href="' . esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', network_admin_url( 'admin.php' ) ) ) . '">',
 					'</a>'
 				),
 			),

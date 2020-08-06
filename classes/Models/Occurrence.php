@@ -206,7 +206,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 					),
 					'woocommerce' => array(
 						'name'      => __( 'WooCommerce', 'wp-security-audit-log' ),
-						'event_ids' => array( 9000, 9001, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015, 9072, 9073, 9077, 9016, 9017, 9018, 9019, 9020, 9021, 9022, 9023, 9024, 9025, 9026, 9042, 9043, 9044, 9045, 9046, 9105, 9047, 9048, 9049, 9050, 9051, 9027, 9028, 9029, 9030, 9031, 9032, 9033, 9034, 9085, 9086, 9087, 9088, 9089, 9090, 9091, 9092, 9093, 9094, 9074, 9075, 9076, 9078, 9079, 9080, 9081, 9082, 9002, 9052, 9053, 9054, 9055, 9056, 9057, 9058, 9059, 9060, 9061, 9062, 9063, 9064, 9065, 9066, 9067, 9068, 9069, 9070, 9071, 9035, 9036, 9037, 9038, 9039, 9040, 9041, 9083, 9084 ),
+						'event_ids' => array( 9000, 9001, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015, 9072, 9073, 9077, 9016, 9017, 9018, 9019, 9020, 9021, 9022, 9023, 9024, 9025, 9026, 9042, 9043, 9044, 9045, 9046, 9105, 9047, 9048, 9049, 9050, 9051, 9027, 9028, 9029, 9030, 9031, 9032, 9033, 9034, 9085, 9086, 9087, 9088, 9089, 9090, 9091, 9092, 9093, 9094, 9074, 9075, 9076, 9078, 9079, 9080, 9081, 9082, 9002, 9052, 9053, 9054, 9055, 9056, 9057, 9058, 9059, 9060, 9061, 9062, 9063, 9064, 9065, 9066, 9067, 9068, 9069, 9070, 9071, 9035, 9036, 9037, 9038, 9039, 9040, 9041, 9083, 9084, 9101, 9102, 9103, 9104 ),
 					),
 					'wfcm' => array(
 						'name'      => __( 'WFCM', 'wp-security-audit-log' ),
@@ -219,7 +219,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 					if ( in_array( $this->alert_id, $addon['event_ids'], true ) ) {
 						// check key and update message here.
 						$message = sprintf(
-							'The details of this event are unknown. You need to install the add-on for %1$s to see the details.%2$s%3$sInstall and activate extension %4$s',
+							'To view this event you need to install the activity log extension for %1$s. %2$s%3$sInstall and activate extension %4$s',
 							esc_html( $addon['name'] ),
 							'<br />',
 							'<button type="button" class="button-primary wsal-addon-install-trigger" data-nonce="' . esc_attr( $installer_nonce ) . '" data-addon-name="' . esc_attr( $key ) . '">',

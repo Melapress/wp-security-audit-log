@@ -1238,21 +1238,21 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				true
 			);
 
+			// Check if plugin is premium and live events are enabled.
+			$is_premium          = ( function_exists( 'wsal_freemius' ) ) && ( wsal_freemius()->can_use_premium_code() || wsal_freemius()->is_plan__premium_only( 'starter' ) );
+			$live_events_enabled = false;
+
 			// Set data array for common script.
 			$script_data = array(
 				'ajaxURL'           => admin_url( 'admin-ajax.php' ),
-				'liveEvents'        => false,
+				'liveEvents'        => $live_events_enabled,
 				'installing'        => __( 'Installing, please wait', 'wp-security-audit-log' ),
 				'already_installed' => __( 'Already installed', 'wp-security-audit-log' ),
 				'installed'         => __( 'Extension installed', 'wp-security-audit-log' ),
 				'activated'         => __( 'Extension activated', 'wp-security-audit-log' ),
 				'failed'            => __( 'Install failed', 'wp-security-audit-log' ),
 			);
-			if ( $live_events_enabled ) {
-				$occurrence                 = new WSAL_Models_Occurrence();
-				$script_data['eventsCount'] = (int) $occurrence->Count();
-				$script_data['commonNonce'] = wp_create_nonce( 'wsal-common-js-nonce' );
-			}
+
 			wp_localize_script( 'wsal-common', 'wsalCommonData', $script_data );
 
 			// Enqueue script.
@@ -1712,15 +1712,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 					//  delete the sessions table and recreate it from scratch (session token is used as primary key
 					//  instead of an autoincrement ID column
-					$extensions = $this->extensions->extensions;
-					if ( ! empty($extensions) ) {
-						foreach ( $extensions as $extension ) {
-							if ( 'WSAL_UserSessions_Plugin' === get_class( $extension ) ) {
-								WSAL_Sensors_Database::$enabled = false;
-								$adapter = WSAL_UserSessions_Plugin::get_sessions_adapter();
-								$adapter->Uninstall();
-								$adapter->Install();
-								WSAL_Sensors_Database::$enabled = true;
+					$extensions_manager = $this->extensions;
+					//  we need to check if the extension manager is set for this to work in free version of the plugin
+					if ( $extensions_manager != null ) {
+						$extensions = $extensions_manager->extensions;
+						if ( ! empty( $extensions ) ) {
+							foreach ( $extensions as $extension ) {
+								if ( 'WSAL_UserSessions_Plugin' === get_class( $extension ) ) {
+									WSAL_Sensors_Database::$enabled = false;
+									$adapter                        = WSAL_UserSessions_Plugin::get_sessions_adapter();
+									$adapter->Uninstall();
+									$adapter->Install();
+									WSAL_Sensors_Database::$enabled = true;
+								}
 							}
 						}
 					}
