@@ -56,6 +56,7 @@ class WSAL_ViewManager {
 		// Skipped views array.
 		$skip_views = array();
 
+
 		/**
 		 * Add setup wizard page to skip views. It will only be initialized
 		 * one time.
@@ -118,6 +119,7 @@ class WSAL_ViewManager {
 
 		// Reorder WSAL submenu.
 		add_filter( 'custom_menu_order', array( $this, 'reorder_wsal_submenu' ), 10, 1 );
+
 
 		add_action( 'admin_head', array( $this, 'hide_freemius_sites_section' ) );
 
@@ -464,6 +466,7 @@ class WSAL_ViewManager {
 		}
 		return $menu_order;
 	}
+
 
 	/**
 	 * Hide Freemius sites section on the account page
