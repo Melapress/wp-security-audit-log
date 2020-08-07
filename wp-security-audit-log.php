@@ -280,7 +280,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function include_options_helper() {
 			require_once 'classes/Helpers/Options.php';
 			if ( ! isset( $this->options_helper ) ) {
-				$this->options_helper = new \WSAL\Helpers\Options( $this, self::OPTIONS_PREFIX );
+				$this->options_helper = new \WSAL\Helpers\Options( self::OPTIONS_PREFIX );
 			}
 			return $this->options_helper;
 		}
@@ -2458,15 +2458,23 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			//  this is called very early so we need to load some settings manually
 			spl_autoload_register( array( __CLASS__, 'autoloader' ) );
-			$options = new WSAL_Models_Option();
-			$is_stealth_mode = $options->GetOptionValue( self::OPT_PRFX . 'mwp-child-stealth-mode', 'no' );
+			require_once 'classes/Helpers/Options.php';
+
+			/*
+			 * We assume settings have already been migrated (in version 4.1.3) to WordPress options table. We might
+			 * miss some 404 events until the plugin upgrade runs, but that is a very rare edge case. The same applies
+			 * to loading of 'admin-blocking-plugins-support' option further down.
+			 */
+			$options_helper = new \WSAL\Helpers\Options( self::OPTIONS_PREFIX );
+			$is_stealth_mode = $options_helper->get_option_value('mwp-child-stealth-mode', 'no');
+
 			if ('yes' !== $is_stealth_mode ) {
 			    //  only intended if MainWP stealth mode is active
 			    return false;
 			}
 
 			//  allow if the admin blocking support settings is active
-			return ('yes' === $options->GetOptionValue( self::OPT_PRFX . 'admin-blocking-plugins-support', 'no' ) );
+			return ('yes' === $options_helper->get_option_value( 'admin-blocking-plugins-support', 'no' ) );
         }
 	}
 
