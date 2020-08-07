@@ -40,13 +40,11 @@ class Options {
 	 * Sets up this class with the main plugin instance and a prefix.
 	 *
 	 * @method __construct
+	 * @param string $prefix A prefix to use when setting/getting.
+	 *
 	 * @since  4.0.2
-	 * @param  WpSecurityAuditLog $plugin The main plugin class instance.
-	 * @param  string             $prefix A prefix to use when setting/getting.
 	 */
-	public function __construct( $plugin, $prefix = '' ) {
-		// the main plugin file incase we need to get data from it.
-		$this->plugin = $plugin;
+	public function __construct( $prefix = '' ) {
 		// sets the prefix used when getting all options through this class.
 		$this->set_prefix( $prefix );
 	}
@@ -113,9 +111,7 @@ class Options {
 			$actual_option_name = $this->prefix . $option_name;
 		}
 
-		$result = self::_set_option_value($actual_option_name, $value, $autoload);
-
-		return $result;
+		return self::_set_option_value($actual_option_name, $value, $autoload);
 	}
 
 	/**

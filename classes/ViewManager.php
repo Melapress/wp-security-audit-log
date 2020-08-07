@@ -278,7 +278,7 @@ class WSAL_ViewManager {
 				if ( 1 === count( $new_links ) && ! wsal_freemius()->is__premium_only() ) {
 					// Trial link
 					$trial_link = 'https://wpactivitylog.com/trial-premium-edition-plugin/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL';
-					$new_links[] = '<a style="font-weight:bold" href="' . $trial_link . '">' . __( 'Free Premium Trial', 'wp-security-audit-log' ) . '</a>';
+					$new_links[] = '<a style="font-weight:bold" href="' . $trial_link . '" target="_blank">' . __( 'Free Premium Trial', 'wp-security-audit-log' ) . '</a>';
 				}
 			}
 		}
