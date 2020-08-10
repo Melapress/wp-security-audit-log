@@ -20,6 +20,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WSAL_Settings {
 
 	/**
+	 * Option name for front-end events.
+	 *
+	 * @var string
+	 */
+	const FRONT_END_EVENTS_OPTION_NAME = 'wsal_frontend-events';
+
+	/**
 	 * Instance of the main plugin.
 	 *
 	 * @var WpSecurityAuditLog
@@ -31,8 +38,6 @@ class WSAL_Settings {
 	const OPT_DEV_REQUEST_LOG    = 'r';
 	const OPT_DEV_BACKTRACE_LOG  = 'b';
 	const ERROR_CODE_INVALID_IP  = 901;
-
-	const DEFAULT_LOGGING_DIR = '/wp-content/uploads/wp-security-audit-log/';
 
 	/**
 	 * List of Site Admins.
@@ -68,13 +73,6 @@ class WSAL_Settings {
 	 * @var array
 	 */
 	protected $_viewers = null;
-
-	/**
-	 * Allowed Plugin Editors.
-	 *
-	 * @var array
-	 */
-	protected $_editors = null;
 
 	/**
 	 * Alerts per page.
@@ -131,7 +129,7 @@ class WSAL_Settings {
 	 *
 	 * @var array
 	 */
-	public $geek_alerts = array( 1004, 1005, 1006, 1007, 2023, 2024, 2053, 2054, 2055, 2062, 2100, 2106, 2111, 2112, 2124, 2125, 2094, 2095, 2043, 2071, 2082, 2083, 2085, 2089, 4014, 4015, 4016, 5010, 5011, 5012, 5019, 5025, 5013, 5014, 5015, 5016, 5017, 5018, 6001, 6002, 6007, 6008, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6023, 6024, 6025 );
+	public $geek_alerts = array( 1004, 1005, 1006, 1007, 2023, 2024, 2053, 2054, 2055, 2062, 2100, 2106, 2111, 2112, 2124, 2125, 2131, 2132, 2094, 2095, 2043, 2071, 2082, 2083, 2085, 2089, 4014, 4015, 4016, 5010, 5011, 5012, 5019, 5025, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6001, 6002, 6007, 6008, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6023, 6024, 6025 );
 
 	/**
 	 * Current screen object.
@@ -152,6 +150,132 @@ class WSAL_Settings {
 			$this->_plugin->include_options_helper();
 		}
 		add_action( 'deactivated_plugin', array( $this, 'reset_stealth_mode' ), 10, 1 );
+	}
+
+	/**
+	 * Gets path to the default working directory relative to the root of WordPress site.
+	 *
+	 * Uses forward slashes and result has a slash at the end.
+	 *
+	 * @return string
+	 */
+	public function get_default_working_dir_relative() {
+		$upload_dir  = wp_upload_dir(null, false);
+		if (false === $upload_dir || ! array_key_exists('basedir', $upload_dir) ||
+		    ( array_key_exists('error', $upload_dir) && ! empty ( $upload_dir['error'] ) )
+		) {
+			//  fallback in case there is a problem with filesystem
+			return '/wp-content/uploads/wp-activity-log/';
+		}
+
+		$result = $upload_dir['basedir'] . '/wp-activity-log/';
+
+		//  remove absolute path from the basedir to make it relative
+		if ( defined( 'ABSPATH' ) ) {
+			$result = preg_replace( '/^' . preg_quote( ABSPATH, '/' ) . '/', '', $result );
+			//  add leading slash if missing
+			if ( '/' !== substr( $result, 0, 1) ) {
+				$result = '/' . $result;
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Retrieves the working directory from the settings relative to the WordPress root folder.
+	 *
+	 * Used by two public helper functions that provide the working directory path and URL for the rest of the plugin:
+	 * - WSAL_Settings::get_working_dir_path
+	 * - WSAL_Settings::get_working_dir_url
+	 *
+	 * Result contains forward slashes suitable for use in URL. It also contains the trailing slash. Replace slashes
+	 * with system specific directory separators when used as filesystem path. This is already done in
+	 * WSAL_Settings::get_working_dir_path in case you need it.
+	 *
+	 * @param string $path Optional path relative to the working directory.
+	 * @param bool $ignore_site If true, there will be no sub-site specific subfolder in multisite context.
+	 * @return string
+	 * @since 4.1.3
+	 *
+	 * @see WSAL_Settings::get_working_dir_path()
+	 * @see WSAL_Settings::get_working_dir_url()
+	 * @see WSAL_Settings::get_working_dir_path_relative()
+	 */
+	private function get_working_dir_path_relative( $path = '', $ignore_site = false ) {
+		if ( ! \function_exists( 'get_home_path' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		//  get relative path from the plugin settings
+		$result = trailingslashit( $this->_plugin->GetGlobalSetting( 'custom-logging-dir', $this->get_default_working_dir_relative() ) );
+
+		//  append site specific subfolder in multisite context
+		if ( ! $ignore_site && $this->_plugin->IsMultisite() ) {
+			$site_id = get_current_blog_id();
+			if ($site_id > 0) {
+				$result .= 'sites/' . $site_id . '/';
+			}
+		}
+
+		//  append optional path passed as a parameter
+		if ( $path && is_string( $path ) ) {
+			$result .= $path . '/';
+		}
+
+		//  result should have the trailing slash at this point, no need to trailingslashit again
+		return $result;
+	}
+
+	/**
+	 * Retrieves the working directory URL including a trailing slash.
+	 *
+	 * Uses as default:
+	 * {uploads folder}/wp-activity-log/
+	 *
+	 * @param string $path Optional path relative to the working directory.
+
+	 * @return string
+	 * @see WSAL_Settings::get_working_dir_path_relative()
+	 *
+	 * @since  4.1.0
+	 */
+	public function get_working_dir_url( $path = '' ) {
+		$result = $this->get_default_working_dir_relative( $path );
+		return trailingslashit( \get_site_url() ) . $result;
+	}
+
+	/**
+	 * Retrieves the working directory from the settings. Returns a folder path
+	 * with a trailing slash. It also creates the folder unless the $skip_creation
+	 * parameter is set to true.
+	 *
+	 * Uses as default:
+	 * {uploads folder}/wp-activity-log/
+	 *
+	 * @param string $path Optional path relative to the working directory.
+	 * @param bool $skip_creation If true, the folder will not be created.
+	 * @param bool $ignore_site If true, there will be no sub-site specific subfolder in multisite context.
+	 *
+	 * @return string|WP_Error
+	 * @see WSAL_Settings::get_working_dir_path_relative()
+	 *
+	 * @since  4.1.0
+	 */
+	public function get_working_dir_path( $path = '', $skip_creation = false, $ignore_site = false ) {
+		$result = $this->get_working_dir_path_relative( $path, $ignore_site );
+		$result = trailingslashit( ABSPATH ) . $result;
+		$result = preg_replace('/\//', DIRECTORY_SEPARATOR, $result);
+		if ( ! $skip_creation ) {
+			if ( ! wp_mkdir_p( $result ) ) {
+				return new WP_Error('mkdir_failed', sprintf(
+				/* translators: %s: Directory path. */
+					__( 'Unable to create directory %s. Is its parent directory writable by the server?' ),
+					esc_html( $result )
+				));
+			}
+		}
+
+		return $result;
 	}
 
 	/**
@@ -186,7 +310,7 @@ class WSAL_Settings {
 	 */
 	public function IsDevOptionEnabled( $option ) {
 		if ( is_null( $this->_devoption ) ) {
-			$this->_devoption = $this->_plugin->GetGlobalOption(
+			$this->_devoption = $this->_plugin->GetGlobalSetting(
 				'dev-options',
 				implode( ',', $this->GetDefaultDevOptions() )
 			);
@@ -201,7 +325,7 @@ class WSAL_Settings {
 	 * @return boolean
 	 */
 	public function IsAnyDevOptionEnabled() {
-		return ! ! $this->_plugin->GetGlobalOption( 'dev-options', null );
+		return ! ! $this->_plugin->GetGlobalSetting( 'dev-options', null );
 	}
 
 	/**
@@ -222,7 +346,7 @@ class WSAL_Settings {
 			$this->_devoption[] = $option;
 		}
 		// Commit option.
-		$this->_plugin->SetGlobalOption(
+		$this->_plugin->SetGlobalSetting(
 			'dev-options',
 			implode( ',', $this->_devoption )
 		);
@@ -233,7 +357,7 @@ class WSAL_Settings {
 	 */
 	public function ClearDevOptions() {
 		$this->_devoption = array();
-		$this->_plugin->SetGlobalOption( 'dev-options', '' );
+		$this->_plugin->SetGlobalSetting( 'dev-options', '' );
 	}
 
 	/**
@@ -278,7 +402,7 @@ class WSAL_Settings {
 	 * @return boolean
 	 */
 	public function IsWidgetsEnabled() {
-		return ! $this->_plugin->GetGlobalOption( 'disable-widgets' );
+		return ! $this->_plugin->GetGlobalBooleanSetting( 'disable-widgets' );
 	}
 
 	/**
@@ -287,7 +411,7 @@ class WSAL_Settings {
 	 * @param boolean $newvalue - True if enabled.
 	 */
 	public function SetWidgetsEnabled( $newvalue ) {
-		$this->_plugin->SetGlobalOption( 'disable-widgets', ! $newvalue );
+		$this->_plugin->SetGlobalBooleanSetting( 'disable-widgets', ! $newvalue );
 	}
 
 	/**
@@ -298,7 +422,7 @@ class WSAL_Settings {
 	 * @return boolean
 	 */
 	public function is_admin_bar_notif() {
-		return ! $this->_plugin->GetGlobalOption( 'disable-admin-bar-notif' );
+		return ! $this->_plugin->GetGlobalSetting( 'disable-admin-bar-notif' );
 	}
 
 	/**
@@ -309,7 +433,7 @@ class WSAL_Settings {
 	 * @param boolean $newvalue - True if enabled.
 	 */
 	public function set_admin_bar_notif( $newvalue ) {
-		$this->_plugin->SetGlobalOption( 'disable-admin-bar-notif', ! $newvalue );
+		$this->_plugin->SetGlobalSetting( 'disable-admin-bar-notif', ! $newvalue );
 	}
 
 	/**
@@ -320,7 +444,7 @@ class WSAL_Settings {
 	 * @return string
 	 */
 	public function get_admin_bar_notif_updates() {
-		return $this->_plugin->GetGlobalOption( 'admin-bar-notif-updates', 'page-refresh' );
+		return $this->_plugin->GetGlobalSetting( 'admin-bar-notif-updates', 'page-refresh' );
 	}
 
 	/**
@@ -331,7 +455,7 @@ class WSAL_Settings {
 	 * @param string $newvalue - New option value.
 	 */
 	public function set_admin_bar_notif_updates( $newvalue ) {
-		$this->_plugin->SetGlobalOption( 'admin-bar-notif-updates', $newvalue );
+		$this->_plugin->SetGlobalSetting( 'admin-bar-notif-updates', $newvalue );
 	}
 
 	/**
@@ -340,7 +464,7 @@ class WSAL_Settings {
 	 * @return boolean
 	 */
 	public function IsRefreshAlertsEnabled() {
-		return ! $this->_plugin->GetGlobalOption( 'disable-refresh' );
+		return ! $this->_plugin->GetGlobalSetting( 'disable-refresh' );
 	}
 
 	/**
@@ -349,7 +473,7 @@ class WSAL_Settings {
 	 * @param boolean $newvalue - True if enabled.
 	 */
 	public function SetRefreshAlertsEnabled( $newvalue ) {
-		$this->_plugin->SetGlobalOption( 'disable-refresh', ! $newvalue );
+		$this->_plugin->SetGlobalSetting( 'disable-refresh', ! $newvalue );
 	}
 
 	/**
@@ -386,7 +510,7 @@ class WSAL_Settings {
 	 */
 	public function GetPruningDate() {
 		if ( ! $this->_pruning ) {
-			$this->_pruning = $this->_plugin->options_helper->get_option_value( 'pruning-date' );
+			$this->_pruning = $this->_plugin->GetGlobalSetting( 'pruning-date' );
 			if ( ! strtotime( $this->_pruning ) ) {
 				$this->_pruning = $this->GetDefaultPruningDate();
 			}
@@ -401,7 +525,7 @@ class WSAL_Settings {
 	 */
 	public function SetPruningDate( $newvalue ) {
 		if ( strtotime( $newvalue ) ) {
-			$this->_plugin->options_helper->set_option_value( 'pruning-date', $newvalue );
+			$this->_plugin->SetGlobalSetting( 'pruning-date', $newvalue );
 			$this->_pruning = $newvalue;
 		}
 	}
@@ -412,7 +536,7 @@ class WSAL_Settings {
 	 * @return string
 	 */
 	public function get_pruning_unit() {
-		return $this->_plugin->options_helper->get_option_value( 'pruning-unit', 'months' );
+		return $this->_plugin->GetGlobalSetting( 'pruning-unit', 'months' );
 	}
 
 	/**
@@ -421,7 +545,7 @@ class WSAL_Settings {
 	 * @param string $newvalue – New value of pruning unit.
 	 */
 	public function set_pruning_unit( $newvalue ) {
-		$this->_plugin->options_helper->set_option_value( 'pruning-unit', $newvalue );
+		$this->_plugin->SetGlobalSetting( 'pruning-unit', $newvalue );
 	}
 
 	/**
@@ -430,7 +554,7 @@ class WSAL_Settings {
 	 * @return integer
 	 */
 	public function GetPruningLimit() {
-		$val = (int) $this->_plugin->options_helper->get_option_value( 'pruning-limit' );
+		$val = (int) $this->_plugin->GetGlobalSetting( 'pruning-limit' );
 		return $val ? $val : $this->GetMaxAllowedAlerts();
 	}
 
@@ -441,27 +565,23 @@ class WSAL_Settings {
 	 */
 	public function SetPruningLimit( $newvalue ) {
 		$newvalue = max( /*min(*/ (int) $newvalue/*, $this->GetMaxAllowedAlerts())*/, 1 );
-		$this->_plugin->options_helper->set_option_value( 'pruning-limit', $newvalue );
+		$this->_plugin->SetGlobalSetting( 'pruning-limit', $newvalue );
 	}
 
 	public function SetPruningDateEnabled( $enabled ) {
-		$this->_plugin->options_helper->set_option_value( 'pruning-date-e', $enabled );
+		$this->_plugin->SetGlobalBooleanSetting( 'pruning-date-e', $enabled );
 	}
 
 	public function SetPruningLimitEnabled( $enabled ) {
-		$this->_plugin->options_helper->set_option_value( 'pruning-limit-e', $enabled );
+		$this->_plugin->SetGlobalBooleanSetting( 'pruning-limit-e', $enabled );
 	}
 
 	public function IsPruningDateEnabled() {
-		return $this->_plugin->options_helper->get_option_value( 'pruning-date-e' );
+		return $this->_plugin->GetGlobalBooleanSetting( 'pruning-date-e' );
 	}
 
 	public function IsPruningLimitEnabled() {
-		return $this->_plugin->options_helper->get_option_value( 'pruning-limit-e' );
-	}
-
-	public function IsRestrictAdmins() {
-		return $this->_plugin->GetGlobalOption( 'restrict-admins', false );
+		return $this->_plugin->GetGlobalBooleanSetting( 'pruning-limit-e' );
 	}
 
 	/**
@@ -473,17 +593,13 @@ class WSAL_Settings {
 		return esc_html__( 'This function is deprecated', 'wp-security-audit-log' );
 	}
 
-	public function SetRestrictAdmins( $enable ) {
-		$this->_plugin->SetGlobalOption( 'restrict-admins', (bool) $enable );
-	}
-
 	/**
 	 * Method: Set Login Page Notification.
 	 *
 	 * @param bool $enable - Enable/Disable.
 	 */
 	public function set_login_page_notification( $enable ) {
-		$this->_plugin->SetGlobalOption( 'login_page_notification', $enable );
+		$this->_plugin->SetGlobalBooleanSetting( 'login_page_notification', $enable );
 	}
 
 	/**
@@ -492,7 +608,7 @@ class WSAL_Settings {
 	 * @return bool - True if set, false if not.
 	 */
 	public function is_login_page_notification() {
-		return $this->_plugin->GetGlobalOption( 'login_page_notification', false );
+		return $this->_plugin->GetGlobalBooleanSetting( 'login_page_notification', false );
 	}
 
 	/**
@@ -502,7 +618,7 @@ class WSAL_Settings {
 	 */
 	public function set_login_page_notification_text( $text ) {
 		$text = wp_kses( $text, $this->_plugin->allowed_html_tags );
-		$this->_plugin->SetGlobalOption( 'login_page_notification_text', $text );
+		$this->_plugin->SetGlobalSetting( 'login_page_notification_text', $text );
 	}
 
 	/**
@@ -511,7 +627,7 @@ class WSAL_Settings {
 	 * @return string|bool - Text if set, false if not.
 	 */
 	public function get_login_page_notification_text() {
-		return $this->_plugin->GetGlobalOption( 'login_page_notification_text', false );
+		return $this->_plugin->GetGlobalSetting( 'login_page_notification_text', false );
 	}
 
 	public function GetDefaultDisabledAlerts() {
@@ -526,7 +642,7 @@ class WSAL_Settings {
 	public function GetDisabledAlerts() {
 		if ( ! $this->_disabled ) {
 			$this->_disabled = implode( ',', $this->GetDefaultDisabledAlerts() );
-			$this->_disabled = $this->_plugin->options_helper->get_option_value( 'disabled-alerts', $this->_disabled );
+			$this->_disabled = $this->_plugin->GetGlobalSetting( 'disabled-alerts', $this->_disabled );
 			$this->_disabled = ( '' == $this->_disabled ) ? array() : explode( ',', $this->_disabled );
 			$this->_disabled = array_map( 'intval', $this->_disabled );
 		}
@@ -540,26 +656,32 @@ class WSAL_Settings {
 	 */
 	public function SetDisabledAlerts( $types ) {
 		$this->_disabled = array_unique( array_map( 'intval', $types ) );
-		$this->_plugin->options_helper->set_option_value( 'disabled-alerts', implode( ',', $this->_disabled ) );
+		$this->_plugin->SetGlobalSetting( 'disabled-alerts', implode( ',', $this->_disabled ) );
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function IsIncognito() {
-		return $this->_plugin->GetGlobalOption( 'hide-plugin' );
+		return $this->_plugin->GetGlobalBooleanSetting( 'hide-plugin' );
 	}
 
+	/**
+	 * @param bool $enabled
+	 */
 	public function SetIncognito( $enabled ) {
-		$this->_plugin->SetGlobalOption( 'hide-plugin', $enabled );
+		$this->_plugin->SetGlobalBooleanSetting( 'hide-plugin', $enabled );
 	}
 
 	/**
 	 * Checking if the data will be removed.
 	 */
 	public function IsDeleteData() {
-		return $this->_plugin->GetGlobalOption( 'delete-data' );
+		return $this->_plugin->GetGlobalBooleanSetting( 'delete-data' );
 	}
 
 	public function SetDeleteData( $enabled ) {
-		$this->_plugin->SetGlobalOption( 'delete-data', $enabled );
+		$this->_plugin->SetGlobalBooleanSetting( 'delete-data', $enabled );
 	}
 
 	/**
@@ -569,7 +691,7 @@ class WSAL_Settings {
 	 */
 	public function SetAllowedPluginViewers( $users_or_roles ) {
 		$this->_viewers = $users_or_roles;
-		$this->_plugin->SetGlobalOption( 'plugin-viewers', implode( ',', $this->_viewers ) );
+		$this->_plugin->SetGlobalSetting( 'plugin-viewers', implode( ',', $this->_viewers ) );
 	}
 
 	/**
@@ -577,29 +699,9 @@ class WSAL_Settings {
 	 */
 	public function GetAllowedPluginViewers() {
 		if ( is_null( $this->_viewers ) ) {
-			$this->_viewers = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalOption( 'plugin-viewers' ) ) ) );
+			$this->_viewers = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'plugin-viewers' ) ) ) );
 		}
 		return $this->_viewers;
-	}
-
-	/**
-	 * Set Plugin Editors.
-	 *
-	 * @param array $users_or_roles – Users/Roles.
-	 */
-	public function SetAllowedPluginEditors( $users_or_roles ) {
-		$this->_editors = $users_or_roles;
-		$this->_plugin->SetGlobalOption( 'plugin-editors', implode( ',', $this->_editors ) );
-	}
-
-	/**
-	 * Get Plugin Editors.
-	 */
-	public function GetAllowedPluginEditors() {
-		if ( is_null( $this->_editors ) ) {
-			$this->_editors = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalOption( 'plugin-editors' ) ) ) );
-		}
-		return $this->_editors;
 	}
 
 	/**
@@ -609,7 +711,7 @@ class WSAL_Settings {
 	 * @since 3.2.3
 	 */
 	public function set_restrict_plugin_setting( $setting ) {
-		$this->_plugin->SetGlobalOption( 'restrict-plugin-settings', $setting );
+		$this->_plugin->SetGlobalSetting( 'restrict-plugin-settings', $setting );
 	}
 
 	/**
@@ -618,21 +720,36 @@ class WSAL_Settings {
 	 * @since 3.2.3
 	 */
 	public function get_restrict_plugin_setting() {
-		$default_value = 'only_admins';
-		if ( $this->IsRestrictAdmins() ) {
-			$default_value = 'only_me';
-		}
-		return $this->_plugin->GetGlobalOption( 'restrict-plugin-settings', $default_value );
+		return $this->_plugin->GetGlobalSetting( 'restrict-plugin-settings', 'only_admins' );
+	}
+
+	/**
+	 * Get restriction setting for viewing the log viewer in multisite context.
+	 *
+	 * @since 4.1.3
+	 */
+	public function get_restrict_log_viewer() {
+		return $this->_plugin->GetGlobalSetting( 'restrict-log-viewer', 'only_admins' );
+	}
+
+	/**
+	 * Set restriction setting for viewing the log viewer in multisite context.
+	 *
+	 * @param string $setting – Setting.
+	 * @since 4.1.3
+	 */
+	public function set_restrict_log_viewer( $setting ) {
+		$this->_plugin->SetGlobalSetting( 'restrict-log-viewer', $setting );
 	}
 
 	public function SetViewPerPage( $newvalue ) {
 		$this->_perpage = max( $newvalue, 1 );
-		$this->_plugin->SetGlobalOption( 'items-per-page', $this->_perpage );
+		$this->_plugin->SetGlobalSetting( 'items-per-page', $this->_perpage );
 	}
 
 	public function GetViewPerPage() {
 		if ( is_null( $this->_perpage ) ) {
-			$this->_perpage = (int) $this->_plugin->GetGlobalOption( 'items-per-page', 10 );
+			$this->_perpage = (int) $this->_plugin->GetGlobalSetting( 'items-per-page', 10 );
 		}
 		return $this->_perpage;
 	}
@@ -692,50 +809,6 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Returns access tokens for a particular action.
-	 *
-	 * @param string $action - Type of action.
-	 * @throws Exception     - Unknown action exception.
-	 * @return array         - List of tokens (usernames, roles etc).
-	 */
-	public function GetAccessTokens( $action ) {
-		$allowed = array();
-		switch ( $action ) {
-			case 'view':
-				$allowed = $this->GetAllowedPluginViewers();
-				$allowed = array_merge( $allowed, $this->GetAllowedPluginEditors() );
-				if ( ! $this->_plugin->IsMultisite() && ! $this->IsRestrictAdmins() ) {
-					$allowed = array_merge( $allowed, $this->GetSuperAdmins() );
-					$allowed = array_merge( $allowed, $this->GetAdmins() );
-				} elseif ( $this->_plugin->IsMultisite() && ! $this->IsRestrictAdmins() ) {
-					if ( 'only_superadmins' === $this->get_restrict_plugin_setting() ) {
-						$allowed = array_merge( $allowed, $this->GetSuperAdmins() );
-					} else {
-						$allowed = array_merge( $allowed, $this->GetSuperAdmins() );
-						$allowed = array_merge( $allowed, $this->GetAdmins() );
-					}
-				}
-				break;
-			case 'edit':
-				$allowed = $this->GetAllowedPluginEditors();
-				if ( ! $this->IsRestrictAdmins() ) {
-					$allowed = array_merge( $allowed, $this->_plugin->IsMultisite() ? $this->GetSuperAdmins() : $this->GetAdmins() );
-				}
-				break;
-			default:
-				throw new Exception( 'Unknown action "' . $action . '".' );
-		}
-		if ( ! $this->IsRestrictAdmins() ) {
-			if ( is_multisite() ) {
-				$allowed = array_merge( $allowed, get_super_admins() );
-			} else {
-				$allowed[] = 'administrator';
-			}
-		}
-		return array_unique( $allowed );
-	}
-
-	/**
 	 * Check if user can perform an action.
 	 *
 	 * @param integer|WP_user $user - User object to check.
@@ -746,14 +819,98 @@ class WSAL_Settings {
 		if ( is_int( $user ) ) {
 			$user = get_userdata( $user );
 		}
-		$allowed = $this->GetAccessTokens( $action );
-		$check   = array_merge( $user->roles, array( $user->user_login ) );
-		foreach ( $check as $item ) {
-			if ( in_array( $item, $allowed ) ) {
-				return true;
-			}
+
+		//  by default the user has no privileges
+		$result = false;
+
+		$is_multisite = $this->_plugin->IsMultisite();
+		switch ( $action ) {
+			case 'view':
+				if ( !$is_multisite ) {
+					//  non-multisite piggybacks on the plugin settings access
+					switch ( $this->get_restrict_plugin_setting() ) {
+						case 'only_admins':
+							//  allow access only if the user is and admin
+							$result = in_array('administrator', $user->roles);
+							break;
+						case 'only_me':
+							//  allow access only if the user matches the only user allowed access
+							$result = $user->ID == $this->get_only_me_user_id();
+							break;
+						default:
+							//  no other options to allow access here
+							$result = false;
+					}
+				} else {
+					//  multisite MUST respect the log viewer restriction settings plus also additional users and roles
+					//  defined in the extra option
+					switch ( $this->get_restrict_log_viewer() ) {
+						case 'only_me':
+							//  allow access only if the user matches the only user allowed access
+							$result = ( $user->ID == $this->get_only_me_user_id() );
+							break;
+						case 'only_superadmins':
+							//  allow access only for super admins
+							if ( function_exists( 'is_super_admin' ) && is_super_admin($user->ID) ) {
+								$result = true;
+							}
+							break;
+						case 'only_admins':
+							//  allow access only for super admins and admins
+							$result = in_array('administrator', $user->roles) || ( function_exists( 'is_super_admin' ) && is_super_admin($user->ID) );
+							break;
+					}
+				}
+
+				if (!$result) {
+					//  user is still not allowed to view the logs, let's check the additional users and roles
+					//  settings
+					$extra_viewers = $this->GetAllowedPluginViewers();
+					if (in_array($user->user_login, $extra_viewers )) {
+						$result = true;
+					} elseif (!empty(array_intersect($extra_viewers, $user->roles))) {
+						$result = true;
+					}
+				}
+				break;
+			case 'edit':
+				if ( $is_multisite ) {
+					//  no one has access to settings on sub site inside a network
+					if ( wp_doing_ajax() ) {
+						//  AJAX calls are an exception
+						$result = true;
+					} else if ( ! is_network_admin() ) {
+						$result = false;
+						break;
+					}
+				}
+
+				$restrict_plugin_setting = $this->get_restrict_plugin_setting();
+				if ( 'only_me' === $restrict_plugin_setting ) {
+					$result = ( $user->ID == $this->get_only_me_user_id());
+				} elseif ( 'only_admins' === $restrict_plugin_setting ) {
+					if ($is_multisite) {
+						$result = ( function_exists( 'is_super_admin' ) && is_super_admin($user->ID) );
+					} else {
+						$result = in_array('administrator', $user->roles);
+					}
+				}
+				break;
+			default:
+				$result = false;
 		}
-		return false;
+
+		/**
+		 * Filters the user permissions result.
+		 *
+		 * @since 4.1.3
+		 *
+		 * @param bool $result User access flag after applying all internal rules.
+		 * @param WP_User $user The user in question.
+		 * @param string $action Action to check permissions for.
+		 * @return bool
+		 */
+		return apply_filters('wsal_user_can', $result, $user, $action);
 	}
 
 	public function GetCurrentUserRoles( $base_roles = null ) {
@@ -772,19 +929,19 @@ class WSAL_Settings {
 	}
 
 	public function IsMainIPFromProxy() {
-		return $this->_plugin->GetGlobalOption( 'use-proxy-ip' );
+		return $this->_plugin->GetGlobalBooleanSetting( 'use-proxy-ip' );
 	}
 
 	public function SetMainIPFromProxy( $enabled ) {
-		$this->_plugin->SetGlobalOption( 'use-proxy-ip', $enabled );
+		$this->_plugin->SetGlobalBooleanSetting( 'use-proxy-ip', $enabled );
 	}
 
 	public function IsInternalIPsFiltered() {
-		return $this->_plugin->GetGlobalOption( 'filter-internal-ip' );
+		return $this->_plugin->GetGlobalSetting( 'filter-internal-ip' );
 	}
 
 	public function SetInternalIPsFiltering( $enabled ) {
-		$this->_plugin->SetGlobalOption( 'filter-internal-ip', $enabled );
+		$this->_plugin->SetGlobalSetting( 'filter-internal-ip', $enabled );
 	}
 
 	/**
@@ -894,12 +1051,12 @@ class WSAL_Settings {
 	 */
 	public function SetExcludedMonitoringUsers( $users ) {
 		$this->_excluded_users = $users;
-		$this->_plugin->SetGlobalOption( 'excluded-users', esc_html( implode( ',', $this->_excluded_users ) ) );
+		$this->_plugin->SetGlobalSetting( 'excluded-users', esc_html( implode( ',', $this->_excluded_users ) ) );
 	}
 
 	public function GetExcludedMonitoringUsers() {
 		if ( empty( $this->_excluded_users ) ) {
-			$this->_excluded_users = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalOption( 'excluded-users' ) ) ) );
+			$this->_excluded_users = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'excluded-users' ) ) ) );
 		}
 		return $this->_excluded_users;
 	}
@@ -912,7 +1069,7 @@ class WSAL_Settings {
 	 */
 	public function set_excluded_post_types( $post_types ) {
 		$this->_post_types = $post_types;
-		$this->_plugin->SetGlobalOption( 'custom-post-types', esc_html( implode( ',', $this->_post_types ) ) );
+		$this->_plugin->SetGlobalSetting( 'custom-post-types', esc_html( implode( ',', $this->_post_types ) ) );
 	}
 
 	/**
@@ -922,7 +1079,7 @@ class WSAL_Settings {
 	 */
 	public function get_excluded_post_types() {
 		if ( empty( $this->_post_types ) ) {
-			$this->_post_types = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalOption( 'custom-post-types' ) ) ) );
+			$this->_post_types = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'custom-post-types' ) ) ) );
 		}
 		return $this->_post_types;
 	}
@@ -937,7 +1094,7 @@ class WSAL_Settings {
 		$urls                = array_map( 'untrailingslashit', $urls );
 		$urls                = array_unique( $urls );
 		$this->excluded_urls = $urls;
-		$this->_plugin->SetGlobalOption( 'excluded-urls', esc_html( implode( ',', $this->excluded_urls ) ) );
+		$this->_plugin->SetGlobalSetting( 'excluded-urls', esc_html( implode( ',', $this->excluded_urls ) ) );
 	}
 
 	/**
@@ -947,7 +1104,7 @@ class WSAL_Settings {
 	 */
 	public function get_excluded_urls() {
 		if ( empty( $this->excluded_urls ) ) {
-			$this->excluded_urls = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalOption( 'excluded-urls' ) ) ) );
+			$this->excluded_urls = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'excluded-urls' ) ) ) );
 		}
 		return $this->excluded_urls;
 	}
@@ -959,7 +1116,7 @@ class WSAL_Settings {
 	 */
 	public function SetExcludedMonitoringRoles( $roles ) {
 		$this->_excluded_roles = $roles;
-		$this->_plugin->SetGlobalOption( 'excluded-roles', esc_html( implode( ',', $this->_excluded_roles ) ) );
+		$this->_plugin->SetGlobalSetting( 'excluded-roles', esc_html( implode( ',', $this->_excluded_roles ) ) );
 	}
 
 	/**
@@ -967,7 +1124,7 @@ class WSAL_Settings {
 	 */
 	public function GetExcludedMonitoringRoles() {
 		if ( empty( $this->_excluded_roles ) ) {
-			$this->_excluded_roles = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalOption( 'excluded-roles' ) ) ) );
+			$this->_excluded_roles = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'excluded-roles' ) ) ) );
 		}
 		return $this->_excluded_roles;
 	}
@@ -977,12 +1134,12 @@ class WSAL_Settings {
 	 */
 	public function SetExcludedMonitoringCustom( $custom ) {
 		$this->_excluded_custom = $custom;
-		$this->_plugin->SetGlobalOption( 'excluded-custom', esc_html( implode( ',', $this->_excluded_custom ) ) );
+		$this->_plugin->SetGlobalSetting( 'excluded-custom', esc_html( implode( ',', $this->_excluded_custom ) ) );
 	}
 
 	public function GetExcludedMonitoringCustom() {
 		if ( empty( $this->_excluded_custom ) ) {
-			$this->_excluded_custom = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalOption( 'excluded-custom' ) ) ) );
+			$this->_excluded_custom = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'excluded-custom' ) ) ) );
 			asort( $this->_excluded_custom );
 		}
 		return $this->_excluded_custom;
@@ -993,12 +1150,12 @@ class WSAL_Settings {
 	 */
 	public function SetExcludedMonitoringIP( $ip ) {
 		$this->_excluded_ip = $ip;
-		$this->_plugin->SetGlobalOption( 'excluded-ip', esc_html( implode( ',', $this->_excluded_ip ) ) );
+		$this->_plugin->SetGlobalSetting( 'excluded-ip', esc_html( implode( ',', $this->_excluded_ip ) ) );
 	}
 
 	public function GetExcludedMonitoringIP() {
 		if ( empty( $this->_excluded_ip ) ) {
-			$this->_excluded_ip = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalOption( 'excluded-ip' ) ) ) );
+			$this->_excluded_ip = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'excluded-ip' ) ) ) );
 		}
 		return $this->_excluded_ip;
 	}
@@ -1067,11 +1224,11 @@ class WSAL_Settings {
 	 * Server's timezone or WordPress' timezone.
 	 */
 	public function GetTimezone() {
-		return $this->_plugin->options_helper->get_option_value( 'timezone', 'wp' );
+		return $this->_plugin->GetGlobalSetting( 'timezone', 'wp' );
 	}
 
 	public function SetTimezone( $newvalue ) {
-		$this->_plugin->options_helper->set_option_value( 'timezone', $newvalue );
+		$this->_plugin->SetGlobalSetting( 'timezone', $newvalue );
 	}
 
 	/**
@@ -1083,7 +1240,7 @@ class WSAL_Settings {
 	 * @return bool
 	 */
 	public function get_show_milliseconds() {
-		return $this->_plugin->GetGlobalOption( 'show_milliseconds', 'yes' );
+		return $this->_plugin->GetGlobalBooleanSetting( 'show_milliseconds', true );
 	}
 
 	/**
@@ -1096,8 +1253,7 @@ class WSAL_Settings {
 	 * @param  mixed $newvalue ideally always bool. If not bool then it's cast to true.
 	 */
 	public function set_show_milliseconds( $newvalue ) {
-		$newvalue = ( ! empty( $newvalue ) ) ? 'yes' : 'no';
-		$this->_plugin->SetGlobalOption( 'show_milliseconds', $newvalue );
+		$this->_plugin->SetGlobalBooleanSetting( 'show_milliseconds', $newvalue );
 	}
 
 
@@ -1105,7 +1261,7 @@ class WSAL_Settings {
 	 * Get type of username to display.
 	 */
 	public function get_type_username() {
-		return $this->_plugin->options_helper->get_option_value( 'type_username', 'display_name' );
+		return $this->_plugin->GetGlobalSetting( 'type_username', 'display_name' );
 	}
 
 	/**
@@ -1115,15 +1271,15 @@ class WSAL_Settings {
 	 * @since 2.6.5
 	 */
 	public function set_type_username( $newvalue ) {
-		$this->_plugin->options_helper->set_option_value( 'type_username', $newvalue );
+		$this->_plugin->SetGlobalSetting( 'type_username', $newvalue );
 	}
 
 	public function GetAdapterConfig( $name_field, $default_value = false ) {
-		return $this->_plugin->GetGlobalOption( $name_field, $default_value );
+		return $this->_plugin->GetGlobalSetting( $name_field, $default_value );
 	}
 
 	public function SetAdapterConfig( $name_field, $newvalue ) {
-		$this->_plugin->SetGlobalOption( $name_field, trim( $newvalue ) );
+		$this->_plugin->SetGlobalSetting( $name_field, trim( $newvalue ) );
 	}
 
 	/**
@@ -1176,19 +1332,19 @@ class WSAL_Settings {
 	}
 
 	public function GetColumnsSelected() {
-		return $this->_plugin->options_helper->get_option_value( 'columns', array() );
+		return $this->_plugin->GetGlobalSetting( 'columns', array() );
 	}
 
 	public function SetColumns( $columns ) {
-		$this->_plugin->options_helper->set_option_value( 'columns', json_encode( $columns ) );
+		$this->_plugin->SetGlobalSetting( 'columns', json_encode( $columns ) );
 	}
 
 	public function IsWPBackend() {
-		return $this->_plugin->options_helper->get_option_value( 'wp-backend' );
+		return $this->_plugin->GetGlobalBooleanSetting( 'wp-backend' );
 	}
 
 	public function SetWPBackend( $enabled ) {
-		$this->_plugin->options_helper->set_option_value( 'wp-backend', $enabled );
+		$this->_plugin->SetGlobalBooleanSetting( 'wp-backend', $enabled );
 	}
 
 	/**
@@ -1197,7 +1353,7 @@ class WSAL_Settings {
 	 * @param string $use – Setting value.
 	 */
 	public function set_use_email( $use ) {
-		$this->_plugin->SetGlobalOption( 'use-email', $use );
+		$this->_plugin->SetGlobalSetting( 'use-email', $use );
 	}
 
 	/**
@@ -1206,31 +1362,31 @@ class WSAL_Settings {
 	 * @return string
 	 */
 	public function get_use_email() {
-		return $this->_plugin->GetGlobalOption( 'use-email', 'default_email' );
+		return $this->_plugin->GetGlobalSetting( 'use-email', 'default_email' );
 	}
 
 	public function SetFromEmail( $email_address ) {
-		$this->_plugin->SetGlobalOption( 'from-email', trim( $email_address ) );
+		$this->_plugin->SetGlobalSetting( 'from-email', trim( $email_address ) );
 	}
 
 	public function GetFromEmail() {
-		return $this->_plugin->GetGlobalOption( 'from-email' );
+		return $this->_plugin->GetGlobalSetting( 'from-email' );
 	}
 
 	public function SetDisplayName( $display_name ) {
-		$this->_plugin->SetGlobalOption( 'display-name', trim( $display_name ) );
+		$this->_plugin->SetGlobalSetting( 'display-name', trim( $display_name ) );
 	}
 
 	public function GetDisplayName() {
-		return $this->_plugin->GetGlobalOption( 'display-name' );
+		return $this->_plugin->GetGlobalSetting( 'display-name' );
 	}
 
 	public function Set404LogLimit( $value ) {
-		$this->_plugin->options_helper->set_option_value( 'log-404-limit', abs( $value ) );
+		$this->_plugin->SetGlobalSetting( 'log-404-limit', abs( $value ) );
 	}
 
 	public function Get404LogLimit() {
-		return $this->_plugin->options_helper->get_option_value( 'log-404-limit', 99 );
+		return $this->_plugin->GetGlobalSetting( 'log-404-limit', 99 );
 	}
 
 	/**
@@ -1240,7 +1396,7 @@ class WSAL_Settings {
 	 * @since  2.6.3
 	 */
 	public function SetVisitor404LogLimit( $value ) {
-		$this->_plugin->options_helper->set_option_value( 'log-visitor-404-limit', abs( $value ) );
+		$this->_plugin->SetGlobalSetting( 'log-visitor-404-limit', abs( $value ) );
 	}
 
 	/**
@@ -1249,7 +1405,7 @@ class WSAL_Settings {
 	 * @since  2.6.3
 	 */
 	public function GetVisitor404LogLimit() {
-		return $this->_plugin->options_helper->get_option_value( 'log-visitor-404-limit', 99 );
+		return $this->_plugin->GetGlobalSetting( 'log-visitor-404-limit', 99 );
 	}
 
 	/**
@@ -1260,9 +1416,9 @@ class WSAL_Settings {
 	 */
 	public function set_failed_login_limit( $value ) {
 		if ( ! empty( $value ) ) {
-			$this->_plugin->options_helper->set_option_value( 'log-failed-login-limit', abs( $value ) );
+			$this->_plugin->SetGlobalSetting( 'log-failed-login-limit', abs( $value ) );
 		} else {
-			$this->_plugin->options_helper->set_option_value( 'log-failed-login-limit', -1 );
+			$this->_plugin->SetGlobalSetting( 'log-failed-login-limit', -1 );
 		}
 	}
 
@@ -1272,7 +1428,7 @@ class WSAL_Settings {
 	 * @since  2.6.3
 	 */
 	public function get_failed_login_limit() {
-		return $this->_plugin->options_helper->get_option_value( 'log-failed-login-limit', 10 );
+		return $this->_plugin->GetGlobalSetting( 'log-failed-login-limit', 10 );
 	}
 
 	/**
@@ -1283,9 +1439,9 @@ class WSAL_Settings {
 	 */
 	public function set_visitor_failed_login_limit( $value ) {
 		if ( ! empty( $value ) ) {
-			$this->_plugin->options_helper->set_option_value( 'log-visitor-failed-login-limit', abs( $value ) );
+			$this->_plugin->SetGlobalSetting( 'log-visitor-failed-login-limit', abs( $value ) );
 		} else {
-			$this->_plugin->options_helper->set_option_value( 'log-visitor-failed-login-limit', -1 );
+			$this->_plugin->SetGlobalSetting( 'log-visitor-failed-login-limit', -1 );
 		}
 	}
 
@@ -1295,11 +1451,11 @@ class WSAL_Settings {
 	 * @since  2.6.3
 	 */
 	public function get_visitor_failed_login_limit() {
-		return $this->_plugin->options_helper->get_option_value( 'log-visitor-failed-login-limit', 10 );
+		return $this->_plugin->GetGlobalSetting( 'log-visitor-failed-login-limit', 10 );
 	}
 
 	public function IsArchivingEnabled() {
-		return $this->_plugin->GetGlobalOption( 'archiving-e' );
+		return $this->_plugin->GetGlobalSetting( 'archiving-e' );
 	}
 
 	/**
@@ -1307,66 +1463,58 @@ class WSAL_Settings {
 	 */
 	public function SwitchToArchiveDB() {
 		if ( $this->IsArchivingEnabled() ) {
-			$archive_type       = $this->_plugin->GetGlobalOption( 'archive-type' );
-			$archive_user       = $this->_plugin->GetGlobalOption( 'archive-user' );
-			$password           = $this->_plugin->GetGlobalOption( 'archive-password' );
-			$archive_name       = $this->_plugin->GetGlobalOption( 'archive-name' );
-			$archive_hostname   = $this->_plugin->GetGlobalOption( 'archive-hostname' );
-			$archive_baseprefix = $this->_plugin->GetGlobalOption( 'archive-base-prefix' );
-			$archive_ssl        = $this->_plugin->GetGlobalOption( 'archive-ssl', false );
-			$archive_cc         = $this->_plugin->GetGlobalOption( 'archive-client-certificate', false );
-			$archive_ssl_ca     = $this->_plugin->GetGlobalOption( 'archive-ssl-ca', false );
-			$archive_ssl_cert   = $this->_plugin->GetGlobalOption( 'archive-ssl-cert', false );
-			$archive_ssl_key    = $this->_plugin->GetGlobalOption( 'archive-ssl-key', false );
+			$archive_type       = $this->_plugin->GetGlobalSetting( 'archive-type' );
+			$archive_user       = $this->_plugin->GetGlobalSetting( 'archive-user' );
+			$password           = $this->_plugin->GetGlobalSetting( 'archive-password' );
+			$archive_name       = $this->_plugin->GetGlobalSetting( 'archive-name' );
+			$archive_hostname   = $this->_plugin->GetGlobalSetting( 'archive-hostname' );
+			$archive_baseprefix = $this->_plugin->GetGlobalSetting( 'archive-base-prefix' );
+			$archive_ssl        = $this->_plugin->GetGlobalSetting( 'archive-ssl', false );
+			$archive_cc         = $this->_plugin->GetGlobalSetting( 'archive-client-certificate', false );
+			$archive_ssl_ca     = $this->_plugin->GetGlobalSetting( 'archive-ssl-ca', false );
+			$archive_ssl_cert   = $this->_plugin->GetGlobalSetting( 'archive-ssl-cert', false );
+			$archive_ssl_key    = $this->_plugin->GetGlobalSetting( 'archive-ssl-key', false );
 			$config             = WSAL_Connector_ConnectorFactory::GetConfigArray( $archive_type, $archive_user, $password, $archive_name, $archive_hostname, $archive_baseprefix, $archive_ssl, $archive_cc, $archive_ssl_ca, $archive_ssl_cert, $archive_ssl_key );
 			$this->_plugin->getConnector( $config )->getAdapter( 'Occurrence' );
 		}
 	}
 
 	/**
-	 * Generate index.php file for each wsal sub-directory
-	 * present in the uploads directory.
+	 * Generate index.php file for each sub-directory present in the plugin working directory.
 	 *
 	 * @since 3.1.2
 	 */
 	public function generate_index_files() {
-		// Get uploads directory.
-		$uploads_dir      = wp_upload_dir();
-		$wsal_uploads_dir = trailingslashit( $uploads_dir['basedir'] . '/wp-security-audit-log/' );
+		//  get plugin working directory.
+		$wsal_working_dir = $this->get_working_dir_path();
 
 		// If the directory exists then generate index.php file for every sub-directory.
-		if ( ! empty( $wsal_uploads_dir ) && is_dir( $wsal_uploads_dir ) ) {
+		if ( ! empty( $wsal_working_dir ) && is_dir( $wsal_working_dir ) ) {
 			// Generate index.php for the main directory.
-			if ( ! file_exists( $wsal_uploads_dir . '/index.php' ) ) {
+			if ( ! file_exists( $wsal_working_dir . DIRECTORY_SEPARATOR . 'index.php' ) ) {
 				// Generate index.php file.
-				$this->create_index_file( $wsal_uploads_dir );
+				$this->create_index_file( $wsal_working_dir );
 			}
 
 			// Generate .htaccess for the main directory.
-			if ( ! file_exists( $wsal_uploads_dir . '/.htaccess' ) ) {
+			if ( ! file_exists( $wsal_working_dir . DIRECTORY_SEPARATOR . '.htaccess' ) ) {
 				// Generate .htaccess file.
-				$this->create_htaccess_file( $wsal_uploads_dir );
+				$this->create_htaccess_file( $wsal_working_dir );
 			}
 
 			// Fetch all files in the uploads directory.
-			$sub_directories = glob( $wsal_uploads_dir . '*' );
+			$sub_directories = glob( $wsal_working_dir . '*' );
 			foreach ( $sub_directories as $sub_dir ) {
 				// index.php file.
-				if ( is_dir( $sub_dir ) && ! file_exists( $sub_dir . '/index.php' ) ) {
+				if ( is_dir( $sub_dir ) && ! file_exists( $sub_dir . DIRECTORY_SEPARATOR . 'index.php' ) ) {
 					// Generate index.php file.
 					$this->create_index_file( $sub_dir . '/' );
 				}
 
 				// .htaccess file.
-				if ( is_dir( $sub_dir ) && ! file_exists( $sub_dir . '/.htaccess' ) ) {
-					// Check for failed-logins, users, visitors and don't create file in it.
-					if ( strpos( $sub_dir, 'failed-logins' )
-						|| strpos( $sub_dir, 'users' )
-						|| strpos( $sub_dir, 'visitors' ) ) {
-						continue;
-					}
+				if ( is_dir( $sub_dir ) && ! file_exists( $sub_dir . DIRECTORY_SEPARATOR . '.htaccess' ) ) {
 					// Generate .htaccess file.
-					$this->create_htaccess_file( $sub_dir . '/' );
+					$this->create_htaccess_file( $sub_dir . DIRECTORY_SEPARATOR );
 				}
 			}
 		}
@@ -1492,13 +1640,13 @@ class WSAL_Settings {
 	 */
 	public function set_mainwp_child_stealth_mode() {
 		if (
-			'yes' !== $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' ) // MainWP Child Stealth Mode is not already active.
+			! $this->_plugin->GetGlobalBooleanSetting( 'mwp-child-stealth-mode', false ) // MainWP Child Stealth Mode is not already active.
 			&& WpSecurityAuditLog::is_mainwp_active() // And if MainWP Child plugin is installed & active.
 		) {
 			// Check if freemius state is anonymous.
-			if ( ! wsal_freemius()->is_premium() && 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) ) {
+			if ( ! wsal_freemius()->is_premium() && 'anonymous' === $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) ) {
 				// Update freemius state to skipped.
-				update_site_option( 'wsal_freemius_state', 'skipped' );
+				$this->_plugin->SetGlobalSetting( 'wsal_freemius_state', 'skipped' );
 
 				if ( ! $this->_plugin->IsMultisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
@@ -1515,12 +1663,13 @@ class WSAL_Settings {
 				FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'trial_promotion' );
 			}
 
-			$this->SetIncognito( '1' ); // Incognito mode to hide WSAL on plugins page.
-			$this->SetRestrictAdmins( true ); // Restrict other admins.
-			$editors   = array();
-			$editors[] = wp_get_current_user()->user_login; // Set the current user as the editor of WSAL.
-			$this->SetAllowedPluginEditors( $editors ); // Save the editors.
-			$this->_plugin->SetGlobalOption( 'mwp-child-stealth-mode', 'yes' ); // Save stealth mode option.
+			$this->SetIncognito( true ); // Incognito mode to hide WSAL on plugins page.
+			$this->set_restrict_log_viewer('only_me');
+			$this->set_restrict_plugin_setting('only_me');
+			//  current user with fallback to default admin (in case this is triggered using WP CLI or something similar)
+			$only_me_user_id = is_user_logged_in() ? get_current_user_id() : 1;
+			$this->set_only_me_user_id($only_me_user_id);
+			$this->_plugin->SetGlobalBooleanSetting( 'mwp-child-stealth-mode', true ); // Save stealth mode option.
 		}
 	}
 
@@ -1530,10 +1679,11 @@ class WSAL_Settings {
 	 * @since 3.2.3.3
 	 */
 	public function deactivate_mainwp_child_stealth_mode() {
-		$this->SetIncognito( '0' ); // Disable incognito mode to hide WSAL on plugins page.
-		$this->SetRestrictAdmins( false ); // Give access to other admins.
-		$this->SetAllowedPluginEditors( array() ); // Empty the editors.
-		$this->_plugin->SetGlobalOption( 'mwp-child-stealth-mode', 'no' ); // Disable stealth mode option.
+		$this->SetIncognito( false ); // Disable incognito mode to hide WSAL on plugins page.
+		$this->set_restrict_plugin_setting('only_admins');
+		$this->set_restrict_log_viewer('only_admins');
+		$this->set_admin_blocking_plugin_support(false);
+		$this->_plugin->SetGlobalBooleanSetting( 'mwp-child-stealth-mode', false ); // Disable stealth mode option.
 	}
 
 	/**
@@ -1546,7 +1696,7 @@ class WSAL_Settings {
 			return;
 		}
 
-		if ( 'yes' === $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' ) ) {
+		if ( $this->_plugin->GetGlobalBooleanSetting( 'mwp-child-stealth-mode', false ) ) {
 			$this->deactivate_mainwp_child_stealth_mode();
 		}
 	}
@@ -1557,18 +1707,19 @@ class WSAL_Settings {
 	 * @return boolean
 	 */
 	public function is_stealth_mode() {
-		$stealth_mode = $this->_plugin->GetGlobalOption( 'mwp-child-stealth-mode', 'no' );
-		return 'yes' === $stealth_mode;
+		return $this->_plugin->GetGlobalBooleanSetting( 'mwp-child-stealth-mode', false );
 	}
 
 	/**
-	 * Method: Meta data formater.
+	 * Method: Meta data formatter.
 	 *
-	 * @param string  $name      - Name of the data.
-	 * @param mixed   $value     - Value of the data.
-	 * @param integer $occ_id    - Event occurrence ID.
-	 * @param mixed   $highlight - Highlight format.
+	 * @param string $name - Name of the data.
+	 * @param mixed $value - Value of the data.
+	 * @param integer $occ_id - Event occurrence ID.
+	 * @param mixed $highlight - Highlight format.
+	 *
 	 * @return string
+	 * @throws Freemius_Exception
 	 */
 	public function meta_formatter( $name, $value, $occ_id, $highlight ) {
 		if ( $highlight && 'daily-report' === $highlight ) {
@@ -1603,14 +1754,11 @@ class WSAL_Settings {
 				}
 				return false;
 
-			case in_array( $name, array( '%EditorLinkPost%', '%EditorLinkProduct%', '%EditorLinkCoupon%' ) ):
+			case in_array( $name, array( '%EditorLinkPost%', '%EditorLinkPage%' ) ):
 				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View post in the editor', 'wp-security-audit-log' ) . '</a>';
 
 			case '%EditorLinkOrder%' == $name:
 				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View Order', 'wp-security-audit-log' ) . '</a>';
-
-			case '%EditorLinkPage%' == $name:
-				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View post in the editor', 'wp-security-audit-log' ) . '</a>';
 
 			case '%CategoryLink%' == $name:
 			case '%cat_link%' == $name:
@@ -1632,6 +1780,7 @@ class WSAL_Settings {
 				) . $highlight_end_tag;
 
 			case '%ClientIP%' == $name:
+			case '%IPAddress%' == $name:
 				if ( is_string( $value ) ) {
 					return $highlight_start_tag . str_replace( array( '"', '[', ']' ), '', $value ) . $highlight_end_tag;
 				} else {
@@ -1846,7 +1995,7 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Method: Meta data formater.
+	 * Method: Meta data formatter.
 	 *
 	 * @since 3.3
 	 *
@@ -1882,9 +2031,6 @@ class WSAL_Settings {
 
 			case '%EditorLinkOrder%' === $name:
 				return ' <' . esc_url( $value ) . '|View Order>';
-
-			case '%EditorLinkPage%' === $name:
-				return ' View the <' . esc_url( $value ) . '|page>';
 
 			case '%CategoryLink%' === $name:
 			case '%cat_link%' === $name:
@@ -2014,7 +2160,7 @@ class WSAL_Settings {
 	 * @return string
 	 */
 	public function get_events_type_nav() {
-		return $this->_plugin->GetGlobalOption( 'events-nav-type', 'infinite-scroll' );
+		return $this->_plugin->GetGlobalSetting( 'events-nav-type', 'infinite-scroll' );
 	}
 
 	/**
@@ -2028,7 +2174,7 @@ class WSAL_Settings {
 	 * @return string
 	 */
 	public function set_events_type_nav( $nav_type ) {
-		$this->_plugin->SetGlobalOption( 'events-nav-type', $nav_type );
+		$this->_plugin->SetGlobalSetting( 'events-nav-type', $nav_type );
 	}
 
 	/**
@@ -2263,7 +2409,7 @@ class WSAL_Settings {
 	 *
 	 * @return array
 	 */
-	public function get_frontend_events() {
+	public static function get_frontend_events() {
 		// Option defaults.
 		$default = array(
 			'register'    => false,
@@ -2273,8 +2419,7 @@ class WSAL_Settings {
 		);
 
 		// Get the option.
-		$event_opt = 'wsal-frontend-events';
-		$value     = ! is_multisite() ? get_option( $event_opt, $default ) : get_network_option( get_main_network_id(), $event_opt, $default );
+		$value     = \WSAL\Helpers\Options::get_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $default );
 
 		// Check for WooCommerce in case it is not stored.
 		$value['woocommerce'] = ! isset( $value['woocommerce'] ) ? WpSecurityAuditLog::is_woocommerce_active() : $value['woocommerce'];
@@ -2288,7 +2433,49 @@ class WSAL_Settings {
 	 * @return bool
 	 */
 	public function set_frontend_events( $value = array() ) {
-		$event_opt = 'wsal-frontend-events';
-		return ! is_multisite() ? update_option( $event_opt, $value ) : update_network_option( get_main_network_id(), $event_opt, $value );
+		return \WSAL\Helpers\Options::set_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $value);
 	}
+
+	/**
+	 * Stores the ID of user who restricted the plugin settings access to "only me".
+	 *
+	 * @param int $user_id
+	 * @since 4.1.3
+	 */
+	public function set_only_me_user_id( $user_id ) {
+		$this->_plugin->SetGlobalSetting( 'only-me-user-id', $user_id );
+	}
+
+	/**
+	 * Stores the ID of user who restricted the plugin settings access to "only me".
+	 *
+	 * @return int
+	 * @since 4.1.3
+	 */
+	public function get_only_me_user_id() {
+		return $this->_plugin->GetGlobalSetting( 'only-me-user-id' );
+	}
+
+    /**
+     * Save admin blocking plugin support enabled.
+     *
+     * @param bool $enabled
+     */
+    public function set_admin_blocking_plugin_support( $enabled ) {
+        $this->_plugin->SetGlobalBooleanSetting( 'admin-blocking-plugins-support', $enabled );
+    }
+
+	/**
+	 * Check if admin blocking plugin support is enabled.
+	 *
+	 * Note: this is purely for retrieving the option value. It is actually used in conjunction with
+	 * stealth mode setting and some other exceptions.
+	 *
+	 * @see WpSecurityAuditLog::is_admin_blocking_plugins_support_enabled()
+	 * @return bool
+	 */
+	public function get_admin_blocking_plugin_support() {
+    	return $this->_plugin->GetGlobalBooleanSetting( 'admin-blocking-plugins-support', false );
+	}
+
 }

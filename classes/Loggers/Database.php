@@ -52,7 +52,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 */
 	public function Log( $type, $data = array(), $date = null, $siteid = null, $migrated = false, $override_buffer = false ) {
 		// Is this a php alert, and if so, are we logging such alerts?
-		if ( $type < 0010 && ! $this->plugin->settings->IsPhpErrorLoggingEnabled() ) {
+		if ( $type < 0010 && ! $this->plugin->settings()->IsPhpErrorLoggingEnabled() ) {
 			return;
 		}
 
@@ -67,7 +67,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		$db_config = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
 
 		// Get external buffer option.
-		$use_buffer = $this->plugin->GetGlobalOption( 'adapter-use-buffer' );
+		$use_buffer = $this->plugin->GetGlobalBooleanSetting( 'adapter-use-buffer' );
 		if ( $override_buffer ) {
 			$use_buffer = false;
 		}
@@ -127,7 +127,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		// Check event occurrence object.
 		if ( ! empty( $occ ) && $occ instanceof WSAL_Models_Occurrence ) {
 			// Get temporary stored alerts.
-			$temp_alerts = get_option( 'wsal_temp_alerts', array() );
+			$temp_alerts = $this->plugin->GetGlobalSetting( 'temp_alerts', array() );
 
 			// Store current event in a temporary buffer.
 			$temp_alerts[ $occ->created_on ]['alert']      = array(
@@ -139,7 +139,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 			$temp_alerts[ $occ->created_on ]['alert_data'] = $event_data;
 
 			// Save temporary alerts to options.
-			update_option( 'wsal_temp_alerts', $temp_alerts );
+			$this->plugin->SetGlobalSetting( 'temp_alerts', $temp_alerts );
 			return true;
 		}
 
@@ -152,10 +152,10 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 */
 	public function CleanUp() {
 		$now       = current_time( 'timestamp' );
-		$max_sdate = $this->plugin->settings->GetPruningDate();
-		$max_count = $this->plugin->settings->GetPruningLimit();
-		$is_date_e = $this->plugin->settings->IsPruningDateEnabled();
-		$is_limt_e = $this->plugin->settings->IsPruningLimitEnabled();
+		$max_sdate = $this->plugin->settings()->GetPruningDate();
+		$max_count = $this->plugin->settings()->GetPruningLimit();
+		$is_date_e = $this->plugin->settings()->IsPruningDateEnabled();
+		$is_limt_e = $this->plugin->settings()->IsPruningLimitEnabled();
 
 		// Return if retention is disabled.
 		if ( ! $is_date_e && ! $is_limt_e ) {
@@ -163,14 +163,14 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		}
 
 		// Return if archiving cron is running.
-		if ( $this->plugin->GetGlobalOption( 'archiving-cron-started', false ) ) {
+		if ( $this->plugin->GetGlobalSetting( 'archiving-cron-started', false ) ) {
 			return;
 		}
 
 		// If archiving is enabled then events are deleted from the archive database.
-		if ( $this->plugin->settings->IsArchivingEnabled() ) {
+		if ( $this->plugin->settings()->IsArchivingEnabled() ) {
 			// Switch to Archive DB.
-			$this->plugin->settings->SwitchToArchiveDB();
+			$this->plugin->settings()->SwitchToArchiveDB();
 		}
 
 		$occ       = new WSAL_Models_Occurrence();
@@ -254,7 +254,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 * @return integer $promoToSend - The array index.
 	 */
 	private function GetPromoAlert() {
-		$last_promo_sent_id = $this->plugin->GetGlobalOption( 'promo-send-id' );
+		$last_promo_sent_id = $this->plugin->GetGlobalSetting( 'promo-send-id' );
 		$last_promo_sent_id = empty( $last_promo_sent_id ) ? 0 : $last_promo_sent_id;
 		$promo_to_send      = null;
 		$promo_alerts       = $this->GetActivePromoText();
@@ -266,7 +266,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 			} else {
 				$last_promo_sent_id = 0;
 			}
-			$this->plugin->SetGlobalOption( 'promo-send-id', $last_promo_sent_id );
+			$this->plugin->SetGlobalSetting( 'promo-send-id', $last_promo_sent_id );
 		}
 		return $promo_to_send;
 	}

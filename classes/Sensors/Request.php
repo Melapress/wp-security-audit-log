@@ -32,7 +32,7 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
-		if ( $this->plugin->settings->IsRequestLoggingEnabled() ) {
+		if ( $this->plugin->settings()->IsRequestLoggingEnabled() ) {
 			add_action( 'shutdown', array( $this, 'EventShutdown' ) );
 		}
 	}
@@ -46,10 +46,9 @@ class WSAL_Sensors_Request extends WSAL_AbstractSensor {
 		$server_array = filter_input_array( INPUT_SERVER );
 
 		// get the custom logging path from settings.
-		$custom_logging_path = $this->plugin->options_helper->get_logging_path();
-
-		if ( ! $this->CheckDirectory( $custom_logging_path ) ) {
-			wp_mkdir_p( $custom_logging_path );
+		$custom_logging_path = $this->plugin->settings()->get_working_dir_path();
+		if ( is_wp_error($custom_logging_path) ) {
+			return;
 		}
 
 		$file = $custom_logging_path . 'Request.log.php';

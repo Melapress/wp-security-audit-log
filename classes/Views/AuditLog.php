@@ -86,7 +86,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_filter( 'wsal_pointers_toplevel_page_wsal-auditlog', array( $this, 'register_privacy_pointer' ), 10, 1 );
 		add_action( 'admin_init', array( $this, 'handle_form_submission' ) );
 
-		if ( $this->_plugin->settings->is_infinite_scroll() ) {
+		if ( $this->_plugin->settings()->is_infinite_scroll() ) {
 			add_action( 'wp_ajax_wsal_infinite_scroll_events', array( $this, 'infinite_scroll_events' ) );
 		}
 
@@ -132,11 +132,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			&& ! class_exists( 'WSAL_Rep_Plugin' )
 			&& ! class_exists( 'WSAL_SearchExtension' )
 			&& ! class_exists( 'WSAL_UserSessions_Plugin' )
-			&& 'anonymous' !== get_site_option( 'wsal_freemius_state', 'anonymous' ) // Anonymous mode option.
+			&& 'anonymous' !== $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) // Anonymous mode option.
 		) {
 			$get_transient_fn         = $this->_plugin->IsMultisite() ? 'get_site_transient' : 'get_transient'; // Check for multisite.
 			$wsal_is_advert_dismissed = $get_transient_fn( 'wsal-is-advert-dismissed' ); // Check if advert has been dismissed.
-			$wsal_premium_advert      = $this->_plugin->GetGlobalOption( 'premium-advert', false ); // Get the advert to display.
+			$wsal_premium_advert      = $this->_plugin->GetGlobalSetting( 'premium-advert', false ); // Get the advert to display.
 			$wsal_premium_advert      = false !== $wsal_premium_advert ? (int) $wsal_premium_advert : 0; // Set the default.
 
 			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $wsal_is_advert_dismissed ) : ?>
@@ -219,13 +219,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Check anonymous mode.
-		if ( 'anonymous' === get_site_option( 'wsal_freemius_state', 'anonymous' ) ) { // If user manually opt-out then don't show the notice.
+		if ( 'anonymous' === $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) ) { // If user manually opt-out then don't show the notice.
 			if (
 				wsal_freemius()->is_anonymous() // Anonymous mode option.
 				&& wsal_freemius()->is_not_paying() // Not paying customer.
 				&& wsal_freemius()->has_api_connectivity() // Check API connectivity.
 				&& $is_current_view
-				&& $this->_plugin->settings->CurrentUserCan( 'edit' ) // Have permission to edit plugin settings.
+				&& $this->_plugin->settings()->CurrentUserCan( 'edit' ) // Have permission to edit plugin settings.
 			) {
 				if ( ! is_multisite() || ( is_multisite() && is_network_admin() ) ) :
 					?>
@@ -245,9 +245,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Display add-on available notice.
 		$screen = get_current_screen();
-		$notice_already_dismissed = get_option( 'wsal_addon_available_notice_dismissed' );
-		if ( $screen->base === 'toplevel_page_wsal-auditlog' && $is_current_view && ! $notice_already_dismissed ) {
-			$addons_available         = get_option( 'wsal_installed_plugin_addon_available' );
+		$notice_already_dismissed = $this->_plugin->GetGlobalSetting( 'addon_available_notice_dismissed' );
+		if ( $screen->base === 'toplevel_page_wsal-auditlog' && $is_current_view && ! $notice_already_dismissed || $screen->base === 'toplevel_page_wsal-auditlog-network' && $is_current_view && ! $notice_already_dismissed ) {
+			$addons_available         = $this->_plugin->GetGlobalSetting( 'installed_plugin_addon_available' );
 			$all_plugins              = get_plugins();
 			$all_plugins              = array_keys( $all_plugins );
 			$predefined_plugins       = WSAL_PluginInstallAndActivate::get_installable_plugins();
@@ -262,6 +262,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					$addon_slug         = array( array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ) );
 					$is_addon_installed = array_intersect( $all_plugins, $addon_slug );
 
+					// Check if a function from the addon exists, just in case.
+					if ( $addon === 'wpforms' && function_exists( 'wsal_wpforms_init_actions' ) || $addon === 'bbpress' && function_exists( 'wsal_bbpress_init_actions' ) ) {
+						continue;
+					}
+
 					if ( empty( $is_addon_installed ) ) {
 						$addon = str_replace( '-', ' ', $addon);
 						if ( $addon === 'bbpress' ) {
@@ -270,12 +275,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						if ( $addon === 'wpforms' ) {
 							$addon = 'WPForms';
 						}
+						if ( $addon === 'woocommerce' ) {
+							$addon = 'WooCommerce';
+						}
 						if ( empty( $addon_names ) ) {
 							$addon_names .= $addon;
-							$button_label = esc_html__( 'Install Extension', 'wp-2fa' );
+							$button_label = esc_html__( 'Install Extension', 'wp-security-audit-log' );
 						} else {
 							$addon_names .= ' & ' .$addon;
-							$button_label = esc_html__( 'Install Extensions', 'wp-2fa' );
+							$button_label = esc_html__( 'Install Extensions', 'wp-security-audit-log' );
 						}
 						$display_notice = true;
 					}
@@ -287,12 +295,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					<p><?php $message = printf(
 						/* translators: %1$s: is the user name, %2$s is the website name */
 						'%1$s %2$s %3$s %4$s. <a href="%6$s" class="button button-primary">%5$s</a>',
-						esc_html__( 'You have', 'wp-2fa' ),
+						esc_html__( 'You have', 'wp-security-audit-log' ),
 						$addon_names,
-						esc_html__( 'installed. Keep a log of changes in', 'wp-2fa' ),
+						esc_html__( 'installed. Keep a log of changes in', 'wp-security-audit-log' ),
 						$addon_names,
 						$button_label,
-						esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', admin_url( 'admin.php' ) ) )
+						esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', network_admin_url( 'admin.php' ) ) )
 					); ?></p>
 					<?php wp_nonce_field( 'wsal_dismiss_notice_addon_available', 'wsal-dismiss-notice-addon-available', false, true ); ?>
 				</div>
@@ -331,7 +339,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Verify nonce.
 		if ( wp_verify_nonce( $post_array['nonce'], 'wsal_dismiss_notice_addon_available' ) ) {
-			add_option( 'wsal_addon_available_notice_dismissed', true );
+			$this->_plugin->SetGlobalSetting( 'addon_available_notice_dismissed', true );
 			die();
 		}
 		die( 'Nonce verification failed!' );
@@ -396,7 +404,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 			// @codingStandardsIgnoreStart
 			$this->page_args->page    = isset( $_REQUEST['page'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) : false;
-			$this->page_args->site_id = $this->_plugin->settings->get_view_site_id();
+			$this->page_args->site_id = $this->_plugin->settings()->get_view_site_id();
 
 			// Order arguments.
 			$this->page_args->order_by = isset( $_REQUEST['orderby'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) : false;
@@ -530,7 +538,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @since 1.0.0
 	 */
 	public function Render() {
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
 		}
 
@@ -573,8 +581,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		<?php
 		if (
-			'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-complete', 'no' )
-			&& 'no' === $this->_plugin->options_helper->get_option_value( 'setup-modal-dismissed', 'no' )
+			! $this->_plugin->GetGlobalBooleanSetting( 'setup-complete', false )
+			&& ! $this->_plugin->GetGlobalBooleanSetting( 'setup-modal-dismissed', false )
 		) :
 			?>
 			<div data-remodal-id="wsal-setup-modal">
@@ -590,16 +598,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					wsal_setup_modal.remodal().open();
 
 					jQuery(document).on('confirmation', wsal_setup_modal, function () {
-						<?php $this->_plugin->options_helper->set_option_value( 'setup-modal-dismissed', 'yes' ); ?>
+						<?php $this->_plugin->SetGlobalBooleanSetting( 'setup-modal-dismissed', true ); ?>
 						window.location = '<?php echo esc_url( add_query_arg( 'page', 'wsal-setup', admin_url( 'index.php' ) ) ); ?>';
 					});
 
 					jQuery(document).on('cancellation', wsal_setup_modal, function () {
-						<?php $this->_plugin->options_helper->set_option_value( 'setup-modal-dismissed', 'yes' ); ?>
+						<?php $this->_plugin->SetGlobalBooleanSetting( 'setup-modal-dismissed', true ); ?>
 					});
 
 					jQuery(document).on('closed', wsal_setup_modal, function () {
-						<?php $this->_plugin->options_helper->set_option_value( 'setup-modal-dismissed', 'yes' ); ?>
+						<?php $this->_plugin->SetGlobalBooleanSetting( 'setup-modal-dismissed', true ); ?>
 					});
 				});
 			</script>
@@ -621,8 +629,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 								'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
 							),
 							'autorefresh' => array(
-								'enabled' => ! $is_search_view ? $this->_plugin->settings->IsRefreshAlertsEnabled() : false,
-								'token'   => $this->_plugin->settings->is_infinite_scroll() ? $this->get_total_events() : $this->GetView()->get_total_items(),
+								'enabled' => ! $is_search_view ? $this->_plugin->settings()->IsRefreshAlertsEnabled() : false,
+								'token'   => $this->_plugin->settings()->is_infinite_scroll() ? $this->get_total_events() : $this->GetView()->get_total_items(),
 							),
 						)
 					);
@@ -637,7 +645,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * Ajax callback to display meta data inspector.
 	 */
 	public function AjaxInspector() {
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -654,7 +662,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Check if archive db is enabled and the current user matches the one who selected archive db.
 		if ( ! empty( $selected_db ) && 'archive' === $selected_db && get_current_user_id() === $selected_db_user ) {
-			$this->_plugin->settings->SwitchToArchiveDB(); // Switch to archive DB.
+			$this->_plugin->settings()->SwitchToArchiveDB(); // Switch to archive DB.
 		}
 
 		$occ = new WSAL_Models_Occurrence();
@@ -680,7 +688,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * Ajax callback to refrest the view.
 	 */
 	public function AjaxRefresh() {
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -697,7 +705,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Check if the user is viewing archived db.
 		$is_archive = false;
-		if ( $this->_plugin->settings->IsArchivingEnabled() ) {
+		if ( $this->_plugin->settings()->IsArchivingEnabled() ) {
 			$selected_db = get_transient( 'wsal_wp_selected_db' );
 			if ( $selected_db && 'archive' === $selected_db ) {
 				$is_archive = true;
@@ -723,7 +731,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * show on a single page.
 	 */
 	public function AjaxSetIpp() {
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -733,7 +741,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		if ( ! isset( $post_array['count'] ) ) {
 			die( 'Count parameter expected.' );
 		}
-		$this->_plugin->settings->SetViewPerPage( (int) $post_array['count'] );
+		$this->_plugin->settings()->SetViewPerPage( (int) $post_array['count'] );
 		die;
 	}
 
@@ -741,7 +749,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * Ajax callback to search.
 	 */
 	public function AjaxSearchSite() {
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -832,28 +840,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Verify nonce.
 		if ( ! empty( $filename ) && ! empty( $nonce ) && wp_verify_nonce( $nonce, 'wsal-download-404-log-' . $filename ) ) {
-			$is_subsite = strpos( $filename, '/sites/' ); // Check for subsite on a multisite network.
 
-			if ( ! $is_subsite ) {
-				// Site is not a subsite on a multisite network.
-				$uploads_dir = wp_upload_dir(); // Get uploads directory.
-				$filename    = basename( $filename ); // Get basename to prevent path traversal attack.
+			// Get basename to prevent path traversal attack.
+			$filename = basename( $filename );
 
-				// Construct log file path to eliminate the risks of path traversal attack.
-				$log_file_path = trailingslashit( $uploads_dir['basedir'] ) . 'wp-security-audit-log/404s/' . $filename;
-			} else {
-				// Site is a subsite on a multisite network.
-				$filepath = substr( $filename, $is_subsite ); // Get the chunk of string from `/sites/` to find the site id.
-
-				// Get basename to prevent path traversal attack.
-				$filename = basename( $filename );
-
-				// Search for site id in the file path by replacing the remaining known chunks such as `/sites/` and the path after site id.
-				$site_id = str_replace( array( '/sites/', '/wp-security-audit-log/404s/' . $filename ), '', $filepath );
-
-				// Construct log file path to eliminate the risks of path traversal attack.
-				$log_file_path = trailingslashit( WP_CONTENT_DIR ) . 'uploads/sites/' . $site_id . '/wp-security-audit-log/404s/' . $filename;
-			}
+			// Construct log file path to eliminate the risks of path traversal attack.
+			$log_file_path = $this->_plugin->settings()->get_working_dir_path( '404s' ) . $filename;
 
 			// Request the file.
 			$response = file_get_contents( $log_file_path, true );
@@ -894,7 +886,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function wsal_freemius_opt_in() {
 		// Die if not have access.
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -933,7 +925,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 
 				// Update freemius state.
-				update_site_option( 'wsal_freemius_state', 'in' );
+                $this->_plugin->SetGlobalSetting( 'freemius_state', 'in' );
 			} elseif ( 'no' === $choice ) {
 				if ( ! is_multisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
@@ -942,7 +934,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 
 				// Update freemius state.
-				update_site_option( 'wsal_freemius_state', 'skipped' );
+				$this->_plugin->SetGlobalSetting( 'freemius_state', 'skipped' );
 			}
 
 			echo wp_json_encode(
@@ -1032,7 +1024,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			'searchTerm'          => isset( $this->page_args->search_term ) ? $this->page_args->search_term : false,
 			'searchFilters'       => isset( $this->page_args->search_filters ) ? $this->page_args->search_filters : false,
 			'viewerNonce'         => wp_create_nonce( 'wsal_auditlog_viewer_nonce' ),
-			'infiniteScroll'      => $this->_plugin->settings->is_infinite_scroll(),
+			'infiniteScroll'      => $this->_plugin->settings()->is_infinite_scroll(),
 			'userView'            => ( in_array( $this->user_last_view, $this->supported_view_types(), true ) ) ? $this->user_last_view : 'list',
 			'installAddonStrings' => array(
 				'defaultButton'   => esc_html( 'Install and activate extension', 'wp-security-audit-log' ),
@@ -1043,8 +1035,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'buttonError'     => esc_html( 'Problem enabling', 'wp-security-audit-log' ),
 				'msgError'        => sprintf(
 					/* translators: 1 - an opening link tag, 2 - the closing tag. */
-					__( '<br>An error occured when trying to install and activate the plugin. Please try install it again from the %1$sevent settings%2$s page.', 'wp-security-audit-log' ),
-					'<a href="' . esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', admin_url( 'admin.php' ) ) ) . '">',
+					__( '<br>An error occurred when trying to install and activate the plugin. Please try install it again from the %1$sevent settings%2$s page.', 'wp-security-audit-log' ),
+					'<a href="' . esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', network_admin_url( 'admin.php' ) ) ) . '">',
 					'</a>'
 				),
 			),
@@ -1067,8 +1059,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Don't display notice if the wizard notice is showing.
 		if (
-			'no' === $this->_plugin->GetGlobalOption( 'wsal-setup-complete', 'no' )
-			&& 'no' === $this->_plugin->options_helper->get_option_value( 'setup-modal-dismissed', 'no' )
+			! $this->_plugin->GetGlobalBooleanSetting( 'setup-complete', false )
+			&& ! $this->_plugin->GetGlobalBooleanSetting( 'setup-modal-dismissed', false )
 		) {
 			return;
 		}
@@ -1085,7 +1077,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Get dismissed pointers.
-		$dismissed      = explode( ',', (string) $this->_plugin->options_helper->get_option_value( 'dismissed-privacy-notice', true ) );
+		$dismissed      = explode( ',', (string) $this->_plugin->GetGlobalSetting( 'dismissed-privacy-notice', true ) );
 		$valid_pointers = array();
 
 		// Check pointers and remove dismissed ones.
@@ -1164,7 +1156,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function wsal_exclude_url() {
 		// Die if user does not have permission to disable.
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 			echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to exclude this URL.', 'wp-security-audit-log' ) . '</p>';
 			die();
 		}
@@ -1182,13 +1174,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die();
 		}
 
-		$excluded_urls = $this->_plugin->GetGlobalOption( 'excluded-urls' );
+		$excluded_urls = $this->_plugin->GetGlobalSetting( 'excluded-urls' );
 		if ( isset( $excluded_urls ) && '' !== $excluded_urls ) {
 			$excluded_urls .= ',' . esc_url( $post_array['url'] );
 		} else {
 			$excluded_urls = esc_url( $post_array['url'] );
 		}
-		$this->_plugin->SetGlobalOption( 'excluded-urls', $excluded_urls );
+		$this->_plugin->SetGlobalSetting( 'excluded-urls', $excluded_urls );
 		$settings_exclude_url = add_query_arg(
 			array(
 				'page' => 'wsal-settings',
@@ -1207,7 +1199,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function wsal_dismiss_advert() {
 		// Die if user does not have permission to dismiss.
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 			echo wp_json_encode(
 				array(
 					'success' => false,
@@ -1235,7 +1227,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		$advert = 2 === $advert ? '0' : $advert + 1;
-		$this->_plugin->SetGlobalOption( 'premium-advert', $advert );
+		$this->_plugin->SetGlobalSetting( 'premium-advert', $advert );
 		$set_transient_fn = $this->_plugin->IsMultisite() ? 'set_site_transient' : 'set_transient';
 		$set_transient_fn( 'wsal-is-advert-dismissed', true, MONTH_IN_SECONDS );
 		echo wp_json_encode(
@@ -1260,7 +1252,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			wp_die( 0 );
 		}
 
-		$dismissed = array_filter( explode( ',', (string) $this->_plugin->options_helper->get_option_value( 'dismissed-privacy-notice', true ) ) );
+		$dismissed = array_filter( explode( ',', (string) $this->_plugin->GetGlobalSetting( 'dismissed-privacy-notice', true ) ) );
 
 		if ( in_array( $pointer, $dismissed ) ) {
 			wp_die( 0 );
@@ -1269,7 +1261,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$dismissed[] = $pointer;
 		$dismissed   = implode( ',', $dismissed );
 
-		$this->_plugin->options_helper->set_option_value( 'dismissed-privacy-notice', $dismissed );
+		$this->_plugin->SetGlobalSetting( 'dismissed-privacy-notice', $dismissed );
 		wp_die( 1 );
 	}
 
@@ -1280,7 +1272,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function infinite_scroll_events() {
 		// Check user permissions.
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
 			die( esc_html__( 'Access Denied', 'wp-security-audit-log' ) );
 		}
 

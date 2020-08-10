@@ -21,6 +21,7 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 	 * Create a helper function for easy SDK access.
 	 *
 	 * @return Freemius
+	 * @throws Freemius_Exception
 	 */
 	function wsal_freemius() {
 		global $wsal_freemius;
@@ -32,7 +33,7 @@ if ( file_exists( dirname( __FILE__ ) . '/freemius/start.php' ) ) {
 			require_once dirname( __FILE__ ) . '/freemius/start.php';
 
 			// Check anonymous mode.
-			$freemius_state = get_site_option( 'wsal_freemius_state', 'anonymous' );
+			$freemius_state = \WSAL\Helpers\Options::get_option_value_ignore_prefix( 'wsal_freemius_state', 'anonymous' );
 			$is_anonymous   = ( 'anonymous' === $freemius_state || 'skipped' === $freemius_state );
 			$is_premium     = false;
 			$is_anonymous   = $is_premium ? false : $is_anonymous;

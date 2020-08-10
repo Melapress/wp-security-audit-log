@@ -1179,7 +1179,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$content_option = 'site_content';
 
 		// Get site plugins options.
-		$this->site_content = $this->plugin->GetGlobalOption( $content_option, false );
+		$this->site_content = $this->plugin->GetGlobalSetting( $content_option, false );
 
 		/**
 		 * Initiate the content option.
@@ -1203,7 +1203,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				$this->site_content->skip_themes[] = strtolower( $theme );
 			}
 
-			$this->plugin->SetGlobalOption( $content_option, $this->site_content );
+			$this->plugin->SetGlobalSetting( $content_option, $this->site_content );
 		}
 
 		// Check if type is plugin and content is not empty.
@@ -1213,7 +1213,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				// Add the plugin to the list and save it.
 				$this->site_content->plugins[]      = strtolower( $content );
 				$this->site_content->skip_plugins[] = strtolower( $content );
-				$this->plugin->SetGlobalOption( $content_option, $this->site_content );
+				$this->plugin->SetGlobalSetting( $content_option, $this->site_content );
 			}
 		} elseif ( 'theme' === $type && ! empty( $content ) ) {
 			// If the theme is not already present in the current list then.
@@ -1221,7 +1221,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				// Add the theme to the list and save it.
 				$this->site_content->themes[]      = strtolower( $content );
 				$this->site_content->skip_themes[] = strtolower( $content );
-				$this->plugin->SetGlobalOption( $content_option, $this->site_content );
+				$this->plugin->SetGlobalSetting( $content_option, $this->site_content );
 			}
 		}
 	}
@@ -1275,7 +1275,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			// If key is found then remove it from the array and save the plugins list.
 			if ( false !== $key ) {
 				unset( $this->site_content->plugins[ $key ] );
-				$this->plugin->SetGlobalOption( 'site_content', $this->site_content );
+				$this->plugin->SetGlobalSetting( 'site_content', $this->site_content );
 				return true;
 			}
 		} elseif ( 'theme' === $type && in_array( $content, $this->site_content->themes, true ) ) {
@@ -1285,7 +1285,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			// If key is found then remove it from the array and save the themes list.
 			if ( false !== $key ) {
 				unset( $this->site_content->themes[ $key ] );
-				$this->plugin->SetGlobalOption( 'site_content', $this->site_content );
+				$this->plugin->SetGlobalSetting( 'site_content', $this->site_content );
 				return true;
 			}
 		}
@@ -1336,11 +1336,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		// Add plugin to skip file alerts list.
 		if ( 'plugin' === $type ) {
 			$this->site_content->skip_plugins[] = $content;
-			$this->plugin->SetGlobalOption( 'site_content', $this->site_content );
+			$this->plugin->SetGlobalSetting( 'site_content', $this->site_content );
 		} elseif ( 'theme' === $type ) {
 			// Add theme to skip file alerts list.
 			$this->site_content->skip_themes[] = $content;
-			$this->plugin->SetGlobalOption( 'site_content', $this->site_content );
+			$this->plugin->SetGlobalSetting( 'site_content', $this->site_content );
 		}
 		return true;
 	}
@@ -1461,15 +1461,15 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				$addon_slug         = array( array_search( $plugin, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ) );
 				$is_addon_installed = array_intersect( $all_plugins, $addon_slug );
 				if ( empty( $is_addon_installed ) ) {
-					$current_value   = get_option( 'wsal_installed_plugin_addon_available' );
+					$current_value   = $this->plugin->GetGlobalSetting( 'installed_plugin_addon_available' );
 					$plugin_filename = array( $plugin_filename );
 					if ( isset( $current_value ) && is_array( $current_value ) ) {
 						$new_plugin_filenames = array_unique( array_merge( $current_value, $plugin_filename ) );
 					} else {
 						$new_plugin_filenames = $plugin_filename;
 					}
-					$this->plugin->options_helper->set_option_value( 'installed_plugin_addon_available', $new_plugin_filenames );
-					delete_option( 'wsal_addon_available_notice_dismissed' );
+					$this->plugin->SetGlobalSetting( 'installed_plugin_addon_available', $new_plugin_filenames );
+					$this->plugin->options_helper->delete_option( 'wsal_addon_available_notice_dismissed' );
 				}
 			}
 		}
@@ -1492,14 +1492,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		foreach ( $predefined_plugins_addon as $plugin ) {
 			// Check if plugin file starts with the same string as our addon_for, or if its equal.
 			if ( $plugin_filename === $plugin ) {
-				$current_installed = get_option( 'wsal_installed_plugin_addon_available' );
+				$current_installed = $this->plugin->GetGlobalSetting( 'installed_plugin_addon_available' );
 				if ( isset( $current_installed ) && ! empty( $current_installed  ) ) {
 					if ( ( $key = array_search( $plugin, $current_installed ) ) !== false ) {
 						unset( $current_installed[$key] );
 					}
 				}
 
-				$this->plugin->options_helper->set_option_value( 'installed_plugin_addon_available', $current_installed );
+				$this->plugin->SetGlobalSetting( 'installed_plugin_addon_available', $current_installed );
 			}
 		}
 	}

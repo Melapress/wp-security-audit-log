@@ -145,7 +145,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		<nav id="wsal-tabs" class="nav-tab-wrapper">
 			<?php
 			foreach ( $this->wsal_help_tabs as $tab_id => $tab ) :
-				if ( 'system-info' !== $this->current_tab || ( 'system-info' === $this->current_tab && $this->_plugin->settings->CurrentUserCan( 'edit' ) ) ) :
+				if ( 'system-info' !== $this->current_tab || ( 'system-info' === $this->current_tab && $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) ) :
 					?>
 					<a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( $tab_id === $this->current_tab ) ? 'nav-tab-active' : false; ?>"><?php echo esc_html( $tab['name'] ); ?></a>
 					<?php
@@ -158,7 +158,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			<div class="wsal-help-main">
 				<?php
 				if ( ! empty( $this->current_tab ) && ! empty( $this->wsal_help_tabs[ $this->current_tab ]['render'] ) ) {
-					if ( 'system-info' !== $this->current_tab || ( 'system-info' === $this->current_tab && $this->_plugin->settings->CurrentUserCan( 'edit' ) ) ) {
+					if ( 'system-info' !== $this->current_tab || ( 'system-info' === $this->current_tab && $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) ) {
 						call_user_func( $this->wsal_help_tabs[ $this->current_tab ]['render'] );
 					}
 				}
@@ -193,7 +193,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Plugin Documentation', 'wp-security-audit-log' ); ?></h2>
 			<p>
 				<?php esc_html_e( 'For more technical information about the WP Activity Log plugin please visit the plugin’s knowledge base.', 'wp-security-audit-log' ); ?>
-				<?php esc_html_e( 'Refer to the list of WordPress security events for a complete list of Events and IDs that the plugin uses to keep a log of all the changes in the WordPress audit log.', 'wp-security-audit-log' ); ?>
+				<?php esc_html_e( 'Refer to the list of WordPress security events for a complete list of Events and IDs that the plugin uses to keep a log of all the changes in the WordPress activity log.', 'wp-security-audit-log' ); ?>
 			</p><p>
 				<a class="button" href="https://wpactivitylog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+website" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
@@ -464,7 +464,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 
 		// WSAL options.
 		$sysinfo .= "\n" . '-- WSAL Options --' . "\n\n";
-		$options  = $this->_plugin->settings->get_wsal_options();
+		$options  = $this->_plugin->settings()->get_wsal_options();
 
 		if ( ! empty( $options ) && is_array( $options ) ) {
 			foreach ( $options as $option ) {
@@ -482,7 +482,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 * Method: Render footer content.
 	 */
 	public function Footer() {
-		if ( 'system-info' === $this->current_tab && $this->_plugin->settings->CurrentUserCan( 'edit' ) ) :
+		if ( 'system-info' === $this->current_tab && $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) :
 			?>
 			<script>
 				/**

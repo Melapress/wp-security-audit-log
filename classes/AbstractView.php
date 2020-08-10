@@ -67,7 +67,7 @@ abstract class WSAL_AbstractView {
 	 * @internal
 	 */
 	public function AjaxDismissNotice() {
-		if ( ! $this->_plugin->settings->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
 			die( 'Access Denied.' );
 		}
 

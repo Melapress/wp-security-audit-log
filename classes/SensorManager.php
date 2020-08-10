@@ -50,10 +50,9 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		}
 
 		/**
-		 * Load Custom Sensor files from /wp-content/uploads/wp-security-audit-log/custom-sensors/
+		 * Load Custom Sensor files from {plugin working dir}/custom-sensors/
 		 */
-		$upload_dir       = wp_upload_dir();
-		$uploads_dir_path = trailingslashit( $upload_dir['basedir'] ) . 'wp-security-audit-log' . DIRECTORY_SEPARATOR . 'custom-sensors' . DIRECTORY_SEPARATOR;
+		$uploads_dir_path = $plugin->settings()->get_working_dir_path( 'custom-sensors', true, true );
 
 		/*
 		 * Get an array of directories to loop through to add custom sensors.
@@ -199,7 +198,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		// Get file name.
 		$filename = basename( $filepath, '.php' );
 
-		$frontend_events = $this->plugin->settings->get_frontend_events();
+		$frontend_events = WSAL_Settings::get_frontend_events();
 
 		// Check to see if LogInOut, FrontendLogin, and FrontendRegister sensors should load on login page.
 		if ( WpSecurityAuditLog::is_login_screen() ) {
@@ -222,7 +221,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		 *
 		 * @param array $public_sensors - List of sensors to be loaded for visitors.
 		 */
-		$public_sensors = apply_filters( 'wsal_load_public_sensors', array( 'FrontendLogin', 'FrontendSystem', 'FrontendRegister', 'FrontendWooCommerce' ) );
+		$public_sensors = apply_filters( 'wsal_load_public_sensors', array( 'FrontendLogin', 'FrontendSystem', 'FrontendRegister' ) );
 
 		if ( WpSecurityAuditLog::is_frontend() && ! is_user_logged_in() && ! in_array( $filename, $public_sensors, true ) ) {
 			return false;
@@ -336,7 +335,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 * frontend, i.e., just before setting up wp query.
 	 */
 	public function load_frontend_system_sensor() {
-		$frontend_events = $this->plugin->settings->get_frontend_events();
+		$frontend_events = WSAL_Settings::get_frontend_events();
 
 		if ( ! empty( $frontend_events['system'] ) && is_404() ) {
 			$sensor = new WSAL_Sensors_FrontendSystem( $this->plugin );

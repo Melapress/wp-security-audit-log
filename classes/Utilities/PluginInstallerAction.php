@@ -141,6 +141,10 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 				return;
 			}
 
+			if ( function_exists( 'is_multisite' ) && is_multisite() ) {
+				return;
+			}
+
 			// get core plugin functions if they are not already in runtime.
 			if ( ! function_exists( 'activate_plugin' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -164,12 +168,22 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 				return;
 			}
 
-			$current = get_option( 'active_plugins' );
+			if ( function_exists( 'is_multisite' ) && is_multisite() ) {
+				$current = get_site_option( 'active_sitewide_plugins' );
+			} else {
+				$current = get_option( 'active_plugins' );
+			}
+
 			$plugin  = plugin_basename( trim( $plugin_slug ) );
 
 			if ( ! in_array( $plugin_slug, $current, true ) ) {
-				$current[] = $plugin_slug;
-				activate_plugin( $plugin_slug );
+				if ( function_exists( 'is_multisite' ) && is_multisite() ) {
+					$current[] = $plugin_slug;
+					activate_plugin( $plugin_slug, '', true );
+				} else {
+					$current[] = $plugin_slug;
+					activate_plugin( $plugin_slug );
+				}
 			}
 			return null;
 		}

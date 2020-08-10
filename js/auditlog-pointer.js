@@ -7,7 +7,6 @@ jQuery(document).ready( function($) {
 	wsal_open_pointer(0);
 	function wsal_open_pointer(i) {
 		pointer = wsalPointer.pointers[i];
-		console.log( pointer );
 		options = $.extend( pointer.options, {
 			close: function() {
 				$.post( ajaxurl, {
@@ -17,6 +16,6 @@ jQuery(document).ready( function($) {
 			}
 		});
 
-		$(pointer.target).pointer( options ).pointer('open');
+		$(pointer.target).first().pointer( options ).pointer('open');
 	}
 });

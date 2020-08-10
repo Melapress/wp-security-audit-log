@@ -150,7 +150,7 @@ final class WSAL_Views_SetupWizard {
 			return;
 		}
 
-		// Grab list of instaleld plugins.
+		// Grab list of installed plugins.
 		$all_plugins      = get_plugins();
 		$plugin_filenames = array();
 		foreach ( $all_plugins as $plugin => $info ) {
@@ -260,7 +260,7 @@ final class WSAL_Views_SetupWizard {
 		// Data array.
 		$data_array = array(
 			'ajaxURL'    => admin_url( 'admin-ajax.php' ),
-			'nonce'      => ( ( ! $this->wsal->settings->CurrentUserCan( 'edit' ) ) && ! 'invalid-step' === $this->current_step ) ? wp_create_nonce( 'wsal-verify-wizard-page' ) : '',
+			'nonce'      => ( ( ! $this->wsal->settings()->CurrentUserCan( 'edit' ) ) && ! 'invalid-step' === $this->current_step ) ? wp_create_nonce( 'wsal-verify-wizard-page' ) : '',
 			'usersError' => esc_html__( 'Specified value in not a user.', 'wp-security-audit-log' ),
 			'rolesError' => esc_html__( 'Specified value in not a role.', 'wp-security-audit-log' ),
 			'ipError'    => esc_html__( 'Specified value in not an IP address.', 'wp-security-audit-log' ),
@@ -308,7 +308,6 @@ final class WSAL_Views_SetupWizard {
 			<?php wp_print_scripts( 'wsal-common' ); ?>
 
 			<?php do_action( 'admin_print_styles' ); ?>
-			<?php do_action( 'admin_head' ); ?>
 		</head>
 		<body class="wsal-setup wp-core-ui">
 			<h1 id="wsal-logo"><a href="https://wpactivitylog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank"><img src="<?php echo esc_url( $this->wsal->GetBaseUrl() ); ?>/img/wsal-logo-full.png" alt="WP Activity Log" /></a></h1>
@@ -428,8 +427,8 @@ final class WSAL_Views_SetupWizard {
 	 */
 	private function wsal_step_welcome() {
 		// Dismiss the setup modal on audit log.
-		if ( 'no' === $this->wsal->options_helper->get_option_value( 'setup-modal-dismissed', 'no' ) ) {
-			$this->wsal->options_helper->set_option_value( 'setup-modal-dismissed', 'yes' );
+		if ( $this->wsal->GetGlobalBooleanSetting( 'setup-modal-dismissed', false ) ) {
+			$this->wsal->SetGlobalBooleanSetting( 'setup-modal-dismissed', true );
 		}
 		?>
 		<p><?php esc_html_e( 'This wizard helps you configure the basic plugin settings. All these settings can be changed at a later stage from the plugin settings.', 'wp-security-audit-log' ); ?></p>
@@ -491,11 +490,11 @@ final class WSAL_Views_SetupWizard {
 		}
 
 		// Save log details option.
-		$this->wsal->SetGlobalOption( 'details-level', $log_details );
+		$this->wsal->SetGlobalSetting( 'details-level', $log_details );
 		if ( ! empty( $log_details ) && 'basic' === $log_details ) {
-			$this->wsal->settings->set_basic_mode();
+			$this->wsal->settings()->set_basic_mode();
 		} elseif ( ! empty( $log_details ) && 'geek' === $log_details ) {
-			$this->wsal->settings->set_geek_mode();
+			$this->wsal->settings()->set_geek_mode();
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
@@ -539,12 +538,12 @@ final class WSAL_Views_SetupWizard {
 		check_admin_referer( 'wsal-step-login' );
 
 		if ( isset( $_POST['wsal-frontend-login'] ) ) {
-			$frontend_sensors = $this->wsal->settings->get_frontend_events(); // Get the frontend sensors setting.
+			$frontend_sensors = WSAL_Settings::get_frontend_events(); // Get the frontend sensors setting.
 			$login_sensor     = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-login'] ) );
 			$login_sensor     = '1' === $login_sensor ? true : false; // Update the sensor option.
 
 			$frontend_sensors['login'] = $login_sensor;
-			$this->wsal->settings->set_frontend_events( $frontend_sensors );
+			$this->wsal->settings()->set_frontend_events( $frontend_sensors );
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
@@ -587,12 +586,12 @@ final class WSAL_Views_SetupWizard {
 		check_admin_referer( 'wsal-step-404s' );
 
 		if ( isset( $_POST['wsal-frontend-system'] ) ) {
-			$frontend_sensors = $this->wsal->settings->get_frontend_events(); // Get the frontend sensors setting.
+			$frontend_sensors = WSAL_Settings::get_frontend_events(); // Get the frontend sensors setting.
 			$system_sensor    = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-system'] ) );
 			$system_sensor    = '1' === $system_sensor ? true : false; // Update the sensor option.
 
 			$frontend_sensors['system'] = $system_sensor;
-			$this->wsal->settings->set_frontend_events( $frontend_sensors );
+			$this->wsal->settings()->set_frontend_events( $frontend_sensors );
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
@@ -636,12 +635,12 @@ final class WSAL_Views_SetupWizard {
 		check_admin_referer( 'wsal-step-frontend-register' );
 
 		if ( isset( $_POST['wsal-frontend-register'] ) ) {
-			$frontend_sensors = $this->wsal->settings->get_frontend_events(); // Get the frontend sensors setting.
+			$frontend_sensors = WSAL_Settings::get_frontend_events(); // Get the frontend sensors setting.
 			$register_sensor  = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-register'] ) );
 			$register_sensor  = '1' === $register_sensor ? true : false; // Update the sensor option.
 
 			$frontend_sensors['register'] = $register_sensor;
-			$this->wsal->settings->set_frontend_events( $frontend_sensors );
+			$this->wsal->settings()->set_frontend_events( $frontend_sensors );
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
@@ -694,10 +693,6 @@ final class WSAL_Views_SetupWizard {
 				// Step help text.
 				$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to <a href="https://wpactivitylog.com/features/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">upgrade to Premium</a> and use the Database tools to store the WordPress activity log in an external database.', 'wp-security-audit-log' );
 
-				if ( wsal_freemius()->is__premium_only() ) {
-					// Change the help text if premium version of the plugin is active.
-					$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to store the WordPress activity log in an external database or enable archiving.', 'wp-security-audit-log' );
-				}
 				echo wp_kses( $step_help, $this->wsal->allowed_html_tags );
 				?>
 			</em>
@@ -726,19 +721,19 @@ final class WSAL_Views_SetupWizard {
 			switch ( $pruning_limit ) {
 				case '6':
 					// 6 months.
-					$this->wsal->options_helper->set_option_value( 'pruning-date-e', true );
-					$this->wsal->options_helper->set_option_value( 'pruning-date', $pruning_limit . ' months' );
+					$this->wsal->SetGlobalBooleanSetting( 'pruning-date-e', true );
+					$this->wsal->SetGlobalSetting( 'pruning-date', $pruning_limit . ' months' );
 					break;
 
 				case '12':
 					// 12 months.
-					$this->wsal->options_helper->set_option_value( 'pruning-date-e', true );
-					$this->wsal->options_helper->set_option_value( 'pruning-date', $pruning_limit . ' months' );
+					$this->wsal->SetGlobalBooleanSetting( 'pruning-date-e', true );
+					$this->wsal->SetGlobalSetting( 'pruning-date', $pruning_limit . ' months' );
 					break;
 
 				case 'none':
 					// None.
-					$this->wsal->options_helper->set_option_value( 'pruning-date-e', false );
+					$this->wsal->SetGlobalBooleanSetting( 'pruning-date-e', false );
 					break;
 
 				default:
@@ -756,7 +751,7 @@ final class WSAL_Views_SetupWizard {
 	 * @param string $token - Token type.
 	 */
 	protected function get_token_type( $token ) {
-		return $this->wsal->settings->get_token_type( $token );
+		return $this->wsal->settings()->get_token_type( $token );
 	}
 
 	/**
@@ -809,7 +804,7 @@ final class WSAL_Views_SetupWizard {
 		check_admin_referer( 'wsal-step-finish' );
 
 		// Mark the finish of the setup.
-		$this->wsal->SetGlobalOption( 'wsal-setup-complete', 'yes' );
+		$this->wsal->SetGlobalBooleanSetting( 'setup-complete', true );
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
 		exit();
@@ -844,6 +839,21 @@ final class WSAL_Views_SetupWizard {
 
 	private function addons_step() {
 		$our_plugins = WSAL_PluginInstallAndActivate::get_installable_plugins();
+
+		// Grab list of instaleld plugins.
+		$all_plugins      = get_plugins();
+		$plugin_filenames = array();
+		foreach ( $all_plugins as $plugin => $info ) {
+			// here we strip all of the plugin slug, leaving just the filename itself. Neat!
+			$plugin_filenames[] = preg_replace( '/\\.[^.\\s]{3,4}$/', '', substr( basename( json_encode( $plugin ) ), 0, -1 ) );
+		}
+
+		// Grab list of plugins we have addons for.
+		$predefined_plugins = array_column( $our_plugins, 'addon_for' );
+
+		// Loop through plugins and create an array of slugs, we will compare these agains the plugins we have addons for.
+		$we_have_addon = array_intersect( $plugin_filenames, $predefined_plugins );
+
 		?>
 		<form method="post" class="wsal-setup-form">
 			<?php wp_nonce_field( 'wsal-step-addon' ); ?>
@@ -851,12 +861,16 @@ final class WSAL_Views_SetupWizard {
 			<p><?php esc_html_e( 'We noticed that the below plugins are installed on this website. You can install our extensions to also keep a log of changes users do on these plugins.', 'wp-security-audit-log' ); ?></p>
 			<?php
 			// Create a nonce to pass through via data attr.
-			$nonce = wp_create_nonce( 'wsal-install-addon' );
+			$nonce      = wp_create_nonce( 'wsal-install-addon' );
+			$skip_addon = false;
 			// Loop through plugins and output.
 			foreach ( $our_plugins as $details ) {
 				$disable_button = '';
-				if ( is_plugin_active( $details['plugin_slug'] ) ) {
+				if ( is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
 					$disable_button = 'disabled';
+				}
+				if ( ! in_array( $details['addon_for'], $we_have_addon ) ) {
+					continue;
 				}
 				// Check if this is actually an addon for something, otherwise bail.
 				if ( ! isset( $details['addon_for'] ) || ! isset( $details['image_filename'] ) ) {
@@ -873,7 +887,7 @@ final class WSAL_Views_SetupWizard {
 							<?php
 							if ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && ! is_plugin_active( $details['plugin_slug'] ) ) {
 								esc_html_e( 'Extension installed, activate now?', 'wp-security-audit-log' );
-							} elseif ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && is_plugin_active( $details['plugin_slug'] ) ) {
+							} elseif ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
 								esc_html_e( 'Extension installed', 'wp-security-audit-log' );
 							} else {
 									esc_html_e( 'Install Extension', 'wp-security-audit-log' );

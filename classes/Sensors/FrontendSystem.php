@@ -43,7 +43,7 @@ class WSAL_Sensors_FrontendSystem extends WSAL_AbstractSensor {
 		$msg               = 'times';
 		list( $y, $m, $d ) = explode( '-', date( 'Y-m-d' ) );
 		$site_id           = function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0;
-		$ip                = $this->plugin->settings->GetMainClientIP();
+		$ip                = $this->plugin->settings()->GetMainClientIP();
 
 		if ( ! is_user_logged_in() ) {
 			$username = 'Website Visitor';
@@ -171,7 +171,7 @@ class WSAL_Sensors_FrontendSystem extends WSAL_AbstractSensor {
 	 * @return integer limit
 	 */
 	protected function get_visitor_404_log_limit() {
-		return $this->plugin->settings->GetVisitor404LogLimit();
+		return $this->plugin->settings()->GetVisitor404LogLimit();
 	}
 
 	/**
@@ -185,7 +185,7 @@ class WSAL_Sensors_FrontendSystem extends WSAL_AbstractSensor {
 			return false;
 		}
 
-		if ( in_array( $url, $this->plugin->settings->get_excluded_urls() ) ) {
+		if ( in_array( $url, $this->plugin->settings()->get_excluded_urls() ) ) {
 			return true;
 		}
 	}
@@ -194,19 +194,21 @@ class WSAL_Sensors_FrontendSystem extends WSAL_AbstractSensor {
 	 * Write Log.
 	 *
 	 * Write a new line on 404 log file.
-	 * Folder: /uploads/wp-security-audit-log/404s/
+	 * Folder: {plugin working folder}/404s/
 	 *
-	 * @param int    $attempts - Number of attempt.
-	 * @param string $ip       - IP address.
+	 * @param int $attempts - Number of attempt.
+	 * @param string $ip - IP address.
 	 * @param string $username - Username.
-	 * @param string $url      - 404 URL.
+	 * @param string $url - 404 URL.
+	 *
+	 * @return string|null
 	 */
 	private function write_log( $attempts, $ip, $username = '', $url = null ) {
 		$name_file = null;
 
-		if ( 'on' === $this->plugin->options_helper->get_option_value( 'log-visitor-404', 'off' ) ) {
+		if ( $this->plugin->GetGlobalBooleanSetting( 'log-visitor-404', false ) ) {
 			// Get option to log referrer.
-			$log_referrer = $this->plugin->options_helper->get_option_value( 'log-visitor-404-referrer' );
+			$log_referrer = $this->plugin->GetGlobalBooleanSetting( 'log-visitor-404-referrer' );
 
 			// Check localhost.
 			if ( '127.0.0.1' == $ip || '::1' == $ip ) {
@@ -243,21 +245,16 @@ class WSAL_Sensors_FrontendSystem extends WSAL_AbstractSensor {
 			$username = '';
 
 			// get the custom logging path from settings.
-			$custom_logging_path = $this->plugin->options_helper->get_logging_path() . '404s/';
-			$custom_logging_url  = $this->plugin->options_helper->get_logging_url() . '404s/';
-
-			if ( ! $this->CheckDirectory( $custom_logging_path ) ) {
-				$dir_made = wp_mkdir_p( $custom_logging_path );
-				if ( $dir_made ) {
+			$custom_logging_path = $this->plugin->settings()->get_working_dir_path( '404s' );
+			if ( ! is_wp_error( $custom_logging_path ) ) {
+				if ( ! file_exists( $custom_logging_path . 'index.php' ) ) {
 					// make an empty index.php in the directory.
 					@file_put_contents( $custom_logging_path . 'index.php', '<?php // Silence is golden' );
 				}
-			}
 
-			// Check directory.
-			if ( $this->CheckDirectory( $custom_logging_path ) ) {
 				$filename  = '6023_' . date( 'Ymd' ) . '.log';
 				$fp        = $custom_logging_path . $filename;
+				$custom_logging_url  = $this->plugin->settings()->get_working_dir_url( '404s' );
 				$name_file = $custom_logging_url . $filename;
 				if ( ! $file = fopen( $fp, 'a' ) ) {
 					$i           = 1;

@@ -5,7 +5,7 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 5.4.1
+Tested up to: 5.4.2
 Stable tag: 4.1.2
 Requires PHP: 5.5
 
@@ -206,17 +206,17 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 = 4.1.2 (2020-06-24) =
 
-Release notes: [WP Activity Log fully integrated with Website File Changes Monitor](https://www.wpwhitesecurity.com/wfcm-1-5/)
+Release notes: [WP Activity Log fully integrated with Website File Changes Monitor (https://www.wpwhitesecurity.com/wfcm-1-5/)
 
 * **New**
-	* Plugin now uses the [Website File Changes Monitor](https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/) plugin for file integrity monitor scans.
+	* Plugin now uses the [Website File Changes Monitor](https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/' plugin for file integrity monitor scans.
 	
 * **Improvements**
-	* Event ID 6033 now reports when [file integrity monitoring](https://www.wpwhitesecurity.com/wordpress-file-integrity-scanning-site/) scans start and stop.
+	* Event ID 6033 now reports when [file integrity monitoring](https://www.wpwhitesecurity.com/wordpress-file-integrity-scanning-site/' scans start and stop.
 	* File changes events in the activity log link directly to the changes reported in Website File Changes Monitor.
 	* Log files custom path setting reverts to default path if left empty.
 
 * **Bug fix**
 	* Plugin creating the log files outside website directory if Website URL is different than WordPress URL.
-
+	
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.

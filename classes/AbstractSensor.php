@@ -102,6 +102,7 @@ abstract class WSAL_AbstractSensor {
 	 * Check to see whether or not the specified directory is accessible.
 	 *
 	 * @param string $dir_path - Directory path.
+	 *
 	 * @return boolean
 	 */
 	protected function CheckDirectory( $dir_path ) {
@@ -114,6 +115,7 @@ abstract class WSAL_AbstractSensor {
 		if ( ! is_writable( $dir_path ) ) {
 			return false;
 		}
+
 		return true;
 	}
 }

@@ -171,9 +171,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	/**
 	 * Install all DB tables.
 	 *
-	 * @param bool $exclude_options - True if excluding.
+	 * @param bool $is_external_database If true, some tables will not be created.
 	 */
-	public function installAll( $exclude_options = false ) {
+	public function installAll( $is_external_database = false ) {
 		$plugin = WpSecurityAuditLog::GetInstance();
 		$adapter_list = glob( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php' );
 		$adapter_list = apply_filters( 'wsal_install_apapters_list', $adapter_list );
@@ -186,12 +186,18 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 				$class = new $class_name( $this->getConnection() );
 			}
 
-			if ( $exclude_options && $class instanceof WSAL_Adapters_MySQL_Option ) {
+			if ( $is_external_database && $class instanceof WSAL_Adapters_MySQL_Session ) {
+				//  sessions table should only ever exist only in local database
 				continue;
 			}
 
-			// Exclude the tmp_users table.
-			if ( ! $exclude_options && $class instanceof WSAL_Adapters_MySQL_TmpUser ) {
+			if ( $is_external_database && $class instanceof WSAL_Adapters_MySQL_Option ) {
+				//  options table should only ever exist only in local database
+				continue;
+			}
+
+			if ( ! $is_external_database && $class instanceof WSAL_Adapters_MySQL_TmpUser ) {
+				//  exclude the tmp_users table for local database
 				continue;
 			}
 
@@ -324,6 +330,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 *
 	 * @param integer $index - Index.
 	 * @param integer $limit - Limit.
+	 *
+	 * @return array
 	 */
 	public function MigrateBackOccurrence( $index, $limit ) {
 		$result = null;

@@ -86,7 +86,7 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 							// Loop through plugins and output.
 							foreach ( $our_plugins as $details ) {
 								$disable_button = '';
-								if ( is_plugin_active( $details['plugin_slug'] ) ) {
+								if ( is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
 									$disable_button = 'disabled';
 								}
 								// Check if this is actually an addon for something, otherwise bail.
@@ -103,10 +103,10 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 									<?php
 									if ( $this->is_plugin_installed( $details['plugin_slug'] ) && ! is_plugin_active( $details['plugin_slug'] ) ) {
 										esc_html_e( 'Extension installed, activate now?', 'wp-security-audit-log' );
-									} elseif ( $this->is_plugin_installed( $details['plugin_slug'] ) && is_plugin_active( $details['plugin_slug'] ) ) {
+									} elseif ( $this->is_plugin_installed( $details['plugin_slug'] ) && is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' )  ) {
 										esc_html_e( 'Extension installed', 'wp-security-audit-log' );
 									} else {
-											esc_html_e( 'Install Extension', 'wp-security-audit-log' );
+										esc_html_e( 'Install Extension', 'wp-security-audit-log' );
 									}
 									?>
 								</button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span></p>
@@ -147,6 +147,15 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-wpforms.latest-stable.zip',
 					'event_tab_id'       => '#tab-wpforms',
 					'plugin_description' => 'Keep a record of when someone adds, modified or delete forms, entries and more in the WPForms plugin.',
+				),
+				array(
+					'addon_for'          => 'woocommerce',
+					'title'              => 'WooCommerce Extension',
+					'image_filename'     => 'woocommerce.png',
+					'plugin_slug'        => 'wp-activity-log-for-woocommerce/wsal-woocommerce.php',
+					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-activity-log-for-woocommerce.latest-stable.zip',
+					'event_tab_id'       => '#tab-woocommerce',
+					'plugin_description' => 'Keep a record of when someone adds, modified or delete products, orders and more in the WooCommerce plugin.',
 				),
 				array(
 					'addon_for'          => 'wfcm',

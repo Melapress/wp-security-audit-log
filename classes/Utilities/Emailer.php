@@ -28,9 +28,9 @@ class WSAL_Utilities_Emailer {
 		$wsal            = WpSecurityAuditLog::GetInstance();
 		$home_url        = home_url();
 		$safe_url        = str_replace( array( 'http://', 'https://' ), '', $home_url );
-		$type_name       = $wsal->settings->get_type_username(); // Get the data to display.
+		$type_name       = $wsal->settings()->get_type_username(); // Get the data to display.
 		$user            = _wp_get_current_user();
-		$datetime_format = $wsal->settings->GetDatetimeFormat( false );
+		$datetime_format = $wsal->settings()->GetDatetimeFormat( false );
 		$date_time       = str_replace(
 			'$$$',
 			substr( number_format( fmod( current_time( 'timestamp' ), 1 ), 3 ), 2 ),
@@ -148,8 +148,8 @@ class WSAL_Utilities_Emailer {
 	 */
 	public static function custom_wp_mail_from( $original_email_from ) {
 		$wsal       = WpSecurityAuditLog::GetInstance();
-		$use_email  = $wsal->settings->get_use_email();
-		$email_from = $wsal->settings->GetFromEmail();
+		$use_email  = $wsal->settings()->get_use_email();
+		$email_from = $wsal->settings()->GetFromEmail();
 		if ( ! empty( $email_from ) && 'custom_email' === $use_email ) {
 			return $email_from;
 		} else {
@@ -165,8 +165,8 @@ class WSAL_Utilities_Emailer {
 	 */
 	public static function custom_wp_mail_from_name( $original_email_from_name ) {
 		$wsal            = WpSecurityAuditLog::GetInstance();
-		$use_email       = $wsal->settings->get_use_email();
-		$email_from_name = $wsal->settings->GetDisplayName();
+		$use_email       = $wsal->settings()->get_use_email();
+		$email_from_name = $wsal->settings()->GetDisplayName();
 		if ( ! empty( $email_from_name ) && 'custom_email' === $use_email ) {
 			return $email_from_name;
 		} else {

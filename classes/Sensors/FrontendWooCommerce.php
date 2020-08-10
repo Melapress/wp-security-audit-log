@@ -1,6 +1,7 @@
 <?php
 /**
  * Frontend WooCommerce sensor.
+ * Although WC is handled by an extension, this is kept to avoid causing issue.
  *
  * @package wsal
  */
@@ -46,7 +47,6 @@ class WSAL_Sensors_FrontendWooCommerce extends WSAL_AbstractSensor {
 			$order_post  = get_post( $order_id ); // Get order post object.
 			$order_title = ( null !== $order_post && $order_post instanceof WP_Post ) ? $order_post->post_title : false;
 			$editor_link = $this->get_editor_link( $order_post );
-
 			$this->plugin->alerts->Trigger(
 				9035,
 				array(
@@ -171,11 +171,29 @@ class WSAL_Sensors_FrontendWooCommerce extends WSAL_AbstractSensor {
 			);
 		}
 
-		$wc_all_stock_changes = $this->plugin->GetGlobalOption( 'wc-all-stock-changes', 'on' );
+		$wc_all_stock_changes = $this->plugin->GetGlobalBooleanSetting( 'wc-all-stock-changes', true );
 
 		// If stock has changed then trigger the alert.
 		if ( ( $old_stock !== $new_stock ) && ( 'on' === $wc_all_stock_changes ) ) {
 			$editor_link = $this->get_editor_link( $post );
+
+			// Check if this was done via an order by looking for event 9035.
+			// If so, we are going to add its data.
+			$query = new WSAL_Models_OccurrenceQuery();
+			$query->addOrderBy( 'created_on', true );
+			$query->setLimit( 1 );
+			$last_occurence = $query->getAdapter()->Execute( $query );
+			if ( isset( $last_occurence[0] ) &&  9035 === $last_occurence[0]->alert_id ) {
+				$latest_event = $this->plugin->alerts->get_latest_events();
+				$latest_event = isset( $latest_event[0] ) ? $latest_event[0] : false;
+				$event_meta   = $latest_event ? $latest_event->GetMetaArray() : false;
+				$order_id     = isset( $event_meta['OrderID'] ) ? $event_meta['OrderID'] : false;
+				$order_title  = isset( $event_meta['OrderTitle'] ) ? $event_meta['OrderTitle'] : false;
+			} else {
+				$order_id    = false;
+				$order_title = false;
+			}
+
 			/**
 			 * Event was changed from 9019 to 9105
 			 *
@@ -190,6 +208,7 @@ class WSAL_Sensors_FrontendWooCommerce extends WSAL_AbstractSensor {
 					'OldValue'           => ! empty( $old_stock ) ? $old_stock : 0,
 					'NewValue'           => $new_stock,
 					'Username'           => $username,
+					'StockOrderID'       => $order_id,
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);

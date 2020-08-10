@@ -111,7 +111,7 @@ class WSAL_Views_ExternalDB extends WSAL_AbstractView {
 	 * Page View.
 	 */
 	public function Render() {
-		$title        = __( 'Audit Log Database & Integration Tools', 'wp-security-audit-log' );
+		$title        = __( 'Activity log database & integration tools', 'wp-security-audit-log' );
 		$description  = __( 'There are several benefits to segregating the logs from the main site database, and to be able to mirror the logs to third party and centralized business solutions. Upgrade to premium and:', 'wp-security-audit-log' );
 		$addon_img    = trailingslashit( WSAL_BASE_URL ) . 'img/' . $this->GetSafeViewName() . '.jpg';
 		$premium_list = array(

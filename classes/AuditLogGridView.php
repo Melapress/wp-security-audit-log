@@ -93,7 +93,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	public function __construct( $plugin, $query_args ) {
 		$this->_plugin    = $plugin;
 		$this->query_args = $query_args;
-		$timezone         = $this->_plugin->settings->GetTimezone();
+		$timezone         = $this->_plugin->settings()->GetTimezone();
 
 		/**
 		 * Transform timezone values.
@@ -181,9 +181,9 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	 */
 	public function extra_tablenav( $which ) {
 		// If the position is not top then render.
-		if ( 'top' !== $which && ! $this->_plugin->settings->is_infinite_scroll() ) :
+		if ( 'top' !== $which && ! $this->_plugin->settings()->is_infinite_scroll() ) :
 			// Items-per-page widget.
-			$p     = $this->_plugin->settings->GetViewPerPage();
+			$p     = $this->_plugin->settings()->GetViewPerPage();
 			$items = array( 5, 10, 15, 30, 50 );
 			if ( ! in_array( $p, $items, true ) ) {
 				$items[] = $p;
@@ -203,7 +203,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 			<?php
 		endif;
 
-		if ( 'top' !== $which && $this->_plugin->settings->is_infinite_scroll() ) :
+		if ( 'top' !== $which && $this->_plugin->settings()->is_infinite_scroll() ) :
 			?>
 			<div id="wsal-auditlog-end"><p><?php esc_html_e( '— End of Activity Log —', 'wp-security-audit-log' ); ?></p></div>
 			<div id="wsal-event-loader"><div class="wsal-lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
@@ -214,10 +214,10 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 		// NOTE: this is shown when the filter IS NOT true.
 		if ( $this->is_multisite() && $this->is_main_blog() && ! apply_filters( 'search_extensition_active', false ) ) {
 			if (
-				( 'top' === $which && $this->_plugin->settings->is_infinite_scroll() )
-				|| ! $this->_plugin->settings->is_infinite_scroll()
+				( 'top' === $which && $this->_plugin->settings()->is_infinite_scroll() )
+				|| ! $this->_plugin->settings()->is_infinite_scroll()
 			) {
-				$curr = $this->_plugin->settings->get_view_site_id();
+				$curr = $this->_plugin->settings()->get_view_site_id();
 				?>
 				<div class="wsal-ssa wsal-ssa-<?php echo esc_attr( $which ); ?>">
 					<?php if ( $this->get_site_count() > 15 ) : ?>
@@ -240,10 +240,10 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 		}
 
 		// Switch to live or archive DB.
-		if ( $this->_plugin->settings->IsArchivingEnabled() ) {
+		if ( $this->_plugin->settings()->IsArchivingEnabled() ) {
 			if (
-				( 'top' === $which && $this->_plugin->settings->is_infinite_scroll() )
-				|| ! $this->_plugin->settings->is_infinite_scroll()
+				( 'top' === $which && $this->_plugin->settings()->is_infinite_scroll() )
+				|| ! $this->_plugin->settings()->is_infinite_scroll()
 			) {
 				$selected    = 'live';
 				$selected_db = get_transient( 'wsal_wp_selected_db' );
@@ -325,7 +325,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 		// Get selected columns from settings.
 		if ( empty( $this->selected_columns ) && ! is_array( $this->selected_columns ) ) {
-			$this->selected_columns = $this->_plugin->settings->GetColumnsSelected();
+			$this->selected_columns = $this->_plugin->settings()->GetColumnsSelected();
 		}
 
 		// If selected columns are not empty, then unset default columns.
@@ -383,7 +383,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	 */
 	public function column_default( $item, $column_name ) {
 		// Get date format.
-		$datetime_format = $this->_plugin->settings->GetDatetimeFormat();
+		$datetime_format = $this->_plugin->settings()->GetDatetimeFormat();
 
 		// Store meta if not set.
 		if ( ! isset( $this->item_meta[ $item->getId() ] ) ) {
@@ -408,7 +408,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 					}
 				}
 
-				if ( ! $this->_plugin->settings->CurrentUserCan( 'edit' ) ) {
+				if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 					return '<span class="log-disable">' . str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
 				}
 				// add description to $extra_msg only if one is available.
@@ -444,9 +444,9 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				$data_link           = '';
 				$modification_alerts = array( 1002, 1003, 6007, 6023 );
 
-				$date_format       = $this->_plugin->settings->GetDateFormat();
-				$show_microseconds = $this->_plugin->settings->get_show_milliseconds();
-				if ( 'no' === $show_microseconds ) {
+				$date_format       = $this->_plugin->settings()->GetDateFormat();
+				$show_microseconds = $this->_plugin->settings()->get_show_milliseconds();
+				if ( ! $show_microseconds ) {
 					// remove the microseconds placeholder from format string.
 					$datetime_format = str_replace( '.$$$', '', $datetime_format );
 				}
@@ -468,7 +468,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				$username = $item->GetUsername( $this->item_meta[ $item->getId() ] ); // Get username.
 				$user     = get_user_by( 'login', $username ); // Get user.
 				if ( empty( $this->name_type ) ) {
-					$this->name_type = $this->_plugin->settings->get_type_username();
+					$this->name_type = $this->_plugin->settings()->get_type_username();
 				}
 
 				// Check if the username and user exists.
@@ -653,7 +653,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	}
 
 	/**
-	 * Method: Meta data formater.
+	 * Method: Meta data formatter.
 	 *
 	 * @param string $name - Name of the data.
 	 * @param mixed  $value - Value of the data.
@@ -856,7 +856,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 		$total_items  = isset( $query_events['total_items'] ) ? $query_events['total_items'] : false;
 		$per_page     = isset( $query_events['per_page'] ) ? $query_events['per_page'] : false;
 
-		if ( ! $this->_plugin->settings->is_infinite_scroll() ) {
+		if ( ! $this->_plugin->settings()->is_infinite_scroll() ) {
 			$this->set_pagination_args(
 				array(
 					'total_items' => $total_items,
@@ -996,11 +996,11 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	 * @return array
 	 */
 	public function query_events( $paged = 0 ) {
-		if ( $this->_plugin->settings->IsArchivingEnabled() ) {
+		if ( $this->_plugin->settings()->IsArchivingEnabled() ) {
 			// Switch to Archive DB.
 			$selected_db = get_transient( 'wsal_wp_selected_db' );
 			if ( $selected_db && 'archive' === $selected_db ) {
-				$this->_plugin->settings->SwitchToArchiveDB();
+				$this->_plugin->settings()->SwitchToArchiveDB();
 			}
 		}
 
@@ -1023,9 +1023,9 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 		 */
 		$query = apply_filters( 'wsal_auditlog_query', $query );
 
-		if ( ! $this->_plugin->settings->is_infinite_scroll() ) {
+		if ( ! $this->_plugin->settings()->is_infinite_scroll() ) {
 			$total_items = $query->getAdapter()->Count( $query );
-			$per_page    = $this->_plugin->settings->GetViewPerPage();
+			$per_page    = $this->_plugin->settings()->GetViewPerPage();
 			$offset      = ( $this->get_pagenum() - 1 ) * $per_page;
 		} else {
 			$total_items = false;
