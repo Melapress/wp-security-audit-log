@@ -155,8 +155,9 @@ We need help translating the plugin and the activity log events. Please visit th
 
 #### WP Activity Log extensions for third party plugins
 
-* <strong>[Activity Log for MainWP](https://wpactivitylog.com/extensions/mainwp-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>: With this MainWP extension you keep a log of the MainWP network changes and can see the activity logs of all child sites from one central location - the MainWP dashboard.
+* <strong>[WP Activity Log for WooCommerce](https://wpactivitylog.com/extensions/woocommerce-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>: When you install this extension you keep a log of changes your team does to the WooCommerce store settings, orders, products, coupons _ much more.
 * <strong>[WP Activity Log for WPForms](https://wpactivitylog.com/extensions/wpforms-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>: When you install this extension you keep a log of changes your team does in the WPForms plugin, forms, form files, entries (leads) and more.
+* <strong>[Activity Log for MainWP](https://wpactivitylog.com/extensions/mainwp-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>: With this MainWP extension you keep a log of the MainWP network changes and can see the activity logs of all child sites from one central location - the MainWP dashboard.
 * <strong>[WP Activity Log for bbPress](https://wordpress.org/plugins/wp-security-audit-log-add-on-for-bbpress/)</strong>: With this extension you can keep a log of changes in bbPress forums, topics, bbPress settings and more.
 
 #### Related Links and Documentation
