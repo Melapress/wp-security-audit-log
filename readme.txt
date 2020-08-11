@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.4.2
-Stable tag: 4.1.2
+Stable tag: 4.1.3
 Requires PHP: 5.5
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -204,19 +204,70 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.1.2 (2020-06-24) =
+= 4.1.3 (2020-08-11) =
 
-Release notes: [WP Activity Log fully integrated with Website File Changes Monitor (https://www.wpwhitesecurity.com/wfcm-1-5/)
+Release notes: [WP Activity Log 4.1.3: New extension for WooCommerce & other updates](https://wpactivitylog.com/wsal-4-1-3/)
 
-* **New**
-	* Plugin now uses the [Website File Changes Monitor](https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/' plugin for file integrity monitor scans.
+* **IMPORTANT**
+	* Only update from 4.1.2 to 4.1.3. If you are using an older version, first update to 4.1.2 before updating to 4.1.3. 
+
+* **New features**
+	* The all new [WP Activity Log for WooCommerce](https://wordpress.org/plugins/wp-activity-log-for-woocommerce/) extension (needed to keep a log of changes on WooCommerce store, products, orders & much more).
+	* New [plugin and activity log privileges](https://wpactivitylog.com/support/kb/managing-wordpress-activity-log-plugin-privileges/) that allow super admins on a multisite network to restrict activity log access to site admins and other super admins.
+	* Coverage for changes done to relationship custom fields created with ACF.
+
+* **New activity log events**
+	* ID 2131: Added relationships in a custom field.
+	* ID 2132: Removed relationships from a custom field.
+	* ID 9101: Created new product tag in WooCommerce.
+	* ID 9102: Deleted a product tag in WooCommerce.
+	* ID 9103: Renamed a product tag in WooCommerce.
+	* ID 9104: Changed the slug of a product tag in WooCommerce.
 	
-* **Improvements**
-	* Event ID 6033 now reports when [file integrity monitoring](https://www.wpwhitesecurity.com/wordpress-file-integrity-scanning-site/' scans start and stop.
-	* File changes events in the activity log link directly to the changes reported in Website File Changes Monitor.
-	* Log files custom path setting reverts to default path if left empty.
+Refer to the [complete list of activity log event IDs](https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/) for more detailed information.	
 
-* **Bug fix**
-	* Plugin creating the log files outside website directory if Website URL is different than WordPress URL.
+* **Improvements**
+	* Improved the plugin's coverage of WooCommerce stores, products, orders etc by adding new events, and updating the current sensor.
+	* Plugin now uses the default WordPress options table to store settings (performance enhancement).
+	* Refactored all settings in the database so they all use yes/no values.
+	* Restricted the plugin's and activity log settings to the network dashboard only on a multisite network.
+	* Change in wp_wsal_sessions table structure: now plugin uses session ID as unique identifier in table.
+	* Plugin keeps the ID of the sites a user is logged in to on a multisite network.
+	* Removed the Import/Export plugin settings functionality (a much better utility will be designed and launched as a replacement).
+	* File changes detected by the Website File Changes Monitor plugin are now reported in the daily summary email.
+	* Log files working directory in uploads directory renamed to wp-activity-log. 
+	* If no path is specified for the log files working directory, the default path is used.
+	* Improved activity log privileges - on multisite super admin can restrict site admins from seeing their own site's activity logs.
+	* WooCommerce front end sensor is automatically enabled if admin enables events to track purchases of non-logged in users.
+	* Improved the text of the third party plugins extensions notifications.
+	* Updated the format of event IDs 9070 and 4020 to matches the standard template.
+	* Coverage of WooCommerce coupon changes has been improved andplugin can now keep a log of usage restriction changes in coupons.
+	* IP address in list of logged in users is now linked to WhatIsMyIPAddress.com.
+	* Added a message for when no sessions are shown in the Logged In users section.
+	* Minor changes in the plugin's settings pages.
+	* Updated some notifications used by the third party plugins extensions.
+	* Third party plugins extensions are now automatically activated on multsite network when installed.
+	* Removed all code that was used for file scanning. Now plugin is fully integrated with Website File Changes Monitor.
+
+* **Bug fixes**
+	* Extensions notifications were wrongly shown to sub sites admins on multisite.
+	* Event 1002 (failed user login) was wrongly reported when a user session is blocked.
+	* When the setting Delete data on uninstall was enabled the plugin was not deleting all the data from the database.
+	* Event ID 1002 (failed user login) incorrectly links to log file.
+	* Plugin does not send logs to [Activity Log for MainWP](https://wpactivitylog.com/extensions/mainwp-activity-log/) extension when child site uses a non-default admin URL.
+	* Error when loading user session tokens from usermeta table in some cases.
+	* Users sessions table was moved to external database when activity log is stored in an external database.
+	* Plugin was reporting event ID 1000 (login) when user changes own password in user profile page.
+	* Plugin's log files working directory was hardcoded (uploads directory).
+	* When super admins changed the plugin's settings on a child site, the settings were not applied globally.
+	* Users who are allowed to view the activity log can also see who is logged in.
+	* The old plugin name was shown on the daily summary email template.
+	* Plugin created working directory in wrong location when site address is different than WordPress address.
+	* Setup wizard shows all the extensions for third party plugins instead of those for the installed plugins.
+	* Wrong anchor text "view post in editor" used for WooCommerce products.
+	* Unknown object reported instead of actual Object in some of the [WPForms activity log](https://wpactivitylog.com/extensions/wpforms-activity-log/) events.
+	* Event ID 2080 not reported when the last item was removed from the site menu.
+	* Plugin logo missing from license activation screen.
+	* [Website File Changes Monitor](https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/) custom posts type changes were reported (these are ignored by default).
 	
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
