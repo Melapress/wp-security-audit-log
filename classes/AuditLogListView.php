@@ -534,9 +534,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$image = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
 					$uhtml = '<i>' . __( 'Plugins', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
-				} elseif ( 'Website Visitor' == $username ) {
+				} elseif ( 'Website Visitor' == $username || 'Unregistered user' == $username ) {
 					$image = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
-					$uhtml = '<i>' . __( 'Website Visitor', 'wp-security-audit-log' ) . '</i>';
+					$uhtml = '<i>' . __( 'Unregistered user', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
 				} else {
 					$image = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';

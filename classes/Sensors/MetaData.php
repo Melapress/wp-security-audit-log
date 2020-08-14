@@ -89,6 +89,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 			return;
 		}
 
+		// Remove WC coupons from ignored array.
+		if ( ( $key = array_search( 'shop_coupon', $this->plugin->alerts->ignored_cpts ) ) !== false) {
+			unset( $this->plugin->alerts->ignored_cpts[$key] );
+		}
+
 		// Ignore updates from ignored custom post types.
 		if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
 			return;
@@ -108,6 +113,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 		 * @param WP_Post $post       - Post object.
 		 */
 		$log_meta_event = apply_filters( 'wsal_before_post_meta_create_event', true, $meta_key, $meta_value, $post );
+
 		if ( $log_meta_event ) {
 			$editor_link = $this->GetEditorLink( $post );
 			$this->plugin->alerts->Trigger(
@@ -304,7 +310,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 			if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
 				return;
 			}
-			
+
 			// If not allowed to log meta event then skip it.
 			if ( ! $log_meta_event ) {
 				continue;

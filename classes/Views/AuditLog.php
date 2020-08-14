@@ -247,27 +247,36 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$screen = get_current_screen();
 		$notice_already_dismissed = $this->_plugin->GetGlobalSetting( 'addon_available_notice_dismissed' );
 		if ( $screen->base === 'toplevel_page_wsal-auditlog' && $is_current_view && ! $notice_already_dismissed || $screen->base === 'toplevel_page_wsal-auditlog-network' && $is_current_view && ! $notice_already_dismissed ) {
-			$addons_available         = $this->_plugin->GetGlobalSetting( 'installed_plugin_addon_available' );
-			$all_plugins              = get_plugins();
-			$all_plugins              = array_keys( $all_plugins );
+			// Grab list of installed plugins.
+			$all_plugins      = get_plugins();
+			$plugin_filenames = array();
+			foreach ( $all_plugins as $plugin => $info ) {
+				// here we strip all of the plugin slug, leaving just the filename itself. Neat!
+				$plugin_filenames[] = preg_replace( '/\\.[^.\\s]{3,4}$/', '', substr( basename( json_encode( $plugin ) ), 0, -1 ) );
+			}
+
+			// Grab list of plugins we have addons for.
 			$predefined_plugins       = WSAL_PluginInstallAndActivate::get_installable_plugins();
-			$predefined_plugins_slugs = array_column( $predefined_plugins, 'plugin_slug' );
-			$is_addon_installed       = array_intersect( $all_plugins, $predefined_plugins_slugs );
+			$predefined_plugins_check = array_column( $predefined_plugins, 'addon_for' );
+
+			// Loop through plugins and create an array of slugs, we will compare these agains the plugins we have addons for.
+			$we_have_addon = array_intersect( $plugin_filenames, $predefined_plugins_check );
+
 			$display_notice           = false;
 
-			if ( isset( $addons_available ) && is_array( $addons_available ) ) {
+			if ( isset( $we_have_addon ) && is_array( $we_have_addon ) ) {
 				$addon_names = '';
 				$i           = 0;
-				foreach ( $addons_available as $addon ) {
-					$addon_slug         = array( array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ) );
-					$is_addon_installed = array_intersect( $all_plugins, $addon_slug );
+				foreach ( $we_have_addon as $addon ) {
+					$addon_slug         = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) );
+					$is_addon_installed = is_plugin_active( $addon_slug );
 
 					// Check if a function from the addon exists, just in case.
 					if ( $addon === 'wpforms' && function_exists( 'wsal_wpforms_init_actions' ) || $addon === 'bbpress' && function_exists( 'wsal_bbpress_init_actions' ) ) {
 						continue;
 					}
 
-					if ( empty( $is_addon_installed ) ) {
+					if ( ! $is_addon_installed ) {
 						$addon = str_replace( '-', ' ', $addon);
 						if ( $addon === 'bbpress' ) {
 							$addon = 'bbPress';

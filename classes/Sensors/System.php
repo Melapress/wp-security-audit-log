@@ -236,7 +236,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		$ip      = $this->plugin->settings()->GetMainClientIP();
 
 		if ( ! is_user_logged_in() ) {
-			$username = 'Website Visitor';
+			$username = 'Unregistered user';
 		} else {
 			$username = wp_get_current_user()->user_login;
 		}
@@ -257,7 +257,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			return;
 		}
 
-		if ( 'Website Visitor' !== $username ) {
+		if ( 'Unregistered user' !== $username ) {
 			// Check if the alert is disabled from the "Enable/Disable Alerts" section.
 			if ( ! $this->plugin->alerts->IsEnabled( 6007 ) ) {
 				return;

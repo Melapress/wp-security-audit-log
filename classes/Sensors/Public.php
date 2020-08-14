@@ -333,7 +333,7 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		// Set username.
 		$username = '';
 		if ( ! is_user_logged_in() ) {
-			$username = 'Website Visitor';
+			$username = 'Unregistered user';
 		} else {
 			$username = wp_get_current_user()->user_login;
 		}
