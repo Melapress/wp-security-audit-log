@@ -980,8 +980,8 @@ final class WSAL_AlertManager {
 			$user_data->username = 'Plugin';
 		} elseif ( 'Plugins' === $username ) {
 			$user_data->username = 'Plugins';
-		} elseif ( 'Website Visitor' === $username ) {
-			$user_data->username = 'Website Visitor';
+		} elseif ( 'Website Visitor' === $username || 'Unregistered user' === $username ) {
+			$user_data->username = 'Unregistered user';
 		} else {
 			// Check WP user.
 			if ( isset( $this->wp_users[ $username ] ) ) {

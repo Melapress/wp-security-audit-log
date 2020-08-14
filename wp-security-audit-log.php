@@ -581,7 +581,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return boolean
 		 */
 		public static function is_woocommerce_active() {
-			return self::is_plugin_active( 'woocommerce/woocommerce.php' );
+			// Check for WC extensional also, as the sensor should not be loaded without it.
+			if ( function_exists( 'wsal_woocommerce_extension_init_actions' ) && self::is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 
 		/**
@@ -2430,17 +2435,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/file.php';
 			}
 
+			if ( file_exists( $base_path . 'extensions' ) ) {
 			$extension_folders = list_files( $base_path . 'extensions', 1 );
-			foreach ( $extension_folders as $extension_folder ) {
-				if ( ! is_dir( $extension_folder ) ) {
-					continue;
-				}
+				foreach ( $extension_folders as $extension_folder ) {
+					if ( ! is_dir( $extension_folder ) ) {
+						continue;
+					}
 
-				$path_to_file = $extension_folder . $partial_path_to_file;
-				if ( file_exists( $path_to_file ) ) {
-					require_once $path_to_file;
+					$path_to_file = $extension_folder . $partial_path_to_file;
+					if ( file_exists( $path_to_file ) ) {
+						require_once $path_to_file;
 
-					return true;
+						return true;
+					}
 				}
 			}
 		}

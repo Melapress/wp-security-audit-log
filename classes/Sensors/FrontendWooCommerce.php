@@ -149,7 +149,7 @@ class WSAL_Sensors_FrontendWooCommerce extends WSAL_AbstractSensor {
 		// Set username.
 		$username = '';
 		if ( ! is_user_logged_in() ) {
-			$username = 'Website Visitor';
+			$username = 'Unregistered user';
 		} else {
 			$username = wp_get_current_user()->user_login;
 		}
@@ -174,7 +174,7 @@ class WSAL_Sensors_FrontendWooCommerce extends WSAL_AbstractSensor {
 		$wc_all_stock_changes = $this->plugin->GetGlobalBooleanSetting( 'wc-all-stock-changes', true );
 
 		// If stock has changed then trigger the alert.
-		if ( ( $old_stock !== $new_stock ) && ( 'on' === $wc_all_stock_changes ) ) {
+		if ( ( $old_stock !== $new_stock ) && ( $wc_all_stock_changes ) ) {
 			$editor_link = $this->get_editor_link( $post );
 
 			// Check if this was done via an order by looking for event 9035.
