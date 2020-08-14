@@ -209,19 +209,19 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 * **Improvement**
 	* Released extension [WP Activity Log for WooCommerce](https://wordpress.org/plugins/wp-activity-log-for-woocommerce/) update 1.1 (improved logging etc).
-	
+
 * **Bug fixes**
 	* The orders details in WooCommerce were not being added to the order ([Support ticket](https://wordpress.org/support/topic/update-4-1-31-broken-woocommerce-urgent/)).
 	* An empty space was added to the top of the WordPress admin menu.
 	* Third party plugins extensions notification not showing in the activity log viewer.
 	* Thurd party plugins extension help text was shown on the wrong pages.
-	
+
 = 4.1.3 (2020-08-11) =
 
 Release notes: [WP Activity Log 4.1.3: New extension for WooCommerce & other updates](https://wpactivitylog.com/wsal-4-1-3/)
 
 * **IMPORTANT**
-	* Only update from 4.1.2 to 4.1.3. If you are using an older version, first update to 4.1.2 before updating to 4.1.3. 
+	* Only update from 4.1.2 to 4.1.3. If you are using an older version, first update to 4.1.2 before updating to 4.1.3.
 
 * **New features**
 	* The all new [WP Activity Log for WooCommerce](https://wordpress.org/plugins/wp-activity-log-for-woocommerce/) extension (needed to keep a log of changes on WooCommerce store, products, orders & much more).
@@ -235,8 +235,8 @@ Release notes: [WP Activity Log 4.1.3: New extension for WooCommerce & other upd
 	* ID 9102: Deleted a product tag in WooCommerce.
 	* ID 9103: Renamed a product tag in WooCommerce.
 	* ID 9104: Changed the slug of a product tag in WooCommerce.
-	
-Refer to the [complete list of activity log event IDs](https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/) for more detailed information.	
+
+Refer to the [complete list of activity log event IDs](https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/) for more detailed information.
 
 * **Improvements**
 	* Improved the plugin's coverage of WooCommerce stores, products, orders etc by adding new events, and updating the current sensor.
@@ -247,7 +247,7 @@ Refer to the [complete list of activity log event IDs](https://wpactivitylog.com
 	* Plugin keeps the ID of the sites a user is logged in to on a multisite network.
 	* Removed the Import/Export plugin settings functionality (a much better utility will be designed and launched as a replacement).
 	* File changes detected by the Website File Changes Monitor plugin are now reported in the daily summary email.
-	* Log files working directory in uploads directory renamed to wp-activity-log. 
+	* Log files working directory in uploads directory renamed to wp-activity-log.
 	* If no path is specified for the log files working directory, the default path is used.
 	* Improved activity log privileges - on multisite super admin can restrict site admins from seeing their own site's activity logs.
 	* WooCommerce front end sensor is automatically enabled if admin enables events to track purchases of non-logged in users.
@@ -281,5 +281,5 @@ Refer to the [complete list of activity log event IDs](https://wpactivitylog.com
 	* Event ID 2080 not reported when the last item was removed from the site menu.
 	* Plugin logo missing from license activation screen.
 	* [Website File Changes Monitor](https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/) custom posts type changes were reported (these are ignored by default).
-	
+
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
