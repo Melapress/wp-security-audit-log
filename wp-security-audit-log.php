@@ -4,7 +4,7 @@
  * Plugin URI: http://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Activity log viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 4.1.3
+ * Version: 4.1.3.2
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -46,7 +46,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
          *
 		 * @var string
 		 */
-		public $version = '4.1.3';
+		public $version = '4.1.3.2';
 
 		/**
          * Plugin constants.
@@ -581,7 +581,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return boolean
 		 */
 		public static function is_woocommerce_active() {
-			return self::is_plugin_active( 'woocommerce/woocommerce.php' );
+			// Check for WC extensional also, as the sensor should not be loaded without it.
+			if ( function_exists( 'wsal_woocommerce_extension_init_actions' ) && self::is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 
 		/**
@@ -2430,17 +2435,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/file.php';
 			}
 
+			if ( file_exists( $base_path . 'extensions' ) ) {
 			$extension_folders = list_files( $base_path . 'extensions', 1 );
-			foreach ( $extension_folders as $extension_folder ) {
-				if ( ! is_dir( $extension_folder ) ) {
-					continue;
-				}
+				foreach ( $extension_folders as $extension_folder ) {
+					if ( ! is_dir( $extension_folder ) ) {
+						continue;
+					}
 
-				$path_to_file = $extension_folder . $partial_path_to_file;
-				if ( file_exists( $path_to_file ) ) {
-					require_once $path_to_file;
+					$path_to_file = $extension_folder . $partial_path_to_file;
+					if ( file_exists( $path_to_file ) ) {
+						require_once $path_to_file;
 
-					return true;
+						return true;
+					}
 				}
 			}
 		}

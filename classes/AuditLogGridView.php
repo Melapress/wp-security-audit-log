@@ -510,8 +510,8 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				} elseif ( 'Plugins' == $username ) {
 					$uhtml = '<i>' . __( 'Plugins', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
-				} elseif ( 'Website Visitor' == $username ) {
-					$uhtml = '<i>' . __( 'Website Visitor', 'wp-security-audit-log' ) . '</i>';
+				} elseif ( 'Website Visitor' == $username || 'Unregistered user' == $username ) {
+					$uhtml = '<i>' . __( 'Unregistered user', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
 				} else {
 					$uhtml = '<i>' . __( 'System', 'wp-security-audit-log' ) . '</i>';

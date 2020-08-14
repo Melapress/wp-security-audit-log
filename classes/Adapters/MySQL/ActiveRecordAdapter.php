@@ -821,7 +821,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 					AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
 					AND (@ipAddress is NULL OR (meta.name = 'ClientIP' AND find_in_set(meta.value, @ipAddress) > 0))
 				HAVING user_login IS NOT NULL) ip_logins
-			WHERE user_login NOT IN ('Website Visitor', 'Plugins', 'Plugin')
+			WHERE user_login NOT IN ('Unregistered user', 'Plugins', 'Plugin')
 				ORDER BY user_login ASC
 		";
 		$_wpdb->query( "SET @siteId = $_site_id" );

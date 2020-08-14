@@ -179,7 +179,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$is_custom       = ! empty( $events_diff ) ? true : false; // If difference is not empty then mode is custom.
 		$log_details     = $this->_plugin->GetGlobalSetting( 'details-level', false ); // Get log level option.
 
-		$subcat_alerts   = array( 1004, 2010, 2111, 9007, 9047 );
+		$subcat_alerts   = array( 1004, 2010, 2111, 9007, 9105, 9047 );
 		$obsolete_events = array( 9999, 2126, 6023, 9011, 9070, 9075, 4013 );
 		?>
 		<p>
@@ -408,6 +408,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 															esc_html_e( 'Post Settings', 'wp-security-audit-log' );
 														} elseif ( 9007 === $alert->type ) {
 															esc_html_e( 'Product Admin', 'wp-security-audit-log' );
+														} elseif ( 9105 === $alert->type ) {
+															esc_html_e( 'Product Stock Changes', 'wp-security-audit-log' );
 														} elseif ( 9047 === $alert->type ) {
 															esc_html_e( 'Product Attributes', 'wp-security-audit-log' );
 														}
@@ -527,7 +529,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<tr>
 												<td></td>
 												<td>
-													<input name="wc_all_stock_changes" type="checkbox" id="wc_all_stock_changes" value="1" <?php checked( $wc_all_stock_changes, 'on' ); ?> />
+													<input name="wc_all_stock_changes" type="checkbox" id="wc_all_stock_changes" value="1" <?php checked( $wc_all_stock_changes ); ?> />
 												</td>
 												<td colspan="2"><?php esc_html_e( 'Log all stock changes. Disable this setting to only keep a log of stock changes done manually via the WooCommerce dashboard. Therefore automated stock changes typically done via customers placing orders or via other plugins will not be logged.', 'wp-security-audit-log' ); ?></td>
 											</tr>

@@ -76,10 +76,10 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 			$our_plugins = $this->get_installable_plugins();
 			?>
 			<table id="tab-third-party-plugins" class="form-table wp-list-table wsal-tab widefat fixed"  style="display: table;" cellspacing="0">
-				<p class="description"><?php esc_html_e( 'WP Activity Log can keep a log of changes done on other plugins. Install the relevant extension from the below list to keep a log of changes done on that plugin.', 'wp-security-audit-log' ); ?></p>
 				<tbody>
 					<tr>
 						<td class="addon-td">
+							<p class="description"><?php esc_html_e( 'WP Activity Log can keep a log of changes done on other plugins. Install the relevant extension from the below list to keep a log of changes done on that plugin.', 'wp-security-audit-log' ); ?></p></br>
 							<?php
 							// Create a nonce to pass through via data attr.
 							$nonce = wp_create_nonce( 'wsal-install-addon' );
@@ -132,7 +132,7 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 			$plugins = array(
 				array(
 					'addon_for'          => 'bbpress',
-					'title'              => 'BBPress Extension',
+					'title'              => 'BBPress',
 					'image_filename'     => 'bbpress.png',
 					'plugin_slug'        => 'wp-security-audit-log-add-on-for-bbpress/wsal-bbpress.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-bbpress.latest-stable.zip',
@@ -141,21 +141,21 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 				),
 				array(
 					'addon_for'          => 'wpforms',
-					'title'              => 'WPForms Extension',
+					'title'              => 'WPForms',
 					'image_filename'     => 'wpforms.png',
 					'plugin_slug'        => 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-wpforms.latest-stable.zip',
 					'event_tab_id'       => '#tab-wpforms',
-					'plugin_description' => 'Keep a record of when someone adds, modified or delete forms, entries and more in the WPForms plugin.',
+					'plugin_description' => 'Keep a record of when someone adds, modifies or deletes forms, entries and more in the WPForms plugin.',
 				),
 				array(
 					'addon_for'          => 'woocommerce',
-					'title'              => 'WooCommerce Extension',
+					'title'              => 'WooCommerce',
 					'image_filename'     => 'woocommerce.png',
 					'plugin_slug'        => 'wp-activity-log-for-woocommerce/wsal-woocommerce.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-activity-log-for-woocommerce.latest-stable.zip',
 					'event_tab_id'       => '#tab-woocommerce',
-					'plugin_description' => 'Keep a record of when someone adds, modified or delete products, orders and more in the WooCommerce plugin.',
+					'plugin_description' => 'Keep a log of your team\'s store settings, products, orders, coupons and any other changes they might do on your eCommerce store.',
 				),
 				array(
 					'addon_for'          => 'wfcm',
