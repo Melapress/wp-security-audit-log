@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.5
-Stable tag: 4.1.3
+Stable tag: 4.1.3.2
 Requires PHP: 5.5
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -205,6 +205,17 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
+= 4.1.3.2 (2020-08-14) =
+
+* **Improvement**
+	* Released extension [WP Activity Log for WooCommerce](https://wordpress.org/plugins/wp-activity-log-for-woocommerce/) update 1.1 (improved logging etc).
+	
+* **Bug fixes**
+	* The orders details in WooCommerce were not being added to the order ([Support ticket](https://wordpress.org/support/topic/update-4-1-31-broken-woocommerce-urgent/)).
+	* An empty space was added to the top of the WordPress admin menu.
+	* Third party plugins extensions notification not showing in the activity log viewer.
+	* Thurd party plugins extension help text was shown on the wrong pages.
+	
 = 4.1.3 (2020-08-11) =
 
 Release notes: [WP Activity Log 4.1.3: New extension for WooCommerce & other updates](https://wpactivitylog.com/wsal-4-1-3/)
