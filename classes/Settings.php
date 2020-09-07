@@ -311,8 +311,7 @@ class WSAL_Settings {
 	public function IsDevOptionEnabled( $option ) {
 		if ( is_null( $this->_devoption ) ) {
 			$this->_devoption = $this->_plugin->GetGlobalSetting(
-				'dev-options',
-				implode( ',', $this->GetDefaultDevOptions() )
+				'dev-options', implode( ',', $this->GetDefaultDevOptions() )
 			);
 			$this->_devoption = explode( ',', $this->_devoption );
 		}
@@ -347,8 +346,7 @@ class WSAL_Settings {
 		}
 		// Commit option.
 		$this->_plugin->SetGlobalSetting(
-			'dev-options',
-			implode( ',', $this->_devoption )
+			'dev-options', implode( ',', $this->_devoption )
 		);
 	}
 
@@ -1418,7 +1416,7 @@ class WSAL_Settings {
 		if ( ! empty( $value ) ) {
 			$this->_plugin->SetGlobalSetting( 'log-failed-login-limit', abs( $value ) );
 		} else {
-			$this->_plugin->SetGlobalSetting( 'log-failed-login-limit', -1 );
+			$this->_plugin->SetGlobalSetting( 'log-failed-login-limit', - 1 );
 		}
 	}
 
@@ -1441,7 +1439,7 @@ class WSAL_Settings {
 		if ( ! empty( $value ) ) {
 			$this->_plugin->SetGlobalSetting( 'log-visitor-failed-login-limit', abs( $value ) );
 		} else {
-			$this->_plugin->SetGlobalSetting( 'log-visitor-failed-login-limit', -1 );
+			$this->_plugin->SetGlobalSetting( 'log-visitor-failed-login-limit', - 1 );
 		}
 	}
 
@@ -2182,44 +2180,9 @@ class WSAL_Settings {
 	 *
 	 * @return array - WSAL Options array.
 	 */
-	public function get_wsal_options() {
-		// Get options transient.
-		$wsal_options = get_transient( 'wsal_options' );
-
-		// If options transient is not set then query and set options.
-		if ( false === $wsal_options ) {
-			// Get raw options from DB.
-			$raw_options = $this->query_wsal_options();
-
-			if ( ! empty( $raw_options ) && is_array( $raw_options ) ) {
-				foreach ( $raw_options as $option ) {
-					if ( ! empty( $option->option_value ) ) {
-						$wsal_options[] = $option;
-					}
-				}
-			}
-
-			// Store the results in a transient.
-			set_transient( 'wsal_options', $wsal_options, DAY_IN_SECONDS );
-		}
-
-		return $wsal_options;
-	}
-
-	/**
-	 * Query WSAL Options from DB.
-	 *
-	 * @return array - Array of options.
-	 */
-	public function query_wsal_options() {
-		// Query WSAL options.
-		global $wpdb;
-
-		// Set table name.
-		$options_table = $wpdb->prefix . 'wsal_options';
-
-		// Query the options.
-		return $wpdb->get_results( "SELECT * FROM $options_table" ); // phpcs:ignore
+	public function get_plugin_settings() {
+		//  @todo get a list of all plugin settings
+		return [];
 	}
 
 	/**

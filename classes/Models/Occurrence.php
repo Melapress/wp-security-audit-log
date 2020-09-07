@@ -200,10 +200,6 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 						'name'      => __( 'WPForms', 'wp-security-audit-log' ),
 						'event_ids' => array( 5500, 5501, 5502, 5503, 5504, 5505, 5506 ),
 					),
-					'bbpress' => array(
-						'name'      => __( 'BBPress', 'wp-security-audit-log' ),
-						'event_ids' => array( 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8016, 8017, 8018, 8019, 8020, 8021, 8022, 8023 ),
-					),
 					'woocommerce' => array(
 						'name'      => __( 'WooCommerce', 'wp-security-audit-log' ),
 						'event_ids' => array( 9000, 9001, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015, 9072, 9073, 9077, 9016, 9017, 9018, 9019, 9020, 9021, 9022, 9023, 9024, 9025, 9026, 9042, 9043, 9044, 9045, 9046, 9105, 9047, 9048, 9049, 9050, 9051, 9027, 9028, 9029, 9030, 9031, 9032, 9033, 9034, 9085, 9086, 9087, 9088, 9089, 9090, 9091, 9092, 9093, 9094, 9074, 9075, 9076, 9078, 9079, 9080, 9081, 9082, 9002, 9052, 9053, 9054, 9055, 9056, 9057, 9058, 9059, 9060, 9061, 9062, 9063, 9064, 9065, 9066, 9067, 9068, 9069, 9070, 9071, 9035, 9036, 9037, 9038, 9039, 9040, 9041, 9083, 9084, 9101, 9102, 9103, 9104 ),
@@ -213,6 +209,10 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 						'event_ids' => array( 6028, 6029, 6030, 6031, 6032, 6033 ),
 					),
 				);
+
+				// Filter to allow items to be added elsewhere.
+				$addon_event_codes = apply_filters( 'wsal_addon_event_codes', $addon_event_codes );
+
 				$installer_nonce   = wp_create_nonce( 'wsal-install-addon' );
 				foreach ( $addon_event_codes as $key => $addon ) {
 					$f1 = in_array( $this->alert_id, $addon['event_ids'], true );

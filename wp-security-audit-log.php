@@ -62,16 +62,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		const MIN_PHP_VERSION = '5.5.0';
 
-        /**
-         * Old option name prefix.
-         *
-         * @var string
-         * @deprecated 4.1.3
-         *
-         * @todo Remove in future versions.
-         */
-		const OPT_PRFX        = 'wsal-';
-
 		/**
          * New option name prefix.
          *
@@ -120,13 +110,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @var WSAL_ConstantManager
 		 */
 		public $constants;
-
-		/**
-		 * Options.
-		 *
-		 * @var WSAL_Models_Option
-		 */
-		public $options;
 
 		/**
 		 * WP Options table options handler.
@@ -423,7 +406,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public function includes() {
 			require_once 'classes/Models/ActiveRecord.php';
-			require_once 'classes/Models/Option.php';
 
 			if ( is_admin() ) {
 				// Models.
@@ -457,6 +439,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Utilities.
 				require_once 'classes/Utilities/PluginInstallAndActivate.php';
 				require_once 'classes/Utilities/PluginInstallerAction.php';
+
+				// Third party extensions.
+				require_once 'classes/ThirdPartyExtensions/AbstractExtension.php';
+				require_once 'classes/ThirdPartyExtensions/YoastSeoExtension.php';
+				require_once 'classes/ThirdPartyExtensions/BBPressExtension.php';
 			}
 
 			// Connectors.
@@ -532,6 +519,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( is_admin() ) {
 				$plugin_installer_ajax = new WSAL_PluginInstallerAction();
 				$plugin_installer_ajax->register();
+
+				$yoast_seo_addon = new WSAL_YoastSeoExtension;
+				$bbpress_addon   = new WSAL_BBPressExtension;
 			}
 		}
 
@@ -696,28 +686,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return bool
 		 */
 		public function load_for_visitor_events() {
-			return 'no' === self::get_raw_option( 'disable-visitor-events', 'no' );
-		}
-
-		/**
-		 * Query option from the WSAL options table directly.
-		 *
-		 * @param string $name    - Option name.
-		 * @param mixed  $default - Option default value.
-		 * @return mixed
-		 */
-		public static function get_raw_option( $name, $default = false ) {
-			global $wpdb;
-			$table_name = $wpdb->base_prefix . 'wsal_options'; // Using base_prefix because we don't have multiple tables on multisite.
-			$name       = 'wsal-' . $name;
-			$value      = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM $table_name WHERE option_name = %s", $name ) );
-			return $value ? $value : $default;
+			return 'no' === \WSAL\Helpers\Options::get_option_value_ignore_prefix( self::OPTIONS_PREFIX . 'disable-visitor-events' );
 		}
 
 		/**
 		 * Whether an alert is enabled. For use before loading the settings.
-		 *
-		 * @since 4.0.2 - updated to use get_option instead of self::get_raw_option.
 		 *
 		 * @param string|int $alert The alert to check.
 		 * @return bool Whether the alert is enabled.
@@ -1278,28 +1251,23 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			require_once 'classes/Settings.php';
 
 			if ( is_admin() ) {
-				$this->options = new WSAL_Models_Option();
-				if ( ! $this->options->IsInstalled() ) {
-					$this->options->Install();
-
-					// Initiate settings object if not set.
-					if ( ! $this->settings ) {
-						$this->settings = new WSAL_Settings( $this );
-					}
-
-					// Setting the prunig date with the old value or the default value.
-					$pruning_date = $this->settings()->GetPruningDate();
-					$this->settings()->SetPruningDate( $pruning_date );
+				// Initiate settings object if not set.
+				if ( ! $this->settings ) {
+					$this->settings = new WSAL_Settings( $this );
 				}
 
-				$log_404 = $this->GetGlobalSetting( 'log-404' );
+                // Setting the pruning date with the old value or the default value.
+                $pruning_date = $this->settings()->GetPruningDate();
+                $this->settings()->SetPruningDate( $pruning_date );
+
 				// If old setting is empty enable 404 logging by default.
+				$log_404 = $this->GetGlobalSetting( 'log-404' );
 				if ( false === $log_404 ) {
 					$this->SetGlobalBooleanSetting( 'log-404', true );
 				}
 
-				$purge_log_404 = $this->GetGlobalSetting( 'purge-404-log' );
 				// If old setting is empty enable 404 purge log by default.
+				$purge_log_404 = $this->GetGlobalSetting( 'purge-404-log' );
 				if ( false === $purge_log_404 ) {
 					$this->SetGlobalBooleanSetting( 'purge-404-log', true );
 				}
@@ -1367,7 +1335,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			if ( ! $pre_installed ) {
 				self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
 				self::getConnector()->getAdapter( 'Meta' )->create_indexes();
-				self::getConnector()->getAdapter( 'Option' )->create_indexes();
 
 				if ( $this->settings()->IsArchivingEnabled() ) {
 					$this->settings()->SwitchToArchiveDB();
@@ -1382,31 +1349,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			if ( $pre_installed && $old_version !== $new_version ) {
 				$this->Update( $old_version, $new_version );
-			}
-
-			// If system wasn't installed, try migration now.
-			if ( ! $pre_installed && $this->CanMigrate() ) {
-				$this->Migrate();
-			}
-
-			// Setting the prunig date with the old value or the default value.
-			$old_disabled = $this->GetGlobalSetting( 'disabled-alerts' );
-
-			// If old setting is empty disable alert 2099 by default.
-			if ( empty( $old_disabled ) ) {
-				$this->settings()->SetDisabledAlerts( array( 2099, 2126 ) );
-			}
-
-			$log_404 = $this->GetGlobalSetting( 'log-404' );
-			// If old setting is empty enable 404 logging by default.
-			if ( false === $log_404 ) {
-				$this->SetGlobalBooleanSetting( 'log-404', true );
-			}
-
-			$purge_log_404 = $this->GetGlobalSetting( 'purge-404-log' );
-			// If old setting is empty enable 404 purge log by default.
-			if ( false === $purge_log_404 ) {
-				$this->SetGlobalBooleanSetting( 'purge-404-log', true );
 			}
 
 			// Install cleanup hook (remove older one if it exists).
@@ -1456,15 +1398,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Do version-to-version specific changes.
 			if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
-				// Update pruning alerts option if purning limit is enabled for backwards compatibility.
-				if ( $this->settings()->IsPruningLimitEnabled() ) {
-					$pruning_date = '6';
-					$pruning_unit = 'months';
-					$this->settings()->SetPruningDate( $pruning_date . ' ' . $pruning_unit );
-					$this->settings()->SetPruningDateEnabled( true );
-					$this->settings()->SetPruningLimitEnabled( false );
-				}
-
 				// Dismiss privacy notice.
 				if ( empty( $this->views ) ) {
 					$this->views = new WSAL_ViewManager( $this );
@@ -1482,30 +1415,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				}
 
 				/**
-				 * IMPORTANT: VERSION SPECIFIC UPDATE
-				 *
-				 * It only needs to run when old version of the plugin is later than 3.0.0.
-				 *
-				 * @since 3.2.2.2
-				 */
-				if ( version_compare( $old_version, '3.0.0', '>' ) ) {
-					// If the freemius state option does not exists then run this update.
-					if ( false === get_site_option( 'wsal_freemius_state', false ) ) {
-						// Check if the user has opted-in.
-						if ( wsal_freemius()->is_registered() ) {
-							// Update freemius state.
-							update_site_option( 'wsal_freemius_state', 'in' );
-						} else {
-							// Update freemius state.
-							update_site_option( 'wsal_freemius_state', 'skipped' );
-						}
-
-						// Remove connect account notice of Freemius.
-						FS_Admin_Notices::instance( 'wp-security-audit-log' )->remove_sticky( 'connect_account' );
-					}
-				}
-
-				/**
 				 * MainWP Child Stealth Mode Update
 				 *
 				 * This update only needs to run if the stealth mode option
@@ -1515,257 +1424,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				 */
 				if ( ! $this->GetGlobalBooleanSetting( 'mwp-child-stealth-mode', false ) ) {
 					$this->settings()->set_mainwp_child_stealth_mode();
-				}
-
-				/**
-				 * IMPORTANT: VERSION SPECIFIC UPDATE
-				 *
-				 * It only needs to run when old version of the plugin is less than 3.4.2
-				 * & the new version is later than 3.4.1.1.
-				 *
-				 * @since 3.4.2
-				 */
-				if ( version_compare( $old_version, '3.4.2', '<' ) && version_compare( $new_version, '3.4.1.1', '>' ) ) {
-					self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
-					self::getConnector()->getAdapter( 'Meta' )->create_indexes();
-					self::getConnector()->getAdapter( 'Option' )->create_indexes();
-
-					if ( $this->settings()->IsArchivingEnabled() ) {
-						$this->settings()->SwitchToArchiveDB();
-						self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
-						self::getConnector()->getAdapter( 'Meta' )->create_indexes();
-					}
-				}
-
-				/**
-				 * IMPORTANT: VERSION SPECIFIC UPDATE
-				 *
-				 * It only needs to run when old version of the plugin is less than 3.5
-				 * & the new version is later than 3.4.3.1.
-				 *
-				 * @since 3.5
-				 */
-				if ( version_compare( $old_version, '3.5', '<' ) && version_compare( $new_version, '3.4.3.1', '>' ) ) {
-					$frontend_events = array(
-						'register'    => true, // Enabled by default to ensure users to not loose any functionality.
-						'login'       => true, // Enabled by default to ensure users to not loose any functionality.
-						'system'      => false,
-						'woocommerce' => self::is_woocommerce_active(),
-					);
-
-					// If event 6023 is enabled.
-					if ( self::raw_alert_is_enabled( 6023 ) ) {
-						$frontend_events['system'] = true; // Then enable it for the frontend.
-					}
-
-					if ( self::is_woocommerce_active() ) {
-						$frontend_events['woocommerce'] = true;
-					}
-
-					$this->settings()->set_frontend_events( $frontend_events );
-				}
-
-				if ( version_compare( $old_version, '4.0.0', '<=' ) ) {
-					/*
-					 * Ensure that the grid view 'info' column is set to display.
-					 */
-					add_action(
-						'init',
-						function() {
-							$cols = $this->settings()->GetColumns();
-							// if the `info` col does not exist in the array then add it now.
-							if ( ! isset( $cols['info'] ) ) {
-								// add this at position 3 in the array.
-								$cols = array_slice( $cols, 0, 2, true ) + array( 'info' => '1' ) + array_slice( $cols, 2, null, true );
-								$this->settings()->SetColumns( $cols );
-							} else {
-								$cols['info'] = '1';
-								$this->settings()->SetColumns( $cols );
-							}
-						}
-					);
-				}
-
-				/*
-				 * From version 4.0.2 onwards options have been getting moved
-				 * over to the standard WP options table. This handles migrating
-				 * any for each new version we release.
-				 *
-				 * @since 4.0.3
-				 * @since 4.1.0 - updated the compare tag.
-				 */
-				if ( version_compare( $old_version, '4.1.0', '<=' ) ) {
-
-					require_once 'classes/Update/Task/MoveSettingsToOptionsTable.php';
-					// run the update routine.
-					$settings_mover = new WSAL\Update\Task\MoveSettingsToOptionsTable( self::GetInstance() );
-					$settings_mover->set_versions( $old_version, $new_version );
-					$settings_mover->run();
-
-				}
-
-				/*
-				 * Remove legacy options related to plugin permissions.
-				 *
-				 * @since 4.1.3
-				 */
-				if ( version_compare( $old_version, '4.1.3', '<=' ) ) {
-
-					/*
-					 * Rename 'wsal-frontend-events' to 'wsal_frontend-events' to follow the naming convention of all
-					 * other options.
-					 */
-					if ( function_exists( 'switch_to_blog' ) ) {
-						switch_to_blog( 1 );
-					}
-
-					global $wpdb;
-					$wpdb->update( $wpdb->options, [
-						'option_name' => 'wsal_frontend-events'
-					], [
-						'option_name' => 'wsal-frontend-events'
-					] );
-
-					if ( is_multisite() ) {
-						$wpdb->update( $wpdb->sitemeta, [
-							'meta_key' => 'wsal_frontend-events'
-						], [
-							'meta_key' => 'wsal-frontend-events'
-						] );
-					}
-
-					//  rename couple of legacy options with duplicated prefix
-					/** @var WSAL_Adapters_MySQL_Option $options_adapter */
-					$options_adapter = $this->options->getAdapter();
-					$options_adapter->Rename( 'wsal-wsal-setup-modal-dismissed', 'wsal-setup-modal-dismissed' );
-					$options_adapter->Rename( 'wsal-wsal-setup-complete', 'wsal-setup-complete' );
-
-					//  migrate all options from sitemeta to the options table on master site
-					if ( is_multisite() ) {
-						$site_meta_data = $wpdb->get_results( "SELECT * FROM {$wpdb->sitemeta} WHERE meta_key LIKE 'wsal%' AND meta_key != 'wsal_networkwide_tracker_cpts';" );
-						if ( ! empty( $site_meta_data ) ) {
-							foreach ( $site_meta_data as $site_meta_entry ) {
-								$setting_name = $site_meta_entry->meta_key;
-
-								// the wsal- prefix needs stripped from this option.
-								if ( false !== ( 'wsal-' === substr( $setting_name, 0, 5 ) ) ) {
-									$setting_name = str_replace( 'wsal-', '', $setting_name );
-								}
-
-								//  we don't mind overriding the value if its already there
-								$this->SetGlobalSetting( $setting_name, $site_meta_entry->meta_value );
-
-								delete_network_option( $site_meta_entry->site_id, $site_meta_entry->meta_key );
-							}
-						}
-					}
-
-					//  use first existing user from the list of editors as the user id with access in case "only me"
-					//  access option is selected
-					$plugin_editors = $this->GetGlobalSetting( 'plugin-editors', [] );
-					if ( ! empty( $plugin_editors ) ) {
-						foreach ( explode( ',', $plugin_editors ) as $user_login ) {
-							$user = get_user_by( 'login', trim( $user_login ) );
-							if ( $user instanceof WP_User ) {
-								$this->settings()->set_only_me_user_id( $user->ID );
-								break;
-							}
-						}
-					}
-
-					$this->DeleteByName( 'wsal-plugin-editors' );
-					$this->DeleteByName( 'wsal-restrict-admins' );
-                    $this->DeleteSettingByName( 'wsal_plugin-editors' );
-                    $this->DeleteSettingByName( 'wsal_restrict-admins' );
-
-					//  migrate remaining settings to WordPress options table
-					require_once 'classes/Update/Task/MoveSettingsToOptionsTable.php';
-					$settings_mover = new WSAL\Update\Task\MoveSettingsToOptionsTable( self::GetInstance() );
-					$settings_mover->set_versions( $old_version, $new_version );
-					$settings_mover->run();
-
-					// Delete options transient.
-					delete_transient( 'wsal_options' );
-
-					if ( function_exists( 'restore_current_blog' ) ) {
-						restore_current_blog();
-					}
-
-					//  delete the custom options table
-					WSAL_Sensors_Database::$enabled = false;
-					$options_adapter->Uninstall();
-					WSAL_Sensors_Database::$enabled = true;
-
-					//  delete settings from option on other sub sites on multisite (only leave settings on the main site)
-					if (is_multisite()) {
-						$sites = get_sites([
-							'number' => 0,
-							'offset' => 0
-						]);
-						if (!empty($sites)) {
-							foreach ( $sites as $site ) {
-								$wpdb->query("DELETE FROM {$wpdb->prefix}{$site->blog_id}_options WHERE option_name LIKE 'wsal%' AND option_name != 'wsal_networkwide_tracker_cpts';");
-							}
-						}
-					}
-
-					wp_cache_flush();
-
-					//  delete the sessions table and recreate it from scratch (session token is used as primary key
-					//  instead of an autoincrement ID column
-					$extensions_manager = $this->extensions;
-					//  we need to check if the extension manager is set for this to work in free version of the plugin
-					if ( $extensions_manager != null ) {
-						$extensions = $extensions_manager->extensions;
-						if ( ! empty( $extensions ) ) {
-							foreach ( $extensions as $extension ) {
-								if ( 'WSAL_UserSessions_Plugin' === get_class( $extension ) ) {
-									WSAL_Sensors_Database::$enabled = false;
-									$adapter                        = WSAL_UserSessions_Plugin::get_sessions_adapter();
-									$adapter->Uninstall();
-									$adapter->Install();
-									WSAL_Sensors_Database::$enabled = true;
-								}
-							}
-						}
-					}
-
-					//  convert all boolean style settings to 'yes'/'no' values
-                    //  on/off/0/1/true/false/enable/disable => yes/no
-					$yes_no_settings = [
-                        'adapter-use-buffer',
-                        'admin-blocking-plugins-support',
-                        'delete-data',
-                        'disable-widgets',
-                        'hide-plugin',
-                        'is-url-shortner',
-                        'log-404',
-                        'log-404-referrer',
-                        'log-visitor-404',
-                        'log-visitor-404-referrer',
-                        'login_page_notification',
-                        'mwp-child-stealth-mode',
-                        'pruning-date-e',
-                        'pruning-limit-e',
-                        'purge-404-log',
-                        'purge-visitor-404-log',
-                        'setup-complete',
-                        'setup-modal-dismissed',
-                        'show_milliseconds',
-                        'use-proxy-ip',
-                        'wc-all-stock-changes',
-                        'wp-backend'
-                    ];
-
-					foreach ($yes_no_settings as $option_name) {
-					    $current_value = $this->GetGlobalSetting($option_name);
-                        $bool_value = \WSAL\Helpers\Options::string_to_bool($current_value);
-                        $new_value = \WSAL\Helpers\Options::bool_to_string($bool_value);
-                        $this->SetGlobalSetting($option_name, $new_value);
-					}
-
-					//  delete unused setting related to file changes scanner
-					$this->DeleteSettingByName('wsal-scan-file-changes');
 				}
 			}
 		}
@@ -1848,18 +1506,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @return string
 		 */
 		public function GetOldVersion() {
-			$old_version = $this->GetGlobalOption( 'version', '0.0.0' );
-
-			/*
-			 * This GetGlobalOption is retained for back compatibility for
-			 * update routines before version 4.0.2.
-			 *
-			 * TODO: remove this AFTER version 4.1.0.
-			 */
-			if ( ! $old_version || '0.0.0' === $old_version ) {
-				$old_version = $this->GetGlobalSetting( 'version', '0.0.0' );
-			}
-			return $old_version;
+			return $this->GetGlobalSetting( 'version', '0.0.0' );
 		}
 
 		/**
@@ -1903,7 +1550,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Get a global option.
          *
-         * Deprecated function. It is only kept for the upgrade routine. It should be removed in future releases.
+         * Deprecated function. It is only kept for the extension plugins. Nothing in the main plugin uses it, not even
+		 * the upgrade process.
 		 *
 		 * @param string $option  - Option name.
 		 * @param mixed  $default - (Optional) Value returned when option is not set (defaults to false).
@@ -1913,22 +1561,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
          * @deprecated 4.1.3 Use WpSecurityAuditLog::GetGlobalSetting instead
          * @see WpSecurityAuditLog::GetGlobalSetting()
 		 */
-		public function GetGlobalOption( $option, $default = false, $prefix = self::OPT_PRFX ) {
-			if ( empty( $this->options ) ) {
-				$this->options = new WSAL_Models_Option();
-			}
-			return $this->options->GetOptionValue( $prefix . $option, $default );
+		public function GetGlobalOption( $option, $default = false, $prefix = '' ) {
+		    return $this->GetGlobalSetting( $option, $default );
 		}
 
 		/**
 		 * Get a global setting.
 		 *
-		 * @param string $option  - Option name.
-		 * @param mixed  $default - (Optional) Value returned when option is not set (defaults to false).
-		 * @param string $prefix  - (Optional) A prefix used before option name. Not used. Present only for API compatibility.
+		 * @param string $option - Option name.
+		 * @param mixed $default - (Optional) Value returned when option is not set (defaults to false).
+		 *
 		 * @return mixed - Option's value or $default if option not set.
 		 */
-		public function GetGlobalSetting( $option, $default = false, $prefix = self::OPT_PRFX ) {
+		public function GetGlobalSetting( $option, $default = false ) {
 		    $this->include_options_helper();
 			return $this->options_helper->get_option_value( $option, $default );
 		}
@@ -1936,7 +1581,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Set a global option.
 		 *
-         * Deprecated function. It is only kept for the upgrade routine. It should be removed in future releases.
+         * Deprecated function. It is only kept for the extension plugins. Nothing in the main plugin uses it, not even
+		 * the upgrade process.
          *
 		 * @param string $option - Option name.
 		 * @param mixed  $value - New value for option.
@@ -1945,14 +1591,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
          * @deprecated 4.1.3 Use WpSecurityAuditLog::SetGlobalSetting instead
 		 * @see WpSecurityAuditLog::SetGlobalSetting()
 		 */
-		public function SetGlobalOption( $option, $value, $prefix = self::OPT_PRFX ) {
-			if ( empty( $this->options ) ) {
-				$this->options = new WSAL_Models_Option();
-			}
-			$this->options->SetOptionValue( $prefix . $option, $value );
-
-			// Delete options transient.
-			delete_transient( 'wsal_options' );
+		public function SetGlobalOption( $option, $value, $prefix = '' ) {
+		    $this->SetGlobalSetting( $option, $value );
 		}
 
 		/**
@@ -1960,11 +1600,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @param string $option - Option name.
 		 * @param mixed $value - New value for option.
-		 * @param string $prefix - (Optional) A prefix used before option name. Not used. Present only for API compatibility.
 		 *
 		 * @return bool
 		 */
-		public function SetGlobalSetting( $option, $value, $prefix = self::OPT_PRFX ) {
+		public function SetGlobalSetting( $option, $value ) {
             $this->include_options_helper();
 			return $this->options_helper->set_option_value( $option, $value );
 		}
@@ -2142,23 +1781,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
-		 * Deletes option by name.
-		 *
-         * Deprecated function. It is only kept for the upgrade routine. It should be removed in future releases.
-         *
-		 * @param string $name - Option name.
-		 *
-		 * @return bool
-         *
-         * @deprecated 4.1.3 Use WpSecurityAuditLog::DeleteSettingByName() instead
-         * @see WpSecurityAuditLog::DeleteSettingByName()
-		 */
-		public function DeleteByName( $name ) {
-			$this->options = new WSAL_Models_Option();
-			return $this->options->DeleteByName( $name );
-		}
-
-		/**
 		 * Deletes setting by name.
 		 *
 		 * @param string $name - Option name not including the plugin prefix.
@@ -2170,22 +1792,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$this->include_options_helper();
 			}
 			return $this->options_helper->delete_option( $name );
-		}
-
-		/**
-		 * Deletes options by prefix.
-		 *
-		 * Deprecated function. It is only kept for the upgrade routine. It should be removed in future releases.
-		 *
-		 * @param string $opt_prefix - Option prefix.
-		 *
-		 * @return bool
-         *
-         * @deprecated Replacement not implemented.
-		 */
-		public function DeleteByPrefix( $opt_prefix ) {
-			$this->options = new WSAL_Models_Option();
-			return $this->options->DeleteByPrefix( self::OPT_PRFX . $opt_prefix );
 		}
 
 		/**
@@ -2203,32 +1809,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		/**
 		 * Update global option.
 		 *
-         * Deprecated function. It is only kept for the upgrade routine. It should be removed in future releases.
+         * Deprecated function. It is only kept for the extension plugins. Nothing in the main plugin uses it, not even
+         * the upgrade process.
          *
 		 * @param string $option - Option name.
 		 * @param mixed  $value - Option value.
 		 *
 		 * @return bool|int
          *
-         * @deprecated 4.1.3 Use WpSecurityAuditLog::UpdateGlobalSetting instead
-		 * @see WpSecurityAuditLog::UpdateGlobalSetting()
+         * @deprecated 4.1.3 Use WpSecurityAuditLog::SetGlobalSetting instead
+		 * @see WpSecurityAuditLog::SetGlobalSetting()
 		 */
 		public function UpdateGlobalOption( $option, $value ) {
-			$this->options = new WSAL_Models_Option();
-			return $this->options->SetOptionValue( $option, $value );
-		}
-
-		/**
-		 * Update global setting.
-		 *
-		 * @param string $option - Option name.
-		 * @param mixed  $value - Option value.
-		 *
-		 * @return bool|int
-		 */
-		public function UpdateGlobalSetting( $option, $value ) {
-		    $this->include_options_helper();
-			return $this->options_helper->set_option_value( $option, $value );
+			return $this->SetGlobalSetting( $option, $value );
 		}
 
 		/**

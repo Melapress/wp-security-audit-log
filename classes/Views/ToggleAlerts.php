@@ -211,12 +211,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		<h2 id="wsal-tabs" class="nav-tab-wrapper">
 			<?php foreach ( $safe_names as $name => $safe ) : ?>
 				<a href="#tab-<?php echo esc_attr( $safe ); ?>" class="nav-tab"><?php echo esc_html( $name ); ?></a>
-				<?php if ( __( 'Yoast SEO', 'wp-security-audit-log' ) === $name ) : ?>
-					<a href="#tab-frontend-events" class="nav-tab">
-						<?php esc_html_e( 'Front-end Events', 'wp-security-audit-log' ); ?>
-					</a>
-				<?php endif; ?>
 			<?php endforeach; ?>
+			<a href="#tab-frontend-events" class="nav-tab">
+				<?php esc_html_e( 'Front-end Events', 'wp-security-audit-log' ); ?>
+			</a>
 			<a href="#tab-third-party-plugins" class="nav-tab">
 				<?php esc_html_e( 'Third party plugins', 'wp-security-audit-log' ); ?>
 			</a>
@@ -338,14 +336,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<tr>
 												<td colspan="4">
 													<h3 class="sub-category"><?php esc_html_e( 'Products', 'wp-security-audit-log' ); ?></h3>
-												</td>
-											</tr>
-										<?php endif; ?>
-									<?php elseif ( __( 'Yoast SEO', 'wp-security-audit-log' ) === $subname ) : ?>
-										<?php if ( ! empty( $disabled ) ) : ?>
-											<tr>
-												<td colspan="4">
-													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'The plugin Yoast SEO is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
 												</td>
 											</tr>
 										<?php endif; ?>
@@ -511,7 +501,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<?php
 										}
 										if ( 1003 === $alert->type ) {
-											$log_visitor_failed_login_limit = (int) $this->_plugin->GetGlobalSetting(  'log-visitor-failed-login-limit', 10 );
+											$log_visitor_failed_login_limit = (int) $this->_plugin->GetGlobalSetting( 'log-visitor-failed-login-limit', 10 );
 											$log_visitor_failed_login_limit = ( -1 === $log_visitor_failed_login_limit ) ? '0' : $log_visitor_failed_login_limit;
 											?>
 											<tr>

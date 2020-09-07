@@ -36,7 +36,6 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	public function __construct( $connection_config = null ) {
 		$this->connectionConfig = $connection_config;
 		parent::__construct( 'MySQL' );
-		require_once $this->getAdaptersDirectory() . '/OptionAdapter.php';
 	}
 
 	/**
@@ -188,11 +187,6 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
 			if ( $is_external_database && $class instanceof WSAL_Adapters_MySQL_Session ) {
 				//  sessions table should only ever exist only in local database
-				continue;
-			}
-
-			if ( $is_external_database && $class instanceof WSAL_Adapters_MySQL_Option ) {
-				//  options table should only ever exist only in local database
 				continue;
 			}
 
