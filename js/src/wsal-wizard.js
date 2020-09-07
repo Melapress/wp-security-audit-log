@@ -1,15 +1,8 @@
 /**
  * WSAL Wizard
  *
- * Entry file for webpack.
- *
  * @since 3.2.3
  */
-
-// Wizard styles.
-import '../../css/src/wsal-wizard.scss';
-
-import jQuery from 'jquery';
 
 jQuery( document ).ready( function() {
 

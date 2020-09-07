@@ -506,4 +506,20 @@ class WSAL_ViewManager {
 	public function bypass_freemius_menu_hiding($should_hide) {
 	    return false;
 	}
+
+	/**
+     * Builds a relative asset path that takes SCRIPT_DEBUG constant into account.
+     *
+	 * @param string $path Path relative to the plugin folder.
+	 * @param string $filename Filename base (.min is optionally appended to this).
+	 * @param string $extension File extension
+	 *
+	 * @return string
+	 */
+	public static function get_asset_path($path, $filename, $extension) {
+		$result = $path . $filename;
+		$result .= SCRIPT_DEBUG ? '.' : '.min.';
+		$result .= $extension;
+		return $result;
+	}
 }

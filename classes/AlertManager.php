@@ -862,7 +862,7 @@ final class WSAL_AlertManager {
 	 */
 	public function log_temp_alerts() {
 		// Get temporary alerts.
-		$temp_alerts = $this->plugin->GetGlobalSetting('temp_alerts', array() );
+		$temp_alerts = $this->plugin->GetGlobalSetting( 'temp_alerts', array() );
 
 		if ( empty( $temp_alerts ) ) {
 			return;
@@ -1116,14 +1116,13 @@ final class WSAL_AlertManager {
 			'system-setting'       => __( 'System Setting', 'wp-security-audit-log' ),
 			'mainwp-network'       => __( 'MainWP Network', 'wp-security-audit-log' ),
 			'mainwp'               => __( 'MainWP', 'wp-security-audit-log' ),
-			'yoast-seo'            => __( 'Yoast SEO', 'wp-security-audit-log' ),
-			'yoast-seo-metabox'    => __( 'Yoast SEO Meta Box', 'wp-security-audit-log' ),
 			'category'             => __( 'Category', 'wp-security-audit-log' ),
 			'custom-field'         => __( 'Custom Field', 'wp-security-audit-log' ),
 			'widget'               => __( 'Widget', 'wp-security-audit-log' ),
 			'menu'                 => __( 'Menu', 'wp-security-audit-log' ),
 			'theme'                => __( 'Theme', 'wp-security-audit-log' ),
-			'activity-logs'        => __( 'Activity Logs', 'wp-security-audit-log' ),
+			'activity-log'         => __( 'Activity log', 'wp-security-audit-log' ),
+			'wp-activity-log'      => __( 'WP Activity Log', 'wp-security-audit-log' ),
 			'multisite-network'    => __( 'Multisite Network', 'wp-security-audit-log' ),
 			'ip-address'           => __( 'IP Address', 'wp-security-audit-log' ),
 		);

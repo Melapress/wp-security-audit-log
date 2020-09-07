@@ -39,13 +39,15 @@ class WSAL_Uninstall {
 	/**
 	 * Delete wsal options from wp_options table.
 	 */
-	private static function delete_options_from_wp_options() {
+	public static function delete_options_from_wp_options() {
 		global $wpdb;
 		$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" );
 
 		foreach( $plugin_options as $option ) {
-	    delete_option( $option->option_name );
+		    delete_option( $option->option_name );
 		}
+
+		//  @todo delete also options from site-level tables in multisite context
 	}
 
 	/**
@@ -79,7 +81,7 @@ class WSAL_Uninstall {
 	private static function get_option( $name ) {
 		global $wpdb;
 
-		$name       = 'wsal-' . $name;
+		$name       = 'wsal_' . $name;
 		$table_name = self::get_table( 'options' );
 		return $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM $table_name WHERE option_name = %s", $name ) );
 	}

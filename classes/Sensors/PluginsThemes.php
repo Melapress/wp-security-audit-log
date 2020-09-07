@@ -25,15 +25,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 5006 User activated a theme
  * 5007 User uninstalled a theme
  * 5019 A plugin created a post
- * 5020 A plugin created a page
- * 5021 A plugin created a custom post
  * 5025 A plugin deleted a post
- * 5026 A plugin deleted a page
- * 5027 A plugin deleted a custom post
  * 5031 User updated a theme
  * 2106 A plugin modified a post
- * 2107 A plugin modified a page
- * 2108 A plugin modified a custom post
  *
  * @package Wsal
  * @subpackage Sensors
@@ -1454,8 +1448,10 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$predefined_plugins_slugs = array_column( $predefined_plugins, 'plugin_slug' );
 		$all_plugins              = get_plugins();
 		$all_plugins              = array_keys( $all_plugins );
-
 		foreach ( $predefined_plugins_addon as $plugin ) {
+
+			$plugin = apply_filters( 'wsal_modify_predefined_plugin_slug', $plugin );
+
 			// Check if plugin file starts with the same string as our addon_for, or if its equal.
 			if ( $plugin_filename === $plugin ) {
 				$addon_slug         = array( array_search( $plugin, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ) );
@@ -1490,6 +1486,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$all_plugins              = array_keys( $all_plugins );
 
 		foreach ( $predefined_plugins_addon as $plugin ) {
+
+			$plugin = apply_filters( 'wsal_modify_predefined_plugin_slug', $plugin );
+
 			// Check if plugin file starts with the same string as our addon_for, or if its equal.
 			if ( $plugin_filename === $plugin ) {
 				$current_installed = $this->plugin->GetGlobalSetting( 'installed_plugin_addon_available' );

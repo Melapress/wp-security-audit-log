@@ -113,14 +113,12 @@ jQuery( document ).ready( function() {
 	}
 
 	// Reset settings handler.
-	var resetSettings = jQuery( '[data-remodal-id=wsal_reset_settings] button[data-remodal-action=confirm]' );
-	resetSettings.click( function() {
-		resetWSAL( 'wsal_reset_settings', jQuery( '#wsal-reset-settings-nonce' ).val() );
+	jQuery( '[data-remodal-id=wsal_reset_settings] button[data-remodal-action=confirm]' ).click( function() {
+		resetWSAL( 'wsal_reset_settings', jQuery( '#wsal-reset-settings-nonce' ).val(), '.js-settings-reset' );
 	});
 
 	// Purge activity handler.
-	var purgeActivity = jQuery( '[data-remodal-id=wsal_purge_activity] button[data-remodal-action=confirm]' );
-	purgeActivity.click( function() {
+	jQuery( '[data-remodal-id=wsal_purge_activity] button[data-remodal-action=confirm]' ).click( function() {
 		resetWSAL( 'wsal_purge_activity', jQuery( '#wsal-purge-activity-nonce' ).val() );
 	});
 
@@ -129,8 +127,22 @@ jQuery( document ).ready( function() {
 	 *
 	 * @param {string} action – Ajax action hook.
 	 * @param {string} nonce – Nonce for security.
+	 * @param {string} triggerSelector - Selector expression of the event trigger element.
 	 */
-	function resetWSAL( action, nonce ) {
+	function resetWSAL( action, nonce, triggerSelector ) {
+		var triggerElm = null;
+		if ( typeof  triggerSelector != 'undefined' && triggerSelector.length != 0 ){
+			triggerElm = jQuery( triggerSelector );
+			if ( triggerElm.length == 0) {
+				triggerElm = null
+			};
+		}
+
+		if ( triggerElm != null ) {
+			jQuery( triggerSelector ).attr( 'disabled', 'disabled' );
+			jQuery( triggerSelector ).after( '<span class="spinner is-active" style="float: none; margin-top: 0;"></span>');
+			jQuery( triggerSelector ).siblings( '.notice' ).remove();
+		}
 		jQuery.ajax({
 			type: 'POST',
 			url: ajaxurl,
@@ -140,7 +152,16 @@ jQuery( document ).ready( function() {
 				nonce: nonce
 			},
 			success: function( data ) {
-				console.log( data );
+				if ( null != triggerElm ) {
+					jQuery( triggerSelector ).removeAttr( 'disabled' );
+					jQuery( triggerSelector ).siblings( '.spinner' ).remove();
+					if ( 'success' in data ) {
+						var noticeCssClass = data.success ? 'notice-success' : 'notice-error';
+						jQuery( triggerSelector ).after( '<span class="notice ' + noticeCssClass + '" style="margin-left: 10px; padding: 6px 10px;">' + data.data + '</span>');
+					}
+				} else {
+					console.log(data);
+				}
 			},
 			error: function( xhr, textStatus, error ) {
 				console.log( xhr.statusText );
@@ -193,4 +214,22 @@ jQuery( document ).ready( function() {
             }
         }
     });
+
+	/**
+	 * Alert user to save settings before switching tabs.
+	 */
+	jQuery(function() {
+		// Get form values as of page load.
+		var $form = jQuery('form#audit-log-settings');
+		var initialState = $form.serialize();
+
+		jQuery( 'body' ).on( 'click', '.nav-tab:not(.nav-tab-active)', function ( e ) {
+			// If the form has been modified, alert user.
+			if (initialState !== $form.serialize()) {
+				e.preventDefault();
+				alert( wsal_data.saveSettingsChanges );
+			}
+		});
+	});
+
 });
