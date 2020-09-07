@@ -231,29 +231,32 @@ final class WSAL_Views_SetupWizard {
 		/**
 		 * Enqueue Styles.
 		 */
+		$wizard_css = WSAL_ViewManager::get_asset_path('/css/dist/', 'wsal-wizard', 'css');
 		wp_enqueue_style(
 			'wsal-wizard-css',
-			$this->wsal->GetBaseUrl() . '/css/dist/wsal-wizard.build.css',
+			$this->wsal->GetBaseUrl() . $wizard_css,
 			array( 'dashicons', 'install', 'forms' ),
-			filemtime( $this->wsal->GetBaseDir() . 'css/dist/wsal-wizard.build.css' )
+			filemtime( $this->wsal->GetBaseDir() . $wizard_css )
 		);
 
 		/**
 		 * Enqueue Scripts.
 		 */
-		 wp_register_script(
+		$wizard_js = WSAL_ViewManager::get_asset_path( '/js/dist/', 'wsal-wizard', 'js');
+		wp_register_script(
  			'wsal-wizard-js',
- 			$this->wsal->GetBaseUrl() . '/js/dist/wsal-wizard.min.js',
- 			array(  ),
- 			filemtime( $this->wsal->GetBaseDir() . 'js/dist/wsal-wizard.min.js' ),
+			$this->wsal->GetBaseUrl() .$wizard_js,
+ 			array( 'jquery' ),
+ 			filemtime( $this->wsal->GetBaseDir() .$wizard_js ),
  			false
  		);
 
+        $common_js = '/js/common.js';
 		wp_register_script(
 			'wsal-common',
-			$this->wsal->GetBaseUrl() . '/js/common.js',
+			$this->wsal->GetBaseUrl() . $common_js,
 			array( 'jquery' ),
-			filemtime( $this->wsal->GetBaseDir() . '/js/common.js' ),
+			filemtime( $this->wsal->GetBaseDir() . $common_js ),
 			true
  		);
 

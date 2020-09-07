@@ -101,11 +101,6 @@ class Options {
 		}
 
 		$actual_option_name = $option_name;
-		if (preg_match( '/\A' .preg_quote(\WpSecurityAuditLog::OPT_PRFX) . '/', $option_name)) {
-			//  remove legacy prefix
-			$actual_option_name = substr($option_name, strlen(\WpSecurityAuditLog::OPT_PRFX));
-		}
-
 		if (!preg_match( '/\A' .preg_quote($this->prefix) . '/', $option_name)) {
 			//  prepend prefix if not already present
 			$actual_option_name = $this->prefix . $option_name;

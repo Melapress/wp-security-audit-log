@@ -287,6 +287,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 						if ( $addon === 'woocommerce' ) {
 							$addon = 'WooCommerce';
 						}
+						if ( $addon === 'wp seo' ) {
+							$addon = 'Yoast SEO';
+						}
 						if ( empty( $addon_names ) ) {
 							$addon_names .= $addon;
 							$button_label = esc_html__( 'Install Extension', 'wp-security-audit-log' );
