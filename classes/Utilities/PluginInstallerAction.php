@@ -81,7 +81,7 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 			// Check if the plugin is installed.
 			if ( $this->is_plugin_installed( $plugin_slug ) ) {
 				// If plugin is installed but not active, activate it.
-				if ( ! is_plugin_active( $plugin_zip ) ) {
+				if ( ! WpSecurityAuditLog::is_plugin_active( $plugin_zip ) ) {
 					$this->run_activate( $plugin_slug );
 					$this->activate( $plugin_zip );
 					$result = 'activated';
@@ -150,7 +150,7 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
-			if ( ! is_plugin_active( $plugin_zip ) ) {
+			if ( ! WpSecurityAuditLog::is_plugin_active( $plugin_zip ) ) {
 				activate_plugin( $plugin_zip );
 			}
 		}

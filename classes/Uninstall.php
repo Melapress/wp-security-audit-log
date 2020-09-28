@@ -25,10 +25,13 @@ class WSAL_Uninstall {
 			self::drop_table( 'options' );
 			self::drop_table( 'occurrences' );
 			self::drop_table( 'metadata' );
+			if ( self::table_exists( 'sessions' ) ) {
+				self::drop_table( 'sessions' );
+			}
 		}
 
 		// Check if we have set things to delete upon uninstall.
-		if ( 'yes' === get_option( 'wsal_delete-data' ) ) {
+		if ( self::should_data_be_deleted() ) {
 			self::delete_options_from_wp_options();
 		}
 
@@ -37,31 +40,23 @@ class WSAL_Uninstall {
 	}
 
 	/**
-	 * Delete wsal options from wp_options table.
+	 * Checks if the removal of data is allowed in the options table.
+	 *
+	 * @return bool
 	 */
-	private static function delete_options_from_wp_options() {
-		global $wpdb;
-		$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" );
-
-		foreach( $plugin_options as $option ) {
-	    delete_option( $option->option_name );
-		}
+	private static function should_uninstall() {
+		return self::should_data_be_deleted() && self::table_exists( 'occurrences' );
 	}
 
-	/**
-	 * Returns the name of the WSAL table.
-	 *
-	 * @param string $table - Name of the WSAL table (without prefix).
-	 * @return string
-	 */
-	private static function get_table( $table ) {
-		return $GLOBALS['wpdb']->base_prefix . 'wsal_' . $table; // Using base_prefix because we don't have multiple tables on multisite.
+	private static function should_data_be_deleted() {
+		return in_array( get_option( 'wsal_delete-data' ), [ 'yes', 1, '1', 'y', 'true', true ] );
 	}
 
 	/**
 	 * Check if a table exists.
 	 *
 	 * @param string $table - Name of the WSAL table (without prefix).
+	 *
 	 * @return bool
 	 */
 	private static function table_exists( $table ) {
@@ -71,17 +66,14 @@ class WSAL_Uninstall {
 	}
 
 	/**
-	 * Get option from WSAL options table.
+	 * Returns the name of the WSAL table.
 	 *
-	 * @param string $name - Option name.
-	 * @return mixed
+	 * @param string $table - Name of the WSAL table (without prefix).
+	 *
+	 * @return string
 	 */
-	private static function get_option( $name ) {
-		global $wpdb;
-
-		$name       = 'wsal-' . $name;
-		$table_name = self::get_table( 'options' );
-		return $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM $table_name WHERE option_name = %s", $name ) );
+	private static function get_table( $table ) {
+		return $GLOBALS['wpdb']->base_prefix . 'wsal_' . $table; // Using base_prefix because we don't have multiple tables on multisite.
 	}
 
 	/**
@@ -91,17 +83,21 @@ class WSAL_Uninstall {
 	 */
 	private static function drop_table( $name ) {
 		global $wpdb;
-
 		$table_name = self::get_table( $name );
 		$wpdb->query( 'DROP TABLE ' . $table_name );
 	}
 
 	/**
-	 * Checks if the removal of data is allowed in the options table.
-	 *
-	 * @return bool
+	 * Delete wsal options from wp_options table.
 	 */
-	private static function should_uninstall() {
-		return self::table_exists( 'options' ) && '1' === self::get_option( 'delete-data' );
+	public static function delete_options_from_wp_options() {
+		global $wpdb;
+		$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" );
+
+		foreach ( $plugin_options as $option ) {
+			delete_option( $option->option_name );
+		}
+
+		//  @todo delete also options from site-level tables in multisite context
 	}
 }

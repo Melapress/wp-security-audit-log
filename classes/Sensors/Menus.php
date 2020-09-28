@@ -177,16 +177,18 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 		$post_array = filter_input_array( INPUT_POST );
 
 		// Verify nonce.
-		if ( isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'save-menu-locations' ) ) {
-			// Manage Location tab.
-			if ( isset( $post_array['menu-locations'] ) ) {
-				$new_locations = $post_array['menu-locations'];
-				if ( isset( $new_locations['top'] ) ) {
-					$this->LocationSetting( $new_locations['top'], 'top' );
-				}
-				if ( isset( $new_locations['social'] ) ) {
-					$this->LocationSetting( $new_locations['social'], 'social' );
-				}
+		if ( ! isset( $post_array['_wpnonce'] ) || ! wp_verify_nonce( $post_array['_wpnonce'], 'save-menu-locations' ) ) {
+			return;
+		}
+
+		// Manage Location tab.
+		if ( isset( $post_array['menu-locations'] ) ) {
+			$new_locations = $post_array['menu-locations'];
+			if ( isset( $new_locations['top'] ) ) {
+				$this->LocationSetting( $new_locations['top'], 'top' );
+			}
+			if ( isset( $new_locations['social'] ) ) {
+				$this->LocationSetting( $new_locations['social'], 'social' );
 			}
 		}
 	}

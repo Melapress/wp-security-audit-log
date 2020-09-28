@@ -84,16 +84,19 @@ class WSAL_Utilities_Emailer {
 	 * @param string $content       - Email content.
 	 * @return bool
 	 */
-	public static function send_email( $email_address, $subject, $content ) {
-		// Get email adresses even when there is the Username.
-		$email_address = self::get_emails( $email_address );
+	public static function send_email( $email_address, $subject, $content, $headers = '', $attachments = array() ) {
+
+		if ( empty( $email_address ) ) {
+			// Get email adresses even when there is the Username.
+			$email_address = self::get_emails( $email_address );
+		}
 
 		// @see: http://codex.wordpress.org/Function_Reference/wp_mail
 		add_filter( 'wp_mail_content_type', array( __CLASS__, 'set_html_content_type' ) );
 		add_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ) );
 		add_filter( 'wp_mail_from_name', array( __CLASS__, 'custom_wp_mail_from_name' ) );
 
-		$result = wp_mail( $email_address, $subject, $content );
+		$result = wp_mail( $email_address, $subject, $content, $headers, $attachments );
 
 		/**
 		 * Reset content-type to avoid conflicts.

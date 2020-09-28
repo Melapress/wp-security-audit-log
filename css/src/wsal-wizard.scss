@@ -81,6 +81,22 @@ body {
 	fieldset {
 		line-height: 1.5;
 	}
+
+	.addon-wrapper {
+		border: 1px solid #eee;
+    padding: 15px;
+    display: flex;
+    margin-bottom: 15px;
+		&:hover {
+			border-color: #ccc;
+		}
+
+		img {
+			align-self: center;
+	    max-width: 200px;
+	    margin-right: 15px;
+		}
+	}
 }
 
 .wsal-setup-actions {

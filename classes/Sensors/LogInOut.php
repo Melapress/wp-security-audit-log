@@ -117,7 +117,14 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	/**
 	 * Event Login.
 	 *
-	 * TODO: update params doc block to match the new hook it's attached to.
+	 * @param string $auth_cookie Authentication cookie value.
+	 * @param int    $expire      The time the login grace period expires as a UNIX timestamp.
+	 *                            Default is 12 hours past the cookie's expiration time.
+	 * @param int    $expiration  The time when the authentication cookie expires as a UNIX timestamp.
+	 *                            Default is 14 days from now.
+	 * @param int    $user_id     User ID.
+	 * @param string $scheme      Authentication scheme. Values include 'auth' or 'secure_auth'.
+	 * @param string $token       User's session token to use for this cookie.
 	 */
 	public function EventLogin( $auth_cookie, $expire, $expiration, $user_id, $scheme, $token ) {
 		// Get global POST array.
@@ -192,7 +199,9 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			 */
 			function ( $manager ) {
 				//  don't fire if the user is changing their password via admin profile page
-				return ! $manager->WillOrHasTriggered(4003);
+				return ! $manager->WillOrHasTriggered( 4003 )
+				       //   ...or if the login has been triggered somewhere else (most likely a front-end login)
+				       && ! $manager->WillOrHasTriggered( 1000, 2 );
 			}
 		);
 

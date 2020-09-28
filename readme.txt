@@ -214,7 +214,7 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 	* The orders details in WooCommerce were not being added to the order ([Support ticket](https://wordpress.org/support/topic/update-4-1-31-broken-woocommerce-urgent/)).
 	* An empty space was added to the top of the WordPress admin menu.
 	* Third party plugins extensions notification not showing in the activity log viewer.
-	* Thurd party plugins extension help text was shown on the wrong pages.
+	* Third party plugins extension help text was shown on the wrong pages.
 
 = 4.1.3 (2020-08-11) =
 
