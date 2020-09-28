@@ -53,8 +53,8 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST );
 
-		if ( isset( $post_array['savewidgets'] ) ) {
-			check_ajax_referer( 'save-sidebar-widgets', 'savewidgets' );
+		if ( ! isset( $post_array['savewidgets'] ) || false === check_ajax_referer( 'save-sidebar-widgets', 'savewidgets', false ) ) {
+			return;
 		}
 
 		if ( isset( $post_array ) && ! empty( $post_array['sidebars'] ) ) {
@@ -222,8 +222,8 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 			return;
 		}
 
-		if ( isset( $post_array['savewidgets'] ) ) {
-			check_ajax_referer( 'save-sidebar-widgets', 'savewidgets' );
+		if ( ! isset( $post_array['savewidgets'] ) || false === check_ajax_referer( 'save-sidebar-widgets', 'savewidgets', false ) ) {
+			return;
 		}
 
 		global $wp_registered_sidebars;

@@ -90,7 +90,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		// Cron Job 404 log files pruning.
 		add_action( self::SCHEDULED_HOOK_LOG_FILE_PRUDING, array( $this, 'LogFilesPruning' ) );
 		// whitelist options.
-		add_action( 'whitelist_options', array( $this, 'EventOptions' ), 10, 1 );
+		add_action( 'allowed_options', array( $this, 'EventOptions' ), 10, 1 );
 
 		// Update admin email alert.
 		add_action( 'update_option_admin_email', array( $this, 'admin_email_changed' ), 10, 3 );
@@ -356,7 +356,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		}
 
 		// Make sure user can actually modify target options.
-		if ( ! current_user_can( 'manage_options' ) && isset( $post_array['_wpnonce'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update' ) ) {
+		if ( ! current_user_can( 'manage_options' ) || ! isset( $post_array['_wpnonce'] ) || ! wp_verify_nonce( $post_array['_wpnonce'], 'update' ) ) {
 			return;
 		}
 
@@ -497,15 +497,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 						'NewVersion' => $new_version,
 					)
 				);
-
-				// Get `site_content` option.
-				$site_content = $this->plugin->GetGlobalSetting( 'site_content' );
-
-				// Check if the option is instance of stdClass.
-				if ( $site_content instanceof stdClass ) {
-					$site_content->skip_core = true; // Set skip core to true to skip file alerts after a core update.
-					$this->plugin->SetGlobalSetting( 'site_content', $site_content ); // Save the option.
-				}
 			}
 		}
 	}
@@ -526,15 +517,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					'NewVersion' => $obj->item->version . ' (auto update)',
 				)
 			);
-
-			// Get `site_content` option.
-			$site_content = $this->plugin->GetGlobalSetting( 'site_content' );
-
-			// Check if the option is instance of stdClass.
-			if ( $site_content instanceof stdClass ) {
-				$site_content->skip_core = true; // Set skip core to true to skip file alerts after a core update.
-				$this->plugin->SetGlobalSetting( 'site_content', $site_content ); // Save the option.
-			}
 		}
 	}
 

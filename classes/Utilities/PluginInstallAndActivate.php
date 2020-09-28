@@ -38,7 +38,7 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 			$allowed_plugins = self::get_installable_plugins();
 			if ( is_array( $allowed_plugins ) ) {
 				foreach ( $allowed_plugins as $allowed_plugin ) {
-					// if we alredy found an allowed slug then break.
+					// if we already found an allowed slug then break.
 					if ( true === $is_allowed_slug ) {
 						break;
 					}
@@ -86,12 +86,12 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 							// Loop through plugins and output.
 							foreach ( $our_plugins as $details ) {
 								$disable_button = '';
-								if ( is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
+								if ( WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) ) {
 									$disable_button = 'disabled';
 								}
 								// Check if this is actually an addon for something, otherwise bail.
 								if ( ! isset( $details['addon_for'] ) || ! isset( $details['image_filename'] ) ) {
-									break;
+									continue;
 								}
 								?>
 
@@ -101,9 +101,9 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 									<p><?php echo sanitize_text_field( $details['plugin_description'] ); ?></p><br>
 									<p><button class="install-addon button button-primary <?php echo esc_attr( $disable_button ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-plugin-slug="<?php echo esc_attr( $details['plugin_slug'] ); ?>" data-plugin-download-url="<?php echo esc_url( $details['plugin_url'] ); ?>" data-plugin-event-tab-id="<?php echo esc_attr( $details['event_tab_id'] ); ?>">
 									<?php
-									if ( $this->is_plugin_installed( $details['plugin_slug'] ) && ! is_plugin_active( $details['plugin_slug'] ) ) {
+									if ( $this->is_plugin_installed( $details['plugin_slug'] ) && ! WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) ) {
 										esc_html_e( 'Extension installed, activate now?', 'wp-security-audit-log' );
-									} elseif ( $this->is_plugin_installed( $details['plugin_slug'] ) && is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' )  ) {
+									} elseif ( $this->is_plugin_installed( $details['plugin_slug'] ) && WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_add_custom_event_objects' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_add_custom_event_objects' ) || 'activity-log-yoast-seo.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_yoast_seo_extension_add_custom_event_objects' )  ) {
 										esc_html_e( 'Extension installed', 'wp-security-audit-log' );
 									} else {
 										esc_html_e( 'Install Extension', 'wp-security-audit-log' );
@@ -131,33 +131,6 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 		public static function get_installable_plugins() {
 			$plugins = array(
 				array(
-					'addon_for'          => 'bbpress',
-					'title'              => 'BBPress',
-					'image_filename'     => 'bbpress.png',
-					'plugin_slug'        => 'wp-security-audit-log-add-on-for-bbpress/wsal-bbpress.php',
-					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-bbpress.latest-stable.zip',
-					'event_tab_id'       => '#tab-bbpress-forums',
-					'plugin_description' => 'Keep a log of your sites bbPress activity, from forum and topic creation, user profile changes and more.',
-				),
-				array(
-					'addon_for'          => 'wpforms',
-					'title'              => 'WPForms',
-					'image_filename'     => 'wpforms.png',
-					'plugin_slug'        => 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php',
-					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-wpforms.latest-stable.zip',
-					'event_tab_id'       => '#tab-wpforms',
-					'plugin_description' => 'Keep a record of when someone adds, modifies or deletes forms, entries and more in the WPForms plugin.',
-				),
-				array(
-					'addon_for'          => 'woocommerce',
-					'title'              => 'WooCommerce',
-					'image_filename'     => 'woocommerce.png',
-					'plugin_slug'        => 'wp-activity-log-for-woocommerce/wsal-woocommerce.php',
-					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-activity-log-for-woocommerce.latest-stable.zip',
-					'event_tab_id'       => '#tab-woocommerce',
-					'plugin_description' => 'Keep a log of your team\'s store settings, products, orders, coupons and any other changes they might do on your eCommerce store.',
-				),
-				array(
 					'addon_for'          => 'wfcm',
 					'title'              => 'Website File Changes Monitor',
 					'plugin_slug'        => 'website-file-changes-monitor/website-file-changes-monitor.php',
@@ -166,7 +139,9 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 			);
 			// runs through a filter so it can be added to programatically.
 			// NOTE: this means when using we need to test it's still an array.
-			return apply_filters( 'wsal_filter_installable_plugins', $plugins );
+			$installable_plugins = apply_filters( 'wsal_filter_installable_plugins', $plugins );
+
+			return $installable_plugins;
 		}
 	}
 }

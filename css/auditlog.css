@@ -645,3 +645,26 @@ input#wsal_as_widget_event::-webkit-outer-spin-button {
 	-webkit-appearance: none;
 	margin: 0;
 }
+
+/* Addon Notices */
+.notice-addon-available {
+	 display: flex;
+ }
+
+.addon-logo-wrapper {
+	display: flex;
+	margin-right: 20px;
+}
+
+.notice-addon-available img {
+	max-height: 48px;
+	align-self: center;
+}
+
+.notice-addon-available .button {
+    margin-top: 8px;
+}
+
+.notice-addon-available .notice-dismiss {
+    margin-top: 5px;
+}

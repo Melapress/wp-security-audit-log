@@ -464,7 +464,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 
 		// WSAL options.
 		$sysinfo .= "\n" . '-- WSAL Options --' . "\n\n";
-		$options  = $this->_plugin->settings()->get_wsal_options();
+		$options  = $this->_plugin->settings()->get_plugin_settings();
 
 		if ( ! empty( $options ) && is_array( $options ) ) {
 			foreach ( $options as $option ) {

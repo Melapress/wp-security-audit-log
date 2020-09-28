@@ -116,10 +116,13 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 				return;
 			}
 
-			$alert_options               = $this->GetEventOptions( $actor );
-			$event_code                  = $this->GetEventCode( $actor, $query_type );
-			$alert_options['TableNames'] = implode( ',', $table_names );
-			$this->plugin->alerts->Trigger( $event_code, $alert_options );
+			// Loop through each item to report event per table.
+			foreach ( $table_names as $table_name ) {
+				$alert_options               = $this->GetEventOptions( $actor );
+				$event_code                  = $this->GetEventCode( $actor, $query_type );
+				$alert_options['TableNames'] = $table_name;
+				$this->plugin->alerts->Trigger( $event_code, $alert_options );
+			}
 		}
 	}
 
@@ -182,6 +185,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			case 'plugins':
 				// Action Plugin Component.
 				$plugin_file = '';
+
 				// @codingStandardsIgnoreStart
 				if ( isset( $_GET['plugin'] ) ) {
 					$plugin_file = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
@@ -205,6 +209,12 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 					$plugin_name             = basename( $plugin_file, '.php' );
 					$plugin_name             = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
 					$plugin_name             = ucwords( $plugin_name );
+
+					// If this is still empty at this point, lets check recent events.
+					if ( empty( $plugin_file ) ) {
+						$plugin_name = $this->determine_recently_activated_plugin();
+					}
+
 					$alert_options['Plugin'] = (object) array( 'Name' => $plugin_name );
 				}
 				break;
@@ -338,5 +348,27 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		}
 
 		return $queries;
+	}
+
+	/**
+	 * Last resort to determine the name of a plugin performing the action.
+	 *
+	 * @return string Name, taken from recent event.
+	 */
+	private function determine_recently_activated_plugin() {
+		$alert_id = 5001;
+
+		$latest_events = $this->plugin->alerts->get_latest_events( 25 );
+
+		foreach ( $latest_events as $latest_event ) {
+			if ( $alert_id === intval( $latest_event->alert_id ) ) {
+				$event_meta   = $latest_event ? $latest_event->GetMetaArray() : false;
+				$plugin_name = $event_meta['PluginData']->Name;
+			}
+		}
+
+		if ( $plugin_name ) {
+			return $plugin_name;
+		}
 	}
 }

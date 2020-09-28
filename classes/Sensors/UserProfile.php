@@ -26,7 +26,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 4007 User was deleted by another user
  * 4008 User granted Super Admin privileges
  * 4009 User revoked from Super Admin privileges
- * 4013 The forum role of a user was changed by another WordPress user
  * 4014 User opened the profile page of another user
  *
  * @package Wsal

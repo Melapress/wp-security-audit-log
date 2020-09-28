@@ -129,7 +129,7 @@ class WSAL_Settings {
 	 *
 	 * @var array
 	 */
-	public $geek_alerts = array( 1004, 1005, 1006, 1007, 2023, 2024, 2053, 2054, 2055, 2062, 2100, 2106, 2111, 2112, 2124, 2125, 2131, 2132, 2094, 2095, 2043, 2071, 2082, 2083, 2085, 2089, 4014, 4015, 4016, 5010, 5011, 5012, 5019, 5025, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6001, 6002, 6007, 6008, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6023, 6024, 6025 );
+	public $geek_alerts = array( 1004, 1005, 1006, 1007, 2023, 2024, 2053, 2054, 2055, 2062, 2100, 2111, 2112, 2124, 2125, 2131, 2132, 2094, 2095, 2043, 2071, 2082, 2083, 2085, 2089, 4014, 4015, 4016, 5010, 5011, 5012, 5019, 5025, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6001, 6002, 6007, 6008, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6023, 6024, 6025 );
 
 	/**
 	 * Current screen object.
@@ -311,8 +311,7 @@ class WSAL_Settings {
 	public function IsDevOptionEnabled( $option ) {
 		if ( is_null( $this->_devoption ) ) {
 			$this->_devoption = $this->_plugin->GetGlobalSetting(
-				'dev-options',
-				implode( ',', $this->GetDefaultDevOptions() )
+				'dev-options', implode( ',', $this->GetDefaultDevOptions() )
 			);
 			$this->_devoption = explode( ',', $this->_devoption );
 		}
@@ -347,8 +346,7 @@ class WSAL_Settings {
 		}
 		// Commit option.
 		$this->_plugin->SetGlobalSetting(
-			'dev-options',
-			implode( ',', $this->_devoption )
+			'dev-options', implode( ',', $this->_devoption )
 		);
 	}
 
@@ -1418,7 +1416,7 @@ class WSAL_Settings {
 		if ( ! empty( $value ) ) {
 			$this->_plugin->SetGlobalSetting( 'log-failed-login-limit', abs( $value ) );
 		} else {
-			$this->_plugin->SetGlobalSetting( 'log-failed-login-limit', -1 );
+			$this->_plugin->SetGlobalSetting( 'log-failed-login-limit', - 1 );
 		}
 	}
 
@@ -1441,7 +1439,7 @@ class WSAL_Settings {
 		if ( ! empty( $value ) ) {
 			$this->_plugin->SetGlobalSetting( 'log-visitor-failed-login-limit', abs( $value ) );
 		} else {
-			$this->_plugin->SetGlobalSetting( 'log-visitor-failed-login-limit', -1 );
+			$this->_plugin->SetGlobalSetting( 'log-visitor-failed-login-limit', - 1 );
 		}
 	}
 
@@ -2182,44 +2180,9 @@ class WSAL_Settings {
 	 *
 	 * @return array - WSAL Options array.
 	 */
-	public function get_wsal_options() {
-		// Get options transient.
-		$wsal_options = get_transient( 'wsal_options' );
-
-		// If options transient is not set then query and set options.
-		if ( false === $wsal_options ) {
-			// Get raw options from DB.
-			$raw_options = $this->query_wsal_options();
-
-			if ( ! empty( $raw_options ) && is_array( $raw_options ) ) {
-				foreach ( $raw_options as $option ) {
-					if ( ! empty( $option->option_value ) ) {
-						$wsal_options[] = $option;
-					}
-				}
-			}
-
-			// Store the results in a transient.
-			set_transient( 'wsal_options', $wsal_options, DAY_IN_SECONDS );
-		}
-
-		return $wsal_options;
-	}
-
-	/**
-	 * Query WSAL Options from DB.
-	 *
-	 * @return array - Array of options.
-	 */
-	public function query_wsal_options() {
-		// Query WSAL options.
-		global $wpdb;
-
-		// Set table name.
-		$options_table = $wpdb->prefix . 'wsal_options';
-
-		// Query the options.
-		return $wpdb->get_results( "SELECT * FROM $options_table" ); // phpcs:ignore
+	public function get_plugin_settings() {
+		//  @todo get a list of all plugin settings
+		return [];
 	}
 
 	/**
@@ -2411,18 +2374,19 @@ class WSAL_Settings {
 	 */
 	public static function get_frontend_events() {
 		// Option defaults.
+		$is_woocommerce_active = WpSecurityAuditLog::is_woocommerce_active();
 		$default = array(
 			'register'    => false,
 			'login'       => false,
 			'system'      => false,
-			'woocommerce' => WpSecurityAuditLog::is_woocommerce_active(),
+			'woocommerce' => $is_woocommerce_active,
 		);
 
 		// Get the option.
-		$value     = \WSAL\Helpers\Options::get_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $default );
+		$value = \WSAL\Helpers\Options::get_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $default );
 
 		// Check for WooCommerce in case it is not stored.
-		$value['woocommerce'] = ! isset( $value['woocommerce'] ) ? WpSecurityAuditLog::is_woocommerce_active() : $value['woocommerce'];
+		$value['woocommerce'] = ! isset( $value['woocommerce'] ) ? $is_woocommerce_active : $value['woocommerce'];
 		return $value;
 	}
 

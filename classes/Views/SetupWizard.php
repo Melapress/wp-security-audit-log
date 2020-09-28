@@ -64,19 +64,19 @@ final class WSAL_Views_SetupWizard {
 	public function __construct( WpSecurityAuditLog $wsal ) {
 		$this->wsal = $wsal;
 
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( $wsal->settings()->CurrentUserCan( 'edit' ) ) {
 			add_action( 'admin_init', array( $this, 'setup_page' ), 10 );
+			add_action( 'admin_menu', array( $this, 'admin_menus' ), 10 );
+			add_action( 'network_admin_menu', array( $this, 'admin_menus' ), 10 );
+			add_action( 'wp_ajax_setup_check_security_token', array( $this, 'setup_check_security_token' ) );
 		}
-		add_action( 'admin_menu', array( $this, 'admin_menus' ), 10 );
-		add_action( 'wp_ajax_setup_check_security_token', array( $this, 'setup_check_security_token' ) );
-
 	}
 
 	/**
 	 * Ajax handler to verify setting token.
 	 */
 	public function setup_check_security_token() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! $this->wsal->settings()->CurrentUserCan( 'edit' ) ) {
 			echo wp_json_encode(
 				array(
 					'success' => false,
@@ -231,29 +231,32 @@ final class WSAL_Views_SetupWizard {
 		/**
 		 * Enqueue Styles.
 		 */
+		$wizard_css = WSAL_ViewManager::get_asset_path('/css/dist/', 'wsal-wizard', 'css');
 		wp_enqueue_style(
 			'wsal-wizard-css',
-			$this->wsal->GetBaseUrl() . '/css/dist/wsal-wizard.build.css',
+			$this->wsal->GetBaseUrl() . $wizard_css,
 			array( 'dashicons', 'install', 'forms' ),
-			filemtime( $this->wsal->GetBaseDir() . 'css/dist/wsal-wizard.build.css' )
+			filemtime( $this->wsal->GetBaseDir() . $wizard_css )
 		);
 
 		/**
 		 * Enqueue Scripts.
 		 */
-		 wp_register_script(
+		$wizard_js = WSAL_ViewManager::get_asset_path( '/js/dist/', 'wsal-wizard', 'js');
+		wp_register_script(
  			'wsal-wizard-js',
- 			$this->wsal->GetBaseUrl() . '/js/dist/wsal-wizard.min.js',
- 			array(  ),
- 			filemtime( $this->wsal->GetBaseDir() . 'js/dist/wsal-wizard.min.js' ),
+			$this->wsal->GetBaseUrl() .$wizard_js,
+ 			array( 'jquery' ),
+ 			filemtime( $this->wsal->GetBaseDir() .$wizard_js ),
  			false
  		);
 
+        $common_js = '/js/common.js';
 		wp_register_script(
 			'wsal-common',
-			$this->wsal->GetBaseUrl() . '/js/common.js',
+			$this->wsal->GetBaseUrl() . $common_js,
 			array( 'jquery' ),
-			filemtime( $this->wsal->GetBaseDir() . '/js/common.js' ),
+			filemtime( $this->wsal->GetBaseDir() . $common_js ),
 			true
  		);
 
@@ -426,8 +429,8 @@ final class WSAL_Views_SetupWizard {
 	 * Step View: `Welcome`
 	 */
 	private function wsal_step_welcome() {
-		// Dismiss the setup modal on audit log.
-		if ( $this->wsal->GetGlobalBooleanSetting( 'setup-modal-dismissed', false ) ) {
+		// dismiss the setup modal in case if not already done
+		if ( ! $this->wsal->GetGlobalBooleanSetting( 'setup-modal-dismissed', false ) ) {
 			$this->wsal->SetGlobalBooleanSetting( 'setup-modal-dismissed', true );
 		}
 		?>
@@ -840,7 +843,7 @@ final class WSAL_Views_SetupWizard {
 	private function addons_step() {
 		$our_plugins = WSAL_PluginInstallAndActivate::get_installable_plugins();
 
-		// Grab list of instaleld plugins.
+		// Grab list of installed plugins.
 		$all_plugins      = get_plugins();
 		$plugin_filenames = array();
 		foreach ( $all_plugins as $plugin => $info ) {
@@ -851,7 +854,7 @@ final class WSAL_Views_SetupWizard {
 		// Grab list of plugins we have addons for.
 		$predefined_plugins = array_column( $our_plugins, 'addon_for' );
 
-		// Loop through plugins and create an array of slugs, we will compare these agains the plugins we have addons for.
+		// Loop through plugins and create an array of slugs, we will compare these against the plugins we have addons for.
 		$we_have_addon = array_intersect( $plugin_filenames, $predefined_plugins );
 
 		?>
@@ -866,7 +869,7 @@ final class WSAL_Views_SetupWizard {
 			// Loop through plugins and output.
 			foreach ( $our_plugins as $details ) {
 				$disable_button = '';
-				if ( is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
+				if ( WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
 					$disable_button = 'disabled';
 				}
 				if ( ! in_array( $details['addon_for'], $we_have_addon ) ) {
@@ -885,9 +888,9 @@ final class WSAL_Views_SetupWizard {
 						<p><?php echo sanitize_text_field( $details['plugin_description'] ); ?></p>
 						<p><button class="install-addon button button-primary <?php echo esc_attr( $disable_button ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-plugin-slug="<?php echo esc_attr( $details['plugin_slug'] ); ?>" data-plugin-download-url="<?php echo esc_url( $details['plugin_url'] ); ?>" data-plugin-event-tab-id="<?php echo esc_attr( $details['event_tab_id'] ); ?>">
 							<?php
-							if ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && ! is_plugin_active( $details['plugin_slug'] ) ) {
+							if ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && ! WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) ) {
 								esc_html_e( 'Extension installed, activate now?', 'wp-security-audit-log' );
-							} elseif ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
+							} elseif ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
 								esc_html_e( 'Extension installed', 'wp-security-audit-log' );
 							} else {
 									esc_html_e( 'Install Extension', 'wp-security-audit-log' );
