@@ -570,7 +570,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					// This IS one of our extensions, so lets check a little deeper as folder
 					// name can differ.
 					if ( function_exists( 'is_multisite' ) && is_multisite() ) {
-						$current_plugins = get_site_option( 'active_sitewide_plugins' );
+						$current_plugins = array_keys( get_site_option( 'active_sitewide_plugins', [] ) );
 					} else {
 						$current_plugins = get_option( 'active_plugins' );
 					}
