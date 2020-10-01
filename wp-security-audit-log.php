@@ -1453,16 +1453,16 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					$this->settings()->set_mainwp_child_stealth_mode();
 				}
 
-				// Remove obselete option from db.
+				//  remove obsolete options from the database
 				if ( version_compare( $new_version, '4.1.4', '>=' ) ) {
-					$this->plugin->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . '_addon_available_notice_dismissed' );
+					$this->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . '_addon_available_notice_dismissed' );
 
 					// Remove old file scanning options.
 					global $wpdb;
 					$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_local_files_%'" );
 					if ( ! empty( $plugin_options ) ) {
 						foreach( $plugin_options as $option ) {
-							$this->plugin->DeleteSettingByName( $option->option_name );
+							$this->DeleteSettingByName( $option->option_name );
 						}
 					}
 				}
