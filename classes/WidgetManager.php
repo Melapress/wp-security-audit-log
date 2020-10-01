@@ -79,14 +79,14 @@ class WSAL_WidgetManager {
 				<tbody>
 					<?php
 					$url = 'admin.php?page=' . $this->_plugin->views->views[0]->GetSafeViewName();
-					$fmt = array( $this->_plugin->settings, 'meta_formatter' );
+					$fmt = array( $this->_plugin->settings(), 'meta_formatter' );
 					foreach ( $results as $entry ) :
 						$username = $entry->GetUsername();
 						?>
 						<tr>
 							<td><?php echo ( $username ) ? esc_html( $username ) : '<i>unknown</i>'; ?></td>
 							<td>
-								<a href="<?php echo esc_url( $url ) . '#Event' . esc_attr( $entry->id ); ?>">
+								<a href="<?php echo esc_url( $url ) . '#Event' . esc_attr( $entry->getId() ); ?>">
 									<?php echo wp_kses( $entry->GetMessage( $fmt ), $this->_plugin->allowed_html_tags ); ?>
 								</a>
 							</td>

@@ -16,6 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WordPress contents (posts, pages and custom posts).
  *
+ * Apart from some other events, the following were migrated from plugins & themes sensor:
+ * 5019 A plugin created a post
+ * 5025 A plugin deleted a post
+ *
  * @package Wsal
  */
 class WSAL_Sensors_Content extends WSAL_AbstractSensor {
@@ -225,10 +229,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		}
 
 		// Support for Admin Columns Pro plugin and its add-on.
-		if ( isset( $_POST['_ajax_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_ajax_nonce'] ) ), 'ac-ajax' ) ) {
-			if ( isset( $_POST['action'] ) && 'acp_editing_single_request' === sanitize_text_field( wp_unslash( $_POST['action'] ) ) ) {
-				return;
-			}
+		if ( ! isset( $_POST['_ajax_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_ajax_nonce'] ) ), 'ac-ajax' ) ) {
+			return;
+		}
+
+		if ( isset( $_POST['action'] ) && 'acp_editing_single_request' === sanitize_text_field( wp_unslash( $_POST['action'] ) ) ) {
+			return;
 		}
 
 		if ( 'post_tag' === $taxonomy ) {
@@ -279,6 +285,19 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			}
 
 			$event_data = $this->get_post_event_data( $post ); // Get event data.
+
+			//  check if this was initiated by a plugin
+			$request_params  = WSAL_Utilities_RequestUtils::get_filtered_request_data();
+			if ( empty( $request_params['action'] ) && isset( $request_params['page'] ) ) {
+				$event = 5025;
+				$event_data = array(
+					'PostID'    => $post->ID,
+					'PostType'  => $post->post_type,
+					'PostTitle' => $post->post_title,
+					'Username'  => 'Plugins',
+				);
+			}
+
 			$this->plugin->alerts->Trigger( $event, $event_data ); // Log event.
 		}
 	}
@@ -795,8 +814,26 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					$event_data['PublishingDate'] = $new_post->post_date;
 					$this->plugin->alerts->Trigger( $event, $event_data );
 				} else {
-					// NOTE: this triggers if NOT firing event 5019.
-					$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'plugin_not_created_post' ) );
+
+					//  so far we assume that the action is initiated by a user, let's check if it was actually initiated
+					//  by a plugin
+					$request_params = WSAL_Utilities_RequestUtils::get_filtered_request_data();
+					if ( array_key_exists( 'plugin', $request_params ) && !empty( $request_params['plugin'] ) ) {
+						//  event initiated by a plugin
+						$plugin_name = $request_params['plugin'];
+						$plugin_data = get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name );
+						$event_data = array(
+							'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
+							'PostID'             => $new_post->ID,
+							'PostType'           => $new_post->post_type,
+							'PostTitle'          => $new_post->post_title,
+							'PostStatus'         => $new_post->post_status,
+							'Username'           => 'Plugins',
+							$editor_link['name'] => $editor_link['value'],
+						);
+					}
+
+					$this->plugin->alerts->Trigger( $event, $event_data );
 				}
 			}
 		}
@@ -1217,10 +1254,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	/**
 	 * Post modified content.
 	 *
-	 * @param integer  $post_id  – Post ID.
-	 * @param stdClass $oldpost  – Old post.
-	 * @param stdClass $newpost  – New post.
-	 * @param int      $modified – Set to 0 if no changes done to the post.
+	 * @param integer $post_id – Post ID.
+	 * @param stdClass $oldpost – Old post.
+	 * @param stdClass $newpost – New post.
+	 * @param int $modified – Set to 0 if no changes done to the post.
+	 *
+	 * @return int|void
 	 */
 	public function check_modification_change( $post_id, $oldpost, $newpost, $modified ) {
 		if ( $this->check_other_sensors( $oldpost ) ) {

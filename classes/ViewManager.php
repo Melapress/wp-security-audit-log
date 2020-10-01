@@ -47,7 +47,9 @@ class WSAL_ViewManager {
 	/**
 	 * Method: Constructor.
 	 *
-	 * @param  WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
+	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
+	 *
+	 * @throws Freemius_Exception
 	 * @since  1.0.0
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
@@ -110,9 +112,8 @@ class WSAL_ViewManager {
 		add_action( 'admin_footer', array( $this, 'RenderViewFooter' ) );
 
 		// Initialize setup wizard.
-		if (
-			! $this->_plugin->GetGlobalBooleanSetting( 'setup-complete', false )
-			|| ! $this->_plugin->GetGlobalBooleanSetting( 'setup-modal-dismissed', false )
+		if ( ! $this->_plugin->GetGlobalBooleanSetting( 'setup-complete', false )
+            && $this->_plugin->settings()->CurrentUserCan( 'edit' )
 		) {
 			new WSAL_Views_SetupWizard( $plugin );
 		}
@@ -231,7 +232,8 @@ class WSAL_ViewManager {
                 'wsal-settings',
                 'wsal-ext-settings',
                 'wsal-rep-views-main',
-                'wsal-np-notifications'
+                'wsal-np-notifications',
+                'wsal-setup'
             );
 
 			//  check edit privileges of the current user
@@ -505,5 +507,21 @@ class WSAL_ViewManager {
 	 */
 	public function bypass_freemius_menu_hiding($should_hide) {
 	    return false;
+	}
+
+	/**
+     * Builds a relative asset path that takes SCRIPT_DEBUG constant into account.
+     *
+	 * @param string $path Path relative to the plugin folder.
+	 * @param string $filename Filename base (.min is optionally appended to this).
+	 * @param string $extension File extension
+	 *
+	 * @return string
+	 */
+	public static function get_asset_path($path, $filename, $extension) {
+		$result = $path . $filename;
+		$result .= SCRIPT_DEBUG ? '.' : '.min.';
+		$result .= $extension;
+		return $result;
 	}
 }

@@ -415,6 +415,24 @@ function wsal_dismiss_advert(element) {
 }
 
 /**
+ * Onclick event handler to dismiss the setup modal.
+ *
+ * @since 4.1.4
+ */
+function wsal_dismiss_setup_modal() {
+	jQuery.ajax( {
+		type: 'POST',
+		url: ajaxurl,
+		async: true,
+		dataType: 'json',
+		data: {
+			action: 'wsal_dismiss_setup_modal',
+			nonce: jQuery( '#wsal-dismiss-setup-modal' ).val()
+		}
+	} );
+}
+
+/**
  * Load Events for Infinite Scroll.
  *
  * @since 3.3.1.1
@@ -508,14 +526,16 @@ jQuery( document ).ready( function() {
 	/**
 	 * Dismiss addon-available notice.
 	 */
-	jQuery( '#wsal-notice-addon-available .notice-dismiss' ).click( function() {
+	jQuery( '.notice-addon-available .notice-dismiss' ).click( function() {
+		var addonToDismiss = jQuery( this ).parent().attr( 'data-addon' );
 		jQuery.ajax({
 			type: 'POST',
 			url: ajaxurl,
 			async: true,
 			data: {
 				action: 'wsal_dismiss_notice_addon_available',
-				nonce: jQuery( '#wsal-dismiss-notice-addon-available' ).val()
+				nonce: jQuery( '#wsal-dismiss-notice-addon-available-' + addonToDismiss ).val(),
+				addon: addonToDismiss
 			},
 			success: function( data ) {
 				console.log( data );

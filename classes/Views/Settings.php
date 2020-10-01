@@ -132,6 +132,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		 *     );
 		 *
 		 * @param array $wsal_setting_tabs – Array of WSAL Setting Tabs.
+		 *
 		 * @since 3.2.3
 		 */
 		$wsal_setting_tabs = apply_filters( 'wsal_setting_tabs', $wsal_setting_tabs );
@@ -444,9 +445,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 */
 	private function tab_general() {
 		?>
-        <p class="description"><?php echo wp_kses( __( 'Need help with setting up the plugin to meet your requirements? <a href="https://wpactivitylog.com/contact/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">Schedule a 20 minutes consultation and setup call</a> with our experts for just $50.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
-
-        <h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
+				<h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
         <p class="description">
 			<?php
 			echo sprintf(
@@ -737,7 +736,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								esc_html_e( 'All administrators', 'wp-security-audit-log' );
 							}
 							?>
-							<?php  ?>
                         </label>
                         <br/>
                     </fieldset>
@@ -781,12 +779,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<?php
 							$restrict_settings = $this->_plugin->settings()->get_restrict_log_viewer();
 							$viewer_restriction_options = array(
-								'only_me' => __('Only me', 'wp-security-audit-log'),
-								'only_superadmins' => __('Super administators only', 'wp-security-audit-log'),
-								'only_admins' => __('Super administators and site administrators', 'wp-security-audit-log'),
+								'only_me'          => __( 'Only me', 'wp-security-audit-log' ),
+								'only_superadmins' => __( 'Super administators only', 'wp-security-audit-log' ),
+								'only_admins'      => __( 'Super administators and site administrators', 'wp-security-audit-log' ),
 							);
 							?>
-							<?php foreach ($viewer_restriction_options as $option => $label): ?>
+							<?php foreach ( $viewer_restriction_options as $option => $label ): ?>
                                 <label for="log_viewer_<?php echo $option; ?>">
 									<?php $disabled = ('only_me' === $option && 'only_superadmins' === $restrict_settings); ?>
                                     <input type="radio" name="restrict-log-viewer" id="log_viewer_<?php echo $option; ?>" value="<?php echo $option; ?>" <?php checked( $restrict_settings, $option ); ?> <?php disabled( $disabled ); ?> />
@@ -1504,18 +1502,18 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
             </tbody>
         </table>
 
-		<h3><?php esc_html_e( 'Reset plugin settings to default', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'Click the RESET button to reset ALL plugin settings to default. Note that the activity log data will be retained and only the plugin settings will be reset. To purge the data of the activity log use the setting below.', 'wp-security-audit-log' ); ?></p>
-		<table class="form-table wsal-tab">
-			<tbody>
-				<tr>
-					<th><?php esc_html_e( 'Reset Settings', 'wp-security-audit-log' ); ?></th>
-					<td>
-						<a href="#wsal_reset_settings" class="button-primary"><?php esc_html_e( 'RESET', 'wp-security-audit-log' ); ?></a>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+        <h3><?php esc_html_e( 'Reset plugin settings to default', 'wp-security-audit-log' ); ?></h3>
+        <p class="description"><?php _e( 'Use this button to <em>factory reset</em> the plugin. This means that all the configured settings will be reset to default and all email notifications, scheduled reports, external database / third party services connections, archiving and mirroring rule will be deleted. NOTE: the activity log data will not be purged. Use the setting below to purge the activity log.', 'wp-security-audit-log' ); ?></p>
+        <table class="form-table wsal-tab">
+            <tbody>
+            <tr>
+                <th><?php esc_html_e( 'Reset Settings', 'wp-security-audit-log' ); ?></th>
+                <td>
+                    <a href="#wsal_reset_settings" class="button-primary js-settings-reset"><?php esc_html_e( 'RESET', 'wp-security-audit-log' ); ?></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
 		<h3><?php esc_html_e( 'Purge the WordPress activity log', 'wp-security-audit-log' ); ?></h3>
 		<p class="description"><?php esc_html_e( 'Click the Purge button below to delete all the data from the WordPress activity log and start afresh.', 'wp-security-audit-log' ); ?></p>
@@ -1598,15 +1596,15 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			</tbody>
 		</table>
 
-		<div class="remodal" data-remodal-id="wsal_reset_settings">
-			<button data-remodal-action="close" class="remodal-close"></button>
-			<h3><?php esc_html_e( 'Are you sure you want to reset all the plugin settings to default?', 'wp-security-audit-log' ); ?></h3>
-			<br>
-			<input type="hidden" id="wsal-reset-settings-nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-reset-settings' ) ); ?>">
-			<button data-remodal-action="confirm" class="remodal-confirm"><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></button>
-			<button data-remodal-action="cancel" class="remodal-cancel"><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></button>
-		</div>
-		<!-- Reset Settings Modal -->
+        <div class="remodal" data-remodal-id="wsal_reset_settings">
+            <button data-remodal-action="close" class="remodal-close"></button>
+            <h3><?php esc_html_e( 'Are you sure you want to reset all the plugin settings to default? This action cannot be undone.', 'wp-security-audit-log' ); ?></h3>
+            <br>
+            <input type="hidden" id="wsal-reset-settings-nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-reset-settings' ) ); ?>">
+            <button data-remodal-action="confirm" class="remodal-confirm"><?php esc_html_e( 'Yes' ); ?></button>
+            <button data-remodal-action="cancel" class="remodal-cancel"><?php esc_html_e( 'No' ); ?></button>
+        </div>
+        <!-- Reset Settings Modal -->
 
 		<div class="remodal" data-remodal-id="wsal_purge_activity">
 			<button data-remodal-action="close" class="remodal-close"></button>
@@ -1749,14 +1747,15 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		);
 		// Passing nonce for security to JS file.
 		$wsal_data = array(
-			'wp_nonce'       => wp_create_nonce( 'wsal-exclude-nonce' ),
-			'invalidURL'     => esc_html__( 'The specified value is not a valid URL!', 'wp-security-audit-log' ),
-			'invalidCPT'     => esc_html__( 'The specified value is not a valid post type!', 'wp-security-audit-log' ),
-			'invalidIP'      => esc_html__( 'The specified value is not a valid IP address!', 'wp-security-audit-log' ),
-			'invalidUser'    => esc_html__( 'The specified value is not a user nor a role!', 'wp-security-audit-log' ),
-			'invalidFile'    => esc_html__( 'Filename cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),
-			'invalidFileExt' => esc_html__( 'File extension cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),
-			'invalidDir'     => esc_html__( 'Directory cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),
+			'wp_nonce'            => wp_create_nonce( 'wsal-exclude-nonce' ),
+			'invalidURL'          => esc_html__( 'The specified value is not a valid URL!', 'wp-security-audit-log' ),
+			'invalidCPT'          => esc_html__( 'The specified value is not a valid post type!', 'wp-security-audit-log' ),
+			'invalidIP'           => esc_html__( 'The specified value is not a valid IP address!', 'wp-security-audit-log' ),
+			'invalidUser'         => esc_html__( 'The specified value is not a user nor a role!', 'wp-security-audit-log' ),
+			'invalidFile'         => esc_html__( 'Filename cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),
+			'invalidFileExt'      => esc_html__( 'File extension cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),
+			'invalidDir'          => esc_html__( 'Directory cannot be added because it contains invalid characters.', 'wp-security-audit-log' ),
+			'saveSettingsChanges' => esc_html__( 'Please save any changes before switching tabs.', 'wp-security-audit-log' ),
 		);
 		wp_localize_script( 'settings', 'wsal_data', $wsal_data );
 		wp_enqueue_script( 'settings' );
@@ -1877,28 +1876,22 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 */
 	public function reset_settings() {
 		// Die if user does not have permission to change settings.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
-			die( esc_html__( 'Access Denied.', 'wp-security-audit-log' ) );
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
+			wp_send_json_error( esc_html__( 'Access Denied.', 'wp-security-audit-log' ) );
 		}
 
 		// Verify nonce.
 		$nonce = filter_input( INPUT_POST, 'nonce', FILTER_SANITIZE_STRING );
-		if ( ! empty( $nonce ) && wp_verify_nonce( $nonce, 'wsal-reset-settings' ) ) {
-			global $wpdb;
-
-			$table_name = $wpdb->prefix . 'wsal_options';
-			$result     = $wpdb->query( "TRUNCATE {$table_name}" );
-
-			if ( $result ) {
-				// Log settings reset event.
-				$this->_plugin->alerts->Trigger( 6006 );
-				die( esc_html__( 'Tables has been reset.', 'wp-security-audit-log' ) );
-			} else {
-				die( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );
-			}
-		} else {
-			die( esc_html__( 'Nonce Verification Failed.', 'wp-security-audit-log' ) );
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal-reset-settings' ) ) {
+			wp_send_json_error( esc_html__( 'Nonce Verification Failed.', 'wp-security-audit-log' ) );
 		}
+
+        // delete all settings
+        WSAL_Uninstall::delete_options_from_wp_options();
+
+        // Log settings reset event.
+        $this->_plugin->alerts->Trigger( 6006 );
+        wp_send_json_success( esc_html__( 'Plugin settings have been reset.', 'wp-security-audit-log' ) );
 	}
 
 	/**
@@ -1907,24 +1900,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	public function purge_activity() {
 		// Die if user does not have permission to change settings.
 		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
-			die( esc_html__( 'Access Denied.', 'wp-security-audit-log' ) );
+			wp_send_json_error( esc_html__( 'Access Denied.', 'wp-security-audit-log' ) );
 		}
 
 		// Verify nonce.
 		$nonce = filter_input( INPUT_POST, 'nonce', FILTER_SANITIZE_STRING );
-		if ( ! empty( $nonce ) && wp_verify_nonce( $nonce, 'wsal-purge-activity' ) ) {
-			$connector = WpSecurityAuditLog::getConnector();
-			$result    = $connector->purge_activity();
-
-			if ( $result ) {
-				// Log purge activity event.
-				$this->_plugin->alerts->Trigger( 6034 );
-				die( esc_html__( 'Tables has been reset.', 'wp-security-audit-log' ) );
-			} else {
-				die( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );
-			}
-		} else {
-			die( esc_html__( 'Nonce Verification Failed.', 'wp-security-audit-log' ) );
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal-purge-activity' ) ) {
+			wp_send_json_error( esc_html__( 'Nonce Verification Failed.', 'wp-security-audit-log' ) );
 		}
+
+        $connector = WpSecurityAuditLog::getConnector();
+        $result    = $connector->purge_activity();
+
+        if ( $result ) {
+            // Log purge activity event.
+            $this->_plugin->alerts->Trigger( 6034 );
+            wp_send_json_success( esc_html__( 'Tables has been reset.', 'wp-security-audit-log' ) );
+        } else {
+            wp_send_json_error( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );
+        }
 	}
 }

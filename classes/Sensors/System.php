@@ -90,7 +90,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		// Cron Job 404 log files pruning.
 		add_action( self::SCHEDULED_HOOK_LOG_FILE_PRUDING, array( $this, 'LogFilesPruning' ) );
 		// whitelist options.
-		add_action( 'whitelist_options', array( $this, 'EventOptions' ), 10, 1 );
+		add_action( 'allowed_options', array( $this, 'EventOptions' ), 10, 1 );
 
 		// Update admin email alert.
 		add_action( 'update_option_admin_email', array( $this, 'admin_email_changed' ), 10, 3 );
@@ -356,7 +356,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		}
 
 		// Make sure user can actually modify target options.
-		if ( ! current_user_can( 'manage_options' ) && isset( $post_array['_wpnonce'] ) && ! wp_verify_nonce( $post_array['_wpnonce'], 'update' ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
@@ -405,7 +405,7 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 
-		// Registeration Option.
+		// Registration Option.
 		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ( get_option( 'users_can_register' ) xor isset( $post_array['users_can_register'] ) ) ) {
 			$old = get_option( 'users_can_register' ) ? 'enabled' : 'disabled';
 			$new = isset( $post_array['users_can_register'] ) ? 'enabled' : 'disabled';
@@ -454,9 +454,9 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		}
 
 		// Admin Email of Network.
-		if ( $is_network_settings && ! empty( $post_array['admin_email'] ) ) {
+		if ( $is_network_settings && ! empty( $post_array['new_admin_email'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'siteoptions' ) ) {
 			$old = get_site_option( 'admin_email' );
-			$new = trim( $post_array['admin_email'] );
+			$new = trim( $post_array['new_admin_email'] );
 			if ( $old != $new ) {
 				$this->plugin->alerts->Trigger(
 					6003,
@@ -470,7 +470,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		}
 
 		// Permalinks changed.
-		if ( $is_permalink_page && ! empty( $post_array['permalink_structure'] ) ) {
+		if ( $is_permalink_page && ! empty( $post_array['permalink_structure'] )
+		     && wp_verify_nonce( $post_array['_wpnonce'], 'update-permalink' )) {
 			$old = get_option( 'permalink_structure' );
 			$new = trim( $post_array['permalink_structure'] );
 			if ( $old != $new ) {
@@ -486,7 +487,8 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 		}
 
 		// Core Update.
-		if ( isset( $get_array['action'] ) && 'do-core-upgrade' === $get_array['action'] && isset( $post_array['version'] ) ) {
+		if ( isset( $get_array['action'] ) && 'do-core-upgrade' === $get_array['action'] && isset( $post_array['version'] )
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'upgrade-core' )) {
 			$old_version = get_bloginfo( 'version' );
 			$new_version = $post_array['version'];
 			if ( $old_version != $new_version ) {
@@ -497,15 +499,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 						'NewVersion' => $new_version,
 					)
 				);
-
-				// Get `site_content` option.
-				$site_content = $this->plugin->GetGlobalSetting( 'site_content' );
-
-				// Check if the option is instance of stdClass.
-				if ( $site_content instanceof stdClass ) {
-					$site_content->skip_core = true; // Set skip core to true to skip file alerts after a core update.
-					$this->plugin->SetGlobalSetting( 'site_content', $site_content ); // Save the option.
-				}
 			}
 		}
 	}
@@ -526,15 +519,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					'NewVersion' => $obj->item->version . ' (auto update)',
 				)
 			);
-
-			// Get `site_content` option.
-			$site_content = $this->plugin->GetGlobalSetting( 'site_content' );
-
-			// Check if the option is instance of stdClass.
-			if ( $site_content instanceof stdClass ) {
-				$site_content->skip_core = true; // Set skip core to true to skip file alerts after a core update.
-				$this->plugin->SetGlobalSetting( 'site_content', $site_content ); // Save the option.
-			}
 		}
 	}
 
@@ -670,8 +654,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				);
 			}
 
-			$old_status = (int) get_option( 'comment_whitelist', 0 );
-			$new_status = isset( $post_array['comment_whitelist'] ) ? 1 : 0;
+			//  comment_whitelist option was renamed to comment_previously_approved in WordPress 5.5.0
+			$comment_whitelist_option_name = version_compare( get_bloginfo( 'version' ), '5.5.0', '<' ) ? 'comment_whitelist' : 'comment_previously_approved';
+			$old_status = (int) get_option( $comment_whitelist_option_name, 0 );
+			$new_status = isset( $post_array[ $comment_whitelist_option_name ] ) ? 1 : 0;
 
 			if ( $old_status !== $new_status ) {
 				$this->plugin->alerts->Trigger(
@@ -698,8 +684,10 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger( 6017, array() );
 			}
 
-			$old_value = get_option( 'blacklist_keys', 0 );
-			$new_value = isset( $post_array['blacklist_keys'] ) ? $post_array['blacklist_keys'] : 0;
+			//  blacklist_keys option was renamed to disallowed_keys in WordPress 5.5.0
+			$blacklist_keys_option_name = version_compare( get_bloginfo( 'version' ), '5.5.0', '<' ) ? 'blacklist_keys' : 'disallowed_keys';
+			$old_value = get_option( $blacklist_keys_option_name, 0 );
+			$new_value = isset( $post_array[ $blacklist_keys_option_name ] ) ? $post_array[ $blacklist_keys_option_name ] : 0;
 			if ( $old_value !== $new_value ) {
 				$this->plugin->alerts->Trigger( 6018, array() );
 			}

@@ -68,6 +68,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		// Filter $_POST array.
 		$post_array = filter_input_array( INPUT_POST );
 
+		// Assume front end events are disbaled unless we are told otherwise.
 		$frontend_events = array(
 			'register'    => false,
 			'login'       => false,
@@ -75,34 +76,32 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			'woocommerce' => false,
 		);
 
+		// Check for enabled front end events and merge result with above array.
 		if ( isset( $post_array['frontend-events'] ) ) {
 			$frontend_events = array_merge( $frontend_events, $post_array['frontend-events'] );
 		}
+
+		// Save enabled front end events.
 		$this->_plugin->settings()->set_frontend_events( $frontend_events );
 
-		$enabled  = array_map( 'intval', $post_array['alert'] );
-		$disabled = array();
-		foreach ( $this->_plugin->alerts->GetAlerts() as $alert ) {
-			if ( 6023 === $alert->type && ! $frontend_events['system'] ) {
-				$disabled[] = $alert->type;
-				continue;
-			} elseif ( 6023 === $alert->type ) {
-				continue;
-			} elseif ( 9036 === $alert->type ) {
-				$frontend_events = WSAL_Settings::get_frontend_events();
-				$frontend_events = array_merge( $frontend_events, array( 'woocommerce' => true ) );
-				$this->_plugin->settings()->set_frontend_events( $frontend_events );
-			}
+		$enabled           = array_map( 'intval', $post_array['alert'] );
+		$disabled          = array();
+		$registered_alerts = $this->_plugin->alerts->GetAlerts();
 
-			if ( ! in_array( $alert->type, $enabled, true ) ) {
-				if ( 9036 === $alert->type ) {
-					$frontend_events = WSAL_Settings::get_frontend_events();
-					$frontend_events = array_merge( $frontend_events, array( 'woocommerce' => false ) );
-					$this->_plugin->settings()->set_frontend_events( $frontend_events );
+		// Now we check all registered events for further processing.
+		foreach ( $registered_alerts as $alert ) {
+			// 6023 (user visits 404) is tied to the 'system' checkbox, so if this is not checked,
+			// set 6023 as a disabled event.
+			if ( 6023 === $alert->type ) {
+				if ( $frontend_events['system'] ) {
+					$enabled[] = $alert->type;
+				} else {
+					$disabled[] = $alert->type;
 				}
-				$disabled[] = $alert->type;
 			}
 		}
+
+		$disabled = apply_filters( 'wsal_save_settings_disabled_events', $disabled, $registered_alerts, $frontend_events, $enabled );
 
 		// Save the disabled events.
 		$this->_plugin->alerts->SetDisabledAlerts( $disabled );
@@ -180,6 +179,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$log_details     = $this->_plugin->GetGlobalSetting( 'details-level', false ); // Get log level option.
 
 		$subcat_alerts   = array( 1004, 2010, 2111, 9007, 9105, 9047 );
+
+		// Allow further items to be added externally.
+		$subcat_alerts = apply_filters( 'wsal_togglealerts_sub_category_events', $subcat_alerts );
+
 		$obsolete_events = array( 9999, 2126, 6023, 9011, 9070, 9075, 4013 );
 		?>
 		<p>
@@ -211,12 +214,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		<h2 id="wsal-tabs" class="nav-tab-wrapper">
 			<?php foreach ( $safe_names as $name => $safe ) : ?>
 				<a href="#tab-<?php echo esc_attr( $safe ); ?>" class="nav-tab"><?php echo esc_html( $name ); ?></a>
-				<?php if ( __( 'Yoast SEO', 'wp-security-audit-log' ) === $name ) : ?>
-					<a href="#tab-frontend-events" class="nav-tab">
-						<?php esc_html_e( 'Front-end Events', 'wp-security-audit-log' ); ?>
-					</a>
-				<?php endif; ?>
 			<?php endforeach; ?>
+			<a href="#tab-frontend-events" class="nav-tab">
+				<?php esc_html_e( 'Front-end Events', 'wp-security-audit-log' ); ?>
+			</a>
 			<a href="#tab-third-party-plugins" class="nav-tab">
 				<?php esc_html_e( 'Third party plugins', 'wp-security-audit-log' ); ?>
 			</a>
@@ -341,14 +342,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												</td>
 											</tr>
 										<?php endif; ?>
-									<?php elseif ( __( 'Yoast SEO', 'wp-security-audit-log' ) === $subname ) : ?>
-										<?php if ( ! empty( $disabled ) ) : ?>
-											<tr>
-												<td colspan="4">
-													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'The plugin Yoast SEO is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
-												</td>
-											</tr>
-										<?php endif; ?>
 										<tr>
 											<td colspan="4">
 												<h3 class="sub-category"><?php esc_html_e( 'Post Changes', 'wp-security-audit-log' ); ?></h3>
@@ -412,6 +405,12 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 															esc_html_e( 'Product Stock Changes', 'wp-security-audit-log' );
 														} elseif ( 9047 === $alert->type ) {
 															esc_html_e( 'Product Attributes', 'wp-security-audit-log' );
+														}
+
+														// Allow further titles to be added externally.
+														$subcat_title = apply_filters( 'wsal_togglealerts_sub_category_titles', $alert->type );
+														if ( $subcat_title ) {
+															echo esc_html( $subcat_title );
 														}
 														?>
 													</h3>
@@ -511,7 +510,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<?php
 										}
 										if ( 1003 === $alert->type ) {
-											$log_visitor_failed_login_limit = (int) $this->_plugin->GetGlobalSetting(  'log-visitor-failed-login-limit', 10 );
+											$log_visitor_failed_login_limit = (int) $this->_plugin->GetGlobalSetting( 'log-visitor-failed-login-limit', 10 );
 											$log_visitor_failed_login_limit = ( -1 === $log_visitor_failed_login_limit ) ? '0' : $log_visitor_failed_login_limit;
 											?>
 											<tr>
@@ -765,11 +764,14 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				max-width: 200px;
 			}
 			.addon-wrapper {
-				max-width: 25%;
+				max-width: calc( 25% - 45px );
 				display: inline-block;
 				border: 1px solid #eee;
 				padding: 20px;
 				text-align: center;
+				float: left;
+				margin-right: 3px;
+				min-height: 250px;
 			}
 			.addon-wrapper:hover {
 				border: 1px solid #ccc;
