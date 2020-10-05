@@ -529,7 +529,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$bbpress_addon      = new WSAL_BBPressExtension;
 				$woocommerce_addon  = new WSAL_WooCommerceExtension;
 				$wpforms_addon      = new WSAL_WPFormsExtension;
-				$gravityforms_addon = new WSAL_GravityFormsExtension;
+				// Comment out till ready.
+				//$gravityforms_addon = new WSAL_GravityFormsExtension;
 			}
 		}
 
@@ -616,7 +617,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 */
 		public static function is_wpseo_active() {
 			return ( ( self::is_plugin_active( 'wordpress-seo/wp-seo.php' ) || self::is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' ) )
-                && ( self::is_plugin_active( 'activity-log-yoast-seo.php' ) )
+                && ( self::is_plugin_active( 'activity-log-wp-seo.php' ) )
 			);
 		}
 
