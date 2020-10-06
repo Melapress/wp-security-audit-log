@@ -1487,7 +1487,7 @@ class WSAL_Settings {
 		$wsal_working_dir = $this->get_working_dir_path();
 
 		// If the directory exists then generate index.php file for every sub-directory.
-		if ( ! empty( $wsal_working_dir ) && is_dir( $wsal_working_dir ) ) {
+		if ( ! is_wp_error( $wsal_working_dir ) && ! empty( $wsal_working_dir ) && is_dir( $wsal_working_dir ) ) {
 			// Generate index.php for the main directory.
 			if ( ! file_exists( $wsal_working_dir . DIRECTORY_SEPARATOR . 'index.php' ) ) {
 				// Generate index.php file.
