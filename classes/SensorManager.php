@@ -255,13 +255,6 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 					}
 					break;
 
-				case 'WooCommerce':
-					// Check if WooCommerce plugin exists.
-					if ( ! WpSecurityAuditLog::is_woocommerce_active() ) {
-						$load_sensor = false;
-					}
-					break;
-
 				case 'YoastSEO':
 					// Check if Yoast SEO (Free or Premium) plugin exists.
 					if ( WpSecurityAuditLog::is_wpseo_active() ) {

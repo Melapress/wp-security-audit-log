@@ -2442,4 +2442,16 @@ class WSAL_Settings {
     	return $this->_plugin->GetGlobalBooleanSetting( 'admin-blocking-plugins-support', false );
 	}
 
+    public function get_mainwp_enforced_settings( ) {
+        return $this->_plugin->GetGlobalSetting( 'mainwp_enforced_settings', [] );
+    }
+
+	public function set_mainwp_enforced_settings( $settings ) {
+	    $this->_plugin->SetGlobalSetting( 'mainwp_enforced_settings', $settings );
+    }
+
+    public function delete_mainwp_enforced_settings( ) {
+        $this->_plugin->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . 'mainwp_enforced_settings' );
+    }
+
 }

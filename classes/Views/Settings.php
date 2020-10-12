@@ -977,77 +977,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				?>
             </p>
 		<?php else : ?>
-			<table class="form-table wsal-tab">
-				<tbody>
-					<tr>
-						<th><label for="delete1"><?php esc_html_e( 'Activity log retention', 'wp-security-audit-log' ); ?></label></th>
-						<td>
-							<fieldset>
-								<?php $nbld = ! $this->_plugin->settings()->IsPruningDateEnabled(); ?>
-								<label for="delete0">
-									<input type="radio" id="delete0" name="PruneBy" value="" <?php checked( $nbld ); ?> />
-									<?php echo esc_html__( 'Keep all data', 'wp-security-audit-log' ); ?>
-								</label>
-							</fieldset>
-
-							<fieldset>
-								<?php
-								// Check pruning date option.
-								$nbld = $this->_plugin->settings()->IsPruningDateEnabled();
-
-								// Find and replace ` months` in the string.
-								$pruning_date = $this->_plugin->settings()->GetPruningDate();
-								$pruning_date = str_replace( ' months', '', $pruning_date );
-								$pruning_date = str_replace( ' years', '', $pruning_date );
-								$pruning_unit = $this->_plugin->settings()->get_pruning_unit();
-
-								// Check if pruning limit was enabled for backwards compatibility.
-								if ( $this->_plugin->settings()->IsPruningLimitEnabled() ) {
-									$nbld         = true;
-									$pruning_date = '6';
-									$pruning_unit = 'months';
-									$this->_plugin->settings()->SetPruningDate( $pruning_date . ' ' . $pruning_unit );
-									$this->_plugin->settings()->SetPruningDateEnabled( true );
-									$this->_plugin->settings()->SetPruningLimitEnabled( false );
-								}
-								?>
-								<label for="delete1">
-									<input type="radio" id="delete1" name="PruneBy" value="date" <?php checked( $nbld ); ?> />
-									<?php esc_html_e( 'Delete events older than', 'wp-security-audit-log' ); ?>
-								</label>
-								<input type="text" id="PruningDate" name="PruningDate"
-									value="<?php echo esc_attr( $pruning_date ); ?>"
-									onfocus="jQuery('#delete1').attr('checked', true);"
-								/>
-								<select name="pruning-unit" id="pruning-unit">
-									<option value="months" <?php echo ( 'months' === $pruning_unit ) ? 'selected' : false; ?>><?php esc_html_e( 'Months', 'wp-security-audit-log' ); ?></option>
-									<option value="years" <?php echo ( 'years' === $pruning_unit ) ? 'selected' : false; ?>><?php esc_html_e( 'Years', 'wp-security-audit-log' ); ?></option>
-								</select>
-							</fieldset>
-
-							<?php if ( $this->_plugin->settings()->IsPruningDateEnabled() ) : ?>
-								<p class="description">
-									<?php
-									$next = wp_next_scheduled( 'wsal_cleanup' );
-									echo esc_html__( 'The next scheduled purging of activity log data that is older than ', 'wp-security-audit-log' );
-									echo esc_html( $pruning_date . ' ' . $pruning_unit );
-									echo sprintf(
-										' is in %s.',
-										esc_html( human_time_diff( current_time( 'timestamp' ), $next ) )
-									);
-									echo '<!-- ' . esc_html( date( 'dMy H:i:s', $next ) ) . ' --> ';
-									echo esc_html__( 'You can run the purging process now by clicking the button below.', 'wp-security-audit-log' );
-									?>
-								</p>
-								<p>
-									<a class="button-primary" href="<?php echo esc_url( add_query_arg( 'action', 'AjaxRunCleanup', admin_url( 'admin-ajax.php' ) ) ); ?>"><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
-								</p>
-							<?php endif; ?>
-						</td>
-					</tr>
-					<!-- Activity log retention -->
-				</tbody>
-			</table>
+			<?php $this->render_retention_settings_table(); ?>
 		<?php endif; ?>
 		<!-- Activity log retention -->
 
@@ -1920,4 +1850,85 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
             wp_send_json_error( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );
         }
 	}
+
+    public function render_retention_settings_table( ) {
+        //  check if the retention settings are enforced from the MainWP master site
+        $settings = $this->_plugin->settings();
+        $enforced_settings = $settings->get_mainwp_enforced_settings();
+        $retention_settings_enforced_by_mainwp = array_key_exists( 'pruning_enabled', $enforced_settings );
+        ?>
+        <table class="form-table wsal-tab">
+            <tbody>
+            <tr>
+                <th><label for="delete1"><?php esc_html_e( 'Activity log retention', 'wp-security-audit-log' ); ?></label></th>
+                <td>
+                    <fieldset>
+                        <?php $nbld = ! $this->_plugin->settings()->IsPruningDateEnabled(); ?>
+                        <label for="delete0">
+                            <input type="radio" id="delete0" name="PruneBy" value="" <?php checked( $nbld ); ?><?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?> />
+                            <?php echo esc_html__( 'Keep all data', 'wp-security-audit-log' ); ?>
+                        </label>
+                    </fieldset>
+
+                    <fieldset>
+                        <?php
+                        // Check pruning date option.
+                        $nbld = $this->_plugin->settings()->IsPruningDateEnabled();
+
+                        // Find and replace ` months` in the string.
+                        $pruning_date = $this->_plugin->settings()->GetPruningDate();
+                        $pruning_date = str_replace( ' months', '', $pruning_date );
+                        $pruning_date = str_replace( ' years', '', $pruning_date );
+                        $pruning_unit = $this->_plugin->settings()->get_pruning_unit();
+
+                        // Check if pruning limit was enabled for backwards compatibility.
+                        if ( $this->_plugin->settings()->IsPruningLimitEnabled() ) {
+                            $nbld         = true;
+                            $pruning_date = '6';
+                            $pruning_unit = 'months';
+                            $this->_plugin->settings()->SetPruningDate( $pruning_date . ' ' . $pruning_unit );
+                            $this->_plugin->settings()->SetPruningDateEnabled( true );
+                            $this->_plugin->settings()->SetPruningLimitEnabled( false );
+                        }
+                        ?>
+                        <label for="delete1">
+                            <input type="radio" id="delete1" name="PruneBy" value="date" <?php checked( $nbld ); ?><?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?> />
+                            <?php esc_html_e( 'Delete events older than', 'wp-security-audit-log' ); ?>
+                        </label>
+                        <input type="text" id="PruningDate" name="PruningDate"
+                               value="<?php echo esc_attr( $pruning_date ); ?>"
+                               onfocus="jQuery('#delete1').attr('checked', true);"
+                            <?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?>
+                        />
+                        <select name="pruning-unit" id="pruning-unit"<?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?> >
+                            <option value="months" <?php echo ( 'months' === $pruning_unit ) ? 'selected' : false; ?>><?php esc_html_e( 'Months', 'wp-security-audit-log' ); ?></option>
+                            <option value="years" <?php echo ( 'years' === $pruning_unit ) ? 'selected' : false; ?>><?php esc_html_e( 'Years', 'wp-security-audit-log' ); ?></option>
+                        </select>
+                    </fieldset>
+
+                    <?php if ( $this->_plugin->settings()->IsPruningDateEnabled() ) : ?>
+                        <p class="description">
+                            <?php
+                            $next = wp_next_scheduled( 'wsal_cleanup' );
+                            echo esc_html__( 'The next scheduled purging of activity log data that is older than ', 'wp-security-audit-log' );
+                            echo esc_html( $pruning_date . ' ' . $pruning_unit );
+                            echo sprintf(
+                                ' is in %s.',
+                                esc_html( human_time_diff( current_time( 'timestamp' ), $next ) )
+                            );
+                            echo '<!-- ' . esc_html( date( 'dMy H:i:s', $next ) ) . ' --> ';
+                            echo esc_html__( 'You can run the purging process now by clicking the button below.', 'wp-security-audit-log' );
+                            ?>
+                        </p>
+                        <p>
+                            <a class="button-primary" href="<?php echo esc_url( add_query_arg( 'action', 'AjaxRunCleanup', admin_url( 'admin-ajax.php' ) ) ); ?>"><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
+                        </p>
+                    <?php endif; ?>
+                </td>
+            </tr>
+            <!-- Activity log retention -->
+            </tbody>
+        </table>
+        <?php
+    }
 }

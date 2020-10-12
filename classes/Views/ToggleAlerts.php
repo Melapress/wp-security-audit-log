@@ -184,13 +184,18 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$subcat_alerts = apply_filters( 'wsal_togglealerts_sub_category_events', $subcat_alerts );
 
 		$obsolete_events = array( 9999, 2126, 6023, 9011, 9070, 9075, 4013 );
+
+        //  check if the disabled events are enforced from the MainWP master site
+        $settings = $this->_plugin->settings();
+        $enforced_settings = $settings->get_mainwp_enforced_settings();
+        $disabled_events_enforced_by_mainwp = array_key_exists( 'disabled_events', $enforced_settings ) && ! empty( $enforced_settings[ 'disabled_events' ]);
 		?>
 		<p>
 			<form method="post" id="wsal-alerts-level">
 				<?php wp_nonce_field( 'wsal-log-level', 'wsal-log-level-nonce' ); ?>
 				<fieldset>
 					<label for="wsal-log-level"><?php esc_html_e( 'Log Level: ', 'wp-security-audit-log' ); ?></label>
-					<select name="wsal-log-level" id="wsal-log-level" onchange="this.form.submit()">
+					<select name="wsal-log-level" id="wsal-log-level" onchange="this.form.submit()"<?php if ( $disabled_events_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?>>
 						<option value="basic"
 							<?php echo ( ! empty( $log_details ) && 'basic' === $log_details ) ? esc_attr( 'selected' ) : false; ?>
 						>
@@ -262,7 +267,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 							}
 
 							// Disabled alerts.
-							$disabled = '';
+							$disable_inputs = '';
 
 							// Skip Pages and CPTs section.
 							if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
@@ -279,7 +284,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										if ( 'Multisite User Profiles' === $subname ) {
 											// Check if this is a multisite.
 											if ( ! is_multisite() ) {
-												$disabled = 'disabled';
+												$disable_inputs = 'disabled';
 											}
 										}
 										break;
@@ -288,21 +293,21 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 									case 'WooCommerce Products':
 										// Check if WooCommerce plugin exists.
 										if ( ! WpSecurityAuditLog::is_woocommerce_active() ) {
-											$disabled = 'disabled';
+											$disable_inputs = 'disabled';
 										}
 										break;
 
 									case 'Yoast SEO':
 										// Check if Yoast SEO plugin exists.
 										if ( ! WpSecurityAuditLog::is_wpseo_active() ) {
-											$disabled = 'disabled';
+											$disable_inputs = 'disabled';
 										}
 										break;
 
 									case 'Multisite Network Sites':
 										// Disable if not multisite.
 										if ( ! is_multisite() ) {
-											$disabled = 'disabled';
+											$disable_inputs = 'disabled';
 										}
 										break;
 
@@ -310,11 +315,15 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										break;
 								}
 							}
+
+							if ( $disabled_events_enforced_by_mainwp ) {
+							    $disable_inputs = 'disabled';
+                            }
 							?>
 							<table class="wp-list-table wsal-tab widefat fixed wsal-sub-tab" cellspacing="0" id="tab-<?php echo esc_attr( $this->GetSafeCatgName( $subname ) ); ?>">
 								<thead>
 									<tr>
-										<th width="48"><input type="checkbox" <?php checked( $allactive ); ?> <?php echo esc_attr( $disabled ); ?> /></th>
+										<th width="48"><input type="checkbox" <?php checked( $allactive ); ?> <?php echo esc_attr( $disable_inputs ); ?> /></th>
 										<th width="80"><?php esc_html_e( 'Code', 'wp-security-audit-log' ); ?></th>
 										<th width="100"><?php esc_html_e( 'Severity', 'wp-security-audit-log' ); ?></th>
 										<th><?php esc_html_e( 'Description', 'wp-security-audit-log' ); ?></th>
@@ -328,7 +337,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											</td>
 										</tr>
 									<?php elseif ( __( 'WooCommerce', 'wp-security-audit-log' ) === $subname || __( 'WooCommerce Products', 'wp-security-audit-log' ) === $subname ) : ?>
-										<?php if ( ! empty( $disabled ) ) : ?>
+										<?php if ( ! empty( $disable_inputs ) ) : ?>
 											<tr>
 												<td colspan="4">
 													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'The plugin WooCommerce is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
@@ -348,7 +357,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											</td>
 										</tr>
 									<?php elseif ( __( 'MultiSite', 'wp-security-audit-log' ) === $subname ) : ?>
-										<?php if ( ! empty( $disabled ) ) : ?>
+										<?php if ( ! empty( $disable_inputs ) ) : ?>
 											<tr>
 												<td colspan="4">
 													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'Your website is a single site so the multisite events have been disabled.', 'wp-security-audit-log' ); ?></p>
@@ -393,22 +402,32 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												<td colspan="4">
 													<h3 class="sub-category">
 														<?php
-														if ( 1004 === $alert->type ) {
-															esc_html_e( 'User Sessions', 'wp-security-audit-log' );
-														} elseif ( 2010 === $alert->type ) {
-															esc_html_e( 'Files', 'wp-security-audit-log' );
-														} elseif ( 2111 === $alert->type ) {
-															esc_html_e( 'Post Settings', 'wp-security-audit-log' );
-														} elseif ( 9007 === $alert->type ) {
-															esc_html_e( 'Product Admin', 'wp-security-audit-log' );
-														} elseif ( 9105 === $alert->type ) {
-															esc_html_e( 'Product Stock Changes', 'wp-security-audit-log' );
-														} elseif ( 9047 === $alert->type ) {
-															esc_html_e( 'Product Attributes', 'wp-security-audit-log' );
-														}
+                                                        $subcat_title = '';
+                                                        switch ( $alert->type ) {
+                                                            case 1004:
+                                                                $subcat_title = esc_html__( 'User Sessions', 'wp-security-audit-log' );
+                                                                break;
+                                                                case 2010:
+                                                                $subcat_title = esc_html__( 'Files', 'wp-security-audit-log' );
+                                                                break;
+                                                            case 2011:
+                                                                $subcat_title = esc_html__( 'Post Settings', 'wp-security-audit-log' );
+                                                                break;
+                                                            case 9007:
+                                                                $subcat_title = esc_html__( 'Product Admin', 'wp-security-audit-log' );
+                                                                break;
+                                                            case 9015:
+                                                                $subcat_title = esc_html__( 'Product Stock Changes', 'wp-security-audit-log' );
+                                                                break;
+                                                            case 9047:
+                                                                $subcat_title = esc_html__( 'Product Attributes', 'wp-security-audit-log' );
+                                                                break;
+                                                            default:
+                                                                break;
+                                                        }
 
 														// Allow further titles to be added externally.
-														$subcat_title = apply_filters( 'wsal_togglealerts_sub_category_titles', $alert->type );
+														$subcat_title = apply_filters( 'wsal_togglealerts_sub_category_titles', $subcat_title, $alert->type );
 														if ( $subcat_title ) {
 															echo esc_html( $subcat_title );
 														}
@@ -428,8 +447,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													<?php checked( $active[ $alert->type ] ); ?>
 													value="<?php echo esc_attr( (int) $alert->type ); ?>"
 													<?php
-													if ( ! empty( $disabled ) ) {
-														echo esc_attr( $disabled );
+													if ( ! empty( $disable_inputs ) ) {
+														echo esc_attr( $disable_inputs );
 													}
 													?>
 													<?php echo ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) ? 'onclick="wsal_toggle_file_changes(this)"' : false; ?>

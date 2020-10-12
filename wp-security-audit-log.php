@@ -4,7 +4,7 @@
  * Plugin URI: http://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Activity log viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 4.1.4
+ * Version: 4.1.5
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -47,7 +47,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
          *
 		 * @var string
 		 */
-		public $version = '4.1.4';
+		public $version = '4.1.5';
 
 		/**
          * Plugin constants.
@@ -463,6 +463,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			require_once 'classes/Adapters/OccurrenceInterface.php';
 			require_once 'classes/Adapters/QueryInterface.php';
 
+			// Third party extensions with public sensors.
+			require_once 'classes/ThirdPartyExtensions/AbstractExtension.php';
+			require_once 'classes/ThirdPartyExtensions/WooCommerceExtension.php';
+
 			// Only include these if we are in multisite envirnoment.
 			if ( $this->isMultisite() ) {
 				require_once 'classes/Multisite/NetworkWide/TrackerInterface.php';
@@ -521,17 +525,20 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			$this->init_freemius();
 
+			// Extensions which are only admin based.
 			if ( is_admin() ) {
 				$plugin_installer_ajax = new WSAL_PluginInstallerAction();
 				$plugin_installer_ajax->register();
 
 				$yoast_seo_addon    = new WSAL_YoastSeoExtension;
 				$bbpress_addon      = new WSAL_BBPressExtension;
-				$woocommerce_addon  = new WSAL_WooCommerceExtension;
 				$wpforms_addon      = new WSAL_WPFormsExtension;
 				// Comment out till ready.
 				//$gravityforms_addon = new WSAL_GravityFormsExtension;
 			}
+
+			// Extensions which are both admin and frontend based.
+			$woocommerce_addon  = new WSAL_WooCommerceExtension;
 		}
 
 		/**
@@ -562,10 +569,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
+			if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
+				require_once 'classes/Utilities/PluginInstallAndActivate.php';
+			}
+
 			// Additional checks for our 3rd party extensions.
 			if ( class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 				$our_plugins = array_column( WSAL_PluginInstallAndActivate::get_installable_plugins(), 'plugin_basename' );
-
 				// Check if we are dealing with one of our extensions.
 				if ( in_array( basename( $plugin ), $our_plugins, true ) ) {
 					// This IS one of our extensions, so lets check a little deeper as folder
@@ -779,7 +789,52 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 							$info = false;
 						}
 						break;
+                    case 'enforce_settings':
+                        //  check subaction
+                        if ( ! array_key_exists( 'subaction', $post_data) || empty( $post_data['subaction'] ) )  {
+                            $info = array(
+                                'success' => 'no',
+                                'message' => 'Missing subaction parameter.'
+                            );
+                            break;
+                        }
 
+                        $subaction = filter_var( $post_data['subaction'], FILTER_SANITIZE_STRING);
+                        if ( ! in_array( $subaction, [ 'update', 'remove' ] ) ) {
+                            $info = array(
+                                'success' => 'no',
+                                'message' => 'Unsupported subaction parameter value.'
+                            );
+                            break;
+                        }
+
+                        if ( 'update' === $subaction ) {
+                            //  store the enforced settings in local database (used for example to disable related parts
+                            //  of the settings UI
+                            $settings_to_enforce = $post_data[ 'settings'];
+                            $this->settings()->set_mainwp_enforced_settings( $settings_to_enforce );
+
+                            //  change the existing settings
+                            if ( array_key_exists( 'pruning_enabled', $settings_to_enforce ) ) {
+                                $this->settings()->SetPruningDateEnabled( $settings_to_enforce['pruning_enabled'] );
+                                if ( array_key_exists( 'pruning_date', $settings_to_enforce ) && array_key_exists( 'pruning_unit', $settings_to_enforce) ) {
+                                    $this->settings()->SetPruningDate($settings_to_enforce[ 'pruning_date' ] . ' ' . $settings_to_enforce[ 'pruning_unit' ]);
+                                    $this->settings()->set_pruning_unit( $settings_to_enforce[ 'pruning_unit' ] );
+                                }
+                            }
+
+                            if ( array_key_exists( 'disabled_events', $settings_to_enforce ) ) {
+                                $disabled_event_ids = array_key_exists( 'disabled_events', $settings_to_enforce ) ? array_map( 'intval', explode( ',', $settings_to_enforce['disabled_events'] ) ) : [];
+                                $this->alerts->SetDisabledAlerts( $disabled_event_ids );
+                            }
+                        } else if ( 'remove' === $subaction ) {
+                            $this->settings()->delete_mainwp_enforced_settings();
+                        }
+
+                        $info = array(
+                            'success' => 'yes'
+                        );
+                        $this->alerts->Trigger( 6043 );
 					default:
 						break;
 				}
