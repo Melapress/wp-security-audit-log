@@ -2093,8 +2093,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		private static function is_admin_blocking_plugins_support_enabled() {
 
 		    //  only meant for 404 pages, but may run before is_404 can be used
-		    $is_404 = did_action('wp') ? is_404() : true;
-		    if (!$is_404) {
+		    $is_404 = did_action( 'wp' ) ? is_404() : true;
+		    if ( ! $is_404 ) {
 		        return false;
 		    }
 
