@@ -13,6 +13,11 @@ on:
     branches: [develop]
   schedule:
     - cron: '0 8 * * 6'
+  workflow_dispatch:
+    inputs:
+      dummy:
+        description: 'Leave empty'
+        required: false
 
 jobs:
   analyze:
@@ -24,7 +29,7 @@ jobs:
       matrix:
         # Override automatic language detection by changing the below list
         # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
-        language: ['javascript', 'php']
+        language: ['javascript']
         # Learn more...
         # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
 
