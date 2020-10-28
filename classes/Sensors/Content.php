@@ -177,7 +177,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				// If block editor is selected and users are not allowed to switch editors then it is Gutenberg's second request.
 				if ( 'block' === $editor_replace && 'disallow' === $allow_users ) {
 					return;
-				} elseif ( 'allow' === $allow_users ) { // Else if users are allowed to switch then it is Gutenberg's second request.
+				}
+
+				if ( 'allow' === $allow_users ) { // if users are allowed to switch then it is Gutenberg's second request.
 					return;
 				}
 			}
@@ -229,7 +231,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		}
 
 		// Support for Admin Columns Pro plugin and its add-on.
-		if ( ! isset( $_POST['_ajax_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_ajax_nonce'] ) ), 'ac-ajax' ) ) {
+		if ( isset( $_POST['_ajax_nonce'] ) && ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_ajax_nonce'] ) ), 'ac-ajax' ) ) {
 			return;
 		}
 
@@ -1159,9 +1161,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	/**
 	 * Categories changed.
 	 *
-	 * @param array   $old_cats - Old categories.
-	 * @param array   $new_cats - New categories.
-	 * @param WP_Post $post     - The post.
+	 * @param array $old_cats - Old categories.
+	 * @param array $new_cats - New categories.
+	 * @param WP_Post $post - The post.
 	 */
 	protected function check_categories_change( $old_cats, $new_cats, $post ) {
 		$old_cats = implode( ', ', (array) $old_cats );
@@ -1181,8 +1183,34 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$editor_link['name'] => $editor_link['value'],
 			);
 			$this->plugin->alerts->Trigger( 2016, $alert_data );
-			return 1;
 		}
+	}
+
+	/**
+	 * Reports tags change event. This could be tags addition, removal and possibly other in the future.
+	 *
+	 * @since 4.1.5
+	 *
+	 * @param int $event_code
+	 * @param WP_Post $post
+	 * @param string[] $tags_changed
+	 */
+	private function report_tags_change_event( $event_code, $post, $tags_changed ) {
+		$editor_link = $this->get_editor_link( $post );
+		$post_status = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
+		$this->plugin->alerts->Trigger(
+			$event_code,
+			array(
+				'PostID'             => $post->ID,
+				'PostType'           => $post->post_type,
+				'PostStatus'         => $post_status,
+				'PostTitle'          => $post->post_title,
+				'PostDate'           => $post->post_date,
+				'PostUrl'            => get_permalink( $post->ID ),
+				'tag'                => ! empty( $tags_changed ) ? implode( ', ', $tags_changed ) : __('no tags', 'wp-security-audit-log'),
+				$editor_link['name'] => $editor_link['value'],
+			)
+		);
 	}
 
 	/**
@@ -1193,61 +1221,22 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param WP_Post $post - The post.
 	 */
 	protected function check_tags_change( $old_tags, $new_tags, $post ) {
+		$intersection = array_intersect( $old_tags, $new_tags );
+		if ( count( $intersection ) === count( $old_tags ) ) {
+			//  no change, let's leave
+			return;
+		}
+
 		// Check for added tags.
 		$added_tags = array_diff( (array) $new_tags, (array) $old_tags );
+		if ( ! empty( $added_tags ) ) {
+			$this->report_tags_change_event( 2119, $post, $added_tags );
+		}
 
 		// Check for removed tags.
 		$removed_tags = array_diff( (array) $old_tags, (array) $new_tags );
-
-		// Convert tags arrays to string.
-		$old_tags     = implode( ', ', (array) $old_tags );
-		$new_tags     = implode( ', ', (array) $new_tags );
-		$added_tags   = implode( ', ', $added_tags );
-		$removed_tags = implode( ', ', $removed_tags );
-
-		// Declare event variables.
-		$add_event    = '';
-		$remove_event = '';
-		if ( $old_tags !== $new_tags && ! empty( $added_tags ) ) {
-			$add_event   = 2119;
-			$editor_link = $this->get_editor_link( $post );
-			$post_status = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
-			$this->plugin->alerts->Trigger(
-				$add_event,
-				array(
-					'PostID'             => $post->ID,
-					'PostType'           => $post->post_type,
-					'PostStatus'         => $post_status,
-					'PostTitle'          => $post->post_title,
-					'PostDate'           => $post->post_date,
-					'PostUrl'            => get_permalink( $post->ID ),
-					'tag'                => $added_tags ? $added_tags : 'no tags',
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
-		}
-
-		if ( $old_tags !== $new_tags && ! empty( $removed_tags ) ) {
-			$remove_event = 2120;
-			$editor_link  = $this->get_editor_link( $post );
-			$post_status  = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
-			$this->plugin->alerts->Trigger(
-				$remove_event,
-				array(
-					'PostID'             => $post->ID,
-					'PostType'           => $post->post_type,
-					'PostStatus'         => $post_status,
-					'PostTitle'          => $post->post_title,
-					'PostDate'           => $post->post_date,
-					'PostUrl'            => get_permalink( $post->ID ),
-					'tag'                => $removed_tags ? $removed_tags : 'no tags',
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
-		}
-
-		if ( $add_event || $remove_event ) {
-			return 1;
+		if ( ! empty( $removed_tags ) ) {
+			$this->report_tags_change_event( 2120, $post, $removed_tags );
 		}
 	}
 
@@ -1414,21 +1403,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return bool
 	 */
 	public function must_not_contain_events( WSAL_AlertManager $manager ) {
-		if ( $manager->WillOrHasTriggered( 2016 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2048 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2049 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2050 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2119 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2120 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2016 ) ) {
-			return false;
-		} elseif ( $manager->WillOrHasTriggered( 2017 ) ) {
+		if ( $manager->WillOrHasTriggered( 2016 )
+		     || $manager->WillOrHasTriggered( 2048 )
+		     || $manager->WillOrHasTriggered( 2049 )
+		     || $manager->WillOrHasTriggered( 2050 )
+		     || $manager->WillOrHasTriggered( 2119 )
+		     || $manager->WillOrHasTriggered( 2120 )
+		     || $manager->WillOrHasTriggered( 2017 ) ) {
 			return false;
 		}
 		return true;

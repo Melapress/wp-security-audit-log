@@ -184,9 +184,9 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				<?php esc_html_e( 'Have you encountered or noticed any issues while using WP Activity Log plugin?', 'wp-security-audit-log' ); ?>
 				<?php esc_html_e( 'Or you want to report something to us? Click any of the options below to post on the plugin\'s forum or contact our support directly.', 'wp-security-audit-log' ); ?>
 			</p><p>
-				<a class="button" href="https://wordpress.org/support/plugin/wp-security-audit-log" target="_blank"><?php esc_html_e( 'Free Support Forum', 'wp-security-audit-log' ); ?></a>
+				<a class="button" rel="noopener noreferrer" href="https://wordpress.org/support/plugin/wp-security-audit-log" target="_blank"><?php esc_html_e( 'Free Support Forum', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="https://wpactivitylog.com/support/submit-ticket/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=free+support+email" target="_blank"><?php esc_html_e( 'Free Support Email', 'wp-security-audit-log' ); ?></a>
+				<a class="button" rel="noopener noreferrer" href="https://wpactivitylog.com/support/submit-ticket/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=free+support+email" target="_blank"><?php esc_html_e( 'Free Support Email', 'wp-security-audit-log' ); ?></a>
 			</p>
 		</div>
 		<div class="wsal-help-section">
@@ -195,11 +195,11 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				<?php esc_html_e( 'For more technical information about the WP Activity Log plugin please visit the plugin’s knowledge base.', 'wp-security-audit-log' ); ?>
 				<?php esc_html_e( 'Refer to the list of WordPress security events for a complete list of Events and IDs that the plugin uses to keep a log of all the changes in the WordPress activity log.', 'wp-security-audit-log' ); ?>
 			</p><p>
-				<a class="button" href="https://wpactivitylog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+website" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
+				<a class="button" rel="noopener noreferrer" href="https://wpactivitylog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+website" target="_blank"><?php esc_html_e( 'Plugin Website', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="https://wpactivitylog.com/support/kb/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=knowledge+base" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
+				<a class="button" rel="noopener noreferrer" href="https://wpactivitylog.com/support/kb/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=knowledge+base" target="_blank"><?php esc_html_e( 'Knowledge Base', 'wp-security-audit-log' ); ?></a>
 				&nbsp;&nbsp;&nbsp;&nbsp;
-				<a class="button" href="https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=list+events" target="_blank"><?php esc_html_e( 'List of activity logs event IDs', 'wp-security-audit-log' ); ?></a>
+				<a class="button" rel="noopener noreferrer" href="https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=list+events" target="_blank"><?php esc_html_e( 'List of activity logs event IDs', 'wp-security-audit-log' ); ?></a>
 			</p>
 		</div>
 		<div class="wsal-help-section">
@@ -211,14 +211,14 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				<?php esc_html_e( 'We appreciate every star!', 'wp-security-audit-log' ); ?>
 			</p>
 			<p>
-				<a class="rating-link" href="https://en-gb.wordpress.org/plugins/wp-security-audit-log/#reviews" target="_blank">
+				<a class="rating-link" rel="noopener noreferrer" href="https://en-gb.wordpress.org/plugins/wp-security-audit-log/#reviews" target="_blank">
 					<span class="dashicons dashicons-star-filled"></span>
 					<span class="dashicons dashicons-star-filled"></span>
 					<span class="dashicons dashicons-star-filled"></span>
 					<span class="dashicons dashicons-star-filled"></span>
 					<span class="dashicons dashicons-star-filled"></span>
 				</a>
-				<a class="button" href="https://en-gb.wordpress.org/plugins/wp-security-audit-log/#reviews" target="_blank"><?php esc_html_e( 'Rate Plugin', 'wp-security-audit-log' ); ?></a>
+				<a class="button" rel="noopener noreferrer" href="https://en-gb.wordpress.org/plugins/wp-security-audit-log/#reviews" target="_blank"><?php esc_html_e( 'Rate Plugin', 'wp-security-audit-log' ); ?></a>
 			</p>
 		</div>
 		<?php

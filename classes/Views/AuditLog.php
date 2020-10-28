@@ -74,9 +74,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_AjaxSearchSite', array( $this, 'AjaxSearchSite' ) );
 		add_action( 'wp_ajax_AjaxSwitchDB', array( $this, 'AjaxSwitchDB' ) );
 		add_action( 'wp_ajax_wsal_download_failed_login_log', array( $this, 'wsal_download_failed_login_log' ) );
-		add_action( 'wp_ajax_wsal_download_404_log', array( $this, 'wsal_download_404_log' ) );
 		add_action( 'wp_ajax_wsal_freemius_opt_in', array( $this, 'wsal_freemius_opt_in' ) );
-		add_action( 'wp_ajax_wsal_exclude_url', array( $this, 'wsal_exclude_url' ) );
 		add_action( 'wp_ajax_wsal_dismiss_setup_modal', array( $this, 'dismiss_setup_modal' ) );
 		add_action( 'wp_ajax_wsal_dismiss_advert', array( $this, 'wsal_dismiss_advert' ) );
 		add_action( 'wp_ajax_wsal_dismiss_notice_disconnect', array( $this, 'dismiss_notice_disconnect' ) );
@@ -263,13 +261,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			$we_have_addon = array_intersect( $plugin_filenames, $predefined_plugins_check );
 
 			if ( isset( $we_have_addon ) && is_array( $we_have_addon ) ) {
-				$addon_names = '';
-				$i           = 0;
+
 				foreach ( $we_have_addon as $addon ) {
 					$addon_slug         = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) );
-
 					$is_addon_installed = WpSecurityAuditLog::is_plugin_active( $addon_slug );
-
 					if ( $is_addon_installed ) {
 						continue;
 					}
@@ -289,7 +284,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							</div>
 							<div class="addon-content-wrapper">
 								<?php
-								$message = printf(
+								printf(
 									'<p><b>%1$s %2$s %3$s</b></br>%4$s.</br> <a href="%6$s" class="button button-primary">%5$s</a></p>',
 									esc_html__( 'We noticed you have', 'wp-security-audit-log' ),
 									esc_html( $title ),
@@ -491,7 +486,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // @codingStandardsIgnoreLine
 		if ( 'admin.php' !== $pagenow ) {
 			return;
-		} elseif ( 'wsal-auditlog' !== $page ) { // Page is admin.php, now check auditlog page.
+		}
+
+		if ( 'wsal-auditlog' !== $page ) { // Page is admin.php, now check auditlog page.
 			return; // Return if the current page is not auditlog's.
 		}
 
@@ -820,70 +817,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Ajax callback to download 404 log.
-	 */
-	public function wsal_download_404_log() {
-		// Get post array through filter.
-		$nonce    = filter_input( INPUT_POST, 'nonce', FILTER_SANITIZE_STRING );
-		$filename = filter_input( INPUT_POST, 'log_file', FILTER_SANITIZE_STRING );
-
-		// If file name is empty then return error.
-		if ( empty( $filename ) ) {
-			// Nonce verification failed.
-			echo wp_json_encode(
-				array(
-					'success' => false,
-					'message' => esc_html__( 'Log file does not exist.', 'wp-security-audit-log' ),
-				)
-			);
-			die();
-		}
-
-		// Verify nonce.
-		if ( empty( $filename ) || empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal-download-404-log-' . $filename ) ) {
-            // Nonce verification failed.
-			echo wp_json_encode(
-				array(
-					'success' => false,
-					'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
-				)
-			);
-			die();
-		}
-
-        // Get basename to prevent path traversal attack.
-        $filename = basename( $filename );
-
-        // Construct log file path to eliminate the risks of path traversal attack.
-        $log_file_path = $this->_plugin->settings()->get_working_dir_path( '404s' ) . $filename;
-
-        // Request the file.
-        $response = file_get_contents( $log_file_path, true );
-
-        // Check if the response is valid.
-        if ( $response ) {
-            // Return the file body.
-            echo wp_json_encode(
-                array(
-                    'success'      => true,
-                    'filename'     => $filename,
-                    'file_content' => $response,
-                )
-            );
-        } else {
-            // Request failed.
-            echo wp_json_encode(
-                array(
-                    'success' => false,
-                    'message' => esc_html__( 'Request to get log file failed.', 'wp-security-audit-log' ),
-                )
-            );
-        }
-
-		die();
-	}
-
-	/**
 	 * Ajax callback to handle freemius opt in/out.
 	 */
 	public function wsal_freemius_opt_in() {
@@ -1148,50 +1081,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			);
 		}
 		return $pointer;
-	}
-
-	/**
-	 * Method: Ajax request handler to exclude URL from
-	 * the event.
-	 *
-	 * @since 3.2.2
-	 */
-	public function wsal_exclude_url() {
-		// Die if user does not have permission to disable.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
-			echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to exclude this URL.', 'wp-security-audit-log' ) . '</p>';
-			die();
-		}
-
-		// Set filter input args.
-		$filter_input_args = array(
-			'nonce' => FILTER_SANITIZE_STRING,
-			'url'   => FILTER_SANITIZE_STRING,
-		);
-
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST, $filter_input_args );
-
-		if ( ! isset( $post_array['nonce'] ) || ! wp_verify_nonce( $post_array['nonce'], 'wsal-exclude-url-' . $post_array['url'] ) ) {
-			die();
-		}
-
-		$excluded_urls = $this->_plugin->GetGlobalSetting( 'excluded-urls' );
-		if ( isset( $excluded_urls ) && '' !== $excluded_urls ) {
-			$excluded_urls .= ',' . esc_url( $post_array['url'] );
-		} else {
-			$excluded_urls = esc_url( $post_array['url'] );
-		}
-		$this->_plugin->SetGlobalSetting( 'excluded-urls', $excluded_urls );
-		$settings_exclude_url = add_query_arg(
-			array(
-				'page' => 'wsal-settings',
-				'tab'  => 'exclude-objects',
-			),
-			admin_url( 'admin.php' )
-		);
-		echo '<p>URL ' . esc_html( $post_array['url'] ) . ' is no longer being monitored.<br />Enable the monitoring of this URL again from the <a href="' . esc_url( $settings_exclude_url ) . '">Excluded Objects</a> tab in the plugin settings.</p>';
-		die;
 	}
 
 	/**

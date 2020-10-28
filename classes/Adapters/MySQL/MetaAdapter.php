@@ -81,15 +81,6 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 	}
 
 	/**
-	 * Method: Constructor.
-	 *
-	 * @param array $conn - Connection array.
-	 */
-	public function __construct( $conn ) {
-		parent::__construct( $conn );
-	}
-
-	/**
 	 * SQL table options (constraints, foreign keys, indexes etc).
 	 *
 	 * @return string
@@ -99,28 +90,16 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 				. '    KEY occurrence_name (occurrence_id,name)';
 	}
 
-	/**
-	 * Delete metadata by occurrence_id.
-	 *
-	 * @param array $occurence_ids - List of occurrence IDs.
-	 */
-	public function DeleteByOccurenceIds( $occurence_ids ) {
-		if ( ! empty( $occurence_ids ) ) {
-			$sql = 'DELETE FROM ' . $this->GetTable() . ' WHERE occurrence_id IN (' . implode( ',', $occurence_ids ) . ')';
+	public function DeleteByOccurrenceIds( $occurrence_ids ) {
+		if ( ! empty( $occurrence_ids ) ) {
+			$sql = 'DELETE FROM ' . $this->GetTable() . ' WHERE occurrence_id IN (' . implode( ',', $occurrence_ids ) . ')';
 			// Execute query.
 			parent::DeleteQuery( $sql );
 		}
 	}
 
-	/**
-	 * Load metadata by name and occurrence_id.
-	 *
-	 * @param string $meta_name - Metadata name.
-	 * @param string $occurence_id - Metadata occurrence_id.
-	 * @return WSAL_Models_Meta[]
-	 */
-	public function LoadByNameAndOccurenceId( $meta_name, $occurence_id ) {
-		return $this->Load( 'occurrence_id = %d AND name = %s', array( $occurence_id, $meta_name ) );
+	public function LoadByNameAndOccurrenceId( $meta_name, $occurrence_id ) {
+		return $this->Load( 'occurrence_id = %d AND name = %s', array( $occurrence_id, $meta_name ) );
 	}
 
 	/**
@@ -148,6 +127,7 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 	public function create_indexes() {
 		$db_connection = $this->get_connection();
 		// check if an index exists.
+		$index_exists = false;
 		if ( $db_connection->query( 'SELECT COUNT(1) IndexIsThere FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema=DATABASE() AND table_name="' . $this->GetTable() . '" AND index_name="name_value"' ) ) {
 			// query succeeded, does index exist?
 			$index_exists = ( isset( $db_connection->last_result[0]->IndexIsThere ) ) ? $db_connection->last_result[0]->IndexIsThere : false;

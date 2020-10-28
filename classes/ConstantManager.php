@@ -126,7 +126,7 @@ class WSAL_ConstantManager {
 			}
 
 			// If we got matches then get the last one in the array,
-			if ( count( $possible_matches ) >= 1 ) {
+			if ( ! empty( $possible_matches ) ) {
 				return end( $possible_matches );
 			}
 		}

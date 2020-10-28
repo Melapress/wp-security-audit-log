@@ -50,8 +50,20 @@ interface WSAL_Connector_ConnectorInterface {
 
 	/**
 	 * Install all.
+	 *
+	 * @param bool $is_external_database
 	 */
-	public function installAll();
+	public function installAll( $is_external_database = false );
+
+	/**
+	 * Install single.
+	 *
+	 * @param $class_name
+	 * @param bool $is_external_database
+	 *
+	 * @since 4.1.4.1
+	 */
+	public function installSingle( $class_name, $is_external_database = false );
 
 	/**
 	 * Uninstall all.

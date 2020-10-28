@@ -85,15 +85,6 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	public $is_migrated = false;
 
 	/**
-	 * Method: Constructor.
-	 *
-	 * @param array $conn - Connection array.
-	 */
-	public function __construct( $conn ) {
-		parent::__construct( $conn );
-	}
-
-	/**
 	 * SQL table options (constraints, foreign keys, indexes etc).
 	 *
 	 * @return string
@@ -289,27 +280,6 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 			GROUP BY occurrence.id
 			ORDER BY created_on DESC',
 			array( $post_id )
-		);
-	}
-
-	/**
-	 * Gets occurrences of the same type by IP within specified time frame.
-	 *
-	 * @param array $args - Query Arguments.
-	 * @return WSAL_Models_Occurrence[]
-	 */
-	public function CheckAlert404( $args = array() ) {
-		$tt2 = new WSAL_Adapters_MySQL_Meta( $this->connection );
-		return $this->LoadMultiQuery(
-			'SELECT occurrence.* FROM `' . $this->GetTable() . '` occurrence
-			INNER JOIN `' . $tt2->GetTable() . '` ipMeta on ipMeta.occurrence_id = occurrence.id
-			and ipMeta.name = "ClientIP" and ipMeta.value = %s
-			INNER JOIN `' . $tt2->GetTable() . '` usernameMeta on usernameMeta.occurrence_id = occurrence.id
-			and usernameMeta.name = "Username" and usernameMeta.value = %s
-			WHERE occurrence.alert_id = %d AND occurrence.site_id = %d
-			AND (created_on BETWEEN %d AND %d)
-			GROUP BY occurrence.id',
-			$args
 		);
 	}
 

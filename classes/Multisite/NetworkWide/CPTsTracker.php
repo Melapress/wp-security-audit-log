@@ -133,8 +133,7 @@ final class CPTsTracker extends AbstractTracker {
 			// if the network doesn't have data for this site or the data it
 			// has is differs then perform the update.
 			$network_wide_list = array();
-			foreach ( $network_data['site'] as $site => $list ) {
-				$items_list = array();
+			foreach ( $network_data['site'] as $list ) {
 				// loop through each item in a site and add uniques to a list.
 				foreach ( $list as $item ) {
 					if ( ! in_array( $item, $network_wide_list, true ) ) {

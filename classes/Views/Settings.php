@@ -977,77 +977,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				?>
             </p>
 		<?php else : ?>
-			<table class="form-table wsal-tab">
-				<tbody>
-					<tr>
-						<th><label for="delete1"><?php esc_html_e( 'Activity log retention', 'wp-security-audit-log' ); ?></label></th>
-						<td>
-							<fieldset>
-								<?php $nbld = ! $this->_plugin->settings()->IsPruningDateEnabled(); ?>
-								<label for="delete0">
-									<input type="radio" id="delete0" name="PruneBy" value="" <?php checked( $nbld ); ?> />
-									<?php echo esc_html__( 'Keep all data', 'wp-security-audit-log' ); ?>
-								</label>
-							</fieldset>
-
-							<fieldset>
-								<?php
-								// Check pruning date option.
-								$nbld = $this->_plugin->settings()->IsPruningDateEnabled();
-
-								// Find and replace ` months` in the string.
-								$pruning_date = $this->_plugin->settings()->GetPruningDate();
-								$pruning_date = str_replace( ' months', '', $pruning_date );
-								$pruning_date = str_replace( ' years', '', $pruning_date );
-								$pruning_unit = $this->_plugin->settings()->get_pruning_unit();
-
-								// Check if pruning limit was enabled for backwards compatibility.
-								if ( $this->_plugin->settings()->IsPruningLimitEnabled() ) {
-									$nbld         = true;
-									$pruning_date = '6';
-									$pruning_unit = 'months';
-									$this->_plugin->settings()->SetPruningDate( $pruning_date . ' ' . $pruning_unit );
-									$this->_plugin->settings()->SetPruningDateEnabled( true );
-									$this->_plugin->settings()->SetPruningLimitEnabled( false );
-								}
-								?>
-								<label for="delete1">
-									<input type="radio" id="delete1" name="PruneBy" value="date" <?php checked( $nbld ); ?> />
-									<?php esc_html_e( 'Delete events older than', 'wp-security-audit-log' ); ?>
-								</label>
-								<input type="text" id="PruningDate" name="PruningDate"
-									value="<?php echo esc_attr( $pruning_date ); ?>"
-									onfocus="jQuery('#delete1').attr('checked', true);"
-								/>
-								<select name="pruning-unit" id="pruning-unit">
-									<option value="months" <?php echo ( 'months' === $pruning_unit ) ? 'selected' : false; ?>><?php esc_html_e( 'Months', 'wp-security-audit-log' ); ?></option>
-									<option value="years" <?php echo ( 'years' === $pruning_unit ) ? 'selected' : false; ?>><?php esc_html_e( 'Years', 'wp-security-audit-log' ); ?></option>
-								</select>
-							</fieldset>
-
-							<?php if ( $this->_plugin->settings()->IsPruningDateEnabled() ) : ?>
-								<p class="description">
-									<?php
-									$next = wp_next_scheduled( 'wsal_cleanup' );
-									echo esc_html__( 'The next scheduled purging of activity log data that is older than ', 'wp-security-audit-log' );
-									echo esc_html( $pruning_date . ' ' . $pruning_unit );
-									echo sprintf(
-										' is in %s.',
-										esc_html( human_time_diff( current_time( 'timestamp' ), $next ) )
-									);
-									echo '<!-- ' . esc_html( date( 'dMy H:i:s', $next ) ) . ' --> ';
-									echo esc_html__( 'You can run the purging process now by clicking the button below.', 'wp-security-audit-log' );
-									?>
-								</p>
-								<p>
-									<a class="button-primary" href="<?php echo esc_url( add_query_arg( 'action', 'AjaxRunCleanup', admin_url( 'admin-ajax.php' ) ) ); ?>"><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
-								</p>
-							<?php endif; ?>
-						</td>
-					</tr>
-					<!-- Activity log retention -->
-				</tbody>
-			</table>
+			<?php $this->render_retention_settings_table(); ?>
 		<?php endif; ?>
 		<!-- Activity log retention -->
 
@@ -1245,7 +1175,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<img src="<?php echo trailingslashit( WSAL_BASE_URL ) . 'img/help/website-file-changes-monitor.jpg'; ?>">
 							<h4><?php echo esc_html__( 'Website File Changes Monitor', 'wp-security-audit-log' ); ?></h4>
 							<p><?php echo esc_html__( 'To keep a log of file changes please install Website File Changes Monitor, a plugin which is also developed by us.', 'wp-security-audit-log' ); ?></p><br>
-							<p><button class="install-addon button button-primary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-install-addon' ) ); ?>" data-plugin-slug="website-file-changes-monitor/website-file-changes-monitor.php" data-plugin-download-url="https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip"><?php _e( 'Install plugin now', 'wp-security-audit-log' ); ?></button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span> <a href="https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank" style="margin-left: 15px;"><?php echo esc_html__( 'Learn More', 'wp-security-audit-log' ); ?></a></p>
+							<p><button class="install-addon button button-primary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-install-addon' ) ); ?>" data-plugin-slug="website-file-changes-monitor/website-file-changes-monitor.php" data-plugin-download-url="https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip"><?php _e( 'Install plugin now', 'wp-security-audit-log' ); ?></button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span> <a href="https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" rel="noopener noreferrer" target="_blank" style="margin-left: 15px;"><?php echo esc_html__( 'Learn More', 'wp-security-audit-log' ); ?></a></p>
 						</div>
 					<?php else : ?>
 						<?php
@@ -1384,28 +1314,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
                 </td>
             </tr>
             <!-- Exclude Custom Fields -->
-
-            <tr>
-                <th><label for="ExURLsQueryBox"><?php esc_html_e( 'Exclude Non-Existing URLs:', 'wp-security-audit-log' ); ?></label></th>
-                <td>
-                    <fieldset>
-                        <input type="text" id="ExURLsQueryBox" style="width: 250px;">
-                        <input type="button" id="ExURLsQueryAdd" class="button-primary" value="Add">
-                        <br style="clear: both;"/>
-                        <div id="ExURLsList">
-							<?php foreach ( $this->_plugin->settings()->get_excluded_urls() as $item ) : ?>
-                                <span class="sectoken-<?php echo esc_attr( $this->GetTokenType( $item ) ); ?>">
-										<input type="hidden" name="ExURLss[]" value="<?php echo esc_attr( $item ); ?>"/>
-										<?php echo esc_html( $item ); ?>
-										<a href="javascript:;" title="Remove">&times;</a>
-									</span>
-							<?php endforeach; ?>
-                        </div>
-                    </fieldset>
-                    <p class="description"><?php esc_html_e( 'Add the non existing URLs for which you do not want to be alerted of HTTP 404 errors in the activity log by specifying the complete URL.	Examples below:', 'wp-security-audit-log' ); ?><br><?php echo esc_html__( 'File: ', 'wp-security-audit-log' ) . esc_url( home_url() ) . '/subdirectory/file.php'; ?><br><?php echo esc_html__( 'Directory: ', 'wp-security-audit-log' ) . esc_url( home_url() ) . '/subdirectory/subdirectory2'; ?></p>
-                </td>
-            </tr>
-            <!-- Exclude 404 URLs -->
             </tbody>
         </table>
         <!-- / Exclude Objects Tab -->
@@ -1424,7 +1332,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->_plugin->settings()->SetExcludedMonitoringCustom( isset( $post_array['Customs'] ) ? $post_array['Customs'] : array() );
 		$this->_plugin->settings()->SetExcludedMonitoringIP( isset( $post_array['IpAddrs'] ) ? $post_array['IpAddrs'] : array() );
 		$this->_plugin->settings()->set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
-		$this->_plugin->settings()->set_excluded_urls( isset( $post_array['ExURLss'] ) ? $post_array['ExURLss'] : array() );
 	}
 
 	/**
@@ -1439,7 +1346,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</p>
 
         <h3><?php esc_html_e( 'Where do you want the plugin\'s working directory for log files, reports and other files?', 'wp-security-audit-log' ); ?></h3>
-        <p class="description"><?php esc_html_e( 'The plugin stores the reports it generates, a number of log files ( for example to keep a log of 404 errors), and the request log in this working directory. By default the directory is in the default WordPress uploads directory. Use the below setting to create the working directory in a different location. Note that the plugin requires write permissions to this directory. Please specify the relative path of the directory.', 'wp-security-audit-log' ); ?></p>
+        <p class="description"><?php esc_html_e( 'The plugin stores the reports it generates, a number of log files and the request log in this working directory. By default the directory is in the default WordPress uploads directory. Use the below setting to create the working directory in a different location. Note that the plugin requires write permissions to this directory. Please specify the relative path of the directory.', 'wp-security-audit-log' ); ?></p>
         <table class="form-table wsal-tab">
             <tbody>
             <!-- custom log directory -->
@@ -1635,7 +1542,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			$this->_plugin->settings()->SetDevOptionEnabled( 'r', false );
 		}
 
-        $was_admin_blocking_plugins_support_just_enabled = false;
 		$stealth_mode = isset( $post_array['mwp_stealth_mode'] ) ? $post_array['mwp_stealth_mode'] : false;
 		if ( 'yes' === $stealth_mode ) {
 			if ( ! WpSecurityAuditLog::is_mainwp_active() ) {
@@ -1646,7 +1552,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			$admin_blocking_plugins_support = isset( $post_array['mwp_admin_blocking_support'] ) ? $post_array['mwp_admin_blocking_support'] : false;
 			if ( 'yes' === $admin_blocking_plugins_support ) {
 				$this->_plugin->settings()->set_admin_blocking_plugin_support(true);
-                $was_admin_blocking_plugins_support_just_enabled = true;
 			}
 		} else {
 			$this->_plugin->settings()->deactivate_mainwp_child_stealth_mode();
@@ -1661,7 +1566,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 
 		if ( ! empty( $custom_logging_dir ) ) {
-			$custom_logging_path = trailingslashit( ABSPATH ) . ltrim( trailingslashit( $custom_logging_dir ), '/' );
+			$custom_logging_path = trailingslashit( get_home_path() ) . ltrim( trailingslashit( $custom_logging_dir ), '/' );
 			if ( ! is_dir( $custom_logging_path ) || ! is_readable( $custom_logging_path ) || ! is_writable( $custom_logging_path ) ) {
                 $dir_made = wp_mkdir_p( $custom_logging_path );
                 if ( $dir_made ) {
@@ -1920,4 +1825,85 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
             wp_send_json_error( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );
         }
 	}
+
+    public function render_retention_settings_table( ) {
+        //  check if the retention settings are enforced from the MainWP master site
+        $settings = $this->_plugin->settings();
+        $enforced_settings = $settings->get_mainwp_enforced_settings();
+        $retention_settings_enforced_by_mainwp = array_key_exists( 'pruning_enabled', $enforced_settings );
+        ?>
+        <table class="form-table wsal-tab">
+            <tbody>
+            <tr>
+                <th><label for="delete1"><?php esc_html_e( 'Activity log retention', 'wp-security-audit-log' ); ?></label></th>
+                <td>
+                    <fieldset>
+                        <?php $nbld = ! $this->_plugin->settings()->IsPruningDateEnabled(); ?>
+                        <label for="delete0">
+                            <input type="radio" id="delete0" name="PruneBy" value="" <?php checked( $nbld ); ?><?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?> />
+                            <?php echo esc_html__( 'Keep all data', 'wp-security-audit-log' ); ?>
+                        </label>
+                    </fieldset>
+
+                    <fieldset>
+                        <?php
+                        // Check pruning date option.
+                        $nbld = $this->_plugin->settings()->IsPruningDateEnabled();
+
+                        // Find and replace ` months` in the string.
+                        $pruning_date = $this->_plugin->settings()->GetPruningDate();
+                        $pruning_date = str_replace( ' months', '', $pruning_date );
+                        $pruning_date = str_replace( ' years', '', $pruning_date );
+                        $pruning_unit = $this->_plugin->settings()->get_pruning_unit();
+
+                        // Check if pruning limit was enabled for backwards compatibility.
+                        if ( $this->_plugin->settings()->IsPruningLimitEnabled() ) {
+                            $nbld         = true;
+                            $pruning_date = '6';
+                            $pruning_unit = 'months';
+                            $this->_plugin->settings()->SetPruningDate( $pruning_date . ' ' . $pruning_unit );
+                            $this->_plugin->settings()->SetPruningDateEnabled( true );
+                            $this->_plugin->settings()->SetPruningLimitEnabled( false );
+                        }
+                        ?>
+                        <label for="delete1">
+                            <input type="radio" id="delete1" name="PruneBy" value="date" <?php checked( $nbld ); ?><?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?> />
+                            <?php esc_html_e( 'Delete events older than', 'wp-security-audit-log' ); ?>
+                        </label>
+                        <input type="text" id="PruningDate" name="PruningDate"
+                               value="<?php echo esc_attr( $pruning_date ); ?>"
+                               onfocus="jQuery('#delete1').attr('checked', true);"
+                            <?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?>
+                        />
+                        <select name="pruning-unit" id="pruning-unit"<?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?> >
+                            <option value="months" <?php echo ( 'months' === $pruning_unit ) ? 'selected' : false; ?>><?php esc_html_e( 'Months', 'wp-security-audit-log' ); ?></option>
+                            <option value="years" <?php echo ( 'years' === $pruning_unit ) ? 'selected' : false; ?>><?php esc_html_e( 'Years', 'wp-security-audit-log' ); ?></option>
+                        </select>
+                    </fieldset>
+
+                    <?php if ( $this->_plugin->settings()->IsPruningDateEnabled() ) : ?>
+                        <p class="description">
+                            <?php
+                            $next = wp_next_scheduled( 'wsal_cleanup' );
+                            echo esc_html__( 'The next scheduled purging of activity log data that is older than ', 'wp-security-audit-log' );
+                            echo esc_html( $pruning_date . ' ' . $pruning_unit );
+                            echo sprintf(
+                                ' is in %s.',
+                                esc_html( human_time_diff( current_time( 'timestamp' ), $next ) )
+                            );
+                            echo '<!-- ' . esc_html( date( 'dMy H:i:s', $next ) ) . ' --> ';
+                            echo esc_html__( 'You can run the purging process now by clicking the button below.', 'wp-security-audit-log' );
+                            ?>
+                        </p>
+                        <p>
+                            <a class="button-primary" href="<?php echo esc_url( add_query_arg( 'action', 'AjaxRunCleanup', admin_url( 'admin-ajax.php' ) ) ); ?>"><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
+                        </p>
+                    <?php endif; ?>
+                </td>
+            </tr>
+            <!-- Activity log retention -->
+            </tbody>
+        </table>
+        <?php
+    }
 }

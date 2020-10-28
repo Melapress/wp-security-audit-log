@@ -209,13 +209,21 @@ td.column-user {
 }
 .dark-tooltip.small{
 	margin-left: 10px;
-	font-size:13px;
-	padding:5px 10px;
-	max-width:150px;
+	font-size: 13px;
+	padding: 16px 16px;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
+	max-width: 280px;
 }
+.dark-tooltip.small > div {
+	line-height: 1.6;
+	margin-bottom: 10px;
+}
+ .dark-tooltip.small > div strong {
+	margin-bottom: 10px;
+	display: inline-block;
+ }
 .dark-tooltip.medium{
 	margin-left: -15px;
 	font-size:13px;

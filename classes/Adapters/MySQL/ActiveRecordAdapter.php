@@ -63,15 +63,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Returns the model class for adapter.
-	 *
-	 * @throws RuntimeException - Throw exception if the function is not overriden.
-	 */
-	public function GetModel() {
-		throw new RuntimeException( 'GetModel() should have been overridden in ' . get_class( $this ) );
-	}
-
-	/**
 	 * Returns table name.
 	 *
 	 * @return string
@@ -179,8 +170,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
 		// Query table exists.
 		$table_exists_query = "SHOW TABLES LIKE '" . $this->GetTable() . "'";
-		$result             = $_wpdb->query( $table_exists_query );
-		return $result;
+		return $_wpdb->query( $table_exists_query );
 	}
 
 	/**
@@ -223,10 +213,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
 		$result = $_wpdb->replace( $this->GetTable(), $data, $format );
 
-		if ( false !== $result ) {
-			if ( $_wpdb->insert_id ) {
-				$copy->setId( $_wpdb->insert_id );
-			}
+		if ( false !== $result && $_wpdb->insert_id ) {
+			$copy->setId( $_wpdb->insert_id );
 		}
 		return $result;
 	}
@@ -235,20 +223,24 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * Load record from DB (Single row).
 	 *
 	 * @param string $cond - (Optional) Load condition.
-	 * @param array  $args - (Optional) Load condition arguments.
+	 * @param array $args - (Optional) Load condition arguments.
+	 *
+	 * @return array
 	 */
 	public function Load( $cond = '%d', $args = array( 1 ) ) {
 		$_wpdb = $this->connection;
 		$sql   = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
-		$data  = $_wpdb->get_row( $sql, ARRAY_A );
-		return $data;
+		return $_wpdb->get_row( $sql, ARRAY_A );
 	}
 
 	/**
 	 * Load records from DB (Multi rows).
 	 *
 	 * @param string $cond Load condition.
-	 * @param array  $args (Optional) Load condition arguments.
+	 * @param array $args (Optional) Load condition arguments.
+	 *
+	 * @return array
+	 * @throws Exception
 	 */
 	public function LoadArray( $cond, $args = array() ) {
 		$_wpdb  = $this->connection;
@@ -268,32 +260,34 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 */
 	public function Delete( $active_record ) {
 		$_wpdb  = $this->connection;
-		$result = $_wpdb->delete(
+		return $_wpdb->delete(
 			$this->GetTable(),
 			$active_record->getId()
 		);
-		return $result;
 	}
 
 	/**
 	 * Delete records in DB matching a query.
 	 *
 	 * @param string $query Full SQL query.
-	 * @param array  $args (Optional) Query arguments.
+	 * @param array $args (Optional) Query arguments.
+	 *
+	 * @return int|bool
 	 */
 	public function DeleteQuery( $query, $args = array() ) {
 		$_wpdb  = $this->connection;
 		$sql    = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
-		$result = $_wpdb->query( $sql );
-		return $result;
+		return $_wpdb->query( $sql );
 	}
 
 	/**
 	 * Load multiple records from DB.
 	 *
 	 * @param string $cond (Optional) Load condition (eg: 'some_id = %d' ).
-	 * @param array  $args (Optional) Load condition arguments (rg: array(45) ).
+	 * @param array $args (Optional) Load condition arguments (rg: array(45) ).
+	 *
 	 * @return self[] List of loaded records.
+	 * @throws Exception
 	 */
 	public function LoadMulti( $cond, $args = array() ) {
 		$_wpdb  = $this->connection;
@@ -334,7 +328,6 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 */
 	public function Count( $cond = '%d', $args = array( 1 ) ) {
 		$_wpdb = $this->connection;
-		$class = get_called_class();
 		$sql   = $_wpdb->prepare( 'SELECT COUNT(*) FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
 		return (int) $_wpdb->get_var( $sql );
 	}
@@ -356,12 +349,13 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * Similar to LoadMulti but allows the use of a full SQL query.
 	 *
 	 * @param string $query Full SQL query.
-	 * @param array  $args (Optional) Query arguments.
+	 * @param array $args (Optional) Query arguments.
+	 *
 	 * @return array List of loaded records.
+	 * @throws Exception
 	 */
 	public function LoadMultiQuery( $query, $args = array() ) {
 		$_wpdb  = $this->connection;
-		$class  = get_called_class();
 		$result = array();
 		$sql    = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
 		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
@@ -410,6 +404,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 				case is_object( $copy->$key ):
 					$sql .= $key . ' LONGTEXT NOT NULL,' . PHP_EOL;
 					break;
+				default:
 			}
 		}
 
@@ -472,16 +467,19 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	/**
 	 * Function used in WSAL reporting extension.
 	 *
-	 * @param int    $_site_id - Site ID.
-	 * @param int    $_user_id - User ID.
+	 * @param int $_site_id - Site ID.
+	 * @param int $_user_id - User ID.
 	 * @param string $_role_name - User role.
-	 * @param int    $_alert_code - Alert code.
-	 * @param int    $_start_timestamp - From created_on.
-	 * @param int    $_end_timestamp - To created_on.
-	 * @param int    $_next_date - (Optional) Created on >.
-	 * @param int    $_limit - (Optional) Limit.
+	 * @param int $_alert_code - Alert code.
+	 * @param int $_start_timestamp - From created_on.
+	 * @param int $_end_timestamp - To created_on.
+	 * @param int $_next_date - (Optional) Created on >.
+	 * @param int $_limit - (Optional) Limit.
 	 * @param string $_post_types - (Optional) Post types.
 	 * @param string $_post_statuses - (Optional) Post statuses.
+	 * @param string $_objects
+	 * @param string $_event_types
+	 *
 	 * @return array Report results
 	 */
 	public function GetReporting( $_site_id, $_user_id, $_role_name, $_alert_code, $_start_timestamp, $_end_timestamp, $_next_date = null, $_limit = 0, $_post_types = '', $_post_statuses = '', $_objects = '', $_event_types = '' ) {
@@ -511,7 +509,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 				COALESCE(
 					(SELECT replace(t4.value, '\"', '') FROM $table_meta as t4 WHERE t4.name = 'Username' AND t4.occurrence_id = occ.id LIMIT 1),
 					(SELECT replace(t5.value, '\"', '') FROM $table_meta as t5 WHERE t5.name = 'CurrentUserID' AND t5.occurrence_id = occ.id LIMIT 1)
-				) as user_id
+				) as user_id,
+				(SELECT replace(t6.value, '\"', '') FROM $table_meta as t6 WHERE t6.name = 'Object' AND t6.occurrence_id = occ.id LIMIT 1) AS object,
+				(SELECT replace(t7.value, '\"', '') FROM $table_meta as t7 WHERE t7.name = 'EventType' AND t7.occurrence_id = occ.id LIMIT 1) AS event_type
 				FROM $table_occ AS occ
 				JOIN $table_meta AS meta ON meta.occurrence_id = occ.id
 				WHERE
@@ -561,7 +561,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 				COALESCE(
 					(SELECT replace(t4.value, '\"', '') FROM $table_meta as t4 WHERE t4.name = 'Username' AND t4.occurrence_id = occ.id LIMIT 1),
 					(SELECT replace(t5.value, '\"', '') FROM $table_meta as t5 WHERE t5.name = 'CurrentUserID' AND t5.occurrence_id = occ.id LIMIT 1)
-				) as user_id
+				) as user_id,
+				(SELECT replace(t6.value, '\"', '') FROM $table_meta as t6 WHERE t6.name = 'Object' AND t6.occurrence_id = occ.id LIMIT 1) AS object,
+				(SELECT replace(t7.value, '\"', '') FROM $table_meta as t7 WHERE t7.name = 'EventType' AND t7.occurrence_id = occ.id LIMIT 1) AS event_type
 			FROM
 				$table_occ as occ
 			WHERE
@@ -734,8 +736,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$_wpdb->query( "SET @endTimestamp = $_end_timestamp" );
 		$_wpdb->query( "SET @ipAddress = $_ip_address" );
 
-		$count = (int) $_wpdb->get_var( $sql );
-		return $count;
+		return (int) $_wpdb->get_var( $sql );
 	}
 
 	/**
@@ -840,11 +841,12 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		if ( ! empty( $results ) ) {
 			foreach ( $results as $key => $row ) {
 				// Get the display_name only for the first row & if the user_login changed from the previous row.
+				$row->display_name = '';
 				if ( 0 == $key || ( $key > 1 && $results[ ( $key - 1 ) ]->user_login != $row->user_login ) ) {
 					$sql          = "SELECT t5.display_name FROM $wpdb->users AS t5 WHERE t5.user_login = \"$row->user_login\"";
 					$display_name = $wpdb->get_var( $sql );
+					$row->display_name = $display_name;
 				}
-				$row->display_name = $display_name;
 
 				if ( ! isset( $grouped_types[ $row->user_login ] ) ) {
 					$grouped_types[ $row->user_login ] = array(
@@ -903,5 +905,12 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 */
 	public function UpdateQuery( $table, $data, $where ) {
 		return $this->connection->update( $table, $data, $where );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function GetModel() {
+		// implement in subclass
 	}
 }

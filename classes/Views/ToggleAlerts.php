@@ -68,11 +68,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		// Filter $_POST array.
 		$post_array = filter_input_array( INPUT_POST );
 
-		// Assume front end events are disbaled unless we are told otherwise.
+		// Assume front end events are disabled unless we are told otherwise.
 		$frontend_events = array(
 			'register'    => false,
 			'login'       => false,
-			'system'      => false,
 			'woocommerce' => false,
 		);
 
@@ -82,44 +81,19 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		}
 
 		// Save enabled front end events.
-		$this->_plugin->settings()->set_frontend_events( $frontend_events );
+		WSAL_Settings::set_frontend_events( $frontend_events );
 
 		$enabled           = array_map( 'intval', $post_array['alert'] );
 		$disabled          = array();
 		$registered_alerts = $this->_plugin->alerts->GetAlerts();
-
-		// Now we check all registered events for further processing.
-		foreach ( $registered_alerts as $alert ) {
-			// 6023 (user visits 404) is tied to the 'system' checkbox, so if this is not checked,
-			// set 6023 as a disabled event.
-			if ( 6023 === $alert->type ) {
-				if ( $frontend_events['system'] ) {
-					$enabled[] = $alert->type;
-				} else {
-					$disabled[] = $alert->type;
-				}
-			}
-		}
-
 		$disabled = apply_filters( 'wsal_save_settings_disabled_events', $disabled, $registered_alerts, $frontend_events, $enabled );
 
 		// Save the disabled events.
 		$this->_plugin->alerts->SetDisabledAlerts( $disabled );
 
-		$this->_plugin->SetGlobalBooleanSetting( 'log-404', isset( $post_array['log_404'] ) );
-		$this->_plugin->SetGlobalBooleanSetting( 'purge-404-log', isset( $post_array['purge_log'] ) );
-		$this->_plugin->SetGlobalBooleanSetting( 'log-404-referrer', isset( $post_array['log_404_referrer'] ) );
+		// Allow 3rd parties to process and save more of the posted data
+		do_action( 'wsal_togglealerts_process_save_settings', $post_array );
 
-		$this->_plugin->SetGlobalBooleanSetting( 'log-visitor-404', isset( $post_array['log_visitor_404'] ) );
-		$this->_plugin->SetGlobalBooleanSetting( 'purge-visitor-404-log', isset( $post_array['purge_visitor_log'] ) );
-		$this->_plugin->SetGlobalBooleanSetting( 'log-visitor-404-referrer', isset( $post_array['log_visitor_404_referrer'] ) );
-		$this->_plugin->SetGlobalBooleanSetting( 'wc-all-stock-changes', isset( $post_array['wc_all_stock_changes'] ) );
-
-		$this->_plugin->settings()->Set404LogLimit( $post_array['user_404Limit'] );
-		$this->_plugin->settings()->SetVisitor404LogLimit( $post_array['visitor_404Limit'] );
-
-		$this->_plugin->settings()->set_failed_login_limit( $post_array['log_failed_login_limit'] );
-		$this->_plugin->settings()->set_visitor_failed_login_limit( $post_array['log_visitor_failed_login_limit'] );
 	}
 
 	/**
@@ -178,19 +152,24 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$is_custom       = ! empty( $events_diff ) ? true : false; // If difference is not empty then mode is custom.
 		$log_details     = $this->_plugin->GetGlobalSetting( 'details-level', false ); // Get log level option.
 
-		$subcat_alerts   = array( 1004, 2010, 2111, 9007, 9105, 9047 );
+		$subcat_alerts   = array( 1004, 2010, 2111 );
 
 		// Allow further items to be added externally.
 		$subcat_alerts = apply_filters( 'wsal_togglealerts_sub_category_events', $subcat_alerts );
 
-		$obsolete_events = array( 9999, 2126, 6023, 9011, 9070, 9075, 4013 );
+		$obsolete_events = array( 9999, 2126, 9011, 9070, 9075, 4013 );
+
+        //  check if the disabled events are enforced from the MainWP master site
+        $settings = $this->_plugin->settings();
+        $enforced_settings = $settings->get_mainwp_enforced_settings();
+        $disabled_events_enforced_by_mainwp = array_key_exists( 'disabled_events', $enforced_settings ) && ! empty( $enforced_settings[ 'disabled_events' ]);
 		?>
 		<p>
 			<form method="post" id="wsal-alerts-level">
 				<?php wp_nonce_field( 'wsal-log-level', 'wsal-log-level-nonce' ); ?>
 				<fieldset>
 					<label for="wsal-log-level"><?php esc_html_e( 'Log Level: ', 'wp-security-audit-log' ); ?></label>
-					<select name="wsal-log-level" id="wsal-log-level" onchange="this.form.submit()">
+					<select name="wsal-log-level" id="wsal-log-level" onchange="this.form.submit()"<?php if ( $disabled_events_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?>>
 						<option value="basic"
 							<?php echo ( ! empty( $log_details ) && 'basic' === $log_details ) ? esc_attr( 'selected' ) : false; ?>
 						>
@@ -215,9 +194,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			<?php foreach ( $safe_names as $name => $safe ) : ?>
 				<a href="#tab-<?php echo esc_attr( $safe ); ?>" class="nav-tab"><?php echo esc_html( $name ); ?></a>
 			<?php endforeach; ?>
-			<a href="#tab-frontend-events" class="nav-tab">
-				<?php esc_html_e( 'Front-end Events', 'wp-security-audit-log' ); ?>
-			</a>
 			<a href="#tab-third-party-plugins" class="nav-tab">
 				<?php esc_html_e( 'Third party plugins', 'wp-security-audit-log' ); ?>
 			</a>
@@ -262,7 +238,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 							}
 
 							// Disabled alerts.
-							$disabled = '';
+							$disable_inputs = '';
 
 							// Skip Pages and CPTs section.
 							if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
@@ -279,7 +255,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										if ( 'Multisite User Profiles' === $subname ) {
 											// Check if this is a multisite.
 											if ( ! is_multisite() ) {
-												$disabled = 'disabled';
+												$disable_inputs = 'disabled';
 											}
 										}
 										break;
@@ -288,21 +264,21 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 									case 'WooCommerce Products':
 										// Check if WooCommerce plugin exists.
 										if ( ! WpSecurityAuditLog::is_woocommerce_active() ) {
-											$disabled = 'disabled';
+											$disable_inputs = 'disabled';
 										}
 										break;
 
 									case 'Yoast SEO':
 										// Check if Yoast SEO plugin exists.
 										if ( ! WpSecurityAuditLog::is_wpseo_active() ) {
-											$disabled = 'disabled';
+											$disable_inputs = 'disabled';
 										}
 										break;
 
 									case 'Multisite Network Sites':
 										// Disable if not multisite.
 										if ( ! is_multisite() ) {
-											$disabled = 'disabled';
+											$disable_inputs = 'disabled';
 										}
 										break;
 
@@ -310,11 +286,15 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										break;
 								}
 							}
+
+							if ( $disabled_events_enforced_by_mainwp ) {
+							    $disable_inputs = 'disabled';
+                            }
 							?>
 							<table class="wp-list-table wsal-tab widefat fixed wsal-sub-tab" cellspacing="0" id="tab-<?php echo esc_attr( $this->GetSafeCatgName( $subname ) ); ?>">
 								<thead>
 									<tr>
-										<th width="48"><input type="checkbox" <?php checked( $allactive ); ?> <?php echo esc_attr( $disabled ); ?> /></th>
+										<th width="48"><input type="checkbox" <?php checked( $allactive ); ?> <?php echo esc_attr( $disable_inputs ); ?> /></th>
 										<th width="80"><?php esc_html_e( 'Code', 'wp-security-audit-log' ); ?></th>
 										<th width="100"><?php esc_html_e( 'Severity', 'wp-security-audit-log' ); ?></th>
 										<th><?php esc_html_e( 'Description', 'wp-security-audit-log' ); ?></th>
@@ -328,7 +308,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											</td>
 										</tr>
 									<?php elseif ( __( 'WooCommerce', 'wp-security-audit-log' ) === $subname || __( 'WooCommerce Products', 'wp-security-audit-log' ) === $subname ) : ?>
-										<?php if ( ! empty( $disabled ) ) : ?>
+										<?php if ( ! empty( $disable_inputs ) ) : ?>
 											<tr>
 												<td colspan="4">
 													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'The plugin WooCommerce is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
@@ -348,7 +328,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											</td>
 										</tr>
 									<?php elseif ( __( 'MultiSite', 'wp-security-audit-log' ) === $subname ) : ?>
-										<?php if ( ! empty( $disabled ) ) : ?>
+										<?php if ( ! empty( $disable_inputs ) ) : ?>
 											<tr>
 												<td colspan="4">
 													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'Your website is a single site so the multisite events have been disabled.', 'wp-security-audit-log' ); ?></p>
@@ -386,6 +366,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											case false:
 												$attrs = 'title="' . __( 'Not Available', 'wp-security-audit-log' ) . '" class="alert-unavailable"';
 												break;
+                                            default:
+	                                            //  fallback for any other cases would go here
+	                                            break;
 										}
 										if ( in_array( $alert->type, $subcat_alerts, true ) ) {
 											?>
@@ -393,22 +376,23 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												<td colspan="4">
 													<h3 class="sub-category">
 														<?php
-														if ( 1004 === $alert->type ) {
-															esc_html_e( 'User Sessions', 'wp-security-audit-log' );
-														} elseif ( 2010 === $alert->type ) {
-															esc_html_e( 'Files', 'wp-security-audit-log' );
-														} elseif ( 2111 === $alert->type ) {
-															esc_html_e( 'Post Settings', 'wp-security-audit-log' );
-														} elseif ( 9007 === $alert->type ) {
-															esc_html_e( 'Product Admin', 'wp-security-audit-log' );
-														} elseif ( 9105 === $alert->type ) {
-															esc_html_e( 'Product Stock Changes', 'wp-security-audit-log' );
-														} elseif ( 9047 === $alert->type ) {
-															esc_html_e( 'Product Attributes', 'wp-security-audit-log' );
-														}
+                            $subcat_title = '';
+                            switch ( $alert->type ) {
+                                case 1004:
+                                    $subcat_title = esc_html__( 'User Sessions', 'wp-security-audit-log' );
+                                    break;
+                                    case 2010:
+                                    $subcat_title = esc_html__( 'Files', 'wp-security-audit-log' );
+                                    break;
+                                case 2011:
+                                    $subcat_title = esc_html__( 'Post Settings', 'wp-security-audit-log' );
+                                    break;
+                                default:
+                                    break;
+                            }
 
 														// Allow further titles to be added externally.
-														$subcat_title = apply_filters( 'wsal_togglealerts_sub_category_titles', $alert->type );
+														$subcat_title = apply_filters( 'wsal_togglealerts_sub_category_titles', $subcat_title, $alert->type );
 														if ( $subcat_title ) {
 															echo esc_html( $subcat_title );
 														}
@@ -428,8 +412,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													<?php checked( $active[ $alert->type ] ); ?>
 													value="<?php echo esc_attr( (int) $alert->type ); ?>"
 													<?php
-													if ( ! empty( $disabled ) ) {
-														echo esc_attr( $disabled );
+													if ( ! empty( $disable_inputs ) ) {
+														echo esc_attr( $disable_inputs );
 													}
 													?>
 													<?php echo ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) ? 'onclick="wsal_toggle_file_changes(this)"' : false; ?>
@@ -463,39 +447,32 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<td><?php echo esc_html( $alert->desc ); ?></td>
 										</tr>
 										<?php
-										if ( 6007 === $alert->type ) {
-											$log_404          = $this->_plugin->GetGlobalBooleanSetting( 'log-404' );
-											$purge_log        = $this->_plugin->GetGlobalBooleanSetting( 'purge-404-log' );
-											$log_404_referrer = $this->_plugin->GetGlobalBooleanSetting( 'log-404-referrer', true );
+										if ( 1000 === $alert->type ) {
+											$frontend_events        = WSAL_Settings::get_frontend_events();
 											?>
 											<tr>
 												<td></td>
-												<td>
-													<input name="log_404" type="checkbox" class="check_log" value="1"
-														<?php checked( $log_404 ); ?> />
+												<td><input type="checkbox" name="frontend-events[login]" id="frontend-events-login" value="1" <?php checked( $frontend_events['login'] ); ?>></td>
+												<td colspan="2">
+													<label for="frontend-events-login"><?php esc_html_e( 'Keep a log when users login to the website from other login pages / forms other than the default WordPress login page.', 'wp-security-audit-log' ); ?></label>
 												</td>
-												<td colspan="2"><?php esc_html_e( 'Capture 404 requests to file (the log file are created in the /wp-content/uploads/wp-activity-log/404s/ directory)', 'wp-security-audit-log' ); ?></td>
-											</tr>
-											<tr>
-												<td></td>
-												<td>
-													<input name="purge_log" type="checkbox" class="check_log" value="1"
-														<?php checked( $purge_log ); ?> />
-												</td>
-												<td colspan="2"><?php esc_html_e( 'Purge log files older than one month', 'wp-security-audit-log' ); ?></td>
-											</tr>
-											<tr>
-												<td></td>
-												<td colspan="1"><input type="number" id="user_404Limit" name="user_404Limit" value="<?php echo esc_attr( $this->_plugin->settings()->Get404LogLimit() ); ?>" /></td>
-												<td colspan="2"><?php esc_html_e( 'Number of 404 Requests to Log. By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests.', 'wp-security-audit-log' ); ?></td>
-											</tr>
-											<tr>
-												<td></td>
-												<td><input name="log_404_referrer" type="checkbox" class="check_log" value="1" <?php checked( $log_404_referrer ); ?>></td>
-												<td colspan="2"><?php esc_html_e( 'Record the referrer that generated the 404 error.', 'wp-security-audit-log' ); ?></td>
 											</tr>
 											<?php
 										}
+
+										if ( 4000 === $alert->type ) {
+											$frontend_events        = WSAL_Settings::get_frontend_events();
+											?>
+											<tr>
+												<td></td>
+												<td><input type="checkbox" name="frontend-events[register]" id="frontend-events-register" value="1" <?php checked( $frontend_events['register'] ); ?>></td>
+												<td colspan="2">
+													<label for="frontend-events-register"><?php esc_html_e( 'Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress.', 'wp-security-audit-log' ); ?></label>
+												</td>
+											</tr>
+											<?php
+										}
+
 										if ( 1002 === $alert->type ) {
 											$log_failed_login_limit = (int) $this->_plugin->GetGlobalSetting( 'log-failed-login-limit', 10 );
 											$log_failed_login_limit = ( -1 === $log_failed_login_limit ) ? '0' : $log_failed_login_limit;
@@ -522,32 +499,16 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											</tr>
 											<?php
 										}
-										if ( 9019 === $alert->type ) {
-											$wc_all_stock_changes = $this->_plugin->GetGlobalBooleanSetting( 'wc-all-stock-changes', true );
-											?>
-											<tr>
-												<td></td>
-												<td>
-													<input name="wc_all_stock_changes" type="checkbox" id="wc_all_stock_changes" value="1" <?php checked( $wc_all_stock_changes ); ?> />
-												</td>
-												<td colspan="2"><?php esc_html_e( 'Log all stock changes. Disable this setting to only keep a log of stock changes done manually via the WooCommerce dashboard. Therefore automated stock changes typically done via customers placing orders or via other plugins will not be logged.', 'wp-security-audit-log' ); ?></td>
-											</tr>
-											<?php
-										}
+
+										do_action( 'wsal_togglealerts_append_content_to_toggle', $alert->type );
 									}
 
 									// File integrity scan link.
 									if ( __( 'Monitor File Changes', 'wp-security-audit-log' ) === $subname && ! defined( 'WFCM_PLUGIN_FILE' ) ) :
-										$wsal_settings_page = '';
 										$redirect_args      = array(
 											'page' => 'wsal-settings',
 											'tab'  => 'file-changes',
 										);
-										if ( ! is_multisite() ) {
-											$wsal_settings_page = add_query_arg( $redirect_args, admin_url( 'admin.php' ) );
-										} else {
-											$wsal_settings_page = add_query_arg( $redirect_args, network_admin_url( 'admin.php' ) );
-										}
 										?>
 										<tr>
 											<td>
@@ -555,7 +516,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													<img src="<?php echo trailingslashit( WSAL_BASE_URL ) . 'img/help/website-file-changes-monitor.jpg'; ?>">
 													<h4><?php echo esc_html__( 'Website File Changes Monitor', 'wp-security-audit-log' ); ?></h4>
 													<p><?php echo esc_html__( 'To keep a log of file changes please install Website File Changes Monitor, a plugin which is also developed by us.', 'wp-security-audit-log' ); ?></p><br>
-													<p><button class="install-addon button button-primary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-install-addon' ) ); ?>" data-plugin-slug="website-file-changes-monitor/website-file-changes-monitor.php" data-plugin-download-url="https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip"><?php _e( 'Install plugin now', 'wp-security-audit-log' ); ?></button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span> <a href="https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank" style="margin-left: 15px;"><?php echo esc_html__( 'Learn More', 'wp-security-audit-log' ); ?></a></p>
+													<p><button class="install-addon button button-primary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-install-addon' ) ); ?>" data-plugin-slug="website-file-changes-monitor/website-file-changes-monitor.php" data-plugin-download-url="https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip"><?php _e( 'Install plugin now', 'wp-security-audit-log' ); ?></button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span> <a href="https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" rel="noopener noreferrer" target="_blank" style="margin-left: 15px;"><?php echo esc_html__( 'Learn More', 'wp-security-audit-log' ); ?></a></p>
 												</div>
 											</td>
 										</tr>
@@ -574,72 +535,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						?>
 					</div>
 				<?php endforeach; ?>
-				<?php
-				$frontend_events = WSAL_Settings::get_frontend_events();
-				?>
-				<table id="tab-frontend-events" class="form-table wp-list-table wsal-tab widefat fixed"  style="display: table;" cellspacing="0">
-					<tbody>
-						<tr>
-							<td>
-								<p><?php esc_html_e( 'This plugin keeps a log of what your website users are doing when they are logged in. On top of that it can also keep a log of some important events of (non logged in) website visitors. Use the below settings to enable / disable any of the front-end sensors:', 'wp-security-audit-log' ); ?></p>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<h3 style="margin:0"><?php esc_html_e( 'Front-end users registrations', 'wp-security-audit-log' ); ?></h3>
-							</td>
-						</tr>
-						<tr>
-							<th><input type="checkbox" name="frontend-events[register]" id="frontend-events-register" value="1" <?php checked( $frontend_events['register'] ); ?>></th>
-							<td>
-								<label for="frontend-events-register"><?php esc_html_e( 'Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress.', 'wp-security-audit-log' ); ?></label>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<h3 style="margin:0"><?php esc_html_e( 'Front-end users logins', 'wp-security-audit-log' ); ?></h3>
-							</td>
-						</tr>
-						<tr>
-							<th><input type="checkbox" name="frontend-events[login]" id="frontend-events-login" value="1" <?php checked( $frontend_events['login'] ); ?>></th>
-							<td>
-								<label for="frontend-events-login"><?php esc_html_e( 'Keep a log when users login to the website from other login pages / forms other than the default WordPress login page.', 'wp-security-audit-log' ); ?></label>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<h3 style="margin:0"><?php esc_html_e( 'Website visitors 404 errors', 'wp-security-audit-log' ); ?></h3>
-							</td>
-						</tr>
-						<tr>
-							<th><input type="checkbox" name="frontend-events[system]" id="frontend-events-system" value="1" <?php checked( $frontend_events['system'] ); ?>></th>
-							<td >
-								<label for="frontend-events-system"><?php esc_html_e( 'Event ID 6023: Keep a log when a website visitor requests a non-existing URL (HTTP 404 response error).', 'wp-security-audit-log' ); ?></label>
-							</td>
-						</tr>
-						<?php
-						$log_visitor_404          = $this->_plugin->GetGlobalBooleanSetting( 'log-visitor-404' );
-						$purge_visitor_log        = $this->_plugin->GetGlobalBooleanSetting( 'purge-visitor-404-log' );
-						$log_visitor_404_referrer = $this->_plugin->GetGlobalBooleanSetting( 'log-visitor-404-referrer', 'on' );
-						?>
-						<tr>
-							<td><input name="log_visitor_404" type="checkbox" class="check_visitor_log" value="1" <?php checked( $log_visitor_404 ); ?> /></td>
-							<td><?php esc_html_e( 'Capture 404 requests to file (the log file are created in the /wp-content/uploads/wp-activity-log/404s/ directory)', 'wp-security-audit-log' ); ?></td>
-						</tr>
-						<tr>
-							<td><input name="purge_visitor_log" type="checkbox" class="check_visitor_log" value="1" <?php checked( $purge_visitor_log ); ?> /></td>
-							<td><?php esc_html_e( 'Purge log files older than one month', 'wp-security-audit-log' ); ?></td>
-						</tr>
-						<tr>
-							<td><input type="number" id="visitor_404Limit" name="visitor_404Limit" value="<?php echo esc_attr( $this->_plugin->settings()->GetVisitor404LogLimit() ); ?>" /></td>
-							<td><?php esc_html_e( 'Number of 404 Requests to Log. By default the plugin keeps up to 99 requests to non-existing pages from the same IP address. Increase the value in this setting to the desired amount to keep a log of more or less requests. Note that by increasing this value to a high number, should your website be scanned the plugin will consume more resources to log all the requests.', 'wp-security-audit-log' ); ?></td>
-						</tr>
-						<tr>
-							<td><input name="log_visitor_404_referrer" type="checkbox" class="check_log" value="1" <?php checked( $log_visitor_404_referrer ); ?>></td>
-							<td><?php esc_html_e( 'Record the referrer that generated the 404 error.', 'wp-security-audit-log' ); ?></td>
-						</tr>
-					</tbody>
-				</table>
 				<?php
 					$addons = new WSAL_PluginInstallAndActivate();
 					$addons->render();
@@ -837,45 +732,17 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					jQuery('#wsal-tabs>a:first').click();
 					jQuery('.wsal-sub-tabs>a:first').click();
 				}
-
-				// Specific for alert 6007
-				jQuery("input[value=6007]").on("change", function(){
-					var check = jQuery("input[value=6007]").is(":checked");
-					if(check) {
-						jQuery(".check_log").attr ( "checked" ,"checked" );
-					} else {
-						jQuery(".check_log").removeAttr('checked');
-					}
-				});
-
-				// Specific for alert 6023
-				jQuery("input[value=6023]").on("change", function(){
-					var check = jQuery("input[value=6023]").is(":checked");
-					if(check) {
-						jQuery(".check_visitor_log").attr ( "checked" ,"checked" );
-					} else {
-						jQuery(".check_visitor_log").removeAttr('checked');
-					}
-				});
-
-				// Specific for alert 9019
-				jQuery("input[value=9019]").on("change", function(){
-					var check = jQuery("input[value=9019]").is(":checked");
-					if(check) {
-						jQuery("#wc_all_stock_changes").attr ( "checked" ,"checked" );
-					} else {
-						jQuery("#wc_all_stock_changes").removeAttr('checked');
-					}
-				});
 			});
 
-			jQuery(document).on('closed', toggle_modal, function (event) {
-				if (event.reason && event.reason === 'cancellation') {
-					for ( var index = 0; index < alerts.length; index++ ) {
-						jQuery( alerts[ index ] ).prop( 'checked', false );
+			if (typeof toggle_modal !== 'undefined') {
+				jQuery(document).on('closed', toggle_modal, function (event) {
+					if (event.reason && event.reason === 'cancellation') {
+						for ( var index = 0; index < alerts.length; index++ ) {
+							jQuery( alerts[ index ] ).prop( 'checked', false );
+						}
 					}
-				}
-			});
+				});
+			}
 		</script>
 		<?php
 	}

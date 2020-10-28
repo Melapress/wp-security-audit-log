@@ -13,11 +13,25 @@ window['WsalAuditLogRefreshed'] = function () {
 			}
 			return obj;
 		};
-		var paged = deparam(this.href).paged;
-		if (typeof paged === 'undefined') paged = 1;
-		jQuery('#audit-log-viewer').append(
-			jQuery('<input type="hidden" name="paged"/>').val(paged)
-		).submit();
+		const viewer = jQuery('#audit-log-viewer');
+		const url_params = deparam(this.href);
+		const param_keys = [ 'paged', 'orderby', 'order' ];
+		for ( let index in param_keys ) {
+			const param_name = param_keys[ index ];
+			let param_value = url_params[param_name];
+			if (typeof param_value === 'undefined' && param_name === 'paged') {
+				param_value = 1;
+			}
+			const input_elm = viewer.find('input[name="' + param_name + '"]');
+			if ( input_elm.length === 0 ) {
+				viewer.append('<input type="hidden" name="' + param_name + '" value="' + param_value + '"/>');
+			} else {
+				input_elm.val( param_value );
+			}
+
+		}
+
+		viewer.submit();
 	});
 
 	var modification_alerts = ['1002', '1003', '6007', '6023'];
@@ -187,8 +201,7 @@ function WsalSsasChange(value) {
 }
 
 function WsalDisableCustom(link, meta_key) {
-	var nfe = jQuery(this).parents('div:first');
-	var nonce = jQuery(this).data('disable-custom-nonce');
+	var nonce = jQuery(link).data('disable-custom-nonce');
 	jQuery(link).hide();
 	jQuery.ajax({
 		type: 'POST',
@@ -254,47 +267,12 @@ function download(filename, text) {
 }
 
 /**
- * Onclick event handler to download 404 log file.
- *
- * @param {object} element - Current element.
- */
-function download_404_log(element) {
-	download_nonce = jQuery(element).data('nonce-404'); // Nonce.
-	log_file = jQuery(element).data('log-file'); // Log file URL.
-	site_id = jQuery(element).data('site-id'); // Site ID.
-
-	if (!download_nonce || !log_file) {
-		console.log('Something went wrong!');
-	}
-
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		async: true,
-		dataType: 'json',
-		data: {
-			action: 'wsal_download_404_log',
-			nonce: download_nonce,
-			log_file: log_file,
-			site_id: site_id
-		},
-		success: function (data) {
-			if (data.success) {
-				download(data.filename, data.file_content);
-			} else {
-				console.log(data.message);
-			}
-		}
-	});
-}
-
-/**
  * Onclick event handler to download failed login log file.
  *
  * @param {object} element - Current element.
  */
 function download_failed_login_log(element) {
-	nonce = jQuery(element).data('download-nonce'); // Nonce.
+	var nonce = jQuery(element).data('download-nonce'); // Nonce.
 	alert = jQuery(element).parent().attr('id').substring(5);
 
 	jQuery.ajax({
@@ -342,39 +320,6 @@ function wsal_freemius_opt_in( element ) {
 			console.log( error );
 		}
 	} );
-}
-
-/**
- * Onclick event handler to exclude URL.
- *
- * @param {string} element - Current element.
- * @since 3.2.2
- */
-function wsal_exclude_url(element) {
-	var exclude_nonce = jQuery( element ).data( 'exclude-url-nonce' ); // Nonce.
-	var exclude_url   = jQuery( element ).data( 'exclude-url' ); // Nonce.
-
-	if ( exclude_url ) {
-		jQuery.ajax( {
-			type: 'POST',
-			url: ajaxurl,
-			async: true,
-			data: {
-				action: 'wsal_exclude_url',
-				nonce: exclude_nonce,
-				url: exclude_url
-			},
-			success: function( data ) {
-				var notice = jQuery( '<div class="updated" data-notice-name="notifications-extension"></div>' ).html( data );
-				jQuery( 'h2:first' ).after( notice );
-			},
-			error: function( xhr, textStatus, error ) {
-				console.log( xhr.statusText );
-				console.log( textStatus );
-				console.log( error );
-			}
-		} );
-	}
 }
 
 /**
@@ -559,7 +504,7 @@ jQuery( document ).ready( function() {
 			jQuery( '.wsal-addon-install-trigger' ).attr( 'disabled', true );
 			jQuery( '.wsal-addon-install-trigger:not([data-addon-name="' + jQuery( this ).data( 'addon-name' ) + '"])' ).text( wsalAuditLogArgs.installAddonStrings.otherInstalling );
 			jQuery( button ).text( wsalAuditLogArgs.installAddonStrings.installingText );
-			spinner = document.createElement( 'span' );
+			var spinner = document.createElement( 'span' );
 			jQuery( spinner ).addClass( 'spinner is-active' );
 			jQuery( spinner ).css(
 				{

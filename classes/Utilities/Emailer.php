@@ -87,7 +87,7 @@ class WSAL_Utilities_Emailer {
 	public static function send_email( $email_address, $subject, $content, $headers = '', $attachments = array() ) {
 
 		if ( empty( $email_address ) ) {
-			// Get email adresses even when there is the Username.
+			// Get email addresses even when there is the Username.
 			$email_address = self::get_emails( $email_address );
 		}
 
@@ -110,7 +110,7 @@ class WSAL_Utilities_Emailer {
 	}
 
 	/**
-	 * Get email adresses by usernames.
+	 * Get email addresses by usernames.
 	 *
 	 * @param string $input_email - Comma separated emails.
 	 * @return string
