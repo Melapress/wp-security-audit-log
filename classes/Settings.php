@@ -117,19 +117,11 @@ class WSAL_Settings {
 	protected $_excluded_ip = array();
 
 	/**
-	 * URLs excluded from monitoring.
-	 *
-	 * @var array
-	 * @since 3.2.2
-	 */
-	protected $excluded_urls = array();
-
-	/**
 	 * Alerts enabled in Geek mode.
 	 *
 	 * @var array
 	 */
-	public $geek_alerts = array( 1004, 1005, 1006, 1007, 2023, 2024, 2053, 2054, 2055, 2062, 2100, 2111, 2112, 2124, 2125, 2131, 2132, 2094, 2095, 2043, 2071, 2082, 2083, 2085, 2089, 4014, 4015, 4016, 5010, 5011, 5012, 5019, 5025, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6001, 6002, 6007, 6008, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6023, 6024, 6025 );
+	public $geek_alerts = array( 1004, 1005, 1006, 1007, 2023, 2024, 2053, 2054, 2055, 2062, 2100, 2111, 2112, 2124, 2125, 2131, 2132, 2094, 2095, 2043, 2071, 2082, 2083, 2085, 2089, 4014, 4015, 4016, 5010, 5011, 5012, 5019, 5025, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6001, 6002, 6008, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6024, 6025 );
 
 	/**
 	 * Current screen object.
@@ -165,7 +157,7 @@ class WSAL_Settings {
 		    ( array_key_exists('error', $upload_dir) && ! empty ( $upload_dir['error'] ) )
 		) {
 			//  fallback in case there is a problem with filesystem
-			return '/wp-content/uploads/wp-activity-log/';
+			return WP_CONTENT_DIR . '/uploads/wp-activity-log/';
 		}
 
 		$result = $upload_dir['basedir'] . '/wp-activity-log/';
@@ -324,7 +316,7 @@ class WSAL_Settings {
 	 * @return boolean
 	 */
 	public function IsAnyDevOptionEnabled() {
-		return ! ! $this->_plugin->GetGlobalSetting( 'dev-options', null );
+		return ! empty( $this->_plugin->GetGlobalSetting( 'dev-options', [] ) );
 	}
 
 	/**
@@ -857,6 +849,9 @@ class WSAL_Settings {
 							//  allow access only for super admins and admins
 							$result = in_array('administrator', $user->roles) || ( function_exists( 'is_super_admin' ) && is_super_admin($user->ID) );
 							break;
+						default:
+							//  fallback for any other cases would go here
+							break;
 					}
 				}
 
@@ -1080,31 +1075,6 @@ class WSAL_Settings {
 			$this->_post_types = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'custom-post-types' ) ) ) );
 		}
 		return $this->_post_types;
-	}
-
-	/**
-	 * Set URLs excluded from monitoring.
-	 *
-	 * @param array $urls - Array of URLs.
-	 * @since 3.2.2
-	 */
-	public function set_excluded_urls( $urls ) {
-		$urls                = array_map( 'untrailingslashit', $urls );
-		$urls                = array_unique( $urls );
-		$this->excluded_urls = $urls;
-		$this->_plugin->SetGlobalSetting( 'excluded-urls', esc_html( implode( ',', $this->excluded_urls ) ) );
-	}
-
-	/**
-	 * Get URLs excluded from monitoring.
-	 *
-	 * @since 3.2.2
-	 */
-	public function get_excluded_urls() {
-		if ( empty( $this->excluded_urls ) ) {
-			$this->excluded_urls = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'excluded-urls' ) ) ) );
-		}
-		return $this->excluded_urls;
 	}
 
 	/**
@@ -1377,33 +1347,6 @@ class WSAL_Settings {
 
 	public function GetDisplayName() {
 		return $this->_plugin->GetGlobalSetting( 'display-name' );
-	}
-
-	public function Set404LogLimit( $value ) {
-		$this->_plugin->SetGlobalSetting( 'log-404-limit', abs( $value ) );
-	}
-
-	public function Get404LogLimit() {
-		return $this->_plugin->GetGlobalSetting( 'log-404-limit', 99 );
-	}
-
-	/**
-	 * Sets the 404 log limit for visitor.
-	 *
-	 * @param  int $value - 404 log limit.
-	 * @since  2.6.3
-	 */
-	public function SetVisitor404LogLimit( $value ) {
-		$this->_plugin->SetGlobalSetting( 'log-visitor-404-limit', abs( $value ) );
-	}
-
-	/**
-	 * Get the 404 log limit for visitor.
-	 *
-	 * @since  2.6.3
-	 */
-	public function GetVisitor404LogLimit() {
-		return $this->_plugin->GetGlobalSetting( 'log-visitor-404-limit', 99 );
 	}
 
 	/**
@@ -1740,7 +1683,7 @@ class WSAL_Settings {
 
 			case '%MetaLink%' == $name:
 				if ( ! empty( $value ) ) {
-					return "<a href=\"#\" data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"WsalDisableCustom(this, '" . $value . "');\"> Exclude Custom Field from the Monitoring</a>";
+					return "<a href=\"#\" data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"return WsalDisableCustom(this, '" . $value . "');\"> Exclude Custom Field from the Monitoring</a>";
 				} else {
 					return '';
 				}
@@ -1785,23 +1728,6 @@ class WSAL_Settings {
 					return '<i>unknown</i>';
 				}
 
-			case '%LinkFile%' === $name:
-				if ( ! $this->is_current_page( 'dashboard' ) ) {
-					if ( 'NULL' != $value ) {
-						$site_id = $this->get_view_site_id(); // Site id for multisite.
-						return '<a href="javascript:;" onclick="download_404_log( this )" data-log-file="' . esc_attr( $value ) . '" data-site-id="' . esc_attr( $site_id ) . '" data-nonce-404="' . esc_attr( wp_create_nonce( 'wsal-download-404-log-' . $value ) ) . '" title="' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '</a>';
-					} else {
-						return 'Click <a href="' . esc_url( add_query_arg( 'page', 'wsal-togglealerts', admin_url( 'admin.php' ) ) ) . '">here</a> to log such requests to file';
-					}
-				}
-				return '';
-
-			case '%URL%' === $name:
-				if ( ! $this->is_current_page( 'dashboard' ) ) {
-					return ' or <a href="javascript:;" data-exclude-url="' . esc_url( $value ) . '" data-exclude-url-nonce="' . wp_create_nonce( 'wsal-exclude-url-' . $value ) . '" onclick="wsal_exclude_url( this )">exclude this URL</a> from being reported.';
-				}
-				return '';
-
 			case '%PostUrlIfPlublished%' === $name:
 				// get connection.
 				$db_config = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
@@ -1809,7 +1735,7 @@ class WSAL_Settings {
 				$wsal_db   = $connector->getConnection(); // Get DB connection.
 				// get values needed.
 				$meta_adapter = new WSAL_Adapters_MySQL_Meta( $wsal_db );
-				$post_id      = $meta_adapter->LoadByNameAndOccurenceId( 'PostID', $occ_id );
+				$post_id      = $meta_adapter->LoadByNameAndOccurrenceId( 'PostID', $occ_id );
 				$occ_post     = ( isset( $post_id['value'] ) ) ? get_post( $post_id['value'] ) : null;
 				// start with an empty string.
 				$return_value = '';
@@ -2374,19 +2300,15 @@ class WSAL_Settings {
 	 */
 	public static function get_frontend_events() {
 		// Option defaults.
-		$is_woocommerce_active = WpSecurityAuditLog::is_woocommerce_active();
 		$default = array(
 			'register'    => false,
 			'login'       => false,
-			'system'      => false,
-			'woocommerce' => $is_woocommerce_active,
+			'woocommerce' => false,
 		);
 
 		// Get the option.
 		$value = \WSAL\Helpers\Options::get_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $default );
 
-		// Check for WooCommerce in case it is not stored.
-		$value['woocommerce'] = ! isset( $value['woocommerce'] ) ? $is_woocommerce_active : $value['woocommerce'];
 		return $value;
 	}
 
@@ -2396,7 +2318,7 @@ class WSAL_Settings {
 	 * @param array $value - Option values.
 	 * @return bool
 	 */
-	public function set_frontend_events( $value = array() ) {
+	public static function set_frontend_events( $value = array() ) {
 		return \WSAL\Helpers\Options::set_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $value);
 	}
 
@@ -2441,5 +2363,17 @@ class WSAL_Settings {
 	public function get_admin_blocking_plugin_support() {
     	return $this->_plugin->GetGlobalBooleanSetting( 'admin-blocking-plugins-support', false );
 	}
+
+    public function get_mainwp_enforced_settings( ) {
+        return $this->_plugin->GetGlobalSetting( 'mainwp_enforced_settings', [] );
+    }
+
+	public function set_mainwp_enforced_settings( $settings ) {
+	    $this->_plugin->SetGlobalSetting( 'mainwp_enforced_settings', $settings );
+    }
+
+    public function delete_mainwp_enforced_settings( ) {
+        $this->_plugin->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . 'mainwp_enforced_settings' );
+    }
 
 }

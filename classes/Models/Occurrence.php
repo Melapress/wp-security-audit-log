@@ -207,7 +207,6 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 
 				$installer_nonce   = wp_create_nonce( 'wsal-install-addon' );
 				foreach ( $addon_event_codes as $key => $addon ) {
-					$f1 = in_array( $this->alert_id, $addon['event_ids'], true );
 					if ( in_array( $this->alert_id, $addon['event_ids'], true ) ) {
 						// check key and update message here.
 						$message = sprintf(
@@ -223,8 +222,8 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 				}
 				$this->_cachedmessage = isset( $cached_message ) ? $cached_message : sprintf(
 					/* Translators: 1: html that opens a link, 2: html that closes a link. */
-					__( 'Alert message was not available, this may have been a custom alert that no longer exists. Read more about custom events %1$shere%2$s.', 'wp-security-audit-log' ),
-					'<a href="https://wpactivitylog.com/support/kb/create-custom-events-wordpress-activity-log/" target="_blank">',
+					__( 'This type of activity / change is no longer monitored. You can create your own custom event IDs to keep a log of such change. Read more about custom events %1$shere%2$s.', 'wp-security-audit-log' ),
+					'<a href="https://wpactivitylog.com/support/kb/create-custom-events-wordpress-activity-log/" rel="noopener noreferrer" target="_blank">',
 					'</a>'
 				);
 			}
@@ -275,6 +274,9 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 					case 'CurrentUserID' === $meta->name:
 						$data = get_userdata( $meta->value );
 						return $data ? $data->user_login : null;
+					default:
+						//  fallback for any other cases would go here
+						break;
 				}
 			}
 		} else {
@@ -379,16 +381,5 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 */
 	public function GetByPostID( $post_id ) {
 		return $this->getAdapter()->GetByPostID( $post_id );
-	}
-
-	/**
-	 * Gets occurrences of the same type by IP within specified time frame.
-	 *
-	 * @see WSAL_Adapters_MySQL_Occurrence::CheckAlert404()
-	 * @param array $args - Query args.
-	 * @return WSAL_Models_Occurrence[]
-	 */
-	public function CheckAlert404( $args = array() ) {
-		return $this->getAdapter()->CheckAlert404( $args );
 	}
 }

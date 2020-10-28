@@ -19,14 +19,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 4010 Existing user added to a site
  * 4011 User removed from site
  * 4012 New network user created
+ * 5008 Activated theme on network
+ * 5009 Deactivated theme from network
  * 7000 New site added on the network
  * 7001 Existing site archived
  * 7002 Archived site has been unarchived
  * 7003 Deactivated site has been activated
  * 7004 Site has been deactivated
  * 7005 Existing site deleted from network
- * 5008 Activated theme on network
- * 5009 Deactivated theme from network
+ * 7012 Network registration option updated
  *
  * @package Wsal
  * @subpackage Sensors
@@ -56,6 +57,27 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 		add_action( 'delete_blog', array( $this, 'EventDeleteBlog' ) );
 		add_action( 'add_user_to_blog', array( $this, 'EventUserAddedToBlog' ), 10, 3 );
 		add_action( 'remove_user_from_blog', array( $this, 'EventUserRemovedFromBlog' ), 10, 2 );
+		add_action( 'update_site_option_registration', array( $this, 'on_network_registration_option_change'), 10, 4 );
+	}
+
+	/**
+	 * Fires when the network registration option is updated.
+	 *
+	 * @since 4.1.5
+	 *
+	 * @param string $option     Name of the network option.
+	 * @param mixed  $value      Current value of the network option.
+	 * @param mixed  $old_value  Old value of the network option.
+	 * @param int    $network_id ID of the network.
+	 */
+	public function on_network_registration_option_change( $option, $value, $old_value, $network_id ) {
+		$this->plugin->alerts->Trigger(
+			7012,
+			array(
+				'previous_setting' => $old_value,
+				'new_setting' => $value
+			)
+		);
 	}
 
 	/**

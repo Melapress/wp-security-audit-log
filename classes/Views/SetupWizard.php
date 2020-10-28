@@ -188,11 +188,6 @@ final class WSAL_Views_SetupWizard {
 				'content' => array( $this, 'wsal_step_login' ),
 				'save'    => array( $this, 'wsal_step_login_save' ),
 			),
-			'404s'           => array(
-				'name'    => __( '404s', 'wp-security-audit-log' ),
-				'content' => array( $this, 'wsal_step_404s' ),
-				'save'    => array( $this, 'wsal_step_404s_save' ),
-			),
 			'register'       => array(
 				'name'    => __( 'User Registrations', 'wp-security-audit-log' ),
 				'content' => array( $this, 'wsal_step_register' ),
@@ -313,7 +308,7 @@ final class WSAL_Views_SetupWizard {
 			<?php do_action( 'admin_print_styles' ); ?>
 		</head>
 		<body class="wsal-setup wp-core-ui">
-			<h1 id="wsal-logo"><a href="https://wpactivitylog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank"><img src="<?php echo esc_url( $this->wsal->GetBaseUrl() ); ?>/img/wsal-logo-full.png" alt="WP Activity Log" /></a></h1>
+			<h1 id="wsal-logo"><a href="https://wpactivitylog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" rel="noopener noreferrer" target="_blank"><img src="<?php echo esc_url( $this->wsal->GetBaseUrl() ); ?>/img/wsal-logo-full.png" alt="WP Activity Log" /></a></h1>
 		<?php
 	}
 
@@ -546,55 +541,7 @@ final class WSAL_Views_SetupWizard {
 			$login_sensor     = '1' === $login_sensor ? true : false; // Update the sensor option.
 
 			$frontend_sensors['login'] = $login_sensor;
-			$this->wsal->settings()->set_frontend_events( $frontend_sensors );
-		}
-
-		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
-		exit();
-	}
-
-	/**
-	 * Step View: `404s Sensor`
-	 */
-	private function wsal_step_404s() {
-		?>
-		<form method="post" class="wsal-setup-form">
-			<?php wp_nonce_field( 'wsal-step-404s' ); ?>
-			<h4><?php esc_html_e( 'Do you want to keep a log of (non-logged in) visitors’ requests to non-existing URLs which generate a HTTP 404 error response?', 'wp-security-audit-log' ); ?></h4>
-			<fieldset>
-				<label for="wsal-frontend-events-system-yes">
-					<input id="wsal-frontend-events-system-yes" name="wsal-frontend-system" type="radio" value="1">
-					<?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?>
-				</label>
-				<br />
-				<label for="wsal-frontend-events-system-no">
-					<input id="wsal-frontend-events-system-no" name="wsal-frontend-system" type="radio" value="0" checked>
-					<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
-				</label>
-			</fieldset>
-			<!-- Question -->
-			<p class="description"><?php esc_html_e( 'Note: You can change the WordPress activity log retention settings at any time from the plugin settings later on.', 'wp-security-audit-log' ); ?></p>
-			<div class="wsal-setup-actions">
-				<button class="button button-primary" type="submit" name="save_step" value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?></button>
-			</div>
-		</form>
-		<?php
-	}
-
-	/**
-	 * Step Save: `404s Sensor`
-	 */
-	private function wsal_step_404s_save() {
-		// Check nonce.
-		check_admin_referer( 'wsal-step-404s' );
-
-		if ( isset( $_POST['wsal-frontend-system'] ) ) {
-			$frontend_sensors = WSAL_Settings::get_frontend_events(); // Get the frontend sensors setting.
-			$system_sensor    = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-system'] ) );
-			$system_sensor    = '1' === $system_sensor ? true : false; // Update the sensor option.
-
-			$frontend_sensors['system'] = $system_sensor;
-			$this->wsal->settings()->set_frontend_events( $frontend_sensors );
+			WSAL_Settings::set_frontend_events( $frontend_sensors );
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
@@ -643,7 +590,7 @@ final class WSAL_Views_SetupWizard {
 			$register_sensor  = '1' === $register_sensor ? true : false; // Update the sensor option.
 
 			$frontend_sensors['register'] = $register_sensor;
-			$this->wsal->settings()->set_frontend_events( $frontend_sensors );
+			WSAL_Settings::set_frontend_events( $frontend_sensors );
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
@@ -723,13 +670,8 @@ final class WSAL_Views_SetupWizard {
 		if ( ! empty( $pruning_limit ) ) {
 			switch ( $pruning_limit ) {
 				case '6':
-					// 6 months.
-					$this->wsal->SetGlobalBooleanSetting( 'pruning-date-e', true );
-					$this->wsal->SetGlobalSetting( 'pruning-date', $pruning_limit . ' months' );
-					break;
-
 				case '12':
-					// 12 months.
+					// 6 or 12 months.
 					$this->wsal->SetGlobalBooleanSetting( 'pruning-date-e', true );
 					$this->wsal->SetGlobalSetting( 'pruning-date', $pruning_limit . ' months' );
 					break;
@@ -767,23 +709,23 @@ final class WSAL_Views_SetupWizard {
 
 		<ul>
 			<li>
-				<a href="https://wpactivitylog.com/support/kb/getting-started-wp-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
+				<a href="https://wpactivitylog.com/support/kb/getting-started-wp-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" rel="noopener noreferrer" target="_blank">
 					<?php esc_html_e( 'Getting started with the WP Activity Log plugin', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 			<li>
-				<a href="https://wpactivitylog.com/support/kb/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
+				<a href="https://wpactivitylog.com/support/kb/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" rel="noopener noreferrer" target="_blank">
 					<?php esc_html_e( 'Knowledge Base & Support Documents', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 			<li>
-				<a href="https://wpactivitylog.com/benefits-wordpress-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">
+				<a href="https://wpactivitylog.com/benefits-wordpress-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" rel="noopener noreferrer" target="_blank">
 					<?php esc_html_e( 'Benefits of keeping a WordPress activity log', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 		</ul>
 
-		<p><?php echo wp_kses( __( 'We trust this plugin meets all your activity log requirements. Should you encounter any problems, have feature requests or would like to share some feedback, <a href="https://wpactivitylog.com/contact/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" target="_blank">please get in touch!</a>', 'wp-security-audit-log' ), $this->wsal->allowed_html_tags ); ?></p>
+		<p><?php echo wp_kses( __( 'We trust this plugin meets all your activity log requirements. Should you encounter any problems, have feature requests or would like to share some feedback, <a href="https://wpactivitylog.com/contact/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" rel="noopener noreferrer" target="_blank">please get in touch!</a>', 'wp-security-audit-log' ), $this->wsal->allowed_html_tags ); ?></p>
 
 		<form method="post" class="wsal-setup-form">
 			<?php wp_nonce_field( 'wsal-step-finish' ); ?>
@@ -865,7 +807,7 @@ final class WSAL_Views_SetupWizard {
 			<?php
 			// Create a nonce to pass through via data attr.
 			$nonce      = wp_create_nonce( 'wsal-install-addon' );
-			$skip_addon = false;
+
 			// Loop through plugins and output.
 			foreach ( $our_plugins as $details ) {
 				$disable_button = '';

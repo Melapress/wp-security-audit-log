@@ -108,14 +108,7 @@ class wpdbCustom extends wpdb {
 	 */
 	public function db_connect( $allow_bail = true ) {
 		$this->is_mysql = true;
-
-		/*
-		 * Deprecated in 3.9+ when using MySQLi. No equivalent
-		 * $new_link parameter exists for mysqli_* functions.
-		 */
-		$new_link     = defined( 'MYSQL_NEW_LINK' ) ? MYSQL_NEW_LINK : true;
 		$client_flags = defined( 'MYSQL_CLIENT_FLAGS' ) ? MYSQL_CLIENT_FLAGS : 0;
-
 		if ( $this->use_mysqli ) {
 			$this->dbh = mysqli_init();
 
@@ -185,11 +178,9 @@ class wpdbCustom extends wpdb {
 				 */
 				$attempt_fallback = true;
 
-				if ( $this->has_connected ) {
-					$attempt_fallback = false;
-				} elseif ( defined( 'WP_USE_EXT_MYSQL' ) && ! WP_USE_EXT_MYSQL ) {
-					$attempt_fallback = false;
-				} elseif ( ! function_exists( 'mysql_connect' ) ) {
+				if ( $this->has_connected
+				     || ( defined( 'WP_USE_EXT_MYSQL' ) && ! WP_USE_EXT_MYSQL )
+				     || ( ! function_exists( 'mysql_connect' ) ) ) {
 					$attempt_fallback = false;
 				}
 

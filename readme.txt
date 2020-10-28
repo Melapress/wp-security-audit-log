@@ -196,7 +196,7 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 1. The WordPress activity logs from where the site administrator can see all the user and site changes.
 2. See who is logged in to your WordPress and manage users sessions with [Users Sessions Management](https://www.wpsecurityauditlog.com/premium-features/wordpress-users-sessions-management-tools/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 3. The plugin settings from where site administrator can configure generic plugin settings such as [reverse proxy support](https://www.wpsecurityauditlog.com/support-documentation/support-reverse-proxies-web-application-firewalls/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description), who can manage the plugin etc.
-4. The WordPress audit trail settings from where you can configure automatic pruning of alerts, which timestamp should be used, how many 404 requests should be logged and more.
+4. The WordPress audit trail settings from where you can configure automatic pruning of alerts, which timestamp should be used and more.
 5. Configuring WordPress email and SMS alerts with the [Email & SMS Notifications module](https://www.wpsecurityauditlog.com/premium-features/email-notifications-wordpress-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 6. Search in the WordPress activity log with the use filters to fine tune the search results.
 7. The Enable/Disable events section from where Administrators can disable or enable activity log events.

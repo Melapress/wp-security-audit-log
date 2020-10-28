@@ -238,6 +238,9 @@ class WSAL_Nicer {
 			case 'object':
 				$d .= ', ' . get_class( $val ) . ', ' . count( get_object_vars( $val ) ) . ' properties';
 				break;
+			default:
+				//  fallback for any other types would go here
+				break;
 		}
 
 		$cls = $this->css_class;

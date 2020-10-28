@@ -22,7 +22,9 @@ class WSAL_Uninstall {
 	public static function uninstall() {
 		// Drop the tables.
 		if ( self::should_uninstall() ) {
-			self::drop_table( 'options' );
+			if ( self::table_exists( 'options' ) ) {
+				self::drop_table( 'options' );
+			}
 			self::drop_table( 'occurrences' );
 			self::drop_table( 'metadata' );
 			if ( self::table_exists( 'sessions' ) ) {

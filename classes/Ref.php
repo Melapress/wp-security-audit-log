@@ -864,13 +864,14 @@ class WSAL_Ref {
 	}
 
 
-
 	/**
 	 * Set or get configuration options
 	 *
-	 * @param   string     $key
-	 * @param   mixed|null $value
+	 * @param string $key
+	 * @param mixed|null $value
+	 *
 	 * @return  mixed
+	 * @throws Exception
 	 */
 	public static function config( $key, $value = null ) {
 
@@ -1270,8 +1271,9 @@ class WSAL_Ref {
 						$url = sprintf( 'http://queryposts.com/function/%s', urlencode( strtolower( $reflector->getName() ) ) );
 						break;
 					}
-
-					// @todo: handle more apps
+                default:
+	                //  fallback for any other apps would go here
+	                break;
 			}
 		}
 
@@ -1306,13 +1308,14 @@ class WSAL_Ref {
 	}
 
 
-
 	/**
 	 * Evaluates the given variable
 	 *
-	 * @param   mixed &$subject   Variable to query
-	 * @param   bool  $specialStr  Should this be interpreted as a special string?
+	 * @param mixed &$subject Variable to query
+	 * @param bool $specialStr Should this be interpreted as a special string?
+	 *
 	 * @return  mixed             Result (both HTML and text modes generate strings)
+	 * @throws ReflectionException
 	 */
 	protected function evaluate( &$subject, $specialStr = false ) {
 
@@ -1376,6 +1379,7 @@ class WSAL_Ref {
 					// restoring original value
 					$value = $buffer;
 				}
+				unset( $value );
 
 				$this->fmt->text( 'array' );
 				$count = count( $subject );
@@ -1416,6 +1420,7 @@ class WSAL_Ref {
 					$this->fmt->endRow();
 				}
 
+				unset( $value );
 				unset( $subject[ static::MARKER_KEY ] );
 
 				$this->fmt->endGroup();
@@ -1507,6 +1512,10 @@ class WSAL_Ref {
 					case 'stream':
 						$meta = stream_get_meta_data( $subject );
 						break;
+
+                    default:
+	                    //  fallback for any other resources would go here
+	                    break;
 
 				}
 
@@ -1755,6 +1764,9 @@ class WSAL_Ref {
 				}
 
 				return;
+            default:
+	            //  fallback for any other types would go here
+	            break;
 		}
 
 		// if we reached this point, $subject must be an object
@@ -2686,7 +2698,6 @@ class RHtmlFormatter extends RFormatter {
 			}
 
 			$tip = " {$this->def['tipRef']}=\"{$tipIdx}\"";
-			// $tip = sprintf('%s="%d"', $this->def['tipRef'], $tipIdx);
 		}
 
 		// wrap text in a link?
@@ -2700,7 +2711,6 @@ class RHtmlFormatter extends RFormatter {
 		}
 
 		$this->out .= "<{$this->def['base']}{$typeStr}{$tip}>{$text}</{$this->def['base']}>";
-		// $this->out .= sprintf('<%1$s%2$s %3$s>%4$s</%1$s>', $this->def['base'], $typeStr, $tip, $text);
 	}
 
 	public function startContain( $type, $label = false ) {
@@ -2792,7 +2802,7 @@ class RHtmlFormatter extends RFormatter {
 		$this->out .= "<{$this->def['base']} data-mod>";
 
 		foreach ( $items as $info ) {
-			$this->out .= $this->text( 'mod-' . strtolower( $info[1] ), $info[0], $info[1] );
+			$this->text( 'mod-' . strtolower( $info[1] ), $info[0], $info[1] );
 		}
 
 		$this->out .= "</{$this->def['base']}>";
@@ -2806,7 +2816,6 @@ class RHtmlFormatter extends RFormatter {
 		if ( WSAL_Ref::config( 'showBacktrace' ) && ($trace = WSAL_Ref::getBacktrace()) ) {
 			$docRoot = isset( $_SERVER['DOCUMENT_ROOT'] ) ? $_SERVER['DOCUMENT_ROOT'] : '';
 			$path = strpos( $trace['file'], $docRoot ) !== 0 ? $trace['file'] : ltrim( str_replace( $docRoot, '', $trace['file'] ), '/' );
-			// $this->out .= "<{$this->def['base']} data-backtrace>{$path}:{$trace['line']}</{$this->def['base']}>";
 		}
 
 		$this->out .= "</{$this->def['base']}><{$this->def['base']} data-output>";
@@ -3085,6 +3094,7 @@ class RTextFormatter extends RFormatter {
 	}
 
 	public function endRow() {
+	    //  not needed in text formatter
 	}
 
 	public function colDiv( $padLen = null ) {

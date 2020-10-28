@@ -22,16 +22,17 @@ interface WSAL_Adapters_MetaInterface {
 	/**
 	 * Create a meta object
 	 *
-	 * @param array $occurenceIds - Array of meta data.
+	 * @param array $occurrence_ids - Array of meta data.
+	 *
 	 * @return int ID of the new meta data
 	 */
-	public function deleteByOccurenceIds( $occurenceIds );
+	public function DeleteByOccurrenceIds( $occurrence_ids );
 
 	/**
 	 * Load by name and occurrence id.
 	 *
-	 * @param string $metaName - Meta name.
-	 * @param int    $occurenceId - Occurrence ID.
+	 * @param string $meta_name - Meta name.
+	 * @param int    $occurrence_id - Occurrence ID.
 	 */
-	public function loadByNameAndOccurenceId( $metaName, $occurenceId );
+	public function LoadByNameAndOccurrenceId( $meta_name, $occurrence_id );
 }

@@ -161,7 +161,7 @@ class WSAL_Sensors_PhpErrors extends WSAL_AbstractSensor {
 			return;
 		}
 
-		if ( ! ! ($e = error_get_last()) && ($this->_maybe_last_error != $this->GetErrorHash( $e['type'], $e['message'], $e['file'], $e['line'] )) ) {
+		if ( ($e = error_get_last()) && ($this->_maybe_last_error != $this->GetErrorHash( $e['type'], $e['message'], $e['file'], $e['line'] )) ) {
 			$data = array(
 				'Code'    => $e['type'],
 				'Message' => $e['message'],

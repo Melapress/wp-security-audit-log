@@ -24,7 +24,14 @@ class WSAL_Sensors_FrontendLogin extends WSAL_AbstractSensor {
 	/**
 	 * Event Login.
 	 *
-	 * TODO: update params doc block to match the new hook it's attached to.
+	 * @param string $auth_cookie Authentication cookie value.
+	 * @param int    $expire      The time the login grace period expires as a UNIX timestamp.
+	 *                            Default is 12 hours past the cookie's expiration time.
+	 * @param int    $expiration  The time when the authentication cookie expires as a UNIX timestamp.
+	 *                            Default is 14 days from now.
+	 * @param int    $user_id     User ID.
+	 * @param string $scheme      Authentication scheme. Values include 'auth' or 'secure_auth'.
+	 * @param string $token       User's session token to use for this cookie.
 	 */
 	public function event_login( $auth_cookie, $expire, $expiration, $user_id, $scheme, $token ) {
 
@@ -45,6 +52,8 @@ class WSAL_Sensors_FrontendLogin extends WSAL_AbstractSensor {
 			'Username'         => $user_login,
 			'CurrentUserRoles' => $user_roles,
 		);
+
+		//  @todo attach this using a filter, it should also remove the need for duplicated function hash_token below
 		if ( class_exists( 'WSAL_UserSessions_Helpers' ) ) {
 			$alert_data['SessionID'] = $this->hash_token( $token );
 		}

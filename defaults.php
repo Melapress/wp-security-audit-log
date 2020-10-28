@@ -301,7 +301,7 @@ function wsaldefaults_wsal_init() {
 
 			__( 'User Accounts', 'wp-security-audit-log' ) => array(
 				__( 'User Profiles', 'wp-security-audit-log' ) => array(
-					array( 4000, WSAL_CRITICAL, __( 'New user was created on WordPress', 'wp-security-audit-log' ), __( 'New user: %NewUserData->Username% %LineBreak% Role: %NewUserData->Roles% %LineBreak% First name: %NewUserData->FirstName% %LineBreak% Last name: %NewUserData->LastName% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'created' ),
+					array( 4000, WSAL_CRITICAL, __( 'New user was created on WordPress', 'wp-security-audit-log' ), __( 'New user: %NewUserData->Username% %LineBreak% Role: %NewUserData->Roles% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'created' ),
 					array( 4001, WSAL_CRITICAL, __( 'User created another WordPress user', 'wp-security-audit-log' ), __( 'New user: %NewUserData->Username% %LineBreak% Role: %NewUserData->Roles% %LineBreak% First name: %NewUserData->FirstName% %LineBreak% Last name: %NewUserData->LastName% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'created' ),
 					array( 4002, WSAL_CRITICAL, __( 'The role of a user was changed by another WordPress user', 'wp-security-audit-log' ), __( 'Changed the role of the user %TargetUsername% %LineBreak% New role: %NewRole% %LineBreak% Previous role: %OldRole% %LineBreak% First name: %FirstName% %LineBreak% Last name: %LastName% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'modified' ),
 					array( 4003, WSAL_HIGH, __( 'User has changed his or her password', 'wp-security-audit-log' ), __( 'Changed the password %LineBreak% First name: %TargetUserData->FirstName% %LineBreak% Last name: %TargetUserData->LastName% %LineBreak% %EditUserLink%', 'wp-security-audit-log' ), 'user', 'modified' ),
@@ -381,14 +381,10 @@ function wsaldefaults_wsal_init() {
 				),
 
 				__( 'Activity log plugin', 'wp-security-audit-log' ) => array(
-					array( 6000, WSAL_INFORMATIONAL, __( 'Events automatically pruned by system', 'wp-security-audit-log' ), __( 'System automatically deleted %EventCount% event(s)', 'wp-security-audit-log' ), 'activity-logs', 'deleted' ),
+					array( 6000, WSAL_INFORMATIONAL, __( 'Events automatically pruned by system', 'wp-security-audit-log' ), __( 'System automatically deleted %EventCount% event(s)', 'wp-security-audit-log' ), 'wp-activity-log', 'deleted' ),
 					array( 6006, WSAL_MEDIUM, __( 'Reset the plugin\'s settings to default', 'wp-security-audit-log' ), __( 'Reset the WP Activity Log plugin settings to default', 'wp-security-audit-log' ), 'wp-activity-log', 'modified' ),
-					array( 6034, WSAL_CRITICAL, __( 'Purged the activity log', 'wp-security-audit-log' ), __( 'Purged the activity log', 'wp-security-audit-log' ), 'activity-logs', 'deleted' ),
-				),
-
-				__( 'User/Visitor Actions', 'wp-security-audit-log' ) => array(
-					array( 6007, WSAL_INFORMATIONAL, __( 'User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Has requested a non existing page (404 error) %LineBreak% Number of times: %Attempts%', 'wp-security-audit-log' ), 'system', 'opened' ),
-					array( 6023, WSAL_INFORMATIONAL, __( 'Website Visitor User requests non-existing pages (404 Error Pages)', 'wp-security-audit-log' ), __( 'Website visitor has requested a non existing page (404 error) %LineBreak% Number of times: %Attempts%', 'wp-security-audit-log' ), 'system', 'opened' ),
+					array( 6034, WSAL_CRITICAL, __( 'Purged the activity log', 'wp-security-audit-log' ), __( 'Purged the activity log', 'wp-security-audit-log' ), 'wp-activity-log', 'deleted' ),
+                    array( 6043, WSAL_HIGH, __( 'Some WP Activity Log plugin settings on this site were propagated and overridden from the MainWP dashboard', 'wp-security-audit-log' ), __( 'Some WP Activity Log plugin settings on this site were propagated and overridden from the MainWP dashboard.', 'wp-security-audit-log' ), 'wp-activity-log', 'modified' ),
 				),
 
 				__( 'WordPress Site Settings', 'wp-security-audit-log' ) => array(
@@ -420,6 +416,7 @@ function wsaldefaults_wsal_init() {
 					array( 7003, WSAL_HIGH, __( 'Deactivated site has been activated', 'wp-security-audit-log' ), __( 'Activated the site: %SiteName% %LineBreak% URL: %BlogURL%', 'wp-security-audit-log' ), 'multisite-network', 'activated' ),
 					array( 7004, WSAL_HIGH, __( 'Site has been deactivated', 'wp-security-audit-log' ), __( 'Deactivated the site: %SiteName% %LineBreak% URL: %BlogURL%', 'wp-security-audit-log' ), 'multisite-network', 'deactivated' ),
 					array( 7005, WSAL_HIGH, __( 'Existing site deleted from network', 'wp-security-audit-log' ), __( 'The site: %SiteName% %LineBreak% URL: %BlogURL%', 'wp-security-audit-log' ), 'multisite-network', 'deleted' ),
+					array( 7012, WSAL_HIGH, __( 'Allow new registrations settings changed', 'wp-security-audit-log' ), __( 'Changed the <strong>Allow new registrations</strong> settings %LineBreak% Previous setting: %previous_setting% %LineBreak% New setting: %new_setting%', 'wp-security-audit-log' ), 'multisite-network', 'modified' ),
 				),
 			),
 		)

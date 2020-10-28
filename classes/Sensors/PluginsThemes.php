@@ -94,7 +94,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		if ( ! empty( $script_name ) ) {
 			$actype = basename( $script_name, '.php' );
 		}
-		$is_themes  = 'themes' === $actype;
+
 		$is_plugins = 'plugins' === $actype;
 
 		// Install plugin.
@@ -497,23 +497,6 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			default:
 				return $type_custom;
 		}
-	}
-
-	/**
-	 * Get editor link.
-	 *
-	 * @param object $post - The post object.
-	 * @return array $editor_link name and value link.
-	 */
-	private function GetEditorLink( $post ) {
-		$name        = 'EditorLink';
-		$name       .= ( 'page' == $post->post_type ) ? 'Page' : 'Post';
-		$value       = get_edit_post_link( $post->ID );
-		$editor_link = array(
-			'name'  => $name,
-			'value' => $value,
-		);
-		return $editor_link;
 	}
 
 	/**

@@ -337,7 +337,7 @@ class WSAL_ViewManager {
 	 * Render header of the current view.
 	 */
 	public function RenderViewHeader() {
-		if ( ! ! ( $view = $this->GetActiveView() ) ) {
+		if ( $view = $this->GetActiveView() ) {
 			$view->Header();
 		}
 	}
@@ -346,7 +346,7 @@ class WSAL_ViewManager {
 	 * Render footer of the current view.
 	 */
 	public function RenderViewFooter() {
-		if ( ! ! ( $view = $this->GetActiveView() ) ) {
+		if ( $view = $this->GetActiveView() ) {
 			$view->Footer();
 		}
 	}

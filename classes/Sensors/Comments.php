@@ -210,19 +210,4 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 			}
 		}
 	}
-
-	/**
-	 * Shows the username if the comment is owned by a user
-	 * and the email if the comment was posted by a non WordPress user
-	 *
-	 * @param stdClass $comment - Comment.
-	 * @return string - Author username or email.
-	 */
-	private function CheckAuthor( $comment ) {
-		if ( username_exists( $comment->comment_author ) ) {
-			return $comment->comment_author;
-		} else {
-			return $comment->comment_author_email;
-		}
-	}
 }
