@@ -5614,47 +5614,47 @@ msgstr ""
 msgid "Mirror not found."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:712, extensions/reports/classes/Common.php:716, extensions/reports/classes/Common.php:720, extensions/reports/classes/Common.php:724, extensions/reports/classes/Common.php:728, extensions/reports/classes/Common.php:732, extensions/reports/classes/Common.php:736, extensions/reports/classes/Common.php:740, extensions/reports/classes/Common.php:744, extensions/reports/classes/Common.php:748, extensions/reports/classes/Common.php:752
+#: extensions/reports/classes/Common.php:714, extensions/reports/classes/Common.php:718, extensions/reports/classes/Common.php:722, extensions/reports/classes/Common.php:726, extensions/reports/classes/Common.php:730, extensions/reports/classes/Common.php:734, extensions/reports/classes/Common.php:738, extensions/reports/classes/Common.php:742, extensions/reports/classes/Common.php:746, extensions/reports/classes/Common.php:750, extensions/reports/classes/Common.php:754
 msgid "Internal error. <code>%s</code> key was not found."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:776, extensions/reports/classes/Common.php:1601
+#: extensions/reports/classes/Common.php:778, extensions/reports/classes/Common.php:1603
 msgid "Please specify at least one Alert Group or specify an Alert Code."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:781
+#: extensions/reports/classes/Common.php:783
 msgid "Internal Error: Could not detect the type of the report to generate."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:891, extensions/reports/classes/Common.php:925, extensions/reports/classes/Common.php:970, extensions/reports/classes/Common.php:988, extensions/reports/classes/Common.php:1802
+#: extensions/reports/classes/Common.php:893, extensions/reports/classes/Common.php:927, extensions/reports/classes/Common.php:972, extensions/reports/classes/Common.php:990, extensions/reports/classes/Common.php:1804
 msgid "There are no alerts that match your filtering criteria. Please try a different set of rules."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:973, extensions/reports/classes/Common.php:991, extensions/reports/classes/Common.php:1805
+#: extensions/reports/classes/Common.php:975, extensions/reports/classes/Common.php:993, extensions/reports/classes/Common.php:1807
 msgid "Error: The <strong>%s</strong> path is not accessible."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1255, extensions/reports/classes/Common.php:1703
+#: extensions/reports/classes/Common.php:1257, extensions/reports/classes/Common.php:1705
 msgid "%1$s - Website %2$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1258, extensions/reports/classes/Common.php:1706
+#: extensions/reports/classes/Common.php:1260, extensions/reports/classes/Common.php:1708
 msgid "Week number %1$s - Website %2$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1261, extensions/reports/classes/Common.php:1709
+#: extensions/reports/classes/Common.php:1263, extensions/reports/classes/Common.php:1711
 msgid "Month %1$s %2$s- Website %3$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1264, extensions/reports/classes/Common.php:1712
+#: extensions/reports/classes/Common.php:1266, extensions/reports/classes/Common.php:1714
 msgid "Quarter %1$s - Website %2$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1279, extensions/reports/classes/Common.php:1721
+#: extensions/reports/classes/Common.php:1281, extensions/reports/classes/Common.php:1723
 msgid " - %s Email Report"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1573
+#: extensions/reports/classes/Common.php:1575
 msgid "Internal Error. Could not retrieve the alerts from the main plugin."
 msgstr ""
 
