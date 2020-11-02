@@ -106,11 +106,16 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 			$args[] = $search_condition['args'];
 		}
 
+		$search_statement = '';
+		if ( ! empty( $search_condition ) ) {
+			$search_statement = empty( $s_where_clause ) ? ' WHERE ' . $search_condition['sql'] : ' AND ' . $search_condition['sql'];
+		}
+
 		$sql = 'SELECT ' . $fields
 			. ' FROM ' . implode( ',', $from_data_sets )
 			. $join_clause
 			. $s_where_clause
-			. ( ! empty( $search_condition ) ? (empty( $s_where_clause ) ? ' WHERE ' . $search_condition['sql'] : ' AND ' . $search_condition['sql']) : '')
+			. $search_statement
 			// @todo GROUP BY goes here
 			. ( ! empty( $order_bys ) ? (' ORDER BY ' . implode( ', ', array_keys( $order_bys ) ) . ' ' . implode( ', ', array_values( $order_bys ) )) : '')
 			. $s_limit_clause;
@@ -211,7 +216,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 			$occ_ids[] = $data['id'];
 		}
 		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
-		$meta->DeleteByOccurenceIds( $occ_ids );
+		$meta->DeleteByOccurrenceIds( $occ_ids );
 	}
 
 	/**

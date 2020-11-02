@@ -141,9 +141,11 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 							foreach ( $value as $k => &$widget_name ) {
 								$widget_name = preg_replace( '/^([a-z]+-[0-9]+)+?_/i', '', $widget_name );
 							}
+							unset( $widget_name );
 							$request_sidebars[ $key ] = $value;
 						}
 					}
+					unset( $value );
 				}
 
 				if ( $request_sidebars ) {
@@ -304,6 +306,9 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 						)
 					);
 				}
+				break;
+			default:
+				//  fallback for any other cases would go here
 				break;
 		}
 	}

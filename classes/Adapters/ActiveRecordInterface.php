@@ -88,4 +88,11 @@ interface WSAL_Adapters_ActiveRecordInterface {
 	 * @param array $args - Query arguments.
 	 */
 	public function LoadMultiQuery( $query, $args = array() );
+
+	/**
+	 * Returns the model class for adapter.
+	 *
+	 * @return WSAL_Models_ActiveRecord
+	 */
+	public function GetModel();
 }

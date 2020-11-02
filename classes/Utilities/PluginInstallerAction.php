@@ -40,6 +40,10 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 
 			$predefined_plugins = WSAL_PluginInstallAndActivate::get_installable_plugins();
 
+			// Setup empties to avoid errors.
+			$plugin_zip  = '';
+			$plugin_slug = '';
+
 			if ( ! ( isset( $_POST['addon_for'] ) && is_array( $predefined_plugins ) ) ) {
 				// no 'addon_for' passed, check for a zip and slug.
 				$plugin_zip  = ( isset( $_POST['plugin_url'] ) ) ? esc_url_raw( wp_unslash( $_POST['plugin_url'] ) ) : '';
@@ -51,6 +55,8 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 				 * @since 4.0.2
 				 */
 				$addon = sanitize_text_field( wp_unslash( $_POST['addon_for'] ) );
+				$addon = apply_filters( 'wsal_modify_predefined_plugin_slug', $addon );
+
 				foreach ( $predefined_plugins as $plugin ) {
 					if ( strtolower( $plugin['addon_for'] ) === $addon ) {
 						$plugin_zip  = $plugin['plugin_url'];
@@ -173,8 +179,6 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 			} else {
 				$current = get_option( 'active_plugins' );
 			}
-
-			$plugin  = plugin_basename( trim( $plugin_slug ) );
 
 			if ( ! in_array( $plugin_slug, $current, true ) ) {
 				if ( function_exists( 'is_multisite' ) && is_multisite() ) {

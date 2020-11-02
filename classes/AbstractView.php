@@ -92,7 +92,7 @@ abstract class WSAL_AbstractView {
 		$meta_key = 'wsal-notice-' . $name;
 
 		self::$AllowedNoticeNames[] = $name;
-		return ! ! get_user_meta( $user_id, $meta_key, true );
+		return get_user_meta( $user_id, $meta_key, true );
 	}
 
 	/**

@@ -52,6 +52,15 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	public static $enabled = true;
 
 	/**
+	 * List of already logged operation during current request. It is used to prevent duplicate events. Values in the
+	 * array are strings in form of "{operation type}_{table name}".
+	 *
+	 * @var string[]
+	 * @since 4.1.5
+	 */
+	private static $already_logged = [];
+
+	/**
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
@@ -83,9 +92,14 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 				array_push( $table_names, $str[2] );
 			}
 			$query_type = 'delete';
-		} elseif ( preg_match( '|CREATE TABLE IF NOT EXISTS ([^ ]*)|', $query ) ) {
-			$table_name = str_replace( '`', '', $str[5] );
-			if ( $table_name !== $wpdb->get_var( "SHOW TABLES LIKE '" . $table_name . "'" ) ) {
+		} elseif ( preg_match( '/CREATE TABLE (IF NOT EXISTS)? ([^ ]*)/i', $query, $matches ) ) {
+			$table_name = $matches[count($matches) - 1];
+			$table_exists_query = $wpdb->prepare(
+				"SHOW TABLES LIKE %s;",
+				$table_name
+			);
+
+			if ( $table_name !== $wpdb->get_var( $table_exists_query ) ) {
 				/**
 				 * Some plugins keep trying to create tables even
 				 * when they already exist - would result in too
@@ -120,8 +134,14 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			foreach ( $table_names as $table_name ) {
 				$alert_options               = $this->GetEventOptions( $actor );
 				$event_code                  = $this->GetEventCode( $actor, $query_type );
+				$db_op_key = $query_type . '_' . $table_name;
+				if ( in_array( $db_op_key, self::$already_logged ) ) {
+					continue;
+				}
+
 				$alert_options['TableNames'] = $table_name;
 				$this->plugin->alerts->Trigger( $event_code, $alert_options );
+				array_push( self::$already_logged, $db_op_key );
 			}
 		}
 	}
@@ -321,14 +341,19 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		foreach ( $queries as $qry ) {
 			$qry = str_replace( '`', '', $qry );
 			$str = explode( ' ', $qry );
-			if ( preg_match( '|CREATE TABLE ([^ ]*)|', $qry ) ) {
-				if ( $str[2] !== $wpdb->get_var( "SHOW TABLES LIKE '" . $str[2] . "'" ) ) {
+			if ( preg_match( '/CREATE TABLE (IF NOT EXISTS)? ([^ ]*)/i', $qry, $matches ) ) {
+				$table_name = $matches[count($matches) - 1];
+ 				$table_exists_query = $wpdb->prepare(
+					"SHOW TABLES LIKE %s;",
+					$table_name
+				);
+				if ( $table_name !== $wpdb->get_var( $table_exists_query ) ) {
 					/**
 					 * Some plugins keep trying to create tables even
 					 * when they already exist- would result in too
 					 * many alerts.
 					 */
-					array_push( $query_types['create'], $str[2] );
+					array_push( $query_types['create'], $table_name );
 				}
 			} elseif ( preg_match( '|ALTER TABLE ([^ ]*)|', $qry ) ) {
 				array_push( $query_types['update'], $str[2] );

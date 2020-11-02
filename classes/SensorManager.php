@@ -39,12 +39,6 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 		// Check sensors before loading for optimization.
 		add_filter( 'wsal_before_sensor_load', array( $this, 'check_sensor_before_load' ), 10, 2 );
-
-		if ( doing_action( 'wp_loaded' ) && ! is_user_logged_in() && WpSecurityAuditLog::is_frontend() && ! WpSecurityAuditLog::is_rest_api() && WpSecurityAuditLog::should_load_frontend() ) {
-			// If WSAL loads on `wp_loaded` hook, then hook the following to see if need to load frontend 404 sensor or not.
-			add_action( 'wp', array( $this, 'load_frontend_system_sensor' ) );
-		}
-
 		foreach ( glob( dirname( __FILE__ ) . '/Sensors/*.php' ) as $file ) {
 			$this->AddFromFile( $file );
 		}
@@ -202,9 +196,8 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 		// Check to see if LogInOut, FrontendLogin, and FrontendRegister sensors should load on login page.
 		if ( WpSecurityAuditLog::is_login_screen() ) {
-			if ( 'FrontendRegister' === $filename && ! empty( $frontend_events['register'] ) ) {
-				return true;
-			} elseif ( 'LogInOut' === $filename ) {
+			if ( 'FrontendRegister' === $filename && ! empty( $frontend_events['register'] )
+			     || 'LogInOut' === $filename ) {
 				return true;
 			}
 			return false; // Any other sensor should not load here.
@@ -221,8 +214,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		 *
 		 * @param array $public_sensors - List of sensors to be loaded for visitors.
 		 */
-		$public_sensors = apply_filters( 'wsal_load_public_sensors', array( 'FrontendLogin', 'FrontendSystem', 'FrontendRegister' ) );
-
+		$public_sensors = apply_filters( 'wsal_load_public_sensors', array( 'FrontendLogin', 'FrontendRegister' ) );
 		if ( WpSecurityAuditLog::is_frontend() && ! is_user_logged_in() && ! in_array( $filename, $public_sensors, true ) ) {
 			return false;
 		}
@@ -251,13 +243,6 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 				case 'BBPress':
 					// Check if BBPress plugin exists.
 					if ( ! WpSecurityAuditLog::is_bbpress_active() ) {
-						$load_sensor = false;
-					}
-					break;
-
-				case 'WooCommerce':
-					// Check if WooCommerce plugin exists.
-					if ( ! WpSecurityAuditLog::is_woocommerce_active() ) {
 						$load_sensor = false;
 					}
 					break;
@@ -296,12 +281,6 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 					}
 					break;
 
-				case 'FrontendWooCommerce':
-					if ( is_user_logged_in() || ! WpSecurityAuditLog::is_woocommerce_active() || empty( $frontend_events['woocommerce'] ) ) {
-						$load_sensor = false;
-					}
-					break;
-
 				case 'FrontendRegister':
 					if ( is_user_logged_in() || empty( $frontend_events['register'] ) ) {
 						$load_sensor = false;
@@ -314,33 +293,10 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 					}
 					break;
 
-				case 'FrontendSystem':
-					if ( is_user_logged_in() || empty( $frontend_events['system'] ) ) {
-						$load_sensor = false;
-					} elseif ( ! is_404() ) {
-						$load_sensor = false;
-					}
-					break;
-
 				default:
 					break;
 			}
 		}
 		return $load_sensor;
-	}
-
-	/**
-	 * Lazy load frontend system sensor to detect 404 errors.
-	 * This is because our plugin loads a bit early on the
-	 * frontend, i.e., just before setting up wp query.
-	 */
-	public function load_frontend_system_sensor() {
-		$frontend_events = WSAL_Settings::get_frontend_events();
-
-		if ( ! empty( $frontend_events['system'] ) && is_404() ) {
-			$sensor = new WSAL_Sensors_FrontendSystem( $this->plugin );
-			$this->AddInstance( $sensor );
-			$sensor->HookEvents();
-		}
 	}
 }

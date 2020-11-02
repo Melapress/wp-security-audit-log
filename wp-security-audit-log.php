@@ -4,7 +4,7 @@
  * Plugin URI: http://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Activity log viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 4.1.4
+ * Version: 4.1.5
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -47,7 +47,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
          *
 		 * @var string
 		 */
-		public $version = '4.1.4';
+		public $version = '4.1.5';
 
 		/**
          * Plugin constants.
@@ -141,13 +141,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public $allowed_html_tags = array();
 
 		/**
-		 * Load WSAL on Front-end?
-		 *
-		 * @var boolean
-		 */
-		public $load_for_404s = null;
-
-		/**
 		 * Standard singleton pattern.
 		 * WARNING! To ensure the system always works as expected, AVOID using this method.
 		 * Instead, make use of the plugin instance provided by 'wsal_init' action.
@@ -168,14 +161,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function __construct() {
 			$bootstrap_hook = [ 'plugins_loaded', 9 ];
 
-			// Frontend requests should only log for certain 404 requests.
-			// For that to happen, we need to delay until template_redirect.
+			//  plugin should be initialised later in the WordPress bootstrap process to minimize overhead
 			if ( self::is_frontend() ) {
 				// to track sessions on frontend logins we need to attach the
 				// the tracker and all the interfaces and classes it depends on.
 				add_action( $bootstrap_hook[0], array( $this, 'maybe_add_sessions_trackers_early' ), $bootstrap_hook[1] );
 				$bootstrap_hook = [ 'wp_loaded', 0 ];
-				add_action( 'wp', array( $this, 'setup_404' ) );
 			}
 
 			add_action( $bootstrap_hook[0], array( $this, 'setup' ), $bootstrap_hook[1] );
@@ -188,6 +179,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// Add custom schedules for WSAL early otherwise they won't work.
 			add_filter( 'cron_schedules', array( $this, 'recurring_schedules' ) );
+
 			// make the options helper class available.
 			$this->include_options_helper();
 		}
@@ -310,33 +302,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
 		/**
-		 * Decides if the plugin should run for 404 events on `wp` hook
-		 * IF not already loaded on `wp_loaded` hook for frontend request.
-		 */
-		public function setup_404() {
-		    $admin_blocking_plugins_support_enabled = $this->is_admin_blocking_plugins_support_enabled();
-		    if (!$admin_blocking_plugins_support_enabled) {
-                // If a user is logged in OR if the frontend sensors are allowed to load, then bail.
-                if ( is_user_logged_in() || self::should_load_frontend() ) {
-                    return;
-                }
-
-                // If the current page is not 404 OR if the loading of 404 frontend sensor is not allowed, then bail.
-                if ( ! is_404() || ! $this->load_for_404s() ) {
-                    return;
-                }
-            }
-
-			if ($admin_blocking_plugins_support_enabled) {
-				//  setup freemius in stealth mode
-				$this->init_freemius();
-			}
-
-			// Otherwise load WSAL on wp hook.
-			$this->setup();
-		}
-
-		/**
 		 * Decides if the plugin should run, sets up constants, includes, inits hooks, etc.
 		 *
 		 * @return bool
@@ -369,18 +334,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				return true;
 			}
 
-			// If this is a frontend request, it's a 404, and 404 logging is disabled.
-			if ( self::is_frontend() ) {
-				if ( is_404() ) {
-					if ( ! $this->load_for_404s() ) {
-						// This is a frontend request, and it's a 404, but we are not logging 404s.
-						return false;
-					}
-				} elseif ( ! is_user_logged_in() && ! self::should_load_frontend() ) {
-					// This is not a 404, and the user isn't logged in, and we aren't logging visitor events.
-					return false;
-				}
+			//  check conditions for frontend
+			if ( self::is_frontend() && ! is_user_logged_in() && ! self::should_load_frontend() ) {
+                // user isn't logged in, and we aren't logging visitor events on front-end
+                return false;
 			}
+
+			//  other contexts/scenarios
 
 			// If this is a rest API request and the user is not logged in, bail.
 			if ( self::is_rest_api() && ! is_user_logged_in() ) {
@@ -395,10 +355,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 *
 		 * @return bool
 		 */
-		public static function should_load_frontend() {
-			$frontend_events = WSAL_Settings::get_frontend_events();
-			return ! empty( $frontend_events['register'] ) || ! empty( $frontend_events['login'] ) || ! empty( $frontend_events['woocommerce'] );
-		}
+		 public static function should_load_frontend() {
+		 	$frontend_events = WSAL_Settings::get_frontend_events();
+		 	$should_load = ! empty( $frontend_events['register'] ) || ! empty( $frontend_events['login'] ) || ! empty( $frontend_events['woocommerce'] );
+
+		 	// Allow extensions to manually allow a sensor to load.
+		 	return apply_filters( 'wsal_load_on_frontend', $should_load, $frontend_events );
+		 }
 
 		/**
 		 * Include Plugin Files.
@@ -463,6 +426,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			require_once 'classes/Adapters/OccurrenceInterface.php';
 			require_once 'classes/Adapters/QueryInterface.php';
 
+			// Third party extensions with public sensors.
+			require_once 'classes/ThirdPartyExtensions/AbstractExtension.php';
+			require_once 'classes/ThirdPartyExtensions/WooCommerceExtension.php';
+
 			// Only include these if we are in multisite envirnoment.
 			if ( $this->isMultisite() ) {
 				require_once 'classes/Multisite/NetworkWide/TrackerInterface.php';
@@ -521,17 +488,23 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			$this->init_freemius();
 
+			// Extensions which are only admin based.
 			if ( is_admin() ) {
 				$plugin_installer_ajax = new WSAL_PluginInstallerAction();
 				$plugin_installer_ajax->register();
 
 				$yoast_seo_addon    = new WSAL_YoastSeoExtension;
 				$bbpress_addon      = new WSAL_BBPressExtension;
-				$woocommerce_addon  = new WSAL_WooCommerceExtension;
 				$wpforms_addon      = new WSAL_WPFormsExtension;
 				// Comment out till ready.
 				//$gravityforms_addon = new WSAL_GravityFormsExtension;
 			}
+
+			// Extensions which are both admin and frontend based.
+			$woocommerce_addon  = new WSAL_WooCommerceExtension;
+
+			// Dequeue conflicting scripts.
+			add_action( 'wp_print_scripts', array( $this, 'dequeue_conflicting_scripts' ) );
 		}
 
 		/**
@@ -562,10 +535,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
+			if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
+				require_once 'classes/Utilities/PluginInstallAndActivate.php';
+			}
+
 			// Additional checks for our 3rd party extensions.
 			if ( class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 				$our_plugins = array_column( WSAL_PluginInstallAndActivate::get_installable_plugins(), 'plugin_basename' );
-
 				// Check if we are dealing with one of our extensions.
 				if ( in_array( basename( $plugin ), $our_plugins, true ) ) {
 					// This IS one of our extensions, so lets check a little deeper as folder
@@ -680,37 +656,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					wsal_freemius()->add_filter( 'show_trial', '__return_false' );
 					wsal_freemius()->add_filter( 'opt_in_error_message', array( $this, 'limited_license_activation_error' ), 10, 1 );
 					wsal_freemius()->add_action( 'after_account_plan_sync', array( $this, 'sync_premium_freemius' ), 10, 1 );
+					wsal_freemius()->add_action( 'after_premium_version_activation', array( $this, 'on_freemius_premium_version_activation') );
 				}
 			}
-		}
-
-		/**
-		 * Check if WSAL should be loaded for logged-in 404s.
-		 *
-		 * @since 3.3
-		 *
-		 * @return boolean
-		 */
-		public function load_for_404s() {
-			if ( null === $this->load_for_404s ) {
-				if ( ! is_user_logged_in() ) {
-					// Get the frontend sensors setting.
-					$frontend_events = WSAL_Settings::get_frontend_events();
-
-					// This overrides the setting.
-					$this->load_for_404s = ! empty( $frontend_events['system'] ) ? true : false;
-				} else {
-					// We are doing a raw lookup here because The WSAL options system might not be loaded.
-					$this->load_for_404s = self::raw_alert_is_enabled( 6007 );
-				}
-
-                if ($this->is_admin_blocking_plugins_support_enabled()) {
-                    //  also load if the support for admin blocking plugins is enabled
-	                $this->load_for_404s = true;
-                }
-			}
-
-			return $this->load_for_404s;
 		}
 
 		/**
@@ -779,7 +727,52 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 							$info = false;
 						}
 						break;
+                    case 'enforce_settings':
+                        //  check subaction
+                        if ( ! array_key_exists( 'subaction', $post_data) || empty( $post_data['subaction'] ) )  {
+                            $info = array(
+                                'success' => 'no',
+                                'message' => 'Missing subaction parameter.'
+                            );
+                            break;
+                        }
 
+                        $subaction = filter_var( $post_data['subaction'], FILTER_SANITIZE_STRING);
+                        if ( ! in_array( $subaction, [ 'update', 'remove' ] ) ) {
+                            $info = array(
+                                'success' => 'no',
+                                'message' => 'Unsupported subaction parameter value.'
+                            );
+                            break;
+                        }
+
+                        if ( 'update' === $subaction ) {
+                            //  store the enforced settings in local database (used for example to disable related parts
+                            //  of the settings UI
+                            $settings_to_enforce = $post_data[ 'settings'];
+                            $this->settings()->set_mainwp_enforced_settings( $settings_to_enforce );
+
+                            //  change the existing settings
+                            if ( array_key_exists( 'pruning_enabled', $settings_to_enforce ) ) {
+                                $this->settings()->SetPruningDateEnabled( $settings_to_enforce['pruning_enabled'] );
+                                if ( array_key_exists( 'pruning_date', $settings_to_enforce ) && array_key_exists( 'pruning_unit', $settings_to_enforce) ) {
+                                    $this->settings()->SetPruningDate($settings_to_enforce[ 'pruning_date' ] . ' ' . $settings_to_enforce[ 'pruning_unit' ]);
+                                    $this->settings()->set_pruning_unit( $settings_to_enforce[ 'pruning_unit' ] );
+                                }
+                            }
+
+                            if ( array_key_exists( 'disabled_events', $settings_to_enforce ) ) {
+                                $disabled_event_ids = array_key_exists( 'disabled_events', $settings_to_enforce ) ? array_map( 'intval', explode( ',', $settings_to_enforce['disabled_events'] ) ) : [];
+                                $this->alerts->SetDisabledAlerts( $disabled_event_ids );
+                            }
+                        } else if ( 'remove' === $subaction ) {
+                            $this->settings()->delete_mainwp_enforced_settings();
+                        }
+
+                        $info = array(
+                            'success' => 'yes'
+                        );
+                        $this->alerts->Trigger( 6043 );
 					default:
 						break;
 				}
@@ -1176,13 +1169,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				die();
 			}
 
-			$fields = $this->GetGlobalSetting( 'excluded-custom' );
-			if ( isset( $fields ) && '' != $fields ) {
-				$fields .= ',' . esc_html( $post_array['notice'] );
-			} else {
-				$fields = esc_html( $post_array['notice'] );
+			$excluded_meta_raw = $this->GetGlobalSetting( 'excluded-custom' );
+			$excluded_meta = [];
+			if ( isset( $excluded_meta_raw ) && '' != $excluded_meta_raw ) {
+				$excluded_meta = explode(',', $excluded_meta_raw);
 			}
-			$this->SetGlobalSetting( 'excluded-custom', $fields );
+
+			array_push( $excluded_meta, esc_html( $post_array['notice'] ) );
+			$this->SetGlobalSetting( 'excluded-custom', implode(',', array_unique( $excluded_meta ) ) );
 
 			// Exclude object link.
 			$exclude_objects_link = add_query_arg(
@@ -1190,9 +1184,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					'page' => 'wsal-settings',
 					'tab'  => 'exclude-objects',
 				),
-				admin_url( 'admin.php' )
+				network_admin_url( 'admin.php' )
 			);
-			echo wp_sprintf( '<p>' . __( 'Custom Field %1$s is no longer being monitored.<br />Enable the monitoring of this custom field again from the', 'wp-security-audit-log' ) . ' <a href="%2$s">%3$s</a>%4$s</p>', $post_array['notice'], $exclude_objects_link, __( 'Excluded Objects', 'wp-security-audit-log' ), __( ' tab in the plugin settings', 'wp-security-audit-log' ) );
+			echo wp_sprintf(
+				'<p>' . __( 'Custom Field <strong>%1$s</strong> is no longer being monitored.<br />Enable the monitoring of this custom field again from the', 'wp-security-audit-log' ) . ' <a href="%2$s">%3$s</a>%4$s</p>',
+				$post_array['notice'],
+				$exclude_objects_link,
+				__( 'Excluded Objects', 'wp-security-audit-log' ),
+				__( ' tab in the plugin settings', 'wp-security-audit-log' )
+			);
 			die;
 		}
 
@@ -1227,6 +1227,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$s_alerts = esc_html( $post_array['code'] );
 			}
 			$this->SetGlobalSetting( 'disabled-alerts', $s_alerts );
+
 			echo wp_sprintf( '<p>' . __( 'Alert %1$s is no longer being monitored.<br /> %2$s', 'wp-security-audit-log' ) . '</p>', esc_html( $post_array['code'] ), __( 'You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.', 'wp-security-audit-log' ) );
 			die;
 		}
@@ -1292,18 +1293,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $pruning_date = $this->settings()->GetPruningDate();
                 $this->settings()->SetPruningDate( $pruning_date );
 
-				// If old setting is empty enable 404 logging by default.
-				$log_404 = $this->GetGlobalSetting( 'log-404' );
-				if ( false === $log_404 ) {
-					$this->SetGlobalBooleanSetting( 'log-404', true );
-				}
-
-				// If old setting is empty enable 404 purge log by default.
-				$purge_log_404 = $this->GetGlobalSetting( 'purge-404-log' );
-				if ( false === $purge_log_404 ) {
-					$this->SetGlobalBooleanSetting( 'purge-404-log', true );
-				}
-
 				// Load translations.
 				load_plugin_textdomain( 'wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/' );
 			}
@@ -1350,12 +1339,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// On first install this won't be loaded because not premium, add it
 			// now so it installs.
-			if ( file_exists( plugin_dir_path( __FILE__ ) . 'extensions/user-sessions/user-sessions.php' ) ) {
-				$this->maybe_add_sessions_trackers_early();
-				require_once plugin_dir_path( __FILE__ ) . 'extensions/user-sessions/user-sessions.php';
-				$sessions = new WSAL_UserSessions_Plugin();
-				$sessions->require_adapter_classes();
-			}
+            $this->load_sessions_extension_db_adapter();
 
 			// run any installs.
 			self::getConnector()->installAll();
@@ -1456,7 +1440,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				//  remove obsolete options from the database
 				if ( version_compare( $new_version, '4.1.4', '>=' ) ) {
-					$this->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . '_addon_available_notice_dismissed' );
+					$this->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . 'addon_available_notice_dismissed' );
 
 					// Remove old file scanning options.
 					global $wpdb;
@@ -1465,6 +1449,34 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						foreach( $plugin_options as $option ) {
 							$this->DeleteSettingByName( $option->option_name );
 						}
+					}
+				}
+
+				if ( version_compare( $new_version, '4.1.5', '>=' ) ) {
+					//  remove 'system' entry from the front-end events array as it was removed along with 404 tracking
+					$frontend_events = WSAL_Settings::get_frontend_events();
+					if ( array_key_exists( 'system', $frontend_events ) ) {
+						unset( $frontend_events['system'] );
+						WSAL_Settings::set_frontend_events( $frontend_events );
+					}
+
+					//  remove all settings related to 404 tracking
+					$not_found_page_related_settings = [
+						'log-404',
+						'purge-404-log',
+						'log-404-referrer',
+						'log-visitor-404',
+						'purge-visitor-404-log',
+						'log-visitor-404-referrer',
+						'excluded-urls'
+					];
+					foreach ( $not_found_page_related_settings as $setting_name ) {
+						$this->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . $setting_name );
+					}
+
+					//  remove cron job for purging 404 logs
+					if ( $schedule_time = wp_next_scheduled( 'wsal_log_files_pruning' ) ) {
+						wp_unschedule_event($schedule_time, 'wsal_log_files_pruning', [] );
 					}
 				}
 			}
@@ -1529,7 +1541,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			);
 			$s = get_option( 'wpph_plugin_settings' );
 			$this->settings()->SetViewPerPage( max( $s->showEventsViewList, 5 ) );
-			$this->settings()->SetWidgetsEnabled( ! ! $s->showDW );
+			$this->settings()->SetWidgetsEnabled( $s->showDW );
 		}
 
 		/**
@@ -1750,6 +1762,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Do we have an existing installation? This only applies for version 1.0 onwards.
 		 *
 		 * @return boolean
+		 * @throws Freemius_Exception
 		 */
 		public function IsInstalled() {
 			return self::getConnector()->isInstalled();
@@ -1759,6 +1772,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * Whether the old plugin was present or not.
 		 *
 		 * @return boolean
+		 * @throws Freemius_Exception
 		 */
 		public function CanMigrate() {
 			return self::getConnector()->canMigrate();
@@ -2088,13 +2102,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		}
 
         /**
+         * @see @see https://trello.com/c/1OCd5iKc/589-wieserdk-al4mwp-cannot-retrieve-events-when-admin-url-is-changed
          * @return bool
          */
 		private static function is_admin_blocking_plugins_support_enabled() {
 
 		    //  only meant for 404 pages, but may run before is_404 can be used
-		    $is_404 = did_action('wp') ? is_404() : true;
-		    if (!$is_404) {
+		    $is_404 = did_action( 'wp' ) ? is_404() : true;
+		    if ( ! $is_404 ) {
 		        return false;
 		    }
 
@@ -2106,6 +2121,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * We assume settings have already been migrated (in version 4.1.3) to WordPress options table. We might
 			 * miss some 404 events until the plugin upgrade runs, but that is a very rare edge case. The same applies
 			 * to loading of 'admin-blocking-plugins-support' option further down.
+			 *
+			 * We do not need to worry about the missed 404s after version 4.1.5 as they were completely removed.
 			 */
 			$options_helper = new \WSAL\Helpers\Options( self::OPTIONS_PREFIX );
 			$is_stealth_mode = $options_helper->get_option_value('mwp-child-stealth-mode', 'no');
@@ -2118,6 +2135,46 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			//  allow if the admin blocking support settings is active
 			return ('yes' === $options_helper->get_option_value( 'admin-blocking-plugins-support', 'no' ) );
         }
+
+		/**
+		 * Loads everything necessary to use DB adapter from the sessions extension.
+         *
+         * @since 4.1.4.1
+		 */
+        public function load_sessions_extension_db_adapter() {
+	        if ( file_exists( plugin_dir_path( __FILE__ ) . 'extensions/user-sessions/user-sessions.php' ) ) {
+		        $this->maybe_add_sessions_trackers_early();
+		        require_once plugin_dir_path( __FILE__ ) . 'extensions/user-sessions/user-sessions.php';
+		        $sessions = new WSAL_UserSessions_Plugin();
+		        $sessions->require_adapter_classes();
+	        }
+        }
+
+		/**
+		 * Runs on premium version activation and installs database tables of the premium extensions (sessions table at
+         * the time of introducing this function).
+		 *
+		 * @since 4.1.4.1
+		 */
+        public function on_freemius_premium_version_activation() {
+            $this->load_sessions_extension_db_adapter();
+	        self::getConnector()->installSingle( 'WSAL_Adapters_MySQL_Session' );
+        }
+
+		/**
+		 * Dequeue JS files which have been added by other plugin to all admin pages and cause conflicts.
+		 * See https://github.com/WPWhiteSecurity/wp-security-audit-log-premium/issues/1246 and
+		 * https://trello.com/c/pWrQn1Be/742-koenhavelaertsflintgrpcom-reports-ui-does-not-load-with-plugin-installed
+		 *
+		 * @since 4.1.5
+		 */
+		public function dequeue_conflicting_scripts() {
+			global $current_screen;
+			// Only dequeue on our admin pages.
+ 			if ( isset( $current_screen->base ) && strpos( $current_screen->base, 'wp-activity-log' ) === 0 ) {
+				wp_deregister_script( 'dateformat' );
+			}
+		}
 	}
 
 	// Begin load sequence.

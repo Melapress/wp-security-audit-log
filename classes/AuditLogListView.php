@@ -316,15 +316,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_columns() {
-		// Get user information from settings.
-		// if ( empty( $this->name_type ) ) {
-		// $this->name_type = $this->_plugin->settings()->get_type_username();
-		// }
-		// if ( 'display_name' === $this->name_type || 'first_last_name' === $this->name_type ) {
-		// $name_column = __( 'User', 'wp-security-audit-log' );
-		// } elseif ( 'username' === $this->name_type ) {
-		// $name_column = __( 'Username', 'wp-security-audit-log' );
-		// }
 		// Audit log columns.
 		$cols = array(
 			'type'       => __( 'ID', 'wp-security-audit-log' ),
@@ -381,6 +372,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					case 'message':
 						$cols['mesg'] = __( 'Message', 'wp-security-audit-log' );
 						break;
+                    default:
+	                    //  fallback for any new columns would go here
+	                    break;
 				}
 			}
 		}
@@ -449,21 +443,17 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				);
 				$extra_msg           = '';
 				$data_link           = '';
-				$modification_alerts = array( 1002, 1003, 6007, 6023 );
+				$modification_alerts = array( 1002, 1003 );
 				if ( in_array( $item->alert_id, $modification_alerts, true ) ) {
 					$extra_msg = '. Modify this alert.';
-					if ( 1002 === $item->alert_id || 1003 === $item->alert_id ) {
-						$data_link = add_query_arg( 'page', 'wsal-togglealerts#tab-users-profiles---activity', admin_url( 'admin.php' ) );
-					} elseif ( 6007 === $item->alert_id || 6023 === $item->alert_id ) {
-						$data_link = add_query_arg( 'page', 'wsal-togglealerts#tab-system-activity', admin_url( 'admin.php' ) );
-					}
+					$data_link = add_query_arg( 'page', 'wsal-togglealerts#tab-users-profiles---activity', admin_url( 'admin.php' ) );
 				}
 
 				if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 					return '<span class="log-disable">' . str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
 				}
 
-				return '<span class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item->alert_id ) . '" data-tooltip="' . __( 'Disable this type of events.', 'wp-security-audit-log' ) . '<br>' . $item->alert_id . ' - ' . esc_html( $code->desc ) . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
+				return '<span class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item->alert_id ) . '" data-tooltip="<strong>' . __( 'Disable this type of events.', 'wp-security-audit-log' ) . '</strong><br>' . $item->alert_id . ' - ' . esc_html( $code->desc ) . $extra_msg . '" data-alert-id="' . $item->alert_id . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
 					. str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
 			case 'code':
 				$code  = $this->_plugin->alerts->GetAlert( $item->alert_id );
@@ -562,7 +552,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$scip = str_replace( array( '"', '[', ']' ), '', $scip );
 				}
 
-				$oips = array(); // $item->GetOtherIPs();
+				$oips = array();
 
 				// If there's no IP...
 				if ( is_null( $scip ) || '' == $scip ) {
@@ -675,7 +665,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 			case '%MetaLink%' == $name:
 				if ( ! empty( $value ) ) {
-					return "<a href=\"#\" data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"WsalDisableCustom(this, '" . $value . "');\"> Exclude Custom Field from the Monitoring</a>";
+					return "<a href=\"#\" data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"return WsalDisableCustom(this, '" . $value . "');\"> Exclude Custom Field from the Monitoring</a>";
 				} else {
 					return '';
 				}
@@ -717,17 +707,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				} else {
 					return '<i>unknown</i>';
 				}
-
-			case '%LinkFile%' === $name:
-				if ( 'NULL' != $value ) {
-					$site_id = $this->get_view_site_id(); // Site id for multisite.
-					return '<a href="javascript:;" onclick="download_404_log( this )" data-log-file="' . esc_attr( $value ) . '" data-site-id="' . esc_attr( $site_id ) . '" data-nonce-404="' . esc_attr( wp_create_nonce( 'wsal-download-404-log-' . $value ) ) . '" title="' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file', 'wp-security-audit-log' ) . '</a>';
-				} else {
-					return 'Click <a href="' . esc_url( admin_url( 'admin.php?page=wsal-togglealerts#tab-system-activity' ) ) . '">here</a> to log such requests to file';
-				}
-
-			case '%URL%' === $name:
-				return ' or <a href="javascript:;" data-exclude-url="' . esc_url( $value ) . '" data-exclude-url-nonce="' . wp_create_nonce( 'wsal-exclude-url-' . $value ) . '" onclick="wsal_exclude_url( this )">exclude this URL</a> from being reported.';
 
 			case '%LogFileLink%' === $name: // Failed login file link.
 				return '';

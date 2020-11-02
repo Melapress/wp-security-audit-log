@@ -256,7 +256,7 @@ final class WSAL_AlertManager {
 		}
 
 		// Get current user roles.
-		if ( isset( $old_user ) && ! false === $old_user ) {
+		if ( isset( $old_user ) && false !== $old_user ) {
 			// looks like this is a switched user so setup original user
 			// roles and values for later user.
 			$roles = $old_user->roles;
@@ -345,13 +345,15 @@ final class WSAL_AlertManager {
 	/**
 	 * Method: Commit an alert now.
 	 *
-	 * @param int   $type - Alert type.
+	 * @param int $type - Alert type.
 	 * @param array $data - Data of the alert.
 	 * @param array $cond - Condition for the alert.
-	 * @param bool  $_retry - Retry.
+	 * @param bool $_retry - Retry.
+	 *
+	 * @return mixed
+	 * @throws Exception - Error if alert is not registered.
 	 * @internal
 	 *
-	 * @throws Exception - Error if alert is not registered.
 	 */
 	protected function _CommitItem( $type, $data, $cond, $_retry = true ) {
 		// Double NOT operation here is intentional. Same as ! ( bool ) [ $value ]
@@ -448,6 +450,8 @@ final class WSAL_AlertManager {
 	 *
 	 * @param array $groups - An array with group name as the index and an array of group items as the value.
 	 * Item values is an array of [type, code, description, message, object, event type] respectively.
+	 *
+	 * @throws Exception
 	 */
 	public function RegisterGroup( $groups ) {
 		foreach ( $groups as $name => $group ) {
@@ -874,13 +878,14 @@ final class WSAL_AlertManager {
 	 * is back.
 	 *
 	 * @return boolean
+	 * @throws Freemius_Exception
 	 */
 	public function log_temp_alerts() {
 		// Get temporary alerts.
 		$temp_alerts = $this->plugin->GetGlobalSetting( 'temp_alerts', array() );
 
 		if ( empty( $temp_alerts ) ) {
-			return;
+			return true;
 		}
 
 		// Get DB connector.
@@ -897,7 +902,7 @@ final class WSAL_AlertManager {
 		// Check DB connection.
 		if ( $connection ) { // If connected then log temporary alerts in DB.
 			// Log each alert.
-			foreach ( $temp_alerts as $timestamp => $alert ) {
+			foreach ( $temp_alerts as $alert ) {
 				$is_migrated = $alert['alert']['is_migrated'];
 				$created_on  = $alert['alert']['created_on'];
 				$alert_id    = $alert['alert']['alert_id'];
@@ -1105,7 +1110,7 @@ final class WSAL_AlertManager {
 		 *
 		 * @param array $public_events - Array of public event ids.
 		 */
-		return apply_filters( 'wsal_public_event_ids', array( 1000, 1002, 1003, 1004, 1005, 1007, 2126, 4000, 4012, 6023 ) ); // Public events.
+		return apply_filters( 'wsal_public_event_ids', array( 1000, 1002, 1003, 1004, 1005, 1007, 2126, 4000, 4012 ) ); // Public events.
 	}
 
 	/**
@@ -1423,7 +1428,9 @@ final class WSAL_AlertManager {
 					foreach ( $value as $post_meta ) {
 						if ( $last_value === $post_meta ) {
 							continue;
-						} elseif ( 'postname' === $prefix ) {
+						}
+
+						if ( 'postname' === $prefix ) {
 							$sql .= "( (meta.value LIKE '$post_meta') > 0 ) OR ";
 						} else {
 							$sql .= "meta.value='$post_meta' OR ";
@@ -1661,12 +1668,7 @@ final class WSAL_AlertManager {
 				}
 
 				$t = $this->get_alert_details( $entry->id, $entry->alert_id, $entry->site_id, $entry->created_on, $entry->user_id, $roles, $ip, $ua );
-
-				if ( ! empty( $ip_addresses ) && in_array( $entry->ip, $ip_addresses, true ) ) {
-					array_push( $data, $t );
-				} else {
-					array_push( $data, $t );
-				}
+				array_push( $data, $t );
 			}
 		}
 

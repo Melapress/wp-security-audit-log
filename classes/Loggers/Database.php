@@ -99,16 +99,6 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		}
 
 		/**
-		 * Inject for promoting the paid add-ons.
-		 *
-		 * @deprecated 3.2.4
-		 */
-		// $type = (int) $type;
-		// if ( 9999 !== $type ) {
-		// 	$this->AlertInject( $occ );
-		// }
-
-		/**
 		 * Fires immediately after an alert is logged.
 		 *
 		 * @since 3.1.2
@@ -207,44 +197,6 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 
 		// Notify system.
 		do_action( 'wsal_prune', $deleted_count, vsprintf( $result['sql'], $result['args'] ) );
-	}
-
-	/**
-	 * Inject Promo alert every $count alerts if no Add-ons are activated.
-	 *
-	 * @param WSAL_Models_Occurrence $occurrence - Occurrence, instance of WSAL_Models_Occurrence.
-	 *
-	 * @deprecated 3.2.4
-	 */
-	private function AlertInject( $occurrence ) {
-		$count = $this->CheckPromoToShow();
-		if ( $count && $occurrence->getId() != 0 ) {
-			if ( ( $occurrence->getId() % $count ) == 0 ) {
-				$promo_to_send = $this->GetPromoAlert();
-				if ( ! empty( $promo_to_send ) ) {
-					$upgrade_link   = add_query_arg( 'page', 'wsal-auditlog-pricing', admin_url( 'admin.php' ) );
-					$more_info_link = add_query_arg(
-						array(
-							'utm_source'   => 'plugin',
-							'utm_medium'   => 'referral',
-							'utm_campaign' => 'WSAL',
-							'utm_content'  => 'db+integrations',
-						),
-						'https://wpactivitylog.com/features/'
-					);
-					$upgrade        = '<a href="' . $upgrade_link . '">' . __( 'Upgrade to Premium', 'wp-security-audit-log' ) . '</a>';
-					$more_info      = '<a href="' . $more_info_link . '" target="_blank">' . __( 'More Information', 'wp-security-audit-log' ) . '</a>';
-					$this->Log(
-						9999, array(
-							'ClientIP'     => '127.0.0.1',
-							'Username'     => 'Plugin',
-							'PromoMessage' => sprintf( $promo_to_send['message'], $upgrade, $more_info ),
-							'PromoName'    => $promo_to_send['name'],
-						)
-					);
-				}
-			}
-		}
 	}
 
 	/**

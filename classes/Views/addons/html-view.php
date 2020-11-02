@@ -30,6 +30,9 @@ switch ( $this->hook_suffix ) {
 	case 'audit-log_page_wsal-search':
 		$utm_params['utm_content'] = 'search';
 		break;
+    default:
+	    //  fallback for any other hook suffices would go here
+	    break;
 }
 // Links.
 $more_info = add_query_arg(

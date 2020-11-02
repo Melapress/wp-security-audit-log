@@ -41,15 +41,6 @@ class WSAL_Adapters_MySQL_TmpUser extends WSAL_Adapters_MySQL_ActiveRecord {
 	}
 
 	/**
-	 * Method: Constructor.
-	 *
-	 * @param array $conn - Connection array.
-	 */
-	public function __construct( $conn ) {
-		parent::__construct( $conn );
-	}
-
-	/**
 	 * Must return SQL for creating table.
 	 *
 	 * @param mixed $prefix - Prefix.

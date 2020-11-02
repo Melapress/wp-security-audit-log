@@ -20,7 +20,7 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-activity-log-for-woocommerce.latest-stable.zip',
 					'event_tab_id'       => '#tab-woocommerce',
 					'plugin_description' => 'Keep a log of your team\'s store settings, products, orders, coupons and any other changes they might do on your eCommerce store.',
-				)
+				),
 			);
 
 			// combine the two arrays.
@@ -41,23 +41,25 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 			return $addon_event_codes;
 		}
 
+		/**
+		 * Further process the $_POST data upon saving events in the ToggleAlerts view.
+		 *
+		 * @param  array  $disabled          Empty array which we will fill if needed.
+		 * @param  object $registered_alerts Currently registered alerts.
+		 * @param  array  $frontend_events   Array of currently enabled frontend events, taken from POST data.
+		 * @param  array  $enabled           Currently enabled events.
+		 *
+		 * @return array                     Disabled events.
+		 */
 		public function save_settings_disabled_events( $disabled, $registered_alerts, $frontend_events, $enabled ) {
-
-			$settings = WpSecurityAuditLog::GetInstance()->settings();
-
 			// Now we check all registered events for further processing.
 			foreach ( $registered_alerts as $alert ) {
-				if ( 9036 === $alert->type ) {
-					$frontend_events = $settings::get_frontend_events();
-					$frontend_events = array_merge( $frontend_events, array( 'woocommerce' => true ) );
-					$settings->set_frontend_events( $frontend_events );
-				}
 
+				// Disable Visitor events if the user disabled the event there are "tied to" in the UI.
 				if ( ! in_array( $alert->type, $enabled, true ) ) {
-					if ( 9036 === $alert->type ) {
-						$frontend_events = $settings::get_frontend_events();
+					if ( 9035 === $alert->type ) {
 						$frontend_events = array_merge( $frontend_events, array( 'woocommerce' => false ) );
-						$settings->set_frontend_events( $frontend_events );
+						WSAL_Settings::set_frontend_events( $frontend_events );
 					}
 					$disabled[] = $alert->type;
 				}

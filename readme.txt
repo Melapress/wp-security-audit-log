@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.5
-Stable tag: 4.1.4
+Stable tag: 4.1.5
 Requires PHP: 5.5
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -196,7 +196,7 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 1. The WordPress activity logs from where the site administrator can see all the user and site changes.
 2. See who is logged in to your WordPress and manage users sessions with [Users Sessions Management](https://www.wpsecurityauditlog.com/premium-features/wordpress-users-sessions-management-tools/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 3. The plugin settings from where site administrator can configure generic plugin settings such as [reverse proxy support](https://www.wpsecurityauditlog.com/support-documentation/support-reverse-proxies-web-application-firewalls/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description), who can manage the plugin etc.
-4. The WordPress audit trail settings from where you can configure automatic pruning of alerts, which timestamp should be used, how many 404 requests should be logged and more.
+4. The WordPress audit trail settings from where you can configure automatic pruning of alerts, which timestamp should be used and more.
 5. Configuring WordPress email and SMS alerts with the [Email & SMS Notifications module](https://www.wpsecurityauditlog.com/premium-features/email-notifications-wordpress-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 6. Search in the WordPress activity log with the use filters to fine tune the search results.
 7. The Enable/Disable events section from where Administrators can disable or enable activity log events.
@@ -206,67 +206,39 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.1.4 (2020-10-07) =
+= 4.1.5 (2020-11-02) =
 
-Release notes: [WP Activity Log 4.1.4: New activity log for Yoast SEP extenion & improved coverage](https://wpactivitylog.com/wsal-4-1-4/)
+Release notes: [WP Activity Log 4.1.5: Support for new MainWP settings module & improved coverage](https://wpactivitylog.com/wsal-4-1-5/)
 
 * **New features**
-	* [Activity Log for Yoast SEO](https://wpactivitylog.com/extensions/yoast-seo-activity-log/) extension.
-	* Plugin detects plugin updates done via a zip file (new feature in WordPress 5.5) 
+	* Support for the new settings module in the [Activity Log for MainWP extension](https://wpactivitylog.com/al4mwp-1-6/).
 
-* **New Yoast SEO activity log event IDs**
-	* ID 8826: user has enabled / disabled the Redirect Attachment URLs in the Yoast SEO plugin.
-	* ID 8827: Usage tracking has been enabled / dsabled.
-	* ID 8828: The REST API: head endpoint setting was enabled / disabled.
-	* ID 8829: The social profile URL was added / modified / deleted.
-	* ID 8830: User changed the taxonomies settings to show in search results.
-	* ID 8831: Chaged the SEO title template for a taxonomy type.
-	* ID 8832: Changed the meta description template for a taxonomy type.
-	* ID 8833: Enabled or disabled the display of Author or Date archives.
-	* ID 8834: Configured the plugin to show the Author or Date archived in the search results.
-	* ID 8835: Changed the SEO title template for the Author or Date archive pages.
-	* ID 8836: Changed the Meta description template for the Author or Date archive pages.
-	* ID 8837: Enabled / disabled the setting to show SEO settings for specific taxonomy types.
+* **New event ID**
+	* ID 7012: user changed the network's users and sites registration settings.
 	
-Refer to the [complete list of activity log event IDs](https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/) for more detailed information.	
-
+* **Security fix**
+	* SQL Injection in external database module reported by [WP deeply](https://wpdeeply.com/). Thank you for the responsible disclosure.
+	
+* **Breaking change**
+	* Removed detection and logging of requests to non-existing URLs (404s). Event ID 6007 and 6023 no longer used in the plugin. This breaking change resulted in a major performance improvement.
+	
 * **Improvements**
-	* Improved the overall coverage and how events of changes in Yoast SEO plugin and YoastSEO metabox are reported.
-	* Implemented a single email class that is now used by all email features in the plugin.
-	* Updated Freemius SDK to the latest version (2.4.0).
-	* Improved the detection mechanism of installed third party plugins used for the activity log extensions notifications.
-	* Consolidated all [activity log extensions code](https://github.com/WPWhiteSecurity/wsal-extension-example) - now all third party plugins extensions use the same code.
-	* Improved the plugin's activation process on multisite network.
-	* Plugin only shows file changes notifications if the [Website File Changes Monitor](https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/) plugin is installed.
-	* Plugin prompts user to save unsaved changes in settings page before switching pages.
-	* Improved plugin & activity log permissions on multisite network.
-	* System information file updated to retrieve settings from the wp_options table.
-	* Removed all the obsolete event IDs from the Enable/Disable events section.
-	* Updated a number of filters/hooks calls that were calling deprecated ones.
-	* Removed all the obsolete code which was used for the old wp_wsal_options table.
-	* The handling of disabled event IDs is now done more efficiently, via filters.
-	* Improved the session db adaptor which was causing errors in specific edge cases.
-	* Branded the notifications for third party plugins extensions and improved the text.
-	* Improved the first-time install wizard CSS to correctly display the list of required extensions for third party plugins.
-	* Removed event ID 2106 (plugin updated post) and ID 8823 (Yoast SEO date snippet) because they were made redundant.
-	* Moved all remaining bbPress code to the [Activity Log for bbPress](https://wordpress.org/plugins/wp-security-audit-log-add-on-for-bbpress/) extension.
-	* Added check to prevent identical search filters from being saved.
+	* Added Event Type and Object in the activity log reports.
+	* Improved the coverage of the login / logout detection sensor.
+	* Improved format of "hover over pop-ups" used in the activity log viewer (such as the one to exclude a specific event ID).
+	* Moved almost all of the remaining WooCommerce sensor code to the [activity log for WooCommerce extension](https://wordpress.org/plugins/wp-activity-log-for-woocommerce/).
+	* Improved UX for the front-end sensors settings - options now are available underneath the relevant event ID.
+	* Removed redundant code that is now in the [WordPress activity log extensions](https://wpactivitylog.com/extensions/).
 
 * **Bug fixes**
-	* Removed the old version check from the wp_wsal_options table.
-	* Reset plugin settings was not deleting all the settings.
-	* Reports UI was not loading in a mixed content environment.
-	* Unkown object was reported in event ID 6034 (user purged activity log).
-	* Custom login page message was not shown in specific edge cases.
-	* Addressed a number of errors that were appearing during WooCommerce setup.
-	* List of IP addresses in event ID 1005 (users has multiple logged in sessions) was incorrect.
-	* Plugin was generating an error when changing the WooCommerce store address on a multisite network.
-	* Event ID 1000 reported twice on websites using the OptimizeMember plugin.
-	* Third party plugins detection was not detecting all plugins on multisite network.
-	* Built-in email notifications couldn't be disabled after they were enabled.
-	* Notifications to install third party plugin extensions were shown in sub sites on a multisite network.
-	* Event ID 1000 (user login) was reported even when user was excluded from the logs.
-	* Data picker obscured by autocomplete in notifications.
-	* Fixed conflict with MyCred plugin (widget sensor was killing ongoing widget requests).
+	* Sorting of activity log events not retained in following pages when in pagination mode.
+	* Users sessions table was not being created when upgrading from the free to the premium editions of the plugin.
+	* Link to exclude custom field in event was broken / not adding the custom field to the exclusion list.
+	* Changing the category of a post was not being reported (Event ID 2016).
+	* Unkown object was reported in event ID 6034 (purged activity log).
+	* Changing password via the WooCommerce account page caused session to remain once user logs out.
+	* Users could add multiple identical search filters causing a crash.
+	* Users not redirected to the correct list of event IDs after installing the activity log for Yoast SEO extension.
+	* Install Extension button in events was broken and not triggering the extension installer.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.

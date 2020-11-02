@@ -124,25 +124,25 @@ final class WSAL_Alert {
 	 */
 	protected function GetFormattedMesg( $orig_mesg, $meta_data = array(), $meta_formatter = null, $occurrence_id = 0, $highlight = null ) {
 		// Tokenize message with regex.
-		$mesg = preg_split( '/(%.*?%)/', (string) $orig_mesg, -1, PREG_SPLIT_DELIM_CAPTURE );
-		if ( ! is_array( $mesg ) ) {
+		$message = preg_split( '/(%.*?%)/', (string) $orig_mesg, -1, PREG_SPLIT_DELIM_CAPTURE );
+		if ( ! is_array( $message ) ) {
 			return (string) $orig_mesg;
 		}
 		// Handle tokenized message.
-		foreach ( $mesg as $i => $token ) {
+		foreach ( $message as $i => $token ) {
 			// Handle escaped percent sign.
 			if ( '%%' == $token ) {
-				$mesg[ $i ] = '%';
+				$message[ $i ] = '%';
 			} elseif ( substr( $token, 0, 1 ) == '%' && substr( $token, -1, 1 ) == '%' ) {
 				// Handle complex expressions.
-				$mesg[ $i ] = $this->GetMetaExprValue( substr( $token, 1, -1 ), $meta_data );
+				$message[ $i ] = $this->GetMetaExprValue( substr( $token, 1, -1 ), $meta_data );
 				if ( $meta_formatter ) {
-					$mesg[ $i ] = call_user_func( $meta_formatter, $token, $mesg[ $i ], $occurrence_id, $highlight );
+					$message[ $i ] = call_user_func( $meta_formatter, $token, $message[ $i ], $occurrence_id, $highlight );
 				}
 			}
 		}
 		// Compact message and return.
-		return implode( '', $mesg );
+		return implode( '', $message );
 	}
 
 	/**
