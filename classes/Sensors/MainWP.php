@@ -64,7 +64,8 @@ class WSAL_Sensors_MainWP extends WSAL_AbstractSensor {
 			add_action( 'mainwp_child_theme_action', array( $this, 'mainwp_child_uninstall_theme' ), 10, 1 );
 
 			// Update theme/plugin from MainWP dashboard.
-			add_action( 'mainwp_child_upgradePluginTheme', array( $this, 'mainwp_child_update_assets' ), 10, 1 );
+            add_action( 'upgrader_process_complete', array( $this, 'mainwp_child_update_assets' ), 10, 2 );
+
 		}
 	}
 
@@ -352,14 +353,15 @@ class WSAL_Sensors_MainWP extends WSAL_AbstractSensor {
 		}
 	}
 
-	/**
-	 * Method: Handle plugin/theme update event
-	 * from MainWP dashboard on child site.
-	 *
-	 * @param array $args - Array of arguments related to asset updated.
-	 * @since 3.2.2
-	 */
-	public function mainwp_child_update_assets( $args ) {
+    /**
+     * Method: Handle plugin/theme update event
+     * from MainWP dashboard on child site.
+     *
+     * @param WP_Upgrader $upgrader
+     * @param array $args - Array of arguments related to asset updated.
+     * @since 3.2.2
+     */
+	public function mainwp_child_update_assets( $upgrader, $args ) {
 		if ( empty( $args ) || ! is_array( $args ) ) {
 			return;
 		}
@@ -372,47 +374,32 @@ class WSAL_Sensors_MainWP extends WSAL_AbstractSensor {
 			isset( $post_array['function'] ) && 'upgradeplugintheme' === $post_array['function']
 			&& isset( $post_array['mainwpsignature'] ) && ! empty( $post_array['mainwpsignature'] )
 			&& isset( $post_array['list'] ) && ! empty( $post_array['list'] )
-			&& isset( $args['type'] ) && ! empty( $args['type'] )
-			&& isset( $args['name'] ) && ! empty( $args['name'] )
+            && isset( $args['action'] ) && 'update' === $args['action']
+            && isset( $args['type'] ) && ! empty( $args['type'] )
 		) {
 			if ( 'theme' === $args['type'] ) {
 				// Site themes updated.
-				$site_themes = explode( ',', $post_array['list'] );
+				$site_themes = array_key_exists( 'themes', $args ) ? $args['themes'] : explode( ',', $post_array['list'] );
 
-				// Theme name.
-				$theme_name = $args['name'];
+				if ( empty( $site_themes ) ) {
+				    //  no themes in any of the lists
+                    return;
+                }
 
-				// Get theme object.
-				$theme = WSAL_Sensors_PluginsThemes::get_theme_by_name( $theme_name );
-
-				if ( ! empty( $theme ) && $theme instanceof WP_Theme && in_array( $theme->stylesheet, $site_themes, true ) ) {
-					$this->plugin->alerts->Trigger(
-						5031,
-						array(
-							'Theme' => (object) array(
-								'Name'                   => $theme->Name,
-								'ThemeURI'               => $theme->ThemeURI,
-								'Description'            => $theme->Description,
-								'Author'                 => $theme->Author,
-								'Version'                => $theme->Version,
-								'get_template_directory' => $theme->get_template_directory(),
-							),
-						)
-					);
-				}
+				foreach ( $site_themes as $theme_name ) {
+                    WSAL_Sensors_PluginsThemes::LogThemeUpdatedEvent( $theme_name );
+                }
 			} elseif ( 'plugin' === $args['type'] ) {
-				// Plugin name.
-				$plugin_name = $args['name'];
+                // Site plugins updated.
+                if ( ! array_key_exists( 'plugins', $args ) || empty( $args['plugins'] ) ) {
+                    //  no plugins in the list
+                    return;
+                }
 
-				// Get plugin filename.
-				$plugin_file = WSAL_Sensors_PluginsThemes::get_plugin_file_name( $plugin_name );
-
-				// If plugin file is empty then return.
-				if ( empty( $plugin_file ) ) {
-					return;
-				}
-
-				WSAL_Sensors_PluginsThemes::LogPluginUpdatedEvent( $plugin_file );
+                $plugins = $args['plugins'];
+                foreach ( $plugins as $plugin_file ) {
+                    WSAL_Sensors_PluginsThemes::LogPluginUpdatedEvent( $plugin_file );
+                }
 			}
 		}
 	}
