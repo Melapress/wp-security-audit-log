@@ -358,27 +358,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			} elseif ( isset( $post_array['themes'] ) ) {
 				$themes = explode( ',', $post_array['themes'] );
 			}
-			if ( isset( $themes ) ) {
-				foreach ( $themes as $theme_name ) {
-					$theme = wp_get_theme( $theme_name );
-					$this->plugin->alerts->Trigger(
-						5031,
-						array(
-							'Theme' => (object) array(
-								'Name'                   => $theme->Name,
-								'ThemeURI'               => $theme->ThemeURI,
-								'Description'            => $theme->Description,
-								'Author'                 => $theme->Author,
-								'Version'                => $theme->Version,
-								'get_template_directory' => $theme->get_template_directory(),
-							),
-						)
-					);
-
-					// Set theme to skip file changes alert.
-					$this->skip_theme_change_alerts( $theme_name );
-				}
-			}
+            if ( isset( $themes ) ) {
+                foreach ( $themes as $theme_name ) {
+                    WSAL_Sensors_PluginsThemes::LogThemeUpdatedEvent( $theme_name );
+                }
+            }
 		}
 
 		// Install theme.
@@ -550,22 +534,23 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 *
 	 * @param string $theme_name - Theme name.
 	 *
-	 * @return WP_Theme
+	 * @return WP_Theme|null
 	 */
 	public static function get_theme_by_name( $theme_name ) {
 		// Check if $theme_name is empty.
 		if ( empty( $theme_name ) ) {
-			return;
+			return null;
 		}
 
 		// Get all themes.
 		$all_themes = wp_get_themes();
 
-		$theme = '';
+		$theme = null;
 		if ( ! empty( $all_themes ) ) {
-			foreach ( $all_themes as $stylesheet => $theme_obj ) {
-				if ( $theme_name === $theme_obj->Name ) {
+			foreach ( $all_themes as $theme_slug => $theme_obj ) {
+				if ( $theme_name === $theme_slug|| $theme_name === $theme_obj->get('Name') ) {
 					$theme = $theme_obj;
+					break;
 				}
 			}
 		}
@@ -684,4 +669,33 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			)
 		);
 	}
+
+    /**
+     * Log theme updated event.
+     *
+     * @param string $theme_name Theme name.
+     *
+     * @since 4.1.5
+     */
+    public static function LogThemeUpdatedEvent( $theme_name ) {
+        $theme = WSAL_Sensors_PluginsThemes::get_theme_by_name($theme_name);
+        if ( ! $theme instanceof WP_Theme ) {
+            return;
+        }
+
+        $wsal = WpSecurityAuditLog::GetInstance();
+        $wsal->alerts->Trigger(
+            5031,
+            array(
+                'Theme' => (object) array(
+                    'Name'                   => $theme->Name,
+                    'ThemeURI'               => $theme->ThemeURI,
+                    'Description'            => $theme->Description,
+                    'Author'                 => $theme->Author,
+                    'Version'                => $theme->Version,
+                    'get_template_directory' => $theme->get_template_directory(),
+                ),
+            )
+        );
+    }
 }
