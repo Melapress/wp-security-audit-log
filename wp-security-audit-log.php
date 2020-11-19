@@ -657,6 +657,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					wsal_freemius()->add_filter( 'opt_in_error_message', array( $this, 'limited_license_activation_error' ), 10, 1 );
 					wsal_freemius()->add_action( 'after_account_plan_sync', array( $this, 'sync_premium_freemius' ), 10, 1 );
 					wsal_freemius()->add_action( 'after_premium_version_activation', array( $this, 'on_freemius_premium_version_activation') );
+					wsal_freemius()->add_filter( 'plugin_icon', function( $plugin_icon) {
+					    return WSAL_BASE_DIR . 'img/wsal-logo@2x.png';
+                    } );
 				}
 			}
 		}
