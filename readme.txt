@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
 Tested up to: 5.5.3
-Stable tag: 4.1.5
+Stable tag: 4.1.5.1
 Requires PHP: 5.5
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -206,39 +206,13 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.1.5 (2020-11-02) =
+= 4.1.5.1 (2020-11-24) =
 
-Release notes: [WP Activity Log 4.1.5: Support for new MainWP settings module & improved coverage](https://wpactivitylog.com/wsal-4-1-5/)
-
-* **New features**
-	* Support for the new settings module in the [Activity Log for MainWP extension](https://wpactivitylog.com/al4mwp-1-6/).
-
-* **New event ID**
-	* ID 7012: user changed the network's users and sites registration settings.
-	
-* **Security fix**
-	* SQL Injection in external database module reported by [WP deeply](https://wpdeeply.com/). Thank you for the responsible disclosure.
-	
-* **Breaking change**
-	* Removed detection and logging of requests to non-existing URLs (404s). Event ID 6007 and 6023 no longer used in the plugin. This breaking change resulted in a major performance improvement.
-	
 * **Improvements**
-	* Added Event Type and Object in the activity log reports.
-	* Improved the coverage of the login / logout detection sensor.
-	* Improved format of "hover over pop-ups" used in the activity log viewer (such as the one to exclude a specific event ID).
-	* Moved almost all of the remaining WooCommerce sensor code to the [activity log for WooCommerce extension](https://wordpress.org/plugins/wp-activity-log-for-woocommerce/).
-	* Improved UX for the front-end sensors settings - options now are available underneath the relevant event ID.
-	* Removed redundant code that is now in the [WordPress activity log extensions](https://wpactivitylog.com/extensions/).
+	* Updated the Freemius SDK to the latest version.
+	* Updated the Twilio SDK to the latest version.
 
-* **Bug fixes**
-	* Sorting of activity log events not retained in following pages when in pagination mode.
-	* Users sessions table was not being created when upgrading from the free to the premium editions of the plugin.
-	* Link to exclude custom field in event was broken / not adding the custom field to the exclusion list.
-	* Changing the category of a post was not being reported (Event ID 2016).
-	* Unkown object was reported in event ID 6034 (purged activity log).
-	* Changing password via the WooCommerce account page caused session to remain once user logs out.
-	* Users could add multiple identical search filters causing a crash.
-	* Users not redirected to the correct list of event IDs after installing the activity log for Yoast SEO extension.
-	* Install Extension button in events was broken and not triggering the extension installer.
+* **Bug fix**
+	* In some edge cases, the time in the reports was incorrect.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
