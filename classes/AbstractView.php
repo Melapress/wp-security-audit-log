@@ -251,4 +251,5 @@ abstract class WSAL_AbstractView {
 	public function GetViewName() {
 		return strtolower( str_replace( array( 'WSAL_Views_', 'WSAL_' ), '', get_class( $this ) ) );
 	}
+
 }

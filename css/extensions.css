@@ -391,7 +391,7 @@ ul.premium-list li:before {
 	padding: 0 12px;
 }
 
-.swipebox {
+.lightbox {
 	display: inline-block;
 	margin-top: 10px;
 }
@@ -580,4 +580,15 @@ ul.premium-list li:before {
 		margin: 0 auto 20px auto;
 	}
 }
- 
+
+.sl-overlay {
+	z-index: 10040 !important;
+}
+
+.sl-wrapper {
+	z-index: 10050 !important;
+}
+
+.sl-wrapper .sl-close, .sl-wrapper .sl-counter {
+	top: 50px !important;
+}
