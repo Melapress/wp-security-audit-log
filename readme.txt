@@ -5,8 +5,8 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 3.6
-Tested up to: 5.5.3
-Stable tag: 4.1.5.1
+Tested up to: 5.6
+Stable tag: 4.1.5.2
 Requires PHP: 5.5
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -206,13 +206,9 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.1.5.1 (2020-11-24) =
+= 4.1.5.2 (2021-01-21) =
 
-* **Improvements**
-	* Updated the Freemius SDK to the latest version.
-	* Updated the Twilio SDK to the latest version.
-
-* **Bug fix**
-	* In some edge cases, the time in the reports was incorrect.
+* **Improvement**
+	* Replaced Swipebox with Simple Lightbox (compatible with WordPress 5.6)
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.

@@ -107,7 +107,7 @@ if ( $this->_plugin->IsMultisite() && ! is_super_admin() ) {
 			<?php foreach ( $screenshots as $screenshot ) : ?>
 				<div class="user-login-content user-screenshots">
 					<div class="user-content-right">
-						<a class="swipebox img-wrap" href="<?php echo esc_url( $screenshot['img'] ); ?>" title="<?php echo esc_attr( $screenshot['desc'] ); ?>">
+						<a class="lightbox img-wrap" href="<?php echo esc_url( $screenshot['img'] ); ?>" title="<?php echo esc_attr( $screenshot['desc'] ); ?>">
 							<img src="<?php echo esc_url( $screenshot['img'] ); ?>" alt="">
 						</a>
 					</div>
