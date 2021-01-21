@@ -212,7 +212,7 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 	* Updated the Freemius SDK to the latest version.
 	* Updated the Twilio SDK to the latest version.
 
-* **Bug fix**
+* **Bug fixes**
 	* In some edge cases, the time in the reports was incorrect.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.

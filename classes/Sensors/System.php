@@ -170,6 +170,99 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 
+		if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['show_on_front'] )
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
+			$old_homepage = ( 'posts' === get_site_option( 'show_on_front' ) ) ? __( 'latest posts', 'wp-security-audit-log' ) :__( 'static page', 'wp-security-audit-log' );
+			$new_homepage = ( 'posts' === $post_array['show_on_front'] ) ? __( 'latest posts', 'wp-security-audit-log' ) :__( 'static page', 'wp-security-audit-log' );
+			if ( $old_homepage != $new_homepage ) {
+				$this->plugin->alerts->Trigger(
+					6035,
+					array(
+						'old_homepage' => $old_homepage,
+						'new_homepage' => $new_homepage,
+					)
+				);
+			}
+		}
+
+		if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['page_on_front'] )
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
+			$old_frontpage = get_the_title( get_site_option( 'page_on_front' ) ) ;
+			$new_frontpage = get_the_title( $post_array[ 'page_on_front' ] );
+			if ( $old_frontpage != $new_frontpage ) {
+				$this->plugin->alerts->Trigger(
+					6036,
+					array(
+						'old_page' => $old_frontpage,
+						'new_page' => $new_frontpage,
+					)
+				);
+			}
+		}
+
+		if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['page_for_posts'] )
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
+			$old_postspage = get_the_title( get_site_option( 'page_for_posts' ) );
+			$new_postspage = get_the_title( $post_array[ 'page_for_posts' ] );
+			if ( $old_postspage != $new_postspage ) {
+				$this->plugin->alerts->Trigger(
+					6037,
+					array(
+						'old_page' => $old_postspage,
+						'new_page' => $new_postspage,
+					)
+				);
+			}
+		}
+
+		// Timezone changed.
+		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['timezone_string'] ) ) {
+			$old_timezone_string = get_option( 'timezone_string' );
+			$new_timezone_string = isset( $post_array['timezone_string'] ) ? $post_array['timezone_string'] : '';
+			if ( $old_timezone_string !== $new_timezone_string ) {
+				$this->plugin->alerts->Trigger(
+					6040,
+					array(
+						'old_timezone'  => $old_timezone_string,
+						'new_timezone'  => $new_timezone_string,
+						'CurrentUserID' => wp_get_current_user()->ID,
+					)
+				);
+			}
+		}
+
+		// Date format changed.
+		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['date_format'] ) ) {
+			$old_date_format = ( 'custom' === get_option( 'date_format' ) ) ? get_option( 'date_format_custom' ) : get_option( 'date_format' );
+			$new_date_format = ( 'custom' === $post_array['date_format'] ) ? $post_array['date_format_custom'] : $post_array['date_format'];
+			if ( $old_date_format !== $new_date_format ) {
+				$this->plugin->alerts->Trigger(
+					6041,
+					array(
+						'old_date_format' => $old_date_format,
+						'new_date_format' => $new_date_format,
+						'CurrentUserID'   => wp_get_current_user()->ID,
+					)
+				);
+			}
+		}
+
+		// Time format changed.
+		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['time_format'] ) ) {
+			$old_time_format = ( 'custom' === get_option( 'time_format' ) ) ? get_option( 'time_format_custom' ) : get_option( 'time_format' );
+			$new_time_format = ( 'custom' === $post_array['time_format'] ) ? $post_array['time_format_custom'] : $post_array['time_format'];
+			if ( $old_time_format !== $new_time_format ) {
+				$this->plugin->alerts->Trigger(
+					6042,
+					array(
+						'old_time_format' => $old_time_format,
+						'new_time_format' => $new_time_format,
+						'CurrentUserID'   => wp_get_current_user()->ID,
+					)
+				);
+			}
+		}
+
 		// Registration Option.
 		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ( get_option( 'users_can_register' ) xor isset( $post_array['users_can_register'] ) ) ) {
 			$old = get_option( 'users_can_register' ) ? 'enabled' : 'disabled';
@@ -265,6 +358,18 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					)
 				);
 			}
+		}
+
+		// Enable core uppdates.
+		if ( isset( $get_array['action'] ) && 'core-major-auto-updates-settings' === $get_array['action'] && isset( $get_array['value'] )
+			&& wp_verify_nonce( $get_array['_wpnonce'], 'core-major-auto-updates-nonce' ) ) {
+			$status     = ( 'enable' === $get_array['value'] ) ? __( 'automatically update to all new versions of WordPress', 'wp-security-audit-log' ) : __( 'automatically update maintenance and security releases only', 'wp-security-audit-log' );
+			$this->plugin->alerts->Trigger(
+				6044,
+				array(
+					'updates_status' => $status,
+				)
+			);
 		}
 	}
 

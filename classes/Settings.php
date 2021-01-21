@@ -1129,61 +1129,92 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Datetime used in the Alerts.
+	 * Determines datetime format to be displayed in any UI in the plugin (logs in administration, emails, reports,
+	 * notifications etc.).
+	 *
+	 * Note: Format returned by this function is not compatible with JavaScript date and time picker widgets. Use
+	 * functions GetTimeFormat and GetDateFormat for those.
 	 *
 	 * @param boolean $line_break - True if line break otherwise false.
+	 *
+	 * @return string
 	 */
-	public function GetDatetimeFormat( $line_break = true ) {
-		if ( $line_break ) {
-			$date_time_format = $this->GetDateFormat() . '<\b\r>' . $this->GetTimeFormat();
-		} else {
-			$date_time_format = $this->GetDateFormat() . ' ' . $this->GetTimeFormat();
-		}
+	public function GetDatetimeFormat( $line_break = true, $use_nb_space_for_am_pm = true ) {
+		$result = $this->GetDateFormat();
 
-		$wp_time_format = get_option( 'time_format' ); // WP time format.
+		$result .= $line_break ? '<\b\r>' : ' ';
+
+		$time_format = $this->GetTimeFormat();
+		$has_am_pm   = false;
+		$am_pm_fraction   = false;
+		$am_pm_pattern = '/(?i)(\s+A)/';
+		if ( preg_match( $am_pm_pattern, $time_format, $am_pm_matches ) ) {
+			$has_am_pm   = true;
+			$am_pm_fraction = $am_pm_matches[0];
+			$time_format = preg_replace( $am_pm_pattern, '', $time_format );
+		}
 
 		// Check if the time format does not have seconds.
-		if ( stripos( $wp_time_format, 's' ) === false ) {
-			if ( stripos( $wp_time_format, '.v' ) !== false ) {
-				$date_time_format = str_replace( '.v', '', $date_time_format );
+		if ( stripos( $time_format, 's' ) === false ) {
+			if ( stripos( $time_format, '.v' ) !== false ) {
+				$time_format = str_replace( '.v', '', $result );
 			}
-			$date_time_format .= ':s'; // Add seconds to time format.
-			$date_time_format .= '.$$$'; // Add milliseconds to time format.
+			$time_format .= ':s'; // Add seconds to time format.
+			$time_format .= '.$$$'; // Add milliseconds to time format.
 		} else {
 			// Check if the time format does have milliseconds.
-			if ( stripos( $wp_time_format, '.v' ) !== false ) {
-				$date_time_format = str_replace( '.v', '.$$$', $date_time_format );
+			if ( stripos( $time_format, '.v' ) !== false ) {
+				$time_format = str_replace( '.v', '.$$$', $result );
 			} else {
-				$date_time_format .= '.$$$';
+				$time_format .= '.$$$';
 			}
 		}
 
-		if ( stripos( $wp_time_format, 'A' ) !== false ) {
-			$date_time_format .= '&\n\b\s\p;A';
+		if ( $has_am_pm ) {
+			$time_format .= preg_replace('/\s/', $use_nb_space_for_am_pm ? '&\n\b\s\p;' : ' ', $am_pm_fraction);
 		}
-		return $date_time_format;
+
+		$result .= $time_format;
+
+		return $result;
 	}
 
 	/**
-	 * Date Format from WordPress General Settings.
+	 * Date format based on WordPress date settings. It can be optionally sanitized to get format compatible with
+	 * JavaScript date and time picker widgets.
+	 *
+	 * Note: This function must not be used to display actual date and time values anywhere. For that use function GetDateTimeFormat.
+	 *
+	 * @param bool $sanitized If true, the format is sanitized for use with JavaScript date and time picker widgets.
+	 *
+	 * @return string
 	 */
-	public function GetDateFormat() {
-		$wp_date_format = get_option( 'date_format' );
-		$search         = array( 'F', 'M', 'n', 'j', ' ', '/', 'y', 'S', ',', 'l', 'D' );
-		$replace        = array( 'm', 'm', 'm', 'd', '-', '-', 'Y', '', '', '', '' );
-		$date_format    = str_replace( $search, $replace, $wp_date_format );
-		return $date_format;
+	public function GetDateFormat( $sanitized = false ) {
+		if ($sanitized) {
+			return 'Y-m-d';
+		}
+
+		return get_option( 'date_format' );
 	}
 
 	/**
-	 * Time Format from WordPress General Settings.
+	 * Time format based on WordPress date settings. It can be optionally sanitized to get format compatible with
+	 * JavaScript date and time picker widgets.
+	 *
+	 * Note: This function must not be used to display actual date and time values anywhere. For that use function GetDateTimeFormat.
+	 *
+	 * @param bool $sanitize If true, the format is sanitized for use with JavaScript date and time picker widgets.
+	 *
+	 * @return string
 	 */
-	public function GetTimeFormat() {
-		$wp_time_format = get_option( 'time_format' );
-		$search         = array( 'a', 'A', 'T', ' ' );
-		$replace        = array( '', '', '', '' );
-		$time_format    = str_replace( $search, $replace, $wp_time_format );
-		return $time_format;
+	public function GetTimeFormat( $sanitize = false ) {
+		$result = get_option( 'time_format' );
+		if ( $sanitize  ) {
+			$search         = array( 'a', 'A', 'T', ' ' );
+			$replace        = array( '', '', '', '' );
+			$result    = str_replace( $search, $replace, $result );
+		}
+		return $result;
 	}
 
 	/**
@@ -1674,9 +1705,7 @@ class WSAL_Settings {
 		switch ( true ) {
 			case '%Message%' == $name:
 				return esc_html( $value );
-			case '%PromoMessage%' == $name:
-				return '<p class="promo-alert">' . $value . '</p>';
-			case '%PromoLink%' == $name:
+
 			case '%CommentLink%' == $name:
 			case '%CommentMsg%' == $name:
 				return $value;
@@ -1741,8 +1770,28 @@ class WSAL_Settings {
 				$return_value = '';
 				if ( null !== $occ_post && 'publish' === $occ_post->post_status ) {
 					$post_permalink = get_permalink( $occ_post->ID );
-					$return_value   = '<br>URL: <a href="' . esc_url( $post_permalink ) . '" title="' . esc_attr( $occ_post->post_title ) . '" target="_blank">' . esc_html( $post_permalink ) . '</a>';
+					$return_value   = '<br>URL: '. $highlight_start_tag . '<a href="' . esc_url( $post_permalink ) . '" title="' . esc_attr( $occ_post->post_title ) . '" target="_blank">' . esc_html( $post_permalink ) . '</a>' . $highlight_end_tag;
 				}
+				return $return_value;
+
+			case '%MenuUrl%' === $name:
+				// get connection.
+				$db_config = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
+				$connector = $this->_plugin->getConnector( $db_config ); // Get connector for DB.
+				$wsal_db   = $connector->getConnection(); // Get DB connection.
+
+				// get values needed.
+				$meta_adapter = new WSAL_Adapters_MySQL_Meta( $wsal_db );
+				$event_data   = $meta_adapter->LoadByNameAndOccurrenceId( 'MenuID', $occ_id );
+				$menu_id      = $event_data['value'];
+
+				// start with an empty string.
+				$return_value = '';
+
+				if ( null !== $menu_id ) {
+					$return_value   = '<br><a href="'. esc_url( add_query_arg( array( 'action' => 'edit', 'menu' => $menu_id ), admin_url( 'nav-menus.php' ) ) ) .'" title="' . esc_html__( 'View Menu', 'wp-security-audit-log' ) . '" target="_blank">' . esc_html__( 'View Menu', 'wp-security-audit-log' ) . '</a>';
+				}
+
 				return $return_value;
 
 			case '%LogFileLink%' === $name: // Failed login file link.
@@ -1779,7 +1828,7 @@ class WSAL_Settings {
 				if ( $this->_plugin->IsMultisite() && $value ) {
 					$site_info = get_blog_details( $value, true );
 					if ( $site_info ) {
-						return ' on site <a href="' . esc_url( $site_info->siteurl ) . '">' . esc_html( $site_info->blogname ) . '</a>';
+						return ' on site '. $highlight_start_tag . '<a href="' . esc_url( $site_info->siteurl ) . '">' . esc_html( $site_info->blogname ) . '</a>' . $highlight_end_tag;
 					}
 					return;
 				}
@@ -2107,8 +2156,9 @@ class WSAL_Settings {
 	 * @return array - WSAL Options array.
 	 */
 	public function get_plugin_settings() {
-		//  @todo get a list of all plugin settings
-		return [];
+		global $wpdb;
+		$plugin_options = $wpdb->get_results( "SELECT * FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" );
+		return $plugin_options;
 	}
 
 	/**

@@ -32,13 +32,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	protected $_plugin;
 
 	/**
-	 * GMT Offset
-	 *
-	 * @var string
-	 */
-	protected $_gmt_offset_sec = 0;
-
-	/**
 	 * Current Alert ID
 	 *
 	 * This class member is used to store the alert ID
@@ -93,24 +86,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	public function __construct( $plugin, $query_args ) {
 		$this->_plugin    = $plugin;
 		$this->query_args = $query_args;
-		$timezone         = $this->_plugin->settings()->GetTimezone();
-
-		/**
-		 * Transform timezone values.
-		 *
-		 * @since 3.2.3
-		 */
-		if ( '0' === $timezone ) {
-			$timezone = 'utc';
-		} elseif ( '1' === $timezone ) {
-			$timezone = 'wp';
-		}
-
-		if ( 'utc' === $timezone ) {
-			$this->_gmt_offset_sec = date( 'Z' );
-		} else {
-			$this->_gmt_offset_sec = get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
-		}
 
 		parent::__construct(
 			array(
@@ -131,8 +106,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 
 	protected function get_table_classes() {
-		$table_classes = array( 'widefat', 'fixed', 'striped', $this->_args['plural'], 'wsal-table', 'wsal-table-grid' );
-		return $table_classes;
+		return array( 'widefat', 'fixed', 'striped', $this->_args['plural'], 'wsal-table', 'wsal-table-grid' );
 	}
 
 	/**
@@ -385,9 +359,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	 * @param string                 $column_name - Name of the column.
 	 */
 	public function column_default( $item, $column_name ) {
-		// Get date format.
-		$datetime_format = $this->_plugin->settings()->GetDatetimeFormat();
-
 		// Store meta if not set.
 		if ( ! isset( $this->item_meta[ $item->getId() ] ) ) {
 			$this->item_meta[ $item->getId() ] = $item->GetMetaArray();
@@ -432,32 +403,19 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 					?>
 					<table id="Event<?php echo absint( $item->id ); ?>">
 						<td class="wsal-grid-text-header"><?php esc_html_e( 'Message:', 'alm-' ); ?></td>
-						<td class="wsal-grid-text-data"><?php echo wp_kses_post( $item->GetMessage( array( $this->_plugin->settings, 'meta_formatter' ), false, $this->item_meta[ $item->getId() ] ) ); ?></td>
+						<td class="wsal-grid-text-data"><?php echo $item->GetMessage( array( $this->_plugin->settings, 'meta_formatter' ), false, $this->item_meta[ $item->getId() ] ); ?></td>
 					</table>
 					<?php
 				}
 				return ob_get_clean();
 			case 'info':
-				$date_format       = $this->_plugin->settings()->GetDateFormat();
-				$show_microseconds = $this->_plugin->settings()->get_show_milliseconds();
-				if ( ! $show_microseconds ) {
-					// remove the microseconds placeholder from format string.
-					$datetime_format = str_replace( '.$$$', '', $datetime_format );
-				}
-				$eventdate = $item->created_on ? (
-						str_replace(
-							'$$$',
-							substr( number_format( fmod( $item->created_on + $this->_gmt_offset_sec, 1 ), 3 ), 2 ),
-							date( $date_format, $item->created_on + $this->_gmt_offset_sec )
-						)
-					) : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
-				$eventtime = $item->created_on ? (
-						str_replace(
-							'$$$',
-							substr( number_format( fmod( $item->created_on + $this->_gmt_offset_sec, 1 ), 3 ), 2 ),
-							date( get_option( 'time_format' ), $item->created_on + $this->_gmt_offset_sec )
-						)
-					) : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
+				$eventdate = $item->created_on
+                    ? WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime($item->created_on, 'date' )
+                    : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
+
+				$eventtime = $item->created_on
+                    ? WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime($item->created_on, 'time' )
+                    : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 
 				$username = $item->GetUsername( $this->item_meta[ $item->getId() ] ); // Get username.
 				$user     = get_user_by( 'login', $username ); // Get user.
@@ -659,11 +617,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 			case '%Message%' == $name:
 				return esc_html( $value );
 
-			case '%PromoMessage%' == $name:
-				return '<p class="promo-alert">' . $value . '</p>';
-
-			case '%PromoLink%' == $name:
-			case '%CommentLink%' == $name:
+						case '%CommentLink%' == $name:
 			case '%CommentMsg%' == $name:
 				return $value;
 
@@ -1042,7 +996,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				$tmp = new WSAL_Models_Occurrence();
 				// Making sure the field exists to order by.
 				if ( isset( $tmp->{$order_by} ) ) {
-					// TODO: We used to use a custom comparator ... is it safe to let MySQL do the ordering now?.
 					$query->addOrderBy( $order_by, $is_descending );
 				} else {
 					$query->addOrderBy( 'created_on', true );

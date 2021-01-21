@@ -90,6 +90,11 @@ final class WSAL_AlertManager {
 	public $ignored_cpts = array();
 
 	/**
+	 * @var string Date format.
+	 */
+	private $date_format;
+
+	/**
 	 * Create new AlertManager instance.
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
@@ -139,20 +144,6 @@ final class WSAL_AlertManager {
 		);
 
 		$this->date_format     = $this->plugin->settings()->GetDateFormat();
-		$this->datetime_format = $this->plugin->settings()->GetDatetimeFormat( false );
-		$timezone              = $this->plugin->settings()->GetTimezone();
-
-		if ( '0' === $timezone ) {
-			$timezone = 'utc';
-		} elseif ( '1' === $timezone ) {
-			$timezone = 'wp';
-		}
-
-		if ( 'utc' === $timezone ) {
-			$this->gmt_offset_sec = date( 'Z' );
-		} else {
-			$this->gmt_offset_sec = get_option( 'gmt_offset' ) * ( 60 * 60 );
-		}
 	}
 
 	/**
@@ -1225,6 +1216,7 @@ final class WSAL_AlertManager {
 			'unblocked'    => __( 'Unblocked', 'wp-security-audit-log' ),
 			'renamed'      => __( 'Renamed', 'wp-security-audit-log' ),
 			'duplicated'   => __( 'Duplicated', 'wp-security-audit-log' ),
+			'submitted'    => __( 'Submitted', 'wp-security-audit-log' ),
 		);
 		// sort the types alphabetically.
 		asort( $types );
@@ -1273,9 +1265,11 @@ final class WSAL_AlertManager {
 	/**
 	 * Filter query for MWPAL.
 	 *
-	 * @param WSAL_Models_OccurrenceQuery $query      - Events query.
-	 * @param array                       $query_args - Query args.
+	 * @param WSAL_Models_OccurrenceQuery $query - Events query.
+	 * @param array $query_args - Query args.
+	 *
 	 * @return WSAL_Models_OccurrenceQuery
+	 * @throws Freemius_Exception
 	 */
 	private function filter_query( $query, $query_args ) {
 		if ( isset( $query_args['search_term'] ) && $query_args['search_term'] ) {
@@ -1297,8 +1291,7 @@ final class WSAL_AlertManager {
 				if ( 'event' === $prefix ) {
 					$query->addORCondition( array( 'alert_id = %s' => $value ) );
 				} elseif ( in_array( $prefix, array( 'from', 'to', 'on' ), true ) ) {
-					$date_format = WpSecurityAuditLog::GetInstance()->settings->GetDateFormat();
-					$date        = DateTime::createFromFormat( $date_format, $value[0] );
+					$date        = DateTime::createFromFormat( $this->date_format, $value[0] );
 					$date->setTime( 0, 0 ); // Reset time to 00:00:00.
 					$date_string = $date->format( 'U' );
 
@@ -1687,7 +1680,9 @@ final class WSAL_AlertManager {
 	 * Create statistics unique IPs report.
 	 *
 	 * @param array $filters - Filters.
+	 *
 	 * @return array
+	 * @throws Freemius_Exception
 	 */
 	private function generate_statistics_unique_ips( $filters ) {
 		$date_start = ! empty( $filters['date-range']['start'] ) ? $filters['date-range']['start'] : null;
@@ -1845,15 +1840,17 @@ final class WSAL_AlertManager {
 	/**
 	 * Get alert details.
 	 *
-	 * @param int          $entry_id   - Entry ID.
-	 * @param int          $alert_id   - Alert ID.
-	 * @param int          $site_id    - Site ID.
-	 * @param string       $created_on - Alert generation time.
-	 * @param int          $user_id    - User id.
-	 * @param string|array $roles      - User roles.
-	 * @param string       $ip         - IP address of the user.
-	 * @param string       $ua         - User agent.
+	 * @param int $entry_id - Entry ID.
+	 * @param int $alert_id - Alert ID.
+	 * @param int $site_id - Site ID.
+	 * @param string $created_on - Alert generation time.
+	 * @param int $user_id - User id.
+	 * @param string|array $roles - User roles.
+	 * @param string $ip - IP address of the user.
+	 * @param string $ua - User agent.
+	 *
 	 * @return array|false details
+	 * @throws Exception
 	 */
 	private function get_alert_details( $entry_id, $alert_id, $site_id, $created_on, $user_id = null, $roles = null, $ip = '', $ua = '' ) {
 		// Must be a new instance every time, otherwise the alert message is not retrieved properly.
@@ -1918,11 +1915,7 @@ final class WSAL_AlertManager {
 			'blog_name'  => $blog_name,
 			'blog_url'   => $blog_url,
 			'alert_id'   => $alert_id,
-			'date'       => str_replace(
-				'$$$',
-				substr( number_format( fmod( (int) $created_on + $this->gmt_offset_sec, 1 ), 3 ), 2 ),
-				date( $this->datetime_format, (int) $created_on + $this->gmt_offset_sec )
-			),
+			'date'       => WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $created_on ),
 			'code'       => $const->name,
 			'message'    => $occurrence->GetAlert()->GetMessage( $occurrence->GetMetaArray(), array( $this->plugin->settings, 'meta_formatter' ), $occurrence->_cachedmessage ),
 			'user_name'  => $username,

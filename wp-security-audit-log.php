@@ -660,6 +660,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					wsal_freemius()->add_filter( 'plugin_icon', function( $plugin_icon) {
 					    return WSAL_BASE_DIR . 'img/wsal-logo@2x.png';
                     } );
+					wsal_freemius()->add_action( 'is_submenu_visible', array( $this, 'hide_freemius_submenu_items' ), 10, 2 );
 				}
 			}
 		}
@@ -1043,7 +1044,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$site_count = null;
 			preg_match( '!\d+!', $error, $site_count );
 
-			if ( ! empty( $site_count[0] ) ) {
+			// Check if this is an expired error.
+			if ( strpos( $error, 'expired' ) !== false ) {
+				/* Translators: Expired message and time */
+				$error = sprintf( esc_html__( '%s You need to renew your license to continue using premium features.', 'wp-security-audit-log' ), preg_replace('/\([^)]+\)/','', $error ) );
+			}
+			elseif ( ! empty( $site_count[0] ) ) {
 				/* Translators: Number of sites */
 				$error = sprintf( esc_html__( 'The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network.', 'wp-security-audit-log' ), $site_count[0] );
 			}
@@ -2037,6 +2043,21 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 
 			return $plugins;
+		}
+
+		/**
+		 * Use filter to hide freemius submenu items.
+		 *
+		 * @param  boolean $is_visible Default visibility.
+		 * @param  string  $submenu_id Menu slug.
+		 *
+		 * @return boolean             New visibility.
+		 */
+		public function hide_freemius_submenu_items( $is_visible, $submenu_id ) {
+			if ( 'contact' === $submenu_id ) {
+				$is_visible = false;
+			}
+			return $is_visible;
 		}
 
 		/**

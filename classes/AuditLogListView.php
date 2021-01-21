@@ -32,13 +32,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	protected $_plugin;
 
 	/**
-	 * GMT Offset
-	 *
-	 * @var string
-	 */
-	protected $_gmt_offset_sec = 0;
-
-	/**
 	 * Current Alert ID
 	 *
 	 * This class member is used to store the alert ID
@@ -93,24 +86,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	public function __construct( $plugin, $query_args ) {
 		$this->_plugin    = $plugin;
 		$this->query_args = $query_args;
-		$timezone         = $this->_plugin->settings()->GetTimezone();
-
-		/**
-		 * Transform timezone values.
-		 *
-		 * @since 3.2.3
-		 */
-		if ( '0' === $timezone ) {
-			$timezone = 'utc';
-		} elseif ( '1' === $timezone ) {
-			$timezone = 'wp';
-		}
-
-		if ( 'utc' === $timezone ) {
-			$this->_gmt_offset_sec = date( 'Z' );
-		} else {
-			$this->_gmt_offset_sec = get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
-		}
 
 		parent::__construct(
 			array(
@@ -413,13 +388,12 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	/**
 	 * Method: Get default column values.
 	 *
-	 * @param WSAL_Models_Occurrence $item        - Column item.
-	 * @param string                 $column_name - Name of the column.
+	 * @param WSAL_Models_Occurrence $item - Column item.
+	 * @param string $column_name - Name of the column.
+	 *
+	 * @return string
 	 */
 	public function column_default( $item, $column_name ) {
-		// Get date format.
-		$datetime_format = $this->_plugin->settings()->GetDatetimeFormat();
-
 		// Store meta if not set.
 		if ( ! isset( $this->item_meta[ $item->getId() ] ) ) {
 			$this->item_meta[ $item->getId() ] = $item->GetMetaArray();
@@ -462,18 +436,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="log-type log-type-' . $const->value . '"></span></a>';
 			case 'crtd':
-				$show_milliseconds = $this->_plugin->settings()->get_show_milliseconds();
-				if ( ! $show_milliseconds ) {
-					// remove the milliseconds placeholder from format string.
-					$datetime_format = str_replace( '.$$$', '', $datetime_format );
-				}
-				return $item->created_on ? (
-						str_replace(
-							'$$$',
-							substr( number_format( fmod( $item->created_on + $this->_gmt_offset_sec, 1 ), 3 ), 2 ),
-							date( $datetime_format, $item->created_on + $this->_gmt_offset_sec )
-						)
-					) : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
+				return $item->created_on
+					? WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $item->created_on, 'datetime', true, true )
+                    : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 			case 'user':
 				$username = $item->GetUsername( $this->item_meta[ $item->getId() ] ); // Get username.
 				$user     = get_user_by( 'login', $username ); // Get user.
@@ -655,10 +620,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 			case '%Message%' == $name:
 				return esc_html( $value );
 
-			case '%PromoMessage%' == $name:
-				return '<p class="promo-alert">' . $value . '</p>';
-
-			case '%PromoLink%' == $name:
 			case '%CommentLink%' == $name:
 			case '%CommentMsg%' == $name:
 				return $value;

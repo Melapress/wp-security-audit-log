@@ -64,6 +64,12 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				'render'   => array( $this, 'tab_help' ),
 				'priority' => 10,
 			),
+			'contact'    => array(
+				'name'     => __( 'Contact Us', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'contact', $this->GetUrl() ),
+				'render'   => array( $this, 'tab_contact_us' ),
+				'priority' => 15,
+			),
 			'system-info' => array(
 				'name'     => __( 'System Info', 'wp-security-audit-log' ),
 				'link'     => add_query_arg( 'tab', 'system-info', $this->GetUrl() ),
@@ -115,7 +121,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 * Method: Get View Name.
 	 */
 	public function GetName() {
-		return __( 'Help', 'wp-security-audit-log' );
+		return __( 'Help & Contact Us', 'wp-security-audit-log' );
 	}
 
 	/**
@@ -222,6 +228,28 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			</p>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Tab: Contact us.
+	 */
+	public function tab_contact_us() {
+		?>
+		<h3 class="wsal-tab__heading"><?php esc_html_e( 'Contact Us', 'wp-security-audit-log' ); ?></h3>
+			<style type="text/css">
+			.fs-secure-notice {
+				position: relative !important;
+				top: 0 !important;
+				left: 0 !important;
+			}
+			.fs-full-size-wrapper {
+			  margin: 10px 20px 0 2px !important;
+			}
+		</style>
+		<?php
+		$freemius_id = wsal_freemius()->get_id();
+		$vars = array( 'id' => $freemius_id );
+		echo fs_get_template( 'contact.php', $vars );
 	}
 
 	/**

@@ -281,12 +281,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
 					$plugin_name = ucwords( $plugin_name );
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+					$plugin_data = get_plugin_data( $plugin_file, false, true );
 					$this->plugin->alerts->Trigger(
 						5003,
 						array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
-								'Name' => $plugin_name,
+								'Name'    => $plugin_name,
+								'Version' => $plugin_data['Version'],
 							),
 						)
 					);
@@ -302,12 +304,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				$plugin_name = basename( $plugin_file, '.php' );
 				$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
 				$plugin_name = ucwords( $plugin_name );
+				$plugin_data = get_plugin_data( $plugin_file, false, true );
 				$this->plugin->alerts->Trigger(
 					5003,
 					array(
 						'PluginFile' => $plugin_file,
 						'PluginData' => (object) array(
-							'Name' => $plugin_name,
+							'Name'    => $plugin_name,
+							'Version' => $plugin_data['Version'],
 						),
 					)
 				);

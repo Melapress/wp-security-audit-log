@@ -293,10 +293,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			if ( empty( $request_params['action'] ) && isset( $request_params['page'] ) ) {
 				$event = 5025;
 				$event_data = array(
-					'PostID'    => $post->ID,
-					'PostType'  => $post->post_type,
-					'PostTitle' => $post->post_title,
-					'Username'  => 'Plugins',
+					'PostID'     => $post->ID,
+					'PostType'   => $post->post_type,
+					'PostTitle'  => $post->post_title,
+					'PostStatus' => $post->post_status,
+					'Username'   => 'Plugins',
 				);
 			}
 
@@ -1222,7 +1223,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	protected function check_tags_change( $old_tags, $new_tags, $post ) {
 		$intersection = array_intersect( $old_tags, $new_tags );
-		if ( count( $intersection ) === count( $old_tags ) ) {
+		if ( count( $intersection ) === count( $old_tags ) && count( $old_tags ) === count( $new_tags ) ) {
 			//  no change, let's leave
 			return;
 		}

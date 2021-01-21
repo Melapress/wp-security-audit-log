@@ -92,7 +92,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 				array_push( $table_names, $str[2] );
 			}
 			$query_type = 'delete';
-		} elseif ( preg_match( '/CREATE TABLE (IF NOT EXISTS)? ([^ ]*)/i', $query, $matches ) ) {
+		} elseif ( preg_match( '/CREATE TABLE (IF NOT EXISTS)? ([^ ]*)/i', $query, $matches ) || preg_match( '/CREATE TABLE ([^ ]*)/i', $query, $matches ) ) {
 			$table_name = $matches[count($matches) - 1];
 			$table_exists_query = $wpdb->prepare(
 				"SHOW TABLES LIKE %s;",
