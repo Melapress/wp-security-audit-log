@@ -388,6 +388,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// Views.
 				require_once 'classes/AbstractView.php';
+				require_once 'classes/ExtensionPlaceholderView.php';
 				require_once 'classes/AuditLogListView.php';
 				require_once 'classes/AuditLogGridView.php';
 				require_once 'classes/Views/AuditLog.php';

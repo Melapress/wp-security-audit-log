@@ -1,4 +1,4 @@
-# Copyright (C) 2020 wp-security-audit-log
+# Copyright (C) 2021 wp-security-audit-log
 # This file is distributed under the same license as the wp-security-audit-log package.
 msgid ""
 msgstr ""
@@ -34,6 +34,14 @@ msgstr ""
 
 #: defaults.php:81
 msgid "Informational events."
+msgstr ""
+
+#: defaults.php:86
+msgid "Users Logins & Sessions Events"
+msgstr ""
+
+#: defaults.php:87, extensions/email-notifications/classes/Notifications.php:1255
+msgid "User Activity"
 msgstr ""
 
 #: defaults.php:88
@@ -106,6 +114,14 @@ msgstr ""
 
 #: defaults.php:98
 msgid "User deleted file from Uploads directory"
+msgstr ""
+
+#: defaults.php:102
+msgid "Content & Comments"
+msgstr ""
+
+#: defaults.php:103
+msgid "Content"
 msgstr ""
 
 #: defaults.php:104
@@ -292,6 +308,10 @@ msgstr ""
 msgid "Pingbacks and Trackbacks in the post %PostTitle% %LineBreak% ID: %PostID% %LineBreak% Type: %PostType% %LineBreak% Status: %PostStatus% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost%"
 msgstr ""
 
+#: defaults.php:129
+msgid "Tags"
+msgstr ""
+
 #: defaults.php:130
 msgid "User added post tag"
 msgstr ""
@@ -348,6 +368,10 @@ msgstr ""
 msgid "Changed the description of the tag %tag% %LineBreak% Slug: %Slug% %LineBreak% Previous description: %old_desc% %LineBreak% New description: %new_desc% %LineBreak% %TagLink%"
 msgstr ""
 
+#: defaults.php:139
+msgid "Categories"
+msgstr ""
+
 #: defaults.php:140
 msgid "User changed post category"
 msgstr ""
@@ -396,6 +420,10 @@ msgstr ""
 msgid "Changed the slug of the category: %CategoryName% %LineBreak% Previous slug: %old_slug% %LineBreak% New slug: %new_slug% %LineBreak% %cat_link%"
 msgstr ""
 
+#: defaults.php:148
+msgid "Custom Fields"
+msgstr ""
+
 #: defaults.php:149
 msgid "User created a custom field for a post"
 msgstr ""
@@ -426,6 +454,14 @@ msgstr ""
 
 #: defaults.php:152
 msgid "Old custom field name: %MetaKeyOld% %LineBreak% New custom field name: %MetaKeyNew% %LineBreak% Post: %PostTitle% %LineBreak% Post ID: %PostID% %LineBreak% Post Type: %PostType% %LineBreak% Post Status: %PostStatus% %PostUrlIfPlublished% %LineBreak% %EditorLinkPost%"
+msgstr ""
+
+#: defaults.php:155
+msgid "Custom Fields (ACF)"
+msgstr ""
+
+#: defaults.php:175
+msgid "Comments"
 msgstr ""
 
 #: defaults.php:176
@@ -512,6 +548,10 @@ msgstr ""
 msgid "Visitor posted a comment"
 msgstr ""
 
+#: defaults.php:196
+msgid "Widgets"
+msgstr ""
+
 #: defaults.php:197
 msgid "User added a new widget"
 msgstr ""
@@ -550,6 +590,10 @@ msgstr ""
 
 #: defaults.php:201
 msgid "Changed the position of the %WidgetName% widget in %Sidebar%."
+msgstr ""
+
+#: defaults.php:207
+msgid "Menus"
 msgstr ""
 
 #: defaults.php:208
@@ -622,6 +666,10 @@ msgstr ""
 
 #: defaults.php:216
 msgid "Menu name: %MenuName% %LineBreak% Moved item %ItemName% as a sub-item of %ParentName%"
+msgstr ""
+
+#: defaults.php:227
+msgid "Custom Post Types"
 msgstr ""
 
 #: defaults.php:228
@@ -822,6 +870,10 @@ msgstr ""
 
 #: defaults.php:256
 msgid "Plugin modified the custom post %PostTitle%. View the post: %EditorLinkPost%."
+msgstr ""
+
+#: defaults.php:267
+msgid "Pages"
 msgstr ""
 
 #: defaults.php:268
@@ -1044,6 +1096,14 @@ msgstr ""
 msgid "Plugin modified the page %PostTitle%. View the page: %EditorLinkPage%."
 msgstr ""
 
+#: defaults.php:302
+msgid "User Accounts"
+msgstr ""
+
+#: defaults.php:303
+msgid "User Profiles"
+msgstr ""
+
 #: defaults.php:304
 msgid "New user was created on WordPress"
 msgstr ""
@@ -1164,6 +1224,10 @@ msgstr ""
 msgid "Changed the display name of the user %TargetUsername% %LineBreak% Previous display name: %old_displayname% %LineBreak% New display name: %new_displayname% %LineBreak% Role: %Roles% %LineBreak% First name: %FirstName% %LineBreak% Last name: %LastName% %LineBreak% %EditUserLink%"
 msgstr ""
 
+#: defaults.php:321
+msgid "Multisite User Profiles"
+msgstr ""
+
 #: defaults.php:322
 msgid "User granted Super Admin privileges"
 msgstr ""
@@ -1202,6 +1266,14 @@ msgstr ""
 
 #: defaults.php:326
 msgid "Created a new network user %NewUserData->Username% %LineBreak% First name: %NewUserData->FirstName% %LineBreak% Last name: %NewUserData->LastName% %LineBreak% %EditUserLink%"
+msgstr ""
+
+#: defaults.php:330
+msgid "Plugins & Themes"
+msgstr ""
+
+#: defaults.php:331, classes/AuditLogGridView.php:505, classes/AuditLogListView.php:525
+msgid "Plugins"
 msgstr ""
 
 #: defaults.php:332
@@ -1280,6 +1352,10 @@ msgstr ""
 msgid "Modified a file with the plugin editor %LineBreak% File: %File%"
 msgstr ""
 
+#: defaults.php:345
+msgid "Themes"
+msgstr ""
+
 #: defaults.php:346
 msgid "User installed a theme"
 msgstr ""
@@ -1340,6 +1416,10 @@ msgstr ""
 msgid "Modified a file with the theme editor %LineBreak% File: %Theme%/%File%"
 msgstr ""
 
+#: defaults.php:356
+msgid "Themes on Multisite"
+msgstr ""
+
 #: defaults.php:357
 msgid "Activated theme on network"
 msgstr ""
@@ -1354,6 +1434,10 @@ msgstr ""
 
 #: defaults.php:358
 msgid "Network deactivated the theme %Theme->Name% %LineBreak% Install location: %Theme->get_template_directory%"
+msgstr ""
+
+#: defaults.php:361
+msgid "Database Events"
 msgstr ""
 
 #: defaults.php:362
@@ -1404,6 +1488,14 @@ msgstr ""
 msgid "WordPress deleted these tables from the database %LineBreak% Tables: %TableNames%"
 msgstr ""
 
+#: defaults.php:371
+msgid "WordPress & System"
+msgstr ""
+
+#: defaults.php:372, classes/AlertManager.php:1127, classes/AlertManager.php:1909, classes/AuditLogGridView.php:511, classes/AuditLogListView.php:533, extensions/email-notifications/classes/DailyNotification.php:241, extensions/email-notifications/classes/Notifier.php:627, extensions/reports/classes/Common.php:666
+msgid "System"
+msgstr ""
+
 #: defaults.php:373
 msgid "Unknown Error"
 msgstr ""
@@ -1452,6 +1544,10 @@ msgstr ""
 msgid "%PromoName% %PromoMessage%"
 msgstr ""
 
+#: defaults.php:383
+msgid "Activity log plugin"
+msgstr ""
+
 #: defaults.php:384
 msgid "Events automatically pruned by system"
 msgstr ""
@@ -1478,6 +1574,10 @@ msgstr ""
 
 #: defaults.php:387
 msgid "Some WP Activity Log plugin settings on this site were propagated and overridden from the MainWP dashboard."
+msgstr ""
+
+#: defaults.php:390
+msgid "WordPress Site Settings"
 msgstr ""
 
 #: defaults.php:391
@@ -1612,6 +1712,14 @@ msgstr ""
 msgid "Changed the site address (URL) %LineBreak% Previous URL: %old_url% %LineBreak% New URL: %new_url%"
 msgstr ""
 
+#: defaults.php:411
+msgid "Multisite Network Sites"
+msgstr ""
+
+#: defaults.php:412
+msgid "MultiSite"
+msgstr ""
+
 #: defaults.php:413
 msgid "New site added on the network"
 msgstr ""
@@ -1668,181 +1776,189 @@ msgstr ""
 msgid "Changed the <strong>Allow new registrations</strong> settings %LineBreak% Previous setting: %previous_setting% %LineBreak% New setting: %new_setting%"
 msgstr ""
 
+#: defaults.php:428, classes/Views/Settings.php:99
+msgid "File Changes"
+msgstr ""
+
+#: defaults.php:429
+msgid "Monitor File Changes"
+msgstr ""
+
 #: defaults.php:430
 msgid "Dummy"
 msgstr ""
 
 #. translators: Username
 #. translators: Username
-#: wp-security-audit-log.php:906, wp-security-audit-log.php:933
+#: wp-security-audit-log.php:907, wp-security-audit-log.php:934
 msgid "Hey %1$s"
 msgstr ""
 
-#: wp-security-audit-log.php:907
+#: wp-security-audit-log.php:908
 msgid "Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com."
 msgstr ""
 
-#: wp-security-audit-log.php:908, wp-security-audit-log.php:936
+#: wp-security-audit-log.php:909, wp-security-audit-log.php:937
 msgid "Note: "
 msgstr ""
 
-#: wp-security-audit-log.php:909, wp-security-audit-log.php:937
+#: wp-security-audit-log.php:910, wp-security-audit-log.php:938
 msgid "NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS."
 msgstr ""
 
 #. translators: 1: Plugin name. 2: Freemius link.
-#: wp-security-audit-log.php:935
+#: wp-security-audit-log.php:936
 msgid "Please help us improve %2$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %5$s, a diagnostic tracking service we use. If you skip this, that's okay! %2$s will still work just fine."
 msgstr ""
 
 #. translators: Plugin name
-#: wp-security-audit-log.php:957
+#: wp-security-audit-log.php:958
 msgid "Get a free 7-day trial of the premium edition of %s. No credit card required, no commitments!"
 msgstr ""
 
-#: wp-security-audit-log.php:958, classes/AlertManager.php:1145, extensions/external-db/classes/Connections.php:173
+#: wp-security-audit-log.php:959, classes/AlertManager.php:1145, extensions/external-db/classes/Connections.php:173
 msgid "WP Activity Log"
 msgstr ""
 
-#: wp-security-audit-log.php:962
+#: wp-security-audit-log.php:963
 msgid "Start free trial"
 msgstr ""
 
-#: wp-security-audit-log.php:1030
+#: wp-security-audit-log.php:1031
 msgid "You need to activate the licence key to use WP Activity Log Premium. %2$s"
 msgstr ""
 
-#: wp-security-audit-log.php:1031
+#: wp-security-audit-log.php:1032
 msgid "Activate the licence key now"
 msgstr ""
 
 #. translators: Number of sites
-#: wp-security-audit-log.php:1048
+#: wp-security-audit-log.php:1049
 msgid "The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network."
 msgstr ""
 
-#: wp-security-audit-log.php:1158
+#: wp-security-audit-log.php:1159
 msgid "Error: You do not have sufficient permissions to disable this custom field."
 msgstr ""
 
-#: wp-security-audit-log.php:1193
+#: wp-security-audit-log.php:1194
 msgid "Custom Field <strong>%1$s</strong> is no longer being monitored.<br />Enable the monitoring of this custom field again from the"
 msgstr ""
 
-#: wp-security-audit-log.php:1196
+#: wp-security-audit-log.php:1197
 msgid "Excluded Objects"
 msgstr ""
 
-#: wp-security-audit-log.php:1197
+#: wp-security-audit-log.php:1198
 msgid " tab in the plugin settings"
 msgstr ""
 
-#: wp-security-audit-log.php:1210
+#: wp-security-audit-log.php:1211
 msgid "Error: You do not have sufficient permissions to disable this alert."
 msgstr ""
 
-#: wp-security-audit-log.php:1234
+#: wp-security-audit-log.php:1235
 msgid "Alert %1$s is no longer being monitored.<br /> %2$s"
 msgstr ""
 
-#: wp-security-audit-log.php:1234
+#: wp-security-audit-log.php:1235
 msgid "You can enable this alert again from the Enable/Disable Alerts node in the plugin menu."
 msgstr ""
 
-#: wp-security-audit-log.php:1259, classes/Views/SetupWizard.php:270
+#: wp-security-audit-log.php:1260, classes/Views/SetupWizard.php:270
 msgid "Installing, please wait"
 msgstr ""
 
-#: wp-security-audit-log.php:1260, classes/Views/SetupWizard.php:271
+#: wp-security-audit-log.php:1261, classes/Views/SetupWizard.php:271
 msgid "Already installed"
 msgstr ""
 
-#: wp-security-audit-log.php:1261, classes/Utilities/PluginInstallAndActivate.php:107, classes/Views/SetupWizard.php:272, classes/Views/SetupWizard.php:836
+#: wp-security-audit-log.php:1262, classes/Utilities/PluginInstallAndActivate.php:107, classes/Views/SetupWizard.php:272, classes/Views/SetupWizard.php:836
 msgid "Extension installed"
 msgstr ""
 
-#: wp-security-audit-log.php:1262, classes/Views/SetupWizard.php:273
+#: wp-security-audit-log.php:1263, classes/Views/SetupWizard.php:273
 msgid "Extension activated"
 msgstr ""
 
-#: wp-security-audit-log.php:1263, classes/Views/SetupWizard.php:274
+#: wp-security-audit-log.php:1264, classes/Views/SetupWizard.php:274
 msgid "Install failed"
 msgstr ""
 
 #. translators: %s: PHP Version
-#: wp-security-audit-log.php:1314
+#: wp-security-audit-log.php:1315
 msgid "You are using a version of PHP that is older than %s, which is no longer supported."
 msgstr ""
 
-#: wp-security-audit-log.php:1316
+#: wp-security-audit-log.php:1317
 msgid "Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using."
 msgstr ""
 
 #. translators: %s: Activity Log for MainWP plugin hyperlink
-#: wp-security-audit-log.php:1321
+#: wp-security-audit-log.php:1322
 msgid "Please install the %s plugin on the MainWP dashboard."
 msgstr ""
 
-#: wp-security-audit-log.php:1321
+#: wp-security-audit-log.php:1322
 msgid "Activity Log for MainWP"
 msgstr ""
 
 #. translators: %s: Getting started guide hyperlink
-#: wp-security-audit-log.php:1323
+#: wp-security-audit-log.php:1324
 msgid "The WP Activity Log should be installed on the child sites only. Refer to the %s for more information."
 msgstr ""
 
-#: wp-security-audit-log.php:1323
+#: wp-security-audit-log.php:1324
 msgid "getting started guide"
 msgstr ""
 
-#: wp-security-audit-log.php:1389
+#: wp-security-audit-log.php:1390
 msgid "This plugin uses 3 tables in the WordPress database to store the activity log and settings. It seems that these tables were not created."
 msgstr ""
 
-#: wp-security-audit-log.php:1391
+#: wp-security-audit-log.php:1392
 msgid "This could happen because the database user does not have the right privileges to create the tables in the database. We recommend you to update the privileges and try enabling the plugin again."
 msgstr ""
 
 #. translators: %s: Support Hyperlink
-#: wp-security-audit-log.php:1393
+#: wp-security-audit-log.php:1394
 msgid "If after doing so you still have issues, please send us an email on %s for assistance."
 msgstr ""
 
-#: wp-security-audit-log.php:1393
+#: wp-security-audit-log.php:1394
 msgid "support@wpsecurityauditlog.com"
 msgstr ""
 
-#: wp-security-audit-log.php:1905
+#: wp-security-audit-log.php:1906
 msgid "For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href=\"https://wpactivitylog.com/\" target=\"_blank\">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from."
 msgstr ""
 
-#: wp-security-audit-log.php:1924
+#: wp-security-audit-log.php:1925
 msgid "Every 6 hours"
 msgstr ""
 
-#: wp-security-audit-log.php:1928
+#: wp-security-audit-log.php:1929
 msgid "Every 45 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1932
+#: wp-security-audit-log.php:1933
 msgid "Every 30 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1936
+#: wp-security-audit-log.php:1937
 msgid "Every 15 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1940
+#: wp-security-audit-log.php:1941
 msgid "Every 10 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1944
+#: wp-security-audit-log.php:1945
 msgid "Every 1 minute"
 msgstr ""
 
 #. translators: 1. Deprecated method name 2. Version since deprecated
-#: wp-security-audit-log.php:1958
+#: wp-security-audit-log.php:1959
 msgid "Method %1$s is deprecated since version %2$s!"
 msgstr ""
 
@@ -1875,10 +1991,6 @@ msgstr ""
 
 #: classes/AlertManager.php:1126, classes/AuditLogListView.php:324, classes/AuditLogListView.php:358, classes/WidgetManager.php:76, classes/Views/Settings.php:1090, extensions/search/classes/Filters/UserNameFilter.php:44, extensions/user-sessions/classes/View/Sessions.php:172
 msgid "User"
-msgstr ""
-
-#: classes/AlertManager.php:1127, classes/AlertManager.php:1909, classes/AuditLogGridView.php:511, classes/AuditLogListView.php:533, extensions/email-notifications/classes/DailyNotification.php:241, extensions/email-notifications/classes/Notifier.php:627, extensions/reports/classes/Common.php:666
-msgid "System"
 msgstr ""
 
 #: classes/AlertManager.php:1128, classes/AuditLogGridView.php:502, classes/AuditLogListView.php:521
@@ -2151,10 +2263,6 @@ msgstr ""
 
 #: classes/AuditLogGridView.php:508, classes/AuditLogListView.php:529
 msgid "Unregistered user"
-msgstr ""
-
-#: classes/AuditLogGridView.php:505, classes/AuditLogListView.php:525
-msgid "Plugins"
 msgstr ""
 
 #: classes/AuditLogGridView.php:484, classes/AuditLogListView.php:502
@@ -2600,59 +2708,59 @@ msgstr ""
 msgid "Notifications Extension"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:42
+#: classes/Views/EmailNotifications.php:35
 msgid "Notifications &#8682;"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:114
+#: classes/Views/EmailNotifications.php:49
 msgid "SMS & Email Notifications"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:115
+#: classes/Views/EmailNotifications.php:50
 msgid "Get instantly alerted of important changes on your site via SMS and email notifications. Upgrade to premium and:"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:118
+#: classes/Views/EmailNotifications.php:53
 msgid "Configure any type of SMS & email notifications"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:119
+#: classes/Views/EmailNotifications.php:54
 msgid "Receive notifications for when users login, change their password or change content"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:120
+#: classes/Views/EmailNotifications.php:55
 msgid "Get alerted of site changes like plugin installs, theme changes etc"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:121
+#: classes/Views/EmailNotifications.php:56
 msgid "Enable built-in security email notifications of suspicious user activity"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:122
+#: classes/Views/EmailNotifications.php:57
 msgid "Personalize all email and SMS templates"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:123
+#: classes/Views/EmailNotifications.php:58
 msgid "Use the trigger builder to configure any type of notification criteria!"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:125
+#: classes/Views/EmailNotifications.php:60
 msgid "Getting started is really easy. You can use one of the plugin’s built-in notifications or create your own using the easy to use trigger builder."
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:128
+#: classes/Views/EmailNotifications.php:63
 msgid "Email and SMS notifications instantly alert you of important changes on your WordPress site."
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:132
+#: classes/Views/EmailNotifications.php:67
 msgid "Easily enable any of the built-in security and user management notifications."
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:136
+#: classes/Views/EmailNotifications.php:71
 msgid "Use the trigger builder to configure any type of email and SMS notification to get instantly alerted of site changes that are important to you and your business."
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:140
+#: classes/Views/EmailNotifications.php:75
 msgid "All email and SMS templates are configurable, allowing you to personalize them."
 msgstr ""
 
@@ -2660,43 +2768,43 @@ msgstr ""
 msgid "External DB Extension"
 msgstr ""
 
-#: classes/Views/ExternalDB.php:42
+#: classes/Views/ExternalDB.php:35
 msgid "DB & Integrations &#8682;"
 msgstr ""
 
-#: classes/Views/ExternalDB.php:114
+#: classes/Views/ExternalDB.php:49
 msgid "Activity log database & integration tools"
 msgstr ""
 
-#: classes/Views/ExternalDB.php:115
+#: classes/Views/ExternalDB.php:50
 msgid "There are several benefits to segregating the logs from the main site database, and to be able to mirror the logs to third party and centralized business solutions. Upgrade to premium and:"
 msgstr ""
 
-#: classes/Views/ExternalDB.php:118
+#: classes/Views/ExternalDB.php:53
 msgid "Store the audit logs of your sites on an external database"
 msgstr ""
 
-#: classes/Views/ExternalDB.php:119
+#: classes/Views/ExternalDB.php:54
 msgid "Configuring archiving and store older log data in a segregated database"
 msgstr ""
 
-#: classes/Views/ExternalDB.php:120
+#: classes/Views/ExternalDB.php:55
 msgid "Mirror the logs to syslog, Slack, Papertrail and central business communication services"
 msgstr ""
 
-#: classes/Views/ExternalDB.php:121
+#: classes/Views/ExternalDB.php:56
 msgid "Configure filters to filter what is mirrored and archived in the databases and services"
 msgstr ""
 
-#: classes/Views/ExternalDB.php:126
+#: classes/Views/ExternalDB.php:61
 msgid "Easily configure integration and database connections thanks to a user friendly wizard."
 msgstr ""
 
-#: classes/Views/ExternalDB.php:130
+#: classes/Views/ExternalDB.php:65
 msgid "Configure activity log filters for third party services connections."
 msgstr ""
 
-#: classes/Views/ExternalDB.php:134
+#: classes/Views/ExternalDB.php:69
 msgid "Configure an unlimited number of connections to different databases and third party services."
 msgstr ""
 
@@ -2812,47 +2920,47 @@ msgstr ""
 msgid "User Sessions Management Extension"
 msgstr ""
 
-#: classes/Views/LogInUsers.php:42
+#: classes/Views/LogInUsers.php:35
 msgid "Logged In Users &#8682;"
 msgstr ""
 
-#: classes/Views/LogInUsers.php:114
+#: classes/Views/LogInUsers.php:49
 msgid "Real-Time Users Sessions Management"
 msgstr ""
 
-#: classes/Views/LogInUsers.php:115
+#: classes/Views/LogInUsers.php:50
 msgid "Better manage your users’ logins and sessions. Upgrade to premium and:"
 msgstr ""
 
-#: classes/Views/LogInUsers.php:119
+#: classes/Views/LogInUsers.php:54
 msgid "See who is logged in to your site"
 msgstr ""
 
-#: classes/Views/LogInUsers.php:120
+#: classes/Views/LogInUsers.php:55
 msgid "When they logged in and from where"
 msgstr ""
 
-#: classes/Views/LogInUsers.php:121
+#: classes/Views/LogInUsers.php:56
 msgid "The last change they have done in real-time"
 msgstr ""
 
-#: classes/Views/LogInUsers.php:122
+#: classes/Views/LogInUsers.php:57
 msgid "Terminate any users’ session with a click of a button"
 msgstr ""
 
-#: classes/Views/LogInUsers.php:123
+#: classes/Views/LogInUsers.php:58
 msgid "Limit or block multiple sessions for the same user"
 msgstr ""
 
-#: classes/Views/LogInUsers.php:124
+#: classes/Views/LogInUsers.php:59
 msgid "Get alerted of multiple same user sessions"
 msgstr ""
 
-#: classes/Views/LogInUsers.php:128
+#: classes/Views/LogInUsers.php:63
 msgid "See who is logged in to your WordPress site and multisite network in real-time."
 msgstr ""
 
-#: classes/Views/LogInUsers.php:132
+#: classes/Views/LogInUsers.php:67
 msgid "Limit, manage and block multiple same user sessions easily."
 msgstr ""
 
@@ -2860,47 +2968,47 @@ msgstr ""
 msgid "Reports Extension"
 msgstr ""
 
-#: classes/Views/Reports.php:42
+#: classes/Views/Reports.php:35
 msgid "Reports &#8682;"
 msgstr ""
 
-#: classes/Views/Reports.php:114
+#: classes/Views/Reports.php:49
 msgid "Individual, Scheduled & Automated Reports"
 msgstr ""
 
-#: classes/Views/Reports.php:115
+#: classes/Views/Reports.php:50
 msgid "Many are not fans of reports, however reports are vital in business. With them you can make informed decisions that allow you to improve user productivity and the business. Upgrade to Premium so you can:"
 msgstr ""
 
-#: classes/Views/Reports.php:118
+#: classes/Views/Reports.php:53
 msgid "Generate any type of user and site (in multisite) activity report"
 msgstr ""
 
-#: classes/Views/Reports.php:119
+#: classes/Views/Reports.php:54
 msgid "Automate and schedule daily, weekly, monthly and quarterly reports"
 msgstr ""
 
-#: classes/Views/Reports.php:120
+#: classes/Views/Reports.php:55
 msgid "Received reports automatically via email"
 msgstr ""
 
-#: classes/Views/Reports.php:121
+#: classes/Views/Reports.php:56
 msgid "Create statistics reports about users’ views, logins, activity from IP addresses & more"
 msgstr ""
 
-#: classes/Views/Reports.php:123
+#: classes/Views/Reports.php:58
 msgid "Reports are vital to the success of your business and management of your site."
 msgstr ""
 
-#: classes/Views/Reports.php:126
+#: classes/Views/Reports.php:61
 msgid "Generate a HTML or CSV report."
 msgstr ""
 
-#: classes/Views/Reports.php:130
+#: classes/Views/Reports.php:65
 msgid "Easily configure a criteria for your reports."
 msgstr ""
 
-#: classes/Views/Reports.php:134
+#: classes/Views/Reports.php:69
 msgid "Schedule reports that are sent to you by email automatically."
 msgstr ""
 
@@ -2908,56 +3016,52 @@ msgstr ""
 msgid "Search Extension"
 msgstr ""
 
-#: classes/Views/Search.php:42
+#: classes/Views/Search.php:35
 msgid "Search &#8682;"
 msgstr ""
 
-#: classes/Views/Search.php:114
+#: classes/Views/Search.php:49
 msgid "Search & Filters for the Activity Log"
 msgstr ""
 
-#: classes/Views/Search.php:115
+#: classes/Views/Search.php:50
 msgid "You can find all the information you want in the activity log, if you know what you are looking for and have the right tools. Upgrade to premium so you can:"
 msgstr ""
 
-#: classes/Views/Search.php:118
+#: classes/Views/Search.php:53
 msgid "Do text searches and use filters to fine tune the search results"
 msgstr ""
 
-#: classes/Views/Search.php:119
+#: classes/Views/Search.php:54
 msgid "Easily find when and who did a specific change on your site"
 msgstr ""
 
-#: classes/Views/Search.php:120
+#: classes/Views/Search.php:55
 msgid "Easily identify and track back suspicious user behaviour"
 msgstr ""
 
-#: classes/Views/Search.php:121
+#: classes/Views/Search.php:56
 msgid "Search for the cause of a problem and ease troubleshooting"
 msgstr ""
 
-#: classes/Views/Search.php:122
+#: classes/Views/Search.php:57
 msgid "Save search terms and filters for future use and improved productivity"
 msgstr ""
 
-#: classes/Views/Search.php:127
+#: classes/Views/Search.php:62
 msgid "Use the text search to find a specific change."
 msgstr ""
 
-#: classes/Views/Search.php:131
+#: classes/Views/Search.php:66
 msgid "Configure any filter you need to fine tune the search results and find what you are looking for with much less effort."
 msgstr ""
 
-#: classes/Views/Search.php:135
+#: classes/Views/Search.php:70
 msgid "Save search terms and filters to run the searches again in the future with just a single click."
 msgstr ""
 
 #: classes/Views/Settings.php:85
 msgid "General"
-msgstr ""
-
-#: classes/Views/Settings.php:99
-msgid "File Changes"
 msgstr ""
 
 #: classes/Views/Settings.php:105
@@ -4527,10 +4631,6 @@ msgstr ""
 
 #: extensions/email-notifications/classes/Notifications.php:1200
 msgid "Critical Event is Generated"
-msgstr ""
-
-#: extensions/email-notifications/classes/Notifications.php:1255
-msgid "User Activity"
 msgstr ""
 
 #: extensions/email-notifications/classes/Notifications.php:1264

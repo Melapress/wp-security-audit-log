@@ -296,6 +296,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 * Method: Get system information.
 	 *
 	 * @return string - System information.
+	 * @throws Freemius_Exception
 	 */
 	public function get_sysinfo() {
 		// System info.
