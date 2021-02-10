@@ -170,6 +170,88 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 
+		if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['show_on_front'] )
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
+			$old_homepage = ( 'posts' === get_site_option( 'show_on_front' ) ) ? __( 'latest posts', 'wp-security-audit-log' ) :__( 'static page', 'wp-security-audit-log' );
+			$new_homepage = ( 'posts' === $post_array['show_on_front'] ) ? __( 'latest posts', 'wp-security-audit-log' ) :__( 'static page', 'wp-security-audit-log' );
+			if ( $old_homepage != $new_homepage ) {
+				$this->plugin->alerts->Trigger(
+					6035,
+					array(
+						'old_homepage' => $old_homepage,
+						'new_homepage' => $new_homepage,
+					)
+				);
+			}
+		}
+
+		if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['page_on_front'] )
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
+			$old_frontpage = get_the_title( get_site_option( 'page_on_front' ) ) ;
+			$new_frontpage = get_the_title( $post_array[ 'page_on_front' ] );
+			if ( $old_frontpage != $new_frontpage ) {
+				$this->plugin->alerts->Trigger(
+					6036,
+					array(
+						'old_page' => $old_frontpage,
+						'new_page' => $new_frontpage,
+					)
+				);
+			}
+		}
+
+		if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['page_for_posts'] )
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
+			$old_postspage = get_the_title( get_site_option( 'page_for_posts' ) );
+			$new_postspage = get_the_title( $post_array[ 'page_for_posts' ] );
+			if ( $old_postspage != $new_postspage ) {
+				$this->plugin->alerts->Trigger(
+					6037,
+					array(
+						'old_page' => $old_postspage,
+						'new_page' => $new_postspage,
+					)
+				);
+			}
+		}
+
+		//  check timezone change
+		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['timezone_string'] ) ) {
+			$this->check_timezone_change( $post_array );
+		}
+
+		//  check date format change
+		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['date_format'] ) ) {
+			$old_date_format = get_option( 'date_format' );
+			$new_date_format = ( '\c\u\s\t\o\m' === $post_array['date_format'] ) ? $post_array['date_format_custom'] : $post_array['date_format'];
+			if ( $old_date_format !== $new_date_format ) {
+				$this->plugin->alerts->Trigger(
+					6041,
+					array(
+						'old_date_format' => $old_date_format,
+						'new_date_format' => $new_date_format,
+						'CurrentUserID'   => wp_get_current_user()->ID,
+					)
+				);
+			}
+		}
+
+		//  check time format change
+		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['time_format'] ) ) {
+			$old_time_format =  get_option( 'time_format' );
+			$new_time_format = ( '\c\u\s\t\o\m' === $post_array['time_format'] ) ? $post_array['time_format_custom'] : $post_array['time_format'];
+			if ( $old_time_format !== $new_time_format ) {
+				$this->plugin->alerts->Trigger(
+					6042,
+					array(
+						'old_time_format' => $old_time_format,
+						'new_time_format' => $new_time_format,
+						'CurrentUserID'   => wp_get_current_user()->ID,
+					)
+				);
+			}
+		}
+
 		// Registration Option.
 		if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ( get_option( 'users_can_register' ) xor isset( $post_array['users_can_register'] ) ) ) {
 			$old = get_option( 'users_can_register' ) ? 'enabled' : 'disabled';
@@ -265,6 +347,18 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 					)
 				);
 			}
+		}
+
+		// Enable core updates.
+		if ( isset( $get_array['action'] ) && 'core-major-auto-updates-settings' === $get_array['action'] && isset( $get_array['value'] )
+			&& wp_verify_nonce( $get_array['_wpnonce'], 'core-major-auto-updates-nonce' ) ) {
+			$status     = ( 'enable' === $get_array['value'] ) ? __( 'automatically update to all new versions of WordPress', 'wp-security-audit-log' ) : __( 'automatically update maintenance and security releases only', 'wp-security-audit-log' );
+			$this->plugin->alerts->Trigger(
+				6044,
+				array(
+					'updates_status' => $status,
+				)
+			);
 		}
 	}
 
@@ -416,5 +510,64 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 			}
 		}
 		return $whitelist;
+	}
+
+	/**
+	 * Checks if the timezone settings have changed. Logs an events if it did.
+	 *
+	 * @param array $post_array Sanitized input array.
+	 *
+	 * @since 4.2.0
+	 */
+	private function check_timezone_change( $post_array ) {
+		$old_timezone_string = get_option( 'timezone_string' );
+		$new_timezone_string = isset( $post_array['timezone_string'] ) ? $post_array['timezone_string'] : '';
+
+		//  backup of the labels as we might change them below when dealing with UTC offset definitions
+		$old_timezone_label = $old_timezone_string;
+		$new_timezone_label = $new_timezone_string;
+		if ( strlen( $old_timezone_string ) === 0 ) {
+			//  the old timezone string can be empty if the time zone was configured using UTC offset selection
+			//  rather than using a country/city selection
+			$old_timezone_string = $old_timezone_label = wp_timezone_string();
+			if ( 'UTC' === $old_timezone_string ) {
+				$old_timezone_string = '+00:00';
+			}
+
+			//  adjusts label to show UTC offset consistently
+			$old_timezone_label = 'UTC' . $old_timezone_label;
+		}
+
+		//  new timezone can be defined as UTC offset
+
+		//  there is one UTC option that doesn't contain the offset, we need to tweak the value for further processing
+		if ( 'UTC' === $new_timezone_string ) {
+			$new_timezone_string = 'UTC+0';
+		}
+
+		if ( preg_match( '/UTC([+\-][0-9\.]+)/', $new_timezone_string, $matches ) ) {
+			$hours_decimal = floatval( $matches[1] );
+
+			//  the new timezone is also set using UTC offset, it needs to be converted to the same format used
+			//  by wp_timezone_string
+			$sign                = $hours_decimal < 0 ? '-' : '+';
+			$abs_hours           = abs( $hours_decimal );
+			$abs_mins            = abs( $hours_decimal * 60 % 60 );
+			$new_timezone_string = sprintf( '%s%02d:%02d', $sign, floor( $abs_hours ), $abs_mins );
+
+			//  adjusts label to show UTC offset consistently
+			$new_timezone_label = 'UTC' . $new_timezone_string;
+		}
+
+		if ( $old_timezone_string !== $new_timezone_string ) {
+			$this->plugin->alerts->Trigger(
+				6040,
+				array(
+					'old_timezone'  => $old_timezone_label,
+					'new_timezone'  => $new_timezone_label,
+					'CurrentUserID' => wp_get_current_user()->ID,
+				)
+			);
+		}
 	}
 }

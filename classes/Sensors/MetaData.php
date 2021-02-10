@@ -86,8 +86,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 			unset( $this->plugin->alerts->ignored_cpts[$key] );
 		}
 
+		// Allow ignored post typed to be modified via filter.
+		$ignored_cpts = apply_filters( 'wsal_post_meta_created_ignored_cpts', $this->plugin->alerts->ignored_cpts );
+
 		// Ignore updates from ignored custom post types.
-		if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
+		if ( in_array( $post->post_type, $ignored_cpts, true ) ) {
 			return;
 		}
 

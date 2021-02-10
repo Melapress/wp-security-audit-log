@@ -273,7 +273,7 @@ function download(filename, text) {
  */
 function download_failed_login_log(element) {
 	var nonce = jQuery(element).data('download-nonce'); // Nonce.
-	alert = jQuery(element).parent().attr('id').substring(5);
+	alert = jQuery(element).closest( '[id^="Event"]' ).attr('id').substring(5);
 
 	jQuery.ajax({
 		type: 'POST',

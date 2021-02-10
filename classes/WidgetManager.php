@@ -73,18 +73,23 @@ class WSAL_WidgetManager {
 			<table class="wp-list-table widefat" cellspacing="0" cellpadding="0"
 				style="display: block; overflow-x: auto;">
 				<thead>
-					<th class="manage-column" style="width: 15%;" scope="col"><?php esc_html_e( 'User', 'wp-security-audit-log' ); ?></th>
-					<th class="manage-column" style="width: 85%;" scope="col"><?php esc_html_e( 'Description', 'wp-security-audit-log' ); ?></th>
+					<th class="manage-column" style="width: 10%;" scope="col"><?php esc_html_e( 'User', 'wp-security-audit-log' ); ?></th>
+					<th class="manage-column" style="width: 10%;" scope="col"><?php esc_html_e( 'Object', 'wp-security-audit-log' ); ?></th>
+					<th class="manage-column" style="width: 10%;" scope="col"><?php esc_html_e( 'Event Type', 'wp-security-audit-log' ); ?></th>
+					<th class="manage-column" style="width: 70%;" scope="col"><?php esc_html_e( 'Description', 'wp-security-audit-log' ); ?></th>
 				</thead>
 				<tbody>
 					<?php
 					$url = 'admin.php?page=' . $this->_plugin->views->views[0]->GetSafeViewName();
 					$fmt = array( $this->_plugin->settings(), 'meta_formatter' );
 					foreach ( $results as $entry ) :
-						$username = $entry->GetUsername();
+						$username   = $entry->GetUsername();
+						$event_meta = $entry->GetMetaArray();
 						?>
 						<tr>
 							<td><?php echo ( $username ) ? esc_html( $username ) : '<i>unknown</i>'; ?></td>
+							<td><?php echo ( $event_meta['Object'] ) ? esc_html( $event_meta['Object'] ) : '<i>unknown</i>'; ?></td>
+							<td><?php echo ( $event_meta['EventType'] ) ? esc_html( $event_meta['EventType'] ) : '<i>unknown</i>'; ?></td>
 							<td>
 								<a href="<?php echo esc_url( $url ) . '#Event' . esc_attr( $entry->getId() ); ?>">
 									<?php echo wp_kses( $entry->GetMessage( $fmt ), $this->_plugin->allowed_html_tags ); ?>

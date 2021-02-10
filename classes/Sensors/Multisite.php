@@ -49,15 +49,16 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 		if ( current_user_can( 'switch_themes' ) ) {
 			add_action( 'shutdown', array( $this, 'EventAdminShutdown' ) );
 		}
-		add_action( 'wpmu_new_blog', array( $this, 'EventNewBlog' ), 10, 1 );
+		add_action( 'wp_insert_site', array( $this, 'EventNewBlog' ), 10, 1 );
 		add_action( 'archive_blog', array( $this, 'EventArchiveBlog' ) );
 		add_action( 'unarchive_blog', array( $this, 'EventUnarchiveBlog' ) );
 		add_action( 'activate_blog', array( $this, 'EventActivateBlog' ) );
 		add_action( 'deactivate_blog', array( $this, 'EventDeactivateBlog' ) );
-		add_action( 'delete_blog', array( $this, 'EventDeleteBlog' ) );
+		add_action( 'wp_uninitialize_site', array( $this, 'EventDeleteBlog' ) );
 		add_action( 'add_user_to_blog', array( $this, 'EventUserAddedToBlog' ), 10, 3 );
 		add_action( 'remove_user_from_blog', array( $this, 'EventUserRemovedFromBlog' ), 10, 2 );
-		add_action( 'update_site_option_registration', array( $this, 'on_network_registration_option_change'), 10, 4 );
+
+		add_action( 'update_site_option', array( $this, 'on_network_option_change'), 10, 4 );
 	}
 
 	/**
@@ -70,14 +71,75 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 * @param mixed  $old_value  Old value of the network option.
 	 * @param int    $network_id ID of the network.
 	 */
-	public function on_network_registration_option_change( $option, $value, $old_value, $network_id ) {
-		$this->plugin->alerts->Trigger(
-			7012,
-			array(
-				'previous_setting' => $old_value,
-				'new_setting' => $value
-			)
-		);
+	public function on_network_option_change( $option, $value, $old_value, $network_id ) {
+
+		switch ( $option ) {
+			case 'registration':
+				// Array of potential values.
+				$possible_values = array(
+					'none' => __( 'disabled', 'wp-security-audit-log' ),
+					'user' => __( 'user accounts only', 'wp-security-audit-log' ),
+					'blog' => __( 'users can register new sites', 'wp-security-audit-log' ),
+					'all'  => __( 'sites & users can be registered', 'wp-security-audit-log' ),
+				);
+				$this->plugin->alerts->Trigger(
+					7012,
+					array(
+						'previous_setting' => ( isset( $possible_values[ $old_value ] ) ) ? $possible_values[ $old_value ] : $old_value,
+						'new_setting'      => ( isset( $possible_values[ $value ] ) ) ? $possible_values[ $value ] : $value,
+					)
+				);
+				break;
+
+			case 'add_new_users':
+				$this->plugin->alerts->Trigger(
+					7007,
+					array(
+						'EventType' => ( ! $value ) ? 'disabled' : 'enabled',
+					)
+				);
+				break;
+
+			case 'upload_space_check_disabled':
+				$this->plugin->alerts->Trigger(
+					7008,
+					array(
+						'EventType' => ( $value ) ? 'disabled' : 'enabled',
+					)
+				);
+				break;
+
+			case 'blog_upload_space':
+				$this->plugin->alerts->Trigger(
+					7009,
+					array(
+						'old_value' => sanitize_text_field( $old_value ),
+						'new_value' => sanitize_text_field( $value ),
+					)
+				);
+				break;
+
+			case 'upload_filetypes':
+				$this->plugin->alerts->Trigger(
+					7010,
+					array(
+						'old_value' => sanitize_text_field( $old_value ),
+						'new_value' => sanitize_text_field( $value ),
+					)
+				);
+				break;
+
+			case 'fileupload_maxk':
+				$this->plugin->alerts->Trigger(
+					7009,
+					array(
+						'old_value' => sanitize_text_field( $old_value ),
+						'new_value' => sanitize_text_field( $value ),
+					)
+				);
+				break;
+		}
+
 	}
 
 	/**
@@ -140,9 +202,10 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	/**
 	 * New site added on the network.
 	 *
-	 * @param int $blog_id - Blog ID.
+	 * @param WP_Site $new_blog - New site object.
 	 */
-	public function EventNewBlog( $blog_id ) {
+	public function EventNewBlog( $new_blog ) {
+		$blog_id = $new_blog->blog_id;
 		$this->plugin->alerts->Trigger(
 			7000,
 			array(
@@ -220,9 +283,10 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	/**
 	 * Existing site deleted from network.
 	 *
-	 * @param int $blog_id - Blog ID.
+	 * @param WP_Site $deleted_blog - Deleted blog object.
 	 */
-	public function EventDeleteBlog( $blog_id ) {
+	public function EventDeleteBlog( $deleted_blog ) {
+		$blog_id = $deleted_blog->blog_id;
 		$this->plugin->alerts->Trigger(
 			7005,
 			array(

@@ -51,8 +51,8 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	 * @param bool    $override_buffer - (Optional) Override buffer to log event immediately.
 	 */
 	public function Log( $type, $data = array(), $date = null, $siteid = null, $migrated = false, $override_buffer = false ) {
-		// Is this a php alert, and if so, are we logging such alerts?
-		if ( $type < 0010 && ! $this->plugin->settings()->IsPhpErrorLoggingEnabled() ) {
+		//  PHP alerts logging was deprecated in version 4.2.0
+		if ( $type < 0010 ) {
 			return;
 		}
 

@@ -249,8 +249,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			$all_plugins      = get_plugins();
 			$plugin_filenames = array();
 			foreach ( $all_plugins as $plugin => $info ) {
-				// here we strip all of the plugin slug, leaving just the filename itself. Neat!
-				$plugin_filenames[] = preg_replace( '/\\.[^.\\s]{3,4}$/', '', substr( basename( json_encode( $plugin ) ), 0, -1 ) );
+				$plugin_info = pathinfo( $plugin );
+				$plugin_filenames[] = $plugin_info['filename'];
 			}
 
 			// Grab list of plugins we have addons for.
@@ -1099,7 +1099,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			);
 			die();
 		}
-		
+
 		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wsal_dismiss_advert' ) ) {
 			// Nonce verification failed.
 			echo wp_json_encode(

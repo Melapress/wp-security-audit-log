@@ -152,7 +152,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	public function isInstalled() {
 		$wpdb  = $this->getConnection();
 		$table = $wpdb->base_prefix . 'wsal_occurrences';
-		return $table === $wpdb->get_var( "SHOW TABLES LIKE '" . $table . "'" );
+		$db_result = $wpdb->query( "SELECT COUNT(1) FROM {$table};");
+		return 1 === $db_result;
 	}
 
 	/**

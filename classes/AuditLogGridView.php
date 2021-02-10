@@ -32,13 +32,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	protected $_plugin;
 
 	/**
-	 * GMT Offset
-	 *
-	 * @var string
-	 */
-	protected $_gmt_offset_sec = 0;
-
-	/**
 	 * Current Alert ID
 	 *
 	 * This class member is used to store the alert ID
@@ -93,24 +86,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	public function __construct( $plugin, $query_args ) {
 		$this->_plugin    = $plugin;
 		$this->query_args = $query_args;
-		$timezone         = $this->_plugin->settings()->GetTimezone();
-
-		/**
-		 * Transform timezone values.
-		 *
-		 * @since 3.2.3
-		 */
-		if ( '0' === $timezone ) {
-			$timezone = 'utc';
-		} elseif ( '1' === $timezone ) {
-			$timezone = 'wp';
-		}
-
-		if ( 'utc' === $timezone ) {
-			$this->_gmt_offset_sec = date( 'Z' );
-		} else {
-			$this->_gmt_offset_sec = get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
-		}
 
 		parent::__construct(
 			array(
@@ -131,8 +106,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 
 	protected function get_table_classes() {
-		$table_classes = array( 'widefat', 'fixed', 'striped', $this->_args['plural'], 'wsal-table', 'wsal-table-grid' );
-		return $table_classes;
+		return array( 'widefat', 'fixed', 'striped', $this->_args['plural'], 'wsal-table', 'wsal-table-grid' );
 	}
 
 	/**
@@ -385,9 +359,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	 * @param string                 $column_name - Name of the column.
 	 */
 	public function column_default( $item, $column_name ) {
-		// Get date format.
-		$datetime_format = $this->_plugin->settings()->GetDatetimeFormat();
-
 		// Store meta if not set.
 		if ( ! isset( $this->item_meta[ $item->getId() ] ) ) {
 			$this->item_meta[ $item->getId() ] = $item->GetMetaArray();
@@ -432,32 +403,19 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 					?>
 					<table id="Event<?php echo absint( $item->id ); ?>">
 						<td class="wsal-grid-text-header"><?php esc_html_e( 'Message:', 'alm-' ); ?></td>
-						<td class="wsal-grid-text-data"><?php echo wp_kses_post( $item->GetMessage( array( $this->_plugin->settings, 'meta_formatter' ), false, $this->item_meta[ $item->getId() ] ) ); ?></td>
+						<td class="wsal-grid-text-data"><?php echo $item->GetMessage( array( $this->_plugin->settings, 'meta_formatter' ), false, $this->item_meta[ $item->getId() ] ); ?></td>
 					</table>
 					<?php
 				}
 				return ob_get_clean();
 			case 'info':
-				$date_format       = $this->_plugin->settings()->GetDateFormat();
-				$show_microseconds = $this->_plugin->settings()->get_show_milliseconds();
-				if ( ! $show_microseconds ) {
-					// remove the microseconds placeholder from format string.
-					$datetime_format = str_replace( '.$$$', '', $datetime_format );
-				}
-				$eventdate = $item->created_on ? (
-						str_replace(
-							'$$$',
-							substr( number_format( fmod( $item->created_on + $this->_gmt_offset_sec, 1 ), 3 ), 2 ),
-							date( $date_format, $item->created_on + $this->_gmt_offset_sec )
-						)
-					) : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
-				$eventtime = $item->created_on ? (
-						str_replace(
-							'$$$',
-							substr( number_format( fmod( $item->created_on + $this->_gmt_offset_sec, 1 ), 3 ), 2 ),
-							date( get_option( 'time_format' ), $item->created_on + $this->_gmt_offset_sec )
-						)
-					) : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
+				$eventdate = $item->created_on
+                    ? WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime($item->created_on, 'date' )
+                    : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
+
+				$eventtime = $item->created_on
+                    ? WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime($item->created_on, 'time' )
+                    : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 
 				$username = $item->GetUsername( $this->item_meta[ $item->getId() ] ); // Get username.
 				$user     = get_user_by( 'login', $username ); // Get user.
@@ -644,127 +602,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	public function reorder_items_int( $a, $b ) {
 		$result = $a->{$this->_orderby} - $b->{$this->_orderby};
 		return ( 'asc' === $this->_order ) ? $result : -$result;
-	}
-
-	/**
-	 * Method: Meta data formatter.
-	 *
-	 * @param string $name - Name of the data.
-	 * @param mixed  $value - Value of the data.
-	 * @return string
-	 * @deprecated 3.3
-	 */
-	public function meta_formatter( $name, $value ) {
-		switch ( true ) {
-			case '%Message%' == $name:
-				return esc_html( $value );
-
-			case '%PromoMessage%' == $name:
-				return '<p class="promo-alert">' . $value . '</p>';
-
-			case '%PromoLink%' == $name:
-			case '%CommentLink%' == $name:
-			case '%CommentMsg%' == $name:
-				return $value;
-
-			case '%MetaLink%' == $name:
-				if ( ! empty( $value ) ) {
-					return "<a href=\"#\" data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"return WsalDisableCustom(this, '" . $value . "');\"> Exclude Custom Field from the Monitoring</a>";
-				} else {
-					return '';
-				}
-
-			case '%RevisionLink%' === $name:
-				$check_value = (string) $value;
-				if ( 'NULL' !== $check_value ) {
-					return ' Click <a target="_blank" href="' . esc_url( $value ) . '">here</a> to see the content changes.';
-				} else {
-					return false;
-				}
-
-			case '%EditorLinkPost%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">post</a>';
-
-			case '%EditorLinkPage%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">page</a>';
-
-			case '%CategoryLink%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">category</a>';
-
-			case '%TagLink%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">tag</a>';
-
-			case '%EditorLinkForum%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">forum</a>';
-
-			case '%EditorLinkTopic%' == $name:
-				return ' View the <a target="_blank" href="' . esc_url( $value ) . '">topic</a>';
-
-			case in_array( $name, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ) ):
-				return '<strong>' . (
-					strlen( $value ) > 50 ? ( esc_html( substr( $value, 0, 50 ) ) . '&hellip;' ) : esc_html( $value )
-				) . '</strong>';
-
-			case '%ClientIP%' == $name:
-				if ( is_string( $value ) ) {
-					return '<strong>' . str_replace( array( '"', '[', ']' ), '', $value ) . '</strong>';
-				} else {
-					return '<i>unknown</i>';
-				}
-
-			case '%LogFileLink%' === $name: // Failed login file link.
-				return '';
-
-			case '%Attempts%' === $name: // Failed login attempts.
-				$check_value = (int) $value;
-				if ( 0 === $check_value ) {
-					return '';
-				} else {
-					return $value;
-				}
-
-			case '%LogFileText%' === $name: // Failed login file text.
-				return '<a href="javascript:;" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
-
-			case strncmp( $value, 'http://', 7 ) === 0:
-			case strncmp( $value, 'https://', 8 ) === 0:
-				return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
-
-			case '%PostStatus%' === $name:
-				if ( ! empty( $value ) && 'publish' === $value ) {
-					return '<strong>' . esc_html__( 'published', 'wp-security-audit-log' ) . '</strong>';
-				} else {
-					return '<strong>' . esc_html( $value ) . '</strong>';
-				}
-
-			case '%multisite_text%' === $name:
-				if ( $this->is_multisite() && $value ) {
-					$site_info = get_blog_details( $value, true );
-					if ( $site_info ) {
-						return ' on site <a href="' . esc_url( $site_info->siteurl ) . '">' . esc_html( $site_info->blogname ) . '</a>';
-					}
-					return;
-				}
-				return;
-
-			case '%ReportText%' === $name:
-				return;
-
-			case '%ChangeText%' === $name:
-				$url = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $this->current_alert_id;
-				return ' View the changes in <a class="thickbox"  title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
-				. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">data inspector.</a>';
-
-			case '%ScanError%' === $name:
-				if ( 'NULL' === $value ) {
-					return false;
-				}
-				/* translators: Mailto link for support. */
-				return ' with errors. ' . sprintf( __( 'Contact us on %s for assistance', 'wp-security-audit-log' ), '<a href="mailto:support@wpsecurityauditlog.com" target="_blank">support@wpsecurityauditlog.com</a>' );
-
-			default:
-				return '<strong>' . esc_html( $value ) . '</strong>';
-		}
 	}
 
 	/**
@@ -1042,7 +879,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				$tmp = new WSAL_Models_Occurrence();
 				// Making sure the field exists to order by.
 				if ( isset( $tmp->{$order_by} ) ) {
-					// TODO: We used to use a custom comparator ... is it safe to let MySQL do the ordering now?.
 					$query->addOrderBy( $order_by, $is_descending );
 				} else {
 					$query->addOrderBy( 'created_on', true );

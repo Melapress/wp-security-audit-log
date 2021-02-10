@@ -53,6 +53,99 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		add_action( 'revoke_super_admin', array( $this, 'get_super_admins' ) );
 		add_action( 'granted_super_admin', array( $this, 'event_super_access_granted' ), 10, 1 );
 		add_action( 'revoked_super_admin', array( $this, 'event_super_access_revoked' ), 10, 1 );
+		add_action( 'update_user_meta', array( $this, 'event_application_password_added' ), 10, 4 );
+
+	}
+
+	public function event_application_password_added( $meta_id, $user_id, $meta_key, $_meta_value ) {
+
+		// Filter global arrays for security.
+		$post_array   = filter_input_array( INPUT_POST );
+		$get_array    = filter_input_array( INPUT_GET );
+		$server_array = filter_input_array( INPUT_SERVER );
+
+		if ( ! isset( $server_array['HTTP_REFERER'] ) || ! isset( $server_array['REQUEST_URI'] ) ) {
+			return;
+		}
+
+		// Check the page which is performing this change.
+		$referer_check = pathinfo( $server_array['HTTP_REFERER'] );
+		$referer_check = $referer_check['filename'];
+		$referer_check = ( strpos( $referer_check, '.' ) !== false ) ? strstr( $referer_check , '.', true ) : $referer_check;
+
+		$is_correct_referer_and_action = false;
+
+		if ( 'profile' === $referer_check || 'user-edit' === $referer_check ) {
+			$is_correct_referer_and_action = true;
+		}
+
+		// Ensure we are dealign with the correct request.
+		if ( $is_correct_referer_and_action && strpos( $server_array['REQUEST_URI'], '/wp/v2/users/'. $user_id .'/application-passwords' ) !== false ) {
+
+			$old_value = get_user_meta( $user_id, '_application_passwords', true );
+
+			$current_user       = get_user_by( 'id', $user_id );
+			$current_userdata   = get_userdata( $user_id );
+			$current_user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $current_userdata->roles ) );
+			$event_id           = ( 'user-edit' === $referer_check ) ? 4026 : 4025;
+
+			// Note, firstname and lastname fields are purposefully spaces to avoid NULL.
+			if ( isset( $_POST['name'] ) ) {
+				$this->plugin->alerts->Trigger(
+					$event_id,
+					array(
+						'roles'         => $current_user_roles,
+						'login'         => $current_user->user_login,
+						'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
+						'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
+						'CurrentUserID' => $current_user->ID,
+						'friendly_name' => sanitize_text_field( $_POST['name'] ),
+						'EventType'     => 'added',
+					)
+				);
+			}
+
+			// Check if all have been removed.
+			elseif ( ! empty( $old_value ) && count( $old_value ) > 1 && empty( $_meta_value ) ) {
+				$event_id        = ( 'user-edit' === $referer_check ) ? 4028 : 4027;
+
+				// Note, firstname and lastname fields are purposefully spaces to avoid NULL.
+				$this->plugin->alerts->Trigger(
+					$event_id ,
+					array(
+						'roles'         => $current_user_roles,
+						'login'         => $current_user->user_login,
+						'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
+						'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
+						'CurrentUserID' => $current_user->ID,
+						'EventType'     => 'revoked',
+					)
+				);
+			}
+
+			// Check the item that was removed.
+			elseif ( count( $_meta_value ) < count( $old_value ) ) {
+				$revoked_pw      = array_diff( array_map( 'serialize', $old_value ), array_map( 'serialize', $_meta_value ) );
+				$revoked_pw      = array_values( array_map( 'unserialize', $revoked_pw ) );
+				$revoked_pw_name = $revoked_pw[0]['name'];
+				$event_id        = ( 'user-edit' === $referer_check ) ? 4026 : 4025;
+
+				// Note, firstname and lastname fields are purposefully spaces to avoid NULL.
+				$this->plugin->alerts->Trigger(
+					$event_id ,
+					array(
+						'roles'         => $current_user_roles,
+						'login'         => $current_user->user_login,
+						'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
+						'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
+						'CurrentUserID' => $current_user->ID,
+						'friendly_name' => sanitize_text_field( $revoked_pw_name ),
+						'EventType'     => 'revoked',
+					)
+				);
+			}
+		}
+
 	}
 
 	/**
@@ -197,6 +290,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		if ( ! $user ) {
 			return;
 		}
+
 		$current_user = wp_get_current_user();
 		$updated      = isset( $_GET['updated'] ); // @codingStandardsIgnoreLine
 		if ( $current_user && ( $user->ID !== $current_user->ID ) && ! $updated ) {

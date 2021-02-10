@@ -438,7 +438,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @return string
 	 */
 	protected function _GetUninstallQuery() {
-		return 'DROP TABLE ' . $this->GetTable();
+		return 'DROP TABLE IF EXISTS ' . $this->GetTable();
 	}
 
 	/**
@@ -625,18 +625,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			$sql .= " LIMIT {$_limit}";
 		}
 		$results = $_wpdb->get_results( $sql );
-
 		if ( ! empty( $results ) ) {
-			foreach ( $results as $row ) {
-				$sql     = "SELECT t6.ID FROM $wpdb->users AS t6 WHERE t6.user_login = \"$row->user_id\"";
-				$user_id = $wpdb->get_var( $sql );
-				if ( null == $user_id ) {
-					$sql     = "SELECT t4.ID FROM $wpdb->users AS t4 WHERE t4.ID = \"$row->user_id\"";
-					$user_id = $wpdb->get_var( $sql );
-				}
-				$row->user_id        = $user_id;
-				$results['lastDate'] = $row->created_on;
-			}
+			$last_item           = end( $results );
+			$results['lastDate'] = $last_item->created_on;
 		}
 
 		return $results;

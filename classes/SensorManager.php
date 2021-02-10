@@ -43,11 +43,6 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 			$this->AddFromFile( $file );
 		}
 
-		/**
-		 * Load Custom Sensor files from {plugin working dir}/custom-sensors/
-		 */
-		$uploads_dir_path = $plugin->settings()->get_working_dir_path( 'custom-sensors', true, true );
-
 		/*
 		 * Get an array of directories to loop through to add custom sensors.
 		 *
@@ -56,7 +51,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		 *
 		 * @since 3.5.1 - Added the `wsal_custom_sensors_classes_dirs` filter.
 		 */
-		$paths = apply_filters( 'wsal_custom_sensors_classes_dirs', array( $uploads_dir_path ) );
+		$paths = apply_filters( 'wsal_custom_sensors_classes_dirs', array() );
 		foreach ( $paths as $inc_path ) {
 			// Check directory.
 			if ( is_dir( $inc_path ) && is_readable( $inc_path ) ) {
@@ -194,7 +189,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 		$frontend_events = WSAL_Settings::get_frontend_events();
 
-		// Check to see if LogInOut, FrontendLogin, and FrontendRegister sensors should load on login page.
+		// Check to see if LogInOut, and FrontendRegister sensors should load on login page.
 		if ( WpSecurityAuditLog::is_login_screen() ) {
 			if ( 'FrontendRegister' === $filename && ! empty( $frontend_events['register'] )
 			     || 'LogInOut' === $filename ) {
@@ -214,7 +209,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		 *
 		 * @param array $public_sensors - List of sensors to be loaded for visitors.
 		 */
-		$public_sensors = apply_filters( 'wsal_load_public_sensors', array( 'FrontendLogin', 'FrontendRegister' ) );
+		$public_sensors = apply_filters( 'wsal_load_public_sensors', array( 'FrontendRegister', 'LogInOut' ) );
 		if ( WpSecurityAuditLog::is_frontend() && ! is_user_logged_in() && ! in_array( $filename, $public_sensors, true ) ) {
 			return false;
 		}
@@ -287,7 +282,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 					}
 					break;
 
-				case 'FrontendLogin':
+				case 'LogInOut':
 					if ( is_user_logged_in() || empty( $frontend_events['login'] ) ) {
 						$load_sensor = false;
 					}
