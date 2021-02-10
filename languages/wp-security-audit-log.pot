@@ -2496,96 +2496,96 @@ msgstr ""
 msgid "This function is deprecated"
 msgstr ""
 
-#: classes/Settings.php:1479
+#: classes/Settings.php:1555
 msgid "View the content changes"
 msgstr ""
 
-#: classes/Settings.php:1489
+#: classes/Settings.php:1565
 msgid "View page in the editor"
 msgstr ""
 
-#: classes/Settings.php:1504
+#: classes/Settings.php:1580
 msgid "View post in the editor"
 msgstr ""
 
-#: classes/Settings.php:1517
+#: classes/Settings.php:1593
 msgid "View Order"
 msgstr ""
 
-#: classes/Settings.php:1532
+#: classes/Settings.php:1608
 msgid "View category"
 msgstr ""
 
-#: classes/Settings.php:1548
+#: classes/Settings.php:1624
 msgid "View tag"
 msgstr ""
 
-#: classes/Settings.php:1553
+#: classes/Settings.php:1629
 msgid "User profile page"
 msgstr ""
 
-#: classes/Settings.php:1631, classes/Settings.php:1631
+#: classes/Settings.php:1707, classes/Settings.php:1707
 msgid "View Menu"
 msgstr ""
 
-#: classes/Settings.php:1651, classes/Settings.php:1651
+#: classes/Settings.php:1727, classes/Settings.php:1727
 msgid "Download the log file."
 msgstr ""
 
-#: classes/Settings.php:1677
+#: classes/Settings.php:1753
 msgid "published"
 msgstr ""
 
 #. translators: Mailto link for support.
-#: classes/Settings.php:1707, classes/Settings.php:1710
+#: classes/Settings.php:1783, classes/Settings.php:1786
 msgid "Contact us on %s for assistance"
 msgstr ""
 
-#: classes/Settings.php:1725, classes/Settings.php:1728
+#: classes/Settings.php:1801, classes/Settings.php:1804
 msgid "plugin settings"
 msgstr ""
 
-#: classes/Settings.php:1731
+#: classes/Settings.php:1807
 msgid "Increase maximum file size limit"
 msgstr ""
 
-#: classes/Settings.php:1739, classes/Settings.php:1742
+#: classes/Settings.php:1815, classes/Settings.php:1818
 msgid "contact our support"
 msgstr ""
 
-#: classes/Settings.php:1745
+#: classes/Settings.php:1821
 msgid "Contact Support"
 msgstr ""
 
-#: classes/Settings.php:2055
+#: classes/Settings.php:2131
 msgid "Root directory of WordPress (excluding sub directories)"
 msgstr ""
 
-#: classes/Settings.php:2056
+#: classes/Settings.php:2132
 msgid "WP Admin directory (/wp-admin/)"
 msgstr ""
 
-#: classes/Settings.php:2057
+#: classes/Settings.php:2133
 msgid "WP Includes directory (/wp-includes/)"
 msgstr ""
 
-#: classes/Settings.php:2058
+#: classes/Settings.php:2134
 msgid "/wp-content/ directory (excluding plugins, themes & uploads directories)"
 msgstr ""
 
-#: classes/Settings.php:2059
+#: classes/Settings.php:2135
 msgid "Themes directory (/wp-content/themes/)"
 msgstr ""
 
-#: classes/Settings.php:2060
+#: classes/Settings.php:2136
 msgid "Plugins directory (/wp-content/plugins/)"
 msgstr ""
 
-#: classes/Settings.php:2061
+#: classes/Settings.php:2137
 msgid "Uploads directory (/wp-content/uploads/)"
 msgstr ""
 
-#: classes/Settings.php:2066
+#: classes/Settings.php:2142
 msgid "Uploads directory of all sub sites on this network (/wp-content/sites/*)"
 msgstr ""
 
