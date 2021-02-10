@@ -217,7 +217,7 @@ Release notes: [WP Activity Log 4.2: Support for all date & time formats & other
 
 **Improved activity log coverage**
 * **New event IDs for changes in posts**
-	* ID 2129: User added / changed remove a post's excerpt
+	* ID 2129: User added / changed / removed a post's excerpt
 	* ID 2130: User added / changed / removed a post's featured image
 
 * **New event IDs for changes in WordPress settings**
