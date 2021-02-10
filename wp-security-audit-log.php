@@ -1112,8 +1112,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					$this->Update( $old_version, $new_version );
 				}
 
-				// Generate index.php for uploads directory.
-				$this->settings()->generate_index_files();
 			}
 
 			/**
