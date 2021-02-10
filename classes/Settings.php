@@ -141,6 +141,71 @@ class WSAL_Settings {
 		add_action( 'deactivated_plugin', array( $this, 'reset_stealth_mode' ), 10, 1 );
 	}
 
+	/**
+	 * Retrieves the full path to plugin's working directory. Returns a folder path with a trailing slash. It also
+	 * creates the folder unless the $skip_creation parameter is set to true.
+	 *
+	 * Default path is "{uploads folder}/wp-activity-log/" and can be change only using a constant WSAL_WORKING_DIR_PATH.
+	 *
+	 * @param string $path Optional path relative to the working directory.
+	 * @param bool   $skip_creation If true, the folder will not be created.
+	 * @param bool   $ignore_site If true, there will be no sub-site specific subfolder in multisite context.
+	 *
+	 * @return string|WP_Error
+	 *
+	 * @since  4.1.0
+	 */
+	public function get_working_dir_path( $path = '', $skip_creation = false, $ignore_site = false ) {
+
+		$result = '';
+
+		// work out the working directory base path
+		if ( defined( 'WSAL_WORKING_DIR_PATH' ) ) {
+			$result = trailingslashit( WSAL_WORKING_DIR_PATH );
+		} else {
+			$upload_dir = wp_upload_dir( null, false );
+			if ( is_array( $upload_dir ) && array_key_exists( 'basedir', $upload_dir ) ) {
+				$result = $upload_dir['basedir'] . '/wp-activity-log/';
+			} elseif ( defined( 'WP_CONTENT_DIR' ) ) {
+				// fallback in case there is a problem with filesystem
+				$result = WP_CONTENT_DIR . '/uploads/wp-activity-log/';
+			}
+		}
+
+		if ( empty( $result ) ) {
+			// empty result here means invalid custom path or a problem with WordPress (uploads folder issue or mission WP_CONTENT_DIR)
+			return new WP_Error( 'wsal_working_dir_base_missing', __( 'The base of WSAL working directory cannot be determined. Custom path is invalid or there is some other issue with your WordPress installation.' ) );
+		}
+
+		// append site specific subfolder in multisite context
+		if ( ! $ignore_site && $this->_plugin->IsMultisite() ) {
+			$site_id = get_current_blog_id();
+			if ( $site_id > 0 ) {
+				$result .= 'sites/' . $site_id . '/';
+			}
+		}
+
+		// append optional path passed as a parameter
+		if ( $path && is_string( $path ) ) {
+			$result .= $path . '/';
+		}
+
+		$result = preg_replace( '/\//', DIRECTORY_SEPARATOR, $result );
+		if ( ! $skip_creation ) {
+			if ( ! wp_mkdir_p( $result ) ) {
+				return new WP_Error(
+					'mkdir_failed',
+					sprintf(
+					/* translators: %s: Directory path. */
+						__( 'Unable to create directory %s. Is its parent directory writable by the server?' ),
+						esc_html( $result )
+					)
+				);
+			}
+		}
+
+		return $result;
+	}
 
 	/**
 	 * Enable Basic Mode.
