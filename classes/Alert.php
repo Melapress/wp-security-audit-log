@@ -122,7 +122,7 @@ final class WSAL_Alert {
 	 * @param mixed         $highlight      - (Optional) Highlight format.
 	 * @return string The expanded message.
 	 */
-	protected function GetFormattedMesg( $orig_mesg, $meta_data = array(), $meta_formatter = null, $occurrence_id = 0, $highlight = null ) {
+	protected function GetFormattedMesg( $orig_mesg, $meta_data = array(), $meta_formatter = null, $occurrence_id = 0, $highlight = null, $context = false ) {
 		// Tokenize message with regex.
 		$message = preg_split( '/(%.*?%)/', (string) $orig_mesg, -1, PREG_SPLIT_DELIM_CAPTURE );
 		if ( ! is_array( $message ) ) {
@@ -155,7 +155,7 @@ final class WSAL_Alert {
 	 * @param mixed         $highlight      - (Optional) Highlight format.
 	 * @return string Fully formatted message.
 	 */
-	public function GetMessage( $meta_data = array(), $meta_formatter = null, $mesg = null, $occurrence_id = 0, $highlight = false ) {
-		return $this->GetFormattedMesg( is_null( $mesg ) ? $this->mesg : $mesg, $meta_data, $meta_formatter, $occurrence_id, $highlight );
+	public function GetMessage( $meta_data = array(), $meta_formatter = null, $mesg = null, $occurrence_id = 0, $highlight = false, $context = false ) {
+		return $this->GetFormattedMesg( is_null( $mesg ) ? $this->mesg : $mesg, $meta_data, $meta_formatter, $occurrence_id, $highlight, $context );
 	}
 }

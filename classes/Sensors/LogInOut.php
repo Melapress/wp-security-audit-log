@@ -52,6 +52,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		add_action( 'wp_login_failed', array( $this, 'EventLoginFailure' ) );
 		add_action( 'clear_auth_cookie', array( $this, 'GetCurrentUser' ), 10 );
 		add_filter( 'wp_login_blocked', array( $this, 'EventLoginBlocked' ), 10, 1 );
+		add_action( 'lostpassword_post', array( $this, 'event_user_requested_pw_reset' ), 10, 2 );
 
 		if ( WpSecurityAuditLog::is_twofactor_active() ) {
 			add_action( 'login_redirect', array( $this, 'event_2fa_login' ), 10, 1 );
@@ -60,6 +61,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		if ( WpSecurityAuditLog::is_plugin_active( 'user-switching/user-switching.php' ) ) {
 			add_action( 'switch_to_user', array( $this, 'user_switched_event' ), 10, 2 );
 		}
+
 	}
 
 	/**
@@ -502,39 +504,6 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	}
 
 	/**
-	 * Event login blocked.
-	 *
-	 * @param string $username - Username.
-	 */
-	public function EventLoginBlocked( $username ) {
-		// try get the user object first by login and then by email.
-		$user = get_user_by( 'login', $username );
-		if ( ! $user ) {
-			$user = get_user_by( 'email', $username );
-		}
-		// bail early if we could not get a WP_User.
-		if ( ! is_a( $user, '\WP_User' ) ) {
-			return;
-		}
-
-		// get the users roles.
-		$user_roles = $this->plugin->settings()->GetCurrentUserRoles( $user->roles );
-		if ( $this->plugin->settings()->IsLoginSuperAdmin( $username ) ) {
-			$user_roles[] = 'superadmin';
-		}
-
-		// record a login blocked event.
-		$this->plugin->alerts->Trigger(
-			1004,
-			array(
-				'Username'         => $user->user_login,
-				'CurrentUserRoles' => $user_roles,
-			),
-			true
-		);
-	}
-
-	/**
 	 * User Switched.
 	 *
 	 * Current user switched to another user event.
@@ -559,6 +528,24 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				'Username'         => $old_user->user_login,
 				'CurrentUserRoles' => $old_user_roles,
 			)
+		);
+	}
+
+	/**
+	 * User has requested a password reset.
+	 *
+	 * @param object $errors Current WP_errors objtect.
+	 * @param object $user   User making the request.
+	 */
+	public function event_user_requested_pw_reset( $errors, $user ) {
+		$user_roles = $this->plugin->settings()->GetCurrentUserRoles( $user->roles );
+		$this->plugin->alerts->Trigger(
+			1010,
+			array(
+				'Username'         => $user->user_login,
+				'CurrentUserRoles' => $user_roles,
+			),
+			true
 		);
 	}
 }

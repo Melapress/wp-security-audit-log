@@ -80,41 +80,43 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 					<tr>
 						<td class="addon-td">
 							<p class="description"><?php esc_html_e( 'WP Activity Log can keep a log of changes done on other plugins. Install the relevant extension from the below list to keep a log of changes done on that plugin.', 'wp-security-audit-log' ); ?></p></br>
-							<?php
-							// Create a nonce to pass through via data attr.
-							$nonce = wp_create_nonce( 'wsal-install-addon' );
-							// Loop through plugins and output.
-							foreach ( $our_plugins as $details ) {
-								$disable_button = '';
-								if ( WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) ) {
-									$disable_button = 'disabled';
-								}
-								// Check if this is actually an addon for something, otherwise bail.
-								if ( ! isset( $details['addon_for'] ) || ! isset( $details['image_filename'] ) ) {
-									continue;
-								}
-								?>
-
-								<div class="addon-wrapper">
-									<img src="<?php echo esc_url( trailingslashit( WSAL_BASE_URL ) . 'img/addons/' . $details['image_filename'] ); ?>">
-									<h4><?php esc_html_e( 'Extension for ', 'wp-security-audit-log' ); ?><?php echo esc_html( $details['title'] ); ?></h4>
-									<p><?php echo sanitize_text_field( $details['plugin_description'] ); ?></p><br>
-									<p><button class="install-addon button button-primary <?php echo esc_attr( $disable_button ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-plugin-slug="<?php echo esc_attr( $details['plugin_slug'] ); ?>" data-plugin-download-url="<?php echo esc_url( $details['plugin_url'] ); ?>" data-plugin-event-tab-id="<?php echo esc_attr( $details['event_tab_id'] ); ?>">
-									<?php
-									if ( $this->is_plugin_installed( $details['plugin_slug'] ) && ! WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) ) {
-										esc_html_e( 'Extension installed, activate now?', 'wp-security-audit-log' );
-									} elseif ( $this->is_plugin_installed( $details['plugin_slug'] ) && WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_add_custom_event_objects' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_add_custom_event_objects' ) || 'activity-log-yoast-seo.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_yoast_seo_extension_add_custom_event_objects' )  ) {
-										esc_html_e( 'Extension installed', 'wp-security-audit-log' );
-									} else {
-										esc_html_e( 'Install Extension', 'wp-security-audit-log' );
+							<div id="extension-wrapper">
+								<?php
+								// Create a nonce to pass through via data attr.
+								$nonce = wp_create_nonce( 'wsal-install-addon' );
+								// Loop through plugins and output.
+								foreach ( $our_plugins as $details ) {
+									$disable_button = '';
+									if ( WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) ) {
+										$disable_button = 'disabled';
+									}
+									// Check if this is actually an addon for something, otherwise bail.
+									if ( ! isset( $details['addon_for'] ) || ! isset( $details['image_filename'] ) ) {
+										continue;
 									}
 									?>
-								</button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span></p>
-								</div>
 
-								<?php
-							}
-							?>
+									<div class="addon-wrapper">
+										<img src="<?php echo esc_url( trailingslashit( WSAL_BASE_URL ) . 'img/addons/' . $details['image_filename'] ); ?>">
+										<h4><?php esc_html_e( 'Extension for ', 'wp-security-audit-log' ); ?><?php echo esc_html( $details['title'] ); ?></h4>
+										<p><?php echo sanitize_text_field( $details['plugin_description'] ); ?></p><br>
+										<p><button class="install-addon button button-primary <?php echo esc_attr( $disable_button ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-plugin-slug="<?php echo esc_attr( $details['plugin_slug'] ); ?>" data-plugin-download-url="<?php echo esc_url( $details['plugin_url'] ); ?>" data-plugin-event-tab-id="<?php echo esc_attr( $details['event_tab_id'] ); ?>">
+										<?php
+										if ( $this->is_plugin_installed( $details['plugin_slug'] ) && ! WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) ) {
+											esc_html_e( 'Extension installed, activate now?', 'wp-security-audit-log' );
+										} elseif ( $this->is_plugin_installed( $details['plugin_slug'] ) && WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_add_custom_event_objects' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_add_custom_event_objects' ) || 'activity-log-yoast-seo.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_yoast_seo_extension_add_custom_event_objects' )  ) {
+											esc_html_e( 'Extension installed', 'wp-security-audit-log' );
+										} else {
+											esc_html_e( 'Install Extension', 'wp-security-audit-log' );
+										}
+										?>
+									</button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span></p>
+									</div>
+
+									<?php
+								}
+								?>
+							</div>
 						</td>
 					</tr>
 				</tbody>

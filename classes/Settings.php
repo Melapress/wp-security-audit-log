@@ -33,11 +33,7 @@ class WSAL_Settings {
 	 */
 	protected $_plugin;
 
-	const OPT_DEV_DATA_INSPECTOR = 'd';
-	const OPT_DEV_PHP_ERRORS     = 'p';
-	const OPT_DEV_REQUEST_LOG    = 'r';
-	const OPT_DEV_BACKTRACE_LOG  = 'b';
-	const ERROR_CODE_INVALID_IP  = 901;
+	const ERROR_CODE_INVALID_IP = 901;
 
 	/**
 	 * List of Site Admins.
@@ -45,13 +41,6 @@ class WSAL_Settings {
 	 * @var array
 	 */
 	private $site_admins = array();
-
-	/**
-	 * Dev Options.
-	 *
-	 * @var array
-	 */
-	protected $_devoption = null;
 
 	/**
 	 * Pruning Date.
@@ -119,9 +108,17 @@ class WSAL_Settings {
 	/**
 	 * Alerts enabled in Geek mode.
 	 *
-	 * @var array
+	 * @var int[]
 	 */
-	public $geek_alerts = array( 1004, 1005, 1006, 1007, 2023, 2024, 2053, 2054, 2055, 2062, 2100, 2111, 2112, 2124, 2125, 2131, 2132, 2094, 2095, 2043, 2071, 2082, 2083, 2085, 2089, 4014, 4015, 4016, 5010, 5011, 5012, 5019, 5025, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6001, 6002, 6008, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6024, 6025 );
+	public $geek_alerts = array( 1004, 1005, 1006, 1007, 2023, 2024, 2053, 2054, 2055, 2062, 2100, 2111, 2112, 2124, 2125, 2131, 2132, 2094, 2095, 2043, 2071, 2082, 2083, 2085, 2089, 4014, 4015, 4016, 5019, 5025, 6001, 6002, 6008, 6010, 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6024, 6025 );
+
+	/**
+	 * Alerts always disabled by default - in basic mode and also in geek mode.
+	 *
+	 * @var int[]
+	 * @since 4.2.0
+	 */
+	public $always_disabled_alerts = array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024 );
 
 	/**
 	 * Current screen object.
@@ -144,247 +141,22 @@ class WSAL_Settings {
 		add_action( 'deactivated_plugin', array( $this, 'reset_stealth_mode' ), 10, 1 );
 	}
 
-	/**
-	 * Gets path to the default working directory relative to the root of WordPress site.
-	 *
-	 * Uses forward slashes and result has a slash at the end.
-	 *
-	 * @return string
-	 */
-	public function get_default_working_dir_relative() {
-		$upload_dir  = wp_upload_dir(null, false);
-		if (false === $upload_dir || ! array_key_exists('basedir', $upload_dir) ||
-		    ( array_key_exists('error', $upload_dir) && ! empty ( $upload_dir['error'] ) )
-		) {
-			//  fallback in case there is a problem with filesystem
-			return WP_CONTENT_DIR . '/uploads/wp-activity-log/';
-		}
-
-		$result = $upload_dir['basedir'] . '/wp-activity-log/';
-
-		//  remove absolute path from the basedir to make it relative
-		if ( defined( 'ABSPATH' ) ) {
-			$result = preg_replace( '/^' . preg_quote( ABSPATH, '/' ) . '/', '', $result );
-			//  add leading slash if missing
-			if ( '/' !== substr( $result, 0, 1) ) {
-				$result = '/' . $result;
-			}
-		}
-		return $result;
-	}
-
-	/**
-	 * Retrieves the working directory from the settings relative to the WordPress root folder.
-	 *
-	 * Used by two public helper functions that provide the working directory path and URL for the rest of the plugin:
-	 * - WSAL_Settings::get_working_dir_path
-	 * - WSAL_Settings::get_working_dir_url
-	 *
-	 * Result contains forward slashes suitable for use in URL. It also contains the trailing slash. Replace slashes
-	 * with system specific directory separators when used as filesystem path. This is already done in
-	 * WSAL_Settings::get_working_dir_path in case you need it.
-	 *
-	 * @param string $path Optional path relative to the working directory.
-	 * @param bool $ignore_site If true, there will be no sub-site specific subfolder in multisite context.
-	 * @return string
-	 * @since 4.1.3
-	 *
-	 * @see WSAL_Settings::get_working_dir_path()
-	 * @see WSAL_Settings::get_working_dir_url()
-	 * @see WSAL_Settings::get_working_dir_path_relative()
-	 */
-	private function get_working_dir_path_relative( $path = '', $ignore_site = false ) {
-		if ( ! \function_exists( 'get_home_path' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-
-		//  get relative path from the plugin settings
-		$result = trailingslashit( $this->_plugin->GetGlobalSetting( 'custom-logging-dir', $this->get_default_working_dir_relative() ) );
-
-		//  append site specific subfolder in multisite context
-		if ( ! $ignore_site && $this->_plugin->IsMultisite() ) {
-			$site_id = get_current_blog_id();
-			if ($site_id > 0) {
-				$result .= 'sites/' . $site_id . '/';
-			}
-		}
-
-		//  append optional path passed as a parameter
-		if ( $path && is_string( $path ) ) {
-			$result .= $path . '/';
-		}
-
-		//  result should have the trailing slash at this point, no need to trailingslashit again
-		return $result;
-	}
-
-	/**
-	 * Retrieves the working directory URL including a trailing slash.
-	 *
-	 * Uses as default:
-	 * {uploads folder}/wp-activity-log/
-	 *
-	 * @param string $path Optional path relative to the working directory.
-
-	 * @return string
-	 * @see WSAL_Settings::get_working_dir_path_relative()
-	 *
-	 * @since  4.1.0
-	 */
-	public function get_working_dir_url( $path = '' ) {
-		$result = $this->get_default_working_dir_relative( $path );
-		return trailingslashit( \get_site_url() ) . $result;
-	}
-
-	/**
-	 * Retrieves the working directory from the settings. Returns a folder path
-	 * with a trailing slash. It also creates the folder unless the $skip_creation
-	 * parameter is set to true.
-	 *
-	 * Uses as default:
-	 * {uploads folder}/wp-activity-log/
-	 *
-	 * @param string $path Optional path relative to the working directory.
-	 * @param bool $skip_creation If true, the folder will not be created.
-	 * @param bool $ignore_site If true, there will be no sub-site specific subfolder in multisite context.
-	 *
-	 * @return string|WP_Error
-	 * @see WSAL_Settings::get_working_dir_path_relative()
-	 *
-	 * @since  4.1.0
-	 */
-	public function get_working_dir_path( $path = '', $skip_creation = false, $ignore_site = false ) {
-		$result = $this->get_working_dir_path_relative( $path, $ignore_site );
-		$result = trailingslashit( ABSPATH ) . $result;
-		$result = preg_replace('/\//', DIRECTORY_SEPARATOR, $result);
-		if ( ! $skip_creation ) {
-			if ( ! wp_mkdir_p( $result ) ) {
-				return new WP_Error('mkdir_failed', sprintf(
-				/* translators: %s: Directory path. */
-					__( 'Unable to create directory %s. Is its parent directory writable by the server?' ),
-					esc_html( $result )
-				));
-			}
-		}
-
-		return $result;
-	}
 
 	/**
 	 * Enable Basic Mode.
 	 */
 	public function set_basic_mode() {
-		// Disable alerts of geek mode.
-		$this->SetDisabledAlerts( $this->geek_alerts );
+		// Disable alerts of geek mode and alerts to be always disabled.
+		$this->SetDisabledAlerts( array_merge( $this->geek_alerts, $this->always_disabled_alerts ) );
 	}
 
 	/**
 	 * Enable Geek Mode.
 	 */
 	public function set_geek_mode() {
-		$this->SetDisabledAlerts( array() ); // Disable alerts of geek mode.
+		$this->SetDisabledAlerts( $this->always_disabled_alerts ); // Disable alerts to be always disabled.
 	}
 
-	/**
-	 * Return array of developer options to be enabled by default.
-	 *
-	 * @return array
-	 */
-	public function GetDefaultDevOptions() {
-		return array();
-	}
-
-	/**
-	 * Returns whether a developer option is enabled or not.
-	 *
-	 * @param string $option - See self::OPT_DEV_* constants.
-	 * @return boolean - If option is enabled or not.
-	 */
-	public function IsDevOptionEnabled( $option ) {
-		if ( is_null( $this->_devoption ) ) {
-			$this->_devoption = $this->_plugin->GetGlobalSetting(
-				'dev-options', implode( ',', $this->GetDefaultDevOptions() )
-			);
-			$this->_devoption = explode( ',', $this->_devoption );
-		}
-		return in_array( $option, $this->_devoption );
-	}
-
-	/**
-	 * Check whether any developer option has been enabled or not.
-	 *
-	 * @return boolean
-	 */
-	public function IsAnyDevOptionEnabled() {
-		return ! empty( $this->_plugin->GetGlobalSetting( 'dev-options', [] ) );
-	}
-
-	/**
-	 * Sets whether a developer option is enabled or not.
-	 *
-	 * @param string  $option - See self::OPT_DEV_* constants.
-	 * @param boolean $enabled - If option should be enabled or not.
-	 */
-	public function SetDevOptionEnabled( $option, $enabled ) {
-		// Make sure options have been loaded.
-		$this->IsDevOptionEnabled( '' );
-		// Remove option if it exists.
-		while ( ( $p = array_search( $option, $this->_devoption ) ) !== false ) {
-			unset( $this->_devoption[ $p ] );
-		}
-		// Add option if callee wants it enabled.
-		if ( $enabled ) {
-			$this->_devoption[] = $option;
-		}
-		// Commit option.
-		$this->_plugin->SetGlobalSetting(
-			'dev-options', implode( ',', $this->_devoption )
-		);
-	}
-
-	/**
-	 * Remove all enabled developer options.
-	 */
-	public function ClearDevOptions() {
-		$this->_devoption = array();
-		$this->_plugin->SetGlobalSetting( 'dev-options', '' );
-	}
-
-	/**
-	 * Check whether to enable data inspector or not.
-	 *
-	 * @return boolean
-	 */
-	public function IsDataInspectorEnabled() {
-		return $this->IsDevOptionEnabled( self::OPT_DEV_DATA_INSPECTOR );
-	}
-
-	/**
-	 * Check whether to enable PHP error logging or not.
-	 *
-	 * @return boolean
-	 */
-	public function IsPhpErrorLoggingEnabled() {
-		return $this->IsDevOptionEnabled( self::OPT_DEV_PHP_ERRORS );
-	}
-
-	/**
-	 * Check whether to log requests to file or not.
-	 *
-	 * @return boolean
-	 */
-	public function IsRequestLoggingEnabled() {
-		return $this->IsDevOptionEnabled( self::OPT_DEV_REQUEST_LOG );
-	}
-
-	/**
-	 * Check whether to store debug backtrace for PHP alerts or not.
-	 *
-	 * @return boolean
-	 */
-	public function IsBacktraceLoggingEnabled() {
-		return $this->IsDevOptionEnabled( self::OPT_DEV_BACKTRACE_LOG );
-	}
 
 	/**
 	 * Check whether dashboard widgets are enabled or not.
@@ -810,69 +582,69 @@ class WSAL_Settings {
 			$user = get_userdata( $user );
 		}
 
-		//  by default the user has no privileges
+		// by default the user has no privileges
 		$result = false;
 
 		$is_multisite = $this->_plugin->IsMultisite();
 		switch ( $action ) {
 			case 'view':
-				if ( !$is_multisite ) {
-					//  non-multisite piggybacks on the plugin settings access
+				if ( ! $is_multisite ) {
+					// non-multisite piggybacks on the plugin settings access
 					switch ( $this->get_restrict_plugin_setting() ) {
 						case 'only_admins':
-							//  allow access only if the user is and admin
-							$result = in_array('administrator', $user->roles);
+							// allow access only if the user is and admin
+							$result = in_array( 'administrator', $user->roles );
 							break;
 						case 'only_me':
-							//  allow access only if the user matches the only user allowed access
+							// allow access only if the user matches the only user allowed access
 							$result = $user->ID == $this->get_only_me_user_id();
 							break;
 						default:
-							//  no other options to allow access here
+							// no other options to allow access here
 							$result = false;
 					}
 				} else {
-					//  multisite MUST respect the log viewer restriction settings plus also additional users and roles
-					//  defined in the extra option
+					// multisite MUST respect the log viewer restriction settings plus also additional users and roles
+					// defined in the extra option
 					switch ( $this->get_restrict_log_viewer() ) {
 						case 'only_me':
-							//  allow access only if the user matches the only user allowed access
+							// allow access only if the user matches the only user allowed access
 							$result = ( $user->ID == $this->get_only_me_user_id() );
 							break;
 						case 'only_superadmins':
-							//  allow access only for super admins
-							if ( function_exists( 'is_super_admin' ) && is_super_admin($user->ID) ) {
+							// allow access only for super admins
+							if ( function_exists( 'is_super_admin' ) && is_super_admin( $user->ID ) ) {
 								$result = true;
 							}
 							break;
 						case 'only_admins':
-							//  allow access only for super admins and admins
-							$result = in_array('administrator', $user->roles) || ( function_exists( 'is_super_admin' ) && is_super_admin($user->ID) );
+							// allow access only for super admins and admins
+							$result = in_array( 'administrator', $user->roles ) || ( function_exists( 'is_super_admin' ) && is_super_admin( $user->ID ) );
 							break;
 						default:
-							//  fallback for any other cases would go here
+							// fallback for any other cases would go here
 							break;
 					}
 				}
 
-				if (!$result) {
-					//  user is still not allowed to view the logs, let's check the additional users and roles
-					//  settings
+				if ( ! $result ) {
+					// user is still not allowed to view the logs, let's check the additional users and roles
+					// settings
 					$extra_viewers = $this->GetAllowedPluginViewers();
-					if (in_array($user->user_login, $extra_viewers )) {
+					if ( in_array( $user->user_login, $extra_viewers ) ) {
 						$result = true;
-					} elseif (!empty(array_intersect($extra_viewers, $user->roles))) {
+					} elseif ( ! empty( array_intersect( $extra_viewers, $user->roles ) ) ) {
 						$result = true;
 					}
 				}
 				break;
 			case 'edit':
 				if ( $is_multisite ) {
-					//  no one has access to settings on sub site inside a network
+					// no one has access to settings on sub site inside a network
 					if ( wp_doing_ajax() ) {
-						//  AJAX calls are an exception
+						// AJAX calls are an exception
 						$result = true;
-					} else if ( ! is_network_admin() ) {
+					} elseif ( ! is_network_admin() ) {
 						$result = false;
 						break;
 					}
@@ -880,12 +652,12 @@ class WSAL_Settings {
 
 				$restrict_plugin_setting = $this->get_restrict_plugin_setting();
 				if ( 'only_me' === $restrict_plugin_setting ) {
-					$result = ( $user->ID == $this->get_only_me_user_id());
+					$result = ( $user->ID == $this->get_only_me_user_id() );
 				} elseif ( 'only_admins' === $restrict_plugin_setting ) {
-					if ($is_multisite) {
-						$result = ( function_exists( 'is_super_admin' ) && is_super_admin($user->ID) );
+					if ( $is_multisite ) {
+						$result = ( function_exists( 'is_super_admin' ) && is_super_admin( $user->ID ) );
 					} else {
-						$result = in_array('administrator', $user->roles);
+						$result = in_array( 'administrator', $user->roles );
 					}
 				}
 				break;
@@ -903,14 +675,14 @@ class WSAL_Settings {
 		 * @param string $action Action to check permissions for.
 		 * @return bool
 		 */
-		return apply_filters('wsal_user_can', $result, $user, $action);
+		return apply_filters( 'wsal_user_can', $result, $user, $action );
 	}
 
 	public function GetCurrentUserRoles( $base_roles = null ) {
 		if ( null == $base_roles ) {
 			$base_roles = wp_get_current_user()->roles;
 		}
-		if ( function_exists( 'is_super_admin' ) && is_super_admin() ) {
+		if ( is_multisite() && function_exists( 'is_super_admin' ) && is_super_admin() ) {
 			$base_roles[] = 'superadmin';
 		}
 		return $base_roles;
@@ -970,7 +742,19 @@ class WSAL_Settings {
 	public function GetClientIPs() {
 		$ips = array();
 
-		foreach ( array( 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR' ) as $key ) {
+		$proxy_headers = array(
+			'HTTP_CLIENT_IP',
+			'HTTP_X_FORWARDED_FOR',
+			'HTTP_X_FORWARDED',
+			'HTTP_X_CLUSTER_CLIENT_IP',
+			'HTTP_FORWARDED_FOR',
+			'HTTP_FORWARDED',
+			'REMOTE_ADDR',
+			//  Cloudflare
+			'HTTP_CF-Connecting-IP',
+			'HTTP_TRUE_CLIENT_IP'
+		);
+		foreach ( $proxy_headers as $key ) {
 			if ( isset( $_SERVER[ $key ] ) ) {
 				$ips[ $key ] = array();
 
@@ -1129,61 +913,92 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Datetime used in the Alerts.
+	 * Determines datetime format to be displayed in any UI in the plugin (logs in administration, emails, reports,
+	 * notifications etc.).
+	 *
+	 * Note: Format returned by this function is not compatible with JavaScript date and time picker widgets. Use
+	 * functions GetTimeFormat and GetDateFormat for those.
 	 *
 	 * @param boolean $line_break - True if line break otherwise false.
+	 *
+	 * @return string
 	 */
-	public function GetDatetimeFormat( $line_break = true ) {
-		if ( $line_break ) {
-			$date_time_format = $this->GetDateFormat() . '<\b\r>' . $this->GetTimeFormat();
-		} else {
-			$date_time_format = $this->GetDateFormat() . ' ' . $this->GetTimeFormat();
-		}
+	public function GetDatetimeFormat( $line_break = true, $use_nb_space_for_am_pm = true ) {
+		$result = $this->GetDateFormat();
 
-		$wp_time_format = get_option( 'time_format' ); // WP time format.
+		$result .= $line_break ? '<\b\r>' : ' ';
+
+		$time_format    = $this->GetTimeFormat();
+		$has_am_pm      = false;
+		$am_pm_fraction = false;
+		$am_pm_pattern  = '/(?i)(\s+A)/';
+		if ( preg_match( $am_pm_pattern, $time_format, $am_pm_matches ) ) {
+			$has_am_pm      = true;
+			$am_pm_fraction = $am_pm_matches[0];
+			$time_format    = preg_replace( $am_pm_pattern, '', $time_format );
+		}
 
 		// Check if the time format does not have seconds.
-		if ( stripos( $wp_time_format, 's' ) === false ) {
-			if ( stripos( $wp_time_format, '.v' ) !== false ) {
-				$date_time_format = str_replace( '.v', '', $date_time_format );
+		if ( stripos( $time_format, 's' ) === false ) {
+			if ( stripos( $time_format, '.v' ) !== false ) {
+				$time_format = str_replace( '.v', '', $result );
 			}
-			$date_time_format .= ':s'; // Add seconds to time format.
-			$date_time_format .= '.$$$'; // Add milliseconds to time format.
+			$time_format .= ':s'; // Add seconds to time format.
+			$time_format .= '.$$$'; // Add milliseconds to time format.
 		} else {
 			// Check if the time format does have milliseconds.
-			if ( stripos( $wp_time_format, '.v' ) !== false ) {
-				$date_time_format = str_replace( '.v', '.$$$', $date_time_format );
+			if ( stripos( $time_format, '.v' ) !== false ) {
+				$time_format = str_replace( '.v', '.$$$', $result );
 			} else {
-				$date_time_format .= '.$$$';
+				$time_format .= '.$$$';
 			}
 		}
 
-		if ( stripos( $wp_time_format, 'A' ) !== false ) {
-			$date_time_format .= '&\n\b\s\p;A';
+		if ( $has_am_pm ) {
+			$time_format .= preg_replace( '/\s/', $use_nb_space_for_am_pm ? '&\n\b\s\p;' : ' ', $am_pm_fraction );
 		}
-		return $date_time_format;
+
+		$result .= $time_format;
+
+		return $result;
 	}
 
 	/**
-	 * Date Format from WordPress General Settings.
+	 * Date format based on WordPress date settings. It can be optionally sanitized to get format compatible with
+	 * JavaScript date and time picker widgets.
+	 *
+	 * Note: This function must not be used to display actual date and time values anywhere. For that use function GetDateTimeFormat.
+	 *
+	 * @param bool $sanitized If true, the format is sanitized for use with JavaScript date and time picker widgets.
+	 *
+	 * @return string
 	 */
-	public function GetDateFormat() {
-		$wp_date_format = get_option( 'date_format' );
-		$search         = array( 'F', 'M', 'n', 'j', ' ', '/', 'y', 'S', ',', 'l', 'D' );
-		$replace        = array( 'm', 'm', 'm', 'd', '-', '-', 'Y', '', '', '', '' );
-		$date_format    = str_replace( $search, $replace, $wp_date_format );
-		return $date_format;
+	public function GetDateFormat( $sanitized = false ) {
+		if ( $sanitized ) {
+			return 'Y-m-d';
+		}
+
+		return get_option( 'date_format' );
 	}
 
 	/**
-	 * Time Format from WordPress General Settings.
+	 * Time format based on WordPress date settings. It can be optionally sanitized to get format compatible with
+	 * JavaScript date and time picker widgets.
+	 *
+	 * Note: This function must not be used to display actual date and time values anywhere. For that use function GetDateTimeFormat.
+	 *
+	 * @param bool $sanitize If true, the format is sanitized for use with JavaScript date and time picker widgets.
+	 *
+	 * @return string
 	 */
-	public function GetTimeFormat() {
-		$wp_time_format = get_option( 'time_format' );
-		$search         = array( 'a', 'A', 'T', ' ' );
-		$replace        = array( '', '', '', '' );
-		$time_format    = str_replace( $search, $replace, $wp_time_format );
-		return $time_format;
+	public function GetTimeFormat( $sanitize = false ) {
+		$result = get_option( 'time_format' );
+		if ( $sanitize ) {
+			$search  = array( 'a', 'A', 'T', ' ' );
+			$replace = array( '', '', '', '' );
+			$result  = str_replace( $search, $replace, $result );
+		}
+		return $result;
 	}
 
 	/**
@@ -1420,87 +1235,13 @@ class WSAL_Settings {
 		}
 	}
 
-	/**
-	 * Generate index.php file for each sub-directory present in the plugin working directory.
-	 *
-	 * @since 3.1.2
-	 */
-	public function generate_index_files() {
-		//  get plugin working directory.
-		$wsal_working_dir = $this->get_working_dir_path();
-
-		// If the directory exists then generate index.php file for every sub-directory.
-		if ( ! is_wp_error( $wsal_working_dir ) && ! empty( $wsal_working_dir ) && is_dir( $wsal_working_dir ) ) {
-			// Generate index.php for the main directory.
-			if ( ! file_exists( $wsal_working_dir . DIRECTORY_SEPARATOR . 'index.php' ) ) {
-				// Generate index.php file.
-				$this->create_index_file( $wsal_working_dir );
-			}
-
-			// Generate .htaccess for the main directory.
-			if ( ! file_exists( $wsal_working_dir . DIRECTORY_SEPARATOR . '.htaccess' ) ) {
-				// Generate .htaccess file.
-				$this->create_htaccess_file( $wsal_working_dir );
-			}
-
-			// Fetch all files in the uploads directory.
-			$sub_directories = glob( $wsal_working_dir . '*' );
-			foreach ( $sub_directories as $sub_dir ) {
-				// index.php file.
-				if ( is_dir( $sub_dir ) && ! file_exists( $sub_dir . DIRECTORY_SEPARATOR . 'index.php' ) ) {
-					// Generate index.php file.
-					$this->create_index_file( $sub_dir . '/' );
-				}
-
-				// .htaccess file.
-				if ( is_dir( $sub_dir ) && ! file_exists( $sub_dir . DIRECTORY_SEPARATOR . '.htaccess' ) ) {
-					// Generate .htaccess file.
-					$this->create_htaccess_file( $sub_dir . DIRECTORY_SEPARATOR );
-				}
-			}
-		}
-	}
-
-	/**
-	 * Create an index.php file, if none exists, in order to
-	 * avoid directory listing in the specified directory.
-	 *
-	 * @param string $dir_path - Directory Path.
-	 * @return bool
-	 * @since 3.1.2
-	 */
-	final public function create_index_file( $dir_path ) {
-		// Check if index.php file exists.
-		$dir_path = trailingslashit( $dir_path );
-		$result   = 0;
-		if ( ! is_file( $dir_path . 'index.php' ) ) {
-			$result = @file_put_contents( $dir_path . 'index.php', '<?php // Silence is golden' );
-		}
-		return ( $result > 0 );
-	}
-
-	/**
-	 * Create an .htaccess file, if none exists, in order to
-	 * block access to directory listing in the specified directory.
-	 *
-	 * @param string $dir_path - Directory Path.
-	 * @return bool
-	 * @since 3.1.2
-	 */
-	final public function create_htaccess_file( $dir_path ) {
-		// Check if .htaccess file exists.
-		$dir_path = trailingslashit( $dir_path );
-		$result   = 0;
-		if ( ! is_file( $dir_path . '.htaccess' ) ) {
-			$result = @file_put_contents( $dir_path . '.htaccess', 'Deny from all' );
-		}
-		return ( $result > 0 );
-	}
 
 	/**
 	 * Method: Get Token Type.
 	 *
 	 * @param string $token - Token type.
+	 *
+	 * @return string
 	 * @since 3.2.3
 	 */
 	public function get_token_type( $token ) {
@@ -1605,11 +1346,11 @@ class WSAL_Settings {
 			}
 
 			$this->SetIncognito( true ); // Incognito mode to hide WSAL on plugins page.
-			$this->set_restrict_log_viewer('only_me');
-			$this->set_restrict_plugin_setting('only_me');
-			//  current user with fallback to default admin (in case this is triggered using WP CLI or something similar)
+			$this->set_restrict_log_viewer( 'only_me' );
+			$this->set_restrict_plugin_setting( 'only_me' );
+			// current user with fallback to default admin (in case this is triggered using WP CLI or something similar)
 			$only_me_user_id = is_user_logged_in() ? get_current_user_id() : 1;
-			$this->set_only_me_user_id($only_me_user_id);
+			$this->set_only_me_user_id( $only_me_user_id );
 			$this->_plugin->SetGlobalBooleanSetting( 'mwp-child-stealth-mode', true ); // Save stealth mode option.
 		}
 	}
@@ -1621,9 +1362,9 @@ class WSAL_Settings {
 	 */
 	public function deactivate_mainwp_child_stealth_mode() {
 		$this->SetIncognito( false ); // Disable incognito mode to hide WSAL on plugins page.
-		$this->set_restrict_plugin_setting('only_admins');
-		$this->set_restrict_log_viewer('only_admins');
-		$this->set_admin_blocking_plugin_support(false);
+		$this->set_restrict_plugin_setting( 'only_admins' );
+		$this->set_restrict_log_viewer( 'only_admins' );
+		$this->set_admin_blocking_plugin_support( false );
 		$this->_plugin->SetGlobalBooleanSetting( 'mwp-child-stealth-mode', false ); // Disable stealth mode option.
 	}
 
@@ -1654,36 +1395,68 @@ class WSAL_Settings {
 	/**
 	 * Method: Meta data formatter.
 	 *
-	 * @param string $name - Name of the data.
-	 * @param mixed $value - Value of the data.
+	 * @param string  $name - Name of the data.
+	 * @param mixed   $value - Value of the data.
 	 * @param integer $occ_id - Event occurrence ID.
-	 * @param mixed $highlight - Highlight format.
+	 * @param mixed   $highlight - Highlight format.
+	 * @param mixed   $meta_context - Context for formatting.
 	 *
 	 * @return string
 	 * @throws Freemius_Exception
 	 */
-	public function meta_formatter( $name, $value, $occ_id, $highlight ) {
-		if ( $highlight && 'daily-report' === $highlight ) {
-			$highlight_start_tag = '<span style="color: #149247;">';
-			$highlight_end_tag   = '</span>';
-		} else {
-			$highlight_start_tag = '<strong>';
-			$highlight_end_tag   = '</strong>';
+	public function meta_formatter( $name, $value, $occ_id = null, $highlight = null, $meta_context = false ) {
+
+		// Setup the correct context.
+		$meta_context = ( $highlight && 'daily-report' === $highlight ) ? $highlight : $meta_context;
+
+		// Define wrapper html based on context of message.
+		switch ( $meta_context ) {
+			case 'reports':
+			case 'sms':
+				$highlight_start_tag = '';
+				$highlight_end_tag   = '';
+				$is_url_shortner     = $this->_plugin->GetGlobalBooleanSetting( 'is-url-shortner' );
+				break;
+			case 'slack':
+				$highlight_start_tag = '*';
+				$highlight_end_tag   = '*';
+				break;
+			case 'daily-report':
+				$highlight_start_tag = '<span style="color: #149247;">';
+				$highlight_end_tag   = '</span>';
+				break;
+			default:
+				$highlight_start_tag = '<strong>';
+				$highlight_end_tag   = '</strong>';
 		}
 
+		// Reassign the variable tags based on context.
 		switch ( true ) {
 			case '%Message%' == $name:
 				return esc_html( $value );
-			case '%PromoMessage%' == $name:
-				return '<p class="promo-alert">' . $value . '</p>';
-			case '%PromoLink%' == $name:
+
 			case '%CommentLink%' == $name:
 			case '%CommentMsg%' == $name:
-				return $value;
+				switch ( $meta_context ) {
+					case 'sms':
+						return wp_strip_all_tags( $value );
+						break;
+					case 'reports':
+						return strip_tags( $value );
+						break;
+					default:
+						return $value;
+				}
 
 			case '%MetaLink%' == $name:
 				if ( ! empty( $value ) ) {
-					return "<a href=\"#\" data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"return WsalDisableCustom(this, '" . $value . "');\"> Exclude Custom Field from the Monitoring</a>";
+					switch ( $meta_context ) {
+						case 'sms':
+						case 'reports':
+						case 'slack':
+							return '';
+					}
+					return $highlight_start_tag . "<a href=\"#\" data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"return WsalDisableCustom(this, '" . $value . "');\"> Exclude Custom Field from the Monitoring</a>" . $highlight_end_tag;
 				} else {
 					return '';
 				}
@@ -1691,27 +1464,93 @@ class WSAL_Settings {
 			case '%RevisionLink%' === $name:
 				$check_value = (string) $value;
 				if ( 'NULL' !== $check_value ) {
-					return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View the content changes', 'wp-security-audit-log' ) . '</a>';
+					switch ( $meta_context ) {
+						case 'sms':
+							$url = $is_url_shortner ? $this->_plugin->wsalCommon->shorten_url_bitly( $value ) : $value;
+							return esc_html( ' Navigate to this URL to view the changes: ' . $url );
+							break;
+						case 'reports':
+							return esc_html( ' Navigate to this URL to view the changes ' . $value );
+							break;
+						case 'slack':
+							return ' Click <' . esc_url( $value ) . '|here> to see the content changes.';
+							break;
+						default:
+							return $highlight_start_tag . '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View the content changes', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
+					}
 				}
 				return false;
 
-			case in_array( $name, array( '%EditorLinkPost%', '%EditorLinkPage%' ) ):
-				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View post in the editor', 'wp-security-audit-log' ) . '</a>';
+			case '%EditorLinkPage%' == $name:
+				if ( 'sms' === $meta_context ) {
+					$url = $is_url_shortner ? $this->_plugin->wsalCommon->shorten_url_bitly( $value ) : $value;
+					return ' View the page: ' . esc_url( $url );
+				}
+				return $highlight_start_tag . '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View page in the editor', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
+
+			case '%EditorLinkPost%' == $name:
+				switch ( $meta_context ) {
+					case 'sms':
+						$url = $is_url_shortner ? $this->_plugin->wsalCommon->shorten_url_bitly( $value ) : $value;
+						return ' View the post: ' . esc_url( $url );
+						break;
+					case 'reports':
+						return ' View the post: ' . esc_url( $value );
+						break;
+					case 'slack':
+						return ' View the <' . esc_url( $value ) . '|post>';
+						break;
+					default:
+						return $highlight_start_tag . '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View post in the editor', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
+				}
 
 			case '%EditorLinkOrder%' == $name:
-				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View Order', 'wp-security-audit-log' ) . '</a>';
+				switch ( $meta_context ) {
+					case 'sms':
+						$url = $is_url_shortner ? $this->_plugin->wsalCommon->shorten_url_bitly( $value ) : $value;
+						return ' View the order: ' . esc_url( $url );
+						break;
+					case 'slack':
+						return ' <' . esc_url( $value ) . '|View Order>';
+						break;
+					default:
+						return $highlight_start_tag. '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View Order', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
+				}
 
 			case '%CategoryLink%' == $name:
 			case '%cat_link%' == $name:
 			case '%ProductCatLink%' == $name:
-				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View category', 'wp-security-audit-log' ) . '</a>';
+				switch ( $meta_context ) {
+					case 'sms':
+						$url = $is_url_shortner ? $this->_plugin->wsalCommon->shorten_url_bitly( $value ) : $value;
+						return ' View the category: ' . esc_url( $url );
+						break;
+					case 'slack':
+						return ' View the <' . esc_url( $value ) . '|category>';
+						break;
+					default:
+						return $highlight_start_tag . '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View category', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
+				}
 
 			case '%TagLink%' == $name:
-				return '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View tag', 'wp-security-audit-log' ) . '</a>';
+				switch ( $meta_context ) {
+					case 'sms':
+						$url = $is_url_shortner ? $this->_plugin->wsalCommon->shorten_url_bitly( $value ) : $value;
+						return ' View the tag: ' . esc_url( $url );
+						break;
+					case 'reports':
+						return ' View the tag: ' . esc_url( $value );
+						break;
+					case 'slack':
+						return ' View the <' . esc_url( $value ) . '|tag>';
+						break;
+					default:
+						return $highlight_start_tag . '<a target="_blank" href="' . esc_url( $value ) . '">' . __( 'View tag', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
+				}
 
 			case '%EditUserLink%' === $name:
 				if ( 'NULL' !== $value ) {
-					return '<a href="' . $value . '" target="_blank">' . __( 'User profile page', 'wp-security-audit-log' ) . '</a>';
+					return $highlight_start_tag . '<a href="' . $value . '" target="_blank">' . __( 'User profile page', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
 				}
 				return '';
 
@@ -1741,7 +1580,56 @@ class WSAL_Settings {
 				$return_value = '';
 				if ( null !== $occ_post && 'publish' === $occ_post->post_status ) {
 					$post_permalink = get_permalink( $occ_post->ID );
-					$return_value   = '<br>URL: <a href="' . esc_url( $post_permalink ) . '" title="' . esc_attr( $occ_post->post_title ) . '" target="_blank">' . esc_html( $post_permalink ) . '</a>';
+					switch ( $meta_context ) {
+						case 'sms':
+							$url = $is_url_shortner ? $this->_plugin->wsalCommon->shorten_url_bitly( $post_permalink ) : $post_permalink;
+							$return_value = ' URL: ' . esc_url( $url );
+							break;
+						case 'reports':
+							$return_value = ' URL: ' . esc_url( $post_permalink );
+							break;
+						case 'slack':
+							$return_valuen = ' URL <' . esc_url( $post_permalink ) . '|tag>';
+							break;
+						default:
+							$return_value  = '<br>URL: ' . $highlight_start_tag . '<a href="' . esc_url( $post_permalink ) . '" title="' . esc_attr( $occ_post->post_title ) . '" target="_blank">' . esc_html( $post_permalink ) . '</a>' . $highlight_end_tag;
+					}
+				}
+				return $return_value;
+
+			case '%MenuUrl%' === $name:
+				// get connection.
+				$db_config = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
+				$connector = $this->_plugin->getConnector( $db_config ); // Get connector for DB.
+				$wsal_db   = $connector->getConnection(); // Get DB connection.
+
+				// get values needed.
+				$meta_adapter = new WSAL_Adapters_MySQL_Meta( $wsal_db );
+				$event_data   = $meta_adapter->LoadByNameAndOccurrenceId( 'MenuID', $occ_id );
+				$menu_id      = $event_data['value'];
+
+				// start with an empty string.
+				$return_value = '';
+
+				if ( null !== $menu_id ) {
+					$menu_url = add_query_arg(
+						array(
+							'action' => 'edit',
+							'menu'   => $menu_id,
+						),
+						admin_url( 'nav-menus.php' )
+					);
+					switch ( $meta_context ) {
+						case 'sms':
+							$url = $is_url_shortner ? $this->_plugin->wsalCommon->shorten_url_bitly( $menu_url ) : $menu_url;
+							$return_value = ' View Menu: ' . esc_url( $url );
+							break;
+						case 'slack':
+							$return_valuen = ' View Menu <' . esc_url( $menu_url ) . '|tag>';
+							break;
+						default:
+							$return_value = '<br>' . $highlight_start_tag . '<a href="' . esc_url( $menu_url ) . '" title="' . esc_html__( 'View Menu', 'wp-security-audit-log' ) . '" target="_blank">' . esc_html__( 'View Menu', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
+					}
 				}
 				return $return_value;
 
@@ -1757,15 +1645,31 @@ class WSAL_Settings {
 				}
 
 			case '%LogFileText%' === $name: // Failed login file text.
-				return '<a href="javascript:;" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
+				if ( 'slack' === $meta_context || 'reports' === $meta_context || 'sms' === $meta_context ) {
+					return '';
+				}
+				return $highlight_start_tag . '<a href="javascript:;" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
 
 			case strncmp( $value, 'http://', 7 ) === 0:
 			case strncmp( $value, 'https://', 8 ) === 0:
-				$updated_line = apply_filters( 'wsal_link_filter', $value, $name );
-				if ( $updated_line !== $value ) {
-					return $updated_line;
-				} else {
-					return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
+				switch ( $meta_context ) {
+					case 'reports':
+						return esc_html( $value );
+						break;
+					case 'sms':
+						$url = $is_url_shortner ? $this->_plugin->wsalCommon->shorten_url_bitly( $value ) : $value;
+						return esc_url( $url );
+						break;
+					case 'slack' :
+						return '<' . esc_html( $value ) . '|' . esc_html( $value ) . '>';
+						break;
+					default:
+						$updated_line = apply_filters( 'wsal_link_filter', $value, $name );
+						if ( $updated_line !== $value ) {
+							return $updated_line;
+						} else {
+							return '<a href="' . esc_html( $value ) . '" title="' . esc_html( $value ) . '" target="_blank">' . esc_html( $value ) . '</a>';
+						}
 				}
 
 			case in_array( $name, array( '%PostStatus%', '%ProductStatus%' ), true ):
@@ -1779,7 +1683,11 @@ class WSAL_Settings {
 				if ( $this->_plugin->IsMultisite() && $value ) {
 					$site_info = get_blog_details( $value, true );
 					if ( $site_info ) {
-						return ' on site <a href="' . esc_url( $site_info->siteurl ) . '">' . esc_html( $site_info->blogname ) . '</a>';
+						if ( 'slack' === $meta_context ) {
+							return ' on site <' . esc_url( $site_info->siteurl ) . '|' . esc_html( $site_info->blogname ) . '>';
+						} else {
+							return ' on site ' . $highlight_start_tag . '<a href="' . esc_url( $site_info->siteurl ) . '">' . esc_html( $site_info->blogname ) . '</a>' . $highlight_end_tag;
+						}
 					}
 					return;
 				}
@@ -1795,6 +1703,9 @@ class WSAL_Settings {
 				if ( 'NULL' === $value ) {
 					return false;
 				}
+				if ( 'slack' === $meta_context ) {
+					return ' with errors. ' . sprintf( __( 'Contact us on %s for assistance', 'wp-security-audit-log' ), '<mailto:support@wpsecurityauditlog.com|support@wpsecurityauditlog.com>' );
+				}
 				/* translators: Mailto link for support. */
 				return ' with errors. ' . sprintf( __( 'Contact us on %s for assistance', 'wp-security-audit-log' ), '<a href="mailto:support@wpsecurityauditlog.com" target="_blank">support@wpsecurityauditlog.com</a>' );
 
@@ -1808,21 +1719,65 @@ class WSAL_Settings {
 					'tab'  => 'file-changes',
 				);
 				$file_settings      = add_query_arg( $file_settings_args, admin_url( 'admin.php' ) );
-				return '<a href="' . esc_url( $file_settings ) . '">' . esc_html__( 'Increase maximum file size limit', 'wp-security-audit-log' ) . '</a>';
+				switch ( $meta_context ) {
+					case 'sms':
+						$file_settings = $this->is_url_shortner ? $this->plugin->wsalCommon->shorten_url_bitly( $value ) : $value;
+						return esc_html__( 'plugin settings', 'wp-security-audit-log' ) . ': ' . $file_settings;
+						break;
+					case 'slack':
+						return '<' . esc_url( $file_settings ) . '|' . esc_html__( 'plugin settings', 'wp-security-audit-log' ) . '>';
+						break;
+					default:
+						return $highlight_start_tag . '<a href="' . esc_url( $file_settings ) . '">' . esc_html__( 'Increase maximum file size limit', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
+				}
 
 			case '%ContactSupport%' === $name:
-				return '<a href="https://wpactivitylog.com/contact/" target="_blank">' . esc_html__( 'Contact Support', 'wp-security-audit-log' ) . '</a>';
+				switch ( $meta_context ) {
+					case 'sms':
+						$value = 'https://wpactivitylog.com/contact/';
+						$url   = $this->is_url_shortner ? $this->plugin->wsalCommon->shorten_url_bitly( $value ) : $value;
+						return esc_html__( 'contact our support', 'wp-security-audit-log' ) . ': ' . $url;
+						break;
+					case 'slack':
+						return '<https://wpactivitylog.com/contact|' . esc_html__( 'contact our support', 'wp-security-audit-log' ) . '>';
+						break;
+				}
+				return $highlight_start_tag . '<a href="https://wpactivitylog.com/contact/" target="_blank">' . esc_html__( 'Contact Support', 'wp-security-audit-log' ) . '</a>' . $highlight_end_tag;
 
 			case '%LineBreak%' === $name:
+				switch ( $meta_context ) {
+					case 'reports':
+					case 'slack':
+					case 'sms':
+						return '';
+				}
 				return '<br>';
 
 			case '%PluginFile%' === $name:
 				return $highlight_start_tag . dirname( $value ) . $highlight_end_tag;
 
+			case '%LinkFile%' == $name:
+				switch ( $meta_context ) {
+					case 'sms':
+						$url = $is_url_shortner ? $this->_plugin->wsalCommon->shorten_url_bitly( $value ) : $value;
+						return 'To view the requests open the log file ' . esc_url( $url );
+						break;
+					case 'slack':
+						return 'Click <' . esc_url( add_query_arg( 'page', 'wsal-togglealerts', admin_url( 'admin.php' ) ) ) . '|here> to log such requests to file';
+						break;
+					default:
+						return '<br>To view the requests open the log file ' . esc_url( $value );
+				}
+
+			case '%URL%' == $name:
+				if ( 'sms' === $meta_context ) {
+					return '.';
+				}
+
 			default:
 				// if we didn't get a match already try get one via a filter.
 				$filtered_formatted_value = apply_filters( 'wsal_meta_formatter_custom_formatter', $value, $name );
-				return ( $value !== $filtered_formatted_value  ) ? $filtered_formatted_value : $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
+				return ( $value !== $filtered_formatted_value ) ? $filtered_formatted_value : $highlight_start_tag . esc_html( $value ) . $highlight_end_tag;
 		}
 	}
 
@@ -1921,144 +1876,18 @@ class WSAL_Settings {
 	/**
 	 * Method: Meta data formatter.
 	 *
+	 * @param string $name - Name of the data.
+	 * @param mixed $value - Value of the data.
+	 * @param integer $occ_id - Event occurrence ID.
+	 * @param mixed $highlight - Highlight format.
+	 *
+	 * @return string
+	 * @throws Freemius_Exception
 	 * @since 3.3
 	 *
-	 * @param string  $name      - Name of the data.
-	 * @param mixed   $value     - Value of the data.
-	 * @param integer $occ_id    - Event occurrence ID.
-	 * @param mixed   $highlight - Highlight format.
-	 * @return string
 	 */
-	public function slack_meta_formatter( $name, $value, $occ_id, $highlight ) {
-		switch ( true ) {
-			case '%Message%' === $name:
-				return esc_html( $value );
-
-			case '%PromoLink%' === $name:
-			case '%CommentLink%' === $name:
-			case '%CommentMsg%' === $name:
-				return $value;
-
-			case '%MetaLink%' === $name:
-				return '';
-
-			case '%RevisionLink%' === $name:
-				$check_value = (string) $value;
-				if ( 'NULL' !== $check_value ) {
-					return ' Click <' . esc_url( $value ) . '|here> to see the content changes.';
-				} else {
-					return false;
-				}
-
-			case '%EditorLinkPost%' === $name:
-				return ' View the <' . esc_url( $value ) . '|post>';
-
-			case '%EditorLinkOrder%' === $name:
-				return ' <' . esc_url( $value ) . '|View Order>';
-
-			case '%CategoryLink%' === $name:
-			case '%cat_link%' === $name:
-			case '%ProductCatLink%' == $name:
-				return ' View the <' . esc_url( $value ) . '|category>';
-
-			case '%TagLink%' === $name:
-				return ' View the <' . esc_url( $value ) . '|tag>';
-
-			case '%EditorLinkForum%' === $name:
-				return ' View the <' . esc_url( $value ) . '|forum>';
-
-			case '%EditorLinkTopic%' === $name:
-				return ' View the <' . esc_url( $value ) . '|topic>';
-
-			case in_array( $name, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ), true ):
-				return '*' . ( strlen( $value ) > 50 ? ( esc_html( substr( $value, 0, 50 ) ) . '...' ) : esc_html( $value ) ) . '*';
-
-			case '%ClientIP%' === $name:
-				if ( is_string( $value ) ) {
-					return '*' . str_replace( array( '"', '[', ']' ), '', $value ) . '*';
-				} else {
-					return '_unknown_';
-				}
-
-			case '%LinkFile%' === $name:
-				if ( 'NULL' != $value ) {
-					return '';
-				} else {
-					return 'Click <' . esc_url( add_query_arg( 'page', 'wsal-togglealerts', admin_url( 'admin.php' ) ) ) . '|here> to log such requests to file';
-				}
-
-			case '%URL%' === $name:
-				return '.';
-
-			case '%LogFileLink%' === $name: // Failed login file link.
-				return '';
-
-			case '%Attempts%' === $name: // Failed login attempts.
-				$check_value = (int) $value;
-				if ( 0 === $check_value ) {
-					return '';
-				} else {
-					return $value;
-				}
-
-			case '%LogFileText%' === $name: // Failed login file text.
-				return '';
-
-			case strncmp( $value, 'http://', 7 ) === 0:
-			case strncmp( $value, 'https://', 8 ) === 0:
-				return '<' . esc_html( $value ) . '|' . esc_html( $value ) . '>';
-
-			case in_array( $name, array( '%PostStatus%', '%ProductStatus%' ), true ):
-				if ( ! empty( $value ) && 'publish' === $value ) {
-					return '*' . esc_html__( 'published', 'wp-security-audit-log' ) . '*';
-				} else {
-					return '*' . esc_html( $value ) . '*';
-				}
-
-			case '%multisite_text%' === $name:
-				if ( $this->_plugin->IsMultisite() && $value ) {
-					$site_info = get_blog_details( $value, true );
-					if ( $site_info ) {
-						return ' on site <' . esc_url( $site_info->siteurl ) . '|' . esc_html( $site_info->blogname ) . '>';
-					}
-					return;
-				}
-				return;
-
-			case '%ReportText%' === $name:
-				return;
-
-			case '%ChangeText%' === $name:
-				return;
-
-			case '%ScanError%' === $name:
-				if ( 'NULL' === $value ) {
-					return false;
-				}
-				/* translators: Mailto link for support. */
-				return ' with errors. ' . sprintf( __( 'Contact us on %s for assistance', 'wp-security-audit-log' ), '<mailto:support@wpsecurityauditlog.com|support@wpsecurityauditlog.com>' );
-
-			case '%TableNames%' === $name:
-				$value = str_replace( ',', ', ', $value );
-				return '*' . esc_html( $value ) . '*';
-
-			case '%FileSettings%' === $name:
-				$file_settings_args = array(
-					'page' => 'wsal-settings',
-					'tab'  => 'file-changes',
-				);
-				$file_settings      = add_query_arg( $file_settings_args, admin_url( 'admin.php' ) );
-				return '<' . esc_url( $file_settings ) . '|' . esc_html__( 'plugin settings', 'wp-security-audit-log' ) . '>';
-
-			case '%ContactSupport%' === $name:
-				return '<https://wpactivitylog.com/contact|' . esc_html__( 'contact our support', 'wp-security-audit-log' ) . '>';
-
-			case '%LineBreak%' === $name:
-				return;
-
-			default:
-				return '*' . esc_html( $value ) . '*';
-		}
+  public function slack_meta_formatter( $name, $value, $occ_id, $highlight ) {
+		return $this->_plugin->settings()->meta_formatter( $name, $value, $occ_id, $highlight, 'slack' );
 	}
 
 	/**
@@ -2107,8 +1936,9 @@ class WSAL_Settings {
 	 * @return array - WSAL Options array.
 	 */
 	public function get_plugin_settings() {
-		//  @todo get a list of all plugin settings
-		return [];
+		global $wpdb;
+		$plugin_options = $wpdb->get_results( "SELECT * FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" );
+		return $plugin_options;
 	}
 
 	/**
@@ -2319,7 +2149,7 @@ class WSAL_Settings {
 	 * @return bool
 	 */
 	public static function set_frontend_events( $value = array() ) {
-		return \WSAL\Helpers\Options::set_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $value);
+		return \WSAL\Helpers\Options::set_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $value );
 	}
 
 	/**
@@ -2342,14 +2172,14 @@ class WSAL_Settings {
 		return $this->_plugin->GetGlobalSetting( 'only-me-user-id' );
 	}
 
-    /**
-     * Save admin blocking plugin support enabled.
-     *
-     * @param bool $enabled
-     */
-    public function set_admin_blocking_plugin_support( $enabled ) {
-        $this->_plugin->SetGlobalBooleanSetting( 'admin-blocking-plugins-support', $enabled );
-    }
+	/**
+	 * Save admin blocking plugin support enabled.
+	 *
+	 * @param bool $enabled
+	 */
+	public function set_admin_blocking_plugin_support( $enabled ) {
+		$this->_plugin->SetGlobalBooleanSetting( 'admin-blocking-plugins-support', $enabled );
+	}
 
 	/**
 	 * Check if admin blocking plugin support is enabled.
@@ -2361,19 +2191,19 @@ class WSAL_Settings {
 	 * @return bool
 	 */
 	public function get_admin_blocking_plugin_support() {
-    	return $this->_plugin->GetGlobalBooleanSetting( 'admin-blocking-plugins-support', false );
+		return $this->_plugin->GetGlobalBooleanSetting( 'admin-blocking-plugins-support', false );
 	}
 
-    public function get_mainwp_enforced_settings( ) {
-        return $this->_plugin->GetGlobalSetting( 'mainwp_enforced_settings', [] );
-    }
+	public function get_mainwp_enforced_settings() {
+		return $this->_plugin->GetGlobalSetting( 'mainwp_enforced_settings', array() );
+	}
 
 	public function set_mainwp_enforced_settings( $settings ) {
-	    $this->_plugin->SetGlobalSetting( 'mainwp_enforced_settings', $settings );
-    }
+		$this->_plugin->SetGlobalSetting( 'mainwp_enforced_settings', $settings );
+	}
 
-    public function delete_mainwp_enforced_settings( ) {
-        $this->_plugin->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . 'mainwp_enforced_settings' );
-    }
+	public function delete_mainwp_enforced_settings() {
+		$this->_plugin->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . 'mainwp_enforced_settings' );
+	}
 
 }
