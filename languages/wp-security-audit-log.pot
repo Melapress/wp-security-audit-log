@@ -2492,100 +2492,100 @@ msgstr ""
 msgid "Warning"
 msgstr ""
 
-#: classes/Settings.php:355
+#: classes/Settings.php:420
 msgid "This function is deprecated"
 msgstr ""
 
-#: classes/Settings.php:1555
+#: classes/Settings.php:1620
 msgid "View the content changes"
 msgstr ""
 
-#: classes/Settings.php:1565
+#: classes/Settings.php:1630
 msgid "View page in the editor"
 msgstr ""
 
-#: classes/Settings.php:1580
+#: classes/Settings.php:1645
 msgid "View post in the editor"
 msgstr ""
 
-#: classes/Settings.php:1593
+#: classes/Settings.php:1658
 msgid "View Order"
 msgstr ""
 
-#: classes/Settings.php:1608
+#: classes/Settings.php:1673
 msgid "View category"
 msgstr ""
 
-#: classes/Settings.php:1624
+#: classes/Settings.php:1689
 msgid "View tag"
 msgstr ""
 
-#: classes/Settings.php:1629
+#: classes/Settings.php:1694
 msgid "User profile page"
 msgstr ""
 
-#: classes/Settings.php:1707, classes/Settings.php:1707
+#: classes/Settings.php:1772, classes/Settings.php:1772
 msgid "View Menu"
 msgstr ""
 
-#: classes/Settings.php:1727, classes/Settings.php:1727
+#: classes/Settings.php:1792, classes/Settings.php:1792
 msgid "Download the log file."
 msgstr ""
 
-#: classes/Settings.php:1753
+#: classes/Settings.php:1818
 msgid "published"
 msgstr ""
 
 #. translators: Mailto link for support.
-#: classes/Settings.php:1783, classes/Settings.php:1786
+#: classes/Settings.php:1848, classes/Settings.php:1851
 msgid "Contact us on %s for assistance"
 msgstr ""
 
-#: classes/Settings.php:1801, classes/Settings.php:1804
+#: classes/Settings.php:1866, classes/Settings.php:1869
 msgid "plugin settings"
 msgstr ""
 
-#: classes/Settings.php:1807
+#: classes/Settings.php:1872
 msgid "Increase maximum file size limit"
 msgstr ""
 
-#: classes/Settings.php:1815, classes/Settings.php:1818
+#: classes/Settings.php:1880, classes/Settings.php:1883
 msgid "contact our support"
 msgstr ""
 
-#: classes/Settings.php:1821
+#: classes/Settings.php:1886
 msgid "Contact Support"
 msgstr ""
 
-#: classes/Settings.php:2131
+#: classes/Settings.php:2196
 msgid "Root directory of WordPress (excluding sub directories)"
 msgstr ""
 
-#: classes/Settings.php:2132
+#: classes/Settings.php:2197
 msgid "WP Admin directory (/wp-admin/)"
 msgstr ""
 
-#: classes/Settings.php:2133
+#: classes/Settings.php:2198
 msgid "WP Includes directory (/wp-includes/)"
 msgstr ""
 
-#: classes/Settings.php:2134
+#: classes/Settings.php:2199
 msgid "/wp-content/ directory (excluding plugins, themes & uploads directories)"
 msgstr ""
 
-#: classes/Settings.php:2135
+#: classes/Settings.php:2200
 msgid "Themes directory (/wp-content/themes/)"
 msgstr ""
 
-#: classes/Settings.php:2136
+#: classes/Settings.php:2201
 msgid "Plugins directory (/wp-content/plugins/)"
 msgstr ""
 
-#: classes/Settings.php:2137
+#: classes/Settings.php:2202
 msgid "Uploads directory (/wp-content/uploads/)"
 msgstr ""
 
-#: classes/Settings.php:2142
+#: classes/Settings.php:2207
 msgid "Uploads directory of all sub sites on this network (/wp-content/sites/*)"
 msgstr ""
 
