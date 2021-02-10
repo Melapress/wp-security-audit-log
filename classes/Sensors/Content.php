@@ -1366,14 +1366,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 							return 0; // Return if any Yoast alert has or will trigger.
 						}
 					}
-
-					// Get post meta events.
-					$meta_events = array( 2053, 2054, 2055, 2062, 2016, 2120, 2119, 2131, 2132 );
-					foreach ( $meta_events as $meta_event ) {
-						if ( $this->plugin->alerts->WillOrHasTriggered( $meta_event ) ) {
-							return 0; // Return if any meta event has or will trigger.
-						}
-					}
 				}
 
 				$event_data                         = $this->get_post_event_data( $oldpost );
@@ -1401,16 +1393,33 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				}
 
 				if ( 2002 === $event ) {
-					if ( ! $this->was_triggered_recently( 2112 )  ) {
-						// If we reach this point, we no longer need to check if the content has changed as we already have an event to handle it.
-						// So trigger 2002 regardess and "something" has changed in the post, we just dont detect it elsewhere.
-						$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'must_not_contain_events' ) );
-					}
+					// If we reach this point, we no longer need to check if the content has changed as we already have an event to handle it.
+					// So trigger 2002 regardess and "something" has changed in the post, we just dont detect it elsewhere.
+					$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'ignore_other_post_events' ) );
 				} else {
 					$this->plugin->alerts->Trigger( $event, $event_data );
 				}
 			}
 		}
+	}
+
+	/**
+	 * Method: Ensure no other post-related events are being fired, or have recently been fired.
+	 *
+	 * @param WSAL_AlertManager $manager - WSAL Alert Manager.
+	 * @return bool
+	 */
+	public function ignore_other_post_events( WSAL_AlertManager $manager ) {
+
+		$post_events = array_keys( $this->plugin->alerts->get_alerts_by_sub_category( 'Content' ) );
+
+		foreach ( $post_events as $event ) {
+			if ( $manager->WillOrHasTriggered( $event) || $this->was_triggered_recently( $event ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -1487,27 +1496,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	private function get_revision_link( $revision_id ) {
 		return ! empty( $revision_id ) ? add_query_arg( 'revision', $revision_id, admin_url( 'revision.php' ) ) : null;
-	}
-
-	/**
-	 * Method: This function make sures that alert 2016
-	 * has not been triggered before triggering categories
-	 * & tags events.
-	 *
-	 * @param WSAL_AlertManager $manager - WSAL Alert Manager.
-	 * @return bool
-	 */
-	public function must_not_contain_events( WSAL_AlertManager $manager ) {
-
-		$post_events = [ 2053, 2054, 2055, 2062, 2016, 2120, 2119, 2131, 2132, 2129, 2130, 2086, 2119 ];
-
-		foreach ( $post_events as $event ) {
-			if ( $manager->WillOrHasTriggered( $event) || $this->was_triggered_recently( $event ) ) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	/**

@@ -2001,111 +2001,111 @@ msgstr ""
 msgid "%s You need to renew your license to continue using premium features."
 msgstr ""
 
-#: wp-security-audit-log.php:1165
+#: wp-security-audit-log.php:1163
 msgid "Error: You do not have sufficient permissions to disable this custom field."
 msgstr ""
 
-#: wp-security-audit-log.php:1200
+#: wp-security-audit-log.php:1198
 msgid "Custom Field <strong>%1$s</strong> is no longer being monitored.<br />Enable the monitoring of this custom field again from the"
 msgstr ""
 
-#: wp-security-audit-log.php:1203
+#: wp-security-audit-log.php:1201
 msgid "Excluded Objects"
 msgstr ""
 
-#: wp-security-audit-log.php:1204
+#: wp-security-audit-log.php:1202
 msgid " tab in the plugin settings"
 msgstr ""
 
-#: wp-security-audit-log.php:1217
+#: wp-security-audit-log.php:1215
 msgid "Error: You do not have sufficient permissions to disable this alert."
 msgstr ""
 
-#: wp-security-audit-log.php:1241
+#: wp-security-audit-log.php:1239
 msgid "Alert %1$s is no longer being monitored.<br /> %2$s"
 msgstr ""
 
-#: wp-security-audit-log.php:1241
+#: wp-security-audit-log.php:1239
 msgid "You can enable this alert again from the Enable/Disable Alerts node in the plugin menu."
 msgstr ""
 
-#: wp-security-audit-log.php:1266, classes/Views/SetupWizard.php:270
+#: wp-security-audit-log.php:1264, classes/Views/SetupWizard.php:270
 msgid "Installing, please wait"
 msgstr ""
 
-#: wp-security-audit-log.php:1267, classes/Views/SetupWizard.php:271
+#: wp-security-audit-log.php:1265, classes/Views/SetupWizard.php:271
 msgid "Already installed"
 msgstr ""
 
-#: wp-security-audit-log.php:1268, classes/Utilities/PluginInstallAndActivate.php:108, classes/Views/SetupWizard.php:272, classes/Views/SetupWizard.php:836
+#: wp-security-audit-log.php:1266, classes/Utilities/PluginInstallAndActivate.php:108, classes/Views/SetupWizard.php:272, classes/Views/SetupWizard.php:836
 msgid "Extension installed"
 msgstr ""
 
-#: wp-security-audit-log.php:1269, classes/Views/SetupWizard.php:273
+#: wp-security-audit-log.php:1267, classes/Views/SetupWizard.php:273
 msgid "Extension activated"
 msgstr ""
 
-#: wp-security-audit-log.php:1270, classes/Views/SetupWizard.php:274
+#: wp-security-audit-log.php:1268, classes/Views/SetupWizard.php:274
 msgid "Install failed"
 msgstr ""
 
 #. translators: %s: PHP Version
-#: wp-security-audit-log.php:1321
+#: wp-security-audit-log.php:1319
 msgid "You are using a version of PHP that is older than %s, which is no longer supported."
 msgstr ""
 
-#: wp-security-audit-log.php:1323
+#: wp-security-audit-log.php:1321
 msgid "Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using."
 msgstr ""
 
 #. translators: %s: Activity Log for MainWP plugin hyperlink
-#: wp-security-audit-log.php:1328
+#: wp-security-audit-log.php:1326
 msgid "Please install the %s plugin on the MainWP dashboard."
 msgstr ""
 
-#: wp-security-audit-log.php:1328
+#: wp-security-audit-log.php:1326
 msgid "Activity Log for MainWP"
 msgstr ""
 
 #. translators: %s: Getting started guide hyperlink
-#: wp-security-audit-log.php:1330
+#: wp-security-audit-log.php:1328
 msgid "The WP Activity Log should be installed on the child sites only. Refer to the %s for more information."
 msgstr ""
 
-#: wp-security-audit-log.php:1330
+#: wp-security-audit-log.php:1328
 msgid "getting started guide"
 msgstr ""
 
-#: wp-security-audit-log.php:1907
+#: wp-security-audit-log.php:1905
 msgid "For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href=\"https://wpactivitylog.com/\" target=\"_blank\">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from."
 msgstr ""
 
-#: wp-security-audit-log.php:1926
+#: wp-security-audit-log.php:1924
 msgid "Every 6 hours"
 msgstr ""
 
-#: wp-security-audit-log.php:1930
+#: wp-security-audit-log.php:1928
 msgid "Every 45 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1934
+#: wp-security-audit-log.php:1932
 msgid "Every 30 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1938
+#: wp-security-audit-log.php:1936
 msgid "Every 15 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1942
+#: wp-security-audit-log.php:1940
 msgid "Every 10 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1946
+#: wp-security-audit-log.php:1944
 msgid "Every 1 minute"
 msgstr ""
 
 #. translators: 1. Deprecated method name 2. Version since deprecated
-#: wp-security-audit-log.php:1960
+#: wp-security-audit-log.php:1958
 msgid "Method %1$s is deprecated since version %2$s!"
 msgstr ""
 
@@ -2492,100 +2492,100 @@ msgstr ""
 msgid "Warning"
 msgstr ""
 
-#: classes/Settings.php:420
+#: classes/Settings.php:355
 msgid "This function is deprecated"
 msgstr ""
 
-#: classes/Settings.php:1620
+#: classes/Settings.php:1479
 msgid "View the content changes"
 msgstr ""
 
-#: classes/Settings.php:1630
+#: classes/Settings.php:1489
 msgid "View page in the editor"
 msgstr ""
 
-#: classes/Settings.php:1645
+#: classes/Settings.php:1504
 msgid "View post in the editor"
 msgstr ""
 
-#: classes/Settings.php:1658
+#: classes/Settings.php:1517
 msgid "View Order"
 msgstr ""
 
-#: classes/Settings.php:1673
+#: classes/Settings.php:1532
 msgid "View category"
 msgstr ""
 
-#: classes/Settings.php:1689
+#: classes/Settings.php:1548
 msgid "View tag"
 msgstr ""
 
-#: classes/Settings.php:1694
+#: classes/Settings.php:1553
 msgid "User profile page"
 msgstr ""
 
-#: classes/Settings.php:1772, classes/Settings.php:1772
+#: classes/Settings.php:1631, classes/Settings.php:1631
 msgid "View Menu"
 msgstr ""
 
-#: classes/Settings.php:1792, classes/Settings.php:1792
+#: classes/Settings.php:1651, classes/Settings.php:1651
 msgid "Download the log file."
 msgstr ""
 
-#: classes/Settings.php:1818
+#: classes/Settings.php:1677
 msgid "published"
 msgstr ""
 
 #. translators: Mailto link for support.
-#: classes/Settings.php:1848, classes/Settings.php:1851
+#: classes/Settings.php:1707, classes/Settings.php:1710
 msgid "Contact us on %s for assistance"
 msgstr ""
 
-#: classes/Settings.php:1866, classes/Settings.php:1869
+#: classes/Settings.php:1725, classes/Settings.php:1728
 msgid "plugin settings"
 msgstr ""
 
-#: classes/Settings.php:1872
+#: classes/Settings.php:1731
 msgid "Increase maximum file size limit"
 msgstr ""
 
-#: classes/Settings.php:1880, classes/Settings.php:1883
+#: classes/Settings.php:1739, classes/Settings.php:1742
 msgid "contact our support"
 msgstr ""
 
-#: classes/Settings.php:1886
+#: classes/Settings.php:1745
 msgid "Contact Support"
 msgstr ""
 
-#: classes/Settings.php:2196
+#: classes/Settings.php:2055
 msgid "Root directory of WordPress (excluding sub directories)"
 msgstr ""
 
-#: classes/Settings.php:2197
+#: classes/Settings.php:2056
 msgid "WP Admin directory (/wp-admin/)"
 msgstr ""
 
-#: classes/Settings.php:2198
+#: classes/Settings.php:2057
 msgid "WP Includes directory (/wp-includes/)"
 msgstr ""
 
-#: classes/Settings.php:2199
+#: classes/Settings.php:2058
 msgid "/wp-content/ directory (excluding plugins, themes & uploads directories)"
 msgstr ""
 
-#: classes/Settings.php:2200
+#: classes/Settings.php:2059
 msgid "Themes directory (/wp-content/themes/)"
 msgstr ""
 
-#: classes/Settings.php:2201
+#: classes/Settings.php:2060
 msgid "Plugins directory (/wp-content/plugins/)"
 msgstr ""
 
-#: classes/Settings.php:2202
+#: classes/Settings.php:2061
 msgid "Uploads directory (/wp-content/uploads/)"
 msgstr ""
 
-#: classes/Settings.php:2207
+#: classes/Settings.php:2066
 msgid "Uploads directory of all sub sites on this network (/wp-content/sites/*)"
 msgstr ""
 
