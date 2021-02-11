@@ -4,7 +4,7 @@
  * Plugin URI: http://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Activity log viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 4.1.5.2
+ * Version: 4.2.0
  * Text Domain: wp-security-audit-log
  * Author URI: http://www.wpwhitesecurity.com/
  * License: GPL2
@@ -47,7 +47,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
          *
 		 * @var string
 		 */
-		public $version = '4.1.5.2';
+		public $version = '4.2.0';
 
 		/**
          * Plugin constants.
@@ -498,7 +498,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$bbpress_addon      = new WSAL_BBPressExtension;
 				$wpforms_addon      = new WSAL_WPFormsExtension;
 				// Comment out till ready.
-				//$gravityforms_addon = new WSAL_GravityFormsExtension;
+				$gravityforms_addon = new WSAL_GravityFormsExtension;
 			}
 
 			// Extensions which are both admin and frontend based.
@@ -661,6 +661,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					wsal_freemius()->add_filter( 'plugin_icon', function( $plugin_icon) {
 					    return WSAL_BASE_DIR . 'img/wsal-logo@2x.png';
                     } );
+					wsal_freemius()->add_action( 'is_submenu_visible', array( $this, 'hide_freemius_submenu_items' ), 10, 2 );
 				}
 			}
 		}
@@ -1044,7 +1045,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$site_count = null;
 			preg_match( '!\d+!', $error, $site_count );
 
-			if ( ! empty( $site_count[0] ) ) {
+			// Check if this is an expired error.
+			if ( strpos( $error, 'expired' ) !== false ) {
+				/* Translators: Expired message and time */
+				$error = sprintf( esc_html__( '%s You need to renew your license to continue using premium features.', 'wp-security-audit-log' ), preg_replace('/\([^)]+\)/','', $error ) );
+			}
+			elseif ( ! empty( $site_count[0] ) ) {
 				/* Translators: Number of sites */
 				$error = sprintf( esc_html__( 'The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network.', 'wp-security-audit-log' ), $site_count[0] );
 			}
@@ -1106,8 +1112,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					$this->Update( $old_version, $new_version );
 				}
 
-				// Generate index.php for uploads directory.
-				$this->settings()->generate_index_files();
 			}
 
 			/**
@@ -1338,8 +1342,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			$this->setup();
 			$this->init();
 
-			// Ensure that the system is installed and schema is correct.
-			$pre_installed = $this->IsInstalled();
+			//  disable database sensor during the creation of tables
+			WSAL_Sensors_Database::$enabled = false;
 
 			// On first install this won't be loaded because not premium, add it
 			// now so it installs.
@@ -1347,23 +1351,20 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			// run any installs.
 			self::getConnector()->installAll();
+            self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
+            self::getConnector()->getAdapter( 'Meta' )->create_indexes();
 
-			if ( ! $pre_installed ) {
-				self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
-				self::getConnector()->getAdapter( 'Meta' )->create_indexes();
-
-				if ( $this->settings()->IsArchivingEnabled() ) {
-					$this->settings()->SwitchToArchiveDB();
-					self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
-					self::getConnector()->getAdapter( 'Meta' )->create_indexes();
-				}
-			}
+            if ( $this->settings()->IsArchivingEnabled() ) {
+                $this->settings()->SwitchToArchiveDB();
+                self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
+                self::getConnector()->getAdapter( 'Meta' )->create_indexes();
+            }
 
 			// If system already installed, do updates now (if any).
 			$old_version = $this->GetOldVersion();
 			$new_version = $this->GetNewVersion();
 
-			if ( $pre_installed && $old_version !== $new_version ) {
+			if ( $old_version !== $new_version ) {
 				$this->Update( $old_version, $new_version );
 			}
 
@@ -1379,25 +1380,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			// Run on each install to check MainWP Child plugin.
 			$this->settings()->set_mainwp_child_stealth_mode();
 
-			// If plugin tables have not installed correctly then don't activate the plugin.
-			if ( ! $this->IsInstalled() ) :
-				?>
-				<html>
-					<head><style>body{margin:0;}.warn-icon-tri{top:7px;left:5px;position:absolute;border-left:16px solid #FFF;border-right:16px solid #FFF;border-bottom:28px solid #C33;height:3px;width:4px}.warn-icon-chr{top:10px;left:18px;position:absolute;color:#FFF;font:26px Georgia}.warn-icon-cir{top:4px;left:0;position:absolute;overflow:hidden;border:6px solid #FFF;border-radius:32px;width:34px;height:34px}.warn-wrap{position:relative;color:#A00;font-size:13px;font-family:sans-serif;padding:6px 48px;line-height:1.4;}.warn-wrap a,.warn-wrap a:hover{color:#F56}</style></head>
-					<body>
-						<div class="warn-wrap">
-							<div class="warn-icon-tri"></div><div class="warn-icon-chr">!</div><div class="warn-icon-cir"></div>
-							<?php esc_html_e( 'This plugin uses 3 tables in the WordPress database to store the activity log and settings. It seems that these tables were not created.', 'wp-security-audit-log' ); ?>
-							<br />
-							<?php esc_html_e( 'This could happen because the database user does not have the right privileges to create the tables in the database. We recommend you to update the privileges and try enabling the plugin again.', 'wp-security-audit-log' ); ?>
-							<br />
-							<?php /* Translators: %s: Support Hyperlink */ echo sprintf( esc_html__( 'If after doing so you still have issues, please send us an email on %s for assistance.', 'wp-security-audit-log' ), '<a href="mailto:support@wpsecurityauditlog.com" target="_blank">' . esc_html__( 'support@wpsecurityauditlog.com', 'wp-security-audit-log' ) . '</a>' ); ?>
-						</div>
-					</body>
-				</html>
-				<?php
-				die( 1 );
-			endif;
+			//  re-enable the database sensor after the tables are created
+			WSAL_Sensors_Database::$enabled = true;
 		}
 
 		/**
@@ -1411,6 +1395,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function Update( $old_version, $new_version ) {
 			// Update version in db.
 			$this->SetGlobalSetting( 'version', $new_version );
+
+			if ( '0.0.0' === $old_version ) {
+				//  set some initial plugins settings (only the ones that bypass the regular settings retrieval at some
+				//  point) - e.g. disabled events
+				$this->SetGlobalSetting( 'disabled-alerts', implode( ',', $this->settings()->always_disabled_alerts ) );
+			}
 
 			// Do version-to-version specific changes.
 			if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
@@ -1482,6 +1472,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					if ( $schedule_time = wp_next_scheduled( 'wsal_log_files_pruning' ) ) {
 						wp_unschedule_event($schedule_time, 'wsal_log_files_pruning', [] );
 					}
+				}
+
+				if ( version_compare( $new_version, '4.2.0', '>=' ) ) {
+					//  delete custom logging dir path from the settings
+					$this->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . 'custom-logging-dir' );
+					//  delete dev options from the settings
+					$this->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . 'dev-options' );
 				}
 			}
 		}
@@ -1573,16 +1570,18 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @internal
 		 */
 		public function HidePlugin() {
-			$selectr = '';
-			$plugins = array( 'wp-security-audit-log', 'wp-security-audit-log-premium' );
-			foreach ( $plugins as $value ) {
-				$selectr .= '.wp-list-table.plugins tr[data-slug="' . $value . '"], ';
+			if ( ! $this->_settings->CurrentUserCan( 'view' ) ) {
+				$selectr = '';
+				$plugins = array( 'wp-security-audit-log', 'wp-security-audit-log-premium' );
+				foreach ( $plugins as $value ) {
+					$selectr .= '.wp-list-table.plugins tr[data-slug="' . $value . '"], ';
+				}
+				?>
+				<style type="text/css">
+					<?php echo rtrim( $selectr, ', ' ); ?> { display: none; }
+				</style>
+				<?php
 			}
-			?>
-			<style type="text/css">
-				<?php echo rtrim( $selectr, ', ' ); ?> { display: none; }
-			</style>
-			<?php
 		}
 
 		/**
@@ -2038,6 +2037,21 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 
 			return $plugins;
+		}
+
+		/**
+		 * Use filter to hide freemius submenu items.
+		 *
+		 * @param  boolean $is_visible Default visibility.
+		 * @param  string  $submenu_id Menu slug.
+		 *
+		 * @return boolean             New visibility.
+		 */
+		public function hide_freemius_submenu_items( $is_visible, $submenu_id ) {
+			if ( 'contact' === $submenu_id ) {
+				$is_visible = false;
+			}
+			return $is_visible;
 		}
 
 		/**

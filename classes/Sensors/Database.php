@@ -64,10 +64,8 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
-		if ( $this->plugin->IsInstalled() ) {
-			add_action( 'dbdelta_queries', array( $this, 'EventDBDeltaQuery' ) );
-			add_filter( 'query', array( $this, 'EventDropQuery' ) );
-		}
+		add_action( 'dbdelta_queries', array( $this, 'EventDBDeltaQuery' ) );
+		add_filter( 'query', array( $this, 'EventDropQuery' ) );
 	}
 
 	/**
@@ -81,25 +79,22 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		if ( ! self::$enabled ) {
 			return $query;
 		}
-		global $wpdb;
+
 		$table_names = array();
 		$str         = explode( ' ', $query );
 		$query_type  = '';
-		if ( preg_match( '|DROP TABLE ([^ ]*)|', $query ) ) {
-			if ( ! empty( $str[4] ) ) {
-				array_push( $table_names, $str[4] );
-			} else {
-				array_push( $table_names, $str[2] );
+		if ( preg_match( '|DROP TABLE( IF EXISTS)? ([^ ]*)|', $query ) ) {
+			$table_name = empty( $str[4] ) ? $str[2] : $str[4];
+			//  only log when the table exists as some plugins try to delete tables even if they don't exist
+			if ( $this->is_table_operation_check_enabled($table_name, 'delete')
+			     && $this->check_if_table_exists( $table_name ) ) {
+				array_push( $table_names, $table_name );
+				$query_type = 'delete';
 			}
-			$query_type = 'delete';
-		} elseif ( preg_match( '/CREATE TABLE (IF NOT EXISTS)? ([^ ]*)/i', $query, $matches ) ) {
+		} elseif ( preg_match( '/CREATE TABLE( IF NOT EXISTS)? ([^ ]*)/i', $query, $matches ) || preg_match( '/CREATE TABLE ([^ ]*)/i', $query, $matches ) ) {
 			$table_name = $matches[count($matches) - 1];
-			$table_exists_query = $wpdb->prepare(
-				"SHOW TABLES LIKE %s;",
-				$table_name
-			);
-
-			if ( $table_name !== $wpdb->get_var( $table_exists_query ) ) {
+			if ( $this->is_table_operation_check_enabled($table_name, 'create')
+			     && ! $this->check_if_table_exists($table_name) ) {
 				/**
 				 * Some plugins keep trying to create tables even
 				 * when they already exist - would result in too
@@ -337,17 +332,13 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			'delete' => array(),
 		);
 
-		global $wpdb;
 		foreach ( $queries as $qry ) {
 			$qry = str_replace( '`', '', $qry );
 			$str = explode( ' ', $qry );
-			if ( preg_match( '/CREATE TABLE (IF NOT EXISTS)? ([^ ]*)/i', $qry, $matches ) ) {
+			if ( preg_match( '/CREATE TABLE( IF NOT EXISTS)? ([^ ]*)/i', $qry, $matches ) ) {
 				$table_name = $matches[count($matches) - 1];
- 				$table_exists_query = $wpdb->prepare(
-					"SHOW TABLES LIKE %s;",
-					$table_name
-				);
-				if ( $table_name !== $wpdb->get_var( $table_exists_query ) ) {
+				if ( $this->is_table_operation_check_enabled($table_name, 'create')
+				     && ! $this->check_if_table_exists( $table_name ) ) {
 					/**
 					 * Some plugins keep trying to create tables even
 					 * when they already exist- would result in too
@@ -357,11 +348,12 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 				}
 			} elseif ( preg_match( '|ALTER TABLE ([^ ]*)|', $qry ) ) {
 				array_push( $query_types['update'], $str[2] );
-			} elseif ( preg_match( '|DROP TABLE ([^ ]*)|', $qry ) ) {
-				if ( ! empty( $str[4] ) ) {
-					array_push( $query_types['delete'], $str[4] );
-				} else {
-					array_push( $query_types['delete'], $str[2] );
+			} elseif ( preg_match( '|DROP TABLE( IF EXISTS)? ([^ ]*)|', $qry ) ) {
+				$table_name = empty( $str[4] ) ? $str[2] : $str[4];
+				//  only log when the table exists as some plugins try to delete tables even if they don't exist
+				if ( $this->is_table_operation_check_enabled($table_name, 'delete')
+				     && $this->check_if_table_exists( $table_name ) ) {
+					array_push( $query_types['delete'], $table_name );
 				}
 			}
 		}
@@ -395,5 +387,45 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		if ( $plugin_name ) {
 			return $plugin_name;
 		}
+	}
+
+	/**
+	 * Checks if a table exists in the WordPress database by running a SELECT query instead of former solution using
+	 * SHOW TABLES. The previous solution has proven to be memory intense in shared hosting environments.
+	 *
+	 * @param string $table_name Table name.
+	 *
+	 * @return bool True if the table exists. False otherwise.
+	 * @since 4.2.0
+	 */
+	private function check_if_table_exists( $table_name ) {
+		try {
+			global $wpdb;
+			$db_result = $wpdb->query( "SELECT COUNT(1) FROM {$table_name};" );
+
+			return ( 1 === $db_result );
+		} catch (Exception $e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Checks if alerts for certain query type are enabled or not.
+	 *
+	 * This is used to prevent unnecessary table existence checks. These checks should not take place
+	 * if a specific alert is not enabled. Unfortunately if the alert is enabled or not is being checked
+	 * too late.
+	 *
+	 * @param string $table_name
+	 * @param string $query_type
+	 *
+	 * @return bool
+	 * @see WSAL_AlertManager::_CommitItem()
+	 * @since 4.2.0
+	 */
+	private function is_table_operation_check_enabled( $table_name, $query_type ) {
+		$actor     = $this->GetActor( [ $table_name ] );
+		$eventCode = $this->GetEventCode( $actor, $query_type );
+		return $this->plugin->alerts->IsEnabled( $eventCode );
 	}
 }

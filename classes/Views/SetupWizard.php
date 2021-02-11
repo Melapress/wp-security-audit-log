@@ -154,8 +154,8 @@ final class WSAL_Views_SetupWizard {
 		$all_plugins      = get_plugins();
 		$plugin_filenames = array();
 		foreach ( $all_plugins as $plugin => $info ) {
-			// here we strip all of the plugin slug, leaving just the filename itself. Neat!
-			$plugin_filenames[] = preg_replace( '/\\.[^.\\s]{3,4}$/', '', substr( basename( json_encode( $plugin ) ), 0, -1 ) );
+			$plugin_info = pathinfo( $plugin );
+			$plugin_filenames[] = $plugin_info['filename'];
 		}
 
 		// Grab list of plugins we have addons for.
@@ -789,8 +789,8 @@ final class WSAL_Views_SetupWizard {
 		$all_plugins      = get_plugins();
 		$plugin_filenames = array();
 		foreach ( $all_plugins as $plugin => $info ) {
-			// here we strip all of the plugin slug, leaving just the filename itself. Neat!
-			$plugin_filenames[] = preg_replace( '/\\.[^.\\s]{3,4}$/', '', substr( basename( json_encode( $plugin ) ), 0, -1 ) );
+			$plugin_info = pathinfo( $plugin );
+			$plugin_filenames[] = $plugin_info['filename'];
 		}
 
 		// Grab list of plugins we have addons for.

@@ -10,14 +10,14 @@ abstract class WSAL_AbstractLogger {
 	/**
 	 * Instance of WpSecurityAuditLog.
 	 *
-	 * @var object
+	 * @var WpSecurityAuditLog
 	 */
 	protected $plugin;
 
 	/**
 	 * Method: Constructor.
 	 *
-	 * @param  object $plugin - Instance of WpSecurityAuditLog.
+	 * @param  WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
 	 * @since  1.0.0
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {

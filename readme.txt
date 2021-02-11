@@ -4,9 +4,9 @@ Plugin URI: https://wpactivitylog.com
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
-Requires at least: 3.6
+Requires at least: 4.4
 Tested up to: 5.6
-Stable tag: 4.1.5.2
+Stable tag: 4.2.0
 Requires PHP: 5.5
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -206,9 +206,83 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.1.5.2 (2021-01-21) =
+= 4.2.0 (2021-02-11) =
 
-* **Improvement**
-	* Replaced Swipebox with Simple Lightbox (compatible with WordPress 5.6)
+Release notes: [WP Activity Log 4.2: Support for all date & time formats & other major updates](https://wpactivitylog.com/wsal-4-2-0/)
+
+**New features**
+	* New daet & time module that supports any type of date and time format that WordPress supports.
+	* An all new activity log dashboard widget.
+	* Added activity log coverage for several new WordPress settings, including automatic updates settings, date and time settings and application passwords.
+
+**Improved activity log coverage**
+* **New event IDs for changes in posts**
+	* ID 2129: User added / changed / removed a post's excerpt
+	* ID 2130: User added / changed / removed a post's featured image
+
+* **New event IDs for changes in WordPress settings**
+	* ID 6035: Changed the "Your homepage displays" WordPress setting
+	* ID 6036: Changed the homepage in the WordPress setting
+	* ID 6037: Changed the posts page in the WordPress settings
+	* ID 6040: Changed the Timezone in the WordPress settings
+	* ID 6041: Changed the Date format in the WordPress settings
+	* ID 6042: Changed the Time format in the WordPress settings
+	* ID 6044: User changed the WordPress automatic update settings
+	
+* **New event IDs for application passwords**
+	* ID 4025: User added / removed application password from own profile
+	* ID 4026: User added / removed application password from another user's profile
+	* ID 4027: User revoked all application passwords from own profile
+	* ID 4028: User revoked all application passwords from another user's profile
+	
+* **New event IDs for multisite network settings**
+	* ID 7007: The setting Allow site administrators to add new users to their site was enabled / disabled
+	* ID 7008: The value of the Site upload space setting was changed
+	* ID 7009: The value of the file size allowed in the site upload space setting was changed
+	* ID 7010: Changed the list of allowed file types on the network
+	* ID 7011: Changed the value of the maximum upload file size network setting
+	
+* **Other new event IDs**
+	* ID 1010: User requested a password reset.
+	
+**Improvements**
+	* Improved coverage of users logins, logout and failed logins activity on custom login pages.
+	* Standardized the text, format and metadata formatting of all the activity log events.
+	* Drastically improved the coverage of the activity logs sensors with a number of new event IDs.
+	* Redesigned the [activity logs extension](https://wpactivitylog.com/extensions/) UI.
+	* Support for URL rewrites and page names (correct page title reported even if the page is a URL rewrite).
+	* Default [activity log SMS notifications](https://wpactivitylog.com/features/email-sms-notifications-wordpress-activity-log/) template updated.
+	* Plugins version numbers are now reported in the activity log (for example when a plugin is updated).
+	* Users who hide the plugin from plugins page now get a notification when a plugin update is available.
+	* Consolidated the code that generates the activity log messages.
+	* Merged the Help and Contact us pages in the plugin menu.
+	* Improved the Reports filters queries to address timeout issues on very big websites.
+	* Replaced the "SHOW TABLES" queries for much better plugin performance.
+	* Removed the "/uploads/wp-activity-log/" directory in the free edition. This is only required in premium edition.
+	* Support for CloudFlare HTTP headers - plugin reports correct IP when behind CloudFlare CDN or firewall (more info on firewalls support)[https://wpactivitylog.com/support/kb/support-reverse-proxies-web-application-firewalls/].
+	* Reports, Email & SMS notifications and other modules now fully support metadata which contains the space character. For example the user role Shop Manager.
+	* Remove support for custom sensors. Custom event IDs in activity log now only supported via [activity log extension plugin](https://wpactivitylog.com/support/kb/create-custom-events-wordpress-activity-log/).
+	* Completely removed the code of the old promotional events (stopped using them in 2017).
+	* Removed the request log file setting. The request log file can now be enabled via a [filter](https://wpactivitylog.com/support/kb/list-hooks/).
+	* Removed the working directory location setting from plugin settings. Instead introduced a new wp-config.php constant: WSAL_WORKING_DIR_PATH	
+	* Plugin now using WP_CONTENT_DIR instead of ABSPATH were applicable (better supported by WordPress specific web hosts).
+	* Added event text to event IDs 1001 and 1001.
+	* The system information file now also includes all of the plugin's settings saved in the wp_options table.
+	* Simplified the process that retrieves filnames.
+	* Several under the hood performance improvements (removed obsolete code, improved sensors etc)
+
+**Bug fixes**
+	* Event ID 1000 (user login) still logged when IP address is excluded.
+	* Change in page template was not being logged with event ID 2048.
+	* Event ID 2002 was not always reported in some edge cases.
+	* Plugin's directory in uploads was not being created when website was hosted on Flywheel and WordPress.com.
+	* Date & time were missing in CSV reports when using some specific date and time formats in WordPress.
+	* Super admin role was also shown for administrators on single site setup.
+	* Plugin was not showing the correct total of sessions when deleting all sessions.
+	* Plugin was generating a PHP error when a network site was deleted.
+	* No event was being reported when installing [activity log extensions for third party plugins](https://wpactivitylog.com/extensions/).
+	* Plugin installation was not running correctly when installed alongside the [Website File Changes Monitor plugin](https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/).
+	* The setting to configure the number of failed logins to keep a log of was reset to default each time the settings page was saved.
+	* Wrong variable was used in licensing notifications, resulting in misleading error responses when license failed to activate.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.

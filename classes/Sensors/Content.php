@@ -74,6 +74,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	protected $old_status = null;
 
 	/**
+	 * Old Post Meta.
+	 *
+	 * @var string
+	 */
+	protected $old_meta = null;
+
+	/**
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
@@ -93,7 +100,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_action( 'create_post_tag', array( $this, 'event_tag_creation' ), 10, 1 );
 		add_action( 'pre_delete_term', array( $this, 'check_taxonomy_term_deletion' ), 10, 2 );
 		add_filter( 'wp_update_term_data', array( $this, 'event_update_term_data' ), 10, 4 );
-		add_action( 'updated_post_meta', array( $this, 'check_template_change' ), 10, 4 );
+		add_filter( 'add_post_metadata', array( $this, 'check_changed_meta' ), 10, 4 );
+		add_filter( 'delete_post_metadata', array( $this, 'check_changed_meta' ), 10, 4 );
+		add_filter( 'updated_post_meta', array( $this, 'check_changed_meta' ), 10, 4 );
+
 
 		// Check if MainWP Child Plugin exists.
 		if ( WpSecurityAuditLog::is_mainwp_active() ) {
@@ -114,13 +124,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		// If post exists.
 		if ( ! empty( $post ) && $post instanceof WP_Post ) {
-			$this->_old_post  = $post;
-			$this->_old_link  = get_permalink( $post_id );
-			$this->_old_tmpl  = $this->get_post_template( $this->_old_post );
-			$this->_old_cats  = $this->get_post_categories( $this->_old_post );
-			$this->_old_tags  = $this->get_post_tags( $this->_old_post );
-			$this->_old_stky  = in_array( $post_id, get_option( 'sticky_posts' ), true );
-			$this->old_status = $post->post_status;
+			$this->_old_post   = $post;
+			$this->_old_link   = get_permalink( $post_id );
+			$this->_old_tmpl   = $this->get_post_template( $this->_old_post );
+			$this->_old_cats   = $this->get_post_categories( $this->_old_post );
+			$this->_old_tags   = $this->get_post_tags( $this->_old_post );
+			$this->_old_stky   = in_array( $post_id, get_option( 'sticky_posts' ), true );
+			$this->old_status  = $post->post_status;
+			$this->old_meta    = get_post_meta( $post_id );
 		}
 	}
 
@@ -293,10 +304,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			if ( empty( $request_params['action'] ) && isset( $request_params['page'] ) ) {
 				$event = 5025;
 				$event_data = array(
-					'PostID'    => $post->ID,
-					'PostType'  => $post->post_type,
-					'PostTitle' => $post->post_title,
-					'Username'  => 'Plugins',
+					'PostID'     => $post->ID,
+					'PostType'   => $post->post_type,
+					'PostTitle'  => $post->post_title,
+					'PostStatus' => $post->post_status,
+					'Username'   => 'Plugins',
 				);
 			}
 
@@ -443,12 +455,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	public function viewing_post() {
 		// Retrieve the current post object.
 		$post = get_queried_object();
+
 		if ( is_user_logged_in() && ! is_admin() ) {
 			if ( $this->check_other_sensors( $post ) ) {
 				return $post->post_title;
 			}
 
 			$current_path = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : false;
+
 			if (
 				! empty( $_SERVER['HTTP_REFERER'] )
 				&& ! empty( $current_path )
@@ -461,6 +475,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			if ( ! empty( $post->post_title ) ) {
 				$edit_link = $this->get_editor_link( $post );       // Get editor link.
 				$post_data = $this->get_post_event_data( $post ); // Get event post data.
+
+				// Update post URL based on current actual path.
+				$full_current_path = home_url( $current_path );
+				if ( $full_current_path !== $post_data['PostUrl'] ) {
+					$post_data['PostUrl'] = esc_url( $full_current_path );
+				}
 
 				// Set editor link.
 				$post_data[ $edit_link['name'] ] = $edit_link['value'];
@@ -664,38 +684,90 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param string $meta_key   Meta key.
 	 * @param mixed  $meta_value Meta value.
 	 */
-	public function check_template_change( $meta_id, $post_id, $meta_key, $meta_value ) {
-		if ( '_wp_page_template' !== $meta_key ) {
-			return;
-		}
-
+	public function check_changed_meta( $meta_id, $post_id, $meta_key, $meta_value ) {
 		if ( ! $post_id ) {
 			return;
 		}
 
-		$post          = get_post( $post_id );
-		$old_tmpl      = ucwords( str_replace( array( '-', '_' ), ' ', basename( $this->_old_tmpl, '.php' ) ) );
-		$new_tmpl_path = $this->get_post_template( $post );
-		$new_tmpl      = ucwords( str_replace( array( '-', '_' ), ' ', basename( $new_tmpl_path, '.php' ) ) );
-
-		if ( $old_tmpl !== $new_tmpl ) {
-			$editor_link = $this->get_editor_link( $post );
-			$this->plugin->alerts->Trigger(
-				2048,
-				array(
-					'PostID'             => $post->ID,
-					'PostType'           => $post->post_type,
-					'PostTitle'          => $post->post_title,
-					'PostStatus'         => $post->post_status,
-					'PostDate'           => $post->post_date,
-					'OldTemplate'        => $old_tmpl,
-					'NewTemplate'        => $new_tmpl,
-					'OldTemplatePath'    => $this->_old_tmpl,
-					'NewTemplatePath'    => $new_tmpl_path,
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
+		switch ( $meta_key ) {
+			case '_wp_page_template':
+				$this->check_template_change( $post_id, $meta_value );
+				break;
+			case '_thumbnail_id':
+				$this->check_featured_image_change( $post_id, $meta_value );
+				break;
+			default:
+				// no other meta keys supported here.
 		}
+	}
+
+	/**
+	 * Check Page Template Update.
+	 *
+	 * @param int    $post_id    Post ID.
+	 * @param mixed  $meta_value Meta value.
+	 */
+	 public function check_template_change( $post_id, $meta_value ) {
+	 	$post          = get_post( $post_id );
+ 		$old_tmpl      = ( $this->_old_tmpl && 'page' !== basename( $this->_old_tmpl, '.php' ) ) ? ucwords( str_replace( array( '-', '_' ), ' ', basename( $this->_old_tmpl, '.php' ) ) ) : __( 'Default template', 'wp-security-audit-log' );
+ 		$new_tmpl      = ( $meta_value ) ? ucwords( str_replace( array( '-', '_' ), ' ', basename( $meta_value ) ) ) : __( 'Default', 'wp-security-audit-log' );
+
+ 		if ( $old_tmpl !== $new_tmpl ) {
+ 			$editor_link = $this->get_editor_link( $post );
+ 			$this->plugin->alerts->Trigger(
+ 				2048,
+ 				array(
+ 					'PostID'             => $post->ID,
+ 					'PostType'           => $post->post_type,
+ 					'PostTitle'          => $post->post_title,
+ 					'PostStatus'         => $post->post_status,
+ 					'PostDate'           => $post->post_date,
+ 					'OldTemplate'        => $old_tmpl,
+ 					'NewTemplate'        => $new_tmpl,
+ 					$editor_link['name'] => $editor_link['value'],
+ 				)
+ 			);
+ 		}
+ 	}
+
+	/**
+	 * Check Post Featured Image Update.
+	 *
+	 * @param int    $post_id    Post ID.
+	 * @param mixed  $meta_value Meta value.
+	 */
+	public function check_featured_image_change( $post_id, $meta_value ) {
+		$previous_featured_image = ( isset( $this->old_meta['_thumbnail_id'][0] ) ) ? wp_get_attachment_metadata( $this->old_meta['_thumbnail_id'][0] ) : false;
+		$new_featured_image      = wp_get_attachment_metadata( $meta_value );
+
+		if ( empty( $new_featured_image['file'] ) && empty( $previous_featured_image['file'] ) ) {
+			return;
+		}
+
+		$event_type = 'modified';
+
+		if ( empty( $previous_featured_image['file'] ) && ! empty( $new_featured_image['file'] ) ) {
+			$event_type = 'added';
+		} elseif ( ! empty( $previous_featured_image['file'] ) &&  empty( $new_featured_image['file'] ) ) {
+			$event_type = 'removed';
+		}
+
+		$post          = get_post( $post_id );
+		$editor_link = $this->get_editor_link( $post );
+		$this->plugin->alerts->Trigger(
+			2130,
+			array(
+				'PostID'             => $post->ID,
+				'PostType'           => $post->post_type,
+				'PostTitle'          => $post->post_title,
+				'PostStatus'         => $post->post_status,
+				'PostDate'           => $post->post_date,
+				'previous_image'     => ( $previous_featured_image['file'] ) ? $previous_featured_image['file'] : __( 'No previous image', 'wp-security-audit-log' ),
+				'new_image'          => ( $new_featured_image['file'] ) ? $new_featured_image['file'] : __( 'No image', 'wp-security-audit-log' ),
+				$editor_link['name'] => $editor_link['value'],
+				'EventType'          => $event_type,
+			)
+		);
 	}
 
 	/**
@@ -1221,8 +1293,12 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param WP_Post $post - The post.
 	 */
 	protected function check_tags_change( $old_tags, $new_tags, $post ) {
+		// Ensure old_tags is not null.
+		if ( ! $old_tags ) {
+			$old_tags = [];
+		}
 		$intersection = array_intersect( $old_tags, $new_tags );
-		if ( count( $intersection ) === count( $old_tags ) ) {
+		if ( count( $intersection ) === count( $old_tags ) && count( $old_tags ) === count( $new_tags ) ) {
 			//  no change, let's leave
 			return;
 		}
@@ -1290,14 +1366,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 							return 0; // Return if any Yoast alert has or will trigger.
 						}
 					}
-
-					// Get post meta events.
-					$meta_events = array( 2053, 2054, 2055, 2062, 2016, 2120, 2119, 2131, 2132 );
-					foreach ( $meta_events as $meta_event ) {
-						if ( $this->plugin->alerts->WillOrHasTriggered( $meta_event ) ) {
-							return 0; // Return if any meta event has or will trigger.
-						}
-					}
 				}
 
 				$event_data                         = $this->get_post_event_data( $oldpost );
@@ -1305,17 +1373,53 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$event_data[ $editor_link['name'] ] = $editor_link['value'];
 				$event_data['RevisionLink']         = $this->get_post_revision( $post_id, $oldpost );
 
+				// Check excerpt change.
+				$old_post_excerpt = $oldpost->post_excerpt;
+				$post_excerpt     = get_post_field( 'post_excerpt', $post_id );
+
+				if ( empty( $old_post_excerpt ) && ! empty( $post_excerpt ) ) {
+					$event_data['EventType'] = 'added';
+				} elseif ( ! empty( $old_post_excerpt ) && empty( $post_excerpt ) ) {
+					$event_data['EventType'] = 'removed';
+				} elseif ( $old_post_excerpt !== $post_excerpt ) {
+					$event_data['EventType'] = 'modified';
+				}
+
+				if ( $old_post_excerpt !== $post_excerpt ) {
+					$event                          = 2129;
+					// We are purposfully showing an empty, not NULL value.
+					$event_data['old_post_excerpt'] = ( $old_post_excerpt ) ? $old_post_excerpt : ' ';
+					$event_data['post_excerpt']     = ( $post_excerpt ) ? $post_excerpt : ' ';
+				}
+
 				if ( 2002 === $event ) {
-					if ( ! $this->was_triggered_recently( 2112 ) ) {
-						if ( $content_changed ) {
-							$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'must_not_contain_events' ) );
-						}
-					}
+					// If we reach this point, we no longer need to check if the content has changed as we already have an event to handle it.
+					// So trigger 2002 regardess and "something" has changed in the post, we just dont detect it elsewhere.
+					$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'ignore_other_post_events' ) );
 				} else {
 					$this->plugin->alerts->Trigger( $event, $event_data );
 				}
 			}
 		}
+	}
+
+	/**
+	 * Method: Ensure no other post-related events are being fired, or have recently been fired.
+	 *
+	 * @param WSAL_AlertManager $manager - WSAL Alert Manager.
+	 * @return bool
+	 */
+	public function ignore_other_post_events( WSAL_AlertManager $manager ) {
+
+		$post_events = array_keys( $this->plugin->alerts->get_alerts_by_sub_category( 'Content' ) );
+
+		foreach ( $post_events as $event ) {
+			if ( $manager->WillOrHasTriggered( $event) || $this->was_triggered_recently( $event ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -1392,27 +1496,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	private function get_revision_link( $revision_id ) {
 		return ! empty( $revision_id ) ? add_query_arg( 'revision', $revision_id, admin_url( 'revision.php' ) ) : null;
-	}
-
-	/**
-	 * Method: This function make sures that alert 2016
-	 * has not been triggered before triggering categories
-	 * & tags events.
-	 *
-	 * @param WSAL_AlertManager $manager - WSAL Alert Manager.
-	 * @return bool
-	 */
-	public function must_not_contain_events( WSAL_AlertManager $manager ) {
-		if ( $manager->WillOrHasTriggered( 2016 )
-		     || $manager->WillOrHasTriggered( 2048 )
-		     || $manager->WillOrHasTriggered( 2049 )
-		     || $manager->WillOrHasTriggered( 2050 )
-		     || $manager->WillOrHasTriggered( 2119 )
-		     || $manager->WillOrHasTriggered( 2120 )
-		     || $manager->WillOrHasTriggered( 2017 ) ) {
-			return false;
-		}
-		return true;
 	}
 
 	/**

@@ -98,7 +98,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$is_plugins = 'plugins' === $actype;
 
 		// Install plugin.
-		if ( in_array( $action, array( 'install-plugin', 'upload-plugin' ) ) && current_user_can( 'install_plugins' ) ) {
+		if ( in_array( $action, array( 'install-plugin', 'upload-plugin', 'run_addon_install' ) ) && current_user_can( 'install_plugins' ) ) {
 			$plugin = array_values( array_diff( array_keys( get_plugins() ), array_keys( $this->old_plugins ) ) );
 			if ( count( $plugin ) != 1 ) {
 				$this->LogError(
@@ -281,12 +281,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
 					$plugin_name = ucwords( $plugin_name );
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+					$plugin_data = get_plugin_data( $plugin_file, false, true );
 					$this->plugin->alerts->Trigger(
 						5003,
 						array(
 							'PluginFile' => $plugin_file,
 							'PluginData' => (object) array(
-								'Name' => $plugin_name,
+								'Name'    => $plugin_name,
+								'Version' => $plugin_data['Version'],
 							),
 						)
 					);
@@ -302,12 +304,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				$plugin_name = basename( $plugin_file, '.php' );
 				$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
 				$plugin_name = ucwords( $plugin_name );
+				$plugin_data = $this->old_plugins[ $post_array['plugin'] ];
 				$this->plugin->alerts->Trigger(
 					5003,
 					array(
 						'PluginFile' => $plugin_file,
 						'PluginData' => (object) array(
-							'Name' => $plugin_name,
+							'Name'    => $plugin_name,
+							'Version' => $plugin_data['Version'],
 						),
 					)
 				);

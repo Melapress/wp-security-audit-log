@@ -31,10 +31,11 @@ class WSAL_Utilities_Emailer {
 		$type_name       = $wsal->settings()->get_type_username(); // Get the data to display.
 		$user            = _wp_get_current_user();
 		$datetime_format = $wsal->settings()->GetDatetimeFormat( false );
+		$now = current_time( 'timestamp' );
 		$date_time       = str_replace(
 			'$$$',
-			substr( number_format( fmod( current_time( 'timestamp' ), 1 ), 3 ), 2 ),
-			date( $datetime_format, current_time( 'timestamp' ) )
+			substr( number_format( fmod( $now, 1 ), 3 ), 2 ),
+			date( $datetime_format, $now )
 		);
 
 		// Checks for display name.
