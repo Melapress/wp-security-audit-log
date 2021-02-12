@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 4.4
 Tested up to: 5.6
-Stable tag: 4.2.0
+Stable tag: 4.2.0.1
 Requires PHP: 5.5
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -205,6 +205,11 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 10. Mirror the WordPress activity log to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
 
 == Changelog ==
+
+= 4.2.0.1 (2021-02-12) =
+
+* **Bug fix**
+	* Menus sensor causing fatal error when there are changes in a menu (support ticket [1](https://wordpress.org/support/topic/fatal-error-3784/) & [2](https://wordpress.org/support/topic/menu-item-order-change-issue/)
 
 = 4.2.0 (2021-02-11) =
 
