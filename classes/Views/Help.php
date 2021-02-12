@@ -182,7 +182,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		<div class="wsal-help-section">
 			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Getting Started', 'wp-security-audit-log' ); ?></h2>
 			<p><?php esc_html_e( 'Getting started with WP Activity Log is really easy; once the plugin is installed it will automatically keep a log of everything that is happening on your website and you do not need to do anything. Watch the video below for a quick overview of the plugin.', 'wp-security-audit-log' ); ?></p>
-			<p><iframe class="wsal-youtube-embed" width="100%" height="315" src="https://www.youtube.com/embed/1nopATCS-CQ?rel=0" frameborder="0" allowfullscreen></iframe></p>
+			<p><iframe class="wsal-youtube-embed" width="100%" height="315" src="https://www.youtube.com/embed/pgFEMIvKFTA?rel=0" frameborder="0" allowfullscreen></iframe></p>
 		</div>
 		<div class="wsal-help-section">
 			<h2 class="wsal-tab__heading"><?php esc_html_e( 'Plugin Support', 'wp-security-audit-log' ); ?></h2>

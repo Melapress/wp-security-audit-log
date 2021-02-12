@@ -60,6 +60,14 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	protected $_old_menu_locations = null;
 
 	/**
+	 * An array of menu IDs for which an order change has already been reported during current request.
+	 *
+	 * @var array
+	 * @since 4.2.0.1
+	 */
+	protected $order_changed_menu_ids = [];
+
+	/**
 	 * Listening to events using WP hooks.
 	 */
 	public function HookEvents() {
@@ -79,9 +87,11 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	/**
 	 * Menu item updated.
 	 *
-	 * @param int   $menu_id - Menu ID.
-	 * @param int   $menu_item_db_id - Menu item DB ID.
+	 * @param int $menu_id - Menu ID.
+	 * @param int $menu_item_db_id - Menu item DB ID.
 	 * @param array $args - An array of items used to update menu.
+	 *
+	 * @return boolean
 	 */
 	public function UpdateMenuItem( $menu_id, $menu_item_db_id, $args ) {
 		// Filter $_POST global array for security.
@@ -92,7 +102,6 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 			$is_changed_order = false;
 			$is_sub_item      = false;
 			$new_menu_items   = array_keys( $post_array['menu-item-title'] );
-			$items            = wp_get_nav_menu_items( $menu_id );
 			if ( ! empty( $this->_old_menu_items ) ) {
 				foreach ( $this->_old_menu_items as $old_item ) {
 					if ( $old_item['menu_id'] == $menu_id ) {
@@ -121,34 +130,44 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 					}
 				}
 			}
-			if ( $is_changed_order && wp_verify_nonce( $post_array['meta-box-order-nonce'], 'meta-box-order' ) ) {
-				$item_name = $old_menu_items[ $menu_item_db_id ]['title'];
-				$this->EventChangeOrder( $item_name, $old_item['menu_name'] );
-			}
-			if ( $is_sub_item && wp_verify_nonce( $post_array['update-nav-menu-nonce'], 'update-nav_menu' ) ) {
-				$item_parent_id = $args['menu-item-parent-id'];
-				$item_name      = $old_menu_items[ $menu_item_db_id ]['title'];
-				if ( $old_menu_items[ $menu_item_db_id ]['parent'] != $item_parent_id ) {
-					$parent_name = isset( $old_menu_items[ $item_parent_id ]['title'] ) ? $old_menu_items[ $item_parent_id ]['title'] : false;
-					$this->EventChangeSubItem( $item_name, $parent_name, $post_array['menu-name'] );
-				}
-			}
-			$added_items = array_diff( $new_menu_items, array_keys( $old_menu_items ) );
 
 			// Add Items to the menu.
+			$added_items = array_diff( $new_menu_items, array_keys( $old_menu_items ) );
 			if ( count( $added_items ) > 0 && wp_verify_nonce( $post_array['update-nav-menu-nonce'], 'update-nav_menu' ) ) {
 				if ( in_array( $menu_item_db_id, $added_items ) ) {
 					$this->EventAddItems( $post_array['menu-item-object'][ $menu_item_db_id ], $post_array['menu-item-title'][ $menu_item_db_id ], $post_array['menu-name'], $menu_id );
 				}
 			}
-			$removed_items = array_diff( array_keys( $old_menu_items ), $new_menu_items );
 
 			// Remove items from the menu.
+			$removed_items = array_diff( array_keys( $old_menu_items ), $new_menu_items );
 			if ( count( $removed_items ) > 0 && wp_verify_nonce( $post_array['update-nav-menu-nonce'], 'update-nav_menu' ) ) {
 				if ( array_search( $menu_item_db_id, $new_menu_items ) == ( count( $new_menu_items ) - 1 ) ) {
 					foreach ( $removed_items as $removed_item_id ) {
 						$this->EventRemoveItems( $old_menu_items[ $removed_item_id ]['type'], $old_menu_items[ $removed_item_id ]['title'], $post_array['menu-name'], $menu_id );
 					}
+				}
+			}
+
+			//  we want to ignore order changes when menu items are added, removed or another order change has already
+			//  been logged during this request
+			$ignore_order_change = ! empty( $removed_items ) || ! empty( $added_items );
+
+			//  check if an order has changed
+			if ( ! $ignore_order_change && $is_changed_order && wp_verify_nonce( $post_array['meta-box-order-nonce'], 'meta-box-order' ) ) {
+				$old_item    = $old_menu_items[ $menu_item_db_id ];
+				$menu_object = wp_get_nav_menu_object( $menu_id );
+				if ( $menu_object instanceof WP_Term ) {
+					$this->EventChangeOrder( $old_item['title'], $menu_object->name, $menu_id );
+				}
+			}
+
+			if ( $is_sub_item && wp_verify_nonce( $post_array['update-nav-menu-nonce'], 'update-nav_menu' ) ) {
+				$item_parent_id = $args['menu-item-parent-id'];
+				$item_name      = $old_menu_items[ $menu_item_db_id ]['title'];
+				if ( $old_menu_items[ $menu_item_db_id ]['parent'] != $item_parent_id ) {
+					$parent_name = isset( $old_menu_items[ $item_parent_id ]['title'] ) ? $old_menu_items[ $item_parent_id ]['title'] : false;
+					$this->EventChangeSubItem( $item_name, $parent_name, $post_array['menu-name'], $menu_id );
 				}
 			}
 		}
@@ -639,16 +658,25 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 *
 	 * @param string $item_name - Item name.
 	 * @param string $menu_name - Menu name.
+	 * @param int $menu_id - Menu ID.
 	 */
 	private function EventChangeOrder( $item_name, $menu_name, $menu_id ) {
+		//  skip if an order change for this menu has already been reported during the current request
+		if ( in_array( $menu_id, $this->order_changed_menu_ids ) ) {
+			return;
+		}
+
 		$this->plugin->alerts->Trigger(
 			2085,
 			array(
 				'ItemName' => $item_name,
 				'MenuName' => $menu_name,
-				'MenuID'      => $menu_id,
+				'MenuID'   => $menu_id,
 			)
 		);
+
+		//  keep track of already reported order changes to prevent repetitive events
+		array_push( $this->order_changed_menu_ids, $menu_id );
 	}
 
 	/**
@@ -657,6 +685,7 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 * @param string $item_name - Item name.
 	 * @param string $parent_name - Parent Name.
 	 * @param string $menu_name - Menu Name.
+	 * @param int $menu_id - Menu ID.
 	 */
 	private function EventChangeSubItem( $item_name, $parent_name, $menu_name, $menu_id ) {
 		$this->plugin->alerts->Trigger(
@@ -675,6 +704,8 @@ class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 	 *
 	 * @param int $term_id - Term ID.
 	 * @param int $item_id - Item ID.
+	 *
+	 * @return string
 	 */
 	private function GetItemName( $term_id, $item_id ) {
 		$item_name  = '';
