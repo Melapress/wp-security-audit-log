@@ -1523,8 +1523,8 @@ final class WSAL_AlertManager {
 	 *
 	 * @param array $filters     - Filters.
 	 * @param mixed $report_type - Type of report.
-	 * @return array
-	 */
+	 * @return stdClass
+     */
 	public function get_mainwp_extension_report( array $filters, $report_type ) {
 		// Check report type.
 		if ( ! $report_type ) {
@@ -1677,7 +1677,7 @@ final class WSAL_AlertManager {
 					continue;
 				}
 
-				$t = $this->get_alert_details( $entry->id, $entry->id, $entry->alert_id, $entry->site_id, $entry->created_on, $entry->user_id, $roles, $ip, $ua );
+				$t = $this->get_alert_details( $entry->id, $entry->id, $entry->alert_id, $entry->site_id, $entry->created_on, $entry->user_id, $roles, $ip, $ua, 'report-' . $report_format);
 				array_push( $data, $t );
 			}
 		}
@@ -1870,7 +1870,7 @@ final class WSAL_AlertManager {
 	 * @return array|false details
 	 * @throws Exception
 	 */
-	private function get_alert_details( $report_format, $entry_id, $alert_id, $site_id, $created_on, $user_id = null, $roles = null, $ip = '', $ua = '' ) {
+	private function get_alert_details( $report_format, $entry_id, $alert_id, $site_id, $created_on, $user_id = null, $roles = null, $ip = '', $ua = '', $context = 'default' ) {
 		// Must be a new instance every time, otherwise the alert message is not retrieved properly.
 		$occurrence = new WSAL_Models_Occurrence();
 
@@ -1919,7 +1919,7 @@ final class WSAL_AlertManager {
 		}
 
 		if ( ! $occurrence->is_migrated || ! $occurrence->_cachedmessage ) {
-			$occurrence->_cachedmessage = $occurrence->GetAlert()->mesg;
+            $occurrence->_cachedmessage = $occurrence->GetAlert()->GetMessage( $occurrence->GetMetaArray(), null, $entry_id, $context );
 		}
 
 		if ( ! $user_id ) {
@@ -1938,7 +1938,7 @@ final class WSAL_AlertManager {
 			'timestamp'  => $created_on,
 			'date'       => WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $created_on ),
 			'code'       => $const->name,
-			'message'    => $occurrence->GetMessage( ),
+			'message'    => $occurrence->GetMessage( null, $context ),
 			'user_name'  => $username,
 			'user_data'  => $user_id ? $this->get_event_user_data( $username ) : false,
 			'role'       => $roles,
