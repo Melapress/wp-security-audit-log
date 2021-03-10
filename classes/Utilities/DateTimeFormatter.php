@@ -129,7 +129,7 @@ class WSAL_Utilities_DateTimeFormatter {
 		//  timezone adjustment
 		$timezone_adjusted_timestamp = $do_timezone_offset ? $timestamp + $this->gmt_offset_sec : $timestamp;
 
-		//  milliseconds in format
+		//  milliseconds in format (this is probably not necessary, but we keep it just to be 100% sure)
 		if ( ! $this->show_milliseconds ) {
 			// remove the milliseconds placeholder from format string.
 			$format = str_replace( '.$$$', '', $format );

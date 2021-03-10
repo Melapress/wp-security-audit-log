@@ -34,6 +34,7 @@ class WSAL_Uninstall {
 		}
 
 		// Clear scheduled hooks.
+		wp_clear_scheduled_hook( 'wsal_delete_logins' );
 		wp_clear_scheduled_hook( 'wsal_cleanup' );
 	}
 
@@ -82,6 +83,9 @@ class WSAL_Uninstall {
 		foreach ( $plugin_options as $option ) {
 			delete_option( $option->option_name );
 		}
+
+		// Remove wsal specific freemius entry.
+		delete_option( 'fs_wsalp' );
 
 		//  @todo delete also options from site-level tables in multisite context
 	}

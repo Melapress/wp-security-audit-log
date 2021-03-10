@@ -222,15 +222,16 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						foreach ( $group as $subname => $alerts ) {
 							$active    = array();
 							$allactive = true;
+							/** @var WSAL_Alert $alert */
 							foreach ( $alerts as $alert ) {
-								if ( $alert->type <= 0006 ) {
+								if ( $alert->code <= 0006 ) {
 									continue; // <- Ignore php alerts.
 								}
-								if ( in_array( $alert->type, $obsolete_events, true ) ) {
+								if ( in_array( $alert->code, $obsolete_events, true ) ) {
 									continue; // <- Ignore promo alerts.
 								}
-								$active[ $alert->type ] = $this->_plugin->alerts->IsEnabled( $alert->type );
-								if ( ! $active[ $alert->type ] ) {
+								$active[ $alert->code ] = $this->_plugin->alerts->IsEnabled( $alert->code );
+								if ( ! $active[ $alert->code ] ) {
 									$allactive = false;
 								}
 							}
@@ -344,7 +345,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 									<?php
 									// Events sections loop.
 									foreach ( $alerts as $alert ) {
-										if ( $alert->type <= 0006 ) {
+										if ( $alert->code <= 0006 ) {
 											continue; // <- Ignore php alerts.
 										}
 
@@ -352,7 +353,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											break;
 										}
 
-										if ( in_array( $alert->type, $obsolete_events, true ) ) {
+										if ( in_array( $alert->code, $obsolete_events, true ) ) {
 											continue; // <- Ignore promo alerts.
 										}
 
@@ -368,39 +369,39 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	                                            //  fallback for any other cases would go here
 	                                            break;
 										}
-										if ( in_array( $alert->type, $subcat_alerts, true ) ) {
+										if ( in_array( $alert->code, $subcat_alerts, true ) ) {
 											?>
 											<tr>
-												<td colspan="4">
-													<h3 class="sub-category">
+                                                <td colspan="4">
+                                                    <h3 class="sub-category">
 														<?php
-                            $subcat_title = '';
-                            switch ( $alert->type ) {
-																case 1000:
-																		$subcat_title = esc_html__( 'User Logins/Logouts', 'wp-security-audit-log' );
-																		break;
-                                case 1004:
-                                    $subcat_title = esc_html__( 'User Sessions', 'wp-security-audit-log' );
-                                    break;
-                                case 2010:
-                                    $subcat_title = esc_html__( 'Files', 'wp-security-audit-log' );
-                                    break;
-                                case 2011:
-                                    $subcat_title = esc_html__( 'Post Settings', 'wp-security-audit-log' );
-                                    break;
-                                default:
-                                    break;
-                            }
+														$subcat_title = '';
+														switch ( $alert->code ) {
+															case 1000:
+																$subcat_title = esc_html__( 'User Logins/Logouts', 'wp-security-audit-log' );
+																break;
+															case 1004:
+																$subcat_title = esc_html__( 'User Sessions', 'wp-security-audit-log' );
+																break;
+															case 2010:
+																$subcat_title = esc_html__( 'Files', 'wp-security-audit-log' );
+																break;
+															case 2011:
+																$subcat_title = esc_html__( 'Post Settings', 'wp-security-audit-log' );
+																break;
+															default:
+																break;
+														}
 
 														// Allow further titles to be added externally.
-														$subcat_title = apply_filters( 'wsal_togglealerts_sub_category_titles', $subcat_title, $alert->type );
+														$subcat_title = apply_filters( 'wsal_togglealerts_sub_category_titles', $subcat_title, $alert->code );
 														if ( $subcat_title ) {
 															echo esc_html( $subcat_title );
 														}
 														?>
-													</h3>
-												</td>
-											</tr>
+                                                    </h3>
+                                                </td>
+                                            </tr>
 											<?php
 										}
 										?>
@@ -410,8 +411,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													name="alert[]"
 													type="checkbox"
 													class="alert"
-													<?php checked( $active[ $alert->type ] ); ?>
-													value="<?php echo esc_attr( (int) $alert->type ); ?>"
+													<?php checked( $active[ $alert->code ] ); ?>
+													value="<?php echo esc_attr( (int) $alert->code ); ?>"
 													<?php
 													if ( ! empty( $disable_inputs ) ) {
 														echo esc_attr( $disable_inputs );
@@ -420,10 +421,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													<?php echo ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) ? 'onclick="wsal_toggle_file_changes(this)"' : false; ?>
 												/>
 											</th>
-											<td><?php echo esc_html( str_pad( $alert->type, 4, '0', STR_PAD_LEFT ) ); ?></td>
+											<td><?php echo esc_html( str_pad( $alert->code, 4, '0', STR_PAD_LEFT ) ); ?></td>
 											<td>
 												<?php
-												$severity_obj = $this->_plugin->constants->GetConstantBy( 'value', $alert->code );
+												$severity_obj = $this->_plugin->constants->GetConstantBy( 'value', $alert->severity );
 												if ( 'E_CRITICAL' === $severity_obj->name ) {
 													esc_html_e( 'Critical', 'wp-security-audit-log' );
 												} elseif ( 'E_WARNING' === $severity_obj->name ) {
@@ -449,7 +450,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										</tr>
 										<?php
 
-										if ( 4000 === $alert->type ) {
+										if ( 4000 === $alert->code ) {
 											$frontend_events        = WSAL_Settings::get_frontend_events();
 											?>
 											<tr>
@@ -462,7 +463,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<?php
 										}
 
-										if ( 1002 === $alert->type ) {
+										if ( 1002 === $alert->code ) {
 											$log_failed_login_limit = (int) $this->_plugin->GetGlobalSetting( 'log-failed-login-limit', 10 );
 											$log_failed_login_limit = ( -1 === $log_failed_login_limit ) ? '0' : $log_failed_login_limit;
 											?>
@@ -475,7 +476,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											</tr>
 											<?php
 										}
-										if ( 1003 === $alert->type ) {
+										if ( 1003 === $alert->code ) {
 											$log_visitor_failed_login_limit = (int) $this->_plugin->GetGlobalSetting( 'log-visitor-failed-login-limit', 10 );
 											$log_visitor_failed_login_limit = ( -1 === $log_visitor_failed_login_limit ) ? '0' : $log_visitor_failed_login_limit;
 											?>
@@ -489,8 +490,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<?php
 										}
 
-
-										if ( 1003 === $alert->type ) {
+										if ( 1003 === $alert->code ) {
 											$frontend_events        = WSAL_Settings::get_frontend_events();
 											?>
 											<tr>
@@ -504,7 +504,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											<?php
 										}
 
-										do_action( 'wsal_togglealerts_append_content_to_toggle', $alert->type );
+										do_action( 'wsal_togglealerts_append_content_to_toggle', $alert->code );
 									}
 
 									// File integrity scan link.

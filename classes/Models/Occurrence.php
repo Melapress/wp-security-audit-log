@@ -162,14 +162,14 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	/**
 	 * Gets alert message.
 	 *
-	 * @see WSAL_Alert::GetMessage()
+	 * @param array $meta - Occurrence meta array.
+	 * @param string $context Message context.
 	 *
-	 * @param callable|null $meta_formatter - (Optional) Meta formatter callback.
-	 * @param mixed         $highlight      - (Optional) Highlight format.
-	 * @param array         $meta           - Occurrence meta array.
 	 * @return string Full-formatted message.
+	 * @throws Freemius_Exception
+	 * @see WSAL_Alert::GetMessage()
 	 */
-	public function GetMessage( $meta_formatter = null, $highlight = false, $meta = null ) {
+	public function GetMessage( $meta = null, $context = false ) {
 		if ( ! isset( $this->_cachedmessage ) ) {
 			// Get correct message entry.
 			if ( $this->is_migrated ) {
@@ -182,7 +182,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 			$meta_array   = null === $meta ? $this->GetMetaArray() : $meta;
 			$alert_object = $this->GetAlert();
 			if ( null !== $alert_object && method_exists( $alert_object, 'GetMessage' ) ) {
-				$this->_cachedmessage = $alert_object->GetMessage( $meta_array, $meta_formatter, $this->_cachedmessage, $this->getId(), $highlight );
+				$this->_cachedmessage = $alert_object->GetMessage( $meta_array, $this->_cachedmessage, $this->getId(), $context );
 			} else {
 				/**
 				 * Reaching this point means we have an event we don't know
