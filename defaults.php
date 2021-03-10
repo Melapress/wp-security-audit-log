@@ -2000,7 +2000,7 @@ function wsaldefaults_wsal_init() {
 						],
 						[],
 						'user',
-						'revoked'
+						'submitted'
 					),
 				),
 
