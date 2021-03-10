@@ -64,19 +64,22 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				'render'   => array( $this, 'tab_help' ),
 				'priority' => 10,
 			),
-			'contact'    => array(
+		);
+
+		if ( $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
+			$wsal_help_tabs['contact'] = array(
 				'name'     => __( 'Contact Us', 'wp-security-audit-log' ),
 				'link'     => add_query_arg( 'tab', 'contact', $this->GetUrl() ),
 				'render'   => array( $this, 'tab_contact_us' ),
 				'priority' => 15,
-			),
-			'system-info' => array(
+			);
+			$wsal_help_tabs['system-info'] = array(
 				'name'     => __( 'System Info', 'wp-security-audit-log' ),
 				'link'     => add_query_arg( 'tab', 'system-info', $this->GetUrl() ),
 				'render'   => array( $this, 'tab_system_info' ),
 				'priority' => 20,
-			),
-		);
+			);
+		}
 
 		/**
 		 * Filter: `wsal_help_tabs`
@@ -147,11 +150,12 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 * Method: Get View.
 	 */
 	public function Render() {
+		$can_current_user_edit = $this->_plugin->settings()->CurrentUserCan( 'edit' );
 		?>
 		<nav id="wsal-tabs" class="nav-tab-wrapper">
 			<?php
 			foreach ( $this->wsal_help_tabs as $tab_id => $tab ) :
-				if ( 'system-info' !== $this->current_tab || ( 'system-info' === $this->current_tab && $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) ) :
+				if ( 'system-info' !== $this->current_tab || ( 'system-info' === $this->current_tab && $can_current_user_edit ) ) :
 					?>
 					<a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( $tab_id === $this->current_tab ) ? 'nav-tab-active' : false; ?>"><?php echo esc_html( $tab['name'] ); ?></a>
 					<?php
@@ -164,7 +168,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			<div class="wsal-help-main">
 				<?php
 				if ( ! empty( $this->current_tab ) && ! empty( $this->wsal_help_tabs[ $this->current_tab ]['render'] ) ) {
-					if ( 'system-info' !== $this->current_tab || ( 'system-info' === $this->current_tab && $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) ) {
+					if ( 'system-info' !== $this->current_tab || ( 'system-info' === $this->current_tab && $can_current_user_edit ) ) {
 						call_user_func( $this->wsal_help_tabs[ $this->current_tab ]['render'] );
 					}
 				}

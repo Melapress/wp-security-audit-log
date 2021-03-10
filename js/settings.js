@@ -232,4 +232,13 @@ jQuery( document ).ready( function() {
 		});
 	});
 
+	// Allow custom login message to be changed without saving/refreshing the page.
+	jQuery('input[name="login_page_notification"]').on('change', function () {
+		if ( 'true' == this.value ) {
+			jQuery( '#login_page_notification_text' ).prop( 'disabled', false );
+		} else {
+			jQuery( '#login_page_notification_text' ).prop( 'disabled', true );
+		}
+	});
+
 });

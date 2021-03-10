@@ -388,7 +388,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 			case 'code':
 				$code  = $this->_plugin->alerts->GetAlert( $item->alert_id );
-				$code  = $code ? $code->code : 0;
+				$code  = $code ? $code->severity : 0;
 				$const = $this->_plugin->constants->get_constant_to_display( $code );
 
 				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="log-type log-type-' . $const->value . '"></span></a>';
@@ -403,7 +403,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 					?>
 					<table id="Event<?php echo absint( $item->id ); ?>">
 						<td class="wsal-grid-text-header"><?php esc_html_e( 'Message:', 'alm-' ); ?></td>
-						<td class="wsal-grid-text-data"><?php echo $item->GetMessage( array( $this->_plugin->settings, 'meta_formatter' ), false, $this->item_meta[ $item->getId() ] ); ?></td>
+						<td class="wsal-grid-text-data"><?php echo $item->GetMessage( $this->item_meta[ $item->getId() ] ); ?></td>
 					</table>
 					<?php
 				}

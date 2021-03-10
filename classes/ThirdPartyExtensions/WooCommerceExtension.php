@@ -56,12 +56,12 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 			foreach ( $registered_alerts as $alert ) {
 
 				// Disable Visitor events if the user disabled the event there are "tied to" in the UI.
-				if ( ! in_array( $alert->type, $enabled, true ) ) {
-					if ( 9035 === $alert->type ) {
+				if ( ! in_array( $alert->code, $enabled, true ) ) {
+					if ( 9035 === $alert->code ) {
 						$frontend_events = array_merge( $frontend_events, array( 'woocommerce' => false ) );
 						WSAL_Settings::set_frontend_events( $frontend_events );
 					}
-					$disabled[] = $alert->type;
+					$disabled[] = $alert->code;
 				}
 			}
 

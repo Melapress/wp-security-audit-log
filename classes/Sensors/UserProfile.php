@@ -54,6 +54,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		add_action( 'granted_super_admin', array( $this, 'event_super_access_granted' ), 10, 1 );
 		add_action( 'revoked_super_admin', array( $this, 'event_super_access_revoked' ), 10, 1 );
 		add_action( 'update_user_meta', array( $this, 'event_application_password_added' ), 10, 4 );
+		add_action( 'retrieve_password', array( $this, 'event_password_reset_link_sent' ), 10, 1 );
 
 	}
 
@@ -366,6 +367,30 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Trigger event when admin sends a password reset link.
+	 *
+	 * @param string $user_login User's login name.
+	 */
+	public function event_password_reset_link_sent( $user_login ) {
+		$current_user       = get_user_by( 'login', $user_login );
+
+		$current_userdata   = get_userdata( $current_user->ID );
+		$current_user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $current_userdata->roles ) );
+
+		$this->plugin->alerts->Trigger(
+			4029,
+			array(
+				'roles'         => $current_user_roles,
+				'login'         => $current_user->user_login,
+				'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
+				'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
+				'CurrentUserID' => $current_user->ID,
+				'EventType'     => 'revoked',
+			)
+		);
 	}
 
 	/**

@@ -6,7 +6,7 @@
  * Author: WP White Security
  * Version: 4.2.0.1
  * Text Domain: wp-security-audit-log
- * Author URI: http://www.wpwhitesecurity.com/
+ * Author URI: https://www.wpwhitesecurity.com/
  * License: GPL2
  * Network: true
  *
@@ -497,7 +497,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$yoast_seo_addon    = new WSAL_YoastSeoExtension;
 				$bbpress_addon      = new WSAL_BBPressExtension;
 				$wpforms_addon      = new WSAL_WPFormsExtension;
-				// Comment out till ready.
 				$gravityforms_addon = new WSAL_GravityFormsExtension;
 			}
 
@@ -770,6 +769,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                                 $disabled_event_ids = array_key_exists( 'disabled_events', $settings_to_enforce ) ? array_map( 'intval', explode( ',', $settings_to_enforce['disabled_events'] ) ) : [];
                                 $this->alerts->SetDisabledAlerts( $disabled_event_ids );
                             }
+
+                            if (array_key_exists('incognito_mode_enabled', $settings_to_enforce)) {
+                                $this->settings()->SetIncognito($settings_to_enforce['incognito_mode_enabled']);
+                            }
+
+                            if (array_key_exists('login_notification_enabled', $settings_to_enforce)) {
+                                $login_page_notification_enabled = $settings_to_enforce['login_notification_enabled'];
+                                $this->settings()->set_login_page_notification($login_page_notification_enabled);
+                                if ('yes' === $login_page_notification_enabled) {
+                                    $this->settings()->set_login_page_notification_text($settings_to_enforce['login_notification_text']);
+                                }
+                            }
+
                         } else if ( 'remove' === $subaction ) {
                             $this->settings()->delete_mainwp_enforced_settings();
                         }
@@ -1122,6 +1134,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @param WpSecurityAuditLog $this – Instance of main plugin class.
 			 */
 			do_action( 'wsal_init', $this );
+
+			//  allow registration of custom alert formatters (must be called after wsal_init action )
+			WSAL_AlertFormatterFactory::bootstrap();
 		}
 
 		/**
@@ -1434,14 +1449,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				//  remove obsolete options from the database
 				if ( version_compare( $new_version, '4.1.4', '>=' ) ) {
-					$this->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . 'addon_available_notice_dismissed' );
+					$this->DeleteGlobalSetting( 'addon_available_notice_dismissed' );
 
 					// Remove old file scanning options.
 					global $wpdb;
 					$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_local_files_%'" );
 					if ( ! empty( $plugin_options ) ) {
 						foreach( $plugin_options as $option ) {
-							$this->DeleteSettingByName( $option->option_name );
+							$this->DeleteGlobalSetting( $option->option_name );
 						}
 					}
 				}
@@ -1465,7 +1480,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						'excluded-urls'
 					];
 					foreach ( $not_found_page_related_settings as $setting_name ) {
-						$this->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . $setting_name );
+						$this->DeleteGlobalSetting( $setting_name );
 					}
 
 					//  remove cron job for purging 404 logs
@@ -1476,9 +1491,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				if ( version_compare( $new_version, '4.2.0', '>=' ) ) {
 					//  delete custom logging dir path from the settings
-					$this->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . 'custom-logging-dir' );
+					$this->DeleteGlobalSetting( 'custom-logging-dir' );
 					//  delete dev options from the settings
-					$this->DeleteSettingByName( WpSecurityAuditLog::OPTIONS_PREFIX . 'dev-options' );
+					$this->DeleteGlobalSetting( 'dev-options' );
 				}
 			}
 		}
@@ -1570,7 +1585,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		 * @internal
 		 */
 		public function HidePlugin() {
-			if ( ! $this->_settings->CurrentUserCan( 'view' ) ) {
+			if ( ! $this->_settings->CurrentUserCan( 'edit' ) ) {
 				$selectr = '';
 				$plugins = array( 'wp-security-audit-log', 'wp-security-audit-log-premium' );
 				foreach ( $plugins as $value ) {
@@ -1663,6 +1678,22 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function SetGlobalSetting( $option, $value ) {
             $this->include_options_helper();
 			return $this->options_helper->set_option_value( $option, $value );
+		}
+
+		/**
+		 * Deletes a global setting.
+         *
+         * Handles option names without the prefix, but also the ones that do for backwards compatibility.
+		 *
+		 * @param string $option - Option name.
+		 *
+		 * @return bool
+		 * @since 4.2.1
+		 */
+		public function DeleteGlobalSetting( $option ) {
+			$this->include_options_helper();
+
+			return $this->options_helper->delete_option( $option );
 		}
 
 		/**
@@ -1837,20 +1868,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		public function GetNotification( $id ) {
 			$this->include_options_helper();
 			return $this->options_helper->GetNotification($id);
-		}
-
-		/**
-		 * Deletes setting by name.
-		 *
-		 * @param string $name - Option name not including the plugin prefix.
-		 *
-		 * @return bool
-		 */
-		public function DeleteSettingByName( $name ) {
-			if ( empty( $this->options_helper ) ) {
-				$this->include_options_helper();
-			}
-			return $this->options_helper->delete_option( $name );
 		}
 
 		/**
