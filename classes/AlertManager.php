@@ -94,6 +94,12 @@ final class WSAL_AlertManager {
 	 */
 	private $date_format;
 
+    /**
+     * @var string Sanitized date format.
+     * @since 4.2.1
+     */
+    private $sanitized_date_format;
+
 	/**
 	 * Create new AlertManager instance.
 	 *
@@ -144,6 +150,7 @@ final class WSAL_AlertManager {
 		);
 
 		$this->date_format     = $this->plugin->settings()->GetDateFormat();
+        $this->sanitized_date_format = $this->plugin->settings()->GetDateFormat(true);
 	}
 
 	/**
@@ -1308,7 +1315,7 @@ final class WSAL_AlertManager {
 				if ( 'event' === $prefix ) {
 					$query->addORCondition( array( 'alert_id = %s' => $value ) );
 				} elseif ( in_array( $prefix, array( 'from', 'to', 'on' ), true ) ) {
-					$date        = DateTime::createFromFormat( $this->date_format, $value[0] );
+					$date = DateTime::createFromFormat( $this->sanitized_date_format, $value[0] );
 					$date->setTime( 0, 0 ); // Reset time to 00:00:00.
 					$date_string = $date->format( 'U' );
 
@@ -1626,17 +1633,15 @@ final class WSAL_AlertManager {
 		$ip_address  = $ip_addresses ? "'" . implode( ',', $ip_addresses ) . "'" : 'null';
 		$alert_codes = ! empty( $codes ) ? "'" . implode( ',', $codes ) . "'" : 'null';
 
-		if ( $date_start ) {
-			$dt              = new \DateTime();
-			$df              = $dt->createFromFormat( $this->date_format . ' H:i:s', $date_start . ' 00:00:00' );
-			$start_timestamp = $df->format( 'U' );
-		}
+        if ($date_start) {
+            $start_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_start . ' 00:00:00');
+            $start_timestamp = $start_datetime->format('U');
+        }
 
-		if ( $date_end ) {
-			$dt            = new \DateTime();
-			$df            = $dt->createFromFormat( $this->date_format . ' H:i:s', $date_end . ' 23:59:59' );
-			$end_timestamp = $df->format( 'U' );
-		}
+        if ($date_end) {
+            $end_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_end . ' 23:59:59');
+            $end_timestamp = $end_datetime->format('U');
+        }
 
 		$last_date = null;
 
@@ -1725,17 +1730,15 @@ final class WSAL_AlertManager {
 		$end_timestamp   = 'null';
 		$alert_code      = "'" . implode( ',', $_codes ) . "'";
 
-		if ( $date_start ) {
-			$dt              = new \DateTime();
-			$df              = $dt->createFromFormat( $this->date_format . ' H:i:s', $date_start . ' 00:00:00' );
-			$start_timestamp = $df->format( 'U' );
-		}
+        if ($date_start) {
+            $start_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_start . ' 00:00:00');
+            $start_timestamp = $start_datetime->format('U');
+        }
 
-		if ( $date_end ) {
-			$dt            = new \DateTime();
-			$df            = $dt->createFromFormat( $this->date_format . ' H:i:s', $date_end . ' 23:59:59' );
-			$end_timestamp = $df->format( 'U' );
-		}
+        if ($date_end) {
+            $end_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_end . ' 23:59:59');
+            $end_timestamp = $end_datetime->format('U');
+        }
 
 		$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReportGrouped( $site_id, $start_timestamp, $end_timestamp, $user_id, $role_name, $ip_address, $alert_code );
 		return array_values( $results );

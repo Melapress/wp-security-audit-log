@@ -104,7 +104,7 @@ msgstr ""
 msgid "Terminated the session of another user."
 msgstr ""
 
-#: defaults.php:259, defaults.php:273, defaults.php:1710, defaults.php:1813, classes/AlertManager.php:1133, classes/AuditLogListView.php:299, classes/AuditLogListView.php:333, classes/WidgetManager.php:76, classes/Views/Settings.php:1094, extensions/external-db/classes/Common.php:964, extensions/reports/classes/CsvReportGenerator.php:87, extensions/reports/classes/CsvReportGenerator.php:71, extensions/reports/classes/HtmlReportGenerator.php:249, extensions/reports/classes/HtmlReportGenerator.php:225, extensions/search/classes/Filters/UserNameFilter.php:44, extensions/user-sessions/classes/View/Sessions.php:138
+#: defaults.php:259, defaults.php:273, defaults.php:1710, defaults.php:1813, classes/AlertManager.php:1140, classes/AuditLogListView.php:299, classes/AuditLogListView.php:333, classes/WidgetManager.php:76, classes/Views/Settings.php:1094, extensions/external-db/classes/Common.php:964, extensions/reports/classes/CsvReportGenerator.php:87, extensions/reports/classes/CsvReportGenerator.php:71, extensions/reports/classes/HtmlReportGenerator.php:249, extensions/reports/classes/HtmlReportGenerator.php:225, extensions/search/classes/Filters/UserNameFilter.php:44, extensions/user-sessions/classes/View/Sessions.php:138
 msgid "User"
 msgstr ""
 
@@ -656,7 +656,7 @@ msgstr ""
 msgid "New custom field name"
 msgstr ""
 
-#: defaults.php:927, classes/AlertManager.php:1137
+#: defaults.php:927, classes/AlertManager.php:1144
 msgid "Post"
 msgstr ""
 
@@ -884,7 +884,7 @@ msgstr ""
 msgid "The setting in the %MenuName%"
 msgstr ""
 
-#: defaults.php:1261, classes/AlertManager.php:1141
+#: defaults.php:1261, classes/AlertManager.php:1148
 msgid "Setting"
 msgstr ""
 
@@ -1740,7 +1740,7 @@ msgstr ""
 msgid "Table"
 msgstr ""
 
-#: defaults.php:2159, defaults.php:2172, defaults.php:2185, defaults.php:2200, defaults.php:2215, classes/AlertManager.php:1135, classes/AuditLogGridView.php:460, classes/AuditLogListView.php:486
+#: defaults.php:2159, defaults.php:2172, defaults.php:2185, defaults.php:2200, defaults.php:2215, classes/AlertManager.php:1142, classes/AuditLogGridView.php:460, classes/AuditLogListView.php:486
 msgid "Plugin"
 msgstr ""
 
@@ -1784,7 +1784,7 @@ msgstr ""
 msgid "Modified a file with the plugin editor"
 msgstr ""
 
-#: defaults.php:2227, defaults.php:2337, classes/AlertManager.php:1138, classes/AlertManager.php:1142
+#: defaults.php:2227, defaults.php:2337, classes/AlertManager.php:1145, classes/AlertManager.php:1149
 msgid "File"
 msgstr ""
 
@@ -1812,7 +1812,7 @@ msgstr ""
 msgid "Theme created this table in the database"
 msgstr ""
 
-#: defaults.php:2285, defaults.php:2298, defaults.php:2311, classes/AlertManager.php:1150
+#: defaults.php:2285, defaults.php:2298, defaults.php:2311, classes/AlertManager.php:1157
 msgid "Theme"
 msgstr ""
 
@@ -1928,7 +1928,7 @@ msgstr ""
 msgid "WordPress & System"
 msgstr ""
 
-#: defaults.php:2451, classes/AlertManager.php:1134, classes/AlertManager.php:1926, classes/AuditLogGridView.php:469, classes/AuditLogListView.php:498, extensions/email-notifications/classes/DailyNotification.php:241, extensions/email-notifications/classes/Notifier.php:639, extensions/reports/classes/Common.php:1259
+#: defaults.php:2451, classes/AlertManager.php:1141, classes/AlertManager.php:1929, classes/AuditLogGridView.php:469, classes/AuditLogListView.php:498, extensions/email-notifications/classes/DailyNotification.php:240, extensions/email-notifications/classes/Notifier.php:639, extensions/reports/classes/Common.php:1258
 msgid "System"
 msgstr ""
 
@@ -2436,7 +2436,7 @@ msgstr ""
 msgid "Get a free 7-day trial of the premium edition of %s. No credit card required, no commitments!"
 msgstr ""
 
-#: wp-security-audit-log.php:972, classes/AlertManager.php:1152, extensions/external-db/classes/Connections.php:173
+#: wp-security-audit-log.php:972, classes/AlertManager.php:1159, extensions/external-db/classes/Connections.php:173
 msgid "WP Activity Log"
 msgstr ""
 
@@ -2586,218 +2586,218 @@ msgid "published"
 msgstr ""
 
 #. translators: Event ID
-#: classes/AlertManager.php:400
+#: classes/AlertManager.php:407
 msgid "Event with code %d has not be registered."
 msgstr ""
 
 #. translators: Event ID
-#: classes/AlertManager.php:484
+#: classes/AlertManager.php:491
 msgid "Event %s already registered with WP Activity Log."
 msgstr ""
 
-#: classes/AlertManager.php:515
+#: classes/AlertManager.php:522
 msgid "You have custom events that are using the same ID or IDs which are already registered in the plugin, so they have been disabled."
 msgstr ""
 
 #. translators: 1.CSS classes, 2. Notice, 3. Contact us link
-#: classes/AlertManager.php:518
+#: classes/AlertManager.php:525
 msgid "%4$s to help you solve this issue."
 msgstr ""
 
-#: classes/AlertManager.php:520
+#: classes/AlertManager.php:527
 msgid "ERROR:"
 msgstr ""
 
-#: classes/AlertManager.php:522
+#: classes/AlertManager.php:529
 msgid "Contact us"
 msgstr ""
 
-#: classes/AlertManager.php:1136
+#: classes/AlertManager.php:1143
 msgid "Database"
 msgstr ""
 
-#: classes/AlertManager.php:1139
+#: classes/AlertManager.php:1146
 msgid "Tag"
 msgstr ""
 
-#: classes/AlertManager.php:1140
+#: classes/AlertManager.php:1147
 msgid "Comment"
 msgstr ""
 
-#: classes/AlertManager.php:1143
+#: classes/AlertManager.php:1150
 msgid "System Setting"
 msgstr ""
 
-#: classes/AlertManager.php:1144
+#: classes/AlertManager.php:1151
 msgid "MainWP Network"
 msgstr ""
 
-#: classes/AlertManager.php:1145
+#: classes/AlertManager.php:1152
 msgid "MainWP"
 msgstr ""
 
-#: classes/AlertManager.php:1146
+#: classes/AlertManager.php:1153
 msgid "Category"
 msgstr ""
 
-#: classes/AlertManager.php:1147
+#: classes/AlertManager.php:1154
 msgid "Custom Field"
 msgstr ""
 
-#: classes/AlertManager.php:1148
+#: classes/AlertManager.php:1155
 msgid "Widget"
 msgstr ""
 
-#: classes/AlertManager.php:1149
+#: classes/AlertManager.php:1156
 msgid "Menu"
 msgstr ""
 
-#: classes/AlertManager.php:1151
+#: classes/AlertManager.php:1158
 msgid "Activity log"
 msgstr ""
 
-#: classes/AlertManager.php:1153
+#: classes/AlertManager.php:1160
 msgid "Multisite Network"
 msgstr ""
 
-#: classes/AlertManager.php:1154, extensions/email-notifications/classes/Common.php:1126, extensions/search/classes/Filters/IpFilter.php:87, extensions/user-sessions/classes/View/Sessions.php:298
+#: classes/AlertManager.php:1161, extensions/email-notifications/classes/Common.php:1126, extensions/search/classes/Filters/IpFilter.php:87, extensions/user-sessions/classes/View/Sessions.php:298
 msgid "IP Address"
 msgstr ""
 
-#: classes/AlertManager.php:1170
+#: classes/AlertManager.php:1177
 msgid "unknown object"
 msgstr ""
 
-#: classes/AlertManager.php:1207
+#: classes/AlertManager.php:1214
 msgid "Login"
 msgstr ""
 
-#: classes/AlertManager.php:1208
+#: classes/AlertManager.php:1215
 msgid "Logout"
 msgstr ""
 
-#: classes/AlertManager.php:1209
+#: classes/AlertManager.php:1216
 msgid "Installed"
 msgstr ""
 
-#: classes/AlertManager.php:1210
+#: classes/AlertManager.php:1217
 msgid "Activated"
 msgstr ""
 
-#: classes/AlertManager.php:1211
+#: classes/AlertManager.php:1218
 msgid "Deactivated"
 msgstr ""
 
-#: classes/AlertManager.php:1212
+#: classes/AlertManager.php:1219
 msgid "Uninstalled"
 msgstr ""
 
-#: classes/AlertManager.php:1213
+#: classes/AlertManager.php:1220
 msgid "Updated"
 msgstr ""
 
-#: classes/AlertManager.php:1214, extensions/user-sessions/classes/View/Sessions.php:145
+#: classes/AlertManager.php:1221, extensions/user-sessions/classes/View/Sessions.php:145
 msgid "Created"
 msgstr ""
 
-#: classes/AlertManager.php:1215
+#: classes/AlertManager.php:1222
 msgid "Modified"
 msgstr ""
 
-#: classes/AlertManager.php:1216, extensions/search/search-init.php:301
+#: classes/AlertManager.php:1223, extensions/search/search-init.php:301
 msgid "Deleted"
 msgstr ""
 
-#: classes/AlertManager.php:1217, extensions/reports/classes/CsvReportGenerator.php:276, extensions/reports/classes/HtmlReportGenerator.php:453
+#: classes/AlertManager.php:1224, extensions/reports/classes/CsvReportGenerator.php:276, extensions/reports/classes/HtmlReportGenerator.php:453
 msgid "Published"
 msgstr ""
 
-#: classes/AlertManager.php:1218
+#: classes/AlertManager.php:1225
 msgid "Approved"
 msgstr ""
 
-#: classes/AlertManager.php:1219
+#: classes/AlertManager.php:1226
 msgid "Unapproved"
 msgstr ""
 
-#: classes/AlertManager.php:1220
+#: classes/AlertManager.php:1227
 msgid "Enabled"
 msgstr ""
 
-#: classes/AlertManager.php:1221, extensions/email-notifications/classes/Notifications.php:1820
+#: classes/AlertManager.php:1228, extensions/email-notifications/classes/Notifications.php:1820
 msgid "Disabled"
 msgstr ""
 
-#: classes/AlertManager.php:1222
+#: classes/AlertManager.php:1229
 msgid "Added"
 msgstr ""
 
-#: classes/AlertManager.php:1223
+#: classes/AlertManager.php:1230
 msgid "Failed Login"
 msgstr ""
 
-#: classes/AlertManager.php:1224
+#: classes/AlertManager.php:1231
 msgid "Blocked"
 msgstr ""
 
-#: classes/AlertManager.php:1225
+#: classes/AlertManager.php:1232
 msgid "Uploaded"
 msgstr ""
 
-#: classes/AlertManager.php:1226
+#: classes/AlertManager.php:1233
 msgid "Restored"
 msgstr ""
 
-#: classes/AlertManager.php:1227
+#: classes/AlertManager.php:1234
 msgid "Opened"
 msgstr ""
 
-#: classes/AlertManager.php:1228
+#: classes/AlertManager.php:1235
 msgid "Viewed"
 msgstr ""
 
-#: classes/AlertManager.php:1229
+#: classes/AlertManager.php:1236
 msgid "Started"
 msgstr ""
 
-#: classes/AlertManager.php:1230
+#: classes/AlertManager.php:1237
 msgid "Stopped"
 msgstr ""
 
-#: classes/AlertManager.php:1231
+#: classes/AlertManager.php:1238
 msgid "Removed"
 msgstr ""
 
-#: classes/AlertManager.php:1232
+#: classes/AlertManager.php:1239
 msgid "Unblocked"
 msgstr ""
 
-#: classes/AlertManager.php:1233
+#: classes/AlertManager.php:1240
 msgid "Renamed"
 msgstr ""
 
-#: classes/AlertManager.php:1234
+#: classes/AlertManager.php:1241
 msgid "Duplicated"
 msgstr ""
 
-#: classes/AlertManager.php:1235
+#: classes/AlertManager.php:1242
 msgid "Submitted"
 msgstr ""
 
-#: classes/AlertManager.php:1236
+#: classes/AlertManager.php:1243
 msgid "Revoked"
 msgstr ""
 
-#: classes/AlertManager.php:1253
+#: classes/AlertManager.php:1260
 msgid "unknown type"
 msgstr ""
 
-#: classes/AlertManager.php:1885, classes/ConstantManager.php:146, extensions/external-db/classes/Common.php:663, extensions/external-db/classes/Common.php:900
+#: classes/AlertManager.php:1888, classes/ConstantManager.php:146, extensions/external-db/classes/Common.php:663, extensions/external-db/classes/Common.php:900
 msgid "Unknown error code."
 msgstr ""
 
 #. translators: Site ID.
-#: classes/AlertManager.php:1904, classes/AlertManager.php:1892, extensions/external-db/classes/Common.php:885, extensions/reports/classes/Common.php:1239, extensions/reports/classes/Common.php:1229
+#: classes/AlertManager.php:1907, classes/AlertManager.php:1895, extensions/external-db/classes/Common.php:885, extensions/reports/classes/Common.php:1238, extensions/reports/classes/Common.php:1228
 msgid "Unknown Site"
 msgstr ""
 
@@ -4975,29 +4975,29 @@ msgid "HTML is accepted. Available template tags:"
 msgstr ""
 
 #. translators: singular or plural form of a login total count.
-#: extensions/email-notifications/classes/DailyNotification.php:340
+#: extensions/email-notifications/classes/DailyNotification.php:339
 msgid "was %d login"
 msgid_plural "were %d logins"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: a number that is total count of unique users in a login group.
-#: extensions/email-notifications/classes/DailyNotification.php:346
+#: extensions/email-notifications/classes/DailyNotification.php:345
 msgid "%d unique user"
 msgid_plural "%d unique users"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1 - number of logins. 2 - total unique users
-#: extensions/email-notifications/classes/DailyNotification.php:353
+#: extensions/email-notifications/classes/DailyNotification.php:352
 msgid "There %1$s on your site today from %2$s. Below is a list of the users and the IP addresses they logged in from:"
 msgstr ""
 
-#: extensions/email-notifications/classes/DailyNotification.php:385
+#: extensions/email-notifications/classes/DailyNotification.php:384
 msgid "There were failed logins due to a wrong password from the following IP addresses:"
 msgstr ""
 
-#: extensions/email-notifications/classes/DailyNotification.php:407
+#: extensions/email-notifications/classes/DailyNotification.php:406
 msgid "There were failed logins due to a wrong username from the following IP addresses:"
 msgstr ""
 
@@ -6316,47 +6316,47 @@ msgstr ""
 msgid "Mirror not found."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:690, extensions/reports/classes/Common.php:1334
+#: extensions/reports/classes/Common.php:691, extensions/reports/classes/Common.php:1333
 msgid "%1$s - Website %2$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:693, extensions/reports/classes/Common.php:1337
+#: extensions/reports/classes/Common.php:694, extensions/reports/classes/Common.php:1336
 msgid "Week number %1$s - Website %2$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:696, extensions/reports/classes/Common.php:1340
+#: extensions/reports/classes/Common.php:697, extensions/reports/classes/Common.php:1339
 msgid "Month %1$s %2$s- Website %3$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:699, extensions/reports/classes/Common.php:1343
+#: extensions/reports/classes/Common.php:700, extensions/reports/classes/Common.php:1342
 msgid "Quarter %1$s - Website %2$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:708, extensions/reports/classes/Common.php:1358
+#: extensions/reports/classes/Common.php:709, extensions/reports/classes/Common.php:1357
 msgid " - %s Email Report"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:921, extensions/reports/classes/Common.php:915
+#: extensions/reports/classes/Common.php:922, extensions/reports/classes/Common.php:916
 msgid "Internal error. <code>%s</code> key was not found."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:949, extensions/reports/classes/Common.php:1174
+#: extensions/reports/classes/Common.php:950, extensions/reports/classes/Common.php:1173
 msgid "Please specify at least one Alert Group or specify an Alert Code."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:955
+#: extensions/reports/classes/Common.php:956
 msgid "Internal Error: Could not detect the type of the report to generate."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1066, extensions/reports/classes/Common.php:1102, extensions/reports/classes/Common.php:1449, extensions/reports/classes/Common.php:1468, extensions/reports/classes/Common.php:1680
+#: extensions/reports/classes/Common.php:1065, extensions/reports/classes/Common.php:1101, extensions/reports/classes/Common.php:1448, extensions/reports/classes/Common.php:1467, extensions/reports/classes/Common.php:1678
 msgid "There are no alerts that match your filtering criteria. Please try a different set of rules."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1145
+#: extensions/reports/classes/Common.php:1144
 msgid "Internal Error. Could not retrieve the alerts from the main plugin."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1452, extensions/reports/classes/Common.php:1471, extensions/reports/classes/Common.php:1683
+#: extensions/reports/classes/Common.php:1451, extensions/reports/classes/Common.php:1470, extensions/reports/classes/Common.php:1681
 msgid "Error: The <strong>%s</strong> path is not accessible."
 msgstr ""
 
