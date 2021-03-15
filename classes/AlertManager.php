@@ -94,6 +94,12 @@ final class WSAL_AlertManager {
 	 */
 	private $date_format;
 
+    /**
+     * @var string Sanitized date format.
+     * @since 4.2.1
+     */
+    private $sanitized_date_format;
+
 	/**
 	 * Create new AlertManager instance.
 	 *
@@ -144,6 +150,7 @@ final class WSAL_AlertManager {
 		);
 
 		$this->date_format     = $this->plugin->settings()->GetDateFormat();
+        $this->sanitized_date_format = $this->plugin->settings()->GetDateFormat(true);
 	}
 
 	/**
@@ -448,27 +455,43 @@ final class WSAL_AlertManager {
 	/**
 	 * Register an alert type.
 	 *
-	 * @param array $info - Array of [type, code, category, sub-category, description, message] respectively.
+	 * @param string $category Category name.
+	 * @param string $subcategory Subcategory name.
+	 * @param array $info Event information from defaults.php.
+	 *
 	 * @throws Exception - Error if alert is already registered.
 	 */
-	public function Register( $info ) {
-		if ( func_num_args() === 1 ) {
-			// Handle single item.
-			list( $type, $code, $catg, $subcatg, $desc, $mesg, $object, $event_type ) = $info;
+	public function Register( $category, $subcategory, $info ) {
 
-			if ( isset( $this->_alerts[ $type ] ) ) {
-				add_action( 'admin_notices', array( $this, 'duplicate_event_notice' ) );
-				/* Translators: Event ID */
-				throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Activity Log.', 'wp-security-audit-log' ), $type ) );
-			}
+		//  default for optional fields
+		$metadata   = [];
+		$links      = [];
+		$object     = '';
+		$event_type = '';
 
-			$this->_alerts[ $type ] = new WSAL_Alert( $type, $code, $catg, $subcatg, $desc, $mesg, $object, $event_type );
+		$definition_items_count = count( $info );
+		if ( 8 == $definition_items_count ) {
+			//  most recent event definition introduced in version 4.2.1
+			list( $code, $severity, $desc, $message, $metadata, $links, $object, $event_type ) = $info;
+		} else if (6 == $definition_items_count ) {
+			//  legacy event definition for backwards compatibility (used prior to version 4.2.1)
+			list( $code, $severity, $desc, $message, $object, $event_type ) = $info;
 		} else {
-			// Handle multiple items.
-			foreach ( func_get_args() as $arg ) {
-				$this->Register( $arg );
-			}
+			//  even older legacy event definition for backwards compatibility
+			list( $code, $severity, $desc, $message ) = $info;
 		}
+
+		if ( is_string( $links ) ) {
+			$links = [ $links ];
+		}
+		
+		if ( isset( $this->_alerts[ $code ] ) ) {
+			add_action( 'admin_notices', array( $this, 'duplicate_event_notice' ) );
+			/* Translators: Event ID */
+			throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Activity Log.', 'wp-security-audit-log' ), $code ) );
+		}
+
+		$this->_alerts[ $code ] = new WSAL_Alert( $code, $severity, $category, $subcategory, $desc, $message, $metadata, $links, $object, $event_type );
 	}
 
 	/**
@@ -482,49 +505,11 @@ final class WSAL_AlertManager {
 	public function RegisterGroup( $groups ) {
 		foreach ( $groups as $name => $group ) {
 			foreach ( $group as $subname => $subgroup ) {
-				// Check to see if this ground has any subgroups
-				if( $this->GetArrayDepth( $group ) > 1 ) {
-					foreach ( $subgroup as $item ) {
-						if ( ! isset( $item[4] ) ) {
-							$item[4] = ''; // Set default event object.
-						}
-
-						if ( ! isset( $item[5] ) ) {
-							$item[5] = ''; // Set default event type.
-						}
-
-						list( $type, $code, $desc, $mesg, $object, $event_type ) = $item;
-						$this->Register( array( $type, $code, $name, $subname, $desc, $mesg, $object, $event_type ) );
-					}
-				// If no subgroups are found, process them accordingly.
-				} else {
-					foreach ( $group as $item ) {
-						if ( ! isset( $item[4] ) ) {
-							$item[4] = ''; // Set default event object.
-						}
-
-						if ( ! isset( $item[5] ) ) {
-							$item[5] = ''; // Set default event type.
-						}
-
-						list( $type, $code, $desc, $mesg, $object, $event_type ) = $item;
-						$this->Register( array( $type, $code, $name, $subname, $desc, $mesg, $object, $event_type ) );
-					}
+				foreach ( $subgroup as $item ) {
+					$this->Register( $name, $subname, $item );
 				}
 			}
 		}
-	}
-
-	public function GetArrayDepth( $array ) {
-		$depth = 0;
-		$iteIte = new RecursiveIteratorIterator( new RecursiveArrayIterator( $array ) );
-
-		foreach ($iteIte as $ite) {
-		    $d = $iteIte->getDepth();
-		    $depth = $d > $depth ? $d : $depth;
-		}
-
-		return $depth;
 	}
 
 	/**
@@ -632,7 +617,7 @@ final class WSAL_AlertManager {
 
 		// Get event severity.
 		$alert_obj  = $this->GetAlert( $event_id );
-		$alert_code = $alert_obj ? $alert_obj->code : 0;
+		$alert_code = $alert_obj ? $alert_obj->severity : 0;
 		$severity   = $this->plugin->constants->GetConstantBy( 'value', $alert_code );
 
 		/**
@@ -759,7 +744,7 @@ final class WSAL_AlertManager {
 		$alerts = array();
 		foreach ( $this->_alerts as $alert ) {
 			if ( $category === $alert->catg ) {
-				$alerts[ $alert->type ] = $alert;
+				$alerts[ $alert->code ] = $alert;
 			}
 		}
 		return $alerts;
@@ -776,7 +761,7 @@ final class WSAL_AlertManager {
 		$alerts = array();
 		foreach ( $this->_alerts as $alert ) {
 			if ( $sub_category === $alert->subcatg ) {
-				$alerts[ $alert->type ] = $alert;
+				$alerts[ $alert->code ] = $alert;
 			}
 		}
 		return $alerts;
@@ -941,7 +926,8 @@ final class WSAL_AlertManager {
 			}
 
 			// Delete temporary alerts.
-			$this->plugin->options_helper->delete_option( 'wsal_temp_alerts' );
+			$this->plugin->DeleteGlobalSetting( 'temp_alerts' );
+
 			return true;
 		}
 	}
@@ -949,10 +935,12 @@ final class WSAL_AlertManager {
 	/**
 	 * Return alerts for MainWP Extension.
 	 *
-	 * @param integer       $limit      - Number of alerts to retrieve.
-	 * @param int|bool      $offset     - Events offset, otherwise false.
+	 * @param integer $limit - Number of alerts to retrieve.
+	 * @param int|bool $offset - Events offset, otherwise false.
 	 * @param stdClass|bool $query_args - Events query arguments, otherwise false.
+	 *
 	 * @return stdClass
+	 * @throws Freemius_Exception
 	 */
 	public function get_mainwp_extension_events( $limit = 100, $offset = false, $query_args = false ) {
 		$mwp_events = new stdClass();
@@ -1327,7 +1315,7 @@ final class WSAL_AlertManager {
 				if ( 'event' === $prefix ) {
 					$query->addORCondition( array( 'alert_id = %s' => $value ) );
 				} elseif ( in_array( $prefix, array( 'from', 'to', 'on' ), true ) ) {
-					$date        = DateTime::createFromFormat( $this->date_format, $value[0] );
+					$date = DateTime::createFromFormat( $this->sanitized_date_format, $value[0] );
 					$date->setTime( 0, 0 ); // Reset time to 00:00:00.
 					$date_string = $date->format( 'U' );
 
@@ -1542,8 +1530,8 @@ final class WSAL_AlertManager {
 	 *
 	 * @param array $filters     - Filters.
 	 * @param mixed $report_type - Type of report.
-	 * @return array
-	 */
+	 * @return stdClass
+     */
 	public function get_mainwp_extension_report( array $filters, $report_type ) {
 		// Check report type.
 		if ( ! $report_type ) {
@@ -1645,17 +1633,15 @@ final class WSAL_AlertManager {
 		$ip_address  = $ip_addresses ? "'" . implode( ',', $ip_addresses ) . "'" : 'null';
 		$alert_codes = ! empty( $codes ) ? "'" . implode( ',', $codes ) . "'" : 'null';
 
-		if ( $date_start ) {
-			$dt              = new \DateTime();
-			$df              = $dt->createFromFormat( $this->date_format . ' H:i:s', $date_start . ' 00:00:00' );
-			$start_timestamp = $df->format( 'U' );
-		}
+        if ($date_start) {
+            $start_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_start . ' 00:00:00');
+            $start_timestamp = $start_datetime->format('U');
+        }
 
-		if ( $date_end ) {
-			$dt            = new \DateTime();
-			$df            = $dt->createFromFormat( $this->date_format . ' H:i:s', $date_end . ' 23:59:59' );
-			$end_timestamp = $df->format( 'U' );
-		}
+        if ($date_end) {
+            $end_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_end . ' 23:59:59');
+            $end_timestamp = $end_datetime->format('U');
+        }
 
 		$last_date = null;
 
@@ -1696,7 +1682,7 @@ final class WSAL_AlertManager {
 					continue;
 				}
 
-				$t = $this->get_alert_details( $entry->id, $entry->alert_id, $entry->site_id, $entry->created_on, $entry->user_id, $roles, $ip, $ua );
+				$t = $this->get_alert_details( $entry->id, $entry->id, $entry->alert_id, $entry->site_id, $entry->created_on, $entry->user_id, $roles, $ip, $ua, 'report-' . $report_format);
 				array_push( $data, $t );
 			}
 		}
@@ -1744,17 +1730,15 @@ final class WSAL_AlertManager {
 		$end_timestamp   = 'null';
 		$alert_code      = "'" . implode( ',', $_codes ) . "'";
 
-		if ( $date_start ) {
-			$dt              = new \DateTime();
-			$df              = $dt->createFromFormat( $this->date_format . ' H:i:s', $date_start . ' 00:00:00' );
-			$start_timestamp = $df->format( 'U' );
-		}
+        if ($date_start) {
+            $start_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_start . ' 00:00:00');
+            $start_timestamp = $start_datetime->format('U');
+        }
 
-		if ( $date_end ) {
-			$dt            = new \DateTime();
-			$df            = $dt->createFromFormat( $this->date_format . ' H:i:s', $date_end . ' 23:59:59' );
-			$end_timestamp = $df->format( 'U' );
-		}
+        if ($date_end) {
+            $end_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_end . ' 23:59:59');
+            $end_timestamp = $end_datetime->format('U');
+        }
 
 		$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReportGrouped( $site_id, $start_timestamp, $end_timestamp, $user_id, $role_name, $ip_address, $alert_code );
 		return array_values( $results );
@@ -1838,7 +1822,7 @@ final class WSAL_AlertManager {
 					// If this is the "System Activity" category...some of those alert needs to be padded.
 					if ( __( 'System Activity', 'wp-security-audit-log' ) === $category ) {
 						foreach ( $cat_alerts[ $category ] as $alert ) {
-							$aid = $alert->type;
+							$aid = $alert->code;
 
 							if ( 1 === strlen( $aid ) ) {
 								$aid = $this->pad_key( $aid );
@@ -1848,7 +1832,7 @@ final class WSAL_AlertManager {
 						}
 					} else {
 						foreach ( $cat_alerts[ $category ] as $alert ) {
-							array_push( $_codes, $alert->type );
+							array_push( $_codes, $alert->code );
 						}
 					}
 				}
@@ -1876,6 +1860,7 @@ final class WSAL_AlertManager {
 	/**
 	 * Get alert details.
 	 *
+	 * @param string $report_format Report format - "csv" or "html".
 	 * @param int $entry_id - Entry ID.
 	 * @param int $alert_id - Alert ID.
 	 * @param int $site_id - Site ID.
@@ -1888,7 +1873,7 @@ final class WSAL_AlertManager {
 	 * @return array|false details
 	 * @throws Exception
 	 */
-	private function get_alert_details( $entry_id, $alert_id, $site_id, $created_on, $user_id = null, $roles = null, $ip = '', $ua = '' ) {
+	private function get_alert_details( $report_format, $entry_id, $alert_id, $site_id, $created_on, $user_id = null, $roles = null, $ip = '', $ua = '', $context = 'default' ) {
 		// Must be a new instance every time, otherwise the alert message is not retrieved properly.
 		$occurrence = new WSAL_Models_Occurrence();
 
@@ -1896,7 +1881,7 @@ final class WSAL_AlertManager {
 
 		// Get alert details.
 		$code  = $this->GetAlert( $alert_id );
-		$code  = $code ? $code->code : 0;
+		$code  = $code ? $code->severity : 0;
 		$const = (object) array(
 			'name'        => 'E_UNKNOWN',
 			'value'       => 0,
@@ -1937,7 +1922,7 @@ final class WSAL_AlertManager {
 		}
 
 		if ( ! $occurrence->is_migrated || ! $occurrence->_cachedmessage ) {
-			$occurrence->_cachedmessage = $occurrence->GetAlert()->mesg;
+            $occurrence->_cachedmessage = $occurrence->GetAlert()->GetMessage( $occurrence->GetMetaArray(), null, $entry_id, $context );
 		}
 
 		if ( ! $user_id ) {
@@ -1953,9 +1938,10 @@ final class WSAL_AlertManager {
 			'blog_name'  => $blog_name,
 			'blog_url'   => $blog_url,
 			'alert_id'   => $alert_id,
+			'timestamp'  => $created_on,
 			'date'       => WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $created_on ),
 			'code'       => $const->name,
-			'message'    => $occurrence->GetAlert()->GetMessage( $occurrence->GetMetaArray(), array( $this->plugin->settings, 'meta_formatter' ), $occurrence->_cachedmessage ),
+			'message'    => $occurrence->GetMessage( null, $context ),
 			'user_name'  => $username,
 			'user_data'  => $user_id ? $this->get_event_user_data( $username ) : false,
 			'role'       => $roles,

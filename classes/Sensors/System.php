@@ -360,6 +360,34 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				)
 			);
 		}
+
+		// Site Language changed.
+		if ( $is_option_page
+			&& wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
+			&& isset( $post_array['WPLANG'] ) ) {
+			// Is there a better way to turn the language into a "nice name"?
+			require_once ABSPATH . 'wp-admin/includes/translation-install.php';
+			$available_translations = wp_get_available_translations();
+
+			// When English (United States) is selected, the WPLANG post entry is empty so lets account for this.
+			$wplang_setting = get_option( 'WPLANG' );
+			$previous_value = ( ! empty( $wplang_setting ) ) ? $wplang_setting : 'en-US';
+			$new_value      = ( ! empty( $post_array['WPLANG'] ) ) ? $post_array['WPLANG'] : 'en-US';
+
+			// Now lets turn these into a nice, native name - the same as shown to the user when choosing a language.
+			$previous_value = ( isset( $available_translations[$previous_value] ) ) ? $available_translations[$previous_value]['native_name'] : 'English (United States)';
+			$new_value      = ( isset( $available_translations[$new_value] ) ) ? $available_translations[$new_value]['native_name'] : 'English (United States)';
+
+			if ( $previous_value !== $new_value ) {
+				$this->plugin->alerts->Trigger(
+					6045,
+					array(
+						'previous_value' => $previous_value,
+						'new_value'      => $new_value,
+					)
+				);
+			}
+		}
 	}
 
 	/**

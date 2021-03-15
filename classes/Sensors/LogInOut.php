@@ -343,6 +343,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		$username       = sanitize_user( $username );
 		$new_alert_code = 1003;
 		$user           = get_user_by( 'login', $username );
+		// If we still dont have the user, lets look for them using there email address.
+		if ( empty( $user ) ) {
+			$user = get_user_by( 'email', $username );
+		}
 		$site_id        = ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
 		if ( $user ) {
 			$new_alert_code = 1002;

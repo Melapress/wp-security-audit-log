@@ -431,7 +431,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					. str_pad( $item->alert_id, 4, '0', STR_PAD_LEFT ) . ' </span>';
 			case 'code':
 				$code  = $this->_plugin->alerts->GetAlert( $item->alert_id );
-				$code  = $code ? $code->code : 0;
+				$code  = $code ? $code->severity : 0;
 				$const = $this->_plugin->constants->get_constant_to_display( $code );
 
 				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="log-type log-type-' . $const->value . '"></span></a>';
@@ -566,7 +566,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return ! $info ? ( 'Unknown Site ' . $item->site_id )
 					: ( '<a href="' . esc_attr( $info->siteurl ) . '">' . esc_html( $info->blogname ) . '</a>' );
 			case 'mesg':
-				return '<div id="Event' . $item->id . '">' . $item->GetMessage( array( $this->_plugin->settings, 'meta_formatter' ), false, $this->item_meta[ $item->getId() ] ) . '</div>';
+				return '<div id="Event' . $item->id . '">' . $item->GetMessage( $this->item_meta[ $item->getId() ] ) . '</div>';
 			case 'data':
 				$url     = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $item->id;
 				$tooltip = esc_attr__( 'View all details of this change', 'wp-security-audit-log' );

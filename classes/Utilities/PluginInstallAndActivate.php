@@ -143,6 +143,9 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 			// NOTE: this means when using we need to test it's still an array.
 			$installable_plugins = apply_filters( 'wsal_filter_installable_plugins', $plugins );
 
+			// Sort them into a a nice order.
+			array_multisort( array_column( $installable_plugins, 'title' ), SORT_ASC, $installable_plugins );
+
 			return $installable_plugins;
 		}
 	}

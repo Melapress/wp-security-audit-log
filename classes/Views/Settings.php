@@ -213,7 +213,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Method: Check security token.
 	 */
 	public function AjaxCheckSecurityToken() {
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 			echo wp_json_encode(
 				array(
 					'success' => false,
@@ -262,7 +262,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Method: Run cleanup.
 	 */
 	public function AjaxRunCleanup() {
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -444,8 +444,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Tab: `General`
 	 */
 	private function tab_general() {
+        $settings = $this->_plugin->settings();
+        $enforced_settings = $settings->get_mainwp_enforced_settings();
+        $login_page_notification_settings_enforced_by_mainwp = array_key_exists('login_notification_enabled', $enforced_settings);
+        $incognito_setting_enforced_by_mainwp = array_key_exists('incognito_mode_enabled', $enforced_settings);
 		?>
-				<h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
+        <h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
         <p class="description">
 			<?php
 			echo sprintf(
@@ -600,7 +604,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
             <tr>
                 <th><label for="login_page_notification"><?php esc_html_e( 'Login Page Notification', 'wp-security-audit-log' ); ?></label></th>
                 <td>
-                    <fieldset>
+                    <fieldset <?php echo disabled($login_page_notification_settings_enforced_by_mainwp); ?>>
 						<?php
 						// Get login page notification checkbox.
 						$wsal_lpn = $this->_plugin->settings()->is_login_page_notification();
@@ -881,7 +885,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<tr>
 					<th><label for="incognito_yes"><?php esc_html_e( 'Hide Plugin in Plugins Page', 'wp-security-audit-log' ); ?></label></th>
 					<td>
-						<fieldset>
+                        <fieldset <?php echo disabled( $incognito_setting_enforced_by_mainwp ); ?>>
 							<label for="incognito_yes">
 								<input type="radio" name="Incognito" value="yes" id="incognito_yes" <?php checked( $this->_plugin->settings()->IsIncognito() ); ?> />
 								<?php esc_html_e( 'Yes, hide the plugin from the list of installed plugins', 'wp-security-audit-log' ); ?>
@@ -1585,8 +1589,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Method: Ajax Request handler for AjaxGetAllUsers.
 	 */
 	public function AjaxGetAllUsers() {
-		// Die if user does not have permission to view.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
+		// Die if user does not have permission to edit.
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -1613,8 +1617,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Method: Ajax Request handler for AjaxGetAllRoles.
 	 */
 	public function AjaxGetAllRoles() {
-		// Die if user does not have permission to view.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
+		// Die if user does not have permission to edit.
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -1643,8 +1647,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * @since 2.6.7
 	 */
 	public function AjaxGetAllCPT() {
-		// Die if user does not have permission to view.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
+		// Die if user does not have permission to edit.
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -1703,9 +1707,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	/**
 	 * Method: Purge plugin occurrence & meta tables.
 	 */
-	public function purge_activity() {
+        public function purge_activity() {
 		// Die if user does not have permission to change settings.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 			wp_send_json_error( esc_html__( 'Access Denied.', 'wp-security-audit-log' ) );
 		}
 

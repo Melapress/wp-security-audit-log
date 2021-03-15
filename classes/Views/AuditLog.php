@@ -821,7 +821,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function wsal_freemius_opt_in() {
 		// Die if not have access.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
+		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
 			die( 'Access Denied.' );
 		}
 

@@ -110,14 +110,10 @@ class Options {
 	}
 
 	/**
-	 * Deletes an option from the WP options table.
+	 * Deletes a plugin option from the WP options table.
 	 *
-	 * NOTE: This is just a straight wrapper around the core function - if the
-	 * item is prefixed then pass the prefix in the option name.
-	 *
-	 * @method delete_option
 	 * @since  4.0.2
-	 * @param  string $option_name Name of the option to delete.
+	 * @param  string $option_name Name of the option to delete (including the prefix).
 	 * @return bool
 	 */
 	public function delete_option( $option_name = '' ) {
@@ -125,7 +121,13 @@ class Options {
 			switch_to_blog(get_main_network_id());
 		}
 
-		$result = \delete_option( $option_name );
+		$actual_option_name = $option_name;
+		if ( ! preg_match( '/\A' . preg_quote( $this->prefix ) . '/', $option_name ) ) {
+			//  prepend prefix if not already present
+			$actual_option_name = $this->prefix . $option_name;
+		}
+
+		$result = \delete_option( $actual_option_name );
 
 		if (is_multisite()) {
 			restore_current_blog();
