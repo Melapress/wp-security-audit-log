@@ -13,7 +13,7 @@ The #1 user-rated activity log plugin. Keep a comprehensive log of the changes t
 
 == Description ==
 
-<strong>THE MOST COMPREHENSIVE & EASY TO USE WORDPRESS ACTIVITY LOG PLUGIN</strong><br />
+<strong>THE MOST COMPREHENSIVE & EASY TO USE ACTIVITY LOG PLUGIN FOR WORDPRESS</strong><br />
 
 Keep an [activity log](https://wpactivitylog.com/wordpress-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) of everything that happens on your WordPress sites and multisite networks with the WP Activity Log plugin to:
 
@@ -26,7 +26,7 @@ Keep an [activity log](https://wpactivitylog.com/wordpress-activity-log/?utm_sou
 
 [WP Activity Log](https://wpactivitylog.com/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) is the most comprehensive real time user activity and monitoring log plugin. It helps thousands of WordPress administrators and security professionals keep an eye on what is happening on their websites. It is also the most highly rated WordPress activity log plugin and have been featured on popular sites such as GoDaddy, Kinsta and WPBeginner.
 
-[youtube https://www.youtube.com/watch?v=1nopATCS-CQ]
+[youtube https://www.youtube.com/watch?v=pgFEMIvKFTA]
 
 > <strong>Note</strong>: The WordPress activity log is FREE. Features such as reports, email notifications, SMS alerts, search and many others are available in the <Strong>[Premium Edition](https://wpactivitylog.com/features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>.
 >
@@ -62,11 +62,11 @@ Below is a summary of the changes that the plugin can keep a record of:
 
 * **WordPress database changes** such as when a plugin adds or removes a table
 
-* Changes on **WooCommerce Stores & Products**, **Yoast SEO**, **Advanced Custom Fields (ACF)**, **MainWP** and other popular WordPress plugins.
+* Changes on **WooCommerce Stores & products**, **Yoast SEO**, **WPForms**, **Gravity Forms**, **Advanced Custom Fields (ACF)**, **MainWP** and other popular WordPress plugins.
 
 * **[WordPress site file changes](https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)** such as new files are added, or existing ones are modified or deleted.
 
-For every event that the plugin keeps a log of it also reports the:
+For every event that the plugin records it also reports the:
 
 * Date & time (and milliseconds) of when it happened,
 * User & role of the user who did the change,
@@ -78,19 +78,18 @@ Refer to [WordPress activity log event IDs](https://wpactivitylog.com/support/kb
 <strong>[Upgrade to WP Activity Log Premium](https://wpactivitylog.com/pricing/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong> to:
 
 * See who is logged,
-* See what everyone is doing in real time,
+* See what everyone is doing in real-time,
 * Log off any user with just a click,
 * Generate HTML and CSV reports,
 * Export the activity log in CSV (ideal for integrations),
 * Get notified via email of important changes,
 * Get instant SMS message notifications of critical site changes,
-* Search the activity log using text-based searches,
-* Use built-in filters to fine tune the searches,
+* Search the activity log using text-based searches and use built-in filters to fine tune the searches,
 * Store activity log in an external database to improve security,
 * Mirror the WordPress activity logs to Slack, Papertrail, Syslog and other central log management and collaboration solutions,
 * Configure archiving and mirroring of logs.
 
-Refer to the [features page](https://wpactivitylog.com/features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information on the plugin's features.
+Refer to the [features and benefits page](https://wpactivitylog.com/features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information on the plugin's features.
 
 ### Free and Premium Support
 
@@ -102,19 +101,18 @@ Premium world-class support is available via email to all [WP Activity Log Premi
 >
 
 #### Other Noteworthy Features
-Apart from the activity logs and the already mentioned features, WP Activity Log has a number of non-logging specific features that make it a complete WordPress logging solution, such as:
+On top of the comprehensive activity log, WP Activity Log also has a number of non-logging specific features that make it a complete WordPress logging solution, such as:
 
+* Full [WordPress multisite support](https://wpactivitylog.com/support/kb/activity-log-multisite-network-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* Easily [create your custom alerts](https://wpactivitylog.com/support/kb/create-custom-events-wordpress-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) to monitor additional functionality
 * Built-in [support for reverse proxies and web application firewalls](https://wpactivitylog.com/support/kb/support-reverse-proxies-web-application-firewalls/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* Full [WordPress multisite support](https://www.wpsecurityauditlog.com/documentation/wordpress-multisite-plugin-features-support/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* Easily [create your custom alerts](https://wpactivitylog.com/support/kb/activity-log-multisite-network-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) to monitor additional functionality
-* Developer tools including the logging of all HTTP GET and POST requests
 * Integration with WhatIsMyIpAddress.com so you can get all information about an IP address with just a mouse click
 * Limit who can view the WordPress activity log by either users or roles
 * Limit who can manage the plugin
-* Settings to enable or [disable individual event IDs from the activity log](https://wpactivitylog.com/support/kb/exclude-logging-specific-change-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* Settings to [toggle (enable/disable) individual event IDs from the activity log](https://wpactivitylog.com/support/kb/exclude-logging-specific-change-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 * Configurable dashboard widget highlighting the most recent critical activity
 * Configurable [WordPress activity log retention policies](https://wpactivitylog.com/support/kb/activity-log-retention-policies/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* User avatar is shown in the events for better recognizability
+* User avatar is displayed in the events for better recognizability
 * and much more...
 
 Refer to the <strong>[WordPress activity log plugin datasheet](https://wpactivitylog.com/activity-log-plugin-datasheet/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong> for a complete list of features.
@@ -144,16 +142,9 @@ Refer to the <strong>[WordPress activity log plugin datasheet](https://wpactivit
 * [KitPloit](http://www.kitploit.com/2016/10/wp-security-audit-log-ultimate.html)
 * [EHacking](https://www.ehacking.net/2018/10/how-activity-log-wordpress-plugin.html)
 
-#### WP Activity Log in your language!
-We need help translating the plugin and the activity log events. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log/) to translate the plugin. Drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
-
-* Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
-* German translation by [Mourad Louha](http://excel-translator.de)
-* Brazilian Portuguese translation by [Hudson Santos](https://www.smallbee.com.br/)
-* Spanish translation by the [WP Body team](https://wpbody.com/)
-* French translations by Denis Moscato
-
 #### WP Activity Log extensions for third party plugins
+
+WP Activity Log can keep a detailed log of changes that happen on other plugins via activity log extensions. Below is the list of the [activity log extensions for third party plugins](https://wpactivitylog.com/extensions/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description):
 
 * <strong>[WP Activity Log for WooCommerce](https://wpactivitylog.com/extensions/woocommerce-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>: Install this extension to keep a log of changes you and yourr team do in the WooCommerce store settings, orders, products, coupons and much more.
 * <strong>[WP Activity Log for Yoast SEO](https://wpactivitylog.com/extensions/yoast-seo-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)</strong>: Install this extension to keep a log of the Yoast SEO plugin settings changes, and also of the on-page SEO changes you and your team make in the Yoast SEO meta box.
@@ -166,11 +157,19 @@ We need help translating the plugin and the activity log events. Please visit th
 
 * [What is the WordPress activity log?](https://wpactivitylog.com/wordpress-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 * [List of WordPress activity log event IDs](https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* [Why WP Activity Log](https://wpactivitylog.com/why-wp-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 * [WordPress Multisite Features](https://wpactivitylog.com/support/kb/activity-log-multisite-network-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* [WP Activity Log support for reverse proxies & WAFs](https://wpactivitylog.com/support/kb/support-reverse-proxies-web-application-firewalls/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* [WP Activity Log database documentation](https://wpactivitylog.com/support/kb/plugin-database-documentation/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 * [The WP Activity Log plugin website](https://wpactivitylog.com/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 * [Activity logs for MainWP](https://wpactivitylog.com/extensions/mainwp-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+
+#### WP Activity Log in your language!
+We need help translating the plugin and the activity log events. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log/) to translate the plugin. Drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
+
+* Italian translation by [Leonardo Musumeci](http://leonardomusumeci.net/)
+* German translation by [Mourad Louha](http://excel-translator.de)
+* Brazilian Portuguese translation by [Hudson Santos](https://www.smallbee.com.br/)
+* Spanish translation by the [WP Body team](https://wpbody.com/)
+* French translations by Denis Moscato
 
 == Installation ==
 
