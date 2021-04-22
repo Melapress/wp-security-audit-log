@@ -1415,6 +1415,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				//  set some initial plugins settings (only the ones that bypass the regular settings retrieval at some
 				//  point) - e.g. disabled events
 				$this->SetGlobalSetting( 'disabled-alerts', implode( ',', $this->settings()->always_disabled_alerts ) );
+
+				//  we stop here as no further updates are needed for a freshly installed plugin
+				return;
 			}
 
 			// Do version-to-version specific changes.
