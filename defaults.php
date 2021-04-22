@@ -180,7 +180,7 @@ function wsaldefaults_wsal_init() {
 						1000,
 						WSAL_LOW,
 						__( 'User logged in', 'wp-security-audit-log' ),
-						__( 'User logged in', 'wp-security-audit-log' ),
+						__( 'User logged in.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'user',
@@ -190,7 +190,7 @@ function wsaldefaults_wsal_init() {
 						1001,
 						WSAL_LOW,
 						__( 'User logged out', 'wp-security-audit-log' ),
-						__( 'User logged out', 'wp-security-audit-log' ),
+						__( 'User logged out.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'user',
@@ -200,7 +200,7 @@ function wsaldefaults_wsal_init() {
 						1002,
 						WSAL_MEDIUM,
 						__( 'Login failed', 'wp-security-audit-log' ),
-						__( '%Attempts% failed login(s)', 'wp-security-audit-log' ),
+						__( '%Attempts% failed login(s).', 'wp-security-audit-log' ),
 						[],
 						[],
 						'user',
@@ -210,7 +210,7 @@ function wsaldefaults_wsal_init() {
 						1003,
 						WSAL_LOW,
 						__( 'Login failed  / non existing user', 'wp-security-audit-log' ),
-						__( '%Attempts% failed login(s)', 'wp-security-audit-log' ),
+						__( '%Attempts% failed login(s).', 'wp-security-audit-log' ),
 						[],
 						wsaldefaults_build_links( [ 'LogFileText' ] ),
 						'system',
@@ -232,7 +232,7 @@ function wsaldefaults_wsal_init() {
 						1005,
 						WSAL_LOW,
 						__( 'User logged in with existing session(s)', 'wp-security-audit-log' ),
-						__( 'User logged in. There are other session(s) using the same username logged in from elsewhere.', 'wp-security-audit-log' ),
+						__( 'User logged in however there are other session(s) already for this user.', 'wp-security-audit-log' ),
 						[
 							__( 'IP address(es)', 'wp-security-audit-log' ) => '%IPAddress%'
 						],
@@ -254,9 +254,8 @@ function wsaldefaults_wsal_init() {
 						1007,
 						WSAL_MEDIUM,
 						__( 'User session destroyed and logged out', 'wp-security-audit-log' ),
-						__( 'Terminated the session of another user.', 'wp-security-audit-log' ),
+						__( 'Terminated the session of the user %TargetUserName%.', 'wp-security-audit-log' ),
 						[
-							__( 'User', 'wp-security-audit-log' )       => '%TargetUserName%',
 							__( 'Role', 'wp-security-audit-log' )       => '%TargetUserRole%',
 							__( 'Session ID', 'wp-security-audit-log' ) => '%TargetSessionID%'
 						],
@@ -268,9 +267,8 @@ function wsaldefaults_wsal_init() {
 						1008,
 						WSAL_MEDIUM,
 						__( 'Switched to another user', 'wp-security-audit-log' ),
-						__( 'Switched to another user.', 'wp-security-audit-log' ),
+						__( 'Switched the session to being logged in as %TargetUserName%.', 'wp-security-audit-log' ),
 						[
-							__( 'User', 'wp-security-audit-log' ) => '%TargetUserName%',
 							__( 'Role', 'wp-security-audit-log' ) => '%TargetUserRole%'
 						],
 						[],
@@ -280,10 +278,9 @@ function wsaldefaults_wsal_init() {
 					array(
 						2010,
 						WSAL_MEDIUM,
-						__( 'User uploaded file from Uploads directory', 'wp-security-audit-log' ),
-						__( 'User uploaded file from Uploads directory', 'wp-security-audit-log' ),
+						__( 'User uploaded file to the Uploads directory', 'wp-security-audit-log' ),
+						__( 'Uploaded a file called %FileName%.', 'wp-security-audit-log' ),
 						[
-							__( 'Filename', 'wp-security-audit-log' )  => '%FileName%',
 							__( 'Directory', 'wp-security-audit-log' ) => '%FilePath%'
 						],
 						[],
@@ -294,9 +291,8 @@ function wsaldefaults_wsal_init() {
 						2011,
 						WSAL_LOW,
 						__( 'User deleted file from Uploads directory', 'wp-security-audit-log' ),
-						__( 'User deleted file from Uploads directory', 'wp-security-audit-log' ),
+						__( 'Deleted the file %FileName%.', 'wp-security-audit-log' ),
 						[
-							__( 'Filename', 'wp-security-audit-log' )  => '%FileName%',
 							__( 'Directory', 'wp-security-audit-log' ) => '%FilePath%'
 						],
 						[],
@@ -322,13 +318,13 @@ function wsaldefaults_wsal_init() {
 						2000,
 						WSAL_INFORMATIONAL,
 						__( 'User created a new post and saved it as draft', 'wp-security-audit-log' ),
-						__( 'Created the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Created the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'created'
 					),
@@ -336,13 +332,13 @@ function wsaldefaults_wsal_init() {
 						2001,
 						WSAL_LOW,
 						__( 'User published a post', 'wp-security-audit-log' ),
-						__( 'Published the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Published the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'published'
 					),
@@ -350,13 +346,13 @@ function wsaldefaults_wsal_init() {
 						2002,
 						WSAL_LOW,
 						__( 'User modified a post', 'wp-security-audit-log' ),
-						__( 'Modified the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Modified the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -364,7 +360,7 @@ function wsaldefaults_wsal_init() {
 						2008,
 						WSAL_MEDIUM,
 						__( 'User permanently deleted a post from the trash', 'wp-security-audit-log' ),
-						__( 'Permanently deleted the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Permanently deleted the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
@@ -378,13 +374,13 @@ function wsaldefaults_wsal_init() {
 						2012,
 						WSAL_MEDIUM,
 						__( 'User moved a post to the trash', 'wp-security-audit-log' ),
-						__( 'Moved the post %PostTitle% to trash', 'wp-security-audit-log' ),
+						__( 'Moved the post %PostTitle% to trash.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished' ] ),
+						wsaldefaults_build_links( [ 'PostUrlIfPublished' ] ),
 						'post',
 						'deleted'
 					),
@@ -392,13 +388,13 @@ function wsaldefaults_wsal_init() {
 						2014,
 						WSAL_LOW,
 						__( 'User restored a post from trash', 'wp-security-audit-log' ),
-						__( 'Restored the post %PostTitle% from trash', 'wp-security-audit-log' ),
+						__( 'Restored the post %PostTitle% from trash.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'restored'
 					),
@@ -406,7 +402,7 @@ function wsaldefaults_wsal_init() {
 						2017,
 						WSAL_INFORMATIONAL,
 						__( 'User changed post URL', 'wp-security-audit-log' ),
-						__( 'Changed the URL of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Changed the URL of the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )      => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )    => '%PostType%',
@@ -422,15 +418,14 @@ function wsaldefaults_wsal_init() {
 						2019,
 						WSAL_INFORMATIONAL,
 						__( 'User changed post author', 'wp-security-audit-log' ),
-						__( 'Changed the author of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Changed the author of the post %PostTitle% to %NewAuthor%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )         => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )       => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' )     => '%PostStatus%',
-							__( 'Previous author', 'wp-security-audit-log' ) => '%OldAuthor%',
-							__( 'New author', 'wp-security-audit-log' )      => '%NewAuthor%'
+							__( 'Previous author', 'wp-security-audit-log' ) => '%OldAuthor%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished' ] ),
+						wsaldefaults_build_links( [ 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -438,14 +433,13 @@ function wsaldefaults_wsal_init() {
 						2021,
 						WSAL_MEDIUM,
 						__( 'User changed post status', 'wp-security-audit-log' ),
-						__( 'Changed the status of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Changed the status of the post %PostTitle% to %NewStatus%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )         => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )       => '%PostType%',
-							__( 'Previous status', 'wp-security-audit-log' ) => '%OldStatus%',
-							__( 'New status', 'wp-security-audit-log' )      => '%NewStatus%'
+							__( 'Previous status', 'wp-security-audit-log' ) => '%OldStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -453,15 +447,14 @@ function wsaldefaults_wsal_init() {
 						2025,
 						WSAL_LOW,
 						__( 'User changed the visibility of a post', 'wp-security-audit-log' ),
-						__( 'Changed the visibility of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Changed the visibility of the post %PostTitle% to %NewVisibility%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )                    => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )                  => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' )                => '%PostStatus%',
-							__( 'Previous visibility status', 'wp-security-audit-log' ) => '%OldVisibility%',
-							__( 'New visibility status', 'wp-security-audit-log' )      => '%NewVisibility%'
+							__( 'Previous visibility status', 'wp-security-audit-log' ) => '%OldVisibility%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -469,15 +462,14 @@ function wsaldefaults_wsal_init() {
 						2027,
 						WSAL_INFORMATIONAL,
 						__( 'User changed the date of a post', 'wp-security-audit-log' ),
-						__( 'Changed the date of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Changed the date of the post %PostTitle% to %NewDate%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )       => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )     => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' )   => '%PostStatus%',
-							__( 'Previous date', 'wp-security-audit-log' ) => '%OldDate%',
-							__( 'New date', 'wp-security-audit-log' )      => '%NewDate%'
+							__( 'Previous date', 'wp-security-audit-log' ) => '%OldDate%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -485,15 +477,14 @@ function wsaldefaults_wsal_init() {
 						2047,
 						WSAL_LOW,
 						__( 'User changed the parent of a page', 'wp-security-audit-log' ),
-						__( 'Changed the parent of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Changed the parent of the post %PostTitle% to %NewParentName%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )         => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )       => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' )     => '%PostStatus%',
-							__( 'Previous parent', 'wp-security-audit-log' ) => '%OldParentName%',
-							__( 'New parent', 'wp-security-audit-log' )      => '%NewParentName%'
+							__( 'Previous parent', 'wp-security-audit-log' ) => '%OldParentName%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -501,15 +492,14 @@ function wsaldefaults_wsal_init() {
 						2048,
 						WSAL_LOW,
 						__( 'User changed the template of a page', 'wp-security-audit-log' ),
-						__( 'Changed the template of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Changed the template of the post %PostTitle% to %NewTemplate%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )           => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )         => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' )       => '%PostStatus%',
-							__( 'Previous template', 'wp-security-audit-log' ) => '%OldTemplate%',
-							__( 'New template', 'wp-security-audit-log' )      => '%NewTemplate%'
+							__( 'Previous template', 'wp-security-audit-log' ) => '%OldTemplate%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -517,13 +507,13 @@ function wsaldefaults_wsal_init() {
 						2049,
 						WSAL_INFORMATIONAL,
 						__( 'User set a post as sticky', 'wp-security-audit-log' ),
-						__( 'Set the post %PostTitle% as sticky', 'wp-security-audit-log' ),
+						__( 'Set the post %PostTitle% as sticky.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -531,13 +521,13 @@ function wsaldefaults_wsal_init() {
 						2050,
 						WSAL_INFORMATIONAL,
 						__( 'User removed post from sticky', 'wp-security-audit-log' ),
-						__( 'Removed the post %PostTitle% from sticky', 'wp-security-audit-log' ),
+						__( 'Removed the post %PostTitle% from sticky.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -545,13 +535,13 @@ function wsaldefaults_wsal_init() {
 						2065,
 						WSAL_LOW,
 						__( 'User modified the content of a post', 'wp-security-audit-log' ),
-						__( 'Modified the content of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Modified the content of the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'RevisionLink', 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'RevisionLink', 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -559,13 +549,13 @@ function wsaldefaults_wsal_init() {
 						2073,
 						WSAL_INFORMATIONAL,
 						__( 'User submitted a post for review', 'wp-security-audit-log' ),
-						__( 'Submitted the post %PostTitle% for review', 'wp-security-audit-log' ),
+						__( 'Submitted the post %PostTitle% for review.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -573,13 +563,13 @@ function wsaldefaults_wsal_init() {
 						2074,
 						WSAL_LOW,
 						__( 'User scheduled a post', 'wp-security-audit-log' ),
-						__( 'Scheduled the post %PostTitle% to be published on %PublishingDate%', 'wp-security-audit-log' ),
+						__( 'Scheduled the post %PostTitle% to be published on %PublishingDate%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -587,14 +577,13 @@ function wsaldefaults_wsal_init() {
 						2086,
 						WSAL_INFORMATIONAL,
 						__( 'User changed title of a post', 'wp-security-audit-log' ),
-						__( 'Changed the title of the post %OldTitle%', 'wp-security-audit-log' ),
+						__( 'Changed the title of the post %OldTitle% to %NewTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
-							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
-							__( 'New title', 'wp-security-audit-log' )   => '%NewTitle%'
+							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -602,13 +591,13 @@ function wsaldefaults_wsal_init() {
 						2100,
 						WSAL_INFORMATIONAL,
 						__( 'User opened a post in the editor', 'wp-security-audit-log' ),
-						__( 'Opened the post %PostTitle% in the editor', 'wp-security-audit-log' ),
+						__( 'Opened the post %PostTitle% in the editor.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'opened'
 					),
@@ -616,7 +605,7 @@ function wsaldefaults_wsal_init() {
 						2101,
 						WSAL_INFORMATIONAL,
 						__( 'User viewed a post', 'wp-security-audit-log' ),
-						__( 'Viewed the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Viewed the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
@@ -630,13 +619,13 @@ function wsaldefaults_wsal_init() {
 						2111,
 						WSAL_LOW,
 						__( 'User enabled/disabled comments in a post', 'wp-security-audit-log' ),
-						__( 'The comments in the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Comments in the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'enabled'
 					),
@@ -644,13 +633,13 @@ function wsaldefaults_wsal_init() {
 						2112,
 						WSAL_LOW,
 						__( 'User enabled/disabled trackbacks and pingbacks in a post', 'wp-security-audit-log' ),
-						__( 'Pingbacks and Trackbacks in the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Pingbacks and Trackbacks in the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'enabled'
 					),
@@ -658,7 +647,7 @@ function wsaldefaults_wsal_init() {
 						2129,
 						WSAL_INFORMATIONAL,
 						__( 'User updated the excerpt in a post', 'wp-security-audit-log' ),
-						__( 'The excerpt of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'The excerpt of the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )                => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )              => '%PostType%',
@@ -666,7 +655,7 @@ function wsaldefaults_wsal_init() {
 							__( 'Previous excerpt entry', 'wp-security-audit-log' ) => '%old_post_excerpt%',
 							__( 'New excerpt entry', 'wp-security-audit-log' )      => '%post_excerpt%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -674,7 +663,7 @@ function wsaldefaults_wsal_init() {
 						2130,
 						WSAL_INFORMATIONAL,
 						__( 'User updated the featured image in a post', 'wp-security-audit-log' ),
-						__( 'The featured image of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'The featured image of the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )        => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )      => '%PostType%',
@@ -682,7 +671,7 @@ function wsaldefaults_wsal_init() {
 							__( 'Previous image', 'wp-security-audit-log' ) => '%previous_image%',
 							__( 'New image', 'wp-security-audit-log' )      => '%new_image%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -693,7 +682,7 @@ function wsaldefaults_wsal_init() {
 						2119,
 						WSAL_INFORMATIONAL,
 						__( 'User added post tag', 'wp-security-audit-log' ),
-						__( 'Added tag(s) to the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Added tag(s) to the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'ID', 'wp-security-audit-log' )           => '%PostID%',
 							__( 'Type', 'wp-security-audit-log' )         => '%PostType%',
@@ -708,14 +697,14 @@ function wsaldefaults_wsal_init() {
 						2120,
 						WSAL_INFORMATIONAL,
 						__( 'User removed post tag', 'wp-security-audit-log' ),
-						__( 'Removed tag(s) from the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Removed tag(s) from the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'ID', 'wp-security-audit-log' )             => '%PostID%',
 							__( 'Type', 'wp-security-audit-log' )           => '%PostType%',
 							__( 'Status', 'wp-security-audit-log' )         => '%PostStatus%',
 							__( 'Removed tag(s)', 'wp-security-audit-log' ) => '%tag%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -723,7 +712,7 @@ function wsaldefaults_wsal_init() {
 						2121,
 						WSAL_INFORMATIONAL,
 						__( 'User created new tag', 'wp-security-audit-log' ),
-						__( 'Created the tag %TagName%', 'wp-security-audit-log' ),
+						__( 'Created the tag %TagName%.', 'wp-security-audit-log' ),
 						[
 							__( 'Slug', 'wp-security-audit-log' ) => 'Slug'
 						],
@@ -735,7 +724,7 @@ function wsaldefaults_wsal_init() {
 						2122,
 						WSAL_LOW,
 						__( 'User deleted tag', 'wp-security-audit-log' ),
-						__( 'Deleted the tag %TagName%', 'wp-security-audit-log' ),
+						__( 'Deleted the tag %TagName%.', 'wp-security-audit-log' ),
 						[
 							__( 'Slug', 'wp-security-audit-log' ) => 'Slug'
 						],
@@ -746,12 +735,10 @@ function wsaldefaults_wsal_init() {
 					array(
 						2123,
 						WSAL_INFORMATIONAL,
-						__( 'User renamed tag', 'wp-security-audit-log' ),
-						__( 'User renamed tag', 'wp-security-audit-log' ),
+						__( 'Renamed the tag %old_name% to %new_name%.', 'wp-security-audit-log' ),
+						'',
 						[
-							__( 'Previous name', 'wp-security-audit-log' ) => '%old_name%',
-							__( 'New name', 'wp-security-audit-log' )      => '%new_name%',
-							__( 'Slug', 'wp-security-audit-log' )          => '%Slug%'
+							__( 'Slug', 'wp-security-audit-log' ) => '%Slug%'
 						],
 						wsaldefaults_build_links( [ 'TagLink' ] ),
 						'tag',
@@ -761,10 +748,9 @@ function wsaldefaults_wsal_init() {
 						2124,
 						WSAL_INFORMATIONAL,
 						__( 'User changed tag slug', 'wp-security-audit-log' ),
-						__( 'Changed the slug of the tag %tag%', 'wp-security-audit-log' ),
+						__( 'Changed the slug of the tag %tag% to %new_slug%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous slug', 'wp-security-audit-log' ) => '%old_slug%',
-							__( 'New slug', 'wp-security-audit-log' )      => '%new_slug%'
+							__( 'Previous slug', 'wp-security-audit-log' ) => '%old_slug%'
 						],
 						wsaldefaults_build_links( [ 'TagLink' ] ),
 						'tag',
@@ -774,7 +760,7 @@ function wsaldefaults_wsal_init() {
 						2125,
 						WSAL_INFORMATIONAL,
 						__( 'User changed tag description', 'wp-security-audit-log' ),
-						__( 'Changed the description of the tag %tag%', 'wp-security-audit-log' ),
+						__( 'Changed the description of the tag %tag%.', 'wp-security-audit-log' ),
 						[
 							__( 'Slug', 'wp-security-audit-log' )                 => '%Slug%',
 							__( 'Previous description', 'wp-security-audit-log' ) => '%old_desc%',
@@ -791,15 +777,14 @@ function wsaldefaults_wsal_init() {
 						2016,
 						WSAL_LOW,
 						__( 'User changed post category', 'wp-security-audit-log' ),
-						__( 'Changed the category of the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Changed the category(ies) of the post %PostTitle% to %NewCategories%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )                => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )              => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' )            => '%PostStatus%',
-							__( 'Previous category(ies)', 'wp-security-audit-log' ) => '%OldCategories%',
-							__( 'New category(ies)', 'wp-security-audit-log' )      => '%NewCategories%'
+							__( 'Previous category(ies)', 'wp-security-audit-log' ) => '%OldCategories%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -807,7 +792,7 @@ function wsaldefaults_wsal_init() {
 						2023,
 						WSAL_MEDIUM,
 						__( 'User created new category', 'wp-security-audit-log' ),
-						__( 'Created the category %CategoryName%', 'wp-security-audit-log' ),
+						__( 'Created the category %CategoryName%.', 'wp-security-audit-log' ),
 						[
 							__( 'Slug', 'wp-security-audit-log' ) => 'Slug'
 						],
@@ -819,7 +804,7 @@ function wsaldefaults_wsal_init() {
 						2024,
 						WSAL_MEDIUM,
 						__( 'User deleted category', 'wp-security-audit-log' ),
-						__( 'Deleted the category %CategoryName%', 'wp-security-audit-log' ),
+						__( 'Deleted the category %CategoryName%.', 'wp-security-audit-log' ),
 						[
 							__( 'Slug', 'wp-security-audit-log' ) => 'Slug'
 						],
@@ -831,11 +816,10 @@ function wsaldefaults_wsal_init() {
 						2052,
 						WSAL_LOW,
 						__( 'Changed the parent of a category', 'wp-security-audit-log' ),
-						__( 'Changed the parent of the category %CategoryName%', 'wp-security-audit-log' ),
+						__( 'Changed the parent of the category %CategoryName% to %NewParent%.', 'wp-security-audit-log' ),
 						[
 							__( 'Slug', 'wp-security-audit-log' )            => '%Slug%',
-							__( 'Previous parent', 'wp-security-audit-log' ) => '%OldParent%',
-							__( 'New parent', 'wp-security-audit-log' )      => '%NewParent%'
+							__( 'Previous parent', 'wp-security-audit-log' ) => '%OldParent%'
 						],
 						wsaldefaults_build_links( [ 'CategoryLink' ] ),
 						'category',
@@ -845,10 +829,8 @@ function wsaldefaults_wsal_init() {
 						2127,
 						WSAL_LOW,
 						__( 'User changed category name', 'wp-security-audit-log' ),
-						__( 'User changed category name', 'wp-security-audit-log' ),
+						__( 'Renamed the category %old_name% to %new_name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous name', 'wp-security-audit-log' ) => '%old_name%',
-							__( 'New name', 'wp-security-audit-log' )      => '%new_name%',
 							__( 'Slug', 'wp-security-audit-log' )          => '%slug%'
 						],
 						wsaldefaults_build_links( [ 'cat_link' ] ),
@@ -859,10 +841,9 @@ function wsaldefaults_wsal_init() {
 						2128,
 						WSAL_LOW,
 						__( 'User changed category slug', 'wp-security-audit-log' ),
-						__( 'Changed the slug of the category %CategoryName%', 'wp-security-audit-log' ),
+						__( 'Changed the slug of the category %CategoryName% to %new_slug%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous slug', 'wp-security-audit-log' ) => '%old_slug%',
-							__( 'New slug', 'wp-security-audit-log' )      => '%new_slug%'
+							__( 'Previous slug', 'wp-security-audit-log' ) => '%old_slug%'
 						],
 						wsaldefaults_build_links( [ 'cat_link' ] ),
 						'category',
@@ -875,14 +856,14 @@ function wsaldefaults_wsal_init() {
 						2053,
 						WSAL_LOW,
 						__( 'User created a custom field for a post', 'wp-security-audit-log' ),
-						__( 'Created the new custom field %MetaKey% in the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Created the new custom field %MetaKey% in the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )            => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )          => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' )        => '%PostStatus%',
 							__( 'Custom field value', 'wp-security-audit-log' ) => '%MetaValue%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost', 'MetaLink' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'MetaLink', 'PostUrlIfPublished' ] ),
 						'post',
 						'modified'
 					),
@@ -890,7 +871,7 @@ function wsaldefaults_wsal_init() {
 						2054,
 						WSAL_LOW,
 						__( 'User updated a custom field value for a post', 'wp-security-audit-log' ),
-						__( 'Modified the value of the custom field %MetaKey% in the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Modified the value of the custom field %MetaName% in the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )                     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )                   => '%PostType%',
@@ -898,7 +879,7 @@ function wsaldefaults_wsal_init() {
 							__( 'Previous custom field value', 'wp-security-audit-log' ) => '%MetaValueOld%',
 							__( 'New custom field value', 'wp-security-audit-log' )      => '%MetaValueNew%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost', 'MetaLink' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'MetaLink', 'PostUrlIfPublished' ] ),
 						'custom-field',
 						'modified'
 					),
@@ -906,13 +887,13 @@ function wsaldefaults_wsal_init() {
 						2055,
 						WSAL_MEDIUM,
 						__( 'User deleted a custom field from a post', 'wp-security-audit-log' ),
-						__( 'Deleted the custom field %MetaKey% from the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Deleted the custom field %MetaKey% from the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'custom-field',
 						'deleted'
 					),
@@ -920,16 +901,14 @@ function wsaldefaults_wsal_init() {
 						2062,
 						WSAL_LOW,
 						__( 'User updated a custom field name for a post', 'wp-security-audit-log' ),
-						__( 'User updated a custom field name for a post', 'wp-security-audit-log' ),
+						__( 'Renamed the custom field %MetaKeyOld% on post %PostTitle% to %MetaKeNew%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous custom field name', 'wp-security-audit-log' ) => '%MetaKeyOld%',
-							__( 'New custom field name', 'wp-security-audit-log' )      => '%MetaKeyNew%',
 							__( 'Post', 'wp-security-audit-log' )                       => '%PostTitle%',
 							__( 'Post ID', 'wp-security-audit-log' )                    => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )                  => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' )                => '%PostStatus%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'EditorLinkPost' ] ),
+						wsaldefaults_build_links( [ 'EditorLinkPost', 'PostUrlIfPublished' ] ),
 						'custom-field',
 						'renamed'
 					),
@@ -940,7 +919,7 @@ function wsaldefaults_wsal_init() {
 						2131,
 						WSAL_LOW,
 						__( 'User added relationship to a custom field value for a post', 'wp-security-audit-log' ),
-						__( 'Added relationships to the custom field %MetaKey% in the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Added relationships to the custom field %MetaKey% in the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )           => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )         => '%PostType%',
@@ -955,7 +934,7 @@ function wsaldefaults_wsal_init() {
 						2132,
 						WSAL_LOW,
 						__( 'User removed relationship from a custom field value for a post', 'wp-security-audit-log' ),
-						__( 'Removed relationships from the custom field %MetaKey% in the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Removed relationships from the custom field %MetaKey% in the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )               => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )             => '%PostType%',
@@ -976,14 +955,14 @@ function wsaldefaults_wsal_init() {
 						2090,
 						WSAL_INFORMATIONAL,
 						__( 'User approved a comment', 'wp-security-audit-log' ),
-						__( 'Approved the comment posted by %Author% on the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Approved the comment posted by %Author% on the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'CommentLink' ] ),
+						wsaldefaults_build_links( [ 'CommentLink', 'PostUrlIfPublished' ] ),
 						'comment',
 						'approved'
 					),
@@ -991,14 +970,14 @@ function wsaldefaults_wsal_init() {
 						2091,
 						WSAL_INFORMATIONAL,
 						__( 'User unapproved a comment', 'wp-security-audit-log' ),
-						__( 'Unapproved the comment posted by %Author% on the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Unapproved the comment posted by %Author% on the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'CommentLink' ] ),
+						wsaldefaults_build_links( [ 'CommentLink', 'PostUrlIfPublished' ] ),
 						'comment',
 						'unapproved'
 					),
@@ -1006,14 +985,14 @@ function wsaldefaults_wsal_init() {
 						2092,
 						WSAL_INFORMATIONAL,
 						__( 'User replied to a comment', 'wp-security-audit-log' ),
-						__( 'Replied to the comment posted by %Author% on the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Replied to the comment posted by %Author% on the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'CommentLink' ] ),
+						wsaldefaults_build_links( [ 'CommentLink', 'PostUrlIfPublished' ] ),
 						'comment',
 						'created'
 					),
@@ -1021,14 +1000,14 @@ function wsaldefaults_wsal_init() {
 						2093,
 						WSAL_LOW,
 						__( 'User edited a comment', 'wp-security-audit-log' ),
-						__( 'Edited the comment posted by %Author% on the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Edited the comment posted by %Author% on the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'CommentLink' ] ),
+						wsaldefaults_build_links( [ 'CommentLink', 'PostUrlIfPublished' ] ),
 						'comment',
 						'modified'
 					),
@@ -1036,14 +1015,14 @@ function wsaldefaults_wsal_init() {
 						2094,
 						WSAL_INFORMATIONAL,
 						__( 'User marked a comment as Spam', 'wp-security-audit-log' ),
-						__( 'Marked the comment posted by %Author% on the post %PostTitle% as spa', 'wp-security-audit-log' ),
+						__( 'Marked the comment posted by %Author% on the post %PostTitle% as spam.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'CommentLink' ] ),
+						wsaldefaults_build_links( [ 'CommentLink', 'PostUrlIfPublished' ] ),
 						'comment',
 						'unapproved'
 					),
@@ -1051,14 +1030,14 @@ function wsaldefaults_wsal_init() {
 						2095,
 						WSAL_LOW,
 						__( 'User marked a comment as Not Spam', 'wp-security-audit-log' ),
-						__( 'Marked the comment posted by %Author% on the post %PostTitle% as not spam', 'wp-security-audit-log' ),
+						__( 'Marked the comment posted by %Author% on the post %PostTitle% as not spam.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'CommentLink' ] ),
+						wsaldefaults_build_links( [ 'CommentLink', 'PostUrlIfPublished' ] ),
 						'comment',
 						'approved'
 					),
@@ -1066,14 +1045,14 @@ function wsaldefaults_wsal_init() {
 						2096,
 						WSAL_LOW,
 						__( 'User moved a comment to trash', 'wp-security-audit-log' ),
-						__( 'Moved the comment posted by %Author% on the post %PostTitle% to trash', 'wp-security-audit-log' ),
+						__( 'Moved the comment posted by %Author% on the post %PostTitle% to trash.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'CommentLink' ] ),
+						wsaldefaults_build_links( [ 'CommentLink', 'PostUrlIfPublished' ] ),
 						'comment',
 						'deleted'
 					),
@@ -1081,14 +1060,14 @@ function wsaldefaults_wsal_init() {
 						2097,
 						WSAL_INFORMATIONAL,
 						__( 'User restored a comment from the trash', 'wp-security-audit-log' ),
-						__( 'Restored the comment posted by %Author% on the post %PostTitle% from trash', 'wp-security-audit-log' ),
+						__( 'Restored the comment posted by %Author% on the post %PostTitle% from trash.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'CommentLink' ] ),
+						wsaldefaults_build_links( [ 'CommentLink', 'PostUrlIfPublished' ] ),
 						'comment',
 						'restored'
 					),
@@ -1096,14 +1075,14 @@ function wsaldefaults_wsal_init() {
 						2098,
 						WSAL_LOW,
 						__( 'User permanently deleted a comment', 'wp-security-audit-log' ),
-						__( 'Permanently deleted the comment posted by %Author% on the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Permanently deleted the comment posted by %Author% on the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished' ] ),
+						wsaldefaults_build_links( [ 'PostUrlIfPublished' ] ),
 						'comment',
 						'deleted'
 					),
@@ -1111,14 +1090,14 @@ function wsaldefaults_wsal_init() {
 						2099,
 						WSAL_INFORMATIONAL,
 						__( 'User posted a comment', 'wp-security-audit-log' ),
-						__( 'Posted a comment on the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Posted a comment on the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'CommentLink' ] ),
+						wsaldefaults_build_links( [ 'CommentLink', 'PostUrlIfPublished' ] ),
 						'comment',
 						'created'
 					),
@@ -1130,14 +1109,14 @@ function wsaldefaults_wsal_init() {
 						2126,
 						WSAL_INFORMATIONAL,
 						__( 'Visitor posted a comment', 'wp-security-audit-log' ),
-						__( 'Posted a comment on the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'Posted a comment on the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
 							__( 'Post status', 'wp-security-audit-log' ) => '%PostStatus%',
 							__( 'Comment ID', 'wp-security-audit-log' )  => '%CommentID%'
 						],
-						wsaldefaults_build_links( [ 'PostUrlIfPlublished', 'CommentLink' ] ),
+						wsaldefaults_build_links( [ 'CommentLink', 'PostUrlIfPublished' ] ),
 						'comment',
 						'created'
 					),
@@ -1181,7 +1160,7 @@ function wsaldefaults_wsal_init() {
 						2045,
 						WSAL_LOW,
 						__( 'User moved widget', 'wp-security-audit-log' ),
-						__( 'Moved the %WidgetName% widget', 'wp-security-audit-log' ),
+						__( 'Moved the %WidgetName% widget.', 'wp-security-audit-log' ),
 						[
 							__( 'From', 'wp-security-audit-log' ) => '%OldSidebar%',
 							__( 'To', 'wp-security-audit-log' )   => '%NewSidebar%'
@@ -1210,7 +1189,7 @@ function wsaldefaults_wsal_init() {
 						2078,
 						WSAL_LOW,
 						__( 'User created new menu', 'wp-security-audit-log' ),
-						__( 'New menu called %MenuName%', 'wp-security-audit-log' ),
+						__( 'New menu called %MenuName%.', 'wp-security-audit-log' ),
 						[],
 						wsaldefaults_build_links( [ 'MenuUrl' ] ),
 						'menu',
@@ -1220,10 +1199,9 @@ function wsaldefaults_wsal_init() {
 						2079,
 						WSAL_LOW,
 						__( 'User added content to a menu', 'wp-security-audit-log' ),
-						__( 'Added new item to the menu %MenuName%', 'wp-security-audit-log' ),
+						__( 'Added the item %ContentName% to the menu %MenuName%.', 'wp-security-audit-log' ),
 						[
-							__( 'Item type', 'wp-security-audit-log' ) => '%ContentType%',
-							__( 'Item name', 'wp-security-audit-log' ) => '%ContentName%'
+							__( 'Item type', 'wp-security-audit-log' ) => '%ContentType%'
 						],
 						wsaldefaults_build_links( [ 'MenuUrl' ] ),
 						'menu',
@@ -1233,10 +1211,9 @@ function wsaldefaults_wsal_init() {
 						2080,
 						WSAL_LOW,
 						__( 'User removed content from a menu', 'wp-security-audit-log' ),
-						__( 'Removed item from the menu %MenuName%', 'wp-security-audit-log' ),
+						__( 'Removed the item %ContentName% from the menu %MenuName%.', 'wp-security-audit-log' ),
 						[
-							__( 'Item type', 'wp-security-audit-log' ) => '%ContentType%',
-							__( 'Item name', 'wp-security-audit-log' ) => '%ContentName%'
+							__( 'Item type', 'wp-security-audit-log' ) => '%ContentType%'
 						],
 						wsaldefaults_build_links( [ 'MenuUrl' ] ),
 						'menu',
@@ -1246,7 +1223,7 @@ function wsaldefaults_wsal_init() {
 						2081,
 						WSAL_MEDIUM,
 						__( 'User deleted menu', 'wp-security-audit-log' ),
-						__( 'Deleted the menu %MenuName%', 'wp-security-audit-log' ),
+						__( 'Deleted the menu %MenuName%.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'menu',
@@ -1256,10 +1233,8 @@ function wsaldefaults_wsal_init() {
 						2082,
 						WSAL_LOW,
 						__( 'User changed menu setting', 'wp-security-audit-log' ),
-						__( 'The setting in the %MenuName%', 'wp-security-audit-log' ),
-						[
-							__( 'Setting', 'wp-security-audit-log' ) => '%MenuSetting%'
-						],
+						__( 'The setting %MenuSetting% in the menu %MenuName%.', 'wp-security-audit-log' ),
+						[],
 						wsaldefaults_build_links( [ 'MenuUrl' ] ),
 						'menu',
 						'enabled'
@@ -1268,10 +1243,9 @@ function wsaldefaults_wsal_init() {
 						2083,
 						WSAL_LOW,
 						__( 'User modified content in a menu', 'wp-security-audit-log' ),
-						__( 'Modified an item in the menu %MenuName%', 'wp-security-audit-log' ),
+						__( 'Modified the item %ContentName% in the menu %MenuName%.', 'wp-security-audit-log' ),
 						[
-							__( 'Item type', 'wp-security-audit-log' ) => '%ContentType%',
-							__( 'Item name', 'wp-security-audit-log' ) => '%ContentName%'
+							__( 'Item type', 'wp-security-audit-log' ) => '%ContentType%'
 						],
 						wsaldefaults_build_links( [ 'MenuUrl' ] ),
 						'menu',
@@ -1281,11 +1255,8 @@ function wsaldefaults_wsal_init() {
 						2084,
 						WSAL_LOW,
 						__( 'User changed name of a menu', 'wp-security-audit-log' ),
-						__( 'User changed name of a menu', 'wp-security-audit-log' ),
-						[
-							__( 'Previous name', 'wp-security-audit-log' ) => '%OldMenuName%',
-							__( 'New name', 'wp-security-audit-log' )      => '%MenuName%'
-						],
+						__( 'Renamed the menu %OldMenuName% to %MenuName%.', 'wp-security-audit-log' ),
+						[],
 						wsaldefaults_build_links( [ 'MenuUrl' ] ),
 						'menu',
 						'renamed'
@@ -1294,7 +1265,7 @@ function wsaldefaults_wsal_init() {
 						2085,
 						WSAL_LOW,
 						__( 'User changed order of the objects in a menu', 'wp-security-audit-log' ),
-						__( 'Changed the order of the items in the menu %MenuName%', 'wp-security-audit-log' ),
+						__( 'Changed the order of the items in the menu %MenuName%.', 'wp-security-audit-log' ),
 						[],
 						wsaldefaults_build_links( [ 'MenuUrl' ] ),
 						'menu',
@@ -1304,9 +1275,8 @@ function wsaldefaults_wsal_init() {
 						2089,
 						WSAL_LOW,
 						__( 'User moved objects as a sub-item', 'wp-security-audit-log' ),
-						'',
+						__( 'Moved items as sub-items in the menu %MenuName%.', 'wp-security-audit-log' ),
 						[
-							__( 'Menu name', 'wp-security-audit-log' )        => '%MenuName%',
 							__( 'Moved item', 'wp-security-audit-log' )       => '%ItemName%',
 							__( 'as a sub-item of', 'wp-security-audit-log' ) => '%ParentName%'
 						],
@@ -1705,10 +1675,9 @@ function wsaldefaults_wsal_init() {
 						4000,
 						WSAL_CRITICAL,
 						__( 'New user was created on WordPress', 'wp-security-audit-log' ),
-						__( 'New user created via registration', 'wp-security-audit-log' ),
+						__( 'A new user %NewUserData->Username% is created via registration.', 'wp-security-audit-log' ),
 						[
-							__( 'User', 'wp-security-audit-log' ) => '%NewUserData->Username%',
-							__( 'Role', 'wp-security-audit-log' ) => '%NewUserData->Roles%'
+							__( 'User', 'wp-security-audit-log' ) => '%NewUserData->Username%'
 						],
 						wsaldefaults_build_links( [ 'EditUserLink' ] ),
 						'user',
@@ -1718,9 +1687,8 @@ function wsaldefaults_wsal_init() {
 						4001,
 						WSAL_CRITICAL,
 						__( 'User created another WordPress user', 'wp-security-audit-log' ),
-						__( 'User created another WordPress user', 'wp-security-audit-log' ),
+						__( 'Created the new user: %NewUserData->Username%.', 'wp-security-audit-log' ),
 						[
-							__( 'New user', 'wp-security-audit-log' )   => '%NewUserData->Username%',
 							__( 'Role', 'wp-security-audit-log' )       => '%NewUserData->Roles%',
 							__( 'First name', 'wp-security-audit-log' ) => '%NewUserData->FirstName%',
 							__( 'Last name', 'wp-security-audit-log' )  => '%NewUserData->LastName%'
@@ -1733,10 +1701,9 @@ function wsaldefaults_wsal_init() {
 						4002,
 						WSAL_CRITICAL,
 						__( 'The role of a user was changed by another WordPress user', 'wp-security-audit-log' ),
-						__( 'Changed the role of user %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Changed the role of user %TargetUsername% to %NewRole%.', 'wp-security-audit-log' ),
 						[
 							__( 'Previous role', 'wp-security-audit-log' ) => '%OldRole%',
-							__( 'New role', 'wp-security-audit-log' )      => '%NewRole%',
 							__( 'First name', 'wp-security-audit-log' )    => '%FirstName%',
 							__( 'Last name', 'wp-security-audit-log' )     => '%LastName%'
 						],
@@ -1748,7 +1715,7 @@ function wsaldefaults_wsal_init() {
 						4003,
 						WSAL_HIGH,
 						__( 'User has changed his or her password', 'wp-security-audit-log' ),
-						__( 'Changed the password', 'wp-security-audit-log' ),
+						__( 'Changed the password.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )       => '%TargetUserData->Roles%',
 							__( 'First name', 'wp-security-audit-log' ) => '%TargetUserData->FirstName%',
@@ -1762,7 +1729,7 @@ function wsaldefaults_wsal_init() {
 						4004,
 						WSAL_HIGH,
 						__( 'User changed another user\'s password', 'wp-security-audit-log' ),
-						__( 'Changed the password of the user %TargetUserData->Username%', 'wp-security-audit-log' ),
+						__( 'Changed the password of the user %TargetUserData->Username%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )       => '%TargetUserData->Roles%',
 							__( 'First name', 'wp-security-audit-log' ) => '%TargetUserData->FirstName%',
@@ -1776,13 +1743,12 @@ function wsaldefaults_wsal_init() {
 						4005,
 						WSAL_MEDIUM,
 						__( 'User changed his or her email address', 'wp-security-audit-log' ),
-						__( 'Changed the email address', 'wp-security-audit-log' ),
+						__( 'Changed the email address to %NewEmail%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )                   => '%Roles%',
 							__( 'First name', 'wp-security-audit-log' )             => '%FirstName%',
 							__( 'Last name', 'wp-security-audit-log' )              => '%LastName%',
-							__( 'Previous email address', 'wp-security-audit-log' ) => '%OldEmail%',
-							__( 'New email address', 'wp-security-audit-log' )      => '%NewEmail%'
+							__( 'Previous email address', 'wp-security-audit-log' ) => '%OldEmail%'
 						],
 						wsaldefaults_build_links( [ 'EditUserLink' ] ),
 						'user',
@@ -1792,13 +1758,12 @@ function wsaldefaults_wsal_init() {
 						4006,
 						WSAL_MEDIUM,
 						__( 'User changed another user\'s email address', 'wp-security-audit-log' ),
-						__( 'Changed the email address of the user %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Changed the email address of the user %TargetUsername% to %NewEmail%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )                   => '%Roles%',
 							__( 'First name', 'wp-security-audit-log' )             => '%FirstName%',
 							__( 'Last name', 'wp-security-audit-log' )              => '%LastName%',
-							__( 'Previous email address', 'wp-security-audit-log' ) => '%OldEmail%',
-							__( 'New email address', 'wp-security-audit-log' )      => '%NewEmail%'
+							__( 'Previous email address', 'wp-security-audit-log' ) => '%OldEmail%'
 						],
 						wsaldefaults_build_links( [ 'EditUserLink' ] ),
 						'user',
@@ -1808,9 +1773,8 @@ function wsaldefaults_wsal_init() {
 						4007,
 						WSAL_HIGH,
 						__( 'User was deleted by another user', 'wp-security-audit-log' ),
-						__( 'User was deleted by another user', 'wp-security-audit-log' ),
+						__( 'Deleted the user %TargetUserData->Username%.', 'wp-security-audit-log' ),
 						[
-							__( 'User', 'wp-security-audit-log' )       => '%TargetUserData->Username%',
 							__( 'Role', 'wp-security-audit-log' )       => '%TargetUserData->Roles%',
 							__( 'First name', 'wp-security-audit-log' ) => '%NewUserData->FirstName%',
 							__( 'Last name', 'wp-security-audit-log' )  => '%NewUserData->LastName%'
@@ -1823,7 +1787,7 @@ function wsaldefaults_wsal_init() {
 						4014,
 						WSAL_INFORMATIONAL,
 						__( 'User opened the profile page of another user', 'wp-security-audit-log' ),
-						__( 'The profile page of the user %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Opened the profile page of user %TargetUsername%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )       => '%Roles%',
 							__( 'First name', 'wp-security-audit-log' ) => '%FirstName%',
@@ -1837,12 +1801,11 @@ function wsaldefaults_wsal_init() {
 						4015,
 						WSAL_LOW,
 						__( 'User updated a custom field value for a user', 'wp-security-audit-log' ),
-						__( 'Changed the value of a custom field in the user profile %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Changed the value of the custom field %custom_field_name% in the user profile %TargetUsername%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )           => '%Roles%',
 							__( 'First name', 'wp-security-audit-log' )     => '%FirstName%',
 							__( 'Last name', 'wp-security-audit-log' )      => '%LastName%',
-							__( 'Custom field', 'wp-security-audit-log' )   => '%custom_field_name%',
 							__( 'Previous value', 'wp-security-audit-log' ) => '%old_value%',
 							__( 'New value', 'wp-security-audit-log' )      => '%new_value%'
 						],
@@ -1854,12 +1817,11 @@ function wsaldefaults_wsal_init() {
 						4016,
 						WSAL_LOW,
 						__( 'User created a custom field value for a user', 'wp-security-audit-log' ),
-						__( 'Created a new custom field in the user profile %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Created the custom field %custom_field_name% in the user profile %TargetUsername%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )               => '%Roles%',
 							__( 'First name', 'wp-security-audit-log' )         => '%FirstName%',
 							__( 'Last name', 'wp-security-audit-log' )          => '%LastName%',
-							__( 'Custom field', 'wp-security-audit-log' )       => '%custom_field_name%',
 							__( 'Custom field value', 'wp-security-audit-log' ) => '%new_value%'
 						],
 						wsaldefaults_build_links( [ 'EditUserLink' ] ),
@@ -1870,11 +1832,10 @@ function wsaldefaults_wsal_init() {
 						4017,
 						WSAL_INFORMATIONAL,
 						__( 'User changed first name for a user', 'wp-security-audit-log' ),
-						__( 'Changed the first name of the user %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Changed the first name of the user %TargetUsername% to %new_firstname%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )          => '%Roles%',
 							__( 'Previous name', 'wp-security-audit-log' ) => '%old_firstname%',
-							__( 'New name', 'wp-security-audit-log' )      => '%new_firstname%',
 							__( 'Last name', 'wp-security-audit-log' )     => '%LastName%'
 						],
 						wsaldefaults_build_links( [ 'EditUserLink' ] ),
@@ -1885,12 +1846,11 @@ function wsaldefaults_wsal_init() {
 						4018,
 						WSAL_INFORMATIONAL,
 						__( 'User changed last name for a user', 'wp-security-audit-log' ),
-						__( 'Changed the last name of the user %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Changed the last name of the user %TargetUsername% to %new_lastname%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )               => '%Roles%',
 							__( 'First name', 'wp-security-audit-log' )         => '%FirstName%',
-							__( 'Previous last name', 'wp-security-audit-log' ) => '%old_lastname%',
-							__( 'New last name', 'wp-security-audit-log' )      => '%new_lastname%'
+							__( 'Previous last name', 'wp-security-audit-log' ) => '%old_lastname%'
 						],
 						wsaldefaults_build_links( [ 'EditUserLink' ] ),
 						'user',
@@ -1900,13 +1860,12 @@ function wsaldefaults_wsal_init() {
 						4019,
 						WSAL_INFORMATIONAL,
 						__( 'User changed nickname for a user', 'wp-security-audit-log' ),
-						__( 'Changed the nickname of the user %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Changed the nickname of the user %TargetUsername% to %new_nickname%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )              => '%Roles%',
 							__( 'First name', 'wp-security-audit-log' )        => '%FirstName%',
 							__( 'Last name', 'wp-security-audit-log' )         => '%LastName%',
-							__( 'Previous nickname', 'wp-security-audit-log' ) => '%old_nickname%',
-							__( 'New nickname', 'wp-security-audit-log' )      => '%new_nickname%'
+							__( 'Previous nickname', 'wp-security-audit-log' ) => '%old_nickname%'
 						],
 						wsaldefaults_build_links( [ 'EditUserLink' ] ),
 						'user',
@@ -1916,13 +1875,12 @@ function wsaldefaults_wsal_init() {
 						4020,
 						WSAL_LOW,
 						__( 'User changed the display name for a user', 'wp-security-audit-log' ),
-						__( 'Changed the display name of the user %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Changed the display name of the user %TargetUsername% to %new_displayname%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )                  => '%Roles%',
 							__( 'First name', 'wp-security-audit-log' )            => '%FirstName%',
 							__( 'Last name', 'wp-security-audit-log' )             => '%LastName%',
-							__( 'Previous display name', 'wp-security-audit-log' ) => '%old_displayname%',
-							__( 'New display name', 'wp-security-audit-log' )      => '%new_displayname%'
+							__( 'Previous display name', 'wp-security-audit-log' ) => '%old_displayname%'
 						],
 						wsaldefaults_build_links( [ 'EditUserLink' ] ),
 						'user',
@@ -1933,12 +1891,11 @@ function wsaldefaults_wsal_init() {
 						4025,
 						WSAL_CRITICAL,
 						__( 'User created an application password', 'wp-security-audit-log' ),
-						__( 'An application password', 'wp-security-audit-log' ),
+						__( 'The application password %friendly_name%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )                               => '%roles%',
 							__( 'First name', 'wp-security-audit-log' )                         => '%firstname%',
-							__( 'Last name', 'wp-security-audit-log' )                          => '%lastname%',
-							__( 'Application password friendly name', 'wp-security-audit-log' ) => '%friendly_name%'
+							__( 'Last name', 'wp-security-audit-log' )                          => '%lastname%'
 						],
 						[],
 						'user',
@@ -1948,12 +1905,11 @@ function wsaldefaults_wsal_init() {
 						4026,
 						WSAL_CRITICAL,
 						__( 'User created an application password', 'wp-security-audit-log' ),
-						__( 'An application password for the user %login%', 'wp-security-audit-log' ),
+						__( 'The application password %friendly_name% for the user %login%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )                               => '%roles%',
 							__( 'First name', 'wp-security-audit-log' )                         => '%firstname%',
-							__( 'Last name', 'wp-security-audit-log' )                          => '%lastname%',
-							__( 'Application password friendly name', 'wp-security-audit-log' ) => '%friendly_name%'
+							__( 'Last name', 'wp-security-audit-log' )                          => '%lastname%'
 						],
 						[],
 						'user',
@@ -1964,7 +1920,7 @@ function wsaldefaults_wsal_init() {
 						4027,
 						WSAL_HIGH,
 						__( 'User revoked all application passwords', 'wp-security-audit-log' ),
-						__( 'All application passwords', 'wp-security-audit-log' ),
+						__( 'All application passwords.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )       => '%roles%',
 							__( 'First name', 'wp-security-audit-log' ) => '%firstname%',
@@ -1978,7 +1934,7 @@ function wsaldefaults_wsal_init() {
 						4028,
 						WSAL_HIGH,
 						__( 'User revoked all application passwords for a user', 'wp-security-audit-log' ),
-						__( 'All application passwords from the user %login%', 'wp-security-audit-log' ),
+						__( 'All application passwords from the user %login%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )       => '%roles%',
 							__( 'First name', 'wp-security-audit-log' ) => '%firstname%',
@@ -1992,7 +1948,7 @@ function wsaldefaults_wsal_init() {
 						4029,
 						WSAL_HIGH,
 						__( 'Admin sent a password reset request to a user', 'wp-security-audit-log' ),
-						__( 'Sent a password reset request to the user %login%', 'wp-security-audit-log' ),
+						__( 'Sent a password reset request to the user %login%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )       => '%roles%',
 							__( 'First name', 'wp-security-audit-log' ) => '%firstname%',
@@ -2009,7 +1965,7 @@ function wsaldefaults_wsal_init() {
 						4008,
 						WSAL_CRITICAL,
 						__( 'User granted Super Admin privileges', 'wp-security-audit-log' ),
-						__( 'Granted Super Admin privileges to %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Granted Super Admin privileges to the user %TargetUsername%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )       => '%Roles%',
 							__( 'First name', 'wp-security-audit-log' ) => '%FirstName%',
@@ -2023,7 +1979,7 @@ function wsaldefaults_wsal_init() {
 						4009,
 						WSAL_CRITICAL,
 						__( 'User revoked from Super Admin privileges', 'wp-security-audit-log' ),
-						__( 'Revoked Super Admin privileges from %TargetUsername%', 'wp-security-audit-log' ),
+						__( 'Revoked Super Admin privileges from %TargetUsername%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )       => '%Roles%',
 							__( 'First name', 'wp-security-audit-log' ) => '%FirstName%',
@@ -2037,7 +1993,7 @@ function wsaldefaults_wsal_init() {
 						4010,
 						WSAL_MEDIUM,
 						__( 'Existing user added to a site', 'wp-security-audit-log' ),
-						__( 'Added user %TargetUsername% to site: %SiteName%', 'wp-security-audit-log' ),
+						__( 'Added user %TargetUsername% to the site %SiteName%.', 'wp-security-audit-log' ),
 						[
 							__( 'Role', 'wp-security-audit-log' )       => '%TargetUserRole%',
 							__( 'First name', 'wp-security-audit-log' ) => '%FirstName%',
@@ -2051,7 +2007,7 @@ function wsaldefaults_wsal_init() {
 						4011,
 						WSAL_MEDIUM,
 						__( 'User removed from site', 'wp-security-audit-log' ),
-						__( 'Removed user %TargetUsername% from site: %SiteName%', 'wp-security-audit-log' ),
+						__( 'Removed user %TargetUsername% from the site %SiteName%', 'wp-security-audit-log' ),
 						[
 							__( 'Site role', 'wp-security-audit-log' )  => '%TargetUserRole%',
 							__( 'First name', 'wp-security-audit-log' ) => '%FirstName%',
@@ -2065,7 +2021,7 @@ function wsaldefaults_wsal_init() {
 						4012,
 						WSAL_CRITICAL,
 						__( 'New network user created', 'wp-security-audit-log' ),
-						__( 'Created a new network user %NewUserData->Username%', 'wp-security-audit-log' ),
+						__( 'Created the new network user %NewUserData->Username%.', 'wp-security-audit-log' ),
 						[
 							__( 'First name', 'wp-security-audit-log' ) => '%NewUserData->FirstName%',
 							__( 'Last name', 'wp-security-audit-log' )  => '%NewUserData->LastName%'
@@ -2083,9 +2039,8 @@ function wsaldefaults_wsal_init() {
 						5000,
 						WSAL_CRITICAL,
 						__( 'User installed a plugin', 'wp-security-audit-log' ),
-						__( 'User installed a plugin', 'wp-security-audit-log' ),
+						__( 'Installed the plugin %Plugin->Name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Name', 'wp-security-audit-log' )             => '%Plugin->Name%',
 							__( 'Version', 'wp-security-audit-log' )          => '%Plugin->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%Plugin->plugin_dir_path%'
 						],
@@ -2097,9 +2052,8 @@ function wsaldefaults_wsal_init() {
 						5001,
 						WSAL_HIGH,
 						__( 'User activated a WordPress plugin', 'wp-security-audit-log' ),
-						__( 'User activated a WordPress plugin', 'wp-security-audit-log' ),
+						__( 'Activated the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Name', 'wp-security-audit-log' )             => '%PluginData->Name%',
 							__( 'Version', 'wp-security-audit-log' )          => '%PluginData->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%PluginFile%'
 						],
@@ -2111,9 +2065,8 @@ function wsaldefaults_wsal_init() {
 						5002,
 						WSAL_HIGH,
 						__( 'User deactivated a WordPress plugin', 'wp-security-audit-log' ),
-						__( 'User deactivated a WordPress plugin', 'wp-security-audit-log' ),
+						__( 'Deactivated the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Name', 'wp-security-audit-log' )             => '%PluginData->Name%',
 							__( 'Version', 'wp-security-audit-log' )          => '%PluginData->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%PluginFile%'
 						],
@@ -2125,9 +2078,8 @@ function wsaldefaults_wsal_init() {
 						5003,
 						WSAL_HIGH,
 						__( 'User uninstalled a plugin', 'wp-security-audit-log' ),
-						__( 'User uninstalled a plugin', 'wp-security-audit-log' ),
+						__( 'Uninstalled the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Name', 'wp-security-audit-log' )             => '%PluginData->Name%',
 							__( 'Version', 'wp-security-audit-log' )          => '%PluginData->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%PluginFile%'
 						],
@@ -2139,9 +2091,8 @@ function wsaldefaults_wsal_init() {
 						5004,
 						WSAL_LOW,
 						__( 'User upgraded a plugin', 'wp-security-audit-log' ),
-						__( 'User upgraded a plugin', 'wp-security-audit-log' ),
+						__( 'Updated the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Name', 'wp-security-audit-log' )             => '%PluginData->Name%',
 							__( 'Updated version', 'wp-security-audit-log' )  => '%PluginData->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%PluginFile%'
 						],
@@ -2153,10 +2104,9 @@ function wsaldefaults_wsal_init() {
 						5010,
 						WSAL_LOW,
 						__( 'Plugin created table', 'wp-security-audit-log' ),
-						__( 'Plugin created this table in the database', 'wp-security-audit-log' ),
+						__( 'The plugin %Plugin->Name% created this table in the database.', 'wp-security-audit-log' ),
 						[
-							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%',
-							__( 'Plugin', 'wp-security-audit-log' ) => '%Plugin->Name%'
+							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%'
 						],
 						[],
 						'database',
@@ -2166,10 +2116,9 @@ function wsaldefaults_wsal_init() {
 						5011,
 						WSAL_LOW,
 						__( 'Plugin modified table structure', 'wp-security-audit-log' ),
-						__( 'Plugin modified the structure of this table', 'wp-security-audit-log' ),
+						__( 'The plugin %Plugin->Name% modified the structure of a database table.', 'wp-security-audit-log' ),
 						[
-							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%',
-							__( 'Plugin', 'wp-security-audit-log' ) => '%Plugin->Name%'
+							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%'
 						],
 						[],
 						'database',
@@ -2179,10 +2128,9 @@ function wsaldefaults_wsal_init() {
 						5012,
 						WSAL_MEDIUM,
 						__( 'Plugin deleted table', 'wp-security-audit-log' ),
-						__( 'Plugin deleted this table from the database', 'wp-security-audit-log' ),
+						__( 'The plugin %Plugin->Name% deleted this table from the database.', 'wp-security-audit-log' ),
 						[
-							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%',
-							__( 'Plugin', 'wp-security-audit-log' ) => '%Plugin->Name%'
+							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%'
 						],
 						[],
 						'database',
@@ -2192,7 +2140,7 @@ function wsaldefaults_wsal_init() {
 						5019,
 						WSAL_MEDIUM,
 						__( 'A plugin created a post', 'wp-security-audit-log' ),
-						__( 'Plugin created the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'The plugin created the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
@@ -2207,7 +2155,7 @@ function wsaldefaults_wsal_init() {
 						5025,
 						WSAL_LOW,
 						__( 'A plugin deleted a post', 'wp-security-audit-log' ),
-						__( 'Plugin deleted the post %PostTitle%', 'wp-security-audit-log' ),
+						__( 'A plugin deleted the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )   => '%PostType%',
@@ -2222,10 +2170,8 @@ function wsaldefaults_wsal_init() {
 						2051,
 						WSAL_HIGH,
 						__( 'User changed a file using the plugin editor', 'wp-security-audit-log' ),
-						__( 'Modified a file with the plugin editor', 'wp-security-audit-log' ),
-						[
-							__( 'File', 'wp-security-audit-log' ) => '%File%'
-						],
+						__( 'Modified the file %File% with the plugin editor.', 'wp-security-audit-log' ),
+						[],
 						[],
 						'file',
 						'modified'
@@ -2237,9 +2183,8 @@ function wsaldefaults_wsal_init() {
 						5005,
 						WSAL_CRITICAL,
 						__( 'User installed a theme', 'wp-security-audit-log' ),
-						__( 'User installed a theme', 'wp-security-audit-log' ),
+						__( 'Installed the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Name', 'wp-security-audit-log' )             => '%Theme->Name%',
 							__( 'Version', 'wp-security-audit-log' )          => '%Theme->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%',
 						],
@@ -2251,9 +2196,8 @@ function wsaldefaults_wsal_init() {
 						5006,
 						WSAL_HIGH,
 						__( 'User activated a theme', 'wp-security-audit-log' ),
-						__( 'User activated a theme', 'wp-security-audit-log' ),
+						__( 'Activated the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Name', 'wp-security-audit-log' )             => '%Theme->Name%',
 							__( 'Version', 'wp-security-audit-log' )          => '%Theme->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%'
 						],
@@ -2265,9 +2209,8 @@ function wsaldefaults_wsal_init() {
 						5007,
 						WSAL_HIGH,
 						__( 'User uninstalled a theme', 'wp-security-audit-log' ),
-						__( 'User uninstalled a theme', 'wp-security-audit-log' ),
+						__( 'Deleted the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Name', 'wp-security-audit-log' )             => '%Theme->Name%',
 							__( 'Version', 'wp-security-audit-log' )          => '%Theme->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%'
 						],
@@ -2279,10 +2222,9 @@ function wsaldefaults_wsal_init() {
 						5013,
 						WSAL_LOW,
 						__( 'Theme created tables', 'wp-security-audit-log' ),
-						__( 'Theme created this table in the database', 'wp-security-audit-log' ),
+						__( 'The theme %Theme->Name% created this tables in the database.', 'wp-security-audit-log' ),
 						[
-							__( 'Table', 'wp-security-audit-log' ) => '%TableNames%',
-							__( 'Theme', 'wp-security-audit-log' ) => '%Theme->Name%'
+							__( 'Table', 'wp-security-audit-log' ) => '%TableNames%'
 						],
 						[],
 						'database',
@@ -2292,10 +2234,9 @@ function wsaldefaults_wsal_init() {
 						5014,
 						WSAL_LOW,
 						__( 'Theme modified tables structure', 'wp-security-audit-log' ),
-						__( 'Theme modified the structure of this database table', 'wp-security-audit-log' ),
+						__( 'The theme %Theme->Name% modified the structure of this database table', 'wp-security-audit-log' ),
 						[
-							__( 'Table', 'wp-security-audit-log' ) => '%TableNames%',
-							__( 'Theme', 'wp-security-audit-log' ) => '%Theme->Name%'
+							__( 'Table', 'wp-security-audit-log' ) => '%TableNames%'
 						],
 						[],
 						'database',
@@ -2305,10 +2246,9 @@ function wsaldefaults_wsal_init() {
 						5015,
 						WSAL_MEDIUM,
 						__( 'Theme deleted tables', 'wp-security-audit-log' ),
-						__( 'Theme deleted this table from the database', 'wp-security-audit-log' ),
+						__( 'The theme %Theme->Name% deleted this table from the database.', 'wp-security-audit-log' ),
 						[
-							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%',
-							__( 'Theme', 'wp-security-audit-log' )  => '%Theme->Name%'
+							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
 						],
 						[],
 						'database',
@@ -2318,9 +2258,8 @@ function wsaldefaults_wsal_init() {
 						5031,
 						WSAL_LOW,
 						__( 'User updated a theme', 'wp-security-audit-log' ),
-						__( 'User updated a theme', 'wp-security-audit-log' ),
+						__( 'Updated the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Name', 'wp-security-audit-log' )             => '%Theme->Name%',
 							__( 'New version', 'wp-security-audit-log' )      => '%Theme->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%'
 						],
@@ -2332,10 +2271,8 @@ function wsaldefaults_wsal_init() {
 						2046,
 						WSAL_HIGH,
 						__( 'User changed a file using the theme editor', 'wp-security-audit-log' ),
-						__( 'Modified a file with the theme editor', 'wp-security-audit-log' ),
-						[
-							__( 'File', 'wp-security-audit-log' ) => '%Theme%/%File%'
-						],
+						__( 'Modified the file %Theme%/%File% with the theme editor.', 'wp-security-audit-log' ),
+						[],
 						[],
 						'file',
 						'modified'
@@ -2347,7 +2284,7 @@ function wsaldefaults_wsal_init() {
 						5008,
 						WSAL_HIGH,
 						__( 'Activated theme on network', 'wp-security-audit-log' ),
-						__( 'Network activated the theme %Theme->Name%', 'wp-security-audit-log' ),
+						__( 'Network activated the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						[
 							__( 'Version', 'wp-security-audit-log' )          => '%Theme->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%'
@@ -2360,7 +2297,7 @@ function wsaldefaults_wsal_init() {
 						5009,
 						WSAL_MEDIUM,
 						__( 'Deactivated theme from network', 'wp-security-audit-log' ),
-						__( 'Network deactivated the theme %Theme->Name%', 'wp-security-audit-log' ),
+						__( 'Network deactivated the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						[
 							__( 'Version', 'wp-security-audit-log' )          => '%Theme->Version%',
 							__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%'
@@ -2376,7 +2313,7 @@ function wsaldefaults_wsal_init() {
 						5016,
 						WSAL_HIGH,
 						__( 'Unknown component created tables', 'wp-security-audit-log' ),
-						__( 'An unknown component created these tables in the database', 'wp-security-audit-log' ),
+						__( 'An unknown component created these tables in the database.', 'wp-security-audit-log' ),
 						[
 							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
 						],
@@ -2388,7 +2325,7 @@ function wsaldefaults_wsal_init() {
 						5017,
 						WSAL_HIGH,
 						__( 'Unknown component modified tables structure', 'wp-security-audit-log' ),
-						__( 'An unknown component modified the structure of these database tables', 'wp-security-audit-log' ),
+						__( 'An unknown component modified the structure of these database tables.', 'wp-security-audit-log' ),
 						[
 							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
 						],
@@ -2400,7 +2337,7 @@ function wsaldefaults_wsal_init() {
 						5018,
 						WSAL_HIGH,
 						__( 'Unknown component deleted tables', 'wp-security-audit-log' ),
-						__( 'An unknown component deleted these tables from the database', 'wp-security-audit-log' ),
+						__( 'An unknown component deleted these tables from the database.', 'wp-security-audit-log' ),
 						[
 							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
 						],
@@ -2412,7 +2349,7 @@ function wsaldefaults_wsal_init() {
 						5022,
 						WSAL_HIGH,
 						__( 'WordPress created tables', 'wp-security-audit-log' ),
-						__( 'WordPress created these tables in the database', 'wp-security-audit-log' ),
+						__( 'WordPress has created these tables in the database.', 'wp-security-audit-log' ),
 						[
 							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
 						],
@@ -2424,7 +2361,7 @@ function wsaldefaults_wsal_init() {
 						5023,
 						WSAL_HIGH,
 						__( 'WordPress modified tables structure', 'wp-security-audit-log' ),
-						__( 'WordPress modified the structure of these database tables', 'wp-security-audit-log' ),
+						__( 'WordPress modified the structure of these database tables.', 'wp-security-audit-log' ),
 						[
 							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
 						],
@@ -2436,7 +2373,7 @@ function wsaldefaults_wsal_init() {
 						5024,
 						WSAL_HIGH,
 						__( 'WordPress deleted tables', 'wp-security-audit-log' ),
-						__( 'WordPress deleted these tables from the database', 'wp-security-audit-log' ),
+						__( 'WordPress deleted these tables from the database.', 'wp-security-audit-log' ),
 						[
 							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
 						],
@@ -2489,7 +2426,7 @@ function wsaldefaults_wsal_init() {
 						6004,
 						WSAL_MEDIUM,
 						__( 'WordPress was updated', 'wp-security-audit-log' ),
-						__( 'Updated WordPress', 'wp-security-audit-log' ),
+						__( 'Updated WordPress.', 'wp-security-audit-log' ),
 						[
 							__( 'Previous version', 'wp-security-audit-log' ) => '%OldVersion%',
 							__( 'New version', 'wp-security-audit-log' )      => '%NewVersion%'
@@ -2518,7 +2455,7 @@ function wsaldefaults_wsal_init() {
 						6000,
 						WSAL_INFORMATIONAL,
 						__( 'Events automatically pruned by system', 'wp-security-audit-log' ),
-						__( 'System automatically deleted %EventCount% events', 'wp-security-audit-log' ),
+						__( 'System automatically deleted %EventCount% events from the activity log.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'wp-activity-log',
@@ -2528,7 +2465,7 @@ function wsaldefaults_wsal_init() {
 						6006,
 						WSAL_MEDIUM,
 						__( 'Reset the plugin\'s settings to default', 'wp-security-audit-log' ),
-						__( 'Reset the activity log plugin\'s settings to default', 'wp-security-audit-log' ),
+						__( 'Reset the activity log plugin\'s settings to default.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'wp-activity-log',
@@ -2538,7 +2475,7 @@ function wsaldefaults_wsal_init() {
 						6034,
 						WSAL_CRITICAL,
 						__( 'Purged the activity log', 'wp-security-audit-log' ),
-						__( 'Purged the activity log', 'wp-security-audit-log' ),
+						__( 'Purged the activity log.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'wp-activity-log',
@@ -2548,7 +2485,7 @@ function wsaldefaults_wsal_init() {
 						6043,
 						WSAL_HIGH,
 						__( 'Some WP Activity Log plugin settings on this site were propagated and overridden from the MainWP dashboard', 'wp-security-audit-log' ),
-						__( 'Some WP Activity Log plugin settings on this site were propagated and overridden from the MainWP dashboard.', 'wp-security-audit-log' ),
+						__( 'Some <strong>WP Activity Log</strong> plugin settings on this site were propagated and overridden from the MainWP dashboard.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'wp-activity-log',
@@ -2561,7 +2498,7 @@ function wsaldefaults_wsal_init() {
 						6001,
 						WSAL_CRITICAL,
 						__( 'Option Anyone Can Register in WordPress settings changed', 'wp-security-audit-log' ),
-						__( 'The <strong>Membership</strong> setting <strong>Anyone can register</strong>', 'wp-security-audit-log' ),
+						__( 'The <strong>Membership</strong> setting <strong>Anyone can register</strong>.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -2571,7 +2508,7 @@ function wsaldefaults_wsal_init() {
 						6002,
 						WSAL_CRITICAL,
 						__( 'New User Default Role changed', 'wp-security-audit-log' ),
-						__( 'Changed the <strong>New user default role</strong> WordPress setting', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>New user default role</strong> WordPress setting.', 'wp-security-audit-log' ),
 						[
 							__( 'Previous role', 'wp-security-audit-log' ) => '%OldRole%',
 							__( 'New role', 'wp-security-audit-log' )      => '%NewRole%'
@@ -2584,7 +2521,7 @@ function wsaldefaults_wsal_init() {
 						6003,
 						WSAL_CRITICAL,
 						__( 'WordPress Administrator Notification email changed', 'wp-security-audit-log' ),
-						__( 'Change the <strong>Administrator email address</strong> in the WordPress settings', 'wp-security-audit-log' ),
+						__( 'Change the <strong>Administrator email address</strong> in the WordPress settings.', 'wp-security-audit-log' ),
 						[
 							__( 'Previous address', 'wp-security-audit-log' ) => '%OldEmail%',
 							__( 'New address', 'wp-security-audit-log' )      => '%NewEmail%'
@@ -2597,7 +2534,7 @@ function wsaldefaults_wsal_init() {
 						6005,
 						WSAL_HIGH,
 						__( 'User changes the WordPress Permalinks', 'wp-security-audit-log' ),
-						__( 'Changed the WordPress permalinks', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>WordPress permalinks</strong>.', 'wp-security-audit-log' ),
 						[
 							__( 'Previous permalinks', 'wp-security-audit-log' ) => '%OldPattern%',
 							__( 'New permalinks', 'wp-security-audit-log' )      => '%NewPattern%'
@@ -2610,7 +2547,7 @@ function wsaldefaults_wsal_init() {
 						6008,
 						WSAL_INFORMATIONAL,
 						__( 'Enabled/Disabled the option Discourage search engines from indexing this site', 'wp-security-audit-log' ),
-						__( 'The <strong>Search engine visibility</strong> in the WordPress settings (Discourage search engines from indexing this site)', 'wp-security-audit-log' ),
+						__( 'Changed the status of the WordPress setting <strong>Search engine visibility</strong> (Discourage search engines from indexing this site)', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -2620,7 +2557,7 @@ function wsaldefaults_wsal_init() {
 						6009,
 						WSAL_MEDIUM,
 						__( 'Enabled/Disabled comments on all the website', 'wp-security-audit-log' ),
-						__( 'Comments on the website', 'wp-security-audit-log' ),
+						__( 'Changed the status of the WordPress setting <strong>Allow people to submit comments on new posts</strong>.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -2631,7 +2568,7 @@ function wsaldefaults_wsal_init() {
 						6010,
 						WSAL_MEDIUM,
 						__( 'Enabled/Disabled the option Comment author must fill out name and email', 'wp-security-audit-log' ),
-						__( 'The WordPress setting <strong>Comment author must fill out name and email</strong>', 'wp-security-audit-log' ),
+						__( 'Changed the status of the WordPress setting <strong>.Comment author must fill out name and email</strong>.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -2641,7 +2578,7 @@ function wsaldefaults_wsal_init() {
 						6011,
 						WSAL_MEDIUM,
 						__( 'Enabled/Disabled the option Users must be logged in and registered to comment', 'wp-security-audit-log' ),
-						__( 'The WordPress setting <strong>Users must be registered and logged in to comment</strong>', 'wp-security-audit-log' ),
+						__( 'Changed the status of the WordPress setting <strong>Users must be registered and logged in to comment</strong>.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -2651,7 +2588,7 @@ function wsaldefaults_wsal_init() {
 						6012,
 						WSAL_INFORMATIONAL,
 						__( 'Enabled/Disabled the option to automatically close comments', 'wp-security-audit-log' ),
-						__( 'The WordPress setting <strong>Automatically close comments after %Value% days</strong>', 'wp-security-audit-log' ),
+						__( 'Changed the status of the WordPress setting <strong>Automatically close comments after %Value% days</strong>.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -2661,10 +2598,9 @@ function wsaldefaults_wsal_init() {
 						6013,
 						WSAL_INFORMATIONAL,
 						__( 'Changed the value of the option Automatically close comments', 'wp-security-audit-log' ),
-						__( 'Changed the value of the WordPress setting to <strong>Automatically close comments after a number of days</strong>', 'wp-security-audit-log' ),
+						__( 'Changed the value of the WordPress setting <strong>Automatically close comments after a number of days</strong> to %NewValue%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous value', 'wp-security-audit-log' ) => '%OldValue%',
-							__( 'New value', 'wp-security-audit-log' )      => '%NewValue%'
+							__( 'Previous value', 'wp-security-audit-log' ) => '%OldValue%'
 						],
 						[],
 						'system-setting',
@@ -2674,7 +2610,7 @@ function wsaldefaults_wsal_init() {
 						6014,
 						WSAL_MEDIUM,
 						__( 'Enabled/Disabled the option for comments to be manually approved', 'wp-security-audit-log' ),
-						__( 'The WordPress setting <strong>Comments must be manually approved</strong>', 'wp-security-audit-log' ),
+						__( 'Changed the value of the WordPress setting <strong>Comments must be manualy approved</strong>.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -2684,7 +2620,7 @@ function wsaldefaults_wsal_init() {
 						6015,
 						WSAL_LOW,
 						__( 'Enabled/Disabled the option for an author to have previously approved comments for the comments to appear', 'wp-security-audit-log' ),
-						__( 'The WordPress setting <strong>Comment author must have a previously approved comment</strong>', 'wp-security-audit-log' ),
+						__( 'Changed the value of the WordPress setting <strong>Comment author must have a previously approved comment</strong>.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -2694,10 +2630,9 @@ function wsaldefaults_wsal_init() {
 						6016,
 						WSAL_LOW,
 						__( 'Changed the number of links that a comment must have to be held in the queue', 'wp-security-audit-log' ),
-						__( 'Changed the WordPress setting <strong>Hold a comment in the queue if it contains links</strong>', 'wp-security-audit-log' ),
+						__( 'Changed the value of the WordPress setting <strong>Hold a comment in the queue if it contains links</strong> to %NewValue% links.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous value', 'wp-security-audit-log' ) => '%OldValue%',
-							__( 'New value', 'wp-security-audit-log' )      => '%NewValue%'
+							__( 'Previous value', 'wp-security-audit-log' ) => '%OldValue%'
 						],
 						[],
 						'system-setting',
@@ -2707,7 +2642,7 @@ function wsaldefaults_wsal_init() {
 						6017,
 						WSAL_INFORMATIONAL,
 						__( 'Modified the list of keywords for comments moderation', 'wp-security-audit-log' ),
-						__( 'Modified the list of keywords for comments moderation in WordPress', 'wp-security-audit-log' ),
+						__( 'Modified the list of keywords for comments medoration in WordPress.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -2717,7 +2652,7 @@ function wsaldefaults_wsal_init() {
 						6018,
 						WSAL_INFORMATIONAL,
 						__( 'Modified the list of keywords for comments blacklisting', 'wp-security-audit-log' ),
-						__( 'Modified the list of <strong>Disallowed comment keys</strong> (keywords) for comments blacklisting in WordPress', 'wp-security-audit-log' ),
+						__( 'Modified the list of <strong>Disallowed comment keys</strong> (keywords) for comments blacklisting in WordPress.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -2727,10 +2662,9 @@ function wsaldefaults_wsal_init() {
 						6024,
 						WSAL_CRITICAL,
 						__( 'Option WordPress Address (URL) in WordPress settings changed', 'wp-security-audit-log' ),
-						__( 'Changed the <strong>WordPress address (URL)</strong>', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>WordPress address (URL)</strong> tp %new_url%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous URL', 'wp-security-audit-log' ) => '%old_url%',
-							__( 'New URL', 'wp-security-audit-log' )      => '%new_url%'
+							__( 'Previous URL', 'wp-security-audit-log' ) => '%old_url%'
 						],
 						[],
 						'system-setting',
@@ -2740,10 +2674,9 @@ function wsaldefaults_wsal_init() {
 						6025,
 						WSAL_CRITICAL,
 						__( 'Option Site Address (URL) in WordPress settings changed', 'wp-security-audit-log' ),
-						__( 'Changed the <strong>Site address (URL)</strong>', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Site address (URL)</strong> to %new_url%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous URL', 'wp-security-audit-log' ) => '%old_url%',
-							__( 'New URL', 'wp-security-audit-log' )      => '%new_url%'
+							__( 'Previous URL', 'wp-security-audit-log' ) => '%old_url%'
 						],
 						[],
 						'system-setting',
@@ -2753,10 +2686,9 @@ function wsaldefaults_wsal_init() {
 						6035,
 						WSAL_CRITICAL,
 						__( 'Option Your homepage displays in WordPress settings changed', 'wp-security-audit-log' ),
-						__( 'The <strong>Your homepage displays</strong> in the WordPress settings', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Your homepage displays</strong> WordPress setting to %new_homepage%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous setting', 'wp-security-audit-log' ) => '%old_homepage%',
-							__( 'New setting', 'wp-security-audit-log' )      => '%new_homepage%'
+							__( 'Previous setting', 'wp-security-audit-log' ) => '%old_homepage%'
 						],
 						[],
 						'system-setting',
@@ -2766,10 +2698,9 @@ function wsaldefaults_wsal_init() {
 						6036,
 						WSAL_CRITICAL,
 						__( 'Option homepage in WordPress settings changed', 'wp-security-audit-log' ),
-						__( 'Changed the <strong>Homepage</strong> in the WordPress settings', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Homepage</strong> in the WordPress settings to %new_page%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous page', 'wp-security-audit-log' ) => '%old_page%',
-							__( 'New page', 'wp-security-audit-log' )      => '%new_page%'
+							__( 'Previous page', 'wp-security-audit-log' ) => '%old_page%'
 						],
 						[],
 						'system-setting',
@@ -2779,10 +2710,9 @@ function wsaldefaults_wsal_init() {
 						6037,
 						WSAL_CRITICAL,
 						__( 'Option posts page in WordPress settings changed', 'wp-security-audit-log' ),
-						__( 'Changed the <strong>Posts page</strong> in the WordPress settings', 'wp-security-audit-log' ),
+						__( 'Changed the <strong> Posts</strong>  page in the WordPress settings to %new_page%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous page', 'wp-security-audit-log' ) => '%old_page%',
-							__( 'New setting', 'wp-security-audit-log' )   => '%new_page%'
+							__( 'Previous page', 'wp-security-audit-log' ) => '%old_page%'
 						],
 						[],
 						'system-setting',
@@ -2793,10 +2723,9 @@ function wsaldefaults_wsal_init() {
 						6040,
 						WSAL_CRITICAL,
 						__( 'Option Timezone in WordPress settings changed', 'wp-security-audit-log' ),
-						__( 'The <strong>Timezone</strong> in the WordPress settings', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Timezone</strong> in the WordPress settings to %new_timezone%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous timezone', 'wp-security-audit-log' ) => '%old_timezone%',
-							__( 'New timezone', 'wp-security-audit-log' )      => '%new_timezone%'
+							__( 'Previous timezone', 'wp-security-audit-log' ) => '%old_timezone%'
 						],
 						[],
 						'system-setting',
@@ -2806,10 +2735,9 @@ function wsaldefaults_wsal_init() {
 						6041,
 						WSAL_CRITICAL,
 						__( 'Option Date format in WordPress settings changed', 'wp-security-audit-log' ),
-						__( 'The <strong>Date format</strong> in the WordPress settings', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Date format</strong> in the WordPress settings to %new_date_format%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous format', 'wp-security-audit-log' ) => '%old_date_format%',
-							__( 'New format', 'wp-security-audit-log' )      => '%new_date_format%'
+							__( 'Previous format', 'wp-security-audit-log' ) => '%old_date_format%'
 						],
 						[],
 						'system-setting',
@@ -2819,10 +2747,9 @@ function wsaldefaults_wsal_init() {
 						6042,
 						WSAL_CRITICAL,
 						__( 'Option Time format in WordPress settings changed', 'wp-security-audit-log' ),
-						__( 'The <strong>Time format</strong> in the WordPress settings', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Time format</strong> in the WordPress settings to %new_time_format%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous format', 'wp-security-audit-log' ) => '%old_time_format%',
-							__( 'New format', 'wp-security-audit-log' )      => '%new_time_format%'
+							__( 'Previous format', 'wp-security-audit-log' ) => '%old_time_format%'
 						],
 						[],
 						'system-setting',
@@ -2833,7 +2760,7 @@ function wsaldefaults_wsal_init() {
 						6044,
 						WSAL_HIGH,
 						__( 'Option Automatic updates setting changed', 'wp-security-audit-log' ),
-						__( 'The <strong>Automatic updates</strong> setting', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Automatic updates</strong> setting.', 'wp-security-audit-log' ),
 						[
 							__( 'New setting status', 'wp-security-audit-log' ) => '%updates_status%'
 						],
@@ -2846,10 +2773,9 @@ function wsaldefaults_wsal_init() {
 						6045,
 						WSAL_HIGH,
 						__( 'Option Site Language setting changed', 'wp-security-audit-log' ),
-						__( 'Changed the <strong>Site Language</strong> setting', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Site Language</strong> to %new_value%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous setting', 'wp-security-audit-log' ) => '%previous_value%',
-							__( 'New setting', 'wp-security-audit-log' )      => '%new_value%'
+							__( 'Previous setting', 'wp-security-audit-log' ) => '%previous_value%'
 						],
 						[],
 						'system-setting',
@@ -2864,7 +2790,7 @@ function wsaldefaults_wsal_init() {
 						7000,
 						WSAL_CRITICAL,
 						__( 'New site added on the network', 'wp-security-audit-log' ),
-						__( 'New site on the network: %SiteName%', 'wp-security-audit-log' ),
+						__( 'Added the new site %SiteName% to the network.', 'wp-security-audit-log' ),
 						[
 							__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%'
 						],
@@ -2876,7 +2802,7 @@ function wsaldefaults_wsal_init() {
 						7001,
 						WSAL_HIGH,
 						__( 'Existing site archived', 'wp-security-audit-log' ),
-						__( 'Archived the site: %SiteName%', 'wp-security-audit-log' ),
+						__( 'Archived the site %SiteName% on the network.', 'wp-security-audit-log' ),
 						[
 							__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%'
 						],
@@ -2888,7 +2814,7 @@ function wsaldefaults_wsal_init() {
 						7002,
 						WSAL_HIGH,
 						__( 'Archived site has been unarchived', 'wp-security-audit-log' ),
-						__( 'Unarchived the site: %SiteName%', 'wp-security-audit-log' ),
+						__( 'Unarchived the site %SiteName%.', 'wp-security-audit-log' ),
 						[
 							__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%'
 						],
@@ -2900,7 +2826,7 @@ function wsaldefaults_wsal_init() {
 						7003,
 						WSAL_HIGH,
 						__( 'Deactivated site has been activated', 'wp-security-audit-log' ),
-						__( 'Activated the site: %SiteName%', 'wp-security-audit-log' ),
+						__( 'Activated the site %SiteName% on the network.', 'wp-security-audit-log' ),
 						[
 							__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%'
 						],
@@ -2912,7 +2838,7 @@ function wsaldefaults_wsal_init() {
 						7004,
 						WSAL_HIGH,
 						__( 'Site has been deactivated', 'wp-security-audit-log' ),
-						__( 'Deactivated the site: %SiteName%', 'wp-security-audit-log' ),
+						__( 'Deactiveated the site %SiteName% on the network.', 'wp-security-audit-log' ),
 						[
 							__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%'
 						],
@@ -2924,7 +2850,7 @@ function wsaldefaults_wsal_init() {
 						7005,
 						WSAL_HIGH,
 						__( 'Existing site deleted from network', 'wp-security-audit-log' ),
-						__( 'The site: %SiteName%', 'wp-security-audit-log' ),
+						__( 'The site: %SiteName%.', 'wp-security-audit-log' ),
 						[
 							__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%'
 						],
@@ -2936,7 +2862,7 @@ function wsaldefaults_wsal_init() {
 						7007,
 						WSAL_CRITICAL,
 						__( 'Allow site administrators to add new users to their sites settings changed', 'wp-security-audit-log' ),
-						__( 'The network setting <strong>Allow site administrators to add new users to their sites</strong>', 'wp-security-audit-log' ),
+						__( 'Changed the status of the network setting <strong>Allow site administrators to add new users to their sites</strong>.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'multisite-network',
@@ -2946,7 +2872,7 @@ function wsaldefaults_wsal_init() {
 						7008,
 						WSAL_HIGH,
 						__( 'Site upload space settings changed', 'wp-security-audit-log' ),
-						__( 'The network setting <strong>Site upload space</strong> (to limit space allocated for each site\'s upload directory)', 'wp-security-audit-log' ),
+						__( 'Changed the status of the network setting <strong>Site upload space</strong> (to limit space allocated for each site\'s upload directory).', 'wp-security-audit-log' ),
 						[],
 						[],
 						'multisite-network',
@@ -2956,10 +2882,9 @@ function wsaldefaults_wsal_init() {
 						7009,
 						WSAL_MEDIUM,
 						__( 'Site upload space file size settings changed', 'wp-security-audit-log' ),
-						__( 'The file size in the <strong>Site upload space</strong> network setting', 'wp-security-audit-log' ),
+						__( 'Changed the file size in the <strong>Site upload space</strong> network setting to %new_value%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous size (MB)', 'wp-security-audit-log' ) => '%old_value%',
-							__( 'New size (MB)', 'wp-security-audit-log' )      => '%new_value%'
+							__( 'Previous size (MB)', 'wp-security-audit-log' ) => '%old_value%'
 						],
 						[],
 						'multisite-network',
@@ -2969,7 +2894,7 @@ function wsaldefaults_wsal_init() {
 						7010,
 						WSAL_CRITICAL,
 						__( 'Site Upload file types settings changed', 'wp-security-audit-log' ),
-						__( 'The network setting <strong>Upload file types</strong> (list of allowed file types)', 'wp-security-audit-log' ),
+						__( 'Changed the network setting <strong>Upload file types (list of allowed file types)</strong>.', 'wp-security-audit-log' ),
 						[
 							__( 'Previous value', 'wp-security-audit-log' ) => '%old_value%',
 							__( 'New value', 'wp-security-audit-log' )      => '%new_value%'
@@ -2982,10 +2907,9 @@ function wsaldefaults_wsal_init() {
 						7011,
 						WSAL_CRITICAL,
 						__( 'Site Max upload file size settings changed', 'wp-security-audit-log' ),
-						__( 'Changed the <strong>Max upload file size</strong> network setting', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Max upload file size</strong> network setting to %new_value%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous size (KB)', 'wp-security-audit-log' ) => '%old_value%',
-							__( 'New size (KB)', 'wp-security-audit-log' )      => '%new_value%'
+							__( 'Previous size (KB)', 'wp-security-audit-log' ) => '%old_value%'
 						],
 						[],
 						'multisite-network',
@@ -2995,10 +2919,9 @@ function wsaldefaults_wsal_init() {
 						7012,
 						WSAL_HIGH,
 						__( 'Allow new registrations settings changed', 'wp-security-audit-log' ),
-						__( 'Changed the <strong>Allow new registrations</strong> settings', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Allow new registrations</strong> setting to %new_setting%.', 'wp-security-audit-log' ),
 						[
-							__( 'Previous setting', 'wp-security-audit-log' ) => '%previous_setting%',
-							__( 'New setting', 'wp-security-audit-log' )      => '%new_setting%'
+							__( 'Previous setting', 'wp-security-audit-log' ) => '%previous_setting%'
 						],
 						[],
 						'multisite-network',
