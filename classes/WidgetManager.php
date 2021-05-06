@@ -43,12 +43,9 @@ class WSAL_WidgetManager {
 	 * Method: Add widgets.
 	 */
 	public function add_widgets() {
-		global $pagenow;
-
 		if (
 			$this->_plugin->settings()->IsWidgetsEnabled() // If widget is enabled.
 			&& $this->_plugin->settings()->CurrentUserCan( 'view' ) // If user has permission to view.
-			&& 'index.php' === $pagenow // If the current page is dashboard.
 		) {
 			wp_add_dashboard_widget(
 				'wsal',
