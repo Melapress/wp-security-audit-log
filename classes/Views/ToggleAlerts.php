@@ -165,7 +165,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		// Allow further items to be added externally.
 		$subcat_alerts = apply_filters( 'wsal_togglealerts_sub_category_events', $subcat_alerts );
 
-		$obsolete_events = array( 9999, 2126, 9011, 9070, 9075, 4013 );
+		$obsolete_events = array( 9999, 2126 );
+		$obsolete_events = apply_filters( 'wsal_togglealerts_obsolete_events', $obsolete_events );
 
         //  check if the disabled events are enforced from the MainWP master site
         $settings = $this->_plugin->settings();

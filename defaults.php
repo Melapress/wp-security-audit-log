@@ -165,11 +165,20 @@ function wsaldefaults_wsal_init() {
 		$wsal->alerts = new WSAL_AlertManager( $wsal );
 	}
 
-	$wsal->constants->AddConstant( 'WSAL_CRITICAL', 1, __( 'Critical severity events.', 'wp-security-audit-log' ) );
-	$wsal->constants->AddConstant( 'WSAL_HIGH', 6, __( 'High severity events.', 'wp-security-audit-log' ) );
-	$wsal->constants->AddConstant( 'WSAL_MEDIUM', 10, __( 'Medium severity events.', 'wp-security-audit-log' ) );
-	$wsal->constants->AddConstant( 'WSAL_LOW', 15, __( 'Low severity events.', 'wp-security-audit-log' ) );
-	$wsal->constants->AddConstant( 'WSAL_INFORMATIONAL', 20, __( 'Informational events.', 'wp-security-audit-log' ) );
+	/*
+	 * severity is based on monolog log levels
+	 * @see https://github.com/Seldaek/monolog/blob/main/doc/01-usage.md#log-levels
+	 */
+	//  ALERT (550): Action must be taken immediately.
+	$wsal->constants->AddConstant( 'WSAL_CRITICAL', 500, __( 'Critical severity events.', 'wp-security-audit-log' ) );
+	//  ERROR (400): Runtime errors that do not require immediate action but should typically be logged and monitored.
+	$wsal->constants->AddConstant( 'WSAL_HIGH', 400, __( 'High severity events.', 'wp-security-audit-log' ) );
+	//  WARNING (300): Exceptional occurrences that are not errors.
+	$wsal->constants->AddConstant( 'WSAL_MEDIUM', 300, __( 'Medium severity events.', 'wp-security-audit-log' ) );
+	//  NOTICE (250): Normal but significant events.
+	$wsal->constants->AddConstant( 'WSAL_LOW', 250, __( 'Low severity events.', 'wp-security-audit-log' ) );
+	//  INFO (200): Interesting events.
+	$wsal->constants->AddConstant( 'WSAL_INFORMATIONAL', 200, __( 'Informational events.', 'wp-security-audit-log' ) );
 
 	// Create list of default alerts.
 	$wsal->alerts->RegisterGroup(
