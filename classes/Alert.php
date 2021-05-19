@@ -107,6 +107,31 @@ final class WSAL_Alert {
 	}
 
 	/**
+	 * Gets the username.
+	 *
+	 * @param array $meta - Event meta data.
+	 *
+	 * @return string User's username.
+	 *
+	 * @since latest Made the meta attribute mandatory, changed to static and moved from occurrence to alert.
+	 */
+	public static function GetUsername( $meta ) {
+		if ( ! is_array( $meta ) ) {
+			return '';
+		}
+
+		if ( isset( $meta['Username'] ) ) {
+			return $meta['Username'];
+		} elseif ( isset( $meta['CurrentUserID'] ) ) {
+			$data = get_userdata( $meta['CurrentUserID'] );
+
+			return $data ? $data->user_login : null;
+		}
+
+		return '';
+	}
+
+	/**
 	 * Gets alert message.
 	 *
 	 * Note: not to be used to display any messages. Use WSAL_Models_Occurrence::GetMessage() instead.

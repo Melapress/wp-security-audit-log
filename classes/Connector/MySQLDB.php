@@ -49,7 +49,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 		$connection_config = $this->connectionConfig;
 		$password          = $this->decryptString( $connection_config['password'] );
 
-		$new_wpdb = new wpdbCustom( $connection_config['user'], $password, $connection_config['name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'], true );
+		$new_wpdb = new wpdbCustom( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'], true );
 
 		if ( isset( $new_wpdb->error ) && isset( $new_wpdb->dbh ) ) {
 			throw new Exception( $new_wpdb->dbh->error, $new_wpdb->dbh->errno );
@@ -74,7 +74,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 				}
 			}
 		} elseif ( isset( $new_wpdb->db_select_error ) ) {
-			throw new Exception( 'Error: Database ' . $connection_config['name'] . ' is unknown.', '1046' );
+			throw new Exception( 'Error: Database ' . $connection_config['db_name'] . ' is unknown.', '1046' );
 		} elseif ( ! $new_wpdb->has_connected ) {
 			throw new Exception( 'Error establishing a database connection.' );
 		} else {
@@ -89,11 +89,13 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	private function createConnection() {
 		if ( ! empty( $this->connectionConfig ) ) {
-			// TO DO: Use the provided connection config.
 			$connection_config = $this->connectionConfig;
 			$password          = $this->decryptString( $connection_config['password'] );
-			$new_wpdb          = new wpdbCustom( $connection_config['user'], $password, $connection_config['name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] );
-			$new_wpdb->set_prefix( $connection_config['base_prefix'] );
+			$new_wpdb          = new wpdbCustom( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] );
+			if ( array_key_exists( 'baseprefix', $connection_config ) ) {
+				$new_wpdb->set_prefix( $connection_config['baseprefix'] );
+			}
+
 			return $new_wpdb;
 		} else {
 			global $wpdb;
@@ -523,95 +525,6 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	public function decryptString_fallback( $ciphertext_base64 ) {
 		$wsal = WpSecurityAuditLog::GetInstance();
 		$wsal->wsal_deprecate( __METHOD__, '3.2.3.3' );
-	}
-
-	/**
-	 * Mirroring Occurrences and Metadata Tables.
-	 * Read from current DB and copy into Mirroring DB.
-	 *
-	 * @param array $args - Archive Database and limit by date.
-	 *
-	 * @return mixed|null
-	 */
-	public function MirroringAlertsToDB( $args ) {
-		$last_event          = null;
-		$first_occurrence_id = null;
-		$_wpdb               = $this->getConnection();
-		$mirroring_db        = $args['mirroring_db'];
-
-		// Load data Occurrences from WP.
-		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $_wpdb );
-		if ( ! $occurrence->IsInstalled() ) {
-			return null;
-		}
-
-		if ( isset( $args['filter'] ) && 'event-codes' === $args['filter'] && isset( $args['events'] ) ) {
-			$sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE id > ' . $args['last_occ_id'] . ' AND created_on > ' . $args['last_created_on'] . ' AND alert_id IN ' . $args['events'];
-		} elseif ( isset( $args['filter'] ) && 'except-codes' === $args['filter'] && isset( $args['events'] ) ) {
-			$sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE id > ' . $args['last_occ_id'] . ' AND created_on > ' . $args['last_created_on'] . ' AND alert_id NOT IN ' . $args['events'];
-		} else {
-			$sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE id > ' . $args['last_occ_id'] . ' AND created_on > ' . $args['last_created_on'];
-		}
-
-		// Query the events.
-		$occurrences = $_wpdb->get_results( $sql, ARRAY_A );
-
-		if ( ! empty( $occurrences ) ) {
-			$occurrence_new = new WSAL_Adapters_MySQL_Occurrence( $mirroring_db );
-			$sql            = 'INSERT INTO ' . $occurrence_new->GetTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ';
-
-			foreach ( $occurrences as $entry ) {
-				$sql .= $mirroring_db->prepare(
-					'( %d, %d, %d, %d, %d ), ',
-					intval( $entry['id'] ),
-					intval( $entry['site_id'] ),
-					intval( $entry['alert_id'] ),
-					$entry['created_on'],
-					$entry['is_read']
-				);
-
-				// Save the first id.
-				if ( is_null( $first_occurrence_id ) ) {
-					$first_occurrence_id = $entry['id'];
-				}
-
-				$last_event = $entry;
-			}
-
-			$sql = rtrim( $sql, ', ' );
-			$mirroring_db->query( $sql );
-		}
-
-		// Load data Meta from WP.
-		$meta = new WSAL_Adapters_MySQL_Meta( $_wpdb );
-
-		if ( ! $meta->IsInstalled() ) {
-			return null;
-		}
-
-		if ( ! empty( $first_occurrence_id ) ) {
-			$sql      = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id >= ' . $first_occurrence_id;
-			$metadata = $_wpdb->get_results( $sql, ARRAY_A );
-
-			if ( ! empty( $metadata ) ) {
-				$meta_new = new WSAL_Adapters_MySQL_Meta( $mirroring_db );
-				$sql      = 'INSERT INTO ' . $meta_new->GetTable() . ' (occurrence_id, name, value) VALUES ';
-
-				foreach ( $metadata as $entry ) {
-					$sql .= $mirroring_db->prepare(
-						'( %d, %s, %s ), ',
-						intval( $entry['occurrence_id'] ),
-						$entry['name'],
-						$entry['value']
-					);
-				}
-
-				$sql = rtrim( $sql, ', ' );
-				$mirroring_db->query( $sql );
-			}
-		}
-
-		return $last_event;
 	}
 
 	/**

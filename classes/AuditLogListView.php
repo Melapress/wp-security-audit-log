@@ -51,15 +51,6 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	private $selected_columns = '';
 
 	/**
-	 * Display Name Type.
-	 *
-	 * @since 3.3.1
-	 *
-	 * @var string
-	 */
-	private $name_type = '';
-
-	/**
 	 * Events Query Arguments.
 	 *
 	 * @since 3.3.1.1
@@ -434,44 +425,29 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				$code  = $code ? $code->severity : 0;
 				$const = $this->_plugin->constants->get_constant_to_display( $code );
 
-				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="log-type log-type-' . $const->value . '"></span></a>';
+				$css_classes = ['log-type', 'log-type-' . $const->value ];
+				if (property_exists($const, 'css')) {
+				    array_push($css_classes, 'log-type-' . $const->css);
+				}
+				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="' . implode( ' ', $css_classes ) . '"></span></a>';
 			case 'crtd':
 				return $item->created_on
 					? WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $item->created_on, 'datetime', true, true )
                     : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 			case 'user':
-				$username = $item->GetUsername( $this->item_meta[ $item->getId() ] ); // Get username.
-				$user     = get_user_by( 'login', $username ); // Get user.
-				if ( empty( $this->name_type ) ) {
-					$this->name_type = $this->_plugin->settings()->get_type_username();
-				}
+				$username = WSAL_Alert::GetUsername( $this->item_meta[ $item->getId() ] );
+				$user     = get_user_by( 'login', $username );
+				$roles = '';
+				$image    = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
 
-				// Check if the username and user exists.
-				if ( $username && $user ) {
+				//  check if there's a user with given username
+				if ( $user instanceof WP_User) {
 					// Get user avatar.
 					$image = get_avatar( $user->ID, 32 );
 
-					// Checks for display name.
-					if ( 'display_name' === $this->name_type && ! empty( $user->display_name ) ) {
-						$display_name = $user->display_name;
-					} elseif (
-						'first_last_name' === $this->name_type
-						&& ( ! empty( $user->first_name ) || ! empty( $user->last_name ) )
-					) {
-						$display_name = $user->first_name . ' ' . $user->last_name;
-					} else {
-						$display_name = $user->user_login;
-					}
-
-					if ( class_exists( 'WSAL_SearchExtension' ) ) {
-						$tooltip = esc_attr__( 'Show me all activity by this User', 'wp-security-audit-log' );
-
-						$uhtml = '<a class="search-user" data-tooltip="' . $tooltip . '" data-user="' . $user->user_login . '" href="' . admin_url( 'user-edit.php?user_id=' . $user->ID )
-							. '" target="_blank">' . esc_html( $display_name ) . '</a>';
-					} else {
-						$uhtml = '<a href="' . admin_url( 'user-edit.php?user_id=' . $user->ID )
-						. '" target="_blank">' . esc_html( $display_name ) . '</a>';
-					}
+					$display_name = WSAL_Utilities_UsersUtils::get_display_label( $this->_plugin, $user );
+					$user_edit_link = admin_url( 'user-edit.php?user_id=' . $user->ID );
+					$uhtml = '<a href="' . $user_edit_link . '" target="_blank">' . esc_html( $display_name ) . '</a>';
 
 					$roles = $item->GetUserRoles( $this->item_meta[ $item->getId() ] );
 					if ( is_array( $roles ) && count( $roles ) ) {
@@ -482,21 +458,13 @@ class WSAL_AuditLogListView extends WP_List_Table {
 						$roles = '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 					}
 				} elseif ( 'Plugin' == $username ) {
-					$image = '<img src="' . $this->_plugin->GetBaseUrl() . '/img/wsal-logo.png" width="32" alt="WSAL Logo"/>';
 					$uhtml = '<i>' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';
-					$roles = '';
 				} elseif ( 'Plugins' == $username ) {
-					$image = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
 					$uhtml = '<i>' . __( 'Plugins', 'wp-security-audit-log' ) . '</i>';
-					$roles = '';
 				} elseif ( 'Website Visitor' == $username || 'Unregistered user' == $username ) {
-					$image = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
 					$uhtml = '<i>' . __( 'Unregistered user', 'wp-security-audit-log' ) . '</i>';
-					$roles = '';
 				} else {
-					$image = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
 					$uhtml = '<i>' . __( 'System', 'wp-security-audit-log' ) . '</i>';
-					$roles = '';
 				}
 				$row_user_data = $image . $uhtml . '<br/>' . $roles;
 

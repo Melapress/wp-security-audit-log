@@ -196,14 +196,13 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			1000,
 			$alert_data,
 			/**
-			 * @param WSAL_AlertManager$manager
+			 * @param WSAL_AlertManager $manager
+			 *
 			 * @return bool
 			 */
 			function ( $manager ) {
 				//  don't fire if the user is changing their password via admin profile page
-				return ! $manager->WillOrHasTriggered( 4003 )
-				       //   ...or if the login has been triggered somewhere else (most likely a front-end login)
-				       && ! $manager->WillOrHasTriggered( 1000, 2 );
+				return ! $manager->WillOrHasTriggered( 4003 );
 			}
 		);
 

@@ -89,18 +89,20 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	/**
 	 * Returns the value of a meta item.
 	 *
-	 * @see WSAL_Adapters_MySQL_Occurrence::GetNamedMeta()
 	 * @param string $name - Name of meta item.
-	 * @param mixed  $default - Default value returned when meta does not exist.
+	 * @param mixed $default - Default value returned when meta does not exist.
+	 *
 	 * @return mixed The value, if meta item does not exist $default returned.
+	 * @see WSAL_Adapters_MySQL_Occurrence::GetNamedMeta()
 	 */
 	public function GetMetaValue( $name, $default = array() ) {
 		// Get meta adapter.
 		$meta = $this->getAdapter()->GetNamedMeta( $this, $name );
-		return maybe_unserialize( $meta['value'] );
+		if ( is_null( $meta ) || ! array_key_exists( 'value', $meta ) ) {
+			return $default;
+		}
 
-		// TO DO: re-introduce add is loaded check before running query
-		// return $meta->IsLoaded() ? $meta->value : $default;
+		return maybe_unserialize( $meta['value'] );
 	}
 
 	/**
@@ -253,41 +255,6 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 */
 	public function get_alert_id() {
 		return ( isset( $this->alert_id ) ) ? $this->alert_id : 0;
-	}
-
-	/**
-	 * Gets the username.
-	 *
-	 * @see WSAL_Adapters_MySQL_Occurrence::GetFirstNamedMeta()
-	 *
-	 * @param array $meta - Occurrence meta array.
-	 * @return string User's username.
-	 */
-	public function GetUsername( $meta = null ) {
-		if ( null === $meta ) {
-			$meta = $this->getAdapter()->GetFirstNamedMeta( $this, array( 'Username', 'CurrentUserID' ) );
-
-			if ( $meta ) {
-				switch ( true ) {
-					case 'Username' === $meta->name:
-						return $meta->value;
-					case 'CurrentUserID' === $meta->name:
-						$data = get_userdata( $meta->value );
-						return $data ? $data->user_login : null;
-					default:
-						//  fallback for any other cases would go here
-						break;
-				}
-			}
-		} else {
-			if ( isset( $meta['Username'] ) ) {
-				return $meta['Username'];
-			} elseif ( isset( $meta['CurrentUserID'] ) ) {
-				$data = get_userdata( $meta['CurrentUserID'] );
-				return $data ? $data->user_login : null;
-			}
-		}
-		return null;
 	}
 
 	/**

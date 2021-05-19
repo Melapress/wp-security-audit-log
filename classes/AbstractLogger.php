@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Abstract class used in the Logger.
  *
@@ -17,7 +18,8 @@ abstract class WSAL_AbstractLogger {
 	/**
 	 * Method: Constructor.
 	 *
-	 * @param  WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
+	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
+	 *
 	 * @since  1.0.0
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
@@ -28,10 +30,32 @@ abstract class WSAL_AbstractLogger {
 	 * Log alert abstract.
 	 *
 	 * @param integer $type - Alert code.
-	 * @param array   $data - Metadata.
+	 * @param array $data - Metadata.
 	 * @param integer $date (Optional) - Created on.
 	 * @param integer $siteid (Optional) - Site id.
-	 * @param bool    $migrated (Optional) - Is migrated.
+	 * @param bool $migrated (Optional) - Is migrated.
 	 */
 	public abstract function Log( $type, $data = array(), $date = null, $siteid = null, $migrated = false );
+
+	/**
+	 * Determines what is the correct timestamp for the event.
+	 *
+	 * It uses the timestamp from metadata if available. This is needed because we introduced a possible delay by using
+	 * action scheduler in 4.3.0. The $legacy_date attribute is only used for migration of legacy data. This should be
+	 * removed in future releases.
+	 *
+	 * @param array $metadata Event metadata.
+	 * @param int $legacy_date Legacy date only used when migrating old db event format to the new one.
+	 *
+	 * @return float GMT timestamp including microseconds.
+	 * @since latest
+	 */
+	protected function get_correct_timestamp( $metadata, $legacy_date ) {
+
+		if ( is_null( $legacy_date ) ) {
+			return array_key_exists( 'Timestamp', $metadata ) ? $metadata['Timestamp'] : current_time( 'U.u', true );
+		}
+
+		return floatval( $legacy_date );
+	}
 }

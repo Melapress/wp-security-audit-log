@@ -601,13 +601,15 @@ td.wsal-grid-text-data {
 .log-type-64:after,
 .log-type-256:after,
 .log-type-4096:after,
-.log-type-E_CRITICAL:after {
+.log-type-E_CRITICAL:after,
+.log-type-wsal_critical:after {
 	content: " ";
 	background-image: url( '../img/icons/critical.svg' );
 }
 
 /* high */
-.log-type-6:after {
+.log-type-6:after,
+.log-type-wsal_high:after {
 	content: " ";
 	background-image: url( '../img/icons/high.svg' );
 }
@@ -617,13 +619,15 @@ td.wsal-grid-text-data {
 .log-type-10:after,
 .log-type-32:after,
 .log-type-128:after,
-.log-type-512:after {
+.log-type-512:after,
+.log-type-wsal_medium:after {
 	content: " ";
 	background-image: url( '../img/icons/medium.svg' );
 }
 
 /* low */
-.log-type-15:after {
+.log-type-15:after,
+.log-type-wsal_low:after {
 	content: " ";
 	background-image: url( '../img/icons/low.svg' );
 }
@@ -635,7 +639,8 @@ td.wsal-grid-text-data {
 .log-type-2048:after,
 .log-type-8192:after,
 .log-type-16384:after,
-.log-type-E_DEBUG:after {
+.log-type-E_DEBUG:after,
+.log-type-wsal_informational:after {
 	content: " ";
 	background-image: url( '../img/icons/info.svg' );
 }
