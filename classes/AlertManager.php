@@ -25,7 +25,7 @@ final class WSAL_AlertManager {
 	/**
 	 * Array of alerts (WSAL_Alert).
 	 *
-	 * @var array
+	 * @var WSAL_Alert[]
 	 */
 	protected $_alerts = array();
 
@@ -41,14 +41,14 @@ final class WSAL_AlertManager {
 	/**
 	 * Array of loggers (WSAL_AbstractLogger).
 	 *
-	 * @var array
+	 * @var WSAL_AbstractLogger[]
 	 */
 	protected $_loggers = array();
 
 	/**
 	 * Instance of WpSecurityAuditLog.
 	 *
-	 * @var object
+	 * @var WpSecurityAuditLog
 	 */
 	protected $plugin;
 
@@ -78,14 +78,14 @@ final class WSAL_AlertManager {
 	 *
 	 * Store WP Users for caching purposes.
 	 *
-	 * @var array
+	 * @var WP_User[]
 	 */
 	private $wp_users = array();
 
 	/**
 	 * Ignored Custom Post Types.
 	 *
-	 * @var array
+	 * @var string[]
 	 */
 	public $ignored_cpts = array();
 
@@ -111,8 +111,8 @@ final class WSAL_AlertManager {
 			$this->AddFromFile( $file );
 		}
 
-		add_action( 'shutdown', array( $this, '_CommitPipeline' ) );
 		add_action( 'wsal_init', array( $this, 'schedule_log_events' ) );
+		add_action( 'shutdown', array( $this, '_CommitPipeline' ), 8 );
 
 		/**
 		 * Filter: `wsal_deprecated_event_ids`
@@ -130,9 +130,10 @@ final class WSAL_AlertManager {
 		 *
 		 * Ignored custom post types filter.
 		 *
+		 * @param array $ignored_cpts - Array of custom post types.
+		 *
 		 * @since 3.3.1
 		 *
-		 * @param array $ignored_cpts - Array of custom post types.
 		 */
 		$this->ignored_cpts = apply_filters(
 			'wsal_ignored_custom_post_types',
@@ -149,8 +150,8 @@ final class WSAL_AlertManager {
 			)
 		);
 
-		$this->date_format     = $this->plugin->settings()->GetDateFormat();
-        $this->sanitized_date_format = $this->plugin->settings()->GetDateFormat(true);
+		$this->date_format           = $this->plugin->settings()->GetDateFormat();
+		$this->sanitized_date_format = $this->plugin->settings()->GetDateFormat( true );
 	}
 
 	/**
@@ -285,6 +286,7 @@ final class WSAL_AlertManager {
 
 		// If user or user role is enable then go ahead.
 		if ( $this->CheckEnableUserRoles( $username, $roles ) ) {
+			$data['Timestamp'] = current_time( 'U.u', 'true' );
 			if ( $delayed ) {
 				$this->TriggerIf( $type, $data, null );
 			} else {
@@ -367,6 +369,9 @@ final class WSAL_AlertManager {
 		}
 
 		if ( $this->CheckEnableUserRoles( $username, $roles ) ) {
+			if ( ! array_key_exists( 'Timestamp', $data ) ) {
+				$data['Timestamp'] = current_time( 'U.u', 'true' );
+			}
 			$this->_pipeline[] = array(
 				'type' => $type,
 				'data' => $data,
@@ -626,38 +631,38 @@ final class WSAL_AlertManager {
 		 * Add event severity to the meta data of the event.
 		 * The lower the number, the higher is the severity.
 		 *
-		 * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
+		 * Based on monolog log levels:
+		 *
+		 * Formerly based on Syslog severity levels (https://en.wikipedia.org/wiki/Syslog#Severity_level).
+		 *
+		 * @see https://github.com/Seldaek/monolog/blob/main/doc/01-usage.md#log-levels
 		 * @since 3.3.1
 		 */
 		if ( is_object( $severity ) && property_exists( $severity, 'name' ) ) {
 			if ( 'E_CRITICAL' === $severity->name ) {
-				$event_data['Severity'] = 2;
+				//  CRITICAL (500): Critical conditions.
+				$event_data['Severity'] = 500;
 			} elseif ( 'E_WARNING' === $severity->name ) {
-				$event_data['Severity'] = 4;
+				//  WARNING (300): Exceptional occurrences that are not errors.
+				$event_data['Severity'] = 300;
 			} elseif ( 'E_NOTICE' === $severity->name ) {
-				$event_data['Severity'] = 5;
-			} elseif ( 'WSAL_CRITICAL' === $severity->name ) {
-				$event_data['Severity'] = 1;
-			} elseif ( 'WSAL_HIGH' === $severity->name ) {
-				$event_data['Severity'] = 6;
-			} elseif ( 'WSAL_MEDIUM' === $severity->name ) {
-				$event_data['Severity'] = 10;
-			} elseif ( 'WSAL_LOW' === $severity->name ) {
-				$event_data['Severity'] = 15;
-			} elseif ( 'WSAL_INFORMATIONAL' === $severity->name ) {
-				$event_data['Severity'] = 20;
+				//  DEBUG (100): Detailed debug information.
+				$event_data['Severity'] = 100;
+			} elseif ( property_exists( $severity, 'value' ) ) {
+				$event_data['Severity'] = $severity->value;
 			}
 		}
 
 		/*
 		 * In cases where we were not able to figure out a severity already
-		 * use a default of 20: info.
+		 * use a default of 200: info.
 		 *
 		 * @since 4.3.0
 		 */
 		if ( ! isset( $event_data['Severity'] ) ) {
-			// assuming this is a missclasified item and using info code.
-			$event_data['Severity'] = 20;
+			//  assuming this is a misclassified item and using info code.
+			//  INFO (200): Interesting events.
+			$event_data['Severity'] = 200;
 		}
 
 		// Add event object.
@@ -694,6 +699,7 @@ final class WSAL_AlertManager {
 		 */
 		$event_data = apply_filters( 'wsal_event_data_before_log', $event_data, $event_id );
 
+		//  log to internal and/or external database immediately
 		foreach ( $this->_loggers as $logger ) {
 			$logger->Log( $event_id, $event_data );
 		}
@@ -1860,7 +1866,6 @@ final class WSAL_AlertManager {
 	/**
 	 * Get alert details.
 	 *
-	 * @param string $report_format Report format - "csv" or "html".
 	 * @param int $entry_id - Entry ID.
 	 * @param int $alert_id - Alert ID.
 	 * @param int $site_id - Site ID.
@@ -1873,7 +1878,7 @@ final class WSAL_AlertManager {
 	 * @return array|false details
 	 * @throws Exception
 	 */
-	private function get_alert_details( $report_format, $entry_id, $alert_id, $site_id, $created_on, $user_id = null, $roles = null, $ip = '', $ua = '', $context = 'default' ) {
+	private function get_alert_details( $entry_id, $alert_id, $site_id, $created_on, $user_id = null, $roles = null, $ip = '', $ua = '', $context = 'default' ) {
 		// Must be a new instance every time, otherwise the alert message is not retrieved properly.
 		$occurrence = new WSAL_Models_Occurrence();
 
@@ -1917,19 +1922,21 @@ final class WSAL_AlertManager {
 		$occurrence->alert_id   = $alert_id;
 		$occurrence->created_on = $created_on;
 
+		$event_metadata = $occurrence->GetMetaArray();
+
 		if ( $occurrence->is_migrated ) {
 			$occurrence->_cachedmessage = $occurrence->GetMetaValue( 'MigratedMesg', false );
 		}
 
 		if ( ! $occurrence->is_migrated || ! $occurrence->_cachedmessage ) {
-            $occurrence->_cachedmessage = $occurrence->GetAlert()->GetMessage( $occurrence->GetMetaArray(), null, $entry_id, $context );
+            $occurrence->_cachedmessage = $occurrence->GetAlert()->GetMessage( $event_metadata, null, $entry_id, $context );
 		}
 
 		if ( ! $user_id ) {
 			$username = __( 'System', 'wp-security-audit-log' );
 			$roles    = '';
 		} else {
-			$username = $occurrence->GetUsername();
+			$username = WSAL_Alert::GetUsername( $event_metadata );
 		}
 
 		// Meta details.
@@ -1941,7 +1948,7 @@ final class WSAL_AlertManager {
 			'timestamp'  => $created_on,
 			'date'       => WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $created_on ),
 			'code'       => $const->name,
-			'message'    => $occurrence->GetMessage( null, $context ),
+			'message'    => $occurrence->GetMessage( $event_metadata, $context ),
 			'user_name'  => $username,
 			'user_data'  => $user_id ? $this->get_event_user_data( $username ) : false,
 			'role'       => $roles,

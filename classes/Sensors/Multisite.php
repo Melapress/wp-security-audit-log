@@ -206,12 +206,33 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 */
 	public function EventNewBlog( $new_blog ) {
 		$blog_id = $new_blog->blog_id;
+
+		//  site meta data nor options are not setup at this points so get_blog_option and get_home_url are not
+		//  returning anything for the new blog
+
+		//  the following code to work out the correct URL for the new site was taken from ms-site.php (WP 5.7)
+		//  @see https://github.com/WordPress/WordPress/blob/5.7/wp-includes/ms-site.php#L673
+		$network = get_network( $new_blog->network_id );
+		if ( ! $network ) {
+			$network = get_network();
+		}
+
+		$home_scheme = 'http';
+		if ( ! is_subdomain_install() ) {
+			if ( 'https' === parse_url( get_home_url( $network->site_id ), PHP_URL_SCHEME ) ) {
+				$home_scheme = 'https';
+			}
+		}
+
+		$blog_title = strip_tags( $_POST['blog']['title'] );
+		$blog_url   = untrailingslashit( $home_scheme . '://' . $new_blog->domain . $new_blog->path );
+
 		$this->plugin->alerts->Trigger(
 			7000,
 			array(
 				'BlogID'   => $blog_id,
-				'SiteName' => get_blog_option( $blog_id, 'blogname' ),
-				'BlogURL'  => get_home_url( $blog_id ),
+				'SiteName' => $blog_title,
+				'BlogURL'  => $blog_url
 			)
 		);
 	}

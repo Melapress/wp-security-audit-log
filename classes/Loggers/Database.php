@@ -59,9 +59,12 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		// Create new occurrence.
 		$occ              = new WSAL_Models_Occurrence();
 		$occ->is_migrated = $migrated;
-		$occ->created_on  = is_null( $date ) ? microtime( true ) : $date;
+		$occ->created_on = $this->get_correct_timestamp( $data, $date );
 		$occ->alert_id    = $type;
 		$occ->site_id     = ! is_null( $siteid ) ? $siteid : ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
+
+		//  we need to remove the timestamp to prevent from saving it as meta
+		unset( $data['Timestamp'] );
 
 		// Get DB connector.
 		$db_config = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
