@@ -283,7 +283,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 					break;
 
 				case 'LogInOut':
-					if ( is_user_logged_in() || empty( $frontend_events['login'] ) ) {
+					if ( empty( $frontend_events['login'] ) ) {
 						$load_sensor = false;
 					}
 					break;
