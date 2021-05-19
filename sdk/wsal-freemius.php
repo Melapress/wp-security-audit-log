@@ -28,7 +28,13 @@ function wsal_freemius() {
 		define( 'WP_FS__PRODUCT_94_MULTISITE', true );
 
 		// Include Freemius SDK.
-		require_once dirname( __FILE__ ) . '/freemius/start.php';
+		require_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . implode( DIRECTORY_SEPARATOR, [
+				'..',
+				'vendor',
+				'freemius',
+				'wordpress-sdk',
+				'start.php'
+			] );
 
 		// Check anonymous mode.
 		$freemius_state = \WSAL\Helpers\Options::get_option_value_ignore_prefix( 'wsal_freemius_state', 'anonymous' );
