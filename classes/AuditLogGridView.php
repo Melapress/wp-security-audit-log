@@ -391,7 +391,11 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				$code  = $code ? $code->severity : 0;
 				$const = $this->_plugin->constants->get_constant_to_display( $code );
 
-				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="log-type log-type-' . $const->value . '"></span></a>';
+				$css_classes = ['log-type', 'log-type-' . $const->value ];
+				if (property_exists($const, 'css')) {
+					array_push($css_classes, 'log-type-' . $const->css);
+				}
+				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="' . implode( ' ', $css_classes ) . '"></span></a>';
 			case 'site':
 				$info = get_blog_details( $item->site_id, true );
 				return ! $info ? ( 'Unknown Site ' . $item->site_id )
@@ -417,7 +421,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
                     ? WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime($item->created_on, 'time' )
                     : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 
-				$username = $item->GetUsername( $this->item_meta[ $item->getId() ] ); // Get username.
+				$username = WSAL_Alert::GetUsername( $this->item_meta[ $item->getId() ] ); // Get username.
 				$user     = get_user_by( 'login', $username ); // Get user.
 				if ( empty( $this->name_type ) ) {
 					$this->name_type = $this->_plugin->settings()->get_type_username();

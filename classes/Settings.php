@@ -747,6 +747,7 @@ class WSAL_Settings {
 			'HTTP_X_FORWARDED_FOR',
 			'HTTP_X_FORWARDED',
 			'HTTP_X_CLUSTER_CLIENT_IP',
+			'X-ORIGINAL-FORWARDED-FOR',
 			'HTTP_FORWARDED_FOR',
 			'HTTP_FORWARDED',
 			'REMOTE_ADDR',
@@ -1051,14 +1052,6 @@ class WSAL_Settings {
 		$this->_plugin->SetGlobalSetting( 'type_username', $newvalue );
 	}
 
-	public function GetAdapterConfig( $name_field, $default_value = false ) {
-		return $this->_plugin->GetGlobalSetting( $name_field, $default_value );
-	}
-
-	public function SetAdapterConfig( $name_field, $newvalue ) {
-		$this->_plugin->SetGlobalSetting( $name_field, trim( $newvalue ) );
-	}
-
 	/**
 	 * Returns audit log columns.
 	 *
@@ -1213,19 +1206,11 @@ class WSAL_Settings {
 	 */
 	public function SwitchToArchiveDB() {
 		if ( $this->IsArchivingEnabled() ) {
-			$archive_type       = $this->_plugin->GetGlobalSetting( 'archive-type' );
-			$archive_user       = $this->_plugin->GetGlobalSetting( 'archive-user' );
-			$password           = $this->_plugin->GetGlobalSetting( 'archive-password' );
-			$archive_name       = $this->_plugin->GetGlobalSetting( 'archive-name' );
-			$archive_hostname   = $this->_plugin->GetGlobalSetting( 'archive-hostname' );
-			$archive_baseprefix = $this->_plugin->GetGlobalSetting( 'archive-base-prefix' );
-			$archive_ssl        = $this->_plugin->GetGlobalSetting( 'archive-ssl', false );
-			$archive_cc         = $this->_plugin->GetGlobalSetting( 'archive-client-certificate', false );
-			$archive_ssl_ca     = $this->_plugin->GetGlobalSetting( 'archive-ssl-ca', false );
-			$archive_ssl_cert   = $this->_plugin->GetGlobalSetting( 'archive-ssl-cert', false );
-			$archive_ssl_key    = $this->_plugin->GetGlobalSetting( 'archive-ssl-key', false );
-			$config             = WSAL_Connector_ConnectorFactory::GetConfigArray( $archive_type, $archive_user, $password, $archive_name, $archive_hostname, $archive_baseprefix, $archive_ssl, $archive_cc, $archive_ssl_ca, $archive_ssl_cert, $archive_ssl_key );
-			$this->_plugin->getConnector( $config )->getAdapter( 'Occurrence' );
+			$connection_name = $this->_plugin->GetGlobalSetting( 'archive-connection' );
+			$connection      = $this->_plugin->external_db_util->get_connection( $connection_name );
+			if ( is_array( $connection ) && ! empty( $connection ) ) {
+				$this->_plugin->getConnector( $connection )->getAdapter( 'Occurrence' );
+			}
 		}
 	}
 

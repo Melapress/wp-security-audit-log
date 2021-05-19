@@ -105,7 +105,7 @@ class WSAL_ConstantManager {
 	 */
 	public function GetConstantBy( $what, $value, $default = null ) {
 		// Make sure we do have some constants.
-		if ( count( $this->_constants ) ) {
+		if ( ! empty( $this->_constants ) ) {
 			// Make sure that constants do have a $what property.
 			if ( ! isset( $this->_constants[0]->$what ) ) {
 				throw new Exception( 'Unexpected detail type "' . $what . '".' );
@@ -147,6 +147,12 @@ class WSAL_ConstantManager {
 		);
 
 		$const = $this->GetConstantBy( 'value', $code, $const );
+
+		//  CSS property was added in 4.3.0 as part of severity levels refactoring to be able to print language
+		//  independent CSS class not based on the constant value
+		if ( ! property_exists($const, 'css')) {
+			$const->css = strtolower( $const->name );
+		}
 
 		if ( 'E_CRITICAL' === $const->name ) {
 			$const->name = __( 'Critical', 'wp-security-audit-log' );

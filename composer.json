@@ -1,0 +1,5 @@
+{
+    "require": {
+        "freemius/wordpress-sdk": "^2.4"
+    }
+}

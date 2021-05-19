@@ -349,6 +349,33 @@ class WSAL_ViewManager {
 		if ( $view = $this->GetActiveView() ) {
 			$view->Footer();
 		}
+		global $pagenow;
+		if ( 'admin.php' === $pagenow && 'wsal-auditlog-pricing' === $_GET['page'] ) {
+			?>
+            <style>
+                .fs-full-size-wrapper {
+                    margin: 0px 0 -65px -20px !important;
+                }
+
+                #root .fs-app-header .fs-page-title h2, #fs_pricing_wrapper .fs-app-header .fs-page-title h2 {
+                    font-size: 23px;
+                    font-weight: 400;
+                    margin: 0;
+                    padding: 9px 0 4px 20px;
+                    line-height: 1.3;
+                }
+
+                @media only screen and (max-width: 768px) {
+                    #root #fs_pricing_wrapper .fs-app-main .fs-section--plans-and-pricing .fs-section--packages .fs-packages-menu, #fs_pricing_wrapper #fs_pricing_wrapper .fs-app-main .fs-section--plans-and-pricing .fs-section--packages .fs-packages-menu {
+                        padding: 5px;
+                        display: flex;
+                        width: 100%;
+                        margin: 0 auto;
+                    }
+                }
+            </style>
+			<?php
+		}
 	}
 
 	/**

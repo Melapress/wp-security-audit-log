@@ -47,10 +47,8 @@ Thumbs.db
 
 # Composer #
 ##########
-library/vendors/composer/
 !resources/js/vendor/
 wpcs/
-composer.lock
 
 # Bower #
 ##########
@@ -89,3 +87,5 @@ Rails
 # proportion of contributors will probably not be using SublimeText
 *.sublime-project
 
+
+/vendor/
