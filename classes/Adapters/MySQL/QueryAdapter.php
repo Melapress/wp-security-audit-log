@@ -135,16 +135,17 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 	 * Execute query and return data as $ar_cls objects.
 	 *
 	 * @param object $query - Query object.
+	 *
 	 * @return WSAL_Models_ActiveRecord[]
 	 */
 	public function Execute( $query ) {
 		$args = array();
-		$sql = $this->GetSql( $query, $args );
+		$sql  = $this->GetSql( $query, $args );
 
-		$occurence_adapter = $query->getConnector()->getAdapter( 'Occurrence' );
+		$occurrence_adapter = $query->getConnector()->getAdapter( 'Occurrence' );
 
-		if ( in_array( $occurence_adapter->GetTable(), $query->getFrom() ) ) {
-			return $occurence_adapter->LoadMulti( $sql, $args );
+		if ( in_array( $occurrence_adapter->GetTable(), $query->getFrom() ) ) {
+			return $occurrence_adapter->LoadMulti( $sql, $args );
 		} else {
 			return $this->getActiveRecordAdapter()->LoadMulti( $sql, $args );
 		}

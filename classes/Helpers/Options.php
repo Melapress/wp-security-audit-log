@@ -135,51 +135,6 @@ class Options {
 
 		return $result;
 	}
-
-	/**
-	 * Get options by prefix (notifications stored in json format).
-	 *
-	 * @param string $opt_prefix - Prefix.
-	 * @return array|null - Options.
-	 */
-	public function GetNotificationsSetting( $opt_prefix ) {
-		global $wpdb;
-		$prepared_query	= $wpdb->prepare(
-		"SELECT * FROM {$wpdb->base_prefix}options WHERE option_name LIKE %s;",
-		$opt_prefix . '%%'
-		);
-		return $wpdb->get_results($prepared_query);
-	}
-
-	/**
-	 * @param int $id Notification ID.
-	 *
-	 * @return array|object|void|null
-	 * @since 4.1.3
-	 */
-	public function GetNotification($id) {
-		global $wpdb;
-		$prepared_query = $wpdb->prepare("SELECT * FROM {$wpdb->options} WHERE option_id = %d LIMIT 1;", $id);
-		return $wpdb->get_row( $prepared_query );
-	}
-
-	/**
-	 * Number of options start with prefix.
-	 *
-	 * @param string $opt_prefix - Prefix.
-	 * @return integer Indicates the number of items.
-	 */
-	public function CountNotifications( $opt_prefix ) {
-		global $wpdb;
-
-		$prepared_query	= $wpdb->prepare(
-			"SELECT COUNT(option_id) FROM {$wpdb->options} WHERE option_name LIKE %s;",
-			$opt_prefix . '%%'
-		);
-		return (int) $wpdb->get_var( $prepared_query );
-
-	}
-
 	/**
 	 * Static function for retrieving an option value statically.
 	 *

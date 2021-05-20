@@ -23,35 +23,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WSAL_AlertFormatterFactory {
 
 	/**
-	 * @var array WSAL_AlertFormatter[]
+	 * @var WSAL_AlertFormatter[]
 	 */
 	private static $formatter_instances = [];
 
 	/**
-	 * @var array
+	 * @var WSAL_AlertFormatterConfiguration[]
 	 */
-	private static $formatter_stack = [];
+	private static $configurations = [];
 
 	public static function bootstrap() {
+
+		$html_configuration             = WSAL_AlertFormatterConfiguration::buildHtmlConfiguration();
+		$dashboard_widget_configuration = ( clone $html_configuration )
+			->setIsJsInLinksAllowed( false )
+			->setSupportsMetadata( false )
+			->setSupportsHyperlinks( false );
+
 		//  let extensions register custom alert formatters
 		$formatters = apply_filters( 'wsal_alert_formatters', [
-			//  no need to supply 'file' elements as the default formatter is loaded by the plugin core
-			[
-				'context' => 'default',
-				'class'   => 'WSAL_AlertFormatter'
-			],
-			[
-				'context' => 'dashboard-widget',
-				'class'   => 'WSAL_DashboardWidgetFormatter'
-			]
+			'default'          => $html_configuration,
+			'dashboard-widget' => $dashboard_widget_configuration
 		] );
 
 		if ( ! empty( $formatters ) ) {
-			foreach ( $formatters as $formatter ) {
-				if ( ! array_key_exists( 'context', $formatter ) ) {
-					continue;
-				}
-				self::$formatter_stack[ $formatter['context'] ] = $formatter;
+			foreach ( $formatters as $context => $formatter_configuration ) {
+				self::$configurations[ $context ] = $formatter_configuration;
 			}
 		}
 	}
@@ -69,42 +66,25 @@ class WSAL_AlertFormatterFactory {
 				return self::$formatter_instances[ $context ];
 			}
 
-			if ( array_key_exists( $context, self::$formatter_stack ) ) {
-				$formatter = self::createFormatter( self::$formatter_stack[ $context ] );
-				if ( null !== $formatter ) {
-					self::$formatter_instances[ $context ] = $formatter;
+			if ( array_key_exists( $context, self::$configurations ) ) {
+				$formatter = new WSAL_AlertFormatter( WpSecurityAuditLog::GetInstance(), self::$configurations[ $context ] );
 
-					return self::$formatter_instances[ $context ];
-				}
+				self::$formatter_instances[ $context ] = $formatter;
+
+				return self::$formatter_instances[ $context ];
 			}
 		} catch ( Exception $exception ) {
-			return new WSAL_AlertFormatter();
+			return self::createDefaultFormatter();
 		}
 
-		return new WSAL_AlertFormatter();
+		return self::createDefaultFormatter();
 	}
 
-	private static function createFormatter( $formatter_def ) {
-
-		if ( ! array_key_exists( 'class', $formatter_def ) ) {
-			return null;
-		}
-
-		//  load the file if provided
-		if ( array_key_exists( 'file', $formatter_def )
-		     && ! empty( $formatter_def['file'] )
-		     && file_exists( $formatter_def['file'] ) ) {
-			require_once $formatter_def['file'];
-		}
-
-		try {
-			if ( class_exists( $formatter_def['class'] ) ) {
-				return new $formatter_def['class']( WpSecurityAuditLog::GetInstance() );
-			}
-		} catch ( Exception $exception ) {
-			return null;
-		}
-
-		return null;
+	/**
+	 * @return WSAL_AlertFormatter Default formatter using full featured HTML configuration.
+	 * @since latest
+	 */
+	private static function createDefaultFormatter() {
+		return new WSAL_AlertFormatter( WpSecurityAuditLog::GetInstance(), WSAL_AlertFormatterConfiguration::buildHtmlConfiguration() );
 	}
 }
