@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => 'b7d38674097985e2d77ffbe382ca002f70a12014',
+    'reference' => 'aa79f60e0003a1d1fd3aeff1c48587c4bacd12e9',
     'name' => '__root__',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'b7d38674097985e2d77ffbe382ca002f70a12014',
+      'reference' => 'aa79f60e0003a1d1fd3aeff1c48587c4bacd12e9',
     ),
     'freemius/wordpress-sdk' => 
     array (

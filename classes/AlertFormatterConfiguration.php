@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * All setter methods are fluent to allow for method chaining.
  *
  * @package Wsal
- * @since latest
+ * @since 4.3.0
  */
 class WSAL_AlertFormatterConfiguration {
 

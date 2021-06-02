@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'b7d38674097985e2d77ffbe382ca002f70a12014',
+    'reference' => 'aa79f60e0003a1d1fd3aeff1c48587c4bacd12e9',
     'name' => '__root__',
   ),
   'versions' => 
@@ -44,7 +44,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'b7d38674097985e2d77ffbe382ca002f70a12014',
+      'reference' => 'aa79f60e0003a1d1fd3aeff1c48587c4bacd12e9',
     ),
     'freemius/wordpress-sdk' => 
     array (
@@ -236,9 +236,23 @@ return $installed[0]['root'];
 
 
 
+
 public static function getRawData()
 {
+@trigger_error('getRawData only returns the first dataset loaded, which may not be what you expect. Use getAllRawData() instead which returns all datasets for all autoloaders present in the process.', E_USER_DEPRECATED);
+
 return self::$installed;
+}
+
+
+
+
+
+
+
+public static function getAllRawData()
+{
+return self::getInstalled();
 }
 
 

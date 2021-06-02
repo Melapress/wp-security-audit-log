@@ -300,6 +300,15 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	}
 
 	/**
+	 * Gets the username.
+	 *
+	 * @return string User's username.
+	 */
+	public function GetUsername() {
+		return WSAL_Utilities_UsersUtils::GetUsername( $this->GetMetaArray() );
+	}
+
+	/**
 	 * Method: Get Microtime.
 	 *
 	 * @return float - Number of seconds (and milliseconds as fraction) since unix Day 0.
