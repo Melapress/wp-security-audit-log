@@ -94,7 +94,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
             public $sensors;
 
             /**
-             * Settings manager. Accessed via $this->settings, which lazy-loads it.
+             * Settings manager.
              *
              * @var WSAL_Settings
              */
