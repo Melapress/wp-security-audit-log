@@ -94,7 +94,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
             public $sensors;
 
             /**
-             * Settings manager. Accessed via $this->settings, which lazy-loads it.
+             * Settings manager.
              *
              * @var WSAL_Settings
              */
@@ -228,6 +228,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @param string $property - Class property.
              * @return object
+             *
+             * @todo check if this is still needed
              */
             public function __get( $property ) {
                 if ( 'settings' === $property ) {
