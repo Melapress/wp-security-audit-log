@@ -1,4 +1,4 @@
-=== WP Activity Log (Premium) ===
+=== WP Activity Log ===
 Contributors: WPWhiteSecurity, robert681
 Plugin URI: https://wpactivitylog.com
 License: GPLv3
@@ -7,7 +7,7 @@ Tags: activity log, wordpress activity logs, security audit log, audit log, user
 Requires at least: 4.4
 Tested up to: 5.7
 Stable tag: 4.3.0
-Requires PHP: 5.5
+Requires PHP: 7.0
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
 

@@ -48,7 +48,7 @@ abstract class WSAL_AbstractLogger {
 	 * @param int $legacy_date Legacy date only used when migrating old db event format to the new one.
 	 *
 	 * @return float GMT timestamp including microseconds.
-	 * @since latest
+	 * @since 4.3.0
 	 */
 	protected function get_correct_timestamp( $metadata, $legacy_date ) {
 

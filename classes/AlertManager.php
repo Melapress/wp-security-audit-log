@@ -989,7 +989,7 @@ final class WSAL_AlertManager {
 			foreach ( $events as $event ) {
 				// Get event meta.
 				$meta_data                                    = $event->GetMetaArray();
-				$meta_data['UserData']                        = $this->get_event_user_data( $event->GetUsername() );
+				$meta_data['UserData']                        = $this->get_event_user_data( WSAL_Utilities_UsersUtils::GetUsername( $meta_data ) );
 				$mwp_events->events[ $event->id ]             = new stdClass();
 				$mwp_events->events[ $event->id ]->id         = $event->id;
 				$mwp_events->events[ $event->id ]->alert_id   = $event->alert_id;
@@ -1936,7 +1936,7 @@ final class WSAL_AlertManager {
 			$username = __( 'System', 'wp-security-audit-log' );
 			$roles    = '';
 		} else {
-			$username = WSAL_Alert::GetUsername( $event_metadata );
+			$username = WSAL_Utilities_UsersUtils::GetUsername( $event_metadata );
 		}
 
 		// Meta details.

@@ -63,7 +63,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @var string
              */
-            const MIN_PHP_VERSION = '5.5.0';
+            const MIN_PHP_VERSION = '7.0.0';
 
             /**
              * New option name prefix.
@@ -460,10 +460,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
             public function init_hooks() {
                 add_action( 'init', array( $this, 'init' ), 5 );
 
-                // Listen for cleanup event.
-                add_action( 'wsal_cleanup', array( $this, 'CleanUp' ) );
+	            // Listen for cleanup event.
+	            add_action( 'wsal_cleanup', array( $this, 'CleanUp' ) );
 
-                // Render wsal footer.
+	            add_action( 'shutdown', array( $this, 'close_external_connection' ), 999 );
+
+	            // Render wsal footer.
                 add_action( 'admin_footer', array( $this, 'render_footer' ) );
 
                 // Plugin redirect on activation.
@@ -1423,11 +1425,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 // Update version in db.
                 $this->SetGlobalSetting( 'version', $new_version );
 
-                if ( '0.0.0' === $old_version ) {
-                    //  set some initial plugins settings (only the ones that bypass the regular settings retrieval at some
-                    //  point) - e.g. disabled events
-                    $this->SetGlobalSetting( 'disabled-alerts', implode( ',', $this->settings()->always_disabled_alerts ) );
-                }
+			if ( '0.0.0' === $old_version ) {
+				//  set some initial plugins settings (only the ones that bypass the regular settings retrieval at some
+				//  point) - e.g. disabled events
+				$this->SetGlobalSetting( 'disabled-alerts', implode( ',', $this->settings()->always_disabled_alerts ) );
+
+				//  we stop here as no further updates are needed for a freshly installed plugin
+				return;
+			}
 
                 // Do version-to-version specific changes.
                 if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
@@ -2214,12 +2219,39 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     wp_deregister_script( 'dateformat' );
                 }
             }
+
+	        /**
+	         * Closes external connection if it's being used.
+	         *
+	         * @since latest
+	         */
+	        public function close_external_connection() {
+		        //  if the adapter type options is not empty, it means we're using the external database
+		        $database_type = $this->GetGlobalSetting( 'adapter-type' );
+		        if ( strlen( $database_type ) > 0 ) {
+			        $this->getConnector()->closeConnection();
+		        }
+	        }
         }
 
-        //  load composer libraries if available
-		$autoloader_file_path = plugin_dir_path( __FILE__ ) . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
-		if ( file_exists( $autoloader_file_path ) ) {
+		//  load composer libraries if available
+		$autoloader_file_path = plugin_dir_path( __FILE__ ) . implode( DIRECTORY_SEPARATOR, [
+					'vendor',
+					'autoload.php'
+				]
+			);
+
+		$prefixed_autoloader_file_path = plugin_dir_path( __FILE__ ) . implode( DIRECTORY_SEPARATOR, [
+					'third-party',
+					'vendor',
+					'autoload.php'
+				]
+			);
+
+		if ( file_exists( $autoloader_file_path ) && file_exists( $prefixed_autoloader_file_path ) ) {
 			require_once $autoloader_file_path;
+			require_once $prefixed_autoloader_file_path;
+
 		}
 
         // Begin load sequence.
@@ -2243,7 +2275,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
  *
  * Note: This code MUST NOT be present in the premium version an is removed automatically during the build process.
  *
- * @since latest
+ * @since 4.3.0
  */
 function wsal_free_on_plugin_activation() {
 	$premium_version_slug = 'wp-security-audit-log-premium/wp-security-audit-log.php';
