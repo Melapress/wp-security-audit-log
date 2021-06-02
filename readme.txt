@@ -5,9 +5,9 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 4.4
-Tested up to: 5.7
-Stable tag: 4.3.0
-Requires PHP: 5.5
+Tested up to: 5.7.2
+Stable tag: 4.3.1
+Requires PHP: 7.0
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
 
@@ -206,33 +206,15 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.3.0 (2021-05-20) =
+= 4.3.1 (2021-06-03) =
 
-Release notes: [WP Activity Log 4.3: The new mirroring module & integrations](https://wpactivitylog.com/wsal-4-3-0/)
-
-**New features**
-	* The new [WordPress activity log mirroring module](https://wpactivitylog.com/features/integration-mirroring-tools-wordpress-activity-log/): mirror your website's activity log in real-time to AWS CloudWatch, Loggly, a log file and several other services.
-	
 **Improvements**
-	* The activity log is mirrored to third party services in real-time.
-	* Event metadata is included in the CSV reports. 
-	* The severity levels of the activity log have been mapped to the standard severity levels documented in the RFC.
-	* The event metadata in the mirrored activity log events is in JSON format.
-	* Event type and Object metadata is included in the mirrored activity log events.
-	* Changes by third party plugins for which an extension is available are no longer muted when extension is not installed.
-	* Removed border from the first time install wizard (minor UI improvement).
-	* Support for X-ORIGINAL-FORWARDED-FOR HTTP header (more info in [support for WAFS & reverse proxies](https://wpactivitylog.com/support/kb/support-reverse-proxies-web-application-firewalls/))
-	* Plugin now is using the new in-plugin pricing page.
-	* A much improved default SMS alert and email notification template.
-	* Revamped the connections and mirroring wizards and included connectivity tests in them.
-	* Improved the external db connection (now it is a persistent connection).
-	
+	* Minimum version of PHP required now is 7.0.
+	* Added a custom prefix to libraries and dependencies used in the plugin to ensure there are no conflicts.
+
 **Bug fixes**
-	* Critical error was being reported when the failed logins notification was triggered.
-	* Fixed an unhandled exception which occurred when the free edition was activated on a site where the premium edition was already activated.
-	* Events time stamp in emails was not always the same as in the activity log.
-	* Event ID 2065 (modified content) was reported unnecessarily after adding a custom field to a post.
-	* Event ID 1010 (user requested password reset) was not reported when the password reset was requested from a custom user profile page.
-	* In some cases, archiving of the activity log could not be disabled.
+	* Corrected logic in code to ensure all sessions are handled and checked when destroying idle sessions.
+	* Fixed an issue causing create/expired times in the "Logged in users" view to appear incorrectly.
+	* Implemented a missing function without with events were not retreived from the MainWP extension.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
