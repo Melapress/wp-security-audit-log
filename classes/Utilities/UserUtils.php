@@ -53,7 +53,7 @@ class WSAL_Utilities_UsersUtils {
 	 *
 	 * @return string User's username.
 	 *
-	 * @since latest Made the meta attribute mandatory, changed to static and moved from occurrence to alert.
+	 * @since 4.3.1 Made the meta attribute mandatory, changed to static and moved from occurrence to alert.
 	 */
 	public static function GetUsername( $meta = null ) {
 		if ( ! is_array( $meta ) ) {

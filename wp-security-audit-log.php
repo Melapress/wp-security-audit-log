@@ -2223,7 +2223,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	        /**
 	         * Closes external connection if it's being used.
 	         *
-	         * @since latest
+	         * @since 4.3.1
 	         */
 	        public function close_external_connection() {
 		        //  if the adapter type options is not empty, it means we're using the external database
