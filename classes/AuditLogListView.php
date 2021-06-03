@@ -435,7 +435,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					? WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $item->created_on, 'datetime', true, true )
                     : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 			case 'user':
-				$username = WSAL_Alert::GetUsername( $this->item_meta[ $item->getId() ] );
+				$username = WSAL_Utilities_UsersUtils::GetUsername( $this->item_meta[ $item->getId() ] );
 				$user     = get_user_by( 'login', $username );
 				$roles = '';
 				$image    = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';

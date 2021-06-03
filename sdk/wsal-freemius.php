@@ -30,7 +30,7 @@ function wsal_freemius() {
 		// Include Freemius SDK.
 		require_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . implode( DIRECTORY_SEPARATOR, [
 				'..',
-				'vendor',
+				'third-party',
 				'freemius',
 				'wordpress-sdk',
 				'start.php'

@@ -421,7 +421,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
                     ? WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime($item->created_on, 'time' )
                     : '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 
-				$username = WSAL_Alert::GetUsername( $this->item_meta[ $item->getId() ] ); // Get username.
+				$username = WSAL_Utilities_UsersUtils::GetUsername( $this->item_meta[ $item->getId() ] ); // Get username.
 				$user     = get_user_by( 'login', $username ); // Get user.
 				if ( empty( $this->name_type ) ) {
 					$this->name_type = $this->_plugin->settings()->get_type_username();

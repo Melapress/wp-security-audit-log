@@ -4,7 +4,7 @@
  * Plugin URI: http://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Activity log viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 4.3.0
+ * Version: 4.3.1
  * Text Domain: wp-security-audit-log
  * Author URI: https://www.wpwhitesecurity.com/
  * License: GPL2
@@ -17,7 +17,7 @@
 
 /*
 	WP Activity Log
-	Copyright(c) 2020  WP White Security  (email : info@wpwhitesecurity.com)
+	Copyright(c) 2021  WP White Security  (email : info@wpwhitesecurity.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License, version 2, as
@@ -49,7 +49,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @var string
              */
-            public $version = '4.3.0';
+            public $version = '4.3.1';
 
             /**
              * Plugin constants.
@@ -63,7 +63,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @var string
              */
-            const MIN_PHP_VERSION = '5.5.0';
+            const MIN_PHP_VERSION = '7.0.0';
 
             /**
              * New option name prefix.
@@ -94,7 +94,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
             public $sensors;
 
             /**
-             * Settings manager. Accessed via $this->settings, which lazy-loads it.
+             * Settings manager.
              *
              * @var WSAL_Settings
              */
@@ -460,10 +460,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
             public function init_hooks() {
                 add_action( 'init', array( $this, 'init' ), 5 );
 
-                // Listen for cleanup event.
-                add_action( 'wsal_cleanup', array( $this, 'CleanUp' ) );
+	            // Listen for cleanup event.
+	            add_action( 'wsal_cleanup', array( $this, 'CleanUp' ) );
 
-                // Render wsal footer.
+	            add_action( 'shutdown', array( $this, 'close_external_connection' ), 999 );
+
+	            // Render wsal footer.
                 add_action( 'admin_footer', array( $this, 'render_footer' ) );
 
                 // Plugin redirect on activation.
@@ -1423,11 +1425,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 // Update version in db.
                 $this->SetGlobalSetting( 'version', $new_version );
 
-                if ( '0.0.0' === $old_version ) {
-                    //  set some initial plugins settings (only the ones that bypass the regular settings retrieval at some
-                    //  point) - e.g. disabled events
-                    $this->SetGlobalSetting( 'disabled-alerts', implode( ',', $this->settings()->always_disabled_alerts ) );
-                }
+			if ( '0.0.0' === $old_version ) {
+				//  set some initial plugins settings (only the ones that bypass the regular settings retrieval at some
+				//  point) - e.g. disabled events
+				$this->SetGlobalSetting( 'disabled-alerts', implode( ',', $this->settings()->always_disabled_alerts ) );
+
+				//  we stop here as no further updates are needed for a freshly installed plugin
+				return;
+			}
 
                 // Do version-to-version specific changes.
                 if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
@@ -2214,12 +2219,39 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     wp_deregister_script( 'dateformat' );
                 }
             }
+
+	        /**
+	         * Closes external connection if it's being used.
+	         *
+	         * @since 4.3.1
+	         */
+	        public function close_external_connection() {
+		        //  if the adapter type options is not empty, it means we're using the external database
+		        $database_type = $this->GetGlobalSetting( 'adapter-type' );
+		        if ( strlen( $database_type ) > 0 ) {
+			        $this->getConnector()->closeConnection();
+		        }
+	        }
         }
 
-        //  load composer libraries if available
-		$autoloader_file_path = plugin_dir_path( __FILE__ ) . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
-		if ( file_exists( $autoloader_file_path ) ) {
+		//  load composer libraries if available
+		$autoloader_file_path = plugin_dir_path( __FILE__ ) . implode( DIRECTORY_SEPARATOR, [
+					'vendor',
+					'autoload.php'
+				]
+			);
+
+		$prefixed_autoloader_file_path = plugin_dir_path( __FILE__ ) . implode( DIRECTORY_SEPARATOR, [
+					'third-party',
+					'vendor',
+					'autoload.php'
+				]
+			);
+
+		if ( file_exists( $autoloader_file_path ) && file_exists( $prefixed_autoloader_file_path ) ) {
 			require_once $autoloader_file_path;
+			require_once $prefixed_autoloader_file_path;
+
 		}
 
         // Begin load sequence.
@@ -2243,7 +2275,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
  *
  * Note: This code MUST NOT be present in the premium version an is removed automatically during the build process.
  *
- * @since latest
+ * @since 4.3.0
  */
 function wsal_free_on_plugin_activation() {
 	$premium_version_slug = 'wp-security-audit-log-premium/wp-security-audit-log.php';

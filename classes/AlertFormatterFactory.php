@@ -82,7 +82,7 @@ class WSAL_AlertFormatterFactory {
 
 	/**
 	 * @return WSAL_AlertFormatter Default formatter using full featured HTML configuration.
-	 * @since latest
+	 * @since 4.3.0
 	 */
 	private static function createDefaultFormatter() {
 		return new WSAL_AlertFormatter( WpSecurityAuditLog::GetInstance(), WSAL_AlertFormatterConfiguration::buildHtmlConfiguration() );

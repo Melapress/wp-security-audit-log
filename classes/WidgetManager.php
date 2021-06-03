@@ -83,7 +83,7 @@ class WSAL_WidgetManager {
 					$url = 'admin.php?page=' . $this->_plugin->views->views[0]->GetSafeViewName();
 					foreach ( $results as $entry ) :
 						$event_meta = $entry->GetMetaArray();
-						$username   = WSAL_Alert::GetUsername( $event_meta );
+						$username   = WSAL_Utilities_UsersUtils::GetUsername( $event_meta );
 						?>
                         <tr>
                             <td><?php echo ( $username ) ? esc_html( $username ) : '<i>unknown</i>'; ?></td>

@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Utility class for some user related stuff.
  *
  * @package Wsal
- * @since latest
+ * @since 4.3.0
  */
 class WSAL_Utilities_UsersUtils {
 
@@ -25,7 +25,7 @@ class WSAL_Utilities_UsersUtils {
 	 * @param WP_User $user WordPress user object.
 	 *
 	 * @return string
-	 * @since latest
+	 * @since 4.3.0
 	 */
 	public static function get_display_label( $plugin, $user ) {
 		if ( ! isset( self::$user_label_setting ) ) {
@@ -44,5 +44,30 @@ class WSAL_Utilities_UsersUtils {
 		}
 
 		return $user->user_login;
+	}
+
+	/**
+	 * Gets the username.
+	 *
+	 * @param array $meta - Event meta data.
+	 *
+	 * @return string User's username.
+	 *
+	 * @since 4.3.1 Made the meta attribute mandatory, changed to static and moved from occurrence to alert.
+	 */
+	public static function GetUsername( $meta = null ) {
+		if ( ! is_array( $meta ) ) {
+			return '';
+		}
+
+		if ( isset( $meta['Username'] ) ) {
+			return $meta['Username'];
+		} elseif ( isset( $meta['CurrentUserID'] ) ) {
+			$data = get_userdata( $meta['CurrentUserID'] );
+
+			return $data ? $data->user_login : '';
+		}
+
+		return '';
 	}
 }
