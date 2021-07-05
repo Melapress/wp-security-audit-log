@@ -326,6 +326,17 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	}
 
 	/**
+   * Event Login blocked
+   *
+   * This is simply a stub to stop the add_filter which refers to this method
+   *  in the HookEvents method from generating an error
+	 *
+	 * @param string $username Username.
+	 */
+  public function EventLoginBlocked( $username ) {}
+
+
+	/**
 	 * Event Login failure.
 	 *
 	 * @param string $username Username.
