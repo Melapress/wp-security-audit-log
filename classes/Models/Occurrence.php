@@ -5,7 +5,7 @@
  * Occurrence model is the model for the Occurrence adapter,
  * used for get the alert, set the meta fields, etc.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Occurrence model is the model for the Occurrence adapter,
  * used for get the alert, set the meta fields, etc.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 
@@ -53,6 +53,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * Is read.
 	 *
 	 * @var bool
+	 * @deprecated 4.3.2
 	 */
 	public $is_read = false;
 
@@ -60,6 +61,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * Is migrated.
 	 *
 	 * @var bool
+	 * @deprecated 4.3.2
 	 */
 	public $is_migrated = false;
 
@@ -69,6 +71,11 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * @var string
 	 */
 	protected $adapterName = 'Occurrence';
+
+	/**
+	 * @var string
+	 */
+	public $_cachedMessage;
 
 	/**
 	 * Returns the alert related to this occurrence.
@@ -172,19 +179,16 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * @see WSAL_Alert::GetMessage()
 	 */
 	public function GetMessage( $meta = null, $context = false ) {
-		if ( ! isset( $this->_cachedmessage ) ) {
-			// Get correct message entry.
-			if ( $this->is_migrated ) {
-				$this->_cachedmessage = $this->GetMetaValue( 'MigratedMesg', false );
-			}
-			if ( ! $this->is_migrated || ! $this->_cachedmessage ) {
-				$this->_cachedmessage = $this->GetAlert()->mesg;
+		if ( ! isset( $this->_cachedMessage ) ) {
+			// message caching
+			if ( ! $this->_cachedMessage ) {
+				$this->_cachedMessage = $this->GetAlert()->mesg;
 			}
 			// Fill variables in message.
 			$meta_array   = null === $meta ? $this->GetMetaArray() : $meta;
 			$alert_object = $this->GetAlert();
 			if ( null !== $alert_object && method_exists( $alert_object, 'GetMessage' ) ) {
-				$this->_cachedmessage = $alert_object->GetMessage( $meta_array, $this->_cachedmessage, $this->getId(), $context );
+				$this->_cachedMessage = $alert_object->GetMessage( $meta_array, $this->_cachedMessage, $this->getId(), $context );
 			} else {
 				/**
 				 * Reaching this point means we have an event we don't know
@@ -222,7 +226,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 						return $message;
 					}
 				}
-				$this->_cachedmessage = isset( $cached_message ) ? $cached_message : sprintf(
+				$this->_cachedMessage = isset( $cached_message ) ? $cached_message : sprintf(
 					/* Translators: 1: html that opens a link, 2: html that closes a link. */
 					__( 'This type of activity / change is no longer monitored. You can create your own custom event IDs to keep a log of such change. Read more about custom events %1$shere%2$s.', 'wp-security-audit-log' ),
 					'<a href="https://wpactivitylog.com/support/kb/create-custom-events-wordpress-activity-log/" rel="noopener noreferrer" target="_blank">',
@@ -230,7 +234,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 				);
 			}
 		}
-		return $this->_cachedmessage;
+		return $this->_cachedMessage;
 	}
 
 	/**

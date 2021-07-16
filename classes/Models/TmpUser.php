@@ -4,7 +4,7 @@
  *
  * Model used for the Temporary WP_users table.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Model used for the Temporary WP_users table.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Models_TmpUser extends WSAL_Models_ActiveRecord {
 

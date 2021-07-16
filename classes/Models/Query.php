@@ -4,7 +4,7 @@
  *
  * Query model is the class for all the query conditions.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Query model is the class for all the query conditions.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Models_Query {
 

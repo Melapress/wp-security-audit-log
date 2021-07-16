@@ -2,7 +2,7 @@
 /**
  * Abstract Sandbox Task class.
  *
- * @package Wsal
+ * @package wsal
  */
 abstract class WSAL_AbstractSandboxTask {
 

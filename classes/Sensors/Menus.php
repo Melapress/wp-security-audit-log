@@ -5,7 +5,7 @@
  * Menus sensor file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -26,8 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2085 User changed order of the objects in a menu
  * 2089 User moved objects as a sub-item
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
 

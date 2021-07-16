@@ -4,7 +4,7 @@
  * Abstract class used for the plugin extension placeholder views/admin pages.
  *
  * @see Views/*.php
- * @package Wsal
+ * @package wsal
  * @since 4.1.5.2
  */
 abstract class WSAL_ExtensionPlaceholderView extends WSAL_AbstractView {

@@ -5,7 +5,7 @@
  * MainWP Plugins & Themes sensor file.
  *
  * @since 4.1.4
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -26,8 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 5007 User uninstalled a theme
  * 5031 User updated a theme
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_MainWP extends WSAL_AbstractSensor {
 
