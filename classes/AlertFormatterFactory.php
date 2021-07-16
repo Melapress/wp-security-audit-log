@@ -5,7 +5,7 @@
  * Class file for alert formatter factory.
  *
  * @since 4.2.1
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Manages various alert formatters and allows registration of custom alert formatters.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_AlertFormatterFactory {
 

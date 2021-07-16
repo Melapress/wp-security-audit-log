@@ -5,7 +5,7 @@
  * Manager class for WSAL's WP Dashboard widget.
  *
  * @since   1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Plugin Widget used in the WordPress Dashboard.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_WidgetManager {
 

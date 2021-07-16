@@ -5,7 +5,7 @@
  * Abstract meta data sensor file.
  *
  * @since 4.1.3
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -16,8 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Abstract sensor for meta data.
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  * @since 4.1.3
  */
 abstract class WSAL_AbstractMetaDataSensor extends WSAL_AbstractSensor {
@@ -32,12 +32,13 @@ abstract class WSAL_AbstractMetaDataSensor extends WSAL_AbstractSensor {
 	/**
 	 * Check "Excluded Custom Fields" or meta keys starts with "_".
 	 *
+	 * @param string $object_type Object type - user or post.
 	 * @param int $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
 	 *
 	 * @return boolean can log true|false
 	 */
-	protected function CanLogMetaKey( $object_id, $meta_key ) {
+	protected function CanLogMetaKey( $object_type, $object_id, $meta_key ) {
 		// Check if excluded meta key or starts with _.
 		if ( '_' === substr( $meta_key, 0, 1 ) ) {
 			/**
@@ -53,7 +54,7 @@ abstract class WSAL_AbstractMetaDataSensor extends WSAL_AbstractSensor {
 			}
 
 			return false;
-		} elseif ( $this->IsExcludedCustomFields( $meta_key ) ) {
+		} elseif ( $this->IsExcludedCustomFields( $object_type, $meta_key ) ) {
 			return false;
 		} else {
 			return true;
@@ -79,12 +80,18 @@ abstract class WSAL_AbstractMetaDataSensor extends WSAL_AbstractSensor {
 	 * Check "Excluded Custom Fields".
 	 * Used in the above function.
 	 *
+	 * @param string $object_type Object type - user or post.
 	 * @param string $custom - Custom meta key.
 	 *
 	 * @return boolean is excluded from monitoring true|false
 	 */
-	public function IsExcludedCustomFields( $custom ) {
-		$custom_fields = $this->plugin->settings()->GetExcludedMonitoringCustom();
+	public function IsExcludedCustomFields( $object_type, $custom ) {
+		$custom_fields = [];
+		if ('post' === $object_type) {
+			$custom_fields = $this->plugin->settings()->GetExcludedPostMetaFields();
+		} else if ('user' === $object_type) {
+			$custom_fields = $this->plugin->settings()->GetExcludedUserMetaFields();
+		}
 
 		if ( in_array( $custom, $custom_fields ) ) {
 			return true;

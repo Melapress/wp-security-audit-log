@@ -4,7 +4,7 @@
  *
  * MySQL database Occurrence class.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * MySQL wsal_occurrences table used for to store the alerts.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_OccurrenceInterface {
 
@@ -74,6 +74,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 * Is read?
 	 *
 	 * @var bool
+	 * @deprecated 4.3.2
 	 */
 	public $is_read = false;
 
@@ -81,6 +82,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 * Is migrated?
 	 *
 	 * @var bool
+	 * @deprecated 4.3.2
 	 */
 	public $is_migrated = false;
 

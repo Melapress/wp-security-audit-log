@@ -5,7 +5,7 @@
  * WSAL setup class file.
  *
  * @since 3.2.3
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -555,7 +555,7 @@ final class WSAL_Views_SetupWizard {
 		?>
 		<form method="post" class="wsal-setup-form">
 			<?php wp_nonce_field( 'wsal-step-frontend-register' ); ?>
-			<h4><?php esc_html_e( 'Can visitors register for a user on your website?', 'wp-security-audit-log' ); ?></h4>
+			<h4><?php esc_html_e( 'Can visitors register as a user on your website?', 'wp-security-audit-log' ); ?></h4>
 			<fieldset>
 				<label for="wsal-frontend-events-register-yes">
 					<input id="wsal-frontend-events-register-yes" name="wsal-frontend-register" type="radio" value="1">

@@ -4,7 +4,7 @@
  *
  * Interface used by the Occurrence.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Interface used by the Occurrence.
  *
- * @package Wsal
+ * @package wsal
  */
 interface WSAL_Adapters_OccurrenceInterface {
 

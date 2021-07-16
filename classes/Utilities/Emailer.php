@@ -4,7 +4,7 @@
  *
  * Utility class used for sending emails.
  *
- * @package Wsal
+ * @package wsal
  * @since 3.3.1
  */
 

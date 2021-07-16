@@ -5,7 +5,7 @@
  * Public/Visitor activity sensor class file.
  *
  * @since 3.3
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * System Activity sensor.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 
@@ -53,9 +53,10 @@ class WSAL_Sensors_Public extends WSAL_AbstractSensor {
 		}
 
 		$event_data = array(
-			'NewUserID'   => $user_id,
-			'UserChanger' => ! empty( $current_user ) ? $current_user->user_login : '',
-			'NewUserData' => (object) $new_user_data,
+			'NewUserID'    => $user_id,
+			'UserChanger'  => ! empty( $current_user ) ? $current_user->user_login : '',
+			'NewUserData'  => (object) $new_user_data,
+			'EditUserLink' => add_query_arg( 'user_id', $user->ID, admin_url( 'user-edit.php' ) ),
 		);
 
 		$plugin->alerts->Trigger( $event, $event_data, true );

@@ -5,7 +5,7 @@
  * WSAL help page.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * - Plugin Support
  * - Plugin Documentation
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Views_Help extends WSAL_AbstractView {
 

@@ -5,7 +5,7 @@
  * Database sensors class file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -29,8 +29,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 5023 WordPress modified tables structure
  * 5024 WordPress deleted tables
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 
@@ -401,7 +401,11 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	private function check_if_table_exists( $table_name ) {
 		try {
 			global $wpdb;
+
+			//  output buffering is here to prevent from error log messages that would be fired if the table didn't exist
+			ob_start();
 			$db_result = $wpdb->query( "SELECT COUNT(1) FROM {$table_name};" );
+			ob_clean();
 
 			return ( 1 === $db_result );
 		} catch (Exception $e) {

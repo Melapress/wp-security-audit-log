@@ -5,7 +5,7 @@
  * System activity sensor class file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -40,8 +40,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 6017 Modified the list of keywords for comments moderation
  * 6018 Modified the list of keywords for comments blacklisting
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_System extends WSAL_AbstractSensor {
 

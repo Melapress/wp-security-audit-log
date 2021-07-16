@@ -3,7 +3,7 @@
 /**
  * Utility class for handling request inputs.
  *
- * @package Wsal
+ * @package wsal
  * @since 4.1.4
  */
 class WSAL_Utilities_RequestUtils {

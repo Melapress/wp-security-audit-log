@@ -5,7 +5,7 @@
  * Abstract ActiveRecord model is the generic model for any kind
  * of adapter.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Abstract ActiveRecord model is the generic model for any kind
  * of adapter.
  *
- * @package Wsal
+ * @package wsal
  */
 abstract class WSAL_Models_ActiveRecord {
 
@@ -361,17 +361,13 @@ abstract class WSAL_Models_ActiveRecord {
 	/**
 	 * Function used in WSAL reporting extension.
 	 *
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::GetReporting()
-	 * @param int    $_site_id - Site ID.
-	 * @param int    $_user_id - User ID.
-	 * @param string $_role_name - User role.
-	 * @param int    $_alert_code - Alert code.
-	 * @param int    $_start_timestamp - From created_on.
-	 * @param int    $_end_timestamp - To created_on.
+	 * @param WSAL_ReportArgs $report_args
+	 *
 	 * @return array Report results.
+	 * @see WSAL_Adapters_MySQL_ActiveRecord::GetReporting()
 	 */
-	public function GetReporting( $_site_id, $_user_id, $_role_name, $_alert_code, $_start_timestamp, $_end_timestamp ) {
-		return $this->getAdapter()->GetReporting( $_site_id, $_user_id, $_role_name, $_alert_code, $_start_timestamp, $_end_timestamp );
+	public function GetReporting( $report_args ) {
+		return $this->getAdapter()->GetReporting( $report_args );
 	}
 
 	/**

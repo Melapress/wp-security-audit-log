@@ -4,7 +4,7 @@
  *
  * Interface used by the WSAL_Connector.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Interface used by the WSAL_Connector.
  *
- * @package Wsal
+ * @package wsal
  */
 interface WSAL_Connector_ConnectorInterface {
 
@@ -30,6 +30,8 @@ interface WSAL_Connector_ConnectorInterface {
 
 	/**
 	 * Get the connection.
+	 *
+	 * @return wpdb
 	 */
 	public function getConnection();
 
@@ -42,11 +44,6 @@ interface WSAL_Connector_ConnectorInterface {
 	 * Is installed?
 	 */
 	public function isInstalled();
-
-	/**
-	 * Can migrate?
-	 */
-	public function canMigrate();
 
 	/**
 	 * Install all.

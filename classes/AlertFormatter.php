@@ -5,7 +5,7 @@
  * Class file for alert formatter.
  *
  * @since 4.2.1
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Formatting rules are given by given formatter configuration.
  *
- * @package Wsal
+ * @package wsal
  * @since 4.2.1
  */
 final class WSAL_AlertFormatter {
@@ -42,6 +42,10 @@ final class WSAL_AlertFormatter {
 		return $this->configuration->getEndOfLine();
 	}
 
+	public function set_end_of_line($value) {
+		return $this->configuration->setEndOfLine($value);
+	}
+
 	/**
 	 * @param string $expression Meta expression including the surrounding percentage chars.
 	 * @param string $value Meta value.
@@ -58,9 +62,10 @@ final class WSAL_AlertFormatter {
 				return esc_html( $value );
 
 			case '%MetaLink%' == $expression:
-				if ( $this->configuration->isJsInLinksAllowed() ) {
-					$label  = __( 'Exclude Custom Field from the Monitoring', 'wp-security-audit-log' );
-					$result = "<a href=\"#\" data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"return WsalDisableCustom(this, '" . $value . "');\"> {$label}</a>";
+				//  NULL value check is here because events related to user meta fields didn't have the MetaLink meta prior to version 4.3.2
+				if ( $this->configuration->isJsInLinksAllowed() && 'NULL' !== $value ) {
+					$label  = __( 'Exclude custom field from the monitoring', 'wp-security-audit-log' );
+					$result = "<a href=\"#\" data-object-type='{$metadata['Object']}' data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"return WsalDisableCustom(this, '" . $value . "');\"> {$label}</a>";
 
 					return $this->wrap_in_hightlight_markup( $result );
 				}
@@ -308,8 +313,11 @@ final class WSAL_AlertFormatter {
 	 */
 	protected function build_link_markup( $url, $label, $title = '', $target = '_blank' ) {
 		$title = empty( $title ) ? $label : $title;
+		if ( $this->configuration->canUseHtmlMarkupForLinks() ) {
+			return '<a href="' . esc_url( $url ) . '" title="' . $title . '" target="' . $target . '">' . $label . '</a>';
+		}
 
-		return '<a href="' . esc_url( $url ) . '" title="' . $title . '" target="' . $target . '">' . $label . '</a>';
+		return $label . ': ' . esc_url( $url );
 	}
 
 	/**

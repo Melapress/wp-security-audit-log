@@ -7,7 +7,7 @@
  * executed directly (CPTs or taxonomies for example).
  *
  * @since   3.5.2
- * @package Wsal
+ * @package wsal
  */
 
 namespace WSAL\Multisite\NetworkWide;
