@@ -3194,43 +3194,43 @@ msgstr ""
 msgid "Warning"
 msgstr ""
 
-#: classes/Settings.php:362
+#: classes/Settings.php:374
 msgid "This function is deprecated"
 msgstr ""
 
-#: classes/Settings.php:1900
+#: classes/Settings.php:1914
 msgid "Root directory of WordPress (excluding sub directories)"
 msgstr ""
 
-#: classes/Settings.php:1901
+#: classes/Settings.php:1915
 msgid "WP Admin directory (/wp-admin/)"
 msgstr ""
 
-#: classes/Settings.php:1902
+#: classes/Settings.php:1916
 msgid "WP Includes directory (/wp-includes/)"
 msgstr ""
 
-#: classes/Settings.php:1903
+#: classes/Settings.php:1917
 msgid "/wp-content/ directory (excluding plugins, themes & uploads directories)"
 msgstr ""
 
-#: classes/Settings.php:1904
+#: classes/Settings.php:1918
 msgid "Themes directory (/wp-content/themes/)"
 msgstr ""
 
-#: classes/Settings.php:1905
+#: classes/Settings.php:1919
 msgid "Plugins directory (/wp-content/plugins/)"
 msgstr ""
 
-#: classes/Settings.php:1906
+#: classes/Settings.php:1920
 msgid "Uploads directory (/wp-content/uploads/)"
 msgstr ""
 
-#: classes/Settings.php:1911
+#: classes/Settings.php:1925
 msgid "Uploads directory of all sub sites on this network (/wp-content/sites/*)"
 msgstr ""
 
-#: classes/Settings.php:2065
+#: classes/Settings.php:2079
 msgid "None provided"
 msgstr ""
 
@@ -7312,7 +7312,7 @@ msgstr ""
 msgid "Name can only be 12 characters long and only letters, numbers and underscore are allowed."
 msgstr ""
 
-#: extensions/search/classes/FilterManager.php:406, extensions/user-sessions/classes/View/Settings.php:96, extensions/user-sessions/classes/View/Options/Policies.php:315
+#: extensions/search/classes/FilterManager.php:406, extensions/user-sessions/classes/View/Settings.php:96, extensions/user-sessions/classes/View/Options/Policies.php:339
 msgid "Save"
 msgstr ""
 
@@ -7791,7 +7791,7 @@ msgstr ""
 msgid "Select a user role to filter"
 msgstr ""
 
-#: extensions/user-sessions/classes/Sensors/UserSessionsTracking.php:307, extensions/user-sessions/classes/View/Options/Policies.php:235
+#: extensions/user-sessions/classes/Sensors/UserSessionsTracking.php:307, extensions/user-sessions/classes/View/Options/Policies.php:259
 msgid "ERROR: Your session was blocked with the <a href=\"https://en-gb.wordpress.org/plugins/wp-security-audit-log\" target=\"_blank\">WP Activity Log plugin</a> because there is already another user logged in with the same username. Please contact the site administrator for more information."
 msgstr ""
 
@@ -7904,7 +7904,17 @@ msgstr ""
 msgid "Do not enforce policies on users with this role"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:159
+#. translators: %s: Twilio settings link
+#. translators: %s: Twilio settings link
+#: extensions/user-sessions/classes/View/Options/Policies.php:158, extensions/user-sessions/classes/View/Options/Policies.php:188
+msgid "Users session management is available in the Business and Enterprise plans. %s"
+msgstr ""
+
+#: extensions/user-sessions/classes/View/Options/Policies.php:159, extensions/user-sessions/classes/View/Options/Policies.php:189
+msgid "Upgrade the plan"
+msgstr ""
+
+#: extensions/user-sessions/classes/View/Options/Policies.php:171
 msgid "Inherit the sessions policies"
 msgstr ""
 
@@ -7920,99 +7930,99 @@ msgstr ""
 msgid "Enable session policies"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:179
+#: extensions/user-sessions/classes/View/Options/Policies.php:203
 msgid "By default WordPress does not limit how many times the same user can connect simultaneously. So two different users can login at the same time using the same username. Use the settings below to limit and also block simultaneous connections for the same username."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:181
+#: extensions/user-sessions/classes/View/Options/Policies.php:205
 msgid "Do you want to allow two or more people to login simultaneously with the same username?"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:183
+#: extensions/user-sessions/classes/View/Options/Policies.php:207
 msgid "By allowing multiple sessions two or more people can login to WordPress using the same username. By blocking them, once a person is logged in with a username, if another person tries to login with the same username they will be blocked."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:188
+#: extensions/user-sessions/classes/View/Options/Policies.php:212
 msgid "Multiple Sessions"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:197
+#: extensions/user-sessions/classes/View/Options/Policies.php:221
 msgid "Allow one session only"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:203
+#: extensions/user-sessions/classes/View/Options/Policies.php:227
 msgid "Allow one session only and override current session"
 msgstr ""
 
 #. translators: Number of sessions input tag
-#: extensions/user-sessions/classes/View/Options/Policies.php:213
+#: extensions/user-sessions/classes/View/Options/Policies.php:237
 msgid "Allow up to %s sessions and block the rest"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:224
+#: extensions/user-sessions/classes/View/Options/Policies.php:248
 msgid "Configure a Blocked Session Notification for Users"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:226
+#: extensions/user-sessions/classes/View/Options/Policies.php:250
 msgid "This error message is shown to users when they try to login with a username that already has a session and their session is blocked. You can change this message by editing the text in the below placeholder. Only <a href> HTML code is allowed."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:231
+#: extensions/user-sessions/classes/View/Options/Policies.php:255
 msgid "Blocked Sessions Error"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:249
+#: extensions/user-sessions/classes/View/Options/Policies.php:273
 msgid "Do you want to terminate idle sessions automatically?"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:251
+#: extensions/user-sessions/classes/View/Options/Policies.php:275
 msgid "If a session has been idle for more than the configured number of hours, it will be automatically destroyed by the plugin."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:256
+#: extensions/user-sessions/classes/View/Options/Policies.php:280
 msgid "Terminate Idle Sessions"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:273
+#: extensions/user-sessions/classes/View/Options/Policies.php:297
 msgid "1"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:274
+#: extensions/user-sessions/classes/View/Options/Policies.php:298
 msgid "4"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:275
+#: extensions/user-sessions/classes/View/Options/Policies.php:299
 msgid "8"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:276
+#: extensions/user-sessions/classes/View/Options/Policies.php:300
 msgid "12"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:277
+#: extensions/user-sessions/classes/View/Options/Policies.php:301
 msgid "24"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:278
+#: extensions/user-sessions/classes/View/Options/Policies.php:302
 msgid "32"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:279
+#: extensions/user-sessions/classes/View/Options/Policies.php:303
 msgid "48"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:286
+#: extensions/user-sessions/classes/View/Options/Policies.php:310
 msgid "terminate sessions if they have been idle for more than"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:297
+#: extensions/user-sessions/classes/View/Options/Policies.php:321
 msgid " hour"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:297, extensions/user-sessions/classes/View/Options/Policies.php:304
+#: extensions/user-sessions/classes/View/Options/Policies.php:321, extensions/user-sessions/classes/View/Options/Policies.php:328
 msgid " hours"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:290
+#: extensions/user-sessions/classes/View/Options/Policies.php:314
 msgid " seconds (Testing)"
 msgstr ""
