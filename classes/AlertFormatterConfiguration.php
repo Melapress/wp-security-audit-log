@@ -78,7 +78,7 @@ class WSAL_AlertFormatterConfiguration {
 
 	/**
 	 * @var bool
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	protected $use_html_markup_for_links = true;
 
@@ -133,7 +133,7 @@ class WSAL_AlertFormatterConfiguration {
 
 	/**
 	 * @return bool
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	public function canUseHtmlMarkupForLinks(): bool {
 		return $this->use_html_markup_for_links;
@@ -143,7 +143,7 @@ class WSAL_AlertFormatterConfiguration {
 	 * @param bool $use_html_markup_for_links
 	 *
 	 * @return WSAL_AlertFormatterConfiguration
-	 * @since latest
+	 * @since 4.3.2
 	 *
 	 */
 	public function setUseHtmlMarkupForLinks( bool $use_html_markup_for_links ): WSAL_AlertFormatterConfiguration {

@@ -70,7 +70,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 	/**
 	 * @var WSAL_Views_AuditLog
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	private $audit_log_view;
 

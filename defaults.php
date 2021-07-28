@@ -2692,7 +2692,7 @@ function wsaldefaults_wsal_init() {
 						6327,
 						WSAL_HIGH,
 						__( 'Changed the status of Logging of events to the database', 'wp-security-audit-log' ),
-						__( 'Changed the status of <strong>Logging of events to the database.</strong>.', 'wp-security-audit-log' ),
+						__( 'Changed the status of <strong>Logging of events to the database</strong>.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'wp-activity-log',

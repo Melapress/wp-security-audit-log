@@ -388,7 +388,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
 				'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
 				'CurrentUserID' => $current_user->ID,
-				'EventType'     => 'revoked',
+				'EventType'     => 'submitted',
 			)
 		);
 	}

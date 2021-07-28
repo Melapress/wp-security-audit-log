@@ -616,14 +616,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die( 'Occurrence parameter expected.' );
 		}
 
-		// Get selected db.
-		$selected_db      = get_transient( 'wsal_wp_selected_db' );
-		$selected_db_user = (int) get_transient( 'wsal_wp_selected_db_user' );
-
-		// Check if archive db is enabled and the current user matches the one who selected archive db.
-		if ( ! empty( $selected_db ) && 'archive' === $selected_db && get_current_user_id() === $selected_db_user ) {
-			$this->_plugin->settings()->SwitchToArchiveDB(); // Switch to archive DB.
-		}
 
 		$occ = new WSAL_Models_Occurrence();
 		$occ->Load( 'id = %d', array( (int) $get_array['occurrence'] ) );
@@ -645,7 +637,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Ajax callback to refrest the view.
+	 * Ajax callback to refresh the view.
 	 */
 	public function AjaxRefresh() {
 		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
@@ -721,18 +713,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		die( json_encode( array_slice( $grp1 + $grp2, 0, 7 ) ) );
 	}
 
-	/**
-	 * Ajax callback to switch database.
-	 */
-	public function AjaxSwitchDB() {
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
-
-		if ( isset( $post_array['selected_db'] ) ) {
-			set_transient( 'wsal_wp_selected_db', $post_array['selected_db'], HOUR_IN_SECONDS );
-			set_transient( 'wsal_wp_selected_db_user', get_current_user_id(), HOUR_IN_SECONDS );
-		}
-	}
 
 	/**
 	 * Ajax callback to download failed login log.
@@ -1184,7 +1164,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 	/**
 	 * @return string URL of the 3rd party extensions tab.
-     * @since latest
+     * @since 4.3.2
 	 */
     public function get_third_party_plugins_tab_url() {
 	    return esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', network_admin_url( 'admin.php' ) ) );
@@ -1197,7 +1177,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @param array $event_meta Event meta data array.
 	 *
 	 * @return string HTML teaser markup or empty string.
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	public function maybe_build_teaser_html( $event_meta ) {
 		$result = '';

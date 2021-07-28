@@ -43,7 +43,7 @@ interface WSAL_Adapters_QueryInterface {
 	/**
 	 * Checks if the adapter is successfully connected.
 	 * @return bool True if the adapter is connected. False otherwise.
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	public function IsConnected();
 }

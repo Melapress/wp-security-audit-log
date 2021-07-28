@@ -452,7 +452,7 @@ final class WSAL_AlertManager {
 		 * @param array $metadata - Event data.
 		 * @param integer $code - Event ID.
 		 *
-		 * @since latest
+		 * @since 4.3.2
 		 *
 		 */
 		$metadata = apply_filters( 'wsal_event_metadata_definition', $metadata, $code );

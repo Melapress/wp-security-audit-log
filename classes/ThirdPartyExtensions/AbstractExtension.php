@@ -6,13 +6,13 @@ if ( ! class_exists( 'WSAL_AbstractExtension' ) ) {
 
 		/**
 		 * @var WSAL_AbstractExtension[]
-		 * @since latest
+		 * @since 4.3.2
 		 */
 		private static $extensions = [];
 
 		/**
 		 * @var WSAL_AbstractExtension[]
-		 * @since latest
+		 * @since 4.3.2
 		 */
 		private static $post_types_map;
 
@@ -20,7 +20,7 @@ if ( ! class_exists( 'WSAL_AbstractExtension' ) ) {
 		 * @param string $post_type
 		 *
 		 * @return WSAL_AbstractExtension|null
-		 * @since latest
+		 * @since 4.3.2
 		 */
 		public static function get_extension_for_post_type( $post_type ) {
 			if ( is_null( self::$post_types_map ) ) {
@@ -92,7 +92,7 @@ if ( ! class_exists( 'WSAL_AbstractExtension' ) ) {
 		 * Returns a list of custom post types associated with particular extension.
 		 *
 		 * @return array List of custom post types.
-		 * @since latest
+		 * @since 4.3.2
 		 */
 		public function get_custom_post_types() {
 			return [];

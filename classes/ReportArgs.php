@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @subpackage reports
  *
  * @author Martin Krcho <martin@wpwhitesecurity.com>
- * @since latest
+ * @since 4.3.2
  */
 class WSAL_ReportArgs {
 
