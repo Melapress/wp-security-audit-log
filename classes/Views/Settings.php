@@ -1668,7 +1668,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		// Get custom post types.
 		$custom_post_types = array();
-		$post_types        = get_post_types( array(), 'names' );
+		$post_types        = get_post_types( array(
+		        'public' => false
+        ), 'names' );
 		// if we are running multisite and have networkwide cpt tracker get the
 		// list from and merge to the post_types array.
 		if ( is_multisite() && class_exists( '\WSAL\Multisite\NetworkWide\CPTsTracker' ) ) {

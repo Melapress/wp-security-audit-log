@@ -37,7 +37,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	/**
 	 * Checks is the connection is for an external database.
 	 *
-	 * @since latest
+	 * @since 4.3.2
 	 * @return boolean
 	 */
 	public function is_external() {

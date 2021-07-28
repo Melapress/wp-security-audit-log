@@ -338,6 +338,18 @@ class WSAL_Settings {
 	}
 
 	public function SetPruningDateEnabled( $enabled ) {
+
+		$old_setting = $this->_plugin->GetGlobalBooleanSetting( 'pruning-date-e', false );
+		$enable = \WSAL\Helpers\Options::string_to_bool( $enabled );
+		if ( $old_setting !== $enable ) {
+			$event_id = 6052;
+			$alert_data = [
+				'new_setting' => ( $enable ) ? 'Delete events older than ' . $this->_pruning = $this->_plugin->GetGlobalSetting( 'pruning-date' ) . ' ' . $this->_plugin->GetGlobalSetting( 'pruning-unit', 'months' ) : 'Keep all data',
+				'previous_setting' => ( $old_setting ) ? 'Delete events older than ' . $this->_pruning = $this->_plugin->GetGlobalSetting( 'pruning-date' ) . ' ' . $this->_plugin->GetGlobalSetting( 'pruning-unit', 'months' ) : 'Keep all data',
+			];
+			$this->_plugin->alerts->Trigger( $event_id, $alert_data );
+		}
+
 		$this->_plugin->SetGlobalBooleanSetting( 'pruning-date-e', $enabled );
 	}
 
@@ -369,11 +381,12 @@ class WSAL_Settings {
 	 */
 	public function set_login_page_notification( $enable ) {
 		//Only trigger an event if an actual changes is made.
-		$old_setting = $this->_plugin->GetGlobalBooleanSetting( 'login_page_notification' );
+		$old_setting = $this->_plugin->GetGlobalBooleanSetting( 'login_page_notification', false );
+		$enable = \WSAL\Helpers\Options::string_to_bool( $enable );
 		if ( $old_setting !== $enable ) {
 			$event_id = 6046;
 			$alert_data = [
-				'EventType' => ( $enable) ? 'enabled' : 'disabled',
+				'EventType' => ( $enable ) ? 'enabled' : 'disabled',
 			];
 			$this->_plugin->alerts->Trigger( $event_id, $alert_data );
 		}
@@ -397,7 +410,7 @@ class WSAL_Settings {
 	public function set_login_page_notification_text( $text ) {
 		$text = wp_kses( $text, $this->_plugin->allowed_html_tags );
 		$old_setting = $this->_plugin->GetGlobalSetting( 'login_page_notification_text' );
-		if ( ! is_null( $old_setting ) && $old_setting !== $text ) {
+		if ( ! empty( $old_setting ) && ! empty( $text ) && ! is_null( $old_setting ) && $old_setting !== $text ) {
 			$this->_plugin->alerts->Trigger( 6047 );
 		}
 		$this->_plugin->SetGlobalSetting( 'login_page_notification_text', $text );
@@ -491,7 +504,7 @@ class WSAL_Settings {
 					6050,
 					array(
 						'user'           => $user,
-						'previous_users' => $this->tidy_blank_values( $old_value ),
+						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'added',
 					)
 				);
@@ -505,6 +518,7 @@ class WSAL_Settings {
 						6050,
 						array(
 							'user'           => $user,
+							'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 							'EventType'      => 'removed',
 						)
 					);
@@ -534,7 +548,7 @@ class WSAL_Settings {
 	 * @since 3.2.3
 	 */
 	public function set_restrict_plugin_setting( $setting ) {
-		$old_value = $this->_plugin->GetGlobalSetting( 'restrict-plugin-settings' );
+		$old_value = $this->_plugin->GetGlobalSetting( 'restrict-plugin-settings', 'only_admins' );
 
 		if ( ! is_null( $old_value ) && $old_value !== $setting ) {
 			$alert_data = [
@@ -917,7 +931,7 @@ class WSAL_Settings {
 					6053,
 					array(
 						'user'           => $user,
-						'previous_users' => $this->tidy_blank_values( $old_value ),
+						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'added',
 					)
 				);
@@ -929,7 +943,7 @@ class WSAL_Settings {
 					6053,
 					array(
 						'user'           => $user,
-						'previous_users' => $this->tidy_blank_values( $old_value ),
+						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'removed',
 					)
 				);
@@ -964,7 +978,7 @@ class WSAL_Settings {
 					6056,
 					array(
 						'post_type'      => $post_type,
-						'previous_types' => $this->tidy_blank_values( $old_value ),
+						'previous_types' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'added',
 					)
 				);
@@ -977,7 +991,7 @@ class WSAL_Settings {
 					6056,
 					array(
 						'post_type'      => $post_type,
-						'previous_types' => $this->tidy_blank_values( $old_value ),
+						'previous_types' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'removed',
 					)
 				);
@@ -1017,7 +1031,7 @@ class WSAL_Settings {
 					6054,
 					array(
 						'role'           => $user,
-						'previous_users' => $this->tidy_blank_values( $old_value ),
+						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'added',
 					)
 				);
@@ -1029,7 +1043,7 @@ class WSAL_Settings {
 					6054,
 					array(
 						'role'           => $user,
-						'previous_users' => $this->tidy_blank_values( $old_value ),
+						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'removed',
 					)
 				);
@@ -1065,7 +1079,7 @@ class WSAL_Settings {
 					6057,
 					array(
 						'custom_field'    => $custom_field,
-						'previous_fields' => $this->tidy_blank_values( $old_value ),
+						'previous_fields' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'added',
 					)
 				);
@@ -1078,7 +1092,7 @@ class WSAL_Settings {
 					6057,
 					array(
 						'custom_field'    => $custom_field,
-						'previous_fields' => $this->tidy_blank_values( $old_value ),
+						'previous_fields' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'removed',
 					)
 				);
@@ -1107,7 +1121,7 @@ class WSAL_Settings {
 	 *
 	 * @param array $custom
 	 *
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	public function SetExcludedUserMetaFields( $custom ) {
 
@@ -1120,7 +1134,7 @@ class WSAL_Settings {
 					6058,
 					array(
 						'custom_field'    => $custom_field,
-						'previous_fields' => $this->tidy_blank_values( implode( ',', $old_value ) ),
+						'previous_fields' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'added',
 					)
 				);
@@ -1133,7 +1147,7 @@ class WSAL_Settings {
 					6058,
 					array(
 						'custom_field'    => $custom_field,
-						'previous_fields' => $this->tidy_blank_values( implode( ',', $old_value ) ),
+						'previous_fields' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'removed',
 					)
 				);
@@ -1148,7 +1162,7 @@ class WSAL_Settings {
 	 * Retrieves a list of user meta fields excluded from monitoring.
 	 *
 	 * @return array
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	public function GetExcludedUserMetaFields() {
 		if ( empty( $this->_excluded_user_meta ) ) {
@@ -1172,7 +1186,7 @@ class WSAL_Settings {
 					6055,
 					array(
 						'ip'           => $user,
-						'previous_ips' => $this->tidy_blank_values( $old_value ),
+						'previous_ips' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'    => 'added',
 					)
 				);
@@ -1184,7 +1198,7 @@ class WSAL_Settings {
 					6055,
 					array(
 						'ip'           => $user,
-						'previous_ips' => $this->tidy_blank_values( $old_value ),
+						'previous_ips' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'    => 'removed',
 					)
 				);
@@ -2069,7 +2083,7 @@ class WSAL_Settings {
 	 * Retrieves current database version.
 	 *
 	 * @return int Current database version number.
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	public function get_database_version() {
 		return (int) $this->_plugin->GetGlobalSetting( 'db_version', 0 );
@@ -2079,7 +2093,7 @@ class WSAL_Settings {
 	 * Updates the current database version.
 	 *
 	 * @param int $version Database version number.
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	public function set_database_version( $version ) {
 		$this->_plugin->SetGlobalSetting( 'db_version', $version );

@@ -554,7 +554,7 @@ function wsal_addon_installer_ajax( button ) {
 }
 
 jQuery( document ).ready( function() {
-console.log( 'rrready');
+
 	jQuery( document ).on( 'click', '.notice.is-dismissible .notice-dismiss', function(event) {
 		var noticeElm = jQuery(this).parent();
 		var action = noticeElm.attr('data-dismiss-action');

@@ -1040,7 +1040,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @param array $data
 	 *
 	 * @return string
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	protected function formatArrayForQuery( $data ) {
 		return "'" . implode( ',', $data ) . "'";
@@ -1050,7 +1050,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * @param array $data
 	 *
 	 * @return string
-	 * @since latest
+	 * @since 4.3.2
 	 */
 	protected function formatArrayForQueryRegex( $data ) {
 		$result = array();
