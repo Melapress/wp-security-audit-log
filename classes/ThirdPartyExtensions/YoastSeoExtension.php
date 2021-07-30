@@ -20,7 +20,6 @@ if ( ! class_exists( 'WSAL_YoastSeoExtension' ) ) {
 
 			// combine the two arrays.
 			return array_merge( $plugins, $new_plugin );
-			return $plugins;
 		}
 
 		public function add_event_codes( $addon_event_codes ) {
