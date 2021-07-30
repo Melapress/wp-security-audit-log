@@ -5,7 +5,7 @@
  * Advanced Custom Fields sensor file.
  *
  * @since 4.1.3
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -19,8 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2131 ACF relationship added
  * 2132 ACF relationship removed
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  * @since 4.1.3
  */
 class WSAL_Sensors_ACFMeta extends WSAL_AbstractMetaDataSensor {
@@ -76,7 +76,7 @@ class WSAL_Sensors_ACFMeta extends WSAL_AbstractMetaDataSensor {
 	 */
 	public function on_field_updated( $meta_id, $object_id, $meta_key, $_meta_value ) {
 		if ( in_array( $meta_key, array_keys( $this->old_meta ) ) ) {
-			if ( $this->CanLogMetaKey( $object_id, $meta_key ) ) {
+			if ( $this->CanLogMetaKey( 'post', $object_id, $meta_key ) ) {
 				$old_value = $this->convert_to_array_of_post_ids( $this->old_meta[ $meta_key ]['value'] );
 				$new_value = $this->convert_to_array_of_post_ids( $_meta_value );
 				$removed   = array_diff( $old_value, $new_value );

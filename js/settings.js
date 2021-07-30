@@ -11,17 +11,25 @@ jQuery( document ).ready( function() {
 		});
 	};
 
-	jQuery( '#ViewerQueryBox, #EditorQueryBox, #ExRoleQueryBox, #ExUserQueryBox, #CustomQueryBox, #IpAddrQueryBox, #ExCPTsQueryBox, #ExURLsQueryBox' ).keydown( function( event ) {
+	jQuery( '.js-query-box, #ViewerQueryBox, #EditorQueryBox, #ExRoleQueryBox, #ExUserQueryBox, #CustomQueryBox, #IpAddrQueryBox, #ExCPTsQueryBox, #ExURLsQueryBox' ).keydown( function( event ) {
 		if ( 13 === event.keyCode ) {
-			var type = jQuery( this ).attr( 'id' ).substr( 0, 6 );
-			console.log( type );
+			var type = jQuery( this ).closest( 'fieldset' ).attr( 'data-type' );
+			if (! type ) {
+				type = jQuery( this ).attr( 'id' ).substr( 0, 6 );
+			}
 			jQuery( '#' + type + 'QueryAdd' ).click();
 			return false;
 		}
 	});
 
-	jQuery( '#ViewerQueryAdd, #EditorQueryAdd, #ExRoleQueryAdd, #ExUserQueryAdd, #CustomQueryAdd, #IpAddrQueryAdd, #ExCPTsQueryAdd, #ExURLsQueryAdd' ).click( function() {
-		var type 	 = jQuery( this ).attr( 'id' ).substr( 0, 6 );
+	jQuery( '.js-query-add, #ViewerQueryAdd, #EditorQueryAdd, #ExRoleQueryAdd, #ExUserQueryAdd, #CustomQueryAdd, #IpAddrQueryAdd, #ExCPTsQueryAdd, #ExURLsQueryAdd' ).click( function() {
+		var buttonElm = jQuery( this );
+		var fieldsetElm = buttonElm.closest( 'fieldset' );
+		var type = fieldsetElm.attr( 'data-type' );
+		if (! type ) {
+			type = buttonElm.attr('id').substr(0, 6);
+		}
+
 		var value 	 = jQuery.trim( jQuery( '#' + type + 'QueryBox' ).val() );
 		var existing = jQuery( '#' + type + 'List input' ).filter( function() {
 			return this.value === value;
@@ -61,7 +69,7 @@ jQuery( document ).ready( function() {
 							jQuery( '#' + type + 'QueryBox' ).val( '' );
 							return;
 						}
-					} else if ( 'Custom' != type && 'IpAddr' != type ) {
+					} else if ( 'UserMeta' != type && 'PostMeta' != type && 'IpAddr' != type ) {
 						if ( 'other' === data.tokenType ) {
 							alert( wsal_data.invalidUser );
 							jQuery( '#' + type + 'QueryBox' ).val( '' );
@@ -71,7 +79,7 @@ jQuery( document ).ready( function() {
 					jQuery( '#' + type + 'QueryBox' ).val( '' );
 					jQuery( '#' + type + 'List' ).append( jQuery( '<span class="sectoken-' + data.tokenType + '"/>' ).text( data.token ).append(
 						jQuery( '<input type="hidden" name="' + type + 's[]"/>' ).val( data.token ),
-						jQuery( '<a href="javascript:;" title="Remove">&times;</a>' ).click( RemoveSecToken )
+						jQuery( '<a href="javascript:;" title="' + wsal_data.remove + '">&times;</a>' ).click( RemoveSecToken )
 					) );
 				} else {
 					alert( data.message );
@@ -82,7 +90,7 @@ jQuery( document ).ready( function() {
 		);
 	});
 
-	jQuery( '#ViewerList>span>a, #EditorList>span>a, #ExRoleList>span>a, #ExUserList>span>a, #CustomList>span>a, #IpAddrList>span>a, #ExCPTsList>span>a, #ExURLsList>span>a' ).click( RemoveSecToken );
+	jQuery( '.js-list>span>a, #ViewerList>span>a, #EditorList>span>a, #ExRoleList>span>a, #ExUserList>span>a, #CustomList>span>a, #IpAddrList>span>a, #ExCPTsList>span>a, #ExURLsList>span>a' ).click( RemoveSecToken );
 
 	var usersUrl = ajaxurl + '?action=AjaxGetAllUsers&wsal_nonce=' + wsal_data.wp_nonce;
 	jQuery( '#ExUserQueryBox' ).autocomplete({

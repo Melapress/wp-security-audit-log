@@ -8,7 +8,7 @@
  * @link https://github.com/uuf6429/nice_r GitHub Repository
  * @version 2.0
  * @since 2.0
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Nicer {
 

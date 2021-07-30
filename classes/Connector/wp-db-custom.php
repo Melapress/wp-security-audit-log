@@ -5,7 +5,7 @@
  * Test the DB connection.
  * It uses wpdb WordPress DB Class.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -17,16 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Test the DB connection.
  * It uses wpdb WordPress DB Class.
  *
- * @package Wsal
+ * @package wsal
  */
 class wpdbCustom extends wpdb {
-
-	/**
-	 * Allow bail?
-	 *
-	 * @var boolean
-	 */
-	private $allow_bail = true;
 
 	/**
 	 * Overwrite wpdb class for set $allow_bail to false
@@ -42,9 +35,8 @@ class wpdbCustom extends wpdb {
 	 * @param string $ssl_ca          - Certificate Authority.
 	 * @param string $ssl_cert        - Client Certificate.
 	 * @param string $ssl_key         - Client Key.
-	 * @param bool   $test_connection - Set to true if testing connection.
 	 */
-	public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key, $test_connection = false ) {
+	public function __construct( $dbuser, $dbpassword, $dbname, $dbhost, $is_ssl, $is_cc, $ssl_ca, $ssl_cert, $ssl_key ) {
 
 		if ( WP_DEBUG && WP_DEBUG_DISPLAY ) {
 			$this->show_errors();
@@ -86,12 +78,7 @@ class wpdbCustom extends wpdb {
 			}
 		}
 
-		if ( $test_connection ) {
-			$this->allow_bail = false;
-			$this->db_connect( false );
-		} else {
-			$this->db_connect();
-		}
+		$this->db_connect( false );
 	}
 
 	/**
@@ -192,37 +179,6 @@ class wpdbCustom extends wpdb {
 		}
 
 		if ( ! $this->dbh && $allow_bail ) {
-			wp_load_translations_early();
-
-			// Load custom DB error template, if present.
-			if ( file_exists( WP_CONTENT_DIR . '/db-error.php' ) ) {
-				require_once WP_CONTENT_DIR . '/db-error.php';
-				die();
-			}
-
-			$message = '<h1>' . __( 'Error establishing a database connection' ) . "</h1>\n";
-
-			$message .= '<p>' . sprintf(
-				/* translators: 1: wp-config.php. 2: database host */
-				__( 'This either means that the username and password information in your %1$s file is incorrect or we can&#8217;t contact the database server at %2$s. This could mean your host&#8217;s database server is down.' ),
-				'<code>wp-config.php</code>',
-				'<code>' . htmlspecialchars( $this->dbhost, ENT_QUOTES ) . '</code>'
-			) . "</p>\n";
-
-			$message .= "<ul>\n";
-			$message .= '<li>' . __( 'Are you sure you have the correct username and password?' ) . "</li>\n";
-			$message .= '<li>' . __( 'Are you sure that you have typed the correct hostname?' ) . "</li>\n";
-			$message .= '<li>' . __( 'Are you sure that the database server is running?' ) . "</li>\n";
-			$message .= "</ul>\n";
-
-			$message .= '<p>' . sprintf(
-				/* translators: %s: support forums URL */
-				__( 'If you&#8217;re unsure what these terms mean you should probably contact your host. If you still need help you can always visit the <a href="%s">WordPress Support Forums</a>.' ),
-				__( 'https://wordpress.org/support/' )
-			) . "</p>\n";
-
-			$this->bail( $message, 'db_connect_fail' );
-
 			return false;
 		} elseif ( $this->dbh ) {
 			if ( ! $this->has_connected ) {
@@ -267,47 +223,7 @@ class wpdbCustom extends wpdb {
 
 		if ( ! $success ) {
 			$this->ready = false;
-
-			if ( ! did_action( 'template_redirect' ) && $this->allow_bail ) {
-				wp_load_translations_early();
-
-				$message = '<h1>' . __( 'Can&#8217;t select database' ) . "</h1>\n";
-
-				$message .= '<p>' . sprintf(
-					/* translators: %s: database name */
-					__( 'We were able to connect to the database server (which means your username and password is okay) but not able to select the %s database.' ),
-					'<code>' . htmlspecialchars( $db, ENT_QUOTES ) . '</code>'
-				) . "</p>\n";
-
-				$message .= "<ul>\n";
-				$message .= '<li>' . __( 'Are you sure it exists?' ) . "</li>\n";
-
-				$message .= '<li>' . sprintf(
-					/* translators: 1: database user, 2: database name */
-					__( 'Does the user %1$s have permission to use the %2$s database?' ),
-					'<code>' . htmlspecialchars( $this->dbuser, ENT_QUOTES ) . '</code>',
-					'<code>' . htmlspecialchars( $db, ENT_QUOTES ) . '</code>'
-				) . "</li>\n";
-
-				$message .= '<li>' . sprintf(
-					/* translators: %s: database name */
-					__( 'On some systems the name of your database is prefixed with your username, so it would be like <code>username_%1$s</code>. Could that be the problem?' ),
-					htmlspecialchars( $db, ENT_QUOTES )
-				) . "</li>\n";
-
-				$message .= "</ul>\n";
-
-				$message .= '<p>' . sprintf(
-					/* translators: %s: support forums URL */
-					__( 'If you don&#8217;t know how to set up a database you should <strong>contact your host</strong>. If all else fails you may find help at the <a href="%s">WordPress Support Forums</a>.' ),
-					__( 'https://wordpress.org/support/forums/' )
-				) . "</p>\n";
-
-				$this->bail( $message, 'db_select_fail' );
-			} else {
-				$this->db_select_error = true;
-			}
+			$this->db_select_error = true;
 		}
 	}
-
 }

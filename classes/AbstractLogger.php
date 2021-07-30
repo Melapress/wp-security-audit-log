@@ -4,7 +4,7 @@
  * Abstract class used in the Logger.
  *
  * @see Loggers/Database.php
- * @package Wsal
+ * @package wsal
  */
 abstract class WSAL_AbstractLogger {
 
@@ -32,10 +32,9 @@ abstract class WSAL_AbstractLogger {
 	 * @param integer $type - Alert code.
 	 * @param array $data - Metadata.
 	 * @param integer $date (Optional) - Created on.
-	 * @param integer $siteid (Optional) - Site id.
-	 * @param bool $migrated (Optional) - Is migrated.
+	 * @param integer $site_id (Optional) - Site id.
 	 */
-	public abstract function Log( $type, $data = array(), $date = null, $siteid = null, $migrated = false );
+	public abstract function Log( $type, $data = array(), $date = null, $site_id = null );
 
 	/**
 	 * Determines what is the correct timestamp for the event.

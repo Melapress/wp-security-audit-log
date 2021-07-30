@@ -4,7 +4,7 @@
  *
  * WSAL settings class.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * This class is the actual controller of the Settings Page.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Settings {
 
@@ -85,11 +85,18 @@ class WSAL_Settings {
 	protected $_excluded_roles = array();
 
 	/**
-	 * Custom fields excluded from monitoring.
+	 * Custom post meta fields excluded from monitoring.
 	 *
 	 * @var array
 	 */
-	protected $_excluded_custom = array();
+	protected $_excluded_post_meta = array();
+
+	/**
+	 * Custom user meta fields excluded from monitoring.
+	 *
+	 * @var array
+	 */
+	protected $_excluded_user_meta = array();
 
 	/**
 	 * Custom Post Types excluded from monitoring.
@@ -184,7 +191,7 @@ class WSAL_Settings {
 	 * @return boolean
 	 */
 	public function is_admin_bar_notif() {
-		return ! $this->_plugin->GetGlobalSetting( 'disable-admin-bar-notif' );
+		return ! $this->_plugin->GetGlobalBooleanSetting( 'disable-admin-bar-notif', true );
 	}
 
 	/**
@@ -195,7 +202,7 @@ class WSAL_Settings {
 	 * @param boolean $newvalue - True if enabled.
 	 */
 	public function set_admin_bar_notif( $newvalue ) {
-		$this->_plugin->SetGlobalSetting( 'disable-admin-bar-notif', ! $newvalue );
+		$this->_plugin->SetGlobalBooleanSetting( 'disable-admin-bar-notif', ! $newvalue );
 	}
 
 	/**
@@ -331,6 +338,18 @@ class WSAL_Settings {
 	}
 
 	public function SetPruningDateEnabled( $enabled ) {
+
+		$old_setting = $this->_plugin->GetGlobalBooleanSetting( 'pruning-date-e', false );
+		$enable = \WSAL\Helpers\Options::string_to_bool( $enabled );
+		if ( $old_setting !== $enable ) {
+			$event_id = 6052;
+			$alert_data = [
+				'new_setting' => ( $enable ) ? 'Delete events older than ' . $this->_pruning = $this->_plugin->GetGlobalSetting( 'pruning-date' ) . ' ' . $this->_plugin->GetGlobalSetting( 'pruning-unit', 'months' ) : 'Keep all data',
+				'previous_setting' => ( $old_setting ) ? 'Delete events older than ' . $this->_pruning = $this->_plugin->GetGlobalSetting( 'pruning-date' ) . ' ' . $this->_plugin->GetGlobalSetting( 'pruning-unit', 'months' ) : 'Keep all data',
+			];
+			$this->_plugin->alerts->Trigger( $event_id, $alert_data );
+		}
+
 		$this->_plugin->SetGlobalBooleanSetting( 'pruning-date-e', $enabled );
 	}
 
@@ -361,6 +380,16 @@ class WSAL_Settings {
 	 * @param bool $enable - Enable/Disable.
 	 */
 	public function set_login_page_notification( $enable ) {
+		//Only trigger an event if an actual changes is made.
+		$old_setting = $this->_plugin->GetGlobalBooleanSetting( 'login_page_notification', false );
+		$enable = \WSAL\Helpers\Options::string_to_bool( $enable );
+		if ( $old_setting !== $enable ) {
+			$event_id = 6046;
+			$alert_data = [
+				'EventType' => ( $enable ) ? 'enabled' : 'disabled',
+			];
+			$this->_plugin->alerts->Trigger( $event_id, $alert_data );
+		}
 		$this->_plugin->SetGlobalBooleanSetting( 'login_page_notification', $enable );
 	}
 
@@ -380,6 +409,10 @@ class WSAL_Settings {
 	 */
 	public function set_login_page_notification_text( $text ) {
 		$text = wp_kses( $text, $this->_plugin->allowed_html_tags );
+		$old_setting = $this->_plugin->GetGlobalSetting( 'login_page_notification_text' );
+		if ( ! empty( $old_setting ) && ! empty( $text ) && ! is_null( $old_setting ) && $old_setting !== $text ) {
+			$this->_plugin->alerts->Trigger( 6047 );
+		}
 		$this->_plugin->SetGlobalSetting( 'login_page_notification_text', $text );
 	}
 
@@ -432,6 +465,15 @@ class WSAL_Settings {
 	 * @param bool $enabled
 	 */
 	public function SetIncognito( $enabled ) {
+		$old_value = $this->_plugin->GetGlobalSetting( 'hide-plugin' );
+		$old_value = ( $old_value === "yes" ) ? true : false;
+		if ( $old_value !== $enabled ) {
+			$alert_data = [
+				'EventType' => ( $enabled ) ? 'enabled' : 'disabled',
+			];
+			$this->_plugin->alerts->Trigger( 6051, $alert_data );
+		}
+
 		$this->_plugin->SetGlobalBooleanSetting( 'hide-plugin', $enabled );
 	}
 
@@ -452,6 +494,39 @@ class WSAL_Settings {
 	 * @param array $users_or_roles – Users/Roles.
 	 */
 	public function SetAllowedPluginViewers( $users_or_roles ) {
+
+		$old_value      = $this->_plugin->GetGlobalSetting( 'plugin-viewers' );
+		$changes        = $this->determine_added_and_removed_items( $old_value, implode( ',', $users_or_roles ) );
+
+		if ( ! empty( $changes[ 'added' ] ) ) {
+			foreach ( $changes[ 'added' ] as $user ) {
+				$this->_plugin->alerts->Trigger(
+					6050,
+					array(
+						'user'           => $user,
+						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'added',
+					)
+				);
+			}
+		}
+
+		if ( ! empty( $changes[ 'removed' ] ) && ! empty( $old_value ) ) {
+			foreach ( $changes[ 'removed' ] as $user ) {
+				if ( ! empty( $user ) ) {
+					$this->_plugin->alerts->Trigger(
+						6050,
+						array(
+							'user'           => $user,
+							'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+							'EventType'      => 'removed',
+						)
+					);
+				}
+			}
+		}
+
+
 		$this->_viewers = $users_or_roles;
 		$this->_plugin->SetGlobalSetting( 'plugin-viewers', implode( ',', $this->_viewers ) );
 	}
@@ -473,6 +548,16 @@ class WSAL_Settings {
 	 * @since 3.2.3
 	 */
 	public function set_restrict_plugin_setting( $setting ) {
+		$old_value = $this->_plugin->GetGlobalSetting( 'restrict-plugin-settings', 'only_admins' );
+
+		if ( ! is_null( $old_value ) && $old_value !== $setting ) {
+			$alert_data = [
+				'new_setting' => ucfirst( str_replace( '_', ' ', $setting ) ),
+				'previous_setting' => ucfirst( str_replace( '_', ' ', $old_value  ) ),
+			];
+			$this->_plugin->alerts->Trigger( 6049, $alert_data );
+		}
+
 		$this->_plugin->SetGlobalSetting( 'restrict-plugin-settings', $setting );
 	}
 
@@ -698,6 +783,14 @@ class WSAL_Settings {
 	}
 
 	public function SetMainIPFromProxy( $enabled ) {
+		$old_value = $this->_plugin->GetGlobalBooleanSetting( 'use-proxy-ip' );
+		$enabled = \WSAL\Helpers\Options::string_to_bool( $enabled );
+		if ( $old_value !== $enabled ) {
+			$alert_data = [
+				'EventType' => ( $enabled ) ? 'enabled' : 'disabled',
+			];
+			$this->_plugin->alerts->Trigger( 6048, $alert_data );
+		}
 		$this->_plugin->SetGlobalBooleanSetting( 'use-proxy-ip', $enabled );
 	}
 
@@ -828,6 +921,35 @@ class WSAL_Settings {
 	 * Users excluded from monitoring.
 	 */
 	public function SetExcludedMonitoringUsers( $users ) {
+
+		$old_value             = $this->_plugin->GetGlobalSetting( 'excluded-users', [] );
+		$changes               = $this->determine_added_and_removed_items( $old_value, implode( ',', $users ) );
+
+		if ( ! empty( $changes[ 'added' ] ) ) {
+			foreach ( $changes[ 'added' ] as $user ) {
+				$this->_plugin->alerts->Trigger(
+					6053,
+					array(
+						'user'           => $user,
+						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'added',
+					)
+				);
+			}
+		}
+		if ( ! empty( $changes[ 'removed' ] ) && ! empty( $old_value ) ) {
+			foreach ( $changes[ 'removed' ] as $user ) {
+				$this->_plugin->alerts->Trigger(
+					6053,
+					array(
+						'user'           => $user,
+						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'removed',
+					)
+				);
+			}
+		}
+
 		$this->_excluded_users = $users;
 		$this->_plugin->SetGlobalSetting( 'excluded-users', esc_html( implode( ',', $this->_excluded_users ) ) );
 	}
@@ -846,6 +968,36 @@ class WSAL_Settings {
 	 * @since 2.6.7
 	 */
 	public function set_excluded_post_types( $post_types ) {
+
+		$old_value         = $this->_plugin->GetGlobalSetting( 'custom-post-types', [] );
+		$changes           = $this->determine_added_and_removed_items( $old_value, implode( ',', $post_types ) );
+
+		if ( ! empty( $changes[ 'added' ] ) ) {
+			foreach ( $changes[ 'added' ] as $post_type ) {
+				$this->_plugin->alerts->Trigger(
+					6056,
+					array(
+						'post_type'      => $post_type,
+						'previous_types' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'added',
+					)
+				);
+			}
+		}
+
+		if ( ! empty( $changes[ 'removed' ] ) && ! empty( $old_value ) ) {
+			foreach ( $changes[ 'removed' ] as $post_type ) {
+				$this->_plugin->alerts->Trigger(
+					6056,
+					array(
+						'post_type'      => $post_type,
+						'previous_types' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'removed',
+					)
+				);
+			}
+		}
+
 		$this->_post_types = $post_types;
 		$this->_plugin->SetGlobalSetting( 'custom-post-types', esc_html( implode( ',', $this->_post_types ) ) );
 	}
@@ -868,8 +1020,38 @@ class WSAL_Settings {
 	 * @param array $roles - Array of roles.
 	 */
 	public function SetExcludedMonitoringRoles( $roles ) {
+
+		// Trigger alert.
+		$old_value             = $this->_plugin->GetGlobalSetting( 'excluded-roles', [] );
+		$changes               = $this->determine_added_and_removed_items( $old_value, implode( ',', $roles ) );
+
+		if ( ! empty( $changes[ 'added' ] ) ) {
+			foreach ( $changes[ 'added' ] as $user ) {
+				$this->_plugin->alerts->Trigger(
+					6054,
+					array(
+						'role'           => $user,
+						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'added',
+					)
+				);
+			}
+		}
+		if ( ! empty( $changes[ 'removed' ] ) && ! empty( $old_value ) ) {
+			foreach ( $changes[ 'removed' ] as $user ) {
+				$this->_plugin->alerts->Trigger(
+					6054,
+					array(
+						'role'           => $user,
+						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'removed',
+					)
+				);
+			}
+		}
+
 		$this->_excluded_roles = $roles;
-		$this->_plugin->SetGlobalSetting( 'excluded-roles', esc_html( implode( ',', $this->_excluded_roles ) ) );
+		$this->_plugin->SetGlobalSetting( 'excluded-roles', esc_html( implode( ',', $roles ) ) );
 	}
 
 	/**
@@ -883,25 +1065,146 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Custom fields excluded from monitoring.
+	 * Updates custom post meta fields excluded from monitoring.
+	 *
+	 * @param array $custom
 	 */
-	public function SetExcludedMonitoringCustom( $custom ) {
-		$this->_excluded_custom = $custom;
-		$this->_plugin->SetGlobalSetting( 'excluded-custom', esc_html( implode( ',', $this->_excluded_custom ) ) );
+	public function SetExcludedPostMetaFields( $custom ) {
+		$old_value             = $this->GetExcludedPostMetaFields();
+		$changes               = $this->determine_added_and_removed_items( $old_value, implode( ',', $custom ) );
+
+		if ( ! empty( $changes[ 'added' ] ) ) {
+			foreach ( $changes[ 'added' ] as $custom_field ) {
+				$this->_plugin->alerts->Trigger(
+					6057,
+					array(
+						'custom_field'    => $custom_field,
+						'previous_fields' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'added',
+					)
+				);
+			}
+		}
+
+		if ( ! empty( $changes[ 'removed' ] ) && ! empty( $old_value ) ) {
+			foreach ( $changes[ 'removed' ] as $custom_field ) {
+				$this->_plugin->alerts->Trigger(
+					6057,
+					array(
+						'custom_field'    => $custom_field,
+						'previous_fields' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'removed',
+					)
+				);
+			}
+		}
+
+		$this->_excluded_post_meta = $custom;
+		$this->_plugin->SetGlobalSetting( 'excluded-post-meta', esc_html( implode( ',', $this->_excluded_post_meta ) ) );
 	}
 
-	public function GetExcludedMonitoringCustom() {
-		if ( empty( $this->_excluded_custom ) ) {
-			$this->_excluded_custom = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'excluded-custom' ) ) ) );
-			asort( $this->_excluded_custom );
+	/**
+	 * Retrieves a list of post meta fields excluded from monitoring.
+	 *
+	 * @return array
+	 */
+	public function GetExcludedPostMetaFields() {
+		if ( empty( $this->_excluded_post_meta ) ) {
+			$this->_excluded_post_meta = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'excluded-post-meta' ) ) ) );
+			asort( $this->_excluded_post_meta );
 		}
-		return $this->_excluded_custom;
+		return $this->_excluded_post_meta;
+	}
+
+	/**
+	 * Updates custom user meta fields excluded from monitoring.
+	 *
+	 * @param array $custom
+	 *
+	 * @since 4.3.2
+	 */
+	public function SetExcludedUserMetaFields( $custom ) {
+
+		$old_value             = $this->GetExcludedUserMetaFields();
+		$changes               = $this->determine_added_and_removed_items( $old_value, implode( ',', $custom ) );
+
+		if ( ! empty( $changes[ 'added' ] ) ) {
+			foreach ( $changes[ 'added' ] as $custom_field ) {
+				$this->_plugin->alerts->Trigger(
+					6058,
+					array(
+						'custom_field'    => $custom_field,
+						'previous_fields' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'added',
+					)
+				);
+			}
+		}
+
+		if ( ! empty( $changes[ 'removed' ] ) && ! empty( $old_value ) ) {
+			foreach ( $changes[ 'removed' ] as $custom_field ) {
+				$this->_plugin->alerts->Trigger(
+					6058,
+					array(
+						'custom_field'    => $custom_field,
+						'previous_fields' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'      => 'removed',
+					)
+				);
+			}
+		}
+
+		$this->_excluded_user_meta = $custom;
+		$this->_plugin->SetGlobalSetting( 'excluded-user-meta', esc_html( implode( ',', $this->_excluded_user_meta ) ) );
+	}
+
+	/**
+	 * Retrieves a list of user meta fields excluded from monitoring.
+	 *
+	 * @return array
+	 * @since 4.3.2
+	 */
+	public function GetExcludedUserMetaFields() {
+		if ( empty( $this->_excluded_user_meta ) ) {
+			$this->_excluded_user_meta = array_unique( array_filter( explode( ',', $this->_plugin->GetGlobalSetting( 'excluded-user-meta' ) ) ) );
+			asort( $this->_excluded_user_meta );
+		}
+
+		return $this->_excluded_user_meta;
 	}
 
 	/**
 	 * IP excluded from monitoring.
 	 */
 	public function SetExcludedMonitoringIP( $ip ) {
+		$old_value          = $this->_plugin->GetGlobalSetting( 'excluded-ip', [] );
+		$changes            = $this->determine_added_and_removed_items( $old_value, implode( ',', $ip ) );
+
+		if ( ! empty( $changes[ 'added' ] ) ) {
+			foreach ( $changes[ 'added' ] as $user ) {
+				$this->_plugin->alerts->Trigger(
+					6055,
+					array(
+						'ip'           => $user,
+						'previous_ips' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'    => 'added',
+					)
+				);
+			}
+		}
+		if ( ! empty( $changes[ 'removed' ] ) && ! empty( $old_value ) ) {
+			foreach ( $changes[ 'removed' ] as $user ) {
+				$this->_plugin->alerts->Trigger(
+					6055,
+					array(
+						'ip'           => $user,
+						'previous_ips' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'EventType'    => 'removed',
+					)
+				);
+			}
+		}
+
 		$this->_excluded_ip = $ip;
 		$this->_plugin->SetGlobalSetting( 'excluded-ip', esc_html( implode( ',', $this->_excluded_ip ) ) );
 	}
@@ -1197,23 +1500,6 @@ class WSAL_Settings {
 		return $this->_plugin->GetGlobalSetting( 'log-visitor-failed-login-limit', 10 );
 	}
 
-	public function IsArchivingEnabled() {
-		return $this->_plugin->GetGlobalSetting( 'archiving-e' );
-	}
-
-	/**
-	 * Switch to Archive DB if is enabled.
-	 */
-	public function SwitchToArchiveDB() {
-		if ( $this->IsArchivingEnabled() ) {
-			$connection_name = $this->_plugin->GetGlobalSetting( 'archive-connection' );
-			$connection      = $this->_plugin->external_db_util->get_connection( $connection_name );
-			if ( is_array( $connection ) && ! empty( $connection ) ) {
-				$this->_plugin->getConnector( $connection )->getAdapter( 'Occurrence' );
-			}
-		}
-	}
-
 
 	/**
 	 * Method: Get Token Type.
@@ -1230,8 +1516,18 @@ class WSAL_Settings {
 			$users[] = $obj->user_login;
 		}
 
+		// Check if the token matched users.
+		if ( in_array( $token, $users ) ) {
+			return 'user';
+		}
+
 		// Get user roles.
 		$roles = array_keys( get_editable_roles() );
+
+		// Check if the token matched user roles.
+		if ( in_array( $token, $roles ) ) {
+			return 'role';
+		}
 
 		// Get custom post types.
 		$post_types = get_post_types( array(), 'names', 'and' );
@@ -1242,16 +1538,6 @@ class WSAL_Settings {
 			foreach ( $network_cpts as $cpt ) {
 				$post_types[ $cpt ] = $cpt;
 			}
-		}
-
-		// Check if the token matched users.
-		if ( in_array( $token, $users ) ) {
-			return 'user';
-		}
-
-		// Check if the token matched user roles.
-		if ( in_array( $token, $roles ) ) {
-			return 'role';
 		}
 
 		// Check if the token matched post types.
@@ -1779,4 +2065,37 @@ class WSAL_Settings {
 		$this->_plugin->DeleteGlobalSetting( 'mainwp_enforced_settings' );
 	}
 
+	public function determine_added_and_removed_items( $old_value, $value ) {
+		$old_value = ( ! is_array( $old_value ) ) ? explode( ',', $old_value ) : $old_value;
+		$value =  ( ! is_array( $value ) ) ? explode( ',', $value ) : $value;
+		$return = [];
+		$return[ 'removed' ] = array_filter( array_diff( $old_value, $value ) );
+		$return[ 'added' ]   = array_filter( array_diff( $value, $old_value ) );
+
+		return $return;
+	}
+
+	public function tidy_blank_values( $value ) {
+		return ( empty( $value ) ) ? __( 'None provided', 'wp-security-audit-log' ) : $value;
+  }
+
+	/**
+	 * Retrieves current database version.
+	 *
+	 * @return int Current database version number.
+	 * @since 4.3.2
+	 */
+	public function get_database_version() {
+		return (int) $this->_plugin->GetGlobalSetting( 'db_version', 0 );
+	}
+
+	/**
+	 * Updates the current database version.
+	 *
+	 * @param int $version Database version number.
+	 * @since 4.3.2
+	 */
+	public function set_database_version( $version ) {
+		$this->_plugin->SetGlobalSetting( 'db_version', $version );
+	}
 }

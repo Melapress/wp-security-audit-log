@@ -5,7 +5,7 @@
  * Log In & Out sensor class file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -23,8 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 1004 Login blocked
  * 4003 User has changed his or her password
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 
@@ -540,7 +540,13 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 * @param object $errors Current WP_errors objtect.
 	 * @param object $user   User making the request.
 	 */
-	public function event_user_requested_pw_reset( $errors, $user ) {
+	public function event_user_requested_pw_reset( $errors, $user = null ) {
+		
+		// If we dont have the user. do nothing.
+		if ( is_null( $user ) || ! isset( $user->roles ) ) {
+			return;
+		}
+		
 		$user_roles = $this->plugin->settings()->GetCurrentUserRoles( $user->roles );
 		$this->plugin->alerts->Trigger(
 			1010,

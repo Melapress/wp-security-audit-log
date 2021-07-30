@@ -4,7 +4,7 @@
  *
  * MySQL database Metadata class.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * because the query between plugin tables and the internal wp_uses table is not possible.
  *
  * @see WSAL_Adapters_MySQL_ActiveRecord->GetReportGrouped()
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Adapters_MySQL_TmpUser extends WSAL_Adapters_MySQL_ActiveRecord {
 

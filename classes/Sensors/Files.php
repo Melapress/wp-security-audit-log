@@ -5,7 +5,7 @@
  * Files sensors class file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -21,8 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2046 User changed a file using the theme editor
  * 2051 User changed a file using the plugin editor
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 

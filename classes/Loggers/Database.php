@@ -5,7 +5,7 @@
  * Logger class for wsal.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This class store the logs in the Database and adds the promo
  * alerts, there is also the function to clean up alerts.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 
@@ -35,22 +35,28 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 	}
 
 	/**
-	 * Log an event.
+	 * Checks is the connection is for an external database.
 	 *
-	 * 1. If native DB is being used then check DB connection.
-	 *   1a. If connection is good, then log the event.
-	 *   1b. If no connection then save the alert in a temp buffer.
+	 * @since 4.3.2
+	 * @return boolean
+	 */
+	public function is_external() {
+		$db_config = WSAL_Connector_ConnectorFactory::GetConfig();
+
+		return is_array( $db_config ) && ! empty( $db_config );
+	}
+
+	/**
+	 * Log an event to the database.
 	 *
-	 * 2. If external DB is in action then send the event to a temp buffer.
+	 * There is no difference between local and external database handling os of version 4.3.2.
 	 *
 	 * @param integer $type            - Alert code.
 	 * @param array   $data            - Metadata.
 	 * @param integer $date            - (Optional) created_on.
-	 * @param integer $siteid          - (Optional) site_id.
-	 * @param bool    $migrated        - (Optional) is_migrated.
-	 * @param bool    $override_buffer - (Optional) Override buffer to log event immediately.
+	 * @param integer $site_id          - (Optional) site_id.
 	 */
-	public function Log( $type, $data = array(), $date = null, $siteid = null, $migrated = false, $override_buffer = false ) {
+	public function Log( $type, $data = array(), $date = null, $site_id = null ) {
 		//  PHP alerts logging was deprecated in version 4.2.0
 		if ( $type < 0010 ) {
 			return;
@@ -58,10 +64,9 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 
 		// Create new occurrence.
 		$occ              = new WSAL_Models_Occurrence();
-		$occ->is_migrated = $migrated;
-		$occ->created_on = $this->get_correct_timestamp( $data, $date );
+		$occ->created_on  = $this->get_correct_timestamp( $data, $date );
 		$occ->alert_id    = $type;
-		$occ->site_id     = ! is_null( $siteid ) ? $siteid : ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
+		$occ->site_id     = ! is_null( $site_id ) ? $site_id : ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
 
 		//  we need to remove the timestamp to prevent from saving it as meta
 		unset( $data['Timestamp'] );
@@ -69,36 +74,25 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		// Get DB connector.
 		$db_config = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
 
-		// Get external buffer option.
-		$use_buffer = $this->plugin->GetGlobalBooleanSetting( 'adapter-use-buffer' );
-		if ( $override_buffer ) {
-			$use_buffer = false;
+		// Get connector for DB.
+		$connector  = $this->plugin->getConnector( $db_config );
+		$wsal_db    = $connector->getConnection(); // Get DB connection.
+		$connection = true;
+		if ( isset( $wsal_db->dbh->errno ) ) {
+			$connection = ( 0 === (int) $wsal_db->dbh->errno ); // Database connection error check.
+		} elseif ( is_wp_error( $wsal_db->error ) ) {
+			$connection = false;
 		}
 
-		// Check external DB.
-		if ( null === $db_config || ( is_array( $db_config ) && ! $use_buffer ) ) { // Not external DB.
-			// Get connector for DB.
-			$connector  = $this->plugin->getConnector( $db_config );
-			$wsal_db    = $connector->getConnection(); // Get DB connection.
-			$connection = true;
-			if ( isset( $wsal_db->dbh->errno ) ) {
-				$connection = 0 !== (int) $wsal_db->dbh->errno ? false : true; // Database connection error check.
-			} elseif ( is_wp_error( $wsal_db->error ) ) {
-				$connection = false;
-			}
+		// Check DB connection.
+		if ( $connection ) { // If connected then save the alert in DB.
+			// Save the alert occurrence.
+			$occ->Save();
 
-			// Check DB connection.
-			if ( $connection ) { // If connected then save the alert in DB.
-				// Save the alert occurrence.
-				$occ->Save();
-
-				// Set up meta data of the alert.
-				$occ->SetMeta( $data );
-			} else { // Else store the alerts in temporary option.
-				$this->store_events_in_buffer( $occ, $data );
-			}
-		} elseif ( is_array( $db_config ) && $use_buffer ) { // External DB.
-			$this->store_events_in_buffer( $occ, $data );
+			// Set up meta data of the alert.
+			$occ->SetMeta( $data );
+		} else {
+			//  @todo write to a debug log
 		}
 
 		/**
@@ -106,38 +100,7 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 		 *
 		 * @since 3.1.2
 		 */
-		do_action( 'wsal_logged_alert', $occ, $type, $data, $date, $siteid, $migrated );
-	}
-
-	/**
-	 * Method: Store events in temporary buffer.
-	 *
-	 * @param WSAL_Models_Occurrence $occ – Event occurrence object.
-	 * @param array                  $event_data – Event meta-data.
-	 * @return boolean
-	 */
-	private function store_events_in_buffer( $occ, $event_data ) {
-		// Check event occurrence object.
-		if ( ! empty( $occ ) && $occ instanceof WSAL_Models_Occurrence ) {
-			// Get temporary stored alerts.
-			$temp_alerts = $this->plugin->GetGlobalSetting( 'temp_alerts', array() );
-
-			// Store current event in a temporary buffer.
-			$temp_alerts[ $occ->created_on ]['alert']      = array(
-				'is_migrated' => $occ->is_migrated,
-				'created_on'  => $occ->created_on,
-				'alert_id'    => $occ->alert_id,
-				'site_id'     => $occ->site_id,
-			);
-			$temp_alerts[ $occ->created_on ]['alert_data'] = $event_data;
-
-			// Save temporary alerts to options.
-			$this->plugin->SetGlobalSetting( 'temp_alerts', $temp_alerts );
-			return true;
-		}
-
-		// Something wrong with $occ object.
-		return false;
+		do_action( 'wsal_logged_alert', $occ, $type, $data, $date, $site_id );
 	}
 
 	/**
@@ -155,16 +118,6 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 			return;
 		}
 
-		// Return if archiving cron is running.
-		if ( $this->plugin->GetGlobalSetting( 'archiving-cron-started', false ) ) {
-			return;
-		}
-
-		// If archiving is enabled then events are deleted from the archive database.
-		if ( $this->plugin->settings()->IsArchivingEnabled() ) {
-			// Switch to Archive DB.
-			$this->plugin->settings()->SwitchToArchiveDB();
-		}
 
 		$occ       = new WSAL_Models_Occurrence();
 		$cnt_items = $occ->Count();

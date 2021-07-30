@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * All setter methods are fluent to allow for method chaining.
  *
- * @package Wsal
+ * @package wsal
  * @since 4.3.0
  */
 class WSAL_AlertFormatterConfiguration {
@@ -77,6 +77,12 @@ class WSAL_AlertFormatterConfiguration {
 	protected $ellipses_sequence = '...';
 
 	/**
+	 * @var bool
+	 * @since 4.3.2
+	 */
+	protected $use_html_markup_for_links = true;
+
+	/**
 	 * Private empty constructor used for method chaining. Builder methods should be used to retrieve implementations
 	 * of this configuration.
 	 */
@@ -121,6 +127,27 @@ class WSAL_AlertFormatterConfiguration {
 	 */
 	public function setIsJsInLinksAllowed( $is_js_in_links_allowed ) {
 		$this->is_js_in_links_allowed = $is_js_in_links_allowed;
+
+		return $this;
+	}
+
+	/**
+	 * @return bool
+	 * @since 4.3.2
+	 */
+	public function canUseHtmlMarkupForLinks(): bool {
+		return $this->use_html_markup_for_links;
+	}
+
+	/**
+	 * @param bool $use_html_markup_for_links
+	 *
+	 * @return WSAL_AlertFormatterConfiguration
+	 * @since 4.3.2
+	 *
+	 */
+	public function setUseHtmlMarkupForLinks( bool $use_html_markup_for_links ): WSAL_AlertFormatterConfiguration {
+		$this->use_html_markup_for_links = $use_html_markup_for_links;
 
 		return $this;
 	}

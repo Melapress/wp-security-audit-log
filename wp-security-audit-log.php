@@ -1,16 +1,16 @@
 <?php
 /**
  * Plugin Name: WP Activity Log
- * Plugin URI: http://wpactivitylog.com/
+ * Plugin URI: https://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Activity log viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 4.3.1
+ * Version: 4.3.2
  * Text Domain: wp-security-audit-log
  * Author URI: https://www.wpwhitesecurity.com/
  * License: GPL2
  * Network: true
  *
- * @package Wsal
+ * @package wsal
  *
  * @fs_premium_only /extensions/, /sdk/twilio-php/
  */
@@ -40,7 +40,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
         /**
          * WSAL Main Class.
          *
-         * @package Wsal
+         * @package wsal
          */
         class WpSecurityAuditLog {
 
@@ -49,7 +49,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @var string
              */
-            public $version = '4.3.1';
+            public $version = '4.3.2';
 
             /**
              * Plugin constants.
@@ -141,6 +141,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              * @var array
              */
             public $allowed_html_tags = array();
+
+
+            /**
+	         * List of third party extensions.
+	         *
+	         * @var WSAL_AbstractExtension[]
+             * @since 4.3.2
+	         */
+	        public $third_party_extensions = [];
 
             /**
              * Standard singleton pattern.
@@ -501,14 +510,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     $plugin_installer_ajax = new WSAL_PluginInstallerAction();
                     $plugin_installer_ajax->register();
 
-                    $yoast_seo_addon    = new WSAL_YoastSeoExtension;
-                    $bbpress_addon      = new WSAL_BBPressExtension;
-                    $wpforms_addon      = new WSAL_WPFormsExtension;
-                    $gravityforms_addon = new WSAL_GravityFormsExtension;
+                    $yoast_seo_addon    = new WSAL_YoastSeoExtension();
+                    $bbpress_addon      = new WSAL_BBPressExtension();
+                    $wpforms_addon      = new WSAL_WPFormsExtension();
+                    $gravityforms_addon = new WSAL_GravityFormsExtension();
                 }
 
                 // Extensions which are both admin and frontend based.
-                $woocommerce_addon  = new WSAL_WooCommerceExtension;
+                $woocommerce_addon  = new WSAL_WooCommerceExtension( $this );
 
                 // Dequeue conflicting scripts.
                 add_action( 'wp_print_scripts', array( $this, 'dequeue_conflicting_scripts' ) );
@@ -671,6 +680,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	                    wsal_freemius()->add_filter( 'freemius_pricing_js_path', function ( $default_pricing_js_path ) {
 		                    return  WSAL_BASE_DIR . 'js/freemius-pricing/freemius-pricing.js';
 	                    } );
+	                    wsal_freemius()->add_filter( 'default_to_anonymous_feedback', '__return_true' );
                     }
                 }
             }
@@ -1107,19 +1117,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 }
 
                 if ( is_admin() ) {
-                    if ( $this->settings()->IsArchivingEnabled() ) {
-                        // Check the current page.
-                        $get_page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
-                        if ( ( ! isset( $get_page ) || 'wsal-auditlog' !== $get_page ) && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
-                            $selected_db      = get_transient( 'wsal_wp_selected_db' );
-                            $selected_db_user = (int) get_transient( 'wsal_wp_selected_db_user' );
-                            if ( $selected_db && ( get_current_user_id() === $selected_db_user ) ) {
-                                // Delete the transient.
-                                delete_transient( 'wsal_wp_selected_db' );
-                                delete_transient( 'wsal_wp_selected_db_user' );
-                            }
-                        }
-                    }
 
                     // Hide plugin.
                     if ( $this->settings()->IsIncognito() ) {
@@ -1193,6 +1190,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $filter_input_args = array(
                     'disable_nonce' => FILTER_SANITIZE_STRING,
                     'notice'        => FILTER_SANITIZE_STRING,
+                    'object_type'   => FILTER_SANITIZE_STRING
                 );
 
                 // Filter $_POST array for security.
@@ -1202,31 +1200,45 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     die();
                 }
 
-                $excluded_meta_raw = $this->GetGlobalSetting( 'excluded-custom' );
-                $excluded_meta = [];
-                if ( isset( $excluded_meta_raw ) && '' != $excluded_meta_raw ) {
-                    $excluded_meta = explode(',', $excluded_meta_raw);
-                }
+	            $object_type = 'post';
+	            if ( array_key_exists( 'object_type', $post_array ) && 'user' === $post_array['object_type'] ) {
+		            $object_type = 'user';
+	            }
 
-                array_push( $excluded_meta, esc_html( $post_array['notice'] ) );
-                $this->SetGlobalSetting( 'excluded-custom', implode(',', array_unique( $excluded_meta ) ) );
+	            $excluded_meta = [];
+	            if ( 'post' === $object_type ) {
+		            $excluded_meta = $this->settings()->GetExcludedPostMetaFields();
+	            } else if ( 'user' === $object_type ) {
+		            $excluded_meta = $this->settings()->GetExcludedUserMetaFields();
+	            }
 
-                // Exclude object link.
-                $exclude_objects_link = add_query_arg(
-                    array(
-                        'page' => 'wsal-settings',
-                        'tab'  => 'exclude-objects',
-                    ),
-                    network_admin_url( 'admin.php' )
-                );
-                echo wp_sprintf(
-                    '<p>' . __( 'Custom Field <strong>%1$s</strong> is no longer being monitored.<br />Enable the monitoring of this custom field again from the', 'wp-security-audit-log' ) . ' <a href="%2$s">%3$s</a>%4$s</p>',
-                    $post_array['notice'],
-                    $exclude_objects_link,
-                    __( 'Excluded Objects', 'wp-security-audit-log' ),
-                    __( ' tab in the plugin settings', 'wp-security-audit-log' )
-                );
-                die;
+	            array_push( $excluded_meta, esc_html( $post_array['notice'] ) );
+
+	            if ( 'post' === $object_type ) {
+		            $excluded_meta = $this->settings()->SetExcludedPostMetaFields( $excluded_meta );
+	            } else if ( 'user' === $object_type ) {
+		            $excluded_meta = $this->settings()->SetExcludedUserMetaFields( $excluded_meta );
+	            }
+
+	            // Exclude object link.
+	            $exclude_objects_link = add_query_arg(
+		            array(
+			            'page' => 'wsal-settings',
+			            'tab'  => 'exclude-objects',
+		            ),
+		            network_admin_url( 'admin.php' )
+	            );
+	            echo wp_sprintf(
+	            /* translators: name of meta field (in bold) */
+		            '<p>' . __( 'Custom field %s is no longer being monitored.', 'wp-security-audit-log' ) . '</p>',
+		            '<strong>' . $post_array['notice'] . '</strong>'
+	            );
+	            echo wp_sprintf(
+	            /* translators: setting tab name "Excluded Objects" */
+		            '<p>' . __( 'Enable the monitoring of this custom field again from the %s tab in the plugin settings.', 'wp-security-audit-log' ) . '</p>',
+		            '<a href="' . $exclude_objects_link . '">' . __( 'Excluded Objects', 'wp-security-audit-log' ) . '</a>'
+	            );
+	            die;
             }
 
             /**
@@ -1383,11 +1395,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
                 self::getConnector()->getAdapter( 'Meta' )->create_indexes();
 
-                if ( $this->settings()->IsArchivingEnabled() ) {
-                    $this->settings()->SwitchToArchiveDB();
-                    self::getConnector()->getAdapter( 'Occurrence' )->create_indexes();
-                    self::getConnector()->getAdapter( 'Meta' )->create_indexes();
-                }
 
                 // If system already installed, do updates now (if any).
                 $old_version = $this->GetOldVersion();
@@ -1512,69 +1519,18 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                         //  delete dev options from the settings
                         $this->DeleteGlobalSetting( 'dev-options' );
                     }
+
+	                if ( version_compare( $new_version, '4.3.2', '>=' ) ) {
+		                $this->settings()->set_database_version( 43200 );
+
+		                //  change the name of the option storing excluded post meta fields
+		                $excludedCustomFields = $this->GetGlobalSetting( 'excluded-custom', null );
+		                if ( ! is_null( $excludedCustomFields ) ) {
+			                $this->SetGlobalSetting( 'excluded-post-meta', $excludedCustomFields );
+			                $this->DeleteGlobalSetting( 'excluded-custom' );
+		                }
+	                }
                 }
-            }
-
-            /**
-             * Migrate data from old plugin.
-             */
-            public function Migrate() {
-                global $wpdb;
-                static $mig_types = array(
-                    3000 => 5006,
-                );
-
-                // Load data.
-                $sql    = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog_events';
-                $events = array();
-                foreach ( $wpdb->get_results( $sql, ARRAY_A ) as $item ) {
-                    $events[ $item['EventID'] ] = $item;
-                }
-                $sql      = 'SELECT * FROM ' . $wpdb->base_prefix . 'wordpress_auditlog';
-                $auditlog = $wpdb->get_results( $sql, ARRAY_A );
-
-                // Migrate using db logger.
-                foreach ( $auditlog as $entry ) {
-                    $data = array(
-                        'ClientIP'      => $entry['UserIP'],
-                        'UserAgent'     => '',
-                        'CurrentUserID' => $entry['UserID'],
-                    );
-                    if ( $entry['UserName'] ) {
-                        $data['Username'] = base64_decode( $entry['UserName'] );
-                    }
-                    $mesg = $events[ $entry['EventID'] ]['EventDescription'];
-                    $date = strtotime( $entry['EventDate'] );
-                    $type = $entry['EventID'];
-                    if ( isset( $mig_types[ $type ] ) ) {
-                        $type = $mig_types[ $type ];
-                    }
-                    // Convert message from '<strong>%s</strong>' to '%Arg1%' format.
-                    $c = 0;
-                    $n = '<strong>%s</strong>';
-                    $l = strlen( $n );
-                    while ( ( $pos = strpos( $mesg, $n ) ) !== false ) {
-                        $mesg = substr_replace( $mesg, '%MigratedArg' . ( $c++ ) . '%', $pos, $l );
-                    }
-                    $data['MigratedMesg'] = $mesg;
-                    // Generate new meta data args.
-                    $temp = unserialize( base64_decode( $entry['EventData'] ) );
-                    foreach ( (array) $temp as $i => $item ) {
-                        $data[ 'MigratedArg' . $i ] = $item;
-                    }
-                    // send event data to logger!
-                    foreach ( $this->alerts->GetLoggers() as $logger ) {
-                        $logger->Log( $type, $data, $date, $entry['BlogId'], true );
-                    }
-                }
-
-                // Migrate settings.
-                $this->settings()->SetAllowedPluginViewers(
-                    get_option( 'WPPH_PLUGIN_ALLOW_ACCESS' )
-                );
-                $s = get_option( 'wpph_plugin_settings' );
-                $this->settings()->SetViewPerPage( max( $s->showEventsViewList, 5 ) );
-                $this->settings()->SetWidgetsEnabled( $s->showDW );
             }
 
             /**
@@ -1799,14 +1755,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
             /**
              * DB connection.
              *
-             * @param mixed $config DB configuration.
+             * @param string|array $config DB configuration array, db alias or empty to use default connection.
              * @param bool $reset - True if reset.
              *
              * @return WSAL_Connector_ConnectorInterface
              * @throws Freemius_Exception
              */
             public static function getConnector( $config = null, $reset = false ) {
-                return WSAL_Connector_ConnectorFactory::getConnector( $config, $reset );
+                return WSAL_Connector_ConnectorFactory::GetConnector( $config, $reset );
             }
 
             /**
@@ -1817,16 +1773,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              */
             public function IsInstalled() {
                 return self::getConnector()->isInstalled();
-            }
-
-            /**
-             * Whether the old plugin was present or not.
-             *
-             * @return boolean
-             * @throws Freemius_Exception
-             */
-            public function CanMigrate() {
-                return self::getConnector()->canMigrate();
             }
 
             /**
@@ -2055,10 +2001,21 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     return $plugins;
                 }
 
+                $predefined_plugins       = WSAL_PluginInstallAndActivate::get_installable_plugins();
+
                 // Find WSAL by plugin basename.
                 if ( array_key_exists( WSAL_BASE_NAME, $plugins ) ) {
                     // Remove WSAL plugin from plugin list page.
                     unset( $plugins[ WSAL_BASE_NAME ] );
+                }
+
+                // Find and hide addons.
+                foreach ( $predefined_plugins as $extension_plugin ) {
+                    if ( array_key_exists( $extension_plugin[ 'plugin_slug' ], $plugins ) ) {
+                        if ( 'website-file-changes-monitor/website-file-changes-monitor.php' !== $extension_plugin[ 'plugin_slug' ] ) {
+                            unset( $plugins[ $extension_plugin[ 'plugin_slug' ] ] );
+                        }
+                    }
                 }
 
                 return $plugins;
@@ -2234,26 +2191,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	        }
         }
 
-		//  load composer libraries if available
-		$autoloader_file_path = plugin_dir_path( __FILE__ ) . implode( DIRECTORY_SEPARATOR, [
-					'vendor',
-					'autoload.php'
-				]
-			);
-
-		$prefixed_autoloader_file_path = plugin_dir_path( __FILE__ ) . implode( DIRECTORY_SEPARATOR, [
-					'third-party',
-					'vendor',
-					'autoload.php'
-				]
-			);
-
-		if ( file_exists( $autoloader_file_path ) && file_exists( $prefixed_autoloader_file_path ) ) {
-			require_once $autoloader_file_path;
-			require_once $prefixed_autoloader_file_path;
-
-		}
-
         // Begin load sequence.
         WpSecurityAuditLog::GetInstance();
 
@@ -2269,19 +2206,21 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 } else {
 	wsal_freemius()->set_basename( true, __FILE__ );
 }
-/**
- * Takes care of deactivation of the premium plugin when the free plugin is activated. The opposite direction is handled
- * by Freemius SDK.
- *
- * Note: This code MUST NOT be present in the premium version an is removed automatically during the build process.
- *
- * @since 4.3.0
- */
-function wsal_free_on_plugin_activation() {
-	$premium_version_slug = 'wp-security-audit-log-premium/wp-security-audit-log.php';
-	if ( WpSecurityAuditLog::is_plugin_active( $premium_version_slug ) ) {
-		deactivate_plugins( $premium_version_slug, true );
+if ( ! function_exists( 'wsal_free_on_plugin_activation' ) ) {
+	/**
+	 * Takes care of deactivation of the premium plugin when the free plugin is activated. The opposite direction is handled
+	 * by Freemius SDK.
+	 *
+	 * Note: This code MUST NOT be present in the premium version an is removed automatically during the build process.
+	 *
+	 * @since 4.3.2
+	 */
+	function wsal_free_on_plugin_activation() {
+		$premium_version_slug = 'wp-security-audit-log-premium/wp-security-audit-log.php';
+		if ( WpSecurityAuditLog::is_plugin_active( $premium_version_slug ) ) {
+			deactivate_plugins( $premium_version_slug, true );
+		}
 	}
-}
 
-register_activation_hook( __FILE__, 'wsal_free_on_plugin_activation' );
+	register_activation_hook( __FILE__, 'wsal_free_on_plugin_activation' );
+}

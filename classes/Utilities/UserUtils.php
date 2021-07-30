@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Utility class for some user related stuff.
  *
- * @package Wsal
+ * @package wsal
  * @since 4.3.0
  */
 class WSAL_Utilities_UsersUtils {

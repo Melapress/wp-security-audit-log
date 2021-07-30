@@ -8,7 +8,7 @@ if ( ! class_exists( 'WSAL_GravityFormsExtension' ) ) {
 			$new_plugin = array(
 				array(
 					'addon_for'          => 'gravityforms',
-					'title'              => __( 'Gravity Forms', 'wp-security-audit-log' ),
+					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'gravityforms.png',
 					'plugin_slug'        => 'activity-log-gravity-forms/activity-log-gravity-forms.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/activity-log-gravity-forms.latest-stable.zip',
@@ -18,21 +18,31 @@ if ( ! class_exists( 'WSAL_GravityFormsExtension' ) ) {
 			);
 
 			// combine the two arrays.
-			$plugins = array_merge( $plugins, $new_plugin );
-			return $plugins;
+			return array_merge( $plugins, $new_plugin );
 		}
 
 		public function add_event_codes( $addon_event_codes ) {
 			$new_event_codes = array(
-				'yoast' => array(
-					'name'      => __( 'Gravity Forms', 'wp-security-audit-log' ),
+				'gravityforms' => array(
+					'name'      => $this->get_plugin_name(),
 					'event_ids' => array( 5700, 5702, 5703, 5704, 5709, 5715, 5705, 5708, 5706, 5707, 5710, 5711, 5712, 5713, 5714, 5716 ),
 				),
 			);
 
 			// combine the two arrays.
-			$addon_event_codes = array_merge( $addon_event_codes, $new_event_codes );
-			return $addon_event_codes;
+			return  array_merge( $addon_event_codes, $new_event_codes );
+		}
+
+		public function get_plugin_name() {
+			return 'Gravity Forms';
+		}
+
+		public function get_plugin_icon_url() {
+			return 'https://ps.w.org/activity-log-gravity-forms/assets/icon-128x128.png?rev=2465070';
+		}
+
+		public function get_color() {
+			return '#F15A29';
 		}
 	}
 }

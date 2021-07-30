@@ -8,7 +8,7 @@ if ( ! class_exists( 'WSAL_WPFormsExtension' ) ) {
 			$new_plugin = array(
 				array(
 					'addon_for'          => 'wpforms',
-					'title'              => 'WPForms',
+					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'wpforms.png',
 					'plugin_slug'        => 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php',
 					'plugin_basename'    => 'wsal-wpforms.php',
@@ -19,21 +19,35 @@ if ( ! class_exists( 'WSAL_WPFormsExtension' ) ) {
 			);
 
 			// combine the two arrays.
-			$plugins = array_merge( $plugins, $new_plugin );
-			return $plugins;
+			return array_merge( $plugins, $new_plugin );
 		}
 
 		public function add_event_codes( $addon_event_codes ) {
 			$new_event_codes = array(
 				'wpforms' => array(
-					'name'      => __( 'WPForms', 'wp-security-audit-log' ),
+					'name'      => $this->get_plugin_name(),
 					'event_ids' => array( 5500, 5501, 5502, 5503, 5504, 5505, 5506 ),
 				),
 			);
 
 			// combine the two arrays.
-			$addon_event_codes = array_merge( $addon_event_codes, $new_event_codes );
-			return $addon_event_codes;
+			return array_merge( $addon_event_codes, $new_event_codes );
+		}
+
+		public function get_custom_post_types() {
+			return [ 'wpforms' ];
+		}
+
+		public function get_plugin_name() {
+			return 'WPForms';
+		}
+
+		public function get_plugin_icon_url() {
+			return 'https://ps.w.org/wp-security-audit-log-add-on-for-wpforms/assets/icon-128x128.png?rev=2241926';
+		}
+
+		public function get_color() {
+			return '#e27730';
 		}
 	}
 }

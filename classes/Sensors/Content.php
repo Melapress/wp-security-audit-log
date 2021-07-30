@@ -5,7 +5,7 @@
  * Content sensor class file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 5019 A plugin created a post
  * 5025 A plugin deleted a post
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
@@ -455,6 +455,13 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$post_data = $this->get_post_event_data( $post ); // Get event post data.
 
 				// Update post URL based on current actual path.
+				if ( $this->plugin->IsMultisite() && ! is_subdomain_install() ) {
+					//	for multisite using subfolders, remove the subfolder
+					$subdir_path = parse_url( home_url(), PHP_URL_PATH );
+					$escaped = str_replace( '/', '\/', preg_quote( $subdir_path ) );
+					$current_path = preg_replace( '/' . $escaped . '/', '', $current_path );
+				}
+
 				$full_current_path = home_url( $current_path );
 				if ( $full_current_path !== $post_data['PostUrl'] ) {
 					$post_data['PostUrl'] = esc_url( $full_current_path );
@@ -1371,7 +1378,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 				if ( 2002 === $event ) {
 					// If we reach this point, we no longer need to check if the content has changed as we already have an event to handle it.
-					// So trigger 2002 regardess and "something" has changed in the post, we just dont detect it elsewhere.
+					// So trigger 2002 regardless and "something" has changed in the post, we just dont detect it elsewhere.
 					$this->plugin->alerts->TriggerIf( $event, $event_data, array( $this, 'ignore_other_post_events' ) );
 				} else {
 					$this->plugin->alerts->Trigger( $event, $event_data );

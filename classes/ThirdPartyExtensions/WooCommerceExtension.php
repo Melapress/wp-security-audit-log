@@ -4,7 +4,7 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 
 	class WSAL_WooCommerceExtension extends WSAL_AbstractExtension {
 
-		public function __construct() {
+		public function __construct( ) {
 			parent::__construct();
 			add_filter( 'wsal_save_settings_disabled_events', array( $this, 'save_settings_disabled_events' ), 10, 4 );
 		}
@@ -13,7 +13,7 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 			$new_plugin = array(
 				array(
 					'addon_for'          => 'woocommerce',
-					'title'              => 'WooCommerce',
+					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'woocommerce.png',
 					'plugin_slug'        => 'wp-activity-log-for-woocommerce/wsal-woocommerce.php',
 					'plugin_basename'    => 'wsal-woocommerce.php',
@@ -24,21 +24,19 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 			);
 
 			// combine the two arrays.
-			$plugins = array_merge( $plugins, $new_plugin );
-			return $plugins;
+			return array_merge( $plugins, $new_plugin );
 		}
 
 		public function add_event_codes( $addon_event_codes ) {
 			$new_event_codes = array(
 				'woocommerce' => array(
-					'name'      => __( 'WooCommerce', 'wp-security-audit-log' ),
+					'name'      => $this->get_plugin_name(),
 					'event_ids' => array( 9000, 9001, 9003, 9004, 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012, 9013, 9014, 9015, 9072, 9073, 9077, 9016, 9017, 9018, 9019, 9020, 9021, 9022, 9023, 9024, 9025, 9026, 9042, 9043, 9044, 9045, 9046, 9105, 9047, 9048, 9049, 9050, 9051, 9027, 9028, 9029, 9030, 9031, 9032, 9033, 9034, 9085, 9086, 9087, 9088, 9089, 9090, 9091, 9092, 9093, 9094, 9074, 9075, 9076, 9078, 9079, 9080, 9081, 9082, 9002, 9052, 9053, 9054, 9055, 9056, 9057, 9058, 9059, 9060, 9061, 9062, 9063, 9064, 9065, 9066, 9067, 9068, 9069, 9070, 9071, 9035, 9036, 9037, 9038, 9039, 9040, 9041, 9083, 9084, 9101, 9102, 9103, 9104 ),
 				),
 			);
 
 			// combine the two arrays.
-			$addon_event_codes = array_merge( $addon_event_codes, $new_event_codes );
-			return $addon_event_codes;
+			return array_merge( $addon_event_codes, $new_event_codes );
 		}
 
 		/**
@@ -66,6 +64,29 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 			}
 
 			return $disabled;
+		}
+
+		public function get_custom_post_types() {
+			return [
+				'product',
+				'shop_coupon',
+				'shop_order',
+				'shop_order_refund',
+				'product_variation',
+				'wc_product_tab'
+			];
+		}
+
+		public function get_plugin_name() {
+			return 'WooCommerce';
+		}
+
+		public function get_plugin_icon_url() {
+			return 'https://ps.w.org/wp-activity-log-for-woocommerce/assets/icon-128x128.png?rev=2357550';
+		}
+
+		public function get_color() {
+			return '#7f54b3';
 		}
 	}
 }

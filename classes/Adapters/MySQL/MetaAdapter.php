@@ -4,7 +4,7 @@
  *
  * MySQL database Metadata class.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * MySQL wsal_metadata table used for to store the alert meta data:
  * username, user_roles, client_ip, user_agent, post_id, post_title, etc.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_MetaInterface {
 

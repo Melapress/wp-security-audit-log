@@ -4,7 +4,7 @@
  *
  * Interface used by the Query.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Interface used by the Query.
  *
- * @package Wsal
+ * @package wsal
  */
 interface WSAL_Adapters_QueryInterface {
 
@@ -39,4 +39,11 @@ interface WSAL_Adapters_QueryInterface {
 	 * @param object $query - Query object.
 	 */
 	public function Delete( $query );
+
+	/**
+	 * Checks if the adapter is successfully connected.
+	 * @return bool True if the adapter is connected. False otherwise.
+	 * @since 4.3.2
+	 */
+	public function IsConnected();
 }

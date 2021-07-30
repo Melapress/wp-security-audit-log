@@ -4,7 +4,7 @@
  *
  * Alerts are defined in this file.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -880,7 +880,7 @@ function wsaldefaults_wsal_init() {
 						2054,
 						WSAL_LOW,
 						__( 'User updated a custom field value for a post', 'wp-security-audit-log' ),
-						__( 'Modified the value of the custom field %MetaName% in the post %PostTitle%.', 'wp-security-audit-log' ),
+						__( 'Modified the value of the custom field %MetaKey% in the post %PostTitle%.', 'wp-security-audit-log' ),
 						[
 							__( 'Post ID', 'wp-security-audit-log' )                     => '%PostID%',
 							__( 'Post type', 'wp-security-audit-log' )                   => '%PostType%',
@@ -1818,7 +1818,7 @@ function wsaldefaults_wsal_init() {
 							__( 'Previous value', 'wp-security-audit-log' ) => '%old_value%',
 							__( 'New value', 'wp-security-audit-log' )      => '%new_value%'
 						],
-						wsaldefaults_build_links( [ 'EditUserLink' ] ),
+						wsaldefaults_build_links( [ 'EditUserLink', 'MetaLink' ] ),
 						'user',
 						'modified'
 					),
@@ -1833,7 +1833,7 @@ function wsaldefaults_wsal_init() {
 							__( 'Last name', 'wp-security-audit-log' )          => '%LastName%',
 							__( 'Custom field value', 'wp-security-audit-log' ) => '%new_value%'
 						],
-						wsaldefaults_build_links( [ 'EditUserLink' ] ),
+						wsaldefaults_build_links( [ 'EditUserLink', 'MetaLink' ] ),
 						'user',
 						'modified'
 					),
@@ -2110,42 +2110,6 @@ function wsaldefaults_wsal_init() {
 						'updated'
 					),
 					array(
-						5010,
-						WSAL_LOW,
-						__( 'Plugin created table', 'wp-security-audit-log' ),
-						__( 'The plugin %Plugin->Name% created this table in the database.', 'wp-security-audit-log' ),
-						[
-							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%'
-						],
-						[],
-						'database',
-						'created'
-					),
-					array(
-						5011,
-						WSAL_LOW,
-						__( 'Plugin modified table structure', 'wp-security-audit-log' ),
-						__( 'The plugin %Plugin->Name% modified the structure of a database table.', 'wp-security-audit-log' ),
-						[
-							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%'
-						],
-						[],
-						'database',
-						'modified'
-					),
-					array(
-						5012,
-						WSAL_MEDIUM,
-						__( 'Plugin deleted table', 'wp-security-audit-log' ),
-						__( 'The plugin %Plugin->Name% deleted this table from the database.', 'wp-security-audit-log' ),
-						[
-							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%'
-						],
-						[],
-						'database',
-						'deleted'
-					),
-					array(
 						5019,
 						WSAL_MEDIUM,
 						__( 'A plugin created a post', 'wp-security-audit-log' ),
@@ -2228,42 +2192,6 @@ function wsaldefaults_wsal_init() {
 						'deleted'
 					),
 					array(
-						5013,
-						WSAL_LOW,
-						__( 'Theme created tables', 'wp-security-audit-log' ),
-						__( 'The theme %Theme->Name% created this tables in the database.', 'wp-security-audit-log' ),
-						[
-							__( 'Table', 'wp-security-audit-log' ) => '%TableNames%'
-						],
-						[],
-						'database',
-						'created'
-					),
-					array(
-						5014,
-						WSAL_LOW,
-						__( 'Theme modified tables structure', 'wp-security-audit-log' ),
-						__( 'The theme %Theme->Name% modified the structure of this database table', 'wp-security-audit-log' ),
-						[
-							__( 'Table', 'wp-security-audit-log' ) => '%TableNames%'
-						],
-						[],
-						'database',
-						'modified'
-					),
-					array(
-						5015,
-						WSAL_MEDIUM,
-						__( 'Theme deleted tables', 'wp-security-audit-log' ),
-						__( 'The theme %Theme->Name% deleted this table from the database.', 'wp-security-audit-log' ),
-						[
-							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
-						],
-						[],
-						'database',
-						'deleted'
-					),
-					array(
 						5031,
 						WSAL_LOW,
 						__( 'User updated a theme', 'wp-security-audit-log' ),
@@ -2314,81 +2242,6 @@ function wsaldefaults_wsal_init() {
 						[],
 						'theme',
 						'deactivated'
-					),
-				),
-
-				__( 'Database Events', 'wp-security-audit-log' ) => array(
-					array(
-						5016,
-						WSAL_HIGH,
-						__( 'Unknown component created tables', 'wp-security-audit-log' ),
-						__( 'An unknown component created these tables in the database.', 'wp-security-audit-log' ),
-						[
-							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
-						],
-						[],
-						'database',
-						'created'
-					),
-					array(
-						5017,
-						WSAL_HIGH,
-						__( 'Unknown component modified tables structure', 'wp-security-audit-log' ),
-						__( 'An unknown component modified the structure of these database tables.', 'wp-security-audit-log' ),
-						[
-							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
-						],
-						[],
-						'database',
-						'modified'
-					),
-					array(
-						5018,
-						WSAL_HIGH,
-						__( 'Unknown component deleted tables', 'wp-security-audit-log' ),
-						__( 'An unknown component deleted these tables from the database.', 'wp-security-audit-log' ),
-						[
-							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
-						],
-						[],
-						'database',
-						'deleted'
-					),
-					array(
-						5022,
-						WSAL_HIGH,
-						__( 'WordPress created tables', 'wp-security-audit-log' ),
-						__( 'WordPress has created these tables in the database.', 'wp-security-audit-log' ),
-						[
-							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
-						],
-						[],
-						'database',
-						'created'
-					),
-					array(
-						5023,
-						WSAL_HIGH,
-						__( 'WordPress modified tables structure', 'wp-security-audit-log' ),
-						__( 'WordPress modified the structure of these database tables.', 'wp-security-audit-log' ),
-						[
-							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
-						],
-						[],
-						'database',
-						'modified'
-					),
-					array(
-						5024,
-						WSAL_HIGH,
-						__( 'WordPress deleted tables', 'wp-security-audit-log' ),
-						__( 'WordPress deleted these tables from the database.', 'wp-security-audit-log' ),
-						[
-							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
-						],
-						[],
-						'database',
-						'deleted'
 					),
 				),
 			),
@@ -2490,6 +2343,7 @@ function wsaldefaults_wsal_init() {
 						'wp-activity-log',
 						'deleted'
 					),
+
 					array(
 						6043,
 						WSAL_HIGH,
@@ -2499,6 +2353,350 @@ function wsaldefaults_wsal_init() {
 						[],
 						'wp-activity-log',
 						'modified'
+					),
+
+					array(
+						6046,
+						WSAL_LOW,
+						__( 'Changed the status of the Login Page Notification', 'wp-security-audit-log' ),
+						__( 'Changed the status of the <strong>Login Page Notification.</strong>', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'enabled'
+					),
+					array(
+						6047,
+						WSAL_LOW,
+						__( 'Changed the text of the Login Page Notification', 'wp-security-audit-log' ),
+						__( 'Changed the text of the <strong>Login Page Notification.</strong>', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'modified'
+					),
+					array(
+						6048,
+						WSAL_LOW,
+						__( 'Changed the status of the Reverse proxy / firewall option', 'wp-security-audit-log' ),
+						__( 'Changed the status of the <strong>Reverse proxy / firewall option.</strong>', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'enabled'
+					),
+					array(
+						6049,
+						WSAL_HIGH,
+						__( 'Changed the Restrict plugin access setting', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Restrict plugin access</strong> setting to %new_setting%.', 'wp-security-audit-log' ),
+						[
+							__( 'Previous setting', 'wp-security-audit-log' ) => '%previous_setting%',
+						],
+						[],
+						'wp-activity-log',
+						'modified'
+					),
+					array(
+						6050,
+						WSAL_HIGH,
+						__( 'The user %user% to / from the list of users who can view the activity log', 'wp-security-audit-log' ),
+						__( 'The user %user% to / from the list of users who can view the activity log.', 'wp-security-audit-log' ),
+						[
+							__( 'Previous list of users who had access to view the activity log', 'wp-security-audit-log' ) => '%previous_users%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+					array(
+						6051,
+						WSAL_MEDIUM,
+						__( 'Changed the status of the Hide plugin in plugins page setting', 'wp-security-audit-log' ),
+						__( 'Changed the status of the <strong>Hide plugin in plugins page</strong> setting.', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'enabled'
+					),
+					array(
+						6052,
+						WSAL_HIGH,
+						__( 'Changed the Activity log retention setting', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Activity log retention</strong> to %new_setting%.', 'wp-security-audit-log' ),
+						[
+							__( 'Previous setting', 'wp-security-audit-log' ) => '%previous_setting%',
+						],
+						[],
+						'wp-activity-log',
+						'modified'
+					),
+					array(
+						6053,
+						WSAL_LOW,
+						__( 'A user was added to / from the list of excluded users from the activity log', 'wp-security-audit-log' ),
+						__( 'The user %user% to / from the list of excluded users from the activity log.', 'wp-security-audit-log' ),
+						[
+							__( 'Previous list of users', 'wp-security-audit-log' ) => '%previous_users%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+					array(
+						6054,
+						WSAL_LOW,
+						__( 'A user role was added to / from the list of excluded roles from the activity log', 'wp-security-audit-log' ),
+						__( 'The user role %role% to / from the list of excluded roles from the activity log.', 'wp-security-audit-log' ),
+						[
+							__( 'Previous list of users', 'wp-security-audit-log' ) => '%previous_users%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+					array(
+						6055,
+						WSAL_LOW,
+						__( 'An IP address was added to / from the list of excluded IP addresses from the activity log', 'wp-security-audit-log' ),
+						__( 'The IP address %ip% to / from the list of excluded IP addresses from the activity log.', 'wp-security-audit-log' ),
+						[
+							__( 'Previous list of IPs', 'wp-security-audit-log' ) => '%previous_ips%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+					array(
+						6056,
+						WSAL_LOW,
+						__( 'A post type was added to / from the list of excluded post types from the activity log', 'wp-security-audit-log' ),
+						__( 'The post type %post_type% to / from the list of excluded post types from the activity log.', 'wp-security-audit-log' ),
+						[
+							__( 'Previous list of Post types', 'wp-security-audit-log' ) => '%previous_types%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+					array(
+						6057,
+						WSAL_LOW,
+						__( 'A custom field was added to / from the list of excluded custom fields from the activity log', 'wp-security-audit-log' ),
+						__( 'The custom field %custom_field% to / from the list of excluded custom fields from the activity log.', 'wp-security-audit-log' ),
+						[
+							__( 'Previous list of Custom fields', 'wp-security-audit-log' ) => '%previous_fields%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+					array(
+						6058,
+						WSAL_LOW,
+						__( 'A custom field was added to / from the list of excluded user profile custom fields from the activity log', 'wp-security-audit-log' ),
+						__( 'The custom field %custom_field% to / from the list of excluded user profile custom fields from the activity log.', 'wp-security-audit-log' ),
+						[
+							__( 'Previous list of user profile Custom fields', 'wp-security-audit-log' ) => '%previous_fields%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+				),
+
+				__( 'Notifications & Integrations', 'wp-security-audit-log' ) => array(
+					array(
+						6310,
+						WSAL_LOW,
+						__( 'Changed the status of the Daily Summary of Activity Log', 'wp-security-audit-log' ),
+						__( 'Changed the status of the <strong>Daily Summary of Activity Log.</strong>.', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'enabled'
+					),
+					array(
+						6311,
+						WSAL_LOW,
+						__( 'Modified the reciepients of the Daily Summary of Activity Log.', 'wp-security-audit-log' ),
+						__( 'Modified the reciepients of the <strong>Daily Summary of Activity Log</strong>.', 'wp-security-audit-log' ),
+						[
+							__( 'New recipient', 'wp-security-audit-log' ) => '%recipient%',
+							__( 'Previous recipient', 'wp-security-audit-log' ) => '%previous_recipient%',
+						],
+						[],
+						'wp-activity-log',
+						'modified'
+					),
+					array(
+						6312,
+						WSAL_LOW,
+						__( 'Changed the status of a built in notification', 'wp-security-audit-log' ),
+						__( 'Changed the status of the built in notification %notification_name%.', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'enabled'
+					),
+					array(
+						6313,
+						WSAL_LOW,
+						__( 'Modified the recipient(s) of the built a notification', 'wp-security-audit-log' ),
+						__( 'Modified the recipient(s) of the built in notification %notification_name%.', 'wp-security-audit-log' ),
+						[
+							__( 'New recipient(s)', 'wp-security-audit-log' ) => '%recipient%',
+							__( 'Previous recipient(s)', 'wp-security-audit-log' ) => '%previous_recipient%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+					array(
+						6314,
+						WSAL_LOW,
+						__( 'Added a new custom notification', 'wp-security-audit-log' ),
+						__( 'Added a new custom notification %notification_name%.', 'wp-security-audit-log' ),
+						[
+							__( 'Recipient(s)', 'wp-security-audit-log' ) => '%recipient%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+					array(
+						6315,
+						WSAL_LOW,
+						__( 'Modified a custom notification', 'wp-security-audit-log' ),
+						__( 'Modified the custom notification %notification_name%.', 'wp-security-audit-log' ),
+						[
+							__( 'Recipient(s)', 'wp-security-audit-log' ) => '%recipient%',
+						],
+						[],
+						'wp-activity-log',
+						'modified'
+					),
+					array(
+						6316,
+						WSAL_LOW,
+						__( 'Changed the status of a custom notification', 'wp-security-audit-log' ),
+						__( 'Changed the status of the custom notification %notification_name%.', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'enabled'
+					),
+					array(
+						6317,
+						WSAL_LOW,
+						__( 'Deleted a custom notification', 'wp-security-audit-log' ),
+						__( 'Deleted the custom notification %notification_name%.', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'deleted'
+					),
+					array(
+						6318,
+						WSAL_LOW,
+						__( 'Modified a default notification template', 'wp-security-audit-log' ),
+						__( 'Modified the default %template_name% notification template.', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'modified'
+					),
+
+					// Integrations.
+					array(
+						6320,
+						WSAL_HIGH,
+						__( 'Added a new integrations connection', 'wp-security-audit-log' ),
+						__( 'Added a new integrations connection %name%', 'wp-security-audit-log' ),
+						[
+							__( 'Connection type', 'wp-security-audit-log' ) => '%type%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+					array(
+						6321,
+						WSAL_HIGH,
+						__( 'Modified an integrations connection', 'wp-security-audit-log' ),
+						__( 'Modified the integrations connection %name%.', 'wp-security-audit-log' ),
+						[
+							__( 'Connection type', 'wp-security-audit-log' ) => '%type%',
+						],
+						[],
+						'wp-activity-log',
+						'modified'
+					),
+					array(
+						6322,
+						WSAL_HIGH,
+						__( 'Deleted a integrations connection', 'wp-security-audit-log' ),
+						__( 'Deleted the integrations connection %name%.', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'deleted'
+					),
+					array(
+						6323,
+						WSAL_HIGH,
+						__( 'Added a new activity log mirror', 'wp-security-audit-log' ),
+						__( 'Added a new activity log mirror %name%.', 'wp-security-audit-log' ),
+						[
+							__( 'Connection used by this mirror', 'wp-security-audit-log' ) => '%connection%',
+						],
+						[],
+						'wp-activity-log',
+						'added'
+					),
+					array(
+						6324,
+						WSAL_HIGH,
+						__( 'Modified an activity log mirror', 'wp-security-audit-log' ),
+						__( 'Modified the activity log mirror %name%.', 'wp-security-audit-log' ),
+						[
+							__( 'Connection used by this mirror', 'wp-security-audit-log' ) => '%connection%',
+						],
+						[],
+						'wp-activity-log',
+						'modified'
+					),
+					array(
+						6325,
+						WSAL_LOW,
+						__( 'Changed the status of an activity log mirror', 'wp-security-audit-log' ),
+						__( 'Changed the status of the activity log mirror %name%.', 'wp-security-audit-log' ),
+						[
+							__( 'Connection used by this mirror', 'wp-security-audit-log' ) => '%connection%',
+						],
+						[],
+						'wp-activity-log',
+						'deleted'
+					),
+					array(
+						6326,
+						WSAL_HIGH,
+						__( 'Deleted an activity log mirror', 'wp-security-audit-log' ),
+						__( 'Deleted the activity log mirror %name%.', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'deleted'
+					),
+					array(
+						6327,
+						WSAL_HIGH,
+						__( 'Changed the status of Logging of events to the database', 'wp-security-audit-log' ),
+						__( 'Changed the status of <strong>Logging of events to the database</strong>.', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'enabled'
 					),
 				),
 
@@ -2789,6 +2987,153 @@ function wsaldefaults_wsal_init() {
 						[],
 						'system-setting',
 						'modified'
+					),
+				),
+
+				__( 'Database Events', 'wp-security-audit-log' ) => array(
+					array(
+						5010,
+						WSAL_LOW,
+						__( 'Plugin created table', 'wp-security-audit-log' ),
+						__( 'The plugin %Plugin->Name% created this table in the database.', 'wp-security-audit-log' ),
+						[
+							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%'
+						],
+						[],
+						'database',
+						'created'
+					),
+					array(
+						5011,
+						WSAL_LOW,
+						__( 'Plugin modified table structure', 'wp-security-audit-log' ),
+						__( 'The plugin %Plugin->Name% modified the structure of a database table.', 'wp-security-audit-log' ),
+						[
+							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%'
+						],
+						[],
+						'database',
+						'modified'
+					),
+					array(
+						5012,
+						WSAL_MEDIUM,
+						__( 'Plugin deleted table', 'wp-security-audit-log' ),
+						__( 'The plugin %Plugin->Name% deleted this table from the database.', 'wp-security-audit-log' ),
+						[
+							__( 'Table', 'wp-security-audit-log' )  => '%TableNames%'
+						],
+						[],
+						'database',
+						'deleted'
+					),
+					array(
+						5013,
+						WSAL_LOW,
+						__( 'Theme created tables', 'wp-security-audit-log' ),
+						__( 'The theme %Theme->Name% created this tables in the database.', 'wp-security-audit-log' ),
+						[
+							__( 'Table', 'wp-security-audit-log' ) => '%TableNames%'
+						],
+						[],
+						'database',
+						'created'
+					),
+					array(
+						5014,
+						WSAL_LOW,
+						__( 'Theme modified tables structure', 'wp-security-audit-log' ),
+						__( 'The theme %Theme->Name% modified the structure of this database table', 'wp-security-audit-log' ),
+						[
+							__( 'Table', 'wp-security-audit-log' ) => '%TableNames%'
+						],
+						[],
+						'database',
+						'modified'
+					),
+					array(
+						5015,
+						WSAL_MEDIUM,
+						__( 'Theme deleted tables', 'wp-security-audit-log' ),
+						__( 'The theme %Theme->Name% deleted this table from the database.', 'wp-security-audit-log' ),
+						[
+							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
+						],
+						[],
+						'database',
+						'deleted'
+					),
+					array(
+						5016,
+						WSAL_HIGH,
+						__( 'Unknown component created tables', 'wp-security-audit-log' ),
+						__( 'An unknown component created these tables in the database.', 'wp-security-audit-log' ),
+						[
+							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
+						],
+						[],
+						'database',
+						'created'
+					),
+					array(
+						5017,
+						WSAL_HIGH,
+						__( 'Unknown component modified tables structure', 'wp-security-audit-log' ),
+						__( 'An unknown component modified the structure of these database tables.', 'wp-security-audit-log' ),
+						[
+							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
+						],
+						[],
+						'database',
+						'modified'
+					),
+					array(
+						5018,
+						WSAL_HIGH,
+						__( 'Unknown component deleted tables', 'wp-security-audit-log' ),
+						__( 'An unknown component deleted these tables from the database.', 'wp-security-audit-log' ),
+						[
+							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
+						],
+						[],
+						'database',
+						'deleted'
+					),
+					array(
+						5022,
+						WSAL_HIGH,
+						__( 'WordPress created tables', 'wp-security-audit-log' ),
+						__( 'WordPress has created these tables in the database.', 'wp-security-audit-log' ),
+						[
+							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
+						],
+						[],
+						'database',
+						'created'
+					),
+					array(
+						5023,
+						WSAL_HIGH,
+						__( 'WordPress modified tables structure', 'wp-security-audit-log' ),
+						__( 'WordPress modified the structure of these database tables.', 'wp-security-audit-log' ),
+						[
+							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
+						],
+						[],
+						'database',
+						'modified'
+					),
+					array(
+						5024,
+						WSAL_HIGH,
+						__( 'WordPress deleted tables', 'wp-security-audit-log' ),
+						__( 'WordPress deleted these tables from the database.', 'wp-security-audit-log' ),
+						[
+							__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%'
+						],
+						[],
+						'database',
+						'deleted'
 					),
 				),
 			),

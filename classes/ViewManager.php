@@ -5,7 +5,7 @@
  * View manager class file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This class includes all the views, initialize them and shows the active one.
  * It creates also the menu items.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_ViewManager {
 

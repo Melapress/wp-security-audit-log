@@ -5,7 +5,7 @@
  * User profile sensor file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -28,8 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 4009 User revoked from Super Admin privileges
  * 4014 User opened the profile page of another user
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 
@@ -388,7 +388,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
 				'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
 				'CurrentUserID' => $current_user->ID,
-				'EventType'     => 'revoked',
+				'EventType'     => 'submitted',
 			)
 		);
 	}
