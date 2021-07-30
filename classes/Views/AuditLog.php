@@ -845,6 +845,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			array(),
 			filemtime( $this->_plugin->GetBaseDir() . '/css/auditlog.css' )
 		);
+
+		// admin notices styles
+		wp_enqueue_style(
+			'wsal_admin_notices',
+			$this->_plugin->GetBaseUrl() . '/css/admin-notices.css',
+			array(),
+			filemtime( $this->_plugin->GetBaseDir() . '/css/admin-notices.css' )
+		);
 	}
 
 	/**

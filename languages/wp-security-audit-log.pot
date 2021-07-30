@@ -3478,7 +3478,7 @@ msgstr ""
 msgid "No Results"
 msgstr ""
 
-#: classes/Views/AuditLog.php:726, classes/Views/AuditLog.php:769, classes/Views/AuditLog.php:1039, classes/Views/AuditLog.php:1101, classes/Views/AuditLog.php:1154, classes/Views/Settings.php:235, classes/Views/Settings.php:1608, classes/Views/Settings.php:1636, classes/Views/Settings.php:1666, classes/Views/SetupWizard.php:96, extensions/search/search-init.php:398, extensions/search/search-init.php:446, extensions/email-notifications/classes/Notifications.php:559, extensions/external-db/classes/Connections.php:825, extensions/external-db/classes/Connections.php:850, extensions/external-db/classes/Connections.php:981, extensions/external-db/classes/Mirroring.php:755, extensions/external-db/classes/Mirroring.php:805, extensions/external-db/classes/Settings.php:672, extensions/external-db/classes/Settings.php:848, extensions/external-db/classes/Settings.php:868, extensions/user-sessions/classes/Views.php:516, extensions/reports/classes/Views/Main.php:739
+#: classes/Views/AuditLog.php:726, classes/Views/AuditLog.php:769, classes/Views/AuditLog.php:1047, classes/Views/AuditLog.php:1109, classes/Views/AuditLog.php:1162, classes/Views/Settings.php:235, classes/Views/Settings.php:1608, classes/Views/Settings.php:1636, classes/Views/Settings.php:1666, classes/Views/SetupWizard.php:96, extensions/search/search-init.php:398, extensions/search/search-init.php:446, extensions/email-notifications/classes/Notifications.php:559, extensions/external-db/classes/Connections.php:825, extensions/external-db/classes/Connections.php:850, extensions/external-db/classes/Connections.php:981, extensions/external-db/classes/Mirroring.php:755, extensions/external-db/classes/Mirroring.php:805, extensions/external-db/classes/Settings.php:672, extensions/external-db/classes/Settings.php:848, extensions/external-db/classes/Settings.php:868, extensions/user-sessions/classes/Views.php:524, extensions/reports/classes/Views/Main.php:739
 msgid "Nonce verification failed."
 msgstr ""
 
@@ -3495,31 +3495,31 @@ msgid "Freemius opt choice selected."
 msgstr ""
 
 #. translators: 1 - an opening link tag, 2 - the closing tag.
-#: classes/Views/AuditLog.php:904
+#: classes/Views/AuditLog.php:912
 msgid "<br>An error occurred when trying to install and activate the plugin. Please try install it again from the %1$sevent settings%2$s page."
 msgstr ""
 
-#: classes/Views/AuditLog.php:1003
+#: classes/Views/AuditLog.php:1011
 msgid "WordPress Activity Log"
 msgstr ""
 
-#: classes/Views/AuditLog.php:1004
+#: classes/Views/AuditLog.php:1012
 msgid "When a user makes a change on your website the plugin will keep a record of that event here. Right now there is nothing because this is a new install."
 msgstr ""
 
-#: classes/Views/AuditLog.php:1005
+#: classes/Views/AuditLog.php:1013
 msgid "Thank you for using WP Activity Log"
 msgstr ""
 
-#: classes/Views/AuditLog.php:1028, classes/Views/AuditLog.php:1138
+#: classes/Views/AuditLog.php:1036, classes/Views/AuditLog.php:1146
 msgid "You do not have sufficient permissions to dismiss this notice."
 msgstr ""
 
-#: classes/Views/AuditLog.php:1096
+#: classes/Views/AuditLog.php:1104
 msgid "Access Denied"
 msgstr ""
 
-#: classes/Views/AuditLog.php:1191
+#: classes/Views/AuditLog.php:1199
 msgid "Install the activity log extension for %1$s for more detailed logging of changes done in %2$s."
 msgstr ""
 
@@ -5857,7 +5857,7 @@ msgstr ""
 msgid "You are not allowed to view this page."
 msgstr ""
 
-#: extensions/external-db/classes/Common.php:819, extensions/external-db/classes/Settings.php:102
+#: extensions/external-db/classes/Common.php:821, extensions/external-db/classes/Settings.php:102
 msgid "External Storage"
 msgstr ""
 
@@ -6479,7 +6479,7 @@ msgid "The activity log data that was generated when writing to the database was
 msgstr ""
 
 #: extensions/external-db/classes/Mirroring.php:827
-msgid "Reenable database logging"
+msgid "Re-enable writing of activity log to the database"
 msgstr ""
 
 #: extensions/external-db/classes/Mirroring.php:837
@@ -7344,7 +7344,7 @@ msgstr ""
 msgid "Name can only be 12 characters long and only letters, numbers and underscore are allowed."
 msgstr ""
 
-#: extensions/search/classes/FilterManager.php:406, extensions/user-sessions/classes/View/Settings.php:96, extensions/user-sessions/classes/View/Options/Policies.php:339
+#: extensions/search/classes/FilterManager.php:406, extensions/user-sessions/classes/View/Settings.php:96, extensions/user-sessions/classes/View/Options/Policies.php:333
 msgid "Save"
 msgstr ""
 
@@ -7440,96 +7440,96 @@ msgstr ""
 msgid "Logged In Users"
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:187
+#: extensions/user-sessions/classes/Views.php:195
 msgid "Logging out..."
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:188
+#: extensions/user-sessions/classes/Views.php:196
 msgid "Refreshing..."
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:189
+#: extensions/user-sessions/classes/Views.php:197
 msgid "This could result in loss of unsaved work. Are you sure?"
 msgstr ""
 
 #. translators: %s: Total number of users
-#: extensions/user-sessions/classes/Views.php:191
+#: extensions/user-sessions/classes/Views.php:199
 msgid "out of %s user sessions terminated."
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:193, extensions/user-sessions/classes/View/Sessions.php:80
+#: extensions/user-sessions/classes/Views.php:201, extensions/user-sessions/classes/View/Sessions.php:80
 msgid "Retrieve user data"
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:194
+#: extensions/user-sessions/classes/Views.php:202
 msgid "Retrieving data"
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:195
+#: extensions/user-sessions/classes/Views.php:203
 msgid "Data retrieved"
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:196
+#: extensions/user-sessions/classes/Views.php:204
 msgid "Event ID: "
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:197
+#: extensions/user-sessions/classes/Views.php:205
 msgid "Object: "
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:198
+#: extensions/user-sessions/classes/Views.php:206
 msgid "Event Type: "
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:259
+#: extensions/user-sessions/classes/Views.php:267
 msgid "Terminate all logged in sessions"
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:260
+#: extensions/user-sessions/classes/Views.php:268
 msgid "This will terminate all users' sessions including yours, which could result in unsaved work. Do you like to proceed?"
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:271
+#: extensions/user-sessions/classes/Views.php:279
 msgid "YES"
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:272
+#: extensions/user-sessions/classes/Views.php:280
 msgid "NO"
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:284
+#: extensions/user-sessions/classes/Views.php:292
 msgid "Terminate All Sessions"
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:404
+#: extensions/user-sessions/classes/Views.php:412
 msgid "Users sessions termination is in progress. Please wait..."
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:431, extensions/reports/classes/Views/Main.php:724
+#: extensions/user-sessions/classes/Views.php:439, extensions/reports/classes/Views/Main.php:724
 msgid "You do not have sufficient permissions."
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:457
+#: extensions/user-sessions/classes/Views.php:465
 msgid "No sessions."
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:482
+#: extensions/user-sessions/classes/Views.php:490
 msgid "Session destroyed."
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:490
+#: extensions/user-sessions/classes/Views.php:498
 msgid "User session data is not set."
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:506, extensions/user-sessions/classes/Views.php:580
+#: extensions/user-sessions/classes/Views.php:514, extensions/user-sessions/classes/Views.php:588
 msgid "User do not have sufficient permissions."
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:559
+#: extensions/user-sessions/classes/Views.php:567
 msgid "Sessions destroyed!"
 msgstr ""
 
-#: extensions/user-sessions/classes/Views.php:590
+#: extensions/user-sessions/classes/Views.php:598
 msgid "Nonce check failed."
 msgstr ""
 
@@ -7823,7 +7823,7 @@ msgstr ""
 msgid "Select a user role to filter"
 msgstr ""
 
-#: extensions/user-sessions/classes/Sensors/UserSessionsTracking.php:307, extensions/user-sessions/classes/View/Options/Policies.php:259
+#: extensions/user-sessions/classes/Sensors/UserSessionsTracking.php:307, extensions/user-sessions/classes/View/Options/Policies.php:253
 msgid "ERROR: Your session was blocked with the <a href=\"https://en-gb.wordpress.org/plugins/wp-security-audit-log\" target=\"_blank\">WP Activity Log plugin</a> because there is already another user logged in with the same username. Please contact the site administrator for more information."
 msgstr ""
 
@@ -7932,129 +7932,127 @@ msgstr ""
 msgid "Main Policies"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:141
-msgid "Do not enforce policies on users with this role"
+#: extensions/user-sessions/classes/View/Options/Policies.php:110
+msgid "Users session management is available in the Business and Enterprise plans."
 msgstr ""
 
-#. translators: %s: Twilio settings link
-#. translators: %s: Twilio settings link
-#: extensions/user-sessions/classes/View/Options/Policies.php:158, extensions/user-sessions/classes/View/Options/Policies.php:188
-msgid "Users session management is available in the Business and Enterprise plans. %s"
-msgstr ""
-
-#: extensions/user-sessions/classes/View/Options/Policies.php:159, extensions/user-sessions/classes/View/Options/Policies.php:189
+#: extensions/user-sessions/classes/View/Options/Policies.php:117
 msgid "Upgrade the plan"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:171
+#: extensions/user-sessions/classes/View/Options/Policies.php:159
+msgid "Do not enforce policies on users with this role"
+msgstr ""
+
+#: extensions/user-sessions/classes/View/Options/Policies.php:177
 msgid "Inherit the sessions policies"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:111
+#: extensions/user-sessions/classes/View/Options/Policies.php:129
 msgid "Users sessions policies"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:113
+#: extensions/user-sessions/classes/View/Options/Policies.php:131
 msgid "Use the settings below to configure the policies to manage the users' sessions policies. These policies are automatically inherited by all profiles. However, you can disable the inheritance or configure different policies for specific roles in the role's tab."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:118
+#: extensions/user-sessions/classes/View/Options/Policies.php:136
 msgid "Enable session policies"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:203
+#: extensions/user-sessions/classes/View/Options/Policies.php:197
 msgid "By default WordPress does not limit how many times the same user can connect simultaneously. So two different users can login at the same time using the same username. Use the settings below to limit and also block simultaneous connections for the same username."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:205
+#: extensions/user-sessions/classes/View/Options/Policies.php:199
 msgid "Do you want to allow two or more people to login simultaneously with the same username?"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:207
+#: extensions/user-sessions/classes/View/Options/Policies.php:201
 msgid "By allowing multiple sessions two or more people can login to WordPress using the same username. By blocking them, once a person is logged in with a username, if another person tries to login with the same username they will be blocked."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:212
+#: extensions/user-sessions/classes/View/Options/Policies.php:206
 msgid "Multiple Sessions"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:221
+#: extensions/user-sessions/classes/View/Options/Policies.php:215
 msgid "Allow one session only"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:227
+#: extensions/user-sessions/classes/View/Options/Policies.php:221
 msgid "Allow one session only and override current session"
 msgstr ""
 
 #. translators: Number of sessions input tag
-#: extensions/user-sessions/classes/View/Options/Policies.php:237
+#: extensions/user-sessions/classes/View/Options/Policies.php:231
 msgid "Allow up to %s sessions and block the rest"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:248
+#: extensions/user-sessions/classes/View/Options/Policies.php:242
 msgid "Configure a Blocked Session Notification for Users"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:250
+#: extensions/user-sessions/classes/View/Options/Policies.php:244
 msgid "This error message is shown to users when they try to login with a username that already has a session and their session is blocked. You can change this message by editing the text in the below placeholder. Only <a href> HTML code is allowed."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:255
+#: extensions/user-sessions/classes/View/Options/Policies.php:249
 msgid "Blocked Sessions Error"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:273
+#: extensions/user-sessions/classes/View/Options/Policies.php:267
 msgid "Do you want to terminate idle sessions automatically?"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:275
+#: extensions/user-sessions/classes/View/Options/Policies.php:269
 msgid "If a session has been idle for more than the configured number of hours, it will be automatically destroyed by the plugin."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:280
+#: extensions/user-sessions/classes/View/Options/Policies.php:274
 msgid "Terminate Idle Sessions"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:297
+#: extensions/user-sessions/classes/View/Options/Policies.php:291
 msgid "1"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:298
+#: extensions/user-sessions/classes/View/Options/Policies.php:292
 msgid "4"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:299
+#: extensions/user-sessions/classes/View/Options/Policies.php:293
 msgid "8"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:300
+#: extensions/user-sessions/classes/View/Options/Policies.php:294
 msgid "12"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:301
+#: extensions/user-sessions/classes/View/Options/Policies.php:295
 msgid "24"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:302
+#: extensions/user-sessions/classes/View/Options/Policies.php:296
 msgid "32"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:303
+#: extensions/user-sessions/classes/View/Options/Policies.php:297
 msgid "48"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:310
+#: extensions/user-sessions/classes/View/Options/Policies.php:304
 msgid "terminate sessions if they have been idle for more than"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:321
+#: extensions/user-sessions/classes/View/Options/Policies.php:315
 msgid " hour"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:321, extensions/user-sessions/classes/View/Options/Policies.php:328
+#: extensions/user-sessions/classes/View/Options/Policies.php:315, extensions/user-sessions/classes/View/Options/Policies.php:322
 msgid " hours"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Options/Policies.php:314
+#: extensions/user-sessions/classes/View/Options/Policies.php:308
 msgid " seconds (Testing)"
 msgstr ""
