@@ -5,7 +5,7 @@
  * Comments sensor class file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -27,8 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2098 User permanently deleted a comment
  * 2099 User posted a comment
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 

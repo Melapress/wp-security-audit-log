@@ -5,7 +5,7 @@
  * WSAL email notifications page.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Email Notifications Add-On promo Page.
  * Used only if the plugin is not activated.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Views_EmailNotifications extends WSAL_ExtensionPlaceholderView {
 

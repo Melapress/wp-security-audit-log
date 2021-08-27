@@ -71,40 +71,38 @@ jQuery( document ).ready( function() {
 			dataType : "json",
 			url: wsalCommonData.ajaxURL,
 			data : {
-				action: "run_addon_install",
+				action: "wsal_run_addon_install",
 				plugin_slug: PluginSlug,
 				plugin_url: PluginDownloadUrl,
 				_wpnonce: nonceValue
 			},
 			complete: function( data ) {
+				var do_redirect = true;
 				if( data.responseText == '"already_installed"' ) {
 					jQuery(currentButton).html( wsalCommonData.already_installed ).addClass('disabled');
 					jQuery(currentButton).next('.spinner').hide('200');
-					if (typeof RedirectToTab !== 'undefined') {
-						window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
-						jQuery('[href="' + RedirectToTab + '"]').trigger('click');
-					}
 					jQuery(currentButton).addClass('disabled');
 				} else if ( data.responseText == '"activated"' ) {
 					jQuery(currentButton).html( wsalCommonData.activated ).addClass('disabled');
 					jQuery(currentButton).next('.spinner').hide('200');
-					if (typeof RedirectToTab !== 'undefined') {
-						window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
-						jQuery('[href="' + RedirectToTab + '"]').trigger('click');
-					}
 					jQuery(currentButton).addClass('disabled');
-			 } else if ( JSON.stringify(data.responseText).toLowerCase().indexOf('failed') >= 0 ) {
+				} else if ( JSON.stringify(data.responseText).toLowerCase().indexOf('failed') >= 0 ) {
 					jQuery(currentButton).html( wsalCommonData.failed ).addClass('disabled');
 					jQuery(currentButton).next('.spinner').hide('200');
-			 } else if ( data.responseText == '"success"' || JSON.stringify(data.responseText).toLowerCase().indexOf('success') >= 0 ) {
+					do_redirect = false;
+				} else if ( data.responseText == '"success"' || JSON.stringify(data.responseText).toLowerCase().indexOf('success') >= 0 ) {
 				 jQuery(currentButton).html( wsalCommonData.installed ).addClass('disabled');
 				 jQuery(currentButton).next('.spinner').hide('200');
-				 if (typeof RedirectToTab !== 'undefined') {
-					 window.location.href="admin.php?page=wsal-togglealerts" + RedirectToTab;
-				 }
-				 // Reload as tabs are not present on page.
-				 location.reload();
-			 }
+				}
+
+				if (do_redirect && typeof RedirectToTab !== 'undefined') {
+					setTimeout(function(){
+						window.location="admin.php?page=wsal-togglealerts" + RedirectToTab;
+						jQuery('[href="' + RedirectToTab + '"]').trigger('click');
+						// Reload as tabs are not present on page.
+						window.location.reload();
+					},100);
+				}
 			 jQuery(".install-addon").not(this).prop('disabled', false);
 			},
 		});

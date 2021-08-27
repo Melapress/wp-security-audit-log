@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 4.4
 Tested up to: 5.7.2
-Stable tag: 4.3.1
+Stable tag: 4.3.1.1
 Requires PHP: 7.0
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -208,15 +208,9 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.3.1 (2021-06-03) =
+= 4.3.1.1 (2021-06-28) =
 
-**Improvements**
-	* Minimum version of PHP required now is 7.0.
-	* Added a custom prefix to libraries and dependencies used in the plugin to ensure there are no conflicts.
-
-**Bug fixes**
-	* Corrected logic in code to ensure all sessions are handled and checked when destroying idle sessions.
-	* Fixed an issue causing create/expired times in the "Logged in users" view to appear incorrectly.
-	* Implemented a missing function without with events were not retreived from the MainWP extension.
+**Bug fix**
+	* Scheduled reports could not be saved / generating a critical error.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.

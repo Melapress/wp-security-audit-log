@@ -5,7 +5,7 @@
  * Sensor manager class file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * This class loads all the sensors and initialize them.
  *
- * @package Wsal
+ * @package wsal
  */
 final class WSAL_SensorManager extends WSAL_AbstractSensor {
 

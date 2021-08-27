@@ -5,7 +5,7 @@
  * Multisite sensor file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -29,8 +29,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 7005 Existing site deleted from network
  * 7012 Network registration option updated
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 

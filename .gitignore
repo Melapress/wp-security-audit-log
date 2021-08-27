@@ -93,3 +93,6 @@ Rails
 /third-party/
 
 /php-scoper/vendor
+.vscode/launch.json
+
+/bin/install-dependencies-composer-indipendant.sh

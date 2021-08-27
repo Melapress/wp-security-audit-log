@@ -4,7 +4,7 @@
  *
  * MySQL database Query class.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -18,14 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * The SQL query is created in this class, here the SQL is filled with
  * the arguments.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 
 	/**
 	 * DB Connection
 	 *
-	 * @var array
+	 * @var wpdb
 	 */
 	protected $connection;
 
@@ -294,5 +294,9 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 		}
 		$search_conditions['args'] = '%' . $condition . '%';
 		return $search_conditions;
+	}
+
+	public function IsConnected() {
+		return ( $this->connection && $this->connection->has_connected );
 	}
 }

@@ -3,14 +3,14 @@
  * Abstract class used in all the views.
  *
  * @see Views/*.php
- * @package Wsal
+ * @package wsal
  */
 abstract class WSAL_AbstractView {
 
 	/**
 	 * Instance of WpSecurityAuditLog.
 	 *
-	 * @var object
+	 * @var WpSecurityAuditLog
 	 */
 	protected $_plugin;
 

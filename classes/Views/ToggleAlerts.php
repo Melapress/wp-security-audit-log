@@ -5,7 +5,7 @@
  * Settings page of the plugin.
  *
  * @since   1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Enable/Disable Alerts Page.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 

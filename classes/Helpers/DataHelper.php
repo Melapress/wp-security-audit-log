@@ -4,7 +4,7 @@
  *
  * Helper class used for encode/decode json data..
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Helper class used for encode/decode json data.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Helpers_DataHelper {
 

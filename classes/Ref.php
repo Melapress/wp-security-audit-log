@@ -6,7 +6,7 @@
  * @link https://github.com/digitalnature/php-ref GitHub Repository
  * @version 1.2
  * @since 3.1.6
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.

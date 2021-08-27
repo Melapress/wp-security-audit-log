@@ -5,7 +5,7 @@
  * Class file for installing plugins from the repo.
  *
  * @since 4.0.1
- * @package Wsal
+ * @package wsal
  */
 
 if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
@@ -24,8 +24,6 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 		 * @since  4.0.1
 		 */
 		public function register() {
-			// @TODO: remove this unprefixed call and swap to prefixed only.
-			add_action( 'wp_ajax_run_addon_install', array( $this, 'run_addon_install' ) );
 			add_action( 'wp_ajax_wsal_run_addon_install', array( $this, 'run_addon_install' ) );
 		}
 

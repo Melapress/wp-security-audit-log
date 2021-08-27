@@ -4,7 +4,7 @@
  *
  * OccurrenceQuery model adds or clears arguments in the Query model.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * OccurrenceQuery model adds or clears arguments in the Query model.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Models_OccurrenceQuery extends WSAL_Models_Query {
 

@@ -201,13 +201,18 @@ function WsalSsasChange(value) {
 }
 
 function WsalDisableCustom(link, meta_key) {
-	var nonce = jQuery(link).data('disable-custom-nonce');
-	jQuery(link).hide();
+	var linkElm = jQuery(link);
+	linkElm.hide();
 	jQuery.ajax({
 		type: 'POST',
 		url: ajaxurl,
 		async: false,
-		data: { action: 'AjaxDisableCustomField', notice: meta_key, disable_nonce: nonce },
+		data: {
+			action: 'AjaxDisableCustomField',
+			notice: meta_key,
+			disable_nonce: linkElm.data('disable-custom-nonce'),
+			object_type: linkElm.data('object-type')
+		},
 		success: function (data) {
 			var notice = jQuery('<div class="updated" data-notice-name="notifications-extension"></div>').html(data);
 			jQuery("h2:first").after(notice);
@@ -446,29 +451,6 @@ var wsalLoadEventsResponse = true; // Global variable to check events loading re
 jQuery( document ).ready( function() {
 
 	/**
-	 * Dismiss DB disconnect issue notice.
-	 */
-	jQuery( '#wsal-notice-connect-issue' ).click( function() {
-		jQuery.ajax({
-			type: 'POST',
-			url: ajaxurl,
-			async: true,
-			data: {
-				action: 'wsal_dismiss_notice_disconnect',
-				nonce: jQuery( '#wsal-dismiss-notice-disconnect' ).val()
-			},
-			success: function( data ) {
-				console.log( data );
-			},
-			error: function( xhr, textStatus, error ) {
-				console.log( xhr.statusText );
-				console.log( textStatus );
-				console.log( error );
-			}
-		});
-	});
-
-	/**
 	 * Dismiss addon-available notice.
 	 */
 	jQuery( '.notice-addon-available .notice-dismiss' ).click( function() {
@@ -570,3 +552,28 @@ function wsal_addon_installer_ajax( button ) {
 		}
 	);
 }
+
+jQuery( document ).ready( function() {
+
+	jQuery( document ).on( 'click', '.notice.is-dismissible .notice-dismiss', function(event) {
+		var noticeElm = jQuery(this).parent();
+		var action = noticeElm.attr('data-dismiss-action');
+		console.log(noticeElm);
+		console.log(action);
+		if ( !action ){
+			return;
+		}
+
+		event.preventDefault();
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			async: true,
+			data: {
+				action: jQuery(this).parent().attr('data-dismiss-action'),
+				nonce: jQuery(this).parent().attr('data-nonce')
+			}
+		});
+	});
+
+});

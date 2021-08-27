@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Audit Log Viewer Page
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
@@ -77,10 +77,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_freemius_opt_in', array( $this, 'wsal_freemius_opt_in' ) );
 		add_action( 'wp_ajax_wsal_dismiss_setup_modal', array( $this, 'dismiss_setup_modal' ) );
 		add_action( 'wp_ajax_wsal_dismiss_advert', array( $this, 'wsal_dismiss_advert' ) );
-		add_action( 'wp_ajax_wsal_dismiss_notice_disconnect', array( $this, 'dismiss_notice_disconnect' ) );
 		add_action( 'wp_ajax_wsal_dismiss_notice_addon_available', array( $this, 'dismiss_notice_addon_available' ) );
+		add_action( 'wp_ajax_wsal_dismiss_missing_aws_sdk_nudge', array( $this, 'dismiss_missing_aws_sdk_nudge' ) );
 		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( $this, 'dismiss_wp_pointer' ) );
-		add_action( 'all_admin_notices', array( $this, 'AdminNoticesPremium' ) );
+		add_action( 'all_admin_notices', array( $this, 'AdminNotices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
 		add_filter( 'wsal_pointers_toplevel_page_wsal-auditlog', array( $this, 'register_privacy_pointer' ), 10, 1 );
 		add_action( 'admin_init', array( $this, 'handle_form_submission' ) );
@@ -121,7 +121,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 *   2. DB disconnection notice.
 	 *   3. Freemius opt-in/out notice.
 	 */
-	public function AdminNoticesPremium() {
+	public function AdminNotices() {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
 
 		// Check if any of the extensions is activated.
@@ -196,26 +196,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			endif;
 		}
 
-		// Get DB connector.
-		$db_config  = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
-		$wsal_db    = $this->_plugin->getConnector( $db_config )->getConnection(); // Get DB connection.
-		$connection = true;
-		if ( isset( $wsal_db->dbh->errno ) ) {
-			$connection = 0 !== (int) $wsal_db->dbh->errno ? false : true; // Database connection error check.
-		} elseif ( is_wp_error( $wsal_db->error ) ) {
-			$connection = false;
-		}
-
-		// Add connectivity notice.
-		$notice_dismissed = get_transient( 'wsal-dismiss-notice-disconnect' );
-		if ( ! $connection && false === $notice_dismissed && $is_current_view ) {
-			?>
-			<div class="notice notice-error is-dismissible" id="wsal-notice-connect-issue">
-				<p><?php esc_html_e( 'There are connectivity issues with the database where the WordPress activity log is stored. The logs will be temporary buffered in the WordPress database until the connection is fully restored.', 'wp-security-audit-log' ); ?></p>
-				<?php wp_nonce_field( 'wsal_dismiss_notice_disconnect', 'wsal-dismiss-notice-disconnect', false, true ); ?>
-			</div>
-			<?php
-		}
 
 		// Check anonymous mode.
 		if ( 'anonymous' === $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) ) { // If user manually opt-out then don't show the notice.
@@ -244,6 +224,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Display add-on available notice.
 		$screen = get_current_screen();
+
+
 		if ( $is_current_view && in_array( $screen->base, array( 'toplevel_page_wsal-auditlog', 'toplevel_page_wsal-auditlog-network' ) ) ) {
 			// Grab list of installed plugins.
 			$all_plugins      = get_plugins();
@@ -291,7 +273,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 									esc_html__( 'installed.', 'wp-security-audit-log' ),
 									esc_html( $plugin_description ),
 									esc_html__( 'Install extension', 'wp-security-audit-log' ),
-									esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', network_admin_url( 'admin.php' ) ) )
+									$this->get_third_party_plugins_tab_url()
 								);
 								?>
 								<?php wp_nonce_field( 'wsal_dismiss_notice_addon_available_' . $addon, 'wsal-dismiss-notice-addon-available-' . $addon, false, true ); ?>
@@ -302,24 +284,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Method: Ajax handler for dismissing DB disconnect issue.
-	 */
-	public function dismiss_notice_disconnect() {
-		// Get $_POST array arguments.
-		$post_array_args = array(
-			'nonce' => FILTER_SANITIZE_STRING,
-		);
-		$post_array      = filter_input_array( INPUT_POST, $post_array_args );
-
-		// Verify nonce.
-		if ( wp_verify_nonce( $post_array['nonce'], 'wsal_dismiss_notice_disconnect' ) ) {
-			set_transient( 'wsal-dismiss-notice-disconnect', 1, 6 * HOUR_IN_SECONDS );
-			die();
-		}
-		die( 'Nonce verification failed!' );
 	}
 
 	/**
@@ -420,9 +384,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 			// If 'grid' is requested use it otherwise use list view by default.
 			if ( 'grid' !== $requested_view ) {
-				$this->_view = new WSAL_AuditLogListView( $this->_plugin, $this->page_args );
+				$this->_view = new WSAL_AuditLogListView( $this->_plugin, $this, $this->page_args );
 			} else {
-				$this->_view = new WSAL_AuditLogGridView( $this->_plugin, $this->page_args );
+				$this->_view = new WSAL_AuditLogGridView( $this->_plugin, $this, $this->page_args );
 			}
 
 			// if the requested view didn't match the view users last viewed
@@ -652,14 +616,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die( 'Occurrence parameter expected.' );
 		}
 
-		// Get selected db.
-		$selected_db      = get_transient( 'wsal_wp_selected_db' );
-		$selected_db_user = (int) get_transient( 'wsal_wp_selected_db_user' );
-
-		// Check if archive db is enabled and the current user matches the one who selected archive db.
-		if ( ! empty( $selected_db ) && 'archive' === $selected_db && get_current_user_id() === $selected_db_user ) {
-			$this->_plugin->settings()->SwitchToArchiveDB(); // Switch to archive DB.
-		}
 
 		$occ = new WSAL_Models_Occurrence();
 		$occ->Load( 'id = %d', array( (int) $get_array['occurrence'] ) );
@@ -681,7 +637,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Ajax callback to refrest the view.
+	 * Ajax callback to refresh the view.
 	 */
 	public function AjaxRefresh() {
 		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
@@ -699,26 +655,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Total number of alerts.
 		$old = (int) $post_array['logcount'];
 
-		// Check if the user is viewing archived db.
-		$is_archive = false;
-		if ( $this->_plugin->settings()->IsArchivingEnabled() ) {
-			$selected_db = get_transient( 'wsal_wp_selected_db' );
-			if ( $selected_db && 'archive' === $selected_db ) {
-				$is_archive = true;
-			}
-		}
 
 		// Check for new total number of alerts.
 		$occ = new WSAL_Models_Occurrence();
 		$new = (int) $occ->Count();
 
-		// If the current view is archive then don't refresh.
-		if ( $is_archive ) {
-			echo 'false';
-		} else {
-			// If the count is changed, then return the new count.
-			echo $old === $new ? 'false' : esc_html( $new );
-		}
+        // If the count is changed, then return the new count.
+        echo $old === $new ? 'false' : esc_html( $new );
 		die;
 	}
 
@@ -770,18 +713,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		die( json_encode( array_slice( $grp1 + $grp2, 0, 7 ) ) );
 	}
 
-	/**
-	 * Ajax callback to switch database.
-	 */
-	public function AjaxSwitchDB() {
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
-
-		if ( isset( $post_array['selected_db'] ) ) {
-			set_transient( 'wsal_wp_selected_db', $post_array['selected_db'], HOUR_IN_SECONDS );
-			set_transient( 'wsal_wp_selected_db_user', get_current_user_id(), HOUR_IN_SECONDS );
-		}
-	}
 
 	/**
 	 * Ajax callback to download failed login log.
@@ -914,6 +845,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			array(),
 			filemtime( $this->_plugin->GetBaseDir() . '/css/auditlog.css' )
 		);
+
+		// admin notices styles
+		wp_enqueue_style(
+			'wsal_admin_notices',
+			$this->_plugin->GetBaseUrl() . '/css/admin-notices.css',
+			array(),
+			filemtime( $this->_plugin->GetBaseDir() . '/css/admin-notices.css' )
+		);
 	}
 
 	/**
@@ -971,7 +910,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'msgError'        => sprintf(
 					/* translators: 1 - an opening link tag, 2 - the closing tag. */
 					__( '<br>An error occurred when trying to install and activate the plugin. Please try install it again from the %1$sevent settings%2$s page.', 'wp-security-audit-log' ),
-					'<a href="' . esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', network_admin_url( 'admin.php' ) ) ) . '">',
+					$this->get_third_party_plugins_tab_url(),
 					'</a>'
 				),
 			),
@@ -1227,6 +1166,46 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		$this->_plugin->SetGlobalBooleanSetting( 'setup-modal-dismissed', true );
-		echo wp_send_json_success();
+		wp_send_json_success();
+	}
+
+
+	/**
+	 * @return string URL of the 3rd party extensions tab.
+     * @since 4.3.2
+	 */
+    public function get_third_party_plugins_tab_url() {
+	    return esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', network_admin_url( 'admin.php' ) ) );
+    }
+
+	/**
+	 * Builds HTML markup to display 3rd party extension teaser if there is a post type in the event meta data and the
+	 * custom post belongs to certain 3rd party plugin.
+	 *
+	 * @param array $event_meta Event meta data array.
+	 *
+	 * @return string HTML teaser markup or empty string.
+	 * @since 4.3.2
+	 */
+	public function maybe_build_teaser_html( $event_meta ) {
+		$result = '';
+		if ( array_key_exists( 'PostType', $event_meta ) ) {
+			$extension = WSAL_AbstractExtension::get_extension_for_post_type( $event_meta['PostType'] );
+			if ( ! is_null( $extension ) ) {
+				$result      .= '<div class="extension-ad" style="border-color: transparent transparent ' . $extension->get_color() . ' transparent;">';
+				$result      .= '</div>';
+				$plugin_name = $extension->get_plugin_name();
+				$link_title  = sprintf(
+					esc_html__( 'Install the activity log extension for %1$s for more detailed logging of changes done in %2$s.', 'wp-security-audit-log' ),
+					$plugin_name,
+					$plugin_name
+				);
+				$result      .= '<a class="icon" title="' . $link_title . '" href="' . $this->get_third_party_plugins_tab_url() . '">';
+				$result      .= '<img src="' . $extension->get_plugin_icon_url() . '" />';
+				$result      .= '</div>';
+			}
+		}
+
+		return $result;
 	}
 }

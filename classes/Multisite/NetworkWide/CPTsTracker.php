@@ -5,7 +5,7 @@
  * Helper class used for tracking various bits of network wide data.
  *
  * @since   3.5.2
- * @package Wsal
+ * @package wsal
  */
 
 namespace WSAL\Multisite\NetworkWide;

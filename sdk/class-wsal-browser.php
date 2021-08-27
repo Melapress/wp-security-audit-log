@@ -5,7 +5,7 @@
  * Browser Information Class of the plugin.
  *
  * @since   3.2.2
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.

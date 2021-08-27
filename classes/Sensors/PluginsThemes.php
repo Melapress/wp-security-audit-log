@@ -5,7 +5,7 @@
  * Plugins & Themes sensor file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -26,8 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 5007 User uninstalled a theme
  * 5031 User updated a theme
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 

@@ -5,7 +5,7 @@
  * Option Model gets and sets the options from the main WP options table.
  *
  * @since   4.0.2
- * @package Wsal
+ * @package wsal
  */
 
 namespace WSAL\Helpers;
@@ -117,6 +117,7 @@ class Options {
 	 * @return bool
 	 */
 	public function delete_option( $option_name = '' ) {
+
 		if (is_multisite()) {
 			switch_to_blog(get_main_network_id());
 		}
@@ -257,5 +258,25 @@ class Options {
 			$bool = self::string_to_bool( $bool );
 		}
 		return true === $bool ? 'yes' : 'no';
+	}
+
+	/**
+	 * Create neat email/sms string to display in the event.
+	 *
+	 * @param  string $email
+	 * @param  string $sms
+	 * @return string
+	 */
+	public static function create_recipient_string( $email, $sms ) {
+		$recipient = ( isset( $email ) ) ? $email : '';
+		if ( isset(  $sms ) && ! empty(  $sms ) ) {
+			// Only add seperator if needed.
+			if ( ! empty( $recipient ) ) {
+				$recipient .= ' | ';
+			}
+			$recipient .= $sms;
+		}
+
+		return $recipient;
 	}
 }

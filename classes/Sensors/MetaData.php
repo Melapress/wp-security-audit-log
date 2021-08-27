@@ -5,7 +5,7 @@
  * Meta Data sensor file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -27,8 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 4019 User changed nickname for a user
  * 4020 User changed the display name for a user
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  * @since 1.0.0
  */
 class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
@@ -63,7 +63,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 * @param mixed  $meta_value - Meta value.
 	 */
 	public function EventPostMetaCreated( $object_id, $meta_key, $meta_value ) {
-		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
+		if ( ! $this->CanLogMetaKey( 'post', $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
@@ -155,7 +155,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 * @param mixed  $meta_value - Meta value.
 	 */
 	public function EventPostMetaUpdated( $meta_id, $object_id, $meta_key, $meta_value ) {
-		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
+		if ( ! $this->CanLogMetaKey( 'post', $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
@@ -281,7 +281,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 
 		$editor_link = $this->GetEditorLink( $post );
 		foreach ( $meta_ids as $meta_id ) {
-			if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) ) {
+			if ( ! $this->CanLogMetaKey( 'post', $object_id, $meta_key ) ) {
 				continue;
 			}
 
@@ -349,7 +349,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 */
 	public function event_user_meta_created( $object_id, $meta_key, $meta_value ) {
 		// Check to see if we can log the meta key.
-		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
+		if ( ! $this->CanLogMetaKey( 'user', $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
@@ -409,7 +409,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 */
 	public function event_user_meta_updated( $meta_id, $object_id, $meta_key, $meta_value ) {
 		// Check to see if we can log the meta key.
-		if ( ! $this->CanLogMetaKey( $object_id, $meta_key ) || is_array( $meta_value ) ) {
+		if ( ! $this->CanLogMetaKey( 'user', $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
@@ -438,6 +438,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 						'LastName'          => $user->user_lastname,
 						'Roles'             => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 						'EditUserLink'      => add_query_arg( 'user_id', $user->ID, admin_url( 'user-edit.php' ) ),
+						'MetaLink'          => $meta_key,
 					),
 					array( $this, 'must_not_contain_role_changes' )
 				);
@@ -459,6 +460,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 								'LastName'       => $user->user_lastname,
 								'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 								'EditUserLink'   => add_query_arg( 'user_id', $user->ID, admin_url( 'user-edit.php' ) ),
+								'MetaLink'       => $meta_key,
 							)
 						);
 					}

@@ -4,7 +4,7 @@
  *
  * Abstract class used as a class loader.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -20,7 +20,7 @@ require_once( 'wp-db-custom.php' );
  *
  * Abstract class used as a class loader.
  *
- * @package Wsal
+ * @package wsal
  */
 abstract class WSAL_Connector_AbstractConnector {
 

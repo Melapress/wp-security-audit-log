@@ -3,7 +3,7 @@
 /**
  * WSAL_Alert Object class.
  *
- * @package Wsal
+ * @package wsal
  */
 final class WSAL_Alert {
 

@@ -4,7 +4,7 @@
  *
  * Abstract class used for create the connector, only MySQL is implemented.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Abstract class used for create the connector, only MySQL is implemented.
  *
  * @todo Add other adapters.
- * @package Wsal
+ * @package wsal
  */
 abstract class WSAL_Connector_ConnectorFactory {
 
@@ -33,7 +33,7 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 *
 	 * @var array
 	 */
-	private static $connector;
+	private static $connectors = [];
 	/**
 	 * Occurrence is installed.
 	 *
@@ -54,31 +54,50 @@ abstract class WSAL_Connector_ConnectorFactory {
 	/**
 	 * Returns a connector singleton
 	 *
-	 * @param array $config - Connection config.
+	 * @param string|array $config DB configuration array, db alias or empty to use default connection.
 	 * @param bool $reset - True if reset.
 	 *
 	 * @return WSAL_Connector_ConnectorInterface
 	 * @throws Freemius_Exception
 	 */
 	public static function GetConnector( $config = null, $reset = false ) {
-		if ( ! empty( $config ) ) {
-			$connection_config = $config;
+		$connection_config = null;
+		if ( is_null( $config ) || empty( $config ) ) {
+			//  default config - local or external, depending on plugin settings and licensing
+			$connection_config = self::GetConfig( $config );
 		} else {
-			$connection_config = self::GetConfig();
+			if ( is_string( $config ) ) {
+			    //  string based config, can be used to retrieve local WP connection
+                if ( 'local' === $config ) {
+                    //  this forces the WSAL_Connector_MySQLDB to return connection to local WP database
+	                $connection_config = null;
+                }
+			} else if ( is_array( $config ) ) {
+			    //  array config gets connection to whatever database configuration it holds
+				$connection_config = $config;
+			}
+		}
+
+		$cache_key = 'default';
+		if ( is_string( $config ) ) {
+			$cache_key = $connection_config;
+		} else if ( is_array( $connection_config ) ) {
+			$cache_key = $connection_config['name'];
 		}
 
 		// TO DO: Load connection config.
-		if ( null == self::$connector || ! empty( $config ) || $reset ) {
-			switch ( strtolower( isset( $connection_config['type'] ) ? $connection_config['type'] : '' ) ) {
+		if ( ! array_key_exists($cache_key,  self::$connectors) || $reset ) {
+			$connection_type = is_array( $connection_config ) && isset( $connection_config['type'] ) ? strtolower( $connection_config['type'] ) : '';
+			switch ( $connection_type ) {
 				// TO DO: Add other connectors.
 				case 'mysql':
 				default:
 					// Use config.
-					self::$connector = new WSAL_Connector_MySQLDB( $connection_config );
+					self::$connectors[$cache_key] = new WSAL_Connector_MySQLDB( $connection_config );
 			}
 		}
 
-		return self::$connector;
+		return self::$connectors[$cache_key];
 	}
 
 	/**
@@ -137,8 +156,8 @@ abstract class WSAL_Connector_ConnectorFactory {
 		//  only mysql supported at the moment
 		if ( array_key_exists( 'type', $config ) && 'mysql' === $config['type'] ) {
 			try {
-				$test = new WSAL_Connector_MySQLDB( $config );
-				return $test->TestConnection();
+				$connector = new WSAL_Connector_MySQLDB( $config );
+				return $connector->TestConnection();
 			} catch ( Exception $e ) {
 				return false;
 			}

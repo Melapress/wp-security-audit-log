@@ -8,7 +8,7 @@ if ( ! class_exists( 'WSAL_BBPressExtension' ) ) {
 			$new_plugin = array(
 				array(
 					'addon_for'          => 'bbpress',
-					'title'              => 'BBPress',
+					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'bbpress.png',
 					'plugin_slug'        => 'wp-security-audit-log-add-on-for-bbpress/wsal-bbpress.php',
 					'plugin_basename'    => 'wsal-bbpress.php',
@@ -19,21 +19,35 @@ if ( ! class_exists( 'WSAL_BBPressExtension' ) ) {
 			);
 
 			// combine the two arrays.
-			$plugins = array_merge( $plugins, $new_plugin );
-			return $plugins;
+			return array_merge( $plugins, $new_plugin );
 		}
 
 		public function add_event_codes( $addon_event_codes ) {
 			$new_event_codes = array(
 				'bbpress' => array(
-					'name'      => __( 'BBPress', 'wp-security-audit-log' ),
+					'name'      => $this->get_plugin_name(),
 					'event_ids' => array( 8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009, 8010, 8011, 8012, 8013, 8014, 8015, 8016, 8017, 8018, 8019, 8020, 8021, 8022, 8023 ),
 				),
 			);
 
 			// combine the two arrays.
-			$addon_event_codes = array_merge( $addon_event_codes, $new_event_codes );
-			return $addon_event_codes;
+			return array_merge( $addon_event_codes, $new_event_codes );
+		}
+
+		public function get_custom_post_types() {
+			return [ 'forum', 'topic', 'reply' ];
+		}
+
+		public function get_plugin_name() {
+			return 'BBPress';
+		}
+
+		public function get_plugin_icon_url() {
+			return 'https://ps.w.org/wp-security-audit-log-add-on-for-bbpress/assets/icon-128x128.png?rev=2253395';
+		}
+
+		public function get_color() {
+			return '#8dc770';
 		}
 	}
 }

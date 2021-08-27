@@ -5,7 +5,7 @@
  * Metadata model is the model for the Metadata adapter,
  * used for save and update the metadata.
  *
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Metadata model is the model for the Metadata adapter,
  * used for save and update the metadata.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_Models_Meta extends WSAL_Models_ActiveRecord {
 

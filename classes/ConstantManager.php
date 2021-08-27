@@ -5,7 +5,7 @@
  * CLass file for constant manager.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -18,9 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * E_NOTICE, E_WARNING, E_CRITICAL, etc.
  *
- * @package Wsal
+ * @package wsal
  */
 class WSAL_ConstantManager {
+
 
 	/**
 	 * Constants array.

@@ -5,7 +5,7 @@
  * Abstract sensor class file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Abstract class used in all the sensors.
  *
  * @see Sensors/*.php
- * @package Wsal
+ * @package wsal
  */
 abstract class WSAL_AbstractSensor {
 

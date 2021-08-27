@@ -5,7 +5,7 @@
  * CLass file for alert manager.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * It is the actual trigger for the alerts.
  *
- * @package Wsal
+ * @package wsal
  */
 final class WSAL_AlertManager {
 
@@ -67,13 +67,6 @@ final class WSAL_AlertManager {
 	protected $_triggered_types = array();
 
 	/**
-	 * Log events schedule hook name
-	 *
-	 * @var string
-	 */
-	private static $log_events_schedule_hook = 'wsal_log_events_ext_db';
-
-	/**
 	 * WP Users
 	 *
 	 * Store WP Users for caching purposes.
@@ -111,7 +104,6 @@ final class WSAL_AlertManager {
 			$this->AddFromFile( $file );
 		}
 
-		add_action( 'wsal_init', array( $this, 'schedule_log_events' ) );
 		add_action( 'shutdown', array( $this, '_CommitPipeline' ), 8 );
 
 		/**
@@ -155,32 +147,6 @@ final class WSAL_AlertManager {
 	}
 
 	/**
-	 * Method: Schedule log events for External DB
-	 * if buffer is enabled.
-	 */
-	public function schedule_log_events() {
-		// Get external buffer option.
-		$use_buffer = $this->plugin->GetGlobalBooleanSetting( 'adapter-use-buffer' );
-
-		// If external DB buffer is enabled then set the cron.
-		if ( $use_buffer ) {
-			// Hook scheduled method.
-			add_action( self::$log_events_schedule_hook, array( $this, 'log_temp_alerts' ) );
-
-			// Schedule event if there isn't any already.
-			if ( ! wp_next_scheduled( self::$log_events_schedule_hook ) ) {
-				wp_schedule_event(
-					time(), // Timestamp.
-					'tenminutes', // Frequency.
-					self::$log_events_schedule_hook // Scheduled event.
-				);
-			}
-		} elseif ( ! $use_buffer && wp_next_scheduled( self::$log_events_schedule_hook ) ) {
-			wp_clear_scheduled_hook( self::$log_events_schedule_hook );
-		}
-	}
-
-	/**
 	 * Add new logger from file inside autoloader path.
 	 *
 	 * @param string $file Path to file.
@@ -209,19 +175,6 @@ final class WSAL_AlertManager {
 	}
 
 	/**
-	 * Remove logger by class name.
-	 *
-	 * @param string $class The class name.
-	 */
-	public function RemoveByClass( $class ) {
-		foreach ( $this->_loggers as $i => $inst ) {
-			if ( get_class( $inst ) == $class ) {
-				unset( $this->_loggers[ $i ] );
-			}
-		}
-	}
-
-	/**
 	 * Trigger an alert.
 	 *
 	 * @param integer $type    - Alert type.
@@ -229,15 +182,9 @@ final class WSAL_AlertManager {
 	 * @param mixed   $delayed - False if delayed, function if not.
 	 */
 	public function Trigger( $type, $data = array(), $delayed = false ) {
-		// Get buffer use option.
-		$use_buffer = $this->plugin->GetGlobalBooleanSetting( 'adapter-use-buffer' );
-
-		// Log temporary alerts first.
-		if ( ! $use_buffer ) {
-			$this->log_temp_alerts();
-		}
-
+		//  figure out the username
 		$username = wp_get_current_user()->user_login;
+
 		// if user switching plugin class exists and filter is set to disable then try get the old user.
 		if ( apply_filters( 'wsal_disable_user_switching_plugin_tracking', false ) && class_exists( 'user_switching' ) ) {
 			$old_user = user_switching::get_old_user();
@@ -300,6 +247,7 @@ final class WSAL_AlertManager {
 	 *
 	 * @param string $user - Username.
 	 * @param array  $roles - User roles.
+	 *
 	 * @return boolean - True if enable false otherwise.
 	 */
 	public function CheckEnableUserRoles( $user, $roles ) {
@@ -321,9 +269,7 @@ final class WSAL_AlertManager {
 	 * @param callable $cond - A future condition callback (receives an object of type WSAL_AlertManager as parameter).
 	 */
 	public function TriggerIf( $type, $data, $cond = null ) {
-
 		$username = null;
-		$roles = [];
 
 		// if user switching plugin class exists and filter is set to disable then try get the old user.
 		if ( apply_filters( 'wsal_disable_user_switching_plugin_tracking', false ) && class_exists( 'user_switching' ) ) {
@@ -337,6 +283,7 @@ final class WSAL_AlertManager {
 			}
 		}
 
+		$roles = [];
 		if ( 1000 === $type ) {
 			//  when event 1000 is triggered, the user is not logged in
 			//  we need to extract the username and user roles from the event data
@@ -495,6 +442,20 @@ final class WSAL_AlertManager {
 			/* Translators: Event ID */
 			throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Activity Log.', 'wp-security-audit-log' ), $code ) );
 		}
+
+		/**
+		 * WSAL Filter: `wsal_event_metadata_definition`
+		 *
+		 * Filters event meta data definition before registering specific event with the alert manager. This is the
+		 * preferred way to change metadata definition of built-in events.
+		 *
+		 * @param array $metadata - Event data.
+		 * @param integer $code - Event ID.
+		 *
+		 * @since 4.3.2
+		 *
+		 */
+		$metadata = apply_filters( 'wsal_event_metadata_definition', $metadata, $code );
 
 		$this->_alerts[ $code ] = new WSAL_Alert( $code, $severity, $category, $subcategory, $desc, $message, $metadata, $links, $object, $event_type );
 	}
@@ -699,7 +660,6 @@ final class WSAL_AlertManager {
 		 */
 		$event_data = apply_filters( 'wsal_event_data_before_log', $event_data, $event_id );
 
-		//  log to internal and/or external database immediately
 		foreach ( $this->_loggers as $logger ) {
 			$logger->Log( $event_id, $event_data );
 		}
@@ -891,54 +851,6 @@ final class WSAL_AlertManager {
 	}
 
 	/**
-	 * Method: Log temporary stored alerts if DB connection
-	 * is back.
-	 *
-	 * @return boolean
-	 * @throws Freemius_Exception
-	 */
-	public function log_temp_alerts() {
-		// Get temporary alerts.
-		$temp_alerts = $this->plugin->GetGlobalSetting( 'temp_alerts', array() );
-
-		if ( empty( $temp_alerts ) ) {
-			return true;
-		}
-
-		// Get DB connector.
-		$db_config  = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
-		$connector  = $this->plugin->getConnector( $db_config ); // Get connector for DB.
-		$wsal_db    = $connector->getConnection(); // Get DB connection.
-		$connection = true;
-		if ( isset( $wsal_db->dbh->errno ) ) {
-			$connection = 0 !== (int) $wsal_db->dbh->errno ? false : true; // Database connection error check.
-		} elseif ( is_wp_error( $wsal_db->error ) ) {
-			$connection = false;
-		}
-
-		// Check DB connection.
-		if ( $connection ) { // If connected then log temporary alerts in DB.
-			// Log each alert.
-			foreach ( $temp_alerts as $alert ) {
-				$is_migrated = $alert['alert']['is_migrated'];
-				$created_on  = $alert['alert']['created_on'];
-				$alert_id    = $alert['alert']['alert_id'];
-				$site_id     = $alert['alert']['site_id'];
-
-				// Loggers.
-				foreach ( $this->_loggers as $logger ) {
-					$logger->Log( $alert_id, $alert['alert_data'], $created_on, $site_id, $is_migrated, true );
-				}
-			}
-
-			// Delete temporary alerts.
-			$this->plugin->DeleteGlobalSetting( 'temp_alerts' );
-
-			return true;
-		}
-	}
-
-	/**
 	 * Return alerts for MainWP Extension.
 	 *
 	 * @param integer $limit - Number of alerts to retrieve.
@@ -1070,6 +982,11 @@ final class WSAL_AlertManager {
 	public function get_latest_events( $limit = 1 ) {
 		// Occurrence query.
 		$occ_query = new WSAL_Models_OccurrenceQuery();
+		if ( ! $occ_query->getAdapter()->IsConnected() ) {
+			//  connection problem while using external database (if local database is used, we would see WordPress's
+			//  "Error Establishing a Database Connection" screen
+			return false;
+		}
 
 		// Get site id.
 		$site_id = (int) $this->plugin->settings()->get_view_site_id();
@@ -1569,92 +1486,28 @@ final class WSAL_AlertManager {
 	 * @return array
 	 */
 	private function generate_report( $filters ) {
-		// Filters.
-		$sites         = null;
-		$users         = empty( $filters['users'] ) ? array() : $filters['users'];
-		$roles         = empty( $filters['roles'] ) ? null : $filters['roles'];
-		$ip_addresses  = empty( $filters['ip-addresses'] ) ? null : $filters['ip-addresses'];
-		$alert_groups  = empty( $filters['alert-codes']['groups'] ) ? null : $filters['alert-codes']['groups'];
-		$alert_codes   = empty( $filters['alert-codes']['alerts'] ) ? null : $filters['alert-codes']['alerts'];
-		$date_start    = empty( $filters['date-range']['start'] ) ? null : $filters['date-range']['start'];
-		$date_end      = empty( $filters['date-range']['end'] ) ? null : $filters['date-range']['end'];
+		//  check the report format
 		$report_format = empty( $filters['report-format'] ) ? 'html' : 'csv';
-
-		$next_date = empty( $filters['nextDate'] ) ? null : $filters['nextDate'];
-		$limit     = empty( $filters['limit'] ) ? 0 : $filters['limit'];
-
-		if ( empty( $alert_groups ) && empty( $alert_codes ) ) {
-			return false;
-		}
-
 		if ( ! in_array( $report_format, array( 'csv', 'html' ), true ) ) {
 			return false;
 		}
 
-		// Check alert codes and post types.
-		$codes = $this->get_codes_by_groups( $alert_groups, $alert_codes );
-
-		if ( ! $codes ) {
+		//  some alert codes or alert groups are needed to run a report
+		if ( empty( $filters['alert-codes']['groups'] ) && empty( $filters['alert-codes']['codes'] ) ) {
 			return false;
 		}
 
-		/**
-		 * -- @userId: COMMA-SEPARATED-LIST WordPress user id
-		 * -- @siteId: COMMA-SEPARATED-LIST WordPress site id
-		 * -- @postType: COMMA-SEPARATED-LIST WordPress post types
-		 * -- @postStatus: COMMA-SEPARATED-LIST WordPress post statuses
-		 * -- @roleName: REGEXP (must be quoted from PHP)
-		 * -- @alertCode: COMMA-SEPARATED-LIST of numeric alert codes
-		 * -- @startTimestamp: UNIX_TIMESTAMP
-		 * -- @endTimestamp: UNIX_TIMESTAMP
-		 *
-		 * Usage:
-		 * --------------------------
-		 * set @siteId = null; -- '1,2,3,4....';
-		 * set @userId = null;
-		 * set @postType = null; -- 'post,page';
-		 * set @postStatus = null; -- 'publish,draft';
-		 * set @roleName = null; -- '(administrator)|(editor)';
-		 * set @alertCode = null; -- '1000,1002';
-		 * set @startTimestamp = null;
-		 * set @endTimestamp = null;
-		 */
-		$site_ids = $sites ? "'" . implode( ',', $sites ) . "'" : 'null';
-		$user_ids = $this->get_user_ids( $users );
+		$args = WSAL_ReportArgs::build_from_alternative_filters( $filters, $this );
 
-		$role_names      = 'null';
-		$start_timestamp = 'null';
-		$end_timestamp   = 'null';
-
-		if ( $roles ) {
-			$role_names = array();
-
-			foreach ( $roles as $role ) {
-				array_push( $role_names, esc_sql( '(' . preg_quote( $role ) . ')' ) );
-			}
-
-			$role_names = "'" . implode( '|', $role_names ) . "'";
-		}
-
-		$ip_address  = $ip_addresses ? "'" . implode( ',', $ip_addresses ) . "'" : 'null';
-		$alert_codes = ! empty( $codes ) ? "'" . implode( ',', $codes ) . "'" : 'null';
-
-        if ($date_start) {
-            $start_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_start . ' 00:00:00');
-            $start_timestamp = $start_datetime->format('U');
-        }
-
-        if ($date_end) {
-            $end_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_end . ' 23:59:59');
-            $end_timestamp = $end_datetime->format('U');
-        }
+		$next_date = empty( $filters['nextDate'] ) ? null : $filters['nextDate'];
+		$limit     = empty( $filters['limit'] ) ? 0 : $filters['limit'];
 
 		$last_date = null;
 
 		if ( isset( $filters['unique-ip'] ) && $filters['unique-ip'] ) {
-			$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReportGrouped( $site_ids, $start_timestamp, $end_timestamp, $user_ids, $role_names, $ip_address );
+			$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReportGrouped( $args );
 		} else {
-			$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReporting( $site_ids, $user_ids, $role_names, $alert_codes, $start_timestamp, $end_timestamp, $next_date, $limit, 'null', 'null' );
+			$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReporting( $args, $next_date, $limit );
 		}
 
 		if ( ! empty( $results['lastDate'] ) ) {
@@ -1713,40 +1566,9 @@ final class WSAL_AlertManager {
 	 * @throws Freemius_Exception
 	 */
 	private function generate_statistics_unique_ips( $filters ) {
-		$date_start = ! empty( $filters['date-range']['start'] ) ? $filters['date-range']['start'] : null;
-		$date_end   = ! empty( $filters['date-range']['end'] ) ? $filters['date-range']['end'] : null;
-		$sites      = null;
+		$report_args = WSAL_ReportArgs::build_from_alternative_filters( $filters, $this );
+		$results     = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReportGrouped( $report_args );
 
-		$user_id    = ! empty( $filters['users'] ) ? $filters['users'] : 'null';
-		$role_name  = ! empty( $filters['roles'] ) ? $filters['roles'] : 'null';
-		$ip_address = ! empty( $filters['ip-addresses'] ) ? $filters['ip-addresses'] : 'null';
-
-		$alert_groups = ! empty( $filters['alert-codes']['groups'] ) ? $filters['alert-codes']['groups'] : null;
-		$alert_codes  = ! empty( $filters['alert-codes']['alerts'] ) ? $filters['alert-codes']['alerts'] : null;
-
-		// Alert Groups.
-		$_codes = $this->get_codes_by_groups( $alert_groups, $alert_codes );
-
-		if ( ! $_codes ) {
-			return false;
-		}
-
-		$site_id         = $sites ? "'" . implode( ',', $sites ) . "'" : 'null';
-		$start_timestamp = 'null';
-		$end_timestamp   = 'null';
-		$alert_code      = "'" . implode( ',', $_codes ) . "'";
-
-        if ($date_start) {
-            $start_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_start . ' 00:00:00');
-            $start_timestamp = $start_datetime->format('U');
-        }
-
-        if ($date_end) {
-            $end_datetime = DateTime::createFromFormat($this->sanitized_date_format . ' H:i:s', $date_end . ' 23:59:59');
-            $end_timestamp = $end_datetime->format('U');
-        }
-
-		$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReportGrouped( $site_id, $start_timestamp, $end_timestamp, $user_id, $role_name, $ip_address, $alert_code );
 		return array_values( $results );
 	}
 
@@ -1754,9 +1576,10 @@ final class WSAL_AlertManager {
 	 * Get user ids for reports.
 	 *
 	 * @param array $usernames - Array of usernames.
+	 *
 	 * @return string
 	 */
-	private function get_user_ids( $usernames ) {
+	public function get_user_ids( $usernames ) {
 		global $wpdb;
 
 		if ( empty( $usernames ) ) {
@@ -1802,7 +1625,7 @@ final class WSAL_AlertManager {
 	 * @param array $event_codes  - Event codes.
 	 * @param bool  $show_error   - (Optional) False if errors do not need to be displayed.
 	 */
-	private function get_codes_by_groups( $event_groups, $event_codes, $show_error = true ) {
+	public function get_codes_by_groups( $event_groups, $event_codes, $show_error = true ) {
 		$_codes           = array();
 		$has_event_groups = empty( $event_groups ) ? false : true;
 		$has_event_codes  = empty( $event_codes ) ? false : true;
@@ -1923,13 +1746,8 @@ final class WSAL_AlertManager {
 		$occurrence->created_on = $created_on;
 
 		$event_metadata = $occurrence->GetMetaArray();
-
-		if ( $occurrence->is_migrated ) {
-			$occurrence->_cachedmessage = $occurrence->GetMetaValue( 'MigratedMesg', false );
-		}
-
-		if ( ! $occurrence->is_migrated || ! $occurrence->_cachedmessage ) {
-            $occurrence->_cachedmessage = $occurrence->GetAlert()->GetMessage( $event_metadata, null, $entry_id, $context );
+		if ( ! $occurrence->_cachedMessage ) {
+			$occurrence->_cachedMessage = $occurrence->GetAlert()->GetMessage( $event_metadata, null, $entry_id, $context );
 		}
 
 		if ( ! $user_id ) {

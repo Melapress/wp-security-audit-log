@@ -5,7 +5,7 @@
  * CLass file for audit log list view.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -20,7 +20,7 @@ require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
  * This view is included in Audit Log Viewer Page.
  *
  * @see Views/AuditLog.php
- * @package Wsal
+ * @package wsal
  */
 class WSAL_AuditLogGridView extends WP_List_Table {
 
@@ -78,14 +78,22 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	private $item_meta = array();
 
 	/**
+	 * @var WSAL_Views_AuditLog
+	 * @since 4.3.2
+	 */
+	private $audit_log_view;
+
+	/**
 	 * Method: Constructor.
 	 *
-	 * @param object   $plugin     - Instance of WpSecurityAuditLog.
+	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
+	 * @param WSAL_Views_AuditLog $audit_log_view Audit log view.
 	 * @param stdClass $query_args - Events query arguments.
 	 */
-	public function __construct( $plugin, $query_args ) {
-		$this->_plugin    = $plugin;
-		$this->query_args = $query_args;
+	public function __construct( $plugin, $audit_log_view, $query_args ) {
+		$this->_plugin        = $plugin;
+		$this->audit_log_view = $audit_log_view;
+		$this->query_args     = $query_args;
 
 		parent::__construct(
 			array(
@@ -213,31 +221,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 			}
 		}
 
-		// Switch to live or archive DB.
-		if ( $this->_plugin->settings()->IsArchivingEnabled() ) {
-			if (
-				( 'top' === $which && $this->_plugin->settings()->is_infinite_scroll() )
-				|| ! $this->_plugin->settings()->is_infinite_scroll()
-			) {
-				$selected    = 'live';
-				$selected_db = get_transient( 'wsal_wp_selected_db' );
-				if ( $selected_db && 'archive' === $selected_db ) {
-					$selected = 'archive';
-				}
-				?>
-				<div class="wsal-ssa wsal-db">
-					<select class="wsal-db" onchange="WsalDBChange(value);">
-						<option value="live" <?php echo ( 'live' == $selected ) ? 'selected="selected"' : false; ?>>
-							<?php esc_html_e( 'Live Database', 'wp-security-audit-log' ); ?>
-						</option>
-						<option value="archive" <?php echo ( 'archive' == $selected ) ? 'selected="selected"' : false; ?>>
-							<?php esc_html_e( 'Archive Database', 'wp-security-audit-log' ); ?>
-						</option>
-					</select>
-				</div>
-				<?php
-			}
-		}
 	}
 
 	/**
@@ -401,17 +384,17 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				return ! $info ? ( 'Unknown Site ' . $item->site_id )
 					: ( '<a href="' . esc_attr( $info->siteurl ) . '">' . esc_html( $info->blogname ) . '</a>' );
 			case 'mesg':
-				ob_start();
-				// login, logout and failed login has no message attached.
+				// login, logout and failed login have no message attached.
 				if ( ! in_array( $item->alert_id, array( 1000, 1001, 1002 ), true ) ) {
-					?>
-					<table id="Event<?php echo absint( $item->id ); ?>">
-						<td class="wsal-grid-text-header"><?php esc_html_e( 'Message:', 'alm-' ); ?></td>
-						<td class="wsal-grid-text-data"><?php echo $item->GetMessage( $this->item_meta[ $item->getId() ] ); ?></td>
-					</table>
-					<?php
+					$event_meta = $this->item_meta[ $item->getId() ];
+					$result = '<table id="Event' .  absint( $item->id ) .  '">';
+					$result .= '<td class="wsal-grid-text-header">' . esc_html__( 'Message:', 'wp-security-audit-log' ) . '</td>';
+					$result .= '<td class="wsal-grid-text-data">' . $item->GetMessage( $event_meta ) . '</td>';
+					$result .= '</table>';
+					$result .= $this->audit_log_view->maybe_build_teaser_html( $event_meta );
+					return $result;
 				}
-				return ob_get_clean();
+				return '';
 			case 'info':
 				$eventdate = $item->created_on
                     ? WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime($item->created_on, 'date' )
@@ -820,13 +803,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	 * @return array
 	 */
 	public function query_events( $paged = 0 ) {
-		if ( $this->_plugin->settings()->IsArchivingEnabled() ) {
-			// Switch to Archive DB.
-			$selected_db = get_transient( 'wsal_wp_selected_db' );
-			if ( $selected_db && 'archive' === $selected_db ) {
-				$this->_plugin->settings()->SwitchToArchiveDB();
-			}
-		}
 
 		// TO DO: Get rid of OccurrenceQuery and use the Occurence Model.
 		$query = new WSAL_Models_OccurrenceQuery();

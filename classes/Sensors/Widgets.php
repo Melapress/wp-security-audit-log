@@ -5,7 +5,7 @@
  * Widgets sensor class file.
  *
  * @since 1.0.0
- * @package Wsal
+ * @package wsal
  */
 
 // Exit if accessed directly.
@@ -22,8 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2045 User moved widget
  * 2071 User changed widget position
  *
- * @package Wsal
- * @subpackage Sensors
+ * @package wsal
+ * @subpackage sensors
  */
 class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 

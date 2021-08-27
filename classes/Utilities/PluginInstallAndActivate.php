@@ -5,7 +5,7 @@
  * Provides the allowed plugins data as well as a render method to display the
  * items inside of a table with install/actiavte buttons.
  *
- * @package Wsal
+ * @package wsal
  * @since 4.0.1
  */
 
