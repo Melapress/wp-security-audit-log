@@ -352,10 +352,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 }
 
                 //  other contexts/scenarios
-
-                // If this is a rest API request and the user is not logged in, bail.
-                if ( self::is_rest_api() && ! is_user_logged_in() ) {
-                    return false;
+                if ( self::is_rest_api() ) {
+                    return is_user_logged_in();
                 }
 
                 return true;
@@ -424,6 +422,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     require_once 'classes/ThirdPartyExtensions/WPFormsExtension.php';
                     require_once 'classes/ThirdPartyExtensions/WooCommerceExtension.php';
                     require_once 'classes/ThirdPartyExtensions/GravityFormsExtension.php';
+                    require_once 'classes/ThirdPartyExtensions/TablePressExtension.php';
                 }
 
                 // Connectors.
@@ -514,6 +513,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     $bbpress_addon      = new WSAL_BBPressExtension();
                     $wpforms_addon      = new WSAL_WPFormsExtension();
                     $gravityforms_addon = new WSAL_GravityFormsExtension();
+                    $tablepress_addon   = new WSAL_TablePressExtension();
                 }
 
                 // Extensions which are both admin and frontend based.
@@ -663,9 +663,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                         // Add filters to customize freemius welcome message.
                         wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
                         wsal_freemius()->add_filter( 'connect_message_on_update', array( $this, 'wsal_freemius_update_connect_message' ), 10, 6 );
-                        wsal_freemius()->add_filter( 'trial_promotion_message', array( $this, 'freemius_trial_promotion_message' ), 10, 1 );
-                        wsal_freemius()->add_filter( 'show_first_trial_after_n_sec', array( $this, 'change_show_first_trial_period' ), 10, 1 );
-                        wsal_freemius()->add_filter( 'reshow_trial_after_every_n_sec', array( $this, 'change_reshow_trial_period' ), 10, 1 );
                         wsal_freemius()->add_filter( 'show_admin_notice', array( $this, 'freemius_show_admin_notice' ), 10, 2 );
                         wsal_freemius()->add_filter( 'show_delegation_option', '__return_false' );
                         wsal_freemius()->add_filter( 'enable_per_site_activation', '__return_false' );
@@ -934,19 +931,17 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              * @return string
              */
             public function wsal_freemius_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
-                $freemius_link = '<a href="https://wpactivitylog.com/support/kb/non-sensitive-diagnostic-data/" target="_blank" tabindex="1">freemius.com</a>';
-                return sprintf(
-                    /* translators: Username */
-                    esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
-                    esc_html__( 'Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com.', 'wp-security-audit-log' ) .
-                    '<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>' .
-                    esc_html__( 'NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' ),
-                    $user_first_name,
-                    '<b>' . $plugin_title . '</b>',
-                    '<b>' . $user_login . '</b>',
-                    $site_link,
-                    $freemius_link
+                $result = sprintf(
+                /* translators: User's first name */
+                    esc_html__( 'Hey %s', 'wp-security-audit-log' ),
+                    $user_first_name
                 );
+                $result .= ',<br>';
+                $result .= esc_html__( 'Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com.', 'wp-security-audit-log' ) .
+                $result .= '<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>';
+                $result .= esc_html__( 'NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' );
+        
+                return $result;
             }
 
             /**
@@ -958,68 +953,31 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              * @param string $user_login - Username.
              * @param string $site_link - Site link.
              * @param string $_freemius_link - Freemius link.
+             *
              * @return string
+             *
+             * @since latest
              */
-            public function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
-                $freemius_link = '<a href="https://wpactivitylog.com/support/kb/non-sensitive-diagnostic-data/" target="_blank" tabindex="1">freemius.com</a>';
-                return sprintf(
-                    /* translators: Username */
-                    esc_html__( 'Hey %1$s', 'wp-security-audit-log' ) . ',<br>' .
-                    /* translators: 1: Plugin name. 2: Freemius link. */
-                    esc_html__( 'Please help us improve %2$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %5$s, a diagnostic tracking service we use. If you skip this, that\'s okay! %2$s will still work just fine.', 'wp-security-audit-log' ) .
-                    '<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>' .
-                    esc_html__( 'NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' ),
-                    $user_first_name,
-                    '<b>' . $plugin_title . '</b>',
-                    '<b>' . $user_login . '</b>',
-                    $site_link,
-                    $freemius_link
+            public static function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
+                $result = sprintf(
+                /* translators: User's first name */
+                    esc_html__( 'Hey %s', 'wp-security-audit-log' ),
+                    $user_first_name
                 );
-            }
-
-            /**
-             * Filter trial message of Freemius.
-             *
-             * @param string $_message – Trial message.
-             * @return string
-             * @since 3.2.3
-             */
-            public function freemius_trial_promotion_message( $_message ) {
-                // Message.
-                $message = sprintf(
-                    /* translators: Plugin name */
-                    __( 'Get a free 7-day trial of the premium edition of %s. No credit card required, no commitments!', 'wp-security-audit-log' ),
-                    '<strong>' . __( 'WP Activity Log', 'wp-security-audit-log' ) . '</strong>'
+                $result .= ',<br>';
+                $result .= sprintf(
+                /* translators: 1: Plugin name. 2: Plugin name. 2: Freemius link. 4: Plugin name. */
+                    esc_html__( 'Please help us improve %1$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %3$s, a diagnostic tracking service we use. If you skip this, that\'s okay! %2$s will still work just fine.', 'wp-security-audit-log' ) .
+                    '<strong>' . $plugin_title . '</strong>',
+                    '<strong>' . $plugin_title . '</strong>',
+                    '<a href="https://wpactivitylog.com/support/kb/non-sensitive-diagnostic-data/" target="_blank" tabindex="1">freemius.com</a>',
+                    '<strong>' . $plugin_title . '</strong>',
                 );
+                $result .= '<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>';
+                $result .= esc_html__( 'NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS.', 'wp-security-audit-log' );
 
-                // Trial link.
-                $message .= '<a style="margin-left: 10px; vertical-align: super;" href="' . wsal_freemius()->get_trial_url() . '"><button class="button button-primary">' . __( 'Start free trial', 'wp-security-audit-log' ) . ' &nbsp;&#10140;</button></a>';
-                return $message;
-            }
-
-            /**
-             * Filter the time period to show the first trial message.
-             * Display it after 20 days.
-             *
-             * @param int $day_in_sec – Time period in seconds.
-             * @return int
-             * @since 3.2.3
-             */
-            public function change_show_first_trial_period( $day_in_sec ) {
-                return 20 * DAY_IN_SECONDS;
-            }
-
-            /**
-             * Filter the time period to re-show the trial message.
-             * Display it after 60 days.
-             *
-             * @param int $thirty_days_in_sec – Time period in seconds.
-             * @return int
-             * @since 3.2.3
-             */
-            public function change_reshow_trial_period( $thirty_days_in_sec ) {
-                return 60 * DAY_IN_SECONDS;
-            }
+                return $result;
+            }            
 
             /**
              * Fremius Admin Notice View Permission.

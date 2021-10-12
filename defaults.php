@@ -117,6 +117,10 @@ function wsaldefaults_build_links( $link_aliases = [] ) {
 					$result[ __( 'URL', 'wp-security-audit-log' ) ] = '%PostUrl%';
 					break;
 
+				case 'AttachmentUrl':
+					$result[ __( 'View attachment page', 'wp-security-audit-log' ) ] = '%AttachmentUrl%';
+					break;
+
 				case 'PostUrlIfPlublished':
 				case 'PostUrlIfPublished':
 					$result[ __( 'URL', 'wp-security-audit-log' ) ] = '%PostUrlIfPlublished%';
@@ -285,6 +289,19 @@ function wsaldefaults_wsal_init() {
 						'login'
 					),
 					array(
+						1009,
+						WSAL_LOW,
+						__( 'The plugin terminated an idle session for a user', 'wp-security-audit-log' ),
+						__( 'The plugin terminated an idle session for the user %username%.', 'wp-security-audit-log' ),
+						[
+							__( 'Role', 'wp-security-audit-log' )       => '%TargetUserRole%',
+							__( 'Session ID', 'wp-security-audit-log' ) => '%SessionID%'
+						],
+						[],
+						'user',
+						'logout'
+					),
+					array(
 						2010,
 						WSAL_MEDIUM,
 						__( 'User uploaded file to the Uploads directory', 'wp-security-audit-log' ),
@@ -292,7 +309,7 @@ function wsaldefaults_wsal_init() {
 						[
 							__( 'Directory', 'wp-security-audit-log' ) => '%FilePath%'
 						],
-						[],
+						wsaldefaults_build_links( [ 'AttachmentUrl' ] ),
 						'file',
 						'uploaded'
 					),
@@ -2139,6 +2156,33 @@ function wsaldefaults_wsal_init() {
 						'post',
 						'deleted'
 					),
+
+					array(
+						5028,
+						WSAL_MEDIUM,
+						__( 'Changed the Automatic updates setting for a plugin.', 'wp-security-audit-log' ),
+						__( 'Changed the Automatic updates setting for the plugin %name%.', 'wp-security-audit-log' ),
+						[
+							__( 'Install location:', 'wp-security-audit-log' )     => '%install_directory%',
+						],
+						[],
+						'wp-activity-log',
+						'enabled'
+					),
+
+					array(
+						5029,
+						WSAL_MEDIUM,
+						__( 'Changed the Automatic updates setting for a theme.', 'wp-security-audit-log' ),
+						__( 'Changed the Automatic updates setting for the theme %name%.', 'wp-security-audit-log' ),
+						[
+							__( 'Install location:', 'wp-security-audit-log' )     => '%install_directory%',
+						],
+						[],
+						'wp-activity-log',
+						'enabled'
+					),
+					
 					array(
 						2051,
 						WSAL_HIGH,
@@ -2338,6 +2382,31 @@ function wsaldefaults_wsal_init() {
 						WSAL_CRITICAL,
 						__( 'Purged the activity log', 'wp-security-audit-log' ),
 						__( 'Purged the activity log.', 'wp-security-audit-log' ),
+						[],
+						[],
+						'wp-activity-log',
+						'deleted'
+					),
+
+					array(
+						6038,
+						WSAL_CRITICAL,
+						__( 'Deleted all the data about a user from the activity log.', 'wp-security-audit-log' ),
+						__( 'Deleted all the data about the user <strong>%user%</strong> from the activity log.', 'wp-security-audit-log' ),
+						[
+							__( 'Role', 'wp-security-audit-log' ) => '%Role%',
+							__( 'First name', 'wp-security-audit-log' )    => '%FirstName%',
+							__( 'Last name', 'wp-security-audit-log' )     => '%LastName%'
+						],
+						[],
+						'wp-activity-log',
+						'deleted'
+					),
+					array(
+						6039,
+						WSAL_CRITICAL,
+						__( 'Deleted all the data of a specific type from the activity log.', 'wp-security-audit-log' ),
+						__( 'Deleted all the data about the %deleted_data_type% %deleted_data% from the activity log.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'wp-activity-log',
@@ -2612,7 +2681,7 @@ function wsaldefaults_wsal_init() {
 						6320,
 						WSAL_HIGH,
 						__( 'Added a new integrations connection', 'wp-security-audit-log' ),
-						__( 'Added a new integrations connection %name%', 'wp-security-audit-log' ),
+						__( 'Added / removed the integrations connection %name%', 'wp-security-audit-log' ),
 						[
 							__( 'Connection type', 'wp-security-audit-log' ) => '%type%',
 						],
