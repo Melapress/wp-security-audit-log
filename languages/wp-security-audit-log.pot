@@ -2702,151 +2702,151 @@ msgstr ""
 
 #. translators: User's first name
 #. translators: User's first name
-#: wp-security-audit-log.php:936, wp-security-audit-log.php:964
+#: wp-security-audit-log.php:938, wp-security-audit-log.php:966
 msgid "Hey %s"
 msgstr ""
 
-#: wp-security-audit-log.php:940
+#: wp-security-audit-log.php:942
 msgid "Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com."
 msgstr ""
 
-#: wp-security-audit-log.php:941, wp-security-audit-log.php:976
+#: wp-security-audit-log.php:943, wp-security-audit-log.php:978
 msgid "Note: "
 msgstr ""
 
-#: wp-security-audit-log.php:942, wp-security-audit-log.php:977
+#: wp-security-audit-log.php:944, wp-security-audit-log.php:979
 msgid "NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS."
 msgstr ""
 
 #. translators: 1: Plugin name. 2: Plugin name. 2: Freemius link. 4: Plugin name.
-#: wp-security-audit-log.php:970
+#: wp-security-audit-log.php:972
 msgid "Please help us improve %1$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %3$s, a diagnostic tracking service we use. If you skip this, that's okay! %2$s will still work just fine."
 msgstr ""
 
-#: wp-security-audit-log.php:1022
+#: wp-security-audit-log.php:1024
 msgid "You need to activate the licence key to use WP Activity Log Premium. %2$s"
 msgstr ""
 
-#: wp-security-audit-log.php:1023
+#: wp-security-audit-log.php:1025
 msgid "Activate the licence key now"
 msgstr ""
 
 #. translators: Number of sites
-#: wp-security-audit-log.php:1045
+#: wp-security-audit-log.php:1047
 msgid "The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network."
 msgstr ""
 
-#: wp-security-audit-log.php:1041
+#: wp-security-audit-log.php:1043
 msgid "%s You need to renew your license to continue using premium features."
 msgstr ""
 
-#: wp-security-audit-log.php:1143
+#: wp-security-audit-log.php:1145
 msgid "Error: You do not have sufficient permissions to disable this custom field."
 msgstr ""
 
 #. translators: name of meta field (in bold)
-#: wp-security-audit-log.php:1191
+#: wp-security-audit-log.php:1193
 msgid "Custom field %s is no longer being monitored."
 msgstr ""
 
 #. translators: setting tab name "Excluded Objects"
-#: wp-security-audit-log.php:1196
+#: wp-security-audit-log.php:1198
 msgid "Enable the monitoring of this custom field again from the %s tab in the plugin settings."
 msgstr ""
 
-#: wp-security-audit-log.php:1197
+#: wp-security-audit-log.php:1199
 msgid "Excluded Objects"
 msgstr ""
 
-#: wp-security-audit-log.php:1210
+#: wp-security-audit-log.php:1212
 msgid "Error: You do not have sufficient permissions to disable this alert."
 msgstr ""
 
-#: wp-security-audit-log.php:1234
+#: wp-security-audit-log.php:1236
 msgid "Alert %1$s is no longer being monitored.<br /> %2$s"
 msgstr ""
 
-#: wp-security-audit-log.php:1234
+#: wp-security-audit-log.php:1236
 msgid "You can enable this alert again from the Enable/Disable Alerts node in the plugin menu."
 msgstr ""
 
-#: wp-security-audit-log.php:1259, classes/Views/SetupWizard.php:270
+#: wp-security-audit-log.php:1261, classes/Views/SetupWizard.php:270
 msgid "Installing, please wait"
 msgstr ""
 
-#: wp-security-audit-log.php:1260, classes/Views/SetupWizard.php:271
+#: wp-security-audit-log.php:1262, classes/Views/SetupWizard.php:271
 msgid "Already installed"
 msgstr ""
 
-#: wp-security-audit-log.php:1261, classes/Utilities/PluginInstallAndActivate.php:108, classes/Views/SetupWizard.php:272, classes/Views/SetupWizard.php:841
+#: wp-security-audit-log.php:1263, classes/Utilities/PluginInstallAndActivate.php:108, classes/Views/SetupWizard.php:272, classes/Views/SetupWizard.php:841
 msgid "Extension installed"
 msgstr ""
 
-#: wp-security-audit-log.php:1262, classes/Views/SetupWizard.php:273
+#: wp-security-audit-log.php:1264, classes/Views/SetupWizard.php:273
 msgid "Extension activated"
 msgstr ""
 
-#: wp-security-audit-log.php:1263, classes/Views/SetupWizard.php:274
+#: wp-security-audit-log.php:1265, classes/Views/SetupWizard.php:274
 msgid "Install failed"
 msgstr ""
 
 #. translators: %s: PHP Version
-#: wp-security-audit-log.php:1315
+#: wp-security-audit-log.php:1317
 msgid "You are using a version of PHP that is older than %s, which is no longer supported."
 msgstr ""
 
-#: wp-security-audit-log.php:1317
+#: wp-security-audit-log.php:1319
 msgid "Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using."
 msgstr ""
 
 #. translators: %s: Activity Log for MainWP plugin hyperlink
-#: wp-security-audit-log.php:1322
+#: wp-security-audit-log.php:1324
 msgid "Please install the %s plugin on the MainWP dashboard."
 msgstr ""
 
-#: wp-security-audit-log.php:1322
+#: wp-security-audit-log.php:1324
 msgid "Activity Log for MainWP"
 msgstr ""
 
 #. translators: %s: Getting started guide hyperlink
-#: wp-security-audit-log.php:1324
+#: wp-security-audit-log.php:1326
 msgid "The WP Activity Log should be installed on the child sites only. Refer to the %s for more information."
 msgstr ""
 
-#: wp-security-audit-log.php:1324
+#: wp-security-audit-log.php:1326
 msgid "getting started guide"
 msgstr ""
 
-#: wp-security-audit-log.php:1806
+#: wp-security-audit-log.php:1808
 msgid "For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href=\"https://wpactivitylog.com/\" target=\"_blank\">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from."
 msgstr ""
 
-#: wp-security-audit-log.php:1825
+#: wp-security-audit-log.php:1827
 msgid "Every 6 hours"
 msgstr ""
 
-#: wp-security-audit-log.php:1829
+#: wp-security-audit-log.php:1831
 msgid "Every 45 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1833
+#: wp-security-audit-log.php:1835
 msgid "Every 30 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1837
+#: wp-security-audit-log.php:1839
 msgid "Every 15 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1841
+#: wp-security-audit-log.php:1843
 msgid "Every 10 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1845
+#: wp-security-audit-log.php:1847
 msgid "Every 1 minute"
 msgstr ""
 
 #. translators: 1. Deprecated method name 2. Version since deprecated
-#: wp-security-audit-log.php:1859
+#: wp-security-audit-log.php:1861
 msgid "Method %1$s is deprecated since version %2$s!"
 msgstr ""
 
