@@ -250,3 +250,30 @@ jQuery( document ).ready( function() {
 	});
 
 });
+
+jQuery( document ).ready( function() {
+
+    var severitiesUrl = ajaxurl + '?action=wsal_ajax_get_all_severities&wsal_nonce=' + wsal_data.wp_nonce;
+	jQuery( '#SeveritiesQueryBox' ).autocomplete({
+	    source: severitiesUrl,
+	    minLength: 1
+	});
+
+	var eventTypesUrl = ajaxurl + '?action=wsal_ajax_get_all_event_types&wsal_nonce=' + wsal_data.wp_nonce;
+	jQuery( '#EventTypeQueryBox' ).autocomplete({
+	    source: eventTypesUrl,
+	    minLength: 1
+	});
+
+	var objectTypesUrl = ajaxurl + '?action=wsal_ajax_get_all_object_types&wsal_nonce=' + wsal_data.wp_nonce;
+	jQuery( '#ObjectTypeQueryBox' ).autocomplete({
+	    source: objectTypesUrl,
+	    minLength: 1
+	});
+
+	var eventIDTypesUrl = ajaxurl + '?action=wsal_ajax_get_all_event_ids&wsal_nonce=' + wsal_data.wp_nonce;
+	jQuery( '#EventIDQueryBox' ).autocomplete({
+	    source: eventIDTypesUrl,
+	    minLength: 1
+	});	  
+ });

@@ -214,6 +214,13 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				)
 			);
 		}
+
+		// Alert if role has changed via Members plugin.
+		if ( isset( $_POST['members_user_roles'] ) && ! empty( $_POST['members_user_roles'] ) ) {
+			if ( $old_userdata->roles !== $_POST['members_user_roles'] ) {
+				$this->event_user_role_changed( $user_id, $_POST['members_user_roles'], $old_userdata->roles, true );
+			}
+		}
 	}
 
 	/**
@@ -223,7 +230,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 * @param string $new_role  - New role.
 	 * @param array  $old_roles - Array of old roles.
 	 */
-	public function event_user_role_changed( $user_id, $new_role, $old_roles ) {
+	public function event_user_role_changed( $user_id, $new_role, $old_roles, $use_posted_data = false ) {
 		// Get WP_User object.
 		$user = get_userdata( $user_id );
 
@@ -232,8 +239,10 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			return;
 		}
 
+		$roles_to_process = ( $use_posted_data ) ? $new_role : $user->roles;
+
 		$old_roles = array_map( array( $this, 'filter_role_names' ), $old_roles );
-		$new_roles = array_map( array( $this, 'filter_role_names' ), $user->roles );
+		$new_roles = array_map( array( $this, 'filter_role_names' ), $roles_to_process );
 
 		// Get roles.
 		$old_roles = is_array( $old_roles ) ? implode( ', ', $old_roles ) : '';
