@@ -513,7 +513,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     $bbpress_addon      = new WSAL_BBPressExtension();
                     $wpforms_addon      = new WSAL_WPFormsExtension();
                     $gravityforms_addon = new WSAL_GravityFormsExtension();
-                    $tablepress_addon   = new WSAL_TablePressExtension();
+
+                    // Comment out untill release.
+                    //$tablepress_addon   = new WSAL_TablePressExtension();
                 }
 
                 // Extensions which are both admin and frontend based.
