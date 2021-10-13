@@ -240,6 +240,9 @@ td.column-user {
 .dashicons-dismiss:hover {
 	color:#c00
 }
+.dark-tooltip {
+	min-width: 260px;
+}
 .dark-tooltip.small{
 	margin-left: 10px;
 	font-size: 13px;

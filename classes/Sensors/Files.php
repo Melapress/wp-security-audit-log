@@ -52,13 +52,14 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 		$post_array = filter_input_array( INPUT_POST );
 
 		$action = isset( $post_array['action'] ) ? $post_array['action'] : '';
-		if ( 'upload-theme' !== $action && 'upload-plugin' !== $action ) {
+		if ( 'upload-theme' !== $action && 'upload-plugin' !== $action ) {			
 			$file = get_attached_file( $attachment_id );
 			$this->plugin->alerts->Trigger(
 				2010, array(
-					'AttachmentID' => $attachment_id,
-					'FileName'     => basename( $file ),
-					'FilePath'     => dirname( $file ),
+					'AttachmentID'  => $attachment_id,
+					'FileName'      => basename( $file ),
+					'FilePath'      => dirname( $file ),
+					'AttachmentUrl' => get_attachment_link( $attachment_id ),
 				)
 			);
 		}
