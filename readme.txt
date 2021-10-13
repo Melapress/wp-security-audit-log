@@ -208,6 +208,11 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
+= 4.3.3.1 (2021-10-13) =
+
+**Bug fixes**
+	* Fixed critical error with PHP 7.2.
+	
 = 4.3.3 (2021-10-13) =
 
 Release notes: [WP Activity Log 4.3.3: Plugin setting importer & exporter & support for REST API](https://wpactivitylog.com/wsal-4-3-0/)
