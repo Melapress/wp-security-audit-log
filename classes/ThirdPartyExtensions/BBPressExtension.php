@@ -13,7 +13,7 @@ if ( ! class_exists( 'WSAL_BBPressExtension' ) ) {
 					'plugin_slug'        => 'wp-security-audit-log-add-on-for-bbpress/wsal-bbpress.php',
 					'plugin_basename'    => 'wsal-bbpress.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-bbpress.latest-stable.zip',
-					'event_tab_id'       => '#tab-bbpress-forums',
+					'event_tab_id'       => '#cat-bbpress-forums',
 					'plugin_description' => 'Keep a log of your sites bbPress activity, from forum and topic creation, user profile changes and more.',
 				)
 			);

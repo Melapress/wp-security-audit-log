@@ -406,7 +406,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						elementRef.checked = false;
 						// Ensure the "no" option is reselected.
 						jQuery('#delete_data_no').click();
-					}                        
+					}
                 }
             }
 
@@ -1138,7 +1138,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	private function tab_audit_log_save() {
 		// Get $_POST global array.
 		$post_array = filter_input_array( INPUT_POST );
-		
+
 		// Get pruning date.
 		$pruning_date = isset( $post_array['PruningDate'] ) ? (int) sanitize_text_field( $post_array['PruningDate'] ) : false;
 		$pruning_unit = isset( $post_array['pruning-unit'] ) ? sanitize_text_field( $post_array['pruning-unit'] ) : false;
@@ -1412,19 +1412,22 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					</td>
 				</tr>
 				<!-- / MainWP Child Site Stealth Mode -->
-                <?php $admin_blocking_plugins_support = $this->_plugin->settings()->get_admin_blocking_plugin_support(); ?>
-                <tr>
-                    <th><label for="mwp_admin_blocking_support"><?php esc_html_e( 'Admin blocking plugins support', 'wp-security-audit-log' ); ?></label></th>
-                    <td>
-                        <fieldset>
-                            <label for="mwp_admin_blocking_support">
-                                <input type="checkbox" name="mwp_admin_blocking_support" value="yes" id="mwp_admin_blocking_support" <?php checked( $admin_blocking_plugins_support ); ?> <?php disabled( ! WpSecurityAuditLog::is_mainwp_active() || !$stealth_mode); ?>/>
-                                <?php esc_html_e( 'Enable early plugin loading on sites that use admin blocking plugins', 'wp-security-audit-log' ); ?>
-                            </label>
-                        </fieldset>
-                    </td>
-                </tr>
-                <!-- /  Admin blocking plugins support -->
+				<?php $admin_blocking_plugins_support = $this->_plugin->settings()->get_admin_blocking_plugin_support(); ?>
+				<tr>
+					<th>
+						<label for="mwp_admin_blocking_support"><?php esc_html_e( 'Admin blocking plugins support', 'wp-security-audit-log' ); ?></label>
+					</th>
+					<td>
+						<fieldset>
+							<label for="mwp_admin_blocking_support">
+								<input type="checkbox" name="mwp_admin_blocking_support" value="yes"
+										id="mwp_admin_blocking_support" <?php checked( $admin_blocking_plugins_support ); ?> <?php disabled( ! WpSecurityAuditLog::is_mainwp_active() || ! $stealth_mode ); ?>/>
+								<?php esc_html_e( 'Enable early plugin loading on sites that use admin blocking plugins', 'wp-security-audit-log' ); ?>
+							</label>
+						</fieldset>
+					</td>
+				</tr>
+				<!-- /  Admin blocking plugins support -->
 			</tbody>
 		</table>
 
@@ -1498,7 +1501,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 			$admin_blocking_plugins_support = isset( $post_array['mwp_admin_blocking_support'] ) ? $post_array['mwp_admin_blocking_support'] : false;
 			if ( 'yes' === $admin_blocking_plugins_support ) {
-				$this->_plugin->settings()->set_admin_blocking_plugin_support(true);
+				$this->_plugin->settings()->set_admin_blocking_plugin_support( true );
 			}
 		} else {
 			$this->_plugin->settings()->deactivate_mainwp_child_stealth_mode();
@@ -1650,8 +1653,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 		
-		echo wp_json_encode( array_values( WSAL_ConstantManager::getSeverities() ) );
+		echo $this->filter_values_for_searched_term( array_values( WSAL_ConstantManager::getSeverities() ), $get_array['term'] );
 		exit;
+	}
+
+	/**
+	 * Filters values to return ones matching the desired term.
+	 *
+	 * @param array $items_to_filter
+	 * @param string $term
+	 * @return string
+	 */
+	public function filter_values_for_searched_term( $items_to_filter, $term ) {
+
+		$result = array_filter( $items_to_filter, function( $value ) use ( $term ) {
+			return strpos( strtolower( $value ), strtolower( $term ) ) !== false;
+		});
+
+		return wp_json_encode( $result );
 	}
 
 	/**
@@ -1667,7 +1686,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		$event_types     = $this->_plugin->alerts->get_event_type_data();
 
-		echo wp_json_encode( array_values( $event_types ) );
+		echo $this->filter_values_for_searched_term( array_values( $event_types ), $get_array['term'] );
 		exit;
 	}
 
@@ -1684,7 +1703,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		$event_objects     = $this->_plugin->alerts->get_event_objects_data();
 		
-		echo wp_json_encode( array_values( $event_objects ) );
+		echo $this->filter_values_for_searched_term( array_values( $event_objects ), $get_array['term'] );
 		exit;
 	}
 
@@ -1695,7 +1714,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * @since  4.3.3
 	 */
 	public function ajax_get_all_event_ids() {
-		
+
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 
@@ -1706,10 +1725,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			$alerts[] = (string) $details->code;
 		}
 
-		echo wp_json_encode( $alerts );
+		echo $this->filter_values_for_searched_term( array_values( $alerts ), $get_array['term'] );
 		exit;
 	}
-	
+
 	/**
 	 * Method: Get CPTs ajax handle.
 	 *

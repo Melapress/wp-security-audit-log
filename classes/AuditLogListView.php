@@ -431,14 +431,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$uhtml = '<a class="tooltip" data-tooltip="' . esc_attr( $tooltip ) . '" data-user="' . $user->user_login . '" href="' . $user_edit_link . '" target="_blank">' . esc_html( $display_name ) . '</a>';
 
 
-					$roles = $item->GetUserRoles( $this->item_meta[ $item->getId() ] );
-					if ( is_array( $roles ) && count( $roles ) ) {
-						$roles = esc_html( ucwords( implode( ', ', $roles ) ) );
-					} elseif ( is_string( $roles ) && '' != $roles ) {
-						$roles = esc_html( ucwords( str_replace( array( '"', '[', ']' ), ' ', $roles ) ) );
-					} else {
-						$roles = '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
-					}
+					$roles = WSAL_Utilities_UsersUtils::get_roles_label( $item->GetUserRoles() );
 				} elseif ( 'Plugin' == $username ) {
 					$uhtml = '<i>' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';
 				} elseif ( 'Plugins' == $username ) {
@@ -462,7 +455,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				 */
 				return apply_filters( 'wsal_auditlog_row_user_data', $row_user_data, $this->current_alert_id );
 			case 'scip':
-				$scip = $item->GetSourceIP( $this->item_meta[ $item->getId() ] );
+				$scip = $item->GetSourceIP();
 				if ( is_string( $scip ) ) {
 					$scip = str_replace( array( '"', '[', ']' ), '', $scip );
 				}
@@ -815,34 +808,24 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 			// TO DO: Allow order by meta values.
 			if ( 'scip' === $order_by ) {
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'ClientIP' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "ClientIP" THEN meta.value END', $is_descending );
+				$query->addOrderBy( 'client_ip', $is_descending );
 			} elseif ( 'user' === $order_by ) {
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'CurrentUserID' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "CurrentUserID" THEN meta.value END', $is_descending );
+				$query->addOrderBy( 'user_id', $is_descending );
 			} elseif ( 'code' === $order_by ) {
 				/*
 				 * Handle the 'code' (Severity) column sorting.
 				 */
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'Severity' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "Severity" THEN meta.value END', $is_descending );
+				$query->addOrderBy( 'severity', $is_descending );
 			} elseif ( 'object' === $order_by ) {
 				/*
 				 * Handle the 'object' column sorting.
 				 */
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'Object' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "Object" THEN meta.value END', $is_descending );
+				$query->addOrderBy( 'object', $is_descending );
 			} elseif ( 'event_type' === $order_by ) {
 				/*
 				 * Handle the 'Event Type' column sorting.
 				 */
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'EventType' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "EventType" THEN meta.value END', $is_descending );
+				$query->addOrderBy( 'event_type', $is_descending );
 			} else {
 				$tmp = new WSAL_Models_Occurrence();
 				// Making sure the field exists to order by.

@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * MySQL generic table used for Save, Read, Create or Delete
  * elements in the Database.
+ *
  * There are also the functions used in the Report Add-On to get the reports.
  *
  * @package wsal
@@ -45,12 +46,19 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	protected $_idkey = '';
 
 	/**
+	 * Local cache for a list of columns.
+	 *
+	 * @var string[]
+	 */
+	protected $_column_cache = [];
+
+	/**
 	 * Method: Constructor.
 	 *
-	 * @param object $conn - DB connection object.
+	 * @param object $connection - DB connection object.
 	 */
-	public function __construct( $conn ) {
-		$this->connection = $conn;
+	public function __construct( $connection ) {
+		$this->connection = $connection;
 	}
 
 	/**
@@ -99,7 +107,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	public function GetColumns() {
 		$model = $this->GetModel();
 
-		if ( ! isset( $this->_column_cache ) ) {
+		if ( empty( $this->_column_cache ) ) {
 			$this->_column_cache = array();
 			foreach ( array_keys( get_object_vars( $model ) ) as $col ) {
 				if ( trim( $col ) && $col[0] != '_' ) {
@@ -107,14 +115,12 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 				}
 			}
 		}
+
 		return $this->_column_cache;
 	}
 
 	/**
-	 * Returns whether table structure is installed or not.
-	 *
-	 * @deprecated
-	 * @return boolean
+	 * @inheritDoc
 	 */
 	public function IsInstalled() {
 		$_wpdb = $this->connection;
@@ -133,7 +139,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Install this ActiveRecord structure into DB.
+	 * @inheritDoc
 	 */
 	public function Install() {
 		$_wpdb = $this->connection;
@@ -149,7 +155,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Remove this ActiveRecord structure from DB.
+	 * @inheritDoc
 	 */
 	public function Uninstall() {
 		$_wpdb = $this->connection;
@@ -174,10 +180,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Save an active record into DB.
-	 *
-	 * @param object $active_record - ActiveRecord object.
-	 * @return integer|boolean - Either the number of modified/inserted rows or false on failure.
+	 * @inheritDoc
 	 */
 	public function Save( $active_record ) {
 		$_wpdb  = $this->connection;
@@ -185,7 +188,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$data   = array();
 		$format = array();
 
-		foreach ( $this->GetColumns() as $index => $key ) {
+		$columns = $this->GetColumns();
+		foreach ( $columns as $index => $key ) {
 			if ( $key == $this->_idkey ) {
 				$_id_index = $index;
 			}
@@ -195,14 +199,17 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			if ( is_int( $copy->$key ) ) {
 				$deffmt = '%d';
 			}
+
 			if ( is_float( $copy->$key ) ) {
 				$deffmt = '%f';
 			}
+
 			if ( is_array( $copy->$key ) || is_object( $copy->$key ) ) {
 				$data[ $key ] = WSAL_Helpers_DataHelper::JsonEncode( $val );
 			} else {
 				$data[ $key ] = $val;
 			}
+
 			$format[] = $deffmt;
 		}
 
@@ -253,16 +260,17 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Delete DB record.
-	 *
-	 * @param object $active_record - ActiveRecord object.
-	 * @return int|boolean - Either the amount of deleted rows or False on error.
+	 * @inheritDoc
 	 */
 	public function Delete( $active_record ) {
-		$_wpdb  = $this->connection;
+		$_wpdb = $this->connection;
+
 		return $_wpdb->delete(
 			$this->GetTable(),
-			$active_record->getId()
+			array(
+				$this->_idkey => $active_record->getId()
+			),
+			array( '%d')
 		);
 	}
 
@@ -281,13 +289,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Load multiple records from DB.
-	 *
-	 * @param string $cond (Optional) Load condition (eg: 'some_id = %d' ).
-	 * @param array $args (Optional) Load condition arguments (rg: array(45) ).
-	 *
-	 * @return self[] List of loaded records.
-	 * @throws Exception
+	 * @inheritDoc
 	 */
 	public function LoadMulti( $cond, $args = array() ) {
 		$_wpdb  = $this->connection;
@@ -302,12 +304,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Load multiple records from DB and call a callback for each record.
-	 * This function is very memory-efficient, it doesn't load records in bulk.
-	 *
-	 * @param callable $callback The callback to invoke.
-	 * @param string   $cond (Optional) Load condition.
-	 * @param array    $args (Optional) Load condition arguments.
+	 * @inheritDoc
 	 */
 	public function LoadAndCallForEach( $callback, $cond = '%d', $args = array( 1 ) ) {
 		$_wpdb = $this->connection;
@@ -319,12 +316,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Count records in the DB matching a condition.
-	 * If no parameters are given, this counts the number of records in the DB table.
-	 *
-	 * @param string $cond (Optional) Query condition.
-	 * @param array  $args (Optional) Condition arguments.
-	 * @return int Number of matching records.
+	 * @inheritDoc
 	 */
 	public function Count( $cond = '%d', $args = array( 1 ) ) {
 		$_wpdb = $this->connection;
@@ -346,13 +338,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Similar to LoadMulti but allows the use of a full SQL query.
-	 *
-	 * @param string $query Full SQL query.
-	 * @param array $args (Optional) Query arguments.
-	 *
-	 * @return array List of loaded records.
-	 * @throws Exception
+	 * @inheritDoc
 	 */
 	public function LoadMultiQuery( $query, $args = array() ) {
 		$_wpdb  = $this->connection;
@@ -365,56 +351,69 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
+	 * Generate SQL column definition string for the CREATE TABLE statement.
+	 *
+	 * @param object $copy
+	 * @param string $key
+	 *
+	 * @return string
+	 */
+	protected function _GetSqlColumnDefinition( $copy, $key ) {
+		$result = '    ';
+		switch ( true ) {
+			case ( $key === $this->_idkey ):
+				$result .= $key . ' BIGINT NOT NULL AUTO_INCREMENT,' . PHP_EOL;
+				break;
+			case is_int( $copy->$key ):
+				$result .= $key . ' BIGINT NOT NULL,' . PHP_EOL;
+				break;
+			case is_float( $copy->$key ):
+				$result .= $key . ' DOUBLE NOT NULL,' . PHP_EOL;
+				break;
+			case is_string( $copy->$key ):
+				$maxlength = $key . '_maxlength';
+				if ( property_exists( $copy, $maxlength ) ) {
+					// The double `$$` is intentional.
+					$result .= $key . ' VARCHAR(' . (int) $copy::$$maxlength . ') NOT NULL,' . PHP_EOL;
+				} else {
+					$result .= $key . ' LONGTEXT NOT NULL,' . PHP_EOL;
+				}
+				break;
+			case is_bool( $copy->$key ):
+				$result .= $key . ' BIT NOT NULL,' . PHP_EOL;
+				break;
+			case is_array( $copy->$key ):
+			case is_object( $copy->$key ):
+				$result .= $key . ' LONGTEXT NOT NULL,' . PHP_EOL;
+				break;
+			default:
+				//  fallback for any other columns would go here
+				break;
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Table install query.
 	 *
 	 * @param string|false $prefix - (Optional) Table prefix.
+	 *
 	 * @return string - Must return SQL for creating table.
 	 */
 	protected function _GetInstallQuery( $prefix = false ) {
 		$_wpdb      = $this->connection;
 		$class      = get_class( $this );
 		$copy       = new $class( $this->connection );
-		$table_name = ( $prefix ) ? $this->GetWPTable() : $this->GetTable();
+		$table_name = $this->GetTable();
 		$sql        = 'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (' . PHP_EOL;
-
-		foreach ( $this->GetColumns() as $key ) {
-			$sql .= '    ';
-			switch ( true ) {
-				case $key == $copy->_idkey:
-					$sql .= $key . ' BIGINT NOT NULL AUTO_INCREMENT,' . PHP_EOL;
-					break;
-				case is_int( $copy->$key ):
-					$sql .= $key . ' BIGINT NOT NULL,' . PHP_EOL;
-					break;
-				case is_float( $copy->$key ):
-					$sql .= $key . ' DOUBLE NOT NULL,' . PHP_EOL;
-					break;
-				case is_string( $copy->$key ):
-					$maxlength = $key . '_maxlength';
-					if ( property_exists( $class, $maxlength ) ) {
-						$sql .= $key . ' VARCHAR(' . (int) $class::$$maxlength . ') NOT NULL,' . PHP_EOL;
-					} else {
-						$sql .= $key . ' LONGTEXT NOT NULL,' . PHP_EOL;
-					}
-					break;
-				case is_bool( $copy->$key ):
-					$sql .= $key . ' BIT NOT NULL,' . PHP_EOL;
-					break;
-				case is_array( $copy->$key ):
-				case is_object( $copy->$key ):
-					$sql .= $key . ' LONGTEXT NOT NULL,' . PHP_EOL;
-					break;
-				default:
-			}
+		$cols       = $this->GetColumns();
+		foreach ( $cols as $key ) {
+			$sql .= $this->_GetSqlColumnDefinition( $copy, $key );
 		}
 
 		$sql .= $this->GetTableOptions() . PHP_EOL;
-
-		$sql .= ')';
-
-		if ( ! empty( $_wpdb->charset ) ) {
-			$sql .= ' DEFAULT CHARACTER SET ' . $_wpdb->charset;
-		}
+		$sql .= ') ' . $_wpdb->get_charset_collate();
 
 		return $sql;
 	}
@@ -445,13 +444,14 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * Get Users user_login.
 	 *
 	 * @param int $_user_id - User ID.
+	 *
 	 * @return string comma separated users login
 	 */
 	private function GetUserNames( $_user_id ) {
 		global $wpdb;
 
-		$user_names = '0';
-		if ( ! empty( $_user_id ) && 'null' != $_user_id ) {
+		$user_names = null;
+		if ( ! empty( $_user_id ) && 'null' != $_user_id && ! is_null( $_user_id ) ) {
 			$sql = 'SELECT user_login FROM ' . $wpdb->users . ' WHERE find_in_set(ID, @userId) > 0';
 			$wpdb->query( "SET @userId = $_user_id" );
 			$result      = $wpdb->get_results( $sql, ARRAY_A );
@@ -461,6 +461,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			}
 			$user_names = implode( ', ', $users_array );
 		}
+
 		return $user_names;
 	}
 
@@ -476,17 +477,26 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	public function GetReporting( $report_args, $_next_date = null, $_limit = 0 ) {
 
 		$_wpdb = $this->connection;
-		$_wpdb->set_charset( $_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci' );
+		$query   = $this->build_reporting_query( $report_args, false, $_next_date, $_limit );
+		$results = $_wpdb->get_results( $query );
+		if ( ! empty( $results ) ) {
+			$last_item           = end( $results );
+			$results['lastDate'] = $last_item->created_on;
+		}
 
-		// Tables.
-		$meta       = new WSAL_Adapters_MySQL_Meta( $this->connection );
-		$table_meta = $meta->GetTable(); // Metadata.
-		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
-		$table_occ  = $occurrence->GetTable(); // Occurrences.
+		return $results;
 
-		$condition_date = ! empty( $_next_date ) ? ' AND occ.created_on < ' . $_next_date : '';
+	}
 
-		$_site_id                = 'null';
+	/**
+	 * Generates SQL where statement based on given report args.
+	 *
+	 * @param WSAL_ReportArgs $report_args
+	 *
+	 * @return string
+	 */
+	private function build_where_statement( $report_args ) {
+		$_site_id                = null;
 		$sites_negate_expression = '';
 		if ( $report_args->site__in ) {
 			$_site_id = $this->formatArrayForQuery( $report_args->site__in );
@@ -495,7 +505,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			$sites_negate_expression = 'NOT';
 		}
 
-		$_user_id                = 'null';
+		$_user_id                = null;
 		$users_negate_expression = '';
 		$users_subselect_operand = 'OR';
 		if ( $report_args->user__in ) {
@@ -508,7 +518,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
 		$user_names = $this->GetUserNames( $_user_id );
 
-		$_role_name              = 'null';
+		$_role_name              = null;
 		$roles_negate_expression = '';
 		if ( $report_args->role__in ) {
 			$_role_name = $this->formatArrayForQueryRegex( $report_args->role__in );
@@ -517,22 +527,52 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			$roles_negate_expression = 'NOT';
 		}
 
-		$_alert_code = 'null';
+		$_alert_code = null;
+		$alert_code_negate_expression = '';
 		if ( $report_args->code__in ) {
 			$_alert_code = $this->formatArrayForQuery( $report_args->code__in );
+		} else if ( $report_args->code__not_in) {
+			$_alert_code = $this->formatArrayForQuery( $report_args->code__not_in );
+			$alert_code_negate_expression = 'NOT';
 		}
 
-		$_post_types = 'null';
+		$_post_ids = null;
+		$post_ids_negate_expression = '';
+		if ( $report_args->post__in ) {
+			$_post_ids = $this->formatArrayForQueryRegex( $report_args->post__in );
+		} else if ($report_args->post__not_in) {
+			$_post_ids = $this->formatArrayForQueryRegex( $report_args->post__not_in );
+			$post_ids_negate_expression = 'NOT';
+		}
+		
+		$_post_types = null;
+		$post_types_negate_expression = '';
 		if ( $report_args->post_type__in ) {
 			$_post_types = $this->formatArrayForQueryRegex( $report_args->post_type__in );
+		} else if ($report_args->post_type__not_in) {
+			$_post_types = $this->formatArrayForQueryRegex( $report_args->post_type__not_in );
+			$post_types_negate_expression = 'NOT';
 		}
 
-		$_post_statuses = 'null';
+		$_post_statuses = null;
+		$post_statuses_negate_expression = '';
 		if ( $report_args->post_status__in ) {
 			$_post_statuses = $this->formatArrayForQueryRegex( $report_args->post_status__in );
+		} else if ($report_args->post_status__not_in) {
+			$_post_statuses = $this->formatArrayForQueryRegex( $report_args->post_status__not_in );
+			$post_statuses_negate_expression = 'NOT';
 		}
 
-		$_objects                  = 'null';
+		$_ip_addresses                  = null;
+		$ip_addresses_negate_expression = '';
+		if ( $report_args->ip__in ) {
+			$_ip_addresses = $this->formatArrayForQuery( $report_args->ip__in );
+		} else if ( $report_args->ip__not_in ) {
+			$_ip_addresses                  = $this->formatArrayForQuery( $report_args->ip__not_in );
+			$ip_addresses_negate_expression = 'NOT';
+		}
+
+		$_objects                  = null;
 		$objects_negate_expression = '';
 		if ( $report_args->object__in ) {
 			$_objects = $this->formatArrayForQuery( $report_args->object__in );
@@ -541,261 +581,145 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			$objects_negate_expression = 'NOT';
 		}
 
-		$_event_types                  = 'null';
+		$_event_types                  = null;
 		$event_types_negate_expression = '';
 		if ( $report_args->type__in ) {
 			$_event_types = $this->formatArrayForQuery( $report_args->type__in );
 		} else if ( $report_args->type__not_in ) {
-			$_event_types = $this->formatArrayForQuery( $report_args->type__not_in );
+			$_event_types                  = $this->formatArrayForQuery( $report_args->type__not_in );
 			$event_types_negate_expression = 'NOT';
 		}
 
-		$_start_timestamp = 'null';
+		$_start_timestamp = null;
 		if ( $report_args->start_date ) {
 			$start_datetime   = DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->start_date . ' 00:00:00' );
 			$_start_timestamp = $start_datetime->format( 'U' );
 		}
 
-		$_end_timestamp = 'null';
+		$_end_timestamp = null;
 		if ( $report_args->end_date ) {
 			$end_datetime   = DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->end_date . ' 23:59:59' );
 			$_end_timestamp = $end_datetime->format( 'U' );
 		}
 
-		$users_condition = "(
-					@userId is NULL
-					OR (
-						{$users_negate_expression} EXISTS( SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='CurrentUserID' AND find_in_set( meta.value, @userId ) > 0)
-						$users_subselect_operand
-						{$users_negate_expression} EXISTS( SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='Username' AND replace(meta.value, '\"', '' ) IN ( $user_names ) )
-					)
-				)";
-
-		if ( 'null' === $_post_types && 'null' === $_post_statuses ) {
-			$sql = "SELECT DISTINCT
-				occ.id,
-				occ.alert_id,
-				occ.site_id,
-				occ.created_on,
-				replace(replace(replace((SELECT t1.value FROM $table_meta AS t1 WHERE t1.name = 'CurrentUserRoles' AND t1.occurrence_id = occ.id LIMIT 1), '[', ''), ']', ''), '\\'', '') AS roles,
-				(SELECT replace(t2.value, '\"','') FROM $table_meta as t2 WHERE t2.name = 'ClientIP' AND t2.occurrence_id = occ.id LIMIT 1) AS ip,
-				(SELECT replace(t3.value, '\"', '') FROM $table_meta as t3 WHERE t3.name = 'UserAgent' AND t3.occurrence_id = occ.id LIMIT 1) AS ua,
-				COALESCE(
-					(SELECT replace(t4.value, '\"', '') FROM $table_meta as t4 WHERE t4.name = 'Username' AND t4.occurrence_id = occ.id LIMIT 1),
-					(SELECT replace(t5.value, '\"', '') FROM $table_meta as t5 WHERE t5.name = 'CurrentUserID' AND t5.occurrence_id = occ.id LIMIT 1)
-				) as user_id,
-				(SELECT replace(t6.value, '\"', '') FROM $table_meta as t6 WHERE t6.name = 'Object' AND t6.occurrence_id = occ.id LIMIT 1) AS object,
-				(SELECT replace(t7.value, '\"', '') FROM $table_meta as t7 WHERE t7.name = 'EventType' AND t7.occurrence_id = occ.id LIMIT 1) AS event_type
-				FROM $table_occ AS occ
-				JOIN $table_meta AS meta ON meta.occurrence_id = occ.id
-				WHERE
-					(
-						@siteId is NULL
-						OR
-						{$sites_negate_expression} find_in_set( occ.site_id, @siteId ) > 0
-					)
-					AND {$users_condition}
-					AND (
-						@roleName is NULL
-						OR (
-							meta.name = 'CurrentUserRoles'
-							AND
-							replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') {$roles_negate_expression} REGEXP @roleName
-						)
-					)
-					AND (
-						@object is NULL
-						OR
-						{$objects_negate_expression} EXISTS( SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='Object' AND find_in_set( meta.value, @object ) > 0 )
-					)
-					AND (
-						@eventType is NULL
-						OR
-						{$event_types_negate_expression} EXISTS( SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='EventType' AND find_in_set( meta.value, @eventType ) > 0)
-					)
-					AND ( @alertCode is NULL OR find_in_set( occ.alert_id, @alertCode ) > 0)
-					AND ( @startTimestamp is NULL OR occ.created_on >= @startTimestamp )
-					AND ( @endTimestamp is NULL OR occ.created_on <= @endTimestamp )
-					{$condition_date}
-				ORDER BY
-					created_on DESC
-			";
-		} else {
-			$sql = "SELECT
-				occ.id,
-				occ.alert_id,
-				occ.site_id,
-				occ.created_on,
-				replace(replace(replace((SELECT t1.value FROM $table_meta AS t1 WHERE t1.name = 'CurrentUserRoles' AND t1.occurrence_id = occ.id LIMIT 1), '[', ''), ']', ''), '\\'', '') AS roles,
-				(SELECT replace(t2.value, '\"','') FROM $table_meta as t2 WHERE t2.name = 'ClientIP' AND t2.occurrence_id = occ.id LIMIT 1) AS ip,
-				(SELECT replace(t3.value, '\"', '') FROM $table_meta as t3 WHERE t3.name = 'UserAgent' AND t3.occurrence_id = occ.id LIMIT 1) AS ua,
-				COALESCE(
-					(SELECT replace(t4.value, '\"', '') FROM $table_meta as t4 WHERE t4.name = 'Username' AND t4.occurrence_id = occ.id LIMIT 1),
-					(SELECT replace(t5.value, '\"', '') FROM $table_meta as t5 WHERE t5.name = 'CurrentUserID' AND t5.occurrence_id = occ.id LIMIT 1)
-				) as user_id,
-				(SELECT replace(t6.value, '\"', '') FROM $table_meta as t6 WHERE t6.name = 'Object' AND t6.occurrence_id = occ.id LIMIT 1) AS object,
-				(SELECT replace(t7.value, '\"', '') FROM $table_meta as t7 WHERE t7.name = 'EventType' AND t7.occurrence_id = occ.id LIMIT 1) AS event_type
-			FROM
-				$table_occ as occ
-			WHERE
-				(
-					@siteId is NULL
-					OR
-					{$sites_negate_expression} find_in_set(occ.site_id, @siteId) > 0
-				)
-				AND {$users_condition}
-				AND (
-					@roleName is NULL
-					OR
-					{$roles_negate_expression} EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='CurrentUserRoles' AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName)
-				)
-				AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
-				AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
-				AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
-				AND (
-					@postType is NULL
-					OR
-					EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='PostType' AND find_in_set(meta.value, @postType) > 0)
-				)
-				AND (
-					@postStatus is NULL
-					OR
-					EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='PostStatus' AND find_in_set(meta.value, @postStatus) > 0)
-				)
-				AND (
-					@object is NULL
-					OR
-					{$objects_negate_expression} EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='Object' AND find_in_set(meta.value, @object) > 0)
-				)
-				AND (
-					@eventType is NULL
-					OR
-					{$event_types_negate_expression} EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='EventType' AND find_in_set(meta.value, @eventType) > 0)
-				)
-				{$condition_date}
-			ORDER BY
-				created_on DESC
-			";
+		$users_condition_parts = array();
+		if ( ! is_null( $_user_id ) ) {
+			array_push( $users_condition_parts, " {$users_negate_expression} find_in_set( occ.user_id, $_user_id ) > 0 " );
 		}
 
-		$_wpdb->query( "SET @siteId = $_site_id" );
-		$_wpdb->query( "SET @userId = $_user_id" );
-		$_wpdb->query( "SET @postType = $_post_types" );
-		$_wpdb->query( "SET @postStatus = $_post_statuses" );
-		$_wpdb->query( "SET @object = $_objects" );
-		$_wpdb->query( "SET @eventType = $_event_types" );
-		$_wpdb->query( "SET @roleName = $_role_name" );
-		$_wpdb->query( "SET @alertCode = $_alert_code" );
-		$_wpdb->query( "SET @startTimestamp = $_start_timestamp" );
-		$_wpdb->query( "SET @endTimestamp = $_end_timestamp" );
+		if ( ! is_null( $user_names ) ) {
+			array_push( $users_condition_parts, " {$users_negate_expression} replace( occ.username, '\"', '' ) IN ( $user_names ) " );
+		}
+
+		$where_statement = " WHERE 1 = 1 ";
+
+		if ( ! empty( $users_condition_parts ) ) {
+			$where_statement .= ' AND ( ' . implode( $users_subselect_operand, $users_condition_parts ) . ' ) ';
+		}
+
+		if ( ! is_null( $_site_id ) ) {
+			$where_statement .= " AND {$sites_negate_expression} find_in_set( occ.site_id, {$_site_id} ) > 0 ";
+		}
+
+		if ( ! is_null( $_role_name ) ) {
+			$where_statement .= " AND user_roles {$roles_negate_expression} REGEXP {$_role_name} ";
+		}
+
+		if ( ! is_null( $_ip_addresses ) ) {
+			$where_statement .= " AND {$ip_addresses_negate_expression} find_in_set( occ.client_ip, {$_ip_addresses} ) > 0 ";
+		}
+
+		if ( ! is_null( $_objects ) ) {
+			$where_statement .= " AND {$objects_negate_expression} find_in_set( occ.object, {$_objects} ) > 0 ";
+		}
+
+		if ( ! is_null( $_event_types ) ) {
+			$where_statement .= " AND {$event_types_negate_expression} find_in_set( occ.event_type, {$_event_types} ) > 0 ";
+		}
+
+		if ( ! is_null( $_alert_code ) ) {
+			$where_statement .= " AND {$alert_code_negate_expression} find_in_set( occ.alert_id, {$_alert_code} ) > 0 ";
+		}
+
+		if ( ! is_null( $_post_ids ) ) {
+			$where_statement .= " AND {$post_ids_negate_expression} find_in_set( occ.post_id, {$_post_ids} ) > 0 ";
+		}
+
+		if ( ! is_null( $_post_statuses ) ) {
+			$where_statement .= " AND {$post_statuses_negate_expression} find_in_set( occ.post_status, {$_post_statuses} ) > 0 ";
+		}
+
+		if ( ! is_null( $_post_types ) ) {
+			$where_statement .= " AND {$post_types_negate_expression} find_in_set( occ.post_type, {$_post_types} ) > 0 ";
+		}
+
+		if ( ! is_null( $_start_timestamp ) ) {
+			$where_statement .= " AND occ.created_on >= {$_start_timestamp} ";
+		}
+
+		if ( ! is_null( $_end_timestamp ) ) {
+			$where_statement .= " AND occ.created_on <= {$_end_timestamp} ";
+		}
+
+		return $where_statement;
+	}
+
+	/**
+	 * Builds SQL query for the main report.
+	 *
+	 * @param WSAL_ReportArgs $report_args
+	 * @param bool $count_only If true, the resulting query will only provide a count of matching entries is returned.
+	 * @param int $_next_date - (Optional) Created on >.
+	 * @param int $_limit - (Optional) Limit.
+	 *
+	 * @return string
+	 */
+	private function build_reporting_query( $report_args, $count_only, $_next_date = null, $_limit = 0 ) {
+		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
+		$table_occ  = $occurrence->GetTable();
+
+		$select_fields = $count_only ? 'COUNT(1)' : "occ.id,
+			occ.alert_id,
+			occ.site_id,
+			occ.created_on,
+			replace( replace( replace( occ.user_roles, '[', ''), ']', ''), '\\'', '') AS roles,
+			occ.client_ip AS ip,
+			occ.user_agent AS ua,
+			COALESCE( occ.username, occ.user_id ) as user_id,
+			occ.object,
+			occ.event_type,
+			occ.post_id,
+			occ.post_type,
+			occ.post_status";
+
+		$sql = "SELECT {$select_fields} FROM {$table_occ} AS occ ";
+
+		$sql .= $this->build_where_statement( $report_args );
+		if ( ! empty( $_next_date ) ) {
+			$sql .= ' AND occ.created_on < ' . $_next_date;
+		}
+
+		$sql .= " ORDER BY created_on DESC ";
 
 		if ( ! empty( $_limit ) ) {
 			$sql .= " LIMIT {$_limit}";
 		}
-		$results = $_wpdb->get_results( $sql );
-		if ( ! empty( $results ) ) {
-			$last_item           = end( $results );
-			$results['lastDate'] = $last_item->created_on;
-		}
 
-		return $results;
+		return $sql;
 	}
 
 	/**
 	 * Function used in WSAL reporting extension.
 	 * Check if criteria are matching in the DB.
 	 *
-	 * @param mixed $criteria - Query conditions.
+	 * @param WSAL_ReportArgs $report_args - Query conditions.
+	 *
 	 * @return int count of distinct values
 	 */
-	public function CheckMatchReportCriteria( $criteria ) {
-		$_site_id         = $criteria['siteId'];
-		$_user_id         = $criteria['userId'];
-		$_post_types      = $criteria['post_types'];
-		$_post_statuses   = $criteria['post_statuses'];
-		$_role_name       = $criteria['roleName'];
-		$_alert_code      = $criteria['alertCode'];
-		$_start_timestamp = $criteria['startTimestamp'];
-		$_end_timestamp   = $criteria['endTimestamp'];
-		$_ip_address      = $criteria['ipAddress'];
+	public function CheckMatchReportCriteria( $report_args ) {
+		$query = $this->build_reporting_query( $report_args, true );
 
-		$_wpdb = $this->connection;
-		$_wpdb->set_charset( $_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci' );
-		// Tables.
-		$meta       = new WSAL_Adapters_MySQL_Meta( $this->connection );
-		$table_meta = $meta->GetTable(); // Metadata.
-		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
-		$table_occ  = $occurrence->GetTable(); // Occurrences.
-
-		$user_names = $this->GetUserNames( $_user_id );
-
-		if ( 'null' === $_post_types && 'null' === $_post_statuses ) {
-			$sql = "SELECT COUNT(DISTINCT occ.id) FROM $table_occ AS occ
-				JOIN $table_meta AS meta ON meta.occurrence_id = occ.id
-				WHERE
-					(@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
-					AND (@userId is NULL OR (
-						(meta.name = 'CurrentUserID' AND find_in_set(meta.value, @userId) > 0)
-					OR (meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($user_names))
-					))
-					AND (@roleName is NULL OR (meta.name = 'CurrentUserRoles'
-					AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName
-					))
-					AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
-					AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
-					AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
-					AND (@ipAddress is NULL OR (meta.name = 'ClientIP' AND find_in_set(meta.value, @ipAddress) > 0))
-				";
-		} else {
-			$sql = "SELECT COUNT(DISTINCT occ.id)
-				FROM $table_occ AS occ
-				WHERE
-					(@siteId is NULL OR find_in_set(occ.site_id, @siteId) > 0)
-					AND (
-						@userId is NULL
-						OR (
-							EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='CurrentUserID' AND find_in_set(meta.value, @userId) > 0)
-							OR
-							EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='Username' AND replace(meta.value, '\"', '') IN ($user_names))
-						)
-					)
-					AND (
-						@roleName is NULL
-						OR
-						EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='CurrentUserRoles' AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName)
-					)
-					AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
-					AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
-					AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
-					AND (
-						@ipAddress is NULL
-						OR
-						EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='ClientIP' AND find_in_set(meta.value, @ipAddress) > 0)
-					)
-					AND (
-						@postType is NULL
-						OR
-						EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='PostType' AND find_in_set(meta.value, @postType) > 0)
-					)
-					AND (
-						@postStatus is NULL
-						OR
-						EXISTS(SELECT 1 FROM $table_meta as meta WHERE meta.occurrence_id = occ.id AND meta.name='PostStatus' AND find_in_set(meta.value, @postStatus) > 0)
-					)
-				";
-		}
-
-		$_wpdb->query( "SET @siteId = $_site_id" );
-		$_wpdb->query( "SET @userId = $_user_id" );
-		$_wpdb->query( "SET @postType = $_post_types" );
-		$_wpdb->query( "SET @postStatus = $_post_statuses" );
-		$_wpdb->query( "SET @roleName = $_role_name" );
-		$_wpdb->query( "SET @alertCode = $_alert_code" );
-		$_wpdb->query( "SET @startTimestamp = $_start_timestamp" );
-		$_wpdb->query( "SET @endTimestamp = $_end_timestamp" );
-		$_wpdb->query( "SET @ipAddress = $_ip_address" );
-
-		return (int) $_wpdb->get_var( $sql );
+		return (int) $this->connection->get_var( $query );
 	}
 
 	/**
@@ -811,148 +735,42 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
 		global $wpdb;
 		$_wpdb = $this->connection;
-		$_wpdb->set_charset( $_wpdb->dbh, 'utf8mb4', 'utf8mb4_general_ci' );
 
 		// Tables.
-		$meta       = new WSAL_Adapters_MySQL_Meta( $this->connection );
-		$table_meta = $meta->GetTable(); // Metadata.
-		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
-		$table_occ  = $occurrence->GetTable(); // Occurrences.
+		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $_wpdb );
+		$table_occ  = $occurrence->GetTable();
+
 		// Get temp table `wsal_tmp_users`.
-		$tmp_users = new WSAL_Adapters_MySQL_TmpUser( $this->connection );
+		$tmp_users = new WSAL_Adapters_MySQL_TmpUser( $_wpdb );
 		// If the table exist.
 		if ( $tmp_users->IsInstalled() ) {
-			$table_users = $tmp_users->GetTable(); // tmp_users.
+			$table_users = $tmp_users->GetTable();
 			$this->TempUsers( $table_users );
 		} else {
 			$table_users = $wpdb->users;
 		}
 
-		$_site_id                = 'null';
-		$sites_negate_expression = '';
-		if ( $report_args->site__in ) {
-			$_site_id = $this->formatArrayForQuery( $report_args->site__in );
-		} else if ( $report_args->site__not_in ) {
-			$_site_id                = $this->formatArrayForQuery( $report_args->site__not_in );
-			$sites_negate_expression = 'NOT';
-		}
-
-		$_user_id                = 'null';
-		$users_negate_expression = '';
-		if ( $report_args->user__in ) {
-			$_user_id = $this->formatArrayForQuery( $report_args->user__in );
-		} else if ( $report_args->user__not_in ) {
-			$_user_id                = $this->formatArrayForQuery( $report_args->user__not_in );
-			$users_negate_expression = 'NOT';
-		}
-
-		$_role_name              = 'null';
-		$roles_negate_expression = '';
-		if ( $report_args->role__in ) {
-			$_role_name = $this->formatArrayForQueryRegex( $report_args->role__in );
-		} else if ( $report_args->role__not_in ) {
-			$_role_name              = $this->formatArrayForQueryRegex( $report_args->role__not_in );
-			$roles_negate_expression = 'NOT';
-		}
-
-		$_alert_code = 'null';
-		if ( $report_args->code__in ) {
-			$_alert_code = $this->formatArrayForQuery( $report_args->code__in );
-		}
-
-		$_ip_address = 'null';
-		$ip_address_negate_expression = '';
-		if ( $report_args->ip__in ) {
-			$_ip_address = $this->formatArrayForQuery( $report_args->ip__in );
-		} else if ( $report_args->ip__not_in ) {
-			$_ip_address = $this->formatArrayForQuery( $report_args->ip__not_in );
-			$ip_address_negate_expression = 'NOT';
-		}
-
-		$_start_timestamp = 'null';
-		if ( $report_args->start_date ) {
-			$start_datetime   = DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->start_date . ' 00:00:00' );
-			$_start_timestamp = $start_datetime->format( 'U' );
-		}
-
-		$_end_timestamp = 'null';
-		if ( $report_args->end_date ) {
-			$end_datetime   = DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->end_date . ' 23:59:59' );
-			$_end_timestamp = $end_datetime->format( 'U' );
-		}
-
-		$user_names = $this->GetUserNames( $_user_id );
-
-		$_wpdb->query( "SET @siteId = $_site_id" );
-		$_wpdb->query( "SET @userId = $_user_id" );
-		$_wpdb->query( "SET @roleName = $_role_name" );
-		$_wpdb->query( "SET @alertCode = $_alert_code" );
-		$_wpdb->query( "SET @startTimestamp = $_start_timestamp" );
-		$_wpdb->query( "SET @endTimestamp = $_end_timestamp" );
-		$_wpdb->query( "SET @ipAddress = $_ip_address" );
-
-		$sql = "SELECT DISTINCT *
-			FROM (SELECT DISTINCT
-					occ.site_id,
-					CONVERT((SELECT replace(t1.value, '\"', '') FROM $table_meta as t1 WHERE t1.name = 'Username' AND t1.occurrence_id = occ.id LIMIT 1) using UTF8) AS user_login ,
-					CONVERT((SELECT replace(t3.value, '\"','') FROM $table_meta as t3 WHERE t3.name = 'ClientIP' AND t3.occurrence_id = occ.id LIMIT 1) using UTF8) AS ip
-				FROM $table_occ AS occ
-				JOIN $table_meta AS meta ON meta.occurrence_id = occ.id
-				WHERE
-					(
-						@siteId is NULL
-						OR
-						{$sites_negate_expression} find_in_set(occ.site_id, @siteId) > 0
-					)
-					AND (
-						@userId is NULL 
-						OR $users_negate_expression (
-							( meta.name = 'CurrentUserID' AND find_in_set(meta.value, @userId) > 0 )
-							OR
-							( meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($user_names) )
-						)
-					)
-					AND (
-						@roleName is NULL
-						OR (
-							meta.name = 'CurrentUserRoles' AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') {$roles_negate_expression} REGEXP @roleName
-						)
-					)
-					AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
-					AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
-					AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
-					AND (@ipAddress is NULL OR (meta.name = 'ClientIP' AND {$ip_address_negate_expression} find_in_set(meta.value, @ipAddress) > 0))
-				HAVING user_login IS NOT NULL
+		$where_statement = $this->build_where_statement( $report_args );
+		$sql = "SELECT DISTINCT * FROM (
+				    SELECT DISTINCT
+						occ.site_id,
+				        occ.client_ip AS ip,
+						occ.username AS user_login 
+					FROM $table_occ AS occ
+					{$where_statement}
+					HAVING user_login IS NOT NULL
 				UNION ALL
 				SELECT DISTINCT
-				occ.site_id,
-				CONVERT((SELECT u.user_login
-					FROM $table_meta as t2
-					JOIN $table_users AS u ON u.ID = replace(t2.value, '\"', '')
-					WHERE t2.name = 'CurrentUserID'
-					AND t2.occurrence_id = occ.id
-					GROUP BY u.ID
-					LIMIT 1) using UTF8) AS user_login,
-				CONVERT((SELECT replace(t4.value, '\"','') FROM $table_meta as t4 WHERE t4.name = 'ClientIP' AND t4.occurrence_id = occ.id LIMIT 1) using UTF8) AS ip
+					occ.site_id,
+				  	occ.client_ip AS ip,
+				  	u.user_login AS user_login
 				FROM $table_occ AS occ
-				JOIN $table_meta AS meta ON meta.occurrence_id = occ.id
-				WHERE
-					(@siteId is NULL OR {$sites_negate_expression} find_in_set(occ.site_id, @siteId) > 0)
-					AND (@userId is NULL OR {$users_negate_expression} (
-						(meta.name = 'CurrentUserID' AND find_in_set(meta.value, @userId) > 0)
-						OR (meta.name = 'Username' AND replace(meta.value, '\"', '') IN ($user_names))
-					))
-					AND (@roleName is NULL OR {$roles_negate_expression} (meta.name = 'CurrentUserRoles'
-					AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP @roleName
-					))
-					AND (@alertCode is NULL OR find_in_set(occ.alert_id, @alertCode) > 0)
-					AND (@startTimestamp is NULL OR occ.created_on >= @startTimestamp)
-					AND (@endTimestamp is NULL OR occ.created_on <= @endTimestamp)
-					AND (@ipAddress is NULL OR {$ip_address_negate_expression} (meta.name = 'ClientIP' AND find_in_set(meta.value, @ipAddress) > 0))
-				HAVING user_login IS NOT NULL) ip_logins
-			WHERE user_login NOT IN ('Unregistered user', 'Plugins', 'Plugin')
-				ORDER BY user_login ASC
-		";
+				JOIN $table_users AS u ON u.ID = occ.user_id  
+				{$where_statement}
+				HAVING user_login IS NOT NULL
+    		) ip_logins
+			WHERE user_login NOT IN ( 'Unregistered user', 'Plugins', 'Plugin')
+			ORDER BY user_login ASC;";
 
 		if ( ! empty( $_limit ) ) {
 			$sql .= " LIMIT {$_limit}";
@@ -965,9 +783,14 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 				// Get the display_name only for the first row & if the user_login changed from the previous row.
 				$row->display_name = '';
 				if ( 0 == $key || ( $key > 1 && $results[ ( $key - 1 ) ]->user_login != $row->user_login ) ) {
-					$sql          = "SELECT t5.display_name FROM $wpdb->users AS t5 WHERE t5.user_login = \"$row->user_login\"";
-					$display_name = $wpdb->get_var( $sql );
-					$row->display_name = $display_name;
+					$row->display_name = $wpdb->get_var(
+						$wpdb->prepare(
+							"SELECT display_name "
+							. " FROM {$wpdb->users} "
+							. " WHERE user_login = %s;",
+							$row->user_login
+						)
+					);
 				}
 
 				if ( ! isset( $grouped_types[ $row->user_login ] ) ) {
@@ -1032,9 +855,9 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	/**
 	 * @inheritDoc
 	 */
-	public function GetModel() {
-		// implement in subclass
-	}
+	 public function GetModel() {
+		 return new WSAL_Models_Query();
+	 }
 
 	/**
 	 * @param array $data

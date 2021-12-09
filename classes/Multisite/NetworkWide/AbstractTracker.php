@@ -32,7 +32,7 @@ abstract class AbstractTracker implements TrackerInterface {
 	/**
 	 * The key used to store data under.
 	 *
-	 * You should always redine this in extended classes.
+	 * You should always redefine this in extended classes.
 	 *
 	 * @since 3.5.2
 	 * @var   string

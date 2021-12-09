@@ -41,7 +41,9 @@ interface WSAL_Connector_ConnectorInterface {
 	public function closeConnection();
 
 	/**
-	 * Is installed?
+	 * Checks if the necessary tables are available
+	 *
+	 * @return bool true|false
 	 */
 	public function isInstalled();
 
@@ -66,4 +68,14 @@ interface WSAL_Connector_ConnectorInterface {
 	 * Uninstall all.
 	 */
 	public function uninstallAll();
+
+	/**
+	 * Run any query.
+	 *
+	 * @param string $query
+	 *
+	 * @return mixed
+	 * @since 4.4.0
+	 */
+	public function query( $query );
 }

@@ -139,11 +139,11 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip',
 				),
 			);
-			// runs through a filter so it can be added to programatically.
+			// runs through a filter, so it can be added to programmatically.
 			// NOTE: this means when using we need to test it's still an array.
 			$installable_plugins = apply_filters( 'wsal_filter_installable_plugins', $plugins );
 
-			// Sort them into a a nice order.
+			// Sort them into a nice order.
 			array_multisort( array_column( $installable_plugins, 'title' ), SORT_ASC, $installable_plugins );
 
 			return $installable_plugins;

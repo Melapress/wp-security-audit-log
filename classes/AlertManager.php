@@ -100,7 +100,7 @@ final class WSAL_AlertManager {
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->plugin = $plugin;
-		foreach ( glob( dirname( __FILE__ ) . '/Loggers/*.php' ) as $file ) {
+		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( dirname( __FILE__ ) . '/Loggers', '*.php' ) as $file ) {
 			$this->AddFromFile( $file );
 		}
 
@@ -1232,7 +1232,6 @@ final class WSAL_AlertManager {
 		if ( ! empty( $query_args['search_filters'] ) ) {
 			// Get DB connection array.
 			$connection = WpSecurityAuditLog::GetInstance()->getConnector()->getAdapter( 'Occurrence' )->get_connection();
-			$connection->set_charset( $connection->dbh, 'utf8mb4', 'utf8mb4_general_ci' );
 
 			// Tables.
 			$meta       = new WSAL_Adapters_MySQL_Meta( $connection );
@@ -1257,23 +1256,20 @@ final class WSAL_AlertManager {
 						$query->addCondition( 'created_on <= %s', strtotime( '+1 day -1 second', $date_string ) );
 					}
 				} elseif ( in_array( $prefix, array( 'username', 'firstname', 'lastname' ), true ) ) {
-					// User ids array.
-					$user_ids = array();
-
+					$users = array();
 					if ( 'username' === $prefix ) {
 						foreach ( $value as $username ) {
 							$user = get_user_by( 'login', $username );
-
 							if ( ! $user ) {
 								$user = get_user_by( 'slug', $username );
 							}
 
 							if ( $user ) {
-								$user_ids[] = $user->ID;
+								array_push( $users, $user );
 							}
 						}
 					} elseif ( 'firstname' === $prefix || 'lastname' === $prefix ) {
-						$users    = array();
+
 						$meta_key = 'firstname' === $prefix ? 'first_name' : ( 'lastname' === $prefix ? 'last_name' : false );
 
 						foreach ( $value as $name ) {
@@ -1287,125 +1283,64 @@ final class WSAL_AlertManager {
 							);
 
 							foreach ( $users_array as $user ) {
-								$users[] = $user;
+								array_push( $users, $user );
 							}
 						}
-
-						$usernames = array();
-
-						if ( ! empty( $users ) ) {
-							foreach ( $users as $user ) {
-								$usernames[] = $user->user_login;
-								$user_ids[]  = $user->ID;
-							}
-						}
-
-						$value = $usernames;
 					}
 
-					$sql = "$table_occ.id IN ( SELECT occurrence_id FROM $table_meta as meta WHERE ";
+					if ( ! empty( $users ) ) {
+						global $wpdb;
+						$usernames           = wp_list_pluck( $users, 'user_login' );
+						$placeholders_string = implode( ', ', array_fill( 0, count( $usernames ), '%s' ) );
 
-					if ( ! empty( $user_ids ) ) {
-						$last_userid = end( $user_ids );
-						$sql        .= "( meta.name='CurrentUserID' AND ( ";
+						$sql = $wpdb->prepare( "username IN ( " . $placeholders_string . ' ) ', $usernames );
 
-						foreach ( $user_ids as $user_id ) {
-							if ( $last_userid === $user_id ) {
-								$sql .= "meta.value='$user_id'";
-							} else {
-								$sql .= "meta.value='$user_id' OR ";
-							}
-						}
+						$user_ids            = wp_list_pluck( $users, 'ID' );
+						$placeholders_string = implode( ', ', array_fill( 0, count( $user_ids ), '%d' ) );
 
-						$sql .= ' ) )';
-						$sql .= ' OR ';
-					}
-
-					if ( ! empty( $value ) ) {
-						$last_username = end( $value );
-						$sql          .= "( meta.name='Username' AND ( ";
-
-						foreach ( $value as $username ) {
-							if ( $last_username === $username ) {
-								$sql .= "meta.value='%s'";
-							} else {
-								$sql .= "meta.value='$username' OR ";
-							}
-						}
-
-						$sql .= ' ) )';
-					}
-
-					$sql       .= ' )';
-					$user_count = count( $value );
-
-					if ( $user_count ) {
-						$query->addORCondition( array( $sql => $value[ $user_count - 1 ] ) );
-					} else {
+						$sql .= ' OR ' . $wpdb->prepare( "user_id IN ( " . $placeholders_string . ' ) ', $user_ids );
 						$query->addORCondition( array( $sql => '' ) );
 					}
 				} elseif ( 'userrole' === $prefix ) {
 					// User role search condition.
-					$sql   = "$table_occ.id IN ( SELECT occurrence_id FROM $table_meta as meta WHERE meta.name='CurrentUserRoles' AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP %s )";
+					$sql   = "$table_occ.user_role replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP %s )";
 					$value = implode( '|', $value );
 					$query->addORCondition( array( $sql => $value ) );
-				} elseif ( in_array( $prefix, array( 'posttype', 'poststatus', 'postid', 'postname' ), true ) ) {
-					$post_meta = '';
+				} elseif ( 'postname' === $prefix ) {
 
-					if ( 'posttype' === $prefix ) {
-						$post_meta = 'PostType';
-					} elseif ( 'poststatus' === $prefix ) {
-						$post_meta = 'PostStatus';
-					} elseif ( 'postid' === $prefix ) {
-						$post_meta = 'PostID';
-					} elseif ( 'postname' === $prefix ) {
-						$post_meta = 'PostTitle';
-					}
-
-					// Post meta search condition.
-					$sql = "$table_occ.id IN ( SELECT occurrence_id FROM $table_meta as meta WHERE meta.name='$post_meta' AND ( ";
-					if ( 'postname' === $prefix ) {
-						$value = array_map( array( $this, 'add_string_wildcards' ), $value );
-					}
+					$sql   = "$table_occ.id IN ( SELECT occurrence_id FROM $table_meta as meta WHERE meta.name='PostTitle' AND ( ";
+					$value = array_map( array( $this, 'add_string_wildcards' ), $value );
 
 					// Get the last value.
 					$last_value = end( $value );
 
-					foreach ( $value as $post_meta ) {
-						if ( $last_value === $post_meta ) {
+					foreach ( $value as $column_name ) {
+						if ( $last_value === $column_name ) {
 							continue;
 						}
-
-						if ( 'postname' === $prefix ) {
-							$sql .= "( (meta.value LIKE '$post_meta') > 0 ) OR ";
-						} else {
-							$sql .= "meta.value='$post_meta' OR ";
-						}
+						$sql .= "( (meta.value LIKE '$column_name') > 0 ) OR ";
 					}
 
 					// Add placeholder for the last value.
-					if ( 'postname' === $prefix ) {
-						$sql .= "( (meta.value LIKE '%s') > 0 ) ) )";
-					} else {
-						$sql .= "meta.value='%s' ) )";
-					}
+					$sql .= "( (meta.value LIKE '%s') > 0 ) ) )";
 
 					$query->addORCondition( array( $sql => $last_value ) );
-				} elseif ( 'ip' === $prefix ) {
-					// IP search condition.
-					$sql   = "$table_occ.id IN ( SELECT occurrence_id FROM $table_meta as meta WHERE meta.name='ClientIP' AND ( ";
-					$count = count( $value );
-
-					foreach ( $value as $ip ) {
-						if ( $value[ $count - 1 ] === $ip ) {
-							$sql .= "meta.value='%s'";
-						} else {
-							$sql .= "meta.value='$ip' OR ";
-						}
+				} elseif ( in_array( $prefix, array( 'posttype', 'poststatus', 'postid' ), true ) ) {
+					$column_name = '';
+					if ( 'posttype' === $prefix ) {
+						$column_name = 'post_type';
+					} elseif ( 'poststatus' === $prefix ) {
+						$column_name = 'post_status';
+					} elseif ( 'postid' === $prefix ) {
+						$column_name = 'post_id';
 					}
 
-					$sql .= ' ) )';
-					$query->addORCondition( array( $sql => $value[ $count - 1 ] ) );
+					$sql = " {$column_name} = %s ";
+					$query->addORCondition( array( $sql => $value ) );
+				} elseif ( 'ip' === $prefix ) {
+					// IP search condition.
+					$sql   = "$table_occ.client_ip = %s ";
+					$query->addORCondition( array( $sql => $value ) );
 				}
 			}
 		}
@@ -1460,27 +1395,29 @@ final class WSAL_AlertManager {
 	 * @param array $filters     - Filters.
 	 * @param mixed $report_type - Type of report.
 	 * @return stdClass
+	 *
+	 * @since 4.4.0 Removed support for report type "statistics_unique_ips".
      */
 	public function get_mainwp_extension_report( array $filters, $report_type ) {
-		// Check report type.
-		if ( ! $report_type ) {
-			$report       = new stdClass();
-			$report->data = array();
+		$report       = new stdClass();
+		$report->data = array();
 
-			do {
-				$response = $this->generate_report( $filters );
-
-				if ( isset( $response['data'] ) ) {
-					$report->data = array_merge( $report->data, $response['data'] );
-				}
-
-				// Set the filters next date.
-				$filters['nextDate'] = ( isset( $response['lastDate'] ) && $response['lastDate'] ) ? $response['lastDate'] : 0;
-			} while ( $filters['nextDate'] );
-		} elseif ( 'statistics_unique_ips' === $report_type ) {
-			$report       = new stdClass();
-			$report->data = $this->generate_statistics_unique_ips( $filters );
+		if ( 'statistics_unique_ips' === $report_type ) {
+			//  support for this report was removed in version 4.4.0, but we still returned empty dataset to avoid
+			//  in the MainWP extension
+			return $report;
 		}
+
+		do {
+			$response = $this->generate_report( $filters );
+
+			if ( isset( $response['data'] ) ) {
+				$report->data = array_merge( $report->data, $response['data'] );
+			}
+
+			// Set the filters next date.
+			$filters['nextDate'] = ( isset( $response['lastDate'] ) && $response['lastDate'] ) ? $response['lastDate'] : 0;
+		} while ( $filters['nextDate'] );
 
 		return $report;
 	}
@@ -1503,18 +1440,14 @@ final class WSAL_AlertManager {
 			return false;
 		}
 
-		$args = WSAL_ReportArgs::build_from_alternative_filters( $filters, $this );
+		$args = WSAL_ReportArgs::build_from_alternative_filters( $filters );
 
 		$next_date = empty( $filters['nextDate'] ) ? null : $filters['nextDate'];
 		$limit     = empty( $filters['limit'] ) ? 0 : $filters['limit'];
 
 		$last_date = null;
 
-		if ( isset( $filters['unique-ip'] ) && $filters['unique-ip'] ) {
-			$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReportGrouped( $args );
-		} else {
-			$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReporting( $args, $next_date, $limit );
-		}
+		$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReporting( $args, $next_date, $limit );
 
 		if ( ! empty( $results['lastDate'] ) ) {
 			$last_date = $results['lastDate'];
@@ -1526,56 +1459,25 @@ final class WSAL_AlertManager {
 		}
 
 		$data             = array();
-		$data_and_filters = array();
 
-		if ( ! empty( $filters['unique-ip'] ) ) {
-			$data = array_values( $results );
-		} else {
-			// Get alert details.
-			foreach ( $results as $entry ) {
-				$ip    = esc_html( $entry->ip );
-				$ua    = esc_html( $entry->ua );
-				$roles = maybe_unserialize( $entry->roles );
-
-				if ( is_array( $roles ) ) {
-					$roles = implode( ', ', $roles );
-				} else {
-					$roles = '';
-				}
-
-				if ( 9999 === (int) $entry->alert_id ) {
-					continue;
-				}
-
-				$t = $this->get_alert_details( $entry->id, $entry->id, $entry->alert_id, $entry->site_id, $entry->created_on, $entry->user_id, $roles, $ip, $ua, 'report-' . $report_format);
-				array_push( $data, $t );
+		// Get alert details.
+		foreach ( $results as $entry ) {
+			if ( 9999 === (int) $entry->alert_id ) {
+				continue;
 			}
+
+			array_push( $data, $this->get_alert_details( $entry, 'report-' . $report_format ) );
 		}
 
 		if ( empty( $data ) ) {
 			return false;
 		}
 
-		$data_and_filters['data']     = $data;
-		$data_and_filters['filters']  = $filters;
-		$data_and_filters['lastDate'] = $last_date;
-
-		return $data_and_filters;
-	}
-
-	/**
-	 * Create statistics unique IPs report.
-	 *
-	 * @param array $filters - Filters.
-	 *
-	 * @return array
-	 * @throws Freemius_Exception
-	 */
-	private function generate_statistics_unique_ips( $filters ) {
-		$report_args = WSAL_ReportArgs::build_from_alternative_filters( $filters, $this );
-		$results     = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReportGrouped( $report_args );
-
-		return array_values( $results );
+		return array(
+			'data'     => $data,
+			'filters'  => $filters,
+			'lastDate' => $last_date
+		);
 	}
 
 	/**
@@ -1695,23 +1597,32 @@ final class WSAL_AlertManager {
 	/**
 	 * Get alert details.
 	 *
-	 * @param int $entry_id - Entry ID.
-	 * @param int $alert_id - Alert ID.
-	 * @param int $site_id - Site ID.
-	 * @param string $created_on - Alert generation time.
-	 * @param int $user_id - User id.
-	 * @param string|array $roles - User roles.
-	 * @param string $ip - IP address of the user.
-	 * @param string $ua - User agent.
+	 * @param stdClass $entry   Raw entry from the occurrences table.
+	 * @param string   $context Display context.
 	 *
-	 * @return array|false details
+	 * @return array|false Alert details.
 	 * @throws Exception
 	 */
-	private function get_alert_details( $entry_id, $alert_id, $site_id, $created_on, $user_id = null, $roles = null, $ip = '', $ua = '', $context = 'default' ) {
+	private function get_alert_details( $entry, $context = 'default' ) {
+		$entry_id   = $entry->id;
+		$alert_id   = $entry->alert_id;
+		$site_id    = $entry->site_id;
+		$created_on = $entry->created_on;
+		$object     = $entry->object;
+		$event_type = $entry->event_type;
+		$user_id    = $entry->user_id;
+
+		$ip    = esc_html( $entry->ip );
+		$ua    = esc_html( $entry->ua );
+		$roles = maybe_unserialize( $entry->roles );
+		if ( is_string( $roles ) ) {
+			$roles = str_replace( array( '"', '[', ']' ), ' ', $roles );
+		}
+
 		// Must be a new instance every time, otherwise the alert message is not retrieved properly.
 		$occurrence = new WSAL_Models_Occurrence();
 
-		$user_id = ( ! is_numeric( $user_id ) && null !== $user_id ) ? WSAL_Rep_Util_S::swap_login_for_id( $user_id ) : $user_id;
+		$user_id = ( ! is_numeric( $user_id ) && null !== $user_id ) ? WSAL_Utilities_UsersUtils::swap_login_for_id( $user_id ) : $user_id;
 
 		// Get alert details.
 		$code  = $this->GetAlert( $alert_id );
@@ -1746,10 +1657,19 @@ final class WSAL_AlertManager {
 		}
 
 		// Get the alert message - properly.
-		$occurrence->id         = $entry_id;
-		$occurrence->site_id    = $site_id;
-		$occurrence->alert_id   = $alert_id;
-		$occurrence->created_on = $created_on;
+		$occurrence->id          = $entry_id;
+		$occurrence->site_id     = $site_id;
+		$occurrence->alert_id    = $alert_id;
+		$occurrence->created_on  = $created_on;
+		$occurrence->client_ip   = $ip;
+		$occurrence->object      = $object;
+		$occurrence->event_type  = $event_type;
+		$occurrence->user_id     = $user_id;
+		$occurrence->user_agent  = $ua;
+		$occurrence->post_id     = $entry->post_id;
+		$occurrence->post_type   = $entry->post_type;
+		$occurrence->post_status = $entry->post_status;
+		$occurrence->SetUserRoles( $roles );
 
 		$event_metadata = $occurrence->GetMetaArray();
 		if ( ! $occurrence->_cachedMessage ) {
@@ -1769,14 +1689,20 @@ final class WSAL_AlertManager {
 			'blog_name'  => $blog_name,
 			'blog_url'   => $blog_url,
 			'alert_id'   => $alert_id,
-			'timestamp'  => $created_on,
 			'date'       => WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $created_on ),
+			// We need to keep the timestamp to be able to group entries by dates etc. The "date" field is not suitable
+			// as it is already translated, thus difficult to parse and process.
+			'timestamp'  => $created_on,
 			'code'       => $const->name,
+			// Fill variables in message.
 			'message'    => $occurrence->GetMessage( $event_metadata, $context ),
+			'user_id'    => $user_id,
 			'user_name'  => $username,
 			'user_data'  => $user_id ? $this->get_event_user_data( $username ) : false,
 			'role'       => $roles,
 			'user_ip'    => $ip,
+			'object'     => $this->get_event_objects_data( $object ),
+			'event_type' => $this->get_event_type_data( $event_type ),
 			'user_agent' => $ua,
 		);
 	}

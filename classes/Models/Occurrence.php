@@ -21,6 +21,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 
+	public static $migrated_meta = array(
+		'ClientIP' => 'client_ip',
+		'Severity' => 'severity',
+		'Object' => 'object',
+		'EventType' => 'event_type',
+		'UserAgent' => 'user_agent',
+		'CurrentUserRoles' => 'user_roles',
+		'Username' => 'username',
+		'CurrentUserID' => 'user_id',
+		'SessionID' => 'session_id',
+		'PostStatus' => 'post_status',
+		'PostType' => 'post_type',
+		'PostID' => 'post_id'
+	);
+
 	/**
 	 * Occurrence ID.
 	 *
@@ -50,20 +65,100 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	public $created_on = 0.0;
 
 	/**
-	 * Is read.
+	 * Client IP address.
 	 *
-	 * @var bool
-	 * @deprecated 4.3.2
+	 * @var string
+	 * @since 4.4.0
 	 */
-	public $is_read = false;
+	public $client_ip = '';
 
 	/**
-	 * Is migrated.
+	 * Severity.
 	 *
-	 * @var bool
-	 * @deprecated 4.3.2
+	 * @var int
+	 * @since 4.4.0
 	 */
-	public $is_migrated = false;
+	public $severity = '';
+
+	/**
+	 * Event object.
+	 *
+	 * @var string
+	 * @since 4.4.0
+	 */
+	public $object = '';
+
+	/**
+	 * Event type.
+	 *
+	 * @var string
+	 * @since 4.4.0
+	 */
+	public $event_type = '';
+
+	/**
+	 * User agent string.
+	 *
+	 * @var string
+	 * @since 4.4.0
+	 */
+	public $user_agent = '';
+
+	/**
+	 * Comma separated user roles of the user belonging to the event.
+	 *
+	 * @var string
+	 * @since 4.4.0
+	 */
+	public $user_roles = '';
+
+	/**
+	 * Username of the user belonging to the event.
+	 *
+	 * @var string
+	 * @since 4.4.0
+	 */
+	public $username = null;
+
+	/**
+	 * User ID of the user belonging to the event.
+	 *
+	 * @var int
+	 * @since 4.4.0
+	 */
+	public $user_id = null;
+
+	/**
+	 * Session ID.
+	 *
+	 * @var string
+	 * @since 4.4.0
+	 */
+	public $session_id = '';
+
+	/**
+	 * Post status.
+	 *
+	 * @var string
+	 * @since 4.4.0
+	 */
+	public $post_status = '';
+
+	/**
+	 * Post status.
+	 *
+	 * @var string
+	 * @since 4.4.0
+	 */
+	public $post_type = '';
+
+	/**
+	 * Post ID.
+	 *
+	 * @var int
+	 * @since 4.4.0
+	 */
+	public $post_id = 0;
 
 	/**
 	 * Model Name.
@@ -103,50 +198,84 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * @see WSAL_Adapters_MySQL_Occurrence::GetNamedMeta()
 	 */
 	public function GetMetaValue( $name, $default = array() ) {
-		// Get meta adapter.
-		$meta = $this->getAdapter()->GetNamedMeta( $this, $name );
-		if ( is_null( $meta ) || ! array_key_exists( 'value', $meta ) ) {
-			return $default;
+		$result = $default;
+
+		//  check if the meta is part of the occurrences table
+		if ( in_array( $name, array_keys( self::$migrated_meta ) ) ) {
+			$property_name = self::$migrated_meta[ $name ];
+			if ( property_exists( $this, $property_name ) ) {
+				$result = $this->$property_name;
+			}
+		} else {
+			// Get meta adapter.
+			$meta = $this->getAdapter()->GetNamedMeta( $this, $name );
+			if ( is_null( $meta ) || ! array_key_exists( 'value', $meta ) ) {
+				return $default;
+			}
+
+			$result = $meta['value'];
 		}
 
-		return maybe_unserialize( $meta['value'] );
+		$result = maybe_unserialize( $result );
+		if ( 'CurrentUserRoles' === $name && is_string( $result ) ) {
+			$result = preg_replace( '/[\[\]"]/', '', $result );
+			$result = explode( ',', $result );
+		}
+
+		return $result;
 	}
 
 	/**
 	 * Sets the value of a meta item (creates or updates meta item).
 	 *
 	 * @param string $name - Meta name.
-	 * @param mixed  $value - Meta value.
+	 * @param mixed $value - Meta value.
 	 */
 	public function SetMetaValue( $name, $value ) {
 		// check explicitly for `0` string values.
 		if ( '0' === $value || ! empty( $value ) ) {
-			// Get meta adapter.
-			$model                = new WSAL_Models_Meta();
-			$model->occurrence_id = $this->getId();
-			$model->name          = $name;
-			$model->value         = maybe_serialize( $value );
-			$model->SaveMeta();
+			//  check if the meta is part of the occurrences table
+			if ( in_array( $name, array_keys( self::$migrated_meta ) ) ) {
+				$property_name = self::$migrated_meta[ $name ];
+				if ( property_exists( $this, $property_name ) ) {
+					if ( 'CurrentUserRoles' === $name ) {
+						$value = maybe_unserialize( $value );
+						if ( is_array( $value ) && ! empty( $value ) ) {
+							$this->$property_name = implode( ',', $value );
+						}
+					} else {
+						$this->$property_name = $value;
+					}
+				}
+			} else {
+				// Get meta adapter.
+				$model                = new WSAL_Models_Meta();
+				$model->occurrence_id = $this->getId();
+				$model->name          = $name;
+				$model->value         = maybe_serialize( $value );
+				$model->SaveMeta();
+			}
 		}
 	}
 
 	/**
 	 * Update Metadata of this occurrence by name.
 	 *
-	 * @see WSAL_Models_Meta::UpdateByNameAndOccurenceId()
 	 * @param string $name - Meta name.
-	 * @param mixed  $value - Meta value.
+	 * @param mixed $value - Meta value.
+	 *
+	 *@see WSAL_Models_Meta::UpdateByNameAndOccurrenceId()
 	 */
 	public function UpdateMetaValue( $name, $value ) {
 		$model = new WSAL_Models_Meta();
-		$model->UpdateByNameAndOccurenceId( $name, $value, $this->getId() );
+		$model->UpdateByNameAndOccurrenceId( $name, $value, $this->getId() );
 	}
 
 	/**
-	 * Returns a key-value pair of meta data.
+	 * Returns a key-value pair of metadata.
 	 *
-	 * @see WSAL_Adapters_MySQL_Occurrence::GetMultiMeta()
 	 * @return array
+	 * @see WSAL_Adapters_MySQL_Occurrence::GetMultiMeta()
 	 */
 	public function GetMetaArray() {
 		$result = array();
@@ -154,11 +283,16 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 		foreach ( $metas as $meta ) {
 			$result[ $meta->name ] = maybe_unserialize( $meta->value );
 		}
+
+		foreach ( self::$migrated_meta as $meta_key => $column_name ) {
+			$result[ $meta_key ] = $this->$column_name;
+		}
+
 		return $result;
 	}
 
 	/**
-	 * Creates or updates all meta data passed as an array of meta-key/meta-value pairs.
+	 * Creates or updates all metadata passed as an array of meta-key/meta-value pairs.
 	 *
 	 * @param array $data - New meta data.
 	 */
@@ -166,6 +300,9 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 		foreach ( (array) $data as $key => $val ) {
 			$this->SetMetaValue( $key, $val );
 		}
+
+		//  the occurrence object itself needs to be saved again as some metadata is stored as its properties
+		$this->Save();
 	}
 
 	/**
@@ -190,24 +327,6 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 			if ( null !== $alert_object && method_exists( $alert_object, 'GetMessage' ) ) {
 				$this->_cachedMessage = $alert_object->GetMessage( $meta_array, $this->_cachedMessage, $this->getId(), $context );
 			} else {
-				/**
-				 * Reaching this point means we have an event we don't know
-				 * about. It could be a custom event or possibly a removed
-				 * event.
-				 *
-				 * We currently have 2 sets of custom events that we can flag
-				 * specific messages about. WPForms and BBPress. Both are
-				 * available as plugin add-ons.
-				 *
-				 * @since 4.0.2
-				 */
-				$addon_event_codes = array(
-					'wfcm' => array(
-						'name'      => __( 'WFCM', 'wp-security-audit-log' ),
-						'event_ids' => array( 6028, 6029, 6030, 6031, 6032, 6033 ),
-					),
-				);
-
 				// Filter to allow items to be added elsewhere.
 				$addon_event_codes = apply_filters( 'wsal_addon_event_codes', $addon_event_codes );
 
@@ -244,7 +363,9 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * @return boolean True on success, false on failure.
 	 */
 	public function Delete() {
-		foreach ( $this->getAdapter()->GetMeta() as $meta ) {
+		/** @var WSAL_Adapters_MySQL_Occurrence $adapter */
+		$adapter= $this->getAdapter();
+		foreach ( $adapter->GetMultiMeta() as $meta ) {
 			$meta->Delete();
 		}
 		return parent::Delete();
@@ -264,14 +385,10 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	/**
 	 * Gets the Client IP.
 	 *
-	 * @param array $meta - Occurrence meta array.
 	 * @return string IP address of request.
 	 */
-	public function GetSourceIP( $meta = null ) {
-		if ( null === $meta ) {
-			return $this->GetMetaValue( 'ClientIP', '' );
-		}
-		return isset( $meta['ClientIP'] ) ? $meta['ClientIP'] : '';
+	public function GetSourceIP() {
+		return $this->GetMetaValue( 'ClientIP', array() );
 	}
 
 	/**
@@ -293,14 +410,14 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	/**
 	 * Gets user roles.
 	 *
-	 * @param array $meta - Occurrence meta array.
 	 * @return array Array of user roles.
 	 */
-	public function GetUserRoles( $meta = null ) {
-		if ( null === $meta ) {
-			return $this->GetMetaValue( 'CurrentUserRoles', array() );
-		}
-		return isset( $meta['CurrentUserRoles'] ) ? $meta['CurrentUserRoles'] : array();
+	public function GetUserRoles() {
+		return $this->GetMetaValue( 'CurrentUserRoles', array() );
+	}
+
+	public function SetUserRoles( $roles ) {
+		$this->user_roles = is_array($roles) ? implode( ',', $roles ) : $roles;
 	}
 
 	/**
@@ -338,8 +455,8 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * @param array $args - Query args.
 	 * @return WSAL_Models_Occurrence[]
 	 */
-	public function CheckUnKnownUsers( $args = array() ) {
-		return $this->getAdapter()->CheckUnKnownUsers( $args );
+	public function CheckUnknownUsers( $args = array() ) {
+		return $this->getAdapter()->CheckUnknownUsers( $args );
 	}
 
 	/**
@@ -361,5 +478,35 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 */
 	public function GetByPostID( $post_id ) {
 		return $this->getAdapter()->GetByPostID( $post_id );
+	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 * Extends the default mechanism for loading data to handle the migrated meta fields in version 4.4.0.
+	 *
+	 * @since 4.4.0
+	 */
+	public function LoadData( $data ) {
+		$copy = get_class( $this );
+		$copy = new $copy();
+		foreach ( (array) $data as $key => $val ) {
+			if ( ! is_null( $val ) && in_array($key, ['user_id', 'username'])) {
+				//  username and user_id cannot have the default value set because some database queries rely on having
+				//  null values in the database
+				if ( 'user_id' === $key ) {
+					$this->user_id = intval( $val );
+				} else if ( 'username' === $key ) {
+					$this->username = (string) $val;
+				}
+			} else if ( 'roles' === $key ) {
+$this->SetUserRoles($val);
+			} else if ( isset( $copy->$key ) ) {
+				//  default type casting is applied to the rest of the fields
+				$this->$key = $this->cast_to_correct_type( $copy, $key, $val );
+			}
+		}
+
+		return $this;
 	}
 }

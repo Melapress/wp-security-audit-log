@@ -4,8 +4,10 @@
  *
  * User profile sensor file.
  *
- * @since 1.0.0
  * @package wsal
+ * @subpackage sensors
+ *
+ * @since 1.0.0
  */
 
 // Exit if accessed directly.
@@ -16,7 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * User Profiles sensor.
  *
- * 4000 New user was created on WordPress
  * 4001 User created another WordPress user
  * 4002 The role of a user was changed by another WordPress user
  * 4003 User has changed his or her password
@@ -41,7 +42,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	protected $old_superadmins;
 
 	/**
-	 * Listening to events using WP hooks.
+	 * {@inheritDoc}
 	 */
 	public function HookEvents() {
 		add_action( 'profile_update', array( $this, 'event_user_updated' ), 10, 2 );
@@ -56,15 +57,22 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		add_action( 'update_user_meta', array( $this, 'event_application_password_added' ), 10, 4 );
 		add_action( 'retrieve_password', array( $this, 'event_password_reset_link_sent' ), 10, 1 );
 
+		// We hook into action 'user_register' because it is part of the function 'wp_insert_user'.
+		add_action( 'user_register', array( $this, 'on_user_register' ), 10, 1 );
 	}
 
+	/**
+	 * Captures addition of application passwords.
+	 *
+	 * @param int    $meta_id ID of the metadata entry to update.
+	 * @param int    $user_id ID of the user metadata is for.
+	 * @param string $meta_key Metadata key.
+	 * @param mixed  $_meta_value Metadata value. Serialized if non-scalar.
+	 */
 	public function event_application_password_added( $meta_id, $user_id, $meta_key, $_meta_value ) {
 
 		// Filter global arrays for security.
-		$post_array   = filter_input_array( INPUT_POST );
-		$get_array    = filter_input_array( INPUT_GET );
 		$server_array = filter_input_array( INPUT_SERVER );
-
 		if ( ! isset( $server_array['HTTP_REFERER'] ) || ! isset( $server_array['REQUEST_URI'] ) ) {
 			return;
 		}
@@ -72,7 +80,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		// Check the page which is performing this change.
 		$referer_check = pathinfo( $server_array['HTTP_REFERER'] );
 		$referer_check = $referer_check['filename'];
-		$referer_check = ( strpos( $referer_check, '.' ) !== false ) ? strstr( $referer_check , '.', true ) : $referer_check;
+		$referer_check = ( strpos( $referer_check, '.' ) !== false ) ? strstr( $referer_check, '.', true ) : $referer_check;
 
 		$is_correct_referer_and_action = false;
 
@@ -80,14 +88,17 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			$is_correct_referer_and_action = true;
 		}
 
-		// Ensure we are dealign with the correct request.
-		if ( $is_correct_referer_and_action && strpos( $server_array['REQUEST_URI'], '/wp/v2/users/'. $user_id .'/application-passwords' ) !== false ) {
+		// Ensure we are dealing with the correct request.
+		if ( $is_correct_referer_and_action && strpos( $server_array['REQUEST_URI'], '/wp/v2/users/' . $user_id . '/application-passwords' ) !== false ) {
 
 			$old_value = get_user_meta( $user_id, '_application_passwords', true );
 
 			$current_user       = get_user_by( 'id', $user_id );
 			$current_userdata   = get_userdata( $user_id );
-			$current_user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $current_userdata->roles ) );
+			$current_user_roles = implode( ', ', array_map( array(
+				$this,
+				'filter_role_names'
+			), $current_userdata->roles ) );
 			$event_id           = ( 'user-edit' === $referer_check ) ? 4026 : 4025;
 
 			// Note, firstname and lastname fields are purposefully spaces to avoid NULL.
@@ -100,19 +111,17 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 						'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
 						'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
 						'CurrentUserID' => $current_user->ID,
-						'friendly_name' => sanitize_text_field( $_POST['name'] ),
+						'friendly_name' => sanitize_text_field( wp_unslash( $_POST['name'] ) ),
 						'EventType'     => 'added',
 					)
 				);
-			}
-
-			// Check if all have been removed.
-			elseif ( ! empty( $old_value ) && count( $old_value ) > 1 && empty( $_meta_value ) ) {
-				$event_id        = ( 'user-edit' === $referer_check ) ? 4028 : 4027;
+			} elseif ( ! empty( $old_value ) && count( $old_value ) > 1 && empty( $_meta_value ) ) {
+				// Check if all have been removed.
+				$event_id = ( 'user-edit' === $referer_check ) ? 4028 : 4027;
 
 				// Note, firstname and lastname fields are purposefully spaces to avoid NULL.
 				$this->plugin->alerts->Trigger(
-					$event_id ,
+					$event_id,
 					array(
 						'roles'         => $current_user_roles,
 						'login'         => $current_user->user_login,
@@ -122,10 +131,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 						'EventType'     => 'revoked',
 					)
 				);
-			}
-
-			// Check the item that was removed.
-			elseif ( count( $_meta_value ) < count( $old_value ) ) {
+			} elseif ( count( $_meta_value ) < count( $old_value ) ) {
+				// Check the item that was removed.
 				$revoked_pw      = array_diff( array_map( 'serialize', $old_value ), array_map( 'serialize', $_meta_value ) );
 				$revoked_pw      = array_values( array_map( 'unserialize', $revoked_pw ) );
 				$revoked_pw_name = $revoked_pw[0]['name'];
@@ -133,7 +140,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 
 				// Note, firstname and lastname fields are purposefully spaces to avoid NULL.
 				$this->plugin->alerts->Trigger(
-					$event_id ,
+					$event_id,
 					array(
 						'roles'         => $current_user_roles,
 						'login'         => $current_user->user_login,
@@ -146,14 +153,13 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				);
 			}
 		}
-
 	}
 
 	/**
 	 * Method: Support for Ultimate Member email change
 	 * alert.
 	 *
-	 * @param int     $user_id      - User ID.
+	 * @param int     $user_id - User ID.
 	 * @param WP_User $old_userdata - Old WP_User object.
 	 */
 	public function event_user_updated( $user_id, $old_userdata ) {
@@ -215,6 +221,23 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			);
 		}
 
+		// Alert if website URL is changed.
+		if ( $old_userdata->user_url !== $new_userdata->user_url ) {
+			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $new_userdata->roles ) );
+			$this->plugin->alerts->Trigger(
+				4021,
+				array(
+					'TargetUsername' => $new_userdata->user_login,
+					'old_url'        => $old_userdata->user_url,
+					'new_url'        => $new_userdata->user_url,
+					'Roles'          => $user_roles,
+					'FirstName'      => $new_userdata->user_firstname,
+					'LastName'       => $new_userdata->user_lastname,
+					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+				)
+			);
+		}
+
 		// Alert if role has changed via Members plugin.
 		if ( isset( $_POST['members_user_roles'] ) && ! empty( $_POST['members_user_roles'] ) ) {
 			if ( $old_userdata->roles !== $_POST['members_user_roles'] ) {
@@ -226,9 +249,10 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	/**
 	 * Triggered when a user role is changed.
 	 *
-	 * @param int    $user_id   - User ID of the user.
-	 * @param string $new_role  - New role.
-	 * @param array  $old_roles - Array of old roles.
+	 * @param int     $user_id         User ID of the user.
+	 * @param string  $new_role        New role.
+	 * @param array   $old_roles       Array of old roles.
+	 * @param boolean $use_posted_data If true, posted user data is used.
 	 */
 	public function event_user_role_changed( $user_id, $new_role, $old_roles, $use_posted_data = false ) {
 		// Get WP_User object.
@@ -331,9 +355,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 *
 	 * Triggers when a user is granted super admin access.
 	 *
-	 * @since 3.4
-	 *
 	 * @param int $user_id - ID of the user that was granted Super Admin privileges.
+	 *
+	 * @since 3.4
 	 */
 	public function event_super_access_granted( $user_id ) {
 		$user = get_userdata( $user_id );
@@ -357,9 +381,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 *
 	 * Triggers when a user is revoked super admin access.
 	 *
-	 * @since 3.4
-	 *
 	 * @param int $user_id - ID of the user that was revoked Super Admin privileges.
+	 *
+	 * @since 3.4
 	 */
 	public function event_super_access_revoked( $user_id ) {
 		$user = get_userdata( $user_id );
@@ -384,10 +408,13 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 * @param string $user_login User's login name.
 	 */
 	public function event_password_reset_link_sent( $user_login ) {
-		$current_user       = get_user_by( 'login', $user_login );
+		$current_user = get_user_by( 'login', $user_login );
 
 		$current_userdata   = get_userdata( $current_user->ID );
-		$current_user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $current_userdata->roles ) );
+		$current_user_roles = implode( ', ', array_map( array(
+			$this,
+			'filter_role_names'
+		), $current_userdata->roles ) );
 
 		$this->plugin->alerts->Trigger(
 			4029,
@@ -405,13 +432,14 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	/**
 	 * Remove BBPress Prefix from User Role.
 	 *
-	 * @since 3.4
-	 *
 	 * @param string $user_role - User role.
+	 *
 	 * @return string
+	 * @since 3.4
 	 */
 	public function filter_role_names( $user_role ) {
 		global $wp_roles;
+
 		return isset( $wp_roles->role_names[ $user_role ] ) ? $wp_roles->role_names[ $user_role ] : false;
 	}
 
@@ -437,5 +465,49 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			|| $mgr->WillOrHasTriggered( 4000 )
 			|| $mgr->WillOrHasTriggered( 4001 )
 		);
+	}
+
+	/**
+	 * When a user is created (by any means other than direct database insert), action 'user_register' is fired because
+	 * it is part of the function 'wp_insert_user'. We can assume one of the following events if the current session is
+	 * logged in end event 4000 is not triggerred from elsewhere (it is also hooked into action 'user_register').
+	 *
+	 * - 4001 User created another WordPress user
+	 * - 4012 New network user created
+	 *
+	 * @param int $user_id - User ID of the registered user.
+	 */
+	public function on_user_register( $user_id ) {
+		if ( ! is_user_logged_in() ) {
+			// We bail if the user is not logged in. That is no longer user creation, but a user registration.
+			return;
+		}
+
+		$user = get_userdata( $user_id );
+		if ( ! $user instanceof WP_User ) {
+			// Bail if the user is not valid for some reason.
+			return;
+		}
+
+		$new_user_data = array(
+			'Username'  => $user->user_login,
+			'FirstName' => ! empty( $user->user_firstname ) ? $user->user_firstname : '',
+			'LastName'  => ! empty( $user->user_lastname ) ? $user->user_lastname : '',
+		);
+
+		$event_code = $this->plugin->IsMultisite() ? 4012 : 4001;
+		if ( 4001 === $event_code ) {
+			$new_user_data['Roles'] = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
+		} else if ( 4012 === $event_code ) {
+			$new_user_data['Email'] = $user->user_email;
+		}
+
+		$event_data = array(
+			'NewUserID'    => $user_id,
+			'NewUserData'  => (object) $new_user_data,
+			'EditUserLink' => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+		);
+
+		$this->plugin->alerts->Trigger( $event_code, $event_data, $this->plugin->IsMultisite() );
 	}
 }

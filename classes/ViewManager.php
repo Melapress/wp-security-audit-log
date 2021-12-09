@@ -89,7 +89,7 @@ class WSAL_ViewManager {
 		$skip_views = apply_filters( 'wsal_skip_views', $skip_views );
 
 		// Load views.
-		foreach ( glob( $this->_plugin->GetBaseDir() . 'classes/Views/*.php' ) as $file ) {
+		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( $this->_plugin->GetBaseDir() . 'classes/Views', '*.php' ) as $file ) {
 			if ( empty( $skip_views ) || ! in_array( $file, $skip_views ) ) {
 				$this->AddFromFile( $file );
 			}
