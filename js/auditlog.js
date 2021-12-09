@@ -576,4 +576,11 @@ jQuery( document ).ready( function() {
 		});
 	});
 
+	jQuery( '[data-shortened-text]' ).on( 'click', function( event ) {
+		var elm = jQuery( this );
+		var full_text = elm.data( 'shortened-text' );
+		elm.parent().find( 'span' ).text( full_text );
+		elm.remove();
+	} );
+
 });

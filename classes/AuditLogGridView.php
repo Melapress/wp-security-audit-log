@@ -418,18 +418,10 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 					
 					// Additional user info tooltip.
 					$tooltip = WSAL_Utilities_UsersUtils::get_tooltip_user_content( $user );
-
 					$uhtml = '<a class="tooltip" data-tooltip="' . esc_attr( $tooltip ) . '" data-user="' . $user->user_login . '" href="' . $user_edit_link . '" target="_blank">' . esc_html( $display_name ) . '</a>';
+					
 
-
-					$roles = $item->GetUserRoles( $this->item_meta[ $item->getId() ] );
-					if ( is_array( $roles ) && count( $roles ) ) {
-						$roles = esc_html( ucwords( implode( ', ', $roles ) ) );
-					} elseif ( is_string( $roles ) && '' != $roles ) {
-						$roles = esc_html( ucwords( str_replace( array( '"', '[', ']' ), ' ', $roles ) ) );
-					} else {
-						$roles = '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
-					}
+					$roles = WSAL_Utilities_UsersUtils::get_roles_label( $item->GetUserRoles() );
 				} elseif ( 'Plugin' == $username ) {
 					$uhtml = '<i>' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';
 					$roles = '';
@@ -459,7 +451,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 
 
-				$scip = $item->GetSourceIP( $this->item_meta[ $item->getId() ] );
+				$scip = $item->GetSourceIP();
 				if ( is_string( $scip ) ) {
 					$scip = str_replace( array( '"', '[', ']' ), '', $scip );
 				}
@@ -791,7 +783,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	 */
 	public function query_events( $paged = 0 ) {
 
-		// TO DO: Get rid of OccurrenceQuery and use the Occurence Model.
+		// TO DO: Get rid of OccurrenceQuery and use the Occurrence Model.
 		$query = new WSAL_Models_OccurrenceQuery();
 
 		$bid = (int) $this->query_args->site_id;
@@ -855,6 +847,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 		$query->setOffset( $offset );  // Set query offset.
 		$query->setLimit( $per_page ); // Set number of events per page.
+
 		return array(
 			'total_items' => $total_items,
 			'per_page'    => $per_page,

@@ -94,5 +94,3 @@ Rails
 
 /php-scoper/vendor
 .vscode/launch.json
-
-/bin/install-dependencies-composer-indipendant.sh

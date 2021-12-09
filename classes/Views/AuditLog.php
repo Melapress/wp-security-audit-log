@@ -79,6 +79,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_dismiss_advert', array( $this, 'wsal_dismiss_advert' ) );
 		add_action( 'wp_ajax_wsal_dismiss_notice_addon_available', array( $this, 'dismiss_notice_addon_available' ) );
 		add_action( 'wp_ajax_wsal_dismiss_missing_aws_sdk_nudge', array( $this, 'dismiss_missing_aws_sdk_nudge' ) );
+		add_action( 'wp_ajax_wsal_dismiss_helper_plugin_needed_nudge', array( $this, 'dismiss_helper_plugin_needed_nudge' ) );
 		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( $this, 'dismiss_wp_pointer' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNotices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
@@ -225,6 +226,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Display add-on available notice.
 		$screen = get_current_screen();
 
+
+        if (class_exists('WSAL_Upgrade_MetadataMigration')) {
+	        WSAL_Upgrade_MetadataMigration::maybe_display_progress_admin_notice();
+        }
 
 		if ( $is_current_view && in_array( $screen->base, array( 'toplevel_page_wsal-auditlog', 'toplevel_page_wsal-auditlog-network' ) ) ) {
 			// Grab list of installed plugins.
@@ -791,7 +796,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 
 				// Update freemius state.
-				$this->_plugin->SetGlobalSetting( 'freemius_state', 'in' );
+				$this->_plugin->SetGlobalSetting( 'freemius_state', 'in', true );
 			} elseif ( 'no' === $choice ) {
 				if ( ! is_multisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
@@ -800,7 +805,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 
 				// Update freemius state.
-				$this->_plugin->SetGlobalSetting( 'freemius_state', 'skipped' );
+				$this->_plugin->SetGlobalSetting( 'freemius_state', 'skipped', true );
 			}
 
 			echo wp_json_encode(
@@ -1165,7 +1170,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die();
 		}
 
-		$this->_plugin->SetGlobalBooleanSetting( 'setup-modal-dismissed', true );
+		$this->_plugin->SetGlobalBooleanSetting( 'setup-modal-dismissed', true, true );
 		wp_send_json_success();
 	}
 

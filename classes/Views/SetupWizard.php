@@ -267,11 +267,12 @@ final class WSAL_Views_SetupWizard {
 
 		$installer_script_data = array(
 			'ajaxURL'           => admin_url( 'admin-ajax.php' ),
-			'installing'        => __( 'Installing, please wait', 'wp-security-audit-log' ),
-			'already_installed' => __( 'Already installed', 'wp-security-audit-log' ),
-			'installed'         => __( 'Extension installed', 'wp-security-audit-log' ),
-			'activated'         => __( 'Extension activated', 'wp-security-audit-log' ),
-			'failed'            => __( 'Install failed', 'wp-security-audit-log' ),
+			'installing'        => esc_html__( 'Installing, please wait', 'wp-security-audit-log' ),
+			'already_installed' => esc_html__( 'Already installed', 'wp-security-audit-log' ),
+			'installed'         => esc_html__( 'Extension installed', 'wp-security-audit-log' ),
+			'activated'         => esc_html__( 'Extension activated', 'wp-security-audit-log' ),
+			'failed'            => esc_html__( 'Install failed', 'wp-security-audit-log' ),
+            'reloading_page'    => esc_html__( 'Reloading page', 'wp-security-audit-log' )
 		);
 		wp_localize_script( 'wsal-common', 'wsalCommonData', $installer_script_data );
 
@@ -426,7 +427,7 @@ final class WSAL_Views_SetupWizard {
 	private function wsal_step_welcome() {
 		// dismiss the setup modal in case if not already done
 		if ( ! $this->wsal->GetGlobalBooleanSetting( 'setup-modal-dismissed', false ) ) {
-			$this->wsal->SetGlobalBooleanSetting( 'setup-modal-dismissed', true );
+			$this->wsal->SetGlobalBooleanSetting( 'setup-modal-dismissed', true, true );
 		}
 		?>
 		<p><?php esc_html_e( 'This wizard helps you configure the basic plugin settings. All these settings can be changed at a later stage from the plugin settings.', 'wp-security-audit-log' ); ?></p>
