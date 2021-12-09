@@ -109,11 +109,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
 		}
 
-		$alert          = new WSAL_Alert(); // IDE type hinting.
-		$grouped_alerts = $this->_plugin->alerts->GetCategorizedAlerts( false );
-		$safe_names     = array_map( array( $this, 'GetSafeCatgName' ), array_keys( $grouped_alerts ) );
-		$safe_names     = array_combine( array_keys( $grouped_alerts ), $safe_names );
-
 		// Filter $_POST array.
 		$post_array = filter_input_array( INPUT_POST );
 
@@ -149,6 +144,11 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			}
 		}
 
+		$alert          = new WSAL_Alert(); // IDE type hinting.
+		$grouped_alerts = $this->_plugin->alerts->GetCategorizedAlerts( false );
+		$safe_names     = array_map( array( $this, 'GetSafeCatgName' ), array_keys( $grouped_alerts ) );
+		$safe_names     = array_combine( array_keys( $grouped_alerts ), $safe_names );
+
 		$disabled_events = $this->_plugin->GetGlobalSetting( 'disabled-alerts' ); // Get disabled events.
 		$disabled_events = explode( ',', $disabled_events );
 
@@ -165,7 +165,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		// Allow further items to be added externally.
 		$subcat_alerts = apply_filters( 'wsal_togglealerts_sub_category_events', $subcat_alerts );
 
-		$obsolete_events = array( 9999, 2126 );
+		$obsolete_events = array( 9999, 2126, 99999 );
 		$obsolete_events = apply_filters( 'wsal_togglealerts_obsolete_events', $obsolete_events );
 
         //  check if the disabled events are enforced from the MainWP master site
@@ -173,380 +173,281 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
         $enforced_settings = $settings->get_mainwp_enforced_settings();
         $disabled_events_enforced_by_mainwp = array_key_exists( 'disabled_events', $enforced_settings ) && ! empty( $enforced_settings[ 'disabled_events' ]);
 		?>
-		<p>
-			<form method="post" id="wsal-alerts-level">
-				<?php wp_nonce_field( 'wsal-log-level', 'wsal-log-level-nonce' ); ?>
-				<fieldset>
-					<label for="wsal-log-level"><?php esc_html_e( 'Log Level: ', 'wp-security-audit-log' ); ?></label>
-					<select name="wsal-log-level" id="wsal-log-level" onchange="this.form.submit()"<?php if ( $disabled_events_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?>>
-						<?php foreach ( $log_level_options as $log_level_id => $log_level_label ): ?>
-                            <option value="<?php echo $log_level_id; ?>" <?php echo selected( $log_level, $log_level_id ); ?>><?php echo $log_level_label; ?></option>
-						<?php endforeach; ?>
-					</select>
-					<p class="description">
-						<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
-					</p>
-				</fieldset>
-			</form>
-		</p>
+	
 		<h2 id="wsal-tabs" class="nav-tab-wrapper">
-			<?php foreach ( $safe_names as $name => $safe ) : ?>
-				<a href="#tab-<?php echo esc_attr( $safe ); ?>" class="nav-tab"><?php echo esc_html( $name ); ?></a>
-			<?php endforeach; ?>
+			<a href="#tab-all" class="nav-tab"><?php esc_html_e( 'Enable/Disable alerts', 'wp-security-audit-log' ); ?></a>
 			<a href="#tab-third-party-plugins" class="nav-tab">
 				<?php esc_html_e( 'Third party plugins', 'wp-security-audit-log' ); ?>
 			</a>
-		</h2>
-		<form id="audit-log-viewer" method="post">
-			<input type="hidden" name="page" value="<?php echo isset( $_GET['page'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; ?>" />
-			<?php wp_nonce_field( 'wsal-togglealerts' ); ?>
+		</h2>	
 
-			<div class="nav-tabs">
-				<?php foreach ( $grouped_alerts as $name => $group ) : ?>
-					<div class="wsal-tab" id="tab-<?php echo esc_attr( $safe_names[ $name ] ); ?>">
-						<h2 class="nav-tab-wrapper wsal-sub-tabs">
-							<?php
-							foreach ( $group as $subname => $alerts ) :
-								// Skip Pages and CPTs section.
-								if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
-									continue;
-								}
-								?>
-								<a href="#tab-<?php echo esc_attr( $this->GetSafeCatgName( $subname ) ); ?>"
-									class="nav-tab"
-									data-parent="tab-<?php echo esc_attr( $safe_names[ $name ] ); ?>">
-									<?php echo esc_html( $subname ); ?>
-								</a>
+		<div class="nav-tabs">
+				
+			<div id="tab-all" class="wsal-tab widefat fixed">
+
+				<form method="post" id="wsal-alerts-level">
+					<?php wp_nonce_field( 'wsal-log-level', 'wsal-log-level-nonce' ); ?>
+					<fieldset>
+						<label for="wsal-log-level"><?php esc_html_e( 'Log Level: ', 'wp-security-audit-log' ); ?></label>
+						<select name="wsal-log-level" id="wsal-log-level" onchange="this.form.submit()"<?php if ( $disabled_events_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?>>
+							<?php foreach ( $log_level_options as $log_level_id => $log_level_label ): ?>
+								<option value="<?php echo $log_level_id; ?>" <?php echo selected( $log_level, $log_level_id ); ?>><?php echo $log_level_label; ?></option>
 							<?php endforeach; ?>
-						</h2>
-						<?php
-						foreach ( $group as $subname => $alerts ) {
-							$active    = array();
-							$allactive = true;
-							/** @var WSAL_Alert $alert */
-							foreach ( $alerts as $alert ) {
-								if ( $alert->code <= 0006 ) {
-									continue; // <- Ignore php alerts.
-								}
-								if ( in_array( $alert->code, $obsolete_events, true ) ) {
-									continue; // <- Ignore promo alerts.
-								}
-								$active[ $alert->code ] = $this->_plugin->alerts->IsEnabled( $alert->code );
-								if ( ! $active[ $alert->code ] ) {
-									$allactive = false;
-								}
-							}
+						</select>
+						<p class="description">
+							<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
+						</p>
+					</fieldset>
+				</form>
 
-							// Disabled alerts.
-							$disable_inputs = '';
+				<form id="audit-log-viewer" method="post">
 
-							// Skip Pages and CPTs section.
-							if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
-								continue;
-							} elseif (
-								'bbPress Forums' === $name
-								|| 'WooCommerce' === $name
-								|| 'Yoast SEO' === $name
-								|| 'Multisite Network Sites' === $name
-								|| 'User Accounts' === $name
-							) {
-								switch ( $name ) {
-									case 'User Accounts':
-										if ( 'Multisite User Profiles' === $subname ) {
-											// Check if this is a multisite.
-											if ( ! is_multisite() ) {
-												$disable_inputs = 'disabled';
-											}
-										}
-										break;
+					<input type="hidden" name="page" value="<?php echo isset( $_GET['page'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; ?>" />
+					<?php wp_nonce_field( 'wsal-togglealerts' ); ?>
 
-									case 'WooCommerce':
-									case 'WooCommerce Products':
-										// Check if WooCommerce plugin exists.
-										if ( ! WpSecurityAuditLog::is_woocommerce_active() ) {
-											$disable_inputs = 'disabled';
-										}
-										break;
+							<div id="flitering-options-wrapper">
+								<div class="search">
+									<span class="search-title"><?php esc_html_e( 'Choose your query and enter your search term', 'wp-security-audit-log' ); ?></span>
+									<select name="searchingFor" id="search-subject" class="search-input-style">
+										<option value="code"><?php esc_html_e( 'Event code', 'wp-security-audit-log' ); ?></option>
+										<option value="severity"><?php esc_html_e( 'Severity', 'wp-security-audit-log' ); ?></option>
+										<option value="desc"><?php esc_html_e( 'Description', 'wp-security-audit-log' ); ?></option>
+									</select>
+									<input type="text" id="query-input" class="search-input-style" onkeyup="filterEventTable()" placeholder="Enter search term">
+								</div>
+								<div class="center-bit"><span><?php esc_html_e( 'OR', 'wp-security-audit-log' ); ?></span></div>
+								<div class="choose">
+									<span class="search-title"><?php esc_html_e( 'Choose a category', 'wp-security-audit-log' ); ?></span>
+									<select name="catFilter" id="filter-cat" class="search-input-style">
+										<option value="all"><?php esc_html_e( 'All categories', 'wp-security-audit-log' ); ?></option>
+									</select>
+								</div>
+							</div>
 
-									case 'Yoast SEO':
-										// Check if Yoast SEO plugin exists.
-										if ( ! WpSecurityAuditLog::is_wpseo_active() ) {
-											$disable_inputs = 'disabled';
-										}
-										break;
-
-									case 'Multisite Network Sites':
-										// Disable if not multisite.
-										if ( ! is_multisite() ) {
-											$disable_inputs = 'disabled';
-										}
-										break;
-
-									default:
-										break;
-								}
-							}
-
-							if ( $disabled_events_enforced_by_mainwp ) {
-							    $disable_inputs = 'disabled';
-                            }
-							?>
-							<table class="wp-list-table wsal-tab widefat fixed wsal-sub-tab" cellspacing="0" id="tab-<?php echo esc_attr( $this->GetSafeCatgName( $subname ) ); ?>">
+							<table id="event-toggle-table">
 								<thead>
 									<tr>
-										<th width="48"><input type="checkbox" <?php checked( $allactive ); ?> <?php echo esc_attr( $disable_inputs ); ?> /></th>
+										<?php
+										foreach ( $grouped_alerts as $name => $group ) {
+											foreach ( $group as $subname => $alerts ) {
+												$active    = array();
+												$allactive = true;
+												/** @var WSAL_Alert $alert */
+												foreach ( $alerts as $alert ) {
+													if ( $alert->code <= 0006 ) {
+														continue; // <- Ignore php alerts.
+													}
+													if ( in_array( $alert->code, $obsolete_events, true ) ) {
+														continue; // <- Ignore promo alerts.
+													}
+													$active[ $alert->code ] = $this->_plugin->alerts->IsEnabled( $alert->code );
+													if ( ! $active[ $alert->code ] ) {
+														$allactive = false;
+													}
+												}
+											}
+										}
+											?>
+										<th width="48"><input type="checkbox" <?php checked( $allactive ); ?> /></th>
 										<th width="80"><?php esc_html_e( 'Code', 'wp-security-audit-log' ); ?></th>
 										<th width="100"><?php esc_html_e( 'Severity', 'wp-security-audit-log' ); ?></th>
 										<th><?php esc_html_e( 'Description', 'wp-security-audit-log' ); ?></th>
+										<th style="display: none;"></th>
+										<th style="display: none;"></th>
 									</tr>
 								</thead>
 								<tbody>
-									<?php if ( __( 'Content', 'wp-security-audit-log' ) === $subname ) : ?>
-										<tr>
-											<td colspan="4">
-												<p class="wsal-tab-help description"><?php echo wp_kses( __( '<strong>Note:</strong> Post refers to any type of content, i.e. blog post, page or a post with a custom post type.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?></p>
-											</td>
-										</tr>
-									<?php elseif ( __( 'WooCommerce', 'wp-security-audit-log' ) === $subname || __( 'WooCommerce Products', 'wp-security-audit-log' ) === $subname ) : ?>
-										<?php if ( ! empty( $disable_inputs ) ) : ?>
-											<tr>
-												<td colspan="4">
-													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'The plugin WooCommerce is not installed on your website so these events have been disabled.', 'wp-security-audit-log' ); ?></p>
-												</td>
-											</tr>
-										<?php endif; ?>
-										<?php if ( __( 'WooCommerce Products', 'wp-security-audit-log' ) === $subname ) : ?>
-											<tr>
-												<td colspan="4">
-													<h3 class="sub-category"><?php esc_html_e( 'Products', 'wp-security-audit-log' ); ?></h3>
-												</td>
-											</tr>
-										<?php endif; ?>
-										<tr>
-											<td colspan="4">
-												<h3 class="sub-category"><?php esc_html_e( 'Post Changes', 'wp-security-audit-log' ); ?></h3>
-											</td>
-										</tr>
-									<?php elseif ( __( 'MultiSite', 'wp-security-audit-log' ) === $subname ) : ?>
-										<?php if ( ! empty( $disable_inputs ) ) : ?>
-											<tr>
-												<td colspan="4">
-													<p class="wsal-tab-help wsal-tab-notice description"><?php esc_html_e( 'Your website is a single site so the multisite events have been disabled.', 'wp-security-audit-log' ); ?></p>
-												</td>
-											</tr>
-										<?php endif; ?>
-									<?php elseif ( __( 'Other User Activity', 'wp-security-audit-log' ) === $subname ) : ?>
-										<tr>
-											<td colspan="4">
-												<h3 class="sub-category"><?php esc_html_e( 'Logins & Logouts', 'wp-security-audit-log' ); ?></h3>
-											</td>
-										</tr>
-									<?php endif; ?>
-
 									<?php
-									// Events sections loop.
-									foreach ( $alerts as $alert ) {
-										if ( $alert->code <= 0006 ) {
-											continue; // <- Ignore php alerts.
-										}
 
-										if ( __( 'Monitor File Changes', 'wp-security-audit-log' ) === $subname && ! defined( 'WFCM_PLUGIN_FILE' ) ) {
-											break;
-										}
-
-										if ( in_array( $alert->code, $obsolete_events, true ) ) {
-											continue; // <- Ignore promo alerts.
-										}
-
-										$attrs = '';
-										switch ( true ) {
-											case ! $alert->mesg:
-												$attrs = 'title="' . __( 'Not Implemented', 'wp-security-audit-log' ) . '" class="alert-incomplete"';
-												break;
-											case false:
-												$attrs = 'title="' . __( 'Not Available', 'wp-security-audit-log' ) . '" class="alert-unavailable"';
-												break;
-                                            default:
-	                                            //  fallback for any other cases would go here
-	                                            break;
-										}
-										if ( in_array( $alert->code, $subcat_alerts, true ) ) {
-											?>
-											<tr>
-                                                <td colspan="4">
-                                                    <h3 class="sub-category">
-														<?php
-														$subcat_title = '';
-														switch ( $alert->code ) {
-															case 1000:
-																$subcat_title = esc_html__( 'User Logins/Logouts', 'wp-security-audit-log' );
-																break;
-															case 1004:
-																$subcat_title = esc_html__( 'User Sessions', 'wp-security-audit-log' );
-																break;
-															case 2010:
-																$subcat_title = esc_html__( 'Files', 'wp-security-audit-log' );
-																break;
-															case 2011:
-																$subcat_title = esc_html__( 'Post Settings', 'wp-security-audit-log' );
-																break;
-															default:
-																break;
-														}
-
-														// Allow further titles to be added externally.
-														$subcat_title = apply_filters( 'wsal_togglealerts_sub_category_titles', $subcat_title, $alert->code );
-														if ( $subcat_title ) {
-															echo esc_html( $subcat_title );
-														}
-														?>
-                                                    </h3>
-                                                </td>
-                                            </tr>
-											<?php
-										}
-										?>
-										<tr <?php echo esc_attr( $attrs ); ?>>
-											<th>
-												<input
-													name="alert[]"
-													type="checkbox"
-													class="alert"
-													<?php checked( $active[ $alert->code ] ); ?>
-													value="<?php echo esc_attr( (int) $alert->code ); ?>"
-													<?php
-													if ( ! empty( $disable_inputs ) ) {
-														echo esc_attr( $disable_inputs );
-													}
-													?>
-													<?php echo ( __( 'File Changes', 'wp-security-audit-log' ) === $subname ) ? 'onclick="wsal_toggle_file_changes(this)"' : false; ?>
-												/>
-											</th>
-											<td><?php echo esc_html( str_pad( $alert->code, 4, '0', STR_PAD_LEFT ) ); ?></td>
-											<td>
-												<?php
-												$severity_obj = $this->_plugin->constants->GetConstantBy( 'value', $alert->severity );
-												if ( 'E_CRITICAL' === $severity_obj->name ) {
-													esc_html_e( 'Critical', 'wp-security-audit-log' );
-												} elseif ( 'E_WARNING' === $severity_obj->name ) {
-													esc_html_e( 'Warning', 'wp-security-audit-log' );
-												} elseif ( 'E_NOTICE' === $severity_obj->name ) {
-													esc_html_e( 'Notification', 'wp-security-audit-log' );
-												} elseif ( 'WSAL_CRITICAL' === $severity_obj->name ) {
-													esc_html_e( 'Critical', 'wp-security-audit-log' );
-												} elseif ( 'WSAL_HIGH' === $severity_obj->name ) {
-													esc_html_e( 'High', 'wp-security-audit-log' );
-												} elseif ( 'WSAL_MEDIUM' === $severity_obj->name ) {
-													esc_html_e( 'Medium', 'wp-security-audit-log' );
-												} elseif ( 'WSAL_LOW' === $severity_obj->name ) {
-													esc_html_e( 'Low', 'wp-security-audit-log' );
-												} elseif ( 'WSAL_INFORMATIONAL' === $severity_obj->name ) {
-													esc_html_e( 'Informational', 'wp-security-audit-log' );
-												} else {
-													esc_html_e( 'Notification', 'wp-security-audit-log' );
+									foreach ( $grouped_alerts as $name => $group ) {
+										foreach ( $group as $subname => $alerts ) {
+											$active    = array();
+											$allactive = true;
+											/** @var WSAL_Alert $alert */
+											foreach ( $alerts as $alert ) {
+												$active[ $alert->code ] = $this->_plugin->alerts->IsEnabled( $alert->code );
+												if ( ! $active[ $alert->code ] ) {
+													$allactive = false;
 												}
-												?>
-											</td>
-											<td><?php echo esc_html( $alert->desc ); ?></td>
-										</tr>
-										<?php
+											}
 
-										if ( 4000 === $alert->code ) {
-											$frontend_events        = WSAL_Settings::get_frontend_events();
-											?>
-											<tr>
-												<td></td>
-												<td><input type="checkbox" name="frontend-events[register]" id="frontend-events-register" value="1" <?php checked( $frontend_events['register'] ); ?>></td>
-												<td colspan="2">
-													<label for="frontend-events-register"><?php esc_html_e( 'Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress.', 'wp-security-audit-log' ); ?></label>
-												</td>
-											</tr>
-											<?php
-										}
+											// Disabled alerts.
+											$disable_inputs = '';
+											$disabled_message = '';
 
-										if ( 1002 === $alert->code ) {
-											$log_failed_login_limit = (int) $this->_plugin->GetGlobalSetting( 'log-failed-login-limit', 10 );
-											$log_failed_login_limit = ( -1 === $log_failed_login_limit ) ? '0' : $log_failed_login_limit;
-											?>
-											<tr>
-												<td></td>
-												<td><input name="log_failed_login_limit" type="number" class="check_visitor_log" value="<?php echo esc_attr( $log_failed_login_limit ); ?>"></td>
-												<td colspan="2">
-													<?php esc_html_e( 'Number of login attempts to log. Enter 0 to log all failed login attempts. (By default the plugin only logs up to 10 failed login because the process can be very resource intensive in case of a brute force attack)', 'wp-security-audit-log' ); ?>
-												</td>
-											</tr>
-											<?php
-										}
-										if ( 1003 === $alert->code ) {
-											$log_visitor_failed_login_limit = (int) $this->_plugin->GetGlobalSetting( 'log-visitor-failed-login-limit', 10 );
-											$log_visitor_failed_login_limit = ( -1 === $log_visitor_failed_login_limit ) ? '0' : $log_visitor_failed_login_limit;
-											?>
-											<tr>
-												<td></td>
-												<td><input name="log_visitor_failed_login_limit" type="number" class="check_visitor_log" value="<?php echo esc_attr( $log_visitor_failed_login_limit ); ?>"></td>
-												<td colspan="2">
-													<p><?php esc_html_e( 'Number of login attempts to log. Enter 0 to log all failed login attempts. (By default the plugin only logs up to 10 failed login because the process can be very resource intensive in case of a brute force attack)', 'wp-security-audit-log' ); ?></p>
-												</td>
-											</tr>
-											<?php
-										}
+											// Skip Pages and CPTs section.
+											if ( __( 'Custom Post Types', 'wp-security-audit-log' ) === $subname || __( 'Pages', 'wp-security-audit-log' ) === $subname ) {
+												continue;
+											} elseif (
+												'bbPress Forums' === $name
+												|| 'WooCommerce' === $name
+												|| 'Yoast SEO' === $name
+												|| 'Multisite Network Sites' === $name
+												|| 'User Accounts' === $name
+											) {
+												switch ( $name ) {
+													case 'User Accounts':
+														if ( 'Multisite User Profiles' === $subname ) {
+															// Check if this is a multisite.
+															if ( ! is_multisite() ) {
+																$disable_inputs = 'disabled';
+															}
+														}
+														break;
 
-										if ( 1003 === $alert->code ) {
-											$frontend_events        = WSAL_Settings::get_frontend_events();
-											?>
-											<tr>
-												<th>
-													<input type="checkbox" name="frontend-events[login]" id="frontend-events-login" value="1" <?php checked( $frontend_events['login'] ); ?>>
-												</th>
-												<td colspan="3">
-													<label for="frontend-events-login"><?php esc_html_e( 'Keep a log of user log in activity on custom login forms (such as WooCommerce & membership plugins)', 'wp-security-audit-log' ); ?></label>
-												</td>
-											</tr>
-											<?php
-										}
+													case 'WooCommerce':
+													case 'WooCommerce Products':
+														// Check if WooCommerce plugin exists.
+														if ( ! WpSecurityAuditLog::is_woocommerce_active() ) {
+															$disable_inputs = 'disabled';
+															$disabled_message = esc_html__( 'Please activate WooCommerce to enable this alert', 'wp-security-audit-log' );
+														}
+														break;
 
-										do_action( 'wsal_togglealerts_append_content_to_toggle', $alert->code );
+													case 'Yoast SEO':
+														// Check if Yoast SEO plugin exists.
+														if ( ! WpSecurityAuditLog::is_wpseo_active() ) {
+															$disable_inputs = 'disabled';
+															$disabled_message = esc_html__( 'Please activate the Yoast SEO Plugin', 'wp-security-audit-log' );
+														}
+														break;
+
+													case 'Multisite Network Sites':
+														// Disable if not multisite.
+														if ( ! is_multisite() ) {
+															$disable_inputs = 'disabled';
+															$disabled_message = esc_html__( 'Your website is a single site so the multisite events have been disabled.', 'wp-security-audit-log' );
+														}
+														break;
+
+													default:
+														break;
+												}
+											}
+
+											if ( $disabled_events_enforced_by_mainwp ) {
+												$disable_inputs = 'disabled';
+											}
+
+											foreach ( $alerts as $alert ) {
+
+												if ( $alert->code <= 0006 ) {
+													continue; // <- Ignore php alerts.
+												}
+												if ( in_array( $alert->code, $obsolete_events, true ) ) {
+													continue; // <- Ignore promo alerts.
+												}
+
+												$disable_inputs_needed = ( ! empty( $disable_inputs ) ) ? esc_attr( $disable_inputs ) : '';
+												$disabled_tooltip      = ( $disabled_message ) ? 'data-tooltip="' . $disabled_message . '"' : '';
+												$checkbox_markup       = '<input name="alert[]" type="checkbox" class="alert"'. checked( $this->_plugin->alerts->IsEnabled( $alert->code ), true, false ) .' value="'. esc_attr( (int) $alert->code ) .'" '. $disable_inputs_needed .' />';
+												$severity              = '';
+												$severity_obj		   = $this->_plugin->constants->GetConstantBy( 'value', $alert->severity );
+
+												if ( is_object( $severity_obj ) ) {
+													if ( 'E_CRITICAL' === $severity_obj->name ) {
+														$severity = esc_html__( 'Critical', 'wp-security-audit-log' );
+													} elseif ( 'E_WARNING' === $severity_obj->name ) {
+														$severity = esc_html__( 'Warning', 'wp-security-audit-log' );
+													} elseif ( 'E_NOTICE' === $severity_obj->name ) {
+														$severity = esc_html__( 'Notification', 'wp-security-audit-log' );
+													} elseif ( 'WSAL_CRITICAL' === $severity_obj->name ) {
+														$severity = esc_html__( 'Critical', 'wp-security-audit-log' );
+													} elseif ( 'WSAL_HIGH' === $severity_obj->name ) {
+														$severity = esc_html__( 'High', 'wp-security-audit-log' );
+													} elseif ( 'WSAL_MEDIUM' === $severity_obj->name ) {
+														$severity = esc_html__( 'Medium', 'wp-security-audit-log' );
+													} elseif ( 'WSAL_LOW' === $severity_obj->name ) {
+														$severity = esc_html__( 'Low', 'wp-security-audit-log' );
+													} elseif ( 'WSAL_INFORMATIONAL' === $severity_obj->name ) {
+														$severity = esc_html__( 'Informational', 'wp-security-audit-log' );
+													} else {
+														$severity = esc_html__( 'Notification', 'wp-security-audit-log' );
+													}
+												}	
+
+												echo '<tr class="alert-wrapper '. $disable_inputs_needed .'" data-alert-cat="' . $alert->catg . '" data-alert-subcat="' . $alert->subcatg . '" ' . $disabled_tooltip . '>';
+													echo '<th>' . $checkbox_markup . '</th>';
+													echo '<td>' . $alert->code . '</td>';
+													echo '<td>' . $severity . '</td>';
+													echo '<td>' . $alert->desc . '</td>';
+													echo '<td style="display: none;">' . $alert->catg . '</td>';
+													echo '<td style="display: none;">' . $alert->subcatg . '</td>';
+												echo '</tr>';
+
+												if ( 4000 === $alert->code ) {
+													$frontend_events        = WSAL_Settings::get_frontend_events();
+													?>
+													<tr class="alert-wrapper" data-alert-cat="Users Logins & Sessions Events" data-alert-subcat="User Activity">													
+														<td></td>
+														<td><input type="checkbox" name="frontend-events[register]" id="frontend-events-register" value="1" <?php checked( $frontend_events['register'] ); ?>></td>
+														<td colspan="2">
+															<label for="frontend-events-register"><?php esc_html_e( 'Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress.', 'wp-security-audit-log' ); ?></label>
+														</td>
+													</tr>
+													<?php
+												}
+
+												if ( 1002 === $alert->code ) {
+													$log_failed_login_limit = (int) $this->_plugin->GetGlobalSetting( 'log-failed-login-limit', 10 );
+													$log_failed_login_limit = ( -1 === $log_failed_login_limit ) ? '0' : $log_failed_login_limit;
+													?>
+													<tr class="alert-wrapper" data-alert-cat="Users Logins & Sessions Events" data-alert-subcat="User Activity">
+														<td></td>
+														<td><input name="log_failed_login_limit" type="number" class="check_visitor_log" value="<?php echo esc_attr( $log_failed_login_limit ); ?>"></td>
+														<td colspan="2">
+															<?php esc_html_e( 'Number of login attempts to log. Enter 0 to log all failed login attempts. (By default the plugin only logs up to 10 failed login because the process can be very resource intensive in case of a brute force attack)', 'wp-security-audit-log' ); ?>
+														</td>
+													</tr>
+													<?php
+												}
+												if ( 1003 === $alert->code ) {
+													$log_visitor_failed_login_limit = (int) $this->_plugin->GetGlobalSetting( 'log-visitor-failed-login-limit', 10 );
+													$log_visitor_failed_login_limit = ( -1 === $log_visitor_failed_login_limit ) ? '0' : $log_visitor_failed_login_limit;
+													?>
+													<tr class="alert-wrapper" data-alert-cat="Users Logins & Sessions Events" data-alert-subcat="User Activity">
+														<td></td>
+														<td><input name="log_visitor_failed_login_limit" type="number" class="check_visitor_log" value="<?php echo esc_attr( $log_visitor_failed_login_limit ); ?>"></td>
+														<td colspan="2">
+															<p><?php esc_html_e( 'Number of login attempts to log. Enter 0 to log all failed login attempts. (By default the plugin only logs up to 10 failed login because the process can be very resource intensive in case of a brute force attack)', 'wp-security-audit-log' ); ?></p>
+														</td>
+													</tr>
+													<?php
+												}
+
+												if ( 1003 === $alert->code ) {
+													$frontend_events        = WSAL_Settings::get_frontend_events();
+													?>
+													<tr class="alert-wrapper" data-alert-cat="Users Logins & Sessions Events" data-alert-subcat="User Activity">
+														<th>
+															<input type="checkbox" name="frontend-events[login]" id="frontend-events-login" value="1" <?php checked( $frontend_events['login'] ); ?>>
+														</th>
+														<td colspan="3">
+															<label for="frontend-events-login"><?php esc_html_e( 'Keep a log of user log in activity on custom login forms (such as WooCommerce & membership plugins)', 'wp-security-audit-log' ); ?></label>
+														</td>
+													</tr>
+													<?php
+												}
+
+												do_action( 'wsal_togglealerts_append_content_to_toggle', $alert->code );
+											}
+										}
 									}
 
-									// File integrity scan link.
-									if ( __( 'Monitor File Changes', 'wp-security-audit-log' ) === $subname && ! defined( 'WFCM_PLUGIN_FILE' ) ) :
-										$redirect_args      = array(
-											'page' => 'wsal-settings',
-											'tab'  => 'file-changes',
-										);
-										?>
-										<tr>
-											<td>
-												<div class="addon-wrapper">
-													<img src="<?php echo trailingslashit( WSAL_BASE_URL ) . 'img/help/website-file-changes-monitor.jpg'; ?>">
-													<h4><?php echo esc_html__( 'Website File Changes Monitor', 'wp-security-audit-log' ); ?></h4>
-													<p><?php echo esc_html__( 'To keep a log of file changes please install Website File Changes Monitor, a plugin which is also developed by us.', 'wp-security-audit-log' ); ?></p><br>
-													<p><button class="install-addon button button-primary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-install-addon' ) ); ?>" data-plugin-slug="website-file-changes-monitor/website-file-changes-monitor.php" data-plugin-download-url="https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip"><?php _e( 'Install plugin now', 'wp-security-audit-log' ); ?></button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span> <a href="https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" rel="noopener noreferrer" target="_blank" style="margin-left: 15px;"><?php echo esc_html__( 'Learn More', 'wp-security-audit-log' ); ?></a></p>
-												</div>
-											</td>
-										</tr>
-										<style type="text/css">
-										#tab-monitor-file-changes thead {
-											display: none;
-										}
-										</style>
-										<?php
-									endif;
 									?>
 								</tbody>
 							</table>
-							<?php
-						}
-						?>
-					</div>
-				<?php endforeach; ?>
-				<?php
-					$addons = new WSAL_PluginInstallAndActivate();
-					$addons->render();
-				?>
+
+					<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save Changes', 'wp-security-audit-log' ) ); ?>"></p>
+				</form>
+
 			</div>
-			<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save Changes', 'wp-security-audit-log' ) ); ?>"></p>
-		</form>
+			<?php
+				$addons = new WSAL_PluginInstallAndActivate();
+				$addons->render();
+			?>			
+		</div>
+
 
 		<?php if ( ! empty( $log_level_to_set ) ) : ?>
 			<!-- Log level updated modal -->
@@ -594,6 +495,16 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		// Remodal styles.
 		wp_enqueue_style( 'wsal-remodal', WSAL_BASE_URL . 'css/remodal.css', array(), '1.1.1' );
 		wp_enqueue_style( 'wsal-remodal-theme', WSAL_BASE_URL . 'css/remodal-default-theme.css', array(), '1.1.1' );
+
+
+		// Darktooltip styles.
+		wp_enqueue_style(
+			'darktooltip',
+			WSAL_BASE_URL . 'css/darktooltip.css',
+			array(),
+			'0.4.0'
+		);
+
 		?>
 		<style type="text/css">
 			.wsal-tab {
@@ -672,28 +583,107 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			}
 			.addon-wrapper {
 				flex: 1 0 30%;
-		    margin: 0 5px 11px 5px;
-		    border: 1px solid #eee;
-		    padding: 20px;
+				margin: 0 5px 11px 5px;
+				border: 1px solid #eee;
+				padding: 20px;
 			}
 			.addon-wrapper:hover {
 				border: 1px solid #ccc;
 			}
 			.addon-wrapper .button-primary {
 				position: relative;
-		    padding: 13px 26px !important;
-		    font-weight: 500;
-		    font-size: 16px;
-		    line-height: 1;
-		    color: white;
-		    background: #007cba;
-		    border: none;
-		    outline: none;
-		    overflow: hidden;
-		    cursor: pointer;
-		    filter: drop-shadow(0 2px 8px rgba(39, 94, 254, 0.32));
-		    transition: 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
-		    line-height: 1 !important;
+				padding: 13px 26px !important;
+				font-weight: 500;
+				font-size: 16px;
+				line-height: 1;
+				color: white;
+				background: #007cba;
+				border: none;
+				outline: none;
+				overflow: hidden;
+				cursor: pointer;
+				filter: drop-shadow(0 2px 8px rgba(39, 94, 254, 0.32));
+				transition: 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
+				line-height: 1 !important;
+			}
+
+			#flitering-options-wrapper {
+				display: flex;
+			}
+			#flitering-options-wrapper .search, #flitering-options-wrapper .choose  {
+				padding: 10px 0;
+			}
+			#flitering-options-wrapper > div {
+				min-width: 80px;
+			}
+			.search-title {
+				display: flex;
+				margin-bottom: 10px;
+			}
+			.center-bit {
+				text-align: center;
+				line-height: 82px;
+			}
+			.center-bit span {
+				background: #2271b1;
+				color: #fff;
+				width: 48px;
+				height: 48px;
+				border-radius: 50%;
+				display: inline-block;
+				line-height: 47px;
+				margin-top: 20px;
+			}
+			.search-input-style {
+				background-position: 10px 12px;
+				background-repeat: no-repeat;
+				font-size: 16px;
+				margin-bottom: 12px;
+			}
+			#query-input {
+				width: 450px;
+				position: relative;
+				top: -3px;
+			}
+			#search-subject {
+				width: 190px;
+				padding: 2px 8px;
+			}
+
+			#filter-cat {			
+				width: 400px;
+				padding: 2px 8px;
+			}
+
+			#event-toggle-table {
+				border-collapse: collapse;
+				width: 100%;
+				border: 1px solid #ddd;
+				font-size: 18px;
+			}
+
+			#event-toggle-table th, #event-toggle-table td {
+				text-align: left;
+				padding: 12px;
+			}
+
+			#event-toggle-table tr {
+				border-bottom: 1px solid #ddd;
+			}
+
+			#event-toggle-table tr.disabled {
+				opacity: 0.5;
+			}
+
+			#event-toggle-table tr.header, #event-toggle-table tr:hover {
+				background-color: #f1f1f1;
+			}
+			#tab-all {
+				background: #fff;
+				margin-top: 10px;
+				padding: 10px;
+				border: 1px solid #c3c4c7;
+   				box-shadow: 0 1px 1px rgb(0 0 0 / 4%);
 			}
 		</style>
 		<?php
@@ -707,10 +697,20 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		wp_enqueue_script(
 			'wsal-remodal-js',
 			WSAL_BASE_URL . 'js/remodal.min.js',
-			array(),
+			array( 'jquery-ui-tooltip' ),
 			'1.1.1',
 			true
 		);
+
+		// Darktooltip js.
+		wp_enqueue_script(
+			'darktooltip', // Identifier.
+			WSAL_BASE_URL . 'js/jquery.darktooltip.js', // Script location.
+			array( 'jquery' ), // Depends on jQuery.
+			'0.4.0', // Script version.
+			true
+		);
+
 		?>
 		<script type="text/javascript">
 			jQuery(document).ready(function(){
@@ -735,10 +735,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					}, 1);
 				});
 				// checkbox handling code
-				jQuery('.wsal-tab>thead>tr>th>:checkbox').change(function(){
+				jQuery('#event-toggle-table thead>tr>th>:checkbox').change(function(){
 					jQuery(this).parents('table:first').find('tbody>tr>th>:checkbox').attr('checked', this.checked);
 				});
-				jQuery('.wsal-tab>tbody>tr>th>:checkbox').change(function(){
+				jQuery('#event-toggle-table tr checkbox').change(function(){
 					var allchecked = jQuery(this).parents('tbody:first').find('th>:checkbox:not(:checked)').length === 0;
 					jQuery(this).parents('table:first').find('thead>tr>th:first>:checkbox:first').attr('checked', allchecked);
 				});
@@ -756,6 +756,94 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					jQuery('#wsal-tabs>a:first').click();
 					jQuery('.wsal-sub-tabs>a:first').click();
 				}
+
+				function filterEventTable() {
+					// Declare variables
+					var input, filter, table, tr, td, i, txtValue;
+					input = document.getElementById("query-input");
+					filter = input.value.toUpperCase();
+					table = document.getElementById("event-toggle-table");
+					tr = table.getElementsByTagName("tr");
+
+					var e = document.getElementById("search-subject");
+					var strSearch = e.options[e.selectedIndex].value;
+
+					// Loop through all table rows, and hide those who don't match the search query
+					for (i = 0; i < tr.length; i++) {
+						if ( strSearch == 'code' ) {
+							td = tr[i].getElementsByTagName("td")[0];
+						} else if ( strSearch == 'severity' ) {
+							td = tr[i].getElementsByTagName("td")[1];
+						} else if ( strSearch == 'desc' ) {
+							td = tr[i].getElementsByTagName("td")[2];
+						}
+						if (td) {
+							txtValue = td.textContent || td.innerText;
+							if (txtValue.toUpperCase().indexOf(filter) > -1) {
+								tr[i].style.display = "";
+							} else {
+								tr[i].style.display = "none";
+							}
+						}
+					}
+				}
+
+				// Add options to category select box.
+				var categories = [];
+				jQuery('[data-alert-cat]').each( function( index, value ) {
+					var title = jQuery( this ).attr( 'data-alert-cat');
+					var found = jQuery.inArray(title, categories);
+					if (found >= 0) {
+						// Nothing needed.
+					} else { 
+						categories.push( title );
+					}
+				});				
+				jQuery( categories ).each( function( index, value ) {
+					jQuery('#filter-cat').append('<option value="'+ value +'">'+ value +'</option>');
+				});
+
+				// Display a specific category based on browser hash.
+				var hash = window.location.hash;
+				jQuery('ul'+hash+':first').show();
+
+				if (window.location.href.indexOf( '#cat-' ) > -1) {
+					var hash = window.location.hash.toUpperCase();
+					hash =  hash.replace('#CAT-', '');
+					jQuery('[data-alert-cat]').each( function( index, value ) {
+						var title = jQuery( this ).attr( 'data-alert-cat').toUpperCase();
+						if ( title == hash  ) {
+							jQuery( this  ).css( 'display', '' );
+						} else {
+							jQuery( this ).css( 'display', 'none' );
+						}
+					});
+				}
+
+				// Filter items based on category.
+				jQuery('#filter-cat').on('change', function() {
+					var filter = jQuery( "#filter-cat option:selected" ).text().toUpperCase();
+					var val = jQuery("#filter-cat").val();
+					if ( 'all' == val ) {
+						jQuery( '#event-toggle-table tr' ).css( 'display', '' );
+					} else {
+						jQuery('[data-alert-cat]').each( function( index, value ) {
+							var title = jQuery( this ).attr( 'data-alert-cat').toUpperCase();
+							if ( title == filter ) {
+								jQuery( this  ).css( 'display', '' );
+							} else {
+								jQuery( this ).css( 'display', 'none' );
+							}
+						});
+					}
+				});
+
+				// Lovely tooltop.s
+				jQuery( '#event-toggle-table tr' ).darkTooltip( {
+					animation: 'fadeIn',
+					gravity: 'north',
+					size: 'large',
+				} );
 			});
 
 			if (typeof toggle_modal !== 'undefined') {

@@ -13,7 +13,7 @@ if ( ! class_exists( 'WSAL_WPFormsExtension' ) ) {
 					'plugin_slug'        => 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php',
 					'plugin_basename'    => 'wsal-wpforms.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-wpforms.latest-stable.zip',
-					'event_tab_id'       => '#tab-wpforms',
+					'event_tab_id'       => '#cat-wpforms',
 					'plugin_description' => 'Keep a record of when someone adds, modifies or deletes forms, entries and more in the WPForms plugin.',
 				)
 			);

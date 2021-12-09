@@ -20,17 +20,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 interface WSAL_Adapters_ActiveRecordInterface {
 
 	/**
-	 * Is installed?
+	 * Returns whether table structure is installed or not.
+	 *
+	 * @deprecated
+	 * @return boolean
 	 */
 	public function IsInstalled();
 
 	/**
-	 * Install.
+	 * Install this ActiveRecord structure into DB.
 	 */
 	public function Install();
 
 	/**
-	 * Uninstall.
+	 * Remove this ActiveRecord structure from DB.
 	 */
 	public function Uninstall();
 
@@ -43,49 +46,59 @@ interface WSAL_Adapters_ActiveRecordInterface {
 	public function Load( $cond = '%d', $args = array( 1 ) );
 
 	/**
-	 * Save.
+	 * Save an active record into DB.
 	 *
-	 * @param object $activeRecord - Active Record object.
+	 * @param object $active_record - ActiveRecord object.
+	 * @return integer|boolean - Either the number of modified/inserted rows or false on failure.
 	 */
 	public function Save( $activeRecord );
 
 	/**
-	 * Delete.
+	 * Delete DB record.
 	 *
-	 * @param object $activeRecord - Active Record object.
+	 * @param object $active_record - ActiveRecord object.
+	 * @return int|boolean - Either the amount of deleted rows or False on error.
 	 */
 	public function Delete( $activeRecord );
 
 	/**
-	 * Load with Multiple Conditions.
+	 * Load multiple records from DB.
 	 *
-	 * @param string $cond - Query Condition.
-	 * @param array  $args - Query arguments.
+	 * @param string $cond (Optional) Load condition (eg: 'some_id = %d' ).
+	 * @param array $args (Optional) Load condition arguments (rg: array(45) ).
+	 *
+	 * @return self[] List of loaded records.
 	 */
 	public function LoadMulti( $cond, $args = array() );
 
 	/**
-	 * Load and call foreach.
+	 * Load multiple records from DB and call a callback for each record.
+	 * This function is very memory-efficient, it doesn't load records in bulk.
 	 *
-	 * @param string $callback - Callback.
-	 * @param string $cond - Query Condition.
-	 * @param array  $args - Query arguments.
+	 * @param callable $callback The callback to invoke.
+	 * @param string   $cond (Optional) Load condition.
+	 * @param array    $args (Optional) Load condition arguments.
 	 */
 	public function LoadAndCallForEach( $callback, $cond = '%d', $args = array( 1 ) );
 
 	/**
-	 * Count.
+	 * Count records in the DB matching a condition.
+	 * If no parameters are given, this counts the number of records in the DB table.
 	 *
-	 * @param string $cond - Query Condition.
-	 * @param array  $args - Query arguments.
+	 * @param string $cond (Optional) Query condition.
+	 * @param array  $args (Optional) Condition arguments.
+	 * @return int Number of matching records.
 	 */
 	public function Count( $cond = '%d', $args = array( 1 ) );
 
 	/**
-	 * Multiple Query.
+	 * Similar to LoadMulti but allows the use of a full SQL query.
 	 *
-	 * @param array $query - Query Condition.
-	 * @param array $args - Query arguments.
+	 * @param string $query Full SQL query.
+	 * @param array $args (Optional) Query arguments.
+	 *
+	 * @return array List of loaded records.
+	 * @throws Exception
 	 */
 	public function LoadMultiQuery( $query, $args = array() );
 

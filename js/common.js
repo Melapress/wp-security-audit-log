@@ -54,59 +54,75 @@ jQuery( document ).ready( function() {
 	jQuery( 'head' ).append( '<style>.wp-submenu .dashicons-external:before{vertical-align: bottom;}</style>' );
 
 	// Add on installer
-	jQuery(".install-addon").not('.disabled').click( function(e) {
+	jQuery(".install-addon").on( 'click', function( e ) {
+		return wsalCommonData.install_addon( e, this );
+	});
+
+	wsalCommonData.install_addon = function( event, button_elm ) {
+		var currentButton = jQuery( button_elm );
+		if (currentButton.hasClass('disabled')) {
+			return;
+		}
+
 		// Disable other buttons whilst the process is happening.
 		jQuery(".install-addon").not(this).prop('disabled', true);
 
-		jQuery(this).html( wsalCommonData.installing );
-		var currentButton = jQuery(this);
-		var PluginSlug = jQuery(this).attr('data-plugin-slug');
-		var nonceValue = jQuery(this).attr('data-nonce');
-		var PluginDownloadUrl = jQuery(this).attr('data-plugin-download-url');
-		var RedirectToTab = jQuery(this).attr('data-plugin-event-tab-id');
-		jQuery(currentButton).next('.spinner').show('200');
-		e.preventDefault();
+		currentButton.html(wsalCommonData.installing);
+
+		var PluginSlug = currentButton.attr('data-plugin-slug');
+		var nonceValue = currentButton.attr('data-nonce');
+		var PluginDownloadUrl = currentButton.attr('data-plugin-download-url');
+		var RedirectToTab = currentButton.attr('data-plugin-event-tab-id');
+		currentButton.next('.spinner').show('200');
+		event.preventDefault();
 		jQuery.ajax({
 			type: 'POST',
-			dataType : "json",
+			dataType: "json",
 			url: wsalCommonData.ajaxURL,
-			data : {
+			data: {
 				action: "wsal_run_addon_install",
 				plugin_slug: PluginSlug,
 				plugin_url: PluginDownloadUrl,
 				_wpnonce: nonceValue
 			},
-			complete: function( data ) {
+			complete: function (data) {
 				var do_redirect = true;
-				if( data.responseText == '"already_installed"' ) {
-					jQuery(currentButton).html( wsalCommonData.already_installed ).addClass('disabled');
-					jQuery(currentButton).next('.spinner').hide('200');
-					jQuery(currentButton).addClass('disabled');
-				} else if ( data.responseText == '"activated"' ) {
-					jQuery(currentButton).html( wsalCommonData.activated ).addClass('disabled');
-					jQuery(currentButton).next('.spinner').hide('200');
-					jQuery(currentButton).addClass('disabled');
-				} else if ( JSON.stringify(data.responseText).toLowerCase().indexOf('failed') >= 0 ) {
-					jQuery(currentButton).html( wsalCommonData.failed ).addClass('disabled');
-					jQuery(currentButton).next('.spinner').hide('200');
+				if (data.responseText == '"already_installed"') {
+					currentButton.html(wsalCommonData.already_installed).addClass('disabled');
+					currentButton.next('.spinner').hide('200');
+					currentButton.addClass('disabled');
+				} else if (data.responseText == '"activated"') {
+					currentButton.html(wsalCommonData.activated).addClass('disabled');
+					currentButton.next('.spinner').hide('200');
+					currentButton.addClass('disabled');
+				} else if (JSON.stringify(data.responseText).toLowerCase().indexOf('failed') >= 0) {
+					currentButton.html(wsalCommonData.failed).addClass('disabled');
+					currentButton.next('.spinner').hide('200');
 					do_redirect = false;
-				} else if ( data.responseText == '"success"' || JSON.stringify(data.responseText).toLowerCase().indexOf('success') >= 0 ) {
-				 jQuery(currentButton).html( wsalCommonData.installed ).addClass('disabled');
-				 jQuery(currentButton).next('.spinner').hide('200');
+				} else if (data.responseText == '"success"' || JSON.stringify(data.responseText).toLowerCase().indexOf('success') >= 0) {
+					currentButton.html(wsalCommonData.installed).addClass('disabled');
+					currentButton.next('.spinner').hide('200');
 				}
 
-				if (do_redirect && typeof RedirectToTab !== 'undefined') {
-					setTimeout(function(){
-						window.location="admin.php?page=wsal-togglealerts" + RedirectToTab;
-						jQuery('[href="' + RedirectToTab + '"]').trigger('click');
-						// Reload as tabs are not present on page.
-						window.location.reload();
-					},100);
+				if ( do_redirect ) {
+					if ( typeof RedirectToTab !== 'undefined' ) {
+						setTimeout(function () {
+							window.location = "admin.php?page=wsal-togglealerts" + RedirectToTab;
+							jQuery('[href="' + RedirectToTab + '"]').trigger('click');
+							// Reload as tabs are not present on page.
+							window.location.reload();
+						}, 100);
+					} else {
+						currentButton.html( wsalCommonData.reloading_page );
+						setTimeout(function () {
+							window.location.reload();
+						}, 100);
+					}
 				}
-			 jQuery(".install-addon").not(this).prop('disabled', false);
+				jQuery(".install-addon").not(this).prop('disabled', false);
 			},
 		});
-	});
+	};
 
 	// Totally disabling the button.
 	jQuery(".install-addon.disabled").prop('disabled', true);

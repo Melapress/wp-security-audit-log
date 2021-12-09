@@ -12,7 +12,7 @@ if ( ! class_exists( 'WSAL_GravityFormsExtension' ) ) {
 					'image_filename'     => 'gravityforms.png',
 					'plugin_slug'        => 'activity-log-gravity-forms/activity-log-gravity-forms.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/activity-log-gravity-forms.latest-stable.zip',
-					'event_tab_id'       => '#tab-gravity-forms',
+					'event_tab_id'       => '#cat-gravity-forms',
 					'plugin_description' => __( 'Keep a record of when someone adds, modifies or deletes forms, entries and more in the Gravity Forms plugin.', 'wp-security-audit-log' ),
 				)
 			);

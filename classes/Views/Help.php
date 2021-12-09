@@ -278,9 +278,21 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	private function sidebar() {
 		$plugins_data = array(
 			array(
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/wp-2fa-img.jpg',
+				'desc' => __( 'Add an extra layer of security to your login pages with 2FA & require your users to use it.', 'wp-security-audit-log' ),
+				'alt'  => 'WP 2FA',
+				'link' => 'https://wp2fa.io/?utm_source=plugin&utm_medium=referral&utm_campaign=WP2FA&utm_content=WSAL+banner',
+			),
+			array(
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/c4wp.jpg',
+				'desc' => __( 'Protect website forms & login pages from spambots & automated attacks.', 'wp-security-audit-log' ),
+				'alt'  => 'Captcha 4WP',
+				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/captcha-plugin-wordpress/?utm_source=plugin&utm_medium=referral&utm_campaign=WP2FA&utm_content=WSAL+banner',
+			),
+			array(
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/password-policy-manager.jpg',
 				'desc' => __( 'Enforce strong password policies on WordPress', 'wp-security-audit-log' ),
-				'alt'  => 'Password Policy Manager',
+				'alt'  => 'WPassword',
 				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/password-policy-manager-wordpress/?utm_source=plugin&utm_medium=referral&utm_campaign=PPMWP&utm_content=WSAL+banner',
 			),
 			array(
@@ -288,12 +300,6 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				'desc' => __( 'Automatically identify unauthorized file changes on WordPress', 'wp-security-audit-log' ),
 				'alt'  => 'Website File Changes Monitor',
 				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/?utm_source=plugin&utm_medium=referral&utm_campaign=WFCM&utm_content=WSAL+banner',
-			),
-			array(
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/wp-2fa-img.jpg',
-				'desc' => __( 'Add an extra layer of security to your login pages with 2FA & require your users to use it.', 'wp-security-audit-log' ),
-				'alt'  => 'WP 2FA',
-				'link' => 'https://www.wpwhitesecurity.com/wordpress-plugins/wp-2fa/?utm_source=plugin&utm_medium=referral&utm_campaign=WP2FA&utm_content=WSAL+banner',
 			),
 			array(
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/activity-log-for-mainwp.jpg',

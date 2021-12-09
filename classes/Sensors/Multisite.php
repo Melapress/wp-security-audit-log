@@ -5,7 +5,9 @@
  * Multisite sensor file.
  *
  * @since 1.0.0
+ *
  * @package wsal
+ * @subpackage sensors
  */
 
 // Exit if accessed directly.
@@ -14,11 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Multisite Sensor.
+ * Multisite sensor.
  *
  * 4010 Existing user added to a site
  * 4011 User removed from site
- * 4012 New network user created
  * 5008 Activated theme on network
  * 5009 Deactivated theme from network
  * 7000 New site added on the network
@@ -58,7 +59,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 		add_action( 'add_user_to_blog', array( $this, 'EventUserAddedToBlog' ), 10, 3 );
 		add_action( 'remove_user_from_blog', array( $this, 'EventUserRemovedFromBlog' ), 10, 2 );
 
-		add_action( 'update_site_option', array( $this, 'on_network_option_change'), 10, 4 );
+		add_action( 'update_site_option', array( $this, 'on_network_option_change' ), 10, 4 );
 	}
 
 	/**
@@ -207,11 +208,13 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	public function EventNewBlog( $new_blog ) {
 		$blog_id = $new_blog->blog_id;
 
-		//  site meta data nor options are not setup at this points so get_blog_option and get_home_url are not
-		//  returning anything for the new blog
-
-		//  the following code to work out the correct URL for the new site was taken from ms-site.php (WP 5.7)
-		//  @see https://github.com/WordPress/WordPress/blob/5.7/wp-includes/ms-site.php#L673
+		/*
+		 * Site meta data nor options are not setup at this points so get_blog_option and get_home_url are not
+		 * returning anything for the new blog.
+		 *
+		 * The following code to work out the correct URL for the new site was taken from ms-site.php (WP 5.7).
+		 * @see https://github.com/WordPress/WordPress/blob/5.7/wp-includes/ms-site.php#L673
+		 */
 		$network = get_network( $new_blog->network_id );
 		if ( ! $network ) {
 			$network = get_network();
@@ -232,7 +235,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 			array(
 				'BlogID'   => $blog_id,
 				'SiteName' => $blog_title,
-				'BlogURL'  => $blog_url
+				'BlogURL'  => $blog_url,
 			)
 		);
 	}
@@ -371,6 +374,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 * New network user created.
 	 *
 	 * @param WSAL_AlertManager $mgr - Instance of Alert Manager.
+	 * @return bool
 	 */
 	public function MustNotContainCreateUser( WSAL_AlertManager $mgr ) {
 		return ! $mgr->WillTrigger( 4012 );

@@ -100,10 +100,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_action( 'create_post_tag', array( $this, 'event_tag_creation' ), 10, 1 );
 		add_action( 'pre_delete_term', array( $this, 'check_taxonomy_term_deletion' ), 10, 2 );
 		add_filter( 'wp_update_term_data', array( $this, 'event_update_term_data' ), 10, 4 );
-		add_filter( 'add_post_metadata', array( $this, 'check_changed_meta' ), 10, 4 );
-		add_filter( 'updated_post_meta', array( $this, 'check_changed_meta' ), 10, 4 );
+		add_filter( 'add_post_metadata', array( $this, 'check_deleted_meta' ), 10, 5 );
 		add_filter( 'delete_post_metadata', array( $this, 'check_deleted_meta' ), 10, 5 );
-
+		add_action( 'updated_post_meta', array( $this, 'check_changed_meta' ), 10, 4 );
 
 		// Check if MainWP Child Plugin exists.
 		if ( WpSecurityAuditLog::is_mainwp_active() ) {

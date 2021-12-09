@@ -80,9 +80,9 @@ class WSAL_Models_Meta extends WSAL_Models_ActiveRecord {
 	 * @param mixed $value - Meta value.
 	 * @param integer $occurrence_id - Occurrence_id.
 	 *
-	 *@see WSAL_Adapters_MySQL_Meta::LoadByNameAndOccurrenceId()
+	 * @see WSAL_Adapters_MySQL_Meta::LoadByNameAndOccurrenceId()
 	 */
-	public function UpdateByNameAndOccurenceId( $name, $value, $occurrence_id ) {
+	public function UpdateByNameAndOccurrenceId( $name, $value, $occurrence_id ) {
 		$meta = $this->getAdapter()->LoadByNameAndOccurrenceId( $name, $occurrence_id );
 		if ( ! empty( $meta ) ) {
 			$this->id = $meta['id'];

@@ -10,10 +10,10 @@ if ( ! class_exists( 'WSAL_TablePressExtension' ) ) {
 					'addon_for'          => 'tablepress',
 					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'tablepress.png',
-					'plugin_slug'        => 'tablepress/tablepress.php',
+					'plugin_slug'        => 'activity-log-tablepress/wsal-tablepress.php',
 					'plugin_basename'    => 'tablepress.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/activity-log-tablepress.latest-stable.zip',
-					'event_tab_id'       => '#tab-tablepress',
+					'event_tab_id'       => '#cat-tablepress',
 					'plugin_description' => 'Keep a log of all the changes in your TablePress tables.',
 				)
 			);
@@ -43,7 +43,7 @@ if ( ! class_exists( 'WSAL_TablePressExtension' ) ) {
 		}
 
 		public function get_plugin_icon_url() {
-			return 'https://ps.w.org/activity-log-wp-seo/assets/icon-128x128.png?rev=2393849';
+			return 'https://ps.w.org/activity-log-tablepress/assets/icon-128x128.png?rev=2393849';
 		}
 
 		public function get_color() {

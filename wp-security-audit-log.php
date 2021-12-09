@@ -4,7 +4,7 @@
  * Plugin URI: https://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Activity log viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 4.3.3.1
+ * Version: 4.4.0
  * Text Domain: wp-security-audit-log
  * Author URI: https://www.wpwhitesecurity.com/
  * License: GPL2
@@ -49,9 +49,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @var string
              */
-            public $version = '4.3.3.1';
-
-            /**
+            public $version = '4.4.0';
+            
+             /**
              * Plugin constants.
              *
              * @var string
@@ -423,6 +423,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     require_once 'classes/ThirdPartyExtensions/WooCommerceExtension.php';
                     require_once 'classes/ThirdPartyExtensions/GravityFormsExtension.php';
                     require_once 'classes/ThirdPartyExtensions/TablePressExtension.php';
+                    require_once 'classes/ThirdPartyExtensions/WFCMExtension.php';
                 }
 
                 // Connectors.
@@ -513,9 +514,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     $bbpress_addon      = new WSAL_BBPressExtension();
                     $wpforms_addon      = new WSAL_WPFormsExtension();
                     $gravityforms_addon = new WSAL_GravityFormsExtension();
-
-                    // Comment out untill release.
-                    //$tablepress_addon   = new WSAL_TablePressExtension();
+                    $tablepress_addon   = new WSAL_TablePressExtension();
+                    $wfcm_addon         = new WSAL_WFCMExtension();
                 }
 
                 // Extensions which are both admin and frontend based.
@@ -523,7 +523,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
                 // Dequeue conflicting scripts.
                 add_action( 'wp_print_scripts', array( $this, 'dequeue_conflicting_scripts' ) );
+
             }
+
 
             /**
              * Whether the current page is the login screen.
@@ -958,7 +960,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @return string
              *
-             * @since latest
+             * @since 4.4.0
              */
             public static function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
                 $result = sprintf(
@@ -1101,6 +1103,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                  * @param WpSecurityAuditLog $this – Instance of main plugin class.
                  */
                 do_action( 'wsal_init', $this );
+
+	            //  background job for metadata migration
+	            new WSAL_Upgrade_MetadataMigration();
 
                 //  allow registration of custom alert formatters (must be called after wsal_init action )
                 WSAL_AlertFormatterFactory::bootstrap();
@@ -1258,11 +1263,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $script_data = array(
                     'ajaxURL'           => admin_url( 'admin-ajax.php' ),
                     'liveEvents'        => $live_events_enabled,
-                    'installing'        => __( 'Installing, please wait', 'wp-security-audit-log' ),
-                    'already_installed' => __( 'Already installed', 'wp-security-audit-log' ),
-                    'installed'         => __( 'Extension installed', 'wp-security-audit-log' ),
-                    'activated'         => __( 'Extension activated', 'wp-security-audit-log' ),
-                    'failed'            => __( 'Install failed', 'wp-security-audit-log' ),
+                    'installing'        => esc_html__( 'Installing, please wait', 'wp-security-audit-log' ),
+                    'already_installed' => esc_html__( 'Already installed', 'wp-security-audit-log' ),
+                    'installed'         => esc_html__( 'Extension installed', 'wp-security-audit-log' ),
+                    'activated'         => esc_html__( 'Extension activated', 'wp-security-audit-log' ),
+                    'failed'            => esc_html__( 'Install failed', 'wp-security-audit-log' ),
+                    'reloading_page'    => esc_html__( 'Reloading page', 'wp-security-audit-log' )
                 );
 
                 wp_localize_script( 'wsal-common', 'wsalCommonData', $script_data );
@@ -1285,7 +1291,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 require_once 'classes/ConstantManager.php';
                 require_once 'classes/Loggers/Database.php';
                 require_once 'classes/SensorManager.php';
-                require_once 'classes/Sensors/Public.php';
                 require_once 'classes/Settings.php';
 
                 if ( is_admin() ) {
@@ -1390,7 +1395,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              */
             public function Update( $old_version, $new_version ) {
                 // Update version in db.
-                $this->SetGlobalSetting( 'version', $new_version );
+                $this->SetGlobalSetting( 'version', $new_version, true );
 
 			if ( '0.0.0' === $old_version ) {
 				//  set some initial plugins settings (only the ones that bypass the regular settings retrieval at some
@@ -1489,6 +1494,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			                $this->SetGlobalSetting( 'excluded-post-meta', $excludedCustomFields );
 			                $this->DeleteGlobalSetting( 'excluded-custom' );
 		                }
+	                }
+
+	                if ( version_compare( $new_version, '4.4.0', '>=' ) ) {
+		                $this->settings()->set_database_version( 44400 );
+
+		                if ( class_exists( 'WSAL_Extension_Manager' ) ) {
+			                WSAL_Extension_Manager::include_extension( 'external-db' );
+		                }
+
+		                if ( ! did_action( 'wsal_init' ) ) {
+			                //  we need to call wsal init manually because it does not run as before the upgrade procedure is triggered
+			                do_action( 'wsal_init', $this );
+		                }
+
+		                require_once 'classes/Upgrade/Upgrade_43000_to_44400.php';
+		                $upgrader = new WSAL_Upgrade_43000_to_44400( $this );
+		                $upgrader->run();
+
+                        //  @todo remove legacy periodic reports for unique_ip and number_logins
 	                }
                 }
             }
@@ -1600,25 +1624,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $this->SetGlobalSetting( $option, $value );
             }
 
-            /**
-             * Set a global setting.
-             *
-             * @param string $option - Option name.
-             * @param mixed $value - New value for option.
-             *
-             * @return bool
-             */
-            public function SetGlobalSetting( $option, $value ) {
-                $this->include_options_helper();
-                return $this->options_helper->set_option_value( $option, $value );
-            }
+	        /**
+	         * Set a global setting.
+	         *
+	         * @param string $option - Option name.
+	         * @param mixed $value - New value for option.
+	         * @param bool $autoload Whether or not to autoload this option.
+	         *
+	         * @return bool
+	         */
+	        public function SetGlobalSetting( $option, $value, $autoload = false ) {
+		        $this->include_options_helper();
+
+		        return $this->options_helper->set_option_value( $option, $value, $autoload );
+	        }
 
             /**
              * Deletes a global setting.
              *
-             * Handles option names without the prefix, but also the ones that do for backwards compatibility.
-             *
-             * @param string $option - Option name.
+             * @param string $option - Option name without the prefix.
              *
              * @return bool
              * @since 4.2.1
@@ -1641,17 +1665,20 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $result = $this->GetGlobalSetting( $option, \WSAL\Helpers\Options::string_to_bool( $default ) );
                 return \WSAL\Helpers\Options::string_to_bool( $result );
             }
-            /**
-             * Sets a global boolean setting. It takes care of the conversion between string and boolean.
-             *
-             * @param string $option - Option name.
-             * @param mixed $value - New value for option.
-             * @since 4.1.3
-             */
-            public function SetGlobalBooleanSetting( $option, $value ) {
-                $boolean_value = \WSAL\Helpers\Options::string_to_bool( $value );
-                $this->SetGlobalSetting( $option, \WSAL\Helpers\Options::bool_to_string( $boolean_value ) );
-            }
+
+	        /**
+	         * Sets a global boolean setting. It takes care of the conversion between string and boolean.
+	         *
+	         * @param string $option - Option name.
+	         * @param mixed $value - New value for option.
+	         * @param bool $autoload Whether or not to autoload this option.
+	         *
+	         * @since 4.1.3
+	         */
+	        public function SetGlobalBooleanSetting( $option, $value, $autoload = false ) {
+		        $boolean_value = \WSAL\Helpers\Options::string_to_bool( $value );
+		        $this->SetGlobalSetting( $option, \WSAL\Helpers\Options::bool_to_string( $boolean_value ), $autoload );
+	        }
 
             /**
              * Run cleanup routines.

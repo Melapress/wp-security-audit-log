@@ -64,8 +64,8 @@ interface TrackerInterface {
 	public static function get_network_data_list( $site_id = 0 );
 
 	/**
-	 * Should setup the $data property to hold it's data. In format of a
-	 * single dimentional array.
+	 * Should setup the $data property to hold its data. In format of a
+	 * single dimensional array.
 	 *
 	 * @method generate_data
 	 * @since  3.5.2
