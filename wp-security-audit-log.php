@@ -2178,6 +2178,17 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	        }
         }
 
+		$prefixed_autoloader_file_path = plugin_dir_path( __FILE__ ) . implode( DIRECTORY_SEPARATOR, [
+					'third-party',
+					'vendor',
+					'autoload.php'
+				]
+			);
+
+		if ( file_exists( $prefixed_autoloader_file_path ) ) {
+			require_once $prefixed_autoloader_file_path;
+		}
+
         // Begin load sequence.
         WpSecurityAuditLog::GetInstance();
 
