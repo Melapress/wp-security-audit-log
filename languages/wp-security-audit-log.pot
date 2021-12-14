@@ -92,7 +92,7 @@ msgstr ""
 msgid "User logged in however there are other session(s) already for this user."
 msgstr ""
 
-#: defaults.php:250, extensions/reports/classes/Common.php:1861
+#: defaults.php:250, extensions/reports/classes/Common.php:1862
 msgid "IP address(es)"
 msgstr ""
 
@@ -1844,7 +1844,7 @@ msgstr ""
 msgid "WordPress & System"
 msgstr ""
 
-#: defaults.php:2336, classes/AlertManager.php:1070, classes/AlertManager.php:1680, classes/AuditLogGridView.php:435, classes/AuditLogListView.php:442, extensions/email-notifications/classes/DailyNotification.php:243, extensions/email-notifications/classes/Notifier.php:659, extensions/reports/classes/Common.php:1213
+#: defaults.php:2336, classes/AlertManager.php:1070, classes/AlertManager.php:1680, classes/AuditLogGridView.php:435, classes/AuditLogListView.php:442, extensions/email-notifications/classes/DailyNotification.php:243, extensions/email-notifications/classes/Notifier.php:659, extensions/reports/classes/Common.php:1214
 msgid "System"
 msgstr ""
 
@@ -3133,7 +3133,7 @@ msgstr ""
 msgid "Unknown error code."
 msgstr ""
 
-#: classes/AlertManager.php:1652, classes/AlertManager.php:1640, extensions/reports/classes/Common.php:1186
+#: classes/AlertManager.php:1652, classes/AlertManager.php:1640, extensions/reports/classes/Common.php:1187
 msgid "Unknown Site"
 msgstr ""
 
@@ -7113,132 +7113,132 @@ msgstr ""
 msgid "Object Type"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:683, extensions/reports/classes/Common.php:1305
+#: extensions/reports/classes/Common.php:684, extensions/reports/classes/Common.php:1306
 msgid "%1$s - Website %2$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:686, extensions/reports/classes/Common.php:1308
+#: extensions/reports/classes/Common.php:687, extensions/reports/classes/Common.php:1309
 msgid "Week number %1$s - Website %2$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:689
+#: extensions/reports/classes/Common.php:690
 msgid "Month %1$s %2$s- Website %3$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:692, extensions/reports/classes/Common.php:1314
+#: extensions/reports/classes/Common.php:693, extensions/reports/classes/Common.php:1315
 msgid "Quarter %1$s - Website %2$s"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:701, extensions/reports/classes/Common.php:1330
+#: extensions/reports/classes/Common.php:702, extensions/reports/classes/Common.php:1331
 msgid " - %s Email Report"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:968, extensions/reports/classes/Common.php:962
+#: extensions/reports/classes/Common.php:969, extensions/reports/classes/Common.php:963
 msgid "Internal error. <code>%s</code> key was not found."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:992
+#: extensions/reports/classes/Common.php:993
 msgid "Internal Error: Could not detect the type of the report to generate."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1016, extensions/reports/classes/Common.php:1036, extensions/reports/classes/Common.php:1689, extensions/reports/classes/Common.php:1805
+#: extensions/reports/classes/Common.php:1017, extensions/reports/classes/Common.php:1037, extensions/reports/classes/Common.php:1690, extensions/reports/classes/Common.php:1806
 msgid "There are no alerts that match your filtering criteria. Please try a different set of rules."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1083
+#: extensions/reports/classes/Common.php:1084
 msgid "Internal Error. Could not retrieve the alerts from the main plugin."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1112
+#: extensions/reports/classes/Common.php:1113
 msgid "Please specify at least one Alert Group or specify an Alert Code."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1311
+#: extensions/reports/classes/Common.php:1312
 msgid "Month %1$s - Website %2$s"
 msgstr ""
 
 #. translators: path to the reports' storage directory
-#: extensions/reports/classes/Common.php:1692, extensions/reports/classes/Common.php:1812
+#: extensions/reports/classes/Common.php:1693, extensions/reports/classes/Common.php:1813
 msgid "Error: The <strong>%s</strong> path is not accessible."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1818
+#: extensions/reports/classes/Common.php:1819
 msgid "Unexpected error occurred."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1834
+#: extensions/reports/classes/Common.php:1835
 msgid "Site(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1839
+#: extensions/reports/classes/Common.php:1840
 msgid "Excluded site(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1843
+#: extensions/reports/classes/Common.php:1844
 msgid "User(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1848
+#: extensions/reports/classes/Common.php:1849
 msgid "Excluded user(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1852
+#: extensions/reports/classes/Common.php:1853
 msgid "Role(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1857
+#: extensions/reports/classes/Common.php:1858
 msgid "Excluded role(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1866
+#: extensions/reports/classes/Common.php:1867
 msgid "Excluded IP address(es)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1870, extensions/reports/classes/Common.php:1874
+#: extensions/reports/classes/Common.php:1871, extensions/reports/classes/Common.php:1875
 msgid "Alert code(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1879
+#: extensions/reports/classes/Common.php:1880
 msgid "Excluded alert code(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1883
+#: extensions/reports/classes/Common.php:1884
 msgid "Alert group(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1888
+#: extensions/reports/classes/Common.php:1889
 msgid "Excluded alert group(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1892
+#: extensions/reports/classes/Common.php:1893
 msgid "Post type(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1897
+#: extensions/reports/classes/Common.php:1898
 msgid "Excluded post type(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1901
+#: extensions/reports/classes/Common.php:1902
 msgid "Post status(es)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1906
+#: extensions/reports/classes/Common.php:1907
 msgid "Excluded post status(es)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1910
+#: extensions/reports/classes/Common.php:1911
 msgid "Object(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1915
+#: extensions/reports/classes/Common.php:1916
 msgid "Excluded object(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1919
+#: extensions/reports/classes/Common.php:1920
 msgid "Event type(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1924
+#: extensions/reports/classes/Common.php:1925
 msgid "Excluded event type(s)"
 msgstr ""
 

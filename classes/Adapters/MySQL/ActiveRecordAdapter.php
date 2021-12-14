@@ -507,13 +507,11 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
 		$_user_id                = null;
 		$users_negate_expression = '';
-		$users_subselect_operand = 'OR';
 		if ( $report_args->user__in ) {
 			$_user_id = $this->formatArrayForQuery( $report_args->user__in );
 		} else if ( $report_args->user__not_in ) {
 			$_user_id                = $this->formatArrayForQuery( $report_args->user__not_in );
 			$users_negate_expression = 'NOT';
-			$users_subselect_operand = 'AND';
 		}
 
 		$user_names = $this->GetUserNames( $_user_id );
@@ -614,7 +612,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$where_statement = " WHERE 1 = 1 ";
 
 		if ( ! empty( $users_condition_parts ) ) {
-			$where_statement .= ' AND ( ' . implode( $users_subselect_operand, $users_condition_parts ) . ' ) ';
+			$where_statement .= ' AND ( ' . implode( 'OR', $users_condition_parts ) . ' ) ';
 		}
 
 		if ( ! is_null( $_site_id ) ) {
