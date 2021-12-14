@@ -213,11 +213,11 @@ class WSAL_ReportArgs {
 		}
 
 		if ( self::is_field_present_and_non_empty_array( 'users', $filters ) ) {
-			$result->user__in = $filters['users'];
+			$result->user__in = array_map( 'intval', $filters['users'] );
 		}
 
 		if ( self::is_field_present_and_non_empty_array( 'users-exclude', $filters ) ) {
-			$result->user__not_in = $filters['users-exclude'];
+			$result->user__not_in = array_map( 'intval', $filters['users-exclude'] );
 		}
 
 		if ( self::is_field_present_and_non_empty_array( 'roles', $filters ) ) {
