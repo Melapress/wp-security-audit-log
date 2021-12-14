@@ -713,6 +713,37 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 		?>
 		<script type="text/javascript">
+			function filterEventTable() {
+				// Declare variables
+				var input, filter, table, tr, td, i, txtValue;
+				input = document.getElementById("query-input");
+				filter = input.value.toUpperCase();
+				table = document.getElementById("event-toggle-table");
+				tr = table.getElementsByTagName("tr");
+
+				var e = document.getElementById("search-subject");
+				var strSearch = e.options[e.selectedIndex].value;
+
+				// Loop through all table rows, and hide those who don't match the search query
+				for (i = 0; i < tr.length; i++) {
+					if ( strSearch == 'code' ) {
+						td = tr[i].getElementsByTagName("td")[0];
+					} else if ( strSearch == 'severity' ) {
+						td = tr[i].getElementsByTagName("td")[1];
+					} else if ( strSearch == 'desc' ) {
+						td = tr[i].getElementsByTagName("td")[2];
+					}
+					if (td) {
+						txtValue = td.textContent || td.innerText;
+						if (txtValue.toUpperCase().indexOf(filter) > -1) {
+							tr[i].style.display = "";
+						} else {
+							tr[i].style.display = "none";
+						}
+					}
+				}
+			}
+
 			jQuery(document).ready(function(){
 				var scrollHeight = jQuery(document).scrollTop();
 				// tab handling code
@@ -755,37 +786,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				} else {
 					jQuery('#wsal-tabs>a:first').click();
 					jQuery('.wsal-sub-tabs>a:first').click();
-				}
-
-				function filterEventTable() {
-					// Declare variables
-					var input, filter, table, tr, td, i, txtValue;
-					input = document.getElementById("query-input");
-					filter = input.value.toUpperCase();
-					table = document.getElementById("event-toggle-table");
-					tr = table.getElementsByTagName("tr");
-
-					var e = document.getElementById("search-subject");
-					var strSearch = e.options[e.selectedIndex].value;
-
-					// Loop through all table rows, and hide those who don't match the search query
-					for (i = 0; i < tr.length; i++) {
-						if ( strSearch == 'code' ) {
-							td = tr[i].getElementsByTagName("td")[0];
-						} else if ( strSearch == 'severity' ) {
-							td = tr[i].getElementsByTagName("td")[1];
-						} else if ( strSearch == 'desc' ) {
-							td = tr[i].getElementsByTagName("td")[2];
-						}
-						if (td) {
-							txtValue = td.textContent || td.innerText;
-							if (txtValue.toUpperCase().indexOf(filter) > -1) {
-								tr[i].style.display = "";
-							} else {
-								tr[i].style.display = "none";
-							}
-						}
-					}
 				}
 
 				// Add options to category select box.
