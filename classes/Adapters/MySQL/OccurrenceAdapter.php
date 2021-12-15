@@ -215,6 +215,8 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 			"SELECT * FROM `{$this->GetTable()}` "
 			. "	WHERE client_ip = %s "
 			. " AND username = %s "
+			. " AND alert_id = %d "
+			. " AND site_id = %d "
 			. " AND ( created_on BETWEEN %d AND %d );",
 			$args
 		);
