@@ -1218,11 +1218,10 @@ final class WSAL_AlertManager {
 	/**
 	 * Filter query for MWPAL.
 	 *
-	 * @param WSAL_Models_OccurrenceQuery $query - Events query.
-	 * @param array $query_args - Query args.
+	 * @param WSAL_Models_OccurrenceQuery $query      Events query.
+	 * @param array                       $query_args Query args.
 	 *
 	 * @return WSAL_Models_OccurrenceQuery
-	 * @throws Freemius_Exception
 	 */
 	private function filter_query( $query, $query_args ) {
 		if ( isset( $query_args['search_term'] ) && $query_args['search_term'] ) {
@@ -1339,7 +1338,7 @@ final class WSAL_AlertManager {
 					$query->addORCondition( array( $sql => $value ) );
 				} elseif ( 'ip' === $prefix ) {
 					// IP search condition.
-					$sql   = "$table_occ.client_ip = %s ";
+					$sql = "$table_occ.client_ip = %s ";
 					$query->addORCondition( array( $sql => $value ) );
 				}
 			}
@@ -1394,10 +1393,11 @@ final class WSAL_AlertManager {
 	 *
 	 * @param array $filters     - Filters.
 	 * @param mixed $report_type - Type of report.
+	 *
 	 * @return stdClass
 	 *
 	 * @since 4.4.0 Removed support for report type "statistics_unique_ips".
-     */
+	 */
 	public function get_mainwp_extension_report( array $filters, $report_type ) {
 		$report       = new stdClass();
 		$report->data = array();
@@ -1426,16 +1426,17 @@ final class WSAL_AlertManager {
 	 * Generate report for MainWP extension.
 	 *
 	 * @param array $filters - Filters.
+	 *
 	 * @return array
 	 */
 	private function generate_report( $filters ) {
-		//  check the report format
+		// Check the report format.
 		$report_format = empty( $filters['report-format'] ) ? 'html' : 'csv';
 		if ( ! in_array( $report_format, array( 'csv', 'html' ), true ) ) {
 			return false;
 		}
 
-		//  some alert codes or alert groups are needed to run a report
+		// Some alert codes or alert groups are needed to run a report.
 		if ( empty( $filters['alert-codes']['groups'] ) && empty( $filters['alert-codes']['codes'] ) ) {
 			return false;
 		}
@@ -1447,7 +1448,7 @@ final class WSAL_AlertManager {
 
 		$last_date = null;
 
-		$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReporting( $args, $next_date, $limit );
+		$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->get_report_data( $args, $next_date, $limit, array(), null );
 
 		if ( ! empty( $results['lastDate'] ) ) {
 			$last_date = $results['lastDate'];
@@ -1458,7 +1459,7 @@ final class WSAL_AlertManager {
 			return false;
 		}
 
-		$data             = array();
+		$data = array();
 
 		// Get alert details.
 		foreach ( $results as $entry ) {
@@ -1476,7 +1477,7 @@ final class WSAL_AlertManager {
 		return array(
 			'data'     => $data,
 			'filters'  => $filters,
-			'lastDate' => $last_date
+			'lastDate' => $last_date,
 		);
 	}
 
@@ -1634,27 +1635,7 @@ final class WSAL_AlertManager {
 		);
 		$const = $this->plugin->constants->GetConstantBy( 'value', $code, $const );
 
-		// Blog details.
-		if ( $this->plugin->IsMultisite() ) {
-			$blog_info = get_blog_details( $site_id, true );
-			$blog_name = esc_html__( 'Unknown Site', 'wp-security-audit-log' );
-			$blog_url  = '';
-
-			if ( $blog_info ) {
-				$blog_name = esc_html( $blog_info->blogname );
-				$blog_url  = esc_attr( $blog_info->siteurl );
-			}
-		} else {
-			$blog_name = get_bloginfo( 'name' );
-			$blog_url  = '';
-
-			if ( empty( $blog_name ) ) {
-				$blog_name = __( 'Unknown Site', 'wp-security-audit-log' );
-			} else {
-				$blog_name = esc_html( $blog_name );
-				$blog_url  = esc_attr( get_bloginfo( 'url' ) );
-			}
-		}
+		$blog_info = WSAL_AlertManager::get_blog_info( $this->plugin, $site_id );
 
 		// Get the alert message - properly.
 		$occurrence->id          = $entry_id;
@@ -1686,8 +1667,8 @@ final class WSAL_AlertManager {
 		// Meta details.
 		return array(
 			'site_id'    => $site_id,
-			'blog_name'  => $blog_name,
-			'blog_url'   => $blog_url,
+			'blog_name'  => $blog_info['name'],
+			'blog_url'   => $blog_info['url'],
 			'alert_id'   => $alert_id,
 			'date'       => WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $created_on ),
 			// We need to keep the timestamp to be able to group entries by dates etc. The "date" field is not suitable
@@ -1704,6 +1685,45 @@ final class WSAL_AlertManager {
 			'object'     => $this->get_event_objects_data( $object ),
 			'event_type' => $this->get_event_type_data( $event_type ),
 			'user_agent' => $ua,
+		);
+	}
+
+	/**
+	 * Retrieves blog info for given site based on current multisite situation. Optimizes for performance using local
+	 * cache.
+	 *
+	 * @param WpSecurityAuditLog $plugin  WSAL plugin instance.
+	 * @param int                $site_id Site ID.
+	 *
+	 * @return array
+	 * @since 4.4.0
+	 */
+	public static function get_blog_info( $plugin, $site_id ) {
+		// Blog details.
+		if ( $plugin->IsMultisite() ) {
+			$blog_info = get_blog_details( $site_id, true );
+			$blog_name = esc_html__( 'Unknown Site', 'wp-security-audit-log' );
+			$blog_url  = '';
+
+			if ( $blog_info ) {
+				$blog_name = esc_html( $blog_info->blogname );
+				$blog_url  = esc_attr( $blog_info->siteurl );
+			}
+		} else {
+			$blog_name = get_bloginfo( 'name' );
+			$blog_url  = '';
+
+			if ( empty( $blog_name ) ) {
+				$blog_name = __( 'Unknown Site', 'wp-security-audit-log' );
+			} else {
+				$blog_name = esc_html( $blog_name );
+				$blog_url  = esc_attr( get_bloginfo( 'url' ) );
+			}
+		}
+
+		return array(
+			'name' => $blog_name,
+			'url'  => $blog_url,
 		);
 	}
 }

@@ -32,25 +32,26 @@ class WSAL_Views_EmailNotifications extends WSAL_ExtensionPlaceholderView {
 	 * Get View Name.
 	 */
 	public function GetName() {
-		return __( 'Notifications &#8682;', 'wp-security-audit-log' );
+		return __( 'Email Notifications &#8682;', 'wp-security-audit-log' );
 	}
 
 	/**
 	 * Get View Weight.
 	 */
 	public function GetWeight() {
-		return 8;
+		return 2;
 	}
 
 	/**
 	 * Page View.
 	 */
 	public function Render() {
-		$title        = __( 'SMS & Email Notifications', 'wp-security-audit-log' );
-		$description  = __( 'Get instantly alerted of important changes on your site via SMS and email notifications. Upgrade to premium and:', 'wp-security-audit-log' );
+		$title        = __( 'Email & SMS Notifications', 'wp-security-audit-log' );
+		$description  = __( 'Get instantly alerted of important changes on your site via email notifications & SMS messages. Upgrade to premium and:', 'wp-security-audit-log' );
 		$addon_img    = trailingslashit( WSAL_BASE_URL ) . 'img/' . $this->GetSafeViewName() . '.jpg';
 		$premium_list = array(
-			__( 'Configure any type of SMS & email notifications', 'wp-security-audit-log' ),
+			__( 'Configure any type of email notification', 'wp-security-audit-log' ),
+			__( 'Configure SMS messages for instant critical alerts', 'wp-security-audit-log' ),			
 			__( 'Receive notifications for when users login, change their password or change content', 'wp-security-audit-log' ),
 			__( 'Get alerted of site changes like plugin installs, theme changes etc', 'wp-security-audit-log' ),
 			__( 'Enable built-in security email notifications of suspicious user activity', 'wp-security-audit-log' ),

@@ -62,6 +62,56 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
+	 * Works out the grouping data entities for given statistical report type.
+	 *
+	 * @param int    $statistics_report_type Statistical report type.
+	 * @param string $grouping_period        Period to use for data grouping.
+	 *
+	 * @return string[]|null
+	 * @since 4.4.0
+	 */
+	public static function get_grouping( $statistics_report_type, $grouping_period ) {
+		$grouping = null;
+		if ( ! is_null( $statistics_report_type ) ) {
+			$grouping = array( 'site' );
+			if ( ! is_null( $grouping_period ) ) {
+				array_push( $grouping, $grouping_period );
+			}
+
+			switch ( $statistics_report_type ) {
+				case WSAL_Rep_Common::DIFFERENT_IP:
+					array_push( $grouping, 'users' );
+					array_push( $grouping, 'ips' );
+					break;
+				case WSAL_Rep_Common::ALL_IPS:
+					array_push( $grouping, 'ips' );
+					break;
+				case WSAL_Rep_Common::LOGIN_ALL:
+				case WSAL_Rep_Common::LOGIN_BY_USER:
+				case WSAL_Rep_Common::LOGIN_BY_ROLE:
+				case WSAL_Rep_Common::PUBLISHED_ALL:
+				case WSAL_Rep_Common::PUBLISHED_BY_USER:
+				case WSAL_Rep_Common::PUBLISHED_BY_ROLE:
+				case WSAL_Rep_Common::ALL_USERS:
+					array_push( $grouping, 'users' );
+					break;
+
+				case WSAL_Rep_Common::VIEWS_ALL:
+					array_push( $grouping, 'posts' );
+					break;
+
+				case WSAL_Rep_Common::VIEWS_BY_USER:
+				case WSAL_Rep_Common::VIEWS_BY_ROLE:
+					array_push( $grouping, 'users' );
+					array_push( $grouping, 'posts' );
+					break;
+			}
+		}
+
+		return $grouping;
+	}
+
+	/**
 	 * Method: Get connection.
 	 *
 	 * @return object – DB connection object.
@@ -71,32 +121,57 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Returns table name.
-	 *
-	 * @return string
-	 */
-	public function GetTable() {
-		$_wpdb = $this->connection;
-		return $_wpdb->base_prefix . $this->_table;
-	}
-
-	/**
 	 * Used for WordPress prefix
 	 *
 	 * @return string Returns table name of WordPress.
 	 */
 	public function GetWPTable() {
 		global $wpdb;
+
 		return $wpdb->base_prefix . $this->_table;
 	}
 
 	/**
-	 * SQL table options (constraints, foreign keys, indexes etc).
+	 * @inheritDoc
+	 */
+	public function Install() {
+		$_wpdb = $this->connection;
+		$_wpdb->query( $this->_GetInstallQuery() );
+	}
+
+	/**
+	 * Table install query.
+	 *
+	 * @param string|false $prefix - (Optional) Table prefix.
+	 *
+	 * @return string - Must return SQL for creating table.
+	 */
+	protected function _GetInstallQuery( $prefix = false ) {
+		$_wpdb      = $this->connection;
+		$class      = get_class( $this );
+		$copy       = new $class( $this->connection );
+		$table_name = $this->GetTable();
+		$sql        = 'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (' . PHP_EOL;
+		$cols       = $this->GetColumns();
+		foreach ( $cols as $key ) {
+			$sql .= $this->_GetSqlColumnDefinition( $copy, $key );
+		}
+
+		$sql .= $this->GetTableOptions() . PHP_EOL;
+		$sql .= ') ' . $_wpdb->get_charset_collate();
+
+		return $sql;
+	}
+
+	/**
+	 * Returns table name.
 	 *
 	 * @return string
 	 */
-	protected function GetTableOptions() {
-		return '    PRIMARY KEY  (' . $this->_idkey . ')';
+	public function GetTable() {
+		$_wpdb = $this->connection;
+
+		return $_wpdb->base_prefix . $this->_table;
 	}
 
 	/**
@@ -122,232 +197,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	/**
 	 * @inheritDoc
 	 */
-	public function IsInstalled() {
-		$_wpdb = $this->connection;
-		$sql   = "SHOW TABLES LIKE '" . $this->GetTable() . "'";
-
-		// Table transient.
-		$wsal_table_transient = 'wsal_' . strtolower( $this->GetTable() ) . '_status';
-		$wsal_db_table_status = get_transient( $wsal_table_transient );
-
-		// If transient does not exist, then run SQL query.
-		if ( ! $wsal_db_table_status ) {
-			$wsal_db_table_status = strtolower( $_wpdb->get_var( $sql ) ) == strtolower( $this->GetTable() );
-			set_transient( $wsal_table_transient, $wsal_db_table_status, DAY_IN_SECONDS );
-		}
-		return $wsal_db_table_status;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function Install() {
-		$_wpdb = $this->connection;
-		$_wpdb->query( $this->_GetInstallQuery() );
-	}
-
-	/**
-	 * Install this ActiveRecord structure into DB WordPress.
-	 */
-	public function InstallOriginal() {
-		global $wpdb;
-		$wpdb->query( $this->_GetInstallQuery( true ) );
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function Uninstall() {
-		$_wpdb = $this->connection;
-
-		// Check if table exists.
-		if ( $this->table_exists() ) {
-			$_wpdb->query( $this->_GetUninstallQuery() );
-		}
-	}
-
-	/**
-	 * Check if table exists.
-	 *
-	 * @return bool – True if exists, false if not.
-	 */
-	public function table_exists() {
-		$_wpdb = $this->connection;
-
-		// Query table exists.
-		$table_exists_query = "SHOW TABLES LIKE '" . $this->GetTable() . "'";
-		return $_wpdb->query( $table_exists_query );
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function Save( $active_record ) {
-		$_wpdb  = $this->connection;
-		$copy   = $active_record;
-		$data   = array();
-		$format = array();
-
-		$columns = $this->GetColumns();
-		foreach ( $columns as $index => $key ) {
-			if ( $key == $this->_idkey ) {
-				$_id_index = $index;
-			}
-
-			$val    = $copy->$key;
-			$deffmt = '%s';
-			if ( is_int( $copy->$key ) ) {
-				$deffmt = '%d';
-			}
-
-			if ( is_float( $copy->$key ) ) {
-				$deffmt = '%f';
-			}
-
-			if ( is_array( $copy->$key ) || is_object( $copy->$key ) ) {
-				$data[ $key ] = WSAL_Helpers_DataHelper::JsonEncode( $val );
-			} else {
-				$data[ $key ] = $val;
-			}
-
-			$format[] = $deffmt;
-		}
-
-		if ( isset( $data[ $this->_idkey ] ) && empty( $data[ $this->_idkey ] ) ) {
-			unset( $data[ $this->_idkey ] );
-			unset( $format[ $_id_index ] );
-		}
-
-		$result = $_wpdb->replace( $this->GetTable(), $data, $format );
-
-		if ( false !== $result && $_wpdb->insert_id ) {
-			$copy->setId( $_wpdb->insert_id );
-		}
-		return $result;
-	}
-
-	/**
-	 * Load record from DB (Single row).
-	 *
-	 * @param string $cond - (Optional) Load condition.
-	 * @param array $args - (Optional) Load condition arguments.
-	 *
-	 * @return array
-	 */
-	public function Load( $cond = '%d', $args = array( 1 ) ) {
-		$_wpdb = $this->connection;
-		$sql   = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
-		return $_wpdb->get_row( $sql, ARRAY_A );
-	}
-
-	/**
-	 * Load records from DB (Multi rows).
-	 *
-	 * @param string $cond Load condition.
-	 * @param array $args (Optional) Load condition arguments.
-	 *
-	 * @return array
-	 * @throws Exception
-	 */
-	public function LoadArray( $cond, $args = array() ) {
-		$_wpdb  = $this->connection;
-		$result = array();
-		$sql    = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
-		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
-			$result[] = $this->getModel()->LoadData( $data );
-		}
-		return $result;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function Delete( $active_record ) {
-		$_wpdb = $this->connection;
-
-		return $_wpdb->delete(
-			$this->GetTable(),
-			array(
-				$this->_idkey => $active_record->getId()
-			),
-			array( '%d')
-		);
-	}
-
-	/**
-	 * Delete records in DB matching a query.
-	 *
-	 * @param string $query Full SQL query.
-	 * @param array $args (Optional) Query arguments.
-	 *
-	 * @return int|bool
-	 */
-	public function DeleteQuery( $query, $args = array() ) {
-		$_wpdb  = $this->connection;
-		$sql    = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
-		return $_wpdb->query( $sql );
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function LoadMulti( $cond, $args = array() ) {
-		$_wpdb  = $this->connection;
-		$result = array();
-		$sql    = ( ! is_array( $args ) || ! count( $args ) ) // Do we really need to prepare() or not?
-			? ( $cond )
-			: $_wpdb->prepare( $cond, $args );
-		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
-			$result[] = $this->getModel()->LoadData( $data );
-		}
-		return $result;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function LoadAndCallForEach( $callback, $cond = '%d', $args = array( 1 ) ) {
-		$_wpdb = $this->connection;
-		$class = get_called_class();
-		$sql   = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
-		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
-			call_user_func( $callback, new $class( $data ) );
-		}
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function Count( $cond = '%d', $args = array( 1 ) ) {
-		$_wpdb = $this->connection;
-		$sql   = $_wpdb->prepare( 'SELECT COUNT(*) FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
-		return (int) $_wpdb->get_var( $sql );
-	}
-
-	/**
-	 * Count records in the DB matching a query.
-	 *
-	 * @param string $query Full SQL query.
-	 * @param array  $args (Optional) Query arguments.
-	 * @return int Number of matching records.
-	 */
-	public function CountQuery( $query, $args = array() ) {
-		$_wpdb = $this->connection;
-		$sql   = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
-		return (int) $_wpdb->get_var( $sql );
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function LoadMultiQuery( $query, $args = array() ) {
-		$_wpdb  = $this->connection;
-		$result = array();
-		$sql    = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
-		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
-			$result[] = $this->getModel()->LoadData( $data );
-		}
-		return $result;
+	public function GetModel() {
+		return new WSAL_Models_Query();
 	}
 
 	/**
@@ -395,40 +246,46 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Table install query.
+	 * SQL table options (constraints, foreign keys, indexes etc).
 	 *
-	 * @param string|false $prefix - (Optional) Table prefix.
-	 *
-	 * @return string - Must return SQL for creating table.
+	 * @return string
 	 */
-	protected function _GetInstallQuery( $prefix = false ) {
-		$_wpdb      = $this->connection;
-		$class      = get_class( $this );
-		$copy       = new $class( $this->connection );
-		$table_name = $this->GetTable();
-		$sql        = 'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (' . PHP_EOL;
-		$cols       = $this->GetColumns();
-		foreach ( $cols as $key ) {
-			$sql .= $this->_GetSqlColumnDefinition( $copy, $key );
-		}
-
-		$sql .= $this->GetTableOptions() . PHP_EOL;
-		$sql .= ') ' . $_wpdb->get_charset_collate();
-
-		return $sql;
+	protected function GetTableOptions() {
+		return '    PRIMARY KEY  (' . $this->_idkey . ')';
 	}
 
 	/**
-	 * Update `option_value` column of the Options table
-	 * of WSAL to LONGTEXT.
-	 *
-	 * @since 3.2.3
+	 * Install this ActiveRecord structure into DB WordPress.
 	 */
-	public function update_value_column() {
+	public function InstallOriginal() {
 		global $wpdb;
-		$sql  = 'ALTER TABLE ' . $this->GetTable();
-		$sql .= ' MODIFY COLUMN option_value LONGTEXT NOT NULL';
-		$wpdb->query( $sql );
+		$wpdb->query( $this->_GetInstallQuery( true ) );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function Uninstall() {
+		$_wpdb = $this->connection;
+
+		// Check if table exists.
+		if ( $this->table_exists() ) {
+			$_wpdb->query( $this->_GetUninstallQuery() );
+		}
+	}
+
+	/**
+	 * Check if table exists.
+	 *
+	 * @return bool – True if exists, false if not.
+	 */
+	public function table_exists() {
+		$_wpdb = $this->connection;
+
+		// Query table exists.
+		$table_exists_query = "SHOW TABLES LIKE '" . $this->GetTable() . "'";
+
+		return $_wpdb->query( $table_exists_query );
 	}
 
 	/**
@@ -441,57 +298,318 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Get Users user_login.
-	 *
-	 * @param int $_user_id - User ID.
-	 *
-	 * @return string comma separated users login
+	 * @inheritDoc
 	 */
-	private function GetUserNames( $_user_id ) {
-		global $wpdb;
+	public function Save( $active_record ) {
+		$_wpdb  = $this->connection;
+		$copy   = $active_record;
+		$data   = array();
+		$format = array();
 
-		$user_names = null;
-		if ( ! empty( $_user_id ) && 'null' != $_user_id && ! is_null( $_user_id ) ) {
-			$sql = 'SELECT user_login FROM ' . $wpdb->users . ' WHERE find_in_set(ID, @userId) > 0';
-			$wpdb->query( "SET @userId = $_user_id" );
-			$result      = $wpdb->get_results( $sql, ARRAY_A );
-			$users_array = array();
-			foreach ( $result as $item ) {
-				$users_array[] = '"' . $item['user_login'] . '"';
+		$columns = $this->GetColumns();
+		foreach ( $columns as $index => $key ) {
+			if ( $key == $this->_idkey ) {
+				$_id_index = $index;
 			}
-			$user_names = implode( ', ', $users_array );
+
+			$val    = $copy->$key;
+			$deffmt = '%s';
+			if ( is_int( $copy->$key ) ) {
+				$deffmt = '%d';
+			}
+
+			if ( is_float( $copy->$key ) ) {
+				$deffmt = '%f';
+			}
+
+			if ( is_array( $copy->$key ) || is_object( $copy->$key ) ) {
+				$data[ $key ] = WSAL_Helpers_DataHelper::JsonEncode( $val );
+			} else {
+				$data[ $key ] = $val;
+			}
+
+			$format[] = $deffmt;
 		}
 
-		return $user_names;
+		if ( isset( $data[ $this->_idkey ] ) && empty( $data[ $this->_idkey ] ) ) {
+			unset( $data[ $this->_idkey ] );
+			unset( $format[ $_id_index ] );
+		}
+
+		$result = $_wpdb->replace( $this->GetTable(), $data, $format );
+
+		if ( false !== $result && $_wpdb->insert_id ) {
+			$copy->setId( $_wpdb->insert_id );
+		}
+
+		return $result;
 	}
 
 	/**
-	 * Function used in WSAL reporting extension.
+	 * Load record from DB (Single row).
 	 *
-	 * @param WSAL_ReportArgs $report_args Report arguments.
-	 * @param int $_next_date - (Optional) Created on >.
-	 * @param int $_limit - (Optional) Limit.
+	 * @param string $cond - (Optional) Load condition.
+	 * @param array  $args - (Optional) Load condition arguments.
+	 *
+	 * @return array
+	 */
+	public function Load( $cond = '%d', $args = array( 1 ) ) {
+		$_wpdb = $this->connection;
+		$sql   = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
+
+		return $_wpdb->get_row( $sql, ARRAY_A );
+	}
+
+	/**
+	 * Load records from DB (Multi rows).
+	 *
+	 * @param string $cond Load condition.
+	 * @param array  $args (Optional) Load condition arguments.
+	 *
+	 * @return array
+	 * @throws Exception
+	 */
+	public function LoadArray( $cond, $args = array() ) {
+		$_wpdb  = $this->connection;
+		$result = array();
+		$sql    = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
+		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
+			$result[] = $this->getModel()->LoadData( $data );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function Delete( $active_record ) {
+		$_wpdb = $this->connection;
+
+		return $_wpdb->delete(
+			$this->GetTable(),
+			array(
+				$this->_idkey => $active_record->getId(),
+			),
+			array( '%d' )
+		);
+	}
+
+	/**
+	 * Delete records in DB matching a query.
+	 *
+	 * @param string $query Full SQL query.
+	 * @param array  $args  (Optional) Query arguments.
+	 *
+	 * @return int|bool
+	 */
+	public function DeleteQuery( $query, $args = array() ) {
+		$_wpdb = $this->connection;
+		$sql   = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
+
+		return $_wpdb->query( $sql );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function LoadMulti( $cond, $args = array() ) {
+		$_wpdb  = $this->connection;
+		$result = array();
+		$sql    = ( ! is_array( $args ) || ! count( $args ) ) // Do we really need to prepare() or not?
+			? ( $cond )
+			: $_wpdb->prepare( $cond, $args );
+		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
+			$result[] = $this->getModel()->LoadData( $data );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function LoadAndCallForEach( $callback, $cond = '%d', $args = array( 1 ) ) {
+		$_wpdb = $this->connection;
+		$class = get_called_class();
+		$sql   = $_wpdb->prepare( 'SELECT * FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
+		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
+			call_user_func( $callback, new $class( $data ) );
+		}
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function Count( $cond = '%d', $args = array( 1 ) ) {
+		$_wpdb = $this->connection;
+		$sql   = $_wpdb->prepare( 'SELECT COUNT(*) FROM ' . $this->GetTable() . ' WHERE ' . $cond, $args );
+
+		return (int) $_wpdb->get_var( $sql );
+	}
+
+	/**
+	 * Count records in the DB matching a query.
+	 *
+	 * @param string $query Full SQL query.
+	 * @param array  $args  (Optional) Query arguments.
+	 *
+	 * @return int Number of matching records.
+	 */
+	public function CountQuery( $query, $args = array() ) {
+		$_wpdb = $this->connection;
+		$sql   = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
+
+		return (int) $_wpdb->get_var( $sql );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function LoadMultiQuery( $query, $args = array() ) {
+		$_wpdb  = $this->connection;
+		$result = array();
+		$sql    = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
+		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
+			$result[] = $this->getModel()->LoadData( $data );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Retrieves report data for generic (alerts based) report. Function used in WSAL reporting extension.
+	 *
+	 * @param WSAL_ReportArgs $report_args            Report arguments.
+	 * @param int             $next_date              (Optional) Created on >.
+	 * @param int             $limit                  (Optional) Limit.
+	 * @param int             $statistics_report_type Statistics report type.
+	 * @param string          $grouping_period        Period to use for data grouping.
 	 *
 	 * @return array Report results
 	 */
-	public function GetReporting( $report_args, $_next_date = null, $_limit = 0 ) {
+	public function get_report_data( $report_args, $next_date = null, $limit = 0, $statistics_report_type = null, $grouping_period = null) {
 
-		$_wpdb = $this->connection;
-		$query   = $this->build_reporting_query( $report_args, false, $_next_date, $_limit );
-		$results = $_wpdb->get_results( $query );
+		// Figure out the grouping statement and the columns' selection.
+		$grouping = self::get_grouping( $statistics_report_type, $grouping_period );
+
+		// Build the SQL query and runs it.
+		$query = $this->build_reporting_query( $report_args, false, $grouping, $next_date, $limit );
+
+		// Statistical reports expect data as array, regular reports use objects.
+		$result_format = is_null( $statistics_report_type ) ? OBJECT : ARRAY_A;
+		$results       = $this->connection->get_results( $query, $result_format );
+
 		if ( ! empty( $results ) ) {
 			$last_item           = end( $results );
 			$results['lastDate'] = $last_item->created_on;
 		}
 
 		return $results;
+	}
 
+	/**
+	 * Builds an SQL query for the main report.
+	 *
+	 * @param WSAL_ReportArgs $report_args Report arguments.
+	 * @param bool            $count_only  If true, the resulting query will only provide a count of matching entries
+	 *                                     is
+	 *                                     returned.
+	 * @param array           $grouping    Grouping criteria. Drives the selected columns as well as the GROUP BY
+	 *                                     statement. Only null value prevents grouping. Empty array means to group by
+	 *                                     time period only.
+	 * @param int             $next_date   (Optional) Created on >.
+	 * @param int             $limit       (Optional) Limit.
+	 *
+	 * @return string
+	 */
+	private function build_reporting_query( $report_args, $count_only, $grouping = null, $next_date = null, $limit = 0 ) {
+		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
+		$table_occ  = $occurrence->GetTable();
+
+		if ( $count_only ) {
+			$select_fields = array( 'COUNT(1) as count' );
+			$group_by      = array( 'occ.id' );
+		} elseif ( is_null( $grouping ) ) {
+			$select_fields = array(
+				"occ.id",
+				"occ.alert_id",
+				"occ.site_id",
+				"occ.created_on",
+				"replace( replace( replace( occ.user_roles, '[', ''), ']', ''), '\\'', '') AS roles",
+				"occ.client_ip AS ip",
+				"occ.user_agent AS ua",
+				"COALESCE( occ.username, occ.user_id ) as user_id",
+				"occ.object",
+				"occ.event_type",
+				"occ.post_id",
+				"occ.post_type",
+				"occ.post_status",
+			);
+		} else {
+			$select_fields = array();
+			$group_by      = array();
+			foreach ( $grouping as $grouping_item ) {
+				switch ($grouping_item) {
+					case 'site':
+						array_push( $select_fields, 'site_id' );
+						array_push( $group_by, 'site_id' );
+						break;
+					case 'users':
+						array_push( $select_fields, "COALESCE( occ.username, occ.user_id ) as user" );
+						array_push( $group_by, 'user' );
+						break;
+					case 'posts':
+						array_push( $select_fields, 'post_id' );
+						array_push( $group_by, 'post_id' );
+						break;
+					case 'day':
+						array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on ), "%Y-%m-%d" ) AS period' );
+						array_push( $group_by, 'period' );
+						break;
+					case 'week':
+						array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on ), "%Y-%u" ) AS period' );
+						array_push( $group_by, 'period' );
+						break;
+					case 'month':
+						array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on ), "%Y-%m" ) AS period' );
+						array_push( $group_by, 'period' );
+						break;
+				}
+			}
+
+			array_push( $select_fields, 'COUNT(*) as count' );
+		}
+
+		$sql = 'SELECT ' . implode( ',', $select_fields ) . ' FROM ' . $table_occ . ' AS occ ';
+
+		$sql .= $this->build_where_statement( $report_args );
+		if ( ! empty( $next_date ) ) {
+			$sql .= ' AND occ.created_on < ' . $next_date;
+		}
+
+		if ( isset( $group_by ) && ! empty( $group_by ) ) {
+			$sql .= " GROUP BY " . implode( ',', $group_by );
+			$orderby_parts = array_map( function ( $item ) {
+				return 'period' === $item ? $item . ' DESC ' : $item . ' ASC ';
+			}, $group_by );
+
+			$sql .= " ORDER BY " . implode( ',', $orderby_parts );
+		} else {
+			$sql .= " ORDER BY created_on DESC ";
+		}
+
+		if ( ! empty( $limit ) ) {
+			$sql .= " LIMIT {$limit}";
+		}
+
+		return $sql;
 	}
 
 	/**
 	 * Generates SQL where statement based on given report args.
 	 *
-	 * @param WSAL_ReportArgs $report_args
+	 * @param WSAL_ReportArgs $report_args Report arguments.
 	 *
 	 * @return string
 	 */
@@ -500,7 +618,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$sites_negate_expression = '';
 		if ( $report_args->site__in ) {
 			$_site_id = $this->formatArrayForQuery( $report_args->site__in );
-		} else if ( $report_args->site__not_in ) {
+		} elseif ( $report_args->site__not_in ) {
 			$_site_id                = $this->formatArrayForQuery( $report_args->site__not_in );
 			$sites_negate_expression = 'NOT';
 		}
@@ -509,7 +627,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$users_negate_expression = '';
 		if ( $report_args->user__in ) {
 			$_user_id = $this->formatArrayForQuery( $report_args->user__in );
-		} else if ( $report_args->user__not_in ) {
+		} elseif ( $report_args->user__not_in ) {
 			$_user_id                = $this->formatArrayForQuery( $report_args->user__not_in );
 			$users_negate_expression = 'NOT';
 		}
@@ -520,44 +638,44 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$roles_negate_expression = '';
 		if ( $report_args->role__in ) {
 			$_role_name = $this->formatArrayForQueryRegex( $report_args->role__in );
-		} else if ( $report_args->role__not_in ) {
+		} elseif ( $report_args->role__not_in ) {
 			$_role_name              = $this->formatArrayForQueryRegex( $report_args->role__not_in );
 			$roles_negate_expression = 'NOT';
 		}
 
-		$_alert_code = null;
+		$_alert_code                  = null;
 		$alert_code_negate_expression = '';
 		if ( $report_args->code__in ) {
 			$_alert_code = $this->formatArrayForQuery( $report_args->code__in );
-		} else if ( $report_args->code__not_in) {
-			$_alert_code = $this->formatArrayForQuery( $report_args->code__not_in );
+		} elseif ( $report_args->code__not_in ) {
+			$_alert_code                  = $this->formatArrayForQuery( $report_args->code__not_in );
 			$alert_code_negate_expression = 'NOT';
 		}
 
-		$_post_ids = null;
+		$_post_ids                  = null;
 		$post_ids_negate_expression = '';
 		if ( $report_args->post__in ) {
 			$_post_ids = $this->formatArrayForQueryRegex( $report_args->post__in );
-		} else if ($report_args->post__not_in) {
-			$_post_ids = $this->formatArrayForQueryRegex( $report_args->post__not_in );
+		} elseif ( $report_args->post__not_in ) {
+			$_post_ids                  = $this->formatArrayForQueryRegex( $report_args->post__not_in );
 			$post_ids_negate_expression = 'NOT';
 		}
-		
-		$_post_types = null;
+
+		$_post_types                  = null;
 		$post_types_negate_expression = '';
 		if ( $report_args->post_type__in ) {
 			$_post_types = $this->formatArrayForQueryRegex( $report_args->post_type__in );
-		} else if ($report_args->post_type__not_in) {
-			$_post_types = $this->formatArrayForQueryRegex( $report_args->post_type__not_in );
+		} elseif ( $report_args->post_type__not_in ) {
+			$_post_types                  = $this->formatArrayForQueryRegex( $report_args->post_type__not_in );
 			$post_types_negate_expression = 'NOT';
 		}
 
-		$_post_statuses = null;
+		$_post_statuses                  = null;
 		$post_statuses_negate_expression = '';
 		if ( $report_args->post_status__in ) {
 			$_post_statuses = $this->formatArrayForQueryRegex( $report_args->post_status__in );
-		} else if ($report_args->post_status__not_in) {
-			$_post_statuses = $this->formatArrayForQueryRegex( $report_args->post_status__not_in );
+		} else if ( $report_args->post_status__not_in ) {
+			$_post_statuses                  = $this->formatArrayForQueryRegex( $report_args->post_status__not_in );
 			$post_statuses_negate_expression = 'NOT';
 		}
 
@@ -574,7 +692,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$objects_negate_expression = '';
 		if ( $report_args->object__in ) {
 			$_objects = $this->formatArrayForQuery( $report_args->object__in );
-		} else if ( $report_args->object__not_in ) {
+		} elseif ( $report_args->object__not_in ) {
 			$_objects                  = $this->formatArrayForQuery( $report_args->object__not_in );
 			$objects_negate_expression = 'NOT';
 		}
@@ -583,7 +701,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$event_types_negate_expression = '';
 		if ( $report_args->type__in ) {
 			$_event_types = $this->formatArrayForQuery( $report_args->type__in );
-		} else if ( $report_args->type__not_in ) {
+		} elseif ( $report_args->type__not_in ) {
 			$_event_types                  = $this->formatArrayForQuery( $report_args->type__not_in );
 			$event_types_negate_expression = 'NOT';
 		}
@@ -663,47 +781,53 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Builds SQL query for the main report.
-	 *
-	 * @param WSAL_ReportArgs $report_args
-	 * @param bool $count_only If true, the resulting query will only provide a count of matching entries is returned.
-	 * @param int $_next_date - (Optional) Created on >.
-	 * @param int $_limit - (Optional) Limit.
+	 * @param array $data
 	 *
 	 * @return string
+	 * @since 4.3.2
 	 */
-	private function build_reporting_query( $report_args, $count_only, $_next_date = null, $_limit = 0 ) {
-		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
-		$table_occ  = $occurrence->GetTable();
+	protected function formatArrayForQuery( $data ) {
+		return "'" . implode( ',', $data ) . "'";
+	}
 
-		$select_fields = $count_only ? 'COUNT(1)' : "occ.id,
-			occ.alert_id,
-			occ.site_id,
-			occ.created_on,
-			replace( replace( replace( occ.user_roles, '[', ''), ']', ''), '\\'', '') AS roles,
-			occ.client_ip AS ip,
-			occ.user_agent AS ua,
-			COALESCE( occ.username, occ.user_id ) as user_id,
-			occ.object,
-			occ.event_type,
-			occ.post_id,
-			occ.post_type,
-			occ.post_status";
+	/**
+	 * Get Users user_login.
+	 *
+	 * @param int $_user_id - User ID.
+	 *
+	 * @return string comma separated users login
+	 */
+	private function GetUserNames( $_user_id ) {
+		global $wpdb;
 
-		$sql = "SELECT {$select_fields} FROM {$table_occ} AS occ ";
-
-		$sql .= $this->build_where_statement( $report_args );
-		if ( ! empty( $_next_date ) ) {
-			$sql .= ' AND occ.created_on < ' . $_next_date;
+		$user_names = null;
+		if ( ! empty( $_user_id ) && 'null' != $_user_id && ! is_null( $_user_id ) ) {
+			$sql = 'SELECT user_login FROM ' . $wpdb->users . ' WHERE find_in_set(ID, @userId) > 0';
+			$wpdb->query( "SET @userId = $_user_id" );
+			$result      = $wpdb->get_results( $sql, ARRAY_A );
+			$users_array = array();
+			foreach ( $result as $item ) {
+				$users_array[] = '"' . $item['user_login'] . '"';
+			}
+			$user_names = implode( ', ', $users_array );
 		}
 
-		$sql .= " ORDER BY created_on DESC ";
+		return $user_names;
+	}
 
-		if ( ! empty( $_limit ) ) {
-			$sql .= " LIMIT {$_limit}";
+	/**
+	 * @param array $data
+	 *
+	 * @return string
+	 * @since 4.3.2
+	 */
+	protected function formatArrayForQueryRegex( $data ) {
+		$result = array();
+		foreach ( $data as $item ) {
+			array_push( $result, esc_sql( preg_quote( $item ) ) );
 		}
 
-		return $sql;
+		return "'" . implode( '|', $result ) . "'";
 	}
 
 	/**
@@ -721,16 +845,16 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	}
 
 	/**
-	 * Function used in WSAL reporting extension.
-	 * List of unique IP addresses used by the same user.
+	 * Retrieves report data for IP address based reports. Function is used in WSAL reporting extension.
 	 *
-	 * @param WSAL_ReportArgs $report_args Report arguments.
-	 * @param int $_limit - (Optional) Limit.
+	 * @param WSAL_ReportArgs $report_args            Report arguments.
+	 * @param int             $limit                  (Optional) Limit.
+	 * @param int             $statistics_report_type Statistics report type.
+	 * @param string          $grouping_period        Period to use for data grouping.
 	 *
-	 * @return array Report results grouped by IP and Username
+	 * @return array Raw report results as objects. Content depends on the report type.
 	 */
-	public function GetReportGrouped( $report_args, $_limit = 0 ) {
-
+	public function get_ip_address_report_data( $report_args, $limit = 0, $statistics_report_type = null, $grouping_period = null ) {
 		global $wpdb;
 		$_wpdb = $this->connection;
 
@@ -748,63 +872,93 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			$table_users = $wpdb->users;
 		}
 
-		$where_statement = $this->build_where_statement( $report_args );
-		$sql = "SELECT DISTINCT * FROM (
-				    SELECT DISTINCT
-						occ.site_id,
-				        occ.client_ip AS ip,
-						occ.username AS user_login 
-					FROM $table_occ AS occ
-					{$where_statement}
-					HAVING user_login IS NOT NULL
-				UNION ALL
-				SELECT DISTINCT
-					occ.site_id,
-				  	occ.client_ip AS ip,
-				  	u.user_login AS user_login
-				FROM $table_occ AS occ
-				JOIN $table_users AS u ON u.ID = occ.user_id  
-				{$where_statement}
-				HAVING user_login IS NOT NULL
-    		) ip_logins
-			WHERE user_login NOT IN ( 'Unregistered user', 'Plugins', 'Plugin')
-			ORDER BY user_login ASC;";
+		// Figure out the grouping statement and the columns' selection.
+		$grouping = self::get_grouping( $statistics_report_type, $grouping_period );
 
-		if ( ! empty( $_limit ) ) {
-			$sql .= " LIMIT {$_limit}";
+		// Figure out the selected columns and group by statement.
+		$group_by_columns = array(
+			'site_id',
+		);
+
+		if ( in_array( 'users', $grouping, true ) ) {
+			array_push( $group_by_columns, 'username' );
 		}
 
-		$grouped_types = array();
-		$results       = $_wpdb->get_results( $sql );
-		if ( ! empty( $results ) ) {
-			foreach ( $results as $key => $row ) {
-				// Get the display_name only for the first row & if the user_login changed from the previous row.
-				$row->display_name = '';
-				if ( 0 == $key || ( $key > 1 && $results[ ( $key - 1 ) ]->user_login != $row->user_login ) ) {
-					$row->display_name = $wpdb->get_var(
-						$wpdb->prepare(
-							"SELECT display_name "
-							. " FROM {$wpdb->users} "
-							. " WHERE user_login = %s;",
-							$row->user_login
-						)
-					);
-				}
+		if ( in_array( 'ips', $grouping, true ) ) {
+			array_push( $group_by_columns, 'client_ip' );
+		}
 
-				if ( ! isset( $grouped_types[ $row->user_login ] ) ) {
-					$grouped_types[ $row->user_login ] = array(
-						'site_id'      => $row->site_id,
-						'user_login'   => $row->user_login,
-						'display_name' => $row->display_name,
-						'ips'          => array(),
-					);
-				}
-
-				$grouped_types[ $row->user_login ]['ips'][] = $row->ip;
+		$select_fields = $group_by_columns;
+		foreach ( $grouping as $grouping_item ) {
+			switch ( $grouping_item ) {
+				case 'day':
+					array_unshift( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%m-%d" ) AS period' );
+					array_unshift( $group_by_columns, 'period' );
+					break;
+				case 'week':
+					array_unshift( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%u" ) AS period' );
+					array_unshift( $group_by_columns, 'period' );
+					break;
+				case 'month':
+					array_unshift( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%m" ) AS period' );
+					array_unshift( $group_by_columns, 'period' );
+					break;
 			}
 		}
 
-		return $grouped_types;
+		$where_statement = $this->build_where_statement( $report_args );
+
+		$sql = "
+			SELECT " . implode( ',', $select_fields ) . " FROM (
+			    SELECT occ.created_on, occ.site_id, occ.username, occ.client_ip 
+				FROM $table_occ AS occ
+				{$where_statement}
+				HAVING username IS NOT NULL AND username NOT IN ( 'Unregistered user', 'Plugins', 'Plugin')
+			UNION ALL
+				SELECT occ.created_on, occ.site_id, u.user_login as username, occ.client_ip 
+				FROM $table_occ AS occ
+				JOIN $table_users AS u ON u.ID = occ.user_id  
+				{$where_statement}
+			HAVING username IS NOT NULL AND username NOT IN ( 'Unregistered user', 'Plugins', 'Plugin')
+        ) ip_logins
+		GROUP BY " . implode( ',', $group_by_columns );
+
+		$orderby_parts = array_map( function ( $item ) {
+			return 'period' === $item ? $item . ' DESC ' : $item . ' ASC ';
+		}, $group_by_columns );
+
+		$sql .= " ORDER BY " . implode( ',', $orderby_parts );
+
+		if ( ! empty( $limit ) ) {
+			$sql .= " LIMIT {$limit}";
+		}
+
+		$results = $_wpdb->get_results( $sql, ARRAY_A );
+		if ( is_array( $results ) && ! empty( $results ) ) {
+			return $results;
+		}
+
+		return array();
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function IsInstalled() {
+		$_wpdb = $this->connection;
+		$sql   = "SHOW TABLES LIKE '" . $this->GetTable() . "'";
+
+		// Table transient.
+		$wsal_table_transient = 'wsal_' . strtolower( $this->GetTable() ) . '_status';
+		$wsal_db_table_status = get_transient( $wsal_table_transient );
+
+		// If transient does not exist, then run SQL query.
+		if ( ! $wsal_db_table_status ) {
+			$wsal_db_table_status = strtolower( $_wpdb->get_var( $sql ) ) == strtolower( $this->GetTable() );
+			set_transient( $wsal_table_transient, $wsal_db_table_status, DAY_IN_SECONDS );
+		}
+
+		return $wsal_db_table_status;
 	}
 
 	/**
@@ -834,51 +988,21 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	/**
 	 * Updates records in DB matching a query.
 	 *
-	 * @param string       $table        Table name
-	 * @param array        $data         Data to update (in column => value pairs).
-	 *                                   Both $data columns and $data values should be "raw" (neither should be SQL escaped).
-	 *                                   Sending a null value will cause the column to be set to NULL - the corresponding
-	 *                                   format is ignored in this case.
-	 * @param array        $where        A named array of WHERE clauses (in column => value pairs).
+	 * @param string $table              Table name
+	 * @param array  $data               Data to update (in column => value pairs).
+	 *                                   Both $data columns and $data values should be "raw" (neither should be SQL
+	 *                                   escaped). Sending a null value will cause the column to be set to NULL - the
+	 *                                   corresponding format is ignored in this case.
+	 * @param array  $where              A named array of WHERE clauses (in column => value pairs).
 	 *                                   Multiple clauses will be joined with ANDs.
 	 *                                   Both $where columns and $where values should be "raw".
-	 *                                   Sending a null value will create an IS NULL comparison - the corresponding format will be ignored in this case.
+	 *                                   Sending a null value will create an IS NULL comparison - the corresponding
+	 *                                   format will be ignored in this case.
+	 *
 	 * @return int|false The number of rows updated, or false on error.
 	 * @since 4.1.3
 	 */
 	public function UpdateQuery( $table, $data, $where ) {
 		return $this->connection->update( $table, $data, $where );
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	 public function GetModel() {
-		 return new WSAL_Models_Query();
-	 }
-
-	/**
-	 * @param array $data
-	 *
-	 * @return string
-	 * @since 4.3.2
-	 */
-	protected function formatArrayForQuery( $data ) {
-		return "'" . implode( ',', $data ) . "'";
-	}
-
-	/**
-	 * @param array $data
-	 *
-	 * @return string
-	 * @since 4.3.2
-	 */
-	protected function formatArrayForQueryRegex( $data ) {
-		$result = array();
-		foreach ( $data as $item ) {
-			array_push( $result, esc_sql( preg_quote( $item ) ) );
-		}
-
-		return "'" . implode( '|', $result ) . "'";
 	}
 }

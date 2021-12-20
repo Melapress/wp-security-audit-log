@@ -45,7 +45,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	 * Method: Get View Weight.
 	 */
 	public function GetWeight() {
-		return 2;
+		return 9;
 	}
 
 	/**

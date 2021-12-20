@@ -205,7 +205,7 @@ abstract class WSAL_Models_ActiveRecord {
 	protected function cast_to_correct_type( $copy, $key, $val ){
 		switch ( true ) {
 			case is_string( $copy->$key ):
-			case $this->is_ip_address( $val ):
+			case WSAL_Utilities_RequestUtils::is_ip_address( $val ):
 				return (string) $val;
 			case is_array( $copy->$key ):
 			case is_object( $copy->$key ):
@@ -389,28 +389,5 @@ abstract class WSAL_Models_ActiveRecord {
 	 */
 	protected static function CacheClear() {
 		self::$_cache = array();
-	}
-
-	/**
-	 * Function used in WSAL reporting extension.
-	 *
-	 * @param WSAL_ReportArgs $report_args
-	 *
-	 * @return array Report results.
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::GetReporting()
-	 */
-	public function GetReporting( $report_args ) {
-		return $this->getAdapter()->GetReporting( $report_args );
-	}
-
-	/**
-	 * Check if the float is IPv4 instead.
-	 *
-	 * @see WSAL_Models_ActiveRecord::LoadData()
-	 * @param float $ip_address - Number to check.
-	 * @return bool result validation
-	 */
-	private function is_ip_address( $ip_address ) {
-		return filter_var( $ip_address, FILTER_VALIDATE_IP ) !== false;
 	}
 }

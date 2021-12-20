@@ -23,8 +23,10 @@ class WSAL_Utilities_UsersUtils {
 	private static $user_label_setting;
 
 	/**
+	 * Build the correct label to display for a given user.
+	 *
 	 * @param WpSecurityAuditLog $plugin Instance of WpSecurityAuditLog.
-	 * @param WP_User $user WordPress user object.
+	 * @param WP_User            $user   WordPress user object.
 	 *
 	 * @return string
 	 * @since 4.3.0
