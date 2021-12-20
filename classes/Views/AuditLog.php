@@ -96,8 +96,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Set adverts array.
 		$this->adverts = array(
 			0 => array(
-				'head' => __( 'Get instantly alerted of critical changes via SMS & email, search the activity log, generate user reports, see who is logged in and more!', 'wp-security-audit-log' ),
-				'desc' => __( 'Upgrade to premium to unlock these powerful activity log features & more!', 'wp-security-audit-log' ),
+				'head' => __( 'Get email notifications about website changes, view logged-in users, do granular log searches, create detailed reports, and more.', 'wp-security-audit-log' ),
+				'desc' => __( 'Upgrade to premium today and get more out of your activity logs!', 'wp-security-audit-log' ),
 			),
 			1 => array(
 				'head' => __( 'Instant SMS & email alerts, search & filters, reports, users sessions management and much more!', 'wp-security-audit-log' ),
@@ -124,7 +124,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function AdminNotices() {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
-
+		
 		// Check if any of the extensions is activated.
 		if (
 			! class_exists( 'WSAL_NP_Plugin' )
@@ -139,6 +139,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			$wsal_premium_advert      = $this->_plugin->GetGlobalSetting( 'premium-advert', false ); // Get the advert to display.
 			$wsal_premium_advert      = false !== $wsal_premium_advert ? (int) $wsal_premium_advert : 0; // Set the default.
 
+			$more_info = add_query_arg(
+				array(
+					'utm_source'   => 'plugin',
+					'utm_medium'   => 'referral',
+					'utm_campaign' => 'WSAL',
+					'utm_content'  => 'tell+me+more',
+				),
+				'https://wpactivitylog.com/features/'
+			);
+
 			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $wsal_is_advert_dismissed ) : ?>
 				<div class="updated wsal_notice">
 					<div class="wsal_notice__wrapper">
@@ -146,47 +156,37 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							<img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wsal-logo@2x.png">
 							<p>
 								<strong><?php echo isset( $this->adverts[ $wsal_premium_advert ]['head'] ) ? esc_html( $this->adverts[ $wsal_premium_advert ]['head'] ) : false; ?></strong><br>
-								<?php echo isset( $this->adverts[ $wsal_premium_advert ]['desc'] ) ? esc_html( $this->adverts[ $wsal_premium_advert ]['desc'] ) : false; ?>
+								<?php echo isset( $this->adverts[ $wsal_premium_advert ]['desc'] ) ? esc_html( $this->adverts[ $wsal_premium_advert ]['desc'] ) : false; ?> - <a href="<?php echo esc_url( $more_info ); ?>" target="_blank"><?php esc_html_e( 'Learn more', 'wp-security-audit-log' ); ?></a>
 							</p>
 						</div>
 						<!-- /.wsal_notice__content -->
 						<div class="wsal_notice__btns">
 							<?php
 							// Trial link arguments.
-							$trial_args = array(
-								'page'          => 'wsal-auditlog-pricing',
-								'billing_cycle' => 'annual',
-								'trial'         => 'true',
-							);
-
-							// Buy Now button link.
-							$buy_now    = add_query_arg( 'page', 'wsal-auditlog-pricing', admin_url( 'admin.php' ) );
-							$trial_link = add_query_arg( $trial_args, admin_url( 'admin.php' ) );
-
-							// If user is not super admin and website is multisite then change the URL.
-							if ( $this->_plugin->IsMultisite() && ! is_super_admin() ) {
-								$buy_now    = 'https://wpactivitylog.com/pricing/';
-								$trial_link = 'https://wpactivitylog.com/pricing/';
-							} elseif ( $this->_plugin->IsMultisite() && is_super_admin() ) {
-								$buy_now    = add_query_arg( 'page', 'wsal-auditlog-pricing', network_admin_url( 'admin.php' ) );
-								$trial_link = add_query_arg( $trial_args, network_admin_url( 'admin.php' ) );
-							}
-
-							$more_info = add_query_arg(
+							$trial_link = add_query_arg(
 								array(
 									'utm_source'   => 'plugin',
 									'utm_medium'   => 'referral',
 									'utm_campaign' => 'WSAL',
-									'utm_content'  => 'tell+me+more',
+									'utm_content'  => 'get+trial',
 								),
-								'https://wpactivitylog.com/features/'
+								'https://wpactivitylog.com/trial-premium-edition-plugin/'
+							);
+
+							$buy_now = add_query_arg(
+								array(
+									'utm_source'   => 'plugin',
+									'utm_medium'   => 'referral',
+									'utm_campaign' => 'WSAL',
+									'utm_content'  => 'upgrade+now',
+								),
+								'https://wpactivitylog.com/pricing/'
 							);
 							?>
 							<?php wp_nonce_field( 'wsal_dismiss_advert', 'wsal-dismiss-advert', false, true ); ?>
-							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary wsal_notice__btn"><?php esc_html_e( 'UPGRADE NOW', 'wp-security-audit-log' ); ?></a>
-							<a href="<?php echo esc_url( $trial_link ); ?>" class="button button-primary"><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>
-							<a href="<?php echo esc_url( $more_info ); ?>" target="_blank"><?php esc_html_e( 'Tell me more', 'wp-security-audit-log' ); ?></a>
+							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary wsal_notice__btn notice-cta" target="_blank"><?php esc_html_e( 'UPGRADE NOW', 'wp-security-audit-log' ); ?></a>
 							<br>
+							<a href="<?php echo esc_url( $trial_link ); ?>" class="start-trial-link" target="_blank"><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>		
 							<a href="javascript:;" data-advert="<?php echo esc_attr( $wsal_premium_advert ); ?>" onclick="wsal_dismiss_advert(this)" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Close', 'wp-security-audit-log' ); ?></a>
 						</div>
 						<!-- /.wsal_notice__btns -->

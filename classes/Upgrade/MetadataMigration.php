@@ -37,20 +37,20 @@ class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 	 */
 	public static function maybe_display_progress_admin_notice() {
 		$plugin        = WpSecurityAuditLog::GetInstance();
-		$existing_info = $plugin->GetGlobalSetting( self::OPTION_NAME_MIGRATION_INFO, [] );
+		$existing_info = $plugin->GetGlobalSetting( self::OPTION_NAME_MIGRATION_INFO, array() );
 		if ( empty( $existing_info ) ) {
 			return;
 		}
 		?>
-        <div class="notice notice-info">
-            <div class="notice-content-wrapper">
-                <p>
-                    <strong><?php esc_html_e( 'WP Activity Log database update in progress.', 'wp-security-audit-log' ); ?></strong>
-                    <br/>
-					<?php esc_html_e( 'WP Activity Log is updating the database in the background. The database update process may take a little while, so please be patient.', 'wp-security-audit-log' ); ?>
-                </p>
-            </div>
-        </div>
+		<div class="notice notice-info">
+			<div class="notice-content-wrapper">
+				<p>
+					<strong><?php esc_html_e( 'Activity log database update in progress.', 'wp-security-audit-log' ); ?></strong>
+					<br />
+					<?php esc_html_e( 'WP Activity Log is updating the database tables where it stores the activity log. This is needed to upgrade the activity log tables to the new database schema, so the logs can be stored and read more efficiently. The duration of this process varies, depending on the number of events in the activity log. This process runs in the background and won\'t affect your website. During the upgrade, you might notice some "null" values in the activity log. This is temporary until the process is complete.', 'wp-security-audit-log' ); ?>
+				</p>
+			</div>
+		</div>
 		<?php
 	}
 
@@ -103,21 +103,30 @@ class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 
 		$occurrences_to_migrate = $occurrence_adapter->get_all_with_meta_to_migrate( $batch_size );
 		if ( ! empty( $occurrences_to_migrate ) ) {
-			$migrated_meta_keys = array_keys( WSAL_Models_Occurrence::$migrated_meta );
+			$migrated_meta_keys =  array_keys( WSAL_Models_Occurrence::$migrated_meta );
+			$lowercase_migrated_meta_keys = array_map( 'strtolower', $migrated_meta_keys );
 			foreach ( $occurrences_to_migrate as $occurrence ) {
 				$all_metadata = $occurrence_adapter->GetMultiMeta( $occurrence );
 				if ( ! empty( $all_metadata ) ) {
 					foreach ( $all_metadata as $meta_model ) {
 						$meta_key = $meta_model->name;
-						if ( in_array( $meta_key, $migrated_meta_keys ) ) {
+						$lowercase_meta_key = strtolower($meta_key);
+
+						// We use lowercase meta keys to make sure we handle even legacy meta keys correctly, for
+						// example "username" was changed to "Username" at some point.
+						if ( in_array( $lowercase_meta_key , $lowercase_migrated_meta_keys ) ) {
 							//  this will store the meta in the occ table if it belongs there
 							$is_empty_string = is_string( $meta_model->value ) && 0 === strlen( $meta_model->value );
-							if ( ! $is_empty_string ) {
+							if ( ! $is_empty_string && in_array( $meta_key, $migrated_meta_keys )) {
+								// The meta is set in the occurrence object on if it is an exact match, otherwise we
+								// would end up writing and deleting the same meta key endlessly.
 								$occurrence->SetMetaValue( $meta_key, $meta_model->value );
 							}
+
 							$meta_model->Delete();
 						}
 					}
+
 					$occurrence->Save();
 				}
 			}

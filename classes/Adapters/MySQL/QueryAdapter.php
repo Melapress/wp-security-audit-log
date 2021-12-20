@@ -162,7 +162,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 		$query->addColumn( 'COUNT(*)' );
 
 		$args = array();
-		$sql = $this->GetSql( $query, $args );
+		$sql  = $this->GetSql( $query, $args );
 
 		// Restore columns.
 		$query->setColumns( $cols );

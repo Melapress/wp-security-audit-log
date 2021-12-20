@@ -32,14 +32,14 @@ class WSAL_Views_Search extends WSAL_ExtensionPlaceholderView {
 	 * Method: Get View Name.
 	 */
 	public function GetName() {
-		return __( 'Search &#8682;', 'wp-security-audit-log' );
+		return __( 'Log Search &#8682;', 'wp-security-audit-log' );
 	}
 
 	/**
 	 * Method: Get View Weight.
 	 */
 	public function GetWeight() {
-		return 11;
+		return 5;
 	}
 
 	/**

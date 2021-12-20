@@ -16,7 +16,7 @@ $utm_params = array(
 );
 switch ( $this->hook_suffix ) {
 	case 'audit-log_page_wsal-loginusers':
-		$utm_params['utm_content'] = 'users+sessions';
+		$utm_params['utm_content'] = 'sessions';
 		break;
 	case 'audit-log_page_wsal-reports':
 		$utm_params['utm_content'] = 'reports';
@@ -25,7 +25,7 @@ switch ( $this->hook_suffix ) {
 		$utm_params['utm_content'] = 'notifications';
 		break;
 	case 'audit-log_page_wsal-externaldb':
-		$utm_params['utm_content'] = 'db+integrations';
+		$utm_params['utm_content'] = 'integrations';
 		break;
 	case 'audit-log_page_wsal-search':
 		$utm_params['utm_content'] = 'search';
@@ -37,7 +37,7 @@ switch ( $this->hook_suffix ) {
 // Links.
 $more_info = add_query_arg(
 	$utm_params,
-	'https://wpactivitylog.com/premium-features/'
+	'https://wpactivitylog.com/features/'
 );
 
 // Trial link arguments.
