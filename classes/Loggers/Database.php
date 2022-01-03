@@ -16,10 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Loggers Class.
  *
- * This class stores the logs in the database and there is also the function to clean up alerts.
+ * This class store the logs in the Database and adds the promo
+ * alerts, there is also the function to clean up alerts.
  *
  * @package wsal
- * @subpackage loggers
  */
 class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 
@@ -153,5 +153,64 @@ class WSAL_Loggers_Database extends WSAL_AbstractLogger {
 
 		// Notify system.
 		do_action( 'wsal_prune', $deleted_count, vsprintf( $result['sql'], $result['args'] ) );
+	}
+
+	/**
+	 * Get the promo id, to send each time a different promo,
+	 * keeping the last id saved in the DB.
+	 *
+	 * @return integer $promoToSend - The array index.
+	 */
+	private function GetPromoAlert() {
+		$last_promo_sent_id = $this->plugin->GetGlobalSetting( 'promo-send-id' );
+		$last_promo_sent_id = empty( $last_promo_sent_id ) ? 0 : $last_promo_sent_id;
+		$promo_to_send      = null;
+		$promo_alerts       = $this->GetActivePromoText();
+		if ( ! empty( $promo_alerts ) ) {
+			$promo_to_send = isset( $promo_alerts[ $last_promo_sent_id ] ) ? $promo_alerts[ $last_promo_sent_id ] : $promo_alerts[0];
+
+			if ( $last_promo_sent_id < count( $promo_alerts ) - 1 ) {
+				$last_promo_sent_id++;
+			} else {
+				$last_promo_sent_id = 0;
+			}
+			$this->plugin->SetGlobalSetting( 'promo-send-id', $last_promo_sent_id );
+		}
+		return $promo_to_send;
+	}
+
+	/**
+	 * Array of promo.
+	 *
+	 * @return array $promo_alerts - The array of promo.
+	 */
+	private function GetActivePromoText() {
+		$promo_alerts   = array();
+		$promo_alerts[] = array(
+			'name'    => 'Upgrade to Premium',
+			'message' => 'See who is logged in, create user productivity reports, get notified instantly via email of important changes, add search and much more. <strong>%1$s</strong> | <strong>%2$s</strong>',
+		);
+		$promo_alerts[] = array(
+			'name'    => 'See Who is Logged In, receive Email Alerts, generate User Productivity Reports and more!',
+			'message' => 'Upgrade to premium and extend the plugin’s features with email alerts, reports tool, free-text based search, user logins and sessions management and more! <strong>%1$s</strong> | <strong>%2$s</strong>',
+		);
+		return $promo_alerts;
+	}
+
+	/**
+	 * Check condition to show promo.
+	 *
+	 * @return integer|null - Counter alert.
+	 */
+	private function CheckPromoToShow() {
+		// If the package is free, show the promo.
+		if ( ! class_exists( 'WSAL_NP_Plugin' )
+			&& ! class_exists( 'WSAL_Ext_Plugin' )
+			&& ! class_exists( 'WSAL_Rep_Plugin' )
+			&& ! class_exists( 'WSAL_SearchExtension' )
+			&& ! class_exists( 'WSAL_UserSessions_Plugin' ) ) {
+			return 150;
+		}
+		return null;
 	}
 }

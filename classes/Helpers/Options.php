@@ -94,28 +94,26 @@ class Options {
 	 * @param  bool   $autoload    Whether or not to autoload this option.
 	 * @return bool Whether or not the option was updated.
 	 */
-	public function set_option_value( $option_name = '', $value = null, $autoload = false ) {
+	public function set_option_value( $option_name = '', $value = null, $autoload = true ) {
 		// bail early if no option name or value was passed.
 		if ( empty( $option_name ) || null === $value ) {
 			return;
 		}
 
 		$actual_option_name = $option_name;
-		if ( ! preg_match( '/\A' . preg_quote( $this->prefix ) . '/', $option_name ) ) {
+		if (!preg_match( '/\A' .preg_quote($this->prefix) . '/', $option_name)) {
 			//  prepend prefix if not already present
 			$actual_option_name = $this->prefix . $option_name;
 		}
 
-		return self::_set_option_value( $actual_option_name, $value, $autoload );
+		return self::_set_option_value($actual_option_name, $value, $autoload);
 	}
 
 	/**
 	 * Deletes a plugin option from the WP options table.
 	 *
-	 * Hanled option name with and without the prefix for backwards compatibility.
-	 *
 	 * @since  4.0.2
-	 * @param  string $option_name Name of the option to delete.
+	 * @param  string $option_name Name of the option to delete (including the prefix).
 	 * @return bool
 	 */
 	public function delete_option( $option_name = '' ) {
@@ -204,8 +202,8 @@ class Options {
 	 * @param  bool   $autoload    Whether or not to autoload this option.
 	 * @return mixed
 	 */
-	public static function set_option_value_ignore_prefix( $option_name = '', $value = null, $autoload = false ) {
-		return self::_set_option_value( $option_name, $value, $autoload );
+	public static function set_option_value_ignore_prefix( $option_name = '', $value = null, $autoload = true ) {
+		return self::_set_option_value( $option_name, $value, $autoload = true );
 	}
 
 	/**
@@ -218,23 +216,19 @@ class Options {
 	 * @param  bool   $autoload    Whether or not to autoload this option.
 	 * @return bool Whether or not the option was updated.
 	 */
-	private static function _set_option_value( $option_name = '', $value = null, $autoload = false ) {
+	private static function _set_option_value( $option_name = '', $value = null, $autoload = true ) {
 		// bail early if no option name or value was passed.
 		if ( empty( $option_name ) || null === $value ) {
 			return;
 		}
 
-		if ( is_multisite() ) {
-			switch_to_blog( get_main_network_id() );
-		}
-
-		if ( false === $autoload ) {
-			delete_option( $option_name );
+		if (is_multisite()) {
+			switch_to_blog(get_main_network_id());
 		}
 
 		$result = \update_option( $option_name, $value, $autoload );
 
-		if ( is_multisite() ) {
+		if (is_multisite()) {
 			restore_current_blog();
 		}
 
@@ -266,4 +260,23 @@ class Options {
 		return true === $bool ? 'yes' : 'no';
 	}
 
+	/**
+	 * Create neat email/sms string to display in the event.
+	 *
+	 * @param  string $email
+	 * @param  string $sms
+	 * @return string
+	 */
+	public static function create_recipient_string( $email, $sms ) {
+		$recipient = ( isset( $email ) ) ? $email : '';
+		if ( isset(  $sms ) && ! empty(  $sms ) ) {
+			// Only add seperator if needed.
+			if ( ! empty( $recipient ) ) {
+				$recipient .= ' | ';
+			}
+			$recipient .= $sms;
+		}
+
+		return $recipient;
+	}
 }

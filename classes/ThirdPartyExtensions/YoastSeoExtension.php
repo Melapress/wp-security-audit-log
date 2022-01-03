@@ -13,7 +13,7 @@ if ( ! class_exists( 'WSAL_YoastSeoExtension' ) ) {
 					'plugin_slug'        => 'activity-log-wp-seo/activity-log-wp-seo.php',
 					'plugin_basename'    => 'activity-log-wp-seo.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/activity-log-wp-seo.latest-stable.zip',
-					'event_tab_id'       => '#cat-yoast-seo',
+					'event_tab_id'       => '#tab-yoast-seo',
 					'plugin_description' => 'Keep a log of all the changes that you and your team do in the Yoast SEO metabox, plugin settings & much more.',
 				)
 			);

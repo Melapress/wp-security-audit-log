@@ -36,15 +36,15 @@ div.wsal_notice__wrapper p {
 }
 
 .wsal_notice__btns a.wsal_notice__btn {
-    background: #A42CD6;
-    border-color: #A42CD6;
-    box-shadow: 0 1px 0 #A42CD6;
+    background: #049443;
+    border-color: #049443;
+    box-shadow: 0 1px 0 #049443;
     text-shadow: none;
 }
 
 .wsal_notice__btns a.wsal_notice__btn:hover {
-    background: #8526ad;
-    border-color: #8526ad;
+    background: #035c2a;
+    border-color: #035c2a;
 }
 
 .wsal_notice__btns a.button-primary {
@@ -67,11 +67,6 @@ div.wsal_notice__wrapper p {
     bottom: 3px;
 }
 
-.wsal_notice__btns a.start-trial-link {
-    position: absolute;
-    right: 14px;
-    bottom: 20px;
-}
 /* Addon Notices */
 .notice-addon-available {
     display: flex;
@@ -95,13 +90,7 @@ div.wsal_notice__wrapper p {
     margin-top: 5px;
 }
 
-.wsal_notice__btns a.wsal_notice__btn.notice-cta {
-    padding: 2px 25px;
-    font-weight: bold;
-    font-size: 16px;
-}
-
 .updated.wsal_notice {
-    border: 2px solid #A42CD6;
+    border: 3px solid #049443;
     overflow: hidden;
 }

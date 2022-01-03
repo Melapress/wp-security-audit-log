@@ -112,7 +112,7 @@ class WSAL_Models_Query {
 	/**
 	 * Gets the adapter.
 	 *
-	 * @return WSAL_Adapters_QueryInterface
+	 * @return WSAL_Adapters_MySQL_Query
 	 */
 	public function getAdapter() {
 		return $this->getConnector()->getAdapter( 'Query' );

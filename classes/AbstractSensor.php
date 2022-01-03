@@ -43,7 +43,7 @@ abstract class WSAL_AbstractSensor {
 	 * @return boolean
 	 */
 	protected function IsMultisite() {
-		return $this->plugin->IsMultisite();
+		return function_exists( 'is_multisite' ) && is_multisite();
 	}
 
 	/**
@@ -60,8 +60,7 @@ abstract class WSAL_AbstractSensor {
 	 */
 	protected function Log( $type, $message, $args ) {
 		$this->plugin->alerts->Trigger(
-			$type,
-			array(
+			$type, array(
 				'Message' => $message,
 				'Context' => $args,
 				'Trace'   => debug_backtrace(),

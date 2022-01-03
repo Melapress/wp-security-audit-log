@@ -72,15 +72,12 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 	public $value = array(); // Force mixed type.
 
 	/**
-	 * @inheritDoc
+	 * Returns the model class for adapter.
 	 *
 	 * @return WSAL_Models_Meta
 	 */
 	public function GetModel() {
-		$result = new WSAL_Models_Meta();
-		$result->setAdapter( $this );
-
-		return $result;
+		return new WSAL_Models_Meta();
 	}
 
 	/**
@@ -93,9 +90,6 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 				. '    KEY occurrence_name (occurrence_id,name)';
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function DeleteByOccurrenceIds( $occurrence_ids ) {
 		if ( ! empty( $occurrence_ids ) ) {
 			$sql = 'DELETE FROM ' . $this->GetTable() . ' WHERE occurrence_id IN (' . implode( ',', $occurrence_ids ) . ')';
@@ -104,19 +98,27 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 		}
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function LoadByNameAndOccurrenceId( $meta_name, $occurrence_id ) {
-		//  make sure to grab the migrated meta fields from the occurrence table
-		if ( in_array( $meta_name, array_keys( WSAL_Models_Occurrence::$migrated_meta ) ) ) {
-			$occurrence  = new WSAL_Adapters_MySQL_Occurrence( $this->get_connection() );
-			$column_name = WSAL_Models_Occurrence::$migrated_meta[ $meta_name ];
-
-			return $occurrence->$column_name;
-		}
-
 		return $this->Load( 'occurrence_id = %d AND name = %s', array( $occurrence_id, $meta_name ) );
+	}
+
+	/**
+	 * Get distinct values of IPs.
+	 *
+	 * @param int $limit - (Optional) Limit.
+	 * @return array - Distinct values of IPs.
+	 */
+	public function GetMatchingIPs( $limit = null ) {
+		$_wpdb = $this->connection;
+		$sql   = "SELECT DISTINCT value FROM {$this->GetTable()} WHERE name = \"ClientIP\"";
+		if ( ! is_null( $limit ) ) {
+			$sql .= ' LIMIT ' . $limit;
+		}
+		$ips = $_wpdb->get_col( $sql );
+		foreach ( $ips as $key => $ip ) {
+			$ips[ $key ] = str_replace( '"', '', $ip );
+		}
+		return array_unique( $ips );
 	}
 
 	/**

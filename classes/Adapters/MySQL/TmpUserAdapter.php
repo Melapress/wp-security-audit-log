@@ -32,7 +32,7 @@ class WSAL_Adapters_MySQL_TmpUser extends WSAL_Adapters_MySQL_ActiveRecord {
 	protected $_table = 'wsal_tmp_users';
 
 	/**
-	 * @inheritDoc
+	 * Returns the model class for adapter.
 	 *
 	 * @return WSAL_Models_TmpUser
 	 */
@@ -41,17 +41,22 @@ class WSAL_Adapters_MySQL_TmpUser extends WSAL_Adapters_MySQL_ActiveRecord {
 	}
 
 	/**
-	 * @inheritDoc
+	 * Must return SQL for creating table.
+	 *
+	 * @param mixed $prefix - Prefix.
+	 * @return string
 	 */
 	protected function _GetInstallQuery( $prefix = false ) {
 		$_wpdb      = $this->connection;
 		$table_name = ( $prefix ) ? $this->GetWPTable() : $this->GetTable();
 		$sql        = 'CREATE TABLE IF NOT EXISTS ' . $table_name . ' (' . PHP_EOL;
-		$sql        .= 'ID BIGINT NOT NULL,' . PHP_EOL;
-		$sql        .= 'user_login VARCHAR(60) NOT NULL,' . PHP_EOL;
-		$sql        .= 'INDEX (ID)' . PHP_EOL;
-		$sql        .= ') ' . $_wpdb->get_charset_collate();
-
+		$sql       .= 'ID BIGINT NOT NULL,' . PHP_EOL;
+		$sql       .= 'user_login VARCHAR(60) NOT NULL,' . PHP_EOL;
+		$sql       .= 'INDEX (ID)' . PHP_EOL;
+		$sql       .= ')';
+		if ( ! empty( $_wpdb->charset ) ) {
+			$sql .= ' DEFAULT CHARACTER SET ' . $_wpdb->charset;
+		}
 		return $sql;
 	}
 }

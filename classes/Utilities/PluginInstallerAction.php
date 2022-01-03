@@ -11,7 +11,7 @@
 if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 
 	/**
-	 * Class to handle the installation and activation of plugins.
+	 * Class to handle the installtion and activation of plugins.
 	 *
 	 * @since 4.0.1
 	 */
@@ -63,20 +63,14 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 				}
 			}
 
-			// validate that the plugin is in the allowed list, or it is our helper plugin with external libraries.
+			// validate that the plugin is in the allowed list.
 			$valid = false;
-			$helper_plugin_installation = 'wsal-external-libraries/wsal-external-libraries.php' === $plugin_slug;
-			if ( $helper_plugin_installation ) {
-				$valid = true;
-			} else {
-				foreach ( $predefined_plugins as $plugin ) {
-					// if we have a valid plugin then break.
-					if ( $valid ) {
-						break;
-					}
-
-					$valid = $plugin_zip === $plugin['plugin_url'] && $plugin_slug === $plugin['plugin_slug'];
+			foreach ( $predefined_plugins as $plugin ) {
+				// if we have a valid plugin then break.
+				if ( $valid ) {
+					break;
 				}
+				$valid = ( $plugin_zip === $plugin['plugin_url'] && $plugin_slug === $plugin['plugin_slug'] ) ? true : false;
 			}
 
 			// bail early if we didn't get a valid url and slug to install.
@@ -104,11 +98,6 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 				$this->run_activate( $plugin_slug );
 				$this->activate( $plugin_zip );
 				$result = 'success';
-			}
-
-			//  if we're installing our helper plugin, we also need to delete the nudge to install the helper plugin
-			if ( $helper_plugin_installation ) {
-				WpSecurityAuditLog::GetInstance()->DeleteGlobalSetting( 'show-helper-plugin-needed-nudge' );
 			}
 
 			wp_send_json( $result );

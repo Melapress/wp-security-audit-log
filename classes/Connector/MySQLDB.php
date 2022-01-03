@@ -186,7 +186,11 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	}
 
 	/**
-	 * @inheritDoc
+	 * Gets an adapter for the specified model.
+	 *
+	 * @param string $class_name - Class name.
+	 *
+	 * @return WSAL_Adapters_ActiveRecordInterface
 	 */
 	public function getAdapter( $class_name ) {
 		$obj_name = $this->getAdapterClassName( $class_name );
@@ -206,7 +210,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	}
 
 	/**
-	 * @inheritDoc
+	 * Checks if the necessary tables are available
+	 *
+	 * @return bool true|false
 	 */
 	public function isInstalled() {
 		$wpdb      = $this->getConnection();
@@ -222,7 +228,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @param bool $is_external_database If true, some tables will not be created.
 	 */
 	public function installAll( $is_external_database = false ) {
-		$adapter_list = WSAL_Utilities_FileSystemUtils::read_files_in_folder( $this->getAdaptersDirectory(), '*.php' );
+		$adapter_list = glob( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php' );
 		$adapter_list = apply_filters( 'wsal_install_adapters_list', $adapter_list );
 		foreach ( $adapter_list as $file ) {
 			$file_path  = explode( DIRECTORY_SEPARATOR, $file );
@@ -263,7 +269,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * Uninstall all DB tables.
 	 */
 	public function uninstallAll() {
-		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( $this->getAdaptersDirectory(), '*.php' ) as $file ) {
+		foreach ( glob( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . '*.php' ) as $file ) {
 			$file_path  = explode( DIRECTORY_SEPARATOR, $file );
 			$file_name  = $file_path[ count( $file_path ) - 1 ];
 			$class_name = $this->getAdapterClassName( str_replace( 'Adapter.php', '', $file_name ) );
@@ -328,19 +334,8 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 				'site_id'    => $entry['site_id'],
 				'alert_id'   => $entry['alert_id'],
 				'created_on' => $entry['created_on'],
-				'client_ip' => $entry['client_ip'],
-				'severity' => $entry['severity'],
-				'object' => $entry['object'],
-				'event_type' => $entry['event_type'],
-				'user_agent' => $entry['user_agent'],
-				'user_roles' => $entry['user_roles'],
-				'username' => $entry['username'],
-				'user_id' => $entry['user_id'],
-				'session_id' => $entry['session_id'],
-				'post_status' => $entry['post_status'],
-				'post_type' => $entry['post_type'],
-				'post_id' => $entry['post_id'],
-			], [ '%d', '%d', '%f','%s', '%d','%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%d'] );
+				'is_read'    => $entry['is_read']
+			], [ '%d', '%d', '%f', '%d' ] );
 
 			$old_entry_id = intval( $entry['id'] );
 			$new_entry_id = $target_db->insert_id;
@@ -498,14 +493,15 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
 			$occurrence_new = new WSAL_Adapters_MySQL_Occurrence( $archive_db );
 
-			$sql = 'INSERT INTO ' . $occurrence_new->GetTable() . ' ( id, site_id, alert_id, created_on ) VALUES ';
+			$sql = 'INSERT INTO ' . $occurrence_new->GetTable() . ' (id, site_id, alert_id, created_on, is_read) VALUES ';
 			foreach ( $occurrences as $entry ) {
 				$sql                      .= $archive_db->prepare(
-					'( %d, %d, %d, %d ), ',
+					'( %d, %d, %d, %d, %d ), ',
 					intval( $entry['id'] ),
 					intval( $entry['site_id'] ),
 					intval( $entry['alert_id'] ),
-					$entry['created_on']
+					$entry['created_on'],
+					0
 				);
 				$args['occurrence_ids'][] = $entry['id'];
 			}
@@ -602,12 +598,5 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
 		// If both queries are successful, then return true.
 		return $query_occ && $query_meta;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function query( $query ) {
-		return $this->getConnection()->query( $query );
 	}
 }

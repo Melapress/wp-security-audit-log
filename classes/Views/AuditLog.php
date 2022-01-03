@@ -79,7 +79,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_dismiss_advert', array( $this, 'wsal_dismiss_advert' ) );
 		add_action( 'wp_ajax_wsal_dismiss_notice_addon_available', array( $this, 'dismiss_notice_addon_available' ) );
 		add_action( 'wp_ajax_wsal_dismiss_missing_aws_sdk_nudge', array( $this, 'dismiss_missing_aws_sdk_nudge' ) );
-		add_action( 'wp_ajax_wsal_dismiss_helper_plugin_needed_nudge', array( $this, 'dismiss_helper_plugin_needed_nudge' ) );
 		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( $this, 'dismiss_wp_pointer' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNotices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
@@ -124,15 +123,15 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function AdminNotices() {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
-		
+
 		// Check if any of the extensions is activated.
 		if (
-			! class_exists( 'WSAL_NP_Plugin' )
-			&& ! class_exists( 'WSAL_Ext_Plugin' )
-			&& ! class_exists( 'WSAL_Rep_Plugin' )
-			&& ! class_exists( 'WSAL_SearchExtension' )
-			&& ! class_exists( 'WSAL_UserSessions_Plugin' )
-			&& 'anonymous' !== $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) // Anonymous mode option.
+				! class_exists( 'WSAL_NP_Plugin' )
+				&& ! class_exists( 'WSAL_Ext_Plugin' )
+				&& ! class_exists( 'WSAL_Rep_Plugin' )
+				&& ! class_exists( 'WSAL_SearchExtension' )
+				&& ! class_exists( 'WSAL_UserSessions_Plugin' )
+				&& 'anonymous' !== $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) // Anonymous mode option.
 		) {
 			$get_transient_fn         = $this->_plugin->IsMultisite() ? 'get_site_transient' : 'get_transient'; // Check for multisite.
 			$wsal_is_advert_dismissed = $get_transient_fn( 'wsal-is-advert-dismissed' ); // Check if advert has been dismissed.
@@ -142,7 +141,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			$more_info = add_query_arg(
 				array(
 					'utm_source'   => 'plugin',
-					'utm_medium'   => 'referral',
+					'utm_medium'   => 'banner',
 					'utm_campaign' => 'WSAL',
 					'utm_content'  => 'tell+me+more',
 				),
@@ -166,17 +165,18 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							$trial_link = add_query_arg(
 								array(
 									'utm_source'   => 'plugin',
-									'utm_medium'   => 'referral',
+									'utm_medium'   => 'banner',
 									'utm_campaign' => 'WSAL',
 									'utm_content'  => 'get+trial',
 								),
 								'https://wpactivitylog.com/trial-premium-edition-plugin/'
 							);
 
+							// Buy Now button link.
 							$buy_now = add_query_arg(
 								array(
 									'utm_source'   => 'plugin',
-									'utm_medium'   => 'referral',
+									'utm_medium'   => 'banner',
 									'utm_campaign' => 'WSAL',
 									'utm_content'  => 'upgrade+now',
 								),
@@ -186,7 +186,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							<?php wp_nonce_field( 'wsal_dismiss_advert', 'wsal-dismiss-advert', false, true ); ?>
 							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary wsal_notice__btn notice-cta" target="_blank"><?php esc_html_e( 'UPGRADE NOW', 'wp-security-audit-log' ); ?></a>
 							<br>
-							<a href="<?php echo esc_url( $trial_link ); ?>" class="start-trial-link" target="_blank"><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>		
+							<a href="<?php echo esc_url( $trial_link ); ?>" class="start-trial-link" target="_blank"><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>
 							<a href="javascript:;" data-advert="<?php echo esc_attr( $wsal_premium_advert ); ?>" onclick="wsal_dismiss_advert(this)" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Close', 'wp-security-audit-log' ); ?></a>
 						</div>
 						<!-- /.wsal_notice__btns -->
@@ -201,11 +201,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Check anonymous mode.
 		if ( 'anonymous' === $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) ) { // If user manually opt-out then don't show the notice.
 			if (
-				wsal_freemius()->is_anonymous() // Anonymous mode option.
-				&& wsal_freemius()->is_not_paying() // Not paying customer.
-				&& wsal_freemius()->has_api_connectivity() // Check API connectivity.
-				&& $is_current_view
-				&& $this->_plugin->settings()->CurrentUserCan( 'edit' ) // Have permission to edit plugin settings.
+					wsal_freemius()->is_anonymous() // Anonymous mode option.
+					&& wsal_freemius()->is_not_paying() // Not paying customer.
+					&& wsal_freemius()->has_api_connectivity() // Check API connectivity.
+					&& $is_current_view
+					&& $this->_plugin->settings()->CurrentUserCan( 'edit' ) // Have permission to edit plugin settings.
 			) {
 				if ( ! is_multisite() || ( is_multisite() && is_network_admin() ) ) :
 					?>
@@ -226,10 +226,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Display add-on available notice.
 		$screen = get_current_screen();
 
-
-        if (class_exists('WSAL_Upgrade_MetadataMigration')) {
-	        WSAL_Upgrade_MetadataMigration::maybe_display_progress_admin_notice();
-        }
 
 		if ( $is_current_view && in_array( $screen->base, array( 'toplevel_page_wsal-auditlog', 'toplevel_page_wsal-auditlog-network' ) ) ) {
 			// Grab list of installed plugins.
@@ -796,7 +792,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 
 				// Update freemius state.
-				$this->_plugin->SetGlobalSetting( 'freemius_state', 'in', true );
+				$this->_plugin->SetGlobalSetting( 'freemius_state', 'in' );
 			} elseif ( 'no' === $choice ) {
 				if ( ! is_multisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
@@ -805,7 +801,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 
 				// Update freemius state.
-				$this->_plugin->SetGlobalSetting( 'freemius_state', 'skipped', true );
+				$this->_plugin->SetGlobalSetting( 'freemius_state', 'skipped' );
 			}
 
 			echo wp_json_encode(
@@ -1170,7 +1166,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die();
 		}
 
-		$this->_plugin->SetGlobalBooleanSetting( 'setup-modal-dismissed', true, true );
+		$this->_plugin->SetGlobalBooleanSetting( 'setup-modal-dismissed', true );
 		wp_send_json_success();
 	}
 

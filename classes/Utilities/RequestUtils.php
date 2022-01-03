@@ -46,15 +46,4 @@ class WSAL_Utilities_RequestUtils {
 
 		return true;
 	}
-
-	/**
-	 * Check if the float is IPv4 instead.
-	 *
-	 * @param float $ip_address - Number to check.
-	 *
-	 * @return bool result validation
-	 */
-	public static function is_ip_address( $ip_address ) {
-		return filter_var( $ip_address, FILTER_VALIDATE_IP ) !== false;
-	}
 }

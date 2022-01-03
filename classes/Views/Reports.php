@@ -32,14 +32,14 @@ class WSAL_Views_Reports extends WSAL_ExtensionPlaceholderView {
 	 * Method: Get View Name.
 	 */
 	public function GetName() {
-		return __( 'Create Reports &#8682;', 'wp-security-audit-log' );
+		return __( 'Reports &#8682;', 'wp-security-audit-log' );
 	}
 
 	/**
 	 * Method: Get View Weight.
 	 */
 	public function GetWeight() {
-		return 3;
+		return 9;
 	}
 
 	/**

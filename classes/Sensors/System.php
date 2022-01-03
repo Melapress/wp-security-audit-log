@@ -413,24 +413,6 @@ class WSAL_Sensors_System extends WSAL_AbstractSensor {
 				);
 			}
 		}
-
-		// Site title.
-		if ( $is_option_page
-			&& wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
-			&& isset( $post_array['blogname'] ) ) {
-			$previous_value = get_option( 'blogname' );
-			$new_value      = ( ! empty( $post_array['blogname'] ) ) ? $post_array['blogname'] : '';
-
-			if ( $previous_value !== $new_value ) {
-				$this->plugin->alerts->Trigger(
-					6059,
-					array(
-						'previous_value' => $previous_value,
-						'new_value'      => $new_value,
-					)
-				);
-			}
-		}
 	}
 
 	/**

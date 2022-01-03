@@ -19,7 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * the arguments.
  *
  * @package wsal
- * @subpackage adapters
  */
 class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 
@@ -33,10 +32,10 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 	/**
 	 * Method: Constructor.
 	 *
-	 * @param array $connection - Connection array.
+	 * @param array $conn - Connection array.
 	 */
-	public function __construct( $connection ) {
-		$this->connection = $connection;
+	public function __construct( $conn ) {
+		$this->connection = $conn;
 	}
 
 	/**
@@ -133,15 +132,15 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 	}
 
 	/**
-	 * @inheritDoc
+	 * Execute query and return data as $ar_cls objects.
+	 *
+	 * @param object $query - Query object.
+	 *
+	 * @return WSAL_Models_ActiveRecord[]
 	 */
 	public function Execute( $query ) {
 		$args = array();
 		$sql  = $this->GetSql( $query, $args );
-
-		$args = array_filter( $args, function ( $item ) {
-			return ( '' !== $item );
-		} );
 
 		$occurrence_adapter = $query->getConnector()->getAdapter( 'Occurrence' );
 
@@ -153,7 +152,10 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 	}
 
 	/**
-	 * @inheritDoc
+	 * Count query
+	 *
+	 * @param object $query - Query object.
+	 * @return integer counting records.
 	 */
 	public function Count( $query ) {
 		// Back up columns, use COUNT as default column and generate sql.
@@ -162,7 +164,7 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 		$query->addColumn( 'COUNT(*)' );
 
 		$args = array();
-		$sql  = $this->GetSql( $query, $args );
+		$sql = $this->GetSql( $query, $args );
 
 		// Restore columns.
 		$query->setColumns( $cols );
@@ -183,7 +185,9 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 	}
 
 	/**
-	 * @inheritDoc
+	 * Query for deleting records
+	 *
+	 * @param object $query query object.
 	 */
 	public function Delete( $query ) {
 		$result = $this->GetSqlDelete( $query );
@@ -292,9 +296,6 @@ class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
 		return $search_conditions;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	public function IsConnected() {
 		return ( $this->connection && $this->connection->has_connected );
 	}
