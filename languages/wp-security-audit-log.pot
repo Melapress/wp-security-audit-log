@@ -1,4 +1,4 @@
-# Copyright (C) 2021 wp-security-audit-log
+# Copyright (C) 2022 wp-security-audit-log
 # This file is distributed under the same license as the wp-security-audit-log package.
 msgid ""
 msgstr ""
@@ -5235,19 +5235,19 @@ msgstr ""
 msgid "Setting created"
 msgstr ""
 
-#: classes/Views/addons/html-view.php:95, classes/Views/addons/html-view.php:120
+#: classes/Views/addons/html-view.php:97, classes/Views/addons/html-view.php:122
 msgid "Upgrade to Premium"
 msgstr ""
 
-#: classes/Views/addons/html-view.php:96
+#: classes/Views/addons/html-view.php:98
 msgid "More Information"
 msgstr ""
 
-#: classes/Views/addons/html-view.php:104
+#: classes/Views/addons/html-view.php:106
 msgid "Screenshots"
 msgstr ""
 
-#: classes/Views/addons/html-view.php:121
+#: classes/Views/addons/html-view.php:123
 msgid "Start Free 14-Day Premium Trial"
 msgstr ""
 
