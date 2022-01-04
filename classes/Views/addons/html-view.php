@@ -15,19 +15,19 @@ $utm_params = array(
 	'utm_campaign' => 'WSAL',
 );
 switch ( $this->hook_suffix ) {
-	case 'audit-log_page_wsal-loginusers':
-		$utm_params['utm_content'] = 'users+sessions';
+	case 'wp-activity-log_page_wsal-loginusers':
+		$utm_params['utm_content'] = 'sessions';
 		break;
-	case 'audit-log_page_wsal-reports':
+	case 'wp-activity-log_page_wsal-reports':
 		$utm_params['utm_content'] = 'reports';
 		break;
-	case 'audit-log_page_wsal-emailnotifications':
+	case 'wp-activity-log_page_wsal-emailnotifications':
 		$utm_params['utm_content'] = 'notifications';
 		break;
-	case 'audit-log_page_wsal-externaldb':
-		$utm_params['utm_content'] = 'db+integrations';
+	case 'wp-activity-log_page_wsal-externaldb':
+		$utm_params['utm_content'] = 'integrations';
 		break;
-	case 'audit-log_page_wsal-search':
+	case 'wp-activity-log_page_wsal-search':
 		$utm_params['utm_content'] = 'search';
 		break;
     default:
@@ -37,14 +37,14 @@ switch ( $this->hook_suffix ) {
 // Links.
 $more_info = add_query_arg(
 	$utm_params,
-	'https://wpactivitylog.com/premium-features/'
+	'https://wpactivitylog.com/features/'
 );
 
 // Trial link arguments.
 $trial_args = array(
 	'page'          => 'wsal-auditlog-pricing',
 	'billing_cycle' => 'annual',
-	'trial'         => 'true',
+	'trial'         => 'true'
 );
 
 // Buy Now button link.

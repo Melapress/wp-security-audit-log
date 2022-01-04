@@ -144,9 +144,9 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 * @return WSAL_Models_Meta The meta item, be sure to checked if it was loaded successfully.
 	 */
 	public function GetNamedMeta( $occurence, $name ) {
-		$meta        = new WSAL_Adapters_MySQL_Meta( $this->connection );
-		$this->_meta = $meta->Load( 'occurrence_id = %d AND name = %s', array( $occurence->id, $name ) );
-		return $this->_meta;
+		$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+
+		return $meta->LoadByNameAndOccurrenceId( $name, $occurence->id );
 	}
 
 	/**

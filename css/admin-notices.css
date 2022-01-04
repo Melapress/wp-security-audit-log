@@ -36,15 +36,15 @@ div.wsal_notice__wrapper p {
 }
 
 .wsal_notice__btns a.wsal_notice__btn {
-    background: #00ad50;
-    border-color: #00ad50 #009344 #009344 #009344;
-    box-shadow: 0 1px 0 #00ad50;
+    background: #049443;
+    border-color: #049443;
+    box-shadow: 0 1px 0 #049443;
     text-shadow: none;
 }
 
 .wsal_notice__btns a.wsal_notice__btn:hover {
-    background: #00b353;
-    border-color: #00ad50 #009344 #009344 #009344;
+    background: #035c2a;
+    border-color: #035c2a;
 }
 
 .wsal_notice__btns a.button-primary {
@@ -88,4 +88,9 @@ div.wsal_notice__wrapper p {
 
 .notice-addon-available .notice-dismiss {
     margin-top: 5px;
+}
+
+.updated.wsal_notice {
+    border: 3px solid #049443;
+    overflow: hidden;
 }
