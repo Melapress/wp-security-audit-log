@@ -1,4 +1,4 @@
-# Copyright (C) 2021 wp-security-audit-log
+# Copyright (C) 2022 wp-security-audit-log
 # This file is distributed under the same license as the wp-security-audit-log package.
 msgid ""
 msgstr ""
@@ -80,7 +80,7 @@ msgstr ""
 msgid "Login blocked because other session(s) already exist for this user."
 msgstr ""
 
-#: defaults.php:238, extensions/email-notifications/classes/Common.php:1110
+#: defaults.php:238, extensions/email-notifications/classes/Common.php:1115
 msgid "IP address"
 msgstr ""
 
@@ -1640,7 +1640,7 @@ msgstr ""
 msgid "Plugins & Themes"
 msgstr ""
 
-#: defaults.php:2063, classes/AuditLogGridView.php:437, classes/AuditLogListView.php:445
+#: defaults.php:2063, classes/AuditLogGridView.php:430, classes/AuditLogListView.php:438
 msgid "Plugins"
 msgstr ""
 
@@ -1656,7 +1656,7 @@ msgstr ""
 msgid "Version"
 msgstr ""
 
-#: defaults.php:2071, defaults.php:2084, defaults.php:2097, defaults.php:2110, defaults.php:2123, defaults.php:2206, defaults.php:2219, defaults.php:2232, defaults.php:2245, defaults.php:2271, defaults.php:2284
+#: defaults.php:2071, defaults.php:2084, defaults.php:2097, defaults.php:2110, defaults.php:2123, defaults.php:2166, defaults.php:2179, defaults.php:2206, defaults.php:2219, defaults.php:2232, defaults.php:2245, defaults.php:2271, defaults.php:2284
 msgid "Install location"
 msgstr ""
 
@@ -1704,7 +1704,7 @@ msgstr ""
 msgid "The plugin created the post %PostTitle%."
 msgstr ""
 
-#: defaults.php:2138, defaults.php:2153, classes/AlertManager.php:1071, classes/AuditLogGridView.php:434, classes/AuditLogListView.php:443
+#: defaults.php:2138, defaults.php:2153, classes/AlertManager.php:1071, classes/AuditLogGridView.php:427, classes/AuditLogListView.php:436
 msgid "Plugin"
 msgstr ""
 
@@ -1722,10 +1722,6 @@ msgstr ""
 
 #: defaults.php:2164
 msgid "Changed the Automatic updates setting for the plugin %name%."
-msgstr ""
-
-#: defaults.php:2166, defaults.php:2179
-msgid "Install location:"
 msgstr ""
 
 #: defaults.php:2176
@@ -1816,7 +1812,7 @@ msgstr ""
 msgid "WordPress & System"
 msgstr ""
 
-#: defaults.php:2294, classes/AlertManager.php:1070, classes/AlertManager.php:1760, classes/AuditLogGridView.php:443, classes/AuditLogListView.php:449, extensions/email-notifications/classes/DailyNotification.php:243, extensions/email-notifications/classes/Notifier.php:647, extensions/reports/classes/Common.php:1178
+#: defaults.php:2294, classes/AlertManager.php:1070, classes/AlertManager.php:1760, classes/AuditLogGridView.php:436, classes/AuditLogListView.php:442, extensions/email-notifications/classes/DailyNotification.php:243, extensions/email-notifications/classes/Notifier.php:657, extensions/reports/classes/Common.php:1178
 msgid "System"
 msgstr ""
 
@@ -2702,151 +2698,151 @@ msgstr ""
 
 #. translators: User's first name
 #. translators: User's first name
-#: wp-security-audit-log.php:938, wp-security-audit-log.php:966
+#: wp-security-audit-log.php:943, wp-security-audit-log.php:971
 msgid "Hey %s"
 msgstr ""
 
-#: wp-security-audit-log.php:942
+#: wp-security-audit-log.php:947
 msgid "Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com."
 msgstr ""
 
-#: wp-security-audit-log.php:943, wp-security-audit-log.php:978
+#: wp-security-audit-log.php:948, wp-security-audit-log.php:983
 msgid "Note: "
 msgstr ""
 
-#: wp-security-audit-log.php:944, wp-security-audit-log.php:979
+#: wp-security-audit-log.php:949, wp-security-audit-log.php:984
 msgid "NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS."
 msgstr ""
 
 #. translators: 1: Plugin name. 2: Plugin name. 2: Freemius link. 4: Plugin name.
-#: wp-security-audit-log.php:972
+#: wp-security-audit-log.php:977
 msgid "Please help us improve %1$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %3$s, a diagnostic tracking service we use. If you skip this, that's okay! %2$s will still work just fine."
 msgstr ""
 
-#: wp-security-audit-log.php:1024
+#: wp-security-audit-log.php:1029
 msgid "You need to activate the licence key to use WP Activity Log Premium. %2$s"
 msgstr ""
 
-#: wp-security-audit-log.php:1025
+#: wp-security-audit-log.php:1030
 msgid "Activate the licence key now"
 msgstr ""
 
 #. translators: Number of sites
-#: wp-security-audit-log.php:1047
+#: wp-security-audit-log.php:1052
 msgid "The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network."
 msgstr ""
 
-#: wp-security-audit-log.php:1043
+#: wp-security-audit-log.php:1048
 msgid "%s You need to renew your license to continue using premium features."
 msgstr ""
 
-#: wp-security-audit-log.php:1145
+#: wp-security-audit-log.php:1150
 msgid "Error: You do not have sufficient permissions to disable this custom field."
 msgstr ""
 
 #. translators: name of meta field (in bold)
-#: wp-security-audit-log.php:1193
+#: wp-security-audit-log.php:1198
 msgid "Custom field %s is no longer being monitored."
 msgstr ""
 
 #. translators: setting tab name "Excluded Objects"
-#: wp-security-audit-log.php:1198
+#: wp-security-audit-log.php:1203
 msgid "Enable the monitoring of this custom field again from the %s tab in the plugin settings."
 msgstr ""
 
-#: wp-security-audit-log.php:1199
+#: wp-security-audit-log.php:1204
 msgid "Excluded Objects"
 msgstr ""
 
-#: wp-security-audit-log.php:1212
+#: wp-security-audit-log.php:1217
 msgid "Error: You do not have sufficient permissions to disable this alert."
 msgstr ""
 
-#: wp-security-audit-log.php:1236
+#: wp-security-audit-log.php:1241
 msgid "Alert %1$s is no longer being monitored.<br /> %2$s"
 msgstr ""
 
-#: wp-security-audit-log.php:1236
+#: wp-security-audit-log.php:1241
 msgid "You can enable this alert again from the Enable/Disable Alerts node in the plugin menu."
 msgstr ""
 
-#: wp-security-audit-log.php:1261, classes/Views/SetupWizard.php:270
+#: wp-security-audit-log.php:1266, classes/Views/SetupWizard.php:270
 msgid "Installing, please wait"
 msgstr ""
 
-#: wp-security-audit-log.php:1262, classes/Views/SetupWizard.php:271
+#: wp-security-audit-log.php:1267, classes/Views/SetupWizard.php:271
 msgid "Already installed"
 msgstr ""
 
-#: wp-security-audit-log.php:1263, classes/Utilities/PluginInstallAndActivate.php:108, classes/Views/SetupWizard.php:272, classes/Views/SetupWizard.php:841
+#: wp-security-audit-log.php:1268, classes/Utilities/PluginInstallAndActivate.php:108, classes/Views/SetupWizard.php:272, classes/Views/SetupWizard.php:841
 msgid "Extension installed"
 msgstr ""
 
-#: wp-security-audit-log.php:1264, classes/Views/SetupWizard.php:273
+#: wp-security-audit-log.php:1269, classes/Views/SetupWizard.php:273
 msgid "Extension activated"
 msgstr ""
 
-#: wp-security-audit-log.php:1265, classes/Views/SetupWizard.php:274
+#: wp-security-audit-log.php:1270, classes/Views/SetupWizard.php:274
 msgid "Install failed"
 msgstr ""
 
 #. translators: %s: PHP Version
-#: wp-security-audit-log.php:1317
+#: wp-security-audit-log.php:1322
 msgid "You are using a version of PHP that is older than %s, which is no longer supported."
 msgstr ""
 
-#: wp-security-audit-log.php:1319
+#: wp-security-audit-log.php:1324
 msgid "Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using."
 msgstr ""
 
 #. translators: %s: Activity Log for MainWP plugin hyperlink
-#: wp-security-audit-log.php:1324
+#: wp-security-audit-log.php:1329
 msgid "Please install the %s plugin on the MainWP dashboard."
 msgstr ""
 
-#: wp-security-audit-log.php:1324
+#: wp-security-audit-log.php:1329
 msgid "Activity Log for MainWP"
 msgstr ""
 
 #. translators: %s: Getting started guide hyperlink
-#: wp-security-audit-log.php:1326
+#: wp-security-audit-log.php:1331
 msgid "The WP Activity Log should be installed on the child sites only. Refer to the %s for more information."
 msgstr ""
 
-#: wp-security-audit-log.php:1326
+#: wp-security-audit-log.php:1331
 msgid "getting started guide"
 msgstr ""
 
-#: wp-security-audit-log.php:1808
+#: wp-security-audit-log.php:1813
 msgid "For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href=\"https://wpactivitylog.com/\" target=\"_blank\">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from."
 msgstr ""
 
-#: wp-security-audit-log.php:1827
+#: wp-security-audit-log.php:1832
 msgid "Every 6 hours"
 msgstr ""
 
-#: wp-security-audit-log.php:1831
+#: wp-security-audit-log.php:1836
 msgid "Every 45 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1835
+#: wp-security-audit-log.php:1840
 msgid "Every 30 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1839
+#: wp-security-audit-log.php:1844
 msgid "Every 15 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1843
+#: wp-security-audit-log.php:1848
 msgid "Every 10 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1847
+#: wp-security-audit-log.php:1852
 msgid "Every 1 minute"
 msgstr ""
 
 #. translators: 1. Deprecated method name 2. Version since deprecated
-#: wp-security-audit-log.php:1861
+#: wp-security-audit-log.php:1866
 msgid "Method %1$s is deprecated since version %2$s!"
 msgstr ""
 
@@ -2957,7 +2953,7 @@ msgstr ""
 msgid "Multisite Network"
 msgstr ""
 
-#: classes/AlertManager.php:1090, extensions/email-notifications/classes/Common.php:1140, extensions/search/classes/Filters/IpFilter.php:88, extensions/user-sessions/classes/View/Sessions.php:325
+#: classes/AlertManager.php:1090, extensions/email-notifications/classes/Common.php:1145, extensions/search/classes/Filters/IpFilter.php:88, extensions/user-sessions/classes/View/Sessions.php:325
 msgid "IP Address"
 msgstr ""
 
@@ -3121,7 +3117,7 @@ msgstr ""
 msgid "— End of Activity Log —"
 msgstr ""
 
-#: classes/AuditLogGridView.php:211, classes/AuditLogListView.php:209, classes/Views/AuditLog.php:588, extensions/reports/inc/wsal-reporting-view.inc.php:711
+#: classes/AuditLogGridView.php:211, classes/AuditLogListView.php:209, classes/Views/AuditLog.php:589, extensions/reports/inc/wsal-reporting-view.inc.php:711
 msgid "All Sites"
 msgstr ""
 
@@ -3133,11 +3129,11 @@ msgstr ""
 msgid "Info"
 msgstr ""
 
-#: classes/AuditLogGridView.php:278, classes/AuditLogListView.php:280, classes/AuditLogListView.php:312, extensions/email-notifications/classes/Common.php:1138, extensions/email-notifications/classes/Common.php:1199, extensions/search/classes/Filters/SiteFilter.php:29
+#: classes/AuditLogGridView.php:278, classes/AuditLogListView.php:280, classes/AuditLogListView.php:312, extensions/email-notifications/classes/Common.php:1143, extensions/email-notifications/classes/Common.php:1204, extensions/search/classes/Filters/SiteFilter.php:29
 msgid "Site"
 msgstr ""
 
-#: classes/AuditLogGridView.php:281, classes/AuditLogGridView.php:304, classes/AuditLogListView.php:283, classes/AuditLogListView.php:321, extensions/email-notifications/classes/Common.php:1143, extensions/email-notifications/classes/Common.php:1173, extensions/reports/classes/CsvReportGenerator.php:86, extensions/reports/classes/HtmlReportGenerator.php:250
+#: classes/AuditLogGridView.php:281, classes/AuditLogGridView.php:304, classes/AuditLogListView.php:283, classes/AuditLogListView.php:321, extensions/email-notifications/classes/Common.php:1148, extensions/email-notifications/classes/Common.php:1178, extensions/reports/classes/CsvReportGenerator.php:86, extensions/reports/classes/HtmlReportGenerator.php:250
 msgid "Message"
 msgstr ""
 
@@ -3153,23 +3149,23 @@ msgstr ""
 msgid "Message:"
 msgstr ""
 
-#: classes/AuditLogGridView.php:401, classes/AuditLogGridView.php:405, classes/AuditLogGridView.php:431, classes/AuditLogListView.php:413, classes/AuditLogListView.php:440
+#: classes/AuditLogGridView.php:401, classes/AuditLogGridView.php:405, classes/AuditLogListView.php:413, classes/Utilities/UserUtils.php:149
 msgid "Unknown"
 msgstr ""
 
-#: classes/AuditLogGridView.php:440, classes/AuditLogListView.php:447
+#: classes/AuditLogGridView.php:433, classes/AuditLogListView.php:440
 msgid "Unregistered user"
 msgstr ""
 
-#: classes/AuditLogGridView.php:477, classes/AuditLogGridView.php:490, classes/AuditLogListView.php:480, classes/AuditLogListView.php:493
+#: classes/AuditLogGridView.php:470, classes/AuditLogGridView.php:483, classes/AuditLogListView.php:473, classes/AuditLogListView.php:486
 msgid "Show me all activity originating from this IP Address"
 msgstr ""
 
-#: classes/AuditLogGridView.php:547, classes/AuditLogListView.php:525
+#: classes/AuditLogGridView.php:540, classes/AuditLogListView.php:518
 msgid "View all details of this change"
 msgstr ""
 
-#: classes/AuditLogGridView.php:548, classes/AuditLogListView.php:526
+#: classes/AuditLogGridView.php:541, classes/AuditLogListView.php:519
 msgid "Alert Data Inspector"
 msgstr ""
 
@@ -3181,11 +3177,11 @@ msgstr ""
 msgid "IP"
 msgstr ""
 
-#: classes/AuditLogListView.php:274, classes/AuditLogListView.php:315, classes/WidgetManager.php:77, extensions/email-notifications/classes/Common.php:1111, extensions/search/classes/Filters/ObjectFilter.php:29, extensions/search/classes/Filters/ObjectFilter.php:53
+#: classes/AuditLogListView.php:274, classes/AuditLogListView.php:315, classes/WidgetManager.php:77, extensions/email-notifications/classes/Common.php:1116, extensions/search/classes/Filters/ObjectFilter.php:29, extensions/search/classes/Filters/ObjectFilter.php:53
 msgid "Object"
 msgstr ""
 
-#: classes/AuditLogListView.php:275, classes/AuditLogListView.php:318, classes/WidgetManager.php:78, extensions/email-notifications/classes/Common.php:1055, extensions/email-notifications/classes/Common.php:1112, extensions/reports/classes/CsvReportGenerator.php:85, extensions/reports/classes/HtmlReportGenerator.php:249, extensions/search/classes/Filters/EventTypeFilter.php:29, extensions/search/classes/Filters/EventTypeFilter.php:53
+#: classes/AuditLogListView.php:275, classes/AuditLogListView.php:318, classes/WidgetManager.php:78, extensions/email-notifications/classes/Common.php:1060, extensions/email-notifications/classes/Common.php:1117, extensions/reports/classes/CsvReportGenerator.php:85, extensions/reports/classes/HtmlReportGenerator.php:249, extensions/search/classes/Filters/EventTypeFilter.php:29, extensions/search/classes/Filters/EventTypeFilter.php:53
 msgid "Event Type"
 msgstr ""
 
@@ -3401,32 +3397,32 @@ msgstr ""
 msgid "Tried to install a zip or slug that was not in the allowed list"
 msgstr ""
 
-#: classes/Utilities/UserUtils.php:89
+#: classes/Utilities/UserUtils.php:91
 msgid "Username: "
 msgstr ""
 
-#: classes/Utilities/UserUtils.php:90
+#: classes/Utilities/UserUtils.php:92
 msgid "First name: "
 msgstr ""
 
-#: classes/Utilities/UserUtils.php:91
+#: classes/Utilities/UserUtils.php:93
 msgid "Last Name: "
 msgstr ""
 
-#: classes/Utilities/UserUtils.php:92
+#: classes/Utilities/UserUtils.php:94
 msgid "Email: "
 msgstr ""
 
-#: classes/Utilities/UserUtils.php:93
+#: classes/Utilities/UserUtils.php:95
 msgid "Nickname: "
 msgstr ""
 
 #: classes/Views/AuditLog.php:98
-msgid "Get instantly alerted of critical changes via SMS & email, search the activity log, generate user reports, see who is logged in and more!"
+msgid "Get email notifications about website changes, view logged-in users, do granular log searches, create detailed reports, and more."
 msgstr ""
 
 #: classes/Views/AuditLog.php:99
-msgid "Upgrade to premium to unlock these powerful activity log features & more!"
+msgid "Upgrade to premium today and get more out of your activity logs!"
 msgstr ""
 
 #: classes/Views/AuditLog.php:102
@@ -3445,132 +3441,132 @@ msgstr ""
 msgid "Unlock these and other powerful features with WP Activity Log Premium."
 msgstr ""
 
-#: classes/Views/AuditLog.php:185
-msgid "UPGRADE NOW"
-msgstr ""
-
-#: classes/Views/AuditLog.php:186
-msgid "Start Free Trial"
+#: classes/Views/AuditLog.php:158
+msgid "Learn more"
 msgstr ""
 
 #: classes/Views/AuditLog.php:187
-msgid "Tell me more"
+msgid "UPGRADE NOW"
 msgstr ""
 
 #: classes/Views/AuditLog.php:189
+msgid "Start Free Trial"
+msgstr ""
+
+#: classes/Views/AuditLog.php:190
 msgid "Dismiss the banner"
 msgstr ""
 
-#: classes/Views/AuditLog.php:189
+#: classes/Views/AuditLog.php:190
 msgid "Close"
 msgstr ""
 
-#: classes/Views/AuditLog.php:212
+#: classes/Views/AuditLog.php:213
 msgid "Help WP Activity Log improve."
 msgstr ""
 
-#: classes/Views/AuditLog.php:213
+#: classes/Views/AuditLog.php:214
 msgid "You can help us improve the plugin by opting in to share non-sensitive data about the plugin usage. The technical data will be shared over a secure channel. Activity log data will never be shared. When you opt-in, you also subscribe to our announcement and newsletter (you can opt-out at any time). If you would rather not opt-in, we will not collect any data."
 msgstr ""
 
-#: classes/Views/AuditLog.php:213
+#: classes/Views/AuditLog.php:214
 msgid "Read more about what data we collect and how."
 msgstr ""
 
-#: classes/Views/AuditLog.php:215
+#: classes/Views/AuditLog.php:216
 msgid "Sure, opt-in"
 msgstr ""
 
-#: classes/Views/AuditLog.php:216
+#: classes/Views/AuditLog.php:217
 msgid "No, thank you"
 msgstr ""
 
-#: classes/Views/AuditLog.php:271
+#: classes/Views/AuditLog.php:272
 msgid "We noticed you have"
 msgstr ""
 
-#: classes/Views/AuditLog.php:273
+#: classes/Views/AuditLog.php:274
 msgid "installed."
 msgstr ""
 
-#: classes/Views/AuditLog.php:275
+#: classes/Views/AuditLog.php:276
 msgid "Install extension"
 msgstr ""
 
-#: classes/Views/AuditLog.php:320
+#: classes/Views/AuditLog.php:321
 msgid "Activity Log Viewer"
 msgstr ""
 
-#: classes/Views/AuditLog.php:347
+#: classes/Views/AuditLog.php:348
 msgid "Log Viewer"
 msgstr ""
 
-#: classes/Views/AuditLog.php:504, classes/Views/Settings.php:324, classes/Views/ToggleAlerts.php:109, extensions/email-notifications/classes/AddNotification.php:224, extensions/email-notifications/classes/AddNotification.php:257, extensions/email-notifications/classes/EditNotification.php:226, extensions/email-notifications/classes/EditNotification.php:234, extensions/email-notifications/classes/EditNotification.php:230, extensions/email-notifications/classes/EditNotification.php:239, extensions/email-notifications/classes/EditNotification.php:267, extensions/external-db/classes/Settings.php:234
+#: classes/Views/AuditLog.php:505, classes/Views/Settings.php:324, classes/Views/ToggleAlerts.php:109, extensions/email-notifications/classes/AddNotification.php:224, extensions/email-notifications/classes/AddNotification.php:257, extensions/email-notifications/classes/EditNotification.php:226, extensions/email-notifications/classes/EditNotification.php:234, extensions/email-notifications/classes/EditNotification.php:230, extensions/email-notifications/classes/EditNotification.php:239, extensions/email-notifications/classes/EditNotification.php:267, extensions/external-db/classes/Settings.php:234
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: classes/Views/AuditLog.php:553
+#: classes/Views/AuditLog.php:554
 msgid "Thank you for installing WP Activity Log. Do you want to run the wizard to configure the basic plugin settings?"
 msgstr ""
 
-#: classes/Views/AuditLog.php:555, classes/Views/Settings.php:532, classes/Views/Settings.php:559, classes/Views/Settings.php:625, classes/Views/Settings.php:683, classes/Views/Settings.php:1118, classes/Views/Settings.php:1402, classes/Views/Settings.php:1443, classes/Views/Settings.php:1474, classes/Views/SetupWizard.php:562
+#: classes/Views/AuditLog.php:556, classes/Views/Settings.php:532, classes/Views/Settings.php:559, classes/Views/Settings.php:625, classes/Views/Settings.php:683, classes/Views/Settings.php:1118, classes/Views/Settings.php:1402, classes/Views/Settings.php:1443, classes/Views/Settings.php:1474, classes/Views/SetupWizard.php:562
 msgid "Yes"
 msgstr ""
 
-#: classes/Views/AuditLog.php:556, classes/Views/Settings.php:537, classes/Views/Settings.php:564, classes/Views/Settings.php:655, classes/Views/Settings.php:693, classes/Views/Settings.php:1123, classes/Views/Settings.php:1409, classes/Views/Settings.php:1450, classes/Views/Settings.php:1475, classes/Views/SetupWizard.php:567
+#: classes/Views/AuditLog.php:557, classes/Views/Settings.php:537, classes/Views/Settings.php:564, classes/Views/Settings.php:655, classes/Views/Settings.php:693, classes/Views/Settings.php:1123, classes/Views/Settings.php:1409, classes/Views/Settings.php:1450, classes/Views/Settings.php:1475, classes/Views/SetupWizard.php:567
 msgid "No"
 msgstr ""
 
-#: classes/Views/AuditLog.php:587
+#: classes/Views/AuditLog.php:588
 msgid "Please enter the number of alerts you would like to see on one page:"
 msgstr ""
 
-#: classes/Views/AuditLog.php:589
+#: classes/Views/AuditLog.php:590
 msgid "No Results"
 msgstr ""
 
-#: classes/Views/AuditLog.php:726, classes/Views/AuditLog.php:769, classes/Views/AuditLog.php:1047, classes/Views/AuditLog.php:1109, classes/Views/AuditLog.php:1162, classes/Views/Settings.php:239, classes/Views/Settings.php:1759, classes/Views/SetupWizard.php:96, extensions/search/search-init.php:398, extensions/search/search-init.php:446, extensions/email-notifications/classes/Notifications.php:559, extensions/external-db/classes/Connections.php:862, extensions/external-db/classes/Connections.php:887, extensions/external-db/classes/Connections.php:1018, extensions/external-db/classes/Mirroring.php:763, extensions/external-db/classes/Mirroring.php:818, extensions/external-db/classes/Settings.php:657, extensions/external-db/classes/Settings.php:833, extensions/external-db/classes/Settings.php:853, extensions/user-sessions/classes/Views.php:525, extensions/reports/classes/Views/Main.php:739
+#: classes/Views/AuditLog.php:727, classes/Views/AuditLog.php:770, classes/Views/AuditLog.php:1048, classes/Views/AuditLog.php:1110, classes/Views/AuditLog.php:1163, classes/Views/Settings.php:239, classes/Views/Settings.php:1759, classes/Views/SetupWizard.php:96, extensions/search/search-init.php:398, extensions/search/search-init.php:446, extensions/email-notifications/classes/Notifications.php:559, extensions/external-db/classes/Connections.php:862, extensions/external-db/classes/Connections.php:887, extensions/external-db/classes/Connections.php:1018, extensions/external-db/classes/Mirroring.php:763, extensions/external-db/classes/Mirroring.php:818, extensions/external-db/classes/Settings.php:657, extensions/external-db/classes/Settings.php:833, extensions/external-db/classes/Settings.php:853, extensions/user-sessions/classes/Views.php:525, extensions/reports/classes/Views/Main.php:739
 msgid "Nonce verification failed."
 msgstr ""
 
-#: classes/Views/AuditLog.php:744
+#: classes/Views/AuditLog.php:745
 msgid "No users found."
 msgstr ""
 
-#: classes/Views/AuditLog.php:816
+#: classes/Views/AuditLog.php:817
 msgid "Freemius opt choice not found."
 msgstr ""
 
-#: classes/Views/AuditLog.php:809
+#: classes/Views/AuditLog.php:810
 msgid "Freemius opt choice selected."
 msgstr ""
 
 #. translators: 1 - an opening link tag, 2 - the closing tag.
-#: classes/Views/AuditLog.php:912
+#: classes/Views/AuditLog.php:913
 msgid "<br>An error occurred when trying to install and activate the plugin. Please try install it again from the %1$sevent settings%2$s page."
 msgstr ""
 
-#: classes/Views/AuditLog.php:1011
+#: classes/Views/AuditLog.php:1012
 msgid "WordPress Activity Log"
 msgstr ""
 
-#: classes/Views/AuditLog.php:1012
+#: classes/Views/AuditLog.php:1013
 msgid "When a user makes a change on your website the plugin will keep a record of that event here. Right now there is nothing because this is a new install."
 msgstr ""
 
-#: classes/Views/AuditLog.php:1013
+#: classes/Views/AuditLog.php:1014
 msgid "Thank you for using WP Activity Log"
 msgstr ""
 
-#: classes/Views/AuditLog.php:1036, classes/Views/AuditLog.php:1146
+#: classes/Views/AuditLog.php:1037, classes/Views/AuditLog.php:1147
 msgid "You do not have sufficient permissions to dismiss this notice."
 msgstr ""
 
-#: classes/Views/AuditLog.php:1104
+#: classes/Views/AuditLog.php:1105
 msgid "Access Denied"
 msgstr ""
 
-#: classes/Views/AuditLog.php:1199
+#: classes/Views/AuditLog.php:1200
 msgid "Install the activity log extension for %1$s for more detailed logging of changes done in %2$s."
 msgstr ""
 
@@ -3583,54 +3579,58 @@ msgid "Notifications &#8682;"
 msgstr ""
 
 #: classes/Views/EmailNotifications.php:49
-msgid "SMS & Email Notifications"
+msgid "Email & SMS Notifications"
 msgstr ""
 
 #: classes/Views/EmailNotifications.php:50
-msgid "Get instantly alerted of important changes on your site via SMS and email notifications. Upgrade to premium and:"
+msgid "Get instantly alerted of important changes on your site via email notifications & SMS messages. Upgrade to premium and:"
 msgstr ""
 
 #: classes/Views/EmailNotifications.php:53
-msgid "Configure any type of SMS & email notifications"
+msgid "Configure any type of email notification"
 msgstr ""
 
 #: classes/Views/EmailNotifications.php:54
-msgid "Receive notifications for when users login, change their password or change content"
+msgid "Configure SMS messages for instant critical alerts"
 msgstr ""
 
 #: classes/Views/EmailNotifications.php:55
-msgid "Get alerted of site changes like plugin installs, theme changes etc"
+msgid "Receive notifications for when users login, change their password or change content"
 msgstr ""
 
 #: classes/Views/EmailNotifications.php:56
-msgid "Enable built-in security email notifications of suspicious user activity"
+msgid "Get alerted of site changes like plugin installs, theme changes etc"
 msgstr ""
 
 #: classes/Views/EmailNotifications.php:57
-msgid "Personalize all email and SMS templates"
+msgid "Enable built-in security email notifications of suspicious user activity"
 msgstr ""
 
 #: classes/Views/EmailNotifications.php:58
+msgid "Personalize all email and SMS templates"
+msgstr ""
+
+#: classes/Views/EmailNotifications.php:59
 msgid "Use the trigger builder to configure any type of notification criteria!"
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:60
+#: classes/Views/EmailNotifications.php:61
 msgid "Getting started is really easy. You can use one of the plugin’s built-in notifications or create your own using the easy to use trigger builder."
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:63
+#: classes/Views/EmailNotifications.php:64
 msgid "Email and SMS notifications instantly alert you of important changes on your WordPress site."
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:67
+#: classes/Views/EmailNotifications.php:68
 msgid "Easily enable any of the built-in security and user management notifications."
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:71
+#: classes/Views/EmailNotifications.php:72
 msgid "Use the trigger builder to configure any type of email and SMS notification to get instantly alerted of site changes that are important to you and your business."
 msgstr ""
 
-#: classes/Views/EmailNotifications.php:75
+#: classes/Views/EmailNotifications.php:76
 msgid "All email and SMS templates are configurable, allowing you to personalize them."
 msgstr ""
 
@@ -4338,7 +4338,7 @@ msgstr ""
 msgid "Date & Time"
 msgstr ""
 
-#: classes/Views/Settings.php:1080, extensions/email-notifications/classes/Common.php:1105, extensions/email-notifications/classes/Common.php:1141, extensions/email-notifications/classes/Common.php:1170, extensions/search/classes/Filters/AlertFilter.php:26, extensions/search/classes/Filters/AlertFilter.php:51
+#: classes/Views/Settings.php:1080, extensions/email-notifications/classes/Common.php:1110, extensions/email-notifications/classes/Common.php:1146, extensions/email-notifications/classes/Common.php:1175, extensions/search/classes/Filters/AlertFilter.php:26, extensions/search/classes/Filters/AlertFilter.php:51
 msgid "Event ID"
 msgstr ""
 
@@ -5132,7 +5132,7 @@ msgstr ""
 
 #. translators: Upgrade now hyperlink.
 #: extensions/settings-import-export/settings-import-export.php:129
-msgid "Settigns import/export is available in the Professional and Business Plans. %s to configure and receive this feature."
+msgid "Settings import/export is available in the Professional and Business Plans. %s to configure and receive this feature."
 msgstr ""
 
 #: extensions/settings-import-export/settings-import-export.php:139
@@ -5363,155 +5363,155 @@ msgstr ""
 msgid "A trigger's condition must not be longer than 50 characters."
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:934
+#: extensions/email-notifications/classes/Common.php:939
 msgid "Email or Username is not valid."
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:941
+#: extensions/email-notifications/classes/Common.php:946
 msgid "Mobile number is not valid."
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:928
+#: extensions/email-notifications/classes/Common.php:933
 msgid "Email or Username is required."
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:929
+#: extensions/email-notifications/classes/Common.php:934
 msgid "Mobile number is required."
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:996, extensions/email-notifications/classes/Notifications.php:610
+#: extensions/email-notifications/classes/Common.php:1001, extensions/email-notifications/classes/Notifications.php:610
 msgid "Notification could not be saved."
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1019, extensions/email-notifications/classes/Notifications.php:696
+#: extensions/email-notifications/classes/Common.php:1024, extensions/email-notifications/classes/Notifications.php:696
 msgid "Notification successfully saved."
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1041
+#: extensions/email-notifications/classes/Common.php:1046
 msgid "Notification Title"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1042
+#: extensions/email-notifications/classes/Common.php:1047
 msgid "Website Name"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1043
+#: extensions/email-notifications/classes/Common.php:1048
 msgid "User Login Name"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1044
+#: extensions/email-notifications/classes/Common.php:1049
 msgid "User First Name"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1045
+#: extensions/email-notifications/classes/Common.php:1050
 msgid "User Last Name"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1046
+#: extensions/email-notifications/classes/Common.php:1051
 msgid "Role(s) of the User"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1047
+#: extensions/email-notifications/classes/Common.php:1052
 msgid "Event generated on Date and Time"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1048
+#: extensions/email-notifications/classes/Common.php:1053
 msgid "Event Code"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1049
+#: extensions/email-notifications/classes/Common.php:1054
 msgid "Event Severity"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1050, extensions/email-notifications/classes/Common.php:1113
+#: extensions/email-notifications/classes/Common.php:1055, extensions/email-notifications/classes/Common.php:1118
 msgid "Event Message"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1051
+#: extensions/email-notifications/classes/Common.php:1056
 msgid "Event Metadata"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1052
+#: extensions/email-notifications/classes/Common.php:1057
 msgid "Event Links"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1053
+#: extensions/email-notifications/classes/Common.php:1058
 msgid "Client IP Address"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1054
+#: extensions/email-notifications/classes/Common.php:1059
 msgid "Event Object"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1101, extensions/email-notifications/classes/Common.php:1167
+#: extensions/email-notifications/classes/Common.php:1106, extensions/email-notifications/classes/Common.php:1172
 msgid "Notification {title} on website {site} triggered"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1102, extensions/email-notifications/classes/Common.php:1168
+#: extensions/email-notifications/classes/Common.php:1107, extensions/email-notifications/classes/Common.php:1173
 msgid "Notification <strong>{title}</strong> was triggered. Below are the notification details:"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1104
+#: extensions/email-notifications/classes/Common.php:1109
 msgid "Website"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1106, extensions/email-notifications/classes/Common.php:1171, extensions/reports/classes/CsvReportGenerator.php:80, extensions/reports/classes/CsvReportGenerator.php:64, extensions/reports/classes/CsvReportGenerator.php:197, extensions/reports/classes/HtmlReportGenerator.php:244, extensions/reports/classes/HtmlReportGenerator.php:220, extensions/reports/classes/HtmlReportGenerator.php:358, extensions/search/classes/FilterManager.php:475, extensions/user-sessions/classes/View/Sessions.php:156, extensions/user-sessions/classes/View/Sessions.php:321
+#: extensions/email-notifications/classes/Common.php:1111, extensions/email-notifications/classes/Common.php:1176, extensions/reports/classes/CsvReportGenerator.php:80, extensions/reports/classes/CsvReportGenerator.php:64, extensions/reports/classes/CsvReportGenerator.php:197, extensions/reports/classes/HtmlReportGenerator.php:244, extensions/reports/classes/HtmlReportGenerator.php:220, extensions/reports/classes/HtmlReportGenerator.php:358, extensions/search/classes/FilterManager.php:475, extensions/user-sessions/classes/View/Sessions.php:156, extensions/user-sessions/classes/View/Sessions.php:321
 msgid "Username"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1107
+#: extensions/email-notifications/classes/Common.php:1112
 msgid "User first name"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1108
+#: extensions/email-notifications/classes/Common.php:1113
 msgid "User last name"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1109
+#: extensions/email-notifications/classes/Common.php:1114
 msgid "User role"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1114
+#: extensions/email-notifications/classes/Common.php:1119
 msgid "Event generated on"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1116
+#: extensions/email-notifications/classes/Common.php:1121
 msgid "These email notifications are sent with <a href=\"http://wpactivitylog.com\">WP Activity Log</a>, the most comprehensive WordPress activity log plugin solution."
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1139, extensions/email-notifications/classes/Common.php:1200
+#: extensions/email-notifications/classes/Common.php:1144, extensions/email-notifications/classes/Common.php:1205
 msgid "User/Role"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1142
+#: extensions/email-notifications/classes/Common.php:1147
 msgid "Event type"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1172, extensions/search/classes/FilterManager.php:487, extensions/search/classes/Filters/userrolefilter.php:49, extensions/search/classes/Filters/userrolefilter.php:87, extensions/user-sessions/classes/View/Sessions.php:326
+#: extensions/email-notifications/classes/Common.php:1177, extensions/search/classes/FilterManager.php:487, extensions/search/classes/Filters/userrolefilter.php:49, extensions/search/classes/Filters/userrolefilter.php:87, extensions/user-sessions/classes/View/Sessions.php:326
 msgid "User Role"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1174
+#: extensions/email-notifications/classes/Common.php:1179
 msgid "Generated On"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1176
+#: extensions/email-notifications/classes/Common.php:1181
 msgid "Monitoring of WordPress and Email Notifications provided by <a href=\"http://wpactivitylog.com\">WP Activity Log, WordPress most comprehensive audit trail plugin</a>."
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1201
+#: extensions/email-notifications/classes/Common.php:1206
 msgid "Event"
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1216
+#: extensions/email-notifications/classes/Common.php:1221
 msgid "Subject "
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1225
+#: extensions/email-notifications/classes/Common.php:1230
 msgid "Body "
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:1228
+#: extensions/email-notifications/classes/Common.php:1233
 msgid "HTML is accepted. Available template tags:"
 msgstr ""
 
@@ -8172,7 +8172,7 @@ msgstr ""
 msgid "Last Event"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Sessions.php:165, extensions/user-sessions/classes/View/Sessions.php:493
+#: extensions/user-sessions/classes/View/Sessions.php:165, extensions/user-sessions/classes/View/Sessions.php:482
 msgid "Actions"
 msgstr ""
 
@@ -8213,19 +8213,19 @@ msgstr ""
 msgid "Network-wide Logins"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Sessions.php:467
+#: extensions/user-sessions/classes/View/Sessions.php:456
 msgid "Session ID: "
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Sessions.php:484
+#: extensions/user-sessions/classes/View/Sessions.php:473
 msgid "Click the button above to retrieve the users' last event."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Sessions.php:504
+#: extensions/user-sessions/classes/View/Sessions.php:493
 msgid "Show me this user's events"
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Sessions.php:520
+#: extensions/user-sessions/classes/View/Sessions.php:509
 msgid "Terminate Session"
 msgstr ""
 
@@ -8237,7 +8237,7 @@ msgstr ""
 msgid "No logged in sessions meet your search criteria."
 msgstr ""
 
-#: extensions/user-sessions/classes/View/Sessions.php:698
+#: extensions/user-sessions/classes/View/Sessions.php:687
 msgid "User sessions do not exist."
 msgstr ""
 

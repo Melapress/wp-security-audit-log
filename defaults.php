@@ -2163,7 +2163,7 @@ function wsaldefaults_wsal_init() {
 						__( 'Changed the Automatic updates setting for a plugin.', 'wp-security-audit-log' ),
 						__( 'Changed the Automatic updates setting for the plugin %name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Install location:', 'wp-security-audit-log' )     => '%install_directory%',
+							__( 'Install location', 'wp-security-audit-log' )     => '%install_directory%',
 						],
 						[],
 						'wp-activity-log',
@@ -2176,7 +2176,7 @@ function wsaldefaults_wsal_init() {
 						__( 'Changed the Automatic updates setting for a theme.', 'wp-security-audit-log' ),
 						__( 'Changed the Automatic updates setting for the theme %name%.', 'wp-security-audit-log' ),
 						[
-							__( 'Install location:', 'wp-security-audit-log' )     => '%install_directory%',
+							__( 'Install location', 'wp-security-audit-log' )     => '%install_directory%',
 						],
 						[],
 						'wp-activity-log',

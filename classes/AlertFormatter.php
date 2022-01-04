@@ -94,7 +94,7 @@ final class WSAL_AlertFormatter {
 
 			case '%PostUrlIfPlublished%' === $expression:
 				$post_id = null;
-				if ( $occurrence_id === 0 && is_array( $metadata ) && array_key_exists( 'PostID', $metadata ) ) {
+				if ( is_array( $metadata ) && array_key_exists( 'PostID', $metadata ) ) {
 					$post_id = $metadata['PostID'];
 				} else {
 					$post_id = $this->get_occurrence_meta_item( $occurrence_id, 'PostID' );

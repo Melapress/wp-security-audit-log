@@ -431,14 +431,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 					$uhtml = '<a class="tooltip" data-tooltip="' . esc_attr( $tooltip ) . '" data-user="' . $user->user_login . '" href="' . $user_edit_link . '" target="_blank">' . esc_html( $display_name ) . '</a>';
 
 
-					$roles = $item->GetUserRoles( $this->item_meta[ $item->getId() ] );
-					if ( is_array( $roles ) && count( $roles ) ) {
-						$roles = esc_html( ucwords( implode( ', ', $roles ) ) );
-					} elseif ( is_string( $roles ) && '' != $roles ) {
-						$roles = esc_html( ucwords( str_replace( array( '"', '[', ']' ), ' ', $roles ) ) );
-					} else {
-						$roles = '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
-					}
+					$roles = WSAL_Utilities_UsersUtils::get_roles_label( $item->GetUserRoles() );
 				} elseif ( 'Plugin' == $username ) {
 					$uhtml = '<i>' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';
 				} elseif ( 'Plugins' == $username ) {
@@ -462,7 +455,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				 */
 				return apply_filters( 'wsal_auditlog_row_user_data', $row_user_data, $this->current_alert_id );
 			case 'scip':
-				$scip = $item->GetSourceIP( $this->item_meta[ $item->getId() ] );
+				$scip = $item->GetSourceIP();
 				if ( is_string( $scip ) ) {
 					$scip = str_replace( array( '"', '[', ']' ), '', $scip );
 				}

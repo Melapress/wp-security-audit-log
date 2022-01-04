@@ -4,7 +4,7 @@
  * Plugin URI: https://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Activity log viewer included in the plugin to see all the security alerts.
  * Author: WP White Security
- * Version: 4.3.3.1
+ * Version: 4.3.4
  * Text Domain: wp-security-audit-log
  * Author URI: https://www.wpwhitesecurity.com/
  * License: GPL2
@@ -49,7 +49,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @var string
              */
-            public $version = '4.3.3.1';
+            public $version = '4.3.4';
 
             /**
              * Plugin constants.
@@ -322,6 +322,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     return;
                 }
 
+	            require_once 'classes/Utilities/OpCacheUtils.php';
+	            add_filter( 'upgrader_pre_install', array( 'WSAL_Utilities_OpCacheUtils', 'clear_caches' ), 10, 2 );
+
                 $this->define_constants();
                 $this->set_allowed_html_tags();
                 $this->includes();
@@ -523,7 +526,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
                 // Dequeue conflicting scripts.
                 add_action( 'wp_print_scripts', array( $this, 'dequeue_conflicting_scripts' ) );
+
             }
+
 
             /**
              * Whether the current page is the login screen.
@@ -958,7 +963,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @return string
              *
-             * @since latest
+             * @since 4.3.4
              */
             public static function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
                 $result = sprintf(
