@@ -488,7 +488,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 *
 	 * @return array Report results
 	 */
-	public function get_report_data( $report_args, $next_date = null, $limit = 0, $statistics_report_type = null, $grouping_period = null) {
+	public function get_report_data( $report_args, $next_date = null, $limit = 0, $statistics_report_type = null, $grouping_period = null ) {
 
 		// Figure out the grouping statement and the columns' selection.
 		$grouping = self::get_grouping( $statistics_report_type, $grouping_period );

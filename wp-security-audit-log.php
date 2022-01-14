@@ -1,37 +1,41 @@
 <?php
 /**
+ * WP Activity Log.
+ *
+ * @copyright Copyright (C) 2013-@current_year, WP White Security - support@wpwhitesecurity.com
+ * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
+ *
+ * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Plugin URI: https://wpactivitylog.com/
- * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Activity log viewer included in the plugin to see all the security alerts.
- * Author: WP White Security
- * Version: 4.4.0
+ * Version:     4.4.0
+ * Plugin URI:  https://wpactivitylog.com/
+ * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
+ * Author:      WP White Security
+ * Author URI:  https://www.wpwhitesecurity.com/
  * Text Domain: wp-security-audit-log
- * Author URI: https://www.wpwhitesecurity.com/
- * License: GPL2
+ * Domain Path: /languages/
+ * License:     GPL v3
+ * Requires at least: 5.0
+ * Requires PHP: 7.0
  * Network: true
  *
  * @package wsal
  *
- * @fs_premium_only /extensions/, /sdk/twilio-php/
+ * @fs_premium_only /extensions/, /third-party/woocommerce/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/*
-	WP Activity Log
-	Copyright(c) 2021  WP White Security  (email : info@wpwhitesecurity.com)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License, version 2, as
-	published by the Free Software Foundation.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
 
 if ( ! function_exists( 'wsal_freemius' ) ) {
 
@@ -50,7 +54,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              * @var string
              */
             public $version = '4.4.0';
-            
+
              /**
              * Plugin constants.
              *
@@ -321,6 +325,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 if ( ! $this->should_load() ) {
                     return;
                 }
+
+	            require_once 'classes/Utilities/OpCacheUtils.php';
+	            add_filter( 'upgrader_pre_install', array( 'WSAL_Utilities_OpCacheUtils', 'clear_caches' ), 10, 2 );
 
                 $this->define_constants();
                 $this->set_allowed_html_tags();
@@ -960,7 +967,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @return string
              *
-             * @since 4.4.0
+             * @since 4.3.4
              */
             public static function wsal_freemius_update_connect_message( $message, $user_first_name, $plugin_title, $user_login, $site_link, $_freemius_link ) {
                 $result = sprintf(

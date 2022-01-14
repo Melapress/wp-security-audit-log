@@ -142,7 +142,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			$more_info = add_query_arg(
 				array(
 					'utm_source'   => 'plugin',
-					'utm_medium'   => 'referral',
+					'utm_medium'   => 'banner',
 					'utm_campaign' => 'WSAL',
 					'utm_content'  => 'tell+me+more',
 				),
@@ -166,7 +166,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							$trial_link = add_query_arg(
 								array(
 									'utm_source'   => 'plugin',
-									'utm_medium'   => 'referral',
+									'utm_medium'   => 'banner',
 									'utm_campaign' => 'WSAL',
 									'utm_content'  => 'get+trial',
 								),
@@ -176,7 +176,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							$buy_now = add_query_arg(
 								array(
 									'utm_source'   => 'plugin',
-									'utm_medium'   => 'referral',
+									'utm_medium'   => 'banner',
 									'utm_campaign' => 'WSAL',
 									'utm_content'  => 'upgrade+now',
 								),
