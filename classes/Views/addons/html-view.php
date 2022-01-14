@@ -13,21 +13,23 @@ $utm_params = array(
 	'utm_source'   => 'plugin',
 	'utm_medium'   => 'referral',
 	'utm_campaign' => 'WSAL',
+	'utm_content'  => 'sessions',
 );
+
 switch ( $this->hook_suffix ) {
-	case 'audit-log_page_wsal-loginusers':
+	case 'wp-activity-log_page_wsal-loginusers':
 		$utm_params['utm_content'] = 'sessions';
 		break;
-	case 'audit-log_page_wsal-reports':
+	case 'wp-activity-log_page_wsal-reports':
 		$utm_params['utm_content'] = 'reports';
 		break;
-	case 'audit-log_page_wsal-emailnotifications':
+	case 'wp-activity-log_page_wsal-emailnotifications':
 		$utm_params['utm_content'] = 'notifications';
 		break;
-	case 'audit-log_page_wsal-externaldb':
+	case 'wp-activity-log_page_wsal-externaldb':
 		$utm_params['utm_content'] = 'integrations';
 		break;
-	case 'audit-log_page_wsal-search':
+	case 'wp-activity-log_page_wsal-search':
 		$utm_params['utm_content'] = 'search';
 		break;
     default:
@@ -44,7 +46,7 @@ $more_info = add_query_arg(
 $trial_args = array(
 	'page'          => 'wsal-auditlog-pricing',
 	'billing_cycle' => 'annual',
-	'trial'         => 'true',
+	'trial'         => 'true'
 );
 
 // Buy Now button link.

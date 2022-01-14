@@ -330,15 +330,13 @@ final class WSAL_AlertManager {
 	/**
 	 * Method: Commit an alert now.
 	 *
-	 * @param int $type - Alert type.
-	 * @param array $data - Data of the alert.
-	 * @param array $cond - Condition for the alert.
-	 * @param bool $_retry - Retry.
+	 * @param int   $type   - Alert type.
+	 * @param array $data   - Data of the alert.
+	 * @param array $cond   - Condition for the alert.
+	 * @param bool  $_retry - Retry.
 	 *
 	 * @return mixed
-	 * @throws Exception - Error if alert is not registered.
 	 * @internal
-	 *
 	 */
 	protected function _CommitItem( $type, $data, $cond, $_retry = true ) {
 		// Double NOT operation here is intentional. Same as ! ( bool ) [ $value ]
@@ -355,8 +353,10 @@ final class WSAL_AlertManager {
 					return $this->_CommitItem( $type, $data, $cond, false );
 				} else {
 					// In general this shouldn't happen, but it could, so we handle it here.
-					/* translators: Event ID */
-					throw new Exception( sprintf( esc_html__( 'Event with code %d has not be registered.', 'wp-security-audit-log' ), $type ) );
+					$this->plugin->wsal_log(
+						/* translators: Event ID */
+						sprintf( esc_html__( 'Event with code %d has not be registered.', 'wp-security-audit-log' ), $type )
+					);
 				}
 			}
 		}
@@ -1403,8 +1403,8 @@ final class WSAL_AlertManager {
 		$report->data = array();
 
 		if ( 'statistics_unique_ips' === $report_type ) {
-			//  support for this report was removed in version 4.4.0, but we still returned empty dataset to avoid
-			//  in the MainWP extension
+			// Support for this report was removed in version 4.4.0, but we still returned empty dataset to avoid issues
+			// in the MainWP extension.
 			return $report;
 		}
 
@@ -1423,7 +1423,7 @@ final class WSAL_AlertManager {
 	}
 
 	/**
-	 * Generate report for MainWP extension.
+	 * Generates report for MainWP extension.
 	 *
 	 * @param array $filters - Filters.
 	 *
@@ -1431,9 +1431,9 @@ final class WSAL_AlertManager {
 	 */
 	private function generate_report( $filters ) {
 		// Check the report format.
-		$report_format = empty( $filters['report-format'] ) ? 'html' : 'csv';
+		$report_format = empty( $filters['report-format'] ) ? 'html' : $filters['report-format'];
 		if ( ! in_array( $report_format, array( 'csv', 'html' ), true ) ) {
-			return false;
+			$report_format = WSAL_Rep_DataFormat::get_default();
 		}
 
 		// Some alert codes or alert groups are needed to run a report.
@@ -1441,14 +1441,12 @@ final class WSAL_AlertManager {
 			return false;
 		}
 
-		$args = WSAL_ReportArgs::build_from_alternative_filters( $filters );
-
+		$args      = WSAL_ReportArgs::build_from_alternative_filters( $filters );
 		$next_date = empty( $filters['nextDate'] ) ? null : $filters['nextDate'];
 		$limit     = empty( $filters['limit'] ) ? 0 : $filters['limit'];
-
 		$last_date = null;
 
-		$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->get_report_data( $args, $next_date, $limit, array(), null );
+		$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->get_report_data( $args, $next_date, $limit );
 
 		if ( ! empty( $results['lastDate'] ) ) {
 			$last_date = $results['lastDate'];

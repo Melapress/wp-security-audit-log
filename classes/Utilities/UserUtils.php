@@ -82,7 +82,7 @@ class WSAL_Utilities_UsersUtils {
 	 *
 	 * @return string HTML representing a tooltip with user's details.
 	 *
-	 * @since 4.4.0.
+	 * @since 4.3.4.
 	 */
 	public static function get_tooltip_user_content( $user ) {
 
@@ -141,7 +141,7 @@ class WSAL_Utilities_UsersUtils {
 	 * @param string|string[] $roles User roles.
 	 *
 	 * @return string
-	 * @since 4.4.0
+	 * @since 4.3.4
 	 */
 	public static function get_roles_label( $roles ) {
 		if ( is_array( $roles ) && count( $roles ) ) {
