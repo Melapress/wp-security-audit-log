@@ -504,7 +504,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     wp_schedule_event( time(), 'daily', 'wsal_delete_logins' );
                 }
 
-                add_filter( 'mainwp_child_extra_execution', array( $this, 'mainwp_dashboard_callback' ), 10, 2 );
+	            add_filter( 'mainwp_child_extra_execution', array( new WSAL_MainWpApi( $this ), 'handle_callback' ), 10, 2 );
 
                 add_action( 'admin_init', array( $this, 'maybe_sync_premium_freemius' ) );
 
@@ -715,133 +715,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
             }
 
             /**
-             * MainWP Dashboard Handler.
-             *
-             * @since 3.2.5
-             *
-             * @param array $info      – Information to return.
-             * @param array $post_data – Post data array from MainWP.
-             * @return mixed
-             */
-            public function mainwp_dashboard_callback( $info, $post_data ) {
-                if ( isset( $post_data['action'] ) ) {
-                    switch ( $post_data['action'] ) {
-                        case 'check_wsal':
-                            $info                 = new stdClass();
-                            $info->wsal_installed = true;
-                            $info->is_premium     = false;
-                            break;
-
-                        case 'get_events':
-                            $limit      = isset( $post_data['events_count'] ) ? $post_data['events_count'] : false;
-                            $offset     = isset( $post_data['events_offset'] ) ? $post_data['events_offset'] : false;
-                            $query_args = isset( $post_data['query_args'] ) ? $post_data['query_args'] : false;
-                            $info       = $this->alerts->get_mainwp_extension_events( $limit, $offset, $query_args );
-                            break;
-
-                        case 'get_report':
-                            $filters     = isset( $post_data['filters'] ) ? $post_data['filters'] : array();
-                            $report_type = isset( $post_data['report_type'] ) ? $post_data['report_type'] : false;
-                            $info        = $this->alerts->get_mainwp_extension_report( $filters, $report_type );
-                            break;
-
-                        case 'latest_event':
-                            // run the query and return it.
-                            $event = $this->query_for_latest_event();
-                            $event = $event->getAdapter()->Execute( $event );
-
-                            // Set the return object.
-                            if ( isset( $event[0] ) ) {
-                                $info             = new stdClass();
-                                $info->alert_id   = $event[0]->alert_id;
-                                $info->created_on = $event[0]->created_on;
-                            } else {
-                                $info = false;
-                            }
-                            break;
-                        case 'enforce_settings':
-                            //  check subaction
-                            if ( ! array_key_exists( 'subaction', $post_data) || empty( $post_data['subaction'] ) )  {
-                                $info = array(
-                                    'success' => 'no',
-                                    'message' => 'Missing subaction parameter.'
-                                );
-                                break;
-                            }
-
-                            $subaction = filter_var( $post_data['subaction'], FILTER_SANITIZE_STRING);
-                            if ( ! in_array( $subaction, [ 'update', 'remove' ] ) ) {
-                                $info = array(
-                                    'success' => 'no',
-                                    'message' => 'Unsupported subaction parameter value.'
-                                );
-                                break;
-                            }
-
-                            if ( 'update' === $subaction ) {
-                                //  store the enforced settings in local database (used for example to disable related parts
-                                //  of the settings UI
-                                $settings_to_enforce = $post_data[ 'settings'];
-                                $this->settings()->set_mainwp_enforced_settings( $settings_to_enforce );
-
-                                //  change the existing settings
-                                if ( array_key_exists( 'pruning_enabled', $settings_to_enforce ) ) {
-                                    $this->settings()->SetPruningDateEnabled( $settings_to_enforce['pruning_enabled'] );
-                                    if ( array_key_exists( 'pruning_date', $settings_to_enforce ) && array_key_exists( 'pruning_unit', $settings_to_enforce) ) {
-                                        $this->settings()->SetPruningDate($settings_to_enforce[ 'pruning_date' ] . ' ' . $settings_to_enforce[ 'pruning_unit' ]);
-                                        $this->settings()->set_pruning_unit( $settings_to_enforce[ 'pruning_unit' ] );
-                                    }
-                                }
-
-                                if ( array_key_exists( 'disabled_events', $settings_to_enforce ) ) {
-                                    $disabled_event_ids = array_key_exists( 'disabled_events', $settings_to_enforce ) ? array_map( 'intval', explode( ',', $settings_to_enforce['disabled_events'] ) ) : [];
-                                    $this->alerts->SetDisabledAlerts( $disabled_event_ids );
-                                }
-
-                                if (array_key_exists('incognito_mode_enabled', $settings_to_enforce)) {
-                                    $this->settings()->SetIncognito($settings_to_enforce['incognito_mode_enabled']);
-                                }
-
-                                if (array_key_exists('login_notification_enabled', $settings_to_enforce)) {
-                                    $login_page_notification_enabled = $settings_to_enforce['login_notification_enabled'];
-                                    $this->settings()->set_login_page_notification($login_page_notification_enabled);
-                                    if ('yes' === $login_page_notification_enabled) {
-                                        $this->settings()->set_login_page_notification_text($settings_to_enforce['login_notification_text']);
-                                    }
-                                }
-
-                            } else if ( 'remove' === $subaction ) {
-                                $this->settings()->delete_mainwp_enforced_settings();
-                            }
-
-                            $info = array(
-                                'success' => 'yes'
-                            );
-                            $this->alerts->Trigger( 6043 );
-                        default:
-                            break;
-                    }
-                }
-                return $info;
-            }
-
-            /**
-             * Performs a query to retrieve the latest event in the logs.
-             *
-             * @method query_for_latest_event
-             * @since  4.0.3
-             * @return array
-             */
-            public function query_for_latest_event() {
-                $event_query = new WSAL_Models_OccurrenceQuery();
-                // order by creation.
-                $event_query->addOrderBy( 'created_on', true );
-                // only request 1 item.
-                $event_query->setLimit( 1 );
-                return $event_query;
-            }
-
-            /**
              * Method: WSAL plugin redirect.
              */
             public function wsal_plugin_redirect() {
@@ -1036,27 +909,33 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 );
             }
 
-            /**
-             * Limited License Activation Error.
-             *
-             * @param string $error - Error Message.
-             * @return string
-             */
-            public function limited_license_activation_error( $error ) {
-                $site_count = null;
-                preg_match( '!\d+!', $error, $site_count );
+			/**
+			 * Limited License Activation Error.
+			 *
+			 * @param string $error - Error Message.
+			 *
+			 * @return string
+			 */
+			public function limited_license_activation_error( $error ) {
+				// We only process error if it's some sort of string message.
+				if ( ! is_string( $error ) ) {
+					return $error;
+				}
 
-                // Check if this is an expired error.
-                if ( strpos( $error, 'expired' ) !== false ) {
-                    /* Translators: Expired message and time */
-                    $error = sprintf( esc_html__( '%s You need to renew your license to continue using premium features.', 'wp-security-audit-log' ), preg_replace('/\([^)]+\)/','', $error ) );
-                }
-                elseif ( ! empty( $site_count[0] ) ) {
-                    /* Translators: Number of sites */
-                    $error = sprintf( esc_html__( 'The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network.', 'wp-security-audit-log' ), $site_count[0] );
-                }
-                return $error;
-            }
+				$site_count = null;
+				preg_match( '!\d+!', $error, $site_count );
+
+				// Check if this is an expired error.
+				if ( strpos( $error, 'expired' ) !== false ) {
+					/* Translators: Expired message and time */
+					$error = sprintf( esc_html__( '%s You need to renew your license to continue using premium features.', 'wp-security-audit-log' ), preg_replace( '/\([^)]+\)/', '', $error ) );
+				} elseif ( ! empty( $site_count[0] ) ) {
+					/* Translators: Number of sites */
+					$error = sprintf( esc_html__( 'The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network.', 'wp-security-audit-log' ), $site_count[0] );
+				}
+
+				return $error;
+			}
 
             /**
              * Start to trigger the events after installation.
@@ -1939,7 +1818,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $old_value     = get_option( $option_name );
 
                 //  determine new value via Freemius SDK
-                $new_value = wsal_freemius()->is_registered() && wsal_freemius()->has_active_valid_license() ? 'yes' : 'no';
+                $new_value = wsal_freemius()->has_active_valid_license() ? 'yes' : 'no';
 
                 //  update the db option only if the value changed
                 if ($new_value != $old_value) {

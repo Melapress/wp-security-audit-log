@@ -32,7 +32,7 @@ class WSAL_Utilities_OpCacheUtils {
 	 */
 	public static function clear_caches( $response, array $hook_extra ) {
 		if ( ( array_key_exists( 'type', $hook_extra ) && 'plugin' === $hook_extra['type'] )
-			|| array_key_exists( 'plugin', $hook_extra ) ) {
+		     || array_key_exists( 'plugin', $hook_extra ) ) {
 			if ( self::is_iis() ) {
 				self::clear_iis_wincache();
 			} else {
@@ -82,12 +82,12 @@ class WSAL_Utilities_OpCacheUtils {
 		}
 
 		$opcache_status = opcache_get_status();
-		if ( ! array_key_exists( 'opcache_enabled', $opcache_status ) || false === $opcache_status['opcache_enabled'] ) {
+		if ( ! is_array( $opcache_status ) || ! array_key_exists( 'opcache_enabled', $opcache_status ) || false === $opcache_status['opcache_enabled'] ) {
 			// Extension loaded but OPcache not enabled.
 			return;
 		}
 
-		if ( ! opcache_reset() ) {
+		if ( ! function_exists( 'opcache_reset' ) || ! opcache_reset() ) {
 			return false;
 		}
 
@@ -101,8 +101,10 @@ class WSAL_Utilities_OpCacheUtils {
 		 *   memory is completely cleared"
 		 */
 		if ( array_key_exists( 'scripts', $opcache_status ) && ! empty( $opcache_status['scripts'] ) ) {
-			foreach ( $opcache_status['scripts'] as $key => $data ) {
-				opcache_invalidate( $data['full_path'], true );
+			if ( function_exists( 'opcache_invalidate' ) ) {
+				foreach ( $opcache_status['scripts'] as $data ) {
+					opcache_invalidate( $data['full_path'], true );
+				}
 			}
 		}
 
