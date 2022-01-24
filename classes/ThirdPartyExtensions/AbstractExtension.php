@@ -104,5 +104,13 @@ if ( ! class_exists( 'WSAL_AbstractExtension' ) ) {
 
 		abstract public function get_color();
 
+		/**
+		 * Gets the filename of the plugin this extension is targetting.
+		 *
+		 * @return string Filename.
+		 *
+		 * @since latest
+		 */
+		abstract public function get_plugin_filename();
 	}
 }

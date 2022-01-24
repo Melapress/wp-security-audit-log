@@ -1194,22 +1194,31 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function maybe_build_teaser_html( $event_meta ) {
 		$result = '';
-		if ( array_key_exists( 'PostType', $event_meta ) ) {
-			$extension = WSAL_AbstractExtension::get_extension_for_post_type( $event_meta['PostType'] );
-			if ( ! is_null( $extension ) ) {
-				$result      .= '<div class="extension-ad" style="border-color: transparent transparent ' . $extension->get_color() . ' transparent;">';
-				$result      .= '</div>';
-				$plugin_name = $extension->get_plugin_name();
-				$link_title  = sprintf(
-					esc_html__( 'Install the activity log extension for %1$s for more detailed logging of changes done in %2$s.', 'wp-security-audit-log' ),
-					$plugin_name,
-					$plugin_name
-				);
-				$result      .= '<a class="icon" title="' . $link_title . '" href="' . $this->get_third_party_plugins_tab_url() . '">';
-				$result      .= '<img src="' . $extension->get_plugin_icon_url() . '" />';
-				$result      .= '</div>';
-			}
+		if ( ! array_key_exists( 'PostType', $event_meta ) ) {
+			return $result;
 		}
+
+		$extension = WSAL_AbstractExtension::get_extension_for_post_type( $event_meta['PostType'] );
+		if ( is_null( $extension ) ) {
+			return $result;
+		}
+
+		$plugin_filename = $extension->get_plugin_filename();
+		if ( WSAL_PluginInstallAndActivate::is_plugin_installed( $plugin_filename ) && WpSecurityAuditLog::is_plugin_active( $plugin_filename ) ) {
+			return $result;
+		}
+
+		$result      .= '<div class="extension-ad" style="border-color: transparent transparent ' . $extension->get_color() . ' transparent;">';
+		$result      .= '</div>';
+		$plugin_name = $extension->get_plugin_name();
+		$link_title  = sprintf(
+			esc_html__( 'Install the activity log extension for %1$s for more detailed logging of changes done in %2$s.', 'wp-security-audit-log' ),
+			$plugin_name,
+			$plugin_name
+		);
+		$result      .= '<a class="icon" title="' . $link_title . '" href="' . $this->get_third_party_plugins_tab_url() . '">';
+		$result      .= '<img src="' . $extension->get_plugin_icon_url() . '" />';
+		$result      .= '</div>';
 
 		return $result;
 	}

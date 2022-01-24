@@ -14,7 +14,7 @@ if ( ! class_exists( 'WSAL_WFCMExtension' ) ) {
 					'addon_for'          => 'wfcm',
 					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'wfcm.png',
-					'plugin_slug'        => 'website-file-changes-monitor/website-file-changes-monitor.php',
+					'plugin_slug'        => $this->get_plugin_filename(),
 					'plugin_basename'    => 'website-file-changes-monitor.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip',
 					'event_tab_id'       => '#cat-wfcm',
@@ -108,6 +108,10 @@ if ( ! class_exists( 'WSAL_WFCMExtension' ) ) {
 			}
 
 			return $body;
+		}
+
+		public function get_plugin_filename() {
+			return 'website-file-changes-monitor/website-file-changes-monitor.php';
 		}
 	}
 }

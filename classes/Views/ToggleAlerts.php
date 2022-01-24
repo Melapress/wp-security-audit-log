@@ -83,6 +83,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		// Save enabled front end events.
 		WSAL_Settings::set_frontend_events( $frontend_events );
 
+		// Ensure we attempt to save even if eveything is disabled.
+		$post_array['alert'] = ( isset( $post_array['alert'] ) ) ? $post_array['alert'] : [];
+
 		$enabled           = array_map( 'intval', $post_array['alert'] );
 		$disabled          = array();
 		$registered_alerts = $this->_plugin->alerts->GetAlerts();
@@ -112,7 +115,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		// Filter $_POST array.
 		$post_array = filter_input_array( INPUT_POST );
 
-		if ( isset( $post_array['submit'] ) && isset( $post_array['alert'] ) ) {
+		if ( isset( $post_array['submit'] ) ) {
 			check_admin_referer( 'wsal-togglealerts' );
 			try {
 				$this->save();
@@ -415,13 +418,12 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													<?php
 												}
 
-												if ( 1003 === $alert->code ) {
+												if ( 1000 === $alert->code ) {
 													$frontend_events        = WSAL_Settings::get_frontend_events();
 													?>
 													<tr class="alert-wrapper" data-alert-cat="Users Logins & Sessions Events" data-alert-subcat="User Activity">
-														<th>
-															<input type="checkbox" name="frontend-events[login]" id="frontend-events-login" value="1" <?php checked( $frontend_events['login'] ); ?>>
-														</th>
+														<td></td>
+														<td><input type="checkbox" name="frontend-events[login]" id="frontend-events-login" value="1" <?php checked( $frontend_events['login'] ); ?>></td>														
 														<td colspan="3">
 															<label for="frontend-events-login"><?php esc_html_e( 'Keep a log of user log in activity on custom login forms (such as WooCommerce & membership plugins)', 'wp-security-audit-log' ); ?></label>
 														</td>
@@ -767,11 +769,11 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				});
 				// checkbox handling code
 				jQuery('#event-toggle-table thead>tr>th>:checkbox').change(function(){
-					jQuery(this).parents('table:first').find('tbody>tr>th>:checkbox').attr('checked', this.checked);
+					jQuery(this).parents('table:first').find('tbody>tr:visible>th>:checkbox').attr('checked', this.checked);
 				});
 				jQuery('#event-toggle-table tr checkbox').change(function(){
 					var allchecked = jQuery(this).parents('tbody:first').find('th>:checkbox:not(:checked)').length === 0;
-					jQuery(this).parents('table:first').find('thead>tr>th:first>:checkbox:first').attr('checked', allchecked);
+					jQuery(this).parents('table:first').find('thead>tr:visible>th:first>:checkbox:first').attr('checked', allchecked);
 				});
 
 				var hashlink = jQuery('#wsal-tabs>a[href="' + location.hash + '"]');

@@ -40,7 +40,7 @@ msgstr ""
 msgid "Users Logins & Sessions Events"
 msgstr ""
 
-#: defaults.php:191, extensions/email-notifications/classes/Notifications.php:1266
+#: defaults.php:191, extensions/email-notifications/classes/Notifications.php:1267
 msgid "User Activity"
 msgstr ""
 
@@ -92,7 +92,7 @@ msgstr ""
 msgid "User logged in however there are other session(s) already for this user."
 msgstr ""
 
-#: defaults.php:250, extensions/reports/classes/Common.php:1737
+#: defaults.php:250, extensions/reports/classes/Common.php:1759
 msgid "IP address(es)"
 msgstr ""
 
@@ -628,7 +628,7 @@ msgstr ""
 msgid "Renamed the custom field %MetaKeyOld% on post %PostTitle% to %MetaKeNew%."
 msgstr ""
 
-#: defaults.php:932, classes/AlertManager.php:1073
+#: defaults.php:932, classes/AlertManager.php:1012
 msgid "Post"
 msgstr ""
 
@@ -788,11 +788,11 @@ msgstr ""
 msgid "Moved the %WidgetName% widget."
 msgstr ""
 
-#: defaults.php:1191, extensions/reports/inc/wsal-reporting-view.inc.php:1507
+#: defaults.php:1191, extensions/reports/inc/wsal-reporting-view.inc.php:1483
 msgid "From"
 msgstr ""
 
-#: defaults.php:1192, extensions/reports/inc/wsal-reporting-view.inc.php:1516
+#: defaults.php:1192, extensions/reports/inc/wsal-reporting-view.inc.php:1492
 msgid "To"
 msgstr ""
 
@@ -1396,7 +1396,7 @@ msgstr ""
 msgid "A new user %NewUserData->Username% is created via registration."
 msgstr ""
 
-#: defaults.php:1706, classes/AlertManager.php:1069, classes/AuditLogListView.php:272, classes/AuditLogListView.php:306, classes/WidgetManager.php:76, classes/Views/Settings.php:1086, extensions/reports/classes/AbstractReportGenerator.php:159, extensions/search/classes/Filters/UserNameFilter.php:31, extensions/user-sessions/classes/View/Sessions.php:140
+#: defaults.php:1706, classes/AlertManager.php:1008, classes/AuditLogListView.php:272, classes/AuditLogListView.php:306, classes/WidgetManager.php:76, classes/Views/Settings.php:1086, extensions/reports/classes/AbstractReportGenerator.php:159, extensions/search/classes/Filters/UserNameFilter.php:31, extensions/user-sessions/classes/View/Sessions.php:140
 msgid "User"
 msgstr ""
 
@@ -1736,7 +1736,7 @@ msgstr ""
 msgid "The plugin created the post %PostTitle%."
 msgstr ""
 
-#: defaults.php:2180, defaults.php:2195, classes/AlertManager.php:1071, classes/AuditLogGridView.php:426, classes/AuditLogListView.php:436
+#: defaults.php:2180, defaults.php:2195, classes/AlertManager.php:1010, classes/AuditLogGridView.php:426, classes/AuditLogListView.php:436
 msgid "Plugin"
 msgstr ""
 
@@ -1844,7 +1844,7 @@ msgstr ""
 msgid "WordPress & System"
 msgstr ""
 
-#: defaults.php:2336, classes/AlertManager.php:1070, classes/AlertManager.php:1659, classes/AuditLogGridView.php:435, classes/AuditLogListView.php:442, extensions/email-notifications/classes/DailyNotification.php:243, extensions/email-notifications/classes/Notifier.php:659, extensions/reports/classes/Common.php:1108
+#: defaults.php:2336, classes/AlertManager.php:1009, classes/AlertManager.php:1375, classes/AuditLogGridView.php:435, classes/AuditLogListView.php:442, extensions/email-notifications/classes/DailyNotification.php:243, extensions/email-notifications/classes/Notifier.php:659, extensions/reports/classes/Common.php:1108
 msgid "System"
 msgstr ""
 
@@ -2738,155 +2738,155 @@ msgstr ""
 
 #. translators: User's first name
 #. translators: User's first name
-#: wp-security-audit-log.php:947, wp-security-audit-log.php:975
+#: wp-security-audit-log.php:820, wp-security-audit-log.php:848
 msgid "Hey %s"
 msgstr ""
 
-#: wp-security-audit-log.php:951
+#: wp-security-audit-log.php:824
 msgid "Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com."
 msgstr ""
 
-#: wp-security-audit-log.php:952, wp-security-audit-log.php:987
+#: wp-security-audit-log.php:825, wp-security-audit-log.php:860
 msgid "Note: "
 msgstr ""
 
-#: wp-security-audit-log.php:953, wp-security-audit-log.php:988
+#: wp-security-audit-log.php:826, wp-security-audit-log.php:861
 msgid "NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS."
 msgstr ""
 
 #. translators: 1: Plugin name. 2: Plugin name. 2: Freemius link. 4: Plugin name.
-#: wp-security-audit-log.php:981
+#: wp-security-audit-log.php:854
 msgid "Please help us improve %1$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %3$s, a diagnostic tracking service we use. If you skip this, that's okay! %2$s will still work just fine."
 msgstr ""
 
-#: wp-security-audit-log.php:1033
+#: wp-security-audit-log.php:906
 msgid "You need to activate the licence key to use WP Activity Log Premium. %2$s"
 msgstr ""
 
-#: wp-security-audit-log.php:1034
+#: wp-security-audit-log.php:907
 msgid "Activate the licence key now"
 msgstr ""
 
 #. translators: Number of sites
-#: wp-security-audit-log.php:1056
+#: wp-security-audit-log.php:934
 msgid "The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network."
 msgstr ""
 
-#: wp-security-audit-log.php:1052
+#: wp-security-audit-log.php:931
 msgid "%s You need to renew your license to continue using premium features."
 msgstr ""
 
-#: wp-security-audit-log.php:1157
+#: wp-security-audit-log.php:1036
 msgid "Error: You do not have sufficient permissions to disable this custom field."
 msgstr ""
 
 #. translators: name of meta field (in bold)
-#: wp-security-audit-log.php:1205
+#: wp-security-audit-log.php:1084
 msgid "Custom field %s is no longer being monitored."
 msgstr ""
 
 #. translators: setting tab name "Excluded Objects"
-#: wp-security-audit-log.php:1210
+#: wp-security-audit-log.php:1089
 msgid "Enable the monitoring of this custom field again from the %s tab in the plugin settings."
 msgstr ""
 
-#: wp-security-audit-log.php:1211
+#: wp-security-audit-log.php:1090
 msgid "Excluded Objects"
 msgstr ""
 
-#: wp-security-audit-log.php:1224
+#: wp-security-audit-log.php:1103
 msgid "Error: You do not have sufficient permissions to disable this alert."
 msgstr ""
 
-#: wp-security-audit-log.php:1248
+#: wp-security-audit-log.php:1127
 msgid "Alert %1$s is no longer being monitored.<br /> %2$s"
 msgstr ""
 
-#: wp-security-audit-log.php:1248
+#: wp-security-audit-log.php:1127
 msgid "You can enable this alert again from the Enable/Disable Alerts node in the plugin menu."
 msgstr ""
 
-#: wp-security-audit-log.php:1273, classes/Views/SetupWizard.php:270
+#: wp-security-audit-log.php:1152, classes/Views/SetupWizard.php:270
 msgid "Installing, please wait"
 msgstr ""
 
-#: wp-security-audit-log.php:1274, classes/Views/SetupWizard.php:271
+#: wp-security-audit-log.php:1153, classes/Views/SetupWizard.php:271
 msgid "Already installed"
 msgstr ""
 
-#: wp-security-audit-log.php:1275, classes/Utilities/PluginInstallAndActivate.php:108, classes/Views/SetupWizard.php:272, classes/Views/SetupWizard.php:842
+#: wp-security-audit-log.php:1154, classes/Utilities/PluginInstallAndActivate.php:108, classes/Views/SetupWizard.php:272, classes/Views/SetupWizard.php:842
 msgid "Extension installed"
 msgstr ""
 
-#: wp-security-audit-log.php:1276, classes/Views/SetupWizard.php:273
+#: wp-security-audit-log.php:1155, classes/Views/SetupWizard.php:273
 msgid "Extension activated"
 msgstr ""
 
-#: wp-security-audit-log.php:1277, classes/Views/SetupWizard.php:274
+#: wp-security-audit-log.php:1156, classes/Views/SetupWizard.php:274
 msgid "Install failed"
 msgstr ""
 
-#: wp-security-audit-log.php:1278, classes/Views/SetupWizard.php:275
+#: wp-security-audit-log.php:1157, classes/Views/SetupWizard.php:275
 msgid "Reloading page"
 msgstr ""
 
 #. translators: %s: PHP Version
-#: wp-security-audit-log.php:1329
+#: wp-security-audit-log.php:1208
 msgid "You are using a version of PHP that is older than %s, which is no longer supported."
 msgstr ""
 
-#: wp-security-audit-log.php:1331
+#: wp-security-audit-log.php:1210
 msgid "Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using."
 msgstr ""
 
 #. translators: %s: Activity Log for MainWP plugin hyperlink
-#: wp-security-audit-log.php:1336
+#: wp-security-audit-log.php:1215
 msgid "Please install the %s plugin on the MainWP dashboard."
 msgstr ""
 
-#: wp-security-audit-log.php:1336
+#: wp-security-audit-log.php:1215
 msgid "Activity Log for MainWP"
 msgstr ""
 
 #. translators: %s: Getting started guide hyperlink
-#: wp-security-audit-log.php:1338
+#: wp-security-audit-log.php:1217
 msgid "The WP Activity Log should be installed on the child sites only. Refer to the %s for more information."
 msgstr ""
 
-#: wp-security-audit-log.php:1338
+#: wp-security-audit-log.php:1217
 msgid "getting started guide"
 msgstr ""
 
-#: wp-security-audit-log.php:1842
+#: wp-security-audit-log.php:1721
 msgid "For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href=\"https://wpactivitylog.com/\" target=\"_blank\">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from."
 msgstr ""
 
-#: wp-security-audit-log.php:1861
+#: wp-security-audit-log.php:1740
 msgid "Every 6 hours"
 msgstr ""
 
-#: wp-security-audit-log.php:1865
+#: wp-security-audit-log.php:1744
 msgid "Every 45 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1869
+#: wp-security-audit-log.php:1748
 msgid "Every 30 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1873
+#: wp-security-audit-log.php:1752
 msgid "Every 15 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1877
+#: wp-security-audit-log.php:1756
 msgid "Every 10 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1881
+#: wp-security-audit-log.php:1760
 msgid "Every 1 minute"
 msgstr ""
 
 #. translators: 1. Deprecated method name 2. Version since deprecated
-#: wp-security-audit-log.php:1895
+#: wp-security-audit-log.php:1774
 msgid "Method %1$s is deprecated since version %2$s!"
 msgstr ""
 
@@ -2907,233 +2907,233 @@ msgid "published"
 msgstr ""
 
 #. translators: Event ID
-#: classes/AlertManager.php:358
+#: classes/AlertManager.php:362
 msgid "Event with code %d has not be registered."
 msgstr ""
 
 #. translators: Event ID
-#: classes/AlertManager.php:443
+#: classes/AlertManager.php:447
 msgid "Event %s already registered with WP Activity Log."
 msgstr ""
 
-#: classes/AlertManager.php:488
+#: classes/AlertManager.php:492
 msgid "You have custom events that are using the same ID or IDs which are already registered in the plugin, so they have been disabled."
 msgstr ""
 
 #. translators: 1.CSS classes, 2. Notice, 3. Contact us link
-#: classes/AlertManager.php:491
+#: classes/AlertManager.php:495
 msgid "%4$s to help you solve this issue."
 msgstr ""
 
-#: classes/AlertManager.php:493
+#: classes/AlertManager.php:497
 msgid "ERROR:"
 msgstr ""
 
-#: classes/AlertManager.php:495
+#: classes/AlertManager.php:499
 msgid "Contact us"
 msgstr ""
 
-#: classes/AlertManager.php:1072
+#: classes/AlertManager.php:1011
 msgid "Database"
 msgstr ""
 
-#: classes/AlertManager.php:1074, classes/AlertManager.php:1078
+#: classes/AlertManager.php:1013, classes/AlertManager.php:1017
 msgid "File"
 msgstr ""
 
-#: classes/AlertManager.php:1075
+#: classes/AlertManager.php:1014
 msgid "Tag"
 msgstr ""
 
-#: classes/AlertManager.php:1076
+#: classes/AlertManager.php:1015
 msgid "Comment"
 msgstr ""
 
-#: classes/AlertManager.php:1077
+#: classes/AlertManager.php:1016
 msgid "Setting"
 msgstr ""
 
-#: classes/AlertManager.php:1079
+#: classes/AlertManager.php:1018
 msgid "System Setting"
 msgstr ""
 
-#: classes/AlertManager.php:1080
+#: classes/AlertManager.php:1019
 msgid "MainWP Network"
 msgstr ""
 
-#: classes/AlertManager.php:1081
+#: classes/AlertManager.php:1020
 msgid "MainWP"
 msgstr ""
 
-#: classes/AlertManager.php:1082
+#: classes/AlertManager.php:1021
 msgid "Category"
 msgstr ""
 
-#: classes/AlertManager.php:1083
+#: classes/AlertManager.php:1022
 msgid "Custom Field"
 msgstr ""
 
-#: classes/AlertManager.php:1084
+#: classes/AlertManager.php:1023
 msgid "Widget"
 msgstr ""
 
-#: classes/AlertManager.php:1085
+#: classes/AlertManager.php:1024
 msgid "Menu"
 msgstr ""
 
-#: classes/AlertManager.php:1086
+#: classes/AlertManager.php:1025
 msgid "Theme"
 msgstr ""
 
-#: classes/AlertManager.php:1087
+#: classes/AlertManager.php:1026
 msgid "Activity log"
 msgstr ""
 
-#: classes/AlertManager.php:1088
+#: classes/AlertManager.php:1027
 msgid "WP Activity Log"
 msgstr ""
 
-#: classes/AlertManager.php:1089
+#: classes/AlertManager.php:1028
 msgid "Multisite Network"
 msgstr ""
 
-#: classes/AlertManager.php:1090, extensions/email-notifications/classes/Common.php:1117, extensions/search/classes/Filters/IpFilter.php:71, extensions/user-sessions/classes/View/Sessions.php:375
+#: classes/AlertManager.php:1029, extensions/email-notifications/classes/Common.php:1117, extensions/search/classes/Filters/IpFilter.php:71, extensions/user-sessions/classes/View/Sessions.php:375
 msgid "IP Address"
 msgstr ""
 
-#: classes/AlertManager.php:1106
+#: classes/AlertManager.php:1045
 msgid "unknown object"
 msgstr ""
 
-#: classes/AlertManager.php:1143
+#: classes/AlertManager.php:1082
 msgid "Login"
 msgstr ""
 
-#: classes/AlertManager.php:1144
+#: classes/AlertManager.php:1083
 msgid "Logout"
 msgstr ""
 
-#: classes/AlertManager.php:1145
+#: classes/AlertManager.php:1084
 msgid "Installed"
 msgstr ""
 
-#: classes/AlertManager.php:1146
+#: classes/AlertManager.php:1085
 msgid "Activated"
 msgstr ""
 
-#: classes/AlertManager.php:1147
+#: classes/AlertManager.php:1086
 msgid "Deactivated"
 msgstr ""
 
-#: classes/AlertManager.php:1148
+#: classes/AlertManager.php:1087
 msgid "Uninstalled"
 msgstr ""
 
-#: classes/AlertManager.php:1149
+#: classes/AlertManager.php:1088
 msgid "Updated"
 msgstr ""
 
-#: classes/AlertManager.php:1150, extensions/user-sessions/classes/View/Sessions.php:145
+#: classes/AlertManager.php:1089, extensions/user-sessions/classes/View/Sessions.php:145
 msgid "Created"
 msgstr ""
 
-#: classes/AlertManager.php:1151
+#: classes/AlertManager.php:1090
 msgid "Modified"
 msgstr ""
 
-#: classes/AlertManager.php:1152, extensions/search/search-init.php:299
+#: classes/AlertManager.php:1091, extensions/search/search-init.php:299
 msgid "Deleted"
 msgstr ""
 
-#: classes/AlertManager.php:1153, extensions/reports/classes/AbstractReportGenerator.php:122
+#: classes/AlertManager.php:1092, extensions/reports/classes/AbstractReportGenerator.php:122
 msgid "Published"
 msgstr ""
 
-#: classes/AlertManager.php:1154
+#: classes/AlertManager.php:1093
 msgid "Approved"
 msgstr ""
 
-#: classes/AlertManager.php:1155
+#: classes/AlertManager.php:1094
 msgid "Unapproved"
 msgstr ""
 
-#: classes/AlertManager.php:1156, extensions/external-db/classes/Mirroring.php:168
+#: classes/AlertManager.php:1095, extensions/external-db/classes/Mirroring.php:168
 msgid "Enabled"
 msgstr ""
 
-#: classes/AlertManager.php:1157, extensions/email-notifications/classes/Notifications.php:1695, extensions/external-db/classes/Mirroring.php:170
+#: classes/AlertManager.php:1096, extensions/email-notifications/classes/Notifications.php:1696, extensions/external-db/classes/Mirroring.php:170
 msgid "Disabled"
 msgstr ""
 
-#: classes/AlertManager.php:1158
+#: classes/AlertManager.php:1097
 msgid "Added"
 msgstr ""
 
-#: classes/AlertManager.php:1159
+#: classes/AlertManager.php:1098
 msgid "Failed Login"
 msgstr ""
 
-#: classes/AlertManager.php:1160
+#: classes/AlertManager.php:1099
 msgid "Blocked"
 msgstr ""
 
-#: classes/AlertManager.php:1161
+#: classes/AlertManager.php:1100
 msgid "Uploaded"
 msgstr ""
 
-#: classes/AlertManager.php:1162
+#: classes/AlertManager.php:1101
 msgid "Restored"
 msgstr ""
 
-#: classes/AlertManager.php:1163
+#: classes/AlertManager.php:1102
 msgid "Opened"
 msgstr ""
 
-#: classes/AlertManager.php:1164
+#: classes/AlertManager.php:1103
 msgid "Viewed"
 msgstr ""
 
-#: classes/AlertManager.php:1165
+#: classes/AlertManager.php:1104
 msgid "Started"
 msgstr ""
 
-#: classes/AlertManager.php:1166, extensions/external-db/classes/Settings.php:565
+#: classes/AlertManager.php:1105, extensions/external-db/classes/Settings.php:565
 msgid "Stopped"
 msgstr ""
 
-#: classes/AlertManager.php:1167
+#: classes/AlertManager.php:1106
 msgid "Removed"
 msgstr ""
 
-#: classes/AlertManager.php:1168
+#: classes/AlertManager.php:1107
 msgid "Unblocked"
 msgstr ""
 
-#: classes/AlertManager.php:1169
+#: classes/AlertManager.php:1108
 msgid "Renamed"
 msgstr ""
 
-#: classes/AlertManager.php:1170
+#: classes/AlertManager.php:1109
 msgid "Duplicated"
 msgstr ""
 
-#: classes/AlertManager.php:1171
+#: classes/AlertManager.php:1110
 msgid "Submitted"
 msgstr ""
 
-#: classes/AlertManager.php:1172
+#: classes/AlertManager.php:1111
 msgid "Revoked"
 msgstr ""
 
-#: classes/AlertManager.php:1189
+#: classes/AlertManager.php:1128
 msgid "unknown type"
 msgstr ""
 
-#: classes/AlertManager.php:1632, classes/ConstantManager.php:147
+#: classes/AlertManager.php:1348, classes/ConstantManager.php:147
 msgid "Unknown error code."
 msgstr ""
 
-#: classes/AlertManager.php:1715, classes/AlertManager.php:1703, extensions/reports/classes/Common.php:1081, extensions/reports/classes/Common.php:1071
+#: classes/AlertManager.php:1431, classes/AlertManager.php:1419, extensions/reports/classes/Common.php:1081, extensions/reports/classes/Common.php:1071
 msgid "Unknown Site"
 msgstr ""
 
@@ -3165,7 +3165,7 @@ msgstr ""
 msgid "All Sites"
 msgstr ""
 
-#: classes/AuditLogGridView.php:272, classes/AuditLogGridView.php:298, classes/AuditLogListView.php:270, classes/AuditLogListView.php:300, classes/Views/Settings.php:1082, classes/Views/ToggleAlerts.php:213, classes/Views/ToggleAlerts.php:253, extensions/search/classes/Filters/CodeFilter.php:28, extensions/search/classes/Filters/CodeFilter.php:54
+#: classes/AuditLogGridView.php:272, classes/AuditLogGridView.php:298, classes/AuditLogListView.php:270, classes/AuditLogListView.php:300, classes/Views/Settings.php:1082, classes/Views/ToggleAlerts.php:216, classes/Views/ToggleAlerts.php:256, extensions/search/classes/Filters/CodeFilter.php:28, extensions/search/classes/Filters/CodeFilter.php:54
 msgid "Severity"
 msgstr ""
 
@@ -3213,7 +3213,7 @@ msgstr ""
 msgid "Alert Data Inspector"
 msgstr ""
 
-#: classes/AuditLogListView.php:271, classes/AuditLogListView.php:303, extensions/reports/classes/AbstractReportGenerator.php:157, extensions/reports/classes/CsvReportGenerator.php:115, extensions/reports/inc/wsal-reporting-view.inc.php:1725, extensions/search/classes/Filters/DateFilter.php:28
+#: classes/AuditLogListView.php:271, classes/AuditLogListView.php:303, extensions/reports/classes/AbstractReportGenerator.php:157, extensions/reports/classes/CsvReportGenerator.php:115, extensions/reports/inc/wsal-reporting-view.inc.php:1724, extensions/search/classes/Filters/DateFilter.php:28
 msgid "Date"
 msgstr ""
 
@@ -3237,31 +3237,31 @@ msgstr ""
 msgid "Alert description not found."
 msgstr ""
 
-#: classes/ConstantManager.php:173, classes/Views/ToggleAlerts.php:363
+#: classes/ConstantManager.php:173, classes/Views/ToggleAlerts.php:366
 msgid "Informational"
 msgstr ""
 
-#: classes/ConstantManager.php:171, classes/Views/ToggleAlerts.php:361
+#: classes/ConstantManager.php:171, classes/Views/ToggleAlerts.php:364
 msgid "Low"
 msgstr ""
 
-#: classes/ConstantManager.php:169, classes/Views/ToggleAlerts.php:359
+#: classes/ConstantManager.php:169, classes/Views/ToggleAlerts.php:362
 msgid "Medium"
 msgstr ""
 
-#: classes/ConstantManager.php:167, classes/Views/ToggleAlerts.php:357
+#: classes/ConstantManager.php:167, classes/Views/ToggleAlerts.php:360
 msgid "High"
 msgstr ""
 
-#: classes/ConstantManager.php:165, classes/ConstantManager.php:159, classes/Views/ToggleAlerts.php:355, classes/Views/ToggleAlerts.php:349
+#: classes/ConstantManager.php:165, classes/ConstantManager.php:159, classes/Views/ToggleAlerts.php:358, classes/Views/ToggleAlerts.php:352
 msgid "Critical"
 msgstr ""
 
-#: classes/ConstantManager.php:163, classes/Views/ToggleAlerts.php:365, classes/Views/ToggleAlerts.php:353
+#: classes/ConstantManager.php:163, classes/Views/ToggleAlerts.php:368, classes/Views/ToggleAlerts.php:356
 msgid "Notification"
 msgstr ""
 
-#: classes/ConstantManager.php:161, classes/Views/ToggleAlerts.php:351
+#: classes/ConstantManager.php:161, classes/Views/ToggleAlerts.php:354
 msgid "Warning"
 msgstr ""
 
@@ -3317,7 +3317,7 @@ msgstr ""
 msgid "Latest Events"
 msgstr ""
 
-#: classes/WidgetManager.php:79, classes/Views/ToggleAlerts.php:214, classes/Views/ToggleAlerts.php:254
+#: classes/WidgetManager.php:79, classes/Views/ToggleAlerts.php:217, classes/Views/ToggleAlerts.php:257
 msgid "Description"
 msgstr ""
 
@@ -3347,7 +3347,7 @@ msgstr ""
 msgid "Default template"
 msgstr ""
 
-#: classes/Sensors/Content.php:735, extensions/external-db/classes/ExternalStorageTab.php:235
+#: classes/Sensors/Content.php:735, extensions/external-db/classes/ExternalStorageTab.php:256
 msgid "Default"
 msgstr ""
 
@@ -3557,7 +3557,7 @@ msgstr ""
 msgid "Log Viewer"
 msgstr ""
 
-#: classes/Views/AuditLog.php:509, classes/Views/Settings.php:324, classes/Views/ToggleAlerts.php:109, extensions/email-notifications/classes/AddNotification.php:226, extensions/email-notifications/classes/AddNotification.php:259, extensions/email-notifications/classes/EditNotification.php:228, extensions/email-notifications/classes/EditNotification.php:236, extensions/email-notifications/classes/EditNotification.php:232, extensions/email-notifications/classes/EditNotification.php:241, extensions/email-notifications/classes/EditNotification.php:269, extensions/external-db/classes/Settings.php:234
+#: classes/Views/AuditLog.php:509, classes/Views/Settings.php:324, classes/Views/ToggleAlerts.php:112, extensions/email-notifications/classes/AddNotification.php:226, extensions/email-notifications/classes/AddNotification.php:259, extensions/email-notifications/classes/EditNotification.php:228, extensions/email-notifications/classes/EditNotification.php:236, extensions/email-notifications/classes/EditNotification.php:232, extensions/email-notifications/classes/EditNotification.php:241, extensions/email-notifications/classes/EditNotification.php:269, extensions/external-db/classes/Settings.php:234
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
@@ -3622,7 +3622,7 @@ msgstr ""
 msgid "Access Denied"
 msgstr ""
 
-#: classes/Views/AuditLog.php:1204
+#: classes/Views/AuditLog.php:1215
 msgid "Install the activity log extension for %1$s for more detailed logging of changes done in %2$s."
 msgstr ""
 
@@ -4038,7 +4038,7 @@ msgstr ""
 msgid "Invalid input."
 msgstr ""
 
-#: classes/Views/Settings.php:340, classes/Views/ToggleAlerts.php:121, extensions/external-db/classes/Settings.php:247
+#: classes/Views/Settings.php:340, classes/Views/ToggleAlerts.php:124, extensions/external-db/classes/Settings.php:247
 msgid "Settings have been saved."
 msgstr ""
 
@@ -4046,7 +4046,7 @@ msgstr ""
 msgid "Message sent successfully."
 msgstr ""
 
-#: classes/Views/Settings.php:346, classes/Views/ToggleAlerts.php:127, extensions/external-db/classes/Settings.php:252, extensions/user-sessions/classes/View/Sessions.php:130
+#: classes/Views/Settings.php:346, classes/Views/ToggleAlerts.php:130, extensions/external-db/classes/Settings.php:252, extensions/user-sessions/classes/View/Sessions.php:130
 msgid "Error: "
 msgstr ""
 
@@ -4819,112 +4819,112 @@ msgstr ""
 msgid "Enable/Disable Events"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:158
+#: classes/Views/ToggleAlerts.php:161
 msgid "Basic"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:159
+#: classes/Views/ToggleAlerts.php:162
 msgid "Geek"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:160
+#: classes/Views/ToggleAlerts.php:163
 msgid "Custom"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:178
+#: classes/Views/ToggleAlerts.php:181
 msgid "Enable/Disable alerts"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:180
+#: classes/Views/ToggleAlerts.php:183
 msgid "Third party plugins"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:191
+#: classes/Views/ToggleAlerts.php:194
 msgid "Log Level: "
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:198
+#: classes/Views/ToggleAlerts.php:201
 msgid "Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href=\"https://wpactivitylog.com/support/kb/list-wordpress-activity-log-event-ids/\" target=\"_blank\">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of."
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:210
+#: classes/Views/ToggleAlerts.php:213
 msgid "Choose your query and enter your search term"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:212
+#: classes/Views/ToggleAlerts.php:215
 msgid "Event code"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:218
+#: classes/Views/ToggleAlerts.php:221
 msgid "OR"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:220
+#: classes/Views/ToggleAlerts.php:223
 msgid "Choose a category"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:222
+#: classes/Views/ToggleAlerts.php:225
 msgid "All categories"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:252, extensions/reports/classes/AbstractReportGenerator.php:155
+#: classes/Views/ToggleAlerts.php:255, extensions/reports/classes/AbstractReportGenerator.php:155
 msgid "Code"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:303
+#: classes/Views/ToggleAlerts.php:306
 msgid "Please activate WooCommerce to enable this alert"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:311
+#: classes/Views/ToggleAlerts.php:314
 msgid "Please activate the Yoast SEO Plugin"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:319
+#: classes/Views/ToggleAlerts.php:322
 msgid "Your website is a single site so the multisite events have been disabled."
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:385
+#: classes/Views/ToggleAlerts.php:388
 msgid "Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress."
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:399, classes/Views/ToggleAlerts.php:412
+#: classes/Views/ToggleAlerts.php:402, classes/Views/ToggleAlerts.php:415
 msgid "Number of login attempts to log. Enter 0 to log all failed login attempts. (By default the plugin only logs up to 10 failed login because the process can be very resource intensive in case of a brute force attack)"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:426
+#: classes/Views/ToggleAlerts.php:428
 msgid "Keep a log of user log in activity on custom login forms (such as WooCommerce & membership plugins)"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:441
+#: classes/Views/ToggleAlerts.php:443
 msgid "Save Changes"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:456
+#: classes/Views/ToggleAlerts.php:458
 msgid "Log Level Updated"
 msgstr ""
 
 #. translators: Alerts log level.
-#: classes/Views/ToggleAlerts.php:460
+#: classes/Views/ToggleAlerts.php:462
 msgid "The %s log level has been successfully loaded and applied."
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:464, extensions/settings-import-export/settings-import-export.php:75, extensions/email-notifications/classes/Notifications.php:347, extensions/email-notifications/classes/Notifications.php:979, extensions/email-notifications/classes/Notifications.php:1809
+#: classes/Views/ToggleAlerts.php:466, extensions/settings-import-export/settings-import-export.php:75, extensions/email-notifications/classes/Notifications.php:347, extensions/email-notifications/classes/Notifications.php:980, extensions/email-notifications/classes/Notifications.php:1810
 msgid "OK"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:479
+#: classes/Views/ToggleAlerts.php:481
 msgid "Enable File Integrity Scanner"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:481
+#: classes/Views/ToggleAlerts.php:483
 msgid "The file integrity scanner is switched off. To enable this event it has to be switched on."
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:485
+#: classes/Views/ToggleAlerts.php:487
 msgid "SWITCH ON"
 msgstr ""
 
-#: classes/Views/ToggleAlerts.php:486
+#: classes/Views/ToggleAlerts.php:488
 msgid "DISABLE EVENT"
 msgstr ""
 
@@ -5065,7 +5065,7 @@ msgstr ""
 msgid "Load & Run"
 msgstr ""
 
-#: extensions/search/search-init.php:297, extensions/email-notifications/classes/NotificationBuilder.php:78, extensions/email-notifications/classes/Notifications.php:1719, extensions/email-notifications/classes/Notifications.php:1782, extensions/email-notifications/classes/Notifications.php:1797, extensions/external-db/classes/Connections.php:159, extensions/external-db/classes/Mirroring.php:135, extensions/reports/inc/wsal-reporting-view.inc.php:1746
+#: extensions/search/search-init.php:297, extensions/email-notifications/classes/NotificationBuilder.php:78, extensions/email-notifications/classes/Notifications.php:1720, extensions/email-notifications/classes/Notifications.php:1783, extensions/email-notifications/classes/Notifications.php:1798, extensions/external-db/classes/Connections.php:159, extensions/external-db/classes/Mirroring.php:135, extensions/reports/inc/wsal-reporting-view.inc.php:1745
 msgid "Delete"
 msgstr ""
 
@@ -5154,7 +5154,7 @@ msgstr ""
 msgid "Please upload a valid JSON file."
 msgstr ""
 
-#: extensions/settings-import-export/settings-import-export.php:71, extensions/email-notifications/classes/Notifications.php:972, extensions/external-db/classes/Connections.php:661, extensions/external-db/classes/ExternalStorageTab.php:176, extensions/external-db/classes/ExternalStorageTab.php:204, extensions/external-db/classes/Mirroring.php:290
+#: extensions/settings-import-export/settings-import-export.php:71, extensions/email-notifications/classes/Notifications.php:973, extensions/external-db/classes/Connections.php:661, extensions/external-db/classes/ExternalStorageTab.php:177, extensions/external-db/classes/ExternalStorageTab.php:205, extensions/external-db/classes/Mirroring.php:290
 msgid "Cancel"
 msgstr ""
 
@@ -5276,11 +5276,11 @@ msgstr ""
 #. translators: Twilio settings hyperlink.
 #. translators: Twilio settings hyperlink.
 #. translators: Twilio settings hyperlink.
-#: extensions/email-notifications/classes/AddNotification.php:277, extensions/email-notifications/classes/EditNotification.php:326, extensions/email-notifications/classes/Notifications.php:903, extensions/email-notifications/classes/Notifications.php:1027, extensions/email-notifications/classes/Notifications.php:1262, extensions/email-notifications/classes/Notifications.php:1384, extensions/email-notifications/classes/Notifications.php:1460, extensions/email-notifications/classes/Notifications.php:1584, extensions/email-notifications/classes/SMSProviderSettings.php:245
+#: extensions/email-notifications/classes/AddNotification.php:277, extensions/email-notifications/classes/EditNotification.php:326, extensions/email-notifications/classes/Notifications.php:904, extensions/email-notifications/classes/Notifications.php:1028, extensions/email-notifications/classes/Notifications.php:1263, extensions/email-notifications/classes/Notifications.php:1385, extensions/email-notifications/classes/Notifications.php:1461, extensions/email-notifications/classes/Notifications.php:1585, extensions/email-notifications/classes/SMSProviderSettings.php:245
 msgid "Click %s to configure Twilio integration for SMS notifications."
 msgstr ""
 
-#: extensions/email-notifications/classes/AddNotification.php:277, extensions/email-notifications/classes/EditNotification.php:326, extensions/email-notifications/classes/Notifications.php:903, extensions/email-notifications/classes/Notifications.php:1027, extensions/email-notifications/classes/Notifications.php:1262, extensions/email-notifications/classes/Notifications.php:1384, extensions/email-notifications/classes/Notifications.php:1460, extensions/email-notifications/classes/Notifications.php:1584, extensions/email-notifications/classes/SMSProviderSettings.php:245
+#: extensions/email-notifications/classes/AddNotification.php:277, extensions/email-notifications/classes/EditNotification.php:326, extensions/email-notifications/classes/Notifications.php:904, extensions/email-notifications/classes/Notifications.php:1028, extensions/email-notifications/classes/Notifications.php:1263, extensions/email-notifications/classes/Notifications.php:1385, extensions/email-notifications/classes/Notifications.php:1461, extensions/email-notifications/classes/Notifications.php:1585, extensions/email-notifications/classes/SMSProviderSettings.php:245
 msgid "here"
 msgstr ""
 
@@ -5306,15 +5306,15 @@ msgstr ""
 msgid "Use event specific email template"
 msgstr ""
 
-#: extensions/email-notifications/classes/AddNotification.php:335, extensions/email-notifications/classes/EditNotification.php:425, extensions/external-db/classes/Connections.php:97, extensions/external-db/classes/Mirroring.php:97, extensions/reports/inc/wsal-reporting-view.inc.php:1429, extensions/reports/inc/wsal-reporting-view.inc.php:1724
+#: extensions/email-notifications/classes/AddNotification.php:335, extensions/email-notifications/classes/EditNotification.php:425, extensions/external-db/classes/Connections.php:97, extensions/external-db/classes/Mirroring.php:97, extensions/reports/inc/wsal-reporting-view.inc.php:1405, extensions/reports/inc/wsal-reporting-view.inc.php:1723
 msgid "Name"
 msgstr ""
 
-#: extensions/email-notifications/classes/AddNotification.php:336, extensions/email-notifications/classes/EditNotification.php:426, extensions/email-notifications/classes/Notifications.php:1732, extensions/email-notifications/classes/Notifications.php:1743
+#: extensions/email-notifications/classes/AddNotification.php:336, extensions/email-notifications/classes/EditNotification.php:426, extensions/email-notifications/classes/Notifications.php:1733, extensions/email-notifications/classes/Notifications.php:1744
 msgid "Title"
 msgstr ""
 
-#: extensions/email-notifications/classes/AddNotification.php:344, extensions/email-notifications/classes/EditNotification.php:434, extensions/email-notifications/classes/Notifications.php:1048, extensions/email-notifications/classes/Notifications.php:2301, extensions/reports/inc/wsal-reporting-view.inc.php:1423, extensions/user-sessions/classes/View/Sessions.php:372
+#: extensions/email-notifications/classes/AddNotification.php:344, extensions/email-notifications/classes/EditNotification.php:434, extensions/email-notifications/classes/Notifications.php:1049, extensions/email-notifications/classes/Notifications.php:2302, extensions/reports/inc/wsal-reporting-view.inc.php:1399, extensions/user-sessions/classes/View/Sessions.php:372
 msgid "Email"
 msgstr ""
 
@@ -5435,7 +5435,7 @@ msgstr ""
 msgid "Notification could not be saved."
 msgstr ""
 
-#: extensions/email-notifications/classes/Common.php:997, extensions/email-notifications/classes/Notifications.php:702
+#: extensions/email-notifications/classes/Common.php:997, extensions/email-notifications/classes/Notifications.php:703
 msgid "Notification successfully saved."
 msgstr ""
 
@@ -5598,7 +5598,7 @@ msgstr ""
 msgid "Edit Notification"
 msgstr ""
 
-#: extensions/email-notifications/classes/EditNotification.php:217, extensions/email-notifications/classes/Notifications.php:1681
+#: extensions/email-notifications/classes/EditNotification.php:217, extensions/email-notifications/classes/Notifications.php:1682
 msgid "Add New"
 msgstr ""
 
@@ -5626,7 +5626,7 @@ msgstr ""
 msgid "Phone number for SMS notifications:"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:171, extensions/email-notifications/classes/Notifications.php:2124, extensions/email-notifications/classes/Notifications.php:2225
+#: extensions/email-notifications/classes/Notifications.php:171, extensions/email-notifications/classes/Notifications.php:2125, extensions/email-notifications/classes/Notifications.php:2226
 msgid "Nonce verification failed. Please refresh and try again."
 msgstr ""
 
@@ -5654,7 +5654,7 @@ msgstr ""
 msgid "WooCommerce"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:240, extensions/email-notifications/classes/Notifications.php:927
+#: extensions/email-notifications/classes/Notifications.php:240, extensions/email-notifications/classes/Notifications.php:928
 msgid "Custom Notifications"
 msgstr ""
 
@@ -5662,11 +5662,11 @@ msgstr ""
 msgid "Notifications Templates"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:252, extensions/email-notifications/classes/Notifications.php:1858
+#: extensions/email-notifications/classes/Notifications.php:252, extensions/email-notifications/classes/Notifications.php:1859
 msgid "Default Email Template"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:256, extensions/email-notifications/classes/Notifications.php:1854
+#: extensions/email-notifications/classes/Notifications.php:256, extensions/email-notifications/classes/Notifications.php:1855
 msgid "Default SMS Template"
 msgstr ""
 
@@ -5674,7 +5674,7 @@ msgstr ""
 msgid "Email Notifications"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:348, extensions/email-notifications/classes/Notifications.php:945
+#: extensions/email-notifications/classes/Notifications.php:348, extensions/email-notifications/classes/Notifications.php:946
 msgid "Test Notifications"
 msgstr ""
 
@@ -5698,444 +5698,444 @@ msgstr ""
 msgid "Email Address and Mobile Number cannot be empty."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:818
+#: extensions/email-notifications/classes/Notifications.php:819
 msgid "To configure email notifications please contact the administrator of this multisite network on "
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:837
+#: extensions/email-notifications/classes/Notifications.php:838
 msgid "Daily summary email sent."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:833
+#: extensions/email-notifications/classes/Notifications.php:834
 msgid "An error occurred while sending the daily summary email."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:827
+#: extensions/email-notifications/classes/Notifications.php:828
 msgid "Invalid request."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:910, extensions/email-notifications/classes/Notifications.php:967
+#: extensions/email-notifications/classes/Notifications.php:911, extensions/email-notifications/classes/Notifications.php:968
 msgid "Helper plugin is needed to enable SMS notifications."
 msgstr ""
 
 #. translators: %s: Twilio settings link
-#: extensions/email-notifications/classes/Notifications.php:917
+#: extensions/email-notifications/classes/Notifications.php:918
 msgid "Tick the check box and specify an email address or username to enable a notification. You can specify a phone number to send a SMS notification as well (%s). Click the Save Notifications button to save the changes."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:918
+#: extensions/email-notifications/classes/Notifications.php:919
 msgid "Configure Twilio account integration"
 msgstr ""
 
 #. translators: %s: Twilio settings link
-#: extensions/email-notifications/classes/Notifications.php:926
+#: extensions/email-notifications/classes/Notifications.php:927
 msgid "You can create your own notification criteria in the %s tab."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:946
+#: extensions/email-notifications/classes/Notifications.php:947
 msgid "Save Notifications"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:955
+#: extensions/email-notifications/classes/Notifications.php:956
 msgid "Specify an email address to where you would like to send a test email notification:"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:961
+#: extensions/email-notifications/classes/Notifications.php:962
 msgid "Specify a mobile phone number to where you would like to send a test SMS notification:"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:971
+#: extensions/email-notifications/classes/Notifications.php:972
 msgid "Send"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1030
+#: extensions/email-notifications/classes/Notifications.php:1031
 msgid "Daily Summary of Activity Log"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1045
+#: extensions/email-notifications/classes/Notifications.php:1046
 msgid "Send me a summary of what happens every day."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1049
+#: extensions/email-notifications/classes/Notifications.php:1050
 msgid "Send Summary Now"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1055
+#: extensions/email-notifications/classes/Notifications.php:1056
 msgid "Suspicious Activity"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1064, extensions/email-notifications/classes/Notifications.php:1075
+#: extensions/email-notifications/classes/Notifications.php:1065, extensions/email-notifications/classes/Notifications.php:1076
 msgid "There are more than"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1066
+#: extensions/email-notifications/classes/Notifications.php:1067
 msgid "failed WordPress logins for a WordPress user (Event ID 1002)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1077
+#: extensions/email-notifications/classes/Notifications.php:1078
 msgid "failed logins of non existing users (Event ID 1003)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1086
+#: extensions/email-notifications/classes/Notifications.php:1087
 msgid "WordPress Install Changes"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1095
+#: extensions/email-notifications/classes/Notifications.php:1096
 msgid "WordPress was updated (Event ID 6004)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1104
+#: extensions/email-notifications/classes/Notifications.php:1105
 msgid "Plugin Changes Notifications"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1112
+#: extensions/email-notifications/classes/Notifications.php:1113
 msgid "New plugin is installed (Event ID 5000)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1119
+#: extensions/email-notifications/classes/Notifications.php:1120
 msgid "Installed plugin is activated (Event ID 5001)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1126
+#: extensions/email-notifications/classes/Notifications.php:1127
 msgid "Plugin file is modified (Event ID 2051)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1133
+#: extensions/email-notifications/classes/Notifications.php:1134
 msgid "Installed plugin is deactivated (Event ID 5002)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1140
+#: extensions/email-notifications/classes/Notifications.php:1141
 msgid "A plugin is uninstalled (Event ID 5003)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1147
+#: extensions/email-notifications/classes/Notifications.php:1148
 msgid "Installed plugin is upgraded (Event ID 5004)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1155
+#: extensions/email-notifications/classes/Notifications.php:1156
 msgid "Themes Changes Notifications"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1164
+#: extensions/email-notifications/classes/Notifications.php:1165
 msgid "New theme is installed (Event ID 5005)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1173
+#: extensions/email-notifications/classes/Notifications.php:1174
 msgid "Installed theme is activated (Event ID 5006)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1182
+#: extensions/email-notifications/classes/Notifications.php:1183
 msgid "Theme file is modified (Event ID 2046)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1191
+#: extensions/email-notifications/classes/Notifications.php:1192
 msgid "A theme is uninstalled (Event ID 5007)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1200
+#: extensions/email-notifications/classes/Notifications.php:1201
 msgid "Installed theme is updated (Event ID 5031)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1209
+#: extensions/email-notifications/classes/Notifications.php:1210
 msgid "Critical Events"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1217
+#: extensions/email-notifications/classes/Notifications.php:1218
 msgid "Critical Event is Generated"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1275
+#: extensions/email-notifications/classes/Notifications.php:1276
 msgid "User logs in (Event ID 1000)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1284
+#: extensions/email-notifications/classes/Notifications.php:1285
 msgid "First time user logs in"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1293
+#: extensions/email-notifications/classes/Notifications.php:1294
 msgid "User changed password (Event ID 4003)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1302
+#: extensions/email-notifications/classes/Notifications.php:1303
 msgid "User Profile Changes"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1311
+#: extensions/email-notifications/classes/Notifications.php:1312
 msgid "User changed email address (Event IDs 4005, 4006)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1320
+#: extensions/email-notifications/classes/Notifications.php:1321
 msgid "User's role has changed (Event ID 4002)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1329
+#: extensions/email-notifications/classes/Notifications.php:1330
 msgid "User changed the password of another user (Event ID 4004)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1338
+#: extensions/email-notifications/classes/Notifications.php:1339
 msgid "New user is created (Event IDs 4000, 4001, 4012)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1394
+#: extensions/email-notifications/classes/Notifications.php:1395
 msgid "New content is published (Event ID 2001)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1403
+#: extensions/email-notifications/classes/Notifications.php:1404
 msgid "Content in a post, page or custom post type is changed (Event ID 2065)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1412
+#: extensions/email-notifications/classes/Notifications.php:1413
 msgid "Anything but content in a post is changed (such as date, category, status, parent page etc)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1471
+#: extensions/email-notifications/classes/Notifications.php:1472
 msgid "User granted super admin (Event ID 4008)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1481
+#: extensions/email-notifications/classes/Notifications.php:1482
 msgid "User revoked super admin (Event ID 4009)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1492
+#: extensions/email-notifications/classes/Notifications.php:1493
 msgid "User added to site (Event ID 4010)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1503
+#: extensions/email-notifications/classes/Notifications.php:1504
 msgid "User removed from site (Event ID 4011)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1514
+#: extensions/email-notifications/classes/Notifications.php:1515
 msgid "Site changes"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1525
+#: extensions/email-notifications/classes/Notifications.php:1526
 msgid "Activated theme on network (Event ID 5008)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1536
+#: extensions/email-notifications/classes/Notifications.php:1537
 msgid "Deactivated theme from network (Event ID 5009)"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1596
+#: extensions/email-notifications/classes/Notifications.php:1597
 msgid "Any product change"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1607
+#: extensions/email-notifications/classes/Notifications.php:1608
 msgid "Any store settings change"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1618
+#: extensions/email-notifications/classes/Notifications.php:1619
 msgid "Any coupon code changes"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1629
+#: extensions/email-notifications/classes/Notifications.php:1630
 msgid "Any orders changes"
 msgstr ""
 
 #. translators: WSAL Notifications Documentation hyperlink
-#: extensions/email-notifications/classes/Notifications.php:1676
+#: extensions/email-notifications/classes/Notifications.php:1677
 msgid "Use the trigger builder to build any type of criteria that triggers email and / or SMS notifications. Refer to the %s for more detailed information."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1677
+#: extensions/email-notifications/classes/Notifications.php:1678
 msgid "WordPress notifications documentation"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1833
+#: extensions/email-notifications/classes/Notifications.php:1834
 msgid "No notifications found. Click the <code>Add New</code> button above to create one."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1819
+#: extensions/email-notifications/classes/Notifications.php:1820
 msgid "No notifications found to match your search."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1826, extensions/email-notifications/classes/Notifications.php:1828, extensions/email-notifications/classes/Notifications.php:1703, extensions/email-notifications/classes/Notifications.php:1705
+#: extensions/email-notifications/classes/Notifications.php:1827, extensions/email-notifications/classes/Notifications.php:1829, extensions/email-notifications/classes/Notifications.php:1704, extensions/email-notifications/classes/Notifications.php:1706
 msgid "Search Notifications"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1694, extensions/reports/classes/HtmlReportGenerator.php:282, extensions/user-sessions/classes/View/Options/Policies.php:24
+#: extensions/email-notifications/classes/Notifications.php:1695, extensions/reports/classes/HtmlReportGenerator.php:282, extensions/user-sessions/classes/View/Options/Policies.php:24
 msgid "All"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1716, extensions/email-notifications/classes/Notifications.php:1794
+#: extensions/email-notifications/classes/Notifications.php:1717, extensions/email-notifications/classes/Notifications.php:1795
 msgid "Bulk actions"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1717, extensions/email-notifications/classes/Notifications.php:1778, extensions/email-notifications/classes/Notifications.php:1795, extensions/external-db/classes/Mirroring.php:124, extensions/external-db/classes/Mirroring.php:750, extensions/external-db/classes/mirrors/PapertrailConnection.php:44
+#: extensions/email-notifications/classes/Notifications.php:1718, extensions/email-notifications/classes/Notifications.php:1779, extensions/email-notifications/classes/Notifications.php:1796, extensions/external-db/classes/Mirroring.php:124, extensions/external-db/classes/Mirroring.php:750, extensions/external-db/classes/mirrors/PapertrailConnection.php:44
 msgid "Enable"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1718, extensions/email-notifications/classes/Notifications.php:1776, extensions/email-notifications/classes/Notifications.php:1796, extensions/external-db/classes/Mirroring.php:127, extensions/external-db/classes/Mirroring.php:753
+#: extensions/email-notifications/classes/Notifications.php:1719, extensions/email-notifications/classes/Notifications.php:1777, extensions/email-notifications/classes/Notifications.php:1797, extensions/external-db/classes/Mirroring.php:127, extensions/external-db/classes/Mirroring.php:753
 msgid "Disable"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1721, extensions/email-notifications/classes/Notifications.php:1799
+#: extensions/email-notifications/classes/Notifications.php:1722, extensions/email-notifications/classes/Notifications.php:1800
 msgid "Apply"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1729, extensions/email-notifications/classes/Notifications.php:1740
+#: extensions/email-notifications/classes/Notifications.php:1730, extensions/email-notifications/classes/Notifications.php:1741
 msgid "Select All"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1766
+#: extensions/email-notifications/classes/Notifications.php:1767
 msgid "Select"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1770, extensions/email-notifications/classes/Notifications.php:1772
+#: extensions/email-notifications/classes/Notifications.php:1771, extensions/email-notifications/classes/Notifications.php:1773
 msgid "Edit this notification"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1772
+#: extensions/email-notifications/classes/Notifications.php:1773
 msgid "Edit"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1778
+#: extensions/email-notifications/classes/Notifications.php:1779
 msgid "Enable this notification"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1776
+#: extensions/email-notifications/classes/Notifications.php:1777
 msgid "Disable this notification"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1782
+#: extensions/email-notifications/classes/Notifications.php:1783
 msgid "Delete this notification"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1785
+#: extensions/email-notifications/classes/Notifications.php:1786
 msgid "Send Test Email"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1786
+#: extensions/email-notifications/classes/Notifications.php:1787
 msgid "Send Test SMS"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1857
+#: extensions/email-notifications/classes/Notifications.php:1858
 msgid "You can modify the default notification email template from here."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1859
+#: extensions/email-notifications/classes/Notifications.php:1860
 msgid "This is the default template. You can override this default template with notification specific template which you can modify when using the Trigger Builder."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1853
+#: extensions/email-notifications/classes/Notifications.php:1854
 msgid "You can modify the default notification SMS template from here."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1855
+#: extensions/email-notifications/classes/Notifications.php:1856
 msgid "This is the default template for SMS notifications. The maximum number of characters for a SMS is 160, so if you configure longer notifications you will be charged for multiple SMS notifications."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1895
+#: extensions/email-notifications/classes/Notifications.php:1896
 msgid "Subject"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1900
+#: extensions/email-notifications/classes/Notifications.php:1901
 msgid "Body"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1925
+#: extensions/email-notifications/classes/Notifications.php:1926
 msgid "HTML is accepted."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1926
+#: extensions/email-notifications/classes/Notifications.php:1927
 msgid "Available template tags:"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1948
+#: extensions/email-notifications/classes/Notifications.php:1949
 msgid "Shorten URLs"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1953
+#: extensions/email-notifications/classes/Notifications.php:1954
 msgid "Shorten URLs with Bit.ly"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1956
+#: extensions/email-notifications/classes/Notifications.php:1957
 msgid "Bit.ly Access Token"
 msgstr ""
 
 #. translators: Bit.ly documentation hyperlink
-#: extensions/email-notifications/classes/Notifications.php:1961
+#: extensions/email-notifications/classes/Notifications.php:1962
 msgid "The URL shortener works for URLs in the {message} variable and will not shorten the URL of the website in the variable {site}. Shorten all URLs in the message using the %s."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1961
+#: extensions/email-notifications/classes/Notifications.php:1962
 msgid "Bit.ly URL Shortener API"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2009
+#: extensions/email-notifications/classes/Notifications.php:2010
 msgid "Template successfully saved."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2007
+#: extensions/email-notifications/classes/Notifications.php:2008
 msgid "Template could not be saved."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2113, extensions/email-notifications/classes/Notifications.php:2219
+#: extensions/email-notifications/classes/Notifications.php:2114, extensions/email-notifications/classes/Notifications.php:2220
 msgid "You do not have sufficient permissions to perform this test."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2145
+#: extensions/email-notifications/classes/Notifications.php:2146
 msgid "Email address is invalid."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2141
+#: extensions/email-notifications/classes/Notifications.php:2142
 msgid "Test email notification from the WP Activity Log plugin."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2142
+#: extensions/email-notifications/classes/Notifications.php:2143
 msgid "This is a test email notification sent with the WP Activity Log plugin."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2155
+#: extensions/email-notifications/classes/Notifications.php:2156
 msgid "Phone number is invalid."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2152
+#: extensions/email-notifications/classes/Notifications.php:2153
 msgid "This is a test SMS notification sent with the WP Activity Log plugin."
 msgstr ""
 
 #. translators: Support email hyperlink
-#: extensions/email-notifications/classes/Notifications.php:2179
+#: extensions/email-notifications/classes/Notifications.php:2180
 msgid "There are some problems sending the test email / SMS. Please contact us on %s to assist you with this problem."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2176, extensions/email-notifications/classes/Notifications.php:2273
+#: extensions/email-notifications/classes/Notifications.php:2177, extensions/email-notifications/classes/Notifications.php:2274
 msgid "There was a problem sending the SMS. Below is the error we got back from the SMS provider. Please contact us on %s if you need assistance with this issue."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2167
+#: extensions/email-notifications/classes/Notifications.php:2168
 msgid "Email / SMS sent successfully."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2164, extensions/email-notifications/classes/Notifications.php:2275
+#: extensions/email-notifications/classes/Notifications.php:2165, extensions/email-notifications/classes/Notifications.php:2276
 msgid "SMS sent successfully."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2161, extensions/email-notifications/classes/Notifications.php:2254
+#: extensions/email-notifications/classes/Notifications.php:2162, extensions/email-notifications/classes/Notifications.php:2255
 msgid "Email sent successfully."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2281
+#: extensions/email-notifications/classes/Notifications.php:2282
 msgid "Unknown notification type."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2278
+#: extensions/email-notifications/classes/Notifications.php:2279
 msgid "There are some problems sending the test SMS. Please contact us on %s to assist you with this problem."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2270
+#: extensions/email-notifications/classes/Notifications.php:2271
 msgid "Mobile number is not set for this notification."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2257
+#: extensions/email-notifications/classes/Notifications.php:2258
 msgid "There are some problems sending the test email. Please contact us on %s to assist you with this problem."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2235
+#: extensions/email-notifications/classes/Notifications.php:2236
 msgid "Unknown notification."
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:2305
+#: extensions/email-notifications/classes/Notifications.php:2306
 msgid "Mobile number"
 msgstr ""
 
@@ -6545,63 +6545,87 @@ msgstr ""
 msgid "Test Connection"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:172
+#: extensions/external-db/classes/ExternalStorageTab.php:173
 msgid "Switch to local storage"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:173
+#: extensions/external-db/classes/ExternalStorageTab.php:174
 msgid "Do you want to change the plugin settings to start using the local database for storing the logs?"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:178, extensions/external-db/classes/ExternalStorageTab.php:206, extensions/external-db/classes/Settings.php:797
+#: extensions/external-db/classes/ExternalStorageTab.php:179, extensions/external-db/classes/ExternalStorageTab.php:207, extensions/external-db/classes/Settings.php:797
 msgid "Switch connection"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:188
+#: extensions/external-db/classes/ExternalStorageTab.php:189
 msgid "Select connection for external storage"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:196, extensions/external-db/classes/Mirroring.php:373, extensions/external-db/classes/Settings.php:338
+#: extensions/external-db/classes/ExternalStorageTab.php:197, extensions/external-db/classes/Mirroring.php:373, extensions/external-db/classes/Settings.php:338
 msgid "Connection"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:213
+#: extensions/external-db/classes/ExternalStorageTab.php:214
 msgid "Activity log events in the external (source) database"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:213
+#: extensions/external-db/classes/ExternalStorageTab.php:214
 msgid "Activity log events in the local (source) database"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:214
+#: extensions/external-db/classes/ExternalStorageTab.php:215
 msgid "Would you like to move these events to the local database or delete them and start afresh?"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:214
+#: extensions/external-db/classes/ExternalStorageTab.php:215
 msgid "Would you like to move these events to the external database or delete them and start afresh?"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:220
+#: extensions/external-db/classes/ExternalStorageTab.php:221
 msgid "There are activity log events in the source database."
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:224
+#: extensions/external-db/classes/ExternalStorageTab.php:225
 msgid "Migrate existing events"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:226
+#: extensions/external-db/classes/ExternalStorageTab.php:227, extensions/external-db/classes/ExternalStorageTab.php:245
 msgid "Delete existing events"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:236
+#: extensions/external-db/classes/ExternalStorageTab.php:234
+msgid "Activity log events in the local (target) database"
+msgstr ""
+
+#: extensions/external-db/classes/ExternalStorageTab.php:234
+msgid "Activity log events in the external (target) database"
+msgstr ""
+
+#: extensions/external-db/classes/ExternalStorageTab.php:235
+msgid "Would you like to keep these events in the local database or delete them and continue?"
+msgstr ""
+
+#: extensions/external-db/classes/ExternalStorageTab.php:235
+msgid "Would you like to keep these events in the external database or delete them and continue?"
+msgstr ""
+
+#: extensions/external-db/classes/ExternalStorageTab.php:241
+msgid "There are activity log events in the target database."
+msgstr ""
+
+#: extensions/external-db/classes/ExternalStorageTab.php:247
+msgid "Merge data"
+msgstr ""
+
+#: extensions/external-db/classes/ExternalStorageTab.php:257
 msgid "Current"
 msgstr ""
 
-#: extensions/external-db/classes/ExternalStorageTab.php:249
+#: extensions/external-db/classes/ExternalStorageTab.php:270
 msgid "Currently connected to database %1$s on server %2$s"
 msgstr ""
 
-#: extensions/external-db/classes/MigrationCancellation.php:41, extensions/external-db/classes/StorageSwitch.php:138
+#: extensions/external-db/classes/MigrationCancellation.php:41, extensions/external-db/classes/StorageSwitch.php:106
 msgid "Insecure request."
 msgstr ""
 
@@ -7037,32 +7061,24 @@ msgstr ""
 msgid "Bad request. Target state attribute is missing."
 msgstr ""
 
-#: extensions/external-db/classes/StorageSwitch.php:73
+#: extensions/external-db/classes/StorageSwitch.php:202
 msgid "The migration of the activity log data from the local database to the external database has started."
 msgstr ""
 
-#: extensions/external-db/classes/StorageSwitch.php:73
+#: extensions/external-db/classes/StorageSwitch.php:202
 msgid "The migration of the activity log data from the external database to the local database has started."
 msgstr ""
 
-#: extensions/external-db/classes/StorageSwitch.php:75
+#: extensions/external-db/classes/StorageSwitch.php:204
 msgid "Click %s to close this prompt and see the progress."
 msgstr ""
 
-#: extensions/external-db/classes/StorageSwitch.php:76
+#: extensions/external-db/classes/StorageSwitch.php:205
 msgid "Continue"
 msgstr ""
 
-#: extensions/external-db/classes/StorageSwitch.php:79
+#: extensions/external-db/classes/StorageSwitch.php:209
 msgid "Activity log migration has started"
-msgstr ""
-
-#: extensions/external-db/classes/StorageSwitch.php:109
-msgid "Plugin found non-empty tables in the target database."
-msgstr ""
-
-#: extensions/external-db/classes/StorageSwitch.php:110
-msgid "Please contact the support or empty the tables manually and try again."
 msgstr ""
 
 #: extensions/external-db/classes/StorageSwitchToExternal.php:39
@@ -7085,15 +7101,15 @@ msgstr ""
 msgid "The plugin has successfully deleted the activity log events from the local database. Now the plugin is connected and will save the activity log events using the external database connection %s."
 msgstr ""
 
-#: extensions/external-db/classes/StorageSwitchToExternal.php:125
+#: extensions/external-db/classes/StorageSwitchToExternal.php:128
 msgid "Switched to external database"
 msgstr ""
 
-#: extensions/external-db/classes/StorageSwitchToExternal.php:127
+#: extensions/external-db/classes/StorageSwitchToExternal.php:130
 msgid "Plugin is now connected to an external database %s."
 msgstr ""
 
-#: extensions/external-db/classes/StorageSwitchToExternal.php:144
+#: extensions/external-db/classes/StorageSwitchToExternal.php:147
 msgid "Cannot connect to the selected database connection."
 msgstr ""
 
@@ -7157,7 +7173,7 @@ msgstr ""
 msgid "Internal Error: Could not detect the type of the report to generate."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:910, extensions/reports/classes/Common.php:932, extensions/reports/classes/Common.php:1565, extensions/reports/classes/Common.php:1681
+#: extensions/reports/classes/Common.php:910, extensions/reports/classes/Common.php:932, extensions/reports/classes/Common.php:1565, extensions/reports/classes/Common.php:1703
 msgid "There are no alerts that match your filtering criteria. Please try a different set of rules."
 msgstr ""
 
@@ -7190,87 +7206,87 @@ msgid " - %s Email Report"
 msgstr ""
 
 #. translators: path to the reports' storage directory
-#: extensions/reports/classes/Common.php:1568, extensions/reports/classes/Common.php:1688
+#: extensions/reports/classes/Common.php:1568, extensions/reports/classes/Common.php:1710
 msgid "Error: The <strong>%s</strong> path is not accessible."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1694
+#: extensions/reports/classes/Common.php:1716
 msgid "Unexpected error occurred."
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1710
+#: extensions/reports/classes/Common.php:1732
 msgid "Site(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1715
+#: extensions/reports/classes/Common.php:1737
 msgid "Excluded site(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1719
+#: extensions/reports/classes/Common.php:1741
 msgid "User(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1724
+#: extensions/reports/classes/Common.php:1746
 msgid "Excluded user(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1728
+#: extensions/reports/classes/Common.php:1750
 msgid "Role(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1733
+#: extensions/reports/classes/Common.php:1755
 msgid "Excluded role(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1742
+#: extensions/reports/classes/Common.php:1764
 msgid "Excluded IP address(es)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1746, extensions/reports/classes/Common.php:1750
+#: extensions/reports/classes/Common.php:1768, extensions/reports/classes/Common.php:1772
 msgid "Alert code(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1755
+#: extensions/reports/classes/Common.php:1777
 msgid "Excluded alert code(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1759
+#: extensions/reports/classes/Common.php:1781
 msgid "Alert group(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1764
+#: extensions/reports/classes/Common.php:1786
 msgid "Excluded alert group(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1768
+#: extensions/reports/classes/Common.php:1790
 msgid "Post type(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1773
+#: extensions/reports/classes/Common.php:1795
 msgid "Excluded post type(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1777
+#: extensions/reports/classes/Common.php:1799
 msgid "Post status(es)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1782
+#: extensions/reports/classes/Common.php:1804
 msgid "Excluded post status(es)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1786
+#: extensions/reports/classes/Common.php:1808
 msgid "Object(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1791
+#: extensions/reports/classes/Common.php:1813
 msgid "Excluded object(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1795
+#: extensions/reports/classes/Common.php:1817
 msgid "Event type(s)"
 msgstr ""
 
-#: extensions/reports/classes/Common.php:1800
+#: extensions/reports/classes/Common.php:1822
 msgid "Excluded event type(s)"
 msgstr ""
 
@@ -7310,7 +7326,7 @@ msgstr ""
 msgid "List of unique IP addresses per user"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:253, extensions/reports/inc/wsal-reporting-view.inc.php:1676
+#: extensions/reports/classes/HtmlReportGenerator.php:253, extensions/reports/inc/wsal-reporting-view.inc.php:1675
 msgid "List of IP addresses that accessed the website"
 msgstr ""
 
@@ -7549,499 +7565,503 @@ msgctxt "a time string of hour followed by minutes"
 msgid "23:00"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:210
+#: extensions/reports/inc/wsal-reporting-view.inc.php:211
 msgid "Invalid Request. Please refresh the page and try again."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:232, extensions/reports/inc/wsal-reporting-view.inc.php:224
-msgid "Error (TODO - error message): Please select SITES"
+#: extensions/reports/inc/wsal-reporting-view.inc.php:230
+msgid "Please select at least one site to exclude from the report."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:286, extensions/reports/inc/wsal-reporting-view.inc.php:255
-msgid "Error (TODO - error message): Please select USERS"
+#: extensions/reports/inc/wsal-reporting-view.inc.php:223
+msgid "Please select at least one site to include in the report."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:365, extensions/reports/inc/wsal-reporting-view.inc.php:329
+#: extensions/reports/inc/wsal-reporting-view.inc.php:274
+msgid "Please select at least one user to exclude from the report."
+msgstr ""
+
+#: extensions/reports/inc/wsal-reporting-view.inc.php:249
+msgid "Please select at least one user to include in the report."
+msgstr ""
+
+#: extensions/reports/inc/wsal-reporting-view.inc.php:342, extensions/reports/inc/wsal-reporting-view.inc.php:306
 msgid "Error: Please select at least one role"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:421, extensions/reports/inc/wsal-reporting-view.inc.php:412
+#: extensions/reports/inc/wsal-reporting-view.inc.php:398, extensions/reports/inc/wsal-reporting-view.inc.php:389
 msgid "Error: Please select at least one IP address"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:448, extensions/reports/inc/wsal-reporting-view.inc.php:439
+#: extensions/reports/inc/wsal-reporting-view.inc.php:425, extensions/reports/inc/wsal-reporting-view.inc.php:416
 msgid "Error: Please select at least one object"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:474, extensions/reports/inc/wsal-reporting-view.inc.php:465
+#: extensions/reports/inc/wsal-reporting-view.inc.php:451, extensions/reports/inc/wsal-reporting-view.inc.php:442
 msgid "Error: Please select at least one event object"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:521, extensions/reports/inc/wsal-reporting-view.inc.php:512
+#: extensions/reports/inc/wsal-reporting-view.inc.php:498, extensions/reports/inc/wsal-reporting-view.inc.php:489
 msgid "Error: Please select at least one event group"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:503, extensions/reports/inc/wsal-reporting-view.inc.php:494
+#: extensions/reports/inc/wsal-reporting-view.inc.php:480, extensions/reports/inc/wsal-reporting-view.inc.php:471
 msgid "Error: Please select at least one event ID"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:657
+#: extensions/reports/inc/wsal-reporting-view.inc.php:635
 msgid "Periodic Report successfully saved."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:620, extensions/reports/inc/wsal-reporting-view.inc.php:676
+#: extensions/reports/inc/wsal-reporting-view.inc.php:598, extensions/reports/inc/wsal-reporting-view.inc.php:654
 msgid "Loading"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:621, extensions/reports/inc/wsal-reporting-view.inc.php:677
+#: extensions/reports/inc/wsal-reporting-view.inc.php:599, extensions/reports/inc/wsal-reporting-view.inc.php:655
 msgid " Generating report. Please do not close this window."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:625, extensions/reports/inc/wsal-reporting-view.inc.php:681
+#: extensions/reports/inc/wsal-reporting-view.inc.php:603, extensions/reports/inc/wsal-reporting-view.inc.php:659
 msgid "Searching events, "
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:625, extensions/reports/inc/wsal-reporting-view.inc.php:681
+#: extensions/reports/inc/wsal-reporting-view.inc.php:603, extensions/reports/inc/wsal-reporting-view.inc.php:659
 msgid " currently found."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:702
+#: extensions/reports/inc/wsal-reporting-view.inc.php:680
 msgid "Periodic Report successfully deleted."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:713
+#: extensions/reports/inc/wsal-reporting-view.inc.php:691
 msgid "Report successfully deleted."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:735
+#: extensions/reports/inc/wsal-reporting-view.inc.php:714
 msgid "Generate & configure"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:736
+#: extensions/reports/inc/wsal-reporting-view.inc.php:715
 msgid "Statistics reports"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:740
+#: extensions/reports/inc/wsal-reporting-view.inc.php:719
 msgid "Saved reports"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:764
+#: extensions/reports/inc/wsal-reporting-view.inc.php:743
 msgid "Generate a report"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:784
+#: extensions/reports/inc/wsal-reporting-view.inc.php:763
 msgid "Step 1: Select the type of report"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:791
+#: extensions/reports/inc/wsal-reporting-view.inc.php:770
 msgid "By Site(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:796
+#: extensions/reports/inc/wsal-reporting-view.inc.php:775
 msgid "All sites"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:802
+#: extensions/reports/inc/wsal-reporting-view.inc.php:781
 msgid "These specific sites"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:811
+#: extensions/reports/inc/wsal-reporting-view.inc.php:790
 msgid "All sites except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:836
+#: extensions/reports/inc/wsal-reporting-view.inc.php:814
 msgid "By User(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:841
+#: extensions/reports/inc/wsal-reporting-view.inc.php:819
 msgid "All users"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:847
+#: extensions/reports/inc/wsal-reporting-view.inc.php:825
 msgid "These specific users"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:860
+#: extensions/reports/inc/wsal-reporting-view.inc.php:833, extensions/reports/inc/wsal-reporting-view.inc.php:849, extensions/reports/inc/wsal-reporting-view.inc.php:1557, extensions/reports/inc/wsal-reporting-view.inc.php:1596, extensions/reports/inc/wsal-reporting-view.inc.php:1635
+msgid "Enter comma separated usernames"
+msgstr ""
+
+#: extensions/reports/inc/wsal-reporting-view.inc.php:841
 msgid "All users except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:874
-msgid "Automated verification of usernames is disabled because you have more than 100 users. The process might require a lot of resources to work with a lot of users. Tick the option below to enable it again."
-msgstr ""
-
-#: extensions/reports/inc/wsal-reporting-view.inc.php:879
-msgid "Enable autocomplete"
-msgstr ""
-
-#: extensions/reports/inc/wsal-reporting-view.inc.php:889
+#: extensions/reports/inc/wsal-reporting-view.inc.php:866
 msgid "By Role(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:894
+#: extensions/reports/inc/wsal-reporting-view.inc.php:871
 msgid "All roles"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:900
+#: extensions/reports/inc/wsal-reporting-view.inc.php:877
 msgid "These specific roles"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:909
+#: extensions/reports/inc/wsal-reporting-view.inc.php:886
 msgid "All roles except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:920
+#: extensions/reports/inc/wsal-reporting-view.inc.php:897
 msgid "By IP address(es)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:925
+#: extensions/reports/inc/wsal-reporting-view.inc.php:902
 msgid "All IP addresses"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:931
+#: extensions/reports/inc/wsal-reporting-view.inc.php:908
 msgid "These specific IP addresses"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:940
+#: extensions/reports/inc/wsal-reporting-view.inc.php:917
 msgid "All IP addresses except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:951
+#: extensions/reports/inc/wsal-reporting-view.inc.php:928
 msgid "By Object(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:956
+#: extensions/reports/inc/wsal-reporting-view.inc.php:933
 msgid "All objects"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:962
+#: extensions/reports/inc/wsal-reporting-view.inc.php:939
 msgid "These specific objects"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:971
+#: extensions/reports/inc/wsal-reporting-view.inc.php:948
 msgid "All objects except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:982
+#: extensions/reports/inc/wsal-reporting-view.inc.php:959
 msgid "By Event type(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:987
+#: extensions/reports/inc/wsal-reporting-view.inc.php:964
 msgid "All event types"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:993
+#: extensions/reports/inc/wsal-reporting-view.inc.php:970
 msgid "These specific event types"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1002
+#: extensions/reports/inc/wsal-reporting-view.inc.php:979
 msgid "All event types except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1013
+#: extensions/reports/inc/wsal-reporting-view.inc.php:990
 msgid "By Post ID(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1018
+#: extensions/reports/inc/wsal-reporting-view.inc.php:995
 msgid "All post IDs"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1024
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1001
 msgid "These specific post IDs"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1037
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1014
 msgid "All post IDs except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1051
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1028
 msgid "By Post type(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1056
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1033
 msgid "All post types"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1062
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1039
 msgid "These specific post types"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1071
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1048
 msgid "All post types except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1082
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1059
 msgid "By Post status(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1087
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1064
 msgid "All post statuses"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1093
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1070
 msgid "These specific post statuses"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1102
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1079
 msgid "All post statuses except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1113
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1090
 msgid "By Event ID(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1119
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1096
 msgid "All event IDs"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1125
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1102
 msgid "These specific event IDs"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1134
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1111
 msgid "All event IDs except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1143
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1120
 msgid "These specific event groups"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1152
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1129
 msgid "All event groups except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1195
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1172
 msgid "Select site(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1199
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1175
 msgid "Select user(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1227
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1203
 msgid "Select role(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1228
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1204
 msgid "Select IP address(es)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1229
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1205
 msgid "Select object(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1230
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1206
 msgid "Select type(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1233
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1209
 msgid "Select post ID(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1260
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1236
 msgid "Select event code(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1261
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1237
 msgid "Select event group(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1262
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1238
 msgid "Select post types(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1263
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1239
 msgid "Select post status(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1368
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1344
 msgid "Step 2: Select the date range"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1370
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1346
 msgid "Note: Do not specify any dates if you are creating a scheduled report or if you want to generate a report from when you started the audit trail."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1375
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1351
 msgid "Start Date"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1378, extensions/reports/inc/wsal-reporting-view.inc.php:1510
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1354, extensions/reports/inc/wsal-reporting-view.inc.php:1486
 msgid "Select start date"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1384
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1360
 msgid "End Date"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1387, extensions/reports/inc/wsal-reporting-view.inc.php:1519
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1363, extensions/reports/inc/wsal-reporting-view.inc.php:1495
 msgid "Select end date"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1411
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1387
 msgid "Step 4: Generate Report Now or Configure Periodic Reports"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1414
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1390
 msgid "Generate Report Now"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1418
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1394
 msgid " Use the buttons below to use the above criteria for a daily, weekly and monthly summary report which is sent automatically via email."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1421
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1397
 msgid "Email address(es)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1427
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1403
 msgid "Report Name"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1430, extensions/reports/classes/Views/Main.php:163
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1406, extensions/reports/classes/Views/Main.php:163
 msgid "Report names can only include numbers, letters and underscore and hyphens."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1434
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1410
 msgid "Frequency"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1436
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1412
 msgid "Daily"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1437
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1413
 msgid "Weekly"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1438
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1414
 msgid "Monthly"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1439
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1415
 msgid "Quarterly"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1453
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1429
 msgid "Configured Periodic Reports"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1456
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1432
 msgid "Below is the list of configured periodic reports. Click on Modify to load the criteria and configure it above. To save the new criteria as a new report change the report name and save it. Do not change the report name to overwrite the existing periodic report."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1459
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1435
 msgid "Note: Use the Send Now button to generate a report with data from the last 90 days if a quarterly report is configured, 30 days if monthly report is configured and 7 days if weekly report is configured."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1503
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1479
 msgid "Step 1: Choose Date Range"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1535
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1511
 msgid "Step 2: Select data sorting type"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1538
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1514
 msgid "Time period"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1548
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1524
 msgid "Step 3: Choose Criteria"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1551
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1532
 msgid "Report for"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1558
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1539
 msgid "Number of logins for all users"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1567
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1548
 msgid "Number of logins for user(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1580
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1567
 msgid "Number of logins for users with the role(s) of"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1592
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1579
 msgid "Number of views for all posts"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1601
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1588
 msgid "Number of views for user(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1613
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1606
 msgid "Number of views for users with the role(s) of"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1625
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1618
 msgid "Number of published content for all users"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1634
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1627
 msgid "Number of published content for user(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1646
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1645
 msgid "Number of published content for users with the role(s) of"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1658
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1657
 msgid "Different IP addresses for Usernames"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1665
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1664
 msgid "List only IP addresses used during login"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1667
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1666
 msgid "If the above option is enabled the report will only include the IP addresses from where the user logged in. If it is disabled it will list all the IP addresses from where the plugin recorded activity originating from the user."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1685
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1684
 msgid "List of users who accessed the website"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1716
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1715
 msgid "Generated reports"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1719
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1718
 msgid "Below is the list of reports previously generated and are now saved in the reports directory on your website. By default the plugin automatically deletes saved reports that are older than 30 days. You can disable or change this from the Reports settings."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1726
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1725
 msgid "Format"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1741
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1740
 msgid "Download"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1764, extensions/reports/inc/wsal-reporting-view.inc.php:1769
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1763, extensions/reports/inc/wsal-reporting-view.inc.php:1768
 msgid "Please specify at least one site"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1775, extensions/reports/inc/wsal-reporting-view.inc.php:1780
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1774, extensions/reports/inc/wsal-reporting-view.inc.php:1779
 msgid "Please specify at least one user"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1786, extensions/reports/inc/wsal-reporting-view.inc.php:1791
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1785, extensions/reports/inc/wsal-reporting-view.inc.php:1790
 msgid "Please specify at least one role"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1797, extensions/reports/inc/wsal-reporting-view.inc.php:1802
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1796, extensions/reports/inc/wsal-reporting-view.inc.php:1801
 msgid "Please specify at least one IP address"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1808, extensions/reports/inc/wsal-reporting-view.inc.php:1813
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1807, extensions/reports/inc/wsal-reporting-view.inc.php:1812
 msgid "Please specify at least one object"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1819, extensions/reports/inc/wsal-reporting-view.inc.php:1824
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1818, extensions/reports/inc/wsal-reporting-view.inc.php:1823
 msgid "Please specify at least one event type"
 msgstr ""
 
@@ -8523,6 +8543,18 @@ msgstr ""
 
 #: extensions/reports/classes/Views/Main.php:952
 msgid "Per month"
+msgstr ""
+
+#: extensions/reports/classes/Views/Main.php:988
+msgid "Automated verification of usernames is disabled because you have more than 100 users. The process might require a lot of resources to work with a lot of users. Tick the option below to enable it again."
+msgstr ""
+
+#: extensions/reports/classes/Views/Main.php:986
+msgid "Automated verification of usernames is enabled even though you have more than 100 users. The process might require a lot of resources to work with a lot of users. Tick the option below to disable it."
+msgstr ""
+
+#: extensions/reports/classes/Views/Main.php:998
+msgid "Enable autocomplete"
 msgstr ""
 
 #: extensions/search/classes/Filters/AlertWidget.php:38

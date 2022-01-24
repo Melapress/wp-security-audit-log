@@ -133,12 +133,13 @@ if ( ! class_exists( 'WSAL_PluginInstallAndActivate' ) ) {
 		public static function get_installable_plugins() {
 			$plugins = array(
 				array(
-					'addon_for'          => 'wfcm',
-					'title'              => 'Website File Changes Monitor',
-					'plugin_slug'        => 'website-file-changes-monitor/website-file-changes-monitor.php',
-					'plugin_url'         => 'https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip',
+					'addon_for'   => 'wfcm',
+					'title'       => 'Website File Changes Monitor',
+					'plugin_slug' => 'website-file-changes-monitor/website-file-changes-monitor.php',
+					'plugin_url'  => 'https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip',
 				),
 			);
+
 			// runs through a filter, so it can be added to programmatically.
 			// NOTE: this means when using we need to test it's still an array.
 			$installable_plugins = apply_filters( 'wsal_filter_installable_plugins', $plugins );

@@ -10,12 +10,12 @@ if ( ! class_exists( 'WSAL_BBPressExtension' ) ) {
 					'addon_for'          => 'bbpress',
 					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'bbpress.png',
-					'plugin_slug'        => 'wp-security-audit-log-add-on-for-bbpress/wsal-bbpress.php',
+					'plugin_slug'        => $this->get_plugin_filename(),
 					'plugin_basename'    => 'wsal-bbpress.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-bbpress.latest-stable.zip',
 					'event_tab_id'       => '#cat-bbpress-forums',
 					'plugin_description' => 'Keep a log of your sites bbPress activity, from forum and topic creation, user profile changes and more.',
-				)
+				),
 			);
 
 			// combine the two arrays.
@@ -35,7 +35,7 @@ if ( ! class_exists( 'WSAL_BBPressExtension' ) ) {
 		}
 
 		public function get_custom_post_types() {
-			return [ 'forum', 'topic', 'reply' ];
+			return array( 'forum', 'topic', 'reply' );
 		}
 
 		public function get_plugin_name() {
@@ -48,6 +48,10 @@ if ( ! class_exists( 'WSAL_BBPressExtension' ) ) {
 
 		public function get_color() {
 			return '#8dc770';
+		}
+
+		public function get_plugin_filename() {
+			return 'wp-security-audit-log-add-on-for-bbpress/wsal-bbpress.php';
 		}
 	}
 }
