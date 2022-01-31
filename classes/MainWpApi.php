@@ -5,7 +5,7 @@
  *
  * @package    wsal
  * @subpackage main-wp
- * @since      latest
+ * @since 4.4.0
  */
 class WSAL_MainWpApi {
 
@@ -83,7 +83,7 @@ class WSAL_MainWpApi {
 	 * Handles API call requesting info about WSAL plugin.
 	 *
 	 * @return stdClass
-	 * @since latest
+	 * @since 4.4.0
 	 */
 	protected function handle_wsal_info_check() {
 		$info                 = new stdClass();
@@ -344,7 +344,7 @@ class WSAL_MainWpApi {
 	 * @param array $post_data Received request data.
 	 *
 	 * @return string[]
-	 * @since latest
+	 * @since 4.4.0
 	 */
 	private function handle_settings_enforcement( $post_data ) {
 		// Check subaction.
@@ -469,7 +469,7 @@ class WSAL_MainWpApi {
 	 *
 	 * @return array Events definitions data.
 	 *
-	 * @since latest
+	 * @since 4.4.0
 	 */
 	private function get_event_definitions() {
 		$alert_manager = $this->plugin->alerts;

@@ -357,10 +357,9 @@ final class WSAL_AlertManager {
 					return $this->_CommitItem( $type, $data, $cond, false );
 				} else {
 					// In general this shouldn't happen, but it could, so we handle it here.
-					$this->plugin->wsal_log(
-						/* translators: Event ID */
-						sprintf( esc_html__( 'Event with code %d has not be registered.', 'wp-security-audit-log' ), $type )
-					);
+					/* translators: Event ID */
+					$error_message = sprintf( esc_html__( 'Event with code %d has not be registered.', 'wp-security-audit-log' ), $type );
+					$this->plugin->wsal_log( $error_message );
 				}
 			}
 		}
@@ -411,40 +410,41 @@ final class WSAL_AlertManager {
 	/**
 	 * Register an alert type.
 	 *
-	 * @param string $category Category name.
+	 * @param string $category    Category name.
 	 * @param string $subcategory Subcategory name.
-	 * @param array $info Event information from defaults.php.
-	 *
-	 * @throws Exception - Error if alert is already registered.
+	 * @param array  $info        Event information from defaults.php.
 	 */
 	public function Register( $category, $subcategory, $info ) {
 
-		//  default for optional fields
-		$metadata   = [];
-		$links      = [];
+		// Default for optional fields.
+		$metadata   = array();
+		$links      = array();
 		$object     = '';
 		$event_type = '';
 
 		$definition_items_count = count( $info );
-		if ( 8 == $definition_items_count ) {
-			//  most recent event definition introduced in version 4.2.1
+		if ( 8 === $definition_items_count ) {
+			// Most recent event definition introduced in version 4.2.1.
 			list( $code, $severity, $desc, $message, $metadata, $links, $object, $event_type ) = $info;
-		} else if (6 == $definition_items_count ) {
-			//  legacy event definition for backwards compatibility (used prior to version 4.2.1)
+		} elseif ( 6 === $definition_items_count ) {
+			// Legacy event definition for backwards compatibility (used prior to version 4.2.1).
 			list( $code, $severity, $desc, $message, $object, $event_type ) = $info;
 		} else {
-			//  even older legacy event definition for backwards compatibility
+			// Even older legacy event definition for backwards compatibility.
 			list( $code, $severity, $desc, $message ) = $info;
 		}
 
 		if ( is_string( $links ) ) {
-			$links = [ $links ];
+			$links = array( $links );
 		}
-		
+
 		if ( isset( $this->_alerts[ $code ] ) ) {
 			add_action( 'admin_notices', array( $this, 'duplicate_event_notice' ) );
 			/* Translators: Event ID */
-			throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Activity Log.', 'wp-security-audit-log' ), $code ) );
+			$error_message = sprintf( esc_html__( 'Event %s already registered with WP Activity Log.', 'wp-security-audit-log' ), $code );
+			$this->plugin->wsal_log( $error_message );
+
+			return;
 		}
 
 		/**
@@ -457,7 +457,6 @@ final class WSAL_AlertManager {
 		 * @param integer $code - Event ID.
 		 *
 		 * @since 4.3.2
-		 *
 		 */
 		$metadata = apply_filters( 'wsal_event_metadata_definition', $metadata, $code );
 
@@ -469,8 +468,6 @@ final class WSAL_AlertManager {
 	 *
 	 * @param array $groups - An array with group name as the index and an array of group items as the value.
 	 * Item values is an array of [type, code, description, message, object, event type] respectively.
-	 *
-	 * @throws Exception
 	 */
 	public function RegisterGroup( $groups ) {
 		foreach ( $groups as $name => $group ) {
@@ -1446,7 +1443,7 @@ final class WSAL_AlertManager {
 	 *
 	 * @return WP_User[] WordPress users.
 	 *
-	 * @since latest
+	 * @since 4.4.0
 	 */
 	public function get_wp_users(): array {
 		return $this->wp_users;
