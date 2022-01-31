@@ -628,7 +628,7 @@ msgstr ""
 msgid "Renamed the custom field %MetaKeyOld% on post %PostTitle% to %MetaKeNew%."
 msgstr ""
 
-#: defaults.php:932, classes/AlertManager.php:1012
+#: defaults.php:932, classes/AlertManager.php:1009
 msgid "Post"
 msgstr ""
 
@@ -1396,7 +1396,7 @@ msgstr ""
 msgid "A new user %NewUserData->Username% is created via registration."
 msgstr ""
 
-#: defaults.php:1706, classes/AlertManager.php:1008, classes/AuditLogListView.php:272, classes/AuditLogListView.php:306, classes/WidgetManager.php:76, classes/Views/Settings.php:1086, extensions/reports/classes/AbstractReportGenerator.php:159, extensions/search/classes/Filters/UserNameFilter.php:31, extensions/user-sessions/classes/View/Sessions.php:140
+#: defaults.php:1706, classes/AlertManager.php:1005, classes/AuditLogListView.php:272, classes/AuditLogListView.php:306, classes/WidgetManager.php:76, classes/Views/Settings.php:1086, extensions/reports/classes/AbstractReportGenerator.php:159, extensions/search/classes/Filters/UserNameFilter.php:31, extensions/user-sessions/classes/View/Sessions.php:140
 msgid "User"
 msgstr ""
 
@@ -1736,7 +1736,7 @@ msgstr ""
 msgid "The plugin created the post %PostTitle%."
 msgstr ""
 
-#: defaults.php:2180, defaults.php:2195, classes/AlertManager.php:1010, classes/AuditLogGridView.php:426, classes/AuditLogListView.php:436
+#: defaults.php:2180, defaults.php:2195, classes/AlertManager.php:1007, classes/AuditLogGridView.php:426, classes/AuditLogListView.php:436
 msgid "Plugin"
 msgstr ""
 
@@ -1844,7 +1844,7 @@ msgstr ""
 msgid "WordPress & System"
 msgstr ""
 
-#: defaults.php:2336, classes/AlertManager.php:1009, classes/AlertManager.php:1375, classes/AuditLogGridView.php:435, classes/AuditLogListView.php:442, extensions/email-notifications/classes/DailyNotification.php:243, extensions/email-notifications/classes/Notifier.php:659, extensions/reports/classes/Common.php:1108
+#: defaults.php:2336, classes/AlertManager.php:1006, classes/AlertManager.php:1372, classes/AuditLogGridView.php:435, classes/AuditLogListView.php:442, extensions/email-notifications/classes/DailyNotification.php:243, extensions/email-notifications/classes/Notifier.php:659, extensions/reports/classes/Common.php:1108
 msgid "System"
 msgstr ""
 
@@ -2907,233 +2907,233 @@ msgid "published"
 msgstr ""
 
 #. translators: Event ID
-#: classes/AlertManager.php:362
+#: classes/AlertManager.php:361
 msgid "Event with code %d has not be registered."
 msgstr ""
 
 #. translators: Event ID
-#: classes/AlertManager.php:447
+#: classes/AlertManager.php:444
 msgid "Event %s already registered with WP Activity Log."
 msgstr ""
 
-#: classes/AlertManager.php:492
+#: classes/AlertManager.php:489
 msgid "You have custom events that are using the same ID or IDs which are already registered in the plugin, so they have been disabled."
 msgstr ""
 
 #. translators: 1.CSS classes, 2. Notice, 3. Contact us link
-#: classes/AlertManager.php:495
+#: classes/AlertManager.php:492
 msgid "%4$s to help you solve this issue."
 msgstr ""
 
-#: classes/AlertManager.php:497
+#: classes/AlertManager.php:494
 msgid "ERROR:"
 msgstr ""
 
-#: classes/AlertManager.php:499
+#: classes/AlertManager.php:496
 msgid "Contact us"
 msgstr ""
 
-#: classes/AlertManager.php:1011
+#: classes/AlertManager.php:1008
 msgid "Database"
 msgstr ""
 
-#: classes/AlertManager.php:1013, classes/AlertManager.php:1017
+#: classes/AlertManager.php:1010, classes/AlertManager.php:1014
 msgid "File"
 msgstr ""
 
-#: classes/AlertManager.php:1014
+#: classes/AlertManager.php:1011
 msgid "Tag"
 msgstr ""
 
-#: classes/AlertManager.php:1015
+#: classes/AlertManager.php:1012
 msgid "Comment"
 msgstr ""
 
-#: classes/AlertManager.php:1016
+#: classes/AlertManager.php:1013
 msgid "Setting"
 msgstr ""
 
-#: classes/AlertManager.php:1018
+#: classes/AlertManager.php:1015
 msgid "System Setting"
 msgstr ""
 
-#: classes/AlertManager.php:1019
+#: classes/AlertManager.php:1016
 msgid "MainWP Network"
 msgstr ""
 
-#: classes/AlertManager.php:1020
+#: classes/AlertManager.php:1017
 msgid "MainWP"
 msgstr ""
 
-#: classes/AlertManager.php:1021
+#: classes/AlertManager.php:1018
 msgid "Category"
 msgstr ""
 
-#: classes/AlertManager.php:1022
+#: classes/AlertManager.php:1019
 msgid "Custom Field"
 msgstr ""
 
-#: classes/AlertManager.php:1023
+#: classes/AlertManager.php:1020
 msgid "Widget"
 msgstr ""
 
-#: classes/AlertManager.php:1024
+#: classes/AlertManager.php:1021
 msgid "Menu"
 msgstr ""
 
-#: classes/AlertManager.php:1025
+#: classes/AlertManager.php:1022
 msgid "Theme"
 msgstr ""
 
-#: classes/AlertManager.php:1026
+#: classes/AlertManager.php:1023
 msgid "Activity log"
 msgstr ""
 
-#: classes/AlertManager.php:1027
+#: classes/AlertManager.php:1024
 msgid "WP Activity Log"
 msgstr ""
 
-#: classes/AlertManager.php:1028
+#: classes/AlertManager.php:1025
 msgid "Multisite Network"
 msgstr ""
 
-#: classes/AlertManager.php:1029, extensions/email-notifications/classes/Common.php:1117, extensions/search/classes/Filters/IpFilter.php:71, extensions/user-sessions/classes/View/Sessions.php:375
+#: classes/AlertManager.php:1026, extensions/email-notifications/classes/Common.php:1117, extensions/search/classes/Filters/IpFilter.php:71, extensions/user-sessions/classes/View/Sessions.php:375
 msgid "IP Address"
 msgstr ""
 
-#: classes/AlertManager.php:1045
+#: classes/AlertManager.php:1042
 msgid "unknown object"
 msgstr ""
 
-#: classes/AlertManager.php:1082
+#: classes/AlertManager.php:1079
 msgid "Login"
 msgstr ""
 
-#: classes/AlertManager.php:1083
+#: classes/AlertManager.php:1080
 msgid "Logout"
 msgstr ""
 
-#: classes/AlertManager.php:1084
+#: classes/AlertManager.php:1081
 msgid "Installed"
 msgstr ""
 
-#: classes/AlertManager.php:1085
+#: classes/AlertManager.php:1082
 msgid "Activated"
 msgstr ""
 
-#: classes/AlertManager.php:1086
+#: classes/AlertManager.php:1083
 msgid "Deactivated"
 msgstr ""
 
-#: classes/AlertManager.php:1087
+#: classes/AlertManager.php:1084
 msgid "Uninstalled"
 msgstr ""
 
-#: classes/AlertManager.php:1088
+#: classes/AlertManager.php:1085
 msgid "Updated"
 msgstr ""
 
-#: classes/AlertManager.php:1089, extensions/user-sessions/classes/View/Sessions.php:145
+#: classes/AlertManager.php:1086, extensions/user-sessions/classes/View/Sessions.php:145
 msgid "Created"
 msgstr ""
 
-#: classes/AlertManager.php:1090
+#: classes/AlertManager.php:1087
 msgid "Modified"
 msgstr ""
 
-#: classes/AlertManager.php:1091, extensions/search/search-init.php:299
+#: classes/AlertManager.php:1088, extensions/search/search-init.php:299
 msgid "Deleted"
 msgstr ""
 
-#: classes/AlertManager.php:1092, extensions/reports/classes/AbstractReportGenerator.php:122
+#: classes/AlertManager.php:1089, extensions/reports/classes/AbstractReportGenerator.php:122
 msgid "Published"
 msgstr ""
 
-#: classes/AlertManager.php:1093
+#: classes/AlertManager.php:1090
 msgid "Approved"
 msgstr ""
 
-#: classes/AlertManager.php:1094
+#: classes/AlertManager.php:1091
 msgid "Unapproved"
 msgstr ""
 
-#: classes/AlertManager.php:1095, extensions/external-db/classes/Mirroring.php:168
+#: classes/AlertManager.php:1092, extensions/external-db/classes/Mirroring.php:168
 msgid "Enabled"
 msgstr ""
 
-#: classes/AlertManager.php:1096, extensions/email-notifications/classes/Notifications.php:1696, extensions/external-db/classes/Mirroring.php:170
+#: classes/AlertManager.php:1093, extensions/email-notifications/classes/Notifications.php:1696, extensions/external-db/classes/Mirroring.php:170
 msgid "Disabled"
 msgstr ""
 
-#: classes/AlertManager.php:1097
+#: classes/AlertManager.php:1094
 msgid "Added"
 msgstr ""
 
-#: classes/AlertManager.php:1098
+#: classes/AlertManager.php:1095
 msgid "Failed Login"
 msgstr ""
 
-#: classes/AlertManager.php:1099
+#: classes/AlertManager.php:1096
 msgid "Blocked"
 msgstr ""
 
-#: classes/AlertManager.php:1100
+#: classes/AlertManager.php:1097
 msgid "Uploaded"
 msgstr ""
 
-#: classes/AlertManager.php:1101
+#: classes/AlertManager.php:1098
 msgid "Restored"
 msgstr ""
 
-#: classes/AlertManager.php:1102
+#: classes/AlertManager.php:1099
 msgid "Opened"
 msgstr ""
 
-#: classes/AlertManager.php:1103
+#: classes/AlertManager.php:1100
 msgid "Viewed"
 msgstr ""
 
-#: classes/AlertManager.php:1104
+#: classes/AlertManager.php:1101
 msgid "Started"
 msgstr ""
 
-#: classes/AlertManager.php:1105, extensions/external-db/classes/Settings.php:565
+#: classes/AlertManager.php:1102, extensions/external-db/classes/Settings.php:565
 msgid "Stopped"
 msgstr ""
 
-#: classes/AlertManager.php:1106
+#: classes/AlertManager.php:1103
 msgid "Removed"
 msgstr ""
 
-#: classes/AlertManager.php:1107
+#: classes/AlertManager.php:1104
 msgid "Unblocked"
 msgstr ""
 
-#: classes/AlertManager.php:1108
+#: classes/AlertManager.php:1105
 msgid "Renamed"
 msgstr ""
 
-#: classes/AlertManager.php:1109
+#: classes/AlertManager.php:1106
 msgid "Duplicated"
 msgstr ""
 
-#: classes/AlertManager.php:1110
+#: classes/AlertManager.php:1107
 msgid "Submitted"
 msgstr ""
 
-#: classes/AlertManager.php:1111
+#: classes/AlertManager.php:1108
 msgid "Revoked"
 msgstr ""
 
-#: classes/AlertManager.php:1128
+#: classes/AlertManager.php:1125
 msgid "unknown type"
 msgstr ""
 
-#: classes/AlertManager.php:1348, classes/ConstantManager.php:147
+#: classes/AlertManager.php:1345, classes/ConstantManager.php:147
 msgid "Unknown error code."
 msgstr ""
 
-#: classes/AlertManager.php:1431, classes/AlertManager.php:1419, extensions/reports/classes/Common.php:1081, extensions/reports/classes/Common.php:1071
+#: classes/AlertManager.php:1428, classes/AlertManager.php:1416, extensions/reports/classes/Common.php:1081, extensions/reports/classes/Common.php:1071
 msgid "Unknown Site"
 msgstr ""
 

@@ -1599,7 +1599,7 @@ class WSAL_Settings {
 		) {
 			// Check if freemius state is anonymous.
 			if ( ! wsal_freemius()->is_premium() && 'anonymous' === $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) ) {
-				// Update freemius state to skipped.
+				// Update Freemius state to skipped.
 				$this->_plugin->SetGlobalSetting( 'wsal_freemius_state', 'skipped', true );
 
 				if ( ! $this->_plugin->IsMultisite() ) {
@@ -1620,7 +1620,7 @@ class WSAL_Settings {
 			$this->SetIncognito( true ); // Incognito mode to hide WSAL on plugins page.
 			$this->set_restrict_log_viewer( 'only_me' );
 			$this->set_restrict_plugin_setting( 'only_me' );
-			// current user with fallback to default admin (in case this is triggered using WP CLI or something similar)
+			// Current user with fallback to default admin (in case this is triggered using WP CLI or something similar).
 			$only_me_user_id = is_user_logged_in() ? get_current_user_id() : 1;
 			$this->set_only_me_user_id( $only_me_user_id );
 			$this->_plugin->SetGlobalBooleanSetting( 'mwp-child-stealth-mode', true ); // Save stealth mode option.

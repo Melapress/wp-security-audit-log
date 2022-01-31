@@ -109,7 +109,7 @@ if ( ! class_exists( 'WSAL_AbstractExtension' ) ) {
 		 *
 		 * @return string Filename.
 		 *
-		 * @since latest
+		 * @since 4.4.0
 		 */
 		abstract public function get_plugin_filename();
 	}
