@@ -237,7 +237,8 @@ final class WSAL_AlertManager {
 
 		// If user or user role is enable then go ahead.
 		if ( $this->CheckEnableUserRoles( $username, $roles ) ) {
-			$data['Timestamp'] = current_time( 'U.u', 'true' );
+
+			$data['Timestamp'] = ( isset( $data['Timestamp'] ) && ! empty( $data['Timestamp'] ) ) ? $data['Timestamp'] : current_time( 'U.u', 'true' );
 			if ( $delayed ) {
 				$this->TriggerIf( $type, $data, null );
 			} else {

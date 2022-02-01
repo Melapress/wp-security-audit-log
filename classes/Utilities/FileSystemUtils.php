@@ -27,11 +27,13 @@ class WSAL_Utilities_FileSystemUtils {
 			return $cached_data;
 		}
 
-		$result = [];
-		if ( $handle = opendir( $directory ) ) {
-			$regexp = '/' . str_replace( [ '.', '*' ], [ '\.', '.*' ], $pattern ) . '/';
+		$result = array();
+		$handle = opendir( $directory );
+		if ( $handle ) {
+			$ignore_list = array( '.', '..' );
+			$regexp      = '/' . str_replace( array( '.', '*' ), array( '\.', '.*' ), $pattern ) . '/';
 			while ( false !== ( $file_name = readdir( $handle ) ) ) {
-				if ( preg_match( $regexp, $file_name ) ) {
+				if ( ! in_array( $file_name, $ignore_list, true ) && preg_match( $regexp, $file_name ) ) {
 					array_push( $result, $folder_slashed . $file_name );
 				}
 			}

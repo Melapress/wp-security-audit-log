@@ -628,7 +628,7 @@ msgstr ""
 msgid "Renamed the custom field %MetaKeyOld% on post %PostTitle% to %MetaKeNew%."
 msgstr ""
 
-#: defaults.php:932, classes/AlertManager.php:1009
+#: defaults.php:932, classes/AlertManager.php:1010
 msgid "Post"
 msgstr ""
 
@@ -788,11 +788,11 @@ msgstr ""
 msgid "Moved the %WidgetName% widget."
 msgstr ""
 
-#: defaults.php:1191, extensions/reports/inc/wsal-reporting-view.inc.php:1483
+#: defaults.php:1191, extensions/reports/inc/wsal-reporting-view.inc.php:1482
 msgid "From"
 msgstr ""
 
-#: defaults.php:1192, extensions/reports/inc/wsal-reporting-view.inc.php:1492
+#: defaults.php:1192, extensions/reports/inc/wsal-reporting-view.inc.php:1491
 msgid "To"
 msgstr ""
 
@@ -1396,7 +1396,7 @@ msgstr ""
 msgid "A new user %NewUserData->Username% is created via registration."
 msgstr ""
 
-#: defaults.php:1706, classes/AlertManager.php:1005, classes/AuditLogListView.php:272, classes/AuditLogListView.php:306, classes/WidgetManager.php:76, classes/Views/Settings.php:1086, extensions/reports/classes/AbstractReportGenerator.php:159, extensions/search/classes/Filters/UserNameFilter.php:31, extensions/user-sessions/classes/View/Sessions.php:140
+#: defaults.php:1706, classes/AlertManager.php:1006, classes/AuditLogListView.php:272, classes/AuditLogListView.php:306, classes/WidgetManager.php:76, classes/Views/Settings.php:1086, extensions/reports/classes/AbstractReportGenerator.php:159, extensions/search/classes/Filters/UserNameFilter.php:31, extensions/user-sessions/classes/View/Sessions.php:140
 msgid "User"
 msgstr ""
 
@@ -1736,7 +1736,7 @@ msgstr ""
 msgid "The plugin created the post %PostTitle%."
 msgstr ""
 
-#: defaults.php:2180, defaults.php:2195, classes/AlertManager.php:1007, classes/AuditLogGridView.php:426, classes/AuditLogListView.php:436
+#: defaults.php:2180, defaults.php:2195, classes/AlertManager.php:1008, classes/AuditLogGridView.php:426, classes/AuditLogListView.php:436
 msgid "Plugin"
 msgstr ""
 
@@ -1844,7 +1844,7 @@ msgstr ""
 msgid "WordPress & System"
 msgstr ""
 
-#: defaults.php:2336, classes/AlertManager.php:1006, classes/AlertManager.php:1372, classes/AuditLogGridView.php:435, classes/AuditLogListView.php:442, extensions/email-notifications/classes/DailyNotification.php:243, extensions/email-notifications/classes/Notifier.php:659, extensions/reports/classes/Common.php:1108
+#: defaults.php:2336, classes/AlertManager.php:1007, classes/AlertManager.php:1373, classes/AuditLogGridView.php:435, classes/AuditLogListView.php:442, extensions/email-notifications/classes/DailyNotification.php:243, extensions/email-notifications/classes/Notifier.php:659, extensions/reports/classes/Common.php:1108
 msgid "System"
 msgstr ""
 
@@ -2907,233 +2907,233 @@ msgid "published"
 msgstr ""
 
 #. translators: Event ID
-#: classes/AlertManager.php:361
+#: classes/AlertManager.php:362
 msgid "Event with code %d has not be registered."
 msgstr ""
 
 #. translators: Event ID
-#: classes/AlertManager.php:444
+#: classes/AlertManager.php:445
 msgid "Event %s already registered with WP Activity Log."
 msgstr ""
 
-#: classes/AlertManager.php:489
+#: classes/AlertManager.php:490
 msgid "You have custom events that are using the same ID or IDs which are already registered in the plugin, so they have been disabled."
 msgstr ""
 
 #. translators: 1.CSS classes, 2. Notice, 3. Contact us link
-#: classes/AlertManager.php:492
+#: classes/AlertManager.php:493
 msgid "%4$s to help you solve this issue."
 msgstr ""
 
-#: classes/AlertManager.php:494
+#: classes/AlertManager.php:495
 msgid "ERROR:"
 msgstr ""
 
-#: classes/AlertManager.php:496
+#: classes/AlertManager.php:497
 msgid "Contact us"
 msgstr ""
 
-#: classes/AlertManager.php:1008
+#: classes/AlertManager.php:1009
 msgid "Database"
 msgstr ""
 
-#: classes/AlertManager.php:1010, classes/AlertManager.php:1014
+#: classes/AlertManager.php:1011, classes/AlertManager.php:1015
 msgid "File"
 msgstr ""
 
-#: classes/AlertManager.php:1011
+#: classes/AlertManager.php:1012
 msgid "Tag"
 msgstr ""
 
-#: classes/AlertManager.php:1012
+#: classes/AlertManager.php:1013
 msgid "Comment"
 msgstr ""
 
-#: classes/AlertManager.php:1013
+#: classes/AlertManager.php:1014
 msgid "Setting"
 msgstr ""
 
-#: classes/AlertManager.php:1015
+#: classes/AlertManager.php:1016
 msgid "System Setting"
 msgstr ""
 
-#: classes/AlertManager.php:1016
+#: classes/AlertManager.php:1017
 msgid "MainWP Network"
 msgstr ""
 
-#: classes/AlertManager.php:1017
+#: classes/AlertManager.php:1018
 msgid "MainWP"
 msgstr ""
 
-#: classes/AlertManager.php:1018
+#: classes/AlertManager.php:1019
 msgid "Category"
 msgstr ""
 
-#: classes/AlertManager.php:1019
+#: classes/AlertManager.php:1020
 msgid "Custom Field"
 msgstr ""
 
-#: classes/AlertManager.php:1020
+#: classes/AlertManager.php:1021
 msgid "Widget"
 msgstr ""
 
-#: classes/AlertManager.php:1021
+#: classes/AlertManager.php:1022
 msgid "Menu"
 msgstr ""
 
-#: classes/AlertManager.php:1022
+#: classes/AlertManager.php:1023
 msgid "Theme"
 msgstr ""
 
-#: classes/AlertManager.php:1023
+#: classes/AlertManager.php:1024
 msgid "Activity log"
 msgstr ""
 
-#: classes/AlertManager.php:1024
+#: classes/AlertManager.php:1025
 msgid "WP Activity Log"
 msgstr ""
 
-#: classes/AlertManager.php:1025
+#: classes/AlertManager.php:1026
 msgid "Multisite Network"
 msgstr ""
 
-#: classes/AlertManager.php:1026, extensions/email-notifications/classes/Common.php:1117, extensions/search/classes/Filters/IpFilter.php:71, extensions/user-sessions/classes/View/Sessions.php:375
+#: classes/AlertManager.php:1027, extensions/email-notifications/classes/Common.php:1117, extensions/search/classes/Filters/IpFilter.php:71, extensions/user-sessions/classes/View/Sessions.php:375
 msgid "IP Address"
 msgstr ""
 
-#: classes/AlertManager.php:1042
+#: classes/AlertManager.php:1043
 msgid "unknown object"
 msgstr ""
 
-#: classes/AlertManager.php:1079
+#: classes/AlertManager.php:1080
 msgid "Login"
 msgstr ""
 
-#: classes/AlertManager.php:1080
+#: classes/AlertManager.php:1081
 msgid "Logout"
 msgstr ""
 
-#: classes/AlertManager.php:1081
+#: classes/AlertManager.php:1082
 msgid "Installed"
 msgstr ""
 
-#: classes/AlertManager.php:1082
+#: classes/AlertManager.php:1083
 msgid "Activated"
 msgstr ""
 
-#: classes/AlertManager.php:1083
+#: classes/AlertManager.php:1084
 msgid "Deactivated"
 msgstr ""
 
-#: classes/AlertManager.php:1084
+#: classes/AlertManager.php:1085
 msgid "Uninstalled"
 msgstr ""
 
-#: classes/AlertManager.php:1085
+#: classes/AlertManager.php:1086
 msgid "Updated"
 msgstr ""
 
-#: classes/AlertManager.php:1086, extensions/user-sessions/classes/View/Sessions.php:145
+#: classes/AlertManager.php:1087, extensions/user-sessions/classes/View/Sessions.php:145
 msgid "Created"
 msgstr ""
 
-#: classes/AlertManager.php:1087
+#: classes/AlertManager.php:1088
 msgid "Modified"
 msgstr ""
 
-#: classes/AlertManager.php:1088, extensions/search/search-init.php:299
+#: classes/AlertManager.php:1089, extensions/search/search-init.php:299
 msgid "Deleted"
 msgstr ""
 
-#: classes/AlertManager.php:1089, extensions/reports/classes/AbstractReportGenerator.php:122
+#: classes/AlertManager.php:1090, extensions/reports/classes/AbstractReportGenerator.php:122
 msgid "Published"
 msgstr ""
 
-#: classes/AlertManager.php:1090
+#: classes/AlertManager.php:1091
 msgid "Approved"
 msgstr ""
 
-#: classes/AlertManager.php:1091
+#: classes/AlertManager.php:1092
 msgid "Unapproved"
 msgstr ""
 
-#: classes/AlertManager.php:1092, extensions/external-db/classes/Mirroring.php:168
+#: classes/AlertManager.php:1093, extensions/external-db/classes/Mirroring.php:168
 msgid "Enabled"
 msgstr ""
 
-#: classes/AlertManager.php:1093, extensions/email-notifications/classes/Notifications.php:1696, extensions/external-db/classes/Mirroring.php:170
+#: classes/AlertManager.php:1094, extensions/email-notifications/classes/Notifications.php:1696, extensions/external-db/classes/Mirroring.php:170
 msgid "Disabled"
 msgstr ""
 
-#: classes/AlertManager.php:1094
+#: classes/AlertManager.php:1095
 msgid "Added"
 msgstr ""
 
-#: classes/AlertManager.php:1095
+#: classes/AlertManager.php:1096
 msgid "Failed Login"
 msgstr ""
 
-#: classes/AlertManager.php:1096
+#: classes/AlertManager.php:1097
 msgid "Blocked"
 msgstr ""
 
-#: classes/AlertManager.php:1097
+#: classes/AlertManager.php:1098
 msgid "Uploaded"
 msgstr ""
 
-#: classes/AlertManager.php:1098
+#: classes/AlertManager.php:1099
 msgid "Restored"
 msgstr ""
 
-#: classes/AlertManager.php:1099
+#: classes/AlertManager.php:1100
 msgid "Opened"
 msgstr ""
 
-#: classes/AlertManager.php:1100
+#: classes/AlertManager.php:1101
 msgid "Viewed"
 msgstr ""
 
-#: classes/AlertManager.php:1101
+#: classes/AlertManager.php:1102
 msgid "Started"
 msgstr ""
 
-#: classes/AlertManager.php:1102, extensions/external-db/classes/Settings.php:565
+#: classes/AlertManager.php:1103, extensions/external-db/classes/Settings.php:565
 msgid "Stopped"
 msgstr ""
 
-#: classes/AlertManager.php:1103
+#: classes/AlertManager.php:1104
 msgid "Removed"
 msgstr ""
 
-#: classes/AlertManager.php:1104
+#: classes/AlertManager.php:1105
 msgid "Unblocked"
 msgstr ""
 
-#: classes/AlertManager.php:1105
+#: classes/AlertManager.php:1106
 msgid "Renamed"
 msgstr ""
 
-#: classes/AlertManager.php:1106
+#: classes/AlertManager.php:1107
 msgid "Duplicated"
 msgstr ""
 
-#: classes/AlertManager.php:1107
+#: classes/AlertManager.php:1108
 msgid "Submitted"
 msgstr ""
 
-#: classes/AlertManager.php:1108
+#: classes/AlertManager.php:1109
 msgid "Revoked"
 msgstr ""
 
-#: classes/AlertManager.php:1125
+#: classes/AlertManager.php:1126
 msgid "unknown type"
 msgstr ""
 
-#: classes/AlertManager.php:1345, classes/ConstantManager.php:147
+#: classes/AlertManager.php:1346, classes/ConstantManager.php:147
 msgid "Unknown error code."
 msgstr ""
 
-#: classes/AlertManager.php:1428, classes/AlertManager.php:1416, extensions/reports/classes/Common.php:1081, extensions/reports/classes/Common.php:1071
+#: classes/AlertManager.php:1429, classes/AlertManager.php:1417, extensions/reports/classes/Common.php:1081, extensions/reports/classes/Common.php:1071
 msgid "Unknown Site"
 msgstr ""
 
@@ -3213,7 +3213,7 @@ msgstr ""
 msgid "Alert Data Inspector"
 msgstr ""
 
-#: classes/AuditLogListView.php:271, classes/AuditLogListView.php:303, extensions/reports/classes/AbstractReportGenerator.php:157, extensions/reports/classes/CsvReportGenerator.php:115, extensions/reports/inc/wsal-reporting-view.inc.php:1724, extensions/search/classes/Filters/DateFilter.php:28
+#: classes/AuditLogListView.php:271, classes/AuditLogListView.php:303, extensions/reports/classes/AbstractReportGenerator.php:157, extensions/reports/classes/CsvReportGenerator.php:115, extensions/reports/inc/wsal-reporting-view.inc.php:1723, extensions/search/classes/Filters/DateFilter.php:28
 msgid "Date"
 msgstr ""
 
@@ -3565,11 +3565,11 @@ msgstr ""
 msgid "Thank you for installing WP Activity Log. Do you want to run the wizard to configure the basic plugin settings?"
 msgstr ""
 
-#: classes/Views/AuditLog.php:560, classes/Views/Settings.php:532, classes/Views/Settings.php:559, classes/Views/Settings.php:625, classes/Views/Settings.php:683, classes/Views/Settings.php:1118, classes/Views/Settings.php:1402, classes/Views/Settings.php:1446, classes/Views/Settings.php:1477, classes/Views/SetupWizard.php:563, extensions/reports/classes/Settings.php:122, extensions/reports/classes/Settings.php:210
+#: classes/Views/AuditLog.php:560, classes/Views/Settings.php:532, classes/Views/Settings.php:559, classes/Views/Settings.php:625, classes/Views/Settings.php:683, classes/Views/Settings.php:1118, classes/Views/Settings.php:1402, classes/Views/Settings.php:1446, classes/Views/Settings.php:1477, classes/Views/SetupWizard.php:563, extensions/reports/classes/Settings.php:124, extensions/reports/classes/Settings.php:215
 msgid "Yes"
 msgstr ""
 
-#: classes/Views/AuditLog.php:561, classes/Views/Settings.php:537, classes/Views/Settings.php:564, classes/Views/Settings.php:655, classes/Views/Settings.php:693, classes/Views/Settings.php:1123, classes/Views/Settings.php:1409, classes/Views/Settings.php:1453, classes/Views/Settings.php:1478, classes/Views/SetupWizard.php:568, extensions/reports/classes/Settings.php:130, extensions/reports/classes/Settings.php:218
+#: classes/Views/AuditLog.php:561, classes/Views/Settings.php:537, classes/Views/Settings.php:564, classes/Views/Settings.php:655, classes/Views/Settings.php:693, classes/Views/Settings.php:1123, classes/Views/Settings.php:1409, classes/Views/Settings.php:1453, classes/Views/Settings.php:1478, classes/Views/SetupWizard.php:568, extensions/reports/classes/Settings.php:132, extensions/reports/classes/Settings.php:223
 msgid "No"
 msgstr ""
 
@@ -5065,7 +5065,7 @@ msgstr ""
 msgid "Load & Run"
 msgstr ""
 
-#: extensions/search/search-init.php:297, extensions/email-notifications/classes/NotificationBuilder.php:78, extensions/email-notifications/classes/Notifications.php:1720, extensions/email-notifications/classes/Notifications.php:1783, extensions/email-notifications/classes/Notifications.php:1798, extensions/external-db/classes/Connections.php:159, extensions/external-db/classes/Mirroring.php:135, extensions/reports/inc/wsal-reporting-view.inc.php:1745
+#: extensions/search/search-init.php:297, extensions/email-notifications/classes/NotificationBuilder.php:78, extensions/email-notifications/classes/Notifications.php:1720, extensions/email-notifications/classes/Notifications.php:1783, extensions/email-notifications/classes/Notifications.php:1798, extensions/external-db/classes/Connections.php:159, extensions/external-db/classes/Mirroring.php:135, extensions/reports/inc/wsal-reporting-view.inc.php:1744
 msgid "Delete"
 msgstr ""
 
@@ -5306,7 +5306,7 @@ msgstr ""
 msgid "Use event specific email template"
 msgstr ""
 
-#: extensions/email-notifications/classes/AddNotification.php:335, extensions/email-notifications/classes/EditNotification.php:425, extensions/external-db/classes/Connections.php:97, extensions/external-db/classes/Mirroring.php:97, extensions/reports/inc/wsal-reporting-view.inc.php:1405, extensions/reports/inc/wsal-reporting-view.inc.php:1723
+#: extensions/email-notifications/classes/AddNotification.php:335, extensions/email-notifications/classes/EditNotification.php:425, extensions/external-db/classes/Connections.php:97, extensions/external-db/classes/Mirroring.php:97, extensions/reports/inc/wsal-reporting-view.inc.php:1404, extensions/reports/inc/wsal-reporting-view.inc.php:1722
 msgid "Name"
 msgstr ""
 
@@ -5314,7 +5314,7 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: extensions/email-notifications/classes/AddNotification.php:344, extensions/email-notifications/classes/EditNotification.php:434, extensions/email-notifications/classes/Notifications.php:1049, extensions/email-notifications/classes/Notifications.php:2302, extensions/reports/inc/wsal-reporting-view.inc.php:1399, extensions/user-sessions/classes/View/Sessions.php:372
+#: extensions/email-notifications/classes/AddNotification.php:344, extensions/email-notifications/classes/EditNotification.php:434, extensions/email-notifications/classes/Notifications.php:1049, extensions/email-notifications/classes/Notifications.php:2302, extensions/reports/inc/wsal-reporting-view.inc.php:1398, extensions/user-sessions/classes/View/Sessions.php:372
 msgid "Email"
 msgstr ""
 
@@ -5953,7 +5953,7 @@ msgstr ""
 msgid "Search Notifications"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1695, extensions/reports/classes/HtmlReportGenerator.php:282, extensions/user-sessions/classes/View/Options/Policies.php:24
+#: extensions/email-notifications/classes/Notifications.php:1695, extensions/reports/classes/HtmlReportGenerator.php:286, extensions/user-sessions/classes/View/Options/Policies.php:24
 msgid "All"
 msgstr ""
 
@@ -7294,7 +7294,7 @@ msgstr ""
 msgid "Blog Name"
 msgstr ""
 
-#: extensions/reports/classes/CsvReportGenerator.php:116, extensions/reports/classes/Settings.php:158
+#: extensions/reports/classes/CsvReportGenerator.php:116, extensions/reports/classes/Settings.php:163
 msgid "Time"
 msgstr ""
 
@@ -7310,59 +7310,59 @@ msgstr ""
 msgid "WP Activity Log Reporter"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:134
+#: extensions/reports/classes/HtmlReportGenerator.php:138
 msgid "Report from"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:134
+#: extensions/reports/classes/HtmlReportGenerator.php:138
 msgid "website"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:164
+#: extensions/reports/classes/HtmlReportGenerator.php:168
 msgid "Report Criteria"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:251
+#: extensions/reports/classes/HtmlReportGenerator.php:255
 msgid "List of unique IP addresses per user"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:253, extensions/reports/inc/wsal-reporting-view.inc.php:1675
+#: extensions/reports/classes/HtmlReportGenerator.php:257, extensions/reports/inc/wsal-reporting-view.inc.php:1674
 msgid "List of IP addresses that accessed the website"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:255
+#: extensions/reports/classes/HtmlReportGenerator.php:259
 msgid "List of users that accessed the website"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:259
+#: extensions/reports/classes/HtmlReportGenerator.php:263
 msgid "Number of Logins per user"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:263
+#: extensions/reports/classes/HtmlReportGenerator.php:267
 msgid "Number of published posts per user"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:267
+#: extensions/reports/classes/HtmlReportGenerator.php:271
 msgid "Number of viewed posts per user"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:269
+#: extensions/reports/classes/HtmlReportGenerator.php:273
 msgid "Statistical report"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:283
+#: extensions/reports/classes/HtmlReportGenerator.php:287
 msgid "From the beginning"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:296
+#: extensions/reports/classes/HtmlReportGenerator.php:300
 msgid "Start date"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:300
+#: extensions/reports/classes/HtmlReportGenerator.php:304
 msgid "End date"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:580
+#: extensions/reports/classes/HtmlReportGenerator.php:585
 msgid "Results"
 msgstr ""
 
@@ -7384,185 +7384,213 @@ msgstr ""
 msgid "Reports are available in the Professional and Business Plans. %s to configure and receive SMS notifications."
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:99
+#: extensions/reports/classes/Settings.php:101
 msgid "Do you want the plugin to automatically delete old reports?"
 msgstr ""
 
 #. translators: path to the reports' storage directory
-#: extensions/reports/classes/Settings.php:104
+#: extensions/reports/classes/Settings.php:106
 msgid "Reports are saved in the %s directory. By default the plugin deletes reports that are older than 30 days. Use the settings below to change this behaviour."
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:113
+#: extensions/reports/classes/Settings.php:115
 msgid "Delete old reports"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:137
+#: extensions/reports/classes/Settings.php:139
 msgid "Delete reports older than"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:144
+#: extensions/reports/classes/Settings.php:146
 msgid "days"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:150
+#: extensions/reports/classes/Settings.php:148
+msgid "The minimum allowed is 30 days and the maximum is 180 days."
+msgstr ""
+
+#: extensions/reports/classes/Settings.php:155
 msgid "At what time should the periodic reports be sent?"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:152
+#: extensions/reports/classes/Settings.php:157
 msgid "By default periodic reports are sent at 8:00AM on the first day of the period's termination."
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:193
+#: extensions/reports/classes/Settings.php:198
 msgid "Periodic reports email summary"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:195
+#: extensions/reports/classes/Settings.php:200
 msgid "Do you want to receive an email even if there are no event IDs that match the criteria for the periodic reports?"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:201
+#: extensions/reports/classes/Settings.php:206
 msgid "Send empty summary emails"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:225
+#: extensions/reports/classes/Settings.php:230
 msgid "White labelling"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:230
+#: extensions/reports/classes/Settings.php:232
+msgid "By default the HTML and PDF reports have a logo of the WP Activity Log plugin in them. Use the settings below to change this logo and also specify a URL that this logo should link to."
+msgstr ""
+
+#: extensions/reports/classes/Settings.php:238
 msgid "Use custom logo for the reports"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:239
+#: extensions/reports/classes/Settings.php:247
 msgid "Upload or enter the file URL"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:244
+#: extensions/reports/classes/Settings.php:252
 msgid "Insert File"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:247
+#: extensions/reports/classes/Settings.php:255
 msgid "Upload a File"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:327
+#: extensions/reports/classes/Settings.php:258
+msgid "The logo size should be 440px x 90px."
+msgstr ""
+
+#: extensions/reports/classes/Settings.php:264
+msgid "Logo link URL"
+msgstr ""
+
+#: extensions/reports/classes/Settings.php:269
+msgid "Enter the logo URL"
+msgstr ""
+
+#: extensions/reports/classes/Settings.php:271
+msgid "Specify the URL that the logo should link to, so when users click on the logo in the report, they are redirected to that URL."
+msgstr ""
+
+#: extensions/reports/classes/Settings.php:348
 msgctxt "a time string representing midnight"
 msgid "00:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:328
+#: extensions/reports/classes/Settings.php:349
 msgctxt "a time string of hour followed by minutes"
 msgid "01:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:329
+#: extensions/reports/classes/Settings.php:350
 msgctxt "a time string of hour followed by minutes"
 msgid "02:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:330
+#: extensions/reports/classes/Settings.php:351
 msgctxt "a time string of hour followed by minutes"
 msgid "03:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:331
+#: extensions/reports/classes/Settings.php:352
 msgctxt "a time string of hour followed by minutes"
 msgid "04:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:332
+#: extensions/reports/classes/Settings.php:353
 msgctxt "a time string of hour followed by minutes"
 msgid "05:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:333
+#: extensions/reports/classes/Settings.php:354
 msgctxt "a time string of hour followed by minutes"
 msgid "06:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:334
+#: extensions/reports/classes/Settings.php:355
 msgctxt "a time string of hour followed by minutes"
 msgid "07:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:335
+#: extensions/reports/classes/Settings.php:356
 msgctxt "a time string of hour followed by minutes"
 msgid "08:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:336
+#: extensions/reports/classes/Settings.php:357
 msgctxt "a time string of hour followed by minutes"
 msgid "09:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:337
+#: extensions/reports/classes/Settings.php:358
 msgctxt "a time string of hour followed by minutes"
 msgid "10:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:338
+#: extensions/reports/classes/Settings.php:359
 msgctxt "a time string of hour followed by minutes"
 msgid "11:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:339
+#: extensions/reports/classes/Settings.php:360
 msgctxt "a time string representing midday"
 msgid "12:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:340
+#: extensions/reports/classes/Settings.php:361
 msgctxt "a time string of hour followed by minutes"
 msgid "13:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:341
+#: extensions/reports/classes/Settings.php:362
 msgctxt "a time string of hour followed by minutes"
 msgid "14:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:342
+#: extensions/reports/classes/Settings.php:363
 msgctxt "a time string of hour followed by minutes"
 msgid "15:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:343
+#: extensions/reports/classes/Settings.php:364
 msgctxt "a time string of hour followed by minutes"
 msgid "16:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:344
+#: extensions/reports/classes/Settings.php:365
 msgctxt "a time string of hour followed by minutes"
 msgid "17:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:345
+#: extensions/reports/classes/Settings.php:366
 msgctxt "a time string of hour followed by minutes"
 msgid "18:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:346
+#: extensions/reports/classes/Settings.php:367
 msgctxt "a time string of hour followed by minutes"
 msgid "19:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:347
+#: extensions/reports/classes/Settings.php:368
 msgctxt "a time string of hour followed by minutes"
 msgid "20:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:348
+#: extensions/reports/classes/Settings.php:369
 msgctxt "a time string of hour followed by minutes"
 msgid "21:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:349
+#: extensions/reports/classes/Settings.php:370
 msgctxt "a time string of hour followed by minutes"
 msgid "22:00"
 msgstr ""
 
-#: extensions/reports/classes/Settings.php:350
+#: extensions/reports/classes/Settings.php:371
 msgctxt "a time string of hour followed by minutes"
 msgid "23:00"
+msgstr ""
+
+#: extensions/reports/classes/Settings.php:397
+msgid "Number of days should be a number between 30 and 180."
 msgstr ""
 
 #: extensions/reports/inc/wsal-reporting-view.inc.php:211
@@ -7577,7 +7605,7 @@ msgstr ""
 msgid "Please select at least one site to include in the report."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:274
+#: extensions/reports/inc/wsal-reporting-view.inc.php:262
 msgid "Please select at least one user to exclude from the report."
 msgstr ""
 
@@ -7585,483 +7613,483 @@ msgstr ""
 msgid "Please select at least one user to include in the report."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:342, extensions/reports/inc/wsal-reporting-view.inc.php:306
+#: extensions/reports/inc/wsal-reporting-view.inc.php:330, extensions/reports/inc/wsal-reporting-view.inc.php:294
 msgid "Error: Please select at least one role"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:398, extensions/reports/inc/wsal-reporting-view.inc.php:389
+#: extensions/reports/inc/wsal-reporting-view.inc.php:386, extensions/reports/inc/wsal-reporting-view.inc.php:377
 msgid "Error: Please select at least one IP address"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:425, extensions/reports/inc/wsal-reporting-view.inc.php:416
+#: extensions/reports/inc/wsal-reporting-view.inc.php:413, extensions/reports/inc/wsal-reporting-view.inc.php:404
 msgid "Error: Please select at least one object"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:451, extensions/reports/inc/wsal-reporting-view.inc.php:442
+#: extensions/reports/inc/wsal-reporting-view.inc.php:439, extensions/reports/inc/wsal-reporting-view.inc.php:430
 msgid "Error: Please select at least one event object"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:498, extensions/reports/inc/wsal-reporting-view.inc.php:489
+#: extensions/reports/inc/wsal-reporting-view.inc.php:486, extensions/reports/inc/wsal-reporting-view.inc.php:477
 msgid "Error: Please select at least one event group"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:480, extensions/reports/inc/wsal-reporting-view.inc.php:471
+#: extensions/reports/inc/wsal-reporting-view.inc.php:468, extensions/reports/inc/wsal-reporting-view.inc.php:459
 msgid "Error: Please select at least one event ID"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:635
+#: extensions/reports/inc/wsal-reporting-view.inc.php:623
 msgid "Periodic Report successfully saved."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:598, extensions/reports/inc/wsal-reporting-view.inc.php:654
+#: extensions/reports/inc/wsal-reporting-view.inc.php:586, extensions/reports/inc/wsal-reporting-view.inc.php:642
 msgid "Loading"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:599, extensions/reports/inc/wsal-reporting-view.inc.php:655
+#: extensions/reports/inc/wsal-reporting-view.inc.php:587, extensions/reports/inc/wsal-reporting-view.inc.php:643
 msgid " Generating report. Please do not close this window."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:603, extensions/reports/inc/wsal-reporting-view.inc.php:659
+#: extensions/reports/inc/wsal-reporting-view.inc.php:591, extensions/reports/inc/wsal-reporting-view.inc.php:647
 msgid "Searching events, "
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:603, extensions/reports/inc/wsal-reporting-view.inc.php:659
+#: extensions/reports/inc/wsal-reporting-view.inc.php:591, extensions/reports/inc/wsal-reporting-view.inc.php:647
 msgid " currently found."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:680
+#: extensions/reports/inc/wsal-reporting-view.inc.php:668
 msgid "Periodic Report successfully deleted."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:691
+#: extensions/reports/inc/wsal-reporting-view.inc.php:679
 msgid "Report successfully deleted."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:714
+#: extensions/reports/inc/wsal-reporting-view.inc.php:702
 msgid "Generate & configure"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:715
+#: extensions/reports/inc/wsal-reporting-view.inc.php:703
 msgid "Statistics reports"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:719
+#: extensions/reports/inc/wsal-reporting-view.inc.php:707
 msgid "Saved reports"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:743
+#: extensions/reports/inc/wsal-reporting-view.inc.php:731
 msgid "Generate a report"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:763
+#: extensions/reports/inc/wsal-reporting-view.inc.php:751
 msgid "Step 1: Select the type of report"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:770
+#: extensions/reports/inc/wsal-reporting-view.inc.php:758
 msgid "By Site(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:775
+#: extensions/reports/inc/wsal-reporting-view.inc.php:763
 msgid "All sites"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:781
+#: extensions/reports/inc/wsal-reporting-view.inc.php:769
 msgid "These specific sites"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:790
+#: extensions/reports/inc/wsal-reporting-view.inc.php:778
 msgid "All sites except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:814
+#: extensions/reports/inc/wsal-reporting-view.inc.php:802
 msgid "By User(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:819
+#: extensions/reports/inc/wsal-reporting-view.inc.php:807
 msgid "All users"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:825
+#: extensions/reports/inc/wsal-reporting-view.inc.php:813
 msgid "These specific users"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:833, extensions/reports/inc/wsal-reporting-view.inc.php:849, extensions/reports/inc/wsal-reporting-view.inc.php:1557, extensions/reports/inc/wsal-reporting-view.inc.php:1596, extensions/reports/inc/wsal-reporting-view.inc.php:1635
+#: extensions/reports/inc/wsal-reporting-view.inc.php:821, extensions/reports/inc/wsal-reporting-view.inc.php:837, extensions/reports/inc/wsal-reporting-view.inc.php:1556, extensions/reports/inc/wsal-reporting-view.inc.php:1595, extensions/reports/inc/wsal-reporting-view.inc.php:1634
 msgid "Enter comma separated usernames"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:841
+#: extensions/reports/inc/wsal-reporting-view.inc.php:829
 msgid "All users except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:866
+#: extensions/reports/inc/wsal-reporting-view.inc.php:854
 msgid "By Role(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:871
+#: extensions/reports/inc/wsal-reporting-view.inc.php:859
 msgid "All roles"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:877
+#: extensions/reports/inc/wsal-reporting-view.inc.php:865
 msgid "These specific roles"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:886
+#: extensions/reports/inc/wsal-reporting-view.inc.php:874
 msgid "All roles except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:897
+#: extensions/reports/inc/wsal-reporting-view.inc.php:885
 msgid "By IP address(es)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:902
+#: extensions/reports/inc/wsal-reporting-view.inc.php:890
 msgid "All IP addresses"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:908
+#: extensions/reports/inc/wsal-reporting-view.inc.php:896
 msgid "These specific IP addresses"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:917
+#: extensions/reports/inc/wsal-reporting-view.inc.php:905
 msgid "All IP addresses except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:928
+#: extensions/reports/inc/wsal-reporting-view.inc.php:916
 msgid "By Object(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:933
+#: extensions/reports/inc/wsal-reporting-view.inc.php:921
 msgid "All objects"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:939
+#: extensions/reports/inc/wsal-reporting-view.inc.php:927
 msgid "These specific objects"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:948
+#: extensions/reports/inc/wsal-reporting-view.inc.php:936
 msgid "All objects except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:959
+#: extensions/reports/inc/wsal-reporting-view.inc.php:947
 msgid "By Event type(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:964
+#: extensions/reports/inc/wsal-reporting-view.inc.php:952
 msgid "All event types"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:970
+#: extensions/reports/inc/wsal-reporting-view.inc.php:958
 msgid "These specific event types"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:979
+#: extensions/reports/inc/wsal-reporting-view.inc.php:967
 msgid "All event types except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:990
-msgid "By Post ID(s)"
+#: extensions/reports/inc/wsal-reporting-view.inc.php:978
+msgid "By Post title(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:995
-msgid "All post IDs"
+#: extensions/reports/inc/wsal-reporting-view.inc.php:983
+msgid "All posts"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1001
-msgid "These specific post IDs"
+#: extensions/reports/inc/wsal-reporting-view.inc.php:989
+msgid "These specific posts"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1014
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1003
 msgid "All post IDs except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1028
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1017
 msgid "By Post type(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1033
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1022
 msgid "All post types"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1039
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1028
 msgid "These specific post types"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1048
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1037
 msgid "All post types except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1059
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1048
 msgid "By Post status(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1064
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1053
 msgid "All post statuses"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1070
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1059
 msgid "These specific post statuses"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1079
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1068
 msgid "All post statuses except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1090
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1079
 msgid "By Event ID(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1096
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1085
 msgid "All event IDs"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1102
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1091
 msgid "These specific event IDs"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1111
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1100
 msgid "All event IDs except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1120
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1109
 msgid "These specific event groups"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1129
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1118
 msgid "All event groups except these"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1172
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1161
 msgid "Select site(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1175
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1164
 msgid "Select user(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1203
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1202
 msgid "Select role(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1204
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1203
 msgid "Select IP address(es)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1205
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1204
 msgid "Select object(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1206
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1205
 msgid "Select type(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1209
-msgid "Select post ID(s)"
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1208
+msgid "Select post(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1236
-msgid "Select event code(s)"
-msgstr ""
-
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1237
-msgid "Select event group(s)"
-msgstr ""
-
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1238
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1235
 msgid "Select post types(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1239
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1236
 msgid "Select post status(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1344
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1237
+msgid "Select event code(s)"
+msgstr ""
+
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1238
+msgid "Select event group(s)"
+msgstr ""
+
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1343
 msgid "Step 2: Select the date range"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1346
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1345
 msgid "Note: Do not specify any dates if you are creating a scheduled report or if you want to generate a report from when you started the audit trail."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1351
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1350
 msgid "Start Date"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1354, extensions/reports/inc/wsal-reporting-view.inc.php:1486
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1353, extensions/reports/inc/wsal-reporting-view.inc.php:1485
 msgid "Select start date"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1360
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1359
 msgid "End Date"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1363, extensions/reports/inc/wsal-reporting-view.inc.php:1495
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1362, extensions/reports/inc/wsal-reporting-view.inc.php:1494
 msgid "Select end date"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1387
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1386
 msgid "Step 4: Generate Report Now or Configure Periodic Reports"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1390
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1389
 msgid "Generate Report Now"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1394
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1393
 msgid " Use the buttons below to use the above criteria for a daily, weekly and monthly summary report which is sent automatically via email."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1397
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1396
 msgid "Email address(es)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1403
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1402
 msgid "Report Name"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1406, extensions/reports/classes/Views/Main.php:163
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1405, extensions/reports/classes/Views/Main.php:163
 msgid "Report names can only include numbers, letters and underscore and hyphens."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1410
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1409
 msgid "Frequency"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1412
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1411
 msgid "Daily"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1413
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1412
 msgid "Weekly"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1414
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1413
 msgid "Monthly"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1415
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1414
 msgid "Quarterly"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1429
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1428
 msgid "Configured Periodic Reports"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1432
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1431
 msgid "Below is the list of configured periodic reports. Click on Modify to load the criteria and configure it above. To save the new criteria as a new report change the report name and save it. Do not change the report name to overwrite the existing periodic report."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1435
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1434
 msgid "Note: Use the Send Now button to generate a report with data from the last 90 days if a quarterly report is configured, 30 days if monthly report is configured and 7 days if weekly report is configured."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1479
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1478
 msgid "Step 1: Choose Date Range"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1511
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1510
 msgid "Step 2: Select data sorting type"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1514
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1513
 msgid "Time period"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1524
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1523
 msgid "Step 3: Choose Criteria"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1532
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1531
 msgid "Report for"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1539
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1538
 msgid "Number of logins for all users"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1548
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1547
 msgid "Number of logins for user(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1567
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1566
 msgid "Number of logins for users with the role(s) of"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1579
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1578
 msgid "Number of views for all posts"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1588
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1587
 msgid "Number of views for user(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1606
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1605
 msgid "Number of views for users with the role(s) of"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1618
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1617
 msgid "Number of published content for all users"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1627
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1626
 msgid "Number of published content for user(s)"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1645
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1644
 msgid "Number of published content for users with the role(s) of"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1657
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1656
 msgid "Different IP addresses for Usernames"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1664
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1663
 msgid "List only IP addresses used during login"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1666
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1665
 msgid "If the above option is enabled the report will only include the IP addresses from where the user logged in. If it is disabled it will list all the IP addresses from where the plugin recorded activity originating from the user."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1684
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1683
 msgid "List of users who accessed the website"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1715
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1714
 msgid "Generated reports"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1718
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1717
 msgid "Below is the list of reports previously generated and are now saved in the reports directory on your website. By default the plugin automatically deletes saved reports that are older than 30 days. You can disable or change this from the Reports settings."
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1725
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1724
 msgid "Format"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1740
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1739
 msgid "Download"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1763, extensions/reports/inc/wsal-reporting-view.inc.php:1768
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1762, extensions/reports/inc/wsal-reporting-view.inc.php:1767
 msgid "Please specify at least one site"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1774, extensions/reports/inc/wsal-reporting-view.inc.php:1779
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1773, extensions/reports/inc/wsal-reporting-view.inc.php:1778
 msgid "Please specify at least one user"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1785, extensions/reports/inc/wsal-reporting-view.inc.php:1790
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1784, extensions/reports/inc/wsal-reporting-view.inc.php:1789
 msgid "Please specify at least one role"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1796, extensions/reports/inc/wsal-reporting-view.inc.php:1801
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1795, extensions/reports/inc/wsal-reporting-view.inc.php:1800
 msgid "Please specify at least one IP address"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1807, extensions/reports/inc/wsal-reporting-view.inc.php:1812
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1806, extensions/reports/inc/wsal-reporting-view.inc.php:1811
 msgid "Please specify at least one object"
 msgstr ""
 
-#: extensions/reports/inc/wsal-reporting-view.inc.php:1818, extensions/reports/inc/wsal-reporting-view.inc.php:1823
+#: extensions/reports/inc/wsal-reporting-view.inc.php:1817, extensions/reports/inc/wsal-reporting-view.inc.php:1822
 msgid "Please specify at least one event type"
 msgstr ""
 

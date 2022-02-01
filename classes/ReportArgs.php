@@ -180,7 +180,7 @@ class WSAL_ReportArgs {
 	 * @return WSAL_ReportArgs
 	 */
 	public static function build_from_alternative_filters( $filters ) {
-		$_filters = [];
+		$_filters = array();
 		foreach ( $filters as $key => $value ) {
 			if ( is_array( $value ) && ! is_int( array_key_first( $value ) ) ) {
 				foreach ( $value as $sub_key => $sub_value ) {
@@ -195,8 +195,8 @@ class WSAL_ReportArgs {
 	}
 
 	/**
-	 * @param array $filters An array of filters as defined in the Reports extension form.
-	 * @param WSAL_Rep_Common $report_utils
+	 * @param array           $filters      An array of filters as defined in the Reports extension form.
+	 * @param WSAL_Rep_Common $report_utils Reporting utils.
 	 *
 	 * @return WSAL_ReportArgs
 	 */
@@ -213,11 +213,11 @@ class WSAL_ReportArgs {
 		}
 
 		if ( self::is_field_present_and_non_empty_array( 'users', $filters ) ) {
-			$result->user__in = array_map( 'intval', $filters['users'] );
+			$result->user__in = self::extract_user_ids( $filters['users'] );
 		}
 
 		if ( self::is_field_present_and_non_empty_array( 'users-exclude', $filters ) ) {
-			$result->user__not_in = array_map( 'intval', $filters['users-exclude'] );
+			$result->user__not_in = self::extract_user_ids( $filters['users-exclude'] );
 		}
 
 		if ( self::is_field_present_and_non_empty_array( 'roles', $filters ) ) {
@@ -298,8 +298,10 @@ class WSAL_ReportArgs {
 	}
 
 	/**
-	 * @param string $key
-	 * @param array $array
+	 * Checks if the key is present in the array and the value is non-empty array.
+	 *
+	 * @param string $key   Key to look for.
+	 * @param array  $array Report filtering data.
 	 *
 	 * @return bool True if the key is present in the array and the value is non-empty array.
 	 *
@@ -312,24 +314,66 @@ class WSAL_ReportArgs {
 	/**
 	 * Determines all alert IDs/codes for given array of data. The groups and keys are located using the provided keys.
 	 *
-	 * @param array $array
-	 * @param string $groups_key
-	 * @param string $codes_key
-	 * @param WSAL_Rep_Common $report_utils
+	 * @param array           $array        Filter data.
+	 * @param string          $groups_key   Key of the event groups array.
+	 * @param string          $codes_key    Key of the event codes array.
+	 * @param WSAL_Rep_Common $report_utils Report utilities.
 	 *
 	 * @return int[]
 	 *
 	 * @since 4.4.0
 	 */
 	private static function get_codes( $array, $groups_key, $codes_key, $report_utils ) {
-		$groups = self::is_field_present_and_non_empty_array( $groups_key, $array ) ? $array[ $groups_key ] : [];
-		$alerts = self::is_field_present_and_non_empty_array( $codes_key, $array ) ? $array[ $codes_key ] : [];
+		$groups = self::is_field_present_and_non_empty_array( $groups_key, $array ) ? $array[ $groups_key ] : array();
+		$alerts = self::is_field_present_and_non_empty_array( $codes_key, $array ) ? $array[ $codes_key ] : array();
 
 		$result = $report_utils->GetCodesByGroups( $groups, $alerts, false );
 		if ( false === $result ) {
-			return [];
+			return array();
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Determines user ID based on given value.
+	 *
+	 * @param int|string $value User ID or login username.
+	 *
+	 * @return int User ID.
+	 * @since 4.4.0
+	 */
+	public static function grab_uid( $value ) {
+		if ( is_numeric( $value ) ) {
+			return intval( $value );
+		}
+
+		// Load user by id.
+		$user = get_user_by( 'login', $value );
+		if ( $user instanceof WP_User ) {
+			return $user->ID;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Extracts user IDs.
+	 *
+	 * @param array $values User IDs or login usernames (or both).
+	 *
+	 * @return int[] User IDs.
+	 * @since 4.4.0
+	 */
+	public static function extract_user_ids( $values ) {
+		return array_filter(
+			array_map(
+				array( __CLASS__, 'grab_uid' ),
+				$values
+			),
+			function ( $item ) {
+				return $item > 0;
+			}
+		);
 	}
 }
