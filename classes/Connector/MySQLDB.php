@@ -317,7 +317,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			return 0;
 		}
 
-		//  insert data to the target database
+		// Insert data to the target database.
 		$occurrence_adapter_target    = new WSAL_Adapters_MySQL_Occurrence( $target_db );
 		$occurrence_table_name_target = $occurrence_adapter_target->GetTable();
 
@@ -421,7 +421,6 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	public function MigrateOccurrenceFromExternalToLocal( $limit ) {
 		global $wpdb;
-
 		return $this->MigrateOccurrence( $this->getConnection(), $wpdb, $limit );
 	}
 
@@ -498,17 +497,32 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
 			$occurrence_new = new WSAL_Adapters_MySQL_Occurrence( $archive_db );
 
-			$sql = 'INSERT INTO ' . $occurrence_new->GetTable() . ' ( id, site_id, alert_id, created_on ) VALUES ';
+			$sql = 'INSERT INTO ' . $occurrence_new->GetTable() . ' ( id, site_id, alert_id, created_on, client_ip, severity, object, event_type, user_agent, user_roles, username, user_id, session_id, post_status, post_type, post_id ) VALUES ';
 			foreach ( $occurrences as $entry ) {
-				$sql                      .= $archive_db->prepare(
-					'( %d, %d, %d, %d ), ',
+
+				$sql .= $archive_db->prepare(
+					'( %d, %d, %d, %f, %s, %d, %s, %s, %s, %s, %s, %d, %s, %s, %s, %d ), ',
 					intval( $entry['id'] ),
 					intval( $entry['site_id'] ),
 					intval( $entry['alert_id'] ),
-					$entry['created_on']
+					$entry['created_on'],
+					$entry['client_ip'],
+					$entry['severity'],
+					$entry['object'],
+					$entry['event_type'],
+					$entry['user_agent'],
+					$entry['user_roles'],
+					$entry['username'],
+					intval( $entry['user_id'] ),
+					$entry['session_id'],
+					$entry['post_status'],
+					$entry['post_type'],
+					intval( $entry['post_id'] )
 				);
-				$args['occurrence_ids'][] = $entry['id'];
+
+				$args['occurrence_ids'][] = intval( $entry['id'] );
 			}
+
 			$sql = rtrim( $sql, ', ' );
 			$archive_db->query( $sql );
 

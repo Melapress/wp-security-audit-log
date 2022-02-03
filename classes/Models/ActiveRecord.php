@@ -62,7 +62,7 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @var boolean
 	 */
-	protected $useDefaultAdapter = false;
+	protected $use_default_adapter = false;
 
 	/**
 	 * Record State.
@@ -139,7 +139,7 @@ abstract class WSAL_Models_ActiveRecord {
 			return $this->connector;
 		}
 
-		if ( $this->useDefaultAdapter ) {
+		if ( $this->use_default_adapter ) {
 			$this->connector = WSAL_Connector_ConnectorFactory::GetDefaultConnector();
 		} else {
 			$this->connector = WSAL_Connector_ConnectorFactory::GetConnector();
