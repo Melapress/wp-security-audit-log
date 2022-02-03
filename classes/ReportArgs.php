@@ -240,16 +240,32 @@ class WSAL_ReportArgs {
 			$result->post_type__in = $filters['alert_codes_post_types'];
 		}
 
+		if ( self::is_field_present_and_non_empty_array( 'post_types', $filters ) ) {
+			$result->post_type__in = $filters['post_types'];
+		}
+
 		if ( self::is_field_present_and_non_empty_array( 'alert_codes_post_types-exclude', $filters ) ) {
 			$result->post_type__not_in = $filters['alert_codes_post_types-exclude'];
+		}
+
+		if ( self::is_field_present_and_non_empty_array( 'post_types-exclude', $filters ) ) {
+			$result->post_type__not_in = $filters['post_types-exclude'];
 		}
 
 		if ( self::is_field_present_and_non_empty_array( 'alert_codes_post_statuses', $filters ) ) {
 			$result->post_status__in = $filters['alert_codes_post_statuses'];
 		}
 
+		if ( self::is_field_present_and_non_empty_array( 'post_statuses', $filters ) ) {
+			$result->post_status__in = $filters['post_statuses'];
+		}
+
 		if ( self::is_field_present_and_non_empty_array( 'alert_codes_post_statuses-exclude', $filters ) ) {
 			$result->post_status__not_in = $filters['alert_codes_post_statuses-exclude'];
+		}
+
+		if ( self::is_field_present_and_non_empty_array( 'post_statuses-exclude', $filters ) ) {
+			$result->post_status__not_in = $filters['post_statuses-exclude'];
 		}
 
 		if ( self::is_field_present_and_non_empty_array( 'objects', $filters ) ) {

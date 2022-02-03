@@ -82,7 +82,7 @@ class WSAL_Models_Query {
 	 *
 	 * @var bool
 	 */
-	protected $useDefaultAdapter = false;
+	protected $use_default_adapter = false;
 
 	/**
 	 * Method: Constructor.
@@ -101,7 +101,8 @@ class WSAL_Models_Query {
 		if ( ! empty( $this->connector ) ) {
 			return $this->connector;
 		}
-		if ( $this->useDefaultAdapter ) {
+
+		if ( $this->use_default_adapter ) {
 			$this->connector = WSAL_Connector_ConnectorFactory::GetDefaultConnector();
 		} else {
 			$this->connector = WSAL_Connector_ConnectorFactory::GetConnector();
