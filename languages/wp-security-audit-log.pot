@@ -2857,36 +2857,36 @@ msgstr ""
 msgid "getting started guide"
 msgstr ""
 
-#: wp-security-audit-log.php:1721
+#: wp-security-audit-log.php:1730
 msgid "For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href=\"https://wpactivitylog.com/\" target=\"_blank\">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from."
 msgstr ""
 
-#: wp-security-audit-log.php:1740
+#: wp-security-audit-log.php:1749
 msgid "Every 6 hours"
 msgstr ""
 
-#: wp-security-audit-log.php:1744
+#: wp-security-audit-log.php:1753
 msgid "Every 45 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1748
+#: wp-security-audit-log.php:1757
 msgid "Every 30 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1752
+#: wp-security-audit-log.php:1761
 msgid "Every 15 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1756
+#: wp-security-audit-log.php:1765
 msgid "Every 10 minutes"
 msgstr ""
 
-#: wp-security-audit-log.php:1760
+#: wp-security-audit-log.php:1769
 msgid "Every 1 minute"
 msgstr ""
 
 #. translators: 1. Deprecated method name 2. Version since deprecated
-#: wp-security-audit-log.php:1774
+#: wp-security-audit-log.php:1783
 msgid "Method %1$s is deprecated since version %2$s!"
 msgstr ""
 
@@ -5953,7 +5953,7 @@ msgstr ""
 msgid "Search Notifications"
 msgstr ""
 
-#: extensions/email-notifications/classes/Notifications.php:1695, extensions/reports/classes/HtmlReportGenerator.php:286, extensions/user-sessions/classes/View/Options/Policies.php:24
+#: extensions/email-notifications/classes/Notifications.php:1695, extensions/reports/classes/HtmlReportGenerator.php:287, extensions/user-sessions/classes/View/Options/Policies.php:24
 msgid "All"
 msgstr ""
 
@@ -7318,59 +7318,59 @@ msgstr ""
 msgid "WP Activity Log Reporter"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:138
+#: extensions/reports/classes/HtmlReportGenerator.php:139
 msgid "Report from"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:138
+#: extensions/reports/classes/HtmlReportGenerator.php:139
 msgid "website"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:168
+#: extensions/reports/classes/HtmlReportGenerator.php:169
 msgid "Report Criteria"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:255
+#: extensions/reports/classes/HtmlReportGenerator.php:256
 msgid "List of unique IP addresses per user"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:257, extensions/reports/inc/wsal-reporting-view.inc.php:1674
+#: extensions/reports/classes/HtmlReportGenerator.php:258, extensions/reports/inc/wsal-reporting-view.inc.php:1674
 msgid "List of IP addresses that accessed the website"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:259
+#: extensions/reports/classes/HtmlReportGenerator.php:260
 msgid "List of users that accessed the website"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:263
+#: extensions/reports/classes/HtmlReportGenerator.php:264
 msgid "Number of Logins per user"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:267
+#: extensions/reports/classes/HtmlReportGenerator.php:268
 msgid "Number of published posts per user"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:271
+#: extensions/reports/classes/HtmlReportGenerator.php:272
 msgid "Number of viewed posts per user"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:273
+#: extensions/reports/classes/HtmlReportGenerator.php:274
 msgid "Statistical report"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:287
+#: extensions/reports/classes/HtmlReportGenerator.php:288
 msgid "From the beginning"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:300
+#: extensions/reports/classes/HtmlReportGenerator.php:301
 msgid "Start date"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:304
+#: extensions/reports/classes/HtmlReportGenerator.php:305
 msgid "End date"
 msgstr ""
 
-#: extensions/reports/classes/HtmlReportGenerator.php:608
+#: extensions/reports/classes/HtmlReportGenerator.php:609
 msgid "Results"
 msgstr ""
 
