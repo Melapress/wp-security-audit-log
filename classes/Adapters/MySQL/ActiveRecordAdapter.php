@@ -501,8 +501,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$results       = $this->connection->get_results( $query, $result_format );
 
 		if ( ! empty( $results ) ) {
-			$last_item           = end( $results );
-			$results['lastDate'] = $last_item->created_on;
+			$last_item = end( $results );
+			if ( property_exists( $last_item, 'created_on' ) ) {
+				$results['lastDate'] = $last_item->created_on;
+			}
 		}
 
 		return $results;

@@ -1383,6 +1383,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	                }
 
 	                if ( version_compare( $new_version, '4.4.0', '>=' ) ) {
+                        // Delete unwanted usermeta.
+                        global $wpdb;
+                        $all_user_meta = $wpdb->get_results(
+                            $wpdb->prepare(
+                                "DELETE FROM {$wpdb->usermeta} WHERE meta_key = '%s';",
+                                'wsal-notice-update-44-notice'
+                            )
+                        );
+
 		                $this->settings()->set_database_version( 44400 );
 
 		                if ( class_exists( 'WSAL_Extension_Manager' ) ) {

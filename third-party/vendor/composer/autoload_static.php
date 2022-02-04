@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit1910bf012f8fe78db01043fff35069d7
+class ComposerStaticInitcf8ad5f9b4c9f7282a3990a9639fcadb
 {
     public static $classMap = array (
         'WSAL_Vendor\\WP_Async_Request' => __DIR__ . '/..' . '/classes/wp-async-request.php',
@@ -14,7 +14,7 @@ class ComposerStaticInit1910bf012f8fe78db01043fff35069d7
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInit1910bf012f8fe78db01043fff35069d7::$classMap;
+            $loader->classMap = ComposerStaticInitcf8ad5f9b4c9f7282a3990a9639fcadb::$classMap;
 
         }, null, ClassLoader::class);
     }
