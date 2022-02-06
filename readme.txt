@@ -212,45 +212,23 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 Release notes: [New Reports engine with more criteria, reports management & more](https://wpactivitylog.com/wsal-440/)
 
-* **IMPORTANT - NEW HELPER PLUGIN**
-	* Third party libraries are now available through a helper plugin. If you are mirroring events or sending SMS messages, you will be prompted to install this helper plugin.
-	
-
 * **New activity log event IDs**
 	* ID 6059: Changed the site's title.
 	* ID 4021: Changed the website URL in the user profile.
 	* ID 4013: User has been activated on a multisite network.
 	
 * **New features & functionality**
-	* Reports for WordPress: we developed an all new reporting engine, with more criteria.
-	* Reports management module: see all generated reports, redownload or delete them etc.
-	* Reports white labelling: users can now change the logo and links on the reports. More to come in upcoming updates.
-	* New template for reports with new title page for reports.
-	* Reports settings page: making a number of reports configuration settings available, giving the user more options to work with.
-	* Setting to configure the plugin to "always" send an email for scheduled reports, even when no events match the criteria.
-	* Hooks to allow users to change the columns in reports or ad value from non-default columns. Refer to the [list of hooks in WP Activity Log](https://wpactivitylog.com/support/kb/list-hooks/) for more information.
-	* New naming format for all the reports: [yyyymmdd]-[report_number].[extension].
-	* Specific reports can now be generated in PDF and JSON formats.
+	* New Reports engine with more criteria and reports management in the [Premium edition](https://wpactivitylog.com/).
 	* New UI for "Enable/Disable event IDs" with search and filtering functionality.
-	* Table with numbers of how many users are logged in with specific roles + filters.
-	* Added the user role next to each user in the list of logged in users.
-	* Removed obsolete code used for advertorial events in the activity log viewer.
-	* New "See user's activity" link for each user in the users' page to see a user's activity with just a click.
 	* New filter that allows user to add metadata to user information popup. Refer to the [List of hooks in WP Activity Log](https://wpactivitylog.com/support/kb/list-hooks/) for more information.
 	* The new [Activity Log for TablePress extension](https://wpactivitylog.com/extensions/tablepress-activity-log/).
 	
 * **Improvements**
 	* Changed the database schema for improved storing of data, and faster writing and reading. After the upgrade the plugin will launch the upgrade process which might take some time to complete, depending on the amount of data in the activity log.
-	* Activity log events from local database can be merged into an extising activity log in an external database.
+	* Removed obsolete code used for advertorial events in the activity log viewer.
 	* Improved the coverage of changes done to a website via REST API.
-	* Improved the format of the statistics reports. More statistics reports will be available in the upcoming version update.
-	* Date and time are now two separate objects in CSV reports.
-	* Updated the search module to read from new database schema.
 	* All plugin settings now have the wsal_ prefix automatically added to them.
-	* Added the URL metadata in CSV reports.
 	* Rewritten some of the settings help text in the plugin to better explain the settings.
-	* Updated the notifications module to read from new database schema.
-	* Updated the integrations module for better backward compatability with older versions of WordPress.
 	* Removed obsolete settings & code of the old file integrity scanner (now part of [Website File Changes Monitor plugin](https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/)).
 	* Removed obsolete reference to the old file changes scanner in the daily summary email.
 	* Made a number of JS strings available for translation.
@@ -260,16 +238,12 @@ Release notes: [New Reports engine with more criteria, reports management & more
 	* Removed forced database table collation: plugin now uses the default WordPress table collation.
 	* Updated the "Help & Contact Us" page; improved text and added more relevant information.
 	* Improved several UI sections in the Third Party Connections module.
-	* Improved the check for writing activity log to external database; now it is less restrictive and faster.
 	
 * **Bug fixes**
 	* Fixed: Database error when trying to log in with a non-existing user and a login notification is enabled.
-	* Fixed: In some edge cases the plugin was creating an empty "external database" connection string.
 	* Fixed a number of typos in the text of activity log events.
-	* Fixed: Auto complete in the Delete activity log data section was not returning the correct list of objects.
 	* Fixed: Wrong object reported for event ID 5029.
 	* Fixed: Event ID 4000 not reported when front-end sensor is disabled.
-	* Fixed: "Unknown connection type" reported back setting up a third party connection on specific versions of WordPress.
 	* Fixed: Event ID 6320 (added / removed connection) reported instead of event ID 6321 (modified connection).
 	* Fixed: Function that was running on "add_filter" instead of "add_action" - [Support ticket](https://wordpress.org/support/topic/issue-with-hook-name-and-param-callback/).
 	* Fixed: PHP warning about OPCacheUtils.php in specific setups.
