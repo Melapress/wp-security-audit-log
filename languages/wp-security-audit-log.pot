@@ -1672,6 +1672,7 @@ msgstr ""
 msgid "Plugins & Themes"
 msgstr ""
 
+
 #: defaults.php:2105, classes/AuditLogGridView.php:429, classes/AuditLogListView.php:438
 msgid "Plugins"
 msgstr ""
@@ -2737,7 +2738,6 @@ msgid "Dummy"
 msgstr ""
 
 #. translators: User's first name
-#. translators: User's first name
 #: wp-security-audit-log.php:820, wp-security-audit-log.php:848
 msgid "Hey %s"
 msgstr ""
@@ -2755,6 +2755,7 @@ msgid "NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS."
 msgstr ""
 
 #. translators: 1: Plugin name. 2: Plugin name. 2: Freemius link. 4: Plugin name.
+
 #: wp-security-audit-log.php:854
 msgid "Please help us improve %1$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %3$s, a diagnostic tracking service we use. If you skip this, that's okay! %2$s will still work just fine."
 msgstr ""
@@ -2781,6 +2782,7 @@ msgid "Error: You do not have sufficient permissions to disable this custom fiel
 msgstr ""
 
 #. translators: name of meta field (in bold)
+
 #: wp-security-audit-log.php:1084
 msgid "Custom field %s is no longer being monitored."
 msgstr ""
@@ -3161,6 +3163,7 @@ msgstr ""
 msgid "— End of Activity Log —"
 msgstr ""
 
+
 #: classes/AuditLogGridView.php:211, classes/AuditLogListView.php:209, classes/Views/AuditLog.php:593
 msgid "All Sites"
 msgstr ""
@@ -3496,6 +3499,7 @@ msgstr ""
 #: classes/Views/AuditLog.php:108
 msgid "Unlock these and other powerful features with WP Activity Log Premium."
 msgstr ""
+
 
 #: classes/Views/AuditLog.php:159
 msgid "Learn more"
@@ -5179,6 +5183,7 @@ msgid "From here you can export the plugin's settings configuration and also imp
 msgstr ""
 
 #. translators: Upgrade now hyperlink.
+
 #: extensions/settings-import-export/settings-import-export.php:126
 msgid "Settings import/export is available in the Professional and Business Plans. %s to configure and receive this feature."
 msgstr ""

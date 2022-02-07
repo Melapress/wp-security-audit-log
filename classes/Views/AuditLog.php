@@ -127,12 +127,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		
 		// Check if any of the extensions is activated.
 		if (
-			! class_exists( 'WSAL_NP_Plugin' )
-			&& ! class_exists( 'WSAL_Ext_Plugin' )
-			&& ! class_exists( 'WSAL_Rep_Plugin' )
-			&& ! class_exists( 'WSAL_SearchExtension' )
-			&& ! class_exists( 'WSAL_UserSessions_Plugin' )
-			&& 'anonymous' !== $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) // Anonymous mode option.
+				! class_exists( 'WSAL_NP_Plugin' )
+				&& ! class_exists( 'WSAL_Ext_Plugin' )
+				&& ! class_exists( 'WSAL_Rep_Plugin' )
+				&& ! class_exists( 'WSAL_SearchExtension' )
+				&& ! class_exists( 'WSAL_UserSessions_Plugin' )
+				&& 'anonymous' !== $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) // Anonymous mode option.
 		) {
 			$get_transient_fn         = $this->_plugin->IsMultisite() ? 'get_site_transient' : 'get_transient'; // Check for multisite.
 			$wsal_is_advert_dismissed = $get_transient_fn( 'wsal-is-advert-dismissed' ); // Check if advert has been dismissed.
@@ -186,7 +186,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 							<?php wp_nonce_field( 'wsal_dismiss_advert', 'wsal-dismiss-advert', false, true ); ?>
 							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary wsal_notice__btn notice-cta" target="_blank"><?php esc_html_e( 'UPGRADE NOW', 'wp-security-audit-log' ); ?></a>
 							<br>
-							<a href="<?php echo esc_url( $trial_link ); ?>" class="start-trial-link" target="_blank"><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>		
+							<a href="<?php echo esc_url( $trial_link ); ?>" class="start-trial-link" target="_blank"><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>
 							<a href="javascript:;" data-advert="<?php echo esc_attr( $wsal_premium_advert ); ?>" onclick="wsal_dismiss_advert(this)" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Close', 'wp-security-audit-log' ); ?></a>
 						</div>
 						<!-- /.wsal_notice__btns -->
@@ -201,11 +201,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Check anonymous mode.
 		if ( 'anonymous' === $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) ) { // If user manually opt-out then don't show the notice.
 			if (
-				wsal_freemius()->is_anonymous() // Anonymous mode option.
-				&& wsal_freemius()->is_not_paying() // Not paying customer.
-				&& wsal_freemius()->has_api_connectivity() // Check API connectivity.
-				&& $is_current_view
-				&& $this->_plugin->settings()->CurrentUserCan( 'edit' ) // Have permission to edit plugin settings.
+					wsal_freemius()->is_anonymous() // Anonymous mode option.
+					&& wsal_freemius()->is_not_paying() // Not paying customer.
+					&& wsal_freemius()->has_api_connectivity() // Check API connectivity.
+					&& $is_current_view
+					&& $this->_plugin->settings()->CurrentUserCan( 'edit' ) // Have permission to edit plugin settings.
 			) {
 				if ( ! is_multisite() || ( is_multisite() && is_network_admin() ) ) :
 					?>
@@ -397,7 +397,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			// if the requested view didn't match the view users last viewed
 			// then update their preference.
 			if ( $requested_view !== $this->user_last_view ) {
-				update_user_meta( get_current_user_id(), 'wsal-selected-main-view', ( in_array( $requested_view, array( 'list', 'grid' ), true ) ) ? $requested_view : 'list' );
+				update_user_meta( get_current_user_id(),
+                         'wsal-selected-main-view', ( in_array( $requested_view, array( 'list', 'grid' ), true ) ) ? $requested_view : 'list' );
 				$this->user_last_view = $requested_view;
 			}
 		}
