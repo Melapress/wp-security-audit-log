@@ -67,6 +67,11 @@ div.wsal_notice__wrapper p {
     bottom: 3px;
 }
 
+.wsal_notice__btns a.start-trial-link {
+    position: absolute;
+    right: 14px;
+    bottom: 20px;
+}
 /* Addon Notices */
 .notice-addon-available {
     display: flex;
@@ -88,6 +93,12 @@ div.wsal_notice__wrapper p {
 
 .notice-addon-available .notice-dismiss {
     margin-top: 5px;
+}
+
+.wsal_notice__btns a.wsal_notice__btn.notice-cta {
+    padding: 2px 25px;
+    font-weight: bold;
+    font-size: 16px;
 }
 
 .updated.wsal_notice {

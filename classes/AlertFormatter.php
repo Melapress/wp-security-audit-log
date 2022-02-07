@@ -72,6 +72,18 @@ final class WSAL_AlertFormatter {
 
 				return '';
 
+			case in_array( $expression, array( '%path%', '%old_path%', '%FilePath%' ) ):
+				//  concatenate directory and file paths
+				$max_length = 50;
+				if ( $this->configuration->isJsInLinksAllowed() && strlen( $value ) > $max_length ) {
+					$result = '<span>'  . substr( $value, 0, $max_length ) . '</span>';
+					$result .= "<a href=\"#\" data-shortened-text='{$value}'>" . $this->configuration->getEllipsesSequence() . "</a>";
+
+					return $result;
+				}
+
+				return $value;
+
 			case in_array( $expression, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ) ):
 				//  trim the meta value to the maximum length and append configured ellipses sequence
 				$result = mb_strlen( $value ) > $this->configuration->getMaxMetaValueLength() ? ( mb_substr( $value, 0, 50 ) . $this->configuration->getEllipsesSequence() ) : $value;

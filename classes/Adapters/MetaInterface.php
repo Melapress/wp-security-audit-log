@@ -20,16 +20,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 interface WSAL_Adapters_MetaInterface {
 
 	/**
-	 * Create a meta object
+	 * Deletes meta data belonging to given occurrences.
 	 *
-	 * @param array $occurrence_ids - Array of meta data.
-	 *
-	 * @return int ID of the new meta data
+	 * @param int[] $occurrence_ids - Array of occurrence IDs.
 	 */
 	public function DeleteByOccurrenceIds( $occurrence_ids );
 
 	/**
-	 * Load by name and occurrence id.
+	 * Load meta by name and occurrence id.
 	 *
 	 * @param string $meta_name - Meta name.
 	 * @param int    $occurrence_id - Occurrence ID.

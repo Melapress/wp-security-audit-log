@@ -79,6 +79,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_dismiss_advert', array( $this, 'wsal_dismiss_advert' ) );
 		add_action( 'wp_ajax_wsal_dismiss_notice_addon_available', array( $this, 'dismiss_notice_addon_available' ) );
 		add_action( 'wp_ajax_wsal_dismiss_missing_aws_sdk_nudge', array( $this, 'dismiss_missing_aws_sdk_nudge' ) );
+		add_action( 'wp_ajax_wsal_dismiss_helper_plugin_needed_nudge', array( $this, 'dismiss_helper_plugin_needed_nudge' ) );
 		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( $this, 'dismiss_wp_pointer' ) );
 		add_action( 'all_admin_notices', array( $this, 'AdminNotices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
@@ -123,7 +124,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function AdminNotices() {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
-
+		
 		// Check if any of the extensions is activated.
 		if (
 				! class_exists( 'WSAL_NP_Plugin' )
@@ -172,7 +173,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 								'https://wpactivitylog.com/trial-premium-edition-plugin/'
 							);
 
-							// Buy Now button link.
 							$buy_now = add_query_arg(
 								array(
 									'utm_source'   => 'plugin',
@@ -226,6 +226,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Display add-on available notice.
 		$screen = get_current_screen();
 
+
+        if (class_exists('WSAL_Upgrade_MetadataMigration')) {
+	        WSAL_Upgrade_MetadataMigration::maybe_display_progress_admin_notice();
+        }
 
 		if ( $is_current_view && in_array( $screen->base, array( 'toplevel_page_wsal-auditlog', 'toplevel_page_wsal-auditlog-network' ) ) ) {
 			// Grab list of installed plugins.
@@ -393,7 +397,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			// if the requested view didn't match the view users last viewed
 			// then update their preference.
 			if ( $requested_view !== $this->user_last_view ) {
-				update_user_meta( get_current_user_id(), 'wsal-selected-main-view', ( in_array( $requested_view, array( 'list', 'grid' ), true ) ) ? $requested_view : 'list' );
+				update_user_meta( get_current_user_id(),
+                         'wsal-selected-main-view', ( in_array( $requested_view, array( 'list', 'grid' ), true ) ) ? $requested_view : 'list' );
 				$this->user_last_view = $requested_view;
 			}
 		}
@@ -792,7 +797,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 
 				// Update freemius state.
-				$this->_plugin->SetGlobalSetting( 'freemius_state', 'in' );
+				$this->_plugin->SetGlobalSetting( 'freemius_state', 'in', true );
 			} elseif ( 'no' === $choice ) {
 				if ( ! is_multisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
@@ -801,7 +806,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 
 				// Update freemius state.
-				$this->_plugin->SetGlobalSetting( 'freemius_state', 'skipped' );
+				$this->_plugin->SetGlobalSetting( 'freemius_state', 'skipped', true );
 			}
 
 			echo wp_json_encode(
@@ -1166,7 +1171,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die();
 		}
 
-		$this->_plugin->SetGlobalBooleanSetting( 'setup-modal-dismissed', true );
+		$this->_plugin->SetGlobalBooleanSetting( 'setup-modal-dismissed', true, true );
 		wp_send_json_success();
 	}
 
@@ -1190,22 +1195,31 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function maybe_build_teaser_html( $event_meta ) {
 		$result = '';
-		if ( array_key_exists( 'PostType', $event_meta ) ) {
-			$extension = WSAL_AbstractExtension::get_extension_for_post_type( $event_meta['PostType'] );
-			if ( ! is_null( $extension ) ) {
-				$result      .= '<div class="extension-ad" style="border-color: transparent transparent ' . $extension->get_color() . ' transparent;">';
-				$result      .= '</div>';
-				$plugin_name = $extension->get_plugin_name();
-				$link_title  = sprintf(
-					esc_html__( 'Install the activity log extension for %1$s for more detailed logging of changes done in %2$s.', 'wp-security-audit-log' ),
-					$plugin_name,
-					$plugin_name
-				);
-				$result      .= '<a class="icon" title="' . $link_title . '" href="' . $this->get_third_party_plugins_tab_url() . '">';
-				$result      .= '<img src="' . $extension->get_plugin_icon_url() . '" />';
-				$result      .= '</div>';
-			}
+		if ( ! array_key_exists( 'PostType', $event_meta ) ) {
+			return $result;
 		}
+
+		$extension = WSAL_AbstractExtension::get_extension_for_post_type( $event_meta['PostType'] );
+		if ( is_null( $extension ) ) {
+			return $result;
+		}
+
+		$plugin_filename = $extension->get_plugin_filename();
+		if ( WSAL_PluginInstallAndActivate::is_plugin_installed( $plugin_filename ) && WpSecurityAuditLog::is_plugin_active( $plugin_filename ) ) {
+			return $result;
+		}
+
+		$result      .= '<div class="extension-ad" style="border-color: transparent transparent ' . $extension->get_color() . ' transparent;">';
+		$result      .= '</div>';
+		$plugin_name = $extension->get_plugin_name();
+		$link_title  = sprintf(
+			esc_html__( 'Install the activity log extension for %1$s for more detailed logging of changes done in %2$s.', 'wp-security-audit-log' ),
+			$plugin_name,
+			$plugin_name
+		);
+		$result      .= '<a class="icon" title="' . $link_title . '" href="' . $this->get_third_party_plugins_tab_url() . '">';
+		$result      .= '<img src="' . $extension->get_plugin_icon_url() . '" />';
+		$result      .= '</div>';
 
 		return $result;
 	}

@@ -32,14 +32,14 @@ class WSAL_Views_EmailNotifications extends WSAL_ExtensionPlaceholderView {
 	 * Get View Name.
 	 */
 	public function GetName() {
-		return __( 'Notifications &#8682;', 'wp-security-audit-log' );
+		return __( 'Email Notifications &#8682;', 'wp-security-audit-log' );
 	}
 
 	/**
 	 * Get View Weight.
 	 */
 	public function GetWeight() {
-		return 8;
+		return 2;
 	}
 
 	/**

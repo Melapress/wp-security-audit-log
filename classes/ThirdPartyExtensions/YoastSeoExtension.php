@@ -10,10 +10,10 @@ if ( ! class_exists( 'WSAL_YoastSeoExtension' ) ) {
 					'addon_for'          => 'wp-seo',
 					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'yoast.png',
-					'plugin_slug'        => 'activity-log-wp-seo/activity-log-wp-seo.php',
+					'plugin_slug'        => $this->get_plugin_filename(),
 					'plugin_basename'    => 'activity-log-wp-seo.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/activity-log-wp-seo.latest-stable.zip',
-					'event_tab_id'       => '#tab-yoast-seo',
+					'event_tab_id'       => '#cat-yoast-seo',
 					'plugin_description' => 'Keep a log of all the changes that you and your team do in the Yoast SEO metabox, plugin settings & much more.',
 				)
 			);
@@ -53,6 +53,10 @@ if ( ! class_exists( 'WSAL_YoastSeoExtension' ) ) {
 
 		public function get_color() {
 			return '#a4286a';
+		}
+
+		public function get_plugin_filename() {
+			return 'activity-log-wp-seo/activity-log-wp-seo.php';
 		}
 	}
 }

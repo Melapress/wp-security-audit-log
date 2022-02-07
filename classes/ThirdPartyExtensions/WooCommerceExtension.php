@@ -15,10 +15,10 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 					'addon_for'          => 'woocommerce',
 					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'woocommerce.png',
-					'plugin_slug'        => 'wp-activity-log-for-woocommerce/wsal-woocommerce.php',
+					'plugin_slug'        => $this->get_plugin_filename(),
 					'plugin_basename'    => 'wsal-woocommerce.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-activity-log-for-woocommerce.latest-stable.zip',
-					'event_tab_id'       => '#tab-woocommerce',
+					'event_tab_id'       => '#cat-woocommerce',
 					'plugin_description' => 'Keep a log of your team\'s store settings, products, orders, coupons and any other changes they might do on your eCommerce store.',
 				),
 			);
@@ -87,6 +87,10 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 
 		public function get_color() {
 			return '#7f54b3';
+		}
+
+		public function get_plugin_filename() {
+			return 'wp-activity-log-for-woocommerce/wsal-woocommerce.php';
 		}
 	}
 }

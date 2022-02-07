@@ -393,15 +393,13 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				$new = $occ->GetMetaValue( 'Attempts', 0 ) + 1;
 
 				$login_failure_log_limit = $this->GetLoginFailureLogLimit();
-				if ( - 1 !== (int) $this->GetLoginFailureLogLimit()
-				     && $new > $this->GetLoginFailureLogLimit() ) {
-					$new = $this->GetLoginFailureLogLimit() . '+';
+				if ( - 1 !== $login_failure_log_limit
+				     && $new > $login_failure_log_limit ) {
+					$new = $login_failure_log_limit . '+';
 				}
 
 				$occ->UpdateMetaValue( 'Attempts', $new );
-				$occ->UpdateMetaValue( 'Username', $username );
-
-				// $occ->SetMetaValue('CurrentUserRoles', $user_roles);
+				$occ->username = $username;
 				$occ->created_on = null;
 				$occ->Save();
 			} else {
@@ -419,14 +417,14 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 					 *
 					 * @return bool
 					 */
-					function ($manager) {
+					function ( $manager ) {
 						//  skip if 1004 (session block) is already in place
 						return !$manager->WillOrHasTriggered(1004);
 					}
 				);
 			}
 		} else {
-			$occ_unknown = $obj_occurrence->CheckUnKnownUsers(
+			$occ_unknown = $obj_occurrence->CheckUnknownUsers(
 				array(
 					$ip,
 					1003,
@@ -445,9 +443,9 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				$new = $occ_unknown->GetMetaValue( 'Attempts', 0 ) + 1;
 
 				// If login attempts pass allowed number of attempts then stop increasing the attempts.
-				if ( -1 !== (int) $this->GetVisitorLoginFailureLogLimit()
-					&& $new > $this->GetVisitorLoginFailureLogLimit() ) {
-					$new = $this->GetVisitorLoginFailureLogLimit() . '+';
+				$failure_limit = $this->GetVisitorLoginFailureLogLimit();
+				if ( -1 !== $failure_limit && $new > $failure_limit ) {
+					$new = $failure_limit . '+';
 				}
 
 				// Update the number of login attempts.
@@ -462,8 +460,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 					$occ_unknown->UpdateMetaValue( 'Users', $users );
 				} else {
 					// In this case the value doesn't exist so set the value to array.
-					$users   = array();
-					$users[] = $username;
+					$users   = array( $username );
 				}
 
 				$occ_unknown->created_on = null;

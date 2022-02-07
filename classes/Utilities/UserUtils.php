@@ -23,8 +23,10 @@ class WSAL_Utilities_UsersUtils {
 	private static $user_label_setting;
 
 	/**
+	 * Build the correct label to display for a given user.
+	 *
 	 * @param WpSecurityAuditLog $plugin Instance of WpSecurityAuditLog.
-	 * @param WP_User $user WordPress user object.
+	 * @param WP_User            $user   WordPress user object.
 	 *
 	 * @return string
 	 * @since 4.3.0
@@ -93,6 +95,10 @@ class WSAL_Utilities_UsersUtils {
 		$tooltip .= ( ! empty( $user->data->first_name ) ) ? '<strong>' . esc_attr__( 'Last Name: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->first_name . '</br>' : '';
 		$tooltip .= '<strong>' . esc_attr__( 'Email: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_email . '</br>';
 		$tooltip .= '<strong>' . esc_attr__( 'Nickname: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_nicename . '</br></br>';
+
+		$additional_content = apply_filters( 'wsal_additional_user_tooltip_content', false );
+
+		$tooltip .= $additional_content;
 
 		return $tooltip;
 	}

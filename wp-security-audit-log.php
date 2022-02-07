@@ -1,37 +1,41 @@
 <?php
 /**
+ * WP Activity Log.
+ *
+ * @copyright Copyright (C) 2013-@current_year, WP White Security - support@wpwhitesecurity.com
+ * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
+ *
+ * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Plugin URI: https://wpactivitylog.com/
- * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress including WordPress users activity. Similar to Windows Event Log and Linux Syslog, WP Activity Log generates a security alert for everything that happens on your WordPress blogs and websites. Use the Activity log viewer included in the plugin to see all the security alerts.
- * Author: WP White Security
- * Version: 4.3.4
+ * Version:     4.4.0
+ * Plugin URI:  https://wpactivitylog.com/
+ * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
+ * Author:      WP White Security
+ * Author URI:  https://www.wpwhitesecurity.com/
  * Text Domain: wp-security-audit-log
- * Author URI: https://www.wpwhitesecurity.com/
- * License: GPL2
+ * Domain Path: /languages/
+ * License:     GPL v3
+ * Requires at least: 5.0
+ * Requires PHP: 7.0
  * Network: true
  *
  * @package wsal
  *
- * @fs_premium_only /extensions/, /sdk/twilio-php/
+ * @fs_premium_only /extensions/, /third-party/woocommerce/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/*
-	WP Activity Log
-	Copyright(c) 2021  WP White Security  (email : info@wpwhitesecurity.com)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License, version 2, as
-	published by the Free Software Foundation.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
 
 if ( ! function_exists( 'wsal_freemius' ) ) {
 
@@ -49,9 +53,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              *
              * @var string
              */
-            public $version = '4.3.4';
+            public $version = '4.4.0';
 
-            /**
+             /**
              * Plugin constants.
              *
              * @var string
@@ -426,6 +430,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     require_once 'classes/ThirdPartyExtensions/WooCommerceExtension.php';
                     require_once 'classes/ThirdPartyExtensions/GravityFormsExtension.php';
                     require_once 'classes/ThirdPartyExtensions/TablePressExtension.php';
+                    require_once 'classes/ThirdPartyExtensions/WFCMExtension.php';
                 }
 
                 // Connectors.
@@ -499,7 +504,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     wp_schedule_event( time(), 'daily', 'wsal_delete_logins' );
                 }
 
-                add_filter( 'mainwp_child_extra_execution', array( $this, 'mainwp_dashboard_callback' ), 10, 2 );
+	            add_filter( 'mainwp_child_extra_execution', array( new WSAL_MainWpApi( $this ), 'handle_callback' ), 10, 2 );
 
                 add_action( 'admin_init', array( $this, 'maybe_sync_premium_freemius' ) );
 
@@ -516,9 +521,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     $bbpress_addon      = new WSAL_BBPressExtension();
                     $wpforms_addon      = new WSAL_WPFormsExtension();
                     $gravityforms_addon = new WSAL_GravityFormsExtension();
-
-                    // Comment out untill release.
-                    //$tablepress_addon   = new WSAL_TablePressExtension();
+                    $tablepress_addon   = new WSAL_TablePressExtension();
+                    $wfcm_addon         = new WSAL_WFCMExtension();
                 }
 
                 // Extensions which are both admin and frontend based.
@@ -708,133 +712,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $alerts = \WSAL\Helpers\Options::get_option_value_ignore_prefix( self::OPTIONS_PREFIX . 'disabled-alerts' );
                 $alerts = explode( ',', $alerts );
                 return ! in_array( $alert, $alerts );
-            }
-
-            /**
-             * MainWP Dashboard Handler.
-             *
-             * @since 3.2.5
-             *
-             * @param array $info      – Information to return.
-             * @param array $post_data – Post data array from MainWP.
-             * @return mixed
-             */
-            public function mainwp_dashboard_callback( $info, $post_data ) {
-                if ( isset( $post_data['action'] ) ) {
-                    switch ( $post_data['action'] ) {
-                        case 'check_wsal':
-                            $info                 = new stdClass();
-                            $info->wsal_installed = true;
-                            $info->is_premium     = false;
-                            break;
-
-                        case 'get_events':
-                            $limit      = isset( $post_data['events_count'] ) ? $post_data['events_count'] : false;
-                            $offset     = isset( $post_data['events_offset'] ) ? $post_data['events_offset'] : false;
-                            $query_args = isset( $post_data['query_args'] ) ? $post_data['query_args'] : false;
-                            $info       = $this->alerts->get_mainwp_extension_events( $limit, $offset, $query_args );
-                            break;
-
-                        case 'get_report':
-                            $filters     = isset( $post_data['filters'] ) ? $post_data['filters'] : array();
-                            $report_type = isset( $post_data['report_type'] ) ? $post_data['report_type'] : false;
-                            $info        = $this->alerts->get_mainwp_extension_report( $filters, $report_type );
-                            break;
-
-                        case 'latest_event':
-                            // run the query and return it.
-                            $event = $this->query_for_latest_event();
-                            $event = $event->getAdapter()->Execute( $event );
-
-                            // Set the return object.
-                            if ( isset( $event[0] ) ) {
-                                $info             = new stdClass();
-                                $info->alert_id   = $event[0]->alert_id;
-                                $info->created_on = $event[0]->created_on;
-                            } else {
-                                $info = false;
-                            }
-                            break;
-                        case 'enforce_settings':
-                            //  check subaction
-                            if ( ! array_key_exists( 'subaction', $post_data) || empty( $post_data['subaction'] ) )  {
-                                $info = array(
-                                    'success' => 'no',
-                                    'message' => 'Missing subaction parameter.'
-                                );
-                                break;
-                            }
-
-                            $subaction = filter_var( $post_data['subaction'], FILTER_SANITIZE_STRING);
-                            if ( ! in_array( $subaction, [ 'update', 'remove' ] ) ) {
-                                $info = array(
-                                    'success' => 'no',
-                                    'message' => 'Unsupported subaction parameter value.'
-                                );
-                                break;
-                            }
-
-                            if ( 'update' === $subaction ) {
-                                //  store the enforced settings in local database (used for example to disable related parts
-                                //  of the settings UI
-                                $settings_to_enforce = $post_data[ 'settings'];
-                                $this->settings()->set_mainwp_enforced_settings( $settings_to_enforce );
-
-                                //  change the existing settings
-                                if ( array_key_exists( 'pruning_enabled', $settings_to_enforce ) ) {
-                                    $this->settings()->SetPruningDateEnabled( $settings_to_enforce['pruning_enabled'] );
-                                    if ( array_key_exists( 'pruning_date', $settings_to_enforce ) && array_key_exists( 'pruning_unit', $settings_to_enforce) ) {
-                                        $this->settings()->SetPruningDate($settings_to_enforce[ 'pruning_date' ] . ' ' . $settings_to_enforce[ 'pruning_unit' ]);
-                                        $this->settings()->set_pruning_unit( $settings_to_enforce[ 'pruning_unit' ] );
-                                    }
-                                }
-
-                                if ( array_key_exists( 'disabled_events', $settings_to_enforce ) ) {
-                                    $disabled_event_ids = array_key_exists( 'disabled_events', $settings_to_enforce ) ? array_map( 'intval', explode( ',', $settings_to_enforce['disabled_events'] ) ) : [];
-                                    $this->alerts->SetDisabledAlerts( $disabled_event_ids );
-                                }
-
-                                if (array_key_exists('incognito_mode_enabled', $settings_to_enforce)) {
-                                    $this->settings()->SetIncognito($settings_to_enforce['incognito_mode_enabled']);
-                                }
-
-                                if (array_key_exists('login_notification_enabled', $settings_to_enforce)) {
-                                    $login_page_notification_enabled = $settings_to_enforce['login_notification_enabled'];
-                                    $this->settings()->set_login_page_notification($login_page_notification_enabled);
-                                    if ('yes' === $login_page_notification_enabled) {
-                                        $this->settings()->set_login_page_notification_text($settings_to_enforce['login_notification_text']);
-                                    }
-                                }
-
-                            } else if ( 'remove' === $subaction ) {
-                                $this->settings()->delete_mainwp_enforced_settings();
-                            }
-
-                            $info = array(
-                                'success' => 'yes'
-                            );
-                            $this->alerts->Trigger( 6043 );
-                        default:
-                            break;
-                    }
-                }
-                return $info;
-            }
-
-            /**
-             * Performs a query to retrieve the latest event in the logs.
-             *
-             * @method query_for_latest_event
-             * @since  4.0.3
-             * @return array
-             */
-            public function query_for_latest_event() {
-                $event_query = new WSAL_Models_OccurrenceQuery();
-                // order by creation.
-                $event_query->addOrderBy( 'created_on', true );
-                // only request 1 item.
-                $event_query->setLimit( 1 );
-                return $event_query;
             }
 
             /**
@@ -1032,27 +909,33 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 );
             }
 
-            /**
-             * Limited License Activation Error.
-             *
-             * @param string $error - Error Message.
-             * @return string
-             */
-            public function limited_license_activation_error( $error ) {
-                $site_count = null;
-                preg_match( '!\d+!', $error, $site_count );
+			/**
+			 * Limited License Activation Error.
+			 *
+			 * @param string $error - Error Message.
+			 *
+			 * @return string
+			 */
+			public function limited_license_activation_error( $error ) {
+				// We only process error if it's some sort of string message.
+				if ( ! is_string( $error ) ) {
+					return $error;
+				}
 
-                // Check if this is an expired error.
-                if ( strpos( $error, 'expired' ) !== false ) {
-                    /* Translators: Expired message and time */
-                    $error = sprintf( esc_html__( '%s You need to renew your license to continue using premium features.', 'wp-security-audit-log' ), preg_replace('/\([^)]+\)/','', $error ) );
-                }
-                elseif ( ! empty( $site_count[0] ) ) {
-                    /* Translators: Number of sites */
-                    $error = sprintf( esc_html__( 'The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network.', 'wp-security-audit-log' ), $site_count[0] );
-                }
-                return $error;
-            }
+				$site_count = null;
+				preg_match( '!\d+!', $error, $site_count );
+
+				// Check if this is an expired error.
+				if ( strpos( $error, 'expired' ) !== false ) {
+					/* Translators: Expired message and time */
+					$error = sprintf( esc_html__( '%s You need to renew your license to continue using premium features.', 'wp-security-audit-log' ), preg_replace( '/\([^)]+\)/', '', $error ) );
+				} elseif ( ! empty( $site_count[0] ) ) {
+					/* Translators: Number of sites */
+					$error = sprintf( esc_html__( 'The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network.', 'wp-security-audit-log' ), $site_count[0] );
+				}
+
+				return $error;
+			}
 
             /**
              * Start to trigger the events after installation.
@@ -1106,6 +989,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                  * @param WpSecurityAuditLog $this – Instance of main plugin class.
                  */
                 do_action( 'wsal_init', $this );
+
+	            //  background job for metadata migration
+	            new WSAL_Upgrade_MetadataMigration();
 
                 //  allow registration of custom alert formatters (must be called after wsal_init action )
                 WSAL_AlertFormatterFactory::bootstrap();
@@ -1263,11 +1149,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $script_data = array(
                     'ajaxURL'           => admin_url( 'admin-ajax.php' ),
                     'liveEvents'        => $live_events_enabled,
-                    'installing'        => __( 'Installing, please wait', 'wp-security-audit-log' ),
-                    'already_installed' => __( 'Already installed', 'wp-security-audit-log' ),
-                    'installed'         => __( 'Extension installed', 'wp-security-audit-log' ),
-                    'activated'         => __( 'Extension activated', 'wp-security-audit-log' ),
-                    'failed'            => __( 'Install failed', 'wp-security-audit-log' ),
+                    'installing'        => esc_html__( 'Installing, please wait', 'wp-security-audit-log' ),
+                    'already_installed' => esc_html__( 'Already installed', 'wp-security-audit-log' ),
+                    'installed'         => esc_html__( 'Extension installed', 'wp-security-audit-log' ),
+                    'activated'         => esc_html__( 'Extension activated', 'wp-security-audit-log' ),
+                    'failed'            => esc_html__( 'Install failed', 'wp-security-audit-log' ),
+                    'reloading_page'    => esc_html__( 'Reloading page', 'wp-security-audit-log' )
                 );
 
                 wp_localize_script( 'wsal-common', 'wsalCommonData', $script_data );
@@ -1290,7 +1177,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 require_once 'classes/ConstantManager.php';
                 require_once 'classes/Loggers/Database.php';
                 require_once 'classes/SensorManager.php';
-                require_once 'classes/Sensors/Public.php';
                 require_once 'classes/Settings.php';
 
                 if ( is_admin() ) {
@@ -1395,7 +1281,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
              */
             public function Update( $old_version, $new_version ) {
                 // Update version in db.
-                $this->SetGlobalSetting( 'version', $new_version );
+                $this->SetGlobalSetting( 'version', $new_version, true );
 
 			if ( '0.0.0' === $old_version ) {
 				//  set some initial plugins settings (only the ones that bypass the regular settings retrieval at some
@@ -1494,6 +1380,34 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			                $this->SetGlobalSetting( 'excluded-post-meta', $excludedCustomFields );
 			                $this->DeleteGlobalSetting( 'excluded-custom' );
 		                }
+	                }
+
+	                if ( version_compare( $new_version, '4.4.0', '>=' ) ) {
+                        // Delete unwanted usermeta.
+                        global $wpdb;
+                        $all_user_meta = $wpdb->get_results(
+                            $wpdb->prepare(
+                                "DELETE FROM {$wpdb->usermeta} WHERE meta_key = '%s';",
+                                'wsal-notice-update-44-notice'
+                            )
+                        );
+
+		                $this->settings()->set_database_version( 44400 );
+
+		                if ( class_exists( 'WSAL_Extension_Manager' ) ) {
+			                WSAL_Extension_Manager::include_extension( 'external-db' );
+		                }
+
+		                if ( ! did_action( 'wsal_init' ) ) {
+			                //  we need to call wsal init manually because it does not run as before the upgrade procedure is triggered
+			                do_action( 'wsal_init', $this );
+		                }
+
+		                require_once 'classes/Upgrade/Upgrade_43000_to_44400.php';
+		                $upgrader = new WSAL_Upgrade_43000_to_44400( $this );
+		                $upgrader->run();
+
+                        //  @todo remove legacy periodic reports for unique_ip and number_logins
 	                }
                 }
             }
@@ -1605,25 +1519,25 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $this->SetGlobalSetting( $option, $value );
             }
 
-            /**
-             * Set a global setting.
-             *
-             * @param string $option - Option name.
-             * @param mixed $value - New value for option.
-             *
-             * @return bool
-             */
-            public function SetGlobalSetting( $option, $value ) {
-                $this->include_options_helper();
-                return $this->options_helper->set_option_value( $option, $value );
-            }
+	        /**
+	         * Set a global setting.
+	         *
+	         * @param string $option - Option name.
+	         * @param mixed $value - New value for option.
+	         * @param bool $autoload Whether or not to autoload this option.
+	         *
+	         * @return bool
+	         */
+	        public function SetGlobalSetting( $option, $value, $autoload = false ) {
+		        $this->include_options_helper();
+
+		        return $this->options_helper->set_option_value( $option, $value, $autoload );
+	        }
 
             /**
              * Deletes a global setting.
              *
-             * Handles option names without the prefix, but also the ones that do for backwards compatibility.
-             *
-             * @param string $option - Option name.
+             * @param string $option - Option name without the prefix.
              *
              * @return bool
              * @since 4.2.1
@@ -1646,17 +1560,20 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $result = $this->GetGlobalSetting( $option, \WSAL\Helpers\Options::string_to_bool( $default ) );
                 return \WSAL\Helpers\Options::string_to_bool( $result );
             }
-            /**
-             * Sets a global boolean setting. It takes care of the conversion between string and boolean.
-             *
-             * @param string $option - Option name.
-             * @param mixed $value - New value for option.
-             * @since 4.1.3
-             */
-            public function SetGlobalBooleanSetting( $option, $value ) {
-                $boolean_value = \WSAL\Helpers\Options::string_to_bool( $value );
-                $this->SetGlobalSetting( $option, \WSAL\Helpers\Options::bool_to_string( $boolean_value ) );
-            }
+
+	        /**
+	         * Sets a global boolean setting. It takes care of the conversion between string and boolean.
+	         *
+	         * @param string $option - Option name.
+	         * @param mixed $value - New value for option.
+	         * @param bool $autoload Whether or not to autoload this option.
+	         *
+	         * @since 4.1.3
+	         */
+	        public function SetGlobalBooleanSetting( $option, $value, $autoload = false ) {
+		        $boolean_value = \WSAL\Helpers\Options::string_to_bool( $value );
+		        $this->SetGlobalSetting( $option, \WSAL\Helpers\Options::bool_to_string( $boolean_value ), $autoload );
+	        }
 
             /**
              * Run cleanup routines.
@@ -1910,7 +1827,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 $old_value     = get_option( $option_name );
 
                 //  determine new value via Freemius SDK
-                $new_value = wsal_freemius()->is_registered() && wsal_freemius()->has_active_valid_license() ? 'yes' : 'no';
+                $new_value = wsal_freemius()->has_active_valid_license() ? 'yes' : 'no';
 
                 //  update the db option only if the value changed
                 if ($new_value != $old_value) {
@@ -2155,6 +2072,17 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		        }
 	        }
         }
+
+		$prefixed_autoloader_file_path = plugin_dir_path( __FILE__ ) . implode( DIRECTORY_SEPARATOR, [
+					'third-party',
+					'vendor',
+					'autoload.php'
+				]
+			);
+
+		if ( file_exists( $prefixed_autoloader_file_path ) ) {
+			require_once $prefixed_autoloader_file_path;
+		}
 
         // Begin load sequence.
         WpSecurityAuditLog::GetInstance();

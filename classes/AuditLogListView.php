@@ -768,7 +768,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 		// TO DO: Get rid of OccurrenceQuery and use the Occurrence Model.
 		$query = new WSAL_Models_OccurrenceQuery();
-		$bid = (int) $this->query_args->site_id;
+		$bid   = (int) $this->query_args->site_id;
 		if ( $bid ) {
 			$query->addCondition( 'site_id = %s ', $bid );
 		}
@@ -808,34 +808,24 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 			// TO DO: Allow order by meta values.
 			if ( 'scip' === $order_by ) {
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'ClientIP' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "ClientIP" THEN meta.value END', $is_descending );
+				$query->addOrderBy( 'client_ip', $is_descending );
 			} elseif ( 'user' === $order_by ) {
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'CurrentUserID' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "CurrentUserID" THEN meta.value END', $is_descending );
+				$query->addOrderBy( 'user_id', $is_descending );
 			} elseif ( 'code' === $order_by ) {
 				/*
 				 * Handle the 'code' (Severity) column sorting.
 				 */
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'Severity' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "Severity" THEN meta.value END', $is_descending );
+				$query->addOrderBy( 'severity', $is_descending );
 			} elseif ( 'object' === $order_by ) {
 				/*
 				 * Handle the 'object' column sorting.
 				 */
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'Object' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "Object" THEN meta.value END', $is_descending );
+				$query->addOrderBy( 'object', $is_descending );
 			} elseif ( 'event_type' === $order_by ) {
 				/*
 				 * Handle the 'Event Type' column sorting.
 				 */
-				$query->addMetaJoin(); // Since LEFT JOIN clause causes the result values to duplicate.
-				$query->addCondition( 'meta.name = %s', 'EventType' ); // A where condition is added to make sure that we're only requesting the relevant meta data rows from metadata table.
-				$query->addOrderBy( 'CASE WHEN meta.name = "EventType" THEN meta.value END', $is_descending );
+				$query->addOrderBy( 'event_type', $is_descending );
 			} else {
 				$tmp = new WSAL_Models_Occurrence();
 				// Making sure the field exists to order by.

@@ -83,15 +83,19 @@ final class WSAL_AlertManager {
 	public $ignored_cpts = array();
 
 	/**
+	 * Date format.
+	 *
 	 * @var string Date format.
 	 */
 	private $date_format;
 
-    /**
-     * @var string Sanitized date format.
-     * @since 4.2.1
-     */
-    private $sanitized_date_format;
+	/**
+	 * Sanitized date format.
+	 *
+	 * @var string
+	 * @since 4.2.1
+	 */
+	private $sanitized_date_format;
 
 	/**
 	 * Create new AlertManager instance.
@@ -100,7 +104,7 @@ final class WSAL_AlertManager {
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->plugin = $plugin;
-		foreach ( glob( dirname( __FILE__ ) . '/Loggers/*.php' ) as $file ) {
+		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( dirname( __FILE__ ) . '/Loggers', '*.php' ) as $file ) {
 			$this->AddFromFile( $file );
 		}
 
@@ -233,7 +237,8 @@ final class WSAL_AlertManager {
 
 		// If user or user role is enable then go ahead.
 		if ( $this->CheckEnableUserRoles( $username, $roles ) ) {
-			$data['Timestamp'] = current_time( 'U.u', 'true' );
+
+			$data['Timestamp'] = ( isset( $data['Timestamp'] ) && ! empty( $data['Timestamp'] ) ) ? $data['Timestamp'] : current_time( 'U.u', 'true' );
 			if ( $delayed ) {
 				$this->TriggerIf( $type, $data, null );
 			} else {
@@ -330,15 +335,13 @@ final class WSAL_AlertManager {
 	/**
 	 * Method: Commit an alert now.
 	 *
-	 * @param int $type - Alert type.
-	 * @param array $data - Data of the alert.
-	 * @param array $cond - Condition for the alert.
-	 * @param bool $_retry - Retry.
+	 * @param int   $type   - Alert type.
+	 * @param array $data   - Data of the alert.
+	 * @param array $cond   - Condition for the alert.
+	 * @param bool  $_retry - Retry.
 	 *
 	 * @return mixed
-	 * @throws Exception - Error if alert is not registered.
 	 * @internal
-	 *
 	 */
 	protected function _CommitItem( $type, $data, $cond, $_retry = true ) {
 		// Double NOT operation here is intentional. Same as ! ( bool ) [ $value ]
@@ -356,7 +359,8 @@ final class WSAL_AlertManager {
 				} else {
 					// In general this shouldn't happen, but it could, so we handle it here.
 					/* translators: Event ID */
-					throw new Exception( sprintf( esc_html__( 'Event with code %d has not be registered.', 'wp-security-audit-log' ), $type ) );
+					$error_message = sprintf( esc_html__( 'Event with code %d has not be registered.', 'wp-security-audit-log' ), $type );
+					$this->plugin->wsal_log( $error_message );
 				}
 			}
 		}
@@ -407,40 +411,41 @@ final class WSAL_AlertManager {
 	/**
 	 * Register an alert type.
 	 *
-	 * @param string $category Category name.
+	 * @param string $category    Category name.
 	 * @param string $subcategory Subcategory name.
-	 * @param array $info Event information from defaults.php.
-	 *
-	 * @throws Exception - Error if alert is already registered.
+	 * @param array  $info        Event information from defaults.php.
 	 */
 	public function Register( $category, $subcategory, $info ) {
 
-		//  default for optional fields
-		$metadata   = [];
-		$links      = [];
+		// Default for optional fields.
+		$metadata   = array();
+		$links      = array();
 		$object     = '';
 		$event_type = '';
 
 		$definition_items_count = count( $info );
-		if ( 8 == $definition_items_count ) {
-			//  most recent event definition introduced in version 4.2.1
+		if ( 8 === $definition_items_count ) {
+			// Most recent event definition introduced in version 4.2.1.
 			list( $code, $severity, $desc, $message, $metadata, $links, $object, $event_type ) = $info;
-		} else if (6 == $definition_items_count ) {
-			//  legacy event definition for backwards compatibility (used prior to version 4.2.1)
+		} elseif ( 6 === $definition_items_count ) {
+			// Legacy event definition for backwards compatibility (used prior to version 4.2.1).
 			list( $code, $severity, $desc, $message, $object, $event_type ) = $info;
 		} else {
-			//  even older legacy event definition for backwards compatibility
+			// Even older legacy event definition for backwards compatibility.
 			list( $code, $severity, $desc, $message ) = $info;
 		}
 
 		if ( is_string( $links ) ) {
-			$links = [ $links ];
+			$links = array( $links );
 		}
-		
+
 		if ( isset( $this->_alerts[ $code ] ) ) {
 			add_action( 'admin_notices', array( $this, 'duplicate_event_notice' ) );
 			/* Translators: Event ID */
-			throw new Exception( sprintf( esc_html__( 'Event %s already registered with WP Activity Log.', 'wp-security-audit-log' ), $code ) );
+			$error_message = sprintf( esc_html__( 'Event %s already registered with WP Activity Log.', 'wp-security-audit-log' ), $code );
+			$this->plugin->wsal_log( $error_message );
+
+			return;
 		}
 
 		/**
@@ -453,7 +458,6 @@ final class WSAL_AlertManager {
 		 * @param integer $code - Event ID.
 		 *
 		 * @since 4.3.2
-		 *
 		 */
 		$metadata = apply_filters( 'wsal_event_metadata_definition', $metadata, $code );
 
@@ -465,8 +469,6 @@ final class WSAL_AlertManager {
 	 *
 	 * @param array $groups - An array with group name as the index and an array of group items as the value.
 	 * Item values is an array of [type, code, description, message, object, event type] respectively.
-	 *
-	 * @throws Exception
 	 */
 	public function RegisterGroup( $groups ) {
 		foreach ( $groups as $name => $group ) {
@@ -857,71 +859,6 @@ final class WSAL_AlertManager {
 	}
 
 	/**
-	 * Return alerts for MainWP Extension.
-	 *
-	 * @param integer $limit - Number of alerts to retrieve.
-	 * @param int|bool $offset - Events offset, otherwise false.
-	 * @param stdClass|bool $query_args - Events query arguments, otherwise false.
-	 *
-	 * @return stdClass
-	 * @throws Freemius_Exception
-	 */
-	public function get_mainwp_extension_events( $limit = 100, $offset = false, $query_args = false ) {
-		$mwp_events = new stdClass();
-
-		// Check if limit is not empty.
-		if ( empty( $limit ) ) {
-			return $mwp_events;
-		}
-
-		// Initiate query occurrence object.
-		$events_query = new WSAL_Models_OccurrenceQuery();
-		$events_query->addCondition( 'site_id = %s ', 1 ); // Set site id.
-		$events_query = $this->filter_query( $events_query, $query_args );
-
-		// Check query arguments.
-		if ( false !== $query_args ) {
-			if ( isset( $query_args['get_count'] ) && $query_args['get_count'] ) {
-				$mwp_events->total_items = $events_query->getAdapter()->Count( $events_query );
-			} else {
-				$mwp_events->total_items = false;
-			}
-		}
-
-		// Set order by.
-		$events_query->addOrderBy( 'created_on', true );
-
-		// Set the limit.
-		$events_query->setLimit( $limit );
-
-		// Set the offset.
-		if ( false !== $offset ) {
-			$events_query->setOffset( $offset );
-		}
-
-		// Execute the query.
-		/** @var \WSAL\MainWPExtension\Models\Occurrence[] $events */
-		$events = $events_query->getAdapter()->Execute( $events_query );
-
-		if ( ! empty( $events ) && is_array( $events ) ) {
-			foreach ( $events as $event ) {
-				// Get event meta.
-				$meta_data                                    = $event->GetMetaArray();
-				$meta_data['UserData']                        = $this->get_event_user_data( WSAL_Utilities_UsersUtils::GetUsername( $meta_data ) );
-				$mwp_events->events[ $event->id ]             = new stdClass();
-				$mwp_events->events[ $event->id ]->id         = $event->id;
-				$mwp_events->events[ $event->id ]->alert_id   = $event->alert_id;
-				$mwp_events->events[ $event->id ]->created_on = $event->created_on;
-				$mwp_events->events[ $event->id ]->meta_data  = $meta_data;
-			}
-
-			$mwp_events->users = $this->wp_users;
-		}
-
-		return $mwp_events;
-	}
-
-	/**
 	 * Return user data array of the events.
 	 *
 	 * @param string $username – Username.
@@ -1216,204 +1153,6 @@ final class WSAL_AlertManager {
 	}
 
 	/**
-	 * Filter query for MWPAL.
-	 *
-	 * @param WSAL_Models_OccurrenceQuery $query - Events query.
-	 * @param array $query_args - Query args.
-	 *
-	 * @return WSAL_Models_OccurrenceQuery
-	 * @throws Freemius_Exception
-	 */
-	private function filter_query( $query, $query_args ) {
-		if ( isset( $query_args['search_term'] ) && $query_args['search_term'] ) {
-			$query->addSearchCondition( $query_args['search_term'] );
-		}
-
-		if ( ! empty( $query_args['search_filters'] ) ) {
-			// Get DB connection array.
-			$connection = WpSecurityAuditLog::GetInstance()->getConnector()->getAdapter( 'Occurrence' )->get_connection();
-			$connection->set_charset( $connection->dbh, 'utf8mb4', 'utf8mb4_general_ci' );
-
-			// Tables.
-			$meta       = new WSAL_Adapters_MySQL_Meta( $connection );
-			$table_meta = $meta->GetTable(); // Metadata.
-			$occurrence = new WSAL_Adapters_MySQL_Occurrence( $connection );
-			$table_occ  = $occurrence->GetTable(); // Occurrences.
-
-			foreach ( $query_args['search_filters'] as $prefix => $value ) {
-				if ( 'event' === $prefix ) {
-					$query->addORCondition( array( 'alert_id = %s' => $value ) );
-				} elseif ( in_array( $prefix, array( 'from', 'to', 'on' ), true ) ) {
-					$date = DateTime::createFromFormat( $this->sanitized_date_format, $value[0] );
-					$date->setTime( 0, 0 ); // Reset time to 00:00:00.
-					$date_string = $date->format( 'U' );
-
-					if ( 'from' === $prefix ) {
-						$query->addCondition( 'created_on >= %s', $date_string );
-					} elseif ( 'to' === $prefix ) {
-						$query->addCondition( 'created_on <= %s', strtotime( '+1 day -1 minute', $date_string ) );
-					} elseif ( 'on' === $prefix ) {
-						$query->addCondition( 'created_on >= %s', strtotime( '-1 day +1 day +1 second', $date_string ) );
-						$query->addCondition( 'created_on <= %s', strtotime( '+1 day -1 second', $date_string ) );
-					}
-				} elseif ( in_array( $prefix, array( 'username', 'firstname', 'lastname' ), true ) ) {
-					// User ids array.
-					$user_ids = array();
-
-					if ( 'username' === $prefix ) {
-						foreach ( $value as $username ) {
-							$user = get_user_by( 'login', $username );
-
-							if ( ! $user ) {
-								$user = get_user_by( 'slug', $username );
-							}
-
-							if ( $user ) {
-								$user_ids[] = $user->ID;
-							}
-						}
-					} elseif ( 'firstname' === $prefix || 'lastname' === $prefix ) {
-						$users    = array();
-						$meta_key = 'firstname' === $prefix ? 'first_name' : ( 'lastname' === $prefix ? 'last_name' : false );
-
-						foreach ( $value as $name ) {
-							$users_array = get_users(
-								array(
-									'meta_key'     => $meta_key,
-									'meta_value'   => $name,
-									'fields'       => array( 'ID', 'user_login' ),
-									'meta_compare' => 'LIKE',
-								)
-							);
-
-							foreach ( $users_array as $user ) {
-								$users[] = $user;
-							}
-						}
-
-						$usernames = array();
-
-						if ( ! empty( $users ) ) {
-							foreach ( $users as $user ) {
-								$usernames[] = $user->user_login;
-								$user_ids[]  = $user->ID;
-							}
-						}
-
-						$value = $usernames;
-					}
-
-					$sql = "$table_occ.id IN ( SELECT occurrence_id FROM $table_meta as meta WHERE ";
-
-					if ( ! empty( $user_ids ) ) {
-						$last_userid = end( $user_ids );
-						$sql        .= "( meta.name='CurrentUserID' AND ( ";
-
-						foreach ( $user_ids as $user_id ) {
-							if ( $last_userid === $user_id ) {
-								$sql .= "meta.value='$user_id'";
-							} else {
-								$sql .= "meta.value='$user_id' OR ";
-							}
-						}
-
-						$sql .= ' ) )';
-						$sql .= ' OR ';
-					}
-
-					if ( ! empty( $value ) ) {
-						$last_username = end( $value );
-						$sql          .= "( meta.name='Username' AND ( ";
-
-						foreach ( $value as $username ) {
-							if ( $last_username === $username ) {
-								$sql .= "meta.value='%s'";
-							} else {
-								$sql .= "meta.value='$username' OR ";
-							}
-						}
-
-						$sql .= ' ) )';
-					}
-
-					$sql       .= ' )';
-					$user_count = count( $value );
-
-					if ( $user_count ) {
-						$query->addORCondition( array( $sql => $value[ $user_count - 1 ] ) );
-					} else {
-						$query->addORCondition( array( $sql => '' ) );
-					}
-				} elseif ( 'userrole' === $prefix ) {
-					// User role search condition.
-					$sql   = "$table_occ.id IN ( SELECT occurrence_id FROM $table_meta as meta WHERE meta.name='CurrentUserRoles' AND replace(replace(replace(meta.value, ']', ''), '[', ''), '\\'', '') REGEXP %s )";
-					$value = implode( '|', $value );
-					$query->addORCondition( array( $sql => $value ) );
-				} elseif ( in_array( $prefix, array( 'posttype', 'poststatus', 'postid', 'postname' ), true ) ) {
-					$post_meta = '';
-
-					if ( 'posttype' === $prefix ) {
-						$post_meta = 'PostType';
-					} elseif ( 'poststatus' === $prefix ) {
-						$post_meta = 'PostStatus';
-					} elseif ( 'postid' === $prefix ) {
-						$post_meta = 'PostID';
-					} elseif ( 'postname' === $prefix ) {
-						$post_meta = 'PostTitle';
-					}
-
-					// Post meta search condition.
-					$sql = "$table_occ.id IN ( SELECT occurrence_id FROM $table_meta as meta WHERE meta.name='$post_meta' AND ( ";
-					if ( 'postname' === $prefix ) {
-						$value = array_map( array( $this, 'add_string_wildcards' ), $value );
-					}
-
-					// Get the last value.
-					$last_value = end( $value );
-
-					foreach ( $value as $post_meta ) {
-						if ( $last_value === $post_meta ) {
-							continue;
-						}
-
-						if ( 'postname' === $prefix ) {
-							$sql .= "( (meta.value LIKE '$post_meta') > 0 ) OR ";
-						} else {
-							$sql .= "meta.value='$post_meta' OR ";
-						}
-					}
-
-					// Add placeholder for the last value.
-					if ( 'postname' === $prefix ) {
-						$sql .= "( (meta.value LIKE '%s') > 0 ) ) )";
-					} else {
-						$sql .= "meta.value='%s' ) )";
-					}
-
-					$query->addORCondition( array( $sql => $last_value ) );
-				} elseif ( 'ip' === $prefix ) {
-					// IP search condition.
-					$sql   = "$table_occ.id IN ( SELECT occurrence_id FROM $table_meta as meta WHERE meta.name='ClientIP' AND ( ";
-					$count = count( $value );
-
-					foreach ( $value as $ip ) {
-						if ( $value[ $count - 1 ] === $ip ) {
-							$sql .= "meta.value='%s'";
-						} else {
-							$sql .= "meta.value='$ip' OR ";
-						}
-					}
-
-					$sql .= ' ) )';
-					$query->addORCondition( array( $sql => $value[ $count - 1 ] ) );
-				}
-			}
-		}
-
-		return $query;
-	}
-
-	/**
 	 * Modify post name values to include MySQL wildcards.
 	 *
 	 * @param string $search_value – Searched post name.
@@ -1452,130 +1191,6 @@ final class WSAL_AlertManager {
 	 */
 	public function get_event_sub_categories() {
 		return array_keys( $this->get_sub_categorized_events() );
-	}
-
-	/**
-	 * Generate report matching the filter passed.
-	 *
-	 * @param array $filters     - Filters.
-	 * @param mixed $report_type - Type of report.
-	 * @return stdClass
-     */
-	public function get_mainwp_extension_report( array $filters, $report_type ) {
-		// Check report type.
-		if ( ! $report_type ) {
-			$report       = new stdClass();
-			$report->data = array();
-
-			do {
-				$response = $this->generate_report( $filters );
-
-				if ( isset( $response['data'] ) ) {
-					$report->data = array_merge( $report->data, $response['data'] );
-				}
-
-				// Set the filters next date.
-				$filters['nextDate'] = ( isset( $response['lastDate'] ) && $response['lastDate'] ) ? $response['lastDate'] : 0;
-			} while ( $filters['nextDate'] );
-		} elseif ( 'statistics_unique_ips' === $report_type ) {
-			$report       = new stdClass();
-			$report->data = $this->generate_statistics_unique_ips( $filters );
-		}
-
-		return $report;
-	}
-
-	/**
-	 * Generate report for MainWP extension.
-	 *
-	 * @param array $filters - Filters.
-	 * @return array
-	 */
-	private function generate_report( $filters ) {
-		//  check the report format
-		$report_format = empty( $filters['report-format'] ) ? 'html' : 'csv';
-		if ( ! in_array( $report_format, array( 'csv', 'html' ), true ) ) {
-			return false;
-		}
-
-		//  some alert codes or alert groups are needed to run a report
-		if ( empty( $filters['alert-codes']['groups'] ) && empty( $filters['alert-codes']['codes'] ) ) {
-			return false;
-		}
-
-		$args = WSAL_ReportArgs::build_from_alternative_filters( $filters, $this );
-
-		$next_date = empty( $filters['nextDate'] ) ? null : $filters['nextDate'];
-		$limit     = empty( $filters['limit'] ) ? 0 : $filters['limit'];
-
-		$last_date = null;
-
-		if ( isset( $filters['unique-ip'] ) && $filters['unique-ip'] ) {
-			$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReportGrouped( $args );
-		} else {
-			$results = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReporting( $args, $next_date, $limit );
-		}
-
-		if ( ! empty( $results['lastDate'] ) ) {
-			$last_date = $results['lastDate'];
-			unset( $results['lastDate'] );
-		}
-
-		if ( empty( $results ) ) {
-			return false;
-		}
-
-		$data             = array();
-		$data_and_filters = array();
-
-		if ( ! empty( $filters['unique-ip'] ) ) {
-			$data = array_values( $results );
-		} else {
-			// Get alert details.
-			foreach ( $results as $entry ) {
-				$ip    = esc_html( $entry->ip );
-				$ua    = esc_html( $entry->ua );
-				$roles = maybe_unserialize( $entry->roles );
-
-				if ( is_array( $roles ) ) {
-					$roles = implode( ', ', $roles );
-				} else {
-					$roles = '';
-				}
-
-				if ( 9999 === (int) $entry->alert_id ) {
-					continue;
-				}
-
-				$t = $this->get_alert_details( $entry->id, $entry->id, $entry->alert_id, $entry->site_id, $entry->created_on, $entry->user_id, $roles, $ip, $ua, 'report-' . $report_format);
-				array_push( $data, $t );
-			}
-		}
-
-		if ( empty( $data ) ) {
-			return false;
-		}
-
-		$data_and_filters['data']     = $data;
-		$data_and_filters['filters']  = $filters;
-		$data_and_filters['lastDate'] = $last_date;
-
-		return $data_and_filters;
-	}
-
-	/**
-	 * Create statistics unique IPs report.
-	 *
-	 * @param array $filters - Filters.
-	 *
-	 * @return array
-	 * @throws Freemius_Exception
-	 */
-	private function generate_statistics_unique_ips( $filters ) {
-		$report_args = WSAL_ReportArgs::build_from_alternative_filters( $filters, $this );
-		$results     = $this->plugin->getConnector()->getAdapter( 'Occurrence' )->GetReportGrouped( $report_args );
-
-		return array_values( $results );
 	}
 
 	/**
@@ -1695,23 +1310,32 @@ final class WSAL_AlertManager {
 	/**
 	 * Get alert details.
 	 *
-	 * @param int $entry_id - Entry ID.
-	 * @param int $alert_id - Alert ID.
-	 * @param int $site_id - Site ID.
-	 * @param string $created_on - Alert generation time.
-	 * @param int $user_id - User id.
-	 * @param string|array $roles - User roles.
-	 * @param string $ip - IP address of the user.
-	 * @param string $ua - User agent.
+	 * @param stdClass $entry   Raw entry from the occurrences table.
+	 * @param string   $context Display context.
 	 *
-	 * @return array|false details
+	 * @return array|false Alert details.
 	 * @throws Exception
 	 */
-	private function get_alert_details( $entry_id, $alert_id, $site_id, $created_on, $user_id = null, $roles = null, $ip = '', $ua = '', $context = 'default' ) {
+	public function get_alert_details( $entry, $context = 'default' ) {
+		$entry_id   = $entry->id;
+		$alert_id   = $entry->alert_id;
+		$site_id    = $entry->site_id;
+		$created_on = $entry->created_on;
+		$object     = $entry->object;
+		$event_type = $entry->event_type;
+		$user_id    = $entry->user_id;
+
+		$ip    = esc_html( $entry->ip );
+		$ua    = esc_html( $entry->ua );
+		$roles = maybe_unserialize( $entry->roles );
+		if ( is_string( $roles ) ) {
+			$roles = str_replace( array( '"', '[', ']' ), ' ', $roles );
+		}
+
 		// Must be a new instance every time, otherwise the alert message is not retrieved properly.
 		$occurrence = new WSAL_Models_Occurrence();
 
-		$user_id = ( ! is_numeric( $user_id ) && null !== $user_id ) ? WSAL_Rep_Util_S::swap_login_for_id( $user_id ) : $user_id;
+		$user_id = ( ! is_numeric( $user_id ) && null !== $user_id ) ? WSAL_Utilities_UsersUtils::swap_login_for_id( $user_id ) : $user_id;
 
 		// Get alert details.
 		$code  = $this->GetAlert( $alert_id );
@@ -1723,8 +1347,72 @@ final class WSAL_AlertManager {
 		);
 		$const = $this->plugin->constants->GetConstantBy( 'value', $code, $const );
 
+		$blog_info = WSAL_AlertManager::get_blog_info( $this->plugin, $site_id );
+
+		// Get the alert message - properly.
+		$occurrence->id          = $entry_id;
+		$occurrence->site_id     = $site_id;
+		$occurrence->alert_id    = $alert_id;
+		$occurrence->created_on  = $created_on;
+		$occurrence->client_ip   = $ip;
+		$occurrence->object      = $object;
+		$occurrence->event_type  = $event_type;
+		$occurrence->user_id     = $user_id;
+		$occurrence->user_agent  = $ua;
+		$occurrence->post_id     = $entry->post_id;
+		$occurrence->post_type   = $entry->post_type;
+		$occurrence->post_status = $entry->post_status;
+		$occurrence->SetUserRoles( $roles );
+
+		$event_metadata = $occurrence->GetMetaArray();
+		if ( ! $occurrence->_cachedMessage ) {
+			$occurrence->_cachedMessage = $occurrence->GetAlert()->GetMessage( $event_metadata, null, $entry_id, $context );
+		}
+
+		if ( ! $user_id ) {
+			$username = __( 'System', 'wp-security-audit-log' );
+			$roles    = '';
+		} else {
+			$username = WSAL_Utilities_UsersUtils::GetUsername( $event_metadata );
+		}
+
+		// Meta details.
+		return array(
+			'site_id'    => $site_id,
+			'blog_name'  => $blog_info['name'],
+			'blog_url'   => $blog_info['url'],
+			'alert_id'   => $alert_id,
+			'date'       => WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $created_on ),
+			// We need to keep the timestamp to be able to group entries by dates etc. The "date" field is not suitable
+			// as it is already translated, thus difficult to parse and process.
+			'timestamp'  => $created_on,
+			'code'       => $const->name,
+			// Fill variables in message.
+			'message'    => $occurrence->GetMessage( $event_metadata, $context ),
+			'user_id'    => $user_id,
+			'user_name'  => $username,
+			'user_data'  => $user_id ? $this->get_event_user_data( $username ) : false,
+			'role'       => $roles,
+			'user_ip'    => $ip,
+			'object'     => $this->get_event_objects_data( $object ),
+			'event_type' => $this->get_event_type_data( $event_type ),
+			'user_agent' => $ua,
+		);
+	}
+
+	/**
+	 * Retrieves blog info for given site based on current multisite situation. Optimizes for performance using local
+	 * cache.
+	 *
+	 * @param WpSecurityAuditLog $plugin  WSAL plugin instance.
+	 * @param int                $site_id Site ID.
+	 *
+	 * @return array
+	 * @since 4.4.0
+	 */
+	public static function get_blog_info( $plugin, $site_id ) {
 		// Blog details.
-		if ( $this->plugin->IsMultisite() ) {
+		if ( $plugin->IsMultisite() ) {
 			$blog_info = get_blog_details( $site_id, true );
 			$blog_name = esc_html__( 'Unknown Site', 'wp-security-audit-log' );
 			$blog_url  = '';
@@ -1745,39 +1433,20 @@ final class WSAL_AlertManager {
 			}
 		}
 
-		// Get the alert message - properly.
-		$occurrence->id         = $entry_id;
-		$occurrence->site_id    = $site_id;
-		$occurrence->alert_id   = $alert_id;
-		$occurrence->created_on = $created_on;
-
-		$event_metadata = $occurrence->GetMetaArray();
-		if ( ! $occurrence->_cachedMessage ) {
-			$occurrence->_cachedMessage = $occurrence->GetAlert()->GetMessage( $event_metadata, null, $entry_id, $context );
-		}
-
-		if ( ! $user_id ) {
-			$username = __( 'System', 'wp-security-audit-log' );
-			$roles    = '';
-		} else {
-			$username = WSAL_Utilities_UsersUtils::GetUsername( $event_metadata );
-		}
-
-		// Meta details.
 		return array(
-			'site_id'    => $site_id,
-			'blog_name'  => $blog_name,
-			'blog_url'   => $blog_url,
-			'alert_id'   => $alert_id,
-			'timestamp'  => $created_on,
-			'date'       => WSAL_Utilities_DateTimeFormatter::instance()->getFormattedDateTime( $created_on ),
-			'code'       => $const->name,
-			'message'    => $occurrence->GetMessage( $event_metadata, $context ),
-			'user_name'  => $username,
-			'user_data'  => $user_id ? $this->get_event_user_data( $username ) : false,
-			'role'       => $roles,
-			'user_ip'    => $ip,
-			'user_agent' => $ua,
+			'name' => $blog_name,
+			'url'  => $blog_url,
 		);
+	}
+
+	/**
+	 * Retrieves local cache of WP Users.
+	 *
+	 * @return WP_User[] WordPress users.
+	 *
+	 * @since 4.4.0
+	 */
+	public function get_wp_users(): array {
+		return $this->wp_users;
 	}
 }

@@ -13,7 +13,9 @@ $utm_params = array(
 	'utm_source'   => 'plugin',
 	'utm_medium'   => 'referral',
 	'utm_campaign' => 'WSAL',
+	'utm_content'  => 'sessions',
 );
+
 switch ( $this->hook_suffix ) {
 	case 'wp-activity-log_page_wsal-loginusers':
 		$utm_params['utm_content'] = 'sessions';

@@ -418,10 +418,8 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 					
 					// Additional user info tooltip.
 					$tooltip = WSAL_Utilities_UsersUtils::get_tooltip_user_content( $user );
-
 					$uhtml = '<a class="tooltip" data-tooltip="' . esc_attr( $tooltip ) . '" data-user="' . $user->user_login . '" href="' . $user_edit_link . '" target="_blank">' . esc_html( $display_name ) . '</a>';
-
-
+					
 					$roles = WSAL_Utilities_UsersUtils::get_roles_label( $item->GetUserRoles() );
 				} elseif ( 'Plugin' == $username ) {
 					$uhtml = '<i>' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';
@@ -784,7 +782,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	 */
 	public function query_events( $paged = 0 ) {
 
-		// TO DO: Get rid of OccurrenceQuery and use the Occurence Model.
+		// TO DO: Get rid of OccurrenceQuery and use the Occurrence Model.
 		$query = new WSAL_Models_OccurrenceQuery();
 
 		$bid = (int) $this->query_args->site_id;
@@ -848,6 +846,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 		$query->setOffset( $offset );  // Set query offset.
 		$query->setLimit( $per_page ); // Set number of events per page.
+
 		return array(
 			'total_items' => $total_items,
 			'per_page'    => $per_page,

@@ -42,6 +42,15 @@ abstract class WSAL_Models_ActiveRecord {
 	protected $id = false;
 
 	/**
+	 * This property is used in conjunction with its setter method to force an adapter used by this record. It completely
+	 * bypasses the default way of creating the adapter using its name and a connector returned by function getConnector.
+	 *
+	 * @var WSAL_Adapters_ActiveRecordInterface
+	 * @since 4.4.0
+	 */
+	protected $adapter = null;
+
+	/**
 	 * Adapter Name.
 	 *
 	 * @var null
@@ -53,7 +62,7 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @var boolean
 	 */
-	protected $useDefaultAdapter = false;
+	protected $use_default_adapter = false;
 
 	/**
 	 * Record State.
@@ -129,7 +138,8 @@ abstract class WSAL_Models_ActiveRecord {
 		if ( ! empty( $this->connector ) ) {
 			return $this->connector;
 		}
-		if ( $this->useDefaultAdapter ) {
+
+		if ( $this->use_default_adapter ) {
 			$this->connector = WSAL_Connector_ConnectorFactory::GetDefaultConnector();
 		} else {
 			$this->connector = WSAL_Connector_ConnectorFactory::GetConnector();
@@ -141,12 +151,27 @@ abstract class WSAL_Models_ActiveRecord {
 	 * Gets an adapter for the specified model
 	 * based on the adapter name.
 	 *
-	 * @see WSAL_Connector_ConnectorInterface::getAdapter()
-	 *
 	 * @return WSAL_Adapters_ActiveRecordInterface
 	 */
 	public function getAdapter() {
+		//  use forcefully set adapter if set
+		if ( ! empty( $this->adapter ) ) {
+			return $this->adapter;
+		}
+
+		//  create adapter using the connector returned from getConnector method
 		return $this->getConnector()->getAdapter( $this->adapterName );
+	}
+
+	/**
+	 * Allows the database adapter to be set from the outside. This is useful during data migrations.
+	 *
+	 * @param WSAL_Adapters_ActiveRecordInterface $adapter
+	 *
+	 * @since 4.4.0
+	 */
+	public function setAdapter( $adapter ) {
+		$this->adapter = $adapter;
 	}
 
 	/**
@@ -167,6 +192,37 @@ abstract class WSAL_Models_ActiveRecord {
 	}
 
 	/**
+	 * Casts given value to a correct type based on the type of property (identified by the $key) in the $copy object.
+	 * This is to allow automatic type casting instead of handling each database column individually.
+	 *
+	 * @param object $copy
+	 * @param string $key
+	 * @param mixed $val
+	 *
+	 * @return mixed
+	 * @throws Exception
+	 */
+	protected function cast_to_correct_type( $copy, $key, $val ){
+		switch ( true ) {
+			case is_string( $copy->$key ):
+			case WSAL_Utilities_RequestUtils::is_ip_address( $val ):
+				return (string) $val;
+			case is_array( $copy->$key ):
+			case is_object( $copy->$key ):
+				$json_decoded_val = WSAL_Helpers_DataHelper::JsonDecode( $val );
+				return is_null( $json_decoded_val ) ? $val : $json_decoded_val;
+			case is_int( $copy->$key ):
+				return (int) $val;
+			case is_float( $copy->$key ):
+				return (float) $val;
+			case is_bool( $copy->$key ):
+				return  (bool) $val;
+			default:
+				throw new Exception( 'Unsupported type "' . gettype( $copy->$key ) . '"' );
+		}
+	}
+
+	/**
 	 * Load object data from variable.
 	 *
 	 * @param array|object $data Data array or object.
@@ -177,30 +233,7 @@ abstract class WSAL_Models_ActiveRecord {
 		$copy = new $copy();
 		foreach ( (array) $data as $key => $val ) {
 			if ( isset( $copy->$key ) ) {
-				switch ( true ) {
-					case $this->is_ip_address( $val ):
-						$this->$key = (string) $val;
-						break;
-					case is_array( $copy->$key ):
-					case is_object( $copy->$key ):
-						$json_decoded_val = WSAL_Helpers_DataHelper::JsonDecode( $val );
-						$this->$key = ( null == $json_decoded_val ) ? $val : $json_decoded_val;
-						break;
-					case is_int( $copy->$key ):
-						$this->$key = (int) $val;
-						break;
-					case is_float( $copy->$key ):
-						$this->$key = (float) $val;
-						break;
-					case is_bool( $copy->$key ):
-						$this->$key = (bool) $val;
-						break;
-					case is_string( $copy->$key ):
-						$this->$key = (string) $val;
-						break;
-					default:
-						throw new Exception( 'Unsupported type "' . gettype( $copy->$key ) . '"' );
-				}
+				$this->$key = $this->cast_to_correct_type($copy, $key, $val);
 			}
 		}
 		return $this;
@@ -356,28 +389,5 @@ abstract class WSAL_Models_ActiveRecord {
 	 */
 	protected static function CacheClear() {
 		self::$_cache = array();
-	}
-
-	/**
-	 * Function used in WSAL reporting extension.
-	 *
-	 * @param WSAL_ReportArgs $report_args
-	 *
-	 * @return array Report results.
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::GetReporting()
-	 */
-	public function GetReporting( $report_args ) {
-		return $this->getAdapter()->GetReporting( $report_args );
-	}
-
-	/**
-	 * Check if the float is IPv4 instead.
-	 *
-	 * @see WSAL_Models_ActiveRecord::LoadData()
-	 * @param float $ip_address - Number to check.
-	 * @return bool result validation
-	 */
-	private function is_ip_address( $ip_address ) {
-		return filter_var( $ip_address, FILTER_VALIDATE_IP ) !== false;
 	}
 }

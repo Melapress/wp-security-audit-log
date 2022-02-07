@@ -49,12 +49,13 @@ class WSAL_Utilities_OpCacheUtils {
 	 * @return bool
 	 */
 	public static function is_iis() {
-		$software = strtolower( $_SERVER["SERVER_SOFTWARE"] );
-		if ( false !== strpos( $software, "microsoft-iis" ) ) {
-			return true;
-		} else {
+		if ( ! array_key_exists( 'SERVER_SOFTWARE', $_SERVER ) ) {
 			return false;
 		}
+
+		$software = strtolower( $_SERVER['SERVER_SOFTWARE'] ); // @codingStandardsIgnoreLine
+
+		return ( false !== strpos( $software, 'microsoft-iis' ) );
 	}
 
 	/**
@@ -66,11 +67,8 @@ class WSAL_Utilities_OpCacheUtils {
 		if ( ! function_exists( 'wincache_ucache_get' ) ) {
 			return;
 		}
-		if ( ! wincache_ucache_clear() ) {
-			return false;
-		} else {
-			return true;
-		}
+
+		return wincache_ucache_clear();
 	}
 
 	/**
@@ -82,28 +80,34 @@ class WSAL_Utilities_OpCacheUtils {
 		if ( ! extension_loaded( 'Zend OPcache' ) ) {
 			return;
 		}
+
 		$opcache_status = opcache_get_status();
-		if ( false === $opcache_status["opcache_enabled"] ) {
-			// extension loaded but OPcache not enabled
+		if ( ! is_array( $opcache_status ) || ! array_key_exists( 'opcache_enabled', $opcache_status ) || false === $opcache_status['opcache_enabled'] ) {
+			// Extension loaded but OPcache not enabled.
 			return;
 		}
-		if ( ! opcache_reset() ) {
-			return false;
-		} else {
-			/**
-			 * opcache_reset() is performed, now try to clear the
-			 * file cache.
-			 * Please note: http://stackoverflow.com/a/23587079/1297898
-			 *   "Opcache does not evict invalid items from memory - they
-			 *   stay there until the pool is full at which point the
-			 *   memory is completely cleared"
-			 */
-			foreach ( $opcache_status['scripts'] as $key => $data ) {
-				$dirs[ dirname( $key ) ][ basename( $key ) ] = $data;
-				opcache_invalidate( $data['full_path'], true );
-			}
 
-			return true;
+		if ( ! function_exists( 'opcache_reset' ) || ! opcache_reset() ) {
+			return false;
 		}
+
+		/**
+		 * Function opcache_reset() was executed, now try to clear the
+		 * file cache.
+		 *
+		 * Please note: http://stackoverflow.com/a/23587079/1297898
+		 *   "Opcache does not evict invalid items from memory - they
+		 *   stay there until the pool is full at which point the
+		 *   memory is completely cleared"
+		 */
+		if ( array_key_exists( 'scripts', $opcache_status ) && ! empty( $opcache_status['scripts'] ) ) {
+			if ( function_exists( 'opcache_invalidate' ) ) {
+				foreach ( $opcache_status['scripts'] as $data ) {
+					opcache_invalidate( $data['full_path'], true );
+				}
+			}
+		}
+
+		return true;
 	}
 }

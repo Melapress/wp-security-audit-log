@@ -4,8 +4,8 @@ Plugin URI: https://wpactivitylog.com
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
-Requires at least: 4.4
-Tested up to: 5.8
+Requires at least: 5.0
+Tested up to: 5.9
 Stable tag: 4.4.0
 Requires PHP: 7.0
 
@@ -162,7 +162,7 @@ WP Activity Log can keep also a detailed log of changes that happen on other plu
 * [Why WP Activity Log](https://wpactivitylog.com/why-wp-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 * [WordPress Multisite Features](https://wpactivitylog.com/support/kb/activity-log-multisite-network-features/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 * [The WP Activity Log plugin website](https://wpactivitylog.com/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
-* [Activity logs for MainWP](https://wpactivitylog.com/extensions/mainwp-activity-log/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
+* [The definitive WordPress security guide](hhttps://www.wpwhitesecurity.com/wordpress-security/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 
 #### WP Activity Log in your language!
 We need help translating the plugin and the activity log events. Please visit the [WordPress Translate Project](https://translate.wordpress.org/projects/wp-plugins/wp-security-audit-log/) to translate the plugin. Drop us an email on support@wpwhitesecurity.com to get mentioned in the list of translators below.
@@ -208,43 +208,76 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.3.4 (2022-01-05) =
+= 4.4.0 (2022-02-08) =
 
-Release notes: [WP Activity Log 4.4.0: new activity log reports & plugin improvements](https://wpactivitylog.com/wsal-4-4-0/)
+Release notes: [New Reports engine with more criteria, reports management & more](https://wpactivitylog.com/wsal-440/)
+
+* **IMPORTANT - NEW HELPER PLUGIN**
+	* Third party libraries are now available through a helper plugin. If you are mirroring events or sending SMS messages, you will be prompted to install this helper plugin.
+	
 
 * **New activity log event IDs**
-	* ID 4013 - User has been activated on the multisite network.
-	* ID 4021 - Changed the website URL of a user.
-	* ID 6059 - Changed the Site title.
-
-* **New features**
-	* The new [Activity log for TablePress](https://wpactivitylog.com/extensions/tablepress-activity-log/) extension.	
-	* New UI for the Enable/disable events section, including search functionality.
-	* Added a "See user's activity" for each user in the WordPress' user list view - when clicked the activity log is filtered with the events of that user.
-
+	* ID 6059: Changed the site's title.
+	* ID 4021: Changed the website URL in the user profile.
+	* ID 4013: User has been activated on a multisite network.
+	
+* **New features & functionality**
+	* Reports for WordPress: we developed an all new reporting engine, with more criteria.
+	* Reports management module: see all generated reports, redownload or delete them etc.
+	* Reports white labelling: users can now change the logo and links on the reports. More to come in upcoming updates.
+	* New template for reports with new title page for reports.
+	* Reports settings page: making a number of reports configuration settings available, giving the user more options to work with.
+	* Setting to configure the plugin to "always" send an email for scheduled reports, even when no events match the criteria.
+	* Hooks to allow users to change the columns in reports or ad value from non-default columns. Refer to the [list of hooks in WP Activity Log](https://wpactivitylog.com/support/kb/list-hooks/) for more information.
+	* New naming format for all the reports: [yyyymmdd]-[report_number].[extension].
+	* Specific reports can now be generated in PDF and JSON formats.
+	* New UI for "Enable/Disable event IDs" with search and filtering functionality.
+	* Table with numbers of how many users are logged in with specific roles + filters.
+	* Added the user role next to each user in the list of logged in users.
+	* Removed obsolete code used for advertorial events in the activity log viewer.
+	* New "See user's activity" link for each user in the users' page to see a user's activity with just a click.
+	* New filter that allows user to add metadata to user information popup. Refer to the [List of hooks in WP Activity Log](https://wpactivitylog.com/support/kb/list-hooks/) for more information.
+	* The new [Activity Log for TablePress extension](https://wpactivitylog.com/extensions/tablepress-activity-log/).
+	
 * **Improvements**
-	* An improved database scheme for more efficient storing of the activity logs, and faster reading and writing to db.
-	* Updated the text of some event IDs (fixed typo's, better grammer etc).
-	* Improved a number of user alerts and prompts (mostly related to the helper plugin).
-	* Added an upgrade check to remove "empty" external database connection string.
-	* All plugin settings in the database are now prefixed with wsal_.
-	* Optimized how the sensors managers are loaded - process runs less often and data is cached. 
-	* Added all the correct licensing details (GPL v3) and the full license text (license.txt).
-	* Removed obsolete code from the [Website File Changes Monitor plugin](https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/) integration. 
-	* Applied a number of minor and text alignment UI improvements to the mirroring settings.
-	* Removed "site filters" in the Reports UI on single site installs (only required on multisite network).
-	* Optimized the auto-loading of plugin settings (only the real neccessary ones are now auto loaded for better performance).
-	* Removed a few legacy code snippets that are no longer required.
-	* Database tables are created using the default WordPress collate (to avoid conflicts and database errors).
-	* Long paths and filenames are truncated in the activity log events by default - optionally users can expand and view the full text.
-	* User info popup (triggered by hover over) is now filterable - users can use a filter to add more information to be displayed in the popup.
+	* Changed the database schema for improved storing of data, and faster writing and reading. After the upgrade the plugin will launch the upgrade process which might take some time to complete, depending on the amount of data in the activity log.
+	* Activity log events from local database can be merged into an extising activity log in an external database.
+	* Improved the coverage of changes done to a website via REST API.
+	* Improved the format of the statistics reports. More statistics reports will be available in the upcoming version update.
+	* Date and time are now two separate objects in CSV reports.
+	* Updated the search module to read from new database schema.
+	* All plugin settings now have the wsal_ prefix automatically added to them.
+	* Added the URL metadata in CSV reports.
+	* Rewritten some of the settings help text in the plugin to better explain the settings.
+	* Updated the notifications module to read from new database schema.
+	* Updated the integrations module for better backward compatability with older versions of WordPress.
+	* Removed obsolete settings & code of the old file integrity scanner (now part of [Website File Changes Monitor plugin](https://www.wpwhitesecurity.com/wordpress-plugins/website-file-changes-monitor/)).
+	* Removed obsolete reference to the old file changes scanner in the daily summary email.
+	* Made a number of JS strings available for translation.
+	* Removed a number of plugin settings from autoload for improved performance.
+	* Improved the plugin's metadata and added the licensing information.
+	* Long URL strings in activity log events are now automatically truncated. Full URL can be seen with just a click.
+	* Removed forced database table collation: plugin now uses the default WordPress table collation.
+	* Updated the "Help & Contact Us" page; improved text and added more relevant information.
+	* Improved several UI sections in the Third Party Connections module.
+	* Improved the check for writing activity log to external database; now it is less restrictive and faster.
 	
 * **Bug fixes**
-	* Fixed: SQL error returned when trying to delete activity log data with specific severity or object via the Logs Management page.
-	* Fixed: Function was running on "add_filter" instead of "add_action" - ([support ticket](https://wordpress.org/support/topic/issue-with-hook-name-and-param-callback/#post-15107211)).
-	* Fixed: An error is reporting on the login screen on failed login in certain edge cases.
-	* Fixed: Bug in MainWP reporting API endpoint failed to create alert data array to be sent to MainWP.
-	* Fixed: Plugin reporting the wrong object for event ID 5029.
-	* Fixed: Auto complete was returning everything and not related values in the logs management page.
-
+	* Fixed: Database error when trying to log in with a non-existing user and a login notification is enabled.
+	* Fixed: In some edge cases the plugin was creating an empty "external database" connection string.
+	* Fixed a number of typos in the text of activity log events.
+	* Fixed: Auto complete in the Delete activity log data section was not returning the correct list of objects.
+	* Fixed: Wrong object reported for event ID 5029.
+	* Fixed: Event ID 4000 not reported when front-end sensor is disabled.
+	* Fixed: "Unknown connection type" reported back setting up a third party connection on specific versions of WordPress.
+	* Fixed: Event ID 6320 (added / removed connection) reported instead of event ID 6321 (modified connection).
+	* Plugin settings and view privileges no longer imported when using the configuration import tools. User is not prompted to choose whether to import them or not.
+	* Fixed: Function that was running on "add_filter" instead of "add_action" - [Support ticket](https://wordpress.org/support/topic/issue-with-hook-name-and-param-callback/).
+	* Fixed: Deletion of events from the activity log based on severity not working.
+	* Fixed: Plugin fails to delete specific events from activity log with an error when using the Logs management module.
+	* Old reports are now properly and automatically deleted from the /uploads/ directory.
+	* Fixed: PHP warning about OPCacheUtils.php in specific setups.
+	* Fixed: Edge case in which other plugins couldn't be installed or updated when WP Activity Log was activated.
+	* Automatic termination of idle sessions was not triggering properly on some setups.
+	
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.

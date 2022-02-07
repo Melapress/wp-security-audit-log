@@ -10,9 +10,9 @@ if ( ! class_exists( 'WSAL_GravityFormsExtension' ) ) {
 					'addon_for'          => 'gravityforms',
 					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'gravityforms.png',
-					'plugin_slug'        => 'activity-log-gravity-forms/activity-log-gravity-forms.php',
+					'plugin_slug'        => $this->get_plugin_filename(),
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/activity-log-gravity-forms.latest-stable.zip',
-					'event_tab_id'       => '#tab-gravity-forms',
+					'event_tab_id'       => '#cat-gravity-forms',
 					'plugin_description' => __( 'Keep a record of when someone adds, modifies or deletes forms, entries and more in the Gravity Forms plugin.', 'wp-security-audit-log' ),
 				)
 			);
@@ -43,6 +43,10 @@ if ( ! class_exists( 'WSAL_GravityFormsExtension' ) ) {
 
 		public function get_color() {
 			return '#F15A29';
+		}
+
+		public function get_plugin_filename() {
+			return 'activity-log-gravity-forms/activity-log-gravity-forms.php';
 		}
 	}
 }

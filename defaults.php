@@ -1912,6 +1912,22 @@ function wsaldefaults_wsal_init() {
 						'user',
 						'modified'
 					),
+					array(
+						4021,
+						WSAL_MEDIUM,
+						__( 'User\'s website URL was modified', 'wp-security-audit-log' ),
+						__( 'Changed the website URL of the user %TargetUsername% to %new_url%.', 'wp-security-audit-log' ),
+						[
+							__( 'Role', 'wp-security-audit-log' )                  => '%Roles%',
+							__( 'First name', 'wp-security-audit-log' )            => '%FirstName%',
+							__( 'Last name', 'wp-security-audit-log' )             => '%LastName%',
+							__( 'Previous website URL',   'wp-security-audit-log' )             => '%old_url%',
+
+						],
+						wsaldefaults_build_links( [ 'EditUserLink' ] ),
+						'user',
+						'modified'
+					),
 
 					array(
 						4025,
@@ -2056,6 +2072,32 @@ function wsaldefaults_wsal_init() {
 						'user',
 						'created'
 					),
+					array(
+						4013,
+						WSAL_HIGH,
+						__( 'Network user has been activated', 'wp-security-audit-log' ),
+						__( 'User %NewUserData->Username% has been activated.', 'wp-security-audit-log' ),
+						[
+							__( 'Role', 'wp-security-audit-log' )       => '%NewUserData->Roles%',
+							__( 'First name', 'wp-security-audit-log' ) => '%NewUserData->FirstName%',
+							__( 'Last name', 'wp-security-audit-log' )  => '%NewUserData->LastName%'
+						],
+						wsaldefaults_build_links( [ 'EditUserLink' ] ),
+						'user',
+						'activated'
+					),
+					array(
+						4024,
+						WSAL_LOW,
+						__( 'Network user has signed-up', 'wp-security-audit-log' ),
+						__( 'User with the email address %email_address% has signed up to the network.', 'wp-security-audit-log' ),
+						[
+							__( 'Username', 'wp-security-audit-log' )  => '%username%'
+						],
+						[],
+						'user',
+						'created'
+					),
 				),
 			),
 
@@ -2166,7 +2208,7 @@ function wsaldefaults_wsal_init() {
 							__( 'Install location', 'wp-security-audit-log' )     => '%install_directory%',
 						],
 						[],
-						'wp-activity-log',
+						'plugin',
 						'enabled'
 					),
 
@@ -2179,7 +2221,7 @@ function wsaldefaults_wsal_init() {
 							__( 'Install location', 'wp-security-audit-log' )     => '%install_directory%',
 						],
 						[],
-						'wp-activity-log',
+						'theme',
 						'enabled'
 					),
 					
@@ -2918,7 +2960,7 @@ function wsaldefaults_wsal_init() {
 						6017,
 						WSAL_INFORMATIONAL,
 						__( 'Modified the list of keywords for comments moderation', 'wp-security-audit-log' ),
-						__( 'Modified the list of keywords for comments medoration in WordPress.', 'wp-security-audit-log' ),
+						__( 'Modified the list of keywords for comments moderation in WordPress.', 'wp-security-audit-log' ),
 						[],
 						[],
 						'system-setting',
@@ -3050,6 +3092,19 @@ function wsaldefaults_wsal_init() {
 						WSAL_HIGH,
 						__( 'Option Site Language setting changed', 'wp-security-audit-log' ),
 						__( 'Changed the <strong>Site Language</strong> to %new_value%.', 'wp-security-audit-log' ),
+						[
+							__( 'Previous setting', 'wp-security-audit-log' ) => '%previous_value%'
+						],
+						[],
+						'system-setting',
+						'modified'
+					),
+
+					array(
+						6059,
+						WSAL_HIGH,
+						__( 'Option Site Title changed', 'wp-security-audit-log' ),
+						__( 'Changed the <strong>Site Title</strong> to %new_value%.', 'wp-security-audit-log' ),
 						[
 							__( 'Previous setting', 'wp-security-audit-log' ) => '%previous_value%'
 						],

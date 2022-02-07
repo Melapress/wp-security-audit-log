@@ -182,7 +182,7 @@ final class WSAL_Alert {
 
 		$end_of_line = $formatter->get_end_of_line();
 
-		//  process metadata and links introduced as part of alert definition in version 4.2.1
+		// Process metadata and links introduced as part of alert definition in version 4.2.1.
 		if ( $formatter->supports_metadata() ) {
 			$metadata_result = $this->get_formatted_metadata( $formatter, $meta_data, $occurrence_id );
 			if ( ! empty( $metadata_result ) ) {
@@ -210,13 +210,13 @@ final class WSAL_Alert {
 	 * Retrieves a value for a particular meta variable expression.
 	 *
 	 * @param string $expr Expression, eg: User->Name looks for a Name property for meta named User.
-	 * @param array $meta_data (Optional) Meta data relevant to expression.
+	 * @param array  $meta_data (Optional) Meta data relevant to expression.
 	 *
 	 * @return mixed The value nearest to the expression.
 	 */
 	protected function GetMetaExprValue( $expr, $meta_data = array() ) {
 		$expr = preg_replace( '/%/', '', $expr );
-		if ( 'IPAddress' == $expr ) {
+		if ( 'IPAddress' === $expr ) {
 			if ( array_key_exists( 'IPAddress', $meta_data ) ) {
 				return implode( ', ', $meta_data['IPAddress'] );
 			}
@@ -232,16 +232,18 @@ final class WSAL_Alert {
 			if ( is_scalar( $meta ) || is_null( $meta ) ) {
 				return $meta; // This isn't 100% correct.
 			}
-			$meta = is_array( $meta ) ? $meta[ $part ] : ( isset( $meta->$part ) ? $meta->$part : 'NULL' );
+			$meta = is_array( $meta ) && array_key_exists( $part, $meta ) ? $meta[ $part ] : ( isset( $meta->$part ) ? $meta->$part : 'NULL' );
 		}
 
 		return is_scalar( $meta ) ? (string) $meta : var_export( $meta, true );
 	}
 
 	/**
-	 * @param WSAL_AlertFormatter $formatter
-	 * @param array $meta_data
-	 * @param int $occurrence_id
+	 * Retrieves formatted meta data item (label and data).
+	 *
+	 * @param WSAL_AlertFormatter $formatter Alert formatter.
+	 * @param array               $meta_data Meta data.
+	 * @param int                 $occurrence_id Occurrence ID.
 	 *
 	 * @return string
 	 * @throws Freemius_Exception
@@ -252,7 +254,7 @@ final class WSAL_Alert {
 		$metadata_as_array = $this->get_metadata_as_array( $formatter, $meta_data, $occurrence_id );
 		if ( ! empty( $metadata_as_array ) ) {
 
-			$meta_result_parts = [];
+			$meta_result_parts = array();
 			foreach ( $metadata_as_array as $meta_label => $meta_expression ) {
 				if ( ! empty( $meta_expression ) ) {
 					array_push( $meta_result_parts, $meta_label . ': ' . $formatter->wrap_in_hightlight_markup( $meta_expression ) );
@@ -267,25 +269,28 @@ final class WSAL_Alert {
 	}
 
 	/**
-	 * @param WSAL_AlertFormatter $formatter
-	 * @param array $meta_data
-	 * @param int $occurrence_id
+	 * Retrieves metadata as an associative array.
+	 *
+	 * @param WSAL_AlertFormatter $formatter Alert formatter.
+	 * @param array               $meta_data Meta data.
+	 * @param int                 $occurrence_id Occurrence ID.
 	 *
 	 * @return array
+	 * @throws Freemius_Exception
 	 * @since 4.2.1
 	 */
 	public function get_metadata_as_array( $formatter, $meta_data, $occurrence_id ) {
-		$result = [];
+		$result = array();
 		if ( ! empty( $this->metadata ) ) {
 			foreach ( $this->metadata as $meta_label => $meta_token ) {
 				if ( strlen( $meta_token ) === 0 ) {
 					continue;
 				}
 
-				//  pure alert meta lookup based on meta token
+				// Pure alert meta lookup based on meta token.
 				$meta_expression = $this->GetMetaExprValue( $meta_token, $meta_data );
 
-				//  additional alert meta processing - handles derived or decorated alert data
+				// Additional alert meta processing - handles derived or decorated alert data.
 				$meta_expression = $formatter->format_meta_expression( $meta_token, $meta_expression, $occurrence_id );
 
 				if ( ! empty( $meta_expression ) ) {

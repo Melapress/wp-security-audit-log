@@ -10,10 +10,10 @@ if ( ! class_exists( 'WSAL_WPFormsExtension' ) ) {
 					'addon_for'          => 'wpforms',
 					'title'              => $this->get_plugin_name(),
 					'image_filename'     => 'wpforms.png',
-					'plugin_slug'        => 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php',
+					'plugin_slug'        => $this->get_plugin_filename(),
 					'plugin_basename'    => 'wsal-wpforms.php',
 					'plugin_url'         => 'https://downloads.wordpress.org/plugin/wp-security-audit-log-add-on-for-wpforms.latest-stable.zip',
-					'event_tab_id'       => '#tab-wpforms',
+					'event_tab_id'       => '#cat-wpforms',
 					'plugin_description' => 'Keep a record of when someone adds, modifies or deletes forms, entries and more in the WPForms plugin.',
 				)
 			);
@@ -48,6 +48,10 @@ if ( ! class_exists( 'WSAL_WPFormsExtension' ) ) {
 
 		public function get_color() {
 			return '#e27730';
+		}
+
+		public function get_plugin_filename() {
+			return 'wp-security-audit-log-add-on-for-wpforms/wsal-wpforms.php';
 		}
 	}
 }

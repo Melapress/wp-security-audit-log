@@ -202,7 +202,7 @@ class WSAL_Settings {
 	 * @param boolean $newvalue - True if enabled.
 	 */
 	public function set_admin_bar_notif( $newvalue ) {
-		$this->_plugin->SetGlobalBooleanSetting( 'disable-admin-bar-notif', ! $newvalue );
+		$this->_plugin->SetGlobalBooleanSetting( 'disable-admin-bar-notif', ! $newvalue, true );
 	}
 
 	/**
@@ -224,7 +224,7 @@ class WSAL_Settings {
 	 * @param string $newvalue - New option value.
 	 */
 	public function set_admin_bar_notif_updates( $newvalue ) {
-		$this->_plugin->SetGlobalSetting( 'admin-bar-notif-updates', $newvalue );
+		$this->_plugin->SetGlobalSetting( 'admin-bar-notif-updates', $newvalue, true );
 	}
 
 	/**
@@ -484,6 +484,11 @@ class WSAL_Settings {
 		return $this->_plugin->GetGlobalBooleanSetting( 'delete-data' );
 	}
 
+	/**
+	 * Sets the plugin setting that allows data deletion on plugin uninstall.
+	 *
+	 * @param mixed $enabled
+	 */
 	public function SetDeleteData( $enabled ) {
 		$this->_plugin->SetGlobalBooleanSetting( 'delete-data', $enabled );
 	}
@@ -528,7 +533,7 @@ class WSAL_Settings {
 
 
 		$this->_viewers = $users_or_roles;
-		$this->_plugin->SetGlobalSetting( 'plugin-viewers', implode( ',', $this->_viewers ) );
+		$this->_plugin->SetGlobalSetting( 'plugin-viewers', implode( ',', $this->_viewers ), true );
 	}
 
 	/**
@@ -558,7 +563,7 @@ class WSAL_Settings {
 			$this->_plugin->alerts->Trigger( 6049, $alert_data );
 		}
 
-		$this->_plugin->SetGlobalSetting( 'restrict-plugin-settings', $setting );
+		$this->_plugin->SetGlobalSetting( 'restrict-plugin-settings', $setting, true );
 	}
 
 	/**
@@ -586,7 +591,7 @@ class WSAL_Settings {
 	 * @since 4.1.3
 	 */
 	public function set_restrict_log_viewer( $setting ) {
-		$this->_plugin->SetGlobalSetting( 'restrict-log-viewer', $setting );
+		$this->_plugin->SetGlobalSetting( 'restrict-log-viewer', $setting, true );
 	}
 
 	public function SetViewPerPage( $newvalue ) {
@@ -1471,10 +1476,11 @@ class WSAL_Settings {
 	/**
 	 * Get the log limit for failed login attempts.
 	 *
+	 * @return int
 	 * @since  2.6.3
 	 */
 	public function get_failed_login_limit() {
-		return $this->_plugin->GetGlobalSetting( 'log-failed-login-limit', 10 );
+		return intval($this->_plugin->GetGlobalSetting( 'log-failed-login-limit', 10 ));
 	}
 
 	/**
@@ -1494,10 +1500,11 @@ class WSAL_Settings {
 	/**
 	 * Get the log limit for failed login attempts for visitor.
 	 *
+	 * @return int
 	 * @since  2.6.3
 	 */
 	public function get_visitor_failed_login_limit() {
-		return $this->_plugin->GetGlobalSetting( 'log-visitor-failed-login-limit', 10 );
+		return intval( $this->_plugin->GetGlobalSetting( 'log-visitor-failed-login-limit', 10 ) );
 	}
 
 
@@ -1592,8 +1599,8 @@ class WSAL_Settings {
 		) {
 			// Check if freemius state is anonymous.
 			if ( ! wsal_freemius()->is_premium() && 'anonymous' === $this->_plugin->GetGlobalSetting( 'freemius_state', 'anonymous' ) ) {
-				// Update freemius state to skipped.
-				$this->_plugin->SetGlobalSetting( 'wsal_freemius_state', 'skipped' );
+				// Update Freemius state to skipped.
+				$this->_plugin->SetGlobalSetting( 'wsal_freemius_state', 'skipped', true );
 
 				if ( ! $this->_plugin->IsMultisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
@@ -1613,7 +1620,7 @@ class WSAL_Settings {
 			$this->SetIncognito( true ); // Incognito mode to hide WSAL on plugins page.
 			$this->set_restrict_log_viewer( 'only_me' );
 			$this->set_restrict_plugin_setting( 'only_me' );
-			// current user with fallback to default admin (in case this is triggered using WP CLI or something similar)
+			// Current user with fallback to default admin (in case this is triggered using WP CLI or something similar).
 			$only_me_user_id = is_user_logged_in() ? get_current_user_id() : 1;
 			$this->set_only_me_user_id( $only_me_user_id );
 			$this->_plugin->SetGlobalBooleanSetting( 'mwp-child-stealth-mode', true ); // Save stealth mode option.
@@ -1759,7 +1766,7 @@ class WSAL_Settings {
 	 * @return boolean
 	 */
 	public function is_infinite_scroll() {
-		return 'infinite-scroll' === $this->get_events_type_nav() ? true : false;
+		return 'infinite-scroll' === $this->get_events_type_nav();
 	}
 
 	/**
@@ -1783,7 +1790,6 @@ class WSAL_Settings {
 	 * @since 3.3.1.1
 	 *
 	 * @param string $nav_type - Navigation type.
-	 * @return string
 	 */
 	public function set_events_type_nav( $nav_type ) {
 		$this->_plugin->SetGlobalSetting( 'events-nav-type', $nav_type );
@@ -1796,8 +1802,7 @@ class WSAL_Settings {
 	 */
 	public function get_plugin_settings() {
 		global $wpdb;
-		$plugin_options = $wpdb->get_results( "SELECT * FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" );
-		return $plugin_options;
+		return $wpdb->get_results( "SELECT * FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" );
 	}
 
 	/**
@@ -1996,9 +2001,7 @@ class WSAL_Settings {
 		);
 
 		// Get the option.
-		$value = \WSAL\Helpers\Options::get_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $default );
-
-		return $value;
+		return \WSAL\Helpers\Options::get_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $default );
 	}
 
 	/**
@@ -2008,17 +2011,17 @@ class WSAL_Settings {
 	 * @return bool
 	 */
 	public static function set_frontend_events( $value = array() ) {
-		return \WSAL\Helpers\Options::set_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $value );
+		return \WSAL\Helpers\Options::set_option_value_ignore_prefix( self::FRONT_END_EVENTS_OPTION_NAME, $value, true );
 	}
 
 	/**
 	 * Stores the ID of user who restricted the plugin settings access to "only me".
 	 *
-	 * @param int $user_id
+	 * @param int $user_id User ID.
 	 * @since 4.1.3
 	 */
 	public function set_only_me_user_id( $user_id ) {
-		$this->_plugin->SetGlobalSetting( 'only-me-user-id', $user_id );
+		$this->_plugin->SetGlobalSetting( 'only-me-user-id', $user_id, true );
 	}
 
 	/**
@@ -2066,18 +2069,18 @@ class WSAL_Settings {
 	}
 
 	public function determine_added_and_removed_items( $old_value, $value ) {
-		$old_value = ( ! is_array( $old_value ) ) ? explode( ',', $old_value ) : $old_value;
-		$value =  ( ! is_array( $value ) ) ? explode( ',', $value ) : $value;
-		$return = [];
-		$return[ 'removed' ] = array_filter( array_diff( $old_value, $value ) );
-		$return[ 'added' ]   = array_filter( array_diff( $value, $old_value ) );
+		$old_value         = ( ! is_array( $old_value ) ) ? explode( ',', $old_value ) : $old_value;
+		$value             = ( ! is_array( $value ) ) ? explode( ',', $value ) : $value;
+		$return            = array();
+		$return['removed'] = array_filter( array_diff( $old_value, $value ) );
+		$return['added']   = array_filter( array_diff( $value, $old_value ) );
 
 		return $return;
 	}
 
 	public function tidy_blank_values( $value ) {
 		return ( empty( $value ) ) ? __( 'None provided', 'wp-security-audit-log' ) : $value;
-  }
+	}
 
 	/**
 	 * Retrieves current database version.
@@ -2096,6 +2099,7 @@ class WSAL_Settings {
 	 * @since 4.3.2
 	 */
 	public function set_database_version( $version ) {
-		$this->_plugin->SetGlobalSetting( 'db_version', $version );
+		$this->_plugin->SetGlobalSetting( 'db_version', $version, true );
 	}
+
 }
