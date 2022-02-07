@@ -20,31 +20,30 @@ class WSAL_Upgrade_43000_to_44400 {
 	/**
 	 * Constructor.
 	 *
-	 * @param WpSecurityAuditLog $plugin
+	 * @param WpSecurityAuditLog $plugin Plugin instance.
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->plugin = $plugin;
 	}
-
 
 	/**
 	 * Runs the upgrade process.
 	 */
 	public function run() {
 
-		//  remove some forgotten WFCM settings from the options table
+		// Remove some forgotten WFCM settings from the options table.
 		$this->remove_wfcm_leftover_settings();
 
-		//  change occurrence table in local database
+		// Change occurrence table in local database.
 		$this->upgrade_occurrence_table( 'local' );
 
-		//  ...as well as in external and/or archive database
+		// ...as well as in external and/or archive database
 		if ( ! is_null( $this->plugin->external_db_util ) ) {
 
-			//  delete invalid external and archive connects leftover from legacy versions
+			// Delete invalid external and archive connects leftover from legacy versions.
 			$this->delete_invalid_active_connections();
 
-			foreach ( [ 'archive-connection', 'adapter-connection' ] as $connection_option_name ) {
+			foreach ( array( 'archive-connection', 'adapter-connection' ) as $connection_option_name ) {
 				$connection_name = $this->plugin->GetGlobalSetting( $connection_option_name, null );
 				if ( ! is_null( $connection_name ) ) {
 					$db_connection = $this->plugin->external_db_util->get_connection( $connection_name );
@@ -56,7 +55,7 @@ class WSAL_Upgrade_43000_to_44400 {
 		}
 
 		if ( ! WSAL_Extension_Manager::is_messaging_available() || ! WSAL_Extension_Manager::is_mirroring_available() ) {
-			//  check if SMS notifications or any external mirrors are setup + force plugin to show a notice
+			// Check if SMS notifications or any external mirrors are setup + force plugin to show a notice.
 			$mirrors_in_use = false;
 			if ( ! is_null( $this->plugin->external_db_util ) ) {
 				$mirrors        = $this->plugin->external_db_util->get_all_mirrors();
@@ -89,8 +88,8 @@ class WSAL_Upgrade_43000_to_44400 {
 	 * Removes a bunch of legacy WFCM extension related settings.
 	 */
 	private function remove_wfcm_leftover_settings() {
-		//  remove all settings related to WFCM plugin
-		$not_found_page_related_settings = [
+		// Remove all settings related to WFCM plugin.
+		$not_found_page_related_settings = array(
 			'wsal_scan-in-progress',
 			'wsal_last-scanned',
 			'wsal_is_initial_scan_0',
@@ -101,8 +100,8 @@ class WSAL_Upgrade_43000_to_44400 {
 			'wsal_is_initial_scan_5',
 			'wsal_is_initial_scan_6',
 			'wsal_last_scan_start',
-			'wsal_scanned_dirs'
-		];
+			'wsal_scanned_dirs',
+		);
 		foreach ( $not_found_page_related_settings as $setting_name ) {
 			$this->plugin->DeleteGlobalSetting( $setting_name );
 		}
@@ -122,23 +121,28 @@ class WSAL_Upgrade_43000_to_44400 {
 		/** @var WSAL_Adapters_MySQL_Occurrence $occurrence_adapter */
 		$occurrence_adapter = $connector->getAdapter( 'Occurrence' );
 
+		// Skip the upgrade it the table does not exist for some reason.
+		if ( ! $connector->isInstalled() ) {
+			return;
+		}
+
 		$table_name = $occurrence_adapter->GetTable();
 		$connector->query( $this->get_occurrence_table_upgrade_query( $table_name ) );
 
-		//  check if there are any events to process
+		// Check if there are any events to process.
 		if ( $occurrence_adapter->Count() > 0 ) {
-			//  create a background job to migrate the metadata
+			// Create a background job to migrate the metadata.
 			$job_info = array(
-				'start_time'             => current_time( 'timestamp' ),
+				'start_time'             => current_time( 'timestamp' ), // phpcs:ignore
 				'processed_events_count' => 0,
 				'batch_size'             => 50,
-				'connection'             => is_array( $connection ) ? $connection['name'] : $connection
+				'connection'             => is_array( $connection ) ? $connection['name'] : $connection,
 			);
 
-			//  store the initial info to the db
+			// Store the initial info to the db.
 			WSAL_Upgrade_MetadataMigration::store_migration_info( $job_info );
 
-			//  create and dispatch the background process itself
+			// Create and dispatch the background process itself.
 			$bg_process = new WSAL_Upgrade_MetadataMigration();
 			$bg_process->push_to_queue( $job_info );
 			$bg_process->save();
@@ -155,20 +159,20 @@ class WSAL_Upgrade_43000_to_44400 {
 	 */
 	private function get_occurrence_table_upgrade_query( $table_name ) {
 		return "ALTER TABLE {$table_name}"
-		       . " DROP COLUMN is_read, "
-		       . " DROP COLUMN is_migrated, "
-		       . " ADD client_ip VARCHAR(255) NOT NULL DEFAULT '',"
-		       . " ADD severity BIGINT NOT NULL DEFAULT 0,"
-		       . " ADD object VARCHAR(255) NOT NULL DEFAULT '',"
-		       . " ADD event_type VARCHAR(255) NOT NULL DEFAULT '',"
-		       . " ADD user_agent VARCHAR(255) NOT NULL DEFAULT '',"
-		       . " ADD user_roles VARCHAR(255) NOT NULL DEFAULT '',"
-		       . " ADD username VARCHAR(255) NULL,"
-		       . " ADD user_id BIGINT NULL ,"
-		       . " ADD session_id VARCHAR(255) NOT NULL DEFAULT '',"
-		       . " ADD post_status VARCHAR(255) NOT NULL DEFAULT '',"
-		       . " ADD post_type VARCHAR(255) NOT NULL DEFAULT '',"
-		       . " ADD post_id BIGINT NOT NULL DEFAULT 0;";
+			   . ' DROP COLUMN is_read, '
+			   . ' DROP COLUMN is_migrated, '
+			   . " ADD client_ip VARCHAR(255) NOT NULL DEFAULT '',"
+			   . ' ADD severity BIGINT NOT NULL DEFAULT 0,'
+			   . " ADD object VARCHAR(255) NOT NULL DEFAULT '',"
+			   . " ADD event_type VARCHAR(255) NOT NULL DEFAULT '',"
+			   . " ADD user_agent VARCHAR(255) NOT NULL DEFAULT '',"
+			   . " ADD user_roles VARCHAR(255) NOT NULL DEFAULT '',"
+			   . ' ADD username VARCHAR(255) NULL,'
+			   . ' ADD user_id BIGINT NULL ,'
+			   . " ADD session_id VARCHAR(255) NOT NULL DEFAULT '',"
+			   . " ADD post_status VARCHAR(255) NOT NULL DEFAULT '',"
+			   . " ADD post_type VARCHAR(255) NOT NULL DEFAULT '',"
+			   . ' ADD post_id BIGINT NOT NULL DEFAULT 0;';
 	}
 
 	/**
@@ -176,21 +180,21 @@ class WSAL_Upgrade_43000_to_44400 {
 	 * leftovers from a bug in one of older plugin versions.
 	 */
 	private function delete_invalid_active_connections() {
-		foreach ( [ 'archive-connection', 'adapter-connection' ] as $connection_option_name ) {
+		foreach ( array( 'archive-connection', 'adapter-connection' ) as $connection_option_name ) {
 			$connection_name = $this->plugin->GetGlobalSetting( $connection_option_name, null );
 			if ( ! is_null( $connection_name ) ) {
 				$db_connection = $this->plugin->external_db_util->get_connection( $connection_name );
 				if ( is_array( $db_connection ) && empty( $db_connection['hostname'] ) && empty( $db_connection['db_name'] ) ) {
 					if ( 'adapter-connection' === $connection_option_name ) {
 						$this->plugin->external_db_util->RemoveExternalStorageConfig();
-					} else if ( 'archive-connection' === $connection_option_name ) {
+					} elseif ( 'archive-connection' === $connection_option_name ) {
 						$this->plugin->external_db_util->RemoveArchivingConfig();
 						$this->plugin->external_db_util->DeleteGlobalSetting( 'archiving-e' );
 						$this->plugin->external_db_util->DeleteGlobalSetting( 'archiving-last-created' );
 					}
 
-					//  function WSAL_Ext_Common::delete_connection is not used on purpose because it would try to
-					//  trigger an event which would result in error while doing this clean-up
+					// Function WSAL_Ext_Common::delete_connection is not used on purpose because it would try to
+					// trigger an event which would result in error while doing this clean-up.
 					$this->plugin->external_db_util->DeleteGlobalSetting( WSAL_CONN_PREFIX . $connection_name );
 				}
 			}
@@ -213,20 +217,22 @@ class WSAL_Upgrade_43000_to_44400 {
 			'wsal_setup-modal-dismissed',
 			'wsal_version',
 			'wsal_freemius_state',
-			'wsal_only-me-user-id'
+			'wsal_only-me-user-id',
 		);
 
+		// phpcs:disable
 		global $wpdb;
 		$plugin_options = $wpdb->get_results(
-			"SELECT option_name, option_value "
+			'SELECT option_name, option_value '
 			. " FROM $wpdb->options "
 			. " WHERE option_name LIKE '" . WpSecurityAuditLog::OPTIONS_PREFIX . "%';",
 			ARRAY_A
 		);
+		// phpcs:enable
 
 		if ( ! empty( $plugin_options ) ) {
 			foreach ( $plugin_options as $option ) {
-				if ( ! in_array( $option['option_name'], $settings_to_leave_on_autoload ) ) {
+				if ( ! in_array( $option['option_name'], $settings_to_leave_on_autoload ) ) { // phpcs:ignore
 					$value = maybe_unserialize( $option['option_value'] );
 					$this->plugin->SetGlobalSetting( $option['option_name'], $value, false );
 				}

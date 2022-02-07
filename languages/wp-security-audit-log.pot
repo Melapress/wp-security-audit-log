@@ -3343,35 +3343,35 @@ msgstr ""
 msgid "This type of activity / change is no longer monitored. You can create your own custom event IDs to keep a log of such change. Read more about custom events %1$shere%2$s."
 msgstr ""
 
-#: classes/Sensors/Content.php:734
+#: classes/Sensors/Content.php:755
 msgid "Default template"
 msgstr ""
 
-#: classes/Sensors/Content.php:735, extensions/external-db/classes/ExternalStorageTab.php:256
+#: classes/Sensors/Content.php:756, extensions/external-db/classes/ExternalStorageTab.php:256
 msgid "Default"
 msgstr ""
 
-#: classes/Sensors/Content.php:777
+#: classes/Sensors/Content.php:797
 msgid "No previous image"
 msgstr ""
 
-#: classes/Sensors/Content.php:778
+#: classes/Sensors/Content.php:798
 msgid "No image"
 msgstr ""
 
-#: classes/Sensors/Content.php:1136, classes/Sensors/Content.php:1144
+#: classes/Sensors/Content.php:1156, classes/Sensors/Content.php:1164
 msgid "Public"
 msgstr ""
 
-#: classes/Sensors/Content.php:1134, classes/Sensors/Content.php:1142
+#: classes/Sensors/Content.php:1154, classes/Sensors/Content.php:1162
 msgid "Private"
 msgstr ""
 
-#: classes/Sensors/Content.php:1132, classes/Sensors/Content.php:1140
+#: classes/Sensors/Content.php:1152, classes/Sensors/Content.php:1160
 msgid "Password Protected"
 msgstr ""
 
-#: classes/Sensors/Content.php:1307
+#: classes/Sensors/Content.php:1327
 msgid "no tags"
 msgstr ""
 
