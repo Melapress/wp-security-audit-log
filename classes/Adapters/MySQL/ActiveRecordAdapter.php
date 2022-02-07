@@ -502,8 +502,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
 		if ( ! empty( $results ) ) {
 			$last_item = end( $results );
-			if ( property_exists( $last_item, 'created_on' ) ) {
+			if ( is_object( $last_item ) && property_exists( $last_item, 'created_on' ) ) {
 				$results['lastDate'] = $last_item->created_on;
+			} elseif ( is_array( $last_item ) && array_key_exists( 'created_on', $last_item ) ) {
+				$results['lastDate'] = $last_item['created_on'];
 			}
 		}
 

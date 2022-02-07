@@ -100,7 +100,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_action( 'create_post_tag', array( $this, 'event_tag_creation' ), 10, 1 );
 		add_action( 'pre_delete_term', array( $this, 'check_taxonomy_term_deletion' ), 10, 2 );
 		add_filter( 'wp_update_term_data', array( $this, 'event_update_term_data' ), 10, 4 );
-		add_filter( 'add_post_metadata', array( $this, 'check_deleted_meta' ), 10, 5 );
+		add_filter( 'add_post_metadata', array( $this, 'check_added_meta' ), 10, 5 );
 		add_filter( 'delete_post_metadata', array( $this, 'check_deleted_meta' ), 10, 5 );
 		add_action( 'updated_post_meta', array( $this, 'check_changed_meta' ), 10, 4 );
 
@@ -123,14 +123,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		// If post exists.
 		if ( ! empty( $post ) && $post instanceof WP_Post ) {
-			$this->_old_post   = $post;
-			$this->_old_link   = get_permalink( $post_id );
-			$this->_old_tmpl   = $this->get_post_template( $this->_old_post );
-			$this->_old_cats   = $this->get_post_categories( $this->_old_post );
-			$this->_old_tags   = $this->get_post_tags( $this->_old_post );
-			$this->_old_stky   = in_array( $post_id, get_option( 'sticky_posts' ), true );
-			$this->old_status  = $post->post_status;
-			$this->old_meta    = get_post_meta( $post_id );
+			$this->_old_post  = $post;
+			$this->_old_link  = get_permalink( $post_id );
+			$this->_old_tmpl  = $this->get_post_template( $this->_old_post );
+			$this->_old_cats  = $this->get_post_categories( $this->_old_post );
+			$this->_old_tags  = $this->get_post_tags( $this->_old_post );
+			$this->_old_stky  = in_array( $post_id, get_option( 'sticky_posts' ), true );
+			$this->old_status = $post->post_status;
+			$this->old_meta   = get_post_meta( $post_id );
 		}
 	}
 
@@ -290,10 +290,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 			$event_data = $this->get_post_event_data( $post ); // Get event data.
 
-			//  check if this was initiated by a plugin
-			$request_params  = WSAL_Utilities_RequestUtils::get_filtered_request_data();
+			// Check if this was initiated by a plugin.
+			$request_params = WSAL_Utilities_RequestUtils::get_filtered_request_data();
 			if ( empty( $request_params['action'] ) && isset( $request_params['page'] ) ) {
-				$event = 5025;
+				$event      = 5025;
 				$event_data = array(
 					'PostID'     => $post->ID,
 					'PostType'   => $post->post_type,
@@ -455,9 +455,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 				// Update post URL based on current actual path.
 				if ( $this->plugin->IsMultisite() && ! is_subdomain_install() ) {
-					//	for multisite using subfolders, remove the subfolder
-					$subdir_path = parse_url( home_url(), PHP_URL_PATH );
-					$escaped = str_replace( '/', '\/', preg_quote( $subdir_path ) );
+					// For multisite using subfolders, remove the subfolder.
+					$subdir_path  = parse_url( home_url(), PHP_URL_PATH );
+					$escaped      = str_replace( '/', '\/', preg_quote( $subdir_path ) );
 					$current_path = preg_replace( '/' . $escaped . '/', '', $current_path );
 				}
 
@@ -602,10 +602,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$this->plugin->alerts->Trigger(
 					2125,
 					array(
-						'tag'        => $new_name,
-						'TagLink'    => $term_link,
-						'old_desc'   => $old_desc,
-						'new_desc'   => $new_desc,
+						'tag'      => $new_name,
+						'TagLink'  => $term_link,
+						'old_desc' => $old_desc,
+						'new_desc' => $new_desc,
 					)
 				);
 			}
@@ -666,97 +666,117 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	}
 
 	/**
+	 * Checks if selected metadata items have changed. Function is called from different contexts.
+	 *
+	 * @param int    $post_id        Post ID.
+	 * @param string $meta_key       Meta key.
+	 * @param mixed  $meta_value     Meta value.
+	 * @param mixed  $default_result Default result.
+	 *
+	 * @return mixed
+	 *
+	 * @since 4.4.0
+	 */
+	private function check_selected_meta_change( $post_id, $meta_key, $meta_value, $default_result ) {
+		if ( ! $post_id ) {
+			return $default_result;
+		}
+
+		switch ( $meta_key ) {
+			case '_wp_page_template':
+				$this->check_template_change( $post_id, $meta_value );
+				break;
+			case '_thumbnail_id':
+				$this->check_featured_image_change( $post_id, $meta_value );
+				break;
+			default:
+				return $default_result;
+		}
+
+		return $default_result;
+	}
+
+	/**
 	 * Check Page Template Update.
 	 *
 	 * @param int    $meta_id    ID of updated metadata entry.
 	 * @param int    $post_id    Post ID.
 	 * @param string $meta_key   Meta key.
 	 * @param mixed  $meta_value Meta value.
-	 * 
-	 * @return int $meta_id      ID of updated metadata entry.
+	 *
+	 * @return int ID of updated metadata entry.
 	 */
 	public function check_changed_meta( $meta_id, $post_id, $meta_key, $meta_value ) {
-		if ( ! $post_id ) {
-			return $meta_id;
-		}
-
-		switch ( $meta_key ) {
-			case '_wp_page_template':
-				$this->check_template_change( $post_id, $meta_value );
-				break;
-			case '_thumbnail_id':
-				$this->check_featured_image_change( $post_id, $meta_value );
-				break;
-			default:
-				return $meta_id;
-		}
-
-		return $meta_id;
+		return $this->check_selected_meta_change( $post_id, $meta_key, $meta_value, $meta_id );
 	}
 
 	/**
-	 * Check Page Template Update for delitions.
+	 * Check Page Template Update for deletions.
 	 *
-	 * @param bool|null $delete     Whether to allow metadata deletion of the given type.
-	 * @param int       $meta_id    ID of updated metadata entry.
-	 * @param int       $post_id    Post ID.
-	 * @param string    $meta_key   Meta key.
-	 * @param mixed     $meta_value Meta value.
-	 * 
-	 * @return bool|null $delete    Whether to allow metadata deletion of the given type.
+	 * @param null|bool $delete     Whether to allow metadata deletion of the given type.
+	 * @param int       $object_id  ID of the object metadata is for.
+	 * @param string    $meta_key   Metadata key.
+	 * @param mixed     $meta_value Metadata value. Must be serializable if non-scalar.
+	 * @param bool      $delete_all Whether to delete the matching metadata entries
+	 *                              for all objects, ignoring the specified $object_id.
+	 *                              Default false.
+	 *
+	 * @return bool|null Whether to allow metadata deletion of the given type.
 	 */
-	public function check_deleted_meta( $delete, $meta_id, $post_id, $meta_key, $meta_value ) {
-		if ( ! $post_id ) {
-			return $delete;
-		}
+	public function check_deleted_meta( $delete, $object_id, $meta_key, $meta_value, $delete_all ) {
+		return $this->check_selected_meta_change( $object_id, $meta_key, $meta_value, $delete );
+	}
 
-		switch ( $meta_key ) {
-			case '_wp_page_template':
-				$this->check_template_change( $post_id, $meta_value );
-				break;
-			case '_thumbnail_id':
-				$this->check_featured_image_change( $post_id, $meta_value );
-				break;
-			default:
-			// no other meta keys supported here.
-		} 
-		return $delete; 
+	/**
+	 * Check Page Template Update for additions.
+	 *
+	 * @param null|bool $check      Whether to allow adding metadata for the given type.
+	 * @param int       $object_id  ID of the object metadata is for.
+	 * @param string    $meta_key   Metadata key.
+	 * @param mixed     $meta_value Metadata value. Must be serializable if non-scalar.
+	 * @param bool      $unique     Whether the specified meta key should be unique for the object.
+	 *
+	 * @return bool|null    Whether to allow metadata addition of the given type.
+	 *
+	 * @since 4.4.0
+	 */
+	public function check_added_meta( $check, $object_id, $meta_key, $meta_value, $unique ) {
+		return $this->check_selected_meta_change( $object_id, $meta_key, $meta_value, $check );
 	}
 
 	/**
 	 * Check Page Template Update.
 	 *
-	 * @param int    $post_id    Post ID.
-	 * @param mixed  $meta_value Meta value.
+	 * @param int   $post_id    Post ID.
+	 * @param mixed $meta_value Meta value.
 	 */
-	 public function check_template_change( $post_id, $meta_value ) {
-	 	$post          = get_post( $post_id );
- 		$old_tmpl      = ( $this->_old_tmpl && 'page' !== basename( $this->_old_tmpl, '.php' ) ) ? ucwords( str_replace( array( '-', '_' ), ' ', basename( $this->_old_tmpl, '.php' ) ) ) : __( 'Default template', 'wp-security-audit-log' );
- 		$new_tmpl      = ( $meta_value ) ? ucwords( str_replace( array( '-', '_' ), ' ', basename( $meta_value ) ) ) : __( 'Default', 'wp-security-audit-log' );
-
- 		if ( $old_tmpl !== $new_tmpl ) {
- 			$editor_link = $this->get_editor_link( $post );
- 			$this->plugin->alerts->Trigger(
- 				2048,
- 				array(
- 					'PostID'             => $post->ID,
- 					'PostType'           => $post->post_type,
- 					'PostTitle'          => $post->post_title,
- 					'PostStatus'         => $post->post_status,
- 					'PostDate'           => $post->post_date,
- 					'OldTemplate'        => $old_tmpl,
- 					'NewTemplate'        => $new_tmpl,
- 					$editor_link['name'] => $editor_link['value'],
- 				)
- 			);
- 		}
- 	}
+	public function check_template_change( $post_id, $meta_value ) {
+		$post     = get_post( $post_id );
+		$old_tmpl = ( $this->_old_tmpl && 'page' !== basename( $this->_old_tmpl, '.php' ) ) ? ucwords( str_replace( array( '-', '_' ), ' ', basename( $this->_old_tmpl, '.php' ) ) ) : __( 'Default template', 'wp-security-audit-log' );
+		$new_tmpl = ( $meta_value ) ? ucwords( str_replace( array( '-', '_' ), ' ', basename( $meta_value ) ) ) : __( 'Default', 'wp-security-audit-log' );
+		if ( $old_tmpl !== $new_tmpl ) {
+			$editor_link = $this->get_editor_link( $post );
+			$this->plugin->alerts->Trigger(
+				2048,
+				array(
+					'PostID'             => $post->ID,
+					'PostType'           => $post->post_type,
+					'PostTitle'          => $post->post_title,
+					'PostStatus'         => $post->post_status,
+					'PostDate'           => $post->post_date,
+					'OldTemplate'        => $old_tmpl,
+					'NewTemplate'        => $new_tmpl,
+					$editor_link['name'] => $editor_link['value'],
+				)
+			);
+		}
+	}
 
 	/**
 	 * Check Post Featured Image Update.
 	 *
-	 * @param int    $post_id    Post ID.
-	 * @param mixed  $meta_value Meta value.
+	 * @param int   $post_id    Post ID.
+	 * @param mixed $meta_value Meta value.
 	 */
 	public function check_featured_image_change( $post_id, $meta_value ) {
 		$previous_featured_image = ( isset( $this->old_meta['_thumbnail_id'][0] ) ) ? wp_get_attachment_metadata( $this->old_meta['_thumbnail_id'][0] ) : false;
@@ -770,14 +790,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 		if ( empty( $previous_featured_image['file'] ) && ! empty( $new_featured_image['file'] ) ) {
 			$event_type = 'added';
-		} elseif ( ! empty( $previous_featured_image['file'] ) &&  empty( $new_featured_image['file'] ) ) {
+		} elseif ( ! empty( $previous_featured_image['file'] ) && empty( $new_featured_image['file'] ) ) {
 			$event_type = 'removed';
 		}
 
 		$previous_image = is_array( $previous_featured_image ) && array_key_exists( 'file', $previous_featured_image ) ? $previous_featured_image['file'] : __( 'No previous image', 'wp-security-audit-log' );
 		$new_image      = is_array( $new_featured_image ) && array_key_exists( 'file', $new_featured_image ) ? $new_featured_image['file'] : __( 'No image', 'wp-security-audit-log' );
 
-		$post          = get_post( $post_id );
+		$post        = get_post( $post_id );
 		$editor_link = $this->get_editor_link( $post );
 		$this->plugin->alerts->Trigger(
 			2130,
@@ -914,14 +934,14 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					$this->plugin->alerts->Trigger( $event, $event_data );
 				} else {
 
-					//  so far we assume that the action is initiated by a user, let's check if it was actually initiated
-					//  by a plugin
+					// So far we assume that the action is initiated by a user, let's check if it was actually initiated
+					// by a plugin.
 					$request_params = WSAL_Utilities_RequestUtils::get_filtered_request_data();
-					if ( array_key_exists( 'plugin', $request_params ) && !empty( $request_params['plugin'] ) ) {
-						//  event initiated by a plugin
+					if ( array_key_exists( 'plugin', $request_params ) && ! empty( $request_params['plugin'] ) ) {
+						// Event initiated by a plugin.
 						$plugin_name = $request_params['plugin'];
 						$plugin_data = get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name );
-						$event_data = array(
+						$event_data  = array(
 							'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
 							'PostID'             => $new_post->ID,
 							'PostType'           => $new_post->post_type,
