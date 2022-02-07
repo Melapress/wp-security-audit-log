@@ -37,49 +37,6 @@ class WSAL_Upgrade_43000_to_44400 {
 		// Change occurrence table in local database.
 		$this->upgrade_occurrence_table( 'local' );
 
-		// ...as well as in external and/or archive database
-		if ( ! is_null( $this->plugin->external_db_util ) ) {
-
-			// Delete invalid external and archive connects leftover from legacy versions.
-			$this->delete_invalid_active_connections();
-
-			foreach ( array( 'archive-connection', 'adapter-connection' ) as $connection_option_name ) {
-				$connection_name = $this->plugin->GetGlobalSetting( $connection_option_name, null );
-				if ( ! is_null( $connection_name ) ) {
-					$db_connection = $this->plugin->external_db_util->get_connection( $connection_name );
-					if ( is_array( $db_connection ) ) {
-						$this->upgrade_occurrence_table( $db_connection );
-					}
-				}
-			}
-		}
-
-		if ( ! WSAL_Extension_Manager::is_messaging_available() || ! WSAL_Extension_Manager::is_mirroring_available() ) {
-			// Check if SMS notifications or any external mirrors are setup + force plugin to show a notice.
-			$mirrors_in_use = false;
-			if ( ! is_null( $this->plugin->external_db_util ) ) {
-				$mirrors        = $this->plugin->external_db_util->get_all_mirrors();
-				$mirrors_in_use = ! empty( $mirrors );
-			}
-
-			$notifications_in_use = false;
-			if ( ! $mirrors_in_use && ! is_null( $this->plugin->notifications_util ) ) {
-				$notifications = $this->plugin->notifications_util->GetNotifications();
-				if ( ! empty( $notifications ) ) {
-					foreach ( $notifications as $notification ) {
-						$item = maybe_unserialize( $notification->option_value );
-						if ( strlen( $item->phone ) > 0 ) {
-							$notifications_in_use = true;
-							break;
-						}
-					}
-				}
-			}
-
-			if ( $notifications_in_use || $mirrors_in_use ) {
-				$this->plugin->SetGlobalBooleanSetting( 'show-helper-plugin-needed-nudge', true, false );
-			}
-		}
 
 		$this->stop_autoloading_some_settings();
 	}
@@ -175,31 +132,6 @@ class WSAL_Upgrade_43000_to_44400 {
 			   . ' ADD post_id BIGINT NOT NULL DEFAULT 0;';
 	}
 
-	/**
-	 * Function deletes legacy external and archive connections with incorrect (empty) database credentials. These are
-	 * leftovers from a bug in one of older plugin versions.
-	 */
-	private function delete_invalid_active_connections() {
-		foreach ( array( 'archive-connection', 'adapter-connection' ) as $connection_option_name ) {
-			$connection_name = $this->plugin->GetGlobalSetting( $connection_option_name, null );
-			if ( ! is_null( $connection_name ) ) {
-				$db_connection = $this->plugin->external_db_util->get_connection( $connection_name );
-				if ( is_array( $db_connection ) && empty( $db_connection['hostname'] ) && empty( $db_connection['db_name'] ) ) {
-					if ( 'adapter-connection' === $connection_option_name ) {
-						$this->plugin->external_db_util->RemoveExternalStorageConfig();
-					} elseif ( 'archive-connection' === $connection_option_name ) {
-						$this->plugin->external_db_util->RemoveArchivingConfig();
-						$this->plugin->external_db_util->DeleteGlobalSetting( 'archiving-e' );
-						$this->plugin->external_db_util->DeleteGlobalSetting( 'archiving-last-created' );
-					}
-
-					// Function WSAL_Ext_Common::delete_connection is not used on purpose because it would try to
-					// trigger an event which would result in error while doing this clean-up.
-					$this->plugin->external_db_util->DeleteGlobalSetting( WSAL_CONN_PREFIX . $connection_name );
-				}
-			}
-		}
-	}
 
 	/**
 	 * Change all but selected plugin settings to stop autoloading.
