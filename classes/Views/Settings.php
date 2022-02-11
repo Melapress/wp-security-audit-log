@@ -1652,7 +1652,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Filter $_GET array for security.
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
-		
+
 		echo $this->filter_values_for_searched_term( array_values( WSAL_ConstantManager::getSeverities() ), $get_array['term'] );
 		exit;
 	}
@@ -1702,7 +1702,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->check_ajax_request_is_valid( $get_array );
 
 		$event_objects     = $this->_plugin->alerts->get_event_objects_data();
-		
+
 		echo $this->filter_values_for_searched_term( array_values( $event_objects ), $get_array['term'] );
 		exit;
 	}

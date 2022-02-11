@@ -326,9 +326,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                     return;
                 }
 
-	            require_once 'classes/Utilities/OpCacheUtils.php';
-	            add_filter( 'upgrader_pre_install', array( 'WSAL_Utilities_OpCacheUtils', 'clear_caches' ), 10, 2 );
-
                 $this->define_constants();
                 $this->set_allowed_html_tags();
                 $this->includes();
@@ -341,30 +338,74 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
                 }
             }
 
-            /**
-             * Returns whether the plugin should load.
-             *
-             * @return bool Whether the plugin should load.
-             */
-            public function should_load() {
-                // Always load on the admin.
-                if ( is_admin() ) {
-                    return true;
-                }
+	        /**
+	         * Returns whether the plugin should load.
+	         *
+	         * @return bool Whether the plugin should load.
+	         */
+	        public function should_load() {
+		        // Always load on the admin, except for the scenario when this plugin is being updated.
+		        if ( is_admin() ) {
+			        $acceptable_slugs = array(
+					        'wp-security-audit-log',
+					        'wp-activity-log',
+			        );
 
-                //  check conditions for frontend
-                if ( self::is_frontend() && ! is_user_logged_in() && ! self::should_load_frontend() ) {
-                    // user isn't logged in, and we aren't logging visitor events on front-end
-                    return false;
-                }
+			        // Check if this plugin is being updated from the plugin list.
+			        if ( isset( $_REQUEST['action'] ) && 'update-plugin' === wp_unslash( trim( $_REQUEST['action'] ) )
+			             && in_array( wp_unslash( trim( $_REQUEST['slug'] ) ), $acceptable_slugs ) ) {
+				        return false;
+			        }
 
-                //  other contexts/scenarios
-                if ( self::is_rest_api() ) {
-                    return is_user_logged_in();
-                }
+			        // Check if this plugin is being updated using the file upload method.
+			        if ( isset( $_REQUEST['action'] ) && 'upload-plugin' === wp_unslash( trim( $_REQUEST['action'] ) )
+			             && isset( $_REQUEST['overwrite'] ) && 'update-plugin' === wp_unslash( trim( $_REQUEST['overwrite'] ) )
+			             && isset( $_REQUEST['package'] )) {
+						/**
+						 * Request doesn't contain the file name, but a numeric package ID.
+						 *
+						 * @see File_Upload_Upgrader::__construct()
+						 */
+				        $post_id	= (int) $_REQUEST['package'];
+				        $attachment = get_post( $post_id );
+				        if ( ! empty( $attachment ) ) {
+					        $filename = $attachment->post_title;
+					        foreach ( $acceptable_slugs as $acceptable_slug ) {
+						        if ( false !== strpos( $filename, $acceptable_slug ) ) {
+							        return false;
+						        }
+					        }
+				        }
+			        }
 
-                return true;
-            }
+			        // Check if this plugin is being updated from the WordPress updated screen (update-core.php).
+			        if ( isset( $_REQUEST['action'] ) && 'do-plugin-upgrade' === wp_unslash( trim( $_REQUEST['action'] ) ) ) {
+				        $selected_plugins = $_REQUEST['checked'];
+				        if ( ! empty( $selected_plugins ) ) {
+					        foreach ( $selected_plugins as $selected_plugin ) {
+						        if ( 'wp-security-audit-log.php' === basename( $selected_plugin ) ) {
+							        return false;
+						        }
+					        }
+				        }
+			        }
+
+			        return true;
+		        }
+
+		        // Check conditions for frontend.
+		        if ( self::is_frontend() && ! is_user_logged_in() && ! self::should_load_frontend() ) {
+			        // User isn't logged in, and we aren't logging visitor events on front-end.
+			        return false;
+		        }
+
+		        // Other contexts/scenarios.
+		        if ( self::is_rest_api() ) {
+			        return is_user_logged_in();
+		        }
+
+		        return true;
+	        }
 
             /**
              * Checks to see if WSAL should be loaded for register, login, and comment events.
