@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 4.4
 Tested up to: 5.8
-Stable tag: 4.3.4
+Stable tag: 4.3.6
 Requires PHP: 7.0
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -208,23 +208,16 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.3.4 (2022-01-05) =
+= 4.3.6 (2022-02-15) =
+Release notes: the improvements in this update are required to prepare for WP Activity Log 4.4. Therefore it is important to install this update in preparation for update 4.4.
 
-Release notes: [WP Activity Log 4.3.4: paving the way for 4.4](https://wpactivitylog.com/wsal-4-3-4/)
+* **Improvements**
+	* Removed opcache purging
+	* Improved error handling during plugin upgrade
 
-**New features**
-	* See a user's activity log with one-click from the WordPress users page.
-	* Added "Custom User Field" as criterion in the notifications trigger builder.
+= 4.3.5 (2022-02-03) =
 
-**Improvements**
-	* User's role is reported in the list of logged in users.
-	* Added PHP Opcache flush during plugin upgrade (needed for updating to 4.4).
-	* Made more JS strings in the plugin translatable.
-	* Added the URL metadata in the CSV activity log reports.
-
-**Bug fixes**
-	* In some code the premium plugin trial was 7 days - changed to 14 days.
-	* Fixed: cannot set up a third party service integration on WordPress earlier than 5.6.
-	* Fixed some typos in some of the events' text.
+**IMPORTANT NOTIFICATION UPDATE**
+	* Added an admin notice about upcoming changes in update 4.4: Next week we will be releasing WP Activity Log 4.4. From 4.4 onward the third-party libraries used in the plugins will be available via a separate helper plugin. Therefore, if you are mirroring the activity log to a third-party service such as Loggly, Papertrail and Amazon AWS, or if you have SMS notifications configured (Trello integration) install the helper plugin as soon as you update to version 4.4. When you upgrade to 4.4 you will be prompted with a link to install the helper plugin.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.

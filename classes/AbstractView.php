@@ -104,7 +104,7 @@ abstract class WSAL_AbstractView {
 		$user_id   = get_current_user_id();
 		$meta_key  = 'wsal-notice-' . $name;
 		$old_value = get_user_meta( $user_id, $meta_key, true );
-		if ( in_array( $name, self::$AllowedNoticeNames ) || false === $old_value ) {
+		if ( in_array( $name, self::$AllowedNoticeNames ) || false === $old_value || empty( $old_value ) ) {
 			update_user_meta( $user_id, $meta_key, '1' );
 		}
 	}
