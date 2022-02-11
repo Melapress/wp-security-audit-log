@@ -129,6 +129,22 @@ class WSAL_ViewManager {
 			add_action( 'admin_notices', array( $this, 'update_wfcm_notice' ) );
 			add_action( 'network_admin_notices', array( $this, 'update_wfcm_notice' ) );
 		}
+
+		add_action( 'admin_notices', array( $this, 'wsal_44_update_notice' ) );
+	}
+
+	public function wsal_44_update_notice() {
+		if ( ! $this->views[0]->IsNoticeDismissed( 'update-44-notice' ) ) {
+		echo '<div class="notice notice-success" data-notice-name="update-44-notice" style="position: relative;">
+				<h3>' . __( 'IMPORTANT WP ACTIVITY LOG UPDATE:', 'wp-security-audit-log' ) . '</h3>
+				<p>' . __( 'Next week we will be releasing WP Activity Log 4.4. From 4.4 onward the third-party libraries used by the plugins will be available via a separate helper plugin. Therefore,', 'wp-security-audit-log' ) . '</p>
+				<p><strong>' . __( 'if you are mirroring the activity log to a third-party service such as Loggly, Papertrail and Amazon AWS, or if you have SMS notifications configured (Trello integration) install the helper plugin as soon as you update to version 4.4.
+				', 'wp-security-audit-log' ) . '</strong></p>
+				<p>' . __( 'When you upgrade to 4.4 you will be prompted with a link to install the helper plugin.', 'wp-security-audit-log' ) . '</p>
+				<p>' . __( 'Thank you for using our plugin.', 'wp-security-audit-log' ) . '</p>
+				<a href="#" class="wsal-dismiss-notification" style="position: absolute; right: 15px; top: 15px;">' . __( 'Dismiss', 'wp-security-audit-log' ) . '</a>
+			</div>';
+		}
 	}
 
 	/**
