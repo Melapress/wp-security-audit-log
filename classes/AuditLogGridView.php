@@ -420,6 +420,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 					$tooltip = WSAL_Utilities_UsersUtils::get_tooltip_user_content( $user );
 					$uhtml = '<a class="tooltip" data-tooltip="' . esc_attr( $tooltip ) . '" data-user="' . $user->user_login . '" href="' . $user_edit_link . '" target="_blank">' . esc_html( $display_name ) . '</a>';
 					
+
 					$roles = WSAL_Utilities_UsersUtils::get_roles_label( $item->GetUserRoles() );
 				} elseif ( 'Plugin' == $username ) {
 					$uhtml = '<i>' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';

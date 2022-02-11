@@ -214,13 +214,13 @@ Release notes: [New Reports engine with more criteria, reports management & more
 
 * **IMPORTANT - NEW HELPER PLUGIN**
 	* Third party libraries are now available through a helper plugin. If you are mirroring events or sending SMS messages, you will be prompted to install this helper plugin.
-	
+
 
 * **New activity log event IDs**
 	* ID 6059: Changed the site's title.
 	* ID 4021: Changed the website URL in the user profile.
 	* ID 4013: User has been activated on a multisite network.
-	
+
 * **New features & functionality**
 	* Reports for WordPress: we developed an all new reporting engine, with more criteria.
 	* Reports management module: see all generated reports, redownload or delete them etc.
@@ -238,7 +238,7 @@ Release notes: [New Reports engine with more criteria, reports management & more
 	* New "See user's activity" link for each user in the users' page to see a user's activity with just a click.
 	* New filter that allows user to add metadata to user information popup. Refer to the [List of hooks in WP Activity Log](https://wpactivitylog.com/support/kb/list-hooks/) for more information.
 	* The new [Activity Log for TablePress extension](https://wpactivitylog.com/extensions/tablepress-activity-log/).
-	
+
 * **Improvements**
 	* Changed the database schema for improved storing of data, and faster writing and reading. After the upgrade the plugin will launch the upgrade process which might take some time to complete, depending on the amount of data in the activity log.
 	* Activity log events from local database can be merged into an extising activity log in an external database.
@@ -261,7 +261,7 @@ Release notes: [New Reports engine with more criteria, reports management & more
 	* Updated the "Help & Contact Us" page; improved text and added more relevant information.
 	* Improved several UI sections in the Third Party Connections module.
 	* Improved the check for writing activity log to external database; now it is less restrictive and faster.
-	
+
 * **Bug fixes**
 	* Fixed: Database error when trying to log in with a non-existing user and a login notification is enabled.
 	* Fixed: In some edge cases the plugin was creating an empty "external database" connection string.
@@ -279,5 +279,5 @@ Release notes: [New Reports engine with more criteria, reports management & more
 	* Fixed: PHP warning about OPCacheUtils.php in specific setups.
 	* Fixed: Edge case in which other plugins couldn't be installed or updated when WP Activity Log was activated.
 	* Automatic termination of idle sessions was not triggering properly on some setups.
-	
+
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
