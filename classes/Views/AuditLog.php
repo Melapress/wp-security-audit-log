@@ -124,7 +124,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function AdminNotices() {
 		$is_current_view = $this->_plugin->views->GetActiveView() == $this;
-		
+
 		// Check if any of the extensions is activated.
 		if (
 				! class_exists( 'WSAL_NP_Plugin' )
@@ -397,8 +397,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			// if the requested view didn't match the view users last viewed
 			// then update their preference.
 			if ( $requested_view !== $this->user_last_view ) {
-				update_user_meta( get_current_user_id(),
-                         'wsal-selected-main-view', ( in_array( $requested_view, array( 'list', 'grid' ), true ) ) ? $requested_view : 'list' );
+				update_user_meta( get_current_user_id(), 'wsal-selected-main-view', ( in_array( $requested_view, array( 'list', 'grid' ), true ) ) ? $requested_view : 'list' );
 				$this->user_last_view = $requested_view;
 			}
 		}
