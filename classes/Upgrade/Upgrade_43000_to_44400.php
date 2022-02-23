@@ -71,7 +71,7 @@ class WSAL_Upgrade_43000_to_44400 {
 	 *
 	 * @param string|array $connection Connection alias or configuration data.
 	 *
-	 * @throws Freemius_Exception
+	 * @throws Freemius_Exception Freemius exception.
 	 */
 	private function upgrade_occurrence_table( $connection ) {
 		$connector = $this->plugin->getConnector( $connection );
