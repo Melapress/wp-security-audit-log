@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitf6293da7ec43bdc309be6c204775f8fd
+class ComposerStaticInitbc29975009838462711aa3a25aaeb276
 {
     public static $classMap = array (
         'WSAL_Vendor\\MirazMac\\Requirements\\Checker' => __DIR__ . '/..' . '/mirazmac/php-requirements-checker/src/Checker.php',
@@ -15,7 +15,7 @@ class ComposerStaticInitf6293da7ec43bdc309be6c204775f8fd
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInitf6293da7ec43bdc309be6c204775f8fd::$classMap;
+            $loader->classMap = ComposerStaticInitbc29975009838462711aa3a25aaeb276::$classMap;
 
         }, null, ClassLoader::class);
     }

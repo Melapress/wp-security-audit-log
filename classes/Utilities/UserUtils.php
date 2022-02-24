@@ -41,10 +41,15 @@ class WSAL_Utilities_UsersUtils {
 		}
 
 		if ( 'first_last_name' === self::$user_label_setting && ( ! empty( $user->first_name ) || ! empty( $user->last_name ) ) ) {
-			return trim( implode( ' ', [
-				$user->first_name,
-				$user->last_name
-			] ) );
+			return trim(
+				implode(
+					' ',
+					array(
+						$user->first_name,
+						$user->last_name,
+					)
+				)
+			);
 		}
 
 		return $user->user_login;
@@ -90,13 +95,23 @@ class WSAL_Utilities_UsersUtils {
 			return '';
 		}
 
-		$tooltip = '<strong>' . esc_attr__( 'Username: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_login . '</br>';
+		$tooltip  = '<strong>' . esc_attr__( 'Username: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_login . '</br>';
 		$tooltip .= ( ! empty( $user->data->first_name ) ) ? '<strong>' . esc_attr__( 'First name: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->first_name . '</br>' : '';
 		$tooltip .= ( ! empty( $user->data->first_name ) ) ? '<strong>' . esc_attr__( 'Last Name: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->first_name . '</br>' : '';
 		$tooltip .= '<strong>' . esc_attr__( 'Email: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_email . '</br>';
 		$tooltip .= '<strong>' . esc_attr__( 'Nickname: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_nicename . '</br></br>';
 
-		$additional_content = apply_filters( 'wsal_additional_user_tooltip_content', false );
+		/**
+		 * WSAL Filter: `wsal_additional_user_tooltip_content'
+		 *
+		 * Allows 3rd parties to append HTML to the user tooltip content in audit log viewer.
+		 *
+		 * @since 4.4.0
+		 *
+		 * @param string $content Blank string to append to.
+		 * @param object  $user  - User object.
+		 */
+		$additional_content = apply_filters( 'wsal_additional_user_tooltip_content', '', $user );
 
 		$tooltip .= $additional_content;
 
