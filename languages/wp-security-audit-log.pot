@@ -374,7 +374,7 @@ msgid "Message:"
 msgstr ""
 
 #: classes/AuditLogGridView.php:401 classes/AuditLogGridView.php:405
-#: classes/AuditLogListView.php:413 classes/Utilities/UserUtils.php:155
+#: classes/AuditLogListView.php:413 classes/Utilities/UserUtils.php:170
 msgid "Unknown"
 msgstr ""
 
@@ -606,11 +606,11 @@ msgstr ""
 msgid "Keep a record of when someone adds, modifies or deletes forms, entries and more in the Gravity Forms plugin."
 msgstr ""
 
-#: classes/Upgrade/MetadataMigration.php:48
+#: classes/Upgrade/MetadataMigration.php:65
 msgid "Activity log database update in progress."
 msgstr ""
 
-#: classes/Upgrade/MetadataMigration.php:50
+#: classes/Upgrade/MetadataMigration.php:67
 msgid "WP Activity Log is updating the database tables where it stores the activity log. This is needed to upgrade the activity log tables to the new database schema, so the logs can be stored and read more efficiently. The duration of this process varies, depending on the number of events in the activity log. This process runs in the background and won't affect your website. During the upgrade, you might notice some \"null\" values in the activity log. This is temporary until the process is complete."
 msgstr ""
 
@@ -657,23 +657,23 @@ msgstr ""
 msgid "Tried to install a zip or slug that was not in the allowed list"
 msgstr ""
 
-#: classes/Utilities/UserUtils.php:93
+#: classes/Utilities/UserUtils.php:98
 msgid "Username: "
 msgstr ""
 
-#: classes/Utilities/UserUtils.php:94
+#: classes/Utilities/UserUtils.php:99
 msgid "First name: "
 msgstr ""
 
-#: classes/Utilities/UserUtils.php:95
+#: classes/Utilities/UserUtils.php:100
 msgid "Last Name: "
 msgstr ""
 
-#: classes/Utilities/UserUtils.php:96
+#: classes/Utilities/UserUtils.php:101
 msgid "Email: "
 msgstr ""
 
-#: classes/Utilities/UserUtils.php:97
+#: classes/Utilities/UserUtils.php:102
 msgid "Nickname: "
 msgstr ""
 
@@ -5011,7 +5011,7 @@ msgstr ""
 msgid "Dummy"
 msgstr ""
 
-#: third-party/vendor/classes/wp-background-process.php:371
+#: third-party/vendor/deliciousbrains/wp-background-processing/classes/wp-background-process.php:371
 #, php-format
 msgid "Every %d Minutes"
 msgstr ""
