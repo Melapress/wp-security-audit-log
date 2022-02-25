@@ -261,6 +261,9 @@ Release notes: [New Reports engine with more criteria, reports management & more
 	* Updated the "Help & Contact Us" page; improved text and added more relevant information.
 	* Improved several UI sections in the Third Party Connections module.
 	* Improved the check for writing activity log to external database; now it is less restrictive and faster.
+	
+* **Security fix**
+	* Upgraded the Freemius SDK to version 2.4.3.
 
 * **Bug fixes**
 	* Fixed: Database error when trying to log in with a non-existing user and a login notification is enabled.
