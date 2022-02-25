@@ -36,6 +36,23 @@ class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 	 * Displays an admin notice if a metadata migration is in progress.
 	 */
 	public static function maybe_display_progress_admin_notice() {
+		if ( ! is_user_logged_in() ) {
+			// Don't show to anonymous users (obviously).
+			return;
+		}
+
+		$current_user = get_userdata( get_current_user_id() );
+		if ( false === $current_user ) {
+			// Bail if there is a problem retrieving the current user.
+			return;
+		}
+
+		$is_admin = in_array( 'administrator', $current_user->roles, true ) || ( function_exists( 'is_super_admin' ) && is_super_admin( $current_user->ID ) );
+		if ( ! $is_admin ) {
+			// Don't show to admin users.
+			return;
+		}
+
 		$plugin        = WpSecurityAuditLog::GetInstance();
 		$existing_info = $plugin->GetGlobalSetting( self::OPTION_NAME_MIGRATION_INFO, array() );
 		if ( empty( $existing_info ) ) {
