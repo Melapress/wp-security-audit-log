@@ -1,4 +1,14 @@
 <?php
+/**
+ * WSAL_Alert class.
+ *
+ * @package wsal
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * WSAL_Alert Object class.
@@ -69,7 +79,7 @@ final class WSAL_Alert {
 	 * @var array
 	 * @since 4.2.1
 	 */
-	public $metadata = [];
+	public $metadata = array();
 
 	/**
 	 * List of metadata items containing metadata key and a label to be displayed.
@@ -77,23 +87,23 @@ final class WSAL_Alert {
 	 * @var string[]
 	 * @since 4.2.1
 	 */
-	public $links = [];
+	public $links = array();
 
 	/**
 	 * Constructor.
 	 *
 	 * @param integer $type - Type of alert.
 	 * @param integer $code - Code of alert.
-	 * @param string $catg - Category of alert.
-	 * @param string $subcatg - Subcategory of alert.
-	 * @param string $desc - Description.
-	 * @param string $mesg - Alert message.
-	 * @param array $metadata - List of metadata items containing metadata key and a label to be displayed.
-	 * @param string $links - This should be a list of links in form of dynamic placeholders or a metadata names.
-	 * @param string $object - Event object.
-	 * @param string $event_type - Event type.
+	 * @param string  $catg - Category of alert.
+	 * @param string  $subcatg - Subcategory of alert.
+	 * @param string  $desc - Description.
+	 * @param string  $mesg - Alert message.
+	 * @param array   $metadata - List of metadata items containing metadata key and a label to be displayed.
+	 * @param string  $links - This should be a list of links in form of dynamic placeholders or a metadata names.
+	 * @param string  $object - Event object.
+	 * @param string  $event_type - Event type.
 	 */
-	public function __construct( $type = 0, $code = 0, $catg = '', $subcatg = '', $desc = '', $mesg = '', $metadata = [], $links = '', $object = '', $event_type = '' ) {
+	public function __construct( $type = 0, $code = 0, $catg = '', $subcatg = '', $desc = '', $mesg = '', $metadata = array(), $links = '', $object = '', $event_type = '' ) {
 		$this->code       = $type;
 		$this->severity   = $code;
 		$this->catg       = $catg;
@@ -111,46 +121,45 @@ final class WSAL_Alert {
 	 *
 	 * Note: not to be used to display any messages. Use WSAL_Models_Occurrence::GetMessage() instead.
 	 *
-	 * @param array $meta_data - (Optional) Meta data relevant to message.
-	 * @param string|null $message - (Optional) Override message template to use.
-	 * @param integer $occurrence_id - (Optional) Event occurrence ID.
+	 * @param array        $meta_data - (Optional) Meta data relevant to message.
+	 * @param string|null  $message - (Optional) Override message template to use.
+	 * @param integer      $occurrence_id - (Optional) Event occurrence ID.
 	 * @param string|false $context - Context in which the message will be used/displayed.
 	 *
 	 * @return string Fully formatted message.
-	 * @throws Freemius_Exception
-	 * @see WSAL_Models_Occurrence::GetMessage()
+	 *
+	 * @see WSAL_Models_Occurrence::get_message()
 	 */
-	public function GetMessage( $meta_data = array(), $message = null, $occurrence_id = 0, $context = false ) {
-		return $this->GetFormattedMesg( is_null( $message ) ? $this->mesg : $message, $meta_data, $occurrence_id, $context );
+	public function get_message( $meta_data = array(), $message = null, $occurrence_id = 0, $context = false ) {
+		return $this->get_formatted_message( is_null( $message ) ? $this->mesg : $message, $meta_data, $occurrence_id, $context );
 	}
 
 	/**
 	 * Expands a message with variables by replacing variables with meta data values.
 	 *
-	 * @param string $original_message - The original message.
-	 * @param array $meta_data - (Optional) Meta data relevant to message.
-	 * @param integer $occurrence_id - (Optional) Event occurrence ID.
+	 * @param string       $original_message - The original message.
+	 * @param array        $meta_data - (Optional) Meta data relevant to message.
+	 * @param integer      $occurrence_id - (Optional) Event occurrence ID.
 	 * @param string|false $context - Context in which the message will be used/displayed.
 	 *
 	 * @return string The expanded message.
-	 * @throws Freemius_Exception
 	 */
-	protected function GetFormattedMesg( $original_message, $meta_data = array(), $occurrence_id = 0, $context = false ) {
+	protected function get_formatted_message( $original_message, $meta_data = array(), $occurrence_id = 0, $context = false ) {
 
 		$result = '';
 
-		//  fallback on the default context
+		// Fallback on the default context.
 		if ( false === $context ) {
 			$context = 'default';
 		}
 
-		//  get the alert formatter for given context
-		$formatter = WSAL_AlertFormatterFactory::getFormatter( $context );
+		// Get the alert formatter for given context.
+		$formatter = WSAL_AlertFormatterFactory::get_formatter( $context );
 
 		// Tokenize message with regex.
 		$message_parts = preg_split( '/(%.*?%)/', (string) $original_message, - 1, PREG_SPLIT_DELIM_CAPTURE );
 		if ( ! is_array( $message_parts ) ) {
-			//  use the message as is
+			// Use the message as is.
 			$result = (string) $original_message;
 		} else {
 			// Handle tokenized message.
@@ -160,11 +169,11 @@ final class WSAL_Alert {
 						continue;
 					}
 					// Handle escaped percent sign.
-					if ( '%%' == $token ) {
+					if ( '%%' === $token ) {
 						$message_parts[ $i ] = '%';
-					} elseif ( substr( $token, 0, 1 ) == '%' && substr( $token, - 1, 1 ) == '%' ) {
+					} elseif ( substr( $token, 0, 1 ) === '%' && substr( $token, - 1, 1 ) === '%' ) {
 						// Handle complex expressions.
-						$message_parts[ $i ] = $this->GetMetaExprValue( substr( $token, 1, - 1 ), $meta_data );
+						$message_parts[ $i ] = $this->get_meta_expression_value( substr( $token, 1, - 1 ), $meta_data );
 						$message_parts[ $i ] = $formatter->format_meta_expression( $token, $message_parts[ $i ], $occurrence_id );
 						if ( ! empty( $message_parts[ $i ] ) ) {
 							$message_parts[ $i ] = $formatter->wrap_in_hightlight_markup( $message_parts[ $i ] );
@@ -172,12 +181,12 @@ final class WSAL_Alert {
 					}
 				}
 
-				// Compact message
+				// Compact message.
 				$result = implode( '', $message_parts );
 			}
 		}
 
-		//  process message to make sure it any HTML tags are handled correctly
+		// Process message to make sure it any HTML tags are handled correctly.
 		$result = $formatter->process_html_tags_in_message( $result );
 
 		$end_of_line = $formatter->get_end_of_line();
@@ -214,7 +223,7 @@ final class WSAL_Alert {
 	 *
 	 * @return mixed The value nearest to the expression.
 	 */
-	protected function GetMetaExprValue( $expr, $meta_data = array() ) {
+	protected function get_meta_expression_value( $expr, $meta_data = array() ) {
 		$expr = preg_replace( '/%/', '', $expr );
 		if ( 'IPAddress' === $expr ) {
 			if ( array_key_exists( 'IPAddress', $meta_data ) ) {
@@ -235,7 +244,7 @@ final class WSAL_Alert {
 			$meta = is_array( $meta ) && array_key_exists( $part, $meta ) ? $meta[ $part ] : ( isset( $meta->$part ) ? $meta->$part : 'NULL' );
 		}
 
-		return is_scalar( $meta ) ? (string) $meta : var_export( $meta, true );
+		return is_scalar( $meta ) ? (string) $meta : var_export( $meta, true ); // phpcs:ignore
 	}
 
 	/**
@@ -246,7 +255,6 @@ final class WSAL_Alert {
 	 * @param int                 $occurrence_id Occurrence ID.
 	 *
 	 * @return string
-	 * @throws Freemius_Exception
 	 * @since 4.2.1
 	 */
 	public function get_formatted_metadata( $formatter, $meta_data, $occurrence_id ) {
@@ -276,7 +284,6 @@ final class WSAL_Alert {
 	 * @param int                 $occurrence_id Occurrence ID.
 	 *
 	 * @return array
-	 * @throws Freemius_Exception
 	 * @since 4.2.1
 	 */
 	public function get_metadata_as_array( $formatter, $meta_data, $occurrence_id ) {
@@ -288,7 +295,7 @@ final class WSAL_Alert {
 				}
 
 				// Pure alert meta lookup based on meta token.
-				$meta_expression = $this->GetMetaExprValue( $meta_token, $meta_data );
+				$meta_expression = $this->get_meta_expression_value( $meta_token, $meta_data );
 
 				// Additional alert meta processing - handles derived or decorated alert data.
 				$meta_expression = $formatter->format_meta_expression( $meta_token, $meta_expression, $occurrence_id );
@@ -303,24 +310,25 @@ final class WSAL_Alert {
 	}
 
 	/**
-	 * @param WSAL_AlertFormatter $formatter
-	 * @param array $meta_data
-	 * @param int $occurrence_id
+	 * Get formatter hyperlinks.
+	 *
+	 * @param WSAL_AlertFormatter $formatter     Alert formatter.
+	 * @param array               $meta_data     Meta data.
+	 * @param int                 $occurrence_id Occurrence ID.
 	 *
 	 * @return string
-	 * @throws Freemius_Exception
 	 * @since 4.2.1
 	 */
 	public function get_formatted_hyperlinks( $formatter, $meta_data, $occurrence_id ) {
 		$result              = '';
 		$hyperlinks_as_array = $this->get_hyperlinks_as_array( $formatter, $meta_data, $occurrence_id );
 		if ( ! empty( $hyperlinks_as_array ) ) {
-			$links_result_parts = [];
+			$links_result_parts = array();
 			foreach ( $hyperlinks_as_array as  $link_data ) {
-				$link_label = $link_data['label'];
-				$link_url = $link_data['url'];
+				$link_label       = $link_data['label'];
+				$link_url         = $link_data['url'];
 				$needs_formatting = $link_data['needs_formatting'];
-				$formatted_link = $needs_formatting ? $formatter->format_link( $link_url, $link_label ) : $link_url;
+				$formatted_link   = $needs_formatting ? $formatter->format_link( $link_url, $link_label ) : $link_url;
 				array_push( $links_result_parts, $formatted_link );
 			}
 
@@ -333,16 +341,21 @@ final class WSAL_Alert {
 	}
 
 	/**
-	 * @param WSAL_AlertFormatter $formatter
-	 * @param array $meta_data
-	 * @param int $occurrence_id
-	 * @param bool $exclude_links_not_needing_formatting If true, links that don't need formatting will be excluded. For example special links that contain onclick attribute already from the meta formatter.
+	 * Retrieves hyperlinks as an array.
+	 *
+	 * @param WSAL_AlertFormatter $formatter                            Alert formatter.
+	 * @param array               $meta_data                            Meta data.
+	 * @param int                 $occurrence_id                        Occurrence ID.
+	 * @param bool                $exclude_links_not_needing_formatting If true, links that don't need formatting will
+	 *                                                                  be excluded. For example special links that
+	 *                                                                  contain onclick attribute already from the meta
+	 *                                                                  formatter.
 	 *
 	 * @return string
 	 * @since 4.2.1
 	 */
 	public function get_hyperlinks_as_array( $formatter, $meta_data, $occurrence_id, $exclude_links_not_needing_formatting = false ) {
-		$result = [];
+		$result = array();
 		if ( ! empty( $this->links ) ) {
 			foreach ( $this->links as $link_label => $link_data ) {
 
@@ -360,27 +373,29 @@ final class WSAL_Alert {
 					$link_title = $link_data['label'];
 				}
 
-				//  link url can be:
-				//  - an actual URL
-				//  - placeholder for an existing meta data field that contains a URL (or the full HTML A tag markup)
-				//  -- before 4.2.1 the CommentLink meta would contain the full HTML markup for the link, now it contains only the URL
-				//  - other placeholder for a dynamic or JS infused link that will be processed by the meta formatter
+				/**
+				 * Link url can be:
+				 * - an actual URL
+				 * - placeholder for an existing metadata field that contains a URL (or the full HTML A tag markup)
+				 * -- before 4.2.1 the CommentLink meta would contain the full HTML markup for the link, now it contains only the URL
+				 * - other placeholder for a dynamic or JS infused link that will be processed by the meta formatter.
+				 */
 				$needs_formatting = true;
 				if ( ! WSAL_Utilities_RequestUtils::is_valid_url( $link_url ) ) {
 
-					$meta_expression = $this->GetMetaExprValue( $link_url, $meta_data );
+					$meta_expression = $this->get_meta_expression_value( $link_url, $meta_data );
 					$meta_expression = $formatter->format_meta_expression( $link_url, $meta_expression, $occurrence_id, $meta_data );
 					if ( ! empty( $meta_expression ) ) {
 						if ( WSAL_Utilities_RequestUtils::is_valid_url( $meta_expression ) ) {
 
 							$link_url = $meta_expression;
-						} else if ( preg_match( '/onclick=/', $meta_expression ) ) {
+						} elseif ( preg_match( '/onclick=/', $meta_expression ) ) {
 							$link_url         = $meta_expression;
 							$needs_formatting = false;
 						} else {
 
 							preg_match( '/href=["\']https?:\/\/([^"\']+)["\']/', $meta_expression, $url_matches );
-							if ( count( $url_matches ) == 2 ) {
+							if ( count( $url_matches ) === 2 ) {
 								$link_url = $url_matches[1];
 							}
 						}
@@ -394,12 +409,12 @@ final class WSAL_Alert {
 				}
 
 				if ( ! empty( $link_url ) ) {
-					$result[ $link_label ] = [
+					$result[ $link_label ] = array(
 						'url'              => $link_url,
 						'needs_formatting' => $needs_formatting,
 						'title'            => $link_title,
-						'label'            => $link_label
-					];
+						'label'            => $link_label,
+					);
 				}
 			}
 		}

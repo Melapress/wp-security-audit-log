@@ -21,25 +21,16 @@ namespace WSAL\Helpers;
 class Options {
 
 	/**
-	 * Instance of the main plugin class.
-	 *
-	 * @since 4.0.2
-	 * @var   WpSecurityAuditLog
-	 */
-	private $plugin;
-
-	/**
 	 * Prefix used when setting/getting options.
 	 *
 	 * @since 4.0.2
-	 * @var   @var string
+	 * @var string
 	 */
 	public $prefix;
 
 	/**
 	 * Sets up this class with the main plugin instance and a prefix.
 	 *
-	 * @method __construct
 	 * @param string $prefix A prefix to use when setting/getting.
 	 *
 	 * @since  4.0.2
@@ -76,12 +67,12 @@ class Options {
 		}
 
 		$actual_option_name = $option_name;
-		if (!preg_match( '/\A' .preg_quote($this->prefix) . '/', $option_name)) {
-			//  remove prefix duplicate if present
+		if ( ! preg_match( '/\A' . preg_quote( $this->prefix ) . '/', $option_name ) ) { // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
+			// Remove prefix duplicate if present.
 			$actual_option_name = $this->prefix . $option_name;
 		}
 
-		return self::_get_option_value( $actual_option_name, $default);
+		return self::get_option_value_internal( $actual_option_name, $default );
 	}
 
 	/**
@@ -101,12 +92,12 @@ class Options {
 		}
 
 		$actual_option_name = $option_name;
-		if ( ! preg_match( '/\A' . preg_quote( $this->prefix ) . '/', $option_name ) ) {
-			//  prepend prefix if not already present
+		if ( ! preg_match( '/\A' . preg_quote( $this->prefix ) . '/', $option_name ) ) { // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
+			// Prepend prefix if not already present.
 			$actual_option_name = $this->prefix . $option_name;
 		}
 
-		return self::_set_option_value( $actual_option_name, $value, $autoload );
+		return self::set_option_value_internal( $actual_option_name, $value, $autoload );
 	}
 
 	/**
@@ -120,19 +111,19 @@ class Options {
 	 */
 	public function delete_option( $option_name = '' ) {
 
-		if (is_multisite()) {
-			switch_to_blog(get_main_network_id());
+		if ( is_multisite() ) {
+			switch_to_blog( get_main_network_id() );
 		}
 
 		$actual_option_name = $option_name;
-		if ( ! preg_match( '/\A' . preg_quote( $this->prefix ) . '/', $option_name ) ) {
-			//  prepend prefix if not already present
+		if ( ! preg_match( '/\A' . preg_quote( $this->prefix ) . '/', $option_name ) ) {  // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
+			// Prepend prefix if not already present.
 			$actual_option_name = $this->prefix . $option_name;
 		}
 
 		$result = \delete_option( $actual_option_name );
 
-		if (is_multisite()) {
+		if ( is_multisite() ) {
 			restore_current_blog();
 		}
 
@@ -149,41 +140,42 @@ class Options {
 	 *
 	 * In all other cases function \WpSecurityAuditLog::GetGlobalSetting() should be used instead.
 	 *
-	 * @see \WpSecurityAuditLog::GetGlobalSetting()
+	 * @see \WpSecurityAuditLog::get_global_setting()
 	 * @since  4.1.3
 	 * @param  string $option_name Option name we want to get a value for including necessary plugin prefix.
 	 * @param  mixed  $default     a default value to use when one doesn't exist.
 	 * @return mixed
 	 */
-	public static function get_option_value_ignore_prefix( $option_name = '', $default = null) {
-		return self::_get_option_value($option_name, $default);
+	public static function get_option_value_ignore_prefix( $option_name = '', $default = null ) {
+		return self::get_option_value_internal( $option_name, $default );
 	}
 
 	/**
 	 * Internal function used to get the value of an option. Any necessary prefixes are already contained in the option
 	 * name.
 	 *
-	 * @since  4.1.3
-	 * @param  string $option_name Option name we want to get a value for including necessary plugin prefix.
-	 * @param  mixed  $default     a default value to use when one doesn't exist.
+	 * @param string $option_name Option name we want to get a value for including necessary plugin prefix.
+	 * @param mixed  $default     a default value to use when one doesn't exist.
+	 *
 	 * @return mixed
+	 * @since  4.1.3
 	 */
-	private static function _get_option_value( $option_name = '', $default = null ) {
+	private static function get_option_value_internal( $option_name = '', $default = null ) {
 		// bail early if no option name was requested.
 		if ( empty( $option_name ) || ! is_string( $option_name ) ) {
 			return;
 		}
 
-		if (is_multisite()) {
-			switch_to_blog(get_main_network_id());
+		if ( is_multisite() ) {
+			switch_to_blog( get_main_network_id() );
 		}
 
 		$result = \get_option( $option_name, $default );
 
-		if (is_multisite()) {
+		if ( is_multisite() ) {
 			restore_current_blog();
 		}
-		return maybe_unserialize($result);
+		return maybe_unserialize( $result );
 	}
 
 	/**
@@ -197,28 +189,30 @@ class Options {
 	 *
 	 * In all other cases function \WpSecurityAuditLog::SetGlobalSetting() should be used instead.
 	 *
-	 * @see \WpSecurityAuditLog::SetGlobalSetting()
-	 * @since  4.1.3
-	 * @param  string $option_name Option name we want to get a value for including necessary plugin prefix.
-	 * @param  mixed  $value     A value to store under the option name.
-	 * @param  bool   $autoload    Whether or not to autoload this option.
+	 * @param string $option_name Option name we want to get a value for including necessary plugin prefix.
+	 * @param mixed  $value       A value to store under the option name.
+	 * @param bool   $autoload    Whether to autoload this option.
+	 *
 	 * @return mixed
+	 * @see    \WpSecurityAuditLog::set_global_setting()
+	 * @since  4.1.3
 	 */
 	public static function set_option_value_ignore_prefix( $option_name = '', $value = null, $autoload = false ) {
-		return self::_set_option_value( $option_name, $value, $autoload );
+		return self::set_option_value_internal( $option_name, $value, $autoload );
 	}
 
 	/**
 	 * Internal function used to set the value of an option. Any necessary prefixes are already contained in the option
 	 * name.
 	 *
+	 * @param string $option_name Option name we want to save a value for including necessary plugin prefix.
+	 * @param mixed  $value       A value to store under the option name.
+	 * @param bool   $autoload    Whether to autoload this option.
+	 *
+	 * @return bool Whether the option was updated.
 	 * @since  4.1.3
-	 * @param  string $option_name Option name we want to save a value for including necessary plugin prefix.
-	 * @param  mixed  $value       A value to store under the option name.
-	 * @param  bool   $autoload    Whether or not to autoload this option.
-	 * @return bool Whether or not the option was updated.
 	 */
-	private static function _set_option_value( $option_name = '', $value = null, $autoload = false ) {
+	private static function set_option_value_internal( $option_name = '', $value = null, $autoload = false ) {
 		// bail early if no option name or value was passed.
 		if ( empty( $option_name ) || null === $value ) {
 			return;
@@ -249,7 +243,7 @@ class Options {
 	 * @return bool
 	 */
 	public static function string_to_bool( $string ) {
-		return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || 'true' === $string || '1' === $string || 'on' === $string || 'enable' === $string);
+		return is_bool( $string ) ? $string : ( 'yes' === $string || 1 === $string || 'true' === $string || '1' === $string || 'on' === $string || 'enable' === $string );
 	}
 
 	/**

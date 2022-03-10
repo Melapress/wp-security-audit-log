@@ -25,8 +25,8 @@ class WSAL_Helpers_DataHelper {
 	 * @param mixed $data The data to encode.
 	 * @return string JSON string.
 	 */
-	public static function JsonEncode( $data ) {
-		return @json_encode( $data );
+	public static function json_encode( $data ) {
+		return @json_encode( $data ); // phpcs:ignore
 	}
 
 	/**
@@ -35,7 +35,7 @@ class WSAL_Helpers_DataHelper {
 	 * @param string $data - The JSON string to decode.
 	 * @return mixed Decoded data.
 	 */
-	public static function JsonDecode( $data ) {
-		return @json_decode( $data );
+	public static function json_decode( $data ) {
+		return @json_decode( $data ); // phpcs:ignore
 	}
 }

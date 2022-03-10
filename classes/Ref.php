@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignoreFile
 /**
  * Inspects and prints out PHP values as HTML in a nicer way than print_r().
  *
