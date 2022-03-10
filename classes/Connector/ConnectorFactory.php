@@ -58,7 +58,7 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 * Returns the default WPDB connector that must be always used for some data, for example user sessions and
 	 * also custom options table in the past.
 	 */
-	public static function GetDefaultConnector() {
+	public static function get_default_connector() {
 		return new WSAL_Connector_MySQLDB();
 	}
 
@@ -71,17 +71,17 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 * @return WSAL_Connector_ConnectorInterface
 	 * @throws Freemius_Exception
 	 */
-	public static function GetConnector( $config = null, $reset = false ) {
+	public static function get_connector( $config = null, $reset = false ) {
 		$connection_config = null;
 		if ( is_null( $config ) || empty( $config ) ) {
 			if ( self::$archive_mode ) {
 				// Force archive database if no config provided and archive mode is enabled.
-				$plugin            = WpSecurityAuditLog::GetInstance();
-				$connection_name   = $plugin->GetGlobalSetting( 'archive-connection' );
+				$plugin            = WpSecurityAuditLog::get_instance();
+				$connection_name   = $plugin->get_global_setting( 'archive-connection' );
 				$connection_config = self::load_connection_config( $connection_name );
 			} else {
 				// Default config - local or external, depending on plugin settings and licensing.
-				$connection_config = self::GetConfig( $config );
+				$connection_config = self::get_config( $config );
 			}
 		} else {
 			if ( is_string( $config ) ) {
@@ -124,9 +124,9 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 * @return array|null adapter config
 	 * @throws Freemius_Exception
 	 */
-	public static function GetConfig() {
-		$plugin          = WpSecurityAuditLog::GetInstance();
-		$connection_name = $plugin->GetGlobalSetting( 'adapter-connection' );
+	public static function get_config() {
+		$plugin          = WpSecurityAuditLog::get_instance();
+		$connection_name = $plugin->get_global_setting( 'adapter-connection' );
 
 		if ( function_exists( 'wsal_freemius' ) && ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
 			$is_not_paying = wsal_freemius()->is_not_paying();
@@ -138,8 +138,8 @@ abstract class WSAL_Connector_ConnectorFactory {
 			$connector = new WSAL_Connector_MySQLDB();
 
 			if ( ! self::$is_installed ) {
-				self::$is_installed = $connector->isInstalled();
-				$connector->installAll();
+				self::$is_installed = $connector->is_installed();
+				$connector->install_all();
 			}
 
 			$connection_name = null;
@@ -166,9 +166,9 @@ abstract class WSAL_Connector_ConnectorFactory {
 		 *
 		 * @see WSAL_Ext_Common::get_connection()
 		 */
-		$plugin         = WpSecurityAuditLog::GetInstance();
-		$connection_raw = maybe_unserialize( $plugin->GetGlobalSetting( 'connection-' . $connection_name ) );
-		$connection     = ( $connection_raw instanceof stdClass ) ? json_decode( json_encode( $connection_raw ), true ) : $connection_raw;
+		$plugin         = WpSecurityAuditLog::get_instance();
+		$connection_raw = maybe_unserialize( $plugin->get_global_setting( 'connection-' . $connection_name ) );
+		$connection     = ( $connection_raw instanceof stdClass ) ? json_decode( json_encode( $connection_raw ), true ) : $connection_raw; // phpcs:ignore
 		if ( ! is_array( $connection ) || empty( $connection ) ) {
 			return null;
 		}
@@ -183,7 +183,7 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 *
 	 * @return boolean true|false
 	 */
-	public static function CheckConfig( $config ) {
+	public static function check_config( $config ) {
 		// Only mysql supported at the moment.
 		if ( array_key_exists( 'type', $config ) && 'mysql' === $config['type'] ) {
 			try {

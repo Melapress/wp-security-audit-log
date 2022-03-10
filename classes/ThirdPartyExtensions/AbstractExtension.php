@@ -1,30 +1,48 @@
 <?php
+/**
+ * Abstract WSAL extension class.
+ *
+ * @package    wsal
+ * @subpackage add-ons
+ */
 
 if ( ! class_exists( 'WSAL_AbstractExtension' ) ) {
 
+	/**
+	 * Abstract class to provide basic information about a specific WSAL extension.
+	 *
+	 * @package    wsal
+	 * @subpackage add-ons
+	 */
 	abstract class WSAL_AbstractExtension {
 
 		/**
+		 * List of extensions.
+		 *
 		 * @var WSAL_AbstractExtension[]
 		 * @since 4.3.2
 		 */
-		private static $extensions = [];
+		private static $extensions = array();
 
 		/**
+		 * A map of custom post types specific to each extension (if any).
+		 *
 		 * @var WSAL_AbstractExtension[]
 		 * @since 4.3.2
 		 */
 		private static $post_types_map;
 
 		/**
-		 * @param string $post_type
+		 * Retrieves an extension class associated with given pst type.
+		 *
+		 * @param string $post_type Post type.
 		 *
 		 * @return WSAL_AbstractExtension|null
 		 * @since 4.3.2
 		 */
 		public static function get_extension_for_post_type( $post_type ) {
 			if ( is_null( self::$post_types_map ) ) {
-				self::$post_types_map = [];
+				self::$post_types_map = array();
 				if ( ! empty( self::$extensions ) ) {
 					foreach ( self::$extensions as $extension ) {
 						$post_types = $extension->get_custom_post_types();
@@ -46,13 +64,15 @@ if ( ! class_exists( 'WSAL_AbstractExtension' ) ) {
 
 		/**
 		 * WSAL_AbstractExtension constructor.
-		 *
 		 */
 		public function __construct() {
 			array_push( self::$extensions, $this );
 			$this->add_filters();
 		}
 
+		/**
+		 * Initialises necessary filters.
+		 */
 		public function add_filters() {
 			add_filter( 'wsal_filter_installable_plugins', array( $this, 'filter_installable_plugins' ), 10, 1 );
 			add_filter( 'wsal_addon_event_codes', array( $this, 'add_event_codes' ), 10, 1 );
@@ -95,17 +115,32 @@ if ( ! class_exists( 'WSAL_AbstractExtension' ) ) {
 		 * @since 4.3.2
 		 */
 		public function get_custom_post_types() {
-			return [];
+			return array();
 		}
 
+		/**
+		 * Retrieves a plugin name.
+		 *
+		 * @return string Plugin name.
+		 */
 		abstract public function get_plugin_name();
 
+		/**
+		 * Gets a plugin icon URL.
+		 *
+		 * @return string Plugin icon URL.
+		 */
 		abstract public function get_plugin_icon_url();
 
+		/**
+		 * Retrieves the color to use when showing some info about the extension.
+		 *
+		 * @return string HEX color.
+		 */
 		abstract public function get_color();
 
 		/**
-		 * Gets the filename of the plugin this extension is targetting.
+		 * Gets the filename of the plugin this extension is targeting.
 		 *
 		 * @return string Filename.
 		 *

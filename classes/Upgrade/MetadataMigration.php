@@ -1,4 +1,11 @@
 <?php
+/**
+ * Metadata migration class.
+ *
+ * @package    wsal
+ * @subpackage upgrade
+ * @since      4.4.0
+ */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,9 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * It handles metadata migration for 1 connection defined as part of the process information. This can be either "local"
  * to work with the local WP database or a name of connection defined by the Integrations extension.
  *
- * @package wsal
+ * @package    wsal
  * @subpackage upgrade
- * @since 4.4.0
+ * @since      4.4.0
  */
 class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 
@@ -28,7 +35,9 @@ class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 	const OPTION_NAME_MIGRATION_INFO = 'meta_data_migration_info_440';
 
 	/**
-	 * @inheritDoc
+	 * Action
+	 *
+	 * @var string
 	 */
 	protected $action = 'wsal_meta_data_migration_440';
 
@@ -53,8 +62,8 @@ class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 			return;
 		}
 
-		$plugin        = WpSecurityAuditLog::GetInstance();
-		$existing_info = $plugin->GetGlobalSetting( self::OPTION_NAME_MIGRATION_INFO, array() );
+		$plugin        = WpSecurityAuditLog::get_instance();
+		$existing_info = $plugin->get_global_setting( self::OPTION_NAME_MIGRATION_INFO, array() );
 		if ( empty( $existing_info ) ) {
 			return;
 		}
@@ -72,17 +81,17 @@ class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 *
-	 * @param array{start_time: int, processed_events_count: int, batch_size: int, connection: string} $item
+	 * @param array{start_time: int, processed_events_count: int, batch_size: int, connection: string} $item Migration process item.
 	 */
 	protected function task( $item ) {
-		//  migrate metadata for the next batch of events
+		// Migrate metadata for the next batch of events.
 		$items_migrated = $this->process_next_batch( $item['connection'], $item['batch_size'] );
 		if ( 0 === $items_migrated ) {
-			//  all metadata has been migrated
+			// All metadata has been migrated.
 			try {
-				//  delete the migration job info to indicate that the migration is done
+				// Delete the migration job info to indicate that the migration is done.
 				self::remove_migration_info( $item['connection'] );
 
 			} catch ( Exception $exception ) {
@@ -92,7 +101,7 @@ class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 			return false;
 		}
 
-		//  update and save the migration info
+		// Update and save the migration info.
 		$item['processed_events_count'] += $items_migrated;
 		self::store_migration_info( $item );
 
@@ -100,13 +109,15 @@ class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 	}
 
 	/**
-	 * @param string $connection
-	 * @param int $batch_size
+	 * Processes next batch of events that need to be migrated.
+	 *
+	 * @param string $connection Connection name.
+	 * @param int    $batch_size Batch size.
 	 *
 	 * @return int
 	 */
 	private function process_next_batch( $connection, $batch_size ) {
-		$plugin = WpSecurityAuditLog::GetInstance();
+		$plugin = WpSecurityAuditLog::get_instance();
 		if ( 'local' !== $connection && ! is_null( $plugin->external_db_util ) ) {
 			$connection = $plugin->external_db_util->get_connection( $connection );
 			if ( false === $connection ) {
@@ -114,37 +125,37 @@ class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 			}
 		}
 
-		$connector = $plugin->getConnector( $connection );
+		$connector = $plugin->get_connector( $connection );
 		/** @var WSAL_Adapters_MySQL_Occurrence $occurrence_adapter */
-		$occurrence_adapter = $connector->getAdapter( 'Occurrence' );
+		$occurrence_adapter = $connector->get_adapter( 'Occurrence' );
 
 		$occurrences_to_migrate = $occurrence_adapter->get_all_with_meta_to_migrate( $batch_size );
 		if ( ! empty( $occurrences_to_migrate ) ) {
-			$migrated_meta_keys =  array_keys( WSAL_Models_Occurrence::$migrated_meta );
+			$migrated_meta_keys           = array_keys( WSAL_Models_Occurrence::$migrated_meta );
 			$lowercase_migrated_meta_keys = array_map( 'strtolower', $migrated_meta_keys );
 			foreach ( $occurrences_to_migrate as $occurrence ) {
-				$all_metadata = $occurrence_adapter->GetMultiMeta( $occurrence );
+				$all_metadata = $occurrence_adapter->get_multi_meta( $occurrence );
 				if ( ! empty( $all_metadata ) ) {
 					foreach ( $all_metadata as $meta_model ) {
-						$meta_key = $meta_model->name;
-						$lowercase_meta_key = strtolower($meta_key);
+						$meta_key           = $meta_model->name;
+						$lowercase_meta_key = strtolower( $meta_key );
 
 						// We use lowercase meta keys to make sure we handle even legacy meta keys correctly, for
 						// example "username" was changed to "Username" at some point.
-						if ( in_array( $lowercase_meta_key , $lowercase_migrated_meta_keys ) ) {
-							//  this will store the meta in the occ table if it belongs there
+						if ( in_array( $lowercase_meta_key, $lowercase_migrated_meta_keys ) ) { // phpcs:ignore
+							// This will store the meta in the occ table if it belongs there.
 							$is_empty_string = is_string( $meta_model->value ) && 0 === strlen( $meta_model->value );
-							if ( ! $is_empty_string && in_array( $meta_key, $migrated_meta_keys )) {
+							if ( ! $is_empty_string && in_array( $meta_key, $migrated_meta_keys, true ) ) {
 								// The meta is set in the occurrence object on if it is an exact match, otherwise we
 								// would end up writing and deleting the same meta key endlessly.
-								$occurrence->SetMetaValue( $meta_key, $meta_model->value );
+								$occurrence->set_meta_value( $meta_key, $meta_model->value );
 							}
 
-							$meta_model->Delete();
+							$meta_model->delete();
 						}
 					}
 
-					$occurrence->Save();
+					$occurrence->save();
 				}
 			}
 		}
@@ -158,38 +169,40 @@ class WSAL_Upgrade_MetadataMigration extends WSAL_Vendor\WP_Background_Process {
 	 * @param string $connection_name Connection name.
 	 */
 	public static function remove_migration_info( $connection_name ) {
-		$plugin        = WpSecurityAuditLog::GetInstance();
-		$existing_info = $plugin->GetGlobalSetting( self::OPTION_NAME_MIGRATION_INFO, [] );
+		$plugin        = WpSecurityAuditLog::get_instance();
+		$existing_info = $plugin->get_global_setting( self::OPTION_NAME_MIGRATION_INFO, array() );
 
 		if ( array_key_exists( $connection_name, $existing_info ) ) {
 			unset( $existing_info[ $connection_name ] );
 		}
 
 		if ( empty( $existing_info ) ) {
-			$plugin->DeleteGlobalSetting( self::OPTION_NAME_MIGRATION_INFO );
+			$plugin->delete_global_setting( self::OPTION_NAME_MIGRATION_INFO );
 		} else {
-			$plugin->SetGlobalSetting( self::OPTION_NAME_MIGRATION_INFO, $existing_info );
+			$plugin->set_global_setting( self::OPTION_NAME_MIGRATION_INFO, $existing_info );
 		}
 	}
 
 	/**
-	 * @param Exception $exception
+	 * Handles an error.
+	 *
+	 * @param Exception $exception Error to handle.
 	 */
 	private function handle_error( $exception ) {
-		//  @todo handle migration error
+		// @todo handle migration error
 	}
 
 	/**
 	 * Stores or updates migration info for one particular connection.
 	 *
-	 * @param array{start_time: int, processed_events_count: int, batch_size: int, connection: string} $info
+	 * @param array{start_time: int, processed_events_count: int, batch_size: int, connection: string} $info Migration info data.
 	 */
 	public static function store_migration_info( $info ) {
-		$plugin          = WpSecurityAuditLog::GetInstance();
-		$existing_info   = $plugin->GetGlobalSetting( self::OPTION_NAME_MIGRATION_INFO, [] );
+		$plugin          = WpSecurityAuditLog::get_instance();
+		$existing_info   = $plugin->get_global_setting( self::OPTION_NAME_MIGRATION_INFO, array() );
 		$connection_name = $info['connection'];
 
 		$existing_info[ $connection_name ] = $info;
-		$plugin->SetGlobalSetting( self::OPTION_NAME_MIGRATION_INFO, $existing_info );
+		$plugin->set_global_setting( self::OPTION_NAME_MIGRATION_INFO, $existing_info );
 	}
 }

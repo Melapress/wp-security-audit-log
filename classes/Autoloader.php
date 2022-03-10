@@ -1,5 +1,11 @@
 <?php
 /**
+ * Autoloader class.
+ *
+ * @package wsal
+ */
+
+/**
  * Classes Auto Loader.
  *
  * @package wsal
@@ -29,7 +35,7 @@ class WSAL_Autoloader {
 		$this->plugin = $plugin;
 
 		// Register autoloader.
-		spl_autoload_register( array( $this, 'LoadClass' ) );
+		spl_autoload_register( array( $this, 'load_class' ) );
 	}
 
 	/**
@@ -38,7 +44,7 @@ class WSAL_Autoloader {
 	 * @param string $prefix - Prefix of the class.
 	 * @param string $path - Path of the file.
 	 */
-	public function Register( $prefix, $path ) {
+	public function register( $prefix, $path ) {
 		if ( ! isset( $this->paths[ $prefix ] ) ) {
 			$this->paths[ $prefix ] = array();
 		}
@@ -51,7 +57,7 @@ class WSAL_Autoloader {
 	 * @param string $class - Class name.
 	 * @return boolean - True if class is found and loaded, false otherwise.
 	 */
-	public function LoadClass( $class ) {
+	public function load_class( $class ) {
 		foreach ( $this->paths as $prefix => $paths ) {
 			foreach ( $paths as $path ) {
 				if ( strstr( $class, $prefix ) !== false ) {
@@ -72,7 +78,7 @@ class WSAL_Autoloader {
 	 * @param string $file File name.
 	 * @return string|false Class name or false on error.
 	 */
-	public function GetClassFileClassName( $file ) {
+	public function get_class_file_class_name( $file ) {
 		$file = str_replace( '\\', '/', $file ); // Win/DOS hotfix.
 
 		foreach ( $this->paths as $prefix => $paths ) {

@@ -4,8 +4,9 @@
  *
  * Meta Data sensor file.
  *
- * @since 1.0.0
- * @package wsal
+ * @since      1.0.0
+ * @package    wsal
+ * @subpackage sensors
  */
 
 // Exit if accessed directly.
@@ -27,9 +28,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 4019 User changed nickname for a user
  * 4020 User changed the display name for a user
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
- * @since 1.0.0
+ * @since      1.0.0
  */
 class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 
@@ -43,11 +44,11 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	/**
 	 * Listening to events using WP hooks.
 	 */
-	public function HookEvents() {
-		add_action( 'add_post_meta', array( $this, 'EventPostMetaCreated' ), 10, 3 );
-		add_action( 'update_post_meta', array( $this, 'EventPostMetaUpdating' ), 10, 3 );
-		add_action( 'updated_post_meta', array( $this, 'EventPostMetaUpdated' ), 10, 4 );
-		add_action( 'deleted_post_meta', array( $this, 'EventPostMetaDeleted' ), 10, 4 );
+	public function hook_events() {
+		add_action( 'add_post_meta', array( $this, 'event_post_meta_created' ), 10, 3 );
+		add_action( 'update_post_meta', array( $this, 'event_post_meta_updating' ), 10, 3 );
+		add_action( 'updated_post_meta', array( $this, 'event_post_meta_updated' ), 10, 4 );
+		add_action( 'deleted_post_meta', array( $this, 'event_post_meta_deleted' ), 10, 4 );
 		add_action( 'save_post', array( $this, 'reset_null_meta_counter' ), 10 );
 		add_action( 'add_user_meta', array( $this, 'event_user_meta_created' ), 10, 3 );
 		add_action( 'update_user_meta', array( $this, 'event_user_meta_updating' ), 10, 3 );
@@ -62,8 +63,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 * @param string $meta_key - Meta key.
 	 * @param mixed  $meta_value - Meta value.
 	 */
-	public function EventPostMetaCreated( $object_id, $meta_key, $meta_value ) {
-		if ( ! $this->CanLogMetaKey( 'post', $object_id, $meta_key ) || is_array( $meta_value ) ) {
+	public function event_post_meta_created( $object_id, $meta_key, $meta_value ) {
+		if ( ! $this->can_log_meta_key( 'post', $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
@@ -82,8 +83,9 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 		}
 
 		// Remove WC coupons from ignored array.
-		if ( ( $key = array_search( 'shop_coupon', $this->plugin->alerts->ignored_cpts ) ) !== false) {
-			unset( $this->plugin->alerts->ignored_cpts[$key] );
+		$key = array_search( 'shop_coupon', $this->plugin->alerts->ignored_cpts ); // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+		if ( false !== $key ) {
+			unset( $this->plugin->alerts->ignored_cpts[ $key ] );
 		}
 
 		// Ignore post types we are not interested in.
@@ -110,8 +112,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 		$log_meta_event = apply_filters( 'wsal_before_post_meta_create_event', true, $meta_key, $meta_value, $post );
 
 		if ( $log_meta_event ) {
-			$editor_link = $this->GetEditorLink( $post );
-			$this->plugin->alerts->Trigger(
+			$editor_link = $this->get_editor_link( $post );
+			$this->plugin->alerts->trigger_event(
 				2053,
 				array(
 					'PostID'             => $object_id,
@@ -136,7 +138,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 * @param int    $object_id - Object ID.
 	 * @param string $meta_key - Meta key.
 	 */
-	public function EventPostMetaUpdating( $meta_id, $object_id, $meta_key ) {
+	public function event_post_meta_updating( $meta_id, $object_id, $meta_key ) {
 		static $meta_type = 'post';
 		$meta             = get_metadata_by_mid( $meta_type, $meta_id );
 
@@ -154,8 +156,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 * @param string $meta_key - Meta key.
 	 * @param mixed  $meta_value - Meta value.
 	 */
-	public function EventPostMetaUpdated( $meta_id, $object_id, $meta_key, $meta_value ) {
-		if ( ! $this->CanLogMetaKey( 'post', $object_id, $meta_key ) || is_array( $meta_value ) ) {
+	public function event_post_meta_updated( $meta_id, $object_id, $meta_key, $meta_value ) {
+		if ( ! $this->can_log_meta_key( 'post', $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
@@ -178,7 +180,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 		 *
 		 * @param int    $meta_id        - Meta ID.
 		 * @param int    $object_id      - Post ID.
-		 * @param array  $this->old_meta - Array of meta data holding keys & values of old meta data before updating the current post.
+		 * @param array  $this->old_meta - Array of metadata holding keys & values of old metadata before updating the current post.
 		 * @param string $meta_key       - Meta key.
 		 * @param mixed  $meta_value     - Meta value.
 		 * @since 3.2.2
@@ -192,21 +194,21 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 			 * Runs before logging events for post meta updated i.e. 2054 or 2062.
 			 * This filter can be used as check to whether log these events or not.
 			 *
-			 * @since 3.3.1
+			 * @param bool     $log_event  - True if log meta event 2054 or 2062, false if not.
+			 * @param string   $meta_key   - Meta key.
+			 * @param mixed    $meta_value - Meta value.
+			 * @param stdClass $old_meta   - Old meta value and key object.
+			 * @param WP_Post  $post       - Post object.
+			 * @param integer  $meta_id    - Meta ID.
 			 *
-			 * @param bool     $log_event                  - True if log meta event 2054 or 2062, false if not.
-			 * @param string   $meta_key                   - Meta key.
-			 * @param mixed    $meta_value                 - Meta value.
-			 * @param stdClass $this->old_meta[ $meta_id ] - Old meta value and key object.
-			 * @param WP_Post  $post                       - Post object.
-			 * @param integer  $meta_id                    - Meta ID.
+			 * @since 3.3.1
 			 */
 			$log_meta_event = apply_filters( 'wsal_before_post_meta_update_event', true, $meta_key, $meta_value, $this->old_meta[ $meta_id ], $post, $meta_id );
 
 			// Check change in meta key.
 			if ( $log_meta_event && $this->old_meta[ $meta_id ]->key !== $meta_key ) {
-				$editor_link = $this->GetEditorLink( $post );
-				$this->plugin->alerts->Trigger(
+				$editor_link = $this->get_editor_link( $post );
+				$this->plugin->alerts->trigger_event(
 					2062,
 					array(
 						'PostID'             => $object_id,
@@ -224,8 +226,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 					)
 				);
 			} elseif ( $log_meta_event && $this->old_meta[ $meta_id ]->val !== $meta_value ) { // Check change in meta value.
-				$editor_link = $this->GetEditorLink( $post );
-				$this->plugin->alerts->TriggerIf(
+				$editor_link = $this->get_editor_link( $post );
+				$this->plugin->alerts->trigger_event_if(
 					2054,
 					array(
 						'PostID'             => $object_id,
@@ -242,13 +244,14 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 						$editor_link['name'] => $editor_link['value'],
 					),
 					/**
-					 * @param WSAL_AlertManager$manager
+					 * Don't fire if there's already an event 2131 or 2132 (ACF relationship change).
+					 *
+					 * @param WSAL_AlertManager $manager
 					 * @return bool
 					 */
 					function ( $manager ) {
-						//  don't fire if there's already an event 2131 or 2132 (ACF relationship change)
-						return ! $manager->WillOrHasTriggered( 2131 )
-						       && ! $manager->WillOrHasTriggered( 2132 );
+						return ! $manager->will_or_has_triggered( 2131 )
+							&& ! $manager->will_or_has_triggered( 2132 );
 					}
 				);
 			}
@@ -265,7 +268,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 * @param string $meta_key - Meta key.
 	 * @param mixed  $meta_value - Meta value.
 	 */
-	public function EventPostMetaDeleted( $meta_ids, $object_id, $meta_key, $meta_value ) {
+	public function event_post_meta_deleted( $meta_ids, $object_id, $meta_key, $meta_value ) {
 		// If meta key starts with "_" then return.
 		if ( '_' === substr( $meta_key, 0, 1 ) ) {
 			return;
@@ -279,9 +282,9 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 			return;
 		}
 
-		$editor_link = $this->GetEditorLink( $post );
+		$editor_link = $this->get_editor_link( $post );
 		foreach ( $meta_ids as $meta_id ) {
-			if ( ! $this->CanLogMetaKey( 'post', $object_id, $meta_key ) ) {
+			if ( ! $this->can_log_meta_key( 'post', $object_id, $meta_key ) ) {
 				continue;
 			}
 
@@ -311,8 +314,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 				continue;
 			}
 
-			if( 'trash' !== $post->post_status ) {
-				$this->plugin->alerts->Trigger(
+			if ( 'trash' !== $post->post_status ) {
+				$this->plugin->alerts->trigger_event(
 					2055,
 					array(
 						'PostID'             => $object_id,
@@ -349,7 +352,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 */
 	public function event_user_meta_created( $object_id, $meta_key, $meta_value ) {
 		// Check to see if we can log the meta key.
-		if ( ! $this->CanLogMetaKey( 'user', $object_id, $meta_key ) || is_array( $meta_value ) ) {
+		if ( ! $this->can_log_meta_key( 'user', $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
@@ -366,7 +369,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 		// Get user.
 		$user = get_user_by( 'ID', $object_id );
 
-		$this->plugin->alerts->TriggerIf(
+		$this->plugin->alerts->trigger_event_if(
 			4016,
 			array(
 				'TargetUsername'    => $user->user_login,
@@ -409,7 +412,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 */
 	public function event_user_meta_updated( $meta_id, $object_id, $meta_key, $meta_value ) {
 		// Check to see if we can log the meta key.
-		if ( ! $this->CanLogMetaKey( 'user', $object_id, $meta_key ) || is_array( $meta_value ) ) {
+		if ( ! $this->can_log_meta_key( 'user', $object_id, $meta_key ) || is_array( $meta_value ) ) {
 			return;
 		}
 
@@ -427,7 +430,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 		if ( isset( $this->old_meta[ $meta_id ] ) && ! in_array( $meta_key, $username_meta, true ) ) {
 			// Check change in meta value.
 			if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
-				$this->plugin->alerts->TriggerIf(
+				$this->plugin->alerts->trigger_event_if(
 					4015,
 					array(
 						'TargetUsername'    => $user->user_login,
@@ -450,7 +453,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 			switch ( $meta_key ) {
 				case 'first_name':
 					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
-						$this->plugin->alerts->Trigger(
+						$this->plugin->alerts->trigger_event(
 							4017,
 							array(
 								'TargetUsername' => $user->user_login,
@@ -468,7 +471,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 
 				case 'last_name':
 					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
-						$this->plugin->alerts->Trigger(
+						$this->plugin->alerts->trigger_event(
 							4018,
 							array(
 								'TargetUsername' => $user->user_login,
@@ -485,7 +488,7 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 
 				case 'nickname':
 					if ( $this->old_meta[ $meta_id ]->val !== $meta_value ) {
-						$this->plugin->alerts->Trigger(
+						$this->plugin->alerts->trigger_event(
 							4019,
 							array(
 								'TargetUsername' => $user->user_login,
@@ -514,8 +517,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 * @return bool
 	 * @since 3.2.3
 	 */
-	public function must_not_contain_role_changes( WSAL_AlertManager $manager ) {
-		return ! $manager->WillOrHasTriggered( 4002 );
+	public function must_not_contain_role_changes( $manager ) {
+		return ! $manager->will_or_has_triggered( 4002 );
 	}
 
 	/**
@@ -526,8 +529,8 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 	 * @return bool
 	 * @since 3.2.3
 	 */
-	public function must_not_contain_new_user_alert( WSAL_AlertManager $manager ) {
-		return ! $manager->WillOrHasTriggered( 4001 ) && ! $manager->WillOrHasTriggered( 4012 );
+	public function must_not_contain_new_user_alert( $manager ) {
+		return ! $manager->will_or_has_triggered( 4001 ) && ! $manager->will_or_has_triggered( 4012 );
 	}
 
 	/**

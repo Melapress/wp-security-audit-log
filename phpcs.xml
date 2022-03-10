@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<ruleset name="WP White Security PHPCS">
+	<description>WP White Security PHPCS extended.</description>
+
+	<exclude-pattern>.github/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/php-scoper/*</exclude-pattern>
+	<exclude-pattern>*/tests/*</exclude-pattern>
+	<exclude-pattern>*/third-party/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/index.php</exclude-pattern>
+
+	<rule ref="WordPress">
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
+		<exclude name="Squiz.Commenting.BlockComment.NoNewLine" />
+		<exclude name="Squiz.Commenting.FunctionCommentThrowTag.Missing" />
+		<exclude name="Squiz.Commenting.FunctionComment.EmptyThrows" />
+		<exclude name="Generic.Commenting.DocComment.MissingShort" />
+	</rule>
+
+	<rule ref="Squiz.Commenting.FunctionComment">
+		<properties>
+			<property name="skipIfInheritdoc" value="true"/>
+		</properties>
+	</rule>
+
+	<!-- Loads the PHP Compatibility ruleset. -->
+	<rule ref="PHPCompatibilityWP" />
+
+	<!-- Sets the minimum supported WP version to 5.0. -->
+	<config name="minimum_supported_wp_version" value="5.0" />
+
+	<!-- PHP version check. -->
+	<config name="testVersion" value="7.0-"/>
+
+	<arg name="extensions" value="php"/>
+
+	<arg name="colors"/>
+</ruleset>
