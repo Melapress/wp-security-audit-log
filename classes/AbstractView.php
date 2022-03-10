@@ -1,9 +1,22 @@
 <?php
 /**
+ * Abstract view class file.
+ *
+ * @package    wsal
+ * @subpackage views
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
  * Abstract class used in all the views.
  *
- * @see Views/*.php
- * @package wsal
+ * @see        Views/*.php
+ * @package    wsal
+ * @subpackage views
  */
 abstract class WSAL_AbstractView {
 
@@ -12,14 +25,14 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @var WpSecurityAuditLog
 	 */
-	protected $_plugin;
+	protected $plugin;
 
 	/**
 	 * WordPress version.
 	 *
 	 * @var string
 	 */
-	protected $_wpversion;
+	protected $wp_version;
 
 	/**
 	 * Contains the result to a call to add_submenu_page().
@@ -40,25 +53,25 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @var array
 	 */
-	public static $AllowedNoticeNames = array();
+	public static $allowed_notice_names = array();
 
 	/**
 	 * Method: Constructor.
 	 *
-	 * @param  object $plugin - Instance of WpSecurityAuditLog.
+	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
-		$this->_plugin = $plugin;
+		$this->plugin = $plugin;
 
 		// Get and store WordPress version.
 		global $wp_version;
 		if ( ! isset( $wp_version ) ) {
-			$wp_version = get_bloginfo( 'version' );
+			$wp_version = get_bloginfo( 'version' ); // phpcs:ignore
 		}
-		$this->_wpversion = floatval( $wp_version );
+		$this->wp_version = floatval( $wp_version );
 
 		// Handle admin notices.
-		add_action( 'wp_ajax_AjaxDismissNotice', array( $this, 'AjaxDismissNotice' ) );
+		add_action( 'wp_ajax_AjaxDismissNotice', array( $this, 'ajax_dismiss_notice' ) );
 	}
 
 	/**
@@ -66,8 +79,8 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @internal
 	 */
-	public function AjaxDismissNotice() {
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'view' ) ) {
+	public function ajax_dismiss_notice() {
+		if ( ! $this->plugin->settings()->current_user_can( 'view' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -78,7 +91,7 @@ abstract class WSAL_AbstractView {
 			die( 'Notice name expected as "notice" parameter.' );
 		}
 
-		$this->DismissNotice( $post_array['notice'] );
+		$this->dismiss_notice( $post_array['notice'] );
 	}
 
 	/**
@@ -87,11 +100,11 @@ abstract class WSAL_AbstractView {
 	 * @param string $name — Name of notice.
 	 * @return boolean — Whether notice got dismissed or not.
 	 */
-	public function IsNoticeDismissed( $name ) {
+	public function is_notice_dismissed( $name ) {
 		$user_id  = get_current_user_id();
 		$meta_key = 'wsal-notice-' . $name;
 
-		self::$AllowedNoticeNames[] = $name;
+		self::$allowed_notice_names[] = $name;
 		return get_user_meta( $user_id, $meta_key, true );
 	}
 
@@ -100,11 +113,11 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @param string $name — Name of notice to dismiss.
 	 */
-	public function DismissNotice( $name ) {
+	public function dismiss_notice( $name ) {
 		$user_id   = get_current_user_id();
 		$meta_key  = 'wsal-notice-' . $name;
 		$old_value = get_user_meta( $user_id, $meta_key, true );
-		if ( in_array( $name, self::$AllowedNoticeNames ) || false === $old_value || empty( $old_value ) ) {
+		if ( in_array( $name, self::$allowed_notice_names ) || false === $old_value || empty( $old_value ) ) { // phpcs:ignore
 			update_user_meta( $user_id, $meta_key, '1' );
 		}
 	}
@@ -114,8 +127,8 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @param string $name — Makes this notice available.
 	 */
-	public function RegisterNotice( $name ) {
-		self::$AllowedNoticeNames[] = $name;
+	public function register_notice( $name ) {
+		self::$allowed_notice_names[] = $name;
 	}
 
 	/**
@@ -123,38 +136,38 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @return string
 	 */
-	abstract public function GetName();
+	abstract public function get_name();
 
 	/**
 	 * Method: Return page title.
 	 *
 	 * @return string
 	 */
-	abstract public function GetTitle();
+	abstract public function get_title();
 
 	/**
 	 * Method: Page icon name.
 	 *
 	 * @return string
 	 */
-	abstract public function GetIcon();
+	abstract public function get_icon();
 
 	/**
 	 * Method: Menu weight, the higher this is, the lower it goes.
 	 *
 	 * @return int
 	 */
-	abstract public function GetWeight();
+	abstract public function get_weight();
 
 	/**
 	 * Renders and outputs the view directly.
 	 */
-	abstract public function Render();
+	abstract public function render();
 
 	/**
 	 * Renders the view icon (this has been deprecated in newwer WP versions).
 	 */
-	public function RenderIcon() {
+	public function render_icon() {
 		?>
 		<div id="icon-plugins" class="icon32"><br></div>
 		<?php
@@ -163,19 +176,19 @@ abstract class WSAL_AbstractView {
 	/**
 	 * Renders the view title.
 	 */
-	public function RenderTitle() {
+	public function render_title() {
 		if ( $this->is_title_visible() ) {
-			echo '<h2>' . esc_html( $this->GetTitle() ) . '</h2>';
+			echo '<h2>' . esc_html( $this->get_title() ) . '</h2>';
 		}
 	}
 
 	/**
 	 * Method: Render content of the view.
 	 *
-	 * @link self::Render()
+	 * @see WSAL_AbstractView::render()
 	 */
-	public function RenderContent() {
-		$this->Render();
+	public function render_content() {
+		$this->render();
 	}
 
 	/**
@@ -183,7 +196,7 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @return boolean
 	 */
-	public function IsVisible() {
+	public function is_visible() {
 		return true;
 	}
 
@@ -192,7 +205,7 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @return boolean
 	 */
-	public function IsAccessible() {
+	public function is_accessible() {
 		return true;
 	}
 
@@ -208,20 +221,20 @@ abstract class WSAL_AbstractView {
 	/**
 	 * Used for rendering stuff into head tag.
 	 */
-	public function Header() {}
+	public function header() {}
 
 	/**
-	 * Used for rendering stuff in page fotoer.
+	 * Used for rendering stuff in page footer.
 	 */
-	public function Footer() {}
+	public function footer() {}
 
 	/**
 	 * Method: Safe view menu name.
 	 *
 	 * @return string
 	 */
-	public function GetSafeViewName() {
-		return 'wsal-' . preg_replace( '/[^A-Za-z0-9\-]/', '-', $this->GetViewName() );
+	public function get_safe_view_name() {
+		return 'wsal-' . preg_replace( '/[^A-Za-z0-9\-]/', '-', $this->get_view_name() );
 	}
 
 	/**
@@ -229,7 +242,7 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @return boolean
 	 */
-	public function HasPluginShortcutLink() {
+	public function has_plugin_shortcut_link() {
 		return false;
 	}
 
@@ -238,9 +251,9 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @return string
 	 */
-	public function GetUrl() {
+	public function get_url() {
 		$fn = function_exists( 'network_admin_url' ) ? 'network_admin_url' : 'admin_url';
-		return $fn( 'admin.php?page=' . $this->GetSafeViewName() );
+		return $fn( 'admin.php?page=' . $this->get_safe_view_name() );
 	}
 
 	/**
@@ -248,7 +261,7 @@ abstract class WSAL_AbstractView {
 	 *
 	 * @return string
 	 */
-	public function GetViewName() {
+	public function get_view_name() {
 		return strtolower( str_replace( array( 'WSAL_Views_', 'WSAL_' ), '', get_class( $this ) ) );
 	}
 

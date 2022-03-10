@@ -1,5 +1,14 @@
 <?php
 /**
+ * WSAL_Nicer class.
+ *
+ * @since   2.0
+ * @package wsal
+ */
+
+// phpcs:disable
+
+/**
  * Inspects and prints out PHP values as HTML in a nicer way than print_r().
  *
  * @author Christian Sciberras <christian@sciberras.me>
@@ -9,6 +18,7 @@
  * @version 2.0
  * @since 2.0
  * @package wsal
+ *
  */
 class WSAL_Nicer {
 

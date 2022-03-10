@@ -4,8 +4,9 @@
  *
  * Widgets sensor class file.
  *
- * @since 1.0.0
- * @package wsal
+ * @since      1.0.0
+ * @package    wsal
+ * @subpackage sensors
  */
 
 // Exit if accessed directly.
@@ -22,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2045 User moved widget
  * 2071 User changed widget position
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
  */
 class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
@@ -32,24 +33,24 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 	 *
 	 * @var array
 	 */
-	protected $_widget_move_data = null;
+	protected $widget_move_data = null;
 
 	/**
-	 * Listening to events using WP hooks.
+	 * {@inheritDoc}
 	 */
-	public function HookEvents() {
+	public function hook_events() {
 		if ( current_user_can( 'edit_theme_options' ) ) {
-			add_action( 'admin_init', array( $this, 'EventWidgetMove' ) );
-			add_action( 'admin_init', array( $this, 'EventWidgetPostMove' ) );
+			add_action( 'admin_init', array( $this, 'event_widget_move' ) );
+			add_action( 'admin_init', array( $this, 'event_widget_post_move' ) );
 		}
-		add_action( 'sidebar_admin_setup', array( $this, 'EventWidgetActivity' ) );
+		add_action( 'sidebar_admin_setup', array( $this, 'event_widget_activity' ) );
 	}
 
 	/**
 	 * Triggered when a user accesses the admin area.
 	 * Moved widget.
 	 */
-	public function EventWidgetMove() {
+	public function event_widget_move() {
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST );
 
@@ -59,7 +60,7 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 
 		if ( isset( $post_array ) && ! empty( $post_array['sidebars'] ) ) {
 			$current_sidebars = $post_array['sidebars'];
-			$sidebars = array();
+			$sidebars         = array();
 			foreach ( $current_sidebars as $key => $val ) {
 				$sb = array();
 				if ( ! empty( $val ) ) {
@@ -74,15 +75,15 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 				$sidebars[ $key ] = $sb;
 			}
 			$current_sidebars = $sidebars;
-			$db_sidebars = get_option( 'sidebars_widgets' );
-			$widget_name = $from_sidebar = $to_sidebar = '';
+			$db_sidebars      = get_option( 'sidebars_widgets' );
+			$widget_name      = $from_sidebar = $to_sidebar = ''; // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
 			foreach ( $current_sidebars as $sidebar_name => $values ) {
 				if ( is_array( $values ) && ! empty( $values ) && isset( $db_sidebars[ $sidebar_name ] ) ) {
 					foreach ( $values as $widget_name ) {
-						if ( ! in_array( $widget_name, $db_sidebars[ $sidebar_name ] ) ) {
+						if ( ! in_array( $widget_name, $db_sidebars[ $sidebar_name ] ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 							$to_sidebar = $sidebar_name;
 							foreach ( $db_sidebars as $name => $v ) {
-								if ( is_array( $v ) && ! empty( $v ) && in_array( $widget_name, $v ) ) {
+								if ( is_array( $v ) && ! empty( $v ) && in_array( $widget_name, $v ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 									$from_sidebar = $name;
 									continue;
 								}
@@ -101,16 +102,18 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 				// as at this moment the $wp_registered_sidebars variable is not yet populated
 				// so we cannot retrieve the name for sidebar-1 || sidebar-2
 				// we will then check for this variable in the EventWidgetPostMove() event.
-				$this->_widget_move_data = array(
+				$this->widget_move_data = array(
 					'widget' => $widget_name,
-					'from' => $from_sidebar,
-					'to' => $to_sidebar,
+					'from'   => $from_sidebar,
+					'to'     => $to_sidebar,
 				);
+
 				return;
 			}
 
-			$this->plugin->alerts->Trigger(
-				2045, array(
+			$this->plugin->alerts->trigger_event(
+				2045,
+				array(
 					'WidgetName' => $widget_name,
 					'OldSidebar' => $from_sidebar,
 					'NewSidebar' => $to_sidebar,
@@ -123,12 +126,12 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 	 * Triggered when a user accesses the admin area.
 	 * Changed widget position or moved widget.
 	 */
-	public function EventWidgetPostMove() {
+	public function event_widget_post_move() {
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST );
 
 		// #!-- generates the event 2071
-		if ( isset( $post_array['action'] ) && ('widgets-order' == $post_array['action']) ) {
+		if ( isset( $post_array['action'] ) && ( 'widgets-order' === $post_array['action'] ) ) {
 			if ( isset( $post_array['sidebars'] ) ) {
 				// Get the sidebars from $post_array.
 				$request_sidebars = array();
@@ -158,20 +161,21 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 					foreach ( $request_sidebars as $sidebar_name => $widgets ) {
 						if ( isset( $sidebar_widgets[ $sidebar_name ] ) ) {
 							foreach ( $sidebar_widgets[ $sidebar_name ] as $i => $widget_name ) {
-								$index = array_search( $widget_name, $widgets );
+								$index = array_search( $widget_name, $widgets ); // phpcs:ignore
 								// Check to see whether or not the widget has been moved.
-								if ( $i != $index ) {
+								if ( $i != $index ) { // phpcs:ignore
 									$sn = $sidebar_name;
 									// Try to retrieve the real name of the sidebar, otherwise fall-back to id: $sidebar_name.
 									if ( $wp_registered_sidebars && isset( $wp_registered_sidebars[ $sidebar_name ] ) ) {
 										$sn = $wp_registered_sidebars[ $sidebar_name ]['name'];
 									}
-									$this->plugin->alerts->Trigger(
-										2071, array(
-											'WidgetName' => $widget_name,
+									$this->plugin->alerts->trigger_event(
+										2071,
+										array(
+											'WidgetName'  => $widget_name,
 											'OldPosition' => $i + 1,
 											'NewPosition' => $index + 1,
-											'Sidebar' => $sn,
+											'Sidebar'     => $sn,
 										)
 									);
 								}
@@ -182,29 +186,28 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 			}
 		}
 		// #!--
-		if ( $this->_widget_move_data ) {
-			$widget_name = $this->_widget_move_data['widget'];
-			$from_sidebar = $this->_widget_move_data['from'];
-			$to_sidebar = $this->_widget_move_data['to'];
+		if ( $this->widget_move_data ) {
+			$widget_name  = $this->widget_move_data['widget'];
+			$from_sidebar = $this->widget_move_data['from'];
+			$to_sidebar   = $this->widget_move_data['to'];
 
 			global $wp_registered_sidebars;
 
 			if ( preg_match( '/^sidebar-/', $from_sidebar ) ) {
 				$from_sidebar = isset( $wp_registered_sidebars[ $from_sidebar ] )
-				? $wp_registered_sidebars[ $from_sidebar ]['name']
-				: $from_sidebar
-				;
+					? $wp_registered_sidebars[ $from_sidebar ]['name']
+					: $from_sidebar;
 			}
 
 			if ( preg_match( '/^sidebar-/', $to_sidebar ) ) {
 				$to_sidebar = isset( $wp_registered_sidebars[ $to_sidebar ] )
-				? $wp_registered_sidebars[ $to_sidebar ]['name']
-				: $to_sidebar
-				;
+					? $wp_registered_sidebars[ $to_sidebar ]['name']
+					: $to_sidebar;
 			}
 
-			$this->plugin->alerts->Trigger(
-				2045, array(
+			$this->plugin->alerts->trigger_event(
+				2045,
+				array(
 					'WidgetName' => $widget_name,
 					'OldSidebar' => $from_sidebar,
 					'NewSidebar' => $to_sidebar,
@@ -215,8 +218,10 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 
 	/**
 	 * Widgets Activity (added, modified, deleted).
+	 *
+	 * phpcs:disable WordPress.Arrays.ArrayKeySpacingRestrictions.NoSpacesAroundArrayKeys
 	 */
-	public function EventWidgetActivity() {
+	public function event_widget_activity() {
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST );
 
@@ -229,32 +234,34 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 		}
 
 		global $wp_registered_sidebars;
-		$can_check_sidebar = (empty( $wp_registered_sidebars ) ? false : true);
+		$can_check_sidebar = ! empty( $wp_registered_sidebars );
 
 		switch ( true ) {
 			// Added widget.
-			case isset( $post_array['add_new'] ) && 'multi' == $post_array['add_new']:
+			case isset( $post_array['add_new'] ) && 'multi' === $post_array['add_new']:
 				$sidebar = isset( $post_array['sidebar'] ) ? $post_array['sidebar'] : null;
 				if ( $can_check_sidebar && preg_match( '/^sidebar-/', $sidebar ) ) {
 					$sidebar = $wp_registered_sidebars[ $sidebar ]['name'];
 				}
-				$this->plugin->alerts->Trigger(
-					2042, array(
+				$this->plugin->alerts->trigger_event(
+					2042,
+					array(
 						'WidgetName' => $post_array['id_base'],
-						'Sidebar' => $sidebar,
+						'Sidebar'    => $sidebar,
 					)
 				);
 				break;
 			// Deleted widget.
-			case isset( $post_array['delete_widget'] ) && intval( $post_array['delete_widget'] ) == 1:
+			case isset( $post_array['delete_widget'] ) && 1 === intval( $post_array['delete_widget'] ):
 				$sidebar = isset( $post_array['sidebar'] ) ? $post_array['sidebar'] : null;
 				if ( $can_check_sidebar && preg_match( '/^sidebar-/', $sidebar ) ) {
 					$sidebar = $wp_registered_sidebars[ $sidebar ]['name'];
 				}
-				$this->plugin->alerts->Trigger(
-					2044, array(
+				$this->plugin->alerts->trigger_event(
+					2044,
+					array(
 						'WidgetName' => $post_array['id_base'],
-						'Sidebar' => $sidebar,
+						'Sidebar'    => $sidebar,
 					)
 				);
 				break;
@@ -271,7 +278,7 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 				}
 
 				$widget_name = $post_array['id_base'];
-				$sidebar = isset( $post_array['sidebar'] ) ? $post_array['sidebar'] : null;
+				$sidebar     = isset( $post_array['sidebar'] ) ? $post_array['sidebar'] : null;
 				$widget_data = isset( $post_array[ "widget-$widget_name" ][ $widget_id ] )
 					? $post_array[ "widget-$widget_name" ][ $widget_id ]
 					: null;
@@ -287,28 +294,29 @@ class WSAL_Sensors_Widgets extends WSAL_AbstractSensor {
 
 				// Transform 'on' -> 1.
 				foreach ( $widget_data as $k => $v ) {
-					if ( 'on' == $v ) {
+					if ( 'on' === $v ) {
 						$widget_data[ $k ] = 1;
 					}
 				}
 
 				// Compare - checks for any changes inside widgets.
-				$diff = array_diff_assoc( $widget_data, $widget_db_data[ $widget_id ] );
+				$diff  = array_diff_assoc( $widget_data, $widget_db_data[ $widget_id ] );
 				$count = count( $diff );
 				if ( $count > 0 ) {
 					if ( $can_check_sidebar && preg_match( '/^sidebar-/', $sidebar ) ) {
 						$sidebar = $wp_registered_sidebars[ $sidebar ]['name'];
 					}
-					$this->plugin->alerts->Trigger(
-						2043, array(
+					$this->plugin->alerts->trigger_event(
+						2043,
+						array(
 							'WidgetName' => $widget_name,
-							'Sidebar' => $sidebar,
+							'Sidebar'    => $sidebar,
 						)
 					);
 				}
 				break;
 			default:
-				//  fallback for any other cases would go here
+				// Fallback for any other cases would go here.
 				break;
 		}
 	}

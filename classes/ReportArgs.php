@@ -1,4 +1,13 @@
 <?php
+/**
+ * Report arguments class.
+ *
+ * @package    wsal
+ * @subpackage reports
+ *
+ * @author     Martin Krcho <martin@wpwhitesecurity.com>
+ * @since      4.3.2
+ */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -175,9 +184,11 @@ class WSAL_ReportArgs {
 	public $post_status__not_in;
 
 	/**
-	 * @param array $filters
+	 * Builds the object from alternative filters data.
 	 *
-	 * @return WSAL_ReportArgs
+	 * @param array $filters Filters data.
+	 *
+	 * @return WSAL_ReportArgs Report args object.
 	 */
 	public static function build_from_alternative_filters( $filters ) {
 		$_filters = array();
@@ -191,14 +202,16 @@ class WSAL_ReportArgs {
 			}
 		}
 
-		return self::build_from_extension_filters( $_filters, WpSecurityAuditLog::GetInstance()->reports_util );
+		return self::build_from_extension_filters( $_filters, WpSecurityAuditLog::get_instance()->reports_util );
 	}
 
 	/**
+	 * Builds the object from extension filters data.
+	 *
 	 * @param array           $filters      An array of filters as defined in the Reports extension form.
 	 * @param WSAL_Rep_Common $report_utils Reporting utils.
 	 *
-	 * @return WSAL_ReportArgs
+	 * @return WSAL_ReportArgs Report args object.
 	 */
 	public static function build_from_extension_filters( $filters, $report_utils ) {
 
@@ -343,7 +356,7 @@ class WSAL_ReportArgs {
 		$groups = self::is_field_present_and_non_empty_array( $groups_key, $array ) ? $array[ $groups_key ] : array();
 		$alerts = self::is_field_present_and_non_empty_array( $codes_key, $array ) ? $array[ $codes_key ] : array();
 
-		$result = $report_utils->GetCodesByGroups( $groups, $alerts, false );
+		$result = $report_utils->get_codes_by_groups( $groups, $alerts, false );
 		if ( false === $result ) {
 			return array();
 		}

@@ -4,8 +4,9 @@
  *
  * WSAL users sessions page.
  *
- * @since 1.0.0
- * @package wsal
+ * @since      1.0.0
+ * @package    wsal
+ * @subpackage views
  */
 
 // Exit if accessed directly.
@@ -17,54 +18,55 @@ if ( ! defined( 'ABSPATH' ) ) {
  * User Sessions Management Add-On promo Page.
  * Used only if the plugin is not activated.
  *
- * @package wsal
+ * @package    wsal
+ * @subpackage views
  */
 class WSAL_Views_LogInUsers extends WSAL_ExtensionPlaceholderView {
 
 	/**
-	 * Method: Get View Title.
+	 * {@inheritDoc}
 	 */
-	public function GetTitle() {
-		return __( 'User Sessions Management Extension', 'wp-security-audit-log' );
+	public function get_title() {
+		return esc_html__( 'User Sessions Management Extension', 'wp-security-audit-log' );
 	}
 
 	/**
-	 * Method: Get View Name.
+	 * {@inheritDoc}
 	 */
-	public function GetName() {
-		return __( 'Logged In Users &#8682;', 'wp-security-audit-log' );
+	public function get_name() {
+		return esc_html__( 'Logged In Users &#8682;', 'wp-security-audit-log' );
 	}
 
 	/**
-	 * Method: Get View Weight.
+	 * {@inheritDoc}
 	 */
-	public function GetWeight() {
+	public function get_weight() {
 		return 7;
 	}
 
 	/**
-	 * Page View.
+	 * {@inheritDoc}
 	 */
-	public function Render() {
-		$title        = __( 'Real-Time Users Sessions Management', 'wp-security-audit-log' );
-		$description  = __( 'Better manage your users’ logins and sessions. Upgrade to premium and:', 'wp-security-audit-log' );
-		$addon_img    = trailingslashit( WSAL_BASE_URL ) . 'img/' . $this->GetSafeViewName() . '.png';
+	public function render() {
+		$title        = esc_html__( 'Real-Time Users Sessions Management', 'wp-security-audit-log' );
+		$description  = esc_html__( 'Better manage your users’ logins and sessions. Upgrade to premium and:', 'wp-security-audit-log' );
+		$addon_img    = trailingslashit( WSAL_BASE_URL ) . 'img/' . $this->get_safe_view_name() . '.png';
 		$subtext      = false;
 		$premium_list = array(
-			__( 'See who is logged in to your site', 'wp-security-audit-log' ),
-			__( 'When they logged in and from where', 'wp-security-audit-log' ),
-			__( 'The last change they have done in real-time', 'wp-security-audit-log' ),
-			__( 'Terminate any users’ session with a click of a button', 'wp-security-audit-log' ),
-			__( 'Limit or block multiple sessions for the same user', 'wp-security-audit-log' ),
-			__( 'Get alerted of multiple same user sessions', 'wp-security-audit-log' ),
+			esc_html__( 'See who is logged in to your site', 'wp-security-audit-log' ),
+			esc_html__( 'When they logged in and from where', 'wp-security-audit-log' ),
+			esc_html__( 'The last change they have done in real-time', 'wp-security-audit-log' ),
+			esc_html__( 'Terminate any users’ session with a click of a button', 'wp-security-audit-log' ),
+			esc_html__( 'Limit or block multiple sessions for the same user', 'wp-security-audit-log' ),
+			esc_html__( 'Get alerted of multiple same user sessions', 'wp-security-audit-log' ),
 		);
 		$screenshots  = array(
 			array(
-				'desc' => __( 'See who is logged in to your WordPress site and multisite network in real-time.', 'wp-security-audit-log' ),
+				'desc' => esc_html__( 'See who is logged in to your WordPress site and multisite network in real-time.', 'wp-security-audit-log' ),
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/users-sessions-management/user_sessions_1.png',
 			),
 			array(
-				'desc' => __( 'Limit, manage and block multiple same user sessions easily.', 'wp-security-audit-log' ),
+				'desc' => esc_html__( 'Limit, manage and block multiple same user sessions easily.', 'wp-security-audit-log' ),
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/users-sessions-management/user_sessions_2.png',
 			),
 		);

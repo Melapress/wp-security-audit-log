@@ -4,7 +4,7 @@
  *
  * View manager class file.
  *
- * @since 1.0.0
+ * @since   1.0.0
  * @package wsal
  */
 
@@ -35,25 +35,24 @@ class WSAL_ViewManager {
 	 *
 	 * @var object
 	 */
-	protected $_plugin;
+	protected $plugin;
 
 	/**
 	 * Active view.
 	 *
 	 * @var WSAL_AbstractView|null
 	 */
-	protected $_active_view = false;
+	protected $active_view = false;
 
 	/**
 	 * Method: Constructor.
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
 	 *
-	 * @throws Freemius_Exception
 	 * @since  1.0.0
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
-		$this->_plugin = $plugin;
+		$this->plugin = $plugin;
 
 		// Skipped views array.
 		$skip_views = array();
@@ -65,8 +64,8 @@ class WSAL_ViewManager {
 		 *
 		 * @since 3.2.3
 		 */
-		if ( file_exists( $this->_plugin->GetBaseDir() . 'classes/Views/SetupWizard.php' ) ) {
-			$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/SetupWizard.php';
+		if ( file_exists( $this->plugin->get_base_dir() . 'classes/Views/SetupWizard.php' ) ) {
+			$skip_views[] = $this->plugin->get_base_dir() . 'classes/Views/SetupWizard.php';
 		}
 
 		/**
@@ -76,7 +75,7 @@ class WSAL_ViewManager {
 		 *
 		 * @since 4.0.4
 		 */
-		$skip_views[] = $this->_plugin->GetBaseDir() . 'classes/Views/Licensing.php';
+		$skip_views[] = $this->plugin->get_base_dir() . 'classes/Views/Licensing.php';
 
 		/**
 		 * Skipped Views.
@@ -89,31 +88,37 @@ class WSAL_ViewManager {
 		$skip_views = apply_filters( 'wsal_skip_views', $skip_views );
 
 		// Load views.
-		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( $this->_plugin->GetBaseDir() . 'classes/Views', '*.php' ) as $file ) {
-			if ( empty( $skip_views ) || ! in_array( $file, $skip_views ) ) {
-				$this->AddFromFile( $file );
+		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( $this->plugin->get_base_dir() . 'classes/Views', '*.php' ) as $file ) {
+			if ( empty( $skip_views ) || ! in_array( $file, $skip_views ) ) { // phpcs:ignore
+				$this->add_from_file( $file );
 			}
 		}
 
-		//  stop Freemius from hiding the menu on sub sites under certain circumstances
-		add_filter('fs_should_hide_site_admin_settings_on_network_activation_mode_wp-security-audit-log', array( $this, 'bypass_freemius_menu_hiding'));
+		// Stop Freemius from hiding the menu on sub sites under certain circumstances.
+		add_filter(
+			'fs_should_hide_site_admin_settings_on_network_activation_mode_wp-security-audit-log',
+			array(
+				$this,
+				'bypass_freemius_menu_hiding',
+			)
+		);
 
 		// Add menus.
-		add_action( 'admin_menu', array( $this, 'AddAdminMenus' ) );
-		add_action( 'network_admin_menu', array( $this, 'AddAdminMenus' ) );
+		add_action( 'admin_menu', array( $this, 'add_admin_menus' ) );
+		add_action( 'network_admin_menu', array( $this, 'add_admin_menus' ) );
 
 		// Add plugin shortcut links.
-		add_filter( 'plugin_action_links_' . $plugin->GetBaseName(), array( $this, 'AddPluginShortcuts' ) );
+		add_filter( 'plugin_action_links_' . $plugin->get_base_name(), array( $this, 'add_plugin_shortcuts' ) );
 
 		// Render header.
-		add_action( 'admin_enqueue_scripts', array( $this, 'RenderViewHeader' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'render_view_header' ) );
 
 		// Render footer.
-		add_action( 'admin_footer', array( $this, 'RenderViewFooter' ) );
+		add_action( 'admin_footer', array( $this, 'render_view_footer' ) );
 
 		// Initialize setup wizard.
-		if ( ! $this->_plugin->GetGlobalBooleanSetting( 'setup-complete', false )
-            && $this->_plugin->settings()->CurrentUserCan( 'edit' )
+		if ( ! $this->plugin->get_global_boolean_setting( 'setup-complete', false )
+			&& $this->plugin->settings()->current_user_can( 'edit' )
 		) {
 			new WSAL_Views_SetupWizard( $plugin );
 		}
@@ -135,7 +140,7 @@ class WSAL_ViewManager {
 		if ( defined( 'WFCM_VERSION' ) ) {
 			if ( version_compare( WFCM_VERSION, '1.6.0', '<' ) ) {
 				echo '<div class="notice notice-success">
-					<p>' . __( 'WP Activity Log requires Website File Changes Monitor 1.6.0. Please upgrade that plugin.', 'wp-security-audit-log' ) . '</p>
+					<p>' . esc_html__( 'WP Activity Log requires Website File Changes Monitor 1.6.0. Please upgrade that plugin.', 'wp-security-audit-log' ) . '</p>
 				</div>';
 			}
 		}
@@ -147,9 +152,9 @@ class WSAL_ViewManager {
 	 *
 	 * @param string $file Path to file.
 	 */
-	public function AddFromFile( $file ) {
+	public function add_from_file( $file ) {
 		$file = basename( $file, '.php' );
-		$this->AddFromClass( WSAL_CLASS_PREFIX . 'Views_' . $file );
+		$this->add_from_class( WSAL_CLASS_PREFIX . 'Views_' . $file );
 	}
 
 	/**
@@ -157,12 +162,12 @@ class WSAL_ViewManager {
 	 *
 	 * @param string $class Class name.
 	 */
-	public function AddFromClass( $class ) {
-		$view = new $class( $this->_plugin );
-		// only load WSAL_AbstractView instances to prevent lingering classes
-		// that did not impliment this from throwing fatals by being autoloaded.
+	public function add_from_class( $class ) {
+		$view = new $class( $this->plugin );
+		// Only load WSAL_AbstractView instances to prevent lingering classes
+		// that did not implement this from throwing fatals by being autoloaded.
 		if ( is_a( $view, '\WSAL_AbstractView' ) ) {
-			$this->AddInstance( $view );
+			$this->add_instance( $view );
 		}
 	}
 
@@ -171,15 +176,15 @@ class WSAL_ViewManager {
 	 *
 	 * @param WSAL_AbstractView $view The new view.
 	 */
-	public function AddInstance( WSAL_AbstractView $view ) {
+	public function add_instance( WSAL_AbstractView $view ) {
 		$this->views[] = $view;
 	}
 
 	/**
 	 * Order views by their declared weight.
 	 */
-	public function ReorderViews() {
-		usort( $this->views, array( $this, 'OrderByWeight' ) );
+	public function reorder_views() {
+		usort( $this->views, array( $this, 'order_by_weight' ) );
 	}
 
 	/**
@@ -190,9 +195,9 @@ class WSAL_ViewManager {
 	 * @param WSAL_AbstractView $b - Second view.
 	 * @return int
 	 */
-	public function OrderByWeight( WSAL_AbstractView $a, WSAL_AbstractView $b ) {
-		$wa = $a->GetWeight();
-		$wb = $b->GetWeight();
+	public function order_by_weight( WSAL_AbstractView $a, WSAL_AbstractView $b ) {
+		$wa = $a->get_weight();
+		$wb = $b->get_weight();
 		switch ( true ) {
 			case $wa < $wb:
 				return -1;
@@ -206,55 +211,55 @@ class WSAL_ViewManager {
 	/**
 	 * WordPress Action
 	 */
-	public function AddAdminMenus() {
-		$this->ReorderViews();
+	public function add_admin_menus() {
+		$this->reorder_views();
 
-		if ( $this->_plugin->settings()->CurrentUserCan( 'view' ) && count( $this->views ) ) {
+		if ( $this->plugin->settings()->current_user_can( 'view' ) && count( $this->views ) ) {
 			// Add main menu.
-            $main_view_menu_slug = $this->views[0]->GetSafeViewName();
+			$main_view_menu_slug         = $this->views[0]->get_safe_view_name();
 			$this->views[0]->hook_suffix = add_menu_page(
 				'WP Activity Log',
 				'WP Activity Log',
 				'read', // No capability requirement.
 				$main_view_menu_slug,
-				array( $this, 'RenderViewBody' ),
-				$this->views[0]->GetIcon(),
+				array( $this, 'render_view_body' ),
+				$this->views[0]->get_icon(),
 				'2.5' // Right after dashboard.
 			);
 
-			//  protected views to be displayed only to user with full plugin access
+			// Protected views to be displayed only to user with full plugin access.
 			$protected_views = array(
-                'wsal-togglealerts',
-                'wsal-usersessions-views',
-                'wsal-settings',
-                'wsal-ext-settings',
-                'wsal-rep-views-main',
-                'wsal-np-notifications',
-                'wsal-setup'
-            );
+				'wsal-togglealerts',
+				'wsal-usersessions-views',
+				'wsal-settings',
+				'wsal-ext-settings',
+				'wsal-rep-views-main',
+				'wsal-np-notifications',
+				'wsal-setup',
+			);
 
-			//  check edit privileges of the current user
-			$has_current_user_edit_priv = $this->_plugin->settings()->CurrentUserCan( 'edit' );
+			// Check edit privileges of the current user.
+			$has_current_user_edit_priv = $this->plugin->settings()->current_user_can( 'edit' );
 
 			// Add menu items.
 			foreach ( $this->views as $view ) {
-				if ( $view->IsAccessible() ) {
-				    $safe_view_name = $view->GetSafeViewName();
-					if ( $this->GetClassNameByView( $safe_view_name ) ) {
+				if ( $view->is_accessible() ) {
+					$safe_view_name = $view->get_safe_view_name();
+					if ( $this->get_class_name_by_view( $safe_view_name ) ) {
 						continue;
 					}
 
-					if ( in_array( $safe_view_name, $protected_views ) && ! $has_current_user_edit_priv ) {
+					if ( in_array( $safe_view_name, $protected_views ) && ! $has_current_user_edit_priv ) { // phpcs:ignore
 						continue;
 					}
 
 					$view->hook_suffix = add_submenu_page(
-						$view->IsVisible() ? $main_view_menu_slug : null,
-						$view->GetTitle(),
-						$view->GetName(),
+						$view->is_visible() ? $main_view_menu_slug : null,
+						$view->get_title(),
+						$view->get_name(),
 						'read', // No capability requirement.
 						$safe_view_name,
-						array( $this, 'RenderViewBody' )
+						array( $this, 'render_view_body' )
 					);
 				}
 			}
@@ -266,17 +271,17 @@ class WSAL_ViewManager {
 	 *
 	 * @param array $old_links - Array of old links.
 	 */
-	public function AddPluginShortcuts( $old_links ) {
-		$this->ReorderViews();
+	public function add_plugin_shortcuts( $old_links ) {
+		$this->reorder_views();
 
 		$new_links = array();
 		foreach ( $this->views as $view ) {
-			if ( $view->HasPluginShortcutLink() ) {
-				$new_links[] = '<a href="' . add_query_arg( 'page', $view->GetSafeViewName(), admin_url( 'admin.php' ) ) . '">' . $view->GetName() . '</a>';
+			if ( $view->has_plugin_shortcut_link() ) {
+				$new_links[] = '<a href="' . add_query_arg( 'page', $view->get_safe_view_name(), admin_url( 'admin.php' ) ) . '">' . $view->get_name() . '</a>';
 
 				if ( 1 === count( $new_links ) && ! wsal_freemius()->is__premium_only() ) {
-					// Trial link
-					$trial_link = 'https://wpactivitylog.com/trial-premium-edition-plugin/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL';
+					// Trial link.
+					$trial_link  = 'https://wpactivitylog.com/trial-premium-edition-plugin/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL';
 					$new_links[] = '<a style="font-weight:bold" href="' . $trial_link . '" target="_blank">' . __( 'Free Premium Trial', 'wp-security-audit-log' ) . '</a>';
 				}
 			}
@@ -289,13 +294,13 @@ class WSAL_ViewManager {
 	 *
 	 * @return int
 	 */
-	protected function GetBackendPageIndex() {
+	protected function get_backend_page_index() {
 		// Get current view via $_GET array.
 		$current_view = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
 
 		if ( isset( $current_view ) ) {
 			foreach ( $this->views as $i => $view ) {
-				if ( $current_view === $view->GetSafeViewName() ) {
+				if ( $current_view === $view->get_safe_view_name() ) {
 					return $i;
 				}
 			}
@@ -308,69 +313,72 @@ class WSAL_ViewManager {
 	 *
 	 * @return WSAL_AbstractView|null
 	 */
-	public function GetActiveView() {
-		if ( false === $this->_active_view ) {
-			$this->_active_view = null;
+	public function get_active_view() {
+		if ( false === $this->active_view ) {
+			$this->active_view = null;
 
 			// Get current view via $_GET array.
 			$current_view = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
 
 			if ( isset( $current_view ) ) {
 				foreach ( $this->views as $view ) {
-					if ( $current_view === $view->GetSafeViewName() ) {
-						$this->_active_view = $view;
+					if ( $current_view === $view->get_safe_view_name() ) {
+						$this->active_view = $view;
 					}
 				}
 			}
 
-			if ( $this->_active_view ) {
-				$this->_active_view->is_active = true;
+			if ( $this->active_view ) {
+				$this->active_view->is_active = true;
 			}
 		}
-		return $this->_active_view;
+		return $this->active_view;
 	}
 
 	/**
 	 * Render header of the current view.
 	 */
-	public function RenderViewHeader() {
-		if ( $view = $this->GetActiveView() ) {
-			$view->Header();
+	public function render_view_header() {
+		$view = $this->get_active_view();
+		if ( $view ) {
+			$view->header();
 		}
 	}
 
 	/**
 	 * Render footer of the current view.
 	 */
-	public function RenderViewFooter() {
-		if ( $view = $this->GetActiveView() ) {
-			$view->Footer();
+	public function render_view_footer() {
+		$view = $this->get_active_view();
+		if ( $view ) {
+			$view->footer();
 		}
+
 		global $pagenow;
-		if ( 'admin.php' === $pagenow && 'wsal-auditlog-pricing' === $_GET['page'] ) {
+		if ( 'admin.php' === $pagenow && 'wsal-auditlog-pricing' === $_GET['page'] ) { // phpcs:ignore
 			?>
-            <style>
-                .fs-full-size-wrapper {
-                    margin: 0px 0 -65px -20px !important;
-                }
+			<style>
+				.fs-full-size-wrapper {
+					margin: 0px 0 -65px -20px !important;
+				}
 
-                #root .fs-app-header .fs-page-title h2, #fs_pricing_wrapper .fs-app-header .fs-page-title h2 {
-                    font-size: 23px;
-                    font-weight: 400;
-                    margin: 0;
-                    padding: 9px 0 4px 20px;
-                    line-height: 1.3;
-                }
+				#root .fs-app-header .fs-page-title h2, #fs_pricing_wrapper .fs-app-header .fs-page-title h2 {
+					font-size: 23px;
+					font-weight: 400;
+					margin: 0;
+					padding: 9px 0 4px 20px;
+					line-height: 1.3;
+				}
 
-                @media only screen and (max-width: 768px) {
-                    #root #fs_pricing_wrapper .fs-app-main .fs-section--plans-and-pricing .fs-section--packages .fs-packages-menu, #fs_pricing_wrapper #fs_pricing_wrapper .fs-app-main .fs-section--plans-and-pricing .fs-section--packages .fs-packages-menu {
-                        padding: 5px;
-                        display: flex;
-                        width: 100%;
-                        margin: 0 auto;
-                    }
-                }
-            </style>
+				@media only screen and (max-width: 768px) {
+					#root #fs_pricing_wrapper .fs-app-main .fs-section--plans-and-pricing .fs-section--packages .fs-packages-menu, #fs_pricing_wrapper #fs_pricing_wrapper .fs-app-main .fs-section--plans-and-pricing .fs-section--packages .fs-packages-menu {
+						padding: 5px;
+						display: flex;
+						width: 100%;
+						margin: 0 auto;
+					}
+				}
+			</style>
 			<?php
 		}
 	}
@@ -378,16 +386,15 @@ class WSAL_ViewManager {
 	/**
 	 * Render content of the current view.
 	 */
-	public function RenderViewBody() {
-		$view = $this->GetActiveView();
-
+	public function render_view_body() {
+		$view = $this->get_active_view();
 		if ( $view && $view instanceof WSAL_AbstractView ) :
 			?>
 			<div class="wrap">
 				<?php
-					$view->RenderIcon();
-					$view->RenderTitle();
-					$view->RenderContent();
+					$view->render_icon();
+					$view->render_title();
+					$view->render_content();
 				?>
 			</div>
 			<?php
@@ -400,7 +407,7 @@ class WSAL_ViewManager {
 	 * @param string $class_name View class name.
 	 * @return WSAL_AbstractView|bool The view or false on failure.
 	 */
-	public function FindByClassName( $class_name ) {
+	public function find_by_class_name( $class_name ) {
 		foreach ( $this->views as $view ) {
 			if ( $view instanceof $class_name ) {
 				return $view;
@@ -415,7 +422,7 @@ class WSAL_ViewManager {
 	 * @param  string $view_slug - Slug of view.
 	 * @since  1.0.0
 	 */
-	private function GetClassNameByView( $view_slug ) {
+	private function get_class_name_by_view( $view_slug ) {
 		$not_show = false;
 		switch ( $view_slug ) {
 			case 'wsal-emailnotifications':
@@ -463,7 +470,7 @@ class WSAL_ViewManager {
 		}
 
 		// Return if multisite but not on the network admin.
-		if ( is_multisite() && ! is_network_admin() ) {
+		if ( ! is_network_admin() ) {
 			return;
 		}
 
@@ -481,27 +488,33 @@ class WSAL_ViewManager {
 	}
 
 	/**
-	 * @param bool $should_hide
+	 * Bypasses Freemius hiding menu items.
+	 *
+	 * @param bool $should_hide Should allow Freemium to hide menu items.
 	 *
 	 * @return bool
 	 */
-	public function bypass_freemius_menu_hiding($should_hide) {
-	    return false;
+	public function bypass_freemius_menu_hiding( $should_hide ) {
+		return false;
 	}
 
 	/**
-     * Builds a relative asset path that takes SCRIPT_DEBUG constant into account.
-     *
-	 * @param string $path Path relative to the plugin folder.
-	 * @param string $filename Filename base (.min is optionally appended to this).
-	 * @param string $extension File extension
+	 * Builds a relative asset path that takes SCRIPT_DEBUG constant into account.
+	 *
+	 * @param string $path                 Path relative to the plugin folder.
+	 * @param string $filename             Filename base (.min is optionally appended to this).
+	 * @param string $extension            File extension.
+	 * @param bool   $use_minified_version If true, the minified version of the file is used.
 	 *
 	 * @return string
 	 */
-	public static function get_asset_path($path, $filename, $extension) {
+	public static function get_asset_path( $path, $filename, $extension, $use_minified_version = true ) {
 		$result = $path . $filename;
-		$result .= SCRIPT_DEBUG ? '.' : '.min.';
+		if ( $use_minified_version ) {
+			$result .= SCRIPT_DEBUG ? '.' : '.min.';
+		}
 		$result .= $extension;
+
 		return $result;
 	}
 }
