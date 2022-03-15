@@ -1,4 +1,17 @@
 <?php
+/**
+ * Class WSAL_Upgrade_43000_to_44400.
+ *
+ * @package wsal
+ * @subpackage upgrade
+ *
+ * @since 4.4.0
+ */
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Class handles upgrade changes from version 43000 to 44400.
@@ -8,7 +21,7 @@
  *
  * @since 4.4.0
  */
-class WSAL_Upgrade_43000_to_44400 {
+class WSAL_Upgrade_43000_To_44400 {
 
 	/**
 	 * Plugin instance.
@@ -60,7 +73,7 @@ class WSAL_Upgrade_43000_to_44400 {
 			'wsal_scanned_dirs',
 		);
 		foreach ( $not_found_page_related_settings as $setting_name ) {
-			$this->plugin->DeleteGlobalSetting( $setting_name );
+			$this->plugin->delete_global_setting( $setting_name );
 		}
 	}
 
@@ -74,20 +87,20 @@ class WSAL_Upgrade_43000_to_44400 {
 	 * @throws Freemius_Exception Freemius exception.
 	 */
 	private function upgrade_occurrence_table( $connection ) {
-		$connector = $this->plugin->getConnector( $connection );
+		$connector = $this->plugin->get_connector( $connection );
 		/** @var WSAL_Adapters_MySQL_Occurrence $occurrence_adapter */
-		$occurrence_adapter = $connector->getAdapter( 'Occurrence' );
+		$occurrence_adapter = $connector->get_adapter( 'Occurrence' );
 
 		// Skip the upgrade it the table does not exist for some reason.
-		if ( ! $connector->isInstalled() ) {
+		if ( ! $connector->is_installed() ) {
 			return;
 		}
 
-		$table_name = $occurrence_adapter->GetTable();
+		$table_name = $occurrence_adapter->get_table();
 		$connector->query( $this->get_occurrence_table_upgrade_query( $table_name ) );
 
 		// Check if there are any events to process.
-		if ( $occurrence_adapter->Count() > 0 ) {
+		if ( $occurrence_adapter->count() > 0 ) {
 			// Create a background job to migrate the metadata.
 			$job_info = array(
 				'start_time'             => current_time( 'timestamp' ), // phpcs:ignore
@@ -116,20 +129,20 @@ class WSAL_Upgrade_43000_to_44400 {
 	 */
 	private function get_occurrence_table_upgrade_query( $table_name ) {
 		return "ALTER TABLE {$table_name}"
-			   . ' DROP COLUMN is_read, '
-			   . ' DROP COLUMN is_migrated, '
-			   . " ADD client_ip VARCHAR(255) NOT NULL DEFAULT '',"
-			   . ' ADD severity BIGINT NOT NULL DEFAULT 0,'
-			   . " ADD object VARCHAR(255) NOT NULL DEFAULT '',"
-			   . " ADD event_type VARCHAR(255) NOT NULL DEFAULT '',"
-			   . " ADD user_agent VARCHAR(255) NOT NULL DEFAULT '',"
-			   . " ADD user_roles VARCHAR(255) NOT NULL DEFAULT '',"
-			   . ' ADD username VARCHAR(255) NULL,'
-			   . ' ADD user_id BIGINT NULL ,'
-			   . " ADD session_id VARCHAR(255) NOT NULL DEFAULT '',"
-			   . " ADD post_status VARCHAR(255) NOT NULL DEFAULT '',"
-			   . " ADD post_type VARCHAR(255) NOT NULL DEFAULT '',"
-			   . ' ADD post_id BIGINT NOT NULL DEFAULT 0;';
+			. ' DROP COLUMN is_read, '
+			. ' DROP COLUMN is_migrated, '
+			. " ADD client_ip VARCHAR(255) NOT NULL DEFAULT '',"
+			. ' ADD severity BIGINT NOT NULL DEFAULT 0,'
+			. " ADD object VARCHAR(255) NOT NULL DEFAULT '',"
+			. " ADD event_type VARCHAR(255) NOT NULL DEFAULT '',"
+			. " ADD user_agent VARCHAR(255) NOT NULL DEFAULT '',"
+			. " ADD user_roles VARCHAR(255) NOT NULL DEFAULT '',"
+			. ' ADD username VARCHAR(255) NULL,'
+			. ' ADD user_id BIGINT NULL ,'
+			. " ADD session_id VARCHAR(255) NOT NULL DEFAULT '',"
+			. " ADD post_status VARCHAR(255) NOT NULL DEFAULT '',"
+			. " ADD post_type VARCHAR(255) NOT NULL DEFAULT '',"
+			. ' ADD post_id BIGINT NOT NULL DEFAULT 0;';
 	}
 
 
@@ -166,7 +179,7 @@ class WSAL_Upgrade_43000_to_44400 {
 			foreach ( $plugin_options as $option ) {
 				if ( ! in_array( $option['option_name'], $settings_to_leave_on_autoload ) ) { // phpcs:ignore
 					$value = maybe_unserialize( $option['option_value'] );
-					$this->plugin->SetGlobalSetting( $option['option_name'], $value, false );
+					$this->plugin->set_global_setting( $option['option_name'], $value, false );
 				}
 			}
 		}

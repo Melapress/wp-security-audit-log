@@ -55,7 +55,7 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @var null
 	 */
-	protected $adapterName = null;
+	protected $adapter_name = null;
 
 	/**
 	 * Use Default Adapter.
@@ -69,25 +69,25 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @var string
 	 */
-	protected $_state = self::STATE_UNKNOWN;
+	protected $state = self::STATE_UNKNOWN;
 
 	/**
 	 * Cache.
 	 *
 	 * @var array
 	 */
-	protected static $_cache = array();
+	protected static $cache = array();
 
 	/**
 	 * Returns this records' fields.
 	 *
 	 * @return array
 	 */
-	public function GetFields() {
+	public function get_fields() {
 		if ( ! isset( $this->_column_cache ) ) {
 			$this->_column_cache = array();
 			foreach ( array_keys( get_object_vars( $this ) ) as $col ) {
-				if ( trim( $col ) && '_' != $col[0] ) {
+				if ( trim( $col ) && '_' != $col[0] ) { // phpcs:ignore
 					$this->_column_cache[] = $col;
 				}
 			}
@@ -100,7 +100,7 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @param integer $id - ID.
 	 */
-	public function setId( $id ) {
+	public function set_id( $id ) {
 		$this->id = $id;
 	}
 
@@ -109,7 +109,7 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @return integer $id.
 	 */
-	public function getId() {
+	public function get_id() {
 		return $this->id;
 	}
 
@@ -120,12 +120,12 @@ abstract class WSAL_Models_ActiveRecord {
 	 * @throws Exception - Requires adapterName.
 	 */
 	public function __construct( $data = null ) {
-		if ( ! $this->adapterName ) {
+		if ( ! $this->adapter_name ) {
 			throw new Exception( 'Class "' . __CLASS__ . '" requires "adapterName" to be set.' );
 		}
 		if ( ! is_null( $data ) ) {
-			$this->LoadData( $data );
-			$this->_state = self::STATE_LOADED;
+			$this->load_data( $data );
+			$this->state = self::STATE_LOADED;
 		}
 	}
 
@@ -134,15 +134,15 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @return WSAL_Connector_ConnectorInterface
 	 */
-	protected function getConnector() {
+	protected function get_connector() {
 		if ( ! empty( $this->connector ) ) {
 			return $this->connector;
 		}
 
 		if ( $this->use_default_adapter ) {
-			$this->connector = WSAL_Connector_ConnectorFactory::GetDefaultConnector();
+			$this->connector = WSAL_Connector_ConnectorFactory::get_default_connector();
 		} else {
-			$this->connector = WSAL_Connector_ConnectorFactory::GetConnector();
+			$this->connector = WSAL_Connector_ConnectorFactory::get_connector();
 		}
 		return $this->connector;
 	}
@@ -153,41 +153,42 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @return WSAL_Adapters_ActiveRecordInterface
 	 */
-	public function getAdapter() {
-		//  use forcefully set adapter if set
+	public function get_adapter() {
+		// Use forcefully set adapter if set.
 		if ( ! empty( $this->adapter ) ) {
 			return $this->adapter;
 		}
 
-		//  create adapter using the connector returned from getConnector method
-		return $this->getConnector()->getAdapter( $this->adapterName );
+		// Create adapter using the connector returned from get_connector method.
+		return $this->get_connector()->get_adapter( $this->adapter_name );
 	}
 
 	/**
 	 * Allows the database adapter to be set from the outside. This is useful during data migrations.
 	 *
-	 * @param WSAL_Adapters_ActiveRecordInterface $adapter
+	 * @param WSAL_Adapters_ActiveRecordInterface $adapter Active record adapter.
 	 *
 	 * @since 4.4.0
 	 */
-	public function setAdapter( $adapter ) {
+	public function set_adapter( $adapter ) {
 		$this->adapter = $adapter;
 	}
 
 	/**
 	 * Load record from DB.
 	 *
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::Load()
 	 * @param string $cond (Optional) Load condition.
 	 * @param array  $args (Optional) Load condition arguments.
+	 *
+	 * @see WSAL_Adapters_MySQL_ActiveRecord::load()
 	 */
-	public function Load( $cond = '%d', $args = array( 1 ) ) {
-		$this->_state = self::STATE_UNKNOWN;
+	public function load( $cond = '%d', $args = array( 1 ) ) {
+		$this->state = self::STATE_UNKNOWN;
 
-		$data = $this->getAdapter()->Load( $cond, $args );
+		$data = $this->get_adapter()->load( $cond, $args );
 		if ( ! is_null( $data ) ) {
-			$this->LoadData( $data );
-			$this->_state = self::STATE_LOADED;
+			$this->load_data( $data );
+			$this->state = self::STATE_LOADED;
 		}
 	}
 
@@ -195,28 +196,28 @@ abstract class WSAL_Models_ActiveRecord {
 	 * Casts given value to a correct type based on the type of property (identified by the $key) in the $copy object.
 	 * This is to allow automatic type casting instead of handling each database column individually.
 	 *
-	 * @param object $copy
-	 * @param string $key
-	 * @param mixed $val
+	 * @param object $copy Model object copy to populate.
+	 * @param string $key  Column key.
+	 * @param mixed  $val  Value.
 	 *
 	 * @return mixed
 	 * @throws Exception
 	 */
-	protected function cast_to_correct_type( $copy, $key, $val ){
+	protected function cast_to_correct_type( $copy, $key, $val ) {
 		switch ( true ) {
 			case is_string( $copy->$key ):
 			case WSAL_Utilities_RequestUtils::is_ip_address( $val ):
 				return (string) $val;
 			case is_array( $copy->$key ):
 			case is_object( $copy->$key ):
-				$json_decoded_val = WSAL_Helpers_DataHelper::JsonDecode( $val );
+				$json_decoded_val = WSAL_Helpers_DataHelper::json_decode( $val );
 				return is_null( $json_decoded_val ) ? $val : $json_decoded_val;
 			case is_int( $copy->$key ):
 				return (int) $val;
 			case is_float( $copy->$key ):
 				return (float) $val;
 			case is_bool( $copy->$key ):
-				return  (bool) $val;
+				return (bool) $val;
 			default:
 				throw new Exception( 'Unsupported type "' . gettype( $copy->$key ) . '"' );
 		}
@@ -228,12 +229,12 @@ abstract class WSAL_Models_ActiveRecord {
 	 * @param array|object $data Data array or object.
 	 * @throws Exception - Unsupported type.
 	 */
-	public function LoadData( $data ) {
+	public function load_data( $data ) {
 		$copy = get_class( $this );
 		$copy = new $copy();
 		foreach ( (array) $data as $key => $val ) {
 			if ( isset( $copy->$key ) ) {
-				$this->$key = $this->cast_to_correct_type($copy, $key, $val);
+				$this->$key = $this->cast_to_correct_type( $copy, $key, $val );
 			}
 		}
 		return $this;
@@ -242,21 +243,22 @@ abstract class WSAL_Models_ActiveRecord {
 	/**
 	 * Save this active record
 	 *
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::Save()
 	 * @return integer|boolean Either the number of modified/inserted rows or false on failure.
+	 * @see WSAL_Adapters_MySQL_ActiveRecord::save()
 	 */
-	public function Save() {
-		$this->_state = self::STATE_UNKNOWN;
+	public function save() {
+		$this->state = self::STATE_UNKNOWN;
 
 		// Use today's date if not set up.
 		if ( is_null( $this->created_on ) ) {
-			$this->created_on = $this->GetMicrotime();
+			$this->created_on = $this->get_microtime();
 		}
-		$update_id = $this->getId();
-		$result = $this->getAdapter()->Save( $this );
+
+		$update_id = $this->get_id();
+		$result    = $this->get_adapter()->save( $this );
 
 		if ( false !== $result ) {
-			$this->_state = ( ! empty( $update_id )) ? self::STATE_UPDATED : self::STATE_CREATED;
+			$this->state = ( ! empty( $update_id ) ) ? self::STATE_UPDATED : self::STATE_CREATED;
 		}
 		return $result;
 	}
@@ -264,15 +266,16 @@ abstract class WSAL_Models_ActiveRecord {
 	/**
 	 * Deletes this active record.
 	 *
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::Delete()
 	 * @return int|boolean Either the amount of deleted rows or False on error.
+	 * @see WSAL_Adapters_MySQL_ActiveRecord::delete()
 	 */
-	public function Delete() {
-		$this->_state = self::STATE_UNKNOWN;
-		$result = $this->getAdapter()->Delete( $this );
+	public function delete() {
+		$this->state = self::STATE_UNKNOWN;
+		$result      = $this->get_adapter()->delete( $this );
 		if ( false !== $result ) {
-			$this->_state = self::STATE_DELETED;
+			$this->state = self::STATE_DELETED;
 		}
+
 		return $result;
 	}
 
@@ -281,11 +284,12 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @param string $cond - Condition.
 	 * @param array  $args - Arguments.
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::Count()
+	 *
 	 * @return int count
+	 * @see WSAL_Adapters_MySQL_ActiveRecord::count()
 	 */
-	public function Count( $cond = '%d', $args = array( 1 ) ) {
-		return (int) $this->getAdapter()->Count( $cond, $args );
+	public function count( $cond = '%d', $args = array( 1 ) ) {
+		return (int) $this->get_adapter()->count( $cond, $args );
 	}
 
 	/**
@@ -293,8 +297,8 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @return bool
 	 */
-	public function IsLoaded() {
-		return self::STATE_LOADED === $this->_state;
+	public function is_loaded() {
+		return self::STATE_LOADED === $this->state;
 	}
 
 	/**
@@ -302,9 +306,9 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @return bool
 	 */
-	public function IsSaved() {
-		return self::STATE_CREATED === $this->_state
-			|| self::STATE_UPDATED === $this->_state;
+	public function is_saved() {
+		return self::STATE_CREATED === $this->state
+			|| self::STATE_UPDATED === $this->state;
 	}
 
 	/**
@@ -312,8 +316,8 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @return bool
 	 */
-	public function IsCreated() {
-		return self::STATE_CREATED === $this->_state;
+	public function is_created() {
+		return self::STATE_CREATED === $this->state;
 	}
 
 	/**
@@ -321,8 +325,8 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @return bool
 	 */
-	public function IsUpdated() {
-		return self::STATE_UPDATED === $this->_state;
+	public function is_updated() {
+		return self::STATE_UPDATED === $this->state;
 	}
 
 	/**
@@ -330,27 +334,27 @@ abstract class WSAL_Models_ActiveRecord {
 	 *
 	 * @return bool
 	 */
-	public function IsDeleted() {
-		return self::STATE_DELETED === $this->_state;
+	public function is_deleted() {
+		return self::STATE_DELETED === $this->state;
 	}
 
 	/**
 	 * Check if the Record structure is created.
 	 *
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::IsInstalled()
 	 * @return bool
+	 * @see WSAL_Adapters_MySQL_ActiveRecord::is_installed()
 	 */
-	public function IsInstalled() {
-		return $this->getAdapter()->IsInstalled();
+	public function is_installed() {
+		return $this->get_adapter()->is_installed();
 	}
 
 	/**
 	 * Install the Record structure.
 	 *
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::Install()
+	 * @see WSAL_Adapters_MySQL_ActiveRecord::install()
 	 */
-	public function Install() {
-		return $this->getAdapter()->Install();
+	public function install() {
+		return $this->get_adapter()->install();
 	}
 
 	/**
@@ -361,13 +365,13 @@ abstract class WSAL_Models_ActiveRecord {
 	 * @param array  $args Arguments used in condition.
 	 * @return WSAL_Models_ActiveRecord
 	 */
-	protected static function CacheLoad( $target, $query, $args ) {
+	protected static function cache_load( $target, $query, $args ) {
 		$index = $target . '::' . vsprintf( $query, $args );
-		if ( ! isset( self::$_cache[ $index ] ) ) {
-			self::$_cache[ $index ] = new $target();
-			self::$_cache[ $index ]->Load( $query, $args );
+		if ( ! isset( self::$cache[ $index ] ) ) {
+			self::$cache[ $index ] = new $target();
+			self::$cache[ $index ]->Load( $query, $args );
 		}
-		return self::$_cache[ $index ];
+		return self::$cache[ $index ];
 	}
 
 	/**
@@ -377,17 +381,17 @@ abstract class WSAL_Models_ActiveRecord {
 	 * @param string $query Load condition.
 	 * @param array  $args Arguments used in condition.
 	 */
-	protected static function CacheRemove( $target, $query, $args ) {
+	protected static function cache_remove( $target, $query, $args ) {
 		$index = $target . '::' . sprintf( $query, $args );
-		if ( ! isset( self::$_cache[ $index ] ) ) {
-			unset( self::$_cache[ $index ] );
+		if ( ! isset( self::$cache[ $index ] ) ) {
+			unset( self::$cache[ $index ] );
 		}
 	}
 
 	/**
 	 * Clear the cache.
 	 */
-	protected static function CacheClear() {
-		self::$_cache = array();
+	protected static function cache_clear() {
+		self::$cache = array();
 	}
 }
