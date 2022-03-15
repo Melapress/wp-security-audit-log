@@ -28,7 +28,7 @@ class WSAL_ConstantManager {
 	 *
 	 * @var array
 	 */
-	protected $_constants = array();
+	protected $constants = array();
 
 	/**
 	 * Constants Cache.
@@ -43,8 +43,8 @@ class WSAL_ConstantManager {
 	 * @param string $name        - Constant name.
 	 * @param string $description - Constant description.
 	 */
-	public function UseConstant( $name, $description = '' ) {
-		$this->_constants[] = (object) array(
+	public function use_constant( $name, $description = '' ) {
+		$this->constants[] = (object) array(
 			'name'        => $name,
 			'value'       => constant( $name ),
 			'description' => $description,
@@ -60,7 +60,7 @@ class WSAL_ConstantManager {
 	 *
 	 * @throws Exception - Error if a constant is already defined.
 	 */
-	public function AddConstant( $name, $value, $description = '' ) {
+	public function add_constant( $name, $value, $description = '' ) {
 		// Check for constant conflict and define new one if required.
 		if ( defined( $name ) && constant( $name ) !== $value ) {
 			throw new Exception( 'Constant already defined with a different value.' );
@@ -68,17 +68,19 @@ class WSAL_ConstantManager {
 			define( $name, $value );
 		}
 		// Add constant to da list.
-		$this->UseConstant( $name, $description );
+		$this->use_constant( $name, $description );
 	}
 
 	/**
 	 * Add multiple constants in one go.
 	 *
 	 * @param array $items - Array of arrays with name, value, description pairs.
+	 *
+	 * @throws Exception Error if a constant is already defined.
 	 */
-	public function AddConstants( $items ) {
+	public function add_constants( $items ) {
 		foreach ( $items as $item ) {
-			$this->AddConstant( $item['name'], $item['value'], $item['description'] );
+			$this->add_constant( $item['name'], $item['value'], $item['description'] );
 		}
 	}
 
@@ -87,9 +89,9 @@ class WSAL_ConstantManager {
 	 *
 	 * @param array $items - Array of arrays with name, description pairs.
 	 */
-	public function UseConstants( $items ) {
+	public function use_constants( $items ) {
 		foreach ( $items as $item ) {
-			$this->UseConstant( $item['name'], $item['description'] );
+			$this->use_constant( $item['name'], $item['description'] );
 		}
 	}
 
@@ -104,11 +106,11 @@ class WSAL_ConstantManager {
 	 *
 	 * @return mixed Either constant details (props: name, value, description) or $default if not found.
 	 */
-	public function GetConstantBy( $what, $value, $default = null ) {
+	public function get_constant_by( $what, $value, $default = null ) {
 		// Make sure we do have some constants.
-		if ( ! empty( $this->_constants ) ) {
+		if ( ! empty( $this->constants ) ) {
 			// Make sure that constants do have a $what property.
-			if ( ! isset( $this->_constants[0]->$what ) ) {
+			if ( ! isset( $this->constants[0]->$what ) ) {
 				throw new Exception( 'Unexpected detail type "' . $what . '".' );
 			}
 
@@ -119,14 +121,14 @@ class WSAL_ConstantManager {
 
 			$possible_matches = array();
 			// Return constant match the property value.
-			foreach ( $this->_constants as $constant ) {
-				if ( $value == $constant->$what ) {
+			foreach ( $this->constants as $constant ) {
+				if ( $value == $constant->$what ) { // phpcs:ignore
 					$this->constants_cache[ $value ] = $constant;
 					$possible_matches[]              = $constant;
 				}
 			}
 
-			// If we got matches then get the last one in the array,
+			// If we got matches then get the last one in the array.
 			if ( ! empty( $possible_matches ) ) {
 				return end( $possible_matches );
 			}
@@ -138,7 +140,10 @@ class WSAL_ConstantManager {
 	 * Get constant object for displaying.
 	 *
 	 * @param integer $code - Value of the constant.
+	 *
 	 * @return stdClass
+	 *
+	 * @throws Exception Error if a constant is already defined.
 	 */
 	public function get_constant_to_display( $code ) {
 		$const = (object) array(
@@ -147,11 +152,11 @@ class WSAL_ConstantManager {
 			'description' => __( 'Unknown error code.', 'wp-security-audit-log' ),
 		);
 
-		$const = $this->GetConstantBy( 'value', $code, $const );
+		$const = $this->get_constant_by( 'value', $code, $const );
 
-		//  CSS property was added in 4.3.0 as part of severity levels refactoring to be able to print language
-		//  independent CSS class not based on the constant value
-		if ( ! property_exists($const, 'css')) {
+		// CSS property was added in 4.3.0 as part of severity levels refactoring to be able to print language
+		// independent CSS class not based on the constant value.
+		if ( ! property_exists( $const, 'css' ) ) {
 			$const->css = strtolower( $const->name );
 		}
 

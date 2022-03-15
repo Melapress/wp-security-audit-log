@@ -47,8 +47,13 @@ class WSAL_Uninstall {
 		return self::should_data_be_deleted();
 	}
 
+	/**
+	 * Checks if data should be deleted.
+	 *
+	 * @return bool True if data should be deleted.
+	 */
 	private static function should_data_be_deleted() {
-		return in_array( get_option( 'wsal_delete-data' ), [ 'yes', 1, '1', 'y', 'true', true ] );
+		return in_array( get_option( 'wsal_delete-data' ), array( 'yes', 1, '1', 'y', 'true', true ), true );
 	}
 
 	/**
@@ -70,7 +75,7 @@ class WSAL_Uninstall {
 	private static function drop_table( $name ) {
 		global $wpdb;
 		$table_name = self::get_table( $name );
-		$wpdb->query( 'DROP TABLE IF EXISTS ' . $table_name );
+		$wpdb->query( 'DROP TABLE IF EXISTS ' . $table_name ); // phpcs:ignore
 	}
 
 	/**
@@ -78,18 +83,18 @@ class WSAL_Uninstall {
 	 */
 	public static function delete_options_from_wp_options() {
 		global $wpdb;
-		$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" );
+		$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" ); // phpcs:ignore
 
 		foreach ( $plugin_options as $option ) {
 			delete_option( $option->option_name );
 		}
 
-		// Remove wsal specific freemius entry.
+		// Remove wsal specific Freemius entry.
 		delete_option( 'fs_wsalp' );
-		
-		// Ensue entry is fully cleared.
-		delete_network_option( 0 ,'wsal_networkwide_tracker_cpts' );
 
-		//  @todo delete also options from site-level tables in multisite context
+		// Ensue entry is fully cleared.
+		delete_network_option( 0, 'wsal_networkwide_tracker_cpts' );
+
+		// @todo delete also options from site-level tables in multisite context
 	}
 }

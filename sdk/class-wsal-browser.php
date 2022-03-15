@@ -8,6 +8,8 @@
  * @package wsal
  */
 
+// phpcs:ignoreFile
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

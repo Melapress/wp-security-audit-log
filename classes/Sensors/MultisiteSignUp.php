@@ -28,7 +28,7 @@ class WSAL_Sensors_MultisiteSignUp extends WSAL_AbstractSensor {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function HookEvents() {
+	public function hook_events() {
 		add_action( 'after_signup_user', array( $this, 'handle_multisite_user_signup' ), 10, 4 );
 		add_action( 'wpmu_activate_user', array( $this, 'handle_multisite_user_activation' ), 10, 3 );
 	}
@@ -60,7 +60,7 @@ class WSAL_Sensors_MultisiteSignUp extends WSAL_AbstractSensor {
 			'EditUserLink' => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 		);
 
-		$this->plugin->alerts->TriggerIf( 4013, $event_data, array( $this, 'must_not_contain_create_user' ) );
+		$this->plugin->alerts->trigger_event_if( 4013, $event_data, array( $this, 'must_not_contain_create_user' ) );
 	}
 
 	/**
@@ -74,7 +74,7 @@ class WSAL_Sensors_MultisiteSignUp extends WSAL_AbstractSensor {
 	 * @param array  $meta       Signup meta data. Default empty array.
 	 */
 	public function handle_multisite_user_signup( $user, $user_email, $key, $meta ) {
-		$this->plugin->alerts->TriggerIf(
+		$this->plugin->alerts->trigger_event_if(
 			4024,
 			array(
 				'username'      => $user,
@@ -90,6 +90,6 @@ class WSAL_Sensors_MultisiteSignUp extends WSAL_AbstractSensor {
 	 * @param WSAL_AlertManager $manager - Instance of WSAL_AlertManager.
 	 */
 	public function must_not_contain_create_user( WSAL_AlertManager $manager ) {
-		return ! $manager->WillTrigger( 4012 );
+		return ! $manager->will_trigger( 4012 );
 	}
 }

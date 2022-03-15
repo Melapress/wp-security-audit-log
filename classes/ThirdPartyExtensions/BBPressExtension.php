@@ -1,9 +1,24 @@
 <?php
+/**
+ * The bbPress extension class.
+ *
+ * @package    wsal
+ * @subpackage add-ons
+ */
 
 if ( ! class_exists( 'WSAL_BBPressExtension' ) ) {
 
+	/**
+	 * Class provides basic information about WSAL extension for bbPress.
+	 *
+	 * @package    wsal
+	 * @subpackage add-ons
+	 */
 	class WSAL_BBPressExtension extends WSAL_AbstractExtension {
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function filter_installable_plugins( $plugins ) {
 			$new_plugin = array(
 				array(
@@ -22,6 +37,9 @@ if ( ! class_exists( 'WSAL_BBPressExtension' ) ) {
 			return array_merge( $plugins, $new_plugin );
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function add_event_codes( $addon_event_codes ) {
 			$new_event_codes = array(
 				'bbpress' => array(
@@ -34,22 +52,37 @@ if ( ! class_exists( 'WSAL_BBPressExtension' ) ) {
 			return array_merge( $addon_event_codes, $new_event_codes );
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function get_custom_post_types() {
 			return array( 'forum', 'topic', 'reply' );
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function get_plugin_name() {
-			return 'BBPress';
+			return 'bbPress';
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function get_plugin_icon_url() {
 			return 'https://ps.w.org/wp-security-audit-log-add-on-for-bbpress/assets/icon-128x128.png?rev=2253395';
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function get_color() {
 			return '#8dc770';
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function get_plugin_filename() {
 			return 'wp-security-audit-log-add-on-for-bbpress/wsal-bbpress.php';
 		}
