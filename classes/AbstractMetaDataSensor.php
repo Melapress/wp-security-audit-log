@@ -4,8 +4,9 @@
  *
  * Abstract meta data sensor file.
  *
- * @since 4.1.3
- * @package wsal
+ * @since      4.1.3
+ * @package    wsal
+ * @subpackage sensors
  */
 
 // Exit if accessed directly.
@@ -16,9 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Abstract sensor for meta data.
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
- * @since 4.1.3
+ * @since      4.1.3
  */
 abstract class WSAL_AbstractMetaDataSensor extends WSAL_AbstractSensor {
 
@@ -33,12 +34,12 @@ abstract class WSAL_AbstractMetaDataSensor extends WSAL_AbstractSensor {
 	 * Check "Excluded Custom Fields" or meta keys starts with "_".
 	 *
 	 * @param string $object_type Object type - user or post.
-	 * @param int $object_id - Object ID.
-	 * @param string $meta_key - Meta key.
+	 * @param int    $object_id   - Object ID.
+	 * @param string $meta_key    - Meta key.
 	 *
-	 * @return boolean can log true|false
+	 * @return boolean Can log true|false
 	 */
-	protected function CanLogMetaKey( $object_type, $object_id, $meta_key ) {
+	protected function can_log_meta_key( $object_type, $object_id, $meta_key ) {
 		// Check if excluded meta key or starts with _.
 		if ( '_' === substr( $meta_key, 0, 1 ) ) {
 			/**
@@ -54,7 +55,7 @@ abstract class WSAL_AbstractMetaDataSensor extends WSAL_AbstractSensor {
 			}
 
 			return false;
-		} elseif ( $this->IsExcludedCustomFields( $object_type, $meta_key ) ) {
+		} elseif ( $this->is_excluded_custom_fields( $object_type, $meta_key ) ) {
 			return false;
 		} else {
 			return true;
@@ -68,7 +69,7 @@ abstract class WSAL_AbstractMetaDataSensor extends WSAL_AbstractSensor {
 	 *
 	 * @return array $editor_link - Name and value link
 	 */
-	protected function GetEditorLink( $post ) {
+	protected function get_editor_link( $post ) {
 		$post_id = is_int( $post ) ? intval( $post ) : $post->ID;
 		return array(
 			'name'  => 'EditorLinkPost',
@@ -85,22 +86,22 @@ abstract class WSAL_AbstractMetaDataSensor extends WSAL_AbstractSensor {
 	 *
 	 * @return boolean is excluded from monitoring true|false
 	 */
-	public function IsExcludedCustomFields( $object_type, $custom ) {
-		$custom_fields = [];
-		if ('post' === $object_type) {
-			$custom_fields = $this->plugin->settings()->GetExcludedPostMetaFields();
-		} else if ('user' === $object_type) {
-			$custom_fields = $this->plugin->settings()->GetExcludedUserMetaFields();
+	public function is_excluded_custom_fields( $object_type, $custom ) {
+		$custom_fields = array();
+		if ( 'post' === $object_type ) {
+			$custom_fields = $this->plugin->settings()->get_excluded_post_meta_fields();
+		} elseif ( 'user' === $object_type ) {
+			$custom_fields = $this->plugin->settings()->get_excluded_user_meta_fields();
 		}
 
-		if ( in_array( $custom, $custom_fields ) ) {
+		if ( in_array( $custom, $custom_fields ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 			return true;
 		}
 
 		foreach ( $custom_fields as $field ) {
 			if ( false !== strpos( $field, '*' ) ) {
 				// Wildcard str[any_character] when you enter (str*).
-				if ( substr( $field, - 1 ) == '*' ) {
+				if ( '*' === substr( $field, - 1 ) ) {
 					$field = rtrim( $field, '*' );
 					if ( preg_match( "/^$field/", $custom ) ) {
 						return true;

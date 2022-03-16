@@ -24,7 +24,7 @@ interface WSAL_Adapters_MetaInterface {
 	 *
 	 * @param int[] $occurrence_ids - Array of occurrence IDs.
 	 */
-	public function DeleteByOccurrenceIds( $occurrence_ids );
+	public function delete_by_occurrence_ids( $occurrence_ids );
 
 	/**
 	 * Load meta by name and occurrence id.
@@ -32,5 +32,5 @@ interface WSAL_Adapters_MetaInterface {
 	 * @param string $meta_name - Meta name.
 	 * @param int    $occurrence_id - Occurrence ID.
 	 */
-	public function LoadByNameAndOccurrenceId( $meta_name, $occurrence_id );
+	public function load_by_name_and_occurrence_id( $meta_name, $occurrence_id );
 }

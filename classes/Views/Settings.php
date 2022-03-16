@@ -4,8 +4,9 @@
  *
  * Settings page of the plugin.
  *
- * @since   1.0.0
- * @package wsal
+ * @since      1.0.0
+ * @package    wsal
+ * @subpackage views
  */
 
 // Exit if accessed directly.
@@ -18,7 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Settings view class to handle settings page functions.
  *
- * @since 1.0.0
+ * @since      1.0.0
+ *
+ * @package    wsal
+ * @subpackage views
  */
 class WSAL_Views_Settings extends WSAL_AbstractView {
 
@@ -55,11 +59,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		parent::__construct( $plugin );
 		add_action( 'admin_init', array( $this, 'setup_settings_tabs' ) );
-		add_action( 'wp_ajax_AjaxCheckSecurityToken', array( $this, 'AjaxCheckSecurityToken' ) );
-		add_action( 'wp_ajax_AjaxRunCleanup', array( $this, 'AjaxRunCleanup' ) );
-		add_action( 'wp_ajax_AjaxGetAllUsers', array( $this, 'AjaxGetAllUsers' ) );
-		add_action( 'wp_ajax_AjaxGetAllRoles', array( $this, 'AjaxGetAllRoles' ) );
-		add_action( 'wp_ajax_AjaxGetAllCPT', array( $this, 'AjaxGetAllCPT' ) );
+		add_action( 'wp_ajax_AjaxCheckSecurityToken', array( $this, 'ajax_check_security_token' ) );
+		add_action( 'wp_ajax_AjaxRunCleanup', array( $this, 'ajax_run_cleanup' ) );
+		add_action( 'wp_ajax_AjaxGetAllUsers', array( $this, 'ajax_get_all_users' ) );
+		add_action( 'wp_ajax_AjaxGetAllRoles', array( $this, 'ajax_get_all_roles' ) );
+		add_action( 'wp_ajax_AjaxGetAllCPT', array( $this, 'ajax_get_all_cpts' ) );
 		add_action( 'wp_ajax_wsal_reset_settings', array( $this, 'reset_settings' ) );
 		add_action( 'wp_ajax_wsal_purge_activity', array( $this, 'purge_activity' ) );
 		add_action( 'wp_ajax_wsal_ajax_get_all_severities', array( $this, 'ajax_get_all_severities' ) );
@@ -74,47 +78,45 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * @since 3.4
 	 */
 	public function setup_settings_tabs() {
-		// @codingStandardsIgnoreStart
-		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false;
-		// @codingStandardsIgnoreEnd
 
 		// Verify that the current page is WSAL settings page.
-		if ( empty( $page ) || $this->GetSafeViewName() !== $page ) {
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore
+		if ( empty( $page ) || $this->get_safe_view_name() !== $page ) {
 			return;
 		}
 
 		// Tab links.
 		$wsal_setting_tabs = array(
 			'general'           => array(
-				'name'     => __( 'General', 'wp-security-audit-log' ),
-				'link'     => add_query_arg( 'tab', 'general', $this->GetUrl() ),
+				'name'     => esc_html__( 'General', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'general', $this->get_url() ),
 				'render'   => array( $this, 'tab_general' ),
 				'save'     => array( $this, 'tab_general_save' ),
 				'priority' => 10,
 			),
 			'audit-log'         => array(
-				'name'     => __( 'Activity log viewer', 'wp-security-audit-log' ),
-				'link'     => add_query_arg( 'tab', 'audit-log', $this->GetUrl() ),
+				'name'     => esc_html__( 'Activity log viewer', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'audit-log', $this->get_url() ),
 				'render'   => array( $this, 'tab_audit_log' ),
 				'save'     => array( $this, 'tab_audit_log_save' ),
 				'priority' => 20,
 			),
 			'file-changes'      => array(
-				'name'     => __( 'File changes', 'wp-security-audit-log' ),
-				'link'     => add_query_arg( 'tab', 'file-changes', $this->GetUrl() ),
+				'name'     => esc_html__( 'File changes', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'file-changes', $this->get_url() ),
 				'render'   => array( $this, 'tab_file_changes' ),
 				'priority' => 30,
 			),
 			'exclude-objects'   => array(
-				'name'     => __( 'Exclude objects', 'wp-security-audit-log' ),
-				'link'     => add_query_arg( 'tab', 'exclude-objects', $this->GetUrl() ),
+				'name'     => esc_html__( 'Exclude objects', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'exclude-objects', $this->get_url() ),
 				'render'   => array( $this, 'tab_exclude_objects' ),
 				'save'     => array( $this, 'tab_exclude_objects_save' ),
 				'priority' => 40,
 			),
 			'advanced-settings' => array(
-				'name'     => __( 'Advanced settings', 'wp-security-audit-log' ),
-				'link'     => add_query_arg( 'tab', 'advanced-settings', $this->GetUrl() ),
+				'name'     => esc_html__( 'Advanced settings', 'wp-security-audit-log' ),
+				'link'     => add_query_arg( 'tab', 'advanced-settings', $this->get_url() ),
 				'render'   => array( $this, 'tab_advanced_settings' ),
 				'save'     => array( $this, 'tab_advanced_settings_save' ),
 				'priority' => 100,
@@ -152,37 +154,37 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Method: Plugin Shortcut.
+	 * {@inheritDoc}
 	 */
-	public function HasPluginShortcutLink() {
+	public function has_plugin_shortcut_link() {
 		return true;
 	}
 
 	/**
-	 * Method: Get View Title.
+	 * {@inheritDoc}
 	 */
-	public function GetTitle() {
-		return __( 'Settings', 'wp-security-audit-log' );
+	public function get_title() {
+		return esc_html__( 'Settings', 'wp-security-audit-log' );
 	}
 
 	/**
-	 * Method: Get View Icon.
+	 * {@inheritDoc}
 	 */
-	public function GetIcon() {
+	public function get_icon() {
 		return 'dashicons-admin-generic';
 	}
 
 	/**
-	 * Method: Get View Name.
+	 * {@inheritDoc}
 	 */
-	public function GetName() {
-		return __( 'Settings', 'wp-security-audit-log' );
+	public function get_name() {
+		return esc_html__( 'Settings', 'wp-security-audit-log' );
 	}
 
 	/**
-	 * Method: Get View Weight.
+	 * {@inheritDoc}
 	 */
-	public function GetWeight() {
+	public function get_weight() {
 		return 8;
 	}
 
@@ -191,8 +193,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 *
 	 * @param string $token - Token type.
 	 */
-	protected function GetTokenType( $token ) {
-		return $this->_plugin->settings()->get_token_type( $token );
+	protected function get_token_type( $token ) {
+		return $this->plugin->settings()->get_token_type( $token );
 	}
 
 	/**
@@ -200,9 +202,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 *
 	 * @throws Exception - Unrecognized settings tab error.
 	 */
-	protected function Save() {
+	protected function save() {
 		// Bail early if user does not have sufficient permissions to save.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
+		if ( ! $this->plugin->settings()->current_user_can( 'edit' ) ) {
 			throw new Exception( esc_html__( 'Current user is not allowed to save settings.', 'wp-security-audit-log' ) );
 		}
 		// Call respective tab save functions if they are set. Nonce is already verified at this point.
@@ -216,8 +218,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	/**
 	 * Method: Check security token.
 	 */
-	public function AjaxCheckSecurityToken() {
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
+	public function ajax_check_security_token() {
+		if ( ! $this->plugin->settings()->current_user_can( 'edit' ) ) {
 			echo wp_json_encode(
 				array(
 					'success' => false,
@@ -256,7 +258,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			array(
 				'success'   => true,
 				'token'     => $token,
-				'tokenType' => esc_html( $this->GetTokenType( $token ) ),
+				'tokenType' => esc_html( $this->get_token_type( $token ) ),
 			)
 		);
 		die();
@@ -265,26 +267,26 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	/**
 	 * Method: Run cleanup.
 	 */
-	public function AjaxRunCleanup() {
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
+	public function ajax_run_cleanup() {
+		if ( ! $this->plugin->settings()->current_user_can( 'edit' ) ) {
 			die( 'Access Denied.' );
 		}
 
-		$now       = current_time( 'timestamp' ); // Current time.
-		$max_sdate = $this->_plugin->settings()->GetPruningDate(); // Pruning date.
+		$now       = current_time( 'timestamp' ); // phpcs:ignore
+		$max_sdate = $this->plugin->settings()->get_pruning_date(); // Pruning date.
 
 
 		// Calculate limit timestamp.
 		$max_stamp = $now - ( strtotime( $max_sdate ) - $now );
 
 		$query = new WSAL_Models_OccurrenceQuery();
-		$query->addOrderBy( 'created_on', false ); // Descending order.
-		$query->addCondition( 'created_on <= %s', intval( $max_stamp ) ); // Add limits of timestamp.
-		$results = $query->getAdapter()->Execute( $query );
+		$query->add_order_by( 'created_on', false ); // Descending order.
+		$query->add_condition( 'created_on <= %s', intval( $max_stamp ) ); // Add limits of timestamp.
+		$results = $query->get_adapter()->execute_query( $query );
 		$items   = count( $results );
 
 		if ( $items ) {
-			$this->_plugin->CleanUp();
+			$this->plugin->clean_up();
 		}
 
 		if ( $archiving ) {
@@ -306,21 +308,21 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					'pruning' => 0,
 				);
 			}
-			wp_safe_redirect( add_query_arg( $redirect_args, $this->GetUrl() ) );
+			wp_safe_redirect( add_query_arg( $redirect_args, $this->get_url() ) );
 		}
 		exit;
 	}
 
 	/**
-	 * Method: Get View.
+	 * {@inheritDoc}
 	 */
-	public function Render() {
+	public function render() {
 		// Verify nonce if a form is submitted.
 		if ( isset( $_POST['_wpnonce'] ) ) {
 			check_admin_referer( 'wsal-settings' );
 		}
 
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
+		if ( ! $this->plugin->settings()->current_user_can( 'edit' ) ) {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
 		}
 
@@ -329,21 +331,23 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		if ( isset( $_POST['submit'] ) ) {
 			try {
-				$this->Save(); // Save settings.
+				$this->save(); // Save settings.
 				if ( 'sms-provider' === $this->current_tab && $section && 'test' === $section ) :
 					?>
-                    <div class="updated">
-                        <p><?php esc_html_e( 'Message sent successfully.', 'wp-security-audit-log' ); ?></p>
-                    </div>
+					<div class="updated">
+						<p><?php esc_html_e( 'Message sent successfully.', 'wp-security-audit-log' ); ?></p>
+					</div>
 				<?php else : ?>
-                    <div class="updated">
-                        <p><?php esc_html_e( 'Settings have been saved.', 'wp-security-audit-log' ); ?></p>
-                    </div>
-				<?php
+					<div class="updated">
+						<p><?php esc_html_e( 'Settings have been saved.', 'wp-security-audit-log' ); ?></p>
+					</div>
+					<?php
 				endif;
 			} catch ( Exception $ex ) {
 				?>
-                <div class="error"><p><?php esc_html_e( 'Error: ', 'wp-security-audit-log' ); ?><?php echo esc_html( $ex->getMessage() ); ?></p></div>
+				<div class="error">
+					<p><?php esc_html_e( 'Error: ', 'wp-security-audit-log' ); ?><?php echo esc_html( $ex->getMessage() ); ?></p>
+				</div>
 				<?php
 			}
 		}
@@ -354,34 +358,33 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		if ( isset( $_GET['pruning'] ) && '1' === $_GET['pruning'] ) {
 			?>
-            <div class="updated">
-                <p><?php esc_html_e( 'Old data successfully purged.', 'wp-security-audit-log' ); ?></p>
-            </div>
+			<div class="updated">
+				<p><?php esc_html_e( 'Old data successfully purged.', 'wp-security-audit-log' ); ?></p>
+			</div>
 			<?php
 		} elseif ( isset( $_GET['pruning'] ) && '0' === $_GET['pruning'] ) {
 			?>
-            <div class="error">
-                <p><?php esc_html_e( 'No data is old enough to be purged.', 'wp-security-audit-log' ); ?></p>
-            </div>
+			<div class="error">
+				<p><?php esc_html_e( 'No data is old enough to be purged.', 'wp-security-audit-log' ); ?></p>
+			</div>
 			<?php
 		}
 		?>
-        <nav id="wsal-tabs" class="nav-tab-wrapper">
+		<nav id="wsal-tabs" class="nav-tab-wrapper">
 			<?php foreach ( $this->wsal_setting_tabs as $tab_id => $tab ) : ?>
-                <a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( $tab_id === $this->current_tab ) ? 'nav-tab-active' : false; ?>">
+				<a href="<?php echo esc_url( $tab['link'] ); ?>" class="nav-tab <?php echo ( $tab_id === $this->current_tab ) ? 'nav-tab-active' : false; ?>">
 					<?php echo esc_html( $tab['name'] ); ?>
-                </a>
+				</a>
 			<?php endforeach; ?>
-        </nav>
+		</nav>
 
-        <form id="audit-log-settings" method="post">
-            <input type="hidden" name="page" value="<?php echo isset( $_GET['page'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; ?>" />
-            <input type="hidden" id="ajaxurl" value="<?php echo esc_attr( admin_url( 'admin-ajax.php' ) ); ?>" />
+		<form id="audit-log-settings" method="post">
+			<input type="hidden" name="page" value="<?php echo isset( $_GET['page'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : false; ?>" />
+			<input type="hidden" id="ajaxurl" value="<?php echo esc_attr( admin_url( 'admin-ajax.php' ) ); ?>" />
 			<?php wp_nonce_field( 'wsal-settings' ); ?>
 
-            <div id="audit-log-adverts">
-            </div>
-            <div class="nav-tabs">
+			<div id="audit-log-adverts"></div>
+			<div class="nav-tabs">
 				<?php
 				if ( ! empty( $this->current_tab ) && ! empty( $this->wsal_setting_tabs[ $this->current_tab ]['render'] ) ) {
 					call_user_func( $this->wsal_setting_tabs[ $this->current_tab ]['render'] );
@@ -389,15 +392,16 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					call_user_func( $this->wsal_setting_tabs['general']['render'] );
 				}
 				?>
-            </div>
+			</div>
 			<?php
 			if ( 'sms-provider' === $this->current_tab && $section && 'test' === $section ) {
-				submit_button( __( 'Send Message', 'wp-security-audit-log' ) );
+				submit_button( esc_html__( 'Send Message', 'wp-security-audit-log' ) );
 			} else {
 				submit_button();
 			}
 			?>
-        </form>
+		</form>
+		<?php // @codingStandardsIgnoreStart ?>
         <script type="text/javascript">
             <!--
             function delete_confirm(elementRef) {
@@ -439,19 +443,20 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
             } );
             // --></script>
 		<?php
+		// @codingStandardsIgnoreEnd
 	}
 
 	/**
 	 * Tab: `General`
 	 */
 	private function tab_general() {
-        $settings = $this->_plugin->settings();
-        $enforced_settings = $settings->get_mainwp_enforced_settings();
-        $login_page_notification_settings_enforced_by_mainwp = array_key_exists('login_notification_enabled', $enforced_settings);
-        $incognito_setting_enforced_by_mainwp = array_key_exists('incognito_mode_enabled', $enforced_settings);
+		$settings          = $this->plugin->settings();
+		$enforced_settings = $settings->get_mainwp_enforced_settings();
+		$login_page_notification_settings_enforced_by_mainwp = array_key_exists( 'login_notification_enabled', $enforced_settings );
+		$incognito_setting_enforced_by_mainwp                = array_key_exists( 'incognito_mode_enabled', $enforced_settings );
 		?>
-        <h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
-        <p class="description">
+		<h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
+		<p class="description">
 			<?php
 			echo sprintf(
 				/* translators: Learn more link. */
@@ -459,156 +464,156 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				'<a href="https://wpactivitylog.com/features/search-filters-wordpress-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . esc_html__( '(Premium feature)', 'wp-security-audit-log' ) . '</a>'
 			);
 			?>
-        </p>
-        <table class="form-table wsal-tab">
-            <tbody>
-            <tr>
-                <th><label for="infinite-scroll"><?php esc_html_e( 'Select event viewer view type:', 'wp-security-audit-log' ); ?></label></th>
-                <td>
-                    <fieldset>
-                        <label for="infinite-scroll">
-                            <input type="radio" name="events-type-nav" value="infinite-scroll" id="infinite-scroll" <?php checked( $this->_plugin->settings()->get_events_type_nav(), 'infinite-scroll' ); ?> />
+		</p>
+		<table class="form-table wsal-tab">
+			<tbody>
+			<tr>
+				<th><label for="infinite-scroll"><?php esc_html_e( 'Select event viewer view type:', 'wp-security-audit-log' ); ?></label></th>
+				<td>
+					<fieldset>
+						<label for="infinite-scroll">
+							<input type="radio" name="events-type-nav" value="infinite-scroll" id="infinite-scroll" <?php checked( $this->plugin->settings()->get_events_type_nav(), 'infinite-scroll' ); ?> />
 							<?php esc_html_e( 'Infinite Scroll (Recommended)', 'wp-security-audit-log' ); ?>
-                        </label>
-                        <br/>
-                        <label for="pagination">
-                            <input type="radio" name="events-type-nav" value="pagination" id="pagination" <?php checked( $this->_plugin->settings()->get_events_type_nav(), 'pagination' ); ?> />
+						</label>
+						<br/>
+						<label for="pagination">
+							<input type="radio" name="events-type-nav" value="pagination" id="pagination" <?php checked( $this->plugin->settings()->get_events_type_nav(), 'pagination' ); ?> />
 							<?php esc_html_e( 'Pagination', 'wp-security-audit-log' ); ?>
-                        </label>
-                        <br />
-                    </fieldset>
-                </td>
-            </tr>
-            <!-- / Reverse Proxy / Firewall Options -->
-            </tbody>
-        </table>
-        <!-- Events Navigation Type -->
+						</label>
+						<br />
+					</fieldset>
+				</td>
+			</tr>
+			<!-- / Reverse Proxy / Firewall Options -->
+			</tbody>
+		</table>
+		<!-- Events Navigation Type -->
 
-        <h3><?php esc_html_e( 'Do you want the activity log viewer to auto refresh?', 'wp-security-audit-log' ); ?></h3>
-        <p class="description"><?php esc_html_e( 'The activity log viewer auto refreshes every 30 seconds when opened so you can see the latest events as they happen almost in real time.', 'wp-security-audit-log' ); ?></p>
-        <table class="form-table wsal-tab">
-            <tbody>
-            <tr>
-                <th><label for="aroption_on"><?php esc_html_e( 'Refresh activity log viewer', 'wp-security-audit-log' ); ?></label></th>
-                <td>
-                    <fieldset>
-						<?php $are = $this->_plugin->settings()->IsRefreshAlertsEnabled(); ?>
-                        <label for="aroption_on">
-                            <input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: -2px;" <?php checked( $are ); ?> value="1">
-                            <span><?php esc_html_e( 'Auto refresh', 'wp-security-audit-log' ); ?></span>
-                        </label>
-                        <br/>
-                        <label for="aroption_off">
-                            <input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: -2px;" <?php checked( $are, false ); ?> value="0">
-                            <span><?php esc_html_e( 'Do not auto refresh', 'wp-security-audit-log' ); ?></span>
-                        </label>
-                    </fieldset>
-                </td>
-            </tr>
-            <!-- Refresh activity log viewer -->
-            </tbody>
-        </table>
-        <!-- Refresh activity log -->
+		<h3><?php esc_html_e( 'Do you want the activity log viewer to auto refresh?', 'wp-security-audit-log' ); ?></h3>
+		<p class="description"><?php esc_html_e( 'The activity log viewer auto refreshes every 30 seconds when opened so you can see the latest events as they happen almost in real time.', 'wp-security-audit-log' ); ?></p>
+		<table class="form-table wsal-tab">
+			<tbody>
+			<tr>
+				<th><label for="aroption_on"><?php esc_html_e( 'Refresh activity log viewer', 'wp-security-audit-log' ); ?></label></th>
+				<td>
+					<fieldset>
+						<?php $are = $this->plugin->settings()->is_refresh_alerts_enabled(); ?>
+						<label for="aroption_on">
+							<input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: -2px;" <?php checked( $are ); ?> value="1">
+							<span><?php esc_html_e( 'Auto refresh', 'wp-security-audit-log' ); ?></span>
+						</label>
+						<br/>
+						<label for="aroption_off">
+							<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: -2px;" <?php checked( $are, false ); ?> value="0">
+							<span><?php esc_html_e( 'Do not auto refresh', 'wp-security-audit-log' ); ?></span>
+						</label>
+					</fieldset>
+				</td>
+			</tr>
+			<!-- Refresh activity log viewer -->
+			</tbody>
+		</table>
+		<!-- Refresh activity log -->
 
-        <h3><?php esc_html_e( 'Display latest events widget in Dashboard & Admin bar', 'wp-security-audit-log' ); ?></h3>
-        <p class="description">
+		<h3><?php esc_html_e( 'Display latest events widget in Dashboard & Admin bar', 'wp-security-audit-log' ); ?></h3>
+		<p class="description">
 			<?php
 			echo sprintf(
 				/* translators: Max number of dashboard widget alerts. */
 				esc_html__( 'The events widget displays the latest %d security events in the dashboard and the admin bar notification displays the latest event.', 'wp-security-audit-log' ),
-				esc_html( $this->_plugin->settings()->GetDashboardWidgetMaxAlerts() )
+				esc_html( $this->plugin->settings()->get_dashboard_widget_max_alerts() )
 			);
 			?>
-        </p>
-        <table class="form-table wsal-tab">
-            <tbody>
-            <tr>
-                <th><label for="dwoption_on"><?php esc_html_e( 'Dashboard Widget', 'wp-security-audit-log' ); ?></label></th>
-                <td>
-                    <fieldset>
-						<?php $dwe = $this->_plugin->settings()->IsWidgetsEnabled(); ?>
-                        <label for="dwoption_on">
-                            <input type="radio" name="EnableDashboardWidgets" id="dwoption_on" style="margin-top: -2px;" <?php checked( $dwe ); ?> value="1">
-                            <span><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></span>
-                        </label>
-                        <br/>
-                        <label for="dwoption_off">
-                            <input type="radio" name="EnableDashboardWidgets" id="dwoption_off" style="margin-top: -2px;" <?php checked( $dwe, false ); ?>  value="0">
-                            <span><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></span>
-                        </label>
-                    </fieldset>
-                </td>
-            </tr>
-            <!-- / Events Dashboard Widget -->
+		</p>
+		<table class="form-table wsal-tab">
+			<tbody>
+			<tr>
+				<th><label for="dwoption_on"><?php esc_html_e( 'Dashboard Widget', 'wp-security-audit-log' ); ?></label></th>
+				<td>
+					<fieldset>
+						<?php $dwe = $this->plugin->settings()->is_widgets_enabled(); ?>
+						<label for="dwoption_on">
+							<input type="radio" name="EnableDashboardWidgets" id="dwoption_on" style="margin-top: -2px;" <?php checked( $dwe ); ?> value="1">
+							<span><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></span>
+						</label>
+						<br/>
+						<label for="dwoption_off">
+							<input type="radio" name="EnableDashboardWidgets" id="dwoption_off" style="margin-top: -2px;" <?php checked( $dwe, false ); ?>  value="0">
+							<span><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></span>
+						</label>
+					</fieldset>
+				</td>
+			</tr>
+			<!-- / Events Dashboard Widget -->
 
-            <tr>
+			<tr>
 				<?php
 				$disabled = '';
-				$label    = __( 'Admin Bar Notification', 'wp-security-audit-log' );
+				$label    = esc_html__( 'Admin Bar Notification', 'wp-security-audit-log' );
 				if ( wsal_freemius()->is_free_plan() ) {
 					$disabled = 'disabled';
-					$label    = __( 'Admin Bar Notification (Premium)', 'wp-security-audit-log' );
+					$label    = esc_html__( 'Admin Bar Notification (Premium)', 'wp-security-audit-log' );
 				}
 				?>
-                <th><label for="admin_bar_notif_on"><?php echo esc_html( $label ); ?></label></th>
-                <td>
-                    <fieldset <?php echo esc_attr( $disabled ); ?>>
-						<?php $abn = $this->_plugin->settings()->is_admin_bar_notif(); ?>
-                        <label for="admin_bar_notif_on">
-                            <input type="radio" name="admin_bar_notif" id="admin_bar_notif_on" style="margin-top: -2px;" <?php checked( $abn ); ?> value="1">
-                            <span><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></span>
-                        </label>
-                        <br/>
-                        <label for="admin_bar_notif_off">
-                            <input type="radio" name="admin_bar_notif" id="admin_bar_notif_off" style="margin-top: -2px;" <?php checked( $abn, false ); ?>  value="0">
-                            <span><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></span>
-                        </label>
-                    </fieldset>
-                </td>
-            </tr>
-            <!-- / Admin Bar Notification -->
+				<th><label for="admin_bar_notif_on"><?php echo esc_html( $label ); ?></label></th>
+				<td>
+					<fieldset <?php echo esc_attr( $disabled ); ?>>
+						<?php $abn = $this->plugin->settings()->is_admin_bar_notif(); ?>
+						<label for="admin_bar_notif_on">
+							<input type="radio" name="admin_bar_notif" id="admin_bar_notif_on" style="margin-top: -2px;" <?php checked( $abn ); ?> value="1">
+							<span><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></span>
+						</label>
+						<br/>
+						<label for="admin_bar_notif_off">
+							<input type="radio" name="admin_bar_notif" id="admin_bar_notif_off" style="margin-top: -2px;" <?php checked( $abn, false ); ?>  value="0">
+							<span><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></span>
+						</label>
+					</fieldset>
+				</td>
+			</tr>
+			<!-- / Admin Bar Notification -->
 
-            <tr>
+			<tr>
 				<?php
 				$disabled = '';
-				$label    = __( 'Admin Bar Notification Updates', 'wp-security-audit-log' );
+				$label    = esc_html__( 'Admin Bar Notification Updates', 'wp-security-audit-log' );
 				if ( wsal_freemius()->is_free_plan() ) {
 					$disabled = 'disabled';
-					$label    = __( 'Admin Bar Notification Updates (Premium)', 'wp-security-audit-log' );
+					$label    = esc_html__( 'Admin Bar Notification Updates (Premium)', 'wp-security-audit-log' );
 				}
 				?>
-                <th><label for="admin_bar_notif_refresh"><?php echo esc_html( $label ); ?></label></th>
-                <td>
-                    <fieldset <?php echo esc_attr( $disabled ); ?>>
-						<?php $abn_updates = $this->_plugin->settings()->get_admin_bar_notif_updates(); ?>
-                        <label for="admin_bar_notif_realtime">
-                            <input type="radio" name="admin_bar_notif_updates" id="admin_bar_notif_realtime" style="margin-top: -2px;" <?php checked( $abn_updates, 'real-time' ); ?> value="real-time">
-                            <span><?php esc_html_e( 'Update in near real time', 'wp-security-audit-log' ); ?></span>
-                        </label>
-                        <br/>
-                        <label for="admin_bar_notif_refresh">
-                            <input type="radio" name="admin_bar_notif_updates" id="admin_bar_notif_refresh" style="margin-top: -2px;" <?php checked( $abn_updates, 'page-refresh' ); ?>  value="page-refresh">
-                            <span><?php esc_html_e( 'Update only on page refreshes', 'wp-security-audit-log' ); ?></span>
-                        </label>
-                    </fieldset>
-                </td>
-            </tr>
-            <!-- / Admin Bar Notification Updates -->
-            </tbody>
-        </table>
-        <!-- Dashboard Widget -->
+				<th><label for="admin_bar_notif_refresh"><?php echo esc_html( $label ); ?></label></th>
+				<td>
+					<fieldset <?php echo esc_attr( $disabled ); ?>>
+						<?php $abn_updates = $this->plugin->settings()->get_admin_bar_notif_updates(); ?>
+						<label for="admin_bar_notif_realtime">
+							<input type="radio" name="admin_bar_notif_updates" id="admin_bar_notif_realtime" style="margin-top: -2px;" <?php checked( $abn_updates, 'real-time' ); ?> value="real-time">
+							<span><?php esc_html_e( 'Update in near real time', 'wp-security-audit-log' ); ?></span>
+						</label>
+						<br/>
+						<label for="admin_bar_notif_refresh">
+							<input type="radio" name="admin_bar_notif_updates" id="admin_bar_notif_refresh" style="margin-top: -2px;" <?php checked( $abn_updates, 'page-refresh' ); ?>  value="page-refresh">
+							<span><?php esc_html_e( 'Update only on page refreshes', 'wp-security-audit-log' ); ?></span>
+						</label>
+					</fieldset>
+				</td>
+			</tr>
+			<!-- / Admin Bar Notification Updates -->
+			</tbody>
+		</table>
+		<!-- Dashboard Widget -->
 
-        <h3><?php esc_html_e( 'Add user notification on the WordPress login page', 'wp-security-audit-log' ); ?></h3>
-        <p class="description"><?php esc_html_e( 'Many compliance regulations (such as the GDPR) require website administrators to tell the users of their website that all the changes they do when logged in are being logged.', 'wp-security-audit-log' ); ?></p>
-        <table class="form-table wsal-tab">
-            <tbody>
-            <tr>
-                <th><label for="login_page_notification"><?php esc_html_e( 'Login Page Notification', 'wp-security-audit-log' ); ?></label></th>
-                <td>
-                    <fieldset <?php echo disabled($login_page_notification_settings_enforced_by_mainwp); ?>>
+		<h3><?php esc_html_e( 'Add user notification on the WordPress login page', 'wp-security-audit-log' ); ?></h3>
+		<p class="description"><?php esc_html_e( 'Many compliance regulations (such as the GDPR) require website administrators to tell the users of their website that all the changes they do when logged in are being logged.', 'wp-security-audit-log' ); ?></p>
+		<table class="form-table wsal-tab">
+			<tbody>
+			<tr>
+				<th><label for="login_page_notification"><?php esc_html_e( 'Login Page Notification', 'wp-security-audit-log' ); ?></label></th>
+				<td>
+					<fieldset <?php echo disabled( $login_page_notification_settings_enforced_by_mainwp ); ?>>
 						<?php
 						// Get login page notification checkbox.
-						$wsal_lpn = $this->_plugin->settings()->is_login_page_notification();
+						$wsal_lpn = $this->plugin->settings()->is_login_page_notification();
 						if ( $wsal_lpn && 'true' === $wsal_lpn ) {
 							// If option exists, value is true then set to true.
 							$wsal_lpn = true;
@@ -620,16 +625,17 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							$wsal_lpn = false;
 						}
 						?>
-                        <label for="wsal_lpn_yes">
-                            <input type="radio" name="login_page_notification" id="wsal_lpn_yes" <?php checked( $wsal_lpn ); ?> value="true" />
+						<label for="wsal_lpn_yes">
+							<input type="radio" name="login_page_notification" id="wsal_lpn_yes" <?php checked( $wsal_lpn ); ?> value="true" />
 							<?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?>
-                        </label>
-                        <br />
+						</label>
+						<br />
 						<?php
 						// Get login page notification text.
-						$wsal_lpn_text         = $this->_plugin->settings()->get_login_page_notification_text();
-						$wsal_lpn_text_default = __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href="https://wpactivitylog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' );
-
+						$wsal_lpn_text = $this->plugin->settings()->get_login_page_notification_text();
+						if ( ! $wsal_lpn_text ) {
+							$wsal_lpn_text = __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href="https://wpactivitylog.com/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' );
+						}
 						// Allowed HTML tags for this setting.
 						$allowed_tags = array(
 							'a' => array(
@@ -638,32 +644,33 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								'target' => array(),
 							),
 						);
+
 						?>
-                        <textarea name="login_page_notification_text"
-                                  id="login_page_notification_text"
-                                  cols="60" rows="6"
+						<textarea name="login_page_notification_text"
+								id="login_page_notification_text"
+								cols="60" rows="6"
 								<?php echo ( $wsal_lpn ) ? false : 'disabled'; ?>
-							><?php echo ( $wsal_lpn_text ) ? wp_kses( $wsal_lpn_text, $allowed_tags ) : wp_kses( $wsal_lpn_text_default, $allowed_tags ); ?></textarea>
-                        <br/>
-                        <p class="description">
-							<?php echo wp_kses( __( '<strong>Note: </strong>', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ) . esc_html__( 'The only HTML code allowed in the login page notification is for links ( < a href >< /a > ).', 'wp-security-audit-log' ); ?>
-                        </p>
-                        <br />
+							><?php echo wp_kses( $wsal_lpn_text, $allowed_tags ); ?></textarea>
+						<br/>
+						<p class="description">
+							<?php echo wp_kses( __( '<strong>Note: </strong>', 'wp-security-audit-log' ), $this->plugin->allowed_html_tags ) . esc_html__( 'The only HTML code allowed in the login page notification is for links ( < a href >< /a > ).', 'wp-security-audit-log' ); // phpcs:ignore ?>
+						</p>
+						<br />
 
-                        <label for="wsal_lpn_no">
-                            <input type="radio" name="login_page_notification" id="wsal_lpn_no" <?php checked( $wsal_lpn, false ); ?> value="false" />
+						<label for="wsal_lpn_no">
+							<input type="radio" name="login_page_notification" id="wsal_lpn_no" <?php checked( $wsal_lpn, false ); ?> value="false" />
 							<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
-                        </label>
-                    </fieldset>
-                </td>
-            </tr>
-            <!-- / Login Page Notification -->
-            </tbody>
-        </table>
-        <!-- Login Page Notification -->
+						</label>
+					</fieldset>
+				</td>
+			</tr>
+			<!-- / Login Page Notification -->
+			</tbody>
+		</table>
+		<!-- Login Page Notification -->
 
-        <h3><?php esc_html_e( 'Is your website running behind a firewall or reverse proxy?', 'wp-security-audit-log' ); ?></h3>
-        <p class="description">
+		<h3><?php esc_html_e( 'Is your website running behind a firewall or reverse proxy?', 'wp-security-audit-log' ); ?></h3>
+		<p class="description">
 			<?php
 			echo sprintf(
 				/* translators: Learn more link. */
@@ -671,38 +678,38 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				'<a href="https://wpactivitylog.com/support/kb/support-reverse-proxies-web-application-firewalls/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . esc_html__( 'learn more', 'wp-security-audit-log' ) . '</a>'
 			);
 			?>
-        </p>
-        <table class="form-table wsal-tab">
-            <tbody>
-            <tr>
-                <th><label for="pioption_on"><?php esc_html_e( 'Reverse Proxy / Firewall Options', 'wp-security-audit-log' ); ?></label></th>
-                <td>
-                    <fieldset>
-                        <label for="enable_proxy_ip_capture_yes">
-                            <input type="radio" name="EnableProxyIpCapture" value="1" id="enable_proxy_ip_capture_yes" <?php checked( $this->_plugin->settings()->IsMainIPFromProxy() ); ?> />
+		</p>
+		<table class="form-table wsal-tab">
+			<tbody>
+			<tr>
+				<th><label for="pioption_on"><?php esc_html_e( 'Reverse Proxy / Firewall Options', 'wp-security-audit-log' ); ?></label></th>
+				<td>
+					<fieldset>
+						<label for="enable_proxy_ip_capture_yes">
+							<input type="radio" name="EnableProxyIpCapture" value="1" id="enable_proxy_ip_capture_yes" <?php checked( $this->plugin->settings()->is_main_ip_from_proxy() ); ?> />
 							<?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?>
-                        </label>
-                        <br/>
-                        <label for="EnableIpFiltering">
-                            <input type="checkbox" name="EnableIpFiltering" value="1" id="EnableIpFiltering" <?php checked( $this->_plugin->settings()->IsInternalIPsFiltered() ); ?> />
+						</label>
+						<br/>
+						<label for="EnableIpFiltering">
+							<input type="checkbox" name="EnableIpFiltering" value="1" id="EnableIpFiltering" <?php checked( $this->plugin->settings()->is_internal_ips_filtered() ); ?> />
 							<?php esc_html_e( 'Filter internal IP addresses from the proxy headers. Enable this option only if you are	are still seeing the internal IP addresses of the firewall or proxy.', 'wp-security-audit-log' ); ?>
-                        </label>
-                        <br/>
-                        <label for="enable_proxy_ip_capture_no">
-                            <input type="radio" name="EnableProxyIpCapture" value="0" id="enable_proxy_ip_capture_no" <?php checked( $this->_plugin->settings()->IsMainIPFromProxy(), false ); ?> />
+						</label>
+						<br/>
+						<label for="enable_proxy_ip_capture_no">
+							<input type="radio" name="EnableProxyIpCapture" value="0" id="enable_proxy_ip_capture_no" <?php checked( $this->plugin->settings()->is_main_ip_from_proxy(), false ); ?> />
 							<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
-                        </label>
-                        <br />
-                    </fieldset>
-                </td>
-            </tr>
-            <!-- / Reverse Proxy / Firewall Options -->
-            </tbody>
-        </table>
-        <!-- Reverse Proxy -->
+						</label>
+						<br />
+					</fieldset>
+				</td>
+			</tr>
+			<!-- / Reverse Proxy / Firewall Options -->
+			</tbody>
+		</table>
+		<!-- Reverse Proxy -->
 
-        <h3><?php esc_html_e( 'Who can change the plugin settings?', 'wp-security-audit-log' ); ?></h3>
-        <p class="description">
+		<h3><?php esc_html_e( 'Who can change the plugin settings?', 'wp-security-audit-log' ); ?></h3>
+		<p class="description">
 			<?php
 			$allowed_tags = array(
 				'a' => array(
@@ -712,60 +719,53 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			);
 			echo wp_kses(
 				sprintf(
-				/* translators: Learn more link. */
+					/* translators: Learn more link. */
 					esc_html__( 'By default only users with administrator role (single site) and super administrator role (multisite) can change the settings of the plugin. Though you can restrict the privileges to just your user - %s.', 'wp-security-audit-log' ),
 					'<a href="https://wpactivitylog.com/support/kb/managing-wordpress-activity-log-plugin-privileges/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">' . __( 'learn more', 'wp-security-audit-log' ) . '</a>'
 				),
 				$allowed_tags
 			);
-			$restrict_settings = $this->_plugin->settings()->get_restrict_plugin_setting();
+			$restrict_settings = $this->plugin->settings()->get_restrict_plugin_setting();
 			?>
-        </p>
-        <table class="form-table wsal-tab">
-            <tbody>
-            <tr>
-                <th><label for="RestrictAdmins"><?php esc_html_e( 'Restrict plugin access', 'wp-security-audit-log' ); ?></label></th>
-                <td>
-                    <fieldset>
-                        <label for="only_me">
-                            <input type="radio" name="restrict-plugin-settings" id="only_me" value="only_me" <?php checked( $restrict_settings, 'only_me' ); ?> />
+		</p>
+		<table class="form-table wsal-tab">
+			<tbody>
+			<tr>
+				<th><label for="RestrictAdmins"><?php esc_html_e( 'Restrict plugin access', 'wp-security-audit-log' ); ?></label></th>
+				<td>
+					<fieldset>
+						<label for="only_me">
+							<input type="radio" name="restrict-plugin-settings" id="only_me" value="only_me" <?php checked( $restrict_settings, 'only_me' ); ?> />
 							<?php esc_html_e( 'Only me', 'wp-security-audit-log' ); ?>
-                        </label>
-                        <br/>
-                        <label for="only_admins">
-                            <input type="radio" name="restrict-plugin-settings" id="only_admins" value="only_admins" <?php checked( $restrict_settings, 'only_admins' ); ?> />
+						</label>
+						<br/>
+						<label for="only_admins">
+							<input type="radio" name="restrict-plugin-settings" id="only_admins" value="only_admins" <?php checked( $restrict_settings, 'only_admins' ); ?> />
 							<?php
-							if ( $this->_plugin->IsMultisite() ) {
+							if ( $this->plugin->is_multisite() ) {
 								esc_html_e( 'All superadmins', 'wp-security-audit-log' );
 							} else {
 								esc_html_e( 'All administrators', 'wp-security-audit-log' );
 							}
 							?>
-                        </label>
-                        <br/>
-                    </fieldset>
-                </td>
-            </tr>
-            <!-- / Restrict Plugin Access -->
-            </tbody>
-        </table>
-        <!-- Restrict Plugin Access -->
+						</label>
+						<br/>
+					</fieldset>
+				</td>
+			</tr>
+			<!-- / Restrict Plugin Access -->
+			</tbody>
+		</table>
+		<!-- Restrict Plugin Access -->
 
-        <h3><?php esc_html_e( 'Allow other users to view the activity log', 'wp-security-audit-log' ); ?></h3>
-        <p class="description">
+		<h3><?php esc_html_e( 'Allow other users to view the activity log', 'wp-security-audit-log' ); ?></h3>
+		<p class="description">
 			<?php
-			$allowed_tags = array(
-				'a' => array(
-					'href'   => true,
-					'target' => true,
-				),
-			);
-			$is_multisite = $this->_plugin->IsMultisite();
-			$section_label = '';
-			if ($is_multisite) {
-				$section_label = esc_html__('By default only super administrators and the child sites\' administrators can view the WordPress activity log. Though you can change this by using the setting below.', 'wp-security-audit-log');
+			$is_multisite = $this->plugin->is_multisite();
+			if ( $is_multisite ) {
+				$section_label = esc_html__( 'By default only super administrators and the child sites\' administrators can view the WordPress activity log. Though you can change this by using the setting below.', 'wp-security-audit-log' );
 			} else {
-				$section_label = esc_html__('By default only users with administrator role can view the WordPress activity log. To allow someone who does not have an admin role to view the activity log, specify them in the below setting.', 'wp-security-audit-log');
+				$section_label = esc_html__( 'By default only users with administrator role can view the WordPress activity log. To allow someone who does not have an admin role to view the activity log, specify them in the below setting.', 'wp-security-audit-log' );
 			}
 
 			echo wp_kses(
@@ -773,43 +773,42 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				$allowed_tags
 			);
 			?>
-        </p>
-		<?php if ( $is_multisite ): ?>
-            <table class="form-table wsal-tab">
-                <tbody>
-                <tr>
-                    <th><?php esc_html_e( 'Can view events', 'wp-security-audit-log' ); ?></th>
-                    <td>
-                        <fieldset>
+		</p>
+		<?php if ( $is_multisite ) : ?>
+			<table class="form-table wsal-tab">
+				<tbody>
+				<tr>
+					<th><?php esc_html_e( 'Can view events', 'wp-security-audit-log' ); ?></th>
+					<td>
+						<fieldset>
 							<?php
-							$restrict_settings = $this->_plugin->settings()->get_restrict_log_viewer();
+							$restrict_settings          = $this->plugin->settings()->get_restrict_log_viewer();
 							$viewer_restriction_options = array(
 								'only_me'          => __( 'Only me', 'wp-security-audit-log' ),
 								'only_superadmins' => __( 'Super administators only', 'wp-security-audit-log' ),
 								'only_admins'      => __( 'Super administators and site administrators', 'wp-security-audit-log' ),
 							);
 							?>
-							<?php foreach ( $viewer_restriction_options as $option => $label ): ?>
-                                <label for="log_viewer_<?php echo $option; ?>">
-									<?php $disabled = ('only_me' === $option && 'only_superadmins' === $restrict_settings); ?>
-                                    <input type="radio" name="restrict-log-viewer" id="log_viewer_<?php echo $option; ?>" value="<?php echo $option; ?>" <?php checked( $restrict_settings, $option ); ?> <?php disabled( $disabled ); ?> />
+							<?php foreach ( $viewer_restriction_options as $option => $label ) : ?>
+								<label for="<?php esc_attr( 'log_viewer_' . $option ); ?>">
+									<?php $disabled = ( 'only_me' === $option && 'only_superadmins' === $restrict_settings ); ?>
+									<input type="radio" name="restrict-log-viewer" id="<?php esc_attr( 'log_viewer_' . $option ); ?>" value="<?php echo esc_attr( $option ); ?>" <?php checked( $restrict_settings, $option ); ?> <?php disabled( $disabled ); ?> />
 									<?php echo esc_html( $label ); ?>
-                                </label>
-                                <br/>
+								</label>
+								<br/>
 							<?php endforeach; ?>
-                        </fieldset>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <p class="description"><?php esc_html_e('To allow someone who does not have an admin role to view the activity log, specify them in the below setting.', 'wp-security-audit-log'); ?></p>
+						</fieldset>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+			<p class="description"><?php esc_html_e( 'To allow someone who does not have an admin role to view the activity log, specify them in the below setting.', 'wp-security-audit-log' ); ?></p>
 		<?php endif; ?>
-        <table class="form-table wsal-tab">
-            <tbody>
-
+		<table class="form-table wsal-tab">
+			<tbody>
 				<tr>
-                    <?php $row_label = $is_multisite ? esc_html__( 'Can also view events', 'wp-security-audit-log' ) : esc_html__( 'Can view events', 'wp-security-audit-log' ); ?>
-					<th><label for="ViewerQueryBox"><?php echo $row_label; ?></label></th>
+					<?php $row_label = $is_multisite ? esc_html__( 'Can also view events', 'wp-security-audit-log' ) : esc_html__( 'Can view events', 'wp-security-audit-log' ); ?>
+					<th><label for="ViewerQueryBox"><?php echo $row_label; // phpcs:ignore ?></label></th>
 					<td>
 						<fieldset>
 							<label>
@@ -823,12 +822,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 							<div id="ViewerList">
 								<?php
-								foreach ( $this->_plugin->settings()->GetAllowedPluginViewers() as $item ) :
+								foreach ( $this->plugin->settings()->get_allowed_plugin_viewers() as $item ) :
 									if ( wp_get_current_user()->user_login === $item ) {
 										continue;
 									}
 									?>
-									<span class="sectoken-<?php echo esc_attr( $this->GetTokenType( $item ) ); ?>">
+									<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
 									<input type="hidden" name="Viewers[]" value="<?php echo esc_attr( $item ); ?>"/>
 									<?php echo esc_html( $item ); ?>
 									<a href="javascript:;" title="<?php esc_attr_e( 'Remove', 'wp-security-audit-log' ); ?>">&times;</a>
@@ -851,7 +850,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<th><label for="FromEmail"><?php esc_html_e( 'From Email & Name', 'wp-security-audit-log' ); ?></label></th>
 					<td>
 						<fieldset>
-							<?php $use_email = $this->_plugin->GetGlobalSetting( 'use-email', 'default_email' ); ?>
+							<?php $use_email = $this->plugin->get_global_setting( 'use-email', 'default_email' ); ?>
 							<label for="default_email">
 								<input type="radio" name="use-email" id="default_email" value="default_email" <?php checked( $use_email, 'default_email' ); ?> />
 								<?php esc_html_e( 'Use the email address from the WordPress general settings', 'wp-security-audit-log' ); ?>
@@ -864,12 +863,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<br>
 							<label for="FromEmail">
 								<?php esc_html_e( 'Email Address', 'wp-security-audit-log' ); ?>
-								<input type="email" id="FromEmail" name="FromEmail" value="<?php echo esc_attr( $this->_plugin->settings()->GetFromEmail() ); ?>" />
+								<input type="email" id="FromEmail" name="FromEmail" value="<?php echo esc_attr( $this->plugin->settings()->get_from_email() ); ?>" />
 							</label>
 							<br>
 							<label for="DisplayName">
 								<?php esc_html_e( 'Display Name', 'wp-security-audit-log' ); ?>&nbsp;
-								<input type="text" id="DisplayName" name="DisplayName" value="<?php echo esc_attr( $this->_plugin->settings()->GetDisplayName() ); ?>" />
+								<input type="text" id="DisplayName" name="DisplayName" value="<?php echo esc_attr( $this->plugin->settings()->get_display_name() ); ?>" />
 							</label>
 						</fieldset>
 					</td>
@@ -879,6 +878,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</table>
 		<!-- From Email & Name -->
 
+		<?php
+		$is_incognito = $this->plugin->settings()->is_incognito();
+		?>
 		<h3><?php esc_html_e( 'Do you want to hide the plugin from the list of installed plugins?', 'wp-security-audit-log' ); ?></h3>
 		<p class="description"><?php esc_html_e( 'By default all installed plugins are listed in the plugins page. Set this option to Yes remove WP Activity Log from the list of installed plugins for users who are unable to access the WP Activity Log settings.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
@@ -886,14 +888,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<tr>
 					<th><label for="incognito_yes"><?php esc_html_e( 'Hide Plugin in Plugins Page', 'wp-security-audit-log' ); ?></label></th>
 					<td>
-                        <fieldset <?php echo disabled( $incognito_setting_enforced_by_mainwp ); ?>>
+						<fieldset <?php echo disabled( $incognito_setting_enforced_by_mainwp ); ?>>
 							<label for="incognito_yes">
-								<input type="radio" name="Incognito" value="yes" id="incognito_yes" <?php checked( $this->_plugin->settings()->IsIncognito() ); ?> />
+								<input type="radio" name="Incognito" value="yes" id="incognito_yes" <?php checked( $is_incognito ); ?> />
 								<?php esc_html_e( 'Yes, hide the plugin and any WP Activity Log plugin extensions from the list of installed plugins', 'wp-security-audit-log' ); ?>
 							</label>
 							<br/>
 							<label for="incognito_no">
-								<input type="radio" name="Incognito" value="no" id="incognito_no" <?php checked( $this->_plugin->settings()->IsIncognito(), false ); ?> />
+								<input type="radio" name="Incognito" value="no" id="incognito_no" <?php checked( $is_incognito, false ); ?> />
 								<?php esc_html_e( 'No, do not hide the plugin', 'wp-security-audit-log' ); ?>
 							</label>
 						</fieldset>
@@ -913,46 +915,45 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Get $_POST global array.
 		$post_array = filter_input_array( INPUT_POST );
 
-		$this->_plugin->settings()->SetRefreshAlertsEnabled( $post_array['EnableAuditViewRefresh'] );
-		$this->_plugin->settings()->set_events_type_nav( sanitize_text_field( $post_array['events-type-nav'] ) );
-		$this->_plugin->settings()->set_use_email( sanitize_text_field( $post_array['use-email'] ) );
-		$this->_plugin->settings()->SetFromEmail( sanitize_email( $post_array['FromEmail'] ) );
-		$this->_plugin->settings()->SetDisplayName( sanitize_text_field( $post_array['DisplayName'] ) );
-
-		$this->_plugin->settings()->SetWidgetsEnabled( sanitize_text_field( $post_array['EnableDashboardWidgets'] ) );
+		$this->plugin->settings()->set_refresh_alerts_enabled( $post_array['EnableAuditViewRefresh'] );
+		$this->plugin->settings()->set_events_type_nav( sanitize_text_field( $post_array['events-type-nav'] ) );
+		$this->plugin->settings()->set_use_email( sanitize_text_field( $post_array['use-email'] ) );
+		$this->plugin->settings()->set_from_email( sanitize_email( $post_array['FromEmail'] ) );
+		$this->plugin->settings()->set_display_name( sanitize_text_field( $post_array['DisplayName'] ) );
+		$this->plugin->settings()->set_widgets_enabled( sanitize_text_field( $post_array['EnableDashboardWidgets'] ) );
 
 		if ( ! wsal_freemius()->is_free_plan() ) {
-			$this->_plugin->settings()->set_admin_bar_notif( sanitize_text_field( $post_array['admin_bar_notif'] ) );
-			$this->_plugin->settings()->set_admin_bar_notif_updates( sanitize_text_field( $post_array['admin_bar_notif_updates'] ) );
+			$this->plugin->settings()->set_admin_bar_notif( sanitize_text_field( $post_array['admin_bar_notif'] ) );
+			$this->plugin->settings()->set_admin_bar_notif_updates( sanitize_text_field( $post_array['admin_bar_notif_updates'] ) );
 		}
 
-		//  handle log viewer settings in multisite context
-		if ($this->_plugin->IsMultisite()) {
+		// Handle log viewer settings in multisite context.
+		if ( $this->plugin->is_multisite() ) {
 			$log_viewer_restrictions = isset( $post_array['restrict-log-viewer'] ) ? sanitize_text_field( $post_array['restrict-log-viewer'] ) : '';
-			$this->_plugin->settings()->set_restrict_log_viewer($log_viewer_restrictions);
+			$this->plugin->settings()->set_restrict_log_viewer( $log_viewer_restrictions );
 			if ( 'only_me' === $log_viewer_restrictions ) {
-				$this->_plugin->settings()->set_only_me_user_id(get_current_user_id());
+				$this->plugin->settings()->set_only_me_user_id( get_current_user_id() );
 			}
 		}
 
 		// Get plugin viewers.
 		$viewers = isset( $post_array['Viewers'] ) ? array_map( 'sanitize_text_field', $post_array['Viewers'] ) : array();
-		$this->_plugin->settings()->SetAllowedPluginViewers( $viewers );
+		$this->plugin->settings()->set_allowed_plugin_viewers( $viewers );
 
-		// handle plugin settings permissions
+		// Handle plugin settings permissions.
 		$restrict_settings = isset( $post_array['restrict-plugin-settings'] ) ? sanitize_text_field( $post_array['restrict-plugin-settings'] ) : false;
-		$this->_plugin->settings()->set_restrict_plugin_setting( $restrict_settings );
+		$this->plugin->settings()->set_restrict_plugin_setting( $restrict_settings );
 		if ( 'only_me' === $restrict_settings ) {
-			$this->_plugin->settings()->set_only_me_user_id(get_current_user_id());
+			$this->plugin->settings()->set_only_me_user_id( get_current_user_id() );
 		}
 
-		$this->_plugin->settings()->set_login_page_notification( isset( $post_array['login_page_notification'] ) ? sanitize_text_field( $post_array['login_page_notification'] ) : false );
-		$this->_plugin->settings()->set_login_page_notification_text( isset( $post_array['login_page_notification_text'] ) ? $post_array['login_page_notification_text'] : false );
-		$this->_plugin->settings()->SetMainIPFromProxy( isset( $post_array['EnableProxyIpCapture'] ) ? sanitize_text_field( $post_array['EnableProxyIpCapture'] ) : false );
-		$this->_plugin->settings()->SetInternalIPsFiltering( isset( $post_array['EnableIpFiltering'] ) ? sanitize_text_field( $post_array['EnableIpFiltering'] ) : false );
+		$this->plugin->settings()->set_login_page_notification( isset( $post_array['login_page_notification'] ) ? sanitize_text_field( $post_array['login_page_notification'] ) : false );
+		$this->plugin->settings()->set_login_page_notification_text( isset( $post_array['login_page_notification_text'] ) ? $post_array['login_page_notification_text'] : false );
+		$this->plugin->settings()->set_main_ip_from_proxy( isset( $post_array['EnableProxyIpCapture'] ) ? sanitize_text_field( $post_array['EnableProxyIpCapture'] ) : false );
+		$this->plugin->settings()->set_internal_ips_filtering( isset( $post_array['EnableIpFiltering'] ) ? sanitize_text_field( $post_array['EnableIpFiltering'] ) : false );
 
 		$is_incognito = isset( $post_array['Incognito'] ) ? \WSAL\Helpers\Options::string_to_bool( sanitize_text_field( $post_array['Incognito'] ) ) : false;
-		$this->_plugin->settings()->SetIncognito( $is_incognito );
+		$this->plugin->settings()->set_incognito( $is_incognito );
 	}
 
 	/**
@@ -960,18 +961,18 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 */
 	private function tab_audit_log() {
 		?>
-        <h3><?php esc_html_e( 'For how long do you want to keep the activity log events (Retention settings) ?', 'wp-security-audit-log' ); ?></h3>
-        <p class="description">
+		<h3><?php esc_html_e( 'For how long do you want to keep the activity log events (Retention settings)?', 'wp-security-audit-log' ); ?></h3>
+		<p class="description">
 			<?php
 			esc_html_e( 'The plugin uses an efficient way to store the activity log data in the WordPress database, though the more data you keep the more disk space will be required. ', 'wp-security-audit-log' );
 			$retention_help_text = __( '<a href="https://wpactivitylog.com/pricing/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">Upgrade to Premium</a> to store the activity log data in an external database.', 'wp-security-audit-log' );
 
-			echo wp_kses( $retention_help_text, $this->_plugin->allowed_html_tags );
+			echo wp_kses( $retention_help_text, $this->plugin->allowed_html_tags );
 			?>
-        </p>
+		</p>
 
 		<?php
-		// Ensure it doesnt load a 2nd time for premium users.
+		// Ensure it doesn't load a 2nd time for premium users.
 		if ( ! wsal_freemius()->can_use_premium_code() ) {
 			$this->render_retention_settings_table();
 		}
@@ -986,7 +987,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<td>
 						<fieldset>
 							<?php
-							$timezone = $this->_plugin->settings()->GetTimezone();
+							$timezone = $this->plugin->settings()->get_timezone();
 
 							/**
 							 * Transform timezone values.
@@ -1018,7 +1019,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<th><?php esc_html_e( 'Show Milliseconds', 'wp-security-audit-log' ); ?></th>
 					<td>
 						<fieldset>
-							<?php $show_milliseconds = $this->_plugin->settings()->get_show_milliseconds(); ?>
+							<?php $show_milliseconds = $this->plugin->settings()->get_show_milliseconds(); ?>
 							<label for="show_milliseconds">
 								<input type="checkbox" name="show_milliseconds" id="show_milliseconds" style="margin-top: -2px;"
 									<?php checked( $show_milliseconds ); ?> value="yes">
@@ -1040,7 +1041,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<th><label for="timezone-default"><?php esc_html_e( 'User information in Activity log', 'wp-security-audit-log' ); ?></label></th>
 					<td>
 						<fieldset>
-							<?php $type_username = $this->_plugin->settings()->get_type_username(); ?>
+							<?php $type_username = $this->plugin->settings()->get_type_username(); ?>
 							<label for="column_username">
 								<input type="radio" name="type_username" id="column_username" style="margin-top: -2px;" <?php checked( $type_username, 'username' ); ?> value="username">
 								<span><?php esc_html_e( 'WordPress username', 'wp-security-audit-log' ); ?></span>
@@ -1071,7 +1072,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<th><label for="columns"><?php esc_html_e( 'Activity log columns selection', 'wp-security-audit-log' ); ?></label></th>
 					<td>
 						<fieldset>
-							<?php $columns = $this->_plugin->settings()->GetColumns(); ?>
+							<?php $columns = $this->plugin->settings()->get_columns(); ?>
 							<?php foreach ( $columns as $key => $value ) { ?>
 								<label for="columns">
 									<input type="checkbox" name="Columns[<?php echo esc_attr( $key ); ?>]" id="<?php echo esc_attr( $key ); ?>" class="sel-columns" style="margin-top: -2px;"
@@ -1102,7 +1103,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</table>
 		<!-- Activity log columns -->
 
-        <?php $is_wp_backend = $this->_plugin->settings()->IsWPBackend(); ?>
+		<?php $is_wp_backend = $this->plugin->settings()->is_wp_backend(); ?>
 		<h3><?php esc_html_e( 'Do you want to keep a log of WordPress background activity?', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
 			<?php esc_html_e( 'WordPress does a lot of things in the background that you do not necessarily need to know about, such as; deletion of post revisions, deletion of auto saved drafts etc. By default the plugin does not report them since there might be a lot and are irrelevant to the user.', 'wp-security-audit-log' ); ?>
@@ -1144,17 +1145,17 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$pruning_unit = isset( $post_array['pruning-unit'] ) ? sanitize_text_field( $post_array['pruning-unit'] ) : false;
 		$pruning_date = ( ! empty( $pruning_date ) && ! empty( $pruning_unit ) ) ? $pruning_date . ' ' . $pruning_unit : false;
 
-		$this->_plugin->settings()->SetPruningDateEnabled( isset( $post_array['PruneBy'] ) ? 'date' === $post_array['PruneBy'] : '' );
-		$this->_plugin->settings()->SetPruningDate( $pruning_date );
-		$this->_plugin->settings()->set_pruning_unit( $pruning_unit );
-		$this->_plugin->settings()->SetTimezone( $post_array['Timezone'] );
-		$this->_plugin->settings()->set_type_username( $post_array['type_username'] );
-		$this->_plugin->settings()->SetWPBackend( isset( $post_array['WPBackend'] ) ? sanitize_text_field( $post_array['WPBackend'] ) : false );
+		$this->plugin->settings()->set_pruning_date_enabled( isset( $post_array['PruneBy'] ) ? 'date' === $post_array['PruneBy'] : '' );
+		$this->plugin->settings()->set_pruning_date( $pruning_date );
+		$this->plugin->settings()->set_pruning_unit( $pruning_unit );
+		$this->plugin->settings()->set_timezone( $post_array['Timezone'] );
+		$this->plugin->settings()->set_type_username( $post_array['type_username'] );
+		$this->plugin->settings()->set_wp_backend( isset( $post_array['WPBackend'] ) ? sanitize_text_field( $post_array['WPBackend'] ) : false );
 		if ( ! empty( $post_array['Columns'] ) ) {
-			$this->_plugin->settings()->SetColumns( $post_array['Columns'] );
+			$this->plugin->settings()->set_columns( $post_array['Columns'] );
 		}
-		$show_milliseconds = ( isset( $post_array['show_milliseconds'] ) && 'yes' === $post_array['show_milliseconds'] ) ? true : false;
-		$this->_plugin->settings()->set_show_milliseconds( $show_milliseconds );
+		$show_milliseconds = isset( $post_array['show_milliseconds'] ) && 'yes' === $post_array['show_milliseconds'];
+		$this->plugin->settings()->set_show_milliseconds( $show_milliseconds );
 	}
 
 	/**
@@ -1168,15 +1169,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<tr>
 					<?php if ( ! defined( 'WFCM_PLUGIN_FILE' ) ) : ?>
 						<div class="addon-wrapper" style="max-width: 380px; text-align: center; border: 1px solid #ccc; padding: 25px;">
-							<img src="<?php echo trailingslashit( WSAL_BASE_URL ) . 'img/help/website-file-changes-monitor.jpg'; ?>">
+							<img src="<?php echo esc_html( trailingslashit( WSAL_BASE_URL ) . 'img/help/website-file-changes-monitor.jpg' ); ?>">
 							<h4><?php echo esc_html__( 'Website File Changes Monitor', 'wp-security-audit-log' ); ?></h4>
 							<p><?php echo esc_html__( 'To keep a log of file changes please install Website File Changes Monitor, a plugin which is also developed by us.', 'wp-security-audit-log' ); ?></p><br>
-							<p><button class="install-addon button button-primary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-install-addon' ) ); ?>" data-plugin-slug="website-file-changes-monitor/website-file-changes-monitor.php" data-plugin-download-url="https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip"><?php _e( 'Install plugin now', 'wp-security-audit-log' ); ?></button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span> <a href="https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" rel="noopener noreferrer" target="_blank" style="margin-left: 15px;"><?php echo esc_html__( 'Learn More', 'wp-security-audit-log' ); ?></a></p>
+							<p><button class="install-addon button button-primary" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-install-addon' ) ); ?>" data-plugin-slug="website-file-changes-monitor/website-file-changes-monitor.php" data-plugin-download-url="https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip"><?php esc_html_e( 'Install plugin now', 'wp-security-audit-log' ); ?></button><span class="spinner" style="display: none; visibility: visible; float: none; margin: 0 0 0 8px;"></span> <a href="https://wpactivitylog.com/support/kb/wordpress-files-changes-warning-activity-logs/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" rel="noopener noreferrer" target="_blank" style="margin-left: 15px;"><?php esc_html_e( 'Learn More', 'wp-security-audit-log' ); ?></a></p>
 						</div>
 					<?php else : ?>
 						<?php
-						$wcfm_settings_page = '';
-						$redirect_args      = array(
+						$redirect_args = array(
 							'page' => 'wfcm-file-changes',
 						);
 						if ( ! is_multisite() ) {
@@ -1210,8 +1210,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<input type="button" id="ExUserQueryAdd" class="button-primary" value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
 							<br style="clear: both;"/>
 							<div id="ExUserList">
-								<?php foreach ( $this->_plugin->settings()->GetExcludedMonitoringUsers() as $item ) : ?>
-									<span class="sectoken-<?php echo esc_attr( $this->GetTokenType( $item ) ); ?>">
+								<?php foreach ( $this->plugin->settings()->get_excluded_monitoring_users() as $item ) : ?>
+									<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
 									<input type="hidden" name="ExUsers[]" value="<?php echo esc_attr( $item ); ?>"/>
 									<?php echo esc_html( $item ); ?>
 									<a href="javascript:;" title="<?php esc_attr_e( 'Remove', 'wp-security-audit-log' ); ?>">&times;</a>
@@ -1231,8 +1231,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<input type="button" id="ExRoleQueryAdd" class="button-primary" value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
 							<br style="clear: both;"/>
 							<div id="ExRoleList">
-								<?php foreach ( $this->_plugin->settings()->GetExcludedMonitoringRoles() as $item ) : ?>
-									<span class="sectoken-<?php echo esc_attr( $this->GetTokenType( $item ) ); ?>">
+								<?php foreach ( $this->plugin->settings()->get_excluded_monitoring_roles() as $item ) : ?>
+									<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
 									<input type="hidden" name="ExRoles[]" value="<?php echo esc_attr( $item ); ?>"/>
 									<?php echo esc_html( $item ); ?>
 									<a href="javascript:;" title="<?php esc_attr_e( 'Remove', 'wp-security-audit-log' ); ?>">&times;</a>
@@ -1252,89 +1252,100 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<input type="button" id="IpAddrQueryAdd" class="button-primary" value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
 							<br style="clear: both;"/>
 							<div id="IpAddrList">
-								<?php foreach ( $this->_plugin->settings()->GetExcludedMonitoringIP() as $item ) : ?>
-									<span class="sectoken-<?php echo esc_attr( $this->GetTokenType( $item ) ); ?>">
+								<?php foreach ( $this->plugin->settings()->get_excluded_monitoring_ip() as $item ) : ?>
+									<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
 										<input type="hidden" name="IpAddrs[]" value="<?php echo esc_attr( $item ); ?>"/>
 										<?php echo esc_html( $item ); ?>
 										<a href="javascript:;" title="<?php esc_attr_e( 'Remove', 'wp-security-audit-log' ); ?>">&times;</a>
 									</span>
 							<?php endforeach; ?>
-                        </div>
-                    </fieldset>
-                    <p class="description"><?php esc_html_e( 'You can exclude an individual IP address or a range of IP addresses. To exclude a range use the following format: [first IP]-[last octet of the last IP]. Example: 172.16.180.6-127.', 'wp-security-audit-log' ); ?></p>
-                </td>
-            </tr>
-            <!-- Exclude IP Addresses -->
+						</div>
+					</fieldset>
+					<p class="description"><?php esc_html_e( 'You can exclude an individual IP address or a range of IP addresses. To exclude a range use the following format: [first IP]-[last octet of the last IP]. Example: 172.16.180.6-127.', 'wp-security-audit-log' ); ?></p>
+				</td>
+			</tr>
+			<!-- Exclude IP Addresses -->
 
-            <tr>
-                <th><label for="ExCPTsQueryBox"><?php esc_html_e( 'Exclude Post Type:', 'wp-security-audit-log' ); ?></label></th>
-                <td>
-                    <fieldset>
-                        <input type="text" id="ExCPTsQueryBox" style="width: 250px;">
-                        <input type="button" id="ExCPTsQueryAdd" class="button-primary" value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
-                        <br style="clear: both;"/>
-                        <div id="ExCPTsList">
-							<?php foreach ( $this->_plugin->settings()->get_excluded_post_types() as $item ) : ?>
-                                <span class="sectoken-<?php echo esc_attr( $this->GetTokenType( $item ) ); ?>">
+			<tr>
+				<th><label for="ExCPTsQueryBox"><?php esc_html_e( 'Exclude Post Type:', 'wp-security-audit-log' ); ?></label></th>
+				<td>
+					<fieldset>
+						<input type="text" id="ExCPTsQueryBox" style="width: 250px;">
+						<input type="button" id="ExCPTsQueryAdd" class="button-primary" value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
+						<br style="clear: both;"/>
+						<div id="ExCPTsList">
+							<?php foreach ( $this->plugin->settings()->get_excluded_post_types() as $item ) : ?>
+								<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
 										<input type="hidden" name="ExCPTss[]" value="<?php echo esc_attr( $item ); ?>"/>
 										<?php echo esc_html( $item ); ?>
 										<a href="javascript:;" title="<?php esc_attr_e( 'Remove', 'wp-security-audit-log' ); ?>">&times;</a>
 									</span>
 							<?php endforeach; ?>
-                        </div>
-                    </fieldset>
-                    <p class="description"><?php esc_html_e( 'WordPress has the post and page post types by default though your website might use more post types (custom post types). You can exclude all post types, including the default WordPress ones.', 'wp-security-audit-log' ); ?></p>
-                </td>
-            </tr>
-            <!-- Exclude Custom Post Types -->
+						</div>
+					</fieldset>
+					<p class="description"><?php esc_html_e( 'WordPress has the post and page post types by default though your website might use more post types (custom post types). You can exclude all post types, including the default WordPress ones.', 'wp-security-audit-log' ); ?></p>
+				</td>
+			</tr>
+			<!-- Exclude Custom Post Types -->
 
-                <?php
-                $this->renderMetaExclusionSection(
-                    esc_html__( 'Exclude custom post fields:', 'wp-security-audit-log' ),
-                    $this->_plugin->settings()->GetExcludedPostMetaFields(),
-                    'PostMeta'
-                );
-                ?><!-- Exclude Custom Post Fields -->
+				<?php
+				$this->renderMetaExclusionSection(
+					esc_html__( 'Exclude custom post fields:', 'wp-security-audit-log' ),
+					$this->plugin->settings()->get_excluded_post_meta_fields(),
+					'PostMeta'
+				);
+				?>
+				<!-- Exclude Custom Post Fields -->
 
 				<?php
 				$this->renderMetaExclusionSection(
 					esc_html__( 'Exclude custom user fields:', 'wp-security-audit-log' ),
-					$this->_plugin->settings()->GetExcludedUserMetaFields(),
+					$this->plugin->settings()->get_excluded_user_meta_fields(),
 					'UserMeta'
 				);
-				?><!-- Exclude Custom User Fields -->
+				?>
+				<!-- Exclude Custom User Fields -->
 
-            </tbody>
-        </table>
-        <!-- / Exclude Objects Tab -->
+			</tbody>
+		</table>
+		<!-- / Exclude Objects Tab -->
 		<?php
 	}
 
+	/**
+	 * Renders form section for excluding metadata of certain object type.
+	 *
+	 * @param string $title  Section title.
+	 * @param array  $values Values.
+	 * @param string $type   Object type.
+	 */
 	private function renderMetaExclusionSection( $title, $values, $type ) {
+		// @codingStandardsIgnoreStart
 		?>
-        <tr>
-            <th><label for="Custom<?php echo $type; ?>QueryBox"><?php echo $title; ?></label></th>
-            <td>
-                <fieldset data-type="<?php echo $type; ?>">
-                    <input type="text" id="<?php echo $type; ?>QueryBox" class="js-query-box" style="width: 250px;">
-                    <input type="button" id="<?php echo $type; ?>QueryAdd" class="js-query-add button-primary"
-                           value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
-                    <br style="clear: both;"/>
-                    <div id="<?php echo $type; ?>List" class="js-list">
+		<tr>
+			<th><label for="Custom<?php echo $type; ?>QueryBox"><?php echo $title; ?></label></th>
+			<td>
+				<fieldset data-type="<?php echo $type; ?>">
+					<input type="text" id="<?php echo $type; ?>QueryBox" class="js-query-box" style="width: 250px;">
+					<input type="button" id="<?php echo $type; ?>QueryAdd" class="js-query-add button-primary"
+						   value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
+					<br style="clear: both;"/>
+					<div id="<?php echo $type; ?>List" class="js-list">
 						<?php foreach ( $values as $item ) : ?>
-                            <span class="sectoken-<?php echo esc_attr( $this->GetTokenType( $item ) ); ?>">
+							<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
 										<input type="hidden" name="<?php echo $type; ?>s[]"
-                                               value="<?php echo esc_attr( $item ); ?>"/>
+											   value="<?php echo esc_attr( $item ); ?>"/>
 										<?php echo esc_html( $item ); ?>
 										<a href="javascript:;" title="<?php esc_attr_e( 'Remove', 'wp-security-audit-log' ); ?>">&times;</a>
 									</span>
 						<?php endforeach; ?>
-                    </div>
-                </fieldset>
-                <p class="description"><?php esc_html_e( 'You can use the * wildcard to exclude multiple matching custom fields. For example to exclude all custom fields starting with wp123 enter wp123*', 'wp-security-audit-log' ); ?></p>
-            </td>
-        </tr>
+					</div>
+				</fieldset>
+				<p class="description"><?php esc_html_e( 'You can use the * wildcard to exclude multiple matching custom fields. For example to exclude all custom fields starting with wp123 enter wp123*', 'wp-security-audit-log' ); ?></p>
+			</td>
+		</tr>
 		<?php
+		// @codingStandardsIgnoreEnd
 	}
 
 	/**
@@ -1344,12 +1355,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Get $_POST global array.
 		$post_array = filter_input_array( INPUT_POST );
 
-		$this->_plugin->settings()->SetExcludedMonitoringUsers( isset( $post_array['ExUsers'] ) ? $post_array['ExUsers'] : array() );
-		$this->_plugin->settings()->SetExcludedMonitoringRoles( isset( $post_array['ExRoles'] ) ? $post_array['ExRoles'] : array() );
-		$this->_plugin->settings()->SetExcludedPostMetaFields( isset( $post_array['PostMetas'] ) ? $post_array['PostMetas'] : array() );
-		$this->_plugin->settings()->SetExcludedUserMetaFields( isset( $post_array['UserMetas'] ) ? $post_array['UserMetas'] : array() );
-		$this->_plugin->settings()->SetExcludedMonitoringIP( isset( $post_array['IpAddrs'] ) ? $post_array['IpAddrs'] : array() );
-		$this->_plugin->settings()->set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
+		$this->plugin->settings()->set_excluded_monitoring_users( isset( $post_array['ExUsers'] ) ? $post_array['ExUsers'] : array() );
+		$this->plugin->settings()->set_excluded_monitoring_roles( isset( $post_array['ExRoles'] ) ? $post_array['ExRoles'] : array() );
+		$this->plugin->settings()->set_excluded_post_meta_fields( isset( $post_array['PostMetas'] ) ? $post_array['PostMetas'] : array() );
+		$this->plugin->settings()->set_excluded_user_meta_fields( isset( $post_array['UserMetas'] ) ? $post_array['UserMetas'] : array() );
+		$this->plugin->settings()->set_excluded_monitoring_ip( isset( $post_array['IpAddrs'] ) ? $post_array['IpAddrs'] : array() );
+		$this->plugin->settings()->set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
 	}
 
 	/**
@@ -1357,23 +1368,23 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 */
 	private function tab_advanced_settings() {
 		?>
-        <p class="description">
+		<p class="description">
 			<?php esc_html_e( 'These settings are for advanced users.', 'wp-security-audit-log' ); ?>
-			<?php echo sprintf( __( 'If you have any questions <a href="https://wpactivitylog.com/contact/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">contact us</a>.', 'wp-security-audit-log' ), $this->_plugin->allowed_html_tags ); ?>
+			<?php echo sprintf( __( 'If you have any questions <a href="https://wpactivitylog.com/contact/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">contact us</a>.', 'wp-security-audit-log' ), $this->plugin->allowed_html_tags ); // phpcs:ignore ?>
 		</p>
 
-        <h3><?php esc_html_e( 'Reset plugin settings to default', 'wp-security-audit-log' ); ?></h3>
-        <p class="description"><?php _e( 'Use this button to <em>factory reset</em> the plugin. This means that all the configured settings will be reset to default and all email notifications, scheduled reports, external database / third party services connections, archiving and mirroring rule will be deleted. NOTE: the activity log data will not be purged. Use the setting below to purge the activity log.', 'wp-security-audit-log' ); ?></p>
-        <table class="form-table wsal-tab">
-            <tbody>
-            <tr>
-                <th><?php esc_html_e( 'Reset Settings', 'wp-security-audit-log' ); ?></th>
-                <td>
-                    <a href="#wsal_reset_settings" class="button-primary js-settings-reset"><?php esc_html_e( 'RESET', 'wp-security-audit-log' ); ?></a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+		<h3><?php esc_html_e( 'Reset plugin settings to default', 'wp-security-audit-log' ); ?></h3>
+		<p class="description"><?php _e( 'Use this button to <em>factory reset</em> the plugin. This means that all the configured settings will be reset to default and all email notifications, scheduled reports, external database / third party services connections, archiving and mirroring rule will be deleted. NOTE: the activity log data will not be purged. Use the setting below to purge the activity log.', 'wp-security-audit-log' ); // phpcs:ignore ?></p>
+		<table class="form-table wsal-tab">
+			<tbody>
+			<tr>
+				<th><?php esc_html_e( 'Reset Settings', 'wp-security-audit-log' ); ?></th>
+				<td>
+					<a href="#wsal_reset_settings" class="button-primary js-settings-reset"><?php esc_html_e( 'RESET', 'wp-security-audit-log' ); ?></a>
+				</td>
+			</tr>
+			</tbody>
+		</table>
 
 		<h3><?php esc_html_e( 'Purge the WordPress activity log', 'wp-security-audit-log' ); ?></h3>
 		<p class="description"><?php esc_html_e( 'Click the Purge button below to delete all the data from the WordPress activity log and start afresh.', 'wp-security-audit-log' ); ?></p>
@@ -1388,7 +1399,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			</tbody>
 		</table>
 
-		<?php $stealth_mode = $this->_plugin->settings()->is_stealth_mode(); ?>
+		<?php $stealth_mode = $this->plugin->settings()->is_stealth_mode(); ?>
 		<h3><?php esc_html_e( 'MainWP Child Site Stealth Mode', 'wp-security-audit-log' ); ?></h3>
 		<p class="description"><?php esc_html_e( 'This option is enabled automatically when the plugin detects the MainWP Child plugin on the site. When this setting is enabled plugin access is restricted to the administrator who installs the plugin, the plugin is not shown in the list of installed plugins and no admin notifications are shown. Disable this option to change the plugin to the default setup.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
@@ -1412,7 +1423,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					</td>
 				</tr>
 				<!-- / MainWP Child Site Stealth Mode -->
-				<?php $admin_blocking_plugins_support = $this->_plugin->settings()->get_admin_blocking_plugin_support(); ?>
+				<?php $admin_blocking_plugins_support = $this->plugin->settings()->get_admin_blocking_plugin_support(); ?>
 				<tr>
 					<th>
 						<label for="mwp_admin_blocking_support"><?php esc_html_e( 'Admin blocking plugins support', 'wp-security-audit-log' ); ?></label>
@@ -1431,6 +1442,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			</tbody>
 		</table>
 
+		<?php
+		$data_deletion_enabled = $this->plugin->settings()->is_delete_data();
+		?>
 		<h3><?php esc_html_e( 'Do you want to delete the plugin data from the database upon uninstall?', 'wp-security-audit-log' ); ?></h3>
 		<p class="description"><?php esc_html_e( 'The plugin saves the activity log data and settings in the WordPress database. By default upon uninstalling the plugin the data is kept in the database so if it is installed again, you can still access the data. If the data is deleted it is not possible to recover it so you won\'t be able to access it again even when you reinstall the plugin.', 'wp-security-audit-log' ); ?></p>
 		<table class="form-table wsal-tab">
@@ -1441,14 +1455,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<fieldset>
 							<label for="delete_data_yes">
 								<input type="radio" name="DeleteData" value="1" id="delete_data_yes" onclick="return delete_confirm(this);"
-									<?php checked( $this->_plugin->settings()->IsDeleteData() ); ?>
+									<?php checked( $data_deletion_enabled ); ?>
 								/>
 								<?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?>
 							</label>
 							<br>
 							<label for="delete_data_no">
 								<input type="radio" name="DeleteData" value="0" id="delete_data_no"
-									<?php checked( $this->_plugin->settings()->IsDeleteData(), false ); ?>
+									<?php checked( $data_deletion_enabled, false ); ?>
 								/>
 								<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
 							</label>
@@ -1459,15 +1473,15 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			</tbody>
 		</table>
 
-        <div class="remodal" data-remodal-id="wsal_reset_settings">
-            <button data-remodal-action="close" class="remodal-close"></button>
-            <h3><?php esc_html_e( 'Are you sure you want to reset all the plugin settings to default? This action cannot be undone.', 'wp-security-audit-log' ); ?></h3>
-            <br>
-            <input type="hidden" id="wsal-reset-settings-nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-reset-settings' ) ); ?>">
-            <button data-remodal-action="confirm" class="remodal-confirm"><?php esc_html_e( 'Yes' ); ?></button>
-            <button data-remodal-action="cancel" class="remodal-cancel"><?php esc_html_e( 'No' ); ?></button>
-        </div>
-        <!-- Reset Settings Modal -->
+		<div class="remodal" data-remodal-id="wsal_reset_settings">
+			<button data-remodal-action="close" class="remodal-close"></button>
+			<h3><?php esc_html_e( 'Are you sure you want to reset all the plugin settings to default? This action cannot be undone.', 'wp-security-audit-log' ); ?></h3>
+			<br>
+			<input type="hidden" id="wsal-reset-settings-nonce" value="<?php echo esc_attr( wp_create_nonce( 'wsal-reset-settings' ) ); ?>">
+			<button data-remodal-action="confirm" class="remodal-confirm"><?php esc_html_e( 'Yes' ); ?></button>
+			<button data-remodal-action="cancel" class="remodal-cancel"><?php esc_html_e( 'No' ); ?></button>
+		</div>
+		<!-- Reset Settings Modal -->
 
 		<div class="remodal" data-remodal-id="wsal_purge_activity">
 			<button data-remodal-action="close" class="remodal-close"></button>
@@ -1490,33 +1504,33 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Get $_POST global array.
 		$post_array = filter_input_array( INPUT_POST );
 
-		$this->_plugin->settings()->SetDeleteData( isset( $post_array['DeleteData'] ) ? sanitize_text_field( $post_array['DeleteData'] ) : false );
+		$this->plugin->settings()->set_delete_data( isset( $post_array['DeleteData'] ) ? sanitize_text_field( $post_array['DeleteData'] ) : false );
 
 		$stealth_mode = isset( $post_array['mwp_stealth_mode'] ) ? $post_array['mwp_stealth_mode'] : false;
 		if ( 'yes' === $stealth_mode ) {
 			if ( ! WpSecurityAuditLog::is_mainwp_active() ) {
 				throw new Exception( __( 'MainWP Child plugin is not active on this website.', 'wp-security-audit-log' ) );
 			}
-			$this->_plugin->settings()->set_mainwp_child_stealth_mode();
+			$this->plugin->settings()->set_mainwp_child_stealth_mode();
 
 			$admin_blocking_plugins_support = isset( $post_array['mwp_admin_blocking_support'] ) ? $post_array['mwp_admin_blocking_support'] : false;
 			if ( 'yes' === $admin_blocking_plugins_support ) {
-				$this->_plugin->settings()->set_admin_blocking_plugin_support( true );
+				$this->plugin->settings()->set_admin_blocking_plugin_support( true );
 			}
 		} else {
-			$this->_plugin->settings()->deactivate_mainwp_child_stealth_mode();
+			$this->plugin->settings()->deactivate_mainwp_child_stealth_mode();
 		}
 	}
 
 	/**
-	 * Method: Get View Header.
+	 * {@inheritDoc}
 	 */
-	public function Header() {
+	public function header() {
 		wp_enqueue_style(
 			'settings',
-			$this->_plugin->GetBaseUrl() . '/css/settings.css',
+			$this->plugin->get_base_url() . '/css/settings.css',
 			array(),
-			filemtime( $this->_plugin->GetBaseDir() . '/css/settings.css' )
+			filemtime( $this->plugin->get_base_dir() . '/css/settings.css' )
 		);
 
 		// Check current tab.
@@ -1526,24 +1540,24 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			wp_enqueue_style( 'wsal-remodal-theme', WSAL_BASE_URL . 'css/remodal-default-theme.css', array(), '1.1.1' );
 		}
 		?>
-        <style type="text/css">
-            .wsal-tab {
-                /* display: none; */
-            }
-            .wsal-tab tr.alert-incomplete td {
-                color: #9BE;
-            }
-            .wsal-tab tr.alert-unavailable td {
-                color: #CCC;
-            }
-        </style>
+		<style type="text/css">
+			.wsal-tab {
+				/* display: none; */
+			}
+			.wsal-tab tr.alert-incomplete td {
+				color: #9BE;
+			}
+			.wsal-tab tr.alert-unavailable td {
+				color: #CCC;
+			}
+		</style>
 		<?php
 	}
 
 	/**
-	 * Method: Get View Footer.
+	 * {@inheritDoc}
 	 */
-	public function Footer() {
+	public function footer() {
 		// Enqueue jQuery UI from core.
 		wp_enqueue_script(
 			'wsal-jquery-ui',
@@ -1568,9 +1582,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Register settings script.
 		wp_register_script(
 			'settings',
-			$this->_plugin->GetBaseUrl() . '/js/settings.js',
+			$this->plugin->get_base_url() . '/js/settings.js',
 			array(),
-			filemtime( $this->_plugin->GetBaseDir() . '/js/settings.js' ),
+			filemtime( $this->plugin->get_base_dir() . '/js/settings.js' ),
 			true
 		);
 		// Passing nonce for security to JS file.
@@ -1589,25 +1603,25 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		wp_localize_script( 'settings', 'wsal_data', $wsal_data );
 		wp_enqueue_script( 'settings' );
 		?>
-        <script type="text/javascript">
-            jQuery( document ).ready( function() {
-                jQuery( '.sel-columns' ).change( function() {
-                    var notChecked = 1;
-                    jQuery( '.sel-columns' ).each( function() {
-                        if ( this.checked ) notChecked = 0;
-                    })
-                    if ( notChecked == 1 ) {
-                        alert( esc_html__( 'You have to select at least one column!', 'wp-security-audit-log' ) );
-                    }
-                });
-            });</script>
+		<script type="text/javascript">
+			jQuery( document ).ready( function() {
+				jQuery( '.sel-columns' ).change( function() {
+					var notChecked = 1;
+					jQuery( '.sel-columns' ).each( function() {
+						if ( this.checked ) notChecked = 0;
+					})
+					if ( notChecked == 1 ) {
+						alert( "<?php esc_html_e( 'You have to select at least one column!', 'wp-security-audit-log' ); ?>" );
+					}
+				});
+			});</script>
 		<?php
 	}
 
 	/**
 	 * Method: Ajax Request handler for AjaxGetAllUsers.
 	 */
-	public function AjaxGetAllUsers() {
+	public function ajax_get_all_users() {
 		// Filter $_GET array for security.
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
@@ -1626,7 +1640,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	/**
 	 * Method: Ajax Request handler for AjaxGetAllRoles.
 	 */
-	public function AjaxGetAllRoles() {
+	public function ajax_get_all_roles() {
 		// Filter $_GET array for security.
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
@@ -1653,22 +1667,29 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 
-		echo $this->filter_values_for_searched_term( array_values( WSAL_ConstantManager::getSeverities() ), $get_array['term'] );
+		echo $this->filter_values_for_searched_term( // phpcs:ignore
+			array_values( WSAL_ConstantManager::get_severities() ),
+			$get_array['term'] // phpcs:ignore
+		);
 		exit;
 	}
 
 	/**
 	 * Filters values to return ones matching the desired term.
 	 *
-	 * @param array $items_to_filter
-	 * @param string $term
-	 * @return string
+	 * @param array  $items_to_filter List of items to filter.
+	 * @param string $term            Search term.
+	 *
+	 * @return string JSON encoded filtered list.
 	 */
 	public function filter_values_for_searched_term( $items_to_filter, $term ) {
 
-		$result = array_filter( $items_to_filter, function( $value ) use ( $term ) {
-			return strpos( strtolower( $value ), strtolower( $term ) ) !== false;
-		});
+		$result = array_filter(
+			$items_to_filter,
+			function( $value ) use ( $term ) {
+				return strpos( strtolower( $value ), strtolower( $term ) ) !== false;
+			}
+		);
 
 		return wp_json_encode( $result );
 	}
@@ -1684,9 +1705,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 
-		$event_types     = $this->_plugin->alerts->get_event_type_data();
+		$event_types = $this->plugin->alerts->get_event_type_data();
 
-		echo $this->filter_values_for_searched_term( array_values( $event_types ), $get_array['term'] );
+		echo $this->filter_values_for_searched_term( array_values( $event_types ), $get_array['term'] ); // phpcs:ignore
 		exit;
 	}
 
@@ -1701,9 +1722,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 
-		$event_objects     = $this->_plugin->alerts->get_event_objects_data();
+		$event_objects = $this->plugin->alerts->get_event_objects_data();
 
-		echo $this->filter_values_for_searched_term( array_values( $event_objects ), $get_array['term'] );
+		echo $this->filter_values_for_searched_term( array_values( $event_objects ), $get_array['term'] ); // phpcs:ignore
 		exit;
 	}
 
@@ -1718,14 +1739,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 
-		$registered_alerts = $this->_plugin->alerts->GetAlerts();
+		$registered_alerts = $this->plugin->alerts->get_alerts();
 
-		$alerts = [];
+		$alerts = array();
 		foreach ( $registered_alerts as $alert => $details ) {
 			$alerts[] = (string) $details->code;
 		}
 
-		echo $this->filter_values_for_searched_term( array_values( $alerts ), $get_array['term'] );
+		echo $this->filter_values_for_searched_term( array_values( $alerts ), $get_array['term'] ); // phpcs:ignore
 		exit;
 	}
 
@@ -1734,16 +1755,19 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 *
 	 * @since 2.6.7
 	 */
-	public function AjaxGetAllCPT() {
+	public function ajax_get_all_cpts() {
 		// Filter $_GET array for security.
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 
 		// Get custom post types.
 		$custom_post_types = array();
-		$post_types        = get_post_types( array(
-		        'public' => false
-        ), 'names' );
+		$post_types        = get_post_types(
+			array(
+				'public' => false,
+			),
+			'names'
+		);
 		// if we are running multisite and have networkwide cpt tracker get the
 		// list from and merge to the post_types array.
 		if ( is_multisite() && class_exists( '\WSAL\Multisite\NetworkWide\CPTsTracker' ) ) {
@@ -1752,6 +1776,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				$post_types[ $cpt ] = $cpt;
 			}
 		}
+
 		$post_types = array_diff( $post_types, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css' ) );
 		foreach ( $post_types as $post_type ) {
 			if ( strpos( $post_type, $get_array['term'] ) !== false ) {
@@ -1765,14 +1790,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	/**
 	 * Checks if provided GET array is valid and bails if not.
 	 *
-	 * @param  array $get_array
-	 * @return void
+	 * @param array $get_array Get data.
 	 */
 	public function check_ajax_request_is_valid( $get_array ) {
 		// Die if user does not have permission to edit.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
+		if ( ! $this->plugin->settings()->current_user_can( 'edit' ) ) {
 			die( 'Access Denied.' );
 		}
+
 		// Die if nonce verification failed.
 		if ( ! wp_verify_nonce( $get_array['wsal_nonce'], 'wsal-exclude-nonce' ) ) {
 			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
@@ -1784,7 +1809,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 */
 	public function reset_settings() {
 		// Die if user does not have permission to change settings.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
+		if ( ! $this->plugin->settings()->current_user_can( 'edit' ) ) {
 			wp_send_json_error( esc_html__( 'Access Denied.', 'wp-security-audit-log' ) );
 		}
 
@@ -1794,20 +1819,20 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			wp_send_json_error( esc_html__( 'Nonce Verification Failed.', 'wp-security-audit-log' ) );
 		}
 
-        // delete all settings
-        WSAL_Uninstall::delete_options_from_wp_options();
+		// Delete all settings.
+		WSAL_Uninstall::delete_options_from_wp_options();
 
-        // Log settings reset event.
-        $this->_plugin->alerts->Trigger( 6006 );
-        wp_send_json_success( esc_html__( 'Plugin settings have been reset.', 'wp-security-audit-log' ) );
+		// Log settings reset event.
+		$this->plugin->alerts->trigger_event( 6006 );
+		wp_send_json_success( esc_html__( 'Plugin settings have been reset.', 'wp-security-audit-log' ) );
 	}
 
 	/**
 	 * Method: Purge plugin occurrence & meta tables.
 	 */
-        public function purge_activity() {
+	public function purge_activity() {
 		// Die if user does not have permission to change settings.
-		if ( ! $this->_plugin->settings()->CurrentUserCan( 'edit' ) ) {
+		if ( ! $this->plugin->settings()->current_user_can( 'edit' ) ) {
 			wp_send_json_error( esc_html__( 'Access Denied.', 'wp-security-audit-log' ) );
 		}
 
@@ -1817,103 +1842,110 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			wp_send_json_error( esc_html__( 'Nonce Verification Failed.', 'wp-security-audit-log' ) );
 		}
 
-        $connector = WpSecurityAuditLog::getConnector();
-        $result    = $connector->purge_activity();
+		$connector = WpSecurityAuditLog::get_connector();
+		$result    = $connector->purge_activity();
 
-        if ( $result ) {
-            // Log purge activity event.
-            $this->_plugin->alerts->Trigger( 6034 );
-            wp_send_json_success( esc_html__( 'Tables has been reset.', 'wp-security-audit-log' ) );
-        } else {
-            wp_send_json_error( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );
-        }
+		if ( $result ) {
+			// Log purge activity event.
+			$this->plugin->alerts->trigger_event( 6034 );
+			wp_send_json_success( esc_html__( 'Tables has been reset.', 'wp-security-audit-log' ) );
+		} else {
+			wp_send_json_error( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );
+		}
 	}
 
-    public function render_retention_settings_table( ) {
-        //  check if the retention settings are enforced from the MainWP master site
-        $settings = $this->_plugin->settings();
-        $enforced_settings = $settings->get_mainwp_enforced_settings();
-        $retention_settings_enforced_by_mainwp = array_key_exists( 'pruning_enabled', $enforced_settings );
-        ?>
-        <table class="form-table wsal-tab">
-            <tbody>
-            <tr>
-                <th><label for="delete1"><?php esc_html_e( 'Activity log retention', 'wp-security-audit-log' ); ?></label></th>
-                <td>
-                    <fieldset>
-                        <?php $nbld = ! $this->_plugin->settings()->IsPruningDateEnabled(); ?>
-                        <label for="delete0">
-                            <input type="radio" id="delete0" name="PruneBy" value="" <?php checked( $nbld ); ?><?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?> />
-                            <?php echo esc_html__( 'Keep all data', 'wp-security-audit-log' ); ?>
-                        </label>
-                    </fieldset>
+	/**
+	 * Renders table with retention related settings.
+	 */
+	public function render_retention_settings_table() {
+		// Check if the retention settings are enforced from the MainWP master site.
+		$settings                              = $this->plugin->settings();
+		$enforced_settings                     = $settings->get_mainwp_enforced_settings();
+		$retention_settings_enforced_by_mainwp = array_key_exists( 'pruning_enabled', $enforced_settings );
+		?>
+		<table class="form-table wsal-tab">
+			<tbody>
+			<tr>
+				<th><label for="delete1"><?php esc_html_e( 'Activity log retention', 'wp-security-audit-log' ); ?></label></th>
+				<td>
+					<fieldset>
+						<?php $nbld = ! $this->plugin->settings()->is_pruning_date_enabled(); ?>
+						<label for="delete0">
+							<input type="radio" id="delete0" name="PruneBy" value="" <?php checked( $nbld ); ?>
+								<?php disabled( $retention_settings_enforced_by_mainwp ); ?> />
+							<?php esc_html_e( 'Keep all data', 'wp-security-audit-log' ); ?>
+						</label>
+					</fieldset>
 
-                    <fieldset>
-                        <?php
-                        // Check pruning date option.
-                        $nbld = $this->_plugin->settings()->IsPruningDateEnabled();
+					<fieldset>
+						<?php
+						// Check pruning date option.
+						$nbld = $this->plugin->settings()->is_pruning_date_enabled();
 
-                        // Find and replace ` months` in the string.
-                        $pruning_date = $this->_plugin->settings()->GetPruningDate();
-						$pruning_date = preg_replace( "/[^0-9]/", "", $pruning_date );
+						// Find and replace ` months` in the string.
+						$pruning_date = $this->plugin->settings()->get_pruning_date();
+						$pruning_date = preg_replace( '/[^0-9]/', '', $pruning_date );
 
-                        $pruning_unit = $this->_plugin->settings()->get_pruning_unit();
+						$pruning_unit = $this->plugin->settings()->get_pruning_unit();
 
-						$pruning_unit_options = [
+						$pruning_unit_options = array(
 							'days'   => esc_html__( 'Days', 'wp-security-audit-log' ),
 							'months' => esc_html__( 'Months', 'wp-security-audit-log' ),
 							'years'  => esc_html__( 'Years', 'wp-security-audit-log' ),
-						];
+						);
 
-                        // Check if pruning limit was enabled for backwards compatibility.
-                        if ( $this->_plugin->settings()->IsPruningLimitEnabled() ) {
-                            $nbld         = true;
-                            $pruning_date = '6';
-                            $pruning_unit = 'months';
-                            $this->_plugin->settings()->SetPruningDate( $pruning_date . ' ' . $pruning_unit );
-                            $this->_plugin->settings()->SetPruningDateEnabled( true );
-                            $this->_plugin->settings()->SetPruningLimitEnabled( false );
-                        }
-                        ?>
-                        <label for="delete1">
-                            <input type="radio" id="delete1" name="PruneBy" value="date" <?php checked( $nbld ); ?><?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?> />
-                            <?php esc_html_e( 'Delete events older than', 'wp-security-audit-log' ); ?>
-                        </label>
-                        <input type="text" id="PruningDate" name="PruningDate"
-                               value="<?php echo esc_attr( $pruning_date ); ?>"
-                               onfocus="jQuery('#delete1').attr('checked', true);"
-                            <?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?>
-                        />
-                        <select name="pruning-unit" id="pruning-unit"<?php if ( $retention_settings_enforced_by_mainwp ): ?> disabled="disabled"<?php endif; ?> >
-							<?php foreach ( $pruning_unit_options as $option => $label ) {
-								echo '<option value="' . $option . '" ' . selected( $pruning_unit, $option, true ) . '>' . ucwords( $label ) . '</option>';
-							} ?>
-                        </select>
-                    </fieldset>
+						// Check if pruning limit was enabled for backwards compatibility.
+						if ( $this->plugin->settings()->is_pruning_limit_enabled() ) {
+							$nbld         = true;
+							$pruning_date = '6';
+							$pruning_unit = 'months';
+							$this->plugin->settings()->set_pruning_date( $pruning_date . ' ' . $pruning_unit );
+							$this->plugin->settings()->set_pruning_date_enabled( true );
+							$this->plugin->settings()->set_pruning_limit_enabled( false );
+						}
+						?>
+						<label for="delete1">
+							<input type="radio" id="delete1" name="PruneBy" value="date" <?php checked( $nbld ); ?>
+									<?php disabled( $retention_settings_enforced_by_mainwp ); ?> />
+							<?php esc_html_e( 'Delete events older than', 'wp-security-audit-log' ); ?>
+						</label>
+						<input type="text" id="PruningDate" name="PruningDate"
+							value="<?php echo esc_attr( $pruning_date ); ?>"
+							onfocus="jQuery('#delete1').attr('checked', true);"
+							<?php disabled( $retention_settings_enforced_by_mainwp ); ?>
+						/>
+						<select name="pruning-unit" id="pruning-unit" <?php disabled( $retention_settings_enforced_by_mainwp ); ?>>
+							<?php
+							foreach ( $pruning_unit_options as $option => $label ) {
+								echo '<option value="' . esc_attr( $option ) . '" ' . selected( $pruning_unit, $option, true ) . '>' . ucwords( $label ) . '</option>'; // phpcs:disable
+							}
+							?>
+						</select>
+					</fieldset>
 
-                    <?php if ( $this->_plugin->settings()->IsPruningDateEnabled() ) : ?>
-                        <p class="description">
-                            <?php
-                            $next = wp_next_scheduled( 'wsal_cleanup' );
-                            echo esc_html__( 'The next scheduled purging of activity log data that is older than ', 'wp-security-audit-log' );
-                            echo esc_html( $pruning_date . ' ' . $pruning_unit );
-                            echo sprintf(
-                                ' is in %s.',
-                                esc_html( human_time_diff( current_time( 'timestamp' ), $next ) )
-                            );
-                            echo '<!-- ' . esc_html( date( 'dMy H:i:s', $next ) ) . ' --> ';
-                            echo esc_html__( 'You can run the purging process now by clicking the button below.', 'wp-security-audit-log' );
-                            ?>
-                        </p>
-                        <p>
-                            <a class="button-primary" href="<?php echo esc_url( add_query_arg( 'action', 'AjaxRunCleanup', admin_url( 'admin-ajax.php' ) ) ); ?>"><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
-                        </p>
-                    <?php endif; ?>
-                </td>
-            </tr>
-            <!-- Activity log retention -->
-            </tbody>
-        </table>
-        <?php
-    }
+					<?php if ( $this->plugin->settings()->is_pruning_date_enabled() ) : ?>
+						<p class="description">
+							<?php
+							$next = wp_next_scheduled( 'wsal_cleanup' );
+							echo esc_html__( 'The next scheduled purging of activity log data that is older than ', 'wp-security-audit-log' );
+							echo esc_html( $pruning_date . ' ' . $pruning_unit );
+							echo sprintf(
+								' is in %s.',
+								esc_html( human_time_diff( current_time( 'timestamp' ), $next ) )
+							);
+							echo '<!-- ' . esc_html( date( 'dMy H:i:s', $next ) ) . ' --> ';
+							echo esc_html__( 'You can run the purging process now by clicking the button below.', 'wp-security-audit-log' );
+							?>
+						</p>
+						<p>
+							<a class="button-primary" href="<?php echo esc_url( add_query_arg( 'action', 'AjaxRunCleanup', admin_url( 'admin-ajax.php' ) ) ); ?>"><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
+						</p>
+					<?php endif; ?>
+				</td>
+			</tr>
+			<!-- Activity log retention -->
+			</tbody>
+		</table>
+		<?php
+	}
 }

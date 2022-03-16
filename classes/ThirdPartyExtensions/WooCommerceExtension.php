@@ -1,14 +1,32 @@
 <?php
+/**
+ * Woocommerce extension class.
+ *
+ * @package    wsal
+ * @subpackage add-ons
+ */
 
 if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 
+	/**
+	 * Class provides basic information about WSAL extension for WooCommerce.
+	 *
+	 * @package    wsal
+	 * @subpackage add-ons
+	 */
 	class WSAL_WooCommerceExtension extends WSAL_AbstractExtension {
 
-		public function __construct( ) {
+		/**
+		 * {@inheritDoc}
+		 */
+		public function __construct() {
 			parent::__construct();
 			add_filter( 'wsal_save_settings_disabled_events', array( $this, 'save_settings_disabled_events' ), 10, 4 );
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function filter_installable_plugins( $plugins ) {
 			$new_plugin = array(
 				array(
@@ -27,6 +45,9 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 			return array_merge( $plugins, $new_plugin );
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function add_event_codes( $addon_event_codes ) {
 			$new_event_codes = array(
 				'woocommerce' => array(
@@ -66,29 +87,44 @@ if ( ! class_exists( 'WSAL_WooCommerceExtension' ) ) {
 			return $disabled;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function get_custom_post_types() {
-			return [
+			return array(
 				'product',
 				'shop_coupon',
 				'shop_order',
 				'shop_order_refund',
 				'product_variation',
-				'wc_product_tab'
-			];
+				'wc_product_tab',
+			);
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function get_plugin_name() {
 			return 'WooCommerce';
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function get_plugin_icon_url() {
 			return 'https://ps.w.org/wp-activity-log-for-woocommerce/assets/icon-128x128.png?rev=2357550';
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function get_color() {
 			return '#7f54b3';
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
 		public function get_plugin_filename() {
 			return 'wp-activity-log-for-woocommerce/wsal-woocommerce.php';
 		}
