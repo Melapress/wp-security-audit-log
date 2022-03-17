@@ -25,9 +25,9 @@ interface WSAL_Adapters_OccurrenceInterface {
 	 * @param WSAL_Models_Occurrence $occurrence - Occurrence model instance.
 	 *
 	 * @return WSAL_Models_Meta[]
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::LoadArray()
+	 * @see WSAL_Adapters_MySQL_ActiveRecord::load_array()
 	 */
-	public function GetMultiMeta( $occurrence );
+	public function get_multi_meta( $occurrence );
 
 	/**
 	 * Loads a meta item given its name.
@@ -36,9 +36,9 @@ interface WSAL_Adapters_OccurrenceInterface {
 	 * @param string $name - Meta name.
 	 *
 	 * @return WSAL_Models_Meta The meta item, be sure to check if it was loaded successfully.
-	 * @see WSAL_Adapters_MySQL_ActiveRecord::Load()
+	 * @see WSAL_Adapters_MySQL_ActiveRecord::load()
 	 */
-	public function GetNamedMeta( $occurrence, $name );
+	public function get_named_meta( $occurrence, $name );
 
 	/**
 	 * Returns the first meta value from a given set of names.
@@ -46,11 +46,11 @@ interface WSAL_Adapters_OccurrenceInterface {
 	 * a particular detail.
 	 *
 	 * @param object $occurrence - Occurrence model instance.
-	 * @param array $names - List of meta names.
+	 * @param array  $names      - List of meta names.
 	 *
 	 * @return WSAL_Models_Meta The first meta item that exists.
 	 */
-	public function GetFirstNamedMeta( $occurrence, $names );
+	public function get_first_named_meta( $occurrence, $names );
 
 	/**
 	 * Gets occurrences of the same type by IP and Username within specified time frame.
@@ -59,7 +59,7 @@ interface WSAL_Adapters_OccurrenceInterface {
 	 *
 	 * @return WSAL_Models_Occurrence[]
 	 */
-	public function CheckKnownUsers( $args = array() );
+	public function check_known_users( $args = array() );
 
 	/**
 	 * Gets occurrences of the same type by IP within specified time frame.
@@ -68,7 +68,7 @@ interface WSAL_Adapters_OccurrenceInterface {
 	 *
 	 * @return WSAL_Models_Occurrence[]
 	 */
-	public function CheckUnknownUsers( $args = array() );
+	public function check_unknown_users( $args = array() );
 
 	/**
 	 * Gets occurrence by Post_id.
@@ -77,7 +77,7 @@ interface WSAL_Adapters_OccurrenceInterface {
 	 *
 	 * @return WSAL_Models_Occurrence[]
 	 */
-	public function GetByPostID( $post_id );
+	public function get_by_post_id( $post_id );
 
 	/**
 	 * Gets occurrences of the alert 1003.
@@ -92,7 +92,7 @@ interface WSAL_Adapters_OccurrenceInterface {
 	 * Retrieves occurrences that have metadata that needs to be migrated to the occurrences table. This relates to the
 	 * database schema change done in version 4.4.0.
 	 *
-	 * @param int $limit
+	 * @param int $limit Limits the number of results.
 	 *
 	 * @return WSAL_Models_Occurrence[]
 	 * @since 4.4.0

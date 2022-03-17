@@ -4,8 +4,9 @@
  *
  * Comments sensor class file.
  *
- * @since 1.0.0
- * @package wsal
+ * @since     1.0.0
+ * @package   wsal
+ * @subpachae sensors
  */
 
 // Exit if accessed directly.
@@ -27,23 +28,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2098 User permanently deleted a comment
  * 2099 User posted a comment
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
  */
 class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 
 	/**
-	 * Listening to events using WP hooks.
+	 * {@inheritDoc}
 	 */
-	public function HookEvents() {
-		add_action( 'edit_comment', array( $this, 'EventCommentEdit' ), 10, 1 );
-		add_action( 'transition_comment_status', array( $this, 'EventCommentApprove' ), 10, 3 );
-		add_action( 'spammed_comment', array( $this, 'EventCommentSpam' ), 10, 1 );
-		add_action( 'unspammed_comment', array( $this, 'EventCommentUnspam' ), 10, 1 );
-		add_action( 'trashed_comment', array( $this, 'EventCommentTrash' ), 10, 1 );
-		add_action( 'untrashed_comment', array( $this, 'EventCommentUntrash' ), 10, 1 );
-		add_action( 'deleted_comment', array( $this, 'EventCommentDeleted' ), 10, 1 );
-		add_action( 'comment_post', array( $this, 'EventComment' ), 10, 3 );
+	public function hook_events() {
+		add_action( 'edit_comment', array( $this, 'event_comment_edit' ), 10, 1 );
+		add_action( 'transition_comment_status', array( $this, 'event_comment_approve' ), 10, 3 );
+		add_action( 'spammed_comment', array( $this, 'event_comment_spam' ), 10, 1 );
+		add_action( 'unspammed_comment', array( $this, 'event_comment_unspam' ), 10, 1 );
+		add_action( 'trashed_comment', array( $this, 'event_comment_trash' ), 10, 1 );
+		add_action( 'untrashed_comment', array( $this, 'event_comment_untrash' ), 10, 1 );
+		add_action( 'deleted_comment', array( $this, 'event_comment_deleted' ), 10, 1 );
+		add_action( 'comment_post', array( $this, 'event_comment' ), 10, 3 );
 	}
 
 	/**
@@ -51,7 +52,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 *
 	 * @param integer $comment_id - Comment ID.
 	 */
-	public function EventCommentEdit( $comment_id ) {
+	public function event_comment_edit( $comment_id ) {
 		$this->EventGeneric( $comment_id, 2093 );
 	}
 
@@ -62,7 +63,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 * @param string   $old_status - Old status.
 	 * @param stdClass $comment - Comment.
 	 */
-	public function EventCommentApprove( $new_status, $old_status, $comment ) {
+	public function event_comment_approve( $new_status, $old_status, $comment ) {
 		if ( ! empty( $comment ) && $old_status !== $new_status ) {
 			$post         = get_post( $comment->comment_post_ID );
 			$comment_link = get_permalink( $post->ID ) . '#comment-' . $comment->comment_ID;
@@ -78,10 +79,10 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 			);
 
 			if ( 'approved' === $new_status ) {
-				$this->plugin->alerts->Trigger( 2090, $fields );
+				$this->plugin->alerts->trigger_event( 2090, $fields );
 			}
 			if ( 'unapproved' === $new_status ) {
-				$this->plugin->alerts->Trigger( 2091, $fields );
+				$this->plugin->alerts->trigger_event( 2091, $fields );
 			}
 		}
 	}
@@ -91,7 +92,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 *
 	 * @param integer $comment_id - Comment ID.
 	 */
-	public function EventCommentSpam( $comment_id ) {
+	public function event_comment_spam( $comment_id ) {
 		$this->EventGeneric( $comment_id, 2094 );
 	}
 
@@ -100,7 +101,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 *
 	 * @param integer $comment_id - Comment ID.
 	 */
-	public function EventCommentUnspam( $comment_id ) {
+	public function event_comment_unspam( $comment_id ) {
 		$this->EventGeneric( $comment_id, 2095 );
 	}
 
@@ -109,7 +110,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 *
 	 * @param integer $comment_id - Comment ID.
 	 */
-	public function EventCommentTrash( $comment_id ) {
+	public function event_comment_trash( $comment_id ) {
 		$this->EventGeneric( $comment_id, 2096 );
 	}
 
@@ -118,7 +119,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 *
 	 * @param integer $comment_id comment ID.
 	 */
-	public function EventCommentUntrash( $comment_id ) {
+	public function event_comment_untrash( $comment_id ) {
 		$this->EventGeneric( $comment_id, 2097 );
 	}
 
@@ -127,7 +128,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 *
 	 * @param integer $comment_id comment ID.
 	 */
-	public function EventCommentDeleted( $comment_id ) {
+	public function event_comment_deleted( $comment_id ) {
 		$this->EventGeneric( $comment_id, 2098 );
 	}
 
@@ -138,7 +139,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 	 * @param int|string $comment_approved 1 if the comment is approved, 0 if not, 'spam' if spam.
 	 * @param array      $comment_data     Comment data.
 	 */
-	public function EventComment( $comment_id, $comment_approved, $comment_data ) {
+	public function event_comment( $comment_id, $comment_approved, $comment_data ) {
 		// Check if the comment is response to another comment.
 		if ( isset( $comment_data['comment_parent'] ) && $comment_data['comment_parent'] ) {
 			$this->EventGeneric( $comment_id, 2092 );
@@ -157,7 +158,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 					'PostStatus'  => $post->post_status,
 					'CommentID'   => $comment->comment_ID,
 					'Date'        => $comment->comment_date,
-					'CommentLink' => $comment_link
+					'CommentLink' => $comment_link,
 				);
 
 				// Get user data.
@@ -175,7 +176,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 					// Set the fields.
 					$fields['Username']         = $user_data->user_login;
 					$fields['CurrentUserRoles'] = $user_roles;
-					$this->plugin->alerts->Trigger( 2099, $fields );
+					$this->plugin->alerts->trigger_event( 2099, $fields );
 				}
 			}
 		}
@@ -205,7 +206,7 @@ class WSAL_Sensors_Comments extends WSAL_AbstractSensor {
 			);
 
 			if ( 'shop_order' !== $post->post_type ) {
-				$this->plugin->alerts->Trigger( $alert_code, $fields );
+				$this->plugin->alerts->trigger_event( $alert_code, $fields );
 			}
 		}
 	}

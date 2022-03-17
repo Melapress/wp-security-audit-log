@@ -22,7 +22,7 @@ class WSAL_Sensors_Register extends WSAL_AbstractSensor {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function HookEvents() {
+	public function hook_events() {
 		/*
 		 * Default WordPress registration utilizes action 'register_new_user', but we cannot rely on it to detect
 		 * a front-end registration implemented by a third party. We hook into the action 'user_register' because it is
@@ -60,9 +60,9 @@ class WSAL_Sensors_Register extends WSAL_AbstractSensor {
 			'EditUserLink' => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 		);
 
-		if ( $this->IsMultisite() ) {
+		if ( $this->is_multisite() ) {
 			// Registration should not be logged on multisite if event 4024 is fired.
-			$this->plugin->alerts->TriggerIf(
+			$this->plugin->alerts->trigger_event_if(
 				4000,
 				$event_data,
 				/**
@@ -71,11 +71,11 @@ class WSAL_Sensors_Register extends WSAL_AbstractSensor {
 				 * @param WSAL_AlertManager $mgr - Instance of WSAL_AlertManager.
 				 */
 				function ( WSAL_AlertManager $mgr ) {
-					return ! $mgr->WillTrigger( 4013 );
+					return ! $mgr->will_trigger( 4013 );
 				}
 			);
 		} else {
-			$this->plugin->alerts->Trigger( 4000, $event_data, true );
+			$this->plugin->alerts->trigger_event( 4000, $event_data, true );
 		}
 
 	}

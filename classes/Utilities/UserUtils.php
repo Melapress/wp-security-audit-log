@@ -1,4 +1,10 @@
 <?php
+/**
+ * User utility class.
+ *
+ * @package wsal
+ * @since 4.3.0
+ */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,10 +19,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WSAL_Utilities_UsersUtils {
 
+	/**
+	 * Local user cache. Keys are usernames and values are user IDs.
+	 *
+	 * @var array
+	 */
 	private static $cached_users = array();
 
 	/**
-	 * Local static cache for the value of setting determining the prefered user data to display as label.
+	 * Local static cache for the value of setting determining the preferred user data to display as label.
 	 *
 	 * @var string
 	 */
@@ -64,7 +75,7 @@ class WSAL_Utilities_UsersUtils {
 	 *
 	 * @since 4.3.1 Made the meta attribute mandatory, changed to static and moved from occurrence to alert.
 	 */
-	public static function GetUsername( $meta = null ) {
+	public static function get_username( $meta = null ) {
 		if ( ! is_array( $meta ) ) {
 			return '';
 		}
@@ -121,7 +132,7 @@ class WSAL_Utilities_UsersUtils {
 	/**
 	 * Retrieves user ID using either the username of user ID.
 	 *
-	 * @param int|string $user_login
+	 * @param int|string $user_login User login or ID.
 	 *
 	 * @return int|null
 	 */
@@ -132,7 +143,7 @@ class WSAL_Utilities_UsersUtils {
 		}
 
 		global $wpdb;
-		$user_id = $wpdb->get_var(
+		$user_id = $wpdb->get_var( // phpcs:ignore
 			$wpdb->prepare(
 				"SELECT ID FROM $wpdb->users WHERE user_login = %s OR ID = %d;",
 				$user_login,
@@ -163,11 +174,10 @@ class WSAL_Utilities_UsersUtils {
 			return esc_html( ucwords( implode( ', ', $roles ) ) );
 		}
 
-		if ( is_string( $roles ) && '' != $roles ) {
+		if ( is_string( $roles ) && '' !== $roles ) {
 			return esc_html( ucwords( str_replace( array( '"', '[', ']' ), ' ', $roles ) ) );
 		}
 
 		return '<i>' . esc_html__( 'Unknown', 'wp-security-audit-log' ) . '</i>';
-
 	}
 }

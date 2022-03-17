@@ -64,7 +64,7 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 			}
 
 			// validate that the plugin is in the allowed list, or it is our helper plugin with external libraries.
-			$valid = false;
+			$valid                      = false;
 			$helper_plugin_installation = 'wsal-external-libraries/wsal-external-libraries.php' === $plugin_slug;
 			if ( $helper_plugin_installation ) {
 				$valid = true;
@@ -106,9 +106,9 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 				$result = 'success';
 			}
 
-			//  if we're installing our helper plugin, we also need to delete the nudge to install the helper plugin
+			// If we're installing our helper plugin, we also need to delete the nudge to install the helper plugin.
 			if ( $helper_plugin_installation ) {
-				WpSecurityAuditLog::GetInstance()->DeleteGlobalSetting( 'show-helper-plugin-needed-nudge' );
+				WpSecurityAuditLog::get_instance()->delete_global_setting( 'show-helper-plugin-needed-nudge' );
 			}
 
 			wp_send_json( $result );
@@ -226,7 +226,6 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 			} else {
 				return false;
 			}
-
 		}
 	}
 }
