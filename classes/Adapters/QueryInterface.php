@@ -22,23 +22,23 @@ interface WSAL_Adapters_QueryInterface {
 	/**
 	 * Execute query and return data as $ar_cls objects.
 	 *
-	 * @param object $query - Query object.
+	 * @param WSAL_Models_Query $query - Query object.
 	 */
-	public function Execute( $query );
+	public function execute_query( $query );
 
 	/**
 	 * Count query.
 	 *
-	 * @param object $query - Query object.
+	 * @param WSAL_Models_Query $query - Query object.
 	 */
-	public function Count( $query );
+	public function count( $query );
 
 	/**
 	 * Query for deleting records.
 	 *
-	 * @param object $query - Query object.
+	 * @param WSAL_Models_Query $query - Query object.
 	 */
-	public function Delete( $query );
+	public function delete( $query );
 
 	/**
 	 * Checks if the adapter is successfully connected.
@@ -46,5 +46,16 @@ interface WSAL_Adapters_QueryInterface {
 	 * @return bool True if the adapter is connected. False otherwise.
 	 * @since 4.3.2
 	 */
-	public function IsConnected();
+	public function is_connected();
+
+	/**
+	 * Deprecated placeholder function.
+	 *
+	 * @param WSAL_Models_Query $query - Query object.
+	 *
+	 * @see        WSAL_Adapters_QueryInterface::execute_query()
+	 *
+	 * @deprecated 4.4.1 Replaced by function execute_query.
+	 */
+	public function Execute( $query );
 }
