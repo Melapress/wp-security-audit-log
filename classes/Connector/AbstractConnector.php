@@ -12,8 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// require_once('ConnectorInterface.php');.
-require_once( 'wp-db-custom.php' );
+require_once 'wp-db-custom.php';
 
 /**
  * Adapter Classes loader class.
@@ -36,14 +35,14 @@ abstract class WSAL_Connector_AbstractConnector {
 	 *
 	 * @var null
 	 */
-	protected $adaptersBasePath = null;
+	protected $adapters_base_path = null;
 
 	/**
 	 * Adapter Directory Name.
 	 *
 	 * @var null
 	 */
-	protected $adaptersDirName = null;
+	protected $adapters_dir_name = null;
 
 	/**
 	 * Method: Constructor.
@@ -51,14 +50,15 @@ abstract class WSAL_Connector_AbstractConnector {
 	 * @param  string $adapters_dir_name - Adapter directory name.
 	 */
 	public function __construct( $adapters_dir_name = null ) {
-		$this->adaptersBasePath = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Adapters' . DIRECTORY_SEPARATOR;
+		$this->adapters_base_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Adapters' . DIRECTORY_SEPARATOR;
 		if ( ! empty( $adapters_dir_name ) ) {
-			$this->adaptersDirName = $adapters_dir_name;
-			require_once( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'ActiveRecordAdapter.php' );
-			require_once( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'MetaAdapter.php' );
-			require_once( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'OccurrenceAdapter.php' );
-			require_once( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'QueryAdapter.php' );
-			require_once( $this->getAdaptersDirectory() . DIRECTORY_SEPARATOR . 'TmpUserAdapter.php' );
+			$this->adapters_dir_name = $adapters_dir_name;
+			$adapters_directory      = $this->get_adapters_directory();
+			require_once $adapters_directory . DIRECTORY_SEPARATOR . 'ActiveRecordAdapter.php';
+			require_once $adapters_directory . DIRECTORY_SEPARATOR . 'MetaAdapter.php';
+			require_once $adapters_directory . DIRECTORY_SEPARATOR . 'OccurrenceAdapter.php';
+			require_once $adapters_directory . DIRECTORY_SEPARATOR . 'QueryAdapter.php';
+			require_once $adapters_directory . DIRECTORY_SEPARATOR . 'TmpUserAdapter.php';
 			do_action( 'wsal_require_additional_adapters' );
 		}
 	}
@@ -66,9 +66,9 @@ abstract class WSAL_Connector_AbstractConnector {
 	/**
 	 * Method: Get adapters directory.
 	 */
-	public function getAdaptersDirectory() {
-		if ( ! empty( $this->adaptersBasePath ) && ! empty( $this->adaptersDirName ) ) {
-			return $this->adaptersBasePath . $this->adaptersDirName;
+	public function get_adapters_directory() {
+		if ( ! empty( $this->adapters_base_path ) && ! empty( $this->adapters_dir_name ) ) {
+			return $this->adapters_base_path . $this->adapters_dir_name;
 		} else {
 			return false;
 		}

@@ -4,8 +4,9 @@
  *
  * Abstract sensor class file.
  *
- * @since 1.0.0
- * @package wsal
+ * @since      1.0.0
+ * @package    wsal
+ * @subpackage sensors
  */
 
 // Exit if accessed directly.
@@ -16,8 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Abstract class used in all the sensors.
  *
- * @see Sensors/*.php
- * @package wsal
+ * @see        Sensors/*.php
+ * @package    wsal
+ * @subpackage sensors
  */
 abstract class WSAL_AbstractSensor {
 
@@ -42,14 +44,17 @@ abstract class WSAL_AbstractSensor {
 	 *
 	 * @return boolean
 	 */
-	protected function IsMultisite() {
-		return $this->plugin->IsMultisite();
+	protected function is_multisite() {
+		return $this->plugin->is_multisite();
 	}
 
 	/**
 	 * Method: Hook events related to sensor.
 	 */
-	abstract function HookEvents();
+	public function hook_events() {
+		// We call the deprecated function for backwards compatibility.
+		$this->HookEvents();
+	}
 
 	/**
 	 * Method: Log the message for sensor.
@@ -58,13 +63,13 @@ abstract class WSAL_AbstractSensor {
 	 * @param string $message - Alert message.
 	 * @param mixed  $args    - Message arguments.
 	 */
-	protected function Log( $type, $message, $args ) {
-		$this->plugin->alerts->Trigger(
+	protected function log( $type, $message, $args ) {
+		$this->plugin->alerts->trigger_event(
 			$type,
 			array(
 				'Message' => $message,
 				'Context' => $args,
-				'Trace'   => debug_backtrace(),
+				'Trace'   => debug_backtrace(), // phpcs:ignore
 			)
 		);
 	}
@@ -75,8 +80,8 @@ abstract class WSAL_AbstractSensor {
 	 * @param string $message - Alert message.
 	 * @param mixed  $args    - Message arguments.
 	 */
-	protected function LogError( $message, $args ) {
-		$this->Log( 0001, $message, $args );
+	protected function log_error( $message, $args ) {
+		$this->log( 0001, $message, $args );
 	}
 
 	/**
@@ -85,8 +90,8 @@ abstract class WSAL_AbstractSensor {
 	 * @param string $message - Alert message.
 	 * @param mixed  $args    - Message arguments.
 	 */
-	protected function LogWarn( $message, $args ) {
-		$this->Log( 0002, $message, $args );
+	protected function log_warn( $message, $args ) {
+		$this->log( 0002, $message, $args );
 	}
 
 	/**
@@ -95,28 +100,16 @@ abstract class WSAL_AbstractSensor {
 	 * @param string $message - Alert message.
 	 * @param mixed  $args    - Message arguments.
 	 */
-	protected function LogInfo( $message, $args ) {
-		$this->Log( 0003, $message, $args );
+	protected function log_info( $message, $args ) {
+		$this->log( 0003, $message, $args );
 	}
 
 	/**
-	 * Check to see whether or not the specified directory is accessible.
+	 * Deprecated placeholder function.
 	 *
-	 * @param string $dir_path - Directory path.
+	 * @see        WSAL_AbstractSensor::hook_events()
 	 *
-	 * @return boolean
+	 * @deprecated 4.4.1 Replaced by function hook_events.
 	 */
-	protected function CheckDirectory( $dir_path ) {
-		if ( ! is_dir( $dir_path ) ) {
-			return false;
-		}
-		if ( ! is_readable( $dir_path ) ) {
-			return false;
-		}
-		if ( ! is_writable( $dir_path ) ) {
-			return false;
-		}
-
-		return true;
-	}
+	public function HookEvents() {}
 }

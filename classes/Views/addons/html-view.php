@@ -3,6 +3,7 @@
  * Addons HTML View in Admin.
  *
  * @package wsal
+ * @subpackage views
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,9 +33,9 @@ switch ( $this->hook_suffix ) {
 	case 'wp-activity-log_page_wsal-search':
 		$utm_params['utm_content'] = 'search';
 		break;
-    default:
-	    //  fallback for any other hook suffices would go here
-	    break;
+	default:
+		// Fallback for any other hook suffix would go here.
+		break;
 }
 // Links.
 $more_info = add_query_arg(
@@ -46,7 +47,7 @@ $more_info = add_query_arg(
 $trial_args = array(
 	'page'          => 'wsal-auditlog-pricing',
 	'billing_cycle' => 'annual',
-	'trial'         => 'true'
+	'trial'         => 'true',
 );
 
 // Buy Now button link.

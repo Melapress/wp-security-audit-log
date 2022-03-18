@@ -18,6 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * It uses wpdb WordPress DB Class.
  *
  * @package wsal
+ *
+ * @phpcs:disable PEAR.NamingConventions.ValidClassName.StartWithCapital
  */
 class wpdbCustom extends wpdb {
 
@@ -87,17 +89,17 @@ class wpdbCustom extends wpdb {
 	 * If $allow_bail is false, the lack of database connection will need
 	 * to be handled manually.
 	 *
+	 * @param bool $allow_bail Optional. Allows the function to bail. Default true.
+	 *
+	 * @return bool True with a successful connection, false on failure.
 	 * @since 3.0.0
 	 * @since 3.9.0 $allow_bail parameter added.
-	 *
-	 * @param bool $allow_bail Optional. Allows the function to bail. Default true.
-	 * @return bool True with a successful connection, false on failure.
 	 */
 	public function db_connect( $allow_bail = true ) {
 		$this->is_mysql = true;
-		$client_flags = defined( 'MYSQL_CLIENT_FLAGS' ) ? MYSQL_CLIENT_FLAGS : 0;
+		$client_flags   = defined( 'MYSQL_CLIENT_FLAGS' ) ? MYSQL_CLIENT_FLAGS : 0;
 		if ( $this->use_mysqli ) {
-			$this->dbh = mysqli_init();
+			$this->dbh = mysqli_init(); // phpcs:ignore
 
 			// mysqli_real_connect doesn't support the host param including a port or socket
 			// like mysql_connect does. This duplicates how mysql_connect detects a port and/or socket file.
@@ -138,7 +140,7 @@ class wpdbCustom extends wpdb {
 				$ssl_opts_set = false;
 			}
 			if ( $ssl_opts_set ) {
-				mysqli_ssl_set(
+				mysqli_ssl_set( // phpcs:ignore
 					$this->dbh,
 					$ssl_opts['KEY'],
 					$ssl_opts['CERT'],
@@ -149,9 +151,9 @@ class wpdbCustom extends wpdb {
 			}
 
 			if ( WP_DEBUG ) {
-				mysqli_real_connect( $this->dbh, $host, $this->dbuser, $this->dbpassword, null, $port, $socket, $client_flags );
+				mysqli_real_connect( $this->dbh, $host, $this->dbuser, $this->dbpassword, null, $port, $socket, $client_flags ); // phpcs:ignore
 			} else {
-				@mysqli_real_connect( $this->dbh, $host, $this->dbuser, $this->dbpassword, null, $port, $socket, $client_flags );
+				@mysqli_real_connect( $this->dbh, $host, $this->dbuser, $this->dbpassword, null, $port, $socket, $client_flags ); // phpcs:ignore
 			}
 
 			if ( $this->dbh->connect_errno ) {
@@ -166,8 +168,8 @@ class wpdbCustom extends wpdb {
 				$attempt_fallback = true;
 
 				if ( $this->has_connected
-				     || ( defined( 'WP_USE_EXT_MYSQL' ) && ! WP_USE_EXT_MYSQL )
-				     || ( ! function_exists( 'mysql_connect' ) ) ) {
+					|| ( defined( 'WP_USE_EXT_MYSQL' ) && ! WP_USE_EXT_MYSQL )
+					|| ( ! function_exists( 'mysql_connect' ) ) ) {
 					$attempt_fallback = false;
 				}
 
@@ -207,7 +209,7 @@ class wpdbCustom extends wpdb {
 	 *
 	 * @since 0.71
 	 *
-	 * @param string        $db  MySQL database name
+	 * @param string        $db  MySQL database name.
 	 * @param resource|null $dbh Optional link identifier.
 	 */
 	public function select( $db, $dbh = null ) {
@@ -216,13 +218,13 @@ class wpdbCustom extends wpdb {
 		}
 
 		if ( $this->use_mysqli ) {
-			$success = mysqli_select_db( $dbh, $db );
+			$success = mysqli_select_db( $dbh, $db ); // phpcs:ignore
 		} else {
-			$success = mysql_select_db( $db, $dbh );
+			$success = mysql_select_db( $db, $dbh ); // phpcs:ignore
 		}
 
 		if ( ! $success ) {
-			$this->ready = false;
+			$this->ready           = false;
 			$this->db_select_error = true;
 		}
 	}

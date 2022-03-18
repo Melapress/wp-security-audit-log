@@ -4,7 +4,7 @@
  *
  * Sensor manager class file.
  *
- * @since 1.0.0
+ * @since   1.0.0
  * @package wsal
  */
 
@@ -38,7 +38,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		// Check sensors before loading for optimization.
 		add_filter( 'wsal_before_sensor_load', array( $this, 'check_sensor_before_load' ), 10, 2 );
 		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( dirname( __FILE__ ) . '/Sensors', '*.php' ) as $file ) {
-			$this->AddFromFile( $file );
+			$this->add_from_file( $file );
 		}
 
 		/*
@@ -53,6 +53,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		foreach ( $paths as $inc_path ) {
 			// Check directory.
 			if ( is_dir( $inc_path ) && is_readable( $inc_path ) ) {
+				$inc_path = trailingslashit( $inc_path );
 				foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( $inc_path, '*.php' ) as $file ) {
 					// Include custom sensor file.
 					require_once $file;
@@ -72,7 +73,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 					 * is retained for back-compat.
 					 */
 					$class = ( class_exists( $sensor ) ) ? $sensor : 'WSAL_Sensors_' . $sensor;
-					$this->AddFromClass( $class );
+					$this->add_from_class( $class );
 				}
 			}
 		}
@@ -81,16 +82,16 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function HookEvents() {
+	public function hook_events() {
 		foreach ( $this->sensors as $sensor ) {
-			$sensor->HookEvents();
+			$sensor->hook_events();
 		}
 	}
 
 	/**
 	 * Method: Get the sensors.
 	 */
-	public function GetSensors() {
+	public function get_sensors() {
 		return $this->sensors;
 	}
 
@@ -99,7 +100,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 *
 	 * @param string $file Path to file.
 	 */
-	public function AddFromFile( $file ) {
+	public function add_from_file( $file ) {
 		/**
 		 * Filter: `wsal_before_sensor_load`
 		 *
@@ -112,7 +113,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 		// Initiate the sensor if $load_sensor is true.
 		if ( $load_sensor ) {
-			$this->AddFromClass( $this->plugin->GetClassFileClassName( $file ) );
+			$this->add_from_class( $this->plugin->autoloader->get_class_file_class_name( $file ) );
 		}
 	}
 
@@ -121,8 +122,8 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 *
 	 * @param string $class Class name.
 	 */
-	public function AddFromClass( $class ) {
-		$this->AddInstance( new $class( $this->plugin ) );
+	public function add_from_class( $class ) {
+		$this->add_instance( new $class( $this->plugin ) );
 	}
 
 	/**
@@ -130,7 +131,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 *
 	 * @param WSAL_AbstractSensor $sensor The new sensor.
 	 */
-	public function AddInstance( WSAL_AbstractSensor $sensor ) {
+	public function add_instance( $sensor ) {
 		$this->sensors[] = $sensor;
 	}
 
@@ -143,7 +144,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 */
 	public function check_sensor_before_load( $load_sensor, $filepath ) {
 		global $pagenow;
-		if ( ! $this->plugin->IsMultisite() ) {
+		if ( ! $this->plugin->is_multisite() ) {
 			$admin_page = $pagenow;
 		} else {
 			/**
@@ -189,14 +190,14 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 		// Only LogInOut and Register sensors should load on login page.
 		if ( WpSecurityAuditLog::is_login_screen() ) {
-			if ( in_array( $filename, array( 'Register', 'LogInOut' ) ) ) {
+			if ( in_array( $filename, array( 'Register', 'LogInOut' ), true ) ) {
 				return true;
 			}
 			return false; // Any other sensor should not load here.
 		}
 
 		$default_public_sensors = array( 'Register', 'LogInOut' );
-		if ( $this->plugin->IsMultisite() ) {
+		if ( $this->plugin->is_multisite() ) {
 			// Multisite sign-up is happening on front-end.
 			array_push( $default_public_sensors, 'MultisiteSignUp' );
 		}
@@ -256,7 +257,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 				case 'Multisite':
 					// If site is not multisite then don't load it.
-					if ( ! $this->plugin->IsMultisite() ) {
+					if ( ! $this->plugin->is_multisite() ) {
 						$load_sensor = false;
 					}
 					break;
