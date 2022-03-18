@@ -26,53 +26,53 @@ interface WSAL_Connector_ConnectorInterface {
 	 *
 	 * @return WSAL_Adapters_ActiveRecordInterface
 	 */
-	public function getAdapter( $class_name );
+	public function get_adapter( $class_name );
 
 	/**
 	 * Get the connection.
 	 *
 	 * @return wpdb
 	 */
-	public function getConnection();
+	public function get_connection();
 
 	/**
 	 * Close the connection.
 	 */
-	public function closeConnection();
+	public function close_connection();
 
 	/**
 	 * Checks if the necessary tables are available
 	 *
 	 * @return bool true|false
 	 */
-	public function isInstalled();
+	public function is_installed();
 
 	/**
 	 * Install all.
 	 *
-	 * @param bool $is_external_database
+	 * @param bool $is_external_database True if this is external database.
 	 */
-	public function installAll( $is_external_database = false );
+	public function install_all( $is_external_database = false );
 
 	/**
-	 * Install single.
+	 * Installs single database table based on its adapter class name.
 	 *
-	 * @param $class_name
-	 * @param bool $is_external_database
+	 * @param string $class_name           Adapter class name.
+	 * @param bool   $is_external_database True if this is external database.
 	 *
 	 * @since 4.1.4.1
 	 */
-	public function installSingle( $class_name, $is_external_database = false );
+	public function install_single( $class_name, $is_external_database = false );
 
 	/**
 	 * Uninstall all.
 	 */
-	public function uninstallAll();
+	public function uninstall_all();
 
 	/**
 	 * Run any query.
 	 *
-	 * @param string $query
+	 * @param string $query Databse query to execute.
 	 *
 	 * @return mixed
 	 * @since 4.4.0

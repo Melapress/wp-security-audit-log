@@ -4,8 +4,9 @@
  *
  * Database sensors class file.
  *
- * @since 1.0.0
- * @package wsal
+ * @since      1.0.0
+ * @package    wsal
+ * @subpackage sensors
  */
 
 // Exit if accessed directly.
@@ -29,13 +30,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 5023 WordPress modified tables structure
  * 5024 WordPress deleted tables
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
  */
 class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 
 	/**
-	 * Local cache for basename of current script. It used used to improve performance
+	 * Local cache for basename of current script. It is used to improve performance
 	 * of determining the actor of current action.
 	 *
 	 * @var string|bool
@@ -58,14 +59,14 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 * @var string[]
 	 * @since 4.1.5
 	 */
-	private static $already_logged = [];
+	private static $already_logged = array();
 
 	/**
 	 * Listening to events using WP hooks.
 	 */
-	public function HookEvents() {
-		add_action( 'dbdelta_queries', array( $this, 'EventDBDeltaQuery' ) );
-		add_filter( 'query', array( $this, 'EventDropQuery' ) );
+	public function hook_events() {
+		add_action( 'dbdelta_queries', array( $this, 'event_db_delta_query' ) );
+		add_filter( 'query', array( $this, 'event_drop_query' ) );
 	}
 
 	/**
@@ -75,7 +76,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 *
 	 * @return string
 	 */
-	public function EventDropQuery( $query ) {
+	public function event_drop_query( $query ) {
 		if ( ! self::$enabled ) {
 			return $query;
 		}
@@ -85,16 +86,16 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		$query_type  = '';
 		if ( preg_match( '|DROP TABLE( IF EXISTS)? ([^ ]*)|', $query ) ) {
 			$table_name = empty( $str[4] ) ? $str[2] : $str[4];
-			//  only log when the table exists as some plugins try to delete tables even if they don't exist
-			if ( $this->is_table_operation_check_enabled($table_name, 'delete')
-			     && $this->check_if_table_exists( $table_name ) ) {
+			// Only log when the table exists as some plugins try to delete tables even if they don't exist.
+			if ( $this->is_table_operation_check_enabled( $table_name, 'delete' )
+				&& $this->check_if_table_exists( $table_name ) ) {
 				array_push( $table_names, $table_name );
 				$query_type = 'delete';
 			}
 		} elseif ( preg_match( '/CREATE TABLE( IF NOT EXISTS)? ([^ ]*)/i', $query, $matches ) || preg_match( '/CREATE TABLE ([^ ]*)/i', $query, $matches ) ) {
-			$table_name = $matches[count($matches) - 1];
-			if ( $this->is_table_operation_check_enabled($table_name, 'create')
-			     && ! $this->check_if_table_exists($table_name) ) {
+			$table_name = $matches[ count( $matches ) - 1 ];
+			if ( $this->is_table_operation_check_enabled( $table_name, 'create' )
+				&& ! $this->check_if_table_exists( $table_name ) ) {
 				/**
 				 * Some plugins keep trying to create tables even
 				 * when they already exist - would result in too
@@ -105,7 +106,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			}
 		}
 
-		$this->MaybeTriggerEvent( $query_type, $table_names );
+		$this->maybe_trigger_event( $query_type, $table_names );
 
 		return $query;
 	}
@@ -114,28 +115,28 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 * Triggers an event if the list of tables is not empty. It also checks if
 	 * the event should be logged for events originated by WordPress.
 	 *
-	 * @param string $query_type
-	 * @param string[] $table_names
+	 * @param string   $query_type  Query type.
+	 * @param string[] $table_names Table names.
 	 */
-	private function MaybeTriggerEvent( $query_type, $table_names ) {
+	private function maybe_trigger_event( $query_type, $table_names ) {
 		if ( ! empty( $table_names ) ) {
-			$actor = $this->GetActor( $table_names );
-			if ( 'wordpress' === $actor && ! $this->plugin->settings()->IsWPBackend() ) {
-				//  event is not fired if the monitoring of background events is disabled
+			$actor = $this->get_actor( $table_names );
+			if ( 'WordPress' === $actor && ! $this->plugin->settings()->is_wp_backend() ) {
+				// Event is not fired if the monitoring of background events is disabled.
 				return;
 			}
 
 			// Loop through each item to report event per table.
 			foreach ( $table_names as $table_name ) {
-				$alert_options               = $this->GetEventOptions( $actor );
-				$event_code                  = $this->GetEventCode( $actor, $query_type );
-				$db_op_key = $query_type . '_' . $table_name;
-				if ( in_array( $db_op_key, self::$already_logged ) ) {
+				$alert_options = $this->get_event_options( $actor );
+				$event_code    = $this->get_event_code( $actor, $query_type );
+				$db_op_key     = $query_type . '_' . $table_name;
+				if ( in_array( $db_op_key, self::$already_logged ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 					continue;
 				}
 
 				$alert_options['TableNames'] = $table_name;
-				$this->plugin->alerts->Trigger( $event_code, $alert_options );
+				$this->plugin->alerts->trigger_event( $event_code, $alert_options );
 				array_push( self::$already_logged, $db_op_key );
 			}
 		}
@@ -148,36 +149,42 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 *
 	 * @return bool|string Theme, plugin or false if unknown.
 	 */
-	private function GetActor( $table_names ) {
-		//  default actor (treated as an unknown component)
+	private function get_actor( $table_names ) {
+		// Default actor (treated as an unknown component).
 		$result = false;
 
-		//  use current script name to determine if the actor is theme or a plugin
-
+		// Use current script name to determine if the actor is theme or a plugin.
 		if ( is_null( $this->script_basename ) ) {
 			$this->script_basename = isset( $_SERVER['SCRIPT_NAME'] ) ? basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ), '.php' ) : false;
 		}
 
 		$result = $this->script_basename;
 
-		//  check table names for default WordPress table names (including network tables)
-		if ( $this->ContainsWordPressTable( $table_names ) ) {
-			$result = 'wordpress';
+		// Check table names for default WordPress table names (including network tables).
+		if ( $this->contains_wordpress_table( $table_names ) ) {
+			$result = 'WordPress';
 		}
 
 		return $result;
 	}
 
-	private function ContainsWordPressTable( $tables ) {
+	/**
+	 * Checks if the list of tables contains a WordPress table.
+	 *
+	 * @param string $tables List of table names.
+	 *
+	 * @return bool True if the list contains a WordPress table.
+	 */
+	private function contains_wordpress_table( $tables ) {
 		if ( ! empty( $tables ) ) {
 			global $wpdb;
-			$prefix        = preg_quote( $wpdb->prefix );
+			$prefix        = preg_quote( $wpdb->prefix ); // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
 			$site_regex    = '/\b' . $prefix . '(\d+_)?(commentmeta|comments|links|options|postmeta|posts|terms|termmeta|term_relationships|term_relationships|term_taxonomy|usermeta|users)\b/';
 			$network_regex = '/\b' . $prefix . '(blogs|blog_versions|registration_log|signups|site|sitemeta|users|usermeta)\b/';
 
 			foreach ( $tables as $table ) {
 				if ( preg_match( $site_regex, $table ) || preg_match( $network_regex, $table ) ) {
-					//  stop as soon as the first WordPress table is found
+					// Stop as soon as the first WordPress table is found.
 					return true;
 				}
 			}
@@ -192,22 +199,23 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 * @param string $actor - Plugins, themes, WordPress or unknown.
 	 *
 	 * @return array
+	 *
+	 * phpcs:disable WordPress.Security.NonceVerification.Recommended
+	 * phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 	 */
-	protected function GetEventOptions( $actor ) {
-		// Check the actor
+	protected function get_event_options( $actor ) {
+		// Check the actor.
 		$alert_options = array();
 		switch ( $actor ) {
 			case 'plugins':
 				// Action Plugin Component.
 				$plugin_file = '';
 
-				// @codingStandardsIgnoreStart
 				if ( isset( $_GET['plugin'] ) ) {
 					$plugin_file = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
 				} elseif ( isset( $_GET['checked'] ) ) {
 					$plugin_file = sanitize_text_field( wp_unslash( $_GET['checked'][0] ) );
 				}
-				// @codingStandardsIgnoreEnd
 
 				// Get plugin data.
 				$plugins = get_plugins();
@@ -221,9 +229,9 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 						'Version'   => $plugin['Version'],
 					);
 				} else {
-					$plugin_name             = basename( $plugin_file, '.php' );
-					$plugin_name             = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
-					$plugin_name             = ucwords( $plugin_name );
+					$plugin_name = basename( $plugin_file, '.php' );
+					$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
+					$plugin_name = ucwords( $plugin_name );
 
 					// If this is still empty at this point, lets check recent events.
 					if ( empty( $plugin_file ) ) {
@@ -236,21 +244,18 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			case 'themes':
 				// Action Theme Component.
 				$theme_name = '';
-
-				// @codingStandardsIgnoreStart
 				if ( isset( $_GET['theme'] ) ) {
 					$theme_name = sanitize_text_field( wp_unslash( $_GET['theme'] ) );
 				} elseif ( isset( $_GET['checked'] ) ) {
 					$theme_name = sanitize_text_field( wp_unslash( $_GET['checked'][0] ) );
 				}
-				// @codingStandardsIgnoreEnd
 
 				$theme_name             = str_replace( array( '_', '-', '  ' ), ' ', $theme_name );
 				$theme_name             = ucwords( $theme_name );
 				$alert_options['Theme'] = (object) array( 'Name' => $theme_name );
 				break;
 
-			case 'wordpress':
+			case 'WordPress':
 				$alert_options['Component'] = 'WordPress';
 				break;
 
@@ -271,7 +276,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 *
 	 * @return int Event code.
 	 */
-	protected function GetEventCode( $actor, $query_type ) {
+	protected function get_event_code( $actor, $query_type ) {
 		switch ( $actor ) {
 			case 'plugins':
 				if ( 'create' === $query_type ) {
@@ -293,7 +298,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 				}
 				break;
 
-			case 'wordpress':
+			case 'WordPress':
 				if ( 'create' === $query_type ) {
 					return 5022;
 				} elseif ( 'update' === $query_type ) {
@@ -321,7 +326,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 *
 	 * @return array
 	 */
-	public function EventDBDeltaQuery( $queries ) {
+	public function event_db_delta_query( $queries ) {
 		if ( ! self::$enabled ) {
 			return $queries;
 		}
@@ -336,9 +341,9 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 			$qry = str_replace( '`', '', $qry );
 			$str = explode( ' ', $qry );
 			if ( preg_match( '/CREATE TABLE( IF NOT EXISTS)? ([^ ]*)/i', $qry, $matches ) ) {
-				$table_name = $matches[count($matches) - 1];
-				if ( $this->is_table_operation_check_enabled($table_name, 'create')
-				     && ! $this->check_if_table_exists( $table_name ) ) {
+				$table_name = $matches[ count( $matches ) - 1 ];
+				if ( $this->is_table_operation_check_enabled( $table_name, 'create' )
+					&& ! $this->check_if_table_exists( $table_name ) ) {
 					/**
 					 * Some plugins keep trying to create tables even
 					 * when they already exist- would result in too
@@ -350,9 +355,9 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 				array_push( $query_types['update'], $str[2] );
 			} elseif ( preg_match( '|DROP TABLE( IF EXISTS)? ([^ ]*)|', $qry ) ) {
 				$table_name = empty( $str[4] ) ? $str[2] : $str[4];
-				//  only log when the table exists as some plugins try to delete tables even if they don't exist
-				if ( $this->is_table_operation_check_enabled($table_name, 'delete')
-				     && $this->check_if_table_exists( $table_name ) ) {
+				// Only log when the table exists as some plugins try to delete tables even if they don't exist.
+				if ( $this->is_table_operation_check_enabled( $table_name, 'delete' )
+					&& $this->check_if_table_exists( $table_name ) ) {
 					array_push( $query_types['delete'], $table_name );
 				}
 			}
@@ -360,7 +365,7 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 
 		if ( ! empty( $query_types['create'] ) || ! empty( $query_types['update'] ) || ! empty( $query_types['delete'] ) ) {
 			foreach ( $query_types as $query_type => $table_names ) {
-				$this->MaybeTriggerEvent( $query_type, $table_names );
+				$this->maybe_trigger_event( $query_type, $table_names );
 			}
 		}
 
@@ -378,8 +383,8 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		$latest_events = $this->plugin->alerts->get_latest_events( 25 );
 
 		foreach ( $latest_events as $latest_event ) {
-			if ( $alert_id === intval( $latest_event->alert_id ) ) {
-				$event_meta   = $latest_event ? $latest_event->GetMetaArray() : false;
+			if ( intval( $latest_event->alert_id ) === $alert_id ) {
+				$event_meta  = $latest_event ? $latest_event->get_meta_array() : false;
 				$plugin_name = $event_meta['PluginData']->Name;
 			}
 		}
@@ -402,13 +407,13 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		try {
 			global $wpdb;
 
-			//  output buffering is here to prevent from error log messages that would be fired if the table didn't exist
+			// Output buffering is here to prevent from error log messages that would be fired if the table didn't exist.
 			ob_start();
-			$db_result = $wpdb->query( "SELECT COUNT(1) FROM {$table_name};" );
+			$db_result = $wpdb->query( "SELECT COUNT(1) FROM {$table_name};" ); // phpcs:ignore
 			ob_clean();
 
 			return ( 1 === $db_result );
-		} catch (Exception $e) {
+		} catch ( Exception $e ) {
 			return false;
 		}
 	}
@@ -420,16 +425,17 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 	 * if a specific alert is not enabled. Unfortunately if the alert is enabled or not is being checked
 	 * too late.
 	 *
-	 * @param string $table_name
-	 * @param string $query_type
+	 * @param string $table_name Table name.
+	 * @param string $query_type Query type.
 	 *
 	 * @return bool
-	 * @see WSAL_AlertManager::_CommitItem()
+	 * @see WSAL_AlertManager::commit_item()
 	 * @since 4.2.0
 	 */
 	private function is_table_operation_check_enabled( $table_name, $query_type ) {
-		$actor     = $this->GetActor( [ $table_name ] );
-		$eventCode = $this->GetEventCode( $actor, $query_type );
-		return $this->plugin->alerts->IsEnabled( $eventCode );
+		$actor      = $this->get_actor( array( $table_name ) );
+		$event_code = $this->get_event_code( $actor, $query_type );
+
+		return $this->plugin->alerts->is_enabled( $event_code );
 	}
 }

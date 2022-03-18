@@ -4,9 +4,9 @@
  *
  * Multisite sensor file.
  *
- * @since 1.0.0
+ * @since      1.0.0
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
  */
 
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 7005 Existing site deleted from network
  * 7012 Network registration option updated
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
  */
 class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
@@ -43,21 +43,21 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	protected $old_allowedthemes = null;
 
 	/**
-	 * Listening to events using WP hooks.
+	 * {@inheritDoc}
 	 */
-	public function HookEvents() {
-		add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
+	public function hook_events() {
+		add_action( 'admin_init', array( $this, 'event_admin_init' ) );
 		if ( current_user_can( 'switch_themes' ) ) {
-			add_action( 'shutdown', array( $this, 'EventAdminShutdown' ) );
+			add_action( 'shutdown', array( $this, 'event_admin_shutdown' ) );
 		}
-		add_action( 'wp_insert_site', array( $this, 'EventNewBlog' ), 10, 1 );
-		add_action( 'archive_blog', array( $this, 'EventArchiveBlog' ) );
-		add_action( 'unarchive_blog', array( $this, 'EventUnarchiveBlog' ) );
-		add_action( 'activate_blog', array( $this, 'EventActivateBlog' ) );
-		add_action( 'deactivate_blog', array( $this, 'EventDeactivateBlog' ) );
-		add_action( 'wp_uninitialize_site', array( $this, 'EventDeleteBlog' ) );
-		add_action( 'add_user_to_blog', array( $this, 'EventUserAddedToBlog' ), 10, 3 );
-		add_action( 'remove_user_from_blog', array( $this, 'EventUserRemovedFromBlog' ), 10, 2 );
+		add_action( 'wp_insert_site', array( $this, 'event_new_blog' ), 10, 1 );
+		add_action( 'archive_blog', array( $this, 'event_archive_blog' ) );
+		add_action( 'unarchive_blog', array( $this, 'event_unarchive_blog' ) );
+		add_action( 'activate_blog', array( $this, 'event_activate_blog' ) );
+		add_action( 'deactivate_blog', array( $this, 'event_deactivate_blog' ) );
+		add_action( 'wp_uninitialize_site', array( $this, 'event_delete_blog' ) );
+		add_action( 'add_user_to_blog', array( $this, 'event_user_added_to_blog' ), 10, 3 );
+		add_action( 'remove_user_from_blog', array( $this, 'event_user_removed_from_blog' ), 10, 2 );
 
 		add_action( 'update_site_option', array( $this, 'on_network_option_change' ), 10, 4 );
 	}
@@ -83,7 +83,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 					'blog' => __( 'users can register new sites', 'wp-security-audit-log' ),
 					'all'  => __( 'sites & users can be registered', 'wp-security-audit-log' ),
 				);
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					7012,
 					array(
 						'previous_setting' => ( isset( $possible_values[ $old_value ] ) ) ? $possible_values[ $old_value ] : $old_value,
@@ -93,7 +93,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 				break;
 
 			case 'add_new_users':
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					7007,
 					array(
 						'EventType' => ( ! $value ) ? 'disabled' : 'enabled',
@@ -102,7 +102,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 				break;
 
 			case 'upload_space_check_disabled':
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					7008,
 					array(
 						'EventType' => ( $value ) ? 'disabled' : 'enabled',
@@ -111,7 +111,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 				break;
 
 			case 'blog_upload_space':
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					7009,
 					array(
 						'old_value' => sanitize_text_field( $old_value ),
@@ -121,7 +121,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 				break;
 
 			case 'upload_filetypes':
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					7010,
 					array(
 						'old_value' => sanitize_text_field( $old_value ),
@@ -131,7 +131,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 				break;
 
 			case 'fileupload_maxk':
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					7009,
 					array(
 						'old_value' => sanitize_text_field( $old_value ),
@@ -146,14 +146,16 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	/**
 	 * Triggered when a user accesses the admin area.
 	 */
-	public function EventAdminInit() {
+	public function event_admin_init() {
 		$this->old_allowedthemes = array_keys( (array) get_site_option( 'allowedthemes' ) );
 	}
 
 	/**
 	 * Activated/Deactivated theme on network.
+	 *
+	 * phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	 */
-	public function EventAdminShutdown() {
+	public function event_admin_shutdown() {
 		if ( is_null( $this->old_allowedthemes ) ) {
 			return;
 		}
@@ -161,9 +163,9 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 
 		// Check for enabled themes.
 		foreach ( $new_allowedthemes as $theme ) {
-			if ( ! in_array( $theme, (array) $this->old_allowedthemes ) ) {
+			if ( ! in_array( $theme, (array) $this->old_allowedthemes, true ) ) {
 				$theme = wp_get_theme( $theme );
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					5008,
 					array(
 						'Theme' => (object) array(
@@ -181,9 +183,9 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 
 		// Check for disabled themes.
 		foreach ( (array) $this->old_allowedthemes as $theme ) {
-			if ( ! in_array( $theme, $new_allowedthemes ) ) {
+			if ( ! in_array( $theme, $new_allowedthemes, true ) ) {
 				$theme = wp_get_theme( $theme );
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					5009,
 					array(
 						'Theme' => (object) array(
@@ -205,11 +207,11 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 *
 	 * @param WP_Site $new_blog - New site object.
 	 */
-	public function EventNewBlog( $new_blog ) {
+	public function event_new_blog( $new_blog ) {
 		$blog_id = $new_blog->blog_id;
 
 		/*
-		 * Site meta data nor options are not setup at this points so get_blog_option and get_home_url are not
+		 * Site metadata nor options are not setup at this point so get_blog_option and get_home_url are not
 		 * returning anything for the new blog.
 		 *
 		 * The following code to work out the correct URL for the new site was taken from ms-site.php (WP 5.7).
@@ -222,15 +224,15 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 
 		$home_scheme = 'http';
 		if ( ! is_subdomain_install() ) {
-			if ( 'https' === parse_url( get_home_url( $network->site_id ), PHP_URL_SCHEME ) ) {
+			if ( 'https' === parse_url( get_home_url( $network->site_id ), PHP_URL_SCHEME ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
 				$home_scheme = 'https';
 			}
 		}
 
-		$blog_title = strip_tags( $_POST['blog']['title'] );
+		$blog_title = strip_tags( $_POST['blog']['title'] ); // phpcs:ignore
 		$blog_url   = untrailingslashit( $home_scheme . '://' . $new_blog->domain . $new_blog->path );
 
-		$this->plugin->alerts->Trigger(
+		$this->plugin->alerts->trigger_event(
 			7000,
 			array(
 				'BlogID'   => $blog_id,
@@ -245,8 +247,8 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 *
 	 * @param int $blog_id - Blog ID.
 	 */
-	public function EventArchiveBlog( $blog_id ) {
-		$this->plugin->alerts->Trigger(
+	public function event_archive_blog( $blog_id ) {
+		$this->plugin->alerts->trigger_event(
 			7001,
 			array(
 				'BlogID'   => $blog_id,
@@ -261,8 +263,8 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 *
 	 * @param int $blog_id - Blog ID.
 	 */
-	public function EventUnarchiveBlog( $blog_id ) {
-		$this->plugin->alerts->Trigger(
+	public function event_unarchive_blog( $blog_id ) {
+		$this->plugin->alerts->trigger_event(
 			7002,
 			array(
 				'BlogID'   => $blog_id,
@@ -277,8 +279,8 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 *
 	 * @param int $blog_id - Blog ID.
 	 */
-	public function EventActivateBlog( $blog_id ) {
-		$this->plugin->alerts->Trigger(
+	public function event_activate_blog( $blog_id ) {
+		$this->plugin->alerts->trigger_event(
 			7003,
 			array(
 				'BlogID'   => $blog_id,
@@ -293,8 +295,8 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 *
 	 * @param int $blog_id - Blog ID.
 	 */
-	public function EventDeactivateBlog( $blog_id ) {
-		$this->plugin->alerts->Trigger(
+	public function event_deactivate_blog( $blog_id ) {
+		$this->plugin->alerts->trigger_event(
 			7004,
 			array(
 				'BlogID'   => $blog_id,
@@ -309,9 +311,9 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 *
 	 * @param WP_Site $deleted_blog - Deleted blog object.
 	 */
-	public function EventDeleteBlog( $deleted_blog ) {
+	public function event_delete_blog( $deleted_blog ) {
 		$blog_id = $deleted_blog->blog_id;
-		$this->plugin->alerts->Trigger(
+		$this->plugin->alerts->trigger_event(
 			7005,
 			array(
 				'BlogID'   => $blog_id,
@@ -328,9 +330,9 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 * @param string $role - User role.
 	 * @param int    $blog_id - Blog ID.
 	 */
-	public function EventUserAddedToBlog( $user_id, $role, $blog_id ) {
+	public function event_user_added_to_blog( $user_id, $role, $blog_id ) {
 		$user = get_userdata( $user_id );
-		$this->plugin->alerts->TriggerIf(
+		$this->plugin->alerts->trigger_event_if(
 			4010,
 			array(
 				'TargetUserID'   => $user_id,
@@ -342,7 +344,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 				'LastName'       => $user ? $user->user_lastname : false,
 				'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 			),
-			array( $this, 'MustNotContainCreateUser' )
+			array( $this, 'must_not_contain_create_user' )
 		);
 	}
 
@@ -352,9 +354,9 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 * @param int $user_id - User ID.
 	 * @param int $blog_id - Blog ID.
 	 */
-	public function EventUserRemovedFromBlog( $user_id, $blog_id ) {
+	public function event_user_removed_from_blog( $user_id, $blog_id ) {
 		$user = get_userdata( $user_id );
-		$this->plugin->alerts->TriggerIf(
+		$this->plugin->alerts->trigger_event_if(
 			4011,
 			array(
 				'TargetUserID'   => $user_id,
@@ -366,7 +368,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 				'LastName'       => $user ? $user->user_lastname : false,
 				'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 			),
-			array( $this, 'MustNotContainCreateUser' )
+			array( $this, 'must_not_contain_create_user' )
 		);
 	}
 
@@ -376,7 +378,7 @@ class WSAL_Sensors_Multisite extends WSAL_AbstractSensor {
 	 * @param WSAL_AlertManager $mgr - Instance of Alert Manager.
 	 * @return bool
 	 */
-	public function MustNotContainCreateUser( WSAL_AlertManager $mgr ) {
-		return ! $mgr->WillTrigger( 4012 );
+	public function must_not_contain_create_user( WSAL_AlertManager $mgr ) {
+		return ! $mgr->will_trigger( 4012 );
 	}
 }
