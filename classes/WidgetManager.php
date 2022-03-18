@@ -27,7 +27,7 @@ class WSAL_WidgetManager {
 	 *
 	 * @var WpSecurityAuditLog
 	 */
-	protected $_plugin;
+	protected $plugin;
 
 	/**
 	 * Method: Constructor.
@@ -35,7 +35,7 @@ class WSAL_WidgetManager {
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
-		$this->_plugin = $plugin;
+		$this->plugin = $plugin;
 		add_action( 'wp_dashboard_setup', array( $this, 'add_widgets' ) );
 	}
 
@@ -46,13 +46,13 @@ class WSAL_WidgetManager {
 		global $pagenow;
 
 		if (
-			$this->_plugin->settings()->IsWidgetsEnabled() // If widget is enabled.
-			&& $this->_plugin->settings()->CurrentUserCan( 'view' ) // If user has permission to view.
-			&& 'index.php' === $pagenow // If the current page is dashboard.
+				$this->plugin->settings()->is_widgets_enabled() // If widget is enabled.
+				&& $this->plugin->settings()->current_user_can( 'view' ) // If user has permission to view.
+				&& 'index.php' === $pagenow // If the current page is dashboard.
 		) {
 			wp_add_dashboard_widget(
 				'wsal',
-				__( 'Latest Events', 'wp-security-audit-log' ) . ' | WP Activity Log',
+				esc_html__( 'Latest Events', 'wp-security-audit-log' ) . ' | WP Activity Log',
 				array( $this, 'render_widget' )
 			);
 		}
@@ -64,7 +64,7 @@ class WSAL_WidgetManager {
 	public function render_widget() {
 		// get the events for the dashboard widget.
 		$query   = $this->get_dashboard_widget_query();
-		$results = $query->getAdapter()->Execute( $query );
+		$results = $query->get_adapter()->execute_query( $query );
 
 		?><div>
 		<?php if ( ! count( $results ) ) : ?>
@@ -80,21 +80,21 @@ class WSAL_WidgetManager {
 				</thead>
 				<tbody>
 					<?php
-					$url = 'admin.php?page=' . $this->_plugin->views->views[0]->GetSafeViewName();
+					$url = 'admin.php?page=' . $this->plugin->views->views[0]->get_safe_view_name();
 					foreach ( $results as $entry ) :
-						$event_meta = $entry->GetMetaArray();
-						$username   = WSAL_Utilities_UsersUtils::GetUsername( $event_meta );
+						$event_meta = $entry->get_meta_array();
+						$username   = WSAL_Utilities_UsersUtils::get_username( $event_meta );
 						?>
-                        <tr>
-                            <td><?php echo ( $username ) ? esc_html( $username ) : '<i>unknown</i>'; ?></td>
-                            <td><?php echo ( $event_meta['Object'] ) ? esc_html( $event_meta['Object'] ) : '<i>unknown</i>'; ?></td>
-                            <td><?php echo ( $event_meta['EventType'] ) ? esc_html( $event_meta['EventType'] ) : '<i>unknown</i>'; ?></td>
-                            <td>
-                                <a href="<?php echo esc_url( $url ) . '#Event' . esc_attr( $entry->getId() ); ?>">
-									<?php echo wp_kses( $entry->GetMessage( $event_meta, 'dashboard-widget' ), $this->_plugin->allowed_html_tags ); ?>
-                                </a>
-                            </td>
-                        </tr>
+						<tr>
+							<td><?php echo ( $username ) ? esc_html( $username ) : '<i>unknown</i>'; ?></td>
+							<td><?php echo ( $event_meta['Object'] ) ? esc_html( $event_meta['Object'] ) : '<i>unknown</i>'; ?></td>
+							<td><?php echo ( $event_meta['EventType'] ) ? esc_html( $event_meta['EventType'] ) : '<i>unknown</i>'; ?></td>
+							<td>
+								<a href="<?php echo esc_url( $url ) . '#Event' . esc_attr( $entry->get_id() ); ?>">
+									<?php echo wp_kses( $entry->get_message( $event_meta, 'dashboard-widget' ), $this->plugin->allowed_html_tags ); ?>
+								</a>
+							</td>
+						</tr>
 					<?php endforeach; ?>
 				</tbody>
 			</table>
@@ -115,12 +115,12 @@ class WSAL_WidgetManager {
 		// get the site we are on (of multisite).
 		$bid = (int) $this->get_view_site_id();
 		if ( $bid ) {
-			$query->addCondition( 'site_id = %s ', $bid );
+			$query->add_condition( 'site_id = %s ', $bid );
 		}
 		// order by date of creation.
-		$query->addOrderBy( 'created_on', true );
+		$query->add_order_by( 'created_on', true );
 		// set the limit based on the limit option for dashboard alerts.
-		$query->setLimit( $this->_plugin->settings()->GetDashboardWidgetMaxAlerts() );
+		$query->set_limit( $this->plugin->settings()->get_dashboard_widget_max_alerts() );
 		return $query;
 	}
 

@@ -4,7 +4,7 @@
  *
  * Class file for alert formatter.
  *
- * @since 4.2.1
+ * @since   4.2.1
  * @package wsal
  */
 
@@ -26,44 +26,70 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class WSAL_AlertFormatter {
 
 	/**
-	 * @var WpSecurityAuditLog Plugin instance.
+	 * Plugin instance.
+	 *
+	 * @var WpSecurityAuditLog
 	 */
 	protected $plugin;
 
-	/** @var WSAL_AlertFormatterConfiguration */
+	/**
+	 * Alert formatter configuration.
+	 *
+	 * @var WSAL_AlertFormatterConfiguration
+	 */
 	private $configuration;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param WpSecurityAuditLog               $plugin        Plugin instance.
+	 * @param WSAL_AlertFormatterConfiguration $configuration Alert formatter configuration.
+	 */
 	public function __construct( $plugin, $configuration ) {
 		$this->plugin        = $plugin;
 		$this->configuration = $configuration;
 	}
 
+	/**
+	 * Gets the end of line character sequence.
+	 *
+	 * @return string End of line character sequence.
+	 */
 	public function get_end_of_line() {
-		return $this->configuration->getEndOfLine();
-	}
-
-	public function set_end_of_line($value) {
-		return $this->configuration->setEndOfLine($value);
+		return $this->configuration->get_end_of_line();
 	}
 
 	/**
-	 * @param string $expression Meta expression including the surrounding percentage chars.
-	 * @param string $value Meta value.
+	 * Updates the end of line character sequence.
+	 *
+	 * @param string $value End of line character sequence.
+	 *
+	 * @return WSAL_AlertFormatterConfiguration
+	 */
+	public function set_end_of_line( $value ) {
+		return $this->configuration->set_end_of_line( $value );
+	}
+
+	/**
+	 * Formats given meta expression.
+	 *
+	 * @param string   $expression    Meta expression including the surrounding percentage chars.
+	 * @param string   $value         Meta value.
 	 * @param int|null $occurrence_id Occurrence ID. Only present if the event was already written to the database.
+	 * @param array    $metadata      Meta data.
 	 *
 	 * @return false|mixed|string|void|WP_Error
-	 * @throws Freemius_Exception
 	 *
 	 * @since 4.2.1
 	 */
-	public function format_meta_expression( $expression, $value, $occurrence_id = null, $metadata = [] ) {
+	public function format_meta_expression( $expression, $value, $occurrence_id = null, $metadata = array() ) {
 		switch ( true ) {
-			case '%Message%' == $expression:
+			case '%Message%' === $expression:
 				return esc_html( $value );
 
-			case '%MetaLink%' == $expression:
-				//  NULL value check is here because events related to user meta fields didn't have the MetaLink meta prior to version 4.3.2
-				if ( $this->configuration->isJsInLinksAllowed() && 'NULL' !== $value ) {
+			case '%MetaLink%' === $expression:
+				// NULL value check is here because events related to user meta fields didn't have the MetaLink meta prior to version 4.3.2.
+				if ( $this->configuration->is_js_in_links_allowed() && 'NULL' !== $value ) {
 					$label  = __( 'Exclude custom field from the monitoring', 'wp-security-audit-log' );
 					$result = "<a href=\"#\" data-object-type='{$metadata['Object']}' data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"return WsalDisableCustom(this, '" . $value . "');\"> {$label}</a>";
 
@@ -72,32 +98,36 @@ final class WSAL_AlertFormatter {
 
 				return '';
 
-			case in_array( $expression, array( '%path%', '%old_path%', '%FilePath%' ) ):
-				//  concatenate directory and file paths
+			case in_array( $expression, array( '%path%', '%old_path%', '%FilePath%' ), true ):
+				// Concatenate directory and file paths.
 				$max_length = 50;
-				if ( $this->configuration->isJsInLinksAllowed() && strlen( $value ) > $max_length ) {
-					$result = '<span>'  . substr( $value, 0, $max_length ) . '</span>';
-					$result .= "<a href=\"#\" data-shortened-text='{$value}'>" . $this->configuration->getEllipsesSequence() . "</a>";
+				if ( $this->configuration->is_js_in_links_allowed() && strlen( $value ) > $max_length ) {
+					$result = '<span>' . substr( $value, 0, $max_length ) . '</span>'; // phpcs:ignore
+					$result .= "<a href=\"#\" data-shortened-text='{$value}'>" . $this->configuration->get_ellipses_sequence() . "</a>"; // phpcs:ignore
 
 					return $result;
 				}
 
 				return $value;
 
-			case in_array( $expression, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ) ):
-				//  trim the meta value to the maximum length and append configured ellipses sequence
-				$result = mb_strlen( $value ) > $this->configuration->getMaxMetaValueLength() ? ( mb_substr( $value, 0, 50 ) . $this->configuration->getEllipsesSequence() ) : $value;
+			case in_array( $expression, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ), true ):
+				// Trim the meta value to the maximum length and append configured ellipses sequence.
+				$result = mb_strlen( $value ) > $this->configuration->get_max_meta_value_length() ? ( mb_substr( $value, 0, 50 ) . $this->configuration->get_ellipses_sequence() ) : $value;
 
 				return $this->wrap_in_hightlight_markup( esc_html( $result ) );
 
-			case '%ClientIP%' == $expression:
-			case '%IPAddress%' == $expression:
+			case '%ClientIP%' === $expression:
+			case '%IPAddress%' === $expression:
 				if ( is_string( $value ) ) {
-					$sanitized_ips = str_replace( array(
-						'"',
-						'[',
-						']'
-					), '', $value );
+					$sanitized_ips = str_replace(
+						array(
+							'"',
+							'[',
+							']',
+						),
+						'',
+						$value
+					);
 
 					return $this->wrap_in_hightlight_markup( $sanitized_ips );
 				} else {
@@ -112,7 +142,7 @@ final class WSAL_AlertFormatter {
 					$post_id = $this->get_occurrence_meta_item( $occurrence_id, 'PostID' );
 				}
 
-				$occ_post = $post_id !== null ? get_post( $post_id ) : null;
+				$occ_post = ! is_null( $post_id ) ? get_post( $post_id ) : null;
 				if ( null !== $occ_post && 'publish' === $occ_post->post_status ) {
 					return get_permalink( $occ_post->ID );
 				}
@@ -121,7 +151,7 @@ final class WSAL_AlertFormatter {
 
 			case '%MenuUrl%' === $expression:
 				$menu_id = null;
-				if ( $occurrence_id === 0 && is_array( $metadata ) && array_key_exists( 'MenuID', $metadata ) ) {
+				if ( 0 === $occurrence_id && is_array( $metadata ) && array_key_exists( 'MenuID', $metadata ) ) {
 					$menu_id = $metadata['MenuID'];
 				} else {
 					$menu_id = $this->get_occurrence_meta_item( $occurrence_id, 'MenuID' );
@@ -147,7 +177,7 @@ final class WSAL_AlertFormatter {
 				}
 
 			case '%LogFileText%' === $expression: // Failed login file text.
-				if ( $this->configuration->isJsInLinksAllowed() ) {
+				if ( $this->configuration->is_js_in_links_allowed() ) {
 					$result = '<a href="javascript:;" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
 
 					return $this->wrap_in_hightlight_markup( $result );
@@ -161,7 +191,7 @@ final class WSAL_AlertFormatter {
 				return $this->wrap_in_hightlight_markup( esc_html( $result ) );
 
 			case '%multisite_text%' === $expression:
-				if ( $this->plugin->IsMultisite() && $value ) {
+				if ( $this->plugin->is_multisite() && $value ) {
 					$site_info = get_blog_details( $value, true );
 					if ( $site_info ) {
 						$site_url = $site_info->siteurl;
@@ -182,7 +212,7 @@ final class WSAL_AlertFormatter {
 				return $this->wrap_in_hightlight_markup( esc_html( $value ) );
 
 			case '%LineBreak%' === $expression:
-				return $this->configuration->getEndOfLine();
+				return $this->configuration->get_end_of_line();
 
 			case '%PluginFile%' === $expression:
 				return $this->wrap_in_hightlight_markup( dirname( $value ) );
@@ -195,12 +225,16 @@ final class WSAL_AlertFormatter {
 				 * @param string $value Meta value.
 				 *
 				 * @deprecated 4.3.0 Use 'wsal_format_custom_meta' instead.
-				 *
 				 */
-				$result = apply_filters_deprecated( 'wsal_meta_formatter_custom_formatter', array(
-					$value,
-					$expression
-				), 'WSAL 4.3.0', 'wsal_format_custom_meta' );
+				$result = apply_filters_deprecated(
+					'wsal_meta_formatter_custom_formatter',
+					array(
+						$value,
+						$expression,
+					),
+					'WSAL 4.3.0',
+					'wsal_format_custom_meta'
+				);
 
 				/**
 				 * Allows meta formatting via filter if no match was found. Runs after the legacy filter 'wsal_meta_formatter_custom_formatter' that is kept for backwards compatibility.
@@ -211,7 +245,6 @@ final class WSAL_AlertFormatter {
 				 * @param int|null $occurrence_id Occurrence ID. Only present if the event was already written to the database. Default null.
 				 *
 				 * @since 4.3.0
-				 *
 				 */
 				return apply_filters( 'wsal_format_custom_meta', $result, $expression, $this, $occurrence_id );
 		}
@@ -222,12 +255,12 @@ final class WSAL_AlertFormatter {
 	 *
 	 * For example meta values displayed as <strong>{meta value}</strong> in the WP admin UI.
 	 *
-	 * @param string $value
+	 * @param string $value Value.
 	 *
 	 * @return string
 	 */
 	public function wrap_in_hightlight_markup( $value ) {
-		return $this->configuration->getHighlightStartTag() . $value . $this->configuration->getHighlightEndTag();
+		return $this->configuration->get_highlight_start_tag() . $value . $this->configuration->get_highlight_end_tag();
 	}
 
 	/**
@@ -235,32 +268,32 @@ final class WSAL_AlertFormatter {
 	 *
 	 * For example an unknown IP address is displayed as <i>unknown</i> in the WP admin UI.
 	 *
-	 * @param string $value
+	 * @param string $value Value.
 	 *
 	 * @return string
 	 */
 	public function wrap_in_emphasis_markup( $value ) {
-		return $this->configuration->getEmphasisStartTag() . $value . $this->configuration->getEmphasisEndTag();
+		return $this->configuration->get_emphasis_start_tag() . $value . $this->configuration->get_emphasis_end_tag();
 	}
 
 	/**
 	 * Helper function to get meta value from an occurrence.
 	 *
-	 * @param int $occurrence_id
-	 * @param string $meta_key
+	 * @param int    $occurrence_id Occurrence ID.
+	 * @param string $meta_key      Meta key.
 	 *
 	 * @return mixed|null Meta value if exists. Otherwise null
 	 * @since 4.2.1
 	 */
 	private function get_occurrence_meta_item( $occurrence_id, $meta_key ) {
 		// get connection.
-		$db_config = WSAL_Connector_ConnectorFactory::GetConfig(); // Get DB connector configuration.
-		$connector = $this->plugin->getConnector( $db_config ); // Get connector for DB.
-		$wsal_db   = $connector->getConnection(); // Get DB connection.
+		$db_config = WSAL_Connector_ConnectorFactory::get_config(); // Get DB connector configuration.
+		$connector = $this->plugin->get_connector( $db_config ); // Get connector for DB.
+		$wsal_db   = $connector->get_connection(); // Get DB connection.
 
 		// get values needed.
 		$meta_adapter = new WSAL_Adapters_MySQL_Meta( $wsal_db );
-		$meta_result  = $meta_adapter->LoadByNameAndOccurrenceId( $meta_key, $occurrence_id );
+		$meta_result  = $meta_adapter->load_by_name_and_occurrence_id( $meta_key, $occurrence_id );
 
 		return isset( $meta_result['value'] ) ? $meta_result['value'] : null;
 	}
@@ -273,17 +306,16 @@ final class WSAL_AlertFormatter {
 	 * - check if the link is disabled
 	 * - optional URL processing
 	 *
-	 * @param string $url
-	 * @param string $label
-	 * @param string $title
-	 * @param string $target
+	 * @param string $url URL.
+	 * @param string $label Label.
+	 * @param string $title Title.
+	 * @param string $target Target attribute.
 	 *
 	 * @return string
 	 * @see process_url())
-	 *
 	 */
-	public final function format_link( $url, $label, $title = '', $target = '_blank' ) {
-		//  check for empty values
+	public function format_link( $url, $label, $title = '', $target = '_blank' ) {
+		// Check for empty values.
 		if ( null === $url || empty( $url ) ) {
 			return '';
 		}
@@ -301,7 +333,7 @@ final class WSAL_AlertFormatter {
 	 *
 	 * Default implementation returns URL as is.
 	 *
-	 * @param string $url
+	 * @param string $url URL.
 	 *
 	 * @return string
 	 */
@@ -316,16 +348,16 @@ final class WSAL_AlertFormatter {
 	 * we moved to a different implementation. Introducing another link markup would require adding link format with
 	 * placeholders to the formatter configuration.
 	 *
-	 * @param string $url
-	 * @param string $label
-	 * @param string $title
-	 * @param string $target
+	 * @param string $url    URL.
+	 * @param string $label  Label.
+	 * @param string $title  Title.
+	 * @param string $target Target attribute.
 	 *
 	 * @return string
 	 */
 	protected function build_link_markup( $url, $label, $title = '', $target = '_blank' ) {
 		$title = empty( $title ) ? $label : $title;
-		if ( $this->configuration->canUseHtmlMarkupForLinks() ) {
+		if ( $this->configuration->can_use_html_markup_for_links() ) {
 			return '<a href="' . esc_url( $url ) . '" title="' . $title . '" target="' . $target . '">' . $label . '</a>';
 		}
 
@@ -333,17 +365,21 @@ final class WSAL_AlertFormatter {
 	}
 
 	/**
-	 * @return bool True if the formatter supports hyperlinks as part of the alert message.
+	 * Checks if formatter supports hyperlinks.
+	 *
+	 * @return bool True if formatter supports hyperlinks.
 	 */
 	public function supports_hyperlinks() {
-		return $this->configuration->isSupportsHyperlinks();
+		return $this->configuration->is_supports_hyperlinks();
 	}
 
 	/**
-	 * @return bool True if the formatter supports metadata as part of the alert message.
+	 * Checks if the formatter supports metadata.
+	 *
+	 * @return bool True if formatter supports metadata.
 	 */
 	public function supports_metadata() {
-		return $this->configuration->isSupportsMetadata();
+		return $this->configuration->is_supports_metadata();
 	}
 
 	/**
@@ -353,17 +389,17 @@ final class WSAL_AlertFormatter {
 	 *
 	 * It also strips any additional HTML tags apart from hyperlink and an end of line to support legacy messages.
 	 *
-	 * @param string $message
+	 * @param string $message Message text.
 	 *
 	 * @return string
 	 */
 	public function process_html_tags_in_message( $message ) {
 		$result = preg_replace(
-			[ '/<strong>/', '/<\/strong>/' ],
-			[ $this->configuration->getHighlightStartTag(), $this->configuration->getHighlightEndTag() ],
+			array( '/<strong>/', '/<\/strong>/' ),
+			array( $this->configuration->get_highlight_start_tag(), $this->configuration->get_highlight_end_tag() ),
 			$message
 		);
 
-		return strip_tags( $result, $this->configuration->getTagsAllowedInMessage() );
+		return strip_tags( $result, $this->configuration->get_tags_allowed_in_message() );
 	}
 }

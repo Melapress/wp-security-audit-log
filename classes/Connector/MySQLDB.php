@@ -26,7 +26,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 *
 	 * @var array
 	 */
-	protected $connectionConfig = null;
+	protected $connection_config = null;
 
 	/**
 	 * Method: Constructor.
@@ -34,7 +34,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @param array $connection_config - Connection config.
 	 */
 	public function __construct( $connection_config = null ) {
-		$this->connectionConfig = $connection_config;
+		$this->connection_config = $connection_config;
 		parent::__construct( 'MySQL' );
 	}
 
@@ -45,21 +45,21 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @throws Exception - Connection failed.
 	 */
 	public function TestConnection() {
-		error_reporting( E_ALL ^ ( E_NOTICE | E_WARNING | E_DEPRECATED ) );
-		$connection_config = $this->connectionConfig;
-		$password          = $this->decryptString( $connection_config['password'] );
+		error_reporting( E_ALL ^ ( E_NOTICE | E_WARNING | E_DEPRECATED ) ); // phpcs:ignore
+		$connection_config = $this->connection_config;
+		$password          = $this->decrypt_string( $connection_config['password'] );
 
 		$new_wpdb = new wpdbCustom( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] );
 
 		if ( isset( $new_wpdb->error ) && isset( $new_wpdb->dbh ) ) {
 			throw new Exception( $new_wpdb->dbh->error, $new_wpdb->dbh->errno );
 		} elseif ( ! isset( $new_wpdb->dbh ) ) {
-			$error_code = mysqli_connect_errno();
+			$error_code = mysqli_connect_errno(); // phpcs:ignore
 
 			if ( 1045 === $error_code ) {
 				throw new Exception( __( 'Error establishing a database connection. DB username or password are not valid.' ), $error_code );
 			} else {
-				$error_message = mysqli_connect_error();
+				$error_message = mysqli_connect_error(); // phpcs:ignore
 				// if we get an error message from mysqli then use it otherwise use a generic message.
 				if ( $error_message ) {
 					throw new Exception(
@@ -91,7 +91,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @return string
 	 * @since  2.6.3
 	 */
-	public function decryptString( $ciphertext_base64 ) {
+	public function decrypt_string( $ciphertext_base64 ) {
 		$encrypt_method = 'AES-256-CBC';
 		$secret_key     = $this->truncateKey();
 		$secret_iv      = $this->get_openssl_iv();
@@ -102,7 +102,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 		// iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning.
 		$iv = substr( hash( 'sha256', $secret_iv ), 0, 16 );
 
-		return openssl_decrypt( base64_decode( $ciphertext_base64 ), $encrypt_method, $key, 0, $iv );
+		return openssl_decrypt( base64_decode( $ciphertext_base64 ), $encrypt_method, $key, 0, $iv ); // phpcs:ignore
 	}
 
 	/**
@@ -140,24 +140,22 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	}
 
 	/**
-	 * Close DB connection
+	 * {@inheritDoc}
 	 */
-	public function closeConnection() {
-		$current_wpdb = $this->getConnection();
+	public function close_connection() {
+		$current_wpdb = $this->get_connection();
 
 		return $current_wpdb->close();
 	}
 
 	/**
-	 * Returns a wpdb instance
-	 *
-	 * @return wpdb
+	 * {@inheritDoc}
 	 */
-	public function getConnection() {
+	public function get_connection() {
 		if ( ! empty( $this->connection ) ) {
 			return $this->connection;
 		} else {
-			$this->connection = $this->createConnection();
+			$this->connection = $this->create_connection();
 
 			return $this->connection;
 		}
@@ -168,10 +166,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 *
 	 * @return wpdb Instance of WPDB.
 	 */
-	private function createConnection() {
-		if ( ! empty( $this->connectionConfig ) ) {
-			$connection_config = $this->connectionConfig;
-			$password          = $this->decryptString( $connection_config['password'] );
+	private function create_connection() {
+		if ( ! empty( $this->connection_config ) ) {
+			$connection_config = $this->connection_config;
+			$password          = $this->decrypt_string( $connection_config['password'] );
 			$new_wpdb          = new wpdbCustom( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] );
 			if ( array_key_exists( 'baseprefix', $connection_config ) ) {
 				$new_wpdb->set_prefix( $connection_config['baseprefix'] );
@@ -186,12 +184,12 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
-	public function getAdapter( $class_name ) {
-		$obj_name = $this->getAdapterClassName( $class_name );
+	public function get_adapter( $class_name ) {
+		$obj_name = $this->get_adapter_class_name( $class_name );
 
-		return new $obj_name( $this->getConnection() );
+		return new $obj_name( $this->get_connection() );
 	}
 
 	/**
@@ -201,76 +199,71 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 *
 	 * @return string
 	 */
-	protected function getAdapterClassName( $class_name ) {
+	protected function get_adapter_class_name( $class_name ) {
 		return 'WSAL_Adapters_MySQL_' . $class_name;
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
-	public function isInstalled() {
-		$wpdb      = $this->getConnection();
+	public function is_installed() {
+		$wpdb      = $this->get_connection();
 		$table     = $wpdb->base_prefix . 'wsal_occurrences';
-		$db_result = $wpdb->query( "SELECT COUNT(1) FROM {$table};" );
+		$db_result = $wpdb->query( "SELECT COUNT(1) FROM {$table};" ); // phpcs:ignore
 
 		return 1 === $db_result;
 	}
 
 	/**
-	 * Install all DB tables.
-	 *
-	 * @param bool $is_external_database If true, some tables will not be created.
+	 * {@inheritDoc}
 	 */
-	public function installAll( $is_external_database = false ) {
-		$adapter_list = WSAL_Utilities_FileSystemUtils::read_files_in_folder( $this->getAdaptersDirectory(), '*.php' );
+	public function install_all( $is_external_database = false ) {
+		$adapter_list = WSAL_Utilities_FileSystemUtils::read_files_in_folder( $this->get_adapters_directory(), '*.php' );
 		$adapter_list = apply_filters( 'wsal_install_adapters_list', $adapter_list );
 		foreach ( $adapter_list as $file ) {
 			$file_path  = explode( DIRECTORY_SEPARATOR, $file );
 			$file_name  = $file_path[ count( $file_path ) - 1 ];
-			$class_name = $this->getAdapterClassName( str_replace( 'Adapter.php', '', $file_name ) );
-			$this->installSingle( $class_name, $is_external_database );
+			$class_name = $this->get_adapter_class_name( str_replace( 'Adapter.php', '', $file_name ) );
+			$this->install_single( $class_name, $is_external_database );
 		}
 	}
 
 	/**
-	 * Installs single database table based on its adapter class name.
-	 *
-	 * @param string $class_name
-	 * @param bool $is_external_database
+	 * {@inheritDoc}
 	 */
-	public function installSingle( $class_name, $is_external_database = false ) {
+	public function install_single( $class_name, $is_external_database = false ) {
 		if ( ! class_exists( $class_name ) ) {
 			return;
 		}
 
-		$class = new $class_name( $this->getConnection() );
+		$class = new $class_name( $this->get_connection() );
 		if ( $is_external_database && $class instanceof WSAL_Adapters_MySQL_Session ) {
-			//  sessions table should only ever exist only in local database
+			// Sessions table should only ever exist only in local database.
 			return;
 		}
 
 		if ( ! $is_external_database && $class instanceof WSAL_Adapters_MySQL_TmpUser ) {
-			//  exclude the tmp_users table for local database
+			// Exclude the tmp_users table for local database.
 			return;
 		}
 
 		if ( is_subclass_of( $class, 'WSAL_Adapters_MySQL_ActiveRecord' ) ) {
-			$class->Install();
+			$class->install();
 		}
 	}
 
 	/**
-	 * Uninstall all DB tables.
+	 * {@inheritDoc}
 	 */
-	public function uninstallAll() {
-		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( $this->getAdaptersDirectory(), '*.php' ) as $file ) {
+	public function uninstall_all() {
+		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( $this->get_adapters_directory(), '*.php' ) as $file ) {
 			$file_path  = explode( DIRECTORY_SEPARATOR, $file );
 			$file_name  = $file_path[ count( $file_path ) - 1 ];
-			$class_name = $this->getAdapterClassName( str_replace( 'Adapter.php', '', $file_name ) );
+			$class_name = $this->get_adapter_class_name( str_replace( 'Adapter.php', '', $file_name ) );
 
-			$class = new $class_name( $this->getConnection() );
+			$class = new $class_name( $this->get_connection() );
 			if ( is_subclass_of( $class, 'WSAL_Adapters_MySQL_ActiveRecord' ) ) {
-				$class->Uninstall();
+				$class->uninstall();
 			}
 		}
 	}
@@ -282,10 +275,10 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 *
 	 * @return int
 	 */
-	public function MigrateOccurrenceFromLocalToExternal( $limit ) {
+	public function migrate_occurrence_from_local_to_external( $limit ) {
 		global $wpdb;
 
-		return $this->MigrateOccurrence( $wpdb, $this->getConnection(), $limit );
+		return $this->migrate_occurrence( $wpdb, $this->get_connection(), $limit );
 	}
 
 	/**
@@ -293,66 +286,70 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 *
 	 * It also deletes the tables in the source database when there is no more data to migrate.
 	 *
-	 * @param wpdb $source_db
-	 * @param wpdb $target_db
-	 * @param int $limit
+	 * @param wpdb $source_db Source database.
+	 * @param wpdb $target_db Target database.
+	 * @param int  $limit     Number of entries to migrate.
 	 *
 	 * @return int Number of occurrence entries migrated.
 	 */
-	private function MigrateOccurrence( $source_db, $target_db, $limit ) {
-		//  load occurrence data from the source database
+	private function migrate_occurrence( $source_db, $target_db, $limit ) {
+		// Load occurrence data from the source database.
 		$occurrence_adapter_source = new WSAL_Adapters_MySQL_Occurrence( $source_db );
-		if ( ! $occurrence_adapter_source->IsInstalled() ) {
+		if ( ! $occurrence_adapter_source->is_installed() ) {
 			return 0;
 		}
 
-		$sql         = 'SELECT * FROM ' . $occurrence_adapter_source->GetTable() . ' LIMIT ' . $limit;
+		$sql         = 'SELECT * FROM ' . $occurrence_adapter_source->get_table() . ' LIMIT ' . $limit;
 		$occurrences = $source_db->get_results( $sql, ARRAY_A );
 
-		//  no more data to migrate, delete the old tables
+		// No more data to migrate, delete the old tables.
 		if ( empty( $occurrences ) ) {
-			$this->DeleteAfterMigrate( $occurrence_adapter_source );
-			$this->DeleteAfterMigrate( new WSAL_Adapters_MySQL_Meta( $source_db ) );
+			$this->delete_after_migrate( $occurrence_adapter_source );
+			$this->delete_after_migrate( new WSAL_Adapters_MySQL_Meta( $source_db ) );
 
 			return 0;
 		}
 
 		// Insert data to the target database.
 		$occurrence_adapter_target    = new WSAL_Adapters_MySQL_Occurrence( $target_db );
-		$occurrence_table_name_target = $occurrence_adapter_target->GetTable();
+		$occurrence_table_name_target = $occurrence_adapter_target->get_table();
 
-		$occurrence_ids_to_delete = [];
+		$occurrence_ids_to_delete = array();
 		foreach ( $occurrences as $entry ) {
 
-			$target_db->insert( $occurrence_table_name_target, [
-				'site_id'    => $entry['site_id'],
-				'alert_id'   => $entry['alert_id'],
-				'created_on' => $entry['created_on'],
-				'client_ip' => $entry['client_ip'],
-				'severity' => $entry['severity'],
-				'object' => $entry['object'],
-				'event_type' => $entry['event_type'],
-				'user_agent' => $entry['user_agent'],
-				'user_roles' => $entry['user_roles'],
-				'username' => $entry['username'],
-				'user_id' => $entry['user_id'],
-				'session_id' => $entry['session_id'],
-				'post_status' => $entry['post_status'],
-				'post_type' => $entry['post_type'],
-				'post_id' => $entry['post_id'],
-			], [ '%d', '%d', '%f','%s', '%d','%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%d'] );
+			$target_db->insert(
+				$occurrence_table_name_target,
+				array(
+					'site_id'     => $entry['site_id'],
+					'alert_id'    => $entry['alert_id'],
+					'created_on'  => $entry['created_on'],
+					'client_ip'   => $entry['client_ip'],
+					'severity'    => $entry['severity'],
+					'object'      => $entry['object'],
+					'event_type'  => $entry['event_type'],
+					'user_agent'  => $entry['user_agent'],
+					'user_roles'  => $entry['user_roles'],
+					'username'    => $entry['username'],
+					'user_id'     => $entry['user_id'],
+					'session_id'  => $entry['session_id'],
+					'post_status' => $entry['post_status'],
+					'post_type'   => $entry['post_type'],
+					'post_id'     => $entry['post_id'],
+				),
+				array( '%d', '%d', '%f', '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%d' )
+			);
 
 			$old_entry_id = intval( $entry['id'] );
 			$new_entry_id = $target_db->insert_id;
-			$this->MigrateMeta( $source_db, $target_db, $old_entry_id, $new_entry_id );
+			$this->migrate_meta( $source_db, $target_db, $old_entry_id, $new_entry_id );
 
 			array_push( $occurrence_ids_to_delete, $old_entry_id );
 		}
 
-		//  delete migrated events and associated meta data
+		// Delete migrated events and associated meta data.
 		$meta_adapter_source = new WSAL_Adapters_MySQL_Meta( $source_db );
-		$source_db->query( 'DELETE FROM ' . $occurrence_adapter_source->GetTable() . ' WHERE id IN (' . implode( ',', $occurrence_ids_to_delete ) . ');' );
-		$source_db->query( 'DELETE FROM ' . $meta_adapter_source->GetTable() . ' WHERE occurrence_id IN (' . implode( ',', $occurrence_ids_to_delete ) . ');' );
+		$source_db->query( 'DELETE FROM ' . $occurrence_adapter_source->get_table() . ' WHERE id IN (' . implode( ',', $occurrence_ids_to_delete ) . ');' );
+		$source_db->query( 'DELETE FROM ' . $meta_adapter_source->get_table() . ' WHERE occurrence_id IN (' . implode( ',', $occurrence_ids_to_delete ) . ');' );
 
 		return count( $occurrence_ids_to_delete );
 	}
@@ -362,39 +359,39 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 *
 	 * @param object $record - Type of record.
 	 */
-	private function DeleteAfterMigrate( $record ) {
+	private function delete_after_migrate( $record ) {
 		global $wpdb;
-		$sql = 'DROP TABLE IF EXISTS ' . $record->GetTable();
-		$wpdb->query( $sql );
+		$sql = 'DROP TABLE IF EXISTS ' . $record->get_table();
+		$wpdb->query( $sql ); // phpcs:ignore
 	}
 
 	/**
 	 * Migrate Metadata from WP DB to External DB.
 	 *
-	 * @param wpdb $source_db
-	 * @param wpdb $target_db
-	 * @param int $old_occurrence_id
-	 * @param int $new_occurrence_id
+	 * @param wpdb $source_db         Source database.
+	 * @param wpdb $target_db         Target database.
+	 * @param int  $old_occurrence_id Old occurrence ID.
+	 * @param int  $new_occurrence_id New occurrence ID.
 	 *
 	 * @return int Number of metadata migrated.
 	 */
-	private function MigrateMeta( $source_db, $target_db, $old_occurrence_id, $new_occurrence_id ) {
+	private function migrate_meta( $source_db, $target_db, $old_occurrence_id, $new_occurrence_id ) {
 
-		// load meta data from the source database
+		// Load meta data from the source database.
 		$meta_adapter_source = new WSAL_Adapters_MySQL_Meta( $source_db );
-		if ( ! $meta_adapter_source->IsInstalled() ) {
+		if ( ! $meta_adapter_source->is_installed() ) {
 			return 0;
 		}
 
-		$query          = 'SELECT * FROM ' . $meta_adapter_source->GetTable() . ' WHERE occurrence_id = %d;';
+		$query          = 'SELECT * FROM ' . $meta_adapter_source->get_table() . ' WHERE occurrence_id = %d;';
 		$prepared_query = $source_db->prepare( $query, $old_occurrence_id );
 		$metadata       = $source_db->get_results( $prepared_query, ARRAY_A );
 
-		//  insert meta data to target database
+		// Insert meta data to target database.
 		if ( ! empty( $metadata ) ) {
 			$meta_adapter_target = new WSAL_Adapters_MySQL_Meta( $target_db );
 
-			$query = 'INSERT INTO ' . $meta_adapter_target->GetTable() . ' (occurrence_id, name, value) VALUES ';
+			$query = 'INSERT INTO ' . $meta_adapter_target->get_table() . ' (occurrence_id, name, value) VALUES ';
 			foreach ( $metadata as $entry ) {
 				$query .= $target_db->prepare(
 					'( %d, %s, %s ), ',
@@ -419,9 +416,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 *
 	 * @return array
 	 */
-	public function MigrateOccurrenceFromExternalToLocal( $limit ) {
+	public function migrate_occurrence_from_external_to_local( $limit ) {
 		global $wpdb;
-		return $this->MigrateOccurrence( $this->getConnection(), $wpdb, $limit );
+		return $this->migrate_occurrence( $this->get_connection(), $wpdb, $limit );
 	}
 
 	/**
@@ -433,7 +430,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @return string
 	 * @since  2.6.3
 	 */
-	public function encryptString( $plaintext ) {
+	public function encrypt_string( $plaintext ) {
 
 		$ciphertext     = false;
 		$encrypt_method = 'AES-256-CBC';
@@ -447,7 +444,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 		$iv = substr( hash( 'sha256', $secret_iv ), 0, 16 );
 
 		$ciphertext = openssl_encrypt( $plaintext, $encrypt_method, $key, 0, $iv );
-		$ciphertext = base64_encode( $ciphertext );
+		$ciphertext = base64_encode( $ciphertext ); // phpcs:ignore
 
 		return $ciphertext;
 	}
@@ -459,24 +456,26 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @param array $args - Archive Database and limit by count OR by date.
 	 *
 	 * @return array|false|null
+	 *
+	 * @phpcs:disable Generic.Commenting.DocComment.MissingShort
 	 */
-	public function ArchiveOccurrence( $args ) {
-		$_wpdb = $this->getConnection();
+	public function archive_occurrence( $args ) {
+		$_wpdb = $this->get_connection();
 		/** @var wpdbCustom $archive_db */
 		$archive_db = $args['archive_db'];
 
 		// Load data Occurrences from WP.
 		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $_wpdb );
-		if ( ! $occurrence->IsInstalled() ) {
+		if ( ! $occurrence->is_installed() ) {
 			return null;
 		}
 		if ( ! empty( $args['by_date'] ) ) {
-			$sql = 'SELECT * FROM ' . $occurrence->GetTable() . ' WHERE created_on <= ' . $args['by_date'];
+			$sql = 'SELECT * FROM ' . $occurrence->get_table() . ' WHERE created_on <= ' . $args['by_date'];
 		}
 
 		if ( ! empty( $args['by_limit'] ) ) {
-			$sql = 'SELECT occ.* FROM ' . $occurrence->GetTable() . ' occ
-			LEFT JOIN (SELECT id FROM ' . $occurrence->GetTable() . ' order by created_on DESC limit ' . $args['by_limit'] . ') as ids
+			$sql = 'SELECT occ.* FROM ' . $occurrence->get_table() . ' occ
+			LEFT JOIN (SELECT id FROM ' . $occurrence->get_table() . ' order by created_on DESC limit ' . $args['by_limit'] . ') as ids
 			on ids.id = occ.id
 			WHERE ids.id IS NULL';
 		}
@@ -497,7 +496,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
 			$occurrence_new = new WSAL_Adapters_MySQL_Occurrence( $archive_db );
 
-			$sql = 'INSERT INTO ' . $occurrence_new->GetTable() . ' ( id, site_id, alert_id, created_on, client_ip, severity, object, event_type, user_agent, user_roles, username, user_id, session_id, post_status, post_type, post_id ) VALUES ';
+			$sql = 'INSERT INTO ' . $occurrence_new->get_table() . ' ( id, site_id, alert_id, created_on, client_ip, severity, object, event_type, user_agent, user_roles, username, user_id, session_id, post_status, post_type, post_id ) VALUES ';
 			foreach ( $occurrences as $entry ) {
 
 				$sql .= $archive_db->prepare(
@@ -540,25 +539,25 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 *
 	 * @return array|false|null
 	 */
-	public function ArchiveMeta( $args ) {
-		$_wpdb = $this->getConnection();
+	public function archive_meta( $args ) {
+		$_wpdb = $this->get_connection();
 		/** @var wpdbCustom $archive_db */
 		$archive_db = $args['archive_db'];
 
 		// Load data Meta from WP.
 		$meta = new WSAL_Adapters_MySQL_Meta( $_wpdb );
-		if ( ! $meta->IsInstalled() ) {
+		if ( ! $meta->is_installed() ) {
 			return null;
 		}
 		$s_occurrence_ids = implode( ', ', $args['occurrence_ids'] );
-		$sql              = 'SELECT * FROM ' . $meta->GetTable() . ' WHERE occurrence_id IN (' . $s_occurrence_ids . ')';
+		$sql              = 'SELECT * FROM ' . $meta->get_table() . ' WHERE occurrence_id IN (' . $s_occurrence_ids . ')';
 		$metadata         = $_wpdb->get_results( $sql, ARRAY_A );
 
 		// Insert data to Archive DB.
 		if ( ! empty( $metadata ) ) {
 			$meta_new = new WSAL_Adapters_MySQL_Meta( $archive_db );
 
-			$sql = 'INSERT INTO ' . $meta_new->GetTable() . ' (occurrence_id, name, value) VALUES ';
+			$sql = 'INSERT INTO ' . $meta_new->get_table() . ' (occurrence_id, name, value) VALUES ';
 			foreach ( $metadata as $entry ) {
 				$sql .= $archive_db->prepare(
 					'( %d, %s, %s ), ',
@@ -581,17 +580,17 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 *
 	 * @param array $args - Archive Database and occurrences IDs.
 	 */
-	public function DeleteAfterArchive( $args ) {
-		$_wpdb = $this->getConnection();
+	public function delete_after_archive( $args ) {
+		$_wpdb = $this->get_connection();
 
 		$s_occurrence_ids = implode( ', ', $args['occurrence_ids'] );
 
 		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $_wpdb );
-		$sql        = 'DELETE FROM ' . $occurrence->GetTable() . ' WHERE id IN (' . $s_occurrence_ids . ')';
+		$sql        = 'DELETE FROM ' . $occurrence->get_table() . ' WHERE id IN (' . $s_occurrence_ids . ')';
 		$_wpdb->query( $sql );
 
 		$meta = new WSAL_Adapters_MySQL_Meta( $_wpdb );
-		$sql  = 'DELETE FROM ' . $meta->GetTable() . ' WHERE occurrence_id IN (' . $s_occurrence_ids . ')';
+		$sql  = 'DELETE FROM ' . $meta->get_table() . ' WHERE occurrence_id IN (' . $s_occurrence_ids . ')';
 		$_wpdb->query( $sql );
 	}
 
@@ -602,26 +601,26 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 */
 	public function purge_activity() {
 		// Get connection.
-		$wpdb = $this->getConnection();
+		$wpdb = $this->get_connection();
 
 		// Get occurrence model.
 		$occ       = new WSAL_Adapters_MySQL_Occurrence( $wpdb );
-		$sql       = 'TRUNCATE ' . $occ->GetTable();
-		$query_occ = $wpdb->query( $sql );
+		$sql       = 'TRUNCATE ' . $occ->get_table();
+		$query_occ = $wpdb->query( $sql ); // phpcs:ignore
 
 		// Get meta model.
 		$meta       = new WSAL_Adapters_MySQL_Meta( $wpdb );
-		$sql        = 'TRUNCATE ' . $meta->GetTable();
-		$query_meta = $wpdb->query( $sql );
+		$sql        = 'TRUNCATE ' . $meta->get_table();
+		$query_meta = $wpdb->query( $sql ); // phpcs:ignore
 
 		// If both queries are successful, then return true.
 		return $query_occ && $query_meta;
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	public function query( $query ) {
-		return $this->getConnection()->query( $query );
+		return $this->get_connection()->query( $query );
 	}
 }

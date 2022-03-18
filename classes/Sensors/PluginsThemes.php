@@ -4,7 +4,7 @@
  *
  * Plugins & Themes sensor file.
  *
- * @since 1.0.0
+ * @since   1.0.0
  * @package wsal
  */
 
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 5007 User uninstalled a theme
  * 5031 User updated a theme
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
  */
 class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
@@ -48,30 +48,33 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	/**
 	 * Listening to events using WP hooks.
 	 */
-	public function HookEvents() {
+	public function hook_events() {
 		$has_permission = ( current_user_can( 'install_plugins' ) || current_user_can( 'activate_plugins' ) ||
-		                    current_user_can( 'delete_plugins' ) || current_user_can( 'update_plugins' ) || current_user_can( 'install_themes' ) );
+							current_user_can( 'delete_plugins' ) || current_user_can( 'update_plugins' ) || current_user_can( 'install_themes' ) );
 
-		add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
+		add_action( 'admin_init', array( $this, 'event_admin_init' ) );
 		if ( $has_permission ) {
-			add_action( 'shutdown', array( $this, 'EventAdminShutdown' ) );
+			add_action( 'shutdown', array( $this, 'event_admin_shutdown' ) );
 		}
-		add_action( 'switch_theme', array( $this, 'EventThemeActivated' ) );
-		add_action( 'upgrader_overwrote_package', [ $this, 'OnPackageOverwrite' ], 10, 3 );
+		add_action( 'switch_theme', array( $this, 'event_theme_activated' ) );
+		add_action( 'upgrader_overwrote_package', array( $this, 'OnPackageOverwrite' ), 10, 3 );
 	}
 
 	/**
 	 * Triggered when a user accesses the admin area.
 	 */
-	public function EventAdminInit() {
+	public function event_admin_init() {
 		$this->old_themes  = wp_get_themes();
 		$this->old_plugins = get_plugins();
 	}
 
 	/**
 	 * Install, uninstall, activate, deactivate, upgrade and update.
+	 *
+	 * phpcs:disable WordPress.PHP.StrictComparisons.LooseComparison
+	 * phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	 */
-	public function EventAdminShutdown() {
+	public function event_admin_shutdown() {
 		// Filter global arrays for security.
 		$post_array  = filter_input_array( INPUT_POST );
 		$get_array   = filter_input_array( INPUT_GET );
@@ -98,10 +101,10 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$is_plugins = 'plugins' === $actype;
 
 		// Install plugin.
-		if ( in_array( $action, array( 'install-plugin', 'upload-plugin', 'run_addon_install' ) ) && current_user_can( 'install_plugins' ) ) {
+		if ( in_array( $action, array( 'install-plugin', 'upload-plugin', 'run_addon_install' ), true ) && current_user_can( 'install_plugins' ) ) {
 			$plugin = array_values( array_diff( array_keys( get_plugins() ), array_keys( $this->old_plugins ) ) );
 			if ( count( $plugin ) != 1 ) {
-				$this->LogError(
+				$this->log_error(
 					'Expected exactly one new plugin but found ' . count( $plugin ),
 					array(
 						'NewPlugin'  => $plugin,
@@ -116,10 +119,10 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			$plugin      = $plugin[ $plugin_path ];
 
 			// Get plugin directory name.
-			$plugin_dir = WSAL_Sensors_PluginsThemes::get_plugin_dir( $plugin_path );
+			$plugin_dir = self::get_plugin_dir( $plugin_path );
 
 			$plugin_path = plugin_dir_path( WP_PLUGIN_DIR . '/' . $plugin_path[0] );
-			$this->plugin->alerts->Trigger(
+			$this->plugin->alerts->trigger_event(
 				5000,
 				array(
 					'Plugin' => (object) array(
@@ -137,7 +140,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 
 		// Activate plugin.
-		if ( $is_plugins && in_array( $action, array( 'activate', 'activate-selected' ) ) && current_user_can( 'activate_plugins' ) ) {
+		if ( $is_plugins && in_array( $action, array( 'activate', 'activate-selected' ), true ) && current_user_can( 'activate_plugins' ) ) {
 			// Check $_GET array case.
 			if ( isset( $get_array['plugin'] ) ) {
 				if ( ! isset( $get_array['checked'] ) ) {
@@ -157,7 +160,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			if ( isset( $get_array['checked'] ) && ! empty( $get_array['checked'] ) ) {
 				$latest_event = $this->plugin->alerts->get_latest_events();
 				$latest_event = isset( $latest_event[0] ) ? $latest_event[0] : false;
-				$event_meta   = $latest_event ? $latest_event->GetMetaArray() : false;
+				$event_meta   = $latest_event ? $latest_event->get_meta_array() : false;
 
 				foreach ( $get_array['checked'] as $plugin_file ) {
 					if ( $latest_event && 5001 === $latest_event->alert_id && $event_meta && isset( $event_meta['PluginFile'] ) ) {
@@ -169,7 +172,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
 
-					$this->plugin->alerts->Trigger(
+					$this->plugin->alerts->trigger_event(
 						5001,
 						array(
 							'PluginFile' => $plugin_file,
@@ -190,7 +193,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
 
-					$this->plugin->alerts->Trigger(
+					$this->plugin->alerts->trigger_event(
 						5001,
 						array(
 							'PluginFile' => $plugin_file,
@@ -210,7 +213,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 
 		// Deactivate plugin.
-		if ( $is_plugins && in_array( $action, array( 'deactivate', 'deactivate-selected' ) ) && current_user_can( 'activate_plugins' ) ) {
+		if ( $is_plugins && in_array( $action, array( 'deactivate', 'deactivate-selected' ), true ) && current_user_can( 'activate_plugins' ) ) {
 			// Check $_GET array case.
 			if ( isset( $get_array['plugin'] ) ) {
 				if ( ! isset( $get_array['checked'] ) ) {
@@ -231,7 +234,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				foreach ( $get_array['checked'] as $plugin_file ) {
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
-					$this->plugin->alerts->Trigger(
+					$this->plugin->alerts->trigger_event(
 						5002,
 						array(
 							'PluginFile' => $plugin_file,
@@ -244,13 +247,13 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							),
 						)
 					);
-					WSAL_Sensors_PluginsThemes::run_addon_removal_check( $plugin_file );
+					self::run_addon_removal_check( $plugin_file );
 				}
 			} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
 				foreach ( $post_array['checked'] as $plugin_file ) {
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
-					$this->plugin->alerts->Trigger(
+					$this->plugin->alerts->trigger_event(
 						5002,
 						array(
 							'PluginFile' => $plugin_file,
@@ -263,14 +266,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							),
 						)
 					);
-					WSAL_Sensors_PluginsThemes::run_addon_removal_check( $plugin_file );
+					self::run_addon_removal_check( $plugin_file );
 				}
 			}
 		}
 
 		// Uninstall plugin.
-		if ( $is_plugins && in_array( $action, array( 'delete-selected' ) ) && current_user_can( 'delete_plugins' ) ) {
-			if ( ! isset( $post_array['verify-delete'] ) ) {
+		if ( $is_plugins && in_array( $action, array( 'delete-selected' ), true ) && current_user_can( 'delete_plugins' ) ) {
+			if ( ! isset( $post_array['verify-delete'] ) ) { // phpcs:ignore
 				// First step, before user approves deletion
 				// TODO store plugin data in session here.
 			} else {
@@ -282,7 +285,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					$plugin_name = ucwords( $plugin_name );
 					$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
 					$plugin_data = get_plugin_data( $plugin_file, false, true );
-					$this->plugin->alerts->Trigger(
+					$this->plugin->alerts->trigger_event(
 						5003,
 						array(
 							'PluginFile' => $plugin_file,
@@ -292,20 +295,20 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 							),
 						)
 					);
-					WSAL_Sensors_PluginsThemes::run_addon_removal_check( $plugin_file );
+					self::run_addon_removal_check( $plugin_file );
 				}
 			}
 		}
 
 		// Uninstall plugin for WordPress version 4.6.
-		if ( in_array( $action, array( 'delete-plugin' ) ) && current_user_can( 'delete_plugins' ) ) {
+		if ( in_array( $action, array( 'delete-plugin' ), true ) && current_user_can( 'delete_plugins' ) ) {
 			if ( isset( $post_array['plugin'] ) ) {
 				$plugin_file = WP_PLUGIN_DIR . '/' . $post_array['plugin'];
 				$plugin_name = basename( $plugin_file, '.php' );
 				$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
 				$plugin_name = ucwords( $plugin_name );
 				$plugin_data = $this->old_plugins[ $post_array['plugin'] ];
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					5003,
 					array(
 						'PluginFile' => $plugin_file,
@@ -316,12 +319,12 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 					)
 				);
 
-				WSAL_Sensors_PluginsThemes::run_addon_removal_check( $plugin_file );
+				self::run_addon_removal_check( $plugin_file );
 			}
 		}
 
 		// Upgrade plugin.
-		if ( in_array( $action, array( 'upgrade-plugin', 'update-plugin', 'update-selected' ) ) && current_user_can( 'update_plugins' ) ) {
+		if ( in_array( $action, array( 'upgrade-plugin', 'update-plugin', 'update-selected' ), true ) && current_user_can( 'update_plugins' ) ) {
 			$plugins = array();
 
 			// Check $_GET array cases.
@@ -339,13 +342,13 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			}
 			if ( isset( $plugins ) ) {
 				foreach ( $plugins as $plugin_file ) {
-					WSAL_Sensors_PluginsThemes::LogPluginUpdatedEvent( $plugin_file, $this->old_plugins );
+					self::log_plugin_updated_event( $plugin_file, $this->old_plugins );
 				}
 			}
 		}
 
 		// Update theme.
-		if ( in_array( $action, array( 'upgrade-theme', 'update-theme', 'update-selected-themes' ) ) && current_user_can( 'install_themes' ) ) {
+		if ( in_array( $action, array( 'upgrade-theme', 'update-theme', 'update-selected-themes' ), true ) && current_user_can( 'install_themes' ) ) {
 			// Themes.
 			$themes = array();
 
@@ -362,18 +365,18 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			} elseif ( isset( $post_array['themes'] ) ) {
 				$themes = explode( ',', $post_array['themes'] );
 			}
-            if ( isset( $themes ) ) {
-                foreach ( $themes as $theme_name ) {
-                    WSAL_Sensors_PluginsThemes::LogThemeUpdatedEvent( $theme_name );
-                }
-            }
+			if ( isset( $themes ) ) {
+				foreach ( $themes as $theme_name ) {
+					self::log_theme_updated_event( $theme_name );
+				}
+			}
 		}
 
 		// Install theme.
-		if ( in_array( $action, array( 'install-theme', 'upload-theme' ) ) && current_user_can( 'install_themes' ) ) {
+		if ( in_array( $action, array( 'install-theme', 'upload-theme' ), true ) && current_user_can( 'install_themes' ) ) {
 			$themes = array_diff( wp_get_themes(), $this->old_themes );
-			foreach ( $themes as $name => $theme ) {
-				$this->plugin->alerts->Trigger(
+			foreach ( $themes as $theme ) {
+				$this->plugin->alerts->trigger_event(
 					5005,
 					array(
 						'Theme' => (object) array(
@@ -390,9 +393,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 
 		// Uninstall theme.
-		if ( in_array( $action, array( 'delete-theme' ) ) && current_user_can( 'install_themes' ) ) {
-			foreach ( $this->GetRemovedThemes() as $index => $theme ) {
-				$this->plugin->alerts->Trigger(
+		if ( in_array( $action, array( 'delete-theme' ), true ) && current_user_can( 'install_themes' ) ) {
+			foreach ( $this->get_removed_themes() as $theme ) {
+				$this->plugin->alerts->trigger_event(
 					5007,
 					array(
 						'Theme' => (object) array(
@@ -413,17 +416,19 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 * Activated a theme.
 	 *
 	 * @param string $theme_name - Theme name.
+	 *
+	 * phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	 */
-	public function EventThemeActivated( $theme_name ) {
+	public function event_theme_activated( $theme_name ) {
 		$theme = null;
 		foreach ( wp_get_themes() as $item ) {
-			if ( $theme_name == $item->Name ) {
+			if ( $theme_name === $item->Name ) {
 				$theme = $item;
 				break;
 			}
 		}
-		if ( null == $theme ) {
-			$this->LogError(
+		if ( null == $theme ) { // phpcs:ignore
+			$this->log_error(
 				'Could not locate theme named "' . $theme . '".',
 				array(
 					'ThemeName' => $theme_name,
@@ -432,7 +437,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 			);
 			return;
 		}
-		$this->plugin->alerts->Trigger(
+		$this->plugin->alerts->trigger_event(
 			5006,
 			array(
 				'Theme' => (object) array(
@@ -452,7 +457,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 *
 	 * @return array of WP_Theme objects
 	 */
-	protected function GetRemovedThemes() {
+	protected function get_removed_themes() {
 		$result = $this->old_themes;
 		foreach ( $result as $i => $theme ) {
 			if ( file_exists( $theme->get_template_directory() ) ) {
@@ -465,14 +470,14 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	/**
 	 * Get event code by post type.
 	 *
-	 * @param object $post - Post object.
-	 * @param int $type_post - Code for post.
-	 * @param int $type_page - Code for page.
-	 * @param int $type_custom - Code for custom post type.
+	 * @param object $post        - Post object.
+	 * @param int    $type_post   - Code for post.
+	 * @param int    $type_page   - Code for page.
+	 * @param int    $type_custom - Code for custom post type.
 	 *
 	 * @return false|int
 	 */
-	protected function GetEventTypeForPostType( $post, $type_post, $type_page, $type_custom ) {
+	protected function get_event_type_for_post_type( $post, $type_post, $type_page, $type_custom ) {
 		if ( empty( $post ) || ! isset( $post->post_type ) ) {
 			return false;
 		}
@@ -552,7 +557,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$theme = null;
 		if ( ! empty( $all_themes ) ) {
 			foreach ( $all_themes as $theme_slug => $theme_obj ) {
-				if ( $theme_name === $theme_slug|| $theme_name === $theme_obj->get('Name') ) {
+				if ( $theme_name === $theme_slug || $theme_name === $theme_obj->get( 'Name' ) ) {
 					$theme = $theme_obj;
 					break;
 				}
@@ -561,6 +566,11 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		return $theme;
 	}
 
+	/**
+	 * Runs an add-on check.
+	 *
+	 * @param string $plugin_dir Plugin directory.
+	 */
 	public function run_addon_check( $plugin_dir ) {
 		$plugin_filename = basename( preg_replace( '/\\.[^.\\s]{3,4}$/', '', $plugin_dir ) );
 
@@ -578,25 +588,30 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 			// Check if plugin file starts with the same string as our addon_for, or if its equal.
 			if ( $plugin_filename === $plugin ) {
-				$addon_slug         = array( array_search( $plugin, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ) );
+				$addon_slug         = array( array_search( $plugin, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ) ); // phpcs:ignore
 				$is_addon_installed = array_intersect( $all_plugins, $addon_slug );
 				if ( empty( $is_addon_installed ) ) {
-					$current_value   = $this->plugin->GetGlobalSetting( 'installed_plugin_addon_available' );
+					$current_value   = $this->plugin->get_global_setting( 'installed_plugin_addon_available' );
 					$plugin_filename = array( $plugin_filename );
 					if ( isset( $current_value ) && is_array( $current_value ) ) {
 						$new_plugin_filenames = array_unique( array_merge( $current_value, $plugin_filename ) );
 					} else {
 						$new_plugin_filenames = $plugin_filename;
 					}
-					$this->plugin->SetGlobalSetting( 'installed_plugin_addon_available', $new_plugin_filenames );
-					$this->plugin->DeleteGlobalSetting( 'addon_available_notice_dismissed' );
+					$this->plugin->set_global_setting( 'installed_plugin_addon_available', $new_plugin_filenames );
+					$this->plugin->delete_global_setting( 'addon_available_notice_dismissed' );
 				}
 			}
 		}
 	}
 
+	/**
+	 * Checks for an add-on removal.
+	 *
+	 * @param string $plugin_dir Plugin directory.
+	 */
 	public static function run_addon_removal_check( $plugin_dir ) {
-		$wsal = WpSecurityAuditLog::GetInstance();
+		$wsal            = WpSecurityAuditLog::get_instance();
 		$plugin_filename = basename( preg_replace( '/\\.[^.\\s]{3,4}$/', '', $plugin_dir ) );
 
 		if ( is_array( $plugin_filename ) ) {
@@ -612,14 +627,15 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 			// Check if plugin file starts with the same string as our addon_for, or if its equal.
 			if ( $plugin_filename === $plugin ) {
-				$current_installed = $wsal->GetGlobalSetting( 'installed_plugin_addon_available' );
-				if ( isset( $current_installed ) && ! empty( $current_installed  ) ) {
-					if ( ( $key = array_search( $plugin, $current_installed ) ) !== false ) {
-						unset( $current_installed[$key] );
+				$current_installed = $wsal->get_global_setting( 'installed_plugin_addon_available' );
+				if ( isset( $current_installed ) && ! empty( $current_installed ) ) {
+					$key = array_search( $plugin, $current_installed ); // phpcs:ignore
+					if ( false !== $key ) {
+						unset( $current_installed[ $key ] );
 					}
 				}
 
-				$wsal->SetGlobalSetting( 'installed_plugin_addon_available', $current_installed );
+				$wsal->set_global_setting( 'installed_plugin_addon_available', $current_installed );
 			}
 		}
 	}
@@ -630,9 +646,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 *
 	 * @since 4.1.4
 	 *
-	 * @param string  $package          The package file.
-	 * @param array   $new_plugin_data  The new plugin data.
-	 * @param string  $package_type     The package type (plugin or theme).
+	 * @param string $package          The package file.
+	 * @param array  $new_plugin_data  The new plugin data.
+	 * @param string $package_type     The package type (plugin or theme).
 	 */
 	public function OnPackageOverwrite( $package, $new_plugin_data, $package_type ) {
 		if ( 'plugin' !== $package_type ) {
@@ -640,9 +656,9 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 
 		if ( array_key_exists( 'Name', $new_plugin_data ) ) {
-			$plugin_file = WSAL_Sensors_PluginsThemes::get_plugin_file_name( $new_plugin_data['Name'] );
+			$plugin_file = self::get_plugin_file_name( $new_plugin_data['Name'] );
 			if ( ! empty( $plugin_file ) ) {
-				WSAL_Sensors_PluginsThemes::LogPluginUpdatedEvent( $plugin_file );
+				self::log_plugin_updated_event( $plugin_file );
 			}
 		}
 	}
@@ -655,7 +671,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 *
 	 * @since 4.1.4
 	 */
-	public static function LogPluginUpdatedEvent( $plugin_file, $old_plugins = '' ) {
+	public static function log_plugin_updated_event( $plugin_file, $old_plugins = '' ) {
 		$plugin_file_full = WP_PLUGIN_DIR . '/' . $plugin_file;
 		$plugin_data      = get_plugin_data( $plugin_file_full, false, true );
 
@@ -663,8 +679,8 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		$new_version = $plugin_data['Version'];
 
 		if ( $old_version !== $new_version ) {
-			$wsal = WpSecurityAuditLog::GetInstance();
-			$wsal->alerts->Trigger(
+			$wsal = WpSecurityAuditLog::get_instance();
+			$wsal->alerts->trigger_event(
 				5004,
 				array(
 					'PluginFile' => $plugin_file,
@@ -680,32 +696,34 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 	}
 
-    /**
-     * Log theme updated event.
-     *
-     * @param string $theme_name Theme name.
-     *
-     * @since 4.1.5
-     */
-    public static function LogThemeUpdatedEvent( $theme_name ) {
-        $theme = WSAL_Sensors_PluginsThemes::get_theme_by_name($theme_name);
-        if ( ! $theme instanceof WP_Theme ) {
-            return;
-        }
+	/**
+	 * Log theme updated event.
+	 *
+	 * @param string $theme_name Theme name.
+	 *
+	 * @since 4.1.5
+	 *
+	 * phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+	 */
+	public static function log_theme_updated_event( $theme_name ) {
+		$theme = self::get_theme_by_name( $theme_name );
+		if ( ! $theme instanceof WP_Theme ) {
+			return;
+		}
 
-        $wsal = WpSecurityAuditLog::GetInstance();
-        $wsal->alerts->Trigger(
-            5031,
-            array(
-                'Theme' => (object) array(
-                    'Name'                   => $theme->Name,
-                    'ThemeURI'               => $theme->ThemeURI,
-                    'Description'            => $theme->Description,
-                    'Author'                 => $theme->Author,
-                    'Version'                => $theme->Version,
-                    'get_template_directory' => $theme->get_template_directory(),
-                ),
-            )
-        );
-    }
+		$wsal = WpSecurityAuditLog::get_instance();
+		$wsal->alerts->trigger_event(
+			5031,
+			array(
+				'Theme' => (object) array(
+					'Name'                   => $theme->Name,
+					'ThemeURI'               => $theme->ThemeURI,
+					'Description'            => $theme->Description,
+					'Author'                 => $theme->Author,
+					'Version'                => $theme->Version,
+					'get_template_directory' => $theme->get_template_directory(),
+				),
+			)
+		);
+	}
 }
