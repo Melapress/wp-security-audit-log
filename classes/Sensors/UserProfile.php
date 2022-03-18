@@ -4,10 +4,10 @@
  *
  * User profile sensor file.
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
  *
- * @since 1.0.0
+ * @since      1.0.0
  */
 
 // Exit if accessed directly.
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 4009 User revoked from Super Admin privileges
  * 4014 User opened the profile page of another user
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
  */
 class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
@@ -44,7 +44,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function HookEvents() {
+	public function hook_events() {
 		add_action( 'profile_update', array( $this, 'event_user_updated' ), 10, 2 );
 		add_action( 'set_user_role', array( $this, 'event_user_role_changed' ), 10, 3 );
 		add_action( 'delete_user', array( $this, 'event_user_deleted' ) );
@@ -68,6 +68,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 * @param int    $user_id ID of the user metadata is for.
 	 * @param string $meta_key Metadata key.
 	 * @param mixed  $_meta_value Metadata value. Serialized if non-scalar.
+	 *
+	 * phpcs:disable WordPress.Security.NonceVerification.Missing
 	 */
 	public function event_application_password_added( $meta_id, $user_id, $meta_key, $_meta_value ) {
 
@@ -95,15 +97,21 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 
 			$current_user       = get_user_by( 'id', $user_id );
 			$current_userdata   = get_userdata( $user_id );
-			$current_user_roles = implode( ', ', array_map( array(
-				$this,
-				'filter_role_names'
-			), $current_userdata->roles ) );
+			$current_user_roles = implode(
+				', ',
+				array_map(
+					array(
+						$this,
+						'filter_role_names',
+					),
+					$current_userdata->roles
+				)
+			);
 			$event_id           = ( 'user-edit' === $referer_check ) ? 4026 : 4025;
 
 			// Note, firstname and lastname fields are purposefully spaces to avoid NULL.
 			if ( isset( $_POST['name'] ) ) {
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					$event_id,
 					array(
 						'roles'         => $current_user_roles,
@@ -120,7 +128,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				$event_id = ( 'user-edit' === $referer_check ) ? 4028 : 4027;
 
 				// Note, firstname and lastname fields are purposefully spaces to avoid NULL.
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					$event_id,
 					array(
 						'roles'         => $current_user_roles,
@@ -139,7 +147,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 				$event_id        = ( 'user-edit' === $referer_check ) ? 4026 : 4025;
 
 				// Note, firstname and lastname fields are purposefully spaces to avoid NULL.
-				$this->plugin->alerts->Trigger(
+				$this->plugin->alerts->trigger_event(
 					$event_id,
 					array(
 						'roles'         => $current_user_roles,
@@ -170,7 +178,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		if ( $old_userdata->user_pass !== $new_userdata->user_pass ) {
 			$event      = get_current_user_id() === $user_id ? 4003 : 4004;
 			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $new_userdata->roles ) );
-			$this->plugin->alerts->Trigger(
+			$this->plugin->alerts->trigger_event(
 				$event,
 				array(
 					'TargetUserID'   => $user_id,
@@ -189,7 +197,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		if ( $old_userdata->user_email !== $new_userdata->user_email ) {
 			$event      = get_current_user_id() === $user_id ? 4005 : 4006;
 			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $new_userdata->roles ) );
-			$this->plugin->alerts->Trigger(
+			$this->plugin->alerts->trigger_event(
 				$event,
 				array(
 					'TargetUserID'   => $user_id,
@@ -207,7 +215,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		// Alert if display name is changed.
 		if ( $old_userdata->display_name !== $new_userdata->display_name ) {
 			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $new_userdata->roles ) );
-			$this->plugin->alerts->Trigger(
+			$this->plugin->alerts->trigger_event(
 				4020,
 				array(
 					'TargetUsername'  => $new_userdata->user_login,
@@ -224,7 +232,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		// Alert if website URL is changed.
 		if ( $old_userdata->user_url !== $new_userdata->user_url ) {
 			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $new_userdata->roles ) );
-			$this->plugin->alerts->Trigger(
+			$this->plugin->alerts->trigger_event(
 				4021,
 				array(
 					'TargetUsername' => $new_userdata->user_login,
@@ -241,7 +249,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		// Alert if role has changed via Members plugin.
 		if ( isset( $_POST['members_user_roles'] ) && ! empty( $_POST['members_user_roles'] ) ) {
 			if ( $old_userdata->roles !== $_POST['members_user_roles'] ) {
-				$this->event_user_role_changed( $user_id, $_POST['members_user_roles'], $old_userdata->roles, true );
+				$this->event_user_role_changed( $user_id, $_POST['members_user_roles'], $old_userdata->roles, true ); // phpcs:ignore
 			}
 		}
 	}
@@ -274,7 +282,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 
 		// Alert if roles are changed.
 		if ( $old_roles !== $new_roles ) {
-			$this->plugin->alerts->TriggerIf(
+			$this->plugin->alerts->trigger_event_if(
 				4002,
 				array(
 					'TargetUserID'   => $user_id,
@@ -284,9 +292,9 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 					'FirstName'      => $user->user_firstname,
 					'LastName'       => $user->user_lastname,
 					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
-					'multisite_text' => $this->plugin->IsMultisite() ? get_current_blog_id() : false,
+					'multisite_text' => $this->plugin->is_multisite() ? get_current_blog_id() : false,
 				),
-				array( $this, 'MustNotContainUserChanges' )
+				array( $this, 'must_not_contain_user_changes' )
 			);
 		}
 	}
@@ -299,7 +307,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	public function event_user_deleted( $user_id ) {
 		$user = get_userdata( $user_id );
 		$role = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
-		$this->plugin->alerts->TriggerIf(
+		$this->plugin->alerts->trigger_event_if(
 			4007,
 			array(
 				'TargetUserID'   => $user_id,
@@ -311,7 +319,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 					'Roles'     => $role ? $role : 'none',
 				),
 			),
-			array( $this, 'MustNotContainCreateUser' )
+			array( $this, 'must_not_contain_create_user' )
 		);
 	}
 
@@ -326,10 +334,10 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		}
 
 		$current_user = wp_get_current_user();
-		$updated      = isset( $_GET['updated'] ); // @codingStandardsIgnoreLine
+		$updated      = isset( $_GET['updated'] ); // phpcs:ignore
 		if ( $current_user && ( $user->ID !== $current_user->ID ) && ! $updated ) {
 			$user_roles = implode( ', ', array_map( array( $this, 'filter_role_names' ), $user->roles ) );
-			$this->plugin->alerts->Trigger(
+			$this->plugin->alerts->trigger_event(
 				4014,
 				array(
 					'UserChanger'    => $current_user->user_login,
@@ -347,7 +355,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 * Triggered when a user accesses the admin area.
 	 */
 	public function get_super_admins() {
-		$this->old_superadmins = $this->IsMultisite() ? get_super_admins() : null;
+		$this->old_superadmins = $this->is_multisite() ? get_super_admins() : null;
 	}
 
 	/**
@@ -362,7 +370,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	public function event_super_access_granted( $user_id ) {
 		$user = get_userdata( $user_id );
 		if ( $user && ! in_array( $user->user_login, $this->old_superadmins, true ) ) {
-			$this->plugin->alerts->Trigger(
+			$this->plugin->alerts->trigger_event(
 				4008,
 				array(
 					'TargetUserID'   => $user_id,
@@ -388,7 +396,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	public function event_super_access_revoked( $user_id ) {
 		$user = get_userdata( $user_id );
 		if ( $user && in_array( $user->user_login, $this->old_superadmins, true ) ) {
-			$this->plugin->alerts->Trigger(
+			$this->plugin->alerts->trigger_event(
 				4009,
 				array(
 					'TargetUserID'   => $user_id,
@@ -411,12 +419,18 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 		$current_user = get_user_by( 'login', $user_login );
 
 		$current_userdata   = get_userdata( $current_user->ID );
-		$current_user_roles = implode( ', ', array_map( array(
-			$this,
-			'filter_role_names'
-		), $current_userdata->roles ) );
+		$current_user_roles = implode(
+			', ',
+			array_map(
+				array(
+					$this,
+					'filter_role_names',
+				),
+				$current_userdata->roles
+			)
+		);
 
-		$this->plugin->alerts->Trigger(
+		$this->plugin->alerts->trigger_event(
 			4029,
 			array(
 				'roles'         => $current_user_roles,
@@ -448,8 +462,8 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 *
 	 * @param WSAL_AlertManager $mgr - Instance of WSAL_AlertManager.
 	 */
-	public function MustNotContainCreateUser( WSAL_AlertManager $mgr ) {
-		return ! $mgr->WillTrigger( 4012 );
+	public function must_not_contain_create_user( WSAL_AlertManager $mgr ) {
+		return ! $mgr->will_trigger( 4012 );
 	}
 
 	/**
@@ -457,13 +471,13 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 *
 	 * @param WSAL_AlertManager $mgr - Instance of WSAL_AlertManager.
 	 */
-	public function MustNotContainUserChanges( WSAL_AlertManager $mgr ) {
+	public function must_not_contain_user_changes( WSAL_AlertManager $mgr ) {
 		return ! (
-			$mgr->WillOrHasTriggered( 4010 )
-			|| $mgr->WillOrHasTriggered( 4011 )
-			|| $mgr->WillOrHasTriggered( 4012 )
-			|| $mgr->WillOrHasTriggered( 4000 )
-			|| $mgr->WillOrHasTriggered( 4001 )
+			$mgr->will_or_has_triggered( 4010 )
+			|| $mgr->will_or_has_triggered( 4011 )
+			|| $mgr->will_or_has_triggered( 4012 )
+			|| $mgr->will_or_has_triggered( 4000 )
+			|| $mgr->will_or_has_triggered( 4001 )
 		);
 	}
 
@@ -495,10 +509,10 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			'LastName'  => ! empty( $user->user_lastname ) ? $user->user_lastname : '',
 		);
 
-		$event_code = $this->plugin->IsMultisite() ? 4012 : 4001;
+		$event_code = $this->plugin->is_multisite() ? 4012 : 4001;
 		if ( 4001 === $event_code ) {
 			$new_user_data['Roles'] = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
-		} else if ( 4012 === $event_code ) {
+		} elseif ( 4012 === $event_code ) {
 			$new_user_data['Email'] = $user->user_email;
 		}
 
@@ -508,6 +522,6 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			'EditUserLink' => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 		);
 
-		$this->plugin->alerts->Trigger( $event_code, $event_data, $this->plugin->IsMultisite() );
+		$this->plugin->alerts->trigger_event( $event_code, $event_data, $this->plugin->is_multisite() );
 	}
 }

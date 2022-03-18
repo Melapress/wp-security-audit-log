@@ -1,4 +1,10 @@
 <?php
+/**
+ * File system utility class.
+ *
+ * @package wsal
+ * @since 4.4.0
+ */
 
 /**
  * Utility class for handling certain file system related functionality.
@@ -32,7 +38,7 @@ class WSAL_Utilities_FileSystemUtils {
 		if ( $handle ) {
 			$ignore_list = array( '.', '..' );
 			$regexp      = '/' . str_replace( array( '.', '*' ), array( '\.', '.*' ), $pattern ) . '/';
-			while ( false !== ( $file_name = readdir( $handle ) ) ) {
+			while ( false !== ( $file_name = readdir( $handle ) ) ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				if ( ! in_array( $file_name, $ignore_list, true ) && preg_match( $regexp, $file_name ) ) {
 					array_push( $result, $folder_slashed . $file_name );
 				}
