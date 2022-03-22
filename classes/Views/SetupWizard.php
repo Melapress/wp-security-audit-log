@@ -230,10 +230,10 @@ final class WSAL_Views_SetupWizard {
 		/**
 		 * Enqueue Styles.
 		 */
-		$wizard_css = WSAL_ViewManager::get_asset_path( '/css/dist/', 'wsal-wizard', 'css', false );
+		$wizard_css = WSAL_ViewManager::get_asset_path( 'css/dist/', 'wsal-wizard', 'css', false );
 		wp_enqueue_style(
 			'wsal-wizard-css',
-			$this->plugin->get_base_url() . $wizard_css,
+			$this->plugin->get_base_url() . '/' . $wizard_css,
 			array( 'dashicons', 'install', 'forms' ),
 			filemtime( $this->plugin->get_base_dir() . $wizard_css )
 		);
@@ -241,10 +241,10 @@ final class WSAL_Views_SetupWizard {
 		/**
 		 * Enqueue Scripts.
 		 */
-		$wizard_js = WSAL_ViewManager::get_asset_path( '/js/dist/', 'wsal-wizard', 'js', false );
+		$wizard_js = WSAL_ViewManager::get_asset_path( 'js/dist/', 'wsal-wizard', 'js', false );
 		wp_register_script(
 			'wsal-wizard-js',
-			$this->plugin->get_base_url() . $wizard_js,
+			$this->plugin->get_base_url() . '/' . $wizard_js,
 			array( 'jquery' ),
 			filemtime( $this->plugin->get_base_dir() . $wizard_js ),
 			false
