@@ -1702,7 +1702,7 @@ function wsaldefaults_wsal_init() {
 						4000,
 						WSAL_CRITICAL,
 						esc_html__( 'New user was created on WordPress', 'wp-security-audit-log' ),
-						esc_html__( 'A new user %NewUserData->Username% is created via registration.', 'wp-security-audit-log' ),
+						__( 'A new user %NewUserData->Username% is created via registration.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'User', 'wp-security-audit-log' ) => '%NewUserData->Username%',
 						),
@@ -1714,7 +1714,7 @@ function wsaldefaults_wsal_init() {
 						4001,
 						WSAL_CRITICAL,
 						esc_html__( 'User created another WordPress user', 'wp-security-audit-log' ),
-						esc_html__( 'Created the new user: %NewUserData->Username%.', 'wp-security-audit-log' ),
+						__( 'Created the new user: %NewUserData->Username%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Role', 'wp-security-audit-log' )       => '%NewUserData->Roles%',
 							esc_html__( 'First name', 'wp-security-audit-log' ) => '%NewUserData->FirstName%',
@@ -1756,7 +1756,7 @@ function wsaldefaults_wsal_init() {
 						4004,
 						WSAL_HIGH,
 						esc_html__( 'User changed another user\'s password', 'wp-security-audit-log' ),
-						esc_html__( 'Changed the password of the user %TargetUserData->Username%.', 'wp-security-audit-log' ),
+						__( 'Changed the password of the user %TargetUserData->Username%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Role', 'wp-security-audit-log' )       => '%TargetUserData->Roles%',
 							esc_html__( 'First name', 'wp-security-audit-log' ) => '%TargetUserData->FirstName%',
@@ -1800,7 +1800,7 @@ function wsaldefaults_wsal_init() {
 						4007,
 						WSAL_HIGH,
 						esc_html__( 'User was deleted by another user', 'wp-security-audit-log' ),
-						esc_html__( 'Deleted the user %TargetUserData->Username%.', 'wp-security-audit-log' ),
+						__( 'Deleted the user %TargetUserData->Username%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Role', 'wp-security-audit-log' )       => '%TargetUserData->Roles%',
 							esc_html__( 'First name', 'wp-security-audit-log' ) => '%NewUserData->FirstName%',
@@ -2064,7 +2064,7 @@ function wsaldefaults_wsal_init() {
 						4012,
 						WSAL_CRITICAL,
 						esc_html__( 'New network user created', 'wp-security-audit-log' ),
-						esc_html__( 'Created the new network user %NewUserData->Username%.', 'wp-security-audit-log' ),
+						__( 'Created the new network user %NewUserData->Username%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'First name', 'wp-security-audit-log' ) => '%NewUserData->FirstName%',
 							esc_html__( 'Last name', 'wp-security-audit-log' )  => '%NewUserData->LastName%',
@@ -2077,7 +2077,7 @@ function wsaldefaults_wsal_init() {
 						4013,
 						WSAL_HIGH,
 						esc_html__( 'Network user has been activated', 'wp-security-audit-log' ),
-						esc_html__( 'User %NewUserData->Username% has been activated.', 'wp-security-audit-log' ),
+						__( 'User %NewUserData->Username% has been activated.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Role', 'wp-security-audit-log' )       => '%NewUserData->Roles%',
 							esc_html__( 'First name', 'wp-security-audit-log' ) => '%NewUserData->FirstName%',
@@ -2108,7 +2108,7 @@ function wsaldefaults_wsal_init() {
 						5000,
 						WSAL_CRITICAL,
 						esc_html__( 'User installed a plugin', 'wp-security-audit-log' ),
-						esc_html__( 'Installed the plugin %Plugin->Name%.', 'wp-security-audit-log' ),
+						__( 'Installed the plugin %Plugin->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Version', 'wp-security-audit-log' )          => '%Plugin->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%Plugin->plugin_dir_path%',
@@ -2121,7 +2121,7 @@ function wsaldefaults_wsal_init() {
 						5001,
 						WSAL_HIGH,
 						esc_html__( 'User activated a WordPress plugin', 'wp-security-audit-log' ),
-						esc_html__( 'Activated the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
+						__( 'Activated the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Version', 'wp-security-audit-log' )          => '%PluginData->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%PluginFile%',
@@ -2134,7 +2134,7 @@ function wsaldefaults_wsal_init() {
 						5002,
 						WSAL_HIGH,
 						esc_html__( 'User deactivated a WordPress plugin', 'wp-security-audit-log' ),
-						esc_html__( 'Deactivated the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
+						__( 'Deactivated the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Version', 'wp-security-audit-log' )          => '%PluginData->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%PluginFile%',
@@ -2147,7 +2147,7 @@ function wsaldefaults_wsal_init() {
 						5003,
 						WSAL_HIGH,
 						esc_html__( 'User uninstalled a plugin', 'wp-security-audit-log' ),
-						esc_html__( 'Uninstalled the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
+						__( 'Uninstalled the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Version', 'wp-security-audit-log' )          => '%PluginData->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%PluginFile%',
@@ -2160,7 +2160,7 @@ function wsaldefaults_wsal_init() {
 						5004,
 						WSAL_LOW,
 						esc_html__( 'User upgraded a plugin', 'wp-security-audit-log' ),
-						esc_html__( 'Updated the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
+						__( 'Updated the plugin %PluginData->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Updated version', 'wp-security-audit-log' )  => '%PluginData->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%PluginFile%',
@@ -2243,7 +2243,7 @@ function wsaldefaults_wsal_init() {
 						5005,
 						WSAL_CRITICAL,
 						esc_html__( 'User installed a theme', 'wp-security-audit-log' ),
-						esc_html__( 'Installed the theme %Theme->Name%.', 'wp-security-audit-log' ),
+						__( 'Installed the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Version', 'wp-security-audit-log' )          => '%Theme->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%',
@@ -2256,7 +2256,7 @@ function wsaldefaults_wsal_init() {
 						5006,
 						WSAL_HIGH,
 						esc_html__( 'User activated a theme', 'wp-security-audit-log' ),
-						esc_html__( 'Activated the theme %Theme->Name%.', 'wp-security-audit-log' ),
+						__( 'Activated the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Version', 'wp-security-audit-log' )          => '%Theme->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%',
@@ -2269,7 +2269,7 @@ function wsaldefaults_wsal_init() {
 						5007,
 						WSAL_HIGH,
 						esc_html__( 'User uninstalled a theme', 'wp-security-audit-log' ),
-						esc_html__( 'Deleted the theme %Theme->Name%.', 'wp-security-audit-log' ),
+						__( 'Deleted the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Version', 'wp-security-audit-log' )          => '%Theme->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%',
@@ -2282,7 +2282,7 @@ function wsaldefaults_wsal_init() {
 						5031,
 						WSAL_LOW,
 						esc_html__( 'User updated a theme', 'wp-security-audit-log' ),
-						esc_html__( 'Updated the theme %Theme->Name%.', 'wp-security-audit-log' ),
+						__( 'Updated the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'New version', 'wp-security-audit-log' )      => '%Theme->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%',
@@ -2308,7 +2308,7 @@ function wsaldefaults_wsal_init() {
 						5008,
 						WSAL_HIGH,
 						esc_html__( 'Activated theme on network', 'wp-security-audit-log' ),
-						esc_html__( 'Network activated the theme %Theme->Name%.', 'wp-security-audit-log' ),
+						__( 'Network activated the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Version', 'wp-security-audit-log' )          => '%Theme->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%',
@@ -2321,7 +2321,7 @@ function wsaldefaults_wsal_init() {
 						5009,
 						WSAL_MEDIUM,
 						esc_html__( 'Deactivated theme from network', 'wp-security-audit-log' ),
-						esc_html__( 'Network deactivated the theme %Theme->Name%.', 'wp-security-audit-log' ),
+						__( 'Network deactivated the theme %Theme->Name%.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Version', 'wp-security-audit-log' )          => '%Theme->Version%',
 							esc_html__( 'Install location', 'wp-security-audit-log' ) => '%Theme->get_template_directory%',
@@ -3120,7 +3120,7 @@ function wsaldefaults_wsal_init() {
 						5010,
 						WSAL_LOW,
 						esc_html__( 'Plugin created table', 'wp-security-audit-log' ),
-						esc_html__( 'The plugin %Plugin->Name% created this table in the database.', 'wp-security-audit-log' ),
+						__( 'The plugin %Plugin->Name% created this table in the database.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Table', 'wp-security-audit-log' )  => '%TableNames%',
 						),
@@ -3132,7 +3132,7 @@ function wsaldefaults_wsal_init() {
 						5011,
 						WSAL_LOW,
 						esc_html__( 'Plugin modified table structure', 'wp-security-audit-log' ),
-						esc_html__( 'The plugin %Plugin->Name% modified the structure of a database table.', 'wp-security-audit-log' ),
+						__( 'The plugin %Plugin->Name% modified the structure of a database table.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Table', 'wp-security-audit-log' )  => '%TableNames%',
 						),
@@ -3144,7 +3144,7 @@ function wsaldefaults_wsal_init() {
 						5012,
 						WSAL_MEDIUM,
 						esc_html__( 'Plugin deleted table', 'wp-security-audit-log' ),
-						esc_html__( 'The plugin %Plugin->Name% deleted this table from the database.', 'wp-security-audit-log' ),
+						__( 'The plugin %Plugin->Name% deleted this table from the database.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Table', 'wp-security-audit-log' )  => '%TableNames%',
 						),
@@ -3156,7 +3156,7 @@ function wsaldefaults_wsal_init() {
 						5013,
 						WSAL_LOW,
 						esc_html__( 'Theme created tables', 'wp-security-audit-log' ),
-						esc_html__( 'The theme %Theme->Name% created this tables in the database.', 'wp-security-audit-log' ),
+						__( 'The theme %Theme->Name% created this tables in the database.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Table', 'wp-security-audit-log' ) => '%TableNames%',
 						),
@@ -3168,7 +3168,7 @@ function wsaldefaults_wsal_init() {
 						5014,
 						WSAL_LOW,
 						esc_html__( 'Theme modified tables structure', 'wp-security-audit-log' ),
-						esc_html__( 'The theme %Theme->Name% modified the structure of this database table', 'wp-security-audit-log' ),
+						__( 'The theme %Theme->Name% modified the structure of this database table', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Table', 'wp-security-audit-log' ) => '%TableNames%',
 						),
@@ -3180,7 +3180,7 @@ function wsaldefaults_wsal_init() {
 						5015,
 						WSAL_MEDIUM,
 						esc_html__( 'Theme deleted tables', 'wp-security-audit-log' ),
-						esc_html__( 'The theme %Theme->Name% deleted this table from the database.', 'wp-security-audit-log' ),
+						__( 'The theme %Theme->Name% deleted this table from the database.', 'wp-security-audit-log' ),
 						array(
 							esc_html__( 'Tables', 'wp-security-audit-log' ) => '%TableNames%',
 						),

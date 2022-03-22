@@ -509,9 +509,9 @@ class WSAL_ViewManager {
 	 * @return string
 	 */
 	public static function get_asset_path( $path, $filename, $extension, $use_minified_version = true ) {
-		$result = $path . $filename;
-		if ( $use_minified_version ) {
-			$result .= SCRIPT_DEBUG ? '.' : '.min.';
+		$result = $path . $filename . '.';
+		if ( $use_minified_version && SCRIPT_DEBUG ) {
+			$result .= 'min.';
 		}
 		$result .= $extension;
 
