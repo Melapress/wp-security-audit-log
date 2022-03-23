@@ -40,5 +40,5 @@ class WSAL_Models_TmpUser extends WSAL_Models_ActiveRecord {
 	 *
 	 * @var string
 	 */
-	protected $adapterName = 'TmpUser';
+	protected $adapter_name = 'TmpUser';
 }

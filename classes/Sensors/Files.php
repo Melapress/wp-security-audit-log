@@ -4,8 +4,9 @@
  *
  * Files sensors class file.
  *
- * @since 1.0.0
- * @package wsal
+ * @since      1.0.0
+ * @package    wsal
+ * @subpackage sensors
  */
 
 // Exit if accessed directly.
@@ -21,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 2046 User changed a file using the theme editor
  * 2051 User changed a file using the plugin editor
  *
- * @package wsal
+ * @package    wsal
  * @subpackage sensors
  */
 class WSAL_Sensors_Files extends WSAL_AbstractSensor {
@@ -34,12 +35,12 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 	protected $is_file_uploaded = false;
 
 	/**
-	 * Listening to events using WP hooks.
+	 * {@inheritDoc}
 	 */
-	public function HookEvents() {
-		add_action( 'add_attachment', array( $this, 'EventFileUploaded' ) );
-		add_action( 'delete_attachment', array( $this, 'EventFileUploadedDeleted' ) );
-		add_action( 'admin_init', array( $this, 'EventAdminInit' ) );
+	public function hook_events() {
+		add_action( 'add_attachment', array( $this, 'event_file_uploaded' ) );
+		add_action( 'delete_attachment', array( $this, 'event_file_uploaded_deleted' ) );
+		add_action( 'admin_init', array( $this, 'event_admin_init' ) );
 	}
 
 	/**
@@ -47,15 +48,16 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 	 *
 	 * @param integer $attachment_id - Attachment ID.
 	 */
-	public function EventFileUploaded( $attachment_id ) {
+	public function event_file_uploaded( $attachment_id ) {
 		// Filter $_POST array for security.
 		$post_array = filter_input_array( INPUT_POST );
 
 		$action = isset( $post_array['action'] ) ? $post_array['action'] : '';
-		if ( 'upload-theme' !== $action && 'upload-plugin' !== $action ) {			
+		if ( 'upload-theme' !== $action && 'upload-plugin' !== $action ) {
 			$file = get_attached_file( $attachment_id );
-			$this->plugin->alerts->Trigger(
-				2010, array(
+			$this->plugin->alerts->trigger_event(
+				2010,
+				array(
 					'AttachmentID'  => $attachment_id,
 					'FileName'      => basename( $file ),
 					'FilePath'      => dirname( $file ),
@@ -71,13 +73,14 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 	 *
 	 * @param integer $attachment_id - Attachment ID.
 	 */
-	public function EventFileUploadedDeleted( $attachment_id ) {
+	public function event_file_uploaded_deleted( $attachment_id ) {
 		if ( $this->is_file_uploaded ) {
 			return;
 		}
 		$file = get_attached_file( $attachment_id );
-		$this->plugin->alerts->Trigger(
-			2011, array(
+		$this->plugin->alerts->trigger_event(
+			2011,
+			array(
 				'AttachmentID' => $attachment_id,
 				'FileName'     => basename( $file ),
 				'FilePath'     => dirname( $file ),
@@ -90,7 +93,7 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 	 *
 	 * Detect file changes in plugins/themes using plugin/theme editor.
 	 */
-	public function EventAdminInit() {
+	public function event_admin_init() {
 		// @codingStandardsIgnoreStart
 		$nonce   = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 		$file    = isset( $_POST['file'] ) ? sanitize_text_field( wp_unslash( $_POST['file'] ) ) : false;
@@ -103,8 +106,9 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 		if ( 'edit-theme-plugin-file' === $action ) {
 			if ( 'plugin-editor' === $referer && wp_verify_nonce( $nonce, 'edit-plugin_' . $file ) ) {
 				$plugin = isset( $_POST['plugin'] ) ? sanitize_text_field( wp_unslash( $_POST['plugin'] ) ) : false;
-				$this->plugin->alerts->Trigger(
-					2051, array(
+				$this->plugin->alerts->trigger_event(
+					2051,
+					array(
 						'File'   => $file,
 						'Plugin' => $plugin,
 					)
@@ -116,8 +120,9 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 					return;
 				}
 
-				$this->plugin->alerts->Trigger(
-					2046, array(
+				$this->plugin->alerts->trigger_event(
+					2046,
+					array(
 						'File'  => $file,
 						'Theme' => trailingslashit( get_theme_root() ) . $stylesheet,
 					)

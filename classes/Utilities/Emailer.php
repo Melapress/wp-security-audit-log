@@ -25,17 +25,17 @@ class WSAL_Utilities_Emailer {
 	 */
 	public static function send_deactivation_email() {
 		// Get the required variables.
-		$wsal            = WpSecurityAuditLog::GetInstance();
+		$wsal            = WpSecurityAuditLog::get_instance();
 		$home_url        = home_url();
 		$safe_url        = str_replace( array( 'http://', 'https://' ), '', $home_url );
 		$type_name       = $wsal->settings()->get_type_username(); // Get the data to display.
 		$user            = _wp_get_current_user();
-		$datetime_format = $wsal->settings()->GetDatetimeFormat( false );
-		$now = current_time( 'timestamp' );
+		$datetime_format = $wsal->settings()->get_datetime_format( false );
+		$now             = current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 		$date_time       = str_replace(
 			'$$$',
 			substr( number_format( fmod( $now, 1 ), 3 ), 2 ),
-			date( $datetime_format, $now )
+			date( $datetime_format, $now ) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 		);
 
 		// Checks for display name.
@@ -83,6 +83,9 @@ class WSAL_Utilities_Emailer {
 	 * @param string $email_address - Email Address.
 	 * @param string $subject       - Email subject.
 	 * @param string $content       - Email content.
+	 * @param string $headers       Email headers.
+	 * @param array  $attachments   Email attachments.
+	 *
 	 * @return bool
 	 */
 	public static function send_email( $email_address, $subject, $content, $headers = '', $attachments = array() ) {
@@ -151,9 +154,9 @@ class WSAL_Utilities_Emailer {
 	 * @return string
 	 */
 	public static function custom_wp_mail_from( $original_email_from ) {
-		$wsal       = WpSecurityAuditLog::GetInstance();
+		$wsal       = WpSecurityAuditLog::get_instance();
 		$use_email  = $wsal->settings()->get_use_email();
-		$email_from = $wsal->settings()->GetFromEmail();
+		$email_from = $wsal->settings()->get_from_email();
 		if ( ! empty( $email_from ) && 'custom_email' === $use_email ) {
 			return $email_from;
 		} else {
@@ -168,9 +171,9 @@ class WSAL_Utilities_Emailer {
 	 * @return string
 	 */
 	public static function custom_wp_mail_from_name( $original_email_from_name ) {
-		$wsal            = WpSecurityAuditLog::GetInstance();
+		$wsal            = WpSecurityAuditLog::get_instance();
 		$use_email       = $wsal->settings()->get_use_email();
-		$email_from_name = $wsal->settings()->GetDisplayName();
+		$email_from_name = $wsal->settings()->get_display_name();
 		if ( ! empty( $email_from_name ) && 'custom_email' === $use_email ) {
 			return $email_from_name;
 		} else {
