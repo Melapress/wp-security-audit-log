@@ -16,7 +16,6 @@ class ComposerStaticInitb9d672d234a3d43fa8ace493e8708e77
     {
         return \Closure::bind(function () use ($loader) {
             $loader->classMap = ComposerStaticInitb9d672d234a3d43fa8ace493e8708e77::$classMap;
-
         }, null, ClassLoader::class);
     }
 }
