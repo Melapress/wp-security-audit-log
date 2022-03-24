@@ -56,14 +56,14 @@ $buy_now_target = '';
 $trial_link     = add_query_arg( $trial_args, admin_url( 'admin.php' ) );
 
 // If user is not super admin and website is multisite then change the URL.
-if ( $this->_plugin->IsMultisite() && ! is_super_admin() ) {
+if ( $this->plugin->is_multisite() && ! is_super_admin() ) {
 	$buy_now        = 'https://wpactivitylog.com/pricing/';
 	$trial_link     = 'https://wpactivitylog.com/pricing/';
 	$buy_now_target = ' target="_blank"';
-} elseif ( $this->_plugin->IsMultisite() && is_super_admin() ) {
+} elseif ( $this->plugin->is_multisite() && is_super_admin() ) {
 	$buy_now    = add_query_arg( 'page', 'wsal-auditlog-pricing', network_admin_url( 'admin.php' ) );
 	$trial_link = add_query_arg( $trial_args, network_admin_url( 'admin.php' ) );
-} elseif ( ! $this->_plugin->IsMultisite() && ! current_user_can( 'manage_options' ) ) {
+} elseif ( $this->plugin->is_multisite() && ! current_user_can( 'manage_options' ) ) {
 	$buy_now        = 'https://wpactivitylog.com/pricing/';
 	$trial_link     = 'https://wpactivitylog.com/pricing/';
 	$buy_now_target = ' target="_blank"';
