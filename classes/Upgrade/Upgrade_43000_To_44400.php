@@ -44,6 +44,24 @@ class WSAL_Upgrade_43000_To_44400 {
 	 */
 	public function run() {
 
+		// Delete unwanted usermeta.
+		global $wpdb;
+		$wpdb->query( // phpcs:ignore
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->usermeta} WHERE meta_key = '%s';", // phpcs:ignore
+				'wsal-notice-update-44-notice'
+			)
+		);
+
+		if ( class_exists( 'WSAL_Extension_Manager' ) ) {
+			WSAL_Extension_Manager::include_extension( 'external-db' );
+		}
+
+		if ( ! did_action( 'wsal_init' ) ) {
+			// We need to call wsal init manually because it does not run as before the upgrade procedure is triggered.
+			do_action( 'wsal_init', $this->plugin );
+		}
+
 		// Remove some forgotten WFCM settings from the options table.
 		$this->remove_wfcm_leftover_settings();
 
