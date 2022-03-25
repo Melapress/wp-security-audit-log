@@ -672,6 +672,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 */
 			public static function is_mainwp_active() {
 				return self::is_plugin_active( 'mainwp-child/mainwp-child.php' );
+        
 			}
 
 			/**
@@ -1321,10 +1322,17 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Update version in db.
 				$this->set_global_setting( 'version', $new_version, true );
 
+				// Keep track of the initial db version. This gets updated multiple times during the upgrade process
+				// and we need to know what was the starting point.
+				$initial_db_version = $this->settings()->get_database_version();
+
 				if ( '0.0.0' === $old_version ) {
 					// Set some initial plugins settings (only the ones that bypass the regular settings retrieval at
 					// some point) - e.g. disabled events.
 					$this->set_global_setting( 'disabled-alerts', implode( ',', $this->settings()->always_disabled_alerts ) );
+
+					// We set the database version to the latest if this is a freshly installed plugin.
+					$this->settings()->set_database_version( 44400 );
 
 					// We stop here as no further updates are needed for a freshly installed plugin.
 					return;
@@ -1422,31 +1430,27 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					}
 
 					if ( version_compare( $new_version, '4.4.0', '>=' ) ) {
-						// Delete unwanted usermeta.
-						global $wpdb;
-						$all_user_meta = $wpdb->get_results( // phpcs:ignore
-							$wpdb->prepare(
-								"DELETE FROM {$wpdb->usermeta} WHERE meta_key = '%s';", // phpcs:ignore
-								'wsal-notice-update-44-notice'
-							)
-						);
+						$should_440_upgrade_run = true;
+						if ( 44400 === $initial_db_version ) {
+							// Database version is 44400 if someone already upgraded from any version to 4.4.0.
+							$should_440_upgrade_run = false;
+						} elseif ( 0 === $initial_db_version ) {
+							// Database version is 0 if the plugin was never upgraded. This could be an upgrade from
+							// 4.3.6, 4.4.0 or any other lower version.
+							$should_440_upgrade_run = false;
+							if ( version_compare( $old_version, '4.4.0', '<' ) ) {
+								// We are upgrading from pre-4.4.0 version.
+								$should_440_upgrade_run = true;
+							}
+						}
+
+						if ( $should_440_upgrade_run ) {
+							require_once 'classes/Upgrade/Upgrade_43000_To_44400.php';
+							$upgrader = new WSAL_Upgrade_43000_To_44400( $this );
+							$upgrader->run();
+						}
 
 						$this->settings()->set_database_version( 44400 );
-
-						if ( class_exists( 'WSAL_Extension_Manager' ) ) {
-							WSAL_Extension_Manager::include_extension( 'external-db' );
-						}
-
-						if ( ! did_action( 'wsal_init' ) ) {
-							// We need to call wsal init manually because it does not run as before the upgrade procedure is triggered.
-							do_action( 'wsal_init', $this );
-						}
-
-						require_once 'classes/Upgrade/Upgrade_43000_To_44400.php';
-						$upgrader = new WSAL_Upgrade_43000_To_44400( $this );
-						$upgrader->run();
-
-						// @todo remove legacy periodic reports for unique_ip and number_logins
 					}
 				}
 			}
