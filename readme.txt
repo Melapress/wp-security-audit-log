@@ -5,8 +5,8 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 5.0
-Tested up to: 5.9.1
-Stable tag: 4.4.1
+Tested up to: 6.0.0
+Stable tag: 4.4.2
 Requires PHP: 7.0
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -208,18 +208,33 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.4.1 (2022-03-23) =
+= 4.4.2 (2022-06-23) =
 
-Release notes: [Out now: Activity Log for MainWP 2.0 & WP Activity Log 4.4.1](https://wpactivitylog.com/activity-log-mainwp-2-0/)
+Release notes: [More reports white labelling options & statistics reports](https://wpactivitylog.com/wsal-4-4-2/)
 
-* **Improvements & changes**
-	* All of the plugin's code is now using the WordPress coding standards.
-	* Removed the reporting and search code from the free edition plugin that was used by the MainWP extension.
+* **New activity log event IDs**
+	* ID 2133: user taken over a post from another user.
+	
+* **Plugin & features improvements**
+	* Automatic plugin and theme updates are now detected and reported in the activity log (event ID: 5004).
+	* Improved the logic of event ID 4029 - the user triggering the password reset request is now reported as the user who did the action.
+	* The function to import / export plugin settings replaced with our own library (to be used in other plugins).
+	* Plugin now uses the hook 'deleted_theme' to detect deletion of installed themes.
+	* Removed redundant "Save" button from the "Delete activity log data" page. 
+	* When deleting data about an IP address or a user from the logs, the user is now asked if they want to delete the events about the user / where the IP address is mentioned, or events generated from that user or IP address.
+	* Premium plugin advert in activity log viewer is now fixed - it does not interrupt user.
+	* Added a new filter to specify which long data fields should be truncated in the activity log viewer.
+	* Applied a number of UI/UX tweakts to the Enable/Disable events section making it neater and easier to use.
 	
 * **Bug fixes**
-	* Fixed: Reports filter "By post title(s)" not working.
-	* Fixed: Users couldn't set up a MySQL connection because of "unknown connection type" error.
-	* Fixed: The daily activity log summary email cannot be enabled again after disabled.
-	* Fixed: PHP fatal error when index.php file is saved in the custom sensors directory.
+	* When user changes multiple plugin settings the plugin now is reporting all the changes and not just one.
+	* Event ID 6310 no longer incorrectly reported with every plugin setting change.
+	* Fixed: activity log retention settings deleted and rewritten to database on page reloads.
+	* Fixed: some premium features such as the "link to view all users activity" available in the free edition.
+	* Fixed: Clicking the expand data in activity log viewer resets the view and redirects the user to top of the activity log.
+	* Fixed: Changes in activity log retention settings not correctly reported in event ID 6052.
+	* Fixed: When a user changes a post's title and content, only the title change is reported.
+	* Fixed: Deleting of activity log events by severity is not deleting the events.
+	* Fixed: The setting "Cleanup expired session data" cannot be disabled.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
