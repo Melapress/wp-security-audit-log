@@ -222,11 +222,18 @@ class Options {
 			switch_to_blog( get_main_network_id() );
 		}
 
+		/**
+		 * The reason for this code is that issue:
+		 * https://github.com/wpwhitesecurity/wp-security-audit-log-premium/issues/1322
+		 * 
+		 * TODO: Make sure that is taking care of and remove that altogether.
+		 */ 
 		if ( false === $autoload ) {
 			delete_option( $option_name );
+			$result = \add_option( $option_name, $value, '', $autoload );
+		} else {
+			$result = \update_option( $option_name, $value, $autoload );
 		}
-
-		$result = \update_option( $option_name, $value, $autoload );
 
 		if ( is_multisite() ) {
 			restore_current_blog();

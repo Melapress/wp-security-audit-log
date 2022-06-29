@@ -149,7 +149,8 @@ final class WSAL_Views_SetupWizard {
 	 */
 	public function setup_page() {
 		// Get page argument from $_GET array.
-		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+
+		$page = ( isset( $_GET['page'] ) ) ? \sanitize_text_field( \wp_unslash( $_GET['page'] ) ) : '';
 		if ( empty( $page ) || 'wsal-setup' !== $page || ! ( current_user_can( 'manage_options' ) ) ) {
 			return;
 		}

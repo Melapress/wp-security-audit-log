@@ -4,18 +4,19 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit3f2af4d6ad50de85879f0d0ae1ddc459
+class ComposerStaticInit8ef6429eef5ecdfa3960bf1324777830
 {
     public static $classMap = array (
-        'WSAL_Vendor\\MirazMac\\Requirements\\Checker' => __DIR__ . '/..' . '/mirazmac/php-requirements-checker/src/Checker.php',
-        'WSAL_Vendor\\WP_Async_Request' => __DIR__ . '/..' . '/deliciousbrains/wp-background-processing/classes/wp-async-request.php',
-        'WSAL_Vendor\\WP_Background_Process' => __DIR__ . '/..' . '/deliciousbrains/wp-background-processing/classes/wp-background-process.php',
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'WSAL_Vendor\\WP_Async_Request' => __DIR__ . '/..' . '/classes/wp-async-request.php',
+        'WSAL_Vendor\\WP_Background_Process' => __DIR__ . '/..' . '/classes/wp-background-process.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInit3f2af4d6ad50de85879f0d0ae1ddc459::$classMap;
+            $loader->classMap = ComposerStaticInit8ef6429eef5ecdfa3960bf1324777830::$classMap;
+
         }, null, ClassLoader::class);
     }
 }

@@ -288,33 +288,12 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Set the new pruning date.
-	 *
-	 * @param string $newvalue - The new pruning date.
-	 */
-	public function set_pruning_date( $newvalue ) {
-		if ( strtotime( $newvalue ) ) {
-			$this->plugin->set_global_setting( 'pruning-date', $newvalue );
-			$this->pruning = $newvalue;
-		}
-	}
-
-	/**
 	 * Return current pruning unit.
 	 *
 	 * @return string
 	 */
 	public function get_pruning_unit() {
 		return $this->plugin->get_global_setting( 'pruning-unit', 'months' );
-	}
-
-	/**
-	 * Set current pruning unit.
-	 *
-	 * @param string $newvalue – New value of pruning unit.
-	 */
-	public function set_pruning_unit( $newvalue ) {
-		$this->plugin->set_global_setting( 'pruning-unit', $newvalue );
 	}
 
 	/**
@@ -339,22 +318,62 @@ class WSAL_Settings {
 	/**
 	 * Enables or disables time based retention period.
 	 *
-	 * @param bool $enabled If true, time based retention period is enabled.
+	 * @param bool   $enable   If true, time based retention period is enabled.
+	 * @param string $new_date - The new pruning date.
+	 * @param string $new_unit – New value of pruning unit.
 	 */
-	public function set_pruning_date_enabled( $enabled ) {
+	public function set_pruning_date_settings( $enable, $new_date, $new_unit ) {
 
-		$old_setting = $this->plugin->get_global_boolean_setting( 'pruning-date-e', false );
-		$enable      = \WSAL\Helpers\Options::string_to_bool( $enabled );
-		if ( $old_setting !== $enable ) {
-			$this->pruning = $this->plugin->get_global_setting( 'pruning-date' ) . ' ' . $this->plugin->get_global_setting( 'pruning-unit', 'months' );
-			$alert_data    = array(
-				'new_setting'      => ( $enable ) ? 'Delete events older than ' . $this->pruning : 'Keep all data',
-				'previous_setting' => ( $old_setting ) ? 'Delete events older than ' . $this->pruning : 'Keep all data',
+		$was_enabled = $this->plugin->get_global_boolean_setting( 'pruning-date-e', false );
+		$old_period  = $this->plugin->get_global_setting( 'pruning-date', '6 months' );
+
+		if ( ! $was_enabled && $enable ) {
+			// The retention period is being enabled.
+			$this->plugin->set_global_setting( 'pruning-date', $new_date );
+			$this->plugin->set_global_setting( 'pruning-unit', $new_unit );
+			$this->plugin->set_global_boolean_setting( 'pruning-date-e', $enable );
+
+			$this->plugin->alerts->trigger_event(
+				6052,
+				array(
+					'new_setting'      => 'Delete events older than ' . $old_period,
+					'previous_setting' => 'Keep all data',
+				)
 			);
-			$this->plugin->alerts->trigger_event( 6052, $alert_data );
+			return;
 		}
 
-		$this->plugin->set_global_boolean_setting( 'pruning-date-e', $enabled );
+		if ( $was_enabled && ! $enable ) {
+			// The retention period is being disabled.
+			$this->plugin->delete_global_setting( 'pruning-date' );
+			$this->plugin->delete_global_setting( 'pruning-unit' );
+			$this->plugin->set_global_boolean_setting( 'pruning-date-e', $enable );
+
+			$this->plugin->alerts->trigger_event(
+				6052,
+				array(
+					'new_setting'      => 'Keep all data',
+					'previous_setting' => 'Delete events older than ' . $old_period,
+				)
+			);
+			return;
+		}
+
+		if ( $enable ) {
+			// The retention period toggle has not changed, we need to check if the actual period changed.
+			if ( $new_date != $old_period ) {
+				$this->plugin->set_global_setting( 'pruning-date', $new_date );
+				$this->plugin->set_global_setting( 'pruning-unit', $new_unit );
+
+				$this->plugin->alerts->trigger_event(
+					6052,
+					array(
+						'new_setting'      => 'Delete events older than ' . $new_date,
+						'previous_setting' => 'Delete events older than ' . $old_period,
+					)
+				);
+			}
+		}
 	}
 
 	/**
@@ -661,7 +680,7 @@ class WSAL_Settings {
 	 * @return array
 	 */
 	protected function get_super_admins() {
-		return $this->plugin->is_multisite() ? get_super_admins() : array();
+		return WpSecurityAuditLog::is_multisite() ? get_super_admins() : array();
 	}
 
 	/**
@@ -670,7 +689,7 @@ class WSAL_Settings {
 	 * @return string[]
 	 */
 	protected function get_admins() {
-		if ( $this->plugin->is_multisite() ) {
+		if ( WpSecurityAuditLog::is_multisite() ) {
 			if ( empty( $this->site_admins ) ) {
 				/**
 				 * Get list of admins.
@@ -714,7 +733,7 @@ class WSAL_Settings {
 		// By default, the user has no privileges.
 		$result = false;
 
-		$is_multisite = $this->plugin->is_multisite();
+		$is_multisite = WpSecurityAuditLog::is_multisite();
 		switch ( $action ) {
 			case 'view':
 				if ( ! $is_multisite ) {
@@ -1091,9 +1110,11 @@ class WSAL_Settings {
 	/**
 	 * Get Custom Post Types excluded from monitoring.
 	 *
+	 * @return array
+	 *
 	 * @since 2.6.7
 	 */
-	public function get_excluded_post_types() {
+	public function get_excluded_post_types(): array {
 		if ( empty( $this->post_types ) ) {
 			$this->post_types = array_unique( array_filter( explode( ',', $this->plugin->get_global_setting( 'custom-post-types' ) ) ) );
 		}
@@ -1474,7 +1495,7 @@ class WSAL_Settings {
 			'info'       => '1',
 		);
 
-		if ( $this->plugin->is_multisite() ) {
+		if ( WpSecurityAuditLog::is_multisite() ) {
 			$columns = array_slice( $columns, 0, 6, true ) + array( 'site' => '1' ) + array_slice( $columns, 6, null, true );
 		}
 
@@ -1493,7 +1514,7 @@ class WSAL_Settings {
 				'message'    => '0',
 			);
 
-			if ( $this->plugin->is_multisite() ) {
+			if ( WpSecurityAuditLog::is_multisite() ) {
 				$columns = array_slice( $columns, 0, 6, true ) + array( 'site' => '0' ) + array_slice( $columns, 6, null, true );
 			}
 
@@ -1644,6 +1665,15 @@ class WSAL_Settings {
 		return intval( $this->plugin->get_global_setting( 'log-visitor-failed-login-limit', 10 ) );
 	}
 
+	/**
+	 * Checks if the archiving is enabled.
+	 *
+	 * @return mixed True if the archiving is enabled.
+	 */
+	public function is_archiving_enabled() {
+		return $this->plugin->get_global_setting( 'archiving-e' );
+	}
+
 
 	/**
 	 * Method: Get Token Type.
@@ -1739,7 +1769,7 @@ class WSAL_Settings {
 				// Update Freemius state to skipped.
 				$this->plugin->set_global_setting( 'wsal_freemius_state', 'skipped', true );
 
-				if ( ! $this->plugin->is_multisite() ) {
+				if ( ! WpSecurityAuditLog::is_multisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
 				} else {
 					wsal_freemius()->skip_connection( null, true ); // Opt out for all websites.
@@ -1811,7 +1841,7 @@ class WSAL_Settings {
 	public function get_view_site_id() {
 		switch ( true ) {
 			// Non-multisite.
-			case ! $this->plugin->is_multisite():
+			case ! WpSecurityAuditLog::is_multisite():
 				return 0;
 			// Multisite + main site view.
 			case $this->is_main_blog() && ! $this->is_specific_view():

@@ -140,4 +140,13 @@ jQuery( document ).ready( function() {
 	} else {
 		jQuery('.submit #submit').show(0);
 	}
+
+	// Change URL and attributes for 'Upgrade' admin menu link.
+	if ( jQuery( '.fs-submenu-item.wp-security-audit-log.pricing' ).length ) {
+		var linkItem = jQuery( '.fs-submenu-item.wp-security-audit-log.pricing' ).parent();
+		jQuery( linkItem ).attr( {
+			target: '_blank', 
+			href: 'https://wpactivitylog.com/pricing/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=upgrade+now+menu',
+		} );
+	}
 });

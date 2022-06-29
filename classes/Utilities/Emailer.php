@@ -31,11 +31,11 @@ class WSAL_Utilities_Emailer {
 		$type_name       = $wsal->settings()->get_type_username(); // Get the data to display.
 		$user            = _wp_get_current_user();
 		$datetime_format = $wsal->settings()->get_datetime_format( false );
-		$now             = current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+		$now             = current_time( 'timestamp' ); // phpcs:ignore
 		$date_time       = str_replace(
 			'$$$',
 			substr( number_format( fmod( $now, 1 ), 3 ), 2 ),
-			date( $datetime_format, $now ) // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			date( $datetime_format, $now ) // phpcs:ignore
 		);
 
 		// Checks for display name.
@@ -95,8 +95,9 @@ class WSAL_Utilities_Emailer {
 			$email_address = self::get_emails( $email_address );
 		}
 
+		$headers = array_merge_recursive( (array) $headers, array( 'Content-Type: ' . self::set_html_content_type() . '; charset=UTF-8' ) );
+
 		// @see: http://codex.wordpress.org/Function_Reference/wp_mail
-		add_filter( 'wp_mail_content_type', array( __CLASS__, 'set_html_content_type' ) );
 		add_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ) );
 		add_filter( 'wp_mail_from_name', array( __CLASS__, 'custom_wp_mail_from_name' ) );
 
@@ -107,7 +108,6 @@ class WSAL_Utilities_Emailer {
 		 *
 		 * @see http://core.trac.wordpress.org/ticket/23578
 		 */
-		remove_filter( 'wp_mail_content_type', array( __CLASS__, 'set_html_content_type' ) );
 		remove_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ) );
 		remove_filter( 'wp_mail_from_name', array( __CLASS__, 'custom_wp_mail_from_name' ) );
 		return $result;

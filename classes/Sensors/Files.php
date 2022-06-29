@@ -78,6 +78,14 @@ class WSAL_Sensors_Files extends WSAL_AbstractSensor {
 			return;
 		}
 		$file = get_attached_file( $attachment_id );
+
+		if ( false !== strpos( $file, 'wp-security-audit-log' ) ) {
+			/**
+			 * This fires when our plugin is get updated - unfortunately that most probably makes calls to the old version of the plugin and that new plugin we have no idea what changes it could have, on the other hand that call is made from the old version / memory, so most probably there are code changes which could lead to PHP errors. Lets silence this if it comes to our plugin
+			 */
+			return;
+		}
+
 		$this->plugin->alerts->trigger_event(
 			2011,
 			array(

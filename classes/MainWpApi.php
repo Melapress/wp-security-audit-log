@@ -12,6 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use WSAL\Adapter\WSAL_Adapters_MySQL_Occurrence;
+use WSAL\Adapter\WSAL_Adapters_MySQL_Meta;
 /**
  * Handler for MainWP API endpoints.
  *
@@ -232,11 +234,13 @@ class WSAL_MainWpApi {
 
 			// Change the existing settings.
 			if ( array_key_exists( 'pruning_enabled', $settings_to_enforce ) ) {
-				$this->plugin->settings()->set_pruning_date_enabled( $settings_to_enforce['pruning_enabled'] );
+				$pruning_date = '';
+				$pruning_unit = '';
 				if ( array_key_exists( 'pruning_date', $settings_to_enforce ) && array_key_exists( 'pruning_unit', $settings_to_enforce ) ) {
-					$this->plugin->settings()->set_pruning_date( $settings_to_enforce['pruning_date'] . ' ' . $settings_to_enforce['pruning_unit'] );
-					$this->plugin->settings()->set_pruning_unit( $settings_to_enforce['pruning_unit'] );
+					$pruning_date = $settings_to_enforce['pruning_date'] . ' ' . $settings_to_enforce['pruning_unit'];
+					$pruning_unit = $settings_to_enforce['pruning_unit'];
 				}
+				$this->plugin->settings()->set_pruning_date_settings( $settings_to_enforce['pruning_enabled'], $pruning_date, $pruning_unit );
 			}
 
 			if ( array_key_exists( 'disabled_events', $settings_to_enforce ) ) {

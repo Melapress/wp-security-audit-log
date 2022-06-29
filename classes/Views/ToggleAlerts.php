@@ -228,6 +228,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										<option value="all"><?php esc_html_e( 'All categories', 'wp-security-audit-log' ); ?></option>
 									</select>
 								</div>
+								<div class="choose">
+									<p class="submit"><input type="submit" name="submit" id="top_submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save Changes', 'wp-security-audit-log' ) ); ?>"></p>
+								</div>
 							</div>
 
 							<table id="event-toggle-table">
@@ -667,10 +670,22 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				border: 1px solid #ddd;
 				font-size: 18px;
 			}
+            #event-toggle-table > thead, #event-toggle-table > thead:hover, #event-toggle-table > thead tr.header, #event-toggle-table > thead tr:hover {
+                background: #2c3338 !important;
+                color: #fff !important;
+            }
+
+            #event-toggle-table > thead  * {
+                color: #fff;
+            }
 
 			#event-toggle-table th, #event-toggle-table td {
 				text-align: left;
 				padding: 12px;
+			}
+
+			.choose input[type=submit] {
+				margin-left: 10px;
 			}
 
 			#event-toggle-table tr {
@@ -750,6 +765,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				}
 			}
 
+            function isEmpty( el ){
+                return !$.trim(el.html())
+            }
+
 			jQuery(document).ready(function(){
 				var scrollHeight = jQuery(document).scrollTop();
 				// tab handling code
@@ -812,13 +831,14 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				// Display a specific category based on browser hash.
 				var hash = window.location.hash;
 				jQuery('ul'+hash+':first').show();
-
 				if (window.location.href.indexOf( '#cat-' ) > -1) {
 					var hash = window.location.hash.toUpperCase();
 					hash =  hash.replace('#CAT-', '');
-					jQuery('[data-alert-cat]').each( function( index, value ) {
+                    hash =  hash.replace('-', ' ');
+                    jQuery('[data-alert-cat]').each( function( index, value ) {
 						var title = jQuery( this ).attr( 'data-alert-cat').toUpperCase();
-						if ( title == hash  ) {
+						if ( title == hash ) {
+                            jQuery('#filter-cat [value="'+ jQuery( this ).attr( 'data-alert-cat') +'"]').attr('selected','selected');
 							jQuery( this  ).css( 'display', '' );
 						} else {
 							jQuery( this ).css( 'display', 'none' );
@@ -843,6 +863,20 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 						});
 					}
 				});
+
+                jQuery('#event-toggle-table tr').each( function( index, value ) {
+                    var td = jQuery( this ).find( 'td:first-of-type' );
+                    if ( jQuery.trim( jQuery( td ).html() ) == '' ) {
+                       jQuery( this ).prev().css( 'border-bottom', '1px solid #fff');
+                    }
+                });
+
+                jQuery('#event-toggle-table tr.disabled').each( function( index, value ) {
+                    var td = jQuery( this ).next().find( 'td:first-of-type' );
+                    if ( jQuery.trim( jQuery( td ).html() ) == '' ) {
+                       jQuery( td ).parent().addClass( 'disabled' );
+                    }
+                });
 
 				// Lovely tooltop.s
 				jQuery( '#event-toggle-table tr' ).darkTooltip( {

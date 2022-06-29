@@ -268,25 +268,25 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	/**
 	 * Check failure limit.
 	 *
-	 * @param string  $ip - IP address.
+	 * @param string  $ip      - IP address.
 	 * @param integer $site_id - Blog ID.
-	 * @param WP_User $user - User object.
+	 * @param WP_User $user    - User object.
+	 *
 	 * @return boolean - Passed limit true|false.
 	 */
 	protected function is_past_login_failure_limit( $ip, $site_id, $user ) {
-		$get_fn = $this->is_multisite() ? 'get_site_transient' : 'get_transient';
 		if ( $user ) {
 			if ( -1 === (int) $this->get_login_failure_log_limit() ) {
 				return false;
 			} else {
-				$data_known = $get_fn( self::TRANSIENT_FAILEDLOGINS );
+				$data_known = WpSecurityAuditLog::get_transient( self::TRANSIENT_FAILEDLOGINS );
 				return ( false !== $data_known ) && isset( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] ) && ( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] >= $this->get_login_failure_log_limit() );
 			}
 		} else {
 			if ( -1 === (int) $this->get_visitor_login_failure_log_limit() ) {
 				return false;
 			} else {
-				$data_unknown = $get_fn( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
+				$data_unknown = WpSecurityAuditLog::get_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
 				return ( false !== $data_unknown ) && isset( $data_unknown[ $site_id . ':' . $ip ] ) && ( $data_unknown[ $site_id . ':' . $ip ] >= $this->get_visitor_login_failure_log_limit() );
 			}
 		}
@@ -300,10 +300,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 * @param WP_User $user - User object.
 	 */
 	protected function increment_login_failure( $ip, $site_id, $user ) {
-		$get_fn = $this->is_multisite() ? 'get_site_transient' : 'get_transient';
-		$set_fn = $this->is_multisite() ? 'set_site_transient' : 'set_transient';
 		if ( $user ) {
-			$data_known = $get_fn( self::TRANSIENT_FAILEDLOGINS );
+			$data_known = WpSecurityAuditLog::get_transient( self::TRANSIENT_FAILEDLOGINS );
 			if ( ! $data_known ) {
 				$data_known = array();
 			}
@@ -311,9 +309,9 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				$data_known[ $site_id . ':' . $user->ID . ':' . $ip ] = 1;
 			}
 			$data_known[ $site_id . ':' . $user->ID . ':' . $ip ]++;
-			$set_fn( self::TRANSIENT_FAILEDLOGINS, $data_known, $this->get_login_failure_expiration() );
+			WpSecurityAuditLog::set_transient( self::TRANSIENT_FAILEDLOGINS, $data_known, $this->get_login_failure_expiration() );
 		} else {
-			$data_unknown = $get_fn( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
+			$data_unknown = WpSecurityAuditLog::get_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
 			if ( ! $data_unknown ) {
 				$data_unknown = array();
 			}
@@ -321,7 +319,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				$data_unknown[ $site_id . ':' . $ip ] = 1;
 			}
 			$data_unknown[ $site_id . ':' . $ip ]++;
-			$set_fn( self::TRANSIENT_FAILEDLOGINS_UNKNOWN, $data_unknown, $this->get_login_failure_expiration() );
+			WpSecurityAuditLog::set_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN, $data_unknown, $this->get_login_failure_expiration() );
 		}
 	}
 
@@ -551,6 +549,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			array(
 				'Username'         => $user->user_login,
 				'CurrentUserRoles' => $user_roles,
+				// Current user ID must be set explicitly as the user is not logged in when this happens.
+				'CurrentUserID'    => $user->ID,
 			),
 			true
 		);

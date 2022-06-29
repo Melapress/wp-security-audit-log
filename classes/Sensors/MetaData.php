@@ -83,17 +83,9 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 		}
 
 		// Remove WC coupons from ignored array.
-		$key = array_search( 'shop_coupon', $this->plugin->alerts->ignored_cpts ); // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+		$key = array_search( 'shop_coupon', $this->plugin->alerts::get_ignored_post_types() ); // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 		if ( false !== $key ) {
-			unset( $this->plugin->alerts->ignored_cpts[ $key ] );
-		}
-
-		// Ignore post types we are not interested in.
-		$ignored_cpts = $this->plugin->alerts->ignored_cpts;
-
-		// Ignore updates from ignored custom post types.
-		if ( in_array( $post->post_type, $ignored_cpts, true ) ) {
-			return;
+			unset( $this->plugin->alerts::get_ignored_post_types()[ $key ] );
 		}
 
 		/**
@@ -303,11 +295,6 @@ class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
 			 * @param integer  $meta_id    - Meta ID.
 			 */
 			$log_meta_event = apply_filters( 'wsal_before_post_meta_delete_event', true, $meta_key, $meta_value, $post, $meta_id );
-
-			// Ignore updates from ignored custom post types.
-			if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
-				return;
-			}
 
 			// If not allowed to log meta event then skip it.
 			if ( ! $log_meta_event ) {
