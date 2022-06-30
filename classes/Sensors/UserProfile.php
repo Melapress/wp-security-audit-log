@@ -292,7 +292,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 					'FirstName'      => $user->user_firstname,
 					'LastName'       => $user->user_lastname,
 					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
-					'multisite_text' => $this->plugin->is_multisite() ? get_current_blog_id() : false,
+					'multisite_text' => WpSecurityAuditLog::is_multisite() ? get_current_blog_id() : false,
 				),
 				array( $this, 'must_not_contain_user_changes' )
 			);
@@ -416,31 +416,32 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 	 * @param string $user_login User's login name.
 	 */
 	public function event_password_reset_link_sent( $user_login ) {
-		$current_user = get_user_by( 'login', $user_login );
+		$user = get_user_by( 'login', $user_login );
+		if ( $user instanceof WP_User ) {
+			$userdata   = get_userdata( $user->ID );
+			$user_roles = implode(
+				', ',
+				array_map(
+					array(
+						$this,
+						'filter_role_names',
+					),
+					$userdata->roles
+				)
+			);
 
-		$current_userdata   = get_userdata( $current_user->ID );
-		$current_user_roles = implode(
-			', ',
-			array_map(
+			$this->plugin->alerts->trigger_event(
+				4029,
 				array(
-					$this,
-					'filter_role_names',
-				),
-				$current_userdata->roles
-			)
-		);
-
-		$this->plugin->alerts->trigger_event(
-			4029,
-			array(
-				'roles'         => $current_user_roles,
-				'login'         => $current_user->user_login,
-				'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
-				'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
-				'CurrentUserID' => $current_user->ID,
-				'EventType'     => 'submitted',
-			)
-		);
+					'roles'        => $user_roles,
+					'login'        => $user->user_login,
+					'firstname'    => ( empty( $user->user_firstname ) ) ? ' ' : $user->user_firstname,
+					'lastname'     => ( empty( $user->user_lastname ) ) ? ' ' : $user->user_lastname,
+					'EventType'    => 'submitted',
+					'TargetUserID' => $user->ID,
+				)
+			);
+		}
 	}
 
 	/**
@@ -509,7 +510,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			'LastName'  => ! empty( $user->user_lastname ) ? $user->user_lastname : '',
 		);
 
-		$event_code = $this->plugin->is_multisite() ? 4012 : 4001;
+		$event_code = WpSecurityAuditLog::is_multisite() ? 4012 : 4001;
 		if ( 4001 === $event_code ) {
 			$new_user_data['Roles'] = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
 		} elseif ( 4012 === $event_code ) {
@@ -522,6 +523,6 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			'EditUserLink' => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 		);
 
-		$this->plugin->alerts->trigger_event( $event_code, $event_data, $this->plugin->is_multisite() );
+		$this->plugin->alerts->trigger_event( $event_code, $event_data, WpSecurityAuditLog::is_multisite() );
 	}
 }

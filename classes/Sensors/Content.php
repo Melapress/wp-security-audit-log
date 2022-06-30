@@ -27,6 +27,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 	/**
+	 * Holds the name of the meta used to setting the lock status of the post
+	 */
+	const LOCK_META_NAME = '_edit_lock';
+
+	/**
 	 * Old post.
 	 *
 	 * @var stdClass
@@ -83,6 +88,15 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	protected $old_meta = null;
 
 	/**
+	 * Holds the static plugin reference to the plugin
+	 *
+	 * @var WpSecurityAuditLog
+	 *
+	 * @since      4.4.2
+	 */
+	private static $wsal_plugin = null;
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public function hook_events() {
@@ -104,12 +118,38 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		add_filter( 'wp_update_term_data', array( $this, 'event_update_term_data' ), 10, 4 );
 		add_filter( 'add_post_metadata', array( $this, 'check_added_meta' ), 10, 5 );
 		add_filter( 'delete_post_metadata', array( $this, 'check_deleted_meta' ), 10, 5 );
+		add_action( 'update_post_meta', array( __CLASS__, 'before_changing_meta' ), 10, 4 );
 		add_action( 'updated_post_meta', array( $this, 'check_changed_meta' ), 10, 4 );
 
 		// Check if MainWP Child Plugin exists.
 		if ( WpSecurityAuditLog::is_mainwp_active() ) {
 			add_action( 'mainwp_before_post_update', array( $this, 'event_mainwp_init' ), 10, 2 );
 		}
+	}
+
+	/**
+	 * Extends the default constructor in order to be able to create static plugin property.
+	 *
+	 * @param WpSecurityAuditLog $plugin - The plugin instance.
+	 *
+	 * @since      4.4.2
+	 */
+	public function __construct( WpSecurityAuditLog $plugin ) {
+		parent::__construct( $plugin );
+		self::init( $plugin );
+	}
+
+	/**
+	 * Responsible for initiating the static parts of the class.
+	 *
+	 * @param WpSecurityAuditLog $plugin - The plugin instance.
+	 *
+	 * @return void
+	 *
+	 * @since      4.4.2
+	 */
+	public static function init( WpSecurityAuditLog $plugin ) {
+		self::$wsal_plugin = $plugin;
 	}
 
 	/**
@@ -146,11 +186,6 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	public function post_changed( $post_id, $post, $update ) {
 		// Ignore if post type is empty, revision or trash.
 		if ( empty( $post->post_type ) || 'revision' === $post->post_type || 'trash' === $post->post_status ) {
-			return;
-		}
-
-		// Ignore updates from ignored custom post types.
-		if ( in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
 			return;
 		}
 
@@ -282,31 +317,28 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		// Exclude CPTs from external plugins.
 		$post = get_post( $post_id );
 
-		// Ignore attachments, revisions and menu items.
-		if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
-			$event = 2008;
-			// Check WordPress backend operations.
-			if ( $this->check_auto_draft( $event, $post->post_title ) ) {
-				return;
-			}
-
-			$event_data = $this->get_post_event_data( $post ); // Get event data.
-
-			// Check if this was initiated by a plugin.
-			$request_params = WSAL_Utilities_RequestUtils::get_filtered_request_data();
-			if ( empty( $request_params['action'] ) && isset( $request_params['page'] ) ) {
-				$event      = 5025;
-				$event_data = array(
-					'PostID'     => $post->ID,
-					'PostType'   => $post->post_type,
-					'PostTitle'  => $post->post_title,
-					'PostStatus' => $post->post_status,
-					'Username'   => 'Plugins',
-				);
-			}
-
-			$this->plugin->alerts->trigger_event( $event, $event_data ); // Log event.
+		$event = 2008;
+		// Check WordPress backend operations.
+		if ( $this->check_auto_draft( $event, $post->post_title ) ) {
+			return;
 		}
+
+		$event_data = $this->get_post_event_data( $post ); // Get event data.
+
+		// Check if this was initiated by a plugin.
+		$request_params = WSAL_Utilities_RequestUtils::get_filtered_request_data();
+		if ( empty( $request_params['action'] ) && isset( $request_params['page'] ) ) {
+			$event      = 5025;
+			$event_data = array(
+				'PostID'     => $post->ID,
+				'PostType'   => $post->post_type,
+				'PostTitle'  => $post->post_title,
+				'PostStatus' => $post->post_status,
+				'Username'   => 'Plugins',
+			);
+		}
+
+		$this->plugin->alerts->trigger_event( $event, $event_data ); // Log event.
 	}
 
 	/**
@@ -315,23 +347,21 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param integer $post_id - Post ID.
 	 */
 	public function event_post_trashed( $post_id ) {
-		$post = get_post( $post_id );
-		if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
-			$editor_link = $this->get_editor_link( $post );
+		$post        = get_post( $post_id );
+		$editor_link = self::get_editor_link( $post_id );
 
-			$this->plugin->alerts->trigger_event(
-				2012,
-				array(
-					'PostID'             => $post->ID,
-					'PostType'           => $post->post_type,
-					'PostTitle'          => $post->post_title,
-					'PostStatus'         => $post->post_status,
-					'PostDate'           => $post->post_date,
-					'PostUrl'            => get_permalink( $post->ID ),
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
-		}
+		$this->plugin->alerts->trigger_event(
+			2012,
+			array(
+				'PostID'             => $post->ID,
+				'PostType'           => $post->post_type,
+				'PostTitle'          => $post->post_title,
+				'PostStatus'         => $post->post_status,
+				'PostDate'           => $post->post_date,
+				'PostUrl'            => get_permalink( $post->ID ),
+				$editor_link['name'] => $editor_link['value'],
+			)
+		);
 	}
 
 	/**
@@ -340,24 +370,22 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param integer $post_id - Post ID.
 	 */
 	public function event_post_untrashed( $post_id ) {
-		$post = get_post( $post_id );
-		if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
-			$editor_link = $this->get_editor_link( $post );
+		$post        = get_post( $post_id );
+		$editor_link = self::get_editor_link( $post_id );
 
-			$this->plugin->alerts->trigger_event(
-				2014,
-				array(
-					'PostID'             => $post->ID,
-					'PostType'           => $post->post_type,
-					'PostTitle'          => $post->post_title,
-					'PostStatus'         => $post->post_status,
-					'PostDate'           => $post->post_date,
-					'PostUrl'            => get_permalink( $post->ID ),
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
-			remove_action( 'save_post', array( $this, 'post_changed' ), 10, 3 );
-		}
+		$this->plugin->alerts->trigger_event(
+			2014,
+			array(
+				'PostID'             => $post->ID,
+				'PostType'           => $post->post_type,
+				'PostTitle'          => $post->post_title,
+				'PostStatus'         => $post->post_status,
+				'PostDate'           => $post->post_date,
+				'PostUrl'            => get_permalink( $post->ID ),
+				$editor_link['name'] => $editor_link['value'],
+			)
+		);
+		remove_action( 'save_post', array( $this, 'post_changed' ), 10, 3 );
 	}
 
 	/**
@@ -368,23 +396,21 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	public function event_publish_future( $post_id ) {
 		$post = get_post( $post_id );
 
-		if ( ! in_array( $post->post_type, $this->plugin->alerts->ignored_cpts, true ) ) {
-			$editor_link = $this->get_editor_link( $post );
+		$editor_link = self::get_editor_link( $post_id );
 
-			$this->plugin->alerts->trigger_event(
-				2001,
-				array(
-					'PostID'             => $post->ID,
-					'PostType'           => $post->post_type,
-					'PostTitle'          => $post->post_title,
-					'PostStatus'         => $post->post_status,
-					'PostDate'           => $post->post_date,
-					'PostUrl'            => get_permalink( $post->ID ),
-					$editor_link['name'] => $editor_link['value'],
-				)
-			);
-			remove_action( 'save_post', array( $this, 'post_changed' ), 10, 3 );
-		}
+		$this->plugin->alerts->trigger_event(
+			2001,
+			array(
+				'PostID'             => $post->ID,
+				'PostType'           => $post->post_type,
+				'PostTitle'          => $post->post_title,
+				'PostStatus'         => $post->post_status,
+				'PostDate'           => $post->post_date,
+				'PostUrl'            => get_permalink( $post->ID ),
+				$editor_link['name'] => $editor_link['value'],
+			)
+		);
+		remove_action( 'save_post', array( $this, 'post_changed' ), 10, 3 );
 	}
 
 	/**
@@ -450,11 +476,11 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			}
 
 			if ( ! empty( $post->post_title ) ) {
-				$edit_link = $this->get_editor_link( $post );       // Get editor link.
+				$edit_link = self::get_editor_link( $post->ID );       // Get editor link.
 				$post_data = $this->get_post_event_data( $post ); // Get event post data.
 
 				// Update post URL based on current actual path.
-				if ( $this->plugin->is_multisite() && ! is_subdomain_install() ) {
+				if ( WpSecurityAuditLog::is_multisite() && ! is_subdomain_install() ) {
 					// For multisite using subfolders, remove the subfolder.
 					$subdir_path  = parse_url( home_url(), PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
 					$escaped      = str_replace( '/', '\/', preg_quote( $subdir_path ) ); // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
@@ -671,9 +697,9 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @param int    $post_id        Post ID.
 	 * @param string $meta_key       Meta key.
 	 * @param mixed  $meta_value     Meta value.
-	 * @param mixed  $default_result Default result.
+	 * @param mixed  $default_result Default result. The name is misleading - it holds the meta ID value.
 	 *
-	 * @return mixed
+	 * @return int - The meta ID.
 	 *
 	 * @since 4.4.0
 	 */
@@ -755,7 +781,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$old_tmpl = ( $this->old_tmpl && 'page' !== basename( $this->old_tmpl, '.php' ) ) ? ucwords( str_replace( array( '-', '_' ), ' ', basename( $this->old_tmpl, '.php' ) ) ) : __( 'Default template', 'wp-security-audit-log' );
 		$new_tmpl = ( $meta_value ) ? ucwords( str_replace( array( '-', '_' ), ' ', basename( $meta_value ) ) ) : __( 'Default', 'wp-security-audit-log' );
 		if ( $old_tmpl !== $new_tmpl ) {
-			$editor_link = $this->get_editor_link( $post );
+			$editor_link = self::get_editor_link( $post_id );
 			$this->plugin->alerts->trigger_event(
 				2048,
 				array(
@@ -769,6 +795,69 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					$editor_link['name'] => $editor_link['value'],
 				)
 			);
+		}
+	}
+
+
+	/**
+	 * Fires immediately before updating a post's metadata.
+	 *
+	 * @since      4.4.2
+	 *
+	 * @param int    $meta_id    ID of metadata entry to update.
+	 * @param int    $object_id  Post ID.
+	 * @param string $meta_key   Metadata key.
+	 * @param mixed  $meta_value Metadata value. This will be a PHP-serialized string representation of the value
+	 *                           if the value is an array, an object, or itself a PHP-serialized string.
+	 */
+	public static function before_changing_meta( $meta_id, $object_id, $meta_key, $meta_value ) {
+		if ( self::LOCK_META_NAME === $meta_key ) {
+			self::fire_lock_change( $object_id, $meta_value );
+		}
+	}
+
+	/**
+	 * Fires lock owner changing.
+	 *
+	 * @param integer $post_id   - The ID of the post.
+	 * @param string  $meta_value - The meta value - that is in format "1649934679:2"
+	 *                             where the "1649934679" is the timestamp of the locking
+	 *                             and "2" is the ID of the \WP_User which currently editing the post.
+	 *
+	 * @return void
+	 *
+	 * @since      4.4.2
+	 */
+	public static function fire_lock_change( int $post_id, string $meta_value ) {
+
+		if ( $meta_value ) {
+			$user_id = \wp_check_post_lock( $post_id ); // The id of the user currently editing the post.
+
+			/**
+			 * The post is currently edited by someone - proceed with extracting the new user editor
+			 */
+			if ( $user_id ) {
+				$lock        = explode( ':', $meta_value );
+				$new_user_id = $lock[1];
+
+				if ( $new_user_id ) {
+					if ( $new_editor_user = get_userdata( $new_user_id ) ) { //phpcs:ignore
+						$post        = get_post( $post_id );
+						$editor_link = self::get_editor_link( $post_id );
+						self::$wsal_plugin->alerts->trigger_event(
+							2133,
+							array(
+								'PostID'             => $post->ID,
+								'PostType'           => $post->post_type,
+								'PostTitle'          => $post->post_title,
+								'PostStatus'         => $post->post_status,
+								$editor_link['name'] => $editor_link['value'],
+								'user'               => get_userdata( $user_id )->display_name,
+							)
+						);
+					}
+				}
+			}
 		}
 	}
 
@@ -798,7 +887,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$new_image      = is_array( $new_featured_image ) && array_key_exists( 'file', $new_featured_image ) ? $new_featured_image['file'] : __( 'No image', 'wp-security-audit-log' );
 
 		$post        = get_post( $post_id );
-		$editor_link = $this->get_editor_link( $post );
+		$editor_link = self::get_editor_link( $post_id );
 		$this->plugin->alerts->trigger_event(
 			2130,
 			array(
@@ -923,7 +1012,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 					break;
 			}
 			if ( $event ) {
-				$editor_link = $this->get_editor_link( $new_post ); // Editor link.
+				$editor_link = self::get_editor_link( $new_post->ID ); // Editor link.
 				$event_data  = $this->get_post_event_data( $new_post ); // Post event data.
 
 				// Set editor link in the event data.
@@ -961,17 +1050,18 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	/**
 	 * Get editor link.
 	 *
-	 * @param stdClass $post - The post.
+	 * @param int $post_id - The \WP_Post post ID.
 	 *
 	 * @return array $editor_link - Name and value link.
 	 */
-	private function get_editor_link( $post ) {
+	private static function get_editor_link( $post_id ): array {
 		$name        = 'EditorLinkPost';
-		$value       = get_edit_post_link( $post->ID );
+		$value       = get_edit_post_link( $post_id );
 		$editor_link = array(
 			'name'  => $name,
 			'value' => $value,
 		);
+
 		return $editor_link;
 	}
 
@@ -1004,7 +1094,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	protected function check_author_change( $oldpost, $newpost ) {
 		if ( $oldpost->post_author !== $newpost->post_author ) {
-			$editor_link = $this->get_editor_link( $oldpost );
+			$editor_link = self::get_editor_link( $oldpost->ID );
 			$old_author  = get_userdata( $oldpost->post_author );
 			$old_author  = ( is_object( $old_author ) ) ? $old_author->user_login : 'N/A';
 			$new_author  = get_userdata( $newpost->post_author );
@@ -1053,7 +1143,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			}
 
 			if ( $event ) {
-				$editor_link = $this->get_editor_link( $newpost ); // Editor link.
+				$editor_link = self::get_editor_link( $newpost->ID ); // Editor link.
 				$event_data  = $this->get_post_event_data( $newpost ); // Post event data.
 
 				// Set editor link in the event data.
@@ -1084,7 +1174,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	protected function check_parent_change( $oldpost, $newpost ) {
 		if ( $oldpost->post_parent !== $newpost->post_parent && 'page' === $newpost->post_type ) {
-			$editor_link = $this->get_editor_link( $oldpost );
+			$editor_link = self::get_editor_link( $oldpost->ID );
 			$this->plugin->alerts->trigger_event(
 				2047,
 				array(
@@ -1118,7 +1208,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		}
 
 		if ( $old_link !== $new_link ) {
-			$editor_link = $this->get_editor_link( $post );
+			$editor_link = self::get_editor_link( $post->ID );
 			$this->plugin->alerts->trigger_event(
 				2017,
 				array(
@@ -1166,7 +1256,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		}
 
 		if ( $old_visibility && $new_visibility && ( $old_visibility !== $new_visibility ) ) {
-			$editor_link = $this->get_editor_link( $oldpost );
+			$editor_link = self::get_editor_link( $oldpost->ID );
 			$this->plugin->alerts->trigger_event(
 				2025,
 				array(
@@ -1207,7 +1297,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		}
 
 		if ( $from !== $to ) {
-			$editor_link = $this->get_editor_link( $oldpost );
+			$editor_link = self::get_editor_link( $oldpost->ID );
 			$this->plugin->alerts->trigger_event(
 				2027,
 				array(
@@ -1235,7 +1325,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	private function check_comments_pings( $oldpost, $newpost ) {
 		$result      = 0;
-		$editor_link = $this->get_editor_link( $newpost );
+		$editor_link = self::get_editor_link( $newpost->ID );
 
 		// Comments.
 		if ( $oldpost->comment_status !== $newpost->comment_status ) {
@@ -1288,7 +1378,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$new_cats = implode( ', ', (array) $new_cats );
 
 		if ( $old_cats !== $new_cats && 'page' !== $post->post_type ) {
-			$editor_link = $this->get_editor_link( $post );
+			$editor_link = self::get_editor_link( $post->ID );
 			$alert_data  = array(
 				'PostID'             => $post->ID,
 				'PostType'           => $post->post_type,
@@ -1314,7 +1404,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @since 4.1.5
 	 */
 	private function report_tags_change_event( $event_code, $post, $tags_changed ) {
-		$editor_link = $this->get_editor_link( $post );
+		$editor_link = self::get_editor_link( $post->ID );
 		$post_status = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
 		$this->plugin->alerts->trigger_event(
 			$event_code,
@@ -1373,9 +1463,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @return int|void
 	 */
 	public function check_modification_change( $post_id, $oldpost, $newpost, $modified ) {
-		if ( $this->check_title_change( $oldpost, $newpost ) ) {
-			return;
-		}
+		$this->check_title_change( $oldpost, $newpost );
 
 		$content_changed = $oldpost->post_content !== $newpost->post_content;
 
@@ -1411,7 +1499,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				}
 
 				$event_data                         = $this->get_post_event_data( $oldpost );
-				$editor_link                        = $this->get_editor_link( $oldpost );
+				$editor_link                        = self::get_editor_link( $oldpost->ID );
 				$event_data[ $editor_link['name'] ] = $editor_link['value'];
 				$event_data['RevisionLink']         = $this->get_post_revision( $post_id, $oldpost );
 
@@ -1457,7 +1545,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$post_events = array_keys( $this->plugin->alerts->get_alerts_by_sub_category( 'Content' ) );
 
 		foreach ( $post_events as $event ) {
-			if ( $manager->will_or_has_triggered( $event ) || $this->was_triggered_recently( $event ) ) {
+			if ( $manager->will_or_has_triggered( $event ) || self::was_triggered_recently( $event ) ) {
 				return false;
 			}
 		}
@@ -1473,7 +1561,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 */
 	private function check_title_change( $oldpost, $newpost ) {
 		if ( $oldpost->post_title !== $newpost->post_title ) {
-			$editor_link = $this->get_editor_link( $oldpost );
+			$editor_link = self::get_editor_link( $oldpost->ID );
 			$this->plugin->alerts->trigger_event(
 				2086,
 				array(
@@ -1532,7 +1620,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 			return;
 		}
 
-		$editor_link = $this->get_editor_link( $post ); // Editor link.
+		$editor_link = self::get_editor_link( $post_id ); // Editor link.
 		$event_data  = $this->get_post_event_data( $post ); // Event data.
 
 		$event_data[ $editor_link['name'] ] = $editor_link['value'];
@@ -1586,7 +1674,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		if ( ! empty( $post->post_title ) ) {
 			$event = 2100;
 			if ( ! $this->was_triggered( $event ) ) {
-				$editor_link = $this->get_editor_link( $post );
+				$editor_link = self::get_editor_link( $post->ID );
 				$this->plugin->alerts->trigger_event(
 					$event,
 					array(
@@ -1679,41 +1767,10 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	public function plugin_not_created_post( $manager ) {
 		$triggered = $manager->will_or_has_triggered( 5019 );
 		// inverting value here to account for the double NOT in _CommitItem().
+		// Ensure no event for a WC coupon.
+		if ( $manager->WillOrHasTriggered( 9063 ) ) {
+			return false;
+		}
 		return ! $triggered;
-	}
-
-	/**
-	 * Check if the alert was triggered recently.
-	 *
-	 * Checks last 5 events if they occurred less than 20 seconds ago.
-	 *
-	 * @param integer|array $alert_id - Alert code.
-	 * @return boolean
-	 */
-	private function was_triggered_recently( $alert_id ) {
-		// if we have already checked this don't check again.
-		if ( isset( $this->cached_alert_checks ) && array_key_exists( $alert_id, $this->cached_alert_checks ) && $this->cached_alert_checks[ $alert_id ] ) {
-			return true;
-		}
-		$query = new WSAL_Models_OccurrenceQuery();
-		$query->add_order_by( 'created_on', true );
-		$query->set_limit( 5 );
-		$last_occurrences = $query->get_adapter()->execute_query( $query );
-		$known_to_trigger = false;
-		foreach ( $last_occurrences as $last_occurrence ) {
-			if ( $known_to_trigger ) {
-				break;
-			}
-			if ( ! empty( $last_occurrence ) && ( $last_occurrence->created_on + 5 ) > time() ) {
-				if ( ! is_array( $alert_id ) && $last_occurrence->alert_id === $alert_id ) {
-					$known_to_trigger = true;
-				} elseif ( is_array( $alert_id ) && in_array( $last_occurrence[0]->alert_id, $alert_id, true ) ) {
-					$known_to_trigger = true;
-				}
-			}
-		}
-		// once we know the answer to this don't check again to avoid queries.
-		$this->cached_alert_checks[ $alert_id ] = $known_to_trigger;
-		return $known_to_trigger;
 	}
 }

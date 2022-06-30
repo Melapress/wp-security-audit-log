@@ -7,6 +7,8 @@
  * @package wsal
  */
 
+namespace WSAL\Adapter;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -20,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @package wsal
  */
-class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_MetaInterface {
+class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implements \WSAL_Adapters_MetaInterface {
 
 	/**
 	 * Contains the table name.
@@ -77,7 +79,7 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 	 * @return WSAL_Models_Meta
 	 */
 	public function get_model() {
-		$result = new WSAL_Models_Meta();
+		$result = new \WSAL_Models_Meta();
 		$result->set_adapter( $this );
 
 		return $result;
@@ -95,6 +97,12 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param array $occurrence_ids - The ids of the occurrences.
+	 *
+	 * @return void
+	 *
+	 * @since      4.4.2
 	 */
 	public function delete_by_occurrence_ids( $occurrence_ids ) {
 		if ( ! empty( $occurrence_ids ) ) {
@@ -106,12 +114,19 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $meta_name - Meta name.
+	 * @param int    $occurrence_id - Occurrence ID.
+	 *
+	 * @return array
+	 *
+	 * @since      4.4.2
 	 */
 	public function load_by_name_and_occurrence_id( $meta_name, $occurrence_id ) {
 		// Make sure to grab the migrated meta fields from the occurrence table.
-		if ( in_array( $meta_name, array_keys( WSAL_Models_Occurrence::$migrated_meta ), true ) ) {
+		if ( in_array( $meta_name, array_keys( \WSAL_Models_Occurrence::$migrated_meta ), true ) ) {
 			$occurrence  = new WSAL_Adapters_MySQL_Occurrence( $this->get_connection() );
-			$column_name = WSAL_Models_Occurrence::$migrated_meta[ $meta_name ];
+			$column_name = \WSAL_Models_Occurrence::$migrated_meta[ $meta_name ];
 
 			return $occurrence->$column_name;
 		}

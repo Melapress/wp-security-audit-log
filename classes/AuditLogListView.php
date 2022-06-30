@@ -510,9 +510,9 @@ class WSAL_AuditLogListView extends WP_List_Table {
 				return '<a class="more-info thickbox" data-tooltip="' . $tooltip . '" title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
 					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
 			case 'object':
-				return isset( $this->item_meta[ $item->get_id() ]['Object'] ) ? $this->plugin->alerts->get_event_objects_data( $this->item_meta[ $item->get_id() ]['Object'] ) : '';
+				return ( isset( $this->item_meta[ $item->get_id() ]['Object'] ) && ! empty( $this->item_meta[ $item->get_id() ]['Object'] ) ) ? $this->plugin->alerts->get_event_objects_data( $this->item_meta[ $item->get_id() ]['Object'] ) : '';
 			case 'event_type':
-				return isset( $this->item_meta[ $item->get_id() ]['EventType'] ) ? $this->plugin->alerts->get_event_type_data( $this->item_meta[ $item->get_id() ]['EventType'] ) : '';
+				return ( isset( $this->item_meta[ $item->get_id() ]['EventType'] ) && !empty( $this->item_meta[ $item->get_id() ]['EventType'] ) )  ? $this->plugin->alerts->get_event_type_data( $this->item_meta[ $item->get_id() ]['EventType'] ) : '';
 			default:
 				return isset( $item->$column_name )
 					? esc_html( $item->$column_name )
@@ -550,7 +550,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 	 * @return bool
 	 */
 	protected function is_multisite() {
-		return $this->plugin->is_multisite();
+		return WpSecurityAuditLog::is_multisite();
 	}
 
 	/**

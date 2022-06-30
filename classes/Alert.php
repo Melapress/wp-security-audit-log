@@ -175,9 +175,6 @@ final class WSAL_Alert {
 						// Handle complex expressions.
 						$message_parts[ $i ] = $this->get_meta_expression_value( substr( $token, 1, - 1 ), $meta_data );
 						$message_parts[ $i ] = $formatter->format_meta_expression( $token, $message_parts[ $i ], $occurrence_id );
-						if ( ! empty( $message_parts[ $i ] ) ) {
-							$message_parts[ $i ] = $formatter->wrap_in_hightlight_markup( $message_parts[ $i ] );
-						}
 					}
 				}
 
@@ -265,7 +262,7 @@ final class WSAL_Alert {
 			$meta_result_parts = array();
 			foreach ( $metadata_as_array as $meta_label => $meta_expression ) {
 				if ( ! empty( $meta_expression ) ) {
-					array_push( $meta_result_parts, $meta_label . ': ' . $formatter->wrap_in_hightlight_markup( $meta_expression ) );
+					array_push( $meta_result_parts, $meta_label . ': ' . $meta_expression );
 				}
 			}
 
@@ -384,7 +381,7 @@ final class WSAL_Alert {
 				if ( ! WSAL_Utilities_RequestUtils::is_valid_url( $link_url ) ) {
 
 					$meta_expression = $this->get_meta_expression_value( $link_url, $meta_data );
-					$meta_expression = $formatter->format_meta_expression( $link_url, $meta_expression, $occurrence_id, $meta_data );
+					$meta_expression = $formatter->format_meta_expression( $link_url, $meta_expression, $occurrence_id, $meta_data, false );
 					if ( ! empty( $meta_expression ) ) {
 						if ( WSAL_Utilities_RequestUtils::is_valid_url( $meta_expression ) ) {
 

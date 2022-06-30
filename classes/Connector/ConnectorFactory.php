@@ -7,6 +7,8 @@
  * @package wsal
  */
 
+use WPMailSMTP\Vendor\Psr\Log\NullLogger;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -35,6 +37,15 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 * @var array
 	 */
 	private static $connectors = array();
+
+	/**
+	 * Holds the configuration of the connection (if there is one)
+	 *
+	 * @var boolean
+	 *
+	 * @since      4.4.2
+	 */
+	private static $connection = false;
 
 	/**
 	 * Occurrence is installed.
@@ -125,31 +136,46 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 * @throws Freemius_Exception
 	 */
 	public static function get_config() {
-		$plugin          = WpSecurityAuditLog::get_instance();
-		$connection_name = $plugin->get_global_setting( 'adapter-connection' );
+		if ( false === self::$connection ) {
+			$plugin          = WpSecurityAuditLog::get_instance();
+			$connection_name = $plugin->get_global_setting( 'adapter-connection' );
 
-		if ( function_exists( 'wsal_freemius' ) && ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
-			$is_not_paying = wsal_freemius()->is_not_paying();
-		} else {
-			$is_not_paying = ! WpSecurityAuditLog::is_premium_freemius();
-		}
-
-		if ( $connection_name && $is_not_paying ) {
-			$connector = new WSAL_Connector_MySQLDB();
-
-			if ( ! self::$is_installed ) {
-				self::$is_installed = $connector->is_installed();
-				$connector->install_all();
+			if ( empty( $connection_name ) ) {
+				self::$connection = null;
 			}
 
-			$connection_name = null;
-		}
+			/** 
+			 * this code is commented out because it is producing errors when license expires. Please do not remove it for now as it is may become part of separate method.
+			 */
+			// if ( function_exists( 'wsal_freemius' ) && ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
+			// 	$is_not_paying = wsal_freemius()->is_not_paying();
+			// } else {
+			// 	$is_not_paying = ! WpSecurityAuditLog::is_premium_freemius();
+			// }
 
-		if ( empty( $connection_name ) ) {
-			return null;
-		}
+			// if ( $connection_name && $is_not_paying ) {
+			// 	$connector = new WSAL_Connector_MySQLDB();
 
-		return self::load_connection_config( $connection_name );
+			// 	if ( ! self::$is_installed ) {
+			// 		self::$is_installed = $connector->is_installed();
+			// 		$connector->install_all();
+			// 	}
+			// }
+
+			self::$connection = self::load_connection_config( $connection_name );
+		}
+		return self::$connection;
+	}
+
+	/**
+	 * As this is static class, we need to destroy the connection sometimes.
+	 *
+	 * @return void
+	 *
+	 * @since      4.4.2
+	 */
+	public static function destroy_connection() {
+		self::$connection = false;
 	}
 
 	/**
@@ -160,7 +186,7 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 * @return array|null
 	 * @since 4.4.0
 	 */
-	private static function load_connection_config( $connection_name ) {
+	public static function load_connection_config( $connection_name ) {
 		/*
 		 * Reused code from the external DB module.
 		 *

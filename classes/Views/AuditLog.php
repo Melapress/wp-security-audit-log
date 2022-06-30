@@ -76,7 +76,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		add_action( 'wp_ajax_wsal_download_failed_login_log', array( $this, 'wsal_download_failed_login_log' ) );
 		add_action( 'wp_ajax_wsal_freemius_opt_in', array( $this, 'wsal_freemius_opt_in' ) );
 		add_action( 'wp_ajax_wsal_dismiss_setup_modal', array( $this, 'dismiss_setup_modal' ) );
-		add_action( 'wp_ajax_wsal_dismiss_advert', array( $this, 'wsal_dismiss_advert' ) );
 		add_action( 'wp_ajax_wsal_dismiss_notice_addon_available', array( $this, 'dismiss_notice_addon_available' ) );
 		add_action( 'wp_ajax_wsal_dismiss_missing_aws_sdk_nudge', array( $this, 'dismiss_missing_aws_sdk_nudge' ) );
 		add_action( 'wp_ajax_wsal_dismiss_helper_plugin_needed_nudge', array( $this, 'dismiss_helper_plugin_needed_nudge' ) );
@@ -134,8 +133,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			&& ! class_exists( 'WSAL_UserSessions_Plugin' )
 			&& 'anonymous' !== $this->plugin->get_global_setting( 'freemius_state', 'anonymous' ) // Anonymous mode option.
 		) {
-			$get_transient_fn         = $this->plugin->is_multisite() ? 'get_site_transient' : 'get_transient'; // Check for multisite.
-			$wsal_is_advert_dismissed = $get_transient_fn( 'wsal-is-advert-dismissed' ); // Check if advert has been dismissed.
 			$wsal_premium_advert      = $this->plugin->get_global_setting( 'premium-advert', false ); // Get the advert to display.
 			$wsal_premium_advert      = false !== $wsal_premium_advert ? (int) $wsal_premium_advert : 0; // Set the default.
 
@@ -149,7 +146,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'https://wpactivitylog.com/features/'
 			);
 
-			if ( current_user_can( 'manage_options' ) && $is_current_view && ! $wsal_is_advert_dismissed ) : ?>
+			if ( current_user_can( 'manage_options' ) && $is_current_view ) : ?>
 				<div class="updated wsal_notice">
 					<div class="wsal_notice__wrapper">
 						<div class="wsal_notice__content">
@@ -183,11 +180,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 								'https://wpactivitylog.com/pricing/'
 							);
 							?>
-							<?php wp_nonce_field( 'wsal_dismiss_advert', 'wsal-dismiss-advert', false, true ); ?>
 							<a href="<?php echo esc_url( $buy_now ); ?>" class="button button-primary wsal_notice__btn notice-cta" target="_blank"><?php esc_html_e( 'UPGRADE NOW', 'wp-security-audit-log' ); ?></a>
 							<br>
 							<a href="<?php echo esc_url( $trial_link ); ?>" class="start-trial-link" target="_blank"><?php esc_html_e( 'Start Free Trial', 'wp-security-audit-log' ); ?></a>
-							<a href="javascript:;" data-advert="<?php echo esc_attr( $wsal_premium_advert ); ?>" onclick="wsal_dismiss_advert(this)" class="wsal_notice__btn_dismiss" title="<?php esc_attr_e( 'Dismiss the banner', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Close', 'wp-security-audit-log' ); ?></a>
 						</div>
 						<!-- /.wsal_notice__btns -->
 					</div>
@@ -226,10 +221,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Display add-on available notice.
 		$screen = get_current_screen();
 
-
-		if ( class_exists( 'WSAL_Upgrade_MetadataMigration' ) ) {
-			WSAL_Upgrade_MetadataMigration::maybe_display_progress_admin_notice();
-		}
 
 		if ( $is_current_view && in_array( $screen->base, array( 'toplevel_page_wsal-auditlog', 'toplevel_page_wsal-auditlog-network' ), true ) ) {
 			// Grab list of installed plugins.
@@ -1026,50 +1017,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			);
 		}
 		return $pointer;
-	}
-
-	/**
-	 * Method: Ajax request handler to dismiss adverts.
-	 *
-	 * @since 3.2.4
-	 */
-	public function wsal_dismiss_advert() {
-		// Die if user does not have permission to dismiss.
-		if ( ! $this->plugin->settings()->current_user_can( 'edit' ) ) {
-			echo wp_json_encode(
-				array(
-					'success' => false,
-					'message' => esc_html__( 'You do not have sufficient permissions to dismiss this notice.', 'wp-security-audit-log' ),
-				)
-			);
-			die();
-		}
-
-		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wsal_dismiss_advert' ) ) {
-			// Nonce verification failed.
-			echo wp_json_encode(
-				array(
-					'success' => false,
-					'message' => esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ),
-				)
-			);
-			die();
-		}
-
-		// @codingStandardsIgnoreStart
-		$advert = isset( $_POST['advert'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['advert'] ) ) : false;
-		// @codingStandardsIgnoreEnd
-
-		$advert = 2 === $advert ? '0' : $advert + 1;
-		$this->plugin->set_global_setting( 'premium-advert', $advert );
-		$set_transient_fn = $this->plugin->is_multisite() ? 'set_site_transient' : 'set_transient';
-		$set_transient_fn( 'wsal-is-advert-dismissed', true, MONTH_IN_SECONDS );
-		echo wp_json_encode(
-			array(
-				'success' => true,
-			)
-		);
-		die();
 	}
 
 	/**
