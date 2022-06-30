@@ -23,6 +23,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class WSAL_AlertManager {
 
 	/**
+	 * Holds list of the ignored \WP_Post types.
+	 */
+	const IGNORED_POST_TYPES = array(
+		'attachment',          // Attachment CPT.
+		'revision',            // Revision CPT.
+		'nav_menu_item',       // Nav menu item CPT.
+		'customize_changeset', // Customize changeset CPT.
+		'custom_css',          // Custom CSS CPT.
+	);
+
+	/**
 	 * Array of alerts (WSAL_Alert).
 	 *
 	 * @var WSAL_Alert[]
@@ -50,7 +61,7 @@ final class WSAL_AlertManager {
 	 *
 	 * @var WpSecurityAuditLog
 	 */
-	protected $plugin;
+	protected static $plugin;
 
 	/**
 	 * Contains a list of alerts to trigger.
@@ -80,7 +91,16 @@ final class WSAL_AlertManager {
 	 *
 	 * @var string[]
 	 */
-	public $ignored_cpts = array();
+	private static $ignored_cpts = array();
+
+	/**
+	 * Disabled post types array.
+	 *
+	 * @var array
+	 *
+	 * @since      4.4.2
+	 */
+	private static $disabled_post_types = array();
 
 	/**
 	 * Date format.
@@ -103,11 +123,14 @@ final class WSAL_AlertManager {
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
-		$this->plugin = $plugin;
-		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( dirname( __FILE__ ) . '/Loggers', '*.php' ) as $file ) {
-			$this->add_logger_from_file( $file );
+		self::$plugin = $plugin;
+		$loggers_list = \WSAL\Helpers\Classes_Helper::get_classes_by_namespace( '\WSAL\Loggers' );
+
+		foreach ( $loggers_list as $class_name ) {
+			$this->add_logger_instance( new $class_name( self::$plugin ) );
 		}
 
+		// phpcs:disable
 		add_action( 'shutdown', array( $this, 'commit_pipeline' ), 8 );
 
 		/**
@@ -121,52 +144,40 @@ final class WSAL_AlertManager {
 		 */
 		$this->deprecated_events = apply_filters( 'wsal_deprecated_event_ids', array( 2004, 2005, 2006, 2007, 2009, 2013, 2015, 2018, 2020, 2022, 2026, 2028, 2059, 2060, 2061, 2064, 2066, 2069, 2075, 2087, 2102, 2103, 2113, 2114, 2115, 2116, 2117, 2118, 5020, 5026, 2107, 2003, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037, 2038, 2039, 2040, 2041, 2056, 2057, 2058, 2063, 2067, 2068, 2070, 2072, 2076, 2088, 2104, 2105, 5021, 5027, 2108 ) );
 
-		/**
-		 * Filter: `wsal_ignored_custom_post_types`
-		 *
-		 * Ignored custom post types filter.
-		 *
-		 * @param array $ignored_cpts - Array of custom post types.
-		 *
-		 * @since 3.3.1
-		 */
-		$this->ignored_cpts = apply_filters(
-			'wsal_ignored_custom_post_types',
-			array_unique(
-				array_merge(
-					$this->get_disabled_post_types(),
-					array(
-						'attachment',          // Attachment CPT.
-						'revision',            // Revision CPT.
-						'nav_menu_item',       // Nav menu item CPT.
-						'customize_changeset', // Customize changeset CPT.
-						'custom_css',          // Custom CSS CPT.
+		$this->date_format           = self::$plugin->settings()->get_date_format();
+		$this->sanitized_date_format = self::$plugin->settings()->get_date_format( true );
+	}
+
+	/**
+	 * Returns all the ignored post types - post types are \WP_Post types
+	 * Note: There is a difference between ignored types and disabled types.
+	 *
+	 * @return array
+	 *
+	 * @since      4.4.2
+	 */
+	public static function get_ignored_post_types(): array {
+		if ( empty( self::$ignored_cpts ) ) {
+			/**
+			 * Filter: `wsal_ignored_custom_post_types`
+			 *
+			 * Ignored custom post types filter.
+			 *
+			 * @param array $ignored_cpts - Array of custom post types.
+			 *
+			 * @since 3.3.1
+			 */
+			self::$ignored_cpts = apply_filters(
+				'wsal_ignored_custom_post_types',
+				array_unique(
+					array_merge(
+						self::get_disabled_post_types(),
+						self::IGNORED_POST_TYPES
 					)
 				)
-			)
-		);
-
-		$this->date_format           = $this->plugin->settings()->get_date_format();
-		$this->sanitized_date_format = $this->plugin->settings()->get_date_format( true );
-	}
-
-	/**
-	 * Add new logger from file inside autoloader path.
-	 *
-	 * @param string $file Path to file.
-	 */
-	public function add_logger_from_file( $file ) {
-		$file = basename( $file, '.php' );
-		$this->add_logger_from_class( WSAL_CLASS_PREFIX . 'Loggers_' . $file );
-	}
-
-	/**
-	 * Add new logger given class name.
-	 *
-	 * @param string $class Class name.
-	 */
-	public function add_logger_from_class( $class ) {
-		$this->add_logger_instance( new $class( $this->plugin ) );
+			);
+		}
+		return self::$ignored_cpts;
 	}
 
 	/**
@@ -215,7 +226,7 @@ final class WSAL_AlertManager {
 			$data['CurrentUserRoles'] = $roles;
 		} else {
 			// not a switched user so get the current user roles.
-			$roles = $this->plugin->settings()->get_current_user_roles();
+			$roles = self::$plugin->settings()->get_current_user_roles();
 		}
 		if ( empty( $roles ) && ! empty( $data['CurrentUserRoles'] ) ) {
 			$roles = $data['CurrentUserRoles'];
@@ -303,7 +314,7 @@ final class WSAL_AlertManager {
 			$data['CurrentUserRoles'] = $roles;
 		} else {
 			$username = wp_get_current_user()->user_login;
-			$roles    = $this->plugin->settings()->get_current_user_roles();
+			$roles    = self::$plugin->settings()->get_current_user_roles();
 		}
 
 		// Check if IP is disabled.
@@ -353,13 +364,13 @@ final class WSAL_AlertManager {
 					$this->log( $type, $data );
 				} elseif ( $_retry ) {
 					// This is the last attempt at loading alerts from default file.
-					$this->plugin->load_defaults();
+					self::$plugin->load_defaults();
 					return $this->commit_item( $type, $data, $cond, false );
 				} else {
 					// In general this shouldn't happen, but it could, so we handle it here.
 					/* translators: Event ID */
 					$error_message = sprintf( esc_html__( 'Event with code %d has not be registered.', 'wp-security-audit-log' ), $type );
-					$this->plugin->wsal_log( $error_message );
+					self::$plugin->wsal_log( $error_message );
 				}
 			}
 		}
@@ -389,7 +400,7 @@ final class WSAL_AlertManager {
 		foreach ( $this->pipeline as $item ) {
 			if ( $item['type'] == $type ) { // phpcs:ignore
 				$number_found++;
-				if ($count == 1 || $number_found == $count) { // phpcs:ignore
+				if ( $count == 1 || $number_found == $count ) { // phpcs:ignore
 					return true;
 				}
 			}
@@ -443,7 +454,7 @@ final class WSAL_AlertManager {
 			add_action( 'admin_notices', array( $this, 'duplicate_event_notice' ) );
 			/* Translators: Event ID */
 			$error_message = sprintf( esc_html__( 'Event %s already registered with WP Activity Log.', 'wp-security-audit-log' ), $code );
-			$this->plugin->wsal_log( $error_message );
+			self::$plugin->wsal_log( $error_message );
 
 			return;
 		}
@@ -505,7 +516,7 @@ final class WSAL_AlertManager {
 	 * @return boolean True if enabled, false otherwise.
 	 */
 	public function is_enabled( $type ) {
-		$disabled_events = $this->plugin->settings()->get_disabled_alerts();
+		$disabled_events = self::$plugin->settings()->get_disabled_alerts();
 		return ! in_array( $type, $disabled_events, true );
 	}
 
@@ -527,13 +538,13 @@ final class WSAL_AlertManager {
 	 */
 	protected function log( $event_id, $event_data = array() ) {
 		if ( ! isset( $event_data['ClientIP'] ) ) {
-			$client_ip = $this->plugin->settings()->get_main_client_ip();
+			$client_ip = self::$plugin->settings()->get_main_client_ip();
 			if ( ! empty( $client_ip ) ) {
 				$event_data['ClientIP'] = $client_ip;
 			}
 		}
-		if ( ! isset( $event_data['OtherIPs'] ) && $this->plugin->settings()->is_main_ip_from_proxy() ) {
-			$other_ips = $this->plugin->settings()->get_client_ips();
+		if ( ! isset( $event_data['OtherIPs'] ) && self::$plugin->settings()->is_main_ip_from_proxy() ) {
+			$other_ips = self::$plugin->settings()->get_client_ips();
 			if ( ! empty( $other_ips ) ) {
 				$event_data['OtherIPs'] = $other_ips;
 			}
@@ -549,7 +560,7 @@ final class WSAL_AlertManager {
 			}
 		}
 		if ( ! isset( $event_data['CurrentUserRoles'] ) && function_exists( 'is_user_logged_in' ) && is_user_logged_in() ) {
-			$current_user_roles = $this->plugin->settings()->get_current_user_roles();
+			$current_user_roles = self::$plugin->settings()->get_current_user_roles();
 			if ( ! empty( $current_user_roles ) ) {
 				$event_data['CurrentUserRoles'] = $current_user_roles;
 			}
@@ -568,7 +579,7 @@ final class WSAL_AlertManager {
 		// Get event severity.
 		$alert_obj  = $this->get_alert( $event_id );
 		$alert_code = $alert_obj ? $alert_obj->severity : 0;
-		$severity   = $this->plugin->constants->get_constant_by( 'value', $alert_code );
+		$severity   = self::$plugin->constants->get_constant_by( 'value', $alert_code );
 
 		/**
 		 * Events Severity.
@@ -621,7 +632,7 @@ final class WSAL_AlertManager {
 		}
 
 		// Append further details if in multisite.
-		if ( $this->plugin->is_multisite() ) {
+		if ( WpSecurityAuditLog::is_multisite() ) {
 			$event_data['SiteID']  = get_current_blog_id();
 			$event_data['SiteURL'] = get_site_url( $event_data['SiteID'] );
 		}
@@ -653,6 +664,7 @@ final class WSAL_AlertManager {
 		foreach ( $this->loggers as $logger ) {
 			$logger->log( $event_id, $event_data );
 		}
+		// phpcs:disable
 	}
 
 	/**
@@ -760,10 +772,10 @@ final class WSAL_AlertManager {
 	/**
 	 * Method: Returns an array of disabled users.
 	 *
-	 * @return array.
+	 * @return array
 	 */
 	public function get_disabled_users() {
-		return $this->plugin->settings()->get_excluded_monitoring_users();
+		return self::$plugin->settings()->get_excluded_monitoring_users();
 	}
 
 	/**
@@ -788,7 +800,7 @@ final class WSAL_AlertManager {
 	 * @return array
 	 */
 	public function get_disabled_roles() {
-		return $this->plugin->settings()->get_excluded_monitoring_roles();
+		return self::$plugin->settings()->get_excluded_monitoring_roles();
 	}
 
 	/**
@@ -799,17 +811,22 @@ final class WSAL_AlertManager {
 	 * @since 2.6.7
 	 */
 	public function is_disabled_post_type( $post_type ) {
-		return in_array( $post_type, $this->get_disabled_post_types(), true );
+		$all_post_types = array_merge( self::get_disabled_post_types(), $this->get_ignored_post_types() );
+		return in_array( $post_type, $all_post_types, true );
 	}
 
 	/**
 	 * Method: Return array of disabled post types.
 	 *
 	 * @return array
+	 *
 	 * @since 2.6.7
 	 */
-	public function get_disabled_post_types() {
-		return $this->plugin->settings()->get_excluded_post_types();
+	public static function get_disabled_post_types(): array {
+		if ( empty( self::$disabled_post_types ) ) {
+			self::$disabled_post_types = self::$plugin->settings()->get_excluded_post_types();
+		}
+		return self::$disabled_post_types;
 	}
 
 	/**
@@ -819,16 +836,16 @@ final class WSAL_AlertManager {
 	 */
 	private function is_ip_address_disabled() {
 		$is_disabled  = false;
-		$ip           = $this->plugin->settings()->get_main_client_ip();
-		$excluded_ips = $this->plugin->settings()->get_excluded_monitoring_ip();
+		$ip           = self::$plugin->settings()->get_main_client_ip();
+		$excluded_ips = self::$plugin->settings()->get_excluded_monitoring_ip();
 
 		if ( ! empty( $excluded_ips ) ) {
 			foreach ( $excluded_ips as $excluded_ip ) {
 				if ( false !== strpos( $excluded_ip, '-' ) ) {
-					$ip_range = $this->plugin->settings()->get_ipv4_by_range( $excluded_ip );
+					$ip_range = self::$plugin->settings()->get_ipv4_by_range( $excluded_ip );
 					$ip_range = $ip_range->lower . '-' . $ip_range->upper;
 
-					if ( $this->plugin->settings()->check_ipv4_in_range( $ip, $ip_range ) ) {
+					if ( self::$plugin->settings()->check_ipv4_in_range( $ip, $ip_range ) ) {
 						$is_disabled = true;
 						break;
 					}
@@ -916,7 +933,7 @@ final class WSAL_AlertManager {
 		}
 
 		// Get site id.
-		$site_id = (int) $this->plugin->settings()->get_view_site_id();
+		$site_id = (int) self::$plugin->settings()->get_view_site_id();
 		if ( $site_id ) {
 			$occ_query->add_condition( 'site_id = %d ', $site_id );
 		}
@@ -942,17 +959,12 @@ final class WSAL_AlertManager {
 	public function get_admin_bar_event( $from_db = false ) {
 		// Get event from transient.
 		$event_transient = 'wsal_admin_bar_event';
-
-		// Check for multisite.
-		$get_fn = $this->plugin->is_multisite() ? 'get_site_transient' : 'get_transient';
-		$set_fn = $this->plugin->is_multisite() ? 'set_site_transient' : 'set_transient';
-
-		$admin_bar_event = $get_fn( $event_transient );
+		$admin_bar_event = WpSecurityAuditLog::get_transient( $event_transient );
 		if ( false === $admin_bar_event || false !== $from_db ) {
 			$event = $this->get_latest_events( 1 );
 
 			if ( $event ) {
-				$set_fn( $event_transient, $event[0], 30 * MINUTE_IN_SECONDS );
+				WpSecurityAuditLog::set_transient( $event_transient, $event[0], 30 * MINUTE_IN_SECONDS );
 				$admin_bar_event = $event[0];
 			}
 		}
@@ -1041,7 +1053,7 @@ final class WSAL_AlertManager {
 	 * NOTE: along with this depreciation the filter `wsal_event_object_text`
 	 * is being removed, use `wsal_event_objects` filter instead.
 	 *
-	 * @TODO: this is to be removed shortly after version 4.0.3 - after other
+	 * TODO: this is to be removed shortly after version 4.0.3 - after other
 	 * plugins have had a chance to adjust to using the get_event_objects_data()
 	 * function directly.
 	 *
@@ -1049,7 +1061,7 @@ final class WSAL_AlertManager {
 	 * @return string
 	 */
 	public function get_display_object_text( $object ) {
-		return get_event_objects_data( $object );
+		return $this->get_event_objects_data( $object );
 	}
 
 	/**
@@ -1125,7 +1137,7 @@ final class WSAL_AlertManager {
 	 * NOTE: along with this depreciation the filter `wsal_event_type_text` is
 	 * being removed, use `wsal_event_type_data` filter instead.
 	 *
-	 * @TODO: this is to be removed shortly after version 4.0.3 - after other
+	 * TODO: this is to be removed shortly after version 4.0.3 - after other
 	 * plugins have had a chance to adjust to using the get_event_type_data()
 	 * function directly.
 	 *
@@ -1134,7 +1146,7 @@ final class WSAL_AlertManager {
 	 */
 	public function get_display_event_type_text( $event_type ) {
 		// Try to get string from the companion data method.
-		return get_event_type_data( $event_type );
+		return $this->get_event_type_data( $event_type );
 	}
 
 	/**
@@ -1319,9 +1331,9 @@ final class WSAL_AlertManager {
 			'value'       => 0,
 			'description' => __( 'Unknown error code.', 'wp-security-audit-log' ),
 		);
-		$const = $this->plugin->constants->get_constant_by( 'value', $code, $const );
+		$const = self::$plugin->constants->get_constant_by( 'value', $code, $const );
 
-		$blog_info = self::get_blog_info( $this->plugin, $site_id );
+		$blog_info = self::get_blog_info( self::$plugin, $site_id );
 
 		// Get the alert message - properly.
 		$occurrence->id          = $entry_id;
@@ -1386,7 +1398,7 @@ final class WSAL_AlertManager {
 	 */
 	public static function get_blog_info( $plugin, $site_id ) {
 		// Blog details.
-		if ( $plugin->is_multisite() ) {
+		if ( WpSecurityAuditLog::is_multisite() ) {
 			$blog_info = get_blog_details( $site_id, true );
 			$blog_name = esc_html__( 'Unknown Site', 'wp-security-audit-log' );
 			$blog_url  = '';

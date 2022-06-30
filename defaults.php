@@ -702,6 +702,20 @@ function wsaldefaults_wsal_init() {
 						'post',
 						'modified',
 					),
+					array(
+						2133,
+						WSAL_INFORMATIONAL,
+						esc_html__( 'Ownership of the post has changed', 'wp-security-audit-log' ),
+						esc_html__( 'Has taken over the post %PostTitle% from %user%', 'wp-security-audit-log' ),
+						array(
+							esc_html__( 'Post ID', 'wp-security-audit-log' )        => '%PostID%',
+							esc_html__( 'Post type', 'wp-security-audit-log' )      => '%PostType%',
+							esc_html__( 'Post status', 'wp-security-audit-log' )    => '%PostStatus%',
+						),
+						wsaldefaults_build_links( array( 'EditorLinkPost', 'PostUrlIfPublished' ) ),
+						'post',
+						'modified',
+					),
 				),
 
 				esc_html__( 'Tags', 'wp-security-audit-log' ) => array(
@@ -2449,7 +2463,7 @@ function wsaldefaults_wsal_init() {
 						6039,
 						WSAL_CRITICAL,
 						esc_html__( 'Deleted all the data of a specific type from the activity log.', 'wp-security-audit-log' ),
-						esc_html__( 'Deleted all the data about the %1$deleted_data_type% %2$deleted_data% from the activity log.', 'wp-security-audit-log' ),
+						esc_html__( 'Deleted all the data about the %deleted_data_type% %deleted_data% from the activity log.', 'wp-security-audit-log' ),
 						array(),
 						array(),
 						'wp-activity-log',

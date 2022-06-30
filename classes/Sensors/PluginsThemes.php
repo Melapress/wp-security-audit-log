@@ -4,8 +4,9 @@
  *
  * Plugins & Themes sensor file.
  *
- * @since   1.0.0
- * @package wsal
+ * @since      1.0.0
+ * @package    wsal
+ * @subpackage sensors
  */
 
 // Exit if accessed directly.
@@ -58,6 +59,69 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 		add_action( 'switch_theme', array( $this, 'event_theme_activated' ) );
 		add_action( 'upgrader_overwrote_package', array( $this, 'OnPackageOverwrite' ), 10, 3 );
+
+		add_action( 'deleted_theme', array( $this, 'on_deleted_theme' ), 10, 2 );
+		add_action( 'upgrader_process_complete', array( $this, 'detect_upgrade_completed' ), 10, 2 );
+	}
+
+	/**
+	 * Trigger event once an automatic theme or plugin update has occured
+	 *
+	 * @param WP_Upgrader $upgrader_object - WP Upgrader object.
+	 * @param array       $hook_extra - Update details.
+	 * @return void
+	 */
+	public function detect_upgrade_completed( $upgrader_object, $hook_extra ) {
+
+		if ( is_array( $hook_extra ) && isset( $hook_extra['plugin'] ) && 'wp-security-audit-log.php' === $hook_extra['plugin'] ) {
+			/**
+			 * Our own plugin gets updated, unfortunately we have no idea (and most probably that is the old version of our plugin) what is the state of the plugin and what has been changed in the new version - check code reference here - https://developer.wordpress.org/reference/hooks/upgrader_process_complete/ especially the part that stays:
+			 * Use with caution: When you use the upgrader_process_complete action hook in your plugin and your plugin is the one which under upgrade, then this action will run the old version of your plugin.
+			 */
+
+			 return;
+		}
+
+		if ( isset( $hook_extra['plugin'] ) ) {
+			self::log_plugin_updated_event( $hook_extra['plugin'] );
+		} elseif ( isset( $hook_extra['theme'] ) ) {
+			self::log_theme_updated_event( $hook_extra['theme'] );
+		}
+	}
+
+	/**
+	 * Handles a theme deletion attempt.
+	 *
+	 * @param string $stylesheet Stylesheet of the theme to delete.
+	 * @param bool   $deleted    Whether the theme deletion was successful.
+	 *
+	 * @since      4.4.2
+	 *
+	 * phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+	 */
+	public function on_deleted_theme( $stylesheet, $deleted ) {
+		if ( ! $deleted ) {
+			return;
+		}
+
+		if ( ! array_key_exists( $stylesheet, $this->old_themes ) ) {
+			return;
+		}
+
+		$theme = $this->old_themes[ $stylesheet ];
+		$this->plugin->alerts->trigger_event(
+			5007,
+			array(
+				'Theme' => (object) array(
+					'Name'                   => $theme->Name,
+					'ThemeURI'               => $theme->ThemeURI,
+					'Description'            => $theme->Description,
+					'Author'                 => $theme->Author,
+					'Version'                => $theme->Version,
+					'get_template_directory' => $theme->get_template_directory(),
+				),
+			)
+		);
 	}
 
 	/**
@@ -102,8 +166,35 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 
 		// Install plugin.
 		if ( in_array( $action, array( 'install-plugin', 'upload-plugin', 'run_addon_install' ), true ) && current_user_can( 'install_plugins' ) ) {
-			$plugin = array_values( array_diff( array_keys( get_plugins() ), array_keys( $this->old_plugins ) ) );
-			if ( count( $plugin ) != 1 ) {
+			$plugin = array_merge( array_diff( array_keys( get_plugins() ), array_keys( $this->old_plugins ) ), array_diff( array_keys( $this->old_plugins ), array_keys( get_plugins() ) ) );
+
+			// Check for premium version being installed / updated.
+			if ( in_array( 'wp-security-audit-log-premium/wp-security-audit-log.php', $plugin ) ) {
+				/**
+				 * It looks like our own plugin is installed / updated. That means that we have no idea if there is a version on server or the plugin is in memory only (if it is he don't know which parts of it are there), that could lead to PHP errors which will prevent plugin install / update, better approach is to do nothing in terms of logging.
+				 *
+				 * TODO: the plugin name (see comparison in if clause above) could be whatever, we must introduce constant for that probably
+				 */
+				return;
+			}
+			// Check for free version being installed / updated.
+			if ( in_array( 'wp-security-audit-log/wp-security-audit-log.php', $plugin ) ) {
+				/**
+				 * It looks like our own plugin is installed / updated. That means that we have no idea if there is a version on server or the plugin is in memory only (if it is he don't know which parts of it are there), that could lead to PHP errors which will prevent plugin install / update, better approach is to do nothing in terms of logging.
+				 *
+				 * TODO: the plugin name (see comparison in if clause above) could be whatever, we must introduce constant for that probably
+				 */
+				return;
+			}
+
+			if ( ! count( $plugin ) ) {
+				/**
+				 * No changed plugins - there is nothing we suppose to log.
+				 */
+				return;
+			}
+
+			if ( count( $plugin ) > 1 ) {
 				$this->log_error(
 					'Expected exactly one new plugin but found ' . count( $plugin ),
 					array(
@@ -391,25 +482,6 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				);
 			}
 		}
-
-		// Uninstall theme.
-		if ( in_array( $action, array( 'delete-theme' ), true ) && current_user_can( 'install_themes' ) ) {
-			foreach ( $this->get_removed_themes() as $theme ) {
-				$this->plugin->alerts->trigger_event(
-					5007,
-					array(
-						'Theme' => (object) array(
-							'Name'                   => $theme->Name,
-							'ThemeURI'               => $theme->ThemeURI,
-							'Description'            => $theme->Description,
-							'Author'                 => $theme->Author,
-							'Version'                => $theme->Version,
-							'get_template_directory' => $theme->get_template_directory(),
-						),
-					)
-				);
-			}
-		}
 	}
 
 	/**
@@ -450,21 +522,6 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 				),
 			)
 		);
-	}
-
-	/**
-	 * Get removed themes.
-	 *
-	 * @return array of WP_Theme objects
-	 */
-	protected function get_removed_themes() {
-		$result = $this->old_themes;
-		foreach ( $result as $i => $theme ) {
-			if ( file_exists( $theme->get_template_directory() ) ) {
-				unset( $result[ $i ] );
-			}
-		}
-		return array_values( $result );
 	}
 
 	/**
@@ -653,6 +710,16 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	public function OnPackageOverwrite( $package, $new_plugin_data, $package_type ) {
 		if ( 'plugin' !== $package_type ) {
 			return;
+		}
+
+		if ( is_array( $new_plugin_data ) && isset( $new_plugin_data['TextDomain'] ) && 'wp-security-audit-log' === $new_plugin_data['TextDomain'] ) {
+			/**
+			 * Out own plugin gets updated, unfortunately we have no idea (and most probably that is the old version of our plugin  ) what is the state of the plugin and what has been changed in the new version - check code reference here - https://developer.wordpress.org/reference/hooks/upgrader_process_complete/ especially the part that stays:
+			 * Use with caution: When you use the upgrader_process_complete action hook in your plugin and your plugin is the one which under upgrade, then this action will run the old version of your plugin.
+			 * Yes - that is not upgrader_overwrote_package but same applies to it im afraid
+			 */
+
+			 return;
 		}
 
 		if ( array_key_exists( 'Name', $new_plugin_data ) ) {

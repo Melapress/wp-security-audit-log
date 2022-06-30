@@ -149,7 +149,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->wsal_setting_tabs = $wsal_setting_tabs;
 
 		// Get the current tab.
-		$current_tab       = filter_input( INPUT_GET, 'tab', FILTER_SANITIZE_STRING );
+		$current_tab       =( isset( $_GET['tab'] ) ) ? \sanitize_text_field( \wp_unslash( $_GET['tab'] ) ) : '';
 		$this->current_tab = empty( $current_tab ) ? 'general' : $current_tab;
 	}
 
@@ -274,6 +274,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		$now       = current_time( 'timestamp' ); // phpcs:ignore
 		$max_sdate = $this->plugin->settings()->get_pruning_date(); // Pruning date.
+		$archiving = $this->plugin->settings()->is_archiving_enabled();
 
 
 		// Calculate limit timestamp.
@@ -552,7 +553,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				$label    = esc_html__( 'Admin Bar Notification', 'wp-security-audit-log' );
 				if ( wsal_freemius()->is_free_plan() ) {
 					$disabled = 'disabled';
-					$label    = esc_html__( 'Admin Bar Notification (Premium)', 'wp-security-audit-log' );
+					$label    = esc_html__( 'Admin Bar Notification', 'wp-security-audit-log' );
 				}
 				?>
 				<th><label for="admin_bar_notif_on"><?php echo esc_html( $label ); ?></label></th>
@@ -579,7 +580,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				$label    = esc_html__( 'Admin Bar Notification Updates', 'wp-security-audit-log' );
 				if ( wsal_freemius()->is_free_plan() ) {
 					$disabled = 'disabled';
-					$label    = esc_html__( 'Admin Bar Notification Updates (Premium)', 'wp-security-audit-log' );
+					$label    = esc_html__( 'Admin Bar Notification Updates', 'wp-security-audit-log' );
 				}
 				?>
 				<th><label for="admin_bar_notif_refresh"><?php echo esc_html( $label ); ?></label></th>
@@ -742,7 +743,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<label for="only_admins">
 							<input type="radio" name="restrict-plugin-settings" id="only_admins" value="only_admins" <?php checked( $restrict_settings, 'only_admins' ); ?> />
 							<?php
-							if ( $this->plugin->is_multisite() ) {
+							if ( WpSecurityAuditLog::is_multisite() ) {
 								esc_html_e( 'All superadmins', 'wp-security-audit-log' );
 							} else {
 								esc_html_e( 'All administrators', 'wp-security-audit-log' );
@@ -761,7 +762,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<h3><?php esc_html_e( 'Allow other users to view the activity log', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
 			<?php
-			$is_multisite = $this->plugin->is_multisite();
+			$is_multisite = WpSecurityAuditLog::is_multisite();
 			if ( $is_multisite ) {
 				$section_label = esc_html__( 'By default only super administrators and the child sites\' administrators can view the WordPress activity log. Though you can change this by using the setting below.', 'wp-security-audit-log' );
 			} else {
@@ -928,7 +929,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 
 		// Handle log viewer settings in multisite context.
-		if ( $this->plugin->is_multisite() ) {
+		if ( WpSecurityAuditLog::is_multisite() ) {
 			$log_viewer_restrictions = isset( $post_array['restrict-log-viewer'] ) ? sanitize_text_field( $post_array['restrict-log-viewer'] ) : '';
 			$this->plugin->settings()->set_restrict_log_viewer( $log_viewer_restrictions );
 			if ( 'only_me' === $log_viewer_restrictions ) {
@@ -972,10 +973,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</p>
 
 		<?php
+		/* @free:start */
 		// Ensure it doesn't load a 2nd time for premium users.
 		if ( ! wsal_freemius()->can_use_premium_code() ) {
 			$this->render_retention_settings_table();
 		}
+		/* @free:end */
 		?>
 
 		<h3><?php esc_html_e( 'What timestamp you would like to see in the WordPress activity log?', 'wp-security-audit-log' ); ?></h3>
@@ -1145,9 +1148,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$pruning_unit = isset( $post_array['pruning-unit'] ) ? sanitize_text_field( $post_array['pruning-unit'] ) : false;
 		$pruning_date = ( ! empty( $pruning_date ) && ! empty( $pruning_unit ) ) ? $pruning_date . ' ' . $pruning_unit : false;
 
-		$this->plugin->settings()->set_pruning_date_enabled( isset( $post_array['PruneBy'] ) ? 'date' === $post_array['PruneBy'] : '' );
-		$this->plugin->settings()->set_pruning_date( $pruning_date );
-		$this->plugin->settings()->set_pruning_unit( $pruning_unit );
+		$pruning_enabled = isset( $post_array['PruneBy'] ) ? 'date' === $post_array['PruneBy'] : '';
+		$this->plugin->settings()->set_pruning_date_settings( $pruning_enabled, $pruning_date, $pruning_unit );
 		$this->plugin->settings()->set_timezone( $post_array['Timezone'] );
 		$this->plugin->settings()->set_type_username( $post_array['type_username'] );
 		$this->plugin->settings()->set_wp_backend( isset( $post_array['WPBackend'] ) ? sanitize_text_field( $post_array['WPBackend'] ) : false );
@@ -1394,6 +1396,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<th><?php esc_html_e( 'Purge Activity Log', 'wp-security-audit-log' ); ?></th>
 					<td>
 						<a href="#wsal_purge_activity" class="button-primary"><?php esc_html_e( 'PURGE', 'wp-security-audit-log' ); ?></a>
+						<span class="notice purge-notice notice-success" style="display: none; margin-left: 10px; padding: 6px 10px;"><?php esc_html_e( 'Activity log successfully purged', 'wp-security-audit-log' ); ?></span>
 					</td>
 				</tr>
 			</tbody>
@@ -1614,6 +1617,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						alert( "<?php esc_html_e( 'You have to select at least one column!', 'wp-security-audit-log' ); ?>" );
 					}
 				});
+				jQuery( 'body' ).on( 'click', '.remodal-confirm', function ( e ) {
+					jQuery( '.purge-notice' ).fadeIn(500);
+					setTimeout(function() { 
+						jQuery( '.purge-notice' ).fadeOut(500);
+					}, 4000);
+				});
 			});</script>
 		<?php
 	}
@@ -1667,8 +1676,15 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 
+		$result = array_map(
+			function ( $item ) {
+				return ucfirst( strtolower( str_replace( 'WSAL_', '', $item ) ) );
+			},
+			array_keys( WSAL_ConstantManager::get_severities() )
+		);
+
 		echo $this->filter_values_for_searched_term( // phpcs:ignore
-			array_values( WSAL_ConstantManager::get_severities() ),
+			$result,
 			$get_array['term'] // phpcs:ignore
 		);
 		exit;
@@ -1899,8 +1915,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							$nbld         = true;
 							$pruning_date = '6';
 							$pruning_unit = 'months';
-							$this->plugin->settings()->set_pruning_date( $pruning_date . ' ' . $pruning_unit );
-							$this->plugin->settings()->set_pruning_date_enabled( true );
+							$this->plugin->settings()->set_pruning_date_settings( true, $pruning_date . ' ' . $pruning_unit, $pruning_unit );
 							$this->plugin->settings()->set_pruning_limit_enabled( false );
 						}
 						?>

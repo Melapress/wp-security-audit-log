@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use WSAL\Adapter\WSAL_Adapters_MySQL_Meta;
+
 /**
  * WSAL_AlertFormatter class.
  *
@@ -48,6 +50,8 @@ final class WSAL_AlertFormatter {
 	public function __construct( $plugin, $configuration ) {
 		$this->plugin        = $plugin;
 		$this->configuration = $configuration;
+
+		add_filter( 'wsal_truncate_alert_value', array( __CLASS__, 'data_truncate' ), 10, 4 );
 	}
 
 	/**
@@ -82,7 +86,10 @@ final class WSAL_AlertFormatter {
 	 *
 	 * @since 4.2.1
 	 */
-	public function format_meta_expression( $expression, $value, $occurrence_id = null, $metadata = array() ) {
+	public function format_meta_expression( $expression, $value, $occurrence_id = null, $metadata = array(), $wrap = true ) {
+
+		$value = apply_filters( 'wsal_truncate_alert_value', $value, $expression, $this->configuration->get_max_meta_value_length(), $this->configuration->get_ellipses_sequence() );
+
 		switch ( true ) {
 			case '%Message%' === $expression:
 				return esc_html( $value );
@@ -93,17 +100,16 @@ final class WSAL_AlertFormatter {
 					$label  = __( 'Exclude custom field from the monitoring', 'wp-security-audit-log' );
 					$result = "<a href=\"#\" data-object-type='{$metadata['Object']}' data-disable-custom-nonce='" . wp_create_nonce( 'disable-custom-nonce' . $value ) . "' onclick=\"return WsalDisableCustom(this, '" . $value . "');\"> {$label}</a>";
 
-					return $this->wrap_in_hightlight_markup( $result );
+					return $this->wrap_in_hightlight_markup( $result, true );
 				}
 
 				return '';
 
 			case in_array( $expression, array( '%path%', '%old_path%', '%FilePath%' ), true ):
 				// Concatenate directory and file paths.
-				$max_length = 50;
-				if ( $this->configuration->is_js_in_links_allowed() && strlen( $value ) > $max_length ) {
-					$result = '<span>' . substr( $value, 0, $max_length ) . '</span>'; // phpcs:ignore
-					$result .= "<a href=\"#\" data-shortened-text='{$value}'>" . $this->configuration->get_ellipses_sequence() . "</a>"; // phpcs:ignore
+				if ( $this->configuration->is_js_in_links_allowed() ) {
+					$result = '<strong><span>' . $value . '</span>'; // phpcs:ignore
+					$result .= "<a href=\"#\" data-shortened-text='{$value}'>" . $this->configuration->get_ellipses_sequence() . "</a></strong>"; // phpcs:ignore
 
 					return $result;
 				}
@@ -112,9 +118,9 @@ final class WSAL_AlertFormatter {
 
 			case in_array( $expression, array( '%MetaValue%', '%MetaValueOld%', '%MetaValueNew%' ), true ):
 				// Trim the meta value to the maximum length and append configured ellipses sequence.
-				$result = mb_strlen( $value ) > $this->configuration->get_max_meta_value_length() ? ( mb_substr( $value, 0, 50 ) . $this->configuration->get_ellipses_sequence() ) : $value;
+				$result = $value;
 
-				return $this->wrap_in_hightlight_markup( esc_html( $result ) );
+				return $this->wrap_in_hightlight_markup( $result );
 
 			case '%ClientIP%' === $expression:
 			case '%IPAddress%' === $expression:
@@ -180,7 +186,7 @@ final class WSAL_AlertFormatter {
 				if ( $this->configuration->is_js_in_links_allowed() ) {
 					$result = '<a href="javascript:;" onclick="download_failed_login_log( this )" data-download-nonce="' . esc_attr( wp_create_nonce( 'wsal-download-failed-logins' ) ) . '" title="' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '">' . esc_html__( 'Download the log file.', 'wp-security-audit-log' ) . '</a>';
 
-					return $this->wrap_in_hightlight_markup( $result );
+					return $this->wrap_in_hightlight_markup( $result, true );
 				}
 
 				return '';
@@ -188,15 +194,15 @@ final class WSAL_AlertFormatter {
 			case in_array( $expression, array( '%PostStatus%', '%ProductStatus%' ), true ):
 				$result = ( ! empty( $value ) && 'publish' === $value ) ? __( 'published', 'wp-security-audit-log' ) : $value;
 
-				return $this->wrap_in_hightlight_markup( esc_html( $result ) );
+				return $this->wrap_in_hightlight_markup( $result );
 
 			case '%multisite_text%' === $expression:
-				if ( $this->plugin->is_multisite() && $value ) {
+				if ( WpSecurityAuditLog::is_multisite() && $value ) {
 					$site_info = get_blog_details( $value, true );
 					if ( $site_info ) {
 						$site_url = $site_info->siteurl;
 
-						return ' on site ' . $this->wrap_in_hightlight_markup( $this->format_link( $expression, $site_info->blogname, $site_url ) );
+						return ' on site ' . $this->format_link( $expression, $site_info->blogname, $site_url );
 					}
 				}
 
@@ -246,8 +252,47 @@ final class WSAL_AlertFormatter {
 				 *
 				 * @since 4.3.0
 				 */
+				// Ensure result is wrapped as expected
+				if ( $wrap ) {
+					$result = $this->wrap_in_hightlight_markup( $result );
+				}
+				
 				return apply_filters( 'wsal_format_custom_meta', $result, $expression, $this, $occurrence_id );
 		}
+	}
+
+	/**
+	 * Truncates the data to a specific number of characters.
+	 *
+	 * @param mixed   $value - The value to be truncated.
+	 * @param string  $expression - The expression for that value.
+	 * @param integer $length - Number of characters to truncate to.
+	 * @param string  $ellipses_sequence - The sequence of ellipses suffix.
+	 *
+	 * @return string|mixed
+	 *
+	 * @since      4.4.2
+	 */
+	public static function data_truncate( $value, $expression, $length = 50, $ellipses_sequence = '...' ) {
+
+		switch ( $expression ) {
+			case '%path%':
+			case '%old_path%':
+			case '%FilePath%':
+				if ( mb_strlen( $value ) > $length ) {
+					$value = mb_substr( $value, 0, $length ); // phpcs:ignore
+				}
+				break;
+			case '%MetaValue%':
+			case '%MetaValueOld%':
+			case '%MetaValueNew%':
+				$value = mb_strlen( $value ) > $length ? ( mb_substr( $value, 0, $length ) . $ellipses_sequence() ) : $value;
+				break;
+			default:
+				break;
+		}
+
+		return $value;
 	}
 
 	/**
@@ -256,10 +301,15 @@ final class WSAL_AlertFormatter {
 	 * For example meta values displayed as <strong>{meta value}</strong> in the WP admin UI.
 	 *
 	 * @param string $value Value.
+	 * @param bool   $no_esc - Do we need to escape the html in the message.
 	 *
 	 * @return string
 	 */
-	public function wrap_in_hightlight_markup( $value ) {
+	public function wrap_in_hightlight_markup( $value, $no_esc = false ) {
+		if ( ! $no_esc ) {
+			$value = esc_html( $value );
+		}
+		
 		return $this->configuration->get_highlight_start_tag() . $value . $this->configuration->get_highlight_end_tag();
 	}
 
@@ -323,7 +373,7 @@ final class WSAL_AlertFormatter {
 		$processed_url = $this->process_url( $url );
 		$result        = $this->build_link_markup( $processed_url, $label, $title, $target );
 
-		return $this->wrap_in_hightlight_markup( $result );
+		return $this->wrap_in_hightlight_markup( $result, true );
 	}
 
 	/**

@@ -86,14 +86,14 @@ class WSAL_Uninstall {
 		$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" ); // phpcs:ignore
 
 		foreach ( $plugin_options as $option ) {
-			delete_option( $option->option_name );
+			delete_site_option( $option->option_name );
 		}
 
 		// Remove wsal specific Freemius entry.
-		delete_option( 'fs_wsalp' );
+		delete_site_option( 'fs_wsalp' );
 
 		// Ensue entry is fully cleared.
-		delete_network_option( 0, 'wsal_networkwide_tracker_cpts' );
+		delete_site_option( 'wsal_networkwide_tracker_cpts' );
 
 		// @todo delete also options from site-level tables in multisite context
 	}
