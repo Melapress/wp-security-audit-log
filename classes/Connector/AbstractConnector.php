@@ -53,12 +53,6 @@ abstract class WSAL_Connector_AbstractConnector {
 		$this->adapters_base_path = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Adapters' . DIRECTORY_SEPARATOR;
 		if ( ! empty( $adapters_dir_name ) ) {
 			$this->adapters_dir_name = $adapters_dir_name;
-			$adapters_directory      = $this->get_adapters_directory();
-			require_once $adapters_directory . DIRECTORY_SEPARATOR . 'ActiveRecordAdapter.php';
-			require_once $adapters_directory . DIRECTORY_SEPARATOR . 'MetaAdapter.php';
-			require_once $adapters_directory . DIRECTORY_SEPARATOR . 'OccurrenceAdapter.php';
-			require_once $adapters_directory . DIRECTORY_SEPARATOR . 'QueryAdapter.php';
-			require_once $adapters_directory . DIRECTORY_SEPARATOR . 'TmpUserAdapter.php';
 			do_action( 'wsal_require_additional_adapters' );
 		}
 	}

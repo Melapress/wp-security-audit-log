@@ -7,6 +7,8 @@
  * @package wsal
  */
 
+namespace WSAL\Adapter;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -19,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @package wsal
  */
-class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_OccurrenceInterface {
+class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord implements \WSAL_Adapters_OccurrenceInterface {
 
 	/**
 	 * Contains the table name
@@ -173,7 +175,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 	 * @return WSAL_Models_Occurrence
 	 */
 	public function get_model() {
-		$result = new WSAL_Models_Occurrence();
+		$result = new \WSAL_Models_Occurrence();
 		$result->set_adapter( $this );
 
 		return $result;
@@ -290,7 +292,7 @@ class WSAL_Adapters_MySQL_Occurrence extends WSAL_Adapters_MySQL_ActiveRecord im
 			function ( $value ) {
 				return '"' . $value . '"';
 			},
-			array_keys( WSAL_Models_Occurrence::$migrated_meta )
+			array_keys( \WSAL_Models_Occurrence::$migrated_meta )
 		);
 
 		return $this->load_multi_query(

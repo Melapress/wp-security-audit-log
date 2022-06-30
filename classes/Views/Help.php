@@ -254,9 +254,19 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			}
 		</style>
 		<?php
-		$freemius_id = wsal_freemius()->get_id();
-		$vars        = array( 'id' => $freemius_id );
-		echo fs_get_template( 'contact.php', $vars ); // phpcs:ignore
+		if ( $freemius_id = wsal_freemius()->get_id() ) { // phpcs:ignore
+			$vars = array( 'id' => $freemius_id );
+			echo fs_get_template( 'contact.php', $vars ); // phpcs:ignore
+		} else {
+			echo '<p>';
+			printf(
+				/* translators: Link to our contact form */
+				esc_html__( 'Please refer to the Help tab for links and information on how to open a support ticket, or access the database. If you have any other queries, please use our %1$scontact form %2$s', 'wp-security-audit-log' ),
+				'<a style="text-decoration:underline" href="https://www.wpwhitesecurity.com/contact/" target="_blank">',
+				'</a>'
+			);
+			echo '</p>';
+		}
 	}
 
 	/**

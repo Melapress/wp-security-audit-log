@@ -7,6 +7,8 @@
  * @package wsal
  */
 
+namespace WSAL\Adapter;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -21,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package wsal
  * @subpackage adapters
  */
-class WSAL_Adapters_MySQL_Query implements WSAL_Adapters_QueryInterface {
+class WSAL_Adapters_MySQL_Query implements \WSAL_Adapters_QueryInterface {
 
 	/**
 	 * DB Connection

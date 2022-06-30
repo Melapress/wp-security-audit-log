@@ -336,7 +336,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 				$this->_cached_message = $alert_object->get_message( $meta_array, $this->_cached_message, $this->get_id(), $context );
 			} else {
 				// Filter to allow items to be added elsewhere.
-				$addon_event_codes = apply_filters( 'wsal_addon_event_codes', $addon_event_codes );
+				$addon_event_codes = apply_filters( 'wsal_addon_event_codes', array() );
 
 				$installer_nonce = wp_create_nonce( 'wsal-install-addon' );
 				foreach ( $addon_event_codes as $key => $addon ) {

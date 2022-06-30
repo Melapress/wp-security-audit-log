@@ -13,15 +13,18 @@
  * @since 4.4.0
  */
 class WSAL_Utilities_FileSystemUtils {
+
 	/**
 	 * Returns a list of files matching given pattern in a given directory.
 	 *
 	 * It uses transients to cache the list of files for a day.
 	 *
+	 * TODO: Check if that is necessary functionality. Currently it is used for loading sensors (switch to autoloader instead ? and give the users ability to load other sensors in a different way). If it is something that can be used in other parts of the code add exclusion filter and read subfolders as well
+	 *
 	 * @param string $directory Directory to search.
 	 * @param string $pattern Filename pattern to narrow down the list of files.
 	 *
-	 * @return string
+	 * @return array
 	 *
 	 * @since 4.4.0
 	 */
@@ -46,7 +49,7 @@ class WSAL_Utilities_FileSystemUtils {
 			closedir( $handle );
 		}
 
-		set_transient( $cache_key, $result, DAY_IN_SECONDS );
+		WpSecurityAuditLog::set_transient( $cache_key, $result, DAY_IN_SECONDS );
 
 		return $result;
 	}

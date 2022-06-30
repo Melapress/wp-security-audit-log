@@ -7,6 +7,8 @@
  * @package wsal
  */
 
+namespace WSAL\Adapter;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

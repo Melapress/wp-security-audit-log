@@ -561,7 +561,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	 * @return bool
 	 */
 	protected function is_multisite() {
-		return $this->plugin->is_multisite();
+		return WpSecurityAuditLog::is_multisite();
 	}
 
 	/**

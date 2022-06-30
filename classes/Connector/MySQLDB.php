@@ -13,6 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use WSAL\Adapter\WSAL_Adapters_MySQL_Occurrence;
+use WSAL\Adapter\WSAL_Adapters_MySQL_Meta;
+
 /**
  * MySQL Connector Class
  * It uses wpdb WordPress DB Class
@@ -200,7 +203,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * @return string
 	 */
 	protected function get_adapter_class_name( $class_name ) {
-		return 'WSAL_Adapters_MySQL_' . $class_name;
+		return 'WSAL\Adapter\WSAL_Adapters_MySQL_' . $class_name;
 	}
 
 	/**
@@ -218,12 +221,9 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 	 * {@inheritDoc}
 	 */
 	public function install_all( $is_external_database = false ) {
-		$adapter_list = WSAL_Utilities_FileSystemUtils::read_files_in_folder( $this->get_adapters_directory(), '*.php' );
-		$adapter_list = apply_filters( 'wsal_install_adapters_list', $adapter_list );
-		foreach ( $adapter_list as $file ) {
-			$file_path  = explode( DIRECTORY_SEPARATOR, $file );
-			$file_name  = $file_path[ count( $file_path ) - 1 ];
-			$class_name = $this->get_adapter_class_name( str_replace( 'Adapter.php', '', $file_name ) );
+		$adapter_list = \WSAL\Helpers\Classes_Helper::get_classes_by_namespace( '\WSAL\Adapter' );
+
+		foreach ( $adapter_list as $class_name ) {
 			$this->install_single( $class_name, $is_external_database );
 		}
 	}
@@ -237,17 +237,13 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 		}
 
 		$class = new $class_name( $this->get_connection() );
-		if ( $is_external_database && $class instanceof WSAL_Adapters_MySQL_Session ) {
-			// Sessions table should only ever exist only in local database.
-			return;
-		}
 
-		if ( ! $is_external_database && $class instanceof WSAL_Adapters_MySQL_TmpUser ) {
+		if ( ! $is_external_database && $class instanceof \WSAL\Adapter\WSAL_Adapters_MySQL_TmpUser ) {
 			// Exclude the tmp_users table for local database.
 			return;
 		}
 
-		if ( is_subclass_of( $class, 'WSAL_Adapters_MySQL_ActiveRecord' ) ) {
+		if ( is_subclass_of( $class, 'WSAL\Adapter\WSAL_Adapters_MySQL_ActiveRecord' ) ) {
 			$class->install();
 		}
 	}
@@ -262,7 +258,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			$class_name = $this->get_adapter_class_name( str_replace( 'Adapter.php', '', $file_name ) );
 
 			$class = new $class_name( $this->get_connection() );
-			if ( is_subclass_of( $class, 'WSAL_Adapters_MySQL_ActiveRecord' ) ) {
+			if ( is_subclass_of( $class, 'WSAL\Adapter\WSAL_Adapters_MySQL_ActiveRecord' ) ) {
 				$class->uninstall();
 			}
 		}

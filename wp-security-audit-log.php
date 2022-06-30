@@ -7,7 +7,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     4.4.1
+ * Version:     4.4.2
  * Plugin URI:  https://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
  * Author:      WP White Security
@@ -37,6 +37,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use WSAL\Helpers\WP_Helper;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+// Require Composer autoloader if it exists.
+if ( file_exists( plugin_dir_path( __FILE__ ) . 'vendor/autoload.php' ) ) {
+	require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
+}
+
+if ( ! defined( 'WSAL_PREFIX' ) ) {
+	define( 'WSAL_VERSION', '4.4.2' );
+	define( 'WSAL_PREFIX', 'wsal_' );
+}
+
 if ( ! function_exists( 'wsal_freemius' ) ) {
 
 	if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
@@ -49,14 +65,15 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		class WpSecurityAuditLog {
 
 			/**
-			 * Plugin version.
-			 *
-			 * @var string
-			 */
-			public $version = '4.4.1';
-
-			/**
 			 * Plugin constants.
+			 *
+			 * The above is misleading - keeping it before making sure all occurrences are covered.
+			 *
+			 * From here the Autoloader tries to guess the classes - probably that is the meaning of the CLS - it looks like its not used anywhere else
+			 *
+			 * Possible name meaning - Plugin CLass Prefix
+			 *
+			 * TODO: Change then name.
 			 *
 			 * @var string
 			 */
@@ -222,14 +239,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// plus make available all the supporting classes it needs to operate.
 				$base_path = plugin_dir_path( __FILE__ );
 				if ( file_exists( $base_path . 'extensions/user-sessions/user-sessions.php' ) ) {
-					spl_autoload_register( array( __CLASS__, 'autoloader' ) );
-
-					// Classes below don't follow any naming convention handled by the autoloader.
-					require_once $base_path . 'extensions/user-sessions/classes/Adapters/SessionInterface.php';
-					require_once $base_path . 'extensions/user-sessions/classes/Adapters/SessionAdapter.php';
-					require_once $base_path . 'extensions/user-sessions/classes/Models/Session.php';
-					require_once $base_path . 'extensions/user-sessions/classes/Helpers.php';
-					require_once $base_path . 'extensions/user-sessions/user-sessions.php';
 
 					$session_tracking = new WSAL_Sensors_UserSessionsTracking( $this );
 					$session_tracking->init();
@@ -329,13 +338,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$this->define_constants();
 				$this->set_allowed_html_tags();
 				$this->includes();
+				$this->update();
 				$this->init_hooks();
 				$this->load_defaults();
 				$this->load_wsal();
-
-				if ( did_action( 'init' ) ) {
-					$this->init();
-				}
+				$this->init();
 			}
 
 			/**
@@ -380,11 +387,13 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 					// Check if this plugin is being updated from the WordPress updated screen (update-core.php).
 					if ( isset( $_REQUEST['action'] ) && 'do-plugin-upgrade' === wp_unslash( trim( $_REQUEST['action'] ) ) ) {
-						$selected_plugins = $_REQUEST['checked'];
-						if ( ! empty( $selected_plugins ) ) {
-							foreach ( $selected_plugins as $selected_plugin ) {
-								if ( 'wp-security-audit-log.php' === basename( $selected_plugin ) ) {
-									return false;
+						if ( isset( $_REQUEST['checked'] ) ) {
+							$selected_plugins = $_REQUEST['checked'];
+							if ( ! empty( $selected_plugins ) ) {
+								foreach ( $selected_plugins as $selected_plugin ) {
+									if ( 'wp-security-audit-log.php' === basename( $selected_plugin ) ) {
+										return false;
+									}
 								}
 							}
 						}
@@ -426,87 +435,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @since 3.3
 			 */
 			public function includes() {
-				require_once 'classes/Models/ActiveRecord.php';
 
-				if ( is_admin() ) {
-					// Models.
-					require_once 'classes/Models/Meta.php';
-					require_once 'classes/Models/Occurrence.php';
-					require_once 'classes/Models/Query.php';
-					require_once 'classes/Models/OccurrenceQuery.php';
-					require_once 'classes/Models/TmpUser.php';
-
-					// Data helper.
-					require_once 'classes/Helpers/DataHelper.php';
-
-					// Managers.
-					require_once 'classes/ViewManager.php';
-					require_once 'classes/WidgetManager.php';
-
-					// Views.
-					require_once 'classes/AbstractView.php';
-					require_once 'classes/ExtensionPlaceholderView.php';
-					require_once 'classes/AuditLogListView.php';
-					require_once 'classes/AuditLogGridView.php';
-					require_once 'classes/Views/AuditLog.php';
-					require_once 'classes/Views/EmailNotifications.php';
-					require_once 'classes/Views/ExternalDB.php';
-					require_once 'classes/Views/Help.php';
-					require_once 'classes/Views/LogInUsers.php';
-					require_once 'classes/Views/Reports.php';
-					require_once 'classes/Views/Search.php';
-					require_once 'classes/Views/Settings.php';
-					require_once 'classes/Views/ToggleAlerts.php';
-
-					// Utilities.
-					require_once 'classes/Utilities/PluginInstallAndActivate.php';
-					require_once 'classes/Utilities/PluginInstallerAction.php';
-					require_once 'classes/Utilities/RequestUtils.php';
-
-					// Third party extensions.
-					require_once 'classes/ThirdPartyExtensions/AbstractExtension.php';
-					require_once 'classes/ThirdPartyExtensions/YoastSeoExtension.php';
-					require_once 'classes/ThirdPartyExtensions/BBPressExtension.php';
-					require_once 'classes/ThirdPartyExtensions/WPFormsExtension.php';
-					require_once 'classes/ThirdPartyExtensions/WooCommerceExtension.php';
-					require_once 'classes/ThirdPartyExtensions/GravityFormsExtension.php';
-					require_once 'classes/ThirdPartyExtensions/TablePressExtension.php';
-					require_once 'classes/ThirdPartyExtensions/WFCMExtension.php';
-				}
-
-				// Connectors.
-				require_once 'classes/Connector/AbstractConnector.php';
-				require_once 'classes/Connector/ConnectorInterface.php';
-				require_once 'classes/Connector/ConnectorFactory.php';
-				require_once 'classes/Connector/MySQLDB.php';
-
-				// Adapters.
-				require_once 'classes/Adapters/ActiveRecordInterface.php';
-				require_once 'classes/Adapters/MetaInterface.php';
-				require_once 'classes/Adapters/OccurrenceInterface.php';
-				require_once 'classes/Adapters/QueryInterface.php';
-
-				// Utilities.
-				require_once 'classes/Utilities/UserUtils.php';
-
-				// Third party extensions with public sensors.
-				require_once 'classes/ThirdPartyExtensions/AbstractExtension.php';
-				require_once 'classes/ThirdPartyExtensions/WooCommerceExtension.php';
-
-				// Only include these if we are in multisite environment.
-				if ( $this->is_multisite() ) {
-					require_once 'classes/Multisite/NetworkWide/TrackerInterface.php';
-					require_once 'classes/Multisite/NetworkWide/AbstractTracker.php';
-					require_once 'classes/Multisite/NetworkWide/CPTsTracker.php';
-					// setup the CPT tracker across the network.
+				if ( self::is_multisite() ) {
 					$cpts_tracker = new \WSAL\Multisite\NetworkWide\CPTsTracker( $this );
 					$cpts_tracker->setup();
 				}
-
-				// Load autoloader and register base paths.
-				require_once 'classes/Autoloader.php';
-				$this->autoloader = new WSAL_Autoloader( $this );
-				$this->autoloader->register( self::PLG_CLS_PRFX, $this->get_base_dir() . 'classes' . DIRECTORY_SEPARATOR );
 			}
 
 			/**
@@ -515,8 +448,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @since 3.3
 			 */
 			public function init_hooks() {
-				add_action( 'init', array( $this, 'init' ), 5 );
-
 				// Listen for cleanup event.
 				add_action( 'wsal_cleanup', array( $this, 'clean_up' ) );
 
@@ -781,7 +712,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					$redirect = '';
 
 					// If current site is multisite and user is super-admin then redirect to network audit log.
-					if ( $this->is_multisite() && $this->settings()->current_user_can( 'edit' ) && is_super_admin() ) {
+					if ( self::is_multisite() && $this->settings()->current_user_can( 'edit' ) && is_super_admin() ) {
 						$redirect = add_query_arg( 'page', 'wsal-auditlog', network_admin_url( 'admin.php' ) );
 					} else {
 						// Otherwise, redirect to main audit log view.
@@ -822,10 +753,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @since 2.6.6
 			 */
 			public function define_constants() {
-				// Plugin version.
-				if ( ! defined( 'WSAL_VERSION' ) ) {
-					define( 'WSAL_VERSION', $this->version );
-				}
+
 				// Plugin Name.
 				if ( ! defined( 'WSAL_BASE_NAME' ) ) {
 					define( 'WSAL_BASE_NAME', plugin_basename( __FILE__ ) );
@@ -983,6 +911,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @internal
 			 */
 			public function init() {
+
 				// Load dependencies.
 				if ( ! isset( $this->alerts ) ) {
 					$this->alerts = new WSAL_AlertManager( $this );
@@ -1011,14 +940,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						add_action( 'admin_head', array( $this, 'hide_plugin' ) );
 						add_filter( 'all_plugins', array( $this, 'wsal_hide_plugin' ) );
 					}
-
-					// Update routine.
-					$old_version = $this->get_old_version();
-					$new_version = $this->get_new_version();
-					if ( $old_version !== $new_version ) {
-						$this->update( $old_version, $new_version );
-					}
-
 				}
 
 				/**
@@ -1029,9 +950,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				 * @param WpSecurityAuditLog $this – Instance of main plugin class.
 				 */
 				do_action( 'wsal_init', $this );
-
-				// Background job for metadata migration.
-				new WSAL_Upgrade_MetadataMigration();
 
 				// Allow registration of custom alert formatters (must be called after wsal_init action).
 				WSAL_AlertFormatterFactory::bootstrap();
@@ -1166,7 +1084,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				}
 				$this->set_global_setting( 'disabled-alerts', $s_alerts );
 
-				echo wp_sprintf( '<p>' . esc_html__( 'Alert %1$s is no longer being monitored.<br /> %2$s', 'wp-security-audit-log' ) . '</p>', esc_html( $post_array['code'] ), esc_html__( 'You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.', 'wp-security-audit-log' ) ); // phpcs:ignore
+				echo wp_sprintf(
+					'<p>' . __( 'Alert %1$s is no longer being monitored.<br /> %2$s', 'wp-security-audit-log' ) . '</p>',
+					 esc_html( $post_array['code'] ),
+					 esc_html__( 'You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.', 'wp-security-audit-log' ) ); // phpcs:ignore
 				die;
 			}
 
@@ -1176,6 +1097,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @internal
 			 */
 			public function render_footer() {
+				// File is not there / deleted during upgrade ? either way stop the execution.
+				if ( ! file_exists( $this->get_base_dir() . '/js/common.js' ) ) {
+					return;
+				}
+
 				// Register common script.
 				wp_register_script(
 					'wsal-common',
@@ -1211,25 +1137,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @internal
 			 */
 			public function load_wsal() {
-				require_once 'classes/Alert.php';
-				require_once 'classes/AbstractLogger.php';
-				require_once 'classes/AbstractSensor.php';
-				require_once 'classes/AbstractMetaDataSensor.php';
-				require_once 'classes/AlertManager.php';
-				require_once 'classes/ConstantManager.php';
-				require_once 'classes/Loggers/Database.php';
-				require_once 'classes/SensorManager.php';
-				require_once 'classes/Settings.php';
 
 				if ( is_admin() ) {
 					// Initiate settings object if not set.
 					if ( ! $this->settings ) {
 						$this->settings = new WSAL_Settings( $this );
 					}
-
-					// Setting the pruning date with the old value or the default value.
-					$pruning_date = $this->settings()->get_pruning_date();
-					$this->settings()->set_pruning_date( $pruning_date );
 
 					// Load translations.
 					load_plugin_textdomain( 'wp-security-audit-log', false, basename( dirname( __FILE__ ) ) . '/languages/' );
@@ -1270,7 +1183,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// Fully set up the plugin.
 				$this->setup();
-				$this->init();
 
 				// Update licensing info in case we're swapping from free to premium or vice-versa.
 				$this->sync_premium_freemius();
@@ -1287,14 +1199,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				self::get_connector()->get_adapter( 'Occurrence' )->create_indexes();
 				self::get_connector()->get_adapter( 'Meta' )->create_indexes();
 
-
-				// If system already installed, do updates now (if any).
-				$old_version = $this->get_old_version();
-				$new_version = $this->get_new_version();
-
-				if ( $old_version !== $new_version ) {
-					$this->update( $old_version, $new_version );
-				}
 
 				// Install cleanup hook (remove older one if it exists).
 				wp_clear_scheduled_hook( 'wsal_cleanup' );
@@ -1314,145 +1218,184 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 			/**
 			 * Run some code that updates critical components required for a newer version.
-			 *
-			 * @param string $old_version The old version.
-			 * @param string $new_version The new version.
 			 */
-			public function update( $old_version, $new_version ) {
-				// Update version in db.
-				$this->set_global_setting( 'version', $new_version, true );
+			public function update() {
+				\WSAL\Utils\Migration::migrate();
+				return;
 
-				// Keep track of the initial db version. This gets updated multiple times during the upgrade process
-				// and we need to know what was the starting point.
-				$initial_db_version = $this->settings()->get_database_version();
+				/*
+				Leaving that here for now because of possible additional checks - dont mind it for now
+				*/
+				// // Update version in db.
+				// $this->set_global_setting( 'version', $new_version, true );
 
-				if ( '0.0.0' === $old_version ) {
-					// Set some initial plugins settings (only the ones that bypass the regular settings retrieval at
-					// some point) - e.g. disabled events.
-					$this->set_global_setting( 'disabled-alerts', implode( ',', $this->settings()->always_disabled_alerts ) );
+				// // Keep track of the initial db version. This gets updated multiple times during the upgrade process
+				// // and we need to know what was the starting point.
+				// $initial_db_version = $this->settings()->get_database_version();
 
-					// We set the database version to the latest if this is a freshly installed plugin.
-					$this->settings()->set_database_version( 44400 );
+				// if ( '0.0.0' === $old_version ) {
+				// 	// Set some initial plugins settings (only the ones that bypass the regular settings retrieval at
+				// 	// some point) - e.g. disabled events.
+				// 	$this->set_global_setting( 'disabled-alerts', implode( ',', $this->settings()->always_disabled_alerts ) );
 
-					// We stop here as no further updates are needed for a freshly installed plugin.
-					return;
+				// 	// We set the database version to the latest if this is a freshly installed plugin.
+				// 	$this->settings()->set_database_version( 44400 );
+
+				// 	// We stop here as no further updates are needed for a freshly installed plugin.
+				// 	return;
+				// }
+
+				// // Do version-to-version specific changes.
+				// if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
+				// 	// Dismiss privacy notice.
+				// 	if ( empty( $this->views ) ) {
+				// 		$this->views = new WSAL_ViewManager( $this );
+				// 	}
+				// 	$this->views->find_by_class_name( 'WSAL_Views_AuditLog' )->dismiss_notice( 'wsal-privacy-notice-3.2' );
+
+				// 	/**
+				// 	 * Delete advert transient on every update.
+				// 	 *
+				// 	 * @since 3.2.4
+				// 	 */
+				// 	if ( wsal_freemius()->is_free_plan() ) {
+				// 		self::delete_transient( 'wsal-is-advert-dismissed' ); // Delete advert transient.
+				// 	}
+
+				// 	/**
+				// 	 * MainWP Child Stealth Mode Update
+				// 	 *
+				// 	 * This update only needs to run if the stealth mode option
+				// 	 * does not exist on free version.
+				// 	 *
+				// 	 * @since 3.2.3.3
+				// 	 */
+				// 	if ( ! $this->get_global_boolean_setting( 'mwp-child-stealth-mode', false ) ) {
+				// 		$this->settings()->set_mainwp_child_stealth_mode();
+				// 	}
+
+				// 	// Remove obsolete options from the database.
+				// 	if ( version_compare( $new_version, '4.1.4', '>=' ) ) {
+				// 		$this->delete_global_setting( 'addon_available_notice_dismissed' );
+
+				// 		// Remove old file scanning options.
+				// 		global $wpdb;
+				// 		$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_local_files_%'" ); // phpcs:ignore
+				// 		if ( ! empty( $plugin_options ) ) {
+				// 			foreach ( $plugin_options as $option ) {
+				// 				$this->delete_global_setting( $option->option_name );
+				// 			}
+				// 		}
+				// 	}
+
+				// 	if ( version_compare( $new_version, '4.1.5', '>=' ) ) {
+				// 		// Remove 'system' entry from the front-end events array as it was removed along with 404 tracking.
+				// 		$frontend_events = WSAL_Settings::get_frontend_events();
+				// 		if ( array_key_exists( 'system', $frontend_events ) ) {
+				// 			unset( $frontend_events['system'] );
+				// 			WSAL_Settings::set_frontend_events( $frontend_events );
+				// 		}
+
+				// 		// Remove all settings related to 404 tracking.
+				// 		$not_found_page_related_settings = array(
+				// 			'log-404',
+				// 			'purge-404-log',
+				// 			'log-404-referrer',
+				// 			'log-visitor-404',
+				// 			'purge-visitor-404-log',
+				// 			'log-visitor-404-referrer',
+				// 			'excluded-urls',
+				// 		);
+				// 		foreach ( $not_found_page_related_settings as $setting_name ) {
+				// 			$this->delete_global_setting( $setting_name );
+				// 		}
+
+				// 		// Remove cron job for purging 404 logs.
+				// 		$schedule_time = wp_next_scheduled( 'wsal_log_files_pruning' );
+				// 		if ( $schedule_time ) {
+				// 			wp_unschedule_event( $schedule_time, 'wsal_log_files_pruning', array() );
+				// 		}
+				// 	}
+
+				// 	if ( version_compare( $new_version, '4.2.0', '>=' ) ) {
+				// 		// Delete custom logging dir path from the settings.
+				// 		$this->delete_global_setting( 'custom-logging-dir' );
+				// 		// Delete dev options from the settings.
+				// 		$this->delete_global_setting( 'dev-options' );
+				// 	}
+
+				// 	if ( version_compare( $new_version, '4.3.2', '>=' ) ) {
+				// 		$this->settings()->set_database_version( 43200 );
+				// 		// Change the name of the option storing excluded post meta fields.
+				// 		$excluded_custom_fields = $this->get_global_setting( 'excluded-custom', null );
+				// 		if ( ! is_null( $excluded_custom_fields ) ) {
+				// 			$this->set_global_setting( 'excluded-post-meta', $excluded_custom_fields );
+				// 			$this->delete_global_setting( 'excluded-custom' );
+				// 		}
+				// 	}
+
+				// 	if ( version_compare( $new_version, '4.4.0', '>=' ) ) {
+				// 		$should_440_upgrade_run = true;
+				// 		if ( 44400 === $initial_db_version ) {
+				// 			// Database version is 44400 if someone already upgraded from any version to 4.4.0.
+				// 			$should_440_upgrade_run = false;
+				// 		} elseif ( 0 === $initial_db_version ) {
+				// 			// Database version is 0 if the plugin was never upgraded. This could be an upgrade from
+				// 			// 4.3.6, 4.4.0 or any other lower version.
+				// 			$should_440_upgrade_run = false;
+				// 			if ( version_compare( $old_version, '4.4.0', '<' ) ) {
+				// 				// We are upgrading from pre-4.4.0 version.
+				// 				$should_440_upgrade_run = true;
+				// 			}
+				// 		}
+
+				// 		if ( $should_440_upgrade_run ) {
+				// 			require_once 'classes/Upgrade/Upgrade_43000_To_44400.php';
+				// 			$upgrader = new WSAL_Upgrade_43000_To_44400( $this );
+				// 			$upgrader->run();
+				// 		}
+
+				// 		$this->settings()->set_database_version( 44400 );
+				// 	}
+
+				// 	if ( version_compare( $new_version, '4.4.0', '>=' ) ) {
+				// 		$transients = self::get_transient_keys_with_prefix( 'wsal__file_list_' );
+				// 		if ( ! empty( $transients ) ) {
+				// 			foreach ( $transients as $key ) {
+				// 				delete_transient( $key );
+				// 			}
+				// 		}
+				// 	}
+				// }
+			}
+
+			/**
+			 * Gets all transient keys in the database with a specific prefix.
+			 *
+			 * Note that this doesn't work for sites that use a persistent object
+			 * cache, since in that case, transients are stored in memory.
+			 *
+			 * @param  string $prefix Prefix to search for.
+			 * @return array          Transient keys with prefix, or empty array on error.
+			 */
+			public static function get_transient_keys_with_prefix( $prefix ) {
+				global $wpdb;
+
+				$prefix = $wpdb->esc_like( '_transient_' . $prefix );
+				$sql    = "SELECT `option_name` FROM $wpdb->options WHERE `option_name` LIKE '%s'";
+				$keys   = $wpdb->get_results( $wpdb->prepare( $sql, $prefix . '%' ), ARRAY_A );
+
+				if ( is_wp_error( $keys ) ) {
+					return array();
 				}
 
-				// Do version-to-version specific changes.
-				if ( '0.0.0' !== $old_version && -1 === version_compare( $old_version, $new_version ) ) {
-					// Dismiss privacy notice.
-					if ( empty( $this->views ) ) {
-						$this->views = new WSAL_ViewManager( $this );
-					}
-					$this->views->find_by_class_name( 'WSAL_Views_AuditLog' )->dismiss_notice( 'wsal-privacy-notice-3.2' );
-
-					/**
-					 * Delete advert transient on every update.
-					 *
-					 * @since 3.2.4
-					 */
-					if ( wsal_freemius()->is_free_plan() ) {
-						$delete_transient_fn = $this->is_multisite() ? 'delete_site_transient' : 'delete_transient'; // Check for multisite.
-						$delete_transient_fn( 'wsal-is-advert-dismissed' ); // Delete advert transient.
-					}
-
-					/**
-					 * MainWP Child Stealth Mode Update
-					 *
-					 * This update only needs to run if the stealth mode option
-					 * does not exist on free version.
-					 *
-					 * @since 3.2.3.3
-					 */
-					if ( ! $this->get_global_boolean_setting( 'mwp-child-stealth-mode', false ) ) {
-						$this->settings()->set_mainwp_child_stealth_mode();
-					}
-
-					// Remove obsolete options from the database.
-					if ( version_compare( $new_version, '4.1.4', '>=' ) ) {
-						$this->delete_global_setting( 'addon_available_notice_dismissed' );
-
-						// Remove old file scanning options.
-						global $wpdb;
-						$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_local_files_%'" ); // phpcs:ignore
-						if ( ! empty( $plugin_options ) ) {
-							foreach ( $plugin_options as $option ) {
-								$this->delete_global_setting( $option->option_name );
-							}
-						}
-					}
-
-					if ( version_compare( $new_version, '4.1.5', '>=' ) ) {
-						// Remove 'system' entry from the front-end events array as it was removed along with 404 tracking.
-						$frontend_events = WSAL_Settings::get_frontend_events();
-						if ( array_key_exists( 'system', $frontend_events ) ) {
-							unset( $frontend_events['system'] );
-							WSAL_Settings::set_frontend_events( $frontend_events );
-						}
-
-						// Remove all settings related to 404 tracking.
-						$not_found_page_related_settings = array(
-							'log-404',
-							'purge-404-log',
-							'log-404-referrer',
-							'log-visitor-404',
-							'purge-visitor-404-log',
-							'log-visitor-404-referrer',
-							'excluded-urls',
-						);
-						foreach ( $not_found_page_related_settings as $setting_name ) {
-							$this->delete_global_setting( $setting_name );
-						}
-
-						// Remove cron job for purging 404 logs.
-						$schedule_time = wp_next_scheduled( 'wsal_log_files_pruning' );
-						if ( $schedule_time ) {
-							wp_unschedule_event( $schedule_time, 'wsal_log_files_pruning', array() );
-						}
-					}
-
-					if ( version_compare( $new_version, '4.2.0', '>=' ) ) {
-						// Delete custom logging dir path from the settings.
-						$this->delete_global_setting( 'custom-logging-dir' );
-						// Delete dev options from the settings.
-						$this->delete_global_setting( 'dev-options' );
-					}
-
-					if ( version_compare( $new_version, '4.3.2', '>=' ) ) {
-						$this->settings()->set_database_version( 43200 );
-
-						// Change the name of the option storing excluded post meta fields.
-						$excluded_custom_fields = $this->get_global_setting( 'excluded-custom', null );
-						if ( ! is_null( $excluded_custom_fields ) ) {
-							$this->set_global_setting( 'excluded-post-meta', $excluded_custom_fields );
-							$this->delete_global_setting( 'excluded-custom' );
-						}
-					}
-
-					if ( version_compare( $new_version, '4.4.0', '>=' ) ) {
-						$should_440_upgrade_run = true;
-						if ( 44400 === $initial_db_version ) {
-							// Database version is 44400 if someone already upgraded from any version to 4.4.0.
-							$should_440_upgrade_run = false;
-						} elseif ( 0 === $initial_db_version ) {
-							// Database version is 0 if the plugin was never upgraded. This could be an upgrade from
-							// 4.3.6, 4.4.0 or any other lower version.
-							$should_440_upgrade_run = false;
-							if ( version_compare( $old_version, '4.4.0', '<' ) ) {
-								// We are upgrading from pre-4.4.0 version.
-								$should_440_upgrade_run = true;
-							}
-						}
-
-						if ( $should_440_upgrade_run ) {
-							require_once 'classes/Upgrade/Upgrade_43000_To_44400.php';
-							$upgrader = new WSAL_Upgrade_43000_To_44400( $this );
-							$upgrader->run();
-						}
-
-						$this->settings()->set_database_version( 44400 );
-					}
-				}
+				return array_map(
+					function( $key ) {
+						// Remove '_transient_' from the option name.
+						return ltrim( $key['option_name'], '_transient_' );
+					},
+					$keys
+				);
 			}
 
 			/**
@@ -1495,24 +1438,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 
 			/**
-			 * Returns the class name of a particular file that contains the class.
-			 *
-			 * @param string $file - File name.
-			 * @return string - Class name.
-			 * @deprecated since 1.2.5 Use autoloader->GetClassFileClassName() instead.
-			 *
-			 * @phpcs:disable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-			 */
-			public function GetClassFileClassName( $file ) {
-				return $this->autoloader->get_class_file_class_name( $file );
-			}
-
-			/**
 			 * Return whether we are running on multisite or not.
 			 *
 			 * @return boolean
 			 */
-			public function is_multisite() {
+			public static function is_multisite() {
 				return function_exists( 'is_multisite' ) && is_multisite();
 			}
 
@@ -1855,7 +1785,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					return;
 				}
 
-				$freemius_transient = get_transient( 'fs_wsalp' );
+				$freemius_transient = self::get_transient( 'fs_wsalp' );
 				if ( false === $freemius_transient || ! in_array( $freemius_transient, array( 'yes', 'no' ), true ) ) {
 					// Transient expired or invalid.
 					$this->sync_premium_freemius();
@@ -1872,18 +1802,18 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 */
 			public function sync_premium_freemius() {
 				$option_name = 'fs_wsalp';
-				$old_value   = get_option( $option_name );
+				$old_value   = get_site_option( $option_name );
 
 				// Determine new value via Freemius SDK.
 				$new_value = wsal_freemius()->has_active_valid_license() ? 'yes' : 'no';
 
 				// Update the db option only if the value changed.
 				if ( $new_value != $old_value ) { // phpcs:ignore
-					update_option( $option_name, $new_value );
+					update_site_option( $option_name, $new_value );
 				}
 
 				// Always update the transient to extend the expiration window.
-				set_transient( $option_name, $new_value, DAY_IN_SECONDS );
+				self::set_transient( $option_name, $new_value, DAY_IN_SECONDS );
 			}
 
 			/**
@@ -1897,7 +1827,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @return boolean
 			 */
 			public static function is_premium_freemius() {
-				return 'yes' === get_option( 'fs_wsalp' );
+				return 'yes' === get_site_option( 'fs_wsalp' );
 			}
 
 			/**
@@ -2045,10 +1975,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					return false;
 				}
 
-				// This is called very early so we need to load some settings manually.
-				spl_autoload_register( array( __CLASS__, 'autoloader' ) );
-				require_once 'classes/Helpers/Options.php';
-
 				/*
 				 * We assume settings have already been migrated (in version 4.1.3) to WordPress options table. We might
 				 * miss some 404 events until the plugin upgrade runs, but that is a very rare edge case. The same applies
@@ -2060,7 +1986,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$is_stealth_mode = $options_helper->get_option_value( 'mwp-child-stealth-mode', 'no' );
 
 				if ( 'yes' !== $is_stealth_mode ) {
-					// Unly intended if MainWP stealth mode is active.
+					// Only intended if MainWP stealth mode is active.
 					return false;
 				}
 
@@ -2077,8 +2003,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				if ( file_exists( plugin_dir_path( __FILE__ ) . 'extensions/user-sessions/user-sessions.php' ) ) {
 					$this->maybe_add_sessions_trackers_early();
 					require_once plugin_dir_path( __FILE__ ) . 'extensions/user-sessions/user-sessions.php';
-					$sessions = new WSAL_UserSessions_Plugin();
-					$sessions->require_adapter_classes();
 				}
 			}
 
@@ -2091,7 +2015,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			public function on_freemius_premium_version_activation() {
 				$this->sync_premium_freemius();
 				$this->load_sessions_extension_db_adapter();
-				self::get_connector()->install_single( 'WSAL_Adapters_MySQL_Session' );
 			}
 
 			/**
@@ -2120,6 +2043,53 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				if ( strlen( $database_type ) > 0 ) {
 					$this->get_connector()->close_connection();
 				}
+			}
+
+			/**
+			 * Retrieves the value of a transient. If this is a multisite, the network transient is retrieved.
+			 *
+			 * If the transient does not exist, does not have a value, or has expired,
+			 * then the return value will be false.
+			 *
+			 * @param string $transient Transient name. Expected to not be SQL-escaped.
+			 *
+			 * @return mixed Value of transient.
+			 * @since      4.4.2
+			 */
+			public static function get_transient( $transient ) {
+				return self::is_multisite() ? get_site_transient( $transient ) : get_transient( $transient );
+			}
+
+			/**
+			 * Sets/updates the value of a transient. If this is a multisite, the network transient is set/updated.
+			 *
+			 * You do not need to serialize values. If the value needs to be serialized,
+			 * then it will be serialized before it is set.
+			 *
+			 * @param string $transient  Transient name. Expected to not be SQL-escaped.
+			 *                           Must be 172 characters or fewer in length.
+			 * @param mixed  $value      Transient value. Must be serializable if non-scalar.
+			 *                           Expected to not be SQL-escaped.
+			 * @param int    $expiration Optional. Time until expiration in seconds. Default 0 (no expiration).
+			 *
+			 * @return bool True if the value was set, false otherwise.
+			 * @since      4.4.2
+			 */
+			public static function set_transient( $transient, $value, $expiration = 0 ) {
+				return self::is_multisite() ? set_site_transient( $transient, $value, $expiration ) : set_transient( $transient, $value, $expiration );
+			}
+
+			/**
+			 * Deletes a transient. If this is a multisite, the network transient is deleted.
+			 *
+			 * @param string $transient Transient name. Expected to not be SQL-escaped.
+			 *
+			 * @return bool True if the transient was deleted, false otherwise.
+			 *
+			 * @since      4.4.2
+			 */
+			public static function delete_transient( $transient ) {
+				return self::is_multisite() ? delete_site_transient( $transient ) : delete_transient( $transient );
 			}
 
 			/**
@@ -2197,6 +2167,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 } else {
 	wsal_freemius()->set_basename( true, __FILE__ );
 }
+/* @free:start */
 if ( ! function_exists( 'wsal_free_on_plugin_activation' ) ) {
 	/**
 	 * Takes care of deactivation of the premium plugin when the free plugin is activated. The opposite direction is handled
@@ -2215,3 +2186,4 @@ if ( ! function_exists( 'wsal_free_on_plugin_activation' ) ) {
 
 	register_activation_hook( __FILE__, 'wsal_free_on_plugin_activation' );
 }
+/* @free:end */

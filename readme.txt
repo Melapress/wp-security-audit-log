@@ -5,8 +5,8 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, wordpress activity logs, security audit log, audit log, user tracking, security event log, audit trail, wordpress security monitor, wordpress admin, wordpress admin monitoring, user activity, admin, multisite, SMS alerts, wordpress monitoring, email notification, wordpress email alerts, tracking, user tracking, user activity report, wordpress audit trail
 Requires at least: 5.0
-Tested up to: 5.9.1
-Stable tag: 4.4.1
+Tested up to: 6.0.0
+Stable tag: 4.4.2
 Requires PHP: 7.0
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -208,18 +208,58 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.4.1 (2022-03-23) =
+= 4.4.2 (2022-06-23) =
 
-Release notes: [Out now: Activity Log for MainWP 2.0 & WP Activity Log 4.4.1](https://wpactivitylog.com/activity-log-mainwp-2-0/)
+Release notes: [More reports white labelling options & statistics reports](https://wpactivitylog.com/wsal-4-4-2/)
 
-* **Improvements & changes**
-	* All of the plugin's code is now using the WordPress coding standards.
-	* Removed the reporting and search code from the free edition plugin that was used by the MainWP extension.
+* **New activity log event IDs**
+	* ID 2133: user taken over a post from another user.
+	
+* **New features & functionality**
+	* A number of new [activity log statistics reports](https://wpactivitylog.com/features/reports-wordpress-activity-log/) such as number of newly created users, user profile changes, password changes and password resets, page views, and more.
+	* Added a number of new whitelabeling options in the activity log reports. Users can now add the business name, contact details, business logo and more in the reports.
+	* Users can now change the report title, add comments etc.
+	* Tags for Loggly & AWS Cloudwatch: add tags to the [WordPress activity logs mirrored to your logs management system](https://wpactivitylog.com/features/integration-mirroring-tools-wordpress-activity-log/).
+	
+* **Plugin & features improvements**
+	* Users can now specify the number of hours when configuring a timeout for idle sessions.
+	* Automatic plugin and theme updates are now detected and reported in the activity log (event ID: 5004).
+	* Improved the logic of event ID 4029 - the user triggering the password reset request is now reported as the user who did the action.
+	* Added the format of the generated report in the periodic reports list.
+	* Draft posts can also be included  in reports criteria.
+	* The function to import / export plugin settings replaced with our own library (to be used in other plugins).
+	* Plugin now uses the hook 'deleted_theme' to detect deletion of installed themes.
+	* Removed the multisite tab from built-in notifications when installed on single site.
+	* Added a check so the name of a mirroring connection cannot be empty.
+	* Plugin now checks if there is an existing mirroring connection with the same name so not to overwrite existing ones.
+	* Removed redundant "Save" button from the "Delete activity log data" page. 
+	* Improved the Integrations wizard - catered for a number of conflicts with other plugins and themes such as Divi.
+	* Reviewed and improved the text in the [WordPress users' sessions management](https://wpactivitylog.com/features/wordpress-users-sessions-management-tools/) module.
+	* Reports generation errors now contain details of why reports failed instead of generic errors, helping the user identify what the issue might be.
+	* When deleting data about an IP address or a user from the logs, the user is now asked if they want to delete the events about the user / where the IP address is mentioned, or events generated from that user or IP address.
+	* Optimized the way licensing data is stored on a multisite network.
+	* Premium plugin advert in activity log viewer is now fixed - it does not interrupt user.
+	* Added a new filter to specify which long data fields should be truncated in the activity log viewer.
+	* "Email Notifications" section renamed to "Email & SMS Notifications".
+	* Reviewed and rewritten the help text in the Sessions module to advise users to terminate current sessions before restricting sessions.
+	* Applied a number of UI/UX tweakts to the Enable/Disable events section making it neater and easier to use.
+	* Post titles are now reported and linked to the post in the daily update email.
 	
 * **Bug fixes**
-	* Fixed: Reports filter "By post title(s)" not working.
-	* Fixed: Users couldn't set up a MySQL connection because of "unknown connection type" error.
-	* Fixed: The daily activity log summary email cannot be enabled again after disabled.
-	* Fixed: PHP fatal error when index.php file is saved in the custom sensors directory.
+	* When user changes multiple plugin settings the plugin now is reporting all the changes and not just one.
+	* Fatal error reported when running certain activity log searches.
+	* Event ID 6310 no longer incorrectly reported with every plugin setting change.
+	* Fixed: activity log retention settings deleted and rewritten to database on page reloads.
+	* Fixed: some premium features such as the "link to view all users activity" available in the free edition.
+	* Fixed: New notification help text shows HTML code rather than formatted message.
+	* Fixed: Clicking the expand data in activity log viewer resets the view and redirects the user to top of the activity log.
+	* Fixed: Reports filter "Post type" was not finding events about posts with some custom post types.
+	* Fixed: Changes in activity log retention settings not correctly reported in event ID 6052.
+	* Fixed: When a user changes a post's title and content, only the title change is reported.
+	* Fixed: Deleting of activity log events by severity is not deleting the events.
+	* Fixed: Excape characters in password cause authentication with third party services to fail.
+	* Fixed: The setting "Cleanup expired session data" cannot be disabled.
+	* Fixed: Step 2 in the integrations wizard is not "scrollable" if you go back to it while configuring a connection.
+	* Fixed: changes in built-in email notifications are not saved in some specific scenarios.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.

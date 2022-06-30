@@ -1,0 +1,143 @@
+li[data-wpws-option-name] span {
+	width: auto;
+	margin-left: 10px;
+	display: inline-block;
+}
+
+li[data-wpws-option-name] span span, li[data-wpws-option-name] [data-help] {
+	width: auto;
+	font-size: 14px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	position: relative;
+	margin: 0;
+	top: -5px;
+}
+
+#import-settings-modal {
+	display: none;
+	position: fixed;
+	z-index: 9999;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	background-color: rgb(0, 0, 0);
+	background-color: rgba(0, 0, 0, 0.4);
+}
+
+#import-settings-modal .modal-content {
+	background-color: #fefefe;
+	margin: 5% auto;
+	padding: 20px;
+	border: 1px solid #888;
+	width: 80%;
+	max-width: 800px;
+}
+
+.import-settings-modal-close {
+	color: #aaa;
+	float: right;
+	font-size: 28px;
+	font-weight: bold;
+}
+
+.import-settings-modal-close:hover, .import-settings-modal-close:focus {
+	color: black;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+[data-wpws-option-name] {
+	line-height: 25px !important;
+}
+
+[data-wpws-option-name]>div {
+	display: inline-block;
+	min-width: 285px;
+	font-size: 15px;
+	font-weight: 500;
+	text-transform: capitalize;
+}
+
+[data-wpws-option-name]:last-of-type {
+	margin-bottom: 30px;
+}
+
+#wpws-modal-title {
+	max-width: 500px;
+	display: inline-block;
+	margin: 0 15px 1px 0;
+	font-size: 24px;
+}
+
+li[data-wpws-option-name] [data-help] {
+    position:relative; /* making the .tooltip span a container for the tooltip text */
+    border-bottom:1px dashed #000; /* little indicater to indicate it's hoverable */
+  }
+
+  li[data-wpws-option-name] [data-help]:before {
+    content: attr(data-help-text); /* here's the magic */
+    position:absolute;
+    
+    /* vertically center */
+    top:50%;
+    transform:translateY(-50%);
+    
+    /* move to right */
+    left:100%;
+    margin-left:15px; /* and add a small left margin */
+    
+    /* basic styles */
+    width:200px;
+    padding:10px;
+    border-radius:10px;
+    background:#000;
+    color: #fff;
+    text-align:center;
+  
+    display:none; /* hide by default */
+  }
+
+ .button-primary#export-settings, .button-primary#import-settings {
+	  min-width: 126px;
+  }
+
+  li[data-wpws-option-name] [data-help] .tooltip {
+    content: attr(data-help-text); /* here's the magic */
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    left:100%;
+    margin-left:15px;
+    width:200px;
+    padding:10px;
+    border-radius:10px;
+    background:#000;
+    color: #fff;
+    text-align:center;
+    line-height: 18px;
+    font-size: 13px;
+  }
+
+  li[data-wpws-option-name] [data-help] .tooltip a {
+	  font-weight: bold;
+	  color: #fff;
+  }
+
+  #wpws-import-read.disabled {
+	  opacity: 0.5;
+	  pointer-events: none;
+  }
+
+  #ready-text {
+	display: block;
+    margin-bottom: 15px;
+  }
+
+  #wpws-import-read input {
+	float: left;
+  }
+.dashicons-info + .dashicons-yes-alt {
+	visibility: hidden;
+}

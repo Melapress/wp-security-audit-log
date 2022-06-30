@@ -1,5 +1,7 @@
 <?php
 /**
+ * TODO: That has to be removed - leaving it here for now for possible additional checks
+ *
  * Class WSAL_Upgrade_43000_to_44400.
  *
  * @package wsal

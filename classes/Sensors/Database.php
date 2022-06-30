@@ -407,13 +407,18 @@ class WSAL_Sensors_Database extends WSAL_AbstractSensor {
 		try {
 			global $wpdb;
 
+			$wpdb->suppress_errors( true );
+
 			// Output buffering is here to prevent from error log messages that would be fired if the table didn't exist.
 			ob_start();
 			$db_result = $wpdb->query( "SELECT COUNT(1) FROM {$table_name};" ); // phpcs:ignore
 			ob_clean();
 
+			$wpdb->suppress_errors( false );
+
 			return ( 1 === $db_result );
 		} catch ( Exception $e ) {
+			$wpdb->suppress_errors( false );
 			return false;
 		}
 	}

@@ -7,10 +7,17 @@
  * @package wsal
  */
 
+namespace WSAL\Adapter;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+
+/**
+ * TODO: move this code to its proper place - in the occurrences entity class and get rid of everything here
+ */
 
 /**
  * MySQL database ActiveRecord class.
@@ -22,12 +29,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @package wsal
  */
-class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInterface {
+class WSAL_Adapters_MySQL_ActiveRecord implements \WSAL_Adapters_ActiveRecordInterface {
 
 	/**
 	 * DB Connection
 	 *
-	 * @var array
+	 * @var object
 	 */
 	protected $connection;
 
@@ -79,32 +86,42 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			}
 
 			switch ( $statistics_report_type ) {
-				case WSAL_Rep_Common::DIFFERENT_IP:
+				case \WSAL_Rep_Common::DIFFERENT_IP:
 					array_push( $grouping, 'users' );
 					array_push( $grouping, 'ips' );
 					break;
-				case WSAL_Rep_Common::ALL_IPS:
+				case \WSAL_Rep_Common::ALL_IPS:
 					array_push( $grouping, 'ips' );
 					break;
-				case WSAL_Rep_Common::LOGIN_ALL:
-				case WSAL_Rep_Common::LOGIN_BY_USER:
-				case WSAL_Rep_Common::LOGIN_BY_ROLE:
-				case WSAL_Rep_Common::PUBLISHED_ALL:
-				case WSAL_Rep_Common::PUBLISHED_BY_USER:
-				case WSAL_Rep_Common::PUBLISHED_BY_ROLE:
-				case WSAL_Rep_Common::ALL_USERS:
+				case \WSAL_Rep_Common::LOGIN_ALL:
+				case \WSAL_Rep_Common::LOGIN_BY_USER:
+				case \WSAL_Rep_Common::LOGIN_BY_ROLE:
+				case \WSAL_Rep_Common::PUBLISHED_ALL:
+				case \WSAL_Rep_Common::PUBLISHED_BY_USER:
+				case \WSAL_Rep_Common::PUBLISHED_BY_ROLE:
+				case \WSAL_Rep_Common::ALL_USERS:
+				case \WSAL_Rep_Common::VIEWS_BY_POST:
+				case \WSAL_Rep_Common::PROFILE_CHANGES_ALL:
+				case \WSAL_Rep_Common::PROFILE_CHANGES_BY_USER:
+				case \WSAL_Rep_Common::PROFILE_CHANGES_BY_ROLE:
 					array_push( $grouping, 'users' );
 					break;
 
-				case WSAL_Rep_Common::VIEWS_ALL:
+				case \WSAL_Rep_Common::PASSWORD_CHANGES:
+					array_push( $grouping, 'users' );
+					array_push( $grouping, 'events' );
+					break;
+
+				case \WSAL_Rep_Common::VIEWS_ALL:
 					array_push( $grouping, 'posts' );
 					break;
 
-				case WSAL_Rep_Common::VIEWS_BY_USER:
-				case WSAL_Rep_Common::VIEWS_BY_ROLE:
+				case \WSAL_Rep_Common::VIEWS_BY_USER:
+				case \WSAL_Rep_Common::VIEWS_BY_ROLE:
 					array_push( $grouping, 'users' );
 					array_push( $grouping, 'posts' );
 					break;
+
 			}
 		}
 
@@ -198,7 +215,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 * {@inheritDoc}
 	 */
 	public function get_model() {
-		return new WSAL_Models_Query();
+		return new \WSAL_Models_Query();
 	}
 
 	/**
@@ -323,7 +340,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			}
 
 			if ( is_array( $copy->$key ) || is_object( $copy->$key ) ) {
-				$data[ $key ] = WSAL_Helpers_DataHelper::json_encode( $val );
+				$data[ $key ] = \WSAL_Helpers_DataHelper::json_encode( $val );
 			} else {
 				$data[ $key ] = $val;
 			}
@@ -336,7 +353,18 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			unset( $format[ $id_index ] );
 		}
 
+		$_wpdb->suppress_errors( true );
+
 		$result = $_wpdb->replace( $this->get_table(), $data, $format );
+
+		if ( '' !== $_wpdb->last_error ) {
+			if ( 1146 === \WSAL\Entities\Occurrences_Entity::get_last_sql_error( $_wpdb ) ) {
+				if ( \WSAL\Entities\Occurrences_Entity::create_table() ) {
+					$result = $_wpdb->replace( $this->get_table(), $data, $format );
+				}
+			}
+		}
+		$_wpdb->suppress_errors( false );
 
 		if ( false !== $result && $_wpdb->insert_id ) {
 			$copy->set_id( $_wpdb->insert_id );
@@ -372,7 +400,19 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$_wpdb  = $this->connection;
 		$result = array();
 		$sql    = $_wpdb->prepare( 'SELECT * FROM ' . $this->get_table() . ' WHERE ' . $cond, $args );
-		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
+
+		$_wpdb->suppress_errors( true );
+		$results = $_wpdb->get_results( $sql, ARRAY_A );
+
+		if ( '' !== $_wpdb->last_error ) {
+			if ( 1146 === \WSAL\Entities\Metadata_Entity::get_last_sql_error( $_wpdb ) ) {
+				if ( \WSAL\Entities\Metadata_Entity::create_table() ) {
+					$results = $_wpdb->get_results( $sql, ARRAY_A );
+				}
+			}
+		}
+		$_wpdb->suppress_errors( false );
+		foreach ( $results as $data ) {
 			$result[] = $this->get_model()->load_data( $data );
 		}
 
@@ -418,7 +458,21 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$sql    = ( ! is_array( $args ) || ! count( $args ) ) // Do we really need to prepare() or not?
 			? ( $cond )
 			: $_wpdb->prepare( $cond, $args );
-		foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
+
+		$_wpdb->suppress_errors( true );
+
+		$data_collected = $_wpdb->get_results( $sql, ARRAY_A );
+
+		if ( '' !== $_wpdb->last_error ) {
+			if ( 1146 === \WSAL\Entities\Occurrences_Entity::get_last_sql_error( $_wpdb ) ) {
+				if ( \WSAL\Entities\Occurrences_Entity::create_table() ) {
+					$data_collected = $_wpdb->get_results( $sql, ARRAY_A );
+				}
+			}
+		}
+		$_wpdb->suppress_errors( false );
+
+		foreach ( $data_collected as $data ) {
 			$result[] = $this->get_model()->load_data( $data );
 		}
 
@@ -444,7 +498,18 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$_wpdb = $this->connection;
 		$sql   = $_wpdb->prepare( 'SELECT COUNT(*) FROM ' . $this->get_table() . ' WHERE ' . $cond, $args );
 
-		return (int) $_wpdb->get_var( $sql );
+		$_wpdb->suppress_errors( true );
+		$count = (int) $_wpdb->get_var( $sql );
+		if ( '' !== $_wpdb->last_error ) {
+			if ( 1146 === \WSAL\Entities\Occurrences_Entity::get_last_sql_error( $_wpdb ) ) {
+				if ( \WSAL\Entities\Occurrences_Entity::create_table() ) {
+					$count = (int) $_wpdb->get_var( $sql );
+				}
+			}
+		}
+		$_wpdb->suppress_errors( false );
+
+		return $count;
 	}
 
 	/**
@@ -492,12 +557,30 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		// Figure out the grouping statement and the columns' selection.
 		$grouping = self::get_grouping( $statistics_report_type, $grouping_period );
 
+		// The user grouping based on an additional meta field is only applicable to the password changes' statistical
+		// report at the moment.
+		$use_meta_field_for_user_grouping = \WSAL_Rep_Common::PASSWORD_CHANGES === $statistics_report_type;
+
 		// Build the SQL query and runs it.
-		$query = $this->build_reporting_query( $report_args, false, $grouping, $next_date, $limit );
+		$query = $this->build_reporting_query( $report_args, false, $grouping, $next_date, $limit, $use_meta_field_for_user_grouping, $statistics_report_type );
 
 		// Statistical reports expect data as array, regular reports use objects.
 		$result_format = is_null( $statistics_report_type ) ? OBJECT : ARRAY_A;
-		$results       = $this->connection->get_results( $query, $result_format );
+
+		// Perform additional query needed for new role counts.
+		if ( \WSAL_Rep_Common::NEW_USERS === $statistics_report_type ) {
+			$occurrences = $this->additional_new_user_query( $grouping, $next_date, $limit, $result_format );
+		}
+
+		$results = $this->connection->get_results( $query, $result_format );
+
+		// Append role counts to results.
+		if ( \WSAL_Rep_Common::NEW_USERS === $statistics_report_type && isset( $occurrences ) && ! empty( $occurrences ) ) {
+			foreach ( $results as $result_key => $result_value ) {
+				$role_counts                           = $occurrences[ $result_value['period'] ]['roles_counts'];
+				$results[ $result_key ]['role_counts'] = $role_counts;
+			}
+		}
 
 		if ( ! empty( $results ) ) {
 			$last_item = end( $results );
@@ -523,13 +606,15 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 *                                     time period only.
 	 * @param int             $next_date   (Optional) Created on >.
 	 * @param int             $limit       (Optional) Limit.
+	 * @param int             $statistics_report_type Statistics report type.
 	 *
 	 * @return string
 	 */
-	private function build_reporting_query( $report_args, $count_only, $grouping = null, $next_date = null, $limit = 0 ) {
+	private function build_reporting_query( $report_args, $count_only, $grouping = null, $next_date = null, $limit = 0, $use_meta_field_for_user_grouping = false, $statistics_report_type = null ) {
 		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
 		$table_occ  = $occurrence->get_table();
 
+		$join_meta_table_for_user_grouping = false;
 		if ( $count_only ) {
 			$select_fields = array( 'COUNT(1) as count' );
 			$group_by      = array( 'occ.id' );
@@ -559,12 +644,26 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 						array_push( $group_by, 'site_id' );
 						break;
 					case 'users':
-						array_push( $select_fields, 'COALESCE( occ.username, occ.user_id ) as user' );
+						if ( $use_meta_field_for_user_grouping ) {
+							array_push( $select_fields, 'COALESCE( m.value, occ.user_id, occ.username ) as user' );
+							$join_meta_table_for_user_grouping = true;
+						} else {
+							array_push( $select_fields, 'COALESCE( occ.user_id, occ.username ) as user' );
+						}
+
+						if ( in_array( $statistics_report_type, range( 70, 72 ), true ) ) {
+							array_push( $select_fields, 'GROUP_CONCAT(occ.alert_id) as events' );
+						}
+
 						array_push( $group_by, 'user' );
 						break;
 					case 'posts':
 						array_push( $select_fields, 'post_id' );
 						array_push( $group_by, 'post_id' );
+						break;
+					case 'events':
+						array_push( $select_fields, 'alert_id' );
+						array_push( $group_by, 'alert_id' );
 						break;
 					case 'day':
 						array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on ), "%Y-%m-%d" ) AS period' );
@@ -585,8 +684,13 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		}
 
 		$sql = 'SELECT ' . implode( ',', $select_fields ) . ' FROM ' . $table_occ . ' AS occ ';
+		if ( $join_meta_table_for_user_grouping ) {
+			$meta = new WSAL_Adapters_MySQL_Meta( $this->connection );
+			$sql .= ' LEFT JOIN ' . $meta->get_table() . ' AS m ON ( m.occurrence_id = occ.id AND m.name = "TargetUserId" ) ';
+		}
 
 		$sql .= $this->build_where_statement( $report_args );
+
 		if ( ! empty( $next_date ) ) {
 			$sql .= ' AND occ.created_on < ' . $next_date;
 		}
@@ -661,27 +765,27 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		$_post_ids                  = null;
 		$post_ids_negate_expression = '';
 		if ( $report_args->post__in ) {
-			$_post_ids = $this->format_array_for_query_regex( $report_args->post__in );
+			$_post_ids = $this->format_array_for_query( $report_args->post__in );
 		} elseif ( $report_args->post__not_in ) {
-			$_post_ids                  = $this->format_array_for_query_regex( $report_args->post__not_in );
+			$_post_ids                  = $this->format_array_for_query( $report_args->post__not_in );
 			$post_ids_negate_expression = 'NOT';
 		}
 
 		$_post_types                  = null;
 		$post_types_negate_expression = '';
 		if ( $report_args->post_type__in ) {
-			$_post_types = $this->format_array_for_query_regex( $report_args->post_type__in );
+			$_post_types = $this->format_array_for_query( $report_args->post_type__in );
 		} elseif ( $report_args->post_type__not_in ) {
-			$_post_types                  = $this->format_array_for_query_regex( $report_args->post_type__not_in );
+			$_post_types                  = $this->format_array_for_query( $report_args->post_type__not_in );
 			$post_types_negate_expression = 'NOT';
 		}
 
 		$_post_statuses                  = null;
 		$post_statuses_negate_expression = '';
 		if ( $report_args->post_status__in ) {
-			$_post_statuses = $this->format_array_for_query_regex( $report_args->post_status__in );
+			$_post_statuses = $this->format_array_for_query( $report_args->post_status__in );
 		} elseif ( $report_args->post_status__not_in ) {
-			$_post_statuses                  = $this->format_array_for_query_regex( $report_args->post_status__not_in );
+			$_post_statuses                  = $this->format_array_for_query( $report_args->post_status__not_in );
 			$post_statuses_negate_expression = 'NOT';
 		}
 
@@ -714,13 +818,13 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 
 		$_start_timestamp = null;
 		if ( $report_args->start_date ) {
-			$start_datetime   = DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->start_date . ' 00:00:00' );
+			$start_datetime   = \DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->start_date . ' 00:00:00' );
 			$_start_timestamp = $start_datetime->format( 'U' );
 		}
 
 		$_end_timestamp = null;
 		if ( $report_args->end_date ) {
-			$end_datetime   = DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->end_date . ' 23:59:59' );
+			$end_datetime   = \DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->end_date . ' 23:59:59' );
 			$_end_timestamp = $end_datetime->format( 'U' );
 		}
 
@@ -898,6 +1002,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 			array_push( $group_by_columns, 'client_ip' );
 		}
 
+		if ( in_array( 'events', $grouping, true ) ) {
+			array_push( $group_by_columns, 'alert_id' );
+		}
+
 		$select_fields = $group_by_columns;
 		foreach ( $grouping as $grouping_item ) {
 			switch ( $grouping_item ) {
@@ -968,7 +1076,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 		// If transient does not exist, then run SQL query.
 		if ( ! $wsal_db_table_status ) {
 			$wsal_db_table_status = strtolower( $_wpdb->get_var( $sql ) ) === strtolower( $this->get_table() );
-			set_transient( $wsal_table_transient, $wsal_db_table_status, DAY_IN_SECONDS );
+			\WpSecurityAuditLog::set_transient( $wsal_table_transient, $wsal_db_table_status, DAY_IN_SECONDS );
 		}
 
 		return $wsal_db_table_status;
@@ -1017,5 +1125,86 @@ class WSAL_Adapters_MySQL_ActiveRecord implements WSAL_Adapters_ActiveRecordInte
 	 */
 	public function update_query( $table, $data, $where ) {
 		return $this->connection->update( $table, $data, $where );
+	}
+
+	/**
+	 * Determine the roles for newly created users, which is then appended to the report result.
+	 *
+	 * @param array  $grouping Period to use for data grouping.
+	 * @param int    $next_date Created on >.
+	 * @param int    $limit Limit.
+	 * @param string $result_format Required format.
+	 * @return array
+	 */
+	private function additional_new_user_query( $grouping, $next_date, $limit, $result_format ) {
+		$occurrence       = new WSAL_Adapters_MySQL_Occurrence( $this->connection );
+		$meta             = new WSAL_Adapters_MySQL_Meta( $this->connection );
+		$table_occ        = $occurrence->get_table();
+		$table_meta       = $meta->get_table();
+		$occurrences      = array();
+		$select_fields    = array(
+			'site_id',
+			'id',
+		);
+		$group_by_columns = array(
+			'site_id',
+		);
+		foreach ( $grouping as $grouping_item ) {
+			switch ( $grouping_item ) {
+				case 'day':
+					array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%m-%d" ) AS period' );
+					array_unshift( $group_by_columns, 'period' );
+					break;
+				case 'week':
+					array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%u" ) AS period' );
+					array_unshift( $group_by_columns, 'period' );
+					break;
+				case 'month':
+					array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%m" ) AS period' );
+					array_unshift( $group_by_columns, 'period' );
+					break;
+			}
+		}
+
+		$user_query       = 'SELECT ' . implode( ',', $select_fields ) . ' FROM ' . $table_occ . ' AS occ WHERE find_in_set( occ.alert_id, "4000,4001" ) > 0 ';
+		$occurrence_query = 'SELECT occ.id FROM ' . $table_occ . ' AS occ WHERE find_in_set( occ.alert_id, "4000,4001" ) > 0 ';
+
+		if ( ! empty( $next_date ) ) {
+			$user_query .= ' AND ' . $table_occ . '.created_on < ' . $next_date;
+		}
+
+		$user_query .= ' ORDER BY created_on DESC ';
+
+		if ( ! empty( $limit ) ) {
+			$user_query .= " LIMIT {$limit}";
+		}
+
+		// Get occurences so we can reference the data.
+		$user_results = $this->connection->get_results( $user_query, $result_format );
+
+		// Get a list of registered roles for columns.
+		$known_roles = get_editable_roles();
+
+		// Strip any values, these will be replaced below.
+		$known_roles_array = array_fill_keys( array_keys( $known_roles ), ' ' );
+
+		foreach ( $user_results as $key => $item ) {
+			$occurrences[ $item['period'] ]['roles_arr'] = empty( $occurrences[ $item['period'] ]['roles_arr'] ) ? array() : $occurrences[ $item['period'] ]['roles_arr'];
+			$lookup_id                                   = $item['id'];
+			// Locate role from possible meta tables rows.
+			$roles     = $this->connection->get_results( 'SELECT value FROM ' . $table_meta . ' metatable WHERE occurrence_id ="' . $lookup_id . '" AND ( name = "NewUserData" OR name = "NewUserID" )', ARRAY_A );
+			$roles_obj = isset( $roles[0]['value'] ) ? maybe_unserialize( $roles[0]['value'] ) : false;
+			if ( isset( $roles_obj->Roles ) ) {
+				$item['roles'] = $roles_obj->Roles;
+			} else {
+				$user          = get_userdata( intval( $roles_obj ) );
+				$item['roles'] = $user->roles[0];
+			}
+			array_push( $occurrences[ $item['period'] ]['roles_arr'], $item['roles'] );
+			$occurrences[ $item['period'] ][ $key ]         = $item;
+			$occurrences[ $item['period'] ]['roles_counts'] = array_merge( $known_roles_array, array_count_values( $occurrences[ $item['period'] ]['roles_arr'] ) );
+		}
+
+		return $occurrences;
 	}
 }

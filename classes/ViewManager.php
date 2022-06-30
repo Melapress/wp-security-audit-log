@@ -296,7 +296,7 @@ class WSAL_ViewManager {
 	 */
 	protected function get_backend_page_index() {
 		// Get current view via $_GET array.
-		$current_view = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+		$current_view = ( isset( $_GET['page'] ) ) ? \sanitize_text_field( \wp_unslash( $_GET['page'] ) ) : '';
 
 		if ( isset( $current_view ) ) {
 			foreach ( $this->views as $i => $view ) {
@@ -318,7 +318,7 @@ class WSAL_ViewManager {
 			$this->active_view = null;
 
 			// Get current view via $_GET array.
-			$current_view = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+			$current_view = ( isset( $_GET['page'] ) ) ? \sanitize_text_field( \wp_unslash( $_GET['page'] ) ) : '';
 
 			if ( isset( $current_view ) ) {
 				foreach ( $this->views as $view ) {
