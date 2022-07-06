@@ -271,7 +271,7 @@ final class WSAL_AlertFormatter {
 	 *
 	 * @return string|mixed
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	public static function data_truncate( $value, $expression, $length = 50, $ellipses_sequence = '...' ) {
 
@@ -286,7 +286,7 @@ final class WSAL_AlertFormatter {
 			case '%MetaValue%':
 			case '%MetaValueOld%':
 			case '%MetaValueNew%':
-				$value = mb_strlen( $value ) > $length ? ( mb_substr( $value, 0, $length ) . $ellipses_sequence() ) : $value;
+				$value = mb_strlen( $value ) > $length ? ( mb_substr( $value, 0, $length ) . $ellipses_sequence ) : $value;
 				break;
 			default:
 				break;

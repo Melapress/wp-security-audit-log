@@ -35,7 +35,7 @@ abstract class WSAL_AbstractSensor {
 	 *
 	 * @var integer
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	protected static $seconds_to_check_back = 5;
 

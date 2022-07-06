@@ -33,7 +33,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @var [type]
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		private static $connection = null;
 
@@ -42,10 +42,10 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @return string
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_table_name(): string {
-			return self::get_connection()->prefix . static::$table;
+			return self::get_connection()->base_prefix . static::$table;
 		}
 
 		/**
@@ -53,7 +53,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @return \WPDB @see \WSAL_Connector_MySQLDB
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_connection() {
 			if ( null === self::$connection ) {
@@ -78,7 +78,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @return void
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function set_connection( $connection ) {
 			self::$connection = $connection;
@@ -89,7 +89,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @return void
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function destroy_connection() {
 			self::$connection = null;
@@ -105,7 +105,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @return bool
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function maybe_create_table( string $table_name, string $create_ddl ): bool {
 			foreach ( self::get_connection()->get_col( 'SHOW TABLES', 0 ) as $table ) {
@@ -130,7 +130,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @return boolean
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function is_external_db(): bool {
 			$db_config = \WSAL_Connector_ConnectorFactory::get_config();
@@ -151,7 +151,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @return boolean - True if the column exists and all given parameters are the same, false otherwise.
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function check_column(
 			string $table_name,
@@ -204,7 +204,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @return integer
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_last_sql_error( $_wpdb ): int {
 			$code = 0;
@@ -235,7 +235,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @return boolean
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function check_table_exists( string $table_name ): bool {
 			foreach ( self::get_connection()->get_col( 'SHOW TABLES', 0 ) as $table ) {

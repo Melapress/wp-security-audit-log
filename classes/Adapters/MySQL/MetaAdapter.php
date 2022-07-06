@@ -102,7 +102,7 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 	 *
 	 * @return void
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	public function delete_by_occurrence_ids( $occurrence_ids ) {
 		if ( ! empty( $occurrence_ids ) ) {
@@ -120,7 +120,7 @@ class WSAL_Adapters_MySQL_Meta extends WSAL_Adapters_MySQL_ActiveRecord implemen
 	 *
 	 * @return array
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	public function load_by_name_and_occurrence_id( $meta_name, $occurrence_id ) {
 		// Make sure to grab the migrated meta fields from the occurrence table.

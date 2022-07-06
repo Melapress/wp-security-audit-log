@@ -47,6 +47,11 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 	class Abstract_Migration {
 
 		/**
+		 * That is a global constant used for marking the migration process as in progress.
+		 */
+		const STARTED_MIGRATION_PROCESS = 'migration-process-started';
+
+		/**
 		 * Extracted version from the DB (WP option)
 		 *
 		 * @var string
@@ -69,7 +74,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 *
 		 * @var string
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		protected static $const_name_of_plugin_version = '';
 
@@ -106,7 +111,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 			}
 
 			// Check if that process is not started already.
-			$migration_started = WP_Helper::get_global_option( 'migration-started', false );
+			$migration_started = WP_Helper::get_global_option( self::STARTED_MIGRATION_PROCESS, false );
 
 			if ( version_compare( static::get_stored_version(), \constant( static::$const_name_of_plugin_version ), '<' ) ) {
 
@@ -116,10 +121,25 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 				if ( '0000' === $stored_version_as_number && ! WP_Helper::is_plugin_installed() ) {
 					// That is first install of the plugin, store the version and leave.
 					self::store_updated_version();
+
+					$disabled_alerts = WP_Helper::get_global_option( 'disabled-alerts', false );
+
+					$always_disabled_alerts = implode( ',', \WSAL_Settings::get_default_always_disabled_alerts() );
+
+					$disabled_alerts = implode( ',', \array_merge( \explode( ',', $disabled_alerts ), \explode( ',', $always_disabled_alerts ) ) );
+
+					/**
+					 * That is split only for clarity
+					 */
+					if ( false === $disabled_alerts ) {
+						WP_Helper::set_global_option( 'disabled-alerts', $always_disabled_alerts );
+					} elseif ( $disabled_alerts !== $always_disabled_alerts ) {
+						WP_Helper::update_global_option( 'disabled-alerts', $disabled_alerts );
+					}
 				} else {
 
 					if ( false === $migration_started ) {
-						WP_Helper::set_global_option( 'migration-started', true );
+						WP_Helper::set_global_option( self::STARTED_MIGRATION_PROCESS, true );
 						try {
 							// set transient for the updating status - would that help ?!?
 							$method_as_version_numbers = static::get_all_migration_methods_as_numbers();
@@ -146,7 +166,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 
 							self::store_updated_version();
 						} finally {
-							\WSAL\Helpers\WP_Helper::delete_global_option( 'migration-started' );
+							\WSAL\Helpers\WP_Helper::delete_global_option( self::STARTED_MIGRATION_PROCESS );
 						}
 					}
 				}
@@ -158,7 +178,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 			 *
 			 * @return void
 			 *
-			 * @since      4.4.2
+			 * @since      4.4.2.1
 			 */
 			if ( false === $migration_started && version_compare( static::get_stored_version(), \constant( static::$const_name_of_plugin_version ), '>' ) ) {
 				self::store_updated_version();
@@ -172,7 +192,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 *
 		 * @return void
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function remove_notice( string $notice ) {
 
@@ -194,7 +214,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		private static function get_stored_version() {
 
 			if ( '' === trim( static::$stored_version ) ) {
-				static::$stored_version = WP_Helper::get_option( static::$version_option_name, '0.0.0' );
+				static::$stored_version = WP_Helper::get_global_option( static::$version_option_name, '0.0.0' );
 			}
 
 			return static::$stored_version;

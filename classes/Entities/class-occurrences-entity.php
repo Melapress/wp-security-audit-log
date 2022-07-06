@@ -58,7 +58,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		 *
 		 * @return bool
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function create_table(): bool {
 			$table_name    = self::get_table_name();

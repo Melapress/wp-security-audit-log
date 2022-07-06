@@ -92,7 +92,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 *
 	 * @var WpSecurityAuditLog
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	private static $wsal_plugin = null;
 
@@ -132,7 +132,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 *
 	 * @param WpSecurityAuditLog $plugin - The plugin instance.
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		parent::__construct( $plugin );
@@ -146,7 +146,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 *
 	 * @return void
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	public static function init( WpSecurityAuditLog $plugin ) {
 		self::$wsal_plugin = $plugin;
@@ -802,7 +802,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	/**
 	 * Fires immediately before updating a post's metadata.
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 *
 	 * @param int    $meta_id    ID of metadata entry to update.
 	 * @param int    $object_id  Post ID.
@@ -826,7 +826,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 *
 	 * @return void
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	public static function fire_lock_change( int $post_id, string $meta_value ) {
 

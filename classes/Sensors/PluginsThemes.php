@@ -95,7 +95,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 	 * @param string $stylesheet Stylesheet of the theme to delete.
 	 * @param bool   $deleted    Whether the theme deletion was successful.
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 *
 	 * phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	 */
