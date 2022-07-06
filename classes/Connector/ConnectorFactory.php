@@ -43,7 +43,7 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 *
 	 * @var boolean
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	private static $connection = false;
 
@@ -172,7 +172,7 @@ abstract class WSAL_Connector_ConnectorFactory {
 	 *
 	 * @return void
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	public static function destroy_connection() {
 		self::$connection = false;

@@ -56,7 +56,7 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 		 *
 		 * @param string $action - The name of the action.
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public function __construct( string $action ) {
 			$this->action .= $action;

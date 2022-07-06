@@ -41,7 +41,7 @@ if ( ! class_exists( '\WSAL\Entities\Options_Entity' ) ) {
 		 *
 		 * @return void
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function transfer_options() {
 			global $wpdb;
@@ -77,7 +77,7 @@ if ( ! class_exists( '\WSAL\Entities\Options_Entity' ) ) {
 		 *
 		 * @return string
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_table_name(): string {
 			global $wpdb;

@@ -7,7 +7,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     4.4.2
+ * Version:     4.4.2.1
  * Plugin URI:  https://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
  * Author:      WP White Security
@@ -37,8 +37,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-use WSAL\Helpers\WP_Helper;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -49,8 +47,33 @@ if ( file_exists( plugin_dir_path( __FILE__ ) . 'vendor/autoload.php' ) ) {
 }
 
 if ( ! defined( 'WSAL_PREFIX' ) ) {
-	define( 'WSAL_VERSION', '4.4.2' );
+	define( 'WSAL_VERSION', '4.4.2.1' );
 	define( 'WSAL_PREFIX', 'wsal_' );
+}
+
+// Plugin Name.
+if ( ! defined( 'WSAL_BASE_NAME' ) ) {
+	define( 'WSAL_BASE_NAME', plugin_basename( __FILE__ ) );
+}
+// Plugin Directory URL.
+if ( ! defined( 'WSAL_BASE_URL' ) ) {
+	define( 'WSAL_BASE_URL', plugin_dir_url( __FILE__ ) );
+}
+// Plugin Directory Path.
+if ( ! defined( 'WSAL_BASE_DIR' ) ) {
+	define( 'WSAL_BASE_DIR', plugin_dir_path( __FILE__ ) );
+}
+// Plugin Docs URL.
+if ( ! defined( 'WSAL_DOCS_URL' ) ) {
+	define( 'WSAL_DOCS_URL', 'https://wpactivitylog.com/support/' );
+}
+// Plugin Issue Reporting URL.
+if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
+	define( 'WSAL_ISSUE_URL', 'https://wordpress.org/support/plugin/wp-security-audit-log' );
+}
+// Plugin Classes Prefix.
+if ( ! defined( 'WSAL_CLASS_PREFIX' ) ) {
+	define( 'WSAL_CLASS_PREFIX', 'WSAL_' );
 }
 
 if ( ! function_exists( 'wsal_freemius' ) ) {
@@ -335,7 +358,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					return;
 				}
 
-				$this->define_constants();
 				$this->set_allowed_html_tags();
 				$this->includes();
 				$this->update();
@@ -603,7 +625,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 */
 			public static function is_mainwp_active() {
 				return self::is_plugin_active( 'mainwp-child/mainwp-child.php' );
-        
 			}
 
 			/**
@@ -747,38 +768,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				);
 			}
 
-			/**
-			 * Method: Define constants.
-			 *
-			 * @since 2.6.6
-			 */
-			public function define_constants() {
-
-				// Plugin Name.
-				if ( ! defined( 'WSAL_BASE_NAME' ) ) {
-					define( 'WSAL_BASE_NAME', plugin_basename( __FILE__ ) );
-				}
-				// Plugin Directory URL.
-				if ( ! defined( 'WSAL_BASE_URL' ) ) {
-					define( 'WSAL_BASE_URL', plugin_dir_url( __FILE__ ) );
-				}
-				// Plugin Directory Path.
-				if ( ! defined( 'WSAL_BASE_DIR' ) ) {
-					define( 'WSAL_BASE_DIR', plugin_dir_path( __FILE__ ) );
-				}
-				// Plugin Docs URL.
-				if ( ! defined( 'WSAL_DOCS_URL' ) ) {
-					define( 'WSAL_DOCS_URL', 'https://wpactivitylog.com/support/' );
-				}
-				// Plugin Issue Reporting URL.
-				if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
-					define( 'WSAL_ISSUE_URL', 'https://wordpress.org/support/plugin/wp-security-audit-log' );
-				}
-				// Plugin Classes Prefix.
-				if ( ! defined( 'WSAL_CLASS_PREFIX' ) ) {
-					define( 'WSAL_CLASS_PREFIX', 'WSAL_' );
-				}
-			}
 			/**
 			 * Customize Freemius connect message for new users.
 			 *
@@ -2054,7 +2043,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @param string $transient Transient name. Expected to not be SQL-escaped.
 			 *
 			 * @return mixed Value of transient.
-			 * @since      4.4.2
+			 * @since      4.4.2.1
 			 */
 			public static function get_transient( $transient ) {
 				return self::is_multisite() ? get_site_transient( $transient ) : get_transient( $transient );
@@ -2073,7 +2062,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @param int    $expiration Optional. Time until expiration in seconds. Default 0 (no expiration).
 			 *
 			 * @return bool True if the value was set, false otherwise.
-			 * @since      4.4.2
+			 * @since      4.4.2.1
 			 */
 			public static function set_transient( $transient, $value, $expiration = 0 ) {
 				return self::is_multisite() ? set_site_transient( $transient, $value, $expiration ) : set_transient( $transient, $value, $expiration );
@@ -2086,7 +2075,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 *
 			 * @return bool True if the transient was deleted, false otherwise.
 			 *
-			 * @since      4.4.2
+			 * @since      4.4.2.1
 			 */
 			public static function delete_transient( $transient ) {
 				return self::is_multisite() ? delete_site_transient( $transient ) : delete_transient( $transient );

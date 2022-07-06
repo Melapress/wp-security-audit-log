@@ -35,7 +35,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		parent::__construct( $plugin );

@@ -35,7 +35,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 *
 		 * @var string
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		protected static $version_option_name = WSAL_PREFIX . 'plugin_version';
 
@@ -46,9 +46,18 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 *
 		 * @var string
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		protected static $const_name_of_plugin_version = 'WSAL_VERSION';
+
+		/**
+		 * Marks 442 update as started
+		 *
+		 * @var boolean
+		 *
+		 * @since      4.4.2.1
+		 */
+		protected static $_442_started = false;
 
 		/**
 		 * Migration for version upto 4.4.2
@@ -58,6 +67,9 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 * @return void
 		 */
 		protected static function migrate_up_to_4420() {
+
+			self::$_442_started = true;
+
 			// If the legacy table exists, lets extract the options and remove it.
 			if ( \WSAL\Entities\Options_Entity::check_table_exists( \WSAL\Entities\Options_Entity::get_table_name() ) ) {
 				\WSAL\Entities\Options_Entity::transfer_options();
@@ -66,11 +78,26 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 				\WSAL\Entities\Options_Entity::destroy_connection();
 			}
 
+			$wsal = \WpSecurityAuditLog::get_instance();
+			$wsal::load_freemius();
+			$wsal->load_defaults();
+
+			// Load dependencies.
+			if ( ! isset( $wsal->alerts ) ) {
+				$wsal->alerts = new \WSAL_AlertManager( $wsal );
+			}
+
+			if ( ! isset( $wsal->constants ) ) {
+				$wsal->constants = new \WSAL_ConstantManager();
+			}
+
+			$wsal->sensors = new \WSAL_SensorManager( $wsal );
+
 			$disabled_alerts = WP_Helper::get_global_option( 'disabled-alerts', false );
 
-			$wsal = \WpSecurityAuditLog::get_instance();
-
 			$always_disabled_alerts = implode( ',', $wsal->settings()->always_disabled_alerts );
+
+			$disabled_alerts = implode( ',', \array_merge( \explode( ',', $disabled_alerts ), \explode( ',', $always_disabled_alerts ) ) );
 
 			/**
 			 * That is split only for clarity
@@ -78,7 +105,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			if ( false === $disabled_alerts ) {
 				WP_Helper::set_global_option( 'disabled-alerts', $always_disabled_alerts );
 			} elseif ( $disabled_alerts !== $always_disabled_alerts ) {
-				WP_Helper::update_global_option( 'disabled-alerts', $always_disabled_alerts );
+				WP_Helper::update_global_option( 'disabled-alerts', $disabled_alerts );
 			}
 
 			self::remove_notice( 'wsal-notice-wsal-privacy-notice-3.2' );
@@ -405,21 +432,23 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			 * Premium or not does not matter. User can had premium but in time of the upgrade, their license could be expired,
 			 * that does not mean that they will never switch back to the premium version.
 			 */
-			$table_exists = \WSAL\Entities\Occurrences_Entity::check_table_exists( $wpdb->prefix . 'wsal_sessions' );
+			$table_exists = \WSAL\Entities\Occurrences_Entity::check_table_exists( $wpdb->base_prefix . 'wsal_sessions' );
 			if ( $table_exists ) {
 				$column_exists = \WSAL\Entities\Occurrences_Entity::check_column(
-					$wpdb->prefix . 'wsal_sessions',
+					$wpdb->base_prefix . 'wsal_sessions',
 					'session_token',
 					'varchar( 255 )'
 				);
 
 				if ( ! $column_exists ) {
-					$alter_query = 'ALTER TABLE `wp_wsal_sessions` CHANGE `session_token` `session_token` VARCHAR(128)
+					$alter_query = 'ALTER TABLE `' . $wpdb->base_prefix . 'wsal_sessions` CHANGE `session_token` `session_token` VARCHAR(128)
 					NOT NULL;';
 
 					$wpdb->query( $alter_query ); // phpcs:ignore
 				}
 			}
+
+			\WSAL\Entities\Occurrences_Entity::destroy_connection();
 
 			// If one of the new columns exists there is no need to alter the table.
 			$column_exists = \WSAL\Entities\Occurrences_Entity::check_column(
@@ -489,6 +518,52 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 					$bg_process->push_to_queue( $job_info );
 					$bg_process->save();
 					$bg_process->dispatch();
+				}
+			}
+		}
+
+		/**
+		 * Migration for version upto 4.4.2.1
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 */
+		protected static function migrate_up_to_4421() {
+			\WSAL\Helpers\WP_Helper::delete_global_option( 'migration-started' );
+
+			if ( ! self::$_442_started ) {
+				self::migrate_up_to_4420();
+			}
+
+			global $wpdb;
+			/**
+			 * User session table should be always in the local database.
+			 *
+			 * Premium or not does not matter. User can had premium but in time of the upgrade, their license could be expired,
+			 * that does not mean that they will never switch back to the premium version.
+			 */
+			$table_exists = \WSAL\Entities\Occurrences_Entity::check_table_exists( $wpdb->base_prefix . 'wsal_sessions' );
+			if ( $table_exists ) {
+				$column_exists    = \WSAL\Entities\Occurrences_Entity::check_column(
+					$wpdb->base_prefix . 'wsal_sessions',
+					'sites',
+					'longtext'
+				);
+				$column_exists_id = \WSAL\Entities\Occurrences_Entity::check_column(
+					$wpdb->base_prefix . 'wsal_sessions',
+					'id',
+					'bigint'
+				);
+
+				if ( ! $column_exists || $column_exists_id ) {
+					$alter_query = 'DROP TABLE `' . $wpdb->base_prefix . 'wsal_sessions`;';
+
+					$wpdb->query( $alter_query ); // phpcs:ignore
+
+					if ( class_exists( '\WSAL\Adapter\User_Sessions' ) ) {
+						\WSAL\Adapter\User_Sessions::create_table();
+					}
 				}
 			}
 		}

@@ -22,7 +22,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 	/**
 	 * All the WP functionality must go trough this class
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	class WP_Helper {
 
@@ -33,7 +33,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @var array
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		private static $user_roles = array();
 
@@ -42,7 +42,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @var array
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		private static $user_roles_wp = array();
 
@@ -51,7 +51,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @var bool
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		private static $is_multisite = null;
 
@@ -69,7 +69,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return boolean
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function is_role_exists( string $role ): bool {
 			self::set_roles();
@@ -86,7 +86,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return array
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_roles() {
 			self::set_roles();
@@ -99,7 +99,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return array
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_roles_wp() {
 			if ( empty( self::$user_roles_wp ) ) {
@@ -115,7 +115,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return boolean
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function is_multisite() {
 			if ( null === self::$is_multisite ) {
@@ -132,7 +132,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return mixed
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_option( $setting_name, $default_value = false ) {
 			$prefixed_name = self::prefix_name( $setting_name );
@@ -148,7 +148,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return mixed
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function set_option( $setting_name, $new_value, $autoload = false ) {
 			return self::update_option( $setting_name, $new_value, $autoload );
@@ -163,7 +163,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return mixed
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function update_option( $setting_name, $new_value, $autoload = false ) {
 			$prefixed_name = self::prefix_name( $setting_name );
@@ -177,7 +177,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return mixed
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function delete_option( $setting_name ) {
 			$prefixed_name = self::prefix_name( $setting_name );
@@ -218,7 +218,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return mixed
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function set_global_option( $setting_name, $new_value, $autoload = false ) {
 			return self::update_global_option( $setting_name, $new_value, $autoload );
@@ -295,7 +295,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return void
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function un_schedule_event( string $event_name ) {
 			$schedule_time = wp_next_scheduled( $event_name );
@@ -329,7 +329,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return bool True if the transient was deleted, false otherwise.
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function delete_transient( $transient ) {
 			return self::is_multisite() ? delete_site_transient( $transient ) : delete_transient( $transient );
@@ -354,7 +354,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return array
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_active_plugins(): array {
 			$active_plugins = array();
@@ -372,7 +372,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return void
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		private static function set_roles() {
 			if ( empty( self::$user_roles ) ) {
@@ -393,7 +393,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @return string
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		private static function prefix_name( string $name ): string {
 

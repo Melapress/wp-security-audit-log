@@ -27,7 +27,7 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 		 *
 		 * @var array
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		private static $class_map = array();
 
@@ -36,7 +36,7 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 		 *
 		 * @return array
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_class_map(): array {
 			if ( empty( self::$class_map ) ) {
@@ -53,7 +53,7 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 		 *
 		 * @return string|false
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_class_by_filename( string $file ) {
 			if ( in_array( $file, self::get_class_map(), true ) ) {
@@ -76,7 +76,7 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 		 *
 		 * @return array
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_subclasses_of_class( string $current_class, string $base_class, bool $exclude_abstracts = true ): array {
 
@@ -100,7 +100,7 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 		 *
 		 * @return array
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_classes_by_namespace( string $namespace ) {
 			if ( 0 === strpos( $namespace, '\\' ) ) {
@@ -148,7 +148,7 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 		 *
 		 * @return array
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function get_classes_with_term( $term ) {
 			$term_upper = strtoupper( $term );

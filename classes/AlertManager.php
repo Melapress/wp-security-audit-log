@@ -98,7 +98,7 @@ final class WSAL_AlertManager {
 	 *
 	 * @var array
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	private static $disabled_post_types = array();
 
@@ -154,7 +154,7 @@ final class WSAL_AlertManager {
 	 *
 	 * @return array
 	 *
-	 * @since      4.4.2
+	 * @since      4.4.2.1
 	 */
 	public static function get_ignored_post_types(): array {
 		if ( empty( self::$ignored_cpts ) ) {

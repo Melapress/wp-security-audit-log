@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit63381eb5ad7f702bb2471bb0fe7f4556
+class ComposerStaticInite2764569fb0dddb672f4325f47684b81
 {
     public static $files = array (
         '2007ccaa29a9efd0493ee82176c977d1' => __DIR__ . '/..' . '/wpwhitesecurity/import-export-plugin-settings/SettingsImportExport.php',
@@ -110,7 +110,6 @@ class ComposerStaticInit63381eb5ad7f702bb2471bb0fe7f4556
         'WSAL_Settings' => __DIR__ . '/../..' . '/classes/Settings.php',
         'WSAL_TablePressExtension' => __DIR__ . '/../..' . '/classes/ThirdPartyExtensions/TablePressExtension.php',
         'WSAL_Uninstall' => __DIR__ . '/../..' . '/classes/Uninstall.php',
-        'WSAL_Upgrade_43000_To_44400' => __DIR__ . '/../..' . '/classes/Upgrade/Upgrade_43000_To_44400.php',
         'WSAL_Utilities_DateTimeFormatter' => __DIR__ . '/../..' . '/classes/Utilities/DateTimeFormatter.php',
         'WSAL_Utilities_Emailer' => __DIR__ . '/../..' . '/classes/Utilities/Emailer.php',
         'WSAL_Utilities_FileSystemUtils' => __DIR__ . '/../..' . '/classes/Utilities/FileSystemUtils.php',
@@ -138,9 +137,9 @@ class ComposerStaticInit63381eb5ad7f702bb2471bb0fe7f4556
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit63381eb5ad7f702bb2471bb0fe7f4556::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit63381eb5ad7f702bb2471bb0fe7f4556::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit63381eb5ad7f702bb2471bb0fe7f4556::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite2764569fb0dddb672f4325f47684b81::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite2764569fb0dddb672f4325f47684b81::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInite2764569fb0dddb672f4325f47684b81::$classMap;
 
         }, null, ClassLoader::class);
     }

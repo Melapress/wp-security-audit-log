@@ -29,7 +29,7 @@ if ( ! class_exists( '\WSAL\Helpers\PHP_Helper' ) ) {
          *
          * @return array
          *
-         * @since      4.4.2
+         * @since      4.4.2.1
          */
         public static function string_to_array( string $string ): array {
 			if ( empty( $string ) ) {

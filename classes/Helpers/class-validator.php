@@ -30,7 +30,7 @@ if ( ! class_exists( '\WSAL\Helpers\Validator' ) ) {
 		 *
 		 * @return boolean - true - tag is valid, false - tag is not valid.
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		public static function validate_mirror_tag( string $string ): bool {
 
@@ -59,7 +59,7 @@ if ( ! class_exists( '\WSAL\Helpers\Validator' ) ) {
 		 *
 		 * @return boolean
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		private static function starts_alpha_numeric( string $string ): bool {
 			if ( preg_match( '/^[a-zA-Z0-9]/', $string ) ) {
@@ -77,7 +77,7 @@ if ( ! class_exists( '\WSAL\Helpers\Validator' ) ) {
 		 *
 		 * @return boolean
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		private static function is_string_less_or_equal( string $string, int $size ): bool {
 			if ( strlen( $string ) <= $size ) {
@@ -94,7 +94,7 @@ if ( ! class_exists( '\WSAL\Helpers\Validator' ) ) {
 		 *
 		 * @return boolean
 		 *
-		 * @since      4.4.2
+		 * @since      4.4.2.1
 		 */
 		private static function is_string_contains_only( string $string ): bool {
 			if ( preg_match( '/[a-z\d_-]*/i', $string ) ) {

@@ -90,7 +90,6 @@ return array(
     'WSAL_Settings' => $baseDir . '/classes/Settings.php',
     'WSAL_TablePressExtension' => $baseDir . '/classes/ThirdPartyExtensions/TablePressExtension.php',
     'WSAL_Uninstall' => $baseDir . '/classes/Uninstall.php',
-    'WSAL_Upgrade_43000_To_44400' => $baseDir . '/classes/Upgrade/Upgrade_43000_To_44400.php',
     'WSAL_Utilities_DateTimeFormatter' => $baseDir . '/classes/Utilities/DateTimeFormatter.php',
     'WSAL_Utilities_Emailer' => $baseDir . '/classes/Utilities/Emailer.php',
     'WSAL_Utilities_FileSystemUtils' => $baseDir . '/classes/Utilities/FileSystemUtils.php',

@@ -128,6 +128,14 @@ class WSAL_Settings {
 	public $always_disabled_alerts = array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024 );
 
 	/**
+	 * Alerts disabled by default - duplication of the above for faster access via static call
+	 *
+	 * @var int[]
+	 * @since 4.4.2.1
+	 */
+	private static $default_always_disabled_alerts = array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024 );
+
+	/**
 	 * Current screen object.
 	 *
 	 * @var WP_Screen
@@ -2297,4 +2305,15 @@ class WSAL_Settings {
 		$this->plugin->set_global_setting( 'db_version', $version, true );
 	}
 
+
+	/**
+	 * Returns default disabled alerts statically
+	 *
+	 * @return array
+	 *
+	 * @since      4.4.2.1
+	 */
+	public static function get_default_always_disabled_alerts(): array {
+		return self::$default_always_disabled_alerts;
+	}
 }
