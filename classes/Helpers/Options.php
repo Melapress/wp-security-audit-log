@@ -112,7 +112,7 @@ class Options {
 	public function delete_option( $option_name = '' ) {
 
 		if ( is_multisite() ) {
-			switch_to_blog( get_main_network_id() );
+			switch_to_blog( get_main_site_id() );
 		}
 
 		$actual_option_name = $option_name;
@@ -167,7 +167,7 @@ class Options {
 		}
 
 		if ( is_multisite() ) {
-			switch_to_blog( get_main_network_id() );
+			switch_to_blog( get_main_site_id() );
 		}
 
 		$result = \get_option( $option_name, $default );
@@ -219,7 +219,7 @@ class Options {
 		}
 
 		if ( is_multisite() ) {
-			switch_to_blog( get_main_network_id() );
+			switch_to_blog( get_main_site_id() );
 		}
 
 		/**
