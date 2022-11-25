@@ -197,7 +197,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			$prefixed_name = self::prefix_name( $option_name );
 
 			if ( self::is_multisite() ) {
-				\switch_to_blog( \get_main_network_id() );
+				\switch_to_blog( \get_main_site_id() );
 			}
 
 			$result = \delete_option( $prefixed_name );
@@ -244,7 +244,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			$prefixed_name = self::prefix_name( $option_name );
 
 			if ( is_multisite() ) {
-				\switch_to_blog( \get_main_network_id() );
+				\switch_to_blog( \get_main_site_id() );
 			}
 
 			$result = \update_option( $prefixed_name, $value, $autoload );
@@ -273,7 +273,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			}
 
 			if ( is_multisite() ) {
-				switch_to_blog( get_main_network_id() );
+				switch_to_blog( get_main_site_id() );
 			}
 
 			$prefixed_name = self::prefix_name( $option_name );
