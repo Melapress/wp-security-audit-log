@@ -206,6 +206,18 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 9. WP Activity Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes](https://www.wpsecurityauditlog.com/support-documentation/how-keep-record-of-content-changes/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description)
 10. Mirror the WordPress activity log to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
 
+== DELETE POST META AFTER UNINSTALL  ==
+DELETE FROM `wp_postmeta` WHERE `meta_key` = 
+'wp_user_activity_object_type';
+DELETE FROM `wp_postmeta` WHERE `meta_key` = 
+'wp_user_activity_object_subtype';
+DELETE FROM `wp_postmeta` WHERE `meta_key` = 
+'wp_user_activity_object_name';
+DELETE FROM `wp_postmeta` WHERE `meta_key` = 'wp_user_activity_object_id';
+DELETE FROM `wp_postmeta` WHERE `meta_key` = 'wp_user_activity_action';
+DELETE FROM `wp_postmeta` WHERE `meta_key` = 'wp_user_activity_ip';
+DELETE FROM `wp_postmeta` WHERE `meta_key` = 'wp_user_activity_ua';
+
 == Changelog ==
 
 = 4.4.2.1 (2022-07-06) =
