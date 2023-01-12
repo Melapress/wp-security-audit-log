@@ -1,0 +1,215 @@
+{
+    "packages": [
+        {
+            "name": "deliciousbrains/wp-background-processing",
+            "version": "1.0.2",
+            "version_normalized": "1.0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/deliciousbrains/wp-background-processing.git",
+                "reference": "2cbee1abd1b49e1133cd8f611df4d4fc5a8b9800"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/deliciousbrains/wp-background-processing/zipball/2cbee1abd1b49e1133cd8f611df4d4fc5a8b9800",
+                "reference": "2cbee1abd1b49e1133cd8f611df4d4fc5a8b9800",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2"
+            },
+            "suggest": {
+                "coenjacobs/mozart": "Easily wrap this library with your own prefix, to prevent collisions when multiple plugins use this library"
+            },
+            "time": "2020-07-31T07:00:11+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "classmap": [
+                    "classes/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Delicious Brains",
+                    "email": "nom@deliciousbrains.com"
+                }
+            ],
+            "description": "WP Background Processing can be used to fire off non-blocking asynchronous requests or as a background processing tool, allowing you to queue tasks.",
+            "support": {
+                "issues": "https://github.com/deliciousbrains/wp-background-processing/issues",
+                "source": "https://github.com/deliciousbrains/wp-background-processing/tree/master"
+            },
+            "install-path": "../deliciousbrains/wp-background-processing"
+        },
+        {
+            "name": "freemius/wordpress-sdk",
+            "version": "2.5.3",
+            "version_normalized": "2.5.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Freemius/wordpress-sdk.git",
+                "reference": "2e56d683dd7b30445940679ecb401d2aff746c9e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/2e56d683dd7b30445940679ecb401d2aff746c9e",
+                "reference": "2e56d683dd7b30445940679ecb401d2aff746c9e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2"
+            },
+            "time": "2022-12-05T10:31:45+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-only"
+            ],
+            "description": "Freemius WordPress SDK",
+            "homepage": "https://freemius.com",
+            "keywords": [
+                "freemius",
+                "plugin",
+                "sdk",
+                "theme",
+                "wordpress",
+                "wordpress-plugin",
+                "wordpress-theme"
+            ],
+            "support": {
+                "issues": "https://github.com/Freemius/wordpress-sdk/issues",
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.3"
+            },
+            "install-path": "../freemius/wordpress-sdk"
+        },
+        {
+            "name": "woocommerce/action-scheduler",
+            "version": "3.5.3",
+            "version_normalized": "3.5.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/woocommerce/action-scheduler.git",
+                "reference": "63ef5af013ca3a6efdd8ef8e9363ac70778713cb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/63ef5af013ca3a6efdd8ef8e9363ac70778713cb",
+                "reference": "63ef5af013ca3a6efdd8ef8e9363ac70778713cb",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7.5",
+                "woocommerce/woocommerce-sniffs": "0.1.0",
+                "wp-cli/wp-cli": "~2.5.0",
+                "yoast/phpunit-polyfills": "^1.0"
+            },
+            "time": "2022-11-09T17:45:19+00:00",
+            "type": "wordpress-plugin",
+            "extra": {
+                "scripts-description": {
+                    "test": "Run unit tests",
+                    "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+                    "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "description": "Action Scheduler for WordPress and WooCommerce",
+            "homepage": "https://actionscheduler.org/",
+            "support": {
+                "issues": "https://github.com/woocommerce/action-scheduler/issues",
+                "source": "https://github.com/woocommerce/action-scheduler/tree/3.5.3"
+            },
+            "install-path": "../woocommerce/action-scheduler"
+        },
+        {
+            "name": "wpwhitesecurity/import-export-plugin-settings",
+            "version": "1.0.0",
+            "version_normalized": "1.0.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wpwhitesecurity/import-export-plugin-settings.git",
+                "reference": "3b8e5707bc754edab795389e0978b9b6bb7ee205"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wpwhitesecurity/import-export-plugin-settings/zipball/3b8e5707bc754edab795389e0978b9b6bb7ee205",
+                "reference": "3b8e5707bc754edab795389e0978b9b6bb7ee205",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "time": "2022-04-11T11:11:46+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "files": [
+                    "SettingsImportExport.php"
+                ]
+            },
+            "authors": [
+                {
+                    "name": "WP White Security",
+                    "email": "info@wpwhitesecurity.com"
+                }
+            ],
+            "description": "Settings import/export library for WordPress",
+            "support": {
+                "source": "https://github.com/wpwhitesecurity/import-export-plugin-settings/tree/v1.0.0",
+                "issues": "https://github.com/wpwhitesecurity/import-export-plugin-settings/issues"
+            },
+            "install-path": "../wpwhitesecurity/import-export-plugin-settings"
+        },
+        {
+            "name": "wpwhitesecurity/select2-wpwhitesecurity",
+            "version": "1.0.2",
+            "version_normalized": "1.0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wpwhitesecurity/select2-wpwhitesecurity.git",
+                "reference": "d56f367bcd22ba0836cd2ee6e88a1a3902f01ad3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wpwhitesecurity/select2-wpwhitesecurity/zipball/d56f367bcd22ba0836cd2ee6e88a1a3902f01ad3",
+                "reference": "d56f367bcd22ba0836cd2ee6e88a1a3902f01ad3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "time": "2022-03-16T08:53:12+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "files": [
+                    "load.php"
+                ]
+            },
+            "authors": [
+                {
+                    "name": "WP White Security",
+                    "email": "info@wpwhitesecurity.com"
+                }
+            ],
+            "description": "Select2 integration library for WordPress",
+            "support": {
+                "source": "https://github.com/wpwhitesecurity/select2-wpwhitesecurity/tree/v1.0.2",
+                "issues": "https://github.com/wpwhitesecurity/select2-wpwhitesecurity/issues"
+            },
+            "install-path": "../wpwhitesecurity/select2-wpwhitesecurity"
+        }
+    ],
+    "dev": false,
+    "dev-package-names": []
+}

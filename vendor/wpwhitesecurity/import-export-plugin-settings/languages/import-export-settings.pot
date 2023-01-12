@@ -1,0 +1,132 @@
+# Copyright (C) 2022 WP White Security
+# This file is distributed under the same license as the settings-import-export package.
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: settings-import-export\n"
+"Report-Msgid-Bugs-To: https://www.wpwhitesecurity.com\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: WP White Security <info@wpwhitesecurity.com>\n"
+"Language-Team: WP White Security <info@wpwhitesecurity.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Generator: Poedit 3.0.1\n"
+"X-Poedit-SearchPath-0: SettingsImportExport.php\n"
+
+#: SettingsImportExport.php:65
+msgid "Export settings"
+msgstr ""
+
+#: SettingsImportExport.php:69
+msgid "Export"
+msgstr ""
+
+#: SettingsImportExport.php:72
+msgid "Once the settings are exported a download will automatically start. The settings are exported to a JSON file."
+msgstr ""
+
+#: SettingsImportExport.php:79
+msgid "Import settings"
+msgstr ""
+
+#: SettingsImportExport.php:86
+msgid "Validate & Import"
+msgstr ""
+
+#: SettingsImportExport.php:88
+msgid "Once you choose a JSON settings file, it will be checked prior to being imported to alert you of any issues, if there are any."
+msgstr ""
+
+#: SettingsImportExport.php:113 SettingsImportExport.php:134
+msgid "Nonce Verification Failed."
+msgstr ""
+
+#: SettingsImportExport.php:162
+msgid "User not found: "
+msgstr ""
+
+#: SettingsImportExport.php:172
+msgid "Role not found: "
+msgstr ""
+
+#: SettingsImportExport.php:182
+msgid "Post type not found: "
+msgstr ""
+
+#: SettingsImportExport.php:207
+msgid "Setting updated"
+msgstr ""
+
+#: SettingsImportExport.php:207
+msgid "Setting created"
+msgstr ""
+
+#: SettingsImportExport.php:275
+msgid "Checking import contents"
+msgstr ""
+
+#: SettingsImportExport.php:276
+msgid "Ready to import"
+msgstr ""
+
+#: SettingsImportExport.php:277
+msgid "Issues found"
+msgstr ""
+
+#: SettingsImportExport.php:278
+msgid "Importing settings"
+msgstr ""
+
+#: SettingsImportExport.php:279
+msgid "Settings imported"
+msgstr ""
+
+#: SettingsImportExport.php:280
+msgid "Help"
+msgstr ""
+
+#: SettingsImportExport.php:281
+msgid "The role, user or post type contained in your settings are not currently found in this website. Importing such settings could lead to abnormal behavour. For more information and / or if you require assistance, please"
+msgstr ""
+
+#: SettingsImportExport.php:282
+msgid "Currently this data is not supported by our export/import wizard."
+msgstr ""
+
+#: SettingsImportExport.php:283
+msgid "To avoid accidental lock-out, this setting is not imported."
+msgstr ""
+
+#: SettingsImportExport.php:284
+msgid "Please upload a valid JSON file."
+msgstr ""
+
+#: SettingsImportExport.php:285
+msgid "Cancel"
+msgstr ""
+
+#: SettingsImportExport.php:286
+msgid "The settings file has been tested and the configuration is ready to be imported. Would you like to proceed?"
+msgstr ""
+
+#: SettingsImportExport.php:287
+msgid "The configuration has been successfully imported. Click OK to close this window"
+msgstr ""
+
+#: SettingsImportExport.php:288
+msgid "Proceed"
+msgstr ""
+
+#: SettingsImportExport.php:289
+msgid "OK"
+msgstr ""
+
+#: SettingsImportExport.php:291
+msgid "Contact Us"
+msgstr ""

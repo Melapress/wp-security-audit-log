@@ -1,0 +1,107 @@
+/**
+ * Audit Log Admin Notice
+ */
+.wsal_notice {
+    position: relative;
+}
+
+.wsal_notice__wrapper {
+    display: table;
+    width: 100%;
+    margin: 12px 0;
+}
+
+.wsal_notice__wrapper .wsal_notice__content {
+    display: table-cell;
+    vertical-align: middle;
+    padding-right: 12px;
+}
+
+.wsal_notice__wrapper img {
+    height: 70px;
+    margin-right: 5px;
+}
+
+div.wsal_notice__wrapper p {
+    display: inline-block;
+    width: 89%;
+    vertical-align: top;
+}
+
+.wsal_notice__btns {
+    display: table-cell;
+    vertical-align: top;
+    width: 235px;
+    text-align: right;
+}
+
+.wsal_notice__btns a.wsal_notice__btn {
+    background: #049443;
+    border-color: #049443;
+    box-shadow: 0 1px 0 #049443;
+    text-shadow: none;
+}
+
+.wsal_notice__btns a.wsal_notice__btn:hover {
+    background: #035c2a;
+    border-color: #035c2a;
+}
+
+.wsal_notice__btns a.button-primary {
+    margin-bottom: 7px;
+}
+
+.wsal_notice__btns > div {
+    width: 110px;
+    margin-top: 5px;
+}
+
+.wsal_notice__btns a.wsal_notice__btn_dismiss {
+    display: inline-block;
+    color: #AAA;
+    font-size: 11px;
+    text-decoration: none;
+    padding: 0;
+    position: absolute;
+    right: 14px;
+    bottom: 3px;
+}
+
+.wsal_notice__btns a.start-trial-link {
+    position: absolute;
+    right: 14px;
+    bottom: 20px;
+}
+/* Addon Notices */
+.notice-addon-available {
+    display: flex;
+}
+
+.addon-logo-wrapper {
+    display: flex;
+    margin-right: 20px;
+}
+
+.notice-addon-available img {
+    max-height: 48px;
+    align-self: center;
+}
+
+.notice-addon-available .button {
+    margin-top: 8px;
+}
+
+.notice-addon-available .notice-dismiss {
+    margin-top: 5px;
+}
+
+.wsal_notice__btns a.wsal_notice__btn.notice-cta {
+    padding: 2px 25px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.updated.wsal_notice {
+    border: 3px solid #049443;
+    overflow: hidden;
+}
