@@ -7,7 +7,7 @@ Tags: activity log, security audit log, user tracking, security event log, audit
 Requires at least: 5.0
 Tested up to: 6.1.1
 Stable tag: 4.4.3
-Requires PHP: 7.0
+Requires PHP: 7.2
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
 
