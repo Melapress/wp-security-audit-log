@@ -271,13 +271,13 @@ class WSAL_ViewManager {
 
 			/* @free:start */
 			// add_submenu_page(
-			// 	'wsal-auditlog',
-			// 	'Pricing',
-			// 	'<span class="fs-submenu-item wp-security-audit-log pricing ">Pricing&nbsp;&nbsp;➤</span>',
-			// 	'read', // No capability requirement.
-			// 	'pricing',
-			// 	array(),
-			// 	300
+			// 'wsal-auditlog',
+			// 'Pricing',
+			// '<span class="fs-submenu-item wp-security-audit-log pricing ">Pricing&nbsp;&nbsp;➤</span>',
+			// 'read', // No capability requirement.
+			// 'pricing',
+			// array(),
+			// 300
 			// );
 			add_submenu_page(
 				'wsal-auditlog',
@@ -382,7 +382,7 @@ class WSAL_ViewManager {
 		}
 
 		global $pagenow;
-		if ( 'admin.php' === $pagenow && 'wsal-auditlog-pricing' === $_GET['page'] ) { // phpcs:ignore
+		if ( 'admin.php' === $pagenow && ( isset( $_GET['page'] ) && 'wsal-auditlog-pricing' === $_GET['page'] ) ) {
 			?>
 			<style>
 				.fs-full-size-wrapper {
