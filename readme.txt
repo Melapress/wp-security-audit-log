@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, security audit log, user tracking, security event log, audit trail, user activity
 Requires at least: 5.0
 Tested up to: 6.1.1
-Stable tag: 4.4.3
+Stable tag: 4.4.3.1
 Requires PHP: 7.2
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -209,49 +209,22 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.4.3 (2022-12-07) =
-
-Release notes: [Announcing WP Activity Log 4.4.3](https://wpactivitylog.com/wsal-4-4-3/)
-
-* **New activity log event IDs**
-	* 6060: an event ID was enabled or disabled.
+= 4.4.3.1 (2023-01-12) =
 	
-* **New features & functionality**
-	* [MemberPress activity log extension](https://wpactivitylog.com/extensions/memberpress-activity-log/) - keep a log of the changes that happen on your MemberPress powered website.
-	* Support for syslog connections over TLS connection.
-	* Setting to write activity logs directly to a log file (completely bypassing the Action Scheduler).
-	* Sessions policies for super admins on a multisite network.
-	* Button to terminate only the displayed sessions in the Logged-In users view.
-	* New setting to show only the logged in users who have multiple sessions.
-	* New {user_email} tag available for custom notifications.
-	* Plugin can now read v4 IP addresses that are mapped to v6.
-		
 * **Plugin & features improvements**
-	* Reports are now generated in the background and an email is sent to the user upon completion, allowing users to navigate away from the page without interrupting the process.
-	* Non mirrored logs are now stored in a php file instead of a log file - more secure implementation.
-	* User email address is now available as a tag that can be used in email templates.
-	* Major database queries improvements to optimize the reading of activity log events from the database.
-	* Improved display of extension events (as well as special sub-options) within the Enable/Disable events view.
-	* Adjusted CSS for a more responsive activity log viewer.
-	* Improved login sensor to improve compatibilty with most custom login forms.
-	* Improved logic handling when creating custom notifications.
-	* Activity Log events sorted by event ID in Enable/Disable Events section.
-	* UI improvements to the Enable/Disable events view.
-	* Activity log event metadata is now consistently an array for efficiency and better data management.
-	* Added new options in the "Terminate all sessions" feature to terminate all but the admin's sessions.
-	* Silencing admin notices in the activity log viewer page.
-	* New selection checkbox to individually select sessions from the logged in users view.
-	* Various UI and UX improvements to the Users Sessions view.
-	* Event data inspector styling improvements.
-	* Removed the Freemius SDK from the free edition of the plugin.
-	* Plugin now displays the user role name instead of the slug.
-	* Improved the plugins internal logging class/system.
-	* Applied several new checks and improvements to improve the reliability of the archiving connection module.
-	* Limited external connection usage to single use (to avoid conflicts and speed up the process).
-	* Removed Freemius from the Free edition of the plugin.
-	* Improved the logic of event ID 1000 (user login) to avoid duplicate events when a user logs in via WooCommerce.
-	* Improved the "ordering and organizing" of the event ID lists in the Enabled / Disable Events section.
-	* Updated the Freemius SDK to version 2.4.5.
-	* Improved compatability with the MemberPress plugin (addresses a number of errors etc).
+	* Better support fo the Nextend Social Login and Register plugin - plugin keeps a log of all logged in sessions, including those signing in via third parties services such as Google and Facebook.
+	* All search filters now have the "add filter" button, replacing the client side scripts to improve cross-browser support.
+	* Improved the placement and text of some notices & error messages in the activity log mirroring wizard.
+	* Added additional checks for the plugin setting "write directly to mirror" to address a number of PHP warnings.
+	
+* **Bug fixes**
+	* Fixed: Error reported when trying to edit a revision of a post on some particular setups.
+	* Fixed: All plugin log files had the .php extension, instead of only the non mirrored logs log file.
+	* Fixed a PHP notice triggered whenever accessing the Integrations section in the plugin.
+	* Fixed a number of PHP warnings which were being reported when the plugin is run in an environment using PHP8.
+	* Fixed: Clicking the "Archive now" button was not triggering the archiving of the activity log, but only the Cron job was triggering the archiving.
+	* Fixed: Uncaught error in "FS_Admin_Notices" reported in some cases when plugin is used with MainWP child.
+	* Fixed: PHP fatal error reported on some membership based websites when users try to log in.
+	* Fixed: Incorrect username is shown in the daily email summary in some multisite network installs.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
