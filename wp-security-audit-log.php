@@ -16,7 +16,7 @@
  * Domain Path: /languages/
  * License:     GPL v3
  * Requires at least: 5.0
- * Requires PHP: 7.0
+ * Requires PHP: 7.2
  * Network: true
  *
  * @package wsal
@@ -123,7 +123,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 *
 			 * @var string
 			 */
-			const MIN_PHP_VERSION = '7.0.0';
+			const MIN_PHP_VERSION = '7.2.0';
 
 			/**
 			 * New option name prefix.
