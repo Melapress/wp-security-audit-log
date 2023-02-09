@@ -1159,11 +1159,10 @@ class WSAL_Settings {
 	 */
 	public function get_excluded_post_types(): array {
 		if ( empty( $this->post_types ) ) {
+			$this->post_types = array();
 			if ( ! is_null( WSAL\Helpers\Settings_Helper::get_option_value( 'custom-post-types' ) ) ) {
 				$this->post_types = array_unique( array_filter( explode( ',', WSAL\Helpers\Settings_Helper::get_option_value( 'custom-post-types' ) ) ) );
-            }
-
-			$this->post_types = array();
+			}
 		}
 
 		return $this->post_types;

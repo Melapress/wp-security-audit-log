@@ -242,6 +242,26 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		}
 
 		/**
+		 * Returns the connection for the passed mirror
+		 *
+		 * @param string $connection_name - The name of the connection.
+		 *
+		 * @return array|false
+		 *
+		 * @since 4.4.3.2
+		 */
+		public static function get_connection_by_name( $connection_name ) {
+			$connections = self::get_all_connections();
+			foreach ( $connections as $connection ) {
+				if ( $connection['name'] === $connection_name ) {
+					return $connection;
+				}
+			}
+
+			return false;
+		}
+
+		/**
 		 * Gets configuration data for all mirrors.
 		 *
 		 * @return array

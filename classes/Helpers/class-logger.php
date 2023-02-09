@@ -150,7 +150,7 @@ if ( ! class_exists( '\WSAL\Helpers\Logger' ) ) {
 		 * @since 4.4.3
 		 */
 		private static function write_to_file( $filename, $content, $override = false ) {
-			return File_Helper::write_to_file( $filename, $content, $override );
+			return File_Helper::write_to_file( self::get_logging_dir_path() . $filename, $content, $override );
 		}
 
 		/**

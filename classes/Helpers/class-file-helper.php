@@ -117,5 +117,27 @@ if ( ! class_exists( '\WSAL\Helpers\File_Helper' ) ) {
 		public static function get_last_error(): string {
 			return self::$last_error;
 		}
+
+		/**
+		 * Reads entire file into memory and returns the content as a string.
+		 * IMPORTANT: Don't use that method if you are expecting large files.
+		 *
+		 * @param string $filename - The full name of the file (including the path).
+		 *
+		 * @return string
+		 *
+		 * @since 4.4.3.2
+		 */
+		public static function read_entire_content_memory( string $filename ): string {
+			global $wp_filesystem;
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+
+			if ( $wp_filesystem->exists( $filename ) ) {
+				return $wp_filesystem->get_contents( $filename );
+			}
+
+			return '';
+		}
 	}
 }

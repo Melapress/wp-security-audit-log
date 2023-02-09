@@ -722,8 +722,8 @@ final class WSAL_Views_SetupWizard {
 				</a>
 			</li>
 			<li>
-				<a href="https://wpactivitylog.com/benefits-wordpress-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" rel="noopener noreferrer" target="_blank">
-					<?php esc_html_e( 'Benefits of keeping a WordPress activity log', 'wp-security-audit-log' ); ?>
+				<a href="https://wpactivitylog.com/wordpress-activity-log/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=wizard+configuration" rel="noopener noreferrer" target="_blank">
+					<?php esc_html_e( 'WordPress activity logs: the definitive guide to understanding & using them', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 		</ul>
