@@ -36,15 +36,14 @@ class WSAL_Utilities_UsersUtils {
 	/**
 	 * Build the correct label to display for a given user.
 	 *
-	 * @param WpSecurityAuditLog $plugin Instance of WpSecurityAuditLog.
-	 * @param WP_User            $user   WordPress user object.
+	 * @param WP_User $user   WordPress user object.
 	 *
 	 * @return string
 	 * @since 4.3.0
 	 */
-	public static function get_display_label( $plugin, $user ) {
+	public static function get_display_label( $user ) {
 		if ( ! isset( self::$user_label_setting ) ) {
-			self::$user_label_setting = $plugin->settings()->get_type_username();
+			self::$user_label_setting = WSAL\Helpers\Settings_Helper::get_option_value( 'type_username', 'display_name' );
 		}
 
 		if ( 'display_name' === self::$user_label_setting && ! empty( $user->display_name ) ) {
@@ -175,14 +174,14 @@ class WSAL_Utilities_UsersUtils {
 
 		if ( is_array( $roles ) && count( $roles ) ) {
 			foreach ( $roles as $index => $role_slug ) {
-				$role_names[ $index ] = ( isset( $wp_roles->roles[ $role_slug ] ) ) ? translate_user_role( $wp_roles->roles[ $role_slug ][ 'name' ] ) : ucwords( $role_slug );
+				$role_names[ $index ] = ( isset( $wp_roles->roles[ $role_slug ] ) ) ? translate_user_role( $wp_roles->roles[ $role_slug ]['name'] ) : ucwords( $role_slug );
 			}
 			return esc_html( implode( ', ', $role_names ) );
 		}
 
 		if ( is_string( $roles ) && '' !== $roles ) {
-			$roles = trim( str_replace( array( '"', '[', ']' ), ' ', $roles ) );
-			$role_name = ( isset( $wp_roles->roles[ $roles ] ) ) ? translate_user_role( $wp_roles->roles[ $roles ][ 'name' ] ) : ucwords( $roles );
+			$roles     = trim( str_replace( array( '"', '[', ']' ), ' ', $roles ) );
+			$role_name = ( isset( $wp_roles->roles[ $roles ] ) ) ? translate_user_role( $wp_roles->roles[ $roles ]['name'] ) : ucwords( $roles );
 			return esc_html( $role_name );
 		}
 

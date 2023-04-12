@@ -10,6 +10,8 @@
  * @since      1.0.0
  */
 
+use WSAL\Helpers\WP_Helper;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -32,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package    wsal
  * @subpackage sensors
  */
-class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
+class WSAL_Sensors_UserProfile {// extends WSAL_AbstractSensor {
 
 	/**
 	 * List of super admins.
@@ -292,7 +294,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 					'FirstName'      => $user->user_firstname,
 					'LastName'       => $user->user_lastname,
 					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
-					'multisite_text' => WpSecurityAuditLog::is_multisite() ? get_current_blog_id() : false,
+					'multisite_text' => WP_Helper::is_multisite() ? get_current_blog_id() : false,
 				),
 				array( $this, 'must_not_contain_user_changes' )
 			);
@@ -510,7 +512,7 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			'LastName'  => ! empty( $user->user_lastname ) ? $user->user_lastname : '',
 		);
 
-		$event_code = WpSecurityAuditLog::is_multisite() ? 4012 : 4001;
+		$event_code = WP_Helper::is_multisite() ? 4012 : 4001;
 		if ( 4001 === $event_code ) {
 			$new_user_data['Roles'] = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
 		} elseif ( 4012 === $event_code ) {
@@ -523,6 +525,6 @@ class WSAL_Sensors_UserProfile extends WSAL_AbstractSensor {
 			'EditUserLink' => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
 		);
 
-		$this->plugin->alerts->trigger_event( $event_code, $event_data, WpSecurityAuditLog::is_multisite() );
+		$this->plugin->alerts->trigger_event( $event_code, $event_data, WP_Helper::is_multisite() );
 	}
 }

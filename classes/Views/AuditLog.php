@@ -9,7 +9,11 @@
  * @subpackage views
  */
 
+use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\Plugins_Helper;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Entities\Occurrences_Entity;
+use WSAL\Controllers\Plugin_Extensions;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -205,7 +209,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				&& $is_current_view
 				&& $this->plugin->settings()->current_user_can( 'edit' ) // Have permission to edit plugin settings.
 			) {
-				if ( ! is_multisite() || ( is_multisite() && is_network_admin() ) ) :
+				if ( ! WP_Helper::is_multisite() || ( WP_Helper::is_multisite() && is_network_admin() ) ) :
 					?>
 					<div class="notice notice-success">
 						<p><strong><?php esc_html_e( 'Help WP Activity Log improve.', 'wp-security-audit-log' ); ?></strong></p>
@@ -235,7 +239,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			}
 
 			// Grab list of plugins we have addons for.
-			$predefined_plugins       = WSAL_PluginInstallAndActivate::get_installable_plugins();
+			$predefined_plugins       = Plugins_Helper::get_installable_plugins();
 			$predefined_plugins_check = array_column( $predefined_plugins, 'addon_for' );
 
 			// Loop through plugins and create an array of slugs, we will compare these against the plugins we have addons for.
@@ -245,7 +249,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 				foreach ( $we_have_addon as $addon ) {
 					$addon_slug         = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ); // phpcs:ignore
-					$is_addon_installed = WpSecurityAuditLog::is_plugin_active( $addon_slug );
+					$is_addon_installed = WP_Helper::is_plugin_active( $addon_slug );
 					if ( $is_addon_installed ) {
 						continue;
 					}
@@ -356,7 +360,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 			// @codingStandardsIgnoreStart
 			$this->page_args->page    = isset( $_REQUEST['page'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) : false;
-			$this->page_args->site_id = $this->plugin->settings()->get_view_site_id();
+			$this->page_args->site_id = WP_Helper::get_view_site_id();
 
 			// Order arguments.
 			$this->page_args->order_by = isset( $_REQUEST['orderby'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) : false;
@@ -651,8 +655,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 
 		// Check for new total number of alerts.
-		$occ = new WSAL_Models_Occurrence();
-		$new = (int) $occ->count();
+		$new = (int) Occurrences_Entity::count();
 
 		// If the count is changed, then return the new count.
 		echo $old === $new ? 'false' : esc_html( $new );
@@ -769,7 +772,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Check if choice is not empty.
 		if ( ! empty( $choice ) ) {
 			if ( 'yes' === $choice ) {
-				if ( ! is_multisite() ) {
+				if ( ! WP_Helper::is_multisite() ) {
 					wsal_freemius()->opt_in(); // Opt in.
 				} else {
 					// Get sites.
@@ -787,7 +790,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				// Update Freemius state.
 				\WSAL\Helpers\Settings_Helper::set_option_value( 'freemius_state', 'in', true );
 			} elseif ( 'no' === $choice ) {
-				if ( ! is_multisite() ) {
+				if ( ! WP_Helper::is_multisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
 				} else {
 					wsal_freemius()->skip_connection( null, true ); // Opt out for all websites.
@@ -1079,8 +1082,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @return int
 	 */
 	public function get_total_events() {
-		$occ = new WSAL_Models_Occurrence();
-		return (int) $occ->count();
+		return (int) Occurrences_Entity::count();
 	}
 
 	/**
@@ -1140,30 +1142,30 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 */
 	public function maybe_build_teaser_html( $event_meta ) {
 		$result = '';
-		if ( ! array_key_exists( 'PostType', $event_meta ) ) {
+		if ( ! array_key_exists( 'PostType', $event_meta ) || empty( $event_meta['PostType'] ) ) {
 			return $result;
 		}
 
-		$extension = WSAL_AbstractExtension::get_extension_for_post_type( $event_meta['PostType'] );
+		$extension = Plugin_Extensions::get_extension_for_post_type( $event_meta['PostType'] );
 		if ( is_null( $extension ) ) {
 			return $result;
 		}
 
-		$plugin_filename = $extension->get_plugin_filename();
-		if ( WSAL_PluginInstallAndActivate::is_plugin_installed( $plugin_filename ) && WpSecurityAuditLog::is_plugin_active( $plugin_filename ) ) {
+		$plugin_filename = call_user_func_array( array( $extension, 'get_plugin_filename' ), array() );
+		if ( Plugins_Helper::is_plugin_installed( $plugin_filename ) && WP_Helper::is_plugin_active( $plugin_filename ) ) {
 			return $result;
 		}
 
-		$result     .= '<div class="extension-ad" style="border-color: transparent transparent ' . $extension->get_color() . ' transparent;">';
+		$result     .= '<div class="extension-ad" style="border-color: transparent transparent ' . call_user_func_array( array( $extension, 'get_color' ), array() ) . ' transparent;">';
 		$result     .= '</div>';
-		$plugin_name = $extension->get_plugin_name();
+		$plugin_name = call_user_func_array( array( $extension, 'get_plugin_name' ), array() );
 		$link_title  = sprintf(
 			esc_html__( 'Install the activity log extension for %1$s for more detailed logging of changes done in %2$s.', 'wp-security-audit-log' ), // phpcs:ignore
 			$plugin_name,
 			$plugin_name
 		);
 		$result     .= '<a class="icon" title="' . $link_title . '" href="' . $this->get_third_party_plugins_tab_url() . '">';
-		$result     .= '<img src="' . $extension->get_plugin_icon_url() . '" />';
+		$result     .= '<img src="' . call_user_func_array( array( $extension, 'get_plugin_icon_url' ), array() ) . '" />';
 		$result     .= '</div>';
 
 		return $result;

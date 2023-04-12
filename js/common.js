@@ -14,18 +14,16 @@ jQuery( document ).ready( function() {
 	if ( wsalCommonData.liveEvents ) {
 		function wsalRefresh() {
 			jQuery.ajax({
-				type: 'POST',
+				type: 'GET',
 				url: wsalCommonData.ajaxURL,
 				async: true,
 				dataType: 'json',
 				data: {
 					action: 'wsal_adminbar_events_refresh',
-					nonce: wsalCommonData.commonNonce,
-					eventsCount: wsalCommonData.eventsCount
+					nonce: wsalCommonData.commonNonce
 				},
 				success: function( data ) {
 					if ( data.success ) {
-						wsalCommonData.eventsCount = data.count;
 						jQuery( '.wsal-live-notif-item a' ).html( data.message );
 					}
 				}

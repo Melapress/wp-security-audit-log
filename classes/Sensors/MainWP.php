@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package    wsal
  * @subpackage sensors
  */
-class WSAL_Sensors_MainWP extends WSAL_AbstractSensor {
+class WSAL_Sensors_MainWP {//extends WSAL_AbstractSensor {
 	/**
 	 * List of Themes.
 	 *

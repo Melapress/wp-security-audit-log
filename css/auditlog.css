@@ -108,6 +108,17 @@ th.column-mesg {
 	padding-left: 10px;
 }
 
+.rtl .wp-list-table .column-mesg .extension-ad {
+	left: 0;
+    right: auto;
+    transform: rotate(90deg);
+}
+
+.rtl .wp-list-table .column-mesg .icon {
+    left: 6px;
+    right: auto;
+}
+
 td.column-user {
 	font-size: 75% !important;
 }

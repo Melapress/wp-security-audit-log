@@ -184,6 +184,27 @@ class WSAL_ReportArgs {
 	public $post_status__not_in;
 
 	/**
+	 * An array of severities to include in report.
+	 *
+	 * @var string[]
+	 */
+	public $severities__in;
+
+	/**
+	 * An array of severities to exclude from report.
+	 *
+	 * @var string[]
+	 */
+	public $severities__not_in;
+
+	/**
+	 * Should there be meta in the report or not.
+	 *
+	 * @var bool
+	 */
+	public $no_meta;
+
+	/**
 	 * Builds the object from alternative filters data.
 	 *
 	 * @param array $filters Filters data.
@@ -305,6 +326,14 @@ class WSAL_ReportArgs {
 			$result->ip__not_in = $filters['ip-addresses-exclude'];
 		}
 
+		if ( self::is_field_present_and_non_empty_array( 'severities', $filters ) ) {
+			$result->severities__in = $filters['severities'];
+		}
+
+		if ( self::is_field_present_and_non_empty_array( 'severities-exclude', $filters ) ) {
+			$result->severities__not_in = $filters['severities-exclude'];
+		}
+
 		$_codes = self::get_codes( $filters, 'alert_codes_groups', 'alert_codes_alerts', $report_utils );
 		if ( is_array( $_codes ) && ! empty( $_codes ) ) {
 			$result->code__in = $_codes;
@@ -321,6 +350,10 @@ class WSAL_ReportArgs {
 
 		if ( array_key_exists( 'date_range_end', $filters ) && $filters['date_range_end'] ) {
 			$result->end_date = $filters['date_range_end'];
+		}
+
+		if ( array_key_exists( 'no_meta', $filters ) && $filters['no_meta'] ) {
+			$result->no_meta = $filters['no_meta'];
 		}
 
 		return $result;

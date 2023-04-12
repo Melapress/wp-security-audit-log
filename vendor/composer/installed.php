@@ -20,9 +20,9 @@
             'dev_requirement' => false,
         ),
         'freemius/wordpress-sdk' => array(
-            'pretty_version' => '2.5.3',
-            'version' => '2.5.3.0',
-            'reference' => '2e56d683dd7b30445940679ecb401d2aff746c9e',
+            'pretty_version' => '2.5.6',
+            'version' => '2.5.6.0',
+            'reference' => '095fc9ced29efef5b18f9b7242bb80b0b4ac6aff',
             'type' => 'library',
             'install_path' => __DIR__ . '/../freemius/wordpress-sdk',
             'aliases' => array(),

@@ -38,7 +38,16 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 * @since 4.4.2.1
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
+
 		parent::__construct( $plugin );
+
+		$sensors = Classes_Helper::get_classes_by_namespace( '\WSAL\WP_Sensors' );
+
+		foreach ( $sensors as $sensor ) {
+			if ( method_exists( $sensor, 'init' ) ) {
+				call_user_func_array( array( $sensor, 'init' ), array() );
+			}
+		}
 
 		// Check sensors before loading for optimization.
 		add_filter( 'wsal_before_sensor_load', array( $this, 'check_sensor_before_load' ), 10, 2 );
@@ -51,7 +60,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 		/**
 		 * Get an array of directories to loop through to add custom sensors.
-		 * 
+		 *
 		 * TODO: remove all that logic as it is wrongly written
 		 *
 		 * Passed through a filter so other plugins or code can add own custom
@@ -155,7 +164,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 	 */
 	public function check_sensor_before_load( $load_sensor, $filepath ) {
 		global $pagenow;
-		if ( ! WpSecurityAuditLog::is_multisite() ) {
+		if ( ! WP_Helper::is_multisite() ) {
 			$admin_page = $pagenow;
 		} else {
 			/**
@@ -197,7 +206,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		// Get file name.
 		$filename = basename( $filepath, '.php' );
 
-		$frontend_events = WSAL_Settings::get_frontend_events();
+		$frontend_events = WSAL\Helpers\Settings_Helper::get_frontend_events();
 
 		// Only LogInOut and Register sensors should load on login page.
 		if ( WpSecurityAuditLog::is_login_screen() ) {
@@ -208,7 +217,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		}
 
 		$default_public_sensors = array( 'Register', 'LogInOut' );
-		if ( WpSecurityAuditLog::is_multisite() ) {
+		if ( WP_Helper::is_multisite() ) {
 			// Multisite sign-up is happening on front-end.
 			array_push( $default_public_sensors, 'MultisiteSignUp' );
 		}
@@ -268,7 +277,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 
 				case 'Multisite':
 					// If site is not multisite then don't load it.
-					if ( ! WpSecurityAuditLog::is_multisite() ) {
+					if ( ! WP_Helper::is_multisite() ) {
 						$load_sensor = false;
 					}
 					break;

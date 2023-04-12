@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package    wsal
  * @subpackage sensors
  */
-class WSAL_Sensors_Database extends WSAL_AbstractSensor {
+class WSAL_Sensors_Database {//extends WSAL_AbstractSensor {
 
 	/**
 	 * Local cache for basename of current script. It is used to improve performance

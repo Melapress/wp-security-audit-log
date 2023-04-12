@@ -82,18 +82,18 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 			$wsal = \WpSecurityAuditLog::get_instance();
 			$wsal::load_freemius();
-			$wsal->load_defaults();
+			$wsal::load_defaults();
 
 			// Load dependencies.
-			if ( ! isset( $wsal->alerts ) ) {
-				$wsal->alerts = new \WSAL_AlertManager( $wsal );
-			}
+			// if ( ! isset( $wsal->alerts ) ) {
+			// 	$wsal->alerts = new \WSAL_AlertManager( $wsal );
+			// }
 
-			if ( ! isset( $wsal->constants ) ) {
-				$wsal->constants = new \WSAL_ConstantManager();
-			}
+			// if ( ! isset( $wsal->constants ) ) {
+			// 	$wsal->constants = new \WSAL_ConstantManager();
+			// }
 
-			$wsal->sensors = new \WSAL_SensorManager( $wsal );
+			// $wsal->sensors = new \WSAL_SensorManager( $wsal );
 
 			$disabled_alerts = WP_Helper::get_global_option( 'disabled-alerts', false );
 
@@ -138,10 +138,10 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			}
 
 			// Remove 'system' entry from the front-end events array as it was removed along with 404 tracking.
-			$frontend_events = \WSAL_Settings::get_frontend_events();
+			$frontend_events = \WSAL\Helpers\Settings_Helper::get_frontend_events();
 			if ( array_key_exists( 'system', $frontend_events ) ) {
 				unset( $frontend_events['system'] );
-				\WSAL_Settings::set_frontend_events( $frontend_events );
+				\WSAL\Helpers\Settings_Helper::set_frontend_events( $frontend_events );
 			}
 
 			// Remove all settings related to 404 tracking.
@@ -582,9 +582,9 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		protected static function migrate_up_to_4430() {
 
 
-			if ( class_exists( 'WSAL_Ext_MirrorLogger' ) && method_exists( 'WSAL_Settings', 'get_working_dir_path_static' ) ) {
+			if ( class_exists( 'WSAL_Ext_MirrorLogger' ) && method_exists( '\WSAL\Helpers\Settings_Helper', 'get_working_dir_path_static' ) ) {
 
-				$working_dir_path = WSAL_Settings::get_working_dir_path_static();
+				$working_dir_path = \WSAL\Helpers\Settings_Helper::get_working_dir_path_static();
 
 				if ( file_exists( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.json' ) ) {
 					rename( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.json', $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.php' );

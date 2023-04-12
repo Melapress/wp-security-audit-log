@@ -9,6 +9,7 @@
  * @subpackage sensors
  */
 
+use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Helper;
 
 // Exit if accessed directly.
@@ -29,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package    wsal
  * @subpackage sensors
  */
-class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
+class WSAL_Sensors_LogInOut {//extends WSAL_AbstractSensor {
 
 	/**
 	 * Transient name.
@@ -58,7 +59,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 		add_action( 'clear_auth_cookie', array( $this, 'get_current_user' ), 10 );
 		add_action( 'lostpassword_post', array( $this, 'event_user_requested_pw_reset' ), 10, 2 );
 
-		if ( WpSecurityAuditLog::is_plugin_active( 'user-switching/user-switching.php' ) ) {
+		if ( WP_Helper::is_plugin_active( 'user-switching/user-switching.php' ) ) {
 			add_action( 'switch_to_user', array( $this, 'user_switched_event' ), 10, 2 );
 		}
 	}
@@ -153,8 +154,8 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			'Username'         => $user_login,
 			'CurrentUserRoles' => $user_roles,
 		);
-		if ( class_exists( 'WSAL_UserSessions_Helpers' ) ) {
-			$alert_data['SessionID'] = WSAL_UserSessions_Helpers::hash_token( $token );
+		if ( class_exists( '\WSAL\Helpers\User_Sessions_Helper' ) ) {
+			$alert_data['SessionID'] = \WSAL\Helpers\User_Sessions_Helper::hash_token( $token );
 		}
 
 		if ( ! isset( $this->plugin->alerts ) ) {
@@ -185,7 +186,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	public function event_logout() {
 		if ( $this->current_user->ID ) {
 			// get the list of excluded users.
-			$excluded_users    = $this->plugin->settings()->get_excluded_monitoring_users();
+			$excluded_users    = \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_users();
 			$excluded_user_ids = array();
 			// convert excluded usernames into IDs.
 			if ( ! empty( $excluded_users ) && is_array( $excluded_users ) ) {
@@ -256,14 +257,14 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 			if ( -1 === (int) $this->get_login_failure_log_limit() ) {
 				return false;
 			} else {
-				$data_known = WpSecurityAuditLog::get_transient( self::TRANSIENT_FAILEDLOGINS );
+				$data_known = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS );
 				return ( false !== $data_known ) && isset( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] ) && ( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] >= $this->get_login_failure_log_limit() );
 			}
 		} else {
 			if ( -1 === (int) $this->get_visitor_login_failure_log_limit() ) {
 				return false;
 			} else {
-				$data_unknown = WpSecurityAuditLog::get_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
+				$data_unknown = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
 				return ( false !== $data_unknown ) && isset( $data_unknown[ $site_id . ':' . $ip ] ) && ( $data_unknown[ $site_id . ':' . $ip ] >= $this->get_visitor_login_failure_log_limit() );
 			}
 		}
@@ -278,12 +279,12 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	 */
 	protected function increment_login_failure( $ip, $site_id, $user ) {
 		if ( $user ) {
-			$data_known      = WpSecurityAuditLog::get_transient( self::TRANSIENT_FAILEDLOGINS );
-			$last_inc        = WpSecurityAuditLog::get_transient( self::TRANSIENT_FAILEDLOGINS_LAST );
+			$data_known      = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS );
+			$last_inc        = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS_LAST );
 
 			// Check if this has already been logged and counted.
 			if ( $last_inc && $last_inc == $user->ID ) {
-				WpSecurityAuditLog::set_transient( self::TRANSIENT_FAILEDLOGINS_NO_INCREMENT, $user->ID, 10 );
+				WP_Helper::set_transient( self::TRANSIENT_FAILEDLOGINS_NO_INCREMENT, $user->ID, 10 );
 				return;
 			}
 			if ( ! $data_known ) {
@@ -293,10 +294,10 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				$data_known[ $site_id . ':' . $user->ID . ':' . $ip ] = 1;
 			}
 			$data_known[ $site_id . ':' . $user->ID . ':' . $ip ]++;
-			WpSecurityAuditLog::set_transient( self::TRANSIENT_FAILEDLOGINS, $data_known, $this->get_login_failure_expiration() );			
-			WpSecurityAuditLog::set_transient( self::TRANSIENT_FAILEDLOGINS_LAST, $user->ID, 10 );
+			WP_Helper::set_transient( self::TRANSIENT_FAILEDLOGINS, $data_known, $this->get_login_failure_expiration() );			
+			WP_Helper::set_transient( self::TRANSIENT_FAILEDLOGINS_LAST, $user->ID, 10 );
 		} else {
-			$data_unknown = WpSecurityAuditLog::get_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
+			$data_unknown = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
 			if ( ! $data_unknown ) {
 				$data_unknown = array();
 			}
@@ -304,7 +305,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				$data_unknown[ $site_id . ':' . $ip ] = 1;
 			}
 			$data_unknown[ $site_id . ':' . $ip ]++;
-			WpSecurityAuditLog::set_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN, $data_unknown, $this->get_login_failure_expiration() );
+			WP_Helper::set_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN, $data_unknown, $this->get_login_failure_expiration() );
 		}
 	}
 
@@ -316,7 +317,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 	public function event_login_failure( $username ) {
 		list($y, $m, $d) = explode( '-', gmdate( 'Y-m-d' ) );
 
-		$ip = $this->plugin->settings()->get_main_client_ip();
+		$ip = \WSAL\Helpers\Settings_Helper::get_main_client_ip();
 
 		// Filter $_POST global array for security.
 		$post_array = filter_input_array( INPUT_POST );
@@ -377,7 +378,7 @@ class WSAL_Sensors_LogInOut extends WSAL_AbstractSensor {
 				// Update existing record exists user.
 				$this->increment_login_failure( $ip, $site_id, $user );
 
-				$no_increment = WpSecurityAuditLog::get_transient( self::TRANSIENT_FAILEDLOGINS_NO_INCREMENT );				
+				$no_increment = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS_NO_INCREMENT );				
 				$new = ( $no_increment && $no_increment == $user->ID ) ? $occ->get_meta_value( 'Attempts', 0 ) : $occ->get_meta_value( 'Attempts', 0 ) + 1;
 				$login_failure_log_limit = $this->get_login_failure_log_limit();
 				if ( - 1 !== $login_failure_log_limit && $new > $login_failure_log_limit ) {

@@ -8,6 +8,8 @@
  * @package wsal
  */
 
+use WSAL\Helpers\WP_Helper;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -42,7 +44,7 @@ function wsal_freemius() {
 		// Check anonymous mode.
 		$freemius_state = \WSAL\Helpers\Settings_Helper::get_option_value( 'wsal_freemius_state', 'anonymous' );
 		$is_anonymous   = ( 'anonymous' === $freemius_state || 'skipped' === $freemius_state );
-		$is_premium     = true;
+		$is_premium     = false;
 		$is_anonymous   = $is_premium ? false : $is_anonymous;
 
 		// Trial arguments.
@@ -51,7 +53,7 @@ function wsal_freemius() {
 			'is_require_payment' => false,
 		);
 
-		if ( WpSecurityAuditLog::is_mainwp_active() && ! is_multisite() ) {
+		if ( WpSecurityAuditLog::is_mainwp_active() && ! WP_Helper::is_multisite() ) {
 			$trial_args = false;
 		}
 

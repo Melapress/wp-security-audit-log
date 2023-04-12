@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace WSAL\Helpers;
 
+use WSAL\Helpers\WP_Helper;
+
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 /**
@@ -163,7 +165,7 @@ if ( ! class_exists( '\WSAL\Helpers\User_Helper' ) ) {
 		public static function get_user_role( $user = null ): string {
 			self::set_proper_user( $user );
 
-			if ( \is_multisite() ) {
+			if ( WP_Helper::is_multisite() ) {
 				$blog_id = \get_current_blog_id();
 
 				if ( ! is_user_member_of_blog( self::$user->ID, $blog_id ) ) {
@@ -189,7 +191,7 @@ if ( ! class_exists( '\WSAL\Helpers\User_Helper' ) ) {
 			/**
 			 * The code looks like this for clearness only
 			 */
-			if ( \is_multisite() ) {
+			if ( WP_Helper::is_multisite() ) {
 				/**
 				 * On multi site we can have user which has no assigned role, but it is superadmin.
 				 * If the check confirms that - assign the role of the administrator to the user in order not to break our code.
@@ -222,7 +224,7 @@ if ( ! class_exists( '\WSAL\Helpers\User_Helper' ) ) {
 
 			$roles = self::$user->roles;
 
-			if ( \is_multisite() ) {
+			if ( WP_Helper::is_multisite() ) {
 
 				$blogs = get_blogs_of_user( self::$user->ID );
 				foreach ( $blogs as $blog ) {
@@ -251,7 +253,7 @@ if ( ! class_exists( '\WSAL\Helpers\User_Helper' ) ) {
 			/**
 			 * The code looks like this for clearness only
 			 */
-			if ( \is_multisite() ) {
+			if ( WP_Helper::is_multisite() ) {
 				/**
 				 * On multi site we can have user which has no assigned role, but it is superadmin.
 				 * If the check confirms that - assign the role of the administrator to the user in order not to break our code.

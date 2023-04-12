@@ -9,6 +9,12 @@
  * @subpackage views
  */
 
+use WSAL\Helpers\WP_Helper;
+use WSAL\Controllers\Constants;
+use WSAL\Helpers\Plugins_Helper;
+use WSAL\Helpers\Settings_Helper;
+use WSAL\Controllers\Alert_Manager;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -82,26 +88,26 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			$frontend_events = array_merge( $frontend_events, $post_array['frontend-events'] );
 		}
 
-		$current_frontend_events = WSAL_Settings::get_frontend_events();
+		$current_frontend_events = Settings_Helper::get_frontend_events();
 
 		$this->report_enabled_disabled_event( $current_frontend_events, $frontend_events, true );
 
 		// Save enabled front end events.
-		WSAL_Settings::set_frontend_events( $frontend_events );
+		Settings_Helper::set_frontend_events( $frontend_events );
 
 		// Ensure we attempt to save even if eveything is disabled.
 		$post_array['alert'] = ( isset( $post_array['alert'] ) ) ? $post_array['alert'] : array();
 
 		$enabled           = array_map( 'intval', $post_array['alert'] );
 		$disabled          = array();
-		$registered_alerts = $this->plugin->alerts->get_alerts();
+		$registered_alerts = Alert_Manager::get_alerts();
 		$disabled          = apply_filters( 'wsal_save_settings_disabled_events', $disabled, $registered_alerts, $frontend_events, $enabled );
 
 		// Report any changes as an event.
 		$this->report_enabled_disabled_event( $enabled, $disabled );
 
 		// Save the disabled events.
-		$this->plugin->settings()->set_disabled_alerts( $disabled ); // Save the disabled events.
+		Settings_Helper::set_disabled_alerts( $disabled ); // Save the disabled events.
 
 		// Update failed login limits.
 		$this->plugin->settings()->set_failed_login_limit( $post_array['log_failed_login_limit'] );
@@ -109,7 +115,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 		// Allow 3rd parties to process and save more of the posted data.
 		do_action( 'wsal_togglealerts_process_save_settings', $post_array );
-
 	}
 
 	/**
@@ -126,19 +131,19 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			$fresh_enabled   = $disabled;
 			$frontend_labels = array(
 				'register'    => esc_html__( 'Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress.', 'wp-security-audit-log' ),
-				'login'       => esc_html__( 'Keep a log of user log in activity on custom login forms (such as WooCommerce & membership plugins)', 'wp-security-audit-log' ),	
-				'woocommerce' => esc_html__( 'Keep a log of visitor orders, stock changes and other public events?', 'wp-security-audit-log' ),	
+				'login'       => esc_html__( 'Keep a log of user log in activity on custom login forms (such as WooCommerce & membership plugins)', 'wp-security-audit-log' ),
+				'woocommerce' => esc_html__( 'Keep a log of visitor orders, stock changes and other public events?', 'wp-security-audit-log' ),
 			);
 
 			$frontend_codes = array(
 				'register'    => 4000,
-				'login'       => 1000,	
-				'woocommerce' => 9035,	
+				'login'       => 1000,
+				'woocommerce' => 9035,
 			);
 
 			foreach ( $current_enabled as $frontend_event => $value ) {
 				if ( $value !== $fresh_enabled[ $frontend_event ] ) {
-					$this->plugin->alerts->trigger_event(
+					Alert_Manager::trigger_event(
 						6060,
 						array(
 							'ID'          => $frontend_codes[ $frontend_event ],
@@ -150,16 +155,16 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			}
 		} else {
 			// Grab currently saved list of disabled events for comparison.
-			$currently_disabled = $this->plugin->settings()->get_disabled_alerts();
+			$currently_disabled = Settings_Helper::get_disabled_alerts();
 
 			// Further remove items which are disabled in the UI but potentially not saved as disabled in the settings yet (for example fresh WSAL install).
 			$obsolete_events  = array( 9999, 2126, 99999, 0001, 0002, 0003, 0004, 0005, 0006 );
-			$ms_alerts        = ( ! is_multisite() ) ? array_keys( $this->plugin->alerts->get_alerts_by_category( 'Multisite Network Sites' ) ) : array();
-			$ms_user_alerts   = ( ! is_multisite() ) ? array_keys( $this->plugin->alerts->get_alerts_by_sub_category( 'Multisite User Profiles' ) ) : array();
-			$wc_alerts        = ( ! WpSecurityAuditLog::is_woocommerce_active() ) ? array_keys( $this->plugin->alerts->get_alerts_by_category( 'WooCommerce' ) ) : array();
-			$yoast_alerts     = ( ! WpSecurityAuditLog::is_wpseo_active() ) ? array_keys( $this->plugin->alerts->get_alerts_by_category( 'Yoast SEO' ) ) : array();			
-			$deprecated_event = $this->plugin->alerts->get_deprecated_events();	
-			$always_disabled  = $this->plugin->settings()->get_default_always_disabled_alerts();
+			$ms_alerts        = ( ! WP_Helper::is_multisite() ) ? array_keys( Alert_Manager::get_alerts_by_category( 'Multisite Network Sites' ) ) : array();
+			$ms_user_alerts   = ( ! WP_Helper::is_multisite() ) ? array_keys( Alert_Manager::get_alerts_by_sub_category( 'Multisite User Profiles' ) ) : array();
+			$wc_alerts        = ( ! WpSecurityAuditLog::is_woocommerce_active() ) ? array_keys( Alert_Manager::get_alerts_by_category( 'WooCommerce' ) ) : array();
+			$yoast_alerts     = ( ! WpSecurityAuditLog::is_wpseo_active() ) ? array_keys( Alert_Manager::get_alerts_by_category( 'Yoast SEO' ) ) : array();
+			$deprecated_event = Alert_Manager::get_deprecated_events();
+			$always_disabled  = Settings_Helper::get_default_always_disabled_alerts();
 			$events_to_ignore = array_merge( $obsolete_events, $ms_alerts, $always_disabled, $deprecated_event, $ms_user_alerts, $wc_alerts, $yoast_alerts );
 
 			// Remove items we dont want to trigger alerts for here.
@@ -168,8 +173,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			// Check for events which are newly enabled.
 			foreach ( $enabled as $enabled_alert_id ) {
 				if ( in_array( $enabled_alert_id, $currently_disabled, true ) ) {
-					$alert_data = $this->plugin->alerts->get_alert( $enabled_alert_id );
-					$this->plugin->alerts->trigger_event(
+					$alert_data = Alert_Manager::get_alert( $enabled_alert_id );
+					Alert_Manager::trigger_event(
 						6060,
 						array(
 							'ID'          => $enabled_alert_id,
@@ -183,8 +188,8 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			// Check for events which are newly disabled.
 			foreach ( $disabled as $disabled_alert_id ) {
 				if ( ! in_array( $disabled_alert_id, $currently_disabled, true ) ) {
-					$alert_data = $this->plugin->alerts->get_alert( $disabled_alert_id );
-					$this->plugin->alerts->trigger_event(
+					$alert_data = Alert_Manager::get_alert( $disabled_alert_id );
+					Alert_Manager::trigger_event(
 						6060,
 						array(
 							'ID'          => $disabled_alert_id,
@@ -195,7 +200,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -233,7 +237,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$log_level_nonce  = isset( $post_array['wsal-log-level-nonce'] ) ? sanitize_text_field( $post_array['wsal-log-level-nonce'] ) : false;
 
 		if ( wp_verify_nonce( $log_level_nonce, 'wsal-log-level' ) ) {
-			\WSAL\Helpers\Settings_Helper::set_option_value( 'details-level', $log_level_to_set );
+			Settings_Helper::set_option_value( 'details-level', $log_level_to_set );
 
 			if ( 'basic' === $log_level_to_set ) {
 				$this->plugin->settings()->set_basic_mode();
@@ -242,12 +246,11 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			}
 		}
 
-		$alert          = new WSAL_Alert(); // IDE type hinting.
-		$grouped_alerts = $this->plugin->alerts->get_categorized_alerts( false );
+		$grouped_alerts = Alert_Manager::get_categorized_alerts( false );
 		$safe_names     = array_map( array( $this, 'get_safe_category_name' ), array_keys( $grouped_alerts ) );
 		$safe_names     = array_combine( array_keys( $grouped_alerts ), $safe_names );
 
-		$disabled_events = \WSAL\Helpers\Settings_Helper::get_option_value( 'disabled-alerts' ); // Get disabled events.
+		$disabled_events = Settings_Helper::get_option_value( 'disabled-alerts' ); // Get disabled events.
 		$disabled_events = explode( ',', $disabled_events );
 
 		// Check if the log level is custom.
@@ -267,8 +270,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$obsolete_events = apply_filters( 'wsal_togglealerts_obsolete_events', $obsolete_events );
 
 		// Check if the disabled events are enforced from the MainWP master site.
-		$settings                           = $this->plugin->settings();
-		$enforced_settings                  = $settings->get_mainwp_enforced_settings();
+		$enforced_settings                  = WSAL\Helpers\Settings_Helper::get_option_value( 'mainwp_enforced_settings', array() );
 		$disabled_events_enforced_by_mainwp = array_key_exists( 'disabled_events', $enforced_settings ) && ! empty( $enforced_settings['disabled_events'] );
 		?>
 
@@ -330,25 +332,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								<thead>
 									<tr>
 										<?php
-										foreach ( $grouped_alerts as $name => $group ) {
-											foreach ( $group as $subname => $alerts ) {
-												$active    = array();
-												$allactive = true;
-												/** @var WSAL_Alert $alert */
-												foreach ( $alerts as $alert ) {
-													if ( $alert->code <= 0006 ) {
-														continue; // <- Ignore php alerts.
-													}
-													if ( in_array( $alert->code, $obsolete_events, true ) ) {
-														continue; // <- Ignore promo alerts.
-													}
-													$active[ $alert->code ] = $this->plugin->alerts->is_enabled( $alert->code );
-													if ( ! $active[ $alert->code ] ) {
-														$allactive = false;
-													}
-												}
-											}
-										}
+										$allactive = false;
 										?>
 										<th width="48"><input type="checkbox" <?php checked( $allactive ); ?> /></th>
 										<th width="80"><?php esc_html_e( 'Code', 'wp-security-audit-log' ); ?></th>
@@ -367,7 +351,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 											$allactive = true;
 											/** @var WSAL_Alert $alert */
 											foreach ( $alerts as $alert ) {
-												$active[ $alert->code ] = $this->plugin->alerts->is_enabled( $alert->code );
+												$active[ $alert->code ] = Alert_Manager::is_enabled( $alert->code );
 												if ( ! $active[ $alert->code ] ) {
 													$allactive = false;
 												}
@@ -391,7 +375,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													case 'User Accounts':
 														if ( 'Multisite User Profiles' === $subname ) {
 															// Check if this is a multisite.
-															if ( ! is_multisite() ) {
+															if ( ! WP_Helper::is_multisite() ) {
 																$disable_inputs = 'disabled';
 															}
 														}
@@ -416,7 +400,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 													case 'Multisite Network Sites':
 														// Disable if not multisite.
-														if ( ! is_multisite() ) {
+														if ( ! WP_Helper::is_multisite() ) {
 															$disable_inputs   = 'disabled';
 															$disabled_message = esc_html__( 'Your website is a single site so the multisite events have been disabled.', 'wp-security-audit-log' );
 														}
@@ -442,31 +426,33 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 												$disable_inputs_needed = ( ! empty( $disable_inputs ) ) ? esc_attr( $disable_inputs ) : '';
 												$disabled_tooltip      = ( $disabled_message ) ? 'data-tooltip="' . $disabled_message . '"' : '';
-												$checkbox_markup       = '<input name="alert[]" type="checkbox" class="alert"' . checked( $this->plugin->alerts->is_enabled( $alert->code ), true, false ) . ' value="' . esc_attr( (int) $alert->code ) . '" ' . $disable_inputs_needed . ' />';
+												$checkbox_markup       = '<input name="alert[]" type="checkbox" class="alert"' . checked( Alert_Manager::is_enabled( $alert->code ), true, false ) . ' value="' . esc_attr( (int) $alert->code ) . '" ' . $disable_inputs_needed . ' />';
 												$severity              = '';
-												$severity_obj          = $this->plugin->constants->get_constant_by( 'value', $alert->severity );
 
-												if ( is_object( $severity_obj ) ) {
-													if ( 'E_CRITICAL' === $severity_obj->name ) {
-														$severity = esc_html__( 'Critical', 'wp-security-audit-log' );
-													} elseif ( 'E_WARNING' === $severity_obj->name ) {
-														$severity = esc_html__( 'Warning', 'wp-security-audit-log' );
-													} elseif ( 'E_NOTICE' === $severity_obj->name ) {
-														$severity = esc_html__( 'Notification', 'wp-security-audit-log' );
-													} elseif ( 'WSAL_CRITICAL' === $severity_obj->name ) {
-														$severity = esc_html__( 'Critical', 'wp-security-audit-log' );
-													} elseif ( 'WSAL_HIGH' === $severity_obj->name ) {
-														$severity = esc_html__( 'High', 'wp-security-audit-log' );
-													} elseif ( 'WSAL_MEDIUM' === $severity_obj->name ) {
-														$severity = esc_html__( 'Medium', 'wp-security-audit-log' );
-													} elseif ( 'WSAL_LOW' === $severity_obj->name ) {
-														$severity = esc_html__( 'Low', 'wp-security-audit-log' );
-													} elseif ( 'WSAL_INFORMATIONAL' === $severity_obj->name ) {
-														$severity = esc_html__( 'Informational', 'wp-security-audit-log' );
-													} else {
-														$severity = esc_html__( 'Notification', 'wp-security-audit-log' );
-													}
-												}
+												$severity = Constants::get_severity_by_code( $alert->severity )['text'];
+												// $severity_obj          = $this->plugin->constants->get_constant_by( 'value', $alert->severity );
+
+												// if ( is_object( $severity_obj ) ) {
+												// if ( 'E_CRITICAL' === $severity_obj->name ) {
+												// $severity = esc_html__( 'Critical', 'wp-security-audit-log' );
+												// } elseif ( 'E_WARNING' === $severity_obj->name ) {
+												// $severity = esc_html__( 'Warning', 'wp-security-audit-log' );
+												// } elseif ( 'E_NOTICE' === $severity_obj->name ) {
+												// $severity = esc_html__( 'Notification', 'wp-security-audit-log' );
+												// } elseif ( 'WSAL_CRITICAL' === $severity_obj->name ) {
+												// $severity = esc_html__( 'Critical', 'wp-security-audit-log' );
+												// } elseif ( 'WSAL_HIGH' === $severity_obj->name ) {
+												// $severity = esc_html__( 'High', 'wp-security-audit-log' );
+												// } elseif ( 'WSAL_MEDIUM' === $severity_obj->name ) {
+												// $severity = esc_html__( 'Medium', 'wp-security-audit-log' );
+												// } elseif ( 'WSAL_LOW' === $severity_obj->name ) {
+												// $severity = esc_html__( 'Low', 'wp-security-audit-log' );
+												// } elseif ( 'WSAL_INFORMATIONAL' === $severity_obj->name ) {
+												// $severity = esc_html__( 'Informational', 'wp-security-audit-log' );
+												// } else {
+												// $severity = esc_html__( 'Notification', 'wp-security-audit-log' );
+												// }
+												// }
 
 												// @codingStandardsIgnoreStart
 												echo '<tr class="alert-wrapper ' . $disable_inputs_needed . '" data-alert-cat="' . $alert->catg . '" data-alert-subcat="' . $alert->subcatg . '" ' . $disabled_tooltip . '>';
@@ -480,7 +466,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												// @codingStandardsIgnoreEnd
 
 												if ( 4000 === $alert->code ) {
-													$frontend_events = WSAL_Settings::get_frontend_events();
+													$frontend_events = Settings_Helper::get_frontend_events();
 													?>
 													<tr class="alert-wrapper" data-alert-cat="Users Logins & Sessions Events" data-alert-subcat="User Activity" data-is-attached-to-alert="4000">													
 														<td></td>
@@ -493,7 +479,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												}
 
 												if ( 1002 === $alert->code ) {
-													$log_failed_login_limit = (int) \WSAL\Helpers\Settings_Helper::get_option_value( 'log-failed-login-limit', 10 );
+													$log_failed_login_limit = (int) Settings_Helper::get_option_value( 'log-failed-login-limit', 10 );
 													$log_failed_login_limit = ( -1 === $log_failed_login_limit ) ? '0' : $log_failed_login_limit;
 													?>
 													<tr class="alert-wrapper" data-alert-cat="Users Logins & Sessions Events" data-alert-subcat="User Activity" data-is-attached-to-alert="1002">
@@ -506,7 +492,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													<?php
 												}
 												if ( 1003 === $alert->code ) {
-													$log_visitor_failed_login_limit = (int) \WSAL\Helpers\Settings_Helper::get_option_value( 'log-visitor-failed-login-limit', 10 );
+													$log_visitor_failed_login_limit = (int) Settings_Helper::get_option_value( 'log-visitor-failed-login-limit', 10 );
 													$log_visitor_failed_login_limit = ( -1 === $log_visitor_failed_login_limit ) ? '0' : $log_visitor_failed_login_limit;
 													?>
 													<tr class="alert-wrapper" data-alert-cat="Users Logins & Sessions Events" data-alert-subcat="User Activity" data-is-attached-to-alert="1003">
@@ -520,7 +506,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												}
 
 												if ( 1000 === $alert->code ) {
-													$frontend_events = WSAL_Settings::get_frontend_events();
+													$frontend_events = Settings_Helper::get_frontend_events();
 													?>
 													<tr class="alert-wrapper" data-alert-cat="Users Logins & Sessions Events" data-alert-subcat="User Activity" data-is-attached-to-alert="1000">
 														<td></td>
@@ -546,8 +532,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 			</div>
 			<?php
-				$addons = new WSAL_PluginInstallAndActivate();
-				$addons->render();
+				Plugins_Helper::render();
 			?>
 		</div>
 
@@ -711,6 +696,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 			#flitering-options-wrapper {
 				display: flex;
+				position: sticky;
+				top: 32px;
+				background: white;
+				border-bottom: 1px solid #ddd;
 			}
 			#flitering-options-wrapper .search, #flitering-options-wrapper .choose  {
 				padding: 10px 0;
@@ -763,14 +752,14 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				border: 1px solid #ddd;
 				font-size: 18px;
 			}
-            #event-toggle-table > thead, #event-toggle-table > thead:hover, #event-toggle-table > thead tr.header, #event-toggle-table > thead tr:hover {
-                background: #2c3338 !important;
-                color: #fff !important;
-            }
+			#event-toggle-table > thead, #event-toggle-table > thead:hover, #event-toggle-table > thead tr.header, #event-toggle-table > thead tr:hover {
+				background: #2c3338 !important;
+				color: #fff !important;
+			}
 
-            #event-toggle-table > thead  * {
-                color: #fff;
-            }
+			#event-toggle-table > thead  * {
+				color: #fff;
+			}
 
 			#event-toggle-table th, #event-toggle-table td {
 				text-align: left;
@@ -859,9 +848,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				}
 			}
 
-            function isEmpty( el ){
-                return !$.trim(el.html())
-            }
+			function isEmpty( el ){
+				return !$.trim(el.html())
+			}
 
 			jQuery(document).ready(function(){
 				var scrollHeight = jQuery(document).scrollTop();
@@ -933,11 +922,11 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				if (window.location.href.indexOf( '#cat-' ) > -1) {
 					var hash = window.location.hash.toUpperCase();
 					hash =  hash.replace('#CAT-', '');
-                    hash =  hash.replace('-', ' ');
-                    jQuery('[data-alert-cat]').each( function( index, value ) {
+					hash =  hash.replace('-', ' ');
+					jQuery('[data-alert-cat]').each( function( index, value ) {
 						var title = jQuery( this ).attr( 'data-alert-cat').toUpperCase();
 						if ( title == hash ) {
-                            jQuery('#filter-cat [value="'+ jQuery( this ).attr( 'data-alert-cat') +'"]').attr('selected','selected');
+							jQuery('#filter-cat [value="'+ jQuery( this ).attr( 'data-alert-cat') +'"]').attr('selected','selected');
 							jQuery( this  ).css( 'display', '' );
 						} else {
 							jQuery( this ).css( 'display', 'none' );
@@ -964,19 +953,19 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					sort_alert_table_by_id();
 				});
 
-                jQuery('#event-toggle-table tr').each( function( index, value ) {
-                    var td = jQuery( this ).find( 'td:first-of-type' );
-                    if ( jQuery.trim( jQuery( td ).html() ) == '' ) {
-                       jQuery( this ).prev().css( 'border-bottom', '1px solid #fff');
-                    }
-                });
+				jQuery('#event-toggle-table tr').each( function( index, value ) {
+					var td = jQuery( this ).find( 'td:first-of-type' );
+					if ( jQuery.trim( jQuery( td ).html() ) == '' ) {
+						jQuery( this ).prev().css( 'border-bottom', '1px solid #fff');
+					}
+				});
 
-                jQuery('#event-toggle-table tr.disabled').each( function( index, value ) {
-                    var td = jQuery( this ).next().find( 'td:first-of-type' );
-                    if ( jQuery.trim( jQuery( td ).html() ) == '' ) {
-                       jQuery( td ).parent().addClass( 'disabled' );
-                    }
-                });
+				jQuery('#event-toggle-table tr.disabled').each( function( index, value ) {
+					var td = jQuery( this ).next().find( 'td:first-of-type' );
+					if ( jQuery.trim( jQuery( td ).html() ) == '' ) {
+						jQuery( td ).parent().addClass( 'disabled' );
+					}
+				});
 
 				// Lovely tooltop.s
 				jQuery( '#event-toggle-table tr' ).darkTooltip( {
@@ -1028,7 +1017,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	 * @since 4.2.0
 	 */
 	private function get_log_level_based_on_events( $disabled_events ) {
-		$events_to_cross_check = $this->plugin->settings()->always_disabled_alerts;
+		$events_to_cross_check = Settings_Helper::get_default_always_disabled_alerts();
 		$events_diff           = array_diff( $disabled_events, $events_to_cross_check );
 		$events_diff           = array_filter( $events_diff ); // Remove empty values.
 		if ( empty( $events_diff ) ) {

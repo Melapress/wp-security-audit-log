@@ -9,6 +9,8 @@
  * @subpackage views
  */
 
+use WSAL\Helpers\WP_Helper;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -358,7 +360,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		$sysinfo .= '-- Site Info --' . "\n\n";
 		$sysinfo .= 'Site URL (WP Address):    ' . site_url() . "\n";
 		$sysinfo .= 'Home URL (Site Address):  ' . home_url() . "\n";
-		$sysinfo .= 'Multisite:                ' . ( is_multisite() ? 'Yes' : 'No' ) . "\n";
+		$sysinfo .= 'Multisite:                ' . ( WP_Helper::is_multisite() ? 'Yes' : 'No' ) . "\n";
 
 		// Browser information.
 		if ( ! class_exists( 'WSAL_Browser' ) && file_exists( WSAL_BASE_DIR . 'sdk/class-wsal-browser.php' ) ) {
@@ -456,7 +458,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			}
 		}
 
-		if ( is_multisite() ) {
+		if ( WP_Helper::is_multisite() ) {
 			// WordPress Multisite active plugins.
 			$sysinfo .= "\n" . '-- Network Active Plugins --' . "\n\n";
 

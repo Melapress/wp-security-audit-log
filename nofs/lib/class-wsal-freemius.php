@@ -85,7 +85,6 @@ if ( ! class_exists( 'WSAL_Freemius' ) ) {
 		}
 
 		public function is_free_plan() {
-		return true;
 			return true;
 		}
 

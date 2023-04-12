@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @subpackage sensors
  * @since      1.0.0
  */
-class WSAL_Sensors_MetaData extends WSAL_AbstractMetaDataSensor {
+class WSAL_Sensors_MetaData {//extends WSAL_AbstractMetaDataSensor {
 
 	/**
 	 * Empty meta counter.

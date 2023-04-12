@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package    wsal
  * @subpackage sensors
  */
-class WSAL_Sensors_Files extends WSAL_AbstractSensor {
+class WSAL_Sensors_Files { //extends WSAL_AbstractSensor {
 
 	/**
 	 * File uploaded.

@@ -20,27 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WSAL_Utilities_RequestUtils {
 
 	/**
-	 * Filters request data.
-	 *
-	 * @return array Filtered request data.
-	 */
-	public static function get_filtered_request_data() {
-		$result = array();
-
-		$get_data = filter_input_array( INPUT_GET );
-		if ( is_array( $get_data ) ) {
-			$result = array_merge( $result, $get_data );
-		}
-
-		$post_data = filter_input_array( INPUT_POST );
-		if ( is_array( $post_data ) ) {
-			$result = array_merge( $result, $post_data );
-		}
-
-		return $result;
-	}
-
-	/**
 	 * Simple check for validating a URL, it must start with http:// or https://.
 	 * and pass FILTER_VALIDATE_URL validation.
 	 *

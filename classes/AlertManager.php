@@ -9,7 +9,10 @@
  */
 
 use WSAL\Helpers\Logger;
+use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Helper;
+use WSAL\Controllers\Alert_Manager;
+use WSAL\Helpers\User_Sessions_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -487,6 +490,8 @@ final class WSAL_AlertManager {
 		$metadata = apply_filters( 'wsal_event_metadata_definition', $metadata, $code );
 
 		$this->alerts[ $code ] = new WSAL_Alert( $code, $severity, $category, $subcategory, $desc, $message, $metadata, $links, $object, $event_type );
+
+		Alert_Manager::register( $category, $subcategory, $info );
 	}
 
 	/**
@@ -530,7 +535,7 @@ final class WSAL_AlertManager {
 	 * @return boolean True if enabled, false otherwise.
 	 */
 	public function is_enabled( $type ) {
-		$disabled_events = self::$plugin->settings()->get_disabled_alerts();
+		$disabled_events = \WSAL\Helpers\Settings_Helper::get_disabled_alerts();
 		return ! in_array( $type, $disabled_events, true );
 	}
 
@@ -552,13 +557,13 @@ final class WSAL_AlertManager {
 	 */
 	protected function log( $event_id, $event_data = array() ) {
 		if ( ! isset( $event_data['ClientIP'] ) ) {
-			$client_ip = self::$plugin->settings()->get_main_client_ip();
+			$client_ip = \WSAL\Helpers\Settings_Helper::get_main_client_ip();
 			if ( ! empty( $client_ip ) ) {
 				$event_data['ClientIP'] = $client_ip;
 			}
 		}
 		if ( ! isset( $event_data['OtherIPs'] ) && self::$plugin->settings()->is_main_ip_from_proxy() ) {
-			$other_ips = self::$plugin->settings()->get_client_ips();
+			$other_ips = \WSAL\Helpers\Settings_Helper::get_client_ips();
 			if ( ! empty( $other_ips ) ) {
 				$event_data['OtherIPs'] = $other_ips;
 			}
@@ -583,7 +588,7 @@ final class WSAL_AlertManager {
 		// If the user sessions plugin is loaded try to attach the SessionID.
 		if ( ! isset( $event_data['SessionID'] ) && class_exists( 'WSAL_UserSessions_Helpers' ) ) {
 			// Try to get the session id generated from logged in cookie.
-			$session_id = WSAL_UserSessions_Helpers::get_session_id_from_logged_in_user_cookie();
+			$session_id = User_Sessions_Helper::get_session_id_from_logged_in_user_cookie();
 			// If we have a SessionID then add it to event_data.
 			if ( ! empty( $session_id ) ) {
 				$event_data['SessionID'] = $session_id;
@@ -646,7 +651,7 @@ final class WSAL_AlertManager {
 		}
 
 		// Append further details if in multisite.
-		if ( WpSecurityAuditLog::is_multisite() ) {
+		if ( WP_Helper::is_multisite() ) {
 			$event_data['SiteID']  = get_current_blog_id();
 			$event_data['SiteURL'] = get_site_url( $event_data['SiteID'] );
 		}
@@ -791,7 +796,7 @@ final class WSAL_AlertManager {
 	 * @return array
 	 */
 	public function get_disabled_users() {
-		return self::$plugin->settings()->get_excluded_monitoring_users();
+		return \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_users();
 	}
 
 	/**
@@ -840,7 +845,7 @@ final class WSAL_AlertManager {
 	 */
 	public static function get_disabled_post_types(): array {
 		if ( empty( self::$disabled_post_types ) ) {
-			self::$disabled_post_types = self::$plugin->settings()->get_excluded_post_types();
+			self::$disabled_post_types = \WSAL\Helpers\Settings_Helper::get_excluded_post_types();
 		}
 		return self::$disabled_post_types;
 	}
@@ -852,16 +857,16 @@ final class WSAL_AlertManager {
 	 */
 	private function is_ip_address_disabled() {
 		$is_disabled  = false;
-		$ip           = self::$plugin->settings()->get_main_client_ip();
-		$excluded_ips = self::$plugin->settings()->get_excluded_monitoring_ip();
+		$ip           = \WSAL\Helpers\Settings_Helper::get_main_client_ip();
+		$excluded_ips = \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_ip();
 
 		if ( ! empty( $excluded_ips ) ) {
 			foreach ( $excluded_ips as $excluded_ip ) {
 				if ( false !== strpos( $excluded_ip, '-' ) ) {
-					$ip_range = self::$plugin->settings()->get_ipv4_by_range( $excluded_ip );
+					$ip_range = \WSAL\Helpers\Settings_Helper::get_ipv4_by_range( $excluded_ip );
 					$ip_range = $ip_range->lower . '-' . $ip_range->upper;
 
-					if ( self::$plugin->settings()->check_ipv4_in_range( $ip, $ip_range ) ) {
+					if ( \WSAL\Helpers\Settings_Helper::check_ipv4_in_range( $ip, $ip_range ) ) {
 						$is_disabled = true;
 						break;
 					}
@@ -949,7 +954,7 @@ final class WSAL_AlertManager {
 		}
 
 		// Get site id.
-		$site_id = (int) self::$plugin->settings()->get_view_site_id();
+		$site_id = (int) WP_Helper::get_view_site_id();
 		if ( $site_id ) {
 			$occ_query->add_condition( 'site_id = %d ', $site_id );
 		}
@@ -975,12 +980,12 @@ final class WSAL_AlertManager {
 	public function get_admin_bar_event( $from_db = false ) {
 		// Get event from transient.
 		$event_transient = 'wsal_admin_bar_event';
-		$admin_bar_event = WpSecurityAuditLog::get_transient( $event_transient );
+		$admin_bar_event = WP_Helper::get_transient( $event_transient );
 		if ( false === $admin_bar_event || false !== $from_db ) {
 			$event = $this->get_latest_events( 1 );
 
 			if ( $event ) {
-				WpSecurityAuditLog::set_transient( $event_transient, $event[0], 30 * MINUTE_IN_SECONDS );
+				WP_Helper::set_transient( $event_transient, $event[0], 30 * MINUTE_IN_SECONDS );
 				$admin_bar_event = $event[0];
 			}
 		}
@@ -1414,7 +1419,7 @@ final class WSAL_AlertManager {
 	 */
 	public static function get_blog_info( $plugin, $site_id ) {
 		// Blog details.
-		if ( WpSecurityAuditLog::is_multisite() ) {
+		if ( WP_Helper::is_multisite() ) {
 			$blog_info = get_blog_details( $site_id, true );
 			$blog_name = esc_html__( 'Unknown Site', 'wp-security-audit-log' );
 			$blog_url  = '';

@@ -9,7 +9,10 @@
  * @subpackage views
  */
 
+use WSAL\Helpers\WP_Helper;
+use WSAL\Controllers\Constants;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -194,9 +197,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Method: Get Token Type.
 	 *
 	 * @param string $token - Token type.
+	 * @param string $type - Type of the input to check.
 	 */
-	protected function get_token_type( $token ) {
-		return $this->plugin->settings()->get_token_type( $token );
+	protected function get_token_type( $token, $type = false ) {
+		return $this->plugin->settings()->get_token_type( $token, $type );
 	}
 
 	/**
@@ -256,11 +260,13 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			die();
 		}
 
+		$input_type = isset( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : false;
+
 		echo wp_json_encode(
 			array(
 				'success'   => true,
 				'token'     => $token,
-				'tokenType' => esc_html( $this->get_token_type( $token ) ),
+				'tokenType' => esc_html( $this->get_token_type( $token, $input_type ) ),
 			)
 		);
 		die();
@@ -278,16 +284,17 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$max_sdate = $this->plugin->settings()->get_pruning_date(); // Pruning date.
 		$archiving = Settings_Helper::is_archiving_set_and_enabled();
 
+		// phpcs:disable
+		// phpcs:disable
 
 		// Calculate limit timestamp.
 		$max_stamp = $now - ( strtotime( $max_sdate ) - $now );
 
-		$query = new WSAL_Models_OccurrenceQuery();
-		$query->add_order_by( 'created_on', false ); // Descending order.
-		$query->add_condition( 'created_on <= %s', intval( $max_stamp ) ); // Add limits of timestamp.
-		$results = $query->get_adapter()->execute_query( $query );
-		$items   = count( $results );
-
+		// $query = new WSAL_Models_OccurrenceQuery();
+		// $query->add_order_by( 'created_on', false ); // Descending order.
+		// $query->add_condition( 'created_on <= %s', intval( $max_stamp ) ); // Add limits of timestamp.
+		// $results = $query->get_adapter()->execute_query( $query );
+		$items   = \WSAL\Entities\Occurrences_Entity::count('created_on <= %s', intval( $max_stamp ));
 		if ( $items ) {
 			$this->plugin->clean_up();
 		}
@@ -745,7 +752,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<label for="only_admins">
 							<input type="radio" name="restrict-plugin-settings" id="only_admins" value="only_admins" <?php checked( $restrict_settings, 'only_admins' ); ?> />
 							<?php
-							if ( WpSecurityAuditLog::is_multisite() ) {
+							if ( WP_Helper::is_multisite() ) {
 								esc_html_e( 'All superadmins', 'wp-security-audit-log' );
 							} else {
 								esc_html_e( 'All administrators', 'wp-security-audit-log' );
@@ -764,11 +771,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		<h3><?php esc_html_e( 'Allow other users to view the activity log', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
 			<?php
-			$is_multisite = WpSecurityAuditLog::is_multisite();
+			$is_multisite = WP_Helper::is_multisite();
 			if ( $is_multisite ) {
 				$section_label = esc_html__( 'By default only super administrators and the child sites\' administrators can view the WordPress activity log. Though you can change this by using the setting below.', 'wp-security-audit-log' );
 			} else {
-				$section_label = esc_html__( 'By default only users with administrator role can view the WordPress activity log. To allow someone who does not have an admin role to view the activity log, specify them in the below setting.', 'wp-security-audit-log' );
+				$section_label = esc_html__( 'You can specify the username of the user that you want to allow. If you want to add all the users with a specific role, you can also specify their role here.', 'wp-security-audit-log' );
 			}
 
 			echo wp_kses(
@@ -931,7 +938,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		}
 
 		// Handle log viewer settings in multisite context.
-		if ( WpSecurityAuditLog::is_multisite() ) {
+		if ( WP_Helper::is_multisite() ) {
 			$log_viewer_restrictions = isset( $post_array['restrict-log-viewer'] ) ? sanitize_text_field( $post_array['restrict-log-viewer'] ) : '';
 			$this->plugin->settings()->set_restrict_log_viewer( $log_viewer_restrictions );
 			if ( 'only_me' === $log_viewer_restrictions ) {
@@ -955,7 +962,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->plugin->settings()->set_main_ip_from_proxy( isset( $post_array['EnableProxyIpCapture'] ) ? sanitize_text_field( $post_array['EnableProxyIpCapture'] ) : false );
 		$this->plugin->settings()->set_internal_ips_filtering( isset( $post_array['EnableIpFiltering'] ) ? sanitize_text_field( $post_array['EnableIpFiltering'] ) : false );
 
-		$is_incognito = isset( $post_array['Incognito'] ) ? \WSAL\Helpers\Options::string_to_bool( sanitize_text_field( $post_array['Incognito'] ) ) : false;
+		$is_incognito = isset( $post_array['Incognito'] ) ? Settings_Helper::string_to_bool( sanitize_text_field( $post_array['Incognito'] ) ) : false;
 		$this->plugin->settings()->set_incognito( $is_incognito );
 	}
 
@@ -992,7 +999,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<td>
 						<fieldset>
 							<?php
-							$timezone = $this->plugin->settings()->get_timezone();
+							$timezone = Settings_Helper::get_timezone();
 
 							/**
 							 * Transform timezone values.
@@ -1024,7 +1031,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<th><?php esc_html_e( 'Show Milliseconds', 'wp-security-audit-log' ); ?></th>
 					<td>
 						<fieldset>
-							<?php $show_milliseconds = $this->plugin->settings()->get_show_milliseconds(); ?>
+							<?php $show_milliseconds = Settings_Helper::get_show_milliseconds(); ?>
 							<label for="show_milliseconds">
 								<input type="checkbox" name="show_milliseconds" id="show_milliseconds" style="margin-top: -2px;"
 									<?php checked( $show_milliseconds ); ?> value="yes">
@@ -1183,7 +1190,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						$redirect_args = array(
 							'page' => 'wfcm-file-changes',
 						);
-						if ( ! is_multisite() ) {
+						if ( ! WP_Helper::is_multisite() ) {
 							$wcfm_settings_page = add_query_arg( $redirect_args, admin_url( 'admin.php' ) );
 						} else {
 							$wcfm_settings_page = add_query_arg( $redirect_args, network_admin_url( 'admin.php' ) );
@@ -1214,7 +1221,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<input type="button" id="ExUserQueryAdd" class="button-primary" value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
 							<br style="clear: both;"/>
 							<div id="ExUserList">
-								<?php foreach ( $this->plugin->settings()->get_excluded_monitoring_users() as $item ) : ?>
+								<?php foreach ( \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_users() as $item ) : ?>
 									<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
 									<input type="hidden" name="ExUsers[]" value="<?php echo esc_attr( $item ); ?>"/>
 									<?php echo esc_html( $item ); ?>
@@ -1256,7 +1263,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<input type="button" id="IpAddrQueryAdd" class="button-primary" value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
 							<br style="clear: both;"/>
 							<div id="IpAddrList">
-								<?php foreach ( $this->plugin->settings()->get_excluded_monitoring_ip() as $item ) : ?>
+								<?php foreach ( \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_ip() as $item ) : ?>
 									<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
 										<input type="hidden" name="IpAddrs[]" value="<?php echo esc_attr( $item ); ?>"/>
 										<?php echo esc_html( $item ); ?>
@@ -1278,7 +1285,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<input type="button" id="ExCPTsQueryAdd" class="button-primary" value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
 						<br style="clear: both;"/>
 						<div id="ExCPTsList">
-							<?php foreach ( $this->plugin->settings()->get_excluded_post_types() as $item ) : ?>
+							<?php foreach ( \WSAL\Helpers\Settings_Helper::get_excluded_post_types() as $item ) : ?>
 								<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
 										<input type="hidden" name="ExCPTss[]" value="<?php echo esc_attr( $item ); ?>"/>
 										<?php echo esc_html( $item ); ?>
@@ -1295,7 +1302,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<?php
 				$this->renderMetaExclusionSection(
 					esc_html__( 'Exclude custom post fields:', 'wp-security-audit-log' ),
-					$this->plugin->settings()->get_excluded_post_meta_fields(),
+					\WSAL\Helpers\Settings_Helper::get_excluded_post_meta_fields(),
 					'PostMeta'
 				);
 				?>
@@ -1304,7 +1311,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<?php
 				$this->renderMetaExclusionSection(
 					esc_html__( 'Exclude custom user fields:', 'wp-security-audit-log' ),
-					$this->plugin->settings()->get_excluded_user_meta_fields(),
+					\WSAL\Helpers\Settings_Helper::get_excluded_user_meta_fields(),
 					'UserMeta'
 				);
 				?>
@@ -1359,10 +1366,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// Get $_POST global array.
 		$post_array = filter_input_array( INPUT_POST );
 
-		$this->plugin->settings()->set_excluded_monitoring_users( isset( $post_array['ExUsers'] ) ? $post_array['ExUsers'] : array() );
+		\WSAL\Helpers\Settings_Helper::set_excluded_monitoring_users( isset( $post_array['ExUsers'] ) ? $post_array['ExUsers'] : array() );
 		$this->plugin->settings()->set_excluded_monitoring_roles( isset( $post_array['ExRoles'] ) ? $post_array['ExRoles'] : array() );
-		$this->plugin->settings()->set_excluded_post_meta_fields( isset( $post_array['PostMetas'] ) ? $post_array['PostMetas'] : array() );
-		$this->plugin->settings()->set_excluded_user_meta_fields( isset( $post_array['UserMetas'] ) ? $post_array['UserMetas'] : array() );
+		\WSAL\Helpers\Settings_Helper::set_excluded_post_meta_fields( isset( $post_array['PostMetas'] ) ? $post_array['PostMetas'] : array() );
+		\WSAL\Helpers\Settings_Helper::set_excluded_user_meta_fields( isset( $post_array['UserMetas'] ) ? $post_array['UserMetas'] : array() );
 		$this->plugin->settings()->set_excluded_monitoring_ip( isset( $post_array['IpAddrs'] ) ? $post_array['IpAddrs'] : array() );
 		$this->plugin->settings()->set_excluded_post_types( isset( $post_array['ExCPTss'] ) ? $post_array['ExCPTss'] : array() );
 	}
@@ -1397,8 +1404,8 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<tr>
 					<th><?php esc_html_e( 'Purge Activity Log', 'wp-security-audit-log' ); ?></th>
 					<td>
-						<a href="#wsal_purge_activity" class="button-primary"><?php esc_html_e( 'PURGE', 'wp-security-audit-log' ); ?></a>
-						<span class="notice purge-notice notice-success" style="display: none; margin-left: 10px; padding: 6px 10px;"><?php esc_html_e( 'Activity log successfully purged', 'wp-security-audit-log' ); ?></span>
+						<a href="#wsal_purge_activity" class="button-primary js-purge-reset"><?php esc_html_e( 'PURGE', 'wp-security-audit-log' ); ?></a>
+						<!-- <span class="notice purge-notice notice-success" style="display: none; margin-left: 10px; padding: 6px 10px;"><?php esc_html_e( 'Activity log successfully purged', 'wp-security-audit-log' ); ?></span> -->
 					</td>
 				</tr>
 			</tbody>
@@ -1619,12 +1626,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						alert( "<?php esc_html_e( 'You have to select at least one column!', 'wp-security-audit-log' ); ?>" );
 					}
 				});
-				jQuery( 'body' ).on( 'click', '.remodal-confirm', function ( e ) {
-					jQuery( '.purge-notice' ).fadeIn(500);
-					setTimeout(function() { 
-						jQuery( '.purge-notice' ).fadeOut(500);
-					}, 4000);
-				});
+				// jQuery( 'body' ).on( 'click', '.remodal-confirm', function ( e ) {
+				// 	jQuery( '.purge-notice' ).fadeIn(500);
+				// 	setTimeout(function() { 
+				// 		jQuery( '.purge-notice' ).fadeOut(500);
+				// 	}, 4000);
+				// });
 			});</script>
 		<?php
 	}
@@ -1682,7 +1689,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			function ( $item ) {
 				return ucfirst( strtolower( str_replace( 'WSAL_', '', $item ) ) );
 			},
-			array_keys( WSAL_ConstantManager::get_severities() )
+			array_keys( Constants::get_severities() )
 		);
 
 		echo $this->filter_values_for_searched_term( // phpcs:ignore
@@ -1723,7 +1730,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 
-		$event_types = $this->plugin->alerts->get_event_type_data();
+		$event_types = Alert_Manager::get_event_type_data();
 
 		echo $this->filter_values_for_searched_term( array_values( $event_types ), $get_array['term'] ); // phpcs:ignore
 		exit;
@@ -1740,7 +1747,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 
-		$event_objects = $this->plugin->alerts->get_event_objects_data();
+		$event_objects = Alert_Manager::get_event_objects_data();
 
 		echo $this->filter_values_for_searched_term( array_values( $event_objects ), $get_array['term'] ); // phpcs:ignore
 		exit;
@@ -1757,14 +1764,14 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$get_array = filter_input_array( INPUT_GET );
 		$this->check_ajax_request_is_valid( $get_array );
 
-		$registered_alerts = $this->plugin->alerts->get_alerts();
+		$registered_alerts = Alert_Manager::get_alerts();
 
-		$alerts = array();
-		foreach ( $registered_alerts as $alert => $details ) {
-			$alerts[] = (string) $details->code;
-		}
+		// $alerts = array();
+		// foreach ( $registered_alerts as $alert => $details ) {
+		// 	$alerts[] = (string) $details->code;
+		// }
 
-		echo $this->filter_values_for_searched_term( array_values( $alerts ), $get_array['term'] ); // phpcs:ignore
+		echo $this->filter_values_for_searched_term( array_keys( $registered_alerts ), $get_array['term'] ); // phpcs:ignore
 		exit;
 	}
 
@@ -1788,7 +1795,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		);
 		// if we are running multisite and have networkwide cpt tracker get the
 		// list from and merge to the post_types array.
-		if ( is_multisite() && class_exists( '\WSAL\Multisite\NetworkWide\CPTsTracker' ) ) {
+		if ( WP_Helper::is_multisite() && class_exists( '\WSAL\Multisite\NetworkWide\CPTsTracker' ) ) {
 			$network_cpts = \WSAL\Multisite\NetworkWide\CPTsTracker::get_network_data_list();
 			foreach ( $network_cpts as $cpt ) {
 				$post_types[ $cpt ] = $cpt;
@@ -1840,7 +1847,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		WSAL_Uninstall::delete_options_from_wp_options();
 
 		// Log settings reset event.
-		$this->plugin->alerts->trigger_event( 6006 );
+		Alert_Manager::trigger_event( 6006 );
 		wp_send_json_success( esc_html__( 'Plugin settings have been reset.', 'wp-security-audit-log' ) );
 	}
 
@@ -1863,7 +1870,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		if ( $result ) {
 			// Log purge activity event.
-			$this->plugin->alerts->trigger_event( 6034 );
+			Alert_Manager::trigger_event( 6034 );
 			wp_send_json_success( esc_html__( 'Tables has been reset.', 'wp-security-audit-log' ) );
 		} else {
 			wp_send_json_error( esc_html__( 'Reset query failed.', 'wp-security-audit-log' ) );

@@ -85,6 +85,15 @@ class WSAL_Models_Query {
 	protected $use_default_adapter = false;
 
 	/**
+	 * Legacy - added because of php8 deprecation remove
+	 *
+	 * @var [type]
+	 *
+	 * @since 4.5.0
+	 */
+	public $connector;
+
+	/**
 	 * Method: Constructor.
 	 *
 	 * @since 1.0.0

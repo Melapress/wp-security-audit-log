@@ -38,6 +38,15 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		private static $connection = null;
 
 		/**
+		 * Keeps the info about the columns of the table - name, type
+		 *
+		 * @var array
+		 *
+		 * @since 4.5.0
+		 */
+		private static $fields = array();
+
+		/**
 		 * Returns the the table name
 		 *
 		 * @return string
@@ -244,6 +253,118 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 				}
 			}
 			return false;
+		}
+
+		/**
+		 * Returns records in the table based on condition
+		 *
+		 * @param string $cond - The condition.
+		 * @param array  $args - The arguments (values).
+		 *
+		 * @return int
+		 *
+		 * @since 4.5.0
+		 */
+		public static function count( $cond = '%d', $args = array( 1 ) ) {
+			$_wpdb = self::get_connection();
+			$sql   = $_wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::get_table_name() . ' WHERE ' . $cond, $args );
+
+			$_wpdb->suppress_errors( true );
+			$count = (int) $_wpdb->get_var( $sql );
+			if ( '' !== $_wpdb->last_error ) {
+				if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
+					if ( ( static::class )::create_table() ) {
+						$count = (int) $_wpdb->get_var( $sql );
+					}
+				}
+			}
+			$_wpdb->suppress_errors( false );
+
+			return $count;
+		}
+
+		/**
+		 * Saves the given data into the table
+		 * The data should be in following format:
+		 * field name => value
+		 *
+		 * It checks the given data array against the table fields and determines the types based on that, it stores the values in the table then.
+		 *
+		 * @param array $data - The data to be saved (check above about the format).
+		 *
+		 * @return int
+		 *
+		 * @since 4.5.0
+		 */
+		public static function save( $data ) {
+
+			$format      = array();
+			$insert_data = array();
+
+			foreach ( $data as $key => $val ) {
+				if ( isset( ( static::class )::$fields[ $key ] ) ) {
+					$insert_data[ $key ] = $val;
+					$format[ $key ]      = '%s';
+					if ( 'int' === ( static::class )::$fields[ $key ] ) {
+						$format[ $key ] = '%d';
+					}
+					if ( 'float' === ( static::class )::$fields[ $key ] ) {
+						$format[ $key ] = '%f';
+					}
+				}
+			}
+
+			if ( ! empty( $format ) ) {
+				$_wpdb = self::get_connection();
+
+				$_wpdb->suppress_errors( true );
+
+				$_wpdb->replace( self::get_table_name(), $insert_data, $format );
+
+				if ( '' !== $_wpdb->last_error ) {
+					if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
+						if ( ( static::class )::create_table() ) {
+							$_wpdb->replace( self::get_table_name(), $data, $format );
+						}
+					}
+				}
+
+				$_wpdb->suppress_errors( false );
+
+				return $_wpdb->insert_id;
+			}
+
+			return 0; // no record is inserted.
+		}
+
+		/**
+		 * Prepares the data array and the format array based on the existing table fields
+		 *
+		 * @param array $data - The data to make preparation from.
+		 *
+		 * @return array
+		 *
+		 * @since 4.5.0
+		 */
+		public static function prepare_data( array $data ): array {
+
+			$format      = array();
+			$insert_data = array();
+
+			foreach ( $data as $key => $val ) {
+				if ( isset( ( static::class )::$fields[ $key ] ) ) {
+					$insert_data[ $key ] = $val;
+					$format[ $key ]      = '%s';
+					if ( 'int' === ( static::class )::$fields[ $key ] ) {
+						$format[ $key ] = '%d';
+					}
+					if ( 'float' === ( static::class )::$fields[ $key ] ) {
+						$format[ $key ] = '%f';
+					}
+				}
+			}
+
+			return array( $insert_data, $format );
 		}
 	}
 }

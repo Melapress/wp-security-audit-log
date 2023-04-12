@@ -6,6 +6,8 @@
  * @since 4.4.0
  */
 
+use WSAL\Helpers\WP_Helper;
+
 /**
  * Utility class for handling certain file system related functionality.
  *
@@ -41,7 +43,7 @@ class WSAL_Utilities_FileSystemUtils {
 		if ( $handle ) {
 			$ignore_list = array( '.', '..' );
 			$regexp      = '/' . str_replace( array( '.', '*' ), array( '\.', '.*' ), $pattern ) . '/';
-			while ( false !== ( $file_name = readdir( $handle ) ) ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+			while ( false !== ( $file_name = readdir( $handle ) ) ) { // phpcs:ignore
 				if ( ! in_array( $file_name, $ignore_list, true ) && preg_match( $regexp, $file_name ) ) {
 					array_push( $result, $folder_slashed . $file_name );
 				}
@@ -49,7 +51,7 @@ class WSAL_Utilities_FileSystemUtils {
 			closedir( $handle );
 		}
 
-		WpSecurityAuditLog::set_transient( $cache_key, $result, DAY_IN_SECONDS );
+		WP_Helper::set_transient( $cache_key, $result, DAY_IN_SECONDS );
 
 		return $result;
 	}

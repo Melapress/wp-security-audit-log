@@ -9,6 +9,8 @@
  * @subpackage sensors
  */
 
+use WP2FA\Admin\Helpers\WP_Helper;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -61,7 +63,7 @@ abstract class WSAL_AbstractSensor {
 	 * @return boolean
 	 */
 	protected function is_multisite() {
-		return WpSecurityAuditLog::is_multisite();
+		return WP_Helper::is_multisite();
 	}
 
 	/**
