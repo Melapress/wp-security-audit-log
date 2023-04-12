@@ -8,6 +8,9 @@
  * @package wsal
  */
 
+use WSAL\Controllers\Alert_Manager;
+use WSAL\Entities\Metadata_Entity;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -188,7 +191,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * @see WSAL_AlertManager::get_alert()
 	 */
 	public function get_alert() {
-		return WpSecurityAuditLog::get_instance()->alerts->get_alert(
+		return Alert_Manager::get_alert(
 			$this->alert_id,
 			(object) array(
 				'mesg' => esc_html__( 'Alert message not found.', 'wp-security-audit-log' ),
@@ -257,12 +260,14 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 					}
 				}
 			} else {
+
+				Metadata_Entity::save(['occurrence_id'=>$this->get_id(),'name'=>$name,'value'=>maybe_serialize( $value )]);
 				// Get meta adapter.
-				$model                = new WSAL_Models_Meta();
-				$model->occurrence_id = $this->get_id();
-				$model->name          = $name;
-				$model->value         = maybe_serialize( $value );
-				$model->save_meta();
+				// $model                = new WSAL_Models_Meta();
+				// $model->occurrence_id = $this->get_id();
+				// $model->name          = $name;
+				// $model->value         = maybe_serialize( $value );
+				// $model->save_meta();
 			}
 		}
 	}
@@ -374,7 +379,7 @@ class WSAL_Models_Occurrence extends WSAL_Models_ActiveRecord {
 	 * @see WSAL_Alert::get_message()
 	 */
 	public static function get_alert_message( $item = null, $context = false ) {
-		$alert = WpSecurityAuditLog::get_instance()->alerts->get_alert(
+		$alert = Alert_Manager::get_alert(
 			$item['alert_id'],
 			(object) array(
 				'mesg' => esc_html__( 'Alert message not found.', 'wp-security-audit-log' ),

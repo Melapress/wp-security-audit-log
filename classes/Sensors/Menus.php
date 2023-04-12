@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package    wsal
  * @subpackage sensors
  */
-class WSAL_Sensors_Menus extends WSAL_AbstractSensor {
+class WSAL_Sensors_Menus {//extends WSAL_AbstractSensor {
 
 	/**
 	 * Menu object.

@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 namespace WSAL\Entities;
 
-use \WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\WP_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,12 +23,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( '\WSAL\Entities\Options_Entity' ) ) {
-
 	/**
 	 * Responsible for the options (legacy).
 	 */
 	class Options_Entity extends Abstract_Entity {
-
 		/**
 		 * Contains the table name.
 		 *
@@ -46,36 +44,33 @@ if ( ! class_exists( '\WSAL\Entities\Options_Entity' ) ) {
 		public static function transfer_options() {
 			global $wpdb;
 
-			$results = $wpdb->get_results( 'SELECT * FROM ' . self::get_table_name(), ARRAY_A ); // phpcs:ignore
+			$results = $wpdb->get_results('SELECT * FROM ' . self::get_table_name(), ARRAY_A); // phpcs:ignore
 
 			foreach ( $results as $data ) {
 				$option_name   = $data['option_name'];
 				$option_name   = \str_replace( 'wsal-', 'wsal_', $option_name );
 				$option_exists = WP_Helper::get_global_option( $option_name, false );
 				if ( false === $option_exists ) {
-
 					WP_Helper::set_global_option( $option_name, \maybe_unserialize( $data['option_value'] ) );
-                }
+				}
 			}
 		}
 
 		/**
 		 * Drop the table from the DB.
-		 * The method from the abstract class is not used because that table must be in the local database, so we just need to user WP_DB
+		 * The method from the abstract class is not used because that table must be in the local database, so we just need to user WP_DB.
 		 */
 		public static function drop_table() {
 			global $wpdb;
 
 			$table_name = self::get_table_name();
 
-			$wpdb->query( 'DROP TABLE IF EXISTS ' . $table_name ); // phpcs:ignore
+			$wpdb->query('DROP TABLE IF EXISTS ' . $table_name); // phpcs:ignore
 		}
 
 		/**
 		 * Returns the the table name
-		 * The method from the abstract class is not used because that table must be in the local database, so we just need to user WP_DB
-		 *
-		 * @return string
+		 * The method from the abstract class is not used because that table must be in the local database, so we just need to user WP_DB.
 		 *
 		 * @since 4.4.2.1
 		 */

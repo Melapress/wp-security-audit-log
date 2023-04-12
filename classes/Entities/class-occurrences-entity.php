@@ -31,6 +31,52 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		protected static $table = 'wsal_occurrences';
 
 		/**
+		 * List of migrated metadata fields.
+		 *
+		 * @var string[]
+		 */
+		public static $migrated_meta = array(
+			'ClientIP'         => 'client_ip',
+			'Severity'         => 'severity',
+			'Object'           => 'object',
+			'EventType'        => 'event_type',
+			'UserAgent'        => 'user_agent',
+			'CurrentUserRoles' => 'user_roles',
+			'Username'         => 'username',
+			'CurrentUserID'    => 'user_id',
+			'SessionID'        => 'session_id',
+			'PostStatus'       => 'post_status',
+			'PostType'         => 'post_type',
+			'PostID'           => 'post_id',
+		);
+
+		/**
+		 * Keeps the info about the columns of the table - name, type.
+		 *
+		 * @var array
+		 *
+		 * @since 4.5.0
+		 */
+		protected static $fields = array(
+			'id'          => 'int',
+			'site_id'     => 'int',
+			'alert_id'    => 'int',
+			'created_on'  => 'float',
+			'client_ip'   => 'string',
+			'severity'    => 'string',
+			'object'      => 'string',
+			'event_type'  => 'string',
+			'user_agent'  => 'string',
+			'user_roles'  => 'string',
+			'username'    => 'string',
+			'user_id'     => 'int',
+			'session_id'  => 'string',
+			'post_status' => 'string',
+			'post_type'   => 'string',
+			'post_id'     => 'int',
+		);
+
+		/**
 		 * Builds an upgrade query for the occurrence table.
 		 *
 		 * @return string
@@ -87,6 +133,101 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 			  ' . self::get_connection()->get_charset_collate() . ';';
 
 			return self::maybe_create_table( $table_name, $wp_entity_sql );
+		}
+
+		/**
+		 * Returns the column name for a given table
+		 *
+		 * @return array
+		 *
+		 * @since 4.5.0
+		 */
+		public static function get_column_names(): array {
+			return array(
+				'id'          => 'bigint',
+				'site_id'     => 'bigint',
+				'alert_id'    => 'bigint',
+				'created_on'  => 'double',
+				'client_ip'   => 'varchar(255)',
+				'severity'    => 'varchar(255)',
+				'object'      => 'varchar(255)',
+				'event_type'  => 'varchar(255)',
+				'user_agent'  => 'varchar(255)',
+				'user_roles'  => 'varchar(255)',
+				'username'    => 'varchar(255)',
+				'user_id'     => 'bigint',
+				'session_id'  => 'varchar(255)',
+				'post_status' => 'varchar(255)',
+				'post_type'   => 'varchar(255)',
+				'post_id'     => 'bigint',
+			);
+		}
+
+		/**
+		 * Responsible for storing the information in both occurrences table and metadata table.
+		 * That one is optimized for DB performance
+		 *
+		 * @param array $data - The data to be stored.
+		 * @param int   $type - The event ID.
+		 * @param float $date - Formatted to UNIX timestamp date.
+		 * @param int   $site_id - The site ID to store data for.
+		 *
+		 * @return void
+		 *
+		 * @since 4.5.0
+		 */
+		public static function store_record( $data, $type, $date, $site_id ) {
+			$data_to_store = array();
+			foreach ( (array) $data as $name => $value ) {
+				if ( '0' === $value || ! empty( $value ) ) {
+					if ( isset( self::$migrated_meta[ $name ] ) ) {
+						if ( 'CurrentUserRoles' === $name ) {
+							$value = maybe_unserialize( $value );
+							if ( is_array( $value ) && ! empty( $value ) ) {
+								$data_to_store[ self::$migrated_meta[ $name ] ] = implode( ',', $value );
+							}
+						} else {
+							$data_to_store[ self::$migrated_meta[ $name ] ] = $value;
+						}
+
+						unset( $data[ $name ] );
+					}
+				}
+			}
+
+			if ( ! empty( $data_to_store ) ) {
+				$data_to_store['created_on'] = $date;
+				$data_to_store['alert_id']   = $type;
+				$data_to_store['site_id']    = ! is_null( $site_id ) ? $site_id : ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
+
+				$occurrences_id = self::save( $data_to_store );
+
+				if ( 0 !== $occurrences_id && ! empty( $data ) ) {
+					$sqls = '';
+					foreach ( (array) $data as $name => $value ) {
+						$meta_insert = array(
+							'occurrence_id' => $occurrences_id,
+							'name'          => $name,
+							'value'         => maybe_serialize( $value ),
+						);
+
+						$data_prepared = Metadata_Entity::prepare_data( $meta_insert );
+
+						$fields  = '`' . implode( '`, `', array_keys( $data_prepared[0] ) ) . '`';
+						$formats = implode( ', ', $data_prepared[1] );
+
+						$sql = "($formats),";
+
+						$sqls .= self::get_connection()->prepare( $sql, $data_prepared[0] );
+					}
+
+					if ( ! empty( $sqls ) ) {
+						$sqls = 'INSERT INTO `' . Metadata_Entity::get_table_name() . "` ($fields) VALUES " . rtrim( $sqls, ',' );
+
+						self::get_connection()->query( $sqls );
+					}
+				}
+			}
 		}
 	}
 }

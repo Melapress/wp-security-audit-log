@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package    wsal
  * @subpackage sensors
  */
-class WSAL_Sensors_Content extends WSAL_AbstractSensor {
+class WSAL_Sensors_Content { //extends WSAL_AbstractSensor {
 
 	/**
 	 * Holds the name of the meta used to setting the lock status of the post
@@ -135,7 +135,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 	 * @since 4.4.2.1
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
-		parent::__construct( $plugin );
+		//parent::__construct( $plugin );
 		self::init( $plugin );
 	}
 
@@ -326,7 +326,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 		$event_data = $this->get_post_event_data( $post ); // Get event data.
 
 		// Check if this was initiated by a plugin.
-		$request_params = WSAL_Utilities_RequestUtils::get_filtered_request_data();
+		$request_params = \WSAL\Helpers\PHP_Helper::get_filtered_request_data();
 		if ( empty( $request_params['action'] ) && isset( $request_params['page'] ) ) {
 			$event      = 5025;
 			$event_data = array(
@@ -480,7 +480,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 				$post_data = $this->get_post_event_data( $post ); // Get event post data.
 
 				// Update post URL based on current actual path.
-				if ( WpSecurityAuditLog::is_multisite() && ! is_subdomain_install() ) {
+				if ( WP_Helper::is_multisite() && ! is_subdomain_install() ) {
 					// For multisite using subfolders, remove the subfolder.
 					$subdir_path  = parse_url( home_url(), PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
 					if ( ! is_null( $subdir_path ) ) {
@@ -1030,7 +1030,7 @@ class WSAL_Sensors_Content extends WSAL_AbstractSensor {
 
 					// So far we assume that the action is initiated by a user, let's check if it was actually initiated
 					// by a plugin.
-					$request_params = WSAL_Utilities_RequestUtils::get_filtered_request_data();
+					$request_params = \WSAL\Helpers\PHP_Helper::get_filtered_request_data();
 					if ( array_key_exists( 'plugin', $request_params ) && ! empty( $request_params['plugin'] ) ) {
 						// Event initiated by a plugin.
 						$plugin_name = $request_params['plugin'];

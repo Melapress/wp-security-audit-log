@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package    wsal
  * @subpackage sensors
  */
-class WSAL_Sensors_Register extends WSAL_AbstractSensor {
+class WSAL_Sensors_Register {//extends WSAL_AbstractSensor {
 	/**
 	 * {@inheritDoc}
 	 */

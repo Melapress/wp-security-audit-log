@@ -8,7 +8,7 @@
  * @package wsal
  */
 
-use WSAL\Adapter\WSAL_Adapters_MySQL_Occurrence;
+use WSAL\Helpers\WP_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -115,7 +115,7 @@ class WSAL_WidgetManager {
 	public function get_dashboard_widget_query() {
 		$query = new WSAL_Models_OccurrenceQuery();
 		// get the site we are on (of multisite).
-		$bid = (int) $this->get_view_site_id();
+		$bid = (int) WP_Helper::get_view_site_id();
 		if ( $bid ) {
 			$query->add_condition( 'site_id = %s ', $bid );
 		}
@@ -124,16 +124,5 @@ class WSAL_WidgetManager {
 		// set the limit based on the limit option for dashboard alerts.
 		$query->set_limit( $this->plugin->settings()->get_dashboard_widget_max_alerts() );
 		return $query;
-	}
-
-	/**
-	 * Method: Get view site id.
-	 */
-	protected function get_view_site_id() {
-		if ( is_super_admin() ) {
-			return 0;
-		} else {
-			return get_current_blog_id();
-		}
 	}
 }

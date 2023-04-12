@@ -45,6 +45,7 @@ jQuery( document ).ready( function() {
 			{
 				action: 'AjaxCheckSecurityToken',
 				token: value,
+				type: type,
 				nonce: wsal_data.wp_nonce
 			},
 			function( data ) {
@@ -132,7 +133,7 @@ jQuery( document ).ready( function() {
 
 	// Purge activity handler.
 	jQuery( '[data-remodal-id=wsal_purge_activity] button[data-remodal-action=confirm]' ).click( function() {
-		resetWSAL( 'wsal_purge_activity', jQuery( '#wsal-purge-activity-nonce' ).val() );
+		resetWSAL( 'wsal_purge_activity', jQuery( '#wsal-purge-activity-nonce' ).val(), '.js-purge-reset' );
 	});
 
 	/**

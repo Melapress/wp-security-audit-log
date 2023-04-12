@@ -248,7 +248,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 
 		$class = new $class_name( $this->get_connection() );
 
-		if ( ! $is_external_database && $class instanceof \WSAL\Adapter\WSAL_Adapters_MySQL_TmpUser ) {
+		if ( ! $is_external_database ) {
 			// Exclude the tmp_users table for local database.
 			return;
 		}
@@ -606,7 +606,7 @@ class WSAL_Connector_MySQLDB extends WSAL_Connector_AbstractConnector implements
 			}
 			$archive_db->suppress_errors( false );
 
-			return $args;
+			return $data;
 		} else {
 			return false;
 		}

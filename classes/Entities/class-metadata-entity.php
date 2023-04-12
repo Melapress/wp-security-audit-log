@@ -17,12 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
-
 	/**
 	 * Responsible for the events metadata.
 	 */
 	class Metadata_Entity extends Abstract_Entity {
-
 		/**
 		 * Contains the table name.
 		 *
@@ -31,9 +29,21 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 		protected static $table = 'wsal_metadata';
 
 		/**
-		 * Creates table functionality
+		 * Keeps the info about the columns of the table - name, type.
 		 *
-		 * @return bool
+		 * @var array
+		 *
+		 * @since 4.5.0
+		 */
+		protected static $fields = array(
+			'id'            => 'int',
+			'occurrence_id' => 'int',
+			'name'          => 'string',
+			'value'         => 'string',
+		);
+
+		/**
+		 * Creates table functionality.
 		 *
 		 * @since 4.4.2.1
 		 */

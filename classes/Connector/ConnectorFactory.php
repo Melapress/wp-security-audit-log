@@ -7,8 +7,6 @@
  * @package wsal
  */
 
-use WPMailSMTP\Vendor\Psr\Log\NullLogger;
-
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

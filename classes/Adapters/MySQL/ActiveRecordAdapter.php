@@ -9,7 +9,9 @@
 
 namespace WSAL\Adapter;
 
+use WSAL\Helpers\WP_Helper;
 use WSAL_Models_Occurrence;
+use WSAL\Helpers\DateTime_Formatter_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -639,6 +641,8 @@ class WSAL_Adapters_MySQL_ActiveRecord implements \WSAL_Adapters_ActiveRecordInt
 			$occurrences = $this->additional_new_user_query( $grouping, $next_date, $limit, $result_format );
 		}
 
+		//SET time_zone='UTC';
+
 		$results = $this->connection->get_results( $query, $result_format );
 
 		// Append role counts to results.
@@ -733,14 +737,23 @@ class WSAL_Adapters_MySQL_ActiveRecord implements \WSAL_Adapters_ActiveRecordInt
 						array_push( $group_by, 'alert_id' );
 						break;
 					case 'day':
+						//array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on + ('.DateTime_Formatter_Helper::get_time_zone_offset().') ), "%Y-%m-%d" ) AS period' );
+						//array_push( $group_by, 'period' );
+						//break;
 						array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on ), "%Y-%m-%d" ) AS period' );
 						array_push( $group_by, 'period' );
 						break;
 					case 'week':
+						// array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on + ('.DateTime_Formatter_Helper::get_time_zone_offset().') ), "%Y-%u" ) AS period' );
+						// array_push( $group_by, 'period' );
+						// break;
 						array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on ), "%Y-%u" ) AS period' );
 						array_push( $group_by, 'period' );
 						break;
 					case 'month':
+						// array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on + ('.DateTime_Formatter_Helper::get_time_zone_offset().') ), "%Y-%m" ) AS period' );
+						// array_push( $group_by, 'period' );
+						// break;
 						array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on ), "%Y-%m" ) AS period' );
 						array_push( $group_by, 'period' );
 						break;
@@ -865,6 +878,15 @@ class WSAL_Adapters_MySQL_ActiveRecord implements \WSAL_Adapters_ActiveRecordInt
 			$ip_addresses_negate_expression = 'NOT';
 		}
 
+		$_severities                  = null;
+		$severities_negate_expression = '';
+		if ( $report_args->severities__in ) {
+			$_severities = $this->format_array_for_query( $report_args->severities__in );
+		} elseif ( $report_args->severities__not_in ) {
+			$_severities                  = $this->format_array_for_query( $report_args->severities__not_in );
+			$severities_negate_expression = 'NOT';
+		}
+
 		$_objects                  = null;
 		$objects_negate_expression = '';
 		if ( $report_args->object__in ) {
@@ -886,13 +908,13 @@ class WSAL_Adapters_MySQL_ActiveRecord implements \WSAL_Adapters_ActiveRecordInt
 		$_start_timestamp = null;
 		if ( $report_args->start_date ) {
 			$start_datetime   = \DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->start_date . ' 00:00:00' );
-			$_start_timestamp = $start_datetime->format( 'U' );
+			$_start_timestamp = $start_datetime->format( 'U' ) + ( DateTime_Formatter_Helper::get_time_zone_offset() )*-1;
 		}
 
 		$_end_timestamp = null;
 		if ( $report_args->end_date ) {
 			$end_datetime   = \DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->end_date . ' 23:59:59' );
-			$_end_timestamp = $end_datetime->format( 'U' );
+			$_end_timestamp = $end_datetime->format( 'U' ) + ( DateTime_Formatter_Helper::get_time_zone_offset() )*-1;
 		}
 
 		$users_condition_parts = array();
@@ -920,6 +942,10 @@ class WSAL_Adapters_MySQL_ActiveRecord implements \WSAL_Adapters_ActiveRecordInt
 
 		if ( ! is_null( $_ip_addresses ) ) {
 			$where_statement .= " AND {$ip_addresses_negate_expression} find_in_set( occ.client_ip, {$_ip_addresses} ) > 0 ";
+		}
+
+		if ( ! is_null( $_severities ) ) {
+			$where_statement .= " AND {$severities_negate_expression} find_in_set( occ.severity, {$_severities} ) > 0 ";
 		}
 
 		if ( ! is_null( $_objects ) ) {
@@ -1043,15 +1069,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements \WSAL_Adapters_ActiveRecordInt
 		$occurrence = new WSAL_Adapters_MySQL_Occurrence( $_wpdb );
 		$table_occ  = $occurrence->get_table();
 
-		// Get temp table `wsal_tmp_users`.
-		$tmp_users = new WSAL_Adapters_MySQL_TmpUser( $_wpdb );
-		// If the table exist.
-		if ( $tmp_users->is_installed() ) {
-			$table_users = $tmp_users->get_table();
-			$this->temp_users( $table_users );
-		} else {
-			$table_users = $wpdb->users;
-		}
+		$table_users = $wpdb->users;
 
 		// Figure out the grouping statement and the columns' selection.
 		$grouping = self::get_grouping( $statistics_report_type, $grouping_period );
@@ -1143,7 +1161,7 @@ class WSAL_Adapters_MySQL_ActiveRecord implements \WSAL_Adapters_ActiveRecordInt
 		// If transient does not exist, then run SQL query.
 		if ( ! $wsal_db_table_status ) {
 			$wsal_db_table_status = strtolower( $_wpdb->get_var( $sql ) ) === strtolower( $this->get_table() );
-			\WpSecurityAuditLog::set_transient( $wsal_table_transient, $wsal_db_table_status, DAY_IN_SECONDS );
+			WP_Helper::set_transient( $wsal_table_transient, $wsal_db_table_status, DAY_IN_SECONDS );
 		}
 
 		return $wsal_db_table_status;

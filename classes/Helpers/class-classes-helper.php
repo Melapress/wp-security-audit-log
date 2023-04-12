@@ -47,6 +47,23 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 		}
 
 		/**
+		 * Adds a class (or classes) to the class map.
+		 *
+		 * @param array $class_add - Array with class or classes to add.
+		 *
+		 * @return void
+		 *
+		 * @since 4.5.0
+		 */
+		public static function add_to_class_map( array $class_add ) {
+			if ( empty( self::$class_map ) ) {
+				self::$class_map = require WSAL_BASE_DIR . 'vendor/composer/autoload_classmap.php';
+			}
+
+			self::$class_map = \array_merge( self::$class_map, $class_add );
+		}
+
+		/**
 		 * Returns the class by its filename. Checks if it exists and returns it as string. Returns false otherwise
 		 *
 		 * @param string $file - The filename of the class to check.

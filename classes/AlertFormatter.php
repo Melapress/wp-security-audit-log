@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use WSAL\Helpers\WP_Helper;
 use WSAL\Adapter\WSAL_Adapters_MySQL_Meta;
 
 /**
@@ -197,7 +198,7 @@ final class WSAL_AlertFormatter {
 				return $this->wrap_in_hightlight_markup( $result );
 
 			case '%multisite_text%' === $expression:
-				if ( WpSecurityAuditLog::is_multisite() && $value ) {
+				if ( WP_Helper::is_multisite() && $value ) {
 					$site_info = get_blog_details( $value, true );
 					if ( $site_info ) {
 						$site_url = $site_info->siteurl;

@@ -9,6 +9,9 @@
  * @subpackage views
  */
 
+use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\Plugins_Helper;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -164,7 +167,7 @@ final class WSAL_Views_SetupWizard {
 		}
 
 		// Grab list of plugins we have addons for.
-		$predefined_plugins = WSAL_PluginInstallAndActivate::get_installable_plugins();
+		$predefined_plugins = Plugins_Helper::get_installable_plugins();
 		$predefined_plugins = array_column( $predefined_plugins, 'addon_for' );
 
 		// Loop through plugins and create an array of slugs, we will compare these agains the plugins we have addons for.
@@ -539,12 +542,12 @@ final class WSAL_Views_SetupWizard {
 		check_admin_referer( 'wsal-step-login' );
 
 		if ( isset( $_POST['wsal-frontend-login'] ) ) {
-			$frontend_sensors = WSAL_Settings::get_frontend_events(); // Get the frontend sensors setting.
+			$frontend_sensors = WSAL\Helpers\Settings_Helper::get_frontend_events(); // Get the frontend sensors setting.
 			$login_sensor     = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-login'] ) );
 			$login_sensor     = '1' === $login_sensor; // Update the sensor option.
 
 			$frontend_sensors['login'] = $login_sensor;
-			WSAL_Settings::set_frontend_events( $frontend_sensors );
+			WSAL\Helpers\Settings_Helper::set_frontend_events( $frontend_sensors );
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
@@ -588,12 +591,12 @@ final class WSAL_Views_SetupWizard {
 		check_admin_referer( 'wsal-step-frontend-register' );
 
 		if ( isset( $_POST['wsal-frontend-register'] ) ) {
-			$frontend_sensors = WSAL_Settings::get_frontend_events(); // Get the frontend sensors setting.
+			$frontend_sensors = WSAL\Helpers\Settings_Helper::get_frontend_events(); // Get the frontend sensors setting.
 			$register_sensor  = sanitize_text_field( wp_unslash( $_POST['wsal-frontend-register'] ) );
 			$register_sensor  = '1' === $register_sensor; // Update the sensor option.
 
 			$frontend_sensors['register'] = $register_sensor;
-			WSAL_Settings::set_frontend_events( $frontend_sensors );
+			WSAL\Helpers\Settings_Helper::set_frontend_events( $frontend_sensors );
 		}
 
 		wp_safe_redirect( esc_url_raw( $this->get_next_step() ) );
@@ -796,7 +799,7 @@ final class WSAL_Views_SetupWizard {
 	 * Renders wizard step showing available add-ons.
 	 */
 	private function addons_step() {
-		$our_plugins = WSAL_PluginInstallAndActivate::get_installable_plugins();
+		$our_plugins = Plugins_Helper::get_installable_plugins();
 
 		// Grab list of installed plugins.
 		$all_plugins      = get_plugins();
@@ -824,7 +827,7 @@ final class WSAL_Views_SetupWizard {
 			// Loop through plugins and output.
 			foreach ( $our_plugins as $details ) {
 				$disable_button = '';
-				if ( WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
+				if ( WP_Helper::is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
 					$disable_button = 'disabled';
 				}
 				if ( ! in_array( $details['addon_for'], $we_have_addon, true ) ) {
@@ -843,9 +846,9 @@ final class WSAL_Views_SetupWizard {
 						<p><?php echo sanitize_text_field( $details['plugin_description'] ); // phpcs:ignore ?></p>
 						<p><button class="install-addon button button-primary <?php echo esc_attr( $disable_button ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-plugin-slug="<?php echo esc_attr( $details['plugin_slug'] ); ?>" data-plugin-download-url="<?php echo esc_url( $details['plugin_url'] ); ?>" data-plugin-event-tab-id="<?php echo esc_attr( $details['event_tab_id'] ); ?>">
 							<?php
-							if ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && ! WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) ) {
+							if ( Plugins_Helper::is_plugin_installed( $details['plugin_slug'] ) && ! WP_Helper::is_plugin_active( $details['plugin_slug'] ) ) {
 								esc_html_e( 'Extension installed, activate now?', 'wp-security-audit-log' );
-							} elseif ( WSAL_PluginInstallAndActivate::is_plugin_installed( $details['plugin_slug'] ) && WpSecurityAuditLog::is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
+							} elseif ( Plugins_Helper::is_plugin_installed( $details['plugin_slug'] ) && WP_Helper::is_plugin_active( $details['plugin_slug'] ) || 'wsal-wpforms.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_wpforms_init_actions' ) || 'wsal-bbpress.php' === basename( $details['plugin_slug'] ) && function_exists( 'wsal_bbpress_init_actions' ) ) {
 								esc_html_e( 'Extension installed', 'wp-security-audit-log' );
 							} else {
 									esc_html_e( 'Install Extension', 'wp-security-audit-log' );

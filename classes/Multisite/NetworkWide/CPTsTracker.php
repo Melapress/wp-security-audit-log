@@ -125,6 +125,11 @@ final class CPTsTracker extends AbstractTracker {
 		$network_data    = get_network_option( null, self::STORAGE_KEY );
 		$current_blog_id = get_current_blog_id();
 		$data_updated    = false;
+
+		if (false === $network_data) {
+			$network_data=[];
+			$network_data['site'] = [];
+		}
 		if (
 			! isset( $network_data['site'][ $current_blog_id ] )
 			|| ( isset( $network_data['site'][ $current_blog_id ] ) && $network_data['site'][ get_current_blog_id() ] !== $this->data )

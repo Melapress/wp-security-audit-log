@@ -89,9 +89,9 @@ abstract class WSAL_AbstractMetaDataSensor extends WSAL_AbstractSensor {
 	public function is_excluded_custom_fields( $object_type, $custom ) {
 		$custom_fields = array();
 		if ( 'post' === $object_type ) {
-			$custom_fields = $this->plugin->settings()->get_excluded_post_meta_fields();
+			$custom_fields = \WSAL\Helpers\Settings_Helper::get_excluded_post_meta_fields();
 		} elseif ( 'user' === $object_type ) {
-			$custom_fields = $this->plugin->settings()->get_excluded_user_meta_fields();
+			$custom_fields = \WSAL\Helpers\Settings_Helper::get_excluded_user_meta_fields();
 		}
 
 		if ( in_array( $custom, $custom_fields ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict

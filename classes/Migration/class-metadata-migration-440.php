@@ -14,8 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use \WSAL_Vendor\WP_Background_Process;
 use \WSAL\Helpers\WP_Helper;
+use WSAL\Utils\Abstract_Migration;
+use \WSAL_Vendor\WP_Background_Process;
 
 /**
  * Migration class
@@ -62,6 +63,25 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 			$this->action .= $action;
 
 			parent::__construct();
+
+			/**
+			 * In theory that does not suppose to happen, but it obviously does - so if there is nothing in the queue but the records in the options table suggest otherwise - lets clear the tem
+			 */
+			if ( ! wp_next_scheduled( $this->cron_hook_identifier ) ) {
+				if ( $this->is_queue_empty() ) {
+					if ( 'archive' === $action ) {
+						$connection = WP_Helper::get_global_option( 'archive-connection' );
+					} else {
+						$connection = WP_Helper::get_global_option( 'adapter-connection' );
+						if ( empty( $connection ) ) {
+							$connection = 'local';
+						}
+					}
+
+					$this->remove_migration_info( $connection );
+					\WSAL\Helpers\WP_Helper::delete_global_option( Abstract_Migration::STARTED_MIGRATION_PROCESS );
+				}
+			}
 		}
 
 		/**
@@ -117,6 +137,7 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 				try {
 					// Delete the migration job info to indicate that the migration is done.
 					self::remove_migration_info( $item['connection'] );
+					\WSAL\Helpers\WP_Helper::delete_global_option( Abstract_Migration::STARTED_MIGRATION_PROCESS );
 
 				} catch ( \Exception $exception ) {
 					$this->handle_error( $exception );

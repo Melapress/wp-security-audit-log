@@ -7,9 +7,10 @@
  * @package wsal
  */
 
-use WSAL\Helpers\File_Helper;
-use WSAL\Helpers\Settings_Helper;
+use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Helper;
+use WSAL\Helpers\Settings_Helper;
+use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,13 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package wsal
  */
 class WSAL_Settings {
-	/**
-	 * Option name for front-end events.
-	 *
-	 * @var string
-	 */
-	public const FRONT_END_EVENTS_OPTION_NAME = 'wsal_frontend-events';
-
 	/**
 	 * Instance of the main plugin.
 	 *
@@ -74,25 +68,11 @@ class WSAL_Settings {
 	protected $per_page = null;
 
 	/**
-	 * Users excluded from monitoring.
-	 *
-	 * @var array
-	 */
-	protected $excluded_users = array();
-
-	/**
 	 * Roles excluded from monitoring.
 	 *
 	 * @var array
 	 */
 	protected $excluded_roles = array();
-
-	/**
-	 * Custom post meta fields excluded from monitoring.
-	 *
-	 * @var array
-	 */
-	protected $excluded_post_meta = array();
 
 	/**
 	 * Custom user meta fields excluded from monitoring.
@@ -154,10 +134,7 @@ class WSAL_Settings {
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->plugin = $plugin;
-		// some settings here may be called before the options helper is setup.
-		if ( ! isset( $this->plugin->options_helper ) ) {
-			$this->plugin->include_options_helper();
-		}
+
 		add_action( 'deactivated_plugin', array( $this, 'reset_stealth_mode' ), 10, 1 );
 	}
 
@@ -167,24 +144,14 @@ class WSAL_Settings {
 	 */
 	public function set_basic_mode() {
 		// Disable alerts of geek mode and alerts to be always disabled.
-		$this->set_disabled_alerts( array_merge( $this->geek_alerts, $this->always_disabled_alerts ) );
+		Settings_Helper::set_disabled_alerts( array_merge( $this->geek_alerts, $this->always_disabled_alerts ) );
 	}
 
 	/**
 	 * Enable Geek Mode.
 	 */
 	public function set_geek_mode() {
-		$this->set_disabled_alerts( $this->always_disabled_alerts ); // Disable alerts to be always disabled.
-	}
-
-	/**
-	 * Check whether to log requests to file or not. Disabled by default and can be enabled only using a custom filter
-	 * wsal_request_logging_enabled.
-	 *
-	 * @return bool
-	 */
-	public function is_request_logging_enabled() {
-		return apply_filters( 'wsal_request_logging_enabled', false );
+		Settings_Helper::set_disabled_alerts( $this->always_disabled_alerts ); // Disable alerts to be always disabled.
 	}
 
 	/**
@@ -358,7 +325,7 @@ class WSAL_Settings {
 			\WSAL\Helpers\Settings_Helper::set_option_value( 'pruning-unit', $new_unit );
 			\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'pruning-date-e', $enable );
 
-			$this->plugin->alerts->trigger_event(
+			Alert_Manager::trigger_event(
 				6052,
 				array(
 					'new_setting'      => 'Delete events older than ' . $old_period,
@@ -375,7 +342,7 @@ class WSAL_Settings {
 			\WSAL\Helpers\Settings_Helper::delete_option_value( 'pruning-unit' );
 			\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'pruning-date-e', $enable );
 
-			$this->plugin->alerts->trigger_event(
+			Alert_Manager::trigger_event(
 				6052,
 				array(
 					'new_setting'      => 'Keep all data',
@@ -392,7 +359,7 @@ class WSAL_Settings {
 				\WSAL\Helpers\Settings_Helper::set_option_value( 'pruning-date', $new_date );
 				\WSAL\Helpers\Settings_Helper::set_option_value( 'pruning-unit', $new_unit );
 
-				$this->plugin->alerts->trigger_event(
+				Alert_Manager::trigger_event(
 					6052,
 					array(
 						'new_setting'      => 'Delete events older than ' . $new_date,
@@ -447,13 +414,13 @@ class WSAL_Settings {
 	public function set_login_page_notification( $enable ) {
 		// Only trigger an event if an actual changes is made.
 		$old_setting = \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'login_page_notification', false );
-		$enable      = \WSAL\Helpers\Options::string_to_bool( $enable );
+		$enable      = Settings_Helper::string_to_bool( $enable );
 		if ( $old_setting !== $enable ) {
 			$event_id   = 6046;
 			$alert_data = array(
 				'EventType' => ( $enable ) ? 'enabled' : 'disabled',
 			);
-			$this->plugin->alerts->trigger_event( $event_id, $alert_data );
+			Alert_Manager::trigger_event( $event_id, $alert_data );
 		}
 		\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'login_page_notification', $enable );
 	}
@@ -476,7 +443,7 @@ class WSAL_Settings {
 		$text        = wp_kses( $text, $this->plugin->allowed_html_tags );
 		$old_setting = WSAL\Helpers\Settings_Helper::get_option_value( 'login_page_notification_text' );
 		if ( ! empty( $old_setting ) && ! empty( $text ) && ! is_null( $old_setting ) && $old_setting !== $text ) {
-			$this->plugin->alerts->trigger_event( 6047 );
+			Alert_Manager::trigger_event( 6047 );
 		}
 		\WSAL\Helpers\Settings_Helper::set_option_value( 'login_page_notification_text', $text );
 	}
@@ -494,26 +461,26 @@ class WSAL_Settings {
 	 * Retrieves a list of alerts disabled by default.
 	 *
 	 * @return int[] List of alerts disabled by default.
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_default_disabled_alerts()
 	 */
 	public function get_default_disabled_alerts() {
-		return array( 0000, 0001, 0002, 0003, 0004, 0005 );
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_default_disabled_alerts()' );
+
+		return \WSAL\Helpers\Settings_Helper::get_default_disabled_alerts();
 	}
 
 	/**
 	 * Return IDs of disabled alerts.
 	 *
 	 * @return array
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_disabled_alerts()
 	 */
 	public function get_disabled_alerts() {
-		if ( ! $this->disabled ) {
-			$disabled_defaults = $this->get_default_disabled_alerts() + $this->get_default_always_disabled_alerts();
-			$this->disabled    = implode( ',', $disabled_defaults );
-			$this->disabled    = WSAL\Helpers\Settings_Helper::get_option_value( 'disabled-alerts', $this->disabled );
-			$this->disabled    = ( '' === $this->disabled ) ? array() : explode( ',', $this->disabled );
-			$this->disabled    = array_map( 'intval', $this->disabled );
-		}
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_disabled_alerts()' );
 
-		return ( ! is_array( $this->disabled ) ) ? explode( ',', $this->disabled ) : $this->disabled;
+		return \WSAL\Helpers\Settings_Helper::get_disabled_alerts();
 	}
 
 	/**
@@ -547,7 +514,7 @@ class WSAL_Settings {
 			$alert_data = array(
 				'EventType' => ( $enabled ) ? 'enabled' : 'disabled',
 			);
-			$this->plugin->alerts->trigger_event( 6051, $alert_data );
+			Alert_Manager::trigger_event( 6051, $alert_data );
 		}
 
 		\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'hide-plugin', $enabled );
@@ -575,16 +542,16 @@ class WSAL_Settings {
 	 * @param array $users_or_roles – Users/Roles.
 	 */
 	public function set_allowed_plugin_viewers( $users_or_roles ) {
-		$old_value = WSAL\Helpers\Settings_Helper::get_option_value( 'plugin-viewers' );
-		$changes   = $this->determine_added_and_removed_items( $old_value, implode( ',', $users_or_roles ) );
+		$old_value = WSAL\Helpers\Settings_Helper::get_option_value( 'plugin-viewers', '' );
+		$changes   = \WSAL\Helpers\Settings_Helper::determine_added_and_removed_items( $old_value, implode( ',', $users_or_roles ) );
 
 		if ( ! empty( $changes['added'] ) ) {
 			foreach ( $changes['added'] as $user ) {
-				$this->plugin->alerts->trigger_event(
+				Alert_Manager::trigger_event(
 					6050,
 					array(
 						'user'           => $user,
-						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'previous_users' => ( empty( $old_value ) ) ? \WSAL\Helpers\Settings_Helper::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'added',
 					)
 				);
@@ -594,11 +561,11 @@ class WSAL_Settings {
 		if ( ! empty( $changes['removed'] ) && ! empty( $old_value ) ) {
 			foreach ( $changes['removed'] as $user ) {
 				if ( ! empty( $user ) ) {
-					$this->plugin->alerts->trigger_event(
+					Alert_Manager::trigger_event(
 						6050,
 						array(
 							'user'           => $user,
-							'previous_users' => empty( $old_value ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+							'previous_users' => empty( $old_value ) ? \WSAL\Helpers\Settings_Helper::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 							'EventType'      => 'removed',
 						)
 					);
@@ -617,7 +584,7 @@ class WSAL_Settings {
 	 */
 	public function get_allowed_plugin_viewers() {
 		if ( is_null( $this->viewers ) ) {
-			$this->viewers = array_unique( array_filter( explode( ',', WSAL\Helpers\Settings_Helper::get_option_value( 'plugin-viewers' ) ) ) );
+			$this->viewers = array_unique( array_filter( explode( ',', WSAL\Helpers\Settings_Helper::get_option_value( 'plugin-viewers', '' ) ) ) );
 		}
 
 		return $this->viewers;
@@ -638,7 +605,7 @@ class WSAL_Settings {
 				'new_setting'      => ucfirst( str_replace( '_', ' ', $setting ) ),
 				'previous_setting' => ucfirst( str_replace( '_', ' ', $old_value ) ),
 			);
-			$this->plugin->alerts->trigger_event( 6049, $alert_data );
+			Alert_Manager::trigger_event( 6049, $alert_data );
 		}
 
 		\WSAL\Helpers\Settings_Helper::set_option_value( 'restrict-plugin-settings', $setting, true );
@@ -713,7 +680,7 @@ class WSAL_Settings {
 	 * @return array
 	 */
 	protected function get_super_admins() {
-		return WpSecurityAuditLog::is_multisite() ? get_super_admins() : array();
+		return WP_Helper::is_multisite() ? get_super_admins() : array();
 	}
 
 	/**
@@ -722,7 +689,7 @@ class WSAL_Settings {
 	 * @return string[]
 	 */
 	protected function get_admins() {
-		if ( WpSecurityAuditLog::is_multisite() ) {
+		if ( WP_Helper::is_multisite() ) {
 			if ( empty( $this->site_admins ) ) {
 				/*
 				 * Get list of admins.
@@ -768,7 +735,7 @@ class WSAL_Settings {
 		// By default, the user has no privileges.
 		$result = false;
 
-		$is_multisite = WpSecurityAuditLog::is_multisite();
+		$is_multisite = WP_Helper::is_multisite();
 		switch ( $action ) {
 			case 'view':
 				if ( ! $is_multisite ) {
@@ -914,12 +881,12 @@ class WSAL_Settings {
 	 */
 	public function set_main_ip_from_proxy( $enabled ) {
 		$old_value = \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'use-proxy-ip' );
-		$enabled   = \WSAL\Helpers\Options::string_to_bool( $enabled );
+		$enabled   = Settings_Helper::string_to_bool( $enabled );
 		if ( $old_value !== $enabled ) {
 			$alert_data = array(
 				'EventType' => ( $enabled ) ? 'enabled' : 'disabled',
 			);
-			$this->plugin->alerts->trigger_event( 6048, $alert_data );
+			Alert_Manager::trigger_event( 6048, $alert_data );
 		}
 		\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'use-proxy-ip', $enabled );
 	}
@@ -946,62 +913,26 @@ class WSAL_Settings {
 	 * Get main client IP.
 	 *
 	 * @return string|null
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_main_client_ip()
 	 */
 	public function get_main_client_ip() {
-		$result = null;
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_main_client_ip()' );
 
-		if ( $this->is_main_ip_from_proxy() ) {
-			// TODO: The algorithm below just gets the first IP in the list...we might want to make this more intelligent somehow.
-			$result = $this->get_client_ips();
-			$result = reset( $result );
-			$result = isset( $result[0] ) ? $result[0] : null;
-		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-			$ip     = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-			$result = $this->normalize_ip( $ip );
-
-			if ( ! $this->validate_ip( $result ) ) {
-				$result = 'Error ' . self::ERROR_CODE_INVALID_IP . ': Invalid IP Address';
-			}
-		}
-
-		return $result;
+		return \WSAL\Helpers\Settings_Helper::get_main_client_ip();
 	}
 
 	/**
 	 * Get client IP addresses.
 	 *
 	 * @return array
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_client_ips()
 	 */
 	public function get_client_ips() {
-		$ips = array();
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_client_ips()' );
 
-		$proxy_headers = array(
-			'HTTP_CLIENT_IP',
-			'HTTP_X_FORWARDED_FOR',
-			'HTTP_X_FORWARDED',
-			'HTTP_X_CLUSTER_CLIENT_IP',
-			'X-ORIGINAL-FORWARDED-FOR',
-			'HTTP_FORWARDED_FOR',
-			'HTTP_FORWARDED',
-			'REMOTE_ADDR',
-			// Cloudflare.
-			'HTTP_CF-Connecting-IP',
-			'HTTP_TRUE_CLIENT_IP',
-		);
-		foreach ( $proxy_headers as $key ) {
-			if ( isset( $_SERVER[ $key ] ) ) {
-				$ips[ $key ] = array();
-
-				foreach ( explode( ',', $_SERVER[ $key ] ) as $ip ) {
-					$ip = $this->normalize_ip( $ip );
-					if ( $this->validate_ip( $ip ) ) {
-						$ips[ $key ][] = $ip;
-					}
-				}
-			}
-		}
-
-		return $ips;
+		return \WSAL\Helpers\Settings_Helper::get_client_ips();
 	}
 
 	/**
@@ -1010,21 +941,13 @@ class WSAL_Settings {
 	 * @param string $ip - IP address.
 	 *
 	 * @return string
-	 *
-	 * phpcs:disable Squiz.PHP.CommentedOutCode.Found
+     *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::normalize_ip()
 	 */
 	protected function normalize_ip( $ip ) {
-		$ip = trim( $ip );
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::normalize_ip()' );
 
-		if ( filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 ) ) {
-			return $ip;
-		}
-
-		$ip = parse_url( 'http://' . $ip, PHP_URL_HOST );
-
-		$ip = str_replace( array( '[', ']' ), '', $ip );
-
-		return $ip;
+		return \WSAL\Helpers\Settings_Helper::normalize_ip( $ip );
 	}
 
 	/**
@@ -1033,80 +956,39 @@ class WSAL_Settings {
 	 * @param string $ip - IP address.
 	 *
 	 * @return string|bool
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Validator::validate_ip()
 	 */
 	protected function validate_ip( $ip ) {
-		$opts = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Validator::validate_ip()' );
 
-		if ( $this->is_internal_ips_filtered() ) {
-			$opts = $opts | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
-		}
-
-		$filtered_ip = filter_var( $ip, FILTER_VALIDATE_IP, $opts );
-
-		if ( ! $filtered_ip || empty( $filtered_ip ) ) {
-			// Regex IPV4.
-			if ( preg_match( '/^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/', $ip ) ) {
-				return $ip;
-			} elseif ( preg_match( '/^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/', $ip ) ) {
-				// Regex IPV6.
-				return $ip;
-			}
-
-			return false;
-		} else {
-			return $filtered_ip;
-		}
+		return \WSAL\Helpers\Validator::validate_ip( $ip );
 	}
 
 	/**
 	 * Sets the users excluded from monitoring.
 	 *
 	 * @param array $users Users to be excluded.
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::set_excluded_monitoring_users()
 	 */
 	public function set_excluded_monitoring_users( $users ) {
-		$old_value = WSAL\Helpers\Settings_Helper::get_option_value( 'excluded-users', array() );
-		$changes   = $this->determine_added_and_removed_items( $old_value, implode( ',', $users ) );
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::set_excluded_monitoring_users()' );
 
-		if ( ! empty( $changes['added'] ) ) {
-			foreach ( $changes['added'] as $user ) {
-				$this->plugin->alerts->trigger_event(
-					6053,
-					array(
-						'user'           => $user,
-						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
-						'EventType'      => 'added',
-					)
-				);
-			}
-		}
-		if ( ! empty( $changes['removed'] ) && ! empty( $old_value ) ) {
-			foreach ( $changes['removed'] as $user ) {
-				$this->plugin->alerts->trigger_event(
-					6053,
-					array(
-						'user'           => $user,
-						'previous_users' => empty( $old_value ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
-						'EventType'      => 'removed',
-					)
-				);
-			}
-		}
-
-		$this->excluded_users = $users;
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'excluded-users', esc_html( implode( ',', $this->excluded_users ) ) );
+		return \WSAL\Helpers\Settings_Helper::set_excluded_monitoring_users( $users );
 	}
 
 	/**
 	 * Retrieves the users excluded from monitoring.
 	 *
 	 * @return array Users excluded from monitoring.
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_users()
 	 */
 	public function get_excluded_monitoring_users() {
-		if ( empty( $this->excluded_users ) ) {
-			$this->excluded_users = array_unique( array_filter( explode( ',', WSAL\Helpers\Settings_Helper::get_option_value( 'excluded-users', '' ) ) ) );
-		}
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_monitoring_users()' );
 
-		return $this->excluded_users;
+		return \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_users();
 	}
 
 	/**
@@ -1118,15 +1000,15 @@ class WSAL_Settings {
 	 */
 	public function set_excluded_post_types( $post_types ) {
 		$old_value = WSAL\Helpers\Settings_Helper::get_option_value( 'custom-post-types', array() );
-		$changes   = $this->determine_added_and_removed_items( $old_value, implode( ',', $post_types ) );
+		$changes   = \WSAL\Helpers\Settings_Helper::determine_added_and_removed_items( $old_value, implode( ',', $post_types ) );
 
 		if ( ! empty( $changes['added'] ) ) {
 			foreach ( $changes['added'] as $post_type ) {
-				$this->plugin->alerts->trigger_event(
+				Alert_Manager::trigger_event(
 					6056,
 					array(
 						'post_type'      => $post_type,
-						'previous_types' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'previous_types' => ( empty( $old_value ) ) ? \WSAL\Helpers\Settings_Helper::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'added',
 					)
 				);
@@ -1135,11 +1017,11 @@ class WSAL_Settings {
 
 		if ( ! empty( $changes['removed'] ) && ! empty( $old_value ) ) {
 			foreach ( $changes['removed'] as $post_type ) {
-				$this->plugin->alerts->trigger_event(
+				Alert_Manager::trigger_event(
 					6056,
 					array(
 						'post_type'      => $post_type,
-						'previous_types' => empty( $old_value ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'previous_types' => empty( $old_value ) ? \WSAL\Helpers\Settings_Helper::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'removed',
 					)
 				);
@@ -1156,16 +1038,13 @@ class WSAL_Settings {
 	 * @return array
 	 *
 	 * @since 2.6.7
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_post_types()
 	 */
-	public function get_excluded_post_types(): array {
-		if ( empty( $this->post_types ) ) {
-			$this->post_types = array();
-			if ( ! is_null( WSAL\Helpers\Settings_Helper::get_option_value( 'custom-post-types' ) ) ) {
-				$this->post_types = array_unique( array_filter( explode( ',', WSAL\Helpers\Settings_Helper::get_option_value( 'custom-post-types' ) ) ) );
-			}
-		}
+    public function get_excluded_post_types(): array {
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_post_types()' );
 
-		return $this->post_types;
+		return \WSAL\Helpers\Settings_Helper::get_excluded_post_types();
 	}
 
 	/**
@@ -1176,15 +1055,15 @@ class WSAL_Settings {
 	public function set_excluded_monitoring_roles( $roles ) {
 		// Trigger alert.
 		$old_value = WSAL\Helpers\Settings_Helper::get_option_value( 'excluded-roles', array() );
-		$changes   = $this->determine_added_and_removed_items( $old_value, implode( ',', $roles ) );
+		$changes   = \WSAL\Helpers\Settings_Helper::determine_added_and_removed_items( $old_value, implode( ',', $roles ) );
 
 		if ( ! empty( $changes['added'] ) ) {
 			foreach ( $changes['added'] as $user ) {
-				$this->plugin->alerts->trigger_event(
+				Alert_Manager::trigger_event(
 					6054,
 					array(
 						'role'           => $user,
-						'previous_users' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'previous_users' => ( empty( $old_value ) ) ? \WSAL\Helpers\Settings_Helper::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'added',
 					)
 				);
@@ -1192,11 +1071,11 @@ class WSAL_Settings {
 		}
 		if ( ! empty( $changes['removed'] ) && ! empty( $old_value ) ) {
 			foreach ( $changes['removed'] as $user ) {
-				$this->plugin->alerts->trigger_event(
+				Alert_Manager::trigger_event(
 					6054,
 					array(
 						'role'           => $user,
-						'previous_users' => empty( $old_value ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'previous_users' => empty( $old_value ) ? \WSAL\Helpers\Settings_Helper::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'      => 'removed',
 					)
 				);
@@ -1222,53 +1101,26 @@ class WSAL_Settings {
 	 * Updates custom post meta fields excluded from monitoring.
 	 *
 	 * @param array $custom Excluded post meta fields.
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::set_excluded_post_meta_fields()
 	 */
 	public function set_excluded_post_meta_fields( $custom ) {
-		$old_value = $this->get_excluded_post_meta_fields();
-		$changes   = $this->determine_added_and_removed_items( $old_value, implode( ',', $custom ) );
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::set_excluded_post_meta_fields()' );
 
-		if ( ! empty( $changes['added'] ) ) {
-			foreach ( $changes['added'] as $custom_field ) {
-				$this->plugin->alerts->trigger_event(
-					6057,
-					array(
-						'custom_field'    => $custom_field,
-						'previous_fields' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
-						'EventType'       => 'added',
-					)
-				);
-			}
-		}
-
-		if ( ! empty( $changes['removed'] ) && ! empty( $old_value ) ) {
-			foreach ( $changes['removed'] as $custom_field ) {
-				$this->plugin->alerts->trigger_event(
-					6057,
-					array(
-						'custom_field'    => $custom_field,
-						'previous_fields' => empty( $old_value ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
-						'EventType'       => 'removed',
-					)
-				);
-			}
-		}
-
-		$this->excluded_post_meta = $custom;
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'excluded-post-meta', esc_html( implode( ',', $this->excluded_post_meta ) ) );
+		return \WSAL\Helpers\Settings_Helper::set_excluded_post_meta_fields( $custom );
 	}
 
 	/**
 	 * Retrieves a list of post meta fields excluded from monitoring.
 	 *
 	 * @return array
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_post_meta_fields()
 	 */
 	public function get_excluded_post_meta_fields() {
-		if ( empty( $this->excluded_post_meta ) ) {
-			$this->excluded_post_meta = array_unique( array_filter( explode( ',', WSAL\Helpers\Settings_Helper::get_option_value( 'excluded-post-meta' ) ) ) );
-			asort( $this->excluded_post_meta );
-		}
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_post_meta_fields()' );
 
-		return $this->excluded_post_meta;
+		return \WSAL\Helpers\Settings_Helper::get_excluded_post_meta_fields();
 	}
 
 	/**
@@ -1277,39 +1129,13 @@ class WSAL_Settings {
 	 * @param array $custom Custom user meta fields excluded from monitoring.
 	 *
 	 * @since 4.3.2
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::set_excluded_user_meta_fields()
 	 */
 	public function set_excluded_user_meta_fields( $custom ) {
-		$old_value = $this->get_excluded_user_meta_fields();
-		$changes   = $this->determine_added_and_removed_items( $old_value, implode( ',', $custom ) );
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::set_excluded_user_meta_fields()' );
 
-		if ( ! empty( $changes['added'] ) ) {
-			foreach ( $changes['added'] as $custom_field ) {
-				$this->plugin->alerts->trigger_event(
-					6058,
-					array(
-						'custom_field'    => $custom_field,
-						'previous_fields' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
-						'EventType'       => 'added',
-					)
-				);
-			}
-		}
-
-		if ( ! empty( $changes['removed'] ) && ! empty( $old_value ) ) {
-			foreach ( $changes['removed'] as $custom_field ) {
-				$this->plugin->alerts->trigger_event(
-					6058,
-					array(
-						'custom_field'    => $custom_field,
-						'previous_fields' => empty( $old_value ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
-						'EventType'       => 'removed',
-					)
-				);
-			}
-		}
-
-		$this->excluded_user_meta = $custom;
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'excluded-user-meta', esc_html( implode( ',', $this->excluded_user_meta ) ) );
+		return \WSAL\Helpers\Settings_Helper::set_excluded_user_meta_fields( $custom );
 	}
 
 	/**
@@ -1318,19 +1144,13 @@ class WSAL_Settings {
 	 * @return array
 	 *
 	 * @since 4.3.2
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_user_meta_fields()
 	 */
 	public function get_excluded_user_meta_fields() {
-		if ( empty( $this->excluded_user_meta ) ) {
-			$excluded_user_meta = WSAL\Helpers\Settings_Helper::get_option_value( 'excluded-user-meta', '' );
-			if ( ! is_null( $excluded_user_meta ) ) {
-				$this->excluded_user_meta = array_unique( array_filter( explode( ',', WSAL\Helpers\Settings_Helper::get_option_value( 'excluded-user-meta', '' ) ) ) );
-				asort( $this->excluded_user_meta );
-			} else {
-				$this->excluded_user_meta = array();
-			}
-		}
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_user_meta_fields()' );
 
-		return $this->excluded_user_meta;
+		return \WSAL\Helpers\Settings_Helper::get_excluded_user_meta_fields();
 	}
 
 	/**
@@ -1340,15 +1160,15 @@ class WSAL_Settings {
 	 */
 	public function set_excluded_monitoring_ip( $ip ) {
 		$old_value = WSAL\Helpers\Settings_Helper::get_option_value( 'excluded-ip', array() );
-		$changes   = $this->determine_added_and_removed_items( $old_value, implode( ',', $ip ) );
+		$changes   = \WSAL\Helpers\Settings_Helper::determine_added_and_removed_items( $old_value, implode( ',', $ip ) );
 
 		if ( ! empty( $changes['added'] ) ) {
 			foreach ( $changes['added'] as $user ) {
-				$this->plugin->alerts->trigger_event(
+				Alert_Manager::trigger_event(
 					6055,
 					array(
 						'ip'           => $user,
-						'previous_ips' => ( empty( $old_value ) ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'previous_ips' => ( empty( $old_value ) ) ? \WSAL\Helpers\Settings_Helper::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'    => 'added',
 					)
 				);
@@ -1356,11 +1176,11 @@ class WSAL_Settings {
 		}
 		if ( ! empty( $changes['removed'] ) && ! empty( $old_value ) ) {
 			foreach ( $changes['removed'] as $user ) {
-				$this->plugin->alerts->trigger_event(
+				Alert_Manager::trigger_event(
 					6055,
 					array(
 						'ip'           => $user,
-						'previous_ips' => empty( $old_value ) ? $this->tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+						'previous_ips' => empty( $old_value ) ? \WSAL\Helpers\Settings_Helper::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 						'EventType'    => 'removed',
 					)
 				);
@@ -1375,13 +1195,13 @@ class WSAL_Settings {
 	 * Retrieves a list of IP addresses to exclude from monitoring.
 	 *
 	 * @return array List of IP addresses to exclude from monitoring.
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_ip()
 	 */
 	public function get_excluded_monitoring_ip() {
-		if ( empty( $this->excluded_ip ) ) {
-			$this->excluded_ip = array_unique( array_filter( explode( ',', WSAL\Helpers\Settings_Helper::get_option_value( 'excluded-ip', '' ) ) ) );
-		}
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_monitoring_ip()' );
 
-		return $this->excluded_ip;
+		return \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_ip();
 	}
 
 	/**
@@ -1397,11 +1217,11 @@ class WSAL_Settings {
 	 * @return string
 	 */
 	public function get_datetime_format( $line_break = true, $use_nb_space_for_am_pm = true ) {
-		$result = $this->get_date_format();
+		$result = Settings_Helper::get_date_format();
 
 		$result .= $line_break ? '<\b\r>' : ' ';
 
-		$time_format    = $this->get_time_format();
+		$time_format    = Settings_Helper::get_time_format();
 		$has_am_pm      = false;
 		$am_pm_fraction = false;
 		$am_pm_pattern  = '/(?i)(\s+A)/';
@@ -1552,7 +1372,7 @@ class WSAL_Settings {
 			'info'       => '1',
 		);
 
-		if ( WpSecurityAuditLog::is_multisite() ) {
+		if ( WP_Helper::is_multisite() ) {
 			$columns = array_slice( $columns, 0, 6, true ) + array( 'site' => '1' ) + array_slice( $columns, 6, null, true );
 		}
 
@@ -1571,7 +1391,7 @@ class WSAL_Settings {
 				'message'    => '0',
 			);
 
-			if ( WpSecurityAuditLog::is_multisite() ) {
+			if ( WP_Helper::is_multisite() ) {
 				$columns = array_slice( $columns, 0, 6, true ) + array( 'site' => '0' ) + array_slice( $columns, 6, null, true );
 			}
 
@@ -1729,12 +1549,13 @@ class WSAL_Settings {
 	 * Method: Get Token Type.
 	 *
 	 * @param string $token - Token type.
+	 * @param string $type - Type of the input to check.
 	 *
 	 * @return string
 	 *
 	 * @since 3.2.3
 	 */
-	public function get_token_type( $token ) {
+	public function get_token_type( $token, $type = false ) {
 		// Get users.
 		$users = array();
 		foreach ( get_users( 'blog_id=0&fields[]=user_login' ) as $obj ) {
@@ -1743,7 +1564,24 @@ class WSAL_Settings {
 
 		// Check if the token matched users.
 		if ( in_array( $token, $users, true ) ) {
-			return 'user';
+
+			// That is shitty code, in order to keep backwards compatibility
+			// that code is added.
+			// Meaning - if that is AJAX call, and it comes from the roles and not users,
+			// we have no business here - the token is valid and within users, but we are looking
+			// for roles
+			if ( false !== $type && 'ExRole' === $type  ) {
+
+			} else {
+				return 'user';
+			}
+		}
+
+		if ( false !== $type && 'ExUser' === $type ) {
+			// We are checking for a user, meaning that at this point we have not find one
+			// bounce.
+
+			return 'other';
 		}
 
 		// Get user roles.
@@ -1754,11 +1592,18 @@ class WSAL_Settings {
 			return 'role';
 		}
 
+		if ( false !== $type && 'ExRole' === $type ) {
+			// We are checking for a role, meaning that at this point we have not find one
+			// bounce.
+
+			return 'other';
+		}
+
 		// Get custom post types.
 		$post_types = get_post_types( array(), 'names', 'and' );
 		// if we are running multisite and have networkwide cpt tracker get the
 		// list from and merge to the post_types array.
-		if ( is_multisite() && class_exists( '\WSAL\Multisite\NetworkWide\CPTsTracker' ) ) {
+		if ( WP_Helper::is_multisite() && class_exists( '\WSAL\Multisite\NetworkWide\CPTsTracker' ) ) {
 			$network_cpts = \WSAL\Multisite\NetworkWide\CPTsTracker::get_network_data_list();
 			foreach ( $network_cpts as $cpt ) {
 				$post_types[ $cpt ] = $cpt;
@@ -1777,7 +1622,7 @@ class WSAL_Settings {
 
 		// Check for IP range.
 		if ( false !== strpos( $token, '-' ) ) {
-			$ip_range = $this->get_ipv4_by_range( $token );
+			$ip_range = \WSAL\Helpers\Settings_Helper::get_ipv4_by_range( $token );
 
 			if ( $ip_range && filter_var( $ip_range->lower, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) && filter_var( $ip_range->upper, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) { // Validate IPv4.
 				return 'ip';
@@ -1820,7 +1665,7 @@ class WSAL_Settings {
 				// Update Freemius state to skipped.
 				\WSAL\Helpers\Settings_Helper::set_option_value( 'wsal_freemius_state', 'skipped', true );
 
-				if ( ! WpSecurityAuditLog::is_multisite() ) {
+				if ( ! WP_Helper::is_multisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
 				} else {
 					wsal_freemius()->skip_connection( null, true ); // Opt out for all websites.
@@ -1896,7 +1741,7 @@ class WSAL_Settings {
 	public function get_view_site_id() {
 		switch ( true ) {
 			// Non-multisite.
-			case ! WpSecurityAuditLog::is_multisite():
+			case ! WP_Helper::is_multisite():
 				return 0;
 				// Multisite + main site view.
 			case $this->is_main_blog() && ! $this->is_specific_view():
@@ -2051,63 +1896,13 @@ class WSAL_Settings {
 	 * @param string $range - Range of IP address.
 	 *
 	 * @return bool
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::check_ipv4_in_range()
 	 */
 	public function check_ipv4_in_range( $ip, $range ) {
-		if ( false !== strpos( $range, '/' ) ) {
-			// $range is in IP/NETMASK format.
-			list($range, $netmask) = explode( '/', $range, 2 );
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::check_ipv4_in_range()' );
 
-			if ( false !== strpos( $netmask, '.' ) ) {
-				// $netmask is a 255.255.0.0 format.
-				$netmask     = str_replace( '*', '0', $netmask );
-				$netmask_dec = ip2long( $netmask );
-
-				return ( ip2long( $ip ) & $netmask_dec ) === ( ip2long( $range ) & $netmask_dec );
-			} else {
-				// $netmask is a CIDR size block
-				// fix the range argument.
-				$x       = explode( '.', $range );
-				$x_count = count( $x );
-
-				while ( $x_count < 4 ) {
-					$x[]     = '0';
-					$x_count = count( $x );
-				}
-
-				list($a, $b, $c, $d) = $x;
-				$range               = sprintf( '%u.%u.%u.%u', empty( $a ) ? '0' : $a, empty( $b ) ? '0' : $b, empty( $c ) ? '0' : $c, empty( $d ) ? '0' : $d );
-				$range_dec           = ip2long( $range );
-				$ip_dec              = ip2long( $ip );
-
-				// Strategy 1 - Create the netmask with 'netmask' 1s and then fill it to 32 with 0s
-				// $netmask_dec = bindec(str_pad('', $netmask, '1') . str_pad('', 32-$netmask, '0'));
-				// Strategy 2 - Use math to create it.
-				$wildcard_dec = pow( 2, ( 32 - $netmask ) ) - 1;
-				$netmask_dec  = ~ $wildcard_dec;
-
-				return ( $ip_dec & $netmask_dec ) === ( $range_dec & $netmask_dec );
-			}
-		} else {
-			// Range might be 255.255.*.* or 1.2.3.0-1.2.3.255.
-			if ( false !== strpos( $range, '*' ) ) { // a.b.*.* format
-				// Just convert to A-B format by setting * to 0 for A and 255 for B.
-				$lower = str_replace( '*', '0', $range );
-				$upper = str_replace( '*', '255', $range );
-				$range = "$lower-$upper";
-			}
-
-			// A-B format.
-			if ( false !== strpos( $range, '-' ) ) {
-				list($lower, $upper) = explode( '-', $range, 2 );
-				$lower_dec           = (float) sprintf( '%u', ip2long( $lower ) );
-				$upper_dec           = (float) sprintf( '%u', ip2long( $upper ) );
-				$ip_dec              = (float) sprintf( '%u', ip2long( $ip ) );
-
-				return ( $ip_dec >= $lower_dec ) && ( $ip_dec <= $upper_dec );
-			}
-
-			return false;
-		}
+		return \WSAL\Helpers\Settings_Helper::check_ipv4_in_range( $ip, $range );
 	}
 
 	/**
@@ -2116,19 +1911,13 @@ class WSAL_Settings {
 	 * @param string $range - Range of IP address.
 	 *
 	 * @return object
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_ipv4_by_range()
 	 */
 	public function get_ipv4_by_range( $range ) {
-		list($lower_ip, $upper_ip) = explode( '-', $range, 2 );
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_ipv4_by_range()' );
 
-		$lower_arr = explode( '.', $lower_ip );
-		$count     = count( $lower_arr );
-		unset( $lower_arr[ $count - 1 ] );
-		$upper_ip = implode( '.', $lower_arr ) . '.' . $upper_ip;
-
-		return (object) array(
-			'lower' => $lower_ip,
-			'upper' => $upper_ip,
-		);
+		return \WSAL\Helpers\Settings_Helper::get_ipv4_by_range( $range );
 	}
 
 	/**
@@ -2156,7 +1945,7 @@ class WSAL_Settings {
 				$uploads_dir     => __( 'Uploads directory (/wp-content/uploads/)', 'wp-security-audit-log' ),
 			);
 
-			if ( is_multisite() ) {
+			if ( WP_Helper::is_multisite() ) {
 				// Upload directories of subsites.
 				$wp_directories[ $uploads_dir . '/sites' ] = __( 'Uploads directory of all sub sites on this network (/wp-content/sites/*)', 'wp-security-audit-log' );
 			}
@@ -2224,17 +2013,14 @@ class WSAL_Settings {
 	 * Get WSAL's frontend events option.
 	 *
 	 * @return array
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_frontend_events()
 	 */
 	public static function get_frontend_events() {
-		// Option defaults.
-		$default = array(
-			'register'    => false,
-			'login'       => false,
-			'woocommerce' => false,
-		);
+		// Missed to remove that from the extensions, so it will cost more to update extensions, instead of removing the deprecation - extensions will be part of the core from the next version, so by then that method will be removed all along.
+		// _deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_frontend_events()' );
 
-		// Get the option.
-		return \WSAL\Helpers\Settings_Helper::get_option_value( self::FRONT_END_EVENTS_OPTION_NAME, $default );
+		return \WSAL\Helpers\Settings_Helper::get_frontend_events();
 	}
 
 	/**
@@ -2243,9 +2029,13 @@ class WSAL_Settings {
 	 * @param array $value - Option values.
 	 *
 	 * @return bool
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::set_frontend_events()
 	 */
 	public static function set_frontend_events( $value = array() ) {
-		return \WSAL\Helpers\Settings_Helper::set_option_value( self::FRONT_END_EVENTS_OPTION_NAME, $value, true );
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::set_frontend_events()' );
+
+		return \WSAL\Helpers\Settings_Helper::set_frontend_events( $value );
 	}
 
 	/**
@@ -2325,15 +2115,13 @@ class WSAL_Settings {
 	 * @param array|string $value     New list. Support comma separated string.
 	 *
 	 * @return array
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::determine_added_and_removed_items()
 	 */
 	public function determine_added_and_removed_items( $old_value, $value ) {
-		$old_value         = ( ! is_array( $old_value ) ) ? explode( ',', $old_value ) : $old_value;
-		$value             = ( ! is_array( $value ) ) ? explode( ',', $value ) : $value;
-		$return            = array();
-		$return['removed'] = array_filter( array_diff( $old_value, $value ) );
-		$return['added']   = array_filter( array_diff( $value, $old_value ) );
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::determine_added_and_removed_items()' );
 
-		return $return;
+		return \WSAL\Helpers\Settings_Helper::determine_added_and_removed_items( $old_value, $value );
 	}
 
 	/**
@@ -2342,9 +2130,13 @@ class WSAL_Settings {
 	 * @param string $value Value.
 	 *
 	 * @return string Tidies up value.
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::tidy_blank_values()
 	 */
 	public function tidy_blank_values( $value ) {
-		return ( empty( $value ) ) ? __( 'None provided', 'wp-security-audit-log' ) : $value;
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::tidy_blank_values()' );
+
+		return \WSAL\Helpers\Settings_Helper::tidy_blank_values( $value );
 	}
 
 	/**
@@ -2374,8 +2166,12 @@ class WSAL_Settings {
 	 * Returns default disabled alerts statically.
 	 *
 	 * @since 4.4.2.1
+	 *
+	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_default_always_disabled_alerts()
 	 */
 	public static function get_default_always_disabled_alerts(): array {
-		return self::$default_always_disabled_alerts;
+		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_default_always_disabled_alerts()' );
+
+		return \WSAL\Helpers\Settings_Helper::get_default_always_disabled_alerts();
 	}
 }

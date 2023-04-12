@@ -8,6 +8,9 @@
  * @package wsal
  */
 
+use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\Plugins_Helper;
+
 if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 
 	/**
@@ -36,7 +39,7 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 		public function run_addon_install() {
 			check_ajax_referer( 'wsal-install-addon' );
 
-			$predefined_plugins = WSAL_PluginInstallAndActivate::get_installable_plugins();
+			$predefined_plugins = Plugins_Helper::get_installable_plugins();
 
 			// Setup empties to avoid errors.
 			$plugin_zip  = '';
@@ -91,7 +94,7 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 			// Check if the plugin is installed.
 			if ( $this->is_plugin_installed( $plugin_slug ) ) {
 				// If plugin is installed but not active, activate it.
-				if ( ! WpSecurityAuditLog::is_plugin_active( $plugin_zip ) ) {
+				if ( ! WP_Helper::is_plugin_active( $plugin_zip ) ) {
 					$this->run_activate( $plugin_slug );
 					$this->activate( $plugin_zip );
 					$result = 'activated';
@@ -165,7 +168,7 @@ if ( ! class_exists( 'WSAL_PluginInstallerAction' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
-			if ( ! WpSecurityAuditLog::is_plugin_active( $plugin_zip ) ) {
+			if ( ! WP_Helper::is_plugin_active( $plugin_zip ) ) {
 				activate_plugin( $plugin_zip );
 			}
 		}

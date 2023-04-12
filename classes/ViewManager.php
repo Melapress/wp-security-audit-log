@@ -8,6 +8,10 @@
  * @package wsal
  */
 
+use WSAL\Helpers\Classes_Helper;
+use WSAL\Controllers\Alert_Manager;
+use WSAL\Entities\Occurrences_Entity;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -57,6 +61,19 @@ class WSAL_ViewManager {
 		// Skipped views array.
 		$skip_views = array();
 
+		$views = array(
+			'WSAL_Views_AuditLog',
+			'WSAL_Views_EmailNotifications',
+			'WSAL_Views_ExternalDB',
+			'WSAL_Views_Help',
+			'WSAL_Views_LogInUsers',
+			'WSAL_Views_Reports',
+			'WSAL_Views_Search',
+			'WSAL_Views_Settings',
+			'WSAL_Views_SetupWizard',
+			'WSAL_Views_ToggleAlerts',
+		);
+
 		// phpcs:ignore
 
 		/**
@@ -66,34 +83,35 @@ class WSAL_ViewManager {
 		 * @since 3.2.3
 		 */
 		if ( file_exists( WSAL_BASE_DIR . 'classes/Views/SetupWizard.php' ) ) {
-			$skip_views[] = WSAL_BASE_DIR . 'classes/Views/SetupWizard.php';
+			$skip_views[] = 'WSAL_Views_SetupWizard';
 		}
-
-		/**
-		 * Removed in version 4.0.3 however some upgrade methods result in the
-		 * file being left behind and `AddFromFile()` tries to load it as a
-		 * class resulting in a fatal error because of it not existing.
-		 *
-		 * @since 4.0.4
-		 */
-		$skip_views[] = WSAL_BASE_DIR . 'classes/Views/Licensing.php';
 
 		/**
 		 * Skipped Views.
 		 *
 		 * Array of views which are skipped before plugin views are initialized.
 		 *
+		 * As of version 4.5 this no longer holds a list with files, but the name of the classes (namespaces must be included if they are in use)
+		 *
 		 * @param array $skip_views - Skipped views.
-		 * @since 3.2.3
+		 *
+		 * @since 4.5.0
 		 */
 		$skip_views = apply_filters( 'wsal_skip_views', $skip_views );
 
-		// Load views.
-		foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( WSAL_BASE_DIR . 'classes/Views', '*.php' ) as $file ) {
-			if ( empty( $skip_views ) || ! in_array( $file, $skip_views ) ) { // phpcs:ignore
-				$this->add_from_file( $file );
+		$views_to_load = array_diff( $views, $skip_views );
+
+		foreach ( $views_to_load as $view ) {
+			if ( Classes_Helper::get_subclasses_of_class( $view, '\WSAL_AbstractView' ) ) {
+				$this->views[] = new $view( $this->plugin );
 			}
 		}
+		// // Load views.
+		// foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( WSAL_BASE_DIR . 'classes/Views', '*.php' ) as $file ) {
+		// if ( empty( $skip_views ) || ! in_array( $file, $skip_views ) ) { // phpcs:ignore
+		// $this->add_from_file( $file );
+		// }
+		// }
 
 		// Stop Freemius from hiding the menu on sub sites under certain circumstances.
 		add_filter(
@@ -109,7 +127,7 @@ class WSAL_ViewManager {
 		add_action( 'network_admin_menu', array( $this, 'add_admin_menus' ) );
 
 		// Add plugin shortcut links.
-		add_filter( 'plugin_action_links_' . $plugin->get_base_name(), array( $this, 'add_plugin_shortcuts' ) );
+		add_filter( 'plugin_action_links_' . WSAL_BASE_NAME, array( $this, 'add_plugin_shortcuts' ) );
 
 		// Render header.
 		add_action( 'admin_enqueue_scripts', array( $this, 'render_view_header' ) );
@@ -147,38 +165,15 @@ class WSAL_ViewManager {
 		}
 	}
 
-
-	/**
-	 * Add new view from file inside autoloader path.
-	 *
-	 * @param string $file Path to file.
-	 */
-	public function add_from_file( $file ) {
-		$file = basename( $file, '.php' );
-		$this->add_from_class( WSAL_CLASS_PREFIX . 'Views_' . $file );
-	}
-
 	/**
 	 * Add new view given class name.
 	 *
 	 * @param string $class Class name.
 	 */
 	public function add_from_class( $class ) {
-		$view = new $class( $this->plugin );
-		// Only load WSAL_AbstractView instances to prevent lingering classes
-		// that did not implement this from throwing fatals by being autoloaded.
-		if ( is_a( $view, '\WSAL_AbstractView' ) ) {
-			$this->add_instance( $view );
+		if ( Classes_Helper::get_subclasses_of_class( $class, '\WSAL_AbstractView' ) ) {
+			$this->views[] = new $class( $this->plugin );
 		}
-	}
-
-	/**
-	 * Add newly created view to list.
-	 *
-	 * @param WSAL_AbstractView $view The new view.
-	 */
-	public function add_instance( WSAL_AbstractView $view ) {
-		$this->views[] = $view;
 	}
 
 	/**
@@ -269,7 +264,9 @@ class WSAL_ViewManager {
 				}
 			}
 
+			// phpcs:disable
 			/* @free:start */
+			// phpcs:enable
 			// add_submenu_page(
 			// 'wsal-auditlog',
 			// 'Pricing',
@@ -288,8 +285,9 @@ class WSAL_ViewManager {
 				array(),
 				301
 			);
+			// phpcs:disable
 			/* @free:end */
-
+			// phpcs:enable
 		}
 	}
 

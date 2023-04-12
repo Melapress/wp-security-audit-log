@@ -9,6 +9,8 @@
  * @subpackage sensors
  */
 
+use WSAL\Helpers\Plugins_Helper;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -30,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package    wsal
  * @subpackage sensors
  */
-class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
+class WSAL_Sensors_PluginsThemes {//extends WSAL_AbstractSensor {
 
 	/**
 	 * List of Themes.
@@ -636,7 +638,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 
 		// Grab list of plugins we have addons for.
-		$predefined_plugins       = WSAL_PluginInstallAndActivate::get_installable_plugins();
+		$predefined_plugins       = Plugins_Helper::get_installable_plugins();
 		$predefined_plugins_addon = array_column( $predefined_plugins, 'addon_for' );
 		$all_plugins              = array_keys( get_plugins() );
 		foreach ( $predefined_plugins_addon as $plugin ) {
@@ -676,7 +678,7 @@ class WSAL_Sensors_PluginsThemes extends WSAL_AbstractSensor {
 		}
 
 		// Grab list of plugins we have addons for.
-		$predefined_plugins       = WSAL_PluginInstallAndActivate::get_installable_plugins();
+		$predefined_plugins       = Plugins_Helper::get_installable_plugins();
 		$predefined_plugins_addon = array_column( $predefined_plugins, 'addon_for' );
 		foreach ( $predefined_plugins_addon as $plugin ) {
 

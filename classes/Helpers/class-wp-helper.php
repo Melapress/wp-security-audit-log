@@ -1,31 +1,34 @@
 <?php
 /**
- * Responsible for the WP core functionalities
+ * Responsible for the WP core functionalities.
  *
  * @package    wsal
  * @subpackage helpers
+ *
  * @since      4.4.2
+ *
  * @copyright  2022 WP White Security
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
- * @link       https://wordpress.org/plugins/wp-2fa/
+ *
+ * @see       https://wordpress.org/plugins/wp-2fa/
  */
+
+declare(strict_types=1);
 
 namespace WSAL\Helpers;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
-/**
+/*
  * WP helper class
  */
 if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
-
 	/**
-	 * All the WP functionality must go trough this class
+	 * All the WP functionality must go trough this class.
 	 *
 	 * @since 4.4.2.1
 	 */
 	class WP_Helper {
-
 		/**
 		 * Hold the user roles as array - Human readable is used for key of the array, and the internal role name is the value.
 		 *
@@ -45,7 +48,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		private static $user_roles_wp = array();
 
 		/**
-		 * Keeps the value of the multisite install of the WP
+		 * Keeps the value of the multisite install of the WP.
 		 *
 		 * @var bool
 		 *
@@ -54,18 +57,16 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		private static $is_multisite = null;
 
 		/**
-		 * Holds array with all the sites in multisite WP installation
+		 * Holds array with all the sites in multisite WP installation.
 		 *
 		 * @var array
 		 */
 		private static $sites = array();
 
 		/**
-		 * Checks if specific role exists
+		 * Checks if specific role exists.
 		 *
 		 * @param string $role - The name of the role to check.
-		 *
-		 * @return boolean
 		 *
 		 * @since 4.4.2.1
 		 */
@@ -80,7 +81,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
-		 * Returns the currently available WP roles - the Human readable format is the key
+		 * Returns the currently available WP roles - the Human readable format is the key.
 		 *
 		 * @return array
 		 *
@@ -93,7 +94,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
-		 * Returns the currently available WP roles
+		 * Returns the currently available WP roles.
 		 *
 		 * @return array
 		 *
@@ -111,7 +112,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		/**
 		 * Check is this is a multisite setup.
 		 *
-		 * @return boolean
+		 * @return bool
 		 *
 		 * @since 4.4.2.1
 		 */
@@ -119,6 +120,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			if ( null === self::$is_multisite ) {
 				self::$is_multisite = function_exists( 'is_multisite' ) && is_multisite();
 			}
+
 			return self::$is_multisite;
 		}
 
@@ -128,7 +130,9 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * Handled option name with and without the prefix for backwards compatibility.
 		 *
 		 * @since  4.0.2
-		 * @param  string $option_name Name of the option to delete.
+		 *
+		 * @param string $option_name Name of the option to delete.
+		 *
 		 * @return bool
 		 */
 		public static function delete_global_option( $option_name = '' ) {
@@ -140,7 +144,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 
 			$result = \delete_option( $prefixed_name );
 
-			if ( is_multisite() ) {
+			if ( self::is_multisite() ) {
 				\restore_current_blog();
 			}
 
@@ -148,11 +152,11 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
-		 * Just an alias for update_global_option
+		 * Just an alias for update_global_option.
 		 *
-		 * @param string  $setting_name - The name of the option.
-		 * @param mixed   $new_value - The value to be stored.
-		 * @param boolean $autoload - Should that option be autoloaded or not? No effect on network wide options.
+		 * @param string $setting_name - The name of the option.
+		 * @param mixed  $new_value    - The value to be stored.
+		 * @param bool   $autoload     - Should that option be autoloaded or not? No effect on network wide options.
 		 *
 		 * @return mixed
 		 *
@@ -171,6 +175,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @param bool   $autoload    Whether to autoload this option.
 		 *
 		 * @return bool Whether the option was updated.
+		 *
 		 * @since  4.1.3
 		 */
 		public static function update_global_option( $option_name = '', $value = null, $autoload = false ) {
@@ -181,13 +186,13 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 
 			$prefixed_name = self::prefix_name( $option_name );
 
-			if ( is_multisite() ) {
+			if ( self::is_multisite() ) {
 				\switch_to_blog( \get_main_network_id() );
 			}
 
 			$result = \update_option( $prefixed_name, $value, $autoload );
 
-			if ( \is_multisite() ) {
+			if ( self::is_multisite() ) {
 				\restore_current_blog();
 			}
 
@@ -202,6 +207,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @param mixed  $default     a default value to use when one doesn't exist.
 		 *
 		 * @return mixed
+		 *
 		 * @since  4.1.3
 		 */
 		public static function get_global_option( $option_name = '', $default = null ) {
@@ -210,7 +216,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 				return;
 			}
 
-			if ( is_multisite() ) {
+			if ( self::is_multisite() ) {
 				switch_to_blog( get_main_network_id() );
 			}
 
@@ -218,16 +224,15 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 
 			$result = \get_option( $prefixed_name, $default );
 
-			if ( is_multisite() ) {
+			if ( self::is_multisite() ) {
 				restore_current_blog();
 			}
 
 			return maybe_unserialize( $result );
 		}
 
-
 		/**
-		 * Removes event from the cron by given name
+		 * Removes event from the cron by given name.
 		 *
 		 * @param string $event_name -The name of the event.
 		 *
@@ -243,14 +248,11 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
-		 * Collects all the sites from multisite WP installation
-		 *
-		 * @return array
+		 * Collects all the sites from multisite WP installation.
 		 */
 		public static function get_multi_sites(): array {
 			if ( self::is_multisite() ) {
 				if ( empty( self::$sites ) ) {
-
 					self::$sites = \get_sites();
 				}
 
@@ -278,7 +280,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 */
 		public static function is_plugin_installed(): bool {
 			global $wpdb;
-			$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE '%wsal_%'" ); // phpcs:ignore
+			$plugin_options = $wpdb->get_results("SELECT option_name FROM $wpdb->options WHERE option_name LIKE '%wsal_%'"); // phpcs:ignore
 
 			if ( ! empty( $plugin_options ) ) {
 				return true;
@@ -290,13 +292,11 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		/**
 		 * Gets all active plugins in current WordPress installation.
 		 *
-		 * @return array
-		 *
 		 * @since 4.4.2.1
 		 */
 		public static function get_active_plugins(): array {
 			$active_plugins = array();
-			if ( function_exists( 'is_multisite' ) && is_multisite() ) {
+			if ( self::is_multisite() ) {
 				$active_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
 			} else {
 				$active_plugins = get_option( 'active_plugins' );
@@ -310,8 +310,6 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * Unfortunately this is not possible as these parameters are dynamically generated, that function searches for the cron name only.
 		 *
 		 * @param string $name - Name of the cron to search for.
-		 *
-		 * @return boolean
 		 *
 		 * @since 4.4.3
 		 */
@@ -339,7 +337,6 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @return bool
 		 */
 		public static function is_admin_page( $slug = array() ) { // phpcs:ignore Generic.Metrics.NestingLevel.MaxExceeded
-
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$cur_page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
 			$check    = WSAL_PREFIX_PAGE;
@@ -353,7 +350,6 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @since 4.4.3
 		 */
 		public static function hide_unrelated_notices() {
-
 			// Bail if we're not on our screen or page.
 			if ( ! self::is_admin_page() ) {
 				return;
@@ -366,6 +362,79 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
+		 * Get editor link.
+		 *
+		 * @param stdClass|int $post - The post.
+		 *
+		 * @return array $editor_link - Name and value link
+		 *
+		 * @since 4.5.0
+		 */
+		public static function get_editor_link( $post ) {
+			$post_id = is_int( $post ) ? intval( $post ) : $post->ID;
+
+			return array(
+				'name'  => 'EditorLinkPost',
+				'value' => get_edit_post_link( $post_id ),
+			);
+		}
+
+		/**
+		 * Method: Get view site id.
+		 *
+		 * @since 4.5.0
+		 *
+		 * @return int
+		 */
+		public static function get_view_site_id() {
+			switch ( true ) {
+				// Non-multisite.
+				case ! self::is_multisite():
+					return 0;
+					// Multisite + main site view.
+				case self::is_main_blog() && ! self::is_specific_view():
+					return 0;
+					// Multisite + switched site view.
+				case self::is_main_blog() && self::is_specific_view():
+					return self::get_specific_view();
+					// Multisite + local site view.
+				default:
+					return get_current_blog_id();
+			}
+		}
+
+		/**
+		 * Method: Get a specific view.
+		 *
+		 * @since 4.5.0
+		 *
+		 * @return int
+		 */
+		public static function get_specific_view() {
+			return isset( $_REQUEST['wsal-cbid'] ) ? (int) sanitize_text_field( wp_unslash( $_REQUEST['wsal-cbid'] ) ) : 0;
+		}
+
+		/**
+		 * Method: Check if the blog is main blog.
+		 *
+		 * @since 4.5.0
+		 */
+		public static function is_main_blog(): bool {
+			return 1 === get_current_blog_id();
+		}
+
+		/**
+		 * Method: Check if it is a specific view.
+		 *
+		 * @since 4.5.0
+		 *
+		 * @return bool
+		 */
+		public static function is_specific_view() {
+			return isset( $_REQUEST['wsal-cbid'] ) && 0 !== (int) $_REQUEST['wsal-cbid'];
+		}
+
+		/**
 		 * Remove all non-WP Mail SMTP notices from the our plugin pages based on the provided action hook.
 		 *
 		 * @since 4.4.3
@@ -373,7 +442,6 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @param string $action The name of the action.
 		 */
 		private static function remove_unrelated_actions( $action ) {
-
 			global $wp_filter;
 
 			if ( empty( $wp_filter[ $action ]->callbacks ) || ! is_array( $wp_filter[ $action ]->callbacks ) ) {
@@ -383,16 +451,16 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			foreach ( $wp_filter[ $action ]->callbacks as $priority => $hooks ) {
 				foreach ( $hooks as $name => $arr ) {
 					if (
-					( // Cover object method callback case.
-						is_array( $arr['function'] ) &&
-						isset( $arr['function'][0] ) &&
-						is_object( $arr['function'][0] ) &&
-						strpos( strtolower( get_class( $arr['function'][0] ) ), WSAL_PREFIX ) !== false
-					) ||
-					( // Cover class static method callback case.
-						! empty( $name ) &&
-						strpos( strtolower( $name ), WSAL_PREFIX ) !== false
-					)
+						( // Cover object method callback case.
+							is_array( $arr['function'] ) &&
+							isset( $arr['function'][0] ) &&
+							is_object( $arr['function'][0] ) &&
+							false !== strpos( strtolower( get_class( $arr['function'][0] ) ), WSAL_PREFIX )
+						) ||
+						( // Cover class static method callback case.
+							! empty( $name ) &&
+							false !== strpos( strtolower( $name ), WSAL_PREFIX )
+						)
 					) {
 						continue;
 					}
@@ -420,7 +488,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 
 				self::$user_roles = array_flip( $wp_roles->get_names() );
 
-				if ( \is_multisite() ) {
+				if ( self::is_multisite() ) {
 					self::$user_roles['Super Admin'] = 'superadmin';
 				}
 			}
@@ -431,18 +499,149 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 *
 		 * @param string $name - The name of the setting.
 		 *
-		 * @return string
-		 *
 		 * @since 4.4.2.1
 		 */
 		private static function prefix_name( string $name ): string {
-
 			if ( false === strpos( $name, WSAL_PREFIX ) ) {
-
 				$name = WSAL_PREFIX . $name;
 			}
 
 			return $name;
+		}
+
+		/**
+		 * Retrieves the value of a transient. If this is a multisite, the network transient is retrieved.
+		 *
+		 * If the transient does not exist, does not have a value, or has expired,
+		 * then the return value will be false.
+		 *
+		 * @param string $transient Transient name. Expected to not be SQL-escaped.
+		 *
+		 * @return mixed Value of transient.
+		 *
+		 * @since 4.5.0
+		 */
+		public static function get_transient( $transient ) {
+			return self::is_multisite() ? get_site_transient( $transient ) : get_transient( $transient );
+		}
+
+		/**
+		 * Sets/updates the value of a transient. If this is a multisite, the network transient is set/updated.
+		 *
+		 * You do not need to serialize values. If the value needs to be serialized,
+		 * then it will be serialized before it is set.
+		 *
+		 * @param string $transient  Transient name. Expected to not be SQL-escaped.
+		 *                           Must be 172 characters or fewer in length.
+		 * @param mixed  $value      Transient value. Must be serializable if non-scalar.
+		 *                           Expected to not be SQL-escaped.
+		 * @param int    $expiration Optional. Time until expiration in seconds. Default 0 (no expiration).
+		 *
+		 * @return bool True if the value was set, false otherwise.
+		 *
+		 * @since 4.5.0
+		 */
+		public static function set_transient( $transient, $value, $expiration = 0 ) {
+			return self::is_multisite() ? set_site_transient( $transient, $value, $expiration ) : set_transient( $transient, $value, $expiration );
+		}
+
+		/**
+		 * Checks if we are currently on the login screen.
+		 *
+		 * @since 4.5.0
+		 */
+		public static function is_login_screen(): bool {
+			if ( isset( $_SERVER['PHP_SELF'] ) && 'wp-login.php' === basename( \sanitize_text_field( \wp_unslash( $_SERVER['PHP_SELF'] ) ) ) ) {
+				return true;
+			}
+
+			return false;
+		}
+
+		/**
+		 * Checks if we are currently on the register page.
+		 *
+		 * @since 4.5.0
+		 */
+		public static function is_register_page(): bool {
+			if ( self::is_login_screen() && ! empty( $_REQUEST['action'] ) && 'register' === $_REQUEST['action'] ) {
+				return true;
+			}
+
+			return false;
+		}
+
+		/**
+		 * Retrieves blog info for given site based on current multisite situation. Optimizes for performance using local
+		 * cache.
+		 *
+		 * @param int $site_id Site ID.
+		 *
+		 * @return array
+		 *
+		 * @since 4.5.0
+		 */
+		public static function get_blog_info( $site_id ) {
+			// Blog details.
+			if ( self::is_multisite() ) {
+				$blog_info = get_blog_details( $site_id, true );
+				$blog_name = esc_html__( 'Unknown Site', 'wp-security-audit-log' );
+				$blog_url  = '';
+
+				if ( $blog_info ) {
+					$blog_name = esc_html( $blog_info->blogname );
+					$blog_url  = esc_attr( $blog_info->siteurl );
+				}
+			} else {
+				$blog_name = get_bloginfo( 'name' );
+				$blog_url  = '';
+
+				if ( empty( $blog_name ) ) {
+					$blog_name = __( 'Unknown Site', 'wp-security-audit-log' );
+				} else {
+					$blog_name = esc_html( $blog_name );
+					$blog_url  = esc_attr( get_bloginfo( 'url' ) );
+				}
+			}
+
+			return array(
+				'name' => $blog_name,
+				'url'  => $blog_url,
+			);
+		}
+
+		/**
+		 * Determines whether a plugin is active.
+		 *
+		 * @uses is_plugin_active() Uses this WP core function after making sure that this function is available.
+		 *
+		 * @param string $plugin Path to the main plugin file from plugins directory.
+		 *
+		 * @return bool True, if in the active plugins list. False, not in the list.
+		 */
+		public static function is_plugin_active( $plugin ) {
+			if ( ! function_exists( 'is_plugin_active' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			return is_plugin_active( $plugin );
+		}
+
+		/**
+		 * Returns the full path to the admin area. Multisite admin is taken of consideration.
+		 *
+		 * @param string $additional_path - If there is additional path to add to the admin area.
+		 *
+		 * @return string
+		 *
+		 * @since 4.5.0
+		 */
+		public static function get_admin_url( string $additional_path = '' ) {
+			if ( self::is_multisite() ) {
+				return network_admin_url( $additional_path );
+			}
+
+			return get_admin_url( null, $additional_path );
 		}
 	}
 }

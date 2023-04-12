@@ -8,16 +8,17 @@
  * @package wsal
  */
 
-use WSAL\Adapter\WSAL_Adapters_MySQL_Occurrence;
-use WSAL\Entities\Occurrences_Entity;
+use WSAL\Helpers\WP_Helper;
+use WSAL\Controllers\Constants;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Controllers\Alert_Manager;
+use WSAL\Helpers\DateTime_Formatter_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// require_once ABSPATH . 'wp-admin/includes/admin.php';
 require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 
 /**
@@ -197,12 +198,12 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 		// Show site alerts widget.
 		// NOTE: this is shown when the filter IS NOT true.
-		if ( $this->is_multisite() && $this->is_main_blog() && ! apply_filters( 'search_extensition_active', false ) ) {
+		if ( WP_Helper::is_multisite() && WP_Helper::is_main_blog() && ! apply_filters( 'search_extensition_active', false ) ) {
 			if (
 				( 'top' === $which && $this->plugin->settings()->is_infinite_scroll() )
 				|| ! $this->plugin->settings()->is_infinite_scroll()
 			) {
-				$curr = $this->plugin->settings()->get_view_site_id();
+				$curr = WP_Helper::get_view_site_id();
 				?>
 				<div class="wsal-ssa wsal-ssa-<?php echo esc_attr( $which ); ?>">
 					<?php if ( $this->get_site_count() > 15 ) : ?>
@@ -275,7 +276,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 		);
 
 		// If multisite then add "Site" column to the view.
-		if ( $this->is_multisite() && $this->is_main_blog() && ! $this->is_specific_view() ) {
+		if ( WP_Helper::is_multisite() && WP_Helper::is_main_blog() && ! WP_Helper::is_specific_view() ) {
 			$cols['site'] = __( 'Site', 'wp-security-audit-log' );
 		}
 
@@ -345,7 +346,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 		switch ( $column_name ) {
 			case 'type':
-				$code                = $this->plugin->alerts->get_alert( $item['alert_id'] );
+				$code                = Alert_Manager::get_alert( $item['alert_id'] );
 				$extra_msg           = '';
 				$data_link           = '';
 				$modification_alerts = array( 1002, 1003 );
@@ -363,15 +364,14 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 					. str_pad( $item['alert_id'], 4, '0', STR_PAD_LEFT ) . ' </span>';
 
 			case 'code':
-				$code  = $this->plugin->alerts->get_alert( $item['alert_id'] );
+				$code  = Alert_Manager::get_alert( $item['alert_id'] );
 				$code  = $code ? $code->severity : 0;
-				$const = $this->plugin->constants->get_constant_to_display( $code );
+				$const = Constants::get_severity_by_code( $code );
 
-				$css_classes = array( 'log-type', 'log-type-' . $const->value );
-				if ( property_exists( $const, 'css' ) ) {
-					array_push( $css_classes, 'log-type-' . $const->css );
-				}
-				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const->name ) . '"><span class="' . implode( ' ', $css_classes ) . '"></span></a>';
+				$css_classes = array( 'log-type', 'log-type-' . $const['value'] );
+				array_push( $css_classes, 'log-type-' . $const['css'] );
+
+				return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const['text'] ) . '"><span class="' . implode( ' ', $css_classes ) . '"></span></a>';
 			case 'site':
 				$info = get_blog_details( $item['site_id'], true );
 				return ! $info ? ( 'Unknown Site ' . $item['site_id'] )
@@ -390,11 +390,11 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				return '';
 			case 'info':
 				$eventdate = $item['created_on']
-					? WSAL_Utilities_DateTimeFormatter::instance()->get_formatted_date_time( $item['created_on'], 'date' )
+					? DateTime_Formatter_Helper::get_formatted_date_time( $item['created_on'], 'date' )
 					: '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 
 				$eventtime = $item['created_on']
-					? WSAL_Utilities_DateTimeFormatter::instance()->get_formatted_date_time( $item['created_on'], 'time' )
+					? DateTime_Formatter_Helper::get_formatted_date_time( $item['created_on'], 'time' )
 					: '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 
 				$username = WSAL_Utilities_UsersUtils::get_username( $this->item_meta[ $item['id'] ] ); // Get username.
@@ -406,7 +406,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 				// Check if the username and user exists.
 				if ( $username && $user ) {
 
-					$display_name   = WSAL_Utilities_UsersUtils::get_display_label( $this->plugin, $user );
+					$display_name   = WSAL_Utilities_UsersUtils::get_display_label( $user );
 					$user_edit_link = admin_url( 'user-edit.php?user_id=' . $user->ID );
 
 					// Additional user info tooltip.
@@ -489,9 +489,9 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 					$ip_html .= '</div>';
 				}
 
-				$eventobj = isset( $this->item_meta[ $item['id'] ]['Object'] ) ? $this->plugin->alerts->get_event_objects_data( $this->item_meta[ $item['id'] ]['Object'] ) : '';
+				$eventobj = isset( $this->item_meta[ $item['id'] ]['Object'] ) ? Alert_Manager::get_event_objects_data( $this->item_meta[ $item['id'] ]['Object'] ) : '';
 
-				$eventtypeobj = isset( $this->item_meta[ $item['id'] ]['EventType'] ) ? $this->plugin->alerts->get_event_type_data( $this->item_meta[ $item['id'] ]['EventType'] ) : '';
+				$eventtypeobj = isset( $this->item_meta[ $item['id'] ]['EventType'] ) ? Alert_Manager::get_event_type_data( $this->item_meta[ $item['id'] ]['EventType'] ) : '';
 
 				ob_start();
 				?>
@@ -557,64 +557,6 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 	public function reorder_items_int( $a, $b ) {
 		$result = $a->{$this->_orderby} - $b->{$this->_orderby};
 		return ( 'asc' === $this->_order ) ? $result : -$result;
-	}
-
-	/**
-	 * Method: Check if multisite.
-	 *
-	 * @return bool
-	 */
-	protected function is_multisite() {
-		return WpSecurityAuditLog::is_multisite();
-	}
-
-	/**
-	 * Method: Check if the blog is main blog.
-	 *
-	 * @return bool
-	 */
-	protected function is_main_blog() {
-		return get_current_blog_id() === 1;
-	}
-
-	/**
-	 * Method: Check if it is a specific view.
-	 *
-	 * @return bool
-	 */
-	protected function is_specific_view() {
-		return isset( $this->query_args->site_id ) && '0' != $this->query_args->site_id; // phpcs:ignore
-	}
-
-	/**
-	 * Method: Get a specific view.
-	 *
-	 * @return int
-	 */
-	protected function get_specific_view() {
-		return isset( $this->query_args->site_id ) ? (int) $this->query_args->site_id : 0;
-	}
-
-	/**
-	 * Method: Get view site id.
-	 *
-	 * @return int
-	 */
-	protected function get_view_site_id() {
-		switch ( true ) {
-			// Non-multisite.
-			case ! $this->is_multisite():
-				return 0;
-			// Multisite + main site view.
-			case $this->is_main_blog() && ! $this->is_specific_view():
-				return 0;
-			// Multisite + switched site view.
-			case $this->is_main_blog() && $this->is_specific_view():
-				return $this->get_specific_view();
-			// Multisite + local site view.
-			default:
-				return get_current_blog_id();
-		}
 	}
 
 	/**
