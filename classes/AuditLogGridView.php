@@ -449,9 +449,16 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 
 				$oips = array();
 
+
 				// If there's no IP...
 				if ( is_null( $scip ) || '' === $scip ) {
-					return '<i>unknown</i>';
+					if ( isset( $item['meta_values'] ) && isset( $item['meta_values']['OtherIPs'] ) ) {
+						if ( is_array( $item['meta_values']['OtherIPs'] ) ) {
+							$scip = reset( $item['meta_values']['OtherIPs'] )[0];
+						}
+					} else {
+						return '<i>unknown</i>';
+					}
 				}
 
 				// If there's only one IP...
@@ -526,7 +533,7 @@ class WSAL_AuditLogGridView extends WP_List_Table {
 			case 'data':
 				$url     = admin_url( 'admin-ajax.php' ) . '?action=AjaxInspector&amp;occurrence=' . $item['id'];
 				$tooltip = esc_attr__( 'View all details of this change', 'wp-security-audit-log' );
-				return '<a class="more-info thickbox" data-tooltip="' . $tooltip . '" title="' . __( 'Alert Data Inspector', 'wp-security-audit-log' ) . '"'
+				return '<a class="more-info button button-secondary thickbox" data-tooltip="' . $tooltip . '" title="' . __( 'Event data inspector', 'wp-security-audit-log' ) . '"'
 					. ' href="' . $url . '&amp;TB_iframe=true&amp;width=600&amp;height=550">&hellip;</a>';
 			default:
 				return isset( $item[$column_name] )

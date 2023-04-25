@@ -1388,7 +1388,7 @@ class WSAL_Ref {
 					return;
 				}
 
-				$max = max( array_map( 'static::strLen', array_keys( $subject ) ) );
+				$max = max( array_map( self::class . '::strLen', array_keys( $subject ) ) );
 				$subject[ static::MARKER_KEY ] = true;
 
 				foreach ( $subject as $key => &$value ) {
@@ -1528,7 +1528,7 @@ class WSAL_Ref {
 					return;
 				}
 
-				$max = max( array_map( 'static::strLen', array_keys( $meta ) ) );
+				$max = max( array_map( self::class . '::strLen', array_keys( $meta ) ) );
 				foreach ( $meta as $key => $value ) {
 					$this->fmt->startRow();
 					$this->fmt->text( 'resourceProp', ucwords( str_replace( '_', ' ', $key ) ) );
@@ -1665,7 +1665,7 @@ class WSAL_Ref {
 								$date   = new \DateTime( $subject );
 								$errors = \DateTime::getLastErrors();
 
-								if ( ($errors['warning_count'] < 1) && ($errors['error_count'] < 1) ) {
+								if ( (((int)$errors['warning_count']) < 1) && (((int)$errors['error_count']) < 1) ) {
 									$now    = new \Datetime( 'now' );
 									$nowUtc = new \Datetime( 'now', new \DateTimeZone( 'UTC' ) );
 									$diff   = $now->diff( $date );
@@ -1928,7 +1928,7 @@ class WSAL_Ref {
 		// class constants
 		if ( $constants ) {
 			$this->fmt->sectionTitle( 'Constants' );
-			$max = max( array_map( 'static::strLen', array_keys( $constants ) ) );
+			$max = max( array_map( self::class . '::strLen', array_keys( $constants ) ) );
 			foreach ( $constants as $name => $value ) {
 				$meta = null;
 				$type = array( 'const' );
@@ -2953,7 +2953,7 @@ class RHtmlFormatter extends RFormatter {
 	 * @return  string|array
 	 */
 	protected static function escape( $var ) {
-		return is_array( $var ) ? array_map( 'static::escape', $var ) : htmlspecialchars( $var, ENT_QUOTES );
+		return is_array( $var ) ? array_map( self::class . '::escape', $var ) : htmlspecialchars( $var, ENT_QUOTES );
 	}
 
 }

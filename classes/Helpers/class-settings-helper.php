@@ -125,6 +125,15 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		private static $database_logging_enabled = null;
 
 		/**
+		 * Is the database logging enabled or not.
+		 *
+		 * @var bool
+		 *
+		 * @since 4.5.1
+		 */
+		private static $frontend_events = null;
+
+		/**
 		 * Gets the value of an option.
 		 *
 		 * @method get_option_value
@@ -498,7 +507,9 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			if ( '' === self::$main_client_ip ) {
 				if ( self::get_boolean_option_value( 'use-proxy-ip' ) ) {
 					// TODO: The algorithm below just gets the first IP in the list...we might want to make this more intelligent somehow.
-					self::$main_client_ip = isset( self::get_client_ips()[0] ) ? self::get_client_ips()[0] : null;
+					$ips                  = self::get_client_ips();
+					$ips                  = reset( $ips );
+					self::$main_client_ip = isset( $ips[0] ) ? $ips[0] : '';
 				} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
 					$ip                   = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 					self::$main_client_ip = self::normalize_ip( $ip );
@@ -1186,15 +1197,18 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function get_frontend_events() {
-			// Option defaults.
-			$default = array(
-				'register'    => false,
-				'login'       => false,
-				'woocommerce' => false,
-			);
+			if ( null === self::$frontend_events ) {
+				// Option defaults.
+				$default               = array(
+					'register'    => false,
+					'login'       => false,
+					'woocommerce' => false,
+				);
+				self::$frontend_events = self::get_option_value( self::FRONT_END_EVENTS_OPTION_NAME, $default );
+			}
 
 			// Get the option.
-			return self::get_option_value( self::FRONT_END_EVENTS_OPTION_NAME, $default );
+			return self::$frontend_events;
 		}
 
 		/**
@@ -1207,6 +1221,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function set_frontend_events( $value = array() ) {
+			self::$frontend_events = $value;
 			return self::set_option_value( self::FRONT_END_EVENTS_OPTION_NAME, $value, true );
 		}
 

@@ -15,6 +15,7 @@ namespace WSAL\WP_Sensors;
 
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Helper;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
@@ -95,6 +96,24 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 */
 		public static function is_login_sensor() {
 			return self::$login_sensor;
+		}
+
+		/**
+		 * That needs to be registered as a frontend sensor, when the admin sets the plugin to monitor the login from 3rd parties.
+		 *
+		 * @return boolean
+		 *
+		 * @since 4.5.1
+		 */
+		public static function is_frontend_sensor(): bool {
+			$frontend_events = Settings_Helper::get_frontend_events();
+			$should_load     = ! empty( $frontend_events['register'] ) || ! empty( $frontend_events['login'] ) || ! empty( $frontend_events['woocommerce'] );
+
+			if ( $should_load ) {
+				return true;
+			}
+
+			return false;
 		}
 
 		/**
@@ -203,7 +222,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		public static function event_logout() {
 			if ( self::$current_user->ID ) {
 				// get the list of excluded users.
-				$excluded_users    = \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_users();
+				$excluded_users    = Settings_Helper::get_excluded_monitoring_users();
 				$excluded_user_ids = array();
 				// convert excluded usernames into IDs.
 				if ( ! empty( $excluded_users ) && is_array( $excluded_users ) ) {
@@ -236,7 +255,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		protected static function get_login_failure_log_limit() {
-			return \WSAL\Helpers\Settings_Helper::get_option_value( 'log-failed-login-limit', 10 );
+			return Settings_Helper::get_option_value( 'log-failed-login-limit', 10 );
 		}
 
 		/**
@@ -247,7 +266,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		protected static function get_visitor_login_failure_log_limit() {
-			return intval( \WSAL\Helpers\Settings_Helper::get_option_value( 'log-visitor-failed-login-limit', 10 ) );
+			return intval( Settings_Helper::get_option_value( 'log-visitor-failed-login-limit', 10 ) );
 		}
 
 		/**
@@ -343,7 +362,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 			$y = (int) $y;
 			$d = (int) $d;
 
-			$ip = \WSAL\Helpers\Settings_Helper::get_main_client_ip();
+			$ip = Settings_Helper::get_main_client_ip();
 
 			// Filter $_POST global array for security.
 			$post_array = filter_input_array( INPUT_POST );
@@ -519,14 +538,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 *
 		 * Current user switched to another user event.
 		 *
-		 * @since 3.4
-		 *
 		 * @param int $new_user_id - New user id.
 		 * @param int $old_user_id - Old user id.
 		 *
 		 * @since 4.5.0
 		 */
-		public function user_switched_event( $new_user_id, $old_user_id ) {
+		public static function user_switched_event( $new_user_id, $old_user_id ) {
 			$target_user       = get_user_by( 'ID', $new_user_id );
 			$target_user_roles = User_Helper::get_user_roles( $target_user );
 			$target_user_roles = implode( ', ', $target_user_roles );
