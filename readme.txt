@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, security audit log, user tracking, security event log, audit trail, user activity
 Requires at least: 5.0
 Tested up to: 6.2
-Stable tag: 4.5.0
+Stable tag: 4.5.1
 Requires PHP: 7.2
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -209,57 +209,17 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.5.0 (2023-04-12) =
-
-Release notes: [Announcing WP Activity Log 4.5](https://wpactivitylog.com/wsal-4-5-0/)
+= 4.5.1 (2023-04-25) =
 	
-* **New features & functionality**
-	* Automatic activation of license key in NOFS edition of the plugin if key is declared on file.
-	* Added events' severity filter in the Report module.
-	* Added a new option to remove report metadata, such as the filters used for the reports from activity logs reports.
+* **Improvement**
+	* Replaced the elipsis icon used to launch the event details viewer with a "More details" button.
 
-* **Plugin & features improvements**
-	* Better support for PHP8 - addressed all reported warnings and fatal errors.
-	* Event D 2002 is now reported when a user changes something in a post for which the plugin does not have a specific event ID.
-	* Added a link to the Saved Reports tab in all reports' emails to allow easy access of all generated reports.
-	* Set the Filters and Save Changes button top bar to "sticky" (always floats at the top of the screen) when enabling / disabling events (better UX).
-	* Applied multiple tiny UI improvements in the Reports and User Sessions Management pages.
-	* Improved the UI of the filters in the activity log viewer - now all the filters are displayed in full and are no longer truncated.
-	* Added checks to the excluded objects placeholders to ensure users do not specify wrong objects in the wrong setting.
-	* Replaced technical term severity labels with friendly ones. For example WSAL_HIGH is now High severity.
-	* Added some new help text and improved existing help text in some pages throughout the plugin.
-	* Improved support for RTL setups in the activity log viewer.
-	* Deleted obsolete upgrade code that was checking for AWS connections during upgrade.
-	* Removed code related to the migration of events when using an external database from the Free edition of the plugin.
-	* Improved the way the database table changes are detected by the plugin - all event IDs used for database changes monitoring are now enabled by default.
-	* Option to "List only IP addresses used during login" for the IP addresses statistics report is grayed out unless the report is choson.
-	* Improved the sensor that detects page changes (page created, deleted or changed) done automatically via plugins.
-	* UI/UX  improvements in the reports page and the settings for the periodic reports.
-	
 * **Bug fixes**
-	* Fixed: Intermittent fatal error in UserSessionsTracking.php when loggin in from custom login pages (like WooCommerce).
-	* Fixed: Event ID 7009 (user changed the maximum upload file size for a site on a multisite network) was wrongly logged instead event ID 7011(user changed the maximum upload file size for the network).
-	* Fixed: Renaming a menu was not reported correctly, event ID 2085 (Changed menu items order) was reported instead.
-	* Fixed: Error reported in the message of event ID 6060 (Changed the status of an event ID).
-	* Fixed: WP Activity Log now keeps a log when it is activated or deactivated.
-	* Fixed: Deleting events with "Informational" severity delets all events in the log.
-	* Fixed: Fatal error in class-alert-manager.php when excluding a user and its role at the same time.
-	* Fixed: Super Admin role added to Admin user in logs on a single site.
-	* Fixed: PHP warning in /classes/Sensors/Multisite.php on a multisite network when running NOFS edition of the plugin on some specific multisite network setup.
-	* Fixed: Plugin version update notice still shown in the NOFS edition of the plugin even when the plugin is up to date.
-	* Fixed: When objets are excluded from the activity log.
-	* Fixed: Event ID 6052 (Changed activity log retention settings) was not reported if the setting is already on "delete events older than" and the user changes the number of months or years.
-	* Fixed: Event IDs 6053 - 6058, used to keep a log of when objects are excluded from the activity log are not reported in a multisite network environment.
-	* Fixed: HTML code was shown instead of characters in some drop down menus in the Reports module pages.
-	* Fixed: Site title change not reported (Event ID 6059).
-	* Fixed: The daily summary email was not reporting file changes reported in the website through the [Website File Changes Monitor plugin](https://wordpress.org/plugins/website-file-changes-monitor/).
-	* Fixed: Tags and Mirror identifier settings removed from Syslog and Slack mirroring settings - these are only used by third parties such as Amazon Cloudwatch and Papertrail.
-	* Fixed: Report for number of published posts by user contained duplicate entries.
-	* Fixed: Event ID 6034 (Purged activity log) also reported along site event ID 6006 when resetting plugin settings to default.
-	* Date filters in reports were not applied correctly; plugin also including events that happened within 24 hours before the start date.
-
-Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin..
-
-Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
+	* Fixed: IP was not extracted properly from HTTP header when a proxy was in use.
+	* Fixed: Fatal error in user-switching.php sensor when switching logged in users with a user switching plugin.
+	* Fixed: Logins from WooCommerce not captured properly even when plugin is configured to capture logins from all login forms.
+	* Fixed: option to "override current logged in session" (Session management module) was not terminating sessions when users log in via the WooCommerce login page.
+	* Fixed: PHP fatal error in the login and logout log sensor.
+	* Fixed: PHP notice in settings helper class when switching off the reverse proxy settings.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
