@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, security audit log, user tracking, security event log, audit trail, user activity, changelog, history, log, website changes
 Requires at least: 5.0
 Tested up to: 6.2
-Stable tag: 4.5.1
+Stable tag: 4.5.2
 Requires PHP: 7.2
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -209,17 +209,26 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 
 == Changelog ==
 
-= 4.5.1 (2023-04-25) =
+= 4.5.2 (2023-05-11) =
 	
-* **Improvement**
-	* Replaced the elipsis icon used to launch the event details viewer with a "More details" button.
-
+* **Plugin & features improvements**
+	* Improved PHP 8.2 compatability.	
+	* Replaced the elipsis icon used for the Event data viewer with a "More details" button in the activity log viewer.
+	* Updated a number of hooks (better interoperability) used in custom sensors.
+	* Improved the "installed plugin" check to only show one extension notification when both the free and premium edition of a plugin are installed at the same time.
+	* Activity log data is also automatically deleted from the archive database when using the logs data deletion tool.
+	
+* **Security updates**
+	* Fixed a number of CSRFs, missing authorization & missing capabilities checks
+	
 * **Bug fixes**
-	* Fixed: IP was not extracted properly from HTTP header when a proxy was in use.
-	* Fixed: Fatal error in user-switching.php sensor when switching logged in users with a user switching plugin.
-	* Fixed: Logins from WooCommerce not captured properly even when plugin is configured to capture logins from all login forms.
-	* Fixed: option to "override current logged in session" (Session management module) was not terminating sessions when users log in via the WooCommerce login page.
-	* Fixed: PHP fatal error in the login and logout log sensor.
-	* Fixed: PHP notice in settings helper class when switching off the reverse proxy settings.
+	* Fixed: Fatal error reported when cloning a site on a multisite network with the NS Cloner plugin.
+	* Fixed: Plugin was not retrieving the correct IP address when using a reverse proxy since update 4.5.0.
+	* Addressed a number of PHP Warnings reported when using the WP Rocket plugin to purge the cache.
+	* Fixed: PHP warning when saving Exclude Objects settings.
+	* Setting up a mirroring connection and configuring the mirror of logs was not being reported in the logs.
+	* Fixed: Fatal error when using the User Switching plugin to switch a user's session.
+	* Fixed: Logins from non-native login forms (such as those from WooCommerce) were not captured correctly since update 4.5.0.
+	* Fixed: Plugin not terminating existing user session when the seting to "overwrite existing session" was enabled.
 
 Refer to the [complete plugin changelog](https://wpactivitylog.com/support/kb/plugin-changelog/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=WSAL&utm_content=plugin+repos+description) for more detailed information about what was new, improved and fixed in previous versions of the WP Activity Log plugin.
