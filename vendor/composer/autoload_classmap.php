@@ -11,6 +11,7 @@ return array(
     'RFormatter' => $baseDir . '/classes/Ref.php',
     'RHtmlFormatter' => $baseDir . '/classes/Ref.php',
     'RTextFormatter' => $baseDir . '/classes/Ref.php',
+    'Tools\\Select2_WPWS' => $baseDir . '/classes/Select2/class-select2-wpws.php',
     'WSAL\\Actions\\Pluging_Installer' => $baseDir . '/classes/Actions/class-plugin-installer.php',
     'WSAL\\Adapter\\WSAL_Adapters_MySQL_ActiveRecord' => $baseDir . '/classes/Adapters/MySQL/ActiveRecordAdapter.php',
     'WSAL\\Adapter\\WSAL_Adapters_MySQL_Meta' => $baseDir . '/classes/Adapters/MySQL/MetaAdapter.php',

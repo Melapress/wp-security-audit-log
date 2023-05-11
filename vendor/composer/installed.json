@@ -2,26 +2,33 @@
     "packages": [
         {
             "name": "deliciousbrains/wp-background-processing",
-            "version": "1.0.2",
-            "version_normalized": "1.0.2.0",
+            "version": "1.1.0",
+            "version_normalized": "1.1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/deliciousbrains/wp-background-processing.git",
-                "reference": "2cbee1abd1b49e1133cd8f611df4d4fc5a8b9800"
+                "reference": "d5ef95cecba7f792ddca3e3bd70ebfb90dc4996d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/deliciousbrains/wp-background-processing/zipball/2cbee1abd1b49e1133cd8f611df4d4fc5a8b9800",
-                "reference": "2cbee1abd1b49e1133cd8f611df4d4fc5a8b9800",
+                "url": "https://api.github.com/repos/deliciousbrains/wp-background-processing/zipball/d5ef95cecba7f792ddca3e3bd70ebfb90dc4996d",
+                "reference": "d5ef95cecba7f792ddca3e3bd70ebfb90dc4996d",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.2"
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "phpcompatibility/phpcompatibility-wp": "*",
+                "phpunit/phpunit": "^8.0",
+                "spryker/code-sniffer": "^0.17.18",
+                "wp-coding-standards/wpcs": "^2.3",
+                "yoast/phpunit-polyfills": "^1.0"
             },
             "suggest": {
                 "coenjacobs/mozart": "Easily wrap this library with your own prefix, to prevent collisions when multiple plugins use this library"
             },
-            "time": "2020-07-31T07:00:11+00:00",
+            "time": "2023-04-18T12:32:25+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -42,29 +49,29 @@
             "description": "WP Background Processing can be used to fire off non-blocking asynchronous requests or as a background processing tool, allowing you to queue tasks.",
             "support": {
                 "issues": "https://github.com/deliciousbrains/wp-background-processing/issues",
-                "source": "https://github.com/deliciousbrains/wp-background-processing/tree/master"
+                "source": "https://github.com/deliciousbrains/wp-background-processing/tree/1.1.0"
             },
             "install-path": "../deliciousbrains/wp-background-processing"
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.5.6",
-            "version_normalized": "2.5.6.0",
+            "version": "2.5.7",
+            "version_normalized": "2.5.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "095fc9ced29efef5b18f9b7242bb80b0b4ac6aff"
+                "reference": "78b876e227905373b94fecdd5e5449bcc4d63407"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/095fc9ced29efef5b18f9b7242bb80b0b4ac6aff",
-                "reference": "095fc9ced29efef5b18f9b7242bb80b0b4ac6aff",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/78b876e227905373b94fecdd5e5449bcc4d63407",
+                "reference": "78b876e227905373b94fecdd5e5449bcc4d63407",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.2"
             },
-            "time": "2023-03-28T10:40:38+00:00",
+            "time": "2023-04-24T06:32:35+00:00",
             "type": "library",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
@@ -84,7 +91,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.6"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.5.7"
             },
             "install-path": "../freemius/wordpress-sdk"
         },
@@ -169,45 +176,6 @@
                 "issues": "https://github.com/wpwhitesecurity/import-export-plugin-settings/issues"
             },
             "install-path": "../wpwhitesecurity/import-export-plugin-settings"
-        },
-        {
-            "name": "wpwhitesecurity/select2-wpwhitesecurity",
-            "version": "1.0.2",
-            "version_normalized": "1.0.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wpwhitesecurity/select2-wpwhitesecurity.git",
-                "reference": "d56f367bcd22ba0836cd2ee6e88a1a3902f01ad3"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wpwhitesecurity/select2-wpwhitesecurity/zipball/d56f367bcd22ba0836cd2ee6e88a1a3902f01ad3",
-                "reference": "d56f367bcd22ba0836cd2ee6e88a1a3902f01ad3",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.0"
-            },
-            "time": "2022-03-16T08:53:12+00:00",
-            "type": "library",
-            "installation-source": "dist",
-            "autoload": {
-                "files": [
-                    "load.php"
-                ]
-            },
-            "authors": [
-                {
-                    "name": "WP White Security",
-                    "email": "info@wpwhitesecurity.com"
-                }
-            ],
-            "description": "Select2 integration library for WordPress",
-            "support": {
-                "source": "https://github.com/wpwhitesecurity/select2-wpwhitesecurity/tree/v1.0.2",
-                "issues": "https://github.com/wpwhitesecurity/select2-wpwhitesecurity/issues"
-            },
-            "install-path": "../wpwhitesecurity/select2-wpwhitesecurity"
         }
     ],
     "dev": false,

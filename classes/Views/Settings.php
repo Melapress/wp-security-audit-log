@@ -154,7 +154,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$this->wsal_setting_tabs = $wsal_setting_tabs;
 
 		// Get the current tab.
-		$current_tab       =( isset( $_GET['tab'] ) ) ? \sanitize_text_field( \wp_unslash( $_GET['tab'] ) ) : '';
+		$current_tab       = ( isset( $_GET['tab'] ) ) ? \sanitize_text_field( \wp_unslash( $_GET['tab'] ) ) : '';
 		$this->current_tab = empty( $current_tab ) ? 'general' : $current_tab;
 	}
 
@@ -276,6 +276,11 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 * Method: Run cleanup.
 	 */
 	public function ajax_run_cleanup() {
+		// Verify nonce.
+		if ( ! isset( $_REQUEST['nonce'] ) || false === wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_REQUEST['nonce'] ) ), 'wsal-run-cleanup' ) ) {
+			wp_send_json_error( esc_html__( 'Insecure request.', 'wp-security-audit-log' ) );
+		}
+
 		if ( ! $this->plugin->settings()->current_user_can( 'edit' ) ) {
 			die( 'Access Denied.' );
 		}
@@ -285,7 +290,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$archiving = Settings_Helper::is_archiving_set_and_enabled();
 
 		// phpcs:disable
-		// phpcs:disable
+		// phpcs:enable
 
 		// Calculate limit timestamp.
 		$max_stamp = $now - ( strtotime( $max_sdate ) - $now );
@@ -294,7 +299,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		// $query->add_order_by( 'created_on', false ); // Descending order.
 		// $query->add_condition( 'created_on <= %s', intval( $max_stamp ) ); // Add limits of timestamp.
 		// $results = $query->get_adapter()->execute_query( $query );
-		$items   = \WSAL\Entities\Occurrences_Entity::count('created_on <= %s', intval( $max_stamp ));
+		$items = \WSAL\Entities\Occurrences_Entity::count( 'created_on <= %s', intval( $max_stamp ) );
 		if ( $items ) {
 			$this->plugin->clean_up();
 		}
@@ -977,17 +982,23 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			esc_html_e( 'The plugin uses an efficient way to store the activity log data in the WordPress database, though the more data you keep the more disk space will be required. ', 'wp-security-audit-log' );
 			$retention_help_text = __( '<a href="https://wpactivitylog.com/pricing/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=settings+pages" target="_blank">Upgrade to Premium</a> to store the activity log data in an external database.', 'wp-security-audit-log' );
 
+			// phpcs:disable
+			// phpcs:enable
 			echo wp_kses( $retention_help_text, $this->plugin->allowed_html_tags );
 			?>
 		</p>
 
 		<?php
+		// phpcs:disable
 		/* @free:start */
+		// phpcs:enable
 		// Ensure it doesn't load a 2nd time for premium users.
 		if ( ! wsal_freemius()->can_use_premium_code() ) {
 			$this->render_retention_settings_table();
 		}
+		// phpcs:disable
 		/* @free:end */
+		// phpcs:enable
 		?>
 
 		<h3><?php esc_html_e( 'What timestamp you would like to see in the WordPress activity log?', 'wp-security-audit-log' ); ?></h3>
@@ -1242,7 +1253,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<input type="button" id="ExRoleQueryAdd" class="button-primary" value="<?php esc_attr_e( 'Add', 'wp-security-audit-log' ); ?>">
 							<br style="clear: both;"/>
 							<div id="ExRoleList">
-								<?php foreach ( $this->plugin->settings()->get_excluded_monitoring_roles() as $item ) : ?>
+								<?php foreach ( \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_roles() as $item ) : ?>
 									<span class="sectoken-<?php echo esc_attr( $this->get_token_type( $item ) ); ?>">
 									<input type="hidden" name="ExRoles[]" value="<?php echo esc_attr( $item ); ?>"/>
 									<?php echo esc_html( $item ); ?>
@@ -1367,7 +1378,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$post_array = filter_input_array( INPUT_POST );
 
 		\WSAL\Helpers\Settings_Helper::set_excluded_monitoring_users( isset( $post_array['ExUsers'] ) ? $post_array['ExUsers'] : array() );
-		$this->plugin->settings()->set_excluded_monitoring_roles( isset( $post_array['ExRoles'] ) ? $post_array['ExRoles'] : array() );
+		\WSAL\Helpers\Settings_Helper::set_excluded_monitoring_roles( isset( $post_array['ExRoles'] ) ? $post_array['ExRoles'] : array() );
 		\WSAL\Helpers\Settings_Helper::set_excluded_post_meta_fields( isset( $post_array['PostMetas'] ) ? $post_array['PostMetas'] : array() );
 		\WSAL\Helpers\Settings_Helper::set_excluded_user_meta_fields( isset( $post_array['UserMetas'] ) ? $post_array['UserMetas'] : array() );
 		$this->plugin->settings()->set_excluded_monitoring_ip( isset( $post_array['IpAddrs'] ) ? $post_array['IpAddrs'] : array() );
@@ -1768,7 +1779,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		// $alerts = array();
 		// foreach ( $registered_alerts as $alert => $details ) {
-		// 	$alerts[] = (string) $details->code;
+		// $alerts[] = (string) $details->code;
 		// }
 
 		echo $this->filter_values_for_searched_term( array_keys( $registered_alerts ), $get_array['term'] ); // phpcs:ignore
@@ -1940,7 +1951,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<select name="pruning-unit" id="pruning-unit" <?php disabled( $retention_settings_enforced_by_mainwp ); ?>>
 							<?php
 							foreach ( $pruning_unit_options as $option => $label ) {
-								echo '<option value="' . esc_attr( $option ) . '" ' . selected( $pruning_unit, $option, true ) . '>' . ucwords( $label ) . '</option>'; // phpcs:disable
+								echo '<option value="' . esc_attr( $option ) . '" ' . selected( $pruning_unit, $option, true ) . '>' . ucwords( $label ) . '</option>'; // phpcs:ignore
 							}
 							?>
 						</select>
@@ -1956,12 +1967,12 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								' is in %s.',
 								esc_html( human_time_diff( current_time( 'timestamp' ), $next ) )
 							);
-							echo '<!-- ' . esc_html( date( 'dMy H:i:s', $next ) ) . ' --> ';
+							echo '<!-- ' . esc_html( gmdate( 'dMy H:i:s', $next ) ) . ' --> ';
 							echo esc_html__( 'You can run the purging process now by clicking the button below.', 'wp-security-audit-log' );
 							?>
 						</p>
 						<p>
-							<a class="button-primary" href="<?php echo esc_url( add_query_arg( 'action', 'AjaxRunCleanup', admin_url( 'admin-ajax.php' ) ) ); ?>"><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
+							<a class="button-primary" href="<?php echo esc_url( add_query_arg( ['action'=> 'AjaxRunCleanup', 'nonce'=> wp_create_nonce( 'wsal-run-cleanup' )], admin_url( 'admin-ajax.php' ) ) ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-run-cleanup' ) ); ?>" ><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
 						</p>
 					<?php endif; ?>
 				</td>

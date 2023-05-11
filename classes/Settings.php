@@ -68,13 +68,6 @@ class WSAL_Settings {
 	protected $per_page = null;
 
 	/**
-	 * Roles excluded from monitoring.
-	 *
-	 * @var array
-	 */
-	protected $excluded_roles = array();
-
-	/**
 	 * Custom user meta fields excluded from monitoring.
 	 *
 	 * @var array
@@ -707,12 +700,10 @@ class WSAL_Settings {
 				// Get admins.
 				$this->site_admins = $wpdb->get_col( $sql ); // phpcs:ignore
 			}
-		} else {
-			if ( empty( $this->site_admins ) ) {
+		} elseif ( empty( $this->site_admins ) ) {
 				$query = 'role=administrator&fields[]=user_login';
-				foreach ( get_users( $query ) as $user ) {
-					$this->site_admins[] = $user->user_login;
-				}
+			foreach ( get_users( $query ) as $user ) {
+				$this->site_admins[] = $user->user_login;
 			}
 		}
 
@@ -941,7 +932,7 @@ class WSAL_Settings {
 	 * @param string $ip - IP address.
 	 *
 	 * @return string
-     *
+	 *
 	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::normalize_ip()
 	 */
 	protected function normalize_ip( $ip ) {
@@ -1041,7 +1032,7 @@ class WSAL_Settings {
 	 *
 	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_post_types()
 	 */
-    public function get_excluded_post_types(): array {
+	public function get_excluded_post_types(): array {
 		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_post_types()' );
 
 		return \WSAL\Helpers\Settings_Helper::get_excluded_post_types();
@@ -1051,50 +1042,24 @@ class WSAL_Settings {
 	 * Set roles excluded from monitoring.
 	 *
 	 * @param array $roles - Array of roles.
+	 *
+	 * @deprecated 4.5.1 - Use \WSAL\Helpers\Settings_Helper::set_excluded_monitoring_roles()
 	 */
 	public function set_excluded_monitoring_roles( $roles ) {
-		// Trigger alert.
-		$old_value = WSAL\Helpers\Settings_Helper::get_option_value( 'excluded-roles', array() );
-		$changes   = \WSAL\Helpers\Settings_Helper::determine_added_and_removed_items( $old_value, implode( ',', $roles ) );
+		_deprecated_function( __FUNCTION__, '4.5.1', '\WSAL\Helpers\Settings_Helper::set_excluded_monitoring_roles()' );
 
-		if ( ! empty( $changes['added'] ) ) {
-			foreach ( $changes['added'] as $user ) {
-				Alert_Manager::trigger_event(
-					6054,
-					array(
-						'role'           => $user,
-						'previous_users' => ( empty( $old_value ) ) ? \WSAL\Helpers\Settings_Helper::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
-						'EventType'      => 'added',
-					)
-				);
-			}
-		}
-		if ( ! empty( $changes['removed'] ) && ! empty( $old_value ) ) {
-			foreach ( $changes['removed'] as $user ) {
-				Alert_Manager::trigger_event(
-					6054,
-					array(
-						'role'           => $user,
-						'previous_users' => empty( $old_value ) ? \WSAL\Helpers\Settings_Helper::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
-						'EventType'      => 'removed',
-					)
-				);
-			}
-		}
-
-		$this->excluded_roles = $roles;
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'excluded-roles', esc_html( implode( ',', $roles ) ) );
+		return \WSAL\Helpers\Settings_Helper::set_excluded_monitoring_users( $roles );
 	}
 
 	/**
 	 * Get roles excluded from monitoring.
+	 *
+	 * @deprecated 4.5.1 - Use \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_roles()
 	 */
 	public function get_excluded_monitoring_roles() {
-		if ( empty( $this->excluded_roles ) ) {
-			$this->excluded_roles = array_unique( array_filter( explode( ',', WSAL\Helpers\Settings_Helper::get_option_value( 'excluded-roles', '' ) ) ) );
-		}
+		_deprecated_function( __FUNCTION__, '4.5.1', '\WSAL\Helpers\Settings_Helper::get_excluded_monitoring_roles()' );
 
-		return $this->excluded_roles;
+		return \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_roles();
 	}
 
 	/**
@@ -1570,7 +1535,7 @@ class WSAL_Settings {
 			// Meaning - if that is AJAX call, and it comes from the roles and not users,
 			// we have no business here - the token is valid and within users, but we are looking
 			// for roles
-			if ( false !== $type && 'ExRole' === $type  ) {
+			if ( false !== $type && 'ExRole' === $type ) {
 
 			} else {
 				return 'user';

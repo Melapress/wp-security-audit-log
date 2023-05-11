@@ -512,14 +512,6 @@ td.crtd.column-crtd {
 	width: 120px;
 }
 
-.wsal-table-grid .more-info {
-	float: inherit;
-	width: 35px;
-	height: 35px;
-	font-size: 2em;
-	line-height: 0.65em;
-}
-
 .wp-list-table.wsal-table-grid #info,
 .wsal-table-grid td.grid.column-info {
 	width: 225px;;

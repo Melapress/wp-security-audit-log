@@ -551,11 +551,10 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function is_login_screen(): bool {
-			if ( isset( $_SERVER['PHP_SELF'] ) && 'wp-login.php' === basename( \sanitize_text_field( \wp_unslash( $_SERVER['PHP_SELF'] ) ) ) ) {
-				return true;
-			}
 
-			return false;
+			$login =  parse_url( site_url( 'wp-login.php' ), PHP_URL_PATH ) === parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ); // phpcs:ignore
+
+			return \apply_filters( 'wsal_login_screen_url', $login );
 		}
 
 		/**

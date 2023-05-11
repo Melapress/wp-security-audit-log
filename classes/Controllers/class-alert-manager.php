@@ -411,11 +411,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 */
 		public static function is_disabled_user( $user ) {
 			if ( empty( self::$excluded_users ) ) {
-				self::$excluded_users = Settings_Helper::get_option_value( 'excluded-users', array() );
-			}
-
-			if ( ! \is_array( self::$excluded_users ) ) {
-				self::$excluded_users = array( self::$excluded_users );
+				self::$excluded_users = Settings_Helper::get_excluded_monitoring_users();
 			}
 
 			return in_array( $user, self::$excluded_users, true );
@@ -434,7 +430,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			$is_disabled = false;
 
 			if ( empty( self::$excluded_roles ) ) {
-				self::$excluded_roles = Settings_Helper::get_option_value( 'excluded-roles', array() );
+				self::$excluded_roles = Settings_Helper::get_excluded_monitoring_roles();
 			}
 
 			if ( ! \is_array( self::$excluded_roles ) ) {

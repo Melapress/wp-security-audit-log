@@ -7,7 +7,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     4.5.1
+ * Version:     4.5.2
  * Plugin URI:  https://wpactivitylog.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
  * Author:      WP White Security
@@ -55,7 +55,7 @@ if ( file_exists( plugin_dir_path( __FILE__ ) . 'vendor/autoload.php' ) ) {
 }
 
 if ( ! defined( 'WSAL_PREFIX' ) ) {
-	define( 'WSAL_VERSION', '4.5.1' );
+	define( 'WSAL_VERSION', '4.5.2' );
 	define( 'WSAL_PREFIX', 'wsal_' );
 	define( 'WSAL_PREFIX_PAGE', 'wsal-' );
 }
@@ -83,6 +83,16 @@ if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
 // Plugin Classes Prefix.
 if ( ! defined( 'WSAL_CLASS_PREFIX' ) ) {
 	define( 'WSAL_CLASS_PREFIX', 'WSAL_' );
+}
+
+/**
+ * Connections Prefix.
+ */
+if ( ! defined( 'WSAL_CONN_PREFIX' ) ) {
+	define( 'WSAL_CONN_PREFIX', 'connection-' );
+}
+if ( ! defined( 'WSAL_MIRROR_PREFIX' ) ) {
+	define( 'WSAL_MIRROR_PREFIX', 'mirror-' );
 }
 
 /* @free:start */
@@ -236,7 +246,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				add_action( 'admin_print_scripts', array( '\WSAL\Helpers\WP_Helper', 'hide_unrelated_notices' ) );
 
 				add_action(
-					$bootstrap_hook[0],
+					'init',
 					function() {
 						WSAL\Controllers\Alert_Manager::init();
 						Sensors_Load_Manager::load_sensors();
@@ -303,7 +313,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 */
 			public static function is_frontend() {
 				return ! is_admin()
-					&& ! self::is_login_screen()
+					&& ! WP_Helper::is_login_screen()
 					&& ( ! defined( 'WP_CLI' ) || ! WP_CLI )
 					&& ( ! defined( 'DOING_CRON' ) || ! DOING_CRON )
 					&& ! self::is_rest_api()
@@ -317,7 +327,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 */
 			public static function is_frontend_page() {
 				return ! is_admin()
-					&& ! self::is_login_screen()
+					&& ! WP_Helper::is_login_screen()
 					&& ( ! defined( 'WP_CLI' ) || ! WP_CLI )
 					&& ( ! defined( 'DOING_CRON' ) || ! DOING_CRON )
 					&& ! self::is_rest_api()
@@ -496,15 +506,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 
 			/**
-			 * Whether the current page is the login screen.
-			 *
-			 * @return bool
-			 */
-			public static function is_login_screen() {
-				return parse_url( site_url( 'wp-login.php' ), PHP_URL_PATH ) === parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ); // phpcs:ignore
-			}
-
-			/**
 			 * Load Freemius SDK.
 			 */
 			public static function load_freemius() {
@@ -593,7 +594,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					}
 				}
 
-				if ( $is_admin_blocking_plugins_support_enabled || is_admin() || self::is_login_screen() || self::is_rest_api() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+				if ( $is_admin_blocking_plugins_support_enabled || is_admin() || WP_Helper::is_login_screen() || self::is_rest_api() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 
 					self::load_freemius();
 					// phpcs:ignore
@@ -841,7 +842,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// $this->sensors = new WSAL_SensorManager( $this );
 
-				Sensors_Load_Manager::load_sensors();
+				// Sensors_Load_Manager::load_sensors();
 
 				if ( is_admin() ) {
 					$this->views   = new WSAL_ViewManager( $this );
@@ -1110,8 +1111,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// run any installs.
 				self::get_connector()->install_all();
-				self::get_connector()->get_adapter( 'Occurrence' )->create_indexes();
-				self::get_connector()->get_adapter( 'Meta' )->create_indexes();
+				// self::get_connector()->get_adapter( 'Occurrence' )->create_indexes();
+				// self::get_connector()->get_adapter( 'Meta' )->create_indexes();
 
 
 				// Install cleanup hook (remove older one if it exists).
