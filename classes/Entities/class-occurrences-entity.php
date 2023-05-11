@@ -224,9 +224,40 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 					if ( ! empty( $sqls ) ) {
 						$sqls = 'INSERT INTO `' . Metadata_Entity::get_table_name() . "` ($fields) VALUES " . rtrim( $sqls, ',' );
 
+						self::get_connection()->suppress_errors( true );
 						self::get_connection()->query( $sqls );
+
+						if ( '' !== self::get_connection()->last_error ) {
+							if ( 1146 === Metadata_Entity::get_last_sql_error( self::get_connection() ) ) {
+								if ( Metadata_Entity::create_table() ) {
+									self::get_connection()->query( $sqls );
+								}
+							}
+						}
+						self::get_connection()->suppress_errors( false );
 					}
 				}
+			}
+		}
+
+		/**
+		 * Sets an index (if not there already)
+		 *
+		 * @return void
+		 *
+		 * @since 4.5.1
+		 */
+		public static function create_indexes() {
+			$index_exists  = false;
+			$db_connection = self::get_connection();
+			// check if an index exists.
+			if ( $db_connection->query( 'SELECT COUNT(1) IndexIsThere FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema=DATABASE() AND table_name="' . self::get_table_name() . '" AND index_name="created_on"' ) ) {
+				// query succeeded, does index exist?
+				$index_exists = ( isset( $db_connection->last_result[0]->IndexIsThere ) ) ? $db_connection->last_result[0]->IndexIsThere : false;
+			}
+			// if no index exists then make one.
+			if ( ! $index_exists ) {
+				$db_connection->query( 'CREATE INDEX created_on ON ' . self::get_table_name() . ' (created_on)' );
 			}
 		}
 	}

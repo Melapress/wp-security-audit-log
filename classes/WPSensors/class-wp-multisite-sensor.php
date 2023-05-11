@@ -247,7 +247,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 				}
 			}
 
-			$blog_title = strip_tags( $_POST['blog']['title'] ); // phpcs:ignore
+			if ( isset( $_POST['blog'] ) && isset( $_POST['blog']['title'] ) ) {
+				$blog_title = strip_tags( $_POST['blog']['title'] );
+			} elseif ( isset( $_POST['target_title'] )  ) {
+				$blog_title = strip_tags( $_POST['target_title'] );
+			} else {
+				$blog_title = WP_Helper::get_blog_info( $new_blog->blog_id )['name'];
+			}
 			$blog_url   = untrailingslashit( $home_scheme . '://' . $new_blog->domain . $new_blog->path );
 
 			Alert_Manager::trigger_event(

@@ -140,8 +140,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			&& ( 'anonymous' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) || // Anonymous mode option.
 			'skipped' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) )
 		) {
-			$wsal_premium_advert      = \WSAL\Helpers\Settings_Helper::get_option_value( 'premium-advert', false ); // Get the advert to display.
-			$wsal_premium_advert      = false !== $wsal_premium_advert ? (int) $wsal_premium_advert : 0; // Set the default.
+			$wsal_premium_advert = \WSAL\Helpers\Settings_Helper::get_option_value( 'premium-advert', false ); // Get the advert to display.
+			$wsal_premium_advert = false !== $wsal_premium_advert ? (int) $wsal_premium_advert : 0; // Set the default.
 
 			$more_info = add_query_arg(
 				array(
@@ -199,6 +199,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			endif;
 		}
 
+		// phpcs:disable
+		// phpcs:enable
 
 		// Check anonymous mode.
 		if ( 'anonymous' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) ) { // If user manually opt-out then don't show the notice.
@@ -228,6 +230,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Display add-on available notice.
 		$screen = get_current_screen();
 
+		// phpcs:disable
+		// phpcs:enable
 
 		if ( $is_current_view && in_array( $screen->base, array( 'toplevel_page_wsal-auditlog', 'toplevel_page_wsal-auditlog-network' ), true ) ) {
 			// Grab list of installed plugins.
@@ -241,6 +245,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			// Grab list of plugins we have addons for.
 			$predefined_plugins       = Plugins_Helper::get_installable_plugins();
 			$predefined_plugins_check = array_column( $predefined_plugins, 'addon_for' );
+
+			$plugin_filenames = array_unique( $plugin_filenames );
 
 			// Loop through plugins and create an array of slugs, we will compare these against the plugins we have addons for.
 			$we_have_addon = array_intersect( $plugin_filenames, $predefined_plugins_check );
@@ -257,11 +263,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					$is_dismissed = \WSAL\Helpers\Settings_Helper::get_option_value( $addon . '_addon_available_notice_dismissed' );
 
 					if ( ! $is_dismissed ) {
-						// @codingStandardsIgnoreStart
-						$image_filename     = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'image_filename' ) );
-						$title              = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'title' ) );
-						$plugin_description = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'plugin_description' ) );
-						// @codingStandardsIgnoreEnd
+
+						$image_filename     = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'image_filename' ), true );
+						$title              = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'title' ), true );
+						$plugin_description = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'plugin_description' ), true );
+
 						?>
 						<div class="notice notice-information is-dismissible notice-addon-available" id="wsal-notice-addon-available-<?php echo esc_attr( $addon ); ?>" data-addon="<?php echo esc_attr( $addon ); ?>">
 							<div class="addon-logo-wrapper">
@@ -614,6 +620,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die( 'Occurrence parameter expected.' );
 		}
 
+		// phpcs:disable
+		// phpcs:enable
 
 		$occ = new WSAL_Models_Occurrence();
 		$occ->load( 'id = %d', array( (int) $get_array['occurrence'] ) );
@@ -653,6 +661,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Total number of alerts.
 		$old = (int) $post_array['logcount'];
 
+		// phpcs:disable
+		// phpcs:enable
 
 		// Check for new total number of alerts.
 		$new = (int) Occurrences_Entity::count();
@@ -710,6 +720,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		die( json_encode( array_slice( $grp1 + $grp2, 0, 7 ) ) ); // phpcs:ignore
 	}
 
+	// phpcs:disable
+	// phpcs:enable
 
 	/**
 	 * Ajax callback to download failed login log.
@@ -1120,6 +1132,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		wp_send_json_success();
 	}
 
+	// phpcs:disable
+	// phpcs:enable
 
 	/**
 	 * Gets a URL to the UI tab listing third party plugins.

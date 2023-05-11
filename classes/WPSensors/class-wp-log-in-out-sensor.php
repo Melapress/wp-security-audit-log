@@ -107,7 +107,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 */
 		public static function is_frontend_sensor(): bool {
 			$frontend_events = Settings_Helper::get_frontend_events();
-			$should_load     = ! empty( $frontend_events['register'] ) || ! empty( $frontend_events['login'] ) || ! empty( $frontend_events['woocommerce'] );
+			$should_load     = ! empty( $frontend_events['register'] ) || ! empty( $frontend_events['login'] );
 
 			if ( $should_load ) {
 				return true;

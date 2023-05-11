@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors;
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
@@ -67,6 +68,24 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Register_Sensor' ) ) {
 		 */
 		public static function is_login_sensor() {
 			return self::$login_sensor;
+		}
+
+		/**
+		 * That needs to be registered as a frontend sensor, when the admin sets the plugin to monitor the login from 3rd parties.
+		 *
+		 * @return boolean
+		 *
+		 * @since 4.5.1
+		 */
+		public static function is_frontend_sensor(): bool {
+			$frontend_events = Settings_Helper::get_frontend_events();
+			$should_load     = ! empty( $frontend_events['register'] ) || ! empty( $frontend_events['login'] ) || ! empty( $frontend_events['woocommerce'] );
+
+			if ( $should_load ) {
+				return true;
+			}
+
+			return false;
 		}
 
 		/**

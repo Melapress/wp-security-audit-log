@@ -220,13 +220,14 @@ function WsalDisableCustom(link, meta_key) {
 	});
 }
 
-function WsalDBChange(value) {
+function WsalDBChange(value, nonce) {
 	jQuery.ajax({
 		type: 'POST',
 		url: ajaxurl,
 		async: true,
 		data: {
 			action: 'AjaxSwitchDB',
+			nonce: nonce,
 			selected_db: value
 		},
 		success: function () {

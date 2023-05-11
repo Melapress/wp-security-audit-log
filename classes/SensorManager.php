@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use WSAL\Helpers\WP_Helper;
 use \WSAL\Helpers\Classes_Helper;
 /**
  * Sensor Manager.
@@ -209,7 +210,7 @@ final class WSAL_SensorManager extends WSAL_AbstractSensor {
 		$frontend_events = WSAL\Helpers\Settings_Helper::get_frontend_events();
 
 		// Only LogInOut and Register sensors should load on login page.
-		if ( WpSecurityAuditLog::is_login_screen() ) {
+		if ( WP_Helper::is_login_screen() ) {
 			if ( in_array( $filename, array( 'Register', 'LogInOut' ), true ) ) {
 				return true;
 			}

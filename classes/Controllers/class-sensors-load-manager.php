@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace WSAL\Controllers;
 
+use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\Classes_Helper;
 
 // Exit if accessed directly.
@@ -89,7 +90,7 @@ if ( ! class_exists( '\WSAL\Controllers\Sensors_Load_Manager' ) ) {
 				$sensors = \array_merge( $sensors, $plugin_sensors );
 			}
 
-			if ( \WpSecurityAuditLog::is_login_screen() && ! is_user_logged_in() ) {
+			if ( WP_Helper::is_login_screen() && ! is_user_logged_in() ) {
 				// Here we need to load only the Sensors which are login enabled.
 				foreach ( $sensors as $key => &$sensor ) {
 					// Check if that sensor is for login or not.
