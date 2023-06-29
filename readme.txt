@@ -6,7 +6,7 @@ License URI: https://www.gnu.org/licenses/gpl.html
 Tags: activity log, security audit log, user tracking, security event log, audit trail, user activity, changelog, history, log, website changes
 Requires at least: 5.0
 Tested up to: 6.2
-Stable tag: 4.5.2
+Stable tag: 4.5.3
 Requires PHP: 7.2
 
 The #1 user-rated activity log plugin. Keep a comprehensive log of the changes that happen on your site with this easy to use plugin.
@@ -208,6 +208,17 @@ Please refer to our [support pages](https://wpactivitylog.com/support/?utm_sourc
 10. Mirror the WordPress activity log to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
 
 == Changelog ==
+
+= 4.5.3 (2023-07-05) =
+
+* **Bug fixes**
+	* Fixed issue causing pruning of reports to remove all stored reports.
+	* Fixed issue which could cause a memory issue when migrating from older WSAL versions.
+	* Fixed error which could cause 'Excluded custom user fields' to not save when updating.
+	* Fixed issue which cause cause a fatal error when saving pages via the Oxygen Builder plugin.
+
+* **Security fix**
+	*  Updated Freemius SDK
 
 = 4.5.2 (2023-05-11) =
 	

@@ -583,8 +583,16 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 						fopen( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.php', 'r' )
 					);
 					if ( false === strpos( $line, '<?php' ) ) {
-						$file_data = file_get_contents( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.php' );
-						file_put_contents( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.php', '<?php' . PHP_EOL . $file_data );
+						$fp_source = fopen( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.php', 'r' );
+						$fp_dest   = fopen( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.php.tmp', 'w' ); // better to generate a real temp filename.
+						fwrite( $fp_dest, '<?php' . "\n" );
+						while ( ! feof( $fp_source ) ) {
+							fwrite( $fp_dest, fread( $fp_source, 8192 ) );
+						}
+						fclose( $fp_source );
+						fclose( $fp_dest );
+						unlink( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.php' );
+						rename( $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.php.tmp', $working_dir_path . WSAL_Ext_MirrorLogger::FILE_NAME_FAILED_LOGS . '.php' );
 					}
 				}
 			}

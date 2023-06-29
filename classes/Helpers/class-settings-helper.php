@@ -922,7 +922,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		public static function get_excluded_user_meta_fields() {
 			if ( empty( self::$excluded_user_meta ) ) {
 				$excluded_user_meta = self::get_option_value( 'excluded-user-meta', '' );
-				if ( ! is_null( $excluded_user_meta ) && empty( $excluded_user_meta ) ) {
+				if ( ! is_null( $excluded_user_meta ) && ! empty( $excluded_user_meta ) ) {
 					self::$excluded_user_meta = array_unique( array_filter( explode( ',', $excluded_user_meta ) ) );
 					asort( self::$excluded_user_meta );
 				} else {
@@ -986,6 +986,11 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 				self::$excluded_users = self::get_option_value( 'excluded-users', array() );
 			}
 
+			if ( is_string( self::$excluded_users ) ) {
+				self::$excluded_users = array_unique( array_filter( explode( ',', self::$excluded_users ) ) );
+				self::set_option_value( 'excluded-users', self::$excluded_users );
+			}
+
 			return self::$excluded_users;
 		}
 
@@ -1033,6 +1038,8 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * Set roles excluded from monitoring.
 		 *
 		 * @param array $roles - Array of roles.
+		 *
+		 * @since 4.5.0
 		 */
 		public static function set_excluded_monitoring_roles( $roles ) {
 			// Trigger alert.
@@ -1070,10 +1077,19 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 
 		/**
 		 * Get roles excluded from monitoring.
+		 *
+		 * @return array
+		 *
+		 * @since 4.5.0
 		 */
 		public static function get_excluded_monitoring_roles() {
 			if ( empty( self::$excluded_roles ) ) {
 				self::$excluded_roles = self::get_option_value( 'excluded-roles', array() );
+			}
+
+			if ( is_string( self::$excluded_roles ) ) {
+				self::$excluded_roles = array_unique( array_filter( explode( ',', self::$excluded_roles ) ) );
+				self::set_option_value( 'excluded-roles', self::$excluded_roles );
 			}
 
 			return self::$excluded_roles;

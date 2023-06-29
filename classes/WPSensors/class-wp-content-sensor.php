@@ -187,6 +187,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 				return;
 			}
 
+			if ( null === self::$old_post ) {
+				return;
+			}
+
 			// Ignorable states.
 			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 				// Check post creation event.
