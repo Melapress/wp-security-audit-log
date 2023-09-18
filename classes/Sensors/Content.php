@@ -1599,16 +1599,17 @@ class WSAL_Sensors_Content { //extends WSAL_AbstractSensor {
 			$revision = array_shift( $revisions );
 			return $this->get_revision_link( $revision->ID );
 		}
+		return '';
 	}
 
 	/**
 	 * Builds revision link.
 	 *
 	 * @param integer $revision_id - Revision ID.
-	 * @return string|null - Link.
+	 * @return string - Link.
 	 */
 	private function get_revision_link( $revision_id ) {
-		return ! empty( $revision_id ) ? add_query_arg( 'revision', $revision_id, admin_url( 'revision.php' ) ) : null;
+		return ! empty( $revision_id ) ? add_query_arg( 'revision', $revision_id, admin_url( 'revision.php' ) ) : '';
 	}
 
 	/**
