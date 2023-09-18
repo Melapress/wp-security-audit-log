@@ -1688,6 +1688,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 				$revision = array_shift( $revisions );
 				return self::get_revision_link( $revision->ID );
 			}
+			return '';
 		}
 
 		/**
@@ -1695,12 +1696,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 *
 		 * @param integer $revision_id - Revision ID.
 		 *
-		 * @return string|null - Link.
+		 * @return string - Link.
 		 *
 		 * @since 4.5.0
 		 */
 		private static function get_revision_link( $revision_id ) {
-			return ! empty( $revision_id ) ? add_query_arg( 'revision', $revision_id, admin_url( 'revision.php' ) ) : null;
+			return ! empty( $revision_id ) ? add_query_arg( 'revision', $revision_id, admin_url( 'revision.php' ) ) : '';
 		}
 
 		/**
