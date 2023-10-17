@@ -2,7 +2,7 @@
 /**
  * WP Activity Log.
  *
- * @copyright Copyright (C) 2013-2023, WP White Security - support@wpwhitesecurity.com
+ * @copyright Copyright (C) 2013-%%YEAR%%, WP White Security - support@wpwhitesecurity.com
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  *
  * @wordpress-plugin

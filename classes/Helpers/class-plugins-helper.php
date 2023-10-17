@@ -7,7 +7,7 @@
  *
  * @since 4.5.0
  *
- * @copyright  2023 WP White Security
+ * @copyright  %%YEAR%% WP White Security
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
  * @see       https://wordpress.org/plugins/wp-2fa/
