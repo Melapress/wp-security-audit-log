@@ -4,7 +4,7 @@
  *
  * Widgets sensor class file.
  *
- * @since     latest
+ * @since     4.6.0
  * @package   wsal
  * @subpackage sensors
  */
@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
-use WSAL\Helpers\WP_Helper;
 use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.

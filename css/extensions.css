@@ -105,21 +105,21 @@ p {
 	margin-top: 20px;
 }
 .user-login-row .title-wrap {
-	padding: 20px 30px;
-	border-top-left-radius: 4px;
-	border-top-right-radius: 4px;
-	background-color: #4f4847;
+    padding: 20px 30px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    background-color: #384a2e;
 }
 .user-login-row .title-wrap h3 {
 	font-size: 20px;
 	line-height: 24px;
-	color: #f7e71c;
+	color: #fff;
 }
 .user-login-content-wrap {
 	padding: 30px 15px 30px;
 	border-bottom-left-radius: 4px;
 	border-bottom-right-radius: 4px;
-	background-color: #f7f5eb;
+	background-color: #fff;
 }
 .user-login-content {
 	display: -ms-flexbox;
@@ -159,7 +159,7 @@ ul.premium-list li:before {
 	top: 4px;
 	width: 14px;
 	height: 14px;
-	background-image: url('../img/check-icon.png');
+	background-image: url('../img/check-icon-pink.png');
 	background-repeat: no-repeat;
 	background-position: left center;
 	background-size: contain;
@@ -186,7 +186,7 @@ ul.premium-list li:before {
 	color: #fff;
 	padding: 0 20px;
 	border-radius: 5px;
-	background: linear-gradient(135deg,#bdd63a,#009344);
+	background: #ff8977;
 }
 .user-login-cta a.user-bordered-cta{
 	font-size: 15px;
@@ -195,9 +195,9 @@ ul.premium-list li:before {
 	text-transform: uppercase;
 	letter-spacing: 0.2px;
 	background-color: transparent;
-	color: #0f9944;
+	color: #ff8977;
 	padding: 0 20px;
-	border: solid 3px #0c9743;
+	border: solid 3px #ff8977;
 	border-radius: 5px;
 }
 

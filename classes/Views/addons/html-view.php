@@ -11,10 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $utm_params = array(
-	'utm_source'   => 'plugin',
-	'utm_medium'   => 'referral',
-	'utm_campaign' => 'WSAL',
-	'utm_content'  => 'sessions',
+	'utm_source'   => 'plugins',
+	'utm_medium'   => 'button',
+	'utm_campaign' => 'wsal',
 );
 
 $buy_now_utm_params = $utm_params;
@@ -54,19 +53,19 @@ switch ( $this->hook_suffix ) {
 // Links.
 $more_info = add_query_arg(
 	$utm_params,
-	'https://wpactivitylog.com/features/'
+	'https://melapress.com/wordpress-activity-log/features/'
 );
 
 // Buy Now button link.
 $buy_now        = add_query_arg(
     $buy_now_utm_params,
-    'https://wpactivitylog.com/pricing/'
+    'https://melapress.com/wordpress-activity-log/pricing/'
 );
 $buy_now_target = ' target="_blank"';
 
 $trial_link = add_query_arg(
     $trial_link_utm_params,
-    'https://wpactivitylog.com/trial-premium-edition-plugin/'
+    'https://melapress.com/trial-premium-edition-plugin/'
 );
 
 ?>
@@ -96,8 +95,8 @@ $trial_link = add_query_arg(
 				</div>
 			</div>
 			<div class="user-login-cta">
-				<a href="<?php echo esc_url( $buy_now ); ?>" class="user-gradient-cta"<?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Upgrade to Premium', 'wp-security-audit-log' ); ?></a>
-				<a href="<?php echo esc_url( $more_info ); ?>" class="user-bordered-cta" target="_blank"><?php esc_html_e( 'More Information', 'wp-security-audit-log' ); ?></a>
+				<a href="<?php echo esc_url( $buy_now ); ?>" class="user-gradient-cta"<?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Get WP Activity Log Premium', 'wp-security-audit-log' ); ?></a>
+				<a href="<?php echo esc_url( $more_info ); ?>" class="user-bordered-cta" target="_blank"><?php esc_html_e( 'See all features', 'wp-security-audit-log' ); ?></a>
 			</div>
 		</div>
 	</div>
@@ -121,8 +120,7 @@ $trial_link = add_query_arg(
 				</div>
 			<?php endforeach; ?>
 			<div class="user-login-cta">
-				<a href="<?php echo esc_url( $trial_link ); ?>" class="user-gradient-cta"<?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Get the Free 14-day Premium trial', 'wp-security-audit-log' ); ?></a>
-				<a href="<?php echo esc_url( $buy_now ); ?>" class="user-bordered-cta"<?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Upgrade to Premium', 'wp-security-audit-log' ); ?></a>
+				<a href="<?php echo esc_url( $buy_now ); ?>" class="user-bordered-cta"<?php echo esc_attr( $buy_now_target ); ?>><?php esc_html_e( 'Get WP Activity Log Premium', 'wp-security-audit-log' ); ?></a>
 			</div>
 		</div>
 	</div>

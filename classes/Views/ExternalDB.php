@@ -34,14 +34,14 @@ class WSAL_Views_ExternalDB extends WSAL_ExtensionPlaceholderView {
 	 * {@inheritDoc}
 	 */
 	public function get_name() {
-		return esc_html__( 'Integrations &#8682;', 'wp-security-audit-log' );
+		return esc_html__( 'Integrations ✛', 'wp-security-audit-log' );
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function get_weight() {
-		return 10;
+		return 7;
 	}
 
 	/**

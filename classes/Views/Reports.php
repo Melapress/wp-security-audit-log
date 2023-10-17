@@ -34,14 +34,14 @@ class WSAL_Views_Reports extends WSAL_ExtensionPlaceholderView {
 	 * {@inheritDoc}
 	 */
 	public function get_name() {
-		return esc_html__( 'Create Reports &#8682;', 'wp-security-audit-log' );
+		return esc_html__( 'Reports ✛', 'wp-security-audit-log' );
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function get_weight() {
-		return 3;
+		return 4;
 	}
 
 	/**

@@ -73,7 +73,11 @@ window['WsalAuditLogRefreshed'] = function () {
 	jQuery('.tooltip').darkTooltip({
 		animation: 'fadeIn',
 		gravity: 'west',
-		size: 'medium'
+		size: 'medium',
+	});
+
+	jQuery('.tooltip').on('click', function(e) {
+		e.preventDefault();
 	});
 
 	// Data inspector tooltip.
@@ -85,39 +89,39 @@ window['WsalAuditLogRefreshed'] = function () {
 };
 
 function WsalAuditLogInit(_WsalData) {
-	WsalData = _WsalData;
-	var WsalTkn = WsalData.autorefresh.token;
+	// WsalData = _WsalData;
+	// var WsalTkn = WsalData.autorefresh.token;
 
-	// List refresher.
-	var WsalAjx = null;
+	// // List refresher.
+	// var WsalAjx = null;
 
-	/**
-	 * Check & Load New Alerts.
-	 */
-	var WsalChk = function () {
-		if (WsalAjx) WsalAjx.abort();
-		WsalAjx = jQuery.post(WsalData.ajaxurl, {
-			action: 'AjaxRefresh',
-			logcount: WsalTkn
-		}, function (data) {
-			data = data.toString();
-			data = data.trim();
-			WsalAjx = null;
-			if (data && data !== 'false') {
-				WsalTkn = data;
-				jQuery('#audit-log-viewer').load(
-					location.href + ' #audit-log-viewer-content',
-					window['WsalAuditLogRefreshed']
-				);
-			}
-		});
-	};
+	// /**
+	//  * Check & Load New Alerts.
+	//  */
+	// var WsalChk = function () {
+	// 	if (WsalAjx) WsalAjx.abort();
+	// 	WsalAjx = jQuery.post(WsalData.ajaxurl, {
+	// 		action: 'AjaxRefresh',
+	// 		logcount: WsalTkn
+	// 	}, function (data) {
+	// 		data = data.toString();
+	// 		data = data.trim();
+	// 		WsalAjx = null;
+	// 		if (data && data !== 'false') {
+	// 			WsalTkn = data;
+	// 			jQuery('#audit-log-viewer').load(
+	// 				location.href + ' #audit-log-viewer-content',
+	// 				window['WsalAuditLogRefreshed']
+	// 			);
+	// 		}
+	// 	});
+	// };
 
 	// If audit log auto refresh is enabled.
-	if ( WsalData.autorefresh.enabled ) {
-		// Check for new alerts every 30 secs.
-		setInterval( WsalChk, 30000 );
-	}
+	// if ( WsalData.autorefresh.enabled ) {
+	// 	// Check for new alerts every 30 secs.
+	// 	setInterval( WsalChk, 30000 );
+	// }
 
 	WsalSsasInit();
 }
@@ -585,4 +589,38 @@ jQuery( document ).ready( function() {
 		elm.remove();
 	} );
 
+	// Data inspector WSAL 4.6+
+	jQuery( document ).on( 'click', '.data-event-inspector-link:not(.inspector-active)', function(event) {
+        event.preventDefault();
+		let count = jQuery( '.event-data-panel' ).length;
+		var origText = jQuery( this ).text();
+		jQuery( this ).attr( 'data-orig-text', origText );
+		jQuery( this ).attr( 'data-panel-number', count );
+		jQuery( this ).closest( 'tr' ).after( '<div class="event-data-panel panel-'+ count +'"></div><div class="panel-'+ count +'-fill"></div>' );
+
+		jQuery( jQuery( '.panel-'+ count ) ).load( jQuery( this ).attr( 'href' ), function() {
+			jQuery( '.panel-'+ count + ' .event-content-wrapper' ).slideDown( 300 );
+		});
+
+		jQuery( this ).attr( 'data-' );
+		jQuery( this ).addClass( 'inspector-active' ).text( wsalAuditLogArgs.closeInspectorString );
+		return true;
+	} );
+
+	jQuery( document ).on( 'click', '.data-event-inspector-link.inspector-active', function(event) {
+        event.preventDefault();
+		var targetPanel = '.panel-' + jQuery( this ).attr( 'data-panel-number');
+		var origText =  jQuery( this ).attr( 'data-orig-text' );		
+		jQuery( '.panel-'+ jQuery( this ).attr( 'data-panel-number') + ' .event-content-wrapper' ).slideUp( 200 );
+
+		setTimeout(function() { 
+			jQuery( targetPanel ).remove();
+			jQuery( targetPanel + '-fill').remove();
+		}, 300);
+
+		jQuery( this ).removeClass( 'inspector-active' ).text( origText );
+		return true;
+	} );
+
+	
 });

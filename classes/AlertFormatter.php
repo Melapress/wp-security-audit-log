@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use WSAL\Helpers\WP_Helper;
-use WSAL\Adapter\WSAL_Adapters_MySQL_Meta;
+use WSAL\Entities\Metadata_Entity;
 
 /**
  * WSAL_AlertFormatter class.
@@ -82,6 +82,7 @@ final class WSAL_AlertFormatter {
 	 * @param string   $value         Meta value.
 	 * @param int|null $occurrence_id Occurrence ID. Only present if the event was already written to the database.
 	 * @param array    $metadata      Meta data.
+	 * @param bool     $wrap          Should metadata be wrapped in highlighted markup.
 	 *
 	 * @return false|mixed|string|void|WP_Error
 	 *
@@ -253,11 +254,11 @@ final class WSAL_AlertFormatter {
 				 *
 				 * @since 4.3.0
 				 */
-				// Ensure result is wrapped as expected
+				// Ensure result is wrapped as expected.
 				if ( $wrap ) {
 					$result = $this->wrap_in_hightlight_markup( $result );
 				}
-				
+
 				return apply_filters( 'wsal_format_custom_meta', $result, $expression, $this, $occurrence_id );
 		}
 	}
@@ -310,7 +311,7 @@ final class WSAL_AlertFormatter {
 		if ( ! $no_esc ) {
 			$value = esc_html( $value );
 		}
-		
+
 		return $this->configuration->get_highlight_start_tag() . $value . $this->configuration->get_highlight_end_tag();
 	}
 
@@ -337,16 +338,10 @@ final class WSAL_AlertFormatter {
 	 * @since 4.2.1
 	 */
 	private function get_occurrence_meta_item( $occurrence_id, $meta_key ) {
-		// get connection.
-		$db_config = WSAL_Connector_ConnectorFactory::get_config(); // Get DB connector configuration.
-		$connector = $this->plugin->get_connector( $db_config ); // Get connector for DB.
-		$wsal_db   = $connector->get_connection(); // Get DB connection.
-
 		// get values needed.
-		$meta_adapter = new WSAL_Adapters_MySQL_Meta( $wsal_db );
-		$meta_result  = $meta_adapter->load_by_name_and_occurrence_id( $meta_key, $occurrence_id );
+		$meta_result = Metadata_Entity::load_by_name_and_occurrence_id( $meta_key, $occurrence_id );
 
-		return isset( $meta_result['value'] ) ? $meta_result['value'] : null;
+		return isset( $meta_result['value'] ) ? maybe_unserialize( $meta_result['value'] ) : null;
 	}
 
 	/**

@@ -16,9 +16,12 @@ namespace WSAL\Controllers;
 
 use WSAL\Helpers\Logger;
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\User_Utils;
 use WSAL\Helpers\User_Helper;
 use WSAL\Controllers\Constants;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Entities\Metadata_Entity;
+use WSAL\Entities\Occurrences_Entity;
 use WSAL\Helpers\DateTime_Formatter_Helper;
 
 // Exit if accessed directly.
@@ -42,6 +45,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			'nav_menu_item',       // Nav menu item CPT.
 			'customize_changeset', // Customize changeset CPT.
 			'custom_css',          // Custom CSS CPT.
+			'wp_template',         // Gutenberg templates.
 		);
 
 		/**
@@ -648,7 +652,6 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				'object'      => $object,
 				'event_type'  => $event_type,
 			);
-			// new \WSAL_Alert( $code, $severity, $category, $subcategory, $desc, $message, $metadata, $links, $object, $event_type );
 		}
 
 		/**
@@ -665,7 +668,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				esc_attr( $class ),
 				'<span style="color:#dc3232; font-weight:bold;">' . esc_html__( 'ERROR:', 'wp-security-audit-log' ) . '</span>',
 				esc_html( $message ),
-				'<a href="https://wpactivitylog.com/contact" target="_blank">' . esc_html__( 'Contact us', 'wp-security-audit-log' ) . '</a>'
+				'<a href="https://melapress.com/contact" target="_blank">' . esc_html__( 'Contact us', 'wp-security-audit-log' ) . '</a>'
 			);
 		}
 
@@ -717,8 +720,8 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			}
 
 			// Get event severity.
-			$alert_obj  = self::get_alert( $event_id );
-			$alert_code = $alert_obj ? Constants::get_constant_code( $alert_obj->severity ) : -1;
+			$alert_obj  = self::get_alerts()[ $event_id ];
+			$alert_code = $alert_obj ? Constants::get_constant_code( $alert_obj['severity'] ) : -1;
 
 			if ( -1 !== $alert_code ) {
 				$event_data['Severity'] = $alert_code;
@@ -738,12 +741,12 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 
 			// Add event object.
 			if ( $alert_obj && ! isset( $event_data['Object'] ) ) {
-				$event_data['Object'] = $alert_obj->object;
+				$event_data['Object'] = $alert_obj['object'];
 			}
 
 			// Add event type.
 			if ( $alert_obj && ! isset( $event_data['EventType'] ) ) {
-				$event_data['EventType'] = $alert_obj->event_type;
+				$event_data['EventType'] = $alert_obj['event_type'];
 			}
 
 			// Append further details if in multisite.
@@ -779,33 +782,11 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			// phpcs:ignore
 
 			foreach ( self::get_loggers() as $logger ) {
-				$logger->log( $event_id, $event_data );
+				// phpcs:disable
+				// phpcs:enable
+				$logger::log( $event_id, $event_data );
 			}
 			// phpcs:disable
-		}
-
-		/**
-		 * Return alert given alert code.
-		 *
-		 * @param int   $code    - Alert code.
-		 * @param mixed $default - Returned if alert is not found.
-		 *
-		 * @return WSAL_Alert
-		 *
-		 * @since 4.5.0
-		 */
-		public static function get_alert( $code, $default = null ) {
-			if ( empty( self::$alerts ) ) {
-				self::get_alerts();
-			}
-
-			if ( isset( self::$alerts[ $code ] ) ) {
-				list($code, $severity, $category, $subcategory, $desc, $message, $metadata, $links, $object, $event_type ) = \array_values( self::$alerts[ $code ] );
-
-				return new \WSAL_Alert( $code, $severity, $category, $subcategory, $desc, $message, $metadata, $links, $object, $event_type );
-			}
-
-			return $default;
 		}
 
 		/**
@@ -954,7 +935,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			$alerts = array();
 			foreach ( self::$alerts as $alert ) {
 				if ( $category === $alert['category'] ) {
-					$alerts[ $alert['code'] ] = self::get_alert( $alert['code'] );
+					$alerts[ $alert['code'] ] = $alert;
 				}
 			}
 
@@ -979,7 +960,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			$alerts = array();
 			foreach ( self::$alerts as $alert ) {
 				if ( $sub_category === $alert['subcategory'] ) {
-					$alerts[ $alert['code'] ] = self::get_alert( $alert['code'] );
+					$alerts[ $alert['code'] ] = $alert;
 				}
 			}
 
@@ -1000,19 +981,18 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			if ( isset( self::$cached_alert_checks ) && array_key_exists( $alert_id, self::$cached_alert_checks ) && self::$cached_alert_checks[ $alert_id ] ) {
 				return true;
 			}
-			$query = new \WSAL_Models_OccurrenceQuery();
-			$query->add_order_by( 'created_on', true );
-			$query->set_limit( 5 );
-			$last_occurrences = $query->get_adapter()->execute_query( $query );
+
+			$last_occurrences = self::get_latest_events( 5 );
+
 			$known_to_trigger = false;
 			foreach ( $last_occurrences as $last_occurrence ) {
 				if ( $known_to_trigger ) {
 					break;
 				}
 				if ( ! empty( $last_occurrence ) && ( $last_occurrence['created_on'] + self::$seconds_to_check_back ) > time() ) {
-					if ( ! is_array( $alert_id ) && $last_occurrence['alert_id'] === $alert_id ) {
+					if ( ! is_array( $alert_id ) && (int) $last_occurrence['alert_id'] === $alert_id ) {
 						$known_to_trigger = true;
-					} elseif ( is_array( $alert_id ) && in_array( $last_occurrence[0]['alert_id'], $alert_id, true ) ) {
+					} elseif ( is_array( $alert_id ) && in_array( (int) $last_occurrence[0]['alert_id'], $alert_id, true ) ) {
 						$known_to_trigger = true;
 					}
 				}
@@ -1026,36 +1006,68 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		/**
 		 * Get latest events from DB.
 		 *
-		 * @param int $limit – Number of events.
+		 * @param int  $limit – Number of events.
+		 * @param bool $include_meta - Should we include meta to the collected events.
 		 *
 		 * @return WSAL_Models_Occurrence[]|bool
 		 *
 		 * @since 4.5.0
 		 */
-		public static function get_latest_events( $limit = 1 ) {
-			// Occurrence query.
-			$occ_query = new \WSAL_Models_OccurrenceQuery();
-			if ( ! $occ_query->get_adapter()->is_connected() ) {
+		public static function get_latest_events( $limit = 1, bool $include_meta = false ) {
+
+			if ( ! Occurrences_Entity::get_connection()->has_connected ) {
 				// Connection problem while using external database (if local database is used, we would see WordPress's
 				// "Error Establishing a Database Connection" screen).
 				return false;
 			}
 
+			$query = array();
+
 			// Get site id.
 			$site_id = (int) WP_Helper::get_view_site_id();
+			// if we have a blog id then add it.
 			if ( $site_id ) {
-				$occ_query->add_condition( 'site_id = %d ', $site_id );
+				$query['AND'][] = array( ' site_id = %s ' => $site_id );
 			}
 
-			$occ_query->add_order_by( 'created_on', true ); // Set order for latest events.
-			$occ_query->set_limit( $limit ); // Set limit.
-			$events = $occ_query->get_adapter()->execute_query( $occ_query );
+			if ( ! $include_meta ) {
+				$events = Occurrences_Entity::build_query( array(), $query, array( 'created_on' => 'DESC' ), array( $limit ) );
+			} else {
+
+				$meta_table_name = Metadata_Entity::get_table_name();
+				$join_clause     = array(
+					$meta_table_name => array(
+						'direction'   => 'LEFT',
+						'join_fields' => array(
+							array(
+								'join_field_left'  => 'occurrence_id',
+								'join_table_right' => Occurrences_Entity::get_table_name(),
+								'join_field_right' => 'id',
+							),
+						),
+					),
+				);
+				// order results by date and return the query.
+				$meta_full_fields_array       = Metadata_Entity::prepare_full_select_statement();
+				$occurrence_full_fields_array = Occurrences_Entity::prepare_full_select_statement();
+
+				/**
+				 * Limit here is set to $limit * 15, because now we have to extract metadata as well.
+				 * Because of that we can not use limit directly here. We will extract enough data to include the metadata as well and limit the results later on - still fastest than creating enormous amount of queries.
+				 * Currently there are no more than 10 records (meta) per occurrence, we are using 12 just in case.
+				 */
+				$events = Occurrences_Entity::build_query( array_merge( $meta_full_fields_array, $occurrence_full_fields_array ), $query, array( 'created_on' => 'DESC' ), array( $limit * 12 ), $join_clause );
+
+				$events = Occurrences_Entity::prepare_with_meta_data( $events );
+
+				$events = array_slice( $events, 0, $limit );
+			}
 
 			if ( ! empty( $events ) && is_array( $events ) ) {
 				return $events;
 			}
 
-			return false;
+			return array();
 		}
 
 		/**
@@ -1155,6 +1167,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 					'duplicated'   => esc_html__( 'Duplicated', 'wp-security-audit-log' ),
 					'submitted'    => esc_html__( 'Submitted', 'wp-security-audit-log' ),
 					'revoked'      => esc_html__( 'Revoked', 'wp-security-audit-log' ),
+					'sent'         => esc_html__( 'Sent', 'wp-security-audit-log' ),
 				);
 				// sort the types alphabetically.
 				asort( self::$event_types );
@@ -1334,57 +1347,36 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				$roles = str_replace( array( '"', '[', ']' ), ' ', $roles );
 			}
 
-			// Must be a new instance every time, otherwise the alert message is not retrieved properly.
-			$occurrence = new \WSAL_Models_Occurrence();
-
-			$user_id = ( ! is_numeric( $user_id ) && null !== $user_id ) ? \WSAL_Utilities_UsersUtils::swap_login_for_id( $user_id ) : $user_id;
+			$user_id = ( ! is_numeric( $user_id ) && null !== $user_id ) ? User_Utils::swap_login_for_id( $user_id ) : $user_id;
 
 			// Get alert details.
-			$code = self::get_alert( $alert_id );
-			$code = $code ? $code->severity : 0;
+			$code = Alert::get_alert( $alert_id );
+			$code = $code ? $code['severity'] : 0;
 
 			$blog_info = WP_Helper::get_blog_info( $site_id );
 
-			// Get the alert message - properly.
-			$occurrence->id          = $entry_id;
-			$occurrence->site_id     = $site_id;
-			$occurrence->alert_id    = $alert_id;
-			$occurrence->created_on  = $created_on;
-			$occurrence->client_ip   = $ip;
-			$occurrence->object      = $object;
-			$occurrence->event_type  = $event_type;
-			$occurrence->user_id     = $user_id;
-			$occurrence->user_agent  = $ua;
-			$occurrence->post_id     = $entry->post_id;
-			$occurrence->post_type   = $entry->post_type;
-			$occurrence->post_status = $entry->post_status;
-			$occurrence->set_user_roles( $roles );
-
-			$event_metadata = $occurrence->get_meta_array();
-			if ( ! $occurrence->_cached_message ) {
-				$occurrence->_cached_message = $occurrence->get_alert()->get_message( $event_metadata, null, $entry_id, $context );
-			}
+			$event_metadata = Occurrences_Entity::get_meta_array( (int) $entry_id );
 
 			if ( ! $user_id ) {
 				$username = __( 'System', 'wp-security-audit-log' );
 				$roles    = '';
 			} else {
-				$username = \WSAL_Utilities_UsersUtils::get_username( $event_metadata );
+				$username = User_Utils::get_username( $event_metadata );
 			}
 
 			// Meta details.
 			return array(
-				'site_id'    => $site_id,
+				'site_id'    => (int) $site_id,
 				'blog_name'  => $blog_info['name'],
 				'blog_url'   => $blog_info['url'],
-				'alert_id'   => $alert_id,
+				'alert_id'   => (int) $alert_id,
 				'date'       => DateTime_Formatter_Helper::get_formatted_date_time( $created_on ),
 				// We need to keep the timestamp to be able to group entries by dates etc. The "date" field is not suitable
 				// as it is already translated, thus difficult to parse and process.
 				'timestamp'  => $created_on,
 				'code'       => Constants::get_constant_name( $code ),
 				// Fill variables in message.
-				'message'    => $occurrence->get_message( $event_metadata, $context ),
+				'message'    => Alert::get_message( $event_metadata, null, $alert_id, $entry_id, $context ),
 				'user_id'    => $user_id,
 				'user_name'  => $username,
 				'user_data'  => $user_id ? self::get_event_user_data( $username ) : false,
@@ -1447,7 +1439,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				if ( ! isset( $result[ \html_entity_decode( $alert['category'] ) ][ \html_entity_decode( $alert['subcategory'] ) ] ) ) {
 					$result[ \html_entity_decode( $alert['category'] ) ][ \html_entity_decode( $alert['subcategory'] ) ] = array();
 				}
-				$result[ \html_entity_decode( $alert['category'] ) ][ \html_entity_decode( $alert['subcategory'] ) ][] = self::get_alert( $alert['code'] );
+				$result[ \html_entity_decode( $alert['category'] ) ][ \html_entity_decode( $alert['subcategory'] ) ][] = $alert;
 			}
 
 			if ( $sorted ) {

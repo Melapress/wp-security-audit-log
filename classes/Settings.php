@@ -8,7 +8,7 @@
  */
 
 use WSAL\Helpers\WP_Helper;
-use WSAL\Helpers\User_Helper;
+use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 
@@ -131,7 +131,6 @@ class WSAL_Settings {
 		add_action( 'deactivated_plugin', array( $this, 'reset_stealth_mode' ), 10, 1 );
 	}
 
-
 	/**
 	 * Enable Basic Mode.
 	 */
@@ -148,24 +147,6 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Check whether dashboard widgets are enabled or not.
-	 *
-	 * @return bool
-	 */
-	public function is_widgets_enabled() {
-		return ! \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'disable-widgets' );
-	}
-
-	/**
-	 * Check whether dashboard widgets are enabled or not.
-	 *
-	 * @param bool $newvalue - True if enabled.
-	 */
-	public function set_widgets_enabled( $newvalue ) {
-		\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'disable-widgets', ! $newvalue );
-	}
-
-	/**
 	 * Check whether admin bar notifications are enabled or not.
 	 *
 	 * @since 3.2.4
@@ -177,17 +158,6 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Set admin bar notifications.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @param bool $newvalue - True if enabled.
-	 */
-	public function set_admin_bar_notif( $newvalue ) {
-		\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'disable-admin-bar-notif', ! $newvalue, true );
-	}
-
-	/**
 	 * Check admin bar notification updates refresh option.
 	 *
 	 * @since 3.3.1
@@ -196,35 +166,6 @@ class WSAL_Settings {
 	 */
 	public function get_admin_bar_notif_updates() {
 		return WSAL\Helpers\Settings_Helper::get_option_value( 'admin-bar-notif-updates', 'page-refresh' );
-	}
-
-	/**
-	 * Set admin bar notifications.
-	 *
-	 * @since 3.3.1
-	 *
-	 * @param string $newvalue - New option value.
-	 */
-	public function set_admin_bar_notif_updates( $newvalue ) {
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'admin-bar-notif-updates', $newvalue, true );
-	}
-
-	/**
-	 * Check whether alerts in audit log view refresh automatically or not.
-	 *
-	 * @return bool
-	 */
-	public function is_refresh_alerts_enabled() {
-		return ! WSAL\Helpers\Settings_Helper::get_option_value( 'disable-refresh' );
-	}
-
-	/**
-	 * Check whether alerts in audit log view refresh automatically or not.
-	 *
-	 * @param bool $newvalue - True if enabled.
-	 */
-	public function set_refresh_alerts_enabled( $newvalue ) {
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'disable-refresh', ! $newvalue );
 	}
 
 	/**
@@ -302,101 +243,12 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Enables or disables time based retention period.
-	 *
-	 * @param bool   $enable   If true, time based retention period is enabled.
-	 * @param string $new_date - The new pruning date.
-	 * @param string $new_unit – New value of pruning unit.
-	 */
-	public function set_pruning_date_settings( $enable, $new_date, $new_unit ) {
-		$was_enabled = \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'pruning-date-e', false );
-		$old_period  = \WSAL\Helpers\Settings_Helper::get_option_value( 'pruning-date', '6 months' );
-
-		if ( ! $was_enabled && $enable ) {
-			// The retention period is being enabled.
-			\WSAL\Helpers\Settings_Helper::set_option_value( 'pruning-date', $new_date );
-			\WSAL\Helpers\Settings_Helper::set_option_value( 'pruning-unit', $new_unit );
-			\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'pruning-date-e', $enable );
-
-			Alert_Manager::trigger_event(
-				6052,
-				array(
-					'new_setting'      => 'Delete events older than ' . $old_period,
-					'previous_setting' => 'Keep all data',
-				)
-			);
-
-			return;
-		}
-
-		if ( $was_enabled && ! $enable ) {
-			// The retention period is being disabled.
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'pruning-date' );
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'pruning-unit' );
-			\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'pruning-date-e', $enable );
-
-			Alert_Manager::trigger_event(
-				6052,
-				array(
-					'new_setting'      => 'Keep all data',
-					'previous_setting' => 'Delete events older than ' . $old_period,
-				)
-			);
-
-			return;
-		}
-
-		if ( $enable ) {
-			// The retention period toggle has not changed, we need to check if the actual period changed.
-			if ( $new_date != $old_period ) {
-				\WSAL\Helpers\Settings_Helper::set_option_value( 'pruning-date', $new_date );
-				\WSAL\Helpers\Settings_Helper::set_option_value( 'pruning-unit', $new_unit );
-
-				Alert_Manager::trigger_event(
-					6052,
-					array(
-						'new_setting'      => 'Delete events older than ' . $new_date,
-						'previous_setting' => 'Delete events older than ' . $old_period,
-					)
-				);
-			}
-		}
-	}
-
-	/**
 	 * Sets the plugin setting that enabled data pruning limit.
 	 *
 	 * @param bool $enabled If true, the limit is enabled.
 	 */
 	public function set_pruning_limit_enabled( $enabled ) {
 		\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'pruning-limit-e', $enabled );
-	}
-
-	/**
-	 * Checks if the time based retention period is enabled.
-	 *
-	 * @return bool
-	 */
-	public function is_pruning_date_enabled() {
-		return \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'pruning-date-e' );
-	}
-
-	/**
-	 * Checks if the data pruning limit is enabled.
-	 *
-	 * @return bool
-	 */
-	public function is_pruning_limit_enabled() {
-		return \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'pruning-limit-e' );
-	}
-
-	/**
-	 * Sandbox functionality is now in an external plugin.
-	 *
-	 * @deprecated
-	 */
-	public function IsSandboxPageEnabled() {
-		return esc_html__( 'This function is deprecated', 'wp-security-audit-log' );
 	}
 
 	/**
@@ -433,7 +285,7 @@ class WSAL_Settings {
 	 * @param string $text - Login Page Notification Text.
 	 */
 	public function set_login_page_notification_text( $text ) {
-		$text        = wp_kses( $text, $this->plugin->allowed_html_tags );
+		$text        = wp_kses( $text, WpSecurityAuditLog::get_allowed_html_tags() );
 		$old_setting = WSAL\Helpers\Settings_Helper::get_option_value( 'login_page_notification_text' );
 		if ( ! empty( $old_setting ) && ! empty( $text ) && ! is_null( $old_setting ) && $old_setting !== $text ) {
 			Alert_Manager::trigger_event( 6047 );
@@ -451,32 +303,6 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Retrieves a list of alerts disabled by default.
-	 *
-	 * @return int[] List of alerts disabled by default.
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_default_disabled_alerts()
-	 */
-	public function get_default_disabled_alerts() {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_default_disabled_alerts()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_default_disabled_alerts();
-	}
-
-	/**
-	 * Return IDs of disabled alerts.
-	 *
-	 * @return array
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_disabled_alerts()
-	 */
-	public function get_disabled_alerts() {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_disabled_alerts()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_disabled_alerts();
-	}
-
-	/**
 	 * Method: Set Disabled Alerts.
 	 *
 	 * @param array $types IDs alerts to disable.
@@ -484,15 +310,6 @@ class WSAL_Settings {
 	public function set_disabled_alerts( $types ) {
 		$this->disabled = array_unique( array_map( 'intval', $types ) );
 		\WSAL\Helpers\Settings_Helper::set_option_value( 'disabled-alerts', implode( ',', $this->disabled ) );
-	}
-
-	/**
-	 * Checks if the plugin is in incognito mode.
-	 *
-	 * @return bool
-	 */
-	public function is_incognito() {
-		return \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'hide-plugin' );
 	}
 
 	/**
@@ -511,13 +328,6 @@ class WSAL_Settings {
 		}
 
 		\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'hide-plugin', $enabled );
-	}
-
-	/**
-	 * Checking if the data will be removed.
-	 */
-	public function is_delete_data() {
-		return \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'delete-data' );
 	}
 
 	/**
@@ -657,17 +467,6 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Check if current user can perform an action.
-	 *
-	 * @param string $action Type of action, either 'view' or 'edit'.
-	 *
-	 * @return bool If user has access or not.
-	 */
-	public function current_user_can( $action ) {
-		return $this->user_can( wp_get_current_user(), $action );
-	}
-
-	/**
 	 * Get list of superadmin usernames.
 	 *
 	 * @return array
@@ -711,139 +510,6 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Check if user can perform an action.
-	 *
-	 * @param int|WP_user $user   - User object to check.
-	 * @param string      $action - Type of action, either 'view' or 'edit'.
-	 *
-	 * @return bool If user has access or not.
-	 */
-	public function user_can( $user, $action ) {
-		if ( is_int( $user ) ) {
-			$user = get_userdata( $user );
-		}
-
-		// By default, the user has no privileges.
-		$result = false;
-
-		$is_multisite = WP_Helper::is_multisite();
-		switch ( $action ) {
-			case 'view':
-				if ( ! $is_multisite ) {
-					// Non-multisite piggybacks on the plugin settings access.
-					switch ( $this->get_restrict_plugin_setting() ) {
-						case 'only_admins':
-							// Allow access only if the user is and admin.
-							$result = in_array( 'administrator', $user->roles, true );
-
-							break;
-						case 'only_me':
-							// Allow access only if the user matches the only user allowed access.
-							$result = $user->ID === $this->get_only_me_user_id();
-
-							break;
-						default:
-							// No other options to allow access here.
-							$result = false;
-					}
-				} else {
-					// Multisite MUST respect the log viewer restriction settings plus also additional users and roles
-					// defined in the extra option.
-					switch ( $this->get_restrict_log_viewer() ) {
-						case 'only_me':
-							// Allow access only if the user matches the only user allowed access.
-							$result = ( $user->ID === $this->get_only_me_user_id() );
-
-							break;
-						case 'only_superadmins':
-							// Allow access only for super admins.
-							if ( function_exists( 'is_super_admin' ) && is_super_admin( $user->ID ) ) {
-								$result = true;
-							}
-
-							break;
-						case 'only_admins':
-							// Allow access only for super admins and admins.
-							$result = in_array( 'administrator', $user->roles, true ) || ( function_exists( 'is_super_admin' ) && is_super_admin( $user->ID ) );
-
-							break;
-						default:
-							// Fallback for any other cases would go here.
-							break;
-					}
-				}
-
-				if ( ! $result ) {
-					// User is still not allowed to view the logs, let's check the additional users and roles
-					// settings.
-					$extra_viewers = $this->get_allowed_plugin_viewers();
-					if ( in_array( $user->user_login, $extra_viewers, true ) ) {
-						$result = true;
-					} elseif ( ! empty( array_intersect( $extra_viewers, $user->roles ) ) ) {
-						$result = true;
-					}
-				}
-
-				break;
-			case 'edit':
-				if ( $is_multisite ) {
-					// No one has access to settings on sub site inside a network.
-					if ( wp_doing_ajax() ) {
-						// AJAX calls are an exception.
-						$result = true;
-					} elseif ( ! is_network_admin() ) {
-						$result = false;
-
-						break;
-					}
-				}
-
-				$restrict_plugin_setting = $this->get_restrict_plugin_setting();
-				if ( 'only_me' === $restrict_plugin_setting ) {
-					$result = ( $user->ID === $this->get_only_me_user_id() );
-				} elseif ( 'only_admins' === $restrict_plugin_setting ) {
-					if ( $is_multisite ) {
-						$result = ( function_exists( 'is_super_admin' ) && is_super_admin( $user->ID ) );
-					} else {
-						$result = in_array( 'administrator', $user->roles, true );
-					}
-				}
-
-				break;
-			default:
-				$result = false;
-		}
-
-		/*
-		 * Filters the user permissions result.
-		 *
-		 * @since 4.1.3
-		 *
-		 * @param bool $result User access flag after applying all internal rules.
-		 * @param WP_User $user The user in question.
-		 * @param string $action Action to check permissions for.
-		 * @return bool
-		 */
-		return apply_filters( 'wsal_user_can', $result, $user, $action );
-	}
-
-	/**
-	 * Retrieves current user's roles.
-	 *
-	 * @param string[] $base_roles An array of base roles.
-	 *
-	 * @return string[]
-	 *
-	 * @deprecated 4.4.3 Use User_Helper::get_user_roles
-	 * @see User_Helper::get_user_roles
-	 */
-	public function get_current_user_roles( $base_roles = null ) {
-		_deprecated_function( __FUNCTION__, '4.4.3', 'User_Helper::get_user_roles()' );
-
-		return User_Helper::get_user_roles();
-	}
-
-	/**
 	 * Checks if given user is a superadmin.
 	 *
 	 * @param string $username Username.
@@ -854,15 +520,6 @@ class WSAL_Settings {
 		$user_id = username_exists( $username );
 
 		return function_exists( 'is_super_admin' ) && is_super_admin( $user_id );
-	}
-
-	/**
-	 * Checks if IP address is determined based on proxy.
-	 *
-	 * @return bool True if IP address is determined based on proxy.
-	 */
-	public function is_main_ip_from_proxy() {
-		return \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'use-proxy-ip' );
 	}
 
 	/**
@@ -898,88 +555,6 @@ class WSAL_Settings {
 	 */
 	public function set_internal_ips_filtering( $enabled ) {
 		\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'filter-internal-ip', $enabled );
-	}
-
-	/**
-	 * Get main client IP.
-	 *
-	 * @return string|null
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_main_client_ip()
-	 */
-	public function get_main_client_ip() {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_main_client_ip()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_main_client_ip();
-	}
-
-	/**
-	 * Get client IP addresses.
-	 *
-	 * @return array
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_client_ips()
-	 */
-	public function get_client_ips() {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_client_ips()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_client_ips();
-	}
-
-	/**
-	 * Normalize IP address, i.e., remove the port number.
-	 *
-	 * @param string $ip - IP address.
-	 *
-	 * @return string
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::normalize_ip()
-	 */
-	protected function normalize_ip( $ip ) {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::normalize_ip()' );
-
-		return \WSAL\Helpers\Settings_Helper::normalize_ip( $ip );
-	}
-
-	/**
-	 * Validate IP address.
-	 *
-	 * @param string $ip - IP address.
-	 *
-	 * @return string|bool
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Validator::validate_ip()
-	 */
-	protected function validate_ip( $ip ) {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Validator::validate_ip()' );
-
-		return \WSAL\Helpers\Validator::validate_ip( $ip );
-	}
-
-	/**
-	 * Sets the users excluded from monitoring.
-	 *
-	 * @param array $users Users to be excluded.
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::set_excluded_monitoring_users()
-	 */
-	public function set_excluded_monitoring_users( $users ) {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::set_excluded_monitoring_users()' );
-
-		return \WSAL\Helpers\Settings_Helper::set_excluded_monitoring_users( $users );
-	}
-
-	/**
-	 * Retrieves the users excluded from monitoring.
-	 *
-	 * @return array Users excluded from monitoring.
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_users()
-	 */
-	public function get_excluded_monitoring_users() {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_monitoring_users()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_users();
 	}
 
 	/**
@@ -1024,101 +599,6 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Get Custom Post Types excluded from monitoring.
-	 *
-	 * @return array
-	 *
-	 * @since 2.6.7
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_post_types()
-	 */
-	public function get_excluded_post_types(): array {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_post_types()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_excluded_post_types();
-	}
-
-	/**
-	 * Set roles excluded from monitoring.
-	 *
-	 * @param array $roles - Array of roles.
-	 *
-	 * @deprecated 4.5.1 - Use \WSAL\Helpers\Settings_Helper::set_excluded_monitoring_roles()
-	 */
-	public function set_excluded_monitoring_roles( $roles ) {
-		_deprecated_function( __FUNCTION__, '4.5.1', '\WSAL\Helpers\Settings_Helper::set_excluded_monitoring_roles()' );
-
-		return \WSAL\Helpers\Settings_Helper::set_excluded_monitoring_users( $roles );
-	}
-
-	/**
-	 * Get roles excluded from monitoring.
-	 *
-	 * @deprecated 4.5.1 - Use \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_roles()
-	 */
-	public function get_excluded_monitoring_roles() {
-		_deprecated_function( __FUNCTION__, '4.5.1', '\WSAL\Helpers\Settings_Helper::get_excluded_monitoring_roles()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_roles();
-	}
-
-	/**
-	 * Updates custom post meta fields excluded from monitoring.
-	 *
-	 * @param array $custom Excluded post meta fields.
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::set_excluded_post_meta_fields()
-	 */
-	public function set_excluded_post_meta_fields( $custom ) {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::set_excluded_post_meta_fields()' );
-
-		return \WSAL\Helpers\Settings_Helper::set_excluded_post_meta_fields( $custom );
-	}
-
-	/**
-	 * Retrieves a list of post meta fields excluded from monitoring.
-	 *
-	 * @return array
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_post_meta_fields()
-	 */
-	public function get_excluded_post_meta_fields() {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_post_meta_fields()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_excluded_post_meta_fields();
-	}
-
-	/**
-	 * Updates custom user meta fields excluded from monitoring.
-	 *
-	 * @param array $custom Custom user meta fields excluded from monitoring.
-	 *
-	 * @since 4.3.2
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::set_excluded_user_meta_fields()
-	 */
-	public function set_excluded_user_meta_fields( $custom ) {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::set_excluded_user_meta_fields()' );
-
-		return \WSAL\Helpers\Settings_Helper::set_excluded_user_meta_fields( $custom );
-	}
-
-	/**
-	 * Retrieves a list of user meta fields excluded from monitoring.
-	 *
-	 * @return array
-	 *
-	 * @since 4.3.2
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_user_meta_fields()
-	 */
-	public function get_excluded_user_meta_fields() {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_user_meta_fields()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_excluded_user_meta_fields();
-	}
-
-	/**
 	 * IP excluded from monitoring.
 	 *
 	 * @param array $ip IP addresses to exclude from monitoring.
@@ -1153,20 +633,7 @@ class WSAL_Settings {
 		}
 
 		$this->excluded_ip = $ip;
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'excluded-ip', esc_html( implode( ',', $this->excluded_ip ) ) );
-	}
-
-	/**
-	 * Retrieves a list of IP addresses to exclude from monitoring.
-	 *
-	 * @return array List of IP addresses to exclude from monitoring.
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_ip()
-	 */
-	public function get_excluded_monitoring_ip() {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_excluded_monitoring_ip()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_excluded_monitoring_ip();
+		\WSAL\Helpers\Settings_Helper::set_excluded_monitoring_ips( $this->excluded_ip );
 	}
 
 	/**
@@ -1334,14 +801,13 @@ class WSAL_Settings {
 			'object'     => '1',
 			'event_type' => '1',
 			'message'    => '1',
-			'info'       => '1',
 		);
 
 		if ( WP_Helper::is_multisite() ) {
 			$columns = array_slice( $columns, 0, 6, true ) + array( 'site' => '1' ) + array_slice( $columns, 6, null, true );
 		}
 
-		$selected = $this->get_columns_selected();
+		$selected = WSAL\Helpers\Settings_Helper::get_option_value( 'columns', array() );
 
 		if ( ! empty( $selected ) ) {
 			$columns = array(
@@ -1368,93 +834,12 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Gets the list of columns selected for display in the audit log viewer.
-	 *
-	 * @return array List of columns selected for display in the audit log viewer
-	 */
-	public function get_columns_selected() {
-		return WSAL\Helpers\Settings_Helper::get_option_value( 'columns', array() );
-	}
-
-	/**
 	 * Sets the list of columns selected for display in the audit log viewer.
 	 *
 	 * @param array $columns List of columns selected for display in the audit log viewer.
 	 */
 	public function set_columns( $columns ) {
 		\WSAL\Helpers\Settings_Helper::set_option_value( 'columns', json_encode( $columns ) );
-	}
-
-	/**
-	 * Checks if the monitoring of background events is enabled.
-	 *
-	 * @return bool True if the monitoring of background events is enabled.
-	 */
-	public function is_wp_backend() {
-		return \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'wp-backend' );
-	}
-
-	/**
-	 * Enables or disables the monitoring of background events.
-	 *
-	 * @param bool $enabled True if the monitoring of background events should be enabled.
-	 */
-	public function set_wp_backend( $enabled ) {
-		\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'wp-backend', $enabled );
-	}
-
-	/**
-	 * Set use email setting.
-	 *
-	 * @param string $use – Setting value.
-	 */
-	public function set_use_email( $use ) {
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'use-email', $use );
-	}
-
-	/**
-	 * Get use email setting.
-	 *
-	 * @return string
-	 */
-	public function get_use_email() {
-		return WSAL\Helpers\Settings_Helper::get_option_value( 'use-email', 'default_email' );
-	}
-
-	/**
-	 * Sets the "From" email address.
-	 *
-	 * @param string $email_address The "From" email address.
-	 */
-	public function set_from_email( $email_address ) {
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'from-email', trim( $email_address ) );
-	}
-
-	/**
-	 * Get the "From" email address.
-	 *
-	 * @return string The "From" email address.
-	 */
-	public function get_from_email() {
-		return WSAL\Helpers\Settings_Helper::get_option_value( 'from-email' );
-	}
-
-	/**
-	 * Sets the user display name for the event audit log.
-	 *
-	 * @param string $display_name User display name setting.
-	 */
-	public function set_display_name( $display_name ) {
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'display-name', trim( $display_name ) );
-	}
-
-	/**
-	 * Gets the user display name for the event audit log.
-	 *
-	 * @return string User display name setting.
-	 */
-	public function get_display_name() {
-		return WSAL\Helpers\Settings_Helper::get_option_value( 'display-name' );
 	}
 
 	/**
@@ -1534,7 +919,7 @@ class WSAL_Settings {
 			// that code is added.
 			// Meaning - if that is AJAX call, and it comes from the roles and not users,
 			// we have no business here - the token is valid and within users, but we are looking
-			// for roles
+			// for roles.
 			if ( false !== $type && 'ExRole' === $type ) {
 
 			} else {
@@ -1697,30 +1082,6 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Method: Get view site id.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @return int
-	 */
-	public function get_view_site_id() {
-		switch ( true ) {
-			// Non-multisite.
-			case ! WP_Helper::is_multisite():
-				return 0;
-				// Multisite + main site view.
-			case $this->is_main_blog() && ! $this->is_specific_view():
-				return 0;
-				// Multisite + switched site view.
-			case $this->is_main_blog() && $this->is_specific_view():
-				return $this->get_specific_view();
-				// Multisite + local site view.
-			default:
-				return get_current_blog_id();
-		}
-	}
-
-	/**
 	 * Method: Check if the blog is main blog.
 	 *
 	 * @since 3.2.4
@@ -1729,28 +1090,6 @@ class WSAL_Settings {
 	 */
 	protected function is_main_blog() {
 		return 1 === get_current_blog_id();
-	}
-
-	/**
-	 * Method: Check if it is a specific view.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @return bool
-	 */
-	protected function is_specific_view() {
-		return isset( $_REQUEST['wsal-cbid'] ) && 0 !== (int) $_REQUEST['wsal-cbid'];
-	}
-
-	/**
-	 * Method: Get a specific view.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @return int
-	 */
-	protected function get_specific_view() {
-		return isset( $_REQUEST['wsal-cbid'] ) ? (int) sanitize_text_field( wp_unslash( $_REQUEST['wsal-cbid'] ) ) : 0;
 	}
 
 	/**
@@ -1814,20 +1153,7 @@ class WSAL_Settings {
 	 * @return string
 	 */
 	public function get_events_type_nav() {
-		return WSAL\Helpers\Settings_Helper::get_option_value( 'events-nav-type', 'infinite-scroll' );
-	}
-
-	/**
-	 * Sets Events Navigation Type.
-	 *
-	 * Sets type of navigation for events log viewer.
-	 *
-	 * @since 3.3.1.1
-	 *
-	 * @param string $nav_type - Navigation type.
-	 */
-	public function set_events_type_nav( $nav_type ) {
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'events-nav-type', $nav_type );
+		return WSAL\Helpers\Settings_Helper::get_option_value( 'events-nav-type', '' );
 	}
 
 	/**
@@ -1839,168 +1165,6 @@ class WSAL_Settings {
 		global $wpdb;
 
 		return $wpdb->get_results("SELECT * FROM $wpdb->options WHERE option_name LIKE 'wsal_%'"); // phpcs:ignore
-	}
-
-	/**
-	 * Check if IP is in range for IPv4.
-	 *
-	 * This function takes 2 arguments, an IP address and a "range" in several different formats.
-	 *
-	 * Network ranges can be specified as:
-	 * 1. Wildcard format:     1.2.3.*
-	 * 2. CIDR format:         1.2.3/24  OR  1.2.3.4/255.255.255.0
-	 * 3. Start-End IP format: 1.2.3.0-1.2.3.255
-	 *
-	 * The function will return true if the supplied IP is within the range.
-	 * Note little validation is done on the range inputs - it expects you to
-	 * use one of the above 3 formats.
-	 *
-	 * @see https://github.com/cloudflarearchive/Cloudflare-Tools/blob/master/cloudflare/ip_in_range.php#L55
-	 *
-	 * @param string $ip    - IP address.
-	 * @param string $range - Range of IP address.
-	 *
-	 * @return bool
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::check_ipv4_in_range()
-	 */
-	public function check_ipv4_in_range( $ip, $range ) {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::check_ipv4_in_range()' );
-
-		return \WSAL\Helpers\Settings_Helper::check_ipv4_in_range( $ip, $range );
-	}
-
-	/**
-	 * Return the range of IP address from 127.0.0.0-24 to 127.0.0.0-127.0.0.24 format.
-	 *
-	 * @param string $range - Range of IP address.
-	 *
-	 * @return object
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_ipv4_by_range()
-	 */
-	public function get_ipv4_by_range( $range ) {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_ipv4_by_range()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_ipv4_by_range( $range );
-	}
-
-	/**
-	 * Returns site server directories.
-	 *
-	 * @param string $context - Context of the directories.
-	 *
-	 * @return array
-	 */
-	public function get_server_directories( $context = '' ) {
-		$wp_directories = array();
-
-		// Get WP uploads directory.
-		$wp_uploads  = wp_upload_dir();
-		$uploads_dir = $wp_uploads['basedir'];
-
-		if ( 'display' === $context ) {
-			$wp_directories = array(
-				'root'           => __( 'Root directory of WordPress (excluding sub directories)', 'wp-security-audit-log' ),
-				'wp-admin'       => __( 'WP Admin directory (/wp-admin/)', 'wp-security-audit-log' ),
-				WPINC            => __( 'WP Includes directory (/wp-includes/)', 'wp-security-audit-log' ),
-				WP_CONTENT_DIR   => __( '/wp-content/ directory (excluding plugins, themes & uploads directories)', 'wp-security-audit-log' ),
-				get_theme_root() => __( 'Themes directory (/wp-content/themes/)', 'wp-security-audit-log' ),
-				WP_PLUGIN_DIR    => __( 'Plugins directory (/wp-content/plugins/)', 'wp-security-audit-log' ),
-				$uploads_dir     => __( 'Uploads directory (/wp-content/uploads/)', 'wp-security-audit-log' ),
-			);
-
-			if ( WP_Helper::is_multisite() ) {
-				// Upload directories of subsites.
-				$wp_directories[ $uploads_dir . '/sites' ] = __( 'Uploads directory of all sub sites on this network (/wp-content/sites/*)', 'wp-security-audit-log' );
-			}
-		} else {
-			// Server directories.
-			$wp_directories = array(
-				'',               // Root directory.
-				'wp-admin',       // WordPress Admin.
-				WPINC,            // wp-includes.
-				WP_CONTENT_DIR,   // wp-content.
-				get_theme_root(), // Themes.
-				WP_PLUGIN_DIR,    // Plugins.
-				$uploads_dir,     // Uploads.
-			);
-		}
-
-		// Prepare directories path.
-		foreach ( $wp_directories as $index => $server_dir ) {
-			if ( 'display' === $context && false !== strpos( $index, ABSPATH ) ) {
-				unset( $wp_directories[ $index ] );
-				$index = untrailingslashit( $index );
-				$index = $this->get_server_directory( $index );
-			} else {
-				$server_dir = untrailingslashit( $server_dir );
-				$server_dir = $this->get_server_directory( $server_dir );
-			}
-
-			$wp_directories[ $index ] = $server_dir;
-		}
-
-		return $wp_directories;
-	}
-
-	/**
-	 * Returns a WP directory without ABSPATH.
-	 *
-	 * @param string $directory - Directory.
-	 *
-	 * @return string
-	 */
-	public function get_server_directory( $directory ) {
-		return preg_replace( '/^' . preg_quote( ABSPATH, '/' ) . '/', '', $directory );
-	}
-
-	/**
-	 * Check the current page screen id against current screen id of WordPress.
-	 *
-	 * @param string $page - Page screen id.
-	 *
-	 * @return bool
-	 */
-	public function is_current_page( $page ) {
-		if ( ! $this->current_screen ) {
-			$this->current_screen = get_current_screen();
-		}
-
-		if ( isset( $this->current_screen->id ) ) {
-			return $page === $this->current_screen->id;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Get WSAL's frontend events option.
-	 *
-	 * @return array
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_frontend_events()
-	 */
-	public static function get_frontend_events() {
-		// Missed to remove that from the extensions, so it will cost more to update extensions, instead of removing the deprecation - extensions will be part of the core from the next version, so by then that method will be removed all along.
-		// _deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_frontend_events()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_frontend_events();
-	}
-
-	/**
-	 * Set WSAL's frontend events option.
-	 *
-	 * @param array $value - Option values.
-	 *
-	 * @return bool
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::set_frontend_events()
-	 */
-	public static function set_frontend_events( $value = array() ) {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::set_frontend_events()' );
-
-		return \WSAL\Helpers\Settings_Helper::set_frontend_events( $value );
 	}
 
 	/**
@@ -2073,70 +1237,8 @@ class WSAL_Settings {
 		\WSAL\Helpers\Settings_Helper::delete_option_value( 'mainwp_enforced_settings' );
 	}
 
-	/**
-	 * Determines added and removed items between 2 arrays.
-	 *
-	 * @param array|string $old_value Old list. Support comma separated string.
-	 * @param array|string $value     New list. Support comma separated string.
-	 *
-	 * @return array
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::determine_added_and_removed_items()
-	 */
-	public function determine_added_and_removed_items( $old_value, $value ) {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::determine_added_and_removed_items()' );
 
-		return \WSAL\Helpers\Settings_Helper::determine_added_and_removed_items( $old_value, $value );
-	}
-
-	/**
-	 * Tidies-up the blank values.
-	 *
-	 * @param string $value Value.
-	 *
-	 * @return string Tidies up value.
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::tidy_blank_values()
-	 */
-	public function tidy_blank_values( $value ) {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::tidy_blank_values()' );
-
-		return \WSAL\Helpers\Settings_Helper::tidy_blank_values( $value );
-	}
-
-	/**
-	 * Retrieves current database version.
-	 *
-	 * @return int Current database version number.
-	 *
-	 * @since 4.3.2
-	 */
-	public function get_database_version() {
-		return (int) WSAL\Helpers\Settings_Helper::get_option_value( 'db_version', 0 );
-	}
-
-	/**
-	 * Updates the current database version.
-	 *
-	 * @param int $version Database version number.
-	 *
-	 * @since 4.3.2
-	 */
-	public function set_database_version( $version ) {
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'db_version', $version, true );
-	}
-
-
-	/**
-	 * Returns default disabled alerts statically.
-	 *
-	 * @since 4.4.2.1
-	 *
-	 * @deprecated 4.5 - Use \WSAL\Helpers\Settings_Helper::get_default_always_disabled_alerts()
-	 */
-	public static function get_default_always_disabled_alerts(): array {
-		_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\Settings_Helper::get_default_always_disabled_alerts()' );
-
-		return \WSAL\Helpers\Settings_Helper::get_default_always_disabled_alerts();
+	public static function get_frontend_events() {
+		return Settings_Helper::get_frontend_events();
 	}
 }

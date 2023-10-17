@@ -477,11 +477,6 @@ td.column-user {
 	margin: 4px 4px 0 0;
 }
 
-td.crtd.column-crtd {
-	font-size: 1em;
-	line-height: 1em;
-}
-
 .striped>tbody>:nth-child(even) {
 	background-color: #f9f9f9;
 }
@@ -643,4 +638,40 @@ input#wsal_as_widget_event::-webkit-outer-spin-button {
 	.column-event_type {
 		display: none;
 	}
+}
+
+.event-content-wrapper {
+	display: none;
+	width: 100pc;
+	padding: 20px;
+}
+
+.event-data-panel {
+	/* height: 0; */
+    display: table-row;
+    overflow: hidden;
+	transition: all 0.3s ease-in-out;
+	box-shadow:  inset 0px 11px 0px -10px rgba(0,0,0,0.1),
+	inset 0px -11px 8px -10px rgba(0,0,0,0.1); 
+	background-color: transparent !important;
+}
+
+a.inspector-active {
+	color: #fff !important;
+    border-color: #2271b1 !important;
+    background-color: #2271b1 !important;
+}
+
+#wsal_try_search {
+	background: #009344;
+    display: flex;
+    color: white;
+    padding: 5px 1px 5px 10px;
+    border-radius: 3px;
+    line-height: 29px;
+    font-size: 12px;
+}
+
+#wsal_try_search > span {
+	margin-left: 10px;
 }

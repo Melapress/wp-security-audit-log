@@ -7,7 +7,7 @@
  *
  * @since 4.5.0
  *
- * @copyright  2023 WP White Security
+ * @copyright  %%YEAR%% WP White Security
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
  * @see       https://wordpress.org/plugins/wp-2fa/
@@ -44,7 +44,7 @@ if ( ! class_exists( '\WSAL\Helpers\Plugins_Helper' ) ) {
 		 *
 		 * @method is_plugin_installed
 		 *
-		 * @since  latest
+		 * @since 4.6.0
 		 *
 		 * @param string $plugin_slug installed plugin slug.
 		 *
@@ -93,7 +93,7 @@ if ( ! class_exists( '\WSAL\Helpers\Plugins_Helper' ) ) {
 		 *
 		 * @method render
 		 *
-		 * @since  latest
+		 * @since 4.6.0
 		 */
 		public static function render() {
 			$our_plugins = self::get_installable_plugins();
@@ -151,11 +151,11 @@ if ( ! class_exists( '\WSAL\Helpers\Plugins_Helper' ) ) {
 		 *
 		 * @method get_installable_plugins
 		 *
-		 * @since  latest
+		 * @since 4.6.0
 		 */
 		public static function get_installable_plugins() {
 			if ( empty( self::$installable_plugins ) ) {
-				$plugins = array(
+				self::$installable_plugins = array(
 					array(
 						'addon_for'   => 'wfcm',
 						'title'       => 'Website File Changes Monitor',
@@ -164,12 +164,12 @@ if ( ! class_exists( '\WSAL\Helpers\Plugins_Helper' ) ) {
 					),
 				);
 
-				// runs through a filter, so it can be added to programmatically.
-				// NOTE: this means when using we need to test it's still an array.
-				self::$installable_plugins = apply_filters( 'wsal_filter_installable_plugins', $plugins );
+				// // runs through a filter, so it can be added to programmatically.
+				// // NOTE: this means when using we need to test it's still an array.
+				// self::$installable_plugins = apply_filters( 'wsal_filter_installable_plugins', self::$installable_plugins );
 
-				// Sort them into a nice order.
-				array_multisort( array_column( self::$installable_plugins, 'title' ), SORT_ASC, self::$installable_plugins );
+				// // Sort them into a nice order.
+				// array_multisort( array_column( self::$installable_plugins, 'title' ), SORT_ASC, self::$installable_plugins );
 
 			}
 

@@ -85,6 +85,7 @@ if ( ! class_exists( 'WSAL_Freemius' ) ) {
 		}
 
 		public function is_free_plan() {
+		return true;
 			return true;
 		}
 
@@ -93,6 +94,10 @@ if ( ! class_exists( 'WSAL_Freemius' ) ) {
 		}
 
 		public function get_id() {
+			return false;
+		}
+
+		public function skip_connection() {
 			return false;
 		}
 	}

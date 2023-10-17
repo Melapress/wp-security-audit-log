@@ -6,6 +6,8 @@
  * @subpackage views
  */
 
+use WSAL\Helpers\Settings_Helper;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -80,7 +82,7 @@ abstract class WSAL_AbstractView {
 	 * @internal
 	 */
 	public function ajax_dismiss_notice() {
-		if ( ! $this->plugin->settings()->current_user_can( 'view' ) ) {
+		if ( ! Settings_Helper::current_user_can( 'view' ) ) {
 			die( 'Access Denied.' );
 		}
 
@@ -165,7 +167,7 @@ abstract class WSAL_AbstractView {
 	abstract public function render();
 
 	/**
-	 * Renders the view icon (this has been deprecated in newwer WP versions).
+	 * Renders the view icon (this has been deprecated in newer WP versions).
 	 */
 	public function render_icon() {
 		?>

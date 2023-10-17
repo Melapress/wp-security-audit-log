@@ -4,7 +4,7 @@
  *
  * Files sensor class file.
  *
- * @since     latest
+ * @since     4.6.0
  * @package   wsal
  * @subpackage sensors
  */
@@ -32,7 +32,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Files_Sensor' ) ) {
 	 * @package    wsal
 	 * @subpackage sensors
 	 *
-	 * @since     latest
+	 * @since 4.6.0
 	 */
 	class WP_Files_Sensor {
 

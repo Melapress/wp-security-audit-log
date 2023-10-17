@@ -12,10 +12,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use WSAL\Helpers\User_Utils;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Entities\Metadata_Entity;
 use WSAL\Controllers\Alert_Manager;
-use WSAL\Adapter\WSAL_Adapters_MySQL_Meta;
-use WSAL\Adapter\WSAL_Adapters_MySQL_Occurrence;
+use WSAL\Entities\Occurrences_Entity;
 /**
  * Handler for MainWP API endpoints.
  *
@@ -69,13 +70,14 @@ class WSAL_MainWpApi {
 
 				case 'latest_event':
 					// run the query and return it.
-					$event = $this->query_for_latest_event();
-					$event = $event->get_adapter()->execute_query( $event );
+					// $event = $this->query_for_latest_event();
+					$event = Occurrences_Entity::build_query( array( 'alert_id' => 'alert_id' ), array(), array( 'created_on' => 'DESC' ), array( 1 ) );
+					// $event = $event->get_adapter()->execute_query( $event );
 
 					// Set the return object.
 					if ( isset( $event[0] ) ) {
 						$info             = new stdClass();
-						$info->alert_id   = $event[0]['alert_id'];
+						$info->alert_id   = (int) $event[0]['alert_id'];
 						$info->created_on = $event[0]['created_on'];
 					} else {
 						$info = false;
@@ -125,42 +127,62 @@ class WSAL_MainWpApi {
 			return $mwp_events;
 		}
 
+		$query_occ          = array();
+
+		if ( isset( $query_args ) && isset( $query_args['site_id'] ) ) {
+			$query_occ['AND'][] = array( ' site_id = %s ' => $query_args['site_id'] );
+		}
+
 		// Initiate query occurrence object.
-		$events_query = new WSAL_Models_OccurrenceQuery();
-		$events_query->add_condition( 'site_id = %s ', 1 ); // Set site id.
+		// $events_query = new WSAL_Models_OccurrenceQuery();
+		// $events_query->add_condition( 'site_id = %s ', 1 ); // Set site id.
 
 		// Check query arguments.
 		if ( false !== $query_args ) {
 			if ( isset( $query_args['get_count'] ) && $query_args['get_count'] ) {
-				$mwp_events->total_items = $events_query->get_adapter()->count( $events_query );
+				$events = Occurrences_Entity::build_query(
+					array( 'COUNT(*)' => 'COUNT(*)' ),
+					$query_occ,
+					array(),
+					array(),
+					array()
+				);
+				$mwp_events->total_items = reset( $events[0] );
 			} else {
 				$mwp_events->total_items = false;
 			}
 		}
 
 		// Set order by.
-		$events_query->add_order_by( 'created_on', true );
+		$query_order               = array();
+		$query_order['created_on'] = 'DESC';
+
+		// $events_query->add_order_by( 'created_on', true );
 
 		// Set the limit.
-		$events_query->set_limit( $limit );
+		// $events_query->set_limit( $limit );
 
 		// Set the offset.
-		if ( false !== $offset ) {
-			$events_query->set_offset( $offset );
-		}
+		// if ( false !== $offset ) {
+		// $events_query->set_offset( $offset );
+		// }
+
+		$events = Occurrences_Entity::build_query( array(), $query_occ, $query_order, array( $limit ), array() );
+
+		$events = Occurrences_Entity::get_multi_meta_array( $events );
 
 		// Execute the query.
 		/** @var WSAL_Models_Occurrence[] $events */
-		$events = $events_query->get_adapter()->execute_query( $events_query );
+		// $events = $events_query->get_adapter()->execute_query( $events_query );
 
 		if ( ! empty( $events ) && is_array( $events ) ) {
 			foreach ( $events as $event ) {
 				// Get event meta.
-				$meta_data                                    = $event['meta_values'];
-				$meta_data['UserData']                        = Alert_Manager::get_event_user_data( WSAL_Utilities_UsersUtils::get_username( $meta_data ) );
+				$meta_data                                      = $event['meta_values'];
+				$meta_data['UserData']                          = Alert_Manager::get_event_user_data( User_Utils::get_username( $meta_data ) );
 				$mwp_events->events[ $event['id'] ]             = new stdClass();
 				$mwp_events->events[ $event['id'] ]->id         = $event['id'];
-				$mwp_events->events[ $event['id'] ]->alert_id   = $event['alert_id'];
+				$mwp_events->events[ $event['id'] ]->alert_id   = (int) $event['alert_id'];
 				$mwp_events->events[ $event['id'] ]->created_on = $event['created_on'];
 				$mwp_events->events[ $event['id'] ]->meta_data  = $meta_data;
 			}
@@ -185,22 +207,6 @@ class WSAL_MainWpApi {
 		$report       = new stdClass();
 		$report->data = array();
 		return $report;
-	}
-
-	/**
-	 * Performs a query to retrieve the latest event in the logs.
-	 *
-	 * @return array
-	 * @since  4.0.3
-	 */
-	public function query_for_latest_event() {
-		$event_query = new WSAL_Models_OccurrenceQuery();
-		// order by creation.
-		$event_query->add_order_by( 'created_on', true );
-		// only request 1 item.
-		$event_query->set_limit( 1 );
-
-		return $event_query;
 	}
 
 	/**
@@ -242,7 +248,7 @@ class WSAL_MainWpApi {
 					$pruning_date = $settings_to_enforce['pruning_date'] . ' ' . $settings_to_enforce['pruning_unit'];
 					$pruning_unit = $settings_to_enforce['pruning_unit'];
 				}
-				$this->plugin->settings()->set_pruning_date_settings( $settings_to_enforce['pruning_enabled'], $pruning_date, $pruning_unit );
+				Settings_Helper::set_pruning_date_settings( $settings_to_enforce['pruning_enabled'], $pruning_date, $pruning_unit );
 			}
 
 			if ( array_key_exists( 'disabled_events', $settings_to_enforce ) ) {
@@ -297,7 +303,7 @@ class WSAL_MainWpApi {
 		$limit     = empty( $filters['limit'] ) ? 0 : $filters['limit'];
 		$last_date = null;
 
-		$results = $this->plugin->get_connector()->get_adapter( 'Occurrence' )->get_report_data( $args, $next_date, $limit );
+		$results = Occurrences_Entity::get_report_data( $args, $next_date, $limit );
 
 		if ( ! empty( $results['lastDate'] ) ) {
 			$last_date = $results['lastDate'];

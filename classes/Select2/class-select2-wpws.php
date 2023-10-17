@@ -8,6 +8,9 @@
 
 namespace Tools;
 
+use WSAL\Helpers\Settings_Helper;
+use WSAL\Helpers\WP_Helper;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -94,9 +97,7 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 				wp_send_json_error( esc_html__( 'Insecure request.', 'wp-security-audit-log' ) );
 			}
 
-			$wsal = \WpSecurityAuditLog::get_instance();
-
-			if ( ! $wsal->settings()->current_user_can( 'edit' ) ) {
+			if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
 				die( 'Access Denied.' );
 			}
 
@@ -110,8 +111,8 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 			}
 
 			$result      = array();
-			$entity      = sanitize_text_field( wp_unslash( trim( $_REQUEST['entity'] ) ) );
-			$search_term = sanitize_text_field( wp_unslash( trim( $_REQUEST['term'] ) ) );
+			$entity      = trim( sanitize_text_field( wp_unslash( $_REQUEST['entity'] ) ) );
+			$search_term = trim( sanitize_text_field( wp_unslash( $_REQUEST['term'] ) ) );
 			switch ( $entity ) {
 				case 'user':
 					$result = self::get_users( $search_term );
@@ -146,6 +147,10 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 			if ( ! is_null( $search_term ) ) {
 				$query_params['search']         = '*' . $search_term . '*';
 				$query_params['search_columns'] = array( 'user_login', 'user_email' );
+			}
+
+			if ( WP_Helper::is_multisite() ) {
+				$query_params['blog_id'] = 0;
 			}
 
 			$users = get_users( $query_params );

@@ -4,7 +4,7 @@
  *
  * Content sensor class file.
  *
- * @since     latest
+ * @since     4.6.0
  * @package   wsal
  * @subpackage sensors
  */
@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
-use WSAL\Controllers\Alert_Manager;
 use WSAL\Helpers\WP_Helper;
+use WSAL\Controllers\Alert_Manager;
+use WSAL\Entities\Occurrences_Entity;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -184,6 +185,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		public static function post_changed( $post_id, $post, $update ) {
 			// Ignore if post type is empty, revision or trash.
 			if ( empty( $post->post_type ) || 'revision' === $post->post_type || 'trash' === $post->post_status ) {
+				return;
+			}
+
+			if ( null === self::$old_post ) {
 				return;
 			}
 
@@ -1341,14 +1346,20 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		/**
 		 * Post date changed.
 		 *
-		 * @param stdClass $oldpost - Old post.
-		 * @param stdClass $newpost - New post.
+		 * @param \WP_Post $oldpost - Old post.
+		 * @param \WP_Post $newpost - New post.
 		 *
 		 * @since 4.5.0
 		 */
 		private static function check_date_change( $oldpost, $newpost ) {
-			$from = strtotime( $oldpost->post_date );
-			$to   = strtotime( $newpost->post_date );
+			$from = 0;
+			$to = 0;
+			if ( isset( $oldpost->post_date ) && null !== $oldpost->post_date ) {
+				$from = strtotime( $oldpost->post_date );
+			}
+			if ( isset( $newpost->post_date ) && null !== $newpost->post_date ) {
+				$to   = strtotime( $newpost->post_date );
+			}
 
 			if ( 'pending' === $oldpost->post_status ) {
 				return 0;
@@ -1805,15 +1816,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		private static function was_triggered( $alert_id ) {
-			$query = new \WSAL_Models_OccurrenceQuery();
-			$query->add_order_by( 'created_on', true );
-			$query->set_limit( 1 );
-			$last_occurrence = $query->get_adapter()->execute_query( $query );
 
-			if ( ! empty( $last_occurrence ) ) {
-				if ( ! is_array( $alert_id ) && $last_occurrence[0]['alert_id'] === $alert_id ) {
+			$last_occurrence = Occurrences_Entity::build_query( array( 'alert_id' => 'alert_id' ), array(), array( 'created_on' => 'DESC' ), array( 1 ) );
+
+			if ( ! empty( $last_occurrence ) && isset( $last_occurrence[0]['alert_id'] ) ) {
+				if ( ! is_array( $alert_id ) && (int) $last_occurrence[0]['alert_id'] === $alert_id ) {
 					return true;
-				} elseif ( is_array( $alert_id ) && in_array( $last_occurrence[0]['alert_id'], $alert_id, true ) ) {
+				} elseif ( is_array( $alert_id ) && in_array( (int) $last_occurrence[0]['alert_id'], $alert_id, true ) ) {
 					return true;
 				}
 			}

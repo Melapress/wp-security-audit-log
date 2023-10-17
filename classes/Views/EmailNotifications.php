@@ -34,7 +34,7 @@ class WSAL_Views_EmailNotifications extends WSAL_ExtensionPlaceholderView {
 	 * {@inheritDoc}
 	 */
 	public function get_name() {
-		return esc_html__( 'Email Notifications &#8682;', 'wp-security-audit-log' );
+		return esc_html__( 'Email & SMS Notifications ✛', 'wp-security-audit-log' );
 	}
 
 	/**

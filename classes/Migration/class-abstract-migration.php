@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage utils
- * @copyright  2022 WP White Security
+ * @copyright  %%YEAR%% WP White Security
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  */
@@ -12,12 +12,11 @@
 namespace WSAL\Utils;
 
 use \WSAL\Helpers\WP_Helper;
-use WSAL\Migration\Metadata_Migration_440;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 /**
- * Abstract AMigration class
+ * Abstract Migration class
  */
 if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 
@@ -43,7 +42,8 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 	 * Note: order of the methods is not preserved - version numbers will be used for ordering
 	 *
 	 * @package WP2FA\Utils
-	 * @since 1.6
+	 *
+	 * @since 4.4.0
 	 */
 	class Abstract_Migration {
 
@@ -56,6 +56,8 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 * Extracted version from the DB (WP option)
 		 *
 		 * @var string
+		 *
+		 * @since 4.4.0
 		 */
 		protected static $stored_version = '';
 
@@ -65,6 +67,8 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 * Note: only numbers will be processed
 		 *
 		 * @var string
+		 *
+		 * @since 4.4.0
 		 */
 		protected static $version_option_name = '';
 
@@ -93,6 +97,8 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 * And current version is stored as 2 (no suffix 0.0) that means that it will be normalized as 200.
 		 *
 		 * @var integer
+		 *
+		 * @since 4.4.0
 		 */
 		protected static $pad_length = 4;
 
@@ -100,16 +106,10 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 * Collects all the migration methods which needs to be executed in order and executes them
 		 *
 		 * @return void
+		 *
+		 * @since 4.4.0
 		 */
 		public static function migrate() {
-
-			if ( class_exists( 'WSAL\Migration\Metadata_Migration_440' ) && ! empty( WP_Helper::get_global_option( Metadata_Migration_440::OPTION_NAME_MIGRATION_INFO, array() ) ) ) {
-
-				new Metadata_Migration_440( 'external' );
-				new Metadata_Migration_440( 'archive' );
-
-				add_action( 'all_admin_notices', array( 'WSAL\Migration\Metadata_Migration_440', 'maybe_display_progress_admin_notice' ) );
-			}
 
 			// Check if that process is not started already.
 			$migration_started = WP_Helper::get_global_option( self::STARTED_MIGRATION_PROCESS, false );
@@ -208,6 +208,8 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 * Extracts currently stored version from the DB
 		 *
 		 * @return string
+		 *
+		 * @since 4.4.0
 		 */
 		private static function get_stored_version() {
 
@@ -222,6 +224,8 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 * Stores the version to which we migrated
 		 *
 		 * @return void
+		 *
+		 * @since 4.4.0
 		 */
 		private static function store_updated_version() {
 			WP_Helper::update_global_option( static::$version_option_name, \constant( static::$const_name_of_plugin_version ) );
@@ -241,6 +245,8 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 * @param string $version - The version string we have to use.
 		 *
 		 * @return int
+		 *
+		 * @since 4.4.0
 		 */
 		private static function normalize_version( string $version ): string {
 			$version_as_number = (int) filter_var( $version, FILTER_SANITIZE_NUMBER_INT );
@@ -259,6 +265,8 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 * value - name of the method
 		 *
 		 * @return array
+		 *
+		 * @since 4.4.0
 		 */
 		private static function get_all_migration_methods_as_numbers() {
 			$class_methods = \get_class_methods( get_called_class() );

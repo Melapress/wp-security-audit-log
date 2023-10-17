@@ -143,6 +143,15 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		private static $frontend_events = null;
 
 		/**
+		 * Allowed Plugin Viewers.
+		 *
+		 * @var array
+		 *
+		 * @since 4.6.0
+		 */
+		private static $viewers = null;
+
+		/**
 		 * Gets the value of an option.
 		 *
 		 * @method get_option_value
@@ -354,6 +363,33 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		}
 
 		/**
+		 * Returns all the connections currently not in use in mirrors.
+		 *
+		 * @param null|string $current_mirror - If is set, (string), that connection will be kept in the array of the connections.
+		 *
+		 * @return array
+		 *
+		 * @since 4.6.0
+		 */
+		public static function get_all_not_used_as_mirrors_connections( $current_mirror = null ) {
+			$connections = self::get_all_connections();
+			$mirrors     = self::get_all_mirrors();
+
+			foreach ( $connections as $key => $connection ) {
+				foreach ( $mirrors as $mirror ) {
+					if ( \is_string( $current_mirror ) && $connection['name'] === $current_mirror ) {
+						continue;
+					}
+					if ( $connection['name'] === $mirror['connection'] ) {
+						unset( $connections[ $key ] );
+					}
+				}
+			}
+
+			return $connections;
+		}
+
+		/**
 		 * Returns the connection for the passed mirror.
 		 *
 		 * @param string $connection_name - The name of the connection.
@@ -479,7 +515,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 *
 		 * @return bool Whether the option w\as updated.
 		 *
-		 * @since  latest
+		 * @since 4.6.0
 		 */
 		private static function set_option_value_internal( $option_name = '', $value = null, $autoload = false ) {
 			// bail early if no option name or value w\as passed.
@@ -607,6 +643,21 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			}
 
 			return self::$excluded_ips;
+		}
+
+		/**
+		 * Sets the excluded IP addresses, and clears the internal cache.
+		 *
+		 * @param array $ips - The IP addresses array to be stored.
+		 *
+		 * @return void
+		 *
+		 * @since 4.6.0
+		 */
+		public static function set_excluded_monitoring_ips( array $ips ) {
+			$ips = esc_html( implode( ',', $ips ) );
+			self::set_option_value( 'excluded-ip', $ips );
+			self::$excluded_ips = array_unique( array_filter( explode( ',', $ips ) ) );
 		}
 
 		/**
@@ -922,7 +973,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		public static function get_excluded_user_meta_fields() {
 			if ( empty( self::$excluded_user_meta ) ) {
 				$excluded_user_meta = self::get_option_value( 'excluded-user-meta', '' );
-				if ( ! is_null( $excluded_user_meta ) && empty( $excluded_user_meta ) ) {
+				if ( ! is_null( $excluded_user_meta ) && ! empty( $excluded_user_meta ) ) {
 					self::$excluded_user_meta = array_unique( array_filter( explode( ',', $excluded_user_meta ) ) );
 					asort( self::$excluded_user_meta );
 				} else {
@@ -986,6 +1037,11 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 				self::$excluded_users = self::get_option_value( 'excluded-users', array() );
 			}
 
+			if ( is_string( self::$excluded_users ) ) {
+				self::$excluded_users = array_unique( array_filter( explode( ',', self::$excluded_users ) ) );
+				self::set_option_value( 'excluded-users', self::$excluded_users );
+			}
+
 			return self::$excluded_users;
 		}
 
@@ -1033,6 +1089,8 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * Set roles excluded from monitoring.
 		 *
 		 * @param array $roles - Array of roles.
+		 *
+		 * @since 4.5.0
 		 */
 		public static function set_excluded_monitoring_roles( $roles ) {
 			// Trigger alert.
@@ -1070,10 +1128,19 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 
 		/**
 		 * Get roles excluded from monitoring.
+		 *
+		 * @return array
+		 *
+		 * @since 4.5.0
 		 */
 		public static function get_excluded_monitoring_roles() {
 			if ( empty( self::$excluded_roles ) ) {
 				self::$excluded_roles = self::get_option_value( 'excluded-roles', array() );
+			}
+
+			if ( is_string( self::$excluded_roles ) ) {
+				self::$excluded_roles = array_unique( array_filter( explode( ',', self::$excluded_roles ) ) );
+				self::set_option_value( 'excluded-roles', self::$excluded_roles );
 			}
 
 			return self::$excluded_roles;
@@ -1301,7 +1368,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 *
 		 * @method get_show_milliseconds
 		 *
-		 * @since  latest
+		 * @since 4.6.0
 		 *
 		 * @return bool
 		 */
@@ -1391,6 +1458,240 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			$result .= $time_format;
 
 			return $result;
+		}
+
+		/**
+		 * Check if current user can perform an action.
+		 *
+		 * @param string $action Type of action, either 'view' or 'edit'.
+		 *
+		 * @return bool If user has access or not.
+		 *
+		 * @since 4.6.0
+		 */
+		public static function current_user_can( $action ) {
+			return self::user_can( wp_get_current_user(), $action );
+		}
+
+		/**
+		 * Check if user can perform an action.
+		 *
+		 * @param int|WP_user $user   - User object to check.
+		 * @param string      $action - Type of action, either 'view' or 'edit'.
+		 *
+		 * @return bool If user has access or not.
+		 *
+		 * @since 4.6.0
+		 */
+		public static function user_can( $user, $action ) {
+			if ( is_int( $user ) ) {
+				$user = get_userdata( $user );
+			}
+
+			// By default, the user has no privileges.
+			$result = false;
+
+			$is_multisite = WP_Helper::is_multisite();
+			switch ( $action ) {
+				case 'view':
+					if ( ! $is_multisite ) {
+						// Non-multisite piggybacks on the plugin settings access.
+						switch ( self::get_option_value( 'restrict-plugin-settings', 'only_admins' ) ) {
+							case 'only_admins':
+								// Allow access only if the user is and admin.
+								$result = in_array( 'administrator', $user->roles, true );
+
+								break;
+							case 'only_me':
+								// Allow access only if the user matches the only user allowed access.
+								$result = (int) self::get_option_value( 'only-me-user-id' ) === $user->ID;
+
+								break;
+							default:
+								// No other options to allow access here.
+								$result = false;
+						}
+					} else {
+						// Multisite MUST respect the log viewer restriction settings plus also additional users and roles
+						// defined in the extra option.
+						switch ( self::get_option_value( 'restrict-log-viewer', 'only_admins' ) ) {
+							case 'only_me':
+								// Allow access only if the user matches the only user allowed access.
+								$result = ( (int) self::get_option_value( 'only-me-user-id' ) === $user->ID );
+
+								break;
+							case 'only_superadmins':
+								// Allow access only for super admins.
+								if ( function_exists( 'is_super_admin' ) && is_super_admin( $user->ID ) ) {
+									$result = true;
+								}
+
+								break;
+							case 'only_admins':
+								// Allow access only for super admins and admins.
+								$result = in_array( 'administrator', $user->roles, true ) || ( function_exists( 'is_super_admin' ) && is_super_admin( $user->ID ) );
+
+								break;
+							default:
+								// Fallback for any other cases would go here.
+								break;
+						}
+					}
+
+					if ( ! $result ) {
+						// User is still not allowed to view the logs, let's check the additional users and roles
+						// settings.
+						$extra_viewers = self::get_allowed_plugin_viewers();
+						if ( in_array( $user->user_login, $extra_viewers, true ) ) {
+							$result = true;
+						} elseif ( ! empty( array_intersect( $extra_viewers, $user->roles ) ) ) {
+							$result = true;
+						}
+					}
+
+					break;
+				case 'edit':
+					if ( $is_multisite ) {
+						// No one has access to settings on sub site inside a network.
+						if ( wp_doing_ajax() ) {
+							// AJAX calls are an exception.
+							$result = true;
+						} elseif ( ! is_network_admin() ) {
+
+							$result = false;
+
+							break;
+						}
+					}
+
+					$restrict_plugin_setting = self::get_option_value( 'restrict-plugin-settings', 'only_admins' );
+					if ( 'only_me' === $restrict_plugin_setting ) {
+						$result = ( (int) self::get_option_value( 'only-me-user-id' ) === $user->ID );
+					} elseif ( 'only_admins' === $restrict_plugin_setting ) {
+						if ( $is_multisite ) {
+							$result = ( function_exists( 'is_super_admin' ) && is_super_admin( $user->ID ) );
+						} else {
+							$result = in_array( 'administrator', $user->roles, true );
+						}
+					}
+
+					break;
+				default:
+					$result = false;
+			}
+
+			/*
+			 * Filters the user permissions result.
+			 *
+			 * @since 4.1.3
+			 *
+			 * @param bool $result User access flag after applying all internal rules.
+			 * @param WP_User $user The user in question.
+			 * @param string $action Action to check permissions for.
+			 * @return bool
+			 */
+			return apply_filters( 'wsal_user_can', $result, $user, $action );
+		}
+
+		/**
+		 * Get Plugin Viewers.
+		 *
+		 * @return array List of users allowed to view the plugin.
+		 *
+		 * @since 4.6.0
+		 */
+		public static function get_allowed_plugin_viewers() {
+			if ( is_null( self::$viewers ) ) {
+				self::$viewers = array_unique( array_filter( explode( ',', self::get_option_value( 'plugin-viewers', '' ) ) ) );
+			}
+
+			return self::$viewers;
+		}
+
+		/**
+		 * Deletes all the settings from the option table of the WP
+		 *
+		 * @return void
+		 *
+		 * @since 4.6.0
+		 */
+		public static function delete_all_settings() {
+			global $wpdb;
+			$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" ); // phpcs:ignore
+
+			foreach ( $plugin_options as $option ) {
+				delete_site_option( $option->option_name );
+			}
+
+			// Remove wsal specific Freemius entry.
+			delete_site_option( 'fs_wsalp' );
+
+			// Ensue entry is fully cleared.
+			delete_site_option( 'wsal_networkwide_tracker_cpts' );
+		}
+
+		/**
+		 * Enables or disables time based retention period.
+		 *
+		 * @param bool   $enable   If true, time based retention period is enabled.
+		 * @param string $new_date - The new pruning date.
+		 * @param string $new_unit – New value of pruning unit.
+		 *
+		 * @since 4.6.0
+		 */
+		public static function set_pruning_date_settings( $enable, $new_date, $new_unit ) {
+			$was_enabled = self::get_boolean_option_value( 'pruning-date-e', false );
+			$old_period  = self::get_option_value( 'pruning-date', '6 months' );
+
+			if ( ! $was_enabled && $enable ) {
+				// The retention period is being enabled.
+				self::set_option_value( 'pruning-date', $new_date );
+				self::set_option_value( 'pruning-unit', $new_unit );
+				self::set_boolean_option_value( 'pruning-date-e', $enable );
+
+				Alert_Manager::trigger_event(
+					6052,
+					array(
+						'new_setting'      => 'Delete events older than ' . $old_period,
+						'previous_setting' => 'Keep all data',
+					)
+				);
+
+				return;
+			}
+
+			if ( $was_enabled && ! $enable ) {
+				// The retention period is being disabled.
+				self::delete_option_value( 'pruning-date' );
+				self::delete_option_value( 'pruning-unit' );
+				self::set_boolean_option_value( 'pruning-date-e', $enable );
+
+				Alert_Manager::trigger_event(
+					6052,
+					array(
+						'new_setting'      => 'Keep all data',
+						'previous_setting' => 'Delete events older than ' . $old_period,
+					)
+				);
+
+				return;
+			}
+
+			if ( $enable ) {
+				// The retention period toggle has not changed, we need to check if the actual period changed.
+				if ( $new_date !== $old_period ) {
+					self::set_option_value( 'pruning-date', $new_date );
+					self::set_option_value( 'pruning-unit', $new_unit );
+
+					Alert_Manager::trigger_event(
+						6052,
+						array(
+							'new_setting'      => 'Delete events older than ' . $new_date,
+							'previous_setting' => 'Delete events older than ' . $old_period,
+						)
+					);
+				}
+			}
 		}
 	}
 }

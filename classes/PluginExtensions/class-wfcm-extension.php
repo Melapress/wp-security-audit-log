@@ -55,25 +55,6 @@ if ( ! class_exists( '\WSAL\PluginExtensions\WFCM_Extension' ) ) {
 		}
 
 		/**
-		 * Add our extensions event IDs to the array of available events.
-		 *
-		 * @return array
-		 *
-		 * @since 4.5.0
-		 */
-		public static function add_event_codes(): array {
-			$new_event_codes = array(
-				'wfcm' => array(
-					'name'      => self::get_plugin_name(),
-					'event_ids' => array( 6028, 6029, 6030, 6031, 6032, 6033 ),
-				),
-			);
-
-			// combine the two arrays.
-			return $new_event_codes;
-		}
-
-		/**
 		 * Retrieves a plugin name.
 		 *
 		 * @return string Plugin name.
@@ -128,11 +109,11 @@ if ( ! class_exists( '\WSAL\PluginExtensions\WFCM_Extension' ) ) {
 		public static function append_dailynotification_email_content( $body, $events ): string {
 			if ( ! empty( $events ) ) {
 				foreach ( $events as $event ) {
-					if ( 6028 === $event['alert_id'] ) {
+					if ( 6028 === (int) $event['alert_id'] ) {
 						$files_modified[] = $event;
-					} elseif ( 6029 === $event['alert_id'] ) {
+					} elseif ( 6029 === (int) $event['alert_id'] ) {
 						$files_added[] = $event;
-					} elseif ( 6030 === $event['alert_id'] ) {
+					} elseif ( 6030 === (int) $event['alert_id'] ) {
 						$files_deleted[] = $event;
 					}
 				}
