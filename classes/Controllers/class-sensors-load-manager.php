@@ -4,7 +4,7 @@
  *
  * Alert manager class file.
  *
- * @since     latest
+ * @since     4.6.0
  * @package   wsal
  *
  * @subpackage controllers
@@ -52,6 +52,24 @@ if ( ! class_exists( '\WSAL\Controllers\Sensors_Load_Manager' ) ) {
 			'wsal-auditlog-contact',
 			'wsal-auditlog-pricing',
 		);
+
+		/**
+		 * Some of the sensors need to load data / attach events earlier - lets give them a chance
+		 *
+		 * @return void
+		 *
+		 * @since 4.6.0
+		 */
+		public static function load_early_sensors() {
+
+			$sensors = Classes_Helper::get_classes_by_namespace( '\WSAL\WP_Sensors' );
+
+			foreach ( $sensors as $sensor ) {
+				if ( method_exists( $sensor, 'early_init' ) ) {
+					call_user_func_array( array( $sensor, 'early_init' ), array() );
+				}
+			}
+		}
 
 		/**
 		 * Loads all the sensors

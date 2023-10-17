@@ -4,7 +4,7 @@
  *
  * Plugins and Themes sensor class file.
  *
- * @since      latest
+ * @since      4.5.0
  * @package    wsal
  * @subpackage sensors
  */
@@ -247,7 +247,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					)
 				);
 
-				self::run_addon_check( $plugin_dir );
+				// self::run_addon_check( $plugin_dir );
 			}
 
 			// Activate plugin.
@@ -269,12 +269,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				}
 
 				if ( isset( $get_array['checked'] ) && ! empty( $get_array['checked'] ) ) {
-					$latest_event = Alert_Manager::get_latest_events();
-					$latest_event = isset( $latest_event[0] ) ? $latest_event[0] : false;
-					$event_meta   = $latest_event ? $latest_event['meta_values'] : false;
+					$latest_event = Alert_Manager::get_latest_events( 1, true );
+
+					if ( false !== $latest_event && \is_array( $latest_event ) ) {
+						$latest_event = reset( $latest_event );
+					}
+					$event_meta = $latest_event ? $latest_event['meta_values'] : false;
 
 					foreach ( $get_array['checked'] as $plugin_file ) {
-						if ( $latest_event && 5001 === $latest_event['alert_id'] && $event_meta && isset( $event_meta['PluginFile'] ) ) {
+						if ( $latest_event && 5001 === (int) $latest_event['alert_id'] && $event_meta && isset( $event_meta['PluginFile'] ) ) {
 							if ( basename( WSAL_BASE_NAME ) === basename( $event_meta['PluginFile'] ) ) {
 								continue;
 							}
@@ -297,7 +300,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 							)
 						);
 
-						self::run_addon_check( $plugin_file );
+						// self::run_addon_check( $plugin_file );
 					}
 				} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
 					foreach ( $post_array['checked'] as $plugin_file ) {
@@ -318,7 +321,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 							)
 						);
 
-						self::run_addon_check( $plugin_file );
+						// self::run_addon_check( $plugin_file );
 					}
 				}
 			}
@@ -358,7 +361,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 								),
 							)
 						);
-						self::run_addon_removal_check( $plugin_file );
+						// self::run_addon_removal_check( $plugin_file );
 					}
 				} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
 					foreach ( $post_array['checked'] as $plugin_file ) {
@@ -377,7 +380,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 								),
 							)
 						);
-						self::run_addon_removal_check( $plugin_file );
+						// self::run_addon_removal_check( $plugin_file );
 					}
 				}
 			}
@@ -406,7 +409,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 								),
 							)
 						);
-						self::run_addon_removal_check( $plugin_file );
+						// self::run_addon_removal_check( $plugin_file );
 					}
 				}
 			}
@@ -430,7 +433,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 						)
 					);
 
-					self::run_addon_removal_check( $plugin_file );
+					// self::run_addon_removal_check( $plugin_file );
 				}
 			}
 
@@ -729,8 +732,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 * Fires when the upgrader has successfully overwritten a currently installed
 		 * plugin or theme with an uploaded zip package.
 		 *
-		 * @since 4.1.4
-		 *
 		 * @param string $package          The package file.
 		 * @param array  $new_plugin_data  The new plugin data.
 		 * @param string $package_type     The package type (plugin or theme).
@@ -825,6 +826,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 *
 		 * @param int    $post_id - Post ID.
 		 * @param object $post - Post object.
+		 *
+		 * @since 4.5.0
 		 */
 		public static function plugin_created_post( $post_id, $post ) {
 			if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
@@ -844,11 +847,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 			// Filter $_REQUEST array for security.
 			$get_array  = filter_input_array( INPUT_GET );
 			$post_array = filter_input_array( INPUT_POST );
-
-			// // Check if Yoast SEO is active.
-			// if ( \WpSecurityAuditLog::is_wpseo_active() ) {
-			// return;
-			// }
 
 			$wp_actions = array( 'editpost', 'heartbeat', 'inline-save', 'trash', 'untrash', 'vc_save' );
 			if ( isset( $get_array['action'] ) && ! in_array( $get_array['action'], $wp_actions, true ) ) {
@@ -944,6 +942,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 *
 		 * @param object $post - The post object.
 		 * @return array $editor_link name and value link.
+		 *
+		 * @since 4.5.0
 		 */
 		private static function get_editor_link( $post ) {
 			$name        = 'EditorLink';

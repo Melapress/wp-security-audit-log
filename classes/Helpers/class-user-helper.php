@@ -4,8 +4,8 @@
  *
  * @package    wsal
  * @subpackage helpers
- * @since      latest
- * @copyright  2022 WP White Security
+ * @since      4.6.0
+ * @copyright  %%YEAR%% WP White Security
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  */
@@ -133,15 +133,18 @@ if ( ! class_exists( '\WSAL\Helpers\User_Helper' ) ) {
 				}
 				self::$user = $user;
 			} elseif ( false !== ( filter_var( $user, FILTER_VALIDATE_INT ) ) ) {
-				if ( isset( self::$user ) && $user === self::$user->ID ) {
+				if ( isset( self::$user ) && $user instanceof \WP_User && $user === self::$user->ID ) {
 					return;
 				}
 				if ( ! function_exists( 'get_user_by' ) ) {
 					require ABSPATH . WPINC . '/pluggable.php';
 				}
 				self::$user = \get_user_by( 'id', $user );
-			} elseif ( is_string( $user ) ) {
-				if ( isset( self::$user ) && $user === self::$user->ID ) {
+				if ( \is_bool( self::$user ) ) {
+					self::$user = \wp_get_current_user();
+				}
+			} elseif ( is_string( $user ) && ! empty( trim( $user ) ) ) {
+				if ( isset( self::$user ) && $user instanceof \WP_User && $user === self::$user->ID ) {
 					return;
 				}
 				if ( ! function_exists( 'get_user_by' ) ) {
@@ -149,6 +152,10 @@ if ( ! class_exists( '\WSAL\Helpers\User_Helper' ) ) {
 				}
 				self::$user = \get_user_by( 'login', $user );
 			} else {
+				if ( ! function_exists( 'wp_get_current_user' ) ) {
+					require ABSPATH . WPINC . '/pluggable.php';
+					wp_cookie_constants();
+				}
 				self::$user = \wp_get_current_user();
 			}
 		}

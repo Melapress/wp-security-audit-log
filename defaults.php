@@ -7,11 +7,11 @@
  * @package wsal
  */
 
-use WSAL\Helpers\Logger;
+// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
+// phpcs:disable WordPress.WP.I18n.UnorderedPlaceholdersText
+
 use WSAL\Helpers\Classes_Helper;
 use WSAL\Controllers\Alert_Manager;
-
-// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -38,31 +38,15 @@ function wsal_load_include_custom_files() {
 	do_action( 'wsal_custom_alerts_register', array() );
 
 	$extension_alerts = Classes_Helper::get_classes_by_namespace( '\WSAL\Custom_Alerts' );
+	$sensors_alerts   = Classes_Helper::get_classes_by_namespace( '\WSAL\WP_Sensors\Alerts' );
+
+	$extension_alerts = array_merge( $extension_alerts, $sensors_alerts );
 
 	foreach ( $extension_alerts as $alerts ) {
 		if ( method_exists( $alerts, 'get_custom_alerts' ) ) {
 			Alert_Manager::register_group( call_user_func_array( array( $alerts, 'get_custom_alerts' ), array() ) );
 		}
 	}
-
-	// $paths = apply_filters( 'wsal_custom_alerts_dirs', array() );
-	// foreach ( $paths as $inc_path ) {
-	// Check directory.
-	// if ( is_dir( $inc_path ) && is_readable( $inc_path ) ) {
-	// $file = $inc_path . DIRECTORY_SEPARATOR . 'custom-alerts.php';
-	// if ( file_exists( $file ) ) {
-	// A file exists that should contain custom alerts - require it.
-	// require_once $file;
-	// if ( ! empty( $custom_alerts ) && is_array( $custom_alerts ) ) {
-	// try {
-	// Alert_Manager::register_group( $custom_alerts );
-	// } catch ( Exception $ex ) {
-	// Logger::log( $ex->getMessage() );
-	// }
-	// }
-	// }
-	// }
-	// }
 }
 
 /**
@@ -85,7 +69,7 @@ function wsaldefaults_build_links( $link_aliases = array() ) {
 					break;
 
 				case 'ContactSupport':
-					$result[ esc_html__( 'Contact Support', 'wp-security-audit-log' ) ] = 'https://wpactivitylog.com/contact/';
+					$result[ esc_html__( 'Contact Support', 'wp-security-audit-log' ) ] = 'https://melapress.com/contact/';
 					break;
 
 				case 'CommentLink':
@@ -2451,7 +2435,7 @@ function set_wsal_alerts() {
 					6039,
 					WSAL_CRITICAL,
 					esc_html__( 'Deleted all the data of a specific type from the activity log.', 'wp-security-audit-log' ),
-					esc_html__( 'Deleted all the data about the %deleted_data_type% %deleted_data% from the activity log.', 'wp-security-audit-log' ),
+					esc_html__( 'Deleted all the data about the %1$deleted_data_type% %2$deleted_data% from the activity log.', 'wp-security-audit-log' ),
 					array(),
 					array(),
 					'wp-activity-log',
@@ -3129,6 +3113,21 @@ function set_wsal_alerts() {
 				),
 			),
 
+			esc_html__( 'Email Events', 'wp-security-audit-log' ) => array(
+				array(
+					6061,
+					WSAL_LOW,
+					esc_html__( 'Email sent to: %EmailAddress%', 'wp-security-audit-log' ),
+					__( 'Email was sent to %EmailAddress%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Subject', 'wp-security-audit-log' ) => '%EmailSubject%',
+					),
+					array(),
+					'system',
+					'sent',
+				),
+			),
+
 			esc_html__( 'Database Events', 'wp-security-audit-log' ) => array(
 				array(
 					5010,
@@ -3273,152 +3272,6 @@ function set_wsal_alerts() {
 					array(),
 					'database',
 					'deleted',
-				),
-			),
-		),
-
-		esc_html__( 'Multisite Network Sites', 'wp-security-audit-log' ) => array(
-			esc_html__( 'MultiSite', 'wp-security-audit-log' ) => array(
-				array(
-					7000,
-					WSAL_CRITICAL,
-					esc_html__( 'New site added on the network', 'wp-security-audit-log' ),
-					esc_html__( 'Added the new site %SiteName% to the network.', 'wp-security-audit-log' ),
-					array(
-						esc_html__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%',
-					),
-					array(),
-					'multisite-network',
-					'added',
-				),
-				array(
-					7001,
-					WSAL_HIGH,
-					esc_html__( 'Existing site archived', 'wp-security-audit-log' ),
-					esc_html__( 'Archived the site %SiteName% on the network.', 'wp-security-audit-log' ),
-					array(
-						esc_html__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%',
-					),
-					array(),
-					'multisite-network',
-					'modified',
-				),
-				array(
-					7002,
-					WSAL_HIGH,
-					esc_html__( 'Archived site has been unarchived', 'wp-security-audit-log' ),
-					esc_html__( 'Unarchived the site %SiteName%.', 'wp-security-audit-log' ),
-					array(
-						esc_html__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%',
-					),
-					array(),
-					'multisite-network',
-					'modified',
-				),
-				array(
-					7003,
-					WSAL_HIGH,
-					esc_html__( 'Deactivated site has been activated', 'wp-security-audit-log' ),
-					esc_html__( 'Activated the site %SiteName% on the network.', 'wp-security-audit-log' ),
-					array(
-						esc_html__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%',
-					),
-					array(),
-					'multisite-network',
-					'activated',
-				),
-				array(
-					7004,
-					WSAL_HIGH,
-					esc_html__( 'Site has been deactivated', 'wp-security-audit-log' ),
-					esc_html__( 'Deactiveated the site %SiteName% on the network.', 'wp-security-audit-log' ),
-					array(
-						esc_html__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%',
-					),
-					array(),
-					'multisite-network',
-					'deactivated',
-				),
-				array(
-					7005,
-					WSAL_HIGH,
-					esc_html__( 'Existing site deleted from network', 'wp-security-audit-log' ),
-					esc_html__( 'The site: %SiteName%.', 'wp-security-audit-log' ),
-					array(
-						esc_html__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%',
-					),
-					array(),
-					'multisite-network',
-					'deleted',
-				),
-				array(
-					7007,
-					WSAL_CRITICAL,
-					esc_html__( 'Allow site administrators to add new users to their sites settings changed', 'wp-security-audit-log' ),
-					__( 'Changed the status of the network setting <strong>Allow site administrators to add new users to their sites</strong>.', 'wp-security-audit-log' ),
-					array(),
-					array(),
-					'multisite-network',
-					'enabled',
-				),
-				array(
-					7008,
-					WSAL_HIGH,
-					esc_html__( 'Site upload space settings changed', 'wp-security-audit-log' ),
-					__( 'Changed the status of the network setting <strong>Site upload space</strong> (to limit space allocated for each site\'s upload directory).', 'wp-security-audit-log' ),
-					array(),
-					array(),
-					'multisite-network',
-					'enabled',
-				),
-				array(
-					7009,
-					WSAL_MEDIUM,
-					esc_html__( 'Site upload space file size settings changed', 'wp-security-audit-log' ),
-					__( 'Changed the file size in the <strong>Site upload space</strong> network setting to %new_value%.', 'wp-security-audit-log' ),
-					array(
-						esc_html__( 'Previous size (MB)', 'wp-security-audit-log' ) => '%old_value%',
-					),
-					array(),
-					'multisite-network',
-					'modified',
-				),
-				array(
-					7010,
-					WSAL_CRITICAL,
-					esc_html__( 'Site Upload file types settings changed', 'wp-security-audit-log' ),
-					__( 'Changed the network setting <strong>Upload file types (list of allowed file types)</strong>.', 'wp-security-audit-log' ),
-					array(
-						esc_html__( 'Previous value', 'wp-security-audit-log' ) => '%old_value%',
-						esc_html__( 'New value', 'wp-security-audit-log' )      => '%new_value%',
-					),
-					array(),
-					'multisite-network',
-					'modified',
-				),
-				array(
-					7011,
-					WSAL_CRITICAL,
-					esc_html__( 'Site Max upload file size settings changed', 'wp-security-audit-log' ),
-					__( 'Changed the <strong>Max upload file size</strong> network setting to %new_value%.', 'wp-security-audit-log' ),
-					array(
-						esc_html__( 'Previous size (KB)', 'wp-security-audit-log' ) => '%old_value%',
-					),
-					array(),
-					'multisite-network',
-					'modified',
-				),
-				array(
-					7012,
-					WSAL_HIGH,
-					esc_html__( 'Allow new registrations settings changed', 'wp-security-audit-log' ),
-					__( 'Changed the <strong>Allow new registrations</strong> setting to %new_setting%.', 'wp-security-audit-log' ),
-					array(
-						esc_html__( 'Previous setting', 'wp-security-audit-log' ) => '%previous_setting%',
-					),
-					array(),
-					'multisite-network',
-					'modified',
 				),
 			),
 		),

@@ -8,7 +8,10 @@
  * @package wsal
  */
 
-use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\User_Utils;
+use WSAL\Helpers\Settings_Helper;
+use WSAL\Controllers\Alert_Manager;
+use WSAL\Entities\Occurrences_Entity;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -48,8 +51,8 @@ class WSAL_WidgetManager {
 		global $pagenow;
 
 		if (
-				$this->plugin->settings()->is_widgets_enabled() // If widget is enabled.
-				&& $this->plugin->settings()->current_user_can( 'view' ) // If user has permission to view.
+				! \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'disable-widgets' ) // If widget is enabled.
+				&& Settings_Helper::current_user_can( 'view' ) // If user has permission to view.
 				&& 'index.php' === $pagenow // If the current page is dashboard.
 		) {
 			wp_add_dashboard_widget(
@@ -65,8 +68,10 @@ class WSAL_WidgetManager {
 	 */
 	public function render_widget() {
 		// get the events for the dashboard widget.
-		$query   = $this->get_dashboard_widget_query();
-		$results = $query->get_adapter()->execute_query( $query );
+		// $query   = $this->get_dashboard_widget_query();
+		// $results = $query->get_adapter()->execute_query( $query );
+
+		$results = Alert_Manager::get_latest_events( $this->plugin->settings()->get_dashboard_widget_max_alerts(), true );
 
 		?><div>
 		<?php if ( ! count( $results ) ) : ?>
@@ -85,7 +90,7 @@ class WSAL_WidgetManager {
 					$url = 'admin.php?page=' . $this->plugin->views->views[0]->get_safe_view_name();
 					foreach ( $results as $entry ) :
 						$event_meta = $entry['meta_values'];
-						$username   = WSAL_Utilities_UsersUtils::get_username( $event_meta );
+						$username   = User_Utils::get_username( $event_meta );
 						?>
 						<tr>
 							<td><?php echo ( $username ) ? esc_html( $username ) : '<i>unknown</i>'; ?></td>
@@ -93,7 +98,7 @@ class WSAL_WidgetManager {
 							<td><?php echo ( $event_meta['EventType'] ) ? esc_html( $event_meta['EventType'] ) : '<i>unknown</i>'; ?></td>
 							<td>
 								<a href="<?php echo esc_url( $url ) . '#Event' . esc_attr( $entry['id'] ); ?>">
-									<?php echo wp_kses( WSAL_Models_Occurrence::get_alert_message( $entry, 'dashboard-widget' ), $this->plugin->allowed_html_tags ); ?>
+									<?php echo wp_kses( Occurrences_Entity::get_alert_message( $entry, 'dashboard-widget' ), WpSecurityAuditLog::get_allowed_html_tags() ); ?>
 								</a>
 							</td>
 						</tr>
@@ -103,26 +108,5 @@ class WSAL_WidgetManager {
 		<?php endif; ?>
 		</div>
 		<?php
-	}
-
-	/**
-	 * Gets the query for the events displayed in the dashboard widget.
-	 *
-	 * @method get_dashboard_widget_query
-	 * @since  4.0.3
-	 * @return WSAL_Models_OccurrenceQuery
-	 */
-	public function get_dashboard_widget_query() {
-		$query = new WSAL_Models_OccurrenceQuery();
-		// get the site we are on (of multisite).
-		$bid = (int) WP_Helper::get_view_site_id();
-		if ( $bid ) {
-			$query->add_condition( 'site_id = %s ', $bid );
-		}
-		// order by date of creation.
-		$query->add_order_by( 'created_on', true );
-		// set the limit based on the limit option for dashboard alerts.
-		$query->set_limit( $this->plugin->settings()->get_dashboard_widget_max_alerts() );
-		return $query;
 	}
 }

@@ -7,7 +7,7 @@
  *
  * @since      4.4.2
  *
- * @copyright  2022 WP White Security
+ * @copyright  %%YEAR%% WP White Security
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
  * @see       https://wordpress.org/plugins/wp-2fa/
@@ -249,6 +249,8 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 
 		/**
 		 * Collects all the sites from multisite WP installation.
+		 *
+		 * @since 4.6.0
 		 */
 		public static function get_multi_sites(): array {
 			if ( self::is_multisite() ) {
@@ -277,6 +279,8 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 
 		/**
 		 * Check wsal options from wp_options table and determines if plugin is installed.
+		 *
+		 * @since 4.6.0
 		 */
 		public static function is_plugin_installed(): bool {
 			global $wpdb;
@@ -303,6 +307,24 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			}
 
 			return $active_plugins;
+		}
+
+		/**
+		 * Collects all active plugins for the current WP installation.
+		 *
+		 * @return array
+		 *
+		 * @since 4.6.0
+		 */
+		public static function get_all_active_plugins(): array {
+			$plugins = array();
+			if ( self::is_multisite() ) {
+				$plugins = wp_get_active_network_plugins();
+			}
+
+			$plugins = \array_merge( $plugins, wp_get_active_and_valid_plugins() );
+
+			return $plugins;
 		}
 
 		/**
@@ -460,6 +482,10 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 						( // Cover class static method callback case.
 							! empty( $name ) &&
 							false !== strpos( strtolower( $name ), WSAL_PREFIX )
+						) ||
+						( // Cover class static method callback case.
+							! empty( $name ) &&
+							false !== strpos( strtolower( $name ), 'wsal\\' )
 						)
 					) {
 						continue;
@@ -617,6 +643,8 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @param string $plugin Path to the main plugin file from plugins directory.
 		 *
 		 * @return bool True, if in the active plugins list. False, not in the list.
+		 *
+		 * @since 4.6.0
 		 */
 		public static function is_plugin_active( $plugin ) {
 			if ( ! function_exists( 'is_plugin_active' ) ) {

@@ -4,7 +4,7 @@
  *
  * System sensor class file.
  *
- * @since      latest
+ * @since      4.6.0
  * @package    wsal
  * @subpackage sensors
  */
@@ -48,6 +48,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 	 * 6016 Changed the number of links that a comment must have to be held in the queue
 	 * 6017 Modified the list of keywords for comments moderation
 	 * 6018 Modified the list of keywords for comments blacklisting
+	 * 6061 Email was sent
 	 *
 	 * @package    wsal
 	 * @subpackage sensors
@@ -75,6 +76,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			// Customizable settings for the dynamic theme editing start.
 			// Blogname change.
 			add_action( 'customize_save_blogname', array( __CLASS__, 'site_blogname_change' ), 20, 1 );
+
+			add_action( 'wp_mail_succeeded', array( __CLASS__, 'mail_was_sent' ) );
 		}
 
 		/**
@@ -631,6 +634,27 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						)
 					);
 				}
+			}
+		}
+
+		/**
+		 * Logs event when email is sent
+		 *
+		 * @param array $mail_data - Array of mail data.
+		 *
+		 * @return void
+		 *
+		 * @since 4.6.0
+		 */
+		public static function mail_was_sent( $mail_data ) {
+			if ( \is_array( $mail_data ) && isset( $mail_data['to'] ) && isset( $mail_data['subject'] ) ) {
+				Alert_Manager::trigger_event(
+					6061,
+					array(
+						'EmailAddress' => $mail_data['to'],
+						'EmailSubject' => $mail_data['subject'],
+					)
+				);
 			}
 		}
 

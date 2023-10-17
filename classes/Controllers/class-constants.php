@@ -90,21 +90,21 @@ if ( ! class_exists( '\WSAL\Controllers\Constants' ) ) {
 			self::$wsal_constants = array(
 				array(
 					'name'        => 'E_CRITICAL',
-					'css'         => 'e_critical',
+					'css'         => 'wsal_critical',
 					'value'       => 500,
 					'text'        => __( 'Critical', 'wp-security-audit-log' ),
 					'description' => '',
 				),
 				array(
 					'name'        => 'E_WARNING',
-					'css'         => 'e_warning',
+					'css'         => 'wsal_medium',
 					'value'       => 300,
-					'text'        => __( 'Warning', 'wp-security-audit-log' ),
+					'text'        => __( 'Medium', 'wp-security-audit-log' ),
 					'description' => '',
 				),
 				array(
 					'name'        => 'E_NOTICE',
-					'css'         => 'e_notice',
+					'css'         => 'wsal_informational',
 					'value'       => 100,
 					'text'        => __( 'Notification', 'wp-security-audit-log' ),
 					'description' => '',
@@ -250,9 +250,12 @@ if ( ! class_exists( '\WSAL\Controllers\Constants' ) ) {
 		/**
 		 * Returns the WSAL constants array
 		 *
+		 * @param boolean $remove_old - Should we remove old constants from the array.
+		 *
 		 * @return array
 		 *
 		 * @since 4.5.0
+		 * @since 4.6.0 - $remove_old is added
 		 */
 		public static function get_wsal_constants( bool $remove_old = false ): array {
 			if ( empty( self::$wsal_constants ) ) {

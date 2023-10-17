@@ -32,14 +32,14 @@ class WSAL_Views_Search extends WSAL_ExtensionPlaceholderView {
 	 * {@inheritDoc}
 	 */
 	public function get_name() {
-		return esc_html__( 'Log Search &#8682;', 'wp-security-audit-log' );
+		return esc_html__( 'Search Filters ✛', 'wp-security-audit-log' );
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function get_weight() {
-		return 5;
+		return 3;
 	}
 
 	/**
@@ -47,10 +47,10 @@ class WSAL_Views_Search extends WSAL_ExtensionPlaceholderView {
 	 */
 	public function render() {
 		$title        = esc_html__( 'Search & Filters for the Activity Log', 'wp-security-audit-log' );
-		$description  = esc_html__( 'You can find all the information you want in the activity log, if you know what you are looking for and have the right tools. Upgrade to premium so you can:', 'wp-security-audit-log' );
+		$description  = esc_html__( 'Add search filters and better text searching capabilities so you can find all the information you want in the activity log within just seconds. Upgrade to premium so you can:', 'wp-security-audit-log' );
 		$addon_img    = trailingslashit( WSAL_BASE_URL ) . 'img/' . $this->get_safe_view_name() . '.jpg';
 		$premium_list = array(
-			esc_html__( 'Do text searches and use filters to fine tune the search results', 'wp-security-audit-log' ),
+			esc_html__( 'Use search filters to fine tune the text search results', 'wp-security-audit-log' ),
 			esc_html__( 'Easily find when and who did a specific change on your site', 'wp-security-audit-log' ),
 			esc_html__( 'Easily identify and track back suspicious user behaviour', 'wp-security-audit-log' ),
 			esc_html__( 'Search for the cause of a problem and ease troubleshooting', 'wp-security-audit-log' ),
@@ -58,10 +58,6 @@ class WSAL_Views_Search extends WSAL_ExtensionPlaceholderView {
 		);
 		$subtext      = false;
 		$screenshots  = array(
-			array(
-				'desc' => esc_html__( 'Use the text search to find a specific change.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/search/search_1.png',
-			),
 			array(
 				'desc' => esc_html__( 'Configure any filter you need to fine tune the search results and find what you are looking for with much less effort.', 'wp-security-audit-log' ),
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/search/search_2.png',

@@ -618,6 +618,33 @@ an absolute waiver of all civil liability in connection with the
 Program, unless a warranty or assumption of liability accompanies a
 copy of the Program in return for a fee.
 
+  18. Additional terms in accordance with Section 7.
+
+  In accordance with Section 7 of this License, the following additional
+terms apply: 
+
+    a) You are prohibited from misrepresenting the the origin of the 
+    covered work. Modified versions of the covered work must be clearly 
+    marked as being different from the original version of the covered 
+    work;
+
+    b) Unless expressly agreed otherwise, you are not allowed to use the 
+    names of the author(s) or any of its licensors for publicity or 
+    marketing purposes;
+
+    c) Unless expressly agreed otherwise, you do not receive any rights 
+    with respect to trademark law, trade name law or comparable laws 
+    whatsoever. Unless expressly agreed otherwise, you are not entitled to
+    use any trade name, trademark, service mark or similar belonging to the
+    author(s) or its licensors for any purpose.   
+
+    d) In the event you choose to convey the covered work or modified 
+    versions thereof, you are required to indemnify and hold harmless the 
+    author(s) and its licensors against any costs resulting from any 
+    contractual assumptions of liability of the author(s) or its licensors 
+    with regard to the covered work agreed on or implied by you.
+
+
                      END OF TERMS AND CONDITIONS
 
             How to Apply These Terms to Your New Programs

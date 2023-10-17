@@ -14,8 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use \WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\WP_Helper;
+use WSAL\Controllers\Connection;
+use WSAL\Entities\Metadata_Entity;
 use WSAL\Utils\Abstract_Migration;
+use WSAL\Entities\Occurrences_Entity;
 use \WSAL_Vendor\WP_Background_Process;
 
 /**
@@ -63,25 +66,6 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 			$this->action .= $action;
 
 			parent::__construct();
-
-			/**
-			 * In theory that does not suppose to happen, but it obviously does - so if there is nothing in the queue but the records in the options table suggest otherwise - lets clear the tem
-			 */
-			if ( ! wp_next_scheduled( $this->cron_hook_identifier ) ) {
-				if ( $this->is_queue_empty() ) {
-					if ( 'archive' === $action ) {
-						$connection = WP_Helper::get_global_option( 'archive-connection' );
-					} else {
-						$connection = WP_Helper::get_global_option( 'adapter-connection' );
-						if ( empty( $connection ) ) {
-							$connection = 'local';
-						}
-					}
-
-					$this->remove_migration_info( $connection );
-					\WSAL\Helpers\WP_Helper::delete_global_option( Abstract_Migration::STARTED_MIGRATION_PROCESS );
-				}
-			}
 		}
 
 		/**
@@ -116,7 +100,7 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 					<strong><?php esc_html_e( 'Activity log database update in progress.', 'wp-security-audit-log' ); ?></strong>
 					<br />
 					<?php
-					echo \__( '<strong>UPGRADE notice: </strong> WP Activity Log is updating the database tables where the activity log is stored. The duration of this process varies depending on the size of the activity log. The upgrade is running in the background and won\'t affect your website. For more information please refer to this <a href="https://wpactivitylog.com/support/kb/upgrade-database-process-442/" target="_blank">knowledge base entry</a>.', 'wp-security-audit-log' );
+					echo \__( '<strong>UPGRADE notice: </strong> WP Activity Log is updating the database tables where the activity log is stored. The duration of this process varies depending on the size of the activity log. The upgrade is running in the background and won\'t affect your website. For more information please refer to this <a href="https://melapress.com/support/kb/upgrade-database-process-442/" target="_blank">knowledge base entry</a>.', 'wp-security-audit-log' );
 					?>
 				</p>
 			</div>
@@ -129,15 +113,15 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 		 *
 		 * @param array{start_time: int, processed_events_count: int, batch_size: int, connection: string} $item Migration process item.
 		 */
-		protected function task( $item ) {
+		public function task( $item ) {
 			// Migrate metadata for the next batch of events.
-			$items_migrated = $this->process_next_batch( $item['connection'], $item['batch_size'] );
+			$items_migrated = self::process_next_batch( $item['connection'], $item['batch_size'] );
 			if ( 0 === $items_migrated ) {
 				// All metadata has been migrated.
 				try {
 					// Delete the migration job info to indicate that the migration is done.
 					self::remove_migration_info( $item['connection'] );
-					\WSAL\Helpers\WP_Helper::delete_global_option( Abstract_Migration::STARTED_MIGRATION_PROCESS );
+					WP_Helper::delete_global_option( Abstract_Migration::STARTED_MIGRATION_PROCESS );
 
 				} catch ( \Exception $exception ) {
 					$this->handle_error( $exception );
@@ -161,48 +145,50 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 		 *
 		 * @return int
 		 */
-		private function process_next_batch( $connection, $batch_size ) {
+		public static function process_next_batch( $connection, $batch_size ) {
 			$plugin = \WpSecurityAuditLog::get_instance();
 			if ( 'local' !== $connection && ! is_null( $plugin->external_db_util ) ) {
-				$connection = $plugin->external_db_util->get_connection( $connection );
+				$connection = Connection::get_connection( $connection );
 				if ( false === $connection ) {
 					return 0;
 				}
 			}
 
-			$connector = $plugin->get_connector( $connection, false );
+			// $connector = $plugin->get_connector( $connection, false );
 			/** WSAL_Adapters_MySQL_Occurrence $occurrence_adapter */
-			$occurrence_adapter = $connector->get_adapter( 'Occurrence' );
+			// $occurrence_adapter = $connector->get_adapter( 'Occurrence' );
 
-			$occurrences_to_migrate = $occurrence_adapter->get_all_with_meta_to_migrate( $batch_size );
+			$occurrences_to_migrate = Occurrences_Entity::get_all_with_meta_to_migrate( $batch_size );
 			if ( ! empty( $occurrences_to_migrate ) ) {
-				$migrated_meta_keys           = array_keys( \WSAL_Models_Occurrence::$migrated_meta );
+				$migrated_meta_keys           = array_keys( Occurrences_Entity::$migrated_meta );
 				$lowercase_migrated_meta_keys = array_map( 'strtolower', $migrated_meta_keys );
-				foreach ( $occurrences_to_migrate as $occurrence ) {
-					$all_metadata = $occurrence_adapter->get_multi_meta( $occurrence );
+				foreach ( $occurrences_to_migrate as &$occurrence ) {
+					$all_metadata = Metadata_Entity::load_array( 'occurrence_id = %d', array( $occurrence['id'] ) );
 					if ( ! empty( $all_metadata ) ) {
 						foreach ( $all_metadata as $meta_model ) {
-							$meta_key           = $meta_model->name;
+							$meta_key           = $meta_model['name'];
 							$lowercase_meta_key = strtolower( $meta_key );
 
 							// We use lowercase meta keys to make sure we handle even legacy meta keys correctly, for
 							// example "username" was changed to "Username" at some point.
 							if ( in_array( $lowercase_meta_key, $lowercase_migrated_meta_keys ) ) { // phpcs:ignore
 								// This will store the meta in the occ table if it belongs there.
-								$is_empty_string = is_string( $meta_model->value ) && 0 === strlen( $meta_model->value );
+								$is_empty_string = is_string( $meta_model['value'] ) && 0 === strlen( $meta_model['value'] );
 								if ( ! $is_empty_string && in_array( $meta_key, $migrated_meta_keys, true ) ) {
 									// The meta is set in the occurrence object on if it is an exact match, otherwise we
 									// would end up writing and deleting the same meta key endlessly.
-									$occurrence->set_meta_value( $meta_key, $meta_model->value );
+									$occurrence[ Occurrences_Entity::$migrated_meta[ $meta_key ] ] = $meta_model['value'];
+									// $occurrence->set_meta_value( $meta_key, $meta_model['value'] );
 								}
 
-								$meta_model->delete();
+								Metadata_Entity::delete( $meta_model );
 							}
 						}
 
-						$occurrence->save();
+						Occurrences_Entity::save( $occurrence );
 					}
 				}
+				unset( $occurrence );
 			}
 
 			return count( $occurrences_to_migrate );
@@ -222,6 +208,7 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 
 			if ( empty( $existing_info ) ) {
 				WP_Helper::delete_global_option( self::OPTION_NAME_MIGRATION_INFO );
+				WP_Helper::delete_global_option( Abstract_Migration::STARTED_MIGRATION_PROCESS );
 			} else {
 				WP_Helper::set_global_option( self::OPTION_NAME_MIGRATION_INFO, $existing_info );
 			}
@@ -232,7 +219,7 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 		 *
 		 * @param Exception $exception Error to handle.
 		 */
-		private function handle_error( $exception ) {
+		private static function handle_error( $exception ) {
 			// @todo handle migration error
 		}
 
@@ -243,10 +230,14 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 		 */
 		public static function store_migration_info( $info ) {
 			$existing_info   = WP_Helper::get_global_option( self::OPTION_NAME_MIGRATION_INFO, array() );
+			// if ( ! \is_array( $info ) || ! isset( $info['connection'] ) ) {
+			// 	$info['connection'] = 'local';
+			// } else
 			$connection_name = $info['connection'];
 
 			$existing_info[ $connection_name ] = $info;
 			WP_Helper::set_global_option( self::OPTION_NAME_MIGRATION_INFO, $existing_info );
+			WP_Helper::set_global_option( Abstract_Migration::STARTED_MIGRATION_PROCESS, true );
 		}
 	}
 }

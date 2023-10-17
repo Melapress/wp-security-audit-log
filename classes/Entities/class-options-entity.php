@@ -59,8 +59,12 @@ if ( ! class_exists( '\WSAL\Entities\Options_Entity' ) ) {
 		/**
 		 * Drop the table from the DB.
 		 * The method from the abstract class is not used because that table must be in the local database, so we just need to user WP_DB.
+		 *
+		 * @param \WPDB $connection - \WPDB connection to be used for name extraction. Not in use here just for compatibility with the parent class.
+		 *
+		 * @since 4.4.2.1
 		 */
-		public static function drop_table() {
+		public static function drop_table( $connection = null ) {
 			global $wpdb;
 
 			$table_name = self::get_table_name();
@@ -72,9 +76,11 @@ if ( ! class_exists( '\WSAL\Entities\Options_Entity' ) ) {
 		 * Returns the the table name
 		 * The method from the abstract class is not used because that table must be in the local database, so we just need to user WP_DB.
 		 *
+		 * @param \WPDB $connection - \WPDB connection to be used for name extraction. Not in use here just for compatibility with the parent class.
+		 *
 		 * @since 4.4.2.1
 		 */
-		public static function get_table_name(): string {
+		public static function get_table_name( $connection = null ): string {
 			global $wpdb;
 
 			return $wpdb->prefix . static::$table;

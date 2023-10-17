@@ -126,9 +126,9 @@ final class CPTsTracker extends AbstractTracker {
 		$current_blog_id = get_current_blog_id();
 		$data_updated    = false;
 
-		if (false === $network_data) {
-			$network_data=[];
-			$network_data['site'] = [];
+		if ( false === $network_data ) {
+			$network_data         = array();
+			$network_data['site'] = array();
 		}
 		if (
 			! isset( $network_data['site'][ $current_blog_id ] )

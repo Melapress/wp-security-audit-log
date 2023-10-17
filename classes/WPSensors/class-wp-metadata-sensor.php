@@ -4,7 +4,7 @@
  *
  * WP Meta Data sensor class file.
  *
- * @since      latest
+ * @since      4.6.0
  * @package    wsal
  * @subpackage sensors
  */
@@ -38,7 +38,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 	 *
 	 * @package    wsal
 	 * @subpackage sensors
-	 * @since      latest
+	 * @since 4.6.0
 	 */
 	class WP_Meta_Data_Sensor {
 
@@ -108,7 +108,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 			}
 
 			// Remove WC coupons from ignored array.
-			Alert_Manager::remove_from_ignored_post_types( 'shop_coupon' );
+			// Alert_Manager::remove_from_ignored_post_types( 'shop_coupon' );
 
 			/**
 			 * WSAL Filter: `wsal_before_post_meta_create_event`
@@ -289,7 +289,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 		 */
 		public static function event_post_meta_deleted( $meta_ids, $object_id, $meta_key, $meta_value ) {
 			// If meta key starts with "_" then return.
-			if ( '_' === substr( $meta_key, 0, 1 ) ) {
+			if ( '_' === substr( (string) $meta_key, 0, 1 ) ) {
 				return;
 			}
 
@@ -565,9 +565,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 		 */
 		private static function is_woocommerce_user_meta( $meta_key ) {
 			// Check for WooCommerce user profile keys.
-			if ( false !== strpos( $meta_key, 'shipping_' ) || false !== strpos( $meta_key, 'billing_' ) ) {
+			if ( false !== strpos( (string) $meta_key, 'shipping_' ) || false !== strpos( (string) $meta_key, 'billing_' ) ) {
 				// Remove the prefix to avoid redundancy in the meta keys.
-				$address_key = str_replace( array( 'shipping_', 'billing_' ), '', $meta_key );
+				$address_key = str_replace( array( 'shipping_', 'billing_' ), '', (string) $meta_key );
 
 				// WC address meta keys without prefix.
 				$meta_keys = array( 'first_name', 'last_name', 'company', 'country', 'address_1', 'address_2', 'city', 'state', 'postcode', 'phone', 'email' );
@@ -594,7 +594,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 		 */
 		public static function can_log_meta_key( $object_type, $object_id, $meta_key ) {
 			// Check if excluded meta key or starts with _.
-			if ( '_' === substr( $meta_key, 0, 1 ) ) {
+			if ( '_' === substr( (string) $meta_key, 0, 1 ) ) {
 				/**
 				 * List of hidden keys allowed to log.
 				 *

@@ -8,9 +8,10 @@
  * @package wsal
  */
 
-use WSAL\Helpers\Classes_Helper;
+use WSAL\Controllers\Alert;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
-use WSAL\Entities\Occurrences_Entity;
+use WSAL\ListAdminEvents\List_Events;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -102,16 +103,10 @@ class WSAL_ViewManager {
 		$views_to_load = array_diff( $views, $skip_views );
 
 		foreach ( $views_to_load as $view ) {
-			if ( Classes_Helper::get_subclasses_of_class( $view, '\WSAL_AbstractView' ) ) {
+			if ( is_subclass_of( $view, '\WSAL_AbstractView' ) ) {
 				$this->views[] = new $view( $this->plugin );
 			}
 		}
-		// // Load views.
-		// foreach ( WSAL_Utilities_FileSystemUtils::read_files_in_folder( WSAL_BASE_DIR . 'classes/Views', '*.php' ) as $file ) {
-		// if ( empty( $skip_views ) || ! in_array( $file, $skip_views ) ) { // phpcs:ignore
-		// $this->add_from_file( $file );
-		// }
-		// }
 
 		// Stop Freemius from hiding the menu on sub sites under certain circumstances.
 		add_filter(
@@ -136,8 +131,8 @@ class WSAL_ViewManager {
 		add_action( 'admin_footer', array( $this, 'render_view_footer' ) );
 
 		// Initialize setup wizard.
-		if ( ! \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'setup-complete', false )
-			&& $this->plugin->settings()->current_user_can( 'edit' )
+		if ( ! Settings_Helper::get_boolean_option_value( 'setup-complete', false )
+			&& Settings_Helper::current_user_can( 'edit' )
 		) {
 			new WSAL_Views_SetupWizard( $plugin );
 		}
@@ -171,7 +166,7 @@ class WSAL_ViewManager {
 	 * @param string $class Class name.
 	 */
 	public function add_from_class( $class ) {
-		if ( Classes_Helper::get_subclasses_of_class( $class, '\WSAL_AbstractView' ) ) {
+		if ( is_subclass_of( $class, '\WSAL_AbstractView' ) ) {
 			$this->views[] = new $class( $this->plugin );
 		}
 	}
@@ -210,7 +205,7 @@ class WSAL_ViewManager {
 	public function add_admin_menus() {
 		$this->reorder_views();
 
-		if ( $this->plugin->settings()->current_user_can( 'view' ) && count( $this->views ) ) {
+		if ( Settings_Helper::current_user_can( 'view' ) && count( $this->views ) ) {
 			// Add main menu.
 			$main_view_menu_slug         = $this->views[0]->get_safe_view_name();
 			$this->views[0]->hook_suffix = add_menu_page(
@@ -222,6 +217,13 @@ class WSAL_ViewManager {
 				$this->views[0]->get_icon(),
 				'2.5' // Right after dashboard.
 			);
+
+			$requested_view = $this->views[0]->detect_view_type();
+
+			// If 'grid' is requested use it otherwise use list view by default.
+			if ( 'grid' !== $requested_view && ! $this->plugin->settings()->is_infinite_scroll() ) {
+				List_Events::add_screen_options( $this->views[0]->hook_suffix );
+			}
 
 			// Protected views to be displayed only to user with full plugin access.
 			$protected_views = array(
@@ -235,7 +237,7 @@ class WSAL_ViewManager {
 			);
 
 			// Check edit privileges of the current user.
-			$has_current_user_edit_priv = $this->plugin->settings()->current_user_can( 'edit' );
+			$has_current_user_edit_priv = Settings_Helper::current_user_can( 'edit' );
 
 			// Add menu items.
 			foreach ( $this->views as $view ) {
@@ -279,7 +281,7 @@ class WSAL_ViewManager {
 			add_submenu_page(
 				'wsal-auditlog',
 				'Upgrade',
-				'<span class="fs-submenu-item wp-security-audit-log pricing upgrade-mode" style="color:#14ff00;">Upgrade&nbsp;&nbsp;➤</span>',
+				'<span class="fs-submenu-item wp-security-audit-log pricing upgrade-mode" style="color:#14ff00;">Upgrade to Premium</span>',
 				'read', // No capability requirement.
 				'upgrade',
 				array(),
@@ -306,8 +308,8 @@ class WSAL_ViewManager {
 
 				if ( 1 === count( $new_links ) && ! wsal_freemius()->is__premium_only() ) {
 					// Trial link.
-					$trial_link  = 'https://wpactivitylog.com/trial-premium-edition-plugin/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL';
-					$new_links[] = '<a style="font-weight:bold" href="' . $trial_link . '" target="_blank">' . __( 'Free Premium Trial', 'wp-security-audit-log' ) . '</a>';
+					$trial_link  = 'https://melapress.com/trial-premium-edition-plugin/?utm_source=plugins&utm_medium=referral&utm_campaign=wsal';
+					$new_links[] = '<a style="font-weight:bold; color:#049443 !important" href="' . $trial_link . '" target="_blank">' . __( 'Get Premium!', 'wp-security-audit-log' ) . '</a>';
 				}
 			}
 		}
@@ -413,6 +415,7 @@ class WSAL_ViewManager {
 	 */
 	public function render_view_body() {
 		$view = $this->get_active_view();
+
 		if ( $view && $view instanceof WSAL_AbstractView ) :
 			?>
 			<div class="wrap">

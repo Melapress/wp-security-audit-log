@@ -2,13 +2,13 @@
 /**
  * WP Activity Log.
  *
- * @copyright Copyright (C) 2013-2023, WP White Security - support@wpwhitesecurity.com
+ * @copyright Copyright (C) 2013-%%YEAR%%, WP White Security - support@melapress.com
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     4.5.2
- * Plugin URI:  https://wpactivitylog.com/
+ * Version:     4.6.0
+ * Plugin URI:  https://melapress.com/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
  * Author:      WP White Security
  * Author URI:  https://www.wpwhitesecurity.com/
@@ -37,13 +37,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+use WSAL\Helpers\Notices;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\Email_Helper;
+use WSAL\Controllers\Connection;
 use WSAL\Helpers\Plugins_Helper;
 use WSAL\Helpers\Settings_Helper;
-use WSAL\Actions\Pluging_Installer;
+use WSAL\Actions\Plugin_Installer;
+use WSAL\Entities\Metadata_Entity;
+use WSAL\Helpers\Uninstall_Helper;
 use WSAL\Controllers\Plugin_Extensions;
 use WSAL\Controllers\Sensors_Load_Manager;
+use WSAL\Migration\Metadata_Migration_440;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -55,7 +60,7 @@ if ( file_exists( plugin_dir_path( __FILE__ ) . 'vendor/autoload.php' ) ) {
 }
 
 if ( ! defined( 'WSAL_PREFIX' ) ) {
-	define( 'WSAL_VERSION', '4.5.2' );
+	define( 'WSAL_VERSION', '4.6.0' );
 	define( 'WSAL_PREFIX', 'wsal_' );
 	define( 'WSAL_PREFIX_PAGE', 'wsal-' );
 }
@@ -74,7 +79,7 @@ if ( ! defined( 'WSAL_BASE_DIR' ) ) {
 }
 // Plugin Docs URL.
 if ( ! defined( 'WSAL_DOCS_URL' ) ) {
-	define( 'WSAL_DOCS_URL', 'https://wpactivitylog.com/support/' );
+	define( 'WSAL_DOCS_URL', 'https://mellapress.com/support/' );
 }
 // Plugin Issue Reporting URL.
 if ( ! defined( 'WSAL_ISSUE_URL' ) ) {
@@ -94,8 +99,9 @@ if ( ! defined( 'WSAL_CONN_PREFIX' ) ) {
 if ( ! defined( 'WSAL_MIRROR_PREFIX' ) ) {
 	define( 'WSAL_MIRROR_PREFIX', 'mirror-' );
 }
-
+// phpcs:disable
 /* @free:start */
+// phpcs:enable
 if ( ! function_exists( 'wsal_disable_freemius_on_free' ) ) {
 	/**
 	 * Disables the freemius
@@ -112,7 +118,9 @@ if ( ! function_exists( 'wsal_disable_freemius_on_free' ) ) {
 }
 add_filter( 'wsal_freemius_sdk_object', 'wsal_disable_freemius_on_free' );
 add_filter( 'wsal_disable_freemius_sdk', '__return_true' );
+// phpcs:disable
 /* @free:end */
+// phpcs:enable
 
 if ( ! function_exists( 'wsal_freemius' ) ) {
 
@@ -126,35 +134,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		class WpSecurityAuditLog {
 
 			/**
-			 * Plugin constants.
-			 *
-			 * The above is misleading - keeping it before making sure all occurrences are covered.
-			 *
-			 * From here the Autoloader tries to guess the classes - probably that is the meaning of the CLS - it looks like its not used anywhere else
-			 *
-			 * Possible name meaning - Plugin CLass Prefix
-			 *
-			 * TODO: Change then name.
-			 *
-			 * @var string
-			 */
-			const PLG_CLS_PRFX = 'WSAL_';
-
-			/**
 			 * Minimal PHP version.
 			 *
 			 * @var string
 			 */
 			const MIN_PHP_VERSION = '7.2.0';
-
-			/**
-			 * New option name prefix.
-			 *
-			 * @var string
-			 *
-			 * @deprecated latest - This was deprecated and will be removed, use WSAL_PREFIX instead - it is globally available.
-			 */
-			const OPTIONS_PREFIX = 'wsal_';
 
 			/**
 			 * Views supervisor.
@@ -200,13 +184,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 */
 			public $extensions;
 
-			/**
-			 * Allowed HTML Tags for strings.
-			 *
-			 * @var array
-			 */
-			public $allowed_html_tags = array();
-
+			// phpcs:disable
+			// phpcs:enable
 
 			/**
 			 * Standard singleton pattern.
@@ -224,11 +203,27 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				return $instance;
 			}
 
+			public static function getInstance() { // phpcs:ignore
+				if ( method_exists( 'WSAL\Controllers\Plugin_Extensions', 'deactivate_plugins' ) ) {
+					Plugin_Extensions::deactivate_plugins();
+				} else {
+					set_transient( 'wsal_deactivate_plugins', true );
+				}
+
+				static $instance = null;
+				if ( ! $instance ) {
+					$instance = new self();
+				}
+				return $instance;
+			}
+
 			/**
 			 * Initialize plugin.
 			 */
 			public function __construct() {
 				$bootstrap_hook = array( 'plugins_loaded', 9 );
+
+				Sensors_Load_Manager::load_early_sensors();
 
 				add_action( $bootstrap_hook[0], array( $this, 'setup' ), $bootstrap_hook[1] );
 
@@ -238,9 +233,22 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Plugin Deactivation Actions.
 				register_deactivation_hook( __FILE__, array( $this, 'deactivate_actions' ) );
 
+				// phpcs:disable
+				/* @free:start */
+				// phpcs:enable
+				register_uninstall_hook( __FILE__, array( '\WSAL\Helpers\Uninstall_Helper', 'uninstall' ) );
+				// phpcs:disable
+				/* @free:end */
+				// phpcs:enable
+
+				// phpcs:disable
+				// phpcs:enable
+
 				// Add custom schedules for WSAL early otherwise they won't work.
 				add_filter( 'cron_schedules', array( $this, 'recurring_schedules' ) );
 
+				// phpcs:disable
+				// phpcs:enable
 
 				// Hide all unrelated to the plugin notices on the plugin admin pages.
 				add_action( 'admin_print_scripts', array( '\WSAL\Helpers\WP_Helper', 'hide_unrelated_notices' ) );
@@ -344,9 +352,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					return;
 				}
 
-				$this->set_allowed_html_tags();
 				$this->includes();
-				\WSAL\Utils\Migration::migrate();
+
+				if ( class_exists( 'WSAL\Migration\Metadata_Migration_440' ) && ! empty( WP_Helper::get_global_option( Metadata_Migration_440::OPTION_NAME_MIGRATION_INFO, array() ) ) ) {
+
+					// ( new Metadata_Migration_440( 'local' ) )->task(['connection'=>'local','batch_size'=>50,'processed_events_count'=>0]);
+					new Metadata_Migration_440( 'local' );
+
+					new Metadata_Migration_440( 'external' );
+					new Metadata_Migration_440( 'archive' );
+
+					add_action( 'all_admin_notices', array( 'WSAL\Migration\Metadata_Migration_440', 'maybe_display_progress_admin_notice' ) );
+				}
+
 				$this->init_hooks();
 				self::load_defaults();
 				$this->load_wsal();
@@ -456,6 +474,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @since 3.3
 			 */
 			public function init_hooks() {
+
+				// Setup screen options. Needs to be here as admin_init hook it too late.
+				add_filter( 'set-screen-option', array( '\WSAL\ListAdminEvents\List_Events', 'set_screen_option' ), 10, 3 );
+
+				add_action( 'current_screen', array( '\WSAL\Helpers\Upgrade_Notice', 'init' ) );
+
 				// Listen for cleanup event.
 				add_action( 'wsal_cleanup', array( $this, 'clean_up' ) );
 
@@ -465,7 +489,10 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				add_action( 'admin_footer', array( $this, 'render_footer' ) );
 
 				// Plugin redirect on activation.
-				if ( current_user_can( 'manage_options' ) ) {
+
+				$restrict_to = Settings_Helper::get_option_value( 'restrict-plugin-settings', 'only_admins' );
+
+				if ( current_user_can( 'manage_options' ) && 'only_me' === $restrict_to && (int) Settings_Helper::get_option_value( 'only-me-user-id' ) === (int) get_current_user_id() ) {
 					add_action( 'admin_init', array( $this, 'wsal_plugin_redirect' ) );
 				}
 
@@ -494,70 +521,28 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// Extensions which are only admin based.
 				if ( is_admin() ) {
-					Pluging_Installer::init();
+					Plugin_Installer::init();
 				}
 
 				Plugin_Extensions::init();
 
+				Notices::init_ajax_hooks();
+
 				// Dequeue conflicting scripts.
 				add_action( 'wp_print_scripts', array( $this, 'dequeue_conflicting_scripts' ) );
 
+				// phpcs:disable
+				// phpcs:enable
 			}
 
+			// phpcs:disable
+			// phpcs:enable
 
 			/**
 			 * Load Freemius SDK.
 			 */
 			public static function load_freemius() {
 				require_once plugin_dir_path( __FILE__ ) . '/sdk/wsal-freemius.php';
-			}
-
-			/**
-			 * Determines whether a plugin is active.
-			 *
-			 * @uses is_plugin_active() Uses this WP core function after making sure that this function is available.
-			 * @param string $plugin Path to the main plugin file from plugins directory.
-			 * @return bool True, if in the active plugins list. False, not in the list.
-			 *
-			 * @deprecated 4.5 - Use \WSAL\Helpers\WP_Helper::is_multisite()
-			 */
-			public static function is_plugin_active( $plugin ) {
-				_deprecated_function( __FUNCTION__, '4.5', '\WSAL\Helpers\WP_Helper::is_multisite()' );
-
-				return WP_Helper::is_plugin_active( $plugin );
-			}
-
-			/**
-			 * Check if BBPress plugin is active or not.
-			 *
-			 * @return boolean
-			 */
-			public static function is_bbpress_active() {
-				return ( WP_Helper::is_plugin_active( 'bbpress/bbpress.php' )
-					&& ( WP_Helper::is_plugin_active( 'wsal-bbpress.php' ) )
-				);
-			}
-
-			/**
-			 * Check if WooCommerce plugin is active or not.
-			 *
-			 * @return boolean
-			 */
-			public static function is_woocommerce_active() {
-				return ( WP_Helper::is_plugin_active( 'woocommerce/woocommerce.php' )
-					&& ( WP_Helper::is_plugin_active( 'wp-activity-log-for-woocommerce/wsal-woocommerce.php' ) )
-				);
-			}
-
-			/**
-			 * Check if Yoast SEO plugin is active or not.
-			 *
-			 * @return boolean
-			 */
-			public static function is_wpseo_active() {
-				return ( ( WP_Helper::is_plugin_active( 'wordpress-seo/wp-seo.php' ) || WP_Helper::is_plugin_active( 'wordpress-seo-premium/wp-seo-premium.php' ) )
-					&& ( WP_Helper::is_plugin_active( 'activity-log-wp-seo/activity-log-wp-seo.php' ) )
-				);
 			}
 
 			/**
@@ -578,7 +563,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				$is_admin_blocking_plugins_support_enabled = $this->is_admin_blocking_plugins_support_enabled();
 				if ( self::is_frontend() && self::is_premium_freemius() && file_exists( WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php' ) ) {
-					require_once WSAL_BASE_DIR . '/extensions/class-wsal-extension-manager.php';
 
 					if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
 						WSAL_Extension_Manager::include_extension( 'reports' );
@@ -586,6 +570,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						WSAL_Extension_Manager::include_extension( 'external-db' );
 					} elseif ( $this->should_load() ) {
 						WSAL_Extension_Manager::include_extension( 'notifications' );
+						WSAL_Extension_Manager::include_extension( 'external-db' );
 					}
 
 					if ( ! $is_admin_blocking_plugins_support_enabled ) {
@@ -597,7 +582,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				if ( $is_admin_blocking_plugins_support_enabled || is_admin() || WP_Helper::is_login_screen() || self::is_rest_api() || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 
 					self::load_freemius();
-					// phpcs:ignore
+					// phpcs:disable
+					// phpcs:enable
 					if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
 						// Add filters to customize freemius welcome message.
 						wsal_freemius()->add_filter( 'connect_message', array( $this, 'wsal_freemius_connect_message' ), 10, 6 );
@@ -665,7 +651,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					$redirect = '';
 
 					// If current site is multisite and user is super-admin then redirect to network audit log.
-					if ( WP_Helper::is_multisite() && $this->settings()->current_user_can( 'edit' ) && is_super_admin() ) {
+					if ( WP_Helper::is_multisite() && Settings_Helper::current_user_can( 'edit' ) && is_super_admin() ) {
 						$redirect = add_query_arg( 'page', 'wsal-auditlog', network_admin_url( 'admin.php' ) );
 					} else {
 						// Otherwise, redirect to main audit log view.
@@ -681,9 +667,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 *
 			 * @since 3.0.0
 			 */
-			public function set_allowed_html_tags() {
+			public static function get_allowed_html_tags() {
 				// Set allowed HTML tags.
-				$this->allowed_html_tags = array(
+				return array(
 					'a'      => array(
 						'href'   => array(),
 						'title'  => array(),
@@ -699,6 +685,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				);
 			}
 
+			// phpcs:disable
 			/**
 			 * Customize Freemius connect message for new users.
 			 *
@@ -750,7 +737,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					esc_html__( 'Please help us improve %1$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %3$s, a diagnostic tracking service we use. If you skip this, that\'s okay! %2$s will still work just fine.', 'wp-security-audit-log' ) .
 					'<strong>' . $plugin_title . '</strong>',
 					'<strong>' . $plugin_title . '</strong>',
-					'<a href="https://wpactivitylog.com/support/kb/non-sensitive-diagnostic-data/" target="_blank" tabindex="1">freemius.com</a>',
+					'<a href="https://melapress.com/support/kb/non-sensitive-diagnostic-data/" target="_blank" tabindex="1">freemius.com</a>',
 					'<strong>' . $plugin_title . '</strong>'
 				);
 				$result .= '<br /><br /><strong>' . esc_html__( 'Note: ', 'wp-security-audit-log' ) . '</strong>';
@@ -771,7 +758,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @since 3.3
 			 */
 			public function freemius_show_admin_notice( $show, $msg ) {
-				if ( $this->settings()->current_user_can( 'edit' ) ) {
+				if ( Settings_Helper::current_user_can( 'edit' ) ) {
 					return $show;
 				}
 				return false;
@@ -837,7 +824,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// }
 
 				// if ( ! isset( $this->constants ) ) {
-				// 	$this->constants = new WSAL_ConstantManager();
+				// $this->constants = new WSAL_ConstantManager();
 				// }
 
 				// $this->sensors = new WSAL_SensorManager( $this );
@@ -855,6 +842,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// }
 
 				if ( is_admin() ) {
+					// phpcs:disable
 
 					// Hide plugin.
 					if ( Settings_Helper::get_boolean_option_value( 'hide-plugin' ) ) {
@@ -876,6 +864,12 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// Allow registration of custom alert formatters (must be called after wsal_init action).
 				WSAL_AlertFormatterFactory::bootstrap();
+
+				\WSAL\Utils\Migration::migrate();
+
+				if ( defined( '\WP_CLI' ) && \WP_CLI ) {
+					\WP_CLI::add_command( 'wsal_cli_commands', '\WSAL\Controllers\WP_CLI\WP_CLI_Commands' );
+				}
 			}
 
 			/**
@@ -913,7 +907,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 */
 			public function ajax_disable_custom_field() {
 				// Die if user does not have permission to disable.
-				if ( ! $this->settings()->current_user_can( 'edit' ) ) {
+				if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
 					echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to disable this custom field.', 'wp-security-audit-log' ) . '</p>';
 					die();
 				}
@@ -979,7 +973,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 */
 			public function ajax_disable_by_code() {
 				// Die if user does not have permission to disable.
-				if ( ! $this->settings()->current_user_can( 'edit' ) ) {
+				if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
 					echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to disable this alert.', 'wp-security-audit-log' ) . '</p>';
 					die();
 				}
@@ -1028,7 +1022,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// Live events disabled in free version of the plugin.
 				$live_events_enabled = false;
-				// phpcs:ignore
+				// phpcs:disable
+				// phpcs:enable
 				// Set data array for common script.
 				$script_data = array(
 					'ajaxURL'           => admin_url( 'admin-ajax.php' ),
@@ -1041,6 +1036,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					'reloading_page'    => esc_html__( 'Reloading page', 'wp-security-audit-log' ),
 				);
 
+				// phpcs:disable
+				// phpcs:enable
 				wp_localize_script( 'wsal-common', 'wsalCommonData', $script_data );
 
 				// Enqueue script.
@@ -1083,7 +1080,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					/* Translators: %s: Activity Log for MainWP plugin hyperlink */
 					$installation_errors = sprintf( __( 'Please install the %s plugin on the MainWP dashboard.', 'wp-security-audit-log' ), '<a href="https://wordpress.org/plugins/activity-log-mainwp/" target="_blank">' . __( 'Activity Log for MainWP', 'wp-security-audit-log' ) . '</a>' ) . ' ';
 					/* Translators: %s: Getting started guide hyperlink */
-					$installation_errors .= sprintf( __( 'The WP Activity Log should be installed on the child sites only. Refer to the %s for more information.', 'wp-security-audit-log' ), '<a href="https://wpactivitylog.com/support/kb/gettting-started-activity-log-mainwp-extension/" target="_blank">' . __( 'getting started guide', 'wp-security-audit-log' ) . '</a>' );
+					$installation_errors .= sprintf( __( 'The WP Activity Log should be installed on the child sites only. Refer to the %s for more information.', 'wp-security-audit-log' ), '<a href="https://melapress.com/support/kb/gettting-started-activity-log-mainwp-extension/" target="_blank">' . __( 'getting started guide', 'wp-security-audit-log' ) . '</a>' );
 				}
 
 				if ( $installation_errors ) {
@@ -1104,16 +1101,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				// Disable database sensor during the creation of tables.
 				\WSAL\WP_Sensors\WP_Database_Sensor::set_enabled( false );
-
-				// On first install this won't be loaded because not premium, add it
-				// now so it installs.
-				$this->load_sessions_extension_db_adapter();
-
-				// run any installs.
-				self::get_connector()->install_all();
-				// self::get_connector()->get_adapter( 'Occurrence' )->create_indexes();
-				// self::get_connector()->get_adapter( 'Meta' )->create_indexes();
-
 
 				// Install cleanup hook (remove older one if it exists).
 				wp_clear_scheduled_hook( 'wsal_cleanup' );
@@ -1166,7 +1153,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @internal
 			 */
 			public function hide_plugin() {
-				if ( ! $this->settings()->current_user_can( 'edit' ) ) {
+				if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
 					$selectr = '';
 					$plugins = array( 'wp-security-audit-log', 'wp-security-audit-log-premium' );
 					foreach ( $plugins as $value ) {
@@ -1178,141 +1165,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					</style>
 					<?php
 				}
-			}
-
-			/**
-			 * Return whether we are running on multisite or not.
-			 *
-			 * @return boolean
-			 *
-			 * @deprecated 4.5 - Use \WSAL\Helpers\WP_Helper::is_multisite()
-			 */
-			public static function is_multisite() {
-				_deprecated_function( __FUNCTION__, '4.4.3', '\WSAL\Helpers\WP_Helper::is_multisite()' );
-
-				return \WSAL\Helpers\WP_Helper::is_multisite();
-			}
-
-			/**
-			 * Get a global option.
-			 *
-			 * Deprecated function. It is only kept for the extension plugins. Nothing in the main plugin uses it, not even
-			 * the upgrade process.
-			 *
-			 * @param string $option  - Option name.
-			 * @param mixed  $default - (Optional) Value returned when option is not set (defaults to false).
-			 * @param string $prefix  - (Optional) A prefix used before option name.
-			 *
-			 * @return mixed - Option's value or $default if option not set.
-			 *
-			 * @deprecated 4.1.3 Use WpSecurityAuditLog::GetGlobalSetting instead
-			 * @see WpSecurityAuditLog::get_global_setting()
-			 *
-			 * @phpcs:disable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-			 */
-			public function GetGlobalOption( $option, $default = false, $prefix = '' ) {
-				return WSAL\Helpers\Settings_Helper::get_option_value( $option, $default );
-			}
-
-			/**
-			 * Get a global setting.
-			 *
-			 * @param string $option - Option name.
-			 * @param mixed  $default - (Optional) Value returned when option is not set (defaults to false).
-			 *
-			 * @return mixed - Option's value or $default if option not set.
-			 *
-			 * @deprecated 4.4.3 - Use \WSAL\Helpers\Settings_Helper::get_option_value()
-			 */
-			public function get_global_setting( $option, $default = false ) {
-				_deprecated_function( __FUNCTION__, '4.4.3', '\WSAL\Helpers\Settings_Helper::get_option_value()' );
-
-				return \WSAL\Helpers\Settings_Helper::get_option_value( $option, $default );
-			}
-
-			/**
-			 * Set a global option.
-			 *
-			 * Deprecated function. It is only kept for the extension plugins. Nothing in the main plugin uses it, not even
-			 * the upgrade process.
-			 *
-			 * @param string $option - Option name.
-			 * @param mixed  $value - New value for option.
-			 * @param string $prefix - (Optional) A prefix used before option name.
-			 *
-			 * @deprecated 4.1.3 Use WpSecurityAuditLog::SetGlobalSetting instead
-			 * @see WpSecurityAuditLog::set_global_setting()
-			 *
-			 * @phpcs:disable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-			 */
-			public function SetGlobalOption( $option, $value, $prefix = '' ) {
-				$this->set_global_setting( $option, $value );
-			}
-
-			/**
-			 * Set a global setting.
-			 *
-			 * @param string $option - Option name.
-			 * @param mixed  $value - New value for option.
-			 * @param bool   $autoload Whether or not to autoload this option.
-			 *
-			 * @return bool
-			 *
-			 * @deprecated 4.4.3 - Use \WSAL\Helpers\Settings_Helper::set_option_value()
-			 */
-			public function set_global_setting( $option, $value, $autoload = false ) {
-				_deprecated_function( __FUNCTION__, '4.4.3', '\WSAL\Helpers\Settings_Helper::set_option_value()' );
-
-				return \WSAL\Helpers\Settings_Helper::set_option_value( $option, $value, $autoload );
-			}
-
-			/**
-			 * Deletes a global setting.
-			 *
-			 * @param string $option - Option name without the prefix.
-			 *
-			 * @return bool
-			 * @since 4.2.1
-			 *
-			 * @deprecated 4.4.3 - Use \WSAL\Helpers\Settings_Helper::delete_option_value()
-			 */
-			public function delete_global_setting( $option ) {
-				_deprecated_function( __FUNCTION__, '4.4.3', '\WSAL\Helpers\Settings_Helper::delete_option_value()' );
-
-				return \WSAL\Helpers\Settings_Helper::delete_option_value( $option );
-			}
-
-			/**
-			 * Get a global boolean setting. It takes care of the conversion between string and boolean.
-			 *
-			 * @param string  $option  - Option name.
-			 * @param boolean $default - (Optional) Value returned when option is not set (defaults to false).
-			 * @return boolean - Option's value or $default if option not set.
-			 * @since 4.1.3
-			 *
-			 * @deprecated 4.4.3 - Use \WSAL\Helpers\Settings_Helper::get_boolean_option_value()
-			 */
-			public function get_global_boolean_setting( $option, $default = false ) {
-				_deprecated_function( __FUNCTION__, '4.4.3', '\WSAL\Helpers\Settings_Helper::get_boolean_option_value()' );
-
-				return \WSAL\Helpers\Settings_Helper::get_boolean_option_value( $option, $default );
-			}
-
-			/**
-			 * Sets a global boolean setting. It takes care of the conversion between string and boolean.
-			 *
-			 * @param string $option - Option name.
-			 * @param mixed  $value - New value for option.
-			 * @param bool   $autoload Whether or not to autoload this option.
-			 *
-			 * @since 4.1.3
-			 *
-			 * @deprecated 4.4.3 - Use \WSAL\Helpers\Settings_Helper::set_boolean_option_value()
-			 */
-			public function set_global_boolean_setting( $option, $value, $autoload = false ) {
-				_deprecated_function( __FUNCTION__, '4.4.3', '\WSAL\Helpers\Settings_Helper::set_boolean_option_value()' );
-
-				\WSAL\Helpers\Settings_Helper::set_boolean_option_value( $option, $value, $autoload );
 			}
 
 			/**
@@ -1334,22 +1186,38 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				// Site id.
 				$site_id = function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0;
 
-				// New occurrence object.
-				$occurrence = new WSAL_Models_Occurrence();
-				$alerts     = $occurrence->check_alert_1003(
+				$alerts = \WSAL\Entities\Occurrences_Entity::find(
 					array(
-						1003,
-						$site_id,
-						mktime( 0, 0, 0, $m - 1, $d, $y ) + 1,
-						mktime( 0, 0, 0, $m, $d, $y ),
+
+						'data'    => array(
+							'alert_id'   => 1003,
+							'site_id'    => $site_id,
+							'created_on' => array(
+								mktime( 0, 0, 0, $m - 1, $d, $y ) + 1,
+								mktime( 0, 0, 0, $m, $d, $y ),
+							),
+						),
+						'formats' => array( '%d', '%d', '%d', '%d' ),
 					)
 				);
+
+				// New occurrence object.
+				// $occurrence = new WSAL_Models_Occurrence();
+				// $alerts     = $occurrence->check_alert_1003(
+				// array(
+				// 1003,
+				// $site_id,
+				// mktime( 0, 0, 0, $m - 1, $d, $y ) + 1,
+				// mktime( 0, 0, 0, $m, $d, $y ),
+				// )
+				// );
 
 				// Alerts exist then continue.
 				if ( ! empty( $alerts ) ) {
 					foreach ( $alerts as $alert ) {
 						// Flush the usernames metadata.
-						$alert->update_meta_value( 'Users', array() );
+						Metadata_Entity::update_by_name_and_occurrence_id( 'Users', array(), $alert['id'] );
+						// $alert->update_meta_value( 'Users', array() );
 					}
 				}
 			}
@@ -1382,57 +1250,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 *
 			 * @return WSAL_Connector_ConnectorInterface
 			 */
-			public static function get_connector( $config = null, $reset = false ) {
-				return WSAL_Connector_ConnectorFactory::get_connector( $config, $reset );
-			}
-
-			/**
-			 * Do we have an existing installation? This only applies for version 1.0 onwards.
-			 *
-			 * @return boolean
-			 */
-			public function is_installed() {
-				return self::get_connector()->is_installed();
-			}
-
-			/**
-			 * Absolute URL to plugin directory WITHOUT final slash.
-			 *
-			 * @return string
-			 *
-			 * @deprecated 4.4.3 - Use WSAL_BASE_URL constant
-			 */
-			public function get_base_url() {
-				_deprecated_function( __FUNCTION__, '4.4.3', 'WSAL_BASE_URL' );
-
-				return WSAL_BASE_URL;
-			}
-
-			/**
-			 * Full path to plugin directory WITH final slash.
-			 *
-			 * @return string
-			 *
-			 * @deprecated 4.4.3 - Use WSAL_BASE_DIR constant
-			 */
-			public function get_base_dir() {
-				_deprecated_function( __FUNCTION__, '4.4.3', 'WSAL_BASE_DIR' );
-
-				return WSAL_BASE_DIR;
-			}
-
-			/**
-			 * Plugin directory name.
-			 *
-			 * @return string
-			 *
-			 * @deprecated 4.4.3 - Use WSAL_BASE_NAME constant
-			 */
-			public function get_base_name() {
-				_deprecated_function( __FUNCTION__, '4.4.3', 'WSAL_BASE_NAME' );
-
-				return WSAL_BASE_NAME;
-			}
+			// public static function get_connector( $config = null, $reset = false ) {
+			// return Connection::build_connection( $config );
+			// }
 
 			/**
 			 * Load default configuration / data.
@@ -1440,24 +1260,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			public static function load_defaults() {
 				\WSAL\Controllers\Constants::init();
 				require_once 'defaults.php';
-			}
-
-			/**
-			 * Update global option.
-			 *
-			 * Deprecated function. It is only kept for the extension plugins. Nothing in the main plugin uses it, not even
-			 * the upgrade process.
-			 *
-			 * @param string $option - Option name.
-			 * @param mixed  $value - Option value.
-			 *
-			 * @return bool|int
-			 *
-			 * @deprecated 4.1.3 Use WpSecurityAuditLog::SetGlobalSetting instead
-			 * @see WpSecurityAuditLog::set_global_setting()
-			 */
-			public function UpdateGlobalOption( $option, $value ) {
-				return \WSAL\Helpers\Settings_Helper::set_option_value( $option, $value );
 			}
 
 			/**
@@ -1479,7 +1281,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 					// Default message.
 					if ( ! $message ) {
-						$message = '<p class="message">' . wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href="https://wpactivitylog.com/" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), $this->allowed_html_tags ) . '</p>';
+						$message = '<p class="message">' . wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href="https://melapress.com/" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), self::get_allowed_html_tags() ) . '</p>';
 					} else {
 						$message = '<p class="message">' . $message . '</p>';
 					}
@@ -1540,7 +1342,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * Uninstall routine for the plugin.
 			 */
 			public static function uninstall() {
-				WSAL_Uninstall::uninstall();
+				Uninstall_Helper::uninstall();
 			}
 
 			/**
@@ -1685,17 +1487,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			}
 
 			/**
-			 * Loads everything necessary to use DB adapter from the sessions' extension.
-			 *
-			 * @since 4.1.4.1
-			 */
-			public function load_sessions_extension_db_adapter() {
-				if ( file_exists( plugin_dir_path( __FILE__ ) . 'extensions/user-sessions/user-sessions.php' ) ) {
-					require_once plugin_dir_path( __FILE__ ) . 'extensions/user-sessions/user-sessions.php';
-				}
-			}
-
-			/**
 			 * Runs on premium version activation and installs database tables of the premium extensions (sessions table at
 			 * the time of introducing this function).
 			 *
@@ -1703,7 +1494,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 */
 			public function on_freemius_premium_version_activation() {
 				$this->sync_premium_freemius();
-				$this->load_sessions_extension_db_adapter();
 			}
 
 			/**
@@ -1731,60 +1521,14 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				$database_type = WSAL\Helpers\Settings_Helper::get_option_value( 'adapter-type' );
 				if ( ! is_null( $database_type ) ) {
 					if ( strlen( $database_type ) > 0 ) {
-						$this->get_connector()->close_connection();
+						Connection::close_connection();
 					}
 				}
-			}
-
-			/**
-			 * Deprecated placeholder function.
-			 *
-			 * @return WpSecurityAuditLog Returns the current plugin instance.
-			 *
-			 * @deprecated 4.4.1 Replaced by function get_instance.
-			 * @see        WpSecurityAuditLog::get_instance()
-			 *
-			 * @phpcs:disable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-			 */
-			public static function GetInstance() {
-				return self::get_instance();
-			}
-
-			/**
-			 * Deprecated placeholder function.
-			 *
-			 * @param string  $option  Option name.
-			 * @param boolean $default (Optional) Value returned when option is not set (defaults to false).
-			 *
-			 * @return boolean Option's value or $default if option not set.
-			 *
-			 * @deprecated 4.4.1 Replaced by function get_instance.
-			 * @see        WpSecurityAuditLog::get_global_boolean_setting()
-			 *
-			 * @phpcs:disable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-			 */
-			public function GetGlobalBooleanSetting( $option, $default = false ) {
-				return $this->get_global_boolean_setting( $option, $default );
-			}
-
-			/**
-			 * Deprecated placeholder function.
-			 *
-			 * @param string $option   Option name.
-			 * @param mixed  $value    New value for option.
-			 * @param bool   $autoload Whether or not to autoload this option.
-			 *
-			 * @deprecated 4.4.1 Replaced by function get_instance.
-			 * @see        WpSecurityAuditLog::set_global_boolean_setting()
-			 *
-			 * @phpcs:disable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-			 */
-			public function SetGlobalBooleanSetting( $option, $value, $autoload = false ) {
-				$this->set_global_boolean_setting( $option, $value, $autoload );
 			}
 		}
 
 		// phpcs:disable
+		// phpcs:enable
 
 		$prefixed_autoloader_file_path = plugin_dir_path( __FILE__ ) . implode(
 			DIRECTORY_SEPARATOR,
@@ -1797,7 +1541,8 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 		if ( file_exists( $prefixed_autoloader_file_path ) ) {
 			require_once $prefixed_autoloader_file_path;
-			// phpcs:ignore
+			// phpcs:disable
+			// phpcs:enable
 		}
 
 		// Begin load sequence.
@@ -1818,7 +1563,9 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 } else {
 	wsal_freemius()->set_basename( true, __FILE__ );
 }
+// phpcs:disable
 /* @free:start */
+// phpcs:enable
 if ( ! function_exists( 'wsal_free_on_plugin_activation' ) ) {
 	/**
 	 * Takes care of deactivation of the premium plugin when the free plugin is activated. The opposite direction is handled

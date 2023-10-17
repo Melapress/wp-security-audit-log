@@ -15,14 +15,14 @@ namespace WSAL\Actions;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\Plugins_Helper;
 
-if ( ! class_exists( '\WSAL\Actions\Pluging_Installer' ) ) {
+if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 
 	/**
 	 * Class to handle the installation and activation of plugins.
 	 *
 	 * @since 4.0.1
 	 */
-	class Pluging_Installer {
+	class Plugin_Installer {
 
 		/**
 		 * Register the ajax action.
@@ -175,6 +175,36 @@ if ( ! class_exists( '\WSAL\Actions\Pluging_Installer' ) ) {
 			if ( ! WP_Helper::is_plugin_active( $plugin_zip ) ) {
 				activate_plugin( $plugin_zip );
 			}
+		}
+
+		/**
+		 * Deactivate plugin by given slug
+		 *
+		 * @param string $plugin - The slug of the plugin to deactivate.
+		 *
+		 * @return boolean
+		 *
+		 * @since 4.6.0
+		 */
+		public static function deactivate_plugin( string $plugin ): bool {
+			if ( ! function_exists( 'deactivate_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+			if ( WP_Helper::is_plugin_active( $plugin ) ) {
+				$network_wide = false; // Set to true if you want to deactivate the plugin network-wide (for multisite).
+				if ( WP_Helper::is_multisite() ) {
+					$network_wide = true;
+				}
+
+				$result = deactivate_plugins( $plugin, false, $network_wide );
+
+				// Check if the plugin was deactivated.
+				if ( is_wp_error( $result ) ) {
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		/**

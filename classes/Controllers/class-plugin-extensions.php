@@ -4,7 +4,7 @@
  *
  * Plugin Extensions class file.
  *
- * @since     latest
+ * @since     4.6.0
  *
  * @package   wsal
  * @subpackage controllers
@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace WSAL\Controllers;
 
 use WSAL\Helpers\Classes_Helper;
+use WSAL\Actions\Plugin_Installer;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -56,8 +57,7 @@ if ( ! class_exists( '\WSAL\Controllers\Plugin_Extensions' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function init() {
-			add_filter( 'wsal_filter_installable_plugins', array( __CLASS__, 'filter_installable_plugins' ), 10, 1 );
-			add_filter( 'wsal_addon_event_codes', array( __CLASS__, 'add_event_codes' ), 10, 1 );
+			// add_filter( 'wsal_filter_installable_plugins', array( __CLASS__, 'filter_installable_plugins' ), 10, 1 ); //.
 
 			foreach ( self::get_extensions() as $extension ) {
 				// Check if that sensor is for login or not.
@@ -65,29 +65,6 @@ if ( ! class_exists( '\WSAL\Controllers\Plugin_Extensions' ) ) {
 					call_user_func_array( array( $extension, 'init' ), array() );
 				}
 			}
-		}
-
-		/**
-		 * Add our extensions event IDs to the array of available events
-		 *
-		 * @param array $addon_event_codes Current extension/addon events.
-		 *
-		 * @return array
-		 *
-		 * @since 4.5.0
-		 */
-		public static function add_event_codes( $addon_event_codes ) {
-			foreach ( self::get_extensions() as $extension ) {
-				// Check if that sensor is for login or not.
-				if ( method_exists( $extension, 'add_event_codes' ) ) {
-					$extension_event_codes = call_user_func_array( array( $extension, 'add_event_codes' ), array( $addon_event_codes ) );
-
-					$addon_event_codes = array_merge( $addon_event_codes, $extension_event_codes );
-				}
-			}
-
-			// combine the two arrays.
-			return $addon_event_codes;
 		}
 
 		/**
@@ -146,6 +123,23 @@ if ( ! class_exists( '\WSAL\Controllers\Plugin_Extensions' ) ) {
 			}
 
 			return null;
+		}
+
+		/**
+		 * Deactivates all of the WSAL plugins.
+		 *
+		 * @return void
+		 *
+		 * @since 4.6.0
+		 */
+		public static function deactivate_plugins() {
+			$plugins = Classes_Helper::get_classes_by_namespace( '\WSAL\WP_Sensors\Helpers' );
+
+			foreach ( $plugins as $plugin ) {
+				if ( method_exists( $plugin, 'get_plugin_filename' ) ) {
+					Plugin_Installer::deactivate_plugin( call_user_func_array( array( $plugin, 'get_plugin_filename' ), array() ) );
+				}
+			}
 		}
 
 		/**

@@ -106,7 +106,7 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 			}
 
 			// @see: http://codex.wordpress.org/Function_Reference/wp_mail
-			add_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ) );
+			add_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ), PHP_INT_MAX );
 			add_filter( 'wp_mail_from_name', array( __CLASS__, 'custom_wp_mail_from_name' ) );
 
 			$result = wp_mail( $email_address, $subject, $content, $headers, $attachments );
@@ -116,7 +116,7 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 			 *
 			 * @see http://core.trac.wordpress.org/ticket/23578
 			 */
-			remove_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ) );
+			remove_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ), PHP_INT_MAX );
 			remove_filter( 'wp_mail_from_name', array( __CLASS__, 'custom_wp_mail_from_name' ) );
 			return $result;
 		}

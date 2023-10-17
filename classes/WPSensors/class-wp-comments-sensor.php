@@ -4,7 +4,7 @@
  *
  * Comments sensor class file.
  *
- * @since     latest
+ * @since     4.6.0
  * @package   wsal
  * @subpackage sensors
  */

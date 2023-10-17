@@ -34,14 +34,14 @@ class WSAL_Views_LogInUsers extends WSAL_ExtensionPlaceholderView {
 	 * {@inheritDoc}
 	 */
 	public function get_name() {
-		return esc_html__( 'Logged In Users &#8682;', 'wp-security-audit-log' );
+		return esc_html__( 'Logged In Users ✛', 'wp-security-audit-log' );
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function get_weight() {
-		return 7;
+		return 5;
 	}
 
 	/**

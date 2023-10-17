@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage utils
- * @copyright  2022 WP White Security
+ * @copyright  %%YEAR%% WP White Security
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-security-audit-log/
  * @since 4.4.3
@@ -44,8 +44,8 @@ if ( ! class_exists( '\WSAL\Helpers\Logger' ) ) {
 			 * Enables / Disables the logging for the plugin.
 			 *
 			 * @param bool $disabled - Default logging for the plugin.
-		 	 *
-		 	 * @since 4.4.3
+			 *
+			 * @since 4.4.3
 			 */
 			return apply_filters( WSAL_PREFIX . 'logging_enabled', true );
 		}

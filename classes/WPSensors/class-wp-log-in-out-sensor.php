@@ -4,7 +4,7 @@
  *
  * Login/Logout sensor class file.
  *
- * @since     latest
+ * @since     4.6.0
  * @package   wsal
  * @subpackage sensors
  */
@@ -16,7 +16,9 @@ namespace WSAL\WP_Sensors;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Entities\Metadata_Entity;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Entities\Occurrences_Entity;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -391,13 +393,23 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 				return;
 			}
 
-			$obj_occurrence = new \WSAL_Models_Occurrence();
-
 			if ( 1002 === $new_alert_code ) {
 				if ( ! Alert_Manager::check_enable_user_roles( $username, $user_roles ) ) {
 					return;
 				}
-				$occ = $obj_occurrence->check_known_users(
+
+				if ( Alert_Manager::will_or_has_triggered( 1004 ) ) {
+					// Skip if 1004 (session block) is already in place.
+					return;
+				}
+
+				/** Check known users */
+				$occ = Occurrences_Entity::build_multi_query(
+					'	WHERE client_ip = %s '
+					. ' AND username = %s '
+					. ' AND alert_id = %d '
+					. ' AND site_id = %d '
+					. ' AND ( created_on BETWEEN %d AND %d );',
 					array(
 						$ip,
 						$username,
@@ -409,26 +421,22 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 				);
 				$occ = count( $occ ) ? $occ[0] : null;
 
-				if ( Alert_Manager::will_or_has_triggered( 1004 ) ) {
-					// Skip if 1004 (session block) is already in place.
-					return;
-				}
-
 				if ( ! empty( $occ ) ) {
 					// Update existing record exists user.
 					self::increment_login_failure( $ip, $site_id, $user );
 
 					$no_increment            = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS_NO_INCREMENT );
-					$new                     = ( $no_increment && $no_increment === $user->ID ) ? $occ->get_meta_value( 'Attempts', 0 ) : $occ->get_meta_value( 'Attempts', 0 ) + 1;
+					$attempts                = Occurrences_Entity::get_meta_value( $occ, 'Attempts', 0 );
+					$new                     = ( $no_increment && $no_increment === $user->ID ) ? $attempts : $attempts + 1;
 					$login_failure_log_limit = self::get_login_failure_log_limit();
 					if ( - 1 !== $login_failure_log_limit && $new > $login_failure_log_limit ) {
 						$new = $login_failure_log_limit . '+';
 					}
 
-					$occ->update_meta_value( 'Attempts', $new );
-					$occ->username   = $username;
-					$occ->created_on = null;
-					$occ->save();
+					Metadata_Entity::update_by_name_and_occurrence_id( 'Attempts', $new, $occ['id'] );
+
+					unset( $occ['created_on'] );
+					Occurrences_Entity::save( $occ );
 				} else {
 
 					// Create a new record exists user.
@@ -451,7 +459,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 					);
 				}
 			} else {
-				$occ_unknown = $obj_occurrence->check_unknown_users(
+				$occ_unknown = Occurrences_Entity::build_multi_query(
+					' WHERE client_ip = %s '
+					. ' AND alert_id = %d '
+					. ' AND site_id = %d '
+					. ' AND ( created_on BETWEEN %d AND %d );',
 					array(
 						$ip,
 						1003,
@@ -467,7 +479,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 					self::increment_login_failure( $ip, $site_id, false );
 
 					// Increase the number of attempts.
-					$new = $occ_unknown->get_meta_value( 'Attempts', 0 ) + 1;
+					$new = Occurrences_Entity::get_meta_value( $occ_unknown, 'Attempts', 0 ) + 1;
 
 					// If login attempts pass allowed number of attempts then stop increasing the attempts.
 					$failure_limit = self::get_visitor_login_failure_log_limit();
@@ -476,22 +488,22 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 					}
 
 					// Update the number of login attempts.
-					$occ_unknown->update_meta_value( 'Attempts', $new );
+					Metadata_Entity::update_by_name_and_occurrence_id( 'Attempts', $new, $occ_unknown['id'] );
 
 					// Get users from alert.
-					$users = $occ_unknown->get_meta_value( 'Users' );
+					$users = \maybe_unserialize( Metadata_Entity::load_by_name_and_occurrence_id( 'Users', $occ_unknown['id'] )['value'] );
 
 					// Update it if username is not already present in the array.
 					if ( ! empty( $users ) && is_array( $users ) && ! in_array( $username, $users, true ) ) {
 						$users[] = $username;
-						$occ_unknown->update_meta_value( 'Users', $users );
+						Metadata_Entity::update_by_name_and_occurrence_id( 'Users', $users, $occ_unknown['id'] );
 					} else {
 						// In this case the value doesn't exist so set the value to array.
 						$users = array( $username );
 					}
 
-					$occ_unknown->created_on = null;
-					$occ_unknown->save();
+					unset( $occ_unknown['created_on'] );
+					Occurrences_Entity::save( $occ_unknown );
 				} else {
 					// Make an array of usernames.
 					$users = array( $username );

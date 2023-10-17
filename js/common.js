@@ -5,7 +5,6 @@
  */
 
 jQuery( document ).ready( function() {
-
 	/**
 	 * Check & Load New Alerts on WP-Admin bar.
 	 *
@@ -144,7 +143,13 @@ jQuery( document ).ready( function() {
 		var linkItem = jQuery( '.fs-submenu-item.wp-security-audit-log.pricing' ).parent();
 		jQuery( linkItem ).attr( {
 			target: '_blank', 
-			href: 'https://wpactivitylog.com/pricing/?utm_source=plugin&utm_medium=referral&utm_campaign=WSAL&utm_content=upgrade+now+menu',
+			href: 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugins&utm_medium=link&utm_campaign=wsal',
 		} );
 	}
+});
+
+jQuery('#toplevel_page_wsal-auditlog li a:contains(✛)').each( function () {
+	var removedPlus = jQuery( this ).html().substring( 0,  jQuery( this ).html().length - 1 );
+	jQuery( this ).html( removedPlus );
+	jQuery( this ).parent().addClass( 'wsal_upgrade_icon' );
 });

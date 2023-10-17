@@ -4,7 +4,7 @@
  *
  * Database sensor class file.
  *
- * @since     latest
+ * @since     4.6.0
  * @package   wsal
  * @subpackage sensors
  */
@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
+use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 
@@ -99,6 +100,17 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 			$res                     = empty( array_diff( Settings_Helper::get_default_always_disabled_alerts(), $current_disabled_alerts ) );
 
 			return ! $res;
+		}
+
+		/**
+		 * Sets the sensor as disabled.
+		 *
+		 * @return void
+		 *
+		 * @since 4.6.0
+		 */
+		public static function set_disabled() {
+			self::$enabled = false;
 		}
 
 		/**
@@ -227,35 +239,60 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 		 */
 		private static function contains_wordpress_table( $tables ) {
 			if ( ! empty( $tables ) ) {
-				global $wpdb;
-				$prefix        = preg_quote( $wpdb->prefix ); // phpcs:ignore
 
 				$wp_tables_array = array(
-					$prefix . 'commentmeta',
-					$prefix . 'comments',
-					$prefix . 'links',
-					$prefix . 'options',
-					$prefix . 'postmeta',
-					$prefix . 'posts',
-					$prefix . 'terms',
-					$prefix . 'termmeta',
-					$prefix . 'term_relationships',
-					$prefix . 'term_taxonomy',
-					$prefix . 'usermeta',
-					$prefix . 'users',
-					$prefix . 'blogs',
-					$prefix . 'blog_versions',
-					$prefix . 'registration_log',
-					$prefix . 'signups',
-					$prefix . 'site',
-					$prefix . 'sitemeta',
-					$prefix . 'usermeta',
+					'commentmeta',
+					'comments',
+					'links',
+					'options',
+					'postmeta',
+					'posts',
+					'terms',
+					'termmeta',
+					'term_relationships',
+					'term_taxonomy',
+					'usermeta',
+					'users',
+					'blogs',
+					'blog_versions',
+					'registration_log',
+					'signups',
+					'site',
+					'sitemeta',
+					'usermeta',
 				);
 
 				foreach ( $tables as $table ) {
-					if ( \in_array( $table, $wp_tables_array, true ) ) {
-						// Stop as soon as the first WordPress table is found.
-						return true;
+					// 'wp_term_relationships' .
+					// 'wp_1_term_relationships' .
+					// 'wp_' .
+
+					global $wpdb;
+
+					$current_db_prefix = $wpdb->base_prefix;
+
+					$table = trim( $table, '`' );
+					$table = trim( $table, "'" );
+
+					if ( 0 === \mb_strpos( $table, $current_db_prefix ) ) {
+
+						$table = substr_replace( $table, '', 0, strlen( $current_db_prefix ) );
+
+						if ( WP_Helper::is_multisite() ) {
+
+							$table_name_chunks = \mb_split( '_', $table );
+							$possible_index    = reset( $table_name_chunks );
+
+							if ( false !== filter_var( $possible_index, FILTER_VALIDATE_INT ) ) {
+								$table = substr_replace( $table, '', 0, strlen( $possible_index . '_' ) );
+							}
+						}
+						if ( \in_array( $table, $wp_tables_array, true ) ) {
+							// Stop as soon as the first WordPress table is found.
+							return true;
+						}
+					} else {
+						return false;
 					}
 				}
 			}
@@ -285,8 +322,28 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 						$plugin_file = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
 					} elseif ( isset( $_GET['checked'] ) && isset( $_GET['checked'][0] ) ) {
 						$plugin_file = sanitize_text_field( wp_unslash( $_GET['checked'][0] ) );
-					}
+					} else {
 
+						global $wp_current_filter;
+						if ( isset( $wp_current_filter ) && ! empty( $wp_current_filter ) ) {
+							foreach ( $wp_current_filter as $key => $value ) {
+								if ( 0 === strpos( $value, 'activate_' ) && 'activate_plugin' !== $value ) {
+
+									$pos = strpos( $value, 'activate_' );
+									if ( false !== $pos ) {
+										$plugin_file = substr_replace( $value, '', $pos, strlen( 'activate_' ) );
+									}
+
+									break;
+								}
+							}
+						}
+						if ( empty( $plugin_file ) ) {
+							if ( isset( $GLOBALS['plugin'] ) && '' !== trim( wp_unslash( $GLOBALS['plugin'] ) ) ) {
+								$plugin_file = sanitize_text_field( wp_unslash( $GLOBALS['plugin'] ) );
+							}
+						}
+					}
 					// Get plugin data.
 					$plugins = get_plugins();
 					if ( isset( $plugins[ $plugin_file ] ) ) {
@@ -463,12 +520,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 		private static function determine_recently_activated_plugin() {
 			$alert_id = 5001;
 
-			$latest_events = Alert_Manager::get_latest_events( 25 );
+			$latest_events = Alert_Manager::get_latest_events( 25, true );
+
+			$plugin_name = false;
 
 			foreach ( $latest_events as $latest_event ) {
 				if ( intval( $latest_event['alert_id'] ) === $alert_id ) {
 					$event_meta  = $latest_event ? $latest_event['meta_values'] : false;
 					$plugin_name = $event_meta['PluginData']->Name;
+
+					break;
 				}
 			}
 

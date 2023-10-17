@@ -1665,7 +1665,7 @@ class WSAL_Ref {
 								$date   = new \DateTime( $subject );
 								$errors = \DateTime::getLastErrors();
 
-								if ( (((int)$errors['warning_count']) < 1) && (((int)$errors['error_count']) < 1) ) {
+								if ( is_array($errors) && isset($errors['warning_count']) && (((int)$errors['warning_count']) < 1) && (((int)$errors['error_count']) < 1) ) {
 									$now    = new \Datetime( 'now' );
 									$nowUtc = new \Datetime( 'now', new \DateTimeZone( 'UTC' ) );
 									$diff   = $now->diff( $date );
