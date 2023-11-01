@@ -7,7 +7,7 @@
  *
  * @since 4.5.0
  *
- * @copyright  %%YEAR%% WP White Security
+ * @copyright  %%YEAR%% Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
  * @see       https://wordpress.org/plugins/wp-2fa/
@@ -163,14 +163,6 @@ if ( ! class_exists( '\WSAL\Helpers\Plugins_Helper' ) ) {
 						'plugin_url'  => 'https://downloads.wordpress.org/plugin/website-file-changes-monitor.latest-stable.zip',
 					),
 				);
-
-				// // runs through a filter, so it can be added to programmatically.
-				// // NOTE: this means when using we need to test it's still an array.
-				// self::$installable_plugins = apply_filters( 'wsal_filter_installable_plugins', self::$installable_plugins );
-
-				// // Sort them into a nice order.
-				// array_multisort( array_column( self::$installable_plugins, 'title' ), SORT_ASC, self::$installable_plugins );
-
 			}
 
 			return self::$installable_plugins;

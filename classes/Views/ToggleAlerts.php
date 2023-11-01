@@ -98,12 +98,20 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		// Save enabled front end events.
 		Settings_Helper::set_frontend_events( $frontend_events );
 
-		// Ensure we attempt to save even if eveything is disabled.
+		// Ensure we attempt to save even if everything is disabled.
 		$post_array['alert'] = ( isset( $post_array['alert'] ) ) ? $post_array['alert'] : array();
 
 		$enabled           = array_map( 'intval', $post_array['alert'] );
 		$disabled          = array();
 		$registered_alerts = Alert_Manager::get_alerts();
+
+		foreach ( $registered_alerts as $alert ) {
+			// Disable Visitor events if the user disabled the event there are "tied to" in the UI.
+			if ( ! in_array( $alert['code'], $enabled, true ) ) {
+				$disabled[] = $alert['code'];
+			}
+		}
+
 		$disabled          = apply_filters( 'wsal_save_settings_disabled_events', $disabled, $registered_alerts, $frontend_events, $enabled );
 
 		// Report any changes as an event.

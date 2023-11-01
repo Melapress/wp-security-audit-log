@@ -7,10 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'RCliTextFormatter' => $baseDir . '/classes/Ref.php',
-    'RFormatter' => $baseDir . '/classes/Ref.php',
-    'RHtmlFormatter' => $baseDir . '/classes/Ref.php',
-    'RTextFormatter' => $baseDir . '/classes/Ref.php',
     'Tools\\Select2_WPWS' => $baseDir . '/classes/Select2/class-select2-wpws.php',
     'WSAL\\Actions\\Plugin_Installer' => $baseDir . '/classes/Actions/class-plugin-installer.php',
     'WSAL\\Controllers\\Alert' => $baseDir . '/classes/Controllers/class-alert.php',
@@ -94,6 +90,7 @@ return array(
     'WSAL\\WP_Sensors\\WooCommerce_Public_Sensor' => $baseDir . '/classes/WPSensors/class-woocommerce-public-sensor.php',
     'WSAL\\WP_Sensors\\WooCommerce_Sensor' => $baseDir . '/classes/WPSensors/class-woocommerce-sensor.php',
     'WSAL\\WP_Sensors\\Yoast_SEO_Sensor' => $baseDir . '/classes/WPSensors/class-yoast-seo-sensor.php',
+    'WSAL\\Writers\\CSV_Writer' => $baseDir . '/classes/Writers/class-csv-writer.php',
     'WSAL_AbstractLogger' => $baseDir . '/classes/AbstractLogger.php',
     'WSAL_AbstractView' => $baseDir . '/classes/AbstractView.php',
     'WSAL_AlertFormatter' => $baseDir . '/classes/AlertFormatter.php',
@@ -103,8 +100,6 @@ return array(
     'WSAL_ExtensionPlaceholderView' => $baseDir . '/classes/ExtensionPlaceholderView.php',
     'WSAL_Helpers_DataHelper' => $baseDir . '/classes/Helpers/DataHelper.php',
     'WSAL_MainWpApi' => $baseDir . '/classes/MainWpApi.php',
-    'WSAL_Nicer' => $baseDir . '/classes/Nicer.php',
-    'WSAL_Ref' => $baseDir . '/classes/Ref.php',
     'WSAL_ReportArgs' => $baseDir . '/classes/ReportArgs.php',
     'WSAL_Settings' => $baseDir . '/classes/Settings.php',
     'WSAL_Utilities_DateTimeFormatter' => $baseDir . '/classes/Utilities/DateTimeFormatter.php',

@@ -78,7 +78,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Files_Sensor' ) ) {
 						'AttachmentID'  => $attachment_id,
 						'FileName'      => basename( $file ),
 						'FilePath'      => dirname( $file ),
-						'AttachmentUrl' => get_attachment_link( $attachment_id ),
+						'AttachmentUrl' => wp_get_attachment_url( $attachment_id ),
 					)
 				);
 			}

@@ -579,8 +579,6 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\MemberPress_Sensor' ) ) {
 				'_mepr_emails'                             => esc_html__( 'Send Membership-Specific Welcome Email to User', 'wp-security-audit-log' ),
 				'_mepr_disable_address_fields'             => esc_html__( 'Disable Address Fields', 'wp-security-audit-log' ),
 				'_mepr_allow_simultaneous_subscriptions'   => esc_html__( 'Allow users to create multiple, active subscriptions to this membership', 'wp-security-audit-log' ),
-				'_mepr_use_custom_template'                => esc_html__( 'Use Custom Template', 'wp-security-audit-log' ),
-				'_mepr_custom_template'                    => esc_html__( 'Custom Template', 'wp-security-audit-log' ),
 				'_mepr_customize_payment_methods'          => esc_html__( 'Customize Payment Methods', 'wp-security-audit-log' ),
 				'_mepr_customize_profile_fields'           => esc_html__( 'Customize User Information Fields', 'wp-security-audit-log' ),
 				'_mepr_cannot_purchase_message'            => esc_html__( 'Cannot Purchase Message', 'wp-security-audit-log' ),

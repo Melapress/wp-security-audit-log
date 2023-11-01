@@ -105,6 +105,5 @@ if ( ! class_exists( '\WSAL\Loggers\Database_Logger' ) ) {
 
 			return floatval( $legacy_date );
 		}
-
 	}
 }

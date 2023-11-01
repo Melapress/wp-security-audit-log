@@ -107,9 +107,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 				return;
 			}
 
-			// Remove WC coupons from ignored array.
-			// Alert_Manager::remove_from_ignored_post_types( 'shop_coupon' );
-
 			/**
 			 * WSAL Filter: `wsal_before_post_meta_create_event`
 			 *

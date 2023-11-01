@@ -129,7 +129,7 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 			$term_upper = strtoupper( $namespace );
 			return array_filter(
 				array_keys( self::get_class_map() ),
-				function( $class ) use ( $term_upper ) {
+				function ( $class ) use ( $term_upper ) {
 					$class_name = strtoupper( $class );
 
 					/**
@@ -171,7 +171,7 @@ if ( ! class_exists( '\WSAL\Helpers\Classes_Helper' ) ) {
 			$term_upper = strtoupper( $term );
 			return array_filter(
 				self::get_class_map(),
-				function( $class ) use ( $term_upper ) {
+				function ( $class ) use ( $term_upper ) {
 					$class_name = strtoupper( $class );
 					if (
 					false !== strpos( $class_name, $term_upper ) &&

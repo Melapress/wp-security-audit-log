@@ -23,9 +23,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 	exit();
 }
 
-// Define custom / new PHP constants.
-// defined( 'E_CRITICAL' ) || define( 'E_CRITICAL', 'E_CRITICAL' );
-
 /**
  * Gets an array of directories to loop through to add custom alerts.
  *
@@ -2435,7 +2432,7 @@ function set_wsal_alerts() {
 					6039,
 					WSAL_CRITICAL,
 					esc_html__( 'Deleted all the data of a specific type from the activity log.', 'wp-security-audit-log' ),
-					esc_html__( 'Deleted all the data about the %1$deleted_data_type% %2$deleted_data% from the activity log.', 'wp-security-audit-log' ),
+					esc_html__( 'Deleted all the data about the %deleted_data_type% %deleted_data% from the activity log.', 'wp-security-audit-log' ),
 					array(),
 					array(),
 					'wp-activity-log',

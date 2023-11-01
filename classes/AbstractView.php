@@ -30,13 +30,6 @@ abstract class WSAL_AbstractView {
 	protected $plugin;
 
 	/**
-	 * WordPress version.
-	 *
-	 * @var string
-	 */
-	protected $wp_version;
-
-	/**
 	 * Contains the result to a call to add_submenu_page().
 	 *
 	 * @var string
@@ -64,13 +57,6 @@ abstract class WSAL_AbstractView {
 	 */
 	public function __construct( WpSecurityAuditLog $plugin ) {
 		$this->plugin = $plugin;
-
-		// Get and store WordPress version.
-		global $wp_version;
-		if ( ! isset( $wp_version ) ) {
-			$wp_version = get_bloginfo( 'version' ); // phpcs:ignore
-		}
-		$this->wp_version = floatval( $wp_version );
 
 		// Handle admin notices.
 		add_action( 'wp_ajax_AjaxDismissNotice', array( $this, 'ajax_dismiss_notice' ) );
@@ -266,5 +252,4 @@ abstract class WSAL_AbstractView {
 	public function get_view_name() {
 		return strtolower( str_replace( array( 'WSAL_Views_', 'WSAL_' ), '', get_class( $this ) ) );
 	}
-
 }

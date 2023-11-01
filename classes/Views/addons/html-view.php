@@ -22,28 +22,28 @@ $trial_link_utm_params = $utm_params;
 
 switch ( $this->hook_suffix ) {
 	case 'wp-activity-log_page_wsal-loginusers':
-		$utm_params['utm_content'] = 'sessions';
-		$buy_now_utm_params['utm_content'] = 'upgrade+now+loginusers';
+		$utm_params['utm_content']            = 'sessions';
+		$buy_now_utm_params['utm_content']    = 'upgrade+now+loginusers';
 		$trial_link_utm_params['utm_content'] = 'get+trial+loginusers';
 		break;
 	case 'wp-activity-log_page_wsal-reports':
-		$utm_params['utm_content'] = 'reports';
-		$buy_now_utm_params['utm_content'] = 'upgrade+now+reports';
+		$utm_params['utm_content']            = 'reports';
+		$buy_now_utm_params['utm_content']    = 'upgrade+now+reports';
 		$trial_link_utm_params['utm_content'] = 'get+trial+reports';
 		break;
 	case 'wp-activity-log_page_wsal-emailnotifications':
-		$utm_params['utm_content'] = 'notifications';
-		$buy_now_utm_params['utm_content'] = 'upgrade+now+notifications';
+		$utm_params['utm_content']            = 'notifications';
+		$buy_now_utm_params['utm_content']    = 'upgrade+now+notifications';
 		$trial_link_utm_params['utm_content'] = 'get+trial+notifications';
 		break;
 	case 'wp-activity-log_page_wsal-externaldb':
-		$utm_params['utm_content'] = 'integrations';
-		$buy_now_utm_params['utm_content'] = 'upgrade+now+integrations';
+		$utm_params['utm_content']            = 'integrations';
+		$buy_now_utm_params['utm_content']    = 'upgrade+now+integrations';
 		$trial_link_utm_params['utm_content'] = 'get+trial+integrations';
 		break;
 	case 'wp-activity-log_page_wsal-search':
-		$utm_params['utm_content'] = 'search';
-		$buy_now_utm_params['utm_content'] = 'upgrade+now+search';
+		$utm_params['utm_content']            = 'search';
+		$buy_now_utm_params['utm_content']    = 'upgrade+now+search';
 		$trial_link_utm_params['utm_content'] = 'get+trial+search';
 		break;
 	default:
@@ -58,14 +58,14 @@ $more_info = add_query_arg(
 
 // Buy Now button link.
 $buy_now        = add_query_arg(
-    $buy_now_utm_params,
-    'https://melapress.com/wordpress-activity-log/pricing/'
+	$buy_now_utm_params,
+	'https://melapress.com/wordpress-activity-log/pricing/'
 );
 $buy_now_target = ' target="_blank"';
 
 $trial_link = add_query_arg(
-    $trial_link_utm_params,
-    'https://melapress.com/trial-premium-edition-plugin/'
+	$trial_link_utm_params,
+	'https://melapress.com/trial-premium-edition-plugin/'
 );
 
 ?>

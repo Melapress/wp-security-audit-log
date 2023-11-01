@@ -146,45 +146,6 @@
                 "source": "https://github.com/woocommerce/action-scheduler/tree/3.6.4"
             },
             "install-path": "../woocommerce/action-scheduler"
-        },
-        {
-            "name": "wpwhitesecurity/import-export-plugin-settings",
-            "version": "1.0.0",
-            "version_normalized": "1.0.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wpwhitesecurity/import-export-plugin-settings.git",
-                "reference": "3b8e5707bc754edab795389e0978b9b6bb7ee205"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wpwhitesecurity/import-export-plugin-settings/zipball/3b8e5707bc754edab795389e0978b9b6bb7ee205",
-                "reference": "3b8e5707bc754edab795389e0978b9b6bb7ee205",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.0"
-            },
-            "time": "2022-04-11T11:11:46+00:00",
-            "type": "library",
-            "installation-source": "dist",
-            "autoload": {
-                "files": [
-                    "SettingsImportExport.php"
-                ]
-            },
-            "authors": [
-                {
-                    "name": "WP White Security",
-                    "email": "info@wpwhitesecurity.com"
-                }
-            ],
-            "description": "Settings import/export library for WordPress",
-            "support": {
-                "source": "https://github.com/wpwhitesecurity/import-export-plugin-settings/tree/v1.0.0",
-                "issues": "https://github.com/wpwhitesecurity/import-export-plugin-settings/issues"
-            },
-            "install-path": "../wpwhitesecurity/import-export-plugin-settings"
         }
     ],
     "dev": false,

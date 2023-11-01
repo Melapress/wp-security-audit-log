@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage utils
- * @copyright  %%YEAR%% WP White Security
+ * @copyright  %%YEAR%% Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  */
@@ -14,7 +14,7 @@ namespace WSAL\Utils;
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 use WSAL_Ext_MirrorLogger;
-use \WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\WP_Helper;
 use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Plugin_Extensions;
@@ -689,6 +689,21 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			// phpcs:disable
 			/* @free:end */
 			// phpcs:enable
+		}
+
+		/**
+		 * Migration for version upto 4.6.1
+		 *
+		 * Removes some redundant options
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 4.6.1
+		 */
+		protected static function migrate_up_to_4610() {
+			WP_Helper::delete_global_option( 'events-nav-type' );
 		}
 	}
 }

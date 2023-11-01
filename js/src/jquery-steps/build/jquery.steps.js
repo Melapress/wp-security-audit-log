@@ -1,5 +1,5 @@
 /*! 
- * jQuery Steps v1.1.1 - 16/07/2021 (changed by WP White Security)
+ * jQuery Steps v1.1.1 - 16/07/2021 (changed by Melapress)
  * Copyright (c) 2014 Rafael Staib (http://www.jquery-steps.com)
  * Licensed under MIT http://www.opensource.org/licenses/MIT
  */

@@ -19,7 +19,7 @@ use WSAL\Controllers\Connection;
 use WSAL\Entities\Metadata_Entity;
 use WSAL\Utils\Abstract_Migration;
 use WSAL\Entities\Occurrences_Entity;
-use \WSAL_Vendor\WP_Background_Process;
+use WSAL_Vendor\WP_Background_Process;
 
 /**
  * Migration class
@@ -230,9 +230,6 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 		 */
 		public static function store_migration_info( $info ) {
 			$existing_info   = WP_Helper::get_global_option( self::OPTION_NAME_MIGRATION_INFO, array() );
-			// if ( ! \is_array( $info ) || ! isset( $info['connection'] ) ) {
-			// 	$info['connection'] = 'local';
-			// } else
 			$connection_name = $info['connection'];
 
 			$existing_info[ $connection_name ] = $info;

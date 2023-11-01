@@ -57,8 +57,6 @@ if ( ! class_exists( '\WSAL\Controllers\Plugin_Extensions' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function init() {
-			// add_filter( 'wsal_filter_installable_plugins', array( __CLASS__, 'filter_installable_plugins' ), 10, 1 ); //.
-
 			foreach ( self::get_extensions() as $extension ) {
 				// Check if that sensor is for login or not.
 				if ( method_exists( $extension, 'init' ) ) {

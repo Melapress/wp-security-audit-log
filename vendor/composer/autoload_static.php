@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitfb1b59e491b3331cf0227e42ee2038a2
+class ComposerStaticInit81891733c327fe98893c6f4ddb81ef1a
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -27,10 +27,6 @@ class ComposerStaticInitfb1b59e491b3331cf0227e42ee2038a2
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'RCliTextFormatter' => __DIR__ . '/../..' . '/classes/Ref.php',
-        'RFormatter' => __DIR__ . '/../..' . '/classes/Ref.php',
-        'RHtmlFormatter' => __DIR__ . '/../..' . '/classes/Ref.php',
-        'RTextFormatter' => __DIR__ . '/../..' . '/classes/Ref.php',
         'Tools\\Select2_WPWS' => __DIR__ . '/../..' . '/classes/Select2/class-select2-wpws.php',
         'WSAL\\Actions\\Plugin_Installer' => __DIR__ . '/../..' . '/classes/Actions/class-plugin-installer.php',
         'WSAL\\Controllers\\Alert' => __DIR__ . '/../..' . '/classes/Controllers/class-alert.php',
@@ -114,6 +110,7 @@ class ComposerStaticInitfb1b59e491b3331cf0227e42ee2038a2
         'WSAL\\WP_Sensors\\WooCommerce_Public_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-woocommerce-public-sensor.php',
         'WSAL\\WP_Sensors\\WooCommerce_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-woocommerce-sensor.php',
         'WSAL\\WP_Sensors\\Yoast_SEO_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-yoast-seo-sensor.php',
+        'WSAL\\Writers\\CSV_Writer' => __DIR__ . '/../..' . '/classes/Writers/class-csv-writer.php',
         'WSAL_AbstractLogger' => __DIR__ . '/../..' . '/classes/AbstractLogger.php',
         'WSAL_AbstractView' => __DIR__ . '/../..' . '/classes/AbstractView.php',
         'WSAL_AlertFormatter' => __DIR__ . '/../..' . '/classes/AlertFormatter.php',
@@ -123,8 +120,6 @@ class ComposerStaticInitfb1b59e491b3331cf0227e42ee2038a2
         'WSAL_ExtensionPlaceholderView' => __DIR__ . '/../..' . '/classes/ExtensionPlaceholderView.php',
         'WSAL_Helpers_DataHelper' => __DIR__ . '/../..' . '/classes/Helpers/DataHelper.php',
         'WSAL_MainWpApi' => __DIR__ . '/../..' . '/classes/MainWpApi.php',
-        'WSAL_Nicer' => __DIR__ . '/../..' . '/classes/Nicer.php',
-        'WSAL_Ref' => __DIR__ . '/../..' . '/classes/Ref.php',
         'WSAL_ReportArgs' => __DIR__ . '/../..' . '/classes/ReportArgs.php',
         'WSAL_Settings' => __DIR__ . '/../..' . '/classes/Settings.php',
         'WSAL_Utilities_DateTimeFormatter' => __DIR__ . '/../..' . '/classes/Utilities/DateTimeFormatter.php',
@@ -145,9 +140,9 @@ class ComposerStaticInitfb1b59e491b3331cf0227e42ee2038a2
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitfb1b59e491b3331cf0227e42ee2038a2::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitfb1b59e491b3331cf0227e42ee2038a2::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitfb1b59e491b3331cf0227e42ee2038a2::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit81891733c327fe98893c6f4ddb81ef1a::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit81891733c327fe98893c6f4ddb81ef1a::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit81891733c327fe98893c6f4ddb81ef1a::$classMap;
 
         }, null, ClassLoader::class);
     }
