@@ -300,7 +300,7 @@ class WSAL_AuditLogListView extends WP_List_Table {
 
 		// Get selected columns from settings.
 		if ( empty( $this->selected_columns ) && ! is_array( $this->selected_columns ) ) {
-			$this->selected_columns = $this->plugin->settings()->get_columns_selected();
+			$this->selected_columns = WSAL\Helpers\Settings_Helper::get_option_value( 'columns', array() );
 		}
 
 		// If selected columns are not empty, then unset default columns.

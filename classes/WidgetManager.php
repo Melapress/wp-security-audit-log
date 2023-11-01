@@ -67,10 +67,6 @@ class WSAL_WidgetManager {
 	 * Method: Render widget.
 	 */
 	public function render_widget() {
-		// get the events for the dashboard widget.
-		// $query   = $this->get_dashboard_widget_query();
-		// $results = $query->get_adapter()->execute_query( $query );
-
 		$results = Alert_Manager::get_latest_events( $this->plugin->settings()->get_dashboard_widget_max_alerts(), true );
 
 		?><div>

@@ -2,16 +2,16 @@
 /**
  * WP Activity Log.
  *
- * @copyright Copyright (C) 2013-%%YEAR%%, WP White Security - support@melapress.com
+ * @copyright Copyright (C) 2013-%%YEAR%%, Melapress - support@melapress.com
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License, version 3 or higher
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     4.6.0
- * Plugin URI:  https://melapress.com/
+ * Version:     4.6.1
+ * Plugin URI:  https://melapress.com/wordpress-activity-log/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
- * Author:      WP White Security
- * Author URI:  https://www.wpwhitesecurity.com/
+ * Author:      Melapress
+ * Author URI:  https://melapress.com/
  * Text Domain: wp-security-audit-log
  * Domain Path: /languages/
  * License:     GPL v3
@@ -60,7 +60,7 @@ if ( file_exists( plugin_dir_path( __FILE__ ) . 'vendor/autoload.php' ) ) {
 }
 
 if ( ! defined( 'WSAL_PREFIX' ) ) {
-	define( 'WSAL_VERSION', '4.6.0' );
+	define( 'WSAL_VERSION', '4.6.1' );
 	define( 'WSAL_PREFIX', 'wsal_' );
 	define( 'WSAL_PREFIX_PAGE', 'wsal-' );
 }
@@ -111,7 +111,7 @@ if ( ! function_exists( 'wsal_disable_freemius_on_free' ) ) {
 	 * @since 4.5.0
 	 */
 	function wsal_disable_freemius_on_free() {
-		require_once dirname( __FILE__ ) . '/nofs/lib/class-wsal-freemius.php';
+		require_once __DIR__ . '/nofs/lib/class-wsal-freemius.php';
 
 		return WSAL_Freemius::get_instance();
 	}
@@ -255,7 +255,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 
 				add_action(
 					'init',
-					function() {
+					function () {
 						WSAL\Controllers\Alert_Manager::init();
 						Sensors_Load_Manager::load_sensors();
 					},
@@ -597,7 +597,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 						wsal_freemius()->add_action( 'after_premium_version_activation', array( $this, 'on_freemius_premium_version_activation' ) );
 						wsal_freemius()->add_filter(
 							'plugin_icon',
-							function( $plugin_icon ) {
+							function ( $plugin_icon ) {
 								return WSAL_BASE_DIR . 'img/wsal-logo@2x.png';
 							}
 						);
@@ -818,28 +818,11 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 			 * @internal
 			 */
 			public function init() {
-				// Load dependencies.
-				// if ( ! isset( $this->alerts ) ) {
-					// $this->alerts = new WSAL_AlertManager( $this );
-				// }
-
-				// if ( ! isset( $this->constants ) ) {
-				// $this->constants = new WSAL_ConstantManager();
-				// }
-
-				// $this->sensors = new WSAL_SensorManager( $this );
-
-				// Sensors_Load_Manager::load_sensors();
 
 				if ( is_admin() ) {
 					$this->views   = new WSAL_ViewManager( $this );
 					$this->widgets = new WSAL_WidgetManager( $this );
 				}
-
-				// Start listening to events.
-				// if ( ! empty( $this->sensors ) && $this->sensors instanceof WSAL_SensorManager ) {
-				// $this->sensors->hook_events();
-				// }
 
 				if ( is_admin() ) {
 					// phpcs:disable
@@ -1139,7 +1122,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 				}
 
 				return array_map(
-					function( $key ) {
+					function ( $key ) {
 						// Remove '_transient_' from the option name.
 						return ltrim( $key['option_name'], '_transient_' );
 					},
@@ -1241,18 +1224,6 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 					unset( $this->cleanup_hooks[ $pos ] );
 				}
 			}
-
-			/**
-			 * DB connection.
-			 *
-			 * @param string|array $config DB configuration array, db alias or empty to use default connection.
-			 * @param bool         $reset - True if reset.
-			 *
-			 * @return WSAL_Connector_ConnectorInterface
-			 */
-			// public static function get_connector( $config = null, $reset = false ) {
-			// return Connection::build_connection( $config );
-			// }
 
 			/**
 			 * Load default configuration / data.

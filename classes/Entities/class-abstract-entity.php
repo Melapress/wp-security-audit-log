@@ -9,8 +9,10 @@ declare(strict_types=1);
 
 namespace WSAL\Entities;
 
-use WSAL\Controllers\Connection;
+use WSAL\Helpers\Logger;
 use WSAL\Helpers\Validator;
+use WSAL\Controllers\Connection;
+use Cassandra\RetryPolicy\Logging;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -183,7 +185,8 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			bool $is_null = null,
 			$key = null,
 			$default = null,
-			$extra = null ): bool {
+			$extra = null
+		): bool {
 
 			$diffs   = 0;
 			$results = self::get_connection()->get_results( "DESC $table_name" );
@@ -723,12 +726,13 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @since 4.6.0
 		 */
-		public static function prepare_full_where( array $where_clause,
+		public static function prepare_full_where(
+			array $where_clause,
 			string $condition = ' AND ',
 			?string $criteria = ' = ',
 			?bool $left_pref = false,
 			?bool $right_pref = false
-			): array {
+		): array {
 
 			foreach ( $where_clause as $field => $value ) {
 				if ( is_null( $value['value'] ) ) {
@@ -918,7 +922,8 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			array $order_by = array(),
 			array $limit = array(),
 			array $join = array(),
-			$connection = null ) {
+			$connection = null
+		) {
 
 			$where_clause = ' WHERE 1 ';
 			$query        = 'SELECT ';
@@ -961,30 +966,127 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			 *
 			 * WHERE 1  AND ((wp_wsal_occurrences.alert_id LIKE %s) AND ( (alert_id = "%s") OR (alert_id = "%s") )  AND ( ( object = %s ) ) )
 			 */
-			foreach ( $query_parameters as $clause => $values ) {
-				// Lets say it is OR - lets collect all the ORs.
-				foreach ( $values as $value ) {
-					$close_bracket = false;
-					if ( ! empty( $string_clause ) && ! is_array( reset( $value ) ) ) {
-						$string_clause .= ' ' . \strtoupper( $clause ) . ' ';
-					} elseif ( ! empty( $string_clause ) && is_array( reset( $value ) ) ) {
-						$string_clause .= ' AND ( ';
-						$close_bracket  = true;
-					}
-					if ( is_array( reset( $value ) ) ) {
-						foreach ( reset( $value ) as $val ) {
-							$string_clause .= '(' . \array_key_first( $value ) . ') ' . \strtoupper( $clause ) . ' ';
-							$sql_values[]   = $val;
-						}
-						$string_clause = rtrim( $string_clause, ' ' . \strtoupper( $clause ) . ' ' );
+			$first_time = true;
+			if ( isset( $query_parameters['OR'] ) && ! empty( $query_parameters['OR'] ) && isset( $query_parameters['AND'] ) && ! empty( $query_parameters['AND'] ) ) {
 
-						if ( $close_bracket ) {
-							$string_clause .= ' ) ';
+				$query_parameters = array(
+					'OR'  => $query_parameters['OR'],
+					'AND' => $query_parameters['AND'],
+				);
+
+			}
+			foreach ( $query_parameters as $clause => $values ) {
+				if ( ! $first_time ) {
+					$string_clause .= ' ' . \strtoupper( $clause ) . ' ( ';
+				} else {
+					$string_clause .= ' ( ';
+				}
+				$first_time          = false;
+				$sub_join_clause     = '';
+				$sub_sub_join_clause = '';
+				foreach ( $values as $sub_clause => $sub_values ) {
+					$sub_join_clause = '';
+					if ( ! \is_int( $sub_clause ) ) {
+						$sub_join_clause = $sub_clause;
+						if ( ' ( ' !== $string_clause ) {
+							$string_clause = \rtrim( $string_clause, ' ( ' );
+							if ( ! $first_time ) {
+								$string_clause = \rtrim( $string_clause, ' ' . \strtoupper( $clause ) . ' ' );
+							}
+
+							if ( empty( $sub_sub_join_clause ) ) {
+								$string_clause .= ' ' . \strtoupper( $clause ) . ' ( ( ';
+							} elseif ( ! empty( $sub_sub_join_clause ) ) {
+								$string_clause      .= ' ' . \strtoupper( $clause ) . ' ( ';
+								$sub_sub_join_clause = '';
+							}
+						} else {
+							$string_clause .= ' ( ';
 						}
-					} else {
-						$string_clause .= '(' . \array_key_first( $value ) . ')';
-						$sql_values[]   = reset( $value );
 					}
+					if ( \is_array( $sub_values ) ) {
+						foreach ( $sub_values as $value => $val ) {
+							$sql_val = $val;
+							if ( ! \is_int( $value ) ) {
+								$sub_sub_join_clause = $value;
+							} else {
+								$sub_sub_join_clause = $sub_join_clause;
+							}
+							if ( \is_array( $val ) ) {
+								foreach ( $val as $sql_string => $substitutes ) {
+									$sql_value = $sql_string;
+									if ( \is_array( $substitutes ) ) {
+										foreach ( $substitutes as $substitute ) {
+											$sql_values[] = $substitute;
+
+											if ( ! empty( $sub_sub_join_clause ) ) {
+												$logic_join = $sub_sub_join_clause;
+											} else {
+												$logic_join = $clause;
+											}
+											$string_clause .= '(' . $sql_value . ') ' . \strtoupper( $logic_join ) . ' ';
+										}
+									} else {
+										if ( ! empty( $sub_sub_join_clause ) ) {
+											$logic_join = $sub_sub_join_clause;
+										} else {
+											$logic_join = $clause;
+										}
+										$string_clause .= '(' . $sql_value . ') ' . \strtoupper( $logic_join ) . ' ';
+										if ( \is_array( $sql_val ) ) {
+											$sql_values[] = reset( $sql_val );
+										} else {
+											$sql_values[] = $sql_val;
+										}
+									}
+								}
+
+								unset( $sub_values[ $value ] );
+
+								$string_clause = \rtrim( $string_clause, $sub_sub_join_clause . ' ' );
+								if ( count( $sub_values ) ) {
+									$string_clause .= ' ) ' . $clause . ' ( ';
+								} else {
+									$string_clause .= ' ) ';
+								}
+							} else {
+								if ( ! empty( $sub_join_clause ) ) {
+									$logic_join = $sub_join_clause;
+									$value      = \array_key_first( $val );
+									$sql_val    = reset( $val[ \array_key_first( $val ) ] );
+								} else {
+									$logic_join = $clause;
+								}
+								$string_clause .= '(' . $value . ') ' . \strtoupper( $logic_join ) . ' ';
+								$sql_values[]   = $sql_val;
+
+								unset( $values[ $sub_clause ] );
+								if ( 0 === count( $values ) ) {
+									$string_clause  = \rtrim( $string_clause, \strtoupper( $logic_join ) . ' ' );
+									$string_clause .= ' ) ';
+								}
+							}
+						}
+					} elseif ( \is_array( $sub_values ) ) {
+							$string_clause .= '(' . \array_key_first( $sub_values ) . ')';
+							$sql_values[]   = reset( $sub_values );
+					} else {
+						$string_clause .= '(' . $sub_clause . ')';
+						$sql_values[]   = $sub_values;
+					}
+				}
+				if ( ! empty( $sub_join_clause ) ) {
+					$logic_join = $sub_join_clause;
+				} else {
+					$logic_join = $clause;
+				}
+				$string_clause = \rtrim( $string_clause, $logic_join . ' ' );
+				if ( ! \is_int( $sub_clause ) ) {
+					$sub_join_clause = $sub_clause;
+					$string_clause  .= ' ) ';
+				}
+				if ( empty( $sub_sub_join_clause ) ) {
+					$string_clause .= ' ) ';
 				}
 			}
 
@@ -1075,6 +1177,8 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 				$_wpdb = self::get_connection();
 			}
 
+			$sql_values = array_filter( $sql_values );
+
 			// If it is simple query without placeholders - lets act properly.
 			if ( ! empty( $sql_values ) ) {
 				$sql = $_wpdb->prepare( $query, $sql_values );
@@ -1090,6 +1194,8 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					if ( ( static::class )::create_table( $_wpdb ) ) {
 						$results = $_wpdb->get_results( $sql, ARRAY_A );
 					}
+				} else {
+					Logger::log( 'Error: ' . (string) $_wpdb->last_error . ' Line: ' . __LINE__ . ' File: ' . __FILE__ . ' SQL data: query - ' . $query . ' Values: ' . \print_r( $sql_values, true ) );
 				}
 			}
 			$_wpdb->suppress_errors( false );

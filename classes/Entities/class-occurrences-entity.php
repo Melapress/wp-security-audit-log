@@ -588,6 +588,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 					'occ.post_id',
 					'occ.post_type',
 					'occ.post_status',
+					'occ.session_id',
 				);
 			} else {
 				$select_fields = array( 'occ.created_on' );
@@ -1162,7 +1163,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 			}
 
 			if ( empty( $record_data ) ) {
-				$record_data = self::load_array( 'id = %d', array( $occurrence_id ) );
+				$record_data = self::load_array( 'id = %d', array( $occurrence_id ), $_wpdb );
 				$record_data = \reset( $record_data );
 			}
 

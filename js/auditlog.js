@@ -560,27 +560,6 @@ function wsal_addon_installer_ajax( button ) {
 
 jQuery( document ).ready( function() {
 
-	jQuery( document ).on( 'click', '.notice.is-dismissible .notice-dismiss', function(event) {
-		var noticeElm = jQuery(this).parent();
-		var action = noticeElm.attr('data-dismiss-action');
-		console.log(noticeElm);
-		console.log(action);
-		if ( !action ){
-			return;
-		}
-
-		event.preventDefault();
-		jQuery.ajax({
-			type: 'POST',
-			url: ajaxurl,
-			async: true,
-			data: {
-				action: jQuery(this).parent().attr('data-dismiss-action'),
-				nonce: jQuery(this).parent().attr('data-nonce')
-			}
-		});
-	});
-
     jQuery( document ).on( 'click', '[data-shortened-text]', function(event) {
         event.preventDefault();
 		var elm = jQuery( this );

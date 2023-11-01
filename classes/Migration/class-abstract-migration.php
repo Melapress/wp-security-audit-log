@@ -4,14 +4,14 @@
  *
  * @package    wsal
  * @subpackage utils
- * @copyright  %%YEAR%% WP White Security
+ * @copyright  %%YEAR%% Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  */
 
 namespace WSAL\Utils;
 
-use \WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\WP_Helper;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
@@ -146,7 +146,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 
 						$migrate_methods = array_filter(
 							$method_as_version_numbers,
-							function( $method, $key ) use ( &$stored_version_as_number, &$target_version_as_number ) {
+							function ( $method, $key ) use ( &$stored_version_as_number, &$target_version_as_number ) {
 
 								if ( ( ( (int) $target_version_as_number ) / 1000 ) > ( ( (int) $stored_version_as_number ) / 1000 ) ) {
 									return ( in_array( $key, range( $stored_version_as_number, $target_version_as_number ), true ) );

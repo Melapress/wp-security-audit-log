@@ -309,7 +309,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 				);
 				add_action(
 					'init',
-					function() {
+					function () {
 
 						if ( current_user_can( 'edit_posts' ) ) {
 							add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );

@@ -7,7 +7,7 @@
  *
  * @since      4.6.0
  *
- * @copyright  %%YEAR%% WP White Security
+ * @copyright  %%YEAR%% Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
  * @see       https://wordpress.org/plugins/wp-2fa/
@@ -17,17 +17,18 @@ declare(strict_types=1);
 
 namespace WSAL\ListAdminEvents;
 
-use WSAL\Controllers\Alert_Manager;
-use WSAL\Controllers\Connection;
+use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\User_Utils;
 use WSAL\Controllers\Constants;
-use WSAL\Controllers\Plugin_Extensions;
-use WSAL\Entities\Metadata_Entity;
-use WSAL\Entities\Occurrences_Entity;
-use WSAL\Helpers\DateTime_Formatter_Helper;
+use WSAL\Controllers\Connection;
+use WSAL\Controllers\CSV_Writer;
 use WSAL\Helpers\Plugins_Helper;
 use WSAL\Helpers\Settings_Helper;
-use WSAL\Helpers\User_Utils;
-use WSAL\Helpers\WP_Helper;
+use WSAL\Entities\Metadata_Entity;
+use WSAL\Controllers\Alert_Manager;
+use WSAL\Entities\Occurrences_Entity;
+use WSAL\Controllers\Plugin_Extensions;
+use WSAL\Helpers\DateTime_Formatter_Helper;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/template.php';
@@ -128,6 +129,24 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		private static $wsal_db = null;
 
 		/**
+		 * Holds the current query arguments.
+		 *
+		 * @var array
+		 *
+		 * @since 4.6.1
+		 */
+		private static $query_occ = array();
+
+		/**
+		 * Holds the current query order.
+		 *
+		 * @var array
+		 *
+		 * @since 4.6.1
+		 */
+		private static $query_order = array();
+
+		/**
 		 * Default class constructor.
 		 *
 		 * @param stdClass            $query_args Events query arguments.
@@ -174,7 +193,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						if ( $try_free_search ) {
 							global $wpdb;
 							echo '<style>
-							#darktooltip-'.$wpdb->prefix.'wsal_occurrences-find-search-input {
+							#darktooltip-' . $wpdb->prefix . 'wsal_occurrences-find-search-input {
 								padding: 15px !important;
 								font-size: 1.2em !important;
 							}
@@ -201,6 +220,17 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				999
 			);
 			/* @free:end */
+		}
+
+		/**
+		 * Returns the current wsal_db connection.
+		 *
+		 * @return \wpdb
+		 *
+		 * @since 4.6.1
+		 */
+		public static function get_wsal_db() {
+			return self::$wsal_db;
 		}
 
 		/**
@@ -234,11 +264,16 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 	<p class="search-box" style="position:relative">
 		<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo $text; ?>:</label>
 			<?php
+			$try_free_search = false;
+			// phpcs:ignore
+			/* @free:start */
 			$try_free_search = Settings_Helper::get_boolean_option_value( 'free-search-try' );
+			// phpcs:ignore
+			/* @free:end */
 
 			if ( $try_free_search ) {
 				?>
-					<span id="wsal_try_search"><?php echo esc_attr(' Try the new search functionality' ); ?><span><input type="search" id="<?php echo esc_attr( $input_id ); ?>" name="s" value="<?php _admin_search_query(); ?>" /><span><span>
+					<span id="wsal_try_search"><?php echo esc_attr( ' Try the new search functionality' ); ?><span><input type="search" id="<?php echo esc_attr( $input_id ); ?>" name="s" value="<?php _admin_search_query(); ?>" /><span><span>
 					<?php
 			} else {
 				?>
@@ -342,6 +377,19 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		}
 
 		/**
+		 * Returns the currently hidden column headers for the current user
+		 *
+		 * @return array
+		 *
+		 * @since 4.6.1
+		 */
+		public static function get_hidden_columns() {
+			return array_filter(
+				(array) get_user_option( 'managetoplevel_page_wsal-auditlogcolumnshidden', false )
+			);
+		}
+
+		/**
 		 * Get a list of columns. The format is:
 		 * 'internal-name' => 'Title'.
 		 *
@@ -408,22 +456,22 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 * @return array
 		 */
 		public function fetch_table_data() {
-			$query_occ = array();
-			$bid       = (int) $this->query_args->site_id;
-			if ( WP_Helper::is_multisite() && ! is_network_admin() ) {
-				$bid = \get_current_blog_id();
-			}
+			self::$query_occ = array();
+			$bid             = (int) $this->query_args->site_id;
+			// if ( WP_Helper::is_multisite() && ! is_network_admin() ) {
+			// $bid = \get_current_blog_id();
+			// }
 			if ( $bid ) {
-				$query_occ['AND'][] = array( ' site_id = %s ' => $bid );
+				self::$query_occ['AND'][] = array( ' site_id = %s ' => $bid );
 			}
 
 			// Set query order arguments.
 			$order_by = isset( $this->query_args->order_by ) ? $this->query_args->order_by : false;
 			$order    = isset( $this->query_args->order ) ? $this->query_args->order : false;
 
-			$query_order = array();
+			self::$query_order = array();
 			if ( ! $order_by ) {
-				$query_order['created_on'] = 'DESC';
+				self::$query_order['created_on'] = 'DESC';
 			} else {
 				$is_descending = 'DESC';
 				if ( $order && 'asc' === $order ) {
@@ -432,47 +480,43 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 				// TO DO: Allow order by meta values.
 				if ( 'type' === $order_by ) {
-					$query_order['alert_id'] = $is_descending;
+					self::$query_order['alert_id'] = $is_descending;
 				} elseif ( 'scip' === $order_by ) {
-					$query_order['client_ip'] = $is_descending;
+					self::$query_order['client_ip'] = $is_descending;
 				} elseif ( 'user' === $order_by ) {
-					$query_order['user_id'] = $is_descending;
+					self::$query_order['user_id'] = $is_descending;
 				} elseif ( 'code' === $order_by ) {
 					/*
 					 * Handle the 'code' (Severity) column sorting.
 					 */
-					$query_order['severity'] = $is_descending;
+					self::$query_order['severity'] = $is_descending;
 				} elseif ( 'object' === $order_by ) {
 					/*
 					 * Handle the 'object' column sorting.
 					 */
-					$query_order['object'] = $is_descending;
+					self::$query_order['object'] = $is_descending;
 				} elseif ( 'event_type' === $order_by ) {
 					/*
 					 * Handle the 'Event Type' column sorting.
 					 */
-					$query_order['event_type'] = $is_descending;
+					self::$query_order['event_type'] = $is_descending;
 				} elseif ( isset( Occurrences_Entity::get_fields_values()[ $order_by ] ) ) {
 					// TODO: We used to use a custom comparator ... is it safe to let MySQL do the ordering now?.
-					$query_order[ $order_by ] = $is_descending;
+					self::$query_order[ $order_by ] = $is_descending;
 				} elseif ( 'crtd' === $order_by ) {
-					$query_order['created_on'] = $is_descending;
+					self::$query_order['created_on'] = $is_descending;
 				} else {
-					$query_order['created_on'] = 'DESC';
+					self::$query_order['created_on'] = 'DESC';
 				}
 			}
 
-			// phpcs:ignore
-			/* @free:start */
-			$query_occ = $this->search( $query_occ );
-			// phpcs:ignore
-			/* @free:end */
+			self::$query_occ = $this->search( self::$query_occ );
 
 			// phpcs:ignore
 
 			$events = Occurrences_Entity::build_query(
 				array( 'COUNT(*)' => 'COUNT(*)' ),
-				$query_occ,
+				self::$query_occ,
 				array(),
 				array(),
 				array(),
@@ -486,8 +530,8 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 			$events = Occurrences_Entity::build_query(
 				array(),
-				$query_occ,
-				$query_order,
+				self::$query_occ,
+				self::$query_order,
 				array( $offset, $per_page ),
 				array(),
 				self::$wsal_db
@@ -547,6 +591,17 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		}
 
 		/**
+		 * Returns the current query
+		 *
+		 * @return array
+		 *
+		 * @since 4.6.1
+		 */
+		public static function get_query_occ(): array {
+			return self::$query_occ;
+		}
+
+		/**
 		 * Render a column when no column specific method exists.
 		 *
 		 * Use that method for common rendering and separate columns logic in different methods. See below.
@@ -559,6 +614,22 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 * @since 4.6.0
 		 */
 		public function column_default( $item, $column_name ) {
+			return self::format_column_value( $item, $column_name );
+		}
+
+		/**
+		 * Render a column when no column specific method exists.
+		 *
+		 * Use that method for common rendering and separate columns logic in different methods. See below.
+		 *
+		 * @param array  $item        - Array with the current row values.
+		 * @param string $column_name - The name of the currently processed column.
+		 *
+		 * @return mixed
+		 *
+		 * @since 4.6.1
+		 */
+		public static function format_column_value( $item, $column_name ) {
 			switch ( $column_name ) {
 				case 'type':
 					if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
@@ -589,7 +660,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					$css_classes = array( 'log-type', 'log-type-' . $const['value'] );
 					array_push( $css_classes, 'log-type-' . $const['css'] );
 
-					return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const['text'] ) . '"><span class="' . implode( ' ', $css_classes ) . '"></span></a>';
+					return '<a class="tooltip" href="#" data-tooltip="' . esc_html( $const['text'] ) . '"><span style="display:none; visibility:hidden">' . $const['text'] . '</span><span class="' . implode( ' ', $css_classes ) . '"></span></a>';
 				case 'crtd':
 					return $item['created_on']
 						? DateTime_Formatter_Helper::get_formatted_date_time( $item['created_on'], 'datetime', true, true )
@@ -701,7 +772,6 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						: ( '<a href="' . esc_attr( $info->siteurl ) . '">' . esc_html( $info->blogname ) . '</a>' );
 				case 'mesg':
 					$result = '<div id="Event' . $item['id'] . '">' . Occurrences_Entity::get_alert_message( $item ) . '</div>';
-					// $result    .= self::maybe_build_teaser_html( $event_meta );
 
 					return $result;
 				case 'data':
@@ -960,58 +1030,6 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		}
 
 		/**
-		 * Builds HTML markup to display 3rd party extension teaser if there is a post type in the event meta data and the
-		 * custom post belongs to certain 3rd party plugin.
-		 *
-		 * @param array $event_meta Event meta data array.
-		 *
-		 * @return string HTML teaser markup or empty string.
-		 *
-		 * @since 4.6.0
-		 */
-		public static function maybe_build_teaser_html( $event_meta ) {
-			$result = '';
-			if ( ! array_key_exists( 'PostType', $event_meta ) || empty( $event_meta['PostType'] ) ) {
-				return $result;
-			}
-
-			$extension = Plugin_Extensions::get_extension_for_post_type( $event_meta['PostType'] );
-			if ( is_null( $extension ) ) {
-				return $result;
-			}
-
-			$plugin_filename = call_user_func_array( array( $extension, 'get_plugin_filename' ), array() );
-			if ( Plugins_Helper::is_plugin_installed( $plugin_filename ) && WP_Helper::is_plugin_active( $plugin_filename ) ) {
-				return $result;
-			}
-
-			$result     .= '<div class="extension-ad" style="border-color: transparent transparent ' . call_user_func_array( array( $extension, 'get_color' ), array() ) . ' transparent;">';
-			$result     .= '</div>';
-			$plugin_name = call_user_func_array( array( $extension, 'get_plugin_name' ), array() );
-			$link_title  = sprintf(
-				esc_html__('Install the activity log extension for %1$s for more detailed logging of changes done in %2$s.', 'wp-security-audit-log'), // phpcs:ignore
-				$plugin_name,
-				$plugin_name
-			);
-			// $result     .= '<a class="icon" title="' . $link_title . '" href="' . self::get_third_party_plugins_tab_url() . '">';
-			$result .= '<img src="' . call_user_func_array( array( $extension, 'get_plugin_icon_url' ), array() ) . '" />';
-			$result .= '</div>';
-
-			return $result;
-		}
-
-		/**
-		 * Gets a URL to the UI tab listing third party plugins.
-		 *
-		 * @return string URL of the 3rd party extensions tab.
-		 *
-		 * @since 4.6.0
-		 */
-		public static function get_third_party_plugins_tab_url() {
-			return esc_url( add_query_arg( 'page', 'wsal-togglealerts#tab-third-party-plugins', network_admin_url( 'admin.php' ) ) );
-		}
-
-		/**
 		 * Form table per-page screen option value.
 		 *
 		 * @since 4.6.0
@@ -1122,9 +1140,9 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			$search_string = ( isset( $_REQUEST['s'] ) ? \esc_sql( \sanitize_text_field( \wp_unslash( $_REQUEST['s'] ) ) ) : '' );
 
 			if ( '' !== $search_string ) {
-				Settings_Helper::delete_option_value( 'free-search-try' );
 				// phpcs:ignore
 				/* @free:start */
+				Settings_Helper::delete_option_value( 'free-search-try' );
 				$column_names = $this->table::get_column_names();
 				unset( $column_names['user_roles'] );
 				unset( $column_names['severity'] );
@@ -1132,12 +1150,16 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				// phpcs:ignore
 				/* @free:end */
 				// phpcs:ignore
+				unset( $column_names['created_on'] );
+				unset( $column_names['site_id'] );
 				foreach ( array_keys( $column_names ) as $value ) {
 					$search[] = array( $value . ' LIKE %s' => '%' . esc_sql( $wpdb->esc_like( $search_string ) ) . '%' );
 				}
 
 				$query['OR'] = $search;
 
+				// phpcs:ignore
+				/* @free:start */
 				$query['OR'][] = array(
 					$this->table::get_table_name( self::$wsal_db ) . '.id IN (
 					SELECT DISTINCT occurrence_id
@@ -1145,6 +1167,8 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						WHERE TRIM(BOTH "\"" FROM value) LIKE %s
 					)' => '%' . $search_string . '%',
 				);
+				// phpcs:ignore
+				/* @free:end */
 			}
 
 			return $query;

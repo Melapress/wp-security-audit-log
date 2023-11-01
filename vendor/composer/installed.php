@@ -46,14 +46,5 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'wpwhitesecurity/import-export-plugin-settings' => array(
-            'pretty_version' => '1.0.0',
-            'version' => '1.0.0.0',
-            'reference' => '3b8e5707bc754edab795389e0978b9b6bb7ee205',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../wpwhitesecurity/import-export-plugin-settings',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
     ),
 );
