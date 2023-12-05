@@ -70,7 +70,7 @@ class WSAL_WidgetManager {
 		$results = Alert_Manager::get_latest_events( $this->plugin->settings()->get_dashboard_widget_max_alerts(), true );
 
 		?><div>
-		<?php if ( ! count( $results ) ) : ?>
+		<?php if ( ! is_countable( $results ) || ! count( $results ) ) : ?>
 			<p><?php esc_html_e( 'No events found.', 'wp-security-audit-log' ); ?></p>
 		<?php else : ?>
 			<table class="wp-list-table widefat" cellspacing="0" cellpadding="0"
