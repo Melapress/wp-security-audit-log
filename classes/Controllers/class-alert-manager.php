@@ -983,6 +983,9 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			}
 
 			$last_occurrences = self::get_latest_events( 5 );
+			if ( ! is_array( $last_occurrences ) ) {
+				return false;
+			}
 
 			$known_to_trigger = false;
 			foreach ( $last_occurrences as $last_occurrence ) {
