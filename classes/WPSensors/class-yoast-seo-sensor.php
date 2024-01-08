@@ -675,7 +675,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 		 * @param mixed  $value – Option old value.
 		 */
 		public static function yoast_blog_options_trigger( $option, $value ) {
-			$site_id = ( isset( $_POST['wpseo_ms'] ) && ! empty( $_POST['wpseo_ms']['site_id'] ) ) ? (int) $_POST['wpseo_ms']['site_id'] : 0;
+			$site_id = ( isset( $_POST['wpseo_ms'] ) && ! empty( $_POST['wpseo_ms']['site_id'] ) ) ? (int) $_POST['wpseo_ms']['site_id'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			if ( $site_id && isset( $value['ms_defaults_set'] ) && true === $value['ms_defaults_set'] ) {
 				self::yoast_setting_change_alert( 'site-default-options-change', $site_id, '' );
 			}

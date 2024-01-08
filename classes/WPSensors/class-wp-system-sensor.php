@@ -622,8 +622,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function site_blogname_change( $customizable ) {
-			if ( isset( $_POST['customized'] ) ) {
-				$post_values = json_decode( wp_unslash( $_POST['customized'] ), true );
+			if ( isset( $_POST['customized'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$post_values = json_decode( \sanitize_text_field( wp_unslash( $_POST['customized'] ) ), true ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 				if ( $customizable->default !== $post_values['blogname'] ) {
 					Alert_Manager::trigger_event(

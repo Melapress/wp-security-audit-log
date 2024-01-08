@@ -59,7 +59,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 * Setup help page tabs.
 	 */
 	public function setup_help_tabs() {
-		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false;
 
 		// Verify that the current page is WSAL settings page.
 		if ( empty( $page ) || $this->get_safe_view_name() !== $page ) {
@@ -260,9 +260,9 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 			}
 		</style>
 		<?php
-		if ( $freemius_id = wsal_freemius()->get_id() ) { // phpcs:ignore
+		if ( $freemius_id = wsal_freemius()->get_id() ) { // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 			$vars = array( 'id' => $freemius_id );
-			echo fs_get_template( 'contact.php', $vars ); // phpcs:ignore
+			echo fs_get_template( 'contact.php', $vars ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		} else {
 			echo '<p>';
 			printf(

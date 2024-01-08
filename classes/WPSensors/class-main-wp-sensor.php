@@ -94,11 +94,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function mainwp_child_init() {
-			if ( isset( $_POST['mainwpsignature'] ) ) {
-				$function        = ( isset( $_POST['function'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['function'] ) ) : null;
-				$action          = ( isset( $_POST['action'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['action'] ) ) : null;
-				$theme           = ( isset( $_POST['theme'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['theme'] ) ) : null;
-				$mainwpsignature = ( isset( $_POST['mainwpsignature'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['mainwpsignature'] ) ) : null;
+			if ( isset( $_POST['mainwpsignature'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$function        = ( isset( $_POST['function'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['function'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$action          = ( isset( $_POST['action'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['action'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$theme           = ( isset( $_POST['theme'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['theme'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$mainwpsignature = ( isset( $_POST['mainwpsignature'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['mainwpsignature'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 				if (
 				isset( $function ) && 'theme_action' === $function

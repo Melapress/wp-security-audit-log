@@ -142,8 +142,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function event_form_entry_updated( $entry_id, $property_name, $property_value, $previous_value ) {
-			if ( isset( $_POST['gforms_save_entry'] ) || isset( $_POST['name'] ) ) {
-				$item_being_updated = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : false;
+			if ( isset( $_POST['gforms_save_entry'] ) || isset( $_POST['name'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$item_being_updated = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				$entry              = \GFAPI::get_entry( $entry_id );
 				$form               = \GFAPI::get_form( $entry['form_id'] );
 				$entry_name         = self::determine_entry_name( $entry );
@@ -343,8 +343,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 				);
 
 				Alert_Manager::trigger_event( 5700, $variables );
-			} else {
-				// Otherwise, the form has been edited, so lets see whats going on.
 			}
 		}
 

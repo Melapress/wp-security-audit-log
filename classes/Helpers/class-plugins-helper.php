@@ -7,7 +7,7 @@
  *
  * @since 4.5.0
  *
- * @copyright  %%YEAR%% Melapress
+ * @copyright  2024 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
  * @see       https://wordpress.org/plugins/wp-2fa/
@@ -122,7 +122,7 @@ if ( ! class_exists( '\WSAL\Helpers\Plugins_Helper' ) ) {
 									<div class="addon-wrapper">
 										<img src="<?php echo esc_url( trailingslashit( WSAL_BASE_URL ) . 'img/addons/' . $details['image_filename'] ); ?>">
 										<h4><?php esc_html_e( 'Extension for ', 'wp-security-audit-log' ); ?><?php echo esc_html( $details['title'] ); ?></h4>
-										<p><?php echo sanitize_text_field($details['plugin_description']); // phpcs:ignore?></p><br>
+										<p><?php echo sanitize_text_field( $details['plugin_description'] ); ?></p><br>
 										<p><button class="install-addon button button-primary <?php echo esc_attr( $disable_button ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-plugin-slug="<?php echo esc_attr( $details['plugin_slug'] ); ?>" data-plugin-download-url="<?php echo esc_url( $details['plugin_url'] ); ?>" data-plugin-event-tab-id="<?php echo esc_attr( $details['event_tab_id'] ); ?>">
 										<?php
 										if ( self::is_plugin_installed( $details['plugin_slug'] ) && ! WP_Helper::is_plugin_active( $details['plugin_slug'] ) ) {

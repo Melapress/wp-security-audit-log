@@ -533,7 +533,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		$this->get_view()->prepare_items();
-		$view_input_value = ( isset( $_GET['view'] ) && 'grid' === wp_unslash( $_GET['view'] ) ) ? 'grid' : self::$default_view; // phpcs:ignore
+		$view_input_value = ( isset( $_GET['view'] ) && 'grid' === \sanitize_text_field( \wp_unslash( $_GET['view'] ) ) ) ? 'grid' : self::$default_view;
 		?>
 		<form id="audit-log-viewer" method="get">
 			<div id="audit-log-viewer-content">
@@ -1081,13 +1081,13 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$pointer = sanitize_text_field( wp_unslash( $_POST['pointer'] ) );
 		// @codingStandardsIgnoreEnd
 
-		if ( $pointer != sanitize_key( $pointer ) ) { // phpcs:ignore
+		if ( sanitize_key( $pointer ) !== $pointer ) {
 			wp_die( 0 );
 		}
 
 		$dismissed = array_filter( explode( ',', (string) \WSAL\Helpers\Settings_Helper::get_option_value( 'dismissed-privacy-notice', true ) ) );
 
-		if ( in_array( $pointer, $dismissed ) ) { // phpcs:ignore
+		if ( in_array( $pointer, $dismissed, true ) ) {
 			wp_die( 0 );
 		}
 
@@ -1154,7 +1154,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Filter $_POST array for security.
-		$nonce  = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false; // phpcs:ignore
+		$nonce = isset( $_POST['nonce'] ) ? \sanitize_text_field( \wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal_dismiss_setup_modal' ) ) {
 			// Nonce verification failed.

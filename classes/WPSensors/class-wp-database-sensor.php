@@ -524,12 +524,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 
 			$plugin_name = false;
 
-			foreach ( $latest_events as $latest_event ) {
-				if ( intval( $latest_event['alert_id'] ) === $alert_id ) {
-					$event_meta  = $latest_event ? $latest_event['meta_values'] : false;
-					$plugin_name = $event_meta['PluginData']->Name;
+			if ( \is_array( $latest_events ) ) {
+				foreach ( $latest_events as $latest_event ) {
+					if ( intval( $latest_event['alert_id'] ) === $alert_id ) {
+						$event_meta  = $latest_event ? $latest_event['meta_values'] : false;
+						$plugin_name = $event_meta['PluginData']->Name;
 
-					break;
+						break;
+					}
 				}
 			}
 

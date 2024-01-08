@@ -101,7 +101,7 @@ class WSAL_Utilities_DateTimeFormatter {
 			}
 
 			if ( 'utc' === $timezone ) {
-				$instance->gmt_offset_sec = date( 'Z' ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+				$instance->gmt_offset_sec = gmdate( 'Z' );
 			} else {
 				$instance->gmt_offset_sec = get_option( 'gmt_offset' ) * HOUR_IN_SECONDS;
 			}
@@ -175,7 +175,7 @@ class WSAL_Utilities_DateTimeFormatter {
 		}
 
 		// Date formatting.
-		$result = $translated ? date_i18n( $format, $timezone_adjusted_timestamp ) : date( $format, $timezone_adjusted_timestamp ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+		$result = $translated ? date_i18n( $format, $timezone_adjusted_timestamp ) : gmdate( $format, $timezone_adjusted_timestamp );
 
 		// Milliseconds value.
 		if ( $this->show_milliseconds ) {

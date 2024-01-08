@@ -212,6 +212,8 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 		 * @param array  $meta_data (Optional) Meta data relevant to expression.
 		 *
 		 * @return mixed The value nearest to the expression.
+		 *
+		 * @since 4.6.2
 		 */
 		protected static function get_meta_expression_value( $expr, $meta_data = array() ) {
 			$expr = preg_replace( '/%/', '', $expr );
@@ -238,7 +240,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 				$meta = is_array( $meta ) && array_key_exists( $part, $meta ) ? $meta[ $part ] : ( isset( $meta->$part ) ? $meta->$part : 'NULL' );
 			}
 
-			return is_scalar( $meta ) ? (string) $meta : var_export( $meta, true ); // phpcs:ignore
+			return is_scalar( $meta ) ? (string) $meta : var_export( $meta, true );
 		}
 
 		/**

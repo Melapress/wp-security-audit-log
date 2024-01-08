@@ -67,7 +67,7 @@ class WSAL_WidgetManager {
 	 * Method: Render widget.
 	 */
 	public function render_widget() {
-		$results = Alert_Manager::get_latest_events( $this->plugin->settings()->get_dashboard_widget_max_alerts(), true );
+		$results = (array) Alert_Manager::get_latest_events( $this->plugin->settings()->get_dashboard_widget_max_alerts(), true );
 
 		?><div>
 		<?php if ( ! count( $results ) ) : ?>

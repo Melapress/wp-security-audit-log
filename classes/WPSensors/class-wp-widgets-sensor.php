@@ -180,7 +180,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Widgets_Sensor' ) ) {
 						foreach ( $request_sidebars as $sidebar_name => $widgets ) {
 							if ( isset( $sidebar_widgets[ $sidebar_name ] ) ) {
 								foreach ( $sidebar_widgets[ $sidebar_name ] as $i => $widget_name ) {
-									$index = array_search( $widget_name, $widgets ); // phpcs:ignore
+									$index = array_search( $widget_name, $widgets, true );
 									// Check to see whether or not the widget has been moved.
 									if ( $i != $index ) { // phpcs:ignore
 										$sn = $sidebar_name;

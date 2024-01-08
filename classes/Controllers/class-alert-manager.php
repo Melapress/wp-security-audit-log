@@ -694,7 +694,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			}
 			if ( ! isset( $event_data['UserAgent'] ) ) {
 				if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
-					$event_data['UserAgent'] = $_SERVER['HTTP_USER_AGENT']; // phpcs:ignore
+					$event_data['UserAgent'] = \sanitize_text_field( \wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
 				}
 			}
 			if ( ! isset( $event_data['Username'] ) && ! isset( $event_data['CurrentUserID'] ) ) {
@@ -985,15 +985,18 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			$last_occurrences = self::get_latest_events( 5 );
 
 			$known_to_trigger = false;
-			foreach ( $last_occurrences as $last_occurrence ) {
-				if ( $known_to_trigger ) {
-					break;
-				}
-				if ( ! empty( $last_occurrence ) && ( $last_occurrence['created_on'] + self::$seconds_to_check_back ) > time() ) {
-					if ( ! is_array( $alert_id ) && (int) $last_occurrence['alert_id'] === $alert_id ) {
-						$known_to_trigger = true;
-					} elseif ( is_array( $alert_id ) && in_array( (int) $last_occurrence[0]['alert_id'], $alert_id, true ) ) {
-						$known_to_trigger = true;
+
+			if ( \is_array( $last_occurrences ) ) {
+				foreach ( $last_occurrences as $last_occurrence ) {
+					if ( $known_to_trigger ) {
+						break;
+					}
+					if ( ! empty( $last_occurrence ) && ( $last_occurrence['created_on'] + self::$seconds_to_check_back ) > time() ) {
+						if ( ! is_array( $alert_id ) && (int) $last_occurrence['alert_id'] === $alert_id ) {
+							$known_to_trigger = true;
+						} elseif ( is_array( $alert_id ) && in_array( (int) $last_occurrence[0]['alert_id'], $alert_id, true ) ) {
+							$known_to_trigger = true;
+						}
 					}
 				}
 			}
@@ -1083,7 +1086,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				array(
 					'Message' => $message,
 					'Context' => $args,
-					'Trace' => debug_backtrace(), // phpcs:ignore
+					'Trace'   => debug_backtrace(),
 				)
 			);
 		}
@@ -1374,7 +1377,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				// We need to keep the timestamp to be able to group entries by dates etc. The "date" field is not suitable
 				// as it is already translated, thus difficult to parse and process.
 				'timestamp'  => $created_on,
-				'code'       => Constants::get_constant_name( $code ),
+				'code'       => $code,
 				// Fill variables in message.
 				'message'    => Alert::get_message( $event_metadata, null, $alert_id, $entry_id, $context ),
 				'user_id'    => $user_id,

@@ -135,18 +135,18 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 		 * @param object WP_Post $post_before - Post before object.
 		 */
 		public static function event_table_updated( $post_ID, $post_after, $post_before ) {
-			if ( isset( $_POST['action'] ) && 'tablepress_save_table' == $_POST['action'] && isset( $_POST['tablepress'] ) && isset( $_POST['tablepress']['id'] ) ) {
+			if ( isset( $_POST['action'] ) && 'tablepress_save_table' == $_POST['action'] && isset( $_POST['tablepress'] ) && isset( $_POST['tablepress']['id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				$editor_link = esc_url(
 					add_query_arg(
 						array(
-							'table_id' => \sanitize_text_field( \wp_unslash( $_POST['tablepress']['id'] ) ),
+							'table_id' => \sanitize_text_field( \wp_unslash( $_POST['tablepress']['id'] ) ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
 							'action'   => 'edit',
 						),
 						admin_url( 'admin.php?page=tablepress' )
 					)
 				);
 
-				$table_id = \sanitize_text_field( \wp_unslash( $_POST['tablepress']['id'] ) );
+				$table_id = \sanitize_text_field( \wp_unslash( $_POST['tablepress']['id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 				$old_table_details = ( isset( self::$_old_meta['_tablepress_table_options'][0] ) ) ? json_decode( self::$_old_meta['_tablepress_table_options'][0], true ) : array();
 
@@ -155,7 +155,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 					unset( $old_table_details['last_editor'] );
 				}
 
-				$new_table_options = ( isset( $_POST['tablepress']['options'] ) ) ? json_decode( wp_unslash( $_POST['tablepress']['options'] ), true ) : array();
+				$new_table_options = ( isset( $_POST['tablepress']['options'] ) ) ? json_decode( \sanitize_text_field( wp_unslash( $_POST['tablepress']['options'] ) ), true ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 				// Remove part we are not interested in.
 				if ( isset( $new_table_options['last_editor'] ) ) {
@@ -171,7 +171,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 				}
 
 				$tablepress    = new \TablePress_Table_Model();
-				$table_details = $tablepress->load( $_POST['tablepress']['id'] );
+				$table_details = $tablepress->load( \sanitize_text_field( \wp_unslash( $_POST['tablepress']['id'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 				if ( $post_after->post_content != $post_before->post_content || $post_after->post_title != $post_before->post_title || $post_after->post_excerpt != $post_before->post_excerpt ) {
 					$explode_to_rows   = explode( '],', $post_after->post_content );
@@ -181,7 +181,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 					$alert_id     = 8905;
 					$variables    = array(
 						'table_name'  => $post_after->post_title,
-						'table_id'    => \sanitize_text_field( \wp_unslash( $_POST['tablepress']['id'] ) ),
+						'table_id'    => \sanitize_text_field( \wp_unslash( $_POST['tablepress']['id'] ) ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
 						'columns'     => ( $number_of_columns ) ? intval( $number_of_columns ) : 0,
 						'rows'        => ( isset( $number_of_rows ) ) ? intval( $number_of_rows ) : 0,
 						'old_columns' => self::$_old_column_count,
@@ -258,13 +258,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 				}
 
 				// Detect new or removed columns.
-				if ( isset( $_POST['tablepress']['number']['columns'] ) && intval( $_POST['tablepress']['number']['columns'] ) != self::$_old_column_count ) {
-					$event_type   = ( self::$_old_column_count > intval( $_POST['tablepress']['number']['columns'] ) ) ? 'removed' : 'added';
+				if ( isset( $_POST['tablepress']['number']['columns'] ) && intval( $_POST['tablepress']['number']['columns'] ) != self::$_old_column_count ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+					$event_type   = ( self::$_old_column_count > intval( $_POST['tablepress']['number']['columns'] ) ) ? 'removed' : 'added'; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 					$alert_id     = 8907;
 					$variables    = array(
 						'table_name' => sanitize_text_field( $table_details['name'] ),
 						'table_id'   => $table_id,
-						'count'      => ( isset( $_POST['tablepress']['number']['columns'] ) ) ? intval( $_POST['tablepress']['number']['columns'] ) : 0,
+						'count'      => ( isset( $_POST['tablepress']['number']['columns'] ) ) ? intval( $_POST['tablepress']['number']['columns'] ) : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing
 						'old_count'  => self::$_old_column_count,
 						'EventType'  => $event_type,
 						'EditorLink' => $editor_link,
@@ -272,13 +272,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 					$alert_needed = true;
 
 					// Detect new or removed rows.
-				} elseif ( isset( $_POST['tablepress']['number']['rows'] ) && intval( $_POST['tablepress']['number']['rows'] ) != self::$_old_row_count ) {
-					$event_type   = ( self::$_old_row_count > intval( $_POST['tablepress']['number']['rows'] ) ) ? 'removed' : 'added';
+				} elseif ( isset( $_POST['tablepress']['number']['rows'] ) && intval( $_POST['tablepress']['number']['rows'] ) != self::$_old_row_count ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+					$event_type   = ( self::$_old_row_count > intval( $_POST['tablepress']['number']['rows'] ) ) ? 'removed' : 'added'; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 					$alert_id     = 8906;
 					$variables    = array(
 						'table_name' => sanitize_text_field( $table_details['name'] ),
 						'table_id'   => $table_id,
-						'count'      => ( isset( $_POST['tablepress']['number']['rows'] ) ) ? intval( $_POST['tablepress']['number']['rows'] ) : 0,
+						'count'      => ( isset( $_POST['tablepress']['number']['rows'] ) ) ? intval( $_POST['tablepress']['number']['rows'] ) : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing
 						'old_count'  => self::$_old_row_count,
 						'EventType'  => $event_type,
 						'EditorLink' => $editor_link,
@@ -342,13 +342,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 				)
 			);
 
-			$event_id = ( isset( $_POST['action'] ) && 'tablepress_import' == $_POST['action'] ) ? 8903 : 8900;
+			$event_id = ( isset( $_POST['action'] ) && 'tablepress_import' === $_POST['action'] ) ? 8903 : 8900; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 			$variables = array(
 				'table_name' => sanitize_text_field( get_the_title( self::$imported_table_id ) ),
 				'table_id'   => $table_id,
-				'columns'    => ( isset( $_POST['table'] ) ) ? intval( $_POST['table']['columns'] ) : 0,
-				'rows'       => ( isset( $_POST['table'] ) ) ? intval( $_POST['table']['rows'] ) : 0,
+				'columns'    => ( isset( $_POST['table'] ) ) ? intval( $_POST['table']['columns'] ) : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				'rows'       => ( isset( $_POST['table'] ) ) ? intval( $_POST['table']['rows'] ) : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				'EditorLink' => $editor_link,
 			);
 

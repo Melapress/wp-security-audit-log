@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage helpers
- * @copyright  %%YEAR%% Melapress
+ * @copyright  2024 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-security-audit-log/
  * @since 4.6.0
@@ -99,7 +99,7 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 				wp_send_json_error();
 			}
 
-			if ( ! array_key_exists( 'nonce', $_POST ) || ! wp_verify_nonce( $_POST['nonce'], 'dismiss_extensions_merged' ) ) { // phpcs:ignore
+			if ( ! array_key_exists( 'nonce', $_POST ) || ! wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['nonce'] ) ), 'dismiss_extensions_merged' ) ) {
 				wp_send_json_error( esc_html_e( 'nonce is not provided or incorrect', 'wp-security-audit-log' ) );
 			}
 

@@ -12,7 +12,6 @@
 use WSAL\Controllers\Alert;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Controllers\Constants;
-use WSAL\Helpers\Plugins_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\WP_Sensors\Helpers\Yoast_SEO_Helper;
@@ -308,7 +307,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 							<?php endforeach; ?>
 						</select>
 						<p class="description">
-							<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/&utm_source=plugins&utm_medium=link&utm_campaign=wsal" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), WpSecurityAuditLog::get_allowed_html_tags() ); ?>
+							<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugins&utm_medium=link&utm_campaign=wsal" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), WpSecurityAuditLog::get_allowed_html_tags() ); ?>
 						</p>
 					</fieldset>
 				</form>
@@ -361,7 +360,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 										foreach ( $group as $subname => $alerts ) {
 											$active    = array();
 											$allactive = true;
-											/** @var WSAL_Alert $alert */
+
 											foreach ( $alerts as $alert ) {
 												$active[ $alert['code'] ] = Alert_Manager::is_enabled( $alert['code'] );
 												if ( ! $active[ $alert['code'] ] ) {
@@ -543,11 +542,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 				</form>
 
 			</div>
-			<?php
-				// Plugins_Helper::render();
-			?>
 		</div>
-
 
 		<?php if ( ! empty( $log_level_to_set ) ) : ?>
 			<!-- Log level updated modal -->

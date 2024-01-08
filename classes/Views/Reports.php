@@ -73,6 +73,6 @@ class WSAL_Views_Reports extends WSAL_ExtensionPlaceholderView {
 			),
 		);
 
-		require_once dirname( __FILE__ ) . '/addons/html-view.php';
+		require_once __DIR__ . '/addons/html-view.php';
 	}
 }

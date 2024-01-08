@@ -170,5 +170,4 @@ final class CPTsTracker extends AbstractTracker {
 		$list = ( 0 !== $site_id && isset( $network_data['site'][ $site_id ] ) ) ? $network_data['site'][ $site_id ] : $network_data['list'];
 		return ( ! empty( $list ) ) ? $list : array();
 	}
-
 }

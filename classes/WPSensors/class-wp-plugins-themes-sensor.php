@@ -380,7 +380,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 								),
 							)
 						);
-						// self::run_addon_removal_check( $plugin_file );
 					}
 				}
 			}
@@ -409,7 +408,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 								),
 							)
 						);
-						// self::run_addon_removal_check( $plugin_file );
 					}
 				}
 			}
@@ -835,8 +833,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 			}
 
 			// Ignore if the request is coming from post editor.
-			if ( isset( $_REQUEST['_wp_http_referer'] ) ) { // phpcs:ignore
-				$referrer   = esc_url_raw( wp_unslash( $_REQUEST['_wp_http_referer'] ) ); // phpcs:ignore
+			if ( isset( $_REQUEST['_wp_http_referer'] ) ) {
+				$referrer   = esc_url_raw( wp_unslash( $_REQUEST['_wp_http_referer'] ) );
 				$parsed_url = wp_parse_url( $referrer );
 
 				if ( isset( $parsed_url['path'] ) && 'post' === basename( $parsed_url['path'], '.php' ) ) {

@@ -88,7 +88,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	public function setup_settings_tabs() {
 
 		// Verify that the current page is WSAL settings page.
-		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false;
 		if ( empty( $page ) || $this->get_safe_view_name() !== $page ) {
 			return;
 		}
@@ -478,7 +478,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 
 		if ( $settings->is_infinite_scroll() ) {
 			?>
- 		<h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
+		<h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
 			<?php
 			echo sprintf(
@@ -511,34 +511,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		</table>
 		<!-- Events Navigation Type -->
 		<?php } ?>
-
-		<?php /*
-		<h3><?php esc_html_e( 'Do you want the activity log viewer to auto refresh?', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'The activity log viewer auto refreshes every 30 seconds when opened so you can see the latest events as they happen almost in real time.', 'wp-security-audit-log' ); ?></p>
-		<table class="form-table wsal-tab">
-			<tbody>
-			<tr>
-				<th><label for="aroption_on"><?php esc_html_e( 'Refresh activity log viewer', 'wp-security-audit-log' ); ?></label></th>
-				<td>
-					<fieldset>
-						<?php $are = ! WSAL\Helpers\Settings_Helper::get_option_value( 'disable-refresh' ); ?>
-						<label for="aroption_on">
-							<input type="radio" name="EnableAuditViewRefresh" id="aroption_on" style="margin-top: -2px;" <?php checked( $are ); ?> value="1">
-							<span><?php esc_html_e( 'Auto refresh', 'wp-security-audit-log' ); ?></span>
-						</label>
-						<br/>
-						<label for="aroption_off">
-							<input type="radio" name="EnableAuditViewRefresh" id="aroption_off" style="margin-top: -2px;" <?php checked( $are, false ); ?> value="0">
-							<span><?php esc_html_e( 'Do not auto refresh', 'wp-security-audit-log' ); ?></span>
-						</label>
-					</fieldset>
-				</td>
-			</tr>
-			<!-- Refresh activity log viewer -->
-			</tbody>
-		</table>
-		<!-- Refresh activity log -->
-		*/  ?>
 
 		<h3><?php esc_html_e( 'Display latest events widget in Dashboard & Admin bar', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
@@ -2000,7 +1972,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 								)
 							);
 							?>
-															" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-run-cleanup' ) ); ?>" ><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
+							" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wsal-run-cleanup' ) ); ?>" ><?php esc_html_e( 'Purge Old Data', 'wp-security-audit-log' ); ?></a>
 						</p>
 					<?php endif; ?>
 				</td>

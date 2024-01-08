@@ -8,7 +8,7 @@
  *
  * @package   wsal
  * @subpackage writers
- * @author Stoil Dobrev <sdobreff@gmail.com>
+ * @author Stoil Dobrev <stoil@melapress.com>
  */
 
 declare(strict_types=1);
@@ -104,7 +104,7 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 				wp_send_json_error( esc_html_e( 'query is not provided or incorrect', 'wp-security-audit-log' ) );
 				die();
 			} else {
-				$query = unserialize( \wp_unslash( $_POST['query'] ) );
+				$query = unserialize( \sanitize_text_field( \wp_unslash( $_POST['query'] ) ) );
 			}
 
 			if ( ! array_key_exists( 'order', $_POST ) ) {

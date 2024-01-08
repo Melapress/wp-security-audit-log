@@ -262,9 +262,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 			}
 
 			// Alert if role has changed via Members plugin.
-			if ( isset( $_POST['members_user_roles'] ) && ! empty( $_POST['members_user_roles'] ) ) {
-				if ( $old_userdata->roles !== $_POST['members_user_roles'] ) {
-					self::event_user_role_changed( $user_id, $_POST['members_user_roles'], $old_userdata->roles, true ); // phpcs:ignore
+			if ( isset( $_POST['members_user_roles'] ) && ! empty( $_POST['members_user_roles'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				if ( $old_userdata->roles !== $_POST['members_user_roles'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+					self::event_user_role_changed( $user_id, $_POST['members_user_roles'], $old_userdata->roles, true );
 				}
 			}
 		}
