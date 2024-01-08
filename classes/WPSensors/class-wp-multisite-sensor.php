@@ -247,10 +247,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 				}
 			}
 
-			if ( isset( $_POST['blog'] ) && isset( $_POST['blog']['title'] ) ) {
-				$blog_title = strip_tags( $_POST['blog']['title'] );
-			} elseif ( isset( $_POST['target_title'] )  ) {
-				$blog_title = strip_tags( $_POST['target_title'] );
+			if ( isset( $_POST['blog'] ) && isset( $_POST['blog']['title'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$blog_title = strip_tags( \sanitize_text_field( \wp_unslash( $_POST['blog']['title'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			} elseif ( isset( $_POST['target_title'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$blog_title = strip_tags( \sanitize_text_field( \wp_unslash( $_POST['target_title'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			} else {
 				$blog_title = WP_Helper::get_blog_info( $new_blog->blog_id )['name'];
 			}

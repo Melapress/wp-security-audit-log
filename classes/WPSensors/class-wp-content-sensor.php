@@ -215,7 +215,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 			 */
 			if ( ! defined( 'REST_REQUEST' ) && ! defined( 'DOING_AJAX' ) ) {
 				// Either Gutenberg's second post request or classic editor's request.
-				if ( ! isset( $_REQUEST['classic-editor'] ) ) { // phpcs:ignore
+				if ( ! isset( $_REQUEST['classic-editor'] ) ) {
 					$editor_replace = get_option( 'classic-editor-replace', 'classic' );
 					$allow_users    = get_option( 'classic-editor-allow-users', 'disallow' );
 
@@ -446,7 +446,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 				return;
 			}
 
-			$post_id = isset( $_GET['post'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['post'] ) ) : false; // phpcs:ignore
+			$post_id = isset( $_GET['post'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['post'] ) ) : false;
 
 			// Check post id.
 			if ( empty( $post_id ) ) {
@@ -852,7 +852,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 */
 		public static function before_changing_meta( $meta_id, $object_id, $meta_key, $meta_value ) {
 			if ( self::LOCK_META_NAME === $meta_key ) {
-				self::fire_lock_change( $object_id, $meta_value );
+				self::fire_lock_change( (int) $object_id, (string) $meta_value );
 			}
 		}
 

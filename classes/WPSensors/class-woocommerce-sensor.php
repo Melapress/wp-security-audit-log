@@ -508,7 +508,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 				return;
 			}
 
-			$post_id = isset( $_GET['post'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['post'] ) ) : false; // phpcs:ignore
+			$post_id = isset( $_GET['post'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['post'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			// Check post id.
 			if ( empty( $post_id ) ) {
@@ -583,7 +583,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 		 */
 		public static function check_product_changes_after_save( $product ) {
 			// We know this hook is only fired when updating, but we need to be sure this is an automatic (not post edit etc) change.
-			if ( ! isset( $_POST['action'] ) ) {
+			if ( ! isset( $_POST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				$product_data = self::get_product_data( $product );
 				if ( empty( $product_data ) ) {
 					return;
@@ -966,8 +966,8 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 			 * Happens when product is created (first time) or when product is in draft but the user want to use preview option.
 			 * Usually in that case the correct SKU is in the post array, so that code tries to extract that data from there - more debugging is needed here probably?
 			 */
-			if ( empty( $sku ) && isset( $_POST['_sku'] ) ) {
-				$sku = sanitize_text_field( \wp_unslash( $_POST['_sku'] ) );
+			if ( empty( $sku ) && isset( $_POST['_sku'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$sku = sanitize_text_field( \wp_unslash( $_POST['_sku'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			} elseif ( empty( $sku ) ) {
 				$sku = __( 'Not provided', 'wp-security-audit-log' );
 			}
@@ -3223,13 +3223,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 					}
 				}
 
-				$webhook_id = ( isset( $_POST['webhook_id'] ) ) ? wp_unslash( $_POST['webhook_id'] ) : false;
+				$webhook_id = ( isset( $_POST['webhook_id'] ) ) ? \sanitize_text_field( wp_unslash( $_POST['webhook_id'] ) ) : false;
 				if ( $webhook_id ) {
 					// Gather POSTed (freshest) data.
 					$new_webhook_data = array(
 						'id'           => $webhook_id,
 						'name'         => isset( $_POST['webhook_name'] ) ? \sanitize_text_field( wp_unslash( $_POST['webhook_name'] ) ) : '',
-						'delivery_url' => isset( $_POST['webhook_delivery_url'] ) ? wp_unslash( $_POST['webhook_delivery_url'] ) : '',
+						'delivery_url' => isset( $_POST['webhook_delivery_url'] ) ? \sanitize_text_field( wp_unslash( $_POST['webhook_delivery_url'] ) ) : '',
 						'topic'        => isset( $_POST['webhook_topic'] ) ? \sanitize_text_field( wp_unslash( $_POST['webhook_topic'] ) ) : '',
 						'status'       => isset( $_POST['webhook_status'] ) ? \sanitize_text_field( wp_unslash( $_POST['webhook_status'] ) ) : '',
 						'secret'       => isset( $_POST['webhook_secret'] ) ? \sanitize_text_field( wp_unslash( $_POST['webhook_secret'] ) ) : '',
@@ -4063,17 +4063,18 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 
 			$output = array();
 
-			if ( isset( $_POST['items'] ) ) {
-				if ( is_array( $_POST['items'] ) ) {
-					foreach ( $_POST['items'] as $key => $value ) {
+			if ( isset( $_POST['items'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				if ( is_array( $_POST['items'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+					$data = array_map( 'sanitize_text_field', wp_unslash( $_POST['items'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.
+					foreach ( $data as $key => $value ) {
 						$items['order_item_id'][]         = $key;
 						$output['order_item_qty'][ $key ] = $value;
 					}
 				} else {
-					parse_str( wp_unslash( $_POST['items'] ), $output );
+					parse_str( sanitize_text_field( wp_unslash( $_POST['items'] ) ), $output ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				}
 			} else {
-				$output = wp_unslash( $_POST );
+				$output = wp_unslash( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			}
 
 			if ( ! isset( $items['order_item_id'] ) ) {
@@ -4694,7 +4695,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 			$post_attributes = ! $post_attributes ? array() : $post_attributes;
 
 			if ( ! $data ) {
-				$data = array_map( 'sanitize_text_field', wp_unslash( $_POST ) );
+				$data = array_map( 'sanitize_text_field', wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			}
 
 			$attribute_names      = isset( $data['attribute_names'] ) && ! empty( $data['attribute_names'] ) ? array_map( 'sanitize_text_field', wp_unslash( $data['attribute_names'] ) ) : false;

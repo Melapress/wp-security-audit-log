@@ -864,7 +864,7 @@ final class WSAL_Views_SetupWizard {
 					<img src="<?php echo esc_url( trailingslashit( WSAL_BASE_URL ) . 'img/addons/' . $details['image_filename'] ); ?>">
 					<div class="addon-content">
 						<h5><?php esc_html_e( 'Extension for ', 'wp-security-audit-log' ); ?><?php echo esc_html( $details['title'] ); ?></h5>
-						<p><?php echo sanitize_text_field( $details['plugin_description'] ); // phpcs:ignore ?></p>
+						<p><?php echo sanitize_text_field( $details['plugin_description'] ); ?></p>
 						<p><button class="install-addon button button-primary <?php echo esc_attr( $disable_button ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-plugin-slug="<?php echo esc_attr( $details['plugin_slug'] ); ?>" data-plugin-download-url="<?php echo esc_url( $details['plugin_url'] ); ?>" data-plugin-event-tab-id="<?php echo esc_attr( $details['event_tab_id'] ); ?>">
 							<?php
 							if ( Plugins_Helper::is_plugin_installed( $details['plugin_slug'] ) && ! WP_Helper::is_plugin_active( $details['plugin_slug'] ) ) {

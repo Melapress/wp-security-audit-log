@@ -12,7 +12,6 @@ namespace WSAL\Entities;
 use WSAL\Helpers\Logger;
 use WSAL\Helpers\Validator;
 use WSAL\Controllers\Connection;
-use Cassandra\RetryPolicy\Logging;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {

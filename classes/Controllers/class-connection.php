@@ -107,7 +107,7 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 			 * @see WSAL_Ext_Common::get_connection()
 			 */
 			$connection_raw = maybe_unserialize( Settings_Helper::get_option_value( 'connection-' . $connection_name ) );
-			$connection = ($connection_raw instanceof \stdClass) ? json_decode(json_encode($connection_raw), true) : $connection_raw; // phpcs:ignore
+			$connection     = ( $connection_raw instanceof \stdClass ) ? json_decode( json_encode( $connection_raw ), true ) : $connection_raw;
 			if ( ! is_array( $connection ) || empty( $connection ) ) {
 				return null;
 			}
@@ -173,7 +173,7 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 			// iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning.
 			$iv = substr( hash( 'sha256', $secret_iv ), 0, 16 );
 
-			return openssl_decrypt(base64_decode($ciphertext_base64), $encrypt_method, $key, 0, $iv); // phpcs:ignore
+			return openssl_decrypt( base64_decode( $ciphertext_base64 ), $encrypt_method, $key, 0, $iv );
 		}
 
 		/**
@@ -216,7 +216,7 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function test_connection( array $connection_config = null ) {
-			error_reporting( E_ALL ^ ( E_NOTICE | E_WARNING | E_DEPRECATED ) ); // phpcs:ignore
+			error_reporting( E_ALL ^ ( E_NOTICE | E_WARNING | E_DEPRECATED ) );
 			if ( ! $connection_config ) {
 				$connection_config = self::get_config();
 			}
