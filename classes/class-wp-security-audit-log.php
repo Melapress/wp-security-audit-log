@@ -65,6 +65,15 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		// phpcs:enable
 
 		/**
+		 * Utility class for settings.
+		 *
+		 * @var WSAL_Settings
+		 *
+		 * @since 5.0.0
+		 */
+		public $settings;
+
+		/**
 		 * Standard singleton pattern.
 		 *
 		 * WARNING! To ensure the system always works as expected, AVOID using this method.
