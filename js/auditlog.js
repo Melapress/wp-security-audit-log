@@ -387,72 +387,6 @@ function wsal_dismiss_setup_modal() {
 	} );
 }
 
-/**
- * Load Events for Infinite Scroll.
- *
- * @since 3.3.1.1
- *
- * @param {integer} pageNumber - Log viewer page number.
- */
-function wsalLoadEvents( pageNumber ) {
-	jQuery( '#wsal-event-loader' ).show( 'fast' );
-	/*
-	 * Gets the view type. Defaults to 'list' but could be 'grid'. Only those 2
-	 * types are supported. Validation handled server side.
-	 */
-	var view = wsalAuditLogArgs.userView;
-	if ( null === view || view.length < 1 ) {
-		view = 'list';
-	}
-	jQuery.ajax( {
-		type:'POST',
-		url: ajaxurl,
-		data: {
-			action: 'wsal_infinite_scroll_events',
-			wsal_viewer_security: wsalAuditLogArgs.viewerNonce,
-			page_number: pageNumber,
-			page : wsalAuditLogArgs.page,
-			'wsal-cbid' : wsalAuditLogArgs.siteId,
-			orderby : wsalAuditLogArgs.orderBy,
-			order : wsalAuditLogArgs.order,
-			s : wsalAuditLogArgs.searchTerm,
-			filters : wsalAuditLogArgs.searchFilters,
-			view: view,
-		},
-		success: function( html ) {
-			jQuery( '#wsal-event-loader' ).hide( '1000' );
-
-			if ( html ) {
-				wsalLoadEventsResponse = true;
-				jQuery( '#audit-log-viewer #the-list' ).append( html ); // This will be the div where our content will be loaded.
-			} else {
-				wsalLoadEventsResponse = false;
-				jQuery( '#wsal-auditlog-end' ).show( 'fast' );
-			}
-
-			// need to bind a click handler to this button if any more have been added.
-			jQuery( '.wsal-addon-install-trigger' ).unbind( 'click' );
-			jQuery( '.wsal-addon-install-trigger' ).click(
-				function( e ) {
-					wsal_addon_installer_ajax( this );
-				}
-			);
-		},
-		error: function( xhr, textStatus, error ) {
-			console.log( xhr.statusText );
-			console.log( textStatus );
-			console.log( error );
-		}
-	});
-
-	if ( wsalLoadEventsResponse ) {
-		return pageNumber + 1;
-	}
-
-	return 0;
-}
-var wsalLoadEventsResponse = true; // Global variable to check events loading response.
-
 jQuery( document ).ready( function() {
 
 	/**
@@ -503,23 +437,6 @@ jQuery( document ).ready( function() {
 			jQuery( button ).after( spinner );
 		}
 	);
-
-	/**
-	 * Load events for Infinite Scroll.
-	 *
-	 * @since 3.3.1.1
-	 */
-	if ( wsalAuditLogArgs.infiniteScroll ) {
-		var count = 2;
-		jQuery( window ).scroll( function() {
-			var scrollToTop = Math.round( jQuery( window ).scrollTop() );
-			if ( scrollToTop === ( jQuery( document ).height() - jQuery( window ).height() ) ) {
-				if ( 0 !== count ) {
-					count = wsalLoadEvents( count );
-				}
-			}
-		});
-	}
 });
 
 function wsal_addon_installer_ajax( button ) {

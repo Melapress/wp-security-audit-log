@@ -225,6 +225,8 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 							$value = maybe_unserialize( $value );
 							if ( is_array( $value ) && ! empty( $value ) ) {
 								$data_to_store[ self::$migrated_meta[ $name ] ] = implode( ',', $value );
+							} elseif ( ! empty( $value ) ) {
+								$data_to_store[ self::$migrated_meta[ $name ] ] = $value;
 							}
 						} else {
 							$data_to_store[ self::$migrated_meta[ $name ] ] = $value;

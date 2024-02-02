@@ -679,7 +679,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 * @param int   $event_id   - Alert type.
 		 * @param array $event_data - Misc alert data.
 		 */
-		protected static function log( $event_id, $event_data = array() ) {
+		public static function log( $event_id, $event_data = array() ) {
 			if ( ! isset( $event_data['ClientIP'] ) ) {
 				$client_ip = Settings_Helper::get_main_client_ip();
 				if ( ! empty( $client_ip ) ) {
@@ -968,6 +968,35 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		}
 
 		/**
+		 * Check if the alert was triggered.
+		 *
+		 * @param integer|array $alert_id - Alert code.
+		 *
+		 * @return boolean
+		 *
+		 * @since 4.5.0
+		 */
+		public static function was_triggered( $alert_id ) {
+
+			$last_occurrence = Occurrences_Entity::build_query(
+				array( 'alert_id' => 'alert_id' ),
+				array(),
+				array( 'created_on' => 'DESC' ),
+				array( 1 )
+			);
+
+			if ( ! empty( $last_occurrence ) && isset( $last_occurrence[0]['alert_id'] ) ) {
+				if ( ! is_array( $alert_id ) && (int) $last_occurrence[0]['alert_id'] === (int) $alert_id ) {
+					return true;
+				} elseif ( is_array( $alert_id ) && in_array( (int) $last_occurrence[0]['alert_id'], $alert_id, true ) ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		/**
 		 * Check if the alert was triggered recently.
 		 *
 		 * Checks last 5 events if they occurred less than self::$seconds_to_check_back seconds ago.
@@ -975,6 +1004,8 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 * @param int|array $alert_id - Alert code.
 		 *
 		 * @return bool
+		 *
+		 * @since 4.6.3
 		 */
 		public static function was_triggered_recently( $alert_id ) {
 			// if we have already checked this don't check again.

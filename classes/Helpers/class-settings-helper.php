@@ -34,6 +34,8 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 
 		public const ERROR_CODE_INVALID_IP = 901;
 
+		public const DASHBOARD_WIDGET_MAX_ALERTS = 5;
+
 		/**
 		 * IP excluded from monitoring.
 		 *

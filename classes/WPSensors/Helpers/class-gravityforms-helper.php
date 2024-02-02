@@ -54,7 +54,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function wsal_gravityforms_allow_sensor_on_frontend( $default, $frontend_events ) {
-			return ( $default || ! empty( $frontend_events['gravityforms'] ) );
+			return ( $default || ! false === $frontend_events['gravityforms'] );
 		}
 
 		/**
@@ -72,13 +72,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper' ) ) {
 				$frontend_events     = Settings_Helper::get_frontend_events();
 				$enable_for_visitors = ( isset( $frontend_events['gravityforms'] ) && $frontend_events['gravityforms'] ) ? true : false;
 				?>
-	<tr class="alert-wrapper" data-alert-cat="Gravity Forms" data-alert-subcat="Monitor Gravity Forms" data-is-attached-to-alert="5709">
-		<td></td>
-		<td>
-		<input name="frontend-events[gravityforms]" type="checkbox" id="frontend-events[woocommerce]" value="1" <?php checked( $enable_for_visitors ); ?> />
-		</td>
-		<td colspan="2"><?php esc_html_e( 'Keep a log when website visitors submits a form (by default the plugin only keeps a log when logged in users submit a form).', 'wp-security-audit-log' ); ?></td>
-	</tr>
+				<tr class="alert-wrapper" data-alert-cat="Gravity Forms" data-alert-subcat="Monitor Gravity Forms" data-is-attached-to-alert="5709">
+					<td></td>
+					<td>
+					<input name="frontend-events[gravityforms]" type="checkbox" id="frontend-events[gravityforms]" value="1" <?php checked( $enable_for_visitors ); ?> />
+					</td>
+					<td colspan="2"><?php esc_html_e( 'Keep a log when website visitors submits a form (by default the plugin only keeps a log when logged in users submit a form).', 'wp-security-audit-log' ); ?></td>
+				</tr>
 				<?php
 			}
 		}
@@ -196,6 +196,31 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper' ) ) {
 		 */
 		public static function get_plugin_filename(): string {
 			return 'activity-log-gravity-forms/activity-log-gravity-forms.php';
+		}
+
+		/**
+		 * Further process the $_POST data upon saving events in the ToggleAlerts view.
+		 *
+		 * @param array  $disabled          Empty array which we will fill if needed.
+		 * @param object $registered_alerts Currently registered alerts.
+		 * @param array  $frontend_events   Array of currently enabled frontend events, taken from POST data.
+		 * @param array  $enabled           Currently enabled events.
+		 *
+		 * @return array Disabled events.
+		 *
+		 * @since 4.6.3
+		 */
+		public static function save_settings_disabled_events( $disabled, $registered_alerts, $frontend_events, $enabled ) {
+			// Now we check all registered events for further processing.
+			foreach ( $disabled as $alert ) {
+				// Disable Visitor events if the user disabled the event there are "tied to" in the UI.
+				if ( 5709 === $alert ) {
+					$frontend_events = array_merge( $frontend_events, array( 'gravityforms' => false ) );
+					Settings_Helper::set_frontend_events( $frontend_events );
+				}
+			}
+
+			return $disabled;
 		}
 	}
 }

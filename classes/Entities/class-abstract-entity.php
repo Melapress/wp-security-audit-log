@@ -11,6 +11,7 @@ namespace WSAL\Entities;
 
 use WSAL\Helpers\Logger;
 use WSAL\Helpers\Validator;
+use WSAL\Helpers\PHP_Helper;
 use WSAL\Controllers\Connection;
 
 // Exit if accessed directly.
@@ -533,7 +534,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 						return (string) $val;
 					case is_array( ( static::class )::$fields_values[ $key ] ):
 					case is_object( ( static::class )::$fields_values[ $key ] ):
-						$json_decoded_val = \WSAL_Helpers_DataHelper::json_decode( $val );
+						$json_decoded_val = PHP_Helper::json_decode( $val );
 						return is_null( $json_decoded_val ) ? $val : $json_decoded_val;
 					case is_int( ( static::class )::$fields_values[ $key ] ):
 						return (int) $val;
@@ -858,7 +859,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 				$_wpdb->suppress_errors( false );
 				$meta_results = array();
 				foreach ( $results as $meta_key => $meta_val ) {
-					$json_decoded_val                  = \WSAL_Helpers_DataHelper::json_decode( $meta_val['value'] );
+					$json_decoded_val                  = PHP_Helper::json_decode( $meta_val['value'] );
 					$val                               = is_null( $json_decoded_val ) ? $meta_val['value'] : $json_decoded_val;
 					$meta_results[ $meta_val['name'] ] = maybe_unserialize( $val );
 				}

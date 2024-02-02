@@ -10,9 +10,11 @@
  */
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Writers\CSV_Writer;
 use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\Helpers\View_Manager;
 use WSAL\ListAdminEvents\List_Events;
 
 // Exit if accessed directly.
@@ -55,19 +57,11 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * Audit Log View Arguments.
 	 *
 	 * @since 3.3.1.1
+	 * @since 5.0.0 - It holds array
 	 *
-	 * @var stdClass
+	 * @var array
 	 */
-	private $page_args;
-
-	/**
-	 * Stores the value of the last view the user requested.
-	 *
-	 * @since 4.0.0
-	 *
-	 * @var string
-	 */
-	public $user_last_view = '';
+	private static $page_args = null;
 
 	/**
 	 * The default view to be used
@@ -105,9 +99,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		add_action( 'wp_ajax_wsal_export_csv_results', array( '\WSAL\Writers\CSV_Writer', 'write_csv_ajax' ) );
 
-		if ( $this->plugin->settings()->is_infinite_scroll() ) {
-			add_action( 'wp_ajax_wsal_infinite_scroll_events', array( $this, 'infinite_scroll_events' ) );
-		}
+		CSV_Writer::init();
 
 		add_filter( 'manage_toplevel_page_wsal-auditlog_columns', array( '\WSAL\ListAdminEvents\List_Events', 'manage_columns' ) );
 
@@ -133,10 +125,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'desc' => esc_html__( 'Unlock these and other powerful features with WP Activity Log Premium.', 'wp-security-audit-log' ),
 			),
 		);
-
-		// Setup the users last view by getting the value from user meta.
-		$last_view            = get_user_meta( get_current_user_id(), 'wsal-selected-main-view', true );
-		$this->user_last_view = ( in_array( $last_view, $this->supported_view_types(), true ) ) ? $last_view : self::$default_view;
 	}
 
 	/**
@@ -148,7 +136,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 *   3. Freemius opt-in/out notice.
 	 */
 	public function admin_notices() {
-		$is_current_view = $this->plugin->views->get_active_view() == $this; // phpcs:ignore
+		$is_current_view = View_Manager::get_active_view() == $this; // phpcs:ignore
 
 		// Check if any of the extensions are activated.
 		if (
@@ -375,48 +363,36 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		return 1;
 	}
 
+	public static function get_page_arguments(): array {
+		if ( null === self::$page_args ) {
+
+			self::$page_args = array();
+
+			self::$page_args['page']    = isset( $_REQUEST['page'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) : false;
+			self::$page_args['site_id'] = WP_Helper::get_view_site_id();
+
+			// Order arguments.
+			self::$page_args['order_by'] = isset( $_REQUEST['orderby'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) : false;
+			self::$page_args['order']    = isset( $_REQUEST['order'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : false;
+
+			// Search arguments.
+			self::$page_args['search_term']    = ( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) ) : false;
+			self::$page_args['search_filters'] = ( isset( $_REQUEST['filters'] ) && is_array( $_REQUEST['filters'] ) ) ? array_map( 'sanitize_text_field', wp_unslash( $_REQUEST['filters'] ) ) : false;
+			// @codingStandardsIgnoreEnd
+		}
+
+		return self::$page_args;
+	}
+
 	/**
 	 * Method: Get View.
 	 */
 	protected function get_view() {
-		// Set page arguments.
-		if ( ! $this->page_args ) {
-			$this->page_args = new stdClass();
-
-			// @codingStandardsIgnoreStart
-			$this->page_args->page    = isset( $_REQUEST['page'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) : false;
-			$this->page_args->site_id = WP_Helper::get_view_site_id();
-
-			// Order arguments.
-			$this->page_args->order_by = isset( $_REQUEST['orderby'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) : false;
-			$this->page_args->order    = isset( $_REQUEST['order'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : false;
-
-			// Search arguments.
-			$this->page_args->search_term    = ( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) ) : false;
-			$this->page_args->search_filters = ( isset( $_REQUEST['filters'] ) && is_array( $_REQUEST['filters'] ) ) ? array_map( 'sanitize_text_field', wp_unslash( $_REQUEST['filters'] ) ) : false;
-			// @codingStandardsIgnoreEnd
-		}
 
 		// Set events listing view class.
 		if ( is_null( $this->view ) ) {
-			// Set the requested view based on POST or GET value. We only care
-			// if the view is 'grid' specifically.
-			$requested_view = $this->detect_view_type();
 
-			// If 'grid' is requested use it otherwise use list view by default.
-			if ( 'grid' === $requested_view || $this->plugin->settings()->is_infinite_scroll() ) {
-				$this->view = new WSAL_AuditLogListView( $this->plugin, $this, $this->page_args );
-			} else {
-				$this->view = new List_Events( $this->page_args, $this->plugin );
-				//$this->view = new WSAL_AuditLogGridView( $this->plugin, $this, $this->page_args );
-			}
-
-			// if the requested view didn't match the view users last viewed
-			// then update their preference.
-			if ( $requested_view !== $this->user_last_view ) {
-				update_user_meta( get_current_user_id(), 'wsal-selected-main-view', ( in_array( $requested_view, $this->supported_view_types(), true ) ) ? $requested_view : self::$default_view );
-				$this->user_last_view = $requested_view;
-			}
+			$this->view = new List_Events( self::get_page_arguments(), $this->plugin );
 		}
 		return $this->view;
 	}
@@ -431,35 +407,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	public function supported_view_types() {
 		return array(
 			'list',
-			'grid',
 		);
-	}
-
-	/**
-	 * Helper to get the current user selected view.
-	 *
-	 * @method detect_view_type
-	 * @since  4.0.0
-	 * @return string
-	 *
-	 * phpcs:disable WordPress.Security.NonceVerification.Missing
-	 * phpcs:disable WordPress.Security.NonceVerification.Recommended
-	 */
-	public function detect_view_type() {
-		// First check if there is a GET/POST request for a specific view.
-		if ( defined( 'DOING_AJAX' ) ) {
-			$requested_view = ( isset( $_POST['view'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['view'] ) ) : '';
-		} else {
-			$requested_view = ( isset( $_GET['view'] ) ) ? \sanitize_text_field( \wp_unslash( $_GET['view'] ) ) : '';
-		}
-
-		// When there is no GET/POST view requested use the user value.
-		if ( empty( $requested_view ) ) {
-			$requested_view = $this->user_last_view;
-		}
-
-		// return the requested view. This is 'list' by default.
-		return ( in_array( $requested_view, $this->supported_view_types(), true ) ) ? $requested_view : self::$default_view;
 	}
 
 	/**
@@ -533,12 +481,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		$this->get_view()->prepare_items();
-		$view_input_value = ( isset( $_GET['view'] ) && 'grid' === \sanitize_text_field( \wp_unslash( $_GET['view'] ) ) ) ? 'grid' : self::$default_view;
+		$view_input_value = self::$default_view;
 		?>
 		<form id="audit-log-viewer" method="get">
 			<div id="audit-log-viewer-content">
-				<input type="hidden" name="page" value="<?php echo esc_attr( $this->page_args->page ); ?>" />
-				<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr( empty( $this->page_args->site_id ) ? '0' : $this->page_args->site_id ); ?>" />
+				<input type="hidden" name="page" value="<?php echo esc_attr( self::get_page_arguments()['page'] ); ?>" />
+				<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr( empty( self::get_page_arguments()['site_id'] ) ? '0' : self::get_page_arguments()['site_id'] ); ?>" />
 				<input type="hidden" id="view" name="view" value="<?php echo esc_attr( $view_input_value ); ?>" />
 				<?php
 				/**
@@ -550,19 +498,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				 */
 				do_action( 'wsal_auditlog_before_view', $this->get_view() );
 
-				$requested_view = $this->detect_view_type();
+				/**
+				 * Action: `wsal_search_filters_list`
+				 *
+				 * Display list of search filters of WSAL.
+				 *
+				 * @param string $which – Navigation position; value is either top or bottom.
+				 * @since 3.2.3
+				 */
+				do_action( 'wsal_search_filters_list', 'top' );
 
-				if ( 'grid' !== $requested_view ) {
-					/**
-					 * Action: `wsal_search_filters_list`
-					 *
-					 * Display list of search filters of WSAL.
-					 *
-					 * @param string $which – Navigation position; value is either top or bottom.
-					 * @since 3.2.3
-					 */
-					do_action( 'wsal_search_filters_list', 'top' );
-				}
 
 				?>
 		<?php
@@ -614,7 +559,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			<?php
 		endif;
 
-		$is_search_view = class_exists( 'WSAL_SearchExtension' ) && ( ! empty( $this->page_args->search_filters ) || ! empty( $this->page_args->search_term ) );
+		$is_search_view = class_exists( 'WSAL_SearchExtension' ) && ( ! empty( self::get_page_arguments()['search_filters'] ) || ! empty( self::get_page_arguments()['search_term'] ) );
 		?>
 		<script type="text/javascript">
 			jQuery( document ).ready( function() {
@@ -628,10 +573,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 								'searchback' => __( 'All Sites', 'wp-security-audit-log' ),
 								'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
 							),
-							// 'autorefresh' => array(
-							// 	'enabled' => ! $is_search_view && ! WSAL\Helpers\Settings_Helper::get_option_value( 'disable-refresh' ),
-							// 	'token'   => $this->plugin->settings()->is_infinite_scroll() ? $this->get_total_events() : $this->get_view()->get_total_items(),
-							// ),
 						)
 					);
 					?>
@@ -876,7 +817,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	/**
 	 * Method: Render header of the view.
 	 */
-	public function header() {
+	public static function header() {
 		add_thickbox();
 
 		// Darktooltip styles.
@@ -911,7 +852,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function footer() {
+	public static function footer() {
 		wp_enqueue_script( 'jquery' );
 
 		// Darktooltip js.
@@ -945,16 +886,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		);
 
 		$audit_log_data = array(
-			'page'                 => isset( $this->page_args->page ) ? $this->page_args->page : false,
-			'siteId'               => isset( $this->page_args->site_id ) ? $this->page_args->site_id : false,
-			'orderBy'              => isset( $this->page_args->order_by ) ? $this->page_args->order_by : false,
-			'order'                => isset( $this->page_args->order ) ? $this->page_args->order : false,
-			'searchTerm'           => isset( $this->page_args->search_term ) ? $this->page_args->search_term : false,
-			'searchFilters'        => isset( $this->page_args->search_filters ) ? $this->page_args->search_filters : false,
+			'page'                 => isset( self::get_page_arguments()['page'] ) ? self::get_page_arguments()['page']: false,
+			'siteId'               => isset( self::get_page_arguments()['site_id'] ) ? self::get_page_arguments()['site_id'] : false,
+			'orderBy'              => isset( self::get_page_arguments()['order_by'] ) ? self::get_page_arguments()['order_by'] : false,
+			'order'                => isset( self::get_page_arguments()['order'] ) ? self::get_page_arguments()['order'] : false,
+			'searchTerm'           => isset( self::get_page_arguments()['search_term'] ) ? self::get_page_arguments()['search_term'] : false,
+			'searchFilters'        => isset( self::get_page_arguments()['search_filters'] ) ? self::get_page_arguments()['search_filters'] : false,
 			'closeInspectorString' => esc_html__( 'Close inspector', 'wp-security-audit-log' ),
 			'viewerNonce'          => wp_create_nonce( 'wsal_auditlog_viewer_nonce' ),
-			'infiniteScroll'       => $this->plugin->settings()->is_infinite_scroll(),
-			'userView'             => ( in_array( $this->user_last_view, $this->supported_view_types(), true ) ) ? $this->user_last_view : self::$default_view,
 			'installAddonStrings'  => array(
 				'defaultButton'    => esc_html__( 'Install and activate extension', 'wp-security-audit-log' ),
 				'installingText'   => esc_html__( 'Installing extension', 'wp-security-audit-log' ),
@@ -1050,7 +989,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @since 3.2
 	 */
 	public function register_privacy_pointer( $pointer ) {
-		$is_current_view = $this->plugin->views->get_active_view() == $this; // phpcs:ignore
+		$is_current_view = View_Manager::get_active_view() == $this; // phpcs:ignore
 		if ( current_user_can( 'manage_options' ) && $is_current_view && ! isset( $pointer['wsal_privacy'] ) ) {
 			$pointer['wsal_privacy'] = array(
 				'target'  => '#toplevel_page_wsal-auditlog .wp-first-item',
@@ -1096,35 +1035,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		\WSAL\Helpers\Settings_Helper::set_option_value( 'dismissed-privacy-notice', $dismissed );
 		wp_die( 1 );
-	}
-
-	/**
-	 * Infinite Scroll Events AJAX handler.
-	 *
-	 * @since 3.3.1.1
-	 */
-	public function infinite_scroll_events() {
-		// Check user permissions.
-		if ( ! Settings_Helper::current_user_can( 'view' ) ) {
-			die( esc_html__( 'Access Denied', 'wp-security-audit-log' ) );
-		}
-
-		// Verify nonce.
-		if ( ! isset( $_POST['wsal_viewer_security'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wsal_viewer_security'] ) ), 'wsal_auditlog_viewer_nonce' ) ) {
-			die( esc_html__( 'Nonce verification failed.', 'wp-security-audit-log' ) );
-		}
-
-		// Get $_POST arguments.
-		$paged = isset( $_POST['page_number'] ) ? sanitize_text_field( wp_unslash( $_POST['page_number'] ) ) : 0;
-
-		// Query events.
-		$events_query = $this->get_view()->query_events( $paged );
-		if ( ! empty( $events_query['items'] ) ) {
-			foreach ( $events_query['items'] as $event ) {
-				$this->get_view()->single_row( $event );
-			}
-		}
-		exit();
 	}
 
 	/**

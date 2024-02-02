@@ -540,9 +540,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 		 */
 		public static function save_settings_disabled_events( $disabled, $registered_alerts, $frontend_events, $enabled ) {
 			// Now we check all registered events for further processing.
-			foreach ( $registered_alerts as $alert ) {
+			foreach ( $disabled as $alert ) {
 				// Disable Visitor events if the user disabled the event there are "tied to" in the UI.
-				if ( 9035 === $alert['code'] ) {
+				if ( 9035 === $alert ) {
 					$frontend_events = array_merge( $frontend_events, array( 'woocommerce' => false ) );
 					Settings_Helper::set_frontend_events( $frontend_events );
 				}

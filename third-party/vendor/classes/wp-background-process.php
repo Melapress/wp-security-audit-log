@@ -7,6 +7,10 @@ namespace WSAL_Vendor;
  *
  * @package WP-Background-Processing
  */
+// phpcs:disable Generic.Commenting.DocComment.MissingShort
+/** @noinspection PhpIllegalPsrClassPathInspection */
+/** @noinspection AutoloadingIssuesInspection */
+// phpcs:disable Generic.Commenting.DocComment.MissingShort
 /**
  * Abstract WP_Background_Process class.
  *
@@ -68,6 +72,7 @@ abstract class WP_Background_Process extends WP_Async_Request
         $this->cron_hook_identifier = $this->identifier . '_cron';
         $this->cron_interval_identifier = $this->identifier . '_cron_interval';
         add_action($this->cron_hook_identifier, array($this, 'handle_cron_healthcheck'));
+        // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected
         add_filter('cron_schedules', array($this, 'schedule_cron_healthcheck'));
     }
     /**
@@ -172,10 +177,7 @@ abstract class WP_Background_Process extends WP_Async_Request
     public function is_cancelled()
     {
         $status = get_site_option($this->get_status_key(), 0);
-        if (absint($status) === self::STATUS_CANCELLED) {
-            return \true;
-        }
-        return \false;
+        return absint($status) === self::STATUS_CANCELLED;
     }
     /**
      * Called when background process has been cancelled.
@@ -199,10 +201,7 @@ abstract class WP_Background_Process extends WP_Async_Request
     public function is_paused()
     {
         $status = get_site_option($this->get_status_key(), 0);
-        if (absint($status) === self::STATUS_PAUSED) {
-            return \true;
-        }
-        return \false;
+        return absint($status) === self::STATUS_PAUSED;
     }
     /**
      * Called when background process has been paused.
@@ -308,6 +307,7 @@ abstract class WP_Background_Process extends WP_Async_Request
      * Is queue empty?
      *
      * @return bool
+     * @noinspection IsEmptyFunctionUsageInspection
      */
     protected function is_queue_empty()
     {
@@ -323,6 +323,7 @@ abstract class WP_Background_Process extends WP_Async_Request
      *
      * @deprecated 1.1.0 Superseded.
      * @see        is_processing()
+     * @noinspection PhpUnused
      */
     protected function is_process_running()
     {
@@ -376,7 +377,7 @@ abstract class WP_Background_Process extends WP_Async_Request
      */
     protected function get_batch()
     {
-        return \array_reduce($this->get_batches(1), function ($carry, $batch) {
+        return \array_reduce($this->get_batches(1), static function ($carry, $batch) {
             return $batch;
         }, array());
     }
@@ -408,7 +409,7 @@ abstract class WP_Background_Process extends WP_Async_Request
 			SELECT *
 			FROM ' . $table . '
 			WHERE ' . $column . ' LIKE %s
-			ORDER BY ' . $key_column . ' ASC
+			ORDER BY ' . $key_column . '
 			';
         $args = array($key);
         if (!empty($limit)) {
@@ -419,7 +420,7 @@ abstract class WP_Background_Process extends WP_Async_Request
         // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
         $batches = array();
         if (!empty($items)) {
-            $batches = \array_map(function ($item) use($column, $value_column) {
+            $batches = \array_map(static function ($item) use($column, $value_column) {
                 $batch = new \stdClass();
                 $batch->key = $item->{$column};
                 $batch->data = maybe_unserialize($item->{$value_column});
@@ -433,6 +434,8 @@ abstract class WP_Background_Process extends WP_Async_Request
      *
      * Pass each queue item to the task handler, while remaining
      * within server memory and time limit constraints.
+     *
+     * @noinspection DisconnectedForeachInstructionInspection
      */
     protected function handle()
     {
@@ -509,7 +512,7 @@ abstract class WP_Background_Process extends WP_Async_Request
             // Sensible default.
             $memory_limit = '128M';
         }
-        if (!$memory_limit || -1 === \intval($memory_limit)) {
+        if (!$memory_limit || -1 === (int) $memory_limit) {
             // Unlimited, set to 32GB.
             $memory_limit = '32000M';
         }
@@ -528,7 +531,7 @@ abstract class WP_Background_Process extends WP_Async_Request
         $finish = $this->start_time + apply_filters($this->identifier . '_default_time_limit', 20);
         // 20 seconds
         $return = \false;
-        if (\time() >= $finish) {
+        if (!(\defined('WP_CLI') && \WP_CLI) && \time() >= $finish) {
             $return = \true;
         }
         return apply_filters($this->identifier . '_time_exceeded', $return);
@@ -622,6 +625,7 @@ abstract class WP_Background_Process extends WP_Async_Request
      *
      * @deprecated 1.1.0 Superseded.
      * @see        cancel()
+     * @noinspection PhpUnused
      */
     public function cancel_process()
     {

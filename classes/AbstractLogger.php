@@ -63,6 +63,10 @@ abstract class WSAL_AbstractLogger {
 	protected function get_correct_timestamp( $metadata, $legacy_date ) {
 
 		if ( is_null( $legacy_date ) ) {
+			$timestamp = current_time( 'U.u', true );
+
+			$timestamp = \apply_filters( 'wsal_database_timestamp_value', $timestamp, $metadata );
+			
 			return array_key_exists( 'Timestamp', $metadata ) ? $metadata['Timestamp'] : current_time( 'U.u', true );
 		}
 
