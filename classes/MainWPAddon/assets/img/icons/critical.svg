@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="112px" height="112px" viewBox="0 0 112 112" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 52.6 (67491) - http://www.bohemiancoding.com/sketch -->
+    <title>BF106194-673C-455E-8A5C-7554CD09CE92</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <path d="M70,126 C39.072054,126 14,100.927946 14,70 C14,39.072054 39.072054,14 70,14 C100.927946,14 126,39.072054 126,70 C126,100.927946 100.927946,126 70,126 Z M71.513513,77.5675664 C74.8570748,77.5675664 77.5675672,74.8570742 77.5675672,71.5135126 L77.5675672,47.2972975 C77.5675672,43.9537359 74.8570748,41.2432437 71.513513,41.2432437 C68.1699512,41.2432437 65.4594588,43.9537359 65.4594588,47.2972975 L65.4594588,71.5135126 C65.4594588,74.8570742 68.1699512,77.5675664 71.513513,77.5675664 Z M71.513513,86.6486454 C68.1699512,86.6486454 65.4594588,89.3591378 65.4594588,92.7026996 C65.4594588,96.0462614 68.1699512,98.7567538 71.513513,98.7567538 C74.8570748,98.7567538 77.5675672,96.0462614 77.5675672,92.7026996 C77.5675672,89.3591378 74.8570748,86.6486454 71.513513,86.6486454 Z" id="path-1"></path>
+    </defs>
+    <g id="WPSAL-Screens" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Custom-icons" transform="translate(-165.000000, -242.000000)">
+            <g id="Custom-Icons" transform="translate(151.000000, 228.000000)">
+                <g id="Critical">
+                    <g id="Atoms-/-icons-/-custom-danger-alt">
+                        <mask id="mask-2" fill="white">
+                            <use xlink:href="#path-1"></use>
+                        </mask>
+                        <use id="custom-danger" fill="#C52F2E" fill-rule="nonzero" xlink:href="#path-1"></use>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

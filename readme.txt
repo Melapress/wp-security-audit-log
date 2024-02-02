@@ -105,11 +105,13 @@ WP Activity Log can keep also a detailed log of changes that happen on third-par
 
 - <strong>WooCommerce</strong>: Keep a log of changes you and your team do in the WooCommerce store settings, orders, products, coupons, and much more.
 - <strong>Yoast SEO</strong>: Keep a log of the Yoast SEO plugin settings changes, and also of the on-page SEO changes you and your team make in the Yoast SEO meta box.
-- <strong>WPForms]</strong>: Keep a log of the changes your team does in the WPForms plugin settings, forms, form files, entries (leads) and more.
+- <strong>WPForms</strong>: Keep a log of the changes your team does in the WPForms plugin settings, forms, form files, entries (leads) and more.
 - <strong>Gravity Forms</strong>: Keep a log of the changes your team does in the Gravity Forms plugin settings, forms, forms settings, entries (leads) and more.
 - <strong>MemberPress</strong>: Keep a log of the changes in your MemberPress powered website, including plugin settings changes, memberships, payments, subscriptions and other changes that your team does on your website.
 - <strong>bbPress</strong>: Keep a log of changes in bbPress forums, topics, bbPress settings and more.
 - <strong>MainWP</strong>: Keep a log of the MainWP network changes and can see the activity logs of all child sites from one central location - the MainWP dashboard.
+
+Refer to [activity logs for third party WordPress plugins](https://melapress.com/wordpress-activity-log/third-party-plugins/) for a complete list of all the plugins WP Activity Log can keep a log of.
 
 #### Other Noteworthy Features
 On top of the comprehensive activity log, WP Activity Log also has a number of non-logging specific features that make it a complete WordPress logging solution, such as:

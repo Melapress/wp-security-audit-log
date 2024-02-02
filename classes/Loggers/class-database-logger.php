@@ -64,6 +64,10 @@ if ( ! class_exists( '\WSAL\Loggers\Database_Logger' ) ) {
 
 			// Check DB connection.
 			if ( $connection ) { // If connected then save the alert in DB.
+				$site_id = ! is_null( $site_id ) ? $site_id : ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
+
+				$site_id = \apply_filters( 'wsal_database_site_id_value', $site_id, $type, $data );
+
 				Occurrences_Entity::store_record(
 					$data,
 					$type,
@@ -100,7 +104,11 @@ if ( ! class_exists( '\WSAL\Loggers\Database_Logger' ) ) {
 		protected static function get_correct_timestamp( $metadata, $legacy_date ) {
 
 			if ( is_null( $legacy_date ) ) {
-				return array_key_exists( 'Timestamp', $metadata ) ? $metadata['Timestamp'] : current_time( 'U.u', true );
+				$timestamp = current_time( 'U.u', true );
+
+				$timestamp = \apply_filters( 'wsal_database_timestamp_value', $timestamp, $metadata );
+
+				return array_key_exists( 'Timestamp', $metadata ) ? $metadata['Timestamp'] : $timestamp;
 			}
 
 			return floatval( $legacy_date );

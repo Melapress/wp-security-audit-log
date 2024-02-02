@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\WP_Sensors\Helpers\GravityForms_Helper;
 
@@ -76,6 +77,27 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 				add_action( 'gform_post_export_entries', array( __CLASS__, 'event_process_export' ), 10, 5 );
 				add_action( 'gform_form_export_filename', array( __CLASS__, 'event_process_export_forms' ), 10, 2 );
 			}
+
+				// Form submitted.
+				add_action( 'gform_after_submission', array( __CLASS__, 'event_form_submitted' ), 10, 2 );
+		}
+
+	    /**
+		 * That needs to be registered as a frontend sensor, when the admin sets the plugin to monitor the login from 3rd parties.
+		 *
+		 * @return boolean
+		 *
+		 * @since 4.5.1
+		 */
+		public static function is_frontend_sensor(): bool {
+			$frontend_events = Settings_Helper::get_frontend_events();
+			$should_load     = ( isset( $frontend_events['gravityforms'] ) && $frontend_events['gravityforms'] );
+
+			if ( $should_load ) {
+				return true;
+			}
+
+			return false;
 		}
 
 		/**
@@ -93,6 +115,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 				2
 			);
 			if ( GravityForms_Helper::is_gravityforms_active() ) {
+				add_filter(
+					'wsal_save_settings_disabled_events',
+					array(
+						'\WSAL\WP_Sensors\Helpers\GravityForms_Helper',
+						'save_settings_disabled_events',
+					),
+					10,
+					4
+				);
 				add_filter(
 					'wsal_event_type_data',
 					array( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper', 'wsal_gravityforms_add_custom_event_type' ),
@@ -123,9 +154,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 					10,
 					2
 				);
-
-				// Form submitted.
-				add_action( 'gform_after_submission', array( __CLASS__, 'event_form_submitted' ), 10, 2 );
 			}
 		}
 
@@ -766,7 +794,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 							if ( ! Alert_Manager::was_triggered_recently( 5703 ) ) {
 								$variables = array(
 									'EventType'         => $event_type,
-									'setting_name'      => sanitize_text_field( str_replace( '_', ' ', ucfirst( preg_replace( '/([a-z0-9])([A-Z])/', '$1 $2', $name ) ) ) ),
+									'setting_name'      => sanitize_text_field( str_replace( '_', ' ', ucfirst( preg_replace( '/([a-z0-9])([A-Z])/', '$1 $2', (string) $name ) ) ) ),
 									'old_setting_value' => ( isset( self::$old_form[ $changed_setting ] ) && self::$old_form[ $changed_setting ] ) ? $old_value : 'N/A',
 									'setting_value'     => sanitize_text_field( $value ),
 									'form_name'         => sanitize_text_field( $form['title'] ),
@@ -826,7 +854,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 								case 'enableHoneypot':
 								case 'requireLogin':
 								case 'scheduleForm':
-									$setting_name = str_replace( '_', ' ', ucfirst( preg_replace( '/([a-z0-9])([A-Z])/', '$1 $2', $changed_setting ) ) );
+									$setting_name = str_replace( '_', ' ', ucfirst( preg_replace( '/([a-z0-9])([A-Z])/', '$1 $2', (string) $changed_setting ) ) );
 									$event_type   = ( 1 === $value ) ? 'enabled' : 'disabled';
 									// Tidy up bools.
 									if ( ! $old_value && 1 === $value || 1 === $old_value && ! $value ) {
@@ -837,13 +865,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 									break;
 
 								case 'save':
-									$setting_name = str_replace( '_', ' ', ucfirst( preg_replace( '/([a-z0-9])([A-Z])/', '$1 $2', $changed_setting ) ) );
+									$setting_name = str_replace( '_', ' ', ucfirst( preg_replace( '/([a-z0-9])([A-Z])/', '$1 $2', (string) $changed_setting ) ) );
 									$event_type   = ( isset( $value_unmodified['enabled'] ) && $value_unmodified['enabled'] ) ? 'enabled' : 'disabled';
 
 									break;
 
 								default:
-									$setting_name = sanitize_text_field( str_replace( '_', ' ', ucfirst( preg_replace( '/([a-z0-9])([A-Z])/', '$1 $2', $changed_setting ) ) ) );
+									$setting_name = sanitize_text_field( str_replace( '_', ' ', ucfirst( preg_replace( '/([a-z0-9])([A-Z])/', '$1 $2', (string) $changed_setting ) ) ) );
 							}
 
 							$variables = array(
@@ -1461,7 +1489,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 				$array,
 				function ( $value, $key ) use ( $glue, $include_keys, &$glued_string ) {
 					if ( $value ) {
-						$tidy_key                       = str_replace( ',', '', str_replace( '_', ' ', ucfirst( preg_replace( '/([a-z0-9])([A-Z])/', '$1 $2', $key ) ) ) ) . ': ';
+						$tidy_key                       = str_replace( ',', '', str_replace( '_', ' ', ucfirst( preg_replace( '/([a-z0-9])([A-Z])/', '$1 $2', (string) $key ) ) ) ) . ': ';
 						$include_keys && $glued_string .= $tidy_key;
 						$glued_string                  .= $value . $glue;
 					}
@@ -1472,7 +1500,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 			strlen( $glue ) > 0 && $glued_string = substr( $glued_string, 0, -strlen( $glue ) ); // phpcs:ignore
 
 			// Trim ALL whitespace.
-			$trim_all && $glued_string = preg_replace( '/(\s)/ixsm', '', $glued_string ); // phpcs:ignore
+			$trim_all && $glued_string = preg_replace( '/(\s)/ixsm', '', (string) $glued_string ); // phpcs:ignore
 
 			return (string) $glued_string;
 		}
@@ -1487,13 +1515,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function determine_entry_name( $entry ) {
-			$propery_ids = array(
+			$property_ids = array(
 				'1',
 				'2',
 				'3',
 			);
 
-			foreach ( $propery_ids as $id ) {
+			foreach ( $property_ids as $id ) {
 				$have_name = rgar( $entry, $id );
 				if ( ! empty( $have_name ) ) {
 					return $have_name;

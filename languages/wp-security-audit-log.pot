@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v3.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Activity Log 4.6.2\n"
+"Project-Id-Version: WP Activity Log 4.6.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-security-audit-log\n"
 "Last-Translator: Melapress <info@wpwhitesecurity.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-01-08T13:54:00+00:00\n"
+"POT-Creation-Date: 2024-02-02T15:04:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.9.0\n"
 "X-Domain: wp-security-audit-log\n"
@@ -32,163 +32,4 @@ msgstr ""
 
 #. Author URI of the plugin
 msgid "https://melapress.com/"
-msgstr ""
-
-#. translators: User's first name
-#: wp-security-audit-log.php:703
-#: wp-security-audit-log.php:731
-msgid "Hey %s"
-msgstr ""
-
-#: wp-security-audit-log.php:707
-msgid "Never miss an important update! Opt-in to our security and feature updates notifications, and non-sensitive diagnostic tracking with freemius.com."
-msgstr ""
-
-#: wp-security-audit-log.php:708
-#: wp-security-audit-log.php:743
-msgid "Note: "
-msgstr ""
-
-#: wp-security-audit-log.php:709
-#: wp-security-audit-log.php:744
-msgid "NO ACTIVITY LOG ACTIVITY & DATA IS SENT BACK TO OUR SERVERS."
-msgstr ""
-
-#. translators: 1: Plugin name. 2: Plugin name. 2: Freemius link. 4: Plugin name.
-#: wp-security-audit-log.php:737
-msgid "Please help us improve %1$s! If you opt-in, some non-sensitive data about your usage of %2$s will be sent to %3$s, a diagnostic tracking service we use. If you skip this, that's okay! %2$s will still work just fine."
-msgstr ""
-
-#: wp-security-audit-log.php:781
-msgid "You need to activate the licence key to use WP Activity Log Premium. %s"
-msgstr ""
-
-#: wp-security-audit-log.php:782
-msgid "Activate the licence key now"
-msgstr ""
-
-#. Translators: Expired message and time
-#: wp-security-audit-log.php:806
-msgid "%s You need to renew your license to continue using premium features."
-msgstr ""
-
-#. Translators: Number of sites
-#: wp-security-audit-log.php:809
-msgid "The license is limited to %s sub-sites. You need to upgrade your license to cover all the sub-sites on this network."
-msgstr ""
-
-#: wp-security-audit-log.php:894
-msgid "Error: You do not have sufficient permissions to disable this custom field."
-msgstr ""
-
-#. translators: name of meta field (in bold)
-#: wp-security-audit-log.php:940
-msgid "Custom field %s is no longer being monitored."
-msgstr ""
-
-#. translators: setting tab name "Excluded Objects"
-#: wp-security-audit-log.php:946
-msgid "Enable the monitoring of this custom field again from the %s tab in the plugin settings."
-msgstr ""
-
-#: wp-security-audit-log.php:947
-msgid "Excluded Objects"
-msgstr ""
-
-#: wp-security-audit-log.php:960
-msgid "Error: You do not have sufficient permissions to disable this alert."
-msgstr ""
-
-#: wp-security-audit-log.php:980
-msgid "Alert %1$s is no longer being monitored.<br /> %2$s"
-msgstr ""
-
-#: wp-security-audit-log.php:982
-msgid "You can enable this alert again from the Enable/Disable Alerts node in the plugin menu."
-msgstr ""
-
-#: wp-security-audit-log.php:1014
-msgid "Installing, please wait"
-msgstr ""
-
-#: wp-security-audit-log.php:1015
-msgid "Already installed"
-msgstr ""
-
-#: wp-security-audit-log.php:1016
-msgid "Extension installed"
-msgstr ""
-
-#: wp-security-audit-log.php:1017
-msgid "Extension activated"
-msgstr ""
-
-#: wp-security-audit-log.php:1018
-msgid "Install failed"
-msgstr ""
-
-#: wp-security-audit-log.php:1019
-msgid "Reloading page"
-msgstr ""
-
-#. Translators: %s: PHP Version
-#: wp-security-audit-log.php:1057
-msgid "You are using a version of PHP that is older than %s, which is no longer supported."
-msgstr ""
-
-#: wp-security-audit-log.php:1059
-msgid "Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using."
-msgstr ""
-
-#. Translators: %s: Activity Log for MainWP plugin hyperlink
-#: wp-security-audit-log.php:1064
-msgid "Please install the %s plugin on the MainWP dashboard."
-msgstr ""
-
-#. Translators: %s: Activity Log for MainWP plugin hyperlink
-#: wp-security-audit-log.php:1064
-msgid "Activity Log for MainWP"
-msgstr ""
-
-#. Translators: %s: Getting started guide hyperlink
-#: wp-security-audit-log.php:1066
-msgid "The WP Activity Log should be installed on the child sites only. Refer to the %s for more information."
-msgstr ""
-
-#. Translators: %s: Getting started guide hyperlink
-#: wp-security-audit-log.php:1066
-msgid "getting started guide"
-msgstr ""
-
-#: wp-security-audit-log.php:1255
-msgid "For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href=\"https://melapress.com/\" target=\"_blank\">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from."
-msgstr ""
-
-#: wp-security-audit-log.php:1274
-msgid "Every 6 hours"
-msgstr ""
-
-#: wp-security-audit-log.php:1278
-msgid "Every 45 minutes"
-msgstr ""
-
-#: wp-security-audit-log.php:1282
-msgid "Every 30 minutes"
-msgstr ""
-
-#: wp-security-audit-log.php:1286
-msgid "Every 15 minutes"
-msgstr ""
-
-#: wp-security-audit-log.php:1290
-msgid "Every 10 minutes"
-msgstr ""
-
-#: wp-security-audit-log.php:1294
-msgid "Every 5 minutes"
-msgstr ""
-
-#. translators: 1. Deprecated method name 2. Version since deprecated
-#: wp-security-audit-log.php:1308
-msgid "Method %1$s is deprecated since version %2$s!"
 msgstr ""

@@ -476,41 +476,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$login_page_notification_settings_enforced_by_mainwp = array_key_exists( 'login_notification_enabled', $enforced_settings );
 		$incognito_setting_enforced_by_mainwp                = array_key_exists( 'incognito_mode_enabled', $enforced_settings );
 
-		if ( $settings->is_infinite_scroll() ) {
-			?>
-		<h3><?php esc_html_e( 'Use infinite scroll or pagination for the event viewer?', 'wp-security-audit-log' ); ?></h3>
-		<p class="description">
-			<?php
-			echo sprintf(
-				/* translators: Learn more link. */
-				esc_html__( 'When using infinite scroll the event viewer and search results %s load up much faster and require less resources.', 'wp-security-audit-log' ),
-				'<a href="https://melapress.com/wordpress-activity-log/features/?utm_source=plugins&utm_medium=link&utm_campaign=wsal" target="_blank">' . esc_html__( '(Premium feature)', 'wp-security-audit-log' ) . '</a>'
-			);
-			?>
-		</p>
-		<table class="form-table wsal-tab">
-			<tbody>
-			<tr>
-				<th><label for="infinite-scroll"><?php esc_html_e( 'Select event viewer view type:', 'wp-security-audit-log' ); ?></label></th>
-				<td>
-					<fieldset>
-						<label for="infinite-scroll">
-							<input type="radio" name="events-type-nav" value="infinite-scroll" id="infinite-scroll" <?php checked( $this->plugin->settings()->get_events_type_nav(), 'infinite-scroll' ); ?> />
-							<?php esc_html_e( 'Infinite Scroll', 'wp-security-audit-log' ); ?>
-						</label>
-						<br/>
-						<label for="pagination">
-							<input type="radio" name="events-type-nav" value="pagination" id="pagination" <?php checked( $this->plugin->settings()->get_events_type_nav(), 'pagination' ); ?> />
-							<?php esc_html_e( 'Pagination (Recommended)', 'wp-security-audit-log' ); ?>
-						</label>
-						<br />
-					</fieldset>
-				</td>
-			</tr>
-			</tbody>
-		</table>
-		<!-- Events Navigation Type -->
-		<?php } ?>
+		?>
 
 		<h3><?php esc_html_e( 'Display latest events widget in Dashboard & Admin bar', 'wp-security-audit-log' ); ?></h3>
 		<p class="description">
@@ -518,7 +484,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			echo sprintf(
 				/* translators: Max number of dashboard widget alerts. */
 				esc_html__( 'The events widget displays the latest %d security events in the dashboard and the admin bar notification displays the latest event.', 'wp-security-audit-log' ),
-				esc_html( $this->plugin->settings()->get_dashboard_widget_max_alerts() )
+				esc_html( Settings_Helper::DASHBOARD_WIDGET_MAX_ALERTS )
 			);
 			?>
 		</p>
@@ -555,7 +521,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<th><label for="admin_bar_notif_on"><?php echo esc_html( $label ); ?></label></th>
 				<td>
 					<fieldset <?php echo esc_attr( $disabled ); ?>>
-						<?php $abn = $this->plugin->settings()->is_admin_bar_notif(); ?>
+						<?php $abn = ! \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'disable-admin-bar-notif', true ); ?>
 						<label for="admin_bar_notif_on">
 							<input type="radio" name="admin_bar_notif" id="admin_bar_notif_on" style="margin-top: -2px;" <?php checked( $abn ); ?> value="1">
 							<span><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></span>
@@ -582,7 +548,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 				<th><label for="admin_bar_notif_refresh"><?php echo esc_html( $label ); ?></label></th>
 				<td>
 					<fieldset <?php echo esc_attr( $disabled ); ?>>
-						<?php $abn_updates = $this->plugin->settings()->get_admin_bar_notif_updates(); ?>
+						<?php $abn_updates = WSAL\Helpers\Settings_Helper::get_option_value( 'admin-bar-notif-updates', 'page-refresh' ); ?>
 						<label for="admin_bar_notif_realtime">
 							<input type="radio" name="admin_bar_notif_updates" id="admin_bar_notif_realtime" style="margin-top: -2px;" <?php checked( $abn_updates, 'real-time' ); ?> value="real-time">
 							<span><?php esc_html_e( 'Update in near real time', 'wp-security-audit-log' ); ?></span>
@@ -610,7 +576,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<fieldset <?php echo disabled( $login_page_notification_settings_enforced_by_mainwp ); ?>>
 						<?php
 						// Get login page notification checkbox.
-						$wsal_lpn = $this->plugin->settings()->is_login_page_notification();
+						$wsal_lpn = \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'login_page_notification', false );
 						if ( $wsal_lpn && 'true' === $wsal_lpn ) {
 							// If option exists, value is true then set to true.
 							$wsal_lpn = true;
@@ -629,7 +595,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						<br />
 						<?php
 						// Get login page notification text.
-						$wsal_lpn_text = $this->plugin->settings()->get_login_page_notification_text();
+						$wsal_lpn_text = WSAL\Helpers\Settings_Helper::get_option_value( 'login_page_notification_text', false );;
 						if ( ! $wsal_lpn_text ) {
 							$wsal_lpn_text = __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href="https://melapress.com/?utm_source=plugins&utm_medium=referral&utm_campaign=wsal&utm_content=settings+pages" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' );
 						}
@@ -913,9 +879,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 		$post_array = filter_input_array( INPUT_POST );
 
 		// \WSAL\Helpers\Settings_Helper::set_option_value( 'disable-refresh', ! $post_array['EnableAuditViewRefresh'] );
-		if ( isset( $post_array['events-type-nav'] ) ) {
-			\WSAL\Helpers\Settings_Helper::set_option_value( 'events-nav-type', sanitize_text_field( $post_array['events-type-nav'] ) );
-		}
 		\WSAL\Helpers\Settings_Helper::set_option_value( 'use-email', sanitize_text_field( $post_array['use-email'] ) );
 		\WSAL\Helpers\Settings_Helper::set_option_value( 'from-email', trim( sanitize_email( $post_array['FromEmail'] ) ) );
 		\WSAL\Helpers\Settings_Helper::set_option_value( 'display-name', trim( sanitize_text_field( $post_array['DisplayName'] ) ) );
@@ -1070,50 +1033,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			</tbody>
 		</table>
 		<!-- User Information -->
-
-		<?php
-		$requested_view = get_user_meta( get_current_user_id(), 'wsal-selected-main-view', true );
-		if ( 'grid' === $requested_view || $this->plugin->settings()->is_infinite_scroll() ) {
-			?>
-		<h3><?php esc_html_e( 'Select the columns to be displayed in the WordPress activity log', 'wp-security-audit-log' ); ?></h3>
-		<p class="description"><?php esc_html_e( 'When you deselect a column it won’t be shown in the activity log viewer in both views. The data will still be recorded by the plugin.', 'wp-security-audit-log' ); ?></p>
-		<table class="form-table wsal-tab">
-			<tbody>
-				<tr>
-					<th><label for="columns"><?php esc_html_e( 'Activity log columns selection', 'wp-security-audit-log' ); ?></label></th>
-					<td>
-						<fieldset>
-							<?php $columns = $this->plugin->settings()->get_columns(); ?>
-							<?php foreach ( $columns as $key => $value ) { ?>
-								<label for="columns">
-									<input type="checkbox" name="Columns[<?php echo esc_attr( $key ); ?>]" id="<?php echo esc_attr( $key ); ?>" class="sel-columns" style="margin-top: -2px;"
-										<?php checked( $value, '1' ); ?> value="1">
-									<?php if ( 'alert_code' === $key ) : ?>
-										<span><?php esc_html_e( 'Event ID', 'wp-security-audit-log' ); ?></span>
-									<?php elseif ( 'type' === $key ) : ?>
-										<span><?php esc_html_e( 'Severity', 'wp-security-audit-log' ); ?></span>
-									<?php elseif ( 'date' === $key ) : ?>
-										<span><?php esc_html_e( 'Date & Time', 'wp-security-audit-log' ); ?></span>
-									<?php elseif ( 'username' === $key ) : ?>
-										<span><?php esc_html_e( 'User', 'wp-security-audit-log' ); ?></span>
-									<?php elseif ( 'source_ip' === $key ) : ?>
-										<span><?php esc_html_e( 'Source IP Address', 'wp-security-audit-log' ); ?></span>
-									<?php elseif ( 'info' === $key ) : ?>
-										<span><?php esc_html_e( 'Info (used in Grid view mode only)', 'wp-security-audit-log' ); ?></span>
-									<?php else : ?>
-										<span><?php echo esc_html( ucwords( str_replace( '_', ' ', $key ) ) ); ?></span>
-									<?php endif; ?>
-								</label>
-								<br/>
-							<?php } ?>
-						</fieldset>
-					</td>
-				</tr>
-				<!-- Activity log columns selection -->
-			</tbody>
-		</table>
-		<!-- Activity log columns -->
-		<?php } ?>
 
 		<?php $is_wp_backend = \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'wp-backend' ); ?>
 		<h3><?php esc_html_e( 'Do you want to keep a log of WordPress background activity?', 'wp-security-audit-log' ); ?></h3>

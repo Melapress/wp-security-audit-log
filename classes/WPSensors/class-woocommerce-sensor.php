@@ -3588,7 +3588,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 				}
 				if ( ! empty( $product->post_title ) ) {
 					$event = 9072;
-					if ( ! self::was_triggered( $event ) && ! self::was_triggered( 9001 ) || ! Alert_Manager::was_triggered_recently( 9000 ) ) {
+					if ( ! Alert_Manager::was_triggered( $event ) && ! Alert_Manager::was_triggered( 9001 ) || ! Alert_Manager::was_triggered_recently( 9000 ) ) {
 						$editor_link = self::get_editor_link( $product );
 						Alert_Manager::trigger_event_if(
 							$event,
@@ -3620,28 +3620,6 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 				return false;
 			}
 			return true;
-		}
-
-		/**
-		 * Check if the alert was triggered.
-		 *
-		 * @param integer $alert_id - Alert code.
-		 * @return boolean
-		 *
-		 * @since 4.6.0
-		 */
-		private static function was_triggered( $alert_id ) {
-			$last_occurrence = Occurrences_Entity::build_query( array( 'alert_id' => 'alert_id' ), array(), array( 'created_on' => 'DESC' ), array( 1 ) );
-			if ( ! empty( $last_occurrence ) ) {
-				if ( is_array( $last_occurrence[0] ) ) {
-					if ( $last_occurrence[0]['alert_id'] === $alert_id ) {
-						return true;
-					}
-				} elseif ( $last_occurrence[0]->alert_id === $alert_id ) {
-						return true;
-				}
-			}
-			return false;
 		}
 
 		/**

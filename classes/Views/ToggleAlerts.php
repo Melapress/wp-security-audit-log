@@ -83,6 +83,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			'register'    => false,
 			'login'       => false,
 			'woocommerce' => false,
+			'gravityforms' => false,
 		);
 
 		// Check for enabled front end events and merge result with above array.
@@ -846,10 +847,15 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 					}
 					if (td) {
 						txtValue = td.textContent || td.innerText;
+						tr[i].style.display = "none";
 						if (txtValue.toUpperCase().indexOf(filter) > -1) {
 							tr[i].style.display = "";
-						} else {
-							tr[i].style.display = "none";
+							if ( tr[i].hasAttribute('data-is-attached-to-alert') ) {
+								tr[i-1].style.display = "";
+							}
+						}
+						if ( "" === tr[i-1].style.display && tr[i].hasAttribute('data-is-attached-to-alert') ) {
+							tr[i].style.display = "";
 						}
 					}
 				}

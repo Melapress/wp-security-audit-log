@@ -1788,7 +1788,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 
 			if ( ! empty( $post->post_title ) ) {
 				$event = 2100;
-				if ( ! self::was_triggered( $event ) ) {
+				if ( ! Alert_Manager::was_triggered( $event ) ) {
 					$editor_link = self::get_editor_link( $post->ID );
 					Alert_Manager::trigger_event(
 						$event,
@@ -1804,30 +1804,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 					);
 				}
 			}
-		}
-
-		/**
-		 * Check if the alert was triggered.
-		 *
-		 * @param integer|array $alert_id - Alert code.
-		 *
-		 * @return boolean
-		 *
-		 * @since 4.5.0
-		 */
-		private static function was_triggered( $alert_id ) {
-
-			$last_occurrence = Occurrences_Entity::build_query( array( 'alert_id' => 'alert_id' ), array(), array( 'created_on' => 'DESC' ), array( 1 ) );
-
-			if ( ! empty( $last_occurrence ) && isset( $last_occurrence[0]['alert_id'] ) ) {
-				if ( ! is_array( $alert_id ) && (int) $last_occurrence[0]['alert_id'] === $alert_id ) {
-					return true;
-				} elseif ( is_array( $alert_id ) && in_array( (int) $last_occurrence[0]['alert_id'], $alert_id, true ) ) {
-					return true;
-				}
-			}
-
-			return false;
 		}
 
 		/**

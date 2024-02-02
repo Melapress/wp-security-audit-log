@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit9643
+class ComposerStaticInit13735
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -44,6 +44,7 @@ class ComposerStaticInit9643
         'WSAL\\Entities\\Metadata_Entity' => __DIR__ . '/../..' . '/classes/Entities/class-metadata-entity.php',
         'WSAL\\Entities\\Occurrences_Entity' => __DIR__ . '/../..' . '/classes/Entities/class-occurrences-entity.php',
         'WSAL\\Entities\\Options_Entity' => __DIR__ . '/../..' . '/classes/Entities/class-options-entity.php',
+        'WSAL\\Helpers\\Assets' => __DIR__ . '/../..' . '/classes/Helpers/class-assets.php',
         'WSAL\\Helpers\\Classes_Helper' => __DIR__ . '/../..' . '/classes/Helpers/class-classes-helper.php',
         'WSAL\\Helpers\\DateTime_Formatter_Helper' => __DIR__ . '/../..' . '/classes/Helpers/class-datetime-formatter-helper.php',
         'WSAL\\Helpers\\Email_Helper' => __DIR__ . '/../..' . '/classes/Helpers/class-email-helper.php',
@@ -58,9 +59,14 @@ class ComposerStaticInit9643
         'WSAL\\Helpers\\User_Helper' => __DIR__ . '/../..' . '/classes/Helpers/class-user-helper.php',
         'WSAL\\Helpers\\User_Utils' => __DIR__ . '/../..' . '/classes/Helpers/class-user-utils.php',
         'WSAL\\Helpers\\Validator' => __DIR__ . '/../..' . '/classes/Helpers/class-validator.php',
+        'WSAL\\Helpers\\View_Manager' => __DIR__ . '/../..' . '/classes/Helpers/class-view-manager.php',
         'WSAL\\Helpers\\WP_Helper' => __DIR__ . '/../..' . '/classes/Helpers/class-wp-helper.php',
+        'WSAL\\Helpers\\Widget_Manager' => __DIR__ . '/../..' . '/classes/Helpers/class-widget-manager.php',
         'WSAL\\ListAdminEvents\\List_Events' => __DIR__ . '/../..' . '/classes/ListAdminEvents/class-list-events.php',
         'WSAL\\Loggers\\Database_Logger' => __DIR__ . '/../..' . '/classes/Loggers/class-database-logger.php',
+        'WSAL\\MainWP\\MainWP_Addon' => __DIR__ . '/../..' . '/classes/MainWPAddon/class-mainwp-addon.php',
+        'WSAL\\MainWP\\MainWP_Helper' => __DIR__ . '/../..' . '/classes/MainWPAddon/class-mainwp-helper.php',
+        'WSAL\\MainWP\\MainWP_Settings' => __DIR__ . '/../..' . '/classes/MainWPAddon/class-mainwp-settings.php',
         'WSAL\\Migration\\Metadata_Migration_440' => __DIR__ . '/../..' . '/classes/Migration/class-metadata-migration-440.php',
         'WSAL\\Multisite\\NetworkWide\\AbstractTracker' => __DIR__ . '/../..' . '/classes/Multisite/NetworkWide/AbstractTracker.php',
         'WSAL\\Multisite\\NetworkWide\\CPTsTracker' => __DIR__ . '/../..' . '/classes/Multisite/NetworkWide/CPTsTracker.php',
@@ -71,6 +77,7 @@ class ComposerStaticInit9643
         'WSAL\\WP_Sensors\\ACF_Meta_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-acf-meta-sensor.php',
         'WSAL\\WP_Sensors\\Alerts\\BBPress_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-bbpress-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Gravity_Forms_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-gravity-forms-custom-alerts.php',
+        'WSAL\\WP_Sensors\\Alerts\\MainWP_Server_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-mainwp-server-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Memberpress_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-memberpress-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Multisite_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-multisite-custom-alerts.php',
         'WSAL\\WP_Sensors\\Alerts\\Tablepress_Custom_Alerts' => __DIR__ . '/../..' . '/classes/WPSensors/Alerts/class-tablepress-custom-alerts.php',
@@ -83,11 +90,13 @@ class ComposerStaticInit9643
         'WSAL\\WP_Sensors\\Gravity_Forms_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-gravity-forms-sensor.php',
         'WSAL\\WP_Sensors\\Helpers\\BBPress_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-bbpress-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\GravityForms_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-gravityforms-helper.php',
+        'WSAL\\WP_Sensors\\Helpers\\MainWP_Server_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-mainwp-server-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\MemberPress_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-memberpress-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\TablePress_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-tablepress-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\WPForms_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-wpforms-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\Woocommerce_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-woocommerce-helper.php',
         'WSAL\\WP_Sensors\\Helpers\\Yoast_SEO_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/Helpers/class-yoast-seo-helper.php',
+        'WSAL\\WP_Sensors\\MainWP_Server_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-mainwp-server-sensor.php',
         'WSAL\\WP_Sensors\\Main_WP_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-main-wp-sensor.php',
         'WSAL\\WP_Sensors\\MemberPress_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-memberpress-sensor.php',
         'WSAL\\WP_Sensors\\Multisite_Sign_Up_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-multisite-sign-up-sensor.php',
@@ -116,14 +125,10 @@ class ComposerStaticInit9643
         'WSAL_AlertFormatter' => __DIR__ . '/../..' . '/classes/AlertFormatter.php',
         'WSAL_AlertFormatterConfiguration' => __DIR__ . '/../..' . '/classes/AlertFormatterConfiguration.php',
         'WSAL_AlertFormatterFactory' => __DIR__ . '/../..' . '/classes/AlertFormatterFactory.php',
-        'WSAL_AuditLogListView' => __DIR__ . '/../..' . '/classes/AuditLogListView.php',
         'WSAL_ExtensionPlaceholderView' => __DIR__ . '/../..' . '/classes/ExtensionPlaceholderView.php',
-        'WSAL_Helpers_DataHelper' => __DIR__ . '/../..' . '/classes/Helpers/DataHelper.php',
         'WSAL_MainWpApi' => __DIR__ . '/../..' . '/classes/MainWpApi.php',
         'WSAL_ReportArgs' => __DIR__ . '/../..' . '/classes/ReportArgs.php',
         'WSAL_Settings' => __DIR__ . '/../..' . '/classes/Settings.php',
-        'WSAL_Utilities_DateTimeFormatter' => __DIR__ . '/../..' . '/classes/Utilities/DateTimeFormatter.php',
-        'WSAL_ViewManager' => __DIR__ . '/../..' . '/classes/ViewManager.php',
         'WSAL_Views_AuditLog' => __DIR__ . '/../..' . '/classes/Views/AuditLog.php',
         'WSAL_Views_EmailNotifications' => __DIR__ . '/../..' . '/classes/Views/EmailNotifications.php',
         'WSAL_Views_ExternalDB' => __DIR__ . '/../..' . '/classes/Views/ExternalDB.php',
@@ -134,15 +139,15 @@ class ComposerStaticInit9643
         'WSAL_Views_Settings' => __DIR__ . '/../..' . '/classes/Views/Settings.php',
         'WSAL_Views_SetupWizard' => __DIR__ . '/../..' . '/classes/Views/SetupWizard.php',
         'WSAL_Views_ToggleAlerts' => __DIR__ . '/../..' . '/classes/Views/ToggleAlerts.php',
-        'WSAL_WidgetManager' => __DIR__ . '/../..' . '/classes/WidgetManager.php',
+        'WpSecurityAuditLog' => __DIR__ . '/../..' . '/classes/class-wp-security-audit-log.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit9643::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit9643::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit9643::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit13735::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit13735::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit13735::$classMap;
 
         }, null, ClassLoader::class);
     }

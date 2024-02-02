@@ -207,16 +207,6 @@ abstract class WSAL_AbstractView {
 	}
 
 	/**
-	 * Used for rendering stuff into head tag.
-	 */
-	public function header() {}
-
-	/**
-	 * Used for rendering stuff in page footer.
-	 */
-	public function footer() {}
-
-	/**
 	 * Method: Safe view menu name.
 	 *
 	 * @return string

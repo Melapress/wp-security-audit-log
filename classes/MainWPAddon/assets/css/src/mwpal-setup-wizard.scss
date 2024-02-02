@@ -1,0 +1,199 @@
+/**
+ * MWPAL Wizard Styles
+ */
+
+$color-primary: #009344;
+$color-secondary: #bdd63a;
+$color-disable: #b4b9be;
+
+body {
+	margin: 65px auto 24px;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	background: #f1f1f1;
+	padding: 0;
+	border: 0;
+}
+
+// Header logo.
+#wsal-logo {
+	border: 0;
+	margin: 0 0 24px;
+	padding: 0;
+	text-align: center;
+
+	img {
+		width: 400px;
+	}
+}
+
+// Wizard steps.
+.steps {
+	display: flex;
+	justify-content: center;
+	list-style-type: none;
+	margin: 0;
+	padding: 0 0 25px;
+	text-align: center;
+
+	li {
+		flex-basis: 200px;
+		font-weight: 700;
+		margin: 0 0 5px;
+		color: $color-disable;
+		padding-bottom: 15px;
+		position: relative;
+
+		&.is-active {
+			color: $color-primary;
+
+			&::before {
+				border: 4px solid $color-primary;
+				background: $color-primary;
+			}
+		}
+
+		&::before {
+			content: '';
+			border: 4px solid $color-disable;
+			border-radius: 100%;
+			width: 4px;
+			height: 4px;
+			position: absolute;
+			bottom: 0;
+			left: 50%;
+			margin-left: -6px;
+			margin-bottom: -8px;
+			background: $color-disable;
+		}
+	}
+}
+
+// Wizard Content.
+.mwpal-setup-content {
+	box-shadow: 0 1px 3px rgba(0,0,0,.13);
+	padding: 2em;
+	margin: 0 0 20px;
+	background: #fff;
+	overflow: hidden;
+	zoom: 1;
+	text-align: left;
+
+	h4,
+	fieldset {
+		line-height: 1.5;
+	}
+
+	.description {
+		font-style: italic;
+	}
+}
+
+// Wizard footer.
+.mwpal-setup-footer {
+	text-align: center;
+
+	a {
+		color: $color-primary;
+		font-size: 14px;
+		text-decoration: none;
+	}
+}
+
+.mwpal-setup-actions {
+	text-align: center;
+
+	.button {
+		box-shadow: none;
+		font-size: 14px;
+		height: auto;
+		padding: 8px 20px;
+		min-width: 12em;
+		min-width: auto;
+		transition: 0.1s all linear;
+	}
+
+	.button-primary {
+		background-color: $color-primary;
+		border-color: $color-primary;
+		box-shadow: none;
+		text-shadow: none;
+		margin: 0;
+		opacity: 1;
+
+		&:hover,
+		&:focus {
+			background: lighten($color: $color-primary, $amount: 5%);
+			border-color: lighten($color: $color-primary, $amount: 5%);
+			box-shadow: none;
+			color: #fff;
+		}
+	}
+}
+
+.sites-container {
+	background: #fff;
+	height: 230px;
+	overflow-y: scroll;
+	border: 1px solid #ddd;
+	padding: 10px;
+}
+
+.checkbox-toggle {
+
+	input {
+		display: none;
+	}
+
+	label {
+		cursor: pointer;
+		padding-right: 35px;
+		position: relative;
+		display: block;
+		padding: 15px 0
+	}
+
+	input[type="checkbox"], input[type="radio"] {
+		position: absolute;
+		visibility: hidden !important;
+	}
+
+	input[type="checkbox"] + label, input[type="radio"] + label {
+
+		&:before,
+		&:after {
+		  content: '';
+		  position: absolute;
+		  top: 50%;
+		  margin-top: -7.5px;
+		  box-sizing: border-box;
+		}
+
+		&:before {
+
+		  width: 30px;
+		  height: 15px;
+		  right: 0px;
+		  background: #fff;
+		  border: 1px solid #e4e3e1;
+		  border-radius: 15px;
+		}
+
+		&:after {
+		  width: 15px;
+		  height: 15px;
+		  right: 15px;
+		  background: #BDBDBD;
+		  border-radius: 50%;
+		  transition: all 200ms ease-out;
+		}
+	}
+
+	input[type="checkbox"]:checked + label, input[type="radio"]:checked + label {
+
+		&:after {
+		  right: 0px;
+		  background: $color-primary;
+		}
+	}
+}

@@ -147,37 +147,6 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Check whether admin bar notifications are enabled or not.
-	 *
-	 * @since 3.2.4
-	 *
-	 * @return bool
-	 */
-	public function is_admin_bar_notif() {
-		return ! \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'disable-admin-bar-notif', true );
-	}
-
-	/**
-	 * Check admin bar notification updates refresh option.
-	 *
-	 * @since 3.3.1
-	 *
-	 * @return string
-	 */
-	public function get_admin_bar_notif_updates() {
-		return WSAL\Helpers\Settings_Helper::get_option_value( 'admin-bar-notif-updates', 'page-refresh' );
-	}
-
-	/**
-	 * Maximum number of alerts to show in dashboard widget.
-	 *
-	 * @return int
-	 */
-	public function get_dashboard_widget_max_alerts() {
-		return 5;
-	}
-
-	/**
 	 * The maximum number of alerts allowable.
 	 *
 	 * @return int
@@ -271,15 +240,6 @@ class WSAL_Settings {
 	}
 
 	/**
-	 * Method: Check if Login Page Notification is set.
-	 *
-	 * @return bool - True if set, false if not.
-	 */
-	public function is_login_page_notification() {
-		return \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'login_page_notification', false );
-	}
-
-	/**
 	 * Method: Set Login Page Notification Text.
 	 *
 	 * @param string $text - Login Page Notification Text.
@@ -291,15 +251,6 @@ class WSAL_Settings {
 			Alert_Manager::trigger_event( 6047 );
 		}
 		\WSAL\Helpers\Settings_Helper::set_option_value( 'login_page_notification_text', $text );
-	}
-
-	/**
-	 * Method: Return Login Page Notification Text.
-	 *
-	 * @return string|bool - Text if set, false if not.
-	 */
-	public function get_login_page_notification_text() {
-		return WSAL\Helpers\Settings_Helper::get_option_value( 'login_page_notification_text', false );
 	}
 
 	/**
@@ -1128,32 +1079,6 @@ class WSAL_Settings {
 		$sql = 'SELECT COUNT(*) FROM ' . $wpdb->blogs;
 
 		return (int) $wpdb->get_var($sql); // phpcs:ignore
-	}
-
-	/**
-	 * Checks Infinite Scroll.
-	 *
-	 * Returns true if infinite scroll is enabled.
-	 *
-	 * @since 3.3.1.1
-	 *
-	 * @return bool
-	 */
-	public function is_infinite_scroll() {
-		return 'infinite-scroll' === $this->get_events_type_nav();
-	}
-
-	/**
-	 * Checks Events Navigation Type.
-	 *
-	 * Returns type of navigation for events log viewer.
-	 *
-	 * @since 3.3.1.1
-	 *
-	 * @return string
-	 */
-	public function get_events_type_nav() {
-		return WSAL\Helpers\Settings_Helper::get_option_value( 'events-nav-type', '' );
 	}
 
 	/**

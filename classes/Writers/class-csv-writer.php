@@ -53,6 +53,19 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 		private static $file_name = '';
 
 		/**
+		 * Inits the class hooks if necessary.
+		 *
+		 * @return void
+		 *
+		 * @since 5.0.0
+		 */
+		public static function init() {
+			if ( ! wsal_freemius()->is_plan_or_trial__premium_only( 'professional' ) ) {
+				add_action( 'wp_ajax_wsal_report_download', array( '\WSAL_Rep_Views_Main', 'process_report_download' ) );
+			}
+		}
+
+		/**
 		 * Writes the CSV file to the specified location.
 		 *
 		 * @param int $step - Current step.
@@ -104,7 +117,7 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 				wp_send_json_error( esc_html_e( 'query is not provided or incorrect', 'wp-security-audit-log' ) );
 				die();
 			} else {
-				$query = unserialize( \sanitize_text_field( \wp_unslash( $_POST['query'] ) ) );
+				$query = unserialize( \base64_decode( \sanitize_text_field( \wp_unslash( $_POST['query'] ) ) ) );
 			}
 
 			if ( ! array_key_exists( 'order', $_POST ) ) {

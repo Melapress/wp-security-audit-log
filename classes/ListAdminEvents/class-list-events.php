@@ -107,10 +107,11 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 * Events Query Arguments.
 		 *
 		 * @since 4.6.0
+		 * @since 5.0.0 Transformed to array
 		 *
-		 * @var stdClass
+		 * @var array
 		 */
-		private $query_args;
+		private static $query_args;
 
 		/**
 		 * Instance of WpSecurityAuditLog.
@@ -155,7 +156,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 * @since 4.6.0
 		 */
 		public function __construct( $query_args, $plugin ) {
-			$this->query_args = $query_args;
+			self::$query_args = $query_args;
 			$this->plugin     = $plugin;
 
 			parent::__construct(
@@ -308,6 +309,14 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				$admin_fields['site'] = __( 'Site', 'wp-security-audit-log' );
 			}
 
+			if ( ! isset( $admin_fields['site'] ) ) {
+				$add_site = \apply_filters( 'wsal_add_site_filter', false );
+
+				if ( $add_site ) {
+					$admin_fields['site'] = __( 'Site', 'wp-security-audit-log' );
+				}
+			}
+
 			$admin_fields['mesg'] = __( 'Message', 'wp-security-audit-log' );
 			$admin_fields['data'] = '';
 
@@ -457,7 +466,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 */
 		public function fetch_table_data() {
 			self::$query_occ = array();
-			$bid             = (int) $this->query_args->site_id;
+			$bid             = (int) self::$query_args['site_id'];
 			// if ( WP_Helper::is_multisite() && ! is_network_admin() ) {
 			// $bid = \get_current_blog_id();
 			// }
@@ -466,8 +475,8 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			}
 
 			// Set query order arguments.
-			$order_by = isset( $this->query_args->order_by ) ? $this->query_args->order_by : false;
-			$order    = isset( $this->query_args->order ) ? $this->query_args->order : false;
+			$order_by = isset( self::$query_args['order_by'] ) ? self::$query_args['order_by'] : false;
+			$order    = isset( self::$query_args['order'] ) ? self::$query_args['order'] : false;
 
 			self::$query_order = array();
 			if ( ! $order_by ) {
@@ -568,7 +577,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			}
 
 			// Set query order arguments.
-			$order   = isset( $this->query_args->order ) ? $this->query_args->order : false;
+			$order   = isset( self::$query_args['order'] ) ? self::$query_args['order'] : false;
 			$orderby = ( isset( $_GET['orderby'] ) && '' != $_GET['orderby'] ) ? \esc_sql( \sanitize_text_field( \wp_unslash( $_GET['orderby'] ) ) ) : '`id`';
 			$order   = ( isset( $_GET['order'] ) && '' != $_GET['orderby'] ) ? \esc_sql( \sanitize_text_field( \wp_unslash( $_GET['order'] ) ) ) : 'DESC';
 			$query   = 'SELECT
@@ -766,7 +775,12 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 					// no break.
 				case 'site':
-					$info = get_blog_details( $item['site_id'], true );
+					$info = null;
+					if ( \function_exists( 'get_blog_details' ) ) {
+						$info = get_blog_details( $item['site_id'], true );
+					}
+
+					$info = \apply_filters( 'wsal_get_site_details', $info, $item['site_id'], $item );
 
 					return ! $info ? ( 'Unknown Site ' . $item['site_id'] )
 						: ( '<a href="' . esc_attr( $info->siteurl ) . '">' . esc_html( $info->blogname ) . '</a>' );
@@ -1082,6 +1096,12 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				</div>
 					<?php
 				}
+			}
+
+			if (
+				( 'top' === $which )
+			) {
+				\do_action( 'wsal_list_view_top_navigation' );
 			}
 
 			// phpcs:disable

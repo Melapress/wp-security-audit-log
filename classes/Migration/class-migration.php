@@ -705,5 +705,20 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		protected static function migrate_up_to_4610() {
 			WP_Helper::delete_global_option( 'events-nav-type' );
 		}
+
+		/**
+		 * Migration for version upto 5.0.0
+		 *
+		 * Removes some redundant options
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.0.0
+		 */
+		protected static function migrate_up_to_5000() {
+			self::migrate_up_to_4610();
+		}
 	}
 }
