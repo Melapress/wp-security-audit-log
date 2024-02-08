@@ -44,7 +44,7 @@ function wsal_freemius() {
 		// Check anonymous mode.
 		$freemius_state = \WSAL\Helpers\Settings_Helper::get_option_value( 'wsal_freemius_state', 'anonymous' );
 		$is_anonymous   = ( 'anonymous' === $freemius_state || 'skipped' === $freemius_state );
-		$is_premium     = false;
+		$is_premium     = true;
 		$is_anonymous   = $is_premium ? false : $is_anonymous;
 
 		// Trial arguments.

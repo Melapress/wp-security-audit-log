@@ -3502,10 +3502,19 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 		 * @since 4.6.0
 		 */
 		private static function get_editor_link( $post ) {
+
+			$post_type = '';
+
+			if ( \method_exists( $post, 'get_id' ) ) {
+				$post_type = get_post_type( $post->get_id() );
+			} else {
+				$post_type = get_post_type( $post->ID );
+			}
+
 			// Meta value key.
-			if ( is_a( $post, '\Automattic\WooCommerce\Admin\Overrides\Order' ) || 'shop_order' === $post->post_type ) {
+			if ( is_a( $post, '\Automattic\WooCommerce\Admin\Overrides\Order' ) || 'shop_order' === $post_type ) {
 				$name = 'EditorLinkOrder';
-			} elseif ( 'shop_coupon' === $post->post_type ) {
+			} elseif ( 'shop_coupon' === $post_type ) {
 				$name = 'EditorLinkCoupon';
 			} else {
 				$name = 'EditorLinkProduct';
@@ -3516,10 +3525,10 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 				$value = $post->get_edit_order_url();
 			} else {
 				$product_id = '';
-				if ( isset( $post->ID ) && ! empty( $post->ID ) ) {
-					$product_id = $post->ID;
-				} else {
+				if ( \method_exists( $post, 'get_id' ) ) {
 					$product_id = $post->get_id();
+				} else {
+					$product_id = $post->ID;
 				}
 				$value = get_edit_post_link( $product_id );
 			}
@@ -3531,25 +3540,31 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 					'value' => $value, // Meta value.
 				);
 			} else {
+				$product_id = '';
+				if ( \method_exists( $post, 'get_id' ) ) {
+					$product_id = $post->get_id();
+				} else {
+					$product_id = $post->ID;
+				}
 				// Get post object.
-				$post = get_post( $post->ID );
+				$post = get_post( $product_id );
 
 				// Set URL action.
-				if ( 'revision' === $post->post_type ) {
+				if ( 'revision' === $post_type ) {
 					$action = '';
 				} else {
 					$action = '&action=edit';
 				}
 
 				// Get and check post type object.
-				$post_type_object = get_post_type_object( $post->post_type );
+				$post_type_object = get_post_type_object( $post_type );
 				if ( ! $post_type_object ) {
 					return;
 				}
 
 				// Set editor link manually.
 				if ( $post_type_object->_edit_link ) {
-					$link = admin_url( sprintf( $post_type_object->_edit_link . $action, $post->ID ) );
+					$link = admin_url( sprintf( $post_type_object->_edit_link . $action, $product_id ) );
 				} else {
 					$link = '';
 				}
