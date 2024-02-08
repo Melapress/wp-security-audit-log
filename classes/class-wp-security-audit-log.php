@@ -514,6 +514,13 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 						}
 					);
 					wsal_freemius()->add_filter( 'default_to_anonymous_feedback', '__return_true' );
+
+					wsal_freemius()->add_filter(
+						'pricing_url',
+						function ( $url ) {
+							return 'https://melapress.com/wordpress-activity-log/pricing/?&utm_source=plugins&utm_medium=link&utm_campaign=wsal';
+						}
+					);
 				}
 			}
 		}

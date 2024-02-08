@@ -5,8 +5,8 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
 Tags:  activity log, security audit log, user tracking, security event log, audit trail, user activity, changelog, history, log, website changes
 Requires at least: 5.0
-Tested up to: 6.3.1
-Stable tag: 4.6.0
+Tested up to: 6.4.3
+Stable tag: 4.6.3
 Requires PHP: 7.2
 
 Keep a comprehensive log of user and system changes that take place on your WordPress website with the the #1 user-rated activity log plugin.
@@ -207,29 +207,20 @@ Please refer to our [support pages](https://melapress.com/support/?utm_source=wp
 
 == Changelog ==
 
-= 4.5.2 (2023-05-11) =
+= 4.6.3 (2024-02-07) =
 
-Release notes: [Improved compatability, UX, security updates, and much more](https://melapress.com/wordpress-activity-log/releases/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
+* **Improvements**
+	* Added support to the new plans and prices (February 2024 change).
+	* Upgraded the Freemius SDK to 2.6.2.
+	* Updated a number of links in the plugin (links used in help text etc).
+	* Removed hardcoding of post types and post statuses in search filters.
 
-	
-* **Plugin & features improvements**
-	* Improved PHP 8.2 compatability.	
-	* Replaced the elipsis icon used for the Event data viewer with a "More details" button in the activity log viewer.
-	* Updated a number of hooks (better interoperability) used in custom sensors.
-	* Improved the "installed plugin" check to only show one extension notification when both the free and premium edition of a plugin are installed at the same time.
-	* Activity log data is also automatically deleted from the archive database when using the logs data deletion tool.
-	
-* **Security updates**
-	* Fixed a number of CSRFs, missing authorization & missing capabilities checks
-	
-* **Bug fixes**
-	* Fixed: Fatal error reported when cloning a site on a multisite network with the NS Cloner plugin.
-	* Fixed: Plugin was not retrieving the correct IP address when using a reverse proxy since update 4.5.0.
-	* Addressed a number of PHP Warnings reported when using the WP Rocket plugin to purge the cache.
-	* Fixed: PHP warning when saving Exclude Objects settings.
-	* Setting up a mirroring connection and configuring the mirror of logs was not being reported in the logs.
-	* Fixed: Fatal error when using the User Switching plugin to switch a user's session.
-	* Fixed: Logins from non-native login forms (such as those from WooCommerce) were not captured correctly since update 4.5.0.
-	* Fixed: Plugin not terminating existing user session when the seting to "overwrite existing session" was enabled.
+ * **Bug fixes**
+	 * Option for event ID 5709 was not showing when filtering the list of event IDs in the Enable/Disable events section.
+	 * Fixed error generated when duplicating forms on Gravity Forms.
+	 * Fixed: plugin keeping a log of forms submission even when the option to keep a log by website visitors was disabled.
+	 * Added event ID check when extracting the last occurrence from the database.
+	 * Addressed a number of PHP errors generated when running the plugin on PHP 8.2
+	 * Fixed a server error generated when exporting search results.
 
 Refer to the complete [plugin changelog](https://melapress.com/support/kb/wp-activity-log-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) for more detailed information about what was new, improved and fixed in previous version updates of WP Activity Log.
