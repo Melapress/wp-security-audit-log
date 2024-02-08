@@ -143,7 +143,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 		WpSecurityAuditLog::load_freemius();
 
 		if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {
-			wsal_freemius()->add_action( 'after_uninstall', array( 'WpSecurityAuditLog', 'uninstall' ) );
+			wsal_freemius()->add_action( 'after_uninstall', array( '\WSAL\Helpers\Uninstall_Helper', 'uninstall' ) );
 		}
 	}
 } elseif ( ! method_exists( 'WSAL_Freemius', 'set_basename' ) ) {
