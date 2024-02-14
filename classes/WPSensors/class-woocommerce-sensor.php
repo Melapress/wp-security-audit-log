@@ -4936,7 +4936,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 			$event_data['SKU']           = self::get_product_sku( $oldpost->ID );
 
 			// Featued image added.
-			if ( empty( $old_attachment_metadata ) && ! empty( $attachment_metadata ) ) {
+			if ( empty( $old_attachment_metadata ) && ! empty( $attachment_metadata ) && isset( $attachment_metadata['file'] ) ) {
 				$event_data['EventType'] = 'added';
 				$event_data['name']      = basename( $attachment_metadata['file'] );
 				$event_data['path']      = $get_upload_dir['basedir'] . DIRECTORY_SEPARATOR . $attachment_metadata['file'];

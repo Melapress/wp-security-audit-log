@@ -1328,9 +1328,10 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			if ( null === self::$frontend_events ) {
 				// Option defaults.
 				$default               = array(
-					'register'    => false,
-					'login'       => false,
-					'woocommerce' => false,
+					'register'     => false,
+					'login'        => false,
+					'woocommerce'  => false,
+					'gravityforms' => false,
 				);
 				self::$frontend_events = self::get_option_value( self::FRONT_END_EVENTS_OPTION_NAME, $default );
 			}
