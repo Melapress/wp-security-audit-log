@@ -11,10 +11,10 @@ namespace WSAL_Vendor;
  * Plugin Name: WP Background Processing
  * Plugin URI: https://github.com/deliciousbrains/wp-background-processing
  * Description: Asynchronous requests and background processing in WordPress.
- * Author: Delicious Brains Inc., forked by KAGG Design
- * Version: 1.2.0
+ * Author: Delicious Brains Inc.
+ * Version: 1.0
  * Author URI: https://deliciousbrains.com/
- * GitHub Plugin URI: https://github.com/kagg-design/wp-background-processing
+ * GitHub Plugin URI: https://github.com/deliciousbrains/wp-background-processing
  * GitHub Branch: master
  */
 if (!\class_exists('WSAL_Vendor\\WP_Async_Request')) {

@@ -36,7 +36,7 @@ if (!function_exists('esc_url_raw')) { function esc_url_raw() { return \WSAL_Ven
 if (!function_exists('get_site_option')) { function get_site_option() { return \WSAL_Vendor\get_site_option(...func_get_args()); } }
 if (!function_exists('get_site_transient')) { function get_site_transient() { return \WSAL_Vendor\get_site_transient(...func_get_args()); } }
 if (!function_exists('is_multisite')) { function is_multisite() { return \WSAL_Vendor\is_multisite(...func_get_args()); } }
-if (!function_exists('maybe_unserialize')) { function maybe_unserialize() { return \WSAL_Vendor\maybe_unserialize(...func_get_args()); } }
+if (!function_exists('is_serialized')) { function is_serialized() { return \WSAL_Vendor\is_serialized(...func_get_args()); } }
 if (!function_exists('plugin_dir_path')) { function plugin_dir_path() { return \WSAL_Vendor\plugin_dir_path(...func_get_args()); } }
 if (!function_exists('set_site_transient')) { function set_site_transient() { return \WSAL_Vendor\set_site_transient(...func_get_args()); } }
 if (!function_exists('update_site_option')) { function update_site_option() { return \WSAL_Vendor\update_site_option(...func_get_args()); } }

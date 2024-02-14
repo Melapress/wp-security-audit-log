@@ -46,15 +46,19 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper' ) ) {
 		/**
 		 * Ensures front end sensor can load when needed.
 		 *
-		 * @param bool  $default - Current loading situation.
+		 * @param bool  $default_value - Current loading situation.
 		 * @param array $frontend_events - Array of current front end events.
 		 *
 		 * @return bool
 		 *
 		 * @since 4.6.0
 		 */
-		public static function wsal_gravityforms_allow_sensor_on_frontend( $default, $frontend_events ) {
-			return ( $default || ! false === $frontend_events['gravityforms'] );
+		public static function wsal_gravityforms_allow_sensor_on_frontend( $default_value, $frontend_events ) {
+			if ( ! isset( $frontend_events['gravityforms'] ) ) {
+				return $default_value;
+			} else {
+				return ( $default_value || ! false === $frontend_events['gravityforms'] );
+			}
 		}
 
 		/**
