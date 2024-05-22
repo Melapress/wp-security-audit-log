@@ -7,7 +7,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     4.6.4
+ * Version:     5.0.0
  * Plugin URI:  https://melapress.com/wordpress-activity-log/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
  * Author:      Melapress
@@ -49,7 +49,7 @@ if ( file_exists( plugin_dir_path( __FILE__ ) . 'vendor/autoload.php' ) ) {
 }
 
 if ( ! defined( 'WSAL_PREFIX' ) ) {
-	define( 'WSAL_VERSION', '4.6.4' );
+	define( 'WSAL_VERSION', '5.0.0' );
 	define( 'WSAL_PREFIX', 'wsal_' );
 	define( 'WSAL_PREFIX_PAGE', 'wsal-' );
 }
@@ -181,3 +181,40 @@ if ( ! function_exists( 'wsal_free_on_plugin_activation' ) ) {
 // phpcs:disable
 /* @free:end */
 // phpcs:enable
+
+if ( ! function_exists( 'str_ends_with' ) ) {
+	/**
+	 * Substitute function if the PHP version is lower than PHP 8
+	 *
+	 * @param string $haystack - The search in string.
+	 * @param string $needle - The search for string.
+	 *
+	 * @return boolean
+	 *
+	 * @since 5.0.0
+	 */
+	function str_ends_with( string $haystack, string $needle ): bool {
+		$needle_len = strlen( $needle );
+		return ( 0 === $needle_len || 0 === substr_compare( $haystack, $needle, - $needle_len ) );
+	}
+}
+
+if ( ! function_exists( 'str_starts_with' ) ) {
+	/**
+	 * PHP lower than 8 is missing that function but it required in the newer versions of our plugin.
+	 *
+	 * @param string $haystack - The string to search in.
+	 * @param string $needle - The needle to search for.
+	 *
+	 * @return bool
+	 *
+	 * @since 5.0.0
+	 */
+	function str_starts_with( $haystack, $needle ): bool {
+		if ( '' === $needle ) {
+			return true;
+		}
+
+		return 0 === strpos( $haystack, $needle );
+	}
+}

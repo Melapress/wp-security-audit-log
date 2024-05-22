@@ -21,6 +21,7 @@
 .sectoken-user,
 .sectoken-role,
 .sectoken-cpts,
+.sectoken-status,
 .sectoken-urls,
 .sectoken-ip,
 .sectoken-other {
@@ -40,6 +41,7 @@
 .sectoken-user a,
 .sectoken-role a,
 .sectoken-cpts a,
+.sectoken-status a,
 .sectoken-urls a,
 .sectoken-ip a,
 .sectoken-other a {
@@ -61,6 +63,7 @@
 .sectoken-user a:hover,
 .sectoken-role a:hover,
 .sectoken-cpts a:hover,
+.sectoken-status a:hover,
 .sectoken-urls a:hover,
 .sectoken-ip a:hover,
 .sectoken-other a:hover {
@@ -70,6 +73,7 @@
 .sectoken-user { background: #EFF; border-color: #5BE; }
 .sectoken-role { background: #EFE; border-color: #5B5; }
 .sectoken-cpts { background: #EFF; border-color: #5BE; }
+.sectoken-status { background: #EFF; border-color: #5BE; }
 .sectoken-urls { background: #EFF; border-color: #5BE; }
 .sectoken-ip { background: #FFE; border-color: #ED5; }
 .sectoken-other { background: #FFE; border-color: #ED5; }

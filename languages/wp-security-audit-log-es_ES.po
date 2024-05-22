@@ -2877,13 +2877,13 @@ msgstr "%CommentMsg% on %CommentLink%."
 #: wp-security-audit-log.php:261
 msgid ""
 "You are using a version of PHP that is older than %s, which is no longer "
-"supported.<br/>Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com"
-"\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you "
+"supported.<br/>Contact us on <a href=\"mailto:plugins@melapress.com"
+"\">plugins@melapress.com</a> to help you switch the version of PHP you "
 "are using."
 msgstr ""
 "Estás usando una versión de PHP que es más antigua que %s, que ya no está "
-"soportada.<br/>Contáctanos en <a href=\"mailto:plugins@wpwhitesecurity.com"
-"\">plugins@wpwhitesecurity.com</a> para ayudarte a cambiar la versión de PHP "
+"soportada.<br/>Contáctanos en <a href=\"mailto:plugins@melapress.com"
+"\">plugins@melapress.com</a> para ayudarte a cambiar la versión de PHP "
 "que estás usando."
 
 #. Plugin Name of the plugin/theme

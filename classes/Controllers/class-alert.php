@@ -165,7 +165,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 						} elseif ( substr( $token, 0, 1 ) === '%' && substr( $token, - 1, 1 ) === '%' ) {
 							// Handle complex expressions.
 							$message_parts[ $i ] = self::get_meta_expression_value( substr( $token, 1, - 1 ), $meta_data );
-							$message_parts[ $i ] = $formatter->format_meta_expression( $token, $message_parts[ $i ], $occurrence_id );
+							$message_parts[ $i ] = $formatter->format_meta_expression( $token, $message_parts[ $i ], $occurrence_id, $meta_data );
 						}
 					}
 

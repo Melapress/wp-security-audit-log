@@ -30,11 +30,13 @@ abstract class WSAL_AbstractView {
 	protected $plugin;
 
 	/**
-	 * Contains the result to a call to add_submenu_page().
+	 * Pointer to the hook suffix
 	 *
 	 * @var string
+	 *
+	 * @since 5.0.0
 	 */
-	public $hook_suffix = '';
+	private static $hook_suffix = null;
 
 	/**
 	 * Tells us whether this view is currently being displayed or not.
@@ -241,5 +243,13 @@ abstract class WSAL_AbstractView {
 	 */
 	public function get_view_name() {
 		return strtolower( str_replace( array( 'WSAL_Views_', 'WSAL_' ), '', get_class( $this ) ) );
+	}
+
+	public static function set_hook_suffix( $suffix ) {
+		self::$hook_suffix = $suffix;
+	}
+
+	public static function get_hook_suffix() {
+		return self::$hook_suffix;
 	}
 }

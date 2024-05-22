@@ -14,6 +14,7 @@ use WSAL\Helpers\WP_Helper;
 use WSAL\Controllers\Constants;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Helpers\Plugin_Settings_Helper;
 use WSAL\WP_Sensors\Helpers\Yoast_SEO_Helper;
 use WSAL\WP_Sensors\Helpers\Woocommerce_Helper;
 
@@ -121,8 +122,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		Settings_Helper::set_disabled_alerts( $disabled ); // Save the disabled events.
 
 		// Update failed login limits.
-		$this->plugin->settings()->set_failed_login_limit( $post_array['log_failed_login_limit'] );
-		$this->plugin->settings()->set_visitor_failed_login_limit( $post_array['log_visitor_failed_login_limit'] );
+		// Plugin_Settings_Helper::set_failed_login_limit( $post_array['log_failed_login_limit'] );
+		if ( isset( $post_array['log_visitor_failed_login_limit'] ) ) {
+			Plugin_Settings_Helper::set_visitor_failed_login_limit( $post_array['log_visitor_failed_login_limit'] );
+		}
 
 		// Allow 3rd parties to process and save more of the posted data.
 		do_action( 'wsal_togglealerts_process_save_settings', $post_array );
@@ -147,9 +150,10 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			);
 
 			$frontend_codes = array(
-				'register'    => 4000,
-				'login'       => 1000,
-				'woocommerce' => 9035,
+				'register'     => 4000,
+				'login'        => 1000,
+				'woocommerce'  => 9035,
+				'gravityforms' => 5709,
 			);
 
 			foreach ( $current_enabled as $frontend_event => $value ) {
@@ -252,9 +256,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			Settings_Helper::set_option_value( 'details-level', $log_level_to_set );
 
 			if ( 'basic' === $log_level_to_set ) {
-				$this->plugin->settings()->set_basic_mode();
+				Plugin_Settings_Helper::set_basic_mode();
 			} elseif ( 'geek' === $log_level_to_set ) {
-				$this->plugin->settings()->set_geek_mode();
+				Plugin_Settings_Helper::set_geek_mode();
 			}
 		}
 
@@ -308,7 +312,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 							<?php endforeach; ?>
 						</select>
 						<p class="description">
-							<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugins&utm_medium=link&utm_campaign=wsal" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), WpSecurityAuditLog::get_allowed_html_tags() ); ?>
+							<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugins&utm_medium=link&utm_campaign=wsal" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), Plugin_Settings_Helper::get_allowed_html_tags() ); ?>
 						</p>
 					</fieldset>
 				</form>
@@ -437,34 +441,11 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												}
 
 												$disable_inputs_needed = ( ! empty( $disable_inputs ) ) ? esc_attr( $disable_inputs ) : '';
-												$disabled_tooltip      = ( $disabled_message ) ? 'data-tooltip="' . $disabled_message . '"' : '';
+												$disabled_tooltip      = ( $disabled_message ) ? 'data-darktooltip="' . $disabled_message . '"' : '';
 												$checkbox_markup       = '<input name="alert[]" type="checkbox" class="alert"' . checked( Alert_Manager::is_enabled( $alert['code'] ), true, false ) . ' value="' . esc_attr( (int) $alert['code'] ) . '" ' . $disable_inputs_needed . ' />';
 												$severity              = '';
 
 												$severity = Constants::get_severity_by_code( $alert['severity'] )['text'];
-												// $severity_obj          = $this->plugin->constants->get_constant_by( 'value', $alert->severity );
-
-												// if ( is_object( $severity_obj ) ) {
-												// if ( 'E_CRITICAL' === $severity_obj->name ) {
-												// $severity = esc_html__( 'Critical', 'wp-security-audit-log' );
-												// } elseif ( 'E_WARNING' === $severity_obj->name ) {
-												// $severity = esc_html__( 'Warning', 'wp-security-audit-log' );
-												// } elseif ( 'E_NOTICE' === $severity_obj->name ) {
-												// $severity = esc_html__( 'Notification', 'wp-security-audit-log' );
-												// } elseif ( 'WSAL_CRITICAL' === $severity_obj->name ) {
-												// $severity = esc_html__( 'Critical', 'wp-security-audit-log' );
-												// } elseif ( 'WSAL_HIGH' === $severity_obj->name ) {
-												// $severity = esc_html__( 'High', 'wp-security-audit-log' );
-												// } elseif ( 'WSAL_MEDIUM' === $severity_obj->name ) {
-												// $severity = esc_html__( 'Medium', 'wp-security-audit-log' );
-												// } elseif ( 'WSAL_LOW' === $severity_obj->name ) {
-												// $severity = esc_html__( 'Low', 'wp-security-audit-log' );
-												// } elseif ( 'WSAL_INFORMATIONAL' === $severity_obj->name ) {
-												// $severity = esc_html__( 'Informational', 'wp-security-audit-log' );
-												// } else {
-												// $severity = esc_html__( 'Notification', 'wp-security-audit-log' );
-												// }
-												// }
 
 												// @codingStandardsIgnoreStart
 												echo '<tr class="alert-wrapper ' . $disable_inputs_needed . '" data-alert-cat="' . $alert['category'] . '" data-alert-subcat="' . $alert['subcategory'] . '" ' . $disabled_tooltip . '>';
@@ -490,6 +471,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													<?php
 												}
 
+												/*
 												if ( 1002 === $alert['code'] ) {
 													$log_failed_login_limit = (int) Settings_Helper::get_option_value( 'log-failed-login-limit', 10 );
 													$log_failed_login_limit = ( -1 === $log_failed_login_limit ) ? '0' : $log_failed_login_limit;
@@ -516,6 +498,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 													</tr>
 													<?php
 												}
+												*/
 
 												if ( 1000 === $alert['code'] ) {
 													$frontend_events = Settings_Helper::get_frontend_events();
@@ -1037,7 +1020,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 			return 'geek';
 		}
 
-		$events_to_cross_check = array_merge( $events_to_cross_check, $this->plugin->settings()->geek_alerts );
+		$events_to_cross_check = array_merge( $events_to_cross_check, Plugin_Settings_Helper::get_geek_alerts() );
 		$events_diff           = array_diff( $disabled_events, $events_to_cross_check );
 		$events_diff           = array_filter( $events_diff ); // Remove empty values.
 		if ( empty( $events_diff ) ) {

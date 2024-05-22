@@ -2,43 +2,50 @@ var WsalData;
 
 window['WsalAuditLogRefreshed'] = function () {
 	// fix pagination links causing form params to get lost
-	jQuery('span.pagination-links a').click(function (ev) {
-		ev.preventDefault();
-		var deparam = function (url) {
-			var obj = {};
-			var pairs = url.split('&');
-			for (var i in pairs) {
-				var split = pairs[i].split('=');
-				obj[decodeURIComponent(split[0])] = decodeURIComponent(split[1]);
-			}
-			return obj;
-		};
-		const viewer = jQuery('#audit-log-viewer');
-		const url_params = deparam(this.href);
-		const param_keys = [ 'paged', 'orderby', 'order' ];
-		for ( let index in param_keys ) {
-			const param_name = param_keys[ index ];
-			let param_value = url_params[param_name];
-			if (typeof param_value === 'undefined' && param_name === 'paged') {
-				param_value = 1;
-			}
-			const input_elm = viewer.find('input[name="' + param_name + '"]');
-			if ( input_elm.length === 0 ) {
-				viewer.append('<input type="hidden" name="' + param_name + '" value="' + param_value + '"/>');
-			} else {
-				input_elm.val( param_value );
-			}
+	// jQuery('span.pagination-links a').click(function (ev) {
+	// 	ev.preventDefault();
+	// 	var deparam = function (url) {
+	// 		var obj = {};
+	// 		var pairs = url.split('&');
+	// 		for (var i in pairs) {
+	// 			var split = pairs[i].split('=');
+	// 			obj[decodeURIComponent(split[0])] = decodeURIComponent(split[1]);
+	// 		}
+	// 		return obj;
+	// 	};
+	// 	const viewer = jQuery('#audit-log-viewer');
+	// 	const url_params = deparam(this.href);
+	// 	const param_keys = [ 'paged', 'orderby', 'order' ];
+	// 	for ( let index in param_keys ) {
+	// 		const param_name = param_keys[ index ];
+	// 		let param_value = url_params[param_name];
+	// 		if (typeof param_value === 'undefined' && param_name === 'paged') {
+	// 			param_value = 1;
+	// 		}
+	// 		const input_elm = viewer.find('input[name="' + param_name + '"]');
+	// 		if ( input_elm.length === 0 ) {
+	// 			viewer.append('<input type="hidden" name="' + param_name + '" value="' + param_value + '"/>');
+	// 		} else {
+	// 			input_elm.val( param_value );
+	// 		}
 
-		}
+	// 	}
 
-		viewer.submit();
-	});
+	// 	viewer.submit();
+	// });
 
 	var modification_alerts = ['1002', '1003', '6007', '6023'];
 
 	jQuery('.log-disable').each(function () {
 		if (-1 == modification_alerts.indexOf(this.innerText)) {
 			// Tooltip Confirm disable alert.
+			if (jQuery(this).attr('data-disabled')) {
+				jQuery(this).darkTooltip({
+					animation: 'fadeIn',
+					size: 'small',
+					gravity: 'west',
+				});
+			} else
 			jQuery(this).darkTooltip({
 				animation: 'fadeIn',
 				size: 'small',
@@ -46,8 +53,28 @@ window['WsalAuditLogRefreshed'] = function () {
 				confirm: true,
 				yes: 'Disable',
 				no: '',
-				onYes: function (elem) {
-					WsalDisableByCode(elem.attr('data-alert-id'), elem.data('disable-alert-nonce'))
+				onYes: function (elem, tooltip) {
+					WsalDisableByCode(elem.attr('data-alert-id'), elem.data('disable-alert-nonce'));
+					elem.attr('data-disabled', 'disabled');
+
+					jQuery('#darktooltip-'+elem.attr('id')+' .confirm').remove();
+					var { __ } = wp.i18n;
+					jQuery('#darktooltip-'+elem.attr('id')+' strong').text(__( 'This event is disabled.', 'wp-security-audit-log' ),);
+
+					// delete jQuery(elem)['tooltip'];
+
+					//console.log(jQuery(elem).darkTooltip());
+
+					//elem.removeAttribute('data-disabled', 'disabled');
+
+					// delete elem['darkTooltip'];
+
+					// jQuery(elem).darkTooltip({
+					// 	animation: 'fadeIn',
+					// 	size: 'small',
+					// 	gravity: 'west',
+					// 	confirm: false,
+					// });
 				}
 			});
 		} else {
@@ -123,23 +150,13 @@ function WsalAuditLogInit(_WsalData) {
 	// 	setInterval( WsalChk, 30000 );
 	// }
 
-	WsalSsasInit();
+	// WsalSsasInit();
 }
 
 var WsalIppsPrev;
 
 function WsalIppsFocus(value) {
 	WsalIppsPrev = value;
-}
-
-function WsalIppsChange(value) {
-	jQuery('select.wsal-ipps').attr('disabled', true);
-	jQuery.post(WsalData.ajaxurl, {
-		action: 'AjaxSetIpp',
-		count: value
-	}, function () {
-		location.reload();
-	});
 }
 
 function WsalSsasInit() {

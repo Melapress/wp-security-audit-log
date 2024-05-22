@@ -14,7 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\MainWP\MainWP_Helper;
 use WSAL\Entities\Metadata_Entity;
+use WSAL\Entities\Occurrences_Entity;
 
 /**
  * WSAL_AlertFormatter class.
@@ -150,6 +152,18 @@ final class WSAL_AlertFormatter {
 					$post_id = $this->get_occurrence_meta_item( $occurrence_id, 'PostID' );
 				}
 
+				$occurrence_data = Occurrences_Entity::load( 'id = %d', array( $occurrence_id ) );
+
+				if ( isset( $occurrence_data ) && isset( $occurrence_data['site_id'] ) ) {
+					if ( MainWP_Helper::SET_SITE_ID_NUMBER < $occurrence_data['site_id'] ) {
+						if ( isset( $metadata['PostUrl'] ) ) {
+							return $metadata['PostUrl'];
+						} else {
+							return '';
+						}
+					}
+				}
+
 				$occ_post = ! is_null( $post_id ) ? get_post( $post_id ) : null;
 				if ( null !== $occ_post && 'publish' === $occ_post->post_status ) {
 					return get_permalink( $occ_post->ID );
@@ -182,6 +196,24 @@ final class WSAL_AlertFormatter {
 					return '';
 				} else {
 					return $value;
+				}
+
+			case '%Users%' === $expression: // Failed login attempts.
+				if ( isset( $metadata['Users'] ) && is_array( $metadata['Users'] ) ) {
+					if ( empty( $metadata['Users'] ) ) {
+						return 'Unknown username';
+					}
+					return $metadata['Users'][0];
+				} elseif ( isset( $metadata['Users'] ) ) {
+					return $metadata['Users'];
+				} else {
+					return 'Unknown username';
+				}
+				$check_value = (int) $value;
+				if ( 0 === $check_value ) {
+					return '';
+				} else {
+					return $metadata['Users'][0];
 				}
 
 			case '%LogFileText%' === $expression: // Failed login file text.
@@ -224,6 +256,10 @@ final class WSAL_AlertFormatter {
 
 			case '%PluginFile%' === $expression:
 				return $this->wrap_in_hightlight_markup( dirname( $value ) );
+
+			case '%OldVersion%' === $expression:
+				$return = ( $value !== 'NULL' ) ? $value : esc_html__( 'Upgrade event prior to WP Activity Log 5.0.0.', 'wp-security-audit-log' );
+				return $this->wrap_in_hightlight_markup( $return );
 
 			default:
 				/**

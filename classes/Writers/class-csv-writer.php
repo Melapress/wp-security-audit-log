@@ -53,6 +53,15 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 		private static $file_name = '';
 
 		/**
+		 * Holds the columns for the CSV file
+		 *
+		 * @var array
+		 *
+		 * @since 5.0.0
+		 */
+		private static $columns_header = array();
+
+		/**
 		 * Inits the class hooks if necessary.
 		 *
 		 * @return void
@@ -60,28 +69,27 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function init() {
-			if ( ! wsal_freemius()->is_plan_or_trial__premium_only( 'professional' ) ) {
-				add_action( 'wp_ajax_wsal_report_download', array( '\WSAL_Rep_Views_Main', 'process_report_download' ) );
+			if ( \class_exists( '\WSAL\Extensions\Views\Reports', false ) ) {
+				\add_action( 'wp_ajax_wsal_report_download', array( '\WSAL\Extensions\Views\Reports', 'process_report_download' ) );
 			}
 		}
 
 		/**
 		 * Writes the CSV file to the specified location.
 		 *
-		 * @param int $step - Current step.
+		 * @param int   $step - Current step.
+		 * @param array $data - If local variable is not set, data array could be passed to that method.
 		 *
 		 * @return void
 		 *
 		 * @since 4.6.1
 		 */
-		public static function write_csv( int $step ) {
-			// header( 'Content-Type: text/csv; charset=utf-8' );
-			// header( 'Content-Disposition: attachment; filename=data.csv' );
+		public static function write_csv( int $step, array &$data = array() ) {
 
 			if ( 1 === $step ) {
-				$output = fopen( self::$file_name, 'w' );
+				$output = fopen( self::get_file(), 'w' );
 			} else {
-				$output = fopen( self::$file_name, 'a+' );
+				$output = fopen( self::get_file(), 'a+' );
 			}
 			if ( 1 === $step ) {
 				fputcsv( $output, self::prepare_header() );
@@ -89,16 +97,125 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 			$enclosure            = '"';
 			$csv_export_separator = ',';
 
-			foreach ( self::$events as $row ) {
-				$current_row = array();
-				foreach ( array_keys( self::prepare_header() ) as $column_name ) {
-					$current_row[] = htmlspecialchars_decode( \trim( \strip_tags( str_replace( array( '<br />', '<br>' ), "\n", List_events::format_column_value( $row, $column_name ) ) ) ) );
+			if ( ! empty( $data ) ) {
+
+				foreach ( $data as $row ) {
+					$current_row = array();
+					foreach ( array_keys( self::prepare_header() ) as $column_name ) {
+						if ( 'message' == $column_name ) {
+							$html = htmlspecialchars_decode(
+								\trim(
+									\strip_tags(
+										str_replace(
+											array( '<br />', '<br>' ),
+											"\n",
+											wp_specialchars_decode( List_events::format_column_value( $row, $column_name ) )
+										),
+										array( '<a>' )
+									)
+								)
+							);
+
+							$split_text = explode( '<a', $html );
+
+							$final_text = '';
+
+							foreach ( $split_text as $line ) {
+								if ( str_starts_with( trim( $line ), 'href' ) ) {
+									$a_info = self::link_extractor( '<a' . $line );
+
+									if ( '#' !== $a_info[0][0] ) {
+										$final_text .= $a_info[0][1] . ': ' . $a_info[0][0];
+									}
+								} else {
+									$final_text .= $line;
+								}
+							}
+							$current_row[] = $final_text;
+						} else {
+							$current_row[] = htmlspecialchars_decode(
+								\trim(
+									\strip_tags(
+										str_replace(
+											array( '<br />', '<br>' ),
+											"\n",
+											wp_specialchars_decode( List_events::format_column_value( $row, $column_name ) )
+										)
+									)
+								)
+							);
+						}
+					}
+					fputcsv( $output, $current_row, $csv_export_separator, $enclosure );
 				}
-				fputcsv( $output, $current_row, $csv_export_separator, $enclosure );
+			} else {
+
+				foreach ( self::$events as $row ) {
+					$current_row = array();
+					foreach ( array_keys( self::prepare_header() ) as $column_name ) {
+						if ( 'mesg' == $column_name ) {
+							$html = htmlspecialchars_decode(
+								\trim(
+									\strip_tags(
+										str_replace( array( '<br />', '<br>', '<br/>', '</br>' ), "\n", List_events::format_column_value( $row, $column_name ) ),
+										array( 'a' )
+									)
+								)
+							);
+
+							$split_text = explode( '<a', $html );
+
+							$final_text = '';
+
+							foreach ( $split_text as $line ) {
+								if ( str_starts_with( trim( $line ), 'href' ) ) {
+									$a_info = self::link_extractor( '<a' . $line );
+
+									if ( '#' !== $a_info[0][0] ) {
+										$final_text .= $a_info[0][1] . ': ' . $a_info[0][0];
+									} else {
+										$final_text .= "\n";
+									}
+								} else {
+									$final_text .= $line;
+								}
+							}
+							$current_row[] = $final_text;
+						} else {
+							$current_row[] = htmlspecialchars_decode(
+								\trim(
+									\strip_tags(
+										str_replace( array( '<br />', '<br>', '<br/>', '</br>' ), "\n", List_events::format_column_value( $row, $column_name ) )
+									)
+								)
+							);
+						}
+					}
+					fputcsv( $output, $current_row, $csv_export_separator, $enclosure );
+				}
 			}
 
 			fclose( $output );
 		}
+
+		/**
+		 * Extract link info from a given teext
+		 *
+		 * @param [type] $html
+		 *
+		 * @return void
+		 *
+		 * @since 5.0.0
+		 */
+		private static function link_extractor( $html ) {
+				$link_array = array();
+				if ( preg_match_all( '/<a\s+.*?href=[\"\']?([^\"\' >]*)[\"\']?[^>]*>(.*?)<\/a>/i', $html, $matches, PREG_SET_ORDER ) ) {
+					foreach ( $matches as $match ) {
+									array_push( $link_array, array( $match[1], $match[2] ) );
+					}
+				}
+				return $link_array;
+			}
 
 		/**
 		 * Accepts the AJAX requests and checks the params then calls the main function of the class responsible for writing the file
@@ -142,7 +259,8 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 				wp_send_json_error( $exports_path->get_error_message() );
 				die();
 			}
-			self::$file_name = $exports_path . 'exports-user' . User_Helper::get_user()->ID . '.csv';
+
+			self::set_file( $exports_path . 'exports-user' . User_Helper::get_user()->ID . '.csv' );
 
 			$url = add_query_arg(
 				array(
@@ -175,6 +293,43 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 					)
 				);
 			}
+		}
+
+		/**
+		 * Sets the writer file name.
+		 *
+		 * @param string $file - The name of the writer file to be used.
+		 *
+		 * @return void
+		 *
+		 * @since 5.0.0
+		 */
+		public static function set_file( string $file ) {
+			self::$file_name = $file;
+		}
+
+		/**
+		 * Returns the writer file name.
+		 *
+		 * @return string
+		 *
+		 * @since 5.0.0
+		 */
+		public static function get_file(): string {
+			return (string) self::$file_name;
+		}
+
+		/**
+		 * Sets the header_columns property to be used in csv generation
+		 *
+		 * @param array $columns - The column names.
+		 *
+		 * @return void
+		 *
+		 * @since 5.0.0
+		 */
+		public static function set_header_columns( array $columns ) {
+			self::$columns_header = $columns;
 		}
 
 		/**
@@ -233,18 +388,20 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 		 * @since 4.6.1
 		 */
 		private static function prepare_header() {
-			$all_columns = List_Events::manage_columns( array() );
-			unset( $all_columns['cb'] );
-			unset( $all_columns['data'] );
-			$hidden_columns = List_Events::get_hidden_columns();
+			if ( empty( self::$columns_header ) ) {
+				$all_columns = List_Events::manage_columns( array() );
+				unset( $all_columns['cb'] );
+				unset( $all_columns['data'] );
+				$hidden_columns = List_Events::get_hidden_columns();
 
-			if ( \is_array( $hidden_columns ) && ! empty( $hidden_columns ) ) {
-				$columns_header = array_diff_key( $all_columns, array_flip( $hidden_columns ) );
-			} else {
-				$columns_header = $all_columns;
+				if ( \is_array( $hidden_columns ) && ! empty( $hidden_columns ) ) {
+					self::$columns_header = array_diff_key( $all_columns, array_flip( $hidden_columns ) );
+				} else {
+					self::$columns_header = $all_columns;
+				}
 			}
 
-			return $columns_header;
+			return self::$columns_header;
 		}
 	}
 }

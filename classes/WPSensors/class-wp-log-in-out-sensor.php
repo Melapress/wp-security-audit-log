@@ -16,9 +16,7 @@ namespace WSAL\WP_Sensors;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Settings_Helper;
-use WSAL\Entities\Metadata_Entity;
 use WSAL\Controllers\Alert_Manager;
-use WSAL\Entities\Occurrences_Entity;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -177,6 +175,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 							4003,
 							array(
 								'Username'         => $user->user_login,
+								'CurrentUserID'    => $user->ID,
 								'CurrentUserRoles' => $user_roles,
 							),
 							true
@@ -196,6 +195,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 
 			$alert_data = array(
 				'Username'         => $user_login,
+				'CurrentUserID'    => $user_id,
 				'CurrentUserRoles' => $user_roles,
 			);
 			if ( class_exists( '\WSAL\Helpers\User_Sessions_Helper' ) ) {
@@ -256,9 +256,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		protected static function get_login_failure_log_limit() {
-			return Settings_Helper::get_option_value( 'log-failed-login-limit', 10 );
-		}
+		// protected static function get_login_failure_log_limit() {
+		// return Settings_Helper::get_option_value( 'log-failed-login-limit', 10 );
+		// }
 
 		/**
 		 * Non-existing Login failure limit count.
@@ -293,21 +293,21 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		protected static function is_past_login_failure_limit( $ip, $site_id, $user ) {
-			if ( $user ) {
-				if ( -1 === (int) self::get_login_failure_log_limit() ) {
-					return false;
-				} else {
-					$data_known = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS );
-					return ( false !== $data_known ) && isset( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] ) && ( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] >= self::get_login_failure_log_limit() );
-				}
-			} elseif ( -1 === (int) self::get_visitor_login_failure_log_limit() ) {
-				return false;
-			} else {
-				$data_unknown = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
-				return ( false !== $data_unknown ) && isset( $data_unknown[ $site_id . ':' . $ip ] ) && ( $data_unknown[ $site_id . ':' . $ip ] >= self::get_visitor_login_failure_log_limit() );
-			}
-		}
+		// protected static function is_past_login_failure_limit( $ip, $site_id, $user ) {
+		// if ( $user ) {
+		// if ( -1 === (int) self::get_login_failure_log_limit() ) {
+		// return false;
+		// } else {
+		// $data_known = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS );
+		// return ( false !== $data_known ) && isset( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] ) && ( $data_known[ $site_id . ':' . $user->ID . ':' . $ip ] >= self::get_login_failure_log_limit() );
+		// }
+		// } elseif ( -1 === (int) self::get_visitor_login_failure_log_limit() ) {
+		// return false;
+		// } else {
+		// $data_unknown = WP_Helper::get_transient( self::TRANSIENT_FAILEDLOGINS_UNKNOWN );
+		// return ( false !== $data_unknown ) && isset( $data_unknown[ $site_id . ':' . $ip ] ) && ( $data_unknown[ $site_id . ':' . $ip ] >= self::get_visitor_login_failure_log_limit() );
+		// }
+		// }
 
 		/**
 		 * Increment failure limit.
@@ -358,11 +358,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function event_login_failure( $username ) {
-			list($y, $m, $d) = explode( '-', gmdate( 'Y-m-d' ) );
+			// list($y, $m, $d) = explode( '-', gmdate( 'Y-m-d' ) );
 
-			$m = (int) $m;
-			$y = (int) $y;
-			$d = (int) $d;
+			// $m = (int) $m;
+			// $y = (int) $y;
+			// $d = (int) $d;
 
 			$ip = Settings_Helper::get_main_client_ip();
 
@@ -370,12 +370,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 			$post_array = filter_input_array( INPUT_POST );
 
 			$username       = isset( $post_array['log'] ) ? $post_array['log'] : $username;
-			$username       = sanitize_user( $username );
+			$username       = \sanitize_user( $username );
 			$new_alert_code = 1003;
-			$user           = get_user_by( 'login', $username );
-			// If we still dont have the user, lets look for them using there email address.
+			$user           = \get_user_by( 'login', $username );
+			// If we still don't have the user, lets look for them using there email address.
 			if ( empty( $user ) ) {
-				$user = get_user_by( 'email', $username );
+				$user = \get_user_by( 'email', $username );
 			}
 
 			$site_id = ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
@@ -389,9 +389,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 				return;
 			}
 
-			if ( self::is_past_login_failure_limit( $ip, $site_id, $user ) ) {
-				return;
-			}
+			// if ( self::is_past_login_failure_limit( $ip, $site_id, $user ) ) {
+			// return;
+			// }
 
 			if ( 1002 === $new_alert_code ) {
 				if ( ! Alert_Manager::check_enable_user_roles( $username, $user_roles ) ) {
@@ -404,8 +404,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 				}
 
 				/** Check known users */
+				/*
 				$occ = Occurrences_Entity::build_multi_query(
-					'	WHERE client_ip = %s '
+					'   WHERE client_ip = %s '
 					. ' AND username = %s '
 					. ' AND alert_id = %d '
 					. ' AND site_id = %d '
@@ -437,14 +438,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 
 					unset( $occ['created_on'] );
 					Occurrences_Entity::save( $occ );
-				} else {
-
+				} else { */
+				{
 					// Create a new record exists user.
 					Alert_Manager::trigger_event_if(
 						$new_alert_code,
 						array(
 							'Attempts'         => 1,
 							'Username'         => $username,
+							'CurrentUserID'    => $user->ID,
 							'LogFileText'      => '',
 							'CurrentUserRoles' => $user_roles,
 						),
@@ -459,6 +461,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 					);
 				}
 			} else {
+				/*
 				$occ_unknown = Occurrences_Entity::build_multi_query(
 					' WHERE client_ip = %s '
 					. ' AND alert_id = %d '
@@ -505,15 +508,17 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 					unset( $occ_unknown['created_on'] );
 					Occurrences_Entity::save( $occ_unknown );
 				} else {
+					*/
+				{
 					// Make an array of usernames.
-					$users = array( $username );
+					// $users = array( $username );
 
 					// Log an alert for a login attempt with unknown username.
 					Alert_Manager::trigger_event(
 						$new_alert_code,
 						array(
 							'Attempts'    => 1,
-							'Users'       => $users,
+							'Users'       => $username,
 							'LogFileText' => '',
 							'ClientIP'    => $ip,
 						)
@@ -538,6 +543,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 					4003,
 					array(
 						'Username'         => $user->user_login,
+						'CurrentUserID'    => $user->ID,
 						'CurrentUserRoles' => $user_roles,
 					),
 					true
@@ -568,6 +574,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 					'TargetUserName'   => $target_user->user_login,
 					'TargetUserRole'   => $target_user_roles,
 					'Username'         => $old_user->user_login,
+					'CurrentUserID'    => $old_user->ID,
 					'CurrentUserRoles' => $old_user_roles,
 				)
 			);

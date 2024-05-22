@@ -2,6 +2,8 @@
 /**
  * Plugin installer action
  *
+ * NOTE: Currently this class is used only for deactivating the legacy extension plugins.
+ *
  * Class file for installing plugins from the repo.
  *
  * @since 4.0.1
@@ -28,20 +30,22 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 		 * Register the ajax action.
 		 *
 		 * @method register
+		 *
 		 * @since  4.0.1
 		 */
 		public static function init() {
-			add_action( 'wp_ajax_wsal_run_addon_install', array( __CLASS__, 'run_addon_install' ) );
+			\add_action( 'wp_ajax_wsal_run_addon_install', array( __CLASS__, 'run_addon_install' ) );
 		}
 
 		/**
 		 * Run the installer.
 		 *
 		 * @method run_addon_install
+		 *
 		 * @since  4.0.1
 		 */
 		public static function run_addon_install() {
-			check_ajax_referer( 'wsal-install-addon' );
+			\check_ajax_referer( 'wsal-install-addon' );
 
 			$predefined_plugins = Plugins_Helper::get_installable_plugins();
 
@@ -88,7 +92,7 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 
 			// bail early if we didn't get a valid url and slug to install.
 			if ( ! $valid ) {
-				wp_send_json_error(
+				\wp_send_json_error(
 					array(
 						'message' => esc_html__( 'Tried to install a zip or slug that was not in the allowed list', 'wp-security-audit-log' ),
 					)
@@ -118,15 +122,15 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 				\WSAL\Helpers\Settings_Helper::delete_option_value( 'show-helper-plugin-needed-nudge' );
 			}
 
-			wp_send_json( $result );
+			\wp_send_json( $result );
 		}
 
 		/**
 		 * Install a plugin given a slug.
 		 *
-		 * @method install
-		 * @since  4.0.1
 		 * @param  string $plugin_zip URL to the direct zip file.
+		 *
+		 * @since  4.0.1
 		 */
 		public static function install_plugin( $plugin_zip = '' ) {
 			// bail early if we don't have a slug to work with.
@@ -138,7 +142,7 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 				include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 			}
 			// clear the cache so we're using fresh data.
-			wp_cache_flush();
+			\wp_cache_flush();
 			$upgrader       = new \Plugin_Upgrader();
 			$install_result = $upgrader->install( $plugin_zip );
 			if ( ! $install_result || is_wp_error( $install_result ) ) {
@@ -152,10 +156,11 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 		/**
 		 * Activates a plugin that is available on the site.
 		 *
-		 * @method activate
-		 * @since  4.0.1
 		 * @param  string $plugin_zip URL to the direct zip file.
+		 *
 		 * @return void
+		 *
+		 * @since  4.0.1
 		 */
 		public static function activate( $plugin_zip = '' ) {
 			// bail early if we don't have a slug to work with.
@@ -196,10 +201,10 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 					$network_wide = true;
 				}
 
-				$result = deactivate_plugins( $plugin, false, $network_wide );
+				$result = \deactivate_plugins( $plugin, false, $network_wide );
 
 				// Check if the plugin was deactivated.
-				if ( is_wp_error( $result ) ) {
+				if ( \is_wp_error( $result ) ) {
 					return false;
 				}
 			}
@@ -229,10 +234,10 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 			if ( ! in_array( $plugin_slug, $current, true ) ) {
 				if ( WP_Helper::is_multisite() ) {
 					$current[] = $plugin_slug;
-					activate_plugin( $plugin_slug, '', true );
+					\activate_plugin( $plugin_slug, '', true );
 				} else {
 					$current[] = $plugin_slug;
-					activate_plugin( $plugin_slug );
+					\activate_plugin( $plugin_slug );
 				}
 			}
 			return null;
@@ -241,9 +246,9 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 		/**
 		 * Check if a plugin is installed.
 		 *
-		 * @method is_plugin_installed
-		 * @since  4.0.1
 		 * @param  string $plugin_slug slug for plugin.
+		 *
+		 * @since  4.0.1
 		 */
 		public static function is_plugin_installed( $plugin_slug = '' ) {
 			// bail early if we don't have a slug to work with.
@@ -255,7 +260,7 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 			if ( ! function_exists( 'get_plugins' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
-			$all_plugins = get_plugins();
+			$all_plugins = \get_plugins();
 
 			// true if plugin is already installed or false if not.
 			if ( ! empty( $all_plugins[ $plugin_slug ] ) ) {

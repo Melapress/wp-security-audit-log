@@ -13,8 +13,13 @@
 
 namespace WSAL\MainWP;
 
+use WSAL\Helpers\WP_Helper;
 use WSAL\MainWP\MainWP_Helper;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\ListAdminEvents\List_Events;
+use WSAL\Actions\Plugin_Installer;
+use WSAL\Entities\Metadata_Entity;
+use WSAL\Entities\Occurrences_Entity;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
@@ -88,6 +93,13 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 		public static function init() {
 			if ( self::check_mainwp_plugin_active() ) {
 
+				if ( Plugin_Installer::is_plugin_installed( 'activity-log-mainwp/activity-log-mainwp.php' ) && WP_Helper::is_plugin_active( 'activity-log-mainwp/activity-log-mainwp.php' ) ) {
+					Plugin_Installer::deactivate_plugin( 'activity-log-mainwp/activity-log-mainwp.php' );
+
+					Occurrences_Entity::drop_table();
+					Metadata_Entity::drop_table();
+				}
+
 				MainWP_Helper::init();
 
 				// Plugin Extension Name.
@@ -101,23 +113,39 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 
 				\add_action( 'admin_init', array( __CLASS__, 'setup_extension_tabs' ), 10 );
 
-				MainWP_Settings::set_extension_activated( 'yes' );
 				self::check_mainwp_active();
 
-				add_filter( 'mainwp_getextensions', array( __CLASS__, 'get_this_extension' ) );
+				\add_filter( 'mainwp_getextensions', array( __CLASS__, 'get_this_extension' ) );
 
-				add_filter( 'mainwp_main_menu', array( __CLASS__, 'mwpal_main_menu' ), 10, 1 );
-				add_filter( 'mainwp_main_menu_submenu', array( __CLASS__, 'mwpal_main_menu_submenu' ), 10, 1 );
+				\add_filter( 'mainwp_main_menu', array( __CLASS__, 'mwpal_main_menu' ), 10, 1 );
+				// add_filter( 'mainwp_main_menu_submenu', array( __CLASS__, 'mwpal_main_menu_submenu' ), 10, 1 );.
 
 				// Render header.
-				add_action( 'mainwp_pageheader_extensions', array( '\WSAL_Views_AuditLog', 'header' ) );
-				add_action( 'mainwp_pagefooter_extensions', array( '\WSAL_Views_AuditLog', 'footer' ), 20 );
+				\add_action( 'mainwp_pageheader_extensions', array( '\WSAL_Views_AuditLog', 'header' ) );
+				\add_action( 'mainwp_pagefooter_extensions', array( '\WSAL_Views_AuditLog', 'footer' ), 20 );
 
-				add_filter( 'wsal_custom_view_page', array( __CLASS__, 'is_that_auditlog_view' ), 20 );
+				\add_filter( 'wsal_custom_view_page', array( __CLASS__, 'is_that_auditlog_view' ), 20 );
 
-				add_filter( 'wsal_add_site_filter', '__return_true', 20 );
+				\add_filter( 'wsal_add_site_filter', '__return_true', 20 );
+
+				\add_action( 'mainwp_header_left', array( __CLASS__, 'custom_page_title' ) );
 			}
 		}
+
+	/**
+	 * Sets a custom page title for our extension plugin.
+	 *
+	 * @param string $title Page title.
+	 *
+	 * @return string
+	 */
+	public static function custom_page_title( $title ) {
+		if ( isset( $_REQUEST['page'] ) && 'Extensions-Wp-Security-Audit-Log-Premium' === $_REQUEST['page'] || isset( $_REQUEST['page'] ) && 'Extensions-Wp-Security-Audit-Log' === $_REQUEST['page'] ) {
+			$title = esc_html__( 'WP Activity Log', 'wp-security-audit-log' );
+		}
+
+		return $title;
+	}
 
 		/**
 		 * Checks if the MainWp server plugin is activated
@@ -247,14 +275,26 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 
 			\WSAL_Views_AuditLog::header();
 
-			$events_list = new List_Events( \WSAL_Views_AuditLog::get_page_arguments(), \WpSecurityAuditLog::get_instance() );
+			\add_filter( 'wsal_override_is_multisite', '__return_true' );
+
+			$events_list = new List_Events( \WSAL_Views_AuditLog::get_page_arguments() );
+
+			\remove_filter( 'wsal_override_is_multisite', '__return_true' );
 
 			$events_list->prepare_items();
 			$view_input_value = 'list';
+			$site_id          = MainWP_Settings::get_view_site_id();
 			?>
 			<form id="audit-log-viewer" method="get">
+				<style>
+					#audit-log-viewer-content {
+						margin-left: 5px;
+						margin-right: 5px;
+					}
+				</style>
 				<div id="audit-log-viewer-content">
 					<input type="hidden" name="page" value="<?php echo esc_attr( \WSAL_Views_AuditLog::get_page_arguments()['page'] ); ?>" />
+					<input type="hidden" id="mwpal-site-id" name="mwpal-site-id" value="<?php echo esc_attr( $site_id ); ?>" />
 					<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr( empty( \WSAL_Views_AuditLog::get_page_arguments()['site_id'] ) ? '0' : \WSAL_Views_AuditLog::get_page_arguments()['site_id'] ); ?>" />
 					<input type="hidden" id="view" name="view" value="<?php echo esc_attr( $view_input_value ); ?>" />
 					<?php
@@ -299,37 +339,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 			?>
 			<script type="text/javascript">
 				jQuery( document ).ready( function() {
-					WsalAuditLogInit(
-						<?php
-						echo wp_json_encode(
-							array(
-								'ajaxurl' => admin_url( 'admin-ajax.php' ),
-								'tr8n'    => array(
-									'numofitems' => __( 'Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log' ),
-									'searchback' => __( 'All Sites', 'wp-security-audit-log' ),
-									'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
-								),
-							)
-						);
-						?>
-					);
-
-					/**
-					 * Retrieve Logs Manually
-					 */
-					jQuery( '#mwpal-wsal-manual-retrieve' ).click( function() {
-						var { __ } = wp.i18n;
-						const retrieveBtn = jQuery( this );
-						retrieveBtn.attr( 'disabled', true );
-						retrieveBtn.val( __( 'Retrieving Logs...', 'wp-security-audit-log' ), );
-
-						jQuery.post( WsalAs.ajaxurl, {
-							action: 'retrieve_events_manually',
-							nonce: '<?php echo wp_create_nonce( 'wsal-notifications-script-nonce' ); ?>',
-						}, function() {
-							location.reload();
-						});
-					});
+					window['WsalAuditLogRefreshed']();
 				} );
 			</script>
 					<?php
@@ -348,7 +358,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 			$sub_menu_after = array_splice( $mwpal_left_menu['leftbar'], 2 );
 
 			$activity_log   = array();
-			$activity_log[] = __( 'Activity Log', 'mwp-al-ext' );
+			$activity_log[] = __( 'Activity Log', 'wp-security-audit-log' );
 			$activity_log[] = MWPAL_EXTENSION_NAME;
 			$activity_log[] = self::$mwpal_extension_tabs['activity-log']['link'];
 
@@ -372,12 +382,12 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 				'mwpal_main_menu_submenu',
 				array(
 					array(
-						__( 'Child Sites Settings', 'mwp-al-ext' ),
+						__( 'Child Sites Settings', 'wp-security-audit-log' ),
 						self::$mwpal_extension_tabs['child_site_settings']['link'],
 						'manage_options',
 					),
 					array(
-						__( 'Extension Settings', 'mwp-al-ext' ),
+						__( 'Extension Settings', 'wp-security-audit-log' ),
 						self::$mwpal_extension_tabs['settings']['link'],
 						'manage_options',
 					),
@@ -413,7 +423,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 				'mwpal_page_navigation',
 				array(
 					array(
-						'title'  => __( 'Extension Settings', 'mwp-al-ext' ),
+						'title'  => __( 'Extension Settings', 'wp-security-audit-log' ),
 						'href'   => self::$mwpal_extension_tabs['settings']['link'],
 						'active' => 'settings' === self::$current_tab,
 					),
@@ -439,27 +449,15 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 			$_mainwp_menu_active_slugs[ MWPAL_EXTENSION_NAME ] = MWPAL_EXTENSION_NAME;
 
 			// Extension view URL.
-			$extension_url = add_query_arg( 'page', MWPAL_EXTENSION_NAME, admin_url( 'admin.php' ) );
+			$extension_url = add_query_arg( 'page', MWPAL_EXTENSION_NAME, \network_admin_url( 'admin.php' ) );
 
 			// Tab links.
 			$mwpal_extension_tabs = array(
-				'activity-log'        => array(
-					'name'   => __( 'Activity Log', 'mwp-al-ext' ),
+				'activity-log' => array(
+					'name'   => __( 'Activity Log', 'wp-security-audit-log' ),
 					'link'   => $extension_url,
 					'render' => array( __CLASS__, 'tab_activity_log' ),
 					'save'   => array( __CLASS__, 'tab_activity_log_save' ),
-				),
-				'child_site_settings' => array(
-					'name'   => __( 'Child Sites Activity Log Settings', 'mwp-al-ext' ),
-					'link'   => add_query_arg( 'tab', 'enforce-settings', $extension_url ),
-					'render' => array( __CLASS__, 'tab_activity_log' ),
-					'save'   => array( __CLASS__, 'tab_activity_log_save' ),
-				),
-				'settings'            => array(
-					'name'   => __( 'Extension Settings', 'mwp-al-ext' ),
-					'link'   => add_query_arg( 'tab', 'settings', $extension_url ),
-					'render' => array( __CLASS__, 'tab_settings' ),
-					'save'   => array( __CLASS__, 'tab_settings_save' ),
 				),
 			);
 
@@ -495,7 +493,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 		 */
 		public static function get_wsal_child_sites() {
 			// Check if the WSAL child sites option exists.
-			$child_sites = MainWP_Settings::get_option_value( 'wsal-child-sites' );
+			$child_sites = Settings_Helper::get_option_value( 'wsal-child-sites' );
 
 			// Get MainWP Child sites.
 			$mwp_sites = MainWP_Settings::get_mwp_child_sites();
@@ -516,9 +514,10 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 							$child_sites[ $site_id ] = $site_array;
 						}
 					}
-					MainWP_Settings::set_option_value( 'wsal-child-sites', $child_sites );
+					Settings_Helper::set_option_value( 'wsal-child-sites', $child_sites );
 				}
 			}
+
 			return $child_sites;
 		}
 

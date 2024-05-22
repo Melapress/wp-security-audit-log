@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace WSAL\Helpers;
 
 use WSAL\Controllers\Alert;
+use WSAL\Views\Setup_Wizard;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\ListAdminEvents\List_Events;
@@ -66,21 +67,10 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 				'WSAL_Views_Reports',
 				'WSAL_Views_Search',
 				'WSAL_Views_Settings',
-				'WSAL_Views_SetupWizard',
 				'WSAL_Views_ToggleAlerts',
 			);
 
             // phpcs:ignore
-
-			/**
-			 * Add setup wizard page to skip views. It will only be initialized
-			 * one time.
-			 *
-			 * @since 3.2.3
-			 */
-			if ( file_exists( WSAL_BASE_DIR . 'classes/Views/SetupWizard.php' ) ) {
-				$skip_views[] = 'WSAL_Views_SetupWizard';
-			}
 
 			/**
 			 * Skipped Views.
@@ -129,7 +119,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 			if ( ! Settings_Helper::get_boolean_option_value( 'setup-complete', false )
 				&& Settings_Helper::current_user_can( 'edit' )
 			) {
-				new \WSAL_Views_SetupWizard( \WpSecurityAuditLog::get_instance() );
+				Setup_Wizard::init();
 			}
 
 
@@ -167,6 +157,8 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		public static function add_from_class( $class ) {
 			if ( is_subclass_of( $class, '\WSAL_AbstractView' ) ) {
 				self::$views[] = new $class( \WpSecurityAuditLog::get_instance() );
+			} else {
+				self::$views[] = $class;
 			}
 		}
 
@@ -190,9 +182,10 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		public static function order_by_weight( \WSAL_AbstractView $a, \WSAL_AbstractView $b ) {
-			$wa = $a->get_weight();
-			$wb = $b->get_weight();
+		public static function order_by_weight( $a, $b ) {
+
+			$wa = \call_user_func( array( $a, 'get_weight' ) ); // $a->get_weight();
+			$wb = \call_user_func( array( $b, 'get_weight' ) ); // $b->get_weight();
 			switch ( true ) {
 				case $wa < $wb:
 					return -1;
@@ -213,18 +206,21 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 			if ( Settings_Helper::current_user_can( 'view' ) && count( self::$views ) ) {
 				// Add main menu.
-				$main_view_menu_slug         = self::$views[0]->get_safe_view_name();
-				self::$views[0]->hook_suffix = add_menu_page(
-					'WP Activity Log',
-					'WP Activity Log',
-					'read', // No capability requirement.
-					$main_view_menu_slug,
-					array( __CLASS__, 'render_view_body' ),
-					self::$views[0]->get_icon(),
-					'2.5' // Right after dashboard.
+				$main_view_menu_slug = \call_user_func( array( self::$views[0], 'get_safe_view_name' ) );
+				\call_user_func(
+					array( self::$views[0], 'set_hook_suffix' ),
+					add_menu_page(
+						'WP Activity Log',
+						'WP Activity Log',
+						'read', // No capability requirement.
+						$main_view_menu_slug,
+						array( __CLASS__, 'render_view_body' ),
+						self::$views[0]->get_icon(),
+						'2.5' // Right after dashboard.
+					)
 				);
 
-				List_Events::add_screen_options( self::$views[0]->hook_suffix );
+				List_Events::add_screen_options( \call_user_func( array( self::$views[0], 'get_hook_suffix' ) ) );
 
 				// Protected views to be displayed only to user with full plugin access.
 				$protected_views = array(
@@ -235,6 +231,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 					'wsal-rep-views-main',
 					'wsal-np-notifications',
 					'wsal-setup',
+					'wsal-reports-new',
 				);
 
 				// Check edit privileges of the current user.
@@ -242,8 +239,8 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 				// Add menu items.
 				foreach ( self::$views as $view ) {
-					if ( $view->is_accessible() ) {
-						$safe_view_name = $view->get_safe_view_name();
+					if ( \call_user_func( array( $view, 'is_accessible' ) ) ) {
+						$safe_view_name = \call_user_func( array( $view, 'get_safe_view_name' ) );
 						if ( self::get_class_name_by_view( $safe_view_name ) ) {
 							continue;
 						}
@@ -256,13 +253,16 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 							$main_view_menu_slug = null;
 						}
 
-						$view->hook_suffix = add_submenu_page(
-							$view->is_visible() ? $main_view_menu_slug : null,
-							$view->get_title(),
-							$view->get_name(),
-							'read', // No capability requirement.
-							$safe_view_name,
-							array( __CLASS__, 'render_view_body' )
+						\call_user_func(
+							array( $view, 'set_hook_suffix' ),
+							add_submenu_page(
+								\call_user_func( array( $view, 'is_visible' ) ) ? $main_view_menu_slug : null,
+								\call_user_func( array( $view, 'get_title' ) ),
+								\call_user_func( array( $view, 'get_name' ) ),
+								'read', // No capability requirement.
+								$safe_view_name,
+								array( __CLASS__, 'render_view_body' )
+							)
 						);
 					}
 				}
@@ -306,12 +306,12 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 			$new_links = array();
 			foreach ( self::$views as $view ) {
-				if ( $view->has_plugin_shortcut_link() ) {
-					$new_links[] = '<a href="' . add_query_arg( 'page', $view->get_safe_view_name(), admin_url( 'admin.php' ) ) . '">' . $view->get_name() . '</a>';
+				if ( \call_user_func( array( $view, 'has_plugin_shortcut_link' ) ) ) {
+					$new_links[] = '<a href="' . add_query_arg( 'page', \call_user_func( array( $view, 'get_safe_view_name' ) ), \network_admin_url( 'admin.php' ) ) . '">' . \call_user_func( array( $view, 'get_name' ) ) . '</a>';
 
 					if ( 1 === count( $new_links ) && ! wsal_freemius()->is__premium_only() ) {
 						// Trial link.
-						$trial_link  = 'https://melapress.com/trial-premium-edition-plugin/?utm_source=plugins&utm_medium=referral&utm_campaign=wsal';
+						$trial_link  = 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugins&utm_medium=link&utm_campaign=wsal';
 						$new_links[] = '<a style="font-weight:bold; color:#049443 !important" href="' . $trial_link . '" target="_blank">' . __( 'Get Premium!', 'wp-security-audit-log' ) . '</a>';
 					}
 				}
@@ -332,7 +332,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 			if ( isset( $current_view ) ) {
 				foreach ( self::$views as $i => $view ) {
-					if ( $current_view === $view->get_safe_view_name() ) {
+					if ( $current_view === \call_user_func( array( $view, 'get_safe_view_name' ) ) ) {
 						return $i;
 					}
 				}
@@ -356,14 +356,10 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 				if ( isset( $current_view ) ) {
 					foreach ( self::$views as $view ) {
-						if ( $current_view === $view->get_safe_view_name() ) {
+						if ( $current_view === \call_user_func( array( $view, 'get_safe_view_name' ) ) ) {
 							self::$active_view = $view;
 						}
 					}
-				}
-
-				if ( self::$active_view ) {
-					self::$active_view->is_active = true;
 				}
 			}
 			return self::$active_view;
@@ -377,7 +373,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		public static function render_view_header() {
 			$view = self::get_active_view();
 			if ( $view ) {
-				$view->header();
+				\call_user_func( array( $view, 'header' ) );
 			}
 		}
 
@@ -389,7 +385,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		public static function render_view_footer() {
 			$view = self::get_active_view();
 			if ( $view ) {
-				$view->footer();
+				\call_user_func( array( $view, 'footer' ) );
 			}
 
 			global $pagenow;
@@ -429,7 +425,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		public static function render_view_body() {
 			$view = self::get_active_view();
 
-			if ( $view && $view instanceof \WSAL_AbstractView ) :
+			if ( $view && $view instanceof \WSAL_AbstractView ) {
 				?>
 				<div class="wrap">
 					<?php
@@ -439,7 +435,17 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 					?>
 				</div>
 				<?php
-			endif;
+			} else {
+				?>
+				<div class="wrap">
+					<?php
+						$view::render_icon();
+						$view::render_title();
+						$view::render_content();
+					?>
+				</div>
+				<?php
+			}
 		}
 
 		/**

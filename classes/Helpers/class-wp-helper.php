@@ -17,6 +17,9 @@ declare(strict_types=1);
 
 namespace WSAL\Helpers;
 
+use WSAL\MainWP\MainWP_Addon;
+use WSAL\MainWP\MainWP_Helper;
+
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 /*
@@ -62,6 +65,20 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 * @var array
 		 */
 		private static $sites = array();
+
+		/**
+		 * Holds array with all the site urls in multisite WP installation. The urls are the keys and values are the IDs.
+		 *
+		 * @var array
+		 */
+		private static $site_urls = array();
+
+		/**
+		 * Internal cache array for site urls extracted as info
+		 *
+		 * @var array
+		 */
+		private static $blogs_info = array();
 
 		/**
 		 * Checks if specific role exists.
@@ -121,7 +138,25 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 				self::$is_multisite = function_exists( 'is_multisite' ) && is_multisite();
 			}
 
-			return self::$is_multisite;
+			return \apply_filters( 'wsal_override_is_multisite', self::$is_multisite );
+		}
+
+		/**
+		 * Collects blogs URLs - used for mainWP site check.
+		 *
+		 * @return array
+		 *
+		 * @since 5.0.0
+		 */
+		public static function get_site_urls() {
+			$sites = self::get_multi_sites();
+
+			foreach ( $sites as $site_object ) {
+				$url                     = \get_blogaddress_by_id( $site_object->blog_id );
+				self::$site_urls[ $url ] = $site_object->blog_id;
+			}
+
+			return self::$site_urls;
 		}
 
 		/**
@@ -412,16 +447,16 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			switch ( true ) {
 				// Non-multisite.
 				case ! self::is_multisite():
-					return 0;
+					return false;
 					// Multisite + main site view.
 				case self::is_main_blog() && ! self::is_specific_view():
-					return 0;
+					return -1;
 					// Multisite + switched site view.
 				case self::is_main_blog() && self::is_specific_view():
 					return self::get_specific_view();
 					// Multisite + local site view.
 				default:
-					return get_current_blog_id();
+					return \get_current_blog_id();
 			}
 		}
 
@@ -578,7 +613,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 */
 		public static function is_login_screen(): bool {
 
-			$login =  parse_url( site_url( 'wp-login.php' ), PHP_URL_PATH ) === parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ); // phpcs:ignore
+			$login = parse_url( site_url( 'wp-login.php' ), PHP_URL_PATH ) === parse_url( \wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 
 			return \apply_filters( 'wsal_login_screen_url', $login );
 		}
@@ -608,31 +643,47 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 */
 		public static function get_blog_info( $site_id ) {
 			// Blog details.
+			if ( isset( self::$blogs_info[ $site_id ] ) ) {
+				return self::$blogs_info[ $site_id ];
+			}
 			if ( self::is_multisite() ) {
-				$blog_info = get_blog_details( $site_id, true );
-				$blog_name = esc_html__( 'Unknown Site', 'wp-security-audit-log' );
+				$blog_info = \get_blog_details( $site_id, true );
+				$blog_name = \esc_html__( 'Unknown Site', 'wp-security-audit-log' );
 				$blog_url  = '';
 
 				if ( $blog_info ) {
-					$blog_name = esc_html( $blog_info->blogname );
-					$blog_url  = esc_attr( $blog_info->siteurl );
+					$blog_name = \esc_html( $blog_info->blogname );
+					$blog_url  = \esc_attr( $blog_info->siteurl );
 				}
 			} else {
-				$blog_name = get_bloginfo( 'name' );
+				$blog_name = \get_bloginfo( 'name' );
 				$blog_url  = '';
 
 				if ( empty( $blog_name ) ) {
 					$blog_name = __( 'Unknown Site', 'wp-security-audit-log' );
 				} else {
-					$blog_name = esc_html( $blog_name );
-					$blog_url  = esc_attr( get_bloginfo( 'url' ) );
+					$blog_name = \esc_html( $blog_name );
+					$blog_url  = \esc_attr( \get_bloginfo( 'url' ) );
 				}
 			}
 
-			return array(
+			if ( MainWP_Addon::check_mainwp_plugin_active() ) {
+				$sites = MainWP_Helper::get_all_sites_array();
+				foreach ( $sites as $site ) {
+					if ( $site_id === $site->blog_id ) {
+						$blog_name = esc_html( $site->blogname );
+						$blog_url  = esc_attr( $site->siteurl );
+						break;
+					}
+				}
+			}
+
+			self::$blogs_info[ $site_id ] = array(
 				'name' => $blog_name,
 				'url'  => $blog_url,
 			);
+
+			return self::$blogs_info[ $site_id ];
 		}
 
 		/**
@@ -669,6 +720,86 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			}
 
 			return get_admin_url( null, $additional_path );
+		}
+
+		/**
+		 * Query sites from WPDB.
+		 *
+		 * @since 5.0.0
+		 *
+		 * @param int|null $limit — Maximum number of sites to return (null = no limit).
+		 *
+		 * @return object — Object with keys: blog_id, blogname, domain
+		 */
+		public static function get_sites( $limit = null ) {
+			if ( self::$is_multisite ) {
+				global $wpdb;
+				// Build query.
+				$sql = 'SELECT blog_id, domain FROM ' . $wpdb->blogs;
+				if ( ! is_null( $limit ) ) {
+					$sql .= ' LIMIT ' . $limit;
+				}
+
+				// Execute query.
+				$res = $wpdb->get_results($sql); // phpcs:ignore
+
+				// Modify result.
+				foreach ( $res as $row ) {
+					$row->blogname = \get_blog_option( $row->blog_id, 'blogname' );
+				}
+			} else {
+				$res           = new \stdClass();
+				$res->blog_id  = \get_current_blog_id();
+				$res->blogname = esc_html( \get_bloginfo( 'name' ) );
+				$res           = array( $res );
+			}
+
+			if ( MainWP_Addon::check_mainwp_plugin_active() ) {
+				$res = MainWP_Helper::get_all_sites_array();
+			}
+
+			// Return result.
+			return $res;
+		}
+
+		/**
+		 * The number of sites on the network.
+		 *
+		 * @since 5.0.0
+		 *
+		 * @return int
+		 */
+		public static function get_site_count() {
+			global $wpdb;
+			$sql = 'SELECT COUNT(*) FROM ' . $wpdb->blogs;
+
+			return (int) $wpdb->get_var($sql); // phpcs:ignore
+		}
+
+		/**
+		 * Returns associate array with user roles names.
+		 *
+		 * @return array
+		 *
+		 * @since 5.0.0
+		 */
+		public static function get_translated_roles(): array {
+			global $wp_roles;
+
+			if ( null === $wp_roles ) {
+				wp_roles();
+			}
+
+			$roles = wp_roles()->get_names();
+
+			foreach ( $roles as $inner => $role ) {
+				$role_names[ $inner ] = translate_user_role( $role );
+			}
+			if ( self::is_multisite() ) {
+				$role_names['superadmin'] = translate_user_role( 'Super Admin' );
+			}
+
+			return $role_names;
 		}
 	}
 }

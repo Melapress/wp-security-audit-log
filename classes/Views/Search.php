@@ -60,11 +60,11 @@ class WSAL_Views_Search extends WSAL_ExtensionPlaceholderView {
 		$screenshots  = array(
 			array(
 				'desc' => esc_html__( 'Configure any filter you need to fine tune the search results and find what you are looking for with much less effort.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/search/search_2.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/search/search_2.webp',
 			),
 			array(
 				'desc' => esc_html__( 'Save search terms and filters to run the searches again in the future with just a single click.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/search/search_3.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/search/search_3.webp',
 			),
 		);
 

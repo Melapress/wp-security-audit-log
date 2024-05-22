@@ -68,7 +68,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					return $connection->base_prefix . static::$table;
 				}
 			}
-			return self::get_connection()->base_prefix . static::$table;
+			return static::get_connection()->base_prefix . static::$table;
 		}
 
 		/**
@@ -129,7 +129,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					$_wpdb = $connection;
 				}
 			} else {
-				$_wpdb = self::get_connection();
+				$_wpdb = static::get_connection();
 			}
 
 			foreach ( $_wpdb->get_col( 'SHOW TABLES', 0 ) as $table ) {
@@ -189,7 +189,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		): bool {
 
 			$diffs   = 0;
-			$results = self::get_connection()->get_results( "DESC $table_name" );
+			$results = static::get_connection()->get_results( "DESC $table_name" );
 
 			foreach ( $results as $row ) {
 
@@ -263,11 +263,11 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					$_wpdb = $connection;
 				}
 			} else {
-				$_wpdb = self::get_connection();
+				$_wpdb = static::get_connection();
 			}
 
 			$table_name = self::get_table_name( $_wpdb );
-			self::get_connection()->query( 'DROP TABLE IF EXISTS ' . $table_name ); // phpcs:ignore
+			static::get_connection()->query( 'DROP TABLE IF EXISTS ' . $table_name ); // phpcs:ignore
 
 			return true;
 		}
@@ -289,7 +289,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					$_wpdb = $connection;
 				}
 			} else {
-				$_wpdb = self::get_connection();
+				$_wpdb = static::get_connection();
 			}
 
 			if ( null === $table_name ) {
@@ -334,7 +334,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					$_wpdb = $connection;
 				}
 			} else {
-				$_wpdb = self::get_connection();
+				$_wpdb = static::get_connection();
 			}
 
 			$sql = $_wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::get_table_name( $_wpdb ) . ' WHERE ' . $cond, $args );
@@ -344,7 +344,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			if ( '' !== $_wpdb->last_error ) {
 				if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
 					if ( ( static::class )::create_table( $_wpdb ) ) {
-						$count = (int) $_wpdb->get_var( $sql );
+						$count = 0;
 					}
 				}
 			}
@@ -385,7 +385,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			}
 
 			if ( ! empty( $format ) ) {
-				$_wpdb = self::get_connection();
+				$_wpdb = static::get_connection();
 
 				$_wpdb->suppress_errors( true );
 
@@ -442,12 +442,26 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @param string $cond - (Optional) Load condition.
 		 * @param array  $args - (Optional) Load condition arguments.
+		 * @param \wpdb  $connection - \wpdb connection to be used for name extraction.
+		 * @param string $extra - The extra SQL string (if needed).
 		 *
 		 * @return array
+		 *
+		 * @since 5.0.0
 		 */
-		public static function load( $cond = '%d', $args = array( 1 ) ) {
-			$_wpdb = self::get_connection();
-			$sql   = $_wpdb->prepare( 'SELECT * FROM ' . self::get_table_name() . ' WHERE ' . $cond, $args );
+		public static function load( $cond = 'id=%d', $args = array( 1 ), $connection = null, $extra = '' ) {
+			if ( null !== $connection ) {
+				if ( $connection instanceof \wpdb ) {
+					$_wpdb = $connection;
+				}
+			} else {
+				$_wpdb = static::get_connection();
+			}
+			$sql = $_wpdb->prepare( 'SELECT * FROM ' . self::get_table_name( $_wpdb ) . ' WHERE ' . $cond, $args );
+
+			if ( ! empty( trim( $extra ) ) ) {
+				$sql .= $extra;
+			}
 
 			return $_wpdb->get_row( $sql, ARRAY_A );
 		}
@@ -458,21 +472,28 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 * @param string $cond Load condition.
 		 * @param array  $args (Optional) Load condition arguments.
 		 * @param \wpdb  $connection - \wpdb connection to be used for name extraction.
+		 * @param string $extra - The extra SQL string (if needed).
 		 *
 		 * @return array
+		 *
+		 * @since 5.0.0
 		 */
-		public static function load_array( $cond, $args = array(), $connection = null ) {
+		public static function load_array( $cond, $args = array(), $connection = null, $extra = '' ) {
 
 			if ( null !== $connection ) {
 				if ( $connection instanceof \wpdb ) {
 					$_wpdb = $connection;
 				}
 			} else {
-				$_wpdb = self::get_connection();
+				$_wpdb = static::get_connection();
 			}
 
 			$result = array();
 			$sql    = $_wpdb->prepare( 'SELECT * FROM ' . self::get_table_name( $_wpdb ) . ' WHERE ' . $cond, $args );
+
+			if ( ! empty( trim( $extra ) ) ) {
+				$sql .= $extra;
+			}
 
 			$_wpdb->suppress_errors( true );
 			$results = $_wpdb->get_results( $sql, ARRAY_A );
@@ -480,14 +501,14 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			if ( '' !== $_wpdb->last_error ) {
 				if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
 					if ( ( static::class )::create_table( $_wpdb ) ) {
-						$results = $_wpdb->get_results( $sql, ARRAY_A );
+						$results = array();
 					}
 				}
 			}
 			$_wpdb->suppress_errors( false );
 
 			foreach ( $results as $data ) {
-				$result[] = self::load_data( $data );
+				$result[] = static::load_data( $data );
 			}
 
 			return $result;
@@ -498,6 +519,8 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 *
 		 * @param array|object $data Data array or object.
 		 * @throws \Exception - Unsupported type.
+		 *
+		 * @since 5.0.0
 		 */
 		public static function load_data( $data ) {
 			foreach ( (array) $data as $key => $val ) {
@@ -539,11 +562,17 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					case is_int( ( static::class )::$fields_values[ $key ] ):
 						return (int) $val;
 					case is_float( ( static::class )::$fields_values[ $key ] ):
-						return (float) $val;
+						$num_arr = \explode( '.', $val );
+
+						$num_arr = array_slice( $num_arr, 0, 2 );
+
+						$num_arr = array_map( 'intval', $num_arr );
+
+						return implode( '.', $num_arr );
 					case is_bool( ( static::class )::$fields_values[ $key ] ):
 						return (bool) $val;
 					default:
-						throw new \Exception( 'Unsupported type "' . gettype( ( static::class )::$fields_values[ $key ] ) . '"' );
+						throw new \Exception( \esc_html__( 'Unsupported type "', 'wp-security-audit-log' ) . gettype( ( static::class )::$fields_values[ $key ] ) . '"' ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 			}
 		}
@@ -565,7 +594,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					$_wpdb = $connection;
 				}
 			} else {
-				$_wpdb = self::get_connection();
+				$_wpdb = static::get_connection();
 			}
 
 			$sql = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
@@ -575,7 +604,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			if ( '' !== $_wpdb->last_error ) {
 				if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
 					if ( ( static::class )::create_table( $_wpdb ) ) {
-						$res = $_wpdb->query( $sql );
+						$res = true;
 					}
 				}
 			}
@@ -616,7 +645,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					$_wpdb = $connection;
 				}
 			} else {
-				$_wpdb = self::get_connection();
+				$_wpdb = static::get_connection();
 			}
 
 			$result = $_wpdb->delete(
@@ -626,6 +655,81 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			);
 
 			return $result;
+		}
+
+		/**
+		 * Duplicates table row by its ID
+		 *
+		 * @param integer $id - The ID of row to duplicate.
+		 * @param \wpdb   $connection - The connection which has to be used.
+		 *
+		 * @return mixed
+		 *
+		 * @since 5.0.0
+		 */
+		public static function duplicate_by_id( int $id, $connection ) {
+			if ( null !== $connection ) {
+				if ( $connection instanceof \wpdb ) {
+					$_wpdb = $connection;
+				}
+			} else {
+				$_wpdb = static::get_connection();
+			}
+
+			$sql = 'INSERT INTO ' . self::get_table_name( $_wpdb ) . '
+				(' . \implode( ',', static::get_duplicate_fields( false ) ) . ')
+			SELECT 
+				' . \implode( ',', static::get_duplicate_fields( true ) ) . '
+			FROM 
+				' . self::get_table_name( $_wpdb ) . '
+			WHERE 
+				id = ' . $id;
+
+			$_wpdb->suppress_errors( true );
+
+			$result = $_wpdb->query(
+				$sql
+			);
+
+			if ( '' !== $_wpdb->last_error ) {
+				if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
+					if ( ( static::class )::create_table( $_wpdb ) ) {
+
+						$result = $_wpdb->query(
+							$sql
+						);
+
+					}
+				}
+			}
+			$_wpdb->suppress_errors( false );
+
+			return $_wpdb->insert_id;
+		}
+
+		/**
+		 * Returns array with fields to duplicate, gets rid of id and created_on columns.
+		 *
+		 * @param bool $duplicate_values - When called for duplication, gives the class ability to set fields that must have specific values in the database.
+		 *
+		 * @return array
+		 *
+		 * @since 5.0.0
+		 */
+		public static function get_duplicate_fields( bool $duplicate_values ): array {
+			$fields = self::get_fields();
+			unset( $fields['id'] );
+			if ( $duplicate_values && isset( $fields['created_on'] ) ) {
+				$fields = \array_keys( $fields );
+				$time   = \microtime( true );
+				$key    = array_search( 'created_on', $fields, true );
+
+				$fields[ $key ] = $time;
+
+				return $fields;
+			}
+
+			return array_keys( $fields );
 		}
 
 		/**
@@ -667,7 +771,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			};
 			// phpcs:enable
 
-			$_wpdb = self::get_connection();
+			$_wpdb = static::get_connection();
 
 			$where_clause = $wpdb_clone->process_fields(
 				self::get_table_name(),
@@ -700,10 +804,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 				if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
 					if ( ( static::class )::create_table( $_wpdb ) ) {
 
-						$result = $_wpdb->get_results(
-							$sql,
-							ARRAY_A
-						);
+						$result = array();
 
 					}
 				}
@@ -783,7 +884,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function load_multi_query( $query, $args = array() ) {
-			$_wpdb  = self::get_connection();
+			$_wpdb  = static::get_connection();
 			$result = array();
 			$sql    = count( $args ) ? $_wpdb->prepare( $query, $args ) : $query;
 			foreach ( $_wpdb->get_results( $sql, ARRAY_A ) as $data ) {
@@ -820,7 +921,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function load_multi( $cond, $args = array() ) {
-			$_wpdb  = self::get_connection();
+			$_wpdb  = static::get_connection();
 			$result = array();
 			$sql    = ( ! is_array( $args ) || ! count( $args ) ) // Do we really need to prepare() or not?
 				? ( $cond )
@@ -833,7 +934,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			if ( '' !== $_wpdb->last_error ) {
 				if ( 1146 === Occurrences_Entity::get_last_sql_error( $_wpdb ) ) {
 					if ( Occurrences_Entity::create_table( $_wpdb ) ) {
-						$data_collected = $_wpdb->get_results( $sql, ARRAY_A );
+						$data_collected = array();
 					}
 				}
 			}
@@ -852,7 +953,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 				if ( '' !== $_wpdb->last_error ) {
 					if ( 1146 === Metadata_Entity::get_last_sql_error( $_wpdb ) ) {
 						if ( Metadata_Entity::create_table( $_wpdb ) ) {
-							$results = $_wpdb->get_results( $sql, ARRAY_A );
+							$results = array();
 						}
 					}
 				}
@@ -1174,7 +1275,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					$_wpdb = $connection;
 				}
 			} else {
-				$_wpdb = self::get_connection();
+				$_wpdb = static::get_connection();
 			}
 
 			$sql_values = array_filter( $sql_values );
@@ -1192,7 +1293,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			if ( '' !== $_wpdb->last_error ) {
 				if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
 					if ( ( static::class )::create_table( $_wpdb ) ) {
-						$results = $_wpdb->get_results( $sql, ARRAY_A );
+						$results = array();
 					}
 				} else {
 					Logger::log( 'Error: ' . (string) $_wpdb->last_error . ' Line: ' . __LINE__ . ' File: ' . __FILE__ . ' SQL data: query - ' . $query . ' Values: ' . \print_r( $sql_values, true ) );
@@ -1240,7 +1341,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					$_wpdb = $connection;
 				}
 			} else {
-				$_wpdb = self::get_connection();
+				$_wpdb = static::get_connection();
 			}
 
 			$sql = "SELECT 
@@ -1257,7 +1358,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			if ( '' !== $_wpdb->last_error ) {
 				if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
 					if ( ( static::class )::create_table( $_wpdb ) ) {
-						$results = $_wpdb->get_var( $sql );
+						$results = array();
 					}
 				}
 			}

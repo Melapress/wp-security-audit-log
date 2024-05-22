@@ -249,7 +249,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 * @since 4.4.0
 		 */
 		private static function normalize_version( string $version ): string {
-			$version_as_number = (int) filter_var( $version, FILTER_SANITIZE_NUMBER_INT );
+			$version_as_number = (string) filter_var( $version, FILTER_SANITIZE_NUMBER_INT );
 
 			if ( self::$pad_length > strlen( $version_as_number ) ) {
 				$version_as_number = str_pad( $version_as_number, static::$pad_length, '0', STR_PAD_RIGHT );

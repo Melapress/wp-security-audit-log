@@ -22,11 +22,12 @@ use WSAL\Helpers\Widget_Manager;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Actions\Plugin_Installer;
 use WSAL\Entities\Metadata_Entity;
-use WSAL\Helpers\Uninstall_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Controllers\Cron_Jobs;
 use WSAL\Entities\Occurrences_Entity;
 use WSAL\Controllers\Plugin_Extensions;
 use WSAL\WP_Sensors\WP_Database_Sensor;
+use WSAL\Helpers\Plugin_Settings_Helper;
 use WSAL\Controllers\Sensors_Load_Manager;
 use WSAL\Migration\Metadata_Migration_440;
 
@@ -141,11 +142,9 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			// phpcs:disable
 			// phpcs:enable
 
-			// Add custom schedules for WSAL early otherwise they won't work.
-			add_filter( 'cron_schedules', array( __CLASS__, 'recurring_schedules' ) );
+			MainWP_Addon::init();
 
-			// phpcs:disable
-			// phpcs:enable
+			Cron_Jobs::init();
 
 			// Hide all unrelated to the plugin notices on the plugin admin pages.
 			add_action( 'admin_print_scripts', array( '\WSAL\Helpers\WP_Helper', 'hide_unrelated_notices' ) );
@@ -162,8 +161,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			add_action( 'admin_init', array( __CLASS__, 'wsal_plugin_redirect' ) );
 
 			add_action( 'admin_init', array( __CLASS__, 'maybe_sync_premium_freemius' ) );
-
-			MainWP_Addon::init();
 		}
 
 		/**
@@ -248,12 +245,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function is_frontend_page() {
-			return ! is_admin()
-			&& ! WP_Helper::is_login_screen()
-			&& ( ! defined( 'WP_CLI' ) || ! \WP_CLI )
-			&& ( ! defined( 'DOING_CRON' ) || ! DOING_CRON )
-			&& ! self::is_rest_api()
-			&& ! self::is_admin_blocking_plugins_support_enabled();
+			return self::is_frontend();
 		}
 
 		/**
@@ -301,17 +293,17 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 					'wp-security-audit-log',
 					'wp-activity-log',
 				);
-				// @codingStandardsIgnoreStart
+
 				// Check if this plugin is being updated from the plugin list.
-				if ( isset( $_REQUEST['action'] ) && 'update-plugin' === wp_unslash( trim( $_REQUEST['action'] ) )
-                && in_array( wp_unslash( trim( $_REQUEST['slug'] ) ), $acceptable_slugs ) ) {
+				if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['slug'] ) && 'update-plugin' === trim( \sanitize_text_field( \wp_unslash( $_REQUEST['action'] ) ) )
+				&& in_array( trim( \sanitize_text_field( \wp_unslash( $_REQUEST['slug'] ) ) ), $acceptable_slugs ) ) {
 					return false;
 				}
 
 				// Check if this plugin is being updated using the file upload method.
-				if ( isset( $_REQUEST['action'] ) && 'upload-plugin' === wp_unslash( trim( $_REQUEST['action'] ) )
-                && isset( $_REQUEST['overwrite'] ) && 'update-plugin' === wp_unslash( trim( $_REQUEST['overwrite'] ) )
-                && isset( $_REQUEST['package'] ) ) {
+				if ( isset( $_REQUEST['action'] ) && 'upload-plugin' === trim( \sanitize_text_field( \wp_unslash( $_REQUEST['action'] ) ) )
+				&& isset( $_REQUEST['overwrite'] ) && 'update-plugin' === trim( \sanitize_text_field( \wp_unslash( $_REQUEST['overwrite'] ) ) )
+				&& isset( $_REQUEST['package'] ) ) {
 					/**
 					 * Request doesn't contain the file name, but a numeric package ID.
 					 *
@@ -330,12 +322,12 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				}
 
 				// Check if this plugin is being updated from the WordPress updated screen (update-core.php).
-				if ( isset( $_REQUEST['action'] ) && 'do-plugin-upgrade' === wp_unslash( trim( $_REQUEST['action'] ) ) ) {
+				if ( isset( $_REQUEST['action'] ) && 'do-plugin-upgrade' === trim( \sanitize_text_field( \wp_unslash( $_REQUEST['action'] ) ) ) ) {
 					if ( isset( $_REQUEST['checked'] ) ) {
-						$selected_plugins = $_REQUEST['checked'];
+						$selected_plugins = $_REQUEST['checked']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 						if ( ! empty( $selected_plugins ) ) {
 							foreach ( $selected_plugins as $selected_plugin ) {
-								if ( 'wp-security-audit-log.php' === basename( $selected_plugin ) ) {
+								if ( 'wp-security-audit-log.php' === basename( trim( \sanitize_text_field( \wp_unslash( $selected_plugin ) ) ) ) ) {
 									return false;
 								}
 							}
@@ -398,10 +390,10 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			add_action( 'admin_footer', array( __CLASS__, 'render_footer' ) );
 
 			// Handle admin Disable Custom Field.
-			add_action( 'wp_ajax_AjaxDisableCustomField', array( $this, 'ajax_disable_custom_field' ) );
+			add_action( 'wp_ajax_AjaxDisableCustomField', array( __CLASS__, 'ajax_disable_custom_field' ) );
 
 			// Handle admin Disable Alerts.
-			add_action( 'wp_ajax_AjaxDisableByCode', array( $this, 'ajax_disable_by_code' ) );
+			add_action( 'wp_ajax_AjaxDisableByCode', array( __CLASS__, 'ajax_disable_by_code' ) );
 
 			// Render Login Page Notification.
 			add_filter( 'login_message', array( __CLASS__, 'render_login_page_message' ), 10, 1 );
@@ -412,7 +404,8 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				wp_schedule_event( time(), 'daily', 'wsal_delete_logins' );
 			}
 
-			add_filter( 'mainwp_child_extra_execution', array( new WSAL_MainWpApi( $this ), 'handle_callback' ), 10, 2 );
+			add_filter( 'mainwp_child_extra_execution', array( '\WSAL\MainWP\MainWP_API', 'retrieve_info_call_back' ), 10, 2 );
+			// add_filter( 'mainwp_child_extra_execution', array( new WSAL_MainWpApi( $this ), 'handle_callback' ), 10, 2 );
 
 			add_action( 'wsal_freemius_loaded', array( $this, 'adjust_freemius_strings' ) );
 
@@ -455,6 +448,17 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 */
 		public static function is_mainwp_active() {
 			return WP_Helper::is_plugin_active( 'mainwp-child/mainwp-child.php' );
+		}
+
+		/**
+		 * Check if MainWP Server plugin is active or not.
+		 *
+		 * @return boolean
+		 *
+		 * @since 5.0.0
+		 */
+		public static function is_mainwp_server_active() {
+			return WP_Helper::is_plugin_active( 'mainwp/mainwp.php' );
 		}
 
 		/**
@@ -547,40 +551,13 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 					// Redirect URL.
 					$redirect = '';
 
-					// If current site is multisite and user is super-admin then redirect to network audit log.
-					if ( WP_Helper::is_multisite() && Settings_Helper::current_user_can( 'edit' ) && is_super_admin() ) {
-						$redirect = add_query_arg( 'page', 'wsal-auditlog', network_admin_url( 'admin.php' ) );
-					} else {
-						// Otherwise, redirect to main audit log view.
-						$redirect = add_query_arg( 'page', 'wsal-auditlog', admin_url( 'admin.php' ) );
-					}
+					// Otherwise, redirect to main audit log view.
+					$redirect = add_query_arg( 'page', 'wsal-auditlog', \network_admin_url( 'admin.php' ) );
+
 					wp_safe_redirect( $redirect );
 					exit();
 				}
 			}
-		}
-
-		/**
-		 * Method: Set allowed  HTML tags.
-		 *
-		 * @since 3.0.0
-		 */
-		public static function get_allowed_html_tags() {
-			// Set allowed HTML tags.
-			return array(
-				'a'      => array(
-					'href'   => array(),
-					'title'  => array(),
-					'target' => array(),
-				),
-				'br'     => array(),
-				'code'   => array(),
-				'em'     => array(),
-				'strong' => array(),
-				'p'      => array(
-					'class' => array(),
-				),
-			);
 		}
 
 		// phpcs:disable
@@ -743,8 +720,8 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 				// Hide plugin.
 				if ( Settings_Helper::get_boolean_option_value( 'hide-plugin' ) ) {
-					add_action( 'admin_head', array( __CLASS__, 'hide_plugin' ) );
-					add_filter( 'all_plugins', array( __CLASS__, 'wsal_hide_plugin' ) );
+					\add_action( 'admin_head', array( __CLASS__, 'hide_plugin' ) );
+					\add_filter( 'all_plugins', array( __CLASS__, 'wsal_hide_plugin' ) );
 				}
 			}
 
@@ -804,7 +781,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		public function ajax_disable_custom_field() {
+		public static function ajax_disable_custom_field() {
 			// Die if user does not have permission to disable.
 			if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
 				echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to disable this custom field.', 'wp-security-audit-log' ) . '</p>';
@@ -872,7 +849,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		public function ajax_disable_by_code() {
+		public static function ajax_disable_by_code() {
 			// Die if user does not have permission to disable.
 			if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
 				echo '<p>' . esc_html__( 'Error: You do not have sufficient permissions to disable this alert.', 'wp-security-audit-log' ) . '</p>';
@@ -882,7 +859,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			$disable_nonce = ( isset( $_POST['disable_nonce'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['disable_nonce'] ) ) : null;
 			$code          = ( isset( $_POST['code'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['code'] ) ) : null;
 
-			if ( ! isset( $disable_nonce ) || ! wp_verify_nonce( $disable_nonce, 'disable-alert-nonce' . $code ) ) {
+			if ( ! isset( $disable_nonce ) || ! \wp_verify_nonce( $disable_nonce, 'disable-alert-nonce' . $code ) ) {
 				die();
 			}
 
@@ -897,7 +874,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			echo wp_sprintf(
 				// translators: Alert code which is no longer monitored.
 				'<p>' . esc_html__( 'Alert %1$s is no longer being monitored. %2$s', 'wp-security-audit-log' ) . '</p>',
-				esc_html( $code ),
+				\esc_html( $code ),
 				'<br />' . esc_html__( 'You can enable this alert again from the Enable/Disable Alerts node in the plugin menu.', 'wp-security-audit-log' )
 			);
 			die;
@@ -931,7 +908,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			// phpcs:enable
 			// Set data array for common script.
 			$script_data = array(
-				'ajaxURL'           => admin_url( 'admin-ajax.php' ),
+				'ajaxURL'           => \admin_url( 'admin-ajax.php' ),
 				'liveEvents'        => $live_events_enabled,
 				'installing'        => esc_html__( 'Installing, please wait', 'wp-security-audit-log' ),
 				'already_installed' => esc_html__( 'Already installed', 'wp-security-audit-log' ),
@@ -947,6 +924,15 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 			// Enqueue script.
 			wp_enqueue_script( 'wsal-common' );
+
+			// Dont want to add a css file to all admin for the of setting an icon opacity.
+			?>			
+			<style>
+				#adminmenu div.wp-menu-image.svg {
+					opacity: 0.6;
+				}
+			</style>
+			<?php
 		}
 
 		/**
@@ -982,14 +968,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				/* Translators: %s: PHP Version */
 				$installation_errors  = sprintf( esc_html__( 'You are using a version of PHP that is older than %s, which is no longer supported.', 'wp-security-audit-log' ), esc_html( self::MIN_PHP_VERSION ) );
 				$installation_errors .= '<br />';
-				$installation_errors .= __( 'Contact us on <a href="mailto:plugins@wpwhitesecurity.com">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are using.', 'wp-security-audit-log' );
-			}
-
-			if ( WP_Helper::is_plugin_active( 'mainwp/mainwp.php' ) ) {
-				/* Translators: %s: Activity Log for MainWP plugin hyperlink */
-				$installation_errors = sprintf( __( 'Please install the %s plugin on the MainWP dashboard.', 'wp-security-audit-log' ), '<a href="https://wordpress.org/plugins/activity-log-mainwp/" target="_blank">' . __( 'Activity Log for MainWP', 'wp-security-audit-log' ) . '</a>' ) . ' ';
-				/* Translators: %s: Getting started guide hyperlink */
-				$installation_errors .= sprintf( __( 'The WP Activity Log should be installed on the child sites only. Refer to the %s for more information.', 'wp-security-audit-log' ), '<a href="https://melapress.com/support/kb/gettting-started-activity-log-mainwp-extension/" target="_blank">' . __( 'getting started guide', 'wp-security-audit-log' ) . '</a>' );
+				$installation_errors .= __( 'Contact us on <a href="mailto:plugins@melapress.com">plugins@melapress.com</a> to help you switch the version of PHP you are using.', 'wp-security-audit-log' );
 			}
 
 			if ( $installation_errors ) {
@@ -1011,17 +990,13 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			// Disable database sensor during the creation of tables.
 			WP_Database_Sensor::set_enabled( false );
 
-			// Install cleanup hook (remove older one if it exists).
-			wp_clear_scheduled_hook( 'wsal_cleanup' );
-			wp_schedule_event( current_time( 'timestamp' ) + 600, 'hourly', 'wsal_cleanup' );
-
 			// WSAL Audit Log page redirect option in anonymous mode.
 			if ( 'anonymous' === Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) ) {
 				Settings_Helper::set_option_value( 'redirect_on_activate', true );
 			}
 
 			// Run on each install to check MainWP Child plugin.
-			$this->settings()->set_mainwp_child_stealth_mode();
+			Plugin_Settings_Helper::set_mainwp_child_stealth_mode();
 
 			// Re-enable the database sensor after the tables are created.
 			WP_Database_Sensor::set_enabled( true );
@@ -1092,7 +1067,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				foreach ( $alerts as $alert ) {
 					// Flush the usernames metadata.
 					Metadata_Entity::update_by_name_and_occurrence_id( 'Users', array(), $alert['id'] );
-					// $alert->update_meta_value( 'Users', array() );
 				}
 			}
 		}
@@ -1150,7 +1124,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 				// Default message.
 				if ( ! $message ) {
-					$message = '<p class="message">' . wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href="https://melapress.com/" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), self::get_allowed_html_tags() ) . '</p>';
+					$message = '<p class="message">' . wp_kses( __( 'For security and auditing purposes, a record of all of your logged-in actions and changes within the WordPress dashboard will be recorded in an activity log with the <a href="https://melapress.com/" target="_blank">WP Activity Log plugin</a>. The audit log also includes the IP address where you accessed this site from.', 'wp-security-audit-log' ), Plugin_Settings_Helper::get_allowed_html_tags() ) . '</p>';
 				} else {
 					$message = '<p class="message">' . $message . '</p>';
 				}
@@ -1158,43 +1132,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 			// Return message.
 			return $message;
-		}
-
-		/**
-		 * Extend WP cron time intervals for scheduling.
-		 *
-		 * @param  array $schedules - Array of schedules.
-		 *
-		 * @return array
-		 *
-		 * @since 5.0.0
-		 */
-		public static function recurring_schedules( $schedules ) {
-			$schedules['sixhours']         = array(
-				'interval' => 21600,
-				'display'  => __( 'Every 6 hours', 'wp-security-audit-log' ),
-			);
-			$schedules['fortyfiveminutes'] = array(
-				'interval' => 2700,
-				'display'  => __( 'Every 45 minutes', 'wp-security-audit-log' ),
-			);
-			$schedules['thirtyminutes']    = array(
-				'interval' => 1800,
-				'display'  => __( 'Every 30 minutes', 'wp-security-audit-log' ),
-			);
-			$schedules['fifteenminutes']   = array(
-				'interval' => 900,
-				'display'  => __( 'Every 15 minutes', 'wp-security-audit-log' ),
-			);
-			$schedules['tenminutes']       = array(
-				'interval' => 600,
-				'display'  => __( 'Every 10 minutes', 'wp-security-audit-log' ),
-			);
-			$schedules['fiveminutes']      = array(
-				'interval' => 300,
-				'display'  => __( 'Every 5 minutes', 'wp-security-audit-log' ),
-			);
-			return $schedules;
 		}
 
 		/**
@@ -1271,16 +1208,26 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			global $pagenow;
 
 			// Check current page, bail early if this isn't the plugins page.
-			if ( 'plugins.php' !== $pagenow ) {
+			if ( 'plugins.php' !== $pagenow
+			&& ! ( is_ajax() && isset( $_REQUEST['pagenow'] ) && 'plugins' === $_REQUEST['pagenow'] ) ) {
+
 				return $plugins;
 			}
 
 			$predefined_plugins = Plugins_Helper::get_installable_plugins();
 
-			// Find WSAL by plugin basename.
-			if ( array_key_exists( WSAL_BASE_NAME, $plugins ) ) {
-				// Remove WSAL plugin from plugin list page.
-				unset( $plugins[ WSAL_BASE_NAME ] );
+			$main_plugins = array(
+				'premium' => 'wp-security-audit-log-premium/wp-security-audit-log.php',
+				'nofs'    => 'wp-security-audit-log-nofs/wp-security-audit-log.php',
+				'free'    => 'wp-security-audit-log/wp-security-audit-log.php',
+			);
+
+			foreach ( $main_plugins as $slug ) {
+				// Find WSAL by plugin basename.
+				if ( array_key_exists( $slug, $plugins ) ) {
+					// Remove WSAL plugin from plugin list page.
+					unset( $plugins[ $slug ] );
+				}
 			}
 
 			// Find and hide addons.

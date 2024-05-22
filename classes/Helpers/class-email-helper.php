@@ -22,11 +22,15 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 	 * Emailer Utility Class
 	 *
 	 * This utility class is used to send emails from WSAL.
+	 *
+	 * @since 5.0.0
 	 */
 	class Email_Helper {
 
 		/**
 		 * Sends the plugin deactivation email template.
+		 *
+		 * @since 5.0.0
 		 */
 		public static function send_deactivation_email() {
 			// Get the required variables.
@@ -91,6 +95,8 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 		 * @param array  $attachments   Email attachments.
 		 *
 		 * @return bool
+		 *
+		 * @since 5.0.0
 		 */
 		public static function send_email( $email_address, $subject, $content, $headers = '', $attachments = array() ) {
 
@@ -106,18 +112,19 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 			}
 
 			// @see: http://codex.wordpress.org/Function_Reference/wp_mail
-			add_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ), PHP_INT_MAX );
-			add_filter( 'wp_mail_from_name', array( __CLASS__, 'custom_wp_mail_from_name' ) );
+			\add_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ), PHP_INT_MAX );
+			\add_filter( 'wp_mail_from_name', array( __CLASS__, 'custom_wp_mail_from_name' ) );
 
-			$result = wp_mail( $email_address, $subject, $content, $headers, $attachments );
+			$result = \wp_mail( $email_address, $subject, $content, $headers, $attachments );
 
 			/**
 			 * Reset content-type to avoid conflicts.
 			 *
 			 * @see http://core.trac.wordpress.org/ticket/23578
 			 */
-			remove_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ), PHP_INT_MAX );
-			remove_filter( 'wp_mail_from_name', array( __CLASS__, 'custom_wp_mail_from_name' ) );
+			\remove_filter( 'wp_mail_from', array( __CLASS__, 'custom_wp_mail_from' ), PHP_INT_MAX );
+			\remove_filter( 'wp_mail_from_name', array( __CLASS__, 'custom_wp_mail_from_name' ) );
+
 			return $result;
 		}
 
@@ -125,7 +132,10 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 		 * Get email addresses by usernames.
 		 *
 		 * @param string $input_email - Comma separated emails.
+		 *
 		 * @return string
+		 *
+		 * @since 5.0.0
 		 */
 		public static function get_emails( $input_email ) {
 			$emails_arr        = array();
@@ -150,6 +160,8 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 
 		/**
 		 * Filter the mail content type.
+		 *
+		 * @since 5.0.0
 		 */
 		public static function set_html_content_type() {
 			return 'text/html';
@@ -159,7 +171,10 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 		 * Return if there is a from-email in the setting or the original passed.
 		 *
 		 * @param string $original_email_from – Original passed.
+		 *
 		 * @return string
+		 *
+		 * @since 5.0.0
 		 */
 		public static function custom_wp_mail_from( $original_email_from ) {
 			$use_email  = Settings_Helper::get_option_value( 'use-email', 'default_email' );
@@ -175,7 +190,10 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 		 * Return if there is a display-name in the setting or the original passed.
 		 *
 		 * @param string $original_email_from_name – Original passed.
+		 *
 		 * @return string
+		 *
+		 * @since 5.0.0
 		 */
 		public static function custom_wp_mail_from_name( $original_email_from_name ) {
 			$use_email       = Settings_Helper::get_option_value( 'use-email', 'default_email' );
@@ -183,8 +201,36 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 			if ( ! empty( $email_from_name ) && 'custom_email' === $use_email ) {
 				return $email_from_name;
 			} else {
+				if ( ! empty( self::get_default_email_address() ) ) {
+					return self::get_default_email_address();
+				}
+
 				return $original_email_from_name;
 			}
+		}
+
+		/**
+		 * Builds and returns the default email address used for the "from" email address when email is send
+		 *
+		 * @return string
+		 *
+		 * @since 5.0.0
+		 */
+		public static function get_default_email_address(): string {
+			$sitename = \wp_parse_url( \network_home_url(), PHP_URL_HOST );
+
+			$from_email = '';
+
+			if ( null !== $sitename ) {
+				$from_email = 'wsal@';
+				if ( \str_starts_with( $sitename, 'www.' ) ) {
+					$sitename = substr( $sitename, 4 );
+				}
+
+				$from_email .= $sitename;
+			}
+
+			return $from_email;
 		}
 	}
 }

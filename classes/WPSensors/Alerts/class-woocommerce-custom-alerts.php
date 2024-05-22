@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors\Alerts;
 
+use WSAL\MainWP\MainWP_Addon;
 use WSAL\WP_Sensors\Helpers\Woocommerce_Helper;
 
 // Exit if accessed directly.
@@ -38,7 +39,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 		 */
 		public static function get_custom_alerts(): array {
 			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( Woocommerce_Helper::is_woocommerce_active() ) {
+			if ( Woocommerce_Helper::is_woocommerce_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					esc_html__( 'WooCommerce', 'wp-security-audit-log' ) => array(
 						esc_html__( 'Products', 'wp-security-audit-log' ) => self::get_products_array(),
@@ -905,7 +906,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					9048,
 					WSAL_LOW,
 					esc_html__( 'Modified the value of an attribute of a product', 'wp-security-audit-log' ),
-					esc_html__( 'Modified the value of the attribute %AttributeName$ in the product %ProductTitle%.', 'wp-security-audit-log' ),
+					esc_html__( 'Modified the value of the attribute %AttributeName% in the product %ProductTitle%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Product ID', 'wp-security-audit-log' ) => '%ProductID%',
 						esc_html__( 'Product SKU', 'wp-security-audit-log' ) => '%SKU%',

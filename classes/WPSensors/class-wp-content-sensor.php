@@ -15,7 +15,6 @@ namespace WSAL\WP_Sensors;
 
 use WSAL\Helpers\WP_Helper;
 use WSAL\Controllers\Alert_Manager;
-use WSAL\Entities\Occurrences_Entity;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -122,26 +121,26 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function init() {
-			add_action( 'pre_post_update', array( __CLASS__, 'get_before_post_edit_data' ), 10, 2 );
-			add_action( 'save_post', array( __CLASS__, 'post_changed' ), 10, 3 );
-			add_action( 'set_object_terms', array( __CLASS__, 'post_terms_changed' ), 10, 4 );
-			add_action( 'post_stuck', array( __CLASS__, 'post_stuck_event' ), 10, 1 );
-			add_action( 'post_unstuck', array( __CLASS__, 'post_unstuck_event' ), 10, 1 );
-			add_action( 'delete_post', array( __CLASS__, 'event_post_deleted' ), 10, 1 );
-			add_action( 'wp_trash_post', array( __CLASS__, 'event_post_trashed' ), 10, 1 );
-			add_action( 'untrash_post', array( __CLASS__, 'event_post_untrashed' ) );
-			add_action( 'future_to_publish', array( __CLASS__, 'event_publish_future' ), 10, 1 );
-			add_action( 'admin_action_edit', array( __CLASS__, 'edit_post_in_gutenberg' ), 10 );
-			add_filter( 'post_edit_form_tag', array( __CLASS__, 'edit_post_in_classic' ), 10, 1 );
-			add_action( 'wp_head', array( __CLASS__, 'viewing_post' ), 10 );
-			add_action( 'create_category', array( __CLASS__, 'event_category_creation' ), 10, 1 );
-			add_action( 'create_post_tag', array( __CLASS__, 'event_tag_creation' ), 10, 1 );
-			add_action( 'pre_delete_term', array( __CLASS__, 'check_taxonomy_term_deletion' ), 10, 2 );
-			add_filter( 'wp_update_term_data', array( __CLASS__, 'event_update_term_data' ), 10, 4 );
-			add_filter( 'add_post_metadata', array( __CLASS__, 'check_added_meta' ), 10, 5 );
-			add_filter( 'delete_post_metadata', array( __CLASS__, 'check_deleted_meta' ), 10, 5 );
-			add_action( 'update_post_meta', array( __CLASS__, 'before_changing_meta' ), 10, 4 );
-			add_action( 'updated_post_meta', array( __CLASS__, 'check_changed_meta' ), 10, 4 );
+			\add_action( 'pre_post_update', array( __CLASS__, 'get_before_post_edit_data' ), 10, 2 );
+			\add_action( 'save_post', array( __CLASS__, 'post_changed' ), 10, 3 );
+			\add_action( 'set_object_terms', array( __CLASS__, 'post_terms_changed' ), 10, 4 );
+			\add_action( 'post_stuck', array( __CLASS__, 'post_stuck_event' ), 10, 1 );
+			\add_action( 'post_unstuck', array( __CLASS__, 'post_unstuck_event' ), 10, 1 );
+			\add_action( 'delete_post', array( __CLASS__, 'event_post_deleted' ), 10, 1 );
+			\add_action( 'wp_trash_post', array( __CLASS__, 'event_post_trashed' ), 10, 1 );
+			\add_action( 'untrash_post', array( __CLASS__, 'event_post_untrashed' ) );
+			\add_action( 'future_to_publish', array( __CLASS__, 'event_publish_future' ), 10, 1 );
+			\add_action( 'admin_action_edit', array( __CLASS__, 'edit_post_in_gutenberg' ), 10 );
+			\add_filter( 'post_edit_form_tag', array( __CLASS__, 'edit_post_in_classic' ), 10, 1 );
+			\add_action( 'wp_head', array( __CLASS__, 'viewing_post' ), 10 );
+			\add_action( 'create_category', array( __CLASS__, 'event_category_creation' ), 10, 1 );
+			\add_action( 'create_post_tag', array( __CLASS__, 'event_tag_creation' ), 10, 1 );
+			\add_action( 'pre_delete_term', array( __CLASS__, 'check_taxonomy_term_deletion' ), 10, 2 );
+			\add_filter( 'wp_update_term_data', array( __CLASS__, 'event_update_term_data' ), 10, 4 );
+			\add_filter( 'add_post_metadata', array( __CLASS__, 'check_added_meta' ), 10, 5 );
+			\add_filter( 'delete_post_metadata', array( __CLASS__, 'check_deleted_meta' ), 10, 5 );
+			\add_action( 'update_post_meta', array( __CLASS__, 'before_changing_meta' ), 10, 4 );
+			\add_action( 'updated_post_meta', array( __CLASS__, 'check_changed_meta' ), 10, 4 );
 
 			// Check if MainWP Child Plugin exists.
 			if ( \WpSecurityAuditLog::is_mainwp_active() ) {
@@ -155,10 +154,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 * Collect old post data before post update event.
 		 *
 		 * @param int $post_id - Post ID.
+		 * 
+		 * @since 5.0.0
 		 */
 		public static function get_before_post_edit_data( $post_id ) {
 			$post_id = (int) $post_id; // Making sure that the post id is integer.
-			$post    = get_post( $post_id ); // Get post.
+			$post    = \get_post( $post_id ); // Get post.
 
 			// If post exists.
 			if ( ! empty( $post ) && $post instanceof \WP_Post ) {
@@ -1112,10 +1113,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function get_editor_link( $post_id ): array {
-			$post_id = is_int( $post_id ) ? intval( $post_id ) : $post_id->ID;
+			$post_id = \is_object( $post_id ) ? $post_id->ID : (int) $post_id;
 			return array(
 				'name'  => 'EditorLinkPost',
-				'value' => get_edit_post_link( $post_id ),
+				'value' => \get_edit_post_link( $post_id ),
 			);
 		}
 
@@ -1711,7 +1712,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		private static function get_revision_link( $revision_id ) {
-			return ! empty( $revision_id ) ? add_query_arg( 'revision', $revision_id, admin_url( 'revision.php' ) ) : null;
+			return ! empty( $revision_id ) ? add_query_arg( 'revision', $revision_id, \network_admin_url( 'revision.php' ) ) : null;
 		}
 
 		/**
@@ -1821,7 +1822,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 				'taxonomy' => $taxonomy,
 				'tag_ID'   => $tag_id,
 			);
-			return ! empty( $tag_id ) ? add_query_arg( $tag_args, admin_url( 'term.php' ) ) : null;
+			return ! empty( $tag_id ) ? add_query_arg( $tag_args, \network_admin_url( 'term.php' ) ) : null;
 		}
 
 		/**

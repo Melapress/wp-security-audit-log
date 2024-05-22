@@ -243,7 +243,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 				'tag_ID'    => $tag_id,
 			);
 
-			return ! empty( $tag_id ) ? add_query_arg( $tag_args, admin_url( 'term.php' ) ) : null;
+			return ! empty( $tag_id ) ? add_query_arg( $tag_args, \network_admin_url( 'term.php' ) ) : null;
 		}
 
 		/**

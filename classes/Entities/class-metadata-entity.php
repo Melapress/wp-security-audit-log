@@ -234,5 +234,44 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 
 			return $results;
 		}
+
+		/**
+		 * Extracts the user data from the migration table based on given occurrences
+		 *
+		 * @param string $occurrence_ids - String with Occurrences IDs to search for.
+		 * @param \wpdb  $connection - \wpdb connection to be used for name extraction.
+		 *
+		 * @return array
+		 *
+		 * @since 5.0.0
+		 */
+		public static function get_user_data_by_occ_ids( string $occurrence_ids, $connection = null ): array {
+			$results = array();
+
+			if ( null !== $connection ) {
+				if ( $connection instanceof \wpdb ) {
+					$_wpdb = $connection;
+				}
+			} else {
+				$_wpdb = self::get_connection();
+			}
+
+			$sql = 'SELECT value FROM ' . self::get_table_name( $_wpdb ) . ' WHERE occurrence_id in (' . $occurrence_ids . ') AND ( name = "NewUserData" )';
+
+			// $sql = 'SELECT value FROM ' . self::get_table_name( $_wpdb ) . ' WHERE occurrence_id in (' . $occurrence_ids . ') AND ( name = "NewUserData" OR name = "NewUserID" )';
+
+			$_wpdb->suppress_errors( true );
+			$results = $_wpdb->get_results( $sql, \ARRAY_A );
+			if ( '' !== $_wpdb->last_error ) {
+				if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
+					if ( ( static::class )::create_table( $_wpdb ) ) {
+						$results = $_wpdb->get_results( $sql, \ARRAY_A );
+					}
+				}
+			}
+			$_wpdb->suppress_errors( false );
+
+			return $results;
+		}
 	}
 }

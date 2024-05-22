@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors\Alerts;
 
+use WSAL\MainWP\MainWP_Addon;
 use WSAL\WP_Sensors\Helpers\TablePress_Helper;
 
 // Exit if accessed directly.
@@ -41,7 +42,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Tablepress_Custom_Alerts' ) ) {
 		 */
 		public static function get_custom_alerts(): array {
 			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( TablePress_Helper::is_tablepress_active() ) {
+			if ( TablePress_Helper::is_tablepress_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					__( 'TablePress', 'wp-security-audit-log' ) => array(
 						__( 'Monitor TablePress', 'wp-security-audit-log' ) =>

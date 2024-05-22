@@ -2764,13 +2764,13 @@ msgstr "Note d'alerte personnalisée"
 #: wp-security-audit-log.php:261
 msgid ""
 "You are using a version of PHP that is older than %s, which is no longer "
-"supported.<br/>Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com"
-"\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you "
+"supported.<br/>Contact us on <a href=\"mailto:plugins@melapress.com"
+"\">plugins@melapress.com</a> to help you switch the version of PHP you "
 "are using."
 msgstr ""
 "Vous utilisez une version de PHP anterieure a %s, qui n'est plus supportee."
-"<br>Contactez-nous à <a href=\"mailto:plugins@wpwhitesecurity.com"
-"\">plugins@wpwhitesecurity.com</a> pour une assistance sur ce sujet."
+"<br>Contactez-nous à <a href=\"mailto:plugins@melapress.com"
+"\">plugins@melapress.com</a> pour une assistance sur ce sujet."
 
 #. Plugin Name of the plugin/theme
 msgid "WP Security Audit Log"

@@ -2,34 +2,39 @@
 # This file is distributed under the GPL v3.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Activity Log 4.6.4\n"
+"Project-Id-Version: WP Activity Log 5.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-security-audit-log\n"
-"Last-Translator: Melapress <info@wpwhitesecurity.com>\n"
+"Last-Translator: Melapress <info@melapress.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-02-14T05:56:45+00:00\n"
+"POT-Creation-Date: 2024-05-22T09:26:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.9.0\n"
+"X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: wp-security-audit-log\n"
 
 #. Plugin Name of the plugin
+#: wp-security-audit-log.php
 msgid "WP Activity Log"
 msgstr ""
 
 #. Plugin URI of the plugin
+#: wp-security-audit-log.php
 msgid "https://melapress.com/wordpress-activity-log/"
 msgstr ""
 
 #. Description of the plugin
+#: wp-security-audit-log.php
 msgid "Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites."
 msgstr ""
 
 #. Author of the plugin
+#: wp-security-audit-log.php
 msgid "Melapress"
 msgstr ""
 
 #. Author URI of the plugin
+#: wp-security-audit-log.php
 msgid "https://melapress.com/"
 msgstr ""

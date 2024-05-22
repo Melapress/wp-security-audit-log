@@ -81,14 +81,14 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 		public static function init() {
 			if ( Woocommerce_Helper::is_woocommerce_active() ) {
 				$frontend_events = Settings_Helper::get_frontend_events();
-				if ( is_user_logged_in() || ! is_user_logged_in() && ( isset( $frontend_events['woocommerce'] ) && $frontend_events['woocommerce'] ) ) {
-					add_action( 'woocommerce_new_order', array( __CLASS__, 'event_new_order' ), 10, 1 );
-					add_filter( 'woocommerce_order_item_quantity', array( __CLASS__, 'set_old_stock' ), 10, 3 );
-					add_filter( 'woocommerce_update_product_stock_query', array( __CLASS__, 'set_old_stock_for_orders' ), 10, 3 );
-					add_action( 'woocommerce_product_set_stock', array( __CLASS__, 'product_stock_changed' ), 10, 1 );
-					add_action( 'woocommerce_variation_set_stock', array( __CLASS__, 'product_stock_changed' ), 10, 1 );
-					add_action( 'update_user_meta', array( __CLASS__, 'before_wc_user_meta_update' ), 10, 3 );
-					add_action( 'added_user_meta', array( __CLASS__, 'before_wc_user_meta_update' ), 10, 3 );
+				\add_action( 'woocommerce_new_order', array( __CLASS__, 'event_new_order' ), 10, 1 );
+				\add_filter( 'woocommerce_order_item_quantity', array( __CLASS__, 'set_old_stock' ), 10, 3 );
+				\add_filter( 'woocommerce_update_product_stock_query', array( __CLASS__, 'set_old_stock_for_orders' ), 10, 3 );
+				\add_action( 'woocommerce_product_set_stock', array( __CLASS__, 'product_stock_changed' ), 10, 1 );
+				\add_action( 'woocommerce_variation_set_stock', array( __CLASS__, 'product_stock_changed' ), 10, 1 );
+				if ( \is_user_logged_in() || ! \is_user_logged_in() && ( isset( $frontend_events['woocommerce'] ) && $frontend_events['woocommerce'] ) ) {
+					\add_action( 'update_user_meta', array( __CLASS__, 'before_wc_user_meta_update' ), 10, 3 );
+					\add_action( 'added_user_meta', array( __CLASS__, 'before_wc_user_meta_update' ), 10, 3 );
 				}
 			}
 		}
@@ -208,7 +208,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 
 				// Set editor link manually.
 				if ( $post_type_object->_edit_link ) {
-					$link = admin_url( sprintf( $post_type_object->_edit_link . $action, $product_id ) );
+					$link = \network_admin_url( sprintf( $post_type_object->_edit_link . $action, $product_id ) );
 				} else {
 					$link = '';
 				}
@@ -365,8 +365,10 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 			$username = '';
 			if ( ! is_user_logged_in() ) {
 				$username = 'Unregistered user';
+				$user_id  = 0;
 			} else {
-				$username = wp_get_current_user()->user_login;
+				$username = \wp_get_current_user()->user_login;
+				$user_id  = \wp_get_current_user()->ID;
 			}
 
 			// If stock status has changed then trigger the alert.
@@ -381,6 +383,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 						'OldStatus'          => self::get_stock_status( $old_stock_status ),
 						'NewStatus'          => self::get_stock_status( $new_stock_status ),
 						'Username'           => $username,
+						'CurrentUserID'      => $user_id,
 						$editor_link['name'] => $editor_link['value'],
 					)
 				);
@@ -432,6 +435,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 						'OldValue'           => ! empty( $old_stock ) ? $old_stock : 0,
 						'NewValue'           => $new_stock,
 						'Username'           => $username,
+						'CurrentUserID'      => $user_id,
 						'StockOrderID'       => $order_id,
 						$editor_link['name'] => $editor_link['value'],
 					)

@@ -190,7 +190,8 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 */
 		public static function init() {
 			// phpcs:disable
-			add_action( 'shutdown', array( __CLASS__, 'commit_pipeline' ), 8 );
+			// phpcs:enable
+			\add_action( 'shutdown', array( __CLASS__, 'commit_pipeline' ), 8 );
 		}
 
 		/**
@@ -212,6 +213,13 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			if ( isset( $data['PostType'] ) && ! empty( $data['PostType'] ) ) {
 				// If the post type is disabled then return.
 				if ( self::is_disabled_post_type( $data['PostType'] ) ) {
+					return;
+				}
+			}
+
+			// If the post status is disabled then return.
+			if ( isset( $data['PostStatus'] ) && ! empty( $data['PostStatus'] ) ) {
+				if ( self::is_disabled_post_status( $data['PostStatus'] ) ) {
 					return;
 				}
 			}
@@ -270,7 +278,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			if ( null === self::$is_ip_disabled ) {
 				self::$is_ip_disabled = false;
 				$ip                   = Settings_Helper::get_main_client_ip();
-				$excluded_ips         = Settings_Helper::get_excluded_monitoring_ip();
+				$excluded_ips         = Settings_Helper::get_excluded_monitoring_ips();
 
 				if ( ! empty( $excluded_ips ) ) {
 					foreach ( $excluded_ips as $excluded_ip ) {
@@ -291,6 +299,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 					}
 				}
 			}
+
 			return self::$is_ip_disabled;
 		}
 
@@ -305,6 +314,19 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 */
 		public static function is_disabled_post_type( $post_type ) {
 			return in_array( $post_type, self::get_all_post_types(), true );
+		}
+
+		/**
+		 * Method: Check whether post status is disabled or not.
+		 *
+		 * @param string $post_status - Post status.
+		 *
+		 * @return bool - True if disabled, False if otherwise.
+		 *
+		 * @since 5.0.0
+		 */
+		public static function is_disabled_post_status( $post_status ) {
+			return in_array( $post_status, Settings_Helper::get_excluded_post_statuses(), true );
 		}
 
 		/**
@@ -473,6 +495,13 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			if ( isset( $data['PostType'] ) && ! empty( $data['PostType'] ) ) {
 				// If the post type is disabled then return.
 				if ( self::is_disabled_post_type( $data['PostType'] ) ) {
+					return;
+				}
+			}
+
+			// If the post status is disabled then return.
+			if ( isset( $data['PostStatus'] ) && ! empty( $data['PostStatus'] ) ) {
+				if ( self::is_disabled_post_status( $data['PostStatus'] ) ) {
 					return;
 				}
 			}
@@ -680,6 +709,8 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 * @param array $event_data - Misc alert data.
 		 */
 		public static function log( $event_id, $event_data = array() ) {
+			$alert_obj  = self::get_alerts()[ $event_id ];
+
 			if ( ! isset( $event_data['ClientIP'] ) ) {
 				$client_ip = Settings_Helper::get_main_client_ip();
 				if ( ! empty( $client_ip ) ) {
@@ -699,10 +730,36 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			}
 			if ( ! isset( $event_data['Username'] ) && ! isset( $event_data['CurrentUserID'] ) ) {
 				if ( function_exists( 'get_current_user_id' ) ) {
-					$event_data['CurrentUserID'] = get_current_user_id();
+					$event_data['CurrentUserID'] = \get_current_user_id();
+					if ( 0 !== $event_data['CurrentUserID'] ) {
+						$event_data['Username']      = \get_user_by( 'ID', $event_data['CurrentUserID'] )->user_login;
+					}
+					if ( 0 === $event_data['CurrentUserID'] ) {
+						if ( 'system' === \strtolower( $alert_obj['object'] ) ) {
+							$event_data['Username'] = 'System';
+						} else {
+							$event_data['Username'] = 'Unknown User';
+						}
+					}
 				}
 			}
-			if ( ! isset( $event_data['CurrentUserRoles'] ) && function_exists( 'is_user_logged_in' ) && is_user_logged_in() ) {
+			if ( isset( $event_data['CurrentUserID'] ) && ! isset( $event_data['Username'] ) ) {
+				if ( 0 === $event_data['CurrentUserID'] ) {
+					if ( 'system' === \strtolower( $alert_obj['object'] ) ) {
+						$event_data['Username'] = 'System';
+					} else {
+						$event_data['Username'] = 'Unknown User';
+					}
+				} else {
+					$user = \get_user_by( 'ID', $event_data['CurrentUserID'] );
+					if ( $user ) {
+						$event_data['Username'] = $user->user_login;
+					} else {
+						$event_data['Username'] = 'Deleted';
+					}
+				}
+			}
+			if ( ! isset( $event_data['CurrentUserRoles'] ) && function_exists( 'is_user_logged_in' ) && \is_user_logged_in() ) {
 				$current_user_roles = User_Helper::get_user_roles();
 				if ( ! empty( $current_user_roles ) ) {
 					$event_data['CurrentUserRoles'] = $current_user_roles;
@@ -720,7 +777,6 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			}
 
 			// Get event severity.
-			$alert_obj  = self::get_alerts()[ $event_id ];
 			$alert_code = $alert_obj ? Constants::get_constant_code( $alert_obj['severity'] ) : -1;
 
 			if ( -1 !== $alert_code ) {
@@ -1042,12 +1098,14 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 *
 		 * @param int  $limit – Number of events.
 		 * @param bool $include_meta - Should we include meta to the collected events.
+		 * @param bool $first - If is set to true, it will extract oldest events (default is most recent ones).
 		 *
 		 * @return WSAL_Models_Occurrence[]|bool
 		 *
 		 * @since 4.5.0
+		 * @since 5.0.0 $first flag is added
 		 */
-		public static function get_latest_events( $limit = 1, bool $include_meta = false ) {
+		public static function get_latest_events( $limit = 1, bool $include_meta = false, bool $first = false ) {
 
 			if ( ! Occurrences_Entity::get_connection()->has_connected ) {
 				// Connection problem while using external database (if local database is used, we would see WordPress's
@@ -1055,17 +1113,25 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				return false;
 			}
 
+			$direction = 'DESC';
+			if ( $first ) {
+				$direction = 'ASC';
+			}
+
 			$query = array();
 
 			// Get site id.
 			$site_id = (int) WP_Helper::get_view_site_id();
+
+			$site_id = \apply_filters( 'wsal_alter_site_id', $site_id );
+
 			// if we have a blog id then add it.
 			if ( $site_id ) {
 				$query['AND'][] = array( ' site_id = %s ' => $site_id );
 			}
 
 			if ( ! $include_meta ) {
-				$events = Occurrences_Entity::build_query( array(), $query, array( 'created_on' => 'DESC' ), array( $limit ) );
+				$events = Occurrences_Entity::build_query( array(), $query, array( 'created_on' => $direction ), array( $limit ) );
 			} else {
 
 				$meta_table_name = Metadata_Entity::get_table_name();
@@ -1090,7 +1156,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				 * Because of that we can not use limit directly here. We will extract enough data to include the metadata as well and limit the results later on - still fastest than creating enormous amount of queries.
 				 * Currently there are no more than 10 records (meta) per occurrence, we are using 12 just in case.
 				 */
-				$events = Occurrences_Entity::build_query( array_merge( $meta_full_fields_array, $occurrence_full_fields_array ), $query, array( 'created_on' => 'DESC' ), array( $limit * 12 ), $join_clause );
+				$events = Occurrences_Entity::build_query( array_merge( $meta_full_fields_array, $occurrence_full_fields_array ), $query, array( 'created_on' => $direction ), array( $limit * 12 ), $join_clause );
 
 				$events = Occurrences_Entity::prepare_with_meta_data( $events );
 
@@ -1289,55 +1355,52 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 *
 		 * @param string $username – Username.
 		 *
-		 * @return stdClass
+		 * @return array
 		 *
 		 * @since 4.5.0
 		 */
 		public static function get_event_user_data( $username ) {
 			// User data.
-			$user_data = new \stdClass();
+			$user_data = array();
 
 			// Handle WSAL usernames.
 			if ( empty( $username ) ) {
-				$user_data->username = 'System';
+				$user_data['username'] = 'System';
 			} elseif ( 'Plugin' === $username ) {
-				$user_data->username = 'Plugin';
+				$user_data['username'] = 'Plugin';
 			} elseif ( 'Plugins' === $username ) {
-				$user_data->username = 'Plugins';
+				$user_data['username'] = 'Plugins';
 			} elseif ( 'Website Visitor' === $username || 'Unregistered user' === $username ) {
-				$user_data->username = 'Unregistered user';
+				$user_data['username'] = 'Unregistered user';
 			} else {
 				// Check WP user.
 				if ( isset( self::$wp_users[ $username ] ) ) {
 					// Retrieve from users cache.
-					$user = self::$wp_users[ $username ];
+					$user_data = self::$wp_users[ $username ];
 				} else {
 					// Get user from WP.
-					$user = get_user_by( 'login', $username );
+					$user = \get_user_by( 'login', $username );
 
 					if ( $user && $user instanceof \WP_User ) {
 						// Store the user data in class member.
-						self::$wp_users[ $username ] = (object) array(
-							'ID'           => $user->ID,
-							'user_login'   => $user->user_login,
-							'first_name'   => $user->first_name,
-							'last_name'    => $user->last_name,
-							'display_name' => $user->display_name,
-							'user_email'   => $user->user_email,
+						self::$wp_users[ $username ] = array(
+							'ID'            => $user->ID,
+							'user_login'    => $user->user_login,
+							'first_name'    => $user->first_name,
+							'last_name'     => $user->last_name,
+							'display_name'  => $user->display_name,
+							'user_email'    => $user->user_email,
+							'user_nicename' => $user->user_nicename,
+							'user_roles'    => User_Helper::get_user_roles( $user ),
 						);
+
+						$user_data = self::$wp_users[ $username ];
 					}
 				}
 
 				// Set user data.
-				if ( $user ) {
-					$user_data->user_id      = $user->ID;
-					$user_data->username     = $user->user_login;
-					$user_data->first_name   = $user->first_name;
-					$user_data->last_name    = $user->last_name;
-					$user_data->display_name = $user->display_name;
-					$user_data->user_email   = $user->user_email;
-				} else {
-					$user_data->username = 'System';
+				if ( ! $user ) {
+					$user_data['username'] = 'System';
 				}
 			}
 
@@ -1345,7 +1408,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		}
 
 		/**
-		 * Returns the cache wp users.
+		 * Returns the cached wp users.
 		 *
 		 * @return array
 		 *
@@ -1462,9 +1525,6 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			}
 
 			$result = array();
-			if ( empty( self::$alerts ) ) {
-				self::get_alerts();
-			}
 
 			foreach ( self::$alerts as $alert ) {
 				if ( ! isset( $result[ \html_entity_decode( $alert['category'] ) ] ) ) {

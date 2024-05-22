@@ -7073,12 +7073,12 @@ msgstr ""
 
 #: wp-security-audit-log.php:826
 msgid ""
-"Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com"
-"\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you "
+"Contact us on <a href=\"mailto:plugins@melapress.com"
+"\">plugins@melapress.com</a> to help you switch the version of PHP you "
 "are using."
 msgstr ""
-"Contattaci a <a href=\"mailto:plugins@wpwhitesecurity.com"
-"\">plugins@wpwhitesecurity.com</a> per aiutarti a cambiare la versione di "
+"Contattaci a <a href=\"mailto:plugins@melapress.com"
+"\">plugins@melapress.com</a> per aiutarti a cambiare la versione di "
 "php che stai utilizzando."
 
 #: wp-security-audit-log.php:909

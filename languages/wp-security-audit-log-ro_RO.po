@@ -1894,13 +1894,13 @@ msgstr ""
 #: wp-security-audit-log.php:193
 msgid ""
 "You are using a version of PHP that is older than %s, which is no longer supported."
-"<br/>Contact us on <a href=\"mailto:plugins@wpwhitesecurity.com"
-"\">plugins@wpwhitesecurity.com</a> to help you switch the version of PHP you are "
+"<br/>Contact us on <a href=\"mailto:plugins@melapress.com"
+"\">plugins@melapress.com</a> to help you switch the version of PHP you are "
 "using."
 msgstr ""
 "Utilizați o versiune PHP mai veche decât%, care nu mai este acceptată. <br/> "
-"Contactaţi-ne pe <a href=\"mailto:plugins@wpwhitesecurity.com\"> "
-"plugins@wpwhitesecurity.com </ o> pentru a vă ajuta să schimbați versiunea PHP pe "
+"Contactaţi-ne pe <a href=\"mailto:plugins@melapress.com\"> "
+"plugins@melapress.com </ o> pentru a vă ajuta să schimbați versiunea PHP pe "
 "care o utilizați."
 
 #. Plugin Name of the plugin/theme

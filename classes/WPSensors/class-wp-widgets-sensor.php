@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( '\WSAL\WP_Sensors\WP_Widgets_Sensor' ) ) {
+if ( ! class_exists( '\WSAL\WP_Sensors\WSAL_Sensors_Widgets' ) ) {
 	/**
 	 * Widgets sensor.
 	 *

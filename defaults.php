@@ -193,9 +193,10 @@ function set_wsal_alerts() {
 					1003,
 					WSAL_LOW,
 					esc_html__( 'Login failed  / non existing user', 'wp-security-audit-log' ),
-					esc_html__( '%Attempts% failed login(s).', 'wp-security-audit-log' ),
+					esc_html__( 'Username %Users% failed login.', 'wp-security-audit-log' ),
 					array(),
-					wsaldefaults_build_links( array( 'LogFileText' ) ),
+					array(),
+					// wsaldefaults_build_links( array( 'LogFileText' ) ),
 					'system',
 					'failed-login',
 				),
@@ -787,11 +788,12 @@ function set_wsal_alerts() {
 					2016,
 					WSAL_LOW,
 					esc_html__( 'User changed post category', 'wp-security-audit-log' ),
-					esc_html__( 'Changed the category(ies) of the post %PostTitle% to %NewCategories%.', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the category(ies) of the post %PostTitle%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Post ID', 'wp-security-audit-log' )                => '%PostID%',
 						esc_html__( 'Post type', 'wp-security-audit-log' )              => '%PostType%',
 						esc_html__( 'Post status', 'wp-security-audit-log' )            => '%PostStatus%',
+						esc_html__( 'New category(ies)', 'wp-security-audit-log' )      => '%NewCategories%',
 						esc_html__( 'Previous category(ies)', 'wp-security-audit-log' ) => '%OldCategories%',
 					),
 					wsaldefaults_build_links( array( 'EditorLinkPost', 'PostUrlIfPublished' ) ),
@@ -2147,6 +2149,7 @@ function set_wsal_alerts() {
 					array(
 						esc_html__( 'Updated version', 'wp-security-audit-log' )  => '%PluginData->Version%',
 						esc_html__( 'Install location', 'wp-security-audit-log' ) => '%PluginFile%',
+						esc_html__( 'Previous version', 'wp-security-audit-log' ) => '%OldVersion%',
 					),
 					array(),
 					'plugin',
@@ -2569,6 +2572,18 @@ function set_wsal_alerts() {
 					esc_html__( 'The post type %post_type% to / from the list of excluded post types from the activity log.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous list of Post types', 'wp-security-audit-log' ) => '%previous_types%',
+					),
+					array(),
+					'wp-activity-log',
+					'added',
+				),
+				array(
+					6062,
+					WSAL_LOW,
+					esc_html__( 'A post status was added to / from the list of excluded post statuses from the activity log', 'wp-security-audit-log' ),
+					esc_html__( 'The post status %post_status% to / from the list of excluded post statuses fields from the activity log.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous list of user profile Custom fields', 'wp-security-audit-log' ) => '%previous_status%',
 					),
 					array(),
 					'wp-activity-log',
@@ -3114,7 +3129,7 @@ function set_wsal_alerts() {
 				array(
 					6061,
 					WSAL_LOW,
-					esc_html__( 'Email sent to: %EmailAddress%', 'wp-security-audit-log' ),
+					esc_html__( 'Email was sent', 'wp-security-audit-log' ),
 					__( 'Email was sent to %EmailAddress%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Subject', 'wp-security-audit-log' ) => '%EmailSubject%',

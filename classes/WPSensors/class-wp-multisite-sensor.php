@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors;
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\MainWP\MainWP_Addon;
 use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
@@ -59,7 +60,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function init() {
-			if ( WP_Helper::is_multisite() ) {
+			if ( WP_Helper::is_multisite() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
 				if ( current_user_can( 'switch_themes' ) ) {
 					add_action( 'shutdown', array( __CLASS__, 'event_admin_shutdown' ) );
@@ -378,7 +379,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 					'SiteName'       => get_blog_option( $blog_id, 'blogname' ),
 					'FirstName'      => $user ? $user->user_firstname : false,
 					'LastName'       => $user ? $user->user_lastname : false,
-					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+					'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 				),
 				array( __CLASS__, 'must_not_contain_create_user' )
 			);
@@ -404,7 +405,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 					'SiteName'       => get_blog_option( $blog_id, 'blogname' ),
 					'FirstName'      => $user ? $user->user_firstname : false,
 					'LastName'       => $user ? $user->user_lastname : false,
-					'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+					'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 				),
 				array( __CLASS__, 'must_not_contain_create_user' )
 			);

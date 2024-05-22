@@ -89,6 +89,35 @@ if ( ! class_exists( '\WSAL\Entities\Archive\Archive_Records' ) ) {
 				$sql   = 'REPLACE INTO ' . Occurrences_Entity::get_table_name( $archive_db ) . ' ( id, site_id, alert_id, created_on, client_ip, severity, object, event_type, user_agent, user_roles, username, user_id, session_id, post_status, post_type, post_id ) VALUES ';
 				foreach ( $occurrences as $entry ) {
 
+					if ( in_array( $entry['alert_id'], array( 1000, 1001, 1002, 1003 ) ) ) {
+						if ( empty( $entry['user_id'] ) && empty( $entry['username'] ) ) {
+							$entry['user_id']  = 0;
+							$entry['username'] = 'Unknown user';
+						} elseif ( empty( $entry['username'] ) ) {
+							if ( 0 === (int) $entry['user_id'] ) {
+								$entry['username'] = 'Unknown User';
+							} else {
+								$user = \get_user_by( 'ID', $entry['user_id'] );
+								if ( $user ) {
+									$entry['username'] = $user->user_login;
+								} else {
+									$entry['username'] = 'Deleted';
+								}
+							}
+						} elseif ( empty( (int) $entry['user_id'] ) ) {
+							if ( 0 === (int) $entry['user_id'] ) {
+								$entry['username'] = 'Unknown User';
+							} else {
+								$user = \get_user_by( 'login', $entry['username'] );
+								if ( $user ) {
+									$entry['user_id'] = $user->ID;
+								} else {
+									$entry['user_id'] = 0;
+								}
+							}
+						}
+					}
+
 					$format_array = array(
 						'id'          => '%d',
 						'site_id'     => '%d',

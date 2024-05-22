@@ -64,19 +64,19 @@ class WSAL_Views_EmailNotifications extends WSAL_ExtensionPlaceholderView {
 		$screenshots  = array(
 			array(
 				'desc' => esc_html__( 'Email and SMS notifications instantly alert you of important changes on your WordPress site.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/notifications/notifications_1.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/notifications/notifications_1.webp',
 			),
 			array(
 				'desc' => esc_html__( 'Easily enable any of the built-in security and user management notifications.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/notifications/notifications_2.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/notifications/notifications_2.webp',
 			),
 			array(
 				'desc' => esc_html__( 'Use the trigger builder to configure any type of email and SMS notification to get instantly alerted of site changes that are important to you and your business.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/notifications/notifications_3.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/notifications/notifications_3.webp',
 			),
 			array(
 				'desc' => esc_html__( 'All email and SMS templates are configurable, allowing you to personalize them.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/notifications/notifications_4.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/notifications/notifications_4.webp',
 			),
 		);
 

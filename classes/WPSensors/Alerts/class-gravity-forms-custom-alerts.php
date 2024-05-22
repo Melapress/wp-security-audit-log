@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors\Alerts;
 
+use WSAL\MainWP\MainWP_Addon;
 use WSAL\WP_Sensors\Helpers\GravityForms_Helper;
 
 // Exit if accessed directly.
@@ -41,7 +42,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 		 */
 		public static function get_custom_alerts(): array {
 			// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
-			if ( GravityForms_Helper::is_gravityforms_active() ) {
+			if ( GravityForms_Helper::is_gravityforms_active() || MainWP_Addon::check_mainwp_plugin_active() ) {
 				return array(
 					esc_html__( 'Gravity Forms', 'wp-security-audit-log' ) => array(
 						esc_html__( 'Monitor Gravity Forms', 'wp-security-audit-log' ) =>

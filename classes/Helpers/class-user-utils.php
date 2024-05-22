@@ -101,7 +101,7 @@ if ( ! class_exists( '\WSAL\Helpers\User_Utils' ) ) {
 			if ( isset( $meta['Username'] ) ) {
 				return $meta['Username'];
 			} elseif ( isset( $meta['CurrentUserID'] ) ) {
-				$data = get_userdata( $meta['CurrentUserID'] );
+				$data = \get_userdata( $meta['CurrentUserID'] );
 
 				return $data ? $data->user_login : '';
 			}
@@ -126,7 +126,7 @@ if ( ! class_exists( '\WSAL\Helpers\User_Utils' ) ) {
 
 			$tooltip  = '<strong>' . esc_attr__( 'Username: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_login . '</br>';
 			$tooltip .= ( ! empty( $user->data->first_name ) ) ? '<strong>' . esc_attr__( 'First name: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->first_name . '</br>' : '';
-			$tooltip .= ( ! empty( $user->data->first_name ) ) ? '<strong>' . esc_attr__( 'Last Name: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->first_name . '</br>' : '';
+			$tooltip .= ( ! empty( $user->data->last_name ) ) ? '<strong>' . esc_attr__( 'Last Name: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->last_name . '</br>' : '';
 			$tooltip .= '<strong>' . esc_attr__( 'Email: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_email . '</br>';
 			$tooltip .= '<strong>' . esc_attr__( 'Nickname: ', 'wp-security-audit-log' ) . '</strong>' . $user->data->user_nicename . '</br></br>';
 
