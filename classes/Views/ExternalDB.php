@@ -61,15 +61,15 @@ class WSAL_Views_ExternalDB extends WSAL_ExtensionPlaceholderView {
 		$screenshots  = array(
 			array(
 				'desc' => esc_html__( 'Easily configure integration and database connections thanks to a user friendly wizard.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/external-db/db_integrations_1.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/external-db/db_integrations_1.webp',
 			),
 			array(
 				'desc' => esc_html__( 'Configure activity log filters for third party services connections.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/external-db/db_integrations_2.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/external-db/db_integrations_2.webp',
 			),
 			array(
 				'desc' => esc_html__( 'Configure an unlimited number of connections to different databases and third party services.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/external-db/db_integrations_3.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/external-db/db_integrations_3.webp',
 			),
 		);
 

@@ -84,8 +84,8 @@
 			//Get tooltip content
 			if(this.options.content){
 				this.content = this.options.content;
-			}else if(this.bearer.attr("data-tooltip")){
-				this.content = this.bearer.attr("data-tooltip");
+			}else if(this.bearer.attr("data-darktooltip")){
+				this.content = this.bearer.attr("data-darktooltip");
 			}else{
 				// console.log("No content for tooltip: " + this.bearer.selector);
 				return;
@@ -246,7 +246,7 @@
 		},
 
 		onYes: function(){
-			this.options.onYes(this.bearer);
+			this.options.onYes(this.bearer, this);
 			this.finalMessage();
 		},
 

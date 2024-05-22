@@ -568,6 +568,22 @@ abstract class WP_Background_Process extends WP_Async_Request
         do_action($this->identifier . '_completed');
     }
     /**
+     * Get the cron healthcheck interval in minutes.
+     *
+     * Default is 5 minutes, minimum is 1 minute.
+     *
+     * @return int
+     */
+    public function get_cron_interval()
+    {
+        $interval = 5;
+        if (\property_exists($this, 'cron_interval')) {
+            $interval = $this->cron_interval;
+        }
+        $interval = apply_filters($this->cron_interval_identifier, $interval);
+        return \is_int($interval) && 0 < $interval ? $interval : 5;
+    }
+    /**
      * Schedule the cron healthcheck job.
      *
      * @access public
@@ -578,10 +594,7 @@ abstract class WP_Background_Process extends WP_Async_Request
      */
     public function schedule_cron_healthcheck($schedules)
     {
-        $interval = apply_filters($this->cron_interval_identifier, 5);
-        if (\property_exists($this, 'cron_interval')) {
-            $interval = apply_filters($this->cron_interval_identifier, $this->cron_interval);
-        }
+        $interval = $this->get_cron_interval();
         if (1 === $interval) {
             $display = __('Every Minute');
         } else {
@@ -616,7 +629,7 @@ abstract class WP_Background_Process extends WP_Async_Request
     protected function schedule_event()
     {
         if (!wp_next_scheduled($this->cron_hook_identifier)) {
-            wp_schedule_event(\time(), $this->cron_interval_identifier, $this->cron_hook_identifier);
+            wp_schedule_event(\time() + $this->get_cron_interval() * \MINUTE_IN_SECONDS, $this->cron_interval_identifier, $this->cron_hook_identifier);
         }
     }
     /**

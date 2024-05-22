@@ -63,11 +63,11 @@ class WSAL_Views_LogInUsers extends WSAL_ExtensionPlaceholderView {
 		$screenshots  = array(
 			array(
 				'desc' => esc_html__( 'See who is logged in to your WordPress site and multisite network in real-time.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/users-sessions-management/user_sessions_1.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/users-sessions-management/user_sessions_1.webp',
 			),
 			array(
 				'desc' => esc_html__( 'Limit, manage and block multiple same user sessions easily.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/users-sessions-management/user_sessions_2.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/users-sessions-management/user_sessions_2.webp',
 			),
 		);
 

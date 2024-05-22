@@ -773,19 +773,20 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 
 			$old_version = ( isset( $old_plugins[ $plugin_file ] ) ) ? $old_plugins[ $plugin_file ]['Version'] : false;
 			$new_version = $plugin_data['Version'];
-
+			
 			if ( $old_version !== $new_version ) {
 				Alert_Manager::trigger_event(
 					5004,
 					array(
 						'PluginFile' => $plugin_file,
 						'PluginData' => (object) array(
-							'Name'      => $plugin_data['Name'],
-							'PluginURI' => $plugin_data['PluginURI'],
-							'Version'   => $new_version,
-							'Author'    => $plugin_data['Author'],
-							'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+							'Name'       => $plugin_data['Name'],
+							'PluginURI'  => $plugin_data['PluginURI'],
+							'Version'    => $new_version,
+							'Author'     => $plugin_data['Author'],
+							'Network'    => $plugin_data['Network'] ? 'True' : 'False',
 						),
+						'OldVersion' => $old_version,
 					)
 				);
 			}

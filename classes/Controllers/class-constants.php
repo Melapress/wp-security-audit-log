@@ -116,35 +116,35 @@ if ( ! class_exists( '\WSAL\Controllers\Constants' ) ) {
 					'text'        => __( 'Unknown', 'wp-security-audit-log' ),
 					'description' => __( 'Unknown error code.', 'wp-security-audit-log' ),
 				),
-				array(
+				500 => array(
 					'name'        => 'WSAL_CRITICAL',
 					'css'         => 'wsal_critical',
 					'value'       => 500,
 					'text'        => __( 'Critical', 'wp-security-audit-log' ),
 					'description' => esc_html__( 'Critical severity events.', 'wp-security-audit-log' ),
 				),
-				array(
+				400 => array(
 					'name'        => 'WSAL_HIGH',
 					'css'         => 'wsal_high',
 					'value'       => 400,
 					'text'        => __( 'High', 'wp-security-audit-log' ),
 					'description' => esc_html__( 'High severity events.', 'wp-security-audit-log' ),
 				),
-				array(
+				300 => array(
 					'name'        => 'WSAL_MEDIUM',
 					'css'         => 'wsal_medium',
 					'value'       => 300,
 					'text'        => __( 'Medium', 'wp-security-audit-log' ),
 					'description' => esc_html__( 'Medium severity events.', 'wp-security-audit-log' ),
 				),
-				array(
+				250 => array(
 					'name'        => 'WSAL_LOW',
 					'css'         => 'wsal_low',
 					'value'       => 250,
 					'text'        => __( 'Low', 'wp-security-audit-log' ),
 					'description' => esc_html__( 'Low severity events.', 'wp-security-audit-log' ),
 				),
-				array(
+				200 => array(
 					'name'        => 'WSAL_INFORMATIONAL',
 					'css'         => 'wsal_informational',
 					'value'       => 200,
@@ -340,5 +340,40 @@ if ( ! class_exists( '\WSAL\Controllers\Constants' ) ) {
 				'description' => __( 'Unknown error code.', 'wp-security-audit-log' ),
 			);
 		}
+
+		/**
+		 * Fast search for code in the severities constants. It uses key to search for and if that fails it fall back into the row by row search.
+		 *
+		 * @param int|string $code - The code to search for.
+		 *
+		 * @return array
+		 *
+		 * @since 5.0.0
+		 */
+		public static function fast_severity_by_code( $code ): array {
+			if ( empty( self::$wsal_constants ) ) {
+				self::init();
+			}
+
+			if ( isset( self::$wsal_constants[ $code ] ) ) {
+				return self::$wsal_constants[ $code ];
+			} else {
+				return self::get_severity_by_code( $code );
+			}
+		}
+
+		/**
+		 * Returns the code name (human readable) by code number.
+		 *
+		 * @param int $code - The code number to get the human readable name.
+		 *
+		 * @return string
+		 *
+		 * @since 5.0.0
+		 */
+		public static function get_severity_name_by_code( $code ) {
+			return self::fast_severity_by_code( (int) $code )['text'];
+		}
+
 	}
 }

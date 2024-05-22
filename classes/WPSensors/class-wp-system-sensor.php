@@ -651,6 +651,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				Alert_Manager::trigger_event(
 					6061,
 					array(
+						'Username'     => 'System',
 						'EmailAddress' => $mail_data['to'],
 						'EmailSubject' => $mail_data['subject'],
 					)

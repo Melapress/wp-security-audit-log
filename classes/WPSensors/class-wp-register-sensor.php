@@ -116,7 +116,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Register_Sensor' ) ) {
 			$event_data = array(
 				'NewUserID'    => $user_id,
 				'NewUserData'  => (object) $new_user_data,
-				'EditUserLink' => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+				'EditUserLink' => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 			);
 
 			if ( WP_Helper::is_multisite() ) {

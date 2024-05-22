@@ -88,13 +88,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 				$frontend_events        = Settings_Helper::get_frontend_events();
 				$enable_wc_for_visitors = ( isset( $frontend_events['woocommerce'] ) && $frontend_events['woocommerce'] ) ? true : false;
 				?>
-		<tr class="alert-wrapper" data-alert-cat="WooCommerce" data-alert-subcat="Products" data-is-attached-to-alert="9035">
-			<td></td>
-			<td>
-			<input name="frontend-events[woocommerce]" type="checkbox" id="frontend-events[woocommerce]" value="1" <?php checked( $enable_wc_for_visitors ); ?> />
-			</td>
-			<td colspan="2"><?php esc_html_e( 'Keep a log of visitor orders, stock changes and other public events?', 'wp-security-audit-log' ); ?></td>
-		</tr>
+				<tr class="alert-wrapper" data-alert-cat="WooCommerce" data-alert-subcat="Products" data-is-attached-to-alert="9035">
+					<td></td>
+					<td>
+					<input name="frontend-events[woocommerce]" type="checkbox" id="frontend-events[woocommerce]" value="1" <?php checked( $enable_wc_for_visitors ); ?> />
+					</td>
+					<td colspan="2"><?php esc_html_e( 'Keep a log of visitor orders, stock changes and other public events?', 'wp-security-audit-log' ); ?></td>
+				</tr>
 				<?php
 			}
 
@@ -104,26 +104,26 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 				}
 
 				?>
-		<tr class="alert-wrapper" data-alert-cat="WooCommerce" data-alert-subcat="woocommerce-order" data-is-attached-to-alert="9019">
-			<td></td>
-			<td>
-				<input name="wc_all_stock_changes" type="checkbox" id="wc_all_stock_changes" value="1" <?php checked( $wc_all_stock_changes ); ?> />
-			</td>
-			<td colspan="2"><?php esc_html_e( 'Log all stock changes. Disable this setting to only keep a log of stock changes done manually via the WooCommerce dashboard. Therefore automated stock changes typically done via customers placing orders or via other plugins will not be logged.', 'wp-security-audit-log' ); ?></td>
-		</tr>
-		<script type="text/javascript">
-		jQuery(document).ready(function(){
-			// Specific for alert 9019
-			jQuery("input[value=9019]").on("change", function(){
-				var check = jQuery("input[value=9019]").is(":checked");
-				if(check) {
-					jQuery("#wc_all_stock_changes").attr ( "checked" ,"checked" );
-				} else {
-					jQuery("#wc_all_stock_changes").removeAttr('checked');
-				}
-			});
-		});
-		</script>
+					<tr class="alert-wrapper" data-alert-cat="WooCommerce" data-alert-subcat="woocommerce-order" data-is-attached-to-alert="9019">
+						<td></td>
+						<td>
+							<input name="wc_all_stock_changes" type="checkbox" id="wc_all_stock_changes" value="1" <?php checked( $wc_all_stock_changes ); ?> />
+						</td>
+						<td colspan="2"><?php esc_html_e( 'Log all stock changes. Disable this setting to only keep a log of stock changes done manually via the WooCommerce dashboard. Therefore automated stock changes typically done via customers placing orders or via other plugins will not be logged.', 'wp-security-audit-log' ); ?></td>
+					</tr>
+					<script type="text/javascript">
+					jQuery(document).ready(function(){
+						// Specific for alert 9019
+						jQuery("input[value=9019]").on("change", function(){
+							var check = jQuery("input[value=9019]").is(":checked");
+							if(check) {
+								jQuery("#wc_all_stock_changes").attr ( "checked" ,"checked" );
+							} else {
+								jQuery("#wc_all_stock_changes").removeAttr('checked');
+							}
+						});
+					});
+					</script>
 				<?php
 			}
 		}
@@ -291,7 +291,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 
 				// Set editor link manually.
 				if ( $post_type_object->_edit_link ) {
-					$link = admin_url( sprintf( $post_type_object->_edit_link . $action, $post->ID ) );
+					$link = \network_admin_url( sprintf( $post_type_object->_edit_link . $action, $post->ID ) );
 				} else {
 					$link = '';
 				}
@@ -399,20 +399,20 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 			// Only dequeue on our admin pages.
 			if ( isset( $current_screen->base ) && false !== strpos( $current_screen->base, 'wsal-togglealerts' ) ) {
 				?>
-		<script type="text/javascript">
-		jQuery(document).ready(function(){
-			jQuery( '#tab-woocommerce [type="checkbox"]' ).removeAttr( 'disabled' );
-		});
-		</script>
+				<script type="text/javascript">
+				jQuery(document).ready(function(){
+					jQuery( '#tab-woocommerce [type="checkbox"]' ).removeAttr( 'disabled' );
+				});
+				</script>
 				<?php
 			}
 			if ( isset( $_REQUEST['page'] ) && 'wsal-togglealerts' === $_REQUEST['page'] ) {
 				?>
-		<style type="text/css">
-			#tab-payment-gateways tr:nth-of-type(2), #tab-products tr:nth-of-type(12), #tab-coupons tr:nth-of-type(8) {
-			display: none;
-			}
-		</style>
+				<style type="text/css">
+					#tab-payment-gateways tr:nth-of-type(2), #tab-products tr:nth-of-type(12), #tab-coupons tr:nth-of-type(8) {
+					display: none;
+					}
+				</style>
 				<?php
 			}
 		}
@@ -471,7 +471,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 				'taxonomy'  => $taxonomy,
 				'tag_ID'    => $tag_id,
 			);
-			return ! empty( $tag_id ) ? add_query_arg( $tag_args, admin_url( 'term.php' ) ) : null;
+			return ! empty( $tag_id ) ? add_query_arg( $tag_args, \network_admin_url( 'term.php' ) ) : null;
 		}
 
 		/**

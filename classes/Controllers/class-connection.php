@@ -16,7 +16,11 @@ declare(strict_types=1);
 
 namespace WSAL\Controllers;
 
+use WSAL\Helpers\Classes_Helper;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Entities\Metadata_Entity;
+use WSAL\Entities\Occurrences_Entity;
+use WSAL\Entities\Archive\Archive_Records;
 use WSAL\Entities\DBConnection\MySQL_Connection;
 
 // Exit if accessed directly.
@@ -57,6 +61,24 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 		 * @since 4.6.0
 		 */
 		private static $archive_mode = false;
+
+		/**
+		 * Local cache for mirror types.
+		 *
+		 * @var array
+		 *
+		 * @since 5.0.0
+		 */
+		private static $mirror_types;
+
+		/**
+		 * Archive DB Connection Object.
+		 *
+		 * @var object
+		 *
+		 * @since 5.0.0
+		 */
+		private static $archive_db = null;
 
 		/**
 		 * Get the adapter config stored in the DB.
@@ -227,32 +249,32 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 			}
 			$password = self::decrypt_string( $connection_config['password'] );
 
-			$new_wpdb = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] ); // phpcs:ignore -- Accessing the database directly should be avoided.
+			$new_wpdb = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] );
 
 			if ( isset( $new_wpdb->error ) && isset( $new_wpdb->dbh ) ) {
-				throw new \Exception( $new_wpdb->dbh->error, $new_wpdb->dbh->errno );
+				throw new \Exception( $new_wpdb->dbh->error, $new_wpdb->dbh->errno ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			} elseif ( ! isset( $new_wpdb->dbh ) ) {
-				$error_code = mysqli_connect_errno(); // phpcs:ignore
+				$error_code = mysqli_connect_errno(); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_connect_errno
 
 				if ( 1045 === $error_code ) {
-					throw new \Exception( __( 'Error establishing a database connection. DB username or password are not valid.' ), $error_code );
+					throw new \Exception( __( 'Error establishing a database connection. DB username or password are not valid.' ), $error_code ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				} else {
-					$error_message = mysqli_connect_error(); // phpcs:ignore
+					$error_message = mysqli_connect_error(); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_connect_error
 					// if we get an error message from mysqli then use it otherwise use a generic message.
 					if ( $error_message ) {
 						throw new \Exception(
 							sprintf(
 							/* translators: 1 - mysqli error code, 2 - mysqli error message */
-								__( 'Code %1$d: %2$s', 'wp-security-audit-log' ),
-								$error_code,
-								$error_message
+								__( 'Code %1$d: %2$s', 'wp-security-audit-log' ), // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+								\esc_attr( $error_code ),
+								\esc_attr( $error_message )
 							),
-							$error_code
+							$error_code  // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 						);
 					}
 				}
 			} elseif ( isset( $new_wpdb->db_select_error ) ) {
-				throw new \Exception( 'Error: Database ' . $connection_config['db_name'] . ' is unknown.', 1046 );
+				throw new \Exception( 'Error: Database ' . $connection_config['db_name'] . ' is unknown.', 1046 ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			} elseif ( ! $new_wpdb->has_connected ) {
 				throw new \Exception( 'Error establishing a database connection.' );
 			} else {
@@ -459,6 +481,439 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 			}
 
 			return true;
+		}
+
+		/**
+		 * Migrate to external database.
+		 *
+		 * @param string $connection_name External connection name.
+		 * @param int    $limit           - Limit.
+		 *
+		 * @return int
+		 *
+		 * @since 5.0.0
+		 */
+		public static function migrate_occurrence( $connection_name, $limit ) {
+			$args['limit']      = $limit;
+			$args['archive_db'] = self::get_connection( $connection_name );
+			$count              = 0;
+
+			Archive_Records::archive( $args, $count );
+
+			return $count;
+		}
+
+		/**
+		 * Migrate back to WP database
+		 *
+		 * @param int $limit - Limit.
+		 *
+		 * @return int
+		 *
+		 * @since 5.0.0
+		 */
+		public static function migrate_back_occurrence( $limit ) {
+			global $wpdb;
+
+			$args['limit']      = $limit;
+			$args['archive_db'] = $wpdb;
+			$count              = 0;
+
+			Archive_Records::archive( $args, $count );
+
+			return $count;
+		}
+
+		/**
+		 * Recreate DB tables on WP.
+		 *
+		 * @since 5.0.0
+		 */
+		public static function recreate_tables() {
+			Occurrences_Entity::create_table();
+			Metadata_Entity::create_table();
+		}
+
+		/**
+		 * Set Connection Object.
+		 *
+		 * @since 5.0.0
+		 *
+		 * @param array|\stdClass $connection - Connection object.
+		 */
+		public static function save_connection( $connection ) {
+			// Stop here if no connection provided.
+			if ( empty( $connection ) ) {
+				return;
+			}
+
+			if ( $connection instanceof \stdClass ) {
+				$connection = (array) $connection;
+			}
+
+			if ( isset( $connection['name'] ) ) {
+				$connection_name = $connection['name'];
+
+				Settings_Helper::set_option_value( WSAL_CONN_PREFIX . $connection_name, $connection );
+			}
+		}
+
+		/**
+		 * Delete Connection Object.
+		 *
+		 * @param string $connection_name - Connection name.
+		 *
+		 * @since 5.0.0
+		 */
+		public static function delete_connection( $connection_name ) {
+			$connection = self::load_connection_config( $connection_name );
+
+			if ( is_array( $connection ) && array_key_exists( 'type', $connection ) ) {
+				Alert_MAnager::trigger_event_if(
+					6320,
+					array(
+						'EventType' => 'deleted',
+						'type'      => $connection['type'],
+						'name'      => $connection_name,
+					),
+					function () {
+						return ! Alert_Manager::will_trigger( 6321 );
+					}
+				);
+			}
+
+			Settings_Helper::delete_option_value( WSAL_CONN_PREFIX . $connection_name );
+		}
+
+		/**
+		 * Remove External DB config.
+		 *
+		 * @since 5.0.0
+		 */
+		public static function remove_external_storage_config() {
+			// Get archive connection.
+			$adapter_conn_name = Settings_Helper::get_option_value( 'adapter-connection' );
+			if ( $adapter_conn_name ) {
+				$adapter_connection             = self::load_connection_config( $adapter_conn_name );
+				$adapter_connection['used_for'] = '';
+				self::save_connection( $adapter_connection );
+			}
+
+			Settings_Helper::delete_option_value( 'adapter-connection' );
+		}
+
+		/**
+		 * Updates given connection to be used for external storage.
+		 *
+		 * @param string $connection_name Connection name.
+		 * @since 5.0.0
+		 */
+		public static function update_connection_as_external( $connection_name ) {
+			// Set external storage to be used for logging events from now on.
+			$db_connection = self::load_connection_config( $connection_name );
+
+			// Error handling.
+			if ( empty( $db_connection ) ) {
+				return false;
+			}
+
+			// Set connection's used_for attribute.
+			$db_connection['used_for'] = __( 'External Storage', 'wp-security-audit-log' );
+			Settings_Helper::set_option_value( 'adapter-connection', $connection_name, true );
+			self::save_connection( $db_connection );
+
+			return true;
+		}
+
+		/**
+		 * Finds all mirrors using a specific connection.
+		 *
+		 * @param string $connection_name Connection name.
+		 *
+		 * @return array[]
+		 * @since 5.0.0
+		 */
+		public static function get_mirrors_by_connection_name( $connection_name ) {
+			$mirrors = \WSAL\Helpers\Settings_Helper::get_all_mirrors();
+			$result  = array();
+			if ( ! empty( $mirrors ) ) {
+				foreach ( $mirrors as $mirror ) {
+					if ( $connection_name === $mirror['connection'] ) {
+						array_push( $result, $mirror );
+					}
+				}
+			}
+
+			return $result;
+		}
+
+		/**
+		 * Gets mirror types.
+		 *
+		 * @return array List of mirror types.
+		 *
+		 * @since 5.0.0
+		 */
+		public static function get_mirror_types() {
+			if ( ! isset( self::$mirror_types ) ) {
+
+				$mirrors = Classes_Helper::get_classes_by_namespace( 'WSAL\Extensions\ExternalDB\Mirrors' );
+
+				$result = array();
+
+				foreach ( $mirrors as $mirror ) {
+					$result [ $mirror::get_type() ] = array(
+						'name'   => $mirror::get_name(),
+						'config' => $mirror::get_config_definition(),
+						'class'  => $mirror,
+					);
+				}
+
+				// $file_filter = $this->get_base_dir() . 'classes' . DIRECTORY_SEPARATOR . 'mirrors' . DIRECTORY_SEPARATOR . '*Connection.php';
+				// foreach ( glob( $file_filter ) as $file ) {
+				// $base_filename = basename( $file );
+				// $class_name    = 'WSAL_Ext_Mirrors_' . substr( $base_filename, 0, strlen( $base_filename ) - 4 );
+				// try {
+				// require_once $file;
+				// $result [ $class_name::get_type() ] = array(
+				// 'name'   => $class_name::get_name(),
+				// 'config' => $class_name::get_config_definition(),
+				// 'class'  => $class_name,
+				// );
+				// } catch ( Exception $exception ) {  // phpcs:ignore
+				// Skip unsuitable class.
+				// TODO log to debug log.
+				// }
+				// }
+
+				self::$mirror_types = $result;
+			}
+
+			return self::$mirror_types;
+		}
+
+		/**
+		 * Delete mirror.
+		 *
+		 * @param string $mirror_name - Mirror name.
+		 *
+		 * @since 5.0.0
+		 */
+		public static function delete_mirror( $mirror_name ) {
+
+			Alert_Manager::trigger_event(
+				6326,
+				array(
+					'EventType' => 'deleted',
+					'name'      => $mirror_name,
+				)
+			);
+
+			Settings_Helper::delete_option_value( \WSAL_MIRROR_PREFIX . $mirror_name );
+		}
+
+		/**
+		 * Set Mirror Object.
+		 *
+		 * @since 5.0.0
+		 *
+		 * @param array|\stdClass $mirror Mirror data.
+		 */
+		public static function save_mirror( $mirror ) {
+			if ( empty( $mirror ) ) {
+				return;
+			}
+
+			$mirror_name = ( $mirror instanceof \stdClass ) ? $mirror->name : $mirror['name'];
+
+			$old_value = Settings_Helper::get_option_value( \WSAL_MIRROR_PREFIX . $mirror_name );
+
+			if ( ! isset( $old_value['state'] ) ) {
+				Alert_Manager::trigger_event(
+					6323,
+					array(
+						'EventType'  => 'added',
+						'connection' => ( $mirror instanceof \stdClass ) ? $mirror->connection : $mirror['connection'],
+						'name'       => $mirror_name,
+					)
+				);
+			} elseif ( isset( $old_value['state'] ) && $old_value['state'] !== $mirror['state'] ) {
+				Alert_Manager::trigger_event(
+					6325,
+					array(
+						'EventType'  => ( $mirror['state'] ) ? 'enabled' : 'disabled',
+						'connection' => ( $mirror instanceof \stdClass ) ? $mirror->connection : $mirror['connection'],
+						'name'       => $mirror_name,
+					)
+				);
+			} else {
+				Alert_Manager::trigger_event(
+					6324,
+					array(
+						'EventType'  => 'modified',
+						'connection' => ( $mirror instanceof \stdClass ) ? $mirror->connection : $mirror['connection'],
+						'name'       => $mirror_name,
+					)
+				);
+			}
+
+			Settings_Helper::set_option_value( \WSAL_MIRROR_PREFIX . $mirror_name, $mirror );
+		}
+
+		/**
+		 * Return Mirror Object.
+		 *
+		 * @since 5.0.0
+		 *
+		 * @param string $mirror_name - Mirror name.
+		 * @return array|bool
+		 */
+		public static function get_mirror( $mirror_name ) {
+			if ( empty( $mirror_name ) ) {
+				return false;
+			}
+			$result_raw = Settings_Helper::get_option_value( \WSAL_MIRROR_PREFIX . $mirror_name );
+			$result     = maybe_unserialize( $result_raw );
+			return ( $result instanceof \stdClass ) ? json_decode( json_encode( $result ), true ) : $result; // phpcs:ignore
+		}
+
+		/**
+		 * Returns the archive connection or null
+		 *
+		 * @return \WPDB|null
+		 *
+		 * @since 5.0.0
+		 */
+		public static function get_archive_database_connection() {
+			if ( ! empty( self::$archive_db ) ) {
+				return self::$archive_db;
+			} else {
+				$connection_config = Settings_Helper::get_archive_config();
+				if ( empty( $connection_config ) ) {
+					return null;
+				} else {
+					// Get archive DB connection.
+					self::$archive_db = self::build_connection( $connection_config );
+
+					// Check object for disconnection or other errors.
+					$connected = true;
+					if ( isset( self::$archive_db->dbh->errno ) ) {
+						$connected = ! ( 0 !== (int) self::$archive_db->dbh->errno ); // Database connection error check.
+					} elseif ( is_wp_error( self::$archive_db->error ) ) {
+						$connected = false;
+					}
+
+					if ( $connected ) {
+						return self::$archive_db;
+					} else {
+						return null;
+					}
+				}
+			}
+		}
+
+		/**
+		 * Enable/Disable archiving cron job started option.
+		 *
+		 * @param bool $value - Value.
+		 *
+		 * @since 5.0.0
+		 */
+		public static function set_archiving_cron_started( $value ) {
+			if ( ! empty( $value ) ) {
+				Settings_Helper::set_option_value( 'archiving-cron-started', 1 );
+			} else {
+				Settings_Helper::delete_option_value( 'archiving-cron-started' );
+			}
+		}
+
+		/**
+		 * Archive alerts (Occurrences table)
+		 *
+		 * @param array $args - Arguments array.
+		 *
+		 * @return array|false|null
+		 *
+		 * @since 5.0.0
+		 */
+		public static function archive( $args ) {
+			$args['archive_db'] = self::get_archive_database_connection();
+			if ( empty( $args['archive_db'] ) ) {
+				return false;
+			}
+			$last_created_on = Settings_Helper::get_option_value( 'archiving-last-created' );
+			if ( ! empty( $last_created_on ) ) {
+				$args['last_created_on'] = $last_created_on;
+			}
+
+			return Archive_Records::archive( $args );
+		}
+
+		/**
+		 * Archiving alerts.
+		 *
+		 * @since 5.0.0
+		 */
+		public static function archiving_alerts() {
+			if ( ! Settings_Helper::is_archiving_cron_started() ) {
+				set_time_limit( 0 );
+				// Start archiving.
+				self::set_archiving_cron_started( true );
+
+				$args          = array();
+				$args['limit'] = 500;
+				$args_result   = false;
+
+				$num             = Settings_Helper::get_archiving_date();
+				$type            = Settings_Helper::get_archiving_date_type();
+				$now             = current_time( 'timestamp' );
+				$args['by_date'] = strtotime( '-' . $num . ' ' . $type, $now );
+				$args_result     = self::archive( $args );
+
+				// End archiving.
+				self::set_archiving_cron_started( false );
+			}
+		}
+
+		/**
+		 * Remove the archiving config.
+		 *
+		 * @since 5.0.0
+		 */
+		public static function remove_archiving_config() {
+			// Get archive connection.
+			$archive_conn_name = Settings_Helper::get_option_value( 'archive-connection' );
+
+			if ( $archive_conn_name ) {
+				$archive_connection             = self::load_connection_config( $archive_conn_name );
+				$archive_connection['used_for'] = '';
+				self::save_connection( $archive_connection );
+			}
+
+			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archive-connection' );
+			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-date' );
+			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-date-type' );
+			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-run-every' );
+			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-daily-e' );
+			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-weekly-e' );
+			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-week-day' );
+			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-time' );
+			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-stop' );
+		}
+
+		/**
+		 * Enable/Disable archiving.
+		 *
+		 * @param bool $enabled - Value.
+		 *
+		 * @since 5.0.0
+		 */
+		public static function set_archiving_enabled( $enabled ) {
+			Settings_Helper::set_option_value( 'archiving-e', $enabled );
+			if ( empty( $enabled ) ) {
+				self::remove_archiving_config();
+				Settings_Helper::delete_option_value( 'archiving-last-created' );
+			}
 		}
 	}
 }

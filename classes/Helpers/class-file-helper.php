@@ -139,5 +139,39 @@ if ( ! class_exists( '\WSAL\Helpers\File_Helper' ) ) {
 
 			return '';
 		}
+
+		/**
+		 * Returns the file size in human readable format.
+		 *
+		 * @param string $filename - The name of the file (including path) to check the size of.
+		 *
+		 * @return string
+		 *
+		 * @since 5.0.0
+		 */
+		public static function format_file_size( string $filename ): string {
+			global $wp_filesystem;
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+
+			if ( $wp_filesystem->exists( $filename ) ) {
+
+				$size = filesize( $filename );
+
+				$units          = array( 'B', 'KB', 'MB', 'GB', 'TB' );
+				$formatted_size = $size;
+
+				$units_length = count( $units ) - 1;
+
+				for ( $i = 0; $size >= 1024 && $i < $units_length; $i++ ) {
+					$size          /= 1024;
+					$formatted_size = round( $size, 2 );
+				}
+
+				return $formatted_size . ' ' . $units[ $i ];
+			}
+
+			return '0KB';
+		}
 	}
 }

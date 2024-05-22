@@ -398,8 +398,9 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 		 * Enqueues necessary JS scripts and stylesheets.
 		 *
 		 * @since 4.5.1
+		 * @since 5.0.0 - this method is no longer private.
 		 */
-		private static function enqueue_scripts() {
+		public static function enqueue_scripts() {
 			if ( self::$scripts_queued ) {
 				return;
 			}

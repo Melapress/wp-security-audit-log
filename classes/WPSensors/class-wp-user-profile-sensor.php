@@ -203,7 +203,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 							'FirstName' => $new_userdata->user_firstname,
 							'LastName'  => $new_userdata->user_lastname,
 						),
-						'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 					)
 				);
 			}
@@ -222,7 +222,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'Roles'          => $user_roles,
 						'FirstName'      => $new_userdata->user_firstname,
 						'LastName'       => $new_userdata->user_lastname,
-						'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 					)
 				);
 			}
@@ -239,7 +239,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'Roles'           => $user_roles,
 						'FirstName'       => $new_userdata->user_firstname,
 						'LastName'        => $new_userdata->user_lastname,
-						'EditUserLink'    => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+						'EditUserLink'    => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 					)
 				);
 			}
@@ -256,7 +256,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'Roles'          => $user_roles,
 						'FirstName'      => $new_userdata->user_firstname,
 						'LastName'       => $new_userdata->user_lastname,
-						'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 					)
 				);
 			}
@@ -308,7 +308,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'NewRole'        => $new_roles,
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
-						'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 						'multisite_text' => WP_Helper::is_multisite() ? get_current_blog_id() : false,
 					),
 					array( __CLASS__, 'must_not_contain_user_changes' )
@@ -366,7 +366,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
 						'Roles'          => $user_roles,
-						'EditUserLink'   => add_query_arg( 'user_id', $user->ID, admin_url( 'user-edit.php' ) ),
+						'EditUserLink'   => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
 					)
 				);
 			}
@@ -401,7 +401,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
-						'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 					)
 				);
 			}
@@ -427,7 +427,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
-						'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 					)
 				);
 			}
@@ -548,7 +548,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 			$event_data = array(
 				'NewUserID'    => $user_id,
 				'NewUserData'  => (object) $new_user_data,
-				'EditUserLink' => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+				'EditUserLink' => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 			);
 
 			Alert_Manager::trigger_event( $event_code, $event_data, WP_Helper::is_multisite() );

@@ -16,8 +16,15 @@ defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 use WSAL_Ext_MirrorLogger;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Controllers\Connection;
+use WSAL\Controllers\Cron_Jobs;
+use WSAL\Entities\Reports_Entity;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Entities\Metadata_Entity;
+use WSAL\Entities\Occurrences_Entity;
 use WSAL\Controllers\Plugin_Extensions;
+use WSAL\Helpers\Plugin_Settings_Helper;
+use WSAL\Entities\Generated_Reports_Entity;
+use WSAL\Reports\Controllers\Statistic_Reports;
 
 /**
  * Migration class
@@ -91,7 +98,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 			$disabled_alerts = WP_Helper::get_global_option( 'disabled-alerts', false );
 
-			$always_disabled_alerts = implode( ',', $wsal->settings()->always_disabled_alerts );
+			$always_disabled_alerts = implode( ',', Settings_Helper::get_default_always_disabled_alerts() );
 
 			$disabled_alerts = implode( ',', \array_merge( \explode( ',', $disabled_alerts ), \explode( ',', $always_disabled_alerts ) ) );
 
@@ -117,7 +124,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			 * @since 3.2.3.3
 			 */
 			if ( ! Settings_Helper::get_boolean_option_value( 'mwp-child-stealth-mode', false ) ) {
-				$wsal->settings()->set_mainwp_child_stealth_mode();
+				Plugin_Settings_Helper::set_mainwp_child_stealth_mode();
 			}
 
 			WP_Helper::delete_global_option( WSAL_PREFIX . 'addon_available_notice_dismissed' );
@@ -237,14 +244,12 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 				if ( class_exists( '\WSAL\Extensions\ExternalDB\Mirrors\WSAL_Ext_Mirrors_AWSCloudWatchConnection' ) ) {
 
-					if ( ! is_null( $wsal->external_db_util ) ) {
-						$connections = Settings_Helper::get_all_connections();
-						if ( ! empty( $connections ) ) {
-							foreach ( $connections as $connection ) {
-								if ( \WSAL\Extensions\ExternalDB\Mirrors\WSAL_Ext_Mirrors_AWSCloudWatchConnection::get_type() === $connection['type'] ) {
-									Settings_Helper::set_boolean_option_value( 'show-aws-sdk-config-nudge-4_3_2', true );
-									break;
-								}
+					$connections = Settings_Helper::get_all_connections();
+					if ( ! empty( $connections ) ) {
+						foreach ( $connections as $connection ) {
+							if ( \WSAL\Extensions\ExternalDB\Mirrors\WSAL_Ext_Mirrors_AWSCloudWatchConnection::get_type() === $connection['type'] ) {
+								Settings_Helper::set_boolean_option_value( 'show-aws-sdk-config-nudge-4_3_2', true );
+								break;
 							}
 						}
 					}
@@ -373,25 +378,23 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			WP_Helper::delete_global_option( 'reports-user-autocomplete' );
 
 			// External DB settings.
-			if ( ! is_null( $wsal->external_db_util ) ) {
-				foreach ( array( 'archive-connection', 'adapter-connection' ) as $connection_option_name ) {
-					$connection_name = WP_Helper::get_global_option( $connection_option_name, null );
-					if ( ! is_null( $connection_name ) ) {
-						$db_connection = Connection::load_connection_config( $connection_name );
-						if ( is_array( $db_connection ) && empty( $db_connection['hostname'] ) && empty( $db_connection['db_name'] ) ) {
-							if ( 'adapter-connection' === $connection_option_name ) {
-								$wsal->external_db_util->remove_external_storage_config();
-							} elseif ( 'archive-connection' === $connection_option_name ) {
-								$wsal->external_db_util->remove_archiving_config();
-								WP_Helper::delete_global_option( 'archiving-e' );
-								WP_Helper::delete_global_option( 'archiving-last-created' );
-							}
+			foreach ( array( 'archive-connection', 'adapter-connection' ) as $connection_option_name ) {
+				$connection_name = WP_Helper::get_global_option( $connection_option_name, null );
+				if ( ! is_null( $connection_name ) ) {
+					$db_connection = Connection::load_connection_config( $connection_name );
+					if ( is_array( $db_connection ) && empty( $db_connection['hostname'] ) && empty( $db_connection['db_name'] ) ) {
+						if ( 'adapter-connection' === $connection_option_name ) {
+							Connection::remove_external_storage_config();
+						} elseif ( 'archive-connection' === $connection_option_name ) {
+							Connection::remove_archiving_config();
+							WP_Helper::delete_global_option( 'archiving-e' );
+							WP_Helper::delete_global_option( 'archiving-last-created' );
+						}
 
-							if ( defined( 'WSAL_CONN_PREFIX' ) ) {
-								// Function WSAL_Ext_Common::delete_connection is not used on purpose because it would try to
-								// trigger an event which would result in error while doing this clean-up.
-								WP_Helper::delete_global_option( WSAL_CONN_PREFIX . $connection_name );
-							}
+						if ( defined( 'WSAL_CONN_PREFIX' ) ) {
+							// Function WSAL_Ext_Common::delete_connection is not used on purpose because it would try to
+							// trigger an event which would result in error while doing this clean-up.
+							WP_Helper::delete_global_option( WSAL_CONN_PREFIX . $connection_name );
 						}
 					}
 				}
@@ -402,10 +405,8 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 				if ( ! \WSAL_Extension_Manager::is_messaging_available() || ! \WSAL_Extension_Manager::is_mirroring_available() ) {
 					// Check if SMS notifications or any external mirrors are setup + force plugin to show a notice.
 					$mirrors_in_use = false;
-					if ( ! is_null( $wsal->external_db_util ) ) {
-						$mirrors        = Settings_Helper::get_all_mirrors();
-						$mirrors_in_use = ! empty( $mirrors );
-					}
+					$mirrors        = Settings_Helper::get_all_mirrors();
+					$mirrors_in_use = ! empty( $mirrors );
 
 					$notifications_in_use = false;
 					if ( ! $mirrors_in_use && ! is_null( $wsal->notifications_util ) ) {
@@ -455,8 +456,8 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			if ( ! \WSAL\Entities\Occurrences_Entity::check_table_exists() ) {
 				\WSAL\Entities\Occurrences_Entity::create_table();
 				// Remove metatdata table if one exists and recreate it.
-				\WSAL\Entities\Metadata_Entity::drop_table();
-				\WSAL\Entities\Metadata_Entity::create_table();
+				Metadata_Entity::drop_table();
+				Metadata_Entity::create_table();
 			} else {
 
 				// If one of the new columns exists there is no need to alter the table.
@@ -505,8 +506,8 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 				if ( ! \WSAL\Entities\Occurrences_Entity::check_table_exists() ) {
 					\WSAL\Entities\Occurrences_Entity::create_table();
 					// Remove metatdata table if one exists and recreate it.
-					\WSAL\Entities\Metadata_Entity::drop_table();
-					\WSAL\Entities\Metadata_Entity::create_table();
+					Metadata_Entity::drop_table();
+					Metadata_Entity::create_table();
 				} else {
 
 					// If one of the new columns exists there is no need to alter the table.
@@ -638,7 +639,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 * @since 4.5.0
 		 */
 		protected static function migrate_up_to_4500() {
-			\WSAL\Entities\Metadata_Entity::create_indexes();
+			Metadata_Entity::create_indexes();
 			\WSAL\Entities\Occurrences_Entity::create_indexes();
 		}
 
@@ -717,8 +718,451 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		protected static function migrate_up_to_5000() {
+		public static function migrate_up_to_5000() {
 			self::migrate_up_to_4610();
+
+			self::migrate_users();
+
+			if ( \class_exists( Generated_Reports_Entity::class, false ) ) {
+				/**
+				 * Migrate generated reports - if there are any.
+				 */
+				$reports = Settings_Helper::get_option_value( 'generated_reports', array() );
+				if ( ! empty( $reports ) ) {
+
+					foreach ( $reports as $report_array ) {
+
+						$username = \get_userdata( $report_array['user'] )->user_login;
+						$filename = pathinfo( $report_array['file'], PATHINFO_FILENAME );
+
+						$report_filters = array();
+
+						if ( isset( $report_array['filters']['type_statistics'] ) && ! empty( $report_array['filters']['type_statistics'] ) ) {
+							$report_type = Statistic_Reports::get_statistical_report_from_legacy_type()[ (int) $report_array['filters']['type_statistics'] ];
+
+							$report_filters[ esc_html__( 'Report Type', 'wp-security-audit-log' ) ] = Statistic_Reports::get_statistical_report_title()[ $report_type ];
+						}
+
+						Generated_Reports_Entity::save(
+							array(
+								'generated_report_user_id' => (int) $report_array['user'],
+								'generated_report_username' => $username,
+								'generated_report_filters' => $report_array['filters'],
+								'generated_report_file'    => $filename,
+								'generated_report_name'    => $filename,
+								'created_on'               => $report_array['time'],
+								'generated_report_format'  => ( isset( $report_array['filters']['type_statistics'] ) && ! empty( $report_array['filters']['type_statistics'] ) ) ? 999 : 0,
+								'generated_report_filters_normalized' => $report_filters,
+								'generated_report_header_columns' => '',
+								'generated_report_where_clause' => '',
+								'generated_report_finished' => true,
+								'generated_report_to_date' => 0,
+								'generated_report_number_of_records' => -1,
+							)
+						);
+					}
+				}
+
+				$reports_white_labeling                  = array();
+				$reports_white_labeling['business_name'] = Settings_Helper::get_option_value( 'reports-business-name', null );
+				Settings_Helper::delete_option_value( 'reports-business-name' );
+				$reports_white_labeling['name_surname'] = Settings_Helper::get_option_value( 'reports-contact-name', null );
+				Settings_Helper::delete_option_value( 'reports-contact-name' );
+				$reports_white_labeling['email'] = Settings_Helper::get_option_value( 'reports-contact-email', null );
+				Settings_Helper::delete_option_value( 'reports-contact-email' );
+				$reports_white_labeling['phone_number'] = Settings_Helper::get_option_value( 'reports-contact-phone', null );
+				Settings_Helper::delete_option_value( 'reports-contact-phone' );
+				$reports_white_labeling['logo'] = Settings_Helper::get_option_value( 'reports-custom-logo', null );
+				Settings_Helper::delete_option_value( 'reports-custom-logo' );
+				$reports_white_labeling['logo_url'] = Settings_Helper::get_option_value( 'reports-custom-logo-link', null );
+				Settings_Helper::delete_option_value( 'reports-custom-logo-link' );
+
+				$reports_white_labeling = array_filter( $reports_white_labeling );
+
+				if ( ! empty( $reports_white_labeling ) ) {
+					Settings_Helper::set_option_value( 'report-white-label-settings', $reports_white_labeling );
+				}
+
+				$reports_column_settings                                       = array();
+				$reports_column_settings['reports_auto_purge_older_than_days'] = (int) Settings_Helper::get_option_value( 'reports-pruning-threshold', 30 );
+				Settings_Helper::delete_option_value( 'reports-pruning-threshold' );
+				$reports_column_settings['reports_auto_purge_enabled'] = (bool) Settings_Helper::get_option_value( 'reports-pruning-enabled', true );
+				Settings_Helper::delete_option_value( 'reports-pruning-enabled' );
+				$reports_column_settings['reports_send_empty_summary_emails'] = (bool) Settings_Helper::get_option_value( 'periodic-reports-empty-emails-enabled', false );
+				Settings_Helper::delete_option_value( 'periodic-reports-empty-emails-enabled' );
+
+				$reports_column_settings = array_filter( $reports_column_settings );
+
+				if ( ! empty( $reports_column_settings ) ) {
+					Settings_Helper::set_option_value( 'report-generate-columns-settings', $reports_column_settings );
+				}
+
+				foreach ( self::get_all_periodic_reports() as $report ) {
+					if ( ! $report->owner ) {
+						$username = __( 'System', 'wp-security-audit-log' );
+					} else {
+						$userdata = \WP_User::get_data_by( 'id', $report->owner );
+
+						if ( ! $userdata ) {
+							$username = __( 'System', 'wp-security-audit-log' );
+						}
+
+						$username = $userdata->user_login;
+
+					}
+
+					$only_these_post_titles = array();
+					if ( isset( $report->post_ids ) ) {
+						foreach ( $report->post_ids as $id ) {
+							$only_these_post_titles[] = get_the_title( $id );
+						}
+					}
+
+					$except_these_post_titles = array();
+					if ( isset( $report->post_ids_excluded ) ) {
+						foreach ( $report->post_ids_excluded as $id ) {
+							$except_these_post_titles[] = get_the_title( $id );
+						}
+					}
+
+					$data = array(
+						'report_type_sites'      => ( isset( $report->sites ) && ! empty( $report->sites ) ) ? 'only_these' : ( ( isset( $report->sites_excluded ) && ! empty( $report->sites_excluded ) ) ? 'all_except' : '' ),
+						'only_these_sites'       => ( isset( $report->sites ) ) ? $report->sites : array(),
+						'except_these_sites'     => ( isset( $report->sites_excluded ) ) ? $report->sites_excluded : array(),
+
+						'report_type_users'      => ( isset( $report->users ) && ! empty( $report->users ) ) ? 'only_these' : ( ( isset( $report->users_excluded ) && ! empty( $report->users_excluded ) ) ? 'all_except' : '' ),
+						'only_these_users'       => ( isset( $report->users ) ) ? $report->users : array(),
+						'except_these_users'     => ( isset( $report->users_excluded ) ) ? $report->users_excluded : array(),
+
+						'report_type_roles'      => ( isset( $report->roles ) && ! empty( $report->roles ) ) ? 'only_these' : ( ( isset( $report->roles_excluded ) && ! empty( $report->roles_excluded ) ) ? 'all_except' : '' ),
+						'only_these_roles'       => ( isset( $report->roles ) ) ? $report->roles : array(),
+						'except_these_roles'     => ( isset( $report->roles_excluded ) ) ? $report->roles_excluded : array(),
+
+						'report_type_ips'        => ( isset( $report->ipAddresses ) && ! empty( $report->ipAddresses ) ) ? 'only_these' : ( ( isset( $report->ipAddresses_excluded ) && ! empty( $report->ipAddresses_excluded ) ) ? 'all_except' : '' ), // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+					'only_these_ips'             => ( isset( $report->ipAddresses ) ) ? $report->ipAddresses : array(), // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+					'except_these_ips'           => ( isset( $report->ipAddresses_excluded ) ) ? $report->ipAddresses_excluded : array(), // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+					'report_type_objects'        => ( isset( $report->objects ) && ! empty( $report->objects ) ) ? 'only_these' : ( ( isset( $report->objects_excluded ) && ! empty( $report->objects_excluded ) ) ? 'all_except' : '' ),
+					'only_these_objects'         => ( isset( $report->objects ) ) ? $report->objects : array(),
+					'except_these_objects'       => ( isset( $report->objects_excluded ) ) ? $report->objects_excluded : array(),
+
+					'report_type_event_types'    => ( isset( $report->event_types ) && ! empty( $report->event_types ) ) ? 'only_these' : ( ( isset( $report->event_types_excluded ) && ! empty( $report->event_types_excluded ) ) ? 'all_except' : '' ),
+					'only_these_event_types'     => ( isset( $report->event_types ) ) ? $report->event_types : array(),
+					'except_these_event_types'   => ( isset( $report->event_types_excluded ) ) ? $report->event_types_excluded : array(),
+
+					'report_type_post_titles'    => ( isset( $only_these_post_titles ) && ! empty( $only_these_post_titles ) ) ? 'only_these' : ( ( isset( $except_these_post_titles ) && ! empty( $except_these_post_titles ) ) ? 'all_except' : '' ),
+					'only_these_post_titles'     => ( isset( $only_these_post_titles ) ) ? $only_these_post_titles : array(),
+					'except_these_post_titles'   => ( isset( $except_these_post_titles ) ) ? $except_these_post_titles : array(),
+
+					'report_type_post_types'     => ( isset( $report->post_types ) && ! empty( $report->post_types ) ) ? 'only_these' : ( ( isset( $report->post_types_excluded ) && ! empty( $report->post_types_excluded ) ) ? 'all_except' : '' ),
+					'only_these_post_types'      => ( isset( $report->post_types ) ) ? $report->post_types : array(),
+					'except_these_post_types'    => ( isset( $report->post_types_excluded ) ) ? $report->post_types_excluded : array(),
+
+					'report_type_post_statuses'  => ( isset( $report->post_statuses ) && ! empty( $report->post_statuses ) ) ? 'only_these' : ( ( isset( $report->post_statuses_excluded ) && ! empty( $report->post_statuses_excluded ) ) ? 'all_except' : '' ),
+					'only_these_post_statuses'   => ( isset( $report->post_statuses ) ) ? $report->post_statuses : array(),
+					'except_these_post_statuses' => ( isset( $report->post_statuses_excluded ) ) ? $report->post_statuses_excluded : array(),
+
+					'report_type_alert_ids'      => ( isset( $report->alert_ids ) && ! empty( $report->alert_ids ) ) ? 'only_these' : ( ( isset( $report->alert_ids_excluded ) && ! empty( $report->alert_ids_excluded ) ) ? 'all_except' : '' ),
+					'only_these_alert_ids'       => ( isset( $report->alert_ids ) ) ? $report->alert_ids : array(),
+					'except_these_alert_ids'     => ( isset( $report->alert_ids_excluded ) ) ? $report->alert_ids_excluded : array(),
+
+					'report_type_alert_groups'   => ( isset( $report->alert_groups ) && ! empty( $report->alert_groups ) ) ? 'only_these' : ( ( isset( $report->alert_groups_excluded ) && ! empty( $report->alert_groups_excluded ) ) ? 'all_except' : '' ),
+					'only_these_alert_groups'    => ( isset( $report->alert_groups ) ) ? $report->alert_groups : array(),
+					'except_these_alert_groups'  => ( isset( $report->alert_groups_excluded ) ) ? $report->alert_groups_excluded : array(),
+
+					'report_type_severities'     => ( isset( $report->severities ) && ! empty( $report->severities ) ) ? 'only_these' : ( ( isset( $report->severities_excluded ) && ! empty( $report->severities_excluded ) ) ? 'all_except' : '' ),
+					'only_these_severities'      => ( isset( $report->severities ) ) ? $report->severities : array(),
+					'except_these_severities'    => ( isset( $report->severities_excluded ) ) ? $report->severities_excluded : array(),
+
+					'report_start_date'          => '',
+					'report_end_date'            => '',
+					'report_tag'                 => '',
+					'report_include_archive'     => false,
+					'report_title'               => ( isset( $report->custom_title ) ) ? $report->custom_title : '',
+					'report_comment'             => ( isset( $report->comment ) ) ? $report->comment : '',
+					'report_metadata'            => ( isset( $report->no_meta ) ) ? $report->no_meta : true,
+					);
+
+					if ( empty( $data['only_these_sites'] ) ) {
+						unset( $data['only_these_sites'] );
+					}
+					if ( empty( $data['except_these_sites'] ) ) {
+						unset( $data['except_these_sites'] );
+					}
+
+					if ( empty( $data['only_these_users'] ) ) {
+						unset( $data['only_these_users'] );
+					}
+					if ( empty( $data['except_these_users'] ) ) {
+						unset( $data['except_these_users'] );
+					}
+
+					if ( empty( $data['only_these_roles'] ) ) {
+						unset( $data['only_these_roles'] );
+					}
+					if ( empty( $data['except_these_roles'] ) ) {
+						unset( $data['except_these_roles'] );
+					}
+
+					if ( empty( $data['only_these_ips'] ) ) {
+						unset( $data['only_these_ips'] );
+					}
+					if ( empty( $data['except_these_ips'] ) ) {
+						unset( $data['except_these_ips'] );
+					}
+
+					if ( empty( $data['only_these_objects'] ) ) {
+						unset( $data['only_these_objects'] );
+					}
+					if ( empty( $data['except_these_objects'] ) ) {
+						unset( $data['except_these_objects'] );
+					}
+
+					if ( empty( $data['only_these_event_types'] ) ) {
+						unset( $data['only_these_event_types'] );
+					}
+					if ( empty( $data['except_these_event_types'] ) ) {
+						unset( $data['except_these_event_types'] );
+					}
+
+					if ( empty( $data['only_these_post_titles'] ) ) {
+						unset( $data['only_these_post_titles'] );
+					}
+					if ( empty( $data['except_these_post_titles'] ) ) {
+						unset( $data['except_these_post_titles'] );
+					}
+
+					if ( empty( $data['only_these_post_types'] ) ) {
+						unset( $data['only_these_post_types'] );
+					}
+					if ( empty( $data['except_these_post_types'] ) ) {
+						unset( $data['except_these_post_types'] );
+					}
+
+					if ( empty( $data['only_these_post_statuses'] ) ) {
+						unset( $data['only_these_post_statuses'] );
+					}
+					if ( empty( $data['except_these_post_statuses'] ) ) {
+						unset( $data['except_these_post_statuses'] );
+					}
+
+					if ( empty( $data['only_these_alert_ids'] ) ) {
+						unset( $data['only_these_alert_ids'] );
+					}
+					if ( empty( $data['except_these_alert_ids'] ) ) {
+						unset( $data['except_these_alert_ids'] );
+					}
+
+					if ( empty( $data['only_these_alert_groups'] ) ) {
+						unset( $data['only_these_alert_groups'] );
+					}
+					if ( empty( $data['except_these_alert_groups'] ) ) {
+						unset( $data['except_these_alert_groups'] );
+					}
+
+					if ( empty( $data['only_these_severities'] ) ) {
+						unset( $data['only_these_severities'] );
+					}
+					if ( empty( $data['except_these_severities'] ) ) {
+						unset( $data['except_these_severities'] );
+					}
+
+					Reports_Entity::save(
+						array(
+							'report_name'  => $report->title,
+							'created_on'   => $report->dateAdded, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+						'report_user_id'   => $report->owner,
+						'report_username'  => $username,
+						'report_frequency' => Reports_Entity::get_frequency_from_name( (string) $report->frequency ),
+						'report_format'    => 0,
+						'report_email'     => $report->email,
+						'report_data'      => $data,
+						'report_tag'       => '',
+						'report_disabled'  => false,
+						)
+					);
+				}
+			}
+		}
+
+		/**
+		 * Previous version of the plugin do not store username or user_id consistently, that method fixed that (in the best way possible) - if there is no user with that username 0 is stored as user_id, if user with that id does not exist anymore 'Deleted' is stored as username (check update_user_name_and_user_id method)
+		 *
+		 * @return void
+		 *
+		 * @since 5.0.0
+		 */
+		public static function migrate_users() {
+			$updated_records = self::update_user_name_and_user_id( Occurrences_Entity::get_connection() );
+
+			$hooks_array = array(
+				'wsal_migrate_users' => array(
+					'time' => 'fiveminutes',
+					'hook' => array( __CLASS__, 'migrate_users' ),
+					'args' => array(),
+				),
+			);
+
+			if ( 0 === $updated_records ) {
+				Cron_Jobs::remove_cron_option( 'wsal_migrate_users' );
+				$wsal_db = null;
+
+			} else {
+				Cron_Jobs::store_cron_option( $hooks_array );
+			}
+		}
+
+		/**
+		 * Checks and replace if empty user_id and username respectively.
+		 *
+		 * @param \wpdb $connection - The connection object to use.
+		 *
+		 * @return integer
+		 *
+		 * @since 5.0.0
+		 */
+		private static function update_user_name_and_user_id( $connection = null ): int {
+
+			$results = array();
+
+			$local_user_cache = array();
+
+			$sql = 'SELECT * FROM ' . Occurrences_Entity::get_table_name( $connection ) . " WHERE 1 AND username IS NOT NULL AND username NOT IN ('Plugin', 'Plugins', 'Website Visitor', 'System' ) AND user_id IS NULL ORDER BY created_on DESC LIMIT 100";
+
+			$records = Occurrences_Entity::load_query( $sql, $connection );
+
+			$results['no_user_ids'] = \count( $records );
+
+			if ( ! empty( $records ) ) {
+				foreach ( $records as $record ) {
+					if ( ! isset( $local_user_cache[ $record['username'] ] ) ) {
+						$user = \get_user_by( 'login', $record['username'] );
+						if ( \is_a( $user, '\WP_User' ) ) {
+							$local_user_cache[ $record['username'] ] = $user->ID;
+						} else {
+							// Try to extract the user data from the meta (probably user is not around anymore).
+							$meta_result = Metadata_Entity::load_by_name_and_occurrence_id( 'UserData', $record['id'] );
+							if ( isset( $meta_result['value'] ) ) {
+								$user = \maybe_unserialize( $meta_result['value'] );
+								if ( \is_array( $user ) ) {
+									$local_user_cache[ $record['username'] ] = $user['ID'];
+								}
+								if ( \is_object( $user ) ) {
+									$local_user_cache[ $record['username'] ] = $user->ID;
+								}
+							}
+						}
+					}
+					if ( isset( $local_user_cache[ $record['username'] ] ) ) {
+						$record['user_id'] = $local_user_cache[ $record['username'] ];
+						$connection->replace(
+							Occurrences_Entity::get_table_name( $connection ),
+							$record,
+							array( '%d', '%d', '%d', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%d' )
+						);
+					} else {
+						$record['user_id'] = 0;
+						$connection->replace(
+							Occurrences_Entity::get_table_name( $connection ),
+							$record,
+							array( '%d', '%d', '%d', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%d' )
+						);
+					}
+				}
+			}
+
+			$sql = 'SELECT * FROM ' . Occurrences_Entity::get_table_name( $connection ) . ' WHERE 1 AND username IS NULL AND user_id IS NOT NULL ORDER BY created_on DESC LIMIT 100';
+
+			$records = Occurrences_Entity::load_query( $sql, $connection );
+
+			$results['no_user_names'] = \count( $records );
+
+			$local_user_cache = \array_flip( $local_user_cache );
+
+			if ( ! empty( $records ) ) {
+				foreach ( $records as $record ) {
+					if ( ! isset( $local_user_cache[ $record['user_id'] ] ) ) {
+						$user = \get_user_by( 'ID', $record['user_id'] );
+						if ( \is_a( $user, '\WP_User' ) ) {
+							$local_user_cache[ $record['user_id'] ] = $user->user_login;
+						} else {
+							// Try to extract the user data from the meta (probably user is not around anymore).
+							$meta_result = Metadata_Entity::load_by_name_and_occurrence_id( 'UserData', $record['id'] );
+							if ( isset( $meta_result['value'] ) ) {
+								$user = \maybe_unserialize( $meta_result['value'] );
+								if ( \is_array( $user ) ) {
+									$local_user_cache[ $record['user_id'] ] = $user['user_login'];
+								}
+								if ( \is_object( $user ) ) {
+									$local_user_cache[ $record['user_id'] ] = $user->user_login;
+								}
+							}
+						}
+					}
+					if ( isset( $local_user_cache[ $record['user_id'] ] ) ) {
+						$record['username'] = $local_user_cache[ $record['user_id'] ];
+						$connection->replace(
+							Occurrences_Entity::get_table_name( $connection ),
+							$record,
+							array( '%d', '%d', '%d', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%d' )
+						);
+					} else {
+						$record['username'] = 'Deleted';
+						$connection->replace(
+							Occurrences_Entity::get_table_name( $connection ),
+							$record,
+							array( '%d', '%d', '%d', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%d' )
+						);
+					}
+				}
+			}
+
+			return ( (int) $results['no_user_ids'] + (int) $results['no_user_names'] );
+		}
+
+		/**
+		 * Extracts all of the periodic reports
+		 *
+		 * @return array
+		 *
+		 * @since 5.0.0
+		 */
+		private static function get_all_periodic_reports(): array {
+
+			$result  = array();
+			$reports = Settings_Helper::get_notifications_setting( WSAL_PREFIX . 'periodic-report-' );
+			if ( ! empty( $reports ) ) {
+				foreach ( $reports as $report ) {
+					$result[ $report->option_name ] = self::patch_legacy_report_object( unserialize( $report->option_value ) ); // @codingStandardsIgnoreLine
+				}
+			}
+
+			return $result;
+		}
+
+		/**
+		 * Takes care of legacy reporting objects and collects their properties
+		 *
+		 * @param mixed $report - The report to be checked and its properties patched.
+		 *
+		 * @return mixed
+		 *
+		 * @since 5.0.0
+		 */
+		private static function patch_legacy_report_object( $report ) {
+			if ( property_exists( $report, 'viewState' ) && property_exists( $report, 'triggers' ) ) {
+				if ( in_array( 'codes', $report->viewState, true ) ) { // phpcs:ignore
+					// Specific event IDs were selected.
+					$index             = array_search( 'codes', $report->viewState, true ); // phpcs:ignore
+					$codes             = $report->triggers[ $index ]['alert_id'];
+					$report->alert_ids = $codes;
+				} elseif ( count( $report->viewState ) < 20 ) { // phpcs:ignore
+					// Specific groups were selected.
+					$report->alert_ids = $report->viewState; // phpcs:ignore
+				}
+			}
+
+			return $report;
 		}
 	}
 }

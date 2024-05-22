@@ -66,7 +66,7 @@ abstract class WSAL_AbstractLogger {
 			$timestamp = current_time( 'U.u', true );
 
 			$timestamp = \apply_filters( 'wsal_database_timestamp_value', $timestamp, $metadata );
-			
+
 			return array_key_exists( 'Timestamp', $metadata ) ? $metadata['Timestamp'] : current_time( 'U.u', true );
 		}
 

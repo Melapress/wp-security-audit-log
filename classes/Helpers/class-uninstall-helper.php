@@ -14,8 +14,10 @@ declare(strict_types=1);
 
 namespace WSAL\Helpers;
 
+use WSAL\Entities\Generated_Reports_Entity;
 use WSAL\Entities\Metadata_Entity;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\Entities\Reports_Entity;
 use WSAL\Helpers\Settings_Helper;
 
 // Exit if accessed directly.
@@ -46,6 +48,11 @@ if ( ! class_exists( '\WSAL\Helpers\Uninstall_Helper' ) ) {
 			if ( Settings_Helper::get_boolean_option_value( 'delete-data' ) ) {
 				Occurrences_Entity::drop_table();
 				Metadata_Entity::drop_table();
+
+				if ( \class_exists( '\WSAL\Extensions\Views\Reports' ) ) {
+					Reports_Entity::drop_table();
+					Generated_Reports_Entity::drop_table();
+				}
 
 				if ( \class_exists( '\WSAL\Adapter\User_Sessions' ) ) {
 					\WSAL\Adapter\User_Sessions::drop_table();

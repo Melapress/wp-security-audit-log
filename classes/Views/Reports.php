@@ -61,15 +61,15 @@ class WSAL_Views_Reports extends WSAL_ExtensionPlaceholderView {
 		$screenshots  = array(
 			array(
 				'desc' => esc_html__( 'Generate a HTML or CSV report.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/reports/reports_1.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/reports/reports_1.webp',
 			),
 			array(
 				'desc' => esc_html__( 'Easily configure a criteria for your reports.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/reports/reports_2.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/reports/reports_2.webp',
 			),
 			array(
 				'desc' => esc_html__( 'Schedule reports that are sent to you by email automatically.', 'wp-security-audit-log' ),
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/reports/reports_3.png',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/reports/reports_3.webp',
 			),
 		);
 

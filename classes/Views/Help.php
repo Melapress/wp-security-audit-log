@@ -14,6 +14,7 @@ use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\Helpers\Plugin_Settings_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -441,13 +442,8 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				continue;
 			}
 
-			if ( 'WP Activity Log' === $plugin['Name'] && $can_use_freemius_premium_code ) {
-				$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
-				$sysinfo .= $plugin['Name'] . ' Premium: ' . $plugin['Version'] . $update . "\n";
-			} else {
-				$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
-				$sysinfo .= $plugin['Name'] . ': ' . $plugin['Version'] . $update . "\n";
-			}
+			$update   = ( array_key_exists( $plugin_path, $updates ) ) ? ' (needs update - ' . $updates[ $plugin_path ]->update->new_version . ')' : '';
+			$sysinfo .= $plugin['Name'] . ': ' . $plugin['Version'] . $update . "\n";
 		}
 
 		if ( WP_Helper::is_multisite() ) {
@@ -500,7 +496,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 
 		// WSAL options.
 		$sysinfo .= "\n" . '-- WSAL Options --' . "\n\n";
-		$options  = $this->plugin->settings()->get_plugin_settings();
+		$options  = Plugin_Settings_Helper::get_plugin_settings();
 
 		if ( ! empty( $options ) && is_array( $options ) ) {
 			foreach ( $options as $option ) {
@@ -514,7 +510,7 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 		$sysinfo .= 'Meta table rows: ' . Metadata_Entity::count() . "\n";
 		$sysinfo .= 'Meta table size: ' . Metadata_Entity::get_table_size() . "Mb\n\n";
 
-		if ( Settings_Helper::is_archiving_enabled() || ! is_null( $this->plugin->external_db_util ) ) {
+		if ( Settings_Helper::is_archiving_enabled() ) {
 			$connection_name = Settings_Helper::get_option_value( 'archive-connection' );
 
 			$wsal_db = Connection::get_connection( $connection_name );

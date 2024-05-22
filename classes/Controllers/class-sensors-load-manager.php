@@ -1,8 +1,6 @@
 <?php
 /**
- * Controller: Alert Manager
- *
- * Alert manager class file.
+ * Controller: Sensors Load Manager
  *
  * @since     4.6.0
  * @package   wsal
@@ -25,9 +23,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( '\WSAL\Controllers\Sensors_Load_Manager' ) ) {
 
 	/**
-	 * Provides logging functionality for the comments
+	 * Responsible for loading Sensors
 	 *
-	 * @since 4.5.0
+	 * @since 4.6.0
 	 */
 	class Sensors_Load_Manager {
 

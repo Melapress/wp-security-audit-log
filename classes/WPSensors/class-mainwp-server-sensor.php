@@ -13,7 +13,9 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors;
 
 use WSAL\MainWP\MainWP_Addon;
+use WSAL\MainWP\MainWP_Helper;
 use WSAL\MainWP\MainWP_Settings;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
@@ -178,6 +180,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 						'mainwp_dash'   => true,
 					)
 				);
+
+				Settings_Helper::delete_option_value( 'wsal-child-sites' );
 			}
 		}
 
@@ -205,6 +209,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 						'mainwp_dash'   => true,
 					)
 				);
+
+				Settings_Helper::delete_option_value( 'wsal-child-sites' );
 			}
 		}
 
@@ -226,7 +232,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 			$mwp_sites = MainWP_Settings::get_mwp_child_sites();
 
 			// Search for the site data.
-			$key = array_search( $site_id, array_column( $mwp_sites, 'id' ), true );
+			$key = array_search( $site_id, array_column( $mwp_sites, 'id' ), false );
 
 			if ( false !== $key && isset( $mwp_sites[ $key ] ) ) {
 				Alert_Manager::trigger_event(
@@ -255,9 +261,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 				return;
 			}
 
-			// @codingStandardsIgnoreStart
-			$is_global_sync = isset( $_POST['isGlobalSync'] ) ? sanitize_text_field( wp_unslash( $_POST['isGlobalSync'] ) ) : false;
-			// @codingStandardsIgnoreEnd
+			$is_global_sync = isset( $_POST['isGlobalSync'] ) ? sanitize_text_field( wp_unslash( $_POST['isGlobalSync'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+			if ( property_exists( $website, 'id' ) ) {
+				MainWP_Helper::sync_site( (int) $website->id );
+			}
 
 			if ( 'true' === $is_global_sync ) { // Check if not global sync.
 				return;
@@ -269,7 +277,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 					array(
 						'friendly_name' => $website->name,
 						'site_url'      => $website->url,
-						'site_id'       => $website->id,
+						'SiteID'       => $website->id,
 						'mainwp_dash'   => true,
 					)
 				);
@@ -293,9 +301,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 				return;
 			}
 
-			if ( MWPAL_Extension\mwpal_extension()->settings->is_events_global_sync() ) {
-				MWPAL_Extension\mwpal_extension()->alerts->retrieve_events_manually();
-			}
+			MainWP_Helper::retrieve_events_manually();
 
 			// Trigger global sync event.
 			Alert_Manager::trigger_event(

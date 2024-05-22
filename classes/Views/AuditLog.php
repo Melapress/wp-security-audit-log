@@ -75,25 +75,22 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function __construct( WpSecurityAuditLog $plugin ) {
-		parent::__construct( $plugin );
+	public function __construct() {
 		add_action( 'wp_ajax_AjaxInspector', array( $this, 'AjaxInspector' ) );
-		add_action( 'wp_ajax_AjaxRefresh', array( $this, 'ajax_refresh' ) );
-		add_action( 'wp_ajax_AjaxSetIpp', array( $this, 'ajax_set_items_per_page' ) );
 		add_action( 'wp_ajax_AjaxSearchSite', array( $this, 'ajax_search_site' ) );
 		add_action( 'wp_ajax_AjaxSwitchDB', array( $this, 'ajax_switch_db' ) );
 		add_action( 'wp_ajax_wsal_download_failed_login_log', array( $this, 'wsal_download_failed_login_log' ) );
 		add_action( 'wp_ajax_wsal_freemius_opt_in', array( $this, 'wsal_freemius_opt_in' ) );
-		add_action( 'wp_ajax_wsal_dismiss_setup_modal', array( $this, 'dismiss_setup_modal' ) );
+		add_action( 'wp_ajax_wsal_dismiss_setup_modal', array( __CLASS__, 'dismiss_setup_modal' ) );
 		// add_action( 'wp_ajax_wsal_dismiss_notice_addon_available', array( $this, 'dismiss_notice_addon_available' ) );
 		add_action( 'wp_ajax_wsal_dismiss_missing_aws_sdk_nudge', array( $this, 'dismiss_missing_aws_sdk_nudge' ) );
 		add_action( 'wp_ajax_wsal_dismiss_helper_plugin_needed_nudge', array( $this, 'dismiss_helper_plugin_needed_nudge' ) );
-		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( $this, 'dismiss_wp_pointer' ) );
+		add_action( 'wp_ajax_wsal_dismiss_wp_pointer', array( __CLASS__, 'dismiss_wp_pointer' ) );
 
 		add_action( 'all_admin_notices', array( '\WSAL\Helpers\Notices', 'init' ) );
 
 		add_action( 'all_admin_notices', array( $this, 'admin_notices' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'load_pointers' ), 1000 );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_pointers' ), 1000 );
 		add_filter( 'wsal_pointers_toplevel_page_wsal-auditlog', array( $this, 'register_privacy_pointer' ), 10, 1 );
 		add_action( 'admin_init', array( $this, 'handle_form_submission' ) );
 
@@ -238,86 +235,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// phpcs:disable
 		// phpcs:enable
-
-		/*
-		if ( $is_current_view && in_array( $screen->base, array( 'toplevel_page_wsal-auditlog', 'toplevel_page_wsal-auditlog-network' ), true ) ) {
-			// Grab list of installed plugins.
-			$all_plugins      = get_plugins();
-			$plugin_filenames = array();
-			foreach ( $all_plugins as $plugin => $info ) {
-				$plugin_info        = pathinfo( $plugin );
-				$plugin_filenames[] = $plugin_info['filename'];
-			}
-
-			// Grab list of plugins we have addons for.
-			$predefined_plugins       = Plugins_Helper::get_installable_plugins();
-			$predefined_plugins_check = array_column( $predefined_plugins, 'addon_for' );
-
-			$plugin_filenames = array_unique( $plugin_filenames );
-
-			// Loop through plugins and create an array of slugs, we will compare these against the plugins we have addons for.
-			$we_have_addon = array_intersect( $plugin_filenames, $predefined_plugins_check );
-
-			if ( isset( $we_have_addon ) && is_array( $we_have_addon ) ) {
-
-				foreach ( $we_have_addon as $addon ) {
-					$addon_slug         = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ); // phpcs:ignore
-					$is_addon_installed = WP_Helper::is_plugin_active( $addon_slug );
-					if ( $is_addon_installed ) {
-						continue;
-					}
-
-					$is_dismissed = \WSAL\Helpers\Settings_Helper::get_option_value( $addon . '_addon_available_notice_dismissed' );
-
-					if ( ! $is_dismissed ) {
-
-						$image_filename     = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'image_filename' ), true );
-						$title              = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'title' ), true );
-						$plugin_description = array_search( $addon, array_column( $predefined_plugins, 'addon_for', 'plugin_description' ), true );
-
-						?>
-						<div class="notice notice-information is-dismissible notice-addon-available" id="wsal-notice-addon-available-<?php echo esc_attr( $addon ); ?>" data-addon="<?php echo esc_attr( $addon ); ?>">
-							<div class="addon-logo-wrapper">
-								<img src="<?php echo esc_url( trailingslashit( WSAL_BASE_URL ) . 'img/addons/' . $image_filename ); ?>">
-							</div>
-							<div class="addon-content-wrapper">
-								<?php
-								printf(
-									'<p><b>%1$s %2$s %3$s</b></br>%4$s.</br> <a href="%6$s" class="button button-primary">%5$s</a></p>',
-									esc_html__( 'We noticed you have', 'wp-security-audit-log' ),
-									esc_html( $title ),
-									esc_html__( 'installed.', 'wp-security-audit-log' ),
-									esc_html( $plugin_description ),
-									esc_html__( 'Install extension', 'wp-security-audit-log' ),
-									$this->get_third_party_plugins_tab_url() // phpcs:ignore
-								);
-								?>
-								<?php wp_nonce_field( 'wsal_dismiss_notice_addon_available_' . $addon, 'wsal-dismiss-notice-addon-available-' . $addon, false, true ); ?>
-							</div>
-						</div>
-						<?php
-					}
-				}
-			}
-		}
-		*/
 	}
-
-	/**
-	 * Method: Ajax handler for dismissing addon notice.
-	 */
-	/*
-		public function dismiss_notice_addon_available() {
-		$addon = \sanitize_text_field( \wp_unslash( $_POST['addon'] ) );
-
-		// Verify nonce.
-		if ( wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['nonce'] ) ), 'wsal_dismiss_notice_addon_available_' . $addon ) ) {
-			\WSAL\Helpers\Settings_Helper::set_option_value( $addon . '_addon_available_notice_dismissed', true );
-			die();
-		}
-		die( 'Nonce verification failed!' );
-	}
-	*/
 
 	/**
 	 * {@inheritDoc}
@@ -346,7 +264,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @return string
 	 */
 	private static function get_icon_encoded() {
-		return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMTEyIiBoZWlnaHQ9IjExMCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMTEyIDExMCI+CiAgICA8aW1hZ2Ugd2lkdGg9IjExMiIgaGVpZ2h0PSIxMTAiIHhsaW5rOmhyZWY9ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBSEFBQUFCdUNBWUFBQUQvUEplZ0FBQUFBWE5TUjBJQXJzNGM2UUFBR1V0SlJFRlVlRjd0M2ZldmRGMVZCL0ExZ2dXd2dGUXJWVUJFbW1KWGtLS2dTQkdsU0ZXRENjYkVHQkwrQThWWWZ0QllJVkhBZ2dKcWFCWXNvSUJVcVNKTmVwTW1UZUFGWGhqeXVjOWFOL3VkWitiT21YUDJtWm43eEVrbWM4dmNPM3Z2NzE1cmZkZDNyWDNPSWk3UngzSzVYTlRVRm92RjhoS2RacHhPOGxLYTRISzV2RkpFZkhsRVhDVWlQaGtSbjFnc0ZwKzdsT1o0dWprdnBVa3RsMHVBWFNjaXZqRWliaFFSVjQrSUQwZkVXeVBpN1JIeGdjVmk4YWxMYWM3bjNnS1h5K1dWMDlxdWxjQjlTMFRjS2lKdW1nQitKQ0xlRkJHdmpJalhSY1E3QUJrUi83ZFlMQzQvNzJDZVN3Q1h5K1VYUmNTWFJNUlYwK0p1RWhHM3ppZkwrN29FejNzK20xYjRub2o0NzRqNHp3UVRxQ2RBZXM5aXNmajhlUVR6M0FDWXBNUjR2emdpdmpLdDdaWnBiVGVQaU90SHhOZEV4TlVpZ2xVQzJmc1JHT0N3dGs5RXhQdlNwYjRoSWw0ZEVhOUo5L3J4Zk0vbnp4UHBPUmNBSm5oZkdoSFhqUWpXeGsxNmZsTUNkODJJK0xJRUYzQ2JIZ1drT1BpL0NSd2d1ZGIvaWdoZnM4ckx6Z3VJUncxZ3Nrbld4aVhlT0NLK09aODN5NTk5VmJwUnJIUFhCMWFLb1g0MEl0NmRjWko3QlNKWDYyY2ZQWGJYZXBRQUxwZEwxblNOQmpqVzlxM0pMRmtoNEx5bng0T0wvWFJFZkN6ZDY1dlRyYjQyZ1h3dmExMHNGcGYxK0xEZS8rTm9BRXcyS1EwQXpqZWtwU0Vtd0pNV1hEdlpwdmcyeDZOaXBWaklqVW83dU5aWFJRUXdXU1JHKzZsallxOEhCVERaSlBmSG1xUUJZaHJRV0p0WXgzWDZPVGJwZmZzWXJ6Z0pUQlluVHI2cmNhL0FmR05FZkNoLy83bER1OWg5TE1oRjFwS2tCTm40aXJTMld5Um8yS1JZaDAzNkhlRG1zcmh0Vmd4RWNmSXpFY0VxdVZMdWxWV3lTRS9nK2gwZ0R5TFg3UjNBakc5WTR3MGpBbUNJaVZmNUd6Y3BEY0E0OXo2Mk14Q3RPQ2tONFY0cE8xZ3JNRm1rNzZrOFl1bGVIM3RacEhTVkxJck1kWU9Jd0NMbGNNQVQ3NzY2eWQvMnVnQWpQcXp5U2U2VnF2UDZGQWU4K3Y1L1V1WFppekF3RzREcEpybkFBbzZGVmVKTjVycGVBaWYrelRhT0VRQU4vUk5XS1o5RWJFcmxJUXFJa3ljV21jejJNM082MTY0TDE4UTJhZ25na0JEeDdUYjV5dm9xRFNoUzBuVU1RMWUvMC91QTZFbXVFd3VwUEc5TDkxcnNGYmgrSjVaMlYzbTZMRjRqYzdFNDhRMkR4Q1JaWEtrbDJLUTBvV1N1VG10NDhtK0tRS3krMW1mVVBOdjVkcGw3TTRsVzVjRlN1Vk9pQUxMRE1va0RIMHdnbDcyc2N2SWtNcjZwdmJFMnJwSEZJU1dBKy9vVWxVdm02Z2xhQVNjbTJkMW92NTN1Nld0V0FWQnNsMGV3ZVl6VHM4Ymo1NVBYWU0ya2pJbDdwZkpVR3RLU0hqOVRvNXdjSjBjUGZybGNZb3JVRWlDeE9JU0V4ZmthV1NHQldiVFJuN0ZtWVV3WU9GUVR1MW10enlMVlV6enl0Y1VEb1BjWGdOaXRNUkVLUEgydFhtZ092RWFwTzJkcHFidHV3TW9ualJlNVlZV1Znb2lUNzB5Vnh3WWM5ZGhwY1ZPYkJBcldDRGdXVjJxSmFnQTNhV0Y2NW01Mk04M1NJbkJORnNJT2ZrdVNCMEFDcml6UFloUjRGdEFjQzBTYmp2VUJFM0RHeTNNWU83VkhmUFl6WUphN0g3V3dhLzZvNG1TcFBDeFNuT1JtcVR4WUxaVm5wODZCclFCbWZPTnFUTHp5Ti9FTk1TazNXZkhOLzl2NlB3ZXNDTXN4WVhrWGdCQURORjNPUmVKNmY0SUpOT0FDclMzT3JrdXEyemdJVUdDcUp5SmJOaVR3QUNuRkVRSVFMdlB5SHZQdllaa2wxL0VRTnFPTmFFN0tXc1ZlZVpVVER6SWtUbTVjN0VibXNsc3BJMkliYS9NcUNiZHpXWnZKOVpLNUFHY0hzalpBY1RjbXAvakszV0I1Zmdjdzd6dFprQ0VUWGQwMERXTzJCc2FQZ0xFOFFKWjNLU0lHV0VEekxEMDJhS2s4TmltWFh5b1BxelJmQWdHcnRJSE5iMk9zWER1WTVYSnBNbllsb0lqSlFPTXU1WExpbTExcEIvZllsYlcyTElncnJCMkp1VlZ5YkxmV3J0ekp4UXl3OXRPM1pJZ3c5L0kyWlpGYU5HeGVNaC9YMnpORUFNZUdYQzAyMjd6bUwxU29ocXlOazZjQXBzVUJSb0lOS0s0RWNNaUorR0RnckpIRjlYeVlBTGRob0hiZmY2U3l3UUpQM01raDFQK21PbUxlM0NrUWI1dnBFU0FSb0o0YjJKb0NTVWl3WVhrYzhiRnFsTmFIQi9wa2E1RW5BS1k3NFNKWTJmZEZ4TGZuMTErYkF3VnNEOWZSQXMrTjZFY1JCMWpiU3lMaVphbGlpSHVBTzRoQXZNYmRtcjk0Q0xqYlJjUjNKZU1XUnFRbHZkZkdwdVp4YkdCQ0FLLzA4b2g0ZmdKNjJqRlFBTnBKTk1sN1JNVDlNb2piWVhQa1NVQ3gwN0F1THNLZ1hwUiszdzR6dU1uNVVVOFgwV3h5UUlxUlNNNzNSTVQzcHFkQzd1WmFLM0d5T3V2K0lpSTh1ZFNUTldvQlpIMFB6cWVkMWRQUDEzcjZVQzZDU3ZHQ2lQaTM3QkRqTHNTQWc1VmxoZ0NlbmdyaEVVcUVGUzcxRG1tUjRxWFVvN2RiTGNJai9mamppUGdkTEx6U2pSWkFNZStoQ1NEWDJYc2d5QWZmTHM0OUp5TCtQVjBEUy96MHNiakxIWUJFNGhDOXNrWkFTcTNFekRFOU9tZDl0STB2ckFEd3Q4NEM4Q0dOQmZZRVVKME1LWGx4UkR3MzR4MHIxRng3ZE81eUNJanBWcXNvemZwdUh4RS9HQkhmbWVFSXdMMGUxcWdzOExmM0NhQVBSbFFFNFg5TjhDU3M3OXRFaThmTU9CazBsMS9KZWR0aVdLSUFDUTR4OEhwNXo0MlRzcUxZS05XNGN4SkJrcUk4dVFmQk9RaUFYQ2IzS0ovNWh3UVBMWjdjcXRlb1EySU85bHdhSjVlR0xWYkt3NVdWRklmUmNVUEdSQXlRUUZOeUJxc2VaMjJ1ekNFUlA2R0lKUUtTRU5ERHBlNFZRRUhYb2pGNWFjRXprMmx5bVhLWTBhbEJXaHEyaDBUSVY5RjY1RXVlUm1Dd1dBREZGaVhrZG4reFh1U0pOd0FrS2M1NEtCN3lxNU1xK3RRVyt4eWZUV1U4M3g4UmQ0K0k3MGdKY2tyK3ZEY0FDenk1SFliNWR4bjNMTkFrb3BLTFk0Y1RHWkFGdXh1QUdETWFMeDhEbXJoVWJmVmxOS1ZCbHVwUlFCcW5SaVZld3VFWDFRSWVZdlNobDZhTEhCRUUzbzlFeEEra0hHbDhZeDU3QXhCWnNhUC9KZDBtVlVXemoxeG05S05aRkxUOWJobGo2dmhZeGJ0ZG1CLzNEaVR4a0VWS1k0Z0pQSVluOFJ6Qm11SXRXQnl2SVBFSElyZktNc2VRbTcwQXlFWFp3ZjhZRVgrZjZ2cUhlcENGQkJCUUZKQUhSc1NQWmtLOUMyaWJObENwSHVJanN2WEN6RkVCZXBwdmpkbDlHUmQ1Qng0RGlIZktlaWszdTh0amRnQzVKQldEWjBmRXMxTHVtVXhXcnFDN1hUZ0hTRnkvWjZZNjhxOWU3ZlUrcWhnemE2UU0vVk8ra3JJR2xYYldJWkt1WDVVRFF3WGlEMlVaYnBkaTkyd0FWbWNXU1l6VlBUMkpRZmY4cnJGQ3U1bGk5T1Bwb25ybXE5V2doT1J3cFdMNFAyZHBaM1FNejdGanlqb1dFSnNmeS9nOVZHT2VCY0JxRjFERFluV2VXRjJYWG84TnV4bXJ4RDd2R2hHL21KV1NYZDNSRU5jbFBrbzNFQnViMHVaODU1VGN0ZW1OVmQxaGlmZHVRTncycHU0QWx1VUJUSnBnZ3BqY3BNQy9iUmFwZmdDTU8vcWxKQWJ5dmg3Sjh1ckhWeDc3aW9oNFNycFVJSTZ1UnphV3lQMnpRckZjR3JUTm5YWUhFR0VSOEo4UkVYKzdML0FTUU1RRm0vdlppTGgvZnQzVGpiWkFsbjVMZUg5U3BrYUl6UlIyYXJOeHAycXQ0amxXdlMyZWR3V1FjaUYzRWgvK0JuaUx4WUt5c1pkSDdtSnU5RDRSOGNoMG96M1k2S2J4YzZmS1hFTEVYMlplMjBPUWtMZnlKUGZLdUNpbkxmRmhkU3pkQUpUbnlaR3d6U2RuN3ZTeEtUdHlWOVFUUUc1VEhIeFVMc0tjQUJheGtTS3B4UUh4clIxeTJ4TEM1WW5pSVhlcUYyY2RpRjBBbEl4VExnbzhzYUZycWpBRXpBU1E1aW1uZW5UVzVPWUU4TVJ6WjczeWVSSHhKeG56Sjg4OWlRMzU3OXNpNHI1cGliekxxdXcyR1VDeEFMVUczbE16MmYzSWxJQStCS3d6bUNnTEZEc1FHYjBxY3dOb0tOYkFCc1pLLzVCbzBlTTRXU2I3NWtOMmUwQVNNNVdOTnE1UEF0REF5VTIwVFc3VHEzTFFRZXA0YVlGMHhwK0lpSjlMOVg4ZkFBSVJlZE83QTBDS2s5YUcwWVNtTm1nMlVBR05aZ3JFNzg2cVNySHIwUUFhbkxLTHBCWUxvM0crYTRyWU85YnlWaVlyNEFPUDI5SExNeGNMWFVjbWNJQy9qb2pINGdOVFkyRXpMMjZUTU0rejJKd2F5NnFlT0JwQUVwbEVIWGpTQlFNZTNjYy9GYnhNSTVTU3hBd0VSZ2VkR0RKSEhyaldnK2VHcHBmK3FrNnh4V0poalNZL212T1U1RUxNbE5KRXVaRWpNcVNkSy9Mb00zM3phZWs2MzdSWUxMaVFnejB5NkdOcWxJeGZTR0Y0akxvL1pRNDJzTUwwYjJiRlJUaVo3RVp6YzlxSTlGMDVJZ0I1R0RrdkhiaDZZZ2ExVkdCQ1JGeVY5RDlMU2VuanZRWTZadlZ5aDdJK0ZZbWZUbEVZRzkyWCs2eGhjMmZJek9NajRzOXQ4cDU4b09uUjVXVzBlRkpzWERzQUQ5SFV0QlhBbjhxS3R1WWplWTllbG9Nd3poYm83RHZSNWkrQi84a0p0YlV4KytjS1EwbHJrTmovWGtTOG9qY25TRThETkgybkdzMzBvTm80TnMyWkFGTDVtYTJERlJpbnVQZWVRNlFMSytCUjdUVUpsWkt2SWpGVXlaOEsyT3JmYzVlVUozSHdOOVFPNTdpS1V6SlQ0UUtwWVZTWU4wMTJJNEJFVmRvaXRGa2RuZlAxdlZqV21GWE1RemJhS0xCT2lmc1BaOTZuNzJYZnJyT2RBaTVBdkg4TWtYdXhXR2lPNnY3SUM5anFQSUFMYTlURi9nZWIyZ290a2dYQzZqVGVLcVVvRFhVSjBCZHQ0d3ZYdEs2amFYNWRlV1VkOThLK3hHSzlMeHFFeEQ1akJONitXT2NtVUtwMTVGZlNTMzE0am5WcTRqNlA0OWdEWGtMSysrQzZ6bXdtaXJiSysraCtYZG9oMW5MeEMrQmhqd0RSTjFMVmNHOG44bEltMnFQYjNLZVlnS0VkMHZKcU9tUkZsZnRmVG1YR1dzMjEwWWtVaklwU2d3SEx5ZW5QRjUyTnNOdTVVZkZQM0hOV1laWkg3aXh0Qm1JYWwyMkFkUzFyc1kzYkJKZ25wdWxuYzV6VkdEcy9LVllMSUl1WUM4RGE3QnE2UE9UbE1vS0xBSFJZQThvNnRRalZzNUdYWkZtQWVWQXlTaFpXQzFDblpWbG90UW1PWGVpNS9vNEY2aXRsZ2JqQ25CWm80ekl1WFcyTUNqL2hzcThBb0VYanp2aFpmZjUwUGl5cmk5YTNJZjRCVUhEK21hd29ISU5ySEFxNEdDak1pSUhxb3RLczdoYllWQ3R3QUd6VVo2cUdySTJCM0tlV1BTM2hCTnUvU2t2c2Z0Q3lhUzFBbWhSbE1hd3BuY3RERjc3WCsxaUNVMWJrTklTdmV5dEpyaEUrZ0pjNE5hWnV5TEIrOTZ6RExmSkFTVEphVExCVmNZZjY2TGE2TTBnTWx1bEVqNUtRM2JWdlNXd3NtQ1h3cXcyUzAxN1VvNnkweGtzVnlhUEdLUGppQlRUcHJVcU11RVFGRndjbDgzdzh2VzkwdS9rR0VBM1FaVW9BU1BkRGFnNmRIZ3dCRllCcW96UmlPZGxyWmxnYjRRUW40YUVZRlN2RVRiWXFNWFUrMEdWRnROVkpIT2w5WkxYVHdEbGtsdHZlazBxRHovbjVWQnFVVXZaVjE5czJ2TE4ranp3Z01JOXIyaXU2MVViVGRXTGZEb3dLYWVLZnpVMEwvYU1oRmdoeGkybW5FVzExS1A5cFdtUzMvcGVtWXhtUmVYZ1NtYkdIUDZZQXN1dmZJakJVbUYvTCttaTNGS0xwSFhWSVZDZ1RXaFI2YmV5ZHkwbk0yR0JkMDBzYmdWWUtIV2hkU2twTnB6VUNvN3BBZFovamlnKzdBblRXKzIxcW5nbVYvM1ZFcHZONnlIZTVTK0RKQ01obzBvaFI5VUFBK3NQcUFTV2thdUo5UTYraWJycFI5UzVpclQ1UGF0QXhKZXlyWUdvdlVTTWxaejJCSyswaDlEZWJHV0RBMHk5YXZhSjR3ZWlLdkFtVXpPVm9OQkRsUFNyemswbE5rMDVvRVh4RXFqSnFmc2RJWnFvekRTOVFSc0pDZGFaTnp2OVN0TmNhb2hLdkdzUUtXODEzRW9BRm9tdVZ1RWlCOUVLaDk3MmRRR1J4emd2WWVVaVUrSHVNT1NIcmsxTEpqN0ZCMWpmNUl1ZE4yZWd1S1d6STkxYXZBalVad0FKUklOVm1iaEtZcVRielNaYVlWbWpBTkZHTlN2dnVjeGtTSXl2M2swZy9NVHZ6SnAvQXlwWkNZUVBqMU1pa0c4MTV3bFUyM2dWQUU3VUxIWmZtUmxUcm5hTnpBbmYwZ1EvL05IZWh2SWNMd1lKWjVCeW5qb2FBZFZGT25UbVlhNVpKcVlnYjcrNndjWUVrWFpBbWNKdEFWSVZaeHdHNkFXaHloRndnWW1LVWdaZW1aam9WUkxFUGNHUWpWUXFhN0RHNFVpVWM2WlRRZ1luakFxUFBDdWFHclJJUjhJZ1lkMHpCZWhPQjZ3cWdNWmlVNHFJK1VSTVRHMCt2M3pWcW0xKzRxYU9FVlE0a2dWV0JsK2dmTXJtdmd5MWlQdVpwczA0U3JwdEtqUFFKZUVCVSt6eHJzM1lIRUVZQ3VKMUp6SlVudW5UV0pMVW1YU2szb2tOWjh4SzNvdUI3Q0JBdEdrOVRIZW5DeGRRejg5aTErZWt1NERZTHZHMEN4aXdBbGlXU2xSQWEybUJaNG1oMzJraHNKaWU1dDFOWjRqN3pRNWJId3lCc05xZVlUdzhlZmJXTkpHczJJdzhqMXF2dllkemJ3R3NKNUtDMndwTFNodGJudUZQVmFURlJnRmZ5SnkrTlpxY05pSGFxWTFmWUdUZERxWmo3UWJnd0h4NUZWNTY2S011YkFsNFJGdk94S1hjQmIzWUF5eEsxWXRpcFlxSllNWFhTTEk2NzBkQWpSK0pXcTZtcDE3V3JhelBVQllxVTBlUjZOcU9MRzJqc1VtMmZzaG5GdHVyeEJCN1BVcGZ6SENwWXpPWkNXMnRnaVdLR0hjdnRjRCtUNkhaYW90SVc0TFI3bUx4RTF3TFVOYnVITHNJNnk2MHJPT25Ic1FIcnFyZ0syazRoRSs5SGhZUG1lbTdFYUlTTXRta09GUTUyR2ZkZUFDeExyR3VrdWZDQjJQaVdLZHBwYy8weDhVT2FBVUJIazJtRjNDckphUXpKc1NqVUpjQzVUQXByVXdQMXRYcWZUb1RSWmFLOHpaNVVDSGpPY2hnM1N4eVRHdTBOd0VyMkhjU1FMeWxGY1VVT2cwdzlWODV0QXNzTzFnUlZWOUt2MjdOU2MveWVBTERhREdVQjZvTGlUaE1CRGtpdVllcGlEVUFqVXZNZ09yNUd1OHpNODFSVlhMV3dtcEgxdHE1VFdJYkc4NzBDV0VGWGY2a1dPTGtpSUgwdHpSamxrazZEMVlVck5sWHZLREFCU0FqMmRWMngwTy9yR3RaMXhsMThxeXNWdWs4RDlsejMrM01sWWRMWVZPQVFQODFhem5Eb0xSSzdlUTFoWUNncFhBZnEzZ0U4MllqWkJxZWVTTG5uVXJrcDVHYVNDTHh5dHpSZ3RkY010VmpyTGplcEVhbTlUcWl2VHk0eGFheFRxZ3JOMlQ0dTBxa2lyUkEwWGVXaEhtYzREZ0pnZ2FpWGcydHk1VUppTUtZS1ZITFU2QmlUcmdvUjhLekxTNHFGTExSdWNWZlhDL1U1ck12ejlJNHZVNEhMTWZoc0lQRUVtREtyRSs5NGhGNjNrajBZZ0FXaVhjNTljYU9zRVUwWEkyYzV0cFlXY1FWWE5NWENOZ1dxSkZoaW13c3QwRE94Wk9TS0d4MURWalo5MUdBQTU3eHF2VUdJUTg2WXl4TUJLZWwvKzV4dC9FTlp3cTd2V3k2WHJNNXhhR2ZaQWFkRnN1NnhOQ1hlYllxQlc2OWFqOW01UXNMRFpyNThGWmVLQWJMR3V1a0hsbnFRdTBDUEFJNWJSSmF3VEFxUk9pYlM0bWR6OWJiYS9OSWRYV20vdjY0elc2eFFXTVNjcXFSZnQ1VHI2UXBxdmNvYTBYakpzNlRmSzFZb2VUN29oUlRXWnZ3WGJnaUdJSWwxaUFxcm94TDVmcTd6aWtJUGFVOGpsUTJ2cFlWSWNucVJvZmJtVjF5Q3hGak80aVFNdjY3ZFhqQjJyS3YzdlcrTDNxUHdWQTlKTkJVSFV5VWtHN2c3dVV3aU9ydGFXUHYraktYbUxiZTBOZ0JqZGRhbjdtUzI2ZnBtWXorNkNCZDFpS2Nxa1VFcnY2Y1FkTm9wdjNyM3Nycjd0Tk13L0h2ZDc1MkwwRDJtWHRkYmg4UUtEWmFDUTRjMFNHQzY1REdMRkRkSDNTTnc3QW8yOXhhVW9vaHJkZWN5cisxWnhURUswRVpPbEF5WnlJQ2xzN2k2NzI3ZHVlemtidGd0SWJ0SWoydHltcnBqRnhlQldVbElQZXRRWnUrV0J4UmZyZ2JJdXBLOEJscEtpVjJud2lGK3p2cElDVXcrVi9jT3BQam9FcFBUK2JuT2dkNmxMUnZZRlJGdFlId0FjRjV0WU9URnVxdzluM0ttb0pwTk40QjBBRk9NQktUSmVHV2hMSlZWOXR5SkxGS0MzZDdLdSs3dm9JQnNRbFNleVUxRm1jZlZ6YXpNbzA0R0E4dG1OVThxVDkzV29QYzh6VU9Pek9MTWtkY2g2U0VzMGk3eTQ1bksxV0JGUEMvelFXOFVFMDJ3dlU4OElBVjRzWEx3Lzl4aVNtSkIzUlpBTEtoN1BOaWxkcVpKV2dEdm9lelV6WTlOdUpKMWNiYVMvVGJKcjNzQ0cyL05pY1h4TGx5a2VGZXlYTTlqM1hXWmF1TTJKMkFKR1JxbWVCMWcrdDNnbnB1ZEZyc0o2dHlJTWduM2FxZXFEckRNWW1Ub2RJLzc2cHF3SjBBS1RCYkl6ZEl6UGJrZTMyTnFkVHVkOWo3eWRUR0Y5alk5UEFxQXpNR0d0QUY5endJQjZyMDEvcDNXYU0ybXJQSGJZT1E3bTQrbEFRNUJFUjZNbjlmWm1iU05HdHpLemFhb0R0eU1vMklGSnZiYVhwUmcxT2VzTEVZdEJEQ0xYZ3ZxRnFWOUZTOU9ibkNWNFB0c01Zc2xJU1d0ZHNwcjFLMTY2b29aUFRaZUtWQzhDTy9BMnVwMnFoWFhWZjI1U1dQZEdiaGFtOGtMbTBWWEZtY3g3R1pBaWgyQ2Y4VVE4V1VPZGFMY1pXbWNnQzNOczlLUGNxR2xrUlpROVgwdndOcjk1ck41QTlhR2hCV2o1Q2FsU0RZZE56bXArdUVESndOWW8yNXVqMk5Ic3o1eEVvaFZ0eE5YeWlwblpaTDV6K3ZNUXJjNURoZzBhK01PV1pmNHh0cUFoNlN3UXA1aWNId2I4SG45QUZ4SmdPM3FxdGx4cnl4UkRsVjN4SjZEMVEyWjd4enZhVmt6b2dVMDhhMU5BekRtU1hYUVRRT2ZiWGMyTmJ1NlZhazBCTU1ESkVVRDQwTWFwQ25jV204WE93ZFlwdzRuV1c4clFLaXVWQnJBVFZaOG0xUnIzRGFKMlFCY2NhM0FBUktyYk85VEQwZ3VscFdLb2IyWTM3WjVqLzE5eVZ5SUVoMjNyRTBPeDAyZTNvZHdYK3JSN0FDdXVOWUNrdFZ4bzhRQXBBZUk1THBTZVhycmkyTUJhLzlPR2lDT0lTTGlHdkM0U1VCS2JXaTMxSks5YXJkN0JYQUZUQ3l3THF1RjROQmRpN2tDa3N2dGRRL2FzUUFpUW9nSDBZQWVLVzlyMHdDNkpiVmtNcHNjTzhDREFiamlZa3NSS2ZkYUtnOGdwU2FTNjdscWJldldEcHNFRHFFQWNHSmJxNWI0M1dWelZQbDNCZkxnQUs0QVdSMW5GQkxTRm9zVUo3RlhGaW1mck5MV3JuUGQ5djZxaXJBNGJGSmNRMHhZSERkSjhjRW1SN2ZZYnh2QW1OOGZEWUFOa0hVUFhISVdsWWM4Vit3Vmd5MzJLazVPTFcyVnVzUGlTSEdTYnRaV2JGSStSMVNmcEphTUFXYm8zeHdkZ0NzV2laV1d5c01DZ2NjYTZhN0ZYc1hSMVpzZWI1dC9hYXpZSkpCWUd4ZnBsVmgrcXBha3pEWDVRZ2JiQmpUMjkwY0w0QnIyQ2tocENORzVWQjRDQWZLajJDeW5ITkwrd1FWaWpkeGkxZDZxWElWbEVwVW50enlPQldUWHZ6c1hBSzVocjYzS1V3VlhRSEszQUY2OVlGQ3h5Wks1c01teXVOT2k2YkhGdHlGZ25qc0FWMXlzT0NtZkxKVkhXUXVEbFYreVNIR3k0bHV4U2ZGTnJPTW1UK0xidm5PM0ljQU1mYys1QmRBRUc3bXVlbmtBQ1R4V0NVamlPYmRZMWdaRXFZRnF3T1NXK3FHTFBPZjd6aldBWjZnOHJLL2tPV1dkYXNXZ2xsdytsN0E4SjFDYi92Y2xBK0NhZkxMeVJTckpTWUgzR0JMdjNpQmZjZ0QyWHFCai8zLy9EK0N4STdSbGZGOEFyMDMwOW1yMEI0SUFBQUFBU1VWT1JLNUNZSUk9Ii8+CiAgPC9zdmc+';
+		return 'data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNjUuNzIgNjUuNzIiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojZmZmO308L3N0eWxlPjwvZGVmcz48ZyBpZD0iTGF5ZXJfMS0yIj48cG9seWdvbiBjbGFzcz0iY2xzLTEiIHBvaW50cz0iNjUuNzIgNjUuNzIgNjUuNzIgNTEuNDEgMzIuODYgNjUuNzIgNjUuNzIgNjUuNzIiLz48cG9seWdvbiBjbGFzcz0iY2xzLTEiIHBvaW50cz0iMCA2NS43MiAzMi44NiA2NS43MiAwIDUxLjQxIDAgNjUuNzIiLz48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Im0zMi44NiwxMC4wN0MxNC43MSwxMC4wNywwLDMyLjg2LDAsMzIuODZjMCwwLDE0LjcxLDIyLjc5LDMyLjg2LDIyLjc5czMyLjg2LTIyLjc5LDMyLjg2LTIyLjc5YzAsMC0xNC43MS0yMi43OS0zMi44Ni0yMi43OVptMCwzNy44N2MtOC4zMSwwLTE1LjA1LTYuNzQtMTUuMDUtMTUuMDUsMC0uMTMuMDItLjI1LjAyLS4zOC42Ni4xOSwxLjMzLjMyLDIuMDUuMzIsNC4xNiwwLDcuNTMtMy4zNyw3LjUzLTcuNTMsMC0yLjA5LS44NS0zLjk4LTIuMjMtNS4zNCwyLjI1LTEuMzQsNC44Ny0yLjEyLDcuNjgtMi4xMiw4LjMxLDAsMTUuMDUsNi43NCwxNS4wNSwxNS4wNXMtNi43NCwxNS4wNS0xNS4wNSwxNS4wNVoiLz48cG9seWdvbiBjbGFzcz0iY2xzLTEiIHBvaW50cz0iMCAxNC4zMSAzMi44NiAwIDAgMCAwIDE0LjMxIi8+PHBvbHlnb24gY2xhc3M9ImNscy0xIiBwb2ludHM9IjMyLjg2IDAgNjUuNzIgMTQuMzEgNjUuNzIgMCAzMi44NiAwIi8+PC9nPjwvc3ZnPg==';
 	}
 
 	/**
@@ -371,6 +289,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			self::$page_args['page']    = isset( $_REQUEST['page'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) : false;
 			self::$page_args['site_id'] = WP_Helper::get_view_site_id();
 
+			self::$page_args['site_id'] = apply_filters( 'wsal_main_view_site_id', self::$page_args['site_id'] );
+
 			// Order arguments.
 			self::$page_args['order_by'] = isset( $_REQUEST['orderby'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) : false;
 			self::$page_args['order']    = isset( $_REQUEST['order'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['order'] ) ) : false;
@@ -378,7 +298,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			// Search arguments.
 			self::$page_args['search_term']    = ( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) ) : false;
 			self::$page_args['search_filters'] = ( isset( $_REQUEST['filters'] ) && is_array( $_REQUEST['filters'] ) ) ? array_map( 'sanitize_text_field', wp_unslash( $_REQUEST['filters'] ) ) : false;
-			// @codingStandardsIgnoreEnd
+
 		}
 
 		return self::$page_args;
@@ -392,7 +312,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		// Set events listing view class.
 		if ( is_null( $this->view ) ) {
 
-			$this->view = new List_Events( self::get_page_arguments(), $this->plugin );
+			$this->view = new List_Events( self::get_page_arguments() );
 		}
 		return $this->view;
 	}
@@ -420,12 +340,12 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		global $pagenow;
 
 		// Only run the function on audit log custom page.
-		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // @codingStandardsIgnoreLine
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false;
 		if ( 'admin.php' !== $pagenow ) {
 			return;
 		}
 
-		if ( 'wsal-auditlog' !== $page ) { // Page is admin.php, now check auditlog page.
+		if ( ! in_array( $page, ['wsal-auditlog', 'Extensions-Wp-Security-Audit-Log-Premium', 'Extensions-Wp-Security-Audit-Log'] ) ) { // Page is admin.php, now check auditlog page.
 			return; // Return if the current page is not auditlog's.
 		}
 
@@ -437,6 +357,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		$wpnonce     = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : false; // View nonce.
 		$search      = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : false; // Search.
 		$site_id     = isset( $_GET['wsal-cbid'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['wsal-cbid'] ) ) : false; // Site id.
+
 		$search_save = ( isset( $_REQUEST['wsal-save-search-name'] ) && ! empty( $_REQUEST['wsal-save-search-name'] ) ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['wsal-save-search-name'] ) ) ) : false;
 
 		if ( ! empty( $_GET['_wp_http_referer'] ) ) {
@@ -449,7 +370,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'view',
 			);
 
-			if ( empty( $site_id ) ) {
+			if ( false === $site_id ) {
 				$remove_args[] = 'wsal-cbid';
 			}
 
@@ -486,7 +407,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		<form id="audit-log-viewer" method="get">
 			<div id="audit-log-viewer-content">
 				<input type="hidden" name="page" value="<?php echo esc_attr( self::get_page_arguments()['page'] ); ?>" />
-				<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr( empty( self::get_page_arguments()['site_id'] ) ? '0' : self::get_page_arguments()['site_id'] ); ?>" />
+				<input type="hidden" id="wsal-cbid" name="wsal-cbid" value="<?php echo esc_attr( empty( self::get_page_arguments()['site_id'] ) ? '-1' : self::get_page_arguments()['site_id'] ); ?>" />
 				<input type="hidden" id="view" name="view" value="<?php echo esc_attr( $view_input_value ); ?>" />
 				<?php
 				/**
@@ -563,20 +484,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		?>
 		<script type="text/javascript">
 			jQuery( document ).ready( function() {
-				WsalAuditLogInit(
-					<?php
-					echo wp_json_encode(
-						array(
-							'ajaxurl'     => admin_url( 'admin-ajax.php' ),
-							'tr8n'        => array(
-								'numofitems' => __( 'Please enter the number of alerts you would like to see on one page:', 'wp-security-audit-log' ),
-								'searchback' => __( 'All Sites', 'wp-security-audit-log' ),
-								'searchnone' => __( 'No Results', 'wp-security-audit-log' ),
-							),
-						)
-					);
-					?>
-				);
+				window['WsalAuditLogRefreshed']();
 			} );
 		</script>
 		<?php
@@ -626,55 +534,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	}
 
 	/**
-	 * Ajax callback to refresh the view.
-	 */
-	public function ajax_refresh() {
-		if ( ! Settings_Helper::current_user_can( 'view' ) ) {
-			die( 'Access Denied.' );
-		}
-
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
-
-		// If log count is not set then return error.
-		if ( ! isset( $post_array['logcount'] ) ) {
-			die( 'Log count parameter expected.' );
-		}
-
-		// Total number of alerts.
-		$old = (int) $post_array['logcount'];
-
-		// phpcs:disable
-		// phpcs:enable
-
-		// Check for new total number of alerts.
-		$new = (int) Occurrences_Entity::count();
-
-		// If the count is changed, then return the new count.
-		echo $old === $new ? 'false' : esc_html( $new );
-		die;
-	}
-
-	/**
-	 * Ajax callback to set number of alerts to
-	 * show on a single page.
-	 */
-	public function ajax_set_items_per_page() {
-		if ( ! Settings_Helper::current_user_can( 'view' ) ) {
-			die( 'Access Denied.' );
-		}
-
-		// Filter $_POST array for security.
-		$post_array = filter_input_array( INPUT_POST );
-
-		if ( ! isset( $post_array['count'] ) ) {
-			die( 'Count parameter expected.' );
-		}
-		$this->plugin->settings()->set_views_per_page( (int) $post_array['count'] );
-		die;
-	}
-
-	/**
 	 * Ajax callback to search.
 	 */
 	public function ajax_search_site() {
@@ -693,7 +552,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		$search = $post_array['search'];
 
-		foreach ( $this->get_view()->get_sites() as $site ) {
+		foreach ( WP_Helper::get_sites() as $site ) {
 			if ( stripos( $site->blogname, $search ) !== false ) {
 				$grp1[] = $site;
 			} elseif ( stripos( $site->domain, $search ) !== false ) {
@@ -913,7 +772,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 * @param string $hook_suffix - Current hook suffix.
 	 * @since 3.2
 	 */
-	public function load_pointers( $hook_suffix ) {
+	public static function load_pointers( $hook_suffix ) {
 		// Don't run on WP < 3.3.
 		if ( get_bloginfo( 'version' ) < '3.3' ) {
 			return;
@@ -1015,35 +874,26 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 *
 	 * @since 3.2.4
 	 */
-	public function dismiss_wp_pointer() {
-		// @codingStandardsIgnoreStart
-		$pointer = sanitize_text_field( wp_unslash( $_POST['pointer'] ) );
-		// @codingStandardsIgnoreEnd
+	public static function dismiss_wp_pointer() {
+		if ( isset( $_POST['pointer'] ) ) {
+			$pointer = sanitize_text_field( wp_unslash( $_POST['pointer'] ) );
 
-		if ( sanitize_key( $pointer ) !== $pointer ) {
-			wp_die( 0 );
+			if ( sanitize_key( $pointer ) !== $pointer ) {
+				wp_die( 0 );
+			}
+
+			$dismissed = array_filter( explode( ',', (string) \WSAL\Helpers\Settings_Helper::get_option_value( 'dismissed-privacy-notice', true ) ) );
+
+			if ( in_array( $pointer, $dismissed, true ) ) {
+				wp_die( 0 );
+			}
+
+			$dismissed[] = $pointer;
+			$dismissed   = implode( ',', $dismissed );
+
+			\WSAL\Helpers\Settings_Helper::set_option_value( 'dismissed-privacy-notice', $dismissed );
+			wp_die( 1 );
 		}
-
-		$dismissed = array_filter( explode( ',', (string) \WSAL\Helpers\Settings_Helper::get_option_value( 'dismissed-privacy-notice', true ) ) );
-
-		if ( in_array( $pointer, $dismissed, true ) ) {
-			wp_die( 0 );
-		}
-
-		$dismissed[] = $pointer;
-		$dismissed   = implode( ',', $dismissed );
-
-		\WSAL\Helpers\Settings_Helper::set_option_value( 'dismissed-privacy-notice', $dismissed );
-		wp_die( 1 );
-	}
-
-	/**
-	 * Return the total number of events in audit log.
-	 *
-	 * @return int
-	 */
-	public function get_total_events() {
-		return (int) Occurrences_Entity::count();
 	}
 
 	/**
@@ -1051,7 +901,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 	 *
 	 * @since 4.1.4
 	 */
-	public function dismiss_setup_modal() {
+	public static function dismiss_setup_modal() {
 		// Die if user does not have permission to dismiss.
 		if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
 			echo wp_json_encode(

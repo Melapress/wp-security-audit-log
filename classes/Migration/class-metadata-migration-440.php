@@ -147,7 +147,7 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 		 */
 		public static function process_next_batch( $connection, $batch_size ) {
 			$plugin = \WpSecurityAuditLog::get_instance();
-			if ( 'local' !== $connection && ! is_null( $plugin->external_db_util ) ) {
+			if ( 'local' !== $connection ) {
 				$connection = Connection::get_connection( $connection );
 				if ( false === $connection ) {
 					return 0;

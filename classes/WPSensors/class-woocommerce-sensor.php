@@ -15,7 +15,6 @@ use WC_Coupon;
 use WC_Product;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
-use WSAL\Entities\Occurrences_Entity;
 use WSAL\WP_Sensors\Helpers\Woocommerce_Helper;
 
 // Exit if accessed directly.
@@ -3564,7 +3563,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 
 				// Set editor link manually.
 				if ( $post_type_object->_edit_link ) {
-					$link = admin_url( sprintf( $post_type_object->_edit_link . $action, $product_id ) );
+					$link = \network_admin_url( sprintf( $post_type_object->_edit_link . $action, $product_id ) );
 				} else {
 					$link = '';
 				}
@@ -3970,7 +3969,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 					'ProductTitle'     => $product->get_name(),
 					'ProductID'        => $product->get_id(),
 					'SKU'              => self::get_product_sku( $product->get_id() ),
-					'OrderStatus'      => $order_post->post_status,
+					'OrderStatus'      => $order_post->get_status(),
 					'EventType'        => 'removed',
 					$edit_link['name'] => $edit_link['value'],
 				);
@@ -3986,7 +3985,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 					'OrderID'          => esc_attr( $order_id ),
 					'OrderTitle'       => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order ),
 					'FeeAmount'        => $item->get_amount(),
-					'OrderStatus'      => $order_post->post_status,
+					'OrderStatus'      => $order_post->get_status(),
 					'EventType'        => 'removed',
 					$edit_link['name'] => $edit_link['value'],
 				);
@@ -4003,7 +4002,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 					'OrderTitle'       => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order ),
 					'CouponName'       => $item->get_name(),
 					'CouponValue'      => $item->get_discount(),
-					'OrderStatus'      => $order_post->post_status,
+					'OrderStatus'      => $order_post->get_status(),
 					'EventType'        => 'removed',
 					$edit_link['name'] => $edit_link['value'],
 				);
@@ -4019,7 +4018,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 					'OrderID'          => esc_attr( $order_id ),
 					'OrderTitle'       => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order ),
 					'TaxName'          => $item->get_name(),
-					'OrderStatus'      => $order_post->post_status,
+					'OrderStatus'      => $order_post->get_status(),
 					'EventType'        => 'removed',
 					$edit_link['name'] => $edit_link['value'],
 				);
@@ -4034,7 +4033,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 				$event_data = array(
 					'OrderID'          => esc_attr( $order_id ),
 					'OrderTitle'       => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order ),
-					'OrderStatus'      => $order_post->post_status,
+					'OrderStatus'      => $order_post->get_status(),
 					'EventType'        => 'removed',
 					$edit_link['name'] => $edit_link['value'],
 				);
@@ -4058,10 +4057,10 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 
 			if ( isset( $_POST['items'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				if ( is_array( $_POST['items'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-					$data = array_map( 'sanitize_text_field', wp_unslash( $_POST['items'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.
+					$data = array_map( 'sanitize_text_field', wp_unslash( $_POST['items'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 					foreach ( $data as $key => $value ) {
 						$items['order_item_id'][]         = $key;
-						$output['order_item_qty'][ $key ] = $value;
+						$output['order_item_qty' . $key ] = $value;
 					}
 				} else {
 					parse_str( sanitize_text_field( wp_unslash( $_POST['items'] ) ), $output ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -4083,16 +4082,16 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 						$order        = wc_get_order( $order_id );
 						$order_post   = wc_get_order( $order_id );
 						$edit_link    = self::get_editor_link( $order_post );
-						if ( intval( $output['order_item_qty'][ $item_id ] ) !== intval( $old_quantity ) ) {
+						if ( isset( $output['order_item_qty' . $item_id ] ) && intval( $output['order_item_qty' . $item_id ] ) !== intval( $old_quantity ) ) {
 							$event_data = array(
 								'OrderID'          => esc_attr( $order_id ),
 								'OrderTitle'       => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order ),
 								'ProductID'        => $product->get_id(),
 								'SKU'              => self::get_product_sku( $product->get_id() ),
-								'NewQuantity'      => $output['order_item_qty'][ $item_id ],
+								'NewQuantity'      => $output['order_item_qty' . $item_id ],
 								'OldQuantity'      => $old_quantity,
 								'ProductTitle'     => $product->get_name(),
-								'OrderStatus'      => $order_post->post_status,
+								'OrderStatus'      => $order_post->get_status(),
 								$edit_link['name'] => $edit_link['value'],
 							);
 							Alert_Manager::trigger_event( 9131, $event_data );
@@ -4111,7 +4110,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 								'OrderTitle'       => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order ),
 								'FeeAmount'        => $output['line_total'][ $item_id ],
 								'OldFeeAmount'     => $item->get_amount(),
-								'OrderStatus'      => $order_post->post_status,
+								'OrderStatus'      => $order_post->get_status(),
 								$edit_link['name'] => $edit_link['value'],
 							);
 							Alert_Manager::trigger_event( 9133, $event_data );
@@ -4298,7 +4297,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 						array(
 							'OrderID'          => esc_attr( $order_id ),
 							'OrderTitle'       => sanitize_text_field( Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order_id ) ),
-							'OrderStatus'      => sanitize_text_field( $order_post->post_status ),
+							'OrderStatus'      => sanitize_text_field( $order_post->get_status() ),
 							$edit_link['name'] => $edit_link['value'],
 						),
 						array( __CLASS__, 'must_not_contain_refund_or_modification' )
@@ -4358,7 +4357,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 					'Reason'           => $refund_reason,
 					'OrderDate'        => $created_date,
 					'OrderTitle'       => sanitize_text_field( Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order_id ) ),
-					'OrderStatus'      => sanitize_text_field( $order_obj->post_status ),
+					'OrderStatus'      => sanitize_text_field( $order_obj->get_status() ),
 					$edit_link['name'] => $edit_link['value'],
 				)
 			);
@@ -5815,7 +5814,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 										'TargetUsername' => $user ? $user->user_login : false,
 										'NewValue'       => sanitize_text_field( $new_address ),
 										'OldValue'       => ( $is_first_edit ) ? esc_html__( 'Not supplied', 'wp-security-audit-log' ) : sanitize_text_field( $old_address ),
-										'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+										'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 										'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 									),
 									array(
@@ -5872,7 +5871,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 										'TargetUsername' => $user ? $user->user_login : false,
 										'NewValue'       => sanitize_text_field( $new_address ),
 										'OldValue'       => ( $is_first_edit ) ? esc_html__( 'Not supplied', 'wp-security-audit-log' ) : sanitize_text_field( $old_address ),
-										'EditUserLink'   => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+										'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 										'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 									),
 									array(

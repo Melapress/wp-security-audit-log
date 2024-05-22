@@ -97,7 +97,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Multisite_Sign_Up_Sensor' ) ) {
 			$event_data = array(
 				'NewUserID'    => $user_id,
 				'NewUserData'  => (object) $new_user_data,
-				'EditUserLink' => add_query_arg( 'user_id', $user_id, admin_url( 'user-edit.php' ) ),
+				'EditUserLink' => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 			);
 
 			Alert_Manager::trigger_event_if( 4013, $event_data, array( __CLASS__, 'must_not_contain_create_user' ) );

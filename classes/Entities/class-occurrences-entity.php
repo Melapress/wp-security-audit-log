@@ -14,7 +14,8 @@ namespace WSAL\Entities;
 use WSAL\Controllers\Alert;
 use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
-use WSAL\Helpers\DateTime_Formatter_Helper;
+use WSAL\Helpers\Plugin_Settings_Helper;
+use WSAL\Entities\Archive\Delete_Records;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -63,22 +64,22 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		 * @since 4.5.0
 		 */
 		protected static $fields = array(
-			'id'          => 'int',
-			'site_id'     => 'int',
-			'alert_id'    => 'int',
-			'created_on'  => 'float',
-			'client_ip'   => 'string',
-			'severity'    => 'string',
-			'object'      => 'string',
-			'event_type'  => 'string',
-			'user_agent'  => 'string',
-			'user_roles'  => 'string',
-			'username'    => 'string',
-			'user_id'     => 'int',
-			'session_id'  => 'string',
-			'post_status' => 'string',
-			'post_type'   => 'string',
-			'post_id'     => 'int',
+			'id'          => 'bigint',
+			'site_id'     => 'bigint',
+			'alert_id'    => 'bigint',
+			'created_on'  => 'double',
+			'client_ip'   => 'varchar(255)',
+			'severity'    => 'varchar(255)',
+			'object'      => 'varchar(255)',
+			'event_type'  => 'varchar(255)',
+			'user_agent'  => 'varchar(255)',
+			'user_roles'  => 'varchar(255)',
+			'username'    => 'varchar(255)',
+			'user_id'     => 'bigint',
+			'session_id'  => 'varchar(255)',
+			'post_status' => 'varchar(255)',
+			'post_type'   => 'varchar(255)',
+			'post_id'     => 'bigint',
 		);
 
 		/**
@@ -176,34 +177,6 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		}
 
 		/**
-		 * Returns the column name for a given table
-		 *
-		 * @return array
-		 *
-		 * @since 4.5.0
-		 */
-		public static function get_column_names(): array {
-			return array(
-				'id'          => 'bigint',
-				'site_id'     => 'bigint',
-				'alert_id'    => 'bigint',
-				'created_on'  => 'double',
-				'client_ip'   => 'varchar(255)',
-				'severity'    => 'varchar(255)',
-				'object'      => 'varchar(255)',
-				'event_type'  => 'varchar(255)',
-				'user_agent'  => 'varchar(255)',
-				'user_roles'  => 'varchar(255)',
-				'username'    => 'varchar(255)',
-				'user_id'     => 'bigint',
-				'session_id'  => 'varchar(255)',
-				'post_status' => 'varchar(255)',
-				'post_type'   => 'varchar(255)',
-				'post_id'     => 'bigint',
-			);
-		}
-
-		/**
 		 * Responsible for storing the information in both occurrences table and metadata table.
 		 * That one is optimized for DB performance
 		 *
@@ -235,12 +208,44 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 						unset( $data[ $name ] );
 					}
 				}
+				if ( 'CurrentUserID' === $name && ! \is_object( $value ) && 0 === (int) $value ) {
+					$data_to_store[ self::$migrated_meta[ $name ] ] = $value;
+				}
 			}
 
 			if ( ! empty( $data_to_store ) ) {
 				$data_to_store['created_on'] = $date;
 				$data_to_store['alert_id']   = $type;
 				$data_to_store['site_id']    = ! is_null( $site_id ) ? $site_id : ( function_exists( 'get_current_blog_id' ) ? get_current_blog_id() : 0 );
+
+				if ( in_array( $type, array( 1000, 1001, 1002, 1003 ) ) ) {
+					if ( empty( $data_to_store['user_id'] ) && empty( $data_to_store['username'] ) ) {
+						$data_to_store['user_id']  = 0;
+						$data_to_store['username'] = 'Unknown user';
+					} elseif ( empty( $data_to_store['username'] ) ) {
+						if ( 0 === (int) $data_to_store['user_id'] ) {
+							$data_to_store['username'] = 'Unknown User';
+						} else {
+							$user = \get_user_by( 'ID', $data_to_store['user_id'] );
+							if ( $user ) {
+								$data_to_store['username'] = $user->user_login;
+							} else {
+								$data_to_store['username'] = 'Deleted';
+							}
+						}
+					} elseif ( empty( (int) $data_to_store['user_id'] ) ) {
+						if ( 0 === (int) $data_to_store['user_id'] ) {
+							$data_to_store['username'] = 'Unknown User';
+						} else {
+							$user = \get_user_by( 'login', $data_to_store['username'] );
+							if ( $user ) {
+								$data_to_store['user_id'] = $user->ID;
+							} else {
+								$data_to_store['user_id'] = 0;
+							}
+						}
+					}
+				}
 
 				$occurrences_id = self::save( $data_to_store );
 
@@ -330,6 +335,10 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 			// );
 			// $cached_message = $alert->mesg;
 
+			if ( ! isset( $item['meta_values'] ) ) {
+				return '';
+			}
+
 			// Fill variables in message.
 			$meta_array = $item['meta_values'];
 			// $alert_object = $alert;
@@ -349,6 +358,7 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 					'</a>'
 				);
 			}
+
 			return $cached_message;
 		}
 
@@ -427,690 +437,6 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 			}
 
 			return $result;
-		}
-
-		/**
-		 * Works out the grouping data entities for given statistical report type.
-		 *
-		 * @param int    $statistics_report_type Statistical report type.
-		 * @param string $grouping_period        Period to use for data grouping.
-		 *
-		 * @return string[]|null
-		 * @since 4.4.0
-		 */
-		public static function get_grouping( $statistics_report_type, $grouping_period ) {
-			$grouping = null;
-			if ( ! is_null( $statistics_report_type ) ) {
-				$grouping = array( 'site' );
-				if ( ! is_null( $grouping_period ) ) {
-					array_push( $grouping, $grouping_period );
-				}
-
-				switch ( $statistics_report_type ) {
-					case \WSAL_Rep_Common::DIFFERENT_IP:
-						array_push( $grouping, 'users' );
-						array_push( $grouping, 'ips' );
-						break;
-					case \WSAL_Rep_Common::ALL_IPS:
-						array_push( $grouping, 'ips' );
-						break;
-					case \WSAL_Rep_Common::LOGIN_ALL:
-					case \WSAL_Rep_Common::LOGIN_BY_USER:
-					case \WSAL_Rep_Common::LOGIN_BY_ROLE:
-					case \WSAL_Rep_Common::PUBLISHED_ALL:
-					case \WSAL_Rep_Common::PUBLISHED_BY_USER:
-					case \WSAL_Rep_Common::PUBLISHED_BY_ROLE:
-					case \WSAL_Rep_Common::ALL_USERS:
-					case \WSAL_Rep_Common::VIEWS_BY_POST:
-					case \WSAL_Rep_Common::PROFILE_CHANGES_ALL:
-					case \WSAL_Rep_Common::PROFILE_CHANGES_BY_USER:
-					case \WSAL_Rep_Common::PROFILE_CHANGES_BY_ROLE:
-						array_push( $grouping, 'users' );
-						break;
-
-					case \WSAL_Rep_Common::PASSWORD_CHANGES:
-						array_push( $grouping, 'users' );
-						array_push( $grouping, 'events' );
-						break;
-
-					case \WSAL_Rep_Common::VIEWS_ALL:
-						array_push( $grouping, 'posts' );
-						break;
-
-					case \WSAL_Rep_Common::VIEWS_BY_USER:
-					case \WSAL_Rep_Common::VIEWS_BY_ROLE:
-						array_push( $grouping, 'users' );
-						array_push( $grouping, 'posts' );
-						break;
-
-				}
-			}
-
-			return $grouping;
-		}
-
-		/**
-		 * Retrieves report data for generic (alerts based) report. Function used in WSAL reporting extension.
-		 *
-		 * @param WSAL_ReportArgs $report_args            Report arguments.
-		 * @param int             $next_date              (Optional) Created on >.
-		 * @param int             $limit                  (Optional) Limit.
-		 * @param int             $statistics_report_type Statistics report type.
-		 * @param string          $grouping_period        Period to use for data grouping.
-		 *
-		 * @return array Report results
-		 */
-		public static function get_report_data( $report_args, $next_date = null, $limit = 0, $statistics_report_type = null, $grouping_period = null ) {
-
-			// Figure out the grouping statement and the columns' selection.
-			$grouping = self::get_grouping( $statistics_report_type, $grouping_period );
-
-			// The user grouping based on an additional meta field is only applicable to the password changes' statistical
-			// report at the moment.
-			$use_meta_field_for_user_grouping = \WSAL_Rep_Common::PASSWORD_CHANGES === $statistics_report_type;
-
-			// Build the SQL query and runs it.
-			$query = self::build_reporting_query( $report_args, false, $grouping, $next_date, $limit, $use_meta_field_for_user_grouping, $statistics_report_type );
-
-			// Statistical reports expect data as array, regular reports use objects.
-			$result_format = is_null( $statistics_report_type ) ? OBJECT : ARRAY_A;
-
-			// Perform additional query needed for new role counts.
-			if ( \WSAL_Rep_Common::NEW_USERS === $statistics_report_type ) {
-				$occurrences = self::additional_new_user_query( $grouping, $next_date, $limit, $result_format );
-			}
-
-			$results = self::get_connection()->get_results( $query, $result_format );
-
-			// Append role counts to results.
-			if ( \WSAL_Rep_Common::NEW_USERS === $statistics_report_type && isset( $occurrences ) && ! empty( $occurrences ) ) {
-				foreach ( $results as $result_key => $result_value ) {
-					$role_counts                           = $occurrences[ $result_value['period'] ]['roles_counts'];
-					$results[ $result_key ]['role_counts'] = $role_counts;
-				}
-			}
-
-			if ( ! empty( $results ) ) {
-				$last_item = end( $results );
-				if ( is_object( $last_item ) && property_exists( $last_item, 'created_on' ) ) {
-					$results['lastDate'] = $last_item->created_on;
-				} elseif ( is_array( $last_item ) && array_key_exists( 'created_on', $last_item ) ) {
-					$results['lastDate'] = $last_item['created_on'];
-				}
-			}
-
-			return $results;
-		}
-
-		/**
-		 * Builds an SQL query for the main report.
-		 *
-		 * @param WSAL_ReportArgs $report_args Report arguments.
-		 * @param bool            $count_only  If true, the resulting query will only provide a count of matching entries
-		 *                                     is
-		 *                                     returned.
-		 * @param array           $grouping    Grouping criteria. Drives the selected columns as well as the GROUP BY
-		 *                                     statement. Only null value prevents grouping. Empty array means to group by
-		 *                                     time period only.
-		 * @param int             $next_date   (Optional) Created on >.
-		 * @param int             $limit       (Optional) Limit.
-		 * @param bool            $use_meta_field_for_user_grouping - Do we need to use meta field for grouping the users table?.
-		 * @param int             $statistics_report_type Statistics report type.
-		 * @param \wpdb           $connection - \wpdb connection to be used for name extraction.
-		 *
-		 * @return string
-		 */
-		private static function build_reporting_query( $report_args, $count_only, $grouping = null, $next_date = null, $limit = 0, $use_meta_field_for_user_grouping = false, $statistics_report_type = null, $connection = null ) {
-			if ( null !== $connection ) {
-				if ( $connection instanceof \wpdb ) {
-					$_wpdb = $connection;
-				}
-			} else {
-				$_wpdb = self::get_connection();
-			}
-
-			$table_occ = self::get_table_name( $_wpdb );
-
-			$join_meta_table_for_user_grouping = false;
-			if ( $count_only ) {
-				$select_fields = array( 'COUNT(1) as count' );
-				$group_by      = array( 'occ.id' );
-			} elseif ( is_null( $grouping ) ) {
-				$select_fields = array(
-					'occ.id',
-					'occ.alert_id',
-					'occ.site_id',
-					'occ.created_on',
-					"replace( replace( replace( occ.user_roles, '[', ''), ']', ''), '\\'', '') AS roles",
-					'occ.client_ip AS ip',
-					'occ.user_agent AS ua',
-					'COALESCE( occ.username, occ.user_id ) as user_id',
-					'occ.object',
-					'occ.event_type',
-					'occ.post_id',
-					'occ.post_type',
-					'occ.post_status',
-					'occ.session_id',
-				);
-			} else {
-				$select_fields = array( 'occ.created_on' );
-				$group_by      = array();
-				foreach ( $grouping as $grouping_item ) {
-					switch ( $grouping_item ) {
-						case 'site':
-							array_push( $select_fields, 'site_id' );
-							array_push( $group_by, 'site_id' );
-							break;
-						case 'users':
-							if ( $use_meta_field_for_user_grouping ) {
-								array_push( $select_fields, 'COALESCE( m.value, occ.user_id, occ.username ) as user' );
-								$join_meta_table_for_user_grouping = true;
-							} else {
-								// array_push( $select_fields, 'COALESCE( occ.user_id, occ.username ) as user' ); //.
-								array_push( $select_fields, 'IF ( occ.user_id>0, occ.user_id, occ.username ) as user' );
-							}
-
-							if ( in_array( $statistics_report_type, range( 70, 72 ), true ) ) {
-								array_push( $select_fields, 'GROUP_CONCAT(occ.alert_id) as events' );
-							}
-
-							array_push( $group_by, 'user' );
-							break;
-						case 'posts':
-							array_push( $select_fields, 'post_id' );
-							array_push( $group_by, 'post_id' );
-							break;
-						case 'events':
-							array_push( $select_fields, 'alert_id' );
-							array_push( $group_by, 'alert_id' );
-							break;
-						case 'day':
-							array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on ), "%Y-%m-%d" ) AS period' );
-							array_push( $group_by, 'period' );
-							break;
-						case 'week':
-							array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on ), "%Y-%u" ) AS period' );
-							array_push( $group_by, 'period' );
-							break;
-						case 'month':
-							array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( occ.created_on ), "%Y-%m" ) AS period' );
-							array_push( $group_by, 'period' );
-							break;
-					}
-				}
-
-				array_push( $select_fields, 'COUNT(*) as count' );
-			}
-
-			$sql = 'SELECT ' . implode( ',', $select_fields ) . ' FROM ' . $table_occ . ' AS occ ';
-			if ( $join_meta_table_for_user_grouping ) {
-				$sql .= ' LEFT JOIN ' . Metadata_Entity::get_table_name( $_wpdb ) . ' AS m ON ( m.occurrence_id = occ.id AND m.name = "TargetUserId" ) ';
-			}
-
-			$sql .= self::build_where_statement( $report_args );
-
-			if ( ! empty( $next_date ) ) {
-				$sql .= ' AND occ.created_on < ' . $next_date;
-			}
-
-			if ( isset( $group_by ) && ! empty( $group_by ) ) {
-				$sql          .= ' GROUP BY ' . implode( ',', $group_by );
-				$orderby_parts = array_map(
-					function ( $item ) {
-						return 'period' === $item ? $item . ' DESC ' : $item . ' ASC ';
-					},
-					$group_by
-				);
-
-				$sql .= ' ORDER BY ' . implode( ',', $orderby_parts );
-			} else {
-				$sql .= ' ORDER BY created_on DESC ';
-			}
-
-			if ( ! empty( $limit ) ) {
-				$sql .= " LIMIT {$limit}";
-			}
-
-			return $sql;
-		}
-
-		/**
-		 * Generates SQL where statement based on given report args.
-		 *
-		 * @param WSAL_ReportArgs $report_args Report arguments.
-		 *
-		 * @return string
-		 */
-		private static function build_where_statement( $report_args ) {
-			$_site_id                = null;
-			$sites_negate_expression = '';
-			if ( $report_args->site__in ) {
-				$_site_id = self::format_array_for_query( $report_args->site__in );
-			} elseif ( $report_args->site__not_in ) {
-				$_site_id                = self::format_array_for_query( $report_args->site__not_in );
-				$sites_negate_expression = 'NOT';
-			}
-
-			$_user_id                = null;
-			$users_negate_expression = '';
-			if ( $report_args->user__in ) {
-				$_user_id = self::format_array_for_query( $report_args->user__in );
-			} elseif ( $report_args->user__not_in ) {
-				$_user_id                = self::format_array_for_query( $report_args->user__not_in );
-				$users_negate_expression = 'NOT';
-			}
-
-			$user_names = self::get_user_names( $_user_id );
-
-			$_role_name              = null;
-			$roles_negate_expression = '';
-			if ( $report_args->role__in ) {
-				$_role_name = self::format_array_for_query_regex( $report_args->role__in );
-			} elseif ( $report_args->role__not_in ) {
-				$_role_name              = self::format_array_for_query_regex( $report_args->role__not_in );
-				$roles_negate_expression = 'NOT';
-			}
-
-			$_alert_code                  = null;
-			$alert_code_negate_expression = '';
-			if ( $report_args->code__in ) {
-				$_alert_code = self::format_array_for_query( $report_args->code__in );
-			} elseif ( $report_args->code__not_in ) {
-				$_alert_code                  = self::format_array_for_query( $report_args->code__not_in );
-				$alert_code_negate_expression = 'NOT';
-			}
-
-			$_post_ids                  = null;
-			$post_ids_negate_expression = '';
-			if ( $report_args->post__in ) {
-				$_post_ids = self::format_array_for_query( $report_args->post__in );
-			} elseif ( $report_args->post__not_in ) {
-				$_post_ids                  = self::format_array_for_query( $report_args->post__not_in );
-				$post_ids_negate_expression = 'NOT';
-			}
-
-			$_post_types                  = null;
-			$post_types_negate_expression = '';
-			if ( $report_args->post_type__in ) {
-				$_post_types = self::format_array_for_query( $report_args->post_type__in );
-			} elseif ( $report_args->post_type__not_in ) {
-				$_post_types                  = self::format_array_for_query( $report_args->post_type__not_in );
-				$post_types_negate_expression = 'NOT';
-			}
-
-			$_post_statuses                  = null;
-			$post_statuses_negate_expression = '';
-			if ( $report_args->post_status__in ) {
-				$_post_statuses = self::format_array_for_query( $report_args->post_status__in );
-			} elseif ( $report_args->post_status__not_in ) {
-				$_post_statuses                  = self::format_array_for_query( $report_args->post_status__not_in );
-				$post_statuses_negate_expression = 'NOT';
-			}
-
-			$_ip_addresses                  = null;
-			$ip_addresses_negate_expression = '';
-			if ( $report_args->ip__in ) {
-				$_ip_addresses = self::format_array_for_query( $report_args->ip__in );
-			} elseif ( $report_args->ip__not_in ) {
-				$_ip_addresses                  = self::format_array_for_query( $report_args->ip__not_in );
-				$ip_addresses_negate_expression = 'NOT';
-			}
-
-			$_severities                  = null;
-			$severities_negate_expression = '';
-			if ( $report_args->severities__in ) {
-				$_severities = self::format_array_for_query( $report_args->severities__in );
-			} elseif ( $report_args->severities__not_in ) {
-				$_severities                  = self::format_array_for_query( $report_args->severities__not_in );
-				$severities_negate_expression = 'NOT';
-			}
-
-			$_objects                  = null;
-			$objects_negate_expression = '';
-			if ( $report_args->object__in ) {
-				$_objects = self::format_array_for_query( $report_args->object__in );
-			} elseif ( $report_args->object__not_in ) {
-				$_objects                  = self::format_array_for_query( $report_args->object__not_in );
-				$objects_negate_expression = 'NOT';
-			}
-
-			$_event_types                  = null;
-			$event_types_negate_expression = '';
-			if ( $report_args->type__in ) {
-				$_event_types = self::format_array_for_query( $report_args->type__in );
-			} elseif ( $report_args->type__not_in ) {
-				$_event_types                  = self::format_array_for_query( $report_args->type__not_in );
-				$event_types_negate_expression = 'NOT';
-			}
-
-			$_start_timestamp = null;
-			if ( $report_args->start_date ) {
-				$start_datetime   = \DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->start_date . ' 00:00:00' );
-				$_start_timestamp = $start_datetime->format( 'U' ) + ( DateTime_Formatter_Helper::get_time_zone_offset() ) * -1;
-			}
-
-			$_end_timestamp = null;
-			if ( $report_args->end_date ) {
-				$end_datetime   = \DateTime::createFromFormat( 'Y-m-d H:i:s', $report_args->end_date . ' 23:59:59' );
-				$_end_timestamp = $end_datetime->format( 'U' ) + ( DateTime_Formatter_Helper::get_time_zone_offset() ) * -1;
-			}
-
-			$users_condition_parts = array();
-			if ( ! is_null( $_user_id ) ) {
-				array_push( $users_condition_parts, " {$users_negate_expression} find_in_set( occ.user_id, $_user_id ) > 0 " );
-			}
-
-			if ( ! is_null( $user_names ) ) {
-				array_push( $users_condition_parts, " {$users_negate_expression} replace( occ.username, '\"', '' ) IN ( $user_names ) " );
-			}
-
-			$where_statement = ' WHERE 1 = 1 ';
-
-			if ( ! empty( $users_condition_parts ) ) {
-				$where_statement .= ' AND ( ' . implode( 'OR', $users_condition_parts ) . ' ) ';
-			}
-
-			if ( ! is_null( $_site_id ) ) {
-				$where_statement .= " AND {$sites_negate_expression} find_in_set( occ.site_id, {$_site_id} ) > 0 ";
-			}
-
-			if ( ! is_null( $_role_name ) ) {
-				$where_statement .= " AND user_roles {$roles_negate_expression} REGEXP {$_role_name} ";
-			}
-
-			if ( ! is_null( $_ip_addresses ) ) {
-				$where_statement .= " AND {$ip_addresses_negate_expression} find_in_set( occ.client_ip, {$_ip_addresses} ) > 0 ";
-			}
-
-			if ( ! is_null( $_severities ) ) {
-				$where_statement .= " AND {$severities_negate_expression} find_in_set( occ.severity, {$_severities} ) > 0 ";
-			}
-
-			if ( ! is_null( $_objects ) ) {
-				$where_statement .= " AND {$objects_negate_expression} find_in_set( occ.object, {$_objects} ) > 0 ";
-			}
-
-			if ( ! is_null( $_event_types ) ) {
-				$where_statement .= " AND {$event_types_negate_expression} find_in_set( occ.event_type, {$_event_types} ) > 0 ";
-			}
-
-			if ( ! is_null( $_alert_code ) ) {
-				$where_statement .= " AND {$alert_code_negate_expression} find_in_set( occ.alert_id, {$_alert_code} ) > 0 ";
-			}
-
-			if ( ! is_null( $_post_ids ) ) {
-				$where_statement .= " AND {$post_ids_negate_expression} find_in_set( occ.post_id, {$_post_ids} ) > 0 ";
-			}
-
-			if ( ! is_null( $_post_statuses ) ) {
-				$where_statement .= " AND {$post_statuses_negate_expression} find_in_set( occ.post_status, {$_post_statuses} ) > 0 ";
-			}
-
-			if ( ! is_null( $_post_types ) ) {
-				$where_statement .= " AND {$post_types_negate_expression} find_in_set( occ.post_type, {$_post_types} ) > 0 ";
-			}
-
-			if ( ! is_null( $_start_timestamp ) ) {
-				$where_statement .= " AND occ.created_on >= {$_start_timestamp} ";
-			}
-
-			if ( ! is_null( $_end_timestamp ) ) {
-				$where_statement .= " AND occ.created_on <= {$_end_timestamp} ";
-			}
-
-			return $where_statement;
-		}
-
-		/**
-		 * Formats array for use in SQL query.
-		 *
-		 * @param array $data Data to format.
-		 *
-		 * @return string
-		 * @since 4.3.2
-		 */
-		protected static function format_array_for_query( $data ) {
-			return "'" . implode( ',', $data ) . "'";
-		}
-
-		/**
-		 * Get Users user_login.
-		 *
-		 * @param int $user_id - User ID.
-		 *
-		 * @return string comma separated users login
-		 */
-		private static function get_user_names( $user_id ) {
-			global $wpdb;
-
-			$user_names = null;
-			if ( ! empty( $user_id ) && 'null' !== $user_id && ! is_null( $user_id ) ) {
-				$sql = 'SELECT user_login FROM ' . $wpdb->users . ' WHERE find_in_set(ID, @userId) > 0';
-				$wpdb->query( "SET @userId = $user_id" ); // phpcs:ignore
-				$result      = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore
-				$users_array = array();
-				foreach ( $result as $item ) {
-					$users_array[] = '"' . $item['user_login'] . '"';
-				}
-				$user_names = implode( ', ', $users_array );
-			}
-
-			return $user_names;
-		}
-
-		/**
-		 * Formats data as SQL query regex.
-		 *
-		 * @param array $data Data to format.
-		 *
-		 * @return string
-		 * @since 4.3.2
-		 */
-		protected static function format_array_for_query_regex( $data ) {
-			$result = array();
-			foreach ( $data as $item ) {
-				array_push( $result, esc_sql( preg_quote( $item ) ) ); // phpcs:ignore
-			}
-
-			return "'" . implode( '|', $result ) . "'";
-		}
-
-		/**
-		 * Determine the roles for newly created users, which is then appended to the report result.
-		 *
-		 * @param array  $grouping Period to use for data grouping.
-		 * @param int    $next_date Created on >.
-		 * @param int    $limit Limit.
-		 * @param string $result_format Required format.
-		 * @return array
-		 */
-		private static function additional_new_user_query( $grouping, $next_date, $limit, $result_format ) {
-			$table_occ        = self::get_table_name();
-			$table_meta       = Metadata_Entity::get_table_name();
-			$occurrences      = array();
-			$select_fields    = array(
-				'site_id',
-				'id',
-			);
-			$group_by_columns = array(
-				'site_id',
-			);
-			foreach ( $grouping as $grouping_item ) {
-				switch ( $grouping_item ) {
-					case 'day':
-						array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%m-%d" ) AS period' );
-						array_unshift( $group_by_columns, 'period' );
-						break;
-					case 'week':
-						array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%u" ) AS period' );
-						array_unshift( $group_by_columns, 'period' );
-						break;
-					case 'month':
-						array_push( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%m" ) AS period' );
-						array_unshift( $group_by_columns, 'period' );
-						break;
-				}
-			}
-
-			$user_query       = 'SELECT ' . implode( ',', $select_fields ) . ' FROM ' . $table_occ . ' AS occ WHERE find_in_set( occ.alert_id, "4000,4001" ) > 0 ';
-			$occurrence_query = 'SELECT occ.id FROM ' . $table_occ . ' AS occ WHERE find_in_set( occ.alert_id, "4000,4001" ) > 0 ';
-
-			if ( ! empty( $next_date ) ) {
-				$user_query .= ' AND ' . $table_occ . '.created_on < ' . $next_date;
-			}
-
-			$user_query .= ' ORDER BY created_on DESC ';
-
-			if ( ! empty( $limit ) ) {
-				$user_query .= " LIMIT {$limit}";
-			}
-
-			// Get occurrences so we can reference the data.
-			$user_results = self::get_connection()->get_results( $user_query, $result_format );
-
-			// Get a list of registered roles for columns.
-			$known_roles = get_editable_roles();
-
-			// Strip any values, these will be replaced below.
-			$known_roles_array = array_fill_keys( array_keys( $known_roles ), ' ' );
-
-			foreach ( $user_results as $key => $item ) {
-				$occurrences[ $item['period'] ]['roles_arr'] = empty( $occurrences[ $item['period'] ]['roles_arr'] ) ? array() : $occurrences[ $item['period'] ]['roles_arr'];
-				$lookup_id                                   = $item['id'];
-				// Locate role from possible meta tables rows.
-				$roles     = self::get_connection()->get_results( 'SELECT value FROM ' . $table_meta . ' metatable WHERE occurrence_id ="' . $lookup_id . '" AND ( name = "NewUserData" OR name = "NewUserID" )', ARRAY_A );
-				$roles_obj = isset( $roles[0]['value'] ) ? maybe_unserialize( $roles[0]['value'] ) : false;
-				if ( isset( $roles->Roles ) ) {
-					$item['roles'] = $roles->Roles;
-				} else {
-					$user          = get_userdata( intval( $roles_obj ) );
-					$item['roles'] = $user->roles[0];
-				}
-				array_push( $occurrences[ $item['period'] ]['roles_arr'], $item['roles'] );
-				$occurrences[ $item['period'] ][ $key ]         = $item;
-				$occurrences[ $item['period'] ]['roles_counts'] = array_merge( $known_roles_array, array_count_values( $occurrences[ $item['period'] ]['roles_arr'] ) );
-			}
-
-			return $occurrences;
-		}
-
-		/**
-		 * Function used in WSAL reporting extension.
-		 * Check if criteria are matching in the DB.
-		 *
-		 * @param WSAL_ReportArgs $report_args - Query conditions.
-		 * @param \wpdb           $connection - \wpdb connection to be used for name extraction.
-		 *
-		 * @return int Count of distinct values.
-		 *
-		 * @since 4.6.0
-		 */
-		public static function check_match_report_criteria( $report_args, $connection = null ) {
-			if ( null !== $connection ) {
-				if ( $connection instanceof \wpdb ) {
-					$_wpdb = $connection;
-				}
-			} else {
-				$_wpdb = self::get_connection();
-			}
-			$query = self::build_reporting_query( $report_args, true, \null, \null, 0, false, \null, $_wpdb );
-
-			return (int) $_wpdb->get_var( $query );
-		}
-
-		/**
-		 * Retrieves report data for IP address based reports. Function is used in WSAL reporting extension.
-		 *
-		 * @param WSAL_ReportArgs $report_args            Report arguments.
-		 * @param int             $limit                  (Optional) Limit.
-		 * @param int             $statistics_report_type Statistics report type.
-		 * @param string          $grouping_period        Period to use for data grouping.
-		 *
-		 * @return array Raw report results as objects. Content depends on the report type.
-		 */
-		public static function get_ip_address_report_data( $report_args, $limit = 0, $statistics_report_type = null, $grouping_period = null ) {
-			global $wpdb;
-			$_wpdb = self::get_connection();
-
-			// Tables.
-			$table_occ = self::get_table_name();
-
-			$table_users = $wpdb->users;
-
-			// Figure out the grouping statement and the columns' selection.
-			$grouping = self::get_grouping( $statistics_report_type, $grouping_period );
-
-			// Figure out the selected columns and group by statement.
-			$group_by_columns = array(
-				'site_id',
-			);
-
-			if ( in_array( 'users', $grouping, true ) ) {
-				array_push( $group_by_columns, 'username' );
-			}
-
-			if ( in_array( 'ips', $grouping, true ) ) {
-				array_push( $group_by_columns, 'client_ip' );
-			}
-
-			if ( in_array( 'events', $grouping, true ) ) {
-				array_push( $group_by_columns, 'alert_id' );
-			}
-
-			$select_fields = $group_by_columns;
-			foreach ( $grouping as $grouping_item ) {
-				switch ( $grouping_item ) {
-					case 'day':
-						array_unshift( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%m-%d" ) AS period' );
-						array_unshift( $group_by_columns, 'period' );
-						break;
-					case 'week':
-						array_unshift( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%u" ) AS period' );
-						array_unshift( $group_by_columns, 'period' );
-						break;
-					case 'month':
-						array_unshift( $select_fields, 'DATE_FORMAT( FROM_UNIXTIME( created_on ), "%Y-%m" ) AS period' );
-						array_unshift( $group_by_columns, 'period' );
-						break;
-				}
-			}
-
-			$where_statement = self::build_where_statement( $report_args );
-
-			$sql = '
-			SELECT ' . implode( ',', $select_fields ) . " FROM (
-			    SELECT occ.created_on, occ.site_id, occ.username, occ.client_ip 
-				FROM $table_occ AS occ
-				{$where_statement}
-				HAVING username IS NOT NULL AND username NOT IN ( 'Unregistered user', 'Plugins', 'Plugin')
-			UNION ALL
-				SELECT occ.created_on, occ.site_id, u.user_login as username, occ.client_ip 
-				FROM $table_occ AS occ
-				JOIN $table_users AS u ON u.ID = occ.user_id  
-				{$where_statement}
-			HAVING username IS NOT NULL AND username NOT IN ( 'Unregistered user', 'Plugins', 'Plugin')
-        ) ip_logins
-		GROUP BY " . implode( ',', $group_by_columns );
-
-			$orderby_parts = array_map(
-				function ( $item ) {
-					return 'period' === $item ? $item . ' DESC ' : $item . ' ASC ';
-				},
-				$group_by_columns
-			);
-
-			$sql .= ' ORDER BY ' . implode( ',', $orderby_parts );
-
-			if ( ! empty( $limit ) ) {
-				$sql .= " LIMIT {$limit}";
-			}
-
-			$results = $_wpdb->get_results( $sql, ARRAY_A );
-			if ( is_array( $results ) && ! empty( $results ) ) {
-				return $results;
-			}
-
-			return array();
 		}
 
 		/**
@@ -1257,6 +583,38 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		}
 
 		/**
+		 * Search IPs for a specific ip text search
+		 *
+		 * @param string     $search - The IP search string.
+		 * @param int|string $limit - The limit results.
+		 *
+		 * @return array
+		 *
+		 * @since 5.0.0
+		 */
+		public static function get_ips_logged_search( string $search = '', $limit = null ) {
+			$_wpdb = self::get_connection();
+
+			$sql = 'SELECT DISTINCT client_ip FROM ' . self::get_table_name();
+			if ( ! empty( $search ) ) {
+				$sql .= ' WHERE 1 AND client_ip LIKE "%' . $_wpdb->esc_like( $search ) . '%"';
+			}
+			if ( ! is_null( $limit ) ) {
+				$sql .= ' LIMIT ' . $limit;
+			}
+			$ips    = $_wpdb->get_col( $sql );
+			$result = array();
+			foreach ( $ips as $ip ) {
+				if ( 0 === strlen( trim( (string) $ip ) ) ) {
+					continue;
+				}
+				array_push( $result, $ip );
+			}
+
+			return $result;
+		}
+
+		/**
 		 * Collects and prepares all the metadata for the given array of the events.
 		 *
 		 * @param array $results - Array with all the data with events collected.
@@ -1290,6 +648,79 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 			}
 
 			return $prepared_array;
+		}
+
+		/**
+		 * Executes and returns the result of the given query.
+		 *
+		 * @param string $sql - The SQL query to execute.
+		 * @param \wpdb  $connection - The database connection.
+		 *
+		 * @return array
+		 *
+		 * @since 5.0.0
+		 */
+		public static function load_query( string $sql, $connection = null ): array {
+
+			if ( null !== $connection ) {
+				if ( $connection instanceof \wpdb ) {
+					$_wpdb = $connection;
+				}
+			} else {
+				$_wpdb = self::get_connection();
+			}
+
+			$_wpdb->suppress_errors( true );
+
+			$res = $_wpdb->get_results( $sql, ARRAY_A );
+			if ( '' !== $_wpdb->last_error ) {
+				if ( 1146 === self::get_last_sql_error( $_wpdb ) ) {
+					if ( ( static::class )::create_table( $_wpdb ) ) {
+						$res = $_wpdb->get_results( $sql, ARRAY_A );
+					}
+				}
+			}
+			$_wpdb->suppress_errors( false );
+
+			return $res;
+		}
+
+		/**
+		 * Cleans up the database, based on pruning date selected and enabled.
+		 *
+		 * @return void
+		 *
+		 * @since 5.0.0
+		 */
+		public static function prune_records() {
+
+			$prune_enabled = Settings_Helper::get_boolean_option_value( 'pruning-date-e', false );
+
+			if ( ! $prune_enabled ) {
+				return;
+			}
+
+			$now       = time();
+			$max_sdate = Plugin_Settings_Helper::get_pruning_date(); // Pruning date.
+			$archiving = Settings_Helper::is_archiving_set_and_enabled();
+
+		// phpcs:disable
+		// phpcs:enable
+
+			// Calculate limit timestamp.
+			$max_stamp = $now - ( strtotime( $max_sdate ) - $now );
+
+			$items = array();
+
+			if ( $archiving ) {
+				$connection_name = Settings_Helper::get_option_value( 'archive-connection' );
+
+				$wsal_db = Connection::get_connection( $connection_name );
+
+				$items = Delete_Records::delete( array(), 0, array( 'created_on <= %s' => intval( $max_stamp ) ), $wsal_db );
+			}
+
+			$main_items = Delete_Records::delete( array(), 0, array( 'created_on <= %s' => intval( $max_stamp ) ) );
 		}
 	}
 }
