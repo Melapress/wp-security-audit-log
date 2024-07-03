@@ -2,7 +2,7 @@
 /**
  * Controller: Cron Jobs.
  *
- * @since     latest
+ * @since 5.1.0
  *
  * @package   wsal
  * @subpackage controllers

@@ -182,7 +182,7 @@ function set_wsal_alerts() {
 				array(
 					1002,
 					WSAL_MEDIUM,
-					esc_html__( 'Login failed', 'wp-security-audit-log' ),
+					esc_html__( 'Failed login attempt', 'wp-security-audit-log' ),
 					esc_html__( '%Attempts% failed login(s).', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -192,7 +192,7 @@ function set_wsal_alerts() {
 				array(
 					1003,
 					WSAL_LOW,
-					esc_html__( 'Login failed  / non existing user', 'wp-security-audit-log' ),
+					esc_html__( 'Failed login attempt with username user', 'wp-security-audit-log' ),
 					esc_html__( 'Username %Users% failed login.', 'wp-security-audit-log' ),
 					array(),
 					array(),

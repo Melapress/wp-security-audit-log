@@ -333,7 +333,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 			<?php do_action( 'admin_print_styles' ); ?>
 		</head>
 		<body class="wsal-setup wp-core-ui">
-			<h1 id="wsal-logo"><a href="https://melapress.com/?utm_source=plugins&utm_medium=referral&utm_campaign=wsal&utm_content=wizard+configuration" rel="noopener noreferrer" target="_blank"><img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wp-activity-log-logo-full-colour-horiz-rgb.svg" alt="WP Activity Log" /></a></h1>
+			<h1 id="wsal-logo"><a href="https://melapress.com/?utm_source=plugin&utm_medium=referral&utm_campaign=wsal&utm_content=wizard+configuration" rel="noopener noreferrer" target="_blank"><img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wp-activity-log-logo-full-colour-horiz-rgb.svg" alt="WP Activity Log" /></a></h1>
 			<?php
 		}
 
@@ -691,7 +691,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 			<em>
 				<?php
 				// Step help text.
-				$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to <a href="https://melapress.com/features/?utm_source=plugins&utm_medium=referral&utm_campaign=wsal&utm_content=wizard+configuration" target="_blank">upgrade to Premium</a> and use the Database tools to store the WordPress activity log in an external database.', 'wp-security-audit-log' );
+				$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to <a href="https://melapress.com/features/?utm_source=plugin&utm_medium=referral&utm_campaign=wsal&utm_content=wizard+configuration" target="_blank">upgrade to Premium</a> and use the Database tools to store the WordPress activity log in an external database.', 'wp-security-audit-log' );
 
 				echo wp_kses( $step_help, Plugin_Settings_Helper::get_allowed_html_tags() );
 				?>
@@ -754,17 +754,17 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 
 		<ul>
 			<li>
-				<a href="https://melapress.com/support/kb/wp-activity-log-getting-started/?utm_source=plugins&utm_source=plugins&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+				<a href="https://melapress.com/support/kb/wp-activity-log-getting-started/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
 					<?php esc_html_e( 'Getting started with the WP Activity Log plugin', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 			<li>
-				<a href="https://melapress.com/support/kb/?utm_source=plugins&utm_source=plugins&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+				<a href="https://melapress.com/support/kb/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
 					<?php esc_html_e( 'Knowledge Base & Support Documents', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
 			<li>
-				<a href="https://melapress.com/wordpress-activity-log/?utm_source=plugins&utm_source=plugins&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+				<a href="https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
 					<?php esc_html_e( 'WordPress activity logs: the definitive guide to understanding & using them', 'wp-security-audit-log' ); ?>
 				</a>
 			</li>
@@ -772,7 +772,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 
 			<?php
 			// Link to contact form.
-			$help_page = 'https://melapress.com/contact/?utm_source=plugins&utm_medium=link&utm_campaign=wsal';
+			$help_page = 'https://melapress.com/contact/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
 			?>
 
 		<p><?php echo wp_kses( __( 'We trust this plugin meets all your activity log requirements. Should you encounter any problems, have feature requests or would like to share some feedback', 'wp-security-audit-log' ), Plugin_Settings_Helper::get_allowed_html_tags() ); ?>  <a href="<?php echo esc_url( $help_page ); ?>" rel="noopener noreferrer" target="_blank"><?php esc_html_e( 'please get in touch!', 'wp-security-audit-log' ); ?></a></p>

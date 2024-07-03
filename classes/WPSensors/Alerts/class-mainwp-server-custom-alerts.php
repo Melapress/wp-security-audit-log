@@ -4,7 +4,7 @@
  *
  * Class file for alert manager.
  *
- * @since   latest
+ * @since 5.1.0
  *
  * @package wsal
  * @subpackage wsal-gravity-forms

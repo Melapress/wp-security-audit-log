@@ -2,7 +2,7 @@
 /**
  * Extension: Base fields.
  *
- * @since     latest
+ * @since 5.1.0
  *
  * @package   wsal
  * @subpackage entities
