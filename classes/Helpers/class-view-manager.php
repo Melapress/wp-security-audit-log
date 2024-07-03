@@ -311,7 +311,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 					if ( 1 === count( $new_links ) && ! wsal_freemius()->is__premium_only() ) {
 						// Trial link.
-						$trial_link  = 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugins&utm_medium=link&utm_campaign=wsal';
+						$trial_link  = 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
 						$new_links[] = '<a style="font-weight:bold; color:#049443 !important" href="' . $trial_link . '" target="_blank">' . __( 'Get Premium!', 'wp-security-audit-log' ) . '</a>';
 					}
 				}

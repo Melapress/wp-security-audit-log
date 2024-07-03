@@ -163,7 +163,7 @@ jQuery( document ).ready( function() {
 		var linkItem = jQuery( '.fs-submenu-item.wp-security-audit-log.pricing' ).parent();
 		jQuery( linkItem ).attr( {
 			target: '_blank', 
-			href: 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugins&utm_medium=link&utm_campaign=wsal',
+			href: 'https://melapress.com/wordpress-activity-log/pricing/?utm_source=plugin&utm_medium=link&utm_campaign=wsal',
 		} );
 	}
 });

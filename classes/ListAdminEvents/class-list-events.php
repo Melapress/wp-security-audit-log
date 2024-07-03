@@ -743,7 +743,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					}
 
 					// If there's only one IP...
-					$link = 'https://whatismyipaddress.com/ip/' . $scip . '?utm_source=plugins&utm_medium=referral&utm_campaign=wsal';
+					$link = 'https://whatismyipaddress.com/ip/' . $scip . '?utm_source=plugin&utm_medium=referral&utm_campaign=wsal';
 					if ( class_exists( 'WSAL_SearchExtension' ) ) {
 						$tooltip = esc_attr__( 'Show me all activity originating from this IP Address', 'wp-security-audit-log' );
 

@@ -1962,7 +1962,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 				9123 => array(
 					9123,
 					WSAL_HIGH,
-					esc_html__( 'Moved the coupon %CouponName% to trash.', 'wp-security-audit-log' ),
+					esc_html__( 'Moved a coupon to trash.', 'wp-security-audit-log' ),
 					esc_html__( 'Moved coupon to trash: %CouponName%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Coupon ID', 'wp-security-audit-log' ) => '%CouponID%',
@@ -2019,7 +2019,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 				9127 => array(
 					9127,
 					WSAL_LOW,
-					esc_html__( 'User moved a WooCommerce coupon out of trash', 'wp-security-audit-log' ),
+					esc_html__( 'Restored a coupon from trash', 'wp-security-audit-log' ),
 					esc_html__( 'Restored the coupon %CouponCode% out of the trash.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Coupon status', 'wp-security-audit-log' ) => '%CouponStatus%',

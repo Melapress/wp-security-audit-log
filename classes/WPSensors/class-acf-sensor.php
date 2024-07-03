@@ -446,21 +446,22 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		private static function check_terms_change( $old_tags, $new_tags, $post, $taxonomy ) {
-			$old_tags = $old_tags[ $taxonomy ];
-			$new_tags = $new_tags[ $taxonomy ];
-
-			// Ensure old_tags is not null.
-			if ( ! $old_tags ) {
-				$old_tags = array();
+			$extracted_old_tags = array();
+			$extracted_new_tags = array();
+			if ( isset( $old_tags ) && \is_array( $old_tags ) && isset( $old_tags[ $taxonomy ] ) ) {
+				$extracted_old_tags = $old_tags[ $taxonomy ];
+			}
+			if ( isset( $new_tags ) && \is_array( $new_tags ) && isset( $new_tags[ $taxonomy ] ) ) {
+				$extracted_new_tags = $new_tags[ $taxonomy ];
 			}
 
-			$intersection = array_intersect_assoc( array_map( 'serialize', $old_tags ), array_map( 'serialize', $new_tags ) );
-			if ( count( $intersection ) === count( $old_tags ) && count( $old_tags ) === count( $new_tags ) ) {
+			$intersection = array_intersect_assoc( array_map( 'serialize', $extracted_old_tags ), array_map( 'serialize', $extracted_new_tags ) );
+			if ( count( $intersection ) === count( $extracted_old_tags ) && count( $extracted_old_tags ) === count( $extracted_new_tags ) ) {
 				// No change, let's leave.
 				return;
 			}
 
-			self::report_terms_change_event( $old_tags, $new_tags, $post, $taxonomy );
+			self::report_terms_change_event( $extracted_old_tags, $extracted_new_tags, $post, $taxonomy );
 		}
 
 		/**
