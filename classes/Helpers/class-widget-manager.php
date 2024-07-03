@@ -73,6 +73,10 @@ if ( ! class_exists( '\WSAL\Helpers\Widget_Manager' ) ) {
 		public static function render_widget() {
 			$results = (array) Alert_Manager::get_latest_events( Settings_Helper::DASHBOARD_WIDGET_MAX_ALERTS, true );
 
+			if ( false === $results[0] ) {
+				return;
+			}
+
 			?><div>
 			<?php if ( ! count( $results ) ) { ?>
 			<p><?php esc_html_e( 'No events found.', 'wp-security-audit-log' ); ?></p>

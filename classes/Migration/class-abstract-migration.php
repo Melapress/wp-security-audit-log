@@ -50,7 +50,12 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		/**
 		 * That is a global constant used for marking the migration process as in progress.
 		 */
-		const STARTED_MIGRATION_PROCESS = 'migration-process-started';
+		public const STARTED_MIGRATION_PROCESS = 'migration-process-started';
+
+		/**
+		 * That is a global constant used for showing the upgrade notice.
+		 */
+		public const UPGRADE_NOTICE = 'upgrade-notice-show';
 
 		/**
 		 * Extracted version from the DB (WP option)
@@ -139,7 +144,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 					}
 				} elseif ( false === $migration_started ) {
 
-						WP_Helper::set_global_option( self::STARTED_MIGRATION_PROCESS, true );
+					WP_Helper::set_global_option( self::STARTED_MIGRATION_PROCESS, true );
 					try {
 						// set transient for the updating status - would that help ?!?
 						$method_as_version_numbers = static::get_all_migration_methods_as_numbers();
@@ -149,7 +154,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 							function ( $method, $key ) use ( &$stored_version_as_number, &$target_version_as_number ) {
 
 								if ( ( ( (int) $target_version_as_number ) / 1000 ) > ( ( (int) $stored_version_as_number ) / 1000 ) ) {
-									return ( in_array( $key, range( $stored_version_as_number, $target_version_as_number ), true ) );
+									return ( in_array( $key, range( $stored_version_as_number + 1, $target_version_as_number ), true ) );
 								}
 
 								return false;
@@ -228,7 +233,13 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		 * @since 4.4.0
 		 */
 		private static function store_updated_version() {
-			WP_Helper::update_global_option( static::$version_option_name, \constant( static::$const_name_of_plugin_version ) );
+			if ( version_compare( static::get_stored_version(), \constant( static::$const_name_of_plugin_version ), '<' ) ) {
+				WP_Helper::update_global_option( static::$version_option_name, \constant( static::$const_name_of_plugin_version ) );
+
+				if ( '0.0.0' !== (string) static::$stored_version ) {
+					WP_Helper::set_global_option( self::UPGRADE_NOTICE, true );
+				}
+			}
 		}
 
 		/**

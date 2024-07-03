@@ -522,7 +522,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 					wsal_freemius()->add_filter(
 						'pricing_url',
 						function ( $url ) {
-							return 'https://melapress.com/wordpress-activity-log/pricing/?&utm_source=plugins&utm_medium=link&utm_campaign=wsal';
+							return 'https://melapress.com/wordpress-activity-log/pricing/?&utm_source=plugin&utm_medium=link&utm_campaign=wsal';
 						}
 					);
 				}
@@ -1209,7 +1209,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 			// Check current page, bail early if this isn't the plugins page.
 			if ( 'plugins.php' !== $pagenow
-			&& ! ( is_ajax() && isset( $_REQUEST['pagenow'] ) && 'plugins' === $_REQUEST['pagenow'] ) ) {
+			&& ! ( \wp_doing_ajax() && isset( $_REQUEST['pagenow'] ) && 'plugins' === $_REQUEST['pagenow'] ) ) {
 
 				return $plugins;
 			}

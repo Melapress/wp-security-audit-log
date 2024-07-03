@@ -59,7 +59,7 @@ if ( ! class_exists( '\WSAL\PluginExtensions\WFCM_Extension' ) ) {
 		 *
 		 * @return string Plugin name.
 		 *
-		 * @latest
+		 * @since 5.1.0
 		 */
 		public static function get_plugin_name(): string {
 			return 'Website File Changes Monitor';
@@ -70,7 +70,7 @@ if ( ! class_exists( '\WSAL\PluginExtensions\WFCM_Extension' ) ) {
 		 *
 		 * @return string Plugin icon URL.
 		 *
-		 * @latest
+		 * @since 5.1.0
 		 */
 		public static function get_plugin_icon_url(): string {
 			return 'https://ps.w.org/website-file-changes-monitor/assets/icon-128x128.png?rev=2393849';
@@ -105,6 +105,8 @@ if ( ! class_exists( '\WSAL\PluginExtensions\WFCM_Extension' ) ) {
 		 * @param array  $events Events.
 		 *
 		 * @return string
+		 * 
+		 * @since 5.1.0
 		 */
 		public static function append_dailynotification_email_content( $body, $events ): string {
 			if ( ! empty( $events ) ) {

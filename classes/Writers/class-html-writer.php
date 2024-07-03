@@ -381,7 +381,7 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 
 				$logo_src = $white_settings['logo'];
 				if ( 0 === strlen( $logo_link ) ) {
-					$logo_link = 'https://melapress.com/?utm_source=plugins&utm_medium=referral&utm_campaign=wsal&utm_content=priodic-report';
+					$logo_link = 'https://melapress.com/?utm_source=plugin&utm_medium=referral&utm_campaign=wsal&utm_content=priodic-report';
 				}
 				if ( ! isset( $logo_src ) || empty( $logo_src ) ) {
 					$logo_src = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 200 68">

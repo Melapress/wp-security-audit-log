@@ -312,7 +312,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 							<?php endforeach; ?>
 						</select>
 						<p class="description">
-							<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugins&utm_medium=link&utm_campaign=wsal" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), Plugin_Settings_Helper::get_allowed_html_tags() ); ?>
+							<?php echo wp_kses( __( 'Use the Log level drop down menu above to use one of our preset log levels. Alternatively you can enable or disable any of the individual events from the below tabs. Refer to <a href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank">the complete list of WordPress activity log event IDs</a> for reference on all the events the plugin can keep a log of.', 'wp-security-audit-log' ), Plugin_Settings_Helper::get_allowed_html_tags() ); ?>
 						</p>
 					</fieldset>
 				</form>

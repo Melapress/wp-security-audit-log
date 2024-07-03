@@ -709,7 +709,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 * @param array $event_data - Misc alert data.
 		 */
 		public static function log( $event_id, $event_data = array() ) {
-			$alert_obj  = self::get_alerts()[ $event_id ];
+			$alert_obj = self::get_alerts()[ $event_id ];
 
 			if ( ! isset( $event_data['ClientIP'] ) ) {
 				$client_ip = Settings_Helper::get_main_client_ip();
@@ -732,7 +732,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				if ( function_exists( 'get_current_user_id' ) ) {
 					$event_data['CurrentUserID'] = \get_current_user_id();
 					if ( 0 !== $event_data['CurrentUserID'] ) {
-						$event_data['Username']      = \get_user_by( 'ID', $event_data['CurrentUserID'] )->user_login;
+						$event_data['Username'] = \get_user_by( 'ID', $event_data['CurrentUserID'] )->user_login;
 					}
 					if ( 0 === $event_data['CurrentUserID'] ) {
 						if ( 'system' === \strtolower( $alert_obj['object'] ) ) {
@@ -1078,7 +1078,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 					if ( $known_to_trigger ) {
 						break;
 					}
-					if ( ! empty( $last_occurrence ) && ( $last_occurrence['created_on'] + self::$seconds_to_check_back ) > time() ) {
+					if ( ! empty( $last_occurrence ) && \is_array( ! empty( $last_occurrence ) ) && \key_exists( 'created_on', $last_occurrence ) && ( $last_occurrence['created_on'] + self::$seconds_to_check_back ) > time() ) {
 						if ( ! is_array( $alert_id ) && (int) $last_occurrence['alert_id'] === $alert_id ) {
 							$known_to_trigger = true;
 						} elseif ( is_array( $alert_id ) && in_array( (int) $last_occurrence[0]['alert_id'], $alert_id, true ) ) {
@@ -1100,7 +1100,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 		 * @param bool $include_meta - Should we include meta to the collected events.
 		 * @param bool $first - If is set to true, it will extract oldest events (default is most recent ones).
 		 *
-		 * @return WSAL_Models_Occurrence[]|bool
+		 * @return array|bool
 		 *
 		 * @since 4.5.0
 		 * @since 5.0.0 $first flag is added
@@ -1439,7 +1439,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 
 			$ip    = esc_html( $entry->ip );
 			$ua    = esc_html( $entry->ua );
-			$roles = maybe_unserialize( $entry->roles );
+			$roles = $entry->roles;
 			if ( is_string( $roles ) ) {
 				$roles = str_replace( array( '"', '[', ']' ), ' ', $roles );
 			}

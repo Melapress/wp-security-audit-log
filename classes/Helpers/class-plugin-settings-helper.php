@@ -327,7 +327,7 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		 *
 		 * @method set_show_milliseconds
 		 *
-		 * @since  latest
+		 * @since 5.1.0
 		 *
 		 * @param mixed $newvalue ideally always bool. If not bool then it's cast to true.
 		 */

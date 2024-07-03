@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $utm_params = array(
-	'utm_source'   => 'plugins',
+	'utm_source'   => 'plugin',
 	'utm_medium'   => 'button',
 	'utm_campaign' => 'wsal',
 );

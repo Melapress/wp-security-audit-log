@@ -2,7 +2,7 @@
 /**
  * Gravity forms sensor helper
  *
- * @since     latest
+ * @since 5.1.0
  * @package   wsal
  * @subpackage sensors
  */
@@ -28,7 +28,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\MainWP_Server_Helper' ) ) {
 	 *
 	 * @package    wsal
 	 * @subpackage sensors-helpers
-	 * @since      latest
+	 * @since 5.1.0
 	 */
 	class MainWP_Server_Helper {
 
