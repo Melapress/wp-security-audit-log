@@ -120,9 +120,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Register_Sensor' ) ) {
 			);
 
 			if ( function_exists( 'get_current_user_id' ) ) {
-				if ( 0 !== $event_data['CurrentUserID'] ) {
-					$event_data['Username'] = 'System';
-				}
+				$event_data['Username'] = 'System';
 			}
 
 			if ( WP_Helper::is_multisite() ) {
