@@ -45,9 +45,9 @@ if ( ! class_exists( '\WSAL\Helpers\Upgrade_Notice' ) ) {
 			}
 
 			if ( 'plugins' === $current_screen->id ) {
-				\add_action( 'in_plugin_update_message-wp-security-audit-log-premium/wp-security-audit-log.php', array( __CLASS__, 'prefix_plugin_update_message' ), 10, 2 );
-				\add_action( 'in_plugin_update_message-wp-security-audit-log/wp-security-audit-log.php', array( __CLASS__, 'prefix_plugin_update_message' ), 10, 2 );
-				\add_action( 'in_plugin_update_message-wp-security-audit-log-premium-nofs/wp-security-audit-log.php', array( __CLASS__, 'prefix_plugin_update_message' ), 10, 2 );
+				\add_action( 'in_plugin_update_message-' . \WpSecurityAuditLog::PREMIUM_VERSION_WHOLE_PLUGIN_NAME, array( __CLASS__, 'prefix_plugin_update_message' ), 10, 2 );
+				\add_action( 'in_plugin_update_message-' . \WpSecurityAuditLog::FREE_VERSION_WHOLE_PLUGIN_NAME, array( __CLASS__, 'prefix_plugin_update_message' ), 10, 2 );
+				\add_action( 'in_plugin_update_message-' . \WpSecurityAuditLog::NOFS_VERSION_WHOLE_PLUGIN_NAME, array( __CLASS__, 'prefix_plugin_update_message' ), 10, 2 );
 			}
 		}
 
@@ -137,7 +137,7 @@ if ( ! class_exists( '\WSAL\Helpers\Upgrade_Notice' ) ) {
 					$notices = (array) preg_split( '~[\r\n]+~', trim( $matches[2] ) );
 
 					if ( version_compare( trim( $matches[1] ), $check_version, '=' ) ) {
-						$style = '<style>
+						$style           = '<style>
 							.wsal_plugin_upgrade_notice {
 								font-weight: normal;
 								background: #fff8e5 !important;

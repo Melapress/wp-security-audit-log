@@ -13,7 +13,10 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
+use WSAL\Helpers\User_Helper;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Helpers\DateTime_Formatter_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -49,11 +52,39 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 	 * 6017 Modified the list of keywords for comments moderation
 	 * 6018 Modified the list of keywords for comments blacklisting
 	 * 6061 Email was sent
+	 * 6064 Email was sent
 	 *
 	 * @package    wsal
 	 * @subpackage sensors
 	 */
 	class WP_System_Sensor {
+
+		/**
+		 * Keeps the value of the old option.
+		 *
+		 * @var array
+		 *
+		 * @since 5.1.0
+		 */
+		private static $old_option = array();
+
+		/**
+		 * The executed cron is removed BEFORE execution, so we have to keep the value of it.
+		 *
+		 * @var \StdClass
+		 *
+		 * @since 5.1.0
+		 */
+		private static $executed_cron = false;
+
+		/**
+		 * The rescheduled cron is holding the old (original) value of the event.
+		 *
+		 * @var \StdClass
+		 *
+		 * @since 5.1.0
+		 */
+		private static $rescheduled_cron = false;
 
 		/**
 		 * Inits the main hooks
@@ -63,21 +94,524 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function init() {
-			add_action( 'wsal_prune', array( __CLASS__, 'event_prune_events' ), 10, 2 );
-			add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
-			add_action( 'automatic_updates_complete', array( __CLASS__, 'wp_update' ), 10, 1 );
+			\add_action( 'wsal_prune', array( __CLASS__, 'event_prune_events' ), 10, 2 );
+			\add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
+			\add_action( 'automatic_updates_complete', array( __CLASS__, 'wp_update' ), 10, 1 );
 
 			// whitelist options.
-			add_action( 'allowed_options', array( __CLASS__, 'event_options' ), 10, 1 );
+			\add_action( 'allowed_options', array( __CLASS__, 'event_options' ), 10, 1 );
 
 			// Update admin email alert.
-			add_action( 'update_option_admin_email', array( __CLASS__, 'admin_email_changed' ), 10, 3 );
+			\add_action( 'update_option_admin_email', array( __CLASS__, 'admin_email_changed' ), 10, 3 );
 
 			// Customizable settings for the dynamic theme editing start.
 			// Blogname change.
-			add_action( 'customize_save_blogname', array( __CLASS__, 'site_blogname_change' ), 20, 1 );
+			\add_action( 'customize_save_blogname', array( __CLASS__, 'site_blogname_change' ), 20, 1 );
 
-			add_action( 'wp_mail_succeeded', array( __CLASS__, 'mail_was_sent' ) );
+			/**
+			 * Options sensors - most of that class must be switched to this way of logging.
+			 */
+			\add_action( 'updated_option', array( __CLASS__, 'updated_option' ), 10, 3 );
+			\add_action( 'added_option', array( __CLASS__, 'added_option' ), 10, 2 );
+			// Use that to store the current option value, before the actual deletion.
+			\add_action( 'delete_option', array( __CLASS__, 'delete_option' ) );
+			// Option is deleted.
+			\add_action( 'deleted_option', array( __CLASS__, 'deleted_option' ) );
+		}
+
+		/**
+		 * Loads all the plugin dependencies early.
+		 *
+		 * @return void
+		 *
+		 * @since 5.1.0
+		 */
+		public static function early_init() {
+
+			\add_action( 'wp_mail_succeeded', array( __CLASS__, 'mail_was_sent' ) );
+
+			/**
+			 * Cron events
+			 *
+			 * The WP cron logic is extremely complicated - in order to reschedule they delete and create a new event - so we inside the wp-cron they set last method variable to true (wp_error) and first to null - if there is an error they expect first (result of the action call) to be populated with error if there is one and then they check the error, otherwise because the wp_error is set from withing wp-cron to true, they know that this is a call from the wp-cron itself and not someone else creating / recreating event.
+			 * Pretty much same applies to everything which is coming from wp-cron.php
+			 *
+			 * Our logic is also complicated - we are attaching ourselves to pre_schedule_event
+			 * Check for the first param to be null and wp_error param to be false - if that is the case, we are assigning the cron class to the class variable and then check for it when schedule_event is called - if there is one set - that means that this call is not from wp-cron so we can log the event.
+			 */
+			$self = __CLASS__;
+			\add_action(
+				'pre_schedule_event',
+				function ( $pre, $hook, $wp_error ) use ( &$self ) {
+					if ( null === $pre && ! defined( 'DOING_CRON' ) ) {
+						$self::set_executed_cron( $hook );
+					}
+				},
+				PHP_INT_MAX,
+				3
+			);
+			\add_action(
+				'pre_reschedule_event',
+				function ( $pre, $hook, $wp_error ) use ( &$self ) {
+					if ( null === $pre && ! defined( 'DOING_CRON' ) ) {
+						$self::set_rescheduled_cron( \wp_get_scheduled_event( $hook->hook, $hook->args ) );
+					}
+				},
+				PHP_INT_MAX,
+				3
+			);
+			\add_action( 'schedule_event', array( __CLASS__, 'created_cron_job' ) );
+			\add_action( 'pre_unschedule_event', array( __CLASS__, 'removed_cron_job' ), PHP_INT_MAX, 5 );
+
+			self::attach_cron_actions();
+		}
+
+		/**
+		 * Setter class method to set a value to the class variable
+		 *
+		 * @param \StdClass $executed_cron - The cron object.
+		 *
+		 * @return void
+		 *
+		 * @since 5.1.0
+		 */
+		public static function set_executed_cron( $executed_cron ) {
+			self::$executed_cron = $executed_cron;
+		}
+
+		/**
+		 * Setter class method to set a value to the class variable
+		 *
+		 * @param \StdClass $rescheduled_cron - The cron object.
+		 *
+		 * @return void
+		 *
+		 * @since 5.1.0
+		 */
+		public static function set_rescheduled_cron( $rescheduled_cron ) {
+			self::$rescheduled_cron = $rescheduled_cron;
+		}
+
+		/**
+		 * Called when the original wp-cron.php gets executed and tries to extract data from it.
+		 *
+		 * @return void
+		 *
+		 * @since 5.1.0
+		 */
+		public static function attach_cron_actions() {
+			if ( defined( 'DOING_CRON' ) ) {
+
+				$self = __CLASS__;
+
+				/**
+				*
+				* The WP cron logic is extremely complicated - in order to execute the event they first delete that event from the internal array and only then calling the assigned action, unfortunately at this point is to late to extract the event info which we need to log.
+				*
+				* Our logic is also complicated - we are attaching ourselves to pre_unschedule_event
+				* Then storing that event before it get deleted in the class variable, and later on using that event info to properly populate our logs.
+				*/
+				\add_action(
+					'pre_unschedule_event',
+					function ( $pre, $timestamp, $hook, $args, $wp_error ) use ( &$self ) {
+						$self::set_executed_cron( \wp_get_scheduled_event( $hook, $args, $timestamp ) );
+					},
+					PHP_INT_MAX,
+					5
+				);
+
+				$crons = \wp_get_ready_cron_jobs();
+
+				foreach ( $crons  as $timestamp => $cronhooks ) {
+
+					foreach ( $cronhooks as $hook => $keys ) {
+						foreach ( $keys as $k => $v ) {
+							\add_action(
+								$hook,
+								function () use ( $hook ) {
+
+									if ( self::$executed_cron && self::$executed_cron->hook === $hook ) {
+										$alert = 6069;
+
+										$cron = self::$executed_cron;
+
+										$data = array(
+											'task_name' => $cron->hook,
+											'timestamp' => DateTime_Formatter_Helper::get_formatted_date_time( $cron->timestamp, 'datetime', true, false ),
+											'arguments' => $cron->args,
+											'CurrentUserID' => User_Helper::get_current_user()->ID,
+											'Username'  => User_Helper::get_current_user()->user_login,
+										);
+
+										if ( empty( $data['CurrentUserID'] ) ) {
+
+											unset( $data['CurrentUserID'] );
+											$data['Username'] = 'System';
+
+										}
+
+										if ( $cron->schedule ) {
+											$alert                = 6070;
+											$data['schedule']     = $cron->schedule;
+											$schedule_info        = isset( \wp_get_schedules()[ $cron->schedule ] ) ? \wp_get_schedules()[ $cron->schedule ] : false;
+											$data['interval']     = ( isset( $schedule_info ) && \is_array( $schedule_info ) ) ? $schedule_info['interval'] : 0;
+											$data['display_name'] = ( isset( $schedule_info ) && \is_array( $schedule_info ) ) ? $schedule_info['display'] : __( 'Unknown or Invalid (non-existing)', 'wp-security-audit-log' );
+										}
+
+										Alert_Manager::trigger_event(
+											$alert,
+											$data
+										);
+
+										self::$executed_cron = false;
+									}
+								}
+							);
+						}
+					}
+				}
+			}
+		}
+
+		/**
+		 * Monitors and logs cron jobs creation.
+		 *
+		 * @param \StdClass $cron - The cron class instance of a cron job created.
+		 *
+		 * @return \StdClass $cron
+		 *
+		 * @since 5.1.0
+		 */
+		public static function created_cron_job( $cron ) {
+			if ( self::$executed_cron && self::$executed_cron->hook === $cron->hook ) {
+				$alert = 6066;
+
+				$data = array(
+					'task_name'     => $cron->hook,
+					'timestamp'     => DateTime_Formatter_Helper::get_formatted_date_time( $cron->timestamp, 'datetime', true, false ),
+					'arguments'     => $cron->args,
+					'CurrentUserID' => User_Helper::get_user()->ID,
+					'Username'      => User_Helper::get_user()->user_login,
+				);
+
+				if ( empty( $data['CurrentUserID'] ) ) {
+
+					unset( $data['CurrentUserID'] );
+					$data['Username'] = 'System';
+
+				}
+
+				if ( $cron->schedule ) {
+					$alert                = 6067;
+					$data['schedule']     = $cron->schedule;
+					$schedule_info        = \wp_get_schedules()[ $cron->schedule ];
+					$data['interval']     = $schedule_info['interval'];
+					$data['display_name'] = $schedule_info['display'];
+				}
+
+				Alert_Manager::trigger_event(
+					$alert,
+					$data
+				);
+
+				self::$executed_cron = false;
+			}
+			if ( self::$rescheduled_cron && self::$rescheduled_cron->hook === $cron->hook ) {
+				$alert           = 6068;
+				$reschedule_info = \wp_get_schedules()[ $cron->schedule ];
+				$schedule_info   = \wp_get_schedules()[ self::$rescheduled_cron->schedule ];
+				$data            = array(
+					'task_name'        => $cron->hook,
+					'timestamp'        => DateTime_Formatter_Helper::get_formatted_date_time( $cron->timestamp, 'datetime', true, false ),
+					'arguments'        => $cron->args,
+					'CurrentUserID'    => User_Helper::get_user()->ID,
+					'Username'         => User_Helper::get_user()->user_login,
+					'new_schedule'     => $cron->schedule,
+					'old_schedule'     => self::$rescheduled_cron,
+					'old_interval'     => $schedule_info['interval'],
+					'new_interval'     => $reschedule_info['interval'],
+					'old_display_name' => $schedule_info['display'],
+					'new_display_name' => $reschedule_info['display'],
+				);
+
+				if ( empty( $data['CurrentUserID'] ) ) {
+
+					unset( $data['CurrentUserID'] );
+					$data['Username'] = 'System';
+
+				}
+
+				Alert_Manager::trigger_event(
+					$alert,
+					$data
+				);
+
+				self::$rescheduled_cron = false;
+			}
+
+			return $cron;
+		}
+
+		/**
+		 * Monitors and logs cron jobs creation.
+		 *
+		 * @param null|bool|WP_Error $pre       Value to return instead. Default null to continue unscheduling the event.
+		 * @param int                $timestamp Timestamp for when to run the event.
+		 * @param string             $hook      Action hook, the execution of which will be unscheduled.
+		 * @param array              $args      Arguments to pass to the hook's callback function.
+		 * @param bool               $wp_error  Whether to return a WP_Error on failure.
+		 *
+		 * @return null|bool|WP_Error
+		 *
+		 * @since 5.1.0
+		 */
+		public static function removed_cron_job( $pre, $timestamp, $hook, $args, $wp_error ) {
+
+			if ( ! $pre && ! defined( 'DOING_CRON' ) ) {
+				$alert = 6071;
+
+				$data = array(
+					'task_name'     => $hook,
+					'timestamp'     => DateTime_Formatter_Helper::get_formatted_date_time( $timestamp, 'datetime', true, false ),
+					'arguments'     => $args,
+					'CurrentUserID' => User_Helper::get_user()->ID,
+					'Username'      => User_Helper::get_user()->user_login,
+				);
+
+				if ( empty( $data['CurrentUserID'] ) ) {
+
+					unset( $data['CurrentUserID'] );
+					$data['Username'] = 'System';
+
+				}
+
+				$cron = \wp_get_scheduled_event( $hook, $args, $timestamp );
+
+				if ( $cron->schedule ) {
+					$alert                = 6072;
+					$data['schedule']     = $cron->schedule;
+					$schedule_info        = \wp_get_schedules()[ $cron->schedule ];
+					$data['interval']     = $schedule_info['interval'];
+					$data['display_name'] = $schedule_info['display'];
+				}
+
+				Alert_Manager::trigger_event(
+					$alert,
+					$data
+				);
+			}
+
+			return $pre;
+		}
+
+		/**
+		 * Stores option values before deletion.
+		 *
+		 * @param string $option - Name of the updated option.
+		 *
+		 * @return void
+		 *
+		 * @since 5.1.0
+		 */
+		public static function delete_option( $option ) {
+
+			$option_value = \get_option( $option );
+
+			if ( isset( $option ) ) {
+				self::$old_option[ $option ] = array(
+					'name'  => $option,
+					'value' => $option_value,
+				);
+			}
+		}
+
+		/**
+		 * Monitors all the option deletes and triggers alerts.
+		 *
+		 * @param string $option - Name of the updated option.
+		 *
+		 * @return void
+		 *
+		 * @since 5.1.0
+		 */
+		public static function deleted_option( $option ) {
+
+			// Site icon is changed - act accordingly.
+			if ( 'site_icon' === $option ) {
+				// That keeps the ids of the attachments.
+				if ( ! empty( self::$old_option ) && isset( self::$old_option[ $option ] ) ) {
+
+					$old_info = self::get_file_info_from_id( (int) self::$old_option[ $option ]['value'] );
+
+					// Icon is removed.
+					Alert_Manager::trigger_event(
+						6064,
+						array(
+							'old_attachment_id ' => (int) self::$old_option[ $option ]['value'],
+							'old_path'           => ( ( ! empty( $old_info ) && isset( $old_info['file_path'] ) ) ? $old_info['file_path'] : '' ),
+							'old_filename'       => ( ( ! empty( $old_info ) && isset( $old_info['file_name'] ) ) ? $old_info['file_name'] : '' ),
+							'old_attachment_url' => ( ( ! empty( $old_info ) && isset( $old_info['attachment_url'] ) ) ? $old_info['attachment_url'] : '' ),
+
+							'CurrentUserID'      => User_Helper::get_user()->ID,
+							'Username'           => User_Helper::get_user()->user_login,
+						)
+					);
+				} else {
+
+					// Icon is removed.
+					Alert_Manager::trigger_event(
+						6064,
+						array(
+							'old_attachment_id ' => 0,
+							'old_path'           => '',
+							'old_filename'       => '',
+							'old_attachment_url' => '',
+
+							'CurrentUserID'      => User_Helper::get_user()->ID,
+							'Username'           => User_Helper::get_user()->user_login,
+						)
+					);
+				}
+			}
+		}
+
+		/**
+		 * Monitors all the option updates and triggers alerts.
+		 *
+		 * @param string $option - Name of the updated option.
+		 * @param mixed  $new_value - The new option value.
+		 *
+		 * @return void
+		 *
+		 * @since 5.1.0
+		 */
+		public static function added_option( $option, $new_value ) {
+
+			// Site icon is added - act accordingly.
+			if ( 'site_icon' === $option ) {
+				$new_info = self::get_file_info_from_id( (int) $new_value );
+
+					// New icon is introduced.
+				if ( 0 !== (int) $new_value ) {
+					Alert_Manager::trigger_event(
+						6063,
+						array(
+							'new_attachment_id ' => (int) $new_value,
+							'new_path'           => ( ( ! empty( $new_info ) && isset( $new_info['file_path'] ) ) ? $new_info['file_path'] : '' ),
+							'filename'           => ( ( ! empty( $new_info ) && isset( $new_info['file_name'] ) ) ? $new_info['file_name'] : '' ),
+							'attachment_url'     => ( ( ! empty( $new_info ) && isset( $new_info['attachment_url'] ) ) ? $new_info['attachment_url'] : '' ),
+
+							'CurrentUserID'      => User_Helper::get_user()->ID,
+							'Username'           => User_Helper::get_user()->user_login,
+						)
+					);
+				}
+			}
+		}
+
+		/**
+		 * Monitors all the option updates and triggers alerts.
+		 *
+		 * @param string $option - Name of the updated option.
+		 * @param mixed  $old_value - The old option value.
+		 * @param mixed  $new_value - The new option value.
+		 *
+		 * @return void
+		 *
+		 * @since 5.1.0
+		 */
+		public static function updated_option( $option, $old_value, $new_value ) {
+
+			// Site icon is changed - act accordingly.
+			if ( 'site_icon' === $option ) {
+				// That keeps the ids of the attachments.
+				if ( (int) $old_value !== (int) $new_value ) {
+
+					$old_info = self::get_file_info_from_id( (int) $old_value );
+					$new_info = self::get_file_info_from_id( (int) $new_value );
+
+					// New icon is introduced.
+					if ( 0 === (int) $old_value ) {
+						Alert_Manager::trigger_event(
+							6063,
+							array(
+								'new_attachment_id ' => (int) $new_value,
+								'new_path'           => ( ( ! empty( $new_info ) && isset( $new_info['file_path'] ) ) ? $new_info['file_path'] : '' ),
+								'filename'           => ( ( ! empty( $new_info ) && isset( $new_info['file_name'] ) ) ? $new_info['file_name'] : '' ),
+								'attachment_url'     => ( ( ! empty( $new_info ) && isset( $new_info['attachment_url'] ) ) ? $new_info['attachment_url'] : '' ),
+
+								'CurrentUserID'      => User_Helper::get_user()->ID,
+								'Username'           => User_Helper::get_user()->user_login,
+							)
+						);
+					}
+
+					// Icon is removed.
+					if ( 0 === (int) $new_value ) {
+						Alert_Manager::trigger_event(
+							6065,
+							array(
+								'old_attachment_id ' => (int) $old_value,
+								'old_path'           => ( ( ! empty( $old_info ) && isset( $old_info['file_path'] ) ) ? $old_info['file_path'] : '' ),
+								'old_filename'       => ( ( ! empty( $old_info ) && isset( $old_info['file_name'] ) ) ? $old_info['file_name'] : '' ),
+								'old_attachment_url' => ( ( ! empty( $old_info ) && isset( $old_info['attachment_url'] ) ) ? $old_info['attachment_url'] : '' ),
+
+								'CurrentUserID'      => User_Helper::get_user()->ID,
+								'Username'           => User_Helper::get_user()->user_login,
+							)
+						);
+					}
+
+					// Icon is changed.
+					if ( $new_value && $old_value ) {
+						Alert_Manager::trigger_event(
+							6064,
+							array(
+								'old_attachment_id ' => (int) $old_value,
+								'new_attachment_id ' => (int) $new_value,
+								'old_path'           => ( ( ! empty( $old_info ) && isset( $old_info['file_path'] ) ) ? $old_info['file_path'] : '' ),
+								'new_path'           => ( ( ! empty( $new_info ) && isset( $new_info['file_path'] ) ) ? $new_info['file_path'] : '' ),
+								'old_filename'       => ( ( ! empty( $old_info ) && isset( $old_info['file_name'] ) ) ? $old_info['file_name'] : '' ),
+								'filename'           => ( ( ! empty( $new_info ) && isset( $new_info['file_name'] ) ) ? $new_info['file_name'] : '' ),
+								'old_attachment_url' => ( ( ! empty( $old_info ) && isset( $old_info['attachment_url'] ) ) ? $old_info['attachment_url'] : '' ),
+								'attachment_url'     => ( ( ! empty( $new_info ) && isset( $new_info['attachment_url'] ) ) ? $new_info['attachment_url'] : '' ),
+
+								'CurrentUserID'      => User_Helper::get_user()->ID,
+								'Username'           => User_Helper::get_user()->user_login,
+							)
+						);
+					}
+				}
+			}
+		}
+
+		/**
+		 * Helper method to extract file info from attachment - probably the proper place for that is in the WP_Helper class.
+		 *
+		 * @param integer $attachment_id - The attachment ID.
+		 *
+		 * @return array - Returns empty array if no attachment is found or wrong - otherwise associative array with file info:
+		 * [
+		 *    'file_name'      => string,
+		 *    'file_path'      => string,
+		 *    'attachment_url' => string,
+		 * ]
+		 *
+		 * @since 5.1.0
+		 */
+		private static function get_file_info_from_id( int $attachment_id ): array {
+			$info = array();
+
+			$file = \get_attached_file( $attachment_id );
+			if ( false !== $file ) {
+				$info = array(
+					'file_name'      => basename( $file ),
+					'file_path'      => dirname( $file ),
+					'attachment_url' => \wp_get_attachment_url( $attachment_id ),
+				);
+			}
+
+			return $info;
 		}
 
 		/**
@@ -99,7 +633,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						array(
 							'OldEmail'      => $old_value,
 							'NewEmail'      => $new_value,
-							'CurrentUserID' => wp_get_current_user()->ID,
+							'CurrentUserID' => User_Helper::get_user()->ID,
 						)
 					);
 				}
@@ -196,7 +730,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						array(
 							'old_url'       => $old_siteurl,
 							'new_url'       => $new_siteurl,
-							'CurrentUserID' => wp_get_current_user()->ID,
+							'CurrentUserID' => User_Helper::get_user()->ID,
 						)
 					);
 				}
@@ -214,7 +748,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						array(
 							'old_url'       => $old_url,
 							'new_url'       => $new_url,
-							'CurrentUserID' => wp_get_current_user()->ID,
+							'CurrentUserID' => User_Helper::get_user()->ID,
 						)
 					);
 				}
@@ -280,7 +814,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						array(
 							'old_date_format' => $old_date_format,
 							'new_date_format' => $new_date_format,
-							'CurrentUserID'   => wp_get_current_user()->ID,
+							'CurrentUserID'   => User_Helper::get_user()->ID,
 						)
 					);
 				}
@@ -296,7 +830,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						array(
 							'old_time_format' => $old_time_format,
 							'new_time_format' => $new_time_format,
-							'CurrentUserID'   => wp_get_current_user()->ID,
+							'CurrentUserID'   => User_Helper::get_user()->ID,
 						)
 					);
 				}
@@ -312,7 +846,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						6001,
 						array(
 							'EventType'     => $new,
-							'CurrentUserID' => wp_get_current_user()->ID,
+							'CurrentUserID' => User_Helper::get_user()->ID,
 						)
 					);
 				}
@@ -328,7 +862,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						array(
 							'OldRole'       => $old,
 							'NewRole'       => $new,
-							'CurrentUserID' => wp_get_current_user()->ID,
+							'CurrentUserID' => User_Helper::get_user()->ID,
 						)
 					);
 				}
@@ -344,7 +878,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						array(
 							'OldEmail'      => $old,
 							'NewEmail'      => $new,
-							'CurrentUserID' => wp_get_current_user()->ID,
+							'CurrentUserID' => User_Helper::get_user()->ID,
 						)
 					);
 				}
@@ -360,7 +894,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						array(
 							'OldEmail'      => $old,
 							'NewEmail'      => $new,
-							'CurrentUserID' => wp_get_current_user()->ID,
+							'CurrentUserID' => User_Helper::get_user()->ID,
 						)
 					);
 				}
@@ -377,7 +911,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 						array(
 							'OldPattern'    => $old,
 							'NewPattern'    => $new,
-							'CurrentUserID' => wp_get_current_user()->ID,
+							'CurrentUserID' => User_Helper::get_user()->ID,
 						)
 					);
 				}
@@ -712,7 +1246,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 					array(
 						'old_timezone'  => $old_timezone_label,
 						'new_timezone'  => $new_timezone_label,
-						'CurrentUserID' => wp_get_current_user()->ID,
+						'CurrentUserID' => User_Helper::get_current_user()->ID,
 					)
 				);
 			}

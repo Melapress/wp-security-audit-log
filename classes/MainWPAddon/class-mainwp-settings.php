@@ -14,6 +14,7 @@
 namespace WSAL\MainWP;
 
 use WSAL\Helpers\Validator;
+use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Settings_Helper;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
@@ -106,7 +107,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Settings' ) ) {
 		 */
 		public function get_current_user_roles( $base_roles = null ) {
 			if ( null === $base_roles ) {
-				$base_roles = wp_get_current_user()->roles;
+				$base_roles = User_Helper::get_current_user()->roles;
 			}
 			if ( function_exists( 'is_super_admin' ) && is_super_admin() ) {
 				$base_roles[] = 'superadmin';

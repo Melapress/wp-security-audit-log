@@ -3,6 +3,8 @@
  * Entity: Abstract.
  *
  * @package wsal
+ *
+ * @since 4.4.2.1
  */
 
 declare(strict_types=1);
@@ -30,6 +32,8 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		 * Contains the table name.
 		 *
 		 * @var string
+		 *
+		 * @since 4.4.2.1
 		 */
 		private static $table = '';
 
@@ -193,23 +197,22 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 
 			foreach ( $results as $row ) {
 
-				// phpcs:disable
-				if ( $row->Field === $col_name ) { // phpcs:ignore
+				if ( $row->Field === $col_name ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 					// Got our column, check the params.
-					if ( ( null !== $col_type ) && ( strtolower( str_replace( ' ', '', $row->Type ) ) !== strtolower( str_replace( ' ', '', $col_type ) ) ) ) { // phpcs:ignore
+					if ( ( null !== $col_type ) && ( strtolower( str_replace( ' ', '', $row->Type ) ) !== strtolower( str_replace( ' ', '', $col_type ) ) ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 						++$diffs;
 					}
-					if ( ( null !== $is_null ) && ( $row->Null !== $is_null ) ) { // phpcs:ignore
+					if ( ( null !== $is_null ) && ( $row->Null !== $is_null ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 						++$diffs;
 					}
-					if ( ( null !== $key ) && ( $row->Key !== $key ) ) { // phpcs:ignore
+					if ( ( null !== $key ) && ( $row->Key !== $key ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 						++$diffs;
 					}
-					if ( ( null !== $default ) && ( $row->Default !== $default ) ) { // phpcs:ignore
+					if ( ( null !== $default ) && ( $row->Default !== $default ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 						++$diffs;
 					}
-					if ( ( null !== $extra ) && ( $row->Extra !== $extra ) ) { // phpcs:ignore
+					if ( ( null !== $extra ) && ( $row->Extra !== $extra ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 						++$diffs;
 					}
 
@@ -219,7 +222,6 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 
 					return true;
 				} // End if found our column.
-				// phpcs:enable
 			}
 
 			return false;
@@ -237,13 +239,12 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 		public static function get_last_sql_error( $_wpdb ): int {
 			$code = 0;
 			if ( $_wpdb->dbh instanceof \mysqli ) {
-				$code = \mysqli_errno( $_wpdb->dbh ); // phpcs:ignore
+				$code = \mysqli_errno( $_wpdb->dbh ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_errno
 			}
 
 			if ( is_resource( $_wpdb->dbh ) ) {
 				// Please do not report this code as a PHP 7 incompatibility. Observe the surrounding logic.
-				// phpcs:ignore
-				$code = mysql_errno( $_wpdb->dbh );
+				$code = mysql_errno( $_wpdb->dbh ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_errno
 			}
 			return $code;
 		}
@@ -267,9 +268,39 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			}
 
 			$table_name = self::get_table_name( $_wpdb );
-			static::get_connection()->query( 'DROP TABLE IF EXISTS ' . $table_name ); // phpcs:ignore
+			static::get_connection()->query( 'DROP TABLE IF EXISTS ' . $table_name );
 
 			return true;
+		}
+
+		/**
+		 * Truncate the table.
+		 *
+		 * @param \wpdb $connection - \wpdb connection to be used for name extraction.
+		 *
+		 * @return bool
+		 *
+		 * @since 5.1.1
+		 */
+		public static function truncate_table( $connection = null ) {
+			if ( null !== $connection ) {
+				if ( $connection instanceof \wpdb ) {
+					$_wpdb = $connection;
+				}
+			} else {
+				$_wpdb = static::get_connection();
+			}
+
+			$table_name = self::get_table_name( $_wpdb );
+
+			if ( self::check_table_exists( $table_name, $connection ) ) {
+
+				static::get_connection()->query( 'TRUNCATE ' . $table_name );
+
+				return true;
+			}
+
+			return false;
 		}
 
 		/**
@@ -787,10 +818,8 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 			$_wpdb->check_current_query = false;
 
 			$sql = $_wpdb->prepare(
-				// phpcs:disable
 				'SELECT * FROM `' . self::get_table_name( $_wpdb ) . '` WHERE ' . $conditions,
 				$values
-				// phpcs:enable
 			);
 
 			$_wpdb->suppress_errors( true );

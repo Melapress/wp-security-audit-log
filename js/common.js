@@ -25,6 +25,31 @@ jQuery( document ).ready( function() {
 		});
 	});
 
+	jQuery( document ).on( 'click', '.wsal-notice .wsal-plugin-notice-close', function(event) {
+		var noticeElm = jQuery(this).parent();
+		var action = noticeElm.attr('data-dismiss-action');
+		if ( !action ){
+			return;
+		}
+
+		event.preventDefault();
+		jQuery.ajax({
+			type: 'POST',
+			url: wsalCommonData.ajaxURL,
+			async: true,
+			data: {
+				action: jQuery(this).parent().attr('data-dismiss-action'),
+				nonce: jQuery(this).parent().attr('data-nonce')
+			}
+		});
+
+		noticeElm.fadeTo(100, 0, function () {
+			noticeElm.slideUp(100, function () {
+				noticeElm.remove()
+			})
+		  })
+	});
+
 	/**
 	 * Check & Load New Alerts on WP-Admin bar.
 	 *

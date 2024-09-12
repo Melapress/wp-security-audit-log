@@ -189,7 +189,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				$plugin = array_merge( array_diff( array_keys( get_plugins() ), array_keys( self::$old_plugins ) ), array_diff( array_keys( self::$old_plugins ), array_keys( get_plugins() ) ) );
 
 				// Check for premium version being installed / updated.
-				if ( in_array( 'wp-security-audit-log-premium/wp-security-audit-log.php', $plugin, true ) ) {
+				if ( in_array( \WpSecurityAuditLog::PREMIUM_VERSION_WHOLE_PLUGIN_NAME, $plugin, true ) ) {
 					/**
 					 * It looks like our own plugin is installed / updated. That means that we have no idea if there is a version on server or the plugin is in memory only (if it is he don't know which parts of it are there), that could lead to PHP errors which will prevent plugin install / update, better approach is to do nothing in terms of logging.
 					 *
@@ -198,7 +198,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					return;
 				}
 				// Check for free version being installed / updated.
-				if ( in_array( 'wp-security-audit-log/wp-security-audit-log.php', $plugin, true ) ) {
+				if ( in_array( \WpSecurityAuditLog::FREE_VERSION_WHOLE_PLUGIN_NAME, $plugin, true ) ) {
+					/**
+					 * It looks like our own plugin is installed / updated. That means that we have no idea if there is a version on server or the plugin is in memory only (if it is he don't know which parts of it are there), that could lead to PHP errors which will prevent plugin install / update, better approach is to do nothing in terms of logging.
+					 *
+					 * TODO: the plugin name (see comparison in if clause above) could be whatever, we must introduce constant for that probably
+					 */
+					return;
+				}
+				// Check for nofs version being installed / updated.
+				if ( in_array( \WpSecurityAuditLog::NOFS_VERSION_WHOLE_PLUGIN_NAME, $plugin, true ) ) {
 					/**
 					 * It looks like our own plugin is installed / updated. That means that we have no idea if there is a version on server or the plugin is in memory only (if it is he don't know which parts of it are there), that could lead to PHP errors which will prevent plugin install / update, better approach is to do nothing in terms of logging.
 					 *

@@ -29,24 +29,6 @@ input[type="submit"] {
 	padding: 0;
 }
 
-body {
-	/* margin: 0;
-	padding: 0;
-	font-family: 'Roboto', sans-serif;
-	-webkit-font-smoothing: antialiased;
-	font-weight: 400;
-	width: 100%;
-	min-height: 100%;
-	color: #23282d;
-	background: #fff; */
-}
-
-a {
-	outline: none;
-	text-decoration: none;
-	color: #23282d;
-}
-
 a:hover, a:focus{
 	outline: none;
 	text-decoration: none;
@@ -97,7 +79,6 @@ p {
 .container {
 	max-width: 1170px;
 	width:100%;
-	/* padding: 0 15px; */
 	margin: auto;
 }
 
@@ -456,16 +437,12 @@ ul.premium-list li:before {
 
 .our-wordpress-plugins h3{
 	font-size: 17px;
-	line-height: 28px;
+	line-height: 1.4rem; /* New */
 	color: #23282D;
 	font-weight: 500;
 	margin: 0;
 	padding: 15px 4px 0px;
 	text-align: center;
-	/* background: #ffffff;
-	-webkit-box-shadow: 0px 4px 4px rgba(0, 0, 0,0.04);
-	-moz-box-shadow: 0px 4px 4px rgba(0, 0, 0,0.04);
-	box-shadow: 0px 4px 4px rgba(0, 0, 0,0.04); */
 }
 
 .our-wordpress-plugins ul{
@@ -487,9 +464,6 @@ ul.premium-list li:before {
 	width: 100%;
 	background: #F7F7F7;
 	border: 1px solid #D9D9D9;
-	/* -webkit-box-shadow: 0px 4px 4px rgba(0, 0, 0,0.04);
-	-moz-box-shadow: 0px 4px 4px rgba(0, 0, 0,0.04);
-	box-shadow: 0px 4px 4px rgba(0, 0, 0,0.04); */
 }
 
 .our-wordpress-plugins ul li .plugin-box .plugin-img img{
@@ -509,7 +483,7 @@ ul.premium-list li:before {
 
 .our-wordpress-plugins h4{
 	font-size: 16px;
-	line-height: 19px;
+	line-height: 1.4rem; /* New */
 	color: #23282D;
 	font-weight: 600;
 	margin: 0;
@@ -520,18 +494,22 @@ ul.premium-list li:before {
 	margin: 0 0 15px 0;
 }
 
-.cta-btn a{
-	font-size: 14px;
-	line-height: 24px;
-	color: #fff;
-	font-weight: 700;
-	background: #2B597A;
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	border-radius: 4px;
-	display: inline-block;
+/* New */
+.cta-btn a {
+	border-radius: 0.25rem;
+	background:#FF8977;
+	color: #0000EE;
+	font-weight: 800;
 	text-decoration: none;
-	padding: 5px 15px;
+	font-size: 0.875rem;
+	padding: 0.4575rem 1rem 0.5rem 1rem;
+	transition: all 0.2s ease-in-out;
+	position: relative;
+}
+
+.cta-btn a:hover {
+	background:#0000EE;
+	color: #FF8977;
 }
 
 .our-wordpress-plugins.full{

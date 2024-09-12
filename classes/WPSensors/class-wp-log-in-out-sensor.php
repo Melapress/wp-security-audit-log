@@ -75,15 +75,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function init() {
-			add_action( 'set_auth_cookie', array( __CLASS__, 'event_login' ), 10, 6 );
-			add_action( 'wp_logout', array( __CLASS__, 'event_logout' ), 5 );
-			add_action( 'password_reset', array( __CLASS__, 'event_password_reset' ), 10, 2 );
-			add_action( 'wp_login_failed', array( __CLASS__, 'event_login_failure' ) );
-			add_action( 'clear_auth_cookie', array( __CLASS__, 'get_current_user' ), 10 );
-			add_action( 'lostpassword_post', array( __CLASS__, 'event_user_requested_pw_reset' ), 10, 2 );
+			\add_action( 'set_auth_cookie', array( __CLASS__, 'event_login' ), 10, 6 );
+			\add_action( 'wp_logout', array( __CLASS__, 'event_logout' ), 5 );
+			\add_action( 'password_reset', array( __CLASS__, 'event_password_reset' ), 10, 2 );
+			\add_action( 'wp_login_failed', array( __CLASS__, 'event_login_failure' ) );
+			\add_action( 'clear_auth_cookie', array( __CLASS__, 'get_current_user' ), 10 );
+			\add_action( 'lostpassword_post', array( __CLASS__, 'event_user_requested_pw_reset' ), 10, 2 );
 
 			if ( WP_Helper::is_plugin_active( 'user-switching/user-switching.php' ) ) {
-				add_action( 'switch_to_user', array( __CLASS__, 'user_switched_event' ), 10, 2 );
+				\add_action( 'switch_to_user', array( __CLASS__, 'user_switched_event' ), 10, 2 );
 			}
 		}
 
@@ -122,7 +122,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function get_current_user() {
-			self::$current_user = wp_get_current_user();
+			self::$current_user = User_Helper::get_current_user();
 		}
 
 		/**

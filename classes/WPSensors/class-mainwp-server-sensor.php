@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
+use WSAL\Helpers\User_Helper;
 use WSAL\MainWP\MainWP_Addon;
 use WSAL\MainWP\MainWP_Helper;
 use WSAL\MainWP\MainWP_Settings;
@@ -152,7 +153,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function get_current_user() {
-			self::$current_user = wp_get_current_user();
+			self::$current_user = User_Helper::get_current_user();
 		}
 
 		/**
@@ -292,9 +293,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function synced_all_sites() {
-			// @codingStandardsIgnoreStart
 			$is_global_sync = isset( $_POST['isGlobalSync'] ) ? sanitize_text_field( wp_unslash( $_POST['isGlobalSync'] ) ) : false;
-			// @codingStandardsIgnoreEnd
 
 			// make sure this is global sync.
 			if ( ! in_array( $is_global_sync, array( 'true', '1' ) ) ) {

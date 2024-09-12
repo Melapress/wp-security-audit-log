@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Helpers\Plugin_Settings_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -55,27 +57,46 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function init() {
-			add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
+			\add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
 
 			// Check if MainWP Child Plugin exists.
 			if ( \WpSecurityAuditLog::is_mainwp_active() ) {
 				self::mainwp_child_init();
 
 				// Handle plugin/theme installation event via MainWP dashboard.
-				add_action( 'mainwp_child_installPluginTheme', array( __CLASS__, 'mainwp_child_install_assets' ), 10, 1 );
+				\add_action( 'mainwp_child_installPluginTheme', array( __CLASS__, 'mainwp_child_install_assets' ), 10, 1 );
 
 				// Activate/Deactivate plugin event.
-				add_action( 'activated_plugin', array( __CLASS__, 'mainwp_child_plugin_events' ), 10, 1 );
-				add_action( 'deactivated_plugin', array( __CLASS__, 'mainwp_child_plugin_events' ), 10, 1 );
+				\add_action( 'activated_plugin', array( __CLASS__, 'mainwp_child_plugin_events' ), 10, 1 );
+				\add_action( 'deactivated_plugin', array( __CLASS__, 'mainwp_child_plugin_events' ), 10, 1 );
 
 				// Uninstall plugin from MainWP dashboard.
-				add_action( 'mainwp_child_plugin_action', array( __CLASS__, 'mainwp_child_uninstall_plugin' ), 10, 1 );
+				\add_action( 'mainwp_child_plugin_action', array( __CLASS__, 'mainwp_child_uninstall_plugin' ), 10, 1 );
 
 				// Uninstall theme from MainWP dashboard.
-				add_action( 'mainwp_child_theme_action', array( __CLASS__, 'mainwp_child_uninstall_theme' ), 10, 1 );
+				\add_action( 'mainwp_child_theme_action', array( __CLASS__, 'mainwp_child_uninstall_theme' ), 10, 1 );
 
 				// Update theme/plugin from MainWP dashboard.
-				add_action( 'upgrader_process_complete', array( __CLASS__, 'mainwp_child_update_assets' ), 10, 2 );
+				\add_action( 'upgrader_process_complete', array( __CLASS__, 'mainwp_child_update_assets' ), 10, 2 );
+			}
+			\add_action( 'deactivated_plugin', array( __CLASS__, 'reset_stealth_mode' ), 10, 1 );
+		}
+
+		/**
+		 *
+		 * Reset Stealth Mode on MainWP Child plugin deactivation.
+		 *
+		 * @param string $plugin — Plugin.
+		 *
+		 * @since 5.1.0
+		 */
+		public static function reset_stealth_mode( $plugin ) {
+			if ( 'mainwp-child/mainwp-child.php' !== $plugin ) {
+				return;
+			}
+
+			if ( Settings_Helper::get_boolean_option_value( 'mwp-child-stealth-mode', false ) ) {
+				Plugin_Settings_Helper::deactivate_mainwp_child_stealth_mode();
 			}
 		}
 

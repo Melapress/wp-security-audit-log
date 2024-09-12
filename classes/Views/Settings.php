@@ -10,6 +10,7 @@
  */
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\User_Helper;
 use WSAL\Controllers\Constants;
 use WSAL\Controllers\Connection;
 use WSAL\Helpers\Settings_Helper;
@@ -230,12 +231,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			die();
 		}
 
-		//@codingStandardsIgnoreStart
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : false;
-		$token = isset( $_POST['token'] ) ? sanitize_text_field( $_POST['token'] ) : false;
-		//@codingStandardsIgnoreEnd
+		$nonce = isset( $_POST['nonce'] ) ? \sanitize_text_field( \wp_unslash( $_POST['nonce'] ) ) : false;
+		$token = isset( $_POST['token'] ) ? \sanitize_text_field( \wp_unslash( $_POST['token'] ) ) : false;
 
-		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wsal-exclude-nonce' ) ) {
+		if ( empty( $nonce ) || ! \wp_verify_nonce( $nonce, 'wsal-exclude-nonce' ) ) {
 			echo wp_json_encode(
 				array(
 					'success' => false,
@@ -408,9 +407,9 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			</div>
 			<?php
 			if ( 'sms-provider' === $this->current_tab && $section && 'test' === $section ) {
-				submit_button( esc_html__( 'Send Message', 'wp-security-audit-log' ) );
-			} else {
-				submit_button();
+				\submit_button( esc_html__( 'Send Message', 'wp-security-audit-log' ) );
+			} elseif ( 'settings-export-import' !== $this->current_tab ) {
+					\submit_button();
 			}
 			?>
 		</form>
@@ -775,7 +774,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 							<div id="ViewerList">
 								<?php
 								foreach ( Plugin_Settings_Helper::get_allowed_plugin_viewers() as $item ) :
-									if ( wp_get_current_user()->user_login === $item ) {
+									if ( User_Helper::get_current_user()->user_login === $item ) {
 										continue;
 									}
 									?>
@@ -1363,23 +1362,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 						</fieldset>
 					</td>
 				</tr>
-				<!-- / MainWP Child Site Stealth Mode -->
-				<?php $admin_blocking_plugins_support = Plugin_Settings_Helper::get_admin_blocking_plugin_support(); ?>
-				<tr>
-					<th>
-						<label for="mwp_admin_blocking_support"><?php esc_html_e( 'Admin blocking plugins support', 'wp-security-audit-log' ); ?></label>
-					</th>
-					<td>
-						<fieldset>
-							<label for="mwp_admin_blocking_support">
-								<input type="checkbox" name="mwp_admin_blocking_support" value="yes"
-										id="mwp_admin_blocking_support" <?php checked( $admin_blocking_plugins_support ); ?> <?php disabled( ! WpSecurityAuditLog::is_mainwp_active() || ! $stealth_mode ); ?>/>
-								<?php esc_html_e( 'Enable early plugin loading on sites that use admin blocking plugins', 'wp-security-audit-log' ); ?>
-							</label>
-						</fieldset>
-					</td>
-				</tr>
-				<!-- /  Admin blocking plugins support -->
 			</tbody>
 		</table>
 
@@ -1454,10 +1436,6 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 			}
 			Plugin_Settings_Helper::set_mainwp_child_stealth_mode();
 
-			$admin_blocking_plugins_support = isset( $post_array['mwp_admin_blocking_support'] ) ? $post_array['mwp_admin_blocking_support'] : false;
-			if ( 'yes' === $admin_blocking_plugins_support ) {
-				Plugin_Settings_Helper::set_admin_blocking_plugin_support( true );
-			}
 		} else {
 			Plugin_Settings_Helper::deactivate_mainwp_child_stealth_mode();
 		}
@@ -1887,7 +1865,7 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 					<?php if ( \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'pruning-date-e' ) ) : ?>
 						<p class="description">
 							<?php
-							$next = wp_next_scheduled( 'wsal_cleanup' );
+							$next = (int) wp_next_scheduled( 'wsal_cleanup_hook' );
 							echo esc_html__( 'The next scheduled purging of activity log data that is older than ', 'wp-security-audit-log' );
 							echo esc_html( $pruning_date . ' ' . $pruning_unit );
 							echo sprintf(

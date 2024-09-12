@@ -145,8 +145,8 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 			\wp_cache_flush();
 			$upgrader       = new \Plugin_Upgrader();
 			$install_result = $upgrader->install( $plugin_zip );
-			if ( ! $install_result || is_wp_error( $install_result ) ) {
-				if ( is_wp_error( $install_result ) ) {
+			if ( ! $install_result || \is_wp_error( $install_result ) ) {
+				if ( \is_wp_error( $install_result ) ) {
 					return $install_result->get_error_message();
 				}
 				die();
@@ -178,7 +178,7 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 			}
 
 			if ( ! WP_Helper::is_plugin_active( $plugin_zip ) ) {
-				activate_plugin( $plugin_zip );
+				\activate_plugin( $plugin_zip );
 			}
 		}
 
@@ -226,9 +226,9 @@ if ( ! class_exists( '\WSAL\Actions\Plugin_Installer' ) ) {
 			}
 
 			if ( WP_Helper::is_multisite() ) {
-				$current = get_site_option( 'active_sitewide_plugins' );
+				$current = \get_site_option( 'active_sitewide_plugins' );
 			} else {
-				$current = get_option( 'active_plugins' );
+				$current = \get_option( 'active_plugins' );
 			}
 
 			if ( ! in_array( $plugin_slug, $current, true ) ) {

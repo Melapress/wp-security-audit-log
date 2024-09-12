@@ -30,6 +30,8 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 		 * Regular expression for matching the milliseconds part of datetime string.
 		 *
 		 * @var string
+		 *
+		 * @since 4.5.0
 		 */
 		private static $am_pm_lookup_pattern = '/\.\d+((\&nbsp;|\ )([AP]M))?/i';
 
@@ -37,6 +39,8 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 		 * GMT Offset
 		 *
 		 * @var string
+		 *
+		 * @since 4.5.0
 		 */
 		private static $gmt_offset_sec = 0;
 
@@ -44,6 +48,8 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 		 * Date format.
 		 *
 		 * @var string
+		 *
+		 * @since 4.5.0
 		 */
 		private static $date_format;
 
@@ -51,6 +57,8 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 		 * Time format.
 		 *
 		 * @var string
+		 *
+		 * @since 4.5.0
 		 */
 		private static $time_format;
 
@@ -58,6 +66,8 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 		 * Datetime format.
 		 *
 		 * @var string
+		 *
+		 * @since 4.5.0
 		 */
 		private static $datetime_format;
 
@@ -65,6 +75,8 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 		 * Datetime format without linebreaks.
 		 *
 		 * @var string
+		 *
+		 * @since 4.5.0
 		 */
 		private static $datetime_format_no_linebreaks;
 
@@ -72,11 +84,15 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 		 * If true, show milliseconds.
 		 *
 		 * @var bool
+		 *
+		 * @since 4.5.0
 		 */
 		private static $show_milliseconds = null;
 
 		/**
 		 * Call this method to get singleton
+		 *
+		 * @since 4.5.0
 		 */
 		public static function init() {
 
@@ -112,6 +128,7 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 		 * @param string $formatted_datetime Formatted datetime string.
 		 *
 		 * @return string
+		 *
 		 * @since 4.2.0
 		 */
 		public static function remove_milliseconds( $formatted_datetime ) {
@@ -129,6 +146,8 @@ if ( ! class_exists( '\WSAL\Helpers\DateTime_Formatter_Helper' ) ) {
 		 * @param bool   $translated             If true, the result is translated.
 		 *
 		 * @return string
+		 *
+		 * @since 4.5.0
 		 */
 		public static function get_formatted_date_time( $timestamp, $type = 'datetime', $do_timezone_offset = true, $line_break = false, $use_nb_space_for_am_pm = true, $translated = true ) {
 

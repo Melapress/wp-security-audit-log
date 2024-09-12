@@ -39,6 +39,15 @@ if ( ! class_exists( '\WSAL\Helpers\User_Helper' ) ) {
 		private static $user = null;
 
 		/**
+		 * Holds the cache for the current WP user. That variable is used because the one returned from the class get_user() method could return another user object (previously set by some of the other plugin logic)
+		 *
+		 * @var \WP_User
+		 *
+		 * @since 5.1.1
+		 */
+		private static $current_user = null;
+
+		/**
 		 * Every meta call for the user must go through this method, so we can unify the code.
 		 *
 		 * @param string            $meta - The meta name that we should check.
@@ -303,6 +312,21 @@ if ( ! class_exists( '\WSAL\Helpers\User_Helper' ) ) {
 				return false;
 			}
 			return true;
+		}
+
+		/**
+		 * Caches the current user WP object - this method is used to avoid unnecessary database queries to core WP functions that returns the current user object. It stores the value of the current user in the class variable and returns it when needed.
+		 *
+		 * @return \WP_User
+		 *
+		 * @since 5.1.1
+		 */
+		public static function get_current_user() {
+			if ( null === self::$current_user ) {
+				self::$current_user = \wp_get_current_user();
+			}
+
+			return self::$current_user;
 		}
 
 		/**

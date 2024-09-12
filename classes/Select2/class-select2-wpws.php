@@ -286,7 +286,6 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 				}
 			);
 
-			// @codingStandardsIgnoreStart
 			echo '<select ' . implode( ' ', $attributes ) . '></select>';
 			echo '<script type="application/javascript">';
 			echo 'jQuery( document ).ready( function() {';
@@ -303,7 +302,6 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 			if ( array_key_exists( 'width', $args ) ) {
 				echo 'width: "' . $args['width'] . 'px",';
 			}
-			// @codingStandardsIgnoreEnd
 
 			if ( array_key_exists( 'data-type', $args ) && 'role' === $args['data-type'] ) {
 				// Populate the roles' data. Local data source will be used.

@@ -55,6 +55,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 				add_action( 'gform_post_form_duplicated', array( __CLASS__, 'event_form_duplicated' ), 10, 2 );
 				add_action( 'gform_post_update_form_meta', array( __CLASS__, 'event_form_meta_updated' ), 10, 3 );
 				add_action( 'gform_forms_post_import', array( __CLASS__, 'event_forms_imported' ), 10, 1 );
+				add_action( 'gform_post_form_activated', array( __CLASS__, 'event_form_activated' ), 10, 1 );
+				add_action( 'gform_post_form_deactivated', array( __CLASS__, 'event_form_deactivated' ), 10, 1 );
 
 				// Confirmations.
 				add_action( 'gform_pre_confirmation_save', array( __CLASS__, 'event_form_confirmation_saved' ), 10, 3 );
@@ -78,11 +80,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 				add_action( 'gform_form_export_filename', array( __CLASS__, 'event_process_export_forms' ), 10, 2 );
 			}
 
-				// Form submitted.
-				add_action( 'gform_after_submission', array( __CLASS__, 'event_form_submitted' ), 10, 2 );
+			// Form submitted.
+			add_action( 'gform_after_submission', array( __CLASS__, 'event_form_submitted' ), 10, 2 );
 		}
 
-	    /**
+		/**
 		 * That needs to be registered as a frontend sensor, when the admin sets the plugin to monitor the login from 3rd parties.
 		 *
 		 * @return boolean
@@ -460,6 +462,68 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 			);
 
 			Alert_Manager::trigger_event( 5704, $variables );
+		}
+
+		/**
+		 * Trigger an event when a form is activated.
+		 *
+		 * @param int $form_id Form ID.
+		 *
+		 * @return void
+		 *
+		 * @since 5.1.0
+		 */
+		public static function event_form_activated( $form_id ) {
+			$original_form = \GFAPI::get_form( $form_id );
+
+			$editor_link = \esc_url(
+				\add_query_arg(
+					array(
+						'id' => $form_id,
+					),
+					\network_admin_url( 'admin.php?page=gf_edit_forms' )
+				)
+			);
+
+			$variables = array(
+				'EventType'      => 'activated',
+				'form_name'      => sanitize_text_field( $original_form['title'] ),
+				'form_id'        => sanitize_text_field( $original_form['id'] ),
+				'EditorLinkForm' => $editor_link,
+			);
+
+			Alert_Manager::trigger_event( 5720, $variables );
+		}
+
+		/**
+		 * Trigger an event when a form is deactivated.
+		 *
+		 * @param int $form_id Form ID.
+		 *
+		 * @return void
+		 *
+		 * @since 4.6.0
+		 */
+		public static function event_form_deactivated( $form_id ) {
+			$original_form = \GFAPI::get_form( $form_id );
+
+			$editor_link = \esc_url(
+				\add_query_arg(
+					array(
+						'id' => $form_id,
+					),
+					\network_admin_url( 'admin.php?page=gf_edit_forms' )
+				)
+			);
+
+			$variables = array(
+				'EventType'      => 'deactivated',
+				'form_name'      => sanitize_text_field( $original_form['title'] ),
+				'form_id'        => sanitize_text_field( $original_form['id'] ),
+				'EditorLinkForm' => $editor_link,
+			);
+
+			Alert_Manager::trigger_event( 5720, $variables );
 		}
 
 		/**
@@ -1522,7 +1586,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Gravity_Forms_Sensor' ) ) {
 			);
 
 			foreach ( $property_ids as $id ) {
-				$have_name = rgar( $entry, $id );
+				$have_name = \rgar( $entry, $id );
 				if ( ! empty( $have_name ) ) {
 					return $have_name;
 				}

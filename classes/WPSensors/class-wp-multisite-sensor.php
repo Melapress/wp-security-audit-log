@@ -74,6 +74,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 				add_action( 'add_user_to_blog', array( __CLASS__, 'event_user_added_to_blog' ), 10, 3 );
 				add_action( 'remove_user_from_blog', array( __CLASS__, 'event_user_removed_from_blog' ), 10, 2 );
 
+				add_action( 'wpmu_upgrade_site', array( __CLASS__, 'event_site_upgraded' ), 10, 1 );
+
 				add_action( 'update_site_option', array( __CLASS__, 'on_network_option_change' ), 10, 4 );
 			}
 		}
@@ -420,6 +422,26 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 		 */
 		public static function must_not_contain_create_user() {
 			return ! Alert_Manager::will_trigger( 4012 );
+		}
+
+
+		/**
+		 * Existing site was upgraded.
+		 *
+		 * @param int $blog_id - Blog ID.
+		 *
+		 * @since 5.1.1
+		 */
+		public static function event_site_upgraded( $blog_id ) {
+			Alert_Manager::trigger_event(
+				7013,
+				array(
+					'BlogID'   => $blog_id,
+					'SiteName' => get_blog_option( $blog_id, 'blogname' ),
+					'BlogURL'  => get_home_url( $blog_id ),
+					'NewVersion' => get_bloginfo( 'version' ),
+				)
+			);
 		}
 	}
 }

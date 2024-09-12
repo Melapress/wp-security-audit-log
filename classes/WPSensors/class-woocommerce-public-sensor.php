@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
+use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Entities\Occurrences_Entity;
@@ -238,14 +239,15 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 			$new_order = new \WC_Order( $order_id );
 
 			if ( $new_order && $new_order instanceof \WC_Order ) {
-				$order_post  = wc_get_order( $order_id ); // Get order post object.
+				$order_post  = \wc_get_order( $order_id ); // Get order post object.
 				$editor_link = self::get_editor_link( $order_post );
 				Alert_Manager::trigger_event(
 					9035,
 					array(
 						'OrderID'            => $order_id,
 						'OrderTitle'         => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order_id ),
-						'OrderStatus'        => $new_order->get_status(),
+						'OrderStatus'        => \wc_get_order_status_name( $new_order->get_status() ),
+						'OrderStatusSlug'    => $new_order->get_status(),
 						$editor_link['name'] => $editor_link['value'],
 					)
 				);
@@ -367,8 +369,8 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 				$username = 'Unregistered user';
 				$user_id  = 0;
 			} else {
-				$username = \wp_get_current_user()->user_login;
-				$user_id  = \wp_get_current_user()->ID;
+				$username = User_Helper::get_current_user()->user_login;
+				$user_id  = User_Helper::get_current_user()->ID;
 			}
 
 			// If stock status has changed then trigger the alert.
@@ -397,24 +399,14 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 
 				// Check if this was done via an order by looking for event 9035.
 				// If so, we are going to add its data.
-				$last_occurence = Occurrences_Entity::build_query(
-					array(
-						'alert_id' => 'alert_id',
-						'id'       => 'id',
-					),
-					array(),
-					array( 'created_on' => 'DESC' ),
-					array( 1 )
-				);
+				$last_occurence = Alert_Manager::get_latest_events();
 
 				$last_occurence_id = ( is_array( $last_occurence[0] ) ) ? $last_occurence[0]['alert_id'] : $last_occurence[0]->alert_id;
-				if ( isset( $last_occurence[0] ) && 9035 === $last_occurence_id ) {
+				if ( isset( $last_occurence[0] ) && ( 9035 === (int) $last_occurence_id || 9155 === (int) $last_occurence_id ) ) {
 
-					$latest_event = Alert_Manager::get_latest_events();
-					$latest_event = isset( $latest_event[0] ) ? $latest_event[0] : false;
-					$event_meta   = $latest_event ? Occurrences_Entity::get_meta_array( $last_occurence[0]['id'] ) : false;
-					$order_id     = isset( $event_meta['OrderID'] ) ? $event_meta['OrderID'] : false;
-					$order_title  = isset( $event_meta['OrderTitle'] ) ? $event_meta['OrderTitle'] : false;
+					$event_meta  = Occurrences_Entity::get_meta_array( (int) $last_occurence[0]['id'] );
+					$order_id    = isset( $event_meta['OrderID'] ) ? $event_meta['OrderID'] : false;
+					$order_title = isset( $event_meta['OrderTitle'] ) ? $event_meta['OrderTitle'] : false;
 				} else {
 					$order_id    = false;
 					$order_title = false;
@@ -437,6 +429,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 						'Username'           => $username,
 						'CurrentUserID'      => $user_id,
 						'StockOrderID'       => $order_id,
+						'OrderTitle'         => $order_title,
 						$editor_link['name'] => $editor_link['value'],
 					)
 				);

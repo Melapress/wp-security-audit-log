@@ -931,8 +931,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 					);
 
 					foreach ( $integrations as $integration ) {
-						if ( $old_value[ $integration ] !== $new_value[ $integration ] ) {
-							self::yoast_setting_switch_alert( $integration, $new_value[ $integration ] );
+						if ( \key_exists( $integration, $old_value ) && \key_exists( $integration, $new_value ) ) {
+
+							if ( $old_value[ $integration ] !== $new_value[ $integration ] ) {
+								self::yoast_setting_switch_alert( $integration, $new_value[ $integration ] );
+							}
 						}
 					}
 

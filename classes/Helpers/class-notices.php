@@ -27,6 +27,11 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 	class Notices {
 
 		/**
+		 * That is a global constant used for showing the ebook notice.
+		 */
+		public const EBOOK_NOTICE = 'ebook-notice-show';
+
+		/**
 		 * Sets the class hooks.
 		 *
 		 * @return void
@@ -40,7 +45,7 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 				return;
 			}
 
-			if ( in_array( $current_screen->base, array( 'toplevel_page_wsal-auditlog', 'wp-activity-log_page_wsal-usersessions-views', 'wp-activity-log_page_wsal-np-notifications', 'wp-activity-log_page_wsal-rep-views-main', 'toplevel_page_wsal-auditlog-network', 'wp-activity-log_page_wsal-usersessions-views-network', 'wp-activity-log_page_wsal-np-notifications-network', 'wp-activity-log_page_wsal-rep-views-main-network' ), true ) ) {
+			if ( in_array( $current_screen->base, \WpSecurityAuditLog::get_plugin_screens_array(), true ) ) {
 				$notice_46_extensions_merged = Settings_Helper::get_boolean_option_value( 'extensions-merged-notice' );
 
 				if ( $notice_46_extensions_merged ) {
@@ -49,7 +54,15 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 
 				$notice_upgrade = Settings_Helper::get_boolean_option_value( Abstract_Migration::UPGRADE_NOTICE, false );
 				if ( $notice_upgrade ) {
+					Settings_Helper::delete_option_value( self::EBOOK_NOTICE );
 					self::display_notice_upgrade();
+				}
+
+				if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
+					$ebook = Settings_Helper::get_boolean_option_value( self::EBOOK_NOTICE, false );
+					if ( ! $ebook ) {
+						self::display_ebook_notice();
+					}
 				}
 			}
 		}
@@ -70,6 +83,13 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 			$notice_upgrade = Settings_Helper::get_boolean_option_value( Abstract_Migration::UPGRADE_NOTICE, false );
 			if ( $notice_upgrade ) {
 				\add_action( 'wp_ajax_wsal_dismiss_upgrade_notice', array( __CLASS__, 'dismiss_upgrade_notice' ) );
+			}
+
+			if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
+				$ebook = Settings_Helper::get_boolean_option_value( self::EBOOK_NOTICE, false );
+				if ( ! $ebook ) {
+					\add_action( 'wp_ajax_wsal_dismiss_ebook_notice', array( __CLASS__, 'dismiss_ebook_notice' ) );
+				}
 			}
 		}
 
@@ -106,47 +126,16 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 		 * @since 5.1.0
 		 */
 		public static function display_notice_upgrade() {
-			?>
-			<div class="updated notice notice-success is-dismissible wsal-upgraded-notice" data-dismiss-action="wsal_dismiss_upgrade_notice" data-nonce="<?php echo \esc_attr( \wp_create_nonce( 'dismiss_upgrade_notice' ) ); ?>">
-				<div class="notice-content-wrapper">
-					<img src="<?php echo esc_url( WSAL_BASE_URL ); ?>img/wsal-logo.png">
-					<p>
-						<?php
-						printf(
-							/* Translators: 1: html that opens a link, 2: html that closes a link. */
-							esc_html__( 'Thank you for upgrading to WP Activity Log version %1$s. Spare a minute and read the release notes to read about all the exciting new features and improvements we have included in this update.', 'wp-security-audit-log' ),
-							\esc_attr( WSAL_VERSION )
-						);
-						?>
-					</p>
-					<p>
-						<?php
-						printf(
-						/* Translators: 1: html that opens a link, 2: html that closes a link. */
-							esc_html__( '%1$sRead the release notes%2$s.', 'wp-security-audit-log' ),
-							'<a href="https://melapress.com/wordpress-activity-log/releases/?utm_source=plugin&utm_medium=banner&utm_campaign=wsal&utm_content=update+notices" rel="noopener noreferrer" target="_blank" class="button button-primary">',
-							'</a>'
-						);
-						?>
-					</p>
-				</div>
-			</div>
-			<style>
-				.wsal-upgraded-notice {
-					border: 2px solid #bdd63a !important;
-    				padding: 10px 15px !important;
-				}
-				.wsal-upgraded-notice img {
-					float: left;
-					max-width: 70px;
-					margin: 5px 12px 10px 0;
-				}
-				.wsal-upgraded-notice .button-primary {
-					background: #009344;
-					border-color: #009344;
-				}
-			</style>
-			<?php
+			include_once WSAL_BASE_DIR . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'Free' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'plugin-update-card.php';
+		}
+
+		/**
+		 * Display upgrade notice.
+		 *
+		 * @since 5.1.1
+		 */
+		public static function display_ebook_notice() {
+			include_once WSAL_BASE_DIR . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'Free' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'wsal-ebook-card.php';
 		}
 
 		/**
@@ -182,6 +171,24 @@ if ( ! class_exists( '\WSAL\Helpers\Notices' ) ) {
 			}
 
 			Settings_Helper::delete_option_value( Abstract_Migration::UPGRADE_NOTICE );
+			\wp_send_json_success();
+		}
+
+		/**
+		 * Method: Ajax request handler to dismiss ebook notice.
+		 *
+		 * @since 5.1.1
+		 */
+		public static function dismiss_ebook_notice() {
+			if ( ! Settings_Helper::current_user_can( 'edit' ) ) {
+				\wp_send_json_error();
+			}
+
+			if ( ! array_key_exists( 'nonce', $_POST ) || ! wp_verify_nonce( \sanitize_text_field( \wp_unslash( $_POST['nonce'] ) ), 'dismiss_ebook_notice' ) ) {
+				\wp_send_json_error( \esc_html_e( 'nonce is not provided or incorrect', 'wp-security-audit-log' ) );
+			}
+
+			Settings_Helper::set_option_value( self::EBOOK_NOTICE, true );
 			\wp_send_json_success();
 		}
 	}

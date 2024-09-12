@@ -56,7 +56,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Register_Sensor' ) ) {
 			 * a front-end registration implemented by a third party. We hook into the action 'user_register' because it is
 			 * part of the function 'wp_insert_user' that definitely runs.
 			 */
-			add_action( 'user_register', array( __CLASS__, 'event_user_register' ), 10, 1 );
+			\add_action( 'user_register', array( __CLASS__, 'event_user_register' ), 10, 1 );
 		}
 
 		/**
@@ -116,8 +116,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Register_Sensor' ) ) {
 			$event_data = array(
 				'NewUserID'    => $user_id,
 				'NewUserData'  => (object) $new_user_data,
-				'EditUserLink' => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+				'EditUserLink' => \add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 			);
+
+			if ( function_exists( 'get_current_user_id' ) ) {
+				if ( 0 !== $event_data['CurrentUserID'] ) {
+					$event_data['Username'] = 'System';
+				}
+			}
 
 			if ( WP_Helper::is_multisite() ) {
 				// Registration should not be logged on multisite if event 4024 is fired.

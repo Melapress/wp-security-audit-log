@@ -7,7 +7,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     5.1.0
+ * Version:     5.2.1
  * Plugin URI:  https://melapress.com/wordpress-activity-log/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
  * Author:      Melapress
@@ -47,9 +47,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( file_exists( plugin_dir_path( __FILE__ ) . 'vendor/autoload.php' ) ) {
 	require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 }
+if ( file_exists( plugin_dir_path( __FILE__ ) . 'third-party/vendor/autoload.php' ) ) {
+	require_once plugin_dir_path( __FILE__ ) . 'third-party/vendor/autoload.php';
+}
 
 if ( ! defined( 'WSAL_PREFIX' ) ) {
-	define( 'WSAL_VERSION', '5.1.0' );
+	define( 'WSAL_VERSION', '5.2.1' );
 	define( 'WSAL_PREFIX', 'wsal_' );
 	define( 'WSAL_PREFIX_PAGE', 'wsal-' );
 }
@@ -85,6 +88,39 @@ if ( ! defined( 'WSAL_CLASS_PREFIX' ) ) {
 }
 
 /**
+ * Remove these in lets say 3 major versions from 5.1.1 and
+ * switch to WpSecurityAuditLog:: ___ consts ___
+ */
+if ( ! defined( 'PREMIUM_VERSION_WHOLE_PLUGIN_NAME' ) ) {
+	/**
+	 * Premium version constant
+	 *
+	 * @var string
+	 *
+	 * @since 5.1.0
+	 */
+	define( 'PREMIUM_VERSION_WHOLE_PLUGIN_NAME', 'wp-security-audit-log-premium/wp-security-audit-log.php' );
+
+	/**
+	 * NOFS version constant
+	 *
+	 * @var string
+	 *
+	 * @since 5.1.0
+	 */
+	define( 'NOFS_VERSION_WHOLE_PLUGIN_NAME', 'wp-security-audit-log-nofs/wp-security-audit-log.php' );
+
+	/**
+	 * Free version constant
+	 *
+	 * @var string
+	 *
+	 * @since 5.1.0
+	 */
+	define( 'FREE_VERSION_WHOLE_PLUGIN_NAME', 'wp-security-audit-log/wp-security-audit-log.php' );
+}
+
+/**
  * Connections Prefix.
  */
 if ( ! defined( 'WSAL_CONN_PREFIX' ) ) {
@@ -110,8 +146,8 @@ if ( ! function_exists( 'wsal_disable_freemius_on_free' ) ) {
 		return WSAL_Freemius::get_instance();
 	}
 }
-add_filter( 'wsal_freemius_sdk_object', 'wsal_disable_freemius_on_free' );
-add_filter( 'wsal_disable_freemius_sdk', '__return_true' );
+\add_filter( 'wsal_freemius_sdk_object', 'wsal_disable_freemius_on_free' );
+\add_filter( 'wsal_disable_freemius_sdk', '__return_true' );
 // phpcs:disable
 /* @free:end */
 // phpcs:enable
@@ -121,19 +157,19 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	// phpcs:disable
 	// phpcs:enable
 
-	$prefixed_autoloader_file_path = WSAL_BASE_DIR . implode(
+	// Load action scheduler for event mirroring.
+	$action_scheduler_file_path = WSAL_BASE_DIR . implode(
 		DIRECTORY_SEPARATOR,
 		array(
 			'third-party',
-			'vendor',
-			'autoload.php',
+			'woocommerce',
+			'action-scheduler',
+			'action-scheduler.php',
 		)
 	);
 
-	if ( file_exists( $prefixed_autoloader_file_path ) ) {
-		require_once $prefixed_autoloader_file_path;
-		// phpcs:disable
-		// phpcs:enable
+	if ( file_exists( $action_scheduler_file_path ) ) {
+		require_once $action_scheduler_file_path;
 	}
 
 	// Begin load sequence.
@@ -166,17 +202,15 @@ if ( ! function_exists( 'wsal_free_on_plugin_activation' ) ) {
 	 * @since 4.3.2
 	 */
 	function wsal_free_on_plugin_activation() {
-		$premium_version_slug = 'wp-security-audit-log-premium/wp-security-audit-log.php';
-		if ( WP_Helper::is_plugin_active( $premium_version_slug ) ) {
-			deactivate_plugins( $premium_version_slug, true );
+		if ( WP_Helper::is_plugin_active( PREMIUM_VERSION_WHOLE_PLUGIN_NAME ) ) {
+			\deactivate_plugins( PREMIUM_VERSION_WHOLE_PLUGIN_NAME, true );
 		}
-		$premium_version_slug = 'wp-security-audit-log-nofs/wp-security-audit-log.php';
-		if ( WP_Helper::is_plugin_active( $premium_version_slug ) ) {
-			deactivate_plugins( $premium_version_slug, true );
+		if ( WP_Helper::is_plugin_active( NOFS_VERSION_WHOLE_PLUGIN_NAME ) ) {
+			\deactivate_plugins( NOFS_VERSION_WHOLE_PLUGIN_NAME, true );
 		}
 	}
 
-	register_activation_hook( __FILE__, 'wsal_free_on_plugin_activation' );
+	\register_activation_hook( __FILE__, 'wsal_free_on_plugin_activation' );
 }
 // phpcs:disable
 /* @free:end */

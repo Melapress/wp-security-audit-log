@@ -443,7 +443,7 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 				return $wpdb;
 			}
 			$password   = self::decrypt_string( $connection_config['password'] );
-			$connection = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] ); // phpcs:ignore -- Accessing database directly should be avoided
+			$connection = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_connection
 			if ( array_key_exists( 'baseprefix', $connection_config ) ) {
 				$connection->set_prefix( $connection_config['baseprefix'] );
 			}
@@ -890,15 +890,15 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 				self::save_connection( $archive_connection );
 			}
 
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archive-connection' );
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-date' );
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-date-type' );
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-run-every' );
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-daily-e' );
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-weekly-e' );
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-week-day' );
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-time' );
-			\WSAL\Helpers\Settings_Helper::delete_option_value( 'archiving-stop' );
+			Settings_Helper::delete_option_value( 'archive-connection' );
+			Settings_Helper::delete_option_value( 'archiving-date' );
+			Settings_Helper::delete_option_value( 'archiving-date-type' );
+			Settings_Helper::delete_option_value( 'archiving-run-every' );
+			Settings_Helper::delete_option_value( 'archiving-daily-e' );
+			Settings_Helper::delete_option_value( 'archiving-weekly-e' );
+			Settings_Helper::delete_option_value( 'archiving-week-day' );
+			Settings_Helper::delete_option_value( 'archiving-time' );
+			Settings_Helper::delete_option_value( 'archiving-stop' );
 		}
 
 		/**

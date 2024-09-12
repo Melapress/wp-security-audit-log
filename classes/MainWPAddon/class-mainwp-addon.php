@@ -118,7 +118,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 				\add_filter( 'mainwp_getextensions', array( __CLASS__, 'get_this_extension' ) );
 
 				\add_filter( 'mainwp_main_menu', array( __CLASS__, 'mwpal_main_menu' ), 10, 1 );
-				// add_filter( 'mainwp_main_menu_submenu', array( __CLASS__, 'mwpal_main_menu_submenu' ), 10, 1 );.
+				\add_filter( 'mainwp_main_menu_submenu', array( __CLASS__, 'mwpal_main_menu_submenu' ), 10, 1 );
 
 				// Render header.
 				\add_action( 'mainwp_pageheader_extensions', array( '\WSAL_Views_AuditLog', 'header' ) );
@@ -132,20 +132,22 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 			}
 		}
 
-	/**
-	 * Sets a custom page title for our extension plugin.
-	 *
-	 * @param string $title Page title.
-	 *
-	 * @return string
-	 */
-	public static function custom_page_title( $title ) {
-		if ( isset( $_REQUEST['page'] ) && 'Extensions-Wp-Security-Audit-Log-Premium' === $_REQUEST['page'] || isset( $_REQUEST['page'] ) && 'Extensions-Wp-Security-Audit-Log' === $_REQUEST['page'] ) {
-			$title = esc_html__( 'WP Activity Log', 'wp-security-audit-log' );
-		}
+		/**
+		 * Sets a custom page title for our extension plugin.
+		 *
+		 * @param string $title Page title.
+		 *
+		 * @return string
+		 *
+		 * @since 5.0.0
+		 */
+		public static function custom_page_title( $title ) {
+			if ( isset( $_REQUEST['page'] ) && 'Extensions-Wp-Security-Audit-Log-Premium' === $_REQUEST['page'] || isset( $_REQUEST['page'] ) && 'Extensions-Wp-Security-Audit-Log' === $_REQUEST['page'] ) {
+				$title = esc_html__( 'WP Activity Log', 'wp-security-audit-log' );
+			}
 
-		return $title;
-	}
+			return $title;
+		}
 
 		/**
 		 * Checks if the MainWp server plugin is activated
@@ -286,12 +288,6 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 			$site_id          = MainWP_Settings::get_view_site_id();
 			?>
 			<form id="audit-log-viewer" method="get">
-				<style>
-					#audit-log-viewer-content {
-						margin-left: 5px;
-						margin-right: 5px;
-					}
-				</style>
 				<div id="audit-log-viewer-content">
 					<input type="hidden" name="page" value="<?php echo esc_attr( \WSAL_Views_AuditLog::get_page_arguments()['page'] ); ?>" />
 					<input type="hidden" id="mwpal-site-id" name="mwpal-site-id" value="<?php echo esc_attr( $site_id ); ?>" />
@@ -378,17 +374,19 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function mwpal_main_menu_submenu( $mwpal_sub_left_menu ) {
+			$extension_url = add_query_arg( 'page', 'wsal-settings', \network_admin_url( 'admin.php' ) );
+
 			$mwpal_sub_left_menu[ MWPAL_EXTENSION_NAME ] = apply_filters(
 				'mwpal_main_menu_submenu',
 				array(
+					// array(
+					// __( 'Child Sites Settings', 'wp-security-audit-log' ),
+					// self::$mwpal_extension_tabs['child_site_settings']['link'],
+					// 'manage_options',
+					// ),
 					array(
-						__( 'Child Sites Settings', 'wp-security-audit-log' ),
-						self::$mwpal_extension_tabs['child_site_settings']['link'],
-						'manage_options',
-					),
-					array(
-						__( 'Extension Settings', 'wp-security-audit-log' ),
-						self::$mwpal_extension_tabs['settings']['link'],
+						__( 'Plugin Settings', 'wp-security-audit-log' ),
+						$extension_url,
 						'manage_options',
 					),
 				)

@@ -200,6 +200,18 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Multisite_Custom_Alerts' ) ) {
 					'multisite-network',
 					'modified',
 				),
+				7013 => array(
+					7013,
+					WSAL_HIGH,
+					esc_html__( 'Sub site was updated', 'wp-security-audit-log' ),
+					__( 'Updated the network site %SiteName% version to %NewVersion%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'URL', 'wp-security-audit-log' ) => '%BlogURL%',
+					),
+					array(),
+					'multisite-network',
+					'updated',
+				),
 			);
 		}
 	}

@@ -618,6 +618,11 @@ td.wsal-grid-text-data {
 	width: 1.2em;
 }
 
+.mainwp-content-wrap #audit-log-viewer-content {
+	margin: 15px;
+	overflow: auto;
+}
+
 #audit-log-viewer-content .tablenav.top {
 	height:inherit;
 }

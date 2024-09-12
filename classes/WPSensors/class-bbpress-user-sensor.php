@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors;
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\User_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\WP_Sensors\Helpers\BBPress_Helper;
 
@@ -94,7 +95,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_User_Sensor' ) ) {
 			$new_bbpress_roles = is_array( $new_bbpress_roles ) ? implode( ', ', $new_bbpress_roles ) : '';
 
 			if ( $old_bbpress_roles !== $new_bbpress_roles ) {
-				$current_user = wp_get_current_user();
+				$current_user = User_Helper::get_current_user();
 				Alert_Manager::trigger_event(
 					8023,
 					array(
@@ -198,8 +199,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_User_Sensor' ) ) {
 			if ( ! $user ) {
 				return;
 			}
-			$current_user = wp_get_current_user();
-			$updated      = isset( $_GET['updated'] ); // @codingStandardsIgnoreLine
+			$current_user = User_Helper::get_current_user();
+			$updated      = isset( $_GET['updated'] );
 			if ( $current_user && ( $user->ID !== $current_user->ID ) && ! $updated ) {
 				$user_roles = implode( ', ', array_map( array( __CLASS__, 'filter_role_names' ), $user->roles ) );
 				Alert_Manager::trigger_event(
@@ -210,7 +211,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_User_Sensor' ) ) {
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
 						'Roles'          => $user_roles,
-						'EditUserLink'   => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
+						'EditUserLink'   => \add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
 					)
 				);
 			}

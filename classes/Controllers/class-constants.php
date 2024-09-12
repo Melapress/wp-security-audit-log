@@ -47,6 +47,14 @@ if ( ! class_exists( '\WSAL\Controllers\Constants' ) ) {
 			'WSAL_INFORMATIONAL' => 200,
 		);
 
+		/**
+		 * All the severities
+		 *
+		 * @var array
+		 *
+		 * @since 5.1.1
+		 */
+		public static $severities = array();
 
 		/**
 		 * Holds the array with all the severities for the plugin.
@@ -375,5 +383,26 @@ if ( ! class_exists( '\WSAL\Controllers\Constants' ) ) {
 			return self::fast_severity_by_code( (int) $code )['text'];
 		}
 
+		/**
+		 * Returns array with all the severities.
+		 * Thats is legacy code - should think of something better.
+		 *
+		 * @return array
+		 *
+		 * @since 4.3.2
+		 */
+		public static function get_severities() {
+			if ( empty( self::$severities ) ) {
+				self::$severities = array(
+					'WSAL_CRITICAL'      => __( 'Critical', 'wp-security-audit-log' ),
+					'WSAL_HIGH'          => __( 'High', 'wp-security-audit-log' ),
+					'WSAL_MEDIUM'        => __( 'Medium', 'wp-security-audit-log' ),
+					'WSAL_LOW'           => __( 'Low', 'wp-security-audit-log' ),
+					'WSAL_INFORMATIONAL' => __( 'Info', 'wp-security-audit-log' ),
+				);
+			}
+
+			return self::$severities;
+		}
 	}
 }

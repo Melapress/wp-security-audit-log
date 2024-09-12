@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace WSAL\Helpers;
 
+use WSAL\Helpers\Settings_Helper;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -112,7 +114,7 @@ if ( ! class_exists( '\WSAL\Helpers\Validator' ) ) {
 		public static function validate_ip( $ip ) {
 			$opts = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
 
-			if ( \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'filter-internal-ip', false ) ) {
+			if ( Settings_Helper::get_boolean_option_value( 'filter-internal-ip', false ) ) {
 				$opts = $opts | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
 			}
 

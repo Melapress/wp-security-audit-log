@@ -37,7 +37,7 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 			$home_url        = home_url();
 			$safe_url        = str_replace( array( 'http://', 'https://' ), '', $home_url );
 			$type_name       = Settings_Helper::get_option_value( 'type_username', 'display_name' ); // Get the data to display.
-			$user            = _wp_get_current_user();
+			$user            = User_Helper::get_current_user();
 			$datetime_format = Settings_Helper::get_datetime_format( false );
 			$now             = current_time( 'timestamp' ); // phpcs:ignore
 			$date_time       = str_replace(

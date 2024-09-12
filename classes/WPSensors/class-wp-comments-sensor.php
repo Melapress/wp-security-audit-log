@@ -239,7 +239,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Comments_Sensor' ) ) {
 					'CommentLink' => '<a target="_blank" href="' . $comment_link . '">' . $comment->comment_date . '</a>',
 				);
 
-				if ( 'shop_order' !== $post->post_type ) {
+				if ( 'shop_order' !== $post->post_type && ( property_exists( $comment, 'comment_type' ) && 'order_note' !== $comment->comment_type ) ) {
 					Alert_Manager::trigger_event( $alert_code, $fields );
 				}
 			}

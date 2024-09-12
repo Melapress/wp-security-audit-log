@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace WSAL\Writers;
 
+use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Extensions\Views\Reports;
 use WSAL\Helpers\DateTime_Formatter_Helper;
@@ -423,7 +424,7 @@ if ( ! class_exists( '\WSAL\Writers\HTML_Writer' ) ) {
 				$date = DateTime_Formatter_Helper::get_formatted_date_time( $now, 'date' );
 				$time = DateTime_Formatter_Helper::get_formatted_date_time( $now, 'time' );
 
-				$user = wp_get_current_user();
+				$user = User_Helper::get_current_user();
 				$str .= '<div id="section-2">';
 
 				$report_attributes = array();
