@@ -387,18 +387,20 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 
 				$cron = \wp_get_scheduled_event( $hook, $args, $timestamp );
 
-				if ( $cron->schedule ) {
-					$alert                = 6072;
-					$data['schedule']     = $cron->schedule;
-					$schedule_info        = \wp_get_schedules()[ $cron->schedule ];
-					$data['interval']     = $schedule_info['interval'];
-					$data['display_name'] = $schedule_info['display'];
-				}
+				if ( false !== $cron && \is_object( $cron ) ) {
+					if ( $cron->schedule ) {
+						$alert                = 6072;
+						$data['schedule']     = $cron->schedule;
+						$schedule_info        = \wp_get_schedules()[ $cron->schedule ];
+						$data['interval']     = $schedule_info['interval'];
+						$data['display_name'] = $schedule_info['display'];
 
-				Alert_Manager::trigger_event(
-					$alert,
-					$data
-				);
+						Alert_Manager::trigger_event(
+							$alert,
+							$data
+						);
+					}
+				}
 			}
 
 			return $pre;
