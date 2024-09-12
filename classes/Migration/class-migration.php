@@ -98,9 +98,21 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 			$disabled_alerts = WP_Helper::get_global_option( 'disabled-alerts', false );
 
-			$always_disabled_alerts = implode( ',', Settings_Helper::get_default_always_disabled_alerts() );
+			if ( ! \is_array( $disabled_alerts ) ) {
+				$disabled_alerts = \explode( ',', $disabled_alerts );
 
-			$disabled_alerts = implode( ',', \array_merge( \explode( ',', $disabled_alerts ), \explode( ',', $always_disabled_alerts ) ) );
+				\array_walk( $disabled_alerts, 'trim' );
+			}
+
+			$always_disabled_alerts = Settings_Helper::get_default_always_disabled_alerts();
+
+			if ( ! \is_array( $always_disabled_alerts ) ) {
+				$always_disabled_alerts = \explode( ',', $always_disabled_alerts );
+
+				\array_walk( $always_disabled_alerts, 'trim' );
+			}
+
+			$disabled_alerts = \array_merge( $disabled_alerts, $always_disabled_alerts );
 
 			/**
 			 * That is split only for clarity
@@ -131,7 +143,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 			// Removes old file scanning options.
 			global $wpdb;
-			$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_local_files_%'" ); // phpcs:ignore
+			$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_local_files_%'" );
 			if ( ! empty( $plugin_options ) ) {
 				foreach ( $plugin_options as $option ) {
 					WP_Helper::delete_global_option( $option->option_name );
@@ -160,7 +172,7 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			}
 
 			// Remove cron job for purging 404 logs.
-			WP_Helper::un_schedule_event( 'wsal_log_files_pruning' );
+			Cron_Jobs::un_schedule_event( 'wsal_log_files_pruning' );
 
 			// Delete custom logging dir path from the settings.
 			WP_Helper::delete_global_option( 'custom-logging-dir' );
@@ -982,6 +994,32 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 						)
 					);
 				}
+			}
+		}
+
+		/**
+		 * Migration for version upto 5.1.1
+		 *
+		 * Removes some redundant options
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.1.1
+		 */
+		protected static function migrate_up_to_5110() {
+			Cron_Jobs::un_schedule_event( 'wsal_delete_logins' );
+			Cron_Jobs::un_schedule_event( 'wsal_cleanup' );
+
+			$disabled_alerts = WP_Helper::get_global_option( 'disabled-alerts', false );
+
+			if ( ! is_array( $disabled_alerts ) ) {
+				$disabled_alerts = \explode( ',', $disabled_alerts );
+
+				\array_walk( $disabled_alerts, 'trim' );
+
+				WP_Helper::update_global_option( 'disabled-alerts', $disabled_alerts );
 			}
 		}
 

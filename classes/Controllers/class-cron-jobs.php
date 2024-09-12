@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 namespace WSAL\Controllers;
 
-use WSAL\Entities\Occurrences_Entity;
 use WSAL\Helpers\Settings_Helper;
+use WSAL\Entities\Occurrences_Entity;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -70,6 +70,11 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			),
 		);
 
+		/**
+		 * The name of the option where plugin stores the cron jobs names (related to the plugin itself).
+		 *
+		 * @since 5.0.0
+		 */
 		public const CRON_JOBS_SETTINGS_NAME = 'cron_jobs_options';
 
 		/**
@@ -83,10 +88,6 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			// Add custom schedules for WSAL early otherwise they won't work.
 			\add_filter( 'cron_schedules', array( __CLASS__, 'recurring_schedules' ) );
 			\add_filter( 'wsal_cron_hooks', array( __CLASS__, 'settings_hooks' ) );
-
-			if ( \wp_next_scheduled( 'wsal_cleanup', array() ) ) {
-				wp_clear_scheduled_hook( 'wsal_cleanup' );
-			}
 
 			if ( Settings_Helper::get_boolean_option_value( 'pruning-date-e', false ) ) {
 				\add_action( 'wsal_cleanup', array( Occurrences_Entity::class, 'prune_records' ) );
@@ -180,6 +181,13 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			\do_action( 'wsal_clear_reports', array() );
 		}
 
+		/**
+		 * Hook method for clearing the plugins data.
+		 *
+		 * @return void
+		 *
+		 * @since 5.0.0
+		 */
 		public static function cleanup_hook() {
 			\do_action( 'wsal_cleanup', array() );
 		}
@@ -230,25 +238,56 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 				'interval' => 2635200 * 4,
 				'display'  => __( 'Once quarterly', 'wp-security-audit-log' ),
 			);
+
 			return $schedules;
 		}
 
 		/**
 		 * Adds a cron job to the stored ones.
 		 *
-		 * @param array $cron_job - Array with the cron job information.
+		 * @param array $cron_job - Array with the cron job information. Every cron job information includes 'time', 'hook', 'args', if it is a recurring one - and 'next_run'.
+		 *
+		 * Example:
+		 * 'hook_name'   => array(
+		 *      'time'     => 'monthly',
+		 *      'hook'     => array( __CLASS_TO_CALL__, 'method_to_call' ),
+		 *      'args'     => array(),
+		 *      'next_run' => '00:00 first day of next month',
+		 *  )
+		 * .
 		 *
 		 * @return void
+		 * @throws \InvalidArgumentException When cron job information passed not contains required keys.
 		 *
 		 * @since 5.0.0
 		 */
 		public static function store_cron_option( array $cron_job ) {
 
-			$available_cron_jobs = Settings_Helper::get_option_value( self::CRON_JOBS_SETTINGS_NAME, array() );
+			if ( empty( $cron_job ) || 1 < count( $cron_job ) ) {
+				throw new \InvalidArgumentException( __( 'Only one cron at a time', 'wp-security-audit-log' ) );
+			}
 
-			$available_cron_jobs = array_merge( $available_cron_jobs, $cron_job );
+			$keys = array(
+				'time',
+				'hook',
+				'args',
+			);
+			if ( count( $keys ) === count(
+				array_filter(
+					array_keys( \reset( $cron_job ) ),
+					function( $key ) use ( $keys ) {
+						return in_array( $key, $keys, true ); }
+				)
+			) ) {
 
-			Settings_Helper::set_option_value( self::CRON_JOBS_SETTINGS_NAME, $available_cron_jobs );
+				$available_cron_jobs = Settings_Helper::get_option_value( self::CRON_JOBS_SETTINGS_NAME, array() );
+
+				$available_cron_jobs = array_merge( $available_cron_jobs, $cron_job );
+
+				Settings_Helper::set_option_value( self::CRON_JOBS_SETTINGS_NAME, $available_cron_jobs );
+			} else {
+				throw new \InvalidArgumentException( __( 'Invalid cron job format', 'wp-security-audit-log' ) );
+			}
 		}
 
 		/**
@@ -263,11 +302,31 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		public static function remove_cron_option( string $cron_name ) {
 			$available_cron_jobs = Settings_Helper::get_option_value( self::CRON_JOBS_SETTINGS_NAME, array() );
 
-			unset( $available_cron_jobs[ $cron_name ] );
+			if ( isset( $available_cron_jobs[ $cron_name ] ) ) {
 
-			\wp_clear_scheduled_hook( $cron_name );
+				\wp_clear_scheduled_hook( $cron_name, $available_cron_jobs[ $cron_name ]['args'] );
 
-			Settings_Helper::set_option_value( self::CRON_JOBS_SETTINGS_NAME, $available_cron_jobs );
+				unset( $available_cron_jobs[ $cron_name ] );
+
+				Settings_Helper::set_option_value( self::CRON_JOBS_SETTINGS_NAME, $available_cron_jobs );
+			}
+		}
+
+		/**
+		 * Removes event from the cron by given name.
+		 *
+		 * @param string $event_name -The name of the event.
+		 * @param array  $args - Arguments passed to the cron event.
+		 *
+		 * @return void
+		 *
+		 * @since 4.4.2.1
+		 */
+		public static function un_schedule_event( string $event_name, array $args = array() ) {
+			$schedule_time = \wp_next_scheduled( $event_name, $args );
+			if ( $schedule_time ) {
+				\wp_unschedule_event( $schedule_time, $event_name, $args );
+			}
 		}
 
 		/**

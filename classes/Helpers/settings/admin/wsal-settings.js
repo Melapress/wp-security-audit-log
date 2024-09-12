@@ -539,7 +539,15 @@ $doc.ready(function () {
 
     /* SAVE PLUGIN SETTINGS
     ------------------------------------------------------------------------------------------ */
-    var $saveAlert = jQuery('#wsal-saving-settings');
+    /**
+     * On the periodic reports whene there are no records in the report we are generating error message.
+     * That error message is using hte same HTML element - so that code checks for existance and if there is
+     * such - it doesn't run this logic.
+     * Search the code base for $genAlert (JS variable)
+     */
+    if ( typeof $genAlert === 'undefined' ) {
+        var $saveAlert = jQuery('#wsal-saving-settings');
+    }
 
     jQuery('#wsal_form').submit(function (evt) {
         $saveAlert.fadeIn();
@@ -637,7 +645,15 @@ $doc.ready(function () {
 
 
     /* SAVE SETTINGS ALERT */
-    $saveAlert.fadeOut();
+     /**
+     * On the periodic reports whene there are no records in the report we are generating error message.
+     * That error message is using hte same HTML element - so that code checks for existance and if there is
+     * such - it doesn't run this logic.
+     * Search the code base for $genAlert (JS variable)
+     */
+    if ( typeof $genAlert === 'undefined' ) {
+        $saveAlert.fadeOut();
+    }
     // jQuery('.wsal-save-button').click(function (evt) {
     //     // jQuery("input:hidden, textarea:hidden, select:hidden").attr("disabled", true);
 

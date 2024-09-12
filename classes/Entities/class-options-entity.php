@@ -9,6 +9,8 @@
  * At some point it was dropped, but in order to keep backwards compatibility, its content needs to be transferred to the main options table.
  *
  * @package wsal
+ *
+ * @since 4.4.2.1
  */
 
 declare(strict_types=1);
@@ -25,12 +27,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( '\WSAL\Entities\Options_Entity' ) ) {
 	/**
 	 * Responsible for the options (legacy).
+	 *
+	 * @since 4.4.2.1
 	 */
 	class Options_Entity extends Abstract_Entity {
 		/**
 		 * Contains the table name.
 		 *
 		 * @var string
+		 *
+		 * @since 4.4.2.1
 		 */
 		protected static $table = 'wsal_options';
 

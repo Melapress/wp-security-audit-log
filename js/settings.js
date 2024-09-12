@@ -220,27 +220,6 @@ jQuery( document ).ready( function() {
 		});
 	}
 
-    jQuery('input[name="mwp_stealth_mode"]').on('change', function () {
-        var admin_blocking_support_input = jQuery('input[name="mwp_admin_blocking_support"]');
-        if ('yes' == this.value) {
-
-            //	re-enable the admin blocking support checkbox
-            admin_blocking_support_input.removeAttr('disabled');
-            if ('yes' == admin_blocking_support_input.attr('data-check-on-revert')) {
-                admin_blocking_support_input.attr('checked', 'checked')
-                    .removeAttr('data-check-on-revert');
-            }
-        } else {
-
-            //	disable the admin blocking support checkbox and uncheck it as well
-            admin_blocking_support_input.attr('disabled', 'disabled');
-            if (admin_blocking_support_input.attr('checked')) {
-                admin_blocking_support_input.removeAttr('checked', 'checked')
-                    .attr('data-check-on-revert', 'yes')
-            }
-        }
-    });
-
 	/**
 	 * Alert user to save settings before switching tabs.
 	 */

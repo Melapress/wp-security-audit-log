@@ -12,6 +12,8 @@
 namespace WSAL\Utils;
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\Settings_Helper;
+use WSAL\Helpers\Plugin_Settings_Helper;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
@@ -130,9 +132,27 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 
 					$disabled_alerts = WP_Helper::get_global_option( 'disabled-alerts', false );
 
-					$always_disabled_alerts = implode( ',', \WSAL\Helpers\Settings_Helper::get_default_always_disabled_alerts() );
+					if ( ! \is_array( $disabled_alerts ) ) {
+						$disabled_alerts = \explode( ',', $disabled_alerts );
 
-					$disabled_alerts = implode( ',', \array_merge( \explode( ',', $disabled_alerts ), \explode( ',', $always_disabled_alerts ) ) );
+						\array_walk( $disabled_alerts, 'trim' );
+					}
+
+					$always_disabled_alerts = Settings_Helper::get_default_always_disabled_alerts();
+
+					if ( ! \is_array( $always_disabled_alerts ) ) {
+						$always_disabled_alerts = \explode( ',', $always_disabled_alerts );
+
+						\array_walk( $always_disabled_alerts, 'trim' );
+					}
+
+					$disabled_alerts = \array_merge( $disabled_alerts, $always_disabled_alerts );
+
+					Settings_Helper::set_boolean_option_value( 'pruning-limit-e', true );
+					$pruning_date = '3';
+					$pruning_unit = 'months';
+					Settings_Helper::set_pruning_date_settings( true, $pruning_date . ' ' . $pruning_unit, $pruning_unit );
+					Plugin_Settings_Helper::set_pruning_limit_enabled( false );
 
 					/**
 					 * That is split only for clarity

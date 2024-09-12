@@ -2256,6 +2256,34 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WooCommerce_Custom_Alerts' ) ) {
 					'woocommerce-order',
 					'opened',
 				),
+				9155 => array(
+					9155,
+					WSAL_LOW,
+					esc_html__( 'Order note is added', 'wp-security-audit-log' ),
+					esc_html__( 'Added a comment in order %OrderTitle%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Note Type', 'wp-security-audit-log' ) => '%NoteType%',
+					),
+					array(
+						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
+					),
+					'woocommerce-order',
+					'added',
+				),
+				9156 => array(
+					9156,
+					WSAL_LOW,
+					esc_html__( 'Order note is deleted', 'wp-security-audit-log' ),
+					esc_html__( 'Removed a note in order %OrderTitle%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Note Type', 'wp-security-audit-log' ) => '%NoteType%',
+					),
+					array(
+						esc_html__( 'View order', 'wp-security-audit-log' ) => '%EditorLinkOrder%',
+					),
+					'woocommerce-order',
+					'removed',
+				),
 			);
 		}
 

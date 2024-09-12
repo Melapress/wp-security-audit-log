@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace WSAL\Helpers;
 
+use WpSecurityAuditLog;
 use WSAL\Controllers\Alert;
 use WSAL\Views\Setup_Wizard;
 use WSAL\Helpers\Settings_Helper;
@@ -60,14 +61,10 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 			$views = array(
 				'WSAL_Views_AuditLog',
-				'WSAL_Views_EmailNotifications',
-				'WSAL_Views_ExternalDB',
 				'WSAL_Views_Help',
-				'WSAL_Views_LogInUsers',
-				'WSAL_Views_Reports',
-				'WSAL_Views_Search',
 				'WSAL_Views_Settings',
 				'WSAL_Views_ToggleAlerts',
+				'\WSAL\Views\Premium_Features',
 			);
 
             // phpcs:ignore
@@ -282,7 +279,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 				add_submenu_page(
 					'wsal-auditlog',
 					'Upgrade',
-					'<span class="fs-submenu-item wp-security-audit-log pricing upgrade-mode" style="color:#14ff00;">Upgrade to Premium</span>',
+					'<span class="fs-submenu-item wp-security-audit-log pricing upgrade-mode" style="color:#FF8977;">Upgrade to Premium</span>',
 					'read', // No capability requirement.
 					'upgrade',
 					array(),
@@ -482,11 +479,6 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 					break;
 				case 'wsal-loginusers':
 					if ( class_exists( 'WSAL_UserSessions_Plugin' ) ) {
-						$not_show = true;
-					}
-					break;
-				case 'wsal-reports':
-					if ( class_exists( 'WSAL_Rep_Plugin' ) ) {
 						$not_show = true;
 					}
 					break;

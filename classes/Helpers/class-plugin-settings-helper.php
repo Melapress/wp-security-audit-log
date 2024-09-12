@@ -61,6 +61,8 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		 * Return current pruning unit.
 		 *
 		 * @return string
+		 *
+		 * @since 5.0.0
 		 */
 		public static function get_pruning_unit() {
 			return Settings_Helper::get_option_value( 'pruning-unit', 'months' );
@@ -186,7 +188,7 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function get_default_pruning_date() {
-			return '6 months';
+			return '3 months';
 		}
 
 		/**
@@ -510,17 +512,6 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		}
 
 		/**
-		 * Save admin blocking plugin support enabled.
-		 *
-		 * @param bool $enabled True, if admin blocking plugin support should be enabled.
-		 *
-		 * @since 5.0.0
-		 */
-		public static function set_admin_blocking_plugin_support( $enabled ) {
-			Settings_Helper::set_boolean_option_value( 'admin-blocking-plugins-support', $enabled );
-		}
-
-		/**
 		 * Deactivate MainWP Child Stealth Mode.
 		 *
 		 * @since 5.0.0
@@ -529,24 +520,7 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 			self::set_incognito( false ); // Disable incognito mode to hide WSAL on plugins page.
 			self::set_restrict_plugin_setting( 'only_admins' );
 			self::set_restrict_log_viewer( 'only_admins' );
-			self::set_admin_blocking_plugin_support( false );
 			Settings_Helper::set_boolean_option_value( 'mwp-child-stealth-mode', false ); // Disable stealth mode option.
-		}
-
-		/**
-		 * Check if admin blocking plugin support is enabled.
-		 *
-		 * Note: this is purely for retrieving the option value. It is actually used in conjunction with
-		 * stealth mode setting and some other exceptions.
-		 *
-		 * @see WpSecurityAuditLog::is_admin_blocking_plugins_support_enabled()
-		 *
-		 * @return bool
-		 *
-		 * @since 5.0.0
-		 */
-		public static function get_admin_blocking_plugin_support() {
-			return Settings_Helper::get_boolean_option_value( 'admin-blocking-plugins-support', false );
 		}
 
 		/**

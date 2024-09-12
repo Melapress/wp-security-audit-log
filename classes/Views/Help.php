@@ -301,19 +301,19 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/wp-2fa-img.jpg',
 				'desc' => esc_html__( 'Add an extra layer of security to your login pages with 2FA & require your users to use it.', 'wp-security-audit-log' ),
 				'alt'  => 'WP 2FA',
-				'link' => 'https://melapress.com/wordpress-2fa/?utm_source=plugin&utm_medium=link&utm_campaign=wsal',
+				'link' => 'https://melapress.com/wordpress-2fa/?utm_source=plugin&utm_medium=link&utm_campaign=wp2fa',
 			),
 			array(
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/c4wp.jpeg',
 				'desc' => esc_html__( 'Protect website forms & login pages from spambots & automated attacks.', 'wp-security-audit-log' ),
 				'alt'  => 'Captcha 4WP',
-				'link' => 'https://melapress.com/wordpress-captcha/?utm_source=plugin&utm_medium=link&utm_campaign=wsal',
+				'link' => 'https://melapress.com/wordpress-captcha/?utm_source=plugin&utm_medium=link&utm_campaign=c4wp',
 			),
 			array(
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/password-policy-manager.jpeg',
 				'desc' => esc_html__( 'Boost WordPress security with login & password policies.', 'wp-security-audit-log' ),
 				'alt'  => 'WPassword',
-				'link' => 'https://melapress.com/wordpress-login-security/?utm_source=plugin&utm_medium=link&utm_campaign=wsal',
+				'link' => 'https://melapress.com/wordpress-login-security/?utm_source=plugin&utm_medium=link&utm_campaign=mls',
 			),
 		);
 		?>

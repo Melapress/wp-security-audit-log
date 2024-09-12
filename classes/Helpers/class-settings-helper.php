@@ -126,7 +126,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		private static $default_always_disabled_alerts = array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024 );
+		private static $default_always_disabled_alerts = array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6069, 6070 );
 
 		/**
 		 * Holds the array with the disabled alerts codes.
@@ -710,14 +710,18 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 					'HTTP_FORWARDED',
 					'REMOTE_ADDR',
 					// Cloudflare.
-					'HTTP_CF-Connecting-IP',
+					'HTTP_CF-CONNECTING-IP',
 					'HTTP_TRUE_CLIENT_IP',
+					'CF-CONNECTING-IP',
+					'TRUE_CLIENT_IP',
 				);
+				$inner_server  = array_change_key_case( $_SERVER, CASE_UPPER );
 				foreach ( $proxy_headers as $key ) {
-					if ( isset( $_SERVER[ $key ] ) ) {
+					$key = \strtoupper( $key );
+					if ( isset( $inner_server[ $key ] ) ) {
 						self::$client_ips[ $key ] = array();
 
-						foreach ( explode( ',', sanitize_text_field( \wp_unslash( $_SERVER[ $key ] ) ) ) as $ip ) {
+						foreach ( explode( ',', \sanitize_text_field( \wp_unslash( $inner_server[ $key ] ) ) ) as $ip ) {
 							$ip = self::normalize_ip( $ip );
 							if ( Validator::validate_ip( $ip ) ) {
 								self::$client_ips[ $key ][] = $ip;
@@ -924,10 +928,12 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * Method: Set Disabled Alerts.
 		 *
 		 * @param array $types IDs alerts to disable.
+		 *
+		 * @since 5.1.1
 		 */
 		public static function set_disabled_alerts( $types ) {
 			self::$disabled_alerts = array_unique( array_map( 'intval', $types ) );
-			self::set_option_value( 'disabled-alerts', implode( ',', self::$disabled_alerts ) );
+			self::set_option_value( 'disabled-alerts', self::$disabled_alerts );
 		}
 
 		/**
@@ -939,10 +945,18 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 */
 		public static function get_disabled_alerts() {
 			if ( ! self::$disabled_alerts ) {
-				$disabled_defaults     = self::get_default_disabled_alerts() + self::get_default_always_disabled_alerts();
-				self::$disabled_alerts = implode( ',', $disabled_defaults );
+				$disabled_defaults = self::get_default_disabled_alerts() + self::get_default_always_disabled_alerts();
+
 				self::$disabled_alerts = self::get_option_value( 'disabled-alerts', self::$disabled_alerts );
-				self::$disabled_alerts = ( '' === self::$disabled_alerts ) ? array() : explode( ',', self::$disabled_alerts );
+				if ( ! \is_array( self::$disabled_alerts ) ) {
+					self::$disabled_alerts = \explode( ',', self::$disabled_alerts );
+
+					\array_walk( self::$disabled_alerts, 'trim' );
+				}
+				self::$disabled_alerts = \array_merge( $disabled_defaults, self::$disabled_alerts );
+				if ( ! \is_array( self::$disabled_alerts ) ) {
+					self::$disabled_alerts = (array) self::$disabled_alerts;
+				}
 				self::$disabled_alerts = array_map( 'intval', self::$disabled_alerts );
 
 				self::$disabled_alerts = ( ! is_array( self::$disabled_alerts ) ) ? explode( ',', self::$disabled_alerts ) : self::$disabled_alerts;
@@ -1604,7 +1618,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function current_user_can( $action ) {
-			return self::user_can( wp_get_current_user(), $action );
+			return self::user_can( User_Helper::get_current_user(), $action );
 		}
 
 		/**
@@ -1736,17 +1750,20 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 */
 		public static function delete_all_settings() {
 			global $wpdb;
-			$plugin_options = $wpdb->get_results( "SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" ); // phpcs:ignore
 
-			foreach ( $plugin_options as $option ) {
-				delete_site_option( $option->option_name );
+			$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'wsal_%'" ); // phpcs:ignore
+
+			if ( is_multisite() ) {
+				$wpdb->query( "DELETE FROM $wpdb->sitemeta WHERE meta_key LIKE 'wsal_%'" );
 			}
 
+			\wp_cache_flush();
+
 			// Remove wsal specific Freemius entry.
-			delete_site_option( 'fs_wsalp' );
+			\delete_site_option( 'fs_wsalp' );
 
 			// Ensue entry is fully cleared.
-			delete_site_option( 'wsal_networkwide_tracker_cpts' );
+			\delete_site_option( 'wsal_networkwide_tracker_cpts' );
 		}
 
 		/**
@@ -1760,7 +1777,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 */
 		public static function set_pruning_date_settings( $enable, $new_date, $new_unit ) {
 			$was_enabled = self::get_boolean_option_value( 'pruning-date-e', false );
-			$old_period  = self::get_option_value( 'pruning-date', '6 months' );
+			$old_period  = self::get_option_value( 'pruning-date', '3 months' );
 
 			if ( ! $was_enabled && $enable ) {
 				// The retention period is being enabled.

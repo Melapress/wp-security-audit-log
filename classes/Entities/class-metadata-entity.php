@@ -5,6 +5,8 @@
  * User Sessions class.
  *
  * @package wsal
+ *
+ * @since 4.4.2.1
  */
 
 declare(strict_types=1);
@@ -25,6 +27,8 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 		 * Contains the table name.
 		 *
 		 * @var string
+		 *
+		 * @since 4.4.2.1
 		 */
 		protected static $table = 'wsal_metadata';
 

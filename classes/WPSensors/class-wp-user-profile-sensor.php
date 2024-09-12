@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors;
 
 use WSAL\Helpers\WP_Helper;
+use WSAL\Helpers\User_Helper;
 use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
@@ -354,7 +355,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 				return;
 			}
 
-			$current_user = wp_get_current_user();
+			$current_user = User_Helper::get_current_user();
 			$updated      = isset( $_GET['updated'] ); // phpcs:ignore
 			if ( $current_user && ( $user->ID !== $current_user->ID ) && ! $updated ) {
 				$user_roles = implode( ', ', array_map( array( __CLASS__, 'filter_role_names' ), $user->roles ) );

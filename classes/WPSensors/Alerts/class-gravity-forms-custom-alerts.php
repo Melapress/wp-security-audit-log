@@ -382,6 +382,20 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Gravity_Forms_Custom_Alerts' ) ) {
 					'gravityforms_settings',
 					'imported',
 				),
+				5720 => array(
+					5720,
+					\WSAL_MEDIUM,
+					esc_html__( 'A form was activated / deactivated.', 'wp-security-audit-log' ),
+					esc_html__( 'The form %form_name%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Form ID', 'wp-security-audit-log' ) => '%form_id%',
+					),
+					array(
+						__( 'View form in editor', 'wp-security-audit-log' ) => '%EditorLinkForm%',
+					),
+					'gravityforms_settings',
+					'imported',
+				),
 			);
 		}
 	}

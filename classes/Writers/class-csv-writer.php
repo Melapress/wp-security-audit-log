@@ -199,23 +199,24 @@ if ( ! class_exists( '\WSAL\Writers\CSV_Writer' ) ) {
 		}
 
 		/**
-		 * Extract link info from a given teext
+		 * Extract link info from a given text
 		 *
-		 * @param [type] $html
+		 * @param string $html - The text to parse.
 		 *
-		 * @return void
+		 * @return array
 		 *
 		 * @since 5.0.0
 		 */
 		private static function link_extractor( $html ) {
-				$link_array = array();
-				if ( preg_match_all( '/<a\s+.*?href=[\"\']?([^\"\' >]*)[\"\']?[^>]*>(.*?)<\/a>/i', $html, $matches, PREG_SET_ORDER ) ) {
-					foreach ( $matches as $match ) {
-									array_push( $link_array, array( $match[1], $match[2] ) );
-					}
+			$link_array = array();
+			if ( preg_match_all( '/<a\s+.*?href=[\"\']?([^\"\' >]*)[\"\']?[^>]*>(.*?)<\/a>/i', $html, $matches, PREG_SET_ORDER ) ) {
+				foreach ( $matches as $match ) {
+					array_push( $link_array, array( $match[1], $match[2] ) );
 				}
-				return $link_array;
 			}
+
+			return $link_array;
+		}
 
 		/**
 		 * Accepts the AJAX requests and checks the params then calls the main function of the class responsible for writing the file

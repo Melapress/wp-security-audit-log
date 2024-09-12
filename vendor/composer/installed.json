@@ -55,17 +55,17 @@
         },
         {
             "name": "freemius/wordpress-sdk",
-            "version": "2.7.3",
-            "version_normalized": "2.7.3.0",
+            "version": "2.7.4",
+            "version_normalized": "2.7.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Freemius/wordpress-sdk.git",
-                "reference": "dad8c4f268f826d1f5a98737d26216d6dede5b03"
+                "reference": "2741ba2b4f819b5018f68529036e505ef1e7c349"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/dad8c4f268f826d1f5a98737d26216d6dede5b03",
-                "reference": "dad8c4f268f826d1f5a98737d26216d6dede5b03",
+                "url": "https://api.github.com/repos/Freemius/wordpress-sdk/zipball/2741ba2b4f819b5018f68529036e505ef1e7c349",
+                "reference": "2741ba2b4f819b5018f68529036e505ef1e7c349",
                 "shasum": ""
             },
             "require": {
@@ -80,7 +80,7 @@
                 "szepeviktor/phpstan-wordpress": "^1.3",
                 "wp-coding-standards/wpcs": "^2.3"
             },
-            "time": "2024-07-01T05:51:06+00:00",
+            "time": "2024-08-07T14:07:59+00:00",
             "type": "library",
             "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
@@ -100,7 +100,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Freemius/wordpress-sdk/issues",
-                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.7.3"
+                "source": "https://github.com/Freemius/wordpress-sdk/tree/2.7.4"
             },
             "install-path": "../freemius/wordpress-sdk"
         },

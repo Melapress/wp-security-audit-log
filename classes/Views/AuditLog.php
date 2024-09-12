@@ -109,10 +109,10 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Set adverts array.
 		$this->adverts = array(
-			0 => array(
-				'head' => esc_html__( 'Upgrade to Premium and enable search filters so you can find the events you need within seconds, get notified via email or SMS about critical website changes, see who is logged-in to your website in real time, manage user sessions, create detailed reports, and much more!', 'wp-security-audit-log' ),
-				'desc' => esc_html__( '', 'wp-security-audit-log' ),
-			),
+			// 0 => array(
+			// 	'head' => esc_html__( 'Upgrade to Premium and enable search filters so you can find the events you need within seconds, get notified via email or SMS about critical website changes, see who is logged-in to your website in real time, manage user sessions, create detailed reports, and much more!', 'wp-security-audit-log' ),
+			// 	'desc' => esc_html__( '', 'wp-security-audit-log' ),
+			// ),
 			1 => array(
 				'head' => esc_html__( 'Instant SMS & email alerts, search & filters, reports, users sessions management and much more!', 'wp-security-audit-log' ),
 				'desc' => esc_html__( 'Upgrade to premium to get more out of your activity logs!', 'wp-security-audit-log' ),
@@ -139,7 +139,6 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		if (
 			! class_exists( 'WSAL_NP_Plugin' )
 			&& ! class_exists( 'WSAL_Ext_Plugin' )
-			&& ! class_exists( 'WSAL_Rep_Plugin' )
 			&& ! class_exists( 'WSAL_SearchExtension' )
 			&& ! class_exists( 'WSAL_UserSessions_Plugin' )
 			&& ( 'anonymous' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) || // Anonymous mode option.
@@ -158,7 +157,9 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				'https://melapress.com/features/'
 			);
 
-			if ( current_user_can( 'manage_options' ) && $is_current_view ) : ?>
+			if ( current_user_can( 'manage_options' ) && $is_current_view ) : 
+
+				/* ?>
 				<div class="updated wsal_notice">
 					<div class="wsal_notice__wrapper">
 						<div class="wsal_notice__content">
@@ -198,7 +199,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 					</div>
 					<!-- /.wsal_notice__wrapper -->
 				</div>
-				<?php
+				<?php */
 			endif;
 		}
 

@@ -62,6 +62,11 @@ abstract class WSAL_AbstractView {
 
 		// Handle admin notices.
 		add_action( 'wp_ajax_AjaxDismissNotice', array( $this, 'ajax_dismiss_notice' ) );
+
+		\add_action( 'in_admin_footer', array( __CLASS__, 'in_admin_footer' ) );
+		\add_action( 'in_admin_header', array( __CLASS__, 'in_admin_header' ) );
+		\add_filter( 'admin_footer_text', array( __CLASS__, 'admin_footer_text' ) );
+		\add_filter( 'update_footer', array( __CLASS__, 'admin_footer_version_text' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -251,5 +256,116 @@ abstract class WSAL_AbstractView {
 
 	public static function get_hook_suffix() {
 		return self::$hook_suffix;
+	}
+
+	/**
+	 * Puts the navigation in the admin header.
+	 *
+	 * @return void
+	 *
+	 * @since 5.1.1
+	 */
+	public static function in_admin_header() {
+
+		global $current_screen;
+
+		if ( isset( $current_screen ) && ( in_array( $current_screen->base, WpSecurityAuditLog::get_plugin_screens_array(), true ) ) ) {
+			if ( 'free' === WpSecurityAuditLog::get_plugin_version() ) {
+				include_once WSAL_BASE_DIR . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'Free' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'nav-bar.php';
+			}
+		}
+	}
+
+
+	/**
+	 * Modifies the admin footer.
+	 *
+	 *
+	 * @since 5.1.1
+	 */
+	public static function in_admin_footer() {
+
+		global $current_screen;
+
+		if ( isset( $current_screen ) && ( in_array( $current_screen->base, WpSecurityAuditLog::get_plugin_screens_array(), true ) ) ) {
+			
+			if ( 'free' === WpSecurityAuditLog::get_plugin_version() ) {
+				
+				include_once WSAL_BASE_DIR . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'Free' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'upgrade-to-premium.php';
+
+			}
+
+		}
+
+	}
+
+	/**
+	 * Modifies the admin footer text.
+	 *
+	 * @param   string $text The current admin footer text.
+	 * @return  string
+	 *
+	 * @since 5.1.1
+	 */
+	public static function admin_footer_text( $text ) {
+
+		global $current_screen;
+
+		if ( isset( $current_screen ) && ( in_array( $current_screen->base, WpSecurityAuditLog::get_plugin_screens_array(), true ) ) ) {
+			$our_footer = '';
+			// if ( 'free' === WpSecurityAuditLog::get_plugin_version() ) {
+			// 	\ob_start();
+			// 	include_once WSAL_BASE_DIR . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'Free' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'upgrade-to-premium.php';
+
+			// 	$our_footer = \ob_get_clean();
+			// }
+
+			$wsal_footer_link = 'https://melapress.com/?utm_source=plugin&utm_medium=referral&utm_campaign=wsal&utm_content=footer';
+			$wsal_link        = 'https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+
+			return $our_footer . \sprintf(
+			/* translators: This text is prepended by a link to Melapress's website, and appended by a link to Melapress's website. */
+				'<a href="%1$s" target="_blank">' . ( 'free' === WpSecurityAuditLog::get_plugin_version() ? 'WP Activity Log' : 'WP Activity Log Premium' ) . '</a> ' . __( 'is developed and maintained by', 'wp-security-audit-log' ) . ' <a href="%2$s" target="_blank">Melapress</a>.',
+				$wsal_link,
+				$wsal_footer_link
+			);
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Modifies the admin footer version text.
+	 *
+	 * @param   string $text The current admin footer version text.
+	 * @return  string
+	 *
+	 * @since 5.1.1
+	 */
+	public static function admin_footer_version_text( $text ) {
+
+		global $current_screen;
+
+		if ( isset( $current_screen ) && ( in_array( $current_screen->base, WpSecurityAuditLog::get_plugin_screens_array(), true ) ) ) {
+			$documentation_link = 'https://melapress.com/support/kb/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+			$support_link       = 'https://melapress.com/support/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+			$feedback_link      = 'https://melapress.com/contact/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+			$version_link       = 'https://melapress.com/support/kb/wp-activity-log-plugin-changelog/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
+
+			return sprintf(
+				'<a href="%s" target="_blank">%s</a> &#8729; <a href="%s" target="_blank">%s</a> &#8729; <a href="%s" target="_blank">%s</a> &#8729; <a href="%s" target="_blank">%s %s</a>',
+				$documentation_link,
+				__( 'Documentation', 'wp-security-audit-log' ),
+				$support_link,
+				__( 'Support', 'wp-security-audit-log' ),
+				$feedback_link,
+				__( 'Feedback', 'wp-security-audit-log' ),
+				$version_link,
+				__( 'Version ', 'wp-security-audit-log' ),
+				WSAL_VERSION
+			);
+		}
+
+		return $text;
 	}
 }

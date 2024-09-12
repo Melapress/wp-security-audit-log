@@ -52,6 +52,15 @@ if ( ! class_exists( '\WSAL\Controllers\Sensors_Load_Manager' ) ) {
 		);
 
 		/**
+		 * Cached sensors array
+		 *
+		 * @var array
+		 *
+		 * @since 5.1.1
+		 */
+		public static $sensors = array();
+
+		/**
 		 * Some of the sensors need to load data / attach events earlier - lets give them a chance
 		 *
 		 * @return void
@@ -60,7 +69,7 @@ if ( ! class_exists( '\WSAL\Controllers\Sensors_Load_Manager' ) ) {
 		 */
 		public static function load_early_sensors() {
 
-			$sensors = Classes_Helper::get_classes_by_namespace( '\WSAL\WP_Sensors' );
+			$sensors = self::get_sensors();
 
 			foreach ( $sensors as $sensor ) {
 				if ( method_exists( $sensor, 'early_init' ) ) {
@@ -96,7 +105,7 @@ if ( ! class_exists( '\WSAL\Controllers\Sensors_Load_Manager' ) ) {
 				}
 			}
 
-			$sensors = Classes_Helper::get_classes_by_namespace( '\WSAL\WP_Sensors' );
+			$sensors = self::get_sensors();
 
 			\do_action( 'wsal_sensors_manager_add' );
 
@@ -106,7 +115,7 @@ if ( ! class_exists( '\WSAL\Controllers\Sensors_Load_Manager' ) ) {
 				$sensors = \array_merge( $sensors, $plugin_sensors );
 			}
 
-			if ( WP_Helper::is_login_screen() && ! is_user_logged_in() ) {
+			if ( WP_Helper::is_login_screen() && ! \is_user_logged_in() ) {
 				// Here we need to load only the Sensors which are login enabled.
 				foreach ( $sensors as $key => &$sensor ) {
 					// Check if that sensor is for login or not.
@@ -133,10 +142,10 @@ if ( ! class_exists( '\WSAL\Controllers\Sensors_Load_Manager' ) ) {
 				 *
 				 * @param array $sensors - List of sensors to be loaded for visitors.
 				 */
-				$sensors = apply_filters( 'wsal_load_login_sensors', $sensors );
+				$sensors = \apply_filters( 'wsal_load_login_sensors', $sensors );
 			} else {
 				// Load all the frontend sensors.
-				if ( \WpSecurityAuditLog::is_frontend() && ! is_user_logged_in() ) {
+				if ( \WpSecurityAuditLog::is_frontend() && ! \is_user_logged_in() ) {
 					// Here we need to load only the Sensors which are frontend enabled.
 					foreach ( $sensors as $key => &$sensor ) {
 						// Check if that sensor is for frontend or not.
@@ -163,7 +172,7 @@ if ( ! class_exists( '\WSAL\Controllers\Sensors_Load_Manager' ) ) {
 					 *
 					 * @param array $sensors - List of sensors to be loaded for visitors.
 					 */
-					$sensors = apply_filters( 'wsal_load_frontend_sensors', $sensors );
+					$sensors = \apply_filters( 'wsal_load_frontend_sensors', $sensors );
 				}
 				// If we are on some frontend page, we don't want to load the sensors.
 				if ( ! \WpSecurityAuditLog::is_frontend() ) {
@@ -187,6 +196,21 @@ if ( ! class_exists( '\WSAL\Controllers\Sensors_Load_Manager' ) ) {
 					call_user_func_array( array( $sensor, 'init' ), array() );
 				}
 			}
+		}
+
+		/**
+		 * Caches the sensors classes
+		 *
+		 * @return array
+		 *
+		 * @since 5.1.1
+		 */
+		public static function get_sensors(): array {
+			if ( empty( self::$sensors ) ) {
+				self::$sensors = Classes_Helper::get_classes_by_namespace( '\WSAL\WP_Sensors' );
+			}
+
+			return self::$sensors;
 		}
 	}
 }

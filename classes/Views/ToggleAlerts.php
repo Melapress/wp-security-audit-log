@@ -267,7 +267,9 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$safe_names     = array_combine( array_keys( $grouped_alerts ), $safe_names );
 
 		$disabled_events = Settings_Helper::get_option_value( 'disabled-alerts' ); // Get disabled events.
-		$disabled_events = explode( ',', $disabled_events );
+		if ( is_string( $disabled_events ) ) {
+			$disabled_events = explode( ',', $disabled_events );
+		}
 
 		// Check if the log level is custom.
 		$log_level         = $this->get_log_level_based_on_events( $disabled_events );
@@ -447,7 +449,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 												$severity = Constants::get_severity_by_code( $alert['severity'] )['text'];
 
-												// @codingStandardsIgnoreStart
 												echo '<tr class="alert-wrapper ' . $disable_inputs_needed . '" data-alert-cat="' . $alert['category'] . '" data-alert-subcat="' . $alert['subcategory'] . '" ' . $disabled_tooltip . '>';
 												echo '<th>' . $checkbox_markup . '</th>';
 												echo '<td>' . $alert['code'] . '</td>';
@@ -456,7 +457,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 												echo '<td style="display: none;">' . $alert['category'] . '</td>';
 												echo '<td style="display: none;">' . $alert['subcategory'] . '</td>';
 												echo '</tr>';
-												// @codingStandardsIgnoreEnd
 
 												if ( 4000 === $alert['code'] ) {
 													$frontend_events = Settings_Helper::get_frontend_events();

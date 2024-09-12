@@ -696,15 +696,18 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 						$roles = User_Utils::get_roles_label( $item['user_roles'] );
 					} elseif ( 'Plugin' === $username ) {
-						$uhtml = '<i>' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';
+						$uhtml = '<i style="display: inline-block;width: 65%;">' . __( 'Plugin', 'wp-security-audit-log' ) . '</i>';
 					} elseif ( 'Plugins' === $username ) {
-						$uhtml = '<i>' . __( 'Plugins', 'wp-security-audit-log' ) . '</i>';
+						$uhtml = '<i style="display: inline-block;width: 65%;">' . __( 'Plugins', 'wp-security-audit-log' ) . '</i>';
 					} elseif ( 'Website Visitor' === $username || 'Unregistered user' === $username ) {
-						$uhtml = '<i>' . __( 'Unregistered user', 'wp-security-audit-log' ) . '</i>';
+						$uhtml = '<i style="display: inline-block;width: 65%;">' . __( 'Unregistered user', 'wp-security-audit-log' ) . '</i>';
 					} elseif ( isset( $username ) && ! empty( $username ) ) {
-						$uhtml = '<i>' . $username . '</i>';
+						$uhtml = '<i style="display: inline-block;width: 65%;">' . $username . '</i>';
+						if ( isset( $item['user_id'] ) && $item['user_id'] ) {
+							$uhtml .= '<div>' . __( 'Deleted user', 'wp-security-audit-log' ) . '</div>';
+						}
 					} else {
-						$uhtml = '<i>' . __( 'System', 'wp-security-audit-log' ) . '</i>';
+						$uhtml = '<i style="display: inline-block;width: 65%;">' . __( 'System', 'wp-security-audit-log' ) . '</i>';
 					}
 
 					$image = \apply_filters( 'wsal_get_user_image', $image, $item );
@@ -979,7 +982,9 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 					$disabled_alerts = Settings_Helper::get_option_value( 'disabled-alerts' );
 
-					$disabled_alerts = \array_filter( \array_map( 'trim', \explode( ',', $disabled_alerts ) ) );
+					if ( is_string( $disabled_alerts ) ) {
+						$disabled_alerts = \array_filter( \array_map( 'trim', \explode( ',', $disabled_alerts ) ) );
+					}
 
 					$ids_array = \array_filter( (array) $_REQUEST[ $this->table_name ] );
 
@@ -988,7 +993,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						$disabled_alerts[] = esc_html( $row_data['alert_id'] );
 					}
 
-					Settings_Helper::set_option_value( 'disabled-alerts', \implode( ',', \array_filter( $disabled_alerts ) ) );
+					Settings_Helper::set_option_value( 'disabled-alerts', \array_filter( $disabled_alerts ) );
 				}
 			}
 

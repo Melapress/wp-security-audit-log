@@ -267,22 +267,6 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		}
 
 		/**
-		 * Removes event from the cron by given name.
-		 *
-		 * @param string $event_name -The name of the event.
-		 *
-		 * @return void
-		 *
-		 * @since 4.4.2.1
-		 */
-		public static function un_schedule_event( string $event_name ) {
-			$schedule_time = wp_next_scheduled( $event_name );
-			if ( $schedule_time ) {
-				wp_unschedule_event( $schedule_time, $event_name, array() );
-			}
-		}
-
-		/**
 		 * Collects all the sites from multisite WP installation.
 		 *
 		 * @since 4.6.0
@@ -319,9 +303,9 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 */
 		public static function is_plugin_installed(): bool {
 			global $wpdb;
-			$plugin_options = $wpdb->get_results("SELECT option_name FROM $wpdb->options WHERE option_name LIKE '%wsal_%'"); // phpcs:ignore
+			$plugin_options = $wpdb->get_results("SELECT option_name FROM $wpdb->options WHERE option_name LIKE 'wsal_%'"); // phpcs:ignore
 
-			if ( ! empty( $plugin_options ) ) {
+			if ( ! empty( $plugin_options ) && 2 < count( $plugin_options ) ) {
 				return true;
 			}
 

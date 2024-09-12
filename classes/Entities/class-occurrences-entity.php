@@ -5,6 +5,8 @@
  * User Sessions class.
  *
  * @package wsal
+ *
+ * @since 4.5.0
  */
 
 declare(strict_types=1);
@@ -33,6 +35,8 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		 * Contains the table name.
 		 *
 		 * @var string
+		 *
+		 * @since 4.5.0
 		 */
 		protected static $table = 'wsal_occurrences';
 
@@ -40,6 +44,8 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		 * List of migrated metadata fields.
 		 *
 		 * @var string[]
+		 *
+		 * @since 4.5.0
 		 */
 		public static $migrated_meta = array(
 			'ClientIP'         => 'client_ip',
@@ -112,6 +118,8 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		 * Builds an upgrade query for the occurrence table.
 		 *
 		 * @return string
+		 *
+		 * @since 4.5.0
 		 */
 		public static function get_upgrade_query() {
 			return 'ALTER TABLE `' . self::get_table_name() . '`'

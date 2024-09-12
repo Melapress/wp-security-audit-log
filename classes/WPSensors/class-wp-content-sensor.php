@@ -144,7 +144,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 
 			// Check if MainWP Child Plugin exists.
 			if ( \WpSecurityAuditLog::is_mainwp_active() ) {
-				add_action( 'mainwp_before_post_update', array( __CLASS__, 'event_mainwp_init' ), 10, 2 );
+				\add_action( 'mainwp_before_post_update', array( __CLASS__, 'event_mainwp_init' ), 10, 2 );
 			}
 		}
 
