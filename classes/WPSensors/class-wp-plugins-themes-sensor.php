@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors;
 
 use WSAL\Helpers\Plugins_Helper;
+use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
@@ -286,51 +287,54 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					$event_meta = $latest_event ? $latest_event['meta_values'] : false;
 
 					foreach ( $get_array['checked'] as $plugin_file ) {
-						if ( $latest_event && 5001 === (int) $latest_event['alert_id'] && $event_meta && isset( $event_meta['PluginFile'] ) ) {
-							if ( basename( WSAL_BASE_NAME ) === basename( $event_meta['PluginFile'] ) ) {
-								continue;
+						if ( ! \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+							if ( $latest_event && 5001 === (int) $latest_event['alert_id'] && $event_meta && isset( $event_meta['PluginFile'] ) ) {
+								if ( basename( WSAL_BASE_NAME ) === basename( $event_meta['PluginFile'] ) ) {
+									continue;
+								}
 							}
+							$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+							$plugin_data = get_plugin_data( $plugin_file, false, true );
+
+							Alert_Manager::trigger_event(
+								5001,
+								array(
+									'PluginFile' => $plugin_file,
+									'PluginData' => (object) array(
+										'Name'      => $plugin_data['Name'],
+										'PluginURI' => $plugin_data['PluginURI'],
+										'Version'   => $plugin_data['Version'],
+										'Author'    => $plugin_data['Author'],
+										'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+									),
+								)
+							);
+
+							// self::run_addon_check( $plugin_file );
 						}
-
-						$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
-						$plugin_data = get_plugin_data( $plugin_file, false, true );
-
-						Alert_Manager::trigger_event(
-							5001,
-							array(
-								'PluginFile' => $plugin_file,
-								'PluginData' => (object) array(
-									'Name'      => $plugin_data['Name'],
-									'PluginURI' => $plugin_data['PluginURI'],
-									'Version'   => $plugin_data['Version'],
-									'Author'    => $plugin_data['Author'],
-									'Network'   => $plugin_data['Network'] ? 'True' : 'False',
-								),
-							)
-						);
-
-						// self::run_addon_check( $plugin_file );
 					}
 				} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
 					foreach ( $post_array['checked'] as $plugin_file ) {
-						$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
-						$plugin_data = get_plugin_data( $plugin_file, false, true );
 
-						Alert_Manager::trigger_event(
-							5001,
-							array(
-								'PluginFile' => $plugin_file,
-								'PluginData' => (object) array(
-									'Name'      => $plugin_data['Name'],
-									'PluginURI' => $plugin_data['PluginURI'],
-									'Version'   => $plugin_data['Version'],
-									'Author'    => $plugin_data['Author'],
-									'Network'   => $plugin_data['Network'] ? 'True' : 'False',
-								),
-							)
-						);
+						if ( ! \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+							$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+							$plugin_data = get_plugin_data( $plugin_file, false, true );
+							Alert_Manager::trigger_event(
+								5001,
+								array(
+									'PluginFile' => $plugin_file,
+									'PluginData' => (object) array(
+										'Name'      => $plugin_data['Name'],
+										'PluginURI' => $plugin_data['PluginURI'],
+										'Version'   => $plugin_data['Version'],
+										'Author'    => $plugin_data['Author'],
+										'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+									),
+								)
+							);
 
-						// self::run_addon_check( $plugin_file );
+							// self::run_addon_check( $plugin_file );
+						}
 					}
 				}
 			}
@@ -355,40 +359,44 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 
 				if ( isset( $get_array['checked'] ) && ! empty( $get_array['checked'] ) ) {
 					foreach ( $get_array['checked'] as $plugin_file ) {
-						$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
-						$plugin_data = get_plugin_data( $plugin_file, false, true );
-						Alert_Manager::trigger_event(
-							5002,
-							array(
-								'PluginFile' => $plugin_file,
-								'PluginData' => (object) array(
-									'Name'      => $plugin_data['Name'],
-									'PluginURI' => $plugin_data['PluginURI'],
-									'Version'   => $plugin_data['Version'],
-									'Author'    => $plugin_data['Author'],
-									'Network'   => $plugin_data['Network'] ? 'True' : 'False',
-								),
-							)
-						);
+						if ( ! \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+							$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+							$plugin_data = get_plugin_data( $plugin_file, false, true );
+							Alert_Manager::trigger_event(
+								5002,
+								array(
+									'PluginFile' => $plugin_file,
+									'PluginData' => (object) array(
+										'Name'      => $plugin_data['Name'],
+										'PluginURI' => $plugin_data['PluginURI'],
+										'Version'   => $plugin_data['Version'],
+										'Author'    => $plugin_data['Author'],
+										'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+									),
+								)
+							);
+						}
 						// self::run_addon_removal_check( $plugin_file );
 					}
 				} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
 					foreach ( $post_array['checked'] as $plugin_file ) {
-						$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
-						$plugin_data = get_plugin_data( $plugin_file, false, true );
-						Alert_Manager::trigger_event(
-							5002,
-							array(
-								'PluginFile' => $plugin_file,
-								'PluginData' => (object) array(
-									'Name'      => $plugin_data['Name'],
-									'PluginURI' => $plugin_data['PluginURI'],
-									'Version'   => $plugin_data['Version'],
-									'Author'    => $plugin_data['Author'],
-									'Network'   => $plugin_data['Network'] ? 'True' : 'False',
-								),
-							)
-						);
+						if ( ! \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+							$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+							$plugin_data = get_plugin_data( $plugin_file, false, true );
+							Alert_Manager::trigger_event(
+								5002,
+								array(
+									'PluginFile' => $plugin_file,
+									'PluginData' => (object) array(
+										'Name'      => $plugin_data['Name'],
+										'PluginURI' => $plugin_data['PluginURI'],
+										'Version'   => $plugin_data['Version'],
+										'Author'    => $plugin_data['Author'],
+										'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+									),
+								)
+							);
+						}
 					}
 				}
 			}
@@ -402,11 +410,36 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					// second step, after deletion approval
 					// TODO use plugin data from session.
 					foreach ( $post_array['checked'] as $plugin_file ) {
+						if ( ! \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+							$plugin_name = basename( $plugin_file, '.php' );
+							$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
+							$plugin_name = ucwords( $plugin_name );
+							$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
+							$plugin_data = get_plugin_data( $plugin_file, false, true );
+							Alert_Manager::trigger_event(
+								5003,
+								array(
+									'PluginFile' => $plugin_file,
+									'PluginData' => (object) array(
+										'Name'    => $plugin_name,
+										'Version' => $plugin_data['Version'],
+									),
+								)
+							);
+						}
+					}
+				}
+			}
+
+			// Uninstall plugin for WordPress version 4.6.
+			if ( in_array( $action, array( 'delete-plugin' ), true ) && current_user_can( 'delete_plugins' ) ) {
+				if ( isset( $post_array['plugin'] ) ) {
+					if ( ! \is_wp_error( \validate_plugin( $post_array['plugin'] ) ) ) {
+						$plugin_file = WP_PLUGIN_DIR . '/' . $post_array['plugin'];
 						$plugin_name = basename( $plugin_file, '.php' );
 						$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
 						$plugin_name = ucwords( $plugin_name );
-						$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
-						$plugin_data = get_plugin_data( $plugin_file, false, true );
+						$plugin_data = self::$old_plugins[ $post_array['plugin'] ];
 						Alert_Manager::trigger_event(
 							5003,
 							array(
@@ -418,27 +451,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 							)
 						);
 					}
-				}
-			}
-
-			// Uninstall plugin for WordPress version 4.6.
-			if ( in_array( $action, array( 'delete-plugin' ), true ) && current_user_can( 'delete_plugins' ) ) {
-				if ( isset( $post_array['plugin'] ) ) {
-					$plugin_file = WP_PLUGIN_DIR . '/' . $post_array['plugin'];
-					$plugin_name = basename( $plugin_file, '.php' );
-					$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
-					$plugin_name = ucwords( $plugin_name );
-					$plugin_data = self::$old_plugins[ $post_array['plugin'] ];
-					Alert_Manager::trigger_event(
-						5003,
-						array(
-							'PluginFile' => $plugin_file,
-							'PluginData' => (object) array(
-								'Name'    => $plugin_name,
-								'Version' => $plugin_data['Version'],
-							),
-						)
-					);
 
 					// self::run_addon_removal_check( $plugin_file );
 				}
@@ -463,7 +475,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				}
 				if ( isset( $plugins ) ) {
 					foreach ( $plugins as $plugin_file ) {
-						self::log_plugin_updated_event( $plugin_file, self::$old_plugins );
+						if ( ! \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+							self::log_plugin_updated_event( $plugin_file, self::$old_plugins );
+						}
 					}
 				}
 			}
@@ -687,15 +701,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					$addon_slug         = array( array_search( $plugin, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ) ); // phpcs:ignore
 					$is_addon_installed = array_intersect( $all_plugins, $addon_slug );
 					if ( empty( $is_addon_installed ) ) {
-						$current_value   = \WSAL\Helpers\Settings_Helper::get_option_value( 'installed_plugin_addon_available' );
+						$current_value   = Settings_Helper::get_option_value( 'installed_plugin_addon_available' );
 						$plugin_filename = array( $plugin_filename );
 						if ( isset( $current_value ) && is_array( $current_value ) ) {
 							$new_plugin_filenames = array_unique( array_merge( $current_value, $plugin_filename ) );
 						} else {
 							$new_plugin_filenames = $plugin_filename;
 						}
-						\WSAL\Helpers\Settings_Helper::set_option_value( 'installed_plugin_addon_available', $new_plugin_filenames );
-						\WSAL\Helpers\Settings_Helper::delete_option_value( 'addon_available_notice_dismissed' );
+						Settings_Helper::set_option_value( 'installed_plugin_addon_available', $new_plugin_filenames );
+						Settings_Helper::delete_option_value( 'addon_available_notice_dismissed' );
 					}
 				}
 			}
@@ -722,7 +736,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 
 				// Check if plugin file starts with the same string as our addon_for, or if its equal.
 				if ( $plugin_filename === $plugin ) {
-					$current_installed = \WSAL\Helpers\Settings_Helper::get_option_value( 'installed_plugin_addon_available' );
+					$current_installed = Settings_Helper::get_option_value( 'installed_plugin_addon_available' );
 					if ( isset( $current_installed ) && ! empty( $current_installed ) ) {
 						$key = array_search( $plugin, $current_installed ); // phpcs:ignore
 						if ( false !== $key ) {
@@ -730,7 +744,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 						}
 					}
 
-					\WSAL\Helpers\Settings_Helper::set_option_value( 'installed_plugin_addon_available', $current_installed );
+					Settings_Helper::set_option_value( 'installed_plugin_addon_available', $current_installed );
 				}
 			}
 		}
@@ -763,7 +777,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 			if ( array_key_exists( 'Name', $new_plugin_data ) ) {
 				$plugin_file = self::get_plugin_file_name( $new_plugin_data['Name'] );
 				if ( ! empty( $plugin_file ) ) {
-					self::log_plugin_updated_event( $plugin_file );
+					if ( ! \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+						self::log_plugin_updated_event( $plugin_file );
+					}
 				}
 			}
 		}
@@ -777,27 +793,29 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function log_plugin_updated_event( $plugin_file, $old_plugins = '' ) {
-			$plugin_file_full = WP_PLUGIN_DIR . '/' . $plugin_file;
-			$plugin_data      = get_plugin_data( $plugin_file_full, false, true );
+			if ( ! \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+				$plugin_file_full = WP_PLUGIN_DIR . '/' . $plugin_file;
+				$plugin_data      = get_plugin_data( $plugin_file_full, false, true );
 
-			$old_version = ( isset( $old_plugins[ $plugin_file ] ) ) ? $old_plugins[ $plugin_file ]['Version'] : false;
-			$new_version = $plugin_data['Version'];
-			
-			if ( $old_version !== $new_version ) {
-				Alert_Manager::trigger_event(
-					5004,
-					array(
-						'PluginFile' => $plugin_file,
-						'PluginData' => (object) array(
-							'Name'       => $plugin_data['Name'],
-							'PluginURI'  => $plugin_data['PluginURI'],
-							'Version'    => $new_version,
-							'Author'     => $plugin_data['Author'],
-							'Network'    => $plugin_data['Network'] ? 'True' : 'False',
-						),
-						'OldVersion' => $old_version,
-					)
-				);
+				$old_version = ( isset( $old_plugins[ $plugin_file ] ) ) ? $old_plugins[ $plugin_file ]['Version'] : false;
+				$new_version = $plugin_data['Version'];
+
+				if ( $old_version !== $new_version ) {
+					Alert_Manager::trigger_event(
+						5004,
+						array(
+							'PluginFile' => $plugin_file,
+							'PluginData' => (object) array(
+								'Name'      => $plugin_data['Name'],
+								'PluginURI' => $plugin_data['PluginURI'],
+								'Version'   => $new_version,
+								'Author'    => $plugin_data['Author'],
+								'Network'   => $plugin_data['Network'] ? 'True' : 'False',
+							),
+							'OldVersion' => $old_version,
+						)
+					);
+				}
 			}
 		}
 
@@ -880,20 +898,23 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 						);
 					} else {
 						$plugin_name = isset( $get_array['plugin'] ) ? $get_array['plugin'] : false;
-						$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name ) : false;
+						if ( ! \is_wp_error( \validate_plugin( $plugin_name ) ) ) {
 
-						Alert_Manager::trigger_event(
-							5019,
-							array(
-								'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
-								'PostID'             => $post->ID,
-								'PostType'           => $post->post_type,
-								'PostTitle'          => $post->post_title,
-								'PostStatus'         => $post->post_status,
-								'Username'           => 'Plugins',
-								$editor_link['name'] => $editor_link['value'],
-							)
-						);
+							$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name ) : false;
+
+							Alert_Manager::trigger_event(
+								5019,
+								array(
+									'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
+									'PostID'             => $post->ID,
+									'PostType'           => $post->post_type,
+									'PostTitle'          => $post->post_title,
+									'PostStatus'         => $post->post_status,
+									'Username'           => 'Plugins',
+									$editor_link['name'] => $editor_link['value'],
+								)
+							);
+						}
 					}
 				}
 			}
@@ -926,20 +947,22 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 						// OR MainWP plugin requests.
 					} else {
 						$plugin_name = isset( $get_array['plugin'] ) ? $get_array['plugin'] : false;
-						$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name ) : false;
-						$editor_link = self::get_editor_link( $post );
-						Alert_Manager::trigger_event(
-							5019,
-							array(
-								'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
-								'PostID'             => $post->ID,
-								'PostType'           => $post->post_type,
-								'PostTitle'          => $post->post_title,
-								'PostStatus'         => $post->post_status,
-								'Username'           => 'Plugins',
-								$editor_link['name'] => $editor_link['value'],
-							)
-						);
+						if ( ! \is_wp_error( \validate_plugin( $plugin_name ) ) ) {
+							$plugin_data = $plugin_name ? get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name ) : false;
+							$editor_link = self::get_editor_link( $post );
+							Alert_Manager::trigger_event(
+								5019,
+								array(
+									'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,
+									'PostID'             => $post->ID,
+									'PostType'           => $post->post_type,
+									'PostTitle'          => $post->post_title,
+									'PostStatus'         => $post->post_status,
+									'Username'           => 'Plugins',
+									$editor_link['name'] => $editor_link['value'],
+								)
+							);
+						}
 					}
 				}
 			}

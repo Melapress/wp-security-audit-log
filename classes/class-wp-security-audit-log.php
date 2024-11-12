@@ -265,7 +265,9 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 
 			self::init_hooks();
 			self::load_defaults();
-			self::load_wsal();
+
+			\add_action( 'after_setup_theme', array( __CLASS__, 'load_wsal' ) );
+
 			$this->init();
 		}
 
@@ -781,7 +783,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			$notice           = ( isset( $_POST['notice'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['notice'] ) ) : null;
 			$object_type_post = ( isset( $_POST['object_type'] ) ) ? \sanitize_text_field( \wp_unslash( $_POST['object_type'] ) ) : null;
 
-			if ( ! isset( $disable_nonce ) || ! wp_verify_nonce( $disable_nonce, 'disable-custom-nonce' . $notice ) ) {
+			if ( ! isset( $disable_nonce ) || ! \wp_verify_nonce( $disable_nonce, 'disable-custom-nonce' . $notice ) ) {
 				die();
 			}
 
@@ -797,7 +799,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				$excluded_meta = Settings_Helper::get_excluded_user_meta_fields();
 			}
 
-			array_push( $excluded_meta, esc_html( $notice ) );
+			array_push( $excluded_meta, \esc_html( $notice ) );
 
 			if ( 'post' === $object_type ) {
 				$excluded_meta = Settings_Helper::set_excluded_post_meta_fields( $excluded_meta );
@@ -928,13 +930,13 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		private static function load_wsal() {
+		public static function load_wsal() {
 
-			if ( is_admin() ) {
+			// if ( is_admin() ) {
 
 				// Load translations.
 				load_plugin_textdomain( 'wp-security-audit-log', false, WSAL_BASE_DIR . '/languages/' );
-			}
+			//}
 		}
 
 		/**

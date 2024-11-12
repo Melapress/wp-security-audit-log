@@ -517,7 +517,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 						esc_html__( 'Previous old URL', 'wp-security-audit-log' ) => '%old_url%',
 						esc_html__( 'New old URL', 'wp-security-audit-log' ) => '%new_old_url%',
 						esc_html__( 'Previous new URL', 'wp-security-audit-log' ) => '%old_new_url%',
-						esc_html__( 'New new URL', 'wp-security-audit-log' ) => '%new_new_url%',
+						esc_html__( 'New URL', 'wp-security-audit-log' ) => '%new_new_url%',
 						esc_html__( 'Previous redirect type', 'wp-security-audit-log' ) => '%old_redirect_code%',
 						esc_html__( 'New redirect type', 'wp-security-audit-log' ) => '%new_redirect_code%',
 					),

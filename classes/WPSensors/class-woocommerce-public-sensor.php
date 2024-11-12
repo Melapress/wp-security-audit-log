@@ -321,6 +321,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 				$product_id     = $product->get_parent_id();
 				$product_title  = $product->get_name(); // Get product title.
 				$product_status = $product->get_status();
+				$product_sku    = $product->get_sku();
 			} else {
 				$product_id    = $product->get_id();
 				$product_title = $product->get_title(); // Get product title.
@@ -334,8 +335,8 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 
 			// Special conditions for WooCommerce Bulk Stock Management.
 			if ( 'edit.php' === $pagenow && isset( $post_array['page'] ) && 'woocommerce-bulk-stock-management' === $post_array['page'] ) {
-				$old_acc_stock = isset( $post_array['current_stock_quantity'] ) ? $post_array['current_stock_quantity'] : false;
-				$new_acc_stock = isset( $post_array['stock_quantity'] ) ? $post_array['stock_quantity'] : false;
+				$old_acc_stock = isset( $post_array['current_stock_quantity'] ) ? \sanitize_text_field( \wp_unslash( $post_array['current_stock_quantity'] ) ) : false;
+				$new_acc_stock = isset( $post_array['stock_quantity'] ) ? \sanitize_text_field( \wp_unslash( $post_array['stock_quantity'] ) ) : false;
 
 				// Get old stock quantity.
 				$old_stock = ! empty( self::$old_stock ) ? self::$old_stock : $old_acc_stock[ $product_id ];
@@ -402,11 +403,16 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 				$last_occurence = Alert_Manager::get_latest_events();
 
 				$last_occurence_id = ( is_array( $last_occurence[0] ) ) ? $last_occurence[0]['alert_id'] : $last_occurence[0]->alert_id;
-				if ( isset( $last_occurence[0] ) && ( 9035 === (int) $last_occurence_id || 9155 === (int) $last_occurence_id ) ) {
+				if ( isset( $last_occurence[0] ) && ( 9035 === (int) $last_occurence_id || 9155 === (int) $last_occurence_id || 9105 === (int) $last_occurence_id || 9130 === (int) $last_occurence_id || 9154 === (int) $last_occurence_id ) ) {
 
 					$event_meta  = Occurrences_Entity::get_meta_array( (int) $last_occurence[0]['id'] );
 					$order_id    = isset( $event_meta['OrderID'] ) ? $event_meta['OrderID'] : false;
 					$order_title = isset( $event_meta['OrderTitle'] ) ? $event_meta['OrderTitle'] : false;
+
+					// If we still dont have an id, check if the last event held something we can use.
+					if ( ! $order_id && isset( $event_meta['StockOrderID'] ) ) {
+						$order_id = $event_meta['StockOrderID'];
+					}
 				} else {
 					$order_id    = false;
 					$order_title = false;
@@ -421,7 +427,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 					9105,
 					array(
 						'PostID'             => $post->ID,
-						'SKU'                => esc_attr( self::get_product_sku( $post->ID ) ),
+						'SKU'                => isset( $product_sku ) ? $product_sku : esc_attr( self::get_product_sku( $post->ID ) ),
 						'ProductTitle'       => $product_title,
 						'ProductStatus'      => ! $product_status ? $post->post_status : $product_status,
 						'OldValue'           => ! empty( $old_stock ) ? $old_stock : 0,

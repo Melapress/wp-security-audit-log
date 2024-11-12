@@ -515,7 +515,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 		}
 
 		/**
-		 * Get a copy of a posts meta data prior to update for later compariso.
+		 * Get a copy of a posts meta data prior to update for later comparison.
 		 *
 		 * @param int $post_id - Post ID.
 		 * @return void

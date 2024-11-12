@@ -1131,7 +1131,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			$site_id = \apply_filters( 'wsal_alter_site_id', $site_id );
 
 			// if we have a blog id then add it.
-			if ( $site_id ) {
+			if ( $site_id && 0 < $site_id ) {
 				$query['AND'][] = array( ' site_id = %s ' => $site_id );
 			}
 

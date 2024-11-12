@@ -281,7 +281,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 
 			// Get themes from MainWP.
 			if ( isset( $post_array['theme'] ) && ! empty( $post_array['theme'] ) ) {
-				$wp_themes = explode( '||', $post_array['theme'] );
+				$wp_themes = explode( '||', \sanitize_text_field( \wp_unslash( $post_array['theme'] ) ) );
 			}
 
 			// Verify actions from MainWP.
@@ -325,7 +325,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 		 */
 		public static function mainwp_child_plugin_events( $plugin ) {
 			// Check parameter.
-			if ( empty( $plugin ) ) {
+			if ( empty( $plugin ) && ! \is_wp_error( \validate_plugin( $plugin ) ) ) {
 				return;
 			}
 
@@ -334,7 +334,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 
 			// Get plugins from MainWP.
 			if ( isset( $post_array['plugin'] ) && ! empty( $post_array['plugin'] ) ) {
-				$wp_plugins = explode( '||', $post_array['plugin'] );
+				$wp_plugins = explode( '||', \sanitize_text_field( \wp_unslash( $post_array['plugin'] ) ) );
 			}
 
 			if (
@@ -416,7 +416,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 			) {
 				if ( 'theme' === $args['type'] ) {
 					// Site themes updated.
-					$site_themes = array_key_exists( 'themes', $args ) ? $args['themes'] : explode( ',', $post_array['list'] );
+					$site_themes = array_key_exists( 'themes', $args ) ? $args['themes'] : explode( ',', \sanitize_text_field( \wp_unslash( $post_array['list'] ) ) );
 
 					if ( empty( $site_themes ) ) {
 						// No themes in any of the lists.

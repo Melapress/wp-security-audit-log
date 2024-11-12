@@ -238,7 +238,7 @@ $help       = ( in_array( $current_screen->base, array( 'wp-activity-log_page_ws
 						array(
 							'page' => 'wsal-auditlog',
 						),
-						\admin_url( 'admin.php' )
+						\network_admin_url( 'admin.php' )
 					)
 				);
 				?>
@@ -252,7 +252,7 @@ $help       = ( in_array( $current_screen->base, array( 'wp-activity-log_page_ws
 						array(
 							'page' => 'wsal-settings',
 						),
-						\admin_url( 'admin.php' )
+						\network_admin_url( 'admin.php' )
 					)
 				);
 				?>
@@ -266,7 +266,7 @@ $help       = ( in_array( $current_screen->base, array( 'wp-activity-log_page_ws
 						array(
 							'page' => 'wsal-togglealerts',
 						),
-						\admin_url( 'admin.php' )
+						\network_admin_url( 'admin.php' )
 					)
 				);
 				?>
@@ -280,7 +280,7 @@ $help       = ( in_array( $current_screen->base, array( 'wp-activity-log_page_ws
 						array(
 							'page' => 'wsal-help',
 						),
-						\admin_url( 'admin.php' )
+						\network_admin_url( 'admin.php' )
 					)
 				);
 				?>

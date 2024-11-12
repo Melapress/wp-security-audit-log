@@ -74,7 +74,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WSAL_Sensors_Widgets' ) ) {
 			}
 
 			if ( isset( $post_array ) && ! empty( $post_array['sidebars'] ) ) {
-				$current_sidebars = $post_array['sidebars'];
+				$current_sidebars = \sanitize_text_field( \wp_unslash( $post_array['sidebars'] ) );
 				$sidebars         = array();
 				foreach ( $current_sidebars as $key => $val ) {
 					$sb = array();
@@ -172,7 +172,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WSAL_Sensors_Widgets' ) ) {
 
 					if ( $request_sidebars ) {
 						// Get the sidebars from DATABASE.
-						$sidebar_widgets = wp_get_sidebars_widgets();
+						$sidebar_widgets = \wp_get_sidebars_widgets();
 						// Get global sidebars so we can retrieve the real name of the sidebar.
 						global $wp_registered_sidebars;
 
@@ -258,28 +258,28 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WSAL_Sensors_Widgets' ) ) {
 			switch ( true ) {
 				// Added widget.
 				case isset( $post_array['add_new'] ) && 'multi' === $post_array['add_new']:
-					$sidebar = isset( $post_array['sidebar'] ) ? $post_array['sidebar'] : null;
+					$sidebar = isset( $post_array['sidebar'] ) ? \sanitize_text_field( \wp_unslash( $post_array['sidebar'] ) ) : null;
 					if ( $can_check_sidebar && preg_match( '/^sidebar-/', $sidebar ) ) {
 						$sidebar = $wp_registered_sidebars[ $sidebar ]['name'];
 					}
 					Alert_Manager::trigger_event(
 						2042,
 						array(
-							'WidgetName' => $post_array['id_base'],
+							'WidgetName' => \sanitize_text_field( \wp_unslash( $post_array['id_base'] ) ),
 							'Sidebar'    => $sidebar,
 						)
 					);
 					break;
 				// Deleted widget.
 				case isset( $post_array['delete_widget'] ) && 1 === intval( $post_array['delete_widget'] ):
-					$sidebar = isset( $post_array['sidebar'] ) ? $post_array['sidebar'] : null;
+					$sidebar = isset( $post_array['sidebar'] ) ? \sanitize_text_field( \wp_unslash( $post_array['sidebar'] ) ) : null;
 					if ( $can_check_sidebar && preg_match( '/^sidebar-/', $sidebar ) ) {
 						$sidebar = $wp_registered_sidebars[ $sidebar ]['name'];
 					}
 					Alert_Manager::trigger_event(
 						2044,
 						array(
-							'WidgetName' => $post_array['id_base'],
+							'WidgetName' => \sanitize_text_field( \wp_unslash( $post_array['id_base'] ) ),
 							'Sidebar'    => $sidebar,
 						)
 					);
@@ -296,8 +296,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WSAL_Sensors_Widgets' ) ) {
 						return;
 					}
 
-					$widget_name = $post_array['id_base'];
-					$sidebar     = isset( $post_array['sidebar'] ) ? $post_array['sidebar'] : null;
+					$widget_name = \sanitize_text_field( \wp_unslash( $post_array['id_base'] ) );
+					$sidebar     = isset( $post_array['sidebar'] ) ? \sanitize_text_field( \wp_unslash( $post_array['sidebar'] ) ) : null;
 					$widget_data = isset( $post_array[ "widget-$widget_name" ][ $widget_id ] )
 					? $post_array[ "widget-$widget_name" ][ $widget_id ]
 					: null;

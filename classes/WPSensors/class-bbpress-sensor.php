@@ -290,6 +290,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 		 * @param int      $post_id - Post ID.
 		 * @param stdClass $newpost - The new post.
 		 * @param stdClass $oldpost - The old post.
+		 *
+		 * @since 4.6.0
 		 */
 		public static function check_forum_change( $post_id, $newpost, $oldpost ) {
 			if ( self::check_bb_press( $oldpost ) ) {
@@ -416,7 +418,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 				return false;
 			}
 
-			$original = isset( $post_array['original_post_status'] ) ? $post_array['original_post_status'] : '';
+			$original = isset( $post_array['original_post_status'] ) ? \sanitize_text_field( \wp_unslash( $post_array['original_post_status'] ) ) : '';
 			if ( 'draft' === $old_post->post_status || 'auto-draft' === $original ) {
 				$editor_link = self::get_editor_link( $new_post );
 				if ( 'publish' === $new_post->post_status ) {
@@ -475,8 +477,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 			$editor_link = self::get_editor_link( $post );
 			switch ( $post->post_type ) {
 				case 'forum':
-					$old_visibility = ! empty( $post_array['visibility'] ) ? $post_array['visibility'] : '';
-					$new_visibility = ! empty( $post_array['bbp_forum_visibility'] ) ? $post_array['bbp_forum_visibility'] : '';
+					$old_visibility = ! empty( $post_array['visibility'] ) ? \sanitize_text_field( \wp_unslash( $post_array['visibility'] ) ) : '';
+					$new_visibility = ! empty( $post_array['bbp_forum_visibility'] ) ? \sanitize_text_field( \wp_unslash( $post_array['bbp_forum_visibility'] ) ) : '';
 					$new_visibility = ( 'publish' === $new_visibility ) ? 'public' : $new_visibility;
 
 					if ( ! empty( $new_visibility ) && 'auto-draft' !== $old_visibility && $old_visibility !== $new_visibility ) {
@@ -494,8 +496,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 
 					break;
 				case 'topic':
-					$old_visibility = ! empty( $post_array['hidden_post_visibility'] ) ? $post_array['hidden_post_visibility'] : '';
-					$new_visibility = ! empty( $post_array['visibility'] ) ? $post_array['visibility'] : '';
+					$old_visibility = ! empty( $post_array['hidden_post_visibility'] ) ? \sanitize_text_field( \wp_unslash( $post_array['hidden_post_visibility'] ) ) : '';
+					$new_visibility = ! empty( $post_array['visibility'] ) ? \sanitize_text_field( \wp_unslash( $post_array['visibility'] ) ) : '';
 					$new_visibility = ( 'password' === $new_visibility ) ? 'password protected' : $new_visibility;
 
 					if ( ! empty( $new_visibility ) && 'auto-draft' !== $old_visibility && $old_visibility !== $new_visibility ) {
@@ -542,7 +544,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 				case 'forum':
 					$bbp_forum_type = get_post_meta( $post->ID, '_bbp_forum_type', true );
 					$old_type       = ! empty( $bbp_forum_type ) ? $bbp_forum_type : 'forum';
-					$new_type       = ! empty( $post_array['bbp_forum_type'] ) ? $post_array['bbp_forum_type'] : '';
+					$new_type       = ! empty( $post_array['bbp_forum_type'] ) ? \sanitize_text_field( \wp_unslash( $post_array['bbp_forum_type'] ) ) : '';
 					if ( ! empty( $new_type ) && $old_type !== $new_type ) {
 						Alert_Manager::trigger_event(
 							8011,
@@ -559,7 +561,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 					break;
 				case 'topic':
 					if ( ! empty( $post_array['parent_id'] ) ) {
-						$post_id = $post_array['parent_id'];
+						$post_id = \intval( $post_array['parent_id'] );
 					} else {
 						$post_id = $post->ID;
 					}
@@ -573,7 +575,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 					} else {
 						$old_type = 'unstick';
 					}
-					$new_type = ! empty( $post_array['bbp_stick_topic'] ) ? $post_array['bbp_stick_topic'] : '';
+					$new_type = ! empty( $post_array['bbp_stick_topic'] ) ? \sanitize_text_field( \wp_unslash( $post_array['bbp_stick_topic'] ) ) : '';
 					if ( ! empty( $new_type ) && $old_type !== $new_type ) {
 						Alert_Manager::trigger_event(
 							8016,
@@ -619,7 +621,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 				case 'forum':
 					$bbp_status = get_post_meta( $post->ID, '_bbp_status', true );
 					$old_status = ! empty( $bbp_status ) ? $bbp_status : 'open';
-					$new_status = ! empty( $post_array['bbp_forum_status'] ) ? $post_array['bbp_forum_status'] : '';
+					$new_status = ! empty( $post_array['bbp_forum_status'] ) ? \sanitize_text_field( \wp_unslash( $post_array['bbp_forum_status'] ) ) : '';
 					if ( ! empty( $new_status ) && $old_status !== $new_status ) {
 						Alert_Manager::trigger_event(
 							8001,
@@ -635,8 +637,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 
 					break;
 				case 'topic':
-					$old_status = ! empty( $post_array['original_post_status'] ) ? $post_array['original_post_status'] : '';
-					$new_status = ! empty( $post_array['post_status'] ) ? $post_array['post_status'] : '';
+					$old_status = ! empty( $post_array['original_post_status'] ) ? \sanitize_text_field( \wp_unslash( $post_array['original_post_status'] ) ) : '';
+					$new_status = ! empty( $post_array['post_status'] ) ? \sanitize_text_field( \wp_unslash( $post_array['post_status'] ) ) : '';
 					// In case of Ajax request Spam/Not spam.
 					if ( isset( $get_array['action'] ) && 'bbp_toggle_topic_spam' === $get_array['action'] ) {
 						$old_status = $post->post_status;

@@ -233,7 +233,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Menus_Sensor' ) ) {
 
 			// Manage Location tab.
 			if ( isset( $post_array['menu-locations'] ) ) {
-				$new_locations = $post_array['menu-locations'];
+				$new_locations = \sanitize_text_field( \wp_unslash( $post_array['menu-locations'] ) );
 				if ( isset( $new_locations['top'] ) ) {
 					self::location_setting( $new_locations['top'], 'top' );
 				}

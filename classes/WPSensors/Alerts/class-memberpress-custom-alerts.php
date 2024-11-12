@@ -183,7 +183,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Memberpress_Custom_Alerts' ) ) {
 					6208,
 					WSAL_HIGH,
 					esc_html__( 'A rule was permanently deleted.', 'wp-security-audit-log' ),
-					esc_html__( 'Permanently deleted the Ruke %name%', 'wp-security-audit-log' ),
+					esc_html__( 'Permanently deleted the Rule %name%', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Rule ID', 'wp-security-audit-log' ) => '%ID%',
 					),

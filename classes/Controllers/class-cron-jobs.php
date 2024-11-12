@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace WSAL\Controllers;
 
+use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Occurrences_Entity;
 
@@ -92,6 +93,8 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			if ( Settings_Helper::get_boolean_option_value( 'pruning-date-e', false ) ) {
 				\add_action( 'wsal_cleanup', array( Occurrences_Entity::class, 'prune_records' ) );
 			}
+
+			\wp_get_schedules();
 
 			self::initialize_hooks();
 		}
@@ -338,6 +341,19 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		 */
 		private static function initialize_hooks() {
 			$hooks_array = self::CRON_JOBS_NAMES;
+
+			if ( WP_Helper::is_multisite() ) {
+				/**
+				 * Multisite crons are running for every single sub-site instance. This is completely wrong as it leads to multiple reports being generated / fired. For that reason only the main site is allowed to run them, and that is the reason for that code existance.
+				 */
+				if ( ! \is_main_site() ) {
+					unset( $hooks_array['wsal_generate_reports_cron'] );
+					unset( $hooks_array['wsal_periodic_reports_daily'] );
+					unset( $hooks_array['wsal_periodic_reports_weekly'] );
+					unset( $hooks_array['wsal_periodic_reports_monthly'] );
+					unset( $hooks_array['wsal_periodic_reports_quarterly'] );
+				}
+			}
 
 			/**
 			 * Gives an option to add hooks which must be enabled.
