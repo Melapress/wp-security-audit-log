@@ -1089,7 +1089,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 */
 		public static function determine_added_and_removed_items( $old_value, $value ) {
 			$old_value         = ( ! is_array( $old_value ) ) ? explode( ',', $old_value ) : $old_value;
-			$value             = ( ! is_array( $value ) ) ? explode( ',', $value ) : $value;
+			$value             = ( ! is_array( $value ) ) ? explode( ',', \sanitize_text_field( \wp_unslash( $value ) ) ) : array_map( 'sanitize_text_field', $value );
 			$return            = array();
 			$return['removed'] = array_filter( array_diff( $old_value, $value ) );
 			$return['added']   = array_filter( array_diff( $value, $old_value ) );
@@ -1200,6 +1200,15 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function set_excluded_monitoring_users( $users ) {
+
+			$users = ( ! is_array( $users ) ) ? explode( ',', \sanitize_text_field( \wp_unslash( $users ) ) ) : array_map( 'sanitize_text_field', $users );
+
+			foreach ( $users as $key => $user ) {
+				if ( ! Validator::validate_username( $user ) ) {
+					unset( $users[ $key ] );
+				}
+			}
+
 			$old_value = self::get_option_value( 'excluded-users', array() );
 			$changes   = self::determine_added_and_removed_items( $old_value, $users );
 
@@ -1250,7 +1259,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 						6054,
 						array(
 							'role'           => $user,
-							'previous_users' => ( empty( $old_value ) ) ? self::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+							'previous_roles' => ( empty( $old_value ) ) ? self::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 							'EventType'      => 'added',
 						)
 					);
@@ -1262,7 +1271,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 						6054,
 						array(
 							'role'           => $user,
-							'previous_users' => empty( $old_value ) ? self::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
+							'previous_roles' => empty( $old_value ) ? self::tidy_blank_values( $old_value ) : str_replace( ',', ', ', $old_value ),
 							'EventType'      => 'removed',
 						)
 					);

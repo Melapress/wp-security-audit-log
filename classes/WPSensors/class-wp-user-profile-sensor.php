@@ -133,7 +133,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 							'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
 							'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
 							'CurrentUserID' => $current_user->ID,
-							'friendly_name' => sanitize_text_field( wp_unslash( $_POST['name'] ) ),
+							'friendly_name' => \sanitize_text_field( \wp_unslash( $_POST['name'] ) ),
 							'EventType'     => 'added',
 						)
 					);
@@ -169,7 +169,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 							'firstname'     => ( empty( $current_user->user_firstname ) ) ? ' ' : $current_user->user_firstname,
 							'lastname'      => ( empty( $current_user->user_lastname ) ) ? ' ' : $current_user->user_lastname,
 							'CurrentUserID' => $current_user->ID,
-							'friendly_name' => sanitize_text_field( $revoked_pw_name ),
+							'friendly_name' => \sanitize_text_field( $revoked_pw_name ),
 							'EventType'     => 'revoked',
 						)
 					);

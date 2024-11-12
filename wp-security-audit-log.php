@@ -7,7 +7,7 @@
  *
  * @wordpress-plugin
  * Plugin Name: WP Activity Log
- * Version:     5.2.1
+ * Version:     5.2.2
  * Plugin URI:  https://melapress.com/wordpress-activity-log/
  * Description: Identify WordPress security issues before they become a problem. Keep track of everything happening on your WordPress, including users activity. Similar to Linux Syslog, WP Activity Log generates an activity log with a record of everything that happens on your WordPress websites.
  * Author:      Melapress
@@ -15,7 +15,7 @@
  * Text Domain: wp-security-audit-log
  * Domain Path: /languages/
  * License:     GPL v3
- * Requires at least: 5.0
+ * Requires at least: 5.5
  * Requires PHP: 7.2
  * Network: true
  *
@@ -52,7 +52,7 @@ if ( file_exists( plugin_dir_path( __FILE__ ) . 'third-party/vendor/autoload.php
 }
 
 if ( ! defined( 'WSAL_PREFIX' ) ) {
-	define( 'WSAL_VERSION', '5.2.1' );
+	define( 'WSAL_VERSION', '5.2.2' );
 	define( 'WSAL_PREFIX', 'wsal_' );
 	define( 'WSAL_PREFIX_PAGE', 'wsal-' );
 }
@@ -175,7 +175,7 @@ if ( ! function_exists( 'wsal_freemius' ) ) {
 	// Begin load sequence.
 	WpSecurityAuditLog::get_instance();
 
-	if ( is_admin() && ! WP_Helper::is_plugin_active( WSAL_BASE_NAME ) ) {
+	if ( ! WP_Helper::is_plugin_active( WSAL_BASE_NAME ) ) {
 		WpSecurityAuditLog::load_freemius();
 
 		if ( ! apply_filters( 'wsal_disable_freemius_sdk', false ) ) {

@@ -213,14 +213,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 		 */
 		public static function wsal_woocommerce_extension_add_custom_meta_format( $value, $expression, $alert_formatter, $occurrence_id ) {
 			if ( '%StockOrderID%' === $expression ) {
-				$check_value = (string) $value;
-				if ( 'NULL' !== $check_value ) {
+				$check_value = \strip_tags( (string) $value );
+				if ( ! empty( $check_value ) && 'NULL' !== $check_value ) {
 					$new_order    = new \WC_Order( strip_tags( $value ) );
 					$editor_title = self::wsal_woocommerce_extension_get_order_title( $new_order );
 
 					return isset( $editor_title ) ? '<strong>' . $editor_title . '</strong>' : '';
 				} else {
-					return '';
+					return 'N/A';
 				}
 			}
 

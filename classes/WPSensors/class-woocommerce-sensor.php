@@ -1034,6 +1034,10 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 			}
 			$sku = $product->get_sku();
 
+			if ( isset( $_POST['variable_sku'] ) && isset( $_POST['variable_sku'][0] ) && ! empty( $_POST['variable_sku'][0] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$sku = sanitize_text_field( \wp_unslash( $_POST['variable_sku'][0] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			}			
+
 			/**
 			 * For some reason the above could return empty string even if there is a SKU.
 			 * Happens when product is created (first time) or when product is in draft but the user want to use preview option.
@@ -2052,11 +2056,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 			$editor_link = self::get_editor_link( $post );
 
 			if ( empty( self::$last_9016_type ) || ! in_array( $type, self::$last_9016_type, true ) ) {
+				// WC does not like data being accessed directly.
+				$post_id = method_exists( $post, 'get_id' ) ? $post->get_id() : $post->ID;
 				Alert_Manager::trigger_event(
 					9016,
 					array(
-						'PostID'             => esc_attr( $post->ID ),
-						'SKU'                => esc_attr( self::get_product_sku( $post->ID ) ),
+						'PostID'             => $post_id,
+						'SKU'                => esc_attr( self::get_product_sku( $post_id ) ),
 						'ProductTitle'       => sanitize_text_field( $post->post_title ),
 						'ProductStatus'      => sanitize_text_field( $post->post_status ),
 						'PriceType'          => $type,
@@ -2166,11 +2172,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 
 			if ( $new_value && ( $old_value !== $new_value ) ) {
 				$editor_link = self::get_editor_link( $oldpost );
+				// WC does not like data being accessed directly.
+				$post_id = method_exists( $oldpost, 'get_id' ) ? $oldpost->get_id() : $oldpost->ID;
 				Alert_Manager::trigger_event(
 					9019,
 					array(
-						'PostID'             => esc_attr( $oldpost->ID ),
-						'SKU'                => esc_attr( self::get_product_sku( $oldpost->ID ) ),
+						'PostID'             => $post_id,
+						'SKU'                => esc_attr( self::get_product_sku( $post_id ) ),
 						'ProductTitle'       => sanitize_text_field( $oldpost->post_title ),
 						'ProductStatus'      => sanitize_text_field( $oldpost->post_status ),
 						'OldValue'           => ! empty( $old_value ) ? $old_value : '0',
@@ -2232,11 +2240,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 
 			if ( $old_virtual && $new_virtual && $old_virtual !== $new_virtual ) {
 				$editor_link = self::get_editor_link( $oldpost );
+				// WC does not like data being accessed directly.
+				$post_id = method_exists( $oldpost, 'get_id' ) ? $oldpost->get_id() : $oldpost->ID;
 				Alert_Manager::trigger_event(
 					9020,
 					array(
-						'PostID'             => esc_attr( $oldpost->ID ),
-						'SKU'                => esc_attr( self::get_product_sku( $oldpost->ID ) ),
+						'PostID'             => $post_id,
+						'SKU'                => esc_attr( self::get_product_sku( $post_id ) ),
 						'ProductTitle'       => sanitize_text_field( $oldpost->post_title ),
 						'ProductStatus'      => sanitize_text_field( $oldpost->post_status ),
 						'OldType'            => 'yes' === $old_virtual ? 'Virtual' : 'Non-Virtual',
@@ -2249,11 +2259,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 
 			if ( $old_download && $new_download && $old_download !== $new_download ) {
 				$editor_link = self::get_editor_link( $oldpost );
+				// WC does not like data being accessed directly.
+				$post_id = method_exists( $oldpost, 'get_id' ) ? $oldpost->get_id() : $oldpost->ID;
 				Alert_Manager::trigger_event(
 					9020,
 					array(
-						'PostID'             => esc_attr( $oldpost->ID ),
-						'SKU'                => esc_attr( self::get_product_sku( $oldpost->ID ) ),
+						'PostID'             => esc_attr( $post_id ),
+						'SKU'                => esc_attr( self::get_product_sku( $post_id ) ),
 						'ProductTitle'       => sanitize_text_field( $oldpost->post_title ),
 						'ProductStatus'      => sanitize_text_field( $oldpost->post_status ),
 						'OldType'            => ( 'yes' === $old_download ) ? 'Downloadable' : 'Non-Downloadable',
@@ -2285,11 +2297,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 			if ( $new_weight && ( $old_weight !== $new_weight ) ) {
 				$weight_unit = self::get_config( 'weight_unit' );
 				$editor_link = self::get_editor_link( $oldpost );
+				// WC does not like data being accessed directly.
+				$post_id = method_exists( $oldpost, 'get_id' ) ? $oldpost->get_id() : $oldpost->ID;
 				Alert_Manager::trigger_event(
 					9021,
 					array(
-						'PostID'             => esc_attr( $oldpost->ID ),
-						'SKU'                => esc_attr( self::get_product_sku( $oldpost->ID ) ),
+						'PostID'             => $post_id,
+						'SKU'                => esc_attr( self::get_product_sku( $post_id ) ),
 						'ProductTitle'       => sanitize_text_field( $oldpost->post_title ),
 						'ProductStatus'      => sanitize_text_field( $oldpost->post_status ),
 						'OldWeight'          => ! empty( $old_weight ) ? $old_weight . ' ' . $weight_unit : 0,
@@ -2377,11 +2391,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 		private static function event_dimension( $oldpost, $type, $old_dimension, $new_dimension ) {
 			$dimension_unit = self::get_config( 'dimension_unit' );
 			$editor_link    = self::get_editor_link( $oldpost );
+			// WC does not like data being accessed directly.
+			$post_id = method_exists( $oldpost, 'get_id' ) ? $oldpost->get_id() : $oldpost->ID;
 			Alert_Manager::trigger_event(
 				9022,
 				array(
-					'PostID'             => esc_attr( $oldpost->ID ),
-					'SKU'                => esc_attr( self::get_product_sku( $oldpost->ID ) ),
+					'PostID'             => $post_id,
+					'SKU'                => esc_attr( self::get_product_sku( $post_id ) ),
 					'ProductTitle'       => sanitize_text_field( $oldpost->post_title ),
 					'ProductStatus'      => sanitize_text_field( $oldpost->post_status ),
 					'DimensionType'      => $type,
@@ -2435,12 +2451,14 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Sensor' ) ) {
 				if ( count( $new_file_urls ) === count( $old_file_urls ) ) {
 					$is_url_changed = true;
 				} else {
+					// WC does not like data being accessed directly.
+					$post_id = method_exists( $oldpost, 'get_id' ) ? $oldpost->get_id() : $oldpost->ID;
 					foreach ( $added_urls as $key => $url ) {
 						Alert_Manager::trigger_event(
 							9023,
 							array(
-								'PostID'             => esc_attr( $oldpost->ID ),
-								'SKU'                => esc_attr( self::get_product_sku( $oldpost->ID ) ),
+								'PostID'             => $post_id,
+								'SKU'                => esc_attr( self::get_product_sku( $post_id ) ),
 								'ProductTitle'       => sanitize_text_field( $oldpost->post_title ),
 								'ProductStatus'      => sanitize_text_field( $oldpost->post_status ),
 								'FileName'           => sanitize_text_field( $new_file_names[ $key ] ),

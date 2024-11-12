@@ -448,6 +448,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 				} else {
 					// Get extension data.
 					$plugin_file = trailingslashit( WP_PLUGIN_DIR ) . $extension;
+					if ( \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
+						return;
+					}
 					$plugin_data = get_plugin_data( $plugin_file );
 					$event_data  = array(
 						'mainwp_dash'    => true,

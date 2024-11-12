@@ -527,7 +527,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				if ( is_array( $value ) || is_object( $value ) ) {
 					$value = var_export( $value, true );
 				}
-				echo '<strong>' . $item . ':</strong> <span style="opacity: 0.7;">' . $value . '</span></br>';
+				echo '<strong>' . $item . ':</strong> <span style="opacity: 0.7;"><pre style="display:inline">' . $value . '</pre></span></br>';
 			}
 		}
 		echo '</div>';

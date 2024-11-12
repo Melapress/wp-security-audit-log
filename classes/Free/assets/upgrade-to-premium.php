@@ -121,7 +121,7 @@
 			/* translators: This text is prepended by a link to Melapress's website, and appended by a link to Melapress's website. */
 				'<strong>%1$s</strong> %2$s',
 				\esc_html__( 'Upgrade to Premium and:', 'wp-security-audit-log' ),
-				\esc_html__( 'Save time and find specific events in seconds with extensive search filters. Stay informed while on the go with fully configurable email and SMS notifications. Manage user sessions with policies and see who is logged in in real-time. Create ad-hoc and periodic reports with white-labeling and email options. And much more.', 'wp-security-audit-log' ),
+				\esc_html__( 'Save time and find specific events in seconds with extensive search filters. Stay informed while on the go with fully configurable email and SMS notifications. Manage user sessions with policies and see who is logged in in real-time. Create ad-hoc and periodic reports with white-labeling and email options. And much more.', 'wp-security-audit-log' )
 			);
 			?>
 		</p>

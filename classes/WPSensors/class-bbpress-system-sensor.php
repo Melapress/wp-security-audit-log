@@ -53,7 +53,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_System_Sensor' ) ) {
 		public static function event_admin_init() {
 			// Filter global arrays for security.
 			$post_array   = filter_input_array( INPUT_POST );
-			$get_array    = filter_input_array( INPUT_GET );
 			$server_array = filter_input_array( INPUT_SERVER );
 
 			// Make sure user can actually modify target options.
@@ -73,7 +72,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_System_Sensor' ) ) {
 			/* BBPress Forum support  Setting */
 			if ( isset( $post_array['action'] ) && 'update' === $post_array['action'] && isset( $post_array['_bbp_default_role'] ) ) {
 				$old_role = get_option( '_bbp_default_role' );
-				$new_role = $post_array['_bbp_default_role'];
+			$get_array    = filter_input_array( INPUT_GET );
+				$new_role = \sanitize_text_field( \wp_unslash( $post_array['_bbp_default_role'] ) );
 				if ( $old_role !== $new_role ) {
 					Alert_Manager::trigger_event(
 						8009,

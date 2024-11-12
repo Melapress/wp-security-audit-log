@@ -1085,6 +1085,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 						if ( array_key_exists( 'plugin', $request_params ) && ! empty( $request_params['plugin'] ) ) {
 							// Event initiated by a plugin.
 							$plugin_name = $request_params['plugin'];
+							if ( \is_wp_error( \validate_plugin( $plugin_name ) ) ) {
+								return;
+							}
 							$plugin_data = get_plugin_data( trailingslashit( WP_PLUGIN_DIR ) . $plugin_name );
 							$event_data  = array(
 								'PluginName'         => ( $plugin_data && isset( $plugin_data['Name'] ) ) ? $plugin_data['Name'] : false,

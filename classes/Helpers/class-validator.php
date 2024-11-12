@@ -160,6 +160,24 @@ if ( ! class_exists( '\WSAL\Helpers\Validator' ) ) {
 		}
 
 		/**
+		 * Validates username
+		 *
+		 * @param string $username - The username to validate.
+		 *
+		 * @return boolean
+		 *
+		 * @since 5.2.1
+		 */
+		public static function validate_username( string $username ): bool {
+
+			if ( preg_match( '/^[A-Za-z0-9\_\.\ \-\@]{3,}$/', $username ) ) {
+				return true;
+			}
+
+			return false;
+		}
+
+		/**
 		 * Check if the float is IPv4 instead.
 		 *
 		 * @param float $ip_address - Number to check.
