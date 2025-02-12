@@ -330,7 +330,7 @@ if ( ! class_exists( '\WSAL\Views\Premium_Features' ) ) {
 						</div>
 					</li>
 				</ul>
-				<p class="wsal-cta"><a href="https://www.melapress.com/wordpress-activity-log/pricing/?&utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank" class="wsal-cta-link">Get WP Activity Log</a></p>
+				<p class="wsal-cta"><a href="https://melapress.com/wordpress-activity-log/pricing/#utm_source=plugin&utm_medium=link&utm_campaign=wsal" target="_blank" class="wsal-cta-link">Get WP Activity Log Premium</a></p>
 			</section>
 			<?php
 		}

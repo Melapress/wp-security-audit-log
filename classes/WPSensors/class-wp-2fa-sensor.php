@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
+use WSAL\Helpers\WP_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\WP_Sensors\Helpers\WP_2FA_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,9 +37,14 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function init() {
-			add_action( 'updated_option', array( __CLASS__, 'settings_trigger' ), 10, 3 );
-			add_action( 'update_user_meta', array( __CLASS__, 'user_trigger' ), 10, 4 );
-			add_action( 'delete_user_meta', array( __CLASS__, 'user_deletions_trigger' ), 10, 4 );
+			if ( WP_2FA_Helper::is_wp2fa_active() ) {
+				\add_action( 'updated_option', array( __CLASS__, 'settings_trigger' ), 10, 3 );
+				if ( WP_Helper::is_multisite() ) {
+					\add_action( 'update_site_option', array( __CLASS__, 'settings_trigger' ), 10, 3 );
+				}
+				\add_action( 'update_user_meta', array( __CLASS__, 'user_trigger' ), 10, 4 );
+				\add_action( 'delete_user_meta', array( __CLASS__, 'user_deletions_trigger' ), 10, 4 );
+			}
 		}
 
 		/**
@@ -239,7 +246,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_2FA_Sensor' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		public static function user_deletions_trigger( $meta_id, $user_id, $meta_key, $_meta_value ) {
+		public static function user_deletions_trigger( $meta_id, $user_id, $meta_key, $_meta_value ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 
 			// Filter global arrays for security.
 			$server_array = filter_input_array( INPUT_SERVER );

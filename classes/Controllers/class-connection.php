@@ -249,7 +249,7 @@ if ( ! class_exists( '\WSAL\Controllers\Connection' ) ) {
 			}
 			$password = self::decrypt_string( $connection_config['password'] );
 
-			$new_wpdb = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] );
+			$new_wpdb = new MySQL_Connection( $connection_config['user'], $password, $connection_config['db_name'], $connection_config['hostname'], $connection_config['is_ssl'], $connection_config['is_cc'], $connection_config['ssl_ca'], $connection_config['ssl_cert'], $connection_config['ssl_key'] ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysql_connection
 
 			if ( isset( $new_wpdb->error ) && isset( $new_wpdb->dbh ) ) {
 				throw new \Exception( $new_wpdb->dbh->error, $new_wpdb->dbh->errno ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped

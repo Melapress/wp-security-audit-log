@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit24283
+class ComposerStaticInit3061
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -37,21 +37,31 @@ class ComposerStaticInit24283
         'WSAL\\Controllers\\Database_Manager' => __DIR__ . '/../..' . '/classes/Controllers/class-database-manager.php',
         'WSAL\\Controllers\\Plugin_Extensions' => __DIR__ . '/../..' . '/classes/Controllers/class-plugin-extensions.php',
         'WSAL\\Controllers\\Sensors_Load_Manager' => __DIR__ . '/../..' . '/classes/Controllers/class-sensors-load-manager.php',
+        'WSAL\\Controllers\\Twilio\\Twilio' => __DIR__ . '/../..' . '/classes/Controllers/twilio/class-twilio.php',
+        'WSAL\\Controllers\\Twilio\\Twilio_API' => __DIR__ . '/../..' . '/classes/Controllers/twilio/class-twilio-api.php',
         'WSAL\\Controllers\\WP_CLI\\WP_CLI_Commands' => __DIR__ . '/../..' . '/classes/Controllers/WP_CLI/class-wp-cli-commands.php',
         'WSAL\\Entities\\Abstract_Entity' => __DIR__ . '/../..' . '/classes/Entities/class-abstract-entity.php',
         'WSAL\\Entities\\Archive\\Archive_Records' => __DIR__ . '/../..' . '/classes/Entities/Archive/class-archive-records.php',
         'WSAL\\Entities\\Archive\\Delete_Records' => __DIR__ . '/../..' . '/classes/Entities/Delete/class-delete-records.php',
         'WSAL\\Entities\\Base_Fields' => __DIR__ . '/../..' . '/classes/Entities/Fields/class-base-fields.php',
+        'WSAL\\Entities\\Custom_Notifications_Entity' => __DIR__ . '/../..' . '/classes/notification/Entities/class-custom-notifications-entity.php',
         'WSAL\\Entities\\DBConnection\\MySQL_Connection' => __DIR__ . '/../..' . '/classes/Entities/DBConnection/class-mysql-connection.php',
         'WSAL\\Entities\\MainWP_Server_Users' => __DIR__ . '/../..' . '/classes/MainWPAddon/Entities/class-mainwp-server-users-entity.php',
         'WSAL\\Entities\\Metadata_Entity' => __DIR__ . '/../..' . '/classes/Entities/class-metadata-entity.php',
         'WSAL\\Entities\\Occurrences_Entity' => __DIR__ . '/../..' . '/classes/Entities/class-occurrences-entity.php',
         'WSAL\\Entities\\Options_Entity' => __DIR__ . '/../..' . '/classes/Entities/class-options-entity.php',
+        'WSAL\\Entities\\Query_Builder_Parser' => __DIR__ . '/../..' . '/classes/Entities/Fields/query-builder-parser/class-query-builder-parser.php',
+        'WSAL\\Extensions\\Helpers\\Notification_Helper' => __DIR__ . '/../..' . '/classes/notification/class-notification-helper.php',
+        'WSAL\\Extensions\\Helpers\\Notification_Template' => __DIR__ . '/../..' . '/classes/notification/class-notification-template.php',
+        'WSAL\\Extensions\\Notifications\\Custom_Notifications' => __DIR__ . '/../..' . '/classes/notification/Lists/class-custom-notifications.php',
         'WSAL\\Helpers\\Assets' => __DIR__ . '/../..' . '/classes/Helpers/class-assets.php',
         'WSAL\\Helpers\\Classes_Helper' => __DIR__ . '/../..' . '/classes/Helpers/class-classes-helper.php',
         'WSAL\\Helpers\\DateTime_Formatter_Helper' => __DIR__ . '/../..' . '/classes/Helpers/class-datetime-formatter-helper.php',
         'WSAL\\Helpers\\Email_Helper' => __DIR__ . '/../..' . '/classes/Helpers/class-email-helper.php',
         'WSAL\\Helpers\\File_Helper' => __DIR__ . '/../..' . '/classes/Helpers/class-file-helper.php',
+        'WSAL\\Helpers\\Formatters\\Alert_Formatter' => __DIR__ . '/../..' . '/classes/Helpers/formatters/class-alert-formatter.php',
+        'WSAL\\Helpers\\Formatters\\Alert_Formatter_Configuration' => __DIR__ . '/../..' . '/classes/Helpers/formatters/class-alert-formatter-configuration.php',
+        'WSAL\\Helpers\\Formatters\\Formatter_Factory' => __DIR__ . '/../..' . '/classes/Helpers/formatters/class-formatter-factory.php',
         'WSAL\\Helpers\\Logger' => __DIR__ . '/../..' . '/classes/Helpers/class-logger.php',
         'WSAL\\Helpers\\Notices' => __DIR__ . '/../..' . '/classes/Helpers/class-notices.php',
         'WSAL\\Helpers\\PHP_Helper' => __DIR__ . '/../..' . '/classes/Helpers/class-php-helper.php',
@@ -69,17 +79,17 @@ class ComposerStaticInit24283
         'WSAL\\Helpers\\Widget_Manager' => __DIR__ . '/../..' . '/classes/Helpers/class-widget-manager.php',
         'WSAL\\ListAdminEvents\\List_Events' => __DIR__ . '/../..' . '/classes/ListAdminEvents/class-list-events.php',
         'WSAL\\Loggers\\Database_Logger' => __DIR__ . '/../..' . '/classes/Loggers/class-database-logger.php',
+        'WSAL\\Loggers\\Notification_Logger' => __DIR__ . '/../..' . '/classes/notification/class-notification-logger.php',
         'WSAL\\MainWP\\MainWP_API' => __DIR__ . '/../..' . '/classes/MainWPAddon/class-mainwp-api.php',
         'WSAL\\MainWP\\MainWP_Addon' => __DIR__ . '/../..' . '/classes/MainWPAddon/class-mainwp-addon.php',
         'WSAL\\MainWP\\MainWP_Helper' => __DIR__ . '/../..' . '/classes/MainWPAddon/class-mainwp-helper.php',
         'WSAL\\MainWP\\MainWP_Settings' => __DIR__ . '/../..' . '/classes/MainWPAddon/class-mainwp-settings.php',
         'WSAL\\Migration\\Metadata_Migration_440' => __DIR__ . '/../..' . '/classes/Migration/class-metadata-migration-440.php',
-        'WSAL\\Multisite\\NetworkWide\\AbstractTracker' => __DIR__ . '/../..' . '/classes/Multisite/NetworkWide/AbstractTracker.php',
-        'WSAL\\Multisite\\NetworkWide\\CPTsTracker' => __DIR__ . '/../..' . '/classes/Multisite/NetworkWide/CPTsTracker.php',
-        'WSAL\\Multisite\\NetworkWide\\TrackerInterface' => __DIR__ . '/../..' . '/classes/Multisite/NetworkWide/TrackerInterface.php',
         'WSAL\\PluginExtensions\\WFCM_Extension' => __DIR__ . '/../..' . '/classes/PluginExtensions/class-wfcm-extension.php',
         'WSAL\\Utils\\Abstract_Migration' => __DIR__ . '/../..' . '/classes/Migration/class-abstract-migration.php',
+        'WSAL\\Utils\\Migrate_53' => __DIR__ . '/../..' . '/classes/Migration/class-migrate-53.php',
         'WSAL\\Utils\\Migration' => __DIR__ . '/../..' . '/classes/Migration/class-migration.php',
+        'WSAL\\Views\\Notifications' => __DIR__ . '/../..' . '/classes/notification/class-notifications.php',
         'WSAL\\Views\\Premium_Features' => __DIR__ . '/../..' . '/classes/Views/class-premium-features.php',
         'WSAL\\Views\\Setup_Wizard' => __DIR__ . '/../..' . '/classes/Views/class-setup-wizard.php',
         'WSAL\\WP_Sensors\\ACF_Meta_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-acf-meta-sensor.php',
@@ -136,13 +146,12 @@ class ComposerStaticInit24283
         'WSAL\\WP_Sensors\\WooCommerce_Public_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-woocommerce-public-sensor.php',
         'WSAL\\WP_Sensors\\WooCommerce_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-woocommerce-sensor.php',
         'WSAL\\WP_Sensors\\Yoast_SEO_Sensor' => __DIR__ . '/../..' . '/classes/WPSensors/class-yoast-seo-sensor.php',
+        'WSAL\\WP_Sensors_Helpers\\WooCommerce_Sensor_Helper' => __DIR__ . '/../..' . '/classes/WPSensors/class-woocommerce-sensor-helper.php',
+        'WSAL\\WP_Sensors_Helpers\\WooCommerce_Sensor_Helper_Second' => __DIR__ . '/../..' . '/classes/WPSensors/class-woocommerce-sensor-helper-second.php',
         'WSAL\\Writers\\CSV_Writer' => __DIR__ . '/../..' . '/classes/Writers/class-csv-writer.php',
         'WSAL\\Writers\\HTML_Writer' => __DIR__ . '/../..' . '/classes/Writers/class-html-writer.php',
         'WSAL_AbstractLogger' => __DIR__ . '/../..' . '/classes/AbstractLogger.php',
         'WSAL_AbstractView' => __DIR__ . '/../..' . '/classes/AbstractView.php',
-        'WSAL_AlertFormatter' => __DIR__ . '/../..' . '/classes/AlertFormatter.php',
-        'WSAL_AlertFormatterConfiguration' => __DIR__ . '/../..' . '/classes/AlertFormatterConfiguration.php',
-        'WSAL_AlertFormatterFactory' => __DIR__ . '/../..' . '/classes/AlertFormatterFactory.php',
         'WSAL_Views_AuditLog' => __DIR__ . '/../..' . '/classes/Views/AuditLog.php',
         'WSAL_Views_Help' => __DIR__ . '/../..' . '/classes/Views/Help.php',
         'WSAL_Views_Settings' => __DIR__ . '/../..' . '/classes/Views/Settings.php',
@@ -153,9 +162,9 @@ class ComposerStaticInit24283
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit24283::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit24283::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit24283::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit3061::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit3061::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit3061::$classMap;
 
         }, null, ClassLoader::class);
     }

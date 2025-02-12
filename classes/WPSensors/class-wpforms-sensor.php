@@ -351,7 +351,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WPForms_Sensor' ) ) {
 											$alert_code = 5521;
 										} elseif ( 'message' === $change_type ) {
 											$alert_code                   = 5522;
-											$confirmation[ $change_type ] = sanitize_text_field( wp_strip_all_tags( $confirmation[ $change_type ] ) );
+											$confirmation[ $change_type ] = \sanitize_text_field( \wp_strip_all_tags( $confirmation[ $change_type ] ) );
+											$new_changed_item[ $change_type ] = \sanitize_text_field( \wp_strip_all_tags( $new_changed_item[ $change_type ] ) );
 										}
 										if ( ! isset( $alert_code ) ) {
 											continue;

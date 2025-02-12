@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors\Alerts;
 
 use WSAL\MainWP\MainWP_Addon;
+use WSAL\Controllers\Constants;
 use WSAL\WP_Sensors\Helpers\WP_2FA_Helper;
 
 // Exit if accessed directly.
@@ -83,7 +84,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WP_2FA_Custom_Alerts' ) ) {
 					esc_html__( 'A WP 2FA user configured a method', 'wp-security-audit-log' ),
 					__( 'Configured the 2FA method %method%.', 'wp-security-audit-log' ),
 					array(),
-					wsaldefaults_build_links( array( 'EditUserLink' ) ),
+					Constants::wsaldefaults_build_links( array( 'EditUserLink' ) ),
 					'2fa',
 					'enabled',
 				),
@@ -95,7 +96,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WP_2FA_Custom_Alerts' ) ) {
 					array(
 						esc_html__( 'Previous method', 'wp-security-audit-log' ) => '%old_method%',
 					),
-					wsaldefaults_build_links( array( 'EditUserLink' ) ),
+					Constants::wsaldefaults_build_links( array( 'EditUserLink' ) ),
 					'2fa',
 					'enabled',
 				),
@@ -107,7 +108,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WP_2FA_Custom_Alerts' ) ) {
 					array(
 						esc_html__( 'Previous configured 2FA method', 'wp-security-audit-log' ) => '%old_method%',
 					),
-					wsaldefaults_build_links( array( 'EditUserLink' ) ),
+					Constants::wsaldefaults_build_links( array( 'EditUserLink' ) ),
 					'2fa',
 					'disabled',
 				),
@@ -117,7 +118,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WP_2FA_Custom_Alerts' ) ) {
 					esc_html__( 'A WP 2FA User has been locked for not configuring 2FA', 'wp-security-audit-log' ),
 					__( 'The user has been locked by WP 2FA for not configuring 2FA. The website administrators can unlock the user from the Users page in wordPress.', 'wp-security-audit-log' ),
 					array(),
-					wsaldefaults_build_links( array( 'EditUserLink' ) ),
+					Constants::wsaldefaults_build_links( array( 'EditUserLink' ) ),
 					'2fa',
 					'blocked',
 				),
@@ -127,7 +128,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\WP_2FA_Custom_Alerts' ) ) {
 					esc_html__( 'A WP 2FA User has been unblocked', 'wp-security-audit-log' ),
 					__( 'The user %user% which was blocked by WP 2FA was unblocked. The user can proceed to log in and configure 2FA.', 'wp-security-audit-log' ),
 					array(),
-					wsaldefaults_build_links( array( 'EditUserLink' ) ),
+					Constants::wsaldefaults_build_links( array( 'EditUserLink' ) ),
 					'2fa',
 					'unblocked',
 				),

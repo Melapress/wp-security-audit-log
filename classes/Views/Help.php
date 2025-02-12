@@ -52,8 +52,11 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 	 * @param WpSecurityAuditLog $plugin Plugin instance.
 	 */
 	public function __construct( $plugin ) {
-		parent::__construct( $plugin );
-		add_action( 'admin_init', array( $this, 'setup_help_tabs' ) );
+		global $wsal_class;
+
+		parent::__construct( $wsal_class );
+
+		\add_action( 'admin_init', array( $this, 'setup_help_tabs' ) );
 	}
 
 	/**

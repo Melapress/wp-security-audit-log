@@ -17,6 +17,7 @@ use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Helpers\User_Sessions_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -68,6 +69,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		private static $login_sensor = true;
 
 		/**
+		 * Keeps a queue of executed events (login and logout)
+		 *
+		 * @var array
+		 *
+		 * @since 5.3.0
+		 */
+		private static $login_queue = array();
+
+		/**
 		 * Inits the main hooks
 		 *
 		 * @return void
@@ -76,11 +86,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 */
 		public static function init() {
 			\add_action( 'set_auth_cookie', array( __CLASS__, 'event_login' ), 10, 6 );
+
 			\add_action( 'wp_logout', array( __CLASS__, 'event_logout' ), 5 );
 			\add_action( 'password_reset', array( __CLASS__, 'event_password_reset' ), 10, 2 );
 			\add_action( 'wp_login_failed', array( __CLASS__, 'event_login_failure' ) );
 			\add_action( 'clear_auth_cookie', array( __CLASS__, 'get_current_user' ), 10 );
 			\add_action( 'lostpassword_post', array( __CLASS__, 'event_user_requested_pw_reset' ), 10, 2 );
+			\add_action( 'shutdown', array( __CLASS__, 'shutdown_empty_queue' ), 7 );
 
 			if ( WP_Helper::is_plugin_active( 'user-switching/user-switching.php' ) ) {
 				\add_action( 'switch_to_user', array( __CLASS__, 'user_switched_event' ), 10, 2 );
@@ -122,6 +134,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function get_current_user() {
+
+			if ( ! empty( self::$login_queue ) ) {
+				self::$login_queue['logout'] = true;
+			}
+
 			self::$current_user = User_Helper::get_current_user();
 		}
 
@@ -199,21 +216,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 				'CurrentUserRoles' => $user_roles,
 			);
 			if ( class_exists( '\WSAL\Helpers\User_Sessions_Helper' ) ) {
-				$alert_data['SessionID'] = \WSAL\Helpers\User_Sessions_Helper::hash_token( $token );
+				$alert_data['SessionID'] = User_Sessions_Helper::hash_token( $token );
 			}
 
-			Alert_Manager::trigger_event_if(
-				1000,
-				$alert_data,
-				/**
-				* Don't fire if the user is changing their password via admin profile page.
-				*
-				* @return bool
-				*/
-				function () {
-					return ! ( Alert_Manager::will_or_has_triggered( 4003 ) || Alert_Manager::has_triggered( 1000 ) || Alert_Manager::will_or_has_triggered( 1005 ) );
-				}
-			);
+			self::$login_queue['login'] = $alert_data;
 		}
 
 		/**
@@ -353,23 +359,19 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		/**
 		 * Event Login failure.
 		 *
-		 * @param string $username Username.
+		 * @param string         $username Username.
+		 * @param \WP_Error|null $error - More details about the error.
 		 *
 		 * @since 4.5.0
 		 */
-		public static function event_login_failure( $username ) {
-			// list($y, $m, $d) = explode( '-', gmdate( 'Y-m-d' ) );
-
-			// $m = (int) $m;
-			// $y = (int) $y;
-			// $d = (int) $d;
+		public static function event_login_failure( $username, $error = null ) {
 
 			$ip = Settings_Helper::get_main_client_ip();
 
 			// Filter $_POST global array for security.
 			$post_array = filter_input_array( INPUT_POST );
 
-			$username       = isset( $post_array['log'] ) ? $post_array['log'] : $username;
+			$username       = isset( $post_array['log'] ) ? \sanitize_text_field( \wp_unslash( $post_array['log'] ) ) : $username;
 			$username       = \sanitize_user( $username );
 			$new_alert_code = 1003;
 			$user           = \get_user_by( 'login', $username );
@@ -387,6 +389,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 			// Check if the alert is disabled from the "Enable/Disable Alerts" section.
 			if ( ! Alert_Manager::is_enabled( $new_alert_code ) ) {
 				return;
+			}
+
+			$error_message = '';
+
+			if ( \is_wp_error( $error ) ) {
+				$error_message = $error->get_error_message();
 			}
 
 			// if ( self::is_past_login_failure_limit( $ip, $site_id, $user ) ) {
@@ -449,6 +457,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 							'CurrentUserID'    => $user->ID,
 							'LogFileText'      => '',
 							'CurrentUserRoles' => $user_roles,
+							'error_message'    => ( ! empty( $error_message ) ) ? $error_message : null,
 						),
 						/**
 						* Skip if 1004 (session block) is already in place.
@@ -517,10 +526,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 					Alert_Manager::trigger_event(
 						$new_alert_code,
 						array(
-							'Attempts'    => 1,
-							'Users'       => $username,
-							'LogFileText' => '',
-							'ClientIP'    => $ip,
+							'Attempts'      => 1,
+							'Users'         => $username,
+							'LogFileText'   => '',
+							'ClientIP'      => $ip,
+							'error_message' => ( ! empty( $error_message ) ) ? $error_message : null,
 						)
 					);
 				}
@@ -562,10 +572,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function user_switched_event( $new_user_id, $old_user_id ) {
-			$target_user       = get_user_by( 'ID', $new_user_id );
+			$target_user       = \get_user_by( 'ID', $new_user_id );
 			$target_user_roles = User_Helper::get_user_roles( $target_user );
 			$target_user_roles = implode( ', ', $target_user_roles );
-			$old_user          = get_user_by( 'ID', $old_user_id );
+			$old_user          = \get_user_by( 'ID', $old_user_id );
 			$old_user_roles    = User_Helper::get_user_roles( $old_user );
 
 			Alert_Manager::trigger_event(
@@ -607,6 +617,36 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Log_In_Out_Sensor' ) ) {
 				),
 				true
 			);
+		}
+
+		/**
+		 * Checks queue with the logged events and executes them based on the login / logout logic
+		 * This is for 2fa plugins - after successful login, a login event is captured, but after that these plugins logout the user so they can implement proper 2fa check - so if that is the sequence - don't log events and wait.
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.0
+		 */
+		public static function shutdown_empty_queue() {
+			if ( ! empty( self::$login_queue ) && isset( self::$login_queue['login'] ) ) {
+
+				if ( ! isset( self::$login_queue['logout'] ) ) {
+
+					Alert_Manager::trigger_event_if(
+						1000,
+						self::$login_queue['login'],
+						/**
+						* Don't fire if the user is changing their password via admin profile page.
+						*
+						* @return bool
+						*/
+						function () {
+							return ! ( Alert_Manager::will_or_has_triggered( 4003 ) || Alert_Manager::has_triggered( 1000 ) || Alert_Manager::will_or_has_triggered( 1005 ) );
+						}
+					);
+
+				}
+			}
 		}
 	}
 }

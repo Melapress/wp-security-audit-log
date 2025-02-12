@@ -9,7 +9,6 @@
  * @subpackage views
  */
 
-use WSAL\Controllers\Alert;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Controllers\Constants;
 use WSAL\Helpers\Settings_Helper;
@@ -94,7 +93,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 		$current_frontend_events = Settings_Helper::get_frontend_events();
 
-		$this->report_enabled_disabled_event( $current_frontend_events, $frontend_events, true );
+		Alert_Manager::report_enabled_disabled_event( $current_frontend_events, $frontend_events, true );
 
 		// Save enabled front end events.
 		Settings_Helper::set_frontend_events( $frontend_events );
@@ -116,7 +115,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$disabled          = apply_filters( 'wsal_save_settings_disabled_events', $disabled, $registered_alerts, $frontend_events, $enabled );
 
 		// Report any changes as an event.
-		$this->report_enabled_disabled_event( $enabled, $disabled );
+		Alert_Manager::report_enabled_disabled_event( $enabled, $disabled );
 
 		// Save the disabled events.
 		Settings_Helper::set_disabled_alerts( $disabled ); // Save the disabled events.
@@ -129,93 +128,6 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 
 		// Allow 3rd parties to process and save more of the posted data.
 		do_action( 'wsal_togglealerts_process_save_settings', $post_array );
-	}
-
-	/**
-	 * Reports an event if an alert has been disabled/enabled.
-	 *
-	 * @param array $enabled - Array of enabled event IDs prior to saving.
-	 * @param array $disabled - Array of disabled events prior to saving.
-	 * @return void
-	 */
-	private function report_enabled_disabled_event( $enabled, $disabled, $is_frontend = false ) {
-
-		if ( $is_frontend ) {
-			$current_enabled = $enabled;
-			$fresh_enabled   = $disabled;
-			$frontend_labels = array(
-				'register'    => esc_html__( 'Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress.', 'wp-security-audit-log' ),
-				'login'       => esc_html__( 'Keep a log of user log in activity on custom login forms (such as WooCommerce & membership plugins)', 'wp-security-audit-log' ),
-				'woocommerce' => esc_html__( 'Keep a log of visitor orders, stock changes and other public events?', 'wp-security-audit-log' ),
-			);
-
-			$frontend_codes = array(
-				'register'     => 4000,
-				'login'        => 1000,
-				'woocommerce'  => 9035,
-				'gravityforms' => 5709,
-			);
-
-			foreach ( $current_enabled as $frontend_event => $value ) {
-				if ( $value !== $fresh_enabled[ $frontend_event ] ) {
-					Alert_Manager::trigger_event(
-						6060,
-						array(
-							'ID'          => $frontend_codes[ $frontend_event ],
-							'description' => $frontend_labels[ $frontend_event ],
-							'EventType'   => ( $fresh_enabled[ $frontend_event ] ) ? 'enabled' : 'disabled',
-						)
-					);
-				}
-			}
-		} else {
-			// Grab currently saved list of disabled events for comparison.
-			$currently_disabled = Settings_Helper::get_disabled_alerts();
-
-			// Further remove items which are disabled in the UI but potentially not saved as disabled in the settings yet (for example fresh WSAL install).
-			$obsolete_events  = array( 9999, 2126, 99999, 0000, 0001, 0002, 0003, 0004, 0005, 0006 );
-			$obsolete_events  = apply_filters( 'wsal_togglealerts_obsolete_events', $obsolete_events );
-			$ms_alerts        = ( ! WP_Helper::is_multisite() ) ? array_keys( Alert_Manager::get_alerts_by_category( 'Multisite Network Sites' ) ) : array();
-			$ms_user_alerts   = ( ! WP_Helper::is_multisite() ) ? array_keys( Alert_Manager::get_alerts_by_sub_category( 'Multisite User Profiles' ) ) : array();
-			$wc_alerts        = ( ! Woocommerce_Helper::is_woocommerce_active() ) ? array_keys( Alert_Manager::get_alerts_by_category( 'WooCommerce' ) ) : array();
-			$yoast_alerts     = ( ! Yoast_SEO_Helper::is_wpseo_active() ) ? array_keys( Alert_Manager::get_alerts_by_category( 'Yoast SEO' ) ) : array();
-			$deprecated_event = Alert_Manager::get_deprecated_events();
-			$always_disabled  = Settings_Helper::get_default_always_disabled_alerts();
-			$events_to_ignore = array_merge( $obsolete_events, $ms_alerts, $always_disabled, $deprecated_event, $ms_user_alerts, $wc_alerts, $yoast_alerts );
-
-			// Remove items we dont want to trigger alerts for here.
-			$disabled = array_diff( $disabled, $events_to_ignore );
-
-			// Check for events which are newly enabled.
-			foreach ( $enabled as $enabled_alert_id ) {
-				if ( in_array( $enabled_alert_id, $currently_disabled, true ) ) {
-					$alert_data = Alert::get_alert( $enabled_alert_id );
-					Alert_Manager::trigger_event(
-						6060,
-						array(
-							'ID'          => $enabled_alert_id,
-							'description' => $alert_data['desc'],
-							'EventType'   => 'enabled',
-						)
-					);
-				}
-			}
-
-			// Check for events which are newly disabled.
-			foreach ( $disabled as $disabled_alert_id ) {
-				if ( ! in_array( $disabled_alert_id, $currently_disabled, true ) ) {
-					$alert_data = Alert::get_alert( $disabled_alert_id );
-					Alert_Manager::trigger_event(
-						6060,
-						array(
-							'ID'          => $disabled_alert_id,
-							'description' => $alert_data['desc'],
-							'EventType'   => 'disabled',
-						)
-					);
-				}
-			}
-		}
 	}
 
 	/**
@@ -266,7 +178,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 		$safe_names     = array_map( array( $this, 'get_safe_category_name' ), array_keys( $grouped_alerts ) );
 		$safe_names     = array_combine( array_keys( $grouped_alerts ), $safe_names );
 
-		$disabled_events = Settings_Helper::get_option_value( 'disabled-alerts' ); // Get disabled events.
+		$disabled_events = Settings_Helper::get_option_value( 'disabled-alerts', array() ); // Get disabled events.
 		if ( is_string( $disabled_events ) ) {
 			$disabled_events = explode( ',', $disabled_events );
 		}
@@ -342,7 +254,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 									</select>
 								</div>
 								<div class="choose">
-									<p class="submit"><input type="submit" name="submit" id="top_submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save Changes', 'wp-security-audit-log' ) ); ?>"></p>
+									<p class="submit"><input type="submit" name="submit" id="top_submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save changes', 'wp-security-audit-log' ) ); ?>"></p>
 								</div>
 							</div>
 
@@ -522,7 +434,7 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 								</tbody>
 							</table>
 
-					<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save Changes', 'wp-security-audit-log' ) ); ?>"></p>
+					<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php echo esc_attr( __( 'Save changes', 'wp-security-audit-log' ) ); ?>"></p>
 				</form>
 
 			</div>
@@ -1014,13 +926,13 @@ class WSAL_Views_ToggleAlerts extends WSAL_AbstractView {
 	 */
 	private function get_log_level_based_on_events( $disabled_events ) {
 		$events_to_cross_check = Settings_Helper::get_default_always_disabled_alerts();
-		$events_diff           = array_diff( $disabled_events, $events_to_cross_check );
+		$events_diff           = array_diff( (array) $disabled_events, $events_to_cross_check, Settings_Helper::get_default_disabled_alerts() );
 		$events_diff           = array_filter( $events_diff ); // Remove empty values.
 		if ( empty( $events_diff ) ) {
 			return 'geek';
 		}
 
-		$events_to_cross_check = array_merge( $events_to_cross_check, Plugin_Settings_Helper::get_geek_alerts() );
+		$events_to_cross_check = array_merge( $events_to_cross_check, Plugin_Settings_Helper::get_geek_alerts(), Settings_Helper::get_default_disabled_alerts() );
 		$events_diff           = array_diff( $disabled_events, $events_to_cross_check );
 		$events_diff           = array_filter( $events_diff ); // Remove empty values.
 		if ( empty( $events_diff ) ) {

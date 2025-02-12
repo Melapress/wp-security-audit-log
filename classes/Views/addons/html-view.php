@@ -18,32 +18,32 @@ $utm_params = array(
 
 $buy_now_utm_params = $utm_params;
 
-if (property_exists($this, 'hook_suffix')){
-switch ( $this->hook_suffix ) {
-	case 'wp-activity-log_page_wsal-loginusers':
-		$utm_params['utm_content']            = 'sessions';
-		$buy_now_utm_params['utm_content']    = 'upgrade+now+loginusers';
-		break;
-	case 'wp-activity-log_page_wsal-reports':
-		$utm_params['utm_content']            = 'reports';
-		$buy_now_utm_params['utm_content']    = 'upgrade+now+reports';
-		break;
-	case 'wp-activity-log_page_wsal-emailnotifications':
-		$utm_params['utm_content']            = 'notifications';
-		$buy_now_utm_params['utm_content']    = 'upgrade+now+notifications';
-		break;
-	case 'wp-activity-log_page_wsal-externaldb':
-		$utm_params['utm_content']            = 'integrations';
-		$buy_now_utm_params['utm_content']    = 'upgrade+now+integrations';
-		break;
-	case 'wp-activity-log_page_wsal-search':
-		$utm_params['utm_content']            = 'search';
-		$buy_now_utm_params['utm_content']    = 'upgrade+now+search';
-		break;
-	default:
-		// Fallback for any other hook suffix would go here.
-		break;
-}
+if ( property_exists( $this, 'hook_suffix' ) ) {
+	switch ( $this->hook_suffix ) {
+		case 'wp-activity-log_page_wsal-loginusers':
+			$utm_params['utm_content']         = 'sessions';
+			$buy_now_utm_params['utm_content'] = 'upgrade+now+loginusers';
+			break;
+		case 'wp-activity-log_page_wsal-reports':
+			$utm_params['utm_content']         = 'reports';
+			$buy_now_utm_params['utm_content'] = 'upgrade+now+reports';
+			break;
+		case 'wp-activity-log_page_wsal-emailnotifications':
+			$utm_params['utm_content']         = 'notifications';
+			$buy_now_utm_params['utm_content'] = 'upgrade+now+notifications';
+			break;
+		case 'wp-activity-log_page_wsal-externaldb':
+			$utm_params['utm_content']         = 'integrations';
+			$buy_now_utm_params['utm_content'] = 'upgrade+now+integrations';
+			break;
+		case 'wp-activity-log_page_wsal-search':
+			$utm_params['utm_content']         = 'search';
+			$buy_now_utm_params['utm_content'] = 'upgrade+now+search';
+			break;
+		default:
+			// Fallback for any other hook suffix would go here.
+			break;
+	}
 }
 // Links.
 $more_info = add_query_arg(
@@ -54,7 +54,7 @@ $more_info = add_query_arg(
 // Buy Now button link.
 $buy_now        = add_query_arg(
 	$buy_now_utm_params,
-	'https://melapress.com/wordpress-activity-log/pricing/'
+	'https://melapress.com/wordpress-activity-log/pricing/#utm_source=plugin&utm_medium=link&utm_campaign=wsal'
 );
 $buy_now_target = ' target="_blank"';
 

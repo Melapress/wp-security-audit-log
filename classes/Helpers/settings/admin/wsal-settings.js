@@ -52,6 +52,7 @@ function attachAllDynamicPostsSelects() {
     /** End Custom Posts sortable and They are using AJAX calls to extract info */
 
 }
+
 function attachAllDynamicPostTitlesSelects() {
     /** Make Custom Posts sortable and They are using AJAX calls to extract info */
 
@@ -87,6 +88,58 @@ function attachAllDynamicPostTitlesSelects() {
         minimumInputLength: 3 // the minimum of symbols to input before perform a search
     });
     jQuery('.wsal-custom-post-titles-selector select').each(function (index) {
+        var selectEl = jQuery(this);
+        selectEl.next().children().children().children().sortable({
+            containment: 'parent', stop: function (event, ui) {
+                ui.item.parent().children('[title]').each(function () {
+                    var title = jQuery(this).attr('title');
+                    var original = jQuery('option:contains(' + title + ')', selectEl).first();
+                    original.detach();
+                    selectEl.append(original)
+                });
+                selectEl.change();
+            }
+        });
+    });
+    /** End Custom Posts sortable and They are using AJAX calls to extract info */
+
+}
+
+function attachAllDynamicPostIDsSelects() {
+    /** Make Custom Posts sortable and They are using AJAX calls to extract info */
+
+    jQuery('.wsal-custom-post-ids-selector select').select2({
+        width: 'resolve',
+        containerCssClass: "s24wp-wrapper",
+        ajax: {
+            url: ajaxurl, // AJAX URL is predefined in WordPress admin
+            dataType: 'json',
+            delay: 250, // delay in ms while typing when to perform a AJAX search
+            data: function (params) {
+                return {
+                    q: params.term, // search query
+                    action: 'wsal_settings_get_posts_ids' // AJAX action for admin-ajax.php
+                };
+            },
+            processResults: function (data) {
+                var options = [];
+                if (data) {
+
+                    // data is the array of arrays, and each of them contains ID and the Label of the option
+                    jQuery.each(data, function (index, text) { // do not forget that "index" is just auto incremented value
+                        options.push({ id: text['id'], text: text['label'] });
+                    });
+
+                }
+                return {
+                    results: options
+                };
+            },
+            cache: true
+        },
+        //minimumInputLength: 3 // the minimum of symbols to input before perform a search
+    });
+    jQuery('.wsal-custom-post-ids-selector select').each(function (index) {
         var selectEl = jQuery(this);
         selectEl.next().children().children().children().sortable({
             containment: 'parent', stop: function (event, ui) {
@@ -392,6 +445,7 @@ $doc.ready(function () {
 
     attachAllDynamicPostsSelects();
     attachAllDynamicPostTitlesSelects();
+    attachAllDynamicPostIDsSelects();
     attachAllDynamicUsersSelects();
     attachAllDynamicSitesSelects();
     attachAllDynamicPostTypes();
@@ -945,4 +999,3 @@ function getContrastColor(hexcolor) {
     var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
     return (yiq >= 128) ? 'dark' : 'light';
 }
-

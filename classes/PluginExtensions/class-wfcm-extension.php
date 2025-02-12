@@ -105,7 +105,7 @@ if ( ! class_exists( '\WSAL\PluginExtensions\WFCM_Extension' ) ) {
 		 * @param array  $events Events.
 		 *
 		 * @return string
-		 * 
+		 *
 		 * @since 5.1.0
 		 */
 		public static function append_dailynotification_email_content( $body, $events ): string {

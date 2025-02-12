@@ -71,6 +71,15 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 		private static $base_url;
 
 		/**
+		 * Keeps class status
+		 *
+		 * @var bool
+		 *
+		 * @since 5.2.2
+		 */
+		private static $initiated = \false;
+
+		/**
 		 * Initializes the library with given base URL.
 		 *
 		 * @param string $lib_base_url URL pointing to the root of the library.
@@ -78,10 +87,14 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 		 * @since 4.5.1
 		 */
 		public static function init( $lib_base_url ) {
-			self::$base_url = $lib_base_url;
+			if ( ! self::$initiated ) {
+				self::$base_url = $lib_base_url;
 
-			if ( ! has_action( 'wp_ajax_' . self::$ajax_action, array( __CLASS__, 'handle_ajax_call' ) ) ) {
-				add_action( 'wp_ajax_' . self::$ajax_action, array( __CLASS__, 'handle_ajax_call' ) );
+				if ( ! has_action( 'wp_ajax_' . self::$ajax_action, array( __CLASS__, 'handle_ajax_call' ) ) ) {
+					add_action( 'wp_ajax_' . self::$ajax_action, array( __CLASS__, 'handle_ajax_call' ) );
+				}
+
+				self::$initiated = true;
 			}
 		}
 
@@ -282,16 +295,16 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 			array_walk(
 				$attributes,
 				function ( &$value, $key ) {
-					$value = $key . '="' . esc_attr( $value ) . '"';
+					$value = $key . '="' . \esc_attr( $value ) . '"';
 				}
 			);
 
-			echo '<select ' . implode( ' ', $attributes ) . '></select>';
+			echo '<select ' . implode( ' ', $attributes ) . '></select>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo '<script type="application/javascript">';
 			echo 'jQuery( document ).ready( function() {';
-			echo 'const s2 = jQuery( "#' . $args['id'] . '" ).select2( {';
+			echo 'const s2 = jQuery( "#' . \esc_attr( $args['id'] ) . '" ).select2( {';
 			if ( array_key_exists( 'placeholder', $args ) ) {
-				echo 'placeholder: "' . $args['placeholder'] . '",';
+				echo 'placeholder: "' . \esc_attr( $args['placeholder'] ) . '",';
 			}
 			echo 'containerCssClass: "s24wp-wrapper",';
 
@@ -300,7 +313,7 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 			}
 
 			if ( array_key_exists( 'width', $args ) ) {
-				echo 'width: "' . $args['width'] . 'px",';
+				echo 'width: "' . \esc_attr( $args['width'] ) . 'px",';
 			}
 
 			if ( array_key_exists( 'data-type', $args ) && 'role' === $args['data-type'] ) {
@@ -354,7 +367,7 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 				$min_chars = array_key_exists( 'min_chars', $args ) ? intval( $args['min_chars'] ) : 3;
 				echo 'minimumInputLength: "' . esc_attr( $min_chars ) . '",';
 				echo 'ajax: {';
-				echo 'url : "' . $url . '",';
+				echo 'url : "' . \esc_url( $url ) . '",';
 				echo 'dataType: "json"';
 				echo '}';
 			}
@@ -378,7 +391,7 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 						if ( isset( $object ) ) {
 							$data_item = self::convert_object_to_select2_data( $object );
 							if ( ! is_null( $data_item ) ) {
-								echo 's2.append(new Option("' . $data_item['text'] . '", ' . $data_item['id'] . ', true, true)).trigger("change");';
+								echo 's2.append(new Option("' . \esc_attr( $data_item['text'] ) . '", ' . \esc_attr( $data_item['id'] ) . ', true, true)).trigger("change");';
 							}
 						}
 					}
@@ -400,6 +413,10 @@ if ( ! class_exists( '\Tools\Select2_WPWS' ) ) {
 		 */
 		public static function enqueue_scripts() {
 			if ( self::$scripts_queued ) {
+				return;
+			}
+
+			if ( ! self::$initiated ) {
 				return;
 			}
 

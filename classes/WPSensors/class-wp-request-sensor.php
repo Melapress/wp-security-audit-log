@@ -60,15 +60,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Request_Sensor' ) ) {
 			$server_array = filter_input_array( INPUT_SERVER );
 
 			// get the custom logging path from settings.
-			$custom_logging_path = \WSAL\Helpers\Settings_Helper::get_working_dir_path_static();
+			$custom_logging_path = Settings_Helper::get_working_dir_path_static();
 			if ( is_wp_error( $custom_logging_path ) ) {
 				return;
 			}
 
 			$file = $custom_logging_path . 'Request.log.php';
 
-			$request_method = isset( $server_array['REQUEST_METHOD'] ) ? $server_array['REQUEST_METHOD'] : false;
-			$request_uri    = isset( $server_array['REQUEST_URI'] ) ? $server_array['REQUEST_URI'] : false;
+			$request_method = isset( $server_array['REQUEST_METHOD'] ) ? \sanitize_text_field( \wp_unslash( $server_array['REQUEST_METHOD'] ) ) : false;
+			$request_uri    = isset( $server_array['REQUEST_URI'] ) ? \sanitize_text_field( \wp_unslash( $server_array['REQUEST_URI'] ) ) : false;
 
 			$line = '[' . gmdate( 'Y-m-d H:i:s' ) . '] '
 			. $request_method . ' '

@@ -51,7 +51,7 @@ td.code.column-code a{
 }
 
 .column-user {
-	width: 140px;
+	width: 150px;
 }
 
 .column-site {
@@ -312,7 +312,7 @@ td.column-user {
 }
 
 .wp-list-table #code {
-	width: 95px;
+	width: 90px;
 }
 
 .wp-list-table #type {
@@ -485,11 +485,11 @@ td.column-user {
 }
 
 .widefat td, .widefat th {
-	padding: 20px 10px;
+	padding: 10px 10px;
 }
 
 .wp-list-table #type {
-	width: 80px;
+	width: 60px;
 }
 
 .wp-list-table #data {

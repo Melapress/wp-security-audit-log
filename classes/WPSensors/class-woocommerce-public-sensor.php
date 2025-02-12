@@ -91,6 +91,14 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 					\add_action( 'update_user_meta', array( __CLASS__, 'before_wc_user_meta_update' ), 10, 3 );
 					\add_action( 'added_user_meta', array( __CLASS__, 'before_wc_user_meta_update' ), 10, 3 );
 				}
+				\add_action( 'comment_post', array( __CLASS__, 'event_comment' ), 10, 3 );
+				\add_action( 'transition_comment_status', array( __CLASS__, 'event_comment_approve' ), 10, 3 );
+				\add_action( 'spammed_comment', array( __CLASS__, 'event_comment_spam' ), 10, 1 );
+				// \add_action( 'unspammed_comment', array( __CLASS__, 'event_comment_unspam' ), 10, 1 );
+				\add_action( 'trashed_comment', array( __CLASS__, 'event_comment_trash' ), 10, 1 );
+				\add_action( 'untrashed_comment', array( __CLASS__, 'event_comment_untrash' ), 10, 1 );
+				\add_action( 'delete_comment', array( __CLASS__, 'event_comment_deleted' ), 10, 1 );
+				\add_action( 'edit_comment', array( __CLASS__, 'event_comment_edit' ), 10, 1 );
 			}
 		}
 
@@ -141,12 +149,13 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 		 * Get editor link.
 		 *
 		 * @since 3.3.1
+		 * @since 5.3.0 - this method is now public
 		 *
 		 * @param WP_Post $post - Product post object.
 		 *
 		 * @return array $editor_link - Name and value link.
 		 */
-		private static function get_editor_link( $post ) {
+		public static function get_editor_link( $post ) {
 
 			$post_type = '';
 
@@ -236,18 +245,20 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 			}
 
 			// Get order object.
-			$new_order = new \WC_Order( $order_id );
+			$new_order = \wc_get_order( $order_id );
 
-			if ( $new_order && $new_order instanceof \WC_Order ) {
+			if ( $new_order && ( $new_order instanceof \WC_Order || $new_order instanceof \WC_Order_Refund ) ) {
 				$order_post  = \wc_get_order( $order_id ); // Get order post object.
 				$editor_link = self::get_editor_link( $order_post );
+				$status      = $new_order->get_status();
 				Alert_Manager::trigger_event(
 					9035,
 					array(
 						'OrderID'            => $order_id,
 						'OrderTitle'         => Woocommerce_Helper::wsal_woocommerce_extension_get_order_title( $order_id ),
-						'OrderStatus'        => \wc_get_order_status_name( $new_order->get_status() ),
-						'OrderStatusSlug'    => $new_order->get_status(),
+						'OrderStatus'        => \wc_get_order_status_name( $status ),
+						'OrderStatusSlug'    => $status,
+						'PostStatus'         => 'wc-' . $status,
 						$editor_link['name'] => $editor_link['value'],
 					)
 				);
@@ -268,6 +279,10 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 		public static function set_old_stock( $order_quantity, $order, $item ) {
 			// Get product from order item.
 			$product = $item->get_product();
+
+			if ( ! $product ) {
+				return $order_quantity;
+			}
 
 			// Get product id.
 			$product_id_with_stock = $product->get_stock_managed_by_id();
@@ -293,6 +308,10 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 		 */
 		public static function set_old_stock_for_orders( $sql, $product_id ) {
 			$old_product = wc_get_product( $product_id );
+
+			if ( ! $old_product ) {
+				return $sql;
+			}
 
 			// Set stock attributes of the product.
 			self::$old_stock        = $old_product->get_stock_quantity();
@@ -383,6 +402,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 						'PostID'             => $post->ID,
 						'ProductTitle'       => $product_title,
 						'ProductStatus'      => ! $product_status ? $post->post_status : $product_status,
+						'PostStatus'         => ! $product_status ? $post->post_status : $product_status,
 						'OldStatus'          => self::get_stock_status( $old_stock_status ),
 						'NewStatus'          => self::get_stock_status( $new_stock_status ),
 						'Username'           => $username,
@@ -392,7 +412,7 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 				);
 			}
 
-			$wc_all_stock_changes = \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'wc-all-stock-changes', true );
+			$wc_all_stock_changes = Settings_Helper::get_boolean_option_value( 'wc-all-stock-changes', true );
 
 			// If stock has changed then trigger the alert.
 			if ( ( $old_stock !== $new_stock ) && ( $wc_all_stock_changes ) ) {
@@ -430,9 +450,10 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 						'SKU'                => isset( $product_sku ) ? $product_sku : esc_attr( self::get_product_sku( $post->ID ) ),
 						'ProductTitle'       => $product_title,
 						'ProductStatus'      => ! $product_status ? $post->post_status : $product_status,
+						'PostStatus'         => ! $product_status ? $post->post_status : $product_status,
 						'OldValue'           => ! empty( $old_stock ) ? $old_stock : 0,
 						'NewValue'           => $new_stock,
-						'Username'           => $username,
+						'Username'           => 'WooCommerce System',
 						'CurrentUserID'      => $user_id,
 						'StockOrderID'       => $order_id,
 						'OrderTitle'         => $order_title,
@@ -440,6 +461,234 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\WooCommerce_Public_Sensor' ) ) {
 					)
 				);
 			}
+		}
+
+		/**
+		 * Fires immediately after a comment is inserted into the database.
+		 *
+		 * @param int        $comment_id       The comment ID.
+		 * @param int|string $comment_approved 1 if the comment is approved, 0 if not, 'spam' if spam.
+		 * @param array      $comment_data     Comment data.
+		 *
+		 * @since 5.3.0
+		 */
+		public static function event_comment( $comment_id, $comment_approved, $comment_data ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+
+			$comment = \get_comment( $comment_id );
+			if ( $comment ) {
+				if ( 'spam' !== $comment->comment_approved ) {
+					$product = \wc_get_product( $comment->comment_post_ID );
+					if ( $product && $product instanceof \WC_Product ) {
+						$comment_link = \get_permalink( $product->get_id() ) . '#comment-' . $comment_id;
+
+						$fields = array(
+							'ProductTitle'      => $product->get_title(),
+							'ProductID'         => $comment->comment_post_ID,
+							'ProductStatus'     => $product->get_status(),
+							'PostStatus'        => $product->get_status(),
+							'SKU'               => $product->get_sku(),
+							'CommentID'         => $comment->comment_ID,
+							'Date'              => $comment->comment_date,
+							'CommentLink'       => $comment_link,
+							'CommentAuthor'     => ( \property_exists( $comment, 'comment_author' ) && ! empty( $comment->comment_author ) ) ? $comment->comment_author : esc_html__( 'Anonymous', 'wp-security-audit-log' ),
+							'CommentAuthorMail' => ( \property_exists( $comment, 'comment_author_email' ) && ! empty( $comment->comment_author_email ) ) ? $comment->comment_author_email : esc_html__( 'Anonymous', 'wp-security-audit-log' ),
+						);
+
+						if ( \wc_review_ratings_enabled() ) {
+							$comment_rating   = \get_comment_meta( $comment->comment_ID, 'rating', true );
+							$fields['Rating'] = (int) $comment_rating;
+						}
+
+						// Get user data.
+						$user_data = \get_user_by( 'email', $comment->comment_author_email );
+
+						if ( $user_data && $user_data instanceof \WP_User ) {
+							// Get user roles.
+							$user_roles = User_Helper::get_user_roles( $user_data );
+
+							// Set the fields.
+							$fields['Username']         = $user_data->user_login;
+							$fields['CurrentUserRoles'] = $user_roles;
+
+						} else {
+							// Set username.
+							$username = '';
+							if ( ! \is_user_logged_in() ) {
+								$username = 'WooCommerce System';
+								$user_id  = 0;
+							}
+							$fields['Username'] = $username;
+
+						}
+
+						Alert_Manager::trigger_event( 9160, $fields );
+					}
+				}
+			}
+		}
+
+		/**
+		 * Trigger comment status.
+		 *
+		 * @param string   $new_status - New status.
+		 * @param string   $old_status - Old status.
+		 * @param stdClass $comment - Comment.
+		 *
+		 * @since 5.3.0
+		 */
+		public static function event_comment_approve( $new_status, $old_status, $comment ) {
+			if ( ! empty( $comment ) && $old_status !== $new_status ) {
+				$product = \wc_get_product( $comment->comment_post_ID );
+				if ( $product && $product instanceof \WC_Product ) {
+					$comment_link = \get_permalink( $product->get_id() ) . '#comment-' . $comment->comment_ID;
+					$fields       = array(
+						'ProductTitle'      => $product->get_title(),
+						'ProductID'         => $comment->comment_post_ID,
+						'ProductStatus'     => $product->get_status(),
+						'PostStatus'        => $product->get_status(),
+						'SKU'               => $product->get_sku(),
+						'CommentID'         => $comment->comment_ID,
+						'Date'              => $comment->comment_date,
+						'CommentLink'       => $comment_link,
+						'CommentAuthor'     => ( \property_exists( $comment, 'comment_author' ) && ! empty( $comment->comment_author ) ) ? $comment->comment_author : esc_html__( 'Anonymous', 'wp-security-audit-log' ),
+						'CommentAuthorMail' => ( \property_exists( $comment, 'comment_author_email' ) && ! empty( $comment->comment_author_email ) ) ? $comment->comment_author_email : esc_html__( 'Anonymous', 'wp-security-audit-log' ),
+
+					);
+
+					if ( \wc_review_ratings_enabled() ) {
+						$comment_rating   = \get_comment_meta( $comment->comment_ID, 'rating', true );
+						$fields['Rating'] = (int) $comment_rating;
+					}
+
+					// Get user data.
+					if ( ! \is_user_logged_in() ) {
+						$fields['Username']      = 'Unregistered user';
+						$fields['CurrentUserID'] = 0;
+					} else {
+						$fields['Username']      = User_Helper::get_current_user()->user_login;
+						$fields['CurrentUserID'] = User_Helper::get_current_user()->ID;
+					}
+
+					if ( 'approved' === $new_status ) {
+						Alert_Manager::trigger_event( 9162, $fields );
+					}
+					if ( 'unapproved' === $new_status ) {
+						Alert_Manager::trigger_event( 9161, $fields );
+					}
+				}
+			}
+		}
+
+		/**
+		 * Trigger comment spam.
+		 *
+		 * @param integer $comment_id - Comment ID.
+		 *
+		 * @since 4.5.0
+		 */
+		public static function event_comment_spam( $comment_id ) {
+			self::event_generic( $comment_id, 9163 );
+		}
+
+		/**
+		 * Trigger comment unspam.
+		 *
+		 * @param integer $comment_id - Comment ID.
+		 *
+		 * @since 4.5.0
+		 */
+		public static function event_comment_unspam( $comment_id ) {
+			self::event_generic( $comment_id, 9164 );
+		}
+
+		/**
+		 * Trigger comment untrash.
+		 *
+		 * @param integer $comment_id comment ID.
+		 *
+		 * @since 5.3.0
+		 */
+		public static function event_comment_untrash( $comment_id ) {
+			self::event_generic( $comment_id, 9165 );
+		}
+
+		/**
+		 * Trigger comment deleted.
+		 *
+		 * @param integer $comment_id comment ID.
+		 *
+		 * @since 5.3.0
+		 */
+		public static function event_comment_deleted( $comment_id ) {
+			self::event_generic( $comment_id, 9166 );
+		}
+
+		/**
+		 * Trigger comment edit.
+		 *
+		 * @param integer $comment_id - Comment ID.
+		 *
+		 * @since 5.3.0
+		 */
+		public static function event_comment_edit( $comment_id ) {
+			self::event_generic( $comment_id, 9167 );
+		}
+
+		/**
+		 * Trigger generic event.
+		 *
+		 * @param integer $comment_id - Comment ID.
+		 * @param integer $alert_code - Event code.
+		 *
+		 * @since 5.3.0
+		 */
+		private static function event_generic( $comment_id, $alert_code ) {
+			$comment = \get_comment( $comment_id );
+			if ( ! empty( $comment ) ) {
+				$product = \wc_get_product( $comment->comment_post_ID );
+				if ( $product && $product instanceof \WC_Product ) {
+					$comment_link = \get_permalink( $product->get_id() ) . '#comment-' . $comment_id;
+					$fields       = array(
+						'ProductTitle'      => $product->get_title(),
+						'ProductID'         => $comment->comment_post_ID,
+						'ProductStatus'     => $product->get_status(),
+						'PostStatus'        => $product->get_status(),
+						'SKU'               => $product->get_sku(),
+						'CommentID'         => $comment->comment_ID,
+						'Date'              => $comment->comment_date,
+						'CommentLink'       => $comment_link,
+						'CommentAuthor'     => ( \property_exists( $comment, 'comment_author' ) && ! empty( $comment->comment_author ) ) ? $comment->comment_author : esc_html__( 'Anonymous', 'wp-security-audit-log' ),
+						'CommentAuthorMail' => ( \property_exists( $comment, 'comment_author_email' ) && ! empty( $comment->comment_author_email ) ) ? $comment->comment_author_email : esc_html__( 'Anonymous', 'wp-security-audit-log' ),
+					);
+
+					if ( \wc_review_ratings_enabled() ) {
+						$comment_rating   = \get_comment_meta( $comment->comment_ID, 'rating', true );
+						$fields['Rating'] = (int) $comment_rating;
+					}
+
+					// Get user data.
+					if ( ! \is_user_logged_in() ) {
+						$fields['Username']      = 'WooCommerce System';
+						$fields['CurrentUserID'] = 0;
+					} else {
+						$fields['Username']      = User_Helper::get_current_user()->user_login;
+						$fields['CurrentUserID'] = User_Helper::get_current_user()->ID;
+					}
+
+					Alert_Manager::trigger_event( $alert_code, $fields );
+				}
+			}
+		}
+
+		/**
+		 * Trigger comment trash.
+		 *
+		 * @param integer $comment_id - Comment ID.
+		 *
+		 * @since 5.3.0
+		 */
+		public static function event_comment_trash( $comment_id ) {
+			self::event_generic( $comment_id, 9164 );
 		}
 
 		/**

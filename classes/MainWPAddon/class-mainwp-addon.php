@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage mainwp
- * @copyright  2024 Melapress
+ * @copyright  2025 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  *
@@ -157,7 +157,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function check_mainwp_plugin_active(): bool {
-			if ( ! is_plugin_active( 'mainwp/mainwp.php' ) ) {
+			if ( ! \is_plugin_active( 'mainwp/mainwp.php' ) ) {
 				return false;
 			}
 
@@ -182,7 +182,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 				if ( false === self::$mainwp_main_activated ) {
 					// Because sometimes our main plugin is activated after the extension plugin is activated we also have a second step,
 					// listening to the 'mainwp_activated' action. This action is triggered by MainWP after initialization.
-					add_action( 'mainwp_activated', array( __CLASS__, 'activate_this_plugin' ) );
+					\add_action( 'mainwp_activated', array( __CLASS__, 'activate_this_plugin' ) );
 				}
 			}
 
@@ -258,9 +258,14 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function is_that_auditlog_view( $view ): bool {
-			// TODO: check page and return bool based on that - that is for the search filters firing.
 
-			$view = true;
+			global $plugin_page;
+
+			if ( isset( $plugin_page ) && ! empty( $plugin_page ) && MWPAL_EXTENSION_NAME === $plugin_page ) {
+
+				// TODO: check page and return bool based on that - that is for the search filters firing.
+
+				$view = true;}
 
 			return $view;
 		}
@@ -273,7 +278,7 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Addon' ) ) {
 		public static function display_extension() {
 			// The "mainwp_pageheader_extensions" action is used to render the tabs on the Extensions screen.
 			// It's used together with mainwp_pagefooter_extensions and mainwp-getextensions.
-			do_action( 'mainwp_pageheader_extensions', __FILE__ );
+			\do_action( 'mainwp_pageheader_extensions', __FILE__ );
 
 			\WSAL_Views_AuditLog::header();
 

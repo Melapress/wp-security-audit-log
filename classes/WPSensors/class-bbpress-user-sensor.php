@@ -156,6 +156,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_User_Sensor' ) ) {
 						'LastName'       => $user->user_lastname,
 						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
 						'multisite_text' => WP_Helper::is_multisite() ? get_current_blog_id() : false,
+						'TargetUserData' => (object) array(
+							'Username'  => $user->user_login,
+							'FirstName' => $user->user_firstname,
+							'LastName'  => $user->user_lastname,
+							'Email'     => $user->user_email,
+							'Roles'     => $new_roles ? $new_roles : 'none',
+						),
 					),
 					array( __CLASS__, 'must_not_contain_user_changes' )
 				);
@@ -212,6 +219,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_User_Sensor' ) ) {
 						'LastName'       => $user->user_lastname,
 						'Roles'          => $user_roles,
 						'EditUserLink'   => \add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
+						'TargetUserData' => (object) array(
+							'Username'  => $user->user_login,
+							'FirstName' => $user->user_firstname,
+							'LastName'  => $user->user_lastname,
+							'Email'     => $user->user_email,
+							'Roles'     => $user_roles ? $user_roles : 'none',
+						),
 					)
 				);
 			}
@@ -238,6 +252,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_User_Sensor' ) ) {
 		public static function event_super_access_granted( $user_id ) {
 			$user = get_userdata( $user_id );
 			if ( $user && ! in_array( $user->user_login, self::$old_superadmins, true ) ) {
+				$user_roles = implode(
+					', ',
+					array_map(
+						array(
+							__CLASS__,
+							'filter_role_names',
+						),
+						$user->roles
+					)
+				);
 				Alert_Manager::trigger_event(
 					4008,
 					array(
@@ -247,6 +271,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_User_Sensor' ) ) {
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
 						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+						'TargetUserData' => (object) array(
+							'Username'  => $user->user_login,
+							'FirstName' => $user->user_firstname,
+							'LastName'  => $user->user_lastname,
+							'Email'     => $user->user_email,
+							'Roles'     => $user_roles ? $user_roles : 'none',
+						),
 					)
 				);
 			}
@@ -264,6 +295,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_User_Sensor' ) ) {
 		public static function event_super_access_revoked( $user_id ) {
 			$user = get_userdata( $user_id );
 			if ( $user && in_array( $user->user_login, self::$old_superadmins, true ) ) {
+				$user_roles = implode(
+					', ',
+					array_map(
+						array(
+							__CLASS__,
+							'filter_role_names',
+						),
+						$user->roles
+					)
+				);
 				Alert_Manager::trigger_event(
 					4009,
 					array(
@@ -273,6 +314,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_User_Sensor' ) ) {
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
 						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+						'TargetUserData' => (object) array(
+							'Username'  => $user->user_login,
+							'FirstName' => $user->user_firstname,
+							'LastName'  => $user->user_lastname,
+							'Email'     => $user->user_email,
+							'Roles'     => $user_roles ? $user_roles : 'none',
+						),
 					)
 				);
 			}

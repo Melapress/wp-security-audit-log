@@ -17,8 +17,13 @@ namespace WSAL\Helpers\Settings;
 
 use WSAL\Helpers\WP_Helper;
 use WSAL\MainWP\MainWP_Addon;
-use WSAL\Entities\Occurrences_Entity;
 use WSAL\MainWP\MainWP_Helper;
+use WSAL\Controllers\Constants;
+use WSAL\Controllers\Alert_Manager;
+use WSAL\Entities\Occurrences_Entity;
+use WSAL\Views\Notifications;
+use WSAL\Entities\Custom_Notifications_Entity;
+use WSAL\Extensions\Helpers\Notification_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -182,6 +187,15 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		public static $max_chars;
 
 		/**
+		 * Holds the title attribute for the text field
+		 *
+		 * @var string
+		 *
+		 * @since 5.3.0
+		 */
+		public static $title_attr;
+
+		/**
 		 * The given field is required
 		 *
 		 * @var string
@@ -200,6 +214,15 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		private static $current_options = \false;
 
 		/**
+		 * Keeps class status
+		 *
+		 * @var bool
+		 *
+		 * @since 5.2.2
+		 */
+		private static $initiated = \false;
+
+		/**
 		 * Inits the class hooks. Can be avoided if not needed.
 		 *
 		 * @return void
@@ -207,279 +230,313 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function init() {
+			if ( ! self::$initiated ) {
+				/**
+				 * Draws the save button in the settings
+				 */
+				\add_action( 'wsal_settings_save_button', array( __CLASS__, 'save_button' ) );
 
-			/**
-			 * Draws the save button in the settings
-			 */
-			\add_action( 'wsal_settings_save_button', array( __CLASS__, 'save_button' ) );
+				\add_action(
+					'wp_ajax_wsal_settings_get_posts_titles',
+					function () {
+						if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+							$query_string = '';
 
-			\add_action(
-				'wp_ajax_wsal_settings_get_posts_titles',
-				function () {
-					if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
-						$query_string = '';
+							$return = array();
 
-						$return = array();
-
-						if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
-							$query_string = \sanitize_text_field( \wp_unslash( $_GET['q'] ) );
-						}
-						$posts = self::get_posts( $query_string );
-
-						if ( $posts ) {
-							foreach ( $posts as $post ) {
-								// shorten the title a little.
-								$title    = ( mb_strlen( $post->post_title ) > 50 ) ? mb_substr( $post->post_title, 0, 49 ) . '...' : $post->post_title;
-								$return[] = array(
-									'id'    => $post->ID,
-									'label' => $title,
-								);
+							if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
+								$query_string = \sanitize_text_field( \wp_unslash( $_GET['q'] ) );
 							}
-						}
-						echo json_encode( $return );
-					} else {
-						$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
+							$posts = self::get_posts( $query_string );
 
-						wp_send_json_error( $error );
-					}
-					wp_die();
-				}
-			);
-			\add_action(
-				'wp_ajax_wsal_settings_get_posts',
-				function () {
-
-					if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
-						// we will pass post IDs and titles to this array.
-						$return = array();
-
-						$args = array(
-							's'                   => isset( $_GET['q'] ) ? \sanitize_text_field( \wp_unslash( $_GET['q'] ) ) : '', // the search query.
-							'post_status'         => 'publish', // if you don't want drafts to be returned.
-							'ignore_sticky_posts' => 1,
-							'posts_per_page'      => 50, // how much to show at once.
-						);
-
-						// you can use WP_Query, query_posts() or get_posts() here - it doesn't matter.
-						$search_results = new \WP_Query(
-							$args
-						);
-
-						if ( $search_results->have_posts() ) {
-							while ( $search_results->have_posts() ) {
-								$search_results->the_post();
-								// shorten the title a little.
-								$title = ( mb_strlen( $search_results->post->post_title ) > 50 ) ? mb_substr( $search_results->post->post_title, 0, 49 ) . '...' : $search_results->post->post_title;
-								if ( isset( $_GET['type'] ) && 'input' === $_GET['type'] ) {
+							if ( $posts ) {
+								foreach ( $posts as $post ) {
+									// shorten the title a little.
+									$title    = ( mb_strlen( $post->post_title ) > 50 ) ? mb_substr( $post->post_title, 0, 49 ) . '...' : $post->post_title;
 									$return[] = array(
-										'id'    => $search_results->post->ID,
+										'id'    => $post->ID,
 										'label' => $title,
 									);
-								} else {
-									$return[] = array( $search_results->post->ID, $title ); // array( Post ID, Post Title ).
 								}
 							}
-						}
-						echo json_encode( $return );
-					} else {
-						$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
-
-						wp_send_json_error( $error );
-					}
-					wp_die();
-				}
-			);
-			\add_action(
-				'wp_ajax_wsal_settings_get_users',
-				function () {
-
-					if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
-
-						$result       = array();
-						$query_params = array();
-						if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
-							$query_params['search']         = '*' . \sanitize_text_field( \wp_unslash( $_GET['q'] ) ) . '*';
-							$query_params['search_columns'] = array( 'user_login', 'user_email' );
-						}
-
-						if ( WP_Helper::is_multisite() ) {
-							$query_params['blog_id'] = 0;
-						}
-
-						$users = \get_users( $query_params );
-
-						if ( MainWP_Addon::check_mainwp_plugin_active() ) {
-
-							$mainwp_users = MainWP_Helper::find_users_by( $query_params['search_columns'], array( str_replace( '*', '%', $query_params['search'] ) ) );
-
-							$users = array_merge( $users, $mainwp_users );
-						}
-
-						if ( empty( $users ) ) {
-							return $result;
+							echo json_encode( $return );
 						} else {
-							foreach ( $users as $user ) {
+							$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
 
-								$return[] = array(
-									'id'    => $user->ID,
-									'label' => $user->user_login . ' (' . $user->user_email . ')',
-								);
+							wp_send_json_error( $error );
+						}
+						wp_die();
+					}
+				);
 
+				\add_action(
+					'wp_ajax_wsal_settings_get_posts_ids',
+					function () {
+						if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+							$query_string = '';
+
+							$return = array();
+
+							if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
+								$query_string = \sanitize_text_field( \wp_unslash( $_GET['q'] ) );
 							}
-						}
+							$posts = self::get_posts( $query_string );
 
-						echo json_encode( $return );
-					} else {
-						$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
+							if ( $posts ) {
+								foreach ( $posts as $post ) {
 
-						wp_send_json_error( $error );
-					}
-					wp_die();
-				}
-			);
-			\add_action(
-				'wp_ajax_wsal_settings_get_roles',
-				function () {
-
-					if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
-
-						$search = '';
-
-						if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
-							$search = \sanitize_text_field( \wp_unslash( $_GET['q'] ) );
-						}
-
-						$role_names = WP_Helper::get_translated_roles();
-
-						if ( MainWP_Addon::check_mainwp_plugin_active() ) {
-
-							$mainwp_roles = MainWP_Helper::get_collected_roles();
-
-							$role_names = array_merge( $role_names, $mainwp_roles );
-						}
-
-						$return = array();
-
-						if ( empty( $role_names ) ) {
-							return $return;
-						} else {
-							asort( $role_names );
-
-							foreach ( $role_names as $slug => $label ) {
-								if ( ! empty( $search ) ) {
-									if ( false !== \mb_strpos( $slug, $search ) || false !== \mb_strpos( $label, $search ) ) {
-										$return[] = array(
-											'id'    => $slug,
-											'label' => $label,
-										);
-									}
-								} else {
 									$return[] = array(
-										'id'    => $slug,
-										'label' => $label,
-									);}
+										'id'    => $post->ID,
+										'label' => $post->ID,
+									);
+								}
 							}
-						}
-
-						echo json_encode( $return );
-					} else {
-						$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
-
-						wp_send_json_error( $error );
-					}
-					wp_die();
-				}
-			);
-			\add_action(
-				'wp_ajax_wsal_settings_get_ips',
-				function () {
-
-					if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
-
-						$result = array();
-						$search = '';
-						if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
-							$search = \sanitize_text_field( \wp_unslash( $_GET['q'] ) );
-						}
-
-						$ips = Occurrences_Entity::get_ips_logged_search( $search );
-
-						if ( empty( $ips ) ) {
-							return $result;
+							echo json_encode( $return );
 						} else {
-							foreach ( $ips as $ip ) {
+							$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
 
-								$return[] = array(
-									'id'    => $ip,
-									'label' => $ip,
-								);
-
-							}
+							wp_send_json_error( $error );
 						}
-
-						echo json_encode( $return );
-					} else {
-						$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
-
-						wp_send_json_error( $error );
+						wp_die();
 					}
-					wp_die();
-				}
-			);
-			\add_action(
-				'wp_ajax_wsal_settings_get_sites',
-				function () {
+				);
+				\add_action(
+					'wp_ajax_wsal_settings_get_posts',
+					function () {
 
-					if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+						if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+							// we will pass post IDs and titles to this array.
+							$return = array();
 
-						$result = array();
-						$search = '';
-						if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
-							$search = \sanitize_text_field( \wp_unslash( $_GET['q'] ) );
-						}
+							$args = array(
+								's'                   => isset( $_GET['q'] ) ? \sanitize_text_field( \wp_unslash( $_GET['q'] ) ) : '', // the search query.
+								'post_status'         => 'publish', // if you don't want drafts to be returned.
+								'ignore_sticky_posts' => 1,
+								'posts_per_page'      => 50, // how much to show at once.
+							);
 
-						if ( WP_Helper::is_multisite() || MainWP_Addon::check_mainwp_plugin_active() ) {
-							$sites = array();
-							if ( function_exists( 'get_sites' ) && class_exists( 'WP_Site_Query' ) ) {
-								$sites = get_sites();
+							// you can use WP_Query, query_posts() or get_posts() here - it doesn't matter.
+							$search_results = new \WP_Query(
+								$args
+							);
+
+							if ( $search_results->have_posts() ) {
+								while ( $search_results->have_posts() ) {
+									$search_results->the_post();
+									// shorten the title a little.
+									$title = ( mb_strlen( $search_results->post->post_title ) > 50 ) ? mb_substr( $search_results->post->post_title, 0, 49 ) . '...' : $search_results->post->post_title;
+									if ( isset( $_GET['type'] ) && 'input' === $_GET['type'] ) {
+										$return[] = array(
+											'id'    => $search_results->post->ID,
+											'label' => $title,
+										);
+									} else {
+										$return[] = array( $search_results->post->ID, $title ); // array( Post ID, Post Title ).
+									}
+								}
 							}
+							echo json_encode( $return );
+						} else {
+							$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
+
+							wp_send_json_error( $error );
+						}
+						wp_die();
+					}
+				);
+				\add_action(
+					'wp_ajax_wsal_settings_get_users',
+					function () {
+
+						if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+
+							$result       = array();
+							$query_params = array();
+							if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
+								$query_params['search']         = '*' . \sanitize_text_field( \wp_unslash( $_GET['q'] ) ) . '*';
+								$query_params['search_columns'] = array( 'user_login', 'user_email' );
+							}
+
+							if ( WP_Helper::is_multisite() ) {
+								$query_params['blog_id'] = 0;
+							}
+
+							$users = \get_users( $query_params );
 
 							if ( MainWP_Addon::check_mainwp_plugin_active() ) {
 
-								$sites = array_merge( $sites, MainWP_Helper::get_all_sites_array() );
+								$mainwp_users = MainWP_Helper::find_users_by( $query_params['search_columns'], array( str_replace( '*', '%', $query_params['search'] ) ) );
+
+								$users = array_merge( $users, $mainwp_users );
 							}
 
-							if ( empty( $sites ) ) {
+							if ( empty( $users ) ) {
 								return $result;
 							} else {
-								foreach ( $sites as $site ) {
+								foreach ( $users as $user ) {
 
-									if ( property_exists( $site, 'site_name' ) ) {
-										$blogname = $site->site_name;
-									} else {
-										$blogname = \get_blog_option( $site->blog_id, 'blogname' );
-									}
+									$return[] = array(
+										'id'    => $user->ID,
+										'label' => $user->user_login . ' (' . $user->user_email . ')',
+									);
 
-									if ( false !== \mb_strpos( \mb_strtolower( $blogname ), \mb_strtolower( $search ) ) ) {
-
-										$result[] = array(
-											'id'    => $site->blog_id,
-											'label' => $blogname,
-										);
-									}
 								}
 							}
 
-							echo json_encode( $result );
-						}
-					} else {
-						$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
+							echo json_encode( $return );
+						} else {
+							$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
 
-						wp_send_json_error( $error );
+							wp_send_json_error( $error );
+						}
+						wp_die();
 					}
-					wp_die();
-				}
-			);
+				);
+				\add_action(
+					'wp_ajax_wsal_settings_get_roles',
+					function () {
+
+						if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+
+							$search = '';
+
+							if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
+								$search = \sanitize_text_field( \wp_unslash( $_GET['q'] ) );
+							}
+
+							$role_names = WP_Helper::get_translated_roles();
+
+							if ( MainWP_Addon::check_mainwp_plugin_active() ) {
+
+								$mainwp_roles = MainWP_Helper::get_collected_roles();
+
+								$role_names = array_merge( $role_names, $mainwp_roles );
+							}
+
+							$return = array();
+
+							if ( empty( $role_names ) ) {
+								return $return;
+							} else {
+								asort( $role_names );
+
+								foreach ( $role_names as $slug => $label ) {
+									if ( ! empty( $search ) ) {
+										if ( false !== \mb_strpos( $slug, $search ) || false !== \mb_strpos( $label, $search ) ) {
+											$return[] = array(
+												'id'    => $slug,
+												'label' => $label,
+											);
+										}
+									} else {
+										$return[] = array(
+											'id'    => $slug,
+											'label' => $label,
+										);}
+								}
+							}
+
+							echo json_encode( $return );
+						} else {
+							$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
+
+							wp_send_json_error( $error );
+						}
+						wp_die();
+					}
+				);
+				\add_action(
+					'wp_ajax_wsal_settings_get_ips',
+					function () {
+
+						if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+
+							$result = array();
+							$search = '';
+							if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
+								$search = \sanitize_text_field( \wp_unslash( $_GET['q'] ) );
+							}
+
+							$ips = Occurrences_Entity::get_ips_logged_search( $search );
+
+							if ( empty( $ips ) ) {
+								return $result;
+							} else {
+								foreach ( $ips as $ip ) {
+
+									$return[] = array(
+										'id'    => $ip,
+										'label' => $ip,
+									);
+
+								}
+							}
+
+							echo json_encode( $return );
+						} else {
+							$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
+
+							wp_send_json_error( $error );
+						}
+						wp_die();
+					}
+				);
+				\add_action(
+					'wp_ajax_wsal_settings_get_sites',
+					function () {
+
+						if ( \is_user_logged_in() && \current_user_can( 'manage_options' ) ) {
+
+							$result = array();
+							$search = '';
+							if ( isset( $_GET['q'] ) && ! is_null( $_GET['q'] ) ) {
+								$search = \sanitize_text_field( \wp_unslash( $_GET['q'] ) );
+							}
+
+							if ( WP_Helper::is_multisite() || MainWP_Addon::check_mainwp_plugin_active() ) {
+								$sites = array();
+								if ( function_exists( 'get_sites' ) && class_exists( 'WP_Site_Query' ) ) {
+									$sites = \get_sites();
+								}
+
+								if ( MainWP_Addon::check_mainwp_plugin_active() ) {
+
+									$sites = array_merge( $sites, MainWP_Helper::get_all_sites_array() );
+								}
+
+								if ( empty( $sites ) ) {
+									return $result;
+								} else {
+									foreach ( $sites as $site ) {
+
+										if ( property_exists( $site, 'site_name' ) ) {
+											$blogname = $site->site_name;
+										} else {
+											$blogname = \get_blog_option( $site->blog_id, 'blogname' );
+										}
+
+										if ( false !== \mb_strpos( \mb_strtolower( $blogname ), \mb_strtolower( $search ) ) ) {
+
+											$result[] = array(
+												'id'    => $site->blog_id,
+												'label' => $blogname,
+											);
+										}
+									}
+								}
+
+								echo json_encode( $result );
+							}
+						} else {
+							$error = new \WP_Error( 'error_code', 'ERROR: Wrong credentials.' );
+
+							wp_send_json_error( $error );
+						}
+						wp_die();
+					}
+				);
+				self::$initiated = true;
+			}
 		}
 
 		/**
@@ -565,6 +622,10 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 						self::text();
 						break;
 
+					case 'button':
+						self::button();
+						break;
+
 					case 'arrayText':
 						self::text_array();
 						break;
@@ -587,6 +648,10 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 
 					case 'select2-multiple':
 						self::multiple_select2();
+						break;
+
+					case 'builder':
+							self::builder();
 						break;
 
 					case 'date':
@@ -627,6 +692,10 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 
 					case 'post_titles':
 						self::post_titles();
+						break;
+
+					case 'post_ids':
+						self::post_ids();
 						break;
 
 					case 'editor':
@@ -774,7 +843,39 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		 * @since 5.0.0
 		 */
 		private static function text() {
-			$type_attr = 'type="text"';
+			$type_attr  = 'type="text"';
+			$pattern    = '';
+			$step       = '';
+			$max_chars  = '';
+			$title_attr = '';
+
+			if ( ! empty( self::$edit_type ) ) {
+				$type_attr = ' type="' . self::$edit_type . '"';
+			}
+			if ( ! empty( self::$title_attr ) ) {
+				$title_attr = ' title="' . self::$title_attr . '"';
+			}
+			if ( ! empty( self::$validate_pattern ) ) {
+				$pattern = ' pattern="' . self::$validate_pattern . '"';
+			}
+			if ( ! empty( self::$step ) ) {
+				$step = ' step="' . self::$step . '"';
+			}
+			if ( ! empty( self::$max_chars ) ) {
+				$max_chars = ' maxlength="' . self::$max_chars . '"';
+			}
+			?>
+			<input <?php echo self::$item_id_attr; ?> <?php echo $title_attr; ?> <?php echo self::$name_attr; ?> <?php echo $type_attr; ?>	value="<?php echo esc_attr( self::$current_value ); ?>" <?php echo self::$placeholder_attr; ?><?php echo $pattern; ?><?php echo $max_chars; ?><?php echo ( ( self::$required ) ? ' required' : '' ); ?><?php echo $step; ?>>
+			<?php
+		}
+
+		/**
+		 * Text
+		 *
+		 * @since 5.0.0
+		 */
+		private static function button() {
+			$type_attr = 'type="button"';
 			$pattern   = '';
 			$step      = '';
 			$max_chars = '';
@@ -791,7 +892,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 				$max_chars = ' maxlength="' . self::$max_chars . '"';
 			}
 			?>
-			<input <?php echo self::$item_id_attr; ?> <?php echo self::$name_attr; ?> <?php echo $type_attr; ?>	value="<?php echo esc_attr( self::$current_value ); ?>" <?php echo self::$placeholder_attr; ?><?php echo $pattern; ?><?php echo $max_chars; ?><?php echo ( ( self::$required ) ? ' required' : '' ); ?><?php echo $step; ?>>
+			<input class="wsal-primary-button button" <?php echo self::$item_id_attr; ?> <?php echo self::$name_attr; ?> <?php echo $type_attr; ?>	value="<?php echo esc_attr( self::$current_value ); ?>" <?php echo self::$placeholder_attr; ?><?php echo $pattern; ?><?php echo $max_chars; ?><?php echo ( ( self::$required ) ? ' required' : '' ); ?><?php echo $step; ?>>
 			<?php
 		}
 
@@ -1004,6 +1105,10 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 			</script>
 			<?php
 		}
+
+		// phpcs:disable
+		// phpcs:enable
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		/**
 		 * Textarea
@@ -1335,6 +1440,39 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		}
 
 		/**
+		 * Post IDS selector
+		 *
+		 * @since 5.2.2
+		 */
+		private static function post_ids() {
+			?>
+			<div class="wsal-custom-post-ids-selector">
+				<div style="width:99%;max-width:25em; float:left;">
+					<select name="<?php echo self::$option_name . '[]'; ?>" <?php echo self::$item_id_attr; ?> multiple="multiple"
+						style="width:100%">
+						<?php
+						$data = maybe_unserialize( self::$current_value );
+
+						if ( ! is_null( $data ) ) {
+
+							if ( ! empty( $data ) ) {
+								foreach ( $data as $post_id ) {
+									?>
+									<option value="<?php echo $post_id; ?>" selected="selected">
+										<?php echo esc_html( $post_id ); ?>
+									</option>
+										<?php
+								}
+							}
+						}
+						?>
+					</select>
+				</div>
+			</div>
+			<?php
+		}
+
+		/**
 		 * Editor
 		 *
 		 * @since 5.0.0
@@ -1348,9 +1486,9 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 			);
 			$settings['textarea_name'] = self::$option_name;
 
-			self::$current_value = ! empty( self::$settings['kses'] ) ? wp_kses_stripslashes( stripslashes( self::$current_value ) ) : self::$current_value;
+			self::$current_value = ! empty( self::$settings['kses'] ) ? \wp_kses_stripslashes( stripslashes( self::$current_value ) ) : self::$current_value;
 
-			wp_editor(
+			\wp_editor(
 				self::$current_value,
 				self::$item_id,
 				$settings
@@ -1435,7 +1573,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		 */
 		private static function hidden() {
 			?>
-			<input <?php echo self::$name_attr; ?> type="hidden" value="<?php echo esc_attr( self::$current_value ); ?>">
+			<input <?php echo self::$item_id_attr; ?> <?php echo self::$name_attr; ?> type="hidden" value="<?php echo esc_attr( self::$current_value ); ?>">
 			<?php
 		}
 
@@ -1499,6 +1637,12 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 			if ( ! empty( self::$settings['name'] ) ) {
 				?>
 				<span class="wsal-label"><?php echo self::$settings['name']; ?></span>
+				<?php
+			}
+
+			if ( isset( self::$settings['add_label'] ) && self::$settings['add_label'] ) {
+				?>
+				<span class="wsal-label">&nbsp;</span>
 				<?php
 			}
 		}
@@ -2094,6 +2238,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 				self::$edit_type        = ! empty( $validate ) ? $validate : false;
 				self::$validate_pattern = ! empty( $pattern ) ? $pattern : false;
 				self::$max_chars        = ! empty( $max_chars ) ? $max_chars : false;
+				self::$title_attr       = ! empty( $title_attr ) ? $title_attr : false;
 			}
 
 			// ID.
@@ -2120,7 +2265,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 			// Get the option stored data.
 			if ( ! \is_null( $data ) ) {
 				self::$current_value = $data;
-			} elseif ( ! empty( $default ) ) {
+			} elseif ( isset( $default ) ) {
 				self::$current_value = $default;
 			}
 		}
@@ -2141,7 +2286,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 				$value['id'] = ' ';
 			}
 
-			$settings_name = $value['settings_name'];
+			$settings_name = ( isset( $value['settings_name'] ) ) ? $value['settings_name'] : '';
 
 			if ( false !== self::get_current_options() && isset( self::get_current_options()[ $value['id'] ] ) ) {
 				$data = self::get_current_options()[ $value['id'] ];
@@ -2158,11 +2303,22 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		 * @since 2.0.0
 		 */
 		public static function save_button() {
+			$query_args_view_data = array(
+				'page'     => ( isset( $_REQUEST['page'] ) ) ? \sanitize_text_field( \wp_unslash( $_REQUEST['page'] ) ) : Notifications::get_safe_view_name(),
+				'action'   => 'edit',
+				'_wpnonce' => \wp_create_nonce( 'bulk-custom-notifications' ),
+				Custom_Notifications_Entity::get_table_name() . '[]' => 0,
+			);
+
+			$admin_page_url = \network_admin_url( 'admin.php' );
+			$view_data_link = \esc_url( \add_query_arg( $query_args_view_data, $admin_page_url ) ) . '#wsal-options-tab-custom-notification-edit';
 
 			?>
 			<div class="wsal-panel-submit">
 				<button name="save" class="wsal-save-button wsal-primary-button button button-primary button-hero"
-						type="submit"><?php esc_html_e( 'Save Changes', 'wp-security-audit-log' ); ?></button>
+						type="submit"><?php esc_html_e( 'Save changes', 'wp-security-audit-log' ); ?></button>
+				
+				<a style="display:none" class="wsal-primary-button button button-primary button-hero create_custom_notification" href="<?php echo $view_data_link; ?>"><?php esc_html_e( 'Create custom notification', 'wp-security-audit-log' ); ?></a>
 			</div>
 			<?php
 		}
@@ -2179,7 +2335,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 		}
 
 		/**
-		 * Setter method fir the current options
+		 * Setter method for the current options
 		 *
 		 * @param array $options - Array with the options to store.
 		 *
@@ -2210,9 +2366,14 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 				'post_type'         => 'any',
 			);
 
-			add_filter( 'posts_where', array( __CLASS__, 'search_post_title' ), 10, 2 );
-			$posts = get_posts( $args );
-			remove_filter( 'posts_where', array( __CLASS__, 'search_post_title' ), 10 );
+			if ( false !== filter_var( $search_term, \FILTER_VALIDATE_INT ) ) {
+				unset( $args['search_post_title'] );
+				$args['post__in'] = array( (int) $search_term );
+			}
+
+			\add_filter( 'posts_where', array( __CLASS__, 'search_post_title' ), 10, 2 );
+			$posts = \get_posts( $args );
+			\remove_filter( 'posts_where', array( __CLASS__, 'search_post_title' ), 10 );
 
 			if ( empty( $posts ) ) {
 				return $result;

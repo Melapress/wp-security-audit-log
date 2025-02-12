@@ -715,7 +715,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 
 			$actype = '';
 			if ( ! empty( $server_array['SCRIPT_NAME'] ) ) {
-				$actype = basename( $server_array['SCRIPT_NAME'], '.php' );
+				$actype = basename( \sanitize_text_field( \wp_unslash( $server_array['SCRIPT_NAME'] ) ), '.php' );
 			}
 
 			if ( isset( $post_array['action'] ) && 'toggle-auto-updates' === $post_array['action'] ) {
@@ -1192,7 +1192,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		 */
 		public static function site_blogname_change( $customizable ) {
 			if ( isset( $_POST['customized'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				$post_values = json_decode( \sanitize_text_field( wp_unslash( $_POST['customized'] ) ), true ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$post_values = json_decode( \sanitize_text_field( \wp_unslash( $_POST['customized'] ) ), true ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 				if ( $customizable->default !== $post_values['blogname'] ) {
 					Alert_Manager::trigger_event(
@@ -1221,8 +1221,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 					6061,
 					array(
 						'Username'     => 'System',
-						'EmailAddress' => $mail_data['to'],
-						'EmailSubject' => $mail_data['subject'],
+						'EmailAddress' => \wp_unslash( $mail_data['to'] ),
+						'EmailSubject' => \wp_unslash( $mail_data['subject'] ),
 					)
 				);
 			}

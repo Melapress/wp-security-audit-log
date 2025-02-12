@@ -29,6 +29,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Redirection_Helper' ) ) {
 	 * @since 5.1.0
 	 */
 	class Redirection_Helper {
+
+		/**
+		 * Class cache to store the state of the plugin.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.0
+		 */
+		private static $plugin_active = null;
+
 		/**
 		 * Register a custom event object within WSAL.
 		 *
@@ -55,7 +65,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Redirection_Helper' ) ) {
 		 * @since 5.1.0
 		 */
 		public static function is_redirection_active() {
-			return WP_Helper::is_plugin_active( 'redirection/redirection.php' );
+			if ( null === self::$plugin_active ) {
+				self::$plugin_active = WP_Helper::is_plugin_active( 'redirection/redirection.php' );
+			}
+
+			return self::$plugin_active;
 		}
 
 		/**
@@ -69,7 +83,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Redirection_Helper' ) ) {
 		 */
 		public static function wsal_redirection_add_custom_event_type( $types ) {
 			$new_types = array(
-				'reset'   => esc_html__( 'Reset', 'wp-security-audit-log' ),
+				'reset' => esc_html__( 'Reset', 'wp-security-audit-log' ),
 			);
 
 			// combine the two arrays.

@@ -393,6 +393,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 					'LastName'          => $user->user_lastname,
 					'Roles'             => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 					'EditUserLink'      => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
+					'TargetUserData'    => (object) array(
+						'Username'  => $user->user_login,
+						'FirstName' => $user->user_firstname,
+						'LastName'  => $user->user_lastname,
+						'Email'     => $user->user_email,
+						'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+					),
 				),
 				array( __CLASS__, 'must_not_contain_new_user_alert' )
 			);
@@ -460,6 +467,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 							'Roles'             => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 							'EditUserLink'      => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
 							'MetaLink'          => $meta_key,
+							'TargetUserData'    => (object) array(
+								'Username'  => $user->user_login,
+								'FirstName' => $user->user_firstname,
+								'LastName'  => $user->user_lastname,
+								'Email'     => $user->user_email,
+								'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+							),
 						),
 						array( __CLASS__, 'must_not_contain_role_changes' )
 					);
@@ -482,6 +496,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 									'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 									'EditUserLink'   => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
 									'MetaLink'       => $meta_key,
+									'TargetUserData' => (object) array(
+										'Username'  => $user->user_login,
+										'FirstName' => $user->user_firstname,
+										'LastName'  => $user->user_lastname,
+										'Email'     => $user->user_email,
+										'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+									),
 								)
 							);
 						}
@@ -499,6 +520,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 									'LastName'       => $user->user_lastname,
 									'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 									'EditUserLink'   => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
+									'TargetUserData' => (object) array(
+										'Username'  => $user->user_login,
+										'FirstName' => $user->user_firstname,
+										'LastName'  => $user->user_lastname,
+										'Email'     => $user->user_email,
+										'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+									),
 								)
 							);
 						}
@@ -516,6 +544,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Meta_Data_Sensor' ) ) {
 									'LastName'       => $user->user_lastname,
 									'Roles'          => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 									'EditUserLink'   => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
+									'TargetUserData' => (object) array(
+										'Username'  => $user->user_login,
+										'FirstName' => $user->user_firstname,
+										'LastName'  => $user->user_lastname,
+										'Email'     => $user->user_email,
+										'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+									),
 								)
 							);
 						}

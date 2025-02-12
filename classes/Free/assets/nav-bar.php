@@ -212,6 +212,10 @@
 	#wsal-navbar .help-contact-link::before {
 		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/help-contact-icon.svg');
 	}
+
+	#wsal-navbar .notifications-link::before {
+		background-image: url('<?php echo \esc_url( WSAL_BASE_URL ); ?>/classes/Free/assets/images/notifications-icon.svg');
+	}
 }
 /* Styles - END */
 </style>
@@ -222,6 +226,7 @@ $log_viewer = ( in_array( $current_screen->base, array( 'toplevel_page_wsal-audi
 $settings   = ( in_array( $current_screen->base, array( 'wp-activity-log_page_wsal-settings', 'wp-activity-log_page_wsal-settings-network' ), true ) ) ? 'active' : '';
 $toggle     = ( in_array( $current_screen->base, array( 'wp-activity-log_page_wsal-togglealerts', 'wp-activity-log_page_wsal-togglealerts-network' ), true ) ) ? 'active' : '';
 $help       = ( in_array( $current_screen->base, array( 'wp-activity-log_page_wsal-help', 'wp-activity-log_page_wsal-help-network' ), true ) ) ? 'active' : '';
+$notifications       = ( in_array( $current_screen->base, array( 'wp-activity-log_page_wsal-notifications', 'wp-activity-log_page_wsal-notifications-network' ), true ) ) ? 'active' : '';
 ?>
 
 <nav id="wsal-navbar">
@@ -243,6 +248,20 @@ $help       = ( in_array( $current_screen->base, array( 'wp-activity-log_page_ws
 				);
 				?>
 				" class="wsal-nav-link log-viewer-link"><?php echo esc_html__( 'Log viewer', 'wp-security-audit-log' ); ?></a>
+			</li>
+			<li class="wsal-nav-item <?php echo \esc_attr( $notifications ); ?>">
+				<a href="
+				<?php
+				echo esc_url(
+					\add_query_arg(
+						array(
+							'page' => 'wsal-notifications',
+						),
+						\network_admin_url( 'admin.php' )
+					)
+				);
+				?>
+				" class="wsal-nav-link notifications-link"><?php echo esc_html__( 'Notifications', 'wp-security-audit-log' ); ?></a>
 			</li>
 			<li class="wsal-nav-item <?php echo \esc_attr( $settings ); ?>">
 				<a href="

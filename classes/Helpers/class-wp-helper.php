@@ -7,7 +7,7 @@
  *
  * @since      4.4.2
  *
- * @copyright  2024 Melapress
+ * @copyright  2025 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
  * @see       https://wordpress.org/plugins/wp-2fa/
@@ -32,6 +32,31 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 	 * @since 4.4.2.1
 	 */
 	class WP_Helper {
+
+		/**
+		 * The cache time to store data for. Default is 1 hour in seconds.
+		 *
+		 * @since 3.5.2
+		 * @var   int
+		 */
+		private static $ttl = 30;
+
+		/**
+		 * The data to be stored.
+		 *
+		 * @since 3.5.2
+		 * @var   mixed
+		 */
+		public static $data;
+
+		/**
+		 * Options key used to this data.
+		 *
+		 * @since 3.5.2
+		 * @var   string
+		 */
+		public const STORAGE_KEY = 'wsal_networkwide_tracker_cpts';
+
 		/**
 		 * Hold the user roles as array - Human readable is used for key of the array, and the internal role name is the value.
 		 *
@@ -124,6 +149,56 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			}
 
 			return self::$user_roles_wp;
+		}
+
+		/**
+		 * Returns the WP post types as array.
+		 *
+		 * @return array
+		 *
+		 * @since 5.2.1
+		 */
+		public static function get_post_types() {
+
+			$post_types = array();
+
+			// Get the post types.
+			$output     = 'names'; // Names or objects, note names is the default.
+			$operator   = 'and'; // Conditions: "and" or "or".
+			$post_types = \get_post_types( array(), $output, $operator );
+
+			// Search and remove attachment type.
+			$key = array_search( 'attachment', $post_types, true );
+			if ( false !== $key ) {
+				unset( $post_types[ $key ] );
+			}
+
+			// Add select options to widget.
+			foreach ( $post_types as $post_type ) {
+				$post_types[ strtolower( $post_type ) ] = $post_type;
+			}
+
+			return $post_types;
+		}
+
+		/**
+		 * Returns WP post statuses as array
+		 *
+		 * @return array
+		 *
+		 * @since 5.2.1
+		 */
+		public static function get_post_statuses() {
+
+			$post_statuses = array();
+
+			$wp_post_statuses = \get_post_stati();
+			// Add select options to widget.
+			foreach ( $wp_post_statuses as $status ) {
+				$post_statuses[ $status ] = $status;
+			}
+
+			return $post_statuses;
 		}
 
 		/**
@@ -444,6 +519,22 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			}
 		}
 
+
+		/**
+		 * Returns the current blog ID if on multisite.
+		 *
+		 * @return bool|int
+		 *
+		 * @since 5.3.0
+		 */
+		public static function get_blog_id() {
+			if ( self::is_multisite() ) {
+				return \get_current_blog_id();
+			}
+
+			return false;
+		}
+
 		/**
 		 * Method: Get a specific view.
 		 *
@@ -597,7 +688,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 		 */
 		public static function is_login_screen(): bool {
 
-			$login = parse_url( site_url( 'wp-login.php' ), PHP_URL_PATH ) === parse_url( \wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			$login = parse_url( site_url( 'wp-login.php' ), PHP_URL_PATH ) === parse_url( \wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			return \apply_filters( 'wsal_login_screen_url', $login );
 		}
@@ -686,7 +777,7 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
-			return is_plugin_active( $plugin );
+			return \is_plugin_active( $plugin );
 		}
 
 		/**
@@ -784,6 +875,179 @@ if ( ! class_exists( '\WSAL\Helpers\WP_Helper' ) ) {
 			}
 
 			return $role_names;
+		}
+
+		/**
+		 * Get the blog URL.
+		 *
+		 * @since 3.4
+		 *
+		 * @return string
+		 */
+		public static function get_blog_domain(): string {
+			if ( self::is_multisite() ) {
+				$blog_id     = function_exists( 'get_current_blog_id' ) ? \get_current_blog_id() : 0;
+				$blog_domain = \get_blog_option( $blog_id, 'home' );
+			} else {
+				$blog_domain = \get_option( 'home' );
+			}
+
+			// Replace protocols.
+			return str_replace( array( 'http://', 'https://' ), '', $blog_domain );
+		}
+
+		public static function get_blog_name(): string {
+			if ( self::is_multisite() ) {
+				$blog_id   = function_exists( 'get_current_blog_id' ) ? \get_current_blog_id() : 0;
+				$blog_name = \get_blog_option( $blog_id, 'blogname' );
+			} else {
+				$blog_name = \get_bloginfo( 'name' );
+			}
+
+			return $blog_name;
+		}
+
+		/** CPT tracker ... stll confused about this one */
+		/**
+		 * Return a list of data about a specific requested site, or the network
+		 * wide list of data otherwise. Empty array if neither exist.
+		 *
+		 * @method get_network_data_list
+		 * @since  3.5.2
+		 * @param  integer $site_id if a specific site is there. This is technically nullable type but for back compat isn't.
+		 * @return array
+		 */
+		public static function get_network_data_list( $site_id = 0 ) {
+			$network_data = get_network_option( null, self::STORAGE_KEY );
+			// get the site list requested otherwise get the network list.
+			$list = ( 0 !== $site_id && isset( $network_data['site'][ $site_id ] ) ) ? $network_data['site'][ $site_id ] : $network_data['list'];
+			return ( ! empty( $list ) ) ? $list : array();
+		}
+		/**
+		 * Tests if the actions need run to store update this sites and the network
+		 * sites cached options for CPTs.
+		 *
+		 * Returns true or false based on the current sites option value being
+		 * present and considered valid.
+		 *
+		 * @method conditions
+		 * @since  3.5.2
+		 * @return bool
+		 */
+		public static function conditions() {
+			$conditions_met           = false;
+			$local_post_types_wrapper = \get_option( self::STORAGE_KEY );
+			if (
+			! $local_post_types_wrapper ||
+			! is_array( $local_post_types_wrapper ) ||
+			! isset( $local_post_types_wrapper['timestamp'] ) ||
+			(int) $local_post_types_wrapper['timestamp'] + self::$ttl < time()
+			) {
+				$conditions_met = true;
+			}
+			return $conditions_met;
+		}
+		/**
+		 * The actions that are used to track CPT registration and store the list
+		 * at a later point.
+		 *
+		 * @method actions
+		 * @since  3.5.2
+		 * @return void
+		 */
+		public static function actions() {
+			\add_action( 'wp_loaded', array( __CLASS__, 'generate_data' ) );
+			\add_action( 'wp_loaded', array( __CLASS__, 'update_storage_site' ) );
+			\add_action( 'wp_loaded', array( __CLASS__, 'update_storage_network' ) );
+		}
+		/**
+		 * Gets a list of post types registered on this site.
+		 *
+		 * @method get_registered_post_types
+		 * @since  3.5.2
+		 * @return array
+		 */
+		private static function get_registered_post_types() {
+			$post_types = get_post_types( array(), 'names' );
+			$post_types = array_diff( $post_types, array( 'attachment', 'revision', 'nav_menu_item', 'customize_changeset', 'custom_css', 'oembed_cache', 'user_request', 'wp_block' ) );
+			$data       = array();
+			foreach ( $post_types as $post_type ) {
+				$data[] = $post_type;
+			}
+			return $data;
+		}
+		/**
+		 * Method to store this site data locally to the site.
+		 *
+		 * Stores the data in an array containing a timestamp for freshness
+		 * invalidation at on later checks or updates.
+		 *
+		 * @method update_storage_site
+		 * @since  3.5.2
+		 * @return bool
+		 */
+		public static function update_storage_site() {
+			$local_data = array(
+				'timestamp' => time(),
+				'data'      => self::$data,
+			);
+			return update_option( self::STORAGE_KEY, $local_data );
+		}
+
+		/**
+		 * Method to store this sites local data as part of the global network wide
+		 * data store. This should merge the data rather than overwrite in most
+		 * cases.
+		 *
+		 * @method update_storage_network
+		 * @since  3.5.2
+		 * @return bool
+		 */
+		public static function update_storage_network() {
+			// get any network stored data.
+			$network_data    = get_network_option( null, self::STORAGE_KEY );
+			$current_blog_id = get_current_blog_id();
+			$data_updated    = false;
+
+			if ( false === $network_data ) {
+				$network_data         = array();
+				$network_data['site'] = array();
+			}
+			if (
+			! isset( $network_data['site'][ $current_blog_id ] )
+			|| ( isset( $network_data['site'][ $current_blog_id ] ) && $network_data['site'][ get_current_blog_id() ] !== self::$data )
+			) {
+				$network_data['site'][ $current_blog_id ] = self::$data;
+				// if the network doesn't have data for this site or the data it
+				// has is differs then perform the update.
+				$network_wide_list = array();
+				foreach ( $network_data['site'] as $list ) {
+					// loop through each item in a site and add uniques to a list.
+					foreach ( $list as $item ) {
+						if ( ! in_array( $item, $network_wide_list, true ) ) {
+							$network_wide_list[] = $item;
+						}
+					}
+				}
+				// save the data on the network with the latest list and the current
+				// sites data updated in it.
+				$network_data['list'] = $network_wide_list;
+				// update the site data on the network.
+				$data_updated = update_network_option( null, self::STORAGE_KEY, $network_data );
+			}
+			return $data_updated;
+		}
+
+		/**
+		 * Gets this sites registered post types and stores them in the $data
+		 * property for saving at a later point.
+		 *
+		 * @method generate_data
+		 * @since  3.5.2
+		 * @return void
+		 */
+		public static function generate_data() {
+			self::$data = self::get_registered_post_types();
 		}
 	}
 }

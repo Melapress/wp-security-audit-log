@@ -13,9 +13,7 @@ declare(strict_types=1);
 
 namespace WSAL\Views;
 
-use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\View_Manager;
-use WSAL\Helpers\Plugins_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Helpers\Plugin_Settings_Helper;
 
@@ -197,10 +195,10 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 			 * Wizard Steps.
 			 */
 			$wizard_steps = array(
-				'welcome'       => array(
-					'name'    => __( 'Welcome', 'wp-security-audit-log' ),
-					'content' => array( __CLASS__, 'wsal_step_welcome' ),
-				),
+				// 'welcome'       => array(
+				// 'name'    => __( 'Welcome', 'wp-security-audit-log' ),
+				// 'content' => array( __CLASS__, 'wsal_step_welcome' ),
+				// ),
 				'log_details'   => array(
 					'name'    => __( 'Log Details', 'wp-security-audit-log' ),
 					'content' => array( __CLASS__, 'wsal_step_log_details' ),
@@ -220,6 +218,11 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 					'name'    => __( 'Log Retention', 'wp-security-audit-log' ),
 					'content' => array( __CLASS__, 'wsal_step_log_retention' ),
 					'save'    => array( __CLASS__, 'wsal_step_log_retention_save' ),
+				),
+				'summary'       => array(
+					'name'    => __( 'Send summary', 'wp-security-audit-log' ),
+					'content' => array( __CLASS__, 'wsal_step_summary' ),
+					'save'    => array( __CLASS__, 'wsal_step_summary_save' ),
 				),
 				'finish'        => array(
 					'name'    => __( 'Finish', 'wp-security-audit-log' ),
@@ -490,18 +493,18 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 			?>
 			<form method="post" class="wsal-setup-form">
 				<?php wp_nonce_field( 'wsal-step-log-details' ); ?>
-				<h4><?php esc_html_e( 'Please select the level of detail for your WordPress activity logs:', 'wp-security-audit-log' ); ?></h4>
+				<h4><?php esc_html_e( 'Let\'s get started. Select your preferred level of activity log detail:', 'wp-security-audit-log' ); ?></h4>
 				<fieldset>
 					<label for="basic">
 						<input id="basic" name="wsal-details-level" type="radio" value="basic">
-						<?php esc_html_e( 'Basic (I want a high level overview and I am not interested in the detail)', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( 'Basic: Get a high-level overview of activity without too much detail.', 'wp-security-audit-log' ); ?>
 					</label>
 					<br />
 					<label for="geek">
 						<input id="geek" name="wsal-details-level" type="radio" value="geek" checked>
-						<?php esc_html_e( 'Geek (I want to know everything that is happening on my WordPress)', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( 'Comprehensive: Track everything happening on your WordPress site for full transparency.', 'wp-security-audit-log' ); ?>
 					</label>
-					<p class="description"><?php esc_html_e( 'Note: You can change the WordPress logging level from the plugin’s settings anytime.', 'wp-security-audit-log' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Note: you can always enable or disable individual event IDs that report specific website changes or user actions from the Enable/Disable Events section in the plugin.', 'wp-security-audit-log' ); ?></p>
 				</fieldset>
 				<div class="wsal-setup-actions">
 					<button class="button button-primary" type="submit" name="save_step" value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?></button>
@@ -536,7 +539,8 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 				Plugin_Settings_Helper::set_geek_mode();
 			}
 
-			wp_safe_redirect( esc_url_raw( self::get_next_step() ) );
+			\wp_safe_redirect( esc_url_raw( self::get_next_step() ) );
+
 			exit();
 		}
 
@@ -549,21 +553,20 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 			?>
 			<form method="post" class="wsal-setup-form">
 				<?php wp_nonce_field( 'wsal-step-login' ); ?>
-				<h4><?php esc_html_e( 'Do you or your users use other pages to log in to WordPress other than the default login page ( /wp-admin/ )?', 'wp-security-audit-log' ); ?></h4>
+				<h4><?php esc_html_e( 'Do you or your users log in to WordPress through pages other than the default login page (/wp-admin/)?', 'wp-security-audit-log' ); ?></h4>
 				<fieldset>
 					<label for="wsal-frontend-events-login-yes">
 						<input id="wsal-frontend-events-login-yes" name="wsal-frontend-login" type="radio" value="1">
-						<?php esc_html_e( 'Yes, we use other pages to login to WordPress.', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( 'Yes, we use other login pages.', 'wp-security-audit-log' ); ?>
 					</label>
 					<br />
 					<label for="wsal-frontend-events-login-no">
 						<input id="wsal-frontend-events-login-no" name="wsal-frontend-login" type="radio" value="0" checked>
-						<?php esc_html_e( 'No, we only use the default WordPress login page.', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( 'No, we only use the default login page.', 'wp-security-audit-log' ); ?>
 					</label>
-					<p class="description"><?php esc_html_e( 'If your website is a membership or ecommerce website most probably you have more than one area from where the users can login. If you are not sure, select Yes.', 'wp-security-audit-log' ); ?></p>
+					<p class="description"><?php esc_html_e( 'If your website is a membership site, eCommerce store, or similar, most likely you have additional login pages. If unsure, select "Yes."', 'wp-security-audit-log' ); ?></p>
 				</fieldset>
 				<!-- Question -->
-				<p class="description"><?php esc_html_e( 'Note: You can change the WordPress activity log retention settings at any time from the plugin settings later on.', 'wp-security-audit-log' ); ?></p>
 				<div class="wsal-setup-actions">
 					<button class="button button-primary" type="submit" name="save_step" value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?></button>
 				</div>
@@ -602,7 +605,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 			?>
 			<form method="post" class="wsal-setup-form">
 				<?php wp_nonce_field( 'wsal-step-frontend-register' ); ?>
-				<h4><?php esc_html_e( 'Can visitors register as a user on your website?', 'wp-security-audit-log' ); ?></h4>
+				<h4><?php esc_html_e( 'Can visitors register as users on your website?', 'wp-security-audit-log' ); ?></h4>
 				<fieldset>
 					<label for="wsal-frontend-events-register-yes">
 						<input id="wsal-frontend-events-register-yes" name="wsal-frontend-register" type="radio" value="1">
@@ -613,10 +616,9 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 						<input id="wsal-frontend-events-register-no" name="wsal-frontend-register" type="radio" value="0" checked>
 						<?php esc_html_e( 'No', 'wp-security-audit-log' ); ?>
 					</label>
-					<p class="description"><?php esc_html_e( 'If you are not sure about this setting, check if the Membership setting in the WordPress General settings is checked or not. If it is not checked (default) select No.', 'wp-security-audit-log' ); ?></p>
+					<p class="description"><?php esc_html_e( 'If unsure, check the “Membership” option in the WordPress General Settings. If it’s not enabled (default), select "No."', 'wp-security-audit-log' ); ?></p>
 				</fieldset>
 				<!-- Question -->
-				<p class="description"><?php esc_html_e( 'Note: You can change the WordPress activity log retention settings at any time from the plugin settings later on.', 'wp-security-audit-log' ); ?></p>
 				<div class="wsal-setup-actions">
 					<button class="button button-primary" type="submit" name="save_step" value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>"><?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?></button>
 				</div>
@@ -656,32 +658,40 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 			<form method="post" class="wsal-setup-form">
 				<?php wp_nonce_field( 'wsal-step-log-retention' ); ?>
 				<h4>
-					<?php esc_html_e( 'How long do you want to keep the data in the WordPress activity Log?', 'wp-security-audit-log' ); ?>
+					<?php esc_html_e( 'How long would you like to keep activity log data?', 'wp-security-audit-log' ); ?>
 				</h4>
 				<fieldset>
 					<label for="3">
 						<input id="3" name="wsal-pruning-limit" type="radio" value="3" checked />
-						<?php esc_html_e( '3 months (data older than 3 months will be deleted)', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( '3 months (Older data will be deleted.)', 'wp-security-audit-log' ); ?>
 					</label>
 					<br />
 					<label for="6">
 						<input id="6" name="wsal-pruning-limit" type="radio" value="6" />
-						<?php esc_html_e( '6 months (data older than 6 months will be deleted)', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( '6 months', 'wp-security-audit-log' ); ?>
 					</label>
 					<br />
 					<label for="12">
 						<input id="12" name="wsal-pruning-limit" type="radio" value="12" />
-						<?php esc_html_e( '12 months (data older than 12 months will be deleted)', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( '12 months', 'wp-security-audit-log' ); ?>
 					</label>
 					<br />
 					<label for="none">
 						<input id="none" name="wsal-pruning-limit" type="radio" value="none" />
 						<?php esc_html_e( 'Keep all data.', 'wp-security-audit-log' ); ?>
 					</label>
-					<p class="description">
-						<?php esc_html_e( 'Note: You can change the WordPress activity log retention settings at any time from the plugin settings later on.', 'wp-security-audit-log' ); ?>
-					</p>
 				</fieldset>
+
+				<p class="description">
+				<em>
+					<?php
+					// Step help text.
+					$step_help = __( 'While the plugin efficiently stores data in your WordPress database, keeping more data will use more storage space. If you need to retain large amounts of activity log data, we recommend <a href="https://melapress.com/wordpress-activity-log/features/#utm_source=plugin&amp;utm_medium=referral&amp;utm_campaign=wsal&amp;utm_content=wizard+configuration" rel="nofollow" target="_blank">upgrading to Premium</a> and using our database tools to store the activity log in an external database. You can also store the logs in third party services such as Loggly, AWS CloudWatch, Slack and other solutions', 'wp-security-audit-log' );
+
+					echo wp_kses( $step_help, Plugin_Settings_Helper::get_allowed_html_tags() );
+					?>
+				</em>
+			</p>
 
 				<div class="wsal-setup-actions">
 					<button class="button button-primary"
@@ -692,17 +702,6 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 					</button>
 				</div>
 			</form>
-
-			<p class="description">
-				<em>
-					<?php
-					// Step help text.
-					$step_help = __( 'The plugin stores the data in the WordPress database in a very efficient way, though the more data you keep the more hard disk space it will consume. If you need need to retain a lot of data we would recommend you to <a href="https://melapress.com/features/?utm_source=plugin&utm_medium=referral&utm_campaign=wsal&utm_content=wizard+configuration" target="_blank">upgrade to Premium</a> and use the Database tools to store the WordPress activity log in an external database.', 'wp-security-audit-log' );
-
-					echo wp_kses( $step_help, Plugin_Settings_Helper::get_allowed_html_tags() );
-					?>
-				</em>
-			</p>
 			<?php
 		}
 
@@ -750,29 +749,131 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 		}
 
 		/**
+		 * Step View: `Summary`
+		 *
+		 * @since 5.3.0
+		 */
+		private static function wsal_step_summary() {
+			?>
+			<form method="post" class="wsal-setup-form">
+				<?php \wp_nonce_field( 'wsal-step-summary' ); ?>
+				<h4>
+					<?php esc_html_e( 'Where should the plugin send your activity log summary?', 'wp-security-audit-log' ); ?>
+				</h4>
+
+				<p class="description">
+					<em>
+						<?php
+						// Step help text.
+						$step_help = __(
+							'WP Activity Log will send you a weekly summary of key activities happening on your website. This includes important events such as user logins, password changes, plugin updates, activations, and changes to WordPress settings.
+
+							<p>Please provide the email address where you\'d like to receive these emails:</p>',
+							'wp-security-audit-log'
+						);
+
+						echo wp_kses( $step_help, Plugin_Settings_Helper::get_allowed_html_tags() );
+						?>
+					</em>
+				</p>
+				<fieldset>
+					<label for="3"><?php esc_html_e( 'Email address:', 'wp-security-audit-log' ); ?>
+						<input id="notification_weekly_email_address" name="built-in-notifications[notification_weekly_email_address]" required="required" type="text" value="<?php echo \sanitize_email( \get_bloginfo( 'admin_email' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" pattern="([a-zA-Z0-9\._\%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,4}[,]{0,}){1,}">
+					</label>
+					<p></p>
+				</fieldset>
+
+				<div class="wsal-setup-actions">
+					<button class="button button-primary"
+						type="submit"
+						name="save_step"
+						value="<?php esc_attr_e( 'Next', 'wp-security-audit-log' ); ?>">
+						<?php esc_html_e( 'Next', 'wp-security-audit-log' ); ?>
+					</button>
+				</div>
+			</form>
+
+			<p class="description">
+				<em>
+					<?php
+					/* @free:start */
+
+					// Change the help text if premium version of the plugin is active.
+					$step_help = __( 'Upgrade to <a href="https://melapress.com/wordpress-activity-log/features/#utm_source=plugin&amp;utm_medium=referral&amp;utm_campaign=wsal&amp;utm_content=wizard+configuration" rel="nofollow"  target="_blank">WP Activity Log Premium</a> to customize your activity log summary. Include additional details and choose exactly what to track', 'wp-security-audit-log' );
+
+					echo wp_kses( $step_help, Plugin_Settings_Helper::get_allowed_html_tags() );
+					/* @free:end */
+
+					?>
+				</em>
+			</p>
+			<?php
+		}
+
+		/**
+		 * Step Save: `Summary`
+		 *
+		 * @since 5.3.0
+		 */
+		private static function wsal_step_summary_save() {
+			// Verify nonce.
+			\check_admin_referer( 'wsal-step-summary' );
+
+			$post_array = array();
+
+			if ( isset( $_POST[ Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) && ! empty( $_POST[ Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) && \is_array( $_POST[ Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ) ) {
+
+				$post_array = \stripslashes_deep( $_POST[ Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			}
+
+			$current_settings = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
+
+			$current_settings['weeklyemail_address'] = ( ( isset( $post_array['notification_weekly_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_weekly_email_address'] ) ) : \get_bloginfo( 'admin_email' ) );
+
+			$current_settings['weekly_summary_notification'] = true;
+
+			Settings_Helper::set_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, $current_settings );
+
+			\wp_safe_redirect( esc_url_raw( self::get_next_step() ) );
+			exit();
+		}
+
+		/**
 		 * Step View: `Finish`
 		 *
 		 * @since 5.0.0
 		 */
 		private static function wsal_step_finish() {
 			?>
-			<p><?php esc_html_e( 'Your plugin is all set and it is ready to start keeping a record of everything that is happening on your WordPress in a WordPress activity log.', 'wp-security-audit-log' ); ?></p>
-			<p><?php esc_html_e( 'Below are a few useful links you might need to refer to:', 'wp-security-audit-log' ); ?></p>
+			<h4>
+				<?php esc_html_e( 'You’re all set!', 'wp-security-audit-log' ); ?>
+			</h4>
+			<p><?php esc_html_e( 'WP Activity Log is now ready and it has already started recording changes and user actions on your WordPress site. To help you make the most of the plugin, check out these helpful resources:', 'wp-security-audit-log' ); ?></p>
 
 			<ul>
 				<li>
 					<a href="https://melapress.com/support/kb/wp-activity-log-getting-started/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
-						<?php esc_html_e( 'Getting started with the WP Activity Log plugin', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( 'Getting started with WP Activity Log', 'wp-security-audit-log' ); ?>
+					</a>
+				</li>
+				<li>
+					<a href="https://melapress.com/support/kb/wp-activity-log-event-ids/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+						<?php esc_html_e( 'What are events and event IDs', 'wp-security-audit-log' ); ?>
+					</a>
+				</li>
+				<li>
+					<a href="https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+						<?php esc_html_e( 'The complete list of all the event IDs', 'wp-security-audit-log' ); ?>
 					</a>
 				</li>
 				<li>
 					<a href="https://melapress.com/support/kb/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
-						<?php esc_html_e( 'Knowledge Base & Support Documents', 'wp-security-audit-log' ); ?>
+						<?php esc_html_e( 'Knowledge base and support documentation', 'wp-security-audit-log' ); ?>
 					</a>
 				</li>
 				<li>
-					<a href="https://melapress.com/wordpress-activity-log/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
-						<?php esc_html_e( 'WordPress activity logs: the definitive guide to understanding & using them', 'wp-security-audit-log' ); ?>
+					<a href="https://melapress.com/wordpress-activity-log/features/?utm_source=plugin&utm_source=plugin&utm_medium=link&utm_campaign=wsal" rel="noopener noreferrer" target="_blank">
+						<?php esc_html_e( 'WP Activity Log plugin features', 'wp-security-audit-log' ); ?>
 					</a>
 				</li>
 			</ul>
@@ -782,7 +883,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 			$help_page = 'https://melapress.com/contact/?utm_source=plugin&utm_medium=link&utm_campaign=wsal';
 			?>
 
-			<p><?php echo wp_kses( __( 'We trust this plugin meets all your activity log requirements. Should you encounter any problems, have feature requests or would like to share some feedback', 'wp-security-audit-log' ), Plugin_Settings_Helper::get_allowed_html_tags() ); ?>  <a href="<?php echo esc_url( $help_page ); ?>" rel="noopener noreferrer" target="_blank"><?php esc_html_e( 'please get in touch!', 'wp-security-audit-log' ); ?></a></p>
+			<p><?php echo wp_kses( __( 'We are confident WP Activity Log will meet your activity monitoring needs. If you have any questions, feature suggestions, or feedback, feel free to ', 'wp-security-audit-log' ), Plugin_Settings_Helper::get_allowed_html_tags() ); ?>  <a href="<?php echo esc_url( $help_page ); ?>" rel="noopener noreferrer" target="_blank"><?php esc_html_e( 'contact us anytime!', 'wp-security-audit-log' ); ?></a></p>
 
 			<form method="post" class="wsal-setup-form">
 				<?php wp_nonce_field( 'wsal-step-finish' ); ?>

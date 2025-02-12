@@ -150,7 +150,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 		 *
 		 * @since 4.6.0
 		 */
-		public static function event_topic_tag_deleted( $term_id, $tt_id, $deleted_term, $object_ids ) {
+		public static function event_topic_tag_deleted( $term_id, $tt_id, $deleted_term, $object_ids ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 			if ( 'topic-tag' === $deleted_term->taxonomy ) {
 				Alert_Manager::trigger_event(
 					8025,
@@ -828,7 +828,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 						if ( ! empty( $post->post_parent ) ) {
 							$post_id = $post->post_parent;
 						} else {
-							$post_id = $get_array['topic_id'];
+							$post_id = \sanitize_text_field( \wp_unslash( $get_array['topic_id'] ) );
 						}
 
 						$bbp_sticky_topics       = maybe_unserialize( get_post_meta( $post_id, '_bbp_sticky_topics', true ) );
@@ -883,7 +883,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\BBPress_Sensor' ) ) {
 						if ( ! empty( $post->post_parent ) ) {
 							$post_id = $post->post_parent;
 						} else {
-							$post_id = $get_array['forum_id'];
+							$post_id = \sanitize_text_field( \wp_unslash( $get_array['forum_id'] ) );
 						}
 
 						$editor_link = self::get_editor_link( $post );

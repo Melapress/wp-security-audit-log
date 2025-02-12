@@ -86,7 +86,8 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 			foreach ( $views_to_load as $view ) {
 				if ( is_subclass_of( $view, '\WSAL_AbstractView' ) ) {
-					self::$views[] = new $view( \WpSecurityAuditLog::get_instance() );
+					global $wsal_class;
+					self::$views[] = new $view( $wsal_class );
 				}
 			}
 
@@ -153,7 +154,8 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		 */
 		public static function add_from_class( $class ) {
 			if ( is_subclass_of( $class, '\WSAL_AbstractView' ) ) {
-				self::$views[] = new $class( \WpSecurityAuditLog::get_instance() );
+				global $wsal_class;
+				self::$views[] = new $class( $wsal_class );
 			} else {
 				self::$views[] = $class;
 			}
@@ -208,7 +210,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 					array( self::$views[0], 'set_hook_suffix' ),
 					add_menu_page(
 						'WP Activity Log',
-						'WP Activity Log',
+						'WP Activity Log' . self::get_updates_count_html(),
 						'read', // No capability requirement.
 						$main_view_menu_slug,
 						array( __CLASS__, 'render_view_body' ),
@@ -229,6 +231,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 					'wsal-np-notifications',
 					'wsal-setup',
 					'wsal-reports-new',
+					'wsal-notifications',
 				);
 
 				// Check edit privileges of the current user.
@@ -244,10 +247,6 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 						if ( in_array( $safe_view_name, $protected_views, true ) && ! $has_current_user_edit_priv ) {
 							continue;
-						}
-
-						if ( $view instanceof \WSAL_NP_EditNotification || $view instanceof \WSAL_NP_AddNotification ) {
-							$main_view_menu_slug = null;
 						}
 
 						\call_user_func(
@@ -292,6 +291,48 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		}
 
 		/**
+		 * Returns the HTML that shows baboon notifications about the banners we have not confirmed.
+		 *
+		 * @return string
+		 *
+		 * @since 5.2.2
+		 */
+		public static function get_updates_count_html(): string {
+			$count = Notices::get_number_of_notices();
+			$count_html = '';
+
+			if ( 0 < $count ) {
+				$style = '<style>
+					#wsal-notices-menu .update-count {
+						position: absolute !important;
+						top: 2px !important;
+						right: 4px !important;
+						min-width: 20px !important;
+						margin-right: 2px !important;
+						line-height: 1.2rem !important;
+						background: #d63638 !important;
+						border-radius: 50% !important;
+						display: inline-block !important;
+						vertical-align: top !important;
+						z-index: 26 !important;
+						font-weight: bold !important;
+					}
+					#wsal-notices-menu.update-plugins {
+						display: inline !important;
+						background: none !important;
+					}
+				</style>';
+
+				$count_html = $style . sprintf(
+					' <span id="wsal-notices-menu" class="update-plugins"><span class="update-count">%d</span></span>',
+					\number_format_i18n( $count )
+				);
+			}
+
+			return $count_html;
+		}
+
+		/**
 		 * WordPress Filter
 		 *
 		 * @param array $old_links - Array of old links.
@@ -329,7 +370,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 			if ( isset( $current_view ) ) {
 				foreach ( self::$views as $i => $view ) {
-					if ( $current_view === \call_user_func( array( $view, 'get_safe_view_name' ) ) ) {
+					if ( \call_user_func( array( $view, 'get_safe_view_name' ) ) === $current_view ) {
 						return $i;
 					}
 				}
@@ -353,7 +394,7 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 
 				if ( isset( $current_view ) ) {
 					foreach ( self::$views as $view ) {
-						if ( $current_view === \call_user_func( array( $view, 'get_safe_view_name' ) ) ) {
+						if ( \call_user_func( array( $view, 'get_safe_view_name' ) ) === $current_view ) {
 							self::$active_view = $view;
 						}
 					}
@@ -472,11 +513,6 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 		private static function get_class_name_by_view( $view_slug ) {
 			$not_show = false;
 			switch ( $view_slug ) {
-				case 'wsal-emailnotifications':
-					if ( class_exists( 'WSAL_NP_Plugin' ) ) {
-						$not_show = true;
-					}
-					break;
 				case 'wsal-loginusers':
 					if ( class_exists( 'WSAL_UserSessions_Plugin' ) ) {
 						$not_show = true;

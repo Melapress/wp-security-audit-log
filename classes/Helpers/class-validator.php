@@ -114,9 +114,9 @@ if ( ! class_exists( '\WSAL\Helpers\Validator' ) ) {
 		public static function validate_ip( $ip ) {
 			$opts = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
 
-			if ( Settings_Helper::get_boolean_option_value( 'filter-internal-ip', false ) ) {
+			// if ( Settings_Helper::get_boolean_option_value( 'filter-internal-ip', false ) ) { .
 				$opts = $opts | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
-			}
+			// } .
 
 			$filtered_ip = filter_var( $ip, FILTER_VALIDATE_IP, $opts );
 
@@ -188,6 +188,64 @@ if ( ! class_exists( '\WSAL\Helpers\Validator' ) ) {
 		 */
 		public static function is_ip_address( $ip_address ) {
 			return filter_var( $ip_address, FILTER_VALIDATE_IP ) !== false;
+		}
+
+		/**
+		 * Checks if give string is a valid JSON
+		 *
+		 * @param string $json_string - The possible JSON string to validate.
+		 *
+		 * @return boolean
+		 *
+		 * @since 5.2.1
+		 */
+		public static function validate_json( string $json_string ): bool {
+			// decode the JSON data.
+			$result = json_decode( $json_string );
+
+			// switch and check possible JSON errors.
+			switch ( json_last_error() ) {
+				case JSON_ERROR_NONE:
+					$error = ''; // JSON is valid // No error has occurred.
+					break;
+				case JSON_ERROR_DEPTH:
+					$error = 'The maximum stack depth has been exceeded.';
+					break;
+				case JSON_ERROR_STATE_MISMATCH:
+					$error = 'Invalid or malformed JSON.';
+					break;
+				case JSON_ERROR_CTRL_CHAR:
+					$error = 'Control character error, possibly incorrectly encoded.';
+					break;
+				case JSON_ERROR_SYNTAX:
+					$error = 'Syntax error, malformed JSON.';
+					break;
+				// PHP >= 5.3.3.
+				case JSON_ERROR_UTF8:
+					$error = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
+					break;
+				// PHP >= 5.5.0.
+				case JSON_ERROR_RECURSION:
+					$error = 'One or more recursive references in the value to be encoded.';
+					break;
+				// PHP >= 5.5.0.
+				case JSON_ERROR_INF_OR_NAN:
+					$error = 'One or more NAN or INF values in the value to be encoded.';
+					break;
+				case JSON_ERROR_UNSUPPORTED_TYPE:
+					$error = 'A value of a type that cannot be encoded was given.';
+					break;
+				default:
+					$error = 'Unknown JSON error occured.';
+					break;
+			}
+
+			if ( '' !== $error ) {
+				return false;
+			}
+
+			// everything is OK.
+			return true;
 		}
 	}
 }

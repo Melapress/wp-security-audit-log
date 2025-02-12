@@ -16,6 +16,7 @@ namespace WSAL\WP_Sensors;
 use WSAL\Helpers\WP_Helper;
 use WSAL\MainWP\MainWP_Addon;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\WP_Sensors\WP_User_Profile_Sensor;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -90,7 +91,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		public static function on_network_option_change( $option, $value, $old_value, $network_id ) {
+		public static function on_network_option_change( $option, $value, $old_value, $network_id ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 
 			switch ( $option ) {
 				case 'registration':
@@ -257,7 +258,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 			} else {
 				$blog_title = WP_Helper::get_blog_info( $new_blog->blog_id )['name'];
 			}
-			$blog_url   = untrailingslashit( $home_scheme . '://' . $new_blog->domain . $new_blog->path );
+			$blog_url = untrailingslashit( $home_scheme . '://' . $new_blog->domain . $new_blog->path );
 
 			Alert_Manager::trigger_event(
 				7000,
@@ -382,6 +383,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 					'FirstName'      => $user ? $user->user_firstname : false,
 					'LastName'       => $user ? $user->user_lastname : false,
 					'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+					'TargetUserData' => (object) array(
+						'Username'  => $user->user_login,
+						'FirstName' => $user->user_firstname,
+						'LastName'  => $user->user_lastname,
+						'Email'     => $user->user_email,
+						'Roles'     => $role ? $role : 'none',
+					),
 				),
 				array( __CLASS__, 'must_not_contain_create_user' )
 			);
@@ -396,7 +404,17 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function event_user_removed_from_blog( $user_id, $blog_id ) {
-			$user = get_userdata( $user_id );
+			$user       = get_userdata( $user_id );
+			$user_roles = implode(
+				', ',
+				array_map(
+					array(
+						WP_User_Profile_Sensor::class,
+						'filter_role_names',
+					),
+					$user->roles
+				)
+			);
 			Alert_Manager::trigger_event_if(
 				4011,
 				array(
@@ -408,6 +426,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 					'FirstName'      => $user ? $user->user_firstname : false,
 					'LastName'       => $user ? $user->user_lastname : false,
 					'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+					'TargetUserData' => (object) array(
+						'Username'  => $user->user_login,
+						'FirstName' => $user->user_firstname,
+						'LastName'  => $user->user_lastname,
+						'Email'     => $user->user_email,
+						'Roles'     => $user_roles ? $user_roles : 'none',
+					),
 				),
 				array( __CLASS__, 'must_not_contain_create_user' )
 			);
@@ -436,9 +461,9 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Multisite_Sensor' ) ) {
 			Alert_Manager::trigger_event(
 				7013,
 				array(
-					'BlogID'   => $blog_id,
-					'SiteName' => get_blog_option( $blog_id, 'blogname' ),
-					'BlogURL'  => get_home_url( $blog_id ),
+					'BlogID'     => $blog_id,
+					'SiteName'   => get_blog_option( $blog_id, 'blogname' ),
+					'BlogURL'    => get_home_url( $blog_id ),
 					'NewVersion' => get_bloginfo( 'version' ),
 				)
 			);

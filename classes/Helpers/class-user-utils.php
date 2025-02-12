@@ -5,7 +5,7 @@
  * @package    wsal
  * @subpackage helpers
  * @since      4.6.0
- * @copyright  2024 Melapress
+ * @copyright  2025 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  */
@@ -41,6 +41,22 @@ if ( ! class_exists( '\WSAL\Helpers\User_Utils' ) ) {
 		 * @since 4.6.0
 		 */
 		private static $cached_users = array();
+
+		/**
+		 * Local user cache. Keys are usernames and values are user IDs.
+		 *
+		 * @var array
+		 *
+		 * @since 5.3.0
+		 */
+		private static $internal_user_names = array(
+			'Plugin',
+			'Plugins',
+			'Website Visitor',
+			'Unregistered user',
+			'Unknown User',
+			'System',
+		);
 
 		/**
 		 * Local static cache for the value of setting determining the preferred user data to display as label.
@@ -82,6 +98,35 @@ if ( ! class_exists( '\WSAL\Helpers\User_Utils' ) ) {
 			}
 
 			return $user->user_login;
+		}
+
+		/**
+		 * Returns user object using alert metadata array (or any array which contains 'Username' or 'CurrentUserID' keys).
+		 *
+		 * @param array $meta - Metadata array with user data.
+		 *
+		 * @return \WP_User|null|string User object.
+		 *
+		 * @since 5.3.0
+		 */
+		public static function get_user_object_from_meta( $meta = null ) {
+			if ( ! is_array( $meta ) ) {
+				return null;
+			}
+
+			if ( isset( $meta['Username'] ) ) {
+
+				if ( \in_array( $meta['Username'], self::$internal_user_names ) ) {
+					return null;
+				}
+				return \get_user_by( 'login', $meta['Username'] );
+			} elseif ( isset( $meta['CurrentUserID'] ) ) {
+				$data = \get_userdata( $meta['CurrentUserID'] );
+
+				return $data;
+			}
+
+			return null;
 		}
 
 		/**

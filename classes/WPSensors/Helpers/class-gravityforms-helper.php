@@ -31,6 +31,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper' ) ) {
 	class GravityForms_Helper {
 
 		/**
+		 * Class cache to store the state of the plugin.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.0
+		 */
+		private static $plugin_active = null;
+
+		/**
 		 * Addes our plugin to the list of allowed public sensors.
 		 *
 		 * @param  array $value - Allowed sensors.
@@ -188,7 +197,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\GravityForms_Helper' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function is_gravityforms_active() {
-			return ( WP_Helper::is_plugin_active( 'gravityforms/gravityforms.php' ) );
+			if ( null === self::$plugin_active ) {
+				self::$plugin_active = ( WP_Helper::is_plugin_active( 'gravityforms/gravityforms.php' ) );
+			}
+
+			return self::$plugin_active;
 		}
 
 		/**

@@ -29,6 +29,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\BBPress_Helper' ) ) {
 	 * @since      4.6.0
 	 */
 	class BBPress_Helper {
+
+		/**
+		 * Class cache to store the state of the plugin.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.0
+		 */
+		private static $plugin_active = null;
+
 		/**
 		 * Adds new custom event objects for our plugin.
 		 *
@@ -102,7 +112,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\BBPress_Helper' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function is_bbpress_active() {
-			return WP_Helper::is_plugin_active( 'bbpress/bbpress.php' );
+			if ( null === self::$plugin_active ) {
+				self::$plugin_active = WP_Helper::is_plugin_active( 'bbpress/bbpress.php' );
+			}
+
+			return self::$plugin_active;
 		}
 
 		/**

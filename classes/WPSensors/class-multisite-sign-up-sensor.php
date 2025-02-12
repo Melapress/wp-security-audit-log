@@ -80,7 +80,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Multisite_Sign_Up_Sensor' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		public static function handle_multisite_user_activation( $user_id, $password, $meta ) {
+		public static function handle_multisite_user_activation( $user_id, $password, $meta ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 			$user = get_userdata( $user_id );
 			if ( ! $user instanceof \WP_User ) {
 				// Bail if the user is not valid for some reason.
@@ -115,7 +115,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Multisite_Sign_Up_Sensor' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		public static function handle_multisite_user_signup( $user, $user_email, $key, $meta ) {
+		public static function handle_multisite_user_signup( $user, $user_email, $key, $meta ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 			Alert_Manager::trigger_event_if(
 				4024,
 				array(

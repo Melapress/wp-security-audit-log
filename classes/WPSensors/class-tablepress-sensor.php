@@ -347,8 +347,8 @@ if ( ! class_exists( '\WSAL\Plugin_Sensors\TablePress_Sensor' ) ) {
 			$variables = array(
 				'table_name' => sanitize_text_field( get_the_title( self::$imported_table_id ) ),
 				'table_id'   => $table_id,
-				'columns'    => ( isset( $_POST['table'] ) ) ? intval( $_POST['table']['columns'] ) : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				'rows'       => ( isset( $_POST['table'] ) ) ? intval( $_POST['table']['rows'] ) : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				'columns'    => ( isset( $_POST['table'] ) && isset( $_POST['table']['columns'] ) ) ? intval( $_POST['table']['columns'] ) : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				'rows'       => ( isset( $_POST['table'] ) && isset( $_POST['table']['rows'] ) ) ? intval( $_POST['table']['rows'] ) : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				'EditorLink' => $editor_link,
 			);
 
