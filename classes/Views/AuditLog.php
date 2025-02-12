@@ -137,8 +137,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Check if any of the extensions are activated.
 		if (
-			! class_exists( 'WSAL_NP_Plugin' )
-			&& ! class_exists( 'WSAL_Ext_Plugin' )
+			! class_exists( 'WSAL_Ext_Plugin' )
 			&& ! class_exists( 'WSAL_SearchExtension' )
 			&& ! class_exists( 'WSAL_UserSessions_Plugin' )
 			&& ( 'anonymous' === \WSAL\Helpers\Settings_Helper::get_option_value( 'freemius_state', 'anonymous' ) || // Anonymous mode option.
@@ -451,13 +450,16 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		<?php
 		if (
 			Settings_Helper::current_user_can( 'edit' )
-			&& ! \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'setup-complete', false )
-			&& ! \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'setup-modal-dismissed', false )
+			&& ! Settings_Helper::get_boolean_option_value( 'setup-complete', false )
+			&& ! Settings_Helper::get_boolean_option_value( 'setup-modal-dismissed', false )
 		) :
 			?>
 			<div data-remodal-id="wsal-setup-modal">
 				<button data-remodal-action="close" class="remodal-close"></button>
-				<p><?php esc_html_e( 'Thank you for installing WP Activity Log. Do you want to run the wizard to configure the basic plugin settings?', 'wp-security-audit-log' ); ?></p>
+				<p><?php esc_html_e( 'Thank you for installing WP Activity Log! To help you get started, we’ve prepared a setup wizard to guide you through configuring the plugin’s basic settings. Would you like to run the setup wizard now?', 'wp-security-audit-log' ); ?></p>
+				<div><em>
+					<?php esc_html_e( 'Note: You can adjust all the settings configured in the wizard later from the plugin\'s settings page.', 'wp-security-audit-log' ); ?></em>
+				</div>
 				<br>
 				<button data-remodal-action="confirm" class="remodal-confirm"><?php esc_html_e( 'Yes', 'wp-security-audit-log' ); ?></button>
 				<button data-remodal-action="cancel" class="remodal-cancel"><?php esc_html_e( 'No', 'wp-security-audit-log' ); ?></button>
@@ -515,19 +517,14 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		unset( $alert_meta['ReportText'] );
 
-		// Set WSAL_Ref class scripts and styles.
-		// WSAL_Ref::config( 'stylePath', esc_url( WSAL_BASE_DIR ) . '/css/wsal-ref.css' );
-		// WSAL_Ref::config( 'scriptPath', esc_url( WSAL_BASE_DIR ) . '/js/wsal-ref.js' );
-
 		echo '<div class="event-content-wrapper">';
-		//wsal_r( $alert_meta );
 
 		foreach ( $alert_meta as $item => $value ) {
 			if ( $value ) {
 				if ( is_array( $value ) || is_object( $value ) ) {
 					$value = var_export( $value, true );
 				}
-				echo '<strong>' . $item . ':</strong> <span style="opacity: 0.7;"><pre style="display:inline">' . $value . '</pre></span></br>';
+				echo '<strong>' . \esc_html( $item ) . ':</strong> <span style="opacity: 0.7;"><pre style="display:inline">' . \esc_html( $value ) . '</pre></span></br>';
 			}
 		}
 		echo '</div>';
@@ -645,7 +642,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 
 				// Update Freemius state.
-				\WSAL\Helpers\Settings_Helper::set_option_value( 'freemius_state', 'in', true );
+				Settings_Helper::set_option_value( 'freemius_state', 'in', true );
 			} elseif ( 'no' === $choice ) {
 				if ( ! WP_Helper::is_multisite() ) {
 					wsal_freemius()->skip_connection(); // Opt out.
@@ -654,7 +651,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				}
 
 				// Update Freemius state.
-				\WSAL\Helpers\Settings_Helper::set_option_value( 'freemius_state', 'skipped', true );
+				Settings_Helper::set_option_value( 'freemius_state', 'skipped', true );
 			}
 
 			echo wp_json_encode(
@@ -781,8 +778,8 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 
 		// Don't display notice if the wizard notice is showing.
 		if (
-			! \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'setup-complete', false )
-			&& ! \WSAL\Helpers\Settings_Helper::get_boolean_option_value( 'setup-modal-dismissed', false )
+			! Settings_Helper::get_boolean_option_value( 'setup-complete', false )
+			&& ! Settings_Helper::get_boolean_option_value( 'setup-modal-dismissed', false )
 		) {
 			return;
 		}
@@ -799,7 +796,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 		}
 
 		// Get dismissed pointers.
-		$dismissed      = explode( ',', (string) \WSAL\Helpers\Settings_Helper::get_option_value( 'dismissed-privacy-notice', true ) );
+		$dismissed      = explode( ',', (string) Settings_Helper::get_option_value( 'dismissed-privacy-notice', true ) );
 		$valid_pointers = array();
 
 		// Check pointers and remove dismissed ones.
@@ -883,7 +880,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 				wp_die( 0 );
 			}
 
-			$dismissed = array_filter( explode( ',', (string) \WSAL\Helpers\Settings_Helper::get_option_value( 'dismissed-privacy-notice', true ) ) );
+			$dismissed = array_filter( explode( ',', (string) Settings_Helper::get_option_value( 'dismissed-privacy-notice', true ) ) );
 
 			if ( in_array( $pointer, $dismissed, true ) ) {
 				wp_die( 0 );
@@ -892,7 +889,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			$dismissed[] = $pointer;
 			$dismissed   = implode( ',', $dismissed );
 
-			\WSAL\Helpers\Settings_Helper::set_option_value( 'dismissed-privacy-notice', $dismissed );
+			Settings_Helper::set_option_value( 'dismissed-privacy-notice', $dismissed );
 			wp_die( 1 );
 		}
 	}
@@ -928,7 +925,7 @@ class WSAL_Views_AuditLog extends WSAL_AbstractView {
 			die();
 		}
 
-		\WSAL\Helpers\Settings_Helper::set_boolean_option_value( 'setup-modal-dismissed', true, true );
+		Settings_Helper::set_boolean_option_value( 'setup-modal-dismissed', true, true );
 		wp_send_json_success();
 	}
 

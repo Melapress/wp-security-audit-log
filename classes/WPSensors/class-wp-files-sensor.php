@@ -69,7 +69,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Files_Sensor' ) ) {
 			// Filter $_POST array for security.
 			$post_array = filter_input_array( INPUT_POST );
 
-			$action = isset( $post_array['action'] ) ? $post_array['action'] : '';
+			$action = isset( $post_array['action'] ) ? \sanitize_text_field( \wp_unslash( $post_array['action'] ) ) : '';
 			if ( 'upload-theme' !== $action && 'upload-plugin' !== $action ) {
 				$file = get_attached_file( $attachment_id );
 				Alert_Manager::trigger_event(

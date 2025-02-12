@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace WSAL\WP_Sensors;
 
 use WSAL\Controllers\Alert_Manager;
+use WSAL\WP_Sensors\Helpers\ACF_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -51,11 +52,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Meta_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function init() {
-			add_filter( 'acf/pre_update_value', array( __CLASS__, 'prepare_relationship_update_check' ), 10, 4 );
+			if ( ACF_Helper::is_acf_active() ) {
+				\add_filter( 'acf/pre_update_value', array( __CLASS__, 'prepare_relationship_update_check' ), 10, 4 );
 
-			// Relationship field is only available for posts to we don't need to check other meta types (comment, term, or user).
-			add_action( 'updated_post_meta', array( __CLASS__, 'on_field_updated' ), 10, 4 );
-			add_action( 'deleted_post_meta', array( __CLASS__, 'on_field_updated' ), 10, 4 );
+				// Relationship field is only available for posts to we don't need to check other meta types (comment, term, or user).
+				\add_action( 'updated_post_meta', array( __CLASS__, 'on_field_updated' ), 10, 4 );
+				\add_action( 'deleted_post_meta', array( __CLASS__, 'on_field_updated' ), 10, 4 );
+			}
 		}
 
 		/**

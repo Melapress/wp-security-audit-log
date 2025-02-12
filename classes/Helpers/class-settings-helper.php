@@ -126,7 +126,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 *
 		 * @since 4.5.0
 		 */
-		private static $default_always_disabled_alerts = array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6069, 6070 );
+		private static $default_always_disabled_alerts = array( 0000, 0001, 0002, 0003, 0004, 0005 );
 
 		/**
 		 * Holds the array with the disabled alerts codes.
@@ -673,11 +673,30 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 */
 		public static function get_main_client_ip() {
 			if ( '' === self::$main_client_ip ) {
-				if ( self::get_boolean_option_value( 'use-proxy-ip' ) ) {
+				if ( 2 === (int) self::get_option_value( 'use-proxy-ip' ) && '' !== trim( self::get_option_value( 'proxy-custom-header', '' ) ) ) {
+					$inner_server = array_change_key_case( $_SERVER, CASE_UPPER );
+					$key          = \strtoupper( self::get_option_value( 'proxy-custom-header' ) );
+					$ip           = 'Unknown'; // Default to 'Unknown' if no custom header is found or empty.
+					if ( isset( $inner_server[ $key ] ) ) {
+						$ip = \sanitize_text_field( \wp_unslash( $inner_server[ $key ] ) );
+					} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+						$ip = \sanitize_text_field( \wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+					}
+					self::$main_client_ip = self::normalize_ip( $ip );
+				} elseif ( self::get_boolean_option_value( 'use-proxy-ip' ) ) {
 					// TODO: The algorithm below just gets the first IP in the list...we might want to make this more intelligent somehow.
-					$ips                  = self::get_client_ips();
-					$ips                  = reset( $ips );
-					self::$main_client_ip = isset( $ips[0] ) ? $ips[0] : '';
+					$inner_server = array_change_key_case( $_SERVER, CASE_UPPER );
+					$key          = \strtoupper( self::get_option_value( 'custom-header', 'REMOTE_ADDR' ) );
+					$ip           = 'Unknown'; // Default to 'Unknown' if no custom header is found or empty.
+					if ( isset( $inner_server[ $key ] ) ) {
+						$ip = \sanitize_text_field( \wp_unslash( $inner_server[ $key ] ) );
+					} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+						$ip = \sanitize_text_field( \wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+					}
+					self::$main_client_ip = self::normalize_ip( $ip );
+					// $ips                  = self::get_client_ips();
+					// $ips                  = reset( $ips );
+					// self::$main_client_ip = isset( $ips[0] ) ? $ips[0] : '';
 				} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
 					$ip                   = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 					self::$main_client_ip = self::normalize_ip( $ip );
@@ -711,8 +730,10 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 					'REMOTE_ADDR',
 					// Cloudflare.
 					'HTTP_CF-CONNECTING-IP',
+					'HTTP_CF_CONNECTING_IP',
 					'HTTP_TRUE_CLIENT_IP',
 					'CF-CONNECTING-IP',
+					'CF_CONNECTING_IP',
 					'TRUE_CLIENT_IP',
 				);
 				$inner_server  = array_change_key_case( $_SERVER, CASE_UPPER );
@@ -793,9 +814,10 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 *
 		 * @param string $range - Range of IP address.
 		 *
-		 * @return object
+		 * @return array
 		 *
 		 * @since 4.5.0
+		 * @since 5.3.0 - Array is returned instead of an object.
 		 */
 		public static function get_ipv4_by_range( $range ) {
 			list($lower_ip, $upper_ip) = explode( '-', $range, 2 );
@@ -805,7 +827,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			unset( $lower_arr[ $count - 1 ] );
 			$upper_ip = implode( '.', $lower_arr ) . '.' . $upper_ip;
 
-			return (object) array(
+			return array(
 				'lower' => $lower_ip,
 				'upper' => $upper_ip,
 			);
@@ -945,7 +967,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 */
 		public static function get_disabled_alerts() {
 			if ( ! self::$disabled_alerts ) {
-				$disabled_defaults = self::get_default_disabled_alerts() + self::get_default_always_disabled_alerts();
+				$disabled_defaults = self::get_default_always_disabled_alerts();
 
 				self::$disabled_alerts = self::get_option_value( 'disabled-alerts', self::$disabled_alerts );
 				if ( ! \is_array( self::$disabled_alerts ) ) {
@@ -977,7 +999,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function get_default_disabled_alerts() {
-			return array( 0000, 0001, 0002, 0003, 0004, 0005 );
+			return array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6069, 6070 );
 		}
 
 		/**
@@ -1399,6 +1421,28 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 			return true === $bool ? 'yes' : 'no';
 		}
 
+		/**
+		 * Create neat email/sms string to display in the event.
+		 *
+		 * @param string $email Email address.
+		 * @param string $sms   Phone number.
+		 *
+		 * @return string
+		 *
+		 * @since 4.5.0
+		 */
+		public static function create_recipient_string( $email, $sms ) {
+			$recipient = ( isset( $email ) ) ? $email : '';
+			if ( isset( $sms ) && ! empty( $sms ) ) {
+				// Only add separator if needed.
+				if ( ! empty( $recipient ) ) {
+					$recipient .= ' | ';
+				}
+				$recipient .= $sms;
+			}
+
+			return $recipient;
+		}
 
 		/**
 		 * Retrieves the full path to plugin's working directory. Returns a folder path with a trailing slash. It also
@@ -1797,7 +1841,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 				Alert_Manager::trigger_event(
 					6052,
 					array(
-						'new_setting'      => 'Delete events older than ' . $old_period,
+						'new_setting'      => 'Delete events older than ' . $new_date,
 						'previous_setting' => 'Keep all data',
 					)
 				);

@@ -154,7 +154,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 * Collect old post data before post update event.
 		 *
 		 * @param int $post_id - Post ID.
-		 * 
+		 *
 		 * @since 5.0.0
 		 */
 		public static function get_before_post_edit_data( $post_id ) {
@@ -199,6 +199,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 				if ( self::$old_post && 'auto-draft' === self::$old_post->post_status && 'draft' === $post->post_status ) {
 					self::check_post_creation( self::$old_post, $post );
 				}
+				return;
+			}
+
+			if ( Alert_Manager::is_disabled_post_type( $post->post_type ) ) {
 				return;
 			}
 
@@ -1357,12 +1361,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 */
 		private static function check_date_change( $oldpost, $newpost ) {
 			$from = 0;
-			$to = 0;
+			$to   = 0;
 			if ( isset( $oldpost->post_date ) && null !== $oldpost->post_date ) {
 				$from = strtotime( $oldpost->post_date );
 			}
 			if ( isset( $newpost->post_date ) && null !== $newpost->post_date ) {
-				$to   = strtotime( $newpost->post_date );
+				$to = strtotime( $newpost->post_date );
 			}
 
 			if ( 'pending' === $oldpost->post_status ) {
@@ -1488,13 +1492,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 		 */
 		private static function report_tags_change_event( $event_code, $post, $tags_changed ) {
 			$editor_link = self::get_editor_link( $post->ID );
-			$post_status = ( 'publish' === $post->post_status ) ? 'published' : $post->post_status;
 			Alert_Manager::trigger_event(
 				$event_code,
 				array(
 					'PostID'             => $post->ID,
 					'PostType'           => $post->post_type,
-					'PostStatus'         => $post_status,
+					'PostStatus'         => $post->post_status,
 					'PostTitle'          => $post->post_title,
 					'PostDate'           => $post->post_date,
 					'PostUrl'            => get_permalink( $post->ID ),
@@ -1647,6 +1650,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Content_Sensor' ) ) {
 			$post_events = array_merge( $post_events, array_keys( Alert_Manager::get_alerts_by_sub_category( 'Custom Post Types' ) ) );
 
 			$post_events = array_merge( $post_events, array_keys( Alert_Manager::get_alerts_by_sub_category( 'Pages' ) ) );
+
+			$post_events[] = 9159;
 
 			foreach ( $post_events as $event ) {
 				if ( Alert_Manager::will_or_has_triggered( $event ) || Alert_Manager::was_triggered_recently( $event ) ) {

@@ -404,6 +404,20 @@ body:not(.toplevel_page_wsal-plugin-options) #wsal-page-overlay {
   line-height: 2.15384615;
 }
 
+.option-item .wsal-custom-builder-selector {
+  padding: 3px 0px;
+  width: calc(100%);
+  clear: both;
+}
+
+.query-builder .rule-container input[type="text"], 
+.query-builder .rule-container input[type="tel"], 
+.query-builder .rule-container input[type="email"] {
+  padding: 3px 0px;
+  width: calc(100% - 5px) !important;
+  float: left;
+}
+
 .option-item .button-secondary {
   height: 35px;
   padding-right: 15px;
@@ -411,40 +425,40 @@ body:not(.toplevel_page_wsal-plugin-options) #wsal-page-overlay {
   line-height: 35px;
 }
 
-.option-item input[type=text], .option-item input[type=email] {
+.option-item input[type=text], .option-item input[type=tel], .option-item input[type=email] {
   border-radius: 3px;
   padding: 3px 10px;
   width: calc(100% - 275px);
-  max-width: 300px;
+  max-width: 500px;
 }
 
-.option-item input[type=text]:focus, .option-item input[type=email]:focus {
+.option-item input[type=text]:focus, .option-item input[type=tel]:focus, .option-item input[type=email]:focus {
   border: solid 1px #c2c2c2;
 }
 
 @media (max-width: 670px) {
-  .option-item input[type=text], .option-item input[type=email] {
+  .option-item input[type=text], .option-item input[type=tel], .option-item input[type=email] {
     width: 100%;
     margin-bottom: 10px;
   }
-  #wsal-options-tab-sidebars .option-item input[type=text], #wsal-options-tab-sidebars .option-item input[type=email] {
+  #wsal-options-tab-sidebars .option-item input[type=text], #wsal-options-tab-sidebars .option-item input[type=tel], #wsal-options-tab-sidebars .option-item input[type=email] {
     width: calc(100% - 100px);
   }
 }
 
 @media (max-width: 670px) and (max-width: 479px) {
-  #wsal-options-tab-sidebars .option-item input[type=text], #wsal-options-tab-sidebars .option-item input[type=email] {
+  #wsal-options-tab-sidebars .option-item input[type=text], #wsal-options-tab-sidebars .option-item input[type=tel], #wsal-options-tab-sidebars .option-item input[type=email] {
     width: 100%;
     max-width: auto;
   }
 }
 
-#wsal-options-tab-translations .option-item input[type=text], #wsal-options-tab-translations .option-item input[type=email] {
+#wsal-options-tab-translations .option-item input[type=text], #wsal-options-tab-translations .option-item input[type=tel], #wsal-options-tab-translations .option-item input[type=email] {
   max-width: 100%;
 }
 
 @media (min-width: 671px) {
-  #wsal-options-tab-translations .option-item input[type=text], #wsal-options-tab-translations .option-item input[type=email] {
+  #wsal-options-tab-translations .option-item input[type=text], #wsal-options-tab-translations .option-item input[type=tel], #wsal-options-tab-translations .option-item input[type=email] {
     width: calc(100% - 275px);
   }
 }
@@ -478,13 +492,15 @@ body:not(.toplevel_page_wsal-plugin-options) #wsal-page-overlay {
 }
 
 .option-item select,
-.option-item input[type=text] {
+.option-item input[type=text],
+.option-item input[type=tel] {
   border-radius: 3px;
 }
 
 @media (max-width: 670px) {
   .option-item select,
-  .option-item input[type=text] {
+  .option-item input[type=text],
+  .option-item input[type=tel] {
     margin-bottom: 10px;
   }
 }
@@ -542,7 +558,8 @@ body:not(.toplevel_page_wsal-plugin-options) #wsal-page-overlay {
     margin: 0 0 10px 0;
   }
   .option-item textarea,
-  .option-item input[type=text] {
+  .option-item input[type=text]
+  .option-item input[type=tel] {
     width: 100%;
   }
   .option-item .extra-text {
@@ -1756,6 +1773,11 @@ span.wsal-number-views-badge {
 }
 
 #main-nav-settings,
+.top-nav-dark-enabled .top-nav-dark {
+  display: block;
+}
+
+#custom-main-nav-settings,
 .top-nav-dark-enabled .top-nav-dark {
   display: block;
 }

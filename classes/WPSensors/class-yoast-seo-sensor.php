@@ -105,7 +105,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 		public static function early_init() {
 			add_filter(
 				'wsal_event_objects',
-				array( '\WSAL\WP_Sensors\Helpers\Yoast_SEO_Helper', 'wsal_yoast_seo_extension_add_custom_event_objects' )
+				array( Yoast_SEO_Helper::class, 'wsal_yoast_seo_extension_add_custom_event_objects' )
 			);
 
 			if ( Yoast_SEO_Helper::is_wpseo_active() ) {
@@ -119,12 +119,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 
 				add_filter(
 					'wsal_togglealerts_sub_category_events',
-					array( '\WSAL\WP_Sensors\Helpers\Yoast_SEO_Helper', 'wsal_yoast_seo_extension_togglealerts_sub_category_events' )
+					array( Yoast_SEO_Helper::class, 'wsal_yoast_seo_extension_togglealerts_sub_category_events' )
 				);
 
 				add_filter(
 					'wsal_togglealerts_sub_category_titles',
-					array( '\WSAL\WP_Sensors\Helpers\Yoast_SEO_Helper', 'wsal_yoast_seo_extension_togglealerts_sub_category_titles' ),
+					array( Yoast_SEO_Helper::class, 'wsal_yoast_seo_extension_togglealerts_sub_category_titles' ),
 					10,
 					2
 				);
@@ -198,78 +198,103 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 				$post_array['action'] = \sanitize_text_field( \wp_unslash( $_POST['action'] ) );
 			}
 
-			if ( isset( $_POST['yoast_wpseo_title'] ) ) {
-				$post_array['yoast_wpseo_title'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_title'] ) );
-			}
-
-			if ( isset( $_POST['yoast_wpseo_metadesc'] ) ) {
-				$post_array['yoast_wpseo_metadesc'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_metadesc'] ) );
-			}
-
-			if ( isset( $_POST['yoast_wpseo_focuskw'] ) ) {
-				$post_array['yoast_wpseo_focuskw'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_focuskw'] ) );
-			}
-
-			if ( isset( $_POST['yoast_wpseo_meta-robots-adv'] ) ) {
-				$post_array['yoast_wpseo_meta-robots-adv'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_meta-robots-adv'] ) );
-			}
-
-			if ( isset( $_POST['yoast_wpseo_schema_page_type'] ) ) {
-				$post_array['yoast_wpseo_schema_page_type'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_schema_page_type'] ) );
-			}
-
-			if ( isset( $_POST['yoast_wpseo_schema_page_type'] ) ) {
-				$post_array['yoast_wpseo_schema_page_type'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_schema_page_type'] ) );
-			}
-
-			if ( isset( $_POST['yoast_wpseo_schema_article_type'] ) ) {
-				$post_array['yoast_wpseo_schema_article_type'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_schema_article_type'] ) );
-			}
-
-			if ( isset( $_POST['yoast_wpseo_bctitle'] ) ) {
-				$post_array['yoast_wpseo_bctitle'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_bctitle'] ) );
-			}
-
 			if ( isset( $post_array['post_ID'] )
 			&& 'editpost' === $post_array['action']
 			&& isset( $post_array['_wpnonce'] )
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-post_' . $post_array['post_ID'] ) ) {
-				self::$post_id = intval( $post_array['post_ID'] );
-				self::$post    = get_post( self::$post_id );
 
-				// Check SEO data changes and alert if changed.
-				if ( isset( $post_array['yoast_wpseo_title'] ) ) {
-					self::check_title_change( $post_array['yoast_wpseo_title'] ); // Title.
+				self::$post_id = intval( $post_array['post_ID'] );
+				self::$post    = \get_post( self::$post_id );
+
+				$return_product = false; // Flag that keeps bool for 'product' post type removal.
+
+				$ignored_cpts = Alert_Manager::get_all_post_types();
+
+				if ( 'product' === self::$post->post_type ) {
+					if ( array_search( 'product', $ignored_cpts, true ) ) {
+
+						/**
+						 * Because it is YOAST sensor and we have to monitor its changes in the products, we have to temporarily remove the product post type from the ignored post types list before do the checking for changes.
+						 */
+						Alert_Manager::remove_from_all_ignored_post_types( 'product' );
+
+						// Product post type is part of the ignored post types list, remove it temporarily and rise this flag so we can add it to the ignored post types list later on.
+						$return_product = true;
+					}
 				}
-				if ( isset( $post_array['yoast_wpseo_metadesc'] ) ) {
-					self::check_desc_change( $post_array['yoast_wpseo_metadesc'] ); // Meta description.
+
+				if ( ! Alert_Manager::is_disabled_post_type( self::$post->post_type ) ) {
+
+					if ( isset( $_POST['yoast_wpseo_title'] ) ) {
+						$post_array['yoast_wpseo_title'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_title'] ) );
+					}
+
+					if ( isset( $_POST['yoast_wpseo_metadesc'] ) ) {
+						$post_array['yoast_wpseo_metadesc'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_metadesc'] ) );
+					}
+
+					if ( isset( $_POST['yoast_wpseo_focuskw'] ) ) {
+						$post_array['yoast_wpseo_focuskw'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_focuskw'] ) );
+					}
+
+					if ( isset( $_POST['yoast_wpseo_meta-robots-adv'] ) ) {
+						$post_array['yoast_wpseo_meta-robots-adv'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_meta-robots-adv'] ) );
+					}
+
+					if ( isset( $_POST['yoast_wpseo_schema_page_type'] ) ) {
+						$post_array['yoast_wpseo_schema_page_type'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_schema_page_type'] ) );
+					}
+
+					if ( isset( $_POST['yoast_wpseo_schema_page_type'] ) ) {
+						$post_array['yoast_wpseo_schema_page_type'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_schema_page_type'] ) );
+					}
+
+					if ( isset( $_POST['yoast_wpseo_schema_article_type'] ) ) {
+						$post_array['yoast_wpseo_schema_article_type'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_schema_article_type'] ) );
+					}
+
+					if ( isset( $_POST['yoast_wpseo_bctitle'] ) ) {
+						$post_array['yoast_wpseo_bctitle'] = \sanitize_text_field( \wp_unslash( $_POST['yoast_wpseo_bctitle'] ) );
+					}
+
+					// Check SEO data changes and alert if changed.
+					if ( isset( $post_array['yoast_wpseo_title'] ) ) {
+						self::check_title_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_title'] ) ) ); // Title.
+					}
+					if ( isset( $post_array['yoast_wpseo_metadesc'] ) ) {
+						self::check_desc_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_metadesc'] ) ) ); // Meta description.
+					}
+					if ( isset( $post_array['yoast_wpseo_meta-robots-noindex'] ) ) {
+						self::check_robots_index_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_meta-robots-noindex'] ) ) ); // Meta Robots Index.
+					}
+					if ( isset( $post_array['yoast_wpseo_meta-robots-nofollow'] ) ) {
+						self::check_robots_follow_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_meta-robots-nofollow'] ) ) ); // Meta Robots Follow.
+					}
+					if ( isset( $post_array['yoast_wpseo_meta-robots-adv'] ) ) {
+						self::check_robots_advanced_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_meta-robots-adv'] ) ) ); // Meta Robots Advanced.
+					}
+					if ( isset( $post_array['yoast_wpseo_canonical'] ) ) {
+						self::check_canonical_url_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_canonical'] ) ) ); // Canonical URL.
+					}
+					if ( isset( $post_array['yoast_wpseo_focuskw'] ) ) {
+						self::check_focus_keys_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_focuskw'] ) ) ); // Focus keywords.
+					}
+					if ( isset( $post_array['yoast_wpseo_is_cornerstone'] ) ) {
+						self::check_cornerstone_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_is_cornerstone'] ) ) ); // Cornerstone.
+					}
+					if ( isset( $post_array['yoast_wpseo_schema_page_type'] ) ) {
+						self::check_schema_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_schema_page_type'] ) ), 'page_type' );
+					}
+					if ( isset( $post_array['yoast_wpseo_schema_article_type'] ) ) {
+						self::check_schema_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_schema_article_type'] ) ), 'article_type' );
+					}
+					if ( isset( $post_array['yoast_wpseo_bctitle'] ) ) {
+						self::check_breadcrumb_change( \sanitize_text_field( \wp_unslash( $post_array['yoast_wpseo_bctitle'] ) ) );
+					}
 				}
-				if ( isset( $post_array['yoast_wpseo_meta-robots-noindex'] ) ) {
-					self::check_robots_index_change( $post_array['yoast_wpseo_meta-robots-noindex'] ); // Meta Robots Index.
-				}
-				if ( isset( $post_array['yoast_wpseo_meta-robots-nofollow'] ) ) {
-					self::check_robots_follow_change( $post_array['yoast_wpseo_meta-robots-nofollow'] ); // Meta Robots Follow.
-				}
-				if ( isset( $post_array['yoast_wpseo_meta-robots-adv'] ) ) {
-					self::check_robots_advanced_change( $post_array['yoast_wpseo_meta-robots-adv'] ); // Meta Robots Advanced.
-				}
-				if ( isset( $post_array['yoast_wpseo_canonical'] ) ) {
-					self::check_canonical_url_change( $post_array['yoast_wpseo_canonical'] ); // Canonical URL.
-				}
-				if ( isset( $post_array['yoast_wpseo_focuskw'] ) ) {
-					self::check_focus_keys_change( $post_array['yoast_wpseo_focuskw'] ); // Focus keywords.
-				}
-				if ( isset( $post_array['yoast_wpseo_is_cornerstone'] ) ) {
-					self::check_cornerstone_change( $post_array['yoast_wpseo_is_cornerstone'] ); // Cornerstone.
-				}
-				if ( isset( $post_array['yoast_wpseo_schema_page_type'] ) ) {
-					self::check_schema_change( $post_array['yoast_wpseo_schema_page_type'], 'page_type' );
-				}
-				if ( isset( $post_array['yoast_wpseo_schema_article_type'] ) ) {
-					self::check_schema_change( $post_array['yoast_wpseo_schema_article_type'], 'article_type' );
-				}
-				if ( isset( $post_array['yoast_wpseo_bctitle'] ) ) {
-					self::check_breadcrumb_change( $post_array['yoast_wpseo_bctitle'] );
+
+				if ( $return_product ) {
+					Alert_Manager::add_to_all_ignored_post_types( 'product' );
 				}
 			}
 		}
@@ -299,14 +324,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 
 				// Ensure default value is not passed as NULL.
 				if ( ! empty( $old_title ) && empty( $title ) ) {
-					if ( strpos( $old_title, '%%title%% %%page%% %%sep%% %%sitename%%' ) !== false ) {
-						$title = '%%title%% %%page%% %%sep%% %%sitename%%';
-					}
+					$title = \WPSEO_Options::get_default( 'wpseo_titles', 'title-' . self::$post->post_type );
 				}
-				if ( empty( $old_title ) && ! empty( $title ) ) {
-					if ( strpos( $title, '%%title%% %%page%% %%sep%% %%sitename%%' ) !== false ) {
-						$old_title = '%%title%% %%page%% %%sep%% %%sitename%%';
-					}
+
+				if ( empty( $old_title ) ) {
+					$old_title = \WPSEO_Options::get_default( 'wpseo_titles', 'title-' . self::$post->post_type );
 				}
 
 				$editor_link = self::get_editor_link( self::$post_id );
@@ -757,6 +779,41 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 						self::yoast_setting_change_alert( 'separator', $old_value['separator'], $new_value['separator'] );
 					}
 
+					// WebSite Name.
+					if ( $old_value['website_name'] !== $new_value['website_name'] ) {
+						self::yoast_setting_change_alert( 'website_name', $old_value['website_name'], $new_value['website_name'] );
+					}
+
+					// Alternate WebSite Name.
+					if ( $old_value['alternate_website_name'] !== $new_value['alternate_website_name'] ) {
+						self::yoast_setting_change_alert( 'alternate_website_name', $old_value['alternate_website_name'], $new_value['alternate_website_name'] );
+					}
+
+					// Company Name.
+					if ( $old_value['company_name'] !== $new_value['company_name'] ) {
+						self::yoast_setting_change_alert( 'company_name', $old_value['company_name'], $new_value['company_name'] );
+					}
+
+					// Alternate Company Name.
+					if ( $old_value['company_alternate_name'] !== $new_value['company_alternate_name'] ) {
+						self::yoast_setting_change_alert( 'company_alternate_name', $old_value['company_alternate_name'], $new_value['company_alternate_name'] );
+					}
+
+					// Company Logo.
+					if ( $old_value['company_logo'] !== $new_value['company_logo'] ) {
+						self::yoast_setting_change_alert( 'company_logo', $old_value['company_logo'], $new_value['company_logo'] );
+					}
+
+					// Organization person.
+					if ( $old_value['company_or_person_user_id'] !== $new_value['company_or_person_user_id'] ) {
+						self::yoast_setting_change_alert( 'company_or_person_user_id', $old_value['company_or_person_user_id'], $new_value['company_or_person_user_id'] );
+					}
+
+					// Company/Person Logo.
+					if ( $old_value['person_logo'] !== $new_value['person_logo'] ) {
+						self::yoast_setting_change_alert( 'person_logo', $old_value['person_logo'], $new_value['person_logo'] );
+					}
+
 					// Homepage Title.
 					if ( $old_value['title-home-wpseo'] !== $new_value['title-home-wpseo'] ) {
 						self::yoast_setting_change_alert( 'title-home-wpseo', $old_value['title-home-wpseo'], $new_value['title-home-wpseo'] );
@@ -880,6 +937,20 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 
 				// Webmaster URL alerts.
 				if ( 'wpseo' === $option ) {
+					// IndexNow analysis.
+					if ( isset( $old_value['enable_index_now'] ) && isset( $new_value['enable_index_now'] ) ) {
+						if ( $old_value['enable_index_now'] !== $new_value['enable_index_now'] ) {
+							self::yoast_setting_switch_alert( 'enable_index_now', $new_value['enable_index_now'] );
+						}
+					}
+
+					// Slack analysis.
+					if ( isset( $old_value['enable_enhanced_slack_sharing'] ) && isset( $new_value['enable_enhanced_slack_sharing'] ) ) {
+						if ( $old_value['enable_enhanced_slack_sharing'] !== $new_value['enable_enhanced_slack_sharing'] ) {
+							self::yoast_setting_switch_alert( 'enable_enhanced_slack_sharing', $new_value['enable_enhanced_slack_sharing'] );
+						}
+					}
+
 					// SEO analysis.
 					if ( isset( $old_value['keyword_analysis_active'] ) && isset( $new_value['keyword_analysis_active'] ) ) {
 						if ( $old_value['keyword_analysis_active'] !== $new_value['keyword_analysis_active'] ) {
@@ -978,12 +1049,54 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 							self::yoast_setting_change_alert( $search_engine, $old_value[ $search_engine ], $new_value[ $search_engine ] );
 						}
 					}
+
+					$crawl_changes = array(
+						'remove_shortlinks'             => esc_html__( 'Remove shortlinks', 'wp-security-audit-log' ),
+						'remove_rest_api_links'         => esc_html__( 'Remove REST API links', 'wp-security-audit-log' ),
+						'remove_rsd_wlw_links'          => esc_html__( 'Remove RSD / WLW links', 'wp-security-audit-log' ),
+						'remove_oembed_links'           => esc_html__( 'Remove oEmbed links', 'wp-security-audit-log' ),
+						'remove_generator'              => esc_html__( 'Remove generator tag', 'wp-security-audit-log' ),
+						'remove_pingback_header'        => esc_html__( 'Pingback HTTP header', 'wp-security-audit-log' ),
+						'remove_feed_global'            => esc_html__( 'Remove global feed', 'wp-security-audit-log' ),
+						'remove_feed_global_comments'   => esc_html__( 'Remove global comment feeds', 'wp-security-audit-log' ),
+						'remove_feed_post_comments'     => esc_html__( 'Remove post comments feeds', 'wp-security-audit-log' ),
+						'remove_feed_authors'           => esc_html__( 'Remove post authors feeds', 'wp-security-audit-log' ),
+						'remove_feed_post_types'        => esc_html__( 'Remove post type feeds', 'wp-security-audit-log' ),
+						'remove_feed_categories'        => esc_html__( 'Remove category feeds', 'wp-security-audit-log' ),
+						'remove_feed_tags'              => esc_html__( 'Remove tag feeds', 'wp-security-audit-log' ),
+						'remove_feed_custom_taxonomies' => esc_html__( 'Remove custom taxonomy feeds', 'wp-security-audit-log' ),
+						'remove_feed_search'            => esc_html__( 'Remove search results feeds', 'wp-security-audit-log' ),
+						'remove_atom_rdf_feeds'         => esc_html__( 'Remove Atom / RDF feeds', 'wp-security-audit-log' ),
+						'remove_emoji_scripts'          => esc_html__( 'Remove emoji scripts', 'wp-security-audit-log' ),
+						'deny_wp_json_crawling'         => esc_html__( 'Remove WP-JSON API', 'wp-security-audit-log' ),
+						'deny_adsbot_crawling'          => esc_html__( 'Prevent Google AdsBot from crawling', 'wp-security-audit-log' ),
+						'deny_google_extended_crawling' => esc_html__( 'Prevent Google Bard and Vertex AI bots from crawling', 'wp-security-audit-log' ),
+						'deny_gptbot_crawling'          => esc_html__( 'Prevent OpenAI GPTBot from crawling', 'wp-security-audit-log' ),
+						'deny_ccbot_crawling'           => esc_html__( 'Prevent Common Crawl CCBot from crawling', 'wp-security-audit-log' ),
+						'search_cleanup'                => esc_html__( 'Filter search terms', 'wp-security-audit-log' ),
+						'search_cleanup_emoji'          => esc_html__( 'Filter searches with emojis and other special characters', 'wp-security-audit-log' ),
+						'search_cleanup_patterns'       => esc_html__( 'Filter searches with common spam patterns', 'wp-security-audit-log' ),
+						'redirect_search_pretty_urls'   => esc_html__( 'Redirect pretty URLs to ‘raw’ formats', 'wp-security-audit-log' ),
+						'deny_search_crawling'          => esc_html__( 'Prevent crawling of internal site search URLs', 'wp-security-audit-log' ),
+						'clean_campaign_tracking_urls'  => esc_html__( 'Optimize Google Analytics utm tracking parameters', 'wp-security-audit-log' ),
+						'clean_permalinks'              => esc_html__( 'Remove unregistered URL parameters', 'wp-security-audit-log' ),
+					);
+
+					foreach ( $crawl_changes as $crawl_change => $type ) {
+						if ( $old_value[ $crawl_change ] !== $new_value[ $crawl_change ] ) {
+							self::yoast_crawl_change_alert( $type, $old_value[ $crawl_change ], $new_value[ $crawl_change ] );
+						}
+					}
 				}
 
 				// Social profile alerts.
 				if ( 'wpseo_social' === $option ) {
 					self::yoast_social_profile_setting_change_alert( $old_value, $new_value );
 				}
+			}
+
+			if ( 'blogdescription' === $option ) {
+				self::yoast_setting_change_alert( 'blogdescription', $old_value, $new_value );
 			}
 
 			if ( 'wpseo-premium-redirects-export-plain' === $option ) {
@@ -993,6 +1106,30 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 			} elseif ( 'wpseo_redirect' === $option ) {
 				self::yoast_redirects_system_change_alert( $option, $old_value, $new_value );
 			}
+		}
+
+		/**
+		 * Registeres Yoast crawl changes event - admin.php?page=wpseo_page_settings#/crawl-optimization
+		 *
+		 * @param string $type - The name of the parameter.
+		 * @param bool   $old_value - The old value.
+		 * @param bool   $new_value -  The new value.
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.0
+		 */
+		private static function yoast_crawl_change_alert( string $type, $old_value, $new_value ) {
+			$alert_code        = 8860;
+			$alert_args        = array();
+			$alert_args['old'] = ( ! empty( $old_value ) ) ? $old_value : esc_html__( 'Not provided', 'wp-security-audit-log' );
+			$alert_args['new'] = ( ! empty( $new_value ) ) ? $new_value : esc_html__( 'Not provided', 'wp-security-audit-log' );
+
+			$alert_args['feature_name'] = $type;
+
+			$alert_args['EventType'] = ( (bool) $new_value ) ? 'enabled' : 'disabled';
+
+			Alert_Manager::trigger_event( $alert_code, $alert_args );
 		}
 
 		/**
@@ -1174,8 +1311,53 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 					}
 					break;
 
+				case 'website_name':
+					$alert_code = 8863;
+					break;
+
+				case 'alternate_website_name':
+					$alert_code        = 8864;
+					$alert_args['old'] = ( ! empty( $alert_args['old'] ) ) ? $alert_args['old'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
+					$alert_args['new'] = ( ! empty( $alert_args['new'] ) ) ? $alert_args['new'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
+					break;
+
+				case 'blogdescription':
+					$alert_code        = 8865;
+					$alert_args['old'] = ( ! empty( $alert_args['old'] ) ) ? $alert_args['old'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
+					$alert_args['new'] = ( ! empty( $alert_args['new'] ) ) ? $alert_args['new'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
+					break;
+
+				case 'company_name':
+					$alert_code = 8868;
+					break;
+
+				case 'company_alternate_name':
+					$alert_code        = 8869;
+					$alert_args['old'] = ( ! empty( $alert_args['old'] ) ) ? $alert_args['old'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
+					$alert_args['new'] = ( ! empty( $alert_args['new'] ) ) ? $alert_args['new'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
+					break;
+
+				case 'company_logo':
+					$alert_code        = 8870;
+					$alert_args['old'] = ( ! empty( $alert_args['old'] ) ) ? $alert_args['old'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
+					$alert_args['new'] = ( ! empty( $alert_args['new'] ) ) ? $alert_args['new'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
+					break;
+
+				case 'person_logo':
+					$alert_code        = 8872;
+					$alert_args['old'] = ( ! empty( $alert_args['old'] ) ) ? $alert_args['old'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
+					$alert_args['new'] = ( ! empty( $alert_args['new'] ) ) ? $alert_args['new'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
+					break;
+
+				case 'company_or_person_user_id':
+					$alert_code        = 8871;
+					$alert_args['old'] = ( ! empty( $alert_args['old'] ) ) ? \get_user_by( 'id', $alert_args['old'] )->user_login : esc_html__( 'None', 'wp-security-audit-log' );
+					$alert_args['new'] = ( ! empty( $alert_args['new'] ) ) ? \get_user_by( 'id', $alert_args['new'] )->user_login : esc_html__( 'None', 'wp-security-audit-log' );
+					break;
+
 				case 'metadesc-archive-wpseo':
 				case 'metadesc-author-wpseo':
+				case 'title-archive-wpseo':
 					$alert_code = 8836;
 					break;
 
@@ -1190,21 +1372,21 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 					$alert_code = 8835;
 					break;
 
-				case strpos( $key, 'title-tax-' ):
+				case 'title-tax-category' === $key:
 					$alert_code = 8831;
 					break;
 
-				case strpos( $key, 'title-' ):
+				case 'title-page' === $key:
 					$alert_code = 8814;
 					break;
 
-				case strpos( $key, 'metadesc-tax-' ):
+				case 'metadesc-tax-category' === $key:
 					$alert_code        = 8832;
 					$alert_args['old'] = ( ! empty( $alert_args['old'] ) ) ? $alert_args['old'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
 					$alert_args['new'] = ( ! empty( $alert_args['new'] ) ) ? $alert_args['new'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
 					break;
 
-				case strpos( $key, 'metadesc-' ):
+				case 'metadesc-page' === $key:
 					$alert_code        = 8822;
 					$alert_args['old'] = ( ! empty( $alert_args['old'] ) ) ? $alert_args['old'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
 					$alert_args['new'] = ( ! empty( $alert_args['new'] ) ) ? $alert_args['new'] : esc_html__( 'Not provided', 'wp-security-audit-log' );
@@ -1393,32 +1575,48 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 					$alert_args['archive_type'] = $archive_type;
 					break;
 
-				case strpos( $key, 'noindex-tax-' ):
-					$alert_code = 8830;
-					break;
-
-				case strpos( $key, 'noindex-' ):
+				case 'noindex-page' === $key:
 					$alert_code = 8813;
 					break;
 
+				case 'noindex-tax-category' === $key:
+					$alert_code = 8830;
+
+					break;
+
 				case 'keyword_analysis_active':
-					$alert_code = 8815;
+					$alert_code                 = 8859;
+					$alert_args['feature_name'] = esc_html__( 'SEO Analysis', 'wp-security-audit-log' );
+					break;
+
+				case 'enable_index_now':
+					$alert_code                 = 8859;
+					$alert_args['feature_name'] = esc_html__( 'IndexNow', 'wp-security-audit-log' );
+					break;
+
+				case 'enable_enhanced_slack_sharing':
+					$alert_code                 = 8859;
+					$alert_args['feature_name'] = esc_html__( 'Slack sharing', 'wp-security-audit-log' );
 					break;
 
 				case 'content_analysis_active':
-					$alert_code = 8816;
+					$alert_code                 = 8859;
+					$alert_args['feature_name'] = esc_html__( 'Readability Analysis', 'wp-security-audit-log' );
 					break;
 
 				case 'enable_cornerstone_content':
-					$alert_code = 8817;
+					$alert_code                 = 8859;
+					$alert_args['feature_name'] = esc_html__( 'Cornerstone Content', 'wp-security-audit-log' );
 					break;
 
 				case 'enable_text_link_counter':
-					$alert_code = 8818;
+					$alert_code                 = 8859;
+					$alert_args['feature_name'] = esc_html__( 'Text Link Counter', 'wp-security-audit-log' );
 					break;
 
 				case 'enable_xml_sitemap':
-					$alert_code = 8819;
+					$alert_code                 = 8859;
+					$alert_args['feature_name'] = esc_html__( 'XML Sitemap', 'wp-security-audit-log' );
 					break;
 
 				case ( false !== strpos( $key, 'network-' ) && false !== strpos( $key, '-inactive' ) ):
@@ -1445,14 +1643,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 					break;
 
 				case 'enable_admin_bar_menu':
-					$alert_code = 8821;
+					$alert_code                 = 8859;
+					$alert_args['feature_name'] = esc_html__( 'Admin Bar menu', 'wp-security-audit-log' );
 					break;
 
-				case strpos( $key, 'display-metabox-pt-' ):
+				case false !== strpos( $key, 'display-metabox-pt-' ):
 					$alert_code = 8824;
 					break;
 
-				case strpos( $key, 'display-metabox-tax-' ):
+				case false !== strpos( $key, 'display-metabox-tax-' ):
 					$alert_code = 8837;
 					// Avoid false reporting for post_format metabox.
 					if ( 'display-metabox-tax-post_format' === $key ) {
@@ -1460,16 +1659,17 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 					}
 					break;
 
-				case strpos( $key, 'disableadvanced_meta' ):
+				case false !== strpos( $key, 'disableadvanced_meta' ):
 					$alert_code = 8825;
 					break;
 
-				case strpos( $key, 'tracking' ):
+				case false !== strpos( $key, 'tracking' ):
 					$alert_code = 8827;
 					break;
 
-				case strpos( $key, 'enable_headless_rest_endpoints' ):
-					$alert_code = 8828;
+				case false !== strpos( $key, 'enable_headless_rest_endpoints' ):
+					$alert_code                 = 8859;
+					$alert_args['feature_name'] = esc_html__( 'Rest API Endpoints', 'wp-security-audit-log' );
 					break;
 
 				case 'disable-author':
@@ -1529,10 +1729,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 
 			// Facebook social settings.
 			if ( $new_value['opengraph'] !== $old_value['opengraph'] ) {
-				$alert_code = 8844;
-				$alert_args = array(
+				$alert_code                 = 8859;
+				$alert_args                 = array(
 					'EventType' => ( ! $new_value['opengraph'] ) ? 'disabled' : 'enabled',
 				);
+				$alert_args['feature_name'] = esc_html__( 'Open Graph metadata', 'wp-security-audit-log' );
 				Alert_Manager::trigger_event( $alert_code, $alert_args );
 			}
 
@@ -1548,10 +1749,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Yoast_SEO_Sensor' ) ) {
 			}
 
 			if ( $new_value['twitter'] !== $old_value['twitter'] ) {
-				$alert_code = 8846;
-				$alert_args = array(
+				$alert_code                 = 8859;
+				$alert_args                 = array(
 					'EventType' => ( ! $new_value['twitter'] ) ? 'disabled' : 'enabled',
 				);
+				$alert_args['feature_name'] = esc_html__( 'Twitter metadata', 'wp-security-audit-log' );
 				Alert_Manager::trigger_event( $alert_code, $alert_args );
 			}
 

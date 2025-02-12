@@ -163,7 +163,7 @@ if ( ! class_exists( '\WSAL\Entities\Metadata_Entity' ) ) {
 				$_wpdb = self::get_connection();
 			}
 			if ( ! empty( $occurrence_ids ) ) {
-				$sql = 'DELETE FROM ' . self::get_table_name( $_wpdb ) . ' WHERE occurrence_id IN (' . implode( ',', $occurrence_ids ) . ')';
+				$sql = 'DELETE FROM ' . self::get_table_name( $_wpdb ) . ' WHERE occurrence_id IN (' . implode( ',', \array_map( 'intval', $occurrence_ids ) ) . ')';
 				// Execute query.
 				self::delete_query( $sql, array(), $_wpdb );
 			}

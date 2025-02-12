@@ -139,7 +139,7 @@ if ( ! class_exists( '\WSAL\Helpers\Email_Helper' ) ) {
 		 */
 		public static function get_emails( $input_email ) {
 			$emails_arr        = array();
-			$input_email       = trim( $input_email );
+			$input_email       = trim( (string) $input_email );
 			$email_or_username = explode( ',', $input_email );
 
 			foreach ( $email_or_username as $token ) {

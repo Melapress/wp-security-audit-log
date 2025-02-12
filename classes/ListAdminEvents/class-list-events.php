@@ -7,7 +7,7 @@
  *
  * @since      4.6.0
  *
- * @copyright  2024 Melapress
+ * @copyright  2025 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  *
  * @see       https://wordpress.org/plugins/wp-2fa/
@@ -180,7 +180,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						if ( $try_free_search ) {
 							global $wpdb;
 							echo '<style>
-							#darktooltip-' . $wpdb->prefix . 'wsal_occurrences-find-search-input {
+							#darktooltip-' . \esc_attr( $wpdb->prefix ) . 'wsal_occurrences-find-search-input {
 								padding: 15px !important;
 								font-size: 1.2em !important;
 							}
@@ -249,7 +249,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			}
 			?>
 	<p class="search-box" style="position:relative">
-		<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo $text; ?>:</label>
+		<label class="screen-reader-text" for="<?php echo \esc_attr( $input_id ); ?>"><?php echo \esc_attr( $text ); ?>:</label>
 			<?php
 			$try_free_search = false;
 			// phpcs:ignore
@@ -439,7 +439,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 			if ( null !== self::$wsal_db && isset( self::$wsal_db::$error_string ) && null !== self::$wsal_db::$error_string ) {
 				echo self::$wsal_db::$error_string;
 			} else {
-				echo __( 'No logs found', 'wp-security-audit-log' );
+				echo \esc_html__( 'No logs found', 'wp-security-audit-log' );
 			}
 		}
 
@@ -657,7 +657,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						. str_pad( (string) $item['alert_id'], 4, '0', STR_PAD_LEFT ) . ' </span>';
 					}
 
-					return '<span' . $id . ' class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item['alert_id'] ) . '" data-darktooltip="<strong>' . __( 'Disable this type of events.', 'wp-security-audit-log' ) . '</strong><br>' . $item['alert_id'] . ' - ' . esc_html( $desc ) . $extra_msg . '" data-alert-id="' . $item['alert_id'] . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
+					return '<span' . $id . ' class="log-disable" data-disable-alert-nonce="' . wp_create_nonce( 'disable-alert-nonce' . $item['alert_id'] ) . '" data-darktooltip="<strong>' . __( 'Disable this type of event.', 'wp-security-audit-log' ) . '</strong><br>' . $item['alert_id'] . ' - ' . esc_html( $desc ) . $extra_msg . '" data-alert-id="' . $item['alert_id'] . '" ' . esc_attr( 'data-link=' . $data_link ) . ' >'
 						. str_pad( (string) $item['alert_id'], 4, '0', STR_PAD_LEFT ) . ' </span>';
 				case 'code':
 					$code = 0;
@@ -676,14 +676,15 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						: '<i>' . __( 'Unknown', 'wp-security-audit-log' ) . '</i>';
 				case 'user':
 					$username = User_Utils::get_username( $item['meta_values'] );
-					$user     = \get_user_by( 'login', $username );
+					//$user     = \get_user_by( 'login', $username );
+					$user     = User_Utils::get_user_object_from_meta( $item['meta_values'] );
 					$roles    = '';
 					$image    = '<span class="dashicons dashicons-wordpress wsal-system-icon"></span>';
 
 					// Check if there's a user with given username.
 					if ( $user instanceof \WP_User ) {
 						// Get user avatar.
-						$image = get_avatar( $user->ID, 32 );
+						$image = \get_avatar( $user->ID, 32 );
 
 						$display_name   = User_Utils::get_display_label( $user );
 						$user_edit_link = \network_admin_url( 'user-edit.php?user_id=' . $user->ID );
@@ -713,7 +714,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					$image = \apply_filters( 'wsal_get_user_image', $image, $item );
 					$uhtml = \apply_filters( 'wsal_get_user_html', $uhtml, $item );
 
-					$row_user_data = $image . $uhtml . '<br/>' . $roles;
+					$row_user_data = '<div style="float:left; margin:5px;">' . $image . '</div>' . '<span style="width:60%;float:left;">' . $uhtml . '<br/>' . $roles . '</span>';
 
 					/*
 					 * WSAL Filter: `wsal_auditlog_row_user_data`
@@ -828,46 +829,6 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		}
 
 		/**
-		 * Responsible for common column rendering.
-		 *
-		 * NOTE: This method is not in use - for future reference.
-		 *
-		 * @param array  $item        - The current riw with data.
-		 * @param string $column_name - The column name.
-		 *
-		 * @since 4.6.0
-		 */
-		private function common_column_render( array $item, $column_name ): string {
-			global $pagenow, $current_screen;
-
-			$admin_page_url = \network_admin_url( 'admin.php' );
-
-			$paged = ( isset( $_GET['paged'] ) ) ? \sanitize_text_field( \wp_unslash( $_GET['paged'] ) ) : 1;
-
-			$search  = ( isset( $_REQUEST['s'] ) ) ? '&s=' . \sanitize_text_field( \wp_unslash( $_REQUEST['s'] ) ) : '';
-			$orderby = ( isset( $_REQUEST['orderby'] ) ) ? '&orderby=' . \sanitize_text_field( \wp_unslash( $_REQUEST['orderby'] ) ) : '';
-			$order   = ( isset( $_REQUEST['order'] ) ) ? '&order=' . \sanitize_text_field( \wp_unslash( $_REQUEST['order'] ) ) : '';
-
-			$actions = array();
-			if ( 'plugin_id' === $column_name ) {
-				// row actions to edit record.
-				$query_args_view_data = array(
-					'page'                    => ( isset( $_REQUEST['page'] ) ) ? \sanitize_text_field( \wp_unslash( $_REQUEST['page'] ) ) : 'wps-proxytron-sites',
-					'action'                  => 'view_data',
-					$this->table_name . '_id' => absint( $item[ $this->table::get_real_id_name() ] ),
-					'_wpnonce'                => \wp_create_nonce( 'view_data_nonce' ),
-					'get_back'                => urlencode( $pagenow . '?page=' . $current_screen->parent_base . '&paged=' . $paged . $search . $orderby . $order ),
-				);
-				$view_data_link       = esc_url( add_query_arg( $query_args_view_data, $admin_page_url ) );
-				$actions['view_data'] = '<a href="' . $view_data_link . '">' . \esc_html( 'Show Info', 'wp-security-audit-log' ) . '</a>';
-			}
-
-			$row_value = '<strong>' . $item[ $column_name ] . '</strong>';
-
-			return $row_value . $this->row_actions( $actions );
-		}
-
-		/**
 		 * Get value for checkbox column.
 		 *
 		 * The special 'cb' column
@@ -940,10 +901,12 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				}
 				$nonce = \sanitize_text_field( \wp_unslash( $_REQUEST['_wpnonce'] ) );
 				// verify the nonce.
-				if ( ! wp_verify_nonce( $nonce, 'view_data_nonce' ) ) {
+				if ( ! \wp_verify_nonce( $nonce, 'view_data_nonce' ) ) {
 					$this->invalid_nonce_redirect();
 				} else {
-					$this->page_view_data( absint( $_REQUEST[ $this->table_name . '_id' ] ) );
+					if ( isset( $_REQUEST[ $this->table_name . '_id' ] ) ) {
+						$this->page_view_data( absint( $_REQUEST[ $this->table_name . '_id' ] ) );
+					}
 					$this->graceful_exit();
 				}
 			}
@@ -955,10 +918,12 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 				$nonce = \sanitize_text_field( \wp_unslash( $_REQUEST['_wpnonce'] ) );
 
 				// verify the nonce.
-				if ( ! wp_verify_nonce( $nonce, 'add_' . $this->table_name . '_nonce' ) ) {
+				if ( ! \wp_verify_nonce( $nonce, 'add_' . $this->table_name . '_nonce' ) ) {
 					$this->invalid_nonce_redirect();
 				} else {
-					$this->page_add_data( absint( $_REQUEST[ $this->table_name . '_id' ] ) );
+					if ( isset( $_REQUEST[ $this->table_name . '_id' ] ) ) {
+						$this->page_add_data( absint( $_REQUEST[ $this->table_name . '_id' ] ) );
+					}
 					$this->graceful_exit();
 				}
 			}
@@ -986,7 +951,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 						$disabled_alerts = \array_filter( \array_map( 'trim', \explode( ',', $disabled_alerts ) ) );
 					}
 
-					$ids_array = \array_filter( (array) $_REQUEST[ $this->table_name ] );
+					$ids_array = \array_filter( (array) $_REQUEST[ $this->table_name ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 					foreach ( $ids_array as $id ) {
 						$row_data          = $this->table::load( 'id=%d', array( (int) $id ), self::$wsal_db );
@@ -1013,7 +978,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 					$disabled_users = Settings_Helper::get_excluded_monitoring_users();
 
-					$ids_array = \array_filter( (array) $_REQUEST[ $this->table_name ] );
+					$ids_array = \array_filter( (array) $_REQUEST[ $this->table_name ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 					foreach ( $ids_array as $id ) {
 						$row_data = $this->table::load( 'id=%d', array( (int) $id ), self::$wsal_db );
@@ -1044,7 +1009,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 
 					$disabled_ips = Settings_Helper::get_excluded_monitoring_ips();
 
-					$ids_array = \array_filter( (array) $_REQUEST[ $this->table_name ] );
+					$ids_array = \array_filter( (array) $_REQUEST[ $this->table_name ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 					foreach ( $ids_array as $id ) {
 						$row_data = $this->table::load( 'id=%d', array( (int) $id ), self::$wsal_db );
@@ -1086,12 +1051,12 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 		 * @return void
 		 */
 		public function invalid_nonce_redirect() {
-			wp_die(
+			\wp_die(
 				'Invalid Nonce',
 				'Error',
 				array(
 					'response'  => 403,
-					'back_link' => esc_url( add_query_arg( array( 'page' => \wp_unslash( $_REQUEST['page'] ) ), \network_admin_url( 'users.php' ) ) ),
+					'back_link' => \esc_url( \add_query_arg( array( 'page' => \sanitize_text_field( \wp_unslash( $_REQUEST['page'] ) ) ), \network_admin_url( 'users.php' ) ) ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 				)
 			);
 		}
@@ -1217,7 +1182,7 @@ if ( ! class_exists( '\WSAL\ListAdminEvents\List_Events' ) ) {
 					$curr = WP_Helper::get_view_site_id();
 					?>
 				<div class="wsal-ssa wsal-ssa-<?php echo esc_attr( $which ); ?>">
-					<?php if ( WP_Helper::get_site_count() > 15 ) { ?>
+					<?php if ( WP_Helper::get_site_count() > 150 ) { ?>
 						<?php $curr = $curr ? get_blog_details( $curr ) : null; ?>
 						<?php $curr = $curr ? ( $curr->blogname . ' (' . $curr->domain . ')' ) : 'All Sites'; ?>
 						<input type="text" class="wsal-ssas" value="<?php echo esc_attr( $curr ); ?>"/>

@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage mainwp
- * @copyright  2024 Melapress
+ * @copyright  2025 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  *

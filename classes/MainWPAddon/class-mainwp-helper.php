@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage mainwp
- * @copyright  2024 Melapress
+ * @copyright  2025 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  *
@@ -13,6 +13,7 @@
 
 namespace WSAL\MainWP;
 
+use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\Logger;
 use WSAL\MainWP\MainWP_Addon;
 use WSAL\Helpers\Settings_Helper;
@@ -130,6 +131,12 @@ if ( ! class_exists( '\WSAL\MainWP\MainWP_Helper' ) ) {
 						<option value="-1"><?php esc_html_e( 'All Sites', 'wp-security-audit-log' ); ?></option>
 						<option value="0" <?php selected( (int) $current_site, 0 ); ?>><?php esc_html_e( 'MainWP Dashboard', 'wp-security-audit-log' ); ?></option>
 						<?php
+						if ( ! WP_Helper::is_multisite() ) {
+							?>
+							<option value="1" <?php selected( (int) $current_site, 1 ); ?>><?php echo esc_attr( \get_bloginfo( 'name' ) ) . \esc_html__( ' (Current site)', 'wp-security-audit-log' ); ?></option>
+							<?php
+						}
+
 						if ( is_array( $wsal_child_sites ) ) {
 							foreach ( $wsal_child_sites as $site_id => $site_data ) {
 								$key = array_search( $site_id, array_column( $mainwp_child_sites, 'id' ), false );

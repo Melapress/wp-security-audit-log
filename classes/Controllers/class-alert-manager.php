@@ -22,6 +22,9 @@ use WSAL\Helpers\Classes_Helper;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\Helpers\User_Sessions_Helper;
+use WSAL\WP_Sensors\Helpers\Yoast_SEO_Helper;
+use WSAL\WP_Sensors\Helpers\Woocommerce_Helper;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -289,7 +292,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 					foreach ( $excluded_ips as $excluded_ip ) {
 						if ( false !== strpos( $excluded_ip, '-' ) ) {
 							$ip_range = Settings_Helper::get_ipv4_by_range( $excluded_ip );
-							$ip_range = $ip_range->lower . '-' . $ip_range->upper;
+							$ip_range = $ip_range['lower'] . '-' . $ip_range['upper'];
 
 							if ( Settings_Helper::check_ipv4_in_range( $ip, $ip_range ) ) {
 								self::$is_ip_disabled = true;
@@ -406,6 +409,69 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 
 			if ( false !== $key ) {
 				unset( self::$ignored_cpts[ $key ] );
+			}
+		}
+
+		/**
+		 * Adds type to the ignored post types.
+		 *
+		 * @param string $post_type - The name of the post type to remove.
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.0
+		 */
+		public static function add_to_ignored_post_types( string $post_type ) {
+			if ( empty( self::$ignored_cpts ) ) {
+				self::get_ignored_post_types();
+			}
+
+			$key = array_search( $post_type, self::$ignored_cpts, true );
+
+			if ( false === $key ) {
+				self::$ignored_cpts[] = $post_type;
+			}
+		}
+
+		/**
+		 * Removes type from the ignored post types.
+		 *
+		 * @param string $post_type - The name of the post type to remove.
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.0
+		 */
+		public static function remove_from_all_ignored_post_types( string $post_type ) {
+			if ( empty( self::$all_post_types ) ) {
+				self::get_all_post_types();
+			}
+
+			$key = array_search( $post_type, self::$all_post_types, true );
+
+			if ( false !== $key ) {
+				unset( self::$all_post_types[ $key ] );
+			}
+		}
+
+		/**
+		 * Adds type to the ignored post types.
+		 *
+		 * @param string $post_type - The name of the post type to remove.
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.0
+		 */
+		public static function add_to_all_ignored_post_types( string $post_type ) {
+			if ( empty( self::$all_post_types ) ) {
+				self::get_all_post_types();
+			}
+
+			$key = array_search( $post_type, self::$all_post_types, true );
+
+			if ( false === $key ) {
+				self::$all_post_types[] = $post_type;
 			}
 		}
 
@@ -739,13 +805,18 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 				if ( function_exists( 'get_current_user_id' ) ) {
 					$event_data['CurrentUserID'] = \get_current_user_id();
 					if ( 0 !== $event_data['CurrentUserID'] ) {
-						$event_data['Username'] = \get_user_by( 'ID', $event_data['CurrentUserID'] )->user_login;
+						$user = \get_user_by( 'ID', $event_data['CurrentUserID'] );
+						if ( \is_a( $user, '\WP_User' ) ) {
+							$event_data['Username'] = $user->user_login;
+						} else {
+							$event_data['Username'] = 'Unknown User';
+						}
 					}
 					if ( 0 === $event_data['CurrentUserID'] ) {
 						if ( 'system' === \strtolower( $alert_obj['object'] ) ) {
 							$event_data['Username'] = 'System';
-						} elseif ( str_starts_with( \strtolower( $alert_obj['object'] ), 'woocommerce' ) ) {
-								$event_data['Username'] = 'WooCommerce System';
+						} elseif ( str_starts_with( \strtolower( $alert_obj['object'] ), 'woocommerce' ) && 9130 !== (int) $event_id ) {
+							$event_data['Username'] = 'WooCommerce System';
 						} else {
 							$event_data['Username'] = 'Unknown User';
 						}
@@ -780,7 +851,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			// If the user sessions plugin is loaded try to attach the SessionID.
 			if ( ! isset( $event_data['SessionID'] ) && class_exists( '\WSAL\Helpers\User_Sessions_Helper' ) ) {
 				// Try to get the session id generated from logged in cookie.
-				$session_id = \WSAL\Helpers\User_Sessions_Helper::get_session_id_from_logged_in_user_cookie();
+				$session_id = User_Sessions_Helper::get_session_id_from_logged_in_user_cookie();
 				// If we have a SessionID then add it to event_data.
 				if ( ! empty( $session_id ) ) {
 					$event_data['SessionID'] = $session_id;
@@ -832,7 +903,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			 * @param int   $event_id   - Event ID.
 			 * @param array $event_data - Event data.
 			 */
-			$event_id = apply_filters( 'wsal_event_id_before_log', $event_id, $event_data );
+			$event_id = \apply_filters( 'wsal_event_id_before_log', $event_id, $event_data );
 
 			/**
 			 * WSAL Filter: `wsal_event_data_before_log`.
@@ -844,14 +915,18 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			 * @param array $event_data - Event data.
 			 * @param int   $event_id   - Event ID.
 			 */
-			$event_data = apply_filters( 'wsal_event_data_before_log', $event_data, $event_id );
+			$event_data = \apply_filters( 'wsal_event_data_before_log', $event_data, $event_id );
 
 			// phpcs:ignore
 
 			foreach ( self::get_loggers() as $logger ) {
 				// phpcs:disable
 				// phpcs:enable
-				$logger::log( $event_id, $event_data );
+				if ( $logger instanceof \WSAL_Ext_MirrorLogger ) {
+					$logger->log( $event_id, $event_data );
+				} else {
+					$logger::log( $event_id, $event_data );
+				}
 			}
 			// phpcs:disable
 		}
@@ -1083,7 +1158,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 					if ( $known_to_trigger ) {
 						break;
 					}
-					if ( ! empty( $last_occurrence ) && \is_array( ! empty( $last_occurrence ) ) && \key_exists( 'created_on', $last_occurrence ) && ( $last_occurrence['created_on'] + self::$seconds_to_check_back ) > time() ) {
+					if ( ! empty( $last_occurrence ) && \is_array( $last_occurrence ) && \key_exists( 'created_on', $last_occurrence ) && ( $last_occurrence['created_on'] + self::$seconds_to_check_back ) > time() ) {
 						if ( ! is_array( $alert_id ) && (int) $last_occurrence['alert_id'] === $alert_id ) {
 							$known_to_trigger = true;
 						} elseif ( is_array( $alert_id ) && in_array( (int) $last_occurrence[0]['alert_id'], $alert_id, true ) ) {
@@ -1276,6 +1351,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 					'revoked'      => esc_html__( 'Revoked', 'wp-security-audit-log' ),
 					'sent'         => esc_html__( 'Sent', 'wp-security-audit-log' ),
 					'executed'     => esc_html__( 'Executed', 'wp-security-audit-log' ),
+					'failed'       => esc_html__( 'Failed', 'wp-security-audit-log' ),
 				);
 				// sort the types alphabetically.
 				asort( self::$event_types );
@@ -1499,6 +1575,147 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			}
 
 			return false;
+		}
+
+		/**
+		 * Disables the alert by its identifier
+		 *
+		 * @param string|array $alert - The array or comma separated string with the ids that needs to be set as disabled.
+		 *
+		 * @return false|void
+		 *
+		 * @since 5.2.2
+		 */
+		public static function disable_enable_alert( $alert ) {
+
+			if ( \is_array( $alert ) && ! empty( $alert ) ) {
+				$alert = array_unique( array_map( 'intval', $alert ) );
+			} elseif ( \is_array( $alert ) && empty( $alert ) ) {
+				return false;
+			}
+
+			if ( \is_string( $alert ) ) {
+				$alert = \explode( ',', $alert );
+				$alert = array_unique( array_map( 'intval', $alert ) );
+			}
+
+			if ( empty( $alert ) ) {
+				return false;
+			}
+
+			$currently_disabled = Settings_Helper::get_disabled_alerts();
+			$disabled           = \array_flip( $currently_disabled );
+			$enabled            = array();
+
+			foreach ( $alert as $alert_id ) {
+				if ( in_array( $alert_id, $currently_disabled, true ) ) {
+					$enabled[] = $alert_id;
+					unset( $disabled[ $alert_id ] );
+				} else {
+					$disabled[ $alert_id ] = '';
+				}
+			}
+
+			$disabled = \array_flip( $disabled );
+
+			$disabled = \apply_filters( 'wsal_save_settings_disabled_events', $disabled, self::get_alerts(), array(), $enabled );
+
+			// Report any changes as an event.
+			self::report_enabled_disabled_event( $enabled, $disabled );
+
+			// Save the disabled events.
+			Settings_Helper::set_disabled_alerts( $disabled ); // Save the disabled events.
+		}
+
+		/**
+		 * Reports an event if an alert has been disabled/enabled.
+		 *
+		 * @param array $enabled - Array of enabled event IDs prior to saving.
+		 * @param array $disabled - Array of disabled events prior to saving.
+		 * @param bool  $is_frontend - If set as frontend - check the frontend event codes.
+		 *
+		 * @return void
+		 *
+		 * @since 5.2.2
+		 */
+		public static function report_enabled_disabled_event( $enabled, $disabled, $is_frontend = false ) {
+
+			if ( $is_frontend ) {
+				$current_enabled = $enabled;
+				$fresh_enabled   = $disabled;
+				$frontend_labels = array(
+					'register'    => esc_html__( 'Keep a log when a visitor registers a user on the website. Only enable this if you allow visitors to register as users on your website. User registration is disabled by default in WordPress.', 'wp-security-audit-log' ),
+					'login'       => esc_html__( 'Keep a log of user log in activity on custom login forms (such as WooCommerce & membership plugins)', 'wp-security-audit-log' ),
+					'woocommerce' => esc_html__( 'Keep a log of visitor orders, stock changes and other public events?', 'wp-security-audit-log' ),
+				);
+
+				$frontend_codes = array(
+					'register'     => 4000,
+					'login'        => 1000,
+					'woocommerce'  => 9035,
+					'gravityforms' => 5709,
+				);
+
+				foreach ( $current_enabled as $frontend_event => $value ) {
+					if ( $value !== $fresh_enabled[ $frontend_event ] ) {
+						self::trigger_event(
+							6060,
+							array(
+								'ID'          => $frontend_codes[ $frontend_event ],
+								'description' => $frontend_labels[ $frontend_event ],
+								'EventType'   => ( $fresh_enabled[ $frontend_event ] ) ? 'enabled' : 'disabled',
+							)
+						);
+					}
+				}
+			} else {
+				// Grab currently saved list of disabled events for comparison.
+				$currently_disabled = Settings_Helper::get_disabled_alerts();
+
+				// Further remove items which are disabled in the UI but potentially not saved as disabled in the settings yet (for example fresh WSAL install).
+				$obsolete_events  = array( 9999, 2126, 99999, 0000, 0001, 0002, 0003, 0004, 0005, 0006 );
+				$obsolete_events  = apply_filters( 'wsal_togglealerts_obsolete_events', $obsolete_events );
+				$ms_alerts        = ( ! WP_Helper::is_multisite() ) ? array_keys( self::get_alerts_by_category( 'Multisite Network Sites' ) ) : array();
+				$ms_user_alerts   = ( ! WP_Helper::is_multisite() ) ? array_keys( self::get_alerts_by_sub_category( 'Multisite User Profiles' ) ) : array();
+				$wc_alerts        = ( ! Woocommerce_Helper::is_woocommerce_active() ) ? array_keys( self::get_alerts_by_category( 'WooCommerce' ) ) : array();
+				$yoast_alerts     = ( ! Yoast_SEO_Helper::is_wpseo_active() ) ? array_keys( self::get_alerts_by_category( 'Yoast SEO' ) ) : array();
+				$deprecated_event = self::get_deprecated_events();
+				$always_disabled  = Settings_Helper::get_default_always_disabled_alerts();
+				$events_to_ignore = array_merge( $obsolete_events, $ms_alerts, $always_disabled, $deprecated_event, $ms_user_alerts, $wc_alerts, $yoast_alerts );
+
+				// Remove items we dont want to trigger alerts for here.
+				$disabled = array_diff( $disabled, $events_to_ignore );
+
+				// Check for events which are newly enabled.
+				foreach ( $enabled as $enabled_alert_id ) {
+					if ( in_array( $enabled_alert_id, $currently_disabled, true ) ) {
+						$alert_data = Alert::get_alert( $enabled_alert_id );
+						self::trigger_event(
+							6060,
+							array(
+								'ID'          => $enabled_alert_id,
+								'description' => $alert_data['desc'],
+								'EventType'   => 'enabled',
+							)
+						);
+					}
+				}
+
+				// Check for events which are newly disabled.
+				foreach ( $disabled as $disabled_alert_id ) {
+					if ( ! in_array( $disabled_alert_id, $currently_disabled, true ) ) {
+						$alert_data = Alert::get_alert( $disabled_alert_id );
+						self::trigger_event(
+							6060,
+							array(
+								'ID'          => $disabled_alert_id,
+								'description' => $alert_data['desc'],
+								'EventType'   => 'disabled',
+							)
+						);
+					}
+				}
+			}
 		}
 	}
 }

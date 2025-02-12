@@ -18,6 +18,8 @@ namespace WSAL\Controllers;
 use WSAL\Helpers\Validator;
 use WSAL\Helpers\Classes_Helper;
 use WSAL\Controllers\Alert_Manager;
+use WSAL\Helpers\Formatters\Alert_Formatter;
+use WSAL\Helpers\Formatters\Formatter_Factory;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -146,7 +148,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 					$context = 'default';
 				}
 				// Get the alert formatter for given context.
-				$formatter = \WSAL_AlertFormatterFactory::get_formatter( $context );
+				$configuration = Formatter_Factory::get_configuration( $context );
 
 				// Tokenize message with regex.
 				$message_parts = preg_split( '/(%.*?%)/', (string) $message, - 1, PREG_SPLIT_DELIM_CAPTURE );
@@ -165,22 +167,22 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 						} elseif ( substr( $token, 0, 1 ) === '%' && substr( $token, - 1, 1 ) === '%' ) {
 							// Handle complex expressions.
 							$message_parts[ $i ] = self::get_meta_expression_value( substr( $token, 1, - 1 ), $meta_data );
-							$message_parts[ $i ] = $formatter->format_meta_expression( $token, $message_parts[ $i ], $occurrence_id, $meta_data );
+							$message_parts[ $i ] = Alert_Formatter::format_meta_expression( $token, $message_parts[ $i ], $configuration, $occurrence_id, $meta_data );
 						}
 					}
 
-						// Compact message.
-						$result = implode( '', $message_parts );
+					// Compact message.
+					$result = implode( '', $message_parts );
 				}
 
 				// Process message to make sure it any HTML tags are handled correctly.
-				$result = $formatter->process_html_tags_in_message( $result );
+				$result = Alert_Formatter::process_html_tags_in_message( $result, $configuration );
 
-				$end_of_line = $formatter->get_end_of_line();
+				$end_of_line = $configuration['end_of_line'];
 
 				// Process metadata and links introduced as part of alert definition in version 4.2.1.
-				if ( $formatter->supports_metadata() ) {
-					$metadata_result = self::get_formatted_metadata( $formatter, $meta_data, $occurrence_id, $alert );
+				if ( $configuration['supports_metadata'] ) {
+					$metadata_result = self::get_formatted_metadata( $configuration, $meta_data, $occurrence_id, $alert );
 					if ( ! empty( $metadata_result ) ) {
 						if ( ! empty( $result ) ) {
 							$result .= $end_of_line;
@@ -189,8 +191,8 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 					}
 				}
 
-				if ( $formatter->supports_hyperlinks() ) {
-					$hyperlinks_result = self::get_formatted_hyperlinks( $formatter, $meta_data, $occurrence_id, $alert );
+				if ( $configuration['supports_hyperlinks'] ) {
+					$hyperlinks_result = self::get_formatted_hyperlinks( $configuration, $meta_data, $occurrence_id, $alert );
 					if ( ! empty( $hyperlinks_result ) ) {
 						if ( ! empty( $result ) ) {
 							$result .= $end_of_line;
@@ -240,23 +242,23 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 				$meta = is_array( $meta ) && array_key_exists( $part, $meta ) ? $meta[ $part ] : ( isset( $meta->$part ) ? $meta->$part : 'NULL' );
 			}
 
-			return is_scalar( $meta ) ? (string) $meta : var_export( $meta, true );
+			return is_scalar( $meta ) ? (string) $meta : var_export( $meta, true ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 		}
 
 		/**
 		 * Retrieves formatted meta data item (label and data).
 		 *
-		 * @param WSAL_AlertFormatter $formatter Alert formatter.
-		 * @param array               $meta_data Meta data.
-		 * @param int                 $occurrence_id Occurrence ID.
-		 * @param array               $alert - The array with all the alert details.
+		 * @param array $configuration  - Alert message configuration rules.
+		 * @param array $meta_data Meta data.
+		 * @param int   $occurrence_id Occurrence ID.
+		 * @param array $alert - The array with all the alert details.
 		 *
 		 * @return string
 		 * @since 4.2.1
 		 */
-		public static function get_formatted_metadata( $formatter, $meta_data, $occurrence_id, $alert ) {
+		public static function get_formatted_metadata( $configuration, $meta_data, $occurrence_id, $alert ) {
 			$result            = '';
-			$metadata_as_array = self::get_metadata_as_array( $formatter, $meta_data, $occurrence_id, $alert );
+			$metadata_as_array = self::get_metadata_as_array( $configuration, $meta_data, $occurrence_id, $alert );
 			if ( ! empty( $metadata_as_array ) ) {
 
 				$meta_result_parts = array();
@@ -267,7 +269,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 				}
 
 				if ( ! empty( $meta_result_parts ) ) {
-					$result .= implode( $formatter->get_end_of_line(), $meta_result_parts );
+					$result .= implode( $configuration['end_of_line'], $meta_result_parts );
 				}
 			}
 			return $result;
@@ -276,15 +278,15 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 		/**
 		 * Retrieves metadata as an associative array.
 		 *
-		 * @param WSAL_AlertFormatter $formatter Alert formatter.
-		 * @param array               $meta_data Meta data.
-		 * @param int                 $occurrence_id Occurrence ID.
-		 * @param array               $alert - The array with all the alert details.
+		 * @param array $configuration  - Alert message configuration rules.
+		 * @param array $meta_data Meta data.
+		 * @param int   $occurrence_id Occurrence ID.
+		 * @param array $alert - The array with all the alert details.
 		 *
 		 * @return array
 		 * @since 4.2.1
 		 */
-		public static function get_metadata_as_array( $formatter, $meta_data, $occurrence_id, $alert ) {
+		public static function get_metadata_as_array( $configuration, $meta_data, $occurrence_id, $alert ) {
 			$result = array();
 			if ( ! empty( $alert['metadata'] ) ) {
 				foreach ( $alert['metadata'] as $meta_label => $meta_token ) {
@@ -296,7 +298,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 					$meta_expression = self::get_meta_expression_value( $meta_token, $meta_data );
 
 					// Additional alert meta processing - handles derived or decorated alert data.
-					$meta_expression = $formatter->format_meta_expression( $meta_token, $meta_expression, $occurrence_id );
+					$meta_expression = Alert_Formatter::format_meta_expression( $meta_token, $meta_expression, $configuration, $occurrence_id );
 
 					if ( ! empty( $meta_expression ) ) {
 						$result[ $meta_label ] = $meta_expression;
@@ -310,29 +312,29 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 		/**
 		 * Get formatter hyperlinks.
 		 *
-		 * @param WSAL_AlertFormatter $formatter     Alert formatter.
-		 * @param array               $meta_data     Meta data.
-		 * @param int                 $occurrence_id Occurrence ID.
-		 * @param array               $alert - The array with all the alert details.
+		 * @param array $configuration  - Alert message configuration rules.
+		 * @param array $meta_data     Meta data.
+		 * @param int   $occurrence_id Occurrence ID.
+		 * @param array $alert - The array with all the alert details.
 		 *
 		 * @return string
 		 * @since 4.2.1
 		 */
-		public static function get_formatted_hyperlinks( $formatter, $meta_data, $occurrence_id, $alert ) {
+		public static function get_formatted_hyperlinks( $configuration, $meta_data, $occurrence_id, $alert ) {
 			$result              = '';
-			$hyperlinks_as_array = self::get_hyperlinks_as_array( $formatter, $meta_data, $occurrence_id, $alert );
+			$hyperlinks_as_array = self::get_hyperlinks_as_array( $configuration, $meta_data, $occurrence_id, $alert );
 			if ( ! empty( $hyperlinks_as_array ) ) {
 				$links_result_parts = array();
 				foreach ( $hyperlinks_as_array as  $link_data ) {
 					$link_label       = $link_data['label'];
 					$link_url         = $link_data['url'];
 					$needs_formatting = $link_data['needs_formatting'];
-					$formatted_link   = $needs_formatting ? $formatter->format_link( $link_url, $link_label ) : $link_url;
+					$formatted_link   = $needs_formatting ? Alert_Formatter::format_link( $configuration, $link_url, $link_label ) : $link_url;
 					array_push( $links_result_parts, $formatted_link );
 				}
 
 				if ( ! empty( $links_result_parts ) ) {
-					$result .= implode( $formatter->get_end_of_line(), $links_result_parts );
+					$result .= implode( $configuration['end_of_line'], $links_result_parts );
 				}
 			}
 
@@ -342,19 +344,19 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 		/**
 		 * Retrieves hyperlinks as an array.
 		 *
-		 * @param WSAL_AlertFormatter $formatter                            Alert formatter.
-		 * @param array               $meta_data                            Meta data.
-		 * @param int                 $occurrence_id                        Occurrence ID.
-		 * @param array               $alert - The array with all the alert details.
-		 * @param bool                $exclude_links_not_needing_formatting If true, links that don't need formatting will
-		 *                                                                  be excluded. For example special links that
-		 *                                                                  contain onclick attribute already from the meta
-		 *                                                                  formatter.
+		 * @param array $configuration  - Alert message configuration rules.
+		 * @param array $meta_data                            Meta data.
+		 * @param int   $occurrence_id                        Occurrence ID.
+		 * @param array $alert - The array with all the alert details.
+		 * @param bool  $exclude_links_not_needing_formatting If true, links that don't need formatting will
+		 *                                                    be excluded. For example special links that
+		 *                                                    contain onclick attribute already from the meta
+		 *                                                    formatter.
 		 *
 		 * @return array
 		 * @since 4.2.1
 		 */
-		public static function get_hyperlinks_as_array( $formatter, $meta_data, $occurrence_id, $alert, $exclude_links_not_needing_formatting = false ) {
+		public static function get_hyperlinks_as_array( $configuration, $meta_data, $occurrence_id, $alert, $exclude_links_not_needing_formatting = false ) {
 			$result = array();
 			if ( ! empty( $alert['links'] ) ) {
 				foreach ( $alert['links'] as $link_label => $link_data ) {
@@ -384,7 +386,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert' ) ) {
 					if ( ! Validator::is_valid_url( $link_url ) ) {
 
 						$meta_expression = self::get_meta_expression_value( $link_url, $meta_data );
-						$meta_expression = $formatter->format_meta_expression( $link_url, $meta_expression, $occurrence_id, $meta_data, false );
+						$meta_expression = Alert_Formatter::format_meta_expression( $link_url, $meta_expression, $configuration, $occurrence_id, $meta_data, false );
 						if ( ! empty( $meta_expression ) ) {
 							if ( Validator::is_valid_url( $meta_expression ) ) {
 

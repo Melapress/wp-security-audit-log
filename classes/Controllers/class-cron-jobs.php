@@ -12,9 +12,10 @@ declare(strict_types=1);
 
 namespace WSAL\Controllers;
 
-use WSAL\Helpers\WP_Helper;
-use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Occurrences_Entity;
+use WSAL\Helpers\Settings_Helper;
+use WSAL\Helpers\WP_Helper;
+use WSAL\Views\Notifications;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -69,6 +70,18 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 				'hook' => array( __CLASS__, 'cleanup_hook' ),
 				'args' => array(),
 			),
+			'wsal_summary_daily_report'       => array(
+				'time'     => 'daily',
+				'hook'     => array( __CLASS__, 'generate_daily_summary_reports' ),
+				'args'     => array(),
+				'next_run' => '03:00 tomorrow',
+			),
+			'wsal_summary_weekly_report'      => array(
+				'time'     => 'weekly',
+				'hook'     => array( __CLASS__, 'generate_weekly_summary_reports' ),
+				'args'     => array(),
+				'next_run' => '03:00 next monday',
+			),
 		);
 
 		/**
@@ -86,6 +99,7 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function init() {
+			\add_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'maybe_prevent_error' ), -1 );
 			// Add custom schedules for WSAL early otherwise they won't work.
 			\add_filter( 'cron_schedules', array( __CLASS__, 'recurring_schedules' ) );
 			\add_filter( 'wsal_cron_hooks', array( __CLASS__, 'settings_hooks' ) );
@@ -96,6 +110,8 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 
 			\wp_get_schedules();
 
+			\remove_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'maybe_prevent_error' ) );
+
 			self::initialize_hooks();
 		}
 
@@ -103,8 +119,6 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		 * Adds cron jobs stored in the globals settings (options table).
 		 *
 		 * @param array $crons - The list of cron jobs to add.
-		 *
-		 * @return array
 		 *
 		 * @since 5.0.0
 		 */
@@ -174,6 +188,28 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		}
 
 		/**
+		 * Hook method for generating the reports.
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.0
+		 */
+		public static function generate_daily_summary_reports() {
+			Notifications::send_daily_summary_cron();
+		}
+
+		/**
+		 * Hook method for generating the weekly reports.
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.0
+		 */
+		public static function generate_weekly_summary_reports() {
+			Notifications::send_weekly_summary_cron();
+		}
+
+		/**
 		 * Hook method for clearing the reports.
 		 *
 		 * @return void
@@ -198,13 +234,24 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		/**
 		 * Extend WP cron time intervals for scheduling.
 		 *
-		 * @param  array $schedules - Array of schedules.
+		 * @param array $schedules - Array of schedules.
 		 *
 		 * @return array
 		 *
 		 * @since 5.0.0
 		 */
 		public static function recurring_schedules( $schedules ) {
+			global $wp_actions;
+
+			$remove_it = false;
+
+			// if ( ! isset( $wp_actions['after_setup_theme'] ) ) {
+			// $remove_it                       = true;
+			// $wp_actions['after_setup_theme'] = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			// }
+
+			\add_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'maybe_prevent_error' ), -1 );
+
 			$schedules['sixhours']         = array(
 				'interval' => 21600,
 				'display'  => __( 'Every 6 hours', 'wp-security-audit-log' ),
@@ -242,6 +289,12 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 				'display'  => __( 'Once quarterly', 'wp-security-audit-log' ),
 			);
 
+			if ( $remove_it ) {
+				unset( $wp_actions['after_setup_theme'] );
+			}
+
+			\remove_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'maybe_prevent_error' ) );
+
 			return $schedules;
 		}
 
@@ -260,12 +313,12 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		 * .
 		 *
 		 * @return void
+		 *
 		 * @throws \InvalidArgumentException When cron job information passed not contains required keys.
 		 *
 		 * @since 5.0.0
 		 */
 		public static function store_cron_option( array $cron_job ) {
-
 			if ( empty( $cron_job ) || 1 < count( $cron_job ) ) {
 				throw new \InvalidArgumentException( __( 'Only one cron at a time', 'wp-security-audit-log' ) );
 			}
@@ -278,11 +331,11 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			if ( count( $keys ) === count(
 				array_filter(
 					array_keys( \reset( $cron_job ) ),
-					function( $key ) use ( $keys ) {
-						return in_array( $key, $keys, true ); }
+					function ( $key ) use ( $keys ) {
+						return in_array( $key, $keys, true );
+					}
 				)
 			) ) {
-
 				$available_cron_jobs = Settings_Helper::get_option_value( self::CRON_JOBS_SETTINGS_NAME, array() );
 
 				$available_cron_jobs = array_merge( $available_cron_jobs, $cron_job );
@@ -294,7 +347,7 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		}
 
 		/**
-		 * Unsets cron job from global settings
+		 * Unset cron job from global settings.
 		 *
 		 * @param string $cron_name - The name of the cron job to remove.
 		 *
@@ -306,7 +359,6 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 			$available_cron_jobs = Settings_Helper::get_option_value( self::CRON_JOBS_SETTINGS_NAME, array() );
 
 			if ( isset( $available_cron_jobs[ $cron_name ] ) ) {
-
 				\wp_clear_scheduled_hook( $cron_name, $available_cron_jobs[ $cron_name ]['args'] );
 
 				unset( $available_cron_jobs[ $cron_name ] );
@@ -319,7 +371,7 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		 * Removes event from the cron by given name.
 		 *
 		 * @param string $event_name -The name of the event.
-		 * @param array  $args - Arguments passed to the cron event.
+		 * @param array  $args       - Arguments passed to the cron event.
 		 *
 		 * @return void
 		 *
@@ -333,6 +385,19 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		}
 
 		/**
+		 * Prevents the PHP error (notice or deprecated) from being triggered for doing it wrong calls.
+		 *
+		 * @param bool $trigger - Should we trigger the error or not?.
+		 *
+		 * @return bool
+		 *
+		 * @since 5.3.0
+		 */
+		public static function maybe_prevent_error( $trigger ) {
+			return false;
+		}
+
+		/**
 		 * Initializes the plugin cron jobs.
 		 *
 		 * @return void
@@ -342,17 +407,52 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		private static function initialize_hooks() {
 			$hooks_array = self::CRON_JOBS_NAMES;
 
-			if ( WP_Helper::is_multisite() ) {
-				/**
-				 * Multisite crons are running for every single sub-site instance. This is completely wrong as it leads to multiple reports being generated / fired. For that reason only the main site is allowed to run them, and that is the reason for that code existance.
+			if ( WP_Helper::is_multisite() || 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
+				/*
+				 * Multisite crons are running for every single sub-site instance. This is completely wrong as it leads to multiple reports being generated / fired. For that reason only the main site is allowed to run them, and that is the reason for that code existence.
+				 *
+				 * Also Free version of the plugin does not need these to be present
 				 */
-				if ( ! \is_main_site() ) {
-					unset( $hooks_array['wsal_generate_reports_cron'] );
-					unset( $hooks_array['wsal_periodic_reports_daily'] );
-					unset( $hooks_array['wsal_periodic_reports_weekly'] );
-					unset( $hooks_array['wsal_periodic_reports_monthly'] );
-					unset( $hooks_array['wsal_periodic_reports_quarterly'] );
+				if ( ! \is_main_site() || 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
+					unset(
+						$hooks_array['wsal_generate_reports_cron'],
+						$hooks_array['wsal_periodic_reports_daily'],
+						$hooks_array['wsal_periodic_reports_weekly'],
+						$hooks_array['wsal_periodic_reports_monthly'],
+						$hooks_array['wsal_periodic_reports_quarterly']
+					);
 				}
+
+				if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
+					unset( $hooks_array['wsal_reports_pruning_cron'] );
+				}
+			}
+
+			if ( WP_Helper::is_multisite() || 'free' !== \WpSecurityAuditLog::get_plugin_version() ) {
+				if ( ! \is_main_site() || 'free' !== \WpSecurityAuditLog::get_plugin_version() ) {
+					$per_site_report = ( isset( Notifications::get_global_notifications_setting()['notification_summary_multisite_individual_site'] ) ? Notifications::get_global_notifications_setting()['notification_summary_multisite_individual_site'] : true );
+
+					if ( ! $per_site_report ) {
+						unset(
+							$hooks_array['wsal_summary_daily_report'],
+							$hooks_array['wsal_summary_weekly_report']
+						);
+					}
+				}
+			}
+
+			$built_notifications = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
+
+			if ( ! isset( $built_notifications['daily_summary_notification'] ) || ! $built_notifications['daily_summary_notification'] ) {
+				unset( $hooks_array['wsal_summary_daily_report'] );
+
+				self::un_schedule_event( 'wsal_summary_daily_report' );
+			}
+
+			if ( ! isset( $built_notifications['weekly_summary_notification'] ) || ! $built_notifications['weekly_summary_notification'] ) {
+				unset( $hooks_array['wsal_summary_weekly_report'] );
+
+				self::un_schedule_event( 'wsal_summary_weekly_report' );
 			}
 
 			/**
@@ -366,7 +466,6 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 
 			foreach ( $hooks_array as $name => $parameters ) {
 				if ( ! \wp_next_scheduled( $name, ( isset( $parameters['args'] ) ) ? $parameters['args'] : array() ) ) {
-
 					$time = time();
 
 					if ( isset( $parameters['next_run'] ) ) {

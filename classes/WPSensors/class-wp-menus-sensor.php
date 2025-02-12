@@ -437,7 +437,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Menus_Sensor' ) ) {
 			// Check if SCRIPT_NAME exists or not.
 			$script_name = '';
 			if ( ! empty( $server_array['SCRIPT_NAME'] ) ) {
-				$script_name = $server_array['SCRIPT_NAME'];
+				$script_name = \sanitize_text_field( \wp_unslash( $server_array['SCRIPT_NAME'] ) );
 			}
 
 			$is_nav_menu = basename( $script_name ) === 'nav-menus.php';

@@ -58,13 +58,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function init() {
-			add_action( 'pre_post_update', array( __CLASS__, 'get_before_post_edit_data' ), 10, 2 );
-			add_action( 'save_post', array( __CLASS__, 'acf_save_post' ), 10, 3 );
-			add_action( 'delete_post', array( __CLASS__, 'event_post_deleted' ), 10, 1 );
-			add_action( 'create_term', array( __CLASS__, 'event_category_creation' ), 10, 4 );
-			add_filter( 'wp_update_term_data', array( __CLASS__, 'event_update_term_data' ), 10, 4 );
-			add_action( 'pre_delete_term', array( __CLASS__, 'check_taxonomy_term_deletion' ), 10, 2 );
-			add_action( 'set_object_terms', array( __CLASS__, 'post_terms_changed' ), 10, 4 );
+			if ( ACF_Helper::is_acf_active() ) {
+				\add_action( 'pre_post_update', array( __CLASS__, 'get_before_post_edit_data' ), 10, 2 );
+				\add_action( 'save_post', array( __CLASS__, 'acf_save_post' ), 10, 3 );
+				\add_action( 'delete_post', array( __CLASS__, 'event_post_deleted' ), 10, 1 );
+				\add_action( 'create_term', array( __CLASS__, 'event_category_creation' ), 10, 4 );
+				\add_filter( 'wp_update_term_data', array( __CLASS__, 'event_update_term_data' ), 10, 4 );
+				\add_action( 'pre_delete_term', array( __CLASS__, 'check_taxonomy_term_deletion' ), 10, 2 );
+				\add_action( 'set_object_terms', array( __CLASS__, 'post_terms_changed' ), 10, 4 );
+			}
 		}
 
 		/**
@@ -78,12 +80,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 			/**
 			 * Add our filters.
 			 */
-			add_filter(
+			\add_filter(
 				'wsal_event_objects',
 				array( '\WSAL\WP_Sensors\Helpers\ACF_Helper', 'add_custom_event_objects' )
 			);
 			if ( ACF_Helper::is_acf_active() ) {
-				add_filter(
+				\add_filter(
 					'wsal_ignored_custom_post_types',
 					array( '\WSAL\WP_Sensors\Helpers\ACF_Helper', 'add_custom_ignored_cpt' )
 				);
@@ -120,30 +122,30 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 							if ( 'trash' === $post->post_status ) {
 								$event      = ( 'acf-post-type' === $post->post_type ) ? 10007 : 10017;
 								$event_data = array(
-									'PostTypeTitle'      => $post->post_title,
-									'PostID'             => $post->ID,
-									'PostStatus'         => $post->post_status,
-									'EditorLink' => $editor_link['value'],
+									'PostTypeTitle' => $post->post_title,
+									'PostID'        => $post->ID,
+									'PostStatus'    => $post->post_status,
+									'EditorLink'    => $editor_link['value'],
 								);
 								Alert_Manager::trigger_event( $event, $event_data );
 							} elseif ( 'trash' === self::$old_post->post_status && 'publish' === $post->post_status ) {
 								$event      = ( 'acf-post-type' === $post->post_type ) ? 10008 : 10018;
 								$event_data = array(
-									'PostTypeTitle'      => $post->post_title,
-									'PostID'             => $post->ID,
-									'PostStatus'         => $post->post_status,
-									'EditorLink'         => $editor_link['value'],
-									'PostUrl'            => get_permalink( $post->ID ),
+									'PostTypeTitle' => $post->post_title,
+									'PostID'        => $post->ID,
+									'PostStatus'    => $post->post_status,
+									'EditorLink'    => $editor_link['value'],
+									'PostUrl'       => get_permalink( $post->ID ),
 								);
 								Alert_Manager::trigger_event( $event, $event_data );
 							} else {
 								$event      = ( 'acf-post-type' === $post->post_type ) ? 10001 : 10011;
 								$event_data = array(
-									'PostTypeTitle'      => $post->post_title,
-									'PostID'             => $post->ID,
-									'PostStatus'         => $post->post_status,
-									'EventType'          => ( 'acf-disabled' === $post->post_status ) ? 'deactivated' : 'activated',
-									'EditorLink' => $editor_link['value'],
+									'PostTypeTitle' => $post->post_title,
+									'PostID'        => $post->ID,
+									'PostStatus'    => $post->post_status,
+									'EventType'     => ( 'acf-disabled' === $post->post_status ) ? 'deactivated' : 'activated',
+									'EditorLink'    => $editor_link['value'],
 								);
 								Alert_Manager::trigger_event( $event, $event_data );
 							}
@@ -152,36 +154,36 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 							if ( self::$old_post->post_title !== $post->post_title ) {
 								$event      = ( 'acf-post-type' === $post->post_type ) ? 10002 : 10012;
 								$event_data = array(
-									'OldPostTypeTitle'   => self::$old_post->post_title,
-									'PostTypeTitle'      => $post->post_title,
-									'PostID'             => $post->ID,
-									'PostStatus'         => $post->post_status,
-									'EditorLink' => $editor_link['value'],
+									'OldPostTypeTitle' => self::$old_post->post_title,
+									'PostTypeTitle'    => $post->post_title,
+									'PostID'           => $post->ID,
+									'PostStatus'       => $post->post_status,
+									'EditorLink'       => $editor_link['value'],
 								);
 								Alert_Manager::trigger_event( $event, $event_data );
 							}
 						}
-					} elseif ( ! Alert_Manager::was_triggered_recently( 10000 ) && ! Alert_Manager::was_triggered_recently( 10006 ) && ! Alert_Manager::was_triggered_recently( 10010 ) ) { 
-							$event      = ( 'acf-post-type' === $post->post_type ) ? 10000 : 10010;
-							$event_data = array(
-								'PostTypeTitle'      => $post->post_title,
-								'PostID'             => $post->ID,
-								'PostStatus'         => 'published',
-								'EditorLink' => $editor_link['value'],
-							);
-							Alert_Manager::trigger_event( $event, $event_data );
+					} elseif ( ! Alert_Manager::was_triggered_recently( 10000 ) && ! Alert_Manager::was_triggered_recently( 10006 ) && ! Alert_Manager::was_triggered_recently( 10010 ) ) {
+						$event      = ( 'acf-post-type' === $post->post_type ) ? 10000 : 10010;
+						$event_data = array(
+							'PostTypeTitle' => $post->post_title,
+							'PostID'        => $post->ID,
+							'PostStatus'    => 'publish',
+							'EditorLink'    => $editor_link['value'],
+						);
+						Alert_Manager::trigger_event( $event, $event_data );
 					}
 
 					if ( isset( $old_content_arr['labels'] ) ) {
 						if ( $old_content_arr['labels']['singular_name'] !== $new_content_arr['labels']['singular_name'] ) {
 							$event      = ( 'acf-post-type' === $post->post_type ) ? 10003 : 10013;
 							$event_data = array(
-								'PostTypeTitle'      => $post->post_title,
-								'PostID'             => $post->ID,
-								'PostStatus'         => $post->post_status,
-								'old_label'          => $old_content_arr['labels']['singular_name'],
-								'new_label'          => $new_content_arr['labels']['singular_name'],
-								'EditorLink' => $editor_link['value'],
+								'PostTypeTitle' => $post->post_title,
+								'PostID'        => $post->ID,
+								'PostStatus'    => $post->post_status,
+								'old_label'     => $old_content_arr['labels']['singular_name'],
+								'new_label'     => $new_content_arr['labels']['singular_name'],
+								'EditorLink'    => $editor_link['value'],
 							);
 							Alert_Manager::trigger_event( $event, $event_data );
 						}
@@ -191,27 +193,27 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 						if ( $old_content_arr['post_type'] !== $new_content_arr['post_type'] ) {
 							$event      = 10004;
 							$event_data = array(
-								'PostTypeTitle'      => $post->post_title,
-								'PostID'             => $post->ID,
-								'PostStatus'         => $post->post_status,
-								'old_key'            => $old_content_arr['post_type'],
-								'new_key'            => $new_content_arr['post_type'],
-								'EditorLink' => $editor_link['value'],
+								'PostTypeTitle' => $post->post_title,
+								'PostID'        => $post->ID,
+								'PostStatus'    => $post->post_status,
+								'old_key'       => $old_content_arr['post_type'],
+								'new_key'       => $new_content_arr['post_type'],
+								'EditorLink'    => $editor_link['value'],
 							);
 							Alert_Manager::trigger_event( $event, $event_data );
 						}
 					}
-					
+
 					if ( isset( $old_content_arr['taxonomy'] ) ) {
 						if ( $old_content_arr['taxonomy'] !== $new_content_arr['taxonomy'] ) {
 							$event      = 10014;
 							$event_data = array(
-								'PostTypeTitle'      => $post->post_title,
-								'PostID'             => $post->ID,
-								'PostStatus'         => $post->post_status,
-								'old_key'            => $old_content_arr[ 'taxonomy' ],
-								'new_key'            => $new_content_arr[ 'taxonomy' ],
-								'EditorLink' => $editor_link['value'],
+								'PostTypeTitle' => $post->post_title,
+								'PostID'        => $post->ID,
+								'PostStatus'    => $post->post_status,
+								'old_key'       => $old_content_arr['taxonomy'],
+								'new_key'       => $new_content_arr['taxonomy'],
+								'EditorLink'    => $editor_link['value'],
 							);
 							Alert_Manager::trigger_event( $event, $event_data );
 						}
@@ -220,12 +222,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 						if ( $old_content_arr['taxonomies'] !== $new_content_arr['taxonomies'] ) {
 							$event      = 10015;
 							$event_data = array(
-								'PostTypeTitle'      => $post->post_title,
-								'PostID'             => $post->ID,
-								'PostStatus'         => $post->post_status,
-								'old_tax'            => ( ! empty( $old_content_arr['taxonomies'] ) ) ? implode( ', ', $old_content_arr['taxonomies'] ) : esc_html__( 'Not provided', 'wp-security-audit-log' ),
-								'new_tax'            => ( ! empty( $new_content_arr['taxonomies'] ) ) ? implode( ', ', $new_content_arr['taxonomies'] ) : esc_html__( 'Not provided', 'wp-security-audit-log' ),
-								'EditorLink' => $editor_link['value'],
+								'PostTypeTitle' => $post->post_title,
+								'PostID'        => $post->ID,
+								'PostStatus'    => $post->post_status,
+								'old_tax'       => ( ! empty( $old_content_arr['taxonomies'] ) ) ? implode( ', ', $old_content_arr['taxonomies'] ) : esc_html__( 'Not provided', 'wp-security-audit-log' ),
+								'new_tax'       => ( ! empty( $new_content_arr['taxonomies'] ) ) ? implode( ', ', $new_content_arr['taxonomies'] ) : esc_html__( 'Not provided', 'wp-security-audit-log' ),
+								'EditorLink'    => $editor_link['value'],
 							);
 							Alert_Manager::trigger_event( $event, $event_data );
 						}
@@ -235,18 +237,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 						if ( $old_content_arr['object_type'] !== $new_content_arr['object_type'] ) {
 							$event      = 10015;
 							$event_data = array(
-								'PostTypeTitle'      => $post->post_title,
-								'PostID'             => $post->ID,
-								'PostStatus'         => $post->post_status,
-								'old_tax'            => ( ! empty( $old_content_arr['object_type'] ) ) ? implode( ', ', $old_content_arr['object_type'] ) : esc_html__( 'Not provided', 'wp-security-audit-log' ),
-								'new_tax'            => ( ! empty( $new_content_arr['object_type'] ) ) ? implode( ', ', $new_content_arr['object_type'] ) : esc_html__( 'Not provided', 'wp-security-audit-log' ),
-								'EditorLink' => $editor_link['value'],
+								'PostTypeTitle' => $post->post_title,
+								'PostID'        => $post->ID,
+								'PostStatus'    => $post->post_status,
+								'old_tax'       => ( ! empty( $old_content_arr['object_type'] ) ) ? implode( ', ', $old_content_arr['object_type'] ) : esc_html__( 'Not provided', 'wp-security-audit-log' ),
+								'new_tax'       => ( ! empty( $new_content_arr['object_type'] ) ) ? implode( ', ', $new_content_arr['object_type'] ) : esc_html__( 'Not provided', 'wp-security-audit-log' ),
+								'EditorLink'    => $editor_link['value'],
 							);
 							Alert_Manager::trigger_event( $event, $event_data );
 						}
 					}
-
-					
 				}
 			}
 		}
@@ -263,7 +263,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 			$post = get_post( $post_id );
 
 			if ( 'acf-taxonomy' === $post->post_type || 'acf-post-type' === $post->post_type ) {
-				$event      = ( 'acf-post-type' === $post->post_type ) ? 10009 : 10019;				
+				$event      = ( 'acf-post-type' === $post->post_type ) ? 10009 : 10019;
 				$event_data = array(
 					'PostTypeTitle' => $post->post_title,
 					'PostID'        => $post->ID,
@@ -331,7 +331,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		public static function event_update_term_data( $data, $term_id, $taxonomy, $args ) {
+		public static function event_update_term_data( $data, $term_id, $taxonomy, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 			$new_name = isset( $data['name'] ) ? $data['name'] : false;
 			$new_slug = isset( $data['slug'] ) ? $data['slug'] : false;
 
@@ -476,7 +476,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		private static function report_terms_change_event( $old_tags, $new_tags, $post, $taxonomy ) {
+		private static function report_terms_change_event( $old_tags, $new_tags, $post, $taxonomy ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 			if ( $old_tags === $new_tags ) {
 				return;
 			}
@@ -489,10 +489,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\ACF_Sensor' ) ) {
 			Alert_Manager::trigger_event(
 				10024,
 				array(
-					'PostID'             => $post->ID,
-					'PostTitle'          => $post->post_title,
-					'old_terms'          => ! empty( $old_tags ) ? implode( ', ', self::create_term_list( $old_tags ) ) : esc_html__( 'none', 'wp-security-audit-log' ),
-					'new_terms'          => ! empty( $new_tags ) ? implode( ', ', self::create_term_list( $new_tags ) ) : esc_html__( 'none', 'wp-security-audit-log' ),
+					'PostID'     => $post->ID,
+					'PostTitle'  => $post->post_title,
+					'old_terms'  => ! empty( $old_tags ) ? implode( ', ', self::create_term_list( $old_tags ) ) : esc_html__( 'none', 'wp-security-audit-log' ),
+					'new_terms'  => ! empty( $new_tags ) ? implode( ', ', self::create_term_list( $new_tags ) ) : esc_html__( 'none', 'wp-security-audit-log' ),
 					'EditorLink' => $editor_link['value'],
 				)
 			);

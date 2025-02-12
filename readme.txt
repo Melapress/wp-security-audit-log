@@ -3,71 +3,64 @@ Contributors: Melapress
 Plugin URI: https://melapress.com/wordpress-activity-log/
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl.html
-Tags:  activity log, security audit log, user tracking, security event log, audit trail, user activity, changelog, history, log, website changes
+Tags: activity log, event log, user tracking, logger, history 
 Requires at least: 5.5
-Tested up to: 6.4.3
-Stable tag: 4.6.3
-Requires PHP: 7.2
+Tested up to: 6.7.1
+Stable tag: 5.2.2
+Requires PHP: 7.4
 
-Keep a comprehensive log of user and system changes that take place on your WordPress website with the the #1 user-rated activity log plugin.
+The #1 user-rated activity log plugin for event logging, activity monitoring and change tracking.
 
 == Description ==
 
-### WP Activity Log is the most comprehensive activity log plugin for logging user and system changes.
+### Monitor activity on your WordPress sites and get clear insights into what's happening with detailed user and event logging.
 
-Keep an [activity log](https://melapress.com/wordpress-activity-log/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) of everything that happens on your WordPress sites and multisite networks with the WP Activity Log plugin to:
+Keep [WordPress logs](https://melapress.com/wordpress-activity-log/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) of everything that happens on your sites and multisite networks with WP Activity Log to:
 
-* Ensure user productivity
-* Improve user accountability
-* Ease troubleshooting
+* Track user logins and logouts to ensure service level agreements (SLAs) are consistently met
+* Record failed login attempts to identify potential security breaches and enhance site security
+* Monitor user activity and productivity to promote accountability
+* Know what happened before an outage for easier troubleshooting 
 * Know exactly what all your users are doing
-* Better manage & organize your WordPress site & users
-* Easily spot suspicious behavior before there are security problems.
+* Ensure compliance with regulations and standards such as GDPR and PCI DSS
+* Better manage & organize your site & users
+* Easily detect suspicious activity on your WordPress site before it escalates into security issues
 
-[WP Activity Log](https://melapress.com/wordpress-activity-log/features/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) is the most comprehensive real-ime user activity and monitoring log plugin. It helps hundreds of thousands of WordPress administrators and security professionals keep an eye on what is happening on their websites and is the most highly-ated activity log plugin for WordPress.
+WP Activity Log is a complete logging solution, helping hundreds of thousands of administrators and security professionals track changes on their websites thanks to real-time user activity monitoring.
 
 [youtube https://www.youtube.com/watch?v=pgFEMIvKFTA]
-
-[Features](https://melapress.com/wordpress-activity-log/features/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) | [Get WP Activity Log Premium](https://melapress.com/wordpress-activity-log/pricing/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) | [Getting Started](https://melapress.com/support/kb/wp-activity-log-getting-started/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
-
-WP Activity Log has been featured on the websites of some of the most popular and leading businesses in the WordPress ecosystem, such as WPBeginner, GoDaddy, and Kinsta.
-
-#### MAINTAINED & SUPPORTED BY MELAPRESS
-
-Melapress develops high-quality WordPress management and security plugins such as [Melapress Login Security](https://melapress.com/wordpress-login-security/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal), [CAPTCHA 4WP](https://melapress.com/wordpress-captcha/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal), and [WP 2FA](https://melapress.com/wordpress-2fa/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal), the #1 user-rated activity log plugin for WordPress.
-
-Browse our list of [WordPress security and administration plugins](https://melapress.com/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) to see how our plugins can help you better manage and improve the security and administration of your WordPress websites and users.
   
-### WordPress changes and details the WP Activity Log keeps a log of
-As a comprehensive and thorough activity log solution for WordPress, WP Activity Log not only tells you that a post, a user profile, or an object was updated, it also lets you know exactly what was changed within the post, the user profile, or the object.
+### WordPress changes and details WP Activity Log keeps track of
+A website activity log is an important tool in improving troubleshooting, compliance, user management, and security.
+Get WP Activity Log and keep track of events on your site. The log not only tells you that a post, a user profile, or an object was updated, it also lets you know exactly what changed, when, and includes a user log (by whom) so you always have the information you need.
 
 Below is a summary of the changes that the plugin can keep a record of:
 
-- **Post, page and custom post type changes** such as status, [content changes](https://melapress.com/support/kb/wp-activity-log-how-keep-record-of-content-changes/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal), title, URL, custom field, and other metadata changes
+- **Post, page and custom post type changes** such as status, content changes, title, URL, custom field, and other metadata changes
 
-- **Tags and categories changes** such as creating, modifying or deleting them, and adding or removing them from posts
+- **Tags and category changes** such as creating, modifying or deleting them, and adding or removing them from posts
 
-- **Widgets and menus changes** such as creating, modifying, or deleting them
+- **Widget and menu changes** such as creating, modifying, or deleting them
 
 - **User changes** such as user created or registered, deleted, or added to a site on multisite network
 
 - **User profile changes** such as password, email, display name, and role changes
 
-- **User activity** such as login, logout, failed logins, and terminating other sessions
+- **Access logging** such as user login, logout, failed logins, and terminating other sessions
 
 - **WordPress core and settings changes** such as installed updates, permalinks, default role, URL, and other site-wide changes
 
-- **WordPress multisite network changes** such as adding, deleting or archiving sites, adding or removing users from sites etc ([activity logs for multisite networks](https://melapress.com/support/kb/wp-activity-log-multisite-network-features/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)).
+- **WordPress multisite network changes** such as adding, deleting or archiving sites, adding or removing users from sites, etc.
 
-- **Plugins and Themes changes** such as installing, activating, deactivating, uninstalling, and updating
+- **Plugin and Theme changes** such as installing, activating, deactivating, uninstalling, and updating
 
 - **WordPress database changes** such as when a plugin adds or removes a table
 
-- Changes on **WooCommerce Stores & products**, **Yoast SEO**, **WPForms**, **Gravity Forms**, **Advanced Custom Fields (ACF)**, **MainWP** and other popular WordPress plugins.
+- Changes to **WooCommerce Stores & products**, **Yoast SEO**, **WPForms**, **Gravity Forms**, **Advanced Custom Fields (ACF)**, **MainWP** and other popular WordPress plugins.
 
-- **[WordPress site file changes](https://melapress.com/support/kb/wp-activity-log-wordpress-files-changes-warning-activity-logs/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)** such as new files are added, or existing ones are modified or deleted.
+- <strong> WordPress site file changes </strong> such as new files are added, or existing ones are modified or deleted.
 
-For every event that the plugin records it also reports the:
+Detailed event logging ensures that for every event that the plugin records, it reports the:
 
 * Date & time (and milliseconds) of when it happened
 * User & role of the user who did the change
@@ -78,62 +71,63 @@ Refer to [WordPress activity log event IDs](https://melapress.com/support/kb/wp-
 
 ### Upgrade to WP Activity Log Premium and get even more
 
-The premium version of WP Activity Log comes bundled with even more features to take your WordPress website administration and security to the next level.
-
-With the premium edition of WP Activity Log, you get:
+The premium edition of WP Activity Log takes WordPress user activity tracking to the next level. It comes bundled with even more features to take your WordPress website administration and security to the next level.
 
 ### Premium features list
 
-- See who is logged to your website in real-time,
-- See what everyone is doing in real-time,
-- Log off any user with just a click,
-- Generate HTML and CSV reports,
-- Get notified via email of important changes,
-- Get instant SMS message alerts of critical site changes,
-- Search filters to fine tune the search results and find what you need in seconds,
-- Store activity log in an external database to improve security and scalability,
-- Mirror the activity log to logs management systems such as AWS CloudWatch, Loggly and Papertrail in real-time,
-- Easily mirror the logs in real-time to business communication systems such as Slack,
-- Send a copy of your websites' activity log to a log file on your web server in real-time,
-- Archive old activity log data to another database for better storage and log management.
+- See who is logged in and their current activities in real-time
+- Log off any user at the click of a button
+- Generate fully-configurable HTML and CSV reports
+- Get email and SMS notifications with important changes (fully configurable)
+- Search filters to fine tune the search results and find what you need in seconds
+- Store activity log in an external database to improve security and scalability
+- Mirror the activity log to logs management systems such as AWS CloudWatch, Loggly, and Papertrail in real-time
+- Easily mirror the logs in real-time to business communication systems such as Slack
+- Send a copy of your websites' activity log to a log file on your web server in real-time
+- Archive old activity log data to another database for better storage and log management
 
 Refer to the [WP Activity Log plugin features and benefits page](https://melapress.com/wordpress-activity-log/features/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) to learn more about the benefits of upgrading to WP Activity Log Premium.
 
 #### WP Activity Log third-party plugin support
 
-WP Activity Log can keep also a detailed log of changes that happen on third-party plugins, including:
+All WP Activity Log editions include activity tracking for third-party plugins, including:
 
-- <strong>WooCommerce</strong>: Keep a log of changes you and your team do in the WooCommerce store settings, orders, products, coupons, and much more.
-- <strong>Yoast SEO</strong>: Keep a log of the Yoast SEO plugin settings changes, and also of the on-page SEO changes you and your team make in the Yoast SEO meta box.
-- <strong>WPForms</strong>: Keep a log of the changes your team does in the WPForms plugin settings, forms, form files, entries (leads) and more.
-- <strong>Gravity Forms</strong>: Keep a log of the changes your team does in the Gravity Forms plugin settings, forms, forms settings, entries (leads) and more.
-- <strong>MemberPress</strong>: Keep a log of the changes in your MemberPress powered website, including plugin settings changes, memberships, payments, subscriptions and other changes that your team does on your website.
-- <strong>bbPress</strong>: Keep a log of changes in bbPress forums, topics, bbPress settings and more.
-- <strong>MainWP</strong>: Keep a log of the MainWP network changes and can see the activity logs of all child sites from one central location - the MainWP dashboard.
-
-Refer to [activity logs for third party WordPress plugins](https://melapress.com/wordpress-activity-log/third-party-plugins/) for a complete list of all the plugins WP Activity Log can keep a log of.
+- <strong>WooCommerce</strong>: Keep a log of changes to the WooCommerce store settings, orders, products, coupons, and much more
+- <strong>Yoast SEO</strong>: Keep a log of changes to Yoast SEO settings, on-page SEO in the Yoast SEO meta box, and much more
+- <strong>WPForms</strong>: Keep a log of changes to WPForms settings, forms, form files, entries (leads) and more
+- <strong>Gravity Forms</strong>: Keep a log of changes to Gravity Forms settings, forms, forms settings, entries (leads), and more
+- <strong>MemberPress</strong>: Keep a log of changes to your MemberPress powered website, including plugin settings changes, memberships, payments, subscriptions and other changes that your team does on your website
+- <strong>bbPress</strong>: Keep a log of changes to bbPress forums, topics, bbPress settings and more
+- <strong>MainWP</strong>: Keep a log of MainWP network changes and see the activity logs of all child sites from one central location - the MainWP dashboard
+- <strong>Advanced Custom Fields</strong>: Keep a log of changes to post types, taxonomies, and taxonomy terms
+- <strong>Redirection</strong>: Keep a log of changes to redirections and redirection groups
 
 #### Other Noteworthy Features
-On top of the comprehensive activity log, WP Activity Log also has a number of non-logging specific features that make it a complete WordPress logging solution, such as:
+Both free and premium editions of WP Activity Log include a number of non-logging specific features that make the plugin a complete WordPress logging solution. Here is what is included:
 
-- Full [WordPress multisite support](https://melapress.com/support/kb/wp-activity-log-multisite-network-features/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
-- Easily [create your custom alerts & notifications](https://melapress.com/support/kb/wp-activity-log-create-custom-events/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) to monitor additional functionality
-- Built-in [support for reverse proxies and web application firewalls](https://melapress.com/support/kb/wp-activity-log-support-reverse-proxies-web-application-firewalls/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
+##### Free
+- Built-in support for reverse proxies and web application firewalls
 - Integration with WhatIsMyIpAddress.com allow you to get all information about an IP address with just a mouse click.
 - Limit who can view the WordPress activity log by users or roles
-- Settings to [toggle (enable/disable) individual event IDs from the activity log](https://melapress.com/support/kb/exclude-logging-specific-change-activity-log/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
+- Settings to enable/disable individual event IDs from the activity log
 - Configurable dashboard widget highlighting the most recent critical activity
-- Configurable [WordPress activity log retention policies](https://melapress.com/support/kb/wp-activity-log-retention-policies/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
+- Configurable WordPress activity log retention policies
 - User avatar is displayed in the events for better recognizability
-- and much more...
+- And much more!
+##### Premium
+Everything that's included in the Free edition, plus:
+
+- Full WordPress multisite support
+- Easily create your custom alerts & notifications to monitor additional functionality
+- Import/export plugin settings
+- Real-time activity log in WordPress admin toolbar
+- And much more!
     
-## Free and premium support
+## Free and premium plugin support
 
-Premium world-class support for WP Activity Log is free via email or through the WordPress support forums.
+ If you encounter any issues with the free edition of WP Activity Log, you can post and get help on the [WordPress.org support forums](https://wordpress.org/support/plugin/wp-security-audit-log/). You can also find more technical information and plugin documentation on the [Melapress knowledge base](https://melapress.com/support/kb/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal).
 
-Note: Paid customer support is given priority and is provided via one-to-one email. Upgrade to Premium to benefit from priority support.
-
-For any other queries, feedback, or if you simply want to get in touch with us, please use our [contact form](https://melapress.com/contact/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal).
+Premium plugins include a full year of free updates and dedicated one-to-one premium email support. This means you get direct access to our support team who will assist you with any questions or issues related to the plugins.
 
 ### As featured on:
 
@@ -147,15 +141,11 @@ For any other queries, feedback, or if you simply want to get in touch with us, 
 - [KitPloit](http://www.kitploit.com/2016/10/wp-security-audit-log-ultimate.html)
 - and many others.
 
-## Related links and documentation:
+#### MAINTAINED & SUPPORTED BY MELAPRESS
 
-You can find more detailed information about WP Activity Log and its benefits in the links below
+Melapress develops high-quality WordPress management and security plugins such as Melapress Login Security, CAPTCHA 4WP, and WP 2FA.
 
-- [The WP Activity Log plugin website](https://melapress.com/wordpress-activity-log/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
-- [List of WordPress activity log event IDs](https://melapress.com/support/kb/wp-activity-log-list-event-ids/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
-- [WP Activity Log benefits and features](https://melapress.com/wordpress-activity-log/features/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
-- [WordPress Multisite Features](https://melapress.com/support/kb/wp-activity-log-multisite-network-features/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
-- [The definitive WordPress security guide](https://melapress.com/wordpress-security/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
+Browse our list of [WordPress security and administration plugins](https://melapress.com/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) to see how our plugins can help you better manage and improve the security and administration of your WordPress websites and users.
 
 == Installing WP Activity Log ==
 
@@ -174,11 +164,23 @@ You can find more detailed information about WP Activity Log and its benefits in
 
 == Frequently Asked Questions ==
 
-= Does the free version of WP Activity Log limit the data it collects? =
-No, the free version does not limit the data the plugin collects. The preium version adds additional features such as extensive log filtering options, external database/log management service integration, user session management, and much more.
+= Does the free edition of WP Activity Log limit the data it collects? =
+No, the free edition does not limit the data the plugin collects whatsoever. All events logged by the premium edition are available in the free edition. The premium edition adds additional features such as extensive log filtering options, external database/log management service integration, user session management, and much more.
 
-= How long can I keep the log data for? =
-You can keep the log data for as long as you want to, with no limits whatsoever placed on data retention. You can keep the log data forever if you want to.
+= How long does WP Activity Log keep data for? =
+Log data can be kept indefinitely in both free and premium editions. By default, the plugin retains all audit logging data for 3 months however this can be changed from the initial configuration wizards or the plugin's settings ([activity log retention policies](https://melapress.com/support/kb/wp-activity-log-retention-policies/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)).
+
+= Where does the plugin store the log? =
+By default, the log is stored in the WordPress database. WP Activity Log Enterprise edition includes an option to save the activity log to an external database and log mirroring to AWS Cloudwatch, Loggly, Papertrail, Syslog, & other SIEMs
+
+= Can the log be exported? =
+Yes, the [log can easily be exported as either CSV or HTML](https://melapress.com/support/kb/wp-activity-log-data-export/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal). The reports module in the Premium plugin is required for this functionality. 
+
+= How does WP Activity Log Improve Security? =
+WP Activity Log keeps a record of security-related user and system activities, including logins, logouts, failed login attempts, changes to settings and configurations, and post edits among other things. This security log can not only uncover suspicious or untowards behaviour, but also aid in forensics and post-mortems for quicker recoveries.
+
+= Who can view the activity log? =
+By default, all users with administrator role can view the activity log. However, you can restrict this to a specific administrator or ccess can be given to other users through the plugin's settings. Refer to the [WordPress activity log privileges](https://melapress.com/support/kb/wp-activity-log-managing-plugin-privileges/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) for more information on how you can do this.
 
 = Does the plugin send any log data to Melapress? =
 No, the plugin does not send any log data to us whatsoever. The only data we recieve is license data from the premium edition of the plugin.
@@ -189,38 +191,59 @@ We update the plugin fairly regularly to ensure the plugin continues to run in t
 = Will WP Activity Log slow down my website? =
 [WP Activity Log will not slow down your website](https://melapress.com/support/kb/wp-activity-log-slow-down-website/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal). Each release is tested before release to ensure it works in the best way possible. Having said that, you need to make sure your WordPress web server has adequate resources to manage the load of your website.
 
-= Support and Documentation =
-Please refer to our [support pages](https://melapress.com/support/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) for all the technical and product documentation.
+= How do I get support? =
+Support for the Free edition of the plugin is provided only via the WordPress.org support forums. You can also refer to our [support pages](https://melapress.com/support/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) for all the technical and product documentation.
+
+If you are using the Premium edition, you get direct access to our support team via one-to-one [email support](https://melapress.com/support/submit-ticket/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal).
+
+= How can I report security bugs? =
+You can report security bugs through the Patchstack Vulnerability Disclosure Program. Please use this [form](https://patchstack.com/database/vdp/wp-security-audit-log). For more details please refer to our [Melapress plugins security program](https://melapress.com/plugins-security-program/).
 
 == Screenshots ==
 
 1. The WordPress activity logs from where the site administrator can see all the user and site changes.
-2. See who is logged in to your WordPress and manage users sessions with Users Sessions Management.
+2. See who is logged in to your WordPress and manage users sessions with Users Sessions Management in the Premium edition.
 3. The plugin settings from where site administrator can configure generic plugin settings such as [reverse proxy support](https://melapress.com/support/kb/wp-activity-log-support-reverse-proxies-web-application-firewalls/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal), who can manage the plugin etc.
-4. The WordPress audit trail settings from where you can configure automatic pruning of alerts, which timestamp should be used and more.
-5. Configuring WordPress email and SMS alerts with the Email & SMS Notifications module.
+4. Use the event Inspector to see more technical details about each event in the activity log, such as the session ID and UserAgent string.
+5. Configuring WordPress email and instant SMS alerts with the Email & SMS Notifications module in the Premium edition.
 6. Search in the WordPress activity log with the use filters to fine tune the search results.
 7. The Enable/Disable events section from where Administrators can disable or enable activity log events.
-8. The Log Viewer of a Super Admin in a WordPress multisite network installation with the Site selection drop down menu.
+8. The Activity Log Viewer of a Super Admin in a WordPress multisite network installation alllows the admin to view the logs from all the network, or filter the logs of a specific site.
 9. WP Activity Log is integrated with the built-in revision system of WordPress, thus allowing you to see what content changes users make on your WordPress posts, pages and custom post types. For more information read [Keep Record of All WordPress Content Changes](https://melapress.com/support/kb/wp-activity-log-how-keep-record-of-content-changes/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal)
-10. Mirror the WordPress activity log to an external solution such as Syslog or Papertrail to centralize logging, ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
+10. Mirror the WordPress activity log to an external solution such as Syslog or Papertrail to centralize logging in the Premium edition, to ensure logs are always available and cannot be tampered with in the unfortunate case of a hack attack.
+11. Use the plugin settings to exclude objects from the logs, configure automatic pruning of events, which timestamp to be shonw in the logs and much more. The plugin is fully confirable.
+12. Generate any type of statistics reports from the actiivty log with the Premium edition. You can see statistics such as number of newly registered users, number of user profile changes, number of logins, different IP addresses per user, and much more.
+13. Use the Premium edition to also export any activity log data to an HTML report or CSV file. CSV files are the most widely supported format and can easily be read, parsed and imported in third party systems.
 
 == Changelog ==
 
-= 4.6.3 (2024-02-07) =
+= 5.2.2 (2024-11-12) =
 
-* **Improvements**
-	* Added support to the new plans and prices (February 2024 change).
-	* Upgraded the Freemius SDK to 2.6.2.
-	* Updated a number of links in the plugin (links used in help text etc).
-	* Removed hardcoding of post types and post statuses in search filters.
+**New feature**
+	 * New setting in the users' sessions module to enable a check for existing sessions when a logged in user accesses the login page directly.
+
+ * **Plugin & functionality improvements**
+	 * Bumped up the minimum WordPress version to 5.5.
+	 * Updated the Freemius SDK to the latest version.
+	 * Addressed a number of spelling mistakes in the code notes etc.
+	 * Reviewed again all possible activity log inputs and improved sanitization.
+	 * Improved WooCommerce coverage: plugin now reports correct variable product SKU in the event IDs instead of the parent product SKU.
+	 * Improved the loading order of the text domain etc (reported on the [forums](https://wordpress.org/support/topic/php-notice-filling-logs-with-new-wp6-7/)).
+
+*  * **Security fix**
+	 * Fixed an unauthenticated stored XSS reported by mikemyers.
 
  * **Bug fixes**
-	 * Option for event ID 5709 was not showing when filtering the list of event IDs in the Enable/Disable events section.
-	 * Fixed error generated when duplicating forms on Gravity Forms.
-	 * Fixed: plugin keeping a log of forms submission even when the option to keep a log by website visitors was disabled.
-	 * Added event ID check when extracting the last occurrence from the database.
-	 * Addressed a number of PHP errors generated when running the plugin on PHP 8.2
-	 * Fixed a server error generated when exporting search results.
+	 * Fixed a conflict with GiveWP plugin (reported on the [forums](https://wordpress.org/support/topic/wpal-conflict-with-givewp-3-17-2/)).
+	 * Fixed: main dashboard events widget failed to load on a multisite network.
+	 * Fixed a fatal error in class-reports-entity.php which occurs when duplicating reports with numbers in the title.
+	 * Fixed: fatal error reported when updating to 5.2.1 using WordPress core5.5 and MainWP.
+	 * Fixed: Enable / disable events ID page not loading on PHP 7.2 or lower.
+	 * Fixed: some specific scheduled events are returning errors (reported on the [forums](https://wordpress.org/support/topic/scheduled-events-returning-errors/)).
+	 * Fixed an Action Scheduler fatal error reported during migration / upgrade.
+	 * "Send now" option for periodic emails now working in some edge cases.
+	 * Fixed: Fatal error in class-alert-manager.php during upgrade to 5.2.1 on some specific multisite networks.
+	 * Fixed: some plugin settings pages cannot be accessed from the header navigation bar on a multisite network. 
+	 * Fixed: periodic emails are triggered for all sub-sites even when filter is for one sub-site.
 
 Refer to the complete [plugin changelog](https://melapress.com/support/kb/wp-activity-log-plugin-changelog/?utm_source=wp+repo&utm_medium=repo+link&utm_campaign=wordpress_org&utm_content=wsal) for more detailed information about what was new, improved and fixed in previous version updates of WP Activity Log.

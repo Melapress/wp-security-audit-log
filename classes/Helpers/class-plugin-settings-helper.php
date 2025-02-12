@@ -157,7 +157,9 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		 */
 		public static function set_basic_mode() {
 			// Disable alerts of geek mode and alerts to be always disabled.
-			Settings_Helper::set_disabled_alerts( array_merge( self::$geek_alerts, Settings_Helper::get_default_always_disabled_alerts() ) );
+			$disabled_alerts = array_merge( self::get_geek_alerts(), Settings_Helper::get_default_disabled_alerts(), Settings_Helper::get_default_always_disabled_alerts() );
+
+			Settings_Helper::set_disabled_alerts( $disabled_alerts );
 		}
 
 		/**
@@ -177,7 +179,10 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function set_geek_mode() {
-			Settings_Helper::set_disabled_alerts( Settings_Helper::get_default_always_disabled_alerts() ); // Disable alerts to be always disabled.
+
+			$disabled_alerts = array_merge( Settings_Helper::get_default_always_disabled_alerts(), Settings_Helper::get_default_disabled_alerts() );
+
+			Settings_Helper::set_disabled_alerts( $disabled_alerts ); // Disable alerts to be always disabled.
 		}
 
 		/**
@@ -275,40 +280,83 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		/**
 		 * Sets the setting that decides if IP address should be determined based on proxy.
 		 *
-		 * @param bool $enabled True if IP address should be determined based on proxy.
+		 * @param bool   $value True if IP address should be determined based on proxy.
+		 * @param string $header Header name which is set.
+		 * @param string $custom_header Custom header name which is set.
+		 *
+		 * @since 5.3.0
 		 */
-		public static function set_main_ip_from_proxy( $enabled ) {
-			$old_value = Settings_Helper::get_boolean_option_value( 'use-proxy-ip' );
-			$enabled   = Settings_Helper::string_to_bool( $enabled );
-			if ( $old_value !== $enabled ) {
+		public static function set_main_ip_from_proxy( $value, $header, $custom_header ) {
+			$old_value = (int) Settings_Helper::get_option_value( 'use-proxy-ip' );
+			$enabled   = (int) $value;
+
+			$old_header = Settings_Helper::get_option_value( 'custom-header', 'REMOTE_ADDR' );
+
+			$old_custom_header = Settings_Helper::get_option_value( 'proxy-custom-header', '' );
+
+			if ( $old_value !== $enabled || $old_header !== $header || $old_custom_header !== $custom_header ) {
+
+				$event_value = '';
+
 				$alert_data = array(
-					'EventType' => ( $enabled ) ? 'enabled' : 'disabled',
+					'EventType'  => ( 0 !== $enabled ) ? 'enabled' : 'disabled',
+					'old_header' => ( $old_header ) ? $old_header : __( 'Not set', 'wp-security-audit-log' ),
+					'new_header' => $header,
 				);
-				Alert_Manager::trigger_event( 6048, $alert_data );
+				if ( $old_value === $enabled ) {
+					$alert_data['EventType'] = 'modified';
+				}
+
+				if ( 0 === $enabled ) {
+					$event_value = __( 'Disabled', 'wp-security-audit-log' );
+				}
+
+				if ( 2 === $enabled ) {
+					$event_value = __( 'Custom Proxy IP Header', 'wp-security-audit-log' );
+				}
+
+				if ( 1 === $enabled ) {
+					$event_value = __( 'Selected Proxy IP Header', 'wp-security-audit-log' );
+
+					if ( ! empty( $old_custom_header ) ) {
+						$alert_data['old_header'] = $old_custom_header;
+					}
+				}
+
+				if ( ! empty( $event_value ) ) {
+					$alert_data['EventValue'] = $event_value;
+				}
+
+				if ( 2 === $enabled ) {
+					$alert_data['new_header'] = $custom_header;
+				}
+
+				if ( 2 === $enabled && empty( $custom_header ) ) {
+					Settings_Helper::delete_option_value( 'proxy-custom-header' );
+					Settings_Helper::set_option_value( 'use-proxy-ip', 0 );
+
+					$alert_data['EventType'] = 'disabled';
+
+					Alert_Manager::trigger_event( 6048, $alert_data );
+
+				} else {
+
+					Alert_Manager::trigger_event( 6048, $alert_data );
+
+					Settings_Helper::set_option_value( 'use-proxy-ip', $enabled );
+					Settings_Helper::set_option_value( 'custom-header', $header );
+
+					if ( 2 === $enabled ) {
+						Settings_Helper::set_option_value( 'proxy-custom-header', $custom_header );
+					} else {
+						Settings_Helper::delete_option_value( 'proxy-custom-header' );
+					}
+				}
 			}
-			Settings_Helper::set_boolean_option_value( 'use-proxy-ip', $enabled );
-		}
 
-		/**
-		 * Checks if internal IP filtering is enabled.
-		 *
-		 * @return bool
-		 *
-		 * @since 5.0.0
-		 */
-		public static function is_internal_ips_filtered() {
-			return Settings_Helper::get_boolean_option_value( 'filter-internal-ip', false );
-		}
-
-		/**
-		 * Enables or disables the internal IP filtering.
-		 *
-		 * @param bool $enabled True if internal IP filtering should be enabled.
-		 *
-		 * @since 5.0.0
-		 */
-		public static function set_internal_ips_filtering( $enabled ) {
-			Settings_Helper::set_boolean_option_value( 'filter-internal-ip', $enabled );
+			if ( empty( $custom_header ) ) {
+				Settings_Helper::delete_option_value( 'proxy-custom-header' );
+			}
 		}
 
 		/**
@@ -356,21 +404,6 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 		public static function set_type_username( $newvalue ) {
 			Settings_Helper::set_option_value( 'type_username', $newvalue );
 		}
-
-		/**
-		 * Sets the log limit for failed login attempts.
-		 *
-		 * @param int $value - Failed login limit.
-		 *
-		 * @since 5.0.0
-		 */
-		// public static function set_failed_login_limit( $value ) {
-		// if ( ! empty( $value ) ) {
-		// Settings_Helper::set_option_value( 'log-failed-login-limit', abs( (int) $value ) );
-		// } else {
-		// Settings_Helper::set_option_value( 'log-failed-login-limit', - 1 );
-		// }
-		// }
 
 		/**
 		 * Sets the log limit for failed login attempts for visitor.
@@ -445,8 +478,8 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 			$post_types = get_post_types( array(), 'names', 'and' );
 			// if we are running multisite and have networkwide cpt tracker get the
 			// list from and merge to the post_types array.
-			if ( WP_Helper::is_multisite() && class_exists( '\WSAL\Multisite\NetworkWide\CPTsTracker' ) ) {
-				$network_cpts = \WSAL\Multisite\NetworkWide\CPTsTracker::get_network_data_list();
+			if ( WP_Helper::is_multisite() ) {
+				$network_cpts = WP_Helper::get_network_data_list();
 				foreach ( $network_cpts as $cpt ) {
 					$post_types[ $cpt ] = $cpt;
 				}
@@ -471,7 +504,7 @@ if ( ! class_exists( '\WSAL\Helpers\Plugin_Settings_Helper' ) ) {
 			if ( false !== strpos( $token, '-' ) ) {
 				$ip_range = \WSAL\Helpers\Settings_Helper::get_ipv4_by_range( $token );
 
-				if ( $ip_range && filter_var( $ip_range->lower, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) && filter_var( $ip_range->upper, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) { // Validate IPv4.
+				if ( $ip_range && filter_var( $ip_range['lower'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) && filter_var( $ip_range['upper'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) { // Validate IPv4.
 					return 'ip';
 				}
 			}

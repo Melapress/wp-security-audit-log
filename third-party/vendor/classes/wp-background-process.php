@@ -12,6 +12,7 @@ namespace WSAL_Vendor;
  *
  * @abstract
  * @extends WP_Async_Request
+ * @internal
  */
 abstract class WP_Background_Process extends WP_Async_Request
 {

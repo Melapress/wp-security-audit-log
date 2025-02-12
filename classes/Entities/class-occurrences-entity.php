@@ -140,6 +140,19 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 		}
 
 		/**
+		 * Returns users fields index query to the occurrences table
+		 *
+		 * @param \wpdb $connection - \wpdn connection to be used for name extraction.
+		 *
+		 * @return string
+		 *
+		 * @since 5.3.0
+		 */
+		public static function get_users_index_query( $connection = null ): string {
+			return 'ALTER TABLE `' . self::get_table_name( $connection ) . '` ADD INDEX `wsal_users` (`user_id`, `username`)';
+		}
+
+		/**
 		 * Creates table functionality
 		 *
 		 * @param \wpdb $connection - \wpdn connection to be used for name extraction.
@@ -177,7 +190,8 @@ if ( ! class_exists( '\WSAL\Entities\Occurrences_Entity' ) ) {
 					`post_id` bigint NOT NULL,
 				PRIMARY KEY (`id`),
 				KEY `site_alert_created` (`site_id`,`alert_id`,`created_on`),
-				KEY `created_on` (`created_on`)
+				KEY `created_on` (`created_on`),
+				KEY `wsal_users` (`user_id`,`username`)
 				)
 			  ' . $collate . ';';
 

@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage utils
- * @copyright  2024 Melapress
+ * @copyright  2025 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  */
@@ -133,7 +133,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 					$disabled_alerts = WP_Helper::get_global_option( 'disabled-alerts', false );
 
 					if ( ! \is_array( $disabled_alerts ) ) {
-						$disabled_alerts = \explode( ',', $disabled_alerts );
+						$disabled_alerts = \explode( ',', (string) $disabled_alerts );
 
 						\array_walk( $disabled_alerts, 'trim' );
 					}
@@ -160,6 +160,7 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 					if ( false === $disabled_alerts ) {
 						WP_Helper::set_global_option( 'disabled-alerts', $always_disabled_alerts );
 					} elseif ( $disabled_alerts !== $always_disabled_alerts ) {
+						$disabled_alerts = array_merge( $disabled_alerts, Settings_Helper::get_default_disabled_alerts() );
 						WP_Helper::update_global_option( 'disabled-alerts', $disabled_alerts );
 					}
 				} elseif ( false === $migration_started ) {

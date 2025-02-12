@@ -32,6 +32,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\ACF_Helper' ) ) {
 	class ACF_Helper {
 
 		/**
+		 * Class cache to store the state of the plugin.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.0
+		 */
+		private static $plugin_active = null;
+
+		/**
 		 * Register a custom event object within WSAL.
 		 *
 		 * @param array $objects array of objects current registered within WSAL.
@@ -73,14 +82,18 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\ACF_Helper' ) ) {
 		}
 
 		/**
-		 * Checks if the Tablepress is active.
+		 * Checks if the ACF is active.
 		 *
 		 * @return bool
 		 *
 		 * @since 5.0.0
 		 */
 		public static function is_acf_active() {
-			return WP_Helper::is_plugin_active( 'advanced-custom-fields/acf.php' );
+			if ( null === self::$plugin_active ) {
+				self::$plugin_active = WP_Helper::is_plugin_active( 'advanced-custom-fields/acf.php' );
+			}
+
+			return self::$plugin_active;
 		}
 	}
 }

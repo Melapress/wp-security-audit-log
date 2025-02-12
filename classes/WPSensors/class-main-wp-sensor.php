@@ -234,7 +234,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Main_WP_Sensor' ) ) {
 
 			// Get plugins from MainWP.
 			if ( isset( $post_array['plugin'] ) && ! empty( $post_array['plugin'] ) ) {
-				$wp_plugins = explode( '||', $post_array['plugin'] );
+				$wp_plugins = explode( '||', \sanitize_text_field( \wp_unslash( $post_array['plugin'] ) ) );
 			}
 
 			// Verify actions from MainWP.

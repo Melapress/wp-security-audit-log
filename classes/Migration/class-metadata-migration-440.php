@@ -24,7 +24,7 @@ use WSAL_Vendor\WP_Background_Process;
 /**
  * Migration class
  */
-if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
+if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) && class_exists( '\WSAL_Vendor\WP_Background_Process' ) ) {
 
 	/**
 	 * Background process for handling the migration of selected metadata from the meta table to the occurrences table. This
@@ -146,7 +146,6 @@ if ( ! class_exists( '\WSAL\Migration\Metadata_Migration_440' ) ) {
 		 * @return int
 		 */
 		public static function process_next_batch( $connection, $batch_size ) {
-			$plugin = \WpSecurityAuditLog::get_instance();
 			if ( 'local' !== $connection ) {
 				$connection = Connection::get_connection( $connection );
 				if ( false === $connection ) {

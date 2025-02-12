@@ -94,7 +94,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 			}
 
 			// Check the page which is performing this change.
-			$referer_check = pathinfo( $server_array['HTTP_REFERER'] );
+			$referer_check = pathinfo( \sanitize_text_field( \wp_unslash( $server_array['HTTP_REFERER'] ) ) );
 			$referer_check = $referer_check['filename'];
 			$referer_check = ( strpos( $referer_check, '.' ) !== false ) ? strstr( $referer_check, '.', true ) : $referer_check;
 
@@ -224,6 +224,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'FirstName'      => $new_userdata->user_firstname,
 						'LastName'       => $new_userdata->user_lastname,
 						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+						'TargetUserData' => (object) array(
+							'Username'  => $new_userdata->user_login,
+							'FirstName' => $new_userdata->user_firstname,
+							'LastName'  => $new_userdata->user_lastname,
+							'Email'     => $new_userdata->user_email,
+							'Roles'     => $user_roles ? $user_roles : 'none',
+						),
 					)
 				);
 			}
@@ -241,6 +248,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'FirstName'       => $new_userdata->user_firstname,
 						'LastName'        => $new_userdata->user_lastname,
 						'EditUserLink'    => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+						'TargetUserData' => (object) array(
+							'Username'  => $new_userdata->user_login,
+							'FirstName' => $new_userdata->user_firstname,
+							'LastName'  => $new_userdata->user_lastname,
+							'Email'     => $new_userdata->user_email,
+							'Roles'     => $user_roles ? $user_roles : 'none',
+						),
 					)
 				);
 			}
@@ -258,6 +272,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'FirstName'      => $new_userdata->user_firstname,
 						'LastName'       => $new_userdata->user_lastname,
 						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+						'TargetUserData' => (object) array(
+							'Username'  => $new_userdata->user_login,
+							'FirstName' => $new_userdata->user_firstname,
+							'LastName'  => $new_userdata->user_lastname,
+							'Email'     => $new_userdata->user_email,
+							'Roles'     => $user_roles ? $user_roles : 'none',
+						),
 					)
 				);
 			}
@@ -310,6 +331,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
 						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+						'TargetUserData' => (object) array(
+							'Username'  => $user->user_login,
+							'FirstName' => $user->user_firstname,
+							'LastName'  => $user->user_lastname,
+							'Email'     => $user->user_email,
+							'Roles'     => $new_roles ? $new_roles : 'none',
+						),
 						'multisite_text' => WP_Helper::is_multisite() ? get_current_blog_id() : false,
 					),
 					array( __CLASS__, 'must_not_contain_user_changes' )
@@ -368,6 +396,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'LastName'       => $user->user_lastname,
 						'Roles'          => $user_roles,
 						'EditUserLink'   => add_query_arg( 'user_id', $user->ID, \network_admin_url( 'user-edit.php' ) ),
+						'TargetUserData' => (object) array(
+							'Username'  => $user->user_login,
+							'FirstName' => $user->user_firstname,
+							'LastName'  => $user->user_lastname,
+							'Email'     => $user->user_email,
+							'Roles'     => $user_roles ? $user_roles : 'none',
+						),
 					)
 				);
 			}
@@ -394,6 +429,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		public static function event_super_access_granted( $user_id ) {
 			$user = get_userdata( $user_id );
 			if ( $user && ! in_array( $user->user_login, self::$old_superadmins, true ) ) {
+				$user_roles = implode( ', ', array_map( array( __CLASS__, 'filter_role_names' ), $user->roles ) );
 				Alert_Manager::trigger_event(
 					4008,
 					array(
@@ -403,6 +439,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
 						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+						'TargetUserData' => (object) array(
+							'Username'  => $user->user_login,
+							'FirstName' => $user->user_firstname,
+							'LastName'  => $user->user_lastname,
+							'Email'     => $user->user_email,
+							'Roles'     => $user_roles ? $user_roles : 'none',
+						),
 					)
 				);
 			}
@@ -420,6 +463,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 		public static function event_super_access_revoked( $user_id ) {
 			$user = get_userdata( $user_id );
 			if ( $user && in_array( $user->user_login, self::$old_superadmins, true ) ) {
+				$user_roles = implode( ', ', array_map( array( __CLASS__, 'filter_role_names' ), $user->roles ) );
 				Alert_Manager::trigger_event(
 					4009,
 					array(
@@ -429,6 +473,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'FirstName'      => $user->user_firstname,
 						'LastName'       => $user->user_lastname,
 						'EditUserLink'   => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
+						'TargetUserData' => (object) array(
+							'Username'  => $user->user_login,
+							'FirstName' => $user->user_firstname,
+							'LastName'  => $user->user_lastname,
+							'Email'     => $user->user_email,
+							'Roles'     => $user_roles ? $user_roles : 'none',
+						),
 					)
 				);
 			}
@@ -465,6 +516,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'lastname'     => ( empty( $user->user_lastname ) ) ? ' ' : $user->user_lastname,
 						'EventType'    => 'submitted',
 						'TargetUserID' => $user->ID,
+						'TargetUserData' => (object) array(
+							'Username'  => $user->user_login,
+							'FirstName' => $user->user_firstname,
+							'LastName'  => $user->user_lastname,
+							'Email'     => $user->user_email,
+							'Roles'     => $user_roles ? $user_roles : 'none',
+						),
 					)
 				);
 			}
@@ -544,6 +602,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 				$new_user_data['Roles'] = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
 			} elseif ( 4012 === $event_code ) {
 				$new_user_data['Email'] = $user->user_email;
+				$new_user_data['Roles'] = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
 			}
 
 			$event_data = array(

@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage utils
- * @copyright  2024 Melapress
+ * @copyright  2025 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-2fa/
  */
@@ -15,8 +15,9 @@ defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 use WSAL_Ext_MirrorLogger;
 use WSAL\Helpers\WP_Helper;
-use WSAL\Controllers\Connection;
 use WSAL\Controllers\Cron_Jobs;
+use WSAL\Controllers\Connection;
+use WSAL\Entities\Options_Entity;
 use WSAL\Entities\Reports_Entity;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Entities\Metadata_Entity;
@@ -25,6 +26,8 @@ use WSAL\Controllers\Plugin_Extensions;
 use WSAL\Helpers\Plugin_Settings_Helper;
 use WSAL\Entities\Generated_Reports_Entity;
 use WSAL\Reports\Controllers\Statistic_Reports;
+
+use function Crontrol\Event\get;
 
 /**
  * Migration class
@@ -85,14 +88,16 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 			self::$_442_started = true;
 
 			// If the legacy table exists, lets extract the options and remove it.
-			if ( \WSAL\Entities\Options_Entity::check_table_exists( \WSAL\Entities\Options_Entity::get_table_name() ) ) {
-				\WSAL\Entities\Options_Entity::transfer_options();
-				\WSAL\Entities\Options_Entity::drop_table();
+			if ( Options_Entity::check_table_exists( Options_Entity::get_table_name() ) ) {
+				Options_Entity::transfer_options();
+				Options_Entity::drop_table();
 				// That will reread the connection, as from the import above that might be changed to external.
-				\WSAL\Entities\Options_Entity::destroy_connection();
+				Options_Entity::destroy_connection();
 			}
 
-			$wsal = \WpSecurityAuditLog::get_instance();
+			global $wsal_class;
+
+			$wsal = $wsal_class;
 			$wsal::load_freemius();
 			$wsal::load_defaults();
 
@@ -421,8 +426,19 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 					$mirrors_in_use = ! empty( $mirrors );
 
 					$notifications_in_use = false;
-					if ( ! $mirrors_in_use && ! is_null( $wsal->notifications_util ) ) {
-						$notifications = $wsal->notifications_util->get_notifications();
+
+					global $wpdb;
+
+					$opt_prefix     = WSAL_PREFIX . WSAL_OPT_PREFIX;
+					$prepared_query = $wpdb->prepare( // phpcs:ignore
+						"SELECT * FROM {$wpdb->base_prefix}options WHERE option_name LIKE %s;",
+						$opt_prefix . '%%'
+					);
+
+					$notifications = $wpdb->get_results( $prepared_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+					if ( ! $mirrors_in_use && ! empty( $notifications ) ) {
+
 						if ( ! empty( $notifications ) ) {
 							foreach ( $notifications as $notification ) {
 								$item = maybe_unserialize( $notification->option_value );
@@ -490,10 +506,10 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 
 					// Create a background job to migrate the metadata.
 					$job_info = array(
-						'start_time'             => current_time( 'timestamp' ), // phpcs:ignore
-						'processed_events_count' => 0,
-						'batch_size'             => 50,
-						'connection'             => $connection,
+					'start_time'             => current_time( 'timestamp' ), // phpcs:ignore
+					'processed_events_count' => 0,
+					'batch_size'             => 50,
+					'connection'             => $connection,
 					);
 
 					// Create and dispatch the background process itself.
@@ -1024,6 +1040,21 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		}
 
 		/**
+		 * Migration for version upto 5.3.0
+		 *
+		 * Migrates notification settings
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.0
+		 */
+		public static function migrate_up_to_5300() {
+			Migrate_53::migrate_up_to_5300();
+		}
+
+		/**
 		 * Previous version of the plugin do not store username or user_id consistently, that method fixed that (in the best way possible) - if there is no user with that username 0 is stored as user_id, if user with that id does not exist anymore 'Deleted' is stored as username (check update_user_name_and_user_id method)
 		 *
 		 * @return void
@@ -1194,9 +1225,9 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 					$index             = array_search( 'codes', $report->viewState, true ); // phpcs:ignore
 					$codes             = $report->triggers[ $index ]['alert_id'];
 					$report->alert_ids = $codes;
-				} elseif ( count( $report->viewState ) < 20 ) { // phpcs:ignore
+					} elseif ( count( $report->viewState ) < 20 ) { // phpcs:ignore
 					// Specific groups were selected.
-					$report->alert_ids = $report->viewState; // phpcs:ignore
+				$report->alert_ids = $report->viewState; // phpcs:ignore
 				}
 			}
 

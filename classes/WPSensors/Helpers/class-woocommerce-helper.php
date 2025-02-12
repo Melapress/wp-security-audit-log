@@ -31,6 +31,16 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 	 * @since 4.6.0
 	 */
 	class Woocommerce_Helper {
+
+		/**
+		 * Class cache to store the state of the plugin.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.0
+		 */
+		private static $plugin_active = null;
+
 		/**
 		 * Ensures our appended setting gets saved when updating via ToggleEvents screen.
 		 *
@@ -163,12 +173,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 		 */
 		public static function wsal_woocommerce_extension_add_custom_event_objects( $objects ) {
 			$new_objects = array(
-				'woocommerce-product'  => __( 'WooCommerce Product', 'wp-security-audit-log' ),
-				'woocommerce-store'    => __( 'WooCommerce Store', 'wp-security-audit-log' ),
-				'woocommerce-coupon'   => __( 'WooCommerce Coupon', 'wp-security-audit-log' ),
-				'woocommerce-category' => __( 'WooCommerce Category', 'wp-security-audit-log' ),
-				'woocommerce-tag'      => __( 'WooCommerce Tag', 'wp-security-audit-log' ),
-				'woocommerce-order'    => __( 'WooCommerce Order', 'wp-security-audit-log' ),
+				'woocommerce-product'        => __( 'WooCommerce Product', 'wp-security-audit-log' ),
+				'woocommerce-product-review' => __( 'WooCommerce Product Review', 'wp-security-audit-log' ),
+				'woocommerce-store'          => __( 'WooCommerce Store', 'wp-security-audit-log' ),
+				'woocommerce-coupon'         => __( 'WooCommerce Coupon', 'wp-security-audit-log' ),
+				'woocommerce-category'       => __( 'WooCommerce Category', 'wp-security-audit-log' ),
+				'woocommerce-tag'            => __( 'WooCommerce Tag', 'wp-security-audit-log' ),
+				'woocommerce-order'          => __( 'WooCommerce Order', 'wp-security-audit-log' ),
 			);
 
 			// combine the two arrays.
@@ -215,7 +226,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 			if ( '%StockOrderID%' === $expression ) {
 				$check_value = \strip_tags( (string) $value );
 				if ( ! empty( $check_value ) && 'NULL' !== $check_value ) {
-					$new_order    = new \WC_Order( strip_tags( $value ) );
+					$new_order    = \wc_get_order( strip_tags( $value ) );
 					$editor_title = self::wsal_woocommerce_extension_get_order_title( $new_order );
 
 					return isset( $editor_title ) ? '<strong>' . $editor_title . '</strong>' : '';
@@ -318,12 +329,10 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 			if ( ! $order_id ) {
 				return false;
 			}
-			if ( is_a( $order_id, 'WC_Order' ) ) {
+			if ( is_a( $order_id, 'WC_Order' ) || is_a( $order_id, 'WC_Order_Refund' ) ) {
 				$order = $order_id;
-			} elseif ( is_int( $order_id ) ) {
-				$order = new \WC_Order( $order_id );
 			} else {
-				$order = wc_get_order( $order_id );
+				$order = \wc_get_order( $order_id );
 			}
 
 			// Final check.
@@ -505,7 +514,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Helpers\Woocommerce_Helper' ) ) {
 		 * @since 4.6.0
 		 */
 		public static function is_woocommerce_active() {
-			return WP_Helper::is_plugin_active( 'woocommerce/woocommerce.php' );
+			if ( null === self::$plugin_active ) {
+				self::$plugin_active = WP_Helper::is_plugin_active( 'woocommerce/woocommerce.php' );
+			}
+
+			return self::$plugin_active;
 		}
 
 		/**

@@ -278,7 +278,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 					array(
 						'friendly_name' => $website->name,
 						'site_url'      => $website->url,
-						'SiteID'       => $website->id,
+						'SiteID'        => $website->id,
 						'mainwp_dash'   => true,
 					)
 				);
@@ -293,7 +293,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		 * @since 5.0.0
 		 */
 		public static function synced_all_sites() {
-			$is_global_sync = isset( $_POST['isGlobalSync'] ) ? sanitize_text_field( wp_unslash( $_POST['isGlobalSync'] ) ) : false;
+			$is_global_sync = isset( $_POST['isGlobalSync'] ) ? \sanitize_text_field( \wp_unslash( $_POST['isGlobalSync'] ) ) : false;
 
 			// make sure this is global sync.
 			if ( ! in_array( $is_global_sync, array( 'true', '1' ) ) ) {

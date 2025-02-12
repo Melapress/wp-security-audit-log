@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
-use WSAL\Helpers\Plugins_Helper;
-use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 
 // Exit if accessed directly.
@@ -34,6 +32,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 	 * 5005 User installed a theme
 	 * 5006 User activated a theme
 	 * 5007 User uninstalled a theme
+	 * 5030 Plugin failed to update
 	 * 5031 User updated a theme
 	 *
 	 * @package    wsal
@@ -61,6 +60,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		private static $old_plugins = array();
 
 		/**
+		 * Stores the plugins data for the currently processed plugin
+		 *
+		 * @var array
+		 *
+		 * @since 5.3.0
+		 */
+		private static $plugins_data = array();
+
+		/**
 		 * Inits the main hooks
 		 *
 		 * @return void
@@ -69,19 +77,75 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 */
 		public static function init() {
 			$has_permission = ( current_user_can( 'install_plugins' ) || current_user_can( 'activate_plugins' ) ||
-				current_user_can( 'delete_plugins' ) || current_user_can( 'update_plugins' ) || current_user_can( 'install_themes' ) );
+				\current_user_can( 'delete_plugins' ) || current_user_can( 'update_plugins' ) || current_user_can( 'install_themes' ) );
 
-			add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
+			\add_action( 'admin_init', array( __CLASS__, 'event_admin_init' ) );
 			if ( $has_permission ) {
-				add_action( 'shutdown', array( __CLASS__, 'event_admin_shutdown' ) );
+				\add_action( 'shutdown', array( __CLASS__, 'event_admin_shutdown' ) );
 			}
-			add_action( 'switch_theme', array( __CLASS__, 'event_theme_activated' ) );
-			add_action( 'upgrader_overwrote_package', array( __CLASS__, 'on_package_overwrite' ), 10, 3 );
+			\add_action( 'switch_theme', array( __CLASS__, 'event_theme_activated' ) );
+			\add_action( 'upgrader_overwrote_package', array( __CLASS__, 'on_package_overwrite' ), 10, 3 );
 
-			add_action( 'deleted_theme', array( __CLASS__, 'on_deleted_theme' ), 10, 2 );
-			add_action( 'upgrader_process_complete', array( __CLASS__, 'detect_upgrade_completed' ), 10, 2 );
+			\add_action( 'deleted_theme', array( __CLASS__, 'on_deleted_theme' ), 10, 2 );
+			\add_action( 'upgrader_process_complete', array( __CLASS__, 'detect_upgrade_completed' ), 10, 2 );
 
-			add_action( 'wp_insert_post', array( __CLASS__, 'plugin_created_post' ), 10, 2 );
+			\add_action( 'wp_insert_post', array( __CLASS__, 'plugin_created_post' ), 10, 2 );
+
+			// Log plugin deletions, i.e. when a user click "Delete" in the plugins listing
+			// or choose plugin(s) and select Bulk actions -> Delete.
+			// Since WordPress 4.4 filters exists that are fired before and after plugin deletion.
+			\add_action( 'delete_plugin', array( __CLASS__, 'on_action_delete_plugin' ), 10, 1 );
+			\add_action( 'deleted_plugin', array( __CLASS__, 'on_action_deleted_plugin' ), 10, 2 );
+		}
+
+		/**
+		 * Store information about a plugin before it gets deleted.
+		 * Called from action `deleted_plugin` that is fired just before the plugin will be deleted.
+		 *
+		 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.0
+		 */
+		public static function on_action_delete_plugin( $plugin_file ) {
+			self::$plugins_data[ $plugin_file ] = \get_plugin_data( \WP_PLUGIN_DIR . '/' . $plugin_file, true, false );
+		}
+
+
+		/**
+		 * Log plugin deletion.
+		 * Called from action `deleted_plugin` that is fired just after a plugin has been deleted.
+		 *
+		 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+		 * @param bool   $deleted     Whether the plugin deletion was successful.
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.0
+		 */
+		public static function on_action_deleted_plugin( $plugin_file, $deleted ) {
+			if ( ! $deleted ) {
+				return;
+			}
+
+			if ( empty( self::$plugins_data[ $plugin_file ] ) ) {
+				return;
+			}
+
+			$plugin_file = $plugin_file;
+			$plugin_name = \strip_tags( self::$plugins_data[ $plugin_file ]['Title'] );
+			$plugin_data = self::$plugins_data[ $plugin_file ];
+			Alert_Manager::trigger_event(
+				5003,
+				array(
+					'PluginFile' => $plugin_file,
+					'PluginData' => (object) array(
+						'Name'    => $plugin_name,
+						'Version' => $plugin_data['Version'],
+					),
+				)
+			);
 		}
 
 		/**
@@ -150,8 +214,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function event_admin_init() {
-			self::$old_themes  = wp_get_themes();
-			self::$old_plugins = get_plugins();
+			self::$old_themes  = \wp_get_themes();
+			self::$old_plugins = \get_plugins();
 		}
 
 		/**
@@ -163,19 +227,19 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 			// Filter global arrays for security.
 			$post_array  = filter_input_array( INPUT_POST );
 			$get_array   = filter_input_array( INPUT_GET );
-			$script_name = isset( $_SERVER['SCRIPT_NAME'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : false;
+			$script_name = isset( $_SERVER['SCRIPT_NAME'] ) ? \sanitize_text_field( \wp_unslash( $_SERVER['SCRIPT_NAME'] ) ) : false;
 
 			$action = '';
 			if ( isset( $get_array['action'] ) && '-1' !== $get_array['action'] ) {
-				$action = $get_array['action'];
+				$action = \sanitize_text_field( \wp_unslash( $get_array['action'] ) );
 			} elseif ( isset( $post_array['action'] ) && '-1' !== $post_array['action'] ) {
-				$action = $post_array['action'];
+				$action = \sanitize_text_field( \wp_unslash( $post_array['action'] ) );
 			}
 
 			if ( isset( $get_array['action2'] ) && '-1' !== $get_array['action2'] ) {
-				$action = $get_array['action2'];
+				$action = \sanitize_text_field( \wp_unslash( $get_array['action2'] ) );
 			} elseif ( isset( $post_array['action2'] ) && '-1' !== $post_array['action2'] ) {
-				$action = $post_array['action2'];
+				$action = \sanitize_text_field( \wp_unslash( $post_array['action2'] ) );
 			}
 
 			$actype = '';
@@ -187,7 +251,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 
 			// Install plugin.
 			if ( in_array( $action, array( 'install-plugin', 'upload-plugin', 'wsal_run_addon_install' ), true ) && current_user_can( 'install_plugins' ) ) {
-				$plugin = array_merge( array_diff( array_keys( get_plugins() ), array_keys( self::$old_plugins ) ), array_diff( array_keys( self::$old_plugins ), array_keys( get_plugins() ) ) );
+				$plugin = array_merge( array_diff( array_keys( get_plugins() ), array_keys( self::$old_plugins ) ), array_diff( array_keys( self::$old_plugins ), array_keys( \get_plugins() ) ) );
 
 				// Check for premium version being installed / updated.
 				if ( in_array( \WpSecurityAuditLog::PREMIUM_VERSION_WHOLE_PLUGIN_NAME, $plugin, true ) ) {
@@ -256,8 +320,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 						),
 					)
 				);
-
-				// self::run_addon_check( $plugin_dir );
 			}
 
 			// Activate plugin.
@@ -267,7 +329,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					if ( ! isset( $get_array['checked'] ) ) {
 						$get_array['checked'] = array();
 					}
-					$get_array['checked'][] = $get_array['plugin'];
+					$get_array['checked'][] = \sanitize_text_field( \wp_unslash( $get_array['plugin'] ) );
 				}
 
 				// Check $_POST array case.
@@ -275,7 +337,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					if ( ! isset( $post_array['checked'] ) ) {
 						$post_array['checked'] = array();
 					}
-					$post_array['checked'][] = $post_array['plugin'];
+					$post_array['checked'][] = \sanitize_text_field( \wp_unslash( $post_array['plugin'] ) );
 				}
 
 				if ( isset( $get_array['checked'] ) && ! empty( $get_array['checked'] ) ) {
@@ -294,7 +356,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 								}
 							}
 							$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
-							$plugin_data = get_plugin_data( $plugin_file, false, true );
+							$plugin_data = \get_plugin_data( $plugin_file, false, true );
 
 							Alert_Manager::trigger_event(
 								5001,
@@ -309,8 +371,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 									),
 								)
 							);
-
-							// self::run_addon_check( $plugin_file );
 						}
 					}
 				} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
@@ -332,8 +392,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 									),
 								)
 							);
-
-							// self::run_addon_check( $plugin_file );
 						}
 					}
 				}
@@ -346,7 +404,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					if ( ! isset( $get_array['checked'] ) ) {
 						$get_array['checked'] = array();
 					}
-					$get_array['checked'][] = $get_array['plugin'];
+					$get_array['checked'][] = \sanitize_text_field( \wp_unslash( $get_array['plugin'] ) );
 				}
 
 				// Check $_POST array case.
@@ -354,7 +412,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 					if ( ! isset( $post_array['checked'] ) ) {
 						$post_array['checked'] = array();
 					}
-					$post_array['checked'][] = $post_array['plugin'];
+					$post_array['checked'][] = \sanitize_text_field( \wp_unslash( $post_array['plugin'] ) );
 				}
 
 				if ( isset( $get_array['checked'] ) && ! empty( $get_array['checked'] ) ) {
@@ -376,7 +434,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 								)
 							);
 						}
-						// self::run_addon_removal_check( $plugin_file );
 					}
 				} elseif ( isset( $post_array['checked'] ) && ! empty( $post_array['checked'] ) ) {
 					foreach ( $post_array['checked'] as $plugin_file ) {
@@ -401,77 +458,22 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				}
 			}
 
-			// Uninstall plugin.
-			if ( $is_plugins && in_array( $action, array( 'delete-selected' ), true ) && current_user_can( 'delete_plugins' ) ) {
-				if ( ! isset( $post_array['verify-delete'] ) ) { // phpcs:ignore
-					// First step, before user approves deletion
-					// TODO store plugin data in session here.
-				} else {
-					// second step, after deletion approval
-					// TODO use plugin data from session.
-					foreach ( $post_array['checked'] as $plugin_file ) {
-						if ( ! \is_wp_error( \validate_plugin( $plugin_file ) ) ) {
-							$plugin_name = basename( $plugin_file, '.php' );
-							$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
-							$plugin_name = ucwords( $plugin_name );
-							$plugin_file = WP_PLUGIN_DIR . '/' . $plugin_file;
-							$plugin_data = get_plugin_data( $plugin_file, false, true );
-							Alert_Manager::trigger_event(
-								5003,
-								array(
-									'PluginFile' => $plugin_file,
-									'PluginData' => (object) array(
-										'Name'    => $plugin_name,
-										'Version' => $plugin_data['Version'],
-									),
-								)
-							);
-						}
-					}
-				}
-			}
-
-			// Uninstall plugin for WordPress version 4.6.
-			if ( in_array( $action, array( 'delete-plugin' ), true ) && current_user_can( 'delete_plugins' ) ) {
-				if ( isset( $post_array['plugin'] ) ) {
-					if ( ! \is_wp_error( \validate_plugin( $post_array['plugin'] ) ) ) {
-						$plugin_file = WP_PLUGIN_DIR . '/' . $post_array['plugin'];
-						$plugin_name = basename( $plugin_file, '.php' );
-						$plugin_name = str_replace( array( '_', '-', '  ' ), ' ', $plugin_name );
-						$plugin_name = ucwords( $plugin_name );
-						$plugin_data = self::$old_plugins[ $post_array['plugin'] ];
-						Alert_Manager::trigger_event(
-							5003,
-							array(
-								'PluginFile' => $plugin_file,
-								'PluginData' => (object) array(
-									'Name'    => $plugin_name,
-									'Version' => $plugin_data['Version'],
-								),
-							)
-						);
-					}
-
-					// self::run_addon_removal_check( $plugin_file );
-				}
-			}
-
 			// Upgrade plugin.
 			if ( in_array( $action, array( 'upgrade-plugin', 'update-plugin', 'update-selected' ), true ) && current_user_can( 'update_plugins' ) ) {
 				$plugins = array();
 
 				// Check $_GET array cases.
 				if ( isset( $get_array['plugins'] ) ) {
-					$plugins = explode( ',', $get_array['plugins'] );
+					$plugins = explode( ',', \sanitize_text_field( \wp_unslash( $get_array['plugins'] ) ) );
 				} elseif ( isset( $get_array['plugin'] ) ) {
-					$plugins[] = $get_array['plugin'];
+					$plugins[] = \sanitize_text_field( \wp_unslash( $get_array['plugin'] ) );
 				}
 
 				// Check $_POST array cases.
 				if ( isset( $post_array['plugins'] ) ) {
 					$plugins = explode( ',', $post_array['plugins'] );
 				} elseif ( isset( $post_array['plugin'] ) ) {
-					$plugins[] = $post_array['plugin'];
+					$plugins[] = \sanitize_text_field( \wp_unslash( $post_array['plugin'] ) );
 				}
 				if ( isset( $plugins ) ) {
 					foreach ( $plugins as $plugin_file ) {
@@ -489,20 +491,20 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 
 				// Check $_GET array cases.
 				if ( isset( $get_array['slug'] ) || isset( $get_array['theme'] ) ) {
-					$themes[] = isset( $get_array['slug'] ) ? $get_array['slug'] : $get_array['theme'];
+					$themes[] = isset( $get_array['slug'] ) ? \sanitize_text_field( \wp_unslash( $get_array['slug'] ) ) : \sanitize_text_field( \wp_unslash( $get_array['theme'] ) );
 				} elseif ( isset( $get_array['themes'] ) ) {
-					$themes = explode( ',', $get_array['themes'] );
+					$themes = explode( ',', \sanitize_text_field( \wp_unslash( $get_array['themes'] ) ) );
 				}
 
 				// Check $_POST array cases.
 				if ( isset( $post_array['slug'] ) || isset( $post_array['theme'] ) ) {
-					$themes[] = isset( $post_array['slug'] ) ? $post_array['slug'] : $post_array['theme'];
+					$themes[] = isset( $post_array['slug'] ) ? \sanitize_text_field( \wp_unslash( $post_array['slug'] ) ) : \sanitize_text_field( \wp_unslash( $post_array['theme'] ) );
 				} elseif ( isset( $post_array['themes'] ) ) {
-					$themes = explode( ',', $post_array['themes'] );
+					$themes = explode( ',', \sanitize_text_field( \wp_unslash( $post_array['themes'] ) ) );
 				}
 				if ( isset( $themes ) ) {
 					foreach ( $themes as $theme_name ) {
-						self::log_theme_updated_event( $theme_name );
+						self::log_theme_updated_event( \sanitize_text_field( \wp_unslash( $theme_name ) ) );
 					}
 				}
 			}
@@ -674,79 +676,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Plugins_Themes_Sensor' ) ) {
 				}
 			}
 			return $theme;
-		}
-
-		/**
-		 * Runs an add-on check.
-		 *
-		 * @param string $plugin_dir Plugin directory.
-		 *
-		 * @since 4.5.0
-		 */
-		public static function run_addon_check( $plugin_dir ) {
-
-			$path_parts      = pathinfo( $plugin_dir );
-			$plugin_filename = $path_parts['filename'];
-
-			// Grab list of plugins we have addons for.
-			$predefined_plugins       = Plugins_Helper::get_installable_plugins();
-			$predefined_plugins_addon = array_column( $predefined_plugins, 'addon_for' );
-			$all_plugins              = array_keys( get_plugins() );
-			foreach ( $predefined_plugins_addon as $plugin ) {
-
-				$plugin = apply_filters( 'wsal_modify_predefined_plugin_slug', $plugin );
-
-				// Check if plugin file starts with the same string as our addon_for, or if its equal.
-				if ( $plugin_filename === $plugin ) {
-					$addon_slug         = array( array_search( $plugin, array_column( $predefined_plugins, 'addon_for', 'plugin_slug' ) ) ); // phpcs:ignore
-					$is_addon_installed = array_intersect( $all_plugins, $addon_slug );
-					if ( empty( $is_addon_installed ) ) {
-						$current_value   = Settings_Helper::get_option_value( 'installed_plugin_addon_available' );
-						$plugin_filename = array( $plugin_filename );
-						if ( isset( $current_value ) && is_array( $current_value ) ) {
-							$new_plugin_filenames = array_unique( array_merge( $current_value, $plugin_filename ) );
-						} else {
-							$new_plugin_filenames = $plugin_filename;
-						}
-						Settings_Helper::set_option_value( 'installed_plugin_addon_available', $new_plugin_filenames );
-						Settings_Helper::delete_option_value( 'addon_available_notice_dismissed' );
-					}
-				}
-			}
-		}
-
-		/**
-		 * Checks for an add-on removal.
-		 *
-		 * @param string $plugin_dir Plugin directory.
-		 *
-		 * @since 4.5.0
-		 */
-		public static function run_addon_removal_check( $plugin_dir ) {
-
-			$path_parts      = pathinfo( $plugin_dir );
-			$plugin_filename = $path_parts['filename'];
-
-			// Grab list of plugins we have addons for.
-			$predefined_plugins       = Plugins_Helper::get_installable_plugins();
-			$predefined_plugins_addon = array_column( $predefined_plugins, 'addon_for' );
-			foreach ( $predefined_plugins_addon as $plugin ) {
-
-				$plugin = apply_filters( 'wsal_modify_predefined_plugin_slug', $plugin );
-
-				// Check if plugin file starts with the same string as our addon_for, or if its equal.
-				if ( $plugin_filename === $plugin ) {
-					$current_installed = Settings_Helper::get_option_value( 'installed_plugin_addon_available' );
-					if ( isset( $current_installed ) && ! empty( $current_installed ) ) {
-						$key = array_search( $plugin, $current_installed ); // phpcs:ignore
-						if ( false !== $key ) {
-							unset( $current_installed[ $key ] );
-						}
-					}
-
-					Settings_Helper::set_option_value( 'installed_plugin_addon_available', $current_installed );
-				}
-			}
 		}
 
 		/**

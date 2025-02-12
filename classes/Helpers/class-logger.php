@@ -4,7 +4,7 @@
  *
  * @package    wsal
  * @subpackage utils
- * @copyright  2024 Melapress
+ * @copyright  2025 Melapress
  * @license    https://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @link       https://wordpress.org/plugins/wp-security-audit-log/
  * @since 4.4.3
@@ -61,7 +61,7 @@ if ( ! class_exists( '\WSAL\Helpers\Logger' ) ) {
 		 */
 		public static function log( $message ) {
 			if ( self::is_logging_enabled() ) {
-				self::write_to_log( self::get_log_timestamp() . "\n" . $message . "\n" . __( 'Current memory usage: ', 'wp-security-audit-log' ) . memory_get_usage( true ) . "\n" );
+				self::write_to_log( self::get_log_timestamp() . "\n" . $message . "\n" . __( 'Current memory usage: ', 'wp-security-audit-log' ) . memory_get_usage( true ) . "\n", );
 			}
 		}
 
@@ -150,7 +150,7 @@ if ( ! class_exists( '\WSAL\Helpers\Logger' ) ) {
 		 * @since 4.4.3
 		 */
 		private static function write_to_file( $filename, $content, $override = false ) {
-			return File_Helper::write_to_file( self::get_logging_dir_path() . $filename, $content, $override );
+			return File_Helper::write_to_file( self::get_logging_dir_path() . $filename, $content, ! $override );
 		}
 
 		/**

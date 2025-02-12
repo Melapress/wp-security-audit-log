@@ -475,5 +475,114 @@ if ( ! class_exists( '\WSAL\Entities\Base_Fields' ) ) {
 
 			return $field_sql;
 		}
+
+		/*
+		public static function convert_sql_where_to_php( string $where_clause ) {
+
+			// Trim and clean the input.
+			$where_clause = trim( $where_clause );
+
+			// Remove leading "WHERE" if present.
+			if ( stripos( $where_clause, 'WHERE' ) === 0 ) {
+				$where_clause = substr( $where_clause, 5 );
+			}
+
+			// Remove whitespace.
+			$where_clause = preg_replace( '/\s+/', ' ', $where_clause );
+
+			// Process the conditions.
+			return self::parse_conditions( $where_clause );
+		}
+
+		public static function parse_conditions( $clause ) {
+			// Handle nested conditions using parentheses.
+
+			preg_match( '/\(([^()]+)\)/', $clause, $matches );
+
+			if ( isset( $matches ) && ! empty( $matches ) ) {
+				$inner_clause  = $matches[1];
+				$php_condition = self::parse_conditions( $inner_clause );
+				$clause        = str_replace( $matches[0], "($php_condition)", $clause );
+			}
+
+			// Split by AND/OR, preserving operators.
+			$conditions     = preg_split( '/\s+(AND|OR)\s+/i', $clause, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
+			$php_conditions = array();
+			$operator       = '&&'; // Default to AND.
+
+			foreach ( $conditions as $condition ) {
+				$condition = trim( $condition );
+
+				if ( preg_match( '/^(.*?)\s*(LIKE|=|!=|<>|>|<|>=|<=|IN\(|IN \(|BETWEEN|IS NULL)\s*(.*)$/i', $condition, $matches ) ) {
+					$field    = trim( $matches[1] );
+					$op       = strtoupper( trim( $matches[2] ) );
+					$value    = trim( $matches[3] );
+					$var_name = 'var_' . uniqid();
+
+					switch ( $op ) {
+						case 'LIKE':
+							// Handle LIKE values.
+							if ( preg_match( '/^\'(.*)\'$/', $value, $value_matches ) ) {
+								$php_conditions[] = "strpos($field, $var_name) !== false"; // Simulate LIKE.
+								$value            = "'" . addslashes( $value_matches[1] ) . "'";
+							}
+							echo "\$$var_name = $value;\n";
+							break;
+
+						case 'IN':
+							// Handle IN clause.
+							$value_array      = explode( ',', trim( $value, '() ' ) );
+							$value_array      = array_map( 'trim', $value_array );
+							$php_conditions[] = "$field IN (" . implode( ', ', array_map( fn( $v) => '$' . 'var_' . uniqid(), $value_array ) ) . ')';
+							foreach ( $value_array as $v ) {
+								echo '$var_' . uniqid() . ' = ' . addslashes( trim( $v, "'" ) ) . ";\n"; // Assigning variables.
+							}
+							break;
+
+						case 'BETWEEN':
+							// Handle BETWEEN clause.
+							if ( preg_match( '/^\'(.*?)\'\s+AND\s+\'(.*?)\'$/', $value, $between_matches ) ) {
+								$lower_bound      = 'var_' . uniqid();
+								$upperBound       = 'var_' . uniqid();
+								$php_conditions[] = "$field BETWEEN \$$lower_bound AND \$$upperBound";
+								echo "\$$lower_bound = '" . addslashes( $between_matches[1] ) . "';\n";
+								echo "\$$upperBound = '" . addslashes( $between_matches[2] ) . "';\n";
+							}
+							break;
+
+						case 'IS NULL':
+							// Handle IS NULL.
+							$php_conditions[] = "$field IS NULL";
+							break;
+
+						default:
+							// Handle other comparisons.
+							if ( preg_match( '/^\'(.*)\'$/', $value, $value_matches ) ) {
+								$php_conditions[] = "$field $op \$$var_name";
+								$value            = "'" . addslashes( $value_matches[1] ) . "'";
+							} else {
+								$php_conditions[] = "$field $op \$$var_name";
+							}
+							echo "\$$var_name = $value;\n";
+							break;
+					}
+				}
+			}
+
+			// Determine the logical operator based on the original clause.
+			if ( stripos( $clause, 'OR' ) !== false ) {
+				$operator = '||';
+			}
+
+			// Combine conditions into a single PHP statement.
+			return '(' . implode( " $operator ", $php_conditions ) . ')';
+		}
+
+			// // Example usage
+			// $sqlWhere     = "WHERE (name LIKE 'John%' OR name LIKE 'Doe%') AND (age > 30 OR status IN ('active', 'pending')) AND birthdate BETWEEN '1990-01-01' AND '2000-12-31' AND status IS NULL";
+			// $phpStatement = convertSqlWhereToPhp( $sqlWhere );
+
+			// echo 'PHP Statement: ' . $phpStatement . "\n";
+			*/
 	}
 }

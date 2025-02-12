@@ -80,10 +80,30 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 		 */
 		private static function get_plugin_settings_changes(): array {
 			return array(
+				8859 => array(
+					8859,
+					WSAL_LOW,
+					esc_html__( 'Changed the status of plugin setting', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the status of the %feature_name% plugin feature.', 'wp-security-audit-log' ),
+					array(),
+					array(),
+					'yoast-seo',
+					'enabled',
+				),
+				8860 => array(
+					8860,
+					WSAL_LOW,
+					esc_html__( 'Changed the status of the crawl optimization setting', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the status of the crawl optimization setting %feature_name% in the plugin settings.', 'wp-security-audit-log' ),
+					array(),
+					array(),
+					'yoast-seo',
+					'enabled',
+				),
 				8815 => array(
 					8815,
 					WSAL_MEDIUM,
-					esc_html__( 'User Enabled/Disabled SEO analysis in the Yoast SEO plugin settings', 'wp-security-audit-log' ),
+					esc_html__( 'User Enabled/Disabled SEO analysis in the Yoast SEO plugin settings (Replaced by event ID 8859 since January 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the status of the <strong>SEO Analysis</strong> plugin feature.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -93,7 +113,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8816 => array(
 					8816,
 					WSAL_MEDIUM,
-					esc_html__( 'User Enabled/Disabled readability analysis in the Yoast SEO plugin settings', 'wp-security-audit-log' ),
+					esc_html__( 'User Enabled/Disabled readability analysis in the Yoast SEO plugin settings (Replaced by event ID 8859 since January 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the <strong>Readability Analysis</strong> plugin feature.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -103,7 +123,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8817 => array(
 					8817,
 					WSAL_MEDIUM,
-					esc_html__( 'User Enabled/Disabled cornerstone content in the Yoast SEO plugin settings', 'wp-security-audit-log' ),
+					esc_html__( 'User Enabled/Disabled cornerstone content in the Yoast SEO plugin settings (Replaced by event ID 8859 since January 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the <strong>Cornerstone content</strong> plugin feature.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -113,7 +133,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8818 => array(
 					8818,
 					WSAL_MEDIUM,
-					esc_html__( 'User Enabled/Disabled the text link counter in the Yoast SEO plugin settings', 'wp-security-audit-log' ),
+					esc_html__( 'User Enabled/Disabled the text link counter in the Yoast SEO plugin settings (Replaced by event ID 8859 since January 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the <strong>Text link counter</strong> plugin feature.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -123,7 +143,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8819 => array(
 					8819,
 					WSAL_MEDIUM,
-					esc_html__( 'User Enabled/Disabled XML sitemaps in the Yoast SEO plugin settings', 'wp-security-audit-log' ),
+					esc_html__( 'User Enabled/Disabled XML sitemaps in the Yoast SEO plugin settings (Replaced by event ID 8859 since January 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the <strong>XML sitemap</strong> plugin feature.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -144,7 +164,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8821 => array(
 					8821,
 					WSAL_MEDIUM,
-					esc_html__( 'User Enabled/Disabled the admin bar menu in the Yoast SEO plugin settings', 'wp-security-audit-log' ),
+					esc_html__( 'User Enabled/Disabled the admin bar menu in the Yoast SEO plugin settings (Replaced by event ID 8859 since January 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the <strong>Admin bar menu</strong> plugin feature.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -207,7 +227,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8828 => array(
 					8828,
 					WSAL_MEDIUM,
-					esc_html__( 'User Enabled/Disabled REST API: Head endpoint in the Yoast SEO plugin settings', 'wp-security-audit-log' ),
+					esc_html__( 'User Enabled/Disabled REST API: Head endpoint in the Yoast SEO plugin settings (Replaced by event ID 8859 since January 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the status of the <strong>REST API: Head endpoint</strong> plugin setting.', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -441,7 +461,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8844 => array(
 					8844,
 					WSAL_MEDIUM,
-					esc_html__( 'Changed the status of the setting Add Open Graph meta data in the Facebook settings', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the status of the setting Add Open Graph meta data in the Facebook settings (Replaced by event ID 8859 since January 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the status of the setting <strong>Add Open Graph meta data</strong> in the <strong>Facebook settings.</strong>', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -465,7 +485,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8846 => array(
 					8846,
 					WSAL_MEDIUM,
-					esc_html__( 'Changed the status of the setting Add Twitter card meta data in the Twitter settings', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the status of the setting Add Twitter card meta data in the Twitter settings (Replaced by event ID 8859 since January 2025)', 'wp-security-audit-log' ),
 					__( 'Changed the status of the setting <strong>Add Twitter card meta data</strong> in the <strong>Twitter settings.</strong>', 'wp-security-audit-log' ),
 					array(),
 					array(),
@@ -600,10 +620,108 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 				8812 => array(
 					8812,
 					WSAL_INFORMATIONAL,
-					esc_html__( 'User changed the Knowledge Graph & Schema.org', 'wp-security-audit-log' ),
-					__( 'Changed the <strong>Knowledge Graph & Schema.org</strong> in the plugin settings to %new%.', 'wp-security-audit-log' ),
+					esc_html__( 'Changed the Organization/Person', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>Organization/Person</strong> plugin setting in <strong>Site representation</strong> to %new%.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'Previous setting', 'wp-security-audit-log' ) => '%old%',
+					),
+					array(),
+					'yoast-seo',
+					'modified',
+				),
+				8863 => array(
+					8863,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'Changed the website name', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>Website name</strong> to %new%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous setting', 'wp-security-audit-log' ) => '%old%',
+					),
+					array(),
+					'yoast-seo',
+					'modified',
+				),
+				8864 => array(
+					8864,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'Changed the alternate website name', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>Alternate Website name</strong> to %new%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous setting', 'wp-security-audit-log' ) => '%old%',
+					),
+					array(),
+					'yoast-seo',
+					'modified',
+				),
+				8865 => array(
+					8865,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'Changed the tag line', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>Tagline</strong> to %new%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous setting', 'wp-security-audit-log' ) => '%old%',
+					),
+					array(),
+					'yoast-seo',
+					'modified',
+				),
+				8868 => array(
+					8868,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'Changed the organization name', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>Organization Name</strong> to %new%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous setting', 'wp-security-audit-log' ) => '%old%',
+					),
+					array(),
+					'yoast-seo',
+					'modified',
+				),
+				8869 => array(
+					8869,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'Changed the Alternate organization name', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>Alternate organization name</strong> to %new%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous setting', 'wp-security-audit-log' ) => '%old%',
+					),
+					array(),
+					'yoast-seo',
+					'modified',
+				),
+				8870 => array(
+					8870,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'Changed the Organization logo', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>Organization Logo</strong>.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous file name', 'wp-security-audit-log' ) => '%old%',
+						esc_html__( 'New file name', 'wp-security-audit-log' ) => '%new%',
+					),
+					array(),
+					'yoast-seo',
+					'modified',
+				),
+				8871 => array(
+					8871,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'Changed the User in the Organization/Person setting', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>User</strong> in the <strong>Organization/Person</strong> setting to %new%.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous user', 'wp-security-audit-log' ) => '%old%',
+					),
+					array(),
+					'yoast-seo',
+					'modified',
+				),
+				8872 => array(
+					8872,
+					WSAL_INFORMATIONAL,
+					esc_html__( 'Changed the Personal logo', 'wp-security-audit-log' ),
+					__( 'Changed the <strong>Personal logo</strong> in the <strong>Organization/Person setting</strong>.', 'wp-security-audit-log' ),
+					array(
+						esc_html__( 'Previous file name', 'wp-security-audit-log' ) => '%old%',
+						esc_html__( 'New file name', 'wp-security-audit-log' ) => '%new%',
 					),
 					array(),
 					'yoast-seo',
@@ -704,7 +822,6 @@ if ( ! class_exists( '\WSAL\WP_Sensors\Alerts\Yoast_Custom_Alerts' ) ) {
 						esc_html__( 'View the post in editor', 'wp-security-audit-log' ) => '%EditorLinkPost%',
 					),
 					'yoast-seo-metabox',
-					'modified',
 				),
 				8806 => array(
 					8806,
