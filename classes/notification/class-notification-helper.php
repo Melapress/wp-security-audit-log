@@ -192,10 +192,12 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 			$date_obj->setTime( 0, 0 ); // Set time of the object to 00:00:00.
 			$date_string = $date_obj->format( 'U' ); // Get the date in UNIX timestamp.
 
+			$current_settings = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
+
 			if ( $weekly ) {
-				$disable_if_empty = ! (bool) Settings_Helper::get_option_value( 'weekly_send_empty_summary_emails' ); // Option to disable if no alerts found.
+				$disable_if_empty = ! (bool) $current_settings['weekly_send_empty_summary_emails']; // Option to disable if no alerts found.
 			} else {
-				$disable_if_empty = ! (bool) Settings_Helper::get_option_value( 'daily_send_empty_summary_emails' ); // Option to disable if no alerts found.
+				$disable_if_empty = ! (bool) $current_settings['daily_send_empty_summary_emails']; // Option to disable if no alerts found.
 			}
 
 			if ( ! $test ) {
@@ -251,7 +253,7 @@ if ( ! class_exists( '\WSAL\Extensions\Helpers\Notification_Helper' ) ) {
 			$total_events = count( $events );
 
 			if ( ! $test && $disable_if_empty && empty( $events ) ) {
-				return false;
+				return array();
 			}
 
 			$home_url = home_url();

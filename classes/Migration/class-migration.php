@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 use WSAL_Ext_MirrorLogger;
 use WSAL\Helpers\WP_Helper;
+use WSAL\Views\Notifications;
 use WSAL\Controllers\Cron_Jobs;
 use WSAL\Controllers\Connection;
 use WSAL\Entities\Options_Entity;
@@ -1052,6 +1053,29 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 		 */
 		public static function migrate_up_to_5300() {
 			Migrate_53::migrate_up_to_5300();
+		}
+
+		/**
+		 * Migration for version upto 5.3.2
+		 *
+		 * Migrates notification settings
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.2
+		 */
+		public static function migrate_up_to_5320() {
+
+			if ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
+				$options = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
+
+				$options['daily_summary_notification']  = false;
+				$options['weekly_summary_notification'] = false;
+
+				Settings_Helper::set_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, $options );
+			}
 		}
 
 		/**

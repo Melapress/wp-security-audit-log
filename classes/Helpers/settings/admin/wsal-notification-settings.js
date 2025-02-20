@@ -425,6 +425,8 @@ $doc.ready(function () {
 
         const nonceValue = jQuery('#send_daily_notification_nonce').val();
 
+        let weekly = ( jQuery(this).attr('id') === 'notification_weekly_send_now_ajax' ) ? 1 : 0;
+
         $wsalBody.addClass('has-overlay');
         $saveAlert.fadeIn();
         $saveAlert.removeClass('is-success is-failed');
@@ -433,6 +435,7 @@ $doc.ready(function () {
             url: ajaxurl,
             data: {
                 action: 'send_daily_summary_now',
+                weekly: weekly,
                 _wpnonce: nonceValue
             },
             success: function (data) {

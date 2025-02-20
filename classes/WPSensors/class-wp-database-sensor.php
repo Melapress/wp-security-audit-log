@@ -53,6 +53,15 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 		private static $script_basename = null;
 
 		/**
+		 * Class cache for sensor enabled state.
+		 *
+		 * @var bool
+		 *
+		 * @since 5.3.0
+		 */
+		private static $sensor_enabled = null;
+
+		/**
 		 * If true, database events are being logged. This is used by the plugin's update process to temporarily disable
 		 * the database sensor to prevent errors (events are registered after the upgrade process is run).
 		 *
@@ -81,8 +90,8 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 		 */
 		public static function init() {
 			if ( self::is_sensor_enabled() ) {
-				add_action( 'dbdelta_queries', array( __CLASS__, 'event_db_delta_query' ) );
-				add_filter( 'query', array( __CLASS__, 'event_drop_query' ) );
+				\add_action( 'dbdelta_queries', array( __CLASS__, 'event_db_delta_query' ) );
+				\add_filter( 'query', array( __CLASS__, 'event_drop_query' ) );
 			}
 		}
 
@@ -96,10 +105,28 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Database_Sensor' ) ) {
 		 * @since 4.5.0
 		 */
 		private static function is_sensor_enabled(): bool {
-			$current_disabled_alerts = Settings_Helper::get_disabled_alerts();
-			$res                     = empty( array_diff( Settings_Helper::get_default_always_disabled_alerts(), $current_disabled_alerts ) );
+			if ( null === self::$sensor_enabled ) {
+						$sensor_alerts           = array(
+							5010,
+							5011,
+							5012,
+							5013,
+							5014,
+							5015,
+							5016,
+							5017,
+							5018,
+							5022,
+							5023,
+							5024,
+						);
+						$current_disabled_alerts = Settings_Helper::get_disabled_alerts();
+						$res                     = empty( array_diff( $sensor_alerts, $current_disabled_alerts ) );
 
-			return ! $res;
+						self::$sensor_enabled = ! $res;
+			}
+
+			return self::$sensor_enabled;
 		}
 
 		/**

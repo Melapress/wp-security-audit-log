@@ -66,7 +66,10 @@ class WSAL_Views_Settings extends WSAL_AbstractView {
 	 *
 	 * @param WpSecurityAuditLog $plugin - Instance of WpSecurityAuditLog.
 	 */
-	public function __construct( WpSecurityAuditLog $plugin ) {
+	public function __construct( $plugin ) {
+		if ( null === $plugin ) {
+			$plugin = WpSecurityAuditLog::get_instance();
+		}
 		parent::__construct( $plugin );
 		add_action( 'admin_init', array( $this, 'setup_settings_tabs' ) );
 		add_action( 'wp_ajax_AjaxCheckSecurityToken', array( $this, 'ajax_check_security_token' ) );

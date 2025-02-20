@@ -287,7 +287,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 
 			/** Set defaults */
 			if ( empty( $current_settings ) ) {
-				self::build_in_check_and_save( array( 'notification_weekly_summary_notification' => true ) );
+				self::build_in_check_and_save( array( 'notification_weekly_summary_notification' => true ), true );
 			}
 
 			// phpcs:disable
@@ -717,10 +717,16 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			// Summary email address.
 			$summary_emails = Settings_Helper::get_option_value( self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
 
+			$email_from = 'daily_email_address';
+
+			if ( isset( $_REQUEST['weekly'] ) && 1 === (int) $_REQUEST['weekly'] ) {
+				$email_from = 'weekly_email_address';
+			}
+
 			if ( empty( $summary_emails ) ) {
 				$summary_emails = \get_bloginfo( 'admin_email' );
-			} elseif ( isset( $summary_emails['daily_email_address'] ) ) {
-				$summary_emails = $summary_emails['daily_email_address'];
+			} elseif ( isset( $summary_emails[ $email_from ] ) ) {
+				$summary_emails = $summary_emails[ $email_from ];
 			} else {
 				$summary_emails = \get_bloginfo( 'admin_email' );
 			}
@@ -1021,14 +1027,18 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		 * Checks and validates the data for the built-in notifications.
 		 *
 		 * @param array $post_array - The array with all the data provided.
+		 * @param bool  $first_time - Set defaults.
 		 *
 		 * @return void
 		 *
 		 * @since 5.1.1
 		 */
-		private static function build_in_check_and_save( array $post_array ) {
+		private static function build_in_check_and_save( array $post_array, bool $first_time = false ) {
 			if ( ! \current_user_can( 'manage_options' ) ) {
-				\wp_die( \esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
+
+				if ( ! $first_time ) {
+					\wp_die( \esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-security-audit-log' ) );
+				}
 			}
 
 			$report_options = array();
@@ -1326,7 +1336,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				$options['notification_bitly_shorten_key'] = ( ( isset( $post_array['notification_bitly_shorten_key'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_bitly_shorten_key'] ) ) : '' );
 			}
 
-			$default = ('free' === \WpSecurityAuditLog::get_plugin_version())?true:false;
+			$default = ( 'free' === \WpSecurityAuditLog::get_plugin_version() ) ? true : false;
 
 			// Summarized emails.
 			$options['notification_summary_user_logins'] = ( ( isset( $post_array['notification_summary_user_logins'] ) ) ? filter_var( $post_array['notification_summary_user_logins'], FILTER_VALIDATE_BOOLEAN ) : $default );

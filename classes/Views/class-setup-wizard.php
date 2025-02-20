@@ -828,7 +828,7 @@ if ( ! class_exists( '\WSAL\Views\Setup_Wizard' ) ) {
 
 			$current_settings = Settings_Helper::get_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
 
-			$current_settings['weeklyemail_address'] = ( ( isset( $post_array['notification_weekly_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_weekly_email_address'] ) ) : \get_bloginfo( 'admin_email' ) );
+			$current_settings['weekly_email_address'] = ( ( isset( $post_array['notification_weekly_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_weekly_email_address'] ) ) : \get_bloginfo( 'admin_email' ) );
 
 			$current_settings['weekly_summary_notification'] = true;
 
