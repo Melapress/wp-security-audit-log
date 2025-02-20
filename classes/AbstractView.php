@@ -59,6 +59,9 @@ abstract class WSAL_AbstractView {
 	 */
 	public function __construct() {
 		global $wsal_class;
+		if ( null === $wsal_class ) {
+			$wsal_class = WpSecurityAuditLog::get_instance();
+		}
 		$this->plugin = $wsal_class;
 
 		// Handle admin notices.

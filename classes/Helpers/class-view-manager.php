@@ -87,6 +87,9 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 			foreach ( $views_to_load as $view ) {
 				if ( is_subclass_of( $view, '\WSAL_AbstractView' ) ) {
 					global $wsal_class;
+					if ( null === $wsal_class ) {
+						$wsal_class = WpSecurityAuditLog::get_instance();
+					}
 					self::$views[] = new $view( $wsal_class );
 				}
 			}
@@ -323,10 +326,10 @@ if ( ! class_exists( '\WSAL\Helpers\View_Manager' ) ) {
 					}
 				</style>';
 
-				$count_html = $style . sprintf(
+				$count_html = $style ;/*. sprintf(
 					' <span id="wsal-notices-menu" class="update-plugins"><span class="update-count">%d</span></span>',
 					\number_format_i18n( $count )
-				);
+				);*/
 			}
 
 			return $count_html;
