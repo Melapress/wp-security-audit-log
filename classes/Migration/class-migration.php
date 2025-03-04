@@ -1077,6 +1077,21 @@ if ( ! class_exists( '\WSAL\Utils\Migration' ) ) {
 				Settings_Helper::set_option_value( Notifications::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, $options );
 			}
 		}
+		/**
+		 * Migration for version upto 5.3.3
+		 *
+		 * Migrates notification settings
+		 *
+		 * Note: The migration methods need to be in line with the @see WSAL\Utils\Abstract_Migration::$pad_length
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.3
+		 */
+		public static function migrate_up_to_5330() {
+
+			Cron_Jobs::remove_cron_option( 'wsal_daily_summary_report' );
+		}
 
 		/**
 		 * Previous version of the plugin do not store username or user_id consistently, that method fixed that (in the best way possible) - if there is no user with that username 0 is stored as user_id, if user with that id does not exist anymore 'Deleted' is stored as username (check update_user_name_and_user_id method)

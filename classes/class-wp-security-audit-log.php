@@ -174,9 +174,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			// phpcs:enable
 
 			MainWP_Addon::init();
-
-			Cron_Jobs::init();
-
 			// Hide all unrelated to the plugin notices on the plugin admin pages.
 			\add_action( 'admin_print_scripts', array( WP_Helper::class, 'hide_unrelated_notices' ) );
 
@@ -402,6 +399,8 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			\add_action( 'wsal_freemius_loaded', array( __CLASS__, 'adjust_freemius_strings' ) );
 
 			self::init_freemius();
+
+			Cron_Jobs::init();
 
 			// Extensions which are only admin based.
 			if ( \is_admin() ) {
@@ -1347,7 +1346,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * @since 5.1.1
 		 */
 		public static function get_plugin_version(): string {
-			if ( class_exists( 'WSAL_Freemius', false ) && ! method_exists( 'WSAL_Freemius', 'set_basename' ) && ! ( new WSAL_Freemius() )->is_free_plan() ) {
+			if ( defined( 'WSAL_NOFS_TOOL_PATH' ) ) {
 				return 'NOFS';
 			}
 			if ( function_exists( 'wsal_freemius' ) && wsal_freemius()->has_active_valid_license() ) {
