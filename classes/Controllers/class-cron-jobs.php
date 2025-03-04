@@ -92,6 +92,15 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		public const CRON_JOBS_SETTINGS_NAME = 'cron_jobs_options';
 
 		/**
+		 * Class cache for initialization
+		 *
+		 * @var boolean
+		 *
+		 * @since 5.3.2
+		 */
+		private static $initialized = false;
+
+		/**
 		 * Inits the class and its hooks.
 		 *
 		 * @return void
@@ -101,18 +110,15 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		public static function init() {
 			\add_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'maybe_prevent_error' ), -1 );
 			// Add custom schedules for WSAL early otherwise they won't work.
-			\add_filter( 'cron_schedules', array( __CLASS__, 'recurring_schedules' ) );
+			\add_filter( 'cron_schedules', array( __CLASS__, 'recurring_schedules' ), PHP_INT_MAX );
 			\add_filter( 'wsal_cron_hooks', array( __CLASS__, 'settings_hooks' ) );
+			\add_filter( 'after_setup_theme', array( __CLASS__, 'initialize_hooks' ) );
 
 			if ( Settings_Helper::get_boolean_option_value( 'pruning-date-e', false ) ) {
 				\add_action( 'wsal_cleanup', array( Occurrences_Entity::class, 'prune_records' ) );
 			}
 
-			\wp_get_schedules();
-
 			\remove_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'maybe_prevent_error' ) );
-
-			self::initialize_hooks();
 		}
 
 		/**
@@ -404,7 +410,7 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 		 *
 		 * @since 5.0.0
 		 */
-		private static function initialize_hooks() {
+		public static function initialize_hooks() {
 			$hooks_array = self::CRON_JOBS_NAMES;
 
 			if ( WP_Helper::is_multisite() || 'free' === \WpSecurityAuditLog::get_plugin_version() ) {
@@ -428,7 +434,7 @@ if ( ! class_exists( '\WSAL\Controllers\Cron_Jobs' ) ) {
 				}
 			}
 
-			if ( WP_Helper::is_multisite() || 'free' !== \WpSecurityAuditLog::get_plugin_version() ) {
+			if ( WP_Helper::is_multisite() ) {
 				if ( ! \is_main_site() || 'free' !== \WpSecurityAuditLog::get_plugin_version() ) {
 					$per_site_report = ( isset( Notifications::get_global_notifications_setting()['notification_summary_multisite_individual_site'] ) ? Notifications::get_global_notifications_setting()['notification_summary_multisite_individual_site'] : true );
 

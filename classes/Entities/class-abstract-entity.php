@@ -1211,7 +1211,7 @@ if ( ! class_exists( '\WSAL\Entities\Abstract_Entity' ) ) {
 					$logic_join = $clause;
 				}
 				$string_clause = \rtrim( $string_clause, $logic_join . ' ' );
-				if ( ! \is_int( $sub_clause ) ) {
+				if ( isset( $sub_clause ) && ! \is_int( $sub_clause ) ) {
 					$sub_join_clause = $sub_clause;
 					$string_clause  .= ' ) ';
 				}

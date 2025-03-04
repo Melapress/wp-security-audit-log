@@ -754,7 +754,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			$is_permalink_page   = 'options-permalink' === $actype;
 
 			// WordPress URL changed.
-			if ( $is_option_page
+			if ( $is_option_page && isset( $post_array['_wpnonce'] )
 			&& \wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
 			&& ! empty( $post_array['siteurl'] ) ) {
 				$old_siteurl = \get_option( 'siteurl' );
@@ -772,7 +772,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Site URL changed.
-			if ( $is_option_page
+			if ( $is_option_page && isset( $post_array['_wpnonce'] )
 			&& \wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
 			&& ! empty( $post_array['home'] ) ) {
 				$old_url = \get_option( 'home' );
@@ -789,7 +789,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				}
 			}
 
-			if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['show_on_front'] )
+			if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['show_on_front'] ) && isset( $post_array['_wpnonce'] )
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
 				$old_homepage = ( 'posts' === get_site_option( 'show_on_front' ) ) ? __( 'latest posts', 'wp-security-audit-log' ) : __( 'static page', 'wp-security-audit-log' );
 				$new_homepage = ( 'posts' === $post_array['show_on_front'] ) ? __( 'latest posts', 'wp-security-audit-log' ) : __( 'static page', 'wp-security-audit-log' );
@@ -804,7 +804,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				}
 			}
 
-			if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['page_on_front'] )
+			if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['page_on_front'] ) && isset( $post_array['_wpnonce'] )
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
 				$old_frontpage = get_the_title( get_site_option( 'page_on_front' ) );
 				$new_frontpage = get_the_title( $post_array['page_on_front'] );
@@ -819,7 +819,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				}
 			}
 
-			if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['page_for_posts'] )
+			if ( isset( $post_array['option_page'] ) && 'reading' === $post_array['option_page'] && isset( $post_array['page_for_posts'] ) && isset( $post_array['_wpnonce'] )
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'reading-options' ) ) {
 				$old_postspage = get_the_title( get_site_option( 'page_for_posts' ) );
 				$new_postspage = get_the_title( $post_array['page_for_posts'] );
@@ -835,12 +835,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Check timezone change.
-			if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['timezone_string'] ) ) {
+			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['timezone_string'] ) ) {
 				self::check_timezone_change( $post_array );
 			}
 
 			// Check date format change.
-			if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['date_format'] ) ) {
+			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['date_format'] ) ) {
 				$old_date_format = get_option( 'date_format' );
 				$new_date_format = ( '\c\u\s\t\o\m' === $post_array['date_format'] ) ? \sanitize_text_field( \wp_unslash( $post_array['date_format_custom'] ) ) : \sanitize_text_field( \wp_unslash( $post_array['date_format'] ) );
 				if ( $old_date_format !== $new_date_format ) {
@@ -856,7 +856,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Check time format change.
-			if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['time_format'] ) ) {
+			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['time_format'] ) ) {
 				$old_time_format = get_option( 'time_format' );
 				$new_time_format = ( '\c\u\s\t\o\m' === $post_array['time_format'] ) ? \sanitize_text_field( \wp_unslash( $post_array['time_format_custom'] ) ) : \sanitize_text_field( \wp_unslash( $post_array['time_format'] ) );
 				if ( $old_time_format !== $new_time_format ) {
@@ -872,7 +872,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Registration Option.
-			if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ( get_option( 'users_can_register' ) xor isset( $post_array['users_can_register'] ) ) ) {
+			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ( get_option( 'users_can_register' ) xor isset( $post_array['users_can_register'] ) ) ) {
 				$old = get_option( 'users_can_register' ) ? 'enabled' : 'disabled';
 				$new = isset( $post_array['users_can_register'] ) ? 'enabled' : 'disabled';
 
@@ -888,7 +888,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Default Role option.
-			if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['default_role'] ) ) {
+			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['default_role'] ) ) {
 				$old = get_option( 'default_role' );
 				$new = trim( \sanitize_text_field( \wp_unslash( $post_array['default_role'] ) ) );
 				if ( $old !== $new ) {
@@ -904,7 +904,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Admin Email Option.
-			if ( $is_option_page && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['admin_email'] ) ) {
+			if ( $is_option_page && isset( $post_array['_wpnonce'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'general-options' ) && ! empty( $post_array['admin_email'] ) ) {
 				$old = get_option( 'admin_email' );
 				$new = trim( \sanitize_text_field( \wp_unslash( $post_array['admin_email'] ) ) );
 				if ( $old !== $new ) {
@@ -920,7 +920,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Admin Email of Network.
-			if ( $is_network_settings && ! empty( $post_array['new_admin_email'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'siteoptions' ) ) {
+			if ( $is_network_settings && isset( $post_array['_wpnonce'] ) && ! empty( $post_array['new_admin_email'] ) && wp_verify_nonce( $post_array['_wpnonce'], 'siteoptions' ) ) {
 				$old = get_site_option( 'admin_email' );
 				$new = trim( \sanitize_text_field( \wp_unslash( $post_array['new_admin_email'] ) ) );
 				if ( $old !== $new ) {
@@ -936,7 +936,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Permalinks changed.
-			if ( $is_permalink_page && ! empty( $post_array['permalink_structure'] )
+			if ( $is_permalink_page && ! empty( $post_array['permalink_structure'] ) && isset( $post_array['_wpnonce'] )
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-permalink' ) ) {
 				$old = get_option( 'permalink_structure' );
 				$new = trim( \sanitize_text_field( \wp_unslash( $post_array['permalink_structure'] ) ));
@@ -953,7 +953,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Core Update.
-			if ( isset( $get_array['action'] ) && 'do-core-upgrade' === $get_array['action'] && isset( $post_array['version'] )
+			if ( isset( $get_array['action'] ) && 'do-core-upgrade' === $get_array['action'] && isset( $post_array['version'] ) && isset( $post_array['_wpnonce'] )
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'upgrade-core' ) ) {
 				$old_version = get_bloginfo( 'version' );
 				$new_version = \sanitize_text_field( \wp_unslash( $post_array['version'] ) );
@@ -981,7 +981,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Site Language changed.
-			if ( $is_option_page
+			if ( $is_option_page && isset( $post_array['_wpnonce'] )
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
 			&& isset( $post_array['WPLANG'] ) ) {
 				// Is there a better way to turn the language into a "nice name"?
@@ -1009,7 +1009,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			}
 
 			// Site title.
-			if ( $is_option_page
+			if ( $is_option_page && isset( $post_array['_wpnonce'] )
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'general-options' )
 			&& isset( $post_array['blogname'] ) ) {
 				$previous_value = get_option( 'blogname' );
