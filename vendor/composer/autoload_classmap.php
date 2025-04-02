@@ -17,6 +17,8 @@ return array(
     'WSAL\\Controllers\\Database_Manager' => $baseDir . '/classes/Controllers/class-database-manager.php',
     'WSAL\\Controllers\\Plugin_Extensions' => $baseDir . '/classes/Controllers/class-plugin-extensions.php',
     'WSAL\\Controllers\\Sensors_Load_Manager' => $baseDir . '/classes/Controllers/class-sensors-load-manager.php',
+    'WSAL\\Controllers\\Slack\\Slack' => $baseDir . '/classes/Controllers/slack/class-slack.php',
+    'WSAL\\Controllers\\Slack\\Slack_API' => $baseDir . '/classes/Controllers/slack/class-slack-api.php',
     'WSAL\\Controllers\\Twilio\\Twilio' => $baseDir . '/classes/Controllers/twilio/class-twilio.php',
     'WSAL\\Controllers\\Twilio\\Twilio_API' => $baseDir . '/classes/Controllers/twilio/class-twilio-api.php',
     'WSAL\\Controllers\\WP_CLI\\WP_CLI_Commands' => $baseDir . '/classes/Controllers/WP_CLI/class-wp-cli-commands.php',

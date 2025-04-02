@@ -922,7 +922,7 @@ if ( ! class_exists( '\WSAL\Controllers\Alert_Manager' ) ) {
 			foreach ( self::get_loggers() as $logger ) {
 				// phpcs:disable
 				// phpcs:enable
-				if ( $logger instanceof \WSAL_Ext_MirrorLogger ) {
+				if ( $logger instanceof \WSAL\Loggers\WSAL_Ext_MirrorLogger ) {
 					$logger->log( $event_id, $event_data );
 				} else {
 					$logger::log( $event_id, $event_data );

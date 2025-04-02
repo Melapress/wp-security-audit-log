@@ -150,6 +150,7 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 		 * @since 5.0.0
 		 */
 		public function __construct() {
+
 			$bootstrap_hook = array( 'plugins_loaded', 9 );
 
 			Sensors_Load_Manager::load_early_sensors();
@@ -738,7 +739,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 			\do_action( 'wsal_init', $wsal_class );
 
 			\add_action( 'init', array( Migration::class, 'migrate' ), PHP_INT_MAX );
-			// Migration::migrate();
 
 			if ( defined( '\WP_CLI' ) && \WP_CLI ) {
 				\WP_CLI::add_command( 'wsal_cli_commands', '\WSAL\Controllers\WP_CLI\WP_CLI_Commands' );
@@ -976,9 +976,6 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				die( 1 );
 			}
 
-			// Fully set up the plugin.
-			// $this->setup();
-
 			// Update licensing info in case we're swapping from free to premium or vice-versa.
 			self::sync_premium_freemius();
 
@@ -1012,9 +1009,9 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 					$selectr .= '.wp-list-table.plugins tr[data-slug="' . $value . '"], ';
 				}
 				?>
-			<style type="text/css">
-				<?php echo \esc_attr( rtrim( $selectr, ', ' ) ); ?> { display: none; }
-			</style>
+				<style type="text/css">
+					<?php echo \esc_attr( rtrim( $selectr, ', ' ) ); ?> { display: none; }
+				</style>
 				<?php
 			}
 		}
@@ -1181,11 +1178,39 @@ if ( ! class_exists( 'WpSecurityAuditLog' ) ) {
 				'free'    => self::FREE_VERSION_WHOLE_PLUGIN_NAME,
 			);
 
-			foreach ( $main_plugins as $slug ) {
+			foreach ( $main_plugins as $plugin_slug ) {
 				// Find WSAL by plugin basename.
-				if ( array_key_exists( $slug, $plugins ) ) {
+				if ( array_key_exists( $plugin_slug, $plugins ) ) {
 					// Remove WSAL plugin from plugin list page.
-					unset( $plugins[ $slug ] );
+
+					$current_version = $plugins[ $plugin_slug ]['Version'];
+					$latest_version  = $current_version;
+
+					$update_plugins = get_site_transient( 'update_plugins' );
+					if ( isset( $update_plugins->response ) ) {
+						$plugins_to_update = (array) $update_plugins->response;
+
+						if ( isset( $plugins_to_update[ $plugin_slug ] ) ) {
+							$latest_version = $plugins_to_update[ $plugin_slug ]->new_version;
+						}
+					}
+
+					if ( ! version_compare( $current_version, $latest_version, '<' ) ) {
+
+						unset( $plugins[ $plugin_slug ] );
+					} else {
+						$restrict_to = Settings_Helper::get_option_value( 'restrict-plugin-settings', 'only_admins' );
+
+						$must_hide = true;
+
+						if ( ( 'only_admins' === $restrict_to && \current_user_can( 'manage_options' ) ) || ( 'only_me' === $restrict_to && (int) Settings_Helper::get_option_value( 'only-me-user-id' ) === (int) get_current_user_id() ) ) {
+							$must_hide = false;
+						}
+
+						if ( $must_hide ) {
+							unset( $plugins[ $plugin_slug ] );
+						}
+					}
 				}
 			}
 

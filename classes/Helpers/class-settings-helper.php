@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace WSAL\Helpers;
 
+use WSAL\Utils\Migration;
 use WSAL\Controllers\Connection;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Helpers\Plugin_Settings_Helper;
@@ -999,7 +1000,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 		 * @since 4.5.0
 		 */
 		public static function get_default_disabled_alerts() {
-			return array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6069, 6070 );
+			return array( 5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5022, 5023, 5024, 6066, 6067, 6068, 6069, 6070, 6071, 6072 );
 		}
 
 		/**
@@ -1817,6 +1818,10 @@ if ( ! class_exists( '\WSAL\Helpers\Settings_Helper' ) ) {
 
 			// Ensue entry is fully cleared.
 			\delete_site_option( 'wsal_networkwide_tracker_cpts' );
+
+			Migration::clear_stored_version();
+
+			Migration::migrate();
 		}
 
 		/**

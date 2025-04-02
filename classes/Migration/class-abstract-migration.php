@@ -231,6 +231,17 @@ if ( ! class_exists( '\WSAL\Utils\Abstract_Migration' ) ) {
 		}
 
 		/**
+		 * Clears the stored version for the static class
+		 *
+		 * @return void
+		 *
+		 * @since 5.3.4
+		 */
+		public static function clear_stored_version() {
+			static::$stored_version = '';
+		}
+
+		/**
 		 * Extracts currently stored version from the DB
 		 *
 		 * @return string

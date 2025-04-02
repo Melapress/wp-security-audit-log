@@ -248,7 +248,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 						'FirstName'       => $new_userdata->user_firstname,
 						'LastName'        => $new_userdata->user_lastname,
 						'EditUserLink'    => add_query_arg( 'user_id', $user_id, \network_admin_url( 'user-edit.php' ) ),
-						'TargetUserData' => (object) array(
+						'TargetUserData'  => (object) array(
 							'Username'  => $new_userdata->user_login,
 							'FirstName' => $new_userdata->user_firstname,
 							'LastName'  => $new_userdata->user_lastname,
@@ -510,12 +510,12 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 				Alert_Manager::trigger_event(
 					4029,
 					array(
-						'roles'        => $user_roles,
-						'login'        => $user->user_login,
-						'firstname'    => ( empty( $user->user_firstname ) ) ? ' ' : $user->user_firstname,
-						'lastname'     => ( empty( $user->user_lastname ) ) ? ' ' : $user->user_lastname,
-						'EventType'    => 'submitted',
-						'TargetUserID' => $user->ID,
+						'roles'          => $user_roles,
+						'login'          => $user->user_login,
+						'firstname'      => ( empty( $user->user_firstname ) ) ? ' ' : $user->user_firstname,
+						'lastname'       => ( empty( $user->user_lastname ) ) ? ' ' : $user->user_lastname,
+						'EventType'      => 'submitted',
+						'TargetUserID'   => $user->ID,
 						'TargetUserData' => (object) array(
 							'Username'  => $user->user_login,
 							'FirstName' => $user->user_firstname,
@@ -593,17 +593,13 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_User_Profile_Sensor' ) ) {
 
 			$new_user_data = array(
 				'Username'  => $user->user_login,
+				'Email'     => $user->user_email,
 				'FirstName' => ! empty( $user->user_firstname ) ? $user->user_firstname : '',
 				'LastName'  => ! empty( $user->user_lastname ) ? $user->user_lastname : '',
+				'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 			);
 
 			$event_code = WP_Helper::is_multisite() ? 4012 : 4001;
-			if ( 4001 === $event_code ) {
-				$new_user_data['Roles'] = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
-			} elseif ( 4012 === $event_code ) {
-				$new_user_data['Email'] = $user->user_email;
-				$new_user_data['Roles'] = is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles;
-			}
 
 			$event_data = array(
 				'NewUserID'    => $user_id,

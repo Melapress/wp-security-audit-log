@@ -319,70 +319,90 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 		 * @since 5.1.0
 		 */
 		public static function created_cron_job( $cron ) {
-			if ( self::$executed_cron && self::$executed_cron->hook === $cron->hook ) {
-				$alert = 6066;
-
-				$data = array(
-					'task_name'     => $cron->hook,
-					'timestamp'     => DateTime_Formatter_Helper::get_formatted_date_time( $cron->timestamp, 'datetime', true, false ),
-					'arguments'     => $cron->args,
-					'CurrentUserID' => User_Helper::get_user()->ID,
-					'Username'      => User_Helper::get_user()->user_login,
-				);
-
-				if ( empty( $data['CurrentUserID'] ) ) {
-
-					unset( $data['CurrentUserID'] );
-					$data['Username'] = 'System';
-
-				}
-
-				if ( $cron->schedule ) {
-					$alert                = 6067;
-					$data['schedule']     = $cron->schedule;
-					$schedule_info        = \wp_get_schedules()[ $cron->schedule ];
-					$data['interval']     = $schedule_info['interval'];
-					$data['display_name'] = $schedule_info['display'];
-				}
-
-				Alert_Manager::trigger_event(
-					$alert,
-					$data
-				);
-
-				self::$executed_cron = false;
+			if ( false === $cron ) {
+				return $cron;
 			}
-			if ( self::$rescheduled_cron && self::$rescheduled_cron->hook === $cron->hook ) {
-				$alert           = 6068;
-				$reschedule_info = \wp_get_schedules()[ $cron->schedule ];
-				$schedule_info   = \wp_get_schedules()[ self::$rescheduled_cron->schedule ];
-				$data            = array(
-					'task_name'        => $cron->hook,
-					'timestamp'        => DateTime_Formatter_Helper::get_formatted_date_time( $cron->timestamp, 'datetime', true, false ),
-					'arguments'        => $cron->args,
-					'CurrentUserID'    => User_Helper::get_user()->ID,
-					'Username'         => User_Helper::get_user()->user_login,
-					'new_schedule'     => $cron->schedule,
-					'old_schedule'     => self::$rescheduled_cron,
-					'old_interval'     => $schedule_info['interval'],
-					'new_interval'     => $reschedule_info['interval'],
-					'old_display_name' => $schedule_info['display'],
-					'new_display_name' => $reschedule_info['display'],
-				);
+			if (
+				isset( self::$executed_cron ) &&
+				! empty( self::$executed_cron ) &&
+				\is_object( $cron ) &&
+				\is_object( self::$executed_cron ) &&
+				\property_exists( self::$executed_cron, 'hook' ) &&
+				\property_exists( $cron, 'hook' ) ) {
 
-				if ( empty( $data['CurrentUserID'] ) ) {
+				if ( self::$executed_cron && self::$executed_cron->hook === $cron->hook ) {
+					$alert = 6066;
 
-					unset( $data['CurrentUserID'] );
-					$data['Username'] = 'System';
+					$data = array(
+						'task_name'     => $cron->hook,
+						'timestamp'     => DateTime_Formatter_Helper::get_formatted_date_time( $cron->timestamp, 'datetime', true, false ),
+						'arguments'     => $cron->args,
+						'CurrentUserID' => User_Helper::get_user()->ID,
+						'Username'      => User_Helper::get_user()->user_login,
+					);
 
+					if ( empty( $data['CurrentUserID'] ) ) {
+
+						unset( $data['CurrentUserID'] );
+						$data['Username'] = 'System';
+
+					}
+
+					if ( $cron->schedule ) {
+						$alert                = 6067;
+						$data['schedule']     = $cron->schedule;
+						$schedule_info        = \wp_get_schedules()[ $cron->schedule ];
+						$data['interval']     = $schedule_info['interval'];
+						$data['display_name'] = $schedule_info['display'];
+					}
+
+					Alert_Manager::trigger_event(
+						$alert,
+						$data
+					);
+
+					self::$executed_cron = false;
 				}
+			}
+			if (
+			isset( self::$rescheduled_cron ) &&
+			! empty( self::$rescheduled_cron ) &&
+			\is_object( $cron ) &&
+			\is_object( self::$rescheduled_cron ) &&
+			\property_exists( self::$rescheduled_cron, 'hook' ) &&
+			\property_exists( $cron, 'hook' ) ) {
+				if ( self::$rescheduled_cron && self::$rescheduled_cron->hook === $cron->hook ) {
+					$alert           = 6068;
+					$reschedule_info = \wp_get_schedules()[ $cron->schedule ];
+					$schedule_info   = \wp_get_schedules()[ self::$rescheduled_cron->schedule ];
+					$data            = array(
+						'task_name'        => $cron->hook,
+						'timestamp'        => DateTime_Formatter_Helper::get_formatted_date_time( $cron->timestamp, 'datetime', true, false ),
+						'arguments'        => $cron->args,
+						'CurrentUserID'    => User_Helper::get_user()->ID,
+						'Username'         => User_Helper::get_user()->user_login,
+						'new_schedule'     => $cron->schedule,
+						'old_schedule'     => self::$rescheduled_cron,
+						'old_interval'     => $schedule_info['interval'],
+						'new_interval'     => $reschedule_info['interval'],
+						'old_display_name' => $schedule_info['display'],
+						'new_display_name' => $reschedule_info['display'],
+					);
 
-				Alert_Manager::trigger_event(
-					$alert,
-					$data
-				);
+					if ( empty( $data['CurrentUserID'] ) ) {
 
-				self::$rescheduled_cron = false;
+						unset( $data['CurrentUserID'] );
+						$data['Username'] = 'System';
+
+					}
+
+					Alert_Manager::trigger_event(
+						$alert,
+						$data
+					);
+
+					self::$rescheduled_cron = false;
+				}
 			}
 
 			return $cron;
@@ -731,7 +751,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 				} elseif ( 'plugin' === $post_array['type'] ) {
 					$all_plugins = \get_plugins();
 					if ( ! \is_wp_error( \validate_plugin( $asset ) ) ) {
-						$our_plugin  = ( isset( $all_plugins[ $asset ] ) ) ? $all_plugins[ $asset ] : '';
+						$our_plugin       = ( isset( $all_plugins[ $asset ] ) ) ? $all_plugins[ $asset ] : '';
 						$install_location = \plugin_dir_path( WP_PLUGIN_DIR . '/' . $asset );
 						$name             = $our_plugin['Name'];
 					}
@@ -939,7 +959,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_System_Sensor' ) ) {
 			if ( $is_permalink_page && ! empty( $post_array['permalink_structure'] ) && isset( $post_array['_wpnonce'] )
 			&& wp_verify_nonce( $post_array['_wpnonce'], 'update-permalink' ) ) {
 				$old = get_option( 'permalink_structure' );
-				$new = trim( \sanitize_text_field( \wp_unslash( $post_array['permalink_structure'] ) ));
+				$new = trim( \sanitize_text_field( \wp_unslash( $post_array['permalink_structure'] ) ) );
 				if ( $old !== $new ) {
 					Alert_Manager::trigger_event(
 						6005,

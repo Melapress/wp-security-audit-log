@@ -158,23 +158,23 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter' ) ) {
 						return $value;
 					}
 
-				case '%Users%' === $expression: // Failed login attempts.
-					if ( isset( $metadata['Users'] ) && is_array( $metadata['Users'] ) ) {
-						if ( empty( $metadata['Users'] ) ) {
-							return 'Unknown username';
-						}
-						return $metadata['Users'][0];
-					} elseif ( isset( $metadata['Users'] ) ) {
-						return $metadata['Users'];
-					} else {
-						return 'Unknown username';
-					}
-					$check_value = (int) $value;
-					if ( 0 === $check_value ) {
-						return '';
-					} else {
-						return $metadata['Users'][0];
-					}
+				// case '%Users%' === $expression: // Failed login attempts.
+				// 	if ( isset( $metadata['Users'] ) && is_array( $metadata['Users'] ) ) {
+				// 		if ( empty( $metadata['Users'] ) ) {
+				// 			return 'Unknown username';
+				// 		}
+				// 		return $metadata['Users'][0];
+				// 	} elseif ( isset( $metadata['Users'] ) ) {
+				// 		return $metadata['Users'];
+				// 	} else {
+				// 		return 'Unknown username';
+				// 	}
+				// 	$check_value = (int) $value;
+				// 	if ( 0 === $check_value ) {
+				// 		return '';
+				// 	} else {
+				// 		return $metadata['Users'][0];
+				// 	}
 
 				case '%LogFileText%' === $expression: // Failed login file text.
 					if ( $configuration['is_js_in_links_allowed'] ) {

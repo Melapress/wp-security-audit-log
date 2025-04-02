@@ -977,7 +977,7 @@ if ( ! class_exists( '\WSAL\Helpers\Settings\Settings_Builder' ) ) {
 				++$i;
 
 				$checked = '';
-				if ( ( ! empty( self::$current_value ) && self::$current_value === $option_key ) || ( empty( self::$current_value ) && 1 === $i ) ) {
+				if ( ( ! empty( self::$current_value ) && self::$current_value == $option_key ) || ( empty( self::$current_value ) && 1 === $i ) ) {
 					$checked = 'checked="checked"';
 				}
 

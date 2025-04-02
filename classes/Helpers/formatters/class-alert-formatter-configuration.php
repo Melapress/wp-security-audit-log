@@ -71,6 +71,29 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter_Configuration' ) 
 			'use_html_markup_for_links' => true,
 		);
 
+
+		/**
+		 * Default (text) alert format configuration.
+		 *
+		 * @var array
+		 *
+		 * @since 5.3.4
+		 */
+		private static $default_slack_configuration = array(
+			'tags_allowed_in_message'   => '',
+			'is_js_in_links_allowed'    => false,
+			'highlight_start_tag'       => '',
+			'highlight_end_tag'         => '',
+			'supports_metadata'         => false,
+			'supports_hyperlinks'       => false,
+			'emphasis_start_tag'        => '',
+			'emphasis_end_tag'          => '',
+			'max_meta_value_length'     => 50,
+			'end_of_line'               => ' ',
+			'ellipses_sequence'         => '...',
+			'use_html_markup_for_links' => false,
+		);
+
 		/**
 		 * Returns the default configuration for the alert.
 		 *
@@ -80,6 +103,17 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter_Configuration' ) 
 		 */
 		public static function get_default_configuration(): array {
 			return self::$default_configuration;
+		}
+
+		/**
+		 * Returns the default configuration for the alert.
+		 *
+		 * @return array
+		 *
+		 * @since 5.3.4
+		 */
+		public static function get_default_slack_configuration(): array {
+			return self::$default_slack_configuration;
 		}
 
 		/**
@@ -120,6 +154,8 @@ if ( ! class_exists( '\WSAL\Helpers\Formatters\Alert_Formatter_Configuration' ) 
 				}
 				return \array_merge( self::$default_configuration, array( $key_to_set => $value_to_set ) );
 			}
+
+			return self::$default_configuration;
 		}
 	}
 }

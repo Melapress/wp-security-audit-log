@@ -1696,6 +1696,7 @@ function set_wsal_alerts() {
 					__( 'A new user %NewUserData->Username% is created via registration.', 'wp-security-audit-log' ),
 					array(
 						esc_html__( 'User', 'wp-security-audit-log' ) => '%NewUserData->Username%',
+						esc_html__( 'Email', 'wp-security-audit-log' )  => '%NewUserData->Email%',
 					),
 					Constants::wsaldefaults_build_links( array( 'EditUserLink' ) ),
 					'user',
@@ -1710,6 +1711,7 @@ function set_wsal_alerts() {
 						esc_html__( 'Role', 'wp-security-audit-log' )       => '%NewUserData->Roles%',
 						esc_html__( 'First name', 'wp-security-audit-log' ) => '%NewUserData->FirstName%',
 						esc_html__( 'Last name', 'wp-security-audit-log' )  => '%NewUserData->LastName%',
+						esc_html__( 'Email', 'wp-security-audit-log' )  => '%NewUserData->Email%',
 					),
 					Constants::wsaldefaults_build_links( array( 'EditUserLink' ) ),
 					'user',
@@ -2389,7 +2391,9 @@ function set_wsal_alerts() {
 					WSAL_CRITICAL,
 					esc_html__( 'Deleted all the data of a specific type from the activity log.', 'wp-security-audit-log' ),
 					esc_html__( 'Deleted all the data about the %deleted_data_type% %deleted_data% from the activity log.', 'wp-security-audit-log' ),
-					array(),
+					array(
+						esc_html__( 'Number of events deleted', 'wp-security-audit-log' ) => '%sum_deleted_events%',
+					),
 					array(),
 					'wp-activity-log',
 					'deleted',

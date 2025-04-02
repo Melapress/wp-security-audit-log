@@ -16,9 +16,11 @@ namespace WSAL\Views;
 use Tools\Select2_WPWS;
 use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\View_Manager;
+use WSAL\Controllers\Slack\Slack;
 use WSAL\Helpers\Settings_Helper;
 use WSAL\Controllers\Alert_Manager;
 use WSAL\Controllers\Twilio\Twilio;
+use WSAL\Controllers\Slack\Slack_API;
 use WSAL\Controllers\Twilio\Twilio_API;
 use WSAL\Helpers\Settings\Settings_Builder;
 use WSAL\Entities\Custom_Notifications_Entity;
@@ -62,6 +64,15 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		 * @since 5.1.1
 		 */
 		private static $twilio_is_set = null;
+
+		/**
+		 * Caching the slack status.
+		 *
+		 * @var boolean
+		 *
+		 * @since 5.3.4
+		 */
+		private static $slack_is_set = null;
 
 		/**
 		 * Caching the global notification settings.
@@ -262,7 +273,6 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		 * @since 5.1.1
 		 */
 		public static function init() {
-
 			if ( \is_admin() ) {
 				\add_action( 'wsal_init', array( __CLASS__, 'wsal_init' ), 20 );
 
@@ -277,15 +287,14 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 
 				// AJAX test email part.
 				\add_action( 'wp_ajax_wsal_send_notifications_test_email', array( Notification_Helper::class, 'send_test_email' ) );
-				\add_action( 'wp_ajax_wsal_send_notifications_test_sms', array( Notification_Helper::class, 'send_test_sms' ) );
 
 				// phpcs:disable
 				// phpcs:enable
 			}
 
-			$current_settings = Settings_Helper::get_option_value( self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
+				$current_settings = Settings_Helper::get_option_value( self::BUILT_IN_NOTIFICATIONS_SETTINGS_NAME, array() );
 
-			/** Set defaults */
+				/** Set defaults */
 			if ( empty( $current_settings ) ) {
 				self::build_in_check_and_save( array( 'notification_weekly_summary_notification' => true ), true );
 			}
@@ -325,6 +334,8 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				),
 				true
 			);
+			$formatters['slack'] = Alert_Formatter_Configuration::get_default_slack_configuration();
+
 			return $formatters;
 		}
 
@@ -889,6 +900,51 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 		}
 
 		/**
+		 * Checks if default phone number is set in the notifications settings.
+		 *
+		 * @return boolean
+		 *
+		 * @since 5.1.1
+		 */
+		public static function is_default_slack_set(): bool {
+
+			if ( null === self::$slack_is_set ) {
+				self::$slack_is_set = false;
+
+				if ( ! Slack::is_set() ) {
+					return false;
+				}
+
+				$settings = self::get_global_notifications_setting();
+
+				if ( ! empty( $settings ) && isset( $settings['notification_default_slack_channel'] ) && ! empty( $settings['notification_default_slack_channel'] ) ) {
+					self::$slack_is_set = true;
+
+					return true;
+				}
+			}
+
+			return self::$slack_is_set;
+		}
+
+		/**
+		 * Returns the default phone number from the notifications settings.
+		 *
+		 * @return string
+		 *
+		 * @since 5.1.1
+		 */
+		public static function get_default_slack(): string {
+			$settings = self::get_global_notifications_setting();
+
+			if ( ! empty( $settings ) && isset( $settings['notification_default_slack_channel'] ) && ! empty( $settings['notification_default_slack_channel'] ) ) {
+				return $settings['notification_default_slack_channel'];
+			}
+
+			return '';
+		}
+
+		/**
 		 * Checks if url shortening is enabled in the notifications settings.
 		 *
 		 * @return boolean
@@ -928,6 +984,9 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				if ( isset( self::$global_notifications_setting['sms_notifications_body'] ) ) {
 					self::$global_notifications_setting['sms_notifications_body'] = json_decode( self::$global_notifications_setting['sms_notifications_body'] );
 				}
+				if ( isset( self::$global_notifications_setting['slack_notifications_body'] ) ) {
+					self::$global_notifications_setting['slack_notifications_body'] = json_decode( self::$global_notifications_setting['slack_notifications_body'] );
+				}
 			}
 
 			return self::$global_notifications_setting;
@@ -948,6 +1007,9 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			}
 			if ( isset( $settings['sms_notifications_body'] ) ) {
 				$settings['sms_notifications_body'] = json_encode( $settings['sms_notifications_body'] );
+			}
+			if ( isset( $settings['slack_notifications_body'] ) ) {
+				$settings['slack_notifications_body'] = json_encode( $settings['slack_notifications_body'] );
 			}
 
 			Settings_Helper::set_option_value(
@@ -1044,7 +1106,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			$report_options = array();
 
 			$no_defaults = false;
-			if ( ! self::is_default_mail_set() && ! self::is_default_twilio_set() ) {
+			if ( ! self::is_default_mail_set() && ! self::is_default_twilio_set() && ! self::is_default_slack_set() ) {
 				$no_defaults = true;
 			}
 
@@ -1123,14 +1185,18 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 					$report_options[ 'event_' . $event_id . '_notification_email_address' ] = ( ( isset( $post_array[ 'notification_event_' . $event_id . '_notification_email_address' ] ) ) ? \sanitize_text_field( \wp_unslash( $post_array[ 'notification_event_' . $event_id . '_notification_email_address' ] ) ) : '' );
 
 					$report_options[ 'event_' . $event_id . '_notification_phone' ] = ( ( isset( $post_array[ 'notification_event_' . $event_id . '_notification_phone' ] ) ) ? \sanitize_text_field( \wp_unslash( $post_array[ 'notification_event_' . $event_id . '_notification_phone' ] ) ) : '' );
+
+					$report_options[ 'event_' . $event_id . '_notification_slack' ] = ( ( isset( $post_array[ 'notification_event_' . $event_id . '_notification_slack' ] ) ) ? \sanitize_text_field( \wp_unslash( $post_array[ 'notification_event_' . $event_id . '_notification_slack' ] ) ) : '' );
 				}
 
 				if ( ( ! isset( $report_options[ 'event_' . $event_id . '_notification_email_address' ] ) || empty( $report_options[ 'event_' . $event_id . '_notification_email_address' ] ) ) &&
 				( ! isset( $report_options[ 'event_' . $event_id . '_notification_phone' ] ) || empty( $report_options[ 'event_' . $event_id . '_notification_phone' ] ) ) &&
+				( ! isset( $report_options[ 'event_' . $event_id . '_notification_slack' ] ) || empty( $report_options[ 'event_' . $event_id . '_notification_slack' ] ) ) &&
 				( $no_defaults ) ) {
 					unset( $report_options[ 'event_' . $event_id . '_notification' ] );
 					unset( $report_options[ 'event_' . $event_id . '_notification_email_address' ] );
 					unset( $report_options[ 'event_' . $event_id . '_notification_phone' ] );
+					unset( $report_options[ 'event_' . $event_id . '_notification_slack' ] );
 					unset( $report_options[ 'event_' . $event_id . '_notification_custom_message' ] );
 					unset( $report_options[ 'event_' . $event_id . '_failed_more_than' ] );
 				} elseif ( $report_options[ 'event_' . $event_id . '_notification' ] ) {
@@ -1151,14 +1217,18 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 					$report_options[ 'event_' . $severity . '_notification_email_address' ] = ( ( isset( $post_array[ 'notification_event_' . $severity . '_notification_email_address' ] ) ) ? \sanitize_text_field( \wp_unslash( $post_array[ 'notification_event_' . $severity . '_notification_email_address' ] ) ) : '' );
 
 					$report_options[ 'event_' . $severity . '_notification_phone' ] = ( ( isset( $post_array[ 'notification_event_' . $severity . '_notification_phone' ] ) ) ? \sanitize_text_field( \wp_unslash( $post_array[ 'notification_event_' . $severity . '_notification_phone' ] ) ) : '' );
+
+					$report_options[ 'event_' . $severity . '_notification_slack' ] = ( ( isset( $post_array[ 'notification_event_' . $severity . '_notification_slack' ] ) ) ? \sanitize_text_field( \wp_unslash( $post_array[ 'notification_event_' . $severity . '_notification_slack' ] ) ) : '' );
 				}
 
 				if ( ( ! isset( $report_options[ 'event_' . $severity . '_notification_email_address' ] ) || empty( $report_options[ 'event_' . $severity . '_notification_email_address' ] ) ) &&
 				( ! isset( $report_options[ 'event_' . $severity . '_notification_phone' ] ) || empty( $report_options[ 'event_' . $severity . '_notification_phone' ] ) ) &&
+				( ! isset( $report_options[ 'event_' . $severity . '_notification_slack' ] ) || empty( $report_options[ 'event_' . $severity . '_notification_slack' ] ) ) &&
 				( $no_defaults ) ) {
 					unset( $report_options[ 'event_' . $severity . '_notification' ] );
 					unset( $report_options[ 'event_' . $severity . '_notification_email_address' ] );
 					unset( $report_options[ 'event_' . $severity . '_notification_phone' ] );
+					unset( $report_options[ 'event_' . $severity . '_notification_slack' ] );
 					unset( $report_options[ 'event_' . $severity . '_notification_custom_message' ] );
 				} elseif ( $report_options[ 'event_' . $severity . '_notification' ] ) {
 					$report_options['notification_severities'][] = $severity;
@@ -1230,7 +1300,10 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 					$store_phone   = ( isset( $settings_to_store[ 'event_' . $event_id . '_notification_phone' ] ) ? $settings_to_store[ 'event_' . $event_id . '_notification_phone' ] : $default_recipient );
 					$current_phone = ( isset( $current_settings[ 'event_' . $event_id . '_notification_phone' ] ) ? $current_settings[ 'event_' . $event_id . '_notification_phone' ] : $default_recipient );
 
-					if ( $store_custom_address !== $current_custom_address || $store_email !== $current_email || $store_phone !== $current_phone ) {
+					$store_slack   = ( isset( $settings_to_store[ 'event_' . $event_id . '_notification_slack' ] ) ? $settings_to_store[ 'event_' . $event_id . '_notification_slack' ] : $default_recipient );
+					$current_slack = ( isset( $current_settings[ 'event_' . $event_id . '_notification_slack' ] ) ? $current_settings[ 'event_' . $event_id . '_notification_slack' ] : $default_recipient );
+
+					if ( $store_custom_address !== $current_custom_address || $store_email !== $current_email || $store_phone !== $current_phone || $store_slack !== $current_slack ) {
 						Alert_Manager::trigger_event(
 							6313,
 							array(
@@ -1279,6 +1352,17 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 				}
 			}
 
+			if (
+			isset( $post_array['slack_notification_auth_token'] ) && ! empty( $post_array['slack_notification_auth_token'] ) ) {
+				$slack_valid =
+				Slack_API::verify_slack_token(
+					(string) \sanitize_text_field( \wp_unslash( $post_array['slack_notification_auth_token'] ) ),
+				);
+				if ( $slack_valid ) {
+					$options['slack_notification_auth_token'] = \sanitize_text_field( \wp_unslash( $post_array['slack_notification_auth_token'] ) );
+				}
+			}
+
 			if ( isset( $post_array['notification_default_email_address'] ) ) {
 				$options['notification_default_email_address'] = ( ( isset( $post_array['notification_default_email_address'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_default_email_address'] ) ) : '' );
 
@@ -1286,6 +1370,10 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 
 			if ( isset( $post_array['notification_default_phone'] ) ) {
 				$options['notification_default_phone'] = ( ( isset( $post_array['notification_default_phone'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_default_phone'] ) ) : '' );
+			}
+
+			if ( isset( $post_array['notification_default_slack_channel'] ) ) {
+				$options['notification_default_slack_channel'] = ( ( isset( $post_array['notification_default_slack_channel'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['notification_default_slack_channel'] ) ) : '' );
 			}
 
 			if ( isset( $post_array['email_notifications_subject'] ) ) {
@@ -1325,6 +1413,25 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 						array(
 							'EventType'     => 'modified',
 							'template_name' => 'SMS',
+						)
+					);
+				}
+			}
+
+			$options['slack_notifications_body'] = '';
+			if ( isset( $post_array['slack_notifications_body'] ) ) {
+				$options['slack_notifications_body'] = ( ( isset( $post_array['slack_notifications_body'] ) ) ? ( \wp_unslash( $post_array['slack_notifications_body'] ) ) : '' );
+
+				if ( ! isset( $current_settings['slack_notifications_body'] ) ) {
+					$current_settings['slack_notifications_body'] = json_encode( stripslashes( Notification_Helper::get_default_slack_body() ) );
+				}
+
+				if ( json_encode( stripslashes( $options['slack_notifications_body'] ) ) !== $current_settings['slack_notifications_body'] ) {
+					Alert_Manager::trigger_event(
+						6318,
+						array(
+							'EventType'     => 'modified',
+							'template_name' => 'Slack',
 						)
 					);
 				}
@@ -1381,7 +1488,14 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 
 			$options['notification_summary_multisite_individual_site'] = ( ( isset( $post_array['notification_summary_multisite_individual_site'] ) ) ? filter_var( $post_array['notification_summary_multisite_individual_site'], FILTER_VALIDATE_BOOLEAN ) : false );
 
-			$options['notification_summary_number_of_events_included'] = ( ( isset( $post_array['notification_summary_number_of_events_included'] ) ) ? filter_var( $post_array['notification_summary_number_of_events_included'], FILTER_VALIDATE_BOOLEAN ) : false );
+			$options['notification_events_included'] = ( ( isset( $post_array['notification_events_included'] ) ) ? filter_var( $post_array['notification_events_included'], FILTER_VALIDATE_BOOLEAN ) : false );
+
+			if ( ! $options['notification_events_included'] ) {
+				$options['notification_summary_number_of_events_included'] = null;
+			} else {
+				$options['notification_summary_number_of_events_included'] = ( ( isset( $post_array['notification_summary_number_of_events_included'] ) ) ? \esc_attr( \absint( $post_array['notification_summary_number_of_events_included'] ) ) : 10 );
+
+			}
 
 			if ( WP_Helper::is_multisite() && ! $options['notification_summary_multisite_individual_site'] ) {
 				$options['notification_summary_content_changes'] = false;
@@ -1411,7 +1525,7 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			$report_options = array();
 
 			$no_defaults = false;
-			if ( ! self::is_default_mail_set() && ! self::is_default_twilio_set() ) {
+			if ( ! self::is_default_mail_set() && ! self::is_default_twilio_set() && ! self::is_default_slack_set() ) {
 				$no_defaults = true;
 			}
 
@@ -1430,6 +1544,8 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 			$report_options['notification_email_user'] = ( ( isset( $post_array['custom_notification_email_user'] ) ) ? filter_var( $post_array['custom_notification_email_user'], FILTER_VALIDATE_BOOLEAN ) : false );
 
 			$report_options['notification_phone'] = ( ( isset( $post_array['custom_notification_phone'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['custom_notification_phone'] ) ) : '' );
+
+			$report_options['notification_slack'] = ( ( isset( $post_array['custom_notification_slack'] ) ) ? \sanitize_text_field( \wp_unslash( $post_array['custom_notification_slack'] ) ) : '' );
 
 			$report_options['notification_username'] = \wp_get_current_user()->user_login;
 			$report_options['notification_user_id']  = \get_current_user_id();
@@ -1452,6 +1568,14 @@ if ( ! class_exists( '\WSAL\Views\Notifications' ) ) {
 
 			if ( isset( $post_array['sms_custom_notifications_body'] ) ) {
 				$report_options['notification_sms_template']['sms_custom_notifications_body'] = ( ( isset( $post_array['sms_custom_notifications_body'] ) ) ? ( \wp_unslash( $post_array['sms_custom_notifications_body'] ) ) : '' );
+			}
+
+			$report_options['notification_slack_template'] = array();
+
+			$report_options['notification_slack_template']['custom_notification_slack_template_enabled'] = ( ( isset( $post_array['custom_notification_slack_template_enabled'] ) ) ? filter_var( $post_array['custom_notification_slack_template_enabled'], FILTER_VALIDATE_BOOLEAN ) : false );
+
+			if ( isset( $post_array['slack_custom_notifications_body'] ) ) {
+				$report_options['notification_slack_template']['slack_custom_notifications_body'] = ( ( isset( $post_array['slack_custom_notifications_body'] ) ) ? ( \wp_unslash( $post_array['slack_custom_notifications_body'] ) ) : '' );
 			}
 
 			$report_options['notification_query'] = '';

@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace WSAL\WP_Sensors;
 
+use WSAL\Helpers\WP_Helper;
 use WSAL\Helpers\User_Helper;
 use WSAL\MainWP\MainWP_Addon;
 use WSAL\MainWP\MainWP_Helper;
@@ -101,7 +102,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 				\add_filter( 'upgrader_post_install', array( __CLASS__, 'mwp_extension_installed' ), 10, 3 );
 
 				// Check if Advanced Uptime Monitor Extension is active.
-				if ( is_plugin_active( 'advanced-uptime-monitor-extension/advanced-uptime-monitor-extension.php' ) ) {
+				if ( WP_Helper::is_plugin_active( 'advanced-uptime-monitor-extension/advanced-uptime-monitor-extension.php' ) ) {
 					add_action( 'mainwp_aum_monitor_created', array( __CLASS__, 'aum_monitor_created' ), 10, 1 );
 					add_action( 'mainwp_aum_monitor_deleted', array( __CLASS__, 'aum_monitor_deleted' ), 10, 1 );
 					add_action( 'mainwp_aum_monitor_started', array( __CLASS__, 'aum_monitor_started' ), 10, 1 );
@@ -347,7 +348,7 @@ if ( ! class_exists( '\WSAL\WP_Sensors\MainWP_Server_Sensor' ) ) {
 		 */
 		public static function extension_menu_edited( $slug, $action ) {
 			// Check if the slug is not empty and it is active.
-			if ( ! empty( $slug ) && \is_plugin_active( $slug ) ) {
+			if ( ! empty( $slug ) && WP_Helper::is_plugin_active( $slug ) ) {
 				Alert_Manager::trigger_event(
 					7709,
 					array(

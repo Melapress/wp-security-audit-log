@@ -109,8 +109,11 @@ if ( ! class_exists( '\WSAL\WP_Sensors\WP_Register_Sensor' ) ) {
 			}
 
 			$new_user_data = array(
-				'Username' => $user->user_login,
-				'Roles'    => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
+				'Username'  => $user->user_login,
+				'Email'     => $user->user_email,
+				'FirstName' => ( $user->user_firstname ) ?? '',
+				'LastName'  => ( $user->user_lastname ) ?? '',
+				'Roles'     => is_array( $user->roles ) ? implode( ', ', $user->roles ) : $user->roles,
 			);
 
 			$event_data = array(

@@ -307,10 +307,10 @@ class WSAL_Views_Help extends WSAL_AbstractView {
 				'link' => 'https://melapress.com/wordpress-2fa/?utm_source=plugin&utm_medium=link&utm_campaign=wp2fa',
 			),
 			array(
-				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/c4wp.jpeg',
-				'desc' => esc_html__( 'Protect website forms & login pages from spambots & automated attacks.', 'wp-security-audit-log' ),
-				'alt'  => 'Captcha 4WP',
-				'link' => 'https://melapress.com/wordpress-captcha/?utm_source=plugin&utm_medium=link&utm_campaign=c4wp',
+				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/mlr.jpg',
+				'desc' => esc_html__( 'Create, edit, and delete and easily manage WordPerss user roles like a pro', 'wp-security-audit-log' ),
+				'alt'  => 'Mellapress Role Editor',
+				'link' => 'https://melapress.com/wordpress-user-roles-editor/?utm_source=plugin&utm_medium=link&utm_campaign=wsal',
 			),
 			array(
 				'img'  => trailingslashit( WSAL_BASE_URL ) . 'img/help/password-policy-manager.jpeg',
